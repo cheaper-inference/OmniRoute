@@ -6,15 +6,15 @@
 
 Sist oppdatert: 2026-08-23
 
-OmniRoute integreres med tre kategorier CLI-verktøy fordelt på tre dedikerte dashboardsider:
+OmniRoute integreres med tre kategorier av CLI verktøy spredt over tre dedikerte dashbordsider:
 
-| Side            | Rute                    | Konsept                                                                     | Antall        |
-| --------------- | ----------------------- | --------------------------------------------------------------------------- | ------------- |
-| **CLI-koder**   | `/dashboard/cli-code`   | Kodeverktøy du kobler til OmniRoute (Klient → CLI → OmniRoute → Leverandør) | 26            |
-| **CLI-agenter** | `/dashboard/cli-agents` | Autonome agenter du kobler til OmniRoute (samme flyt, bredere omfang)       | 10            |
-| **ACP-agenter** | `/dashboard/acp-agents` | CLI-er som OmniRoute starter som backend via stdio/ACP (omvendt flyt)       | se registeret |
+| Side            | Rute                    | Konsept                                                                   | Telle         |
+| --------------- | ----------------------- | ------------------------------------------------------------------------- | ------------- |
+| **CLI -kodene** | `/dashboard/cli-code`   | Kodeverktøy du peker på OmniRoute (klient → CLI → OmniRoute → leverandør) | 26            |
+| **CLI agenter** | `/dashboard/cli-agents` | Autonome agenter du peker på OmniRoute (samme flyt, bredere omfang)       | 11            |
+| **ACP agenter** | `/dashboard/acp-agents` | CLIs som OmniRoute gyter som backend via stdio/ACP (omvendt flyt)         | se registeret |
 
-Eldre ruter omdirigeres via 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Eldre ruter omdirigerer via 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,9 +43,9 @@ ACP-agenter (omvendt oppstartsflyt):
 
 ---
 
-## Automatisk konfigurasjon med `setup-*`
+## Autokonfigurer med `setup-*`
 
-Du trenger ikke å skrive konfigurasjonen for hvert verktøy manuelt. OmniRoute leveres med en `setup-*`-kommando for hvert støttet CLI-verktøy. Kommandoen leser den **aktive** modellkatalogen fra en kjørende OmniRoute-instans (lokal eller ekstern) og skriver verktøyets egen konfigurasjon på maskinen din:
+Du trenger ikke å skrive hver verktøys konfigurasjon for hånd. OmniRoute sender en `setup-*` -kommando per støttet CLI som leser** bo** modellkatalog fra en kjørende OmniRoute (lokal eller ekstern) og skriver verktøyets egen konfigurasjon på maskinen din:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -53,23 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Alle godtar `--remote <url> --api-key <key>` (konfigurer et lokalt verktøy mot en ekstern OmniRoute-instans), `--dry-run` (forhåndsvis uten å skrive) og `--port`. Verktøy uten automatisk modelloppdagelse (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) bruker `--model <id>` (og `--yes` for ikke-interaktive kjøringer). `setup-5dive` er den eneste oppskriften som ikke skriver under `$HOME`: Den konfigurerer en flåte med 5dive-agenter ved å skrive en roteid autentiseringsprofil på flåteverten. Derfor starter den seg selv på nytt gjennom `sudo` og har ingen egen ekstern modus. Hvis du vil starte et CLI-verktøy med riktige miljøvariabler injisert uten å skrive noen konfigurasjon, bruker du den generiske oppstarteren `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — mål og aliaser kommer fra `bin/cli/cli-manifest.mjs`). De eldre verktøyspesifikke oppstarterne `omniroute launch` (Claude Code) og `omniroute launch-codex` (Codex) er fortsatt tilgjengelige. Gemini CLI kan bare startes: Det er et mål for `omniroute run`, men har ingen `setup-*`/`configure`-oppskrift.
+Hver godtar `--remote <url> --api-key <key>` (konfigurer et lokalt verktøy mot en ekstern OmniRoute), `--dry-run` (forhåndsvisning uten å skrive) og `--port`. Verktøy uten automatisk oppdagelse av modellen (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) tar `--model <id>` (og `--yes` for ikke-interaktive løp). `setup-5dive` er den ene oppskriften som ikke skriver under `$HOME`: den konfigurerer en 5dive-agentflåte ved å skrive en root-eid autentiseringsprofil på flåteverten, slik at den kjører på nytt gjennom `sudo` og har ingen egen ekstern modus. For å starte en CLI med riktig env injisert og ingen konfig skrevet i det hele tatt, bruk den generiske `omniroute run <target>` starteren (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — mål og aliaser kommer fra `bin/cli/cli-manifest.mjs`); de eldre lanseringene per verktøy `omniroute launch` (Claude Code) og `omniroute launch-codex` (Codex) forblir tilgjengelige. Gemini CLI er kun for lansering: det er et `omniroute run` mål, men har ingen `setup-*`/`configure` -oppskrift.
 
-> **Fullstendig referanse:** Hovedtabellen — hva hver kommando skriver, alle flagg,
-> lokalt kontra eksternt og hvilke verktøy som krever et `/v1`-suffiks — finnes i
-> **[CLI-integrasjoner](../guides/CLI-INTEGRATIONS.md)**.
+> **Full referanse:** mastertabellen – hva hver kommando skriver, hvert flagg, lokal kontra ekstern, og hvilke verktøy som vil ha et `/v1` suffiks – lever i** [CLI -integrasjoner](../guides/CLI-INTEGRATIONS.md)** .
 
-### Kjøre disse inne i en container
+### Kjører disse inne i en container
 
-En `setup-*`-kommando som kjøres inne i OmniRoute-containeren, skriver til containerens egen hjemmekatalog. Ingen CLI-verktøy på verten leser denne katalogen, og den forsvinner sammen med containeren. OmniRoute oppdager dette og avslutter med `2` og instruksjoner i stedet for å skrive. Det finnes to støttede løsninger — installer CLI-verktøyet på verten og bruk `omniroute connect` mot containeren, eller bind-monter konfigurasjonskatalogene og angi `CLI_CONFIG_HOME` (`host`-profilen i Compose). Alle `setup-*`-kommandoer, i tillegg til `omniroute configure` og `omniroute config set`, godtar `--allow-container-write` når hensikten faktisk er å konfigurere containerens egne CLI-verktøy. `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` gjør det samme for serveren. Se
-[Docker-veiledning → Konfigurere CLI-verktøy på verten](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+En `setup-*` kommando utført inne i OmniRoute beholderen skriver inn i beholderens eget hjem, som ingen vert CLI leser og som forsvinner med beholderen. OmniRoute oppdager det og avslutter `2` med instruksjoner i stedet for å skrive. To støttede veier fremover – installer CLI på verten og `omniroute connect` til containeren, eller bind-monter konfigurasjonsdirene og sett `CLI_CONFIG_HOME` (compose `host` profilen). Hver `setup-*` kommando, pluss `omniroute configure` og `omniroute config set`, aksepterer `--allow-container-write` når konfigurering av containerens egen CLIs er det du egentlig mente; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` gjør det samme for serveren. Se [Docker veiledningen → Konfigurere verts CLI verktøy](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Kontrollpanelets **apply-endepunkt** (`POST /api/cli-tools/apply`) håndhever det samme vernet: I en container vil en skriveoperasjon med et mål som ikke er bind-montert fra verten, svare med **`422`**, `containerEphemeralTarget: true`, en trygg feilmelding og — for verktøyene som har en oppskrift for verten (claude, codex, opencode, cline, kilo, continue) — en `hostSetupCommand` (f.eks. `omniroute setup-opencode`) som skal kjøres på verten i stedet. Ingenting blir skrevet. `dryRun: true` fungerer fortsatt i containermodus og returnerer en maskert forhåndsvisning samt målbanen uten å berøre disken. Innholdet i forhåndsvisningen er ikke en konfigurasjon med legitimasjon som kan kopieres eller importeres. Bruk de opprinnelige inndataene for verktøy, basis-URL, API-nøkkel og modell på verten, eller bruk den angitte oppsettskommandoen på vertssiden. Se [Sikkerhet for CLI-konfigurasjon](../security/CLI-CONFIGURATION.md)
-for forhåndsvisningshodet og forespørselskontrakten. Denne virkemåten er tilsiktet og beskyttet mot regresjoner av
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — aldri «fiks» en 422
-ved å fjerne vernet.
+Dashbordets** bruke endepunkt** (`POST /api/cli-tools/apply`) håndhever samme vakt: i en container svarer en skriving hvis mål ikke er bind-montert fra verten**`422`** med `containerEphemeralTarget: true`, den sikre feilteksten og — for verktøyene med en vertsoppskrift (claude, codex, opencode, cline, kilo, continue) — en `hostSetupCommand` (f.eks. `omniroute setup-opencode`) for å kjøre på verten i stedet; ingenting er skrevet. `dryRun: true` fortsetter å jobbe i containermodus og returnerer en redigert forhåndsvisning av + målbanen uten å berøre disken. Forhåndsvisningsinnhold er ikke en legitimasjonsbærende konfigurasjon som skal kopieres eller importeres. Bruk med de originale tool/base URL/API key/model inngangene på verten, eller bruk den angitte oppsettkommandoen på vertssiden. Se [CLI -konfigurasjonssikkerhet](../security/CLI-CONFIGURATION.md) for forhåndsvisningstoppen og forespørselskontrakten. Denne oppførselen er tilsiktet og regresjonsbeskyttet av `tests/unit/api/cli-tools/apply-container-guard.test.ts` - aldri "fiks" en 422 ved å fjerne beskyttelsen.
 
 ---
 
@@ -149,22 +144,23 @@ Alle verktøyene som vises i `/dashboard/cli-code`. De med `baseUrlSupport: none
 Verktøy med `baseUrlSupport: "partial"` viser merket «⚠ Delvis basis-URL» i kortet på kontrollpanelet.
 ---
 
-## 2. Katalog over CLI-agenter (10 verktøy)
+## 2. CLI agentkatalog (11 verktøy)
 
 Autonome agenter som vises i `/dashboard/cli-agents`:
 
-| id           | navn             | leverandør               | baseUrl-støtte | kanStartesViaAcp |
-| ------------ | ---------------- | ------------------------ | -------------- | ---------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false            |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true             |
-| goose        | Goose            | Block / Linux Foundation | full           | true             |
-| interpreter  | Open Interpreter | OSS                      | full           | true             |
-| warp         | Warp AI          | Warp Inc.                | partial        | true             |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false            |
-| omp          | Oh My Pi         | OSS                      | full           | true             |
-| letta        | Letta CLI        | Letta                    | full           | false            |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false            |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false            |
+| id            | navn         | selger                   | baseUrlSupport | acpSpawnable |
+| ------------- | ------------ | ------------------------ | -------------- | ------------ |
+| hermes-agent  | Hermes agent | Nous Research            | full           | falsk        |
+| åpen klo      | OpenClaw     | OSS (P. Steinberger)     | full           | ekte         |
+| gås           | Gås          | Block / Linux Foundation | full           | ekte         |
+| tolk          | Åpne tolk    | OSS                      | full           | ekte         |
+| renning       | Warp AI      | Warp Inc.                | delvis         | ekte         |
+| agent-dekk    | Agent Deck   | asheshgoplani (OSS)      | full           | falsk        |
+| omp           | Å min Pi     | OSS                      | full           | ekte         |
+| letta         | Letta CLI    | Letta                    | full           | falsk        |
+| prime-agent   | Hovedagent   | Prime Intellect (OSS)    | full           | falsk        |
+| 5 dykk        | 5 dykk       | OSS (5dive-ai)           | full           | falsk        |
+| hvorfor-koder | WhyCodes     | Hvorfor Corporation      | full           | falsk        |
 
 ---
 

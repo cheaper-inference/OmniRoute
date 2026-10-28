@@ -12,38 +12,38 @@ AgentBridge est le proxy MITM (Man-in-the-Middle, ou « homme du milieu ») d’
 
 ---
 
-## §1 Vue d'ensemble
+## §1 Aperçu
 
-### Qu'est-ce qu'AgentBridge ?
+### Qu’est-ce que AgentBridge?
 
-Lorsqu'un agent IDE (par ex., GitHub Copilot, Cursor, Claude Code) effectue un appel d'API, il se connecte directement au fournisseur d'IA amont (OpenAI, Anthropic, etc.). AgentBridge intercepte cette connexion de manière transparente au niveau TLS — sans nécessiter aucune modification de la configuration de l'agent — et réécrit la requête via OmniRoute.
+Lorsqu'un agent IDE (par exemple, GitHub Copilot, Cursor, Claude Code) effectue un appel API, il se connecte directement au fournisseur AI en amont (OpenAI, Anthropic, etc.). AgentBridge intercepte cette connexion de manière transparente au niveau TLS — sans nécessiter de modification de la configuration de l'agent — et réécrit la requête via OmniRoute.
 
-Cela signifie que vous pouvez :
+Cela signifie que vous pouvez :
 
-- **Réacheminer n'importe quel agent vers n'importe quel fournisseur** : Copilot communique avec OpenAI ? Redirigez-le vers Anthropic Claude, Gemini ou l'un des 375 fournisseurs d'OmniRoute.
+- **Redirigez n’importe quel agent vers n’importe quel fournisseur** : Copilot parle à OpenAI? Redirigez-le vers Anthropic Claude, Gemini ou l'un des 377 fournisseurs de OmniRoute.
 - **Appliquer des mappages de modèles** : `gemini-3-flash` → `claude-sonnet-4.7` de manière transparente au niveau du gestionnaire.
-- **Observer tout le trafic des agents** : chaque requête interceptée est publiée dans le [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Appliquer la résilience d'OmniRoute** : le routage combiné, les disjoncteurs, les solutions de repli et le suivi des coûts fonctionnent également pour le trafic des agents IDE.
+- **Observez tout le trafic des agents** : toute demande interceptée est publiée à l' [Inspecteur de la Circulation](./TRAFFIC_INSPECTOR.md).
+- **Appliquer la résilience OmniRoute** : routage combiné, disjoncteurs, solutions de secours et travail de suivi des coûts pour le trafic des agents IDE également.
 
 ### Positionnement par rapport au marché
 
-| Fonctionnalité                  | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                     |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                  |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                      |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                    |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                      |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                  |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                     |    —    |    —     |        ✓        |             ✓             |
-| Open Code                       |    —    |    —     |        ✓        |             ✓             |
-| Trae                            |    —    |    —     |        —        |       🔍 À l'étude        |
-| Interface de tableau de bord    |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector               |    ✗    |    ✗     |        ✓        |             ✓             |
-| Routage OmniRoute               |    ✗    |    ✗     |        ✗        |             ✓             |
-| Interface de mappage de modèles |    ✗    |    ✗     |        ✗        |             ✓             |
-| Liste de contournement          |    ✗    |    ✗     |        ✓        |             ✓             |
-| Certificat CA amont             |    ✗    |    ✗     |        ✓        |             ✓             |
+| Fonctionnalité               | 9routeur | anti-API | intercepteur llm | **OmniRoute AgentBridge** |
+| ---------------------------- | :------: | :------: | :--------------: | :-----------------------: |
+| Antigravity                  |    ✓     |    ✓     |        —         |             ✓             |
+| GitHub Copilot               |    ✓     |    ✓     |        —         |             ✓             |
+| Kiro (AWS)                   |    ✓     |    ✓     |        —         |             ✓             |
+| OpenAI Codex                 |    —     |    ✓     |        —         |             ✓             |
+| Cursor IDE                   |    ✓     |    ✓     |        —         |             ✓             |
+| Zed Industries               |    —     |    ✓     |        —         |             ✓             |
+| Code Claude                  |    —     |    —     |        ✓         |             ✓             |
+| Code ouvert                  |    —     |    —     |        ✓         |             ✓             |
+| Traé                         |    —     |    —     |        —         |        🔍 enquête         |
+| Tableau de bord UI           |    ✓     |    ✗     |        ✗         |             ✓             |
+| Inspecteur de la circulation |    ✗     |    ✗     |        ✓         |             ✓             |
+| routage OmniRoute            |    ✗     |    ✗     |        ✗         |             ✓             |
+| Cartographie du modèle UI    |    ✗     |    ✗     |        ✗         |             ✓             |
+| Liste de contournement       |    ✗     |    ✗     |        ✓         |             ✓             |
+| Certificat CA en amont       |    ✗     |    ✗     |        ✓         |             ✓             |
 
 ---
 

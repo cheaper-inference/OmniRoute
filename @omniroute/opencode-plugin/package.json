@@ -58,7 +58,7 @@
     "@opencode-ai/plugin": "*"
   },
   "dependencies": {
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@opencode-ai/plugin": "^1.15.6",
@@ -69,6 +69,7 @@
   },
   "overrides": {
     "esbuild": "^0.28.1",
-    "toml": "^5.0.1"
+    "toml": "^5.0.1",
+    "zod": "$zod"
   }
 }

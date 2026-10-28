@@ -112,9 +112,9 @@ export function SidebarProvider({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() !== "b" || (!event.metaKey && !event.ctrlKey)) return;
-      const target = event.target as HTMLElement | null;
-      if (target?.matches("input, textarea, select, [contenteditable='true']")) return;
+      if (typeof event.key !== "string" || event.key.toLowerCase() !== "b" || (!event.metaKey && !event.ctrlKey)) return;
+      const target = event.target;
+      if (target instanceof Element && target.matches("input, textarea, select, [contenteditable='true']")) return;
       event.preventDefault();
       toggleSidebar();
     };
