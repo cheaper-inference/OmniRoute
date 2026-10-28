@@ -152,3 +152,68 @@ test("resolved targets and runtime config helpers are defensive", () => {
   assert.deepEqual(extractComboRuntimeConfig({ config: null }), {});
   assert.deepEqual(extractComboRuntimeConfig({ config: { maxRetries: 2 } }), { maxRetries: 2 });
 });
+
+/**
+ * #17393: the configured-target row renders the pinned ACCOUNT. The label the
+ * combo builder stores is only a fallback — the connection's current display
+ * name wins, and a connection without any name falls back to the full
+ * (untruncated) connection id.
+ */
+test("getComboControlCenterTargets resolves the pinned account label", () => {
+  const targets = getComboControlCenterTargets(
+    {
+      name: "coding-fast",
+      models: [
+        {
+          id: "named-step",
+          kind: "model",
+          providerId: "openai",
+          model: "openai/gpt-5-codex",
+          connectionId: "conn-named",
+          weight: 0,
+          label: "stale@example.com",
+        },
+        {
+          id: "nameless-step",
+          kind: "model",
+          providerId: "openai",
+          model: "openai/gpt-5-mini",
+          connectionId: "conn-nameless",
+          weight: 0,
+        },
+        {
+          id: "unpinned-step",
+          kind: "model",
+          providerId: "openai",
+          model: "openai/gpt-5-nano",
+          weight: 0,
+        },
+      ],
+    },
+    null,
+    { "conn-named": "renamed@example.com" }
+  );
+
+  assert.equal(targets[0].accountLabel, "renamed@example.com");
+  assert.equal(targets[1].accountLabel, "conn-nameless");
+  assert.equal(targets[2].accountLabel, null);
+});
+
+test("getComboControlCenterTargets falls back to the step label when the connection is unknown", () => {
+  const targets = getComboControlCenterTargets({
+    name: "coding-fast",
+    models: [
+      {
+        id: "named-step",
+        kind: "model",
+        providerId: "openai",
+        model: "openai/gpt-5-codex",
+        connectionId: "conn-named",
+        weight: 0,
+        label: "user@example.com",
+      },
+    ],
+  });
+
+  assert.equal(targets[0].accountLabel, "user@example.com");
+});

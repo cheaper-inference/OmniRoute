@@ -647,27 +647,29 @@ sudo systemctl enable --now omniroute-update.path
 Baineann an tseirbhís an t-iarratas sula dtarraingíonn sí, ionas nach lúbfaidh rith teipthe. Gan
 `DOCKER_UPDATE_TRIGGER_FILE`, coinníonn an deais sreabhadh an ordaithe láimhe.
 
-## Infhaighteacht: is macasamhail aonair é SQLite réamhshocraithe
+## Infhaighteacht: is macasamhail singil é SQLite réamhshocraithe
 
-Is éard atá i ngnáthleagan Docker / Kubernetes de OmniRoute ná **próiseas Node amháin + scríbhneoir SQLite amháin**. **Ní thacaítear le hinfhaighteacht ard** ar an toipeolaíocht sin.
+Tá stoc Docker / Kubernetes OmniRoute** próiseas Nód amháin + scríbhneoir SQLite amháin** . Tá infhaighteacht ard** gan tacaíocht** ar an topology sin.
 
-| Srian                                  | Iarmhairt                                                                                                                                                                                                                                                                                                                                                       |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Scríbhneoir aonair                     | **Ná** rith macasamhla iolracha in aghaidh an chomhaid SQLite chéanna. Truaillíonn sé sin an DB.                                                                                                                                                                                                                                                                |
-| Athchruthú / atosú / marú HEALTHCHECK  | **Briseadh iomlán** ar SSE atá idir lámha, seisiúin deaise, agus staid sa chuimhne. Dícheanglaítear gach cliant nasctha. Faigheann iarratais nua le linn na fuinneoige críochphointe folmha **`502 Bad Gateway: Unknown error`** ón seachfhreastalaí droim ar ais, seachas JSON OmniRoute — ní féidir le cliaint é seo a idirdhealú ó theip soláthraí (#11015). |
-| An lúb teagmhais chéanna le `/healthz` | Is féidir le catalóg ghnóthach nó ticeáil chomhbhrúite taiscéalaithe a mhoilliú; atosaíonn teorainn ama ghearr an t-**aon** mhacasamhail ansin.                                                                                                                                                                                                                 |
+| Srian                                     | Iarmhairt                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scríbhneoir aonair                        | Déan** nach bhfuil** rith macasamhla iolracha i gcoinne an chomhaid SQLite céanna. Éillíonn sé sin an DB.                                                                                                                                                                                                                                     |
+| Athchruthaigh / atosú / HEALTHCHECK mharú | **Briseadh iomlán** de SSE san eitilt , seisiúin deais, agus staid cuimhneacháin. Titeann gach cliant nasctha. Faigheann iarratais nua le linn na fuinneoige críochphointe folamh seachfhreastalaí droim ar ais**`502 Bad Gateway: Unknown error`** , ní OmniRoute JSON — ní féidir le cliaint é seo a idirdhealú ó theip soláthraí (#11015). |
+| Lúb an imeachta céanna agus `/healthz`    | Is féidir le catalóg ghnóthach nó tic comhbhrú moill a chur ar thaiscéalaithe; atosú gearr ansin an** amháin** macasamhail.                                                                                                                                                                                                                   |
 
-**Maitrís taiscéalaithe** (féach freisin [moltaí taiscéalaithe Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Maitrís taiscéalaithe** (féach freisin [moltaí probe Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Taiscéalaí       | Sprioc                                                                  | Ná húsáid                                                                  |
-| ---------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Beocht           | TCP ar `PORT` (`20128` de réir réamhshocraithe), nó HTTP bog `/healthz` | `/api/monitoring/health`                                                   |
-| Ullmhacht        | HTTP `GET /healthz`                                                     | Teorainneacha ama dochta a mheasann lúb teagmhais ghnóthach a bheith marbh |
-| Domhain / daoine | `/api/monitoring/health`                                                | Beocht uathoibrithe kubelet                                                |
+| Tóraigh          | Sprioc                                                           | Ná húsáid                                                                       |
+| ---------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Beo              | TCP ar `PORT` ( `20128` réamhshocraithe), nó HTTP `/healthz` bog | `/api/monitoring/health`                                                        |
+| ullmhacht        | HTTP `GET /healthz`                                              | Teorainneacha ama daingean a dhéileálann le lúb imeachta gnóthach mar rud marbh |
+| Doimhne / daoine | `/api/monitoring/health`                                         | beocht cubelet uathoibrithe                                                     |
 
-**Uasghráduithe:** bí ag súil go ndícheanglófar gach seisiún. Taosc cliaint más féidir leat; níl aon nuashonrú céimneach ar SQLite réamhshocraithe. Cuirfidh `restart: unless-stopped` Compose agus `HEALTHCHECK` Docker an t-aon phróiseas amháin in ionad freisin nuair a bhíonn an coimeádán Míshláintiúil — an ga tionchair céanna.
+**Uasghráduithe:** ag súil go dtitfidh gach seisiún. Taosc cliaint más féidir leat; níl aon nuashonrú rollach ar SQLite réamhshocraithe . Beidh Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` freisin in ionad an phróisis amháin nuair a bhíonn an coimeádán Míshláintiúil - ga soinneáin céanna.
 
-Blúire Kubernetes do **mhacasamhail aonair** (tá Recreate riachtanach; ná méadaigh `replicas` in aghaidh aon chomhaid SQLite amháin):
+Tá manifests réamhdhéanta agus cairt Helm beo i `deploy/kubernetes/` agus `deploy/helm/omniroute/` — féach [treoir imscartha Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Gearrthóg Kubernetes le haghaidh a** macasamhail singil** (Tá athchruthú ag teastáil; ná ardaigh `replicas` i gcoinne comhad amháin SQLite ):
 
 ```yaml
 spec:
@@ -694,9 +696,9 @@ spec:
             periodSeconds: 20
 ```
 
-Ligeann codladh `preStop` do kube críochphointí Service a bhaint sula seoltar SIGTERM, ionas nach seoltar trácht **nua** chuig an bpróiseas atá ag druidim síos. Tugtar suas le `SHUTDOWN_TIMEOUT_MS` (30s de réir réamhshocraithe) do SSE `/v1/responses` atá ar siúl chun críochnú, trí léasanna iontrála tromualaithe (#11015). Faigheann iarratais nua a shroicheann an próiseas fós `503` + `Retry-After: 5`. Is briseadh crua seirbhíse fós í an bhearna gan chríochphointí de bharr Recreate go dtí go mbíonn an t-ionadaí Ready — is saintréith de thoipeolaíocht SQLite í sin, ní míchumrú taiscéalaí.
+Ligeann codlata `preStop` do kube críochphointí na Seirbhíse a laghdú roimh SIGTERM mar sin** nua** stopann trácht ag bualadh leis an bpróiseas ag fáil bháis. Déantar `/v1/responses` SSE san eitilt a dhraenáil suas go `SHUTDOWN_TIMEOUT_MS` (30idí réamhshocraithe) trí léasanna iontrála trom-mheáchain (#11015). Faigheann iarratais nua a shroicheann an próiseas fós `503` + `Retry-After: 5`. Is briseadh crua fós é an bhearna chríochphointe Recreate folamh go dtí go bhfuil an t-athsholáthar Réidh - is é sin topology SQLite, ní misconfig taiscéalaithe.
 
-**Ní** conair chaighdeánach dhoiciméadaithe é Postgres seachtrach / HA ilscríbhneora. Má theastaíonn HA uait, coinnigh macasamhail aonair nó rith toipeolaíocht a ndearna an tionscadal tástáil uirthi agus a dhoiciméadaigh sé ar leithligh. Tá an obair Postgres/MySQL in [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Go dtí go seolfar é sin, is é an t-aon bhealach tacaithe chun acmhainn `/v1/responses` **mhór** a iolrú ná N próiseas neamhspleácha (an chéad rannán eile), seachas `replicas > 1` ar imleabhar amháin.
+Tá Postgres seachtrach / il-scríbhneoir HA** nach bhfuil** cosán stoc doiciméadaithe. Más gá duit HA, coinnigh macasamhail amháin nó rith topology a ndearna an tionscadal tástáil air agus doiciméadaithe ar leithligh. Tá cónaí ar an obair Postgres/MySQL i [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Go dtí go long, an t-aon bhealach tacaithe a iolrú** mór** Is éard atá in acmhainn `/v1/responses` ná N próisis neamhspleácha (an chéad chuid eile), ní `replicas > 1` ar imleabhar amháin.
 
 ## Scálú amach: N próiseas neamhspleácha
 

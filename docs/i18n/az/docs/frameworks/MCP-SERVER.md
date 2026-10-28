@@ -72,6 +72,16 @@ curl -i \
 
 `manage` əhatə dairəsi olmayan açar (və ya Bearer olmadıqda) `403 LOCAL_ONLY` qaytarır. Qonşu `/api/cli-tools/runtime/*` prefiksi üçün yan keçmə qəsdən MÜMKÜN DEYİL — [Route Guard səviyyələri — manage əhatə dairəsi üçün istisna](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) bölməsinə baxın.
 
+### Origin yoxlaması
+
+Autentifikasiyadan sonra `/api/mcp/*` ünvanına gələn hər sorğunun — transportların və `status`, `tools`, `audit`, `restart` kimi idarəetmə marşrutlarının — `Origin` başlığı çağıranın kim olmasından asılı olmayaraq (API açarı, CLI tokeni, dashboard sessiyası və ya giriş söndürüldükdə anonim loopback) yoxlanılır. Bu, MCP Streamable HTTP spesifikasiyasının tələb etdiyi DNS rebinding müdafiəsidir.
+
+- **`Origin` başlığı yoxdur** → icazə verilir. OmniRoute CLI, SDK və IDE müştəriləri bu başlığı göndərmir.
+- **İcazə verilən `Origin`** → istənilən portda `localhost` / `127.0.0.1` / `[::1]` və ya OmniRoute-un öz ictimai origin-i: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, etibarlı əks proksinin ötürdüyü origin (`OMNIROUTE_TRUST_PROXY`, yalnız base URL təyin edilmədikdə) və ya birbaşa müraciət edilən loopback/LAN IP hostu. Təkcə `Host` başlığı heç vaxt origin-i etibarlı etmir.
+- **`null` daxil olmaqla istənilən digər `Origin`** → JSON-RPC xəta gövdəsi ilə `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Etibarlı CSRF tokeni təqdim edən dashboard sessiyası, digər dashboard yazmalarında olduğu kimi, qəbul olunmağa davam edir.
+
+Əks proksi arxasında təqdim olunan brauzer MCP müştərisinə `OMNIROUTE_PUBLIC_BASE_URL` lazımdır; digər origin-lər üçün icazə siyahısı yoxdur. CORS ilkin sorğusu (`OPTIONS`) Origin baxımından yoxlanılmır; ondan sonrakı sorğu yoxlanılır.
+
 ## IDE Konfiqurasiyası
 
 Claude Desktop, Cursor, Cline və uyğun MCP klientlərinin qurulması üçün [MCP Klient Konfiqurasiyası](../guides/SETUP_GUIDE.md#mcp-client-configuration) bölməsinə baxın.

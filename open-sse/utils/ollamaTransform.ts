@@ -8,6 +8,31 @@ type PendingToolCall = {
   };
 };
 
+type ToolCallDelta = {
+  index: number;
+  id?: string | number;
+  function?: { name?: string; arguments?: string };
+};
+
+function appendToolCallDelta(
+  tc: ToolCallDelta,
+  pending: Record<number, PendingToolCall>,
+  completed: PendingToolCall[]
+): void {
+  const idx = tc.index;
+  const toolCallId = tc.id != null ? String(tc.id) : undefined;
+  // T37: Prevent merging tool_calls on same index if ID changes.
+  if (pending[idx] && toolCallId && pending[idx].id !== toolCallId) {
+    completed.push(pending[idx]);
+    delete pending[idx];
+  }
+  if (!pending[idx]) {
+    pending[idx] = { id: toolCallId, function: { name: "", arguments: "" } };
+  }
+  if (tc.function?.name) pending[idx].function.name += tc.function.name;
+  if (tc.function?.arguments) pending[idx].function.arguments += tc.function.arguments;
+}
+
 type OllamaMessage = {
   role: "assistant";
   content: string;
@@ -79,25 +104,7 @@ export function transformToOllama(response, model) {
 
     if (toolCalls) {
       for (const tc of toolCalls) {
-        const idx = tc.index;
-
-        const toolCallId = tc.id != null ? String(tc.id) : tc.id;
-
-        // T37: Prevent merging tool_calls on same index if ID changes
-        if (pendingToolCalls[idx] && toolCallId && pendingToolCalls[idx].id !== toolCallId) {
-          completedToolCalls.push(pendingToolCalls[idx]);
-          delete pendingToolCalls[idx];
-        }
-
-        if (!pendingToolCalls[idx]) {
-          pendingToolCalls[idx] = {
-            id: toolCallId,
-            function: { name: "", arguments: "" },
-          };
-        }
-        if (tc.function?.name) pendingToolCalls[idx].function.name += tc.function.name;
-        if (tc.function?.arguments)
-          pendingToolCalls[idx].function.arguments += tc.function.arguments;
+        appendToolCallDelta(tc, pendingToolCalls, completedToolCalls);
       }
     }
 

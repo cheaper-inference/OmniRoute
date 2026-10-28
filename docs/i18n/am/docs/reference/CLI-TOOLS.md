@@ -4,17 +4,17 @@
 
 ---
 
-መጨረሻ የተዘመነው፦ 2026-08-23
+ለመጨረሻ ጊዜ የዘመነው፡ 2026-08-23
 
-OmniRoute በሦስት ልዩ የዳሽቦርድ ገጾች ላይ ከተከፋፈሉ ሦስት የCLI መሣሪያዎች ምድቦች ጋር ይዋሃዳል፦
+OmniRoute በሶስት የልዩ ዳሽቦርድ ገፆች ላይ ከተሰራጩ የሶስት ምድቦች CLI መሳሪያዎች ጋር ያዋህዳል
 
-| ገጽ             | መስመር                    | ጽንሰ-ሐሳብ                                                                      | ብዛት             |
-| -------------- | ----------------------- | ---------------------------------------------------------------------------- | --------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | ወደ OmniRoute የሚያመለክቷቸው የኮድ መጻፊያ መሣሪያዎች (Client → CLI → OmniRoute → Provider) | 26              |
-| **CLI Agents** | `/dashboard/cli-agents` | ወደ OmniRoute የሚያመለክቷቸው ራስ-ገዝ ወኪሎች (ተመሳሳይ ፍሰት፣ ሰፋ ያለ ወሰን)                     | 10              |
-| **ACP Agents** | `/dashboard/acp-agents` | OmniRoute በstdio/ACP በኩል እንደ backend የሚያስነሳቸው CLIs (ተቃራኒ ፍሰት)                | registryን ይመልከቱ |
+| ገጽ           | መንገድ                    | ጽንሰ-ሐሳብ                                                               | መቁጠር       |
+| ------------ | ----------------------- | --------------------------------------------------------------------- | ---------- |
+| **CLI ኮድ's** | `/dashboard/cli-code`   | በ OmniRoute ላይ የጠቆሙት የኮድ ማድረጊያ መሳሪያዎች (ደንበኛ → CLI → OmniRoute → አቅራቢ) | 26         |
+| **CLI ወኪሎች** | `/dashboard/cli-agents` | በ OmniRoute (ተመሳሳይ ፍሰት፣ ሰፊ ወሰን) የሚጠቁሟቸው ራስ ወዳድ ወኪሎች                   | 11         |
+| **ACP ወኪሎች** | `/dashboard/acp-agents` | CLIs stdio/ACP OmniRoute እንደ ጀርባ የሚፈልቅ (የተገላቢጦሽ ፍሰት)                  | መዝገብ ይመልከቱ |
 
-የቆዩ መስመሮች በ308 ይዛወራሉ፦ `/dashboard/cli-tools` → `/dashboard/cli-code`፣ `/dashboard/agents` → `/dashboard/acp-agents`።
+የቆዩ መንገዶች በ 308 አቅጣጫ አቅጣጫ ይቀየራሉ `/dashboard/cli-tools` → `/dashboard/cli-code`፣ `/dashboard/agents` → `/dashboard/acp-agents`።
 
 ---
 
@@ -43,11 +43,9 @@ ACP Agents (ተቃራኒ የማስነሳት ፍሰት):
 
 ---
 
-## `setup-*`ን በመጠቀም በራስ-ሰር ማዋቀር
+## በ `setup-*` በራስ-አዋቅር
 
-የእያንዳንዱን መሣሪያ ውቅር በእጅ መጻፍ አያስፈልግዎትም። OmniRoute ለእያንዳንዱ የሚደገፍ CLI የ`setup-*`
-ትዕዛዝ ያቀርባል፤ ይህም እየሰራ ካለ OmniRoute (አካባቢያዊ ወይም የርቀት) የ**ቀጥታ** ሞዴል ካታሎግን በማንበብ
-የመሣሪያውን የራሱን ውቅር በማሽንዎ ላይ ይጽፋል፦
+የእያንዳንዱን መሳሪያ ውቅር በእጅ መጻፍ አያስፈልግም። OmniRoute የሚለውን የሚያነብ የ `setup-*` ትዕዛዝ በእያንዳንዱ የሚደገፍ CLI ይልካል** መኖር** የሞዴል ካታሎግ ከሩጫ OmniRoute (አካባቢያዊ ወይም የርቀት መቆጣጠሪያ) እና የመሳሪያውን የራሱን ውቅር በማሽንዎ ላይ ይጽፋል
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,33 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-እያንዳንዱ `--remote <url> --api-key <key>` (አካባቢያዊ መሣሪያን ከርቀት OmniRoute ጋር ማዋቀር)፣ `--dry-run` (ሳይጽፉ ቅድመ-ዕይታ ማየት) እና `--port`ን ይቀበላል። ራስ-ሰር የሞዴል ማግኘት ባህሪ የሌላቸው መሣሪያዎች (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)
-`--model <id>`ን (እንዲሁም መስተጋብራዊ ላልሆኑ አሂዶች `--yes`ን) ይቀበላሉ። `setup-5dive` በ`$HOME` ስር የማይጽፍ ብቸኛው የማዋቀሪያ ዘዴ ነው፦ በፍሊቱ አስተናጋጅ ላይ በroot ባለቤትነት የሚያዝ የማረጋገጫ መገለጫ በመጻፍ የ5dive ወኪሎች ፍሊትን ያዋቅራል፤ ስለዚህ ራሱን በ`sudo` በኩል እንደገና ያስፈጽማል እና የራሱ የርቀት ሁነታ የለውም። ትክክለኛው env ተጨምሮለት እና ምንም ውቅር ሳይጻፍ CLIን ለማስጀመር፣ አጠቃላዩን
-`omniroute run <target>` ማስጀመሪያ ይጠቀሙ (claude, codex, aider, goose, opencode, qwen,
-gemini — ዒላማዎች እና ተለዋጭ ስሞች ከ`bin/cli/cli-manifest.mjs` ይመጣሉ)፤ ነባሮቹ
-የየመሣሪያው ማስጀመሪያዎች `omniroute launch` (Claude Code) እና `omniroute launch-codex`
-(Codex) አሁንም ይገኛሉ። Gemini CLI ለማስጀመር ብቻ ነው፦ የ`omniroute run`
-ዒላማ ነው፣ ነገር ግን የ`setup-*`/`configure` ማዋቀሪያ ዘዴ የለውም።
+እያንዳንዱ `--remote <url> --api-key <key>` (የአካባቢውን መሳሪያ ከርቀት OmniRoute ጋር ያዋቅሩ)፣ `--dry-run` (ሳይፃፍ ቅድመ እይታ) እና `--port` ይቀበላል። ያለ ሞዴል ራስ-ግኝት (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) መሳሪያዎች `--model <id>` (እና `--yes` መስተጋብራዊ ላልሆኑ ሩጫዎች) ይወስዳሉ. `setup-5dive` በ `$HOME` ስር የማይጽፈው አንዱ የምግብ አዘገጃጀት መመሪያ ነው፡ የስርወ-ባለቤትነት ማረጋገጫን በ የበረራ አስተናጋጁ ላይ በመፃፍ 5dive agent መርከቦችን ያዋቅራል፣ ስለዚህ በ `sudo` እንደገና ይሰራል እና የራሱ የርቀት ሁነታ የለውም። CLI ለማስጀመር ትክክለኛው ኢንቪ የተከተተ እና ምንም አይነት ውቅረት ያልተጻፈበት፣ አጠቃላይ የሆነውን `omniroute run <target>` ማስጀመሪያን ተጠቀም (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — ኢላማዎች እና ተለዋጭ ስሞች ከ `bin/cli/cli-manifest.mjs` የመጡ ናቸው); የቅርስ በመሳሪያ አስጀማሪዎች `omniroute launch` (Claude Code) እና `omniroute launch-codex` (Codex) ይገኛሉ። Gemini CLI ማስጀመሪያ-ብቻ ነው `omniroute run` ኢላማ ነው ነገር ግን `setup-*`/`configure` የምግብ አሰራር የለውም።
 
-> **ሙሉ ማጣቀሻ፦** ዋናው ሰንጠረዥ — እያንዳንዱ ትዕዛዝ ምን እንደሚጽፍ፣ ሁሉም ጠቋሚዎች፣
-> አካባቢያዊ ከርቀት ጋር ያለው ልዩነት፣ እና የትኞቹ መሣሪያዎች የ`/v1` ቅጥያ እንደሚፈልጉ — በ
-> **[CLI ውህደቶች](../guides/CLI-INTEGRATIONS.md)** ውስጥ ይገኛል።
+> **ሙሉ ማጣቀሻ፡** ዋናው ጠረጴዛ - እያንዳንዱ ትዕዛዝ የሚጽፈውን, እያንዳንዱን ባንዲራ, አካባቢያዊ vs የርቀት መቆጣጠሪያ እና የትኞቹ መሳሪያዎች `/v1` ቅጥያ ይፈልጋሉ - ይኖራል.** [CLI ውህደቶች](../guides/CLI-INTEGRATIONS.md)** .
 
-### እነዚህን በኮንቴይነር ውስጥ ማስኬድ
+### እነዚህን በእቃ ማጠራቀሚያ ውስጥ ማስኬድ
 
-በOmniRoute ኮንቴይነር ውስጥ የሚፈጸም የ`setup-*` ትዕዛዝ ወደኮንቴይነሩ የራሱ home ይጽፋል፤ ይህንን ምንም የአስተናጋጅ CLI አያነብም፣ እንዲሁም ከኮንቴይነሩ ጋር አብሮ ይጠፋል። OmniRoute ይህን ፈልጎ በማግኘት ከመጻፍ ይልቅ መመሪያዎችን አሳይቶ በ`2` ይወጣል። ወደፊት ለመቀጠል ሁለት የሚደገፉ መንገዶች አሉ — CLIን በአስተናጋጁ ላይ ጭነው
-`omniroute connect`ን ወደኮንቴይነሩ መጠቀም፣ ወይም የውቅር ማውጫዎቹን bind-mount አድርጎ
-`CLI_CONFIG_HOME`ን ማዘጋጀት (የcompose `host` መገለጫ)። እያንዳንዱ የ`setup-*` ትዕዛዝ፣ እንዲሁም
-`omniroute configure` እና `omniroute config set`፣ በእርግጥ የኮንቴይነሩን የራሱን CLIዎች ማዋቀር ካሰቡ
-`--allow-container-write`ን ይቀበላሉ፤ `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`ም ለአገልጋዩ ተመሳሳይ ነገር ያደርጋል።
-[የDocker መመሪያ → የአስተናጋጅ CLI መሣሪያዎችን ማዋቀር](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)ን ይመልከቱ።
+በ OmniRoute ኮንቴይነር ውስጥ የተተገበረ `setup-*` ትእዛዝ በእቃ መያዣው ቤት ውስጥ ይጽፋል፣ ማንም አስተናጋጅ CLI የማያነብ እና ከእቃ መያዣው ጋር ይጠፋል። OmniRoute ያንን አግኝቶ ከመጻፍ ይልቅ በመመሪያው ከ `2` ይወጣል። ሁለት የሚደገፉ መንገዶች ወደፊት - CLI በአስተናጋጁ ላይ እና `omniroute connect` ወደ መያዣው ላይ ይጫኑት ወይም ኮንግረስ ዲርስን ያስሩ እና `CLI_CONFIG_HOME` ያዘጋጁ (የ `host` ፕሮፋይል ያዘጋጁ)። እያንዳንዱ `setup-*` ትእዛዝ፣ እንዲሁም `omniroute configure` እና `omniroute config set`፣ የመያዣውን የራሱ CLIs ሲያዋቅሩ `--allow-container-write` ይቀበላል እርስዎ በትክክል ለማለት የፈለጉት ነው። `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ለአገልጋዩም እንዲሁ ያደርጋል። [Docker መመሪያን ይመልከቱ → አስተናጋጅ CLI መሳሪያዎችን በማዋቀር ላይ](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) ።
 
-የዳሽቦርዱ **apply endpoint** (`POST /api/cli-tools/apply`) ተመሳሳዩን ጥበቃ ያስፈጽማል፦ በኮንቴይነር ውስጥ፣ ዒላማው ከአስተናጋጁ bind-mount ያልተደረገ የመጻፍ ጥያቄ **`422`**ን ከ`containerEphemeralTarget: true`፣ ከአስተማማኙ የስህተት ጽሑፍ እና — የአስተናጋጅ ማዋቀሪያ ዘዴ ላላቸው መሣሪያዎች (claude, codex, opencode, cline,
-kilo, continue) — በምትኩ በአስተናጋጁ ላይ የሚሰራ `hostSetupCommand` (ለምሳሌ `omniroute setup-opencode`) ጋር ይመልሳል፤ ምንም ነገር አይጻፍም። `dryRun: true` በኮንቴይነር ሁነታ መስራቱን ይቀጥላል፣ እና ዲስኩን ሳይነካ ስሱ መረጃ የተደበቀበትን ቅድመ-ዕይታ + የዒላማ ዱካ ይመልሳል። የቅድመ-ዕይታው ይዘት ለመቅዳት ወይም ለማስመጣት የሚያገለግል ማረጋገጫ-የያዘ ውቅር አይደለም። በአስተናጋጁ ላይ በመጀመሪያዎቹ የመሣሪያ/base URL/API key/model ግብዓቶች apply ያድርጉ፣ ወይም የተጠቆመውን የአስተናጋጅ-ወገን ማዋቀሪያ ትዕዛዝ ይጠቀሙ። ስለቅድመ-ዕይታው header እና የጥያቄው contract
-[የCLI ውቅር ደህንነት](../security/CLI-CONFIGURATION.md)ን ይመልከቱ። ይህ ባህሪ ሆን ተብሎ የተደረገ ሲሆን ተመልሶ እንዳይበላሽ
-በ`tests/unit/api/cli-tools/apply-container-guard.test.ts` ይጠበቃል — ጥበቃውን በማስወገድ 422ን "ለማስተካከል" በፍጹም አይሞክሩ።
+ዳሽቦርዱ** የመጨረሻ ነጥብ ተግብር** (`POST /api/cli-tools/apply`) ተመሳሳይ ጥበቃን ያስፈጽማል፡ በኮንቴይነር ውስጥ ኢላማው ያልተያያዘ ጽሁፍ ከአስተናጋጁ መልስ ይሰጣል**`422`** ከ `containerEphemeralTarget: true` ጋር, ደህንነቱ የተጠበቀ የስህተት ጽሑፍ እና - ለመሳሪያዎች በአስተናጋጅ የምግብ አዘገጃጀት መመሪያ (ክላውድ, ኮዴክስ, ክፍት ኮድ, ክላይን, ኪሎ, ቀጥል) - `hostSetupCommand` (ለምሳሌ `omniroute setup-opencode`) በምትኩ በአስተናጋጁ ላይ እንዲሰራ; ምንም አልተጻፈም. `dryRun: true` በመያዣ ሞድ ውስጥ መስራቱን ይቀጥላል እና ዲስክን ሳይነካ የተቀየረ ቅድመ እይታ + ኢላማ መንገድን ይመልሳል። ቅድመ-ዕይታ ይዘት ለመቅዳት ወይም ለማስመጣት ምስክርነት ያለው ውቅር አይደለም። በአስተናጋጁ ላይ ከመጀመሪያው tool/base URL/API key/model ግብዓቶች ጋር ያመልክቱ ወይም የተጠቆመውን የአስተናጋጅ-ጎን ማዋቀር ትዕዛዙን ይጠቀሙ። ለቅድመ እይታ ራስጌ [CLI ውቅር ደህንነትን](../security/CLI-CONFIGURATION.md) ይመልከቱ እና ውል ይጠይቁ። ይህ ባህሪ ሆን ተብሎ እና በድግግሞሽ የሚጠበቀው በ `tests/unit/api/cli-tools/apply-container-guard.test.ts` - ጠባቂውን በማንሳት 422 ን በጭራሽ "ማስተካከል".
 
 ---
 
@@ -154,22 +137,23 @@ kilo, continue) — በምትኩ በአስተናጋጁ ላይ የሚሰራ `host
 `baseUrlSupport: "partial"` ያላቸው መሣሪያዎች በዳሽቦርድ ካርዱ ላይ "⚠ ከፊል Base URL" የሚል ባጅ ያሳያሉ።
 ---
 
-## 2. የCLI ኤጀንቶች ካታሎግ (10 መሣሪያዎች)
+## 2. CLI ወኪሎች ካታሎግ (11 መሳሪያዎች)
 
-በ`/dashboard/cli-agents` ውስጥ የሚታዩ ራስ-ሰር ኤጀንቶች፦
+በ `/dashboard/cli-agents` ውስጥ የሚታዩ ራስ ወዳድ ወኪሎች፡-
 
-| id           | ስም               | አቅራቢ                     | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| መታወቂያ     | ስም         | ሻጭ                 | baseUrl ድጋፍ | acpSpawnable |
+| --------- | ---------- | ------------------ | ----------- | ------------ |
+| ሄርሜስ-ወኪል  | ሄርሜስ ወኪል   | የኑስ ምርምር           | ሙሉ          | የውሸት         |
+| ክራንቻ      | OpenClaw   | OSS (ፒ. ስታይንበርገር)  | ሙሉ          | እውነት ነው።     |
+| ዝይ        | ዝይ         | አግድ / Linux ፋውንዴሽን | ሙሉ          | እውነት ነው።     |
+| አስተርጓሚ    | አስተርጓሚ ክፈት | OSS                | ሙሉ          | እውነት ነው።     |
+| መወዛወዝ     | Warp AI    | Warp Inc.          | ከፊል         | እውነት ነው።     |
+| ወኪል-የመርከቧ | ወኪል ዴክ     | አሽሽጎፕላኒ (OSS)      | ሙሉ          | የውሸት         |
+| omp       | ኦ የእኔ ፒ    | OSS                | ሙሉ          | እውነት ነው።     |
+| ሌታ        | Letta CLI  | ሌታ                 | ሙሉ          | የውሸት         |
+| ዋና ወኪል    | ዋና ወኪል     | ዋና አእምሮ (OSS)      | ሙሉ          | የውሸት         |
+| 5 መስመጥ    | 5 መስመጥ     | OSS (5dive-ai)     | ሙሉ          | የውሸት         |
+| ለምን ኮዶች   | WhyCodes   | ለምን ኮርፖሬሽን         | ሙሉ          | የውሸት         |
 
 ---
 
