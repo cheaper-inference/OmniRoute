@@ -1007,6 +1007,16 @@ jobs:
         run: |
           rm -rf coverage-shard coverage-shard-compact
           npm run test:unit:ci:shard
+      - name: Upload unit progress receipt
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: unit-progress-ci-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
+          path: .artifacts/unit-progress/*.jsonl
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
       # Compress the original V8 files losslessly. Do not pre-merge each shard:
       # mixed function/block-level coverage must retain its global input order.
       - name: Compact successful shard coverage
