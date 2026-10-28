@@ -4,6 +4,7 @@ import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import next from "next";
+import { writePublicOpenApi } from "../build/publicOpenApi.mjs";
 import { bootstrapEnv } from "../build/bootstrap-env.mjs";
 import { resolveRuntimePorts, withRuntimePortEnv } from "../build/runtime-env.mjs";
 import { createOmnirouteWsBridge } from "./v1-ws-bridge.mjs";
@@ -53,6 +54,7 @@ const dev = mode === "dev";
 // Self-heal a stale better-sqlite3 native binary after a Node version switch
 // (nvm 22 <-> 24) before bootstrap touches the DB. No-op when the ABI matches.
 if (dev) {
+  writePublicOpenApi(process.cwd());
   ensureNativeSqlite();
 }
 

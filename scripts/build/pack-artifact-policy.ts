@@ -162,6 +162,7 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "open-sse/utils/setupPolyfill.ts",
   "package.json",
   "scripts/build/assembleStandalone.mjs",
+  "scripts/build/publicOpenApi.mjs",
   "scripts/build/backendOnlyPages.mjs",
   "scripts/build/build-tproxy-native.mjs",
   "scripts/build/build-next-isolated.mjs",

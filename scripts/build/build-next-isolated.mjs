@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { writePublicOpenApi } from "./publicOpenApi.mjs";
 import { generateGlobalErrorMessages } from "../i18n/generate-global-error-messages.mjs";
 import {
   assembleStandalone,
@@ -303,6 +304,7 @@ export async function main() {
 
   try {
     generateGlobalErrorMessages(projectRoot);
+    writePublicOpenApi(projectRoot);
     for (const entry of transientBuildPaths) {
       if (!(await exists(entry.sourcePath))) continue;
       await movePath(entry.sourcePath, entry.backupPath);

@@ -1,0 +1,1 @@
+- fix(api): regenerate the public OpenAPI spec with the build version and deployment-relative server URL (#18331).

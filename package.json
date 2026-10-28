@@ -39,6 +39,7 @@
     "scripts/check/check-supported-node-runtime.ts",
     "scripts/dev/sync-env.mjs",
     "scripts/build/assembleStandalone.mjs",
+    "scripts/build/publicOpenApi.mjs",
     "scripts/build/backendOnlyPages.mjs",
     "scripts/build/build-tproxy-native.mjs",
     "scripts/build/native-binary-compat.mjs",
