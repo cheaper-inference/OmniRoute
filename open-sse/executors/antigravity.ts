@@ -69,6 +69,7 @@ import {
   tryEmbedLongRetryAfter,
   buildFinalAntigravityResult,
   peekFirstAntigravitySseEvent,
+  isAntigravityHeaderDeadlineTimeout,
   buildAntigravity429ErrorMessage,
   markCreditsExhausted,
   isAbortError,
@@ -900,7 +901,12 @@ export class AntigravityExecutor extends BaseExecutor {
         : rawTransformedRequest;
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
-    (transformedRequest as Record<string, unknown>).labels = identity.labels;
+    // Identity labels join (never replace) the caller's own labels (#16618).
+    const callerLabels = asRecord((transformedRequest as Record<string, unknown>).labels);
+    (transformedRequest as Record<string, unknown>).labels = {
+      ...callerLabels,
+      ...identity.labels,
+    };
     const {
       project: _project,
       model: _model,
@@ -1467,7 +1473,9 @@ export class AntigravityExecutor extends BaseExecutor {
         }
         // This deadline has already consumed its full header budget. Never
         // spend it again on another host within the SAME provider account.
-        if (isAntigravityPreResponseTimeout(error)) throw error;
+        // A silent body (headers but no first SSE event) is per-host and
+        // still fails over to the next base URL (#13125).
+        if (isAntigravityHeaderDeadlineTimeout(error)) throw error;
         lastError = error;
         // A fetch failure on a URL that still has a fallback is a retry, not a
         // failed request: the loop continues and the client gets the next

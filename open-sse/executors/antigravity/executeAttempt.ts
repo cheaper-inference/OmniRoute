@@ -102,6 +102,29 @@ export class AntigravityPreResponseTimeoutError extends Error {
   }
 }
 
+/**
+ * Silent-body watchdog (#13125): the headers arrived but no first SSE event
+ * did within the readiness budget. It keeps the pre-response 504 code, so the
+ * account layer treats it like the header deadline, but that budget is spent
+ * per base URL: executeOnce may still fail over to the next host.
+ */
+export class AntigravityFirstEventTimeoutError extends AntigravityPreResponseTimeoutError {
+  constructor(timeoutMs: number, url: string) {
+    super(timeoutMs, url);
+    this.message = `Antigravity upstream sent no SSE event within ${timeoutMs}ms: ${url}`;
+  }
+}
+
+/**
+ * True only for the exhausted response-header deadline (#18052), which must
+ * not be spent again on another host; the silent-body watchdog is excluded.
+ */
+export function isAntigravityHeaderDeadlineTimeout(error: unknown): boolean {
+  return (
+    isAntigravityPreResponseTimeout(error) && !(error instanceof AntigravityFirstEventTimeoutError)
+  );
+}
+
 function getAbortErrorCode(error: unknown): string | null {
   if (!error || typeof error !== "object") return null;
   const value = (error as { code?: unknown }).code;
@@ -633,7 +656,7 @@ export async function peekFirstAntigravitySseEvent(
   });
 
   if (!readiness.ok) {
-    throw new AntigravityPreResponseTimeoutError(timeoutMs, url);
+    throw new AntigravityFirstEventTimeoutError(timeoutMs, url);
   }
 
   return readiness.response;

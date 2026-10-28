@@ -43,7 +43,7 @@ describe("Part A - Antigravity Envelope Identity and Labels", () => {
     assert.equal("model_enum" in identityGemini.labels, false);
   });
 
-  it("transformRequest attaches labels and structured requestId to envelope, surviving Claude sanitizer", async () => {
+  it("transformRequest attaches labels and structured requestId to envelope, surviving Claude sanitizer (minus the #16618 telemetry keys)", async () => {
     const executor = new AntigravityExecutor();
     const creds = {
       accessToken: "test-token",
@@ -67,8 +67,10 @@ describe("Part A - Antigravity Envelope Identity and Labels", () => {
     assert.match(claudeEnvelope.requestId, /^agent\/[0-9a-f-]{36}\/\d+\/[0-9a-f-]{36}\/2$/);
     assert.ok(claudeEnvelope.request, "has inner request");
     assert.ok(claudeLabels, "labels attached to inner request");
-    assert.equal(claudeLabels.used_claude, "true");
-    assert.equal(claudeLabels.used_claude_conservative, "true");
+    // #16618 strips the used_claude* harness telemetry keys from every
+    // envelope `labels` map before dispatch; the identity labels stay.
+    assert.equal("used_claude" in claudeLabels, false);
+    assert.equal("used_claude_conservative" in claudeLabels, false);
     assert.equal(claudeLabels.last_step_index, "1");
     assert.equal(claudeLabels.trajectory_id, claudeEnvelope.requestId.split("/")[3]);
     assert.equal("model_enum" in claudeLabels, false);
@@ -89,8 +91,9 @@ describe("Part A - Antigravity Envelope Identity and Labels", () => {
 
     assert.match(geminiEnvelope.requestId, /^agent\/[0-9a-f-]{36}\/\d+\/[0-9a-f-]{36}\/2$/);
     assert.ok(geminiLabels, "labels attached to Gemini inner request");
-    assert.equal(geminiLabels.used_claude, "false");
-    assert.equal(geminiLabels.used_claude_conservative, "false");
+    assert.equal("used_claude" in geminiLabels, false);
+    assert.equal("used_claude_conservative" in geminiLabels, false);
+    assert.equal(geminiLabels.last_step_index, "1");
     assert.equal(geminiLabels.trajectory_id, geminiEnvelope.requestId.split("/")[3]);
   });
 });
