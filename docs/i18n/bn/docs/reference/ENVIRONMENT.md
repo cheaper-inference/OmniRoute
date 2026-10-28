@@ -1364,11 +1364,11 @@ Adobe Firefly ওয়েব প্রোভাইডারের জন্য 
 
 ---
 
-## ডিপ্লয়মেন্ট সিনারিও
+## স্থাপনার পরিস্থিতি
 
-রিলে ব্যাকএন্ড SRE নির্দেশিকার জন্য (ts/bifrost/auto আচরণ, 9router বনাম CLIProxyAPI স্থাপনা, এবং উচ্চ-থ্রুপুট ফলব্যাক কৌশল), দেখুন [রিলে ব্যাকএন্ড কৌশল](/docs/reference/RELAY_BACKEND_STRATEGY.md)।
+রিলে ব্যাকএন্ড এসআরই নির্দেশিকা (ts/bifrost/auto আচরণ, 9রাউটার বনাম CLIProxyAPI প্লেসমেন্ট, এবং উচ্চ-থ্রুপুট ফলব্যাক কৌশল), দেখুন [রিলে ব্যাকএন্ড কৌশল](/docs/reference/RELAY_BACKEND_STRATEGY.md) ।
 
-### ন্যূনতম লোকাল ডেভেলপমেন্ট
+### ন্যূনতম স্থানীয় উন্নয়ন
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1378,7 +1378,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker প্রোডাকশন
+### Docker উৎপাদন
 
 ```bash
 JWT_SECRET=<generated>
@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### এয়ার-গ্যাপড / CI
+### এয়ার-গ্যাপড/সিআই
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1408,7 +1408,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### রিভার্স প্রক্সি সহ VPS (nginx + Cloudflare)
+### বিপরীত প্রক্সি সহ VPS (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1625,47 +1625,49 @@ Skills ফ্রেমওয়ার্ক (`src/lib/skills/`) যখন স্
 
 ---
 
-## 26. টেস্ট ও E2E হারনেস
+## 26. পরীক্ষা এবং E2E জোতা
 
-`scripts/dev/run-next-playwright.mjs`, `scripts/dev/smoke-electron-packaged.mjs`,
-`scripts/dev/run-ecosystem-tests.mjs` এবং `scripts/build/uninstall.mjs` স্ক্রিপ্টগুলো এগুলো ব্যবহার করে। প্রোডাকশন ডিপ্লয়মেন্টে নিচের প্রতিটি মান আনসেট রাখুন।
+`scripts/dev/run-next-playwright.mjs`, `scripts/dev/smoke-electron-packaged.mjs`, `scripts/dev/run-ecosystem-tests.mjs`, এবং `scripts/build/uninstall.mjs`দ্বারা ব্যবহৃত। উৎপাদন স্থাপনায় সেট না করে নিচের প্রতিটি মান ছেড়ে দিন।
 
-| ভেরিয়েবল                              | ডিফল্ট                           | সোর্স ফাইল                                | বর্ণনা                                                                                                                                                                                                                                                           |
-| -------------------------------------- | -------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_E2E_BOOTSTRAP_MODE`         | `auth`                           | `scripts/dev/run-next-playwright.mjs`     | Playwright রানারের জন্য E2E বুটস্ট্র্যাপ মোড (`auth`, `fresh`, `reuse`)।                                                                                                                                                                                         |
-| `OMNIROUTE_E2E_PASSWORD`               | `INITIAL_PASSWORD`-এ ফলব্যাক করে | `scripts/dev/run-next-playwright.mjs`     | Playwright এনভায়রনমেন্টে ইনজেক্ট করা অ্যাডমিন পাসওয়ার্ড।                                                                                                                                                                                                       |
-| `OMNIROUTE_DISABLE_LOCAL_HEALTHCHECK`  | `true`                           | `scripts/dev/run-next-playwright.mjs`     | Playwright রানের সময় লোকাল হেলথচেক পোল বন্ধ করে।                                                                                                                                                                                                                |
-| `OMNIROUTE_DISABLE_TOKEN_HEALTHCHECK`  | `true`                           | `scripts/dev/run-next-playwright.mjs`     | টেস্টের সময় OAuth টোকেন হেলথচেক লুপ বন্ধ করে।                                                                                                                                                                                                                   |
-| `OMNIROUTE_HEALTHCHECK_SKIP_PROVIDERS` | _(সেট করা নেই)_                  | `src/lib/tokenHealthCheck.ts`             | প্রোঅ্যাক্টিভ টোকেন-রিফ্রেশ সুইপ থেকে বাদ দেওয়া কমা-বিভাজিত প্রোভাইডার (যেমন `codex,openai`)। হেলথচেক পুরোপুরি বন্ধ করার পরিবর্তে একটি লক্ষ্যভিত্তিক বিকল্প — স্বল্প-TTL প্রোভাইডারগুলো রিফ্রেশ হতে থাকে, আর cascade প্রোভাইডারগুলো শুধুমাত্র রিঅ্যাক্টিভ থাকে। |
-| `OMNIROUTE_HIDE_HEALTHCHECK_LOGS`      | `true`                           | `scripts/dev/run-next-playwright.mjs`     | Playwright stdout-এ হেলথচেকের অতিরিক্ত আউটপুট নীরব করে।                                                                                                                                                                                                          |
-| `OMNIROUTE_PLAYWRIGHT_SKIP_BUILD`      | `0`                              | `scripts/dev/run-next-playwright.mjs`     | Playwright শুরু হওয়ার আগে Next.js প্রোডাকশন বিল্ড এড়িয়ে যায় (CI অপ্টিমাইজেশন)।                                                                                                                                                                               |
-| `OMNIROUTE_SKIP_UNINSTALL_HOOK`        | `0`                              | `scripts/build/uninstall.mjs`             | OmniRoute আনইনস্টল হুক এড়িয়ে যায় (`node_modules` অক্ষত রাখতে CI এটি ব্যবহার করে)।                                                                                                                                                                             |
-| `ECOSYSTEM_SERVER_WAIT_MS`             | `180000`                         | `scripts/dev/run-ecosystem-tests.mjs`     | ইকোসিস্টেম/প্রোটোকল টেস্ট চালানোর আগে সার্ভার হেলদি হওয়া পর্যন্ত অপেক্ষার সময় (ms)।                                                                                                                                                                            |
-| `ELECTRON_SMOKE_URL`                   | `http://127.0.0.1:20128/login`   | `scripts/dev/smoke-electron-packaged.mjs` | Electron স্মোক হারনেস যে URL-এ প্যাকেজড অ্যাপটি সার্ভ করবে বলে আশা করে।                                                                                                                                                                                          |
-| `ELECTRON_SMOKE_TIMEOUT_MS`            | `45000`                          | `scripts/dev/smoke-electron-packaged.mjs` | স্মোক হারনেস হাল ছেড়ে দেওয়ার আগে মোট টাইমআউট (ms)।                                                                                                                                                                                                             |
-| `ELECTRON_SMOKE_SETTLE_MS`             | `2000`                           | `scripts/dev/smoke-electron-packaged.mjs` | পেজ লোড হওয়ার পর সেটল উইন্ডো (ms)।                                                                                                                                                                                                                              |
-| `ELECTRON_SMOKE_APP_EXECUTABLE`        | _(স্বয়ংক্রিয়)_                 | `scripts/dev/smoke-electron-packaged.mjs` | প্যাকেজড Electron এক্সিকিউটেবলের সুস্পষ্ট পাথ।                                                                                                                                                                                                                   |
-| `ELECTRON_SMOKE_DATA_DIR`              | _(tmpdir)_                       | `scripts/dev/smoke-electron-packaged.mjs` | Electron স্মোক রানের ডেটা ডিরেক্টরি।                                                                                                                                                                                                                             |
-| `ELECTRON_SMOKE_KEEP_DATA`             | `0`                              | `scripts/dev/smoke-electron-packaged.mjs` | রান শেষ হওয়ার পরে smoke ডেটা ডিরেক্টরি সংরক্ষণ করতে `1` সেট করুন।                                                                                                                                                                                               |
-| `ELECTRON_SMOKE_STREAM_LOGS`           | `0`                              | `scripts/dev/smoke-electron-packaged.mjs` | রান চলাকালীন stdout-এ Electron লগ স্ট্রিম করতে `1` সেট করুন।                                                                                                                                                                                                     |
-| `ELECTRON_SMOKE_COLD_RESTART`          | `0`                              | `scripts/dev/smoke-electron-packaged.mjs` | #7592: একই ডেটা ডিরেক্টরি ব্যবহার করে পুনরায় চালু করুন এবং দ্বিতীয় লঞ্চটি নেটিভ SQLite ড্রাইভার নির্বাচন করে কিনা তা যাচাই করুন।                                                                                                                               |
-| `CLI_DEVIN_BIN`                        | _(PATH অনুসন্ধান)_               | `open-sse/executors/devin-cli.ts`         | Devin CLI বাইনারি পাথ ওভাররাইড করুন।                                                                                                                                                                                                                             |
+| পরিবর্তনশীল                            | ডিফল্ট                         | উৎস ফাইল                                  | বর্ণনা                                                                                                                                                                                                                                                                |
+| -------------------------------------- | ------------------------------ | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_E2E_BOOTSTRAP_MODE`         | `auth`                         | `scripts/dev/run-next-playwright.mjs`     | Playwright রানার জন্য E2E বুটস্ট্র্যাপ মোড (`auth`, `fresh`, `reuse`)।                                                                                                                                                                                                |
+| `OMNIROUTE_E2E_PASSWORD`               | `INITIAL_PASSWORD` ফিরে পড়ে   | `scripts/dev/run-next-playwright.mjs`     | অ্যাডমিন পাসওয়ার্ড Playwright পরিবেশে প্রবেশ করানো হয়েছে।                                                                                                                                                                                                           |
+| `OMNIROUTE_DISABLE_LOCAL_HEALTHCHECK`  | `true`                         | `scripts/dev/run-next-playwright.mjs`     | Playwright রান চলাকালীন স্থানীয় স্বাস্থ্য পরীক্ষা পোল অক্ষম করুন।                                                                                                                                                                                                    |
+| `OMNIROUTE_DISABLE_TOKEN_HEALTHCHECK`  | `true`                         | `scripts/dev/run-next-playwright.mjs`     | পরীক্ষার সময় OAuth টোকেন হেলথচেক লুপ অক্ষম করুন।                                                                                                                                                                                                                     |
+| `OMNIROUTE_HEALTHCHECK_SKIP_PROVIDERS` | _(আনসেট)_                      | `src/lib/tokenHealthCheck.ts`             | সক্রিয় টোকেন-রিফ্রেশ সুইপ (যেমন `codex,openai`) থেকে কমা-বিচ্ছিন্ন প্রদানকারীদের বাদ দেওয়া হয়েছে। স্বাস্থ্য পরীক্ষা সম্পূর্ণরূপে নিষ্ক্রিয় করার লক্ষ্যযুক্ত বিকল্প — শর্ট-টিটিএল প্রদানকারীরা সতেজ থাকে যখন ক্যাসকেড প্রদানকারীরা শুধুমাত্র প্রতিক্রিয়াশীল থাকে। |
+| `OMNIROUTE_HIDE_HEALTHCHECK_LOGS`      | `true`                         | `scripts/dev/run-next-playwright.mjs`     | Playwright stdout-এ নীরব স্বাস্থ্য পরীক্ষার শব্দ।                                                                                                                                                                                                                     |
+| `OMNIROUTE_PLAYWRIGHT_SKIP_BUILD`      | `0`                            | `scripts/dev/run-next-playwright.mjs`     | Playwright শুরু হওয়ার আগে Next.js প্রোডাকশন বিল্ড এড়িয়ে যান (CI অপ্টিমাইজেশান)।                                                                                                                                                                                    |
+| `OMNIROUTE_SKIP_UNINSTALL_HOOK`        | `0`                            | `scripts/build/uninstall.mjs`             | OmniRoute আনইনস্টল হুক ( `node_modules` অক্ষত রাখতে CI দ্বারা ব্যবহৃত) এড়িয়ে যান।                                                                                                                                                                                   |
+| `ECOSYSTEM_SERVER_WAIT_MS`             | `180000`                       | `scripts/dev/run-ecosystem-tests.mjs`     | ecosystem/protocol পরীক্ষা চালানোর আগে সার্ভার সুস্থ হওয়ার জন্য সময় (ms) অপেক্ষা করুন।                                                                                                                                                                              |
+| `ELECTRON_SMOKE_URL`                   | `http://127.0.0.1:20128/login` | `scripts/dev/smoke-electron-packaged.mjs` | URL দ্য Electron স্মোক হারনেস প্যাকেজ করা অ্যাপটি পরিবেশন করবে বলে আশা করে।                                                                                                                                                                                           |
+| `ELECTRON_SMOKE_TIMEOUT_MS`            | `45000`                        | `scripts/dev/smoke-electron-packaged.mjs` | স্মোক হার্নেস ছেড়ে দেওয়ার আগে মোট টাইমআউট (এমএস)৷                                                                                                                                                                                                                   |
+| `ELECTRON_SMOKE_SETTLE_MS`             | `2000`                         | `scripts/dev/smoke-electron-packaged.mjs` | পৃষ্ঠা লোড হওয়ার পরে উইন্ডো (ms) সেটেল করুন।                                                                                                                                                                                                                         |
+| `ELECTRON_SMOKE_APP_EXECUTABLE`        | _(স্বয়ংক্রিয়)_               | `scripts/dev/smoke-electron-packaged.mjs` | প্যাকেজ করা Electron এক্সিকিউটেবলের সুস্পষ্ট পথ।                                                                                                                                                                                                                      |
+| `ELECTRON_SMOKE_DATA_DIR`              | _(tmpdir)_                     | `scripts/dev/smoke-electron-packaged.mjs` | Electron ধোঁয়া চালানোর জন্য ডেটা ডিরেক্টরি।                                                                                                                                                                                                                          |
+| `ELECTRON_SMOKE_KEEP_DATA`             | `0`                            | `scripts/dev/smoke-electron-packaged.mjs` | রানের পরে স্মোক ডেটা ডিরেক্টরি সংরক্ষণ করতে `1` সেট করুন।                                                                                                                                                                                                             |
+| `ELECTRON_SMOKE_STREAM_LOGS`           | `0`                            | `scripts/dev/smoke-electron-packaged.mjs` | রান চলাকালীন Electron লগগুলিকে stdout এ স্ট্রিম করতে `1` সেট করুন।                                                                                                                                                                                                    |
+| `ELECTRON_SMOKE_COLD_RESTART`          | `0`                            | `scripts/dev/smoke-electron-packaged.mjs` | #7592: একই ডাটা ডির-এর বিপরীতে পুনরায় লঞ্চ করুন এবং দ্বিতীয় লঞ্চটি নেটিভ SQLite ড্রাইভার নির্বাচন করে।                                                                                                                                                              |
+| `CLI_DEVIN_BIN`                        | _(পথ সন্ধান)_                  | `open-sse/executors/devin-cli.ts`         | Devin CLI বাইনারি পাথ ওভাররাইড করুন।                                                                                                                                                                                                                                  |
 
 ### ডক্স অনুবাদ পাইপলাইন
 
-`scripts/i18n/run-translation.mjs` দ্বারা ব্যবহৃত (`npm run i18n:run` কমান্ড)।
-ছয়টি ভেরিয়েবলই ডিফল্টভাবে সেট করা থাকে না — শুধুমাত্র সেই মেশিনগুলোতে
-`.env`-এ এগুলো সেট করুন যেখানে ডক্স অনুবাদক চালানোর প্রয়োজন।
+`scripts/i18n/run-translation.mjs` ( `npm run i18n:run` কমান্ড) দ্বারা ব্যবহৃত। সমস্ত ছয়টি ভেরিয়েবল ডিফল্টরূপে আনসেট থাকে — সেগুলিকে কেবলমাত্র সেই মেশিনে `.env` এ সেট করুন যা ডক্স অনুবাদক চালাতে সক্ষম হবে।
 
-| ভেরিয়েবল                                | ডিফল্ট          | সোর্স ফাইল                               | বিবরণ                                                                                                                                                                                                  |
-| ---------------------------------------- | --------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `OMNIROUTE_TRANSLATION_API_URL`          | _(সেট করা নেই)_ | `scripts/i18n/run-translation.mjs`       | অনুবাদ ব্যাকএন্ডের জন্য OpenAI-সামঞ্জস্যপূর্ণ বেস URL।                                                                                                                                                 |
-| `OMNIROUTE_TRANSLATION_API_KEY`          | _(সেট করা নেই)_ | `scripts/i18n/run-translation.mjs`       | অনুবাদ ব্যাকএন্ডের জন্য Bearer টোকেন (কখনো লগ করা হয় না)।                                                                                                                                             |
-| `OMNIROUTE_TRANSLATION_MODEL`            | _(সেট করা নেই)_ | `scripts/i18n/run-translation.mjs`       | মডেল আইডি, যেমন `gpt-4o-mini` বা `cx/gpt-5.4-mini`।                                                                                                                                                    |
-| `OMNIROUTE_TRANSLATION_FALLBACK_MODELS`  | _(সেট করা নেই)_ | `scripts/i18n/lib/translate-backend.mjs` | প্রাথমিক মডেল ব্যর্থ হলে (429 কোটা, 401/402, 5xx, টাইমআউট, নেটওয়ার্ক) ক্রমানুসারে চেষ্টা করা ঐচ্ছিক কমা-বিভাজিত মডেল চেইন; ত্রুটিপূর্ণ রিকোয়েস্ট (400/413/422) অন্য কোথাও পুনরায় চেষ্টা করা হয় না। |
-| `OMNIROUTE_TRANSLATION_TIMEOUT_MS`       | `60000`         | `scripts/i18n/run-translation.mjs`       | প্রতি-রিকোয়েস্ট টাইমআউট, মিলিসেকেন্ডে।                                                                                                                                                                |
-| `OMNIROUTE_TRANSLATION_REASONING_EFFORT` | _(সেট করা নেই)_ | `scripts/i18n/lib/translate-backend.mjs` | ঐচ্ছিক reasoning নিয়ন্ত্রণ, সেট করা থাকলে ব্যাকএন্ডে অপরিবর্তিত অবস্থায় পাঠানো হয়।                                                                                                                  |
-| `OMNIROUTE_TRANSLATION_CONCURRENCY`      | `4`             | `scripts/i18n/run-translation.mjs`       | একাধিক ফাইল / লোকেল জুড়ে চালানোর সময় সমান্তরাল অনুবাদ রিকোয়েস্ট।                                                                                                                                    |
+| পরিবর্তনশীল                                | ডিফল্ট    | উৎস ফাইল                                 | বর্ণনা                                                                                                                                                                                                                     |
+| ------------------------------------------ | --------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_TRANSLATION_API_URL`            | _(আনসেট)_ | `scripts/i18n/run-translation.mjs`       | অনুবাদ ব্যাকএন্ডের জন্য OpenAI- সামঞ্জস্যপূর্ণ বেস URL ।                                                                                                                                                                   |
+| `OMNIROUTE_TRANSLATION_API_KEY`            | _(আনসেট)_ | `scripts/i18n/run-translation.mjs`       | অনুবাদ ব্যাকএন্ডের জন্য বহনকারী টোকেন (কখনও লগ করা হয়নি)।                                                                                                                                                                 |
+| `OMNIROUTE_TRANSLATION_MODEL`              | _(আনসেট)_ | `scripts/i18n/run-translation.mjs`       | মডেল আইডি, যেমন `gpt-4o-mini` বা `cx/gpt-5.4-mini`।                                                                                                                                                                        |
+| `OMNIROUTE_TRANSLATION_FALLBACK_MODELS`    | _(আনসেট)_ | `scripts/i18n/lib/translate-backend.mjs` | ঐচ্ছিক কমা-বিচ্ছিন্ন মডেল চেইন ক্রমানুসারে চেষ্টা করা হয় যখন প্রাথমিক মডেল ব্যর্থ হয় (429 কোটা, 401/402, 5xx, টাইমআউট, নেটওয়ার্ক); একটি বিকৃত অনুরোধ (400/413/422) অন্য কোথাও পুনরায় চেষ্টা করা হয় না।                |
+| `OMNIROUTE_TRANSLATION_TIMEOUT_MS`         | `60000`   | `scripts/i18n/run-translation.mjs`       | মিলিসেকেন্ডে প্রতি-অনুরোধের সময়সীমা।                                                                                                                                                                                      |
+| `OMNIROUTE_TRANSLATION_REASONING_EFFORT`   | _(আনসেট)_ | `scripts/i18n/lib/translate-backend.mjs` | ঐচ্ছিক যুক্তি নিয়ন্ত্রণ, সেট করার সময় ব্যাকএন্ডে যেমন-ই পাঠানো হয়।                                                                                                                                                      |
+| `OMNIROUTE_TRANSLATION_CONCURRENCY`        | `4`       | `scripts/i18n/run-translation.mjs`       | সমান্তরাল অনুবাদ অনুরোধগুলি যখন একাধিক ফাইল / লোকেলে চলছে।                                                                                                                                                                 |
+| `OMNIROUTE_TRANSLATION_ENGINE`             | `llm`     | `scripts/i18n/run-translation.mjs`       | `llm` উপরের ব্যাকএন্ড ব্যবহার করে; `google` কাঠামো-নিরাপদ Google ইঞ্জিনের মাধ্যমে অনুবাদ করে এবং LLM ভেরিয়েবলের কোনো প্রয়োজন নেই।                                                                                        |
+| `OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK`    | `1`       | `scripts/i18n/run-translation.mjs`       | `llm` ইঞ্জিনের সাহায্যে, মডেলটি তৈরি করতে পারেনি এমন একটি অংশ (আউটপুট গার্ড প্রতিটি প্রচেষ্টায় ব্যর্থ হয়েছে, বা একটি মডেল ত্রুটি) লোকেলে ব্যর্থ হওয়ার পরিবর্তে Google দ্বারা অনুবাদ করা হয়েছে। `0` এটি নিষ্ক্রিয় করে। |
+| `OMNIROUTE_TRANSLATION_GOOGLE_API_KEY`     | _(আনসেট)_ | `scripts/i18n/lib/google-translate.mjs`  | ঐচ্ছিক ক্লাউড অনুবাদ v2 কী। আনসেট চাবিহীন ওয়েব এন্ডপয়েন্ট ব্যবহার করে (রেট-সীমিত, মাঝে মাঝে তরঙ্গের জন্য জরিমানা)।                                                                                                       |
+| `OMNIROUTE_TRANSLATION_GOOGLE_CONCURRENCY` | `6`       | `scripts/i18n/lib/google-translate.mjs`  | একটি রানের প্রতিটি লোকেল দ্বারা ভাগ করা সমান্তরাল Google অনুরোধ।                                                                                                                                                           |
+| `OMNIROUTE_TRANSLATION_GOOGLE_TIMEOUT_MS`  | `30000`   | `scripts/i18n/lib/google-translate.mjs`  | Google ইঞ্জিনের জন্য প্রতি-অনুরোধের সময়সীমা মিলিসেকেন্ডে।                                                                                                                                                                 |
 
 ---
 
