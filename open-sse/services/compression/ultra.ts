@@ -47,16 +47,51 @@ async function mapTextContentAsync(
  * (`b)`, `{`, `+`, …) inside code blocks, corrupting them while leaving the fence
  * markers intact — output that looks like valid code but isn't (B-ULTRA-CODE).
  */
+/** NUL byte that brackets every preserved-block placeholder (see preservation.ts). */
+const PLACEHOLDER_DELIM = "\u0000";
+const PLACEHOLDER_MARKER = "OMNI_CAVEMAN";
+
+/**
+ * Split text into prose and placeholder parts without compiling an alternation.
+ *
+ * The previous form built `new RegExp(placeholders.join("|"))` per call, so the cost of
+ * splitting grew with the number of preserved blocks and dominated ultra mode (~30% of
+ * its CPU). Placeholders are bracketed by a NUL byte that appears nowhere else, so two
+ * `indexOf` calls locate each one exactly.
+ */
+function splitPreserved(text: string): string[] {
+  const out: string[] = [];
+  let cursor = 0;
+  let scan = 0;
+  for (;;) {
+    const start = text.indexOf(PLACEHOLDER_DELIM, scan);
+    if (start === -1) break;
+    // A NUL that is not followed by the sentinel is ordinary prose, not a placeholder.
+    if (!text.startsWith(PLACEHOLDER_MARKER, start + 1)) {
+      scan = start + 1;
+      continue;
+    }
+    const end = text.indexOf(PLACEHOLDER_DELIM, start + 1);
+    if (end === -1) {
+      scan = start + 1;
+      continue;
+    }
+    if (start > cursor) out.push(text.slice(cursor, start));
+    out.push(text.slice(start, end + 1));
+    cursor = end + 1;
+    scan = cursor;
+  }
+  if (cursor < text.length) out.push(text.slice(cursor));
+  return out;
+}
+
 function pruneProseOnly(text: string, rate: number, minScore: number): string {
   const { text: withPlaceholders, blocks } = extractPreservedBlocks(text);
   if (blocks.length === 0) return pruneByScore(text, rate, minScore);
 
   const placeholderToContent = new Map(blocks.map((b) => [b.placeholder, b.content]));
-  const escaped = blocks.map((b) => b.placeholder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  const splitRe = new RegExp(`(${escaped.join("|")})`, "g");
 
-  return withPlaceholders
-    .split(splitRe)
+  return splitPreserved(withPlaceholders)
     .map((part) => {
       if (!part) return "";
       const preserved = placeholderToContent.get(part);
@@ -91,9 +126,7 @@ async function compressProseSlm(text: string, cfg: UltraConfig): Promise<ProseSl
     return slmOrHeuristic(text, cfg);
   }
   const placeholderToContent = new Map(blocks.map((b) => [b.placeholder, b.content]));
-  const escaped = blocks.map((b) => b.placeholder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  const splitRe = new RegExp(`(${escaped.join("|")})`, "g");
-  const parts = withPlaceholders.split(splitRe);
+  const parts = splitPreserved(withPlaceholders);
   const out: string[] = [];
   let usedSlm = false;
   for (const part of parts) {

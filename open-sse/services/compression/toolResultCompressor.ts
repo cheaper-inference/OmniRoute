@@ -38,9 +38,12 @@ function parseGrepLinePath(line: string): string | null {
   const secondColon = line.indexOf(":", firstColon + 1);
   if (secondColon === -1) return null;
 
-  const lineNumber = line.slice(firstColon + 1, secondColon);
-  if (!lineNumber || ![...lineNumber].every((char) => char >= "0" && char <= "9")) {
-    return null;
+  if (secondColon <= firstColon + 1) return null;
+  // Digit loop, not [...lineNumber].every(): that allocated an array of single-char
+  // strings per scanned line, which alone was ~24% of aggressive-mode CPU.
+  for (let i = firstColon + 1; i < secondColon; i++) {
+    const code = line.charCodeAt(i);
+    if (code < 0x30 || code > 0x39) return null;
   }
 
   const filePath = line.slice(0, firstColon);
@@ -76,13 +79,17 @@ function compressFileContent(content: string): string | null {
 
 function compressGrepSearch(content: string): string | null {
   const lines = content.split("\n");
-  const grepLines = lines.filter((line) => parseGrepLinePath(line) !== null);
-  if (grepLines.length === 0) return null;
+  // Parse each line once. The previous version filtered, then re-parsed every kept
+  // line just to collect its path, doubling the work on the whole grep block.
+  const grepLines: string[] = [];
   const paths = new Set<string>();
-  for (const line of grepLines) {
+  for (const line of lines) {
     const filePath = parseGrepLinePath(line);
-    if (filePath) paths.add(filePath);
+    if (filePath === null) continue;
+    grepLines.push(line);
+    paths.add(filePath);
   }
+  if (grepLines.length === 0) return null;
   const top30 = grepLines.slice(0, 30);
   const remaining = grepLines.length - top30.length;
   let result = top30.join("\n");
