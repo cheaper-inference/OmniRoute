@@ -22,6 +22,7 @@ import {
   resolveRuleMatchBody,
   honorsRuleLockScope,
   setProviderErrorRuleFlagReader,
+  type ProviderErrorRuleMatch,
 } from "../config/providerErrorRules.ts";
 import * as rot from "./rotationConfig.ts";
 import { isContentPolicyRefusal } from "../utils/contentPolicyError.ts";
@@ -1586,7 +1587,9 @@ export function classifyError(
       context.headers ?? null,
       context.body
     );
-    if (match) return match.reason;
+    // A catch-all default without an explicit reason only knows the status; the text
+    // classification below is more specific (e.g. a quota 429 stays quota_exhausted).
+    if (match && !match.reasonFromStatus) return match.reason;
   }
 
   // Text classification takes priority (more specific)
@@ -1840,14 +1843,26 @@ export function checkFallbackError(
     return profile?.useUpstreamRetryHints ? detectRetryHint() : null;
   }
 
-  function ruleScopedResult(match: NonNullable<ReturnType<typeof getProviderErrorRuleMatch>>) {
+  // Owner decision (2026-10-27): an operator catch-all default yields to a LONGER
+  // upstream retry hint (the same hint buildRetryableFallback would honor), so it can
+  // lengthen a short Retry-After but never cut a real provider reset short. Explicit
+  // operator/catalog rules keep their exact cooldown.
+  function ruleCooldownMs(match: ProviderErrorRuleMatch | null): number | undefined {
+    const configured = match?.cooldownMs;
+    if (configured === undefined || !match?.fromOperatorDefault) return configured;
+    const hintMs = getUpstreamRetryHint()?.retryAfterMs ?? 0;
+    return hintMs > configured ? hintMs : configured;
+  }
+
+  function ruleScopedResult(match: ProviderErrorRuleMatch) {
     const scaled = getScaledBaseCooldown(match.reason as RateLimitReasonValue, backoffLevel);
+    const cooldownMs = ruleCooldownMs(match);
     return {
       shouldFallback: true,
-      cooldownMs: match.cooldownMs ?? scaled.cooldownMs,
-      baseCooldownMs: match.cooldownMs ?? scaled.baseCooldownMs,
-      configuredCooldownMs: match.cooldownMs,
-      newBackoffLevel: match.cooldownMs !== undefined ? 0 : scaled.newBackoffLevel,
+      cooldownMs: cooldownMs ?? scaled.cooldownMs,
+      baseCooldownMs: cooldownMs ?? scaled.baseCooldownMs,
+      configuredCooldownMs: cooldownMs,
+      newBackoffLevel: cooldownMs !== undefined ? 0 : scaled.newBackoffLevel,
       reason: match.reason,
       ruleScope: match.scope,
     };
@@ -2208,10 +2223,9 @@ export function checkFallbackError(
       // this, the rule's reason is used but its cooldownMs is silently
       // dropped — which is exactly the user-visible bug where a 13-day
       // upstream quota reset was being treated as ~60s.
+      const matchCooldownMs = ruleCooldownMs(providerMatch);
       const providerCooldownMs =
-        providerMatch?.cooldownMs !== undefined && providerMatch.cooldownMs > 0
-          ? providerMatch.cooldownMs
-          : undefined;
+        matchCooldownMs !== undefined && matchCooldownMs > 0 ? matchCooldownMs : undefined;
       const ruleScope =
         providerMatch && honorsRuleLockScope(provider) ? providerMatch.scope : undefined;
       const fallback = buildRetryableFallback(reason);
@@ -2249,7 +2263,7 @@ export function checkFallbackError(
     ) {
       return { ...buildRetryableFallback(RateLimitReason.UNKNOWN), ambiguousAuth: true };
     }
-    const cooldownMs = providerMatch?.cooldownMs ?? configuredRule.cooldownMs ?? 0;
+    const cooldownMs = ruleCooldownMs(providerMatch) ?? configuredRule.cooldownMs ?? 0;
     const ruleScope =
       providerMatch && honorsRuleLockScope(provider) ? providerMatch.scope : undefined;
     return {
