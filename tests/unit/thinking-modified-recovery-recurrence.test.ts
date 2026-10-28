@@ -19,6 +19,8 @@ const { stripLatestAssistantThinkingForModifiedRecovery } =
   await import("../../open-sse/handlers/chatCore/passthroughHelpers.ts");
 const { compareThinkingSignatures } =
   await import("../../open-sse/handlers/chatCore/thinkingSignatureDiagnostics.ts");
+const { DEFAULT_THINKING_CLAUDE_SIGNATURE } =
+  await import("../../open-sse/config/defaultThinkingSignature.ts");
 
 const ADAPTIVE_MODEL = "claude-opus-5-5";
 const TOOL_ID = "toolu_01ADAPTIVE";
@@ -182,6 +184,60 @@ test("modified-recovery: injected blocks in an EARLIER turn are stripped (recove
     body.messages[3],
     "the clean latest assistant message is untouched"
   );
+});
+
+test("modified-recovery under manual thinking: an EARLIER tool_use turn keeps the #5312 placeholder", () => {
+  // thinking.type "enabled" rejects an assistant tool_use turn with no thinking
+  // precursor, so the restored block on the earlier turn is swapped for the
+  // placeholder instead of being dropped (adaptive drops it, see the test above).
+  assert.equal(
+    storeClaudeThinkingFromResponse(
+      {
+        model: "claude-sonnet-4-5",
+        content: [
+          { type: "redacted_thinking", data: "OPAQUE_EARLY_MANUAL" },
+          { type: "tool_use", id: TOOL_ID, name: "read_file", input: {} },
+        ],
+      },
+      { provider: "claude", model: "claude-sonnet-4-5", connectionId: "conn-org-a" }
+    ),
+    true
+  );
+  const restored = restoreClaudeThinkingBlocks({
+    toolUseIds: [TOOL_ID],
+    provider: "claude",
+    model: "claude-sonnet-4-5",
+    connectionId: "conn-org-a",
+  })!;
+  assert.ok(restored, "restore yields provenance-marked blocks");
+
+  const body = {
+    thinking: { type: "enabled", budget_tokens: 2048 },
+    messages: [
+      { role: "user", content: [{ type: "text", text: "Read a.ts" }] },
+      {
+        role: "assistant",
+        content: [...restored, { type: "tool_use", id: TOOL_ID, name: "read_file", input: {} }],
+      },
+      { role: "user", content: [{ type: "tool_result", tool_use_id: TOOL_ID, content: "ok" }] },
+      {
+        role: "assistant",
+        content: [{ type: "tool_use", id: "toolu_LATEST", name: "read_file", input: {} }],
+      },
+      {
+        role: "user",
+        content: [{ type: "tool_result", tool_use_id: "toolu_LATEST", content: "ok" }],
+      },
+    ],
+  };
+
+  const recovered = stripLatestAssistantThinkingForModifiedRecovery(body) as typeof body;
+  assert.notEqual(recovered, body, "recovery must change the body");
+  assert.deepEqual(recovered.messages[1].content, [
+    { type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE },
+    { type: "tool_use", id: TOOL_ID, name: "read_file", input: {} },
+  ]);
+  assert.deepEqual(recovered.messages[3], body.messages[3], "clean latest turn is untouched");
 });
 
 test("diagnostics delta: added redacted_thinking blocks are counted (was blind: 0/0/0 with +3 outbound)", () => {
