@@ -48,15 +48,15 @@ jaħdmu direttament), jiċċekkja s-saħħa tas-server, u jeżegwixxi `claude`.
 
 ---
 
-## Aliases għall-iskoperta — uri mudelli li mhumiex Claude fis-selettur `/model`
+## Alias tad-discovery — uri mudelli li mhumiex Claude fil-picker `/model`
 
-L-iskoperta ta’ mudelli tal-gateway ta’ Claude Code telenka biss ids li jibdew bi `claude`
-jew `anthropic`, għalhekk b’`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` is-selettur
-nattiv `/model` normalment juri **biss** il-mudelli Claude/Anthropic ta’ OmniRoute —
-`kimi/kimi-k2.6` jew `glm/glm-5.2` qatt ma jidhru, minkejja li r-routing tagħhom jaħdem tajjeb.
+Id-discovery tal-mudelli tal-gateway ta' Claude Code jelenka biss ids li jibdew b'`claude`
+jew `anthropic`, għalhekk b'`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` il-picker
+nattiv `/model` normalment juri **biss** il-mudelli Claude/Anthropic ta' OmniRoute —
+`kimi/kimi-k2.6` jew `glm/glm-5.2` qatt ma jidher, anki jekk jirrotta tajjeb.
 
-OmniRoute jista’ jirrifletti kwalunkwe mudell attivat (u combo) taħt id `claude/…` sabiex
-jgħaddi minn dak il-filtru u jidher fis-selettur:
+OmniRoute jista' jirrifletti kwalunkwe mudell attivat (u combo) taħt id `claude/…`
+sabiex jgħaddi minn dak il-filtru u jidher fil-picker:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,32 +64,41 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Meta tagħżel wieħed minn dawn fi Claude Code, OmniRoute jneħħi l-wrapper `claude/`
-biex jerġa’ jikseb l-id reali qabel ir-routing — id ġenwin `claude/<real-claude-model>`
-(il-fornitur Claude OAuth attwali) dejjem jitħalla kif inhu.
+Meta tagħżel wieħed minn dawn f'Claude Code, OmniRoute ineħħi l-wrapper `claude/`
+u jirritorna lill-id reali qabel ir-rottar — id ġenwina `claude/<real-claude-model>`
+(il-provider Claude OAuth attwali) dejjem titħalla kif inhi, ma tintmessx.
 
-**Dan huwa diżattivat b’mod predefinit** u huwa kkontrollat minn gate bi tliet livelli (l-aktar wieħed
-speċifiku jirbaħ), sabiex OmniRoute sempliċi qatt ma jidduplika l-katalgu tiegħu għal klijenti li ma jużawx
-Claude Code:
+B'mod awtomatiku biss l-ids bażiċi jiġu riflessi. Bil-feature flag opt-in
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` mixgħul, il-varjanti ta' effort tar-raġunar li
+l-katalgu diġà jelenka (eż. `codex/gpt-6-sol-high`) jiġu riflessi bħal kwalunkwe
+id ieħor, sabiex Claude Code jista' jagħżel livell ta' effort espliċitu, u l-ids
+built-in `auto/*` li t-triq tar-rikjesti ma tistax timmaterializzahom mhumiex
+riflessi. Jekk il-varjanti ta' effort jelenkawx jew le xorta jirregolaha
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — ir-rifless qatt ma iżid varjant li
+l-katalgu bażiku m'għandux.
 
-| Livell   | Fejn                                                                                              |
-| -------- | ------------------------------------------------------------------------------------------------- |
-| Mudell   | Paġna tad-dettalji tal-fornitur → toggle "Uri fi Claude Code" għal kull mudell                    |
-| Fornitur | Paġna tad-dettalji tal-fornitur → toggle fil-livell tal-fornitur (ikopri l-mudelli kollha tiegħu) |
-| Globali  | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (diżattivat b’mod predefinit)            |
+**Dan huwa mitfi b'mod awtomatiku** u kkontrollat minn kontroll ta' tliet livelli
+(l-iktar wieħed speċifiku jirbaħ), sabiex OmniRoute sempliċi qatt ma jirdoppja
+l-katalgu tiegħu għal klijenti li ma jużawx Claude Code:
 
-Il-varjabbli tal-ambjent `EXPOSE_CC_DISCOVERY_ALIASES` iġiegħel il-livell globali jkun attiv
-u jieħu preċedenza fuq l-override tad-dashboard (l-iskrin Feature Flags juri
-nota "attiv permezz ta’ varjabbli tal-ambjent" meta jagħmel dan). It-toggles għal kull fornitur u
-għal kull mudell jirfinaw il-konfigurazzjoni minn hemm — eż. il-livell globali diżattivat + il-fornitur Kimi attivat jesponi
-biss il-mudelli ta’ Kimi.
+| Livell   | Fejn                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------ |
+| Mudell   | Paġna tad-dettall tal-provider → toggle "Expose in Claude Code" għal kull mudell                 |
+| Provider | Paġna tad-dettall tal-provider → toggle fil-livell tal-provider (tkopri l-mudelli kollha tiegħu) |
+| Globali  | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (mitfi b'mod awtomatiku)                |
 
-> ⚠️ **Nuqqas ta’ qbil fit-tieqa għal mudelli li mhumiex Claude.** Claude Code jassumi tieqa tal-kuntest
-> ta’ 200K għal kwalunkwe id li ma jagħrafx (ma jistax jaqra tieqa reali minn
-> `/v1/models`). Għal mudell b’tieqa akbar (eż. il-256K ta’ Kimi K2), issettja
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` għal valur iżgħar mit-tieqa reali tal-mudell sabiex
-> il-kompattazzjoni awtomatika ma tiskattax qabel il-ħin. Il-profili ġġenerati hawn fuq diġà
-> jagħmlu dan għal kull mudell.
+Il-varjabbli ambjentali `EXPOSE_CC_DISCOVERY_ALIASES` jforza l-livell globali
+mixgħul u jieħu preċedenza fuq l-override tad-dashboard (l-iskrin Feature Flags
+juri nota "active via environment variable" meta dan jiġri). It-toggles għal kull
+provider u għal kull mudell jirfinaw minn dak il-punt — eż. globali mitfi +
+provider Kimi mixgħul jesponi biss il-mudelli ta' Kimi.
+
+> ⚠️ **Tieqa mhux korrispondenti fuq mudelli li mhumiex Claude.** Claude Code
+> jassumi tieqa ta' kuntest ta' 200K għal kwalunkwe id li ma jrikkonoxxihx (ma
+> jistax jaqra tieqa reali minn `/v1/models`). Għal mudell b'tieqa akbar (eż.
+> it-256K ta' Kimi K2), issettja `CLAUDE_CODE_AUTO_COMPACT_WINDOW` fuq valur
+> inqas mit-tieqa reali tal-mudell sabiex l-auto-compaction ma jinqala'x
+> prematurament. Il-profili ġġenerati hawn fuq diġà jagħmlu dan għal kull mudell.
 
 ---
 

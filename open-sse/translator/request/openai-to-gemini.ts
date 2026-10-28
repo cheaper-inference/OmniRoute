@@ -693,7 +693,7 @@ function openaiToGeminiBase(
   }
 
   // Collapse any consecutive same-role contents Gemini would reject (9router#2191).
-  result.contents = mergeConsecutiveSameRoleContents(result.contents ?? []);
+  result.contents = mergeConsecutiveSameRoleContents(result.contents ?? [], model);
   // Guard the one alternation violation the merge above cannot reach: history
   // that opens with a functionCall-bearing turn instead of a user turn.
   result.contents = ensureHistoryDoesNotOpenWithFunctionCall(result.contents);

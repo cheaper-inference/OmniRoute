@@ -20,7 +20,8 @@ async function render(
     root.render(<ModelSelectModal {...props} />);
   });
   roots.push({ root, el });
-  return el;
+  // Queries go through document.body: the dialog is portaled there (KEA-7886).
+  return document.body;
 }
 
 // Configurable fake backend shared across tests. Each test overrides the

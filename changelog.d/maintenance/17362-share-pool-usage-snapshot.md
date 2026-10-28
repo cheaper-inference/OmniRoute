@@ -1,0 +1,1 @@
+- **refactor(quota):** the SQLite and Redis quota stores now share one `buildPoolUsageSnapshot()` for the per-dimension/per-key pool usage arithmetic (equal-split fallback, percentage weights, burn rate) instead of two copy-pasted ~70-line bodies; behavior is unchanged ([#17362](https://github.com/diegosouzapw/OmniRoute/pull/17362) - thanks @JxnLexn)

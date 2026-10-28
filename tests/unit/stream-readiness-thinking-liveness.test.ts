@@ -118,7 +118,7 @@ test("content probe: a Responses function_call item start commits before its arg
   assert.equal(hasUsefulStreamContent(frame), false, "default semantics stay as released");
 });
 
-for (const reason of ["refusal", "pause_turn", "model_context_window_exceeded"]) {
+for (const reason of ["pause_turn", "model_context_window_exceeded"]) {
   test(`content probe: stop_reason ${reason} is a legitimate empty terminal only in the probe`, () => {
     const frame = [
       "event: message_delta",

@@ -371,7 +371,7 @@ jobs:
           set -euo pipefail
           echo "Configuring for GitHub Packages..."
           echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" > .npmrc
-          npm pkg set name="@diegosouzapw/omniroute"
+          npm pkg set name="@cheaper-inference/omniroute"
           npm publish --registry=https://npm.pkg.github.com --tag "$TAG" \
             || echo "⚠️ omniroute@${VERSION} might already be published on GitHub Packages."
           echo "✅ Action finished for GitHub Packages"
@@ -423,7 +423,7 @@ jobs:
       # GitHub's id-token — no NPM_TOKEN secret, no 2FA prompt, provenance included, and
       # it is the bypass npm sanctions now that tokens which skip 2FA are being retired
       # (gh.io/npm-gat-bypass2fa-deprecation). Requires the package's Trusted Publisher to
-      # be configured on npmjs.com (owner: diegosouzapw/OmniRoute, workflow
+      # be configured on npmjs.com (owner: cheaper-inference/OmniRoute, workflow
       # npm-publish.yml) and a github-hosted runner — which is why this job exists.
       # Without that configuration `npm publish` fails with ENEEDAUTH: re-dispatch with
       # publish_mode=staged or direct. Automatic publishing was the flow up to v3.8.48;

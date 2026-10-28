@@ -407,6 +407,32 @@ const contentDelta = (content: string) => sseLine({ choices: [{ index: 0, delta:
 const finishChunk = (reason: string) =>
   sseLine({ choices: [{ index: 0, delta: {}, finish_reason: reason }] });
 
+test("reused tool indices retain completed calls and assemble later fragments independently", async () => {
+  const toolDelta = (tool_calls: unknown[]) => sseLine({ choices: [{ delta: { tool_calls } }] });
+  const out = await readNdjson(
+    transformToOllama(
+      sseUpstream([
+        toolDelta([{ index: 0, id: 1, function: { name: "first", arguments: "{}" } }]),
+        toolDelta([{ index: 0, id: "second", function: { name: "sec", arguments: '{"x":' } }]),
+        toolDelta([
+          { index: 0, function: { name: "ond", arguments: "1}" } },
+          { index: 1, id: "third", function: { name: "third", arguments: "bad json" } },
+        ]),
+        finishChunk("tool_calls"),
+        "data: [DONE]\n",
+      ]),
+      "m"
+    )
+  );
+  assert.equal(out.length, 1);
+  assert.equal(out[0].done, true);
+  assert.deepEqual(out[0].message.tool_calls, [
+    { function: { name: "first", arguments: {} } },
+    { function: { name: "second", arguments: { x: 1 } } },
+    { function: { name: "third", arguments: {} } },
+  ]);
+});
+
 test("transformToOllama ends the stream with exactly one done:true", async () => {
   const out = await readNdjson(
     transformToOllama(sseUpstream([contentDelta("hi"), finishChunk("stop"), "data: [DONE]\n"]), "m")

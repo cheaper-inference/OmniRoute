@@ -16,40 +16,40 @@ OmniRoute는 비공식 클라이언트를 능동적으로 지문 식별하는 �
 
 ---
 
-## TLS 지문 식별 계층
+## TLS 핑거프린팅 계층
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-영구 `wreq-js` 세션은 계정 범위 및 확인된 프록시별로 지연 생성됩니다. 프로세스 전역 `TlsClient`는 Cloudflare 뒤에 있는 업스트림을 대상으로 **macOS의 Chrome 124**를 가장하는 세션을 최대 128개까지 풀링합니다. 네이티브 런타임을 사용할 수 없으면 `TlsClient.fetch()`는 실패 시 차단되며, 호출자는 이 래퍼 외부에서 폴백을 명시적으로 선택할 수 있습니다.
+영구 `wreq-js` 세션은 계정 범위와 확인된 프록시별로 지연 생성됩니다. 프로세스 전역 `TlsClient`는 Cloudflare 뒤에 있는 업스트림을 위해 **macOS의 Chrome 124**를 가장하는 세션을 최대 128개까지 풀링합니다. 네이티브 런타임을 사용할 수 없으면 `TlsClient.fetch()`는 실패 시 차단되며, 호출자는 이 래퍼 외부에서 폴백을 명시적으로 선택할 수 있습니다.
 
 - 세션 프로필: `browser: "chrome_124", os: "macos"`
-- 프록시 확인(우선순위): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY`(소문자 변수도 포함)
-- 시간 제한: `TLS_CLIENT_TIMEOUT_MS`(`FETCH_TIMEOUT_MS`에서 상속, 기본값 600000)
+- 프록시 확인(우선순위): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (소문자 형식도 포함)
+- 타임아웃: `TLS_CLIENT_TIMEOUT_MS` (`FETCH_TIMEOUT_MS`에서 상속, 기본값 600000)
 - `wreq-js` Response는 fetch와 호환됩니다(`headers`, `text()`, `json()`, `clone()`, `body`).
-- 첫 바이트 감시 타이머(`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`는 업스트림 헤더가 도착하는 즉시 완료되므로, `TLS_CLIENT_TIMEOUT_MS`만으로는 첫 바이트를 전혀 반환하지 않는 본문을 제한할 수 없습니다. `guardTlsFirstByte()`는 본문의 첫 번째 `read()`와 `TLS_FIRST_BYTE_WATCHDOG_MS`(기본값 `10000`, `0`이면 비활성화)를 경합시킵니다. 정상 본문에는 영향을 주지 않지만, 본문이 중단되면 wreq 리더를 취소하고 `proxyFetch`의 기존 TLS 폴백 로직이 직접/프록시 디스패처로 넘어가도록 합니다(예: 본문이 있는 POST처럼 재실행이 안전하지 않은 요청은 자동으로 재시도되지 않고 여전히 예외를 발생시킵니다).
+- 첫 바이트 감시 타이머(`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`는 업스트림 헤더가 도착하는 즉시 완료되므로, `TLS_CLIENT_TIMEOUT_MS`만으로는 첫 바이트를 전혀 생성하지 않는 본문의 시간을 제한할 수 없습니다. `guardTlsFirstByte()`는 본문의 첫 번째 `read()`와 `TLS_FIRST_BYTE_WATCHDOG_MS`(기본값 `10000`, `0`이면 비활성화)를 경합시킵니다. 정상적인 본문에는 영향을 주지 않지만, 본문이 중단되면 wreq 리더를 취소하고 `proxyFetch`의 기존 TLS 폴백 로직이 직접/프록시 디스패처로 넘어가도록 합니다(예: 본문이 있는 POST처럼 재실행이 안전하지 않은 요청은 자동으로 재시도되지 않고 여전히 예외를 발생시킵니다).
 
 ### 웹 쿠키 제공자 전송 계층 — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts`는 아래의 특수 웹 쿠키 전송 계층 5개가 공유하는 어댑터입니다. 각 경량 제공자 래퍼는 브라우저/OS 프로필을 선택합니다. 어댑터는 `open-sse/utils/tlsClient.ts`의 단일 wreq 런타임 로더와 전송 풀을 사용하며, 프로필 + OS + 확인된 프록시를 키로 사용합니다. 한편 모든 요청은 `cookieMode: "ephemeral"`을 사용합니다. 따라서 계정과 요청은 전송 계층 연결을 공유하지만, wreq 세션이나 쿠키 저장소는 절대 공유하지 않습니다.
+`open-sse/services/tlsClientBase.ts`는 아래의 특수 웹 쿠키 전송 계층 5개에서 공유하는 어댑터입니다. 각 경량 제공자 래퍼는 브라우저/OS 프로필을 선택합니다. 이 어댑터는 `open-sse/utils/tlsClient.ts`의 단일 wreq 런타임 로더와 전송 풀을 사용하며, 프로필 + OS + 확인된 프록시를 키로 사용합니다. 한편 모든 요청은 `cookieMode: "ephemeral"`을 사용합니다. 따라서 계정과 요청은 전송 계층 연결을 공유하지만, wreq 세션이나 쿠키 저장소는 절대 공유하지 않습니다.
 
 | 제공자     | 프로필        | 에뮬레이션 OS | 스트림 EOF 정책                   |
 | ---------- | ------------- | ------------- | --------------------------------- |
 | Claude     | `chrome_146`  | Linux         | `[DONE]` 포함                     |
-| Perplexity | `firefox_148` | macOS         | `event: end_of_stream` 포함       |
+| Perplexity | `firefox_151` | macOS         | `event: end_of_stream` 포함       |
 | Grok       | `chrome_146`  | Linux         | `[DONE]` 제외                     |
 | Notion     | `chrome_146`  | Windows       | `[DONE]` 포함                     |
-| LMArena    | `chrome_146`  | Windows       | 센티널 없음, 네이티브 EOF 시 종료 |
+| LMArena    | `chrome_146`  | Windows       | 센티널 없음, 네이티브 EOF 시 닫기 |
 
-- 스트리밍은 네이티브 응답 `ReadableStream`을 직접 소비하며, 임시 파일이나 사이드카를 생성하지 않습니다.
-- 스트림을 노출하기 전에 최초 최대 256바이트를 검사합니다. SSE 제공자는 SSE가 아닌 오류를 버퍼링하며, Grok/LMArena는 Cloudflare 챌린지를 `403`으로, HTML 중간 페이지를 `502`로 매핑합니다.
-- 네이티브 요청 시간 제한은 절대적인 JS 하드 데드라인으로 계속 래핑됩니다. 중단이 발생하면 영향을 받은 프로필/OS/프록시 전송 계층만 무효화하고 닫으며, 다음 요청 전에 이를 다시 생성합니다.
-- 프록시 확인 우선순위는 호출별 `proxyUrl` → 요청 범위의 계정/대시보드 컨텍스트 → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY`(소문자 변수 포함)입니다. 확인 오류 시 직접 연결이 누출되지 않도록 실패 시 차단됩니다. LMArena는 의도적으로 `arena.ai`를 기준으로 확인합니다.
+- 스트리밍은 네이티브 응답 `ReadableStream`을 직접 사용하며, 임시 파일이나 사이드카를 생성하지 않습니다.
+- 스트림을 노출하기 전에 초기 바이트를 최대 256개까지 검사합니다. SSE 제공자는 SSE가 아닌 오류를 버퍼링하며, Grok/LMArena는 Cloudflare 챌린지를 `403`으로, HTML 중간 페이지를 `502`로 매핑합니다.
+- 네이티브 요청 타임아웃은 절대적인 JS 하드 데드라인으로 계속 래핑됩니다. 중단이 발생하면 영향을 받은 프로필/OS/프록시 전송 계층만 무효화하고 닫으며, 다음 요청이 이를 다시 생성합니다.
+- 프록시 확인 우선순위는 호출별 `proxyUrl` → 요청 범위의 계정/대시보드 컨텍스트 → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY`(소문자 형식 포함)입니다. 확인 오류가 발생하면 직접 연결이 유출되지 않도록 실패 시 차단됩니다. LMArena는 의도적으로 `arena.ai`를 기준으로 확인합니다.
 - `byteResponse`는 UTF-8 손상 없이 콘텐츠 유형이 지정된 `data:` URL을 반환합니다.
-- 모든 128개의 제한된 프로필/OS/프록시 슬롯이 사용 중이거나 닫히는 중일 때 발생하는 오류는 `TlsClientUnavailableError`(패키지/애드온 사용 불가), `TlsClientHangError`(데드라인 초과), `WreqTransportCapacityError`(공유 세션 용량 오류 코드)입니다.
+- 오류는 `TlsClientUnavailableError`(패키지/애드온을 사용할 수 없음), `TlsClientHangError`(데드라인 초과), 그리고 제한된 128개의 프로필/OS/프록시 슬롯이 모두 활성 상태이거나 닫히는 중일 때 발생하는 `WreqTransportCapacityError`(공유 세션 용량 오류 코드)입니다.
 
-위의 범용 `TlsClient` 세션은 브라우저 기반의 영구 쿠키 상태에 계속 특화되어 있습니다. 두 경로 모두 캐시된 단일 wreq 모듈 로더와 프로세스 수명 주기 훅을 재사용하지만, 의도된 쿠키 수명이 서로 다르므로 각 풀은 분리된 상태로 유지됩니다.
+위의 범용 `TlsClient` 세션은 브라우저 기반의 영구 쿠키 상태에 특화된 상태로 유지됩니다. 두 경로는 하나의 캐시된 wreq 모듈 로더와 프로세스 수명 주기 훅을 재사용하지만, 의도적으로 쿠키 수명이 다르므로 각 풀은 분리된 상태로 유지됩니다.
 
-이 프로필들은 고정된 패키지에서 지원되지만, 실제 WAF 허용 여부는 로컬 계약 테스트와 별개로 변경될 수 있습니다. 업스트림 브라우저와 동등하다고 주장하기 전에 명시적으로 승인된 실제 계정을 대상으로 지문 변경 사항을 검증하십시오.
+해당 프로필은 고정된 패키지에서 지원되지만, 실제 WAF 허용 여부는 로컬 계약 테스트와 무관하게 변경될 수 있습니다. 업스트림 브라우저와 동등하다고 주장하기 전에 명시적으로 승인된 실제 계정에서 핑거프린트 변경 사항을 검증하십시오.
 
 ---
 

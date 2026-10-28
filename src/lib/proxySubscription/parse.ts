@@ -144,6 +144,16 @@ function nodeFromClashObject(
   return null;
 }
 
+function decodeNodeLabel(hash: string): string {
+  const label = hash.replace(/^#/, "");
+  try {
+    return decodeURIComponent(label);
+  } catch {
+    // A literal percent in a display name must not invalidate the subscription.
+    return label;
+  }
+}
+
 function nodeFromUri(uri: string): SubscriptionNode | NeedsCoreNode | null {
   let parsed: URL;
   try {
@@ -157,7 +167,7 @@ function nodeFromUri(uri: string): SubscriptionNode | NeedsCoreNode | null {
   // host:port (`vmess://eyJhZGQiOi...`). Handle it BEFORE the host/port check.
   if (scheme === "vmess") {
     const b64 = (parsed.pathname || "").replace(/^\//, "");
-    const tag = decodeURIComponent((parsed.hash || "").replace(/^#/, ""));
+    const tag = decodeNodeLabel(parsed.hash);
     const name = tag || `vmess-${(parsed.hostname || "").slice(0, 8) || "node"}`;
     let host = parsed.hostname || undefined;
     let port = parsed.port ? Number(parsed.port) : undefined;
@@ -183,9 +193,10 @@ function nodeFromUri(uri: string): SubscriptionNode | NeedsCoreNode | null {
     };
   }
 
-  const name = decodeURIComponent(parsed.hash.replace(/^#/, "")) || parsed.hostname;
+  const name = decodeNodeLabel(parsed.hash) || parsed.hostname;
   const host = parsed.hostname;
-  const port = Number(parsed.port);
+  const defaultPort = scheme === "http" ? 80 : scheme === "https" ? 443 : 0;
+  const port = parsed.port ? Number(parsed.port) : defaultPort;
   if (!host || !port) return null;
 
   if (DIRECT_TYPES.has(scheme)) {

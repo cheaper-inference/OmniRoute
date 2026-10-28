@@ -23,9 +23,9 @@ const REASON_KEYS: Record<string, string> = {
 };
 
 const STATUS_CLASS: Record<PingStatus, string> = {
-  succeeded: "text-emerald-600 dark:text-emerald-400",
-  skipped: "text-amber-600 dark:text-amber-400",
-  failed: "text-red-600 dark:text-red-400",
+  succeeded: "text-success",
+  skipped: "text-warning",
+  failed: "text-error",
 };
 
 /**

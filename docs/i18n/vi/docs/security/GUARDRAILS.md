@@ -4,662 +4,659 @@
 
 ---
 
-> **Nguồn chuẩn:** `src/lib/guardrails/`
-> **Cập nhật lần cuối:** 2026-08-29 — v3.8.51 (nguồn gốc bản chép lời Video Bridge do bên gọi khai báo,
-> chưa được máy chủ xác minh — đã làm rõ theo #11661)
+> **Nguồn chính xác:** `src/lib/guardrails/`
+> **Cập nhật lần cuối:** 2026-10-17 — v3.8.52 (bổ sung [Mức độ bao phủ và giới hạn](#coverage-and-limits):
+> các route và đường dẫn response mà các hook chạm tới, các header tắt đã được gộp (#16412), chế độ
+> chặn injection như một ranh giới bắt buộc (#16413), và thành phần nào nhìn thấy response trước post-call)
 
-Các guardrail thực thi những phép biến đổi về an toàn, chính sách và nội dung tại ranh giới
-giữa OmniRoute và các nhà cung cấp thượng nguồn. Mỗi guardrail có thể kiểm tra (và
-tùy chọn từ chối, biến đổi hoặc chú thích) payload yêu cầu (`preCall`) và
-phản hồi thượng nguồn (`postCall`).
+Guardrails thực thi các biến đổi về an toàn, chính sách và nội dung tại ranh giới
+giữa OmniRoute và các nhà cung cấp upstream. Mỗi guardrail có thể kiểm tra (và
+tùy chọn từ chối, biến đổi hoặc chú thích) payload của request (`preCall`) và
+response từ upstream (`postCall`).
 
-Hệ thống hoạt động theo cơ chế **fail-open**: nếu một guardrail phát sinh lỗi trong khi thực thi, registry
-sẽ ghi lại lỗi và tiếp tục với guardrail tiếp theo thay vì làm yêu cầu
-thất bại. Việc chặn là một quyết định rõ ràng (`block: true`), không bao giờ là sự cố ngoài ý muốn.
+Hệ thống hoạt động theo kiểu **fail-open**: nếu một guardrail ném lỗi khi đang
+thực thi, registry sẽ ghi lại lỗi và tiếp tục với guardrail tiếp theo thay vì
+làm request thất bại. Việc chặn là một quyết định tường minh (`block: true`),
+không bao giờ xảy ra một cách ngẫu nhiên. Ngoại lệ duy nhất là request bị hủy:
+khi `signal` của caller bị abort, một guardrail ném lỗi sẽ reject lượt chạy hook
+thay vì bị bỏ qua.
 
-## Các cơ chế bảo vệ tích hợp sẵn
+Các hook **không** chạy trên mọi route hay mọi response. Hãy đọc
+[Mức độ bao phủ và giới hạn](#coverage-and-limits) trước khi dựa vào một
+guardrail như một biện pháp kiểm soát bảo mật.
 
-Registry tự động nạp sáu cơ chế bảo vệ theo thứ tự ưu tiên khi import
+## Guardrail tích hợp sẵn
+
+Registry tự động nạp sáu guardrail theo thứ tự ưu tiên khi import
 (xem `registry.ts` → `registerDefaultGuardrails()`):
 
-| Độ ưu tiên | Tên                 | Giai đoạn      | Tệp                   |
-| ---------- | ------------------- | -------------- | --------------------- |
-| `5`        | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`        | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`        | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`       | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`       | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`       | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| Ưu tiên | Tên                 | (Các) giai đoạn | Tệp                   |
+| ------- | ------------------- | --------------- | --------------------- |
+| `5`     | `vision-bridge`     | `preCall`       | `visionBridge.ts`     |
+| `6`     | `audio-bridge`      | `preCall`       | `audioBridge.ts`      |
+| `7`     | `video-bridge`      | `preCall`       | `videoBridge.ts`      |
+| `10`    | `pii-masker`        | `pre` + `post`  | `piiMasker.ts`        |
+| `20`    | `prompt-injection`  | `preCall`       | `promptInjection.ts`  |
+| `95`    | `credential-masker` | `pre` + `post`  | `credentialMasker.ts` |
 
-Số ưu tiên thấp hơn sẽ chạy **trước**.
+Số ưu tiên thấp hơn chạy **trước**.
 
-### Cầu nối thị giác (`visionBridge.ts`) — Cầu nối phương thức PR-1
+### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-Chặn các yêu cầu chứa hình ảnh được gửi đến **các mô hình không hỗ trợ thị giác** và
-chuyển hướng toàn bộ yêu cầu đến một mô hình hỗ trợ thị giác hoặc thay thế các phần
-hình ảnh bằng mô tả văn bản do một mô hình thị giác có thể cấu hình tạo ra trước
-lời gọi thượng nguồn. Điều này cho phép các nhà cung cấp chỉ hỗ trợ văn bản xử lý
-các payload đa phương thức một cách minh bạch.
+Model cơ sở GLM 5.3 và `glm-5.3-{low,high,max}` có metadata registry/spec
+tường minh là `supportsVision:false`. Các biến thể GLM 5.3 Flash vẫn là các
+model vision gốc. Route `/v1/messages` của Claude Code đi vào chuỗi guardrail
+pre-call dùng chung `handleChat` **trước** khi diễn ra quá trình dịch
+Claude-sang-OpenAI; các ảnh lồng trong kết quả tool `Read` phải được mô tả
+hoặc xử lý trước khi quá trình dịch đó đưa chúng thành nội dung `image_url`
+của OpenAI (#17069).
 
-Luồng:
+Chặn các request chứa ảnh nhắm tới **các model không hỗ trợ vision** và hoặc
+định tuyến lại toàn bộ request sang một model có khả năng vision, hoặc thay
+thế các phần ảnh bằng các mô tả văn bản do một model vision có thể cấu hình
+tạo ra trước khi gọi upstream. Điều này cho phép các nhà cung cấp chỉ hỗ trợ
+văn bản xử lý payload đa phương thức một cách trong suốt.
 
-1. Bỏ qua nếu mô hình đích đã hỗ trợ thị giác (trừ khi mô hình đó xuất hiện trong
-   danh sách buộc sử dụng cầu nối `isVisionBridgeForcedModel`).
-2. Trích xuất các phần hình ảnh qua `extractImageParts(messages)`
-   (`visionBridgeHelpers.ts`), hàm này ủy quyền cho **bộ phát hiện phương tiện
-   hợp nhất** `detectMediaParts()` trong `open-sse/utils/mediaParts.ts` — nguồn
-   sự thật duy nhất được dùng chung với bộ lọc tương thích combo.
-   Việc trích xuất chỉ cho phép các phần cấp cao nhất có hình dạng mà
-   `replaceImageParts` có thể chèn trở lại (hợp đồng trích xuất↔thay thế): OpenAI
-   `image_url`, `source.type:"base64"` dạng base64 của Anthropic, URL Anthropic
-   `source.type:"url"` và `input_image` của Responses API. Các kết quả khớp lồng
-   nhau và các hình dạng chỉ có chỉ báo là dữ liệu dành cho bộ lọc combo và
-   không bao giờ được trích xuất.
-   Bỏ qua nếu không tìm thấy phần nào.
-3. Phân giải cấu hình thời gian chạy qua `resolveVisionBridgeRuntimeSettings()`
-   (`src/shared/constants/modalityBridgeDefaults.ts`): các khóa cài đặt
-   `modalityBridge*` mới được ưu tiên; các khóa `visionBridge*` cũ vẫn là một
-   **phương án dự phòng trong một chu kỳ** (cửa sổ khôi phục). Bỏ qua trước khi
-   duyệt bất kỳ phương tiện nào nếu cầu nối bị vô hiệu hóa.
+Luồng xử lý:
+
+1. Bỏ qua nếu model đích đã hỗ trợ vision (trừ khi nó xuất hiện trong danh
+   sách bắt buộc bridge `isVisionBridgeForcedModel`).
+2. Trích xuất các phần ảnh qua `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), hàm này ủy quyền cho **bộ phát hiện media
+   thống nhất** `detectMediaParts()` trong `open-sse/utils/mediaParts.ts` —
+   nguồn chính xác duy nhất được chia sẻ với bộ lọc tương thích combo.
+   Việc trích xuất được giới hạn trong danh sách cho phép gồm các dạng mà
+   `replaceImageParts` có thể ghép lại (hợp đồng extract↔replace): `image_url`
+   của OpenAI, base64 của Anthropic `source.type:"base64"`, URL của Anthropic
+   `source.type:"url"`, và `input_image` của Responses API. Các ảnh khớp nằm
+   lồng bên trong `tool_result.content` của Claude Code và output của tool
+   Responses cũng được trích xuất và thay thế tại đường dẫn gốc của chúng;
+   các dạng chỉ mang tính chỉ báo (indicator-only) thuộc phạm vi của bộ lọc
+   combo và không được trích xuất. Bỏ qua nếu không tìm thấy ảnh nào.
+3. Phân giải cấu hình runtime qua `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): các khóa cài đặt mới
+   `modalityBridge*` được ưu tiên; các khóa cũ `visionBridge*` vẫn đóng vai
+   trò **phương án dự phòng trong một chu kỳ** (cửa sổ rollback). Bỏ qua
+   trước mọi thao tác duyệt media khi bridge bị tắt.
 4. Bộ chọn chế độ (`modalityBridgeVisionMode`, xem bảng bên dưới) quyết định
-   chuyển hướng hay mô tả. Chuyển hướng trả về `modifiedPayload` với chỉ `model`
-   được hoán đổi, cùng metadata `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Nhánh mô tả: giới hạn số hình ảnh ở `maxImages`, tạo prompt nhận biết tác vụ,
-   tham khảo bộ nhớ đệm mô tả, gọi mô hình thị giác **song song**
-   (`Promise.allSettled`) và chèn các phần văn bản `[Image N]: <description>`
-   vào vị trí tương ứng. Một lần mô tả thất bại sẽ trả về `null` và phần hình
-   ảnh gốc được **giữ nguyên** (#4012) — ngoại trừ trên nhánh mô tả combo khi
-   mọi lần mô tả đều thất bại, trong trường hợp đó một thượng nguồn đã được xác
-   nhận là không hỗ trợ thị giác sẽ nhận phần giữ chỗ
-   `(unavailable — no vision-capable provider connected)` thay thế (#8430).
-6. Trả về `modifiedPayload` + metadata (`imagesProcessed`, `descriptions`,
+   reroute hay describe. Reroute trả về `modifiedPayload` chỉ với `model`
+   được đổi, kèm meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Nhánh describe: giới hạn số ảnh ở `maxImages`, tạo prompt có nhận biết
+   theo tác vụ, tra cứu cache describe, gọi model vision **song song**
+   (`Promise.allSettled`), và chèn các phần văn bản `[Image N]: <description>`
+   vào vị trí tương ứng. Một lần describe thất bại trả về `null`: ảnh gốc
+   được giữ lại cho các đích chưa xác định/có khả năng vision (#4012), nhưng
+   một **đích trực tiếp đã xác nhận chỉ hỗ trợ văn bản** hoặc combo không có
+   khả năng vision sẽ nhận được một đoạn văn bản thay thế tường minh
+   `(unavailable — no vision-capable provider connected)` cho mỗi ảnh không
+   được mô tả, bao gồm cả các thất bại từng phần và các ảnh vượt quá ngưỡng
+   lượt gọi describe (#17069). Phương án dự phòng describe hiện có cho combo
+   khi tất cả đều thất bại vẫn được giữ nguyên (#8430).
+6. Trả về `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
    `processingTimeMs`, `visionModel`).
 
 #### Bộ chọn chế độ (`modalityBridgeVisionMode`)
 
-| Chế độ     | Mặc định | Hành vi                                                                                                                                                                                                                                                                                                      |
-| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto`     | ✔        | Heuristic cũ, không thay đổi (#6640/#7204): các mô hình không phải combo/`auto/` được chuyển hướng đến mô hình thị giác tốt nhất, trừ khi mô hình gốc đã có thông tin xác thực khả dụng (khi đó sẽ mô tả); các đích combo luôn mô tả.                                                                        |
-| `describe` |          | Luôn mô tả — khối chuyển hướng bị bỏ qua hoàn toàn; mô hình do người dùng chọn luôn trả lời.                                                                                                                                                                                                                 |
-| `reroute`  |          | Buộc chuyển hướng: cơ chế bảo vệ giữ lại mô hình có thông tin xác thực bị bỏ qua. Cơ chế bảo vệ thông tin xác thực của **đích** chuyển hướng vẫn được áp dụng — khi không có đích thị giác khả dụng, yêu cầu sẽ chuyển sang mô tả để hình ảnh thô không bao giờ đến được backend chỉ hỗ trợ văn bản (#8430). |
+| Chế độ     | Mặc định | Hành vi                                                                                                                                                                                                                                                                |
+| ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔        | Heuristic legacy, giữ nguyên không đổi (#6640/#7204): các model không phải combo/`auto/` được reroute sang model vision tốt nhất trừ khi model gốc đã có credential khả dụng (khi đó thì describe); các target combo luôn describe.                                    |
+| `describe` |          | Luôn describe — khối reroute bị bỏ qua hoàn toàn; model do người dùng chọn luôn là model trả lời.                                                                                                                                                                      |
+| `reroute`  |          | Buộc reroute: guard giữ lại model có credential bị bỏ qua. Guard credential của **target** reroute vẫn áp dụng — khi không tồn tại target vision khả dụng nào, bridge sẽ chặn với một lỗi rõ ràng thay vì describe hoặc gửi ảnh thô tới một target chỉ hỗ trợ văn bản. |
 
-Các chế độ bắt buộc đoản mạch **trước khi** heuristic tự động chạy; hành vi
-`auto` giống từng byte với cơ chế bảo vệ trước PR-1.
+Các chế độ bắt buộc sẽ short-circuit **trước khi** heuristic auto chạy; hành vi của `auto`
+giống hệt từng byte với guardrail trước PR-1.
 
-#### Phạm vi khóa API (`visionBridgeKeyScope.ts`)
+#### Phạm vi API key (`visionBridgeKeyScope.ts`)
 
-Khi khóa API của bên gọi hạn chế `allowedConnections`, các nhóm hạn ngạch
-(`allowedQuotas`) hoặc mô hình (`allowedModels` / `blockedModels` /
-`modelAccessMode: "restricted"` / `disableNonPublicModels`), cầu nối chỉ
-chọn các mô hình chuyển hướng và mô tả mà khóa được phép sử dụng, trên các kết
-nối mà khóa được phép sử dụng. Sau đó, lời gọi mô tả luôn đi qua vòng lặp nội bộ
-OmniRoute với header `x-omniroute-self-loop-key-id`, để yêu cầu trò chuyện tiếp
-nhận thực thi lại chính sách kết nối và mô hình của khóa đó.
-`enforceApiKeyPolicy()` chỉ tuân theo header đó khi được dùng cùng bearer của
-vòng lặp nội bộ, vì vậy nó chỉ có thể thu hẹp quyền truy cập, và một id không
+Khi API key của người gọi giới hạn `allowedConnections`, các pool quota
+(`allowedQuotas`) hoặc các model (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), bridge chỉ
+chọn các model reroute và describe mà key được phép dùng, trên các connection
+mà key được phép dùng. Lệnh gọi describe sau đó luôn đi qua self-loop của
+OmniRoute với header `x-omniroute-self-loop-key-id`, để chat request
+nhận được sẽ tự thực thi lại chính sách connection và model của key đó.
+`enforceApiKeyPolicy()` chỉ công nhận header đó khi đi cùng với bearer
+self-loop, vì vậy nó chỉ có thể thu hẹp quyền truy cập, và một id không
 phân giải được sẽ bị từ chối.
 
-Nếu khóa không được phép dùng bất kỳ mô hình thị giác nào, nhánh mô tả sẽ không
-can thiệp và yêu cầu được chuyển tiếp mà không thay đổi, cùng hành vi mở khi lỗi
-như một cơ chế bảo vệ bị vô hiệu hóa (metadata
-`{ skipped: true, reason: "no_permitted_vision_model" }`).
-Các yêu cầu không có khóa và các khóa không có những hạn chế này hoạt động
-chính xác như trước đây.
+Nếu không có model vision nào được phép cho key, một **target đã xác nhận
+chỉ hỗ trợ văn bản** sẽ từ chối request ảnh ngay tại chỗ với lỗi HTTP 400
+rõ ràng thay vì chuyển tiếp các byte ảnh tới một upstream không có khả năng
+xử lý (#17069). Với các target có khả năng vision chưa biết hoặc vision
+native, đường describe giữ nguyên hành vi fail-open trước đây
+(meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Các request không có key, và các key không có những giới hạn này,
+hoạt động giống hệt như trước.
 
-#### Prompt mô tả nhận biết tác vụ (`modalityBridgeVisionTaskAware`)
+#### Prompt describe nhận biết tác vụ (`modalityBridgeVisionTaskAware`)
 
-Mặc định là **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) nối thêm
-nội dung của **tin nhắn người dùng cuối cùng** (được cắt còn 500 ký tự) vào prompt
-mô tả cơ sở, hướng phần mô tả theo đúng nội dung người dùng thực sự yêu cầu
-(theo mẫu codex-vision-proxy) và yêu cầu mô hình thị giác chép lại văn bản nhìn
-thấy được. Khi tắt cờ này — hoặc không có văn bản của người dùng — prompt cơ sở
-được sử dụng mà không thay đổi.
+Mặc định **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) nối thêm
+văn bản của **tin nhắn user cuối cùng** (cắt ngắn còn 500 ký tự) vào prompt
+describe cơ sở, điều hướng mô tả theo điều người dùng thực sự hỏi
+(pattern codex-vision-proxy) và yêu cầu model vision phiên lại phần văn bản
+nhìn thấy được. Khi flag tắt — hoặc không có văn bản user — prompt cơ sở
+được dùng nguyên bản.
 
-Yêu cầu tương thích OpenAI của vòng lặp tự mô tả (`callVisionModelSingle()`
+Request tương thích OpenAI của chính self-loop describe (`callVisionModelSingle()`
 trong `visionBridgeHelpers.ts`) luôn yêu cầu `image_url.detail: "high"` —
-vô điều kiện, đối với mọi trình gọi/nhà cung cấp, không phụ thuộc vào bất kỳ tín
-hiệu nào từ máy khách. Việc lấy mẫu ở mức chi tiết thấp làm giảm độ chính xác OCR
-cho chính tác vụ chép lại văn bản mà prompt này yêu cầu, vì vậy bản thân lệnh gọi
-mô tả luôn yêu cầu mức chi tiết cao, bất kể mức chi tiết mà yêu cầu đầu vào ban
-đầu đã sử dụng. Điều này chỉ ảnh hưởng đến phần thân yêu cầu mô tả nội bộ; nó
-không thay đổi cách OmniRoute chuyển tiếp `image_url.detail` của chính trình gọi
-trên yêu cầu chính — giá trị mặc định đó được áp dụng riêng và chỉ dành cho các
-máy khách OpenCode được phát hiện, trong `defaultImageDetail()`
-(`open-sse/handlers/chatCore/upstreamBody.ts`). Nhánh định dạng dây Anthropic của
-vòng lặp tự mô tả không có trường `detail` và không bị ảnh hưởng bởi bất kỳ giá
-trị mặc định nào trong hai giá trị trên.
+vô điều kiện, cho mọi caller/provider, không bị ràng buộc bởi bất kỳ tín hiệu
+client nào. Việc lấy mẫu ở độ chi tiết thấp làm giảm độ chính xác OCR đúng
+cho tác vụ phiên văn bản mà prompt này yêu cầu, nên bản thân lệnh gọi describe
+luôn yêu cầu độ chi tiết cao bất kể request đến ban đầu dùng mức chi tiết nào.
+Điều này chỉ ảnh hưởng đến body của request describe nội bộ; nó không thay đổi
+cách OmniRoute chuyển tiếp `image_url.detail` của chính caller trên request
+chính — mặc định đó được áp dụng riêng, và chỉ cho các client OpenCode được
+phát hiện, trong `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`).
+Nhánh định dạng wire của Anthropic trong self-loop describe không có trường
+`detail` và không bị ảnh hưởng bởi cả hai mặc định đó.
 
-#### Giới hạn đầu ra mô tả (`modalityBridgeVisionMaxChars`)
+#### Giới hạn đầu ra describe (`modalityBridgeVisionMaxChars`)
 
-| Khóa                           | Mặc định | Phạm vi            |
+| Khóa                           | Mặc định | Khoảng             |
 | ------------------------------ | -------- | ------------------ |
 | `modalityBridgeVisionMaxChars` | `0`      | `0` hoặc 100–50000 |
 
-`0` (mặc định) có nghĩa là **không giới hạn** — phần mô tả do
-`callVisionModel()` trả về được chuyển tiếp mà không sửa đổi, duy trì hành vi
-hiện có. Bất kỳ giá trị nào trong phạm vi 100–50000 sẽ cắt ngắn phần mô tả với
-hậu tố `…` trước khi phần mô tả được chèn trở lại dưới dạng
-`[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` trong
-`src/lib/guardrails/visionBridge.ts`). Hãy tăng giá trị này cho các tác vụ OCR
-có nhiều chi tiết, nơi mô hình hạ nguồn cần toàn bộ phần chép lại; giảm giá trị
-này để giới hạn mức sử dụng token đối với các mô hình thị giác dài dòng.
-Trường trên bảng điều khiển nằm trong bảng Nâng cao của thẻ Vision
-(`modality-bridge-max-chars` trong `ModalityBridgeVisionTab.tsx`) và điều chỉnh
-mọi giá trị từ 1 đến 99 lên mức sàn 100, đồng thời giữ nguyên giá trị `0` được
-chỉ định rõ ràng — bản thân `0` là một giá trị Zod hợp lệ
-(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), chứ không chỉ
-đơn thuần là giá trị mặc định "chưa đặt".
+`0` (mặc định) nghĩa là **không giới hạn** — mô tả do
+`callVisionModel()` trả về được chuyển qua nguyên bản, giữ nguyên hành vi
+hiện có. Bất kỳ giá trị nào trong khoảng 100–50000 sẽ cắt ngắn mô tả với
+hậu tố `…` trước khi nó được ghép lại dưới dạng `[Image N]: <description>`
+(`VisionBridgeGuardrail.preCall()` trong `src/lib/guardrails/visionBridge.ts`).
+Tăng giá trị này cho các tác vụ OCR nhiều chi tiết khi model downstream cần
+bản phiên đầy đủ; giảm nó để giới hạn mức dùng token trên các model vision
+nhiều lời. Trường trên dashboard nằm ở panel Advanced của tab Vision
+(`modality-bridge-max-chars` trong `ModalityBridgeVisionTab.tsx`) và kẹp (clamp)
+mọi giá trị từ 1 đến 99 lên ngưỡng sàn 100 trong khi vẫn giữ nguyên giá trị
+`0` tường minh — `0` là một giá trị Zod hợp lệ theo đúng nghĩa của nó
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), chứ không
+chỉ là mặc định "chưa đặt".
 
-#### Bộ nhớ đệm mô tả (`modalityBridge/bridgeCache.ts`)
+#### Cache describe (`modalityBridge/bridgeCache.ts`)
 
-Bộ nhớ đệm LRU + TTL trong bộ nhớ, được dùng chung trên toàn tiến trình.
+Cache LRU + TTL trong bộ nhớ cho các đầu ra describe, dùng chung toàn tiến trình.
 Khóa = `sha256(imageRef + composedPrompt + configuredBridgeModel)` với cơ chế
-đóng khung bằng tiền tố độ dài (không xảy ra va chạm ranh giới trường). Thành
-phần mô hình là mô hình cầu nối **được cấu hình**, không phải mô hình thực sự đã
-trả lời — `callVisionModel` có thể chuyển sang phương án dự phòng ở nội bộ, và
-việc tạo khóa theo từng lần thử sẽ làm phân mảnh bộ nhớ đệm. Các lần mô tả thất
-bại không bao giờ được lưu vào bộ nhớ đệm. Cài đặt:
+khung tiền tố độ dài (không xung đột biên trường). Thành phần model là model
+bridge **được cấu hình**, không phải model thực sự trả lời — `callVisionModel`
+có thể tự fallback bên trong, và tạo khóa theo từng lần thử sẽ làm phân mảnh
+cache. Các describe thất bại không bao giờ được cache. Cài đặt:
 
-| Khóa                            | Mặc định | Phạm vi |
+| Khóa                            | Mặc định | Khoảng  |
 | ------------------------------- | -------- | ------- |
 | `modalityBridgeCacheEnabled`    | `true`   | —       |
 | `modalityBridgeCacheTtlMinutes` | `60`     | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`    | 10–5000 |
 
-#### Chuẩn hóa hình ảnh từ xa (tự mô tả vòng lặp/tìm nạp base64)
+#### Chuẩn hóa ảnh từ xa (tải describe/base64 qua self-loop)
 
-Khi cầu nối tự tìm nạp một hình ảnh **từ xa** — lệnh tự gọi mô tả Anthropic và
-phép chuyển đổi base64 theo định dạng dây claude
+Khi bridge tự tải một ảnh **từ xa** — lệnh tự gọi (self-call) describe của Anthropic
+và quá trình chuyển đổi base64 theo định dạng claude-wire
 (`ensureBase64ImagesForClaudeWire`), cả hai đều thông qua
-`fetchRemoteImageAsDataUri()` trong `visionBridgeHelpers.ts` — URI dữ liệu thu
-được sẽ được truyền qua `normalizeDataUri()`
-(`open-sse/utils/imageNormalize.ts`) trước khi được nhúng vào yêu cầu gửi đến mô
-hình thị giác. Các hình ảnh quá lớn được thu nhỏ để có **cạnh dài 2048px** (khớp
-với giới hạn đổi kích thước mà OpenAI/Anthropic đã áp dụng ở phía máy chủ), giúp
-giảm số byte tải lên/độ trễ mà không thay đổi những gì mô hình thị giác nhìn
-thấy. Việc đổi kích thước sử dụng `sharp`, được tải bằng phép nhập động: trên nền
-tảng mà tệp nhị phân gốc của nó không tải được, `normalizeDataUri()` **không bao
-giờ ném lỗi** — nó quay về chuyển tiếp nguyên trạng các byte ban đầu, vì vậy
-luồng mô tả/chuyển đổi base64 luôn tiếp tục hoạt động. Các byte không phải hình
-ảnh (một lần tìm nạp không trả về hình ảnh có thể giải mã) cũng được chuyển tiếp
-nguyên trạng. Việc chuẩn hóa này chỉ áp dụng cho các hình ảnh mà cầu nối tìm nạp
-cho lệnh tự gọi của chính nó — nó không bao giờ được áp dụng cho tải trọng chuyển
-tiếp thô của trình gọi, phù hợp với nguyên tắc chỉ sửa đổi khi có sự chủ động
-chọn dùng (Quy tắc cứng #20).
+`fetchRemoteImageAsDataUri()` trong `visionBridgeHelpers.ts` — data URI thu được
+sẽ được truyền qua `normalizeDataUri()`
+(`open-sse/utils/imageNormalize.ts`) trước khi được nhúng vào request gửi tới
+vision model. Các ảnh quá lớn sẽ được thu nhỏ xuống còn **cạnh dài 2048px** (tương
+ứng với giới hạn resize mà OpenAI/Anthropic đã áp dụng phía server), giúp giảm
+số byte/độ trễ khi upload mà không thay đổi những gì vision model nhìn thấy.
+Việc resize sử dụng `sharp`, được nạp qua dynamic import: trên nền tảng mà native
+binary của nó không nạp được, `normalizeDataUri()` **không bao giờ throw** — nó
+chuyển về chế độ passthrough các byte gốc, nhờ đó đường dẫn
+describe/chuyển đổi base64 luôn tiếp tục hoạt động. Các byte không phải ảnh (một
+lượt fetch không trả về ảnh có thể giải mã được) cũng được truyền thẳng qua mà
+không thay đổi. Việc chuẩn hóa này chỉ giới hạn ở các ảnh mà bridge tự tải cho
+lệnh self-call của chính nó — nó không bao giờ được áp dụng cho payload
+passthrough thô của caller, phù hợp với nguyên tắc chỉ biến đổi khi được chọn
+tham gia (Hard Rule #20).
 
-#### Lược đồ cài đặt + di chuyển
+#### Schema cài đặt + migration
 
-Các khóa `modalityBridge*` mới được Zod xác thực trong `updateSettingsSchema`
+Các key `modalityBridge*` mới được validate bằng Zod trong `updateSettingsSchema`
 (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
 `modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
 `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
 `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
-`modalityBridgeVisionMaxChars`, bộ ba `modalityBridgeCache*` và nhóm
-`modalityBridgeAudio*` được Audio Bridge sử dụng. Bản di chuyển
-`141_modality_bridge_settings.sql` sao chép các giá trị `visionBridge*` cũ hiện
-có sang các khóa mới tương ứng (có tính lũy đẳng, không bao giờ ghi đè giá trị
-`modalityBridge*` do người vận hành đặt); các khóa cũ vẫn được chấp nhận làm
-phương án đọc dự phòng trong một chu kỳ phát hành.
+`modalityBridgeVisionMaxChars`, bộ ba `modalityBridgeCache*`, và nhóm
+`modalityBridgeAudio*` được Audio Bridge sử dụng. Migration
+`141_modality_bridge_settings.sql` sao chép các giá trị legacy
+`visionBridge*` hiện có sang các key mới tương ứng (idempotent, không bao giờ
+ghi đè giá trị `modalityBridge*` do operator đặt); các key legacy vẫn được chấp
+nhận như một phương án đọc dự phòng trong một chu kỳ phát hành.
 
-#### Tiêu đề minh bạch + thống kê
+#### Header minh bạch + thống kê
 
-Các phản hồi được biến đổi bằng mô tả mang
+Các response đã được describe biến đổi mang header
 `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
-(được tạo bởi `buildModalityBridgeHeader()` trong
-`modalityBridge/bridgeStats.ts`, được gắn bởi `withModalityBridgeHeader()` trong
-`src/sse/handlers/chatHelpers.ts`). Các yêu cầu được định tuyến lại **không** có
-tiêu đề này — tải trọng không bị thay đổi và việc hoán đổi mô hình đã hiển thị
-trong trường `model` của phần thân phản hồi.
+(được xây dựng bởi `buildModalityBridgeHeader()` trong `modalityBridge/bridgeStats.ts`,
+được gắn bởi `withModalityBridgeHeader()` trong `src/sse/handlers/chatHelpers.ts`).
+Các request được reroute **không** nhận header — vì payload không bị thay đổi và
+việc đổi model đã hiển thị trong trường `model` của response body.
 
 `GET /api/modality-bridge/stats` (xác thực quản trị, cùng cấp với
-`GET /api/settings`) trả về các bộ đếm trong bộ nhớ theo từng phương thức
+`GET /api/settings`) trả về các bộ đếm trong bộ nhớ theo từng modality
 `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
-latencySamples, averageLatencyMs, lastUsedAt }` cho `vision`, `audio` và
-`video`. `averageLatencyMs` sử dụng `latencySamples` làm mẫu số, không phải tất
-cả các lần thử; một thao tác không có dữ liệu thời gian sẽ không tạo ra một mẫu
-giả có thời lượng 0 mili giây. `bridged` vẫn là bí danh tương thích ngược cho
-các lượt chuyển đổi thành công; các lần thử thất bại không làm tăng giá trị này.
-Theo thiết kế, các bộ đếm được đặt lại khi tiến trình khởi động lại
-(đây là dữ liệu đo từ xa, không phải dữ liệu kế toán).
+latencySamples, averageLatencyMs, lastUsedAt }` cho `vision`, `audio`, và
+`video`. `averageLatencyMs` dùng `latencySamples`, chứ không phải tất cả các lần
+thử, làm mẫu số; một thao tác không có dữ liệu thời gian sẽ không bịa ra một mẫu
+0 mili giây. `bridged` vẫn là alias tương thích ngược cho các lượt chuyển đổi
+thành công; các lần thử thất bại không làm tăng nó.
+Các bộ đếm được reset khi tiến trình khởi động lại, theo thiết kế
+(đây là telemetry, không phải kế toán).
 
-#### Cấu hình bảng điều khiển
+#### Cấu hình dashboard
 
-Trang bảng điều khiển chuyên biệt là
-`/dashboard/settings/modality-bridge`. Các tab `Vision`, `Audio` và
-`Video` có thể được truy cập trực tiếp qua URL và giữ nguyên các tham số truy vấn
-khi chuyển đổi giá trị `tab`.
-Tab Vision cung cấp các tùy chọn bật/tắt, chế độ, lựa chọn mô hình (bao gồm tùy
-chọn tự động mặc định), lời nhắc theo tác vụ, các giới hạn nâng cao về thời gian
-chờ/hình ảnh/độ dài mô tả/bộ nhớ đệm, các bộ đếm thời gian chạy và một yêu cầu mẫu
-được bảo vệ. Tab Audio cũng hoạt động đầy đủ: cung cấp tùy chọn bật/tắt, bộ chọn
-mô hình chỉ dành cho STT với tùy chọn Auto, các giới hạn thời gian chờ/độ dài clip
-tối đa, các bộ đếm âm thanh và một bài kiểm tra mẫu `input_audio`. Tab Video có
-đầy đủ chức năng: báo cáo trạng thái thời gian chạy của FFmpeg/ffprobe — một trong
-bốn trạng thái giao diện người dùng rõ ràng (`unknown` khi quá trình thăm dò đang
-diễn ra hoặc không thể hoàn tất, `restricted` trên máy chủ bảng điều khiển không
-phải loopback nơi quá trình thăm dò bị bỏ qua ở phía máy khách, `unavailable` sau
-khi đã thăm dò và xác nhận là không có, hoặc `available` kèm theo các phiên bản
-FFmpeg/ffprobe) — lưu các giới hạn bật/mô hình/khung hình/video/thời gian chờ, lọc
-bộ chọn mô hình để chỉ hiển thị các mô hình hỗ trợ thị giác và cung cấp các bộ
-đếm video.
+Trang dashboard chuyên dụng là
+`/dashboard/settings/modality-bridge`. Các tab `Vision`, `Audio`,
+và `Video` có thể truy cập trực tiếp qua URL, đồng thời giữ nguyên các query
+parameter khi chuyển đổi giá trị `tab`.
+Tab Vision hiển thị các tùy chọn bật/tắt, chế độ, lựa chọn model (bao gồm mặc định
+tự động), prompt theo ngữ cảnh tác vụ (task-aware), các giới hạn nâng cao về
+timeout/số ảnh/độ dài mô tả/cache, các bộ đếm runtime, và một sample request được
+bảo vệ. Tab Audio cũng đã hoạt động: nó hiển thị tùy chọn bật/tắt, bộ chọn model
+chỉ-STT với tùy chọn Auto, giới hạn timeout/độ dài clip tối đa, các bộ đếm audio,
+và một bài test mẫu `input_audio`. Tab Video đã hoạt động: nó báo cáo trạng thái
+runtime của FFmpeg/ffprobe — một trong bốn trạng thái UI rõ ràng (`unknown` khi
+lượt probe đang chạy hoặc không thể hoàn tất, `restricted` trên host dashboard
+không phải loopback nơi probe bị bỏ qua phía client, `unavailable` sau khi đã
+probe và xác nhận không có sẵn, hoặc `available` kèm phiên bản FFmpeg/ffprobe) —
+lưu trữ các giới hạn bật/model/frame/video/timeout, lọc bộ chọn model chỉ còn
+các model có khả năng vision, và hiển thị các bộ đếm video.
 
-Thẻ Vision Bridge trước đây trong phần cài đặt AI giờ là một liên kết tương thích
-đến trang mới; thẻ này không còn sở hữu một bản sao thứ hai của biểu mẫu. Media
-Providers cũng liên kết các quy trình Image-to-Text và Speech-to-Text đến các tab
-Modality Bridge tương ứng mà không xóa sân chơi Speech-to-Text hiện có.
+Card Vision Bridge trước đây trong phần cài đặt AI giờ chỉ là một liên kết tương
+thích tới trang mới; nó không còn sở hữu bản sao thứ hai của form nữa. Media
+Providers cũng liên kết các workflow Image-to-Text và Speech-to-Text tới các tab
+Modality Bridge tương ứng mà không xóa playground Speech-to-Text hiện có.
 
-**Bỏ qua kiểm tra tiếp nhận cho self-loop:** khi lệnh gọi mô tả được định tuyến
-qua `/v1` self-loop của chính OmniRoute (mô hình nhà cung cấp không tiêu chuẩn),
-yêu cầu con sẽ gửi `x-omniroute-admission-bypass: internal` và được xác thực bằng
-thông tin xác thực self-loop đã phân giải — sentinel cục bộ `sk_omniroute` ở chế
-độ cục bộ, hoặc khóa môi trường `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` do người
-vận hành cấu hình (#1350), để các bản triển khai `REQUIRE_API_KEY=true` vẫn có thể
-thực hiện lệnh gọi mô tả. Việc bỏ qua chỉ được chấp nhận đối với chính xác các
-thông tin xác thực đó, vì vậy máy khách bên ngoài không thể dùng header này để bỏ
-qua bước tiếp nhận.
+**Bỏ qua kiểm soát admission qua self-loop:** khi lệnh gọi describe được định
+tuyến qua self-loop `/v1` của chính OmniRoute (model provider không chuẩn),
+sub-request gửi `x-omniroute-admission-bypass: internal` và được xác thực bằng
+credential self-loop đã được phân giải — sentinel `sk_omniroute` cục bộ ở chế độ
+local, hoặc env key `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` do operator cấu hình
+(#1350) để các triển khai có `REQUIRE_API_KEY=true` vẫn có thể chạy lệnh gọi
+describe. Cơ chế bypass chỉ được chấp nhận với đúng những credential đó, vì vậy
+client bên ngoài không thể dùng header này để bỏ qua admission.
 
-Các giá trị mặc định cũ nằm trong `src/shared/constants/visionBridgeDefaults.ts`;
-các giá trị mặc định mới về chế độ/nhận biết tác vụ/bộ nhớ đệm và trình phân giải
-cài đặt nằm trong `src/shared/constants/modalityBridgeDefaults.ts`. Guardrail cung
-cấp tùy chọn hàm khởi tạo `deps` để các bài kiểm thử có thể chèn các phần triển
-khai `getSettings` và `callVisionModel` giả.
+Các giá trị mặc định legacy nằm trong `src/shared/constants/visionBridgeDefaults.ts`;
+các giá trị mặc định mới về mode/task-aware/cache và trình phân giải cài đặt nằm
+trong `src/shared/constants/modalityBridgeDefaults.ts`. Guardrail cung cấp tùy
+chọn constructor `deps` để các test có thể inject các implementation giả của
+`getSettings` và `callVisionModel`.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Chặn các yêu cầu chat chứa âm thanh trước khi chúng đến một đích không được xác
-định là có khả năng chấp nhận đầu vào âm thanh. Nó không bao giờ định tuyến lại
-yêu cầu chat: các phần âm thanh được phiên âm thông qua endpoint multipart tương
-thích OpenAI hiện có, và mô hình chat đã chọn tiếp tục xử lý với các bản phiên âm
-dạng văn bản.
+Chặn các chat request có chứa audio trước khi chúng đến một target không được
+biết là chấp nhận đầu vào audio. Nó không bao giờ reroute chat request: các phần
+audio được phiên âm qua endpoint multipart tương thích OpenAI hiện có và chat
+model đã chọn tiếp tục với các bản phiên âm dạng văn bản.
 
 Luồng xử lý:
 
-1. Phân giải `supportsAudio` thông qua `getResolvedModelCapabilities()`. Siêu dữ
-   liệu tường minh từ sổ đăng ký nhà cung cấp được ưu tiên, tiếp theo là siêu dữ
-   liệu mô hình tĩnh, rồi đến `modalities_input` đã đồng bộ. Một danh sách đầu vào
-   đã khai báo nhưng không chứa `audio` sẽ cho kết quả `false`; nếu không có bằng
-   chứng nào về khả năng hỗ trợ thì giá trị vẫn là `null`. Cả `false` và `null`
-   đều kích hoạt bridge theo hướng thận trọng, còn `true` sẽ bỏ qua bridge.
-2. Phân giải các cài đặt `modalityBridgeAudio*` và trích xuất các phần âm thanh
-   cấp cao nhất có thể được nối ghép từ mọi tin nhắn thông qua bộ dò dùng chung
-   `detectMediaParts()`. Các định dạng truyền dẫn được hỗ trợ là `input_audio`
-   của OpenAI, `audio_url` và `source.media_type: "audio/*"`. Âm thanh lồng nhau
-   được phát hiện để định tuyến nhưng không bị loại bỏ bởi đường xử lý nối ghép.
-   Khối lượng công việc bị giới hạn bởi `modalityBridgeAudioMaxClips`; các phần
-   phía sau vẫn được giữ nguyên.
-3. Tuân theo `provider/model` đã cấu hình, hoặc để `selectAudioBridgeModel()` duyệt
-   `AUDIO_TRANSCRIPTION_PROVIDERS` theo thứ tự danh mục ổn định và chọn mô hình
-   đầu tiên có thông tin xác thực nhà cung cấp đang hoạt động và sử dụng được.
-4. `callAudioTranscription()` chuyển đổi âm thanh base64/data-URI thành một `file`
-   multipart, hoặc tải xuống `audio_url` từ xa thông qua cơ chế bảo vệ truy cập ra
-   ngoài chỉ dành cho địa chỉ công khai, có ghim DNS và giới hạn 25 MB. Sau đó,
-   hàm gửi POST với tệp và mô hình đã chọn đến self-loop cục bộ
-   `/v1/audio/transcriptions`, được xác thực bằng `resolveSelfLoopBearer()`. Tuyến
-   phiên âm hiện có thực hiện quy trình tra cứu thông tin xác thực, xử lý thời gian
-   tạm ngưng/giới hạn tốc độ và điều phối nhà cung cấp như bình thường.
-5. Các lệnh gọi thành công thay thế phần tương ứng bằng
-   `[Audio N]: <transcript>`. Các lệnh gọi chạy với `Promise.allSettled`: một lỗi
-   riêng lẻ sẽ giữ nguyên phần âm thanh ban đầu đó (hợp đồng #4012). Nếu mọi lệnh
-   gọi đều thất bại và đích đã được chứng minh có `supportsAudio === false`, các
-   phần sẽ trở thành
-   `[Audio N]: (unavailable — no STT provider connected)` (hợp đồng #8430). Đối
-   với đích chưa xác định (`null`), kết quả thất bại toàn bộ vẫn được giữ nguyên.
-   Một đích đã được chứng minh là chỉ hỗ trợ văn bản và không có thông tin xác
-   thực STT khả dụng sẽ nhận cùng placeholder tường minh này mà không thực hiện
-   lệnh gọi mạng.
+1. Phân giải `supportsAudio` thông qua `getResolvedModelCapabilities()`. Metadata
+   provider-registry khai báo tường minh được ưu tiên trước, sau đó đến metadata
+   model tĩnh, rồi đến `modalities_input` đã đồng bộ. Một danh sách input đã khai
+   báo mà không chứa `audio` thì kết quả là `false`; không có bằng chứng
+   capability nào thì vẫn giữ `null`. Cả `false` và `null` đều kích hoạt bridge
+   bảo thủ, trong khi `true` bỏ qua nó.
+2. Phân giải các thiết lập `modalityBridgeAudio*` và trích xuất các phần audio
+   cấp cao nhất có thể splice từ mọi message thông qua detector dùng chung
+   `detectMediaParts()`. Các dạng wire được hỗ trợ là `input_audio` của OpenAI,
+   `audio_url`, và `source.media_type: "audio/*"`. Audio lồng nhau được phát hiện
+   để routing nhưng không bị loại bỏ bởi đường splice. Khối lượng công việc bị
+   giới hạn bởi `modalityBridgeAudioMaxClips`; các phần đứng sau được giữ nguyên.
+3. Tuân theo `provider/model` đã được cấu hình, hoặc để `selectAudioBridgeModel()`
+   duyệt qua `AUDIO_TRANSCRIPTION_PROVIDERS` theo thứ tự catalog ổn định và chọn
+   model đầu tiên có credential provider đang hoạt động và khả dụng.
+4. `callAudioTranscription()` chuyển đổi audio base64/data-URI thành một `file`
+   multipart, hoặc tải xuống một `audio_url` từ xa thông qua guard outbound
+   chỉ-public với DNS pinning và giới hạn 25 MB. Sau đó nó POST file cùng model
+   đã chọn đến self-loop cục bộ `/v1/audio/transcriptions`, được xác thực bằng
+   `resolveSelfLoopBearer()`. Route transcription hiện có thực hiện tra cứu
+   credential thông thường, xử lý cooldown/rate-limit, và điều phối provider.
+5. Các lời gọi thành công thay thế các phần của chúng bằng
+   `[Audio N]: <transcript>`. Các lời gọi chạy với `Promise.allSettled`: một
+   thất bại riêng lẻ sẽ giữ nguyên phần audio gốc tương ứng (contract #4012).
+   Nếu mọi lời gọi đều thất bại và đích được chứng minh là
+   `supportsAudio === false`, các phần sẽ trở thành
+   `[Audio N]: (unavailable — no STT provider connected)` (contract #8430). Với
+   đích không xác định (`null`), kết quả toàn bộ-thất-bại được giữ nguyên không
+   thay đổi. Một đích được chứng minh là chỉ-text và không có credential STT khả
+   dụng sẽ nhận cùng một stub tường minh đó mà không phát sinh bất kỳ lời gọi
+   mạng nào.
 
-Các bản phiên âm thành công sử dụng bộ nhớ đệm LRU/TTL Modality Bridge dùng chung
-toàn tiến trình. Khóa kết hợp tham chiếu âm thanh, nhãn thao tác ổn định
-`audio-transcription` và mô hình STT đã chọn; các lỗi không bao giờ được lưu vào
-bộ nhớ đệm. Các lần thử âm thanh cập nhật những bộ đếm dùng chung `bridged`,
-`cacheHits`, `failures` và `lastUsedAt`. Các phản hồi đã được chuyển đổi chứa
-`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; các yêu cầu
-không thay đổi sẽ không nhận phân đoạn Audio Bridge.
+Các transcript thành công sử dụng cache LRU/TTL phạm vi toàn-process của
+Modality Bridge. Key kết hợp tham chiếu audio, nhãn operation ổn định
+`audio-transcription`, và model STT đã chọn; các thất bại không bao giờ được
+cache. Các lần thử audio cập nhật các bộ đếm dùng chung `bridged`, `cacheHits`,
+`failures`, và `lastUsedAt`. Các response đã được biến đổi mang theo
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; các
+request không bị động vào sẽ không nhận segment Audio Bridge.
 
-Các cài đặt thời gian chạy được lưu trong DB và xác thực bằng Zod:
+Các thiết lập runtime được lưu trữ trong DB và được validate bằng Zod:
 
-| Khóa                          | Mặc định | Phạm vi             |
+| Key                           | Mặc định | Khoảng              |
 | ----------------------------- | -------- | ------------------- |
 | `modalityBridgeAudioEnabled`  | `true`   | —                   |
-| `modalityBridgeAudioModel`    | `""`     | Tự động hoặc ID STT |
+| `modalityBridgeAudioModel`    | `""`     | Tự động hoặc STT ID |
 | `modalityBridgeAudioTimeout`  | `60000`  | 1000–300000         |
 | `modalityBridgeAudioMaxClips` | `3`      | 1–10                |
 
-Bộ nhớ đệm dùng chung vẫn được kiểm soát bởi `modalityBridgeCacheEnabled`,
-`modalityBridgeCacheTtlMinutes` và `modalityBridgeCacheMaxEntries`.
+Cache dùng chung vẫn được kiểm soát bởi `modalityBridgeCacheEnabled`,
+`modalityBridgeCacheTtlMinutes`, và `modalityBridgeCacheMaxEntries`.
 
-### Cầu nối video (`videoBridge.ts`, `videoBridgePipeline.ts`)
+### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Chặn các phần video cấp cao nhất trong `messages` của Chat Completions và `input`
-của Responses API trước khi gọi một đích không được biết là có hỗ trợ video gốc.
-Các định dạng được hỗ trợ gồm `input_video`, `video_url`, `video_source`, URL HTTPS
-và URI dữ liệu `data:video/*;base64,...`. Tên tệp thuần túy trong văn bản không được
-coi là video.
+Chặn các phần video cấp cao nhất trong `messages` của Chat Completions và
+`input` của Responses API trước khi một đích không có hỗ trợ video native đã
+biết được gọi. Các dạng được hỗ trợ là `input_video`, `video_url`,
+`video_source`, các URL HTTPS, và các data URI dạng `data:video/*;base64,...`.
+Tên file thuần túy trong văn bản không được coi là video.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) đảm nhiệm việc duyệt yêu cầu,
-kiểm tra khả năng/chính sách, tổng hợp theo từng yêu cầu và tải trọng phản hồi.
-Công việc theo từng video — thu nhận, bộ nhớ đệm toàn bộ kết quả, mô tả chuỗi
-khung hình (kết hợp mọi bản chép lời âm thanh do bên gọi khai báo), cùng
-số liệu/hủy/dọn dẹp theo từng lần thử — được ẩn phía sau `processVideoPart` trong
-`videoBridgePipeline.ts`, được gọi một lần cho mỗi phần video trong vòng lặp của `preCall`.
-Mô-đun đó cũng định nghĩa các ranh giới cổng tường minh `VideoMediaBrokerPort`
-(thu nhận byte và trích xuất các khung hình được lấy mẫu), `VideoAudioTranscriptionPort`
-(kết hợp bản chép lời âm thanh do bên gọi khai báo với các chú thích được lấy mẫu) và
-`VideoDrilldownPort` (ranh giới lưu trữ truy sâu khung hình; chưa được kết nối
-vào `processVideoPart` — hiện chỉ có tuyến `/api/modality-bridge/video/drilldown`
-riêng biệt ghi các mục truy sâu).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) chịu trách nhiệm duyệt
+request, kiểm tra capability/policy, tổng hợp theo-từng-request, và payload
+response. Công việc theo-từng-video — thu nhận, cache toàn bộ-kết-quả, mô tả
+một chuỗi frame (được kết hợp với bất kỳ transcript audio nào do caller khai
+báo), và metrics/abort/cleanup theo-từng-lần-thử — được ẩn sau
+`processVideoPart` trong `videoBridgePipeline.ts`, được gọi một lần cho mỗi
+phần video bên trong vòng lặp của `preCall`. Module đó cũng định nghĩa các ranh
+giới port tường minh `VideoMediaBrokerPort` (thu nhận bytes và trích xuất các
+frame đã lấy mẫu), `VideoAudioTranscriptionPort` (kết hợp một transcript audio
+do caller khai báo với các caption đã lấy mẫu), và `VideoDrilldownPort` (ranh
+giới persistence cho frame drill-down; chưa được kết nối vào `processVideoPart`
+— hiện tại chỉ có route riêng biệt `/api/modality-bridge/video/drilldown` mới
+ghi các entry drill-down).
 
-Đường dẫn yêu cầu `/v1` công khai không bao giờ nhập hoặc gọi một tiến trình con. Video
-từ xa được tải xuống với giới hạn 50 MiB; video base64 nội tuyến có giới hạn thận trọng
-là 36 MiB sau khi giải mã cho mỗi video để phần bao gói mô hình/thông điệp/đóng khung
-có thể nằm trong giới hạn tiếp nhận yêu cầu JSON công khai là 50 MiB. Độ dài nội tuyến
-và kích thước ước tính sau khi giải mã được kiểm tra trước khi cấp phát. HTTPS là
-bắt buộc đối với URL từ xa ban đầu và mọi chuyển hướng, sử dụng cơ chế bảo vệ đầu ra
-chỉ-công-khai hiện có với tính năng ghim DNS. Sau đó, các byte đi qua đúng ranh giới
-broker nội bộ `POST /api/modality-bridge/video/extract`. Tuyến đó vừa là
-`LOCAL_ONLY` vừa là `SPAWN_CAPABLE`, chỉ chấp nhận yêu cầu loopback đáng tin cậy,
-được xác thực theo từng tiến trình và không bao giờ chấp nhận URL, đường dẫn hệ thống
-tệp, tệp thực thi hoặc danh sách đối số. Pipeline kích thước nội dung API và trình đọc
-nội dung tăng dần của trình xử lý thực thi độc lập giới hạn đầu vào broker ở 50 MiB.
-Hàng đợi có giới hạn của nó chạy mỗi lần một tác vụ trích xuất, cho phép bốn tác vụ
-đang chờ và giới hạn tổng đầu vào đang chờ ở 100 MiB.
+Đường request `/v1` công khai không bao giờ import hay gọi một subprocess. Các
+video từ xa được tải xuống trong giới hạn 50 MiB; các video base64 inline có
+giới hạn giải mã bảo thủ 36 MiB mỗi video để envelope model/messages/framing có
+thể nằm gọn trong giới hạn chấp nhận request JSON công khai là 50 MiB. Độ dài
+inline và ước lượng kích thước sau giải mã được kiểm tra trước khi cấp phát.
+HTTPS là bắt buộc trên URL remote ban đầu và mọi redirect, sử dụng guard
+outbound chỉ-public hiện có với DNS pinning. Các bytes sau đó đi qua đúng ranh
+giới broker nội bộ `POST /api/modality-bridge/video/extract`. Route đó vừa là
+`LOCAL_ONLY` vừa là `SPAWN_CAPABLE`, chỉ chấp nhận một request trusted-loopback
+được xác thực theo-từng-process, và không bao giờ chấp nhận URL, đường dẫn
+filesystem, executable, hay danh sách tham số. Pipeline body-size của API và bộ
+đọc body tăng dần của handler độc lập với nhau cùng thực thi giới hạn input
+broker 50 MiB. Hàng đợi bị giới hạn của nó chạy mỗi lần một tác vụ trích xuất,
+cho phép bốn job đang chờ, và giới hạn input đang chờ ở mức 100 MiB.
 
-Bên trong broker, `ffprobe` đọc một tệp cục bộ riêng tư; danh sách định dạng cho phép
-cố định loại trừ các định dạng danh sách phát và tệp kê khai. Đối với các vùng chứa
-thuộc họ MOV được cho phép, các tham chiếu dữ liệu MOV bên ngoài mặc định vẫn bị vô
-hiệu hóa và lệnh cố định không chủ động bật chúng. Cả `ffprobe` và `ffmpeg` đều sử dụng
-danh sách trắng giao thức chỉ gồm `file`, một luồng, các mảng đối số cố định, không có
-shell và các tệp thực thi được phân giải từ `PATH`. Các luồng ảnh bìa đính kèm không
-phải là ứng viên có thể phát. Tất cả các luồng có thể phát phải đáp ứng các giới hạn,
-và một luồng mặc định tường minh được ưu tiên trước phương án dự phòng có chỉ số thấp
-nhất mang tính tất định. Video được giới hạn ở 600 giây, 8.192 pixel trên mỗi chiều và
-33.554.432 pixel nguồn. FFmpeg lấy mẫu 1–16 khung hình JPEG tại điểm giữa, thu nhỏ cạnh
-dài xuống tối đa 1.024 pixel mà không phóng to đầu vào nhỏ hơn và không bao giờ nhận
-URL. Việc lấy mẫu mặc định là `uniform`. Các chính sách tùy chọn
-`scene_aware` và `segment_aware` thử nghiệm thực hiện thêm một lượt FFmpeg cố định
-trên luồng cục bộ đã được xác thực, chọn các dấu thời gian cảnh `showinfo` có giới hạn
-và dự phòng theo cách tất định về cùng các điểm giữa đồng đều khi bộ phát hiện gặp lỗi,
-hết thời gian chờ, đầu ra không đúng định dạng hoặc tập ứng viên trống. Chế độ nhận biết
-phân đoạn phân bổ các mẫu điểm giữa theo tỷ lệ cho các khoảng cảnh đã được xác thực;
-bằng chứng nhận biết phân đoạn và hành vi dự phòng được trình bày chi tiết bên dưới.
-Giới hạn cứng 16 khung hình được áp dụng sau khi lựa chọn trong mọi chính sách. Khi một
-yêu cầu nhận biết cảnh chỉ có ngân sách một khung hình, yêu cầu đó sử dụng điểm giữa
-đồng đều của toàn bộ video đang hoạt động hoặc cửa sổ tiêu điểm và báo cáo
-`policyEffective: uniform`: một khung hình cảnh được chọn duy nhất không thể bảo toàn
-cả hai đầu thời gian. Bên gọi có thể tùy chọn cung cấp một cửa sổ tiêu điểm hữu hạn
-(`start`/`end` giây); các giới hạn được thu hẹp theo thời lượng phương tiện, các cửa sổ
-đảo ngược hoặc không hữu hạn bị từ chối và tất cả chính sách lấy mẫu chỉ được thực hiện
-bên trong khoảng đã chuẩn hóa. Cửa sổ kết quả được đưa vào siêu dữ liệu lấy mẫu và
-tiền tố mô tả không đáng tin cậy để các mô hình phía sau có thể phân biệt một đoạn trích
-tập trung với toàn bộ dòng thời gian.
+Bên trong broker, `ffprobe` đọc một tệp cục bộ riêng tư; danh sách cho phép định dạng cố định loại trừ các định dạng playlist và manifest. Đối với các container thuộc họ MOV được cho phép, các tham chiếu dữ liệu MOV bên ngoài vẫn bị tắt theo mặc định, và lệnh cố định không chọn tham gia chúng. Cả `ffprobe` và `ffmpeg` đều sử dụng danh sách trắng giao thức chỉ `file`, một luồng, mảng đối số cố định, không có shell, và các tệp thực thi được phân giải từ `PATH`. Các luồng ảnh bìa đính kèm (attached-picture) không phải là ứng viên có thể phát. Tất cả các luồng có thể phát phải thỏa mãn các giới hạn, và một luồng mặc định rõ ràng được ưu tiên trước phương án dự phòng theo chỉ số thấp nhất mang tính xác định. Video bị giới hạn ở 600 giây, 8,192 pixel mỗi chiều, và 33,554,432 pixel nguồn. FFmpeg lấy mẫu 1–16 khung hình JPEG ở điểm giữa, thu nhỏ cạnh dài xuống tối đa 1,024 pixel mà không phóng to các đầu vào nhỏ hơn, và không bao giờ nhận một URL. Việc lấy mẫu mặc định là `uniform`. Các chính sách tùy chọn `scene_aware` và thử nghiệm `segment_aware` thực hiện một lượt FFmpeg cố định bổ sung trên luồng cục bộ đã được xác thực, chọn các mốc thời gian cảnh `showinfo` có giới hạn, và quay về một cách xác định về cùng các điểm giữa đồng đều khi bộ phát hiện thất bại, hết thời gian chờ, đầu ra không đúng định dạng, hoặc tập ứng viên rỗng. Chế độ nhận biết phân đoạn phân bổ các mẫu điểm giữa tỷ lệ với các khoảng cảnh đã được xác thực; bằng chứng của chế độ nhận biết phân đoạn và hành vi dự phòng được trình bày chi tiết bên dưới. Giới hạn cứng 16 khung hình được áp dụng sau khi lựa chọn trong mọi chính sách. Khi một yêu cầu scene-aware chỉ có ngân sách một khung hình, nó sử dụng điểm giữa đồng đều của toàn bộ video đang hoạt động hoặc cửa sổ tập trung và báo cáo `policyEffective: uniform`: một khung cảnh được chọn duy nhất không thể bảo toàn cả hai đầu thời gian. Người gọi có thể tùy ý cung cấp một cửa sổ tập trung hữu hạn (giây `start`/`end`); các biên được kẹp vào thời lượng phương tiện, các cửa sổ bị đảo ngược hoặc không hữu hạn bị từ chối, và tất cả các chính sách lấy mẫu chỉ được thực hiện bên trong khoảng đã chuẩn hóa. Cửa sổ kết quả được đưa vào siêu dữ liệu lấy mẫu và trong tiền tố mô tả không đáng tin cậy để các mô hình hạ nguồn có thể phân biệt một đoạn trích được tập trung với toàn bộ dòng thời gian.
 
-Tiêu điểm chú thích ngữ nghĩa là một thiết lập riêng biệt, tường minh. Chế độ phân tích
-`full` mặc định duy trì lời nhắc khung hình hiện có và không bao giờ chuyển tiếp văn bản
-yêu cầu tới mô hình chú thích. Trong chế độ `focused`, cầu nối chỉ đọc `text`/`input_text`
-không trống mới nhất do người dùng tạo từ cùng vùng chứa Chat hoặc Responses, chuẩn hóa
-nó thành NFC, thu gọn các ký tự điều khiển và khoảng trắng, đồng thời giới hạn ở 500 điểm
-mã Unicode. Kết quả trống sẽ quay về đúng lời nhắc `full`. Một gợi ý có thể sử dụng được
-tuần tự hóa dưới dạng JSON trong một khối ngữ cảnh người dùng không đáng tin cậy chuyên
-biệt và chỉ có thể ưu tiên các chi tiết có thể quan sát được; nó không thể ghi đè cảnh
-báo riêng về việc không làm theo các chỉ dẫn nhìn thấy hoặc nghe thấy trong phương tiện.
-Tiêu điểm văn bản không bao giờ suy luận `start`/`end` hoặc thay đổi bộ lấy mẫu thời gian.
+Tập trung chú thích ngữ nghĩa là một cài đặt riêng biệt, rõ ràng. Chế độ phân tích `full` mặc định giữ nguyên prompt khung hình hiện có và không bao giờ chuyển tiếp văn bản yêu cầu đến mô hình chú thích. Ở chế độ `focused`, bridge chỉ đọc `text`/`input_text` mới nhất, không rỗng do người dùng tạo từ cùng một container Chat hoặc Responses, chuẩn hóa nó về NFC, gộp các ký tự điều khiển và khoảng trắng, và giới hạn ở 500 điểm mã Unicode. Kết quả rỗng sẽ quay về đúng prompt `full`. Một gợi ý khả dụng được tuần tự hóa dưới dạng JSON trong một khối ngữ cảnh người dùng không đáng tin cậy chuyên dụng và chỉ có thể ưu tiên các chi tiết quan sát được; nó không thể ghi đè cảnh báo riêng về việc không tuân theo các chỉ thị hiển thị hoặc nghe được trong phương tiện. Tập trung dạng văn bản không bao giờ suy ra `start`/`end` hoặc thay đổi bộ lấy mẫu thời gian.
 
 #### Bằng chứng phân đoạn cấu trúc FU-07
 
-`segment_aware` sử dụng một lượt tiền phân tích có giới hạn trên luồng video cục bộ đã được xác thực. Chuỗi bộ lọc cố định trước tiên thu nhỏ video xuống chiều rộng tối đa 320 pixel, phát hiện các lần chuyển cảnh và khoảng thời gian đóng băng, sau đó lấy mẫu ở tốc độ 1 khung hình mỗi giây để đo độ mờ, độ chói trung bình và thông tin không gian/thời gian. Lượt này bị giới hạn ở 600 mẫu cấu trúc, một luồng FFmpeg/bộ lọc, cùng danh sách cho phép chỉ dành cho giao thức `file` và định dạng vùng chứa, giới hạn đầu ra tiến trình là 1 MiB, và tối đa 30 giây trong cơ chế hủy/thời hạn dùng chung của broker. Nó không bao giờ chấp nhận lệnh, bộ lọc, đường dẫn hoặc URL từ yêu cầu.
+`segment_aware` sử dụng một lượt tiền phân tích có giới hạn trên luồng video cục bộ đã được xác thực. Chuỗi bộ lọc cố định trước tiên thu nhỏ xuống tối đa 320 pixel chiều rộng, phát hiện các thay đổi cảnh và khoảng đứng hình, sau đó lấy mẫu ở tốc độ 1 khung hình mỗi giây để đo độ mờ, độ sáng trung bình (luma), và thông tin không gian/thời gian. Lượt này bị giới hạn ở 600 mẫu cấu trúc, một luồng FFmpeg/bộ lọc, cùng danh sách cho phép giao thức chỉ `file` và container, giới hạn đầu ra tiến trình 1 MiB, và tối đa 30 giây trong phạm vi abort/deadline dùng chung của broker. Nó không bao giờ chấp nhận lệnh, bộ lọc, đường dẫn, hoặc URL từ yêu cầu.
 
-Các giá trị cấu trúc là bằng chứng lấy mẫu có tính xác định, không phải khả năng hiểu ngữ nghĩa video. Chúng không suy luận chủ thể, hành động, phụ đề, lời nói hoặc ý định của người dùng. Các ranh giới cảnh và khoảng đóng băng tạo thành các phân đoạn; mức độ bao phủ đóng băng, độ mờ, độ phơi sáng, chi tiết không gian và thay đổi theo thời gian chỉ tác động đến cách phân bổ ngân sách 1–16 khung hình hiện có. Một phân đoạn bị đóng băng hoàn toàn được giới hạn ở một khung hình, trong khi các phân đoạn không đóng băng cạnh tranh ngân sách còn lại. Khi số lượng ranh giới nhiều hơn số khung hình, độ bao phủ đồng đều trên dòng thời gian vẫn được duy trì để các lần cắt cảnh nhanh ở phần đầu không thể che khuất một phân đoạn dài ở cuối. Các ranh giới cảnh nằm trong độ phân giải phân tích 1 giây của một ranh giới đóng băng sẽ được hợp nhất.
+Các giá trị cấu trúc là bằng chứng lấy mẫu mang tính xác định, không phải là sự hiểu biết ngữ nghĩa về video. Chúng không suy ra chủ thể, hành động, chú thích, lời nói, hoặc ý định của người dùng. Các ranh giới cảnh và đứng hình tạo thành các phân đoạn; mức độ bao phủ đứng hình, độ mờ, độ phơi sáng, chi tiết không gian, và thay đổi theo thời gian chỉ ảnh hưởng đến cách phân bổ ngân sách 1–16 khung hình hiện có. Một phân đoạn hoàn toàn đứng hình bị giới hạn ở một khung hình, trong khi các phân đoạn không đứng hình cạnh tranh phần ngân sách còn lại. Khi số ranh giới nhiều hơn số khung hình, độ bao phủ dòng thời gian đồng đều được giữ lại để các cú cắt nhanh ở đầu không thể che giấu một phân đoạn dài ở cuối. Các ranh giới cảnh nằm trong độ phân giải phân tích 1 giây của một ranh giới đứng hình được hợp nhất.
 
-Bộ lọc bị thiếu, bằng chứng sai định dạng/trống, lỗi bộ dò hoặc thời gian chờ tiền phân tích có giới hạn đều chuyển sang chính xác chính sách điểm giữa đồng đều. Việc người gọi hủy hoặc hết thời hạn của broker không chuyển sang chính sách dự phòng: điều đó chấm dứt tiến trình con đang chạy, ngăn việc trích xuất khung hình sau đó và cây thư mục tạm riêng tư được xóa trong `finally`.
+Thiếu bộ lọc, bằng chứng không đúng định dạng/rỗng, lỗi bộ phát hiện, hoặc hết thời gian chờ tiền phân tích có giới hạn sẽ fail-open về đúng chính sách điểm giữa đồng đều. Một lệnh abort của người gọi hoặc deadline của broker thì không fail-open: nó kết thúc tiến trình con đang chạy, ngăn việc trích xuất khung hình sau đó, và cây thư mục tạm riêng tư được xóa trong `finally`.
 
-`scripts/perf/video-bridge-fu07-eval.ts` tạo các dữ liệu kiểm thử FFmpeg thực, có tính xác định, cho mức tiết kiệm số lần gọi tạo chú thích sau khi loại bỏ trùng lặp, phân bổ ngân sách cho chuyển động dày đặc, bằng chứng về độ mờ/độ phơi sáng/SI-TI, các lần cắt cảnh nhanh kèm đoạn cuối dài và các trường hợp dương tính giả do chuyển cảnh mờ dần. Tập lệnh ghi lại thời gian thực tế của quá trình tiền phân tích và, khi có `/usr/bin/time`, thời gian CPU của tiến trình con cùng mức RSS cao nhất. Các bước kiểm tra chất lượng của tập lệnh chỉ là các oracle cấu trúc. Chất lượng thực tế của mô hình tạo chú thích vẫn là `HOLD` vì bộ kiểm thử này không có điểm cuối được ủy quyền hoặc bộ đánh giá cố định. Mức tiết kiệm chi phí cũng vẫn là `HOLD`, trừ khi `--caption-cost-per-call-usd` cung cấp một ước tính dương rõ ràng về chi phí cho mỗi lần gọi; tập lệnh không bao giờ tự tạo ra bất kỳ kết quả nào trong hai loại này.
+`scripts/perf/video-bridge-fu07-eval.ts` tạo các fixture FFmpeg thực mang tính xác định cho mức tiết kiệm lời gọi chú thích sau khử trùng lặp, phân bổ ngân sách chuyển động dày đặc, bằng chứng độ mờ/độ phơi sáng/SI-TI, các cú cắt nhanh với phần đuôi dài, và các dương tính giả do chuyển mờ dần. Nó ghi lại thời gian thực (wall time) của tiền phân tích và, khi `/usr/bin/time` khả dụng, CPU của tiến trình con và RSS đỉnh. Các kiểm tra chất lượng của nó chỉ là các oracle cấu trúc. Chất lượng mô hình chú thích thực tế vẫn ở trạng thái `HOLD` vì harness này không có endpoint được ủy quyền hoặc bộ đánh giá đã đóng băng. Mức tiết kiệm tiền tệ cũng vẫn ở trạng thái `HOLD` trừ khi `--caption-cost-per-call-usd` cung cấp một ước tính dương rõ ràng cho mỗi lời gọi; script không bao giờ bịa ra bất kỳ kết quả nào trong hai kết quả đó.
 
-Mỗi khung hình được giới hạn ở 4 MiB, tổng tất cả khung hình thô ở 23 MiB và phản hồi broker được tuần tự hóa ở 32 MiB. Một thư mục tạm riêng tư được xóa trong `finally`. OmniRoute không đóng gói kèm FFmpeg và không chấp nhận đường dẫn tùy chỉnh đến tệp thực thi. Trước khi tạo chú thích, bridge áp dụng một lượt loại bỏ trùng lặp hình ảnh thận trọng: mỗi ảnh JPEG được thu nhỏ thành một bộ đệm thang độ xám 16×16 và chỉ được so sánh với khung hình gần nhất đã được giữ lại. Khi ngân sách chú thích được yêu cầu lớn hơn một khung hình, quá trình trích xuất cung cấp một nhóm ứng viên có giới hạn, tối đa gấp đôi ngân sách đó và không bao giờ vượt quá 16 khung hình. Giới hạn được yêu cầu chỉ được áp dụng sau khi loại bỏ trùng lặp; ứng viên được chọn đầu tiên và cuối cùng được giữ nguyên trong bước rút gọn cuối cùng khi ngân sách ít nhất là hai. Chính sách có phiên bản `grayscale-16x16-mean-cells-v2` sử dụng giá trị lớn hơn giữa độ chênh lệch độ chói trung bình và tỷ lệ các ô ảnh thu nhỏ có độ chênh lệch chuẩn hóa ít nhất là 0.05. Ngưỡng trùng lặp là hằng số 0.04, được chọn để đảm bảo tính dự đoán được thay vì được cung cấp dưới dạng một thiết lập lúc chạy. Tín hiệu phụ có độ tương phản cao này bảo toàn các chuyển động nhỏ và thay đổi văn bản hiển thị mà phép so sánh chỉ dựa trên giá trị trung bình có thể bỏ sót. Lỗi bộ so sánh hoặc bộ giải mã sẽ chuyển sang giữ lại độ bao phủ. Siêu dữ liệu đầu ra phân biệt các ứng viên đã trích xuất, các khung hình được sử dụng thành công và các bản trùng lặp hình ảnh đã bị loại bỏ.
+Mỗi khung hình (frame) được giới hạn ở 4 MiB, tổng tất cả các khung hình thô giới hạn ở 23 MiB, và phản hồi đã tuần tự hóa của broker giới hạn ở 32 MiB. Một thư mục tạm riêng tư được xóa trong `finally`. OmniRoute không đóng gói sẵn FFmpeg và không chấp nhận đường dẫn tệp thực thi tùy chỉnh. Trước khi tạo chú thích, bridge áp dụng một bước khử trùng lặp hình ảnh (visual deduplication) theo hướng thận trọng: mỗi ảnh JPEG được giảm xuống thành bộ đệm thang xám 16×16 và chỉ được so sánh với khung hình được giữ lại gần nhất. Đối với ngân sách chú thích được yêu cầu lớn hơn một khung hình, quá trình trích xuất cung cấp một nhóm ứng viên (candidate pool) có giới hạn tối đa gấp đôi ngân sách đó và không bao giờ vượt quá 16 khung hình. Giới hạn được yêu cầu chỉ được áp dụng sau khi khử trùng lặp, với ứng viên đầu tiên và cuối cùng được chọn luôn được giữ lại trong quá trình rút gọn cuối cùng khi ngân sách ít nhất là hai. Chính sách có phiên bản `grayscale-16x16-mean-cells-v2` sử dụng giá trị lớn hơn giữa độ lệch độ chói trung bình (mean luma delta) và tỷ lệ các ô thumbnail có độ lệch đã chuẩn hóa ít nhất là 0.05. Ngưỡng trùng lặp là hằng số 0.04, được chọn để đảm bảo tính dự đoán được thay vì được đưa ra thành một thiết lập thời gian chạy (runtime setting). Tín hiệu phụ có độ tương phản cao này bảo toàn các chuyển động nhỏ và những thay đổi về văn bản hiển thị mà phép so sánh chỉ dựa trên giá trị trung bình có thể che giấu. Lỗi của bộ so sánh hoặc bộ giải mã sẽ fail open và duy trì độ bao phủ. Metadata đầu ra tách biệt giữa các ứng viên được trích xuất, các khung hình được sử dụng thành công, và các khung hình trùng lặp về hình ảnh bị loại bỏ.
 
-Một phần video được đánh dấu rõ ràng có thể yêu cầu một bảng liên hệ có dấu thời gian. Bridge tạo một lưới JPEG tối đa 4 cột và 16 khung hình. Mỗi ô 512 pixel ghi cố định dấu thời gian nguồn vào một dải có độ tương phản cao ở phía dưới, đồng thời các dấu thời gian đó vẫn được lưu trong siêu dữ liệu văn bản để phục vụ việc liên kết và kiểm tra ở hạ nguồn. Ảnh JPEG hoàn chỉnh vẫn bị giới hạn ở 32 MiB. Nếu `sharp` không thể giải mã hoặc tổng hợp lưới, bridge sẽ chuyển sang các khung hình JPEG riêng lẻ; thao tác hủy từ máy khách vẫn được truyền qua thao tác tạo bảng.
+Một phần video được đánh dấu rõ ràng có thể yêu cầu một contact sheet kèm dấu thời gian. Bridge xây dựng tối đa một lưới JPEG gồm 4 cột, 16 khung hình. Mỗi ô 512 pixel sẽ ghi (burn) dấu thời gian nguồn của nó vào một dải đáy có độ tương phản cao, trong khi các dấu thời gian đó vẫn được giữ trong metadata dạng văn bản để phục vụ việc liên kết và kiểm toán ở hạ nguồn. Toàn bộ ảnh JPEG vẫn bị giới hạn ở 32 MiB. Nếu `sharp` không thể giải mã hoặc tổng hợp lưới, bridge sẽ quay về dùng các khung hình JPEG riêng lẻ; một thao tác hủy (abort) từ phía client vẫn được truyền qua toàn bộ thao tác tạo sheet.
 
-Bằng chứng để đưa vào sử dụng chính thức được cố ý tách biệt khỏi phép đo hiệu năng vi mô tổng hợp. `scripts/perf/video-bridge-contact-sheet-eval.ts` định nghĩa một bộ kiểm thử A/B có lập phiên bản lược đồ dành cho các mô hình thị giác thực tương thích với OpenAI. Bộ kiểm thử đo số token do nhà cung cấp báo cáo, độ trễ đầu-cuối theo thời gian thực tế (bao gồm cả việc tổng hợp bảng), số lần gọi mô hình và mức độ giữ lại dữ kiện được định nghĩa trong bản kê khai. Phản hồi thô từ mô hình không được ghi vào báo cáo; chỉ các bản tóm lược SHA-256 và ID dữ kiện đã khớp được giữ lại. Bộ kiểm thử không thực hiện bất kỳ lệnh gọi mạng hoặc mô hình trả phí nào trừ khi truyền `--execute-real` và đã cấu hình `--model`, `OMNIROUTE_BASE_URL` cùng `OMNIROUTE_API_KEY`. Nếu không có lượt chạy thực rõ ràng đó, phán quyết ở dạng máy có thể đọc vẫn là `HOLD`; chỉ riêng các phép đo tải trọng/số lần gọi tổng hợp không được coi là bằng chứng để đưa vào sử dụng chính thức.
+Bằng chứng thăng cấp (promotion evidence) được cố ý tách biệt khỏi microbenchmark tổng hợp (synthetic composition microbenchmark). `scripts/perf/video-bridge-contact-sheet-eval.ts` định nghĩa một bộ khung A/B (harness) có phiên bản schema dành cho các mô hình vision thực tế tương thích OpenAI. Nó đo lường số token do nhà cung cấp báo cáo, độ trễ thời gian thực đầu-cuối (bao gồm cả việc tổng hợp sheet), số lượng lệnh gọi mô hình, và mức độ giữ lại dữ kiện được định nghĩa trong manifest. Các phản hồi thô của mô hình không được ghi vào báo cáo; chỉ có các digest SHA-256 và ID dữ kiện khớp được giữ lại. Bộ khung này không thực hiện bất kỳ lệnh gọi mạng hay lệnh gọi mô hình trả phí nào trừ khi được truyền `--execute-real` và đã cấu hình `--model`, `OMNIROUTE_BASE_URL` cùng `OMNIROUTE_API_KEY`. Nếu không có lần chạy thực tế được chỉ định rõ ràng đó, kết luận máy-đọc-được của nó vẫn là `HOLD`; chỉ riêng các phép đo payload/số lượng lệnh gọi tổng hợp không đủ làm bằng chứng thăng cấp.
 
-Người gọi có thể đính kèm một mảng `transcript.cues` tùy chọn vào một phần video được hỗ trợ khi họ đã có văn bản được căn chỉnh. Mỗi cue phải chứa `text`, một khoảng `start`/`end` hữu hạn nằm trong thời lượng đã thăm dò và một `source` thuộc danh sách cho phép (`client`, `embedded` hoặc `audio-bridge`); `confidence` mặc định là `1` và phải nằm trong khoảng từ `0` đến `1`. Các cue trùng khớp hoàn toàn sẽ được hợp nhất. OmniRoute không bao giờ khởi chạy quá trình phiên âm từ siêu dữ liệu này: các cue đã được xác thực được sao chép vào kết quả được mô tả cùng với nguồn, độ tin cậy và khoảng thời gian, đồng thời được hiển thị dưới dạng các quan sát không đáng tin cậy bên cạnh chú thích khung hình. Văn bản không hợp lệ, nằm ngoài phạm vi hoặc không có nguồn gốc sẽ bị từ chối thay vì được trộn vào luồng chú thích. Cả hai kênh bản phiên âm trong phần thân yêu cầu đều chuẩn hóa nguồn gốc được cung cấp thành `client`, bao gồm cả các nhãn `embedded` hoặc `audio-bridge` do chính người gửi tự xác nhận. Chỉ một adapter do máy chủ sở hữu mới có thể gán các nhãn đáng tin cậy đó thông qua đối số chỉ dùng trong mã `trustedSource`; một trường JSON trong yêu cầu không thể truyền tới đối số đó. Văn bản phiên âm vẫn là nội dung không đáng tin cậy bắt nguồn từ phương tiện, bất kể nguồn gốc của nó, và tuyệt đối không được dùng để quyết định việc ủy quyền.
+Phía gọi có thể đính kèm một mảng `transcript.cues` tùy chọn vào một phần video được hỗ trợ khi họ đã có sẵn văn bản đã căn chỉnh (aligned text). Mỗi cue phải mang `text`, một khoảng `start`/`end` hữu hạn nằm trong thời lượng đã thăm dò (probed duration), và một `source` nằm trong danh sách cho phép (`client`, `embedded`, hoặc `audio-bridge`); `confidence` mặc định là `1` và phải nằm trong khoảng từ `0` đến `1`. Các cue trùng lặp chính xác sẽ được gộp lại. OmniRoute không bao giờ khởi động quá trình phiên âm (transcription) từ metadata này: các cue đã được xác thực sẽ được sao chép vào kết quả mô tả kèm theo source, confidence, và khoảng thời gian, đồng thời được hiển thị như các quan sát không đáng tin cậy (untrusted observations) bên cạnh các chú thích khung hình. Văn bản không hợp lệ, nằm ngoài phạm vi, hoặc không có nguồn gốc (provenance) sẽ bị từ chối thay vì bị trộn vào luồng chú thích. Cả hai kênh transcript trong request body đều chuẩn hóa nguồn gốc được cung cấp thành `client`, kể cả các nhãn tự khai báo là `embedded` hoặc `audio-bridge`. Chỉ một adapter do server sở hữu mới có thể gán các nhãn tin cậy đó thông qua tham số chỉ-truy-cập-từ-mã `trustedSource`; một trường JSON trong request không thể chạm tới tham số đó. Văn bản transcript vẫn là nội dung không đáng tin cậy bắt nguồn từ media, bất kể nguồn gốc của nó, và không bao giờ được dùng để quyết định việc cấp quyền (authorization).
 
-Một trình gọi nâng cao có thể cung cấp một luồng `audioTranscript` cho cùng video;
-luồng này được xem là văn bản do máy khách cung cấp, không phải bằng chứng về việc máy chủ đã phiên âm.
-Điểm hợp nhất chạy các quan sát hình ảnh và âm thanh trong cùng
-một thời hạn và tín hiệu hủy, sắp xếp chúng trên một dòng thời gian chung, gộp
-các bản trùng lặp hoàn toàn và báo cáo kết quả một phần khi chỉ một bên thành công.
-Một `audioTranscript` không hợp lệ sẽ hạ cấp thành kết quả một phần đó — phần mô tả
-hình ảnh được giữ lại và nhánh âm thanh ghi nhận một mã lỗi đã được làm sạch —
-thay vì khiến toàn bộ video thất bại. Trạng thái khả dụng của từng nhánh, cờ kết quả một phần
-và các mã lỗi đã được làm sạch được giữ lại trong kết quả được mô tả, trong
-siêu dữ liệu guardrail (`audioFusionRuns`/`audioFusionPartials`/
-`audioFusionFailureCodes`), trong siêu dữ liệu bộ nhớ đệm kết quả và trong các bộ đếm
-hợp nhất của bridge. Đường dẫn Video Bridge mặc định không gọi chuyển giọng nói thành văn bản
-hoặc tải xuống bản sao phương tiện thứ hai; nếu không có luồng tường minh đó, đường dẫn này vẫn
-chỉ xử lý video.
+Phía gọi nâng cao có thể cung cấp một track `audioTranscript` cho cùng video đó; track này được xem là văn bản do client cung cấp, chứ không phải bằng chứng của việc phiên âm phía server. Điểm nối kết hợp (fusion seam) chạy các quan sát hình ảnh và âm thanh trong một deadline và một abort signal chung, sắp xếp chúng trên một dòng thời gian chung, gộp các mục trùng lặp chính xác, và báo cáo kết quả một phần (partial result) khi chỉ một phía thành công. Một `audioTranscript` không hợp lệ sẽ suy giảm xuống thành kết quả một phần đó — phần mô tả hình ảnh được giữ lại và nhánh âm thanh ghi lại một mã lỗi đã được làm sạch (sanitized failure code) — thay vì làm hỏng toàn bộ video. Tính sẵn sàng của từng nhánh, cờ partial, và các mã lỗi đã làm sạch được bảo toàn trong kết quả mô tả, trong metadata guardrail (`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`), trong metadata của bộ đệm kết quả (result-cache), và trong các bộ đếm fusion của bridge. Đường dẫn Video Bridge mặc định không gọi dịch vụ chuyển giọng nói thành văn bản (speech-to-text) và không tải xuống một bản sao media thứ hai; nếu không có track được chỉ định rõ ràng đó, nó vẫn chỉ là video-only.
 
-**Lưu giữ bản chép lời (#12150 P1).** Điều này tự động áp dụng bất cứ khi nào
-Video Bridge (bản thân là tính năng phải chủ động bật) kết xuất một cue bản chép lời — không có
-cờ lưu giữ riêng. Khi một yêu cầu kết xuất bất kỳ cue bản chép lời nào (một
-`transcript` do trình gọi khai báo hoặc một `audioTranscript` đã hợp nhất), guardrail đánh dấu yêu cầu đó là
-`videoBridgeObserved` và tạo ra một bản sao đã biên tập của phần mô tả video —
-một kết xuất giống hệt, trong đó phần nội dung văn bản tự do của mọi cue được thay thế bằng
-`[redacted-video-transcript]`, được xây dựng bằng cách thay thế trường cue có cấu trúc
-trước khi chuỗi được ghép lại (không bao giờ bằng cách phân tích văn bản đã được làm phẳng, vì vậy không có nội dung
-cue nào — dù mang tính đối kháng hay thông thường, bao gồm cả nội dung chứa `]` như
-`[inaudible]`/`[music]` — có thể còn sót lại). Nội dung yêu cầu trong nhật ký cuộc gọi được lưu bền vững
-thay từng phần văn bản bắt nguồn từ video bằng bản sao đã biên tập đó, được đối chiếu theo tính
-đồng nhất của nội dung; neo `fullText` được đọc lại từ tải trọng guardrail trước cuộc gọi đã hoàn tất,
-do đó việc đối chiếu vẫn thành công sau khi các guardrail chuỗi phía sau (các bộ che PII và
-thông tin xác thực, với mức ưu tiên 10/95) viết lại trực tiếp văn bản mô tả và
-sau khi việc chèn lời nhắc hệ thống/bàn giao/bộ nhớ định hình lại mảng thông điệp. Nội dung
-được gửi lên mô hình không thay đổi. Một yêu cầu được quan sát cũng không điền dữ liệu vào
-Memory bền vững nào (cả quá trình trích xuất từ yêu cầu lẫn phản hồi đều bị bỏ qua),
-vì vậy phản hồi của chính mô hình không thể lặp lại văn bản bản chép lời vào Memory.
+**Lưu giữ transcript (#12150 P1).** Điều này được áp dụng tự động bất cứ khi nào
+Video Bridge (vốn là tính năng opt-in) hiển thị một transcript cue — không có
+cờ lưu giữ riêng biệt. Khi một request hiển thị bất kỳ transcript cue nào (một
+`transcript` do caller khai báo hoặc một `audioTranscript` được hợp nhất), guardrail
+sẽ đánh dấu nó là `videoBridgeObserved` và tạo ra một bản sao đã lược bỏ (redacted
+shadow) của phần mô tả video — một bản hiển thị giống hệt trong đó phần thân
+văn bản tự do của mọi cue được thay thế bằng
+`[redacted-video-transcript]`, được xây dựng bằng cách thay thế trường cue có
+cấu trúc trước khi chuỗi được lắp ráp (không bao giờ bằng cách phân tích văn bản
+đã được làm phẳng, vì vậy không có nội dung cue nào — dù độc hại hay thông
+thường, kể cả các phần thân chứa `]` như
+`[inaudible]`/`[music]` — có thể tồn tại sót lại). Phần thân request trong
+call-log được lưu trữ sẽ thay thế mỗi phần văn bản bắt nguồn từ video bằng bản
+sao đã lược bỏ đó, được khớp theo sự bằng nhau về nội dung; neo `fullText`
+được đọc lại từ payload guardrail trước khi gọi (pre-call) đã hoàn tất, vì vậy
+việc khớp vẫn thành công sau khi các guardrail sau đó trong chuỗi (các bộ che
+PII và credential, mức ưu tiên 10/95) ghi đè văn bản mô tả tại chỗ và sau khi
+việc chèn system-prompt/handoff/memory định hình lại mảng tin nhắn. Phần thân
+gửi lên upstream tới model không thay đổi. Một request được quan sát (observed)
+cũng không tạo ra bất kỳ Memory bền vững nào (cả việc trích xuất từ request lẫn
+từ response đều được bỏ qua), vì vậy câu trả lời của chính model không thể lặp
+lại văn bản transcript vào Memory.
 
-**Các trường video thô (#12430).** Khi bridge được bật và khả năng hỗ trợ video gốc chưa xác định hoặc không có, các trường `transcript`/`audioTranscript` đã được định nghĩa cũng kích hoạt `videoBridgeObserved`, ngay cả sau khi việc mô tả thất bại hoặc đạt giới hạn `maxVideos`. `null` và chuỗi rỗng vẫn được tính; các trường không tồn tại và siêu dữ liệu không phải video thì không. Các bản sao được lưu giữ sẽ biên tập các trường này hoặc bỏ qua yêu cầu, đồng thời các bộ nhớ đệm/Memory bị bỏ qua.
+**Các trường video thô (#12430).** Khi bridge được bật và khả năng hỗ trợ video native chưa biết hoặc không có, các trường `transcript`/`audioTranscript` được định nghĩa cũng kích hoạt `videoBridgeObserved`, ngay cả sau khi việc mô tả thất bại hoặc đạt tới giới hạn `maxVideos`. `null` và chuỗi rỗng đều được tính; các trường vắng mặt và metadata không phải video thì không. Các bản sao được lưu giữ sẽ lược bỏ các trường này hoặc bỏ qua toàn bộ request, và caches/Memory đều bị bỏ qua (bypass).
 
-Trên các đường dẫn dự phòng đó, các cue hợp lệ từ trình gọi trở thành các phần `text`/`input_text`
-được hỗ trợ thay vì các trường nhà cung cấp không chuẩn. Cả hai luồng do yêu cầu cung cấp
-vẫn là các quan sát `client` không đáng tin cậy, kèm cảnh báo rõ ràng rằng video
-chưa được mô tả và dấu thời gian chưa được xác minh với phương tiện. Các giới hạn hiện có
-là 256 cue/tổng cộng 64 KiB và giới hạn cho từng cue được áp dụng chung cho cả hai luồng;
-dấu thời gian phải nằm trong mức trần 600 giây của broker và bất kỳ cửa sổ
-tiêu điểm nào được cung cấp. Các luồng không hợp lệ bị loại bỏ, không được chuyển tiếp dưới dạng văn bản tùy ý; một
-luồng đồng cấp hợp lệ vẫn có thể được sử dụng trừ khi tổng ngân sách kết hợp của chúng bị vượt quá. Các trường null/rỗng
-không thêm văn bản. Cơ chế dự phòng này không bổ sung việc tìm nạp phương tiện hoặc phiên âm.
-Các trường mở rộng của bản chép lời bị xóa khỏi phần chứa video dự phòng và các đối tượng
-`video_url`/`source` của nó. Danh sách cho phép trên đường truyền OpenAI vẫn nghiêm ngặt; các phần chứa video
-có khả năng hỗ trợ gốc chưa xác định vẫn khả dụng và các đích đã biết là chỉ hỗ trợ văn bản vẫn giữ các dấu hiệu an toàn.
-Các bản sao biên tập có cấu trúc bảo vệ văn bản bản chép lời được nối thêm, trong khi
-yêu cầu gốc thuộc sở hữu của trình gọi vẫn không thay đổi. Các đích có hỗ trợ gốc và
-các bridge bị tắt duy trì hành vi bỏ qua hiện có.
+Trên các đường dẫn fallback đó, các cue hợp lệ của caller trở thành các phần
+`text`/`input_text` được hỗ trợ thay vì các trường provider không chuẩn. Cả hai
+track do request cung cấp vẫn là các quan sát `client` không đáng tin cậy, kèm
+theo cảnh báo rõ ràng rằng video đã không được mô tả và các dấu thời gian chưa
+được xác minh so với nội dung media. Ngân sách tổng 256 cue/64-KiB và ngân sách
+mỗi cue hiện có áp dụng chung cho cả hai track cùng nhau; các dấu thời gian phải
+nằm trong trần 600 giây của broker và bất kỳ cửa sổ focus nào được cung cấp. Các
+track không hợp lệ sẽ bị loại bỏ, không được chuyển tiếp dưới dạng văn bản tùy ý;
+một track anh em hợp lệ vẫn có thể được sử dụng trừ khi ngân sách kết hợp của
+chúng bị vượt quá. Các trường null/rỗng không thêm văn bản nào. Fallback này
+không thêm bất kỳ việc tải media hay phiên âm nào. Các trường mở rộng transcript
+bị xóa khỏi video carrier fallback và các đối tượng `video_url`/`source` của nó.
+Danh sách cho phép (allowlist) wire của OpenAI vẫn giữ nguyên nghiêm ngặt; các
+video carrier chưa biết mức hỗ trợ native vẫn khả dụng và các target chỉ-văn-bản
+đã biết vẫn giữ các điểm đánh dấu an toàn. Các bản sao lược bỏ có cấu trúc bảo
+vệ văn bản transcript được thêm vào, trong khi request gốc thuộc sở hữu của
+caller vẫn không thay đổi. Các target được hỗ trợ native và các bridge bị tắt
+vẫn giữ hành vi bypass hiện có của chúng.
 
-Các bản sao được lưu giữ bổ sung sử dụng cùng tín hiệu yêu cầu được quan sát. Ảnh chụp nhanh
-yêu cầu máy khách thô trước guardrail, yêu cầu đang chờ trong bộ nhớ và nhật ký
-yêu cầu bị từ chối sớm sẽ thay thế theo cấu trúc các trường bản chép lời trong các phần video;
-các lời nhắc dạng chuỗi được tổng hợp bởi các giai đoạn pipeline và hoạt động bàn giao ngữ cảnh được biên tập
-tại đầu thu nội dung yêu cầu được lưu bền vững. Dấu hiệu `video_content_removed` được lưu bền vững
-khiến việc tiếp tục bằng `previous_response_id` đóng an toàn thay vì tái tạo
-văn bản đã bị chủ ý loại bỏ. Nếu một yêu cầu được quan sát mất
-bản sao biên tập theo từng phần trước khi ghi nhật ký, hoặc chỉ cần một trong nhiều bản sao video
-không đối chiếu được sau các thay đổi yêu cầu ở giai đoạn sau, toàn bộ nội dung yêu cầu được lưu giữ sẽ
-bị bỏ qua thay vì lưu giữ một bản chép lời chỉ được biên tập một phần.
+Các bản sao lưu giữ bổ sung sử dụng cùng tín hiệu request-được-quan-sát. Snapshot
+request-client thô trước guardrail, request đang chờ trong bộ nhớ, và log request
+bị từ chối sớm sẽ thay thế về mặt cấu trúc các trường transcript trong các phần
+video; các prompt dạng chuỗi được tổng hợp bởi các giai đoạn pipeline và việc
+chuyển giao ngữ cảnh (context handoff) được lược bỏ tại sink phần thân request
+được lưu trữ. Điểm đánh dấu `video_content_removed` được lưu trữ khiến việc
+tiếp tục qua `previous_response_id` thất bại ở trạng thái đóng (fail closed)
+thay vì tái cấu trúc văn bản đã bị cố ý loại bỏ. Nếu một request được quan sát
+mất bản sao lược bỏ theo từng phần của nó trước khi ghi log, hoặc thậm chí chỉ
+một trong số nhiều bản sao video không khớp sau các lần thay đổi request về sau,
+phần thân request được lưu giữ sẽ bị bỏ qua hoàn toàn thay vì giữ lại một
+transcript chỉ được lược bỏ một phần.
 
-Đối với một yêu cầu được quan sát, phản hồi của mô hình có thể trích dẫn bất kỳ phần nào của
-bản chép lời mà không có ranh giới cue có cấu trúc. Vì vậy, `responseBody` trong nhật ký cuộc gọi
-được lưu bền vững sẽ được thay thế bằng một dấu hiệu bỏ qua; tạo tác pipeline chi tiết
-(có thể bao gồm nội dung phía thượng nguồn/máy khách và các đoạn luồng) không được lưu giữ.
-Các bộ nhớ đệm ngữ nghĩa, idempotency và phát lại suy luận đều bỏ qua thao tác đọc
-và ghi cho yêu cầu đó. Yêu cầu gửi đến nhà cung cấp và phản hồi hiển thị cho máy khách
-vẫn không thay đổi. Các byte keepalive ban đầu được rút khỏi bộ đệm tạm thời
-khi tạo tác chi tiết bị bỏ qua. Cảnh báo EventStream không đúng định dạng của Kiro
-chỉ báo cáo số byte của tải trọng, tuyệt đối không báo cáo nội dung của nó hoặc lỗi thô
-từ bộ phân tích cú pháp JSON.
-Điều này không khẳng định rằng mọi thông tin chẩn đoán không liên quan của nhà cung cấp/plugin đều đã được
-kiểm tra; đợt rà soát rộng hơn đối với các đầu thu lưu giữ được theo dõi trong #11658.
+Đối với một request được quan sát, response của model có thể trích dẫn bất kỳ
+phần nào của transcript mà không có ranh giới cue có cấu trúc. Do đó,
+`responseBody` trong call-log được lưu trữ của nó sẽ được thay thế bằng một điểm
+đánh dấu bỏ qua (omission marker); artifact pipeline chi tiết (có thể bao gồm
+các phần thân upstream/client và các chunk stream) không được lưu giữ. Các cache
+semantic, idempotency và reasoning-replay bỏ qua cả việc đọc lẫn ghi cho request
+đó. Request gửi tới provider và response hiển thị với client vẫn không thay đổi.
+Các byte keepalive sớm được xả khỏi bộ đệm tạm thời khi artifact chi tiết bị bỏ
+qua. Cảnh báo EventStream không đúng định dạng của Kiro chỉ báo cáo số lượng
+byte của payload, không bao giờ báo cáo nội dung của nó hoặc lỗi thô của bộ
+phân tích JSON. Điều này không khẳng định rằng mọi chẩn đoán provider/plugin
+không liên quan đã được kiểm toán; việc quét các sink lưu giữ rộng hơn được
+theo dõi trong #11658.
 
-Vòng đời nội bộ `/api/modality-bridge/video/drilldown` là một tầng nền bộ nhớ đệm riêng biệt, được xác thực bằng loopback/token. Mọi thao tác cũng yêu cầu một ID principal chuẩn hóa, không rõ nghĩa. Trước khi một bên gọi production được kích hoạt, bên đó phải suy ra ID này từ tenant đã xác thực và tuyệt đối không được chuyển tiếp giá trị do client lựa chọn. Các khóa bộ nhớ đệm liên kết principal đó với các ID phiên và tham chiếu video chuẩn hóa, chỉ lưu các khóa được dẫn xuất bằng SHA-256, đồng thời giới hạn cả thao tác đọc lẫn xóa trong cùng principal. Bộ nhớ đệm lưu tối đa 16 khung hình JPEG đã dẫn xuất cho mỗi mục, làm chúng hết hạn sau mười phút và hỗ trợ đọc theo phạm vi `start`/`end` có giới hạn hoặc xóa phiên một cách tường minh.
+Vòng đời `/api/modality-bridge/video/drilldown` nội bộ là một nền tảng cache
+riêng biệt, được xác thực bằng loopback/token. Mọi thao tác cũng yêu cầu một
+principal ID mờ (opaque) chuẩn (canonical). Trước khi một caller production được
+kích hoạt, nó phải dẫn xuất ID đó từ tenant đã được xác thực và không bao giờ
+được chuyển tiếp một giá trị do client chọn. Các khóa cache ràng buộc principal
+đó với các ID phiên và ID tham chiếu video chuẩn, chỉ lưu trữ các khóa dẫn xuất
+từ SHA-256 của chúng, và giới hạn phạm vi cả việc đọc lẫn xóa trong cùng
+principal đó. Cache lưu trữ tối đa 16 khung hình JPEG dẫn xuất mỗi mục (entry),
+cho hết hạn sau mười phút, và hỗ trợ đọc có giới hạn theo `start`/`end` hoặc
+xóa phiên một cách rõ ràng.
 
-Mỗi principal bị giới hạn ở 16 mục và 64 MiB dữ liệu JPEG chuẩn hóa. Các giới hạn đó độc lập với mức trần toàn cục là 64 mục/256 MiB: áp lực hạn ngạch của principal chỉ loại bỏ các mục ít được sử dụng gần đây nhất của chính principal đó trước khi xem xét loại bỏ theo LRU toàn cục. Các mục đã hết hạn được loại khỏi cả phần hạch toán theo principal lẫn toàn cục khi có hoạt động trên bộ nhớ đệm, trong khi việc hủy và lỗi xác thực không ghi nhận một phần thay thế chưa hoàn chỉnh.
+Mỗi principal bị giới hạn ở 16 mục và 64 MiB dữ liệu JPEG chuẩn. Các giới hạn
+đó độc lập với trần toàn cục 64 mục/256 MiB: áp lực hạn ngạch principal chỉ
+loại bỏ các mục ít được sử dụng gần đây nhất của chính principal đó trước khi
+việc loại bỏ LRU toàn cục được xem xét. Các mục hết hạn được quét khỏi cả hạch
+toán principal lẫn toàn cục khi có hoạt động cache, trong khi việc hủy và thất
+bại xác thực không commit một thay thế một phần.
 
-Bộ nhớ đệm từ chối Base64 không chuẩn hóa, phần đệm dư thừa, nội dung không phải JPEG, JPEG sai định dạng hoặc bị cắt ngắn, cũng như JPEG tạo ra cảnh báo trong quá trình giải mã toàn bộ ảnh có giới hạn bằng `sharp`. Bộ nhớ đệm mã hóa lại từng ảnh được chấp nhận thành JPEG chuẩn hóa, suy ra chiều rộng và chiều cao từ các byte đã giải mã thay vì tin tưởng các trường do bên gọi cung cấp, đồng thời loại bỏ mọi byte polyglot ở cuối thay vì giữ lại chúng. Chỉ bộ đệm nén chuẩn hóa có giới hạn mới được tính vào cả hai hạn ngạch. Giới hạn truyền tải JSON bao gồm phần tăng thêm do Base64 đối với mức trần đầu vào đã giải mã là 32 MiB. Mỗi dẫn xuất được lưu trữ đều ghi lại định dạng/độ phân giải JPEG đã xác thực, chính sách lấy mẫu, phiên bản dẫn xuất, thời điểm tạo, hàm băm nội dung do máy chủ tính toán, tham chiếu cha đã được băm cùng với hàm băm nội dung cha của bên gọi đáng tin cậy. Việc hủy được kiểm tra giữa các giai đoạn giải mã/băm bất đồng bộ trước khi ghi nguyên tử vào bộ nhớ đệm.
+Cache từ chối Base64 không chuẩn, phần đệm thừa, media không phải JPEG, các JPEG bị lỗi định dạng hoặc bị cắt ngắn, và các JPEG phát sinh cảnh báo trong quá trình giải mã toàn ảnh có giới hạn bằng `sharp`. Cache mã hóa lại mỗi ảnh được chấp nhận thành một JPEG chuẩn hóa, suy ra chiều rộng và chiều cao từ các byte đã giải mã thay vì tin tưởng các trường từ phía caller, và loại bỏ mọi byte polyglot nằm cuối thay vì giữ lại chúng. Chỉ buffer nén chuẩn hóa có giới hạn mới được tính vào cả hai hạn ngạch. Giới hạn truyền tải JSON bao gồm chi phí Base64 cho mức trần đầu vào đã giải mã 32 MiB. Mỗi
+dẫn xuất được lưu trữ đều ghi lại định dạng/độ phân giải JPEG đã xác thực, chính sách lấy mẫu,
+phiên bản dẫn xuất, thời điểm tạo, hash nội dung do máy chủ tính, và tham chiếu cha đã hash
+cùng với hash nội dung cha của caller tin cậy. Việc hủy được kiểm tra
+giữa các pha giải mã/hash bất đồng bộ trước khi commit cache nguyên tử.
 
-Phần triển khai này chưa kết nối một producer production với route và không cung cấp khả năng lựa chọn biến thể đa độ phân giải. Do đó, đường dẫn yêu cầu Video Bridge trong suốt không phát sinh thêm công việc, trong khi việc dẫn xuất principal gắn với tenant và toàn bộ vòng đời đa độ phân giải FU-08 vẫn là công việc tiếp nối được nêu rõ, thay vì được ghi nhận là hành vi đã hoàn thiện.
+Phần (tranche) này chưa kết nối producer production vào route và chưa
+cung cấp lựa chọn biến thể đa độ phân giải. Do đó, đường dẫn yêu cầu Video Bridge trong suốt
+không phát sinh thêm công việc, trong khi việc dẫn xuất principal gắn với tenant và
+toàn bộ vòng đời đa độ phân giải FU-08 vẫn là công việc tiếp nối được nêu rõ thay
+vì được tài liệu hóa như hành vi đã hoàn thiện.
 
-Các khung hình được tạo chú thích tuần tự bằng mô hình Video đã cấu hình. Một giá trị ghi đè Video rỗng sẽ kế thừa thiết lập Vision; nếu cả hai đều rỗng, bộ định tuyến tự động Vision sẽ chọn mô hình hiệu dụng có khả năng xử lý thị giác. Các chú thích thành công thay thế phần ban đầu bằng tiền tố ổn định `[Video description:`, đồng thời đánh dấu văn bản là một quan sát không đáng tin cậy được dẫn xuất từ nội dung đa phương tiện và yêu cầu các mô hình hạ nguồn không làm theo hướng dẫn tìm thấy trong nội dung đó. Khóa bộ nhớ đệm chú thích khung hình bao gồm các byte JPEG, prompt, dấu thời gian và mô hình hiệu dụng; chỉ các chú thích thành công mới được lưu vào bộ nhớ đệm. Các mục bộ nhớ đệm giữ lại mô hình producer thực tế đã thành công, bao gồm cả mô hình dự phòng; bridge báo cáo `mixed` khi các khung hình khác nhau được tạo bởi các mô hình khác nhau. Một lần trúng bộ nhớ đệm sẽ tái sử dụng danh tính producer đó thay vì gắn nhãn lại thành kế hoạch định tuyến được yêu cầu. Bộ nhớ đệm kết quả cho toàn bộ video được tạo khóa dựa trên mọi đầu vào làm thay đổi đầu ra — prompt, mô hình hiệu dụng, chính sách lấy mẫu, số lượng khung hình, chế độ phân tích ngữ nghĩa, dấu vân tay SHA-256 của gợi ý trọng tâm đã chuẩn hóa, cửa sổ trọng tâm, `transcript`, `audioTranscript` và cờ contact-sheet — vì vậy, thay đổi bất kỳ chiều nào trong số đó đều dẫn đến trượt bộ nhớ đệm, tuyệt đối không tái sử dụng dữ liệu cũ. Phiên bản chính sách khử trùng lặp hình ảnh, ngưỡng và số lượng khung hình ứng viên có giới hạn cũng được nêu tường minh trong khóa và metadata của bộ nhớ đệm kết quả; do đó, thay đổi chính sách không thể tái sử dụng mô tả toàn bộ video đã cũ. Metadata v4 của bộ nhớ đệm kết quả giữ lại chế độ và dấu vân tay, tuyệt đối không giữ tác vụ thô của người dùng. Metadata guardrail báo cáo cả chế độ phân tích được yêu cầu lẫn chế độ hiệu dụng; chế độ `focused` được yêu cầu nhưng không có văn bản người dùng khả dụng sẽ được báo cáo là có hiệu lực `full`.
+Các khung hình được gắn chú thích tuần tự bằng mô hình Video đã cấu hình. Nếu giá trị ghi đè
+Video để trống thì kế thừa thiết lập Vision; nếu cả hai đều trống, bộ định tuyến tự động
+Vision sẽ chọn mô hình hiệu lực có khả năng vision. Các chú thích thành công
+thay thế phần gốc bằng tiền tố ổn định `[Video description:` — tiền tố này cũng
+đánh dấu văn bản là một quan sát không tin cậy bắt nguồn từ media và chỉ thị cho các mô hình
+hạ nguồn không tuân theo các chỉ dẫn tìm thấy trong media. Khóa cache
+chú thích khung hình bao gồm các byte JPEG, prompt, timestamp, và mô hình hiệu lực; chỉ các
+chú thích thành công mới được cache. Các mục cache giữ lại mô hình producer
+thực tế đã thành công, kể cả mô hình dự phòng; bridge báo `mixed` khi các khung hình
+khác nhau được tạo bởi các mô hình khác nhau. Khi trúng cache (cache hit), danh tính producer
+đó được tái sử dụng thay vì bị gắn nhãn lại theo kế hoạch định tuyến được yêu cầu.
+Cache kết quả toàn video được khóa theo mọi đầu vào làm thay đổi đầu ra — prompt, mô hình
+hiệu lực, chính sách lấy mẫu, số khung hình, chế độ phân tích ngữ nghĩa, dấu vân tay SHA-256
+của gợi ý tiêu điểm đã chuẩn hóa, cửa sổ tiêu điểm, `transcript`,
+`audioTranscript`, và cờ contact-sheet — vì vậy việc thay đổi bất kỳ chiều nào
+trong số đó đều là cache miss, không bao giờ là tái sử dụng dữ liệu cũ. Phiên bản chính sách
+khử trùng lặp hình ảnh, ngưỡng, và số khung hình ứng viên có giới hạn cũng được nêu rõ trong
+khóa và metadata của cache kết quả; do đó một thay đổi chính sách không thể tái sử dụng mô tả
+toàn video cũ. Metadata cache kết quả v4 giữ chế độ và
+dấu vân tay, không bao giờ giữ tác vụ người dùng thô. Metadata của guardrail báo cáo cả
+chế độ phân tích được yêu cầu lẫn chế độ hiệu lực; chế độ `focused` được yêu cầu
+nhưng không có văn bản người dùng khả dụng sẽ được báo cáo là hiệu lực `full`.
 
-Guardrail trích xuất mọi phần video được hỗ trợ nhưng không mô tả quá `modalityBridgeVideoMaxVideos`. Đối với một target được chứng minh có `supportsVideo === false`, các video bị lỗi và vượt giới hạn trở thành những dấu văn bản an toàn, tường minh để không còn video thô nào tồn tại. Khi chưa xác định được khả năng, các phần đó vẫn giữ phần chứa video; mọi bản chép lời dự phòng đều tuân theo phép chuyển đổi văn bản có giới hạn nêu trên. Các target có `supportsVideo === true` bỏ qua bridge. Tín hiệu hủy yêu cầu của client được truyền qua quá trình tải xuống, hàng đợi broker, các subprocess và các lệnh gọi tạo chú thích; việc hủy sẽ dừng giữa các video và tuyệt đối không mở đường dự phòng cho nội dung đa phương tiện thô.
+Guardrail trích xuất mọi phần video được hỗ trợ nhưng không mô tả quá
+`modalityBridgeVideoMaxVideos`. Đối với target được chứng minh có
+`supportsVideo === false`, các video lỗi và vượt giới hạn sẽ trở thành các điểm đánh dấu
+văn bản an toàn rõ ràng để không còn video thô nào sót lại. Khi chưa biết khả năng,
+các phần đó giữ nguyên vật mang video; mọi transcript dự phòng đều tuân theo quy trình
+chuyển đổi văn bản có giới hạn ở trên. Các target có `supportsVideo === true` bỏ qua bridge.
+Tín hiệu hủy yêu cầu của client lan truyền qua quá trình tải xuống, hàng đợi broker,
+các tiến trình con, và các lệnh gọi gắn chú thích; việc hủy dừng giữa các video và không bao giờ
+fail-open sang media thô.
 
-Các thiết lập runtime được lưu trong DB và xác thực bằng Zod:
+Cài đặt runtime được lưu trong DB và được xác thực bằng Zod:
 
-| Khóa                                | Mặc định    | Phạm vi / hành vi                                                                                                   |
-| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`     | Runtime tùy chọn, cần chủ động bật                                                                                  |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` giữ nguyên chú thích chung; `focused` sử dụng ngữ cảnh người dùng mới nhất bị giới hạn và không đáng tin cậy |
-| `modalityBridgeVideoModel`          | `""`        | Kế thừa mô hình Vision Bridge                                                                                       |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                                |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware`, hoặc `segment_aware` theo tỷ lệ; khi bộ phát hiện lỗi sẽ dự phòng về `uniform`            |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                 |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                      |
+| Khóa                                | Mặc định    | Phạm vi / hành vi                                                                                           |
+| ----------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------- |
+| `modalityBridgeVideoEnabled`        | `false`     | Runtime tùy chọn, phải chủ động bật (opt-in)                                                                |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` giữ nguyên chú thích chung; `focused` dùng ngữ cảnh người dùng mới nhất có giới hạn và không tin cậy |
+| `modalityBridgeVideoModel`          | `""`        | Kế thừa mô hình Vision Bridge                                                                               |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                        |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware`, hoặc `segment_aware` theo tỷ lệ; khi bộ phát hiện lỗi sẽ quay về `uniform`        |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                         |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                              |
 
-Các giá trị thời gian chờ Video cũ đã được lưu và vượt quá 120 giây sẽ bị giới hạn theo
-thời hạn của broker; các lần ghi cài đặt mới vượt quá giới hạn đó sẽ bị từ chối.
-`GET /api/modality-bridge/video/runtime` yêu cầu tính cục bộ loopback đã được đóng dấu
-đáng tin cậy trước khi xác thực hoặc thăm dò runtime, sau đó yêu cầu xác thực quản trị.
-Nó chỉ trả về `available`, các phiên bản FFmpeg/ffprobe đã được làm sạch và một
-lý do cố định khi runtime không khả dụng. Điểm cuối trích xuất nội bộ không phải là
-API tải lên công khai: khi hàng đợi bão hòa sẽ trả về `503` cùng `Retry-After`, khi bên gọi
-ngắt kết nối sẽ trả về `499`, và khi đạt thời hạn cố định của broker sẽ trả về `504`. Các phản hồi đã chuyển đổi sẽ thêm
+Các giá trị timeout Video cũ đã lưu vượt quá 120 giây sẽ bị kẹp về deadline
+của broker; các lần ghi cài đặt mới vượt quá giới hạn đó sẽ bị từ chối.
+`GET /api/modality-bridge/video/runtime` yêu cầu locality loopback
+được đóng dấu tin cậy trước khi xác thực hoặc thăm dò runtime, sau đó yêu cầu xác thực
+quản trị. Endpoint chỉ trả về `available`, các phiên bản FFmpeg/ffprobe đã được làm sạch, và một
+lý do cố định khi runtime không khả dụng. Endpoint trích xuất nội bộ không
+phải là API tải lên công khai: hàng đợi bão hòa trả về `503` kèm `Retry-After`, caller
+ngắt kết nối trả về `499`, và deadline cố định của broker trả về `504`. Các phản hồi đã chuyển đổi thêm
 `video->text;model=<visionModel>;parts=<videos>` vào header trung tâm
 `x-omniroute-modality-bridge` mà không xóa các phân đoạn Vision hoặc Audio.
 
-### Bộ che PII (`piiMasker.ts`)
+### PII Masker (`piiMasker.ts`)
 
 Chạy ở **cả hai** giai đoạn.
 
-- **`preCall`** sao chép payload, duyệt qua `system`, `messages`, `input` và
-  `prompt` (bao gồm cả các mục chuỗi thuần túy), rồi áp dụng `processPII()` (từ
-  `@/shared/utils/inputSanitizer`) cho các trường chuỗi `content`/`text`. Khi
+- **`preCall`** sao chép (clone) payload, duyệt qua `system`, `messages`, `input` và
+  `prompt` (bao gồm cả các phần tử chuỗi thuần túy), và áp dụng `processPII()` (từ
+  `@/shared/utils/inputSanitizer`) cho các trường `content`/`text` dạng chuỗi. Khi
   `PII_REDACTION_ENABLED=true`, PII được phát hiện sẽ bị che trong payload gửi đi.
-  Điều này độc lập với `INPUT_SANITIZER_MODE` (biến này chỉ kiểm soát chính sách
-  chèn prompt). Khi tính năng che bị tắt, lệnh gọi sẽ ghi lại số lượng phát hiện
-  mà không viết lại nội dung.
-- **`postCall`** sao chép sâu phản hồi, chạy `sanitizePIIResponse()` cùng với
-  bộ che theo cấu trúc Responses API (`maskResponsesOutput` — bao phủ
-  `output_text` và `output[].content[].text`). Nếu có bất kỳ thao tác che nào xảy ra,
-  phản hồi đã sửa đổi sẽ thay thế phản hồi ban đầu.
+  Điều này độc lập với `INPUT_SANITIZER_MODE` (vốn chỉ kiểm soát chính sách
+  prompt-injection). Khi tắt tính năng che, lệnh gọi vẫn ghi nhận số lượng phát hiện
+  mà không ghi đè nội dung.
+- **`postCall`** sao chép sâu (deep-clone) response, chạy `sanitizePIIResponse()` cùng
+  với bộ che theo cấu trúc Responses API (`maskResponsesOutput` — bao gồm
+  `output_text` và `output[].content[].text`). Nếu có bất kỳ việc che nào xảy ra,
+  response đã chỉnh sửa sẽ thay thế response gốc.
 
 Guardrail không bao giờ chặn; nó chỉ chú thích (`meta.detections`,
-`meta.redacted`) hoặc viết lại.
+`meta.redacted`) hoặc ghi đè.
 
-#### Lựa chọn theo từng loại, mẫu tùy chỉnh và bộ đếm phát hiện
+#### Lựa chọn theo loại, mẫu tùy chỉnh và bộ đếm phát hiện
 
-**Dashboard → Settings → Security → PII masking** chọn _nội dung_ cần che.
-Nó không bật tính năng che: việc đó vẫn do `PII_REDACTION_ENABLED` (yêu cầu) và
-`PII_RESPONSE_SANITIZATION` (phản hồi + SSE) kiểm soát; cả hai đều tắt theo mặc định.
+**Dashboard → Cài đặt → Bảo mật → Che PII** chọn _những gì_ được che. Nó
+không bật tính năng che: việc đó vẫn do `PII_REDACTION_ENABLED` (request) và
+`PII_RESPONSE_SANITIZATION` (response + SSE) đảm nhiệm, cả hai đều tắt theo mặc định.
 
-- **Lựa chọn theo từng loại** — các id tích hợp sẵn được liệt kê trong
-  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Không thiết lập có nghĩa là mọi
-  loại (hành vi trước khi cài đặt này tồn tại). Mẫu `ssn_us` của công cụ xử lý yêu cầu
-  được ánh xạ thành `ssn`. Các mẫu thiết lập sẵn (Tối thiểu, Tiêu chuẩn, Tài chính,
-  Brazil, Hoa Kỳ, Đầy đủ) chỉ điền vào các hộp kiểm trong giao diện người dùng.
-- **Mẫu tùy chỉnh** — tối đa 20 mẫu biểu thức chính quy hoặc ký tự đại diện (`*` = tối đa 64
-  ký tự không phải khoảng trắng, `?` = một ký tự). Các kết quả khớp trở thành `[CUSTOM_REDACTED]`.
-  Mỗi mẫu đều được xử lý qua `compilePiiCustomPattern()`
-  (`src/shared/utils/piiCustomPatterns.ts`): tối đa 500 ký tự, cờ chỉ giới hạn ở
-  `g i m s u`, phải biên dịch được, phải vượt qua `safe-regex` (quay lui
-  thảm khốc), và không được khớp với chuỗi rỗng hoặc phần giữ chỗ che dữ liệu.
-  Mẫu không đạt yêu cầu sẽ bị từ chối khi lưu và khi kiểm thử; hàng đã lưu
-  nhưng không đạt yêu cầu sẽ bị bỏ qua trong runtime thay vì được biên dịch. Các mẫu tùy chỉnh chỉ
-  chạy khi tính năng che được bật.
-- **Bộ đếm phát hiện** — số lượng theo từng loại (không bao giờ lưu các giá trị khớp), được giữ trong
-  bộ nhớ và đặt lại khi khởi động lại (`src/lib/pii/piiDetectionStats.ts`). Chúng chỉ
-  tăng khi tính năng che được bật.
+- **Lựa chọn theo loại** — các id tích hợp sẵn được liệt kê trong
+  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Chưa thiết lập nghĩa là
+  áp dụng mọi loại (hành vi như trước khi cài đặt này tồn tại). Mẫu `ssn_us` của
+  engine xử lý request được ánh xạ sang `ssn`. Các template (Minimal, Standard,
+  Financial, Brazilian, USA, Full) chỉ điền sẵn các hộp kiểm trong giao diện.
+- **Mẫu tùy chỉnh** — tối đa 20 mẫu regex hoặc wildcard (`*` = tối đa 64
+  ký tự không phải khoảng trắng, `?` = một ký tự). Các đoạn khớp trở thành
+  `[CUSTOM_REDACTED]`. Mọi mẫu đều đi qua `compilePiiCustomPattern()`
+  (`src/shared/utils/piiCustomPatterns.ts`): tối đa 500 ký tự, cờ giới hạn
+  ở `g i m s u`, phải biên dịch được, phải vượt qua `safe-regex` (kiểm tra
+  catastrophic backtracking), và không được khớp chuỗi rỗng hoặc placeholder
+  che. Mẫu không đạt sẽ bị từ chối khi lưu và khi kiểm thử, còn một bản ghi đã
+  lưu mà không đạt sẽ bị bỏ qua khi chạy thay vì được biên dịch. Mẫu tùy chỉnh
+  chỉ chạy khi tính năng che đang bật.
+- **Bộ đếm phát hiện** — số lượng theo từng loại (không bao giờ là giá trị khớp),
+  được giữ trong bộ nhớ và đặt lại khi khởi động lại
+  (`src/lib/pii/piiDetectionStats.ts`). Chúng chỉ tăng khi tính năng che đang bật.
 
 Các cài đặt nằm trong bảng `key_value` (namespace `pii_settings`,
-`src/lib/db/piiSettings.ts`) và được đọc thông qua bộ nhớ đệm 1 giây. API:
+`src/lib/db/piiSettings.ts`) và được đọc thông qua cache 1 giây. API:
 
-| Phương thức | Đường dẫn                | Mục đích                                                           |
-| ----------- | ------------------------ | ------------------------------------------------------------------ |
-| `GET`       | `/api/settings/pii`      | Trạng thái cờ, `enabledTypes`, `customPatterns`, bộ đếm phát hiện  |
-| `PUT`       | `/api/settings/pii`      | Thay thế `enabledTypes` (`null` = tất cả) và/hoặc `customPatterns` |
-| `POST`      | `/api/settings/pii/test` | Chạy thử một mẫu với dữ liệu mẫu tối đa 8 KB; không có gì được lưu |
+| Phương thức | Đường dẫn                | Mục đích                                                                 |
+| ----------- | ------------------------ | ------------------------------------------------------------------------ |
+| `GET`       | `/api/settings/pii`      | Trạng thái cờ, `enabledTypes`, `customPatterns`, bộ đếm phát hiện        |
+| `PUT`       | `/api/settings/pii`      | Thay thế `enabledTypes` (`null` = tất cả) và/hoặc `customPatterns`       |
+| `POST`      | `/api/settings/pii/test` | Chạy thử (dry-run) một mẫu trên dữ liệu mẫu tối đa 8 KB; không lưu gì cả |
 
-Cả ba đều yêu cầu xác thực quản trị và xác thực phần thân bằng Zod
+Cả ba đều yêu cầu xác thực quản trị (management auth) và kiểm tra body bằng Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
 
-### Chèn Prompt (`promptInjection.ts`)
+### Prompt Injection (`promptInjection.ts`)
 
-Phát hiện các cấu trúc đối kháng trong nội dung do người dùng cung cấp và thực thi
-chính sách đã cấu hình. Hành vi được điều khiển bởi các biến môi trường và tùy chọn
-constructor:
+Phát hiện các cấu trúc tấn công (adversarial) trong nội dung do người dùng cung cấp
+và thực thi chính sách đã cấu hình. Hành vi được điều khiển bởi các biến môi trường
+và các tùy chọn constructor:
 
-| Cài đặt     | Biến môi trường                                                                                           | Mặc định | Tác dụng                                                                                                                                                                                                                    |
-| ----------- | --------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Đã bật      | `INPUT_SANITIZER_ENABLED`                                                                                 | `true`   | Khi là `false`, guardrail sẽ kết thúc sớm.                                                                                                                                                                                  |
-| Chế độ      | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                           | `warn`   | Chính sách chống injection: `block`, `warn` hoặc `log`. (`redact` được chấp nhận để tương thích ngược nhưng **không** loại bỏ văn bản injection; việc ghi đè PII trong yêu cầu được kiểm soát bởi `PII_REDACTION_ENABLED`.) |
-| Ngưỡng chặn | tùy chọn `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (bí danh `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Mức độ nghiêm trọng tối thiểu cần thiết để chặn. Theo mặc định, mức Medium chỉ được theo dõi.                                                                                                                               |
+| Cài đặt     | Biến môi trường                                                                                           | Mặc định | Tác động                                                                                                                                                                                                  |
+| ----------- | --------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bật         | `INPUT_SANITIZER_ENABLED`                                                                                 | `true`   | Khi `false`, guardrail sẽ thoát sớm (short-circuit).                                                                                                                                                      |
+| Chế độ      | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                           | `warn`   | Chính sách injection: `block`, `warn` hoặc `log`. (`redact` được chấp nhận để tương thích ngược nhưng **không** xóa văn bản injection; việc ghi đè PII của request do `PII_REDACTION_ENABLED` kiểm soát.) |
+| Ngưỡng chặn | tùy chọn `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (bí danh `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Mức độ nghiêm trọng tối thiểu cần có để chặn. Với mặc định, mức Medium chỉ được quan sát.                                                                                                                 |
 
-**Thứ tự ưu tiên chế độ** (`getMode`): `options.mode` của bên gọi →
-**giá trị ghi đè cờ tính năng trong DB** `INJECTION_GUARD_MODE` (Dashboard → Settings →
-Feature Flags) → biến môi trường `INJECTION_GUARD_MODE` → biến môi trường `INPUT_SANITIZER_MODE` →
-`warn`. Do đó, giá trị ghi đè trên dashboard được ưu tiên hơn các biến môi trường, nên giao diện
-Feature Flags kiểm soát trực tiếp guard đang chạy (không cần khởi động lại). Việc đọc DB tuân theo
-cơ chế an toàn khi xảy ra lỗi: nếu có lỗi, guard sẽ quay về hành vi dựa trên biến môi trường, và khi
-không đặt giá trị ghi đè, hành vi sẽ giống hệt cơ chế phân giải chỉ dựa trên biến môi trường.
+**Thứ tự ưu tiên chế độ** (`getMode`): `options.mode` của phía gọi →
+**ghi đè feature-flag từ DB** cho `INJECTION_GUARD_MODE` (Dashboard → Cài đặt →
+Feature Flags) → env `INJECTION_GUARD_MODE` → env `INPUT_SANITIZER_MODE` →
+`warn`. Do đó, một ghi đè từ dashboard sẽ thắng các biến môi trường, nên giao
+diện Feature Flags điều khiển guard đang chạy theo thời gian thực (không cần
+khởi động lại). Việc đọc DB là an toàn khi lỗi (fail-safe): nếu gặp lỗi, guard
+quay về hành vi dựa trên env, và khi không có ghi đè nào được thiết lập thì hành
+vi giống hệt với cách phân giải chỉ dùng env.
 
-Các nguồn phát hiện:
+Nguồn phát hiện:
 
-1. `sanitizeRequest()` từ `@/shared/utils/inputSanitizer` (tập hợp bộ phát hiện dùng chung
+1. `sanitizeRequest()` từ `@/shared/utils/inputSanitizer` (tập detector dùng chung
    được sử dụng ở những nơi khác trong pipeline).
-2. `DEFAULT_GUARD_PATTERNS` tích hợp sẵn (hiện gồm `system_override_inline` và
-   `markdown_system_block`, cả hai đều có mức độ nghiêm trọng `high`).
-3. `customPatterns` tùy chọn được truyền qua các tùy chọn của constructor (chuỗi, biểu thức chính quy
-   hoặc các bản ghi `{ name, pattern, severity }`).
+2. `DEFAULT_GUARD_PATTERNS` tích hợp sẵn (hiện tại gồm `system_override_inline` và
+   `markdown_system_block`, cả hai đều ở mức độ nghiêm trọng `high`).
+3. `customPatterns` tùy chọn được truyền qua các tùy chọn constructor (chuỗi,
+   regex, hoặc các bản ghi `{ name, pattern, severity }`).
 
-Khi `mode === "block"` **và** có ít nhất một kết quả phát hiện đạt ngưỡng mức độ nghiêm trọng,
-`preCall` trả về `{ block: true, message: "Request rejected:
-suspicious content detected" }`. Trong các chế độ `warn`/`log`, guardrail ghi log nhưng
-vẫn cho phép lệnh gọi. Hàm hỗ trợ dùng chung `evaluatePromptInjection()` cũng được export
-cho các bên gọi cần đánh giá prompt mà không phải thông qua registry.
+Khi `mode === "block"` **và** có ít nhất một phát hiện đạt đến ngưỡng mức độ nghiêm trọng, `preCall` trả về `{ block: true, message: "Request rejected: suspicious content detected" }`. Ở chế độ `warn`/`log`, guardrail chỉ ghi log nhưng vẫn cho phép lệnh gọi. Hàm helper dùng chung `evaluatePromptInjection()` cũng được export cho những caller cần đánh giá prompt mà không phải đi qua registry.
 
-**Giới hạn quét (v3.8.20):** bộ phát hiện chỉ kiểm tra **16 KB đầu tiên** của
-văn bản prompt đã nối — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 byte) trong
-`src/shared/utils/inputSanitizer.ts`. Cả `detectInjection()` và
-`evaluatePromptInjection()` đều gọi `slice(0, MAX_INJECTION_SCAN_BYTES)` trước khi chạy
-vòng lặp mẫu. Các chỉ thị injection thường nằm gần đầu dữ liệu đầu vào, vì vậy cách này
-giới hạn mức sử dụng CPU/GC của regex đối với các payload có kích thước hàng trăm KB mà
-không làm suy yếu khả năng phát hiện (xem #3932, #4041).
+**Giới hạn quét (v3.8.20):** bộ phát hiện chỉ kiểm tra **16 KB đầu tiên** của văn bản prompt đã nối — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 byte) trong `src/shared/utils/inputSanitizer.ts`. Cả `detectInjection()` và `evaluatePromptInjection()` đều `slice(0, MAX_INJECTION_SCAN_BYTES)` trước khi chạy vòng lặp mẫu. Các chỉ thị injection thường nằm gần đầu của đầu vào, vì vậy điều này giới hạn CPU/GC của regex trên các payload hàng trăm KB mà không làm suy yếu khả năng phát hiện (xem #3932, #4041).
 
-### Bộ che thông tin xác thực (`credentialMasker.ts`)
+### Trình che giấu thông tin xác thực (`credentialMasker.ts`)
 
-Chạy ở **cả hai** giai đoạn và đứng cuối trong chuỗi mặc định (độ ưu tiên `95`). Che
-các mẫu khóa API / token bí mật phổ biến khỏi payload gửi đi (nội dung thông báo,
-đối số lệnh gọi công cụ, kết quả công cụ) **và** phản hồi của nhà cung cấp, để thông tin
-xác thực được dán vào prompt (hoặc được kết quả công cụ trả lại) không bị rò rỉ
-đến nhà cung cấp thượng nguồn hoặc trở lại máy khách.
+Chạy ở **cả hai** giai đoạn, đứng cuối trong chuỗi mặc định (độ ưu tiên `95`). Che giấu các mẫu API-key / secret-token phổ biến khỏi payload gửi đi (nội dung tin nhắn, tham số tool-call, kết quả tool) **và** phản hồi của provider, để thông tin xác thực được dán vào prompt (hoặc được tool result trả về) không bị rò rỉ đến provider upstream hoặc quay ngược lại client.
 
-- **Chỉ bật khi chủ động chọn**, theo cùng quy ước với việc che PII (liên quan đến Quy tắc cứng #20):
-  bị tắt trừ khi `settings.credentialRedactionEnabled === true` **hoặc**
-  `CREDENTIAL_REDACTION_ENABLED=true`. Khi tính năng này tắt, guardrail không thực hiện thao tác nào —
-  không bao giờ chặn và không bao giờ ghi đè.
-- `redactCredentials()` duyệt toàn bộ cây payload/phản hồi (`walkValue()`,
-  an toàn trước prototype pollution, an toàn với chu trình nhờ `WeakSet`) và thay thế các kết quả khớp bằng
-  phần giữ chỗ `[REDACTED:<type>]`, chỉ sao chép những nhánh thực sự
-  đã thay đổi.
-- `CREDENTIAL_PATTERNS` bao phủ các khóa của nhà cung cấp LLM (OpenAI, OpenAI-proj,
-  Anthropic, Google, Hugging Face, Replicate), token VCS/SaaS (GitHub, Slack,
-  Linear, Notion, npm, Postman, Discord), khóa thanh toán (Stripe, Square), khóa
-  đám mây (khóa truy cập AWS, Twilio, SendGrid, Mailgun), khóa riêng tư / JWT,
-  chuỗi kết nối chứa thông tin xác thực (`mongodb://user:pass@...`, v.v.) và
-  một mẫu chung cho giá trị header `Authorization`/`x-api-key`/`api-key`/`apikey`.
-  Các khóa có dạng header (`authorization`, `x-api-key`, `api-key`,
-  `apikey`) được che theo cấu trúc (chỉ giá trị, giữ nguyên tiền tố scheme như
-  `Bearer `/`Basic `) thay vì thông qua regex văn bản chung.
-- Guardrail không bao giờ chặn; nó chỉ ghi đè (`modifiedPayload` /
-  `modifiedResponse`) và thêm chú thích (`meta.credentialsRedacted`, `meta.count`).
+- **Chỉ bật khi chọn tham gia (opt-in)**, cùng quy ước với việc che giấu PII (liên quan Quy tắc cứng #20): bị tắt trừ khi `settings.credentialRedactionEnabled === true` **hoặc** `CREDENTIAL_REDACTION_ENABLED=true`. Khi tắt, guardrail là no-op — không bao giờ chặn và không bao giờ ghi đè.
+- `redactCredentials()` duyệt toàn bộ cây payload/response (`walkValue()`, an toàn với prototype pollution, an toàn với tham chiếu vòng nhờ `WeakSet`) và thay thế các kết quả khớp bằng placeholder `[REDACTED:<type>]`, chỉ clone những nhánh thực sự thay đổi.
+- `CREDENTIAL_PATTERNS` bao gồm các khóa của LLM provider (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), token VCS/SaaS (GitHub, Slack, Linear, Notion, npm, Postman, Discord), khóa thanh toán (Stripe, Square), khóa cloud (AWS access key, Twilio, SendGrid, Mailgun), private key / JWT, các chuỗi kết nối chứa thông tin xác thực (`mongodb://user:pass@...`, v.v.), và một mẫu giá trị header chung `Authorization`/`x-api-key`/`api-key`/`apikey`. Các khóa dạng header (`authorization`, `x-api-key`, `api-key`, `apikey`) được che giấu theo cấu trúc (chỉ giá trị, giữ nguyên tiền tố scheme như `Bearer `/`Basic `) thay vì qua regex văn bản chung.
+- Guardrail không bao giờ chặn; nó chỉ ghi đè (`modifiedPayload` / `modifiedResponse`) và chú thích (`meta.credentialsRedacted`, `meta.count`).
 
-Biện pháp bảo vệ chống hồi quy: `tests/unit/credential-masker-guardrail.test.ts`.
+Kiểm thử hồi quy: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## Hợp đồng cơ sở (`base.ts`)
 
@@ -677,11 +674,11 @@ class BaseGuardrail {
 }
 
 interface GuardrailResult<TValue = unknown> {
-  block?: boolean; // true sẽ dừng chuỗi ngay lập tức
+  block?: boolean; // true sẽ ngắt mạch chuỗi
   message?: string; // được hiển thị khi chặn
   meta?: Record<string, unknown> | null;
-  modifiedPayload?: TValue; // được preCall trả về để ghi lại yêu cầu
-  modifiedResponse?: TValue; // được postCall trả về để ghi lại phản hồi
+  modifiedPayload?: TValue; // do preCall trả về để ghi đè request
+  modifiedResponse?: TValue; // do postCall trả về để ghi đè response
 }
 
 interface GuardrailContext {
@@ -700,109 +697,185 @@ interface GuardrailContext {
 }
 ```
 
-Một guardrail biểu thị "không thay đổi" bằng cách trả về `void`, `{}`, hoặc
+Một guardrail báo hiệu "không thay đổi" bằng cách trả về `void`, `{}`, hoặc
 `{ block: false }`. Việc trả về `modifiedPayload`/`modifiedResponse` sẽ thay thế
-giá trị đang truyền qua chuỗi cho các guardrail phía sau.
-`signal?: AbortSignal` truyền vòng đời của bên gọi vào các guardrail. Việc hủy yêu cầu là ngoại lệ fail-open có chủ đích: các cầu nối phương tiện sẽ dừng công việc và dọn dẹp mà không khôi phục dữ liệu phương tiện thô cho một đích được biết là không hỗ trợ dữ liệu đó.
+giá trị đang chảy qua chuỗi cho các guardrail phía sau.
+`signal?: AbortSignal` mang vòng đời của caller vào trong các guardrail. Việc hủy request là ngoại lệ fail-open có chủ đích: các media bridge dừng xử lý và dọn dẹp mà không khôi phục media thô về một đích đã biết là không hỗ trợ nó.
 
 ## Registry (`registry.ts`)
 
 Singleton `guardrailRegistry` cung cấp:
 
-- `register(guardrail)` — thêm một guardrail (hoặc thay thế theo tên đã chuẩn hóa) và
+- `register(guardrail)` — thêm (hoặc thay thế theo tên đã chuẩn hóa) một guardrail và
   sắp xếp lại theo `priority` tăng dần.
-- `clear()` / `list()` — các tiện ích quản trị.
-- `runPreCallHooks(payload, context)` — lặp qua các guardrail đang hoạt động, truyền
-  payload qua `modifiedPayload`, và dừng tại `block: true` đầu tiên.
-- `runPostCallHooks(response, context)` — luồng tương tự ở phía phản hồi.
+- `clear()` / `list()` — các hàm tiện ích quản trị.
+- `runPreCallHooks(payload, context)` — duyệt qua các guardrail đang hoạt động, chuyền
+  payload qua `modifiedPayload`, và dừng lại ở `block: true` đầu tiên.
+- `runPostCallHooks(response, context)` — luồng tương tự ở phía response.
 - `resetGuardrailsForTests({ registerDefaults })` — xóa trạng thái và tùy chọn
-  đăng ký lại các giá trị mặc định để cô lập kiểm thử một cách sạch sẽ.
+  đăng ký lại các guardrail mặc định để cô lập test một cách sạch sẽ.
 
-Cả hai trình chạy đều trả về `{ blocked, payload|response, results, guardrail?, message? }`,
+Cả hai runner đều trả về `{ blocked, payload|response, results, guardrail?, message? }`
 trong đó `results` là một mảng các bản ghi `GuardrailExecutionResult` bao gồm
 các trường `blocked`, `skipped`, `modified`, `error`, và `meta` cho từng guardrail,
-hữu ích cho việc truy vết.
+rất hữu ích cho việc truy vết.
 
-### Vô hiệu hóa guardrail theo từng yêu cầu
+### Tắt guardrail theo từng request
 
 `resolveDisabledGuardrails({ apiKeyInfo, body, headers })` tổng hợp một
-danh sách tên guardrail đã loại bỏ trùng lặp cần được bỏ qua đối với yêu cầu
-hiện tại. Các nguồn (tất cả đều không bắt buộc và đều được hợp nhất):
+danh sách đã loại bỏ trùng lặp gồm các tên guardrail cần được bỏ qua cho
+request hiện tại. Có năm kênh, được đọc theo thứ tự này và hợp nhất thành một danh sách
+(lần xuất hiện đầu tiên được ưu tiên khi loại bỏ trùng lặp):
 
-- `apiKeyInfo.disabledGuardrails`
-- `disabledGuardrails` trong phần thân yêu cầu (cấp cao nhất)
-- `metadata.disabledGuardrails` trong phần thân yêu cầu
-- Header `x-omniroute-disabled-guardrails` (hoặc dạng cũ
-  `x-disabled-guardrails`)
+1. `apiKeyInfo.disabledGuardrails`
+2. `disabledGuardrails` trong body của request (cấp cao nhất)
+3. `metadata.disabledGuardrails` trong body của request (chỉ khi `metadata` là một object)
+4. Header `x-omniroute-disabled-guardrails`
+5. Header cũ `x-disabled-guardrails`
 
-Giá trị có thể là mảng chuỗi hoặc chuỗi phân tách bằng dấu phẩy; tên được
-chuẩn hóa thành kebab-case viết thường (`pii_masker` → `pii-masker`). Kết quả
-được truyền qua `context.disabledGuardrails` tới registry, nơi sẽ bỏ qua
-các guardrail khớp tên (`skipped: true` trong `results`).
+Cả năm kênh đều được hợp nhất, bao gồm cả hai header: gửi đồng thời
+`x-omniroute-disabled-guardrails` và `x-disabled-guardrails` sẽ bỏ qua hợp của
+hai danh sách, và một header hiện đại rỗng không còn che giấu header cũ nữa
+([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412), đã được sửa trong
+[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
+
+Giá trị có thể là mảng các chuỗi hoặc một chuỗi phân tách bằng dấu phẩy; tên được
+cắt khoảng trắng và chuẩn hóa về dạng kebab-case chữ thường (`pii_masker` → `pii-masker`), và các mục
+rỗng bị loại bỏ. Kết quả được truyền qua `context.disabledGuardrails`
+tới registry, nơi sẽ bỏ qua các guardrail khớp (`skipped: true` trong `results`).
+
+Danh sách tắt chỉ ảnh hưởng đến **registry**. Chế độ `block` của prompt-injection là
+một ranh giới bắt buộc: middleware injection-guard
+(`src/middleware/promptInjectionGuard.ts`) gọi `evaluatePromptInjection()`
+mà không có bất kỳ danh sách tắt nào do caller kiểm soát (lời gọi
+`resolveDisabledGuardrails({ body })` chết mà nó từng thực hiện đã bị xóa trong
+[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934)), vì vậy một request
+tắt `prompt-injection` vẫn bị từ chối ở chế độ `block`. Đây là
+thiết kế có chủ đích. Các kênh tắt đều do caller kiểm soát (body của request,
+metadata, header), và caller không được phép tắt một biện pháp
+kiểm soát bảo mật mà operator đã thiết lập
+([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Việc hợp nhất
+header từ [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
+chỉ thay đổi những guardrail nào của registry bị bỏ qua; nó không cho phép client
+vượt qua middleware. Các chính sách guardrail bắt buộc theo từng key và theo từng nhóm
+được theo dõi trong RFC v4 [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417).
+Xem [Phạm vi và giới hạn](#coverage-and-limits).
 
 ## Thứ tự thực thi
 
-Đối với mỗi yêu cầu đi qua `src/sse/handlers/chat.ts` và
-`open-sse/handlers/chatCore.ts`:
+Đối với mỗi request đi qua `src/sse/handlers/chat.ts` và
+`open-sse/handlers/chatCore.ts` (các route thuộc nhóm chat được liệt kê trong
+[Phạm vi và giới hạn](#coverage-and-limits)):
 
-1. `resolveDisabledGuardrails(...)` tạo danh sách bỏ qua từ khóa API, phần thân
-   và các header.
-2. `guardrailRegistry.runPreCallHooks(body, ctx)` chạy các guardrail theo thứ tự
-   ưu tiên tăng dần:
-   - Các guardrail bị vô hiệu hóa được ghi nhận là `skipped`.
-   - `preCall` của mỗi guardrail có thể ghi lại payload thông qua `modifiedPayload`.
-   - Guardrail đầu tiên có `block: true` sẽ dừng ngay chuỗi xử lý và handler trả về
-     phản hồi từ chối của guardrail.
-3. Payload (có thể đã được ghi lại) được chuyển vào quá trình định tuyến kết hợp
-   và gửi đến upstream.
-4. Sau khi phản hồi được tập hợp, `guardrailRegistry.runPostCallHooks(...)`
-   chạy cùng chuỗi đó trên phản hồi. `block: true` tại đây sẽ loại bỏ phản hồi
-   từ upstream.
+1. `resolveDisabledGuardrails(...)` xây dựng danh sách bỏ qua từ API key, body
+   và header.
+2. `guardrailRegistry.runPreCallHooks(body, ctx)` chạy các guardrail theo thứ
+   tự ưu tiên tăng dần:
+   - Các guardrail bị vô hiệu hóa được ghi lại là `skipped`.
+   - `preCall` của mỗi guardrail có thể ghi đè payload thông qua
+     `modifiedPayload`.
+   - `block: true` đầu tiên sẽ ngắt mạch và handler trả về phản hồi từ chối
+     của guardrail.
+3. Payload (có thể đã bị ghi đè) đi vào định tuyến combo và điều phối
+   upstream.
+4. **Chỉ non-streaming:** sau khi phản hồi được tập hợp xong,
+   `guardrailRegistry.runPostCallHooks(...)` chạy cùng chuỗi đó trên phản
+   hồi. `block: true` tại đây sẽ loại bỏ phản hồi upstream và trả về HTTP 400. Các phản hồi streaming bỏ qua hoàn toàn bước này.
 
-Các guardrail phát sinh ngoại lệ được ghi nhận với `error: <message>` và được ghi log qua
-`logger.warn`, nhưng chuỗi vẫn tiếp tục — theo thiết kế fail-open.
+Các guardrail ném lỗi được ghi lại với `error: <message>` và được log qua
+`logger.warn`, nhưng chuỗi vẫn tiếp tục — fail-open theo thiết kế.
+
+## Phạm vi và giới hạn
+
+Registry guardrail chỉ được nối vào pipeline chat. Các giới hạn này được ghim
+bởi `tests/unit/guardrail-pipeline-wiring-characterization.test.ts` và
+`tests/unit/guardrail-pipeline-characterization.test.ts`; hãy cập nhật các test
+đó một cách có chủ đích khi hành vi thay đổi.
+
+### Vị trí các hook chạy
+
+| Hook / điều khiển                   | Chạy trên                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `runPreCallHooks`                   | Các request được xử lý bởi `handleChat` (`src/sse/handlers/chat.ts`): `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses` (và `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*`, và proxy chat Telegram. Ngoài ra còn có endpoint test của dashboard `/api/guardrails/test`. Một block pre-call trả về HTTP 400. |
+| `runPostCallHooks`                  | Chỉ các phản hồi chat **non-streaming** (`open-sse/handlers/chatCore/nonStreamingResponse.ts`). Các phản hồi streaming không bao giờ chạm tới nó.                                                                                                                                                                                                                                                                                          |
+| Streaming PII                       | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`), được pipe trong `streamingPipeline.ts` khi `PII_RESPONSE_SANITIZATION` bật. Nó không phải là guardrail, nên các kênh vô hiệu hóa không ảnh hưởng đến nó.                                                                                                                                                                                                                     |
+| Middleware injection-guard (legacy) | Mọi route `/v1` mang prompt, bao gồm cả nhóm chat (xem [phạm vi route](#injection-guard-route-coverage--red-team-phase-8--block-d)). Chỉ prompt injection.                                                                                                                                                                                                                                                                                 |
+
+### Những gì không được bao phủ
+
+- **Các route media, embeddings và dữ liệu** (`/v1/images/*`, `/v1/embeddings`,
+  `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`,
+  `/v1/rerank`, `/v1/search`, `/v1/moderations`) không bao giờ chạm tới
+  registry. Không có PII masking, credential masking hay modality bridge nào
+  chạy ở đó. Kiểm tra duy nhất của chúng là middleware injection-guard legacy.
+- **Các phản hồi streaming** không có guardrail post-call: không có
+  `pii-masker` hay `credential-masker` post-call, và không có block post-call.
+  Chỉ có transform PII streaming áp dụng (khi `PII_RESPONSE_SANITIZATION`
+  bật). Một credential được echo lại trong phản hồi streaming sẽ không bị che.
+- **Các kênh vô hiệu hóa so với middleware (theo thiết kế):** middleware đánh
+  giá prompt injection bằng lời gọi riêng tới `evaluatePromptInjection()`,
+  không truyền bất kỳ danh sách vô hiệu hóa nào do caller kiểm soát. Chế độ
+  `block` là một ranh giới bắt buộc mà các lệnh vô hiệu hóa do caller kiểm
+  soát không thể vượt qua, kể cả trên các route nhóm chat
+  ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Việc vô
+  hiệu hóa `prompt-injection` chỉ bỏ qua guardrail của registry.
+
+### Những gì nhìn thấy phản hồi trước post-call
+
+Trên đường non-streaming, thứ tự là: trích xuất bộ nhớ → thực thi tool tích
+hợp sẵn → guardrail post-call → thoát do block post-call → lưu semantic-cache.
+
+- **Trích xuất bộ nhớ** và **thực thi công cụ** nhìn thấy phản hồi trước khi các
+  guardrail sau cuộc gọi (post-call) có thể viết lại hoặc chặn nó. Kể từ
+  [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401), quá trình
+  trích xuất bộ nhớ sẽ đưa văn bản đã trích xuất qua `sanitizePII` khi
+  `PII_RESPONSE_SANITIZATION` được bật (cả ở chế độ streaming lẫn non-streaming), nhưng một
+  phản hồi sau đó bị post-call chặn thì vẫn đã được cung cấp cho bộ nhớ và
+  các công cụ.
+- **Bộ nhớ đệm ngữ nghĩa** (semantic cache) lưu phản hồi sau post-call, nên nó lưu
+  phản hồi đã được viết lại, và một phản hồi bị chặn sẽ không bao giờ được lưu vào cache. Các mục trong cache được
+  khóa theo từng khóa API.
 
 ## Cấu hình
 
-Các biến môi trường được những guardrail tích hợp sẵn đọc:
+Các biến môi trường được đọc bởi các guardrail tích hợp sẵn:
 
-| Biến                                  | Được dùng bởi             | Tác dụng                                                                                                        |
-| ------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`        | Đặt thành `false` để vô hiệu hóa hoàn toàn việc phát hiện.                                                      |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`        | Chính sách đối với injection: `warn`, `block` hoặc `log`. Giá trị cũ `redact` không ghi lại văn bản injection.  |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`        | Chế độ cho guard chống injection; đồng thời là cờ tính năng trong DB **ghi đè** các biến môi trường (DB > ENV). |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`        | Mức độ nghiêm trọng tối thiểu mà `MODE=block` sẽ từ chối: `high` (mặc định), `medium` hoặc `low`.               |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`        | Bí danh cũ của `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                               |
-| `PII_REDACTION_ENABLED`               | `pii-masker`              | Khi là `true`, PII trong yêu cầu được che đi (độc lập với chế độ injection).                                    |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream) | Kiểm soát hành vi che dữ liệu ở phía phản hồi.                                                                  |
+| Biến                                  | Được sử dụng bởi          | Tác động                                                                                                      |
+| ------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`        | Đặt `false` để tắt hoàn toàn việc phát hiện.                                                                  |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`        | Chính sách injection: `warn`, `block`, hoặc `log`. Giá trị cũ `redact` không viết lại văn bản injection.      |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`        | Chế độ cho injection guard; đồng thời là một feature flag trong DB **ghi đè** các biến môi trường (DB > ENV). |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`        | Mức nghiêm trọng tối thiểu mà `MODE=block` từ chối: `high` (mặc định), `medium`, hoặc `low`.                  |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`        | Bí danh cũ của `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                             |
+| `PII_REDACTION_ENABLED`               | `pii-masker`              | Khi `true`, PII trong request sẽ được che (độc lập với chế độ injection).                                     |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream) | Kiểm soát hành vi của masker phía response.                                                                   |
 
-Các guardrail Modality Bridge đọc cấu hình thời gian chạy từ kho cài đặt được
-DB hỗ trợ (`getSettings()`), không phải từ các biến môi trường. Các khóa chính
-của Vision là `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`,
+Các guardrail của Modality Bridge đọc cấu hình runtime từ kho cài đặt
+được hỗ trợ bởi DB (`getSettings()`), chứ không phải từ biến môi trường. Các khóa chính
+của Vision là
+`modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`,
 `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`,
 `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`,
 `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`,
-`modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` và
+`modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes`, và
 `modalityBridgeCacheMaxEntries`. Các khóa cũ
-`visionBridge*` chỉ được chấp nhận làm phương án đọc dự phòng trong một chu kỳ
-như đã ghi trong tài liệu; các thao tác ghi từ dashboard sử dụng những khóa
-chính. Các giá trị mặc định và trình phân giải dự phòng nằm trong
-`src/shared/constants/modalityBridgeDefaults.ts`, còn các hằng số cũ được giữ
-lại trong `src/shared/constants/visionBridgeDefaults.ts`.
+`visionBridge*` chỉ được chấp nhận như phương án đọc dự phòng một chu kỳ
+đã được ghi trong tài liệu; dashboard ghi bằng các khóa chính. Các giá trị mặc định
+và trình phân giải fallback nằm trong `src/shared/constants/modalityBridgeDefaults.ts`, với các hằng số cũ
+được giữ lại trong `src/shared/constants/visionBridgeDefaults.ts`.
 
 Audio sử dụng `modalityBridgeAudioEnabled`, `modalityBridgeAudioModel`,
-`modalityBridgeAudioTimeout` và `modalityBridgeAudioMaxClips`, cùng với các cài
-đặt `modalityBridgeCache*` dùng chung. Audio không có cơ chế dự phòng bằng khóa
-cũ vì các khóa này được giới thiệu cùng với schema Modality Bridge.
+`modalityBridgeAudioTimeout`, và `modalityBridgeAudioMaxClips`, cùng với các cài đặt
+dùng chung `modalityBridgeCache*`. Audio không có fallback khóa cũ vì các
+khóa này được giới thiệu cùng với schema Modality Bridge.
 
 Video sử dụng `modalityBridgeVideoEnabled`, `modalityBridgeVideoAnalysisMode`,
 `modalityBridgeVideoModel`,
 `modalityBridgeVideoFrameCount`, `modalityBridgeVideoSamplingPolicy`,
-`modalityBridgeVideoMaxVideos` và
-`modalityBridgeVideoTimeout`, cùng với các cài đặt `modalityBridgeCache*` dùng
-chung. Tính năng này mặc định bị vô hiệu hóa vì FFmpeg/ffprobe là các dependency
-vận hành không bắt buộc, đồng thời việc tạo chú thích cho khung hình làm tăng độ
-trễ và chi phí mô hình.
+`modalityBridgeVideoMaxVideos`, và
+`modalityBridgeVideoTimeout`, cùng với các cài đặt dùng chung `modalityBridgeCache*`.
+Nó bị tắt theo mặc định vì FFmpeg/ffprobe là các phụ thuộc vận hành
+tùy chọn và việc tạo chú thích khung hình làm tăng độ trễ và chi phí mô hình.
 
 ## Guardrail tùy chỉnh
 
@@ -827,69 +900,70 @@ guardrailRegistry.register(new BudgetGuardrail());
 
 Các bước:
 
-1. Tạo `src/lib/guardrails/myGuardrail.ts` mở rộng `BaseGuardrail`.
+1. Tạo `src/lib/guardrails/myGuardrail.ts` kế thừa `BaseGuardrail`.
 2. Triển khai `preCall` và/hoặc `postCall`.
-3. Đăng ký ngay khi import (thêm từ `registerDefaultGuardrails`) hoặc
-   gọi `guardrailRegistry.register(...)` trong thời gian chạy — registry sẽ thay thế
-   mọi guardrail trước đó có cùng tên đã chuẩn hóa.
-4. Thêm các bài kiểm thử trong `tests/unit/` (các ví dụ hiện có:
+3. Đăng ký tại thời điểm import (đẩy từ `registerDefaultGuardrails`) hoặc
+   gọi `guardrailRegistry.register(...)` tại runtime — registry sẽ thay thế
+   bất kỳ guardrail nào trước đó có cùng tên đã chuẩn hóa.
+4. Thêm test trong `tests/unit/` (các ví dụ hiện có:
    `tests/unit/guardrails-registry.test.ts`,
    `tests/unit/prompt-injection-guard.test.ts`,
    `tests/unit/guardrails/visionBridge.test.ts`).
 
 ## Kiểm thử
 
-Sử dụng `resetGuardrailsForTests()` giữa các bài kiểm thử để bắt đầu từ một trạng thái đã biết.
-Truyền `{ registerDefaults: false }` để bắt đầu với một registry trống và
-chỉ đăng ký các guardrail đang được kiểm thử. Vision Bridge hỗ trợ chèn phần phụ thuộc
-(`deps.getSettings`, `deps.callVisionModel`); Audio Bridge cung cấp các điểm nối
-tương đương cho phần cài đặt, khả năng, lựa chọn mô hình STT, kiểm tra thông tin xác thực
-và phiên âm. Do đó, các bài kiểm thử có thể thực thi cả hai luồng mà không cần truy cập
-cơ sở dữ liệu hoặc mạng.
+Sử dụng `resetGuardrailsForTests()` giữa các lần chạy test để bắt đầu từ một trạng thái xác định.
+Truyền `{ registerDefaults: false }` để bắt đầu với một registry rỗng và
+chỉ đăng ký các guardrail đang được test. Vision Bridge chấp nhận dependency
+injection (`deps.getSettings`, `deps.callVisionModel`); Audio Bridge cung cấp
+các seam tương đương cho cài đặt, khả năng, lựa chọn mô hình STT, kiểm tra
+credential và transcription. Do đó, test có thể thực thi cả hai luồng mà không
+cần truy cập DB hoặc mạng.
 
 ## Xem thêm
 
 - `src/lib/guardrails/` — phần triển khai
 - `src/shared/utils/inputSanitizer.ts` — bộ phát hiện dùng chung hỗ trợ
-  chống chèn prompt và che thông tin nhận dạng cá nhân (PII)
+  chống prompt-injection và che giấu PII
 - `src/shared/constants/visionBridgeDefaults.ts` — các giá trị mặc định của Vision Bridge và
-  danh sách mô hình bắt buộc sử dụng bridge
-- `src/shared/constants/modalityBridgeDefaults.ts` — các giá trị mặc định khi chạy dùng chung cho Vision/Audio
-- `docs/architecture/RESILIENCE_GUIDE.md` — lớp độc lập (circuit breaker, thời gian chờ)
+  danh sách mô hình forced-bridge
+- `src/shared/constants/modalityBridgeDefaults.ts` — các giá trị mặc định runtime dùng chung của Vision/Audio
+- `docs/architecture/RESILIENCE_GUIDE.md` — lớp trực giao (circuit breaker, cooldown)
 - `docs/reference/ENVIRONMENT.md` — tài liệu tham khảo đầy đủ về biến môi trường
 
-## Phạm vi route và red-team của guard chống chèn (Giai đoạn 8 · Khối D)
+## Độ bao phủ route của injection-guard & red-team (Giai đoạn 8 · Khối D)
 
-Guard chống chèn (`createInjectionGuard` / `withInjectionGuard`) bao phủ tất cả các route
-chấp nhận prompt của người dùng. Guard tuân theo `INJECTION_GUARD_MODE` (mặc định `warn` = chỉ ghi log;
+Injection-guard (`createInjectionGuard` / `withInjectionGuard`) bao phủ tất cả các route
+chấp nhận prompt của người dùng. Nó tuân theo `INJECTION_GUARD_MODE` (mặc định `warn` = chỉ ghi log;
 `block` = trả về HTTP 400 `SECURITY_001`).
 
 | Loại              | Route                                                                                                                                                | Chế độ mặc định |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
 | Văn bản (hiện có) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | warn            |
-| Sinh nội dung     | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn            |
+| Tạo sinh          | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn            |
 | Dữ liệu           | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | warn            |
 
-Quá trình trích xuất văn bản (`extractMessageContents`) bao phủ `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`.
+Việc trích xuất văn bản (`extractMessageContents`) bao phủ `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`.
 
-**Red-team (hằng đêm, `nightly-llm-security.yml`):** promptfoo xác thực rằng mỗi route đều chặn
-tập dữ liệu OWASP-LLM khi `INJECTION_GUARD_MODE=block`; garak chạy các phép thăm dò (bỏ qua khi không có secret).
-`moderations` được đưa vào để đảm bảo tính nhất quán — các đơn vị vận hành ở chế độ chặn có thể miễn trừ route này thông qua
-`resolveDisabledGuardrails`.
+**Red-team (hằng đêm, `nightly-llm-security.yml`):** promptfoo xác minh rằng mỗi route đều chặn
+bộ dữ liệu OWASP-LLM khi `INJECTION_GUARD_MODE=block`; garak chạy các probe (bỏ qua nếu không có secret).
+`moderations` được đưa vào để đảm bảo tính nhất quán. Chế độ block là một ranh giới bắt buộc: `evaluatePromptInjection()`
+bỏ qua danh sách vô hiệu hóa theo từng request mà middleware truyền vào, vì vậy `disabledGuardrails`
+**không** miễn trừ một route khỏi chế độ này ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
 
-Quy trình hằng đêm (`.github/workflows/nightly-llm-security.yml`, cron + kích hoạt thủ công)
-có hai job:
+Workflow hằng đêm (`.github/workflows/nightly-llm-security.yml`, cron + kích hoạt
+thủ công) có hai job:
 
 - **`promptfoo-guard` (bắt buộc)** — chạy `promptfoo eval -c promptfooconfig.yaml`
-  với `INJECTION_GUARD_MODE=block`. Mỗi trường hợp đối kháng (ví dụ: "bỏ qua tất cả
-  chỉ dẫn trước đó…", các kiểu jailbreak dạng DAN) xác nhận rằng phản hồi chứa
-  `error.code === "SECURITY_001"`, tức là guard thực sự đã từ chối yêu cầu.
+  với `INJECTION_GUARD_MODE=block`. Mỗi trường hợp tấn công (ví dụ: "bỏ qua mọi
+  chỉ dẫn trước đó…", các jailbreak kiểu DAN) khẳng định rằng phản hồi chứa
+  `error.code === "SECURITY_001"`, tức là guard đã thực sự từ chối request.
 - **`garak` (tham khảo)** — chạy garak `--probes promptinject,dan,leakreplay`
-  với một phiên bản OmniRoute cục bộ (`http://localhost:20128/v1`). Job này phụ thuộc vào
-  secret của nhà cung cấp (`PROMPTFOO_PROVIDER_KEY`); sẽ bỏ qua một cách an toàn khi không có và được thêm hậu tố
-  `|| true`, vì vậy job chỉ báo cáo mà không làm CI thất bại.
+  đối với một instance OmniRoute cục bộ (`http://localhost:20128/v1`). Chỉ chạy khi có
+  secret của provider (`PROMPTFOO_PROVIDER_KEY`); nếu không có sẽ tự động bỏ qua
+  và được thêm hậu tố `|| true`, vì vậy nó báo cáo kết quả mà không làm CI thất bại.
 
-Phạm vi bao phủ của helper guard (`createInjectionGuard` / `withInjectionGuard`)
-trải rộng trên mọi route `/v1` có chứa prompt; văn bản prompt được lấy từ
+Độ bao phủ của guard helper (`createInjectionGuard` / `withInjectionGuard`)
+trải dài trên mọi route `/v1` có chứa prompt; văn bản prompt được lấy từ
 `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` bởi
 `extractMessageContents()` trong `src/shared/utils/inputSanitizer.ts`.

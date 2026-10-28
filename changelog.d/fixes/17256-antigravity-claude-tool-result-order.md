@@ -1,0 +1,1 @@
+- **fix(antigravity):** Keep Claude tool results ahead of merged user text when translating to Gemini-format requests, so Claude models served through Antigravity no longer fail Anthropic's `tool_result`-first ordering rule ([#17256](https://github.com/diegosouzapw/OmniRoute/pull/17256)) — thanks @edosulai

@@ -9,10 +9,7 @@ const tailwind = require("@tailwindcss/postcss");
     `@import "tailwindcss" source(none); @source "${resolve("src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaCardExpanded.tsx")}";`,
     { from: resolve("src/layout-test.css") }
   );
-  const font = readFileSync(
-    resolve("node_modules/material-symbols/material-symbols-outlined.woff2")
-  ).toString("base64");
-  const fontCss = `@font-face{font-family:Symbols;src:url(data:font/woff2;base64,${font})}.material-symbols-outlined{font-family:Symbols;font-weight:normal;font-style:normal;line-height:1;white-space:nowrap;word-wrap:normal;font-feature-settings:'liga'}`;
+  // Icons are inline Lucide SVGs (KEA-7886): no icon font to load into the page.
   const fixture = readFileSync(process.argv[2], "utf8");
   const browser = await chromium.launch({
     headless: true,
@@ -29,7 +26,7 @@ const tailwind = require("@tailwindcss/postcss");
           String(messages[key] || key)
         );
         await page.setContent(
-          `<style>${css}\n${fontCss}</style><div id="card" style="width:${width}px;overflow:hidden">${html}</div>`
+          `<style>${css}</style><div id="card" style="width:${width}px;overflow:hidden">${html}</div>`
         );
         await page.evaluate(() => document.fonts.ready);
         const buttons = page.locator("#card button");

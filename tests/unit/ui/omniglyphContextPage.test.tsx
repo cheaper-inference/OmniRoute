@@ -109,7 +109,7 @@ async function mountPage(): Promise<HTMLElement> {
 
 function enableToggle(container: HTMLElement): HTMLButtonElement {
   const toggle = container.querySelector(
-    '[data-testid="omniglyph-enable-toggle"] button'
+    '[data-testid="omniglyph-enable-toggle"] [role="switch"]'
   ) as HTMLButtonElement | null;
   expect(toggle, "enable toggle button must exist").toBeTruthy();
   return toggle!;
@@ -333,7 +333,7 @@ describe("OmniglyphContextPage when the settings GET fails", () => {
 
   function toggleButton(container: HTMLElement) {
     return container.querySelector(
-      '[data-testid="omniglyph-enable-toggle"] button'
+      '[data-testid="omniglyph-enable-toggle"] [role="switch"]'
     ) as HTMLButtonElement | null;
   }
 

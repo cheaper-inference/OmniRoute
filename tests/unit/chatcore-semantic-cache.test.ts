@@ -707,3 +707,57 @@ test("#12734: identical tool_choice/tools/response_format across requests still 
 
   assert.ok(result, "identical tool_choice/tools/response_format must still HIT");
 });
+
+test("read path isolates response controls written by either cache store", async () => {
+  const { storeSemanticCacheResponse } =
+    await import("../../open-sse/handlers/chatCore/semanticCacheStore.ts");
+  const { storeStreamingSemanticCacheResponse } =
+    await import("../../open-sse/handlers/chatCore/streamingSemanticCacheStore.ts");
+  for (const streaming of [false, true]) {
+    clearCache();
+    const body = {
+      messages: [{ role: "user", content: "Synthetic cache identity check." }],
+      temperature: 0,
+      max_tokens: 4096,
+    };
+    const complete = {
+      choices: [
+        { finish_reason: "stop", message: { role: "assistant", content: "Synthetic answer." } },
+      ],
+    };
+    const common = {
+      enabled: true,
+      model: "synthetic-cache-model",
+      body,
+      headers: undefined,
+      apiKeyId: "synthetic-key",
+    };
+    if (streaming)
+      storeStreamingSemanticCacheResponse({
+        ...common,
+        streamStatus: 200,
+        streamResponseBody: complete,
+      });
+    else storeSemanticCacheResponse({ ...common, translatedResponse: complete });
+    const read = async (requestBody: Record<string, unknown>) => {
+      const { args } = makeBaseArgs({
+        semanticCacheEnabled: true,
+        model: common.model,
+        body: requestBody,
+        apiKeyId: common.apiKeyId,
+        reqLogger: { logConvertedResponse: () => {} },
+        log: null,
+      });
+      return checkSemanticCache(args as Parameters<typeof checkSemanticCache>[0]);
+    };
+    assert.ok(await read(body), "identical request must hit");
+    for (const change of [
+      { reasoning_effort: "low" },
+      { max_tokens: 2048 },
+      { max_output_tokens: 2048 },
+      { parallel_tool_calls: false },
+    ]) {
+      assert.equal(await read({ ...body, ...change }), null, JSON.stringify(change));
+    }
+  }
+});

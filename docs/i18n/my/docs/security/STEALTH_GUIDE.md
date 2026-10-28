@@ -16,40 +16,58 @@ Stealth အင်္ဂါရပ်များသည် သုံးစွဲ�
 
 ---
 
-## TLS Fingerprinting Layer
+## TLS လက်ဗွေခွဲခြားမှုအလွှာ
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-တည်တံ့သော `wreq-js` session များကို account scope တစ်ခုချင်းစီနှင့် ဖြေရှင်းသတ်မှတ်ပြီးသော proxy တစ်ခုချင်းစီအလိုက် လိုအပ်သည့်အချိန်မှသာ ဖန်တီးသည်။ Process တစ်ခုလုံးအတိုင်းအတာရှိ `TlsClient` သည် Cloudflare နောက်ကွယ်ရှိ upstream များအတွက် **macOS ပေါ်ရှိ Chrome 124** အဖြစ် အယောင်ဆောင်သော session အများဆုံး 128 ခုကို pool ပြုလုပ်ထားသည်။ Native runtime ကို မရရှိနိုင်သည့်အခါ `TlsClient.fetch()` သည် fail closed ဖြစ်သည်။ ခေါ်ယူသူသည် ဤ wrapper ၏ အပြင်ဘက်တွင် fallback တစ်ခုကို အတိအလင်း ရွေးချယ်နိုင်သည်။
+အကောင့် scope နှင့် ဖြေရှင်းသတ်မှတ်ထားသော proxy တစ်ခုစီအတွက် အမြဲတမ်းအသုံးပြုသည့် `wreq-js` session များကို လိုအပ်သည့်အချိန်မှသာ ဖန်တီးသည်။ Process တစ်ခုလုံးအတိုင်းအတာရှိ `TlsClient` သည် Cloudflare နောက်ကွယ်ရှိ upstream များအတွက် **macOS ပေါ်ရှိ Chrome 124** အဖြစ် အတုယူလုပ်ဆောင်သော session အများဆုံး 128 ခုကို pool ထဲတွင် ထိန်းသိမ်းထားသည်။ Native runtime မရရှိနိုင်သည့်အခါ `TlsClient.fetch()` သည် လုံခြုံစွာပိတ်ဆို့ပြီး ပျက်ကွက်သည်။ ခေါ်ယူသူသည် ဤ wrapper အပြင်ဘက်ရှိ fallback တစ်ခုကို အတိအလင်း ရွေးချယ်နိုင်သည်။
 
 - Session profile: `browser: "chrome_124", os: "macos"`
-- Proxy ဖြေရှင်းသတ်မှတ်မှု (ဦးစားပေးအစီအစဉ်): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (စာလုံးအသေးပုံစံများလည်း ပါဝင်သည်)
-- Timeout: `TLS_CLIENT_TIMEOUT_MS` (`FETCH_TIMEOUT_MS` မှ အမွေဆက်ခံပြီး မူလတန်ဖိုးမှာ 600000 ဖြစ်သည်)
-- `wreq-js` Response သည် fetch နှင့် ကိုက်ညီသည် (`headers`, `text()`, `json()`, `clone()`, `body`)။
-- ပထမ byte စောင့်ကြည့်စနစ် (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): Upstream header များရောက်ရှိသည်နှင့် `TlsClient.fetch()` သည် ဖြေရှင်းပြီးဖြစ်သောကြောင့် `TLS_CLIENT_TIMEOUT_MS` တစ်ခုတည်းဖြင့် ပထမ byte ကို လုံးဝမပေးသော body တစ်ခုကို အချိန်ကန့်သတ်၍ မရနိုင်ပါ။ `guardTlsFirstByte()` သည် body ၏ ပထမဆုံး `read()` နှင့် `TLS_FIRST_BYTE_WATCHDOG_MS` (မူလတန်ဖိုး `10000`၊ `0` ဖြင့် ပိတ်နိုင်သည်) တို့ကို အပြိုင်လုပ်ဆောင်စေသည်။ အခြေအနေကောင်းမွန်သော body ကို သက်ရောက်မှုမရှိသော်လည်း ရပ်တန့်နေသော body အတွက် wreq reader ကို ပယ်ဖျက်ပြီး `proxyFetch` ၏ ရှိပြီးသား TLS-fallback logic ကို direct/proxy dispatcher သို့ ဆက်လက်ကျရောက်စေသည် (ပြန်လည်ပေးပို့ရန် မလုံခြုံသော request၊ ဥပမာ body ပါသည့် POST သည် အသံတိတ်ပြန်လည်ကြိုးစားခြင်းမရှိဘဲ error ပစ်ဆဲဖြစ်သည်)။
+- Proxy ဖြေရှင်းသတ်မှတ်မှု (ဦးစားပေးအစဉ်): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (စာလုံးအသေးပုံစံများလည်း ပါဝင်သည်)
+- Timeout: `TLS_CLIENT_TIMEOUT_MS` (`FETCH_TIMEOUT_MS` ထံမှ ဆက်ခံသည်၊ မူလတန်ဖိုး 600000)
+- `wreq-js` Response သည် fetch နှင့် ကိုက်ညီမှုရှိသည် (`headers`, `text()`, `json()`, `clone()`, `body`)။
+- ပထမ byte စောင့်ကြည့်ကိရိယာ (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): Upstream header များ ရောက်ရှိသည်နှင့် `TlsClient.fetch()`
+  သည် ဖြေရှင်းပြီးဆုံးသွားသောကြောင့် `TLS_CLIENT_TIMEOUT_MS` တစ်ခုတည်းဖြင့် ပထမ byte လုံးဝမထုတ်ပေးသည့်
+  body တစ်ခုကို အချိန်ကန့်သတ်၍ မရနိုင်ပါ။ `guardTlsFirstByte()` သည် body ၏ ပထမဆုံး `read()` ကို
+  `TLS_FIRST_BYTE_WATCHDOG_MS` (မူလတန်ဖိုး `10000`၊ `0` က ၎င်းကို ပိတ်သည်) နှင့် ပြိုင်တူလုပ်ဆောင်စေသည်။ ပုံမှန် body တစ်ခုကို
+  သက်ရောက်မှုမရှိသော်လည်း ရပ်တန့်နေသော body တစ်ခုသည် wreq reader ကို ပယ်ဖျက်ပြီး `proxyFetch` ၏ ရှိပြီးသား
+  TLS-fallback logic ကို direct/proxy dispatcher သို့ ဆက်လက်ကျရောက်စေသည် (ပြန်လည်ပေးပို့ရန် မလုံခြုံသော request၊ ဥပမာ
+  body ပါသည့် POST သည် အသံတိတ်ပြန်လည်ကြိုးစားခြင်းအစား error ပစ်နေဆဲဖြစ်သည်)။
 
-### Web-cookie provider transport — wreq-js 3.2.0
+### Web-cookie provider သယ်ယူပို့ဆောင်မှု — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` သည် အောက်ပါ အထူးပြု web-cookie transport ငါးခုအတွက် မျှဝေအသုံးပြုသော adapter ဖြစ်သည်။ ပါးလွှာသော provider wrapper တစ်ခုချင်းစီသည် browser/OS profile တစ်ခုကို ရွေးချယ်သည်။ Adapter သည် `open-sse/utils/tlsClient.ts` ထဲရှိ တစ်ခုတည်းသော wreq runtime loader နှင့် transport pool ကို အသုံးပြုပြီး profile + OS + ဖြေရှင်းသတ်မှတ်ပြီးသော proxy ဖြင့် key သတ်မှတ်ထားကာ request တိုင်းတွင် `cookieMode: "ephemeral"` ကို အသုံးပြုသည်။ ထို့ကြောင့် account များနှင့် request များသည် transport အဆင့် connection များကို မျှဝေသော်လည်း wreq session သို့မဟုတ် cookie jar ကို မည်သည့်အခါမျှ မမျှဝေပါ။
+`open-sse/services/tlsClientBase.ts` သည် အောက်ပါ အထူးပြု web-cookie သယ်ယူပို့ဆောင်မှု ငါးခုအတွက် မျှဝေသုံး adapter ဖြစ်သည်။ ပါးလွှာသော provider wrapper တစ်ခုစီသည် browser/OS profile တစ်ခုကို ရွေးချယ်သည်။ Adapter သည် `open-sse/utils/tlsClient.ts` ရှိ တစ်ခုတည်းသော wreq runtime loader နှင့် transport pool ကို အသုံးပြုပြီး
+profile + OS + ဖြေရှင်းသတ်မှတ်ထားသော proxy အလိုက် key သတ်မှတ်ထားသည်။ Request တစ်ခုစီက `cookieMode: "ephemeral"` ကို အသုံးပြုသည်။ ထို့ကြောင့် အကောင့်များနှင့်
+request များသည် transport အဆင့် connection များကို မျှဝေသော်လည်း wreq session သို့မဟုတ် cookie jar ကို မည်သည့်အခါမျှ မမျှဝေပါ။
 
 | Provider   | Profile       | အတုယူထားသော OS | Stream EOF မူဝါဒ                        |
 | ---------- | ------------- | -------------- | --------------------------------------- |
 | Claude     | `chrome_146`  | Linux          | `[DONE]` ကို ထည့်သွင်းသည်               |
-| Perplexity | `firefox_148` | macOS          | `event: end_of_stream` ကို ထည့်သွင်းသည် |
+| Perplexity | `firefox_151` | macOS          | `event: end_of_stream` ကို ထည့်သွင်းသည် |
 | Grok       | `chrome_146`  | Linux          | `[DONE]` ကို ဖယ်ထုတ်သည်                 |
 | Notion     | `chrome_146`  | Windows        | `[DONE]` ကို ထည့်သွင်းသည်               |
 | LMArena    | `chrome_146`  | Windows        | sentinel မရှိ၊ native EOF တွင် ပိတ်သည်  |
 
-- Streaming သည် native response `ReadableStream` ကို တိုက်ရိုက်သုံးစွဲသည်။ ယာယီဖိုင် သို့မဟုတ် sidecar ကို မဖန်တီးပါ။
-- Stream ကို ဖော်ထုတ်မပေးမီ ကနဦး byte 256 ခုအထိ စစ်ဆေးသည်။ SSE provider များသည် SSE မဟုတ်သော error များကို buffer လုပ်သည်။ Grok/LMArena သည် Cloudflare challenge များကို `403` သို့လည်းကောင်း၊ HTML interstitial များကို `502` သို့လည်းကောင်း ချိတ်ဆက်သတ်မှတ်သည်။
-- Native request timeout ကို အကြွင်းမဲ့ JS hard deadline ဖြင့် ဆက်လက် wrap လုပ်ထားသည်။ Hang ဖြစ်ခြင်းသည် သက်ရောက်မှုရှိသော profile/OS/proxy transport ကိုသာ ပျက်ပြယ်စေပြီး ပိတ်သည်။ ထို့နောက် နောက် request မတိုင်မီ ၎င်းကို ပြန်လည်ဖန်တီးသည်။
-- Proxy ဖြေရှင်းသတ်မှတ်မှု၏ ဦးစားပေးအစီအစဉ်မှာ ခေါ်ယူမှုတစ်ခုချင်းစီ၏ `proxyUrl` → request အလိုက် account/dashboard context → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (စာလုံးအသေးပုံစံများ အပါအဝင်) ဖြစ်သည်။ ဖြေရှင်းသတ်မှတ်မှု error များသည် direct connection တစ်ခု ပေါက်ကြားသွားခြင်းမရှိစေရန် fail closed ဖြစ်သည်။ LMArena သည် ရည်ရွယ်ချက်ရှိရှိ `arena.ai` နှင့် ဆက်စပ်၍ ဖြေရှင်းသတ်မှတ်သည်။
-- `byteResponse` သည် UTF-8 ပျက်စီးမှုမရှိဘဲ content type သတ်မှတ်ထားသော `data:` URL တစ်ခုကို ပြန်ပေးသည်။
-- Error များမှာ `TlsClientUnavailableError` (package/addon ကို မရရှိနိုင်ခြင်း)၊ `TlsClientHangError` (deadline ကျော်လွန်ခြင်း) နှင့် ကန့်သတ်ထားသော profile/OS/proxy slot 128 ခုလုံး အသုံးပြုနေသည် သို့မဟုတ် ပိတ်နေဆဲဖြစ်သည့်အခါ `WreqTransportCapacityError` (မျှဝေအသုံးပြုသော session-capacity error code) တို့ဖြစ်သည်။
+- Streaming သည် native response `ReadableStream` ကို တိုက်ရိုက်သုံးစွဲသည်။ ယာယီ file သို့မဟုတ် sidecar ကို
+  မဖန်တီးပါ။
+- Stream ကို ထုတ်ဖော်မပေးမီ ကနဦး byte 256 အထိ စစ်ဆေးသည်။ SSE provider များသည် SSE မဟုတ်သော
+  error များကို buffer ပြုလုပ်သည်။ Grok/LMArena သည် Cloudflare challenge များကို `403` အဖြစ်နှင့် HTML interstitial များကို `502` အဖြစ် ပြောင်းလဲသတ်မှတ်သည်။
+- Native request timeout ကို အကြွင်းမဲ့ JS hard deadline တစ်ခုဖြင့် ဆက်လက်ခြုံငုံထားသည်။ Hang ဖြစ်ပါက
+  သက်ရောက်မှုရှိသော profile/OS/proxy transport ကိုသာ မမှန်ကန်တော့ကြောင်း သတ်မှတ်ပြီး ပိတ်ကာ နောက် request တွင် ၎င်းကို ပြန်လည်ဖန်တီးသည်။
+- Proxy ဖြေရှင်းသတ်မှတ်မှု၏ ဦးစားပေးအစဉ်မှာ ခေါ်ယူမှုတစ်ခုချင်းစီ၏ `proxyUrl` → request အလိုက် account/dashboard context →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (စာလုံးအသေးပုံစံများ အပါအဝင်) ဖြစ်သည်။ ဖြေရှင်းသတ်မှတ်မှု error များသည်
+  direct connection မပေါက်ကြားစေရန် လုံခြုံစွာပိတ်ဆို့ပြီး ပျက်ကွက်သည်။ LMArena သည် ရည်ရွယ်ချက်ရှိရှိ `arena.ai` ကို အခြေခံ၍ ဖြေရှင်းသတ်မှတ်သည်။
+- `byteResponse` သည် UTF-8 ပျက်စီးမှုမရှိသော content type သတ်မှတ်ထားသည့် `data:` URL တစ်ခုကို ပြန်ပေးသည်။
+- Error များမှာ `TlsClientUnavailableError` (package/addon မရရှိနိုင်ခြင်း)၊ `TlsClientHangError`
+  (deadline ကျော်လွန်ခြင်း) နှင့် လက်ရှိအသုံးပြုနေသော သို့မဟုတ် ပိတ်နေဆဲဖြစ်သော profile/OS/proxy slot 128 ခုလုံး ပြည့်နေသည့်အခါ
+  `WreqTransportCapacityError` (မျှဝေထားသော session စွမ်းရည်ဆိုင်ရာ error code) တို့ဖြစ်သည်။
 
-အထက်ပါ ယေဘုယျ `TlsClient` session သည် တည်တံ့သော browser-backed cookie state အတွက် အထူးပြုထားဆဲဖြစ်သည်။ လမ်းကြောင်းနှစ်ခုလုံးသည် cache လုပ်ထားသော wreq module loader တစ်ခုနှင့် process lifecycle hook တစ်ခုကို ပြန်လည်အသုံးပြုသည်။ သို့သော် ၎င်းတို့၏ cookie သက်တမ်းများကို ရည်ရွယ်ချက်ရှိရှိ မတူညီအောင် သတ်မှတ်ထားသောကြောင့် ၎င်းတို့၏ pool များကို သီးခြားထားသည်။
+အထက်ပါ ယေဘုယျ `TlsClient` session သည် အမြဲတမ်းသိမ်းဆည်းထားသော browser-backed cookie
+state အတွက် အထူးပြုထားဆဲဖြစ်သည်။ လမ်းကြောင်းနှစ်ခုစလုံးသည် cache လုပ်ထားသော wreq module loader တစ်ခုနှင့် process lifecycle hook တစ်ခုကို ပြန်လည်အသုံးပြုသည်။ သို့သော် ၎င်းတို့၏ cookie သက်တမ်းများကို ရည်ရွယ်ချက်ရှိရှိ ကွဲပြားစွာထားသောကြောင့် pool များကို သီးခြားထားသည်။
 
-Profile များကို pin လုပ်ထားသော package က ပံ့ပိုးပေးသော်လည်း တကယ့် WAF လက်ခံနိုင်မှုသည် local contract test များနှင့် သီးခြားစီ ပြောင်းလဲနိုင်သည်။ Upstream browser တစ်ခုနှင့် တူညီမှုရှိကြောင်း မဆိုမီ fingerprint ပြောင်းလဲမှုများကို အတိအလင်း ခွင့်ပြုထားသော live account တစ်ခုဖြင့် စစ်ဆေးအတည်ပြုပါ။
+Profile များကို pin လုပ်ထားသော package က ပံ့ပိုးပေးသော်လည်း အမှန်တကယ် WAF လက်ခံမှုသည်
+local contract test များနှင့် မသက်ဆိုင်ဘဲ ပြောင်းလဲနိုင်သည်။ Upstream browser နှင့် တူညီမှုရှိကြောင်း မပြောဆိုမီ
+အတိအလင်း ခွင့်ပြုထားသော live account တစ်ခုဖြင့် fingerprint ပြောင်းလဲမှုများကို အတည်ပြုစစ်ဆေးပါ။
 
 ---
 

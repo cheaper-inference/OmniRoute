@@ -1,5 +1,12 @@
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { pickResponsesSnapshot } from "./sseParser/responsesSnapshot.ts";
+import {
+  TRUNCATED_STREAM_CLAUDE_STOP_REASON,
+  TRUNCATED_STREAM_FINISH_REASON,
+  TRUNCATED_STREAM_RESPONSES_INCOMPLETE_REASON,
+  hasSseDoneMarker,
+} from "./sseParser/truncation.ts";
 
 /**
  * Extract a provider error message from a buffered SSE stream that carries an
@@ -169,7 +176,8 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
     if (!payload || payload === "[DONE]") continue;
     try {
       const parsed = JSON.parse(payload);
-      if (Array.isArray(parsed?.choices)) {
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) continue;
+      if (Array.isArray(parsed.choices)) {
         sawChoices = true;
       }
       chunks.push(parsed);
@@ -182,6 +190,7 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
 
   const first = chunks[0];
   const contentParts = [];
+  const refusalParts = [];
   const reasoningParts = [];
   type AccumulatedToolCall = {
     id: string | null;
@@ -193,6 +202,7 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
   const accumulatedToolCalls = new Map<string, AccumulatedToolCall>();
   let unknownToolCallSeq = 0;
   let finishReason = "stop";
+  let sawFinishReason = false;
   let usage = null;
 
   const getToolCallKey = (toolCall: Record<string, unknown>) => {
@@ -208,6 +218,9 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
 
     if (typeof delta.content === "string" && delta.content.length > 0) {
       contentParts.push(delta.content);
+    }
+    if (typeof delta.refusal === "string" && delta.refusal.length > 0) {
+      refusalParts.push(delta.refusal);
     }
     if (typeof delta.reasoning_content === "string" && delta.reasoning_content.length > 0) {
       reasoningParts.push(delta.reasoning_content);
@@ -257,10 +270,19 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
 
     if (choice?.finish_reason) {
       finishReason = choice.finish_reason;
+      sawFinishReason = true;
     }
     if (chunk?.usage && typeof chunk.usage === "object") {
       usage = chunk.usage;
     }
+  }
+
+  // #18432 — output but neither a finish_reason nor [DONE]: the upstream stream was
+  // cut, so do not report the partial answer as a clean stop.
+  const producedOutput =
+    contentParts.length > 0 || refusalParts.length > 0 || reasoningParts.length > 0;
+  if (!sawFinishReason && producedOutput && !hasSseDoneMarker(rawSSE)) {
+    finishReason = TRUNCATED_STREAM_FINISH_REASON;
   }
 
   const joinedContent = contentParts.length > 0 ? contentParts.join("").trim() : "";
@@ -269,6 +291,9 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
     role: "assistant",
     content: joinedContent,
   };
+  if (refusalParts.length > 0) {
+    message.refusal = refusalParts.join("");
+  }
   if (joinedReasoning) {
     message.reasoning_content = joinedReasoning;
   }
@@ -323,6 +348,7 @@ export function parseSSEToClaudeResponse(rawSSE, fallbackModel) {
   let stopReason = "end_turn";
   let stopSequence = null;
   let sawClaudeEvent = false;
+  let sawClaudeTerminal = false;
 
   const mergeUsage = (incoming) => {
     const usageRecord = toRecord(incoming);
@@ -441,9 +467,14 @@ export function parseSSEToClaudeResponse(rawSSE, fallbackModel) {
       continue;
     }
 
+    if (eventType === "message_stop") {
+      sawClaudeTerminal = true;
+    }
+
     if (eventType === "message_delta") {
       sawClaudeEvent = true;
       const delta = toRecord(payload.delta);
+      if (delta.stop_reason != null && delta.stop_reason !== "") sawClaudeTerminal = true;
       stopReason = toString(delta.stop_reason, stopReason);
       stopSequence =
         typeof delta.stop_sequence === "string" ? String(delta.stop_sequence) : stopSequence;
@@ -476,6 +507,11 @@ export function parseSSEToClaudeResponse(rawSSE, fallbackModel) {
 
     const input = block.inputJson.trim().length > 0 ? tryParseJson(block.inputJson) : block.input;
     content.push({ type: "tool_use", id: block.id, name: block.name, input });
+  }
+
+  // #18432 — content but no message_stop / stop_reason / [DONE]: the stream was cut.
+  if (!sawClaudeTerminal && content.length > 0 && !hasSseDoneMarker(rawSSE)) {
+    stopReason = TRUNCATED_STREAM_CLAUDE_STOP_REASON;
   }
 
   return {
@@ -662,6 +698,54 @@ function mergeResponseItems(existing, incoming) {
   };
 }
 
+function hasNonEmptyText(parts: unknown, field: string): boolean {
+  return (
+    Array.isArray(parts) &&
+    parts.some((part) => {
+      const value = toRecord(part)[field];
+      return typeof value === "string" && value.length > 0;
+    })
+  );
+}
+
+/** True when the output carries model content (text, refusal, reasoning or a call). */
+function responsesOutputHasContent(items: unknown[]): boolean {
+  return items.some((item) => {
+    const record = toRecord(item);
+    if (record.type === "message") {
+      return hasNonEmptyText(record.content, "text") || hasNonEmptyText(record.content, "refusal");
+    }
+    if (record.type === "reasoning") return hasNonEmptyText(record.summary, "text");
+    return typeof record.type === "string" && record.type.endsWith("_call");
+  });
+}
+
+/** Snapshot statuses that mean the response never settled. */
+const RESPONSES_UNSETTLED_STATUSES = new Set(["in_progress", "queued"]);
+
+/**
+ * Final `status` (+ `incomplete_details`) of a buffered Responses stream. A stream that
+ * produced output but closed before any terminal event, with its snapshot still
+ * unsettled, was cut (#18432): report it `incomplete` so the chat translation maps it to
+ * `length` instead of `stop`. A snapshot's own `incomplete_details` is preserved.
+ */
+function resolveResponsesTerminalStatus(
+  picked: Record<string, unknown>,
+  status: unknown,
+  sawTerminalEvent: boolean,
+  producedOutput: boolean
+): { status: unknown; incomplete_details?: unknown } {
+  if (!sawTerminalEvent && producedOutput && RESPONSES_UNSETTLED_STATUSES.has(String(status))) {
+    return {
+      status: "incomplete",
+      incomplete_details: { reason: TRUNCATED_STREAM_RESPONSES_INCOMPLETE_REASON },
+    };
+  }
+  return picked.incomplete_details != null
+    ? { status, incomplete_details: picked.incomplete_details }
+    : { status };
+}
+
 export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
   const lines = String(rawSSE || "").split("\n");
   const events = [];
@@ -818,7 +902,7 @@ export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
     }
   }
 
-  const picked = terminalResponse || latestResponse;
+  const picked = pickResponsesSnapshot(terminalResponse, latestResponse, events);
   if (!picked || typeof picked !== "object") return null;
   const reconstructedOutput = [...outputItems.entries()]
     .sort((a, b) => a[0] - b[0])
@@ -880,7 +964,12 @@ export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
       };
     }),
     usage: picked.usage || null,
-    status: picked.status || statusFallback,
+    ...resolveResponsesTerminalStatus(
+      picked,
+      picked.status || statusFallback,
+      !!terminalResponse,
+      responsesOutputHasContent(chosenOutput)
+    ),
     ...(picked.error != null ? { error: picked.error } : {}),
     created_at: picked.created_at || Math.floor(Date.now() / 1000),
     metadata: picked.metadata || {},

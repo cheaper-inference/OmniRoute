@@ -63,14 +63,20 @@ test("CodeBuddy rows preserve the opt-in cap and replacement provenance in every
   }
 });
 
-test("the two source-delta mirror records describe current source and translated bytes", () => {
+test("the two source-delta mirror records describe the translated bytes", () => {
+  // Whether the English source moved on since the translation is the i18n drift gate's call
+  // (scripts/i18n/check-translation-drift.mjs — PR-scoped since 2026-10-20); pinning it here
+  // turned every inherited drift of ENVIRONMENT.md into a red unit shard on unrelated PRs
+  // (release/v3.8.53, translation backend down). What a unit test CAN pin is that each mirror
+  // still holds the bytes its record describes — no hand edit, no truncated write.
   for (const relative of [envDoc, qualityDoc]) {
-    const sourceHash = hash(read(relative));
-    assert.equal(state.sources[relative].source_hash, sourceHash);
     for (const locale of locales) {
       const record = state.sources[relative].locales[locale];
-      assert.equal(record.source_hash, sourceHash);
-      assert.equal(record.target_hash, hash(read(`docs/i18n/${locale}/${relative}`)));
+      assert.equal(
+        record.target_hash,
+        hash(read(`docs/i18n/${locale}/${relative}`)),
+        `${locale}: ${relative} mirror bytes differ from the recorded translation`
+      );
     }
   }
 });

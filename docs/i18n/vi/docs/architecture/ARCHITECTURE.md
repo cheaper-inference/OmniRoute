@@ -10,77 +10,76 @@ _Cập nhật lần cuối: 2026-06-28_
 
 ## Tóm tắt điều hành
 
-OmniRoute là một cổng định tuyến AI cục bộ và bảng điều khiển được xây dựng trên Next.js.
-Nó cung cấp một endpoint duy nhất tương thích với OpenAI (`/v1/*`) và định tuyến lưu lượng qua nhiều nhà cung cấp thượng nguồn, đồng thời hỗ trợ chuyển đổi, dự phòng, làm mới token và theo dõi mức sử dụng.
+OmniRoute là cổng định tuyến và bảng điều khiển AI cục bộ được xây dựng trên Next.js. Nó cung cấp một điểm cuối tương thích với OpenAI (`/v1/*`) và định tuyến lưu lượng truy cập trên nhiều nhà cung cấp ngược dòng với tính năng dịch thuật, dự phòng, làm mới mã thông báo và theo dõi việc sử dụng.
 
-Các khả năng cốt lõi:
+Khả năng cốt lõi:
 
-- Bề mặt API tương thích với OpenAI dành cho CLI/công cụ (375 nhà cung cấp, 154 mô-đun thực thi)
-- Chuyển đổi yêu cầu/phản hồi giữa các định dạng của nhà cung cấp
-- Dự phòng tổ hợp mô hình (chuỗi nhiều mô hình)
-- Các bước tổ hợp có cấu trúc (`provider + model + connection`) với thứ tự khi chạy dựa trên `compositeTiers`
-- Dự phòng ở cấp tài khoản (nhiều tài khoản cho mỗi nhà cung cấp)
-- Kiểm tra trước hạn ngạch và lựa chọn tài khoản P2C có xét hạn ngạch trong luồng trò chuyện chính
-- Quản lý kết nối nhà cung cấp bằng OAuth + khóa API (27 mô-đun nhà cung cấp OAuth)
-- Tạo embedding qua `/v1/embeddings` (18 nhà cung cấp)
-- Tạo hình ảnh qua `/v1/images/generations` (hơn 10 nhà cung cấp, hơn 20 mô hình)
-- Chuyển âm thanh thành văn bản qua `/v1/audio/transcriptions` (18 nhà cung cấp)
-- Chuyển văn bản thành giọng nói qua `/v1/audio/speech` (24 nhà cung cấp tích hợp sẵn)
+- Bề mặt API tương thích OpenAI cho CLI/tools (377 nhà cung cấp, 156 mô-đun thực thi)
+- dịch Request/response trên các định dạng của nhà cung cấp
+- Dự phòng kết hợp mô hình (trình tự nhiều mô hình)
+- Các bước kết hợp có cấu trúc (`provider + model + connection`) với thứ tự thời gian chạy theo `compositeTiers`
+- Dự phòng cấp tài khoản (nhiều tài khoản cho mỗi nhà cung cấp)
+- Lựa chọn tài khoản P2C nhận biết hạn ngạch và nhận biết hạn ngạch trong đường dẫn trò chuyện chính
+- OAuth + Quản lý kết nối nhà cung cấp khóa API (27 mô-đun nhà cung cấp OAuth )
+- Nhúng thế hệ qua `/v1/embeddings` (18 nhà cung cấp)
+- Tạo hình ảnh qua `/v1/images/generations` (10 nhà cung cấp +, 20 mô hình + )
+- Phiên âm âm thanh qua `/v1/audio/transcriptions` (18 nhà cung cấp)
+- Chuyển văn bản thành giọng nói qua `/v1/audio/speech` (24 nhà cung cấp tích hợp)
 - Tạo video qua `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Tạo nhạc qua `/v1/music/generations` (ComfyUI)
-- Tìm kiếm web qua `/v1/search` (20 nhà cung cấp)
-- Kiểm duyệt qua `/v1/moderations`
+- Tìm kiếm trên web qua `/v1/search` (20 nhà cung cấp)
+- Kiểm duyệt thông qua `/v1/moderations`
 - Xếp hạng lại qua `/v1/rerank`
-- Phân tích thẻ suy luận (``) cho các mô hình lập luận
-- Làm sạch phản hồi để tương thích nghiêm ngặt với OpenAI SDK
-- Chuẩn hóa vai trò (developer→system, system→user) để tương thích giữa các nhà cung cấp
-- Chuyển đổi đầu ra có cấu trúc (json_schema → Gemini responseSchema)
-- Lưu trữ cục bộ nhà cung cấp, khóa, bí danh, tổ hợp, cài đặt và giá (122 mô-đun DB)
-- Theo dõi mức sử dụng/chi phí và ghi nhật ký yêu cầu
-- Đồng bộ đám mây tùy chọn để đồng bộ trạng thái trên nhiều thiết bị
-- Danh sách IP được phép/bị chặn để kiểm soát quyền truy cập API
-- Quản lý ngân sách suy luận (truyền nguyên trạng/tự động/tùy chỉnh/thích ứng)
-- Chèn lời nhắc hệ thống toàn cục
-- Theo dõi và tạo dấu vân tay phiên
-- Giới hạn tốc độ nâng cao theo từng tài khoản với hồ sơ riêng cho từng nhà cung cấp
-- Mẫu ngắt mạch để tăng khả năng phục hồi của nhà cung cấp
-- Bảo vệ chống hiệu ứng bầy đàn bằng khóa mutex
-- Bộ nhớ đệm khử trùng lặp yêu cầu dựa trên chữ ký
+- Hãy suy nghĩ phân tích thẻ (`<think>...</think>`) cho các mô hình lý luận
+- Khử trùng phản hồi để tương thích OpenAI SDK nghiêm ngặt
+- Chuẩn hóa vai trò (hệ thống → của nhà phát triển, người dùng → hệ thống) để tương thích với nhiều nhà cung cấp
+- Chuyển đổi đầu ra có cấu trúc (json_schema → Gemini replySchema)
+- Tính bền vững cục bộ cho nhà cung cấp, khóa, bí danh, tổ hợp, cài đặt, giá cả (122 mô-đun DB )
+- theo dõi Usage/cost và yêu cầu ghi nhật ký
+- Đồng bộ hóa đám mây tùy chọn để đồng bộ hóa multi-device/state
+- IP allowlist/blocklist để kiểm soát truy cập API
+- Tư duy quản lý ngân sách (passthrough/auto/custom/adaptive)
+- Tiêm nhắc nhở hệ thống toàn cầu
+- Theo dõi phiên và lấy dấu vân tay
+- Giới hạn tỷ lệ nâng cao cho mỗi tài khoản với hồ sơ dành riêng cho nhà cung cấp
+- Mô hình ngắt mạch cho khả năng phục hồi của nhà cung cấp
+- Bảo vệ đàn chống sét bằng khóa mutex
+- Bộ đệm chống trùng lặp yêu cầu dựa trên chữ ký
 - Lớp miền: quy tắc chi phí, chính sách dự phòng, chính sách khóa
-- Context Relay: bản tóm tắt bàn giao phiên nhằm duy trì tính liên tục khi luân chuyển tài khoản
-- Lưu trữ trạng thái miền (bộ nhớ đệm SQLite ghi xuyên cho các cơ chế dự phòng, ngân sách, khóa và bộ ngắt mạch)
-- Công cụ chính sách để đánh giá yêu cầu tập trung (khóa → ngân sách → dự phòng)
-- Dữ liệu đo từ xa của yêu cầu với tổng hợp độ trễ p50/p95/p99
-- Dữ liệu đo từ xa của mục tiêu tổ hợp và tình trạng lịch sử của mục tiêu tổ hợp qua `combo_execution_key` / `combo_step_id`
-- ID tương quan (X-Request-Id) để truy vết đầu-cuối
-- Ghi nhật ký kiểm toán tuân thủ với tùy chọn không tham gia cho từng khóa API
+- Chuyển tiếp bối cảnh: tóm tắt chuyển giao phiên để liên tục xoay vòng tài khoản
+- Tính bền vững của trạng thái miền (bộ đệm ghi SQLite dành cho dự phòng, ngân sách, khóa, bộ ngắt mạch)
+- Công cụ chính sách để đánh giá yêu cầu tập trung (khóa ngân sách → dự phòng → )
+- Yêu cầu đo từ xa với tổng hợp độ trễ p50/p95/p99
+- Kết hợp đo từ xa mục tiêu và sức khỏe mục tiêu kết hợp lịch sử thông qua `combo_execution_key` / `combo_step_id`
+- Tương quan ID (X-Request-Id) để theo dõi từ đầu đến cuối
+- Ghi nhật ký kiểm tra tuân thủ với tính năng chọn không tham gia trên mỗi khóa API
 - Khung đánh giá để đảm bảo chất lượng LLM
-- Bảng điều khiển tình trạng với trạng thái bộ ngắt mạch của nhà cung cấp theo thời gian thực
-- MCP Server (110 công cụ) với 3 phương thức truyền tải (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) với các kỹ năng và vòng đời tác vụ
+- Bảng thông tin tình trạng với trạng thái ngắt mạch của nhà cung cấp theo thời gian thực
+- Máy chủ MCP (110 công cụ) với 3 lần vận chuyển (stdio/SSE/Streamable HTTP)
+- Máy chủ A2A (JSON-RPC 2.0 + SSE) với các kỹ năng và vòng đời nhiệm vụ
 - Hệ thống bộ nhớ (trích xuất, chèn, truy xuất, tóm tắt)
-- Hệ thống kỹ năng (sổ đăng ký, trình thực thi, sandbox, kỹ năng tích hợp sẵn)
-- Proxy MITM với chức năng quản lý chứng chỉ và xử lý DNS
-- Phần mềm trung gian bảo vệ chống chèn lời nhắc
-- Pipeline nén lời nhắc với Caveman, RTK, các pipeline xếp chồng, tổ hợp nén, gói ngôn ngữ và phân tích
-- Sổ đăng ký ACP (Agent Communication Protocol)
-- Các nhà cung cấp OAuth dạng mô-đun (22 mô-đun riêng lẻ trong `src/lib/oauth/providers/`)
-- Script gỡ cài đặt/gỡ cài đặt hoàn toàn
-- Thao tác sửa chữa môi trường OAuth
-- Cầu nối WebSocket dành cho các máy khách WS tương thích với OpenAI (`/v1/ws`)
-- Quản lý token đồng bộ (phát hành/thu hồi, tải xuống gói cấu hình được lập phiên bản bằng ETag)
-- Thiết lập sẵn nhà cung cấp hạng nhất cho GLM Thinking (`glmt`)
-- Đếm token kết hợp (`/messages/count_tokens` phía nhà cung cấp với phương án ước tính dự phòng)
-- Tự động khởi tạo bí danh mô hình (hơn 30 phép chuẩn hóa phương ngữ giữa các proxy khi khởi động)
-- Tìm nạp ra ngoài an toàn với cơ chế bảo vệ SSRF, chặn URL riêng tư và khả năng thử lại có thể cấu hình
-- Thử lại trò chuyện có xét thời gian chờ với `requestRetry` và `maxRetryIntervalSec` có thể cấu hình
-- Xác thực môi trường chạy bằng Zod khi khởi động
-- Kiểm toán tuân thủ v2 với phân trang, các sự kiện CRUD của nhà cung cấp và ghi nhật ký xác thực bị SSRF chặn
+- Hệ thống kỹ năng (đăng ký, người thực thi, hộp cát, kỹ năng tích hợp)
+- proxy MITM với quản lý chứng chỉ và xử lý DNS
+- Phần mềm trung gian bảo vệ tiêm nhắc nhở
+- Quy trình nén nhanh chóng với Caveman, RTK, quy trình xếp chồng, tổ hợp nén, gói ngôn ngữ và phân tích
+- đăng ký ACP (Giao thức truyền thông đại lý)
+- Nhà cung cấp OAuth mô-đun (22 mô-đun riêng lẻ theo `src/lib/oauth/providers/`)
+- tập lệnh Uninstall/full-uninstall
+- hành động sửa chữa môi trường OAuth
+- cầu WebSocket dành cho máy khách WS tương thích với OpenAI (`/v1/ws`)
+- Đồng bộ hóa quản lý mã thông báo (issue/revoke, tải xuống gói cấu hình phiên bản ETag)
+- cài đặt sẵn của nhà cung cấp hạng nhất GLM Thought (`glmt`)
+- Đếm mã thông báo kết hợp ( `/messages/count_tokens` phía nhà cung cấp với dự phòng ước tính)
+- Tự động gieo hạt bí danh mô hình (30 chuẩn hóa phương ngữ proxy chéo + khi khởi động)
+- Tìm nạp ra ngoài an toàn với tính năng bảo vệ SSRF, chặn URL riêng tư và thử lại có thể định cấu hình
+- Thử lại trò chuyện có nhận biết thời gian hồi chiêu với `requestRetry` và `maxRetryIntervalSec` có thể định cấu hình
+- Xác thực môi trường thời gian chạy với Zod khi khởi động
+- Kiểm tra tuân thủ v2 với phân trang, sự kiện CRUD của nhà cung cấp và ghi nhật ký xác thực bị chặn SSRF
 
 Mô hình thời gian chạy chính:
 
-- Các route của ứng dụng Next.js trong `src/app/api/*` triển khai cả API bảng điều khiển và API tương thích
-- Lõi SSE/định tuyến dùng chung trong `src/sse/*` + `open-sse/*` xử lý việc thực thi nhà cung cấp, chuyển đổi, phát trực tuyến, dự phòng và mức sử dụng
+- các tuyến ứng dụng Next.js trong `src/app/api/*` triển khai cả bảng điều khiển APIs và khả năng tương thích APIs
+- Lõi SSE/routing được chia sẻ trong `src/sse/*` + `open-sse/*` xử lý việc thực thi, dịch thuật, phát trực tuyến, dự phòng và sử dụng của nhà cung cấp
 
 ## Sơ đồ tham chiếu
 
@@ -114,43 +113,51 @@ các sơ đồ còn lại được liên kết từ những hướng dẫn dành
 - SLA/mặt phẳng điều khiển của nhà cung cấp bên ngoài tiến trình cục bộ
 - Bản thân các tệp nhị phân CLI bên ngoài (Claude CLI, Codex CLI, v.v.)
 
-## Giao diện dashboard (Hiện tại)
+## Giao diện Dashboard (Hiện tại)
 
 Các trang chính trong `src/app/(dashboard)/dashboard/`:
 
 - `/dashboard` — bắt đầu nhanh + tổng quan về nhà cung cấp
-- `/dashboard/endpoint` — proxy endpoint + MCP + A2A + các tab endpoint API
+- `/dashboard/endpoint` — các tab proxy endpoint + MCP + A2A + API endpoint
 - `/dashboard/providers` — kết nối và thông tin xác thực của nhà cung cấp
-- `/dashboard/combos` — chiến lược combo, mẫu, trình dựng theo từng bước, quy tắc định tuyến mô hình, thứ tự thủ công được lưu bền vững
-- `/dashboard/auto-combo` — Auto Combo Engine: trọng số chấm điểm, gói chế độ, cài đặt sẵn cho nhà máy ảo, dữ liệu đo từ xa
+- `/dashboard/combos` — chiến lược combo, mẫu, trình dựng theo từng bước, quy tắc định tuyến mô hình, thứ tự được lưu thủ công
+- `/dashboard/auto-combo` — Auto Combo Engine: trọng số chấm điểm, gói chế độ, cấu hình sẵn cho nhà máy ảo, dữ liệu đo từ xa
 - `/dashboard/costs` — tổng hợp chi phí và khả năng hiển thị giá
 - `/dashboard/analytics` — phân tích mức sử dụng, đánh giá, tình trạng mục tiêu combo
 - `/dashboard/limits` — kiểm soát hạn ngạch/tần suất
-- `/dashboard/cli-tools` — hướng dẫn thiết lập CLI ban đầu, phát hiện môi trường chạy, tạo cấu hình
-- `/dashboard/agents` — các tác nhân ACP được phát hiện + đăng ký tác nhân tùy chỉnh
-- `/dashboard/cloud-agents` — tác vụ của tác nhân được lưu trữ trên đám mây (Codex Cloud, Devin, Jules) và vòng đời tác vụ
+- `/dashboard/cli-tools` — hướng dẫn thiết lập CLI, phát hiện runtime, tạo cấu hình
+- `/dashboard/agents` — các agent ACP đã phát hiện + đăng ký agent tùy chỉnh
+- `/dashboard/cloud-agents` — tác vụ agent được lưu trữ trên đám mây (Codex Cloud, Devin, Jules) và vòng đời tác vụ
 - `/dashboard/skills` — sổ đăng ký kỹ năng A2A, thực thi trong sandbox, danh mục kỹ năng tích hợp sẵn
-- `/dashboard/memory` — kiểm tra và truy xuất bộ nhớ hội thoại bền vững
-- `/dashboard/webhooks` — đăng ký webhook gửi đi, luân chuyển bí mật, số liệu thống kê thử lại
-- `/dashboard/batch` — gửi công việc hàng loạt và theo dõi tiến độ
-- `/dashboard/cache` — số liệu thống kê về bộ nhớ đệm đọc xuyên qua và suy luận, các tùy chọn kiểm soát loại bỏ
-- `/dashboard/playground` — môi trường thử nghiệm trò chuyện tương tác với bất kỳ combo/mô hình nào đã được cấu hình
+- `/dashboard/memory` — kiểm tra và truy xuất bộ nhớ hội thoại liên tục
+- `/dashboard/webhooks` — đăng ký webhook gửi đi, luân chuyển bí mật, thống kê thử lại
+- `/dashboard/batch` — gửi tác vụ hàng loạt và theo dõi tiến trình
+- `/dashboard/cache` — thống kê bộ nhớ đệm đọc xuyên qua và bộ nhớ đệm suy luận, các tùy chọn loại bỏ
+- `/dashboard/playground` — môi trường trò chuyện tương tác với bất kỳ combo/mô hình nào đã được cấu hình
 - `/dashboard/changelog` — trình xem nhật ký thay đổi trong ứng dụng (hiển thị `CHANGELOG.md`)
-- `/dashboard/system` — chẩn đoán môi trường chạy, thông tin phiên bản, giao diện xác thực môi trường
-- `/dashboard/onboarding` — trình hướng dẫn thiết lập lần đầu cho các bản cài đặt mới
+- `/dashboard/system` — chẩn đoán runtime, thông tin phiên bản, giao diện xác thực môi trường
+- `/dashboard/onboarding` — trình hướng dẫn thiết lập lần chạy đầu tiên cho các bản cài đặt mới
 - `/dashboard/media` — môi trường thử nghiệm hình ảnh/video/âm nhạc
 - `/dashboard/search-tools` — kiểm thử nhà cung cấp tìm kiếm và lịch sử
 - `/dashboard/health` — thời gian hoạt động, bộ ngắt mạch, giới hạn tần suất, các phiên được giám sát hạn ngạch
 - `/dashboard/logs` — nhật ký yêu cầu/proxy/kiểm tra/console
 - `/dashboard/settings` — các tab cài đặt hệ thống (chung, định tuyến, giá trị mặc định của combo, v.v.)
 - `/dashboard/context/caveman` — quy tắc nén Caveman, gói ngôn ngữ, bản xem trước và chế độ đầu ra
-- `/dashboard/context/rtk` — bộ lọc đầu ra lệnh RTK, bản xem trước và cài đặt an toàn khi chạy
-- `/dashboard/context/combos` — các quy trình nén có tên được gán cho các combo định tuyến
-- `/dashboard/translator` — kiểm tra trình chuyển đổi và xem trước việc chuyển đổi định dạng yêu cầu
-- `/dashboard/audit` — trình duyệt nhật ký kiểm tra tuân thủ với tính năng phân trang và siêu dữ liệu có cấu trúc
+- `/dashboard/context/rtk` — bộ lọc đầu ra lệnh RTK, bản xem trước và cài đặt an toàn runtime
+- `/dashboard/context/combos` — các pipeline nén có tên được gán cho combo định tuyến
+- `/dashboard/translator` — kiểm tra trình biên dịch và xem trước việc chuyển đổi định dạng yêu cầu
+- `/dashboard/audit` — trình duyệt nhật ký kiểm tra tuân thủ với phân trang và siêu dữ liệu có cấu trúc
 - `/dashboard/usage` — trình duyệt mức sử dụng theo từng yêu cầu được liên kết với `usage_history`
-- `/dashboard/compression` — phân tích nén, số liệu thống kê và gán quy trình
+- `/dashboard/compression` — phân tích nén, thống kê và gán pipeline
 - `/dashboard/api-manager` — vòng đời khóa API và quyền mô hình
+
+Lớp giao diện người dùng: mọi trang đều được hiển thị bên trong một shell — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset`
+của bộ công cụ, cùng `Sidebar.tsx` và `Header.tsx` của OmniRoute). Các trang nhập những khối cấu thành
+từ `@/shared/components` (các adapter bao quanh Keak CI UI Kit được cung cấp trong
+`packages/ui-kit`) hoặc từ các đường dẫn con của thành phần trong bộ công cụ (`@omniroute/ui-kit/table`, `…/page-header`), và
+các biểu tượng thông qua `<Icon>` (`ICON_MAP` → Lucide). Chủ đề (`system` theo mặc định, sáng/tối) và các token được cung cấp
+từ bộ công cụ thông qua cầu nối trong `src/app/globals.css`. Chi tiết: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Bối cảnh hệ thống cấp cao
 

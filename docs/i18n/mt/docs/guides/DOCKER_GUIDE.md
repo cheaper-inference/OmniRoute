@@ -645,27 +645,29 @@ sudo systemctl enable --now omniroute-update.path
 Is-servizz ineħħi t-talba qabel ma jagħmel pull sabiex eżekuzzjoni falluta ma tidħolx f'loop. Mingħajr
 `DOCKER_UPDATE_TRIGGER_FILE`, id-dashboard iżomm il-fluss tal-kmand manwali.
 
-## Disponibbiltà: SQLite predefinit għandu replika waħda
+## Disponibbiltà: SQLite default huwa replika waħda
 
-OmniRoute standard fuq Docker / Kubernetes huwa **proċess Node wieħed + writer SQLite wieħed**. Id-disponibbiltà għolja **mhijiex appoġġjata** b'din it-topoloġija.
+Stock Docker / Kubernetes OmniRoute is** wieħed Node proċess + wieħed SQLite kittieb** . Disponibbiltà għolja hija** mhux appoġġjat** fuq dik it-topoloġija.
 
-| Restrizzjoni                                                    | Konsegwenza                                                                                                                                                                                                                                                                                                                                             |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Writer wieħed                                                   | **Tħaddimx** diversi repliki mal-istess fajl SQLite. Dan jikkorrompi d-DB.                                                                                                                                                                                                                                                                              |
-| Ħolqien mill-ġdid / ristartjar / terminazzjoni minn HEALTHCHECK | **Qtugħ totali** ta' SSE li jkunu għaddejjin, sessjonijiet tad-dashboard u state fil-memorja. Kull klijent konness jinqata'. Talbiet ġodda matul il-perjodu mingħajr endpoint jirċievu **`502 Bad Gateway: Unknown error`** mir-reverse proxy, mhux JSON ta' OmniRoute — il-klijenti ma jistgħux jiddistingwu dan minn falliment tal-fornitur (#11015). |
-| L-istess event loop bħal `/healthz`                             | Ċiklu impenjattiv tal-katalgu jew tal-kompressjoni jista' jdewwem il-probes; timeout qasir imbagħad jerġa' jibda l-**unika** replika.                                                                                                                                                                                                                   |
+| Restrizzjoni                          | Konsegwenza                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kittieb waħdieni                      | Do** le** mexxi repliki multipli kontra l-istess fajl SQLite. Li jikkorrompi liz DB.                                                                                                                                                                                                                                               |
+| Recreate / restart / HEALTHCHECK kill | **Outage sħiħ** ta' matul it-titjira SSE, sessjonijiet dashboard, u stat fil-memorja. Kull klijent konness jinżel. Talbiet ġodda matul it-tieqa tal-endpoint vojta jiksbu reverse-proxy**`502 Bad Gateway: Unknown error`** , mhux OmniRoute JSON — il-klijenti ma jistgħux jiddistingwu dan minn falliment tal-fornitur (#11015). |
+| L-istess event loop bħal `/healthz`   | Katalgu impenjattiv jew qurdien tal-kompressjoni jista 'jdewwem is-sondi; timeout qasir imbagħad jerġa' jibda l-** biss** replika.                                                                                                                                                                                                 |
 
-**Matriċi tal-probes** (ara wkoll [ir-rakkomandazzjonijiet għall-probes ta' Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Matriċi tas-sonda** (ara wkoll [ir-rakkomandazzjonijiet tas-sonda Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Probe                   | Mira                                                                            | Tużax                                                      |
-| ----------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| Liveness                | TCP fuq `PORT` (il-valur predefinit huwa `20128`), jew HTTP soft fuq `/healthz` | `/api/monitoring/health`                                   |
-| Readiness               | HTTP `GET /healthz`                                                             | Timeouts stretti li jqisu event loop impenjat bħala mejjet |
-| Profond / għall-bnedmin | `/api/monitoring/health`                                                        | Liveness awtomatizzat tal-kubelet                          |
+| Sonda          | Mira                                                        | Tużax                                                      |
+| -------------- | ----------------------------------------------------------- | ---------------------------------------------------------- |
+| Ħajja          | TCP fuq `PORT` (default `20128`), jew artab HTTP `/healthz` | `/api/monitoring/health`                                   |
+| Prontezza      | HTTP `GET /healthz`                                         | Timeouts stretti li jittrattaw event-loop busy bħala mejta |
+| Fond / bnedmin | `/api/monitoring/health`                                    | Ħajja kubelet awtomatizzata                                |
 
-**Aġġornamenti:** stenna li kull sessjoni tinqata'. Neħħi gradwalment il-klijenti jekk tista'; m'hemm l-ebda rolling update bl-SQLite predefinit. Compose `restart: unless-stopped` flimkien ma' Docker `HEALTHCHECK` ukoll jissostitwixxu l-uniku proċess meta l-container ikun Unhealthy — bl-istess firxa ta' impatt.
+**Titjib:** jistennew li kull sessjoni tinżel. Ixxotta l-klijenti jekk tista’; m'hemm l-ebda aġġornament kontinwu dwar SQLite default. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` se jissostitwixxi wkoll l-uniku proċess meta l-kontenitur ma jkunx tajjeb għas-saħħa — l-istess raġġ tal-blast.
 
-Snippet ta' Kubernetes għal **replika waħda** (Recreate huwa meħtieġ; iżżidx `replicas` ma' fajl SQLite wieħed):
+Manifesti lesti u tabella Helm ħajjin `deploy/kubernetes/` u `deploy/helm/omniroute/` — ara l- [gwida għall-iskjerament ta' Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes snippet għal a** replika waħda** (Ricreate hija meħtieġa; tgħollix `replicas` kontra fajl SQLite wieħed):
 
 ```yaml
 spec:
@@ -692,9 +694,9 @@ spec:
             periodSeconds: 20
 ```
 
-L-istennija ta’ `preStop` tippermetti lil kube ineħħi l-endpoints tas-Service qabel SIGTERM sabiex traffiku **ġdid** ma jibqax jasal għand il-proċess li jkun qed jieqaf. L-SSE ta’ `/v1/responses` li jkun għaddej jitħalla jitlesta sa `SHUTDOWN_TIMEOUT_MS` (30s b’mod awtomatiku) permezz ta’ heavyweight admission leases (#11015). Talbiet ġodda li xorta jaslu għand il-proċess jirċievu `503` + `Retry-After: 5`. Il-perjodu mingħajr endpoints ta’ Recreate sakemm is-sostitut ikun Ready jibqa’ interruzzjoni totali — din hija t-topoloġija ta’ SQLite, mhux konfigurazzjoni ħażina tal-probe.
+`preStop` sleep tikri kube qatra l-endpoints tas-Servizz qabel SIGTERM hekk** ġdid** it-traffiku jieqaf jolqot il-proċess tal-mewt. Matul it-titjira `/v1/responses` SSE jitbattal sa `SHUTDOWN_TIMEOUT_MS` (default 30s) permezz ta 'kirjiet ta' ammissjoni heavyweight (#11015). Talbiet ġodda li għadhom jilħqu l-proċess jiksbu `503` + `Retry-After: 5`. Id-distakk tar-Recreate vojt-endpoint sakemm is-sostituzzjoni tkun Lesta tibqa' qtugħ iebes - jiġifieri t-topoloġija SQLite, mhux sonda ħażina.
 
-Postgres estern / HA b’diversi writers **mhuwiex** proċess standard dokumentat. Jekk teħtieġ HA, żomm replica waħda jew uża topoloġija li l-proġett ittestja u ddokumenta separatament. Ix-xogħol fuq Postgres/MySQL jinsab f’[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Sakemm dan jiġi rilaxxat, l-uniku mod appoġġjat biex timmultiplika l-kapaċità għal `/v1/responses` **kbar** huwa billi tuża N proċessi indipendenti (it-taqsima li jmiss), mhux `replicas > 1` fuq volume wieħed.
+Esterni Postgres / multi-writer HA is** le** mogħdija tal-istokk dokumentata. Jekk għandek bżonn HA, żomm replika waħda jew mexxi topoloġija li l-proġett ikun ittestja u ddokumenta separatament. Ix-xogħol Postgres/MySQL jgħix [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Sakemm il-vapuri, l-uniku mod appoġġjat biex timmultiplika** kbar** Il-kapaċità `/v1/responses` hija N proċessi indipendenti (sezzjoni li jmiss), mhux `replicas > 1` fuq volum wieħed.
 
 ## Skalar orizzontali: N proċessi indipendenti
 

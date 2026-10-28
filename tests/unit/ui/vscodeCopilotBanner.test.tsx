@@ -57,6 +57,12 @@ describe("VscodeCopilotBanner", () => {
   it("shows the Open VSX secondary note near the CTA", async () => {
     const container = await renderBanner();
     expect(container.textContent).toContain("secondaryNote");
+    const note = Array.from(container.querySelectorAll("span")).find(
+      (el) => el.textContent === "secondaryNote"
+    );
+    // AA (KEA-7886 P7): was text-[9px] text-text-muted/70.
+    expect(note?.className).toContain("text-text-muted");
+    expect(note?.className).not.toMatch(/text-\[9px\]|text-text-muted\/\d+/);
   });
 
   it("dismiss button hides the banner and persists the dismissal to localStorage", async () => {

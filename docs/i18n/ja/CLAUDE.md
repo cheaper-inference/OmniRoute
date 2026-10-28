@@ -11,16 +11,18 @@
 PII に関する知見）。全文を読み、ここにプロジェクトルールを再記載しないでください。以下の内容はすべて
 Claude Code にのみ適用されます — `AGENTS.md` ですでに定義されているルールを運用面で補足するものです。
 
-## ワークツリーの分離 — Claude Code 固有事項
+## Worktree 分離 — Claude Code 固有の事項
 
-必須のワークツリープロトコル全体（ベースブランチの確認、`.claude/worktrees/` という正規
-パス、`cp -al` node_modules、破棄ルール）は、`AGENTS.md` → Git Workflow → "Worktree
-isolation" にあります。Claude Code 固有の要点：
+必須の worktree プロトコル全体(ベースブランチの確認、正規パス `.claude/worktrees/`、
+`cp -al` による node_modules、ティアダウンルール)は
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) に記載されています(`AGENTS.md` →
+Git Workflow → "Worktree isolation" に要約あり)。Claude Code 固有のポイント:
 
-- オペレーターからすでに指定されている場合を除き、`AskUserQuestion` を使用してベースブランチを確認してください（ハードルール #19）。
-- ネイティブの `EnterWorktree` ツールを優先してください — このツールは、すでに
-  `.claude/worktrees/`（正規パス）配下にワークツリーを作成します。文書化されている `git
-worktree add` コマンドでワークツリーを作成してから、その `path` を指定して `EnterWorktree` を呼び出してください。
+- オペレーターがすでに指示していない限り、`AskUserQuestion` を通じてオペレーターにベースブランチを
+  確認すること(Hard Rule #19)。
+- ネイティブの `EnterWorktree` ツールを優先すること — このツールは `.claude/worktrees/`(正規パス)
+  配下に worktree をすでに作成します。ドキュメントに記載されている `git
+worktree add` コマンドで worktree を作成し、その `path` を指定して `EnterWorktree` を呼び出してください。
 
 ## セッション間の安全性 — Claude Code 固有事項
 

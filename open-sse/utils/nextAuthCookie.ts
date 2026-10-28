@@ -9,6 +9,28 @@
  */
 export const SESSION_TOKEN_FAMILY_RE = /^__Secure-next-auth\.session-token(?:\.\d+)?$/;
 
+function retainOtherCookies(pairs: string[], refreshed: Map<string, string>) {
+  const result: string[] = [];
+  let mutated = false;
+  let droppedStale = false;
+  for (const pair of pairs) {
+    const eqIdx = pair.indexOf("=");
+    if (eqIdx < 0) {
+      result.push(pair);
+      continue;
+    }
+    const name = pair.slice(0, eqIdx).trim();
+    const value = pair.slice(eqIdx + 1);
+    if (SESSION_TOKEN_FAMILY_RE.test(name)) {
+      if (!refreshed.has(name) || refreshed.get(name) !== value) mutated = true;
+      droppedStale = true;
+      continue;
+    }
+    result.push(`${name}=${value}`);
+  }
+  return { result, mutated: mutated || !droppedStale };
+}
+
 /**
  * Merge any rotated session-token chunks from a Set-Cookie response into the
  * original cookie blob, preserving every other cookie the caller pasted
@@ -37,28 +59,10 @@ export function mergeRefreshedCookie(
   }
 
   const pairs = blob.split(/;\s*/).filter(Boolean);
-  const result: string[] = [];
-  let mutated = false;
-  let droppedStale = false;
-  for (const pair of pairs) {
-    const eqIdx = pair.indexOf("=");
-    if (eqIdx < 0) {
-      result.push(pair);
-      continue;
-    }
-    const name = pair.slice(0, eqIdx).trim();
-    const value = pair.slice(eqIdx + 1);
-    if (SESSION_TOKEN_FAMILY_RE.test(name)) {
-      if (!refreshed.has(name) || refreshed.get(name) !== value) mutated = true;
-      droppedStale = true;
-      continue;
-    }
-    result.push(`${name}=${value}`);
-  }
+  const { result, mutated } = retainOtherCookies(pairs, refreshed);
   for (const [name, value] of refreshed) {
     result.push(`${name}=${value}`);
   }
-  if (!droppedStale) mutated = true;
   return mutated ? result.join("; ") : null;
 }
 

@@ -151,7 +151,7 @@ export async function runReadinessFallback(
     body: unknown
   ): ReadinessFallbackOutcome => ({ ...readiness, providerResponse: response, finalBody: body });
 
-  if (args.failedReadiness.ok === true)
+  if (args.failedReadiness.ok === true || args.failedReadiness.upstreamFailure)
     return fail(args.failedReadiness, args.failedBody, args.finalBody);
 
   await args.failedBody.body?.cancel().catch(() => {});

@@ -86,17 +86,17 @@ test("getNextResetSummary returns null when no future resets", () => {
 
 test("getBarColor returns red below 20%", () => {
   const c = getBarColor(15);
-  assert.equal(c.bar, "#ef4444");
+  assert.equal(c.bar, "var(--color-error)");
 });
 
 test("getBarColor returns yellow between 20-50%", () => {
   const c = getBarColor(35);
-  assert.equal(c.bar, "#eab308");
+  assert.equal(c.bar, "var(--color-warning)");
 });
 
 test("getBarColor returns green above 50%", () => {
   const c = getBarColor(80);
-  assert.equal(c.bar, "#22c55e");
+  assert.equal(c.bar, "var(--color-success)");
 });
 
 test("formatCountdown returns null for null/empty/past", () => {

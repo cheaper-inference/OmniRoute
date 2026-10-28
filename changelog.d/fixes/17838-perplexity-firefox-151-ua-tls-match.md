@@ -1,0 +1,1 @@
+- **fix(perplexity-web):** align the Perplexity Firefox user agent and TLS profile on Firefox 151 (wreq-js 3.2.0) and correct the connection validator's drifted Firefox 152 UA ([#17838](https://github.com/diegosouzapw/OmniRoute/pull/17838)) — thanks @HouMinXi
