@@ -1,11 +1,11 @@
 {
   "sources": {
     "AGENTS.md": {
-      "source_hash": "13b510d66749761bcbeb799bdd38b6fd821976bc29b0859ed28f3dd94e064f70",
+      "source_hash": "9582b1b44990ad0c71ac3038551739a4606c71563bb73a179f6f1dc068192197",
       "locales": {
         "bs": {
-          "source_hash": "13b510d66749761bcbeb799bdd38b6fd821976bc29b0859ed28f3dd94e064f70",
-          "target_hash": "6b0367805ef41dbe605558de43c60731262551ea39ea197f064ed6248604d326",
+          "source_hash": "9582b1b44990ad0c71ac3038551739a4606c71563bb73a179f6f1dc068192197",
+          "target_hash": "f9254dd2e3883b5bf7849cd91149c807c391f0bea9785a9c593fdcd7af9baabf",
           "section_hashes": [
             "fe5597d25ab9",
             "51077e57dcfb",
@@ -17,14 +17,14 @@
             "e176a4cab67e",
             "50974cb9b793",
             "fa8d46969e63",
-            "e2846a2c88af",
+            "ee07221961a8",
             "25fd324dc753",
             "685657476062",
             "6c80b3f13040",
             "c6718a13a780",
             "102fdf6fcdfa",
             "66d8aabf7235",
-            "114c30ca5a5e",
+            "aefad6f80d60",
             "462ab5da1d83",
             "f6624f38d27c",
             "92c9bfddd378"
