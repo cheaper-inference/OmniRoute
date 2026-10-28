@@ -2,13 +2,6 @@ import type { LegacyModel as ModelV2 } from "../legacy-model.js";
 import { buildModelDisplayName } from "./naming.js";
 import type { FreeModelFreeType } from "./naming.js";
 
-export interface HistoricalPricingCandidate {
-  /** Fully qualified historical public ID, proven by the old node snapshot. */
-  previousPublicId: string;
-  /** Price from the original node/legacy namespace. No zero-cost fallback. */
-  pricing: NonNullable<OmniRouteEnrichmentEntry["pricing"]>;
-}
-
 export interface OmniRouteEnrichmentEntry {
   /** Human-readable display name. Replaces ModelV2.name when present. */
   name?: string;
@@ -47,80 +40,10 @@ export interface OmniRouteEnrichmentEntry {
   monthlyTokens?: number;
   /** Credit token budget for credit-based free models. */
   creditTokens?: number;
-  /** Pending evidence only: never publish this price before served-ID validation. */
-  historicalPricingCandidates?: HistoricalPricingCandidate[];
 }
 
 /** Map keyed by full model id (possibly namespaced, e.g. `cc/claude-sonnet-4-6`). */
 export type OmniRouteEnrichmentMap = Map<string, OmniRouteEnrichmentEntry>;
-
-/**
- * Reconcile a historical price only against ACTUALLY served model IDs.
- * This runs on every publish, including warm disk snapshots and partial
- * catalog refreshes. A live `ih/ag/foo` always wins over an old `ag/foo`
- * hypothesis, and a current price always wins over historical candidates.
- *
- * The function does not mutate the cached source map: the same stored overlay
- * can safely be re-projected after /v1/models changes during a prefix rename.
- */
-export function reconcileHistoricalEnrichment(
-  enrichment: OmniRouteEnrichmentMap,
-  servedModels: ReadonlyArray<{ id: string }>
-): OmniRouteEnrichmentMap {
-  const served = new Set(servedModels.map((item) => item.id));
-  const result: OmniRouteEnrichmentMap = new Map();
-  for (const [key, entry] of enrichment) {
-    const alias = entry.providerAlias;
-    const isCompatible =
-      typeof entry.providerCanonical === "string" &&
-      /^(?:openai-compatible-(?:chat|responses)-|anthropic-compatible-)/.test(
-        entry.providerCanonical
-      );
-    // Cached bare fallback keys are also stale if neither their unprefixed
-    // nor their current public-prefixed route is served. Preserve literal
-    // slash-bearing IDs when their prefixed route is live. For a namespaced
-    // entry, do not mistake alias/foo for alias/alias/foo.
-    if (isCompatible && alias) {
-      const namespaced = key.startsWith(`${alias}/`);
-      if (namespaced ? !served.has(key) : !served.has(key) && !served.has(`${alias}/${key}`)) {
-        continue;
-      }
-    }
-    const candidates = entry.historicalPricingCandidates;
-    if (!candidates?.length) {
-      result.set(key, entry);
-      continue;
-    }
-    const output = { ...entry };
-    if (
-      alias &&
-      served.has(key) &&
-      output.pricing === undefined &&
-      candidates.length === 1 &&
-      !served.has(candidates[0].previousPublicId) &&
-      !served.has(`${alias}/${candidates[0].previousPublicId}`)
-    ) {
-      output.pricing = { ...candidates[0].pricing };
-    }
-    result.set(key, output);
-  }
-  return result;
-}
-
-/**
- * True when the bare (unnamespaced) lookup key of a compatible-node model would
- * equal a namespaced key `<publicPrefix>/<id>`: a literal upstream id that
- * already starts with the public prefix. Such a key belongs to the model whose
- * served id it is, so the literal model is only reachable through its own
- * namespaced key (`<publicPrefix>/<publicPrefix>/...`).
- */
-function bareKeyIsNamespacedId(
-  publicPrefix: string,
-  providerAlias: string,
-  modelId: string
-): boolean {
-  return publicPrefix.length > 0 && modelId.startsWith(`${providerAlias}/`);
-}
 
 /**
  * Free-tier match between the enrichment overlay and the served catalog:
@@ -442,13 +365,6 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
   // index the served /v1/models names. No prefix guessing for stale IDs.
   const catalogAliasByKey = new Map<string, string>();
   const compatiblePublicPrefixes = new Set<string>();
-  const currentCatalogKeys = new Set<string>();
-  const unsafeReusedPrefixPriceKeys = new Set<string>();
-  const canonicalByPublicPrefix = new Map<string, string>();
-  const upstreamModelIdsByAlias = new Map<string, Set<string>>();
-  const historyCandidatesByAlias = new Map<string, Map<string, string>>();
-  const pendingHistoryClaims: Array<{ oldPrefix: string; alias: string }> = [];
-  const pendingPricingClaims: Array<{ pricingKey: string; alias: string }> = [];
   if (!baseURL || !apiKey) return out;
   const root = trimTrailingSlashes(baseURL.replace(/\/v1\/?$/, ""));
   const headers = {
@@ -475,86 +391,17 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
       if (providers && typeof providers === "object") {
         for (const [catalogKey, slot] of Object.entries(providers)) {
           if (!slot || typeof slot !== "object") continue;
-          // Display-only orphan / historical-pricing records are not live
-          // ownership evidence. They must not shadow historical claims or
-          // inject their price-only IDs into a published model catalog.
-          if ((slot as { pricingOnly?: unknown }).pricingOnly === true) continue;
           const configuredPrefix = (slot as { displayPrefix?: unknown }).displayPrefix;
           const publicPrefix = typeof configuredPrefix === "string" ? configuredPrefix.trim() : "";
           const providerAlias = publicPrefix || catalogKey;
-          currentCatalogKeys.add(catalogKey);
-          currentCatalogKeys.add(providerAlias);
-          if (publicPrefix) {
-            compatiblePublicPrefixes.add(publicPrefix);
-            // A public prefix re-used after node deletion cannot prove the
-            // existing price belongs to the new owner. Only direct node-ID
-            // pricing is eligible; the old namespace stays management-only.
-            if (
-              (slot as { pricingUnsafePublicPrefix?: unknown }).pricingUnsafePublicPrefix === true
-            ) {
-              unsafeReusedPrefixPriceKeys.add(publicPrefix);
-            }
-          }
+          if (publicPrefix) compatiblePublicPrefixes.add(publicPrefix);
           const models = (slot as { models?: unknown[] }).models;
           if (!Array.isArray(models)) continue;
-          if (publicPrefix) {
-            // The gateway's upstreamId=true bit disambiguates a literal
-            // upstream "ih/foo" from a pre-prefixed representation of "foo".
-            // IDs containing '/' must not be normalized by startsWith alone.
-            const literal = new Set<string>();
-            for (const candidate of models) {
-              if (!candidate || typeof candidate !== "object") continue;
-              const record = candidate as { id?: unknown; upstreamId?: unknown };
-              if (record.upstreamId === true && typeof record.id === "string") {
-                literal.add(record.id);
-              }
-            }
-            upstreamModelIdsByAlias.set(publicPrefix, literal);
-          }
           const canonicalRaw = (slot as { id?: unknown }).id;
           const providerCanonical =
             typeof canonicalRaw === "string" && canonicalRaw.length > 0 ? canonicalRaw : catalogKey;
           catalogAliasByKey.set(catalogKey, providerAlias);
           catalogAliasByKey.set(providerCanonical, providerAlias);
-          const storedPricingKey = (slot as { pricingKey?: unknown }).pricingKey;
-          if (typeof storedPricingKey === "string" && storedPricingKey.trim()) {
-            pendingPricingClaims.push({
-              pricingKey: storedPricingKey.trim(),
-              alias: providerAlias,
-            });
-          }
-          if (publicPrefix) {
-            canonicalByPublicPrefix.set(publicPrefix, providerCanonical);
-            const snapshots = (slot as { historicalPrefixes?: unknown }).historicalPrefixes;
-            if (Array.isArray(snapshots)) {
-              const byOldId =
-                historyCandidatesByAlias.get(publicPrefix) ?? new Map<string, string>();
-              for (const snapshot of snapshots) {
-                if (!snapshot || typeof snapshot !== "object") continue;
-                const oldPrefix = (snapshot as { prefix?: unknown }).prefix;
-                const oldIds = (snapshot as { modelIds?: unknown }).modelIds;
-                if (
-                  typeof oldPrefix !== "string" ||
-                  !oldPrefix ||
-                  oldPrefix.includes("/") ||
-                  oldPrefix === publicPrefix ||
-                  !Array.isArray(oldIds)
-                )
-                  continue;
-                const knownIds = new Set(
-                  oldIds.filter((id): id is string => typeof id === "string" && id.length > 0)
-                );
-                // If the raw upstream itself included "ag/foo", then "ag/foo"
-                // could name TWO different objects. Such rows cannot migrate.
-                for (const bare of knownIds) {
-                  const legacyId = `${oldPrefix}/${bare}`;
-                  if (!knownIds.has(legacyId)) byOldId.set(legacyId, bare);
-                }
-                pendingHistoryClaims.push({ oldPrefix, alias: publicPrefix });
-              }
-              historyCandidatesByAlias.set(publicPrefix, byOldId);
-            }
-          }
           const slotNameRaw = (slot as { name?: unknown }).name;
           const providerDisplayName =
             typeof slotNameRaw === "string" && slotNameRaw.trim().length > 0
@@ -575,9 +422,7 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
             // Canonical providers keep their upstream IDs intact.
             // Never strip an arbitrary segment: upstream model IDs may contain /.
             const modelId =
-              publicPrefix &&
-              id.startsWith(`${providerAlias}/`) &&
-              !upstreamModelIdsByAlias.get(providerAlias)?.has(id)
+              publicPrefix && id.startsWith(`${providerAlias}/`)
                 ? id.slice(providerAlias.length + 1)
                 : id;
             const namespaced = `${providerAlias}/${modelId}`;
@@ -586,11 +431,7 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
             // gets its OWN copy: sharing the object would let a later write
             // for one provider — a price, typically — land on another
             // provider's entry that happens to sell the same model id.
-            // A literal upstream "ih/foo" must not take the bare key "ih/foo": that key
-            // is the NAMESPACED entry of the model "foo" (#17348).
-            if (!bareKeyIsNamespacedId(publicPrefix, providerAlias, modelId) && !out.has(modelId)) {
-              out.set(modelId, { ...entry });
-            }
+            if (!out.has(modelId)) out.set(modelId, { ...entry });
           }
         }
       }
@@ -612,37 +453,6 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
     report("/api/pricing/models", `HTTP ${catalogStatus}`);
   }
 
-  // Resolve ALL claims (historical prefix + explicit pricingKey) together.
-  // A conflict between categories is just as dangerous as two legacy nodes
-  // claiming the same prefix: do not silently grant priority to either one.
-  const historyAliasClaims = new Map<string, string | null>();
-  const allClaims = new Map<string, Set<string>>();
-  const addClaim = (key: string, alias: string) => {
-    if (currentCatalogKeys.has(key)) return;
-    const owners = allClaims.get(key) ?? new Set<string>();
-    owners.add(alias);
-    allClaims.set(key, owners);
-  };
-  for (const { oldPrefix, alias } of pendingHistoryClaims) {
-    addClaim(oldPrefix, alias);
-    if (!historyAliasClaims.has(oldPrefix)) historyAliasClaims.set(oldPrefix, alias);
-    else if (historyAliasClaims.get(oldPrefix) !== alias) {
-      historyAliasClaims.set(oldPrefix, null);
-    }
-  }
-  for (const { pricingKey, alias } of pendingPricingClaims) addClaim(pricingKey, alias);
-
-  const ambiguousPricingNamespaces = new Set<string>();
-  for (const [key, claims] of allClaims) {
-    const owner = [...claims][0];
-    const currentOwner = catalogAliasByKey.get(key);
-    if (claims.size !== 1 || (currentOwner && currentOwner !== owner)) {
-      ambiguousPricingNamespaces.add(key);
-      continue;
-    }
-    if (!currentOwner) catalogAliasByKey.set(key, owner);
-  }
-
   // 2. Pricing values from /api/pricing.
   const priceAc = new AbortController();
   const priceTimer = setTimeout(() => priceAc.abort(), timeoutMs);
@@ -657,59 +467,15 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
     if (res.ok) {
       const body = (await res.json()) as unknown;
       if (body && typeof body === "object" && !Array.isArray(body)) {
-        const allPrices = body as Record<string, unknown>;
-        // Two historical/current pricing namespaces can coexist. A price
-        // explicitly keyed by the CURRENT compatible node ID is authoritative
-        // for that model; a public alias must not override it based on JSON
-        // enumeration order (#17348). Keep distinct alias-only model prices.
-        const canonicalPricedModels = new Map<string, Set<string>>();
-        for (const [publicAlias, canonical] of canonicalByPublicPrefix) {
-          if (publicAlias === canonical) continue;
-          const nodeSlot = allPrices[canonical];
-          if (!nodeSlot || typeof nodeSlot !== "object" || Array.isArray(nodeSlot)) continue;
-          const available = new Set<string>();
-          for (const [rawId, value] of Object.entries(nodeSlot)) {
-            if (!value || typeof value !== "object" || Array.isArray(value)) continue;
-            const fields = value as Record<string, unknown>;
-            if (
-              !["input", "output", "cached", "cacheRead", "cache_creation", "cacheWrite"].some(
-                (field) => typeof fields[field] === "number"
-              )
-            )
-              continue;
-            const normalized =
-              rawId.startsWith(`${publicAlias}/`) &&
-              !upstreamModelIdsByAlias.get(publicAlias)?.has(rawId)
-                ? rawId.slice(publicAlias.length + 1)
-                : rawId;
-            available.add(normalized);
-          }
-          if (available.size > 0) canonicalPricedModels.set(publicAlias, available);
-        }
-        for (const [pricingProviderKey, slot] of Object.entries(allPrices)) {
+        for (const [pricingProviderKey, slot] of Object.entries(body as Record<string, unknown>)) {
           if (!slot || typeof slot !== "object" || Array.isArray(slot)) continue;
-          // Never leak a disputed historical pricing namespace into either
-          // provider, not even through the bare-key fallback.
-          if (
-            ambiguousPricingNamespaces.has(pricingProviderKey) ||
-            unsafeReusedPrefixPriceKeys.has(pricingProviderKey)
-          )
-            continue;
           const providerAlias = catalogAliasByKey.get(pricingProviderKey) ?? pricingProviderKey;
           for (const [rawModelId, raw] of Object.entries(slot as Record<string, unknown>)) {
             const modelId =
               compatiblePublicPrefixes.has(providerAlias) &&
-              rawModelId.startsWith(`${providerAlias}/`) &&
-              !upstreamModelIdsByAlias.get(providerAlias)?.has(rawModelId)
+              rawModelId.startsWith(`${providerAlias}/`)
                 ? rawModelId.slice(providerAlias.length + 1)
                 : rawModelId;
-            if (
-              // Compare the ORIGINAL pricing namespace with the direct node
-              // price index, not an alias remapped from another catalog key.
-              canonicalByPublicPrefix.has(pricingProviderKey) &&
-              canonicalPricedModels.get(pricingProviderKey)?.has(modelId)
-            )
-              continue;
             if (!raw || typeof raw !== "object") continue;
             const p = raw as Record<string, unknown>;
             const parsed: NonNullable<OmniRouteEnrichmentEntry["pricing"]> = {};
@@ -730,41 +496,6 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
                   : undefined;
             if (typeof cacheWrite === "number") parsed.cacheWrite = cacheWrite;
             if (Object.keys(parsed).length === 0) continue;
-            const candidates = historyCandidatesByAlias.get(providerAlias);
-            const fromHistoricalNamespace =
-              historyAliasClaims.get(pricingProviderKey) === providerAlias;
-            const historicalId =
-              fromHistoricalNamespace && !rawModelId.startsWith(`${pricingProviderKey}/`)
-                ? `${pricingProviderKey}/${rawModelId}`
-                : rawModelId;
-            const currentBareId = candidates?.get(historicalId);
-            if (currentBareId) {
-              const target = `${providerAlias}/${currentBareId}`;
-              const existing = out.get(target) ?? {
-                providerAlias,
-                providerCanonical: canonicalByPublicPrefix.get(providerAlias),
-              };
-              const pending = existing.historicalPricingCandidates ?? [];
-              // Keep contradictory quotes as separate candidates. The served-ID
-              // reconciler only promotes a single unambiguous quote; silently
-              // keeping the first price would make JSON key order decide cost.
-              if (
-                !pending.some(
-                  (candidate) =>
-                    candidate.previousPublicId === historicalId &&
-                    (["input", "output", "cacheRead", "cacheWrite"] as const).every(
-                      (field) => candidate.pricing[field] === parsed[field]
-                    )
-                )
-              ) {
-                pending.push({ previousPublicId: historicalId, pricing: parsed });
-              }
-              existing.historicalPricingCandidates = pending;
-              out.set(target, existing);
-            }
-            // A pricing key that was an old public namespace cannot claim
-            // unproven IDs. Keep those orphan prices in DB, not in the client.
-            if (fromHistoricalNamespace) continue;
             const namespaced = `${providerAlias}/${modelId}`;
             const existingNs = out.get(namespaced);
             if (existingNs) {
@@ -778,14 +509,9 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
             // overwrites the first one's price, and the picker shows a cost
             // that belongs to a different connection.
             const bareBelongsHere =
-              !bareKeyIsNamespacedId(
-                compatiblePublicPrefixes.has(providerAlias) ? providerAlias : "",
-                providerAlias,
-                modelId
-              ) &&
-              (existingBare === undefined || existingBare.providerAlias === undefined
+              existingBare === undefined || existingBare.providerAlias === undefined
                 ? true
-                : existingBare.providerAlias === providerAlias);
+                : existingBare.providerAlias === providerAlias;
             if (bareBelongsHere) {
               if (existingBare) {
                 existingBare.pricing = { ...(existingBare.pricing ?? {}), ...parsed };

@@ -190,7 +190,11 @@ function getRegistryModel(providerIdOrAlias: string | null, modelId: string | nu
   if (!Array.isArray(models)) return null;
   const normalizedModelId =
     providerAlias === "cnl" ? modelId.replace(/-(?:xhigh|high|medium|low)$/i, "") : modelId;
-  return models.find((model) => model?.id === normalizedModelId) || null;
+  return (
+    models.find(
+      (model) => model?.id === normalizedModelId || model?.aliases?.includes(normalizedModelId)
+    ) || null
+  );
 }
 
 /**
@@ -1011,6 +1015,16 @@ export function getResolvedModelCapabilities(
     compatVisionOverride,
     syncedAvailableModelVision
   );
+  // #17289: WorkBuddy's DeepSeek Flash endpoint was observed to accept image_url
+  // (unlike other gateways serving the same upstream id). Provider-scoped, not a
+  // global DeepSeek name heuristic, and only applied while the verdict is still
+  // unknown: an explicit operator override, synced denial or registry value wins.
+  const effectiveSupportsVision =
+    supportsVision === null &&
+    resolved.provider === "workbuddy" &&
+    /^(?:global:|cn:)?deepseek-v4\.1-flash$/i.test(resolved.model ?? "")
+      ? true
+      : supportsVision;
   const supportsAudio = resolveAudioCapability(spec, registryModel, modalitiesInput);
   const supportsVideo = resolveVideoCapability(spec, registryModel, modalitiesInput);
 
@@ -1034,7 +1048,7 @@ export function getResolvedModelCapabilities(
       resolveSyncedEffortTierFallback(synced?.reasoning_efforts),
     reasoningEffortsOverride: reasoningEffortsOverride !== null,
     supportsTools,
-    supportsVision,
+    supportsVision: effectiveSupportsVision,
     supportsAudio,
     supportsVideo,
     supportsMaxTokens: heuristicMaxTokens(lookupKey),

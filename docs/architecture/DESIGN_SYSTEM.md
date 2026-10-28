@@ -1,6 +1,6 @@
 ---
 title: "Design System & Visual Identity"
-lastUpdated: 2026-10-22
+lastUpdated: 2026-10-27
 ---
 
 # OmniRoute — Design System & Visual Identity
@@ -8,10 +8,10 @@ lastUpdated: 2026-10-22
 > **Status:** the dashboard is built on the **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
 > as the workspace `packages/ui-kit` (`@omniroute/ui-kit`; the upstream snapshot is pinned in
 > `packages/ui-kit/UPSTREAM.md` and guarded by `npm run check:ui-kit-snapshot`). Light is the canonical
-> theme; the default preference is `system`. The accent is Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) is the UI family, Instrument Serif only for large sparse
-> display text (`.ci-dashboard-display`), IBM Plex Mono for code — all self-hosted through the
-> `@fontsource/*` imports at the top of `src/app/globals.css`. Every icon is a Lucide glyph.
+> theme; the default preference is `system`. The accent is Keak lime (`--ci-color-accent`). Switzer is
+> the single family for UI, display and code text (`--ci-font-ui`; `--ci-font-display` and
+> `--ci-font-mono` resolve to it), self-hosted by the kit itself (`packages/ui-kit/src/ci-fonts.css`,
+> imported by `ci-tokens.css`). Every icon is a Lucide glyph.
 
 ## 1. Where things live
 
@@ -82,10 +82,13 @@ lastUpdated: 2026-10-22
 
 ## 2. Rules
 
-1. Tokens, never literals. Exceptions kept on purpose: the always-dark console terminal, ReactFlow SVG
-   strokes via `STATUS_HEX` (`src/shared/constants/statusColors.ts`), and the categorical palettes
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) and
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
+1. Tokens, never literals. Exceptions kept on purpose: the always-dark console terminal and
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), the resolved-hex mirror of the kit status
+   palette for callers that need a literal hex. The categorical palettes are no exception any more:
+   they ride on the kit's five chart tokens (`--color-chart-1..5`) through
+   `src/shared/utils/categoricalPalette.ts` and, for routing strategies,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges and the orchestration
+   canvas read the theme-aware `--orch-status-*` variables (`src/shared/components/flow/edgeStyles.ts`).
 2. Never patch `packages/ui-kit/src` by hand: sync with `scripts/dev/sync-ui-kit.sh <commit>`; the
    pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) fails on any byte that
    differs from the pinned upstream commit (it skips with a warning when the upstream clone,
@@ -96,8 +99,8 @@ lastUpdated: 2026-10-22
 4. Tailwind utilities win over kit component classes (the kit declares
    `@layer theme, base, components, utilities` and its rules live in `components`) — use utilities for
    spacing and layout, not to re-color kit components.
-5. Headings: `.ci-heading` (Inter, no tracking) for page and section titles; `.ci-dashboard-display`
-   (Instrument Serif) only for large, sparse display text such as the error-page status code.
+5. Headings: `.ci-heading` for page and section titles; `.ci-dashboard-display` only for large, sparse
+   display text such as the error-page status code. Both use Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` guards the kit adoption: no Material ligature span under
    `src/app` or `src/shared/components`; in the dashboard tree (`src/app/(dashboard)` and
    `src/shared/components`) no raw `<select>`, `<textarea>` or `<table>` and no hand-rolled
@@ -146,7 +149,43 @@ relative imports). Then: review `git diff packages/ui-kit`, do a visual pass on 
 usage and endpoint in both themes, run `npm run check:ui-kit-snapshot` and `npm run test:vitest:ui`, and
 open the PR with the upstream changelog.
 
-## 6. Reference index
+## 6. README diagrams
+
+The twelve diagrams the root `README.md` embeds (`docs/diagrams/*.svg`) are the kit applied to a static
+image, and they are generated, not drawn by hand: 13 generator files at `scripts/docs/gen-readme-*.mjs`
+(twelve diagrams plus the `gen-readme-diagrams.mjs` driver) and 12 staleness tests at
+`tests/unit/docs/readme-*-svg.test.ts`, one per diagram, each byte-comparing the committed file with its
+generator's output (job `test-unit`).
+
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` copies the palette from `packages/ui-kit/src/ci-tokens.css`
+  (pinned against that file by `tests/unit/docs/readme-diagram-theme.test.ts`) and defines the text roles on
+  the kit's earlier faces — Instrument Serif for display, Inter for UI text, IBM Plex Mono for figures and
+  code — from the `@fontsource` packages (the dashboard itself uses the kit's Switzer since kit 0.0.66).
+  Light values sit on `:root`, dark values behind `prefers-color-scheme: dark`, inside the file, so each
+  image follows the viewer's scheme on GitHub.
+- **Fonts.** `scripts/docs/readme-fonts.mjs` subsets those woff2 files to the glyphs each diagram draws and
+  embeds them as `@font-face` `data:` URIs — the only way kit typography reaches a README image, since
+  GitHub Markdown carries no CSS and the camo proxy blocks every external fetch. The subsets are latin-only;
+  the symbol glyphs that fall back to the system stack are allowed one by one in `SYMBOL_FALLBACKS`, and any
+  other uncovered glyph throws.
+- **Regenerate.** `npm run docs:readme-diagrams` rewrites all twelve in README order and prints one line per
+  file with its size. A single generator also runs on its own (`node scripts/docs/gen-readme-<name>.mjs`;
+  `free-tier-budget` needs `node --import tsx/esm` because its figures come from the live catalog loader in
+  `open-sse/config/freeModelCatalog.ts`; the CI consequence of a catalog change is in
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit the generator and the SVG together.
+- **Proof.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renders a file the way GitHub serves
+  it (an `<img>` tag, camo's `Content-Security-Policy`, `image/svg+xml`), captures a light and a dark frame
+  and reports the external font requests the page made (must be 0).
+- **Budget.** Under 200 KB per file (each staleness test asserts it); 500 KB is the hard cap for any README
+  image (the SVG studio validator's rule).
+- **Copy unchanged, counts from the gate.** The rebrand changed type and palette, not words: each generator
+  carries its diagram's copy in a `*_COPY` constant (or builds it from the live catalog) that is both the
+  drawn text and the font-subset input. Canonical figures stay in `<text>` nodes, read by `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`); the staleness tests of the diagrams that gate reads also run
+  its validators on the generated file, so a figure that drifts from the code fails the test — fix the
+  source the gate reads, never the number in the generator.
+
+## 7. Reference index
 
 - `src/app/globals.css` — token bridge, `.dark` overrides, OmniRoute `@layer components` extensions
 - `packages/ui-kit/UPSTREAM.md` — pinned upstream commit and license authorization; `packages/ui-kit/PATCHES.md`

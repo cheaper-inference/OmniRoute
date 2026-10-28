@@ -37,13 +37,13 @@ Ntụnyere atụmatụ ziri ezi megide AI routers open-source ama ama.
 | **Nkwado tunnel (Cloudflared, Tailscale, Ngrok)**       |                     ✅                      |         ❌         |        n/a        |        n/a        |
 | **Akwụkwọ ikike**                                       |                     MIT                     |        MIT         |   nke pụrụ iche   |   nke pụrụ iche   |
 
-## Mgbe ị ga-ahọrọ OmniRoute
+## Mgbe ịhọrọ OmniRoute
 
-- Ị na-ebunye onwe gị (self-host) ma chọọ **ịkpuchite ndị na-enye ọrụ kacha ukwuu** (ndị na-enye ọrụ 375, ihe 155 ndị e debere n'efu/na-enweghị njirimara)
-- Ị chọrọ **MCP server arụnyere n'ime** (ngwá ọrụ LLM, ebe nchekwa, na nkà a gosipụtara dị ka ngwá ọrụ)
-- Ị chọrọ **A2A protocol** maka usoro ọrụ agent-na-agent
-- Ị chọrọ **izobe mkpịsị aka** (JA3/JA4) iji zere ịchọpụta site na CAPTCHAs nke elu
-- Ị chọrọ **atụmatụ nnukwu ụlọ ọrụ** (nchebe, nyocha, ndekọ nyocha) na-enweghị ụgwọ SaaS
+- Ị na-elekọta onwe gị ma chọọ** mkpuchi onye na-eweta kacha** (ndị na-enye 377, ndenye katalọgụ free/no-auth 155)
+- Ị chọrọ a** ihe nkesa MCP arụnyere n'ime ya** (ngwaọrụ LLM, ebe nchekwa, nka ekpughere dị ka ngwaọrụ)
+- Ị chọrọ**A2A protocol** maka ndị nnọchi anya ọrụ na-arụ ọrụ
+- Ị chọrọ** stealth mkpịsị aka mkpịsị aka** (JA3/JA4) iji zere nchọta site n'elu CAPTCHAs
+- Ị chọrọ** atụmatụ ụlọ ọrụ** (guardrails, evals, audit trail) na-enweghị ụgwọ SaaS
 
 ## Mgbe ị ga-ahọrọ LiteLLM
 

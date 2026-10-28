@@ -9,11 +9,6 @@ import { backupDbFile } from "../backup";
 import { invalidateDbCache } from "../readCache";
 import { toRecord, type JsonRecord } from "./columns";
 import { resetProviderNodePrefixCache } from "./nodePrefix";
-import {
-  recordNodePrefixChange,
-  deleteNodePrefixHistory,
-  recordDeletedNodePrefixTombstone,
-} from "./nodePrefixHistory";
 
 function normalizeDailyQuotaResetHour(value: unknown): number | null {
   return value === 0 || value ? Number(value) : null;
@@ -42,7 +37,6 @@ interface StatementLike<TRow = unknown> {
 
 interface DbLike {
   prepare: <TRow = unknown>(sql: string) => StatementLike<TRow>;
-  transaction: <T>(action: () => T) => () => T;
 }
 
 export async function getProviderNodes(filter: JsonRecord = {}, limit?: number, offset?: number) {
@@ -190,9 +184,8 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
     merged["customHeadersJson"] = typeof existingJson === "string" ? existingJson : null;
   }
 
-  db.transaction(() => {
-    db.prepare(
-      `
+  db.prepare(
+    `
     UPDATE provider_nodes SET type = @type, name = @name, prefix = @prefix,
     api_type = @apiType, base_url = @baseUrl, chat_path = @chatPath,
     models_path = @modelsPath, icon_url = @iconUrl,
@@ -202,39 +195,23 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
     updated_at = @updatedAt
     WHERE id = @id
   `
-    ).run({
-      id,
-      type: merged["type"],
-      name: merged["name"],
-      prefix: merged["prefix"] || null,
-      apiType: merged["apiType"] || null,
-      baseUrl: merged["baseUrl"] || null,
-      chatPath: merged["chatPath"] || null,
-      modelsPath: merged["modelsPath"] || null,
-      // #2166: iconUrl is nullable — explicit `null` (not omission) clears a previously
-      // stored custom icon when the caller submits an empty value.
-      iconUrl: merged["iconUrl"] || null,
-      customHeadersJson: merged["customHeadersJson"] || null,
-      dailyQuotaResetTimezone: merged["dailyQuotaResetTimezone"] || null,
-      dailyQuotaResetHour: normalizeDailyQuotaResetHour(merged["dailyQuotaResetHour"]),
-      updatedAt: merged["updatedAt"],
-    });
-    // Persist evidence from the SAME pre-change node and its known upstream
-    // model IDs atomically with the routing-prefix update (#17348). A value
-    // such as "ag/model" may be a legitimate upstream ID; the history never
-    // guesses that removing "ag/" is safe.
-    const original = existing as JsonRecord;
-    const compatible =
-      original.type === "openai-compatible" || original.type === "anthropic-compatible";
-    if (compatible) {
-      recordNodePrefixChange(
-        db,
-        id,
-        typeof original.prefix === "string" ? original.prefix : null,
-        typeof merged["prefix"] === "string" ? merged["prefix"] : null
-      );
-    }
-  })();
+  ).run({
+    id,
+    type: merged["type"],
+    name: merged["name"],
+    prefix: merged["prefix"] || null,
+    apiType: merged["apiType"] || null,
+    baseUrl: merged["baseUrl"] || null,
+    chatPath: merged["chatPath"] || null,
+    modelsPath: merged["modelsPath"] || null,
+    // #2166: iconUrl is nullable — explicit `null` (not omission) clears a previously
+    // stored custom icon when the caller submits an empty value.
+    iconUrl: merged["iconUrl"] || null,
+    customHeadersJson: merged["customHeadersJson"] || null,
+    dailyQuotaResetTimezone: merged["dailyQuotaResetTimezone"] || null,
+    dailyQuotaResetHour: normalizeDailyQuotaResetHour(merged["dailyQuotaResetHour"]),
+    updatedAt: merged["updatedAt"],
+  });
 
   backupDbFile("pre-write");
   invalidateDbCache("nodes");
@@ -248,16 +225,7 @@ export async function deleteProviderNode(id: string) {
   const existing = db.prepare("SELECT * FROM provider_nodes WHERE id = ?").get(id);
   if (!existing) return null;
 
-  db.transaction(() => {
-    const row = existing as { type?: string; prefix?: string | null };
-    if (row.type === "openai-compatible" || row.type === "anthropic-compatible") {
-      // Make reuse of this deleted node's public prefixes an ambiguity veto
-      // for future historical-price recovery, even after the node is gone.
-      recordDeletedNodePrefixTombstone(db, id, row.prefix);
-    }
-    db.prepare("DELETE FROM provider_nodes WHERE id = ?").run(id);
-    deleteNodePrefixHistory(db, id);
-  })();
+  db.prepare("DELETE FROM provider_nodes WHERE id = ?").run(id);
   backupDbFile("pre-write");
   invalidateDbCache("nodes");
   resetProviderNodePrefixCache();

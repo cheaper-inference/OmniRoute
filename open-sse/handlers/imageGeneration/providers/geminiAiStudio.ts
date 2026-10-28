@@ -1,4 +1,5 @@
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import { geminiInlineImagePart, geminiReferenceImageError } from "./geminiInline.ts";
 
 /**
  * Google AI Studio (Gemini API key) native image generation — `gemini` image provider,
@@ -154,11 +155,26 @@ export async function handleGeminiAiImageGeneration({
     });
   }
 
+  const referenceError = geminiReferenceImageError(body);
+  if (referenceError) {
+    return deps.saveErrorResult({
+      provider: PROVIDER,
+      model,
+      status: 400,
+      startTime,
+      error: referenceError,
+      requestBody: logRequestBody,
+    });
+  }
+
   const baseUrl = String(providerConfig.baseUrl || "").replace(/\/+$/, "");
   const url = `${baseUrl}/${model}:generateContent`;
+  const inlineImage = geminiInlineImagePart(body);
   // No `candidateCount`: Gemini image models reject values above 1.
   const requestBody = {
-    contents: [{ role: "user", parts: [{ text: promptText }] }],
+    contents: [
+      { role: "user", parts: [...(inlineImage ? [inlineImage] : []), { text: promptText }] },
+    ],
     generationConfig: { responseModalities: ["TEXT", "IMAGE"], imageConfig: { aspectRatio } },
   };
 

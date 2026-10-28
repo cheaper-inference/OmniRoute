@@ -47,7 +47,7 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,targe
 #   ip-address      10.2.0 (needs >= 10.5.1)  CVE-2026-69192/-69198/-54272 + the
 #                   isLinkLocal / NAT64 local-use SSRF advisories fixed in 10.5.1
 #   tar             7.5.19 (needs >= 7.5.21)  GHSA-r292-9mhp-454m
-#   undici          6.27.0 (needs >= 6.28.0)  CVE-2026-16729/-16728/-15157
+#   undici          6.27.0 (needs >= 6.29.1)  GHSA-2m5v-pch6-74hx and October 2026 fixes
 # No published npm release carries patched copies, so `npm install -g npm@latest`
 # alone was pure build time for zero CVEs — it is kept only to land on a known,
 # current npm tree, and the patched copies are overlaid on top below.
@@ -67,7 +67,7 @@ RUN set -eux; \
   npm install -g npm@latest; \
   npm install --prefix /tmp/npm-cve-patch --no-audit --no-fund --ignore-scripts \
     --install-strategy=nested \
-    brace-expansion@5.0.12 ip-address@10.7.4 postcss-selector-parser@7.1.6 tar@7.5.22 undici@6.29.0; \
+    brace-expansion@5.0.12 ip-address@10.7.4 postcss-selector-parser@7.1.6 tar@7.5.22 undici@6.29.1; \
   for pkg in brace-expansion ip-address postcss-selector-parser tar undici; do \
     test -d "/usr/local/lib/node_modules/npm/node_modules/$pkg"; \
     rm -rf "/usr/local/lib/node_modules/npm/node_modules/$pkg"; \
@@ -230,7 +230,15 @@ ENV NODE_OPTIONS="--max-old-space-size=${OMNIROUTE_BUILD_MEMORY_MB}"
 ARG OMNIROUTE_BUILD_WORKERS=2
 ENV CIRCLE_NODE_TOTAL=${OMNIROUTE_BUILD_WORKERS}
 
+# Webpack production builds skip the persistent cache unless this is 1 (see
+# next.config.mjs). Declared as ARG+ENV so `--build-arg
+# OMNIROUTE_WEBPACK_BUILD_CACHE=1` reaches `npm run build`.
+ARG OMNIROUTE_WEBPACK_BUILD_CACHE=""
+ENV OMNIROUTE_WEBPACK_BUILD_CACHE=$OMNIROUTE_WEBPACK_BUILD_CACHE
+
 COPY . ./
+# The cache mount keeps .build/next/cache across builds on the same BuildKit host.
+# It holds only the SWC cache unless OMNIROUTE_WEBPACK_BUILD_CACHE=1.
 RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-next-cache,target=/app/.build/next/cache \
   mkdir -p /app/data \
   && npm run build \
@@ -395,7 +403,7 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,targe
 # npm 12 requires an explicit allowlist for required global lifecycle scripts.
 RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-npm-cache,target=/root/.npm \
   npm install -g --no-audit --no-fund --allow-scripts=@anthropic-ai/claude-code,openclaw \
-    @openai/codex@0.159.2 \
+    @openai/codex@0.165.0 \
     @anthropic-ai/claude-code@2.1.260 \
     droid@0.212.0 \
     openclaw@2026.9.1 \
