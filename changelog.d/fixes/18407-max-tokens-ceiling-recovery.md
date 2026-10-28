@@ -1,0 +1,1 @@
+- **fix(executors):** a 400 advertising a `max_tokens` ceiling ("expected a value <= N") is now parsed, clamped (squeezing an over-cap thinking budget), retried once, and learned so future requests pre-clamp ([#18407](https://github.com/cheaper-inference/OmniRoute/pull/18407)) — thanks @jjxyxsjr
