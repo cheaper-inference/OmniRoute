@@ -11,73 +11,73 @@ _Cập nhật lần cuối: 2026-06-28_
 ## Tóm tắt điều hành
 
 OmniRoute là một cổng định tuyến AI cục bộ và bảng điều khiển được xây dựng trên Next.js.
-Nó cung cấp một endpoint duy nhất tương thích với OpenAI (`/v1/*`) và định tuyến lưu lượng qua nhiều nhà cung cấp thượng nguồn, với khả năng chuyển đổi, dự phòng, làm mới token và theo dõi mức sử dụng.
+Nó cung cấp một endpoint duy nhất tương thích với OpenAI (`/v1/*`) và định tuyến lưu lượng qua nhiều nhà cung cấp thượng nguồn, hỗ trợ chuyển đổi định dạng, dự phòng, làm mới token và theo dõi mức sử dụng.
 
 Các khả năng cốt lõi:
 
 - Bề mặt API tương thích với OpenAI dành cho CLI/công cụ (376 nhà cung cấp, 156 mô-đun thực thi)
 - Chuyển đổi yêu cầu/phản hồi giữa các định dạng của nhà cung cấp
 - Dự phòng theo tổ hợp mô hình (chuỗi nhiều mô hình)
-- Các bước tổ hợp có cấu trúc (`provider + model + connection`) với thứ tự lúc chạy dựa trên `compositeTiers`
+- Các bước tổ hợp có cấu trúc (`provider + model + connection`) với thứ tự thời gian chạy theo `compositeTiers`
 - Dự phòng ở cấp tài khoản (nhiều tài khoản cho mỗi nhà cung cấp)
-- Kiểm tra trước hạn mức và lựa chọn tài khoản P2C có nhận biết hạn mức trong luồng chat chính
+- Kiểm tra trước hạn ngạch và lựa chọn tài khoản P2C có nhận biết hạn ngạch trong luồng trò chuyện chính
 - Quản lý kết nối nhà cung cấp bằng OAuth + khóa API (27 mô-đun nhà cung cấp OAuth)
 - Tạo embedding qua `/v1/embeddings` (18 nhà cung cấp)
 - Tạo hình ảnh qua `/v1/images/generations` (hơn 10 nhà cung cấp, hơn 20 mô hình)
-- Chuyển âm thanh thành văn bản qua `/v1/audio/transcriptions` (18 nhà cung cấp)
+- Chuyển lời nói thành văn bản qua `/v1/audio/transcriptions` (18 nhà cung cấp)
 - Chuyển văn bản thành giọng nói qua `/v1/audio/speech` (24 nhà cung cấp tích hợp sẵn)
 - Tạo video qua `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Tạo nhạc qua `/v1/music/generations` (ComfyUI)
-- Tìm kiếm web qua `/v1/search` (20 nhà cung cấp)
+- Tìm kiếm trên web qua `/v1/search` (20 nhà cung cấp)
 - Kiểm duyệt qua `/v1/moderations`
 - Xếp hạng lại qua `/v1/rerank`
 - Phân tích thẻ suy luận (`<think>...</think>`) cho các mô hình suy luận
 - Làm sạch phản hồi để tương thích nghiêm ngặt với OpenAI SDK
 - Chuẩn hóa vai trò (developer→system, system→user) để tương thích giữa các nhà cung cấp
 - Chuyển đổi đầu ra có cấu trúc (json_schema → Gemini responseSchema)
-- Lưu trữ cục bộ cho nhà cung cấp, khóa, bí danh, tổ hợp, cài đặt và giá cả (122 mô-đun DB)
+- Lưu trữ cục bộ nhà cung cấp, khóa, bí danh, tổ hợp, cài đặt và giá (122 mô-đun DB)
 - Theo dõi mức sử dụng/chi phí và ghi nhật ký yêu cầu
-- Tùy chọn đồng bộ đám mây để đồng bộ trạng thái trên nhiều thiết bị
-- Danh sách IP được phép/bị chặn để kiểm soát quyền truy cập API
-- Quản lý ngân sách suy luận (chuyển tiếp nguyên trạng/tự động/tùy chỉnh/thích ứng)
-- Chèn lời nhắc hệ thống toàn cục
+- Đồng bộ đám mây tùy chọn để đồng bộ trạng thái trên nhiều thiết bị
+- Danh sách cho phép/chặn IP để kiểm soát quyền truy cập API
+- Quản lý ngân sách suy luận (truyền nguyên trạng/tự động/tùy chỉnh/thích ứng)
+- Chèn prompt hệ thống toàn cục
 - Theo dõi phiên và tạo dấu vân tay
-- Giới hạn tốc độ nâng cao theo từng tài khoản với các cấu hình riêng cho từng nhà cung cấp
+- Giới hạn tốc độ nâng cao theo từng tài khoản với các hồ sơ dành riêng cho nhà cung cấp
 - Mẫu circuit breaker để tăng khả năng phục hồi của nhà cung cấp
 - Bảo vệ chống hiệu ứng thundering herd bằng khóa mutex
-- Bộ nhớ đệm loại bỏ yêu cầu trùng lặp dựa trên chữ ký
+- Bộ nhớ đệm loại bỏ trùng lặp yêu cầu dựa trên chữ ký
 - Lớp miền: quy tắc chi phí, chính sách dự phòng, chính sách khóa
 - Context Relay: bản tóm tắt bàn giao phiên để duy trì tính liên tục khi luân chuyển tài khoản
-- Lưu trữ trạng thái miền (bộ nhớ đệm ghi xuyên SQLite cho dự phòng, ngân sách, khóa và circuit breaker)
+- Lưu trữ trạng thái miền (bộ nhớ đệm ghi xuyên SQLite cho trạng thái dự phòng, ngân sách, khóa và circuit breaker)
 - Công cụ chính sách để đánh giá yêu cầu tập trung (khóa → ngân sách → dự phòng)
 - Dữ liệu đo từ xa của yêu cầu với tổng hợp độ trễ p50/p95/p99
-- Dữ liệu đo từ xa của đích tổ hợp và tình trạng lịch sử của đích tổ hợp thông qua `combo_execution_key` / `combo_step_id`
-- ID tương quan (X-Request-Id) để theo dõi xuyên suốt từ đầu đến cuối
-- Ghi nhật ký kiểm toán tuân thủ với khả năng từ chối tham gia theo từng khóa API
+- Dữ liệu đo từ xa của đích tổ hợp và tình trạng lịch sử của đích tổ hợp qua `combo_execution_key` / `combo_step_id`
+- ID tương quan (X-Request-Id) để truy vết đầu-cuối
+- Ghi nhật ký kiểm toán tuân thủ với tùy chọn từ chối theo từng khóa API
 - Khung đánh giá để đảm bảo chất lượng LLM
 - Bảng điều khiển tình trạng với trạng thái circuit breaker của nhà cung cấp theo thời gian thực
-- MCP Server (110 công cụ) với 3 phương thức truyền tải (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) với các kỹ năng và vòng đời tác vụ
+- Máy chủ MCP (110 công cụ) với 3 phương thức truyền tải (stdio/SSE/Streamable HTTP)
+- Máy chủ A2A (JSON-RPC 2.0 + SSE) với các kỹ năng và vòng đời tác vụ
 - Hệ thống bộ nhớ (trích xuất, chèn, truy xuất, tóm tắt)
-- Hệ thống kỹ năng (registry, executor, sandbox, các kỹ năng tích hợp sẵn)
-- Proxy MITM với khả năng quản lý chứng chỉ và xử lý DNS
-- Middleware bảo vệ chống chèn lời nhắc
-- Pipeline nén lời nhắc với Caveman, RTK, các pipeline xếp chồng, tổ hợp nén, gói ngôn ngữ và phân tích
-- Registry ACP (Agent Communication Protocol)
+- Hệ thống kỹ năng (sổ đăng ký, bộ thực thi, sandbox, kỹ năng tích hợp sẵn)
+- Proxy MITM với tính năng quản lý chứng chỉ và xử lý DNS
+- Middleware bảo vệ chống chèn prompt
+- Quy trình nén prompt với Caveman, RTK, các quy trình xếp chồng, tổ hợp nén, gói ngôn ngữ và phân tích
+- Sổ đăng ký ACP (Agent Communication Protocol)
 - Các nhà cung cấp OAuth dạng mô-đun (22 mô-đun riêng lẻ trong `src/lib/oauth/providers/`)
 - Các tập lệnh gỡ cài đặt/gỡ cài đặt hoàn toàn
 - Hành động sửa chữa môi trường OAuth
 - Cầu nối WebSocket cho các máy khách WS tương thích với OpenAI (`/v1/ws`)
 - Quản lý token đồng bộ (phát hành/thu hồi, tải xuống gói cấu hình được lập phiên bản bằng ETag)
-- GLM Thinking (`glmt`) dưới dạng cấu hình đặt trước của nhà cung cấp hạng nhất
-- Đếm token kết hợp (`/messages/count_tokens` phía nhà cung cấp với phương án dự phòng bằng ước tính)
-- Tự động khởi tạo bí danh mô hình (hơn 30 phép chuẩn hóa phương ngữ giữa các proxy khi khởi động)
-- Tìm nạp ra ngoài an toàn với lớp bảo vệ SSRF, chặn URL riêng tư và cơ chế thử lại có thể cấu hình
-- Thử lại chat có nhận biết thời gian chờ với `requestRetry` và `maxRetryIntervalSec` có thể cấu hình
-- Xác thực môi trường runtime bằng Zod khi khởi động
-- Kiểm toán tuân thủ v2 với phân trang, các sự kiện CRUD của nhà cung cấp và ghi nhật ký xác thực bị chặn bởi SSRF
+- GLM Thinking (`glmt`) dưới dạng cấu hình nhà cung cấp hạng nhất
+- Đếm token lai (`/messages/count_tokens` phía nhà cung cấp với phương án dự phòng bằng ước tính)
+- Tự động khởi tạo bí danh mô hình (hơn 30 chuẩn hóa phương ngữ xuyên proxy khi khởi động)
+- Truy xuất ra ngoài an toàn với cơ chế bảo vệ SSRF, chặn URL riêng tư và khả năng thử lại có thể cấu hình
+- Thử lại trò chuyện có nhận biết thời gian chờ với `requestRetry` và `maxRetryIntervalSec` có thể cấu hình
+- Xác thực môi trường thời gian chạy bằng Zod khi khởi động
+- Kiểm toán tuân thủ v2 với phân trang, sự kiện CRUD của nhà cung cấp và ghi nhật ký xác thực bị SSRF chặn
 
-Mô hình runtime chính:
+Mô hình thời gian chạy chính:
 
 - Các route ứng dụng Next.js trong `src/app/api/*` triển khai cả API bảng điều khiển lẫn API tương thích
 - Lõi SSE/định tuyến dùng chung trong `src/sse/*` + `open-sse/*` xử lý việc thực thi nhà cung cấp, chuyển đổi, truyền phát, dự phòng và mức sử dụng

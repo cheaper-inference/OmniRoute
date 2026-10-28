@@ -397,22 +397,22 @@ open-sse/
 
 | 문서                        | 목적                                                                                 |
 | --------------------------- | ------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | 상위 수준 아키텍처, 서브시스템 맵, 대시보드 표면                                     |
+| `ARCHITECTURE.md`           | 상위 수준 아키텍처, 서브시스템 맵, 대시보드 화면                                     |
 | `CODEBASE_DOCUMENTATION.md` | 엔지니어링 레퍼런스: 디렉터리, 모듈, 컨벤션                                          |
 | `FEATURES.md`               | v3.8 하이라이트가 포함된 기능 매트릭스                                               |
 | `USER_GUIDE.md`             | 최종 사용자 매뉴얼 (설정, 모델, 콤보, CLI, 오디오 등)                                |
 | `API_REFERENCE.md`          | 인증 모델이 포함된 API 엔드포인트 레퍼런스                                           |
-| `openapi.yaml`              | OpenAPI 3.0 명세 (121개 경로)                                                        |
+| `openapi.yaml`              | OpenAPI 3.0 스펙 (121개 경로)                                                        |
 | `SETUP_GUIDE.md`            | 설치 방법 (npm, npx, Docker, Electron, Termux, 소스)                                 |
 | `ENVIRONMENT.md`            | 모든 환경 변수 (약 800개 문서화, 약 3,050줄의 `.env.example`)                        |
 | `TROUBLESHOOTING.md`        | 일반적인 오류 + v3.8.0 알려진 이슈                                                   |
 | `RELEASE_CHECKLIST.md`      | 전체 릴리스 흐름 (스킬, husky, conventional commits, 배포)                           |
 | `COVERAGE_PLAN.md`          | 커버리지 목표 및 현재 상태                                                           |
-| `FREE_TIERS.md`             | 선별된 무료 티어 프로바이더 (48개 이상 무료 + 11개 OAuth)                            |
+| `FREE_TIERS.md`             | 선별된 무료 티어 프로바이더 (무료 48개 이상 + OAuth 11개)                            |
 | `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                                   |
 | `I18N.md`                   | i18n 아키텍처, 언어 추가 방법, 67개 로케일                                           |
-| `UNINSTALL.md`              | 깔끔한 제거 단계                                                                     |
-| `PROVIDER_REFERENCE.md`     | 376개 프로바이더의 **자동 생성** 카탈로그 (재생성: `npm run gen:provider-reference`) |
+| `UNINSTALL.md`              | 클린 제거 단계                                                                       |
+| `PROVIDER_REFERENCE.md`     | **자동 생성**된 376개 프로바이더 카탈로그 (재생성: `npm run gen:provider-reference`) |
 
 ### 서브시스템 심층 분석
 
@@ -423,7 +423,7 @@ open-sse/
 | `AGENT_PROTOCOLS_GUIDE.md`                  | 통합 가이드: A2A vs ACP vs Cloud Agents                            |
 | `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules 오케스트레이션                         |
 | `SKILLS.md`                                 | 스킬 프레임워크 (내장 + 마켓플레이스 + SkillsSH + 샌드박스)        |
-| `RADAR.md`                                  | Radar 무료 모델 카탈로그 오버레이 (`RADAR_ENABLED`, 기본 비활성화) |
+| `RADAR.md`                                  | Radar 무료 모델 카탈로그 오버레이 (`RADAR_ENABLED`, 기본값은 꺼짐) |
 | `MEMORY.md`                                 | 메모리 시스템 (SQLite FTS5 + Qdrant)                               |
 | `EVALS.md`                                  | 평가 프레임워크 (스위트, 실행, 루브릭)                             |
 | `GUARDRAILS.md`                             | PII 마스커, 프롬프트 인젝션, 비전 브리지                           |
@@ -431,7 +431,7 @@ open-sse/
 | `WEBHOOKS.md`                               | HMAC 서명 웹훅 전달                                                |
 | `REASONING_REPLAY.md`                       | `reasoning_content`를 위한 하이브리드 메모리/SQLite 캐시           |
 | `AUTHZ_GUIDE.md`                            | 인가 파이프라인 (`classify` → `policies` → `enforce`)              |
-| `RESILIENCE_GUIDE.md`                       | 서킷 브레이커 + 쿨다운 + 모델 잠금                                 |
+| `RESILIENCE_GUIDE.md`                       | 서킷 브레이커 + 쿨다운 + 모델 차단                                 |
 | `docs/security/STEALTH_GUIDE.md` (git 전용) | TLS 핑거프린팅 (JA3/JA4), Claude Code CCH, MITM 인증서             |
 | `AUTO-COMBO.md`                             | Auto Combo 엔진 (16개 팩터 스코어링, 6개 모드 팩, 가상 팩토리)     |
 
@@ -447,24 +447,24 @@ open-sse/
 
 ### 배포
 
-| 문서                         | 목적                                                            |
-| ---------------------------- | --------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker 빌드, 프로필 (base/cli/host/cliproxyapi), Redis 사이드카 |
-| `VM_DEPLOYMENT_GUIDE.md`     | 범용 VM/VPS 배포 (Ubuntu/Debian + nginx + systemd)              |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io 배포 (현재 중국어만 제공)                                |
-| `TERMUX_GUIDE.md`            | Termux를 통한 Android 헤드리스 실행                             |
-| `PWA_GUIDE.md`               | Progressive Web App 설치 + 서비스 워커                          |
-| `ELECTRON_GUIDE.md`          | 데스크톱 앱 빌드 + 서명 + 배포                                  |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                          |
-| `PROXY_GUIDE.md`             | 4단계 아웃바운드 프록시 + 1proxy 마켓플레이스                   |
+| 문서                         | 목적                                                           |
+| ---------------------------- | -------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker 빌드, 프로필(base/cli/host/cliproxyapi), Redis 사이드카 |
+| `VM_DEPLOYMENT_GUIDE.md`     | 일반 VM/VPS 배포 (Ubuntu/Debian + nginx + systemd)             |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io 배포 (현재 중국어로만 제공)                             |
+| `TERMUX_GUIDE.md`            | Termux를 통한 Android 헤드리스 실행                            |
+| `PWA_GUIDE.md`               | Progressive Web App 설치 + 서비스 워커                         |
+| `ELECTRON_GUIDE.md`          | 데스크톱 앱 빌드 + 서명 + 배포                                 |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                         |
+| `PROXY_GUIDE.md`             | 4단계 아웃바운드 프록시 + 1proxy 마켓플레이스                  |
 
 ### 하위 디렉토리
 
-| 하위 디렉토리         | 목적                                                                                                                                                                                                              |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | 현지화된 문서 번역 (41개 로케일)                                                                                                                                                                                  |
-| `docs/screenshots/`   | 가이드용 이미지 에셋                                                                                                                                                                                              |
-| `_tasks/superpowers/` | superpowers에서 생성된 계획/명세 (`writing-plans`/`brainstorming`) + 리서치 — 독립적이고 별도로 버전 관리되는 리포지토리이며, 메인 트리에서는 gitignore 처리됨. CLAUDE.md → "Planning & Research Artifacts" 참조. |
+| 하위 디렉토리         | 목적                                                                                                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | 현지화된 문서 번역 (41개 로케일)                                                                                                                                                                       |
+| `docs/screenshots/`   | 가이드용 이미지 자산                                                                                                                                                                                   |
+| `_tasks/superpowers/` | superpowers에서 생성된 계획/스펙(`writing-plans`/`brainstorming`) 및 리서치 자료 — 격리된 별도 버전 관리 저장소이며, 메인 트리에서 gitignore 처리됨. CLAUDE.md → "Planning & Research Artifacts" 참조. |
 
 ---
 

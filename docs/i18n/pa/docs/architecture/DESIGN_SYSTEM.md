@@ -4,78 +4,83 @@
 
 ---
 
-> **ਸਥਿਤੀ:** ਡੈਸ਼ਬੋਰਡ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ਉੱਤੇ ਬਣਿਆ ਹੈ, ਜਿਸ ਨੂੰ
-> ਵਰਕਸਪੇਸ `packages/ui-kit` (`@omniroute/ui-kit`) ਵਜੋਂ ਵੈਂਡਰ ਕੀਤਾ ਗਿਆ ਹੈ; ਅੱਪਸਟ੍ਰੀਮ ਸਨੈਪਸ਼ਾਟ ਨੂੰ
-> `packages/ui-kit/UPSTREAM.md` ਵਿੱਚ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ ਅਤੇ `npm run check:ui-kit-snapshot` ਦੁਆਰਾ ਸੁਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ ਹੈ। ਲਾਈਟ ਕੈਨੋਨੀਕਲ
-> ਥੀਮ ਹੈ; ਡਿਫੌਲਟ ਤਰਜੀਹ `system` ਹੈ। ਐਕਸੈਂਟ Keak ਲਾਈਮ (`--ci-color-accent`) ਹੈ। Inter
-> (ਅੱਖਰ-ਵਿੱਥ 0, `--ci-letter-spacing-ui`) UI ਫੈਮਿਲੀ ਹੈ, Instrument Serif ਸਿਰਫ਼ ਵੱਡੇ ਅਤੇ ਵਿਰਲੇ
-> ਡਿਸਪਲੇ ਟੈਕਸਟ (`.ci-dashboard-display`) ਲਈ ਹੈ, ਅਤੇ IBM Plex Mono ਕੋਡ ਲਈ ਹੈ — ਇਹ ਸਾਰੇ
-> `src/app/globals.css` ਦੇ ਸਿਖਰ ਉੱਤੇ `@fontsource/*` ਇੰਪੋਰਟਾਂ ਰਾਹੀਂ ਸਵੈ-ਹੋਸਟ ਕੀਤੇ ਗਏ ਹਨ। ਹਰ ਆਈਕਨ ਇੱਕ Lucide ਗਲਿਫ਼ ਹੈ।
+> **ਸਥਿਤੀ:** ਡੈਸ਼ਬੋਰਡ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) 'ਤੇ ਬਣਾਇਆ ਗਿਆ ਹੈ, ਜਿਸਨੂੰ ਵਰਕਸਪੇਸ `packages/ui-kit` (`@omniroute/ui-kit`) ਵਜੋਂ ਵੈਂਡਰ ਕੀਤਾ ਗਿਆ ਹੈ; ਅੱਪਸਟਰੀਮ ਸਨੈਪਸ਼ੌਟ
+> `packages/ui-kit/UPSTREAM.md` ਵਿੱਚ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ ਅਤੇ `npm run check:ui-kit-snapshot` ਦੁਆਰਾ ਸੁਰੱਖਿਅਤ ਹੈ। Light ਕੈਨੋਨੀਕਲ
+> ਥੀਮ ਹੈ; ਡਿਫੌਲਟ ਤਰਜੀਹ `system` ਹੈ। ਐਕਸੈਂਟ Keak lime (`--ci-color-accent`) ਹੈ। Inter
+> (letter-spacing 0, `--ci-letter-spacing-ui`) UI ਫੋਂਟ ਪਰਿਵਾਰ ਹੈ, Instrument Serif ਸਿਰਫ਼ ਵੱਡੇ ਵਿਰਲੇ
+> ਡਿਸਪਲੇ ਟੈਕਸਟ ਲਈ (`.ci-dashboard-display`), IBM Plex Mono ਕੋਡ ਲਈ — ਸਾਰੇ
+> `src/app/globals.css` ਦੇ ਸਿਖਰ 'ਤੇ `@fontsource/*` ਇੰਪੋਰਟਸ ਰਾਹੀਂ ਸਵੈ-ਹੋਸਟ ਕੀਤੇ ਗਏ ਹਨ। ਹਰ ਆਈਕਨ ਇੱਕ Lucide ਗਲਿਫ਼ ਹੈ।
 
-## 1. ਚੀਜ਼ਾਂ ਕਿੱਥੇ ਸਥਿਤ ਹਨ
+## 1. ਚੀਜ਼ਾਂ ਕਿੱਥੇ ਹਨ
 
-- **ਕਿਟ।** `packages/ui-kit/src`, `packages/ui-kit/UPSTREAM.md` ਵਿੱਚ ਪਿੰਨ ਕੀਤੇ ਕਮਿਟ ਉੱਤੇ ਮੌਜੂਦ ਅੱਪਸਟ੍ਰੀਮ `src/` ਦੀ ਬਾਈਟ-ਦਰ-ਬਾਈਟ ਕਾਪੀ ਹੈ (ਜੋ ਲਾਇਸੈਂਸ ਅਧਿਕਾਰ ਵੀ ਦਰਜ ਕਰਦੀ ਹੈ); `PATCHES.md` ਸਥਾਨਕ ਪੈਚਾਂ ਨੂੰ ਸੂਚੀਬੱਧ ਕਰਦੀ ਹੈ (ਕੋਈ ਨਹੀਂ)। ਇਸਨੂੰ ਬਿਨਾਂ ਕਿਸੇ ਬਿਲਡ ਦੇ ਸਰੋਤ ਵਜੋਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ: `next.config.mjs` ਇਸਨੂੰ ਟ੍ਰਾਂਸਪਾਇਲ ਕਰਦੀ ਹੈ, ਅਤੇ
-  `tsconfig.json`, `@omniroute/ui-kit` → `packages/ui-kit/src` ਅਤੇ `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` ਨੂੰ ਮੈਪ ਕਰਦੀ ਹੈ (`vitest.config.ts` ਅਤੇ `vitest.mcp.config.ts` ਵਿੱਚ ਵੀ ਇਹੀ ਉਪਨਾਮ ਹਨ)। ਕਿਸੇ
-  ਕਿਟ ਕੰਪੋਨੈਂਟ ਨੂੰ ਉਸਦੇ ਸਬਪਾਥ ਰਾਹੀਂ ਇੰਪੋਰਟ ਕਰੋ (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ਕਦੇ ਵੀ
-  `@omniroute/ui-kit` ਬੈਰਲ ਰਾਹੀਂ ਨਹੀਂ: ਬੈਰਲ ਹਰ ਕੰਪੋਨੈਂਟ (ਮਿਤੀ ਚੋਣਕਾਰ ਸਮੇਤ) ਨੂੰ
-  ਹਰੇਕ ਇੰਪੋਰਟਰ ਵਿੱਚ ਖਿੱਚ ਲਿਆਉਂਦਾ ਹੈ। ਕਿਟ ਸਟਾਈਲਸ਼ੀਟ `src/app/globals.css` ਰਾਹੀਂ ਦਾਖ਼ਲ ਹੁੰਦੀ ਹੈ
+- **ਕਿੱਟ.** `packages/ui-kit/src` ਉਸ ਕਮਿਟ ਤੇ ਅੱਪਸਟ੍ਰੀਮ `src/` ਦੀ ਬਾਈਟ-ਦਰ-ਬਾਈਟ ਨਕਲ ਹੈ ਜੋ
+  `packages/ui-kit/UPSTREAM.md` ਵਿੱਚ ਪਿੰਨ ਕੀਤੀ ਗਈ ਹੈ (ਜਿਸ ਵਿੱਚ ਲਾਇਸੰਸ ਪ੍ਰਮਾਣੀਕਰਣ ਵੀ ਦਰਜ ਹੈ);
+  `PATCHES.md` ਸਥਾਨਕ ਪੈਚਾਂ ਦੀ ਸੂਚੀ ਦਿੰਦਾ ਹੈ (ਕੋਈ ਨਹੀਂ)। ਇਸਨੂੰ ਸੋਰਸ ਵਜੋਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ, ਬਿਨਾਂ ਕਿਸੇ ਬਿਲਡ
+  ਦੇ: `next.config.mjs` ਇਸਨੂੰ ਟ੍ਰਾਂਸਪਾਇਲ ਕਰਦਾ ਹੈ, ਅਤੇ `tsconfig.json` `@omniroute/ui-kit` →
+  `packages/ui-kit/src` ਅਤੇ `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` ਮੈਪ ਕਰਦਾ ਹੈ
+  (`vitest.config.ts` ਅਤੇ `vitest.mcp.config.ts` ਵੀ ਉਹੀ ਅਲੀਆਸ ਰੱਖਦੇ ਹਨ)। ਕਿੱਟ ਕੰਪੋਨੈਂਟ ਨੂੰ ਹਮੇਸ਼ਾ ਉਸਦੇ
+  ਸਬਪਾਥ ਰਾਹੀਂ ਇੰਪੋਰਟ ਕਰੋ (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ਕਦੇ ਵੀ
+  `@omniroute/ui-kit` ਬੈਰਲ ਰਾਹੀਂ ਨਹੀਂ: ਬੈਰਲ ਹਰੇਕ ਕੰਪੋਨੈਂਟ (ਡੇਟ ਪਿਕਰ ਸਮੇਤ) ਨੂੰ ਹਰੇਕ ਇੰਪੋਰਟਰ ਵਿੱਚ ਖਿੱਚ ਲੈਂਦਾ
+  ਹੈ। ਕਿੱਟ ਸਟਾਇਲਸ਼ੀਟ `src/app/globals.css` ਰਾਹੀਂ ਦਾਖਲ ਹੁੰਦੀ ਹੈ
   (`@import "../../packages/ui-kit/src/ci-ui.css"`)।
-- **ਟੋਕਨ।** `packages/ui-kit/src/ci-tokens.css`, `--ci-*` ਟੋਕਨ ਘੋਸ਼ਿਤ ਕਰਦੀ ਹੈ; `src/app/globals.css`
-  ਉਨ੍ਹਾਂ ਨੂੰ ਪੁਰਾਣੇ OmniRoute ਨਾਵਾਂ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`) ਨਾਲ ਜੋੜਦੀ ਹੈ, ਤਾਂ ਜੋ ਮੌਜੂਦਾ `var(--color-*)` ਰੀਡਾਂ ਅਤੇ Tailwind
+- **ਟੋਕਨ.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` ਟੋਕਨ ਘੋਸ਼ਿਤ ਕਰਦੀ ਹੈ; `src/app/globals.css`
+  ਉਹਨਾਂ ਨੂੰ ਲੈਗਸੀ OmniRoute ਨਾਮਾਂ ਨਾਲ ਜੋੜਦੀ ਹੈ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), ਤਾਂ ਜੋ ਮੌਜੂਦਾ `var(--color-*)` ਰੀਡ ਅਤੇ Tailwind
   ਯੂਟਿਲਿਟੀਆਂ ਕੰਮ ਕਰਦੀਆਂ ਰਹਿਣ। ਨਵਾਂ ਕੋਡ Tailwind ਯੂਟਿਲਿਟੀਆਂ (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ਜਾਂ ਕਿਟ ਕਲਾਸਾਂ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ — ਕਦੇ ਵੀ ਕੋਈ hex ਮੁੱਲ
-  ਨਹੀਂ (`tests/unit/design-kit-bridge.test.ts` ਇਸ ਬ੍ਰਿਜ ਨੂੰ ਲਾਗੂ ਕਰਦਾ ਹੈ)। `text-primary`,
-  `--text-color-primary` ਰਾਹੀਂ `--color-primary-ink` ਵਜੋਂ ਰਿਜ਼ਾਲਵ ਹੁੰਦਾ ਹੈ (ਲਾਈਟ ਵਿੱਚ lime-800, ਡਾਰਕ ਵਿੱਚ lime ਐਕਸੈਂਟ), ਇਸ ਲਈ
-  ਪ੍ਰਾਇਮਰੀ ਟੈਕਸਟ ਪੜ੍ਹਨਯੋਗ ਰਹਿੰਦਾ ਹੈ ਜਦਕਿ `bg-primary`/`border-primary`, lime ਸਤਹ ਨੂੰ ਕਾਇਮ ਰੱਖਦੇ ਹਨ। ਚਾਰਟ ਲੜੀਆਂ
-  `--color-chart-1` … `--color-chart-5` ਦੀ ਵਰਤੋਂ ਕਰਦੀਆਂ ਹਨ।
-- **ਥੀਮਾਂ।** `<html className="ci-theme">` (`src/app/layout.tsx`) ਦਸਤਾਵੇਜ਼ ਨੂੰ ਕਿਟ ਥੀਮ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰਦਾ ਹੈ।
-  ਤਰਜੀਹ `light`, `dark` ਜਾਂ `system` ਹੈ (`THEME_CONFIG.defaultTheme = "system"` ਵਿੱਚ
-  `src/shared/constants/appConfig.ts`; `system`, `prefers-color-scheme` ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ)। `applyTheme()` ਵਿੱਚ
-  `src/store/themeStore.ts` (`src/app/layout.tsx` ਵਿੱਚ ਇਨਲਾਈਨ ਬੂਟਸਟਰੈਪ ਸਕ੍ਰਿਪਟ ਦੁਆਰਾ ਪ੍ਰਤੀਬਿੰਬਿਤ, ਜੋ
-  ਹਾਈਡ੍ਰੇਸ਼ਨ ਤੋਂ ਪਹਿਲਾਂ ਚੱਲਦੀ ਹੈ) `data-theme="dark"|"light"` ਸੈੱਟ ਕਰਦਾ ਹੈ ਅਤੇ ਨਾਲ ਹੀ `<html>` ਉੱਤੇ `.dark` ਕਲਾਸ ਨੂੰ ਟੌਗਲ ਕਰਦਾ ਹੈ।
-  ਕਿਟ ਦਾ ਡਾਰਕ ਟੋਕਨ ਸੈੱਟ `data-theme="dark"` ਉੱਤੇ ਕੁੰਜੀਬੱਧ ਹੈ (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute ਦੇ ਆਪਣੇ ਡਾਰਕ ਓਵਰਰਾਈਡ (`globals.css` ਵਿੱਚ `.dark` ਬਲਾਕ) ਅਤੇ ਪੁਰਾਣੀਆਂ Tailwind `dark:`
-  ਯੂਟਿਲਿਟੀਆਂ `.dark` ਕਲਾਸ ਉੱਤੇ ਕੁੰਜੀਬੱਧ ਹਨ। ਕੋਈ ਐਕਸੈਂਟ ਰੰਗ ਪ੍ਰੀਸੈੱਟ ਨਹੀਂ ਹਨ: ਐਕਸੈਂਟ ਹਮੇਸ਼ਾ
-  ਕਿਟ ਤੋਂ ਆਉਂਦਾ ਹੈ, ਅਤੇ ਪੁਰਾਣੇ ਬਿਲਡ ਤੋਂ ਸਥਾਈ ਕੀਤਾ ਪ੍ਰੀਸੈੱਟ ਸਟੋਰ ਲੋਡ ਹੋਣ ਵੇਲੇ ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।
-- **ਕੰਪੋਨੈਂਟ (ਅਡੈਪਟਰ)।** `src/shared/components/index.tsx`, OmniRoute ਕੰਪੋਨੈਂਟ API ਨੂੰ ਕਾਇਮ ਰੱਖਦੀ ਹੈ (ਉਹੀ
-  ਨਾਮ, ਡਿਫਾਲਟ ਐਕਸਪੋਰਟ ਅਤੇ ਪ੍ਰੌਪਸ), ਅਤੇ ਇਸਦੇ ਪਿੱਛੇ ਵਾਲੇ ਪ੍ਰਿਮਿਟਿਵ ਕਿਟ ਉੱਤੇ ਬਣੇ ਅਡੈਪਟਰ ਹਨ: ਫਾਰਮ
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ਓਵਰਲੇਅ ਅਤੇ ਫੀਡਬੈਕ
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  ਸੰਰਚਨਾ (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) ਅਤੇ ਟੇਬਲਾਂ
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)। ਇੱਕ ਅਡੈਪਟਰ ਕਿਟ
-  ਕੰਪੋਨੈਂਟ ਨੂੰ ਸਬਪਾਥ ਰਾਹੀਂ ਇੰਪੋਰਟ ਕਰਦਾ ਹੈ ਅਤੇ ਪੁਰਾਣੇ ਪ੍ਰੌਪਸ ਨੂੰ ਉਸ ਉੱਤੇ ਮੈਪ ਕਰਦਾ ਹੈ — ਉਦਾਹਰਨ ਲਈ `Button variant="primary"` ਕਿਟ ਦਾ
-  `default` ਬਟਨ ਹੈ (`--ci-button-primary-*`: ਲਾਈਟ ਵਿੱਚ ਉਲਟੀ ਸਤਹ, ਡਾਰਕ ਵਿੱਚ ਇਸਦੀ
-  `--ci-color-accent-foreground` ਸਿਆਹੀ ਵਾਲਾ ਐਕਸੈਂਟ), `danger`, `destructive` ਹੈ, ਅਤੇ `warning`, `outline` ਦੇ ਨਾਲ
-  `.ci-button--warning` ਐਕਸਟੈਂਸ਼ਨ ਹੈ। `globals.css` ਦੇ ਅੰਤ ਵਿੱਚ `.ci-button--warning` ਅਤੇ `.ci-badge[data-tone]` ਨਿਯਮ
-  (`@layer components`) ਕਿਟ ਕਲਾਸਾਂ ਉੱਤੇ OmniRoute ਐਕਸਟੈਂਸ਼ਨ ਹਨ।
-  `tests/unit/ui/adapters/*.test.tsx` ਹਰੇਕ ਅਡੈਪਟਰ ਨੂੰ ਪਿੰਨ ਕਰਦੀਆਂ ਹਨ।
-- **ਸ਼ੈੱਲ।** `src/app/(dashboard)/layout.tsx`, `DashboardLayout` ਨੂੰ ਰੈਂਡਰ ਕਰਦੀ ਹੈ, ਜੋ
-  `src/shared/components/layouts/DashboardShell.tsx` ਨੂੰ ਰੈਂਡਰ ਕਰਦਾ ਹੈ: ਕਿਟ `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), ਜਿਸ ਵਿੱਚ OmniRoute ਦਾ ਨੈਵੀਗੇਸ਼ਨ ਤਰਕ
-  `src/shared/components/Sidebar.tsx` ਵਿੱਚ ਹੈ। `#main-content` ਵੱਲ ਇੱਕ "ਸਮੱਗਰੀ 'ਤੇ ਜਾਓ" ਲਿੰਕ ਪਹਿਲਾ ਫੋਕਸ ਕਰਨਯੋਗ
-  ਐਲੀਮੈਂਟ ਹੈ। `src/shared/components/Header.tsx` ਵਿੱਚ ਕਿਟ `SidebarTrigger` (ਸ਼ੈੱਲ ਦਾ ਇਕੱਲਾ ਸਾਈਡਬਾਰ
-  ਟੌਗਲ), Keak `ProductSwitcher` ਅਤੇ ਕਮਾਂਡ-ਪੈਲਿਟ ਓਪਨਰ ਹਨ; ਇਹ ਰੂਟ ਸਿਰਲੇਖ ਸਿਰਫ਼ ਉਦੋਂ ਦਿਖਾਉਂਦਾ ਹੈ ਜਦੋਂ
-  `#main-content` ਦੇ ਅੰਦਰ ਕੋਈ ਕਿਟ `PageHeader` (`.ci-page-header`) ਮਾਊਂਟ ਨਾ ਹੋਵੇ, ਤਾਂ ਜੋ ਆਪਣੇ
-  `PageHeader` ਵਾਲੇ ਪੰਨੇ ਵਿੱਚ ਇੱਕੋ `h1` ਹੋਵੇ। `src/shared/components/CommandPalette.tsx` ਇੱਕ ਕਿਟ `Dialog` ਹੈ।
-- **ਆਈਕਨ।** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ਨਾਮ ਨੂੰ (ਸਕ੍ਰੀਨਾਂ ਦੁਆਰਾ ਵਰਤੀ ਜਾਂਦੀ
-  Material Symbols ਸ਼ਬਦਾਵਲੀ) `ICON_MAP` (`src/shared/constants/iconMap.ts`) ਰਾਹੀਂ ਇੱਕ
-  Lucide ਗਲਿਫ਼ ਨਾਲ ਰਿਜ਼ਾਲਵ ਕਰਦਾ ਹੈ। Material Symbols ਫੌਂਟ ਅਤੇ ਪੈਕੇਜ ਹਟਾ ਦਿੱਤੇ ਗਏ ਹਨ: ਮੈਪ ਵਿੱਚੋਂ ਗੈਰਹਾਜ਼ਰ ਨਾਮ ਇੱਕ
-  ਨਿਰਪੱਖ ਪਲੇਸਹੋਲਡਰ ਗਲਿਫ਼ (`data-icon-missing="true"`) ਰੈਂਡਰ ਕਰਦਾ ਹੈ ਅਤੇ ਪ੍ਰੋਡਕਸ਼ਨ ਤੋਂ ਬਾਹਰ ਕੰਸੋਲ ਚੇਤਾਵਨੀ ਲੌਗ ਕਰਦਾ ਹੈ।
-  `npm run gen:icon-map` ਵਰਤੋਂ ਵਿੱਚ ਮੌਜੂਦ ਉਹ ਨਾਮ ਪ੍ਰਿੰਟ ਕਰਦਾ ਹੈ ਜੋ ਮੈਪ ਵਿੱਚੋਂ ਗੈਰਹਾਜ਼ਰ ਹਨ
-  (`tests/unit/icon-map-coverage.test.ts` ਬਿਨਾਂ Lucide ਆਈਕਨ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨਾਮ ਉੱਤੇ ਅਸਫਲ ਹੁੰਦੀ ਹੈ;
-  `tests/unit/icon-map-object-values.test.ts` ਲੁੱਕਅੱਪ ਆਬਜੈਕਟਾਂ ਵਿੱਚ ਸਟੋਰ ਕੀਤੇ ਨਾਵਾਂ ਨੂੰ ਕਵਰ ਕਰਦੀ ਹੈ);
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ਜਾਂ ਕਿੱਟ ਕਲਾਸਾਂ ਵਰਤਦਾ ਹੈ — ਕਦੇ ਵੀ ਹੈਕਸ
+  ਵੈਲਯੂ ਨਹੀਂ (`tests/unit/design-kit-bridge.test.ts` ਬ੍ਰਿਜ ਲਾਗੂ ਕਰਦਾ ਹੈ)। `text-primary`
+  `--text-color-primary` ਰਾਹੀਂ `--color-primary-ink` ਤੇ ਰਿਜ਼ੌਲਵ ਹੁੰਦਾ ਹੈ (ਲਾਈਟ ਵਿੱਚ lime-800, ਡਾਰਕ ਵਿੱਚ
+  ਲਾਈਮ ਐਕਸੈਂਟ), ਤਾਂ ਜੋ ਪ੍ਰਾਇਮਰੀ ਟੈਕਸਟ ਪੜ੍ਹਨਯੋਗ ਬਣਿਆ ਰਹੇ ਜਦਕਿ `bg-primary`/`border-primary` ਲਾਈਮ ਸਰਫ਼ੇਸ
+  ਰੱਖਦੇ ਹਨ। ਚਾਰਟ ਸੀਰੀਜ਼ `--color-chart-1` … `--color-chart-5` ਵਰਤਦੀਆਂ ਹਨ।
+- **ਥੀਮ.** `<html className="ci-theme">` (`src/app/layout.tsx`) ਡੌਕੂਮੈਂਟ ਨੂੰ ਕਿੱਟ ਥੀਮ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰਦਾ ਹੈ।
+  ਪਸੰਦ `light`, `dark` ਜਾਂ `system` ਹੈ (`src/shared/constants/appConfig.ts` ਵਿੱਚ
+  `THEME_CONFIG.defaultTheme = "system"`; `system` `prefers-color-scheme` ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ)।
+  `src/store/themeStore.ts` ਵਿੱਚ `applyTheme()` (ਜਿਸਨੂੰ `src/app/layout.tsx` ਦੀ ਇਨਲਾਈਨ ਬੂਟਸਟ੍ਰੈਪ ਸਕ੍ਰਿਪਟ
+  ਮਿਰਰ ਕਰਦੀ ਹੈ, ਜੋ ਹਾਈਡ੍ਰੇਸ਼ਨ ਤੋਂ ਪਹਿਲਾਂ ਚੱਲਦੀ ਹੈ) `data-theme="dark"|"light"` ਸੈੱਟ ਕਰਦਾ ਹੈ ਅਤੇ `<html>`
+  ਤੇ `.dark` ਕਲਾਸ ਨੂੰ ਇਕੱਠਾ ਟੌਗਲ ਕਰਦਾ ਹੈ। ਕਿੱਟ ਦਾ ਡਾਰਕ ਟੋਕਨ ਸੈੱਟ `data-theme="dark"` ਤੇ ਕੁੰਜੀਬੱਧ ਹੈ
+  (`packages/ui-kit/src/ci-tokens.css`); OmniRoute ਦੇ ਆਪਣੇ ਡਾਰਕ ਓਵਰਰਾਈਡ (`globals.css` ਵਿੱਚ `.dark`
+  ਬਲਾਕ) ਅਤੇ ਲੈਗਸੀ Tailwind `dark:` ਯੂਟਿਲਿਟੀਆਂ `.dark` ਕਲਾਸ ਤੇ ਕੁੰਜੀਬੱਧ ਹਨ। ਕੋਈ ਐਕਸੈਂਟ ਰੰਗ ਪ੍ਰੀਸੈੱਟ ਨਹੀਂ
+  ਹਨ: ਐਕਸੈਂਟ ਹਮੇਸ਼ਾ ਕਿੱਟ ਤੋਂ ਆਉਂਦਾ ਹੈ, ਅਤੇ ਪੁਰਾਣੀ ਬਿਲਡ ਦਾ ਪਰਸਿਸਟ ਕੀਤਾ ਪ੍ਰੀਸੈੱਟ ਸਟੋਰ ਲੋਡ ਹੋਣ ਵੇਲੇ ਛੱਡ
+  ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।
+- **ਕੰਪੋਨੈਂਟ (ਅਡੈਪਟਰ).** `src/shared/components/index.tsx` OmniRoute ਕੰਪੋਨੈਂਟ API ਬਣਾਈ ਰੱਖਦਾ ਹੈ (ਉਹੀ
+  ਨਾਮ, ਡਿਫੌਲਟ ਐਕਸਪੋਰਟ ਅਤੇ ਪ੍ਰੌਪਸ), ਅਤੇ ਇਸਦੇ ਪਿੱਛੇ ਪ੍ਰਿਮਿਟਿਵ ਕਿੱਟ ਉੱਤੇ ਅਡੈਪਟਰ ਹਨ: ਫਾਰਮ (`Button`,
+  `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ਓਵਰਲੇ ਅਤੇ ਫੀਡਬੈਕ
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), ਢਾਂਚਾ
+  (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) ਅਤੇ ਟੇਬਲ
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)। ਇੱਕ ਅਡੈਪਟਰ ਕਿੱਟ ਕੰਪੋਨੈਂਟ ਨੂੰ
+  ਸਬਪਾਥ ਰਾਹੀਂ ਇੰਪੋਰਟ ਕਰਦਾ ਹੈ ਅਤੇ ਲੈਗਸੀ ਪ੍ਰੌਪਸ ਨੂੰ ਉਸ ਉੱਤੇ ਮੈਪ ਕਰਦਾ ਹੈ — ਉਦਾਹਰਣ ਲਈ
+  `Button variant="primary"` ਕਿੱਟ ਦਾ `default` ਬਟਨ ਹੈ (`--ci-button-primary-*`: ਲਾਈਟ ਵਿੱਚ ਉਲਟਾ ਸਰਫ਼ੇਸ,
+  ਡਾਰਕ ਵਿੱਚ ਆਪਣੀ `--ci-color-accent-foreground` ਇੰਕ ਵਾਲਾ ਐਕਸੈਂਟ), `danger` `destructive` ਹੈ, ਅਤੇ
+  `warning` `outline` ਨਾਲ਼ `.ci-button--warning` ਐਕਸਟੈਂਸ਼ਨ ਹੈ। `globals.css` ਦੇ ਅੰਤ ਵਿੱਚ
+  `.ci-button--warning` ਅਤੇ `.ci-badge[data-tone]` ਨਿਯਮ (`@layer components`) ਕਿੱਟ ਕਲਾਸਾਂ ਦੇ ਉੱਤੇ
+  OmniRoute ਐਕਸਟੈਂਸ਼ਨ ਹਨ। `tests/unit/ui/adapters/*.test.tsx` ਹਰੇਕ ਅਡੈਪਟਰ ਨੂੰ ਪਿੰਨ ਕਰਦੇ ਹਨ।
+- **ਸ਼ੈੱਲ.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` ਰੈਂਡਰ ਕਰਦਾ ਹੈ, ਜੋ
+  `src/shared/components/layouts/DashboardShell.tsx` ਰੈਂਡਰ ਕਰਦਾ ਹੈ: ਕਿੱਟ `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), ਜਿਸ ਵਿੱਚ OmniRoute ਦੀ ਨੈਵੀਗੇਸ਼ਨ ਲੌਜਿਕ
+  `src/shared/components/Sidebar.tsx` ਵਿੱਚ ਹੈ। `#main-content` ਵੱਲ ਇੱਕ "ਸਮੱਗਰੀ ਵੱਲ ਜਾਓ" ਲਿੰਕ ਪਹਿਲਾ
+  ਫੋਕਸਯੋਗ ਐਲੀਮੈਂਟ ਹੈ। `src/shared/components/Header.tsx` ਕਿੱਟ `SidebarTrigger` (ਸ਼ੈੱਲ ਦੀ ਇਕਲੌਤੀ ਸਾਈਡਬਾਰ
+  ਟੌਗਲ), Keak `ProductSwitcher` ਅਤੇ ਕਮਾਂਡ-ਪੈਲੇਟ ਓਪਨਰ ਰੱਖਦਾ ਹੈ; ਇਹ ਰੂਟ ਟਾਈਟਲ ਸਿਰਫ਼ ਉਦੋਂ ਦਿਖਾਉਂਦਾ ਹੈ ਜਦੋਂ
+  `#main-content` ਅੰਦਰ ਕੋਈ ਕਿੱਟ `PageHeader` (`.ci-page-header`) ਮਾਊਂਟ ਨਹੀਂ ਹੁੰਦਾ, ਤਾਂ ਜੋ ਆਪਣਾ
+  `PageHeader` ਰੱਖਣ ਵਾਲੇ ਪੇਜ ਕੋਲ ਇੱਕ ਹੀ `h1` ਹੋਵੇ। `src/shared/components/CommandPalette.tsx` ਇੱਕ ਕਿੱਟ
+  `Dialog` ਹੈ।
+- **ਆਈਕਨ.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ਨਾਮ (ਸਕ੍ਰੀਨਾਂ ਵੱਲੋਂ ਵਰਤੀ
+  ਜਾਂਦੀ Material Symbols ਸ਼ਬਦਾਵਲੀ) ਨੂੰ `ICON_MAP` (`src/shared/constants/iconMap.ts`) ਰਾਹੀਂ ਇੱਕ Lucide
+  ਗਲਿਫ ਤੇ ਰਿਜ਼ੌਲਵ ਕਰਦਾ ਹੈ। Material Symbols ਫੌਂਟ ਅਤੇ ਪੈਕੇਜ ਹੁਣ ਨਹੀਂ ਰਹੇ: ਨਕਸ਼ੇ ਵਿੱਚ ਮੌਜੂਦ ਨਾ ਹੋਇਆ ਨਾਮ ਇੱਕ
+  ਨਿਰਪੱਖ ਪਲੇਸਹੋਲਡਰ ਗਲਿਫ ਰੈਂਡਰ ਕਰਦਾ ਹੈ (`data-icon-missing="true"`) ਅਤੇ ਪ੍ਰੋਡਕਸ਼ਨ ਤੋਂ ਬਾਹਰ ਕੰਸੋਲ ਚੇਤਾਵਨੀ
+  ਲੌਗ ਕਰਦਾ ਹੈ। `npm run gen:icon-map` ਵਰਤੇ ਜਾ ਰਹੇ ਉਹ ਨਾਮ ਛਾਪਦਾ ਹੈ ਜੋ ਨਕਸ਼ੇ ਵਿੱਚ ਮੌਜੂਦ ਨਹੀਂ ਹਨ
+  (`tests/unit/icon-map-coverage.test.ts` ਬਿਨਾਂ Lucide ਆਈਕਨ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨਾਮ ਤੇ ਫੇਲ ਹੁੰਦਾ ਹੈ;
+  `tests/unit/icon-map-object-values.test.ts` ਲੁੱਕਅੱਪ ਆਬਜੈਕਟਾਂ ਵਿੱਚ ਸਟੋਰ ਕੀਤੇ ਨਾਮਾਂ ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ);
   `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ਲਿਟਰਲ
-  `<span className="material-symbols-outlined">` ਸਪੈਨਾਂ ਨੂੰ `<Icon>` ਵਜੋਂ ਮੁੜ ਲਿਖਦੀ ਹੈ।
-- **ਬ੍ਰਾਂਡ।** `src/shared/components/OmniRouteLogo.tsx` ਕਿਟ ਨੂੰ ਰੈਪ ਕਰਦੀ ਹੈ: ਡਿਫਾਲਟ ਐਕਸਪੋਰਟ `OmniRouteLogo`,
-  `ProductIcon product="omniroute" variant="glyph"` (ਇਨਲਾਈਨ SVG, `basePath`-ਸੁਰੱਖਿਅਤ) ਨੂੰ ਰੈਂਡਰ ਕਰਦਾ ਹੈ ਅਤੇ
-  `OmniRouteLockup`, `ProductLockup product="omniroute"` (ਪਹੁੰਚਯੋਗ ਨਾਮ "Keak OmniRoute") ਜਾਂ, ਵ੍ਹਾਈਟ-ਲੇਬਲ
-  ਓਪਰੇਟਰਾਂ ਲਈ, ਉਨ੍ਹਾਂ ਦਾ ਆਪਣਾ `name`/`logoSrc` ਰੈਂਡਰ ਕਰਦਾ ਹੈ। ਪ੍ਰੋਡਕਟ-ਸਵਿੱਚਰ ਮੰਜ਼ਿਲਾਂ
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) ਵਿੱਚ ਹਨ। ਸਟੈਂਡਅਲੋਨ
-  ਸਕ੍ਰੀਨਾਂ — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` ਅਤੇ `src/shared/components/ErrorPageScaffold.tsx`
-  — ਲੌਕਅੱਪ ਦਿਖਾਉਂਦੀਆਂ ਹਨ; `tests/unit/brand-pages-static.test.ts` ਇਸਦੀ ਰੱਖਿਆ ਕਰਦੀ ਹੈ।
+  `<span className="material-symbols-outlined">` ਸਪੈਨਾਂ ਨੂੰ `<Icon>` ਵਿੱਚ ਮੁੜ-ਲਿਖਦਾ ਹੈ।
+- **ਬ੍ਰਾਂਡ.** `src/shared/components/OmniRouteLogo.tsx` ਕਿੱਟ ਨੂੰ ਰੈਪ ਕਰਦਾ ਹੈ: ਡਿਫੌਲਟ ਐਕਸਪੋਰਟ
+  `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` ਰੈਂਡਰ ਕਰਦਾ ਹੈ (ਇਨਲਾਈਨ SVG,
+  `basePath`-ਸੁਰੱਖਿਅਤ) ਅਤੇ `OmniRouteLockup` `ProductLockup product="omniroute"` ਰੈਂਡਰ ਕਰਦਾ ਹੈ
+  (ਪਹੁੰਚਯੋਗ ਨਾਮ "Keak OmniRoute") ਜਾਂ, ਵ੍ਹਾਈਟ-ਲੇਬਲ ਓਪਰੇਟਰਾਂ ਲਈ, ਉਹਨਾਂ ਦਾ ਆਪਣਾ `name`/`logoSrc`।
+  ਪ੍ਰੋਡਕਟ-ਸਵਿਚਰ ਮੰਜ਼ਿਲਾਂ `src/shared/constants/keakProducts.ts` ਵਿੱਚ ਰਹਿੰਦੀਆਂ ਹਨ (`KEAK_PRODUCT_LINKS`,
+  `KEAK_ACTIVE_PRODUCT`)। ਸਟੈਂਡਅਲੋਨ ਸਕ੍ਰੀਨਾਂ — `src/app/login/page.tsx`, `src/app/status/page.tsx`,
+  `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ਅਤੇ
+  `src/shared/components/ErrorPageScaffold.tsx` — ਲੌਕਅੱਪ ਦਿਖਾਉਂਦੀਆਂ ਹਨ;
+  `tests/unit/brand-pages-static.test.ts` ਇਸਦੀ ਰੱਖਿਆ ਕਰਦਾ ਹੈ।
 
 ## 2. ਨਿਯਮ
 
@@ -109,41 +114,42 @@
 
 ## 3. ਸਕ੍ਰੀਨ ਜੋੜਨਾ
 
-1. ਪੇਜ ਨੂੰ ਕਿਟ ਦੇ `PageHeader` (`@omniroute/ui-kit/page-header`, ਡੈਸ਼ਬੋਰਡ ਦੇ ਅੰਦਰ `compact`) ਨਾਲ ਖੋਲ੍ਹੋ —
-   ਸਿਰਲੇਖ, ਵਰਣਨ ਅਤੇ `actions`। ਫਿਰ ਸ਼ੈੱਲ ਹੈਡਰ ਆਪਣਾ ਸਿਰਲੇਖ ਹਟਾ ਦਿੰਦਾ ਹੈ।
-2. ਕੰਟਰੋਲ `@/shared/components` (ਅਡੈਪਟਰਾਂ) ਤੋਂ ਬਣਾਓ ਅਤੇ ਜਿੱਥੇ ਕੋਈ ਅਡੈਪਟਰ ਮੌਜੂਦ ਨਾ ਹੋਵੇ, ਉੱਥੇ ਸਬਪਾਥ ਰਾਹੀਂ ਕਿਟ ਕੰਪੋਨੈਂਟ ਵਰਤੋ
-   (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+1. ਪੰਨੇ ਦੀ ਸ਼ੁਰੂਆਤ ਕਿਟ `PageHeader` ਨਾਲ ਕਰੋ (`@omniroute/ui-kit/page-header`, ਡੈਸ਼ਬੋਰਡ ਅੰਦਰ
+   `compact`) — ਸਿਰਲੇਖ, ਵੇਰਵਾ ਅਤੇ `actions`। ਫਿਰ ਸ਼ੈੱਲ ਹੈਡਰ ਆਪਣਾ ਸਿਰਲੇਖ ਹਟਾ ਦਿੰਦਾ ਹੈ।
+2. `@/shared/components` (ਐਡਾਪਟਰ) ਤੋਂ ਕੰਟਰੋਲ ਬਣਾਓ ਅਤੇ ਜਿੱਥੇ ਕੋਈ ਐਡਾਪਟਰ ਮੌਜੂਦ ਨਾ ਹੋਵੇ ਉੱਥੇ ਸਬਪਾਥ ਰਾਹੀਂ
+   ਕਿਟ ਕੰਪੋਨੈਂਟ ਵਰਤੋ (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
    `Slider`…)।
-3. ਆਈਕਨ: `<Icon name="…" />`। ਨਵਾਂ ਨਾਮ ਅਰਥਕ ਤੌਰ 'ਤੇ ਮੇਲ ਖਾਂਦੇ Lucide
-   ਕੰਪੋਨੈਂਟ ਨਾਲ `ICON_MAP` ਵਿੱਚ ਜਾਂਦਾ ਹੈ; `npm run gen:icon-map` ਹਾਲੇ ਗੁੰਮ ਨਾਮਾਂ ਦੀ ਸੂਚੀ ਦਿੰਦਾ ਹੈ।
-4. ਰੰਗ: ਸਿਮੈਂਟਿਕ ਯੂਟਿਲਿਟੀਆਂ (`text-success`, `bg-warning-bg`, `border-border`…) ਅਤੇ
-   ਚਾਰਟ ਸੀਰੀਜ਼ ਲਈ `var(--color-chart-N)`; ਕੋਈ hex ਮੁੱਲ ਨਹੀਂ ਅਤੇ ਅਜਿਹੇ `dark:` ਵੇਰੀਐਂਟ ਨਹੀਂ ਜੋ ਸਿਰਫ਼ ਕਿਸੇ ਰੰਗ ਨੂੰ ਦੁਹਰਾਉਂਦੇ ਹੋਣ।
-5. ਟੈਕਸਟ: ਹਰ ਸਟ੍ਰਿੰਗ, ਕਿਟ ਕੰਪੋਨੈਂਟਾਂ ਨੂੰ ਪਾਸ ਕੀਤੇ ਲੇਬਲਾਂ ਸਮੇਤ, `useTranslations` ਤੋਂ ਆਉਂਦੀ ਹੈ। ਨਵੀਆਂ
-   ਕੁੰਜੀਆਂ `src/i18n/messages/en.json`, `pt-BR.json` ਅਤੇ `vi.json` ਵਿੱਚ ਜਾਂਦੀਆਂ ਹਨ (ਵੀਅਤਨਾਮੀ ਸਮਾਨਤਾ ਟੈਸਟ
-   ਹਰ ਅੰਗਰੇਜ਼ੀ ਕੁੰਜੀ ਨੂੰ ਪਿੰਨ ਕਰਦਾ ਹੈ); ਹੋਰ ਲੋਕੇਲ i18n ਸਿੰਕ ਦੁਆਰਾ ਭਰੇ ਜਾਂਦੇ ਹਨ।
+3. ਆਈਕਨ: `<Icon name="…" />`। ਨਵਾਂ ਨਾਮ ਸੈਮੈਂਟਿਕ ਤੌਰ 'ਤੇ ਮਿਲਦੇ Lucide ਕੰਪੋਨੈਂਟ ਦੇ ਨਾਲ
+   `ICON_MAP` ਵਿੱਚ ਜਾਂਦਾ ਹੈ; `npm run gen:icon-map` ਅਜੇ ਬਾਕੀ ਰਹਿੰਦੇ ਨਾਮਾਂ ਦੀ ਸੂਚੀ ਦਿੰਦਾ ਹੈ।
+4. ਰੰਗ: ਸੈਮੈਂਟਿਕ ਯੂਟਿਲਿਟੀਆਂ (`text-success`, `bg-warning-bg`, `border-border`…) ਅਤੇ ਚਾਰਟ ਸੀਰੀਜ਼ ਲਈ
+   `var(--color-chart-N)`; ਕੋਈ hex ਮੁੱਲ ਨਹੀਂ ਅਤੇ ਕੋਈ ਅਜਿਹਾ `dark:` ਵੇਰੀਐਂਟ ਨਹੀਂ ਜੋ ਸਿਰਫ਼ ਰੰਗ ਨੂੰ ਦੁਹਰਾਉਂਦਾ ਹੋਵੇ।
+5. ਟੈਕਸਟ: ਹਰ ਸਟ੍ਰਿੰਗ, ਜਿਸ ਵਿੱਚ ਕਿਟ ਕੰਪੋਨੈਂਟਾਂ ਨੂੰ ਦਿੱਤੇ ਲੇਬਲ ਵੀ ਸ਼ਾਮਲ ਹਨ, `useTranslations` ਤੋਂ ਆਉਂਦੀ ਹੈ।
+   ਨਵੀਆਂ ਕੁੰਜੀਆਂ `src/i18n/messages/en.json`, `pt-BR.json` ਅਤੇ `vi.json` ਵਿੱਚ ਜਾਂਦੀਆਂ ਹਨ
+   (ਵੀਅਤਨਾਮੀ ਪੈਰਿਟੀ ਟੈਸਟ ਹਰ ਅੰਗਰੇਜ਼ੀ ਕੁੰਜੀ ਨੂੰ ਪਿੰਨ ਕਰਦਾ ਹੈ); ਬਾਕੀ ਲੋਕੇਲ i18n ਸਿੰਕ ਰਾਹੀਂ ਭਰੇ ਜਾਂਦੇ ਹਨ।
 6. PR ਤੋਂ ਪਹਿਲਾਂ ਗਾਰਡ ਚਲਾਓ: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (ਇੱਕੋ-ਇੱਕ ਚੈਕ ਜੋ `iconMap.ts` ਵਿੱਚ ਡੁਪਲੀਕੇਟ ਇੰਪੋਰਟ ਨੂੰ ਫੜਦਾ ਹੈ),
+   `npm run check:dashboard-typecheck` (ਇਕਲੌਤੀ ਜਾਂਚ ਜੋ `iconMap.ts` ਵਿੱਚ ਡੁਪਲੀਕੇਟ ਇੰਪੋਰਟ ਫੜਦੀ ਹੈ),
    `npm run check:ui-icu`, ਅਤੇ ਸਕ੍ਰੀਨ ਦੇ ਆਪਣੇ ਟੈਸਟ।
 
 ## 4. ਅਡੈਪਟਰ ਜੋੜਨਾ ਜਾਂ ਬਦਲਣਾ
 
-1. `src/shared/components/index.tsx` ਦਾ ਪਬਲਿਕ API ਬਰਕਰਾਰ ਰੱਖੋ: ਉਹੀ export ਨਾਮ, default exports ਅਤੇ
-   ਸਵੀਕਾਰ ਕੀਤੇ props। ਅਡੈਪਟਰ ਦੇ ਅੰਦਰ legacy props ਨੂੰ ਕਿੱਟ ਨਾਲ ਮੈਪ ਕਰੋ (`Button.tsx` ਵੇਖੋ: `VARIANT_TO_KIT`,
+1. `src/shared/components/index.tsx` ਦਾ ਪਬਲਿਕ API ਕਾਇਮ ਰੱਖੋ: ਉਹੀ ਐਕਸਪੋਰਟ ਨਾਂ, ਡਿਫੌਲਟ ਐਕਸਪੋਰਟ ਅਤੇ
+   ਸਵੀਕਾਰ ਕੀਤੇ props। ਅਡੈਪਟਰ ਦੇ ਅੰਦਰ legacy props ਨੂੰ ਕਿੱਟ 'ਤੇ ਮੈਪ ਕਰੋ (ਵੇਖੋ `Button.tsx`: `VARIANT_TO_KIT`,
    `SIZE_TO_KIT`)।
-2. ਕਿੱਟ ਨੂੰ subpath ਰਾਹੀਂ import ਕਰੋ (`@omniroute/ui-kit/<component>`)।
-3. ਕਿੱਟ ਦੀਆਂ ਕਮੀਆਂ ਲਈ workarounds ਅਡੈਪਟਰ ਵਿੱਚ (ਜਾਂ ਜਦੋਂ ਹੱਲ ਇੱਕ
-   style ਹੋਵੇ ਤਾਂ `globals.css` ਦੇ `@layer components` ਵਿੱਚ) ਰੱਖੋ, `packages/ui-kit/src` ਵਿੱਚ ਕਦੇ ਨਹੀਂ।
-4. `tests/unit/ui/adapters/<name>.test.tsx` ਜੋੜੋ ਜਾਂ ਅੱਪਡੇਟ ਕਰੋ। ਬਹੁਤ ਸਾਰੇ callers ਵਾਲੇ ਅਡੈਪਟਰ ਲਈ,
-   ਤਬਦੀਲੀ ਤੋਂ ਪਹਿਲਾਂ ਅਤੇ ਬਾਅਦ ਦੇ rendered markup ਦੀ ਤੁਲਨਾ ਕਰੋ — padding ਜਾਂ wrapper ਦੀਆਂ ਤਬਦੀਲੀਆਂ ਹਰ ਸਕ੍ਰੀਨ ਤੱਕ ਫੈਲਦੀਆਂ ਹਨ।
+2. ਕਿੱਟ ਨੂੰ ਸਬਪਾਥ ਰਾਹੀਂ ਇੰਪੋਰਟ ਕਰੋ (`@omniroute/ui-kit/<component>`)।
+3. ਕਿੱਟ ਦੀਆਂ ਕਮੀਆਂ ਦੇ ਵਰਕਅਰਾਊਂਡ ਅਡੈਪਟਰ ਵਿੱਚ ਰਹਿੰਦੇ ਹਨ (ਜਾਂ `globals.css` `@layer components` ਵਿੱਚ ਜਦੋਂ
+   ਠੀਕ ਕਰਨ ਵਾਲੀ ਚੀਜ਼ ਸਟਾਈਲ ਹੋਵੇ), ਕਦੇ ਵੀ `packages/ui-kit/src` ਵਿੱਚ ਨਹੀਂ।
+4. `tests/unit/ui/adapters/<name>.test.tsx` ਜੋੜੋ ਜਾਂ ਅੱਪਡੇਟ ਕਰੋ। ਬਹੁਤ ਸਾਰੇ ਕਾਲਰਾਂ ਵਾਲੇ ਅਡੈਪਟਰ ਲਈ, ਤਬਦੀਲੀ
+   ਤੋਂ ਪਹਿਲਾਂ ਅਤੇ ਬਾਅਦ ਦੇ ਰੈਂਡਰ ਕੀਤੇ ਮਾਰਕਅੱਪ ਦੀ ਤੁਲਨਾ ਕਰੋ — padding ਜਾਂ wrapper ਦੀਆਂ ਤਬਦੀਲੀਆਂ ਹਰ ਸਕ੍ਰੀਨ
+   'ਤੇ ਫੈਲ ਜਾਂਦੀਆਂ ਹਨ।
 
-## 5. ਕਿੱਟ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨਾ
+## 5. ਕਿੱਟ ਅੱਪਡੇਟ ਕਰਨਾ
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` ਉਸ commit ਦੇ upstream `src/` ਨੂੰ
-`packages/ui-kit/src` ਵਿੱਚ ਕਾਪੀ ਕਰਦੀ ਹੈ ਅਤੇ ਇਕੱਲੀ ਮਨਜ਼ੂਰਸ਼ੁਦਾ transformation ਲਾਗੂ ਕਰਦੀ ਹੈ (ਇਹ relative imports ਤੋਂ
-`.js` suffix ਹਟਾਉਂਦੀ ਹੈ)। ਫਿਰ: `git diff packages/ui-kit` ਦੀ ਸਮੀਖਿਆ ਕਰੋ, ਦੋਵੇਂ themes ਵਿੱਚ providers, settings, combos,
-usage ਅਤੇ endpoint ਦੀ visual ਜਾਂਚ ਕਰੋ, `npm run check:ui-kit-snapshot` ਅਤੇ `npm run test:vitest:ui` ਚਲਾਓ, ਅਤੇ
-upstream changelog ਨਾਲ PR ਖੋਲ੍ਹੋ।
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` ਉਸ ਕਮਿੱਟ 'ਤੇ ਮੌਜੂਦ ਅਪਸਟ੍ਰੀਮ `src/` ਨੂੰ `packages/ui-kit/src`
+ਵਿੱਚ ਕਾਪੀ ਕਰਦਾ ਹੈ ਅਤੇ ਇਕੋ ਇੱਕ ਮਨਜ਼ੂਰਸ਼ੁਦਾ ਤਬਦੀਲੀ ਲਾਗੂ ਕਰਦਾ ਹੈ (ਇਹ relative imports ਤੋਂ `.js` ਸਫਿਕਸ ਹਟਾ
+ਦਿੰਦਾ ਹੈ)। ਫਿਰ: `git diff packages/ui-kit` ਦੀ ਸਮੀਖਿਆ ਕਰੋ, ਦੋਵੇਂ ਥੀਮਾਂ ਵਿੱਚ providers, settings, combos,
+usage ਅਤੇ endpoint ਦੀ ਵਿਜ਼ੂਅਲ ਜਾਂਚ ਕਰੋ, `npm run check:ui-kit-snapshot` ਅਤੇ `npm run test:vitest:ui`
+ਚਲਾਓ, ਅਤੇ ਅਪਸਟ੍ਰੀਮ changelog ਨਾਲ PR ਖੋਲ੍ਹੋ।
 
 ## 6. README ਦੇ ਚਿੱਤਰ
 

@@ -10,17 +10,17 @@ _Ultimo aggiornamento: 2026-06-28_
 
 ## Riepilogo esecutivo
 
-OmniRoute è un gateway locale di routing IA e una dashboard basata su Next.js.
-Fornisce un unico endpoint compatibile con OpenAI (`/v1/*`) e instrada il traffico tra più provider upstream, con traduzione, fallback, aggiornamento dei token e monitoraggio dell'utilizzo.
+OmniRoute è un gateway locale per l'instradamento dell'IA e una dashboard basata su Next.js.
+Fornisce un singolo endpoint compatibile con OpenAI (`/v1/*`) e instrada il traffico tra più provider upstream, offrendo traduzione, fallback, rinnovo dei token e monitoraggio dell'utilizzo.
 
 Funzionalità principali:
 
 - Superficie API compatibile con OpenAI per CLI/strumenti (376 provider, 156 moduli executor)
 - Traduzione di richieste/risposte tra i formati dei provider
-- Fallback con combinazioni di modelli (sequenza multi-modello)
-- Passaggi di combinazione strutturati (`provider + model + connection`) con ordinamento a runtime tramite `compositeTiers`
+- Fallback tramite combinazioni di modelli (sequenza multi-modello)
+- Passaggi di combinazione strutturati (`provider + model + connection`) con ordinamento in fase di esecuzione tramite `compositeTiers`
 - Fallback a livello di account (più account per provider)
-- Controllo preliminare delle quote e selezione degli account P2C basata sulle quote nel flusso principale della chat
+- Controllo preliminare della quota e selezione degli account P2C basata sulla quota nel flusso principale della chat
 - Gestione delle connessioni ai provider tramite OAuth e chiavi API (27 moduli provider OAuth)
 - Generazione di embedding tramite `/v1/embeddings` (18 provider)
 - Generazione di immagini tramite `/v1/images/generations` (oltre 10 provider, oltre 20 modelli)
@@ -32,55 +32,55 @@ Funzionalità principali:
 - Moderazione tramite `/v1/moderations`
 - Riordinamento tramite `/v1/rerank`
 - Analisi dei tag Think (`<think>...</think>`) per i modelli di ragionamento
-- Sanificazione delle risposte per una compatibilità rigorosa con l'SDK OpenAI
+- Sanitizzazione delle risposte per una rigorosa compatibilità con l'SDK OpenAI
 - Normalizzazione dei ruoli (developer→system, system→user) per la compatibilità tra provider
 - Conversione dell'output strutturato (json_schema → Gemini responseSchema)
-- Persistenza locale per provider, chiavi, alias, combinazioni, impostazioni e prezzi (122 moduli DB)
+- Persistenza locale di provider, chiavi, alias, combinazioni, impostazioni e prezzi (122 moduli DB)
 - Monitoraggio dell'utilizzo e dei costi e registrazione delle richieste
 - Sincronizzazione cloud facoltativa per la sincronizzazione dello stato tra più dispositivi
-- Elenco di indirizzi IP consentiti/bloccati per il controllo degli accessi alle API
+- Lista di indirizzi IP consentiti/bloccati per il controllo dell'accesso alle API
 - Gestione del budget di ragionamento (passthrough/auto/custom/adaptive)
 - Inserimento di un prompt di sistema globale
 - Monitoraggio e fingerprinting delle sessioni
-- Limitazione avanzata della frequenza per account con profili specifici per provider
+- Limitazione avanzata della frequenza per account, con profili specifici per provider
 - Pattern circuit breaker per la resilienza dei provider
 - Protezione anti-thundering herd con blocco mutex
 - Cache di deduplicazione delle richieste basata sulla firma
 - Livello di dominio: regole dei costi, criteri di fallback, criteri di blocco
-- Context Relay: riepiloghi per il passaggio di sessione, per garantire la continuità durante la rotazione degli account
-- Persistenza dello stato del dominio (cache SQLite write-through per fallback, budget, blocchi e circuit breaker)
-- Motore di criteri per la valutazione centralizzata delle richieste (blocco → budget → fallback)
+- Context Relay: riepiloghi di passaggio delle sessioni per garantire la continuità durante la rotazione degli account
+- Persistenza dello stato del dominio (cache write-through SQLite per fallback, budget, blocchi e circuit breaker)
+- Motore di policy per la valutazione centralizzata delle richieste (blocco → budget → fallback)
 - Telemetria delle richieste con aggregazione della latenza p50/p95/p99
-- Telemetria delle destinazioni delle combinazioni e stato storico delle destinazioni tramite `combo_execution_key` / `combo_step_id`
+- Telemetria dei target delle combinazioni e cronologia dello stato dei target tramite `combo_execution_key` / `combo_step_id`
 - ID di correlazione (X-Request-Id) per il tracciamento end-to-end
 - Registrazione degli audit di conformità con possibilità di disattivazione per ogni chiave API
-- Framework di valutazione per la garanzia della qualità degli LLM
+- Framework di valutazione per il controllo qualità degli LLM
 - Dashboard di integrità con stato in tempo reale dei circuit breaker dei provider
 - Server MCP (110 strumenti) con 3 trasporti (stdio/SSE/Streamable HTTP)
 - Server A2A (JSON-RPC 2.0 + SSE) con competenze e ciclo di vita delle attività
 - Sistema di memoria (estrazione, inserimento, recupero, riepilogo)
 - Sistema di competenze (registro, executor, sandbox, competenze integrate)
 - Proxy MITM con gestione dei certificati e del DNS
-- Middleware di protezione dall'iniezione di prompt
+- Middleware di protezione contro l'iniezione di prompt
 - Pipeline di compressione dei prompt con Caveman, RTK, pipeline sovrapposte, combinazioni di compressione, pacchetti linguistici e analisi
 - Registro ACP (Agent Communication Protocol)
 - Provider OAuth modulari (22 moduli individuali in `src/lib/oauth/providers/`)
 - Script di disinstallazione/disinstallazione completa
-- Azione di riparazione dell'ambiente OAuth
+- Azione di ripristino dell'ambiente OAuth
 - Bridge WebSocket per client WS compatibili con OpenAI (`/v1/ws`)
-- Gestione dei token di sincronizzazione (emissione/revoca, download del bundle di configurazione con versionamento ETag)
-- GLM Thinking (`glmt`) come preset provider di prima classe
-- Conteggio ibrido dei token (`/messages/count_tokens` lato provider con fallback basato sulla stima)
-- Inizializzazione automatica degli alias dei modelli (oltre 30 normalizzazioni tra dialetti proxy all'avvio)
-- Fetch in uscita sicuro con protezione SSRF, blocco degli URL privati e nuovi tentativi configurabili
-- Nuovi tentativi di chat basati sul cooldown con `requestRetry` e `maxRetryIntervalSec` configurabili
+- Gestione dei token di sincronizzazione (emissione/revoca, download di bundle di configurazione con versionamento ETag)
+- Preset provider GLM Thinking (`glmt`) di prima classe
+- Conteggio ibrido dei token (`/messages/count_tokens` lato provider con fallback alla stima)
+- Inizializzazione automatica degli alias dei modelli (oltre 30 normalizzazioni dei dialetti tra proxy all'avvio)
+- Recupero in uscita sicuro con protezione SSRF, blocco degli URL privati e nuovi tentativi configurabili
+- Nuovi tentativi della chat sensibili al periodo di attesa, con `requestRetry` e `maxRetryIntervalSec` configurabili
 - Convalida dell'ambiente di runtime con Zod all'avvio
 - Audit di conformità v2 con paginazione, eventi CRUD dei provider e registrazione delle convalide bloccate da SSRF
 
 Modello di runtime principale:
 
 - Le route dell'app Next.js in `src/app/api/*` implementano sia le API della dashboard sia le API di compatibilità
-- Un core SSE/routing condiviso in `src/sse/*` + `open-sse/*` gestisce l'esecuzione dei provider, la traduzione, lo streaming, il fallback e l'utilizzo
+- Un nucleo SSE/di instradamento condiviso in `src/sse/*` + `open-sse/*` gestisce l'esecuzione dei provider, la traduzione, lo streaming, il fallback e l'utilizzo
 
 ## Diagrammi di riferimento
 

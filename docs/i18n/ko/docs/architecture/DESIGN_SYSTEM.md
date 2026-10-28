@@ -4,100 +4,23 @@
 
 ---
 
-> **상태:** 대시보드는 **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)을 기반으로 구축되었으며, 워크스페이스 `packages/ui-kit` (`@omniroute/ui-kit`)으로
-> 벤더링되어 있습니다(업스트림 스냅샷은
-> `packages/ui-kit/UPSTREAM.md`에 고정되어 있으며 `npm run check:ui-kit-snapshot`으로 보호됩니다). 라이트 테마가 표준
-> 테마이며, 기본 환경설정은 `system`입니다. 강조 색상은 Keak 라임(`--ci-color-accent`)입니다. Inter
-> (자간 0, `--ci-letter-spacing-ui`)는 UI 글꼴이며, Instrument Serif는 크고 여백이 많은
-> 디스플레이 텍스트(`.ci-dashboard-display`)에만 사용하고, IBM Plex Mono는 코드에 사용합니다. 모든 글꼴은
-> `src/app/globals.css` 상단의 `@fontsource/*` import를 통해 자체 호스팅됩니다. 모든 아이콘은 Lucide 글리프입니다.
+> **상태:** 대시보드는 **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)을 기반으로 구축되었으며,
+> 워크스페이스 `packages/ui-kit` (`@omniroute/ui-kit`)로 벤더링되어 있습니다 (업스트림 스냅샷은
+> `packages/ui-kit/UPSTREAM.md`에 고정되어 있으며 `npm run check:ui-kit-snapshot`으로 검증됩니다). Light가 표준
+> 테마이며, 기본 설정은 `system`입니다. 강조색은 Keak lime (`--ci-color-accent`)입니다. Inter
+> (letter-spacing 0, `--ci-letter-spacing-ui`)가 UI 패밀리이고, Instrument Serif는 크고 드물게 사용되는
+> 디스플레이 텍스트 (`.ci-dashboard-display`)에만 사용되며, IBM Plex Mono는 코드용입니다 — 모두
+> `src/app/globals.css` 상단의 `@fontsource/*` 임포트를 통해 셀프 호스팅됩니다. 모든 아이콘은 Lucide 글리프입니다.
 
-## 1. 구성 요소 위치
+## 1. 각 요소의 위치
 
-- **키트.** `packages/ui-kit/src`는
-  `packages/ui-kit/UPSTREAM.md`에 고정된 커밋의 업스트림 `src/`를 바이트 단위로 그대로 복사한 것입니다
-  (`packages/ui-kit/UPSTREAM.md`에는 라이선스 승인도 기록되어 있음). `PATCHES.md`에는 로컬 패치가
-  나열되어 있으며 현재는 없습니다. 별도의 빌드 없이 소스로 직접 사용됩니다. `next.config.mjs`가 이를
-  트랜스파일하고, `tsconfig.json`은 `@omniroute/ui-kit` → `packages/ui-kit/src` 및
-  `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`로 매핑합니다
-  (`vitest.config.ts`와 `vitest.mcp.config.ts`에도 동일한 별칭이 설정되어 있음). 키트 컴포넌트는
-  `@omniroute/ui-kit` 배럴을 통하지 말고 해당 하위 경로
-  (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…)에서 임포트하세요. 배럴을 사용하면
-  날짜 선택기를 포함한 모든 컴포넌트가 각 임포터에 포함됩니다. 키트 스타일시트는
-  `src/app/globals.css`를 통해 적용됩니다
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **토큰.** `packages/ui-kit/src/ci-tokens.css`는 `--ci-*` 토큰을 선언합니다.
-  `src/app/globals.css`는 이 토큰을 기존 OmniRoute 이름
-  (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`,
-  `--color-fd-*`)에 연결하므로, 기존 `var(--color-*)` 참조와 Tailwind 유틸리티가 계속
-  작동합니다. 새 코드는 Tailwind 유틸리티
-  (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`,
-  `bg-chart-1`…) 또는 키트 클래스를 사용하며, 16진수 값은 절대 사용하지 않습니다
-  (`tests/unit/design-kit-bridge.test.ts`가 이 연결을 검증함). `text-primary`는
-  `--text-color-primary`를 통해 `--color-primary-ink`로 해석됩니다(라이트 모드에서는 lime-800,
-  다크 모드에서는 라임 강조색). 따라서 기본 텍스트의 가독성은 유지되고
-  `bg-primary`/`border-primary`는 라임 표면색을 유지합니다. 차트 계열에는
-  `--color-chart-1` … `--color-chart-5`를 사용합니다.
-- **테마.** `<html className="ci-theme">` (`src/app/layout.tsx`)는 문서에 키트 테마를
-  적용합니다. 테마 기본 설정은 `light`, `dark`, `system` 중 하나입니다
-  (`src/shared/constants/appConfig.ts`의 `THEME_CONFIG.defaultTheme = "system"`).
-  `system`은 `prefers-color-scheme`을 따릅니다. `src/store/themeStore.ts`의 `applyTheme()`는
-  `data-theme="dark"|"light"`를 설정하는 동시에 `<html>`의 `.dark` 클래스를 토글합니다.
-  이 동작은 하이드레이션 전에 실행되는 `src/app/layout.tsx`의 인라인 부트스트랩 스크립트에도
-  동일하게 구현되어 있습니다. 키트의 다크 토큰 집합은 `data-theme="dark"`를 기준으로 적용됩니다
-  (`packages/ui-kit/src/ci-tokens.css`). OmniRoute 자체의 다크 모드 오버라이드
-  (`globals.css`의 `.dark` 블록)와 기존 Tailwind `dark:` 유틸리티는 `.dark` 클래스를 기준으로
-  적용됩니다. 강조색 프리셋은 없습니다. 강조색은 항상 키트에서 가져오며, 이전 빌드에서 유지된
-  프리셋은 스토어를 로드할 때 제거됩니다.
-- **컴포넌트(어댑터).** `src/shared/components/index.tsx`는 OmniRoute 컴포넌트 API
-  (동일한 이름, 기본 익스포트 및 props)를 유지하며, 그 이면의 프리미티브는 키트 기반 어댑터입니다.
-  여기에는 폼
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),
-  오버레이 및 피드백
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  구조
-  (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`),
-  그리고 테이블
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)이 포함됩니다.
-  어댑터는 키트 컴포넌트를 하위 경로에서 임포트하고 기존 props를 이에 맞게 매핑합니다. 예를 들어
-  `Button variant="primary"`는 키트의 `default` 버튼입니다
-  (`--ci-button-primary-*`: 라이트 모드에서는 반전 표면색, 다크 모드에서는
-  `--ci-color-accent-foreground` 텍스트 색상과 함께 사용하는 강조색). `danger`는
-  `destructive`에 해당하고, `warning`은 `outline`에 `.ci-button--warning` 확장을 추가한
-  형태입니다. `globals.css` 끝의
-  `.ci-button--warning` 및 `.ci-badge[data-tone]` 규칙(`@layer components`)은 키트 클래스
-  위에 적용되는 OmniRoute 확장입니다. `tests/unit/ui/adapters/*.test.tsx`가 각 어댑터의 동작을
-  고정합니다.
-- **셸.** `src/app/(dashboard)/layout.tsx`는 `DashboardLayout`을 렌더링하고,
-  `DashboardLayout`은 `src/shared/components/layouts/DashboardShell.tsx`를 렌더링합니다.
-  이 셸은 키트의 `SidebarProvider` / `Sidebar` / `SidebarInset`
-  (`packages/ui-kit/src/sidebar.tsx`)을 사용하며, OmniRoute의 탐색 로직은
-  `src/shared/components/Sidebar.tsx`에 있습니다. `#main-content`로 이동하는 "콘텐츠로 건너뛰기"
-  링크가 포커스를 받을 수 있는 첫 번째 요소입니다. `src/shared/components/Header.tsx`에는 키트의
-  `SidebarTrigger`(셸에서 유일한 사이드바 토글), Keak `ProductSwitcher`, 명령 팔레트 열기 버튼이
-  있습니다. `#main-content` 내부에 키트 `PageHeader` (`.ci-page-header`)가 마운트되지 않은
-  경우에만 경로 제목을 표시하므로, 자체 `PageHeader`가 있는 페이지에는 `h1`이 하나만 존재합니다.
-  `src/shared/components/CommandPalette.tsx`는 키트 `Dialog`입니다.
-- **아이콘.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`)은 화면에서
-  사용하는 Material Symbols 명칭을 `ICON_MAP` (`src/shared/constants/iconMap.ts`)을 통해
-  Lucide 글리프로 변환합니다. Material Symbols 글꼴과 패키지는 제거되었습니다. 맵에 없는 이름은
-  중립적인 자리표시자 글리프(`data-icon-missing="true"`)로 렌더링되며, 프로덕션 이외의 환경에서는
-  콘솔 경고가 기록됩니다. `npm run gen:icon-map`은 현재 사용 중이지만 맵에 없는 이름을 출력합니다
-  (`tests/unit/icon-map-coverage.test.ts`는 Lucide 아이콘이 없는 이름이 하나라도 있으면 실패하며,
-  `tests/unit/icon-map-object-values.test.ts`는 조회 객체에 저장된 이름을 검사함).
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`는 리터럴
-  `<span className="material-symbols-outlined">` 요소를 `<Icon>`으로 다시 작성합니다.
-- **브랜드.** `src/shared/components/OmniRouteLogo.tsx`는 키트를 래핑합니다. 기본 익스포트
-  `OmniRouteLogo`는 `ProductIcon product="omniroute" variant="glyph"`를 렌더링하고
-  (인라인 SVG, `basePath`와 호환), `OmniRouteLockup`은
-  `ProductLockup product="omniroute"`(접근성 이름 "Keak OmniRoute")를 렌더링합니다. 화이트
-  라벨 운영자의 경우에는 해당 운영자 고유의 `name`/`logoSrc`를 렌더링합니다. 제품 전환기 대상은
-  `src/shared/constants/keakProducts.ts`에 있습니다
-  (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). 독립 실행형 화면인
-  `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx`,
-  `src/shared/components/ErrorPageScaffold.tsx`에는 로고타입이 표시되며,
-  `tests/unit/brand-pages-static.test.ts`가 이를 보장합니다.
+- **키트.** `packages/ui-kit/src`는 `packages/ui-kit/UPSTREAM.md`에 고정된 커밋 시점의 업스트림 `src/`를 바이트 단위로 그대로 복사한 것입니다(해당 파일에는 라이선스 승인 내용도 기록되어 있습니다). `PATCHES.md`에는 로컬 패치가 나열되어 있습니다(현재 없음). 빌드 없이 소스 그대로 사용됩니다: `next.config.mjs`가 이를 트랜스파일하고, `tsconfig.json`은 `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`로 매핑합니다(`vitest.config.ts`와 `vitest.mcp.config.ts`도 동일한 별칭을 사용합니다). 키트 컴포넌트는 서브패스(`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…)로 임포트하고, `@omniroute/ui-kit` 배럴(barrel)을 통해서는 절대 임포트하지 마세요. 배럴은 모든 컴포넌트(데이트 피커 포함)를 각 임포터로 끌어들입니다. 키트 스타일시트는 `src/app/globals.css`를 통해 로드됩니다(`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **토큰.** `packages/ui-kit/src/ci-tokens.css`가 `--ci-*` 토큰을 선언하고, `src/app/globals.css`가 이를 레거시 OmniRoute 이름(`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`)으로 브리지하므로, 기존 `var(--color-*)` 참조와 Tailwind 유틸리티가 계속 동작합니다. 새 코드는 Tailwind 유틸리티(`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…)나 키트 클래스를 사용하며, 16진수 값은 절대 사용하지 않습니다(`tests/unit/design-kit-bridge.test.ts`가 이 브리지를 강제합니다). `text-primary`는 `--text-color-primary`를 통해 `--color-primary-ink`로 해석되므로(라이트에서는 lime-800, 다크에서는 라임 액센트) `bg-primary`/`border-primary`가 라임 서피스를 유지하는 동안에도 primary 텍스트의 가독성이 보장됩니다. 차트 시리즈는 `--color-chart-1` … `--color-chart-5`를 사용합니다.
+- **테마.** `<html className="ci-theme">`(`src/app/layout.tsx`)가 문서를 키트 테마에 옵트인합니다. 설정값은 `light`, `dark` 또는 `system`입니다(`src/shared/constants/appConfig.ts`의 `THEME_CONFIG.defaultTheme = "system"`; `system`은 `prefers-color-scheme`을 따릅니다). `src/store/themeStore.ts`의 `applyTheme()`(하이드레이션 전에 실행되는 `src/app/layout.tsx`의 인라인 부트스트랩 스크립트에 미러링됨)는 `data-theme="dark"|"light"`를 설정하고 `<html>`의 `.dark` 클래스를 함께 토글합니다. 키트의 다크 토큰 세트는 `data-theme="dark"`를 기준으로 하고(`packages/ui-kit/src/ci-tokens.css`), OmniRoute 자체의 다크 오버라이드(`globals.css`의 `.dark` 블록)와 레거시 Tailwind `dark:` 유틸리티는 `.dark` 클래스를 기준으로 합니다. 액센트 색상 프리셋은 없습니다: 액센트는 항상 키트에서 가져오며, 이전 빌드에서 저장된 프리셋은 스토어 로드 시 폐기됩니다.
+- **컴포넌트(어댑터).** `src/shared/components/index.tsx`는 OmniRoute 컴포넌트 API(동일한 이름, 기본 내보내기, props)를 유지하며, 그 이면의 프리미티브는 키트 위에 구축된 어댑터입니다: 폼(`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), 오버레이 및 피드백(`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), 구조(`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`), 테이블(`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). 어댑터는 키트 컴포넌트를 서브패스로 임포트하고 레거시 props를 그에 매핑합니다. 예를 들어 `Button variant="primary"`는 키트의 `default` 버튼(`--ci-button-primary-*`: 라이트에서는 반전 서피스, 다크에서는 `--ci-color-accent-foreground` 잉크가 적용된 액센트)이고, `danger`는 `destructive`, `warning`은 `outline`에 `.ci-button--warning` 확장을 더한 것입니다. `globals.css` 끝부분(`@layer components`)의 `.ci-button--warning` 및 `.ci-badge[data-tone]` 규칙은 키트 클래스 위에 추가된 OmniRoute 확장입니다. `tests/unit/ui/adapters/*.test.tsx`가 각 어댑터를 고정합니다.
+- **셸.** `src/app/(dashboard)/layout.tsx`는 `DashboardLayout`을 렌더링하고, 이는 다시 `src/shared/components/layouts/DashboardShell.tsx`를 렌더링합니다: 키트의 `SidebarProvider` / `Sidebar` / `SidebarInset`(`packages/ui-kit/src/sidebar.tsx`)이며, OmniRoute의 내비게이션 로직은 `src/shared/components/Sidebar.tsx`에 있습니다. `#main-content`로 연결되는 "본문으로 건너뛰기" 링크가 첫 번째 포커스 가능 요소입니다. `src/shared/components/Header.tsx`는 키트의 `SidebarTrigger`(셸의 유일한 사이드바 토글), Keak `ProductSwitcher`, 명령 팔레트 오프너를 포함합니다. 라우트 제목은 `#main-content` 내부에 키트 `PageHeader`(`.ci-page-header`)가 마운트되어 있지 않을 때만 표시되므로, 자체 `PageHeader`를 사용하는 페이지에는 `h1`이 하나만 존재합니다. `src/shared/components/CommandPalette.tsx`는 키트 `Dialog`입니다.
+- **아이콘.** `<Icon name="material_name">`(`src/shared/components/Icon.tsx`)은 `ICON_MAP`(`src/shared/constants/iconMap.ts`)을 통해 이름(화면에서 사용하는 Material Symbols 어휘)을 Lucide 글리프로 해석합니다. Material Symbols 폰트와 패키지는 제거되었습니다: 맵에 없는 이름은 중립적인 플레이스홀더 글리프(`data-icon-missing="true"`)를 렌더링하고, 프로덕션 이외 환경에서는 콘솔 경고를 기록합니다. `npm run gen:icon-map`은 사용 중이지만 맵에 누락된 이름을 출력합니다(`tests/unit/icon-map-coverage.test.ts`는 Lucide 아이콘이 없는 이름이 하나라도 있으면 실패하고, `tests/unit/icon-map-object-values.test.ts`는 룩업 객체에 저장된 이름을 검사합니다). `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`는 리터럴 `<span className="material-symbols-outlined">` 스팬을 `<Icon>`으로 재작성합니다.
+- **브랜드.** `src/shared/components/OmniRouteLogo.tsx`는 키트를 래핑합니다: 기본 내보내기 `OmniRouteLogo`는 `ProductIcon product="omniroute" variant="glyph"`(인라인 SVG, `basePath` 안전)를 렌더링하고, `OmniRouteLockup`은 `ProductLockup product="omniroute"`(접근 가능한 이름 "Keak OmniRoute") 또는 화이트라벨 운영자의 경우 자체 `name`/`logoSrc`를 렌더링합니다. 제품 전환기의 대상은 `src/shared/constants/keakProducts.ts`(`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`)에 정의되어 있습니다. 독립 실행형 화면 — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx`, `src/shared/components/ErrorPageScaffold.tsx` — 은 락업을 표시하며, `tests/unit/brand-pages-static.test.ts`가 이를 보장합니다.
 
 ## 2. 규칙
 
@@ -117,31 +40,42 @@
 
 ## 3. 화면 추가하기
 
-1. 키트의 `PageHeader`(`@omniroute/ui-kit/page-header`, 대시보드 내부에서는 `compact`)로 페이지를 시작하세요. 제목, 설명 및 `actions`를 제공합니다. 그러면 셸 헤더는 자체 제목을 표시하지 않습니다.
-2. `@/shared/components`의 어댑터로 컨트롤을 구성하고, 어댑터가 없는 경우에는 하위 경로를 통해 키트 컴포넌트(`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…)를 사용하세요.
-3. 아이콘: `<Icon name="…" />`을 사용합니다. 새 이름은 의미상 일치하는 Lucide 컴포넌트와 함께 `ICON_MAP`에 추가하세요. `npm run gen:icon-map`을 실행하면 아직 누락된 이름이 표시됩니다.
-4. 색상: 의미론적 유틸리티(`text-success`, `bg-warning-bg`, `border-border`…)와 차트 계열용 `var(--color-chart-N)`을 사용하세요. 16진수 값과 색상만 반복하는 `dark:` 변형은 사용하지 마세요.
-5. 텍스트: 키트 컴포넌트에 전달하는 레이블을 포함한 모든 문자열은 `useTranslations`에서 가져와야 합니다. 새 키는 `src/i18n/messages/en.json`, `pt-BR.json`, `vi.json`에 추가하세요(베트남어 동등성 테스트는 모든 영어 키를 고정합니다). 다른 로케일은 i18n 동기화로 채워집니다.
-6. PR 전에 다음 검사를 실행하세요: `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck`(`iconMap.ts`의 중복 import를 탐지하는 유일한 검사), `npm run check:ui-icu`, 그리고 해당 화면 자체의 테스트.
+1. kit `PageHeader`(`@omniroute/ui-kit/page-header`, 대시보드 내부에서는 `compact`)로 페이지를
+   시작합니다 — title, description, `actions`를 지정합니다. 그러면 셸 헤더는 자체 제목을 생략합니다.
+2. `@/shared/components`(어댑터)로 컨트롤을 구성하고, 어댑터가 없는 경우 서브패스로 kit 컴포넌트를
+   사용합니다(`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…).
+3. 아이콘: `<Icon name="…" />`. 새 이름은 의미상 일치하는 Lucide 컴포넌트와 함께 `ICON_MAP`에
+   추가합니다. `npm run gen:icon-map`이 아직 누락된 이름을 나열합니다.
+4. 색상: 시맨틱 유틸리티(`text-success`, `bg-warning-bg`, `border-border`…)와 차트 시리즈용
+   `var(--color-chart-N)`을 사용합니다. hex 값이나 색상을 그대로 반복하기만 하는 `dark:` 변형은
+   사용하지 않습니다.
+5. 텍스트: kit 컴포넌트에 전달하는 라벨을 포함한 모든 문자열은 `useTranslations`에서 가져옵니다.
+   새 키는 `src/i18n/messages/en.json`, `pt-BR.json`, `vi.json`에 추가합니다(베트남어 패리티 테스트가
+   모든 영어 키를 고정합니다). 나머지 로케일은 i18n 동기화가 채웁니다.
+6. PR 전에 가드를 실행하세요: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck`(`iconMap.ts`의 중복 import를 잡아내는 유일한 검사),
+   `npm run check:ui-icu`, 그리고 해당 화면 자체의 테스트.
 
 ## 4. 어댑터 추가 또는 변경
 
-1. `src/shared/components/index.tsx`의 공개 API를 유지합니다. 즉, 동일한 export 이름, default export 및
-   허용되는 props를 유지합니다. 어댑터 내부에서 레거시 props를 키트에 매핑합니다(`Button.tsx`의 `VARIANT_TO_KIT`,
-   `SIZE_TO_KIT` 참조).
-2. 키트는 하위 경로로 import합니다(`@omniroute/ui-kit/<component>`).
-3. 키트의 미비점을 보완하기 위한 workaround는 어댑터 내부에 둡니다(수정 사항이 스타일인 경우에는 `globals.css`의 `@layer components`에 둠).
-   절대로 `packages/ui-kit/src`에 두지 않습니다.
-4. `tests/unit/ui/adapters/<name>.test.tsx`를 추가하거나 업데이트합니다. 호출하는 곳이 많은 어댑터의 경우 변경 전후의
-   렌더링된 마크업을 비교합니다. padding 또는 wrapper 변경 사항은 모든 화면에 영향을 미칩니다.
+1. `src/shared/components/index.tsx`의 공개 API를 유지합니다: 동일한 export 이름, default export 및
+   허용되는 props. 어댑터 내부에서 레거시 props를 kit에 매핑합니다 (`Button.tsx` 참조: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. kit은 서브패스로 import합니다 (`@omniroute/ui-kit/<component>`).
+3. kit의 부족한 부분에 대한 해결책은 어댑터에 둡니다 (수정 사항이 스타일인 경우 `globals.css`의
+   `@layer components`에). 절대 `packages/ui-kit/src`에 두지 않습니다.
+4. `tests/unit/ui/adapters/<name>.test.tsx`를 추가하거나 업데이트합니다. 호출자가 많은 어댑터의 경우,
+   변경 전후의 렌더링된 마크업을 비교하세요 — 패딩이나 래퍼 변경이 모든 화면으로 퍼져나갑니다.
 
-## 5. 키트 업데이트
+## 5. kit 업데이트
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]`은 해당 commit의 upstream `src/`를
-`packages/ui-kit/src`로 복사하고 허용된 단일 변환을 적용합니다(상대 import에서 `.js` suffix 제거).
-그런 다음 `git diff packages/ui-kit`을 검토하고, 두 theme에서 provider, settings, combo,
-usage 및 endpoint를 시각적으로 점검한 후 `npm run check:ui-kit-snapshot`과 `npm run test:vitest:ui`를 실행하고,
-upstream changelog와 함께 PR을 엽니다.
+`scripts/dev/sync-ui-kit.sh <commit> [clone]`은 해당 커밋의 업스트림 `src/`를
+`packages/ui-kit/src`로 복사하고 허용된 단일 변환을 적용합니다 (상대 import에서 `.js` 접미사를
+제거). 그 다음: `git diff packages/ui-kit`를 검토하고, 두 테마 모두에서 providers, settings, combos,
+usage 및 endpoint를 시각적으로 점검하고, `npm run check:ui-kit-snapshot`과 `npm run test:vitest:ui`를
+실행한 후, 업스트림 변경 로그와 함께 PR을 엽니다.
 
 ## 6. README 다이어그램
 

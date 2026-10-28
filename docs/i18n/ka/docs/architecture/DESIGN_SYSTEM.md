@@ -4,80 +4,80 @@
 
 ---
 
-> **სტატუსი:** დეშბორდი აგებულია **Keak CI UI Kit**-ზე (`@keak/cheaper-inference-ui-kit`), რომელიც
-> სამუშაო სივრცეში ჩაშენებულია როგორც `packages/ui-kit` (`@omniroute/ui-kit`; საწყისი ვერსიის სნეპშოტი დაფიქსირებულია
-> `packages/ui-kit/UPSTREAM.md`-ში და მოწმდება `npm run check:ui-kit-snapshot`-ით). ღია თემა კანონიკურია,
-> ხოლო ნაგულისხმევი პარამეტრია `system`. აქცენტის ფერია Keak lime (`--ci-color-accent`). Inter
-> (ასოებს შორის დაშორება 0, `--ci-letter-spacing-ui`) ინტერფეისის შრიფტების ოჯახია, Instrument Serif კი გამოიყენება მხოლოდ დიდი, მეჩხერი
-> სადემონსტრაციო ტექსტისთვის (`.ci-dashboard-display`), ხოლო IBM Plex Mono — კოდისთვის; ყველა შრიფტი ლოკალურადაა განთავსებული
-> `src/app/globals.css`-ის დასაწყისში არსებული `@fontsource/*` იმპორტების მეშვეობით. ყველა ხატულა Lucide-ის გლიფია.
+> **სტატუსი:** დეშბორდი აგებულია **Keak CI UI Kit**-ზე (`@keak/cheaper-inference-ui-kit`) და ჩასმულია
+> სამუშაო სივრცეში როგორც `packages/ui-kit` (`@omniroute/ui-kit`; upstream სნაფშოტი დაფიქსირებულია
+> `packages/ui-kit/UPSTREAM.md`-ში და მას იცავს `npm run check:ui-kit-snapshot`). ღია თემა არის კანონიკური;
+> ნაგულისხმევი პარამეტრია `system`. აქცენტი არის Keak lime (`--ci-color-accent`). Inter
+> (letter-spacing 0, `--ci-letter-spacing-ui`) არის UI-ის შრიფტების ოჯახი, Instrument Serif გამოიყენება მხოლოდ
+> დიდი, იშვიათი სადემონსტრაციო ტექსტისთვის (`.ci-dashboard-display`), ხოლო IBM Plex Mono — კოდისთვის; ყველა
+> თვითჰოსტინგულია `src/app/globals.css`-ის დასაწყისში მოთავსებული `@fontsource/*` იმპორტების საშუალებით. ყოველი ხატული Lucide-ის გლიფია.
 
 ## 1. სად რა მდებარეობს
 
-- **კიტი.** `packages/ui-kit/src` არის ზედა დონის წყაროს `src/`-ის ბაიტობრივად იდენტური ასლი, იმ კომიტზე, რომელიც დაფიქსირებულია
-  `packages/ui-kit/UPSTREAM.md`-ში (სადაც ასევე აღრიცხულია ლიცენზიის ავტორიზაცია); `PATCHES.md` ჩამოთვლის ლოკალურ
-  პატჩებს (არცერთი). ის გამოიყენება როგორც საწყისი კოდი, აგების გარეშე: `next.config.mjs` ახდენს მის ტრანსპილაციას, ხოლო
-  `tsconfig.json` აკავშირებს `@omniroute/ui-kit` → `packages/ui-kit/src` და `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts`-სა და `vitest.mcp.config.ts`-შიც იგივე ალიასია). კიტის კომპონენტი
-  დააიმპორტეთ მისი ქვეკონტურის მეშვეობით (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), არასდროს
-  `@omniroute/ui-kit` barrel-ის გავლით: barrel თითოეულ იმპორტიორში ყველა კომპონენტს (მათ შორის თარიღის ამრჩევს)
-  ტვირთავს. კიტის სტილების ფაილი ერთვის `src/app/globals.css`-ის მეშვეობით
+- **კიტი.** `packages/ui-kit/src` არის აღმავალი (upstream) `src/`-ის ბაიტ-ბაიტში ზუსტი ასლი იმ კომიტზე, რომელიც დაფიქსირებულია
+  `packages/ui-kit/UPSTREAM.md`-ში (რომელიც ასევე აფიქსირებს ლიცენზიის ნებართვას); `PATCHES.md` ჩამოთვლის ლოკალურ
+  პატჩებს (არც ერთი). ის მოიხმარბა როგორც საწყისი კოდი, ბილდის გარეშე: `next.config.mjs` მის ტრანსპილაციას ახდენს, ხოლო
+  `tsconfig.json` ასახებს `@omniroute/ui-kit` → `packages/ui-kit/src` და `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` და `vitest.mcp.config.ts` იგივე ალიასს ატარებენ). კიტის კომპონენტი
+  დააიმპორტეთ მისი ქვებილიკით (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), არასდროს
+  `@omniroute/ui-kit` ბარელის გავლით: ბარელი თითოეულ იმპორტიორში ითრევს ყველა კომპონენტს (მათ შორის თარიღის
+  ამომრჩევს). კიტის სტილფურცელი შედის `src/app/globals.css`-ით
   (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **ტოკენები.** `packages/ui-kit/src/ci-tokens.css` განსაზღვრავს `--ci-*` ტოკენებს; `src/app/globals.css`
+- **ტოკენები.** `packages/ui-kit/src/ci-tokens.css` აცხადებს `--ci-*` ტოკენებს; `src/app/globals.css`
   აკავშირებს მათ OmniRoute-ის ძველ სახელებთან (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), რათა არსებულმა `var(--color-*)` წაკითხვებმა და Tailwind-ის
-  უტილიტებმა მუშაობა განაგრძოს. ახალი კოდი იყენებს Tailwind-ის უტილიტებს (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ან კიტის კლასებს — არასდროს თექვსმეტობით მნიშვნელობას
-  (`tests/unit/design-kit-bridge.test.ts` ამ კავშირის დაცვას უზრუნველყოფს). `text-primary` გარდაიქმნება
-  `--color-primary-ink`-ად `--text-color-primary`-ის მეშვეობით (ღია თემაში lime-800, ბნელ თემაში კი lime აქცენტი), ამიტომ
-  ძირითადი ტექსტი კითხვადი რჩება, ხოლო `bg-primary`/`border-primary` ინარჩუნებს lime ზედაპირს. დიაგრამის სერიები იყენებს
-  `--color-chart-1` … `--color-chart-5`.
-- **თემები.** `<html className="ci-theme">` (`src/app/layout.tsx`) დოკუმენტისთვის კიტის თემას ააქტიურებს.
-  პარამეტრი არის `light`, `dark` ან `system` (`THEME_CONFIG.defaultTheme = "system"` ფაილში
-  `src/shared/constants/appConfig.ts`; `system` მიჰყვება `prefers-color-scheme`-ს). `applyTheme()` ფუნქცია
-  `src/store/themeStore.ts`-ში (რომელსაც იმეორებს `src/app/layout.tsx`-ში ჩაშენებული საწყისი სკრიპტი და რომელიც
-  ჰიდრატაციამდე სრულდება) ერთდროულად აყენებს `data-theme="dark"|"light"`-ს და რთავს ან თიშავს `.dark` კლასს `<html>`-ზე.
-  კიტის ბნელი თემის ტოკენების ნაკრები მიბმულია `data-theme="dark"`-ზე (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute-ის საკუთარი ბნელი თემის გადაფარვები (`.dark` ბლოკი `globals.css`-ში) და ძველი Tailwind-ის `dark:`
-  უტილიტები მიბმულია `.dark` კლასზე. აქცენტის ფერის წინასწარ განსაზღვრული ვარიანტები არ არსებობს: აქცენტი ყოველთვის
-  კიტიდან მოდის, ხოლო ძველი აგებიდან შენახული ვარიანტი საცავის ჩატვირთვისას იშლება.
-- **კომპონენტები (ადაპტერები).** `src/shared/components/index.tsx` ინარჩუნებს OmniRoute-ის კომპონენტების API-ს (იგივე
-  სახელები, ნაგულისხმევი ექსპორტები და props), ხოლო მის უკან მდგომი პრიმიტივები კიტზე აგებული ადაპტერებია: ფორმები
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), ასე რომ არსებული `var(--color-*)` წაკითხვები და Tailwind-ის
+  უტილიტები განაგრძობენ მუშაობას. ახალი კოდი იყენებს Tailwind-ის უტილიტებს (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ან კიტის კლასებს — არასდროს hex-მნიშვნელობას
+  (ხიდს `tests/unit/design-kit-bridge.test.ts` აკონტროლებს). `text-primary` იხსნება
+  `--color-primary-ink`-ზე `--text-color-primary`-ის მეშვეობით (lime-800 ღია თემაში, lime-აქცენტი — მუქ თემაში), ასე რომ
+  პირველადი ტექსტი კითხვადი რჩება, მაშინ როცა `bg-primary`/`border-primary` ინარჩუნებს lime-ზედაპირს. დიაგრამის
+  სერიები იყენებენ `--color-chart-1` … `--color-chart-5`-ს.
+- **თემები.** `<html className="ci-theme">` (`src/app/layout.tsx`) რთავს დოკუმენტს კიტის თემაში.
+  პარამეტრია `light`, `dark` ან `system` (`THEME_CONFIG.defaultTheme = "system"` ფაილში
+  `src/shared/constants/appConfig.ts`; `system` მიჰყვება `prefers-color-scheme`-ს). `applyTheme()` ფაილში
+  `src/store/themeStore.ts` (რომელსაც ასახავს `src/app/layout.tsx`-ის ჩაშენებული საწყისი სკრიპტი, რომელიც ჰიდრატაციამდე
+  სრულდება) ადგენს `data-theme="dark"|"light"`-ს და ერთდროულად რთავს/თიშავს `.dark` კლასს `<html>`-ზე.
+  კიტის მუქი ტოკენების ნაკრები მიბმულია `data-theme="dark"`-ზე (`packages/ui-kit/src/ci-tokens.css`);
+  OmniRoute-ის საკუთარი მუქი გადაფარვები (`.dark` ბლოკი `globals.css`-ში) და ძველი Tailwind-ის `dark:`
+  უტილიტები მიბმულია `.dark` კლასზე. აქცენტ-ფერის პრესეტები არ არსებობს: აქცენტი ყოველთვის
+  კიტიდან მოდის, ხოლო ძველი ბილდიდან შენახული პრესეტი საცავის ჩატვირთვისას უარსდება.
+- **კომპონენტები (ადაპტერები).** `src/shared/components/index.tsx` ინარჩუნებს OmniRoute-ის კომპონენტურ API-ს (იგივე
+  სახელები, default ექსპორტები და props-ები), ხოლო მის უკან მდგომი პრიმიტივები კიტზე აგებული ადაპტერებია: ფორმები
   (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), გადაფარვები და უკუკავშირი
   (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
   სტრუქტურა (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) და ცხრილები
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ადაპტერი კიტის კომპონენტს
-  ქვეკონტურის მიხედვით აიმპორტებს და ძველ props-ს მასზე ასახავს — მაგალითად, `Button variant="primary"` არის კიტის
-  `default` ღილაკი (`--ci-button-primary-*`: ღია თემაში ინვერსიული ზედაპირი, ბნელ თემაში კი აქცენტი თავისი
-  `--ci-color-accent-foreground` ტექსტის ფერით), `danger` არის `destructive`, ხოლო `warning` — `outline` პლუს
-  `.ci-button--warning` გაფართოება. `globals.css`-ის ბოლოში (`@layer components`) არსებული
-  `.ci-button--warning` და `.ci-badge[data-tone]` წესები OmniRoute-ის გაფართოებებია კიტის კლასებზე.
-  `tests/unit/ui/adapters/*.test.tsx` თითოეული ადაპტერის ქცევას აფიქსირებს.
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ადაპტერი კიტის
+  კომპონენტს ქვებილიკით იმპორტირებს და ძველ props-ებს მასზე ასახებს — მაგალითად, `Button variant="primary"` არის
+  კიტის `default` ღილაკი (`--ci-button-primary-*`: ინვერსიული ზედაპირი ღია თემაში, აქცენტი თავისი
+  `--ci-color-accent-foreground` ტექსტის ფერით მუქ თემაში), `danger` არის `destructive`, ხოლო `warning` — `outline`
+  პლიუს `.ci-button--warning` გაფართოება. `globals.css`-ის ბოლოში მდებარე `.ci-button--warning` და
+  `.ci-badge[data-tone]` წესები (`@layer components`) OmniRoute-ის გაფართოებებია კიტის კლასების თავზე.
+  `tests/unit/ui/adapters/*.test.tsx` თითოეულ ადაპტერს აფიქსირებს.
 - **გარსი.** `src/app/(dashboard)/layout.tsx` არენდერებს `DashboardLayout`-ს, რომელიც არენდერებს
   `src/shared/components/layouts/DashboardShell.tsx`-ს: კიტის `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), OmniRoute-ის ნავიგაციის ლოგიკით
-  `src/shared/components/Sidebar.tsx`-ში. „კონტენტზე გადასვლის“ ბმული `#main-content`-ზე პირველი ფოკუსირებადი
-  ელემენტია. `src/shared/components/Header.tsx` შეიცავს კიტის `SidebarTrigger`-ს (გარსში გვერდითი პანელის ერთადერთ
-  გადამრთველს), Keak-ის `ProductSwitcher`-სა და ბრძანებების პალიტრის გასახსნელ ღილაკს; ის მარშრუტის სათაურს მხოლოდ მაშინ
-  აჩვენებს, როცა `#main-content`-ში კიტის `PageHeader` (`.ci-page-header`) არ არის დამონტაჟებული, ამიტომ საკუთარი
-  `PageHeader`-ის მქონე გვერდს მხოლოდ ერთი `h1` აქვს. `src/shared/components/CommandPalette.tsx` არის კიტის `Dialog`.
-- **ხატულები.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) სახელს (ეკრანებზე გამოყენებულ
-  Material Symbols-ის ლექსიკონიდან) `ICON_MAP`-ის (`src/shared/constants/iconMap.ts`) მეშვეობით შესაბამის Lucide-ის
-  გლიფთან აკავშირებს. Material Symbols-ის შრიფტი და პაკეტი ამოღებულია: რუკაში არარსებული სახელი არენდერებს ნეიტრალურ
-  ჩანაცვლებით გლიფს (`data-icon-missing="true"`) და production გარემოს გარეთ კონსოლში გაფრთხილებას წერს.
-  `npm run gen:icon-map` ბეჭდავს გამოყენებულ სახელებს, რომლებიც რუკაში არ არის
-  (`tests/unit/icon-map-coverage.test.ts` ვერ გაივლის Lucide-ის ხატულის არმქონე ნებისმიერი სახელის შემთხვევაში;
-  `tests/unit/icon-map-object-values.test.ts` ამოწმებს საძიებო ობიექტებში შენახულ სახელებს);
+  `SidebarInset`-ს (`packages/ui-kit/src/sidebar.tsx`), OmniRoute-ის ნავიგაციის ლოგიკით
+  `src/shared/components/Sidebar.tsx`-ში. „skip to content" ბმული `#main-content`-ზე პირველი ფოკუსირებადი
+  ელემენტია. `src/shared/components/Header.tsx` შეიცავს კიტის `SidebarTrigger`-ს (გარსის ერთადერთ გვერდითი
+  ზოლის გადამრთველს), Keak-ის `ProductSwitcher`-ს და ბრძანებების პალიტრის გამშვებს; ის მარშრუტის სათაურს მხოლოდ
+  მაშინ აჩვენებს, როცა `#main-content`-ში კიტის `PageHeader` (`.ci-page-header`) არ არის ჩამაგრებული, ასე რომ
+  საკუთარი `PageHeader`-ის მქონე გვერდს ერთი `h1` აქვს. `src/shared/components/CommandPalette.tsx` კიტის `Dialog`-ია.
+- **ხატულები.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) სახელს (Material Symbols-ის
+  ლექსიკონს, რომელსაც ეკრანები იყენებენ) `ICON_MAP`-ით (`src/shared/constants/iconMap.ts`) Lucide-ის გლიფად
+  გარდაქმნის. Material Symbols-ის შრიფტი და პაკეტი ამოღებულია: რუკაში არმყოფი სახელი ნეიტრალურ შემავსებელ
+  გლიფს არენდერებს (`data-icon-missing="true"`) და პროდაქშენის გარეთ კონსოლში გაფრთხილებას წერს.
+  `npm run gen:icon-map` ბეჭდავს გამოყენებულ სახელებს, რომლებიც რუკაში აკლია
+  (`tests/unit/icon-map-coverage.test.ts` ვარდება ნებისმიერ სახელზე, რომელსაც Lucide-ის ხატულა არ აქვს;
+  `tests/unit/icon-map-object-values.test.ts` ფარავს საძიებო ობიექტებში შენახულ სახელებს);
   `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ლიტერალურ
-  `<span className="material-symbols-outlined">` span-ებს `<Icon>`-ად გარდაქმნის.
-- **ბრენდი.** `src/shared/components/OmniRouteLogo.tsx` კიტს გარსს არტყამს: ნაგულისხმევი ექსპორტი `OmniRouteLogo`
-  არენდერებს `ProductIcon product="omniroute" variant="glyph"`-ს (ჩაშენებული SVG, `basePath`-თან თავსებადი), ხოლო
-  `OmniRouteLockup` არენდერებს `ProductLockup product="omniroute"`-ს (ხელმისაწვდომი სახელი „Keak OmniRoute“) ან,
-  თეთრი ეტიკეტით მომუშავე ოპერატორებისთვის, მათ საკუთარ `name`/`logoSrc`-ს. პროდუქტების გადამრთველის დანიშნულების
-  მისამართები ინახება `src/shared/constants/keakProducts.ts`-ში (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`).
-  დამოუკიდებელი ეკრანები — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `<span className="material-symbols-outlined">` span-ებს `<Icon>`-ად გადაწერს.
+- **ბრენდი.** `src/shared/components/OmniRouteLogo.tsx` ფუთავს კიტს: default ექსპორტი `OmniRouteLogo`
+  არენდერებს `ProductIcon product="omniroute" variant="glyph"`-ს (inline SVG, `basePath`-ის მიმართ უსაფრთხო), ხოლო
+  `OmniRouteLockup` არენდერებს `ProductLockup product="omniroute"`-ს (ხელმისაწვდომი სახელით „Keak OmniRoute") ან,
+  white-label ოპერატორებისთვის, მათ საკუთარ `name`/`logoSrc`-ს. პროდუქტების გადამრთველის მიმართულებები მდებარეობს
+  `src/shared/constants/keakProducts.ts`-ში (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). ავტონომიური
+  ეკრანები — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` და `src/shared/components/ErrorPageScaffold.tsx`
-  — lockup-ს აჩვენებს; `tests/unit/brand-pages-static.test.ts` მის არსებობას იცავს.
+  — აჩვენებენ ლოქაფს; `tests/unit/brand-pages-static.test.ts` იცავს მას.
 
 ## 2. წესები
 
@@ -114,39 +114,43 @@
 
 ## 3. ეკრანის დამატება
 
-1. გვერდი გახსენით ნაკრების `PageHeader`-ით (`@omniroute/ui-kit/page-header`, dashboard-ის შიგნით — `compact`) — სათაური, აღწერა და `actions`. ამის შემდეგ shell-ის სათაური აღარ გამოჩნდება.
-2. მართვის ელემენტები ააწყვეთ `@/shared/components`-იდან (ადაპტერები), ხოლო იქ, სადაც ადაპტერი არ არსებობს, ნაკრების კომპონენტები subpath-ით გამოიყენეთ (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
-   `Slider`…).
-3. ხატულები: `<Icon name="…" />`. ყოველი ახალი სახელი დაამატეთ `ICON_MAP`-ში სემანტიკურად შესაბამის Lucide-ის
-   კომპონენტთან ერთად; `npm run gen:icon-map` ჯერ კიდევ არარსებული სახელების სიას აჩვენებს.
-4. ფერები: სემანტიკური utility-ები (`text-success`, `bg-warning-bg`, `border-border`…) და
-   `var(--color-chart-N)` დიაგრამის სერიებისთვის; არ გამოიყენოთ hex-მნიშვნელობები და `dark:` ვარიანტები, რომლებიც მხოლოდ იმავე ფერს იმეორებს.
-5. ტექსტი: ყველა სტრიქონი, მათ შორის ნაკრების კომპონენტებისთვის გადაცემული label-ები, უნდა მოდიოდეს `useTranslations`-იდან. ახალი
-   გასაღებები დაამატეთ `src/i18n/messages/en.json`, `pt-BR.json` და `vi.json` ფაილებში (ვიეტნამური პარიტეტის ტესტი
-   ყველა ინგლისურ გასაღებს ამაგრებს); დანარჩენი locale-ები i18n სინქრონიზაციით ივსება.
-6. PR-მდე გაუშვით შემოწმებები: `tests/unit/dashboard-kit-sweep.test.ts`,
+1. დაიწყე გვერდი კიტის `PageHeader`-ით (`@omniroute/ui-kit/page-header`, `compact` დაშბორდის
+   შიგნით) — სათაური, აღწერა და `actions`. ამის შემდეგ გარსის (shell) ჰედერი საკუთარ სათაურს შეუშვებს.
+2. ააშენე კონტროლები `@/shared/components`-დან (ადაპტერები) და გამოიყენე კიტის კომპონენტები
+   ქვებილიწუნით (subpath) იქ, სადაც ადაპტერი არ არსებობს (`Table`/`TableScrollArea`/`DataTableShell`,
+   `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. იკონები: `<Icon name="…" />`. ახალი სახელი შედის `ICON_MAP`-ში სემანტიკურად შესაბამისი Lucide
+   კომპონენტით; `npm run gen:icon-map` ჩამოთვლის ჯერ კიდევ დაკლებულ სახელებს.
+4. ფერები: სემანტიკური უტილიტები (`text-success`, `bg-warning-bg`, `border-border`…) და
+   `var(--color-chart-N)` ჩარტის სერიებისთვის; არანაირი hex მნიშვნელობა და არანაირი `dark:` ვარიანტი,
+   რომელიც მხოლოდ ფერს იმეორებს.
+5. ტექსტი: ყველა სტრიქონი, მათ შორის ის ლეიბლებიც, რომლებსაც კიტის კომპონენტებს გადასცემ, მოდის
+   `useTranslations`-დან. ახალი გასაღებები შედის `src/i18n/messages/en.json`-ში, `pt-BR.json`-ში და
+   `vi.json`-ში (ვიეტნამური პარიტეტის ტესტი ამაგრებს ყოველ ინგლისურ გასაღებას); დანარჩენი ლოკალები
+   ივსება i18n სინქრონიზაციით.
+6. PR-მდე გაუშვი დამცველები: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (ერთადერთი შემოწმება, რომელიც `iconMap.ts`-ში დუბლირებულ import-ს აღმოაჩენს),
-   `npm run check:ui-icu` და თავად ეკრანის ტესტები.
+   `npm run check:dashboard-typecheck` (ერთადერთი შემოწმება, რომელიც იჭერს დუბლირებულ import-ს
+   `iconMap.ts`-ში), `npm run check:ui-icu` და ეკრანის საკუთარი ტესტები.
 
 ## 4. ადაპტერის დამატება ან შეცვლა
 
-1. შეინარჩუნეთ `src/shared/components/index.tsx`-ის საჯარო API: იგივე ექსპორტის სახელები, ნაგულისხმევი ექსპორტები და
-   მიღებული props. მოძველებული props ადაპტერში შეუსაბამეთ kit-ს (იხილეთ `Button.tsx`: `VARIANT_TO_KIT`,
+1. შეინარჩუნეთ `src/shared/components/index.tsx`-ის საჯარო API: იგივე ექსპორტის სახელები, default ექსპორტები და
+   მიღებული props-ები. გადაამაპეთ მემკვიდრეობითი props-ები ნაკრებზე ადაპტერის შიგნით (იხ. `Button.tsx`: `VARIANT_TO_KIT`,
    `SIZE_TO_KIT`).
-2. მოახდინეთ kit-ის იმპორტი ქვეკვალის მეშვეობით (`@omniroute/ui-kit/<component>`).
-3. kit-ში არსებული ხარვეზების დროებითი გამოსავლები უნდა განთავსდეს ადაპტერში (ან `globals.css`-ის `@layer components`-ში, როცა შესწორება
-   სტილს ეხება), და არასდროს — `packages/ui-kit/src`-ში.
-4. დაამატეთ ან განაახლეთ `tests/unit/ui/adapters/<name>.test.tsx`. ბევრი გამომძახებლის მქონე ადაპტერისთვის შეადარეთ
-   ცვლილებამდე და ცვლილების შემდეგ დარენდერებული მარკირება — padding-ის ან wrapper-ის ცვლილებები ყველა ეკრანზე ვრცელდება.
+2. შემოიტანეთ ნაკრები ქვეგზით (`@omniroute/ui-kit/<component>`).
+3. ნაკრების ხარვეზების დროებითი გამოსავლები თავმოყრილია ადაპტერში (ან `globals.css`-ის `@layer components`-ში, როდესაც
+   გასწორება სტილია), არასდროს `packages/ui-kit/src`-ში.
+4. დაამატეთ ან განაახლეთ `tests/unit/ui/adapters/<name>.test.tsx`. მრავალი გამომძახებელის მქონე ადაპტერისთვის შეადარეთ
+   რენდერებული მარკაპი ცვლილებამდე და შემდეგ — padding-ის ან wrapper-ის ცვლილებები ყველა ეკრანზე ვრცელდება.
 
-## 5. kit-ის განახლება
+## 5. ნაკრების განახლება
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` აკოპირებს upstream-ის `src/`-ს მითითებული commit-იდან
-`packages/ui-kit/src`-ში და იყენებს ერთადერთ დაშვებულ გარდაქმნას (შედარებითი იმპორტებიდან შლის `.js` სუფიქსს).
-შემდეგ: გადახედეთ `git diff packages/ui-kit`-ს, ორივე თემაში ვიზუალურად შეამოწმეთ providers, settings, combos,
-usage და endpoint, გაუშვით `npm run check:ui-kit-snapshot` და `npm run test:vitest:ui`, შემდეგ კი
-გახსენით PR upstream-ის ცვლილებების ჟურნალთან ერთად.
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` აკოპირებს upstream `src/`-ს მითითებული კომიტიდან
+`packages/ui-kit/src`-ში და იყენებს ერთადერთ ნებადართულ ტრანსფორმაციას (შლის `.js` სუფიქსს
+შეფარდებითი იმპორტებიდან). შემდეგ: გადახედეთ `git diff packages/ui-kit`-ს, გაიარეთ ვიზუალური შემოწმება providers-,
+settings-, combos-, usage- და endpoint-გვერდებზე ორივე თემაში, გაუშვით `npm run check:ui-kit-snapshot` და `npm run test:vitest:ui`,
+და გახსენით PR upstream changelog-ით.
 
 ## 6. README-ის დიაგრამები
 
