@@ -562,12 +562,89 @@ export function validateTranslatedChunk(source, output) {
       `inline code changed: ${shown.join(", ")}${lost.length > 3 ? ` (+${lost.length - 3})` : ""}`
     );
   }
+  problems.push(...htmlStructureProblems(source, text));
+  const leaked = countMatches(LEAKED_PLACEHOLDER, text) - countMatches(LEAKED_PLACEHOLDER, source);
+  if (leaked > 0) problems.push(`leaked translator placeholder x${leaked}`);
   return { text, problems };
+}
+
+// The Google engine's masking tokens (`<span translate="no">zqa</span>`, bare `zqi`, private-use
+// placeholders): none may survive into a mirror (ja, 2026-10-28, shipped `zqi` / `zqo`).
+const LEAKED_PLACEHOLDER = /<span translate=|(?<!\p{L})zq[a-z]+(?!\p{L})|[\ue000-\uf8ff]/gu;
+const HTML_TAG = /<(\/?)([A-Za-z][\w-]*)(?=[\s/>])[^>]*?(\/?)>/g;
+const HTML_CODE = /<(code|kbd|samp)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
+const VOID_TAGS = new Set(["br", "hr", "img", "input", "meta", "link", "wbr", "source", "col"]);
+
+// Prose an HTML tag can live in: outside fences and outside backtick code spans (a tag inside
+// backticks is a literal, compared by lostInlineCode). <think> is checked on its own above.
+function htmlProse(markdown) {
+  return proseOutsideFences(markdown).replace(/(`+)[^\n]*?\1/g, "");
+}
+
+function htmlTags(prose) {
+  const tags = [];
+  for (const m of prose.matchAll(HTML_TAG)) {
+    const name = m[2].toLowerCase();
+    if (name === "think") continue;
+    tags.push({ name, close: m[1] === "/", single: m[3] === "/" || VOID_TAGS.has(name) });
+  }
+  return tags;
+}
+
+function nestsWell(tags) {
+  const stack = [];
+  for (const t of tags) {
+    if (t.single) continue;
+    if (!t.close) stack.push(t.name);
+    else if (stack.pop() !== t.name) return false;
+  }
+  return stack.length === 0;
+}
+
+// README's tech-stack table is HTML inside markdown: a translated `<tr>` row must keep every tag
+// (by name, opening and closing counted apart), the source's nesting, and the exact text of its
+// `<code>` / `<kbd>` / `<samp>` spans, the same contract lostInlineCode applies to backticks.
+export function htmlStructureProblems(source, translated) {
+  const problems = [];
+  const src = htmlProse(source);
+  const out = htmlProse(translated);
+  const srcTags = htmlTags(src);
+  const outTags = htmlTags(out);
+  const tally = (tags) => {
+    const counts = new Map();
+    for (const t of tags) {
+      const key = `<${t.close ? "/" : ""}${t.name}>`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return counts;
+  };
+  const before = tally(srcTags);
+  const after = tally(outTags);
+  const changed = [...new Set([...before.keys(), ...after.keys()])]
+    .filter((key) => (before.get(key) ?? 0) !== (after.get(key) ?? 0))
+    .map((key) => `${key} ${after.get(key) ?? 0}/${before.get(key) ?? 0}`);
+  if (changed.length) problems.push(`html tags ${changed.slice(0, 4).join(", ")}`);
+  if (nestsWell(srcTags) && !nestsWell(outTags)) problems.push("html nesting broken");
+  const codes = (prose) => {
+    const spans = new Map();
+    for (const m of prose.matchAll(HTML_CODE)) spans.set(m[2], (spans.get(m[2]) ?? 0) + 1);
+    return spans;
+  };
+  const srcCode = codes(src);
+  const outCode = codes(out);
+  const lost = [...srcCode].filter(([span, n]) => (outCode.get(span) ?? 0) < n).map(([s]) => s);
+  if (lost.length) {
+    const shown = lost.slice(0, 3).map((span) => `<code>${span}</code>`);
+    problems.push(
+      `html code changed: ${shown.join(", ")}${lost.length > 3 ? ` (+${lost.length - 3})` : ""}`
+    );
+  }
+  return problems;
 }
 
 // Inline code spans outside fenced blocks, counted by content. Soft-wrapped lines of a paragraph
 // are joined first, because a CommonMark code span may cross a line break.
-function inlineCodeSpans(markdown) {
+function proseOutsideFences(markdown) {
   const prose = [];
   let inFence = false;
   for (const line of markdown.split("\n")) {
@@ -576,7 +653,11 @@ function inlineCodeSpans(markdown) {
       prose.push("");
     } else prose.push(inFence ? "" : line);
   }
-  const joined = prose.join("\n").replace(/([^\n])\n(?=[^\n])/g, "$1 ");
+  return prose.join("\n").replace(/([^\n])\n(?=[^\n])/g, "$1 ");
+}
+
+function inlineCodeSpans(markdown) {
+  const joined = proseOutsideFences(markdown);
   const spans = new Map();
   for (const match of joined.matchAll(/(?<!`)`([^`\n]+)`(?!`)/g)) {
     const span = match[1].replace(/\s+/g, " ").trim();

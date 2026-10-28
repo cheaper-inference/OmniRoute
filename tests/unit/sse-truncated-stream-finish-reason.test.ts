@@ -71,12 +71,23 @@ test("#18432 OpenAI chat: [DONE] without any finish_reason is still a terminal s
   assert.equal(parsed.choices[0].finish_reason, "stop");
 });
 
-test("#18432 OpenAI chat: a cut tool call keeps the tool_calls normalization (T18)", () => {
+test("#18432 OpenAI chat: a cut stream with a complete tool call keeps the tool_calls normalization (T18)", () => {
+  const sse = openAiChunk({
+    tool_calls: [{ index: 0, id: "call_1", function: { name: "f", arguments: '{"a":1}' } }],
+  });
+  const parsed = parseSSEToOpenAIResponse(sse, "m") as ChatBody;
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+});
+
+test("#18432 OpenAI chat: a tool call cut mid arguments is withheld and reports length", () => {
+  // Was `tool_calls` in #18460 (T18 forced it over half-written JSON). The follow-up
+  // withholds an incomplete call so a client never executes it — see
+  // sse-cut-tool-call-arguments.test.ts.
   const sse = openAiChunk({
     tool_calls: [{ index: 0, id: "call_1", function: { name: "f", arguments: '{"a":' } }],
   });
   const parsed = parseSSEToOpenAIResponse(sse, "m") as ChatBody;
-  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].finish_reason, "length");
 });
 
 // ── OpenAI Responses events ─────────────────────────────────────────────────────
