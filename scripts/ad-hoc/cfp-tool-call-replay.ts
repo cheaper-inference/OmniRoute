@@ -11,7 +11,9 @@
  *   ok         the declared tool was read and finalized
  *   mislabeled the call was read under a different tool name
  *   rejected   a call was read but failed the nonce/schema contract
- *   unparsed   no call was read at all
+ *   retried    no call was read, but the executor's one repair retry fires
+ *   silent     no call was read and no retry fires — the reply ships as text
+ *              with the call buried in it (the leak this hardening removed)
  *
  * Usage:
  *   npx tsx scripts/ad-hoc/cfp-tool-call-replay.ts

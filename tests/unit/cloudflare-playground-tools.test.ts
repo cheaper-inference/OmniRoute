@@ -3,7 +3,8 @@
  *
  * Covers:
  * - serializeCfToolPrompt: contract block generation
- * - parseCfToolCalls: all observed markup shapes (4 patterns)
+ * - parseCfToolCalls: every observed markup shape (a nine-step pattern ladder,
+ *   ending in the wrong-closer / unclosed-body recovery)
  * - hasMalformedCfToolIntent: detection of incomplete/broken tool tags
  * - buildCfToolConversationPrompt: contract injection + conversation cap
  * - stripCfToolMarkup: cleaning model output

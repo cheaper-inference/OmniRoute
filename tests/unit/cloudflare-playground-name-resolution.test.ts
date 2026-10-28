@@ -1,21 +1,26 @@
 /**
  * Tool-name resolution for the Cloudflare Playground emulated tool calling.
  *
- * These tests are derived from live captures (see
- * `tests/fixtures/cloudflare-playground/cases.json`) and pin the three defects
- * that made a well-formed call resolve to the wrong tool:
+ * The first block replays every shape captured from a live OpenCode session
+ * (`tests/fixtures/cloudflare-playground/cases.json`) end to end — parse, then
+ * finalize, because a call that parses but fails validation burns the single
+ * repair retry. The matrices below pin the seven defects those captures exposed:
  *
  *   D1 — a `<tool_call>` container was matched as if it were the call, so the
  *        name inside it was never read and the wrapper body was accepted as a
  *        nameless payload;
  *   D2 — a nameless payload fell back to `availableTools[0]`, i.e. the caller's
  *        first tool, which executes the wrong tool instead of failing;
- *   D3 — a complete JSON body closed with the wrong tag (`</path>`) was dropped
- *        because every pattern required a matching closer.
- *
- * Every case also asserts the *finalize* outcome, because a call that parses but
- * fails validation burns the single repair retry — the fix has to land on a
- * valid call, not merely on a parsed name.
+ *   D3 — a complete JSON body closed with the wrong tag (`</path>`) or not closed
+ *        at all was dropped, because every pattern required a matching closer;
+ *   D4 — markup that *had* been read as a call still shipped in `content`, so the
+ *        client saw the raw block as prose next to the `tool_calls`;
+ *   D6 — a reply that carried tool intent but produced no readable call was
+ *        returned as text, with no error and nothing to retry;
+ *   D7 — the name written *inside* the JSON body (`{"arg": "read", ...}`) was
+ *        ignored, and the block was read as whatever the tag was;
+ *   D8 — the contract's example used the caller's first tool name as its
+ *        placeholder, priming the wrong tag on every request.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -273,6 +278,64 @@ test("D3: the recovery never invents a call from prose", () => {
   assert.deepEqual(parseCfToolCalls(text, OPENCODE_TOOLS), []);
 });
 
+test("D3: a wrong-closer call is still recovered next to a well-formed one", () => {
+  // Gating the recovery on "nothing else parsed" lost the second call silently:
+  // a parsed call suppresses the repair retry, so the turn looked complete.
+  const text =
+    '<read>{"path":"/repo/a.py"}</read>\n<write>{"path":"/repo/b.py","content":"x"}</path>';
+  assert.deepEqual(
+    parseCfToolCalls(text, OPENCODE_TOOLS).map((call) => call.name),
+    ["read", "write"]
+  );
+});
+
+test("D3: every wrong-closer block in a turn is recovered, in document order", () => {
+  const text =
+    '<write>{"path":"/repo/a.py","content":"a"}</path>\n' +
+    '<write>{"path":"/repo/b.py","content":"b"}</path>';
+  assert.deepEqual(
+    parseCfToolCalls(text, OPENCODE_TOOLS).map((call) => call.name),
+    ["write", "write"]
+  );
+});
+
+test("D3: an unclosed declared-tool body is recovered", () => {
+  const text = '<write>{"path":"/repo/a.py","content":"x"}';
+  assert.deepEqual(
+    parseCfToolCalls(text, OPENCODE_TOOLS).map((call) => call.name),
+    ["write"]
+  );
+});
+
+test("D3: the <tool:name> form is recovered through its tag suffix", () => {
+  // Pattern 2 needs `</tool:name>`, so this shape only recovers through the
+  // `:name` suffix read off the opener.
+  const text = '<tool:write>{"path":"/repo/a.py","content":"x"}</path>';
+  assert.deepEqual(
+    parseCfToolCalls(text, OPENCODE_TOOLS).map((call) => call.name),
+    ["write"]
+  );
+});
+
+test("D3: a <tool:name> block matched by its own pattern is not read twice", () => {
+  const text = '<tool:read>{"path":"/repo/a.py"}</tool:read>';
+  const calls = parseCfToolCalls(text, OPENCODE_TOOLS);
+  assert.deepEqual(
+    calls.map((call) => call.name),
+    ["read"]
+  );
+});
+
+test("D3: the recovery only accepts a body that starts at the opener", () => {
+  const text = '<write> the file is {"path":"/repo/a.py","content":"x"}';
+  assert.deepEqual(parseCfToolCalls(text, OPENCODE_TOOLS), []);
+});
+
+test("D3: the recovery does not turn a non-JSON body into a call", () => {
+  const text = "<write>here is some prose</write>";
+  assert.deepEqual(parseCfToolCalls(text, OPENCODE_TOOLS), []);
+});
+
 // ── D7: the model puts the tool name inside the JSON ─────────────────────────
 
 test('D7: <edit>{"arg":"read", path} is honoured as a read', () => {
@@ -395,6 +458,50 @@ test("D4: surrounding prose is preserved", () => {
     // executor only nulls content that is *entirely* empty).
     "Let me read it.\n\n"
   );
+});
+
+test("D4: a recovered wrong-closer block is stripped with its own markup", () => {
+  // The paired-tag removals cannot see it (the closer names a different tag),
+  // and the orphan removal would leave the JSON body behind as visible text.
+  const stripped = stripCfToolMarkup(
+    'Writing it now.\n<write>{"path":"/repo/a.py","content":"x"}</path>',
+    TOOL_NAMES
+  );
+  assert.ok(!stripped.includes("<write>"), "the opener must be gone");
+  assert.ok(!stripped.includes("</path>"), "the wrong closer must be gone");
+  assert.ok(!stripped.includes('"content"'), "the body must be gone");
+  assert.ok(stripped.startsWith("Writing it now."), "the prose must survive");
+});
+
+test("D4: a closer inside a JSON string does not truncate the strip", () => {
+  // The per-tool removal is a lazy regex, so it used to stop at the `</write>`
+  // *inside* the string and leave `y"}</write>` as visible prose. The string-aware
+  // pass runs first, so the whole balanced block goes.
+  assert.equal(
+    stripCfToolMarkup('<write>{"path":"a.py","content":"x</write>y"}</write>', TOOL_NAMES),
+    ""
+  );
+  // …and the call itself must keep the full string value.
+  const [call] = parseCfToolCalls(
+    '<write>{"path":"a.py","content":"x</write>y"}</write>',
+    OPENCODE_TOOLS
+  );
+  assert.deepEqual(JSON.parse(call.arguments), { path: "a.py", content: "x</write>y" });
+});
+
+test("D4: an unclosed body is stripped with its opener", () => {
+  assert.equal(stripCfToolMarkup('<tool>{"path":"/repo/a.py"}', TOOL_NAMES), "");
+  assert.equal(stripCfToolMarkup('<write>{"path":"/repo/a.py","content":"x"}', TOOL_NAMES), "");
+  assert.equal(stripCfToolMarkup('<tool:read>{"path":"/repo/a.py"}</path>', TOOL_NAMES), "");
+});
+
+test("D4: markup that is not a recoverable call is left alone", () => {
+  for (const text of [
+    'The <div>{"a": 1}</div> is markup, not a call.',
+    "I said <read> is a tag, and nothing follows it.",
+  ]) {
+    assert.equal(stripCfToolMarkup(text, TOOL_NAMES), text, `must be left alone: ${text}`);
+  }
 });
 
 // ── D8: the contract must not prime a real tool name ─────────────────────────

@@ -978,6 +978,9 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
       name: unwrapped.name ?? tagName,
       arguments: unwrapped.argsJson,
     });
+    // Claimed, so Pattern 6 does not read the same block again through its
+    // `<tool:name>` fallback.
+    handledSpans.push([match.index, match.index + match[0].length]);
   }
 
   // Pattern 3: <toolname>...</toolname> — the tool name IS the tag.
@@ -1079,31 +1082,35 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
   // whose closing tag is wrong (`</path>` instead of `</write>`) or missing
   // entirely. Every pattern above needs a matching closer, so three of the four
   // `write` calls in the live corpus were dropped even though their payload was
-  // valid JSON. Only runs when nothing else matched, so it can never change the
-  // result of a turn that already parses, and it only accepts a body that starts
-  // immediately after the opener (whitespace allowed) — never a JSON object
-  // plucked out of prose.
-  if (calls.length === 0) {
-    const recovered = recoverCompleteBodyWithWrongCloser(text, availableTools, isHandled);
-    if (recovered) calls.push(recovered);
-  }
+  // valid JSON. Runs after every other pattern, but is deliberately NOT gated on
+  // "nothing else parsed": a turn can carry a well-formed call *and* a
+  // wrong-closer one, and losing the second is silent — a parsed call suppresses
+  // the repair retry. Spans the other patterns already consumed are skipped, so
+  // this can only add calls, never change one, and it only accepts a body that
+  // starts immediately after the opener (whitespace allowed) — never a JSON
+  // object plucked out of prose.
+  calls.push(...recoverCompleteBodiesWithWrongCloser(text, availableTools, isHandled));
 
   return calls;
 }
 
 /**
- * Recover `<tag ...>{…}</wrong-tag>` / `<tag ...>{…}` (no closer at all).
+ * Recover every wrong-closer / unclosed tool block in the text — `<tag ...>
+ * {...}</wrong-tag>`, `<tag ...>{...}` with no closer at all, and the same with
+ * the name written as `<tool:name>`.
  *
  * The body must be a balanced, string-aware JSON object that normalizes, and the
- * name must come from the tag, a `name=` attribute, or the argument schema — in
- * that order. Anything less is left unparsed so the repair retry can ask again;
- * accepting a truncated payload here would ship a half-written file.
+ * name must come from the body's own `name`/hint key, a `name=` attribute, a
+ * `<tool:name>` suffix, the tag itself, or the argument schema — in that order.
+ * Anything less is left unparsed so the repair retry can ask again; accepting a
+ * truncated payload here would ship a half-written file.
  */
-function recoverCompleteBodyWithWrongCloser(
+function recoverCompleteBodiesWithWrongCloser(
   text: string,
   availableTools: CfToolDef[],
   isHandled: (start: number, end: number) => boolean
-): CfParsedToolCall | null {
+): CfParsedToolCall[] {
+  const recovered: CfParsedToolCall[] = [];
   const openerRegex = /<\s*([A-Za-z_][\w.-]*)\b([^>]*)>/g;
   let match: RegExpExecArray | null;
   while ((match = openerRegex.exec(text)) !== null) {
@@ -1113,8 +1120,12 @@ function recoverCompleteBodyWithWrongCloser(
     const declared = resolveDeclaredToolName(tag, availableTools);
     const isWrapper = CF_GENERIC_TOOL_TAGS.has(tag.toLowerCase());
     if (!declared && !isWrapper) continue;
+    // `<tool:read>` — the name lives in the attribute suffix, and Pattern 2
+    // needs a matching closer this shape does not have.
+    const colonName = match[2].match(/^\s*:\s*([A-Za-z_][\w.-]*)/);
     // The payload has to begin right after the opener.
-    const rest = text.slice(start + match[0].length);
+    const bodyStart = start + match[0].length;
+    const rest = text.slice(bodyStart);
     if (!/^\s*[[{]/.test(rest)) continue;
     const body = extractBalancedJson(rest);
     if (!body) continue;
@@ -1123,20 +1134,26 @@ function recoverCompleteBodyWithWrongCloser(
     const unwrapped = unwrapToolPayload(normalized);
     const attrName = match[2].match(/name\s*=\s*["']([^"']+)["']/i);
     const resolved = applyToolNameHint(
-      unwrapped.name ?? (attrName ? attrName[1] : declared),
+      unwrapped.name ??
+        (attrName ? attrName[1] : null) ??
+        (colonName ? colonName[1] : null) ??
+        declared,
       unwrapped.argsJson,
       availableTools
     );
     if (!resolved) continue;
     const name = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
     if (!name) continue;
-    return {
+    recovered.push({
       id: `call_${crypto.randomUUID().slice(0, 8)}`,
       name,
       arguments: resolved.argsJson,
-    };
+    });
+    // Do not rescan the body: a `<` inside a JSON string is not an opener, and a
+    // second recovery from inside this payload would double the call.
+    openerRegex.lastIndex = text.indexOf(body, bodyStart) + body.length;
   }
-  return null;
+  return recovered;
 }
 
 /**
@@ -1297,9 +1314,15 @@ export function buildCfToolConversationPrompt(
 export function stripCfToolMarkup(text: string, toolNames: string[] = []): string {
   if (!text) return "";
 
+  // String-aware first: the per-tool removals below are lazy regexes, so a
+  // `</write>` inside a JSON *string* (`{"content":"x</write>y"}`) ends the match
+  // early and leaves the payload's tail behind. Removing the balanced block here
+  // — opener, complete JSON body, closer — keeps that case clean and leaves the
+  // XML-style bodies to the paired regexes below.
+  let stripped = stripRecoveredBlocks(text, toolNames);
+
   // Innermost first: a declared tool tag can sit inside a generic wrapper, and
   // removing the wrapper first would leave the inner tag's body behind.
-  let stripped = text;
   for (const toolName of toolNames) {
     const escaped = escapeRegex(toolName);
     stripped = stripped
@@ -1314,7 +1337,9 @@ export function stripCfToolMarkup(text: string, toolNames: string[] = []): strin
   stripped = stripped
     .replace(/<\s*tool:(\w+)>[\s\S]*?<\s*\/\s*tool:\1\s*>/gi, "")
     .replace(/<\s*shell\b[^>]*>[\s\S]*?<\s*\/\s*shell\s*>/gi, "")
-    .replace(/<\s*tool\b[^>]*>[\s\S]*?<\s*\/\s*tool\s*>/gi, "")
+    .replace(/<\s*tool\b[^>]*>[\s\S]*?<\s*\/\s*tool\s*>/gi, "");
+
+  stripped = stripped
     // The wrapper family, closed…
     .replace(
       new RegExp(
@@ -1332,4 +1357,46 @@ export function stripCfToolMarkup(text: string, toolNames: string[] = []): strin
   return stripped
     .replace(/^---+\s*\n?/m, "") // separator line
     .trimStart(); // only trim leading whitespace, preserve trailing for test
+}
+
+/**
+ * Remove an opening tool tag whose JSON body is complete but whose closer is
+ * missing or wrong — `<write>{...}</path>`, `<tool name="write">{...}`, and the
+ * `<tool>{"path": "a"}` shape recovered without a closer at all.
+ *
+ * Uses the same shape rule the last-resort recovery accepts — a declared tool or
+ * generic wrapper tag whose payload starts right after the opener — and
+ * deliberately does not repeat its name resolution: a block whose shape is
+ * recoverable is call markup either way, and leaving it in the content would
+ * hand the client the raw call as prose. A tag with no readable body (prose, or
+ * a payload the parser refused because it was truncated) is left untouched, so
+ * nothing is hidden unless a call could have been read from it.
+ */
+function stripRecoveredBlocks(text: string, toolNames: string[]): string {
+  const declared = new Set(toolNames.map((name) => name.toLowerCase()));
+  declared.add("shell");
+  const isToolTag = (tag: string) =>
+    declared.has(tag.toLowerCase()) || CF_GENERIC_TOOL_TAGS.has(tag.toLowerCase());
+
+  const opener = /<\s*([A-Za-z_][\w.-]*)\b([^>]*)>/g;
+  let out = "";
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+  while ((match = opener.exec(text)) !== null) {
+    if (!isToolTag(match[1])) continue;
+    const bodyStart = match.index + match[0].length;
+    const rest = text.slice(bodyStart);
+    if (!/^\s*[[{]/.test(rest)) continue;
+    const body = extractBalancedJson(rest);
+    if (!body) continue;
+    // A closer immediately after the body is removed with it, whatever it names.
+    const bodyEnd = text.indexOf(body, bodyStart) + body.length;
+    const closer = text.slice(bodyEnd).match(/^\s*<\s*\/\s*[A-Za-z_][\w.-]*\s*>/);
+    const end = bodyEnd + (closer ? closer[0].length : 0);
+    out += text.slice(cursor, match.index);
+    cursor = end;
+    opener.lastIndex = end;
+  }
+
+  return cursor === 0 ? text : out + text.slice(cursor);
 }
