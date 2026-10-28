@@ -3,7 +3,11 @@
 // state, following the handlers submodule pattern (chatCore/, responseSanitizer/).
 import { normalizeOpenAICompatibleFinishReasonString } from "../../utils/finishReason.ts";
 import { stripObfuscationZeroWidth } from "../../utils/zeroWidth.ts";
-import { TRUNCATED_STREAM_FINISH_REASON, hasSseDoneMarker } from "./truncation.ts";
+import {
+  TRUNCATED_STREAM_FINISH_REASON,
+  hasSseDoneMarker,
+  markTruncatedStreamBody,
+} from "./truncation.ts";
 
 type AccumulatedToolCall = {
   id: string;
@@ -309,9 +313,10 @@ export function parseSSEToGeminiResponse(
   if (!acc.sawContent && acc.toolCalls.length === 0) return null;
 
   // #18432 — content but no candidate finishReason (nor [DONE]): the stream was cut.
-  if (!acc.sawFinishReason && acc.sawContent && !hasSseDoneMarker(rawSSE)) {
+  const streamCut = !acc.sawFinishReason && acc.sawContent && !hasSseDoneMarker(rawSSE);
+  if (streamCut) {
     acc.finishReason = TRUNCATED_STREAM_FINISH_REASON;
   }
 
-  return buildChatCompletionFromAccumulator(acc, fallbackModel);
+  return markTruncatedStreamBody(buildChatCompletionFromAccumulator(acc, fallbackModel), streamCut);
 }
