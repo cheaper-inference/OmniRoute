@@ -8,6 +8,8 @@
  * version when it is a dotted triple newer than the pin. The lookup is
  * fire-and-forget; a cold or failed fetch stays on the pin.
  */
+import { canStartBackgroundRefresh } from "../utils/backgroundRefresh";
+
 export const GEMINI_CLI_CLIENT_VERSION = "0.1.0";
 export const GEMINI_CLI_USER_AGENT_SUFFIX = "(linux; x64)";
 
@@ -52,7 +54,7 @@ function readFreshCache(): string | null {
 }
 
 function shouldAutoRefreshGeminiCliVersion(): boolean {
-  if (typeof process === "undefined") return false;
+  if (!canStartBackgroundRefresh()) return false;
   return !process.env.NODE_TEST_CONTEXT;
 }
 

@@ -1,3 +1,5 @@
+import { canStartBackgroundRefresh } from "@/shared/utils/backgroundRefresh";
+
 export const KIMI_CODING_BASE_URL = "https://api.kimi.com/coding/v1";
 export const KIMI_CODING_MODELS_URL = `${KIMI_CODING_BASE_URL}/models`;
 export const KIMI_CODING_OPENAI_URL = `${KIMI_CODING_BASE_URL}/chat/completions`;
@@ -122,7 +124,7 @@ export function getKimiCodeCliVersion(): string {
   const override = readEnvOverride();
   if (override) return override;
   if (
-    typeof process !== "undefined" &&
+    canStartBackgroundRefresh() &&
     !process.env.NODE_TEST_CONTEXT &&
     !readFreshCache() &&
     !inFlight
