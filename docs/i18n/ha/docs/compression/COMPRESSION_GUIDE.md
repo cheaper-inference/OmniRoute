@@ -32,91 +32,94 @@ Buƙatar Abokin Ciniki
 
 ## Yanayin Matsewa
 
-### A Kashe
+### Off
 
-Ba a aiwatar da matsewa ba. Duk saƙonni suna wucewa ba tare da canji ba.
+Babu matsewa da aka yi. Duk saƙonnin suna wucewa ba tare da canji ba.
 
-### Yanayin Lite (~15% tanadi, jinkiri <1ms)
+### Yanayin Lite (~15% tanadi, <1ms jinkiri)
 
-Yanayi mafi aminci — babu sauyin ma'ana, tsaftace tsarawa kawai:
+Yanayin da yafi aminci — babu canji na ma'ana, kawai tsabtace tsarawa:
 
-| Dabara                   | Bayani                                                   |
-| ------------------------ | -------------------------------------------------------- |
-| `collapseWhitespace`     | Haɗa jerin layukan da babu komai da sararin ƙarshen layi |
-| `dedupSystemPrompt`      | Cire saƙonnin tsarin da aka maimaita                     |
-| `compressToolResults`    | Matse dogayen fitarwar kayan aiki/ayyuka                 |
-| `removeRedundantContent` | Cire umarnin da aka maimaita                             |
-| `replaceImageUrls`       | Gajarta URI na bayanan hoton base64                      |
+| Fasaha                   | Bayani                                                    |
+| ------------------------ | --------------------------------------------------------- |
+| `collapseWhitespace`     | Haɗa layukan fanko masu juna biye da sararin ƙarshen layi |
+| `dedupSystemPrompt`      | Cire saƙonnin tsarin da suka maimaita                     |
+| `compressToolResults`    | Matse fitar kayan aiki/aikace-aikace masu yalwa           |
+| `removeRedundantContent` | Cire umarni masu maimaitawa                               |
+| `replaceImageUrls`       | Gajarta URIs na bayanan hoto na base64                    |
 
-**Ya fi dacewa da:** Amfani na dindindin, hanyoyin aiki masu matuƙar buƙatar aminci.
+**Yafi kyau ga:** Amfani koyaushe, ayyukan da suke buƙatar aminci sosai.
 
 ### Yanayin Standard (~30% tanadi)
 
-An samo ra'ayinsa daga [Caveman](https://github.com/JuliusBrussee/caveman) — yana cire kalmomin cikewa da dogayen salon magana tare da kiyaye ma'ana:
+An samo wahayi daga [Caveman](https://github.com/JuliusBrussee/caveman) — yana cire kalmomin cika-gibi da maganganu masu yalwa yayin da yake kiyaye ma'ana:
 
-- Yana cire kalmomin cikewa ("don Allah", "ina tsammani", "a taƙaice", "a zahiri")
-- Yana taƙaita dogayen jimloli ("domin a yi" → "don", "sakamakon" → "saboda")
-- Yana cire lafazin ladabi mai rangwame ("Za ka damu idan...", "Idan za ka iya don Allah...")
-- Dokokin regex sama da 30 da aka daidaita don umarnin rubuta lamba
+- Yana cire kalmomin cika-gibi ("please", "I think", "basically", "actually")
+- Yana taƙaita maganganu masu yalwa ("in order to" → "to", "as a result of" → "because")
+- Yana cire maganganun ladabi masu tsawaita magana ("Would you mind...", "If you could possibly...")
+- Dokokin regex 30+ da aka daidaita don saƙonnin shirye-shirye
 
-**Ya fi dacewa da:** Ayyukan rubuta lamba na yau da kullum, ƙungiyoyi masu lura da farashi.
+**Yafi kyau ga:** Ayyukan shirye-shirye na yau da kullum, ƙungiyoyi masu kula da kuɗi.
 
 ### Yanayin Aggressive (~50% tanadi)
 
-Sarrafa tarihi cikin hikima don zaman aiki masu tsawo:
+Sarrafa tarihi mai wayo don zama masu tsawo:
 
-- **Tsufar Saƙonni** — ana ƙara matse tsofaffin saƙonni sannu a hankali
-- **Matse Sakamakon Kayan Aiki** — ana yanke ko ɓoye dogayen fitarwar kayan aiki (layukan farko/ƙarshe,
-  tace layukan da suka dace, taƙaita maɓallan JSON)
-- **Masu Kiyaye Ingancin Tsari** — yana tabbatar da cewa nau'i-nau'in `tool_use` + `tool_result` sun kasance daidai
-- **Fahimtar Tagar Mahalli** — yana kiyaye iyakokin token na kowane samfuri
+- **Tsufa na Saƙo** — saƙonnin da suka tsufa suna matsewa a hankali
+- **Matsawar Sakamakon Kayan Aiki** — fitar kayan aiki masu tsawo ana guntawa ko ɓoyewa
+  (layuka na farko/ƙarshe, tace layukan da suka dace, matse maɓallan JSON)
+- **Masu Tsaron Cikakken Tsari** — yana tabbatar da cewa nau'ikan `tool_use` + `tool_result`
+  suna kasancewa daidai
+- **Sanin Tagar Mahalli** — yana mutunta iyakokin token na kowane samfuri
 
-**Ya fi dacewa da:** Dogayen zaman gyaran matsala, manyan rumbunan lamba.
+**Yafi kyau ga:** Zama masu tsawo na gyara kura-kurai, manyan codebase.
 
 ### Yanayin Ultra (~75% tanadi)
 
-Matsakaicin matsewa don yanayin da token yake da matuƙar muhimmanci:
+Matsawar mafi girma don yanayi masu mahimmancin token:
 
-- **Tacewa Bisa Ƙa'ida** — tace token na rubutu bisa maki
-- **Kiyaye Tsari** — tubalan lamba masu shinge, lamba a cikin layi, URL da masu ganowa ana
-  sanya musu alamar wucin gadi sannan a sake haɗa su yadda suke, ba a taɓa tace su ba
-- **Matakin SLM na zaɓi** — ƙaramin samfuri na cikin gida zai iya inganta tacewar idan an saita shi
-- Mai cin gashin kansa daga yanayin Aggressive: ba ya gudanar da tsufar saƙonni, matse sakamakon kayan aiki
-  ko mai taƙaitawa na madadin (gazawar matakin SLM ce kaɗai za ta iya tura aikin madadin ta hanyar
-  aggressive)
+- **Yankewa ta Heuristic** — yankewar token na rubutu bisa maki
+- **Kiyaye Tsari** — fenced code blocks, inline code, URLs da identifiers ana alanta su a
+  matsayin tombstone kuma ana sake haɗa su kamar yadda suke, ba a taɓa yankewarsu
+- **Matakin SLM na zaɓi** — ƙaramin samfurin gida zai iya tsarfa yankewar idan aka saita shi
+- Mai zaman kansa daga yanayin Aggressive: ba ya gudanar da tsufa na saƙo, matsawar
+  sakamakon kayan aiki ko mai taƙaitawa na madadin (kawai gazawar matakin SLM ce zata iya
+  tura wucewar madadin ta hanyar aggressive)
 
-**Ya fi dacewa da:** Lokacin da kake kai iyakar mahalli akai-akai.
+**Yafi kyau ga:** Lokacin da kake cika iyakokin mahallin akai-akai.
 
-### Yanayin RTK (kewayon 60-90% a sama)
+### Yanayin RTK (kewayon 60-90% na upstream)
 
-An inganta yanayin RTK don dogayen fitarwar kayan aiki da ke bayyana a zaman wakilan rubuta lamba:
+An inganta yanayin RTK don fitar kayan aiki masu yalwa waɗanda ke bayyana a zaman wakilai masu shirye-shirye:
 
-- Yana gano nau'ikan umarni/fitarwa kamar `git status`, `git diff`, `git log`, masu gudanar da gwaji,
-  ginawa ta TypeScript/Vite/Webpack, ESLint/Biome/Prettier, binciken npm/shigarwa, rajistan Docker, fitarwar infra,
-  da fitarwar shell ta gama-gari
-- Yana amfani da tarin matatan JSON daga `open-sse/services/compression/engines/rtk/filters/`
-- Yana shigo da matatan RTK TOML schema v1 daga fayilolin `filters.toml` na aikin ko na gama-gari, tare da
-  tabbatarwar gwaji a ciki da tantance amincewa ga fayilolin aikin
-- Ya ƙunshi matata 55 da aka gina a ciki tare da misalan tabbatarwa a ciki
-- Yana cire jerin sarrafa ANSI, sandunan ci gaba, layukan da aka maimaita, da hayaniyar da ba ta da amfani
-- Yana kiyaye gazawa, kurakurai, gargaɗi, fayilolin da aka canza, taƙaitawa, da ƙarshen doguwar fitarwa
-- Yana goyon bayan matatan aikin da aka tantance amincewarsu, matatan gama-gari, da dawo da ɗanyen fitarwa da aka ɓoye bayanansa a matsayin zaɓi
+- Yana gano nau'ikan umarni/fitarwa kamar `git status`, `git diff`, `git log`, masu gudanar
+  da gwaji, gina TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, rajistan
+  Docker, fitar infra, da fitar shell ta gama-gari
+- Yana amfani da fakitin tacewa na JSON daga `open-sse/services/compression/engines/rtk/filters/`
+- Yana shigo da tacewar RTK TOML schema v1 daga fayilolin `filters.toml` na aikin ko na duniya,
+  tare da tabbatar da gwajin inline da tsare-ƙofar amana ga fayilolin aikin
+- Yana zuwa da tacewa 56 da aka gina a ciki tare da samfuran tabbatarwa na inline
+- Yana cire jerin sarrafa ANSI, sandunan ci gaba, layuka masu maimaitawa, da hayaniya marar amfani
+- Yana kiyaye gazawa, kurakurai, gargaɗi, fayilolin da suka canza, taƙaitawa, da ƙarshen
+  fitarwa mai tsawo
+- Yana goyan bayan tacewar aikin da aka tsare da amana, tacewar duniya, da zaɓin dawo da
+  fitar ainihi da aka goge
 
-**Ya fi dacewa da:** Zaman wakilai masu ɗauke da shell, ginawa, gwaji, git, grep, da bayanan fitarwar fayil.
+**Yafi kyau ga:** Zaman wakilai tare da rubuce-rubucen fitarwa na shell, build, test, git, grep, da fayil.
 
-### Yanayin Stacked (kewayon cancanta 78-95%)
+### Yanayin Stacked (kewayon cancanta na 78-95%)
 
-Yanayin Stacked yana gudanar da injunan matsewa da yawa cikin ƙayyadadden tsari. Bututun tsoho shi ne:
+Yanayin Stacked yana gudanar da injunan matsewa da yawa bisa tsari tabbatacce. Layin aikin tsoho shi ne:
 
 ```txt
 RTK -> Caveman
 ```
 
-Wannan tsarin yana fara taƙaita fitarwar terminal/kayan aiki, sannan ya yi amfani da taƙaitawar ma'ana ta Caveman ga
-sauran umarnin harshe na halitta. Ana iya saita bututun Stacked a matakin gama-gari ko ta hanyar
-haɗaɗɗun saitunan matsewa da aka sanya wa haɗaɗɗun saitunan turawa.
+Wannan tsari yana sa fitar terminal/kayan aiki ta kasance a taƙaice da farko, sannan yana amfani
+da taƙaitacciyar ma'ana ta Caveman ga sauran saƙon harshen halitta. Ana iya saita layukan aiki
+na Stacked a duniya ko ta hanyar combos na matsewa da aka sanya wa combos na jagora.
 
-**Ya fi dacewa da:** Haɗaɗɗen mahalli mai manyan rajistan kayan aiki tare da umarnin ɗan Adam ko taƙaitawar mataimaki.
+**Yafi kyau ga:** Mahallin gauraye tare da manyan rajistan kayan aiki da umarnin mutum ko taƙaitaccen mataimaki.
 
 ---
 

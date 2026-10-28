@@ -63,8 +63,11 @@ test("suites run hosted on the resolved commit and only outside push", () => {
   assert.match(suites.if ?? "", /github\.event_name != 'push'/);
   const checkout = suites.steps?.find((s) => s.uses?.startsWith("actions/checkout@"));
   assert.equal(checkout?.with?.ref, "${{ needs.resolve-target.outputs.sha }}");
+  const runtime = suites.steps?.find((s) => s.uses?.startsWith("actions/setup-node@"));
+  assert.equal(runtime?.with?.["node-version"], "${{ needs.resolve-target.outputs.node-version }}");
   assert.match(workflow.jobs["resolve-target"].if ?? "", /github\.event_name != 'push'/);
   assert.deepEqual(Object.keys(workflow.jobs["resolve-target"].outputs ?? {}).sort(), [
+    "node-version",
     "sha",
     "target",
   ]);
@@ -76,13 +79,17 @@ test("the slot validation waits for the suites, reads their results and still ru
   assert.match(job.if ?? "", /^\$\{\{ !cancelled\(\) && /, "push skips the suites, not this job");
   const steps = job.steps ?? [];
   const download = steps.find((s) => s.uses?.startsWith("actions/download-artifact@"));
-  assert.equal(download?.with?.pattern, "release-green-suite-*");
+  assert.equal(download?.with?.pattern, "release-green-suite-${{ github.run_attempt }}-*");
   assert.equal(download?.with?.path, "suite-results");
   const upload = workflow.jobs.suites.steps?.find((s) =>
     s.uses?.startsWith("actions/upload-artifact@")
   );
-  assert.equal(upload?.with?.name, "release-green-suite-${{ matrix.name }}");
+  assert.equal(
+    upload?.with?.name,
+    "release-green-suite-${{ github.run_attempt }}-${{ matrix.name }}"
+  );
   const validate = steps.find((s) => s.run?.includes("validate-release-green.mjs"));
+  assert.match(validate?.run ?? "", /--suites-workflow-sha "\$GITHUB_WORKFLOW_SHA"/);
   assert.match(validate?.run ?? "", /MODE="--with-build --full-ci --suites-from suite-results"/);
   assert.match(validate?.run ?? "", /MODE="--quick"/, "push keeps the quick profile");
   const checkout = steps.find((s) => s.run?.includes("SWEEP_SHA"));

@@ -149,7 +149,10 @@ function targetHealthTone(target: ComboControlCenterTarget | ComboControlCenterT
   return "border-success/20 bg-success/10 text-success";
 }
 
-function TargetConfiguredRow({ target }: { target: ComboControlCenterTarget }) {
+// Exported for the dashboard regression test (#17393): the configured-target
+// row is the only place that renders the configured model and the pinned
+// account, so it is the unit under test.
+export function TargetConfiguredRow({ target }: { target: ComboControlCenterTarget }) {
   const t = useTranslations("comboControl");
   return (
     <div className="rounded-xl border border-border bg-surface p-3">
@@ -168,10 +171,10 @@ function TargetConfiguredRow({ target }: { target: ComboControlCenterTarget }) {
               </Badge>
             )}
           </div>
-          <p className="mt-2 truncate font-mono text-sm text-text-main">{target.label}</p>
+          <p className="mt-2 truncate font-mono text-sm text-text-main">{target.model}</p>
           <p className="mt-1 text-xs text-text-muted">
             {target.provider ? getProviderDisplayName(target.provider) : t("comboReference")} ·{" "}
-            {t("accountShort", { id: shortId(target.connectionId, t("dynamic")) })}
+            {t("accountShort", { id: target.accountLabel || t("dynamic") })}
           </p>
         </div>
         <div className={`rounded-lg border px-3 py-2 text-xs ${targetHealthTone(target)}`}>
@@ -311,7 +314,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
     [combo, metrics, health]
   );
   const configuredTargets = useMemo(
-    () => (combo ? getComboControlCenterTargets(combo, health) : []),
+    () => (combo ? getComboControlCenterTargets(combo, health, combo.connectionLabels) : []),
     [combo, health]
   );
   const resolvedTargets = useMemo(() => getResolvedComboControlCenterTargets(health), [health]);

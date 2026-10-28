@@ -20,59 +20,36 @@ Umiiral ang mga stealth feature upang makakilos ang OmniRoute bilang compatibili
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Ang mga persistent na session ng `wreq-js` ay ginagawa nang lazily para sa bawat saklaw ng account at nalutas na proxy. Ang
-process-wide na `TlsClient` ay nagpo-pool ng hindi hihigit sa 128 session na nagpapanggap bilang **Chrome 124 sa macOS** para sa
-mga upstream na nasa likod ng Cloudflare. Nagfa-fail closed ang `TlsClient.fetch()` kapag hindi available ang native runtime;
-maaaring tahasang pumili ang tumatawag ng fallback sa labas ng wrapper na ito.
+Ang mga persistent na session ng `wreq-js` ay ginagawa nang lazy para sa bawat saklaw ng account at na-resolve na proxy. Ang process-wide na `TlsClient` ay nagpo-pool ng hindi hihigit sa 128 session na nagpapanggap bilang **Chrome 124 sa macOS** para sa mga upstream na nasa likod ng Cloudflare. Ang `TlsClient.fetch()` ay nagfa-fail closed kapag hindi available ang native runtime; maaaring tahasang pumili ang caller ng fallback sa labas ng wrapper na ito.
 
 - Profile ng session: `browser: "chrome_124", os: "macos"`
-- Paglutas ng proxy (ayon sa priyoridad): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (pati lower-case)
+- Pag-resolve ng proxy (ayon sa priyoridad): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (pati mga lower-case na bersyon)
 - Timeout: `TLS_CLIENT_TIMEOUT_MS` (namamana mula sa `FETCH_TIMEOUT_MS`, default na 600000)
-- Fetch-compatible ang Response ng `wreq-js` (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Watchdog ng unang byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): Nagre-resolve ang `TlsClient.fetch()`
-  sa sandaling dumating ang mga upstream header, kaya hindi kayang limitahan ng `TLS_CLIENT_TIMEOUT_MS` lamang ang isang
-  body na hindi kailanman naglalabas ng unang byte. Pinagpapaligsahan ng `guardTlsFirstByte()` ang unang `read()` ng body
-  laban sa `TLS_FIRST_BYTE_WATCHDOG_MS` (default na `10000`, dini-disable ito ng `0`); hindi naaapektuhan ang maayos na body,
-  habang kinakansela ng isang naka-stall na body ang wreq reader at hinahayaang tumuloy ang umiiral na
-  TLS-fallback logic ng `proxyFetch` sa direct/proxy dispatcher (ang request na hindi ligtas i-replay, hal.
-  isang POST na may body, ay magti-throw pa rin sa halip na tahimik na subukang muli).
+- Ang Response ng `wreq-js` ay compatible sa fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Watchdog ng unang byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): Nagre-resolve ang `TlsClient.fetch()` sa sandaling dumating ang mga upstream header, kaya hindi kayang limitahan ng `TLS_CLIENT_TIMEOUT_MS` lamang ang isang body na hindi kailanman nagbibigay ng unang byte. Ipinag-uunahan ng `guardTlsFirstByte()` ang unang `read()` ng body at ang `TLS_FIRST_BYTE_WATCHDOG_MS` (default na `10000`, dini-disable ito ng `0`); hindi naaapektuhan ang isang maayos na body, samantalang kinakansela ng isang natigil na body ang wreq reader at hinahayaan ang umiiral na TLS-fallback logic ng `proxyFetch` na magpatuloy sa direct/proxy dispatcher (ang isang request na hindi ligtas i-replay, hal. isang POST na may body, ay magti-throw pa rin sa halip na tahimik na subukang muli).
 
-### Transport ng provider na gumagamit ng web cookie — wreq-js 3.2.0
+### Transport ng web-cookie provider — wreq-js 3.2.0
 
-Ang `open-sse/services/tlsClientBase.ts` ang shared adapter para sa limang specialized na
-web-cookie transport sa ibaba. Pumipili ang bawat manipis na provider wrapper ng browser/OS profile. Ginagamit ng adapter
-ang iisang wreq runtime loader at transport pool sa `open-sse/utils/tlsClient.ts`, na naka-key ayon sa
-profile + OS + nalutas na proxy, habang gumagamit ang bawat request ng `cookieMode: "ephemeral"`. Samakatuwid, pinagsasaluhan ng mga account at
-request ang mga koneksyon sa antas ng transport, ngunit hindi kailanman ang isang wreq session o cookie jar.
+Ang `open-sse/services/tlsClientBase.ts` ang nakabahaging adapter para sa limang specialized na web-cookie transport sa ibaba. Pumipili ang bawat manipis na provider wrapper ng profile ng browser/OS. Ginagamit ng adapter ang iisang wreq runtime loader at transport pool sa `open-sse/utils/tlsClient.ts`, na naka-key ayon sa profile + OS + na-resolve na proxy, habang gumagamit ang bawat request ng `cookieMode: "ephemeral"`. Samakatuwid, nagbabahagi ang mga account at request ng mga koneksyon sa antas ng transport, ngunit hindi kailanman ng wreq session o cookie jar.
 
-| Provider   | Profile       | Ginagayang OS | Patakaran sa EOF ng stream           |
-| ---------- | ------------- | ------------- | ------------------------------------ |
-| Claude     | `chrome_146`  | Linux         | isama ang `[DONE]`                   |
-| Perplexity | `firefox_148` | macOS         | isama ang `event: end_of_stream`     |
-| Grok       | `chrome_146`  | Linux         | huwag isama ang `[DONE]`             |
-| Notion     | `chrome_146`  | Windows       | isama ang `[DONE]`                   |
-| LMArena    | `chrome_146`  | Windows       | walang sentinel; isara sa native EOF |
+| Provider   | Profile       | Ginayang OS | Patakaran sa EOF ng stream              |
+| ---------- | ------------- | ----------- | --------------------------------------- |
+| Claude     | `chrome_146`  | Linux       | isama ang `[DONE]`                      |
+| Perplexity | `firefox_151` | macOS       | isama ang `event: end_of_stream`        |
+| Grok       | `chrome_146`  | Linux       | huwag isama ang `[DONE]`                |
+| Notion     | `chrome_146`  | Windows     | isama ang `[DONE]`                      |
+| LMArena    | `chrome_146`  | Windows     | walang sentinel; isara sa native na EOF |
 
-- Direktang kinokonsumo ng streaming ang native response na `ReadableStream`; walang ginagawang temp file o sidecar.
-- Hanggang 256 na paunang byte ang sinusuri bago ilantad ang isang stream. Bina-buffer ng mga SSE provider ang mga error na hindi SSE;
-  minamapa ng Grok/LMArena ang mga challenge ng Cloudflare sa `403` at ang mga HTML interstitial sa `502`.
-- Nananatiling nakabalot ang native request timeout sa isang absolute na JS hard deadline. Pinapawalang-bisa
-  at isinasara lamang ng hang ang apektadong profile/OS/proxy transport bago ito muling gawin ng susunod na request.
-- Ang priyoridad sa paglutas ng proxy ay per-call na `proxyUrl` → request-scoped na account/dashboard context →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (kabilang ang mga lower-case na variant). Nagfa-fail closed ang mga error sa paglutas
-  sa halip na mag-leak ng direktang koneksyon. Sinasadyang mag-resolve ng LMArena laban sa `arena.ai`.
-- Nagbabalik ang `byteResponse` ng content-typed na `data:` URL nang walang UTF-8 corruption.
-- Ang mga error ay `TlsClientUnavailableError` (hindi available ang package/addon), `TlsClientHangError`
-  (lumampas sa deadline), at `WreqTransportCapacityError` (ang shared na session-capacity error code)
-  kapag aktibo o nagsasara ang lahat ng 128 bounded na profile/OS/proxy slot.
+- Direktang ginagamit ng streaming ang native response na `ReadableStream`; walang ginagawang pansamantalang file o sidecar.
+- Sinusuri ang hanggang 256 paunang byte bago ilantad ang isang stream. Bina-buffer ng mga SSE provider ang mga error na hindi SSE; mina-map ng Grok/LMArena ang mga hamon ng Cloudflare sa `403` at ang mga HTML interstitial sa `502`.
+- Nananatiling naka-wrap ang native na timeout ng request ng isang absolutong JS hard deadline. Kapag nag-hang, ini-invalidate at isinasara lamang nito ang apektadong profile/OS/proxy transport bago ito muling gawin ng susunod na request.
+- Ang priyoridad sa pag-resolve ng proxy ay per-call na `proxyUrl` → account/dashboard context na sakop ng request → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (kabilang ang mga lowercase na variant). Nagfa-fail closed ang mga error sa pag-resolve sa halip na mag-leak ng direktang koneksyon. Sadyang nagre-resolve ang LMArena laban sa `arena.ai`.
+- Nagbabalik ang `byteResponse` ng `data:` URL na may uri ng content nang walang UTF-8 corruption.
+- Ang mga error ay `TlsClientUnavailableError` (hindi available ang package/addon), `TlsClientHangError` (lumampas sa deadline), at `WreqTransportCapacityError` (ang nakabahaging error code para sa kapasidad ng session) kapag aktibo o isinasara ang lahat ng 128 limitadong profile/OS/proxy slot.
 
-Nananatiling specialized ang generic na `TlsClient` session sa itaas para sa persistent na cookie state na sinusuportahan ng browser.
-Muling ginagamit ng parehong path ang iisang naka-cache na wreq module loader at process lifecycle hook; nananatiling
-magkahiwalay ang kanilang mga pool dahil sinadyang magkaiba ang lifecycle ng kanilang mga cookie.
+Nananatiling specialized ang generic na session ng `TlsClient` sa itaas para sa persistent na cookie state na sinusuportahan ng browser. Muling ginagamit ng dalawang path ang iisang naka-cache na wreq module loader at process lifecycle hook; nananatiling magkahiwalay ang kanilang mga pool dahil sadyang magkaiba ang lifecycle ng kanilang mga cookie.
 
-Sinusuportahan ng naka-pin na package ang mga profile, ngunit maaaring magbago ang aktuwal na pagtanggap ng WAF nang hiwalay
-sa mga lokal na contract test. I-validate ang mga pagbabago sa fingerprint gamit ang isang tahasang awtorisadong live account
-bago magpahayag ng parity sa isang upstream browser.
+Sinusuportahan ng naka-pin na package ang mga profile, ngunit maaaring magbago ang aktuwal na pagtanggap ng WAF nang hiwalay sa mga lokal na contract test. I-validate ang mga pagbabago sa fingerprint gamit ang isang tahasang awtorisadong live account bago sabihing kapantay ito ng isang upstream browser.
 
 ---
 
@@ -241,7 +218,7 @@ Nangangailangan ang lahat ng MITM endpoint ng management auth (`requireCliToolsA
 
 ---
 
-## Mga Pag-override ng User-Agent — mga env var (`.env.example` seksyon 12)
+## Mga Override ng User-Agent — mga env var (`.env.example` seksyon 12)
 
 | Variable                 | Default                                                         |
 | ------------------------ | --------------------------------------------------------------- |
@@ -253,7 +230,7 @@ Nangangailangan ang lahat ng MITM endpoint ng management auth (`requireCliToolsA
 | `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
 | `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
 
-Ginagamit ng `open-sse/executors/base.ts::buildHeaders()` sa pamamagitan ng dynamic lookup. **I-update ang mga ito kapag naglabas ang mga provider ng mga bagong bersyon ng CLI** — nagsisimulang tanggihan ang mga lumang UA string bilang mga lipas nang client.
+Ginagamit ng `open-sse/executors/base.ts::buildHeaders()` sa pamamagitan ng dinamikong lookup. **I-update ang mga ito kapag naglalabas ang mga provider ng mga bagong bersyon ng CLI** — ang mga lumang UA string ay nagsisimulang tanggihan bilang mga lipas na client.
 
 ## Mga Toggle ng CLI Compatibility Mode (`.env.example` seksyon 13)
 

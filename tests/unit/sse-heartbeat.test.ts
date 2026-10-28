@@ -179,10 +179,17 @@ test("shape: openai-responses-in-progress emits response.in_progress data event"
     // #14330 / #15202: the frame now carries a required `sequence_number`, a
     // `response` object, and a STRING `response.id` so a strict Responses decoder
     // does not abort on it.
-    assert.equal(
-      emitted[0],
-      'data: {"type":"response.in_progress","sequence_number":1,"response":{"id":"resp_keepalive_omniroute","status":"in_progress"}}\n\n'
-    );
+    // #17825: the frame is now a complete Response (created_at/model/output/object).
+    assert.match(emitted[0], /^data: .*\n\n$/s);
+    const parsed = JSON.parse(emitted[0].slice("data: ".length));
+    assert.equal(parsed.type, "response.in_progress");
+    assert.equal(parsed.sequence_number, 1);
+    assert.equal(parsed.response.id, "resp_keepalive_omniroute");
+    assert.equal(parsed.response.status, "in_progress");
+    assert.equal(parsed.response.object, "response");
+    assert.equal(typeof parsed.response.created_at, "number");
+    assert.equal(typeof parsed.response.model, "string");
+    assert.deepEqual(parsed.response.output, []);
   });
 });
 

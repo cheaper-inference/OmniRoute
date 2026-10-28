@@ -651,27 +651,29 @@ sudo systemctl enable --now omniroute-update.path
 Palvelu poistaa pyynnön ennen näköistiedoston lataamista, jotta epäonnistunut suoritus ei jää silmukkaan. Ilman
 `DOCKER_UPDATE_TRIGGER_FILE`-muuttujaa hallintapaneeli säilyttää manuaalisen komentotyönkulun.
 
-## Saatavuus: oletusarvoinen SQLite tukee yhtä replikointia
+## Saatavuus: oletus SQLite on yksikopio
 
-Dockerin tai Kubernetesin OmniRoute-vakiokokoonpano on **yksi Node-prosessi + yksi SQLite-kirjoittaja**. Korkeaa käytettävyyttä **ei tueta** tässä topologiassa.
+Varasto Docker / Kubernetes OmniRoute on** yksi solmuprosessi + yksi SQLite -kirjoitin** . Korkea saatavuus on** ei tueta** tuossa topologiassa.
 
-| Rajoite                                                     | Seuraus                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Yksi kirjoittaja                                            | **Älä** suorita useita replikoita samaa SQLite-tiedostoa vasten. Se vioittaa tietokannan.                                                                                                                                                                                                                                                                                                                                |
-| Uudelleenluonti / uudelleenkäynnistys / HEALTHCHECK-lopetus | Käynnissä oleville SSE-yhteyksille, hallintapaneeli-istunnoille ja muistissa olevalle tilalle aiheutuu **täydellinen käyttökatko**. Jokaisen yhdistetyn asiakkaan yhteys katkeaa. Uudet pyynnöt saavat tyhjän päätepisteen aikana käänteiseltä välityspalvelimelta vastauksen **`502 Bad Gateway: Unknown error`**, eivät OmniRoute-JSON-vastausta — asiakkaat eivät voi erottaa tätä palveluntarjoajan viasta (#11015). |
-| Sama tapahtumasilmukka kuin `/healthz`                      | Kiireinen luettelo- tai pakkausjakso voi viivästyttää tarkistuksia; lyhyt aikakatkaisu käynnistää tällöin **ainoan** replikan uudelleen.                                                                                                                                                                                                                                                                                 |
+| Rajoitus                                               | Seuraus                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Yksinäinen kirjoittaja                                 | Tehdä** ei** suorittaa useita replikoita samaa SQLite tiedostoa vastaan. Se turmelee DB.                                                                                                                                                                                                                                       |
+| Luo uudelleen / käynnistä uudelleen / HEALTHCHECK kill | **Täysi katkos** lennon aikana SSE, kojelautaistunnot ja muistitila. Jokainen yhdistetty asiakas putoaa. Uudet pyynnöt tyhjän päätepisteen ikkunan aikana saavat käänteisen välityspalvelimen**`502 Bad Gateway: Unknown error`** , ei OmniRoute JSON — asiakkaat eivät voi erottaa tätä palveluntarjoajan virheestä (#11015). |
+| Sama tapahtumasilmukka kuin `/healthz`                 | Kiireinen luettelo tai pakkausrasti voi viivyttää koettimia; lyhyt aikakatkaisu ja käynnistää sitten uudelleen** vain** kopio.                                                                                                                                                                                                 |
 
-**Tarkistusmatriisi** (katso myös [Kubernetes-tarkistusten suositukset](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Anturin matriisi** (katso myös [Kubernetes-luotaimen suositukset](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Tarkistus        | Kohde                                                          | Älä käytä                                                                         |
-| ---------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Elossaolo        | TCP portissa `PORT` (oletus `20128`) tai kevyt HTTP `/healthz` | `/api/monitoring/health`                                                          |
-| Valmius          | HTTP `GET /healthz`                                            | Tiukkoja aikakatkaisuja, jotka tulkitsevat kiireisen tapahtumasilmukan kuolleeksi |
-| Syvä / ihmisille | `/api/monitoring/health`                                       | Automatisoituna kubeletin elossaolotarkistuksena                                  |
+| Koetin         | Kohde                                                       | Älä käytä                                                                |
+| -------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Elävyyttä      | TCP zqb: `PORT` (oletus `20128`) tai pehmeä HTTP `/healthz` | `/api/monitoring/health`                                                 |
+| Valmius        | HTTP `GET /healthz`                                         | Tiukat aikakatkaisut, jotka pitävät tapahtumasilmukan kiirettä kuolleina |
+| Syvä / ihmiset | `/api/monitoring/health`                                    | Automatisoitu kubelet-eloisuus                                           |
 
-**Päivitykset:** varaudu siihen, että jokainen istunto katkeaa. Ohjaa asiakkaat hallitusti pois, jos mahdollista; oletusarvoisella SQLite-kokoonpanolla ei voi tehdä vaiheittaista päivitystä. Composen `restart: unless-stopped` yhdessä Dockerin `HEALTHCHECK`-tarkistuksen kanssa korvaa myös ainoan prosessin, kun kontin tila on Unhealthy — vaikutusalue on sama.
+**Päivitykset:** odottaa jokaisen istunnon putoavan. Tyhjennä asiakkaat, jos voit; oletus- SQLite ssa ei ole jatkuvaa päivitystä. Kirjoita `restart: unless-stopped` plus Docker `HEALTHCHECK` korvaa myös ainoan prosessin, kun säiliö on epäterveellinen – sama räjähdyssäde.
 
-Kubernetes-katkelma **yhdelle replikalle** (Recreate vaaditaan; älä kasvata `replicas`-arvoa yhtä SQLite-tiedostoa käytettäessä):
+Valmiit luettelot ja Helm-kaavio livenä `deploy/kubernetes/` ssa ja `deploy/helm/omniroute/` ssä – katso [Kubernetesin käyttöönottoopas](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes-katkelma a** yksi kopio** (Uudelleenluo vaaditaan; älä nosta `replicas` yhtä SQLite tiedostoa vastaan):
 
 ```yaml
 spec:
@@ -698,9 +700,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop`-viive antaa kuben poistaa Service-päätepisteet ennen SIGTERM-signaalia, jotta **uusi** liikenne ei enää ohjaudu sammutettavaan prosessiin. Käynnissä olevien `/v1/responses`-SSE-yhteyksien annetaan päättyä enintään `SHUTDOWN_TIMEOUT_MS`-ajan (oletus 30 s) raskaiden pääsynhallintavarausten avulla (#11015). Prosessiin edelleen päätyvät uudet pyynnöt saavat vastauksen `503` + `Retry-After: 5`. Recreate-strategiassa syntyvä tyhjien päätepisteiden jakso korvaavan instanssin Ready-tilaan asti aiheuttaa edelleen täydellisen käyttökatkon — tämä johtuu SQLite-topologiasta, ei virheellisistä probe-asetuksista.
+`preStop` sleep antaa kuben pudottaa palvelun päätepisteet ennen SIGTERM tä niin** uusi** liikenne lakkaa koskettamasta kuolettavaa prosessia. Lennon aikana `/v1/responses` SSE tyhjennetään `SHUTDOWN_TIMEOUT_MS` asti (oletus 30s) raskaan sarjan sisäänpääsysopimusten (#11015) kautta. Uudet pyynnöt, jotka edelleen saavuttavat prosessin, saavat `503` + `Retry-After: 5`. Luo tyhjän päätepisteen väli uudelleen, kunnes vaihto on valmis, pysyy kovana katkoksena – se on SQLite -topologia, ei koettimen määritysvirhe.
 
-Ulkoinen Postgres / usean kirjoittajan HA **ei** ole dokumentoitu vakiokokoonpano. Jos tarvitset HA:n, käytä yhtä replikaa tai topologiaa, jonka projekti on testannut ja dokumentoinut erikseen. Postgres/MySQL-työtä seurataan kohdassa [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Siihen asti ainoa tuettu tapa kasvattaa **suurten** `/v1/responses`-pyyntöjen kapasiteettia on käyttää N:ää itsenäistä prosessia (seuraava osio), ei asetusta `replicas > 1` yhdellä taltiolla.
+Ulkoinen Postgres / monikirjoitin HA on** ei** dokumentoitu osakepolku. Jos tarvitset HA, säilytä yksi replika tai suorita topologia, jonka projekti on testannut ja dokumentoinut erikseen. Postgres/MySQL teos asuu paikassa [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kunnes se toimitetaan, ainoa tuettu tapa kertoa** suuri** `/v1/responses` kapasiteetti on N riippumatonta prosessia (seuraava osa), ei `replicas > 1` yhdellä tilavuudella.
 
 ## Skaalaus ulospäin: N itsenäistä prosessia
 
