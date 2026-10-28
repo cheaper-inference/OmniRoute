@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gatewayen vokser videre
+## 📈 Gatewayen bliver ved med at vokse
 
 <div align="center">
 
-|                             |       v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------- | :------------------: | :---------: | :-------------------: |
-| 🌐 Udbydere                 |         352          |   **358**   |          376          |
-| 🧠 Unikke chatmodel-ID'er   |         1320         |  **1374**   |         1475          |
-| 🖼️ Modalitetsbro            | 🆕 syn + lyd + video |      ✓      |           ✓           |
-| 📡 Gratis Radar-katalog     |      🆕 opt-in       |      ✓      |           ✓           |
-| ⚖️ Kvotebevidst planlægning |    🆕 Quota-Share    |      ✓      |           ✓           |
-| 📊 Kvotetelemetri           |       🆕 live        |      ✓      |           ✓           |
-| 🧰 Headless-tilstand        |          —           |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-rail-infrastruktur   |          —           |      —      | 🆕 udgivelseskanaler  |
-| 🔎 API til modelopdagelse   |          —           |      —      | 🆕 `/v1/models/query` |
+|                             |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------- | :-----------------------: | :---------: | :-------------------: |
+| 🌐 udbydere                 |            352            |   **358**   |          376          |
+| 🧠 Unik chatmodel IDs       |           1320            |  **1374**   |         1475          |
+| 🖼️ Modalitetsbro            | 🆕 vision + audio + video |      ✓      |           ✓           |
+| 📡 Radar gratis katalog     |         🆕 opt-in         |      ✓      |           ✓           |
+| ⚖️ Kvotebevidst planlægning |      🆕 Kvote-andel       |      ✓      |           ✓           |
+| 📊 Kvote telemetri          |          🆕 live          |      ✓      |           ✓           |
+| 🧰 Hovedløs tilstand        |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS skinne infra         |             —             |      —      | 🆕 udgivelseskanaler  |
+| 🔎 Modelopdagelse API       |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Roadmap](ROADMAP.md) — på skinnerne mod `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — kører på skinnen til `v3.9.0 LTS`**
 
 </div>
 
@@ -621,59 +621,58 @@ adgangskrav og det aktuelle katalog på **[radar.omniroute.online/planos](https:
 
 <div align="center">
 
-## 🤖 Kompatible CLI'er og kodningsagenter
+## 🤖 kompatible CLIs og kodningsagenter
 
-> Én konfiguration — `http://localhost:20128/v1` — og **alle** AI-IDE'er eller CLI'er kører på gratis og billige modeller.
+> En konfiguration - `http://localhost:20128/v1` - og** hver** AI IDE eller CLI kører på gratis og billige modeller.
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Kode </b></sub><br/><sub> </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b> Kilokode </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b> Zoo kode </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b> Fortsæt </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b> Aider </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> Factory Droid </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b> Smelt </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Pi </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Byg </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b> Hermes Agent </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b> Gås </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b> Åben tolk </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ fungerer også med</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>ethvert OpenAI-kompatibelt værktøj</b>
+<b>＋ fungerer også med </b> · Agent Deck · Kiro · Kommandokode · Antigravity · Windsurf · AMP · <b> ethvert OpenAI-kompatibelt værktøj </b>
 </div>
 
-<sub>📖 Opsætning pr. værktøj for alle 37 værktøjer (27 CLI-kodeværktøjer + 10 CLI-agenter) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode-plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Per-værktøj opsætning for alle 38 værktøjer (27 CLI Code's + 11 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**Start enhver understøttet CLI gennem OmniRoute med én kommando** — ingen konfigurationsfiler skrives,
-legitimationsoplysninger indlæses pr. proces, og Qwen/Gemini får en midlertidig, isoleret hjemmemappe:
+**Start enhver understøttet CLI gennem OmniRoute i én kommando** — ingen konfigurationsfiler skrevet, legitimationsoplysninger injiceret pr. proces, Qwen/Gemini får et isoleret hjem:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -684,13 +683,11 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# Eller vælg udbyder+model interaktivt, og skriv værktøjets egen konfiguration:
-omniroute configure codex          # også: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider+model interactively and write the tool's own config:
+omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-Hver kommando respekterer den aktive fjernkontekst (`omniroute connect <host>`), `--dry-run`
-viser de præcise miljøvariabler/argumenter uden at udføre kommandoen, og `--api-key-env NAME` holder hemmeligheder ude
-af din shellhistorik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
+Hver kommando respekterer den aktive fjernkontekst (`omniroute connect <host>`), `--dry-run` forhåndsviser den nøjagtige env/args uden at udføre, og `--api-key-env NAME` holder hemmeligheder ude af din shell-historie. → [CLI integrationer](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
@@ -765,92 +762,80 @@ af din shellhistorik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🖥️ Hvor OmniRoute kører — overalt
+## 🖥️ Hvor OmniRoute kører - Hvor som helst
 
 </div>
 
-> Samme app, din maskine, dine regler. Fra en global npm-installation til **din telefon** via Termux.
+> Samme app, din maskine, dine regler. Fra en global npm installation til** din telefon** via Termux.
 
 <table>
-  <tr><th align="left">Platform</th><th align="left">Installation</th><th align="left">Højdepunkter</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Én kommando, ethvert operativsystem</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multi-arkitektur: <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Integreret vindue + systembakke — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>Menulinje (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Overvåger &amp; opdaterer automatisk serveren — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>integreret <code>arm64</code></td><td align="left">Raspberry Pi, ARM-servere, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Kører <b>på din telefon</b>, døgnet rundt, uden root</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Føj til hjemmeskærm"</td><td align="left">Fuld skærm, offline, kan installeres fra browseren</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode-plugin</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Integreret OpenCode-integration</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>installer udvidelsen <b>OmniCopilot</b></td><td align="left">Alle OmniRoute-modeller i den integrerede Copilot Chat-vælger — stabil &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>Fra kildekoden</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Tilpas den, bidrag</td></tr>
+  <tr><th align="left"> platform </th><th align="left"> Installer </th><th align="left"> Højdepunkter </th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (global)</b></td><td align="left" nowrap><code> npm installer -g omniroute </code></td><td align="left"> En kommando, enhver OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Samme registreringsdatabasen tarball, hurtigere installationer </td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-bue <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron)</b></td><td align="left" nowrap><code> npm run electron:build </code></td><td align="left"> Native window + systembakke — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b> Menulinje (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Overvåger &amp; automatisk opdaterer serveren — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> native <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM servere, Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Kører <b> på din telefon </b>, 24/7, no root </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Tilføj til startskærm"</td><td align="left"> Fuldskærm, offline, kan installeres fra browser </td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode plugin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Native OpenCode integration </td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Kode Copilot Chat </b></td><td align="left" nowrap> installer <b>OmniCopilot</b> extension </td><td align="left"> Hver OmniRoute -model i den oprindelige Copilot Chat-vælger — stabil &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> Fra kilden </b></td><td align="left" nowrap><code> npm installer && npm kør dev </code></td><td align="left"> Hack på det, bidrag med </td></tr>
 </table>
 
-<sub>📖 [Docker-vejledning](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Menulinje-app](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker Guide](docs/guides/DOCKER_GUIDE.md) · [Skrivebord](electron/README.md) · [Menulinjebakke](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Nyt: OmniRoute i VS Codes integrerede Copilot Chat
+### 🧩 Nyt: OmniRoute inde i VS Codes oprindelige Copilot Chat
 
 </div>
 
-> Ingen ny sidebjælke, ingen ny chatgrænseflade — alle modeller, som OmniRoute leverer, vises direkte i
-> **den Copilot Chat-modelvælger, du allerede bruger**. Siden VS Code 1.122 fungerer udbydermodeller
-> uden GitHub-login eller Copilot-abonnement — agenttilstand, værktøjskald og billedforståelse, helt
-> gratis.
+> Ingen ny sidebjælke, ingen ny chat UI - hver model OmniRoute serverer dukker op lige i**Copilot Chat-modelvælger, du allerede bruger** . Siden VS -kode 1.122 fungerer udbydermodeller uden et GitHub -login eller et Copilot abonnement - agenttilstand, værktøjsopkald og vision gratis.
 
-Installer udvidelsen **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, forbind den
-til din OmniRoute-server (standarden er `localhost:20128`), og åbn derefter Copilot Chat → modelvælger
-→ **Administrer modeller…** → **OmniRoute**.
+Installer** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** udvidelse, peg den mod din OmniRoute server (standard til `localhost:20128`), åbn derefter Copilot Chat → model picker →** Administrer modeller...** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">Butik</th><th align="left">Link</th><th align="left">Fungerer med</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Installer →</a></td><td align="left">VS Code — stabil &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Installer →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"> Fungerer med </th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Kode Markedsplads </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Installer →</a ></td >< td align ="venstre">VS Kode — stabil &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🔓 <b> Åbn VSX Registry </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Installer →</a ></td >< td align ="venstre">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod </tr>Antigravity, Kiro</td>…
 </table>
 
-Inde fra editoren: Åbn visningen **Udvidelser**, søg efter **"OmniRoute"**, og klik på **Installer**
-— det fungerer på samme måde i begge butikker. Kildekode, problemrapporter og udgivelsesvejledningen findes på
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Inde fra editoren: åbn** Udvidelser** se, søg** "OmniRoute"** , klik** Installere** — fungerer på samme måde i begge butikker. Kilde, numre og udgivelses-runbook live på [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [Vejledning til VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — opsætning, hvad vælgeren viser, kontrolpanel i en fane, fejlfinding</sub>
+<sub>📖 [VS Code Copilot Chatguide](docs/guides/VSCODE-COPILOT.md) — opsætning, hvad vælgeren viser, dashboard-i-en-fane, fejlfinding </sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Nyt: OmniRouteTray — din gateway direkte i menulinjen
+### 🎩 Nyt: OmniRouteTray — din gateway, der bor i menulinjen
 
 </div>
 
-> `omniroute serve` fungerer bedst, når den altid er aktiv. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> gør den til en menulinje-app til macOS, som du kan konfigurere og derefter glemme: Den starter serveren, holder den kørende
-> efter genstarter, opdaterer den på stedet og giver adgang til dit aktuelle tokenbudget med ét klik — **intet
-> terminalvindue skal stå åbent, og ingen `npm install -g omniroute` skal passes.**
+> `omniroute serve` er gladest, når den altid er tændt.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** gør det til en sæt-og-glem menulinje-app til macOS: den starter serveren, holder den i live på tværs af genstarter, opdaterer den på plads og placerer dit live token-budget et klik væk —** intet terminalvindue efterladt åbent, ingen `npm install -g omniroute` til babysitning.**
 
-Den er bygget med [Tauri v2](https://v2.tauri.app/) (en Rust-kerne på størrelse med en afrundingsfejl), leveres
-med sit eget signerede Node 24-kørselsmiljø og administrerer en app-ejet OmniRoute-installation, så den aldrig er i konflikt med din
-globale `node`/`bun`. Den **deler din eksisterende konfiguration og database i `~/.omniroute/`** — så det er den
-samme OmniRoute, du allerede kører, bare med hat på. 🎩
+Bygget med [Tauri v2](https://v2.tauri.app/) (en Rust-kerne på størrelse med en afrundingsfejl), sender den sin egen signerede Node 24-runtime og administrerer en app-ejet OmniRoute installation, så den bekæmper aldrig din globale `node`/`bun`. Det** deler din eksisterende `~/.omniroute/` -konfiguration og database** — så det er den samme OmniRoute, du allerede kører, bare med en hat på. 🎩
 
 <table>
-  <tr><th align="left">Hvad den gør</th><th align="left">Hvordan</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>Overvåger serveren</b></td><td align="left">Starter <code>omniroute serve</code> og overtager en allerede kørende instans i stedet for at duplikere den</td></tr>
-  <tr><td align="left" nowrap>📊 <b>Direkte overblik over forbruget</b></td><td align="left">Udbydernes kvotebjælker, Claude-sessionens/ugens grænser med nedtællinger til nulstilling samt en omkostningsfordeling for 30 dage</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>Opdaterer automatisk på stedet</b></td><td align="left">Trinvis installation, atomisk udskiftning og tilbagerulning ved fejl — altid på den nyeste version</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>Start ved login</b></td><td align="left">Valgfri start ved login; kun i menulinjen, intet ikon i Dock</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>Diagnosticering &amp; logfiler</b></td><td align="left">Diagnosticering med ét klik og adgang til serverens logfiler</td></tr>
+  <tr><th align="left"> Hvad det gør </th><th align="left"> Hvordan </th></tr>
+  <tr><td align="left" nowrap>🟢 <b> Overvåger serveren </b></td><td align="left"> Spawns <code> omniroute serve </code>, adopterer en allerede kørende instans i stedet for at duplikere den </td></tr>
+  <tr><td align="left" nowrap>📊 <b> Live brug på et blik </b></td><td align="left"> Udbyder kvotebarer, Claude session/weekly grænser med nulstillede nedtællinger, 30-dages omkostningsfordeling </td></tr>
+  <tr><td align="left" nowrap>🔄 <b> Automatiske opdateringer på plads </b></td><td align="left"> Etapevis installation, atomic swap, rollback ved fejl — altid på den nyeste udgivelse </td></tr>
+  <tr><td align="left" nowrap>🚀 <b> Start ved login </b></td><td align="left"> Valgfri start ved login; Kun bakke, intet dock-ikon </td></tr>
+  <tr><td align="left" nowrap>🩺 <b> Læge &amp; logs </b></td><td align="left"> Diagnostik med ét klik og serverlogadgang </td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>Foretrækker du en download? Hent den nyeste <code>.dmg</code> fra
-<a href="https://github.com/zoispag/omniroute-tray/releases">Udgivelser</a>. Kildekode, fejlrapporter og dokumentation
-til kompilering findes på <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Et fællesskabsprojekt af <a href="https://github.com/zoispag">@zoispag</a> — ikke en officiel OmniRoute-udgivelse.</sub>
+<sub> Foretrækker du en download? Få fat i den nyeste <code>.dmg </code> fra
+<a href="https://github.com/zoispag/omniroute-tray/releases"> Frigiver </a>. Kilde, problemer og opbygning
+docs live på <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Et fællesskabsprojekt af <a href="https://github.com/zoispag">@zoispag </a> — ikke en officiel OmniRoute udgivelse.</sub>
 
 <br/>
 

@@ -4,13 +4,7 @@
 
 ---
 
-> **Status:** papan pemuka ini dibina di atas **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), divendorkan
-> sebagai workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream dipinkan dalam
-> `packages/ui-kit/UPSTREAM.md` dan dijaga oleh `npm run check:ui-kit-snapshot`). Light ialah tema
-> kanonik; keutamaan lalai ialah `system`. Aksennya ialah Keak lime (`--ci-color-accent`). Inter
-> (jarak huruf 0, `--ci-letter-spacing-ui`) ialah famili UI, Instrument Serif hanya untuk teks paparan
-> besar yang jarang (`.ci-dashboard-display`), IBM Plex Mono untuk kod — semuanya dihoskan sendiri melalui
-> import `@fontsource/*` di bahagian atas `src/app/globals.css`. Setiap ikon ialah glif Lucide.
+> **Status:** papan pemuka dibina di atas** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dijual sebagai ruang kerja `packages/ui-kit` (`@omniroute/ui-kit`; syot kilat hulu disematkan dalam `packages/ui-kit/UPSTREAM.md` dan dikawal oleh `npm run check:ui-kit-snapshot`). Cahaya ialah tema kanonik; keutamaan lalai ialah `system`. Loghatnya ialah limau keak (`--ci-color-accent`). Switzer ialah keluarga tunggal untuk UI, paparan dan teks kod (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` menyelesaikannya), dihoskan sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimport oleh `ci-tokens.css`). Setiap ikon ialah glif Lucide.
 
 ## 1. Di mana semuanya berada
 
@@ -83,34 +77,13 @@
 
 ## 2. Peraturan
 
-1. Token, bukan literal. Pengecualian dikekalkan dengan sengaja: terminal konsol yang sentiasa gelap dan
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), cermin heks-terselesai bagi palet status kit
-   untuk pemanggil yang memerlukan heks literal. Palet kategori tidak lagi dikecualikan:
-   ia bergantung pada lima token carta kit (`--color-chart-1..5`) melalui
-   `src/shared/utils/categoricalPalette.ts` dan, untuk strategi penghalaan,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; tepi ReactFlow dan kanvas orkestrasi
-   membaca pembolehubah `--orch-status-*` yang peka tema (`src/shared/components/flow/edgeStyles.ts`).
-2. Jangan sesekali tampal `packages/ui-kit/src` secara manual: segerakkan dengan `scripts/dev/sync-ui-kit.sh <commit>`;
-   gerbang pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) gagal pada mana-mana bait yang
-   berbeza daripada komit upstream yang disematkan (ia melangkau dengan amaran apabila klon upstream,
-   `UI_KIT_CLONE` atau `_references/cheaper-inference-ui-kit`, tidak wujud). Apabila kit kekurangan sesuatu,
-   atasinya dalam penyesuai atau skrin dan minta ia daripada upstream.
-3. Teks lalai kit adalah Bahasa Inggeris (`label = "Loading"`, `loadingLabel = "Loading table"`…) — hantar rentetan
-   terjemahan daripada `useTranslations(...)` setiap kali komponen kit memaparkan teks.
-4. Utiliti Tailwind mengatasi kelas komponen kit (kit mengisytiharkan
-   `@layer theme, base, components, utilities` dan peraturannya berada dalam `components`) — gunakan utiliti untuk
-   jarak dan susun atur, bukan untuk mewarna semula komponen kit.
-5. Tajuk: `.ci-heading` (Inter, tanpa tracking) untuk tajuk halaman dan bahagian; `.ci-dashboard-display`
-   (Instrument Serif) hanya untuk teks paparan yang besar dan jarang seperti kod status halaman ralat.
-6. `tests/unit/dashboard-kit-sweep.test.ts` menjaga penggunaan kit: tiada span ligatur Material di bawah
-   `src/app` atau `src/shared/components`; dalam pepohon papan pemuka (`src/app/(dashboard)` dan
-   `src/shared/components`) tiada `<select>`, `<textarea>` atau `<table>` mentah dan tiada
-   `role="dialog"` buatan sendiri di luar pengecualian yang disenaraikan (cabang asli penyesuai `Select`,
-   `RequestLoggerDetail`); setiap `<button>` atau `<input>` mentah di sana memerlukan komen yang mengandungi
-   `kit-exception:` (dengan sebabnya) yang berakhir tidak lebih daripada 3 baris di atasnya; rona palet dan varian
-   `dark:` hanya dalam fail yang disenaraikan oleh ujian.
-7. Sahkan kedua-dua tema dan viewport 390 px sebelum PR (tangkapan skrin); `tests/e2e/a11y.spec.ts` menjalankan
-   axe.
+1. Token, tidak pernah literal. Pengecualian disimpan dengan sengaja: terminal konsol sentiasa gelap dan `STATUS_HEX` (`src/shared/constants/statusColors.ts`), cermin hex yang diselesaikan palet status kit untuk pemanggil yang memerlukan hex literal. Palet kategori tidak terkecuali lagi: mereka menggunakan lima token carta kit (`--color-chart-1..5`) melalui `src/shared/utils/categoricalPalette.ts` dan, untuk strategi penghalaan, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; tepi ReactFlow dan kanvas orkestra membaca pembolehubah `--orch-status-*` yang sedar tema (`src/shared/components/flow/edgeStyles.ts`).
+2. Jangan sekali-kali menampal `packages/ui-kit/src` dengan tangan: segerak dengan `scripts/dev/sync-ui-kit.sh <commit>`; gerbang pra-komit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) gagal pada mana-mana bait yang berbeza daripada komit huluan yang disematkan (ia melangkau dengan amaran apabila klon huluan, `UI_KIT_CLONE` atau `_references/cheaper-inference-ui-kit`, tiada). Apabila kit kekurangan sesuatu, atasinya dalam penyesuai atau skrin dan minta ke huluan untuknya.
+3. Lalai teks kit ialah bahasa Inggeris (`label = "Loading"`, `loadingLabel = "Loading table"`…) — hantar rentetan terjemahan daripada `useTranslations(...)` apabila komponen kit memaparkan teks.
+4. Utiliti Tailwind memenangi kelas komponen kit (kit mengisytiharkan `@layer theme, base, components, utilities` dan peraturannya disiarkan dalam `components`) — gunakan utiliti untuk jarak dan susun atur, bukan untuk mewarna semula komponen kit.
+5. Tajuk: `.ci-heading` untuk tajuk halaman dan bahagian; `.ci-dashboard-display` hanya untuk teks paparan yang besar dan jarang seperti kod status halaman ralat. Kedua-duanya menggunakan Switzerland.
+6. `tests/unit/dashboard-kit-sweep.test.ts` menjaga penggunaan kit: tiada rentang ligatur bahan di bawah `src/app` atau `src/shared/components`; dalam pepohon papan pemuka (`src/app/(dashboard)` dan `src/shared/components`) tiada `<select>` mentah , `<textarea>` atau `<table>` dan tiada `role="dialog"` gulung tangan di luar pengecualian yang disenaraikan (cawangan asal penyesuai `Select`, `RequestLoggerDetail`); setiap `<button>` mentah atau `<input>` memerlukan ulasan yang mengandungi `kit-exception:` (dengan alasan) berakhir paling banyak 3 baris di atasnya; warna palet dan varian `dark:` hanya dalam fail yang disenaraikan ujian.
+7. Sahkan kedua-dua tema dan port pandangan 390 px sebelum PR (tangkapan skrin); `tests/e2e/a11y.spec.ts` menjalankan kapak.
 
 ## 3. Menambah skrin
 
@@ -151,43 +124,16 @@ daripada import relatif). Kemudian: semak `git diff packages/ui-kit`, lakukan pe
 tetapan, kombo, penggunaan dan endpoint dalam kedua-dua tema, jalankan `npm run check:ui-kit-snapshot` dan
 `npm run test:vitest:ui`, dan buka PR dengan log perubahan hulu.
 
-## 6. Gambar rajah README
+## 6. gambar rajah README
 
-Dua belas gambar rajah yang disematkan oleh `README.md` di akar (`docs/diagrams/*.svg`) ialah kit yang diterapkan
-pada imej statik, dan ia dijana, bukan dilukis dengan tangan: 13 fail penjana di `scripts/docs/gen-readme-*.mjs`
-(dua belas gambar rajah serta pemacu `gen-readme-diagrams.mjs`) dan 12 ujian keusangan di
-`tests/unit/docs/readme-*-svg.test.ts`, satu untuk setiap gambar rajah, setiap satu membandingkan bait demi bait
-fail yang di-commit dengan output penjananya (job `test-unit`).
+Dua belas rajah yang dibenamkan `README.md` akar (`docs/diagrams/*.svg`) ialah kit yang digunakan pada imej statik, dan ia dijana, bukan dilukis dengan tangan: 13 fail penjana pada `scripts/docs/gen-readme-*.mjs` (dua belas gambar rajah ditambah pemacu `gen-readme-diagrams.mjs` ) dan 12 ujian staleness pada `tests/unit/docs/readme-*-svg.test.ts`, satu setiap rajah, setiap bait-membandingkan fail keluaran `test-unit` yang dikomitkan dengan penjana jobnya.
 
-- **Token.** `scripts/docs/readme-diagram-theme.mjs` menyalin palet daripada `packages/ui-kit/src/ci-tokens.css`
-  (diikat pada fail tersebut oleh `tests/unit/docs/readme-diagram-theme.test.ts`) dan mentakrifkan peranan teks
-  pada muka taip kit — Instrument Serif untuk paparan, Inter untuk teks UI, IBM Plex Mono untuk angka dan kod,
-  pakej `@fontsource` yang sama yang dimuatkan oleh `src/app/globals.css` untuk papan pemuka. Nilai cerah terletak
-  pada `:root`, nilai gelap di sebalik `prefers-color-scheme: dark`, di dalam fail, supaya setiap imej mengikut
-  skema pelihat di GitHub.
-- **Fon.** `scripts/docs/readme-fonts.mjs` membuat subset bagi fail woff2 tersebut kepada glif yang dilukis oleh
-  setiap gambar rajah dan menyematkannya sebagai URI `data:` `@font-face` — satu-satunya cara tipografi kit sampai
-  ke imej README, memandangkan GitHub Markdown tidak membawa CSS dan proksi camo menyekat setiap pengambilan
-  luaran. Subset tersebut hanya latin; glif simbol yang kembali kepada timbunan sistem dibenarkan satu demi satu
-  dalam `SYMBOL_FALLBACKS`, dan mana-mana glif lain yang tidak diliputi akan melontar ralat.
-- **Jana semula.** `npm run docs:readme-diagrams` menulis semula kesemua dua belas mengikut susunan README dan
-  mencetak satu baris setiap fail beserta saiznya. Penjana tunggal juga boleh dijalankan bersendirian
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` memerlukan `node --import tsx/esm` kerana
-  angkanya diperoleh daripada pemuat katalog langsung dalam `open-sse/config/freeModelCatalog.ts`; akibat CI bagi
-  perubahan katalog terdapat dalam `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit penjana dan
-  SVG itu bersama-sama.
-- **Bukti.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` memaparkan fail sebagaimana GitHub
-  menghidangkannya (tag `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), menangkap satu bingkai cerah
-  dan satu bingkai gelap serta melaporkan permintaan fon luaran yang dibuat oleh halaman itu (mestilah 0).
-- **Bajet.** Di bawah 200 KB setiap fail (setiap ujian keusangan menegaskannya); 500 KB ialah had keras untuk
-  mana-mana imej README (peraturan pengesah studio SVG).
-- **Teks tidak diubah, kiraan daripada gate.** Penjenamaan semula menukar tipografi dan palet, bukan kata-kata:
-  setiap penjana membawa teks gambar rajahnya dalam pemalar `*_COPY` (atau membinanya daripada katalog langsung)
-  yang menjadi kedua-dua teks yang dilukis dan input subset fon. Angka kanonik kekal dalam nod `<text>`, dibaca
-  oleh `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); ujian keusangan bagi gambar rajah yang
-  dibaca oleh gate itu turut menjalankan pengesahnya pada fail yang dijana, jadi angka yang menyimpang daripada
-  kod akan menggagalkan ujian — betulkan sumber yang dibaca oleh gate itu, jangan sekali-kali angka dalam
-  penjana.
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` menyalin palet daripada `packages/ui-kit/src/ci-tokens.css` (disematkan pada fail itu oleh `tests/unit/docs/readme-diagram-theme.test.ts`) dan mentakrifkan peranan teks pada muka awal kit — Serif Instrumen untuk paparan, Inter untuk teks UI, IBM Plex Mono untuk angka dan kod — daripada pakej `@fontsource` (papan pemuka itu sendiri menggunakan Switzer kit sejak kit 0.0.66). Nilai cahaya terletak pada `:root`, nilai gelap di belakang `prefers-color-scheme: dark`, di dalam fail, jadi setiap imej mengikut skema penonton pada GitHub.
+- **Fon.** `scripts/docs/readme-fonts.mjs` mensubsetkan fail woff2 tersebut kepada glyph yang dilukis oleh setiap rajah dan membenamkannya sebagai `@font-face` `data:` URIs — satu-satunya cara tipografi kit mencapai imej README, memandangkan Penurunan GitHub tidak membawa CSS dan proksi camo menyekat setiap pengambilan luaran. Subset adalah latin sahaja; simbol glif yang kembali ke timbunan sistem dibenarkan satu demi satu dalam `SYMBOL_FALLBACKS`, dan sebarang lontaran glif lain yang tidak dilindungi.
+- **Menjana semula.** `npm run docs:readme-diagrams` menulis semula kesemua dua belas dalam susunan README dan mencetak satu baris bagi setiap fail dengan saiznya. Penjana tunggal juga berjalan sendiri (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` memerlukan `node --import tsx/esm` kerana angkanya datang daripada pemuat katalog langsung dalam `open-sse/config/freeModelCatalog.ts`; akibat CI daripada perubahan katalog adalah dalam `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Pasangkan penjana dan SVG bersama-sama.
+- **Bukti.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` menjadikan fail seperti cara GitHub menghidangkannya (tag `<img>`, camo's `Content-Security-Policy`, `image/svg+xml`), menangkap bingkai terang dan gelap dan melaporkan permintaan fon luaran halaman dibuat (mesti 0).
+- **Bajet.** Di bawah 200 KB setiap fail (setiap ujian kebas menegaskannya); 500 KB ialah had keras untuk mana-mana imej README (peraturan pengesah studio SVG ).
+- **Salin tidak berubah, kiraan dari pintu pagar.** Jenama semula menukar jenis dan palet, bukan perkataan: setiap penjana membawa salinan rajahnya dalam pemalar `*_COPY` (atau membinanya daripada katalog langsung) iaitu kedua-dua teks yang dilukis dan input subset fon. Angka kanonik kekal dalam nod `<text>`, dibaca oleh `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); ujian staleness bagi rajah yang dibaca get juga menjalankan pengesahnya pada fail yang dijana, jadi angka yang hanyut daripada kod gagal dalam ujian — betulkan sumber yang dibaca get, bukan nombor dalam penjana.
 
 ## 7. Indeks rujukan
 

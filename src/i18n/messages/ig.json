@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "E bubatala ụdị niile",
     "noNewModelsToImport": "Enweghị ụdị ọhụrụ a ga-ebubata — ụdị niile adịlarị na ndekọ ma ọ bụ ndepụta ụdị ahaziri iche",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Nchọpụta modelu enweghị ịga nke ọma {time}",
     "skippingExistingModels": "Na-amafe ụdị {count} dị adị",
     "autoSync": "Mmekọrịta akpaaka",
     "autoSyncShort": "Mekọrịta",
@@ -15298,5 +15299,8 @@
     "importButton": "Bubata",
     "importFailed": "Mbubata dara.",
     "importSuccess": "E bubatara akaụntụ {connections} na nodes {nodes} nke ndị na-eweta ọrụ; a wụfere {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Malite site n'ọnọdụ ugbu a (wụpụ ndekọ ndị dị ugbu a)"
   }
 }

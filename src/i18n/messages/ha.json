@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "An riga an shigo da duk samfuran",
     "noNewModelsToImport": "Babu sababbin samfuran da za a shigo da su — duk samfuran suna cikin kundin rajista ko jerin samfuran al'ada",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Gano model ya kasa {time}",
     "skippingExistingModels": "Ana tsallake samfura {count} da suke akwai",
     "autoSync": "Daidaitawa ta Atomatik",
     "autoSyncShort": "Daidaita",
@@ -15298,5 +15299,8 @@
     "importButton": "Shigo da",
     "importFailed": "Shigowa ta gaza.",
     "importSuccess": "An shigo da asusu {connections} da nodes {nodes} na masu samarwa; an tsallake {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Fara daga matsayin yanzu (tsallake bayanan da ke akwai)"
   }
 }

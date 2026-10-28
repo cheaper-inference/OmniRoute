@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Toate modelele sunt deja importate",
     "noNewModelsToImport": "Niciun model nou de importat — toate modelele sunt deja în registru sau în lista de modele personalizate",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Descoperirea modelului a eșuat {time}",
     "skippingExistingModels": "Se omit {count} modele existente",
     "autoSync": "Sincronizare automată",
     "autoSyncShort": "Sincronizează",
@@ -15298,5 +15299,8 @@
     "importButton": "Importă",
     "importFailed": "Importul a eșuat.",
     "importSuccess": "Au fost importate {connections} conturi și {nodes} noduri de furnizor; {skipped} omise."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Începe de la poziția curentă (omite jurnalele existente)"
   }
 }

@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Modeli zote tayari zimeingizwa",
     "noNewModelsToImport": "Hakuna modeli mpya za kuingiza — modeli zote tayari ziko kwenye sajili au orodha ya modeli maalum",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Kugundua mfano kumeshindwa {time}",
     "skippingExistingModels": "Inapuuza modeli {count} zilizopo",
     "autoSync": "Usawazishaji Otomatiki",
     "autoSyncShort": "Sawazisha",
@@ -15298,5 +15299,8 @@
     "importButton": "Leta",
     "importFailed": "Kuleta kumeshindwa.",
     "importSuccess": "Akaunti {connections} na nodi {nodes} za watoa huduma zimeletwa; {skipped} zimerukwa."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Anza kutoka nafasi ya sasa (ruka kumbukumbu zilizopo)"
   }
 }

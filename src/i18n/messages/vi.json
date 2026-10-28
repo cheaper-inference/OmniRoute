@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Tất cả mô hình đã được nhập",
     "noNewModelsToImport": "Không có mô hình mới để nhập — tất cả mô hình đã có trong sổ đăng ký hoặc danh sách mô hình tùy chỉnh",
     "localCatalogFallbackStatus": "Không thể lấy danh sách mô hình của nhà cung cấp — đang hiển thị danh mục tích hợp sẵn",
+    "discoveryDegradedStatus": "Khám phá mô hình thất bại {time}",
     "skippingExistingModels": "Bỏ qua {count} mô hình đã tồn tại",
     "autoSync": "Tự động đồng bộ hóa",
     "autoSyncShort": "Đồng bộ",
@@ -15301,5 +15302,8 @@
     "importButton": "Nhập",
     "importFailed": "Nhập thất bại.",
     "importSuccess": "Đã nhập {connections} tài khoản và {nodes} nút nhà cung cấp; bỏ qua {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Bắt đầu từ vị trí hiện tại (bỏ qua nhật ký hiện có)"
   }
 }

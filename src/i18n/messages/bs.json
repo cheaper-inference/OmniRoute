@@ -5666,6 +5666,7 @@
     "allModelsAlreadyImported": "Svi modeli su već uvezeni",
     "noNewModelsToImport": "Nema novih modela za uvoz — svi modeli su već u registru ili listi prilagođenih modela",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Otkrivanje modela nije uspjelo {time}",
     "skippingExistingModels": "Preskaču se {count} postojećih modela",
     "autoSync": "Auto-sinkronizacija",
     "autoSyncShort": "Sinkronizuj",
@@ -15298,5 +15299,8 @@
     "importButton": "Uvezi",
     "importFailed": "Uvoz nije uspio.",
     "importSuccess": "Uvezeno {connections} računa i {nodes} čvorova provajdera; preskočeno {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Počni od trenutne pozicije (preskoči postojeće zapise)"
   }
 }

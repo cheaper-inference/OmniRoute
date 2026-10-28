@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Visi modeļi jau importēti",
     "noNewModelsToImport": "Nav jaunu modeļu importēšanai — visi modeļi jau ir reģistrā vai pielāgoto modeļu sarakstā",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Modeļa atklāšana neizdevās {time}",
     "skippingExistingModels": "Tiek izlaisti esošie modeļi ({count})",
     "autoSync": "Automātiskā sinhronizācija",
     "autoSyncShort": "Sinhronizēt",
@@ -15298,5 +15299,8 @@
     "importButton": "Importēt",
     "importFailed": "Importēšana neizdevās.",
     "importSuccess": "Importēti {connections} konti un {nodes} pakalpojumu sniedzēju mezgli; izlaisti {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Sākt no pašreizējās pozīcijas (izlaist esošos žurnālus)"
   }
 }

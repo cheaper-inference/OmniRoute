@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Όλα τα μοντέλα έχουν ήδη εισαχθεί",
     "noNewModelsToImport": "Δεν υπάρχουν νέα μοντέλα για εισαγωγή — όλα τα μοντέλα βρίσκονται ήδη στο μητρώο ή στη λίστα προσαρμοσμένων μοντέλων",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Η ανακάλυψη μοντέλου απέτυχε {time}",
     "skippingExistingModels": "Παράλειψη {count} υφιστάμενων μοντέλων",
     "autoSync": "Αυτόματος Συγχρονισμός",
     "autoSyncShort": "Συγχρονισμός",
@@ -15298,5 +15299,8 @@
     "importButton": "Εισαγωγή",
     "importFailed": "Η εισαγωγή απέτυχε.",
     "importSuccess": "Εισήχθησαν {connections} λογαριασμοί και {nodes} κόμβοι παρόχων· {skipped} παραλείφθηκαν."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Έναρξη από την τρέχουσα θέση (παράλειψη υπαρχόντων αρχείων καταγραφής)"
   }
 }

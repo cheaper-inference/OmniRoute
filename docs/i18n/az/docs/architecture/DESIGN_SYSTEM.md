@@ -4,13 +4,7 @@
 
 ---
 
-> **Vəziyyət:** panel **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) üzərində qurulub və
-> `packages/ui-kit` iş sahəsi kimi daxil edilib (`@omniroute/ui-kit`; yuxarı axın snapshot-ı
-> `packages/ui-kit/UPSTREAM.md` faylında sabitlənib və `npm run check:ui-kit-snapshot` ilə qorunur). İşıqlı (Light) mövzu kanonik
-> mövzudur; standart seçim `system`-dir. Vurğu rəngi Keak lime-dır (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) UI şrift ailəsidir, Instrument Serif yalnız böyük, seyrək
-> displey mətnləri üçün (`.ci-dashboard-display`), IBM Plex Mono isə kod üçündür — hamısı
-> `src/app/globals.css` faylının əvvəlindəki `@fontsource/*` importları vasitəsilə öz hostingində yerləşdirilir. Hər bir ikon Lucide qlifidir.
+> **Vəziyyət:** panel üzərində qurulmuşdur** Keak CI UI dəsti** (`@keak/cheaper-inference-ui-kit`), iş sahəsi `packages/ui-kit` (`@omniroute/ui-kit`; yuxarı snapshot `packages/ui-kit/UPSTREAM.md` -də bərkidilir və `npm run check:ui-kit-snapshot` tərəfindən qorunur). İşıq kanonik mövzudur; standart üstünlük `system`. Vurğu Keak əhəngdir (`--ci-color-accent`). Switzer UI, displey və kod mətni (`--ci-font-ui`; `--ci-font-display` və `--ci-font-mono` həll etmək üçün ) üçün vahid ailədir , dəstin özü tərəfindən (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tərəfindən idxal olunur ). Hər ikona Lucide qlifidir.
 
 ## 1. Hər şey harada yerləşir
 
@@ -24,34 +18,13 @@
 
 ## 2. Qaydalar
 
-1. Tokenlər, heç vaxt literallar yox. Qəsdən saxlanılan istisnalar: həmişə-qaranlıq konsol terminalı və
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — literal hex lazım olan çağıranlar üçün kit
-   status palitrasının resolve edilmiş hex əksi. Kateqorik palitralar artıq istisna deyil:
-   onlar `src/shared/utils/categoricalPalette.ts` vasitəsilə, routing strategiyaları üçün isə
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` vasitəsilə kitin beş qrafik tokenindən
-   (`--color-chart-1..5`) istifadə edirlər; ReactFlow kənarları və orkestrasiya kanvası mövzudan xəbərdar
-   olan `--orch-status-*` dəyişənlərini oxuyur (`src/shared/components/flow/edgeStyles.ts`).
-2. `packages/ui-kit/src` qovluğunu əl ilə heç vaxt patch etməyin: `scripts/dev/sync-ui-kit.sh <commit>` ilə
-   sinxronlaşdırın; pre-commit qapısı `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) sabitlənmiş
-   upstream commit-dən fərqlənən istənilən baytda uğursuz olur (upstream klon,
-   `UI_KIT_CLONE` və ya `_references/cheaper-inference-ui-kit` olmadıqda xəbərdarlıqla keçir). Kitdə nəsə
-   çatışmadıqda, onu adapterdə və ya ekranda əvəz edin və upstream-dən tələb edin.
-3. Kit mətn defoltları ingiliscədir (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit komponenti
-   mətn göstərəndə `useTranslations(...)` vasitəsilə tərcümə edilmiş sətirlər ötürün.
-4. Tailwind utility-ləri kit komponent siniflərindən üstün gəlir (kit
-   `@layer theme, base, components, utilities` elan edir və onun qaydaları `components`-də yaşayır) —
-   utility-lərdən boşluqlar və layout üçün istifadə edin, kit komponentlərini yenidən rəngləmək üçün yox.
-5. Başlıqlar: səhifə və bölmə başlıqları üçün `.ci-heading` (Inter, tracking-siz); `.ci-dashboard-display`
-   (Instrument Serif) yalnız xəta səhifəsinin status kodu kimi böyük, seyrək display mətnləri üçün.
-6. `tests/unit/dashboard-kit-sweep.test.ts` kitin qəbulunu qoruyur: `src/app` və ya `src/shared/components`
-   altında Material ligatura span yoxdur; dashboard ağacında (`src/app/(dashboard)` və
-   `src/shared/components`) qeyd olunmuş istisnalar kənarında ( `Select` adapterinin native budağı,
-   `RequestLoggerDetail`) xam `<select>`, `<textarea>` və ya `<table>` və əl ilə yazılmış
-   `role="dialog"` yoxdur; oradakı hər xam `<button>` və ya `<input>` üçün ondan ən çox 3 sətir yuxarıda
-   bitən, `kit-exception:` (səbəb göstərilməklə) ehtiva edən şərh lazımdır; palitra çalarları və `dark:`
-   variantları yalnız testin qeyd etdiyi fayllarda.
-7. PR-dan əvvəl hər iki mövzunu və 390 px viewport-u yoxlayın (ekran görüntüləri); `tests/e2e/a11y.spec.ts`
-   axe işə salır.
+1. Tokens, heç vaxt hərfi deyil. İstisnalar məqsədyönlü şəkildə saxlanılır: həmişə qaranlıq olan konsol terminalı və `STATUS_HEX` (`src/shared/constants/statusColors.ts`), hərfi hex ehtiyacı olan zəng edənlər üçün kit status palitrasının həll edilmiş hex güzgüsü. Kateqorik palitralar artıq istisna deyil: onlar `src/shared/utils/categoricalPalette.ts` vasitəsilə dəstin beş diaqram nişanı (`--color-chart-1..5`) üzərində işləyirlər və marşrutlaşdırma strategiyaları üçün `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow kənarları və orkestrasiya kətan mövzudan xəbərdar olan `--orch-status-*` dəyişənlərini (`src/shared/components/flow/edgeStyles.ts`) oxuyur.
+2. Heç vaxt `packages/ui-kit/src` əl ilə yamaq etməyin: `scripts/dev/sync-ui-kit.sh <commit>` ilə sinxronizasiya edin; əvvəlcədən icra qapısı `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) bərkidilmiş yuxarı commitdən fərqlənən hər hansı baytda uğursuz olur (yuxarı axın klonu, `UI_KIT_CLONE` və ya `_references/cheaper-inference-ui-kit` olmadıqda, xəbərdarlıqla ötürülür). Dəstdə bir şey çatışmırsa, adapterdə və ya ekranda onun ətrafında işləyin və onu yuxarıdan soruşun.
+3. Kit mətninin defoltları ingilis dilidir (`label = "Loading"`, `loadingLabel = "Loading table"`…) — dəst komponenti mətni təqdim etdikdə `useTranslations(...)` dən tərcümə edilmiş sətirləri ötürün.
+4. Tailwind utilitləri dəst komponent sinifləri üzərində qalib gəlir (kit `@layer theme, base, components, utilities` elan edir və onun qaydaları `components` də yaşayır) — dəst komponentlərini yenidən rəngləmək üçün deyil, boşluqlar və yerləşdirmə üçün utilitlərdən istifadə edin.
+5. Başlıqlar: səhifə və bölmə başlıqları üçün `.ci-heading` ; `.ci-dashboard-display` yalnız səhv səhifəsi status kodu kimi böyük, seyrək ekran mətni üçün. Hər ikisi Switzer istifadə edir.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kitin qəbulunu qoruyur: `src/app` və ya `src/shared/components` altında heç bir Material ligature span; tablosuna ağacda (`src/app/(dashboard)` və `src/shared/components`) heç bir xam `<select>`, `<textarea>` və ya `<table>` və sadalanan istisnalar xaricində əl ilə yuvarlanan `role="dialog"` yoxdur ( `Select` adapterinin yerli filialı, `RequestLoggerDetail`); orada hər xam `<button>` və ya `<input>` yuxarıda ən çox 3 sətirlə bitən `kit-exception:` (səbəbi ilə) olan şərhə ehtiyac duyur; palitra çalarları və `dark:` variantları yalnız testin sadaladığı fayllarda.
+7. PR dan əvvəl həm mövzuları, həm də 390 px görüntü pəncərəsini yoxlayın (skrinşotlar); `tests/e2e/a11y.spec.ts` balta işlədir.
 
 ## 3. Ekran əlavə etmək
 
@@ -85,14 +58,14 @@
 
 ## 6. README diaqramları
 
-Kök `README.md`-in yerləşdirdiyi on iki diaqram (`docs/diagrams/*.svg`) statik şəklə tətbiq olunmuş kit-dir və onlar əllə çəkilmir, generasiya olunur: `scripts/docs/gen-readme-*.mjs` ünvanında 13 generator faylı (on iki diaqram üstəgəl `gen-readme-diagrams.mjs` driver-i) və `tests/unit/docs/readme-*-svg.test.ts` ünvanında hər diaqram üçün bir ədəd olmaqla 12 köhnəlmə testi, hər biri commit olunmuş faylı öz generatorunun çıxışı ilə bayt-bayt müqayisə edir (job `test-unit`).
+Kök `README.md` yerləşdirdiyi on iki diaqram (`docs/diagrams/*.svg`) statik təsvirə tətbiq edilən dəstdir və onlar əl ilə tərtib edilmir: `scripts/docs/gen-readme-*.mjs` -də 13 generator faylı (on iki diaqram və `gen-readme-diagrams.mjs` sürücüsü) və `tests/unit/docs/readme-*-svg.test.ts`-də 12 köhnəlmə testi, diaqram başına bir, hər bir faylın işini çıxaran bir bayt. `test-unit`).
 
-- **Token-lər.** `scripts/docs/readme-diagram-theme.mjs` palitranı `packages/ui-kit/src/ci-tokens.css` faylından köçürür (`tests/unit/docs/readme-diagram-theme.test.ts` ilə həmin fayla bağlanıb) və kit şriftləri üzrə mətn rollarını təyin edir — display üçün Instrument Serif, UI mətni üçün Inter, rəqəmlər və kod üçün IBM Plex Mono, `src/app/globals.css` faylının dashboard üçün yüklədiyi eyni `@fontsource` paketləri. Açıq dəyərlər `:root` üzərində, tünd dəyərlər isə faylın içində `prefers-color-scheme: dark` arxasında yerləşir, beləliklə hər şəkil GitHub-da izləyicinin sxeminə uyğun gəlir.
-- **Şriftlər.** `scripts/docs/readme-fonts.mjs` həmin woff2 fayllarını hər diaqramın çəkdiyi qliflərə qədər alt-çoxluğa endirir və onları `@font-face` `data:` URI-ləri kimi daxil edir — kit tippoqrafiyasının README şəklinə çatmasının yeganə yolu, çünki GitHub Markdown CSS daşımır və camo proksi hər xarici yüklənməni bloklayır. Alt-çoxluqlar yalnız latın əlifbasındadır; sistem stekinə qayıdan simvol qliflərinə `SYMBOL_FALLBACKS` içində tək-tək icazə verilir və başqa hər hansı əhatə olunmamış qlif xəta atır.
-- **Yenidən generasiya.** `npm run docs:readme-diagrams` on ikisinin hamısını README sırası ilə yenidən yazır və hər fayl üçün ölçüsü ilə bir sətir çap edir. Tək bir generator da ayrıca işləyir (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` üçün `node --import tsx/esm` lazımdır, çünki onun rəqəmləri `open-sse/config/freeModelCatalog.ts` faylındakı canlı kataloq yükləyicisindən gəlir; kataloq dəyişikliyinin CI nəticəsi `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` bölməsindədir). Generatoru və SVG-ni birlikdə commit edin.
-- **Sübut.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` faylı GitHub-ın təqdim etdiyi formada render edir (`<img>` teqi, camo-nun `Content-Security-Policy`-si, `image/svg+xml`), bir açıq və bir tünd kadr tutur və səhifənin etdiyi xarici şrift sorğularını bildirir (0 olmalıdır).
-- **Büdcə.** Fayl başına 200 KB-dan az (hər köhnəlmə testi bunu təsdiq edir); 500 KB istənilən README şəkli üçün sərt həddir (SVG studio validatorunun qaydası).
-- **Mətn dəyişməzdir, rəqəmlər qapıdan.** Rebrendinq şrifti və palitranı dəyişdi, sözləri yox: hər generator öz diaqramının mətnini `*_COPY` sabitində daşıyır (və ya onu canlı kataloqdan qurur) ki, bu da həm çəkilən mətndir, həm də şrift alt-çoxluğunun girişi. Kanonik rəqəmlər `<text>` qovşaqlarında qalır və `check:docs-counts` tərəfindən oxunur (`scripts/check/check-docs-counts-sync.mjs`); qapının oxuduğu diaqramların köhnəlmə testləri də onun validatorlarını generasiya olunmuş fayl üzərində işə salır, buna görə koddan kənara çıxan rəqəm testi uğursuz edir — qapının oxuduğu mənbəni düzəldin, heç vaxt generatordakı rəqəmi yox.
+- **Tokenlər.** `scripts/docs/readme-diagram-theme.mjs` palitranı `packages/ui-kit/src/ci-tokens.css` -dən kopyalayır ( `tests/unit/docs/readme-diagram-theme.test.ts` tərəfindən həmin fayla qarşı bərkidilir) və dəstin əvvəlki üzlərindəki mətn rollarını müəyyən edir — Ekran üçün Alət Serif, UI mətni üçün Inter, rəqəmlər və kodlar üçün IBM Plex Mono — `@fontsource` paketlərindən (baxış paneli özü kitin S.06.0.-dən istifadə edir). İşıq dəyərləri `:root` üzərində, qaranlıq dəyərlər isə `prefers-color-scheme: dark` arxasında, faylın içərisində yerləşir, beləliklə, hər bir şəkil GitHub də izləyicinin sxemini izləyir.
+- **Şriftlər.** `scripts/docs/readme-fonts.mjs` həmin woff2 fayllarını hər diaqramın çəkdiyi qliflərə alt təyin edir və onları `@font-face` `data:` URIs kimi daxil edir – GitHub Markdown heç bir CSS daşımadığından və camo proksi hər bir xarici gətirməni blokladığı üçün kit tipoqrafiyasının README şəklinə çatmasının yeganə yolu. Alt çoxluqlar yalnız latın dilindədir; sistem yığınına geri düşən simvol qliflərinə `SYMBOL_FALLBACKS`-də bir-bir icazə verilir və hər hansı digər açıq qliflər atılır.
+- **Yenidən canlandırmaq.** `npm run docs:readme-diagrams` bütün on ikisini README qaydasında yenidən yazır və ölçüsü ilə fayl başına bir sətir çap edir. Tək generator da öz-özünə işləyir (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` `node --import tsx/esm` lazımdır, çünki onun rəqəmləri `open-sse/config/freeModelCatalog.ts`-də canlı kataloq yükləyicisindən gəlir; kataloq dəyişikliyinin CI nəticəsi `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` dir). Generatoru və SVG birlikdə yerinə yetirin.
+- **Sübut.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` faylı GitHub ona xidmət etdiyi şəkildə təqdim edir ( `<img>` teqi, camonun `Content-Security-Policy`, `image/svg+xml`), açıq və qaranlıq çərçivəni çəkir və səhifənin etdiyi xarici şrift sorğularını bildirir (0 olmalıdır).
+- **Büdcə.** Fayl başına 200 KB dan az (hər bir köhnəlmə testi bunu təsdiqləyir); 500 KB istənilən README təsviri üçün sərt ölçüdür ( SVG studio validator qaydası).
+- **Dəyişmədən kopyalayın, qapıdan sayır.** Rebrend sözlər deyil, növü və palitrasını dəyişdi: hər bir generator öz diaqramının surətini `*_COPY` sabitində daşıyır (yaxud onu canlı kataloqdan qurur), bu həm tərtib edilmiş mətn, həm də şrift-alt çoxluq daxiletməsidir. Kanonik rəqəmlər `<text>` qovşaqlarında qalır, `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) tərəfindən oxunur; Qapının oxuduğu diaqramların köhnəlmə testləri də yaradılan faylda öz təsdiqləyicilərini işə salır, buna görə də koddan kənara çıxan rəqəm testdən keçə bilmir — qapının oxuduğu mənbəni düzəldin, generatordakı nömrəni heç vaxt.
 
 ## 7. İstinadat indeksi
 

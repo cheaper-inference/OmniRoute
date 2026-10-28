@@ -21,18 +21,17 @@ webpack 빌드 및 lint 작업과 동시에 실행될 때만 박스가 리소스
 
 2026-10-18 측정 결과:
 
-| 리소스    | 값                      | 스케줄링 측면에서의 의미                                                                                                                                                                                                                                                                                                                                                                                           |
-| --------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| RAM / CPU | **78 GB / 32코어**      | 제한을 두지 않은 Turbopack 프로덕션 빌드는 최대 49 GB를 사용했습니다(`tests/unit/ci-build-bundler-webpack.test.ts`). Next 16.3.8에서는 컴파일 단계만으로도 약 40 GB를 점유합니다(`next-build`의 RSS 36 GB와 각각 3 GB를 사용하는 로더 워커 17개, 2026-10-18 측정). webpack 빌드는 약 14–16 GB를 사용합니다. Turbopack 빌드 하나와 webpack 빌드 하나는 동시에 실행할 수 있지만, Turbopack 빌드 두 개는 불가능합니다 |
-| 스왑      | 16 GB                   | `omniroute-113-5`는 스왑을 비활성화한 상태(`MemorySwapMax=0`)로 실행되므로, 제어 불능 상태의 빌드는 박스 전체를 스왑시키는 대신 설정된 한도에서 중단됩니다                                                                                                                                                                                                                                                         |
-| `/tmp`    | **12 GB tmpfs = RAM**   | 여기에 저장되는 모든 것은 메모리를 사용하며, 남은 파일은 3시간 후 정리됩니다                                                                                                                                                                                                                                                                                                                                       |
-| CPU       | 32코어에서 부하 60 관측 | 할당량을 적용하기 전에는 Turbopack 빌드 하나(약 1166 % CPU)와 커버리지 스위트가 동일한 박스에서 함께 실행되면서 다른 리스너의 하트비트가 리소스를 받지 못했습니다(`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                             |
-| 러너      | **리스너 6개**          | OmniRoute 4개 + OmniHeuris + OmniMind이며, `omniroute-113-3/-4/-7/-8`은 비활성화되어 있습니다(`systemctl enable --now`로 하나를 다시 활성화할 수 있음)                                                                                                                                                                                                                                                             |
+| 리소스    | 값                          | 스케줄링 측면에서의 의미                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| RAM / CPU | **78 GB / 32코어**          | 제한을 두지 않은 Turbopack 프로덕션 빌드는 최대 49 GB를 사용했습니다(`tests/unit/ci-build-bundler-webpack.test.ts`). Next 16.3.8에서는 컴파일 단계만으로도 약 40 GB를 점유합니다(`next-build`의 RSS 36 GB와 각각 3 GB를 사용하는 로더 워커 17개, 2026-10-18 측정). webpack 빌드는 약 14–16 GB를 사용합니다. Turbopack 빌드 하나와 webpack 빌드 하나는 동시에 실행할 수 있지만, Turbopack 빌드 두 개는 불가능합니다 |
+| 스왑      | 16 GB                       | `omniroute-113-5`는 스왑을 비활성화한 상태(`MemorySwapMax=0`)로 실행되므로, 제어 불능 상태의 빌드는 박스 전체를 스왑시키는 대신 설정된 한도에서 중단됩니다                                                                                                                                                                                                                                                         |
+| `/tmp`    | **12 GB tmpfs = RAM**       | 여기에 저장되는 모든 것은 메모리를 사용하며, 남은 파일은 3시간 후 정리됩니다                                                                                                                                                                                                                                                                                                                                       |
+| CPU       | 32코어에서 부하 60 관측     | 할당량을 적용하기 전에는 Turbopack 빌드 하나(약 1166 % CPU)와 커버리지 스위트가 동일한 박스에서 함께 실행되면서 다른 리스너의 하트비트가 리소스를 받지 못했습니다(`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                             |
+| 러너      | **리스너 7개** (2026-10-28) | OmniRoute 5개 + OmniHeuris + OmniMind이며, `omniroute-113-7`은 `omni-build`도 함께 담당하고, `omniroute-113-3/-4/-8`은 저장소에서 삭제되었습니다(2026-10-28)                                                                                                                                                                                                                                                       |
 
 제한 설정은 각 유닛의 `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`에
 있으며(이전 값은 `override.conf.bak-20261018`로 보관), `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…`를 통해 실시간으로 적용되었습니다. 재시작하지 않았으므로
-실행 중인 작업에는 영향을 주지 않았습니다. 레이블 역시 러너 API를 통해
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+실행 중인 작업에는 영향을 주지 않았습니다. 레이블 역시 러너 API를 통해 (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) 실시간으로 변경됩니다.
 
 ## janitor 설치(최초 1회, 해당 머신에서)
@@ -41,7 +40,7 @@ webpack 빌드 및 lint 작업과 동시에 실행될 때만 박스가 리소스
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron(root): 30분마다 실행하고 /var/log/runner-janitor.log에 기록
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof`는 필수입니다. janitor는 경로를 제거하기 전에 열린 파일을 한 번
@@ -123,9 +122,9 @@ runner 하나만, 유휴 상태일 때에만** 재시작하고, 유휴 상태 �
   실행한다. `omniroute-113`은 2026-10-18까지 `MemoryHigh=4G`였다. 그곳에서 promptfoo 빌드는
   54분 동안 메모리를 회수하며 간신히 진행되었고, 8 GB로 설정하면 스로틀링이 사라진다.
 - **리스너 수를 의도적으로 줄임.** 2026-08-29에 OmniRoute 유닛 네 개를 비활성화했다. 리스너가
-  추가될 때마다 위 메모리 예산을 사용하는 테넌트가 하나씩 늘어나기 때문이다. janitor의 상한은
-  6이다(cron의 `MAX_ACTIVE_RUNNERS=6`). 이 값은 서버의 모든 `Runner.Listener`를 세며,
-  OmniHeuris와 OmniMind가 네 개의 리스너에 두 개를 추가한다.
+  추가될 때마다 위 메모리 예산을 사용하는 테넌트가 하나씩 늘어나기 때문이다. janitor의 상한은 8이다(cron의 `MAX_ACTIVE_RUNNERS=8`). 이 값은 서버의 모든 `Runner.Listener`를 세며,
+  OmniHeuris와 OmniMind가 다섯 개의 리스너에 두 개를 추가한다.
+- **Unit 및 Vitest 작업은 호스팅 러너에 남긴다.** `ci.yml`은 저장소 변수 `vars.USE_VPS_TEST_RUNNER`가 `true`일 때만, 그것도 같은 저장소의 `pull_request` 실행에 한해 unit 샤드와 Vitest 작업을 `[self-hosted, omni-ci]`로 보낸다. 포크, `merge_group`, 푸시는 `ubuntu-latest`에 남는다(`tests/unit/vps-runner-variable-scope.test.ts`). 이 변수는 `false`이다. 2026-10-28에 4코어 `omni-ci` 리스너 세 개에서 `npm ci`에 250–270초가 걸렸고, 모든 unit 샤드가 30분 작업 제한에 걸렸다. 호스팅 샤드는 약 634초였으며, 서버 부하는 17–24였다. 해당 리스너는 삭제되었다. unit 샤드에 맞게 크기를 잡은 리스너 없이 이 변수를 다시 켜지 않는다.
 - **러너가 하나라도 작업 중일 때는 `/tmp` 또는 `_work`를 절대로 수동으로 정리하지 않는다.**
   검사와 삭제 사이에 간격이 있는 확인 후 삭제 방식 때문에 2026-08-27에 실행 중이던 Build 작업의
   `_work`가 유실되었다. janitor는 확인과 제거를 한 단계로 수행하므로 그대로 맡긴다.
@@ -138,8 +137,7 @@ runner 하나만, 유휴 상태일 때에만** 재시작하고, 유휴 상태 �
 
 ## 호스팅 레인(GitHub 호스팅 러너)
 
-이 계정은 **Pro** 플랜을 사용하며, **동시 호스팅 작업 40개**를 모든 PR 검사,
-모든 푸시 트리거 워크플로 및 CodeQL 기본 설정이 공유합니다. 2026-10-18의
+이 저장소는 `cheaper-inference` 조직에 속하며 **Team** 플랜을 사용하고, **동시 호스팅 작업 60개**를 조직의 모든 저장소, 모든 PR 검사, 모든 푸시 트리거 워크플로 및 CodeQL 기본 설정이 공유합니다. 아래 수치는 **Pro** 플랜(동시 호스팅 작업 40개)에서 측정한 것입니다. 2026-10-18의
 병합 캠페인 중(`release/v3.8.52`에서 시간당 약 10회 병합) 측정한 결과, **24시간 동안
 2,500개의 워크플로 실행이 생성**되었고, 6시간 동안 해당 브랜치에 44회 푸시되었으며,
 PR 검사가 몇 시간 동안 대기하는 사이 **106개의 호스팅 작업이 큐에 쌓였고** 검사 없이

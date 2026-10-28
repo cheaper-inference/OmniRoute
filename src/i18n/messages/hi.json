@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "सभी मॉडल पहले से ही आयातित हैं",
     "noNewModelsToImport": "आयात करने के लिए कोई नए मॉडल नहीं — सभी मॉडल पहले से ही रजिस्ट्री या कस्टम मॉडल सूची में हैं",
     "localCatalogFallbackStatus": "प्रदाता की मॉडल सूची तक नहीं पहुँचा जा सका — अंतर्निहित कैटलॉग दिखाया जा रहा है",
+    "discoveryDegradedStatus": "मॉडल खोज विफल {time}",
     "skippingExistingModels": "{count} मौजूदा मॉडल छोड़े जा रहे हैं",
     "autoSync": "स्वतः-सिंक",
     "autoSyncShort": "सिंक करें",
@@ -15298,5 +15299,8 @@
     "importButton": "आयात करें",
     "importFailed": "आयात विफल रहा।",
     "importSuccess": "{connections} खाते और {nodes} प्रदाता नोड आयात किए गए; {skipped} छोड़े गए।"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "वर्तमान स्थिति से शुरू करें (मौजूदा लॉग छोड़ें)"
   }
 }

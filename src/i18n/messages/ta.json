@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "அனைத்து மாடல்களும் ஏற்கனவே இறக்குமதி செய்யப்பட்டுள்ளன",
     "noNewModelsToImport": "இறக்குமதி செய்யப் புதிய மாடல்கள் எதுவும் இல்லை — அனைத்து மாடல்களும் ஏற்கனவே பதிவகத்தில் அல்லது தனிப்பயன் மாடல்கள் பட்டியலில் உள்ளன",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "மாடல் கண்டுபிடிப்பு தோல்வியடைந்தது {time}",
     "skippingExistingModels": "ஏற்கனவே உள்ள {count} மாடல்கள் தவிர்க்கப்படுகின்றன",
     "autoSync": "தானியங்கு ஒத்திசைவு",
     "autoSyncShort": "ஒத்திசைக்கவும்",
@@ -15298,5 +15299,8 @@
     "importButton": "இறக்குமதி செய்",
     "importFailed": "இறக்குமதி தோல்வியடைந்தது.",
     "importSuccess": "{connections} கணக்குகளும் {nodes} வழங்குநர் முனைகளும் இறக்குமதி செய்யப்பட்டன; {skipped} தவிர்க்கப்பட்டன."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "தற்போதைய இடத்திலிருந்து தொடங்கு (ஏற்கனவே உள்ள பதிவுகளைத் தவிர்)"
   }
 }

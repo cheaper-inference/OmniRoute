@@ -968,6 +968,7 @@
       "header",
       "kiroAuthModal",
       "kiroSocialOAuthModal",
+      "logExport",
       "noAuthProvider",
       "oauthModal",
       "providers",

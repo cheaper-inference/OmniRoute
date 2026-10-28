@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "සියලුම මාදිලි දැනටමත් ආයාත කර ඇත",
     "noNewModelsToImport": "ආයාත කිරීමට නව මාදිලි නොමැත — සියලුම මාදිලි දැනටමත් රෙජිස්ට්රියේ හෝ අභිරුචි මාදිලි ලැයිස්තුවේ ඇත",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "මොඩල් සොයා ගැනීම අසාර්ථක {time}",
     "skippingExistingModels": "පවතින මාදිලි {count}ක් මඟ හරිමින්",
     "autoSync": "ස්වයංක්රීය සමමුහුර්තකරණය",
     "autoSyncShort": "සමමුහුර්ත කරන්න",
@@ -15298,5 +15299,8 @@
     "importButton": "ආයාත කරන්න",
     "importFailed": "ආයාතය අසාර්ථක විය.",
     "importSuccess": "ගිණුම් {connections}ක් සහ සපයන්නා නෝඩ් {nodes}ක් ආයාත කළා; {skipped}ක් මඟ හැරියා."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "වත්මන් ස්ථානයෙන් ආරම්භ කරන්න (පවතින ලොග් මඟ හරින්න)"
   }
 }

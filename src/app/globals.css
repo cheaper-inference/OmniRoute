@@ -1,21 +1,9 @@
 @import "tailwindcss" source(none);
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
-/* Keak type ramp — self-hosted (no CDN: Google Fonts is unreachable in some regions, #3695). Inter is the
-   UI family (tracking 0), Instrument Serif only for sparse large headings, IBM Plex Mono for code.
-   Static weights on purpose: the variable Inter package registers the family "Inter Variable",
-   which the kit's `--ci-font-ui: "Inter", …` never matches (spike finding). Mirrors the kit's
-   own Storybook preview. */
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
-@import "@fontsource/instrument-serif/400.css";
-@import "@fontsource/instrument-serif/400-italic.css";
-@import "@fontsource/ibm-plex-mono/400.css";
-@import "@fontsource/ibm-plex-mono/500.css";
-@import "@fontsource/ibm-plex-mono/600.css";
-@import "@fontsource/ibm-plex-mono/700.css";
+/* Keak type ramp: the vendored kit self-hosts Switzer (packages/ui-kit/src/ci-fonts.css, imported by
+   ci-tokens.css) for UI, display and code text. No CDN (Google Fonts is unreachable in some regions,
+   #3695). */
 /* CI UI Kit — vendored snapshot (packages/ui-kit, see UPSTREAM.md). Declares the same
    `@layer theme, base, components, utilities` order as Tailwind v4, so Tailwind utilities on
    legacy screens keep winning over kit components, and the kit's `@layer base` (.ci-theme)
@@ -210,7 +198,7 @@
   --shadow-warm: var(--shadow-warm);
   --shadow-elevated: var(--shadow-elevated);
 
-  /* Keak type ramp (kit tokens): Inter / IBM Plex Mono / Instrument Serif (font-display) */
+  /* Keak type ramp (kit tokens): Switzer for sans, mono and display */
   --font-sans: var(--ci-font-ui);
   --font-mono: var(--ci-font-mono);
   --font-display: var(--ci-font-display);

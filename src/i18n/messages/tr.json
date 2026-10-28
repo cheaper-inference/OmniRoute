@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Tüm modeller zaten içe aktarıldı",
     "noNewModelsToImport": "İçe aktarılacak yeni model yok — tüm modeller zaten kayıt defterinde veya özel modeller listesinde",
     "localCatalogFallbackStatus": "Sağlayıcının model listesine ulaşılamadı — yerleşik katalog gösteriliyor",
+    "discoveryDegradedStatus": "Model keşfi başarısız {time}",
     "skippingExistingModels": "{count} mevcut model atlanıyor",
     "autoSync": "Otomatik Senkronizasyon",
     "autoSyncShort": "Senkronize Et",
@@ -15298,5 +15299,8 @@
     "importButton": "İçe aktar",
     "importFailed": "İçe aktarma başarısız oldu.",
     "importSuccess": "{connections} hesap ve {nodes} sağlayıcı düğümü içe aktarıldı; {skipped} atlandı."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Geçerli konumdan başla (mevcut günlükleri atla)"
   }
 }

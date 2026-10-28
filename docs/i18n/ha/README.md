@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Ƙofar na Ci Gaba da Girma
+## 📈 Ƙofar Yana Cigaba Da Girma
 
 <div align="center">
 
-|                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| -------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Masu samarwa                  |           352            |   **358**   |          376          |
-| 🧠 Keɓaɓɓun ID na samfuran hira  |           1320           |  **1374**   |         1475          |
-| 🖼️ Modality Bridge               | 🆕 gani + sauti + bidiyo |      ✓      |           ✓           |
-| 📡 Katalogin kyauta na Radar     |        🆕 ta zaɓi        |      ✓      |           ✓           |
-| ⚖️ Shirye-shirye mai sanin quota |      🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Telemetry na quota            |       🆕 kai tsaye       |      ✓      |           ✓           |
-| 🧰 Yanayin headless              |            —             |      —      | 🆕 `serve --headless` |
-| 🛤️ Kayan aikin hanyar LTS        |            —             |      —      | 🆕 tashoshin fitarwa  |
-| 🔎 API na gano samfurori         |            —             |      —      | 🆕 `/v1/models/query` |
+|                          |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------ | :-----------------------: | :---------: | :-------------------: |
+| 🌐 Masu bayarwa          |            352            |   **358**   |          376          |
+| 🧠 Unique chat model IDs |           1320            |  **1374**   |         1475          |
+| 🖼️ Modality Bridge       | 🆕 vision + audio + video |      ✓      |           ✓           |
+| 📡 Radar free catalog    |         🆕 ficewa         |      ✓      |           ✓           |
+| ⚖️ Quota-aware jadawalin |      🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Quota telemetry       |          🆕 live          |      ✓      |           ✓           |
+| 🧰 Yanayin mara kai      |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS dogo infra        |             —             |      —      |   tashoshin saki 🆕   |
+| 🔎 Model gano API        |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Taswirar Aiki](ROADMAP.md) — a kan hanyar zuwa `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) - hawan dogo zuwa `v3.9.0 LTS`**
 
 </div>
 
@@ -612,59 +612,58 @@ Radar na zaɓi ne kuma GET-only. Abokin hulɗar OmniRoute ba ya loda prompts, zi
 
 <div align="center">
 
-## 🤖 CLI da Wakilan Coding Masu Jituwa
+## 🤖 Masu jituwa CLIs & Wakilan Coding
 
-> Tsari ɗaya — `http://localhost:20128/v1` — kuma **kowace** IDE ko CLI ta AI tana aiki da samfurori na kyauta da masu araha.
+> Saita ɗaya - `http://localhost:20128/v1` - da** kowane** AI IDE ko CLI yana gudana akan samfura masu kyauta & masu rahusa.
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code </b></sub><br/><sub> </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b> Kilo Code </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b> Zoo Code </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b> Ci gaba </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b> Aider </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> Factory Droid </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b> Smelt </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Pi </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Gina </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b> Hamisa Agent </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b> Goose </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b> Budaddiyar Tafsiri </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ yana kuma aiki da</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>duk wani kayan aiki mai jituwa da OpenAI</b>
+<b>＋ kuma yana aiki tare da </b> · Agent Deck · Kiro · Code Code · Antigravity · Windsurf · AMP · <b> duk wani kayan aikin BudeAI mai jituwa </b>
 </div>
 
-<sub>📖 Saitin kowane kayan aiki ga dukkan kayan aiki 37 (CLI Code 27 + CLI Agents 10) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin na OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+Saitin kayan aiki na <sub>📖 don duk kayan aikin 38 (27 CLI Code's + 11 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**Ƙaddamar da kowane CLI mai goyon baya ta OmniRoute da umarni guda** — ba a rubuta fayilolin saiti,
-ana saka bayanan tantancewa ga kowane tsari, sannan Qwen/Gemini suna samun keɓantaccen home na wucin gadi:
+**Kaddamar da duk wani goyan bayan CLI ta hanyar OmniRoute a cikin umarni ɗaya** - babu fayilolin saiti da aka rubuta, takaddun shaidar allura ta kowane tsari, Qwen/Gemini sami keɓantaccen gida:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -675,13 +674,11 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# Ko zaɓi provider+model ta hanyar hulɗa sannan a rubuta saitin kayan aikin:
-omniroute configure codex          # akwai kuma: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider+model interactively and write the tool's own config:
+omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-Kowane umarni yana mutunta remote context mai aiki (`omniroute connect <host>`), `--dry-run`
-yana nuna ainihin env/args ba tare da aiwatarwa ba, sannan `--api-key-env NAME` yana hana sirrika
-shiga tarihin shell ɗinka. → [Haɗaɗɗun CLI](docs/guides/CLI-INTEGRATIONS.md)
+Kowane umarni yana girmama mahallin nesa mai aiki (`omniroute connect <host>`), `--dry-run` yana samfoti daidai env/args ba tare da aiwatarwa ba, kuma `--api-key-env NAME` yana ɓoye sirri daga tarihin harsashi. → [CLI kai](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
@@ -756,92 +753,80 @@ shiga tarihin shell ɗinka. → [Haɗaɗɗun CLI](docs/guides/CLI-INTEGRATIONS.m
 
 <div align="center">
 
-## 🖥️ Inda OmniRoute Ke Gudana — Ko’ina
+## 🖥️ Inda OmniRoute Ke Gudu - Ko'ina
 
 </div>
 
-> Manhaja ɗaya, na’urarka, dokokinka. Daga shigarwar npm ta duniya baki ɗaya har zuwa **wayarka** ta hanyar Termux.
+> app iri ɗaya, injin ku, dokokin ku. Daga shigarwar npm na duniya zuwa** wayarka** ta hanyar Termux.
 
 <table>
-  <tr><th align="left">Dandali</th><th align="left">Shigarwa</th><th align="left">Muhimman abubuwa</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (na duniya baki ɗaya)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Umarni ɗaya, kowane OS</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Gine-ginen na’ura da yawa <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>Kwamfutar tebur (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Tagar asali + tiren tsarin — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>Sandar menu (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Yana sa ido kan sabar &amp; yana sabunta ta kai tsaye — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>na asali <code>arm64</code></td><td align="left">Raspberry Pi, sabar ARM, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Yana gudana <b>a wayarka</b>, 24/7, ba tare da root ba</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Ƙara zuwa Fuskar Farko"</td><td align="left">Cikakken allo, ba tare da intanet ba, ana iya shigarwa daga burauza</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>Fulogin OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Haɗawar OpenCode ta asali</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>shigar da ƙarin <b>OmniCopilot</b></td><td align="left">Kowane samfurin OmniRoute a cikin mai zaɓar Copilot Chat na asali — barga &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>Daga lambar tushe</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Yi masa gyare-gyare, ba da gudummawa</td></tr>
+  <tr><th align="left"> Platform </th><th align="left"></th><th align="left"> bayanai </th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (duniya)</b></td><td align="left" nowrap><code> npm shigar -g omniroute </code></td><td align="left"> Umarni ɗaya, kowane OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (duniya)</b></td><td align="left" nowrap><code> bun ƙara -g omniroute </code></td><td align="left"> Same registry tarball, saurin shigarwa </td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron)</b></td><td align="left" nowrap><code> npm run electron:build </code></td><td align="left"> Native taga + tsarin tray — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b> Menu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code> brew shigar --cask zoispag/tap/omniroute-tray</code></td><td align="left">&amp; yana sabunta uwar garken ta atomatik — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> na asali <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM sabobin, Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg shigar nodejs && npx -y omniroute </code></td><td align="left"> Yana gudanar da <b> akan wayarka </b>, 24/7, babu tushen </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Ƙara zuwa Fuskar allo"</td><td align="left"> Cikakken allo, offline, wanda za'a iya shigarwa daga browser </td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode plugin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Haɗin OpenCode asalin </td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat </b></td><td align="left" nowrap> shigar <b>OmniCopilot</b> tsawo </td><td align="left"> Kowane samfurin OmniRoute a cikin ɗan asalin Copilot Chat picker — barga &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> Daga tushen </b></td><td align="left" nowrap><code> npm shigar && npm run dev </code></td><td align="left"> Hack akan shi, ba da gudummawar </td></tr>
 </table>
 
-<sub>📖 [Jagorar Docker](docs/guides/DOCKER_GUIDE.md) · [Kwamfutar tebur](electron/README.md) · [Tiren sandar menu](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker Jagora](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Menu-bar tray](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Sabo: OmniRoute a cikin Copilot Chat na asali na VS Code
+### 🧩 Sabuwa: OmniRoute a cikin VS Code ta asalin Copilot Chat
 
 </div>
 
-> Babu sabon sandar gefe, babu sabon UI na hira — duk samfurin da OmniRoute ke samarwa yana bayyana kai tsaye a cikin
-> **mai zaɓar samfurin Copilot Chat da kake amfani da shi tuni**. Tun daga VS Code 1.122, samfuran masu samarwa suna aiki
-> ba tare da shiga GitHub ko biyan kuɗin Copilot ba — yanayin wakili, kiran kayan aiki da hangen hoto, duk
-> kyauta.
+> Babu sabon labarun gefe, babu sabon hira UI - kowane samfurin OmniRoute hidima yana nunawa daidai a cikin**Copilot Chat model picker da kuka riga amfani** . Tun da lambar VS 1.122, samfuran masu ba da sabis suna aiki ba tare da shiga GitHub ko biyan kuɗin Copilot ba - yanayin wakili, kiran kayan aiki da hangen nesa, kyauta.
 
-Shigar da ƙarin **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, saita shi zuwa
-sabar OmniRoute ɗinka (tsohon saitin shi ne `localhost:20128`), sannan buɗe Copilot Chat → mai zaɓar samfuri
-→ **Sarrafa Samfura…** → **OmniRoute**.
+Shigar da** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** tsawo, nuna shi a uwar garken OmniRoute ɗinku (tsoho zuwa `localhost:20128`), sannan buɗe Copilot Chat → samfurin picker →** Sarrafa Samfura…** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">Shago</th><th align="left">Mahaɗi</th><th align="left">Yana aiki da</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Shigar →</a></td><td align="left">VS Code — barga &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Shigar →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"> Yana aiki tare da </th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Shigar →</a ></td >< td align ="hagu">VS Code — barga &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🔓 <b> Buɗe VSX Registry </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">→</a ></td >< td daidaita ="hagu">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro...</td></tr>
 </table>
 
-Daga cikin editan: buɗe kallon **Extensions**, bincika **"OmniRoute"**, danna **Install**
-— yana aiki iri ɗaya a shagunan biyu. Lambar tushe, matsaloli da littafin matakan wallafawa suna nan a
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Daga ciki editan: bude** kari** duba, bincika** "OmniRoute"** , danna** Shigar** - yana aiki iri ɗaya akan shagunan biyu. Tushen, al'amurra da buguwar runbook kai tsaye a [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [Jagorar VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — saitawa, abin da mai zaɓar ke nunawa, allon kulawa a cikin shafi, warware matsaloli</sub>
+<sub>📖 [VS Code Copilot Jagorar Taɗi](docs/guides/VSCODE-COPILOT.md) - saitin, abin da mai ɗauka ya nuna, dashboard-in-a-tab, warware matsalar </sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Sabo: OmniRouteTray — ƙofarka, tana zaune a sandar menu
+### 🎩 Sabuwa: OmniRouteTray — ƙofar ku, zaune a mashaya menu
 
 </div>
 
-> `omniroute serve` ya fi jin daɗi idan yana kunne koyaushe. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> yana mayar da hakan manhajar sandar menu ta macOS da za ka saita ka manta da ita: yana fara sabar, yana tabbatar da ci gaba da aikinta
-> bayan sake kunna na’ura, yana sabunta ta a wurinta, kuma yana sa kasafin token ɗinka na kai-tsaye ya kasance kusa da dannawa ɗaya — **ba a
-> bar tagar terminal a buɗe ba, babu `npm install -g omniroute` da za a riƙa kula da shi.**
+> `omniroute serve` ta fi farin ciki idan ana kunna ta koyaushe.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** yana juya wannan zuwa saitin menu-bar app don macOS: yana farawa sabar, yana kiyaye shi a duk lokacin sake yi, sabunta shi a wurin, kuma yana sanya kasafin kuɗin ku na rayuwa dannawa ɗaya nesa -** babu tagar taga a bude, babu `npm install -g omniroute` zuwa babysit.**
 
-An gina shi da [Tauri v2](https://v2.tauri.app/) (jigon Rust mai ƙanƙanta ƙwarai), yana zuwa
-da runtime na Node 24 nasa mai sa hannu kuma yana sarrafa shigarwar OmniRoute mallakar manhajar, don haka ba ya taɓa cin karo da
-`node`/`bun` naka na duniya baki ɗaya. Yana **amfani tare da saitunanka da rumbun bayananka na `~/.omniroute/` da suke akwai** — don haka
-OmniRoute ɗin da kake gudanarwa tuni ne, kawai yanzu yana sanye da hula. 🎩
+An gina shi tare da [Tauri v2](https://v2.tauri.app/) (tsatsa mai girman girman kuskuren zagaye), yana jigilar nasa sa hannun Node 24 lokacin aiki kuma yana sarrafa shigar OmniRoute mallakar app, don haka ba zai taɓa yaƙar `node`/`bun` ɗin ku na duniya ba. Yana** yana raba tsarin tsarin `~/.omniroute/` ku da kuma bayanan bayanai** - don haka OmniRoute ɗaya ne da kuka riga kuka gudu, kawai tare da hula. 🎩
 
 <table>
-  <tr><th align="left">Abin da yake yi</th><th align="left">Yadda yake yi</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>Yana sa ido kan sabar</b></td><td align="left">Yana ƙaddamar da <code>omniroute serve</code>, yana karɓar misalin da ke gudana tuni maimakon maimaita shi</td></tr>
-  <tr><td align="left" nowrap>📊 <b>Amfani na kai-tsaye a kallo ɗaya</b></td><td align="left">Sandunan ƙason masu samarwa, iyakokin zaman Claude/na mako-mako tare da ƙidayar lokacin sake saitawa, rabon kuɗin kwanaki 30</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>Yana sabunta kansa a wurinsa</b></td><td align="left">Shigarwa mai matakai, musayar atomic, komawa baya idan an gaza — koyaushe a kan sabuwar fitarwa</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>Farawa yayin shiga</b></td><td align="left">Zaɓin ƙaddamarwa yayin shiga; tire kawai, babu alamar dock</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>Bincike &amp; rajistoci</b></td><td align="left">Binciken matsala da samun damar rajistan sabar da dannawa ɗaya</td></tr>
+  <tr><th align="left"> Abin da yake aikatawa </th><th align="left"> Yaya </th></tr>
+  <tr><td align="left" nowrap>🟢 <b> Yana Kula da uwar garken </b></td><td align="left"> Spawns <code> omniroute bautar </code>, ya ɗauki misali mai gudana maimakon kwafin shi </td></tr>
+  <tr><td align="left" nowrap>📊 <b> Amfani kai tsaye a kallo </b></td><td align="left"> Sanduna keɓe masu bayarwa, iyakoki Claude session/weekly tare da sake saitin kirgawa, raguwar farashi na kwanaki 30 </td></tr>
+  <tr><td align="left" nowrap>🔄 <b> Sabuntawa ta atomatik a wurin </b></td><td align="left"> Tsarin shigarwa, musanya atomatik, sake dawowa akan gazawa - koyaushe akan sabon sakin </td></tr>
+  <tr><td align="left" nowrap>🚀 <b> Fara shiga </b></td><td align="left"> Ƙaddamar da zaɓi a shiga; tire-kawai, babu alamar tashar jirgin ruwa </td></tr>
+  <tr><td align="left" nowrap>🩺 <b> Doctor &amp; rajistan ayyukan </b></td><td align="left"> Dannawa guda ɗaya bincike da shiga sabar uwar garke </td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>Ka fi son saukewa? Ɗauko sabuwar <code>.dmg</code> daga
-<a href="https://github.com/zoispag/omniroute-tray/releases">Fitowar Sabbin Nau'ikan</a>. Lambar tushe, matsaloli da takardun
-ginawa suna nan a <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Aikin al'umma ne daga <a href="https://github.com/zoispag">@zoispag</a> — ba fitowar OmniRoute ta hukuma ba ce.</sub>
+<sub> An fi son saukewa? Dauki sabon <code>.dmg </code> daga
+<a href="https://github.com/zoispag/omniroute-tray/releases"> Saki </a>. Source, al'amurra da ginawa
+docs live at <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Aikin al'umma ta <a href="https://github.com/zoispag">@zoispag </a> - ba sakin OmniRoute na hukuma ba.</sub>
 
 <br/>
 

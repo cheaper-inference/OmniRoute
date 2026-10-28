@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Brána sa neustále rozrastá
+## 📈 Brána neustále rastie
 
 <div align="center">
 
-|                                  |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| -------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Poskytovatelia                |           352           |   **358**   |          376          |
-| 🧠 Jedinečné ID modelov chatu    |          1320           |  **1374**   |         1475          |
-| 🖼️ Most modalít                  | 🆕 obraz + zvuk + video |      ✓      |           ✓           |
-| 📡 Bezplatný katalóg Radaru      |  🆕 voliteľné zapnutie  |      ✓      |           ✓           |
-| ⚖️ Plánovanie zohľadňujúce kvóty |     🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Telemetria kvót               |    🆕 v reálnom čase    |      ✓      |           ✓           |
-| 🧰 Bezobslužný režim             |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ Infraštruktúra vetvy LTS      |            —            |      —      |   🆕 kanály vydaní    |
-| 🔎 API na vyhľadávanie modelov   |            —            |      —      | 🆕 `/v1/models/query` |
+|                                  |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| -------------------------------- | :-----------------------: | :---------: | :-------------------: |
+| Poskytovatelia 🌐                |            352            |   **358**   |          376          |
+| 🧠 Unikátny model chatu IDs      |           1320            |  **1374**   |         1475          |
+| 🖼️ Modality Bridge               | 🆕 vision + audio + video |      ✓      |           ✓           |
+| Bezplatný katalóg radarov 📡     |      🆕 prihlásenie       |      ✓      |           ✓           |
+| ⚖️ plánovanie s ohľadom na kvóty |      🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Kvótová telemetria            |         🆕 naživo         |      ✓      |           ✓           |
+| 🧰 Bezhlavý režim                |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS koľajnica infra           |             —             |      —      | 🆕 uvoľňovacie kanály |
+| 🔎 Objavovanie modelov API       |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Plán vývoja](ROADMAP.md) — po koľajniciach k `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — jazda po železnici do `v3.9.0 LTS`**
 
 </div>
 
@@ -612,59 +612,58 @@ Radar je voliteľný a používa iba požiadavky GET. Klient OmniRoute neodosiel
 
 <div align="center">
 
-## 🤖 Kompatibilné CLI a programovacie agenty
+## 🤖 Kompatibilné CLIs a kódovacie prostriedky
 
-> Jedna konfigurácia — `http://localhost:20128/v1` — a **každé** AI IDE alebo CLI funguje s bezplatnými a nízkonákladovými modelmi.
+> Jedna konfigurácia — `http://localhost:20128/v1` — a** každý** AI IDE alebo CLI beží na bezplatných a lacných modeloch.
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Kód </b></sub><br/><sub> </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b> Kilo Code </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b> Zoo Code </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b> Pokračovať </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b> Aider </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> továrenský droid </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b> Smelt </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Pi </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Zostavte </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b> Hermes Agent </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b> hus </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b> Open Interpreter </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ funguje aj s</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>akýmkoľvek nástrojom kompatibilným s OpenAI</b>
+<b>＋ funguje aj so </b> · balík agentov · Kiro · príkazový kód · Antigravity · Windsurf · AMP · <b> akýkoľvek nástroj kompatibilný s OpenAI </b>
 </div>
 
-<sub>📖 Nastavenie jednotlivých nástrojov pre všetkých 37 nástrojov (27 CLI Code + 10 CLI agentov) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Nastavenie jednotlivých nástrojov pre všetkých 38 nástrojov (27 CLI Code's + 11 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**Spustite ľubovoľné podporované CLI cez OmniRoute jediným príkazom** — bez zapisovania konfiguračných súborov,
-prihlasovacie údaje sa vložia samostatne pre každý proces a Qwen/Gemini získajú dočasný izolovaný domovský adresár:
+**Spustite všetky podporované CLI až OmniRoute jedným príkazom** — nie sú zapísané žiadne konfiguračné súbory, prihlasovacie údaje vložené do procesu, Qwen/Gemini získate izolovaný domov:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -675,13 +674,11 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# Alebo interaktívne vyberte poskytovateľa a model a zapíšte vlastnú konfiguráciu nástroja:
-omniroute configure codex          # tiež: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider+model interactively and write the tool's own config:
+omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-Každý príkaz rešpektuje aktívny vzdialený kontext (`omniroute connect <host>`), `--dry-run`
-zobrazí presné premenné prostredia a argumenty bez vykonania a `--api-key-env NAME` zabráni uloženiu tajných údajov
-do histórie vášho shellu. → [Integrácie CLI](docs/guides/CLI-INTEGRATIONS.md)
+Každý príkaz rešpektuje aktívny vzdialený kontext (`omniroute connect <host>`), `--dry-run` zobrazuje náhľad presného env/args bez vykonania a `--api-key-env NAME` uchováva tajomstvá mimo vašej histórie shellu. → [CLI integrácie](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
@@ -760,88 +757,76 @@ do histórie vášho shellu. → [Integrácie CLI](docs/guides/CLI-INTEGRATIONS.
 
 </div>
 
-> Rovnaká aplikácia, váš počítač, vaše pravidlá. Od globálnej inštalácie cez npm až po **váš telefón** prostredníctvom Termuxu.
+> Rovnaká aplikácia, váš stroj, vaše pravidlá. Od globálnej inštalácie npm po** váš telefón** cez Termux.
 
 <table>
-  <tr><th align="left">Platforma</th><th align="left">Inštalácia</th><th align="left">Hlavné výhody</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (globálne)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Jeden príkaz, ľubovoľný OS</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Viacero architektúr: <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Natívne okno + systémová lišta — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>Panel ponuky (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Dohliada na server a automaticky ho aktualizuje — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>natívne <code>arm64</code></td><td align="left">Raspberry Pi, servery ARM, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Beží <b>vo vašom telefóne</b>, nepretržite, bez prístupu root</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>„Pridať na plochu“</td><td align="left">Na celú obrazovku, offline, inštalovateľné z prehliadača</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>Doplnok OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Natívna integrácia s OpenCode</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>nainštalujte rozšírenie <b>OmniCopilot</b></td><td align="left">Každý model OmniRoute v natívnom výbere modelov Copilot Chat — stabilná verzia aj Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>Zo zdrojového kódu</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Upravujte ho a prispievajte</td></tr>
+  <tr><th align="left"> Platforma </th><th align="left"> Inštalovať </th><th align="left"> Hlavné prvky </th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (globálne)</b></td><td align="left" nowrap><code> npm inštalácia -g omniroute </code></td><td align="left"> Jeden príkaz, ľubovoľný OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (globálne)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Rovnaký tarball registra, rýchlejšie inštalácie </td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> dokovací beh … diegosouzapw/omniroute</code></td><td align="left"> Viacoblúkový <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron)</b></td><td align="left" nowrap><code> npm spustiť electron:build </code></td><td align="left"> Natívne okno + systémová lišta — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b> Panel ponuky (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Dohliada na &amp; automatické aktualizácie servera — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> natívne <code> arm64 </code></td><td align="left"> Raspberry Pi, servery ARM, Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Spustí <b> na vašom telefóne </b>, 24/7, no root </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Pridať na domovskú obrazovku"</td><td align="left"> Celá obrazovka, offline, inštalovateľné z prehliadača </td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode plugin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode integrácia </td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Kód Copilot Chat </b></td><td align="left" nowrap> inštalácia <b>OmniCopilot</b> rozšírenie </td><td align="left"> Každý model OmniRoute v natívnom výbere chatu Copilot — stabilný &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> Zo zdroja </b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left"> Hacknite to, prispejte </td></tr>
 </table>
 
-<sub>📖 [Príručka pre Docker](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Ikona na paneli ponuky](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker Sprievodca](docs/guides/DOCKER_GUIDE.md) · [Pracovná plocha](electron/README.md) · [Panel s ponukami](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Novinka: OmniRoute priamo v natívnom Copilot Chat vo VS Code
+### 🧩 Novinka: OmniRoute v natívnom Copilot VS zqc
 
 </div>
 
-> Žiadny nový bočný panel ani nové používateľské rozhranie chatu — každý model poskytovaný službou OmniRoute sa zobrazí priamo vo
-> **výbere modelov Copilot Chat, ktorý už používate**. Od verzie VS Code 1.122 fungujú modely poskytovateľov
-> bez prihlásenia do GitHubu alebo predplatného Copilot — režim agenta, volanie nástrojov aj obrazové funkcie,
-> úplne zadarmo.
+> Žiadny nový bočný panel, žiadny nový chat UI – každý model OmniRoute ponúka, sa zobrazí priamo v**Copilot nástroj na výber modelu chatu, ktorý už používate** . Od VS Code 1.122 fungujú modely poskytovateľov bez prihlásenia GitHub alebo predplatného Copilot – režim agenta, volanie nástrojov a vízia zadarmo.
 
-Nainštalujte rozšírenie **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, nasmerujte ho
-na svoj server OmniRoute (predvolene `localhost:20128`) a potom otvorte Copilot Chat → výber modelu
-→ **Spravovať modely…** → **OmniRoute**.
+Nainštalujte** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** rozšírenie, nasmerujte ho na váš server OmniRoute (predvolené je `localhost:20128`), potom otvorte Copilot Chat → výber modelu →** Spravovať modely…** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">Obchod</th><th align="left">Odkaz</th><th align="left">Funguje s</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Inštalovať →</a></td><td align="left">VS Code — stabilná verzia aj Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Inštalovať →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"> Funguje s </th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Kód Trhovisko </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Inštalácia →</a ></td >< td zarovnanie ="doľava">VS Kód — stabilný &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🔓 <b> Otvorenie registra VSX </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Inštalácia →</a ></td >< td zarovnanie ="doľava">Cursor, Windsurf, VSCodium, Theia, kódový server </td> Gitpod, Antigravity, Kiro</tr>
 </table>
 
-V editore otvorte zobrazenie **Rozšírenia**, vyhľadajte **„OmniRoute“** a kliknite na **Inštalovať**
-— v oboch obchodoch to funguje rovnako. Zdrojový kód, hlásenia problémov a postup publikovania nájdete na
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Z vnútra editora: otvorte** Rozšírenia** zobraziť, vyhľadať** "OmniRoute"** , kliknite** Inštalovať** — funguje rovnako v oboch obchodoch. Zdroj, čísla a publikovaná príručka sú zverejnené na [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [Príručka pre VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — nastavenie, obsah výberu modelov, ovládací panel na karte, riešenie problémov</sub>
+<sub>📖 [VS Code Copilot Sprievodca rozhovorom](docs/guides/VSCODE-COPILOT.md) – nastavenie, to, čo zobrazuje nástroj na výber, informačný panel na karte, riešenie problémov </sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Novinka: OmniRouteTray — vaša brána priamo v paneli ponuky
+### 🎩 Novinka: OmniRouteTray — vaša brána v paneli s ponukami
 
 </div>
 
-> `omniroute serve` funguje najlepšie, keď je stále spustený. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> z neho pre macOS vytvorí bezúdržbovú aplikáciu v paneli ponuky: spúšťa server, udržiava ho v prevádzke
-> aj po reštartoch, priebežne ho aktualizuje a poskytuje váš aktuálny limit tokenov jediným kliknutím — **bez
-> otvoreného okna terminálu a bez nutnosti dohliadať na `npm install -g omniroute`.**
+> `omniroute serve` je najšťastnejšia, keď je stále zapnutá.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** premení to na aplikáciu s panelom s ponukami pre macOS: spustí server, udrží ho pri živote počas reštartov, aktualizuje ho na svojom mieste a na jedno kliknutie odloží váš rozpočet na token –** žiadne okno terminálu nezostalo otvorené, žiadne `npm install -g omniroute` na stráženie detí.**
 
-Je vytvorený pomocou [Tauri v2](https://v2.tauri.app/) (jadro v jazyku Rust, ktorého veľkosť je prakticky zanedbateľná), dodáva sa
-s vlastným podpísaným runtime Node 24 a spravuje vlastnú inštaláciu OmniRoute, takže nikdy nebude v konflikte s vaším
-globálnym `node`/`bun`. **Zdieľa vašu existujúcu konfiguráciu a databázu v `~/.omniroute/`** — ide teda o
-ten istý OmniRoute, ktorý už používate, iba s klobúkom. 🎩
+Postavený s [Tauri v2](https://v2.tauri.app/) (jadro Rust veľkosti chyby zaokrúhľovania), dodáva svoj vlastný podpísaný runtime Node 24 a spravuje inštaláciu OmniRoute vo vlastníctve aplikácie, takže nikdy nebude bojovať s vaším globálnym `node`/`bun`. to** zdieľa vašu existujúcu konfiguráciu a databázu `~/.omniroute/`** — tak to je to isté OmniRoute, čo už beháš, len s klobúkom. 🎩
 
 <table>
-  <tr><th align="left">Čo robí</th><th align="left">Ako</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>Dohliada na server</b></td><td align="left">Spustí <code>omniroute serve</code> a namiesto vytvorenia duplicity prevezme už spustenú inštanciu</td></tr>
-  <tr><td align="left" nowrap>📊 <b>Aktuálne využitie na prvý pohľad</b></td><td align="left">Ukazovatele kvót poskytovateľov, limity relácie a týždenné limity Claude s odpočítavaním do obnovenia, prehľad nákladov za 30 dní</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>Automaticky sa aktualizuje na mieste</b></td><td align="left">Fázovaná inštalácia, atomická výmena, návrat pri zlyhaní — vždy na najnovšom vydaní</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>Spustenie po prihlásení</b></td><td align="left">Voliteľné spustenie po prihlásení; iba na paneli ponuky, bez ikony v Docku</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>Diagnostika a protokoly</b></td><td align="left">Diagnostika jedným kliknutím a prístup k protokolom servera</td></tr>
+  <tr><th align="left"> Čo to robí </th><th align="left"> Ako </th></tr>
+  <tr><td align="left" nowrap>🟢 <b> Dohliada na server </b></td><td align="left"> Vytvára <code> omniroute serve </code>, prijíma už spustenú inštanciu namiesto jej duplikovania </td></tr>
+  <tr><td align="left" nowrap>📊 <b> Živé využitie na prvý pohľad </b></td><td align="left"> Lišty kvót poskytovateľa, Claude limity session/weekly s resetovanými odpočítavami, 30-dňový rozpis nákladov </td></tr>
+  <tr><td align="left" nowrap>🔄 <b> Zavedenie automatických aktualizácií </b></td><td align="left"> Postupná inštalácia, atómová výmena, vrátenie pri zlyhaní — vždy v najnovšom vydaní </td></tr>
+  <tr><td align="left" nowrap>🚀 <b> Spustiť pri prihlásení </b></td><td align="left"> Voliteľné spustenie pri prihlásení; iba zásobník, žiadna ikona doku </td></tr>
+  <tr><td align="left" nowrap>🩺 <b> Lekár &amp; protokoly </b></td><td align="left"> Diagnostika jedným kliknutím a prístup k protokolu servera </td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>Uprednostňujete stiahnutie? Získajte najnovší súbor <code>.dmg</code> zo stránky
-<a href="https://github.com/zoispag/omniroute-tray/releases">Vydania</a>. Zdrojový kód, hlásenia problémov a dokumentácia k zostaveniu
-sú k dispozícii v repozitári <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Komunitný projekt od <a href="https://github.com/zoispag">@zoispag</a> — nejde o oficiálne vydanie OmniRoute.</sub>
+<sub> Preferujete sťahovanie? Získajte najnovšie <code>.dmg </code> z
+<a href="https://github.com/zoispag/omniroute-tray/releases"> Uvoľňuje </a>. Zdroj, problémy a zostava
+dokumenty žijú na <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Komunitný projekt od <a href="https://github.com/zoispag">@zoispag </a> — nie je oficiálnym vydaním OmniRoute.</sub>
 
 <br/>
 

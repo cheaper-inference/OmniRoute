@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "Všetky modely sú už importované",
     "noNewModelsToImport": "Žiadne nové modely na import — všetky modely sú už v registri alebo v zozname vlastných modelov",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Objavenie modelu zlyhalo {time}",
     "skippingExistingModels": "Preskakujem {count} existujúcich modelov",
     "autoSync": "Automatická synchronizácia",
     "autoSyncShort": "Synchronizovať",
@@ -15298,5 +15299,8 @@
     "importButton": "Importovať",
     "importFailed": "Import zlyhal.",
     "importSuccess": "Importovaných {connections} účtov a {nodes} uzlov poskytovateľov; preskočených {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Začať od aktuálnej pozície (preskočiť existujúce záznamy)"
   }
 }

@@ -5666,6 +5666,7 @@
     "allModelsAlreadyImported": "Всички модели вече са импортирани",
     "noNewModelsToImport": "Няма нови модели за импортиране — всички модели вече са в регистъра или списъка с персонализирани модели",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Откриването на модел не бе успешно {time}",
     "skippingExistingModels": "Пропускане на {count} съществуващи модела",
     "autoSync": "Автоматично синхронизиране",
     "autoSyncShort": "Синхронизиране",
@@ -15298,5 +15299,8 @@
     "importButton": "Импортирай",
     "importFailed": "Импортът е неуспешен.",
     "importSuccess": "Импортирани {connections} акаунта и {nodes} възела на доставчици; пропуснати {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Започни от текущата позиция (пропусни съществуващите журнали)"
   }
 }

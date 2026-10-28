@@ -5666,6 +5666,7 @@
     "allModelsAlreadyImported": "所有模型已导入",
     "noNewModelsToImport": "没有新模型可导入 — 所有模型已在注册表或自定义模型列表中",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "模型发现失败 {time}",
     "skippingExistingModels": "跳过 {count} 个已有模型",
     "autoSync": "自动同步",
     "autoSyncShort": "同步",
@@ -15298,5 +15299,8 @@
     "importButton": "导入",
     "importFailed": "导入失败。",
     "importSuccess": "已导入 {connections} 个账号和 {nodes} 个提供者节点;跳过 {skipped} 个。"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "从当前位置开始（跳过现有日志）"
   }
 }

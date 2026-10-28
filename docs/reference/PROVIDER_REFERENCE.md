@@ -307,7 +307,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `poe` | `poe` | Poe | API key, aggregator | [link](https://creator.poe.com/api-reference) | Bearer API key for the Poe OpenAI-compatible API. |
 | `poixe-ai` | `poixe-ai` | Poixe AI | API key, aggregator | [link](https://poixe.com) | Current public free limits are small and model-group specific: 2 RPM/5 RPD for large-cup models and 20 RPM/50 RPD for small-cup models. |
 | `pollinations` | `pol` | Pollinations AI | API key, video | [link](https://pollinations.ai) | Anonymous/keyless access to the documented free models is best-effort. Local v3.8.50 verification (2026-07-31) returned 401 via OmniRoute and Cloudflare 1010 on direct upstream probes from the same network. Premium models still require a Pollinations API key from enter.pollinations.ai. |
-| `poolside` | `poolside` | Poolside | API key | [link](https://poolside.ai) | Laguna S 2.1 and XS 2.1 are free during Preview; no public numeric quota is published. |
+| `poolside` | `poolside` | Poolside | API key | [link](https://poolside.ai) | Preview ending: direct Poolside Platform inference shuts down on 2026-10-31. Laguna S 2.1 and XS 2.1 are free during Preview; no public numeric quota is published. |
 | `predibase` | `predibase` | Predibase | API key | [link](https://predibase.com) | ⚠️ **DEPRECATED.** serving.app.predibase.com no longer resolves (sweep 2026-06-19); the managed serving API appears discontinued. |
 | `publicai` | `publicai` | PublicAI | API key | [link](https://publicai.co) | Requires an API key — one-time signup credit, then paid |
 | `qianfan` | `qianfan` | Baidu Qianfan | API key | [link](https://cloud.baidu.com/product-s/qianfan_home) | — |

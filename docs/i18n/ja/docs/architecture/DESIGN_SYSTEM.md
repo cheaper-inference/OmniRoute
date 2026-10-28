@@ -4,14 +4,7 @@
 
 ---
 
-> **ステータス:** このダッシュボードは **Keak CI UI Kit**（`@keak/cheaper-inference-ui-kit`）を基盤に構築されており、
-> ワークスペースの `packages/ui-kit`（`@omniroute/ui-kit`、上流スナップショットは
-> `packages/ui-kit/UPSTREAM.md` に固定され、`npm run check:ui-kit-snapshot` で保護されている）として
-> ベンダー化されている。Light が標準テーマであり、デフォルトの設定は `system`。アクセントカラーは Keak ライム
-> （`--ci-color-accent`）。Inter（letter-spacing 0、`--ci-letter-spacing-ui`）が UI フォントファミリーで、
-> Instrument Serif は大きく余白の多いディスプレイテキスト（`.ci-dashboard-display`）専用、IBM Plex Mono は
-> コード用 — すべて `src/app/globals.css` 先頭の `@fontsource/*` インポートを通じてセルフホストされている。
-> すべてのアイコンは Lucide グリフである。
+> **状態：**ダッシュボードは上に構築されています**Keak CI UIキット**(`@keak/cheaper-inference-ui-kit`)、ワークスペース`packages/ui-kit` (`@omniroute/ui-kit`; 上流のスナップショットは`packages/ui-kit/UPSTREAM.md`に固定され、 `npm run check:ui-kit-snapshot`によって保護されます) として販売されます。光は標準的なテーマです。デフォルトの設定は`system`です。アクセントはキークライム（`--ci-color-accent`）です。 Switzer は、 UI、表示およびコード テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`これに解決されます) の単一ファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。すべてのアイコンは Lucide グリフです。
 
 ## 1. どこに何があるか
 
@@ -25,39 +18,13 @@
 
 ## 2. ルール
 
-1. トークンを使い、リテラルは使わないこと。意図的に残されている例外は、常にダークなコンソール
-   ターミナルと `STATUS_HEX`（`src/shared/constants/statusColors.ts`）— リテラルな hex を
-   必要とする呼び出し元のための、キットのステータスパレットの解決済み hex ミラー。
-   カテゴリカルパレットはもはや例外ではない: キットの5つのチャートトークン
-   （`--color-chart-1..5`）を `src/shared/utils/categoricalPalette.ts` 経由で利用し、
-   ルーティング戦略については `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` を
-   利用する。ReactFlow のエッジとオーケストレーションキャンバスは、テーマ対応の
-   `--orch-status-*` 変数（`src/shared/components/flow/edgeStyles.ts`）を読み取る。
-2. `packages/ui-kit/src` を手作業でパッチしないこと: `scripts/dev/sync-ui-kit.sh <commit>` で
-   同期する。pre-commit ゲート `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）は、
-   ピン留めされた上流コミットと1バイトでも異なると失敗する（上流のクローン、
-   `UI_KIT_CLONE` または `_references/cheaper-inference-ui-kit` が存在しない場合は警告付きで
-   スキップする）。キットに不足がある場合は、アダプターまたは画面側で回避し、上流に要望を出す。
-3. キットのテキストのデフォルトは英語（`label = "Loading"`、`loadingLabel = "Loading table"` など）—
-   キットコンポーネントがテキストをレンダリングする際は、必ず `useTranslations(...)` から
-   翻訳済み文字列を渡すこと。
-4. Tailwind ユーティリティはキットコンポーネントのクラスに優先する（キットは
-   `@layer theme, base, components, utilities` を宣言しており、そのルールは `components`
-   に配置されている）— ユーティリティはスペーシングとレイアウトに使い、キットコンポーネントの
-   色の付け替えには使わないこと。
-5. 見出し: ページおよびセクションのタイトルには `.ci-heading`（Inter、トラッキングなし）。
-   `.ci-dashboard-display`（Instrument Serif）は、エラーページのステータスコードのような
-   大きく疎なディスプレイテキストにのみ使用する。
-6. `tests/unit/dashboard-kit-sweep.test.ts` がキット採用をガードする: `src/app` および
-   `src/shared/components` 配下で Material リガチャ span を使わない。ダッシュボードツリー
-   （`src/app/(dashboard)` と `src/shared/components`）では、リストされた例外（`Select`
-   アダプターのネイティブ分岐、`RequestLoggerDetail`）以外で、生の `<select>`、`<textarea>`、
-   `<table>`、および自作の `role="dialog"` を使わない。そこにあるすべての生の `<button>`
-   または `<input>` には、その要素の最大3行上で終わる `kit-exception:` を含むコメント
-   （理由を添えたもの）が必要。パレットの色相と `dark:` バリアントは、テストがリストする
-   ファイル内のみ。
-7. PR の前に両方のテーマと 390 px ビューポートを確認すること（スクリーンショット）。
-   `tests/e2e/a11y.spec.ts` が axe を実行する。
+1. 決してリテラルではなくトークンです。例外は意図的に保持されています: 常に暗いコンソール端末と、リテラル 16 進数を必要とする呼び出し元用のキット ステータス パレットの解決済み 16 進数ミラーである`STATUS_HEX` (`src/shared/constants/statusColors.ts`)。カテゴリカル パレットも例外ではなくなりました。これらは、キットの 5 つのチャート トークン (`--color-chart-1..5`) から`src/shared/utils/categoricalPalette.ts` 、およびルーティング戦略の場合は`src/app/(dashboard)/dashboard/combos/strategyPalette.ts`に乗ります。 ReactFlowエッジとオーケストレーション キャンバスは、テーマ対応の`--orch-status-*`変数 (`src/shared/components/flow/edgeStyles.ts`) を読み取ります。
+2. `packages/ui-kit/src`に手動でパッチを適用しないでください。 `scripts/dev/sync-ui-kit.sh <commit>`と同期します。プリコミットゲート`npm run check:ui-kit-snapshot` (`.husky/pre-commit`) は、ピン留めされた上流コミットと異なるバイトで失敗します (上流クローン`UI_KIT_CLONE`または`_references/cheaper-inference-ui-kit`存在しない場合、警告を出してスキップされます)。キットに何かが不足している場合は、アダプターまたは画面でそれを回避し、アップストリームに問い合わせてください。
+3. キットのテキストのデフォルトは英語 (`label = "Loading"`、 `loadingLabel = "Loading table"`…) です。キット コンポーネントがテキストをレンダリングするたびに、 `useTranslations(...)`から翻訳された文字列を渡します。
+4. Tailwind ユーティリティはキット コンポーネント クラスに優先します (キットは`@layer theme, base, components, utilities`宣言し、そのルールは`components`に存在します)。キット コンポーネントの色を変更するためではなく、スペースとレイアウトにユーティリティを使用します。
+5. 見出し: ページとセクションのタイトルの`.ci-heading` 。 `.ci-dashboard-display` 、エラー ページのステータス コードなど、大きくてまばらな表示テキストにのみ使用します。どちらもスイスを使用しています。
+6. `tests/unit/dashboard-kit-sweep.test.ts`キットの採用を保護します: `src/app`または`src/shared/components`の下にマテリアルのリガチャー スパンはありません。ダッシュボード ツリー (`src/app/(dashboard)`および`src/shared/components`) には、リストされた例外 ( `Select`アダプターのネイティブ ブランチ`RequestLoggerDetail`) の外に、生の`<select>`、 `<textarea>`または`<table>`およびハンドロールされた`role="dialog"`はありません。そこにあるすべての生の`<button>`または`<input>`は、その上で最大 3 行で終わる`kit-exception:` (理由付き) を含むコメントが必要です。パレットの色相と`dark:`バリアントは、テストでリストされるファイルにのみ含まれます。
+7. PR (スクリーンショット) の前に、両方のテーマと 390 ピクセルのビューポートを確認します。 `tests/e2e/a11y.spec.ts`斧を実行します。
 
 ## 3. 画面の追加
 
@@ -100,46 +67,16 @@
 usage、endpoint を両テーマで目視確認し、`npm run check:ui-kit-snapshot` と `npm run test:vitest:ui` を
 実行してから、上流の変更履歴を添えて PR を作成する。
 
-## 6. README の図
+## 6. README図
 
-ルートの `README.md` に埋め込まれている 12 の図(`docs/diagrams/*.svg`)は、キットを静的画像に
-適用したものであり、手作業で描かれたのではなく生成されたものである:13 のジェネレーターファイルが
-`scripts/docs/gen-readme-*.mjs`(12 の図とドライバーの `gen-readme-diagrams.mjs`)にあり、12 の
-陳腐化テストが `tests/unit/docs/readme-*-svg.test.ts`(図ごとに 1 つ)にあり、それぞれコミット済み
-ファイルとジェネレーターの出力をバイト単位で比較する(ジョブ `test-unit`)。
+ルート`README.md`が埋め込む 12 個のダイアグラム (`docs/diagrams/*.svg`) は、静的イメージに適用されるキットであり、手作業で描画されるのではなく生成されます。 `scripts/docs/gen-readme-*.mjs`に 13 個のジェネレーター ファイル (12 個のダイアグラムと`gen-readme-diagrams.mjs`ドライバー) および`tests/unit/docs/readme-*-svg.test.ts`にある 12 個の失効性テスト (ダイアグラムごとに 1 つ) があり、それぞれコミットされたファイルとジェネレーターの出力 (ジョブ`test-unit`) をバイト比較します。
 
-- **トークン。** `scripts/docs/readme-diagram-theme.mjs` は `packages/ui-kit/src/ci-tokens.css` から
-  パレットをコピーし(`tests/unit/docs/readme-diagram-theme.test.ts` によってそのファイルに固定されている)、
-  キットの書体上のテキストロールを定義する —— ディスプレイには Instrument Serif、UI テキストには Inter、
-  数字とコードには IBM Plex Mono で、ダッシュボード用に `src/app/globals.css` が読み込むのと同じ
-  `@fontsource` パッケージである。ライトの値は `:root` に、ダークの値はファイル内の
-  `prefers-color-scheme: dark` の内側に置かれるため、各画像は GitHub 上で閲覧者のスキームに従う。
-- **フォント。** `scripts/docs/readme-fonts.mjs` は、これらの woff2 ファイルを各図が描画するグリフに
-  サブセット化し、`@font-face` の `data:` URI として埋め込む —— GitHub Markdown は CSS を持たず、
-  camo プロキシが外部のフェッチをすべてブロックするため、キットのタイポグラフィが README 画像に
-  届く唯一の方法である。サブセットはラテン文字のみであり、システムスタックにフォールバックする
-  記号グリフは `SYMBOL_FALLBACKS` で 1 つずつ許可され、それ以外のカバーされていないグリフは例外を
-  スローする。
-- **再生成。** `npm run docs:readme-diagrams` は README の順序で 12 個すべてを書き直し、ファイルごとに
-  1 行ずつサイズを出力する。単一のジェネレーターを単独で実行することもできる
-  (`node scripts/docs/gen-readme-<name>.mjs`。`free-tier-budget` はその数値が
-  `open-sse/config/freeModelCatalog.ts` のライブカタログローダーから得られるため
-  `node --import tsx/esm` が必要。カタログ変更の CI 上の影響については
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` を参照)。ジェネレーターと SVG は
-  一緒にコミットすること。
-- **検証。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` は、GitHub が配信するのと同じ
-  方法(`<img>` タグ、camo の `Content-Security-Policy`、`image/svg+xml`)でファイルをレンダリングし、
-  ライトとダークのフレームをキャプチャして、ページが行った外部フォントリクエストを報告する
-  (0 でなければならない)。
-- **予算。** ファイルあたり 200 KB 未満(各陳腐化テストがこれをアサートする)。500 KB があらゆる
-  README 画像のハード上限である(SVG スタジオバリデーターのルール)。
-- **文言は不変、数値はゲートから。** リブランドで変わったのは書体とパレットであり、文言ではない:
-  各ジェネレーターは図の文言を `*_COPY` 定数に持ち(あるいはライブカタログから構築し)、それが
-  描画されるテキストであると同時にフォントサブセットの入力でもある。正規の数値は `<text>` ノードに
-  残り、`check:docs-counts`(`scripts/check/check-docs-counts-sync.mjs`)が読み取る。このゲートが
-  読み取る図の陳腐化テストは、生成されたファイルに対してそのバリデーターも実行するため、コードから
-  ずれた数値はテストを失敗させる —— ゲートが読み取るソースを修正すること。ジェネレーター内の数値を
-  決して修正してはならない。
+- **トークン。** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` ( `tests/unit/docs/readme-diagram-theme.test.ts`によってそのファイルに対して固定) からパレットをコピーし、キットの以前の面のテキストの役割 (表示用の Instrument Serif、 UIテキスト用の Inter、図とコード用のIBM Plex Mono) を`@fontsource`パッケージから定義します (ダッシュボード自体はキット 0.0.66 以降、キットの Switzer を使用します)。ファイル内の明るい値は`:root`に、暗い値は`prefers-color-scheme: dark`後ろにあるため、各画像はGitHub上のビューアのスキームに従います。
+- **フォント。** `scripts/docs/readme-fonts.mjs`これらの woff2 ファイルを各図が描画するグリフにサブセット化し、 `@font-face` `data:` URIsとして埋め込みます。zqf Markdown GitHubはCSSが含まれておらず、迷彩プロキシがすべての外部フェッチをブロックするため、キット タイポグラフィがREADMEイメージに到達する唯一の方法です。サブセットはラテン語のみです。システム スタックにフォールバックするシンボル グリフは`SYMBOL_FALLBACKS`で 1 つずつ許可され、その他のカバーされていないグリフはスローされます。
+- **再生します。** `npm run docs:readme-diagrams` 12 個すべてをREADME順序で書き換え、ファイルごとに 1 行とそのサイズを出力します。単一のジェネレーターも単独で実行されます (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget`は`node --import tsx/esm`が必要です。その数値は`open-sse/config/freeModelCatalog.ts`のライブ カタログ ローダーから取得されるためです。カタログ変更のCI結果は`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`にあります)。ジェネレーターとSVG一緒にコミットします。
+- **証拠。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` GitHub提供する方法 ( `<img>`タグ、迷彩の`Content-Security-Policy`、 `image/svg+xml`) でファイルをレンダリングし、明るいフレームと暗いフレームをキャプチャし、ページが作成した外部フォント リクエストを報告します (0 である必要があります)。
+- **予算。**ファイルあたり 200 KB未満 (各ファイルの古さテストで確認されます)。 500 KBは、 READMEイメージのハード キャップです ( SVG Studio バリデーターのルール)。
+- **コピーは変更せず、ゲートからカウントします。**ブランド変更により、単語ではなくタイプとパレットが変更されました。各ジェネレーターは、描画テキストとフォント サブセット入力の両方である`*_COPY`定数で図のコピーを保持します (またはライブ カタログから構築します)。正準数値は`<text>`ノードに残り、 `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) によって読み取られます。ゲートが読み取る図の古さテストでは、生成されたファイルに対してバリデーターも実行されるため、コードから逸脱した図はテストに失敗します。ジェネレーター内の数値ではなく、ゲートが読み取るソースを修正してください。
 
 ## 7. リファレンス索引
 

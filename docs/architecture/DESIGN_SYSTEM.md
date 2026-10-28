@@ -8,10 +8,10 @@ lastUpdated: 2026-10-27
 > **Status:** the dashboard is built on the **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
 > as the workspace `packages/ui-kit` (`@omniroute/ui-kit`; the upstream snapshot is pinned in
 > `packages/ui-kit/UPSTREAM.md` and guarded by `npm run check:ui-kit-snapshot`). Light is the canonical
-> theme; the default preference is `system`. The accent is Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) is the UI family, Instrument Serif only for large sparse
-> display text (`.ci-dashboard-display`), IBM Plex Mono for code — all self-hosted through the
-> `@fontsource/*` imports at the top of `src/app/globals.css`. Every icon is a Lucide glyph.
+> theme; the default preference is `system`. The accent is Keak lime (`--ci-color-accent`). Switzer is
+> the single family for UI, display and code text (`--ci-font-ui`; `--ci-font-display` and
+> `--ci-font-mono` resolve to it), self-hosted by the kit itself (`packages/ui-kit/src/ci-fonts.css`,
+> imported by `ci-tokens.css`). Every icon is a Lucide glyph.
 
 ## 1. Where things live
 
@@ -99,8 +99,8 @@ lastUpdated: 2026-10-27
 4. Tailwind utilities win over kit component classes (the kit declares
    `@layer theme, base, components, utilities` and its rules live in `components`) — use utilities for
    spacing and layout, not to re-color kit components.
-5. Headings: `.ci-heading` (Inter, no tracking) for page and section titles; `.ci-dashboard-display`
-   (Instrument Serif) only for large, sparse display text such as the error-page status code.
+5. Headings: `.ci-heading` for page and section titles; `.ci-dashboard-display` only for large, sparse
+   display text such as the error-page status code. Both use Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` guards the kit adoption: no Material ligature span under
    `src/app` or `src/shared/components`; in the dashboard tree (`src/app/(dashboard)` and
    `src/shared/components`) no raw `<select>`, `<textarea>` or `<table>` and no hand-rolled
@@ -159,10 +159,10 @@ generator's output (job `test-unit`).
 
 - **Tokens.** `scripts/docs/readme-diagram-theme.mjs` copies the palette from `packages/ui-kit/src/ci-tokens.css`
   (pinned against that file by `tests/unit/docs/readme-diagram-theme.test.ts`) and defines the text roles on
-  the kit faces — Instrument Serif for display, Inter for UI text, IBM Plex Mono for figures and code, the
-  same `@fontsource` packages `src/app/globals.css` loads for the dashboard. Light values sit on `:root`, dark
-  values behind `prefers-color-scheme: dark`, inside the file, so each image follows the viewer's scheme on
-  GitHub.
+  the kit's earlier faces — Instrument Serif for display, Inter for UI text, IBM Plex Mono for figures and
+  code — from the `@fontsource` packages (the dashboard itself uses the kit's Switzer since kit 0.0.66).
+  Light values sit on `:root`, dark values behind `prefers-color-scheme: dark`, inside the file, so each
+  image follows the viewer's scheme on GitHub.
 - **Fonts.** `scripts/docs/readme-fonts.mjs` subsets those woff2 files to the glyphs each diagram draws and
   embeds them as `@font-face` `data:` URIs — the only way kit typography reaches a README image, since
   GitHub Markdown carries no CSS and the camo proxy blocks every external fetch. The subsets are latin-only;

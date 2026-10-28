@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "นำเข้าโมเดลทั้งหมดแล้ว",
     "noNewModelsToImport": "ไม่มีโมเดลใหม่ที่จะนำเข้า — โมเดลทั้งหมดมีอยู่แล้วในรีจิสทรีหรือรายการโมเดลที่กำหนดเอง",
     "localCatalogFallbackStatus": "ไม่สามารถเข้าถึงรายการโมเดลของผู้ให้บริการได้ — กำลังแสดงแค็ตตาล็อกที่มีมาในตัว",
+    "discoveryDegradedStatus": "การค้นพบโมเดลล้มเหลว {time}",
     "skippingExistingModels": "ข้าม {count} โมเดลที่มีอยู่",
     "autoSync": "ซิงค์อัตโนมัติ",
     "autoSyncShort": "ซิงค์",
@@ -15298,5 +15299,8 @@
     "importButton": "นำเข้า",
     "importFailed": "นำเข้าไม่สำเร็จ",
     "importSuccess": "นำเข้า {connections} บัญชีและ {nodes} โหนดผู้ให้บริการแล้ว ข้าม {skipped} รายการ"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "เริ่มจากตำแหน่งปัจจุบัน (ข้ามบันทึกที่มีอยู่)"
   }
 }
