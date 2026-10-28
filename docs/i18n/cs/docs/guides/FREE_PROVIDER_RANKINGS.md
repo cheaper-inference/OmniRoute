@@ -13,30 +13,17 @@
 
 ## Co to je
 
-OmniRoute registruje 376 poskytovatelů, včetně 155 položek katalogu označených **free/no-auth**
-(bez autentizace, OAuth s bezplatnou úrovní nebo API klíč s bezplatnou úrovní — viz
-[Průvodce bezplatnými úrovněmi](../getting-started/FREE-TIERS-GUIDE.md) a kompletní
-[adresář bezplatných úrovní](../reference/FREE_TIERS.md)). Háček spočívá v tom, že bezplatní
-poskytovatelé se značně liší v kvalitě modelů. Poskytovatel bez autentizace nabízející
-špičkový model je mnohem užitečnější než ten, který nabízí malý zastaralý model.
+OmniRoute registruje 377 poskytovatelů, včetně 155 katalogových záznamů označených**free/no-auth** (no-auth, free-tier OAuth nebo free-tier API klíč – viz [průvodce Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) a celý [adresář Free Tiers](../reference/FREE_TIERS.md) ). Háček: bezplatní poskytovatelé se velmi liší v kvalitě modelu. Poskytovatel bez autorizace obsluhující hraniční model je mnohem užitečnější než poskytovatel obsluhující malý starší model.
 
-**Free Provider Rankings** odpovídá na otázku „**který bezplatný poskytovatel mi nabídne
-nejlepší model?**“ spojením katalogu každého bezplatného poskytovatele s **crowdsourcingem
-získanými skóre kvality** ze **žebříčku Arena AI** (ELO založené na lidských preferencích —
-stejný princip, na kterém stojí chatbotová aréna LMArena). Poskytovatelé jsou poté seřazeni
-podle síly svého **nejlepšího bezplatného modelu**.
+**Bezplatné hodnocení poskytovatelů** odpovědi"** který bezplatný poskytovatel mi nabízí nejlepší model?** “ tím, že se připojíte ke každému bezplatnému katalogu poskytovatele** davové skóre kvality** z** Žebříček Arena AI** (lidská preference ELO, stejný nápad stojí za chatbot arénou LMArena). Poskytovatelé jsou pak seřazeni podle síly jejich** nejlepší bezplatný model** .
 
-Žebříček je vypočítán ze tří skutečných zdrojů:
+Hodnocení je vypočítáno ze tří skutečných zdrojů:
 
-1. Seznamy bezplatných poskytovatelů — `NOAUTH_PROVIDERS`, plus položky `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` označené příznakem `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Katalog modelů každého poskytovatele z registru poskytovatelů
-   (`open-sse/config/providerRegistry.ts`).
-3. Skóre vhodnosti pro úlohy odvozená z ELO, uložená v databázové tabulce `model_intelligence`
-   synchronizačním enginem Arena ELO (`src/lib/arenaEloSync.ts`).
+1. Seznam bezplatných poskytovatelů — `NOAUTH_PROVIDERS` plus položky `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` označené příznakem `hasFree` (`src/shared/constants/providers.ts`).
+2. Katalog modelů každého poskytovatele z registru poskytovatelů (`open-sse/config/providerRegistry.ts`).
+3. Skóre přizpůsobení úloh odvozené z ELO uložené v tabulce `model_intelligence` DB synchronizačním enginem Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Logika spojování se nachází v `src/lib/freeProviderRankings.ts`.
+Logika spojení žije v `src/lib/freeProviderRankings.ts`.
 
 ---
 
