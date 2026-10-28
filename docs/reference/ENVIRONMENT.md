@@ -1692,6 +1692,11 @@ that should be able to run the docs translator.
 | `OMNIROUTE_TRANSLATION_TIMEOUT_MS`       | `60000`   | `scripts/i18n/run-translation.mjs`       | Per-request timeout in milliseconds.                                                                                                                                                      |
 | `OMNIROUTE_TRANSLATION_REASONING_EFFORT` | _(unset)_ | `scripts/i18n/lib/translate-backend.mjs` | Optional reasoning control, sent as-is to the backend when set.                                                                                                                           |
 | `OMNIROUTE_TRANSLATION_CONCURRENCY`      | `4`       | `scripts/i18n/run-translation.mjs`       | Parallel translation requests when running over multiple files / locales.                                                                                                                 |
+| `OMNIROUTE_TRANSLATION_ENGINE` | `llm` | `scripts/i18n/run-translation.mjs` | `llm` uses the backend above; `google` translates through the structure-safe Google engine and needs none of the LLM variables. |
+| `OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK` | `1` | `scripts/i18n/run-translation.mjs` | With the `llm` engine, a chunk the model could not produce (output guard failed on every attempt, or a model error) is translated by Google instead of failing the locale. `0` disables it. |
+| `OMNIROUTE_TRANSLATION_GOOGLE_API_KEY` | _(unset)_ | `scripts/i18n/lib/google-translate.mjs` | Optional Cloud Translation v2 key. Unset uses the keyless web endpoint (rate-limited, fine for occasional waves). |
+| `OMNIROUTE_TRANSLATION_GOOGLE_CONCURRENCY` | `6` | `scripts/i18n/lib/google-translate.mjs` | Parallel Google requests shared by every locale of a run. |
+| `OMNIROUTE_TRANSLATION_GOOGLE_TIMEOUT_MS` | `30000` | `scripts/i18n/lib/google-translate.mjs` | Per-request timeout for the Google engine, in milliseconds. |
 
 ---
 
