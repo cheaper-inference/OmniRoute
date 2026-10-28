@@ -82307,8 +82307,8 @@
           "updated_at": "2026-10-28T19:53:01.380Z"
         },
         "ro": {
-          "source_hash": "a91144590e9dd0006b40daab8aa620581375af2aef6376b21b6ba1ee0989c609",
-          "target_hash": "77ad9dc8600f0235c42f9e1677dc372211403eb846984a609c860f8174acd322",
+          "source_hash": "fc700cd81c22f1a90c073d3e84d56618a8de8b48f495b758e4fc595f9b880ffb",
+          "target_hash": "3cc93d05630777385b7987fd58129d991656b13e1226937e34e84e104846ce23",
           "section_hashes": [
             "6713ceb19965",
             "347341ba6233",
@@ -82323,7 +82323,7 @@
             "99806e673e20",
             "b21010bacda0",
             "f857debd468b",
-            "31927ce7df89",
+            "9b81fc1c0057",
             "33d9a48202ff",
             "ecf685aef1a2",
             "c7cf690e4c7f",
@@ -82362,7 +82362,7 @@
             "09c726593fd5",
             "488a77759b48"
           ],
-          "updated_at": "2026-10-28T18:56:35.548Z"
+          "updated_at": "2026-10-28T20:10:37.772Z"
         },
         "ru": {
           "source_hash": "fc700cd81c22f1a90c073d3e84d56618a8de8b48f495b758e4fc595f9b880ffb",

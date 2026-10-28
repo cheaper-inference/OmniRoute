@@ -853,11 +853,11 @@ apelant fără sesiune (la preluare, ștergere, anulare și la verificarea `inpu
 
 abstracția furnizorului Web/search (Tavily, Brave, Exa, Serper etc.).
 
-| Metodă | Cale                   | Descriere                                                                                     |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Listați capabilitățile + ale furnizorilor de căutare configurați                              |
-| POST   | `/v1/search`           | Rulați o interogare de căutare — body validat de `v1SearchSchema`, acceptă caching/coalescing |
-| GET    | `/v1/search/analytics` | Statistici hit/latency/cache per furnizor                                                     |
+| Metodă | Cale                   | Descriere                                                                                      |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Listați capabilitățile + ale furnizorilor de căutare configurați                               |
+| POST   | `/v1/search`           | Rulați o interogare de căutare — body validată de `v1SearchSchema`, acceptă caching/coalescing |
+| GET    | `/v1/search/analytics` | Statistici hit/latency/cache per furnizor                                                      |
 
 **Auth:** Cheie API purtător (`extractApiKey` + `isValidApiKey`). Politica de căutare aplicată prin `enforceApiKeyPolicy`.
 
@@ -878,7 +878,7 @@ Rezultatele exa păstrează `id`, `highlight_scores`, `summary`, `subpages`, `en
 
 Exa `type: "lite"` (Exa 3.0) acceptă un set mai mic de câmpuri și respinge întreaga cerere atunci când este setat orice alt câmp. Pentru lite, `additionalQueries`, `systemPrompt` și fiecare tastă `contents` cu excepția `text` și `highlights` sunt abandonate înainte de apel. `subpages`, `subpageTarget`, `highlights.numSentences` și `highlights.highlightsPerUrl` depreciate nu mai sunt redirecționate.
 
-Contabilitatea costurilor este registrul plat `costPerQuery`, cu excepția Exa `type: "lite"`, care este înregistrat la prețul redus (0,004 USD per apel față de 0,007 USD pentru `auto`). Tipul `instant` moștenit este facturat ca lite; `fast` este facturat ca `auto`. Tavily facturează `search_depth: "advanced"` cu mai multe credite per apel, iar diferența nu se reflectă în `usage.search_cost_usd`.
+Contabilitatea costurilor este registrul plat `costPerQuery`, cu excepția Exa, care urmează prețul propriu al Exa: 0,007 USD per apel pentru `auto` (și `fast` moștenit) sau 0,004 USD pentru `lite` (și `instant` moștenit), acoperind 10 rezultate; 0,001 USD pentru fiecare rezultat suplimentar; și 0,001 USD per rezultat returnat când `contents.summary` este setat. Tavily este înregistrat la 1 credit (0,008 USD) pentru `search_depth` `basic`, `fast` și `ultra-fast` și 2 credite (0,016 USD) pentru `advanced` ( [credite Tavily API](https://docs.tavily.com/documentation/api-credits) ). Un apel cu `auto_parameters: true` pe care Tavily face upgrade la avansat este încă înregistrat la 1 credit.
 
 ---
 
