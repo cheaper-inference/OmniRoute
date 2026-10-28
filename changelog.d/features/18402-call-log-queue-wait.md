@@ -1,0 +1,1 @@
+- **feat(db):** call log rows now persist `queue_wait_ms` — the wait from execution start to the first upstream dispatch ([#18402](https://github.com/cheaper-inference/OmniRoute/pull/18402)) — thanks @jjxyxsjr
