@@ -1,0 +1,1 @@
+- **fix(dashboard):** `/api/usage/utilization` (exposes account emails) and `/api/provider-stats` now sit behind the standard `requireManagementAuth` gate instead of being public bare GETs ([#18441](https://github.com/cheaper-inference/OmniRoute/pull/18441)) — thanks @jjxyxsjr
