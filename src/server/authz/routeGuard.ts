@@ -62,6 +62,7 @@ export const LOCAL_ONLY_API_PREFIXES: ReadonlyArray<string> = [
   "/api/cli-tools/pi-settings", // spawns via getCliRuntimeStatus() to detect the `pi` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
   "/api/cli-tools/smelt-settings", // spawns via getCliRuntimeStatus() to detect the `smelt` CLI install (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
   "/api/cli-tools/status", // GET calls getCliRuntimeStatus() per CLI_TOOL_IDS entry (Hard Rules #15 + #17, GHSA-35fw-cv32-2373)
+  "/api/cli-tools/whycodes-settings", // spawns via getCliRuntimeStatus() to detect the `whycodes` CLI install (Hard Rules #15 + #17, #14107)
   "/api/services/", // T-10: embedded service lifecycle (spawn child processes)
   "/api/version-manager/", // downloads, unpacks and runs the CLIProxyAPI binary, the same work as /api/services/cliproxy/ (Hard Rules #15 + #17); read-only GETs exempted below
   "/api/tunnels/cloudflared", // POST installs/starts/stops cloudflared; safe methods are exempted below
@@ -238,6 +239,24 @@ export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
   // or the local CLI when login is on; in open mode it fell back to "anyone".
   // The bundle itself stays a public route: it authenticates with the token.
   "/api/sync/tokens",
+  // Host CLI config writers. /apply overwrites the operator's CLI config (for Claude the
+  // whole ~/.claude/settings.json) with a caller-supplied base URL and token, repointing
+  // the operator's CLI at that endpoint; guide-settings and hermes-agent-settings write
+  // the same kind of config and backups restores one. The handlers only call
+  // requireCliToolsAuth() and guardCliConfigWrite() (CLI_ALLOW_CONFIG_WRITES defaults to
+  // true), so with login disabled they were anonymous while their sibling
+  // /api/cli-tools/codex-profiles above was not. Read-only CLI tool routes stay as is.
+  "/api/cli-tools/apply",
+  "/api/cli-tools/guide-settings",
+  "/api/cli-tools/hermes-agent-settings",
+  "/api/cli-tools/backups",
+  // Log export destinations: a destination is a caller-chosen BigQuery project with its
+  // own service account, and /[id]/run ships call_logs (prompts, responses, key names)
+  // into it. Same data as /api/logs/export above; the prefix covers destinations, their
+  // run/test children, status and types.
+  "/api/log-export",
+  // SIGTERMs the process, like its twin /api/shutdown above.
+  "/api/restart",
 ];
 
 /**
@@ -344,6 +363,13 @@ export function isPrivateLanHost(hostHeader: string | null): boolean {
  *   PATH lookup (`which cloudflared`), which runs only for loopback/LAN callers:
  *   a remote caller gets the unprobed status (`probed: false`) with no spawn
  *   (GHSA-35fw-cv32-2373 class, GHSA-jmq6-8j86-8xqj call-site gate).
+ *   /api/services/cliproxy/status — GET returns lifecycle/version metadata only;
+ *   its latest-version lookup is an HTTPS release query, never a child process.
+ *   Lifecycle mutations remain LOCAL_ONLY through the parent /api/services/
+ *   prefix. The other service status routes are deliberately NOT exempt:
+ *   bifrost/dario/mux/openwa call `getLatestVersion()` → `npm view` (execFile) on
+ *   a cache miss, which a remote caller must never trigger (Hard Rules #15/#17),
+ *   and 9router also supports `?reveal=key` (plaintext service credential).
  */
 export const LOCAL_ONLY_API_GET_EXEMPTIONS: ReadonlySet<string> = new Set([
   "/api/system/version",
@@ -358,6 +384,7 @@ export const LOCAL_ONLY_API_GET_EXEMPTIONS: ReadonlySet<string> = new Set([
   // 403s the timeline MCP poll forever (#13941).
   "/api/mcp/audit",
   "/api/mcp/audit/stats",
+  "/api/services/cliproxy/status",
 ]);
 
 /** Safe HTTP methods that can be exempted for read-only paths. */

@@ -873,10 +873,10 @@ and a key with the wrong type is dropped. Any other key is ignored, including au
 `stream` and `outputSchema`. The flat keys used by other providers (`cx`, `depth`, ...) work
 as before.
 
-| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                                            |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` merged over the default `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                 |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` merged over the default `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
 
 The generic fields always win: `query`, `max_results`, `filters` (domains), `country` and the
 topic derived from `search_type`. On Exa, `search_type: "news"` keeps `category: "news"`.
@@ -889,7 +889,16 @@ overrides the mapped one.
 Exa results keep `id`, `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
 `provider_raw`. Tavily results keep `images` and `favicon`.
 
-Cost accounting is still the flat registry `costPerQuery`. Tavily bills
+Exa `type: "lite"` (Exa 3.0) accepts a smaller set of fields and rejects the whole request
+when any other field is set. For lite, `additionalQueries`, `systemPrompt` and every
+`contents` key except `text` and `highlights` are dropped before the call. The deprecated
+`subpages`, `subpageTarget`, `highlights.numSentences` and `highlights.highlightsPerUrl` are no
+longer forwarded.
+
+Cost accounting is the flat registry `costPerQuery`, except for Exa, which follows Exa's
+own pricing: $0.007 per call for `auto` (and the legacy `fast`) or $0.004 for `lite` (and the
+legacy `instant`), covering 10 results; $0.001 for each further result; and $0.001 per
+returned result when `contents.summary` is set. Tavily bills
 `search_depth: "advanced"` at more credits per call, and that difference is not reflected in
 `usage.search_cost_usd`.
 

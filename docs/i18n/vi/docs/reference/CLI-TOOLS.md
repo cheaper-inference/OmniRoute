@@ -4,17 +4,17 @@
 
 ---
 
-Cập nhật lần cuối: 2026-08-23
+Cập nhật lần cuối: 23-08-2026
 
-OmniRoute tích hợp với ba loại công cụ CLI, được phân bổ trên ba trang bảng điều khiển chuyên biệt:
+OmniRoute tích hợp với ba loại công cụ CLI trải rộng trên ba trang bảng điều khiển chuyên dụng:
 
-| Trang          | Tuyến                   | Khái niệm                                                                                | Số lượng     |
-| -------------- | ----------------------- | ---------------------------------------------------------------------------------------- | ------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | Các công cụ lập trình mà bạn trỏ đến OmniRoute (Client → CLI → OmniRoute → Nhà cung cấp) | 26           |
-| **CLI Agents** | `/dashboard/cli-agents` | Các tác nhân tự động mà bạn trỏ đến OmniRoute (cùng luồng, phạm vi rộng hơn)             | 10           |
-| **ACP Agents** | `/dashboard/acp-agents` | Các CLI được OmniRoute khởi chạy làm backend qua stdio/ACP (luồng ngược)                 | xem registry |
+| Trang   | Tuyến đường             | Ý tưởng                                                                             | Đếm            |
+| ------- | ----------------------- | ----------------------------------------------------------------------------------- | -------------- |
+| **CLI** | `/dashboard/cli-code`   | Các công cụ mã hóa bạn trỏ vào OmniRoute (Nhà cung cấp client → CLI → OmniRoute → ) | 26             |
+| **CLI** | `/dashboard/cli-agents` | Các tác nhân tự trị bạn trỏ vào OmniRoute (cùng luồng, phạm vi rộng hơn)            | 11             |
+| **ACP** | `/dashboard/acp-agents` | CLIs mà OmniRoute sinh ra dưới dạng phụ trợ thông qua stdio/ACP (dòng ngược)        | xem sổ đăng ký |
 
-Các tuyến cũ chuyển hướng bằng mã 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Các tuyến kế thừa chuyển hướng qua 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -45,9 +45,7 @@ ACP Agents (luồng khởi chạy ngược):
 
 ## Tự động cấu hình với `setup-*`
 
-Bạn không cần phải viết thủ công cấu hình cho từng công cụ. OmniRoute cung cấp một lệnh `setup-*`
-cho mỗi CLI được hỗ trợ; lệnh này đọc danh mục mô hình **trực tiếp** từ một
-OmniRoute đang chạy (cục bộ hoặc từ xa) và ghi cấu hình riêng của công cụ đó trên máy của bạn:
+Bạn không cần phải viết cấu hình của từng công cụ bằng tay. OmniRoute gửi lệnh `setup-*` cho mỗi CLI được hỗ trợ để đọc** sống** danh mục mô hình từ OmniRoute đang chạy (cục bộ hoặc từ xa) và ghi cấu hình riêng của công cụ trên máy của bạn:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,54 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Mỗi lệnh đều chấp nhận `--remote <url> --api-key <key>` (cấu hình một công cụ cục bộ để kết nối với
-OmniRoute từ xa), `--dry-run` (xem trước mà không ghi) và `--port`. Các công cụ
-không hỗ trợ tự động phát hiện mô hình (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) nhận
-`--model <id>` (và `--yes` cho các lần chạy không tương tác). `setup-5dive` là công thức duy nhất
-không ghi vào `$HOME`: nó cấu hình một cụm tác nhân 5dive bằng cách
-ghi hồ sơ xác thực thuộc sở hữu của root trên máy chủ của cụm, vì vậy nó tự thực thi lại thông qua `sudo`
-và không có chế độ từ xa riêng. Để khởi chạy một CLI với
-các biến môi trường phù hợp được chèn vào mà hoàn toàn không ghi cấu hình, hãy dùng trình khởi chạy chung
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — các đích và bí danh đến từ `bin/cli/cli-manifest.mjs`); các trình khởi chạy
-riêng cho từng công cụ kiểu cũ là `omniroute launch` (Claude Code) và `omniroute launch-codex`
-(Codex) vẫn khả dụng. Gemini CLI chỉ hỗ trợ khởi chạy: đây là một đích của `omniroute run`
-nhưng không có công thức `setup-*`/`configure`.
+Mỗi cái chấp nhận `--remote <url> --api-key <key>` (cấu hình một công cụ cục bộ dựa trên OmniRoute từ xa), `--dry-run` (xem trước mà không cần viết) và `--port`. Các công cụ không có tính năng tự động phát hiện mô hình (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) lấy `--model <id>` (và `--yes` cho các lần chạy không tương tác). `setup-5dive` là một công thức không ghi theo `$HOME`: nó định cấu hình nhóm đại lý 5dive bằng cách viết hồ sơ xác thực thuộc sở hữu gốc trên máy chủ nhóm, do đó, nó sẽ thực thi lại thông qua `sudo` và không có chế độ từ xa riêng. Để khởi chạy CLI với đúng env được chèn và không có cấu hình nào được ghi, hãy sử dụng trình khởi chạy `omniroute run <target>` chung (claude, codex, aider, ngỗng, opencode, qwen, gemini, Whycodes - mục tiêu và bí danh đến từ `bin/cli/cli-manifest.mjs`); các trình khởi chạy cho mỗi công cụ kế thừa `omniroute launch` (Claude Code) và `omniroute launch-codex` (Codex) vẫn khả dụng. Gemini CLI chỉ khởi chạy: nó là mục tiêu `omniroute run` nhưng không có công thức `setup-*`/`configure`.
 
-> **Tài liệu tham khảo đầy đủ:** bảng tổng hợp — mỗi lệnh ghi những gì, tất cả các cờ,
-> chế độ cục bộ so với từ xa và những công cụ nào yêu cầu hậu tố `/v1` — có trong
-> **[Tích hợp CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Tham khảo đầy đủ:** bảng chính — mỗi lệnh ghi nội dung gì, mọi cờ, cục bộ hay từ xa và công cụ nào muốn có hậu tố `/v1` — tồn tại trong** [tích hợp CLI](../guides/CLI-INTEGRATIONS.md)** .
 
-### Chạy các lệnh này bên trong container
+### Chạy những thứ này bên trong một container
 
-Một lệnh `setup-*` được thực thi bên trong container OmniRoute sẽ ghi vào thư mục home
-riêng của container, nơi không CLI nào trên máy chủ đọc được và sẽ biến mất cùng với
-container. OmniRoute phát hiện điều đó và thoát với mã `2`, kèm theo hướng dẫn thay vì
-ghi dữ liệu. Có hai hướng xử lý được hỗ trợ — cài đặt CLI trên máy chủ và
-dùng `omniroute connect` để kết nối với container, hoặc bind-mount các thư mục cấu hình và đặt
-`CLI_CONFIG_HOME` (profile `host` của compose). Mọi lệnh `setup-*`, cùng với
-`omniroute configure` và `omniroute config set`, đều chấp nhận
-`--allow-container-write` khi điều bạn thực sự muốn là cấu hình các CLI riêng của container;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` cũng thực hiện điều tương tự cho
-máy chủ. Xem
-[Hướng dẫn Docker → Cấu hình các công cụ CLI trên máy chủ](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Lệnh `setup-*` được thực thi bên trong vùng chứa OmniRoute sẽ ghi vào nhà riêng của vùng chứa mà không có máy chủ CLI đọc và lệnh này sẽ biến mất cùng với vùng chứa. OmniRoute phát hiện điều đó và thoát `2` bằng hướng dẫn thay vì viết. Hai cách được hỗ trợ về phía trước — cài đặt CLI trên máy chủ và `omniroute connect` vào vùng chứa hoặc liên kết gắn kết các thư mục cấu hình và đặt `CLI_CONFIG_HOME` (cấu hình soạn thảo `host` ). Mọi lệnh `setup-*`, cộng với `omniroute configure` và `omniroute config set`, chấp nhận `--allow-container-write` khi định cấu hình CLIs của chính vùng chứa là điều bạn thực sự muốn nói; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` thực hiện tương tự với máy chủ. Xem [Hướng dẫn Docker → Định cấu hình các công cụ CLI của máy chủ](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Endpoint áp dụng** của bảng điều khiển (`POST /api/cli-tools/apply`) thực thi
-cùng một cơ chế bảo vệ: trong container, thao tác ghi có đích không được bind-mount từ
-máy chủ sẽ trả về **`422`** cùng với `containerEphemeralTarget: true`, nội dung lỗi an toàn
-và — đối với các công cụ có công thức dành cho máy chủ (claude, codex, opencode, cline,
-kilo, continue) — một `hostSetupCommand` (ví dụ: `omniroute setup-opencode`) để chạy
-trên máy chủ thay thế; không có gì được ghi. `dryRun: true` vẫn hoạt động trong chế độ container
-và trả về bản xem trước đã được che thông tin nhạy cảm cùng với đường dẫn đích mà không tác động đến ổ đĩa. Nội dung
-xem trước không phải là một cấu hình chứa thông tin xác thực để sao chép hoặc nhập. Hãy áp dụng với
-các đầu vào ban đầu về công cụ/URL cơ sở/API key/mô hình trên máy chủ, hoặc sử dụng
-lệnh thiết lập phía máy chủ được chỉ định. Xem [Bảo mật cấu hình CLI](../security/CLI-CONFIGURATION.md)
-để biết tiêu đề xem trước và quy ước yêu cầu. Hành vi này là
-có chủ đích và được bảo vệ khỏi hồi quy bởi
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — tuyệt đối không “sửa” lỗi 422
-bằng cách loại bỏ cơ chế bảo vệ.
+Bảng điều khiển của** áp dụng điểm cuối** (`POST /api/cli-tools/apply`) thực thi cùng một biện pháp bảo vệ: trong một thùng chứa, một lệnh ghi có mục tiêu không được liên kết với các câu trả lời của máy chủ**`422`** với `containerEphemeralTarget: true`, văn bản lỗi an toàn và — đối với các công cụ có công thức máy chủ (claude, codex, opencode, cline, kilo, continue) — một `hostSetupCommand` (ví dụ `omniroute setup-opencode`) để chạy trên máy chủ thay thế; không có gì được viết `dryRun: true` tiếp tục hoạt động ở chế độ vùng chứa và trả về đường dẫn đích + xem trước được xử lý lại mà không cần chạm vào đĩa. Nội dung xem trước không phải là cấu hình mang thông tin xác thực để sao chép hoặc nhập. Áp dụng với đầu vào tool/base URL/API key/model ban đầu trên máy chủ hoặc sử dụng lệnh thiết lập phía máy chủ được chỉ định. Xem [bảo mật cấu hình CLI](../security/CLI-CONFIGURATION.md) để biết tiêu đề xem trước và hợp đồng yêu cầu. Hành vi này là có chủ ý và được bảo vệ hồi quy bởi `tests/unit/api/cli-tools/apply-container-guard.test.ts` - không bao giờ "sửa" 422 bằng cách loại bỏ bảo vệ.
 
 ---
 
@@ -145,59 +107,60 @@ một bề mặt mà không được thêm vào các bề mặt khác sẽ khi�
 
 ---
 
-## 1. Danh mục CLI Code (27 công cụ)
+## 1. Danh mục mã CLI (27 công cụ)
 
-Tất cả các công cụ xuất hiện trong `/dashboard/cli-code`. Những công cụ có `baseUrlSupport: none` được kết nối thông qua MITM hoặc hướng dẫn thủ công thay vì URL cơ sở tùy chỉnh:
+Tất cả các công cụ xuất hiện trong `/dashboard/cli-code`. Những người có `baseUrlSupport: none` được nối dây thông qua MITM hoặc hướng dẫn thủ công thay vì cơ sở tùy chỉnh URL:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| nhận dạng        | tên                     | người bán            | baseUrlHỗ trợ | loại cấu hình            | acp có thể sinh sản |
+| ---------------- | ----------------------- | -------------------- | ------------- | ------------------------ | ------------------- |
+| Claude           | Claude                  | Anthropic            | đầy           | env                      | ĐÚNG VẬY            |
+| mật mã           | OpenAI Codex CLI        | OpenAI               | đầy           | phong tục                | ĐÚNG VẬY            |
+| mã zcode         | ZCode (Gói mã hóa GLM ) | Z.ai                 | không có      | phong tục                | SAI                 |
+| theo dõi         | Cline                   | OSS (cựu Claude Dev) | đầy           | phong tục                | ĐÚNG VẬY            |
+| kg               | Mã Kilo                 | Kilo-Org             | đầy           | phong tục                | SAI                 |
+| roo              | Mã Roo                  | Roo (OSS)            | đầy           | hướng dẫn                | SAI                 |
+| Tiếp tục         | Tiếp tục                | tiếp tục.dev         | đầy           | hướng dẫn                | SAI                 |
+| người giúp việc  | Người trợ giúp          | OSS (P. Gauthier)    | đầy           | hướng dẫn                | ĐÚNG VẬY            |
+| rèn              | ForgeCode               | Antinomy HQ          | đầy           | phong tục                | ĐÚNG VẬY            |
+| mã jcode         | mã jcode                | 1jehuang (OSS)       | đầy           | phong tục                | SAI                 |
+| deepseek-tui     | DeepSeek TUI            | Cung thợ săn (OSS)   | đầy           | phong tục                | SAI                 |
+| cá voi mã        | CodeWhale               | Hmbown (OSS)         | đầy           | phong tục                | SAI                 |
+| mã mở            | OpenCode                | Bất thường (cựu SST) | đầy           | hướng dẫn                | ĐÚNG VẬY            |
+| droid            | Nhà máy Droid           | nhà máy AI           | một phần      | hướng dẫn                | SAI                 |
+| phi công phụ     | GitHub Copilot CLI      | GitHub/MS            | đầy           | phong tục                | SAI                 |
+| con trỏ-cli      | Cursor CLI              | mọi nơi              | một phần      | hướng dẫn                | ĐÚNG VẬY            |
+| có mùi           | mùi                     | leonardcser (OSS)    | đầy           | phong tục                | SAI                 |
+| số pi            | Pi (tác nhân mã hóa pi) | M. Zechner (OSS)     | đầy           | phong tục                | SAI                 |
+| xây dựng Grok    | xây dựng Grok           | xAI                  | đầy           | phong tục                | SAI                 |
+| người mình thích | Người mình thích        | OSS (Bùa chú)        | đầy           | phong tục                | SAI                 |
+| qwen             | Qwen                    | Alibaba              | đầy           | hướng dẫn                | ĐÚNG VẬY            |
+| zed              | Zed                     | công nghiệp Zed      | đầy           | hướng dẫn                | SAI                 |
+| con trỏ          | Cursor                  | mọi nơi              | không có      | hướng dẫn                | SAI                 |
+| phản trọng lực   | Antigravity             | Google               | không có      | mitm                     | SAI                 |
+| Hermes           | Hermes                  | Nghiên cứu Nous      | không có      | hướng dẫn                | SAI                 |
+| kiro             | Kiro AI                 | Amazon               | không có      | mitm                     | SAI                 |
+| phong tục        | CLI tùy chỉnh           | —                    | đầy           | người xây dựng tùy chỉnh | SAI                 |
 
-Các công cụ có `baseUrlSupport: "partial"` hiển thị huy hiệu "⚠ URL cơ sở được hỗ trợ một phần" trong thẻ trên bảng điều khiển.
+Các công cụ có `baseUrlSupport: "partial"` hiển thị huy hiệu "⚠ Base URL parcial" trong thẻ bảng điều khiển.
 ---
 
-## 2. Danh mục CLI Agent (10 công cụ)
+## 2. Danh mục đại lý CLI (11 công cụ)
 
-Các agent tự trị xuất hiện trong `/dashboard/cli-agents`:
+Các đại lý tự trị xuất hiện trong `/dashboard/cli-agents`:
 
-| id           | tên              | nhà cung cấp             | hỗ trợ base URL | có thể khởi chạy qua ACP |
-| ------------ | ---------------- | ------------------------ | --------------- | ------------------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full            | false                    |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full            | true                     |
-| goose        | Goose            | Block / Linux Foundation | full            | true                     |
-| interpreter  | Open Interpreter | OSS                      | full            | true                     |
-| warp         | Warp AI          | Warp Inc.                | partial         | true                     |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full            | false                    |
-| omp          | Oh My Pi         | OSS                      | full            | true                     |
-| letta        | Letta CLI        | Letta                    | full            | false                    |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full            | false                    |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full            | false                    |
+| nhận dạng       | tên                | người bán               | baseUrlHỗ trợ | acp có thể sinh sản |
+| --------------- | ------------------ | ----------------------- | ------------- | ------------------- |
+| đại lý Hermes   | Đại lý Hermes      | Nghiên cứu Nous         | đầy           | SAI                 |
+| móng vuốt hở    | OpenClaw           | OSS (P. Steinberger)    | đầy           | ĐÚNG VẬY            |
+| ngỗng           | Ngỗng              | Khối / Linux Foundation | đầy           | ĐÚNG VẬY            |
+| thông dịch viên | Mở thông dịch viên | OSS                     | đầy           | ĐÚNG VẬY            |
+| làm cong vênh   | Warp AI            | Warp Inc.               | một phần      | ĐÚNG VẬY            |
+| sàn đại lý      | Sàn đặc vụ         | asheshgoplani (OSS)     | đầy           | SAI                 |
+| ồ               | Ôi Pi của tôi      | OSS                     | đầy           | ĐÚNG VẬY            |
+| thư             | Letta CLI          | Letta                   | đầy           | SAI                 |
+| đại lý chính    | Đại lý chính       | Trí tuệ hàng đầu (OSS)  | đầy           | SAI                 |
+| 5 lần lặn       | 5 lần lặn          | OSS (5dive-ai)          | đầy           | SAI                 |
+| tại sao mã      | WhyCodes           | Tại sao Tổng công ty    | đầy           | SAI                 |
 
 ---
 

@@ -30,93 +30,93 @@ Pedido do cliente
 
 ---
 
-## Modos de compressão
+## Modos de Compressão
 
 ### Desativado
 
-Não é aplicada qualquer compressão. Todas as mensagens são transmitidas sem alterações.
+Sem compressão aplicada. Todas as mensagens passam inalteradas.
 
 ### Modo Lite (~15% de poupança, latência <1ms)
 
-O modo mais seguro — sem qualquer alteração semântica, apenas limpeza da formatação:
+O modo mais seguro — zero alteração semântica, apenas limpeza de formatação:
 
-| Técnica                  | Descrição                                                |
-| ------------------------ | -------------------------------------------------------- |
-| `collapseWhitespace`     | Combina linhas em branco consecutivas e espaços no final |
-| `dedupSystemPrompt`      | Remove mensagens de sistema duplicadas                   |
-| `compressToolResults`    | Comprime resultados detalhados de ferramentas/funções    |
-| `removeRedundantContent` | Remove instruções repetidas                              |
-| `replaceImageUrls`       | Encurta URIs de dados de imagens em base64               |
+| Técnica                  | Descrição                                          |
+| ------------------------ | -------------------------------------------------- |
+| `collapseWhitespace`     | Une linhas em branco consecutivas e espaços finais |
+| `dedupSystemPrompt`      | Remove mensagens de sistema duplicadas             |
+| `compressToolResults`    | Comprime saídas verbosas de ferramentas/funções    |
+| `removeRedundantContent` | Elimina instruções repetidas                       |
+| `replaceImageUrls`       | Encurta URIs de dados de imagens base64            |
 
-**Ideal para:** Utilização permanente e fluxos de trabalho críticos em termos de segurança.
+**Ideal para:** Utilização contínua, fluxos de trabalho críticos em termos de segurança.
 
 ### Modo Standard (~30% de poupança)
 
-Inspirado no [Caveman](https://github.com/JuliusBrussee/caveman) — remove palavras supérfluas e formulações prolixas, preservando o significado:
+Inspirado no [Caveman](https://github.com/JuliusBrussee/caveman) — remove palavras de preenchimento e frases verbosas, preservando o significado:
 
-- Remove palavras supérfluas ("please", "I think", "basically", "actually")
-- Condensa expressões prolixas ("in order to" → "to", "as a result of" → "because")
-- Remove formulações excessivamente corteses ("Would you mind...", "If you could possibly...")
-- Mais de 30 regras regex ajustadas para prompts de programação
+- Remove palavras de preenchimento ("please", "I think", "basically", "actually")
+- Condensa frases verbosas ("in order to" → "to", "as a result of" → "because")
+- Elimina rodeios de cortesia ("Would you mind...", "If you could possibly...")
+- Mais de 30 regras de regex ajustadas para prompts de programação
 
-**Ideal para:** Fluxos de trabalho diários de programação e equipas preocupadas com os custos.
+**Ideal para:** Fluxos de trabalho diários de programação, equipas atentas aos custos.
 
-### Modo Aggressive (~50% de poupança)
+### Modo Agressivo (~50% de poupança)
 
 Gestão inteligente do histórico para sessões longas:
 
-- **Envelhecimento de mensagens** — as mensagens mais antigas são progressivamente comprimidas
-- **Compressão dos resultados de ferramentas** — resultados longos de ferramentas são truncados ou omitidos (primeiras/últimas linhas,
+- **Envelhecimento de Mensagens** — as mensagens mais antigas são progressivamente comprimidas
+- **Compressão de Resultados de Ferramentas** — saídas longas de ferramentas truncadas ou elididas (primeiras/últimas linhas,
   filtragem de linhas correspondentes, compactação de chaves JSON)
-- **Proteções da integridade estrutural** — garantem que os pares `tool_use` + `tool_result` permanecem consistentes
-- **Consideração da janela de contexto** — respeita os limites de tokens de cada modelo
+- **Guardas de Integridade Estrutural** — garante que os pares `tool_use` + `tool_result` permanecem consistentes
+- **Consciência da Janela de Contexto** — respeita os limites de tokens por modelo
 
-**Ideal para:** Sessões prolongadas de depuração e grandes bases de código.
+**Ideal para:** Sessões de depuração prolongadas, bases de código grandes.
 
 ### Modo Ultra (~75% de poupança)
 
-Compressão máxima para cenários em que os tokens são críticos:
+Compressão máxima para cenários críticos em termos de tokens:
 
-- **Poda heurística** — poda de tokens de prosa baseada em pontuação
-- **Preservação da estrutura** — blocos de código delimitados, código inline, URLs e identificadores são
-  substituídos por marcadores e reinseridos literalmente, nunca sendo podados
-- **Camada SLM opcional** — um pequeno modelo local pode aperfeiçoar a poda quando configurado
-- Independente do modo Aggressive: não executa o envelhecimento de mensagens, a compressão de resultados
-  de ferramentas nem o gerador de resumos de contingência (apenas uma falha da camada SLM pode encaminhar
-  uma passagem de contingência através do modo Aggressive)
+- **Poda Heurística** — poda de tokens do texto baseada em pontuação
+- **Preservação de Estrutura** — blocos de código delimitados, código inline, URLs e identificadores são
+  marcados (tombstoned) e recolocados verbatim, nunca podados
+- **Nível SLM opcional** — um pequeno modelo local pode refinar a poda quando configurado
+- Independente do modo Agressivo: não executa envelhecimento de mensagens, compressão de resultados
+  de ferramentas nem o sumarizador de fallback (apenas uma falha no nível SLM pode encaminhar uma
+  passagem de fallback através do modo agressivo)
 
 **Ideal para:** Quando atinge repetidamente os limites de contexto.
 
-### Modo RTK (intervalo a montante de 60-90%)
+### Modo RTK (intervalo de 60-90% a montante)
 
-O modo RTK está otimizado para resultados detalhados de ferramentas que surgem em sessões de agentes de programação:
+O modo RTK é otimizado para saídas verbosas de ferramentas que aparecem em sessões de agentes de programação:
 
-- Deteta classes de comandos/resultados, como `git status`, `git diff`, `git log`, executores de testes,
-  compilações TypeScript/Vite/Webpack, ESLint/Biome/Prettier, auditorias/instalações npm, registos do Docker, resultados
-  de infraestrutura e resultados genéricos da shell
+- Deteta classes de comandos/saídas como `git status`, `git diff`, `git log`, executores de testes,
+  builds TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, logs do Docker, saída
+  de infraestrutura e saída genérica de shell
 - Aplica pacotes de filtros JSON de `open-sse/services/compression/engines/rtk/filters/`
-- Importa filtros do esquema RTK TOML v1 de ficheiros `filters.toml` do projeto ou globais, com validação
-  de testes inline e controlo de confiança para ficheiros do projeto
-- Inclui 55 filtros integrados com exemplos de verificação inline
+- Importa filtros RTK TOML schema v1 de ficheiros `filters.toml` do projeto ou globais, com validação
+  por testes inline e trust-gating para ficheiros de projeto
+- Inclui 56 filtros incorporados com amostras de verificação inline
 - Remove sequências de controlo ANSI, barras de progresso, linhas repetidas e ruído não acionável
-- Preserva falhas, erros, avisos, ficheiros alterados, resumos e o final de resultados longos
-- Suporta filtros de projeto sujeitos a controlo de confiança, filtros globais e recuperação opcional de resultados brutos com dados ocultados
+- Preserva falhas, erros, avisos, ficheiros alterados, resumos e a cauda de saídas longas
+- Suporta filtros de projeto com trust-gating, filtros globais e recuperação opcional de saída bruta redigida
 
-**Ideal para:** Sessões de agentes com transcrições de shell, compilação, testes, git, grep e resultados de ficheiros.
+**Ideal para:** Sessões de agentes com transcrições de shell, build, testes, git, grep e saídas de ficheiros.
 
 ### Modo Stacked (intervalo elegível de 78-95%)
 
-O modo Stacked executa vários motores de compressão por uma ordem determinística. O pipeline predefinido é:
+O modo Stacked executa múltiplos motores de compressão numa ordem determinística. O pipeline predefinido é:
 
 ```txt
 RTK -> Caveman
 ```
 
-Esta ordem começa por manter compactos os resultados do terminal/das ferramentas e, em seguida, aplica a condensação semântica do Caveman ao
-restante prompt em linguagem natural. Os pipelines Stacked podem ser configurados globalmente ou através de
-combos de compressão atribuídos a combos de encaminhamento.
+Essa ordem mantém primeiro a saída de terminal/ferramentas compacta e depois aplica a condensação semântica
+do Caveman ao prompt em linguagem natural restante. Os pipelines Stacked podem ser configurados globalmente
+ou através de combos de compressão atribuídos a combos de encaminhamento.
 
-**Ideal para:** Contexto misto com grandes registos de ferramentas, juntamente com instruções humanas ou resumos do assistente.
+**Ideal para:** Contexto misto com grandes registos de ferramentas, combinados com instruções humanas ou resumos do assistente.
 
 ---
 
