@@ -3,9 +3,15 @@ import type { RegistryEntry } from "../../shared.ts";
 export const mistralProvider: RegistryEntry = {
   id: "mistral",
   alias: "mistral",
-  format: "openai",
+  // Mistral serves the OpenAI Responses format natively (public preview, stateless:
+  // https://docs.mistral.ai/studio/conversations/responses). Responses clients pass
+  // through; Chat Completions clients are translated by chatCore.
+  format: "openai-responses",
   executor: "default",
-  baseUrl: "https://api.mistral.ai/v1/chat/completions",
+  baseUrl: "https://api.mistral.ai/v1/responses",
+  // Key validation and model discovery cannot be derived from a /responses URL.
+  modelsUrl: "https://api.mistral.ai/v1/models",
+  testKeyModelsUrl: "https://api.mistral.ai/v1/models",
   authType: "apikey",
   authHeader: "bearer",
   models: [
