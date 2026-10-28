@@ -27,6 +27,7 @@ import {
   resolveBaseUrl,
 } from "./validation/urlHelpers";
 import { toValidationErrorResult } from "./validation/transport";
+import { validateCloudflareAiProvider } from "./validation/cloudflareAi";
 import {
   validateDeepSeekWebProvider,
   validateGrokWebProvider,
@@ -229,6 +230,7 @@ export async function validateProviderApiKey({
 
   // ── Specialty provider validation ──
   const SPECIALTY_VALIDATORS = {
+    "cloudflare-ai": validateCloudflareAiProvider,
     "v0-vercel": ({ apiKey, providerSpecificData }: any) =>
       validateV0VercelProvider({ apiKey, providerSpecificData, isLocal }),
     jules: validateJulesProvider,
