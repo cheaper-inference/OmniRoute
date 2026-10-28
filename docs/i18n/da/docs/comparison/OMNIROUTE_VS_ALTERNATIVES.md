@@ -15,7 +15,7 @@ Objektiv funktionssammenligning med populære open source AI-routere.
 | **Gratis katalogposter uden autentificering**            |                  **155**                   |        n/a        |    passthrough    |    n/a     |
 | **Selvhostbar**                                          |                     ✅                     |        ✅         |        ❌         |  ⚠ betalt  |
 | **OAuth-katalogposter**                                  |                   **23**                   |      delvis       |        ❌         |     ❌     |
-| **Automatiske fallback-kombinationer**                   |             **20 strategier**              | prioritetsbaseret |   niveaubaseret   |   vægtet   |
+| **Automatiske fallback-kombinationer**                   |             **21 strategier**              | prioritetsbaseret |   niveaubaseret   |   vægtet   |
 | **Fusion (parallelt panel + dommersyntese)**             |                     ✅                     |        ❌         |        ❌         |     ❌     |
 | **Niveau 1/2/3-fallback (abonnement→billig→gratis)**     |                  ✅ + UI                   |      manuel       |        n/a        |   manuel   |
 | **Token-komprimering**                                   | 12-motors stak (RTK + Caveman + LLMLingua) |       ingen       |       ingen       |   ingen    |

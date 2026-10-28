@@ -15,7 +15,7 @@ Objektiv funksjonssammenligning mot populære AI-rutere med åpen kildekode.
 | **Gratis/uten-auth-katalogoppføringer**            |                   **155**                    |       n/a        |   videresending   |    n/a     |
 | **Selvhostbar**                                    |                      ✅                      |        ✅        |        ❌         |  ⚠ betalt  |
 | **OAuth-katalogoppføringer**                       |                    **23**                    |      delvis      |        ❌         |     ❌     |
-| **Automatiske fallback-kombinasjoner**             |              **20 strategier**               | prioritetsbasert |    nivåbasert     |   vektet   |
+| **Automatiske fallback-kombinasjoner**             |              **21 strategier**               | prioritetsbasert |    nivåbasert     |   vektet   |
 | **Fusjon (parallelt panel + dommersyntese)**       |                      ✅                      |        ❌        |        ❌         |     ❌     |
 | **Nivå 1/2/3-fallback (abonnement→billig→gratis)** |                   ✅ + UI                    |     manuell      |        n/a        |  manuell   |
 | **Token-komprimering**                             | 12-motors stabel (RTK + Caveman + LLMLingua) |      ingen       |       ingen       |   ingen    |

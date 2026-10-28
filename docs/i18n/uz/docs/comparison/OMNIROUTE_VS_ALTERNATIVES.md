@@ -15,7 +15,7 @@ Ommabop ochiq kodli AI routerlarga nisbatan obyektiv xususiyatlar taqqoslanishi.
 | **Bepul/avtorizatsiyasiz katalog yozuvlari**                  |                    **155**                     |        n/a         |     oʻtkazma      |    n/a    |
 | **Oʻz serverida joylashtirish**                               |                       ✅                       |         ✅         |        ❌         | ⚠ pullik  |
 | **OAuth katalog yozuvlari**                                   |                     **23**                     |       qisman       |        ❌         |    ❌     |
-| **Avtomatik fallback kombinatsiyalari**                       |               **20 strategiya**                | ustuvorlik asosida |  daraja asosida   |  vaznli   |
+| **Avtomatik fallback kombinatsiyalari**                       |               **21 strategiya**                | ustuvorlik asosida |  daraja asosida   |  vaznli   |
 | **Fusion (parallel panel + hakam sintezi)**                   |                       ✅                       |         ❌         |        ❌         |    ❌     |
 | **1/2/3-darajali fallback (obuna→arzon→bepul)**               |                    ✅ + UI                     |       qoʻlda       |        n/a        |  qoʻlda   |
 | **Tokenlarni siqish**                                         | 12 dvigatelli stek (RTK + Caveman + LLMLingua) |        yoʻq        |       yoʻq        |   yoʻq    |

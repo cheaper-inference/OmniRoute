@@ -15,7 +15,7 @@ Populyar açıq mənbəli AI routerləri ilə obyektiv xüsusiyyət müqayisəsi
 | **Pulsuz/auth-suz kataloq qeydləri**                |                    **155**                     |       n/a        |    passthrough    |     n/a     |
 | **Öz serverində işlədilə bilən**                    |                       ✅                       |        ✅        |        ❌         | ⚠ ödənişli  |
 | **OAuth kataloq qeydləri**                          |                     **23**                     |      qismən      |        ❌         |     ❌      |
-| **Avtomatik fallback kombinasiyaları**              |               **20 strategiya**                | prioritet əsaslı |  səviyyə əsaslı   |   çəkili    |
+| **Avtomatik fallback kombinasiyaları**              |               **21 strategiya**                | prioritet əsaslı |  səviyyə əsaslı   |   çəkili    |
 | **Fusion (paralel panel + hakim sintezi)**          |                       ✅                       |        ❌        |        ❌         |     ❌      |
 | **Tier 1/2/3 fallback (abunəlik→ucuz→pulsuz)**      |                    ✅ + UI                     |      əl ilə      |        n/a        |   əl ilə    |
 | **Token sıxılması**                                 | 12 mühərrikli stek (RTK + Caveman + LLMLingua) |      yoxdur      |      yoxdur       |   yoxdur    |

@@ -15,7 +15,7 @@ Ulinganisho wa vipengele bila upendeleo dhidi ya maruta maarufu ya AI ya chanzo 
 | **Vipengee vya katalogi vya bure/bila uthibitishaji**   |                    **155**                     |           n/a           |     mapitisho      |        n/a        |
 | **Inayoweza kujihudumishwa mwenyewe**                   |                       ✅                       |           ✅            |         ❌         |   ⚠ ya kulipia    |
 | **Vipengee vya katalogi vya OAuth**                     |                     **23**                     |         sehemu          |         ❌         |        ❌         |
-| **Michanganyiko ya njia mbadala otomatiki**             |                **mikakati 20**                 | kulingana na kipaumbele | kulingana na ngazi |    yenye uzani    |
+| **Michanganyiko ya njia mbadala otomatiki**             |                **mikakati 21**                 | kulingana na kipaumbele | kulingana na ngazi |    yenye uzani    |
 | **Fusion (jopo sambamba + usanisi wa jaji)**            |                       ✅                       |           ❌            |         ❌         |        ❌         |
 | **Njia mbadala ya Ngazi 1/2/3 (usajili→nafuu→bure)**    |                    ✅ + UI                     |        kwa mkono        |        n/a         |     kwa mkono     |
 | **Ubanaji wa tokeni**                                   | rundo la injini 12 (RTK + Caveman + LLMLingua) |         hakuna          |       hakuna       |      hakuna       |

@@ -15,7 +15,7 @@ Comparáid oibiachtúil gnéithe le ródairí AI foinse oscailte coitianta.
 | **Iontrálacha catalóige saor in aisce/gan údarú**                 |                    **155**                    |          n/a           |       dul tríd       |    n/a    |
 | **In-fhéinóstáilte**                                              |                      ✅                       |           ✅           |          ❌          | ⚠ íoctha  |
 | **Iontrálacha catalóige OAuth**                                   |                    **23**                     |       páirteach        |          ❌          |    ❌     |
-| **Teaglamaí uath-aisphillte**                                     |               **20 straitéis**                | bunaithe ar thosaíocht | bunaithe ar leibhéil | ualaithe  |
+| **Teaglamaí uath-aisphillte**                                     |               **21 straitéis**                | bunaithe ar thosaíocht | bunaithe ar leibhéil | ualaithe  |
 | **Cumasc (painéal comhthreomhar + sintéis bhreithimh)**           |                      ✅                       |           ❌           |          ❌          |    ❌     |
 | **Aisphilleadh leibhéal 1/2/3 (síntiús→saor→saor in aisce)**      |                    ✅ + UI                    |         láimhe         |         n/a          |  láimhe   |
 | **Comhbhrú comharthaí**                                           | cruach 12-inneall (RTK + Caveman + LLMLingua) |          dada          |         dada         |   dada    |

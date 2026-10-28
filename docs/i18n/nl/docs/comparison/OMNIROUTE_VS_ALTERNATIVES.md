@@ -15,7 +15,7 @@ Objectieve functievergelijking versus populaire open-source AI-routers.
 | **Gratis/no-auth-catalogusitems**                       |                     **155**                      |         n.v.t.          |     passthrough     |   n.v.t.    |
 | **Zelf te hosten**                                      |                        ✅                        |           ✅            |         ❌          |  ⚠ betaald  |
 | **OAuth-catalogusitems**                                |                      **23**                      |      gedeeltelijk       |         ❌          |     ❌      |
-| **Automatische fallback-combinaties**                   |                **20 strategieën**                | op prioriteit gebaseerd | op niveau gebaseerd |   gewogen   |
+| **Automatische fallback-combinaties**                   |                **21 strategieën**                | op prioriteit gebaseerd | op niveau gebaseerd |   gewogen   |
 | **Fusie (parallel panel + beoordelaarssynthese)**       |                        ✅                        |           ❌            |         ❌          |     ❌      |
 | **Niveau 1/2/3-fallback (abonnement→goedkoop→gratis)**  |                     ✅ + UI                      |        handmatig        |       n.v.t.        |  handmatig  |
 | **Tokencompressie**                                     | stack van 12 engines (RTK + Caveman + LLMLingua) |          geen           |        geen         |    geen     |

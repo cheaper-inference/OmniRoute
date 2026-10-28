@@ -15,7 +15,7 @@ Objektívne porovnanie funkcií oproti populárnym open-source AI smerovačom.
 | **Bezplatné položky katalógu bez autentifikácie**      |                   **155**                    |      n/a       |    passthrough    |     n/a      |
 | **Možnosť self-hostingu**                              |                      ✅                      |       ✅       |        ❌         |  ⚠ platené   |
 | **Položky katalógu OAuth**                             |                    **23**                    |   čiastočne    |        ❌         |      ❌      |
-| **Kombinácie automatického fallbacku**                 |               **20 stratégií**               | podľa priority |   podľa úrovní    |    vážené    |
+| **Kombinácie automatického fallbacku**                 |               **21 stratégií**               | podľa priority |   podľa úrovní    |    vážené    |
 | **Fúzia (paralelný panel + syntéza rozhodcu)**         |                      ✅                      |       ❌       |        ❌         |      ❌      |
 | **Fallback Tier 1/2/3 (predplatné→lacné→zadarmo)**     |                   ✅ + UI                    |    manuálne    |        n/a        |   manuálne   |
 | **Kompresia tokenov**                                  | stack 12 enginov (RTK + Caveman + LLMLingua) |     žiadne     |      žiadne       |    žiadne    |

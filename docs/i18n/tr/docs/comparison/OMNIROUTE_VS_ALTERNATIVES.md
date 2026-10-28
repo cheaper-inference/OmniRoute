@@ -15,7 +15,7 @@ Popüler açık kaynak AI yönlendiricileriyle tarafsız özellik karşılaştı
 | **Ücretsiz/kimlik doğrulamasız katalog girdileri**  |                   **155**                    |       n/a       |    passthrough    |    n/a     |
 | **Kendi sunucusunda barındırılabilir**              |                      ✅                      |       ✅        |        ❌         | ⚠ ücretli  |
 | **OAuth katalog girdileri**                         |                    **23**                    |      kısmi      |        ❌         |     ❌     |
-| **Otomatik fallback kombinasyonları**               |               **20 strateji**                | öncelik tabanlı |  kademe tabanlı   | ağırlıklı  |
+| **Otomatik fallback kombinasyonları**               |               **21 strateji**                | öncelik tabanlı |  kademe tabanlı   | ağırlıklı  |
 | **Füzyon (paralel panel + hakem sentezi)**          |                      ✅                      |       ❌        |        ❌         |     ❌     |
 | **Kademe 1/2/3 fallback (abonelik→ucuz→ücretsiz)**  |                   ✅ + UI                    |     manuel      |        n/a        |   manuel   |
 | **Token sıkıştırma**                                | 12 motorlu yığın (RTK + Caveman + LLMLingua) |       yok       |        yok        |    yok     |

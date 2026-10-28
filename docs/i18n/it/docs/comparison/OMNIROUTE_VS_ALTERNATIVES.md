@@ -15,7 +15,7 @@ Confronto oggettivo delle funzionalità rispetto ai più diffusi router AI open-
 | **Voci di catalogo gratuite/senza autenticazione**            |                    **155**                    |        n/a         |    passthrough    |      n/a       |
 | **Ospitabile in self-hosting**                                |                      ✅                       |         ✅         |        ❌         | ⚠ a pagamento  |
 | **Voci di catalogo OAuth**                                    |                    **23**                     |      parziale      |        ❌         |       ❌       |
-| **Combinazioni di fallback automatico**                       |               **20 strategie**                | basate su priorità | basate su livelli |   ponderate    |
+| **Combinazioni di fallback automatico**                       |               **21 strategie**                | basate su priorità | basate su livelli |   ponderate    |
 | **Fusion (pannello parallelo + sintesi del giudice)**         |                      ✅                       |         ❌         |        ❌         |       ❌       |
 | **Fallback a livelli 1/2/3 (abbonamento→economico→gratuito)** |                    ✅ + UI                    |      manuale       |        n/a        |    manuale     |
 | **Compressione dei token**                                    | stack a 12 motori (RTK + Caveman + LLMLingua) |      nessuna       |      nessuna      |    nessuna     |

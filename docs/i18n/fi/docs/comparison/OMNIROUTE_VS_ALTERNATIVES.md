@@ -15,7 +15,7 @@ Objektiivinen ominaisuusvertailu suosittuihin avoimen lähdekoodin tekoälyreiti
 | **Ilmaiset / kirjautumisvapaat luettelomerkinnät**                |                    **155**                    |          n/a          |    läpivienti     |      n/a       |
 | **Itseisännöitävä**                                               |                      ✅                       |          ✅           |        ❌         | ⚠ maksullinen  |
 | **OAuth-luettelomerkinnät**                                       |                    **23**                     |      osittainen       |        ❌         |       ❌       |
-| **Automaattiset varautumisyhdistelmät**                           |               **20 strategiaa**               | prioriteettipohjainen |   tasopohjainen   |   painotettu   |
+| **Automaattiset varautumisyhdistelmät**                           |               **21 strategiaa**               | prioriteettipohjainen |   tasopohjainen   |   painotettu   |
 | **Fuusio (rinnakkaispaneeli + arvioijasynteesi)**                 |                      ✅                       |          ❌           |        ❌         |       ❌       |
 | **Tason 1/2/3 varautuminen (tilaus→halpa→ilmainen)**              |              ✅ + käyttöliittymä              |      manuaalinen      |        n/a        |  manuaalinen   |
 | **Token-pakkaus**                                                 | 12 moottorin pino (RTK + Caveman + LLMLingua) |          ei           |        ei         |       ei       |

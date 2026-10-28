@@ -15,7 +15,7 @@ Comparação objetiva de recursos vs roteadores de IA de código aberto populare
 | **Entradas de catálogo gratuitas/sem autenticação**   |                     **155**                     |          n/a          |    passthrough    |     n/a      |
 | **Auto-hospedável**                                   |                       ✅                        |          ✅           |        ❌         |    ⚠ pago    |
 | **Entradas de catálogo OAuth**                        |                     **23**                      |        parcial        |        ❌         |      ❌      |
-| **Combinações de fallback automático**                |               **20 estratégias**                | baseado em prioridade | baseado em níveis |  ponderado   |
+| **Combinações de fallback automático**                |               **21 estratégias**                | baseado em prioridade | baseado em níveis |  ponderado   |
 | **Fusion (painel paralelo + síntese por juiz)**       |                       ✅                        |          ❌           |        ❌         |      ❌      |
 | **Fallback Nível 1/2/3 (assinatura→barato→gratuito)** |                     ✅ + UI                     |        manual         |        n/a        |    manual    |
 | **Compressão de tokens**                              | stack de 12 motores (RTK + Caveman + LLMLingua) |        nenhum         |      nenhum       |    nenhum    |

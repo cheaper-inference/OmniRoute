@@ -15,7 +15,7 @@ Layunin na paghahambing ng mga feature vs mga sikat na open-source AI router.
 | **Mga entry sa catalog na libre/walang-auth**         |                    **155**                     |        n/a        |    passthrough    |     n/a      |
 | **Maaaring i-self-host**                              |                       ✅                       |        ✅         |        ❌         | ⚠ may bayad  |
 | **Mga entry sa OAuth catalog**                        |                     **23**                     |      bahagya      |        ❌         |      ❌      |
-| **Mga auto-fallback combo**                           |               **20 estratehiya**               | batay sa priority |   batay sa tier   | may timbang  |
+| **Mga auto-fallback combo**                           |               **21 estratehiya**               | batay sa priority |   batay sa tier   | may timbang  |
 | **Fusion (parallel panel + judge synthesis)**         |                       ✅                       |        ❌         |        ❌         |      ❌      |
 | **Tier 1/2/3 fallback (subscription→mura→libre)**     |                    ✅ + UI                     |     manu-mano     |        n/a        |  manu-mano   |
 | **Pag-compress ng token**                             | stack ng 12 engine (RTK + Caveman + LLMLingua) |       wala        |       wala        |     wala     |

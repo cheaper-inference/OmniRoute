@@ -15,7 +15,7 @@ Comparaison objective des fonctionnalités avec les routeurs IA open source popu
 | **Entrées de catalogue gratuites/sans authentification**        |                    **155**                     |        n/a        |    passthrough    |     n/a      |
 | **Auto-hébergeable**                                            |                       ✅                       |        ✅         |        ❌         |   ⚠ payant   |
 | **Entrées de catalogue OAuth**                                  |                     **23**                     |      partiel      |        ❌         |      ❌      |
-| **Combinaisons de basculement automatique**                     |               **20 stratégies**                | basé sur priorité | basé sur niveaux  |   pondéré    |
+| **Combinaisons de basculement automatique**                     |               **21 stratégies**                | basé sur priorité | basé sur niveaux  |   pondéré    |
 | **Fusion (panel parallèle + synthèse par juge)**                |                       ✅                       |        ❌         |        ❌         |      ❌      |
 | **Basculement niveau 1/2/3 (abonnement→économique→gratuit)**    |                    ✅ + UI                     |      manuel       |        n/a        |    manuel    |
 | **Compression de tokens**                                       | Pile de 12 moteurs (RTK + Caveman + LLMLingua) |      aucune       |      aucune       |    aucune    |

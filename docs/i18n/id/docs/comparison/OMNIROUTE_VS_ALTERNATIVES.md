@@ -15,7 +15,7 @@ Perbandingan fitur objektif dengan router AI open-source populer.
 | **Entri katalog gratis/tanpa autentikasi**          |                  **155**                   |        n/a         |    passthrough    |     n/a     |
 | **Dapat di-hosting sendiri**                        |                     ✅                     |         ✅         |        ❌         | ⚠ berbayar  |
 | **Entri katalog OAuth**                             |                   **23**                   |      sebagian      |        ❌         |     ❌      |
-| **Kombinasi auto-fallback**                         |              **20 strategi**               | berbasis prioritas |   berbasis tier   |  berbobot   |
+| **Kombinasi auto-fallback**                         |              **21 strategi**               | berbasis prioritas |   berbasis tier   |  berbobot   |
 | **Fusi (panel paralel + sintesis juri)**            |                     ✅                     |         ❌         |        ❌         |     ❌      |
 | **Fallback tier 1/2/3 (langganan→murah→gratis)**    |                  ✅ + UI                   |       manual       |        n/a        |   manual    |
 | **Kompresi token**                                  | stack 12 mesin (RTK + Caveman + LLMLingua) |     tidak ada      |     tidak ada     |  tidak ada  |

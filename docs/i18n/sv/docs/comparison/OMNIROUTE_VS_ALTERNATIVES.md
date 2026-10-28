@@ -15,7 +15,7 @@ Objektiv funktionsjämförelse mot populära AI-routrar med öppen källkod.
 | **Katalogposter gratis/utan autentisering**           |                     **155**                      |        n/a        |    passthrough    |    n/a     |
 | **Självhostbar**                                      |                        ✅                        |        ✅         |        ❌         |  ⚠ betald  |
 | **OAuth-katalogposter**                               |                      **23**                      |      delvis       |        ❌         |     ❌     |
-| **Automatiska fallback-kombinationer**                |                **20 strategier**                 | prioritetsbaserad |    nivåbaserad    |   viktad   |
+| **Automatiska fallback-kombinationer**                |                **21 strategier**                 | prioritetsbaserad |    nivåbaserad    |   viktad   |
 | **Fusion (parallell panel + domarsyntes)**            |                        ✅                        |        ❌         |        ❌         |     ❌     |
 | **Fallback nivå 1/2/3 (prenumeration→billig→gratis)** |                     ✅ + UI                      |      manuell      |        n/a        |  manuell   |
 | **Tokenkomprimering**                                 | Stack med 12 motorer (RTK + Caveman + LLMLingua) |       ingen       |       ingen       |   ingen    |
