@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { getProviderCallStats, getModelCallStats } from "@/lib/db/providerStats";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Management plane: per-provider/per-model call volumes, combo metrics and
+    // telemetry — behind the same gate every other management route uses.
+    const authError = await requireManagementAuth(request);
+    if (authError) return authError;
+
     // Hard Rule #5: SQL lives in src/lib/db/providerStats.ts, not inline here.
     const providerStats = getProviderCallStats();
     const modelStats = getModelCallStats();

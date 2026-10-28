@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAggregatedSnapshots } from "@/lib/db/quotaSnapshots";
 import { getProviderConnectionById } from "@/lib/db/providers";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import type {
   ProviderUtilizationResponse,
   UtilizationTimeRange,
@@ -38,6 +39,13 @@ function getRangeStartIso(range: UtilizationTimeRange): string {
 
 export async function GET(request: Request) {
   try {
+    // Management plane: connection meta includes account emails — the same
+    // dashboard session / oma token / manage-scope key gate every other
+    // management route uses. There is no global middleware (route-specific
+    // interception only), so an unguarded GET here is public.
+    const authError = await requireManagementAuth(request);
+    if (authError) return authError;
+
     const { searchParams } = new URL(request.url);
     const rangeParam = searchParams.get("range");
     const providerParam = searchParams.get("provider");
