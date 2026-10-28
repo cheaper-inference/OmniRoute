@@ -19,7 +19,8 @@
     "intl-messageformat": "FormatJS ICU MessageFormat compiler (formatjs/formatjs, BSD-3-Clause), already a transitive dependency of next-intl. Pinned 11.2.14 as a direct devDependency so check:ui-icu compiles every UI catalog with the same engine the app uses (PR #15912, refs #12560).",
     "istanbul-lib-instrument": "Official IstanbulJS original-source instrumenter, pinned at 6.0.3 (BSD-3-Clause). npm provenance checked on 2026-09-22: repository istanbuljs/istanbuljs, package created 2015-11-21. Common Node/Vitest coverage instrumentation with real parity regression; review in PR #14524. Does not change coverage floors or activate rollout.",
     "react-day-picker": "DayPicker 10.0.1 required by packages/ui-kit's calendar. KEA-7886 — CI UI Kit runtime dependency.",
-    "vite": ""
+    "vite": "",
+    "subset-font": "devDependency used only by scripts/docs/readme-fonts.mjs to subset the @fontsource woff2 files (Inter, Instrument Serif, IBM Plex Mono) to the glyphs each README SVG draws, so the UI kit typography can be embedded as data: URIs that render inside GitHub's <img> sandbox. BSD-3-Clause; HarfBuzz compiled to WASM (harfbuzzjs, MIT), no native build, no network at runtime. Maintained by papandreou (assetgraph), 2.x line since 2022."
   },
   "allowed": [
     "@agentclientprotocol/sdk",
@@ -175,6 +176,7 @@
     "source-map-js",
     "sql.js",
     "sqlite-vec",
+    "subset-font",
     "tailwind-merge",
     "tailwindcss",
     "tiktoken",

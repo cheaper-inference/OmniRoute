@@ -644,27 +644,29 @@ sudo systemctl enable --now omniroute-update.path
 Služba před stažením odstraní soubor požadavku, aby se neúspěšné spuštění neopakovalo ve smyčce. Bez
 `DOCKER_UPDATE_TRIGGER_FILE` řídicí panel nadále používá postup s ručním příkazem.
 
-## Dostupnost: výchozí SQLite podporuje jedinou repliku
+## Dostupnost: výchozí SQLite je jedna replika
 
-Standardní nasazení OmniRoute v Dockeru / Kubernetes tvoří **jeden proces Node + jeden zapisující proces SQLite**. Vysoká dostupnost v této topologii **není podporována**.
+Akcie Docker / Kubernetes OmniRoute jsou** proces jednoho uzlu + jeden zapisovač SQLite** . Vysoká dostupnost je** není podporováno** na té topologii.
 
-| Omezení                                                    | Důsledek                                                                                                                                                                                                                                                                                                                                    |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jediný zapisující proces                                   | **Nespouštějte** více replik nad stejným souborem SQLite. Došlo by k poškození databáze.                                                                                                                                                                                                                                                    |
-| Opětovné vytvoření / restart / ukončení pomocí HEALTHCHECK | **Úplný výpadek** probíhajících SSE, relací řídicího panelu a stavu v paměti. Připojení všech klientů se přeruší. Nové požadavky během intervalu bez dostupného koncového bodu obdrží od reverzní proxy chybu **`502 Bad Gateway: Unknown error`**, nikoli JSON z OmniRoute — klienti ji nemohou odlišit od selhání poskytovatele (#11015). |
-| Stejná smyčka událostí jako `/healthz`                     | Vytížená aktualizace katalogu nebo komprese může zpozdit sondy; krátký časový limit pak restartuje **jedinou** repliku.                                                                                                                                                                                                                     |
+| Omezení                                          | Následek                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jediný spisovatel                                | Dělat** ne** spustit více replik proti stejnému souboru SQLite. To kazí DB.                                                                                                                                                                                                                                |
+| Znovu vytvořit / restartovat / zabít HEALTHCHECK | **Plný výpadek** SSE za letu, relací řídicího panelu a stavu v paměti. Každý připojený klient vypadne. Nové požadavky během okna prázdného koncového bodu získají reverzní proxy**`502 Bad Gateway: Unknown error`** , ne OmniRoute JSON — klienti to nedokážou odlišit od selhání poskytovatele (#11015). |
+| Stejná smyčka událostí jako `/healthz`           | Zaneprázdněný katalog nebo kompresní klíště mohou zpozdit sondy; krátký časový limit a poté se restartuje** pouze** replika.                                                                                                                                                                               |
 
-**Matice sond** (viz také [doporučení pro sondy Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Matrice sondy** (viz také [doporučení Kubernetes sondy](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Sonda                | Cíl                                                              | Nepoužívejte                                                             |
-| -------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Živost               | TCP na `PORT` (výchozí `20128`) nebo měkká HTTP sonda `/healthz` | `/api/monitoring/health`                                                 |
-| Připravenost         | HTTP `GET /healthz`                                              | Krátké časové limity, které vytížení smyčky událostí považují za selhání |
-| Hloubková / pro lidi | `/api/monitoring/health`                                         | Automatizovanou kontrolu živosti kubeletu                                |
+| Sonda          | Cíl                                                         | Nepoužívejte                                                                       |
+| -------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Živost         | TCP na `PORT` (výchozí `20128`), nebo měkké HTTP `/healthz` | `/api/monitoring/health`                                                           |
+| Připravenost   | HTTP `GET /healthz`                                         | Krátké časové limity, které považují smyčku událostí za zaneprázdněnou jako mrtvou |
+| Hluboko / lidé | `/api/monitoring/health`                                    | Automatizovaná živost kubelet                                                      |
 
-**Aktualizace:** počítejte s ukončením každé relace. Pokud můžete, předem odpojte klienty; s výchozím SQLite není postupná aktualizace možná. Nastavení Compose `restart: unless-stopped` spolu s Docker `HEALTHCHECK` také nahradí jediný proces, když kontejner přejde do stavu Unhealthy — se stejně rozsáhlými dopady.
+**Upgrady:** očekávat pokles každé relace. Vypusťte klienty, pokud můžete; na výchozí SQLite není žádná průběžná aktualizace. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` také nahradí jediný proces, když je kontejner nezdravý – stejný rádius výbuchu.
 
-Ukázka konfigurace Kubernetes pro **jedinou repliku** (strategie Recreate je povinná; nezvyšujte `replicas` nad jedním souborem SQLite):
+Hotové manifesty a Helm graf fungují v `deploy/kubernetes/` a `deploy/helm/omniroute/` – viz [Průvodce nasazením Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Fragment Kubernetes pro a** jediná replika** (Je vyžadováno opětovné vytvoření; nezvyšujte `replicas` proti jednomu souboru SQLite ):
 
 ```yaml
 spec:
@@ -691,9 +693,9 @@ spec:
             periodSeconds: 20
 ```
 
-Prodleva `preStop` umožní Kubernetes odebrat koncové body služby před signálem SIGTERM, takže **nový** provoz přestane být směrován na ukončovaný proces. Probíhající spojení SSE pro `/v1/responses` se nechají doběhnout po dobu až `SHUTDOWN_TIMEOUT_MS` (ve výchozím nastavení 30 s) prostřednictvím kapacitně náročných vstupních pronájmů (#11015). Nové požadavky, které se přesto dostanou k procesu, obdrží `503` + `Retry-After: 5`. Prodleva s prázdnými koncovými body při strategii Recreate, která trvá, dokud není náhrada ve stavu Ready, zůstává úplným výpadkem — jde o vlastnost topologie SQLite, nikoli o nesprávnou konfiguraci sondy.
+`preStop` sleep umožňuje kube zahodit koncové body služby před SIGTERM tak** nový** provoz přestane narážet na proces umírání. `/v1/responses` SSE za letu je vyčerpán až na `SHUTDOWN_TIMEOUT_MS` (výchozí 30 s) prostřednictvím pronájmů vstupného s vysokou gramáží (#11015). Nové požadavky, které se stále dostanou do procesu, získají `503` + `Retry-After: 5`. Mezera Recreate empty-endpoint, dokud není náhrada připravena, zůstává těžkým výpadkem – to je topologie SQLite, nikoli chybná konfigurace sondy.
 
-Externí Postgres / HA s více zapisujícími instancemi **není** zdokumentovanou standardní cestou. Pokud potřebujete HA, ponechte jedinou repliku nebo použijte topologii, kterou projekt otestoval a samostatně zdokumentoval. Práce na podpoře Postgres/MySQL probíhá v [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Dokud nebude tato podpora vydána, jediným podporovaným způsobem, jak znásobit kapacitu pro **velké** požadavky `/v1/responses`, je N nezávislých procesů (další část), nikoli `replicas > 1` nad jedním svazkem.
+Externí Postgres / multi-writer HA je** ne** dokumentovaná dráha akcií. Pokud potřebujete HA, ponechte si jednu repliku nebo spusťte topologii, kterou projekt testoval a zdokumentoval samostatně. Práce Postgres/MySQL žije v [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Do té doby je to jediný podporovaný způsob množení** velký** Kapacita `/v1/responses` je N nezávislých procesů (další sekce), nikoli `replicas > 1` na jednom svazku.
 
 ## Horizontální škálování: N nezávislých procesů
 

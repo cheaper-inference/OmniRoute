@@ -61,7 +61,10 @@ export function mergeProviderModelListing(
   const curated =
     input.usesCuratedModelsOnly === true || providerUsesCuratedModelsOnly(input.providerId);
   const synced = curated ? [] : input.syncedModels.filter((m) => m?.id);
-  const custom = curated ? [] : input.customModels.filter((m) => m?.id);
+  // Curated only means "no upstream discovery endpoint" — the registry catalog is the
+  // whole lineup and there is nothing to sync. It does NOT mean the operator may not add
+  // ids by hand, so custom rows are kept for every provider (#18018).
+  const custom = input.customModels.filter((m) => m?.id);
 
   const exclusive =
     !curated &&

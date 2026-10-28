@@ -489,12 +489,12 @@ Bu, aşağıdakıları emal edir:
 | Fayl                          | Məqsəd                                              |
 | ----------------------------- | --------------------------------------------------- |
 | `providerRegistry.ts`         | 377 provayder kataloqu üzərində chat-model reyestri |
-| `providerModels.ts`           | Model ləqəbləri, format uyğunlaşdırması             |
-| `constants.ts`                | Zaman aşımları, limitlər, status kodları            |
-| `defaultThinkingSignature.ts` | Defolt Claude düşünmə imzası                        |
-| `modelStrip.ts` (services-də) | Hər provayder üçün sahə təmizləməsi                 |
+| `providerModels.ts`           | Model ləqəbləri, formatın xəritəsi                  |
+| `constants.ts`                | Taymoutlar, limitlər, status kodları                |
+| `defaultThinkingSignature.ts` | Defolt Claude düşüncə imzası                        |
+| `modelStrip.ts` (xidmətlərdə) | Hər provayder üçün sahənin soyulması                |
 
-### Provayder Reyestri Sxemi
+### Provayder Reyestrinin Sxemi
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Modul yüklənməsi zamanı Zod validasiyası bütün provayder konfiqurasiyalarının etibarlı olmasını təmin edir.
+modulun yüklənməsi zamanı Zod yoxlaması bütün provayder konfiqurasiyalarının etibarlı olmasını təmin edir.
 
 ---
 
