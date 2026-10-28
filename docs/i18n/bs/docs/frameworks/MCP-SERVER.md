@@ -72,6 +72,16 @@ curl -i \
 
 Ključ bez `manage` opsega (ili bez Bearer tokena) vraća `403 LOCAL_ONLY`. Srodni prefiks `/api/cli-tools/runtime/*` namjerno NIJE moguće zaobići — pogledajte [Nivoi zaštite ruta — izuzetak za manage opseg](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Provjera Origina
+
+Nakon autentifikacije svaki zahtjev prema `/api/mcp/*` — transportima i upravljačkim rutama kao što su `status`, `tools`, `audit`, `restart` — ima provjereno zaglavlje `Origin`, bez obzira na pozivaoca (API ključ, CLI token, sesija kontrolne table ili anonimni loopback s isključenom prijavom). To je zaštita od DNS rebindinga koju zahtijeva specifikacija MCP Streamable HTTP.
+
+- **Bez zaglavlja `Origin`** → dozvoljeno. OmniRoute CLI, SDK i IDE klijenti ga ne šalju.
+- **Dozvoljeni `Origin`** → `localhost` / `127.0.0.1` / `[::1]` na bilo kojem portu ili vlastiti javni origin OmniRoutea: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin koji prosljeđuje pouzdani reverzni proxy (`OMNIROUTE_TRUST_PROXY`, samo ako base URL nije postavljen) ili direktno pristupljeni loopback/LAN IP host. Samo zaglavlje `Host` nikada ne čini origin pouzdanim.
+- **Bilo koji drugi `Origin`, uključujući `null`** → `403` s JSON-RPC tijelom greške: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Sesija kontrolne table s važećim CSRF tokenom i dalje se prihvata, kao i kod drugih upisa kontrolne table.
+
+Preglednički MCP klijent iza reverznog proxyja treba `OMNIROUTE_PUBLIC_BASE_URL`; ne postoji lista dozvoljenih drugih origina. CORS preflight (`OPTIONS`) ne provjerava Origin; zahtjev koji slijedi ga provjerava.
+
 ## Konfiguracija IDE-a
 
 Pogledajte [Konfiguracija MCP klijenta](../guides/SETUP_GUIDE.md#mcp-client-configuration) za postavljanje Claude Desktopa,

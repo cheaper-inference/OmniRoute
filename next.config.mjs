@@ -17,6 +17,7 @@ import {
 } from "./scripts/build/knownBuildWarnings.mjs";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+const LOCALE_MESSAGES_JSON = /[\\/]src[\\/]i18n[\\/]messages[\\/][^\\/]+\.json$/;
 const distDir = process.env.NEXT_DIST_DIR || ".build/next";
 const projectRoot = dirname(fileURLToPath(import.meta.url));
 const scriptSrc =
@@ -369,6 +370,22 @@ const nextConfig = {
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       isNextIntlExtractorDynamicImportWarning,
+    ];
+    // Locale catalogs (src/i18n/messages/*.json) are only ever read whole, through
+    // the dynamic import in src/i18n/request.ts. As `json` modules webpack keeps
+    // every catalog as an object tree, tracks an export for every nested key and
+    // generates code from it, about 1 GB of server compile heap for 67 catalogs.
+    // As `asset/source` each catalog stays a string (validated and minified by
+    // the loader) and request.ts parses it on first use. Turbopack does not read
+    // this hook and still imports the catalogs as JSON.
+    config.module = config.module || {};
+    config.module.rules = [
+      ...(config.module.rules || []),
+      {
+        test: LOCALE_MESSAGES_JSON,
+        type: "asset/source",
+        use: [{ loader: join(projectRoot, "scripts/build/localeMessagesLoader.cjs") }],
+      },
     ];
     const infrastructureLogging = config.infrastructureLogging || {};
     config.infrastructureLogging = {

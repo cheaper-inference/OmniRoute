@@ -12,38 +12,38 @@ AgentBridge huwa l-proxy MITM (Man-in-the-Middle) ta' OmniRoute li jinterċetta 
 
 ---
 
-## §1 Ħarsa Ġenerali
+## §1 Ħarsa ġenerali
 
 ### X'inhu AgentBridge?
 
-Meta aġent tal-IDE (eż., GitHub Copilot, Cursor, Claude Code) jagħmel sejħa API, jikkonnettja direttament mal-fornitur AI upstream (OpenAI, Anthropic, eċċ.). AgentBridge jinterċetta dik il-konnessjoni b'mod trasparenti fil-livell tat-TLS — mingħajr ma teħtieġ ebda bidla fil-konfigurazzjoni tal-aġent — u jikteb mill-ġdid it-talba permezz ta' OmniRoute.
+Meta aġent IDE (eż., GitHub Copilot, Cursor, Claude Code) jagħmel sejħa API, jikkonnettja direttament mal-fornitur AI upstream (OpenAI, Anthropic, eċċ.). AgentBridge jinterċetta dik il-konnessjoni b'mod trasparenti fil-livell TLS — mingħajr ma jeħtieġ ebda bidla fil-konfigurazzjoni tal-aġent — u jikteb mill-ġdid it-talba permezz OmniRoute.
 
 Dan ifisser li tista':
 
-- **Irreroutja kwalunkwe aġent lejn kwalunkwe fornitur**: Copilot jitkellem ma' OpenAI? Iddirejjah lejn Anthropic Claude, Gemini, jew kwalunkwe wieħed mill-375 fornitur ta' OmniRoute.
-- **Applika mappini tal-mudelli**: `gemini-3-flash` → `claude-sonnet-4.7` b'mod trasparenti fil-livell tal-handler.
-- **Osserva t-traffiku kollu tal-aġenti**: kull talba interċettata tiġi ppublikata fl-[Spezzjoni tat-Traffiku](./TRAFFIC_INSPECTOR.md).
-- **Applika r-reżiljenza ta' OmniRoute**: combo routing, circuit breakers, fallbacks, u intraċċar tal-ispejjeż jaħdmu wkoll għat-traffiku tal-aġenti tal-IDE.
+- **Ibdel kull aġent lejn kwalunkwe fornitur** : Copilot titkellem ma OpenAI? Idderieġih lil Anthropic Claude, Gemini, jew lil xi wieħed mit-377 fornitur ta' OmniRoute.
+- **Applika mappings tal-mudell** : `gemini-3-flash` → `claude-sonnet-4.7` b'mod trasparenti fil-livell ta' handler.
+- **Osserva t-traffiku kollu tal-aġenti** : kull talba interċettata tiġi ppubblikata lill - [Ispettur tat - Traffiku](./TRAFFIC_INSPECTOR.md).
+- **Applika OmniRoute resilience** : combo routing, circuit breakers, fallbacks, u xogħol ta 'traċċar tal-ispejjeż għat-traffiku tal-aġent IDE ukoll.
 
-### Pożizzjonament meta mqabbel mas-suq
+### Pożizzjonament vs is-suq
 
-| Karatteristika              | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| --------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                 |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot              |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                  |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                  |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries              |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                 |    —    |    —     |        ✓        |             ✓             |
-| Open Code                   |    —    |    —     |        ✓        |             ✓             |
-| Trae                        |    —    |    —     |        —        |     🔍 Qed tinvestiga     |
-| UI tad-Dashboard            |    ✓    |    ✗     |        ✗        |             ✓             |
-| Spezzjoni tat-Traffiku      |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ir-rottar ta' OmniRoute     |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI għall-mappar tal-mudelli |    ✗    |    ✗     |        ✗        |             ✓             |
-| Lista ta' bypass            |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ċertifikat CA upstream      |    ✗    |    ✗     |        ✓        |             ✓             |
+| Karatteristika       | 9router | anti-api | llm-interċettur | **OmniRoute AgentBridge** |
+| -------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity          |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot       |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)           |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex         |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE           |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries       |    —    |    ✓     |        —        |             ✓             |
+| Claude Code          |    —    |    —     |        ✓        |             ✓             |
+| Kodiċi Miftuħ        |    —    |    —     |        ✓        |             ✓             |
+| Trae                 |    —    |    —     |        —        |     🔍 Investigating      |
+| Dashboard UI         |    ✓    |    ✗     |        ✗        |             ✓             |
+| Spettur tat-Traffiku |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute routing    |    ✗    |    ✗     |        ✗        |             ✓             |
+| Model mapping UI     |    ✗    |    ✗     |        ✗        |             ✓             |
+| Lista tal-bypass     |    ✗    |    ✗     |        ✓        |             ✓             |
+| Upstream CA cert     |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

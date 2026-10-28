@@ -4,17 +4,17 @@
 
 ---
 
-Pēdējoreiz atjaunināts: 2026-08-23
+Pēdējo reizi atjaunināts: 2026-08-23
 
-OmniRoute integrējas ar trīs kategoriju CLI rīkiem, kas sadalīti trīs īpašās informācijas paneļa lapās:
+OmniRoute integrējas ar trīs CLI rīku kategorijām, kas izvietotas trīs īpašās informācijas paneļa lapās:
 
-| Lapa           | Maršruts                | Koncepcija                                                                                      | Skaits           |
-| -------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
-| **CLI kodi**   | `/dashboard/cli-code`   | Kodēšanas rīki, kurus novirzāt uz OmniRoute (Klients → CLI → OmniRoute → Pakalpojuma sniedzējs) | 26               |
-| **CLI aģenti** | `/dashboard/cli-agents` | Autonomi aģenti, kurus novirzāt uz OmniRoute (tā pati plūsma, plašāks tvērums)                  | 10               |
-| **ACP aģenti** | `/dashboard/acp-agents` | CLI, kurus OmniRoute palaiž kā aizmugursistēmas, izmantojot stdio/ACP (apgrieztā plūsma)        | skatiet reģistru |
+| Lapa           | Maršruts                | Koncepcija                                                                             | Skaitīt          |
+| -------------- | ----------------------- | -------------------------------------------------------------------------------------- | ---------------- |
+| **CLI kods**   | `/dashboard/cli-code`   | Kodēšanas rīki, kurus norādāt uz OmniRoute (klienta → CLI → OmniRoute → nodrošinātājs) | 26               |
+| **CLI aģenti** | `/dashboard/cli-agents` | Autonomie aģenti, uz kuriem norādāt OmniRoute (tā pati plūsma, plašāks darbības joma)  | 11               |
+| **ACP aģenti** | `/dashboard/acp-agents` | CLIs, ka OmniRoute parādās kā aizmugursistēma, izmantojot stdio/ACP (reverse flow)     | skatiet reģistru |
 
-Novecojušie maršruti veic 308 novirzīšanu: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Mantotie maršruti novirza, izmantojot 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -45,9 +45,7 @@ ACP aģenti (apgrieztā palaišanas plūsma):
 
 ## Automātiska konfigurēšana ar `setup-*`
 
-Katra rīka konfigurācija nav jāraksta manuāli. OmniRoute katrai atbalstītajai CLI nodrošina `setup-*`
-komandu, kas nolasa **aktuālo** modeļu katalogu no darbojošās
-OmniRoute instances (lokālas vai attālas) un ieraksta attiecīgā rīka konfigurāciju jūsu datorā:
+Jums nav jāraksta katra rīka konfigurācija ar roku. OmniRoute katram atbalstītajam CLI nosūta `setup-*` komandu, kas nolasa** dzīvot** modeļu katalogu no darbojošās OmniRoute (lokālās vai attālās) un ieraksta rīka konfigurāciju jūsu datorā:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,53 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Katra komanda pieņem `--remote <url> --api-key <key>` (lokāla rīka konfigurēšanai darbam ar
-attālu OmniRoute), `--dry-run` (priekšskatīšanai bez ierakstīšanas) un `--port`. Rīkiem
-bez automātiskas modeļu atklāšanas (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) ir nepieciešams
-`--model <id>` (un `--yes` neinteraktīvai izpildei). `setup-5dive` ir vienīgā
-recepte, kas neveic ierakstīšanu zem `$HOME`: tā konfigurē 5dive aģentu kopu,
-kopas resursdatorā ierakstot `root` lietotājam piederošu autentifikācijas profilu, tāpēc tā atkārtoti izpilda sevi ar `sudo`
-un tai nav sava attālā režīma. Lai palaistu CLI ar
-ievadītiem pareizajiem vides mainīgajiem, vispār neierakstot konfigurāciju, izmantojiet vispārīgo
-`omniroute run <target>` palaidēju (claude, codex, aider, goose, opencode, qwen,
-gemini — mērķi un aizstājvārdi tiek iegūti no `bin/cli/cli-manifest.mjs`); joprojām ir pieejami arī mantotie
-atsevišķo rīku palaidēji `omniroute launch` (Claude Code) un `omniroute launch-codex`
-(Codex). Gemini CLI ir paredzēta tikai palaišanai: tā ir `omniroute run`
-mērķis, taču tai nav `setup-*`/`configure` receptes.
+Katrs no tiem pieņem `--remote <url> --api-key <key>` (vietējā rīka konfigurēšana pret attālo OmniRoute), `--dry-run` (priekšskatījums bez rakstīšanas) un `--port`. Rīki bez modeļa automātiskās noteikšanas (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) izmanto `--model <id>` (un `--yes` neinteraktīviem skrējieniem). `setup-5dive` ir tā recepte, kas neraksta zem `$HOME`: tā konfigurē 5dive aģentu floti, flotes resursdatorā ierakstot saknes autentifikācijas profilu, tāpēc tā tiek atkārtoti izpildīta, izmantojot `sudo`, un tai nav sava attālā režīma. Lai palaistu CLI ar ievadītu pareizo env un vispār bez konfigurācijas, izmantojiet vispārējo `omniroute run <target>` palaišanas programmu (claude, codex, aider, goose, opencode, qwen, gemini, Whycodes — mērķi un aizstājvārdi nāk no `bin/cli/cli-manifest.mjs`); mantotās katra rīka palaišanas ierīces `omniroute launch` (Claude Code) un `omniroute launch-codex` (Codex) joprojām ir pieejamas. Gemini CLI ir tikai palaišanai: tas ir `omniroute run` mērķis, taču tam nav `setup-*`/`configure` receptes.
 
-> **Pilna atsauce:** galvenā tabula — ko katra komanda ieraksta, visi karodziņi,
-> lokālais un attālais režīms, kā arī tas, kuriem rīkiem nepieciešams `/v1` sufikss — ir pieejama sadaļā
-> **[CLI integrācijas](../guides/CLI-INTEGRATIONS.md)**.
+> **Pilna atsauce:** galvenā tabula — tas, ko raksta katra komanda, katrs karogs, vietējais vai tālvadības pults un kuri rīki vēlas `/v1` sufiksu — atrodas** [CLI integrācijas](../guides/CLI-INTEGRATIONS.md)** .
 
-### Šo komandu izpilde konteinerā
+### Palaižot tos konteinerā
 
-Konteinerā OmniRoute izpildīta `setup-*` komanda veic ierakstīšanu paša
-konteinera mājas direktorijā, kuru neviena resursdatora CLI nelasa un kura pazūd kopā ar
-konteineru. OmniRoute to nosaka un tā vietā, lai veiktu ierakstīšanu, beidz darbu ar kodu `2` un parāda norādījumus.
-Ir divi atbalstīti risinājumi — instalēt CLI resursdatorā un
-izmantot `omniroute connect`, lai izveidotu savienojumu ar konteineru, vai piesaistīt konfigurācijas direktorijus un iestatīt
-`CLI_CONFIG_HOME` (compose profils `host`). Katra `setup-*` komanda, kā arī
-`omniroute configure` un `omniroute config set`, pieņem
-`--allow-container-write`, ja patiesībā vēlaties konfigurēt paša konteinera CLI;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` nodrošina to pašu serverim. Skatiet
-[Docker rokasgrāmatu → Resursdatora CLI rīku konfigurēšana](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+`setup-*` komanda, kas izpildīta OmniRoute konteinerā, ieraksta konteinera mājā, ko neviens CLI resursdators nelasa un kas pazūd kopā ar konteineru. OmniRoute to nosaka un iziet `2` ar instrukcijām, nevis rakstot. Divi atbalstīti tālākie virzieni — instalējiet CLI resursdatorā un `omniroute connect` konteinerā vai iestatiet konfigurācijas direktorijus un iestatiet `CLI_CONFIG_HOME` ( `host` izveides profils). Katra `setup-*` komanda, kā arī `omniroute configure` un `omniroute config set`, pieņem `--allow-container-write`, konfigurējot konteinera pašu CLIs tas ir tas, ko jūs patiesībā domājāt; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` to pašu dara serverim. Skatiet [Docker rokasgrāmatu → resursdatora CLI rīku konfigurēšana](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Informācijas paneļa **lietošanas galapunkts** (`POST /api/cli-tools/apply`) piemēro
-to pašu aizsardzību: konteinerā ierakstīšanas pieprasījums, kura mērķis nav no
-resursdatora piesaistīts sējums, atbild ar **`422`**, `containerEphemeralTarget: true`, drošu kļūdas
-tekstu un — rīkiem, kuriem ir resursdatora recepte (claude, codex, opencode, cline,
-kilo, continue), — `hostSetupCommand` (piem., `omniroute setup-opencode`), kas tā vietā jāizpilda
-resursdatorā; nekas netiek ierakstīts. `dryRun: true` turpina darboties konteinera
-režīmā un, nepiekļūstot diskam, atgriež rediģētu priekšskatījumu un mērķa ceļu. Priekšskatījuma
-saturs nav akreditācijas datus ietveroša konfigurācija, ko var kopēt vai importēt. Lietojiet
-sākotnējos rīka/bāzes URL/API atslēgas/modeļa ievades datus resursdatorā vai izmantojiet norādīto
-resursdatora iestatīšanas komandu. Informāciju par priekšskatījuma galveni un pieprasījuma līgumu skatiet sadaļā [CLI konfigurācijas drošība](../security/CLI-CONFIGURATION.md).
-Šāda darbība ir
-apzināta, un pret regresijām to aizsargā
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nekad „nelabojiet” kļūdu 422,
-noņemot šo aizsardzību.
+Informācijas panelis** piemērot beigu punktu** (`POST /api/cli-tools/apply`) ievieš to pašu aizsardzību: konteinerā atbild raksts, kura mērķis nav piesaistīts resursdatoram.**`422`** ar `containerEphemeralTarget: true`, drošas kļūdas teksts un — rīkiem ar resursdatora recepti (claude, codex, opencode, cline, kilo, turpināt) — `hostSetupCommand` (piem., `omniroute setup-opencode`), lai tā vietā darbotos resursdatorā; nekas nav rakstīts. `dryRun: true` turpina strādāt konteinera režīmā un atgriež rediģētu priekšskatījuma + mērķa ceļu, nepieskaroties diskam. Priekšskatījuma saturs nav kopēšanai vai importēšanai nepieciešama akreditācijas datu konfigurācija. Lietojiet ar oriģinālajām tool/base URL/API key/model ieejām resursdatorā vai izmantojiet norādīto saimniekdatora puses iestatīšanas komandu. Skatiet [CLI konfigurācijas drošību](../security/CLI-CONFIGURATION.md), lai iegūtu priekšskatījuma galveni un pieprasītu līgumu. Šāda rīcība ir tīša, un `tests/unit/api/cli-tools/apply-container-guard.test.ts` to aizsargā no regresijas — nekad "nelabojiet" 422, noņemot aizsargu.
 
 ---
 
@@ -144,59 +107,60 @@ vienai saskarnei, bet ne pārējām, testu komplekts neizdodas, nevis ļauj neat
 
 ---
 
-## 1. CLI Code katalogs (27 rīki)
+## 1. CLI koda katalogs (27 rīki)
 
-Visi rīki, kas redzami sadaļā `/dashboard/cli-code`. Rīki ar `baseUrlSupport: none` tiek savienoti, izmantojot MITM vai manuālu pamācību, nevis pielāgotu bāzes URL:
+Visi rīki, kas parādās `/dashboard/cli-code`. Tie, kuriem ir `baseUrlSupport: none` ir savienoti ar MITM vai manuālo ceļvedi, nevis pielāgotu bāzes URL:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Pielāgots CLI           | —                   | full           | custom-builder | false        |
+| id               | nosaukums                   | pārdevējs                 | baseUrlSupport | configType           | acpSpawnable |
+| ---------------- | --------------------------- | ------------------------- | -------------- | -------------------- | ------------ |
+| Klauds           | Claude kods                 | Anthropic                 | pilns          | env                  | taisnība     |
+| kodekss          | OpenAI Codex CLI            | OpenAI                    | pilns          | pasūtījuma           | taisnība     |
+| zcode            | ZCode (GLM kodēšanas plāns) | Z.ai                      | neviens        | pasūtījuma           | viltus       |
+| klīnika          | Cline                       | OSS (bijušais Klods Devs) | pilns          | pasūtījuma           | taisnība     |
+| kilogramu        | Kilo kods                   | Kilo-Org                  | pilns          | pasūtījuma           | viltus       |
+| roo              | Roo kods                    | Rū (OSS)                  | pilns          | ceļvedis             | viltus       |
+| turpināt         | Turpināt                    | turpināt.dev              | pilns          | ceļvedis             | viltus       |
+| palīgs           | Palīdzētājs                 | OSS (P. Gotjē)            | pilns          | ceļvedis             | taisnība     |
+| kalums           | ForgeCode                   | Antinomija HQ             | pilns          | pasūtījuma           | taisnība     |
+| jcode            | jcode                       | 1jehuang (OSS)            | pilns          | pasūtījuma           | viltus       |
+| deepseek-tui     | DeepSeek TUI                | Hanters Bouns (OSS)       | pilns          | pasūtījuma           | viltus       |
+| koda valis       | CodeWhale                   | Hmbown (OSS)              | pilns          | pasūtījuma           | viltus       |
+| atvērtais kods   | OpenCode                    | Anomālija (bijušais SST)  | pilns          | ceļvedis             | taisnība     |
+| droīds           | Rūpnīcas Droid              | Rūpnīcas AI               | daļēja         | ceļvedis             | viltus       |
+| otrais pilots    | GitHub Copilot CLI          | GitHub/MS                 | pilns          | pasūtījuma           | viltus       |
+| kursors-klikšķis | Cursor CLI                  | Jebkura sfēra             | daļēja         | ceļvedis             | taisnība     |
+| smaka            | Smaka                       | leonardcsers (OSS)        | pilns          | pasūtījuma           | viltus       |
+| pi               | Pi (pi-kodēšanas aģents)    | M. Zehners (OSS)          | pilns          | pasūtījuma           | viltus       |
+| grok-būvēt       | Grok Build                  | xAI                       | pilns          | pasūtījuma           | viltus       |
+| simpātiju        | Sasmalciniet                | OSS (šarms)               | pilns          | pasūtījuma           | viltus       |
+| qwen             | Qwen kods                   | Alibaba                   | pilns          | ceļvedis             | taisnība     |
+| zed              | Zed                         | Zed Industries            | pilns          | ceļvedis             | viltus       |
+| kursors          | Cursor                      | Jebkura sfēra             | neviens        | ceļvedis             | viltus       |
+| antigravitācija  | Antigravity                 | Google                    | neviens        | mitm                 | viltus       |
+| hermes           | Hermess                     | Nous pētījums             | neviens        | ceļvedis             | viltus       |
+| kiro             | Kiro AI                     | Amazon                    | neviens        | mitm                 | viltus       |
+| pasūtījuma       | Pielāgots CLI               | —                         | pilns          | pasūtījuma celtnieks | viltus       |
 
-Rīkiem ar `baseUrlSupport: "partial"` informācijas paneļa kartītē tiek rādīta emblēma „⚠ Daļējs bāzes URL atbalsts”.
+Rīki ar `baseUrlSupport: "partial"` informācijas paneļa kartē parāda emblēmu "⚠ Base URL parcial".
 ---
 
-## 2. CLI aģentu katalogs (10 rīki)
+## 2. CLI aģentu katalogs (11 rīki)
 
-Autonomie aģenti, kas tiek rādīti sadaļā `/dashboard/cli-agents`:
+Autonomie aģenti, kas parādās `/dashboard/cli-agents`:
 
-| id           | nosaukums        | piegādātājs              | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| id               | nosaukums        | pārdevējs                 | baseUrlSupport | acpSpawnable |
+| ---------------- | ---------------- | ------------------------- | -------------- | ------------ |
+| hermes-aģents    | Hermes aģents    | Nous pētījums             | pilns          | viltus       |
+| vaļēja naga      | OpenClaw         | OSS (P. Šteinbergers)     | pilns          | taisnība     |
+| zoss             | Zoss             | Bloks / Linux fonds       | pilns          | taisnība     |
+| tulks            | Atveriet tulku   | OSS                       | pilns          | taisnība     |
+| velku            | Warp AI          | Warp Inc.                 | daļēja         | taisnība     |
+| aģents-klājs     | Aģents Deks      | ashgoplani (OSS)          | pilns          | viltus       |
+| omp              | Ak, mans Pi      | OSS                       | pilns          | taisnība     |
+| letta            | Letta CLI        | Letta                     | pilns          | viltus       |
+| galvenais aģents | Galvenais aģents | Galvenais intelekts (OSS) | pilns          | viltus       |
+| 5 niršana        | 5 niršana        | OSS (5dive-ai)            | pilns          | viltus       |
+| kāpēc kodi       | WhyCodes         | Kāpēc korporācija         | pilns          | viltus       |
 
 ---
 

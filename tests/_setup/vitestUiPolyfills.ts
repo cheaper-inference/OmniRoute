@@ -22,20 +22,17 @@ if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
   };
 }
 
-// jsdom (unlike real browsers) does not implement `ResizeObserver`. The `TableScrollArea`
-// component of the UI kit (packages/ui-kit/src/table-scroll-area.tsx:83) creates one in a
-// `useEffect` on mount, so any test mounting it — directly or transitively, e.g. via
-// `ProviderStatsPage` — crashes with `ReferenceError: ResizeObserver is not defined` unless
-// this polyfill runs first. It is a no-op stub: jsdom does not lay out boxes, so none of the
-// callbacks need to fire for these tests.
-if (typeof window !== "undefined" && typeof window.ResizeObserver === "undefined") {
-  const ResizeObserverPolyfill = class ResizeObserver {
-    constructor(public callback: () => void) {}
-    observe(): void {}
-    unobserve(): void {}
-    disconnect(): void {}
-  };
-  (window as Record<string, unknown>).ResizeObserver = ResizeObserverPolyfill;
+// jsdom does not implement `ResizeObserver`. The kit `Table` (packages/ui-kit/src/table-scroll-area.tsx,
+// KEA-7886) measures its scroll area with one on mount, so any test rendering a dashboard table
+// crashes with "ResizeObserver is not defined" unless a no-op stub exists. ~50 test files used to
+// repeat this stub locally; registering it once here covers the rest (a file-local `??=` stub
+// stays harmless). Layout is never measured under jsdom, so a no-op is enough.
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
 }
 
 // #7935 wired `useTranslations`/`useLocale` (next-intl) into ~180 dashboard/shared

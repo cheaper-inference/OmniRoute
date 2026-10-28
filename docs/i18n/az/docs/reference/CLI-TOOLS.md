@@ -4,15 +4,15 @@
 
 ---
 
-Son yenilənmə: 2026-08-23
+Son yeniləmə: 23-08-2026
 
-OmniRoute üç xüsusi idarəetmə paneli səhifəsində yerləşən üç kateqoriyalı CLI alətləri ilə inteqrasiya olunur:
+OmniRoute üç xüsusi tablosunun səhifəsində yayılmış üç kateqoriyalı CLI alətləri ilə inteqrasiya edir:
 
-| Səhifə            | Marşrut                 | Konsepsiya                                                                                | Say            |
-| ----------------- | ----------------------- | ----------------------------------------------------------------------------------------- | -------------- |
-| **CLI Kodları**   | `/dashboard/cli-code`   | OmniRoute-a yönləndirdiyiniz kodlaşdırma alətləri (Müştəri → CLI → OmniRoute → Provayder) | 26             |
-| **CLI Agentləri** | `/dashboard/cli-agents` | OmniRoute-a yönləndirdiyiniz avtonom agentlər (eyni axın, daha geniş əhatə dairəsi)       | 10             |
-| **ACP Agentləri** | `/dashboard/acp-agents` | OmniRoute-un stdio/ACP vasitəsilə arxa xidmət kimi işə saldığı CLI-lər (əks axın)         | reyestrə baxın |
+| Səhifə            | Marşrut                 | Konsepsiya                                                                                | saymaq           |
+| ----------------- | ----------------------- | ----------------------------------------------------------------------------------------- | ---------------- |
+| **CLI kodu**      | `/dashboard/cli-code`   | OmniRoute -da göstərdiyiniz kodlaşdırma alətləri (Müştəri → CLI → OmniRoute → Provayderi) | 26               |
+| **CLI agentləri** | `/dashboard/cli-agents` | OmniRoute -da göstərdiyiniz avtonom agentlər (eyni axın, daha geniş əhatə dairəsi)        | 11               |
+| **ACP agentləri** | `/dashboard/acp-agents` | CLIs ki, OmniRoute stdio/ACP vasitəsilə backend kimi yaranır (əks axın)                   | reyestrinə baxın |
 
 Köhnə marşrutlar 308 vasitəsilə yönləndirilir: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
@@ -43,11 +43,9 @@ ACP Agentləri (əks işə salma axını):
 
 ---
 
-## `setup-*` ilə avtomatik konfiqurasiya
+## `setup-*` ilə avtomatik konfiqurasiya edin
 
-Hər alətin konfiqurasiyasını əl ilə yazmağınız lazım deyil. OmniRoute hər dəstəklənən CLI üçün işləyən
-OmniRoute instansiyasından (lokal və ya uzaq) **aktiv** model kataloqunu oxuyan və
-alətin öz konfiqurasiyasını kompüterinizdə yazan bir `setup-*` əmri təqdim edir:
+Hər bir alətin konfiqurasiyasını əl ilə yazmağa ehtiyac yoxdur. OmniRoute oxuyan dəstəklənən CLI üçün `setup-*` əmrini göndərir** yaşamaq** çalışan OmniRoute -dən (yerli və ya uzaqdan) model kataloqu yaradır və alətin öz konfiqurasiyasını maşınınıza yazır:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,21 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Hər biri `--remote <url> --api-key <key>` (lokal aləti uzaq OmniRoute ilə işləmək üçün konfiqurasiya edir), `--dry-run` (yazmadan önizləmə) və `--port` seçimlərini qəbul edir. Modelləri avtomatik aşkarlamayan alətlər (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) `--model <id>` (və interaktiv olmayan icralar üçün `--yes`) qəbul edir. `setup-5dive`, `$HOME` altında yazmayan yeganə reseptdir: o, donanma hostunda root-a məxsus autentifikasiya profili yazaraq 5dive agent donanmasını konfiqurasiya edir, buna görə `sudo` vasitəsilə özünü yenidən işə salır və öz uzaq rejimi yoxdur. Düzgün mühit dəyişənlərini ötürərək və heç bir konfiqurasiya yazmadan CLI-ni işə salmaq üçün ümumi `omniroute run <target>` başladıcısından istifadə edin (claude, codex, aider, goose, opencode, qwen, gemini — hədəflər və aliaslar `bin/cli/cli-manifest.mjs` faylından gəlir); əvvəlki hər-alət-üçün başladıcılar olan `omniroute launch` (Claude Code) və `omniroute launch-codex` (Codex) əlçatan olaraq qalır. Gemini CLI yalnız başladılma üçündür: o, `omniroute run` hədəfidir, lakin `setup-*`/`configure` resepti yoxdur.
+Hər biri `--remote <url> --api-key <key>` (uzaqdan OmniRoute qarşı yerli aləti konfiqurasiya edin), `--dry-run` (yazmadan önizləmə) və `--port` qəbul edir. Modelin avtomatik kəşfi olmayan alətlər (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) `--model <id>` (və interaktiv olmayan qaçışlar üçün `--yes` ) alır. `setup-5dive` `$HOME` altında yazılmayan yeganə reseptdir: o, donanma hostunda kökə məxsus auth profilini yazmaqla 5 dalış agent donanmasını konfiqurasiya edir, ona görə də `sudo` vasitəsilə yenidən icra edir və özünün uzaq rejimi yoxdur. Doğru env yeridilmiş və heç bir konfiqurasiya yazılmamış CLI işə salmaq üçün ümumi `omniroute run <target>` başlatma qurğusundan istifadə edin (claude, codex, aider, goose, opencode, qwen, gemini, Whycodes — hədəflər və ləqəblər `bin/cli/cli-manifest.mjs` dan gəlir); `omniroute launch` (Claude Code) və `omniroute launch-codex` (Codex) hər alət üçün köhnə işə salma qurğuları əlçatan olaraq qalır. Gemini CLI yalnız işə salınır: o, `omniroute run` hədəfidir, lakin `setup-*`/`configure` resepti yoxdur.
 
-> **Tam istinad:** əsas cədvəl — hər əmrin nə yazdığı, bütün seçimlər,
-> lokal və uzaq rejimlər, həmçinin hansı alətlərin `/v1` suffiksi tələb etdiyi —
-> **[CLI İnteqrasiyaları](../guides/CLI-INTEGRATIONS.md)** bölməsindədir.
+> **Tam istinad:** əsas cədvəl - hər əmrin nə yazdığı, hər bayraq, yerli və uzaq və hansı alətlər `/v1` şəkilçisini istəyir - yaşayır** [CLI inteqrasiyaları](../guides/CLI-INTEGRATIONS.md)** .
 
-### Bunların konteyner daxilində işə salınması
+### Bunları bir konteynerin içərisində işlədin
 
-OmniRoute konteynerində icra edilən `setup-*` əmri konteynerin öz ev qovluğuna yazır; heç bir host CLI-si bunu oxumur və konteynerlə birlikdə həmin məlumat yox olur. OmniRoute bunu aşkarlayır və yazmaq əvəzinə təlimatlarla birlikdə `2` kodu ilə çıxır. İki dəstəklənən həll yolu var — CLI-ni hostda quraşdırıb konteynerə `omniroute connect` ilə qoşulmaq və ya konfiqurasiya qovluqlarını bind-mount edib `CLI_CONFIG_HOME` təyin etmək (compose `host` profili). Konteynerin öz CLI-lərini konfiqurasiya etmək həqiqətən istədiyiniz haldırsa, hər `setup-*` əmri, eləcə də `omniroute configure` və `omniroute config set`, `--allow-container-write` seçimini qəbul edir; server üçün `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` eyni işi görür. Baxın:
-[Docker Bələdçisi → Host CLI alətlərinin konfiqurasiyası](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+OmniRoute konteynerinin daxilində yerinə yetirilən `setup-*` əmri konteynerin öz evinə yazır, heç bir host CLI oxumur və konteynerlə birlikdə yox olur. OmniRoute bunu aşkar edir və `2` yazmaq əvəzinə təlimatlarla çıxış edir. Dəstəklənən iki yol – CLI hostda quraşdırın və konteynerə `omniroute connect` və ya konfiqurasiya dirəklərini bağlayın və `CLI_CONFIG_HOME` ( `host` profilini tərtib edin) təyin edin. Hər bir `setup-*` əmri, üstəgəl `omniroute configure` və `omniroute config set`, konteynerin öz CLIs konfiqurasiya edərkən `--allow-container-write` qəbul edir, əslində nəzərdə tutduğunuz budur; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` eyni şeyi server üçün edir. [Docker Bələdçisi → Host CLI alətlərinin konfiqurasiyasına](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) baxın.
 
-İdarəetmə panelinin **tətbiqetmə endpoint-i** (`POST /api/cli-tools/apply`) eyni qorumanı tətbiq edir: konteynerdə hədəfi hostdan bind-mount edilməyən yazma əməliyyatı təhlükəsiz xəta mətni, `containerEphemeralTarget: true` və — host resepti olan alətlər (claude, codex, opencode, cline, kilo, continue) üçün — əvəzinə hostda icra ediləcək `hostSetupCommand` (məsələn, `omniroute setup-opencode`) ilə **`422`** cavabı qaytarır; heç nə yazılmır. `dryRun: true` konteyner rejimində işləməyə davam edir və diskə toxunmadan redaktə edilmiş önizləmə ilə hədəf yolunu qaytarır. Önizləmə məzmunu kopyalanacaq və ya idxal ediləcək etimadnamələri ehtiva edən konfiqurasiya deyil. İlkin alət/baza URL-si/API açarı/model girişləri ilə hostda tətbiq edin və ya göstərilən host tərəfli quraşdırma əmrindən istifadə edin. Önizləmə başlığı və sorğu müqaviləsi üçün [CLI konfiqurasiyasının təhlükəsizliyi](../security/CLI-CONFIGURATION.md) bölməsinə baxın. Bu davranış qəsdən belədir və
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` tərəfindən reqressiyaya qarşı qorunur — qorumanı silərək 422 xətasını heç vaxt "düzəltməyin".
+Tablosuna aiddir** son nöqtəni tətbiq edin** (`POST /api/cli-tools/apply`) eyni mühafizəni tətbiq edir: konteynerdə, hədəfi hostdan bağlanmayan bir yazı cavab verir**`422`** `containerEphemeralTarget: true` ilə təhlükəsiz xəta mətni və — host resepti olan alətlər üçün (claude, codex, opencode, cline, kilo, davam) — əvəzinə hostda işləmək üçün `hostSetupCommand` (məsələn, `omniroute setup-opencode`); heç nə yazılmayıb. `dryRun: true` konteyner rejimində işləməyə davam edir və diskə toxunmadan redaktə edilmiş önizləmə + hədəf yolunu qaytarır. Preview məzmunu kopyalamaq və ya idxal etmək üçün etimadnamə daşıyan konfiqurasiya deyil. Hostda orijinal tool/base URL/API key/model girişləri ilə tətbiq edin və ya göstərilən host tərəfində quraşdırma əmrindən istifadə edin. Ön baxış başlığı və sorğu müqaviləsi üçün [CLI konfiqurasiya təhlükəsizliyinə](../security/CLI-CONFIGURATION.md) baxın. Bu davranış qəsdəndir və `tests/unit/api/cli-tools/apply-container-guard.test.ts` tərəfindən reqressiya ilə qorunur - heç vaxt mühafizəçini çıxararaq 422-ni "düzəltməyin".
 
 ---
 
@@ -149,22 +144,23 @@ bir səthə əlavə edilən hədəf səssizcə uyğunsuzlaşmaq əvəzinə test 
 `baseUrlSupport: "partial"` olan alətlərin idarəetmə panelindəki kartında "⚠ Qismən baza URL-i" nişanı göstərilir.
 ---
 
-## 2. CLI Agentləri Kataloqu (10 alət)
+## 2. CLI Agentlər Kataloqu (11 alət)
 
-`/dashboard/cli-agents` səhifəsində görünən avtonom agentlər:
+`/dashboard/cli-agents`-da görünən avtonom agentlər:
 
-| id           | ad               | təchizatçı               | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| id              | ad             | satıcı               | baseUrlSupport | acpSpawnable |
+| --------------- | -------------- | -------------------- | -------------- | ------------ |
+| hermes-agent    | Hermes agenti  | Nous Araşdırma       | dolu           | yalan        |
+| açıq pəncə      | OpenClaw       | OSS (P. Steinberger) | dolu           | doğrudur     |
+| qaz             | qaz            | Blok / Linux Vəqfi   | dolu           | doğrudur     |
+| tərcüməçi       | Tərcüməçi açın | OSS                  | dolu           | doğrudur     |
+| əyilmə          | Warp AI        | Warp Inc.            | qismən         | doğrudur     |
+| agent göyərtəsi | Agent Deck     | asheshgoplani (OSS)  | dolu           | yalan        |
+| omp             | Oh mənim Pi    | OSS                  | dolu           | doğrudur     |
+| letta           | Getta CLI      | Letta                | dolu           | yalan        |
+| əsas agent      | Baş Agent      | Baş İntellekt (OSS)  | dolu           | yalan        |
+| 5 dalış         | 5 dalış        | OSS (5 dalış-ai)     | dolu           | yalan        |
+| niyə kodları    | WhyCodes       | Niyə Korporasiya     | dolu           | yalan        |
 
 ---
 
