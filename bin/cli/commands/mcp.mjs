@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { apiFetch, isServerUp } from "../api.mjs";
-import { MCP_ACCEPT, readJsonRpcResponse } from "../mcpClient.mjs";
+import { mcpCallTool } from "../mcpClient.mjs";
 import { emit } from "../output.mjs";
 import { t } from "../i18n.mjs";
 
@@ -75,6 +75,13 @@ export function registerMcp(program) {
     .option("--scope <s>", t("mcp.call.scope"), (v, prev = []) => [...prev, v], [])
     .action(async (tool, argsPositional, opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
+      // Commander always fills the global --timeout with its default ("30000").
+      // Drop that so only an explicit --timeout (source "cli") counts; see
+      // runMcpCallCommand for what applies when it is absent.
+      const callGlobals =
+        cmd.getOptionValueSourceWithGlobals("timeout") === "default"
+          ? { ...globalOpts, timeout: undefined }
+          : globalOpts;
       const args = opts.args
         ? JSON.parse(opts.args)
         : opts.argsFile
@@ -90,7 +97,7 @@ export function registerMcp(program) {
           ...opts,
           stream: opts.stream,
         },
-        globalOpts
+        callGlobals
       );
 
       if (exitCode !== 0) process.exit(exitCode);
@@ -113,132 +120,126 @@ export function registerMcp(program) {
     });
 }
 
+// Node's setTimeout cannot represent longer delays: it truncates them to 1ms.
+export const MAX_TIMEOUT_MS = 2_147_483_647;
+
 /**
- * Shared JSON-RPC 2.0 MCP client used by both stream and non-stream `mcp call`.
+ * Parse a --timeout (or OMNIROUTE_HTTP_TIMEOUT_MS) value for mcp call.
  *
- * Protocol:
- *   1. POST /api/mcp/stream with initialize → get Mcp-Session-Id header
- *   2. POST /api/mcp/stream with tools/call + Mcp-Session-Id header
- *
- * When `stream` is true, writes SSE data chunks to stdout as they arrive.
- * When `stream` is false, returns the parsed JSON-RPC result.
- *
- * Returns the exit code (0 = success, non-zero = failure).
+ * - missing → undefined (resolveMcpCallTimeouts then falls back to
+ *   OMNIROUTE_HTTP_TIMEOUT_MS, else its defaults)
+ * - exactly "0" → 0: no client-side deadline (intentional; unlike
+ *   OMNIROUTE_HTTP_TIMEOUT_MS=0, which apiFetch treats as unset)
+ * - a canonical positive integer (no sign, no leading zeros, no surrounding
+ *   whitespace) → milliseconds, clamped to MAX_TIMEOUT_MS so a "very long"
+ *   timeout never turns into an immediate 1ms abort
+ * - anything else (blank, " 50 ", "00", "007", "abc", "-1", "300ms", "1e3", "0.5")
+ *   → { invalid: true }: the caller warns and treats it like a missing value
  */
-async function mcpJsonRpcCall(tool, args, { stream = false, globalOpts = {} } = {}) {
-  const baseUrl = globalOpts.baseUrl ?? "http://localhost:20128";
-  const apiKey = globalOpts.apiKey ?? "";
-  const streamUrl = `${baseUrl}/api/mcp/stream`;
+const CANONICAL_TIMEOUT_MS = /^(0|[1-9]\d*)$/;
 
-  const hdrs = {
-    "Content-Type": "application/json",
-    Accept: MCP_ACCEPT,
-    ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-  };
-
-  // Step 1 — initialize
-  const initRes = await fetch(streamUrl, {
-    method: "POST",
-    headers: hdrs,
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "initialize",
-      params: {
-        protocolVersion: "2024-11-05",
-        capabilities: {},
-        clientInfo: { name: "omniroute-cli", version: "1.0" },
-      },
-    }),
-  });
-
-  if (!initRes.ok) {
-    const text = await initRes.text().catch(() => "");
-    process.stderr.write(
-      `MCP initialize failed: HTTP ${initRes.status}${text ? ` — ${text}` : ""}\n`
-    );
-    return 1;
-  }
-
-  const sessionId = initRes.headers.get("mcp-session-id");
-  if (!sessionId) {
-    process.stderr.write("MCP initialize failed: no Mcp-Session-Id in response\n");
-    return 1;
-  }
-
-  // Step 2 — tools/call
-  const callHeaders = {
-    ...hdrs,
-    "mcp-session-id": sessionId,
-  };
-
-  const callRes = await fetch(streamUrl, {
-    method: "POST",
-    headers: callHeaders,
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 2,
-      method: "tools/call",
-      params: { name: tool, arguments: args },
-    }),
-  });
-
-  if (!callRes.ok) {
-    const text = await callRes.text().catch(() => "");
-    process.stderr.write(`MCP call failed: HTTP ${callRes.status}${text ? ` — ${text}` : ""}\n`);
-    return 1;
-  }
-
-  if (stream) {
-    return readMcpSseStream(callRes.body);
-  }
-
-  // Non-stream: parse JSON-RPC response
-  const data = await readJsonRpcResponse(callRes);
-  if (data.error) {
-    process.stderr.write(`MCP error: ${data.error.message || JSON.stringify(data.error)}\n`);
-    return 1;
-  }
-  // Print the result content
-  const content = data.result?.content;
-  if (content) {
-    for (const item of content) {
-      if (item.type === "text") {
-        process.stdout.write(item.text + "\n");
-      } else if (item.type === "resource") {
-        process.stdout.write(JSON.stringify(item.resource) + "\n");
-      } else {
-        process.stdout.write(JSON.stringify(item) + "\n");
-      }
-    }
-  } else {
-    process.stdout.write(JSON.stringify(data.result, null, 2) + "\n");
-  }
-  return 0;
+export function resolveMcpCallTimeoutMs(raw) {
+  if (raw == null) return { timeout: undefined, invalid: false };
+  const s = String(raw);
+  if (!CANONICAL_TIMEOUT_MS.test(s)) return { timeout: undefined, invalid: true };
+  return { timeout: Math.min(Number(s), MAX_TIMEOUT_MS), invalid: false };
 }
 
-async function readMcpSseStream(body) {
-  if (!body) return 1;
-  const reader = body.getReader();
-  const dec = new TextDecoder();
-  let buf = "";
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-  }
-  const lines = buf.split("\n");
-  for (const line of lines) {
-    if (line.startsWith("data: ")) {
-      const raw = line.slice(6).trim();
-      if (raw && raw !== "[DONE]") process.stdout.write(raw + "\n");
+// apiFetch's default when neither --timeout nor OMNIROUTE_HTTP_TIMEOUT_MS is set.
+export const DEFAULT_HANDSHAKE_TIMEOUT_MS = 30_000;
+
+/**
+ * Timeouts for one `mcp call`, from the raw --timeout flag and the raw
+ * OMNIROUTE_HTTP_TIMEOUT_MS value. Both go through resolveMcpCallTimeoutMs, so
+ * "300ms", " 50 " or "1e3" is rejected the same way in either place; a
+ * rejected value produces a warning and is ignored. An empty env value and
+ * OMNIROUTE_HTTP_TIMEOUT_MS=0 count as unset (apiFetch's rule); --timeout 0
+ * means no client-side deadline.
+ *
+ * - handshake (initialize, notifications/initialized; per attempt, until the
+ *   response headers arrive): flag, else env, else 30s
+ * - toolCall (the whole tools/call, until the result or the last --stream
+ *   frame has been read): flag, else env, else 0 = no deadline. Before the
+ *   shared client `mcp call` used bare fetch with no client-side timeout, and
+ *   a tool may legitimately run for minutes.
+ */
+export function resolveMcpCallTimeouts(rawFlag, rawEnv = process.env.OMNIROUTE_HTTP_TIMEOUT_MS) {
+  const warnings = [];
+  const flag = resolveMcpCallTimeoutMs(rawFlag);
+  if (flag.invalid) warnings.push(`invalid --timeout ${JSON.stringify(String(rawFlag))}`);
+  let env;
+  if (rawEnv != null && rawEnv !== "") {
+    const parsed = resolveMcpCallTimeoutMs(rawEnv);
+    if (parsed.invalid) {
+      warnings.push(`invalid OMNIROUTE_HTTP_TIMEOUT_MS ${JSON.stringify(String(rawEnv))}`);
+    } else if (parsed.timeout > 0) {
+      env = parsed.timeout;
     }
   }
-  return 0;
+  const explicit = flag.timeout ?? env;
+  return {
+    handshake: explicit ?? DEFAULT_HANDSHAKE_TIMEOUT_MS,
+    toolCall: explicit ?? 0,
+    warnings,
+  };
 }
 
+const describeLimit = (ms) => (ms ? `${ms}ms` : "no limit");
+
+/**
+ * `mcp call` entry point. Protocol + transport live in mcpClient.mjs
+ * (`mcpCallTool`); this wrapper only formats the result for the terminal
+ * and maps failures to exit codes.
+ */
 export async function runMcpCallCommand(tool, args, opts = {}, globalOpts = {}) {
-  return mcpJsonRpcCall(tool, args, { stream: opts.stream, globalOpts });
+  if (opts.scope?.length) {
+    // Scopes come from the server-side credential, never from the client.
+    process.stderr.write("Warning: --scope is ignored by mcp call and will be removed.\n");
+  }
+  // --timeout is a global option (string from commander); see
+  // resolveMcpCallTimeouts for how it combines with OMNIROUTE_HTTP_TIMEOUT_MS.
+  const { handshake, toolCall, warnings } = resolveMcpCallTimeouts(globalOpts.timeout);
+  for (const warning of warnings) {
+    process.stderr.write(
+      `Warning: ${warning}; ignoring it (tools/call: ${describeLimit(toolCall)}, ` +
+        `initialize: ${describeLimit(handshake)} per attempt).\n`
+    );
+  }
+  try {
+    const result = await mcpCallTool(tool, args, {
+      stream: Boolean(opts.stream),
+      timeout: handshake,
+      toolCallTimeout: toolCall,
+      baseUrl: globalOpts.baseUrl,
+      apiKey: globalOpts.apiKey,
+      context: globalOpts.context,
+    });
+
+    if (opts.stream) {
+      // mcpCallTool already wrote SSE chunks to stdout.
+      return 0;
+    }
+
+    const content = result?.content;
+    if (content) {
+      for (const item of content) {
+        if (item.type === "text") {
+          process.stdout.write(item.text + "\n");
+        } else if (item.type === "resource") {
+          process.stdout.write(JSON.stringify(item.resource) + "\n");
+        } else {
+          process.stdout.write(JSON.stringify(item) + "\n");
+        }
+      }
+    } else if (result != null) {
+      process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+    }
+    return 0;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`${message}\n`);
+    return 1;
+  }
 }
 
 export async function runMcpStatusCommand(opts = {}) {

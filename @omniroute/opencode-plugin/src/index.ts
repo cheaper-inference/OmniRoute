@@ -42,7 +42,7 @@
  * remains supported for users who can't run plugins (CI, scripted scaffolding).
  *
  * @see https://opencode.ai/docs/plugins for the OpenCode plugin contract.
- * @see https://github.com/diegosouzapw/OmniRoute for the AI Gateway.
+ * @see https://github.com/cheaper-inference/OmniRoute for the AI Gateway.
  */
 
 import { createHash } from "node:crypto";

@@ -4,227 +4,147 @@
 
 ---
 
-# OmniRoute — Dizajn sistem i vizuelni identitet
+> **Status:** kontrolna tabla je izgrađena na** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), isporučeno kao radni prostor `packages/ui-kit` (`@omniroute/ui-kit`; gornji snimak je zakačen u `packages/ui-kit/UPSTREAM.md` i čuva ga `npm run check:ui-kit-snapshot`). Svetlost je kanonska tema; zadana postavka je `system`. Naglasak je Keak lime (`--ci-color-accent`). Switzer je jedinstvena porodica za UI, prikaz i tekst koda (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` rješavaju ga), koji sam hostuje sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvezen od `ci-tokens.css`). Svaka ikona je Lucide glif.
 
-> **Status:** referenca — standardizacija opisana ovdje je **implementirana** (faze 1–6: pozadina sa mrežom, primitive, centralizacija statusnih boja, mono token, migracija DataTable tokena, focus-ring → accent, Checkbox/Textarea primitive, `cn()` → tailwind-merge, mreža na svakom samostalnom ekranu, fluidna 4K ljuska sadržaja, neprozirne površine tabele podataka). Ovaj dokument je kanonski opis dizajnerskih tokena, komponenti i konvencija kontrolne table; okvir faza ispod je zadržan kao obrazloženje za svaku odluku.
-> **Opseg:** OmniRoute kontrolna tabla (`src/`) i marketinška stranica (`_mono_repo/omnirouteSite/`) dijele **jedan vizuelni identitet** — ista pozadina sa mrežom (32px), isti tokeni boja, standardizovane komponente.
->
-> Praktične napomene za održavaoce:
->
-> - Nekoliko preostalih hardkodovanih heksadecimalnih vrijednosti su **namjerne** (konzola terminala koja je uvijek tamna, ReactFlow SVG potezi) i **NE** smiju se pretvarati u tokene.
-> - "Veća" mreža na pokrenutoj instanci je zastarjela verzija (build), a ne kod — veličina mreže je 32px, identična onoj na stranici.
-> - `--table-*` vrijednosti za tamnu temu su bajt-identične sa hardkodovanim rgba vrijednostima prije migracije; svijetla tema je popravljena (bila je greškom uvijek tamna zbog mrtvih `var()` rezervnih vrijednosti).
+## 1. Gdje se stvari nalaze
 
----
+- **Kit.** `packages/ui-kit/src` je bajt-po-bajt kopija upstream `src/` direktorija na commitu fiksiranom u
+  `packages/ui-kit/UPSTREAM.md` (koji također bilježi autorizaciju licence); `PATCHES.md` navodi lokalne
+  zakrpe (nema ih). Koristi se kao izvorni kod, bez build koraka: `next.config.mjs` ga transpilira, a
+  `tsconfig.json` mapira `@omniroute/ui-kit` → `packages/ui-kit/src` i `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` i `vitest.mcp.config.ts` nose isti alias). Kit komponentu
+  uvezite preko njenog podputa (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nikad
+  kroz `@omniroute/ui-kit` barrel: barrel uvlači svaku komponentu (uključujući date picker)
+  u svakog uvoznika. Stylesheet kita ulazi kroz `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Tokeni.** `packages/ui-kit/src/ci-tokens.css` deklariše `--ci-*` tokene; `src/app/globals.css`
+  ih premošćuje na legacy OmniRoute imena (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), tako da postojeća očitanja `var(--color-*)` i Tailwind
+  utility-ji i dalje rade. Novi kod koristi Tailwind utility-je (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ili kit klase — nikad hex vrijednost
+  (`tests/unit/design-kit-bridge.test.ts` nameće most). `text-primary` se razrješava u
+  `--color-primary-ink` kroz `--text-color-primary` (lime-800 u svijetloj temi, lime akcent u tamnoj), tako da
+  primarni tekst ostaje čitljiv dok `bg-primary`/`border-primary` zadržavaju lime površinu. Serije grafikona
+  koriste `--color-chart-1` … `--color-chart-5`.
+- **Teme.** `<html className="ci-theme">` (`src/app/layout.tsx`) uključuje dokument u temu kita.
+  Postavka je `light`, `dark` ili `system` (`THEME_CONFIG.defaultTheme = "system"` u
+  `src/shared/constants/appConfig.ts`; `system` prati `prefers-color-scheme`). `applyTheme()` u
+  `src/store/themeStore.ts` (reflektirana inline bootstrap skriptom u `src/app/layout.tsx`, koja se
+  izvršava prije hidracije) postavlja `data-theme="dark"|"light"` i zajedno uključuje/isključuje `.dark`
+  klasu na `<html>`. Tamni set tokena kita vezan je uz `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  OmniRouteova vlastita tamna preklapanja (`.dark` blok u `globals.css`) i legacy Tailwind `dark:`
+  utility-ji vezani su uz `.dark` klasu. Ne postoje presetovi akcentnih boja: akcent uvijek dolazi iz
+  kita, a sačuvani preset iz starije verzije odbacuje se kada se store učita.
+- **Komponente (adapteri).** `src/shared/components/index.tsx` zadržava OmniRoute API komponenti (ista
+  imena, default exporte i propse), a primitive iza njega su adapteri nad kitom: forme
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), preklopni slojevi i povratne
+  informacije (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  struktura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) i tabele
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter uvozi kit
+  komponentu po podputu i mapira legacy propse na nju — na primjer `Button variant="primary"` je kit
+  `default` dugme (`--ci-button-primary-*`: inverzna površina u svijetloj temi, akcent sa svojom
+  `--ci-color-accent-foreground` tintom u tamnoj), `danger` je `destructive`, a `warning` je `outline` plus
+  `.ci-button--warning` ekstenzija. Pravila `.ci-button--warning` i `.ci-badge[data-tone]` na
+  kraju `globals.css` (`@layer components`) su OmniRoute ekstenzije povrh klasa kita.
+  `tests/unit/ui/adapters/*.test.tsx` fiksira svaki adapter.
+- **Shell.** `src/app/(dashboard)/layout.tsx` renderira `DashboardLayout`, koji renderira
+  `src/shared/components/layouts/DashboardShell.tsx`: kit `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), s OmniRoute navigacijskom logikom u
+  `src/shared/components/Sidebar.tsx`. Link „Preskoči na sadržaj" prema `#main-content` je prvi fokusabilni
+  element. `src/shared/components/Header.tsx` sadrži kit `SidebarTrigger` (jedini prekidač bočne
+  trake u shellu), Keak `ProductSwitcher` i otvarač palete komandi; prikazuje naslov rute samo dok
+  nijedan kit `PageHeader` (`.ci-page-header`) nije montiran unutar `#main-content`, tako da stranica sa
+  vlastitim `PageHeader` ima jedan jedini `h1`. `src/shared/components/CommandPalette.tsx` je kit `Dialog`.
+- **Ikone.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) razrješava ime
+  (vokabular Material Symbols koji ekrani koriste) kroz `ICON_MAP` (`src/shared/constants/iconMap.ts`) do
+  Lucide glifa. Font i paket Material Symbols su uklonjeni: ime koje nedostaje iz mape renderira
+  neutralni zamjenski glif (`data-icon-missing="true"`) i bilježi upozorenje u konzolu izvan produkcije.
+  `npm run gen:icon-map` ispisuje imena u upotrebi koja nedostaju iz mape
+  (`tests/unit/icon-map-coverage.test.ts` pada na svakom imenu bez Lucide ikone;
+  `tests/unit/icon-map-object-values.test.ts` pokriva imena pohranjena u lookup objektima);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` prepisuje doslovne
+  `<span className="material-symbols-outlined">` spanove u `<Icon>`.
+- **Brend.** `src/shared/components/OmniRouteLogo.tsx` omotava kit: default export `OmniRouteLogo`
+  renderira `ProductIcon product="omniroute" variant="glyph"` (inline SVG, siguran s obzirom na `basePath`), a
+  `OmniRouteLockup` renderira `ProductLockup product="omniroute"` (pristupačno ime „Keak OmniRoute") ili, za
+  white-label operatere, njihove vlastite `name`/`logoSrc`. Odredišta product-switchera nalaze se u
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Samostalni
+  ekrani — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` i `src/shared/components/ErrorPageScaffold.tsx`
+  — prikazuju lockup; `tests/unit/brand-pages-static.test.ts` ga čuva.
 
-## 1. Svrha
+## 2. Pravila
 
-Marketinška stranica (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) i kontrolna tabla proizvoda trebaju izgledati kao **jedan proizvod**. Stranica je već posudila svoju paletu sa kontrolne table — njen `css/tokens.css` čak kaže _"Paleta odražava OmniRoute kontrolnu tablu (src/app/globals.css)"_. Dakle, njih dvije su već ~80% usklađene na nivou boja. Šta nedostaje na kontrolnoj tabli:
+1. Tokeni, nikad literali. Namjerno se čuvaju izuzeci: uvijek taman terminal konzole i `STATUS_HEX` (`src/shared/constants/statusColors.ts`), riješeno heksadecimalno ogledalo statusne palete kompleta za pozivaoce kojima je potreban doslovni heksadecimalni. Palete kategorija više nisu izuzetak: one se koriste na pet tokena grafikona (`--color-chart-1..5`) kompleta kroz `src/shared/utils/categoricalPalette.ts` i, za strategije rutiranja, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow ivice i platno orkestracije čitaju `--orch-status-*` varijable koje su svjesne teme (`src/shared/components/flow/edgeStyles.ts`).
+2. Nikada nemojte krpiti `packages/ui-kit/src` ručno: sinhronizirajte sa `scripts/dev/sync-ui-kit.sh <commit>`; kapija pre urezivanja `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ne uspijeva na bilo kojem bajtu koji se razlikuje od zakačenog uzvodnog urezivanja (preskače uz upozorenje kada je uzvodni klon, `UI_KIT_CLONE` ili `_references/cheaper-inference-ui-kit`, odsutan). Kada kompletu nešto nedostaje, zaobiđite to u adapteru ili ekranu i zatražite to uzvodno.
+3. Zadane postavke teksta kompleta su engleski (`label = "Loading"`, `loadingLabel = "Loading table"`…) — proslijedite prevedene stringove iz `useTranslations(...)` kad god komponenta kompleta prikaže tekst.
+4. Tailwind uslužni programi pobjeđuju nad klasama komponenti kompleta (komplet deklarira `@layer theme, base, components, utilities` i njegova pravila žive u `components`) — koristite pomoćne programe za razmak i raspored, a ne za ponovno bojenje komponenti kompleta.
+5. Naslovi: `.ci-heading` za naslove stranica i odjeljaka; `.ci-dashboard-display` samo za veliki, rijetki tekst na ekranu kao što je statusni kod stranice greške. Obojica koriste Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` čuva usvajanje kompleta: nema raspona materijalne ligature ispod `src/app` ili `src/shared/components`; u stablu kontrolne table (`src/app/(dashboard)` i `src/shared/components`) nema sirovog `<select>`, `<textarea>` ili `<table>` i nema ručno umotanog `role="dialog"` izvan navedenih izuzetaka (prirodna grana `Select` adaptera, `RequestLoggerDetail`); svaki sirovi `<button>` ili `<input>` tamo treba komentar koji sadrži `kit-exception:` (sa razlogom) koji završava najviše 3 reda iznad njega; palete nijansi i `dark:` varijanti samo u fajlovima koje test navodi.
+7. Provjerite obje teme i okvir za prikaz od 390 px prije PR (snimke ekrana); `tests/e2e/a11y.spec.ts` pokreće axe.
 
-1. **Pozadina sa mrežom** (graph-paper grid) koju stranica koristi na svakoj stranici.
-2. Nekoliko **zajedničkih dizajnerskih tokena** koje stranica ima, a kontrolna tabla nema (skala radijusa, gradijent brenda, `surface-2`, mono font).
-3. **Konzistentnost na nivou komponenti** — brojne komponente kontrolne table zaobilaze tematske tokene koristeći hardkodovane hex/rgba vrijednosti.
+## 3. Dodavanje ekrana
 
-Ovaj dokument predstavlja analizu i plan.
+1. Započnite stranicu s kitovskim `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` unutar
+   nadzorne ploče) — naslov, opis i `actions`. Zaglavlje okruženja tada odbacuje vlastiti naslov.
+2. Gradite kontrole iz `@/shared/components` (adaptera) i koristite komponente kita preko podputanje
+   tamo gdje adapter ne postoji (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`,
+   `Tabs`, `RadioGroup`, `Slider`…).
+3. Ikone: `<Icon name="…" />`. Novo ime ide u `ICON_MAP` sa semantički odgovarajućom Lucide
+   komponentom; `npm run gen:icon-map` navodi imena koja još nedostaju.
+4. Boje: semantičke uslužne klase (`text-success`, `bg-warning-bg`, `border-border`…) i
+   `var(--color-chart-N)` za serije grafikona; bez hex vrijednosti i bez `dark:` varijanti koje samo
+   ponavljaju boju.
+5. Tekst: svaki string, uključujući oznake koje prosljeđujete komponentama kita, dolazi iz
+   `useTranslations`. Novi ključevi idu u `src/i18n/messages/en.json`, `pt-BR.json` i `vi.json`
+   (vijetnamski test pariteta fiksira svaki engleski ključ); ostale jezike popunjava i18n
+   sinhronizacija.
+6. Pokrenite zaštitne provjere prije PR-a: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (jedina provjera koja otkriva duplirani import u
+   `iconMap.ts`), `npm run check:ui-icu` i vlastite testove ekrana.
 
----
+## 4. Dodavanje ili izmjena adaptera
 
-## 2. Principi
+1. Zadržite javni API od `src/shared/components/index.tsx`: isti nazivi eksporta, default eksporti i
+   prihvaćeni props-i. Preslikajte naslijeđene props-e na kit unutar adaptera (vidi `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Uvezite kit preko podputanje (`@omniroute/ui-kit/<component>`).
+3. Zaobilazna rješenja za nedostatke kita žive u adapteru (ili u `globals.css` `@layer components` kada je
+   ispravka stil), nikad u `packages/ui-kit/src`.
+4. Dodajte ili ažurirajte `tests/unit/ui/adapters/<name>.test.tsx`. Za adapter s mnogo pozivalaca, uporedite
+   renderirani markup prije i poslije promjene — promjene paddinga ili wrappera šire se na svaki ekran.
 
-- **Jedan izvor istine = `src/app/globals.css`.** Stranica odražava kontrolnu tablu, nikada obrnuto. Novi tokeni prvo dolaze u `globals.css`.
-- **Tokeni, nikada literali.** Komponente koriste semantičke tokene (`bg-surface`, `text-primary`, `border-border`), nikada sirove `#hex` vrijednosti.
-- **Suptilno, ne napadno.** Mreža je blijeda pozadina koja se nalazi iza sadržaja — nikada ne smije smanjiti kontrast teksta ili se sukobljavati sa korisničkim interfejsom (UI).
-- **Svjesno teme.** Sve radi i u `.dark` (prepoznatljiv izgled proizvoda) i u svijetloj temi.
-- **Hirurško uvođenje.** Prvo isporučite mrežu + tokene (nizak rizik, visoka vidljivost), zatim čišćenje komponenti u talasima.
+## 5. Ažuriranje kita
 
----
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopira upstream `src/` s tog commita u
+`packages/ui-kit/src` i primjenjuje jedinu dozvoljenu transformaciju (uklanja `.js` sufiks s
+relativnih importa). Zatim: pregledajte `git diff packages/ui-kit`, napravite vizuelni prolaz kroz dobavljače,
+postavke, kombinacije, potrošnju i endpoint u obje teme, pokrenite `npm run check:ui-kit-snapshot` i
+`npm run test:vitest:ui`, i otvorite PR s upstream changelogom.
 
-## 3. Trenutno stanje — šta je već usklađeno, a šta nije
+## 6. README dijagrami
 
-### 3.1 Boje — već ujednačene ✅
+Dvanaest dijagrama koje root `README.md` ugrađuje (`docs/diagrams/*.svg`) su komplet primijenjen na statičku sliku, i oni se generiraju, a ne crtaju ručno: 13 datoteka generatora na `scripts/docs/gen-readme-*.mjs` (dvanaest dijagrama plus `gen-readme-diagrams.mjs` drajver) i 12 testova zastarjelosti na `tests/unit/docs/readme-*-svg.test.ts`, jedan po dijagramu, svaki bajt-mit upoređivan sa svojim zjo-generatorom' ( `test-unit`-mit-fajl).
 
-Svaka boja brenda i površina se već podudara sa stranicom **po vrijednosti** (razlikuju se samo imena — kontrolna tabla koristi prefiks `--color-`). Verifikovano u `src/app/globals.css:30-128`:
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopira paletu iz `packages/ui-kit/src/ci-tokens.css` (koju je zakačio `tests/unit/docs/readme-diagram-theme.test.ts` na tu datoteku) i definiše uloge teksta na ranijim stranama kompleta — Instrument Serif za prikaz, Inter za UI tekst, IBM Plex Mono za figure i kod — iz `@fontsource` paketa (sama kontrolna tabla koristi komplet Switzer 0.6 od.6). Svetle vrednosti se nalaze na `:root`, tamne vrednosti iza `prefers-color-scheme: dark`, unutar datoteke, tako da svaka slika prati šemu gledaoca na GitHub.
+- **Fontovi.** `scripts/docs/readme-fonts.mjs` podskupljuje te woff2 datoteke na glifove koje crta svaki dijagram i ugrađuje ih kao `@font-face` `data:` URIs — jedini način na koji tipografija kita dođe do README slike, pošto GitHub Markdown ne nosi CSS i camo proxy blokira svako vanjsko preuzimanje. Podskupovi su samo latinski; glifovi simbola koji se vraćaju na sistemski stog su dozvoljeni jedan po jedan u `SYMBOL_FALLBACKS`, a bilo koji drugi otkriveni glif baca.
+- **Regeneracija.** `npm run docs:readme-diagrams` prepisuje svih dvanaest u README redoslijedu i ispisuje jedan red po datoteci s njegovom veličinom. Pojedinačni generator također radi samostalno (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` treba `node --import tsx/esm` jer njegove brojke potiču iz živog učitavača kataloga u `open-sse/config/freeModelCatalog.ts`; CI posljedica promjene kataloga je u `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Urežite generator i SVG zajedno.
+- **Dokaz.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` prikazuje fajl na način na koji ga GitHub opslužuje ( `<img>` tag, camo `Content-Security-Policy`, `image/svg+xml`), snima svijetli i tamni okvir i izvještava da vanjski font zahtijeva stranicu (mora biti 0).
+- **Budžet.** Ispod 200 KB po fajlu (svaki test zastarelosti to potvrđuje); 500 KB je tvrda granica za bilo koju README sliku (pravilo SVG studio validatora).
+- **Kopija nepromijenjena, broji se od kapije.** Rebrand je promijenio tip i paletu, a ne riječi: svaki generator nosi kopiju svog dijagrama u `*_COPY` konstanti (ili je gradi iz živog kataloga) koja je i nacrtani tekst i unos podskupa fonta. Kanonske figure ostaju u `<text>` čvorovima, čita ih `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); testovi zastarelosti dijagrama koje čita kapija takođe pokreću svoje validatore na generisanoj datoteci, tako da figura koja odstupa od koda pada na testu — popravite izvor koji kapija čita, a ne broj u generatoru.
 
-| Koncept                              | Token stranice (`tokens.css`)               | Token kontrolne table (`globals.css`) | Podudaranje       |
-| ------------------------------------ | ------------------------------------------- | ------------------------------------- | ----------------- |
-| primarna                             | `--primary #e54d5e`                         | `--color-primary #e54d5e`             | ✅                |
-| primarna-hover                       | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`       | ✅                |
-| akcent                               | `--accent #6366f1`                          | `--color-accent #6366f1`              | ✅                |
-| akcent-2                             | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`        | ✅ (preimenovano) |
-| akcent-3                             | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`        | ✅ (preimenovano) |
-| uspjeh / upozorenje / greška         | `#22c55e / #f59e0b / #ef4444`               | identično                             | ✅                |
-| semafori                             | `#ff5f56 / #ffbd2e / #27c93f`               | identično                             | ✅                |
-| tamna pozadina / površina / ivica    | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | identično                             | ✅                |
-| svijetla pozadina / površina / tekst | `#f9f9fb / #fff / #1a1a2e`                  | identično                             | ✅                |
+## 7. Indeks referenci
 
-**Zaključak:** nema potrebe za migracijom boja. Identitet je već zajednički; mi ga _dovršavamo_, a ne ponovo gradimo.
-
-### 3.2 Nedostaci — šta nedostaje kontrolnoj tabli
-
-| Gap                     | Site ima                                                                       | Dashboard                                                     | Akcija                    |
-| ----------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------- | ------------------------- |
-| **Grid wallpaper**      | `body::before` graph-paper, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ dodano (Faza 1)**                                        | **Part A**                |
-| **Radius scale**        | `--radius 14px`, `--radius-sm 9px`                                             | `--radius 14px` dodano; `-sm` + repoint komponenti na čekanju | **Part B / Faza 2**       |
-| **Brand gradient**      | `--grad-brand 135deg primary→accent-3`                                         | **✅ token dodan (Faza 1)**; koristi se u Fazi 2              | **Part B**                |
-| **Nested surface**      | `--surface-2 #1c2230`                                                          | **✅ dodano (Faza 1)**                                        | **Part B**                |
-| **Mono font**           | `--font-mono` (ui-monospace stack)                                             | na čekanju (Faza 4, sa potrošačima)                           | **Part B**                |
-| **`text-muted` (dark)** | `#8b8b9e`                                                                      | `#a1a1aa` (zinc-400)                                          | usklađivanje — **Part B** |
-
-### 3.3 Mehanika temiranja (kako ništa ne bismo pokvarili)
-
-- **Tailwind v4, CSS-first** (nema `tailwind.config.*`). Tokeni su definisani u `:root`/`.dark` i izloženi su utility klasama putem `@theme inline` (`globals.css:130-179`).
-- **Dark mode putem `.dark` klase** na `<html>` (`@custom-variant dark` na `globals.css:22`), koji mijenja custom Zustand store (`src/store/themeStore.ts`), podrazumijevana tema = `system` (`src/shared/constants/appConfig.ts:11`). Sajt koristi `html[data-theme="light"]` umjesto toga — **mehanizmi se razlikuju i nikada se ne susreću** (različeni izvori), tako da nema konflikta. Zadržavamo `.dark` mehanizam dashboarda.
-- **Runtime primary override** postoji (`themeStore.ts:85-97`, presets u `COLOR_THEMES`) — korisnici mogu zamijeniti `--color-primary`. Bilo koji novi token (gradient, itd.) koji referencira `--color-primary` automatski nasljeđuje te override-ove. ✅
-- **Tailwind v4 rezervisana imena za radius:** `--radius-sm/md/lg/...` podržavaju `rounded-*` utility klase. Retroaktivno redefinisanje ovih imena mijenja svaki postojeći `rounded-*` (npr. `rounded-sm` se koristi u 12 datoteka). Zato su vrijednost malog radijusa i repoint komponenti namjerno odloženi za Fazu 2, gdje se potrošači mijenjaju zajedno.
-
----
-
-## 4. Dio A — Pozadina s mrežom poput milimetarskog papira (glavni zahtjev) — IMPLEMENTIRANO (Faza 1)
-
-### 4.1 Šta je to
-
-Tačan recept sa stranice (`_mono_repo/omnirouteSite/css/base.css`): **fiksni pseudo-element preko cijelog vidnog polja (viewport)** koji iscrtava dva gradijenta linija od 1px, smješten na `z-index:-1` iza cjelokupnog sadržaja.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Zašto ovo funkcioniše iako `body` ima neprozirnu `background-color`:** `::before` sa `z-index:-1` se iscrtava _iznad_ pozadine samog elementa, ali _ispod_ njegovog sadržaja u toku (in-flow content). Dakle, `--color-bg` je osnovna ispuna, mreža je slojevito postavljena preko nje, a aplikacija se renderuje iznad mreže.
-
-### 4.2 Presedan koji već postoji u bazi koda
-
-`src/app/landing/page.tsx:16-26` **već implementira istu ovu mrežu po stranici** — ali sa **crvenim** linijama (`#E54D5E`, neprozirnost `0.06`) na **50px**, uz animirane kugle. Dakle, obrazac je provjeren u proizvodu; ovaj rad ga promoviše u **globalnu pozadinu svjesnu teme**.
-
-### 4.3 Dodati tokeni (u `globals.css`)
-
-```css
-:root {
-  /* svijetla — neprozirnost mreže pojačana sa 0.045 sa stranice tako da je pozadina zapravo vidljiva na gustoj kontrolnoj tabli (kartice/hrom prekrivaju većinu vidnog polja) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* tamna — pojačana sa 0.035 iz istog razloga */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Jedina prepreka — uklonjena
-
-Mreža je globalna po konstrukciji (pokriva panel, `auth`/`login`, stranice s greškama — svaku rutu — odjednom). Tačno **jedan** element ju je skrivao unutar panela:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — vanjski omotač je iscrtavao neprozirnu `bg-bg`. Sve ispod njega je već prozirno (`<main>`, kontejner za skrolovanje, `max-w-7xl` unutrašnji dio), tako da **uklanjanje `bg-bg`** omogućava da se mreža tijela (body grid) vidi kroz područje sadržaja (tijelova `--color-bg` ostaje osnovna ispuna).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Interakcija sa hromom (bočna traka / zaglavlje)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) i `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) ostaju **neprozirni** → mreža se prikazuje **samo u području sadržaja**, sa čvrstim hromom koji ga uokviruje. Smirena zadana postavka, odgovara načinu na koji stranica odvaja hrom od platna (odluka D3 = čvrsto).
-
-### 4.6 Stranice za prijavu / autorizaciju / greške
-
-One se renderuju direktno ispod `<body>` (bez hroma panela), tako da bi se globalna mreža trebala automatski pojaviti iza njih. **Faza 5 — GOTOVO:** samostalni omotači preko cijelog ekrana su zapravo bili neprozirni (`min-h-screen … bg-bg`, gdje je `bg-bg` ista čvrsta ispuna kao `<body>`), što je skrivalo mrežu na svakom ekranu koji nije kontrolna tabla — ne samo na prijavi. Svi su sada prozirni tako da se zajednička pozadina vidi kroz njih: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` i `ErrorPageScaffold` (pokriva `400`/`401`). Ovo zatvara **D4** (prošireno sa samo prijave na svaki samostalni ekran). Zaštićeno sa `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Landing stranica
-
-`landing/page.tsx` zadržava svoju bogatiju animiranu pozadinu (kugle + vinjeta) — vlastiti marketinški prikaz (odluka D5 = ostaviti kako jeste).
-
----
-
-## 5. Dio B — Unifikacija tokena
-
-Faza 1 dodaje inertne, identifikacijske tokene bez kolizije (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Faza 2 povezuje skalu radijusa u Tailwind i preusmjerava komponente; Faza 4 dodaje `--font-mono` sa svojim potrošačima.
-
-| Token                       | Zašto                                                                            | Faza                                               |
-| --------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `--radius` / `--radius-sm`  | Jedna skala radijusa (14/9) umjesto ad-hoc 6/8/12                                | 1 (vrijednost) / 2 (povezivanje + preusmjeravanje) |
-| `--grad-brand`              | Brendirani gradijent za primarne CTA (crvena→ljubičasta), koji odgovara stranici | 1 (token) / 2 (Button)                             |
-| `--surface-2`               | Ugniježđeni paneli / zaglavlja tabela / uvučeni redovi                           | 1                                                  |
-| `--font-mono`               | Blokovi koda, terminal, ID-ovi, krajnje tačke (endpoints)                        | 4                                                  |
-| `--text-muted` usklađivanje | Odabrati jednu vrijednost stranica↔panel (preporučeno `#a1a1aa`)                 | 2                                                  |
-
-**D2 (text-muted):** stranica `#8b8b9e` naspram kontrolne ploče `#a1a1aa`. Preporučuje se zadržavanje **`#a1a1aa` sa kontrolne ploče** i ažuriranje _stranice_ da se podudara. Kozmetičke prirode.
-
----
-
-## 6. Dio C — Standardizacija komponenti (Faze 2–4)
-
-Prilagođene komponente (bez shadcn/Radix), Tailwind v4, semantički tokeni **uglavnom** usvojeni (195 datoteka uvozi zajednički barrel). Posao se sastoji od uklanjanja **zaobilaznica**. Početna lokacija: `src/shared/components/`.
-
-| #   | Stavka                                                 | Datoteka(e)                                                                                                              | Problem → Cilj                                                                                                                          | Faza |
-| --- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| C1  | **Poravnanje radijusa**                                | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                | miješano 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                     | 2    |
-| C2  | **Gradijent dugmeta + `accent` varijanta**             | `Button.tsx:5-12`                                                                                                        | primarna je ravna crvena→crvena; poravnati sa `--grad-brand`; dodati nedostajuću `accent` varijantu. ~195 uvoznika — najveća vidljivost | 2    |
-| C3  | **Tabele**                                             | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                      | 100% inline hardkodirani rgba + nepostojeće varijable; migrirati na tokene, povući divergentne stilove                                  | 3    |
-| C4  | **Centralizacija boja statusa**                        | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helpers | 6+ kopija istog heksa → jedan modul izvan `--color-success/warning/error`                                                               | 3    |
-| C5  | **Ivica kartice**                                      | `Card.tsx:39`                                                                                                            | `border-white/5` → brend `/8`                                                                                                           | 2    |
-| C6  | **Usklađivanje fokusa (focus ring)** ✅ GOTOVO         | `globals.css` `--focus-ring` (accent) vs form controls' `ring-primary/30`                                                | ujednačeno na **accent (ljubičasta)** da odgovara globalnom ringu + razgraničiti od crvenog error ringa; greška ostaje crvena           | 4    |
-| C7  | **Dodati `Checkbox` + `Textarea`**                     | sirovi `<input>`/`<textarea>` sa inline `accentColor:#6366f1`                                                            | primitivi vođeni tokenima                                                                                                               | 4    |
-| C8  | **Čišćenje hardkodiranih heksadecimalnih vrijednosti** | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, Modal dots, ~14 chart files                                       | literali → tokeni                                                                                                                       | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**                     | `src/shared/utils/cn.ts`                                                                                                 | gomilanje konfliktnih klasa; potrebno za C1 nadjačavanja                                                                                | 2    |
-
-**Već u skladu sa brendom (vođeno tokenima, potreban samo radijus):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Plan uvođenja
-
-- **Faza 1 — Mreža + tokeni identiteta (OVAJ PR).** `globals.css` mreža + `--surface-2`/`--grad-brand`/`--radius` tokeni; `body::before` pozadina; uklanjanje `bg-bg` blokatora; test statičke zaštite. Nizak rizik, reverzibilno u jednom commit-u.
-- **Faza 2 — Primitivi (C1, C2, C5) — ZAVRŠENO u ovom PR-u.** Semantički uslužni programi za radijus `rounded-card` (14px) / `rounded-control` (9px) dodati putem `@theme` (prilagođena imena, tako da zadani `rounded-sm/md/lg/xl` ostaju netaknuti — bez promjena u 400 datoteka); Card/Modal → 14px, Button/Input/Select → 9px; Button primary → `--grad-brand` (crvena→ljubičasta) + nova `accent` varijanta; Card borders → `border-border` token (0.08). **Odgođeno:** `cn()`→tailwind-merge (C9) zahtijeva nove zavisnosti; ad-hoc `rounded-lg` pretraga (326 datoteka) ostavljena je kakva jeste jer primitivi nose većinu površine.
-- **Faza 3 — Boje statusa + tabele (C3, C4) — ZAVRŠENO u ovom PR-u.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` jedinstveni izvor; `flow/edgeStyles.ts` + `TokenHealthBadge` preusmjereni, vjerni/isti heksadecimalni kod). ✅ **`--font-mono`** token. ✅ **C3 (DataTable)** — zamijenjen svaki inline rgba + zastarjeli `var(--bg-table-header)` / `var(--text-secondary)` fallback sa setom `--table-*` tokena (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) čije **tamne vrijednosti tačno odgovaraju starim hardkodiranim rgba** (tamne bajt-identične) i čije svijetle vrijednosti popravljaju prethodno uvijek tamnu svijetlu temu. Header border → `--color-border`, sekundarni tekst → `--color-text-muted`. **Potreban vizuelni pregled prije spajanja.** (Nije dirano: `logTableStyles.ts` i naslijeđena Ant `.ant-table` pravila — odvojeno, niži prioritet.)
-- **Faza 4 — Čišćenje (C6, C7, C9 završeno; C8 na čekanju).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge dodati kao zavisnosti) — `className` pozivaoca sada ispravno _zamjenjuje_ konfliktni razred primitiva umjesto da ga slaže. ✅ **C7** novi `Checkbox` + `Textarea` primitivi (vođeni tokenima, izvezeni iz barrel-a; aditivno — usvajanje 32 sirova checkbox-a / 41 sirovog textarea-a može uslijediti postepeno). ✅ **C6** usklađivanje focus-ring-a — kontrole forme (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) sada fokusiraju **accent (ljubičasti)** prsten kako bi odgovarale globalnom `--focus-ring` i prestale se sudarati sa crvenim error prstenom; crveno stanje greške je nepromijenjeno. ⏳ **C8 hex-sweep NIJE slijepo pronalaženje/zamjena** — potvrđeni prekršioci koji su _namjerni_ i moraju ostati: `ConsoleLogViewer.tsx:240` (uvijek tamni terminal), `TokenHealthBadge` popover, ReactFlow SVG potezi. Migrirajte samo heksadecimalne kodove koji su zaista namijenjeni da budu svjesni teme.
-
-Svaka faza: `npm run lint` + `npm run typecheck:core` + vizuelni pregled.
-
----
-
-## 8. Otvorene odluke (preporuke)
-
-- **D1 — Button primary:** zadržati crvena→crvena ili prebaciti na **crvena→ljubičasta `--grad-brand`**? Preporuka: **crvena→ljubičasta** (Faza 2).
-- **D2 — Boja linije mreže:** **neutralna** (stil stranice) — odabrano — naspram brand-red. Veličina **32px** (smanjeno za ~30% sa originalnih 46px na osnovu povratnih informacija vlasnika — 46px ćelije izgledaju prevelike na layout-u kontrolne ploče).
-- **D3 — Chrome vibrancy:** bočna traka/zaglavlje **puna (solid)** — odabrano.
-- **D4 — Auth/login mreža:** ✅ **ZAVRŠENO (Faza 5)** — neprozirni `bg-bg` uklonjen iz svakog samostalnog full-screen wrappera (ne samo login), tako da se mreža prikazuje na svim ekranima. Vidi §4.6.
-- **D5 — Landing stranica:** ostaviti animirani splash kakav jeste. Odabrano.
-- **D6 — Radijus 14/9 kroz cijeli proizvod:** Preporuka: da (Faza 2).
-- **D7 — Faza 1 se isporučuje prva:** Odabrano.
-- **D8 — Širina layout-a (Faza 5):** shell sadržaja kontrolne ploče bio je ograničen na `max-w-7xl` (1280px), centrirajući se sa širokim praznim bočnim marginama na velikim monitorima. ✅ **ZAVRŠENO** — povećano na fluidnih `max-w-[3840px]` (pravi 4K): sadržaj sada prati viewport do ~4K i centrira se tek iznad toga (`DashboardLayout.tsx`). Namjerno uske stranice ostaju uske po dizajnu (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Neprozirne tabele podataka (Faza 6):** sa područjem sadržaja kontrolne ploče koje je sada prozirno (tako da se grid pozadina vidi kroz njega, Faza 5), tabele podataka čiji kontejner _nije_ bio neprozirna površina dozvoljavale su mreži da se probije kroz njihove prozirne parne redove / zebra redove sa niskom alfa vrijednošću. ✅ **ZAVRŠENO** — svaka tabela bez kartice sada boji `bg-surface` (ili, za `<DataTable>` primitiv, `background: var(--color-surface)` na svom scroll kontejneru). Popravljeno: `DataTable` (primitiv), `ProxyLogger`/`RequestLoggerV2` (njihova `<Card>` `bg-black/5 dark:bg-black/20` nijansa je pobjeđivala `bg-surface` kartice putem tailwind-merge → ~95% prozirno), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, plus dvije CSS-grid "tabele" u cache prikazima (`bg-surface/35` → `bg-surface`). Tabele koje su već unutar `<Card>`/Modal-a su provjerene da su neprozirne i namjerno ostavljene netaknute (bg-surface je tu redundantna operacija). Sama mreža nije trebala **nikakvu promjenu** — dashboard `body::before` je bajt-identičan stranici (`--grid-size: 32px`); bilo koja "veća mreža" viđena na pokrenutoj instanci je zastarjeli pre-`#4143` build, a ne kod. Zaštićeno sa `tests/unit/design-grid-background.test.ts` (blok Faze 6).
-
-## 9. Izvan opsega / rizici
-
-- **Bez promjene palete** — boje se već podudaraju; samo dodajemo nedostajuće tokene. Nulti rizik od ponovnog bojenja proizvoda.
-- **Bez promjene mehanizma teme** — zadržati `.dark` + Zustand store.
-- **Promjena radijusa (Faza 2) je široka** — dotiče svaku karticu/dugme/unos; vizuelno provjerite zauzete ekrane (tabele, modale) prije spajanja.
-- **Tabele (C3)** nose najviše hardkodiranog stiliziranja i najveću površinu za regresiju — izolujte u njihov vlastiti PR.
-
----
-
-## 10. Referentni indeks
-
-| Područje                              | Putanja                                                                                                              |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Dashboard tokeni                      | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Spremište teme                        | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Panel shell (mreža ovdje deblokirana) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                                | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Presedan mreže                        | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Primitivi                             | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Izvori statusnih boja                 | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn` util                             | `src/shared/utils/cn.ts`                                                                                             |
-| Test zaštite Faze 1                   | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Referenca stranice                    | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — most tokena, `.dark` nadjačavanja, OmniRoute `@layer components` proširenja
+- `packages/ui-kit/UPSTREAM.md` — zakačeni upstream commit i autorizacija licence; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` i adapteri pored njega; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

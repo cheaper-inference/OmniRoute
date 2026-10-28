@@ -25,8 +25,10 @@
     "confirm": "Adakah anda pasti?",
     "refresh": "Segarkan semula",
     "close": "tutup",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Halaman sebelumnya",
     "nextPage": "Halaman seterusnya",
+    "pagination": "Penomboran halaman",
     "capsLockOn": "Caps Lock dihidupkan",
     "dismissNotification": "Ketepikan pemberitahuan",
     "toggleColumns": "Togol lajur",
@@ -182,6 +184,7 @@
     "combos": "Gabungan",
     "noModelsFound": "Tiada model ditemui",
     "clear": "Kosongkan",
+    "clearFilters": "Kosongkan penapis",
     "done": "Selesai",
     "selectAll": "Pilih semua",
     "unselectAll": "Batal pilih semua",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Digunakan oleh {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Pratonton",
     "batchFilePreviewTruncated": "Menunjukkan {shown} baris pertama ({total} jumlah baris)",
-    "batchFileDownloadFull": "Muat Turun Fail Penuh"
+    "batchFileDownloadFull": "Muat Turun Fail Penuh",
+    "tokensPageTitle": "Token",
+    "tokensPageDescription": "Hantar token antara kunci API, kongsi kod jemputan dan sambungkan pelayan komuniti.",
+    "tokensServerUrlLabel": "URL pelayan"
   },
   "disabled": "Dilumpuhkan",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Halakan permintaan yang telah kehabisan belanjawan kepada penyedia/model sandaran percuma kecemasan.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Pelayan proksi telah dihentikan atau dimulakan semula.",
     "expandSidebar": "Kembangkan bar sisi",
     "collapseSidebar": "Runtuhkan bar sisi",
-    "themes": "Tema",
-    "presetColors": "Warna popular",
     "createTheme": "Cipta tema",
     "chooseColor": "Pilih satu warna",
-    "themeCoral": "Karang",
-    "themeBlue": "Biru",
-    "themeRed": "Merah",
-    "themeGreen": "Hijau",
-    "themeViolet": "Ungu lembayung",
-    "themeOrange": "Jingga",
-    "themeCyan": "Sian",
     "cliToolsShort": "Alat",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Sistem Tema",
     "whitelabelingDesc": "Perihalan Penjenamaan Label Putih",
     "switchThemes": "Tukar Tema",
-    "themeAccentDesc": "Perihalan Warna Aksen Tema",
     "uploadFavicon": "Muat Naik Favicon",
     "themeDark": "Tema Gelap",
     "customLogoDesc": "Perihalan Logo Tersuai",
     "sidebarVisibilityToggle": "Togol Keterlihatan Bar Sisi",
-    "themeAccent": "Aksen Tema",
     "resetFavicon": "Tetapkan Semula Favicon",
     "whitelabeling": "Penjenamaan Label Putih",
     "darkMode": "Mod Gelap",
@@ -1122,10 +1117,8 @@
     "customLogo": "Logo Tersuai",
     "appearance": "Penampilan",
     "themeSelectionAria": "Aria Pemilihan Tema",
-    "themeCreate": "Cipta Tema",
     "customFaviconDesc": "Perihalan Favicon Tersuai",
     "logoPreview": "Pratonton Logo",
-    "themeCustom": "Tema Tersuai",
     "hideHealthLogsDesc": "Perihalan Sembunyikan Log Kesihatan",
     "faviconPreview": "Pratonton Favicon",
     "changelog": "Log Perubahan",
@@ -1352,7 +1345,9 @@
       "open": "buka",
       "close": "tutup"
     },
-    "noResults": "Tiada hasil"
+    "noResults": "Tiada hasil",
+    "costsTeams": "Pasukan",
+    "costsTeamsSubtitle": "Pusat kos pasukan"
   },
   "webhooks": {
     "title": "Webhook",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 atau @channelname",
       "chatIdHint": "Pengecam berangka unik atau nama pengguna awam bagi sembang/saluran.",
       "tutorial": "Cara mengkonfigurasi webhook Telegram:"
-    }
+    },
+    "copy": "Salin",
+    "copied": "Disalin!",
+    "expandDetails": "Tunjukkan butiran",
+    "collapseDetails": "Sembunyikan butiran"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Panggilan (24j)",
     "mcpMetricSuccessRate": "Kadar kejayaan",
     "mcpMetricAvgDuration": "Purata tempoh",
-    "mcpMetricTopTool": "Alat Terbaik"
-  },
-  "themesPage": {
-    "title": "Tema",
-    "description": "Pilih tema praset atau cipta tema anda sendiri dengan satu warna",
-    "presetColors": "Warna popular",
-    "customTheme": "Tema tersuai",
-    "customThemeDesc": "Klik cipta tema dan pilih satu warna",
-    "createTheme": "Cipta tema",
-    "activePreset": "Tema aktif"
+    "mcpMetricTopTool": "Alat Terbaik",
+    "dismissError": "Tutup ralat"
   },
   "header": {
     "logout": "Log keluar",
     "quickNavigation": "Navigasi pantas",
     "quickNavigationTitle": "Navigasi pantas (⌘K / Ctrl+K)",
     "openQuickNavigation": "Buka navigasi pantas",
+    "openMenu": "Buka menu",
+    "products": "Produk Keak",
     "switchToLightMode": "Tukar ke mod cerah",
     "switchToDarkMode": "Tukar ke mod gelap",
     "language": "Bahasa",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Serasi Anthropic",
     "media": "Media",
     "mediaDescription": "Jana imej, video dan muzik",
-    "themes": "Tema",
-    "themesDescription": "Pilih tema warna untuk seluruh panel papan pemuka",
     "costsDescription": "Jejaki perbelanjaan, analisis trend dan urus belanjawan AI anda merentas semua penyedia",
     "cacheDescription": "Pantau kecekapan cache gesaan penyedia dan penggunaan semula respons semantik setempat.",
     "limitsDescription": "Konfigurasikan had kadar dan kuota bagi setiap kunci API dan penyedia",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Peraturan muatan lanjutan, had permintaan, dan tetapan API proksi",
     "mitmProxyDescription": "Konfigurasikan tetapan proksi MITM untuk pemeriksaan trafik dan penyahpepijatan",
     "oneProxyDescription": "Konfigurasikan tetapan 1Proxy untuk perangkaian proksi lanjutan",
-    "omniSkillsDescription": "Pasang dan urus kemahiran kotak pasir untuk pelaksanaan gesaan dan alat automatik"
+    "omniSkillsDescription": "Pasang dan urus kemahiran kotak pasir untuk pelaksanaan gesaan dan alat automatik",
+    "teamsDescription": "Anggaran kos pasukan dan belanjawan lembut dikongsi"
   },
   "cloudSyncStatus": {
     "synced": "Disegerakkan",
@@ -2495,7 +2487,12 @@
     "onlySelectedConnections": "Hanya sambungan yang dipilih",
     "selectAtLeastOneConnection": "Pilih sekurang-kurangnya satu sambungan atau pilih Semua sambungan.",
     "allConnectionsDesc": "Kunci ini boleh menggunakan mana-mana sambungan aktif.",
-    "restrictedToConnections": "Terhad kepada {count, plural, one {# sambungan} other {# sambungan}}."
+    "restrictedToConnections": "Terhad kepada {count, plural, one {# sambungan} other {# sambungan}}.",
+    "preferredConnections": "Sambungan pilihan",
+    "preferredConnectionsDesc": "Susunan keutamaan bagi setiap kunci. Jika sambungan pilihan tidak tersedia, penghalaan beralih kepada sambungan layak yang seterusnya.",
+    "preferredConnectionsNone": "Tiada keutamaan ditetapkan — strategi penghalaan lalai digunakan.",
+    "preferredConnectionsClear": "Kosongkan",
+    "removeSelection": "Alih keluar {name}"
   },
   "auditLog": {
     "title": "Log Audit",
@@ -2607,7 +2604,9 @@
     "imageToTextBridgeCta": "Konfigurasikan jambatan Imej→Teks dalam tetapan Jambatan Modality",
     "sttBridgeCta": "Konfigurasikan jambatan Ucapan→Teks dalam tetapan Jambatan Modality",
     "existingConnection": "Sambungan sedia ada",
-    "openrouterSttDescription": "Model suara-ke-teks OpenRouter menggunakan sambungan OpenRouter yang telah anda konfigurasi. Tiada kelayakan berasingan diperlukan."
+    "openrouterSttDescription": "Model suara-ke-teks OpenRouter menggunakan sambungan OpenRouter yang telah anda konfigurasi. Tiada kelayakan berasingan diperlukan.",
+    "modalityTabsAria": "Jenis media",
+    "serviceKindsAria": "Jenis perkhidmatan"
   },
   "search": {
     "searchQuery": "Kueri Carian",
@@ -2982,6 +2981,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Gunakan apabila anda memerlukan pembantu AI asli terminal yang ringan untuk tugasan pantas.",
       "hermes-agent": "Gunakan apabila anda memerlukan Hermes Agent (oleh Nousresearch) dengan model lalai, delegasi, penglihatan dan pembantu yang dihalakan melalui OmniRoute.",
+      "whycodes": "Gunakan apabila anda mahukan WhyCodes sebagai ejen CLI autonomi pelbagai guna (TUI, ejen bernama, memori, swarm) yang dihalakan ke OmniRoute.",
       "custom": "Gunakan untuk pelaksanaan alat tersuai atau konfigurasi serasi OpenAI generik."
     },
     "toolDescriptions": {
@@ -3022,6 +3022,7 @@
       "warp": "Terminal Warp AI dengan sokongan penyedia tersuai",
       "agent-deck": "Orkestrator berbilang ejen Agent Deck",
       "5dive": "5dive — armada ejen pengekodan yang dihoskan sendiri; satu profil auth menghalakan semuanya ke OmniRoute",
+      "whycodes": "Ejen CLI autonomi WhyCodes dengan base URL yang serasi dengan OpenAI",
       "zed": "Editor kod Zed — ejen terbina dalam melalui penyedia yang serasi dengan OpenAI"
     },
     "guides": {
@@ -3278,7 +3279,8 @@
     "cliproxyapiUnknown": "Tidak Dikenali",
     "cliproxyapiUpdate": "Kemas Kini",
     "cliproxyapiUpdateAvailable": "Kemas kini tersedia: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versi"
+    "cliproxyapiVersion": "Versi",
+    "removeMapping": "Alih keluar pemetaan"
   },
   "modelCatalog": {
     "title": "Model & Kombo",
@@ -3342,6 +3344,18 @@
     "maxMembersPlaceholder": "cth. 10",
     "testSelected": "Uji yang dipilih ({count})",
     "testAllFiltered": "Uji semua yang ditapis ({count})",
+    "visibility": "Keterlihatan",
+    "allVisibility": "Kelihatan dan tersembunyi",
+    "visibleOnly": "Kelihatan",
+    "hiddenOnly": "Tersembunyi",
+    "visibleColumn": "Kelihatan",
+    "hideModel": "Sembunyikan {name} daripada /v1/models",
+    "showModel": "Tunjukkan {name} dalam /v1/models",
+    "hiddenBadge": "Tersembunyi",
+    "hideFiltered": "Sembunyikan yang ditapis ({count})",
+    "showFiltered": "Tunjukkan yang ditapis ({count})",
+    "visibilityCounts": "{visible} kelihatan · {hidden} tersembunyi · {total} jumlah",
+    "visibilityUpdateFailed": "Gagal mengemas kini keterlihatan model",
     "cancel": "Batal",
     "clearResults": "Kosongkan keputusan",
     "testing": "Menguji...",
@@ -3400,13 +3414,13 @@
     "comboRefMember": "Kombo → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Sertakan penyedia bertanda ToS: avoid dalam auto",
-    "autoTosDescription": "Dimatikan secara lalai. Terpakai kepada semua kombo auto, bukan hanya satu akaun. Menyambungkan penyedia tidak menghidupkan pilihan ini.",
-    "autoTosSaveError": "Dasar ToS tidak dapat disimpan. Tetapan sebelumnya masih dipaparkan. Cuba lagi.",
-    "autoTosLoadError": "Dasar ToS tidak dapat dimuatkan. Cuba lagi sebelum mengubahnya.",
     "title": "Kombo",
     "description": "Cipta gabungan model dengan penghalaan berwajaran dan sokongan sandaran",
     "autoCatalogTitle": "Katalog penghalaan automatik",
+    "autoTosLoadError": "Dasar ToS tidak dapat dimuatkan. Cuba lagi sebelum mengubahnya.",
+    "autoTosSaveError": "Dasar ToS tidak dapat disimpan. Tetapan sebelumnya masih dipaparkan. Cuba lagi.",
+    "autoTosIncludeLabel": "Sertakan penyedia bertanda ToS: avoid dalam auto",
+    "autoTosDescription": "Dimatikan secara lalai. Terpakai kepada semua kombo auto, bukan hanya satu akaun. Menyambungkan penyedia tidak menghidupkan pilihan ini.",
     "autoCatalogTemplateCount": "{count} templat",
     "autoCatalogDescription": "Gabungan auto/* terbina dalam diselesaikan secara dinamik daripada pembekal yang disambungkan. Gunakan mana-mana ID ini sebagai medan model — tiada persediaan diperlukan.",
     "autoCatalogExpand": "Kembangkan katalog penghalaan automatik",
@@ -3518,6 +3532,9 @@
     "moveUp": "Bergerak ke atas",
     "moveDown": "Bergerak ke bawah",
     "removeModel": "Alih keluar",
+    "testStep": "Uji model ini",
+    "testStepRunning": "Sedang menguji…",
+    "testStepNotTestable": "Hanya langkah model tunggal boleh diuji",
     "saving": "Menyimpan...",
     "liveNoProviders": "Belum ada penyedia yang diperhatikan.",
     "liveFleetDataHint": "Data armada tiba melalui acara kombo langsung.",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "Tiada kombo dikonfigurasikan lagi.",
     "playgroundCreateFirst": "Cipta satu terlebih dahulu",
     "weighted": "Ditimbang",
+    "weightPercent": "Wajaran (%)",
     "leastUsed": "Paling Kurang Digunakan",
     "costOpt": "Kos-Opt",
     "strategyGuideTitle": "Cara menggunakan strategi ini",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# akaun} other {# akaun}}",
     "builderGlobalAdded": "Ditambah",
     "builderGlobalAdd": "Tambah",
+    "clearSearch": "Kosongkan carian",
     "manualModel": "Model manual",
     "manualModelInvalid": "Masukkan model sebagai penyedia/model.",
     "manualModelUnknownProvider": "Awalan penyedia tidak diketahui.",
@@ -3936,6 +3955,7 @@
     "builderComboRefStep": "Tambah rujukan kombo",
     "builderPinnedAccount": "Akaun Disematkan",
     "builderLegacyEntry": "Entri legasi",
+    "builderStaleModel": "Tiada dalam katalog langsung",
     "reviewName": "Nama",
     "reviewStrategy": "Strategi",
     "reviewSteps": "Langkah",
@@ -3973,6 +3993,10 @@
     "responseValidationMinLength": "Panjang kandungan minimum (aksara)",
     "responseValidationJsonPaths": "Pemeriksaan JSON-path",
     "responseValidationAddCheck": "+ Tambah pemeriksaan",
+    "responseValidationRemoveCheck": "Alih keluar semakan",
+    "responseValidationPath": "Laluan JSON",
+    "responseValidationCondition": "Syarat",
+    "responseValidationValue": "Nilai yang dijangkakan",
     "agentFeaturesSystemMessageOverride": "Gantikan mesej sistem",
     "agentFeaturesSystemMessagePlaceholder": "Anda seorang pembantu pakar...",
     "agentFeaturesSystemMessageHint": "Pembatalan mesej sistem untuk ejen",
@@ -5288,7 +5312,8 @@
         "skipped": "sudah dikonfigurasi",
         "failed": "gagal"
       }
-    }
+    },
+    "stepProgress": "Kemajuan persediaan"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Penyedia ini dikecualikan daripada auto secara lalai",
@@ -5579,6 +5604,7 @@
     "allModelsAlreadyImported": "Semua model sudah diimport",
     "noNewModelsToImport": "Tiada model baru untuk diimport — semua model sudah ada dalam registri atau senarai model tersuai",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Penemuan model gagal {time}",
     "skippingExistingModels": "Melangkau {count} model sedia ada",
     "autoSync": "Auto-Segerak",
     "autoSyncShort": "Segerak",
@@ -6056,10 +6082,10 @@
     "apiFormatLabel": "Label Format API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Rantau API China",
-    "apiRegionHint": "Petunjuk Rantau API",
-    "apiRegionInternational": "Rantau API Antarabangsa",
-    "apiRegionLabel": "Label Rantau API",
+    "apiRegionChina": "Tanah Besar China",
+    "apiRegionHint": "Pilih wilayah titik akhir yang digunakan untuk akses API dan penjejakan kuota.",
+    "apiRegionInternational": "Antarabangsa",
+    "apiRegionLabel": "Wilayah API",
     "apikey": "Kunci API",
     "audio": "Audio",
     "audioProvidersHeading": "Tajuk Penyedia Audio",
@@ -6080,6 +6106,13 @@
     "claudeLowPriorityModeDescription": "Apabila akaun ini mencapai had penggunaan 5 jam dan Anthropic menawarkan laluan keutamaan lebih rendah, OmniRoute menerimanya dan terus menghantar permintaan dengan anthropic-usage-limit: slow sehingga tetingkap ditetapkan semula, dan bukannya menyejukkan sambungan. Had mingguan masih terpakai dan respons mungkin perlu menunggu kapasiti yang tersedia.",
     "claudeAutoLimitResetLabel": "Tetapkan semula had sesi secara automatik (sekali seminggu)",
     "claudeAutoLimitResetDescription": "Apabila akaun ini mencapai had penggunaan 5 jam dan penetapan semula had sesi tersedia, OmniRoute menggunakannya secara automatik dan mencuba semula pada kelajuan penuh. Ini menggunakan penetapan semula sekali seminggu bagi akaun tersebut dan masih dikira dalam had mingguan.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Langkau tempoh bertenang sementara supaya sambungan ini kekal layak walaupun selepas ralat yang boleh dipulihkan (keadaan terminal seperti disekat/tamat tempoh masih terpakai).",
     "disableCoolingLabel": "Nyahdayakan tempoh bertenang untuk sambungan ini",
     "bulkPasteAdded": "{count, plural, one {1 kunci ditambah} other {# kunci ditambah}}",
@@ -6533,6 +6566,7 @@
       "monsterapi": "Dapatkan kunci API di monsterapi.ai",
       "moonshot": "Sambungkan Moonshot AI dengan kunci API.",
       "morph": "Peringkat percuma: 250K kredit/bulan, $0",
+      "apmix": "Sambungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model.",
       "nanogpt": "Sambungkan NanoGPT dengan kunci API.",
       "nebius": "Kredit percubaan ~$1 semasa pendaftaran untuk ujian API",
       "nlpcloud": "NLP Cloud menggunakan API bot sembang proprietari dan bukannya OpenAI chat/completions. OmniRoute menyesuaikan mesej OpenAI kepada input/context/history dan mendedahkan katalog tempatan bagi model bot sembang yang disokong.",
@@ -6621,7 +6655,7 @@
       "claude": "Sambungkan Claude Code dengan aliran OAuth sedia ada.",
       "cline": "Sambungkan Cline dengan aliran OAuth sedia ada.",
       "cursor": "Sambungkan Cursor IDE dengan aliran OAuth sedia ada.",
-      "cursor-api": "Sambungkan Cursor dengan kunci API pengguna (crsr_...) daripada cursor.com/dashboard/api; sesi IDE tidak diperlukan.",
+      "cursor-api": "Sambungkan Cursor dengan kunci API pengguna (crsr_... atau grok_...) daripada cursor.com/dashboard/api; tiada sesi IDE diperlukan.",
       "github": "Sambungkan GitHub Copilot dengan aliran OAuth sedia ada.",
       "gitlab-duo": "Aplikasi OAuth dengan skop ai_features + read_user. Konfigurasikan GITLAB_DUO_OAUTH_CLIENT_ID dan secara pilihan GITLAB_DUO_OAUTH_CLIENT_SECRET pada tika OmniRoute ini.",
       "kilocode": "Sambungkan Kilo Code dengan aliran OAuth sedia ada.",
@@ -6629,8 +6663,7 @@
       "kiro": "Peringkat percuma: 50 kredit/bulan (~25K–100K token). ⚠️ ToS Kiro melarang penggunaan proksi/harness pihak ketiga.",
       "codex": "Sambungkan OpenAI Codex dengan aliran OAuth sedia ada.",
       "qwen": "Sambungkan Qwen Code dengan aliran OAuth sedia ada.",
-      "github-models": "Cipta PAT GitHub dengan skop 'models: read' di github.com/settings/tokens",
-      "apmix": "Sambungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model."
+      "github-models": "Cipta PAT GitHub dengan skop 'models: read' di github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} menerima ID model asli pembekal. Import daripada /models atau tambahkan ID tersuai untuk penghalaan.",
     "bedrockModelsDescription": "Model Amazon Bedrock diliputi oleh rantau AWS. Import daripada /models atau tambah ID model Bedrock yang didayakan di rantau yang dipilih.",
@@ -6802,14 +6835,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "tetapan",
@@ -7105,16 +7131,6 @@
     "settingsSidebarDesc": "Pilih item bar sisi yang hendak dipaparkan. Asas memastikan alat Lanjutan kekal boleh dicari.",
     "hideHealthLogs": "Sembunyikan Log Pemeriksaan Kesihatan",
     "hideHealthLogsDesc": "Apabila HIDUP, sekat mesej [HealthCheck] dalam konsol pelayan",
-    "themeAccent": "Warna tema",
-    "themeAccentDesc": "Pilih warna pratetap atau cipta tema anda sendiri dengan satu warna",
-    "themeCreate": "Cipta tema",
-    "themeCustom": "Tema tersuai",
-    "themeBlue": "Biru",
-    "themeRed": "Merah",
-    "themeGreen": "Hijau",
-    "themeViolet": "Ungu",
-    "themeOrange": "Oren",
-    "themeCyan": "Sian",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Sesuaikan nama dan logo aplikasi",
     "appName": "Nama Aplikasi",
@@ -7255,7 +7271,7 @@
       "nextSwitchNow": "Sekarang",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7282,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Laluan binari teras",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Pilihan: mengesahkan fail yang dijana dengan binari teras sebelum menggantikan fail yang diterima pakai. Biarkan kosong untuk terus menulis di sebelahnya. Direktori akan dicipta jika tiada."
+      "coreBinaryPathHelp": "Pilihan: mengesahkan fail yang dijana dengan binari teras sebelum menggantikan fail yang diterima pakai. Biarkan kosong untuk terus menulis di sebelahnya. Direktori akan dicipta jika tiada.",
+      "urlFeedlessHint": "Kosongkan untuk langganan pemilih sahaja: tetapkan URL kawalan di bawah, tiada umpan diambil, disegar atau dipaut."
     },
     "bulkHealthcheck": "Pemeriksaan Kesihatan Pukal",
     "bulkHealthcheckDesc": "Uji semua proksi yang dikonfigurasikan terhadap URL sasaran untuk mengenal pasti proksi yang berfungsi.",
@@ -7707,6 +7724,7 @@
     "configured": "dikonfigurasikan",
     "none": "Tiada",
     "modelOverrideValuePlaceholder": "Nilai angka",
+    "modelOverrideKey": "Kunci penggantian",
     "modelOverrideReasoningEffortsPlaceholder": "Dipisahkan dengan koma Inggeris, cth. low, medium, high",
     "addKeyValue": "Tambah nilai kunci",
     "noModelOverrides": "Tiada pintasan dikonfigurasikan untuk model ini.",
@@ -7755,7 +7773,6 @@
     "customPricingNote": "Anda boleh mengatasi harga lalai untuk model tertentu. Penggantian tersuai diutamakan berbanding harga yang dikesan secara automatik.",
     "editPricing": "Edit Harga",
     "viewFullDetails": "Lihat Butiran Penuh",
-    "themeCoral": "Koral",
     "adaptiveVolumeRouting": "Penghalaan Volum Adaptif",
     "adaptiveVolumeRoutingDesc": "Skalakan sambungan secara dinamik berdasarkan volum muatan dan tekanan daya pemprosesan.",
     "lkgpToggleTitle": "Penyedia Terakhir Diketahui Baik (LKGP)",
@@ -7850,6 +7867,8 @@
     "compressionDesc": "Kurangkan penggunaan token dengan memampatkan prom sebelum dihantar kepada penyedia",
     "autoCombosTitle": "Kombo Auto",
     "autoCombosDesc": "Benarkan kunci ini menggunakan kombo auto/* terbina dalam, yang memilih model secara automatik daripada setiap penyedia yang dikonfigurasikan",
+    "ccDiscoveryAliasesTitle": "Alias penemuan Claude Code",
+    "ccDiscoveryAliasesDesc": "Umumkan cermin keserasian claude/... untuk model dan kombo yang sudah boleh diakses oleh kunci ini",
     "compressionGuidanceFullGuideLink": "Panduan pemampatan penuh",
     "compressionGuidanceShow": "Butiran",
     "compressionGuidanceHide": "Sembunyikan butiran",
@@ -9035,7 +9054,8 @@
     "tomlTestPassed": "Lulus",
     "tomlTestFailed": "Gagal",
     "tomlImportError": "Tidak dapat memproses fail TOML RTK.",
-    "tomlFileReadError": "Tidak dapat membaca fail TOML yang dipilih."
+    "tomlFileReadError": "Tidak dapat membaca fail TOML yang dipilih.",
+    "viewMode": "Mod paparan"
   },
   "compressionEngineConfig": {
     "loading": "Memuatkan…",
@@ -9257,7 +9277,8 @@
     "languagePacksList": "Pek bahasa: {packs}",
     "dragToReorder": "Seret untuk menyusun semula langkah",
     "engine": "Enjin",
-    "intensity": "Keamatan"
+    "intensity": "Keamatan",
+    "compressionOverride": "Penggantian pemampatan"
   },
   "compressionStudio": {
     "noRun": "Tiada larian pemampatan tersedia.",
@@ -9317,7 +9338,8 @@
     "encoderWinner": "pemenang: {winner}",
     "encoder": "pengekod",
     "bytes": "bait",
-    "tokensCl100k": "token (cl100k)"
+    "tokensCl100k": "token (cl100k)",
+    "studioViews": "Paparan Studio"
   },
   "omniglyph": {
     "preview": "Pratonton",
@@ -9523,7 +9545,9 @@
     "tooltipMinLength": "Mesej yang lebih pendek daripada ini tidak dimampatkan. Rendah = lebih mampatan.",
     "tooltipMinSavings": "Hanya mampatkan jika ia menjimatkan sekurang-kurangnya token sebanyak ini.",
     "ultraSettings": "Tetapan Ultra",
-    "ultraSettingsDesc": "Pemampatan semantik berkuasa SLM"
+    "ultraSettingsDesc": "Pemampatan semantik berkuasa SLM",
+    "defaultLanguage": "Bahasa lalai",
+    "viewMode": "Mod paparan"
   },
   "translator": {
     "title": "Penterjemah",
@@ -9835,6 +9859,9 @@
     "streamTransformFailed": "Gagal mengubah strim"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kuota telah habis; penggunaan tambahan dibenarkan, jadi perkhidmatan diteruskan.",
+    "healthPaidCreditsBypass": "Kuota telah habis; kredit berbayar yang tersedia membolehkan perkhidmatan diteruskan.",
+    "healthFilteringBypass": "Kuota telah habis; penapisan kuota setempat dilumpuhkan, jadi perkhidmatan diteruskan.",
     "title": "Penggunaan",
     "grokExtraUsageCredits": "Kredit Penggunaan Tambahan",
     "grokAutoTopUp": "Pengisian Automatik",
@@ -9998,6 +10025,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Had Pembekal",
     "noProviders": "Tiada Pembekal Disambungkan",
+    "quotaAuthRequired": "Pengesahan diperlukan - log masuk ke papan pemuka",
+    "quotaAuthRequiredHint": "Sambungan penyedia tidak dapat dimuatkan kerana sesi papan pemuka tiada atau telah tamat tempoh. Log masuk dan muat semula untuk melihat had kuota anda.",
     "connectProvidersForQuota": "Sambung kepada pembekal dengan OAuth untuk menjejak had kuota dan penggunaan API anda.",
     "accountsCount": "{count, plural, one {# akaun} other {# akaun}}",
     "filteredFromCount": "(ditapis daripada {count})",
@@ -10047,9 +10076,6 @@
     "tierLite": "Ringan",
     "tierUnknown": "Tidak diketahui",
     "statTotal": "Jumlah",
-    "statCritical": "Kritikal",
-    "statAlert": "Amaran",
-    "statHealthy": "Sihat",
     "filterPurchaseTypeLabel": "Jenis",
     "filterTierLabel": "Tahap",
     "purchaseAll": "Semua",
@@ -10288,10 +10314,64 @@
     "lastRefreshed": "Terakhir disegarkan",
     "providerQuota": "Kuota Penyedia",
     "providerQuotaHomeHint": "Status langsung merentas akaun yang disambungkan",
+    "claudeResetCreditDefaultTitle": "Tetapan semula had Claude",
+    "confirmRedeemClaudeResetCredit": "Penebusan akan menetapkan semula had penggunaan Claude yang layak dengan serta-merta dan menggunakan kredit ini secara kekal.",
+    "claudeResetCreditsModalTitle": "Kredit tetapan semula Claude",
+    "claudeResetCreditsModalExplainer": "Kredit tetapan semula Claude yang tersedia dan tetapan semula sesi mingguan untuk akaun ini.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Berdasarkan pemerhatian terkini, bukan ujian langsung. Pilih akaun untuk butiran.",
+    "healthRecovery": "Anggaran pemulihan",
+    "healthAvailable": "Tersedia",
+    "healthRestricted": "Terhad sebahagiannya",
+    "healthUnavailable": "Tidak tersedia",
+    "healthPeakHourProtection": "Perlindungan waktu puncak",
+    "healthCooldown": "Tempoh menunggu",
+    "healthQuotaExhausted": "Kuota telah habis",
+    "healthOverview": "Gambaran keseluruhan",
+    "layoutFull": "Penuh",
+    "layoutCompact": "Padat",
+    "healthQuotaError": "Gagal membaca kuota",
+    "healthNoRuntime": "Status operasi tidak tersedia",
+    "healthPreviousSnapshot": "Muat semula terakhir gagal; memaparkan hasil sebelumnya",
+    "healthPreviousFailure": "Permintaan terakhir gagal; tempoh menunggu tamat",
+    "healthAwaitingSync": "Masa tetapan semula telah berlalu; menunggu penyegerakan",
+    "healthVerdictUnavailable": "Semakan ketersediaan tidak dapat diperoleh; hanya paras kuota dipaparkan",
+    "healthSummaryFailed": "Gagal membaca ringkasan operasi; maklumat kunci model mungkin tiada",
+    "healthRuntimeObserved": "Status dikemas kini {time}",
+    "healthQuotaObserved": "Kuota diperhatikan {time}",
+    "healthOldestQuota": "Petikan kuota tertua: {time}",
+    "healthRecoveryUnknown": "Masa pemulihan tidak diketahui",
+    "healthDetailsHint": "Klik untuk butiran dan tindakan",
+    "healthFiveHour": "5 jam",
+    "healthOverall": "Keseluruhan",
+    "healthAction": "Perlu tindakan",
+    "healthTitle": "Ketersediaan akaun",
+    "healthDrag": "Seret untuk menyusun penyedia",
+    "healthDragPosition": "{provider}, {count, plural, other {kedudukan {position, number} daripada #}}",
+    "healthResetOrder": "Pulihkan susunan lalai",
+    "healthPool": "Kumpulan {name}",
+    "healthOtherPool": "Akaun yang sama · {pool}: {status} (baki {remaining})",
+    "healthIncluded": "Termasuk {count, number} terhad sebahagian",
+    "healthBannerUnavailable": "Akaun tidak tersedia sementara: {count, number}",
+    "healthBannerAvailable": "Semua {count, number} akaun tersedia",
+    "healthLegendHide": "Sembunyikan petunjuk",
+    "healthLegendShow": "Tunjukkan petunjuk",
+    "healthLegendOk": "Pejal = baki kuota; lut cahaya = telah digunakan.",
+    "healthLegendCooldown": "Kuota {window} habis. Pejal = masa menunggu berlalu; lut cahaya = baki masa menunggu.",
+    "healthLegendAction": "Kebenaran tamat atau akaun disekat; menunggu tidak menyelesaikannya.",
+    "healthLegendPartial": "Masih boleh digunakan. Bahagian atas kuning = model atau kumpulan terhad.",
+    "healthWaited": "Telah menunggu {percent}",
+    "healthWait": "Tunggu {duration} lagi (pulih pada {time})",
+    "healthFastest": "Pemulihan terawal dalam {duration}",
+    "healthRatio": "{available, number} / {active, number} tersedia",
+    "healthCd5": "5 jam · Tempoh menunggu",
+    "healthCdw": "Mingguan · Tempoh menunggu",
+    "healthRecentSuccessBypass": "Penghalaan membenarkan akaun ini kerana permintaan berjaya baru-baru ini.",
+    "healthPurchasedBalanceBypass": "Baki yang dibeli membolehkan penggunaan diteruskan selepas kuota yang disertakan habis.",
+    "healthCutoffAtRequest": "Ambang kuota langsung diperiksa semasa menghalakan permintaan."
   },
   "modals": {
     "waitingAuth": "Menunggu Keizinan",
@@ -11078,7 +11158,8 @@
       "message": "Mesej",
       "error": "Ralat",
       "completion": "Pelengkapan"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Sembang Mudah",
@@ -11259,7 +11340,8 @@
     "minutesAgo": "{minutes}m lalu",
     "hoursAgo": "{hours}j lalu",
     "daysAgo": "{days}h lalu",
-    "entries": "Entri"
+    "entries": "Entri",
+    "viewSwitcherAria": "Paparan cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Global",
@@ -11447,6 +11529,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Tindakan lanjut",
     "test": "Uji",
     "edit": "Sunting",
     "delete": "Padam",
@@ -11526,7 +11609,7 @@
     "bulkImportNoValidEntries": "Tiada entri yang sah ditemui. Semak format dan cuba lagi.",
     "bulkImportSuccess": "Import selesai: {created} dibuat, {updated} dikemas kini, {failed} gagal",
     "bulkImportErrorLine": "Baris {line}: {reason}",
-    "bulkImportMaxExceeded": "Maksimum 100 proksi setiap import",
+    "bulkImportMaxExceeded": "Maksimum {max} proksi setiap import",
     "bulkImportPreview": "Pratonton",
     "clearAssignment": "(tugasan yang jelas)",
     "bulkProxyAssignment": "Tugasan Proksi Pukal",
@@ -11587,6 +11670,7 @@
     "poolSetAsideKindIpQuota429": "had kadar IP (429)",
     "poolSetAsideKindSlow": "respons perlahan",
     "poolSetAsideKindGeoBlocked": "wilayah-diblokir (403/451)",
+    "poolSetAsideKindOperatorReported": "gangguan dilaporkan oleh pengendali",
     "poolSetAsideUntil": "Kembali dalam putaran {endsAt}",
     "poolSetAsideRepeat": "Diketepikan {count, plural, one {# kali} other {# kali}}",
     "poolUnknownAddress": "Alamat tidak diketahui",
@@ -11696,7 +11780,6 @@
     "exportCodeTitle": "Eksport Kod",
     "exportShort": "Eksport",
     "noStateToExport": "Tiada keadaan playground tersedia untuk dieksport.",
-    "closeExportModal": "Tutup modal eksport",
     "close": "Tutup",
     "exportRealKeyWarning": "Amaran keselamatan: eksport disekat — kunci API sebenar telah dikesan dalam output. Sila tetapkan semula kunci API anda dan cuba lagi.",
     "placeholderHintPrefix": "Gantikan",
@@ -11809,7 +11892,8 @@
       "nextButton": "Seterusnya",
       "runButton": "Jalankan",
       "promptPlaceholder": "Masukkan mesej anda… (Enter untuk hantar, Shift+Enter untuk baris baharu)"
-    }
+    },
+    "playgroundTabs": "Mod Playground"
   },
   "miniPlayground": {
     "endpoint": "Titik akhir",
@@ -11880,7 +11964,8 @@
     "assistant": "Pembantu",
     "errorLabel": "Ralat",
     "requestFailed": "Permintaan gagal",
-    "stop": "Henti"
+    "stop": "Henti",
+    "messageInputAria": "Mesej"
   },
   "requestLogger": {
     "recording": "Merakam",
@@ -12067,8 +12152,18 @@
       "resilienceRotations": "{count} putaran akaun",
       "resilienceRetried": "Giliran kosong dicuba semula",
       "resilienceContinued": "Disambung semula di tengah strim",
-      "resilienceRecovered": "Dipulihkan oleh tindakan daya tahan"
-    }
+      "resilienceRecovered": "Dipulihkan oleh tindakan daya tahan",
+      "conversationContext": "Konteks Perbualan",
+      "goToBottom": "Pergi ke bawah",
+      "liveRefreshOn": "Muat semula langsung: hidup",
+      "liveRefreshOff": "Muat semula langsung: mati",
+      "liveRefresh": "Muat semula langsung",
+      "continuesFromParent": "bersambung daripada induk",
+      "continuesFrom": "Bersambung daripada {id}",
+      "viewConversation": "lihat perbualan",
+      "openConversation": "Buka perbualan {id}"
+    },
+    "tableLabel": "Log permintaan"
   },
   "proxyLogger": {
     "filterAll": "Semua",
@@ -12113,7 +12208,9 @@
     "colServedBy": "Dihidangkan oleh",
     "filterTraffic": "Lalu lintas",
     "filterTests": "Ujian",
-    "filterSource": "Sumber"
+    "filterSource": "Sumber",
+    "tableLabel": "Log proksi",
+    "sortLogs": "Isih log"
   },
   "endpointOptions": {
     "speech": "Pertuturan",
@@ -12198,7 +12295,8 @@
     "statusExhausted": "HABIS",
     "statusAlerting": "MEMBERI AMARAN",
     "statusError": "RALAT",
-    "moreSuffix": "+{count} lagi"
+    "moreSuffix": "+{count} lagi",
+    "feedFilterLabel": "Tapis peristiwa"
   },
   "quotaShare": {
     "weightPercent": "Pemberat %",
@@ -12365,7 +12463,10 @@
     "ungroupedTitle": "Tanpa kumpulan",
     "ungroupedHint": "Kolam ini tidak diperuntukkan kepada kumpulan yang dikenali. Edit kolam untuk memindahkannya ke dalam kumpulan sebenar.",
     "removeFailed": "Tidak dapat mengalih keluar kumpulan ini.",
-    "dismiss": "Tutup"
+    "dismiss": "Tutup",
+    "allocationsHeading": "Peruntukan",
+    "wizardRemoveDimension": "Alih keluar dimensi",
+    "wizardRemoveKey": "Alih keluar kunci"
   },
   "plugins": {
     "title": "Pemalam",
@@ -12523,7 +12624,8 @@
       "settingsUpdateFailed": "Kemas kini tetapan gagal",
       "serviceRevealApiKey": "{actor} mendedahkan kunci API untuk {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Tutup ralat"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12758,21 @@
       "goNow": "Pergi sekarang",
       "message": "Proksi MITM kini berada di bawah AgentBridge.",
       "title": "Halaman ini telah dipindahkan"
-    }
+    },
+    "dnsOn": "DNS dihidupkan",
+    "dnsOff": "DNS dimatikan",
+    "showServerSettings": "Tunjukkan tetapan pelayan",
+    "hideServerSettings": "Sembunyikan tetapan pelayan",
+    "upstreamCaTesting": "Menguji…",
+    "removeMapping": "Alih keluar pemetaan",
+    "mappingSourcePlaceholder": "cth., gemini-3.6-flash-medium, atau * untuk semua yang tidak dipetakan",
+    "mappingWildcardHint": "Gunakan * sebagai sumber untuk menghalakan setiap model tanpa pemetaan eksplisit melalui OmniRoute ke sasaran yang dipilih. Padanan sumber tepat sentiasa diutamakan berbanding *.",
+    "wizardDetectingModels": "Mengesan model daripada trafik yang dipintas...",
+    "wizardDetectedModels": "Menemui {count, plural, one {# model} other {# model}} dalam trafik yang dipintas. Pilih model yang ingin anda tambahkan:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# model}} dipilih. Anda akan memetakannya kepada model OmniRoute pada skrin seterusnya.",
+    "wizardAddModels": "Tambah {count, plural, one {# model} other {# model}}",
+    "wizardNoModelsDetected": "Belum ada model dikesan. Gunakan {agent} untuk membuat permintaan, kemudian jalankan semula pembantu ini untuk mengesan model secara automatik daripada trafik.",
+    "wizardNoModelsHint": "Atau tutup pembantu ini dan tambahkan pemetaan secara manual dalam kad ejen."
   },
   "providerStats": {
     "unknownError": "Ralat tidak diketahui",
@@ -12686,7 +12802,11 @@
     "avgTtft": "Purata TTFT",
     "avgTotal": "Purata Jumlah",
     "requestTelemetry": "Telemetri Permintaan",
-    "requestTelemetryDescription": "Pecahan saluran paip 7 fasa (5 minit terakhir)"
+    "requestTelemetryDescription": "Pecahan saluran paip 7 fasa (5 minit terakhir)",
+    "title": "Statistik penyedia",
+    "description": "Trafik, kependaman dan kadar kejayaan mengikut penyedia dan model",
+    "combo": "Gabungan",
+    "toggleModels": "Tunjukkan model untuk {provider}"
   },
   "relay": {
     "title": "Proksi Geganti Tanpa Pelayan",
@@ -12847,7 +12967,18 @@
     "noRequestBody": "Tiada badan permintaan.",
     "noResponseBody": "Tiada badan respons.",
     "formatted": "Diformat",
-    "raw": "Mentah"
+    "raw": "Mentah",
+    "requestCount": "{count, plural, one {# permintaan} other {# permintaan}}",
+    "expandList": "Kembangkan senarai",
+    "collapseList": "Runtuhkan senarai",
+    "snippetLanguage": "Bahasa coretan kod",
+    "headersTable": "Pengepala",
+    "showSecrets": "Tunjukkan rahsia",
+    "maskSecrets": "Samarkan rahsia",
+    "llmNotAvailable": "Metadata LLM tidak tersedia untuk permintaan ini.",
+    "llmStreamYes": "ya (SSE)",
+    "llmStreamNo": "tidak",
+    "llmTotalTokens": "Jumlah: {count} token"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13437,8 @@
     "colReliabilityHelp": "Bahagian panggilan yang benar-benar dijawab oleh penyedia ini sepanjang 24 jam yang lalu. Tanda sengkang bermaksud trafik yang dikendalikannya terlalu sedikit untuk menyatakan kadar.",
     "reliabilitySample": "{successes} daripada {requests} panggilan berjaya dalam {hours}j yang lalu",
     "reliabilityTooFew": "Hanya {requests} panggilan dalam {hours}j yang lalu — terlalu sedikit untuk menyatakan kadar",
-    "reliabilityNoTraffic": "Tiada panggilan direkodkan dalam 24j yang lalu"
+    "reliabilityNoTraffic": "Tiada panggilan direkodkan dalam 24j yang lalu",
+    "categoryFilter": "Kategori tugas"
   },
   "discovery": {
     "title": "Penemuan Penyedia",
@@ -13331,7 +13463,11 @@
     "method": "Kaedah",
     "auth": "Pengesahan",
     "feasibility": "Kebolehlaksanaan",
-    "models": "Model"
+    "models": "Model",
+    "provider": "Penyedia",
+    "status": "Status",
+    "endpoint": "Titik akhir",
+    "actions": "Tindakan"
   },
   "noAuthProvider": {
     "title": "Tiada pengesahan diperlukan",
@@ -13380,7 +13516,8 @@
     "ownProxy": "Proksi sendiri",
     "freeTierPause": "Model {model} dijeda (429), kembali pada {time}",
     "freeTierPauseProvider": "Dijeda (429), kembali pada {time}",
-    "freeTierPauseNote": "Jeda dalam proses pada instance ini"
+    "freeTierPauseNote": "Jeda dalam proses pada instance ini",
+    "proxyType": "Jenis proksi"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13690,10 @@
         "description": "Pencapaian tersembunyi menanti...",
         "criteria": "Lengkapkan pencapaian tersembunyi untuk mendedahkan lencana ini."
       }
-    }
+    },
+    "leaderboardTitle": "Papan pendahulu",
+    "leaderboardDescription": "Kedudukan dan pencapaian merentas kunci API anda",
+    "badgeLocked": "Dikunci"
   },
   "featureFlags": {
     "title": "Bendera Ciri",
@@ -13794,6 +13934,7 @@
     "latency": "Kependaman",
     "quota": "Kuota",
     "rangeWindow": "Tetingkap {range}",
+    "timeRange": "Julat masa",
     "runtimeHealthBlend": "campuran masa jalan/kesihatan",
     "averageResponseTime": "masa tindak balas purata",
     "worstQuota": "Kuota terburuk",
@@ -13995,7 +14136,11 @@
     "learnMore": "Ketahui lebih lanjut",
     "changelogLoadFailed": "Tidak dapat memuatkan log perubahan. Sila cuba lagi kemudian.",
     "retry": "Cuba semula",
-    "viewFullHistory": "Lihat sejarah penuh di GitHub"
+    "viewFullHistory": "Lihat sejarah penuh di GitHub",
+    "title": "Berita & log perubahan",
+    "description": "Pengumuman daripada pasukan OmniRoute dan nota keluaran terkini",
+    "viewLabel": "Lihat",
+    "loadingNews": "Memuatkan pengumuman..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14691,9 @@
       "circuitBreakerState": "Keadaan Pemutus Litar Penyedia",
       "lastUpdate": "Kemaskini terakhir: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours}j {minutes}m"
+      "uptimeHoursMinutes": "{hours}j {minutes}m",
+      "breakerClosed": "Ditutup",
+      "breakerNotClosed": "Terbuka atau separa terbuka"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14768,9 @@
         "primaryAction": "Butiran Penyelenggaraan",
         "secondaryAction": "Status Sistem"
       }
+    },
+    "miniapp": {
+      "askAnything": "Tanya apa sahaja…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14961,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} dipaparkan / {total} jumlah",
+    "modeLabel": "Mod paparan",
+    "jumpToNow": "Lompat ke waktu semasa, garisan NOW ditetapkan semula ke kedudukan {position}%",
+    "laneReuse": "Penggunaan semula lorong",
+    "laneReuseLabel": "Tetingkap penggunaan semula lorong (minit)",
+    "laneReuseHint": "Permintaan yang berkongsi ID perbualan kekal pada baris garis masa yang sama selagi sela antara permintaan tersebut kurang daripada bilangan minit ini.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Muat semula automatik",
+    "autoRefreshLabel": "Selang muat semula automatik (saat)",
+    "autoRefreshHint": "Kekerapan garis masa mendapatkan semula senarai permintaan daripada pelayan.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Zum keluar",
+    "zoomIn": "Zum masuk"
   },
   "metadata": {
     "compressionTitle": "Pemampatan",
@@ -15015,6 +15178,83 @@
     "dismissAriaLabel": "Tutup"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Lumpuhkan penjanaan varian tahap pemikiran (cth. -low, -medium, -high) dalam katalog /v1/models.",
+  "teamCosts": {
+    "title": "Kos pasukan",
+    "subtitle": "Urus belanjawan lembut dikongsi dan anggaran kos katalog.",
+    "refresh": "Muat semula",
+    "create": "Cipta pasukan",
+    "edit": "Edit pasukan",
+    "archive": "Arkib",
+    "selectTeam": "Pasukan",
+    "searchTeams": "Cari pasukan",
+    "statusFilter": "Status pasukan",
+    "active": "Aktif",
+    "archived": "Diarkibkan · baca sahaja",
+    "allTeams": "Semua pasukan",
+    "noTeams": "Tiada pasukan yang sepadan.",
+    "selectHint": "Cipta atau pilih pasukan untuk melihat kos.",
+    "loading": "Memuatkan kos pasukan…",
+    "budgetTitle": "Belanjawan lembut semasa",
+    "budgetSubtitle": "Penggunaan berjaya yang direkodkan · tetingkap bergolek · bebas daripada tarikh laporan",
+    "archivedBudget": "Diarkibkan: penguatkuasaan belanjawan tidak aktif. Laporan sejarah kekal tersedia.",
+    "unlimited": "Tanpa had — tiada belanjawan lembut dikongsi dikonfigurasikan.",
+    "budgetUnavailable": "Status belanjawan tidak tersedia. Muat semula untuk cuba lagi.",
+    "used": "Penggunaan berjaya",
+    "maximum": "Maksimum belanjawan",
+    "remaining": "Baki diketahui",
+    "resets": "Ditetapkan semula",
+    "unpricedBudget": "Sebahagian penggunaan berjaya mempunyai harga yang tidak diketahui. Jumlah diketahui tidak lengkap; penguatkuasaan belanjawan menganggap tetingkap ini melebihi had.",
+    "overBudget": "Belanjawan dicapai atau dilebihi · {amount} lebih",
+    "reportTitle": "Laporan penggunaan",
+    "reportSubtitle": "Semua percubaan · anggaran katalog dalam USD, bukan invois · tarikh UTC penuh",
+    "reportPeriod": "Tempoh laporan",
+    "day1": "1 hari",
+    "day7": "7 hari",
+    "day30": "30 hari",
+    "allTime": "Sepanjang masa",
+    "reportSpend": "Anggaran perbelanjaan laporan",
+    "requests": "Permintaan",
+    "assignedKeys": "Kunci yang ditetapkan",
+    "unpricedReport": "Laporan ini mengandungi harga yang tidak diketahui. Anggaran perbelanjaan tidak lengkap.",
+    "breakdown": "Kos mengikut kunci API",
+    "noUsage": "Tiada penggunaan dalam tempoh laporan ini.",
+    "keyName": "Nama kunci API",
+    "tokens": "Token input + output",
+    "unnamedKey": "Kunci tanpa nama atau dipadam",
+    "unpriced": "Harga tidak diketahui",
+    "members": "Keahlian",
+    "memberSubtitle": "Menukar keahlian mengekalkan perbelanjaan sejarah pada pasukan asal.",
+    "searchKeys": "Cari kunci atau pemilik semasa",
+    "chooseKey": "Pilih kunci API",
+    "unassigned": "Belum ditetapkan",
+    "ownership": "Pasukan pengebilan semasa: {team}",
+    "assign": "Tetapkan",
+    "remove": "Alih keluar",
+    "noMembers": "Tiada ahli semasa. Penggunaan sejarah mungkin masih dikira dalam belanjawan.",
+    "assignedAt": "Ditetapkan pada {date} (UTC)",
+    "name": "Nama pasukan",
+    "description": "Penerangan",
+    "enableBudget": "Dayakan belanjawan lembut dikongsi",
+    "amount": "Jumlah belanjawan (USD)",
+    "duration": "Tetingkap belanjawan bergolek",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "confirm": "Sahkan",
+    "transferTitle": "Sahkan pemindahan kunci",
+    "transferMessage": "Alihkan kunci ini daripada “{source}” ke “{destination}”? Perbelanjaan sejarah kekal pada pasukan asal.",
+    "removeTitle": "Alih keluar penetapan kunci",
+    "removeMessage": "Alih keluar kunci ini daripada “{team}”? Perbelanjaan sejarah kekal dalam pasukan ini.",
+    "archiveTitle": "Arkibkan pasukan",
+    "archiveMessage": "Arkibkan “{team}”? Semua pengikatan semasa ditutup dan penguatkuasaan belanjawan berhenti. Laporan sejarah kekal tersedia.",
+    "invalidName": "Masukkan nama (1–200 aksara) dan penerangan tidak melebihi 2,000 aksara.",
+    "invalidAmount": "Masukkan jumlah belanjawan terhingga yang lebih besar daripada sifar.",
+    "unauthorized": "Log masuk ke papan pemuka pengurusan untuk meneruskan.",
+    "forbidden": "Anda tidak mempunyai kebenaran untuk mengurus pasukan. Input anda dikekalkan.",
+    "notFound": "Pasukan atau penetapan ini tidak lagi wujud.",
+    "conflict": "Penetapan atau pasukan telah berubah. Muat semula dan sahkan pemilikan semasa sebelum mencuba lagi.",
+    "failed": "Permintaan gagal. Input anda dikekalkan; sila cuba lagi.",
+    "partialBudget": "Sesetengah baldi harian yang dikekalkan bertindih dengan sempadan tetingkap dan tidak dapat diagihkan dengan tepat. Perbelanjaan yang dipaparkan tidak lengkap; baki peruntukan tidak tersedia. Dasar belanjawan lembut sedia ada tidak berubah."
+  },
   "connectionTest": {
     "title": "Mesej ujian",
     "description": "Hantar satu permintaan sebenar melalui akaun ini. Tindakan ini menggunakan sedikit kuota dan boleh memulakan tempoh penggunaan, bergantung pada penyedia.",
@@ -15074,5 +15314,8 @@
     "importButton": "Import",
     "importFailed": "Import gagal.",
     "importSuccess": "{connections} akaun dan {nodes} nod penyedia diimport; {skipped} dilangkau."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Mula dari kedudukan semasa (langkau log sedia ada)"
   }
 }

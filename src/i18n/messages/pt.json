@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "Custos da equipa",
+    "subtitle": "Gira orçamentos flexíveis partilhados e estimativas de custo do catálogo.",
+    "refresh": "Atualizar",
+    "create": "Criar equipa",
+    "edit": "Editar equipa",
+    "archive": "Arquivar",
+    "selectTeam": "Equipas",
+    "searchTeams": "Pesquisar equipas",
+    "statusFilter": "Estado da equipa",
+    "active": "Ativa",
+    "archived": "Arquivada · só de leitura",
+    "allTeams": "Todas as equipas",
+    "noTeams": "Nenhuma equipa correspondente.",
+    "selectHint": "Crie ou selecione uma equipa para ver os custos.",
+    "loading": "A carregar os custos da equipa…",
+    "budgetTitle": "Orçamento flexível atual",
+    "budgetSubtitle": "Utilização bem-sucedida confirmada · janela deslizante · independente das datas do relatório",
+    "archivedBudget": "Arquivada: a aplicação do orçamento está inativa. Os relatórios históricos continuam disponíveis.",
+    "unlimited": "Ilimitado — nenhum orçamento flexível partilhado configurado.",
+    "budgetUnavailable": "O estado do orçamento não está disponível. Atualize para tentar novamente.",
+    "used": "Utilização bem-sucedida",
+    "maximum": "Máximo do orçamento",
+    "remaining": "Restante conhecido",
+    "resets": "Reinicia em",
+    "unpricedBudget": "Parte da utilização bem-sucedida tem preço desconhecido. A soma conhecida está incompleta; a aplicação do orçamento considera esta janela excedida.",
+    "overBudget": "Orçamento atingido ou excedido · {amount} acima",
+    "reportTitle": "Relatório de utilização",
+    "reportSubtitle": "Todas as tentativas · estimativa do catálogo em USD, não uma fatura · datas UTC inteiras",
+    "reportPeriod": "Período do relatório",
+    "day1": "1 dia",
+    "day7": "7 dias",
+    "day30": "30 dias",
+    "allTime": "Todo o período",
+    "reportSpend": "Despesa estimada do relatório",
+    "requests": "Pedidos",
+    "assignedKeys": "Chaves atribuídas",
+    "unpricedReport": "Este relatório contém preços desconhecidos. A despesa estimada está incompleta.",
+    "breakdown": "Custo por chave de API",
+    "noUsage": "Sem utilização neste período do relatório.",
+    "keyName": "Nome da chave de API",
+    "tokens": "Tokens de entrada + saída",
+    "unnamedKey": "Chave sem nome ou eliminada",
+    "unpriced": "Preço desconhecido",
+    "members": "Associação",
+    "memberSubtitle": "Alterar a associação mantém a despesa histórica na equipa original.",
+    "searchKeys": "Pesquisar chaves ou proprietários atuais",
+    "chooseKey": "Escolha uma chave de API",
+    "unassigned": "Não atribuída",
+    "ownership": "Equipa de faturação atual: {team}",
+    "assign": "Atribuir",
+    "remove": "Remover",
+    "noMembers": "Sem membros atuais. A utilização histórica pode ainda contar para o orçamento.",
+    "assignedAt": "Atribuída em {date} (UTC)",
+    "name": "Nome da equipa",
+    "description": "Descrição",
+    "enableBudget": "Ativar orçamento flexível partilhado",
+    "amount": "Montante do orçamento (USD)",
+    "duration": "Janela deslizante do orçamento",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "confirm": "Confirmar",
+    "transferTitle": "Confirmar transferência de chave",
+    "transferMessage": "Mover esta chave de “{source}” para “{destination}”? A despesa histórica permanece na equipa original.",
+    "removeTitle": "Remover atribuição de chave",
+    "removeMessage": "Remover esta chave de “{team}”? A despesa histórica permanece nesta equipa.",
+    "archiveTitle": "Arquivar equipa",
+    "archiveMessage": "Arquivar “{team}”? Todas as ligações atuais são encerradas e a aplicação do orçamento pára. Os relatórios históricos continuam disponíveis.",
+    "invalidName": "Introduza um nome (1–200 carateres) e uma descrição com no máximo 2.000 carateres.",
+    "invalidAmount": "Introduza um montante de orçamento finito superior a zero.",
+    "unauthorized": "Inicie sessão no painel de gestão para continuar.",
+    "forbidden": "Não tem permissão para gerir equipas. A sua entrada foi preservada.",
+    "notFound": "Esta equipa ou atribuição já não existe.",
+    "conflict": "A atribuição ou a equipa mudou. Atualize e confirme a propriedade atual antes de tentar novamente.",
+    "failed": "O pedido falhou. A sua entrada foi preservada; tente novamente.",
+    "partialBudget": "Alguns baldes diários retidos sobrepõem-se ao limite da janela e não podem ser repartidos com exatidão. A despesa mostrada está incompleta; a margem restante não está disponível. A política de orçamento flexível existente não muda."
+  },
   "codexKeyServiceMode": {
     "title": "Modo de serviço Codex para esta chave de API",
     "description": "Aplica-se a pedidos Codex, incluindo modelos Codex em combinações. Os modos forçados sobrepõem-se ao cliente, às definições globais e às predefinições da ligação. Os restantes fornecedores permanecem inalterados.",
@@ -25,8 +102,10 @@
     "confirm": "Você tem certeza?",
     "refresh": "Atualizar",
     "close": "Fechar",
+    "dialogTitleFallback": "Caixa de diálogo",
     "previousPage": "Página anterior",
     "nextPage": "Página seguinte",
+    "pagination": "Paginação",
     "capsLockOn": "O Caps Lock está ativado",
     "dismissNotification": "Dispensar notificação",
     "toggleColumns": "Alternar colunas",
@@ -182,6 +261,7 @@
     "combos": "Combinações",
     "noModelsFound": "Nenhum modelo encontrado",
     "clear": "Limpar",
+    "clearFilters": "Limpar filtros",
     "done": "Concluído",
     "selectAll": "Selecionar tudo",
     "unselectAll": "Desmarcar tudo",
@@ -998,7 +1078,10 @@
     "batchFileUsedByCount": "Usado por {count, plural, one {# lote} other {# lotes}}",
     "batchFilePreview": "Pré-visualização",
     "batchFilePreviewTruncated": "A mostrar as primeiras {shown} linhas ({total} linhas no total)",
-    "batchFileDownloadFull": "Transferir Ficheiro Completo"
+    "batchFileDownloadFull": "Transferir Ficheiro Completo",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Envie tokens entre chaves de API, partilhe códigos de convite e ligue servidores da comunidade.",
+    "tokensServerUrlLabel": "URL do servidor"
   },
   "disabled": "Desativado",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Encaminhar pedidos com orçamento esgotado para o fornecedor/modelo de contingência gratuito de emergência.",
@@ -1085,17 +1168,8 @@
     "serverDisconnectedMsg": "O servidor proxy foi interrompido ou está reiniciando.",
     "expandSidebar": "Expandir barra lateral",
     "collapseSidebar": "Recolher barra lateral",
-    "themes": "Temas",
-    "presetColors": "Cores populares",
     "createTheme": "Criar tema",
     "chooseColor": "Escolhe uma cor",
-    "themeCoral": "Coral",
-    "themeBlue": "Azul",
-    "themeRed": "Vermelho",
-    "themeGreen": "Verde",
-    "themeViolet": "Violeta",
-    "themeOrange": "Laranja",
-    "themeCyan": "Ciano",
     "cliToolsShort": "Ferramentas",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1177,10 @@
     "themeSystem": "Tema do Sistema",
     "whitelabelingDesc": "Descrição de Marca Própria",
     "switchThemes": "Alternar Temas",
-    "themeAccentDesc": "Descrição do Acento do Tema",
     "uploadFavicon": "Carregar Favicon",
     "themeDark": "Tema Escuro",
     "customLogoDesc": "Descrição do Logo Personalizado",
     "sidebarVisibilityToggle": "Alternância de Visibilidade da Barra Lateral",
-    "themeAccent": "Acento do Tema",
     "resetFavicon": "Repor Favicon",
     "whitelabeling": "Marca Própria",
     "darkMode": "Modo Escuro",
@@ -1122,10 +1194,8 @@
     "customLogo": "Logo Personalizado",
     "appearance": "Aparência",
     "themeSelectionAria": "Seleção de Tema",
-    "themeCreate": "Criar Tema",
     "customFaviconDesc": "Descrição do Favicon Personalizado",
     "logoPreview": "Pré-visualização do Logo",
-    "themeCustom": "Tema Personalizado",
     "hideHealthLogsDesc": "Descrição de Ocultar Registos de Saúde",
     "faviconPreview": "Pré-visualização do Favicon",
     "changelog": "Registo de Alterações",
@@ -1352,7 +1422,9 @@
       "open": "abrir",
       "close": "fechar"
     },
-    "noResults": "Sem resultados"
+    "noResults": "Sem resultados",
+    "costsTeams": "Equipas",
+    "costsTeamsSubtitle": "Centros de custo da equipa"
   },
   "webhooks": {
     "title": "Webhooks",
@@ -1485,7 +1557,11 @@
       "chatIdPlaceholder": "-100123456789 ou @channelname",
       "chatIdHint": "O identificador numérico exclusivo ou nome de utilizador público do chat/canal.",
       "tutorial": "Como configurar o webhook do Telegram:"
-    }
+    },
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "expandDetails": "Mostrar detalhes",
+    "collapseDetails": "Ocultar detalhes"
   },
   "compliance": {
     "auditTitle": "Auditoria",
@@ -1597,22 +1673,17 @@
     "mcpMetricCalls24h": "Chamadas (24h)",
     "mcpMetricSuccessRate": "Taxa de sucesso",
     "mcpMetricAvgDuration": "Duração média",
-    "mcpMetricTopTool": "Ferramenta principal"
-  },
-  "themesPage": {
-    "title": "Temas",
-    "description": "Escolha um tema predefinido ou crie o seu próprio com uma única cor",
-    "presetColors": "Cores populares",
-    "customTheme": "Tema personalizado",
-    "customThemeDesc": "Clique em criar tema e escolha uma cor",
-    "createTheme": "Criar tema",
-    "activePreset": "Tema ativo"
+    "mcpMetricTopTool": "Ferramenta principal",
+    "dismissError": "Dispensar erro"
   },
   "header": {
+    "teamsDescription": "Estimativas de custo da equipa e orçamentos flexíveis partilhados",
     "logout": "Sair",
     "quickNavigation": "Navegação rápida",
     "quickNavigationTitle": "Navegação rápida (⌘K / Ctrl+K)",
     "openQuickNavigation": "Abrir navegação rápida",
+    "openMenu": "Abrir menu",
+    "products": "Produtos Keak",
     "switchToLightMode": "Mudar para o modo claro",
     "switchToDarkMode": "Mudar para o modo escuro",
     "language": "Idioma",
@@ -1640,8 +1711,6 @@
     "anthropicCompatible": "Compatível Antrópico",
     "media": "Multimédia",
     "mediaDescription": "Gera imagens, vídeos e música",
-    "themes": "Temas",
-    "themesDescription": "Escolhe um tema de cor para todo o painel",
     "costsDescription": "Acompanha gastos, analisa tendências e gere o teu orçamento de IA em todos os fornecedores",
     "cacheDescription": "Monitoriza a eficiência da cache de prompt do fornecedor e a reutilização local de respostas semânticas.",
     "limitsDescription": "Configura limites de taxa e quotas por chave de API e fornecedor",
@@ -2495,7 +2564,12 @@
     "onlySelectedConnections": "Apenas as ligações selecionadas",
     "selectAtLeastOneConnection": "Selecione pelo menos uma ligação ou escolha Todas as ligações.",
     "allConnectionsDesc": "Esta chave pode utilizar qualquer ligação ativa.",
-    "restrictedToConnections": "Limitado a {count, plural, one {# ligação} other {# ligações}}."
+    "restrictedToConnections": "Limitado a {count, plural, one {# ligação} other {# ligações}}.",
+    "preferredConnections": "Ligações preferenciais",
+    "preferredConnectionsDesc": "Ordem de prioridade por chave. Se uma ligação preferencial estiver indisponível, o encaminhamento passa para a próxima elegível.",
+    "preferredConnectionsNone": "Nenhuma preferência definida — é usada a estratégia de encaminhamento predefinida.",
+    "preferredConnectionsClear": "Limpar",
+    "removeSelection": "Remover {name}"
   },
   "auditLog": {
     "title": "Registro de auditoria",
@@ -2607,7 +2681,9 @@
     "imageToTextBridgeCta": "Configure a ponte Imagem→Texto nas definições da Ponte de Modalidade",
     "sttBridgeCta": "Configure a ponte Fala→Texto nas definições da Modality Bridge",
     "existingConnection": "Conexão existente",
-    "openrouterSttDescription": "Os modelos de reconhecimento de voz para texto do OpenRouter utilizam a sua conexão OpenRouter configurada. Nenhuma credencial separada é necessária."
+    "openrouterSttDescription": "Os modelos de reconhecimento de voz para texto do OpenRouter utilizam a sua conexão OpenRouter configurada. Nenhuma credencial separada é necessária.",
+    "modalityTabsAria": "Tipo de multimédia",
+    "serviceKindsAria": "Tipo de serviço"
   },
   "search": {
     "searchQuery": "Consulta de Pesquisa",
@@ -2982,6 +3058,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Use quando precisar de um assistente leve de IA nativo do terminal para tarefas rápidas.",
       "hermes-agent": "Utilize quando precisar do Hermes Agent (da Nousresearch) com modelos predefinidos, de delegação, de visão e auxiliares encaminhados através do OmniRoute.",
+      "whycodes": "Utilize quando quiser o WhyCodes como agente CLI autónomo de uso geral (TUI, agentes com nome, memória, swarm) apontado para o OmniRoute.",
       "custom": "Use para implementações de ferramentas personalizadas ou configurações genéricas compatíveis com OpenAI."
     },
     "toolDescriptions": {
@@ -3022,6 +3099,7 @@
       "warp": "Terminal Warp AI com suporte para fornecedor personalizado",
       "agent-deck": "Orquestrador multi-agente Agent Deck",
       "5dive": "5dive — frota auto-alojada de agentes de codificação; um perfil de autenticação aponta todos para o OmniRoute",
+      "whycodes": "Agente CLI autónomo WhyCodes com URL base compatível com OpenAI",
       "zed": "Editor de código Zed — agente integrado através de um fornecedor compatível com OpenAI"
     },
     "guides": {
@@ -3278,7 +3356,8 @@
     "cliproxyapiUnknown": "Desconhecido",
     "cliproxyapiUpdate": "Atualizar",
     "cliproxyapiUpdateAvailable": "Atualização disponível: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versão"
+    "cliproxyapiVersion": "Versão",
+    "removeMapping": "Remover mapeamento"
   },
   "modelCatalog": {
     "title": "Modelos e Combos",
@@ -3342,6 +3421,18 @@
     "maxMembersPlaceholder": "ex.: 10",
     "testSelected": "Testar selecionados ({count})",
     "testAllFiltered": "Testar todos os filtrados ({count})",
+    "visibility": "Visibilidade",
+    "allVisibility": "Visíveis e ocultos",
+    "visibleOnly": "Visíveis",
+    "hiddenOnly": "Ocultos",
+    "visibleColumn": "Visível",
+    "hideModel": "Ocultar {name} de /v1/models",
+    "showModel": "Mostrar {name} em /v1/models",
+    "hiddenBadge": "Oculto",
+    "hideFiltered": "Ocultar filtrados ({count})",
+    "showFiltered": "Mostrar filtrados ({count})",
+    "visibilityCounts": "{visible} visíveis · {hidden} ocultos · {total} no total",
+    "visibilityUpdateFailed": "Falha ao atualizar a visibilidade do modelo",
     "cancel": "Cancelar",
     "clearResults": "Limpar resultados",
     "testing": "A testar...",
@@ -3400,13 +3491,13 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Incluir no auto fornecedores marcados como ToS: avoid",
-    "autoTosDescription": "Desativado por predefinição. Aplica-se a todos os combos auto, não apenas a uma conta. Ligar um fornecedor não ativa esta opção.",
-    "autoTosSaveError": "Não foi possível guardar a política de ToS. A definição anterior continua visível. Tente novamente.",
-    "autoTosLoadError": "Não foi possível carregar a política de ToS. Tente novamente antes de a alterar.",
     "title": "Combinações",
     "description": "Crie combinações de modelos com roteamento ponderado e suporte substituto",
     "autoCatalogTitle": "Catálogo de roteamento automático",
+    "autoTosLoadError": "Não foi possível carregar a política de ToS. Tente novamente antes de a alterar.",
+    "autoTosSaveError": "Não foi possível guardar a política de ToS. A definição anterior continua visível. Tente novamente.",
+    "autoTosIncludeLabel": "Incluir no auto fornecedores marcados como ToS: avoid",
+    "autoTosDescription": "Desativado por predefinição. Aplica-se a todos os combos auto, não apenas a uma conta. Ligar um fornecedor não ativa esta opção.",
     "autoCatalogTemplateCount": "{count} modelos",
     "autoCatalogDescription": "Combos automáticos/* integrados resolvidos dinamicamente a partir de provedores conectados. Use qualquer um desses IDs como campo de modelo — nenhuma configuração é necessária.",
     "autoCatalogExpand": "Expanda o catálogo de roteamento automático",
@@ -3518,6 +3609,9 @@
     "moveUp": "Subir",
     "moveDown": "Mover para baixo",
     "removeModel": "Remover",
+    "testStep": "Testar este modelo",
+    "testStepRunning": "A testar…",
+    "testStepNotTestable": "Só é possível testar passos com um único modelo",
     "saving": "Salvando...",
     "liveNoProviders": "Nenhum fornecedor observado ainda.",
     "liveFleetDataHint": "Os dados da frota chegam através de eventos combo em tempo real.",
@@ -3559,6 +3653,7 @@
     "playgroundNoCombosYet": "Ainda não há combinações configuradas.",
     "playgroundCreateFirst": "Crie uma primeiro",
     "weighted": "Ponderado",
+    "weightPercent": "Peso (%)",
     "leastUsed": "Menos usado",
     "costOpt": "Opção de custo",
     "strategyGuideTitle": "Como usar esta estratégia",
@@ -3720,6 +3815,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# conta} other {# contas}}",
     "builderGlobalAdded": "Adicionado",
     "builderGlobalAdd": "Adicionar",
+    "clearSearch": "Limpar pesquisa",
     "manualModel": "Modelo manual",
     "manualModelInvalid": "Introduza um modelo como fornecedor/modelo.",
     "manualModelUnknownProvider": "Prefixo de fornecedor desconhecido.",
@@ -3936,6 +4032,7 @@
     "builderComboRefStep": "Adicionar referência de combo",
     "builderPinnedAccount": "Conta Fixada",
     "builderLegacyEntry": "Entrada legada",
+    "builderStaleModel": "Fora do catálogo em direto",
     "reviewName": "Nome",
     "reviewStrategy": "Estratégia",
     "reviewSteps": "Passos",
@@ -3973,6 +4070,10 @@
     "responseValidationMinLength": "Comprimento mínimo do conteúdo (caracteres)",
     "responseValidationJsonPaths": "Verificações de JSON-path",
     "responseValidationAddCheck": "+ Adicionar verificação",
+    "responseValidationRemoveCheck": "Remover verificação",
+    "responseValidationPath": "Caminho JSON",
+    "responseValidationCondition": "Condição",
+    "responseValidationValue": "Valor esperado",
     "agentFeaturesSystemMessageOverride": "Substituir mensagem do sistema",
     "agentFeaturesSystemMessagePlaceholder": "Você é um assistente especialista...",
     "agentFeaturesSystemMessageHint": "Substituição de mensagens do sistema para agentes",
@@ -5288,7 +5389,8 @@
         "skipped": "já configurado",
         "failed": "falhou"
       }
-    }
+    },
+    "stepProgress": "Progresso da configuração"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Este fornecedor é excluído do auto por predefinição",
@@ -5579,6 +5681,7 @@
     "allModelsAlreadyImported": "Todos os modelos já foram importados",
     "noNewModelsToImport": "Nenhum modelo novo para importar — todos os modelos já estão no registo ou na lista de modelos personalizados",
     "localCatalogFallbackStatus": "Não foi possível aceder à lista de modelos do fornecedor — a mostrar o catálogo integrado",
+    "discoveryDegradedStatus": "Falha na descoberta do modelo {time}",
     "skippingExistingModels": "A ignorar {count} modelos existentes",
     "autoSync": "Sincronização automática",
     "autoSyncShort": "Sincronizar",
@@ -6056,9 +6159,9 @@
     "apiFormatLabel": "Formato da API",
     "apiKeyOptionalHint": "Dica de Chave de API Opcional",
     "apiKeyOptionalLabel": "Chave de API Opcional",
-    "apiRegionChina": "Região da API: China",
-    "apiRegionHint": "Dica da Região da API",
-    "apiRegionInternational": "Região da API: Internacional",
+    "apiRegionChina": "China Continental",
+    "apiRegionHint": "Selecione a região do endpoint utilizada para o acesso à API e o controlo de quotas.",
+    "apiRegionInternational": "Internacional",
     "apiRegionLabel": "Região da API",
     "apikey": "Chave de API",
     "audio": "Áudio",
@@ -6080,6 +6183,13 @@
     "claudeLowPriorityModeDescription": "Quando esta conta atinge o limite de utilização de 5 horas e a Anthropic disponibiliza a via de prioridade mais baixa, o OmniRoute aceita-a e continua a enviar pedidos com anthropic-usage-limit: slow até a janela ser reposta, em vez de colocar a ligação em período de espera. O limite semanal continua a aplicar-se e as respostas poderão aguardar por capacidade disponível.",
     "claudeAutoLimitResetLabel": "Repor automaticamente o limite da sessão (uma vez por semana)",
     "claudeAutoLimitResetDescription": "Quando esta conta atinge o limite de utilização de 5 horas e está disponível uma reposição do limite da sessão, o OmniRoute solicita-a automaticamente e tenta novamente à velocidade máxima. Utiliza a reposição semanal da conta e continua a contar para o limite semanal.",
+    "codexPaidCreditsShort": "Créditos extra",
+    "codexPaidCreditsToggleTitle": "Permitir créditos pagos do Codex depois de esgotada a quota da subscrição (podem aplicar-se custos adicionais)",
+    "codexPaidCreditsEnabled": "Créditos pagos do Codex ativados (podem aplicar-se custos adicionais)",
+    "codexPaidCreditsDisabled": "Créditos pagos do Codex desativados",
+    "failedUpdateCodexPaidCredits": "Falha ao atualizar a política de créditos pagos do Codex",
+    "allowCodexPaidCreditsLabel": "Permitir créditos pagos do Codex",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ignorar o cooldown transitório para que esta ligação permaneça elegível mesmo após erros recuperáveis (estados terminais como banido/expirado continuam a aplicar-se).",
     "disableCoolingLabel": "Desativar cooldown para esta ligação",
     "bulkPasteAdded": "{count, plural, one {1 chave adicionada} other {# chaves adicionadas}}",
@@ -6533,6 +6643,7 @@
       "monsterapi": "Obtenha a chave de API em monsterapi.ai",
       "moonshot": "Ligue o Moonshot AI com uma chave de API.",
       "morph": "Nível gratuito: 250K créditos/mês, $0",
+      "apmix": "Ligue o Apmix com uma chave API do apmix.ai/dashboard — uma subscrição, muitos modelos.",
       "nanogpt": "Ligue o NanoGPT com uma chave de API.",
       "nebius": "~$1 em créditos de avaliação no registo para testes de API",
       "nlpcloud": "O NLP Cloud utiliza uma API de chatbot proprietária em vez do chat/completions da OpenAI. O OmniRoute adapta as mensagens da OpenAI para input/context/history e disponibiliza um catálogo local de modelos de chatbot suportados.",
@@ -6621,7 +6732,7 @@
       "claude": "Ligar o Claude Code com o fluxo OAuth existente.",
       "cline": "Ligar o Cline com o fluxo OAuth existente.",
       "cursor": "Ligar o Cursor IDE com o fluxo OAuth existente.",
-      "cursor-api": "Ligue o Cursor com uma chave de API de utilizador (crsr_...) de cursor.com/dashboard/api; não é necessária uma sessão no IDE.",
+      "cursor-api": "Ligue o Cursor com uma chave de API de utilizador (crsr_... ou grok_...) de cursor.com/dashboard/api; não é necessária uma sessão do IDE.",
       "github": "Ligar o GitHub Copilot com o fluxo OAuth existente.",
       "gitlab-duo": "Aplicação OAuth com os âmbitos ai_features + read_user. Configure GITLAB_DUO_OAUTH_CLIENT_ID e, opcionalmente, GITLAB_DUO_OAUTH_CLIENT_SECRET nesta instância do OmniRoute.",
       "kilocode": "Ligar o Kilo Code com o fluxo OAuth existente.",
@@ -6629,8 +6740,7 @@
       "kiro": "Nível gratuito: 50 créditos/mês (~25K–100K tokens). ⚠️ Os ToS do Kiro proíbem a utilização de proxy/harness de terceiros.",
       "codex": "Ligar o OpenAI Codex com o fluxo OAuth existente.",
       "qwen": "Ligar o Qwen Code com o fluxo OAuth existente.",
-      "github-models": "Crie um PAT do GitHub com o âmbito 'models: read' em github.com/settings/tokens",
-      "apmix": "Ligue o Apmix com uma chave API do apmix.ai/dashboard — uma subscrição, muitos modelos."
+      "github-models": "Crie um PAT do GitHub com o âmbito 'models: read' em github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} aceita IDs de modelo nativos do provedor. Importe de /models ou adicione IDs personalizados para roteamento.",
     "bedrockModelsDescription": "Os modelos Amazon Bedrock têm escopo definido por região da AWS. Importe de /models ou adicione IDs de modelo Bedrock habilitados na região selecionada.",
@@ -6802,14 +6912,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Limites de concorrência por modelo",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Opcional: um modelo=limite por linha, comparado com o ID exato do modelo no fornecedor. Os pedidos excedentes ficam em fila localmente; em branco significa sem limite por modelo.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Entrada de concorrência por modelo inválida \"{entry}\" — use modelo=limite com um número inteiro de 1 a {max}.",
-    "codexPaidCreditsShort": "Créditos extra",
-    "codexPaidCreditsToggleTitle": "Permitir créditos pagos do Codex depois de esgotada a quota da subscrição (podem aplicar-se custos adicionais)",
-    "codexPaidCreditsEnabled": "Créditos pagos do Codex ativados (podem aplicar-se custos adicionais)",
-    "codexPaidCreditsDisabled": "Créditos pagos do Codex desativados",
-    "failedUpdateCodexPaidCredits": "Falha ao atualizar a política de créditos pagos do Codex",
-    "allowCodexPaidCreditsLabel": "Permitir créditos pagos do Codex",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Entrada de concorrência por modelo inválida \"{entry}\" — use modelo=limite com um número inteiro de 1 a {max}."
   },
   "settings": {
     "title": "Configurações",
@@ -7105,16 +7208,6 @@
     "settingsSidebarDesc": "Escolha os itens a apresentar na barra lateral. A opção Essenciais mantém as ferramentas avançadas acessíveis através da pesquisa.",
     "hideHealthLogs": "Ocultar registros de verificação de integridade",
     "hideHealthLogsDesc": "Quando ativado, suprime mensagens [HealthCheck] no console do servidor",
-    "themeAccent": "Cor do tema",
-    "themeAccentDesc": "Escolha uma cor predefinida ou crie seu próprio tema com uma cor",
-    "themeCreate": "Criar tema",
-    "themeCustom": "Tema personalizado",
-    "themeBlue": "Azul",
-    "themeRed": "Vermelho",
-    "themeGreen": "Verde",
-    "themeViolet": "Violeta",
-    "themeOrange": "Laranja",
-    "themeCyan": "Ciano",
     "whitelabeling": "Marca",
     "whitelabelingDesc": "Personaliza o nome e o logo da aplicação",
     "appName": "Nome da Aplicação",
@@ -7255,7 +7348,7 @@
       "nextSwitchNow": "Agora",
       "coreConfigPath": "Ficheiro de configuração do núcleo",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Caminho absoluto de um .json (extensão em minúsculas). Vazio = sem geração. Cada sincronização grava '<caminho>'.generated junto ao ficheiro adotado, nunca dentro dele.",
+      "coreConfigPathDesc": "Caminho absoluto de um .json/.yaml/.yml (extensão em minúsculas). Vazio = sem geração. Cada sincronização grava '<caminho>'.generated junto ao ficheiro adotado, nunca dentro dele.",
       "lastSwitchKind": "Motivo da troca",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7359,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Caminho do binário principal",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Opcional: verifica o ficheiro gerado com o binário principal antes de substituir o ficheiro adotado. Deixe vazio para continuar a escrever ao lado. O diretório é criado quando não existe."
+      "coreBinaryPathHelp": "Opcional: verifica o ficheiro gerado com o binário principal antes de substituir o ficheiro adotado. Deixe vazio para continuar a escrever ao lado. O diretório é criado quando não existe.",
+      "urlFeedlessHint": "Deixe vazio para uma subscrição apenas de seletor: defina um URL de controlo abaixo, nenhum feed é obtido, atualizado ou associado."
     },
     "bulkHealthcheck": "Verificação de Saúde em Massa",
     "bulkHealthcheckDesc": "Testa todos os proxies configurados contra um URL alvo para descobrir quais funcionam.",
@@ -7707,6 +7801,7 @@
     "configured": "configurado",
     "none": "Nenhum",
     "modelOverrideValuePlaceholder": "Valor numérico",
+    "modelOverrideKey": "Chave de substituição",
     "modelOverrideReasoningEffortsPlaceholder": "Valores em inglês separados por vírgulas, por exemplo: low, medium, high",
     "addKeyValue": "Adicionar chave-valor",
     "noModelOverrides": "Nenhuma substituição configurada para este modelo.",
@@ -7755,7 +7850,6 @@
     "customPricingNote": "Você pode substituir o preço padrão de modelos específicos. As substituições personalizadas têm prioridade sobre os preços detectados automaticamente.",
     "editPricing": "Editar preços",
     "viewFullDetails": "Ver detalhes completos",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "Roteamento de Volume Adaptativo",
     "adaptiveVolumeRoutingDesc": "Escala conexões dinamicamente com base no volume e pressão na taxa de transferência.",
     "lkgpToggleTitle": "Último Bom Fornecedor Conhecido (LKGP)",
@@ -7850,6 +7944,8 @@
     "compressionDesc": "Reduz o uso de tokens comprimindo prompts antes de os enviar aos fornecedores",
     "autoCombosTitle": "Combinações automáticas",
     "autoCombosDesc": "Permitir que esta chave utilize as combinações auto/* incorporadas, que escolhem automaticamente um modelo de cada fornecedor configurado",
+    "ccDiscoveryAliasesTitle": "Aliases de descoberta do Claude Code",
+    "ccDiscoveryAliasesDesc": "Anunciar espelhos de compatibilidade claude/... para modelos e combos a que esta chave já pode aceder",
     "compressionGuidanceFullGuideLink": "Guia completo de compressão",
     "compressionGuidanceShow": "Detalhes",
     "compressionGuidanceHide": "Ocultar detalhes",
@@ -9035,7 +9131,8 @@
     "tomlTestPassed": "Passou",
     "tomlTestFailed": "Falhou",
     "tomlImportError": "Não foi possível processar o ficheiro RTK TOML.",
-    "tomlFileReadError": "Não foi possível ler o ficheiro TOML selecionado."
+    "tomlFileReadError": "Não foi possível ler o ficheiro TOML selecionado.",
+    "viewMode": "Modo de visualização"
   },
   "compressionEngineConfig": {
     "loading": "A carregar…",
@@ -9257,7 +9354,8 @@
     "languagePacksList": "Pacotes de idioma: {packs}",
     "dragToReorder": "Arraste para reordenar o passo",
     "engine": "Motor",
-    "intensity": "Intensidade"
+    "intensity": "Intensidade",
+    "compressionOverride": "Substituição da compressão"
   },
   "compressionStudio": {
     "noRun": "Nenhuma execução de compressão disponível.",
@@ -9317,7 +9415,8 @@
     "encoderWinner": "vencedor: {winner}",
     "encoder": "codificador",
     "bytes": "bytes",
-    "tokensCl100k": "tokens (cl100k)"
+    "tokensCl100k": "tokens (cl100k)",
+    "studioViews": "Vistas do Studio"
   },
   "omniglyph": {
     "preview": "Pré-visualização",
@@ -9523,7 +9622,9 @@
     "tooltipMinLength": "Mensagens menores que isso não são compactadas. Menor = mais compressão.",
     "tooltipMinSavings": "Compacte apenas se salvar pelo menos esse número de tokens.",
     "ultraSettings": "Configurações Ultra",
-    "ultraSettingsDesc": "Compressão semântica alimentada por SLM"
+    "ultraSettingsDesc": "Compressão semântica alimentada por SLM",
+    "defaultLanguage": "Idioma predefinido",
+    "viewMode": "Modo de visualização"
   },
   "translator": {
     "title": "Tradutor",
@@ -9835,6 +9936,9 @@
     "streamTransformFailed": "Falha ao transformar o fluxo"
   },
   "usage": {
+    "healthExtraUsageBypass": "Quota esgotada; a utilização adicional é permitida, pelo que o serviço continua.",
+    "healthPaidCreditsBypass": "Quota esgotada; os créditos pagos disponíveis permitem continuar o serviço.",
+    "healthFilteringBypass": "Quota esgotada; a filtragem local de quotas está desativada, pelo que o serviço continua.",
     "title": "Uso",
     "grokExtraUsageCredits": "Créditos de Uso Extra",
     "grokAutoTopUp": "Recarregamento Automático",
@@ -9998,6 +10102,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limites do provedor",
     "noProviders": "Nenhum provedor conectado",
+    "quotaAuthRequired": "Autenticação necessária — inicie sessão no painel",
+    "quotaAuthRequiredHint": "Não foi possível carregar as ligações aos fornecedores porque a sessão do painel está em falta ou expirou. Inicie sessão e atualize a página para ver os seus limites de quota.",
     "connectProvidersForQuota": "Conecte-se a provedores com OAuth para rastrear o uso e os limites de cota de API.",
     "accountsCount": "{count, plural, one {# conta} other {# contas}}",
     "filteredFromCount": "(filtrado de {count})",
@@ -10047,9 +10153,6 @@
     "tierLite": "Leve",
     "tierUnknown": "Desconhecido",
     "statTotal": "Total",
-    "statCritical": "Crítico",
-    "statAlert": "Alerta",
-    "statHealthy": "Saudável",
     "filterPurchaseTypeLabel": "Tipo",
     "filterTierLabel": "Nível",
     "purchaseAll": "Todos",
@@ -10288,10 +10391,64 @@
     "lastRefreshed": "Última atualização",
     "providerQuota": "Quota do fornecedor",
     "providerQuotaHomeHint": "Estado em tempo real em todas as contas associadas",
+    "claudeResetCreditDefaultTitle": "Reposição do limite do Claude",
+    "confirmRedeemClaudeResetCredit": "O resgate repõe imediatamente os limites de utilização elegíveis do Claude e consome permanentemente este crédito.",
+    "claudeResetCreditsModalTitle": "Créditos de reposição do Claude",
+    "claudeResetCreditsModalExplainer": "Créditos de reposição do Claude disponíveis e reposições semanais de sessão para esta conta.",
     "codexPaidCreditsLabel": "Créditos pagos do Codex",
     "codexPaidCreditsAvailable": "Disponíveis (saldo não indicado)",
     "codexPaidCreditsUnavailable": "Indisponíveis ou limite de gastos atingido",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Com base nas observações recentes, não num teste em direto. Selecione uma conta para ver detalhes.",
+    "healthRecovery": "Recuperação prevista",
+    "healthAvailable": "Disponível",
+    "healthRestricted": "Parcialmente restrito",
+    "healthUnavailable": "Indisponível",
+    "healthPeakHourProtection": "Proteção nas horas de ponta",
+    "healthCooldown": "Tempo de espera",
+    "healthQuotaExhausted": "Quota esgotada",
+    "healthOverview": "Visão geral",
+    "layoutFull": "Completo",
+    "layoutCompact": "Compacto",
+    "healthQuotaError": "Falha ao ler a quota",
+    "healthNoRuntime": "Estado operacional indisponível",
+    "healthPreviousSnapshot": "A última atualização falhou; a mostrar o resultado anterior",
+    "healthPreviousFailure": "O último pedido falhou; o período de espera terminou",
+    "healthAwaitingSync": "A hora de reposição passou; a aguardar sincronização",
+    "healthVerdictUnavailable": "Verificação de disponibilidade indisponível; são apresentados apenas os níveis de quota",
+    "healthSummaryFailed": "Falha ao ler o resumo operacional; podem faltar bloqueios de modelos",
+    "healthRuntimeObserved": "Estado atualizado {time}",
+    "healthQuotaObserved": "Quota observada {time}",
+    "healthOldestQuota": "Registo de quota mais antigo: {time}",
+    "healthRecoveryUnknown": "Hora de recuperação desconhecida",
+    "healthDetailsHint": "Clique para ver detalhes e ações",
+    "healthFiveHour": "5 horas",
+    "healthOverall": "Global",
+    "healthAction": "Requer atenção",
+    "healthTitle": "Disponibilidade das contas",
+    "healthDrag": "Arrastar para reordenar fornecedores",
+    "healthDragPosition": "{provider}, {count, plural, one {posição {position, number} de #} many {posição {position, number} de #} other {posição {position, number} de #}}",
+    "healthResetOrder": "Restaurar a ordem predefinida",
+    "healthPool": "Grupo {name}",
+    "healthOtherPool": "Mesma conta · {pool}: {status} ({remaining} restante)",
+    "healthIncluded": "{count, plural, one {Inclui # conta com restrições parciais} many {Inclui # contas com restrições parciais} other {Inclui # contas com restrições parciais}}",
+    "healthBannerUnavailable": "{count, plural, one {# conta temporariamente indisponível} many {# contas temporariamente indisponíveis} other {# contas temporariamente indisponíveis}}",
+    "healthBannerAvailable": "{count, plural, one {# conta disponível} many {Todas as # contas disponíveis} other {Todas as # contas disponíveis}}",
+    "healthLegendHide": "Ocultar legenda",
+    "healthLegendShow": "Mostrar legenda",
+    "healthLegendOk": "Opaco = quota restante; translúcido = quota utilizada.",
+    "healthLegendCooldown": "Quota de {window} esgotada. Opaco = espera decorrida; translúcido = espera restante.",
+    "healthLegendAction": "Autorização expirada ou conta bloqueada; esperar não resolve.",
+    "healthLegendPartial": "Ainda utilizável. Topo amarelo = modelo ou grupo restrito.",
+    "healthWaited": "Espera decorrida: {percent}",
+    "healthWait": "Faltam {duration} (recuperação às {time})",
+    "healthFastest": "Primeira recuperação dentro de {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} disponível} many {# / {active, number} disponíveis} other {# / {active, number} disponíveis}}",
+    "healthCd5": "5 horas · Tempo de espera",
+    "healthCdw": "Semanal · Tempo de espera",
+    "healthRecentSuccessBypass": "O encaminhamento permite esta conta porque um pedido foi bem-sucedido recentemente.",
+    "healthPurchasedBalanceBypass": "O saldo comprado permite continuar após esgotar a quota incluída.",
+    "healthCutoffAtRequest": "Os limiares de quota em tempo real são verificados ao encaminhar um pedido."
   },
   "modals": {
     "waitingAuth": "Aguardando autorização",
@@ -11078,7 +11235,8 @@
       "message": "Mensagem",
       "error": "Erro",
       "completion": "Conclusão"
-    }
+    },
+    "statusFilter": "Estado"
   },
   "templateNames": {
     "simple-chat": "Chat Simples",
@@ -11259,7 +11417,8 @@
     "minutesAgo": "há {minutes}m",
     "hoursAgo": "há {hours}h",
     "daysAgo": "há {days}d",
-    "entries": "Entradas"
+    "entries": "Entradas",
+    "viewSwitcherAria": "Vista da cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globais",
@@ -11447,6 +11606,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Mais ações",
     "test": "Testar",
     "edit": "Editar",
     "delete": "Eliminar",
@@ -11526,7 +11686,7 @@
     "bulkImportNoValidEntries": "Nenhuma entrada válida encontrada. Verifique o formato e tente novamente.",
     "bulkImportSuccess": "Importação concluída: {created} criado, {updated} atualizado, {failed} falhou",
     "bulkImportErrorLine": "Linha {line}: {reason}",
-    "bulkImportMaxExceeded": "Máximo de 100 proxies por importação",
+    "bulkImportMaxExceeded": "Máximo de {max} proxies por importação",
     "bulkImportPreview": "Visualização",
     "clearAssignment": "(atribuição clara)",
     "bulkProxyAssignment": "Atribuição de proxy em massa",
@@ -11587,6 +11747,7 @@
     "poolSetAsideKindIpQuota429": "limite de taxa por IP (429)",
     "poolSetAsideKindSlow": "respostas lentas",
     "poolSetAsideKindGeoBlocked": "região bloqueada (403/451)",
+    "poolSetAsideKindOperatorReported": "interrupção comunicada pelo operador",
     "poolSetAsideUntil": "De volta à rotação {endsAt}",
     "poolSetAsideRepeat": "Afastado {count, plural, one {# vez} other {# vezes}}",
     "poolUnknownAddress": "Endereço desconhecido",
@@ -11696,7 +11857,6 @@
     "exportCodeTitle": "Exportar Código",
     "exportShort": "Exportar",
     "noStateToExport": "Não há estado do playground disponível para exportar.",
-    "closeExportModal": "Fechar modal de exportação",
     "close": "Fechar",
     "exportRealKeyWarning": "Aviso de segurança: exportação bloqueada — foi detetada uma chave de API real no resultado. Redefina a sua chave de API e tente novamente.",
     "placeholderHintPrefix": "Substituir",
@@ -11809,7 +11969,8 @@
       "nextButton": "Seguinte",
       "runButton": "Executar",
       "promptPlaceholder": "Introduza a sua mensagem… (Enter para enviar, Shift+Enter para nova linha)"
-    }
+    },
+    "playgroundTabs": "Modos do Playground"
   },
   "miniPlayground": {
     "endpoint": "Ponto final",
@@ -11880,7 +12041,8 @@
     "assistant": "Assistente",
     "errorLabel": "Erro",
     "requestFailed": "O pedido falhou",
-    "stop": "Parar"
+    "stop": "Parar",
+    "messageInputAria": "Mensagem"
   },
   "requestLogger": {
     "recording": "A gravar",
@@ -12067,8 +12229,18 @@
       "resilienceRotations": "{count} rotações de conta",
       "resilienceRetried": "Turno vazio repetido",
       "resilienceContinued": "Retomado no meio do fluxo",
-      "resilienceRecovered": "Recuperado por uma ação de resiliência"
-    }
+      "resilienceRecovered": "Recuperado por uma ação de resiliência",
+      "conversationContext": "Contexto da conversa",
+      "goToBottom": "Ir para o fim",
+      "liveRefreshOn": "Atualização em tempo real: ativada",
+      "liveRefreshOff": "Atualização em tempo real: desativada",
+      "liveRefresh": "Atualização em tempo real",
+      "continuesFromParent": "continua a partir do elemento principal",
+      "continuesFrom": "Continua a partir de {id}",
+      "viewConversation": "ver conversa",
+      "openConversation": "Abrir conversa {id}"
+    },
+    "tableLabel": "Registos de pedidos"
   },
   "proxyLogger": {
     "filterAll": "Todos",
@@ -12113,7 +12285,9 @@
     "colServedBy": "Servido por",
     "filterTraffic": "Tráfego",
     "filterTests": "Testes",
-    "filterSource": "Fonte"
+    "filterSource": "Fonte",
+    "tableLabel": "Registos do proxy",
+    "sortLogs": "Ordenar registos"
   },
   "endpointOptions": {
     "speech": "Fala",
@@ -12198,7 +12372,8 @@
     "statusExhausted": "ESGOTADO",
     "statusAlerting": "EM ALERTA",
     "statusError": "ERRO",
-    "moreSuffix": "+{count} mais"
+    "moreSuffix": "+{count} mais",
+    "feedFilterLabel": "Filtrar eventos"
   },
   "quotaShare": {
     "weightPercent": "Peso %",
@@ -12365,7 +12540,10 @@
     "ungroupedTitle": "Sem grupo",
     "ungroupedHint": "Estas pools não estão atribuídas a um grupo conhecido. Edite uma pool para a mover para um grupo real.",
     "removeFailed": "Não foi possível remover este pool.",
-    "dismiss": "Dispensar"
+    "dismiss": "Dispensar",
+    "allocationsHeading": "Alocações",
+    "wizardRemoveDimension": "Remover dimensão",
+    "wizardRemoveKey": "Remover chave"
   },
   "plugins": {
     "title": "Plugins",
@@ -12523,7 +12701,8 @@
       "settingsUpdateFailed": "Falha ao atualizar as definições",
       "serviceRevealApiKey": "{actor} revelou a chave de API para {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Fechar erro"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12835,21 @@
       "goNow": "Ir agora",
       "message": "O MITM Proxy reside agora no AgentBridge.",
       "title": "Esta página foi movida"
-    }
+    },
+    "dnsOn": "DNS ativado",
+    "dnsOff": "DNS desativado",
+    "showServerSettings": "Mostrar definições do servidor",
+    "hideServerSettings": "Ocultar definições do servidor",
+    "upstreamCaTesting": "A testar…",
+    "removeMapping": "Remover mapeamento",
+    "mappingSourcePlaceholder": "por ex., gemini-3.6-flash-medium, ou * para todos os modelos não mapeados",
+    "mappingWildcardHint": "Utilize * como origem para encaminhar através do OmniRoute todos os modelos sem um mapeamento explícito para o destino selecionado. As correspondências exatas da origem têm sempre prioridade sobre *.",
+    "wizardDetectingModels": "A detetar modelos no tráfego intercetado...",
+    "wizardDetectedModels": "Foram encontrados {count, plural, one {# modelo} other {# modelos}} no tráfego intercetado. Selecione os que pretende adicionar:",
+    "wizardSelectedModels": "{count, plural, one {# modelo selecionado} other {# modelos selecionados}}. Irá mapeá-los para modelos do OmniRoute no ecrã seguinte.",
+    "wizardAddModels": "Adicionar {count, plural, one {# modelo} other {# modelos}}",
+    "wizardNoModelsDetected": "Ainda não foram detetados modelos. Utilize {agent} para efetuar um pedido e, em seguida, execute novamente este assistente para detetar automaticamente modelos no tráfego.",
+    "wizardNoModelsHint": "Em alternativa, feche este assistente e adicione os mapeamentos manualmente no cartão do agente."
   },
   "providerStats": {
     "unknownError": "Erro desconhecido",
@@ -12686,7 +12879,11 @@
     "avgTtft": "TTFT médio",
     "avgTotal": "Total médio",
     "requestTelemetry": "Telemetria de pedidos",
-    "requestTelemetryDescription": "Desagregação do pipeline de 7 fases (últimos 5 minutos)"
+    "requestTelemetryDescription": "Desagregação do pipeline de 7 fases (últimos 5 minutos)",
+    "title": "Estatísticas dos fornecedores",
+    "description": "Tráfego, latência e taxas de sucesso por fornecedor e por modelo",
+    "combo": "Combinação",
+    "toggleModels": "Mostrar modelos de {provider}"
   },
   "relay": {
     "title": "Proxies de relay serverless",
@@ -12847,7 +13044,18 @@
     "noRequestBody": "Sem corpo do pedido.",
     "noResponseBody": "Sem corpo da resposta.",
     "formatted": "Formatado",
-    "raw": "Em bruto"
+    "raw": "Em bruto",
+    "requestCount": "{count, plural, one {# pedido} other {# pedidos}}",
+    "expandList": "Expandir lista",
+    "collapseList": "Fechar lista",
+    "snippetLanguage": "Linguagem do fragmento",
+    "headersTable": "Cabeçalhos",
+    "showSecrets": "Mostrar segredos",
+    "maskSecrets": "Ocultar segredos",
+    "llmNotAvailable": "Os metadados de LLM não estão disponíveis para este pedido.",
+    "llmStreamYes": "sim (SSE)",
+    "llmStreamNo": "não",
+    "llmTotalTokens": "Total: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13514,8 @@
     "colReliabilityHelp": "Percentagem de chamadas a que este fornecedor respondeu efetivamente nas últimas 24 horas. Um travessão significa que processou tráfego insuficiente para determinar uma taxa.",
     "reliabilitySample": "{successes} de {requests} chamadas foram bem-sucedidas nas últimas {hours} h",
     "reliabilityTooFew": "Apenas {requests} chamadas nas últimas {hours} h — demasiado poucas para determinar uma taxa",
-    "reliabilityNoTraffic": "Nenhuma chamada registada nas últimas 24 h"
+    "reliabilityNoTraffic": "Nenhuma chamada registada nas últimas 24 h",
+    "categoryFilter": "Categoria da tarefa"
   },
   "discovery": {
     "title": "Deteção de Fornecedores",
@@ -13331,7 +13540,11 @@
     "method": "Método",
     "auth": "Autenticação",
     "feasibility": "Viabilidade",
-    "models": "Modelos"
+    "models": "Modelos",
+    "provider": "Fornecedor",
+    "status": "Estado",
+    "endpoint": "Endpoint",
+    "actions": "Ações"
   },
   "noAuthProvider": {
     "title": "Nenhuma autenticação necessária",
@@ -13380,7 +13593,8 @@
     "ownProxy": "Proxy próprio",
     "freeTierPause": "Modelo {model} em pausa (429), retoma em {time}",
     "freeTierPauseProvider": "Em pausa (429), retoma em {time}",
-    "freeTierPauseNote": "Pausa em processo nesta instância"
+    "freeTierPauseNote": "Pausa em processo nesta instância",
+    "proxyType": "Tipo de proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13767,10 @@
         "description": "Uma conquista oculta aguarda...",
         "criteria": "Conclua a conquista oculta para revelar este emblema."
       }
-    }
+    },
+    "leaderboardTitle": "Tabela classificativa",
+    "leaderboardDescription": "Classificações e conquistas das suas chaves de API",
+    "badgeLocked": "Bloqueado"
   },
   "featureFlags": {
     "title": "Sinalizadores de Funcionalidades",
@@ -13794,6 +14011,7 @@
     "latency": "Latência",
     "quota": "Quota",
     "rangeWindow": "Janela de {range}",
+    "timeRange": "Intervalo de tempo",
     "runtimeHealthBlend": "combinação de tempo de execução/estado",
     "averageResponseTime": "tempo médio de resposta",
     "worstQuota": "Pior quota",
@@ -13995,7 +14213,11 @@
     "learnMore": "Saber mais",
     "changelogLoadFailed": "Não foi possível carregar o registo de alterações. Por favor, tente novamente mais tarde.",
     "retry": "Tentar novamente",
-    "viewFullHistory": "Ver histórico completo no GitHub"
+    "viewFullHistory": "Ver histórico completo no GitHub",
+    "title": "Notícias e registo de alterações",
+    "description": "Anúncios da equipa OmniRoute e as notas de lançamento mais recentes",
+    "viewLabel": "Ver",
+    "loadingNews": "A carregar anúncios..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14768,9 @@
       "circuitBreakerState": "Estado do Disjuntor do Fornecedor",
       "lastUpdate": "Última atualização: {timestamp}",
       "uptimeMinutes": "{minutes}min",
-      "uptimeHoursMinutes": "{hours}h {minutes}min"
+      "uptimeHoursMinutes": "{hours}h {minutes}min",
+      "breakerClosed": "Fechado",
+      "breakerNotClosed": "Aberto ou semiaberto"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14845,9 @@
         "primaryAction": "Detalhes de Manutenção",
         "secondaryAction": "Estado do Sistema"
       }
+    },
+    "miniapp": {
+      "askAnything": "Pergunte qualquer coisa…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +15038,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} visíveis / {total} no total",
+    "modeLabel": "Modo de visualização",
+    "jumpToNow": "Ir para a hora atual; a linha AGORA é reposta na posição {position}%",
+    "laneReuse": "Reutilização de faixas",
+    "laneReuseLabel": "Janela de reutilização de faixas (minutos)",
+    "laneReuseHint": "Os pedidos que partilham um ID de conversa permanecem na mesma linha cronológica, desde que o intervalo entre eles seja inferior a este número de minutos.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Atualização automática",
+    "autoRefreshLabel": "Intervalo de atualização automática (segundos)",
+    "autoRefreshHint": "Frequência com que a linha cronológica volta a obter a lista de pedidos do servidor.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Reduzir zoom",
+    "zoomIn": "Aumentar zoom"
   },
   "metadata": {
     "compressionTitle": "Compressão",
@@ -15074,5 +15314,8 @@
     "importButton": "Importar",
     "importFailed": "A importação falhou.",
     "importSuccess": "{connections} contas e {nodes} nós de fornecedor importados; {skipped} ignorados."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Começar na posição atual (ignorar os registos existentes)"
   }
 }

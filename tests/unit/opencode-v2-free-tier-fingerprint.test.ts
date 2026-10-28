@@ -221,13 +221,15 @@ test("contract body: v1 placeholders and tool_choice by default, v2 schemas when
   );
 });
 
-test("executor: a gated request without a key builds headers and invents no credential", () => {
+test("executor: a gated request without a key carries only the anonymous credential", () => {
   _setOpencodeFreeModelsForTests([FREE_MODEL]);
   for (const flag of [undefined, "true"]) {
     withFlag(flag, () => {
       const executor = new OpencodeExecutor("opencode-zen");
       const headers = executor.buildHeaders(null, true, null, FREE_MODEL);
-      assert.equal(headers["Authorization"], undefined, `flag=${flag}`);
+      // No operator key is invented: the gated lane's own credential stands in for it
+      // (the /inference lane serves `Bearer public`, measured 2026-10-21).
+      assert.equal(headers["Authorization"], "Bearer public", `flag=${flag}`);
       assert.equal(headers["x-api-key"], undefined, `flag=${flag}`);
     });
   }
@@ -244,7 +246,8 @@ test("executor: the flag drives the identity on the real header path", () => {
   assert.equal(off["x-opencode-client"], "desktop");
   assert.match(off["x-opencode-request"], /^msg_/);
   assert.equal(off["x-opencode-session-id"], undefined);
-  assert.equal(off["Authorization"], "Bearer sk-test");
+  // Gated: the anonymous /inference credential stands in for sk-test (measured 2026-10-21).
+  assert.equal(off["Authorization"], "Bearer public");
 
   const on = withFlag("true", () =>
     new OpencodeExecutor("opencode-zen").buildHeaders(creds, true, null, FREE_MODEL)
@@ -253,7 +256,7 @@ test("executor: the flag drives the identity on the real header path", () => {
   assert.equal(on["x-opencode-client"], "cli");
   assert.equal(on["x-opencode-request"], undefined);
   assert.equal(on["x-opencode-session-id"], on["x-opencode-session"]);
-  assert.equal(on["Authorization"], "Bearer sk-test");
+  assert.equal(on["Authorization"], "Bearer public");
 
   // A paid (ungated) model keeps its request id even with the flag on.
   const paid = withFlag("true", () =>

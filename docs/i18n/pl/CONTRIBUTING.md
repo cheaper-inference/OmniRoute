@@ -175,7 +175,7 @@ Zakresy (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`,
 ## Uruchamianie testów
 
 ```bash
-# Wszystkie testy (jednostkowe + vitest + ekosystemowe + e2e)
+# Wszystkie testy (jednostkowe + vitest + ekosystem + e2e)
 npm run test:all
 
 # Pojedynczy plik testowy (natywny mechanizm uruchamiania testów Node.js — korzysta z niego większość testów)
@@ -183,10 +183,10 @@ node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Tylko testy jednostkowe, na które wpływa Twoja zmiana (ten sam selektor TIA co w bramce CI, #8084)
 npm run test:scoped            # zmiany w ostatnim commicie (lub w drzewie roboczym)
-npm run test:scoped:staged     # tylko przygotowane zmiany — dobrze współpracuje z uruchomieniem przed commitem
-npm run test:scoped:full       # najpierw przebuduj mapę grafu importów (po dodaniu/przeniesieniu plików)
-# Kod wyjścia 1 + „uruchom pełny zestaw” oznacza, że zmienił się plik centralny (tsconfig, package.json, …)
-# lub nieodwzorowany plik źródłowy — selektor działa bezpiecznie i nigdy nie pomija niczego po cichu.
+npm run test:scoped:staged     # tylko zmiany dodane do indeksu — dobrze współpracuje z uruchomieniem przed commitem
+npm run test:scoped:full       # najpierw ponownie tworzy mapę grafu importów (po dodaniu/przeniesieniu plików)
+# Kod wyjścia 1 + „uruchom pełny zestaw” oznacza, że zmienił się plik centralny (tsconfig, package.json, …) lub
+# niezmapowane źródło — selektor bezpiecznie przerywa działanie i nigdy po cichu niczego nie pomija.
 
 # Vitest (serwer MCP, autoCombo, pamięć podręczna)
 npm run test:vitest
@@ -204,56 +204,57 @@ npm run test:ecosystem
 npm run test:coverage
 npm run coverage:report
 
-# Lintowanie + sprawdzanie formatowania
+# Sprawdzanie lintowania i formatowania
 npm run lint
 npm run check
 
-# Warunkowo uruchamiany test dymny kombinacji z rzeczywistymi usługami upstream (wymaga dostępu do VPS + środków u rzeczywistych dostawców)
-# Korzysta z RZECZYWISTYCH dostawców — generuje niewielkie koszty. NIGDY nie jest uruchamiany w CI. Bez warunku jest prawidłowo pomijany.
-# Wymaga: dostępu ssh root@192.168.0.15 (pobiera z VPS migawkę bazy danych tylko do odczytu).
+# Warunkowy test smoke rzeczywistej kombinacji upstream (wymaga dostępu do VPS i środków u rzeczywistych dostawców)
+# Korzysta z RZECZYWISTYCH dostawców — generuje niewielkie koszty. NIGDY nie działa w CI. Jest bezpiecznie pomijany bez aktywnej bramki.
+# Wymaga dostępu: ssh root@192.168.0.15 (pobiera z VPS migawkę bazy danych tylko do odczytu).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Test dymny na żywo VPS fazy 3 — zwykłe skrypty Node ESM komunikujące się bezpośrednio z działającym serwerem .15.
-# Wymaga: dostępu ssh root@192.168.0.15 (kombinacje są tworzone/usuwane przez SSH sqlite).
-# Korzysta z RZECZYWISTYCH dostawców (niewielki koszt). Tworzy/usuwa tylko kombinacje __live_test__*. NIGDY nie jest uruchamiany w CI.
-# REQUIRE_API_KEY=false na .15, więc klucz API nie jest potrzebny, ale respektuje COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY, jeśli je ustawiono.
+# Test smoke na żywo fazy 3 na VPS — zwykłe skrypty Node ESM, bezpośrednio korzystające z działającego serwera .15.
+# Wymaga dostępu: ssh root@192.168.0.15 (kombinacje są tworzone/usuwane przez SSH sqlite).
+# Korzysta z RZECZYWISTYCH dostawców (niewielki koszt). Tworzy/usuwa wyłącznie kombinacje __live_test__*. NIGDY nie działa w CI.
+# Na .15 ustawiono REQUIRE_API_KEY=false, więc klucz API nie jest wymagany, ale ustawienia COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY są respektowane.
 npm run test:combo:live:vps              # 7 scenariuszy HTTP (priorytet/cykliczny/ważony/koszt/fuzja/automatyczny + kondycja)
 npm run test:combo:live:vps:failover     # dodaje rzeczywisty scenariusz przełączania awaryjnego między dostawcami (łącznie 8)
 ```
 
 Uwagi dotyczące pokrycia:
 
-- `npm run test:coverage` mierzy pokrycie kodu źródłowego przez główny zestaw testów jednostkowych, wyklucza `tests/**` i obejmuje `open-sse/**`
-- Pull requesty muszą utrzymywać próg pokrycia na poziomie **60%+** instrukcji/wierszy/funkcji/gałęzi
+- `npm run test:coverage` mierzy pokrycie kodu źródłowego dla głównego zestawu testów jednostkowych, wyklucza `tests/**` i obejmuje `open-sse/**`
+- Pull requesty muszą utrzymywać bramkę pokrycia na poziomie **60%+** instrukcji/wierszy/funkcji/gałęzi
 - Jeśli PR zmienia kod produkcyjny w `src/`, `open-sse/`, `electron/` lub `bin/`, musi w tym samym PR dodawać lub aktualizować testy automatyczne
-- `npm run coverage:report` wyświetla szczegółowy raport dla poszczególnych plików z ostatniego uruchomienia testów pokrycia
-- `npm run test:coverage:legacy` zachowuje starszą metrykę na potrzeby porównań historycznych
-- Zobacz `docs/ops/COVERAGE_PLAN.md`, aby poznać etapowy plan poprawy pokrycia
+- `npm run coverage:report` wyświetla szczegółowy raport dla poszczególnych plików z ostatniego pomiaru pokrycia
+- `npm run test:coverage:legacy` zachowuje starszą metrykę do porównań historycznych
+- Etapowy plan poprawy pokrycia znajduje się w `docs/ops/COVERAGE_PLAN.md`
 
-### Wymagania dotyczące Pull Requestów
+### Wymagania dotyczące pull requestów
 
 Przed otwarciem PR skorzystaj z
-[zalecanej ścieżki wnoszenia wkładu](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), aby uruchomić ukierunkowaną pętlę dla
-wprowadzonych zmian. Za pełny zestaw testów jednostkowych (4 fragmenty CI), Vitest, bramkę pokrycia **60%+** oraz
-kompilację produkcyjną odpowiada CI — uruchamianie ich lokalnie nie dostarcza żadnych dodatkowych informacji ponad to,
-co i tak zapewnią kontrole PR, a na słabszych maszynach może przeciążyć hosta (#8084):
+[zalecanej ścieżki wnoszenia zmian](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), aby uruchomić ukierunkowaną pętlę dla
+wprowadzonych zmian. Pełny zestaw testów jednostkowych (4 fragmenty CI), Vitest, bramka pokrycia **60%+** oraz
+kompilacja produkcyjna należą do obowiązków CI — ich lokalne uruchamianie nie dostarcza żadnych informacji,
+których nie zapewnią już kontrole PR, a na słabszych maszynach może przeciążyć hosta (#8084):
 
 - Uruchom pliki testowe obejmujące Twoją zmianę: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Uruchom `npm run lint`
-- Za każdym razem, gdy zmienia się kod produkcyjny, dodaj lub zaktualizuj testy automatyczne w tym samym PR
-- Jeśli zmienił się kod produkcyjny, wymień zmienione lub dodane pliki testowe w opisie PR
-- Sprawdź wynik SonarQube w PR, gdy sekrety projektu są skonfigurowane w CI
+- Za każdym razem, gdy zmienia się kod produkcyjny, uwzględnij lub zaktualizuj testy automatyczne w tym samym PR
+- W plikach `node:test` umieść każde `await` najwyższego poziomu (np. `await import(...)`) przed pierwszym `test()` / `describe()`: przy `--test-force-exit` testy zarejestrowane po nim mogą po cichu nigdy się nie uruchomić (#18045; wymuszane przez `npm run check:test-tla-order`)
+- Jeśli zmienił się kod produkcyjny, uwzględnij zmienione lub dodane pliki testowe w opisie PR
+- Gdy sekrety projektu są skonfigurowane w CI, sprawdź wynik SonarQube dla PR
 
-Aktualny stan testów: **122 pliki testów jednostkowych** obejmujące:
+Bieżący stan testów: **122 pliki testów jednostkowych** obejmujące:
 
 - Translatory dostawców i konwersję formatów
-- Ograniczanie szybkości, wyłącznik awaryjny i odporność
+- Ograniczanie częstotliwości, wyłącznik automatyczny i odporność
 - Semantyczną pamięć podręczną, idempotencję i śledzenie postępu
 - Operacje na bazie danych i schemat (21 modułów DB)
 - Przepływy OAuth i uwierzytelnianie
 - Walidację punktów końcowych API (Zod v4)
-- Narzędzia serwera MCP i wymuszanie zakresów
-- Systemy Memory i Skills
+- Narzędzia serwera MCP i egzekwowanie zakresów
+- Systemy pamięci i umiejętności
 
 ---
 
