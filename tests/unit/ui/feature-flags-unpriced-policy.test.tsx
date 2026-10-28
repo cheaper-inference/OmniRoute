@@ -4,6 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FeatureFlagsGrid from "@/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid";
 import FeatureFlagCard from "@/app/(dashboard)/dashboard/settings/components/FeatureFlagCard";
+import { chooseKitSelectValue, kitSelectValue } from "../../helpers/kitSelect";
 
 const POLICY = "UNPRICED_USAGE_BUDGET_POLICY";
 const LEGACY = "USAGE_LIMIT_IGNORE_UNPRICED";
@@ -84,8 +85,10 @@ function card(key: string) {
   expect(node).toBeDefined();
   return node!;
 }
-function policySelect() {
-  return card(POLICY).querySelector<HTMLSelectElement>("select")!;
+// The enum control is the shared Select adapter in kit (Radix) mode since KEA-7886: there is
+// no DOM <select>, so the controlled value is read from the kit root's data-value.
+function policyValue() {
+  return kitSelectValue(card(POLICY));
 }
 function resetButton(key: string) {
   return card(key).querySelector<HTMLButtonElement>('button[aria-label^="Reset"]');
@@ -124,7 +127,7 @@ describe("Feature Flags unpriced policy state contract", () => {
     const fetcher = vi.fn().mockResolvedValue(response([legacy, inherited], 1));
     vi.stubGlobal("fetch", fetcher);
     await mount();
-    expect(policySelect().value).toBe("count_as_zero");
+    expect(policyValue()).toBe("count_as_zero");
     expect(card(POLICY).textContent).toContain(LEGACY);
     expect(card(POLICY).textContent).toContain("DB");
     expect(resetButton(POLICY)).toBeNull();
@@ -142,7 +145,7 @@ describe("Feature Flags unpriced policy state contract", () => {
     vi.stubGlobal("fetch", fetcher);
     await mount();
     await click(card(LEGACY).querySelector<HTMLButtonElement>('[role="switch"]')!);
-    expect(policySelect().value).toBe("fail_closed");
+    expect(policyValue()).toBe("fail_closed");
     expect(card(LEGACY).querySelector('[role="switch"]')?.getAttribute("aria-checked")).toBe(
       "false"
     );
@@ -165,7 +168,7 @@ describe("Feature Flags unpriced policy state contract", () => {
     vi.stubGlobal("fetch", fetcher);
     await mount();
     await click(resetButton(LEGACY)!);
-    expect(policySelect().value).toBe("fail_closed");
+    expect(policyValue()).toBe("fail_closed");
     expect(card(POLICY).textContent).toContain("ENV");
     expect(resetButton(POLICY)).toBeNull();
     expect(resetButton(LEGACY)).toBeNull();
@@ -184,12 +187,9 @@ describe("Feature Flags unpriced policy state contract", () => {
       .mockResolvedValueOnce(response([legacy, inherited], 1));
     vi.stubGlobal("fetch", fetcher);
     await mount();
-    await act(async () => {
-      policySelect().value = "fail_closed";
-      policySelect().dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    chooseKitSelectValue(card(POLICY), "fail_closed");
     await settle();
-    expect(policySelect().value).toBe("fail_closed");
+    expect(policyValue()).toBe("fail_closed");
     expect(resetButton(POLICY)).not.toBeNull();
     expect(container.textContent).toContain("2 DB overrides");
     expect(JSON.parse(fetcher.mock.calls[1][1].body)).toEqual({
@@ -197,7 +197,7 @@ describe("Feature Flags unpriced policy state contract", () => {
       value: "fail_closed",
     });
     await click(resetButton(POLICY)!);
-    expect(policySelect().value).toBe("count_as_zero");
+    expect(policyValue()).toBe("count_as_zero");
     expect(resetButton(POLICY)).toBeNull();
     expect(resetButton(LEGACY)).not.toBeNull();
     expect(card(POLICY).textContent).toContain(LEGACY);
@@ -216,7 +216,7 @@ describe("Feature Flags unpriced policy state contract", () => {
     vi.stubGlobal("fetch", fetcher);
     await mount();
     await click(card(LEGACY).querySelector<HTMLButtonElement>('[role="switch"]')!);
-    expect(policySelect().value).toBe("fail_closed");
+    expect(policyValue()).toBe("fail_closed");
     expect(resetButton(POLICY)).not.toBeNull();
     expect(card(POLICY).textContent).not.toContain(LEGACY);
     expect(fetcher).toHaveBeenCalledTimes(3);
@@ -226,7 +226,7 @@ describe("Feature Flags unpriced policy state contract", () => {
     const env: Flag = { ...explicit, source: "env", configuredSource: "env" };
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response([legacy, env], 1, 1)));
     await mount();
-    expect(policySelect().value).toBe("fail_closed");
+    expect(policyValue()).toBe("fail_closed");
     expect(resetButton(POLICY)).toBeNull();
     expect(card(POLICY).textContent).toContain("ENV");
   });
@@ -249,7 +249,7 @@ describe("Feature Flags unpriced policy state contract", () => {
     await mount();
     await click(card(other.key).querySelector<HTMLButtonElement>('[role="switch"]')!);
     expect(fetcher).toHaveBeenCalledTimes(2);
-    expect(policySelect().value).toBe("count_as_zero");
+    expect(policyValue()).toBe("count_as_zero");
     expect(resetButton(other.key)).not.toBeNull();
     expect(container.textContent).toContain("1 DB overrides");
     await click(resetButton(other.key)!);
