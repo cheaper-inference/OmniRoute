@@ -35,6 +35,53 @@ export interface FlowMediaResult {
   b64_json?: string;
 }
 
+async function syncRotatedCookies(context: any): Promise<void> {
+  if (!context) return;
+  try {
+    const cookies = await context.cookies();
+    if (!Array.isArray(cookies) || cookies.length === 0) return;
+    const hasTimestamp = cookies.some((c: any) => c && c.name && c.name.includes("PSIDTS"));
+    if (!hasTimestamp) return;
+
+    const fs = await import("fs").catch(() => null);
+    if (!fs || !fs.existsSync("/app/data/storage.sqlite") || !fs.existsSync("/app/data/server.env"))
+      return;
+
+    const crypto = await import("crypto");
+    const env = fs.readFileSync("/app/data/server.env", "utf8");
+    let key = "";
+    for (const line of env.split("\n")) {
+      if (line.startsWith("STORAGE_ENCRYPTION_KEY=")) {
+        key = line.split("=")[1].trim();
+      }
+    }
+    if (!key) return;
+
+    const cookieStr = cookies
+      .filter((c: any) => c && typeof c.name === "string" && typeof c.value === "string")
+      .map((c: any) => `${c.name}=${c.value}`)
+      .join("; ");
+
+    const staticKey = crypto.scryptSync(key, "omniroute-field-encryption-v1", 32);
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv("aes-256-gcm", staticKey, iv, { authTagLength: 16 });
+    let enc = cipher.update(cookieStr, "utf8", "hex");
+    enc += cipher.final("hex");
+    const tag = cipher.getAuthTag().toString("hex");
+    const encrypted = "enc:v1:" + iv.toString("hex") + ":" + enc + ":" + tag;
+
+    const Database = (await import("better-sqlite3")).default;
+    const db = new Database("/app/data/storage.sqlite");
+    db.prepare(
+      "UPDATE provider_connections SET api_key = ?, updated_at = ? WHERE provider = 'googleflow-web' AND is_active = 1"
+    ).run(encrypted, new Date().toISOString());
+    db.close();
+    console.log("[FLOW_DEBUG] Automatically synced rotated session cookies to storage.sqlite");
+  } catch (err) {
+    console.error("[FLOW_DEBUG] Failed to auto-sync rotated cookies:", err);
+  }
+}
+
 // Map user model names to UI selector / model keys
 export const VIDEO_MODEL_MAP: Record<string, string> = {
   "veo-3.1": "veo_3_1_quality",
@@ -420,7 +467,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     const clickApproveIfPresent = async (timeoutMs: number) => {
       const btn = page
         .locator(
-          ".option-row:has-text('Approve'), .option-row:has-text('Одобрить'), button:has-text('Approve'), button:has-text('Одобрить'), [role='button']:has-text('Approve'), [role='button']:has-text('Одобрить')"
+          ".option-row:not(.read-only):has-text('Approve'), .option-row:not(.read-only):has-text('Одобрить'), button:not([disabled]):has-text('Approve'), button:not([disabled]):has-text('Одобрить'), [role='button']:not([aria-disabled='true']):has-text('Approve'), [role='button']:not([aria-disabled='true']):has-text('Одобрить')"
         )
         .first();
       if (await btn.isVisible({ timeout: timeoutMs }).catch(() => false)) {
@@ -514,6 +561,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     };
   } finally {
     if (context) {
+      await syncRotatedCookies(context).catch(() => {});
       await context.close().catch(() => {});
     }
     await releaseFlowBrowser(browser).catch(() => {});
@@ -758,6 +806,7 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
     };
   } finally {
     if (context) {
+      await syncRotatedCookies(context).catch(() => {});
       await context.close().catch(() => {});
     }
     await releaseFlowBrowser(browser).catch(() => {});
