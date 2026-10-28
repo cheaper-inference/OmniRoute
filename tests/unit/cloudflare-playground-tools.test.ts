@@ -74,9 +74,14 @@ test("serializeCfToolPrompt generates a compact contract block", () => {
   assert.ok(prompt.includes("# Tools"));
   assert.ok(prompt.includes("bash"));
   assert.ok(prompt.includes("read_file"));
-  // Concrete example uses the first tool name as the tag, and binds the call to
-  // this request's nonce
-  assert.match(prompt, /<bash>\{"arg": value, "_nonce": "[a-z0-9]+"\}<\/bash>/);
+  // The example is a placeholder, NOT the first declared tool: a real name there
+  // gets copied verbatim (`<bash>{"arg": "read"}` for a `read` call), which is
+  // exactly the mislabelled call this provider kept producing.
+  assert.match(
+    prompt,
+    /<TOOL>\{"<argument_name>": <argument_value>, "_nonce": "[a-z0-9]+"\}<\/TOOL>/
+  );
+  assert.doesNotMatch(prompt, /<bash>\{/);
   assert.ok(prompt.includes("command: string"));
   assert.ok(prompt.includes("path: string"));
   // Compact one-line signatures instead of pretty-printed JSON
@@ -84,13 +89,16 @@ test("serializeCfToolPrompt generates a compact contract block", () => {
   assert.ok(prompt.length < 1200, `contract should stay small, got ${prompt.length}`);
 });
 
-test("serializeCfToolPrompt forbids the markup shapes the models invent", () => {
+test("serializeCfToolPrompt says the tool name belongs in the tag, not the JSON", () => {
   const prompt = serializeCfToolPrompt(TEST_TOOLS_OPENAI);
-  // Each of these was observed live and had to be recovered by the parser; the
-  // contract names them so the model does not reach for them in the first place.
-  for (const forbidden of ["<tool>", "<tool_call>", "<tool:name>", "XML argument tags"]) {
-    assert.ok(prompt.includes(forbidden), `contract should forbid ${forbidden}`);
-  }
+  assert.ok(
+    prompt.includes("The tool name goes in the TAG — never inside the JSON body."),
+    'the rule that prevents `<edit>{"arg": "read"}` must be stated'
+  );
+  // The wrapper shapes are now parsed by the ladder, so the contract asks for a
+  // single positive form instead of enumerating the tags models reach for — a
+  // negative list that names `<tool_call>` only primes it.
+  assert.ok(prompt.includes("Do not wrap the block in another tag or a code fence."));
   // Requirement is stated twice: once in the example, once as a rule.
   const nonce = prompt.match(/"_nonce": "([a-z0-9]+)"/)?.[1];
   assert.ok(nonce, "contract should carry a nonce");
@@ -390,9 +398,14 @@ test("parseCfToolCalls does not turn prose that merely mentions <tool> into a ca
   // The unterminated-tag recovery must not fire on explanatory text.
   const prose = "Wrap the payload in <tool> tags and put the JSON object right after them.";
   assert.equal(parseCfToolCalls(prose, TEST_TOOLS).length, 0);
+});
 
-  // A mismatched closing tag still counts as malformed intent, not a call.
-  assert.equal(hasMalformedCfToolIntent('<tool>{"command": "ls"}</other>'), true);
+test("parseCfToolCalls recovers a body closed with the wrong tag", () => {
+  // `</other>` is not `</tool>`, but the JSON body is complete: reading it is
+  // strictly better than dropping the turn and burning a repair retry.
+  const calls = parseCfToolCalls('<tool>{"command": "ls"}</other>', TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
 });
 
 test("parseCfToolCalls handles <read_file>...</read_file> tag", () => {
@@ -558,11 +571,42 @@ test("parseCfToolCalls handles multiple tool calls in one response", () => {
   assert.equal(calls[1].name, "read_file");
 });
 
-test("parseCfToolCalls infers name from first tool when multiple available and name omitted", () => {
-  const text = '<tool>{"command": "pwd"}</tool>';
-  const calls = parseCfToolCalls(text, TEST_TOOLS); // 2 tools available
-  assert.equal(calls.length, 1);
-  assert.equal(calls[0].name, "bash"); // first tool
+test("parseCfToolCalls infers the name from the argument schema when omitted", () => {
+  // Two tools available, so the name cannot come from the array. It comes from
+  // the only schema the payload satisfies — never from `availableTools[0]`.
+  const fromCommand = parseCfToolCalls('<tool>{"command": "pwd"}</tool>', TEST_TOOLS);
+  assert.equal(fromCommand.length, 1);
+  assert.equal(fromCommand[0].name, "bash");
+
+  const fromPath = parseCfToolCalls('<tool>{"path": "a.py"}</tool>', TEST_TOOLS);
+  assert.equal(fromPath.length, 1);
+  assert.equal(fromPath[0].name, "read_file");
+});
+
+test("parseCfToolCalls refuses to guess when two schemas fit the payload", () => {
+  const calls = parseCfToolCalls(
+    '<tool>{"pattern": "*.ts"}</tool>',
+    [
+      {
+        name: "glob",
+        parameters: {
+          type: "object",
+          properties: { pattern: { type: "string" } },
+          required: ["pattern"],
+        },
+      },
+      {
+        name: "grep",
+        parameters: {
+          type: "object",
+          properties: { pattern: { type: "string" } },
+          required: ["pattern"],
+        },
+      },
+    ]
+    // Both tools accept {pattern}: no call is better than the wrong one.
+  );
+  assert.deepEqual(calls, []);
 });
 
 test("parseCfToolCalls handles attributes with single quotes", () => {
@@ -607,8 +651,14 @@ test("hasMalformedCfToolIntent returns true for unclosed tags", () => {
   assert.equal(hasMalformedCfToolIntent('<tool name="bash">{"command": "ls"'), true);
 });
 
-test("hasMalformedCfToolIntent returns true for mismatched tags", () => {
-  assert.equal(hasMalformedCfToolIntent('<tool>{"command": "ls"}</other>'), true);
+test("hasMalformedCfToolIntent returns false for a recoverable mismatched tag", () => {
+  // A complete body closed with the wrong tag used to reach the retry path; the
+  // parser now reads it, so the executor must not re-ask.
+  assert.equal(hasMalformedCfToolIntent('<tool>{"command": "ls"}</other>'), false);
+});
+
+test("hasMalformedCfToolIntent returns true for a wrong closing tag with no body", () => {
+  assert.equal(hasMalformedCfToolIntent('<tool>{"command": "ls"</other>'), true);
 });
 
 test("hasMalformedCfToolIntent returns true for invalid JSON in tool call", () => {
@@ -914,8 +964,13 @@ test("buildCfToolReminder restates the contract with this request's nonce", () =
   const nonce = cfToolNonce(TEST_TOOLS_OPENAI);
 
   assert.ok(reminder.includes("# Tool call reminder"));
-  // The tag shape, spelled with the first declared tool as the example.
-  assert.ok(reminder.includes(`<bash>{"arg": value, "_nonce": "${nonce}"}</bash>`));
+  // The tag shape, spelled with a placeholder rather than the first declared
+  // tool — a real name in the example is copied as the tag verbatim.
+  assert.ok(
+    reminder.includes(`<TOOL>{"<argument_name>": <argument_value>, "_nonce": "${nonce}"}</TOOL>`)
+  );
+  assert.ok(reminder.includes("The tool name goes in the tag, never inside the JSON."));
+  assert.ok(!reminder.includes("<bash>{"), "the reminder must not prime the first tool");
   // The binding is the one the caller validated against, not a fresh one.
   assert.ok(reminder.includes(`"_nonce": "${nonce}"`));
   // Escaping guidance for large bodies — the failure the reminder exists for.

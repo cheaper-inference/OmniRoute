@@ -33,9 +33,23 @@
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import type { ChatCompletionTool } from "openai/resources/chat/completions";
 
-// Nonce binding, name resolution and schema validation come from the shared
+import {
+  CF_MAX_MESSAGE_CHARS,
+  compactCfConversation,
+  countsTowardCfConversationCap,
+} from "./cloudflarePlaygroundConversation.ts";
+import {
+  CF_GENERIC_TOOL_TAGS,
+  CF_WRAPPER_TAG_SOURCE,
+  applyToolNameHint,
+  hasNestedToolTag,
+  inferToolName,
+  resolveDeclaredToolName,
+} from "./cloudflarePlaygroundNameResolution.ts";
+
+// Nonce binding, schema validation and name aliasing come from the shared
 // emulated-tool-calling core the other web providers use, so cfp cannot drift
-// from them. Only the contract wording and the dialect parser are cfp-specific.
+// from them.
 import {
   getRequestedToolNames,
   getToolNonce,
@@ -43,6 +57,20 @@ import {
   resolveRequestedToolName,
 } from "./webTools.ts";
 import { validateToolArguments } from "./toolArgValidation.ts";
+
+// Re-exported so existing importers (the executor, the tests) keep one entry
+// point for the provider's translation surface.
+export {
+  CF_COMPACT_HEADER,
+  CF_MAX_MESSAGE_CHARS,
+  cfMessageText,
+  cfToolCallMarkup,
+  compactCfConversation,
+  flattenCfMessageContent,
+  trimCfConversation,
+  truncateCfMessage,
+  type CfMessageLike,
+} from "./cloudflarePlaygroundConversation.ts";
 
 /**
  * OpenAI tool definition (subset we care about).
@@ -61,12 +89,6 @@ export interface CfParsedToolCall {
   name: string;
   arguments: string; // JSON string
 }
-
-/**
- * The Cloudflare Playground rejects any single message longer than 6000
- * characters ("Prompt too long (max 6000 characters)"). Keep a safety margin.
- */
-export const CF_MAX_MESSAGE_CHARS = 5800;
 
 /**
  * The Cloudflare Playground rejects a conversation carrying more than 10
@@ -97,224 +119,6 @@ export const CF_TOOL_REMINDER_DEPTH = 1;
  * short conversation the reminder would only repeat what the model just read.
  */
 export const CF_TOOL_REMINDER_MIN_MESSAGES = 6;
-
-/** Roles the playground counts toward the 10-message conversation cap. */
-function countsTowardCfConversationCap(role: string | undefined): boolean {
-  return role === "user" || role === "tool";
-}
-
-/**
- * Index the oldest message a `maxUserMessages`-turn window can start on: the
- * newest user turns are kept, and the window always begins on a user turn so a
- * trimmed history never opens with an assistant tool-call whose results were
- * dropped. Returns 0 when everything already fits, and `messages.length` when
- * the budget is non-positive.
- */
-function cfTailStartIndex(messages: ChatCompletionMessageParam[], maxUserMessages: number): number {
-  if (maxUserMessages <= 0) return (messages ?? []).length;
-  const list = messages ?? [];
-  let seen = 0;
-  for (let i = list.length - 1; i >= 0; i--) {
-    if (!countsTowardCfConversationCap(list[i]?.role)) continue;
-    seen++;
-    if (seen === maxUserMessages) return i;
-  }
-  return 0;
-}
-
-/**
- * Keep only the most recent `maxUserMessages` user-role turns (tool results
- * included), dropping the oldest history first. Returns the input untouched
- * when it already fits.
- */
-export function trimCfConversation(
-  messages: ChatCompletionMessageParam[],
-  maxUserMessages: number
-): ChatCompletionMessageParam[] {
-  const list = messages ?? [];
-  return list.slice(cfTailStartIndex(list, maxUserMessages));
-}
-
-// ── Message rendering (shared by the executor and the compaction block) ──────
-
-/** The subset of an OpenAI message the playground bridge renders as text. */
-export interface CfMessageLike {
-  role?: string;
-  content?: unknown;
-  tool_calls?: Array<{ function?: { name?: string; arguments?: string } }>;
-  tool_call_id?: string;
-}
-
-/** Placeholder used when a tool result carries no text at all. */
-const CF_EMPTY_TOOL_RESULT = "Tool executed successfully";
-
-/**
- * Flatten an OpenAI message content field (string, or an array of text parts)
- * into the plain text the playground receives.
- */
-export function flattenCfMessageContent(content: unknown): string {
-  if (typeof content === "string") return content;
-  if (Array.isArray(content)) {
-    return content
-      .map((part) => (typeof part === "string" ? part : ((part as { text?: string })?.text ?? "")))
-      .filter(Boolean)
-      .join("\n");
-  }
-  return "";
-}
-
-/** Render an assistant message's `tool_calls` as `<tool name="...">` markup. */
-export function cfToolCallMarkup(toolCalls: CfMessageLike["tool_calls"]): string {
-  if (!Array.isArray(toolCalls) || toolCalls.length === 0) return "";
-  return toolCalls
-    .map((call) => `<tool name="${call?.function?.name}">${call?.function?.arguments}</tool>`)
-    .join("\n");
-}
-
-/**
- * Render one OpenAI message as the text the playground receives: flattened
- * content, plus replayed tool calls / tool results so the model sees the
- * conversation history. Returns "" when the message carries nothing to render.
- */
-export function cfMessageText(message: CfMessageLike): string {
-  let text = flattenCfMessageContent(message?.content);
-  if (message?.role === "assistant") {
-    const markup = cfToolCallMarkup(message.tool_calls);
-    if (markup) text = text ? `${text}\n${markup}` : markup;
-  }
-  if (message?.role === "tool") {
-    const resultText = text || CF_EMPTY_TOOL_RESULT;
-    text = message.tool_call_id
-      ? `<tool_result call_id="${message.tool_call_id}">${resultText}</tool_result>`
-      : `<tool_result>${resultText}</tool_result>`;
-  }
-  return text;
-}
-
-/**
- * The playground rejects any single message longer than 6000 characters, so
- * every outbound message is capped a little below that.
- */
-export function truncateCfMessage(text: string): string {
-  if (text.length <= CF_MAX_MESSAGE_CHARS) return text;
-  const marker = "\n…[truncated to fit the playground's 6000-char limit]";
-  return text.slice(0, CF_MAX_MESSAGE_CHARS - marker.length) + marker;
-}
-
-// ── Conversation compaction ──────────────────────────────────────────────────
-
-/**
- * Header of the compacted-history block. The block is a single user message
- * carrying the turns that no longer fit in the verbatim window, so a long
- * session keeps its thread (including the original task) instead of silently
- * losing everything the playground's 10-message cap pushed out.
- */
-export const CF_COMPACT_HEADER =
-  "# Earlier conversation (compacted to fit the playground's history limit)";
-
-/**
- * Per-message character budget inside the compacted block. User turns are the
- * cheapest way to keep the thread (what was asked), so they get the most room;
- * tool output is capped hardest — it is normally the bulkiest and the least
- * useful once the turn it belonged to is historical.
- */
-const CF_COMPACT_ITEM_CHARS: Record<string, number> = {
-  user: 700,
-  assistant: 300,
-  tool: 400,
-};
-
-/** Room reserved for the `... N earlier turns (M chars) elided ...` marker. */
-const CF_COMPACT_MARKER_RESERVE = 80;
-
-interface CfCompactItem {
-  header: string;
-  text: string;
-}
-
-/** Cap one compacted turn, flagging how much was dropped. */
-function capCfCompactText(text: string, cap: number): string {
-  if (text.length <= cap) return text;
-  return `${text.slice(0, cap).trimEnd()} …[+${text.length - cap} chars]`;
-}
-
-/** Render one conversation message as a compacted-block item, or null. */
-function toCfCompactItem(message: CfMessageLike): CfCompactItem | null {
-  if (message?.role !== "user" && message?.role !== "assistant" && message?.role !== "tool") {
-    return null;
-  }
-  const text = cfMessageText(message);
-  if (!text) return null;
-  // Tool results already carry their `<tool_result ...>` wrapper, so they are
-  // self-describing inside the block.
-  const header =
-    message.role === "user"
-      ? "### USER"
-      : message.role === "assistant"
-        ? "### ASSISTANT"
-        : "### TOOL RESULT";
-  return { header, text: capCfCompactText(text, CF_COMPACT_ITEM_CHARS[message.role] ?? 300) };
-}
-
-function renderCfCompactItem(item: CfCompactItem): string {
-  return `${item.header}\n${item.text}`;
-}
-
-/**
- * Assemble the compacted block. When it cannot hold every dropped turn it keeps
- * the first one (the original task statement) and the newest ones, and elides
- * the middle — never the tail, which is the part closest to the live context.
- */
-function assembleCfCompactBlock(items: CfCompactItem[], maxChars: number): string {
-  const prefix = `${CF_COMPACT_HEADER}\n\n`;
-  const body = items.map(renderCfCompactItem);
-  const full = prefix + body.join("\n\n");
-  if (full.length <= maxChars) return full;
-
-  const head = body[0];
-  const tail: string[] = [];
-  let room = maxChars - prefix.length - head.length - CF_COMPACT_MARKER_RESERVE;
-  for (let i = body.length - 1; i >= 1; i--) {
-    if (body[i].length + 2 > room) break;
-    room -= body[i].length + 2;
-    tail.unshift(body[i]);
-  }
-
-  const elided = items.slice(1, items.length - tail.length);
-  const elidedChars = elided.reduce((sum, item) => sum + item.text.length, 0);
-  const marker = `... ${elided.length} earlier turns (${elidedChars.toLocaleString("en-US")} chars) elided ...`;
-  const assembled = [head, marker, ...tail].join("\n\n");
-  // A single oversized first turn is already capped, so `assembled` fits; the
-  // guard keeps a future cap change from producing a rejected request.
-  return assembled.length + prefix.length <= maxChars
-    ? prefix + assembled
-    : `${prefix}${head}`.slice(0, maxChars);
-}
-
-/**
- * Split a conversation into the turns the playground can take verbatim and a
- * single compacted block for everything older.
- *
- * `maxUserMessages` is the verbatim budget; the block (when there is overflow)
- * is itself a user message, so callers must leave a slot for it.
- */
-export function compactCfConversation(
-  messages: ChatCompletionMessageParam[],
-  maxUserMessages: number
-): { block: string | null; tail: ChatCompletionMessageParam[] } {
-  const list = messages ?? [];
-  const tailStart = cfTailStartIndex(list, maxUserMessages);
-  const tail = list.slice(tailStart);
-  if (tailStart === 0) return { block: null, tail };
-
-  const items = list
-    .slice(0, tailStart)
-    .map((message) => toCfCompactItem(message as CfMessageLike))
-    .filter((item): item is CfCompactItem => item !== null);
-  if (items.length === 0) return { block: null, tail };
-
-  return { block: assembleCfCompactBlock(items, CF_MAX_MESSAGE_CHARS), tail };
-}
 
 /**
  * Render a JSON schema as a compact TypeScript-ish signature.
@@ -350,18 +154,20 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
   if (!tools || tools.length === 0) return "";
 
   const nonce = getToolNonce(tools);
-  const exampleName = tools[0].function.name;
+  // The example deliberately uses a placeholder instead of the caller's first
+  // tool. A real name there is copied verbatim: with OpenCode's tool list the
+  // model answered every request with `<edit>{"arg": "read", ...}</edit>`,
+  // putting the tool it meant inside the JSON and never calling `read` at all.
   const lines = [
     "# Tools",
     "To call a tool, reply with exactly this block and nothing else:",
-    `<${exampleName}>{"arg": value, "_nonce": "${nonce}"}</${exampleName}>`,
-    `${exampleName} is replaced by the tool name and the body is a JSON object of arguments.`,
+    `<TOOL>{"<argument_name>": <argument_value>, "_nonce": "${nonce}"}</TOOL>`,
     "Rules:",
-    `- Use exactly <${exampleName}>...</${exampleName}> with the tool name as the tag.`,
-    '- Do NOT use <tool>, <tool_call>, <tool:name>, XML argument tags, name="..." attributes or code fences.',
+    "- Replace TOOL with the name of the tool you are calling. The tool name goes in the TAG — never inside the JSON body.",
+    "- The body is that tool's arguments object; use the parameter names from its signature below.",
     `- Include "_nonce": "${nonce}" exactly as shown. A different binding is rejected.`,
-    "- Argument names must match the tool's declared parameters.",
     "- Emit one block per call; several blocks may follow each other.",
+    "- Do not wrap the block in another tag or a code fence.",
     "- If no tool is needed, answer normally with no tool block.",
     "",
     "Tools:",
@@ -391,14 +197,14 @@ export function buildCfToolReminder(tools: ChatCompletionTool[]): string {
 
   const nonce = getToolNonce(tools);
   const names = tools.map((tool) => tool.function.name);
-  const example = names[0];
   const shown = names.slice(0, 6);
   const more = names.length > shown.length ? ` (+${names.length - shown.length} more)` : "";
 
   return [
     "# Tool call reminder",
     "To call a tool, reply with that tool's own tag, one JSON object, and nothing else:",
-    `<${example}>{"arg": value, "_nonce": "${nonce}"}</${example}>`,
+    `<TOOL>{"<argument_name>": <argument_value>, "_nonce": "${nonce}"}</TOOL>`,
+    "The tool name goes in the tag, never inside the JSON.",
     `Only these tags are read: ${shown.map((name) => `<${name}>`).join(" ")}${more}.`,
     'Inside the JSON, escape every quote as \\" and every newline as \\n — long file bodies must stay parseable.',
     "- If you do not need a tool, answer normally with no tag.",
@@ -415,9 +221,6 @@ export function buildCfToolReminder(tools: ChatCompletionTool[]): string {
 export function cfToolNonce(tools: unknown): string {
   return getToolNonce(tools);
 }
-
-/** The single canonical wrapper tag the contract asks for. */
-const CF_GENERIC_TOOL_TAGS = new Set(["tool", "tool_call", "toolcall", "tool-call"]);
 
 /**
  * Hold a parsed turn to the nonce + argument-schema contract before it is handed
@@ -519,7 +322,11 @@ function escapeRegex(value: string): string {
  * the tag has to open a block — be followed by a JSON/XML body, or have a
  * matching closing tag.
  */
-export function hasMalformedCfToolIntent(text: string, toolNames: string[] = []): boolean {
+export function hasMalformedCfToolIntent(
+  text: string,
+  toolNames: string[] = [],
+  availableTools?: CfToolDef[]
+): boolean {
   if (!text) return false;
 
   const candidates = [...CF_GENERIC_TOOL_TAGS, "shell", ...toolNames];
@@ -530,15 +337,35 @@ export function hasMalformedCfToolIntent(text: string, toolNames: string[] = [])
       new RegExp(`${tag}[\\s\\S]*?<\\s*\\/\\s*${escapeRegex(name)}\\s*>`, "i").test(text)
     );
   });
-  if (!opensABlock) return false;
+
+  // A call written as a function invocation — `read(path: "/")`, `shell("ls")`,
+  // or the same thing right after a wrapper opener. No pattern reads the colon
+  // form, and before this check the reply was returned as a plain text answer
+  // with the call buried in it, so the client never learned the turn failed.
+  // Anchored to a line start or an opening tag so a prose mention of `read(` is
+  // not mistaken for intent.
+  const callIntent =
+    [...toolNames, "shell"].some((name) => {
+      const escaped = escapeRegex(name);
+      return new RegExp(`(^|\\n|<[^>\\n]*>)\\s*${escaped}\\s*\\(`, "i").test(text);
+    }) ||
+    // A call-looking identifier right after a generic wrapper: the tool may not
+    // be declared at all (`<tool_call>list_directory(path: "/")`), and answering
+    // with the markup as prose is worse than one retry.
+    new RegExp(`<\\s*${CF_WRAPPER_TAG_SOURCE}\\b[^>]*>\\s*[A-Za-z_][\\w.-]*\\s*\\(`, "i").test(
+      text
+    );
+
+  if (!opensABlock && !callIntent) return false;
 
   // If it has tags but parseCfToolCalls returns empty, it's malformed. The probe
   // list mirrors the real tool set so name inference and the declared-name
-  // patterns behave exactly as they do in the executor.
-  const probe: CfToolDef[] = [
-    { name: "dummy", parameters: {} },
-    ...toolNames.map((name) => ({ name, parameters: {} })),
-  ];
+  // patterns behave exactly as they do in the executor. Without the real
+  // schemas, a nameless payload looks ambiguous and would be retried forever.
+  const probe: CfToolDef[] =
+    availableTools && availableTools.length > 0
+      ? availableTools
+      : [{ name: "dummy", parameters: {} }, ...toolNames.map((name) => ({ name, parameters: {} }))];
   return parseCfToolCalls(text, probe).length === 0;
 }
 
@@ -1009,10 +836,13 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
     handledSpans.some(([s, e]) => start < e && end > s);
 
   // Pattern 1: <tool name="...">...</tool> or <tool>...</tool>. Also accepts
-  // the `<tool_call>` / `<tool-call>` / `<toolcall>` spellings many models are
-  // trained on (e.g. `<tool_call>{"name":"bash","arguments":{...}}</tool_call>`).
-  const toolTagRegex =
-    /<\s*tool(?:[_-]?call)?\b([^>]*)>([\s\S]*?)<\s*\/\s*tool(?:[_-]?call)?\s*>/gi;
+  // the `<tool_call>` / `<tool-call>` / `<toolcall>` / `<function_call>`
+  // spellings many models are trained on (e.g.
+  // `<tool_call>{"name":"bash","arguments":{...}}</tool_call>`).
+  const toolTagRegex = new RegExp(
+    `<\\s*${CF_WRAPPER_TAG_SOURCE}\\b([^>]*)>([\\s\\S]*?)<\\s*\\/\\s*${CF_WRAPPER_TAG_SOURCE}\\s*>`,
+    "gi"
+  );
   let match: RegExpExecArray | null;
   while ((match = toolTagRegex.exec(text)) !== null) {
     const attrs = match[1];
@@ -1040,14 +870,35 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
     // Handle format: <tool>{"name": "shell", "arguments": {...}}</tool>
     const unwrapped = unwrapToolPayload(normalized);
     const nameMatch = attrs.match(/name\s*=\s*["']([^"']+)["']/i);
-    const name =
-      unwrapped.name ??
-      (nameMatch ? nameMatch[1] : inferToolName(unwrapped.argsJson, availableTools));
+
+    // A nameless generic wrapper that carries a nested tool tag is a container,
+    // not a call: step past its opener and let the loop match the inner tag.
+    // Before this, the wrapper body was accepted as a nameless payload (the
+    // embedded JSON was extracted from the markup), the inner name was never
+    // read, and the call resolved to the caller's first tool.
+    const body = match[2];
+    if (
+      !unwrapped.name &&
+      !nameMatch &&
+      !/^\s*[[{]/.test(body) &&
+      hasNestedToolTag(body, availableTools)
+    ) {
+      toolTagRegex.lastIndex = match.index + match[0].indexOf(">") + 1;
+      continue;
+    }
+
+    const resolved = applyToolNameHint(
+      unwrapped.name ?? (nameMatch ? nameMatch[1] : null),
+      unwrapped.argsJson,
+      availableTools
+    );
+    if (!resolved) continue;
+    const name = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
     if (name) {
       calls.push({
         id: `call_${crypto.randomUUID().slice(0, 8)}`,
         name,
-        arguments: unwrapped.argsJson,
+        arguments: resolved.argsJson,
       });
       handledSpans.push([match.index, match.index + match[0].length]);
     }
@@ -1056,7 +907,10 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
   // Pattern 1b: recover malformed `<tool ...>` tags where a `>` inside the JSON
   // payload (e.g. `{"command": "ls > out.txt"}`) truncated the attribute scan
   // above. Re-scan the whole tag body for a balanced JSON payload.
-  const looseToolRegex = /<\s*tool(?:[_-]?call)?\b([\s\S]*?)<\s*\/\s*tool(?:[_-]?call)?\s*>/gi;
+  const looseToolRegex = new RegExp(
+    `<\\s*${CF_WRAPPER_TAG_SOURCE}\\b([\\s\\S]*?)<\\s*\\/\\s*${CF_WRAPPER_TAG_SOURCE}\\s*>`,
+    "gi"
+  );
   while ((match = looseToolRegex.exec(text)) !== null) {
     const start = match.index;
     const end = start + match[0].length;
@@ -1084,7 +938,7 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
   // starts with the JSON payload. A `<tool:name>` body belongs to Pattern 2, a
   // body with any closing tag belongs to Pattern 1, and prose that merely
   // mentions `<tool>` is left alone.
-  const openOnlyRegex = /<\s*tool(?:[_-]?call)?\b([^>]*)>([\s\S]*)$/gi;
+  const openOnlyRegex = new RegExp(`<\\s*${CF_WRAPPER_TAG_SOURCE}\\b([^>]*)>([\\s\\S]*)$`, "gi");
   while ((match = openOnlyRegex.exec(text)) !== null) {
     const start = match.index;
     if (isHandled(start, start + 1)) continue;
@@ -1095,14 +949,18 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
     if (!normalized) continue;
     const unwrapped = unwrapToolPayload(normalized);
     const attrName = match[1].match(/name\s*=\s*["']([^"']+)["']/i);
-    const name =
-      unwrapped.name ??
-      (attrName ? attrName[1] : inferToolName(unwrapped.argsJson, availableTools));
+    const resolved = applyToolNameHint(
+      unwrapped.name ?? (attrName ? attrName[1] : null),
+      unwrapped.argsJson,
+      availableTools
+    );
+    if (!resolved) continue;
+    const name = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
     if (!name) continue;
     calls.push({
       id: `call_${crypto.randomUUID().slice(0, 8)}`,
       name,
-      arguments: unwrapped.argsJson,
+      arguments: resolved.argsJson,
     });
     handledSpans.push([start, text.length]);
   }
@@ -1128,20 +986,35 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
   // playground models emit even when the caller named the tool differently).
   const knownTagNames = new Set(availableTools.map((t) => t.name));
   knownTagNames.add("shell");
+  // Tags are matched case-insensitively (models write `<Read>`); the name handed
+  // to the client must keep the caller's declared spelling.
+  const resolveKnownTag = (tagName: string): string | null => {
+    if (knownTagNames.has(tagName)) return tagName;
+    return resolveDeclaredToolName(tagName, availableTools);
+  };
   const anyToolTagRegex = /<\s*([a-zA-Z_][\w.-]*)\b([^>]*)>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
   while ((match = anyToolTagRegex.exec(text)) !== null) {
-    const tagName = match[1];
-    if (!knownTagNames.has(tagName)) continue;
+    const tagName = resolveKnownTag(match[1]);
+    if (!tagName) continue;
+    const start = match.index;
+    if (isHandled(start, start + 1)) continue;
     const content =
       match[3].trim() || extractPayloadFromAttrs(match[2]) || extractEmbeddedJson(match[2]) || "";
     const normalized = normalizeToolArguments(content);
     if (!normalized) continue;
     const unwrapped = unwrapToolPayload(normalized);
+    const resolved = applyToolNameHint(
+      unwrapped.name ?? tagName,
+      unwrapped.argsJson,
+      availableTools
+    );
+    if (!resolved) continue;
     calls.push({
       id: `call_${crypto.randomUUID().slice(0, 8)}`,
-      name: unwrapped.name ?? tagName,
-      arguments: unwrapped.argsJson,
+      name: resolved.name ?? tagName,
+      arguments: resolved.argsJson,
     });
+    handledSpans.push([start, start + match[0].length]);
   }
 
   // Pattern 3b: <toolname><param>value</param></toolname> — XML-style arguments
@@ -1153,8 +1026,10 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
   // batches several reads keeps its ordering.
   const xmlToolRegex = /<\s*([a-zA-Z_][\w.-]*)\b([^>]*)>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
   while ((match = xmlToolRegex.exec(text)) !== null) {
-    const tagName = match[1];
-    if (!knownTagNames.has(tagName)) continue;
+    const tagName = resolveKnownTag(match[1]);
+    if (!tagName) continue;
+    const start = match.index;
+    if (isHandled(start, start + 1)) continue;
     const body = match[3].trim();
     // A JSON body belongs to Pattern 3; do not also read it as XML params.
     if (!body || /^[[{]/.test(body)) continue;
@@ -1166,6 +1041,7 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
       name: tagName,
       arguments: JSON.stringify(xmlParamsToArguments(params, def)),
     });
+    handledSpans.push([start, start + match[0].length]);
   }
 
   // Pattern 4: name({"arg": value}) — function-call style, observed live.
@@ -1199,7 +1075,68 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
     });
   }
 
+  // Pattern 6 — last resort. An opening tool tag whose JSON body is complete but
+  // whose closing tag is wrong (`</path>` instead of `</write>`) or missing
+  // entirely. Every pattern above needs a matching closer, so three of the four
+  // `write` calls in the live corpus were dropped even though their payload was
+  // valid JSON. Only runs when nothing else matched, so it can never change the
+  // result of a turn that already parses, and it only accepts a body that starts
+  // immediately after the opener (whitespace allowed) — never a JSON object
+  // plucked out of prose.
+  if (calls.length === 0) {
+    const recovered = recoverCompleteBodyWithWrongCloser(text, availableTools, isHandled);
+    if (recovered) calls.push(recovered);
+  }
+
   return calls;
+}
+
+/**
+ * Recover `<tag ...>{…}</wrong-tag>` / `<tag ...>{…}` (no closer at all).
+ *
+ * The body must be a balanced, string-aware JSON object that normalizes, and the
+ * name must come from the tag, a `name=` attribute, or the argument schema — in
+ * that order. Anything less is left unparsed so the repair retry can ask again;
+ * accepting a truncated payload here would ship a half-written file.
+ */
+function recoverCompleteBodyWithWrongCloser(
+  text: string,
+  availableTools: CfToolDef[],
+  isHandled: (start: number, end: number) => boolean
+): CfParsedToolCall | null {
+  const openerRegex = /<\s*([A-Za-z_][\w.-]*)\b([^>]*)>/g;
+  let match: RegExpExecArray | null;
+  while ((match = openerRegex.exec(text)) !== null) {
+    const start = match.index;
+    if (isHandled(start, start + 1)) continue;
+    const tag = match[1];
+    const declared = resolveDeclaredToolName(tag, availableTools);
+    const isWrapper = CF_GENERIC_TOOL_TAGS.has(tag.toLowerCase());
+    if (!declared && !isWrapper) continue;
+    // The payload has to begin right after the opener.
+    const rest = text.slice(start + match[0].length);
+    if (!/^\s*[[{]/.test(rest)) continue;
+    const body = extractBalancedJson(rest);
+    if (!body) continue;
+    const normalized = normalizeToolArguments(body);
+    if (!normalized) continue;
+    const unwrapped = unwrapToolPayload(normalized);
+    const attrName = match[2].match(/name\s*=\s*["']([^"']+)["']/i);
+    const resolved = applyToolNameHint(
+      unwrapped.name ?? (attrName ? attrName[1] : declared),
+      unwrapped.argsJson,
+      availableTools
+    );
+    if (!resolved) continue;
+    const name = resolved.name ?? inferToolName(resolved.argsJson, availableTools);
+    if (!name) continue;
+    return {
+      id: `call_${crypto.randomUUID().slice(0, 8)}`,
+      name,
+      arguments: resolved.argsJson,
+    };
+  }
+  return null;
 }
 
 /**
@@ -1256,35 +1193,6 @@ function parseScalar(raw: string): unknown {
   if (value === "null") return null;
   if (/^-?\d+(\.\d+)?$/.test(value)) return Number(value);
   return value;
-}
-
-/**
- * Infer the tool name when the model omits it.
- * Strategy:
- *   1. If availableTools has exactly one tool, use that.
- *   2. If a hint is provided (e.g., "shell" for <shell> tags), use that if it matches.
- *   3. Otherwise, return the first tool's name.
- */
-function inferToolName(
-  _content: string,
-  availableTools: CfToolDef[],
-  hint?: string
-): string | null {
-  if (availableTools.length === 0) return null;
-
-  // If hint provided and matches a tool, use it
-  if (hint) {
-    const hintTool = availableTools.find((t) => t.name === hint);
-    if (hintTool) return hintTool.name;
-  }
-
-  // Single tool available — infer it
-  if (availableTools.length === 1) {
-    return availableTools[0].name;
-  }
-
-  // Multiple tools but no name given — default to first (best effort)
-  return availableTools[0].name;
 }
 
 /**
@@ -1388,22 +1296,39 @@ export function buildCfToolConversationPrompt(
  */
 export function stripCfToolMarkup(text: string, toolNames: string[] = []): string {
   if (!text) return "";
-  let stripped = text
-    .replace(/<\s*tool\b[^>]*>[\s\S]*?<\s*\/\s*tool\s*>/gi, "")
-    .replace(/<\s*tool:(\w+)>[\s\S]*?<\s*\/\s*tool:\1\s*>/gi, "")
-    .replace(/<\s*shell\b[^>]*>[\s\S]*?<\s*\/\s*shell\s*>/gi, "");
+
+  // Innermost first: a declared tool tag can sit inside a generic wrapper, and
+  // removing the wrapper first would leave the inner tag's body behind.
+  let stripped = text;
   for (const toolName of toolNames) {
-    const escaped = toolName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    stripped = stripped.replace(
-      new RegExp(`<\\s*${escaped}\\b[^>]*>[\\s\\S]*?<\\s*\\/\\s*${escaped}\\s*>`, "gi"),
-      ""
-    );
-    // function-call style: bash({"command": "ls"})
-    stripped = stripped.replace(
-      new RegExp(`\\b${escaped}\\s*\\(\\s*\\{[\\s\\S]*?\\}\\s*\\)`, "gi"),
-      ""
-    );
+    const escaped = escapeRegex(toolName);
+    stripped = stripped
+      .replace(
+        new RegExp(`<\\s*${escaped}\\b[^>]*>[\\s\\S]*?<\\s*\\/\\s*${escaped}\\s*>`, "gi"),
+        ""
+      )
+      // function-call style: bash({"command": "ls"})
+      .replace(new RegExp(`\\b${escaped}\\s*\\(\\s*\\{[\\s\\S]*?\\}\\s*\\)`, "gi"), "");
   }
+
+  stripped = stripped
+    .replace(/<\s*tool:(\w+)>[\s\S]*?<\s*\/\s*tool:\1\s*>/gi, "")
+    .replace(/<\s*shell\b[^>]*>[\s\S]*?<\s*\/\s*shell\s*>/gi, "")
+    .replace(/<\s*tool\b[^>]*>[\s\S]*?<\s*\/\s*tool\s*>/gi, "")
+    // The wrapper family, closed…
+    .replace(
+      new RegExp(
+        `<\\s*${CF_WRAPPER_TAG_SOURCE}\\b[^>]*>[\\s\\S]*?<\\s*\\/\\s*${CF_WRAPPER_TAG_SOURCE}\\s*>`,
+        "gi"
+      ),
+      ""
+    )
+    // …and any orphan opener/closer left behind by an unclosed or half-stripped
+    // block. Without this a recovered call shipped `"<tool_call>"` as content
+    // next to its `tool_calls`, re-priming the next turn with the banned shape.
+    .replace(new RegExp(`<\\s*\\/?\\s*${CF_WRAPPER_TAG_SOURCE}\\b[^>]*>`, "gi"), "")
+    .replace(/<\s*\/?\s*tool\b[^>]*>/gi, "");
+
   return stripped
     .replace(/^---+\s*\n?/m, "") // separator line
     .trimStart(); // only trim leading whitespace, preserve trailing for test

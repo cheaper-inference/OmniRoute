@@ -647,7 +647,9 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       if (!hasTools) return [];
       const parsed = parseCfToolCalls(text, availableTools);
       if (parsed.length === 0) {
-        return hasMalformedCfToolIntent(text, toolNames) ? null : [];
+        // The real schemas matter: without them a nameless payload looks
+        // ambiguous and every such turn would be retried forever.
+        return hasMalformedCfToolIntent(text, toolNames, availableTools) ? null : [];
       }
       return finalizeCfToolCalls(parsed, tools, nonce);
     };
