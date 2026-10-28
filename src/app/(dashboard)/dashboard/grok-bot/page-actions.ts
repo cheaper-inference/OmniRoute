@@ -201,7 +201,7 @@ export const answerSecret = async (
 };
 export const discardDraft = async (
   state: PageState,
-  card: Extract<TranscriptCard, { kind: "email" | "slack" }>
+  card: Extract<TranscriptCard, { kind: "email" | "slack" | "meeting" | "imessage" }>
 ) => {
   const { setCardBusy } = state;
   const generation = state.generationRef.current;

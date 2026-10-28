@@ -177,6 +177,41 @@ test("an email draft keeps its body", () => {
   assert.equal(state.cards[0]?.kind === "email" ? state.cards[0].body : "", "The actual message");
 });
 
+test("meeting and imessage drafts stay readable", () => {
+  const state = applyTranscriptFrame(
+    { cursor: "0", visible: [], cards: [], permissions: [], sealed: false },
+    {
+      rows: {
+        entries: [
+          wire(
+            "send-message",
+            {
+              message: {
+                type: "meeting-chat-draft",
+                draft: { meeting_title: "Standup", body: "Notes" },
+              },
+            },
+            "31",
+            "entry-31"
+          ),
+          wire(
+            "send-message",
+            { message: { type: "imessage-draft", draft: { recipient_name: "Ada", body: "Ping" } } },
+            "32",
+            "entry-32"
+          ),
+        ],
+      },
+    }
+  );
+  assert.equal(state.cards[0]?.kind, "meeting");
+  assert.equal(state.cards[0]?.kind === "meeting" ? state.cards[0].title : "", "Standup");
+  assert.equal(state.cards[0]?.kind === "meeting" ? state.cards[0].body : "", "Notes");
+  assert.equal(state.cards[1]?.kind, "imessage");
+  assert.equal(state.cards[1]?.kind === "imessage" ? state.cards[1].recipient : "", "Ada");
+  assert.equal(state.cards[1]?.kind === "imessage" ? state.cards[1].body : "", "Ping");
+});
+
 test("a live secret card reads the label at the message root", () => {
   const state = applyTranscriptFrame(
     { cursor: "0", visible: [], cards: [], permissions: [], sealed: false },

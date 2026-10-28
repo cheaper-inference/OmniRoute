@@ -54,6 +54,8 @@ export type TranscriptCard =
       body: string;
     }
   | { seq: string; entryId: string; kind: "slack"; target: string; body: string }
+  | { seq: string; entryId: string; kind: "meeting"; title: string; body: string }
+  | { seq: string; entryId: string; kind: "imessage"; recipient: string; body: string }
   | { seq: string; entryId: string; kind: "unknown"; type: string };
 
 export type TranscriptState = {
@@ -97,7 +99,15 @@ type Message = {
   multiSelect?: unknown;
   dismissOnMoveOn?: unknown;
   secretRequest?: { label?: unknown; target?: { field?: unknown } };
-  draft?: { from?: unknown; to?: unknown; subject?: unknown; target?: unknown; body?: unknown };
+  draft?: {
+    from?: unknown;
+    to?: unknown;
+    subject?: unknown;
+    target?: unknown;
+    body?: unknown;
+    meeting_title?: unknown;
+    recipient_name?: unknown;
+  };
 };
 
 type Body = {
@@ -118,7 +128,15 @@ type Body = {
   multiSelect?: unknown;
   dismissOnMoveOn?: unknown;
   secretRequest?: { label?: unknown };
-  draft?: { from?: unknown; to?: unknown; subject?: unknown; target?: unknown; body?: unknown };
+  draft?: {
+    from?: unknown;
+    to?: unknown;
+    subject?: unknown;
+    target?: unknown;
+    body?: unknown;
+    meeting_title?: unknown;
+    recipient_name?: unknown;
+  };
 };
 
 function readBody(entry: Entry): Body | null {
@@ -217,6 +235,20 @@ function slackCard(identity: CardIdentity, source: Message | undefined): Transcr
     : { ...identity, kind: "slack", target, body: stringValue(source?.draft?.body) };
 }
 
+function meetingCard(identity: CardIdentity, source: Message | undefined): TranscriptCard | null {
+  const body = stringValue(source?.draft?.body);
+  return body === ""
+    ? null
+    : { ...identity, kind: "meeting", title: stringValue(source?.draft?.meeting_title), body };
+}
+
+function imessageCard(identity: CardIdentity, source: Message | undefined): TranscriptCard | null {
+  const body = stringValue(source?.draft?.body);
+  return body === ""
+    ? null
+    : { ...identity, kind: "imessage", recipient: stringValue(source?.draft?.recipient_name), body };
+}
+
 function structuredCard(
   identity: CardIdentity,
   source: Message | undefined,
@@ -234,6 +266,10 @@ function structuredCard(
       return emailCard(identity, source);
     case "slack-draft":
       return slackCard(identity, source);
+    case "meeting-chat-draft":
+      return meetingCard(identity, source);
+    case "imessage-draft":
+      return imessageCard(identity, source);
     case "":
     case "text":
     case "local-tool-permission":

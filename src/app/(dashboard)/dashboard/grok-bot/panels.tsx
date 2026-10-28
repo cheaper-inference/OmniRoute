@@ -269,14 +269,18 @@ function SecretCard(props: CardProps<"secret">) {
   );
 }
 
-function DraftCard(props: CardProps<"email" | "slack">) {
+function DraftCard(props: CardProps<"email" | "slack" | "meeting" | "imessage">) {
   const { card, t, busy, onDiscardDraft } = props;
   return (
     <div className="flex items-center gap-2">
       <span>
         {card.kind === "email"
           ? `${card.from} → ${card.to}: ${card.subject}: ${card.body}`
-          : `${card.target}: ${card.body}`}
+          : card.kind === "slack"
+            ? `${card.target}: ${card.body}`
+            : card.kind === "meeting"
+              ? `${card.title}: ${card.body}`
+              : `${card.recipient}: ${card.body}`}
       </span>
       <Button
         variant="ghost"
@@ -307,6 +311,8 @@ function MessageCardContent(props: CardActions & { card: TranscriptCard }) {
       return <SecretCard {...props} card={card} />;
     case "email":
     case "slack":
+    case "meeting":
+    case "imessage":
       return <DraftCard {...props} card={card} />;
     case "unknown":
       return <p>{t("unsupportedMessage")}</p>;
@@ -537,7 +543,9 @@ export type ConversationHandlers = {
   onWidget: (card: Extract<TranscriptCard, { kind: "widget" }>, value: string) => void;
   onDismissWidget: (card: Extract<TranscriptCard, { kind: "widget" }>) => void;
   onSecret: (card: Extract<TranscriptCard, { kind: "secret" }>, value: string) => void;
-  onDiscardDraft: (card: Extract<TranscriptCard, { kind: "email" | "slack" }>) => void;
+  onDiscardDraft: (
+    card: Extract<TranscriptCard, { kind: "email" | "slack" | "meeting" | "imessage" }>
+  ) => void;
   onDraft: (value: string) => void;
   onSubmit: () => void;
   onUpload: (name: string) => void;
@@ -550,6 +558,8 @@ function actionableCard(card: TranscriptCard): boolean {
     card.kind === "secret" ||
     card.kind === "email" ||
     card.kind === "slack" ||
+    card.kind === "meeting" ||
+    card.kind === "imessage" ||
     (card.kind === "connector" && card.requestId !== "")
   );
 }
