@@ -73,15 +73,15 @@
 | --------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Furnizori                      |            352             |   **358**   |          376          |
 | 🧠 ID-uri unice de modele de chat |            1320            |  **1374**   |         1475          |
-| 🖼️ Punte între modalități         | 🆕 viziune + audio + video |      ✓      |           ✓           |
+| 🖼️ Punte de modalități            | 🆕 viziune + audio + video |      ✓      |           ✓           |
 | 📡 Catalog gratuit Radar          |         🆕 opt-in          |      ✓      |           ✓           |
-| ⚖️ Planificare bazată pe cote     |       🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Telemetrie a cotelor           |      🆕 în timp real       |      ✓      |           ✓           |
+| ⚖️ Programare conștientă de cotă  |       🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Telemetrie de cotă             |          🆕 live           |      ✓      |           ✓           |
 | 🧰 Mod headless                   |             —              |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastructura liniei LTS      |             —              |      —      | 🆕 canale de lansare  |
+| 🛤️ Infrastructură rail LTS        |             —              |      —      | 🆕 canale de release  |
 | 🔎 API de descoperire a modelelor |             —              |      —      | 🆕 `/v1/models/query` |
 
-**→ [Foaie de parcurs](ROADMAP.md) — pe linia către `v3.9.0 LTS`**
+**→ [Foaie de parcurs](ROADMAP.md) — pe șine către `v3.9.0 LTS`**
 
 </div>
 

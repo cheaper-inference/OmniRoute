@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Šliuzas ir toliau auga
+## 📈 Gateway nuolat auga
 
 <div align="center">
 
-|                                      |                v3.8.50                | **v3.8.51** |      `v3.8.53+`       |
-| ------------------------------------ | :-----------------------------------: | :---------: | :-------------------: |
-| 🌐 Teikėjai                          |                  352                  |   **358**   |          376          |
-| 🧠 Unikalūs pokalbių modelių ID      |                 1320                  |  **1374**   |         1475          |
-| 🖼️ Modalumų tiltas                   | 🆕 regėjimas + garsas + vaizdo įrašai |      ✓      |           ✓           |
-| 📡 Radar nemokamas katalogas         |            🆕 pasirenkama             |      ✓      |           ✓           |
-| ⚖️ Planavimas atsižvelgiant į kvotas |            🆕 Quota-Share             |      ✓      |           ✓           |
-| 📊 Kvotų telemetrija                 |            🆕 realiu laiku            |      ✓      |           ✓           |
-| 🧰 „Headless“ režimas                |                   —                   |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS linijos infrastruktūra        |                   —                   |      —      |  🆕 leidimo kanalai   |
-| 🔎 Modelių aptikimo API              |                   —                   |      —      | 🆕 `/v1/models/query` |
+|                                      |             v3.8.50              | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------------------ | :------------------------------: | :---------: | :-------------------: |
+| 🌐 Tiekėjai                          |               352                |   **358**   |          376          |
+| 🧠 Unikalūs pokalbių modelių ID      |               1320               |  **1374**   |         1475          |
+| 🖼️ Modality Bridge                   | 🆕 rega + garsas + vaizdo įrašas |      ✓      |           ✓           |
+| 📡 Radar nemokamas katalogas         |         🆕 pasirenkamas          |      ✓      |           ✓           |
+| ⚖️ Planavimas atsižvelgiant į kvotas |          🆕 Quota-Share          |      ✓      |           ✓           |
+| 📊 Kvotų telemetrija                 |          🆕 tiesioginė           |      ✓      |           ✓           |
+| 🧰 Režimas be sąsajos                |                —                 |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS linijos infrastruktūra        |                —                 |      —      |  🆕 leidimo kanalai   |
+| 🔎 Modelių aptikimo API              |                —                 |      —      | 🆕 `/v1/models/query` |
 
-**→ [Veiklos planas](ROADMAP.md) — riedame bėgiais link `v3.9.0 LTS`**
+**→ [Veiksmų planas](ROADMAP.md) — riedame bėgiais link `v3.9.0 LTS`**
 
 </div>
 

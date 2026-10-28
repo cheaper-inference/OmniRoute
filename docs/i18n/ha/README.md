@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway Yana Ci Gaba Da Girma
+## 📈 Ƙofar na Ci Gaba da Girma
 
 <div align="center">
 
-|                                       |         v3.8.50          | **v3.8.51** |       `v3.8.53+`       |
-| ------------------------------------- | :----------------------: | :---------: | :--------------------: |
-| 🌐 Masu bayarwa                       |           352            |   **358**   |          376           |
-| 🧠 ID na musamman na samfuran hira    |           1320           |  **1374**   |          1475          |
-| 🖼️ Gadar Modality                     | 🆕 gani + sauti + bidiyo |      ✓      |           ✓            |
-| 📡 Katalogin kyauta na Radar          |        🆕 opt-in         |      ✓      |           ✓            |
-| ⚖️ Tsarawa mai fahimtar quota         |      🆕 Quota-Share      |      ✓      |           ✓            |
-| 📊 Telemetry na quota                 |       🆕 kai tsaye       |      ✓      |           ✓            |
-| 🧰 Yanayin headless                   |            —             |      —      | 🆕 `serve --headless`  |
-| 🛤️ Kayayyakin more rayuwa na LTS rail |            —             |      —      | 🆕 tashoshi na fitarwa |
-| 🔎 API na gano samfura                |            —             |      —      | 🆕 `/v1/models/query`  |
+|                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| -------------------------------- | :----------------------: | :---------: | :-------------------: |
+| 🌐 Masu samarwa                  |           352            |   **358**   |          376          |
+| 🧠 Keɓaɓɓun ID na samfuran hira  |           1320           |  **1374**   |         1475          |
+| 🖼️ Modality Bridge               | 🆕 gani + sauti + bidiyo |      ✓      |           ✓           |
+| 📡 Katalogin kyauta na Radar     |        🆕 ta zaɓi        |      ✓      |           ✓           |
+| ⚖️ Shirye-shirye mai sanin quota |      🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Telemetry na quota            |       🆕 kai tsaye       |      ✓      |           ✓           |
+| 🧰 Yanayin headless              |            —             |      —      | 🆕 `serve --headless` |
+| 🛤️ Kayan aikin hanyar LTS        |            —             |      —      | 🆕 tashoshin fitarwa  |
+| 🔎 API na gano samfurori         |            —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Taswirar Ci Gaba](ROADMAP.md) — muna tafiya a kan layin zuwa `v3.9.0 LTS`**
+**→ [Taswirar Aiki](ROADMAP.md) — a kan hanyar zuwa `v3.9.0 LTS`**
 
 </div>
 

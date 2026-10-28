@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                             |       v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------- | :------------------: | :---------: | :-------------------: |
-| 🌐 Leverandører             |         352          |   **358**   |          376          |
-| 🧠 Unike chatmodell-ID-er   |         1320         |  **1374**   |         1475          |
-| 🖼️ Modalitetsbro            | 🆕 syn + lyd + video |      ✓      |           ✓           |
-| 📡 Radar gratiskatalog      |      🆕 valgfri      |      ✓      |           ✓           |
-| ⚖️ Kvotebevisst skedulering |    🆕 Quota-Share    |      ✓      |           ✓           |
-| 📊 Kvotetelemetri           |      🆕 sanntid      |      ✓      |           ✓           |
-| 🧰 Headless-modus           |          —           |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-sporinfrastruktur    |          —           |      —      | 🆕 utgivelseskanaler  |
-| 🔎 API for modelloppdagelse |          —           |      —      | 🆕 `/v1/models/query` |
+|                             |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------- | :--------------------: | :---------: | :-------------------: |
+| 🌐 Leverandører             |          352           |   **358**   |          376          |
+| 🧠 Unike chatmodell-ID-er   |          1320          |  **1374**   |         1475          |
+| 🖼️ Modalitetsbro            | 🆕 bilde + lyd + video |      ✓      |           ✓           |
+| 📡 Radar gratis katalog     |       🆕 opt-in        |      ✓      |           ✓           |
+| ⚖️ Kvotebevisst planlegging |     🆕 Quota-Share     |      ✓      |           ✓           |
+| 📊 Kvotetelemetri           |       🆕 sanntid       |      ✓      |           ✓           |
+| 🧰 Headless-modus           |           —            |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS-skinneinfrastruktur  |           —            |      —      | 🆕 utgivelseskanaler  |
+| 🔎 API for modelloppdagelse |           —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Veikart](ROADMAP.md) — på sporet mot `v3.9.0 LTS`**
+**→ [Veikart](ROADMAP.md) — på skinner mot `v3.9.0 LTS`**
 
 </div>
 

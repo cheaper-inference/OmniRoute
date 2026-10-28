@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                   |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Provider                       |            352            |   **358**   |          376          |
-| 🧠 ID univoci di modelli chat     |           1320            |  **1374**   |         1475          |
-| 🖼️ Ponte di modalità              | 🆕 vision + audio + video |      ✓      |           ✓           |
-| 📡 Catalogo Radar gratuito        |         🆕 opt-in         |      ✓      |           ✓           |
-| ⚖️ Scheduling basato sulle quote  |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Telemetria delle quote         |          🆕 live          |      ✓      |           ✓           |
-| 🧰 Modalità headless              |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastruttura del binario LTS |             —             |      —      | 🆕 canali di rilascio |
-| 🔎 API di discovery dei modelli   |             —             |      —      | 🆕 `/v1/models/query` |
+|                                      |            v3.8.50            | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------------------ | :---------------------------: | :---------: | :-------------------: |
+| 🌐 Provider                          |              352              |   **358**   |          376          |
+| 🧠 ID univoci dei modelli di chat    |             1320              |  **1374**   |         1475          |
+| 🖼️ Ponte tra modalità                |  🆕 visione + audio + video   |      ✓      |           ✓           |
+| 📡 Catalogo gratuito Radar           | 🆕 partecipazione facoltativa |      ✓      |           ✓           |
+| ⚖️ Pianificazione basata sulle quote |        🆕 Quota-Share         |      ✓      |           ✓           |
+| 📊 Telemetria delle quote            |       🆕 in tempo reale       |      ✓      |           ✓           |
+| 🧰 Modalità headless                 |               —               |      —      | 🆕 `serve --headless` |
+| 🛤️ Infrastruttura del ramo LTS       |               —               |      —      | 🆕 canali di rilascio |
+| 🔎 API di rilevamento dei modelli    |               —               |      —      | 🆕 `/v1/models/query` |
 
-**→ [Roadmap](ROADMAP.md) — in viaggio sul binario verso `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — sul binario verso `v3.9.0 LTS`**
 
 </div>
 

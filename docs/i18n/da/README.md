@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway'en bliver ved med at vokse
+## 📈 Gatewayen vokser videre
 
 <div align="center">
 
-|                             |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Udbydere                 |           352           |   **358**   |          376          |
-| 🧠 Unikke chatmodel-ID'er   |          1320           |  **1374**   |         1475          |
-| 🖼️ Modalitetsbro            | 🆕 vision + lyd + video |      ✓      |           ✓           |
-| 📡 Radar gratis-katalog     |       🆕 tilvalg        |      ✓      |           ✓           |
-| ⚖️ Kvotebevidst planlægning |     🆕 Kvote-Deling     |      ✓      |           ✓           |
-| 📊 Kvotetelemetri           |         🆕 live         |      ✓      |           ✓           |
-| 🧰 Headless-tilstand        |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-sporinfrastruktur    |            —            |      —      | 🆕 udgivelseskanaler  |
-| 🔎 Modelopdagelses-API      |            —            |      —      | 🆕 `/v1/models/query` |
+|                             |       v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------- | :------------------: | :---------: | :-------------------: |
+| 🌐 Udbydere                 |         352          |   **358**   |          376          |
+| 🧠 Unikke chatmodel-ID'er   |         1320         |  **1374**   |         1475          |
+| 🖼️ Modalitetsbro            | 🆕 syn + lyd + video |      ✓      |           ✓           |
+| 📡 Gratis Radar-katalog     |      🆕 opt-in       |      ✓      |           ✓           |
+| ⚖️ Kvotebevidst planlægning |    🆕 Quota-Share    |      ✓      |           ✓           |
+| 📊 Kvotetelemetri           |       🆕 live        |      ✓      |           ✓           |
+| 🧰 Headless-tilstand        |          —           |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS-rail-infrastruktur   |          —           |      —      | 🆕 udgivelseskanaler  |
+| 🔎 API til modelopdagelse   |          —           |      —      | 🆕 `/v1/models/query` |
 
-**→ [Køreplan](ROADMAP.md) — på sporet mod `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — på skinnerne mod `v3.9.0 LTS`**
 
 </div>
 

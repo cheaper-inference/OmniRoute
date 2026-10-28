@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Shlyuz o'sishda davom etmoqda
+## 📈 Gateway oʻsishda davom etmoqda
 
 <div align="center">
 
-|                                           |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| ----------------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Provayderlar                           |            352            |   **358**   |          376          |
-| 🧠 Noyob chat-model ID'lari               |           1320            |  **1374**   |         1475          |
-| 🖼️ Modallik ko'prigi                      | 🆕 ko'ruv + audio + video |      ✓      |           ✓           |
-| 📡 Radar bepul katalogi                   |       🆕 ixtiyoriy        |      ✓      |           ✓           |
-| ⚖️ Kvotani hisobga oluvchi rejalashtirish |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Kvota telemetriyasi                    |         🆕 jonli          |      ✓      |           ✓           |
-| 🧰 Headless rejim                         |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS rels infratuzilmasi                |             —             |      —      |  🆕 reliz kanallari   |
-| 🔎 Modellarni kashf etish API'si          |             —             |      —      | 🆕 `/v1/models/query` |
+|                                           |          v3.8.50           | **v3.8.51** |       `v3.8.53+`       |
+| ----------------------------------------- | :------------------------: | :---------: | :--------------------: |
+| 🌐 Provayderlar                           |            352             |   **358**   |          376           |
+| 🧠 Noyob chat model IDlari                |            1320            |  **1374**   |          1475          |
+| 🖼️ Modallik koʻprigi                      | 🆕 koʻrish + audio + video |      ✓      |           ✓            |
+| 📡 Radar bepul katalogi                   |        🆕 ixtiyoriy        |      ✓      |           ✓            |
+| ⚖️ Kvotani hisobga oluvchi rejalashtirish |     🆕 Kvota-ulashish      |      ✓      |           ✓            |
+| 📊 Kvota telemetriyasi                    |          🆕 jonli          |      ✓      |           ✓            |
+| 🧰 Boshsiz rejim                          |             —              |      —      | 🆕 `serve --headless`  |
+| 🛤️ LTS rels infratuzilmasi                |             —              |      —      | 🆕 chiqarish kanallari |
+| 🔎 Modelni aniqlash API                   |             —              |      —      | 🆕 `/v1/models/query`  |
 
-**→ [Yo'l xaritasi](ROADMAP.md) — `v3.9.0 LTS` sari rels bo'ylab**
+**→ [Yoʻl xaritasi](ROADMAP.md) — `v3.9.0 LTS` sari rels boʻylab**
 
 </div>
 

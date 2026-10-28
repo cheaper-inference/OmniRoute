@@ -73,15 +73,15 @@
 | -------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Nodrošinātāji                 |           352            |   **358**   |          376          |
 | 🧠 Unikālie tērzēšanas modeļu ID |           1320           |  **1374**   |         1475          |
-| 🖼️ Modalitātes tilts             | 🆕 redze + audio + video |      ✓      |           ✓           |
+| 🖼️ Modalitāšu tilts              | 🆕 redze + audio + video |      ✓      |           ✓           |
 | 📡 Radar bezmaksas katalogs      |      🆕 pēc izvēles      |      ✓      |           ✓           |
-| ⚖️ Kvotu apzinīga plānošana      |      🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Kvotu telemetrija             |       🆕 tiešraide       |      ✓      |           ✓           |
+| ⚖️ Kvotu apzināta plānošana      |  🆕 Kvotu koplietošana   |      ✓      |           ✓           |
+| 📊 Kvotu telemetrija             |       🆕 reāllaikā       |      ✓      |           ✓           |
 | 🧰 Headless režīms               |            —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS sliežu infrastruktūra     |            —             |      —      |  🆕 laidiena kanāli   |
+| 🛤️ LTS sliežu infrastruktūra     |            —             |      —      |   🆕 laidenu kanāli   |
 | 🔎 Modeļu atklāšanas API         |            —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Ceļa karte](ROADMAP.md) — braucam pa sliedēm uz `v3.9.0 LTS`**
+**→ [Ceļa karte](ROADMAP.md) — pa sliedēm uz `v3.9.0 LTS`**
 
 </div>
 

@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                    |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| ---------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Poskytovatelé                   |           352           |   **358**   |          376          |
-| 🧠 Jedinečná ID chatovacích modelů |          1320           |  **1374**   |         1475          |
-| 🖼️ Modality Bridge                 | 🆕 obraz + zvuk + video |      ✓      |           ✓           |
-| 📡 Bezplatný katalog Radar         |        🆕 opt-in        |      ✓      |           ✓           |
-| ⚖️ Plánování s ohledem na kvóty    |     🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Telemetrie kvót                 |         🆕 živě         |      ✓      |           ✓           |
-| 🧰 Headless režim                  |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastruktura LTS koleje       |            —            |      —      |   🆕 kanály vydání    |
-| 🔎 API pro vyhledávání modelů      |            —            |      —      | 🆕 `/v1/models/query` |
+|                                    |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| ---------------------------------- | :----------------------: | :---------: | :-------------------: |
+| 🌐 Poskytovatelé                   |           352            |   **358**   |          376          |
+| 🧠 Jedinečná ID chatovacích modelů |           1320           |  **1374**   |         1475          |
+| 🖼️ Most modalit                    | 🆕 vidění + zvuk + video |      ✓      |           ✓           |
+| 📡 Radar: katalog zdarma           |        🆕 opt-in         |      ✓      |           ✓           |
+| ⚖️ Plánování s ohledem na kvóty    |      🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Telemetrie kvót                 |         🆕 živě          |      ✓      |           ✓           |
+| 🧰 Headless režim                  |            —             |      —      | 🆕 `serve --headless` |
+| 🛤️ Infrastruktura LTS rail         |            —             |      —      |   🆕 kanály vydání    |
+| 🔎 API pro vyhledávání modelů      |            —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Plán vývoje](ROADMAP.md) — po kolejích směrem k `v3.9.0 LTS`**
+**→ [Roadmapa](ROADMAP.md) — na cestě k `v3.9.0 LTS`**
 
 </div>
 

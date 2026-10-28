@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                   |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Ndị na-enye                    |           352           |   **358**   |          376          |
-| 🧠 Njirimara model chat pụrụ iche |          1320           |  **1374**   |         1475          |
-| 🖼️ Ọlọ modality                   | 🆕 ọhụhụ + ụda + vidiyo |      ✓      |           ✓           |
-| 📡 Ndepụta Radar n'efu            |     🆕 nhọrọ ịbanye     |      ✓      |           ✓           |
-| ⚖️ Nhazi nke na-amata quota       |     🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Telemetry quota                |         🆕 ndụ          |      ✓      |           ✓           |
-| 🧰 Ọnọdụ headless                 |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ Ihe owuwu okporo LTS           |            —            |      —      |    🆕 ọwa ntọhapụ     |
-| 🔎 API nchọpụta model             |            —            |      —      | 🆕 `/v1/models/query` |
+|                              |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| ---------------------------- | :---------------------: | :---------: | :-------------------: |
+| 🌐 Ndị na-enye ọrụ           |           352           |   **358**   |          376          |
+| 🧠 ID model chat pụrụ iche   |          1320           |  **1374**   |         1475          |
+| 🖼️ Modality Bridge           | 🆕 ịhụ + ọdịyo + vidiyo |      ✓      |           ✓           |
+| 📡 Katalog Radar n'efu       |     🆕 nhọrọ isonye     |      ✓      |           ✓           |
+| ⚖️ Nhazi oge nke maara quota |     🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Telemetry quota           |        🆕 dị ndụ        |      ✓      |           ✓           |
+| 🧰 Ọnọdụ headless            |            —            |      —      | 🆕 `serve --headless` |
+| 🛤️ Akụrụngwa rail LTS        |            —            |      —      |    🆕 ọwa ntọhapụ     |
+| 🔎 API ịchọpụta model        |            —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Atụmatụ Ụzọ](ROADMAP.md) — na-agba ọsọ n'okporo ígwè gaa `v3.9.0 LTS`**
+**→ [Atụmatụ Ụzọ](ROADMAP.md) — na-agba n'okporo ígwè gaa `v3.9.0 LTS`**
 
 </div>
 

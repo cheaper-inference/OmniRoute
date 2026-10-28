@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                         |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 Soláthraithe                         |            352             |   **358**   |          376          |
-| 🧠 Aitheantas uathúla samhalacha comhrá |            1320            |  **1374**   |         1475          |
-| 🖼️ Droichead Módalachais                | 🆕 amharc + fuaim + físeán |      ✓      |           ✓           |
-| 📡 Catalóg saor in aisce Radar          |        🆕 roghnach         |      ✓      |           ✓           |
-| ⚖️ Sceidealú feasach ar chuóta          |       🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Teileafis cuóta                      |           🆕 beo           |      ✓      |           ✓           |
-| 🧰 Mód gan cheann                       |             —              |      —      | 🆕 `serve --headless` |
-| 🛤️ Bonneagar ráille LTS                 |             —              |      —      |  🆕 cainéil eisiúna   |
-| 🔎 API aimsithe samhalacha              |             —              |      —      | 🆕 `/v1/models/query` |
+|                                        |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| -------------------------------------- | :---------------------: | :---------: | :-------------------: |
+| 🌐 Soláthraithe                        |           352           |   **358**   |          376          |
+| 🧠 Aitheantóirí uathúla samhail comhrá |          1320           |  **1374**   |         1475          |
+| 🖼️ Droichead Modhalachta               | 🆕 fís + fuaim + físeán |      ✓      |           ✓           |
+| 📡 Catalóg saor in aisce Radar         |       🆕 roghnach       |      ✓      |           ✓           |
+| ⚖️ Sceidealú cuóta-fhiosach            |     🆕 Cuóta-Roinnt     |      ✓      |           ✓           |
+| 📊 Teiliméadracht chuóta               |         🆕 beo          |      ✓      |           ✓           |
+| 🧰 Mód headless                        |            —            |      —      | 🆕 `serve --headless` |
+| 🛤️ Infra iarnróid LTS                  |            —            |      —      |  🆕 cainéil eisiúna   |
+| 🔎 API aimsithe samhail                |            —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Treochlár](ROADMAP.md) — ag marcaíocht ar an ráille go `v3.9.0 LTS`**
+**→ [Treochlár](ROADMAP.md) — ag marcaíocht ar an iarnród go `v3.9.0 LTS`**
 
 </div>
 

@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 A Gateway folyamatosan bővül
+## 📈 A Gateway tovább növekszik
 
 <div align="center">
 
-|                                    |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| ---------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Szolgáltatók                    |           352           |   **358**   |          376          |
-| 🧠 Egyedi csevegőmodell-azonosítók |          1320           |  **1374**   |         1475          |
-| 🖼️ Modality Bridge                 | 🆕 látás + hang + videó |      ✓      |           ✓           |
-| 📡 Radar ingyenes katalógus        |        🆕 opt-in        |      ✓      |           ✓           |
-| ⚖️ Kvótatudatos ütemezés           |     🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Kvóta-telemetria                |         🆕 élő          |      ✓      |           ✓           |
-| 🧰 Headless mód                    |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-vágány infrastruktúra       |            —            |      —      | 🆕 kiadási csatornák  |
-| 🔎 Modellfelderítési API           |            —            |      —      | 🆕 `/v1/models/query` |
+|                                 |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------------- | :---------------------: | :---------: | :-------------------: |
+| 🌐 Szolgáltatók                 |           352           |   **358**   |          376          |
+| 🧠 Egyedi chatmodell-azonosítók |          1320           |  **1374**   |         1475          |
+| 🖼️ Modalitás-híd                | 🆕 látás + hang + videó |      ✓      |           ✓           |
+| 📡 Radar ingyenes katalógus     |      🆕 opcionális      |      ✓      |           ✓           |
+| ⚖️ Kvóta-tudatos ütemezés       |     🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Kvóta-telemetria             |         🆕 élő          |      ✓      |           ✓           |
+| 🧰 Headless mód                 |            —            |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS síninfrastruktúra        |            —            |      —      | 🆕 kiadási csatornák  |
+| 🔎 Modellfelderítő API          |            —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Útiterv](ROADMAP.md) — a vágányon haladva az `v3.9.0 LTS` felé**
+**→ [Ütemterv](ROADMAP.md) — a sínen haladva a `v3.9.0 LTS` felé**
 
 </div>
 

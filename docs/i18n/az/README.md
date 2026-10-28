@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway böyüməyə davam edir
+## 📈 Şlüz Böyüməyə Davam Edir
 
 <div align="center">
 
-|                                 |         v3.8.50          | **v3.8.51** |       `v3.8.53+`       |
-| ------------------------------- | :----------------------: | :---------: | :--------------------: |
-| 🌐 Provayderlər                 |           352            |   **358**   |          376           |
-| 🧠 Unikal söhbət modeli ID-ləri |           1320           |  **1374**   |          1475          |
-| 🖼️ Modallıq körpüsü             | 🆕 görmə + audio + video |      ✓      |           ✓            |
-| 📡 Radar pulsuz kataloqu        |        🆕 opt-in         |      ✓      |           ✓            |
-| ⚖️ Kvotaya həssas planlaşdırma  |      🆕 Quota-Share      |      ✓      |           ✓            |
-| 📊 Kvota telemetriyası          |         🆕 canlı         |      ✓      |           ✓            |
-| 🧰 Headless rejimi              |            —             |      —      | 🆕 `serve --headless`  |
-| 🛤️ LTS rail infrastrukturu      |            —             |      —      | 🆕 buraxılış kanalları |
-| 🔎 Model kəşfi API-si           |            —             |      —      | 🆕 `/v1/models/query`  |
+|                                |         v3.8.50          | **v3.8.51** |       `v3.8.53+`       |
+| ------------------------------ | :----------------------: | :---------: | :--------------------: |
+| 🌐 Provayderlər                |           352            |   **358**   |          376           |
+| 🧠 Unikal söhbət model ID-ləri |           1320           |  **1374**   |          1475          |
+| 🖼️ Modallıq Körpüsü            | 🆕 görmə + audio + video |      ✓      |           ✓            |
+| 📡 Radar pulsuz kataloqu       |     🆕 istəyə bağlı      |      ✓      |           ✓            |
+| ⚖️ Kvota-həsas planlaşdırma    |      🆕 Quota-Share      |      ✓      |           ✓            |
+| 📊 Kvota telemetriyası         |         🆕 canlı         |      ✓      |           ✓            |
+| 🧰 Başsız rejim                |            —             |      —      | 🆕 `serve --headless`  |
+| 🛤️ LTS rels infrastrukturu     |            —             |      —      | 🆕 buraxılış kanalları |
+| 🔎 Model kəşfiyyatı API-si     |            —             |      —      | 🆕 `/v1/models/query`  |
 
-**→ [Yol xəritəsi](ROADMAP.md) — `v3.9.0 LTS`-ə doğru rels boyunca**
+**→ [Yol xəritəsi](ROADMAP.md) — `v3.9.0 LTS`-ə doğru relsdə hərəkət**
 
 </div>
 

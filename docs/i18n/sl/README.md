@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway še naprej raste
+## 📈 Gateway kar naprej raste
 
 <div align="center">
 
-|                                     |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
-| ----------------------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 Ponudniki                        |          352          |   **358**   |          376          |
-| 🧠 Edinstveni ID-ji modelov klepeta |         1320          |  **1374**   |         1475          |
-| 🖼️ Most modalnosti                  | 🆕 vid + zvok + video |      ✓      |           ✓           |
-| 📡 Brezplačni katalog Radar         |     🆕 po izbiri      |      ✓      |           ✓           |
-| ⚖️ Razporejanje z upoštevanjem kvot |    🆕 Quota-Share     |      ✓      |           ✓           |
-| 📊 Telemetrija kvot                 |       🆕 v živo       |      ✓      |           ✓           |
-| 🧰 Način headless                   |           —           |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastruktura tirnice LTS       |           —           |      —      |    🆕 kanali izdaj    |
-| 🔎 API za odkrivanje modelov        |           —           |      —      | 🆕 `/v1/models/query` |
+|                                         |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------------------- | :-------------------: | :---------: | :-------------------: |
+| 🌐 Ponudniki                            |          352          |   **358**   |          376          |
+| 🧠 Edinstveni ID-ji klepetalnih modelov |         1320          |  **1374**   |         1475          |
+| 🖼️ Most med modalnostmi                 | 🆕 vid + zvok + video |      ✓      |           ✓           |
+| 📡 Brezplačni katalog Radar             |     🆕 po izbiri      |      ✓      |           ✓           |
+| ⚖️ Razporejanje ob upoštevanju kvot     |    🆕 Quota-Share     |      ✓      |           ✓           |
+| 📊 Telemetrija kvot                     |       🆕 v živo       |      ✓      |           ✓           |
+| 🧰 Način headless                       |           —           |      —      | 🆕 `serve --headless` |
+| 🛤️ Infrastruktura tira LTS              |           —           |      —      |    🆕 kanali izdaj    |
+| 🔎 API za odkrivanje modelov            |           —           |      —      | 🆕 `/v1/models/query` |
 
-**→ [Načrt razvoja](ROADMAP.md) — po tirnici do `v3.9.0 LTS`**
+**→ [Načrt razvoja](ROADMAP.md) — po tiru proti `v3.9.0 LTS`**
 
 </div>
 

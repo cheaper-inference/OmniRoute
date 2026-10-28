@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway kasvab edasi
+## 📈 Lüüs jätkab kasvamist
 
 <div align="center">
 
-|                                    |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| ---------------------------------- | :--------------------: | :---------: | :-------------------: |
-| 🌐 Pakkujad                        |          352           |   **358**   |          376          |
-| 🧠 Kordumatud vestlusmudelite ID-d |          1320          |  **1374**   |         1475          |
-| 🖼️ Modaalsuse sild                 | 🆕 pilt + heli + video |      ✓      |           ✓           |
-| 📡 Radari tasuta kataloog          |     🆕 valikuline      |      ✓      |           ✓           |
-| ⚖️ Kvooditeadlik ajastamine        |     🆕 Quota-Share     |      ✓      |           ✓           |
-| 📊 Kvoodi telemeetria              |      🆕 reaalajas      |      ✓      |           ✓           |
-| 🧰 Headless-režiim                 |           —            |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-i raudtee taristu           |           —            |      —      | 🆕 väljalaskekanalid  |
-| 🔎 Mudelite avastamise API         |           —            |      —      | 🆕 `/v1/models/query` |
+|                                    |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+| ---------------------------------- | :------------------------: | :---------: | :-------------------: |
+| 🌐 Teenusepakkujad                 |            352             |   **358**   |          376          |
+| 🧠 Unikaalsed vestlusmudelite ID-d |            1320            |  **1374**   |         1475          |
+| 🖼️ Modaliteetide sild              | 🆕 nägemine + heli + video |      ✓      |           ✓           |
+| 📡 Radari tasuta kataloog          |         🆕 opt-in          |      ✓      |           ✓           |
+| ⚖️ Kvooditeadlik ajastamine        |       🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Kvoodi telemeetria              |        🆕 reaalajas        |      ✓      |           ✓           |
+| 🧰 Headless-režiim                 |             —              |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS-i rööpa taristu             |             —              |      —      | 🆕 väljalaskekanalid  |
+| 🔎 Mudelite tuvastamise API        |             —              |      —      | 🆕 `/v1/models/query` |
 
-**→ [Teekaart](ROADMAP.md) — rööbast mööda `v3.9.0 LTS`-i poole**
+**→ [Teekaart](ROADMAP.md) — rööbastel liikudes suunas `v3.9.0 LTS`**
 
 </div>
 

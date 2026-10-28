@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway không ngừng phát triển
+## 📈 Cổng kết nối không ngừng mở rộng
 
 <div align="center">
 
-|                             |            v3.8.50             | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------- | :----------------------------: | :---------: | :-------------------: |
-| 🌐 Nhà cung cấp             |              352               |   **358**   |          376          |
-| 🧠 ID mô hình chat duy nhất |              1320              |  **1374**   |         1475          |
-| 🖼️ Cầu nối đa phương thức   | 🆕 thị giác + âm thanh + video |      ✓      |           ✓           |
-| 📡 Danh mục miễn phí Radar  |        🆕 tùy chọn bật         |      ✓      |           ✓           |
-| ⚖️ Lập lịch theo hạn mức    |         🆕 Quota-Share         |      ✓      |           ✓           |
-| 📊 Telemetry hạn mức        |          🆕 trực tiếp          |      ✓      |           ✓           |
-| 🧰 Chế độ headless          |               —                |      —      | 🆕 `serve --headless` |
-| 🛤️ Hạ tầng rail LTS         |               —                |      —      |   🆕 kênh phát hành   |
-| 🔎 API khám phá mô hình     |               —                |      —      | 🆕 `/v1/models/query` |
+|                             |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------- | :-----------------------: | :---------: | :-------------------: |
+| 🌐 Nhà cung cấp             |            352            |   **358**   |          376          |
+| 🧠 ID mô hình chat duy nhất |           1320            |  **1374**   |         1475          |
+| 🖼️ Cầu nối phương thức      | 🆕 vision + audio + video |      ✓      |           ✓           |
+| 📡 Danh mục miễn phí Radar  |     🆕 chọn tham gia      |      ✓      |           ✓           |
+| ⚖️ Lập lịch theo hạn mức    |      🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Đo lường hạn mức         |       🆕 trực tiếp        |      ✓      |           ✓           |
+| 🧰 Chế độ headless          |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ Hạ tầng đường ray LTS    |             —             |      —      | 🆕 các kênh phát hành |
+| 🔎 API khám phá mô hình     |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Lộ trình](ROADMAP.md) — đang lăn bánh trên đường ray tới `v3.9.0 LTS`**
+**→ [Lộ trình](ROADMAP.md) — tiến dọc đường ray tới `v3.9.0 LTS`**
 
 </div>
 

@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Brama wciąż rośnie
+## 📈 Brama stale się rozwija
 
 <div align="center">
 
-|                                         |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Dostawcy                             |           352            |   **358**   |          376          |
-| 🧠 Unikalne identyfikatory modeli czatu |           1320           |  **1374**   |         1475          |
-| 🖼️ Most modalności                      | 🆕 wizja + audio + wideo |      ✓      |           ✓           |
-| 📡 Darmowy katalog Radar                |  🆕 opcjonalny (opt-in)  |      ✓      |           ✓           |
-| ⚖️ Planowanie z uwzględnieniem limitów  |      🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Telemetria limitów                   |        🆕 na żywo        |      ✓      |           ✓           |
-| 🧰 Tryb headless                        |            —             |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastruktura torów LTS             |            —             |      —      |    🆕 kanały wydań    |
-| 🔎 API odnajdywania modeli              |            —             |      —      | 🆕 `/v1/models/query` |
+|                                         |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------------------- | :-----------------------: | :---------: | :-------------------: |
+| 🌐 Dostawcy                             |            352            |   **358**   |          376          |
+| 🧠 Unikalne identyfikatory modeli czatu |           1320            |  **1374**   |         1475          |
+| 🖼️ Most modalności                      | 🆕 obraz + dźwięk + wideo |      ✓      |           ✓           |
+| 📡 Bezpłatny katalog Radar              |       🆕 opcjonalny       |      ✓      |           ✓           |
+| ⚖️ Planowanie z uwzględnieniem limitów  | 🆕 Współdzielenie limitów |      ✓      |           ✓           |
+| 📊 Telemetria limitów                   |        🆕 na żywo         |      ✓      |           ✓           |
+| 🧰 Tryb headless                        |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ Infrastruktura toru LTS              |             —             |      —      |    🆕 kanały wydań    |
+| 🔎 API wykrywania modeli                |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Mapa drogowa](ROADMAP.md) — jadąc torem w stronę `v3.9.0 LTS`**
+**→ [Plan rozwoju](ROADMAP.md) — podążając torem do `v3.9.0 LTS`**
 
 </div>
 

@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 De gateway blijft groeien
+## 📈 De Gateway Blijft Groeien
 
 <div align="center">
 
 |                           |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 Providers              |            352            |   **358**   |          376          |
-| 🧠 Unieke chatmodel-ID's  |           1320            |  **1374**   |         1475          |
-| 🖼️ Modality Bridge        | 🆕 vision + audio + video |      ✓      |           ✓           |
-| 📡 Gratis Radar-catalogus |         🆕 opt-in         |      ✓      |           ✓           |
-| ⚖️ Quotumbewuste planning |      🆕 Quota-Share       |      ✓      |           ✓           |
+| 🧠 Unieke chat-model-ID's |           1320            |  **1374**   |         1475          |
+| 🖼️ Modaliteitsbrug        | 🆕 vision + audio + video |      ✓      |           ✓           |
+| 📡 Radar gratis catalogus |         🆕 opt-in         |      ✓      |           ✓           |
+| ⚖️ Quotabewuste planning  |      🆕 Quota-Share       |      ✓      |           ✓           |
 | 📊 Quotatelemetrie        |          🆕 live          |      ✓      |           ✓           |
 | 🧰 Headless-modus         |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-spoorinfra         |             —             |      —      |   🆕 releasekanalen   |
-| 🔎 API voor modeldetectie |             —             |      —      | 🆕 `/v1/models/query` |
+| 🛤️ LTS-railinfrastructuur |             —             |      —      |   🆕 releasekanalen   |
+| 🔎 Modeldetectie-API      |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Roadmap](ROADMAP.md) — op het spoor richting `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — op de rail naar `v3.9.0 LTS`**
 
 </div>
 

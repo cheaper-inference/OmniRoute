@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 O Gateway Continua a Crescer
+## 📈 O Gateway continua a crescer
 
 <div align="center">
 
-|                                     |         v3.8.50          | **v3.8.51** |       `v3.8.53+`        |
-| ----------------------------------- | :----------------------: | :---------: | :---------------------: |
-| 🌐 Fornecedores                     |           352            |   **358**   |           376           |
-| 🧠 IDs de modelos de chat únicos    |           1320           |  **1374**   |          1475           |
-| 🖼️ Modality Bridge                  | 🆕 visão + áudio + vídeo |      ✓      |            ✓            |
-| 📡 Catálogo gratuito Radar          |        🆕 opt-in         |      ✓      |            ✓            |
-| ⚖️ Agendamento com gestão de quotas |      🆕 Quota-Share      |      ✓      |            ✓            |
-| 📊 Telemetria de quotas             |       🆕 em direto       |      ✓      |            ✓            |
-| 🧰 Modo headless                    |            —             |      —      |  🆕 `serve --headless`  |
-| 🛤️ Infraestrutura do trilho LTS     |            —             |      —      | 🆕 canais de lançamento |
-| 🔎 API de descoberta de modelos     |            —             |      —      |  🆕 `/v1/models/query`  |
+|                                             |         v3.8.50          | **v3.8.51** |       `v3.8.53+`        |
+| ------------------------------------------- | :----------------------: | :---------: | :---------------------: |
+| 🌐 Fornecedores                             |           352            |   **358**   |           376           |
+| 🧠 IDs únicos de modelos de chat            |           1320           |  **1374**   |          1475           |
+| 🖼️ Ponte de modalidades                     | 🆕 visão + áudio + vídeo |      ✓      |            ✓            |
+| 📡 Catálogo gratuito do Radar               |    🆕 adesão opcional    |      ✓      |            ✓            |
+| ⚖️ Agendamento com reconhecimento de quotas |      🆕 Quota-Share      |      ✓      |            ✓            |
+| 📊 Telemetria de quotas                     |     🆕 em tempo real     |      ✓      |            ✓            |
+| 🧰 Modo headless                            |            —             |      —      |  🆕 `serve --headless`  |
+| 🛤️ Infraestrutura de via LTS                |            —             |      —      | 🆕 canais de lançamento |
+| 🔎 API de descoberta de modelos             |            —             |      —      |  🆕 `/v1/models/query`  |
 
-**→ [Roadmap](ROADMAP.md) — no trilho rumo à `v3.9.0 LTS`**
+**→ [Roteiro](ROADMAP.md) — a seguir a via até `v3.9.0 LTS`**
 
 </div>
 
