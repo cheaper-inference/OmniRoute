@@ -593,6 +593,8 @@
       "tests/unit/connection-circuit-breaker.test.ts",
       "tests/unit/connection-test-closes-degraded-breaker.test.ts",
       "tests/unit/muse-code-oauth.test.ts",
+      "tests/unit/minimax-code-oauth.test.ts",
+      "tests/unit/minimax-code-shutdown-drain.test.ts",
       "tests/unit/model-not-found-must-not-poison-credential.test.ts",
       "tests/unit/codex-reasoning-replay-rejection.test.ts",
       "tests/unit/opencode-free-tier-combo-scoped-failure-14313.test.ts",

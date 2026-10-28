@@ -27,7 +27,7 @@ import {
   resolveGatewayInputLimit,
   type GatewayStreamState,
 } from "./minimaxCodeGateway.ts";
-import { isDraining } from "../../src/lib/gracefulShutdown.ts";
+import { drainAwareFailureStatus, isInstanceDraining } from "../utils/drainStatus.ts";
 
 /**
  * MiniMax Code provider.
@@ -69,34 +69,6 @@ function gatewayFailureStatus(error: unknown): number {
   // It says nothing about the health of the model, and a 502 would lock the
   // model out of every combo of the instance for half an hour.
   return 500;
-}
-
-/**
- * The status a failure of this executor is answered with while the instance
- * is draining.
- *
- * A graceful shutdown tears the transport down under the requests that are
- * still in flight, so the failure is evidence about OUR shutdown, not about
- * the health of the provider. A 5xx says the opposite: it is in the
- * model-lockout list and in the provider-breaker list, and it is not exempt
- * from the connection cooldown — so the account is written as `unavailable`
- * with a `rateLimitedUntil` into the `provider_connections` table, a state
- * that outlives the restart. The shutdown the operator asked for must not
- * cost the account its health.
- *
- * 499 is the answer an aborted caller gets, and it carries
- * `client_disconnected`, which the connection-cooldown policy already exempts
- * (`shouldSkipConnDisable`) — so the account is not poisoned. It is in neither
- * the model-lockout nor the provider-breaker status list, so it can neither
- * lock the model out nor open the provider circuit.
- *
- * A refusal that belongs to the request (a 4xx of the gateway) keeps its own
- * status: that answer is about the request, not about the shutdown.
- *
- * The drain flag is read live on every call — it never latches.
- */
-function drainAwareFailureStatus(status: number): number {
-  return status >= 500 && isDraining() ? 499 : status;
 }
 
 /** A failure of the HTTP transport itself, not of our code. */
@@ -189,6 +161,94 @@ function sseChunk(
   };
   if (extra.usage) chunk.usage = extra.usage;
   return `data: ${JSON.stringify(chunk)}\n\n`;
+}
+
+/** Feed every complete SSE frame in `buffer` to the state; return the unread rest. */
+function drainGatewayFrames(
+  buffer: string,
+  state: GatewayStreamState,
+  emit: (delta: string) => void
+): string {
+  let rest = buffer;
+  let index = rest.indexOf("\n\n");
+  while (index >= 0) {
+    applyGatewayFrame(rest.slice(0, index), state, emit);
+    rest = rest.slice(index + 2);
+    index = rest.indexOf("\n\n");
+  }
+  return rest;
+}
+
+function applyGatewayFrame(
+  frame: string,
+  state: GatewayStreamState,
+  emit: (delta: string) => void
+): void {
+  for (const event of parseGatewaySse(frame)) {
+    const delta = applyGatewayEvent(state, event);
+    if (delta) emit(delta);
+  }
+}
+
+/** The last OpenAI chunk: the tool calls, the finish reason and the usage. */
+function finalGatewayChunk(model: string, state: GatewayStreamState, messageId: string): string {
+  const toolCalls = state.toolCalls.map((call, index) => ({
+    index,
+    id: call.id,
+    type: "function",
+    function: { name: call.name, arguments: call.arguments || "{}" },
+  }));
+  let finishReason = "stop";
+  if (toolCalls.length) finishReason = "tool_calls";
+  else if (state.finishReason === "max_tokens") finishReason = "length";
+  const finalDelta: JsonRecord = toolCalls.length ? { tool_calls: toolCalls } : {};
+  return sseChunk(model, finalDelta, finishReason, {
+    id: messageId,
+    usage: {
+      prompt_tokens: state.inputTokens,
+      completion_tokens: state.outputTokens,
+      total_tokens: state.inputTokens + state.outputTokens,
+    },
+  });
+}
+
+/** Relay the Anthropic SSE of the gateway as OpenAI chunks, ending with [DONE]. */
+async function relayGatewayStream(
+  upstream: ReadableStream<Uint8Array> | null,
+  model: string,
+  messageId: string,
+  write: (chunk: string) => void
+): Promise<void> {
+  const state: GatewayStreamState = {
+    text: "",
+    toolCalls: [],
+    finishReason: "end_turn",
+    inputTokens: 0,
+    outputTokens: 0,
+  };
+  const emit = (delta: string) =>
+    write(sseChunk(model, { content: delta }, null, { id: messageId }));
+  write(sseChunk(model, { role: "assistant", content: "" }, null, { id: messageId }));
+  if (upstream) {
+    const reader = upstream.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer = drainGatewayFrames(buffer + decoder.decode(value, { stream: true }), state, emit);
+    }
+    if (buffer.trim()) applyGatewayFrame(buffer, state, emit);
+  }
+  write(finalGatewayChunk(model, state, messageId));
+  write("data: [DONE]\n\n");
+}
+
+/** A failure after the stream opened travels as an error frame plus [DONE]. */
+function gatewayStreamErrorFrame(error: unknown, message: string): string {
+  const status = gatewayFailureStatus(error);
+  const body = buildErrorBody(status, message, undefined, gatewayFailureClassification(error));
+  return `data: ${JSON.stringify(body)}\n\ndata: [DONE]\n\n`;
 }
 
 export class MinimaxCodeExecutor extends BaseExecutor {
@@ -337,87 +397,18 @@ export class MinimaxCodeExecutor extends BaseExecutor {
     const upstream = response.body;
     const encoder = new TextEncoder();
     const messageId = `chatcmpl-minimax-code-${Date.now()}`;
-    const state: GatewayStreamState = {
-      text: "",
-      toolCalls: [],
-      finishReason: "end_turn",
-      inputTokens: 0,
-      outputTokens: 0,
-    };
-
     const stream = new ReadableStream<Uint8Array>({
       start: (controller) => {
-        void (async () => {
-          const write = (chunk: string) => controller.enqueue(encoder.encode(chunk));
-          try {
-            write(sseChunk(model, { role: "assistant", content: "" }, null, { id: messageId }));
-            if (upstream) {
-              const reader = upstream.getReader();
-              const decoder = new TextDecoder();
-              let buffer = "";
-              for (;;) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                buffer += decoder.decode(value, { stream: true });
-                let index = buffer.indexOf("\n\n");
-                while (index >= 0) {
-                  const frame = buffer.slice(0, index);
-                  buffer = buffer.slice(index + 2);
-                  for (const event of parseGatewaySse(frame)) {
-                    const delta = applyGatewayEvent(state, event);
-                    if (delta) write(sseChunk(model, { content: delta }, null, { id: messageId }));
-                  }
-                  index = buffer.indexOf("\n\n");
-                }
-              }
-              if (buffer.trim()) {
-                for (const event of parseGatewaySse(buffer)) {
-                  const delta = applyGatewayEvent(state, event);
-                  if (delta) write(sseChunk(model, { content: delta }, null, { id: messageId }));
-                }
-              }
-            }
-            const toolCalls = state.toolCalls.map((call, index) => ({
-              index,
-              id: call.id,
-              type: "function",
-              function: { name: call.name, arguments: call.arguments || "{}" },
-            }));
-            const finishReason = state.toolCalls.length
-              ? "tool_calls"
-              : state.finishReason === "max_tokens"
-                ? "length"
-                : "stop";
-            const finalDelta: JsonRecord = {};
-            if (toolCalls.length) finalDelta.tool_calls = toolCalls;
-            write(
-              sseChunk(model, finalDelta, finishReason, {
-                id: messageId,
-                usage: {
-                  prompt_tokens: state.inputTokens,
-                  completion_tokens: state.outputTokens,
-                  total_tokens: state.inputTokens + state.outputTokens,
-                },
-              })
-            );
-            write("data: [DONE]\n\n");
-          } catch (error) {
+        const write = (chunk: string) => controller.enqueue(encoder.encode(chunk));
+        void relayGatewayStream(upstream, model, messageId, write)
+          .catch((error) => {
             const message = sanitizeErrorMessage(
               error instanceof Error ? error.message : String(error)
             );
             input.log?.warn?.("MINIMAX_CODE", message);
-            const status = gatewayFailureStatus(error);
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify(
-                  buildErrorBody(status, message, undefined, gatewayFailureClassification(error))
-                )}\n\ndata: [DONE]\n\n`
-              )
-            );
-          } finally {
-            controller.close();
-          }
-        })();
+            write(gatewayStreamErrorFrame(error, message));
+          })
+          .finally(() => controller.close());
       },
     });
 
@@ -457,48 +448,53 @@ export class MinimaxCodeExecutor extends BaseExecutor {
         ? await this.executeGatewayStream(input, resolution.model, body)
         : await this.executeGateway(input, resolution.model, body);
     } catch (error) {
-      const message = sanitizeErrorMessage(error instanceof Error ? error.message : String(error));
-      const failureStatus = gatewayFailureStatus(error);
-      if (isDraining() && failureStatus >= 500) {
-        // Our own shutdown tore the transport down under a request that was
-        // still in flight. That failure is evidence about OUR shutdown, not
-        // about the health of the provider, so the answer is 499
-        // (client_disconnected) — the status an aborted caller already gets.
-        // 499 is exempt from the connection cooldown, so the account is not
-        // written as `unavailable` in the database, a state that outlives
-        // the restart; and it is in neither the model-lockout nor the
-        // provider-breaker status list.
-        //
-        // A refusal that belongs to the request (a 4xx of the gateway) keeps
-        // its own status — that answer is about the request, not about the
-        // shutdown — so only a 5xx takes this branch.
-        input.log?.warn?.(
-          "MINIMAX_CODE",
-          `gateway transport failed while the instance is draining: ${message}`
-        );
-        return errorResponse(499, message);
-      }
-      // The status of the gateway answer decides what the runtime does with
-      // the failure. A 4xx is a property of the request and keeps its own
-      // status: a refusal that arrives as a 502 is recorded as a model
-      // outage, and the model lockout that follows takes the MiniMax leg
-      // out of every combo for minutes (incident 2026-10-21). Only a
-      // failure of the transport itself is a 502; everything else is ours
-      // and stays a 500.
-      const status = failureStatus;
-      const detail =
-        status === 502
-          ? `MiniMax managed gateway unavailable (${message})`
-          : `MiniMax gateway rejected the request (${status}): ${message}`;
-      input.log?.warn?.("MINIMAX_CODE", detail);
-      // The failure happens before the stream is opened, so the request
-      // answers with a real status instead of an error inside a 200 stream.
-      return errorResponse(
-        drainAwareFailureStatus(status),
-        detail,
-        gatewayFailureClassification(error)
-      );
+      return this.gatewayFailureResponse(input, error);
     }
+  }
+
+  /** The answer for a gateway call that failed before its stream was opened. */
+  private gatewayFailureResponse(input: ExecuteInput, error: unknown): Response {
+    const message = sanitizeErrorMessage(error instanceof Error ? error.message : String(error));
+    const failureStatus = gatewayFailureStatus(error);
+    if (isInstanceDraining() && failureStatus >= 500) {
+      // Our own shutdown tore the transport down under a request that was
+      // still in flight. That failure is evidence about OUR shutdown, not
+      // about the health of the provider, so the answer is 499
+      // (client_disconnected) — the status an aborted caller already gets.
+      // 499 is exempt from the connection cooldown, so the account is not
+      // written as `unavailable` in the database, a state that outlives
+      // the restart; and it is in neither the model-lockout nor the
+      // provider-breaker status list.
+      //
+      // A refusal that belongs to the request (a 4xx of the gateway) keeps
+      // its own status — that answer is about the request, not about the
+      // shutdown — so only a 5xx takes this branch.
+      input.log?.warn?.(
+        "MINIMAX_CODE",
+        `gateway transport failed while the instance is draining: ${message}`
+      );
+      return errorResponse(499, message);
+    }
+    // The status of the gateway answer decides what the runtime does with
+    // the failure. A 4xx is a property of the request and keeps its own
+    // status: a refusal that arrives as a 502 is recorded as a model
+    // outage, and the model lockout that follows takes the MiniMax leg
+    // out of every combo for minutes (incident 2026-10-21). Only a
+    // failure of the transport itself is a 502; everything else is ours
+    // and stays a 500.
+    const status = failureStatus;
+    const detail =
+      status === 502
+        ? `MiniMax managed gateway unavailable (${message})`
+        : `MiniMax gateway rejected the request (${status}): ${message}`;
+    input.log?.warn?.("MINIMAX_CODE", detail);
+    // The failure happens before the stream is opened, so the request
+    // answers with a real status instead of an error inside a 200 stream.
+    return errorResponse(
+      drainAwareFailureStatus(status),
+      detail,
+      gatewayFailureClassification(error)
+    );
   }
 
   // Credentials are intentionally ignored: the local MiniMax Code profile owns auth.

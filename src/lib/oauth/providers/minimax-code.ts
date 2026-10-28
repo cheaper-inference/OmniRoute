@@ -216,13 +216,13 @@ export const minimaxCode = {
     return { profileSynced: true, profileReplacedAccount: profile.replacedAccount === true };
   },
 
-  mapTokens: (tokens: MiniMaxCodeTokenResponse, extra?: MiniMaxCodePostExchange) => {
-    const expiresIn = asNumber(tokens.expires_in);
+  // The credential is written into the local MiniMax Code profile by
+  // postExchange and stays there: the connection row is the account entry and
+  // carries no token. A copy in provider_connections would go stale as soon as
+  // the CLI rotates the credential, and a generic refresher could spend the
+  // refresh token the profile depends on.
+  mapTokens: (_tokens: MiniMaxCodeTokenResponse, extra?: MiniMaxCodePostExchange) => {
     return {
-      accessToken: asString(tokens.access_token),
-      refreshToken: asString(tokens.refresh_token) || undefined,
-      expiresIn: expiresIn > 0 ? expiresIn : undefined,
-      tokenType: asString(tokens.token_type) || "Bearer",
       // The account endpoint does not return an account identity, so the
       // dashboard labels the account by provider.
       displayName: "MiniMax Code account",

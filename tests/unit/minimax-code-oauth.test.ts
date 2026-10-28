@@ -162,15 +162,20 @@ test("pollToken returns the token pair of an authorized grant", async () => {
   assert.equal(result.data.refresh_token, "refresh-token");
 });
 
-test("mapTokens maps the grant and reports whether the local profile was written", () => {
+test("mapTokens keeps the credential out of the connection row and reports the profile write", () => {
   const mapped = minimaxCode.mapTokens(
     { access_token: "access-token", refresh_token: "refresh-token", expires_in: 3600 },
     { profileSynced: true }
   );
-  assert.equal(mapped.accessToken, "access-token");
-  assert.equal(mapped.refreshToken, "refresh-token");
-  assert.equal(mapped.expiresIn, 3600);
-  assert.equal(mapped.tokenType, "Bearer");
+  // The credential lives only in the local MiniMax Code profile (postExchange
+  // writes it there). The connection row is the account entry: a copy of the
+  // tokens in provider_connections would go stale as soon as the CLI rotates
+  // them, and a generic refresher could spend the profile's refresh token.
+  assert.equal("accessToken" in mapped, false);
+  assert.equal("refreshToken" in mapped, false);
+  assert.equal("expiresIn" in mapped, false);
+  assert.equal(JSON.stringify(mapped).includes("access-token"), false);
+  assert.equal(JSON.stringify(mapped).includes("refresh-token"), false);
   assert.equal(mapped.providerSpecificData.profileSynced, true);
 
   const unsynced = minimaxCode.mapTokens({ access_token: "access-token" });

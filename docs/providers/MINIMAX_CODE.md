@@ -1,7 +1,7 @@
 ---
 title: "MiniMax Code Provider"
 version: 3.8.53
-lastUpdated: 2026-10-25
+lastUpdated: 2026-10-28
 ---
 
 # MiniMax Code Provider
@@ -38,8 +38,9 @@ credential into your local MiniMax Code profile — the same file the CLI reads.
 
 The provider stays a **no-auth** provider: it can be enabled without any
 connection, and the credential a request uses is the one in your local profile.
-The dashboard connection is the account entry — it can be re-authenticated from
-the panel, but it never routes a request. The profile is created when it is
+The dashboard connection is the account entry — it stores no access or refresh
+token (those stay in the local profile only), it can be re-authenticated from
+the panel, and it never routes a request. The profile is created when it is
 missing, and the credential that was there before is kept: the account service
 returns no account identity, so a sign-in never destroys an account the operator
 cannot get back — pin the record with `MINIMAX_CODE_AUTH_RECORD` to go back to

@@ -169,87 +169,136 @@ function parseToolArguments(raw: unknown): unknown {
   }
 }
 
+/** Accumulates the Anthropic conversation while the OpenAI messages are read. */
+interface GatewayConversation {
+  messages: JsonRecord[];
+  systemParts: string[];
+  toolNames: Map<string, string>;
+  pendingToolResults: JsonRecord[];
+}
+
+// Anthropic requires every tool_result to sit in the user message that
+// immediately follows the assistant message with the matching tool_use, and
+// it rejects a tool_use whose result is missing. The results of all tools
+// called in one turn therefore share a single user message.
+function flushToolResults(conversation: GatewayConversation): void {
+  if (!conversation.pendingToolResults.length) return;
+  conversation.messages.push({ role: "user", content: conversation.pendingToolResults });
+  conversation.pendingToolResults = [];
+}
+
+function addSystemMessage(conversation: GatewayConversation, message: JsonRecord): void {
+  const text = contentToText(message.content).trim();
+  if (text) conversation.systemParts.push(text);
+}
+
+function toolUseBlock(conversation: GatewayConversation, rawCall: unknown): JsonRecord | null {
+  const call = asRecord(rawCall);
+  const fn = asRecord(call.function);
+  const id = asString(call.id);
+  const name = asString(fn.name);
+  if (!id || !name) return null;
+  conversation.toolNames.set(id, name);
+  return { type: "tool_use", id, name, input: parseToolArguments(fn.arguments) };
+}
+
+function addAssistantMessage(conversation: GatewayConversation, message: JsonRecord): void {
+  flushToolResults(conversation);
+  const blocks: JsonRecord[] = [];
+  const text = contentToText(message.content);
+  if (text) blocks.push({ type: "text", text });
+  for (const rawCall of Array.isArray(message.tool_calls) ? message.tool_calls : []) {
+    const block = toolUseBlock(conversation, rawCall);
+    if (block) blocks.push(block);
+  }
+  if (blocks.length) conversation.messages.push({ role: "assistant", content: blocks });
+}
+
+function addToolResult(conversation: GatewayConversation, message: JsonRecord): void {
+  const toolUseId = asString(message.tool_call_id);
+  if (!toolUseId) return;
+  const name = asString(message.name) || conversation.toolNames.get(toolUseId) || "";
+  const text = contentToText(message.content);
+  const block: JsonRecord = { type: "tool_result", tool_use_id: toolUseId, content: text };
+  if (name) block.name = name;
+  conversation.pendingToolResults.push(block);
+}
+
+function addUserMessage(conversation: GatewayConversation, message: JsonRecord): void {
+  flushToolResults(conversation);
+  const text = contentToText(message.content);
+  const blocks: JsonRecord[] = [];
+  if (text) blocks.push({ type: "text", text });
+  blocks.push(...imageBlocks(message.content));
+  if (!blocks.length) return;
+  // The gateway reads the content of a message as a list of content blocks
+  // (`[]*custom.ClaudeContent`). A single block used to travel as a bare
+  // object when it carried no text — an image-only message — and the
+  // gateway answered 400 "Mismatch type []*custom.ClaudeContent with value
+  // object". Every message carries the array form.
+  conversation.messages.push({ role: "user", content: blocks });
+}
+
+function addOpenAiMessage(conversation: GatewayConversation, raw: unknown): void {
+  const message = asRecord(raw);
+  const role = asString(message.role) || "user";
+  if (role === "system" || role === "developer") addSystemMessage(conversation, message);
+  else if (role === "assistant") addAssistantMessage(conversation, message);
+  else if (role === "tool" || role === "function") addToolResult(conversation, message);
+  else addUserMessage(conversation, message);
+}
+
+function buildGatewayConversation(body: JsonRecord): GatewayConversation {
+  const conversation: GatewayConversation = {
+    messages: [],
+    systemParts: [],
+    toolNames: new Map<string, string>(),
+    pendingToolResults: [],
+  };
+  for (const raw of Array.isArray(body.messages) ? body.messages : []) {
+    addOpenAiMessage(conversation, raw);
+  }
+  flushToolResults(conversation);
+  // The gateway requires the conversation to start with a user turn.
+  const { messages } = conversation;
+  while (messages.length && messages[0].role !== "user") messages.shift();
+  if (!messages.length) messages.push({ role: "user", content: "(continue)" });
+  return conversation;
+}
+
+function gatewayTool(raw: unknown): JsonRecord {
+  const fn = asRecord(asRecord(raw).function);
+  const schema = asRecord(fn.parameters);
+  return {
+    name: asString(fn.name),
+    description: asString(fn.description),
+    input_schema: Object.keys(schema).length > 0 ? schema : { type: "object", properties: {} },
+  };
+}
+
+function applyGatewayTools(payload: JsonRecord, body: JsonRecord): void {
+  const rawTools = Array.isArray(body.tools) ? body.tools : [];
+  const toolChoice = asString(body.tool_choice);
+  if (!rawTools.length || toolChoice === "none") return;
+  payload.tools = rawTools.map(gatewayTool);
+  if (toolChoice === "required" || toolChoice === "any") payload.tool_choice = { type: "any" };
+  else if (toolChoice) payload.tool_choice = { type: "auto" };
+}
+
+function applyGatewaySampling(payload: JsonRecord, body: JsonRecord): void {
+  const temperature = Number(body.temperature);
+  if (Number.isFinite(temperature)) payload.temperature = temperature;
+  const topP = Number(body.top_p);
+  if (Number.isFinite(topP)) payload.top_p = topP;
+}
+
 /**
  * Convert an OpenAI chat request into the Anthropic Messages payload the
  * managed gateway expects. Assistant tool calls become `tool_use` blocks and
  * tool results become `tool_result` blocks carried by a user message.
  */
 export function buildGatewayPayload(body: JsonRecord, model: string): JsonRecord {
-  const messages: JsonRecord[] = [];
-  const systemParts: string[] = [];
-  const toolNames = new Map<string, string>();
-  let pendingToolResults: JsonRecord[] = [];
-
-  // Anthropic requires every tool_result to sit in the user message that
-  // immediately follows the assistant message with the matching tool_use, and
-  // it rejects a tool_use whose result is missing. The results of all tools
-  // called in one turn therefore share a single user message.
-  const flushToolResults = () => {
-    if (!pendingToolResults.length) return;
-    messages.push({ role: "user", content: pendingToolResults });
-    pendingToolResults = [];
-  };
-
-  for (const raw of Array.isArray(body.messages) ? body.messages : []) {
-    const message = asRecord(raw);
-    const role = asString(message.role) || "user";
-
-    if (role === "system" || role === "developer") {
-      const text = contentToText(message.content).trim();
-      if (text) systemParts.push(text);
-      continue;
-    }
-
-    if (role === "assistant") {
-      flushToolResults();
-      const blocks: JsonRecord[] = [];
-      const text = contentToText(message.content);
-      if (text) blocks.push({ type: "text", text });
-      for (const rawCall of Array.isArray(message.tool_calls) ? message.tool_calls : []) {
-        const call = asRecord(rawCall);
-        const fn = asRecord(call.function);
-        const id = asString(call.id);
-        const name = asString(fn.name);
-        if (!id || !name) continue;
-        toolNames.set(id, name);
-        blocks.push({ type: "tool_use", id, name, input: parseToolArguments(fn.arguments) });
-      }
-      if (!blocks.length) continue;
-      messages.push({ role: "assistant", content: blocks });
-      continue;
-    }
-
-    if (role === "tool" || role === "function") {
-      const toolUseId = asString(message.tool_call_id);
-      if (!toolUseId) continue;
-      const name = asString(message.name) || toolNames.get(toolUseId) || "";
-      const text = contentToText(message.content);
-      const block: JsonRecord = { type: "tool_result", tool_use_id: toolUseId, content: text };
-      if (name) block.name = name;
-      pendingToolResults.push(block);
-      continue;
-    }
-
-    flushToolResults();
-    const text = contentToText(message.content);
-    const images = imageBlocks(message.content);
-    const blocks: JsonRecord[] = [];
-    if (text) blocks.push({ type: "text", text });
-    blocks.push(...images);
-    if (!blocks.length) continue;
-    // The gateway reads the content of a message as a list of content blocks
-    // (`[]*custom.ClaudeContent`). A single block used to travel as a bare
-    // object when it carried no text — an image-only message — and the
-    // gateway answered 400 "Mismatch type []*custom.ClaudeContent with value
-    // object". Every message carries the array form.
-    messages.push({ role: "user", content: blocks });
-  }
-  flushToolResults();
-
-  // The gateway requires the conversation to start with a user turn.
-  while (messages.length && messages[0].role !== "user") messages.shift();
-  if (!messages.length) messages.push({ role: "user", content: "(continue)" });
-
+  const { messages, systemParts } = buildGatewayConversation(body);
   const payload: JsonRecord = {
     model,
     max_tokens: resolveMaxTokens(body),
@@ -258,28 +307,8 @@ export function buildGatewayPayload(body: JsonRecord, model: string): JsonRecord
   if (systemParts.length) {
     payload.system = systemParts.map((text) => ({ type: "text", text }));
   }
-
-  const rawTools = Array.isArray(body.tools) ? body.tools : [];
-  const toolChoice = asString(body.tool_choice);
-  if (rawTools.length && toolChoice !== "none") {
-    payload.tools = rawTools.map((raw) => {
-      const item = asRecord(raw);
-      const fn = asRecord(item.function);
-      const schema = asRecord(fn.parameters);
-      return {
-        name: asString(fn.name),
-        description: asString(fn.description),
-        input_schema: Object.keys(schema).length > 0 ? schema : { type: "object", properties: {} },
-      };
-    });
-    if (toolChoice === "required" || toolChoice === "any") payload.tool_choice = { type: "any" };
-    else if (toolChoice) payload.tool_choice = { type: "auto" };
-  }
-
-  const temperature = Number(body.temperature);
-  if (Number.isFinite(temperature)) payload.temperature = temperature;
-  const topP = Number(body.top_p);
-  if (Number.isFinite(topP)) payload.top_p = topP;
+  applyGatewayTools(payload, body);
+  applyGatewaySampling(payload, body);
 
   const contextWindow = resolveContextWindow();
   if (contextWindow < MAX_CONTEXT_WINDOW) {
@@ -470,37 +499,45 @@ export async function readAuthProfiles(path: string): Promise<MinimaxAuthProfile
   } catch {
     return [];
   }
-  const records = asRecord(doc.records);
-  const profiles: MinimaxAuthProfile[] = [];
-  for (const [key, raw] of Object.entries(records)) {
-    const record = asRecord(raw);
-    const accessToken = asString(record.accessToken);
-    if (!accessToken) continue;
-    profiles.push({
-      accessToken,
-      refreshToken: record.refreshToken ? asString(record.refreshToken) : undefined,
-      clientId: asString(record.clientId) || resolvePublicCred("minimax_id"),
-      scopes: Array.isArray(record.scopes) ? record.scopes.map(asString) : ["agent.default"],
-      audience: asString(record.audience) || "agent-backend",
-      expiresAtMs: Number(record.expiresAtMs ?? 0) || 0,
-      generation: Number(record.generation ?? 0) || 0,
-      path,
-      recordKey: key,
-    });
-  }
+  const profiles = Object.entries(asRecord(doc.records))
+    .map(([key, raw]) => profileFromRecord(path, key, asRecord(raw)))
+    .filter((profile): profile is MinimaxAuthProfile => profile !== null);
   profiles.sort((a, b) => b.generation - a.generation || b.expiresAtMs - a.expiresAtMs);
-  // An operator can pin the record explicitly when several accounts share the
-  // profile. The newest generation stays the default.
+  return pinExplicitRecord(profiles);
+}
+
+function profileFromRecord(
+  path: string,
+  key: string,
+  record: JsonRecord
+): MinimaxAuthProfile | null {
+  const accessToken = asString(record.accessToken);
+  if (!accessToken) return null;
+  return {
+    accessToken,
+    refreshToken: record.refreshToken ? asString(record.refreshToken) : undefined,
+    clientId: asString(record.clientId) || resolvePublicCred("minimax_id"),
+    scopes: Array.isArray(record.scopes) ? record.scopes.map(asString) : ["agent.default"],
+    audience: asString(record.audience) || "agent-backend",
+    expiresAtMs: Number(record.expiresAtMs ?? 0) || 0,
+    generation: Number(record.generation ?? 0) || 0,
+    path,
+    recordKey: key,
+  };
+}
+
+// An operator can pin the record explicitly when several accounts share the
+// profile. The newest generation stays the default.
+function pinExplicitRecord(profiles: MinimaxAuthProfile[]): MinimaxAuthProfile[] {
   const explicit = (process.env.MINIMAX_CODE_AUTH_RECORD || "").trim();
-  if (explicit) {
-    const index = profiles.findIndex((profile) => profile.recordKey === explicit);
-    if (index < 0) {
-      throw new Error(
-        `MINIMAX_CODE_AUTH_RECORD=${explicit} is not a record of the MiniMax Code profile`
-      );
-    }
-    if (index > 0) profiles.unshift(...profiles.splice(index, 1));
+  if (!explicit) return profiles;
+  const index = profiles.findIndex((profile) => profile.recordKey === explicit);
+  if (index < 0) {
+    throw new Error(
+      `MINIMAX_CODE_AUTH_RECORD=${explicit} is not a record of the MiniMax Code profile`
+    );
   }
+  if (index > 0) profiles.unshift(...profiles.splice(index, 1));
   return profiles;
 }
 
@@ -791,7 +828,7 @@ export async function persistProfileCredential(
     const profile: MinimaxAuthProfile = {
       accessToken: options.accessToken,
       refreshToken: options.refreshToken,
-      clientId: options.clientId || asString(record.clientId) || "mcode-public",
+      clientId: options.clientId || asString(record.clientId) || resolvePublicCred("minimax_id"),
       scopes:
         options.scopes ??
         (Array.isArray(record.scopes) ? record.scopes.map(asString) : ["agent.default"]),
@@ -869,6 +906,25 @@ export async function refreshAuthProfile(
   profile: MinimaxAuthProfile,
   options: EnsureTokenOptions = {}
 ): Promise<MinimaxAuthProfile> {
+  const timeoutMs = Math.max(1_000, options.timeoutMs ?? DEFAULT_REFRESH_TIMEOUT_MS);
+  const response = await requestTokenRefresh(profile, options, timeoutMs);
+  if (!response.ok) throw await tokenRefreshFailure(response);
+  const data = asRecord(await response.json());
+  const accessToken = asString(data.access_token);
+  if (!accessToken) {
+    throw new GatewayStatusError(500, "MiniMax token refresh returned no access token");
+  }
+  const updated = await persistRefreshedProfile(profile, data, accessToken);
+  options.onRefresh?.(updated);
+  return updated;
+}
+
+/** POST the refresh grant to the account endpoint of the profile's region. */
+async function requestTokenRefresh(
+  profile: MinimaxAuthProfile,
+  options: EnsureTokenOptions,
+  timeoutMs: number
+): Promise<Response> {
   const region =
     (options.region || process.env.MINIMAX_CODE_REGION || "en").trim().toLowerCase() || "en";
   const base = resolveMinimaxCodeAccountBase(region);
@@ -880,13 +936,11 @@ export async function refreshAuthProfile(
     scope: profile.scopes.join(" "),
     audience: profile.audience,
   });
-  const timeoutMs = Math.max(1_000, options.timeoutMs ?? DEFAULT_REFRESH_TIMEOUT_MS);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   timer.unref?.();
-  let response: Response;
   try {
-    response = await doFetch(`${base}/oauth2/token`, {
+    return await doFetch(`${base}/oauth2/token`, {
       method: "POST",
       headers: {
         "content-type": "application/x-www-form-urlencoded",
@@ -913,30 +967,31 @@ export async function refreshAuthProfile(
   } finally {
     clearTimeout(timer);
   }
-  if (!response.ok) {
-    const detail = (await response.text().catch(() => "")).slice(0, 200);
-    if (response.status >= 400 && response.status < 500) {
-      // The refresh token was consumed or revoked: the credential is dead
-      // and the operator has to sign in again. This is the same refusal the
-      // CLI transport answers with 401 — a 502 would lock the model out.
-      throw new GatewayAuthError(
-        `MiniMax token refresh rejected (${response.status})${detail ? `: ${detail}` : ""}`
-      );
-    }
-    // The account endpoint itself failed. The model is untouched, so the
-    // answer must not be a status of the lockout list.
-    throw new GatewayStatusError(
-      500,
-      `MiniMax token endpoint failed (${response.status})${detail ? `: ${detail}` : ""}`
-    );
+}
+
+/** The error a refused or failed refresh answer turns into. */
+async function tokenRefreshFailure(response: Response): Promise<Error> {
+  const detail = (await response.text().catch(() => "")).slice(0, 200);
+  const suffix = detail ? `: ${detail}` : "";
+  if (response.status >= 400 && response.status < 500) {
+    // The refresh token was consumed or revoked: the credential is dead
+    // and the operator has to sign in again. This is the same refusal the
+    // CLI transport answers with 401 — a 502 would lock the model out.
+    return new GatewayAuthError(`MiniMax token refresh rejected (${response.status})${suffix}`);
   }
-  const data = asRecord(await response.json());
-  const accessToken = asString(data.access_token);
-  if (!accessToken) {
-    throw new GatewayStatusError(500, "MiniMax token refresh returned no access token");
-  }
+  // The account endpoint itself failed. The model is untouched, so the
+  // answer must not be a status of the lockout list.
+  return new GatewayStatusError(500, `MiniMax token endpoint failed (${response.status})${suffix}`);
+}
+
+/** Write the rotated credential (and the CLI state file) back into the profile. */
+async function persistRefreshedProfile(
+  profile: MinimaxAuthProfile,
+  data: JsonRecord,
+  accessToken: string
+): Promise<MinimaxAuthProfile> {
   const expiresIn = Number(data.expires_in ?? 0);
-  const updated: MinimaxAuthProfile = await withProfileWriteLock(profile.path, async () => {
+  return withProfileWriteLock(profile.path, async () => {
     const rotated: MinimaxAuthProfile = {
       ...profile,
       accessToken,
@@ -959,8 +1014,6 @@ export async function refreshAuthProfile(
     }
     return rotated;
   });
-  options.onRefresh?.(updated);
-  return updated;
 }
 
 export interface GatewayCallOptions {
@@ -1044,7 +1097,6 @@ function sleep(ms: number, signal?: AbortSignal | null): Promise<void> {
  * reported as `GatewayAuthError` so the caller can refresh it and retry.
  */
 export async function callGateway(options: GatewayCallOptions): Promise<Response> {
-  const doFetch = options.fetchImpl || fetch;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const maxRetries = Math.max(
     0,
@@ -1064,70 +1116,86 @@ export async function callGateway(options: GatewayCallOptions): Promise<Response
       await sleep(Math.min(baseMs * 2 ** (attempt - 1), 30_000), options.signal);
     }
     const attemptTimeoutMs = Math.max(1, Math.min(timeoutMs, deadline - Date.now()));
-    const controller = new AbortController();
-    // A ref'd timer: an unref'd abort timer never fires when the caller is
-    // not a server, and the attempt is then abandoned without an answer.
-    const timer = setTimeout(() => controller.abort(), attemptTimeoutMs);
-    const onAbort = () => controller.abort();
-    options.signal?.addEventListener("abort", onAbort, { once: true });
     try {
-      const response = await doFetch(options.url || resolveGatewayUrl(), {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${options.accessToken}`,
-          "content-type": "application/json",
-          "anthropic-version": "2023-06-01",
-          "user-agent": "MiniMaxAgent",
-          accept: options.stream ? "text/event-stream" : "application/json",
-        },
-        body: JSON.stringify({ ...options.payload, stream: options.stream }),
-        signal: controller.signal,
-      });
-      if (response.status === 401) {
-        const detail = await response.text().catch(() => "");
-        throw new GatewayAuthError(
-          `MiniMax gateway rejected the access token (401)${detail ? `: ${detail.slice(0, 200)}` : ""}`
-        );
-      }
-      if (!response.ok) {
-        const detail = await response.text().catch(() => "");
-        const error = new GatewayStatusError(
-          response.status,
-          `MiniMax gateway error ${response.status}${detail ? `: ${detail.slice(0, 300)}` : ""}`
-        );
-        if (isRetryableGatewayStatus(response.status)) {
-          lastError = error;
-          continue;
-        }
-        throw error;
-      }
-      return response;
+      return await gatewayAttempt(options, attemptTimeoutMs);
     } catch (error) {
-      if (error instanceof GatewayAuthError) throw error;
-      // A 4xx that is not a quota is a property of the request: retrying it
-      // spends the same answer again.
-      if (error instanceof GatewayStatusError && !isRetryableGatewayStatus(error.status)) {
-        throw error;
-      }
-      // Our own timeout is not a verdict on the model: the gateway may be
-      // slow, or the request may be a large one. A 504 is in the lockout
-      // list, so a slow answer would take the model out of every combo for
-      // half an hour. The answer is a 500, which leaves the model in place.
-      if (isAbortError(error) && !options.signal?.aborted) {
-        throw new GatewayStatusError(
-          500,
-          `MiniMax gateway call timed out after ${attemptTimeoutMs} ms`
-        );
-      }
-      lastError = error;
-      if (attempt >= maxRetries) break;
-    } finally {
-      clearTimeout(timer);
-      options.signal?.removeEventListener("abort", onAbort);
+      lastError = retryableGatewayFailure(error, options, attemptTimeoutMs);
     }
   }
 
   throw lastError instanceof Error ? lastError : new Error("MiniMax gateway request failed");
+}
+
+/** One POST to the gateway; a refused answer is thrown as a typed error. */
+async function gatewayAttempt(
+  options: GatewayCallOptions,
+  attemptTimeoutMs: number
+): Promise<Response> {
+  const doFetch = options.fetchImpl || fetch;
+  const controller = new AbortController();
+  // A ref'd timer: an unref'd abort timer never fires when the caller is
+  // not a server, and the attempt is then abandoned without an answer.
+  const timer = setTimeout(() => controller.abort(), attemptTimeoutMs);
+  const onAbort = () => controller.abort();
+  options.signal?.addEventListener("abort", onAbort, { once: true });
+  try {
+    const response = await doFetch(options.url || resolveGatewayUrl(), {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${options.accessToken}`,
+        "content-type": "application/json",
+        "anthropic-version": "2023-06-01",
+        "user-agent": "MiniMaxAgent",
+        accept: options.stream ? "text/event-stream" : "application/json",
+      },
+      body: JSON.stringify({ ...options.payload, stream: options.stream }),
+      signal: controller.signal,
+    });
+    await assertGatewayResponseOk(response);
+    return response;
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener("abort", onAbort);
+  }
+}
+
+async function assertGatewayResponseOk(response: Response): Promise<void> {
+  if (response.ok) return;
+  const detail = await response.text().catch(() => "");
+  if (response.status === 401) {
+    throw new GatewayAuthError(
+      `MiniMax gateway rejected the access token (401)${detail ? `: ${detail.slice(0, 200)}` : ""}`
+    );
+  }
+  throw new GatewayStatusError(
+    response.status,
+    `MiniMax gateway error ${response.status}${detail ? `: ${detail.slice(0, 300)}` : ""}`
+  );
+}
+
+/** Rethrow a failure that a retry cannot fix; return the one worth retrying. */
+function retryableGatewayFailure(
+  error: unknown,
+  options: GatewayCallOptions,
+  attemptTimeoutMs: number
+): unknown {
+  if (error instanceof GatewayAuthError) throw error;
+  // A 4xx that is not a quota is a property of the request: retrying it
+  // spends the same answer again.
+  if (error instanceof GatewayStatusError && !isRetryableGatewayStatus(error.status)) {
+    throw error;
+  }
+  // Our own timeout is not a verdict on the model: the gateway may be
+  // slow, or the request may be a large one. A 504 is in the lockout
+  // list, so a slow answer would take the model out of every combo for
+  // half an hour. The answer is a 500, which leaves the model in place.
+  if (isAbortError(error) && !options.signal?.aborted) {
+    throw new GatewayStatusError(
+      500,
+      `MiniMax gateway call timed out after ${attemptTimeoutMs} ms`
+    );
+  }
+  return error;
 }
 
 export interface GatewayStreamState {
@@ -1142,63 +1210,74 @@ export interface GatewayStreamState {
  * Fold one Anthropic SSE event into the stream state.
  * Returns the text delta carried by the event ("" when there is none).
  */
-export function applyGatewayEvent(state: GatewayStreamState, event: JsonRecord): string {
-  const type = asString(event.type);
+function throwGatewayStreamError(event: JsonRecord): never {
+  // The gateway refused inside the stream. Folding it into a normal
+  // completion would hand the client an answer that looks successful and
+  // carries no content at all.
+  const bodyError = gatewayErrorInBody(event);
+  throw new GatewayStatusError(
+    gatewayErrorStatus(bodyError?.type ?? "error"),
+    `MiniMax gateway error: ${bodyError?.message ?? "the gateway answered with an error"}`
+  );
+}
 
-  if (type === "error") {
-    // The gateway refused inside the stream. Folding it into a normal
-    // completion would hand the client an answer that looks successful and
-    // carries no content at all.
-    const bodyError = gatewayErrorInBody(event);
-    throw new GatewayStatusError(
-      gatewayErrorStatus(bodyError?.type ?? "error"),
-      `MiniMax gateway error: ${bodyError?.message ?? "the gateway answered with an error"}`
-    );
-  }
-  if (type === "message_start") {
-    const message = asRecord(event.message);
-    const usage = asRecord(message.usage);
-    state.inputTokens = Number(usage.input_tokens ?? 0) || 0;
-    return "";
-  }
-  if (type === "content_block_start") {
-    const block = asRecord(event.content_block);
-    if (asString(block.type) === "tool_use") {
-      state.toolCalls.push({
-        id: asString(block.id),
-        name: asString(block.name),
-        arguments: "",
-      });
-    }
-    return "";
-  }
-  if (type === "content_block_delta") {
-    const delta = asRecord(event.delta);
-    const deltaType = asString(delta.type);
-    if (deltaType === "text_delta") {
-      const text = asString(delta.text);
-      state.text += text;
-      return text;
-    }
-    if (deltaType === "input_json_delta") {
-      const partial = asString(delta.partial_json);
-      const last = state.toolCalls[state.toolCalls.length - 1];
-      if (last) last.arguments += partial;
-      return "";
-    }
-    return "";
-  }
-  if (type === "message_delta") {
-    const delta = asRecord(event.delta);
-    const stopReason = asString(delta.stop_reason);
-    if (stopReason) state.finishReason = stopReason;
-    const usage = asRecord(event.usage);
-    if (usage && Number(usage.output_tokens ?? 0) > 0) {
-      state.outputTokens = Number(usage.output_tokens);
-    }
-    return "";
+function applyMessageStart(state: GatewayStreamState, event: JsonRecord): string {
+  const usage = asRecord(asRecord(event.message).usage);
+  state.inputTokens = Number(usage.input_tokens ?? 0) || 0;
+  return "";
+}
+
+function applyContentBlockStart(state: GatewayStreamState, event: JsonRecord): string {
+  const block = asRecord(event.content_block);
+  if (asString(block.type) === "tool_use") {
+    state.toolCalls.push({
+      id: asString(block.id),
+      name: asString(block.name),
+      arguments: "",
+    });
   }
   return "";
+}
+
+function applyContentBlockDelta(state: GatewayStreamState, event: JsonRecord): string {
+  const delta = asRecord(event.delta);
+  const deltaType = asString(delta.type);
+  if (deltaType === "text_delta") {
+    const text = asString(delta.text);
+    state.text += text;
+    return text;
+  }
+  if (deltaType === "input_json_delta") {
+    const last = state.toolCalls[state.toolCalls.length - 1];
+    if (last) last.arguments += asString(delta.partial_json);
+  }
+  return "";
+}
+
+function applyMessageDelta(state: GatewayStreamState, event: JsonRecord): string {
+  const stopReason = asString(asRecord(event.delta).stop_reason);
+  if (stopReason) state.finishReason = stopReason;
+  const usage = asRecord(event.usage);
+  if (usage && Number(usage.output_tokens ?? 0) > 0) {
+    state.outputTokens = Number(usage.output_tokens);
+  }
+  return "";
+}
+
+const GATEWAY_EVENT_HANDLERS = new Map<
+  string,
+  (state: GatewayStreamState, event: JsonRecord) => string
+>([
+  ["error", (_state, event) => throwGatewayStreamError(event)],
+  ["message_start", applyMessageStart],
+  ["content_block_start", applyContentBlockStart],
+  ["content_block_delta", applyContentBlockDelta],
+  ["message_delta", applyMessageDelta],
+]);
+
+export function applyGatewayEvent(state: GatewayStreamState, event: JsonRecord): string {
+  const handler = GATEWAY_EVENT_HANDLERS.get(asString(event.type));
+  return handler ? handler(state, event) : "";
 }
 
 /** Parse a raw SSE buffer into the Anthropic events it carries. */
@@ -1220,6 +1299,20 @@ export function parseGatewaySse(chunk: string): JsonRecord[] {
     }
   }
   return events;
+}
+
+/** CJK, Hiragana, Katakana, Hangul and the CJK compatibility ideographs. */
+function isWideCodePoint(code: number): boolean {
+  return (
+    (code >= 0x3000 && code <= 0x9fff) ||
+    (code >= 0xac00 && code <= 0xd7af) ||
+    (code >= 0xf900 && code <= 0xfaff)
+  );
+}
+
+/** Cyrillic and the Cyrillic supplement. */
+function isCyrillicCodePoint(code: number): boolean {
+  return code >= 0x0400 && code <= 0x052f;
 }
 
 /**
@@ -1248,20 +1341,8 @@ export function estimateGatewayInputTokens(payload: JsonRecord): number {
   let cyrillic = 0;
   for (const char of text) {
     const code = char.codePointAt(0) ?? 0;
-    if (
-      (code >= 0x3000 && code <= 0x9fff) || // CJK, Hiragana, Katakana
-      (code >= 0xac00 && code <= 0xd7af) || // Hangul
-      (code >= 0xf900 && code <= 0xfaff) // CJK compatibility ideographs
-    ) {
-      wide += 1;
-      continue;
-    }
-    if (
-      (code >= 0x0400 && code <= 0x04ff) || // Cyrillic
-      (code >= 0x0500 && code <= 0x052f) // Cyrillic supplement
-    ) {
-      cyrillic += 1;
-    }
+    if (isWideCodePoint(code)) wide += 1;
+    else if (isCyrillicCodePoint(code)) cyrillic += 1;
   }
   const latin = text.length - wide - cyrillic;
   return (
