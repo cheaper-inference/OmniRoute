@@ -805,47 +805,36 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## 搜尋 API
+## 搜尋API
 
-Web/搜尋提供者抽象層（Tavily、Brave、Exa、Serper 等）。
+Web/search提供者抽象化（Tavily、Brave、Exa、Serper 等）。
 
-| 方法 | 路徑                   | 說明                                                          |
-| ---- | ---------------------- | ------------------------------------------------------------- |
-| GET  | `/v1/search`           | 列出已設定的搜尋提供者及其功能                                |
-| POST | `/v1/search`           | 執行搜尋查詢——請求主體由 `v1SearchSchema` 驗證，支援快取/合併 |
-| GET  | `/v1/search/analytics` | 各提供者的命中率/延遲/快取統計資料                            |
+| 方法 | 小路                   | 描述                                                                |
+| ---- | ---------------------- | ------------------------------------------------------------------- |
+| GET  | `/v1/search`           | 列出配置的搜尋提供者+功能                                           |
+| POST | `/v1/search`           | 執行搜尋查詢 - 由`v1SearchSchema`驗證的正文，支援caching/coalescing |
+| GET  | `/v1/search/analytics` | 每個提供者的hit/latency/cache統計數據                               |
 
-**驗證：** Bearer API 金鑰（`extractApiKey` + `isValidApiKey`）。搜尋政策透過 `enforceApiKeyPolicy` 強制執行。
+**授權：**承載API密鑰 (`extractApiKey` + `isValidApiKey`)。透過`enforceApiKeyPolicy`強制執行搜尋策略。
 
 ### Exa 和 Tavily `provider_options`
 
-Exa 和 Tavily 會從具命名空間的資料包讀取提供者特定欄位：
-`provider_options.exa`（或 `provider_options["exa-search"]`）以及 `provider_options.tavily`
-（或 `provider_options["tavily-search"]`）。只有下列鍵會被轉送。每個鍵都會依照
-`open-sse/handlers/search/providerOptionsPassthrough.ts` 中各自的 Zod 結構描述進行檢查，
-類型錯誤的鍵會被捨棄。其他任何鍵都會被忽略，包括驗證、基礎 URL、
-`stream` 和 `outputSchema`。其他提供者使用的扁平鍵（`cx`、`depth` 等）仍會
-如先前一樣運作。
+Exa 和 Tavily 從命名空間包中讀取特定於提供者的欄位： `provider_options.exa` （或`provider_options["exa-search"]`）和`provider_options.tavily` （或`provider_options["tavily-search"]`）。僅轉送以下密鑰。每個金鑰都會根據`open-sse/handlers/search/providerOptionsPassthrough.ts`中自己的Zod模式進行檢查，並刪除類型錯誤的金鑰。任何其他鍵都會被忽略，包括 auth、base URL、 `stream`和`outputSchema`。其他提供者（`cx`、 `depth`等）使用的平面密鑰與以前一樣工作。
 
-| 提供者 | 頂層欄位                                                                                                                                                                                                                                                                                                                                                                  | 巢狀欄位                                                                                                                                                     |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa    | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（扁平基本型別）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` 會合併並覆寫預設值 `{ text: true, highlights: true }` |
-| Tavily | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                                            |
+| 提供者 | 頂級字段                                                                                                                                                                                                                                                                                                                                                                  | 嵌套                                                                                                                          |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 艾克薩 | `type`、 `category`、 `userLocation`、 `moderation`、 `additionalQueries`、 `objective`、 `systemPrompt`、 `compliance` （平面基元）、 `startPublishedDate`、 `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`合併到預設的`{ text: true, highlights: true }`上 |
+| 塔維利 | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                             |
 
-一般欄位一律優先：`query`、`max_results`、`filters`（網域）、`country`，以及從
-`search_type` 衍生的主題。在 Exa 上，`search_type: "news"` 會保留 `category: "news"`。
-Tavily 也接受 `search_type: "finance"`（`topic: "finance"`）。
+通用欄位總是獲勝： `query`、 `max_results`、 `filters` （域）、 `country`和從`search_type`派生的主題。在 Exa 上， `search_type: "news"`保留`category: "news"`。 Tavily 也接受`search_type: "finance"` (`topic: "finance"`)。
 
-一般的 `time_range` 現在會傳遞給這兩個提供者：Exa 會收到 `startPublishedDate`（ISO
-時間戳記），而 Tavily 會收到 `start_date`（`YYYY-MM-DD`）。`provider_options`
-中的明確日期會覆寫對應產生的日期。
+通用`time_range`現在到達兩個提供者：Exa 取得`startPublishedDate` （ISO時間戳記），Tavily 取得`start_date` （`YYYY-MM-DD`）。 `provider_options`中的明確日期會覆蓋映射的日期。
 
-Exa 結果會將 `id`、`highlight_scores`、`summary`、`subpages`、`entities` 和 `extras` 保留在
-`provider_raw` 中。Tavily 結果會保留 `images` 和 `favicon`。
+Exa 結果將`id`、 `highlight_scores`、 `summary`、 `subpages`、 `entities`和`extras`保留在`provider_raw`。整體結果保留`images`和`favicon`。
 
-成本核算仍使用扁平登錄表 `costPerQuery`。Tavily 對每次
-`search_depth: "advanced"` 呼叫收取較多點數，而此差異不會反映在
-`usage.search_cost_usd` 中。
+Exa `type: "lite"` (Exa 3.0) 接受較小的欄位集，並在設定任何其他欄位時拒絕整個請求。對於 lite， `additionalQueries`、 `systemPrompt`和除`text`和`highlights`之外的每個`contents`鍵在呼叫之前都會被刪除。已棄用的`subpages`、 `subpageTarget`、 `highlights.numSentences`和`highlights.highlightsPerUrl`不再轉發。
+
+成本核算是平面註冊表`costPerQuery`，但 Exa `type: "lite"`除外，它以精簡價格記錄（每次呼叫 0.004 美元，而`auto`為 0.007 美元）。舊版`instant`類型的計費方式與 lite 類似； `fast`的計費方式與`auto`類似。 Tavilly 對`search_depth: "advanced"`每次呼叫收取更多積分，且該差異未反映在`usage.search_cost_usd`中。
 
 ---
 
@@ -1556,10 +1545,10 @@ GET /api/telemetry/summary
 ## 預算
 
 ```bash
-# 取得所有 API 金鑰的預算狀態
+# Get budget status for all API keys
 GET /api/usage/budget
 
-# 設定或更新預算
+# Set or update a budget
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1573,7 +1562,7 @@ Content-Type: application/json
 }
 ```
 
-> **結構描述注意事項**（`setBudgetSchema`）：`apiKeyId` 為必填；`dailyLimitUsd`、`weeklyLimitUsd` 或 `monthlyLimitUsd` 其中至少一項必須大於零。選填欄位：`warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。舊版 `{keyId, limit, period}` 結構會傳回 `400 Bad Request`。
+> **模式註釋**(`setBudgetSchema`): `apiKeyId`為必填項； `dailyLimitUsd`、 `weeklyLimitUsd`或`monthlyLimitUsd`中至少之一必須大於零。可選欄位： `warningThreshold` (0–1)、 `resetInterval` (`daily` | `weekly` | `monthly`)、 `resetTime` (`HH:MM`)。舊版`{keyId, limit, period}`形狀回傳`400 Bad Request`。
 
 ## Token 限制
 

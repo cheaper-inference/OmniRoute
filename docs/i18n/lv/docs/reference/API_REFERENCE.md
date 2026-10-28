@@ -849,47 +849,36 @@ izsaucējam bez sesijas (iegūšana, dzēšana, atcelšana un `input_file_id` p�
 
 ---
 
-## Meklēšanas API
+## Meklēt API
 
-Tīmekļa/meklēšanas pakalpojumu sniedzēju abstrakcija (Tavily, Brave, Exa, Serper u.c.).
+Web/search sniedzēja abstrakcija (Tavily, Brave, Exa, Serper utt.).
 
-| Metode | Ceļš                   | Apraksts                                                                                                                  |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Uzskaita konfigurētos meklēšanas pakalpojumu sniedzējus un to iespējas                                                    |
-| POST   | `/v1/search`           | Izpilda meklēšanas vaicājumu — pamatteksts tiek validēts ar `v1SearchSchema`, atbalsta kešatmiņu/pieprasījumu apvienošanu |
-| GET    | `/v1/search/analytics` | Trāpījumu/latentuma/kešatmiņas statistika katram pakalpojumu sniedzējam                                                   |
+| Metode | Ceļš                   | Apraksts                                                                                                |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Uzskaitiet konfigurēto meklēšanas pakalpojumu sniedzēju + iespējas                                      |
+| POST   | `/v1/search`           | Palaidiet meklēšanas vaicājumu — `v1SearchSchema` apstiprināts pamatteksts, atbalsta caching/coalescing |
+| GET    | `/v1/search/analytics` | hit/latency/cache statistika katram pakalpojumu sniedzējam                                              |
 
-**Autorizācija:** Bearer API atslēga (`extractApiKey` + `isValidApiKey`). Meklēšanas politika tiek piemērota ar `enforceApiKeyPolicy`.
+**Auth:** Nesēja API atslēga (`extractApiKey` + `isValidApiKey`). Meklēšanas politika tiek īstenota, izmantojot `enforceApiKeyPolicy`.
 
 ### Exa un Tavily `provider_options`
 
-Exa un Tavily nolasa pakalpojumu sniedzējam specifiskos laukus no nosaukumvietas objekta:
-`provider_options.exa` (vai `provider_options["exa-search"]`) un `provider_options.tavily`
-(vai `provider_options["tavily-search"]`). Tālāk tiek nodotas tikai tālāk norādītās atslēgas. Katra no tām
-tiek pārbaudīta pret savu Zod shēmu failā `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-un atslēga ar nepareizu tipu tiek atmesta. Visas pārējās atslēgas tiek ignorētas, tostarp autorizācija, bāzes URL,
-`stream` un `outputSchema`. Plakanās atslēgas, kuras izmanto citi pakalpojumu sniedzēji (`cx`, `depth`, ...), darbojas
-tāpat kā iepriekš.
+Exa un Tavily nolasa pakalpojumu sniedzējam raksturīgus laukus no nosaukumiem sadalīta maisa: `provider_options.exa` (vai `provider_options["exa-search"]`) un `provider_options.tavily` (vai `provider_options["tavily-search"]`). Tiek pārsūtītas tikai tālāk norādītās atslēgas. Katrs no tiem tiek pārbaudīts, salīdzinot ar savu Zod shēmu `open-sse/handlers/search/providerOptionsPassthrough.ts`, un tiek atmesta atslēga ar nepareizu veidu. Jebkura cita atslēga tiek ignorēta, tostarp auth, base URL, `stream` un `outputSchema`. Plakanie taustiņi, ko izmanto citi pakalpojumu sniedzēji (`cx`, `depth`, ...) darbojas tāpat kā iepriekš.
 
-| Pakalpojumu sniedzējs | Augstākā līmeņa lauki                                                                                                                                                                                                                                                                                                                                                     | Ligzdotie lauki                                                                                                                                                                   |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa                   | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (plakanas primitīvas vērtības), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                 | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` tiek sapludināts ar noklusējuma vērtību `{ text: true, highlights: true }` |
-| Tavily                | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                                 |
+| Pakalpojumu sniedzējs | Augstākā līmeņa lauki                                                                                                                                                                                                                                                                                                                                                     | Ligzdotas                                                                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Piem                  | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (plakanie primitīvie), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ir apvienots ar noklusējuma `{ text: true, highlights: true }` |
+| Tavilijs              | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                            |
 
-Vispārīgajiem laukiem vienmēr ir prioritāte: `query`, `max_results`, `filters` (domēni), `country` un no
-`search_type` atvasinātā tēma. Exa gadījumā `search_type: "news"` saglabā `category: "news"`.
-Tavily pieņem arī `search_type: "finance"` (`topic: "finance"`).
+Vienmēr uzvar vispārīgie lauki: `query`, `max_results`, `filters` (domēni), `country` un tēma, kas iegūta no `search_type`. Uz Exa `search_type: "news"` saglabā `category: "news"`. Tavilijs pieņem arī `search_type: "finance"` (`topic: "finance"`).
 
-Vispārīgais `time_range` tagad tiek nodots abiem pakalpojumu sniedzējiem: Exa saņem `startPublishedDate` (ISO
-laikspiedolu), bet Tavily saņem `start_date` (`YYYY-MM-DD`). Laukā `provider_options`
-tieši norādītam datumam ir prioritāte pār kartēto datumu.
+Vispārējais `time_range` tagad sasniedz abus pakalpojumu sniedzējus: Exa iegūst `startPublishedDate` (ISO laikspiedolu), bet Tavily iegūst `start_date` (`YYYY-MM-DD`). Precīzs datums `provider_options` ignorē kartēto datumu.
 
-Exa rezultāti saglabā `id`, `highlight_scores`, `summary`, `subpages`, `entities` un `extras` laukā
-`provider_raw`. Tavily rezultāti saglabā `images` un `favicon`.
+Eksāmenu rezultāti saglabā `id`, `highlight_scores`, `summary`, `subpages`, `entities` un `extras` `provider_raw`. Tavily rezultāti saglabā `images` un `favicon`.
 
-Izmaksu uzskaitei joprojām tiek izmantots plakanais reģistrs `costPerQuery`. Tavily piemēro
-lielāku kredītu skaitu par izsaukumu, ja izmantots `search_depth: "advanced"`, un šī atšķirība netiek atspoguļota laukā
-`usage.search_cost_usd`.
+Exa `type: "lite"` (Exa 3.0) pieņem mazāku lauku kopu un noraida visu pieprasījumu, ja ir iestatīts kāds cits lauks. Lite versijai `additionalQueries`, `systemPrompt` un visi `contents` taustiņi, izņemot `text` un `highlights` tiek atmesti pirms izsaukuma. Novecojušie `subpages`, `subpageTarget`, `highlights.numSentences` un `highlights.highlightsPerUrl` vairs netiek pārsūtīti.
+
+Izmaksu uzskaite ir vienotā reģistra `costPerQuery`, izņemot Exa `type: "lite"`, kas tiek reģistrēta par vienkāršo cenu (0,004 USD par zvanu pret 0,007 USD par `auto`). Mantotajam `instant` veidam tiek piemērota maksa kā lite; `fast` tiek iekasēta kā `auto`. Tavily iekasē `search_depth: "advanced"` vairāk kredītu par zvanu, un šī atšķirība nav atspoguļota `usage.search_cost_usd`.
 
 ---
 

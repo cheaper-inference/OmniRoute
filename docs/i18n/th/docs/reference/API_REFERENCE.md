@@ -849,47 +849,36 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API การค้นหา
+## ค้นหา API
 
-เลเยอร์นามธรรมสำหรับผู้ให้บริการเว็บ/การค้นหา (Tavily, Brave, Exa, Serper เป็นต้น)
+นามธรรมของผู้ให้บริการ Web/search (Tavily, Brave, Exa, Serper ฯลฯ )
 
-| เมธอด | พาธ                    | คำอธิบาย                                                                                      |
-| ----- | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | แสดงรายการผู้ให้บริการค้นหาที่กำหนดค่าไว้พร้อมความสามารถ                                      |
-| POST  | `/v1/search`           | ดำเนินการคำค้นหา — เนื้อหาคำขอได้รับการตรวจสอบโดย `v1SearchSchema` และรองรับการแคช/การรวมคำขอ |
-| GET   | `/v1/search/analytics` | สถิติการพบข้อมูล/เวลาแฝง/แคชแยกตามผู้ให้บริการ                                                |
+| วิธี | เส้นทาง                | คำอธิบาย                                                                          |
+| ---- | ---------------------- | --------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | แสดงรายการความสามารถ + ของผู้ให้บริการการค้นหาที่กำหนดค่าไว้                      |
+| POST | `/v1/search`           | เรียกใช้คำค้นหา - เนื้อหาที่ตรวจสอบโดย `v1SearchSchema` รองรับ caching/coalescing |
+| GET  | `/v1/search/analytics` | สถิติ hit/latency/cache ต่อผู้ให้บริการ                                           |
 
-**การยืนยันตัวตน:** คีย์ API แบบ Bearer (`extractApiKey` + `isValidApiKey`) นโยบายการค้นหาบังคับใช้ผ่าน `enforceApiKeyPolicy`
+**รับรองความถูกต้อง:** ผู้ถือคีย์ API (`extractApiKey` + `isValidApiKey`) นโยบายการค้นหาบังคับใช้ผ่าน `enforceApiKeyPolicy`
 
-### `provider_options` ของ Exa และ Tavily
+### Exa และ Tavily `provider_options`
 
-Exa และ Tavily อ่านฟิลด์เฉพาะของผู้ให้บริการจากออบเจ็กต์แบบแยกเนมสเปซ:
-`provider_options.exa` (หรือ `provider_options["exa-search"]`) และ `provider_options.tavily`
-(หรือ `provider_options["tavily-search"]`) ระบบจะส่งต่อเฉพาะคีย์ด้านล่าง แต่ละคีย์จะได้รับ
-การตรวจสอบกับสคีมา Zod ของตนเองใน `open-sse/handlers/search/providerOptionsPassthrough.ts`
-และคีย์ที่มีชนิดไม่ถูกต้องจะถูกตัดทิ้ง คีย์อื่นทั้งหมดจะถูกละเว้น รวมถึงข้อมูลยืนยันตัวตน, URL ฐาน,
-`stream` และ `outputSchema` คีย์แบบแบนที่ผู้ให้บริการรายอื่นใช้ (`cx`, `depth`, ...) ยังคงทำงาน
-เหมือนเดิม
+Exa และ Tavily อ่านฟิลด์เฉพาะผู้ให้บริการจากกระเป๋าเนมสเปซ: `provider_options.exa` (หรือ `provider_options["exa-search"]`) และ `provider_options.tavily` (หรือ `provider_options["tavily-search"]`) เฉพาะคีย์ด้านล่างเท่านั้นที่จะถูกส่งต่อ แต่ละรายการจะถูกตรวจสอบกับ Zod schema ของตัวเองใน `open-sse/handlers/search/providerOptionsPassthrough.ts` และคีย์ที่มีประเภทไม่ถูกต้องจะถูกละทิ้ง คีย์อื่นๆ จะถูกละเว้น รวมถึง auth, base URL, `stream` และ `outputSchema` ปุ่มแบนที่ใช้โดยผู้ให้บริการรายอื่น (`cx`, `depth`, ... ) ทำงานเหมือนเมื่อก่อน
 
-| ผู้ให้บริการ | ฟิลด์ระดับบนสุด                                                                                                                                                                                                                                                                                                                                                           | ฟิลด์ซ้อน                                                                                                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ค่าพื้นฐานแบบแบน), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ผสานทับค่าเริ่มต้น `{ text: true, highlights: true }` |
-| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                            |
+| ผู้ให้บริการ | ฟิลด์ระดับบนสุด                                                                                                                                                                                                                                                                                                                                                           | ซ้อนกัน                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| สอบ          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ดั้งเดิมแบน), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ถูกรวมเข้ากับ `{ text: true, highlights: true }` เริ่มต้น |
+| ทาวิลี่      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                       |
 
-ฟิลด์ทั่วไปจะมีลำดับความสำคัญเหนือกว่าเสมอ ได้แก่ `query`, `max_results`, `filters` (โดเมน), `country` และ
-หัวข้อที่ได้มาจาก `search_type` สำหรับ Exa ค่า `search_type: "news"` จะคง `category: "news"` ไว้
-นอกจากนี้ Tavily ยังยอมรับ `search_type: "finance"` (`topic: "finance"`) ด้วย
+ช่องทั่วไปจะชนะเสมอ: `query`, `max_results`, `filters` (โดเมน), `country` และหัวข้อที่ได้มาจาก `search_type` บน Exa นั้น `search_type: "news"` จะเก็บ `category: "news"` ไว้ Tavily ยังยอมรับ `search_type: "finance"` (`topic: "finance"`)
 
-ขณะนี้ `time_range` แบบทั่วไปจะถูกส่งไปยังผู้ให้บริการทั้งสอง: Exa จะได้รับ `startPublishedDate` (การประทับเวลา
-แบบ ISO) และ Tavily จะได้รับ `start_date` (`YYYY-MM-DD`) วันที่ที่ระบุไว้อย่างชัดเจนใน `provider_options`
-จะมีลำดับความสำคัญเหนือกว่าค่าที่แมปไว้
+ขณะนี้ `time_range` ทั่วไปเข้าถึงผู้ให้บริการทั้งสองรายแล้ว: Exa ได้รับ `startPublishedDate` (ISO timestamp) และ Tavily ได้รับ `start_date` (`YYYY-MM-DD`) วันที่ที่ชัดเจนใน `provider_options` จะแทนที่วันที่ที่แมปไว้
 
-ผลลัพธ์ของ Exa จะเก็บ `id`, `highlight_scores`, `summary`, `subpages`, `entities` และ `extras` ไว้ใน
-`provider_raw` ส่วนผลลัพธ์ของ Tavily จะเก็บ `images` และ `favicon`
+ผลลัพธ์ Exa เก็บ `id`, `highlight_scores`, `summary`, `subpages`, `entities` และ `extras` ใน `provider_raw` ผลลัพธ์ Tavily ให้ `images` และ `favicon`
 
-การคำนวณค่าใช้จ่ายยังคงใช้รีจิสทรีแบบแบน `costPerQuery` Tavily เรียกเก็บเครดิตต่อการเรียกใช้สำหรับ
-`search_depth: "advanced"` มากกว่า และความแตกต่างดังกล่าวจะไม่แสดงอยู่ใน
-`usage.search_cost_usd`
+Exa `type: "lite"` (Exa 3.0) ยอมรับชุดฟิลด์ที่เล็กกว่าและปฏิเสธคำขอทั้งหมดเมื่อมีการตั้งค่าฟิลด์อื่น สำหรับ lite, `additionalQueries`, `systemPrompt` และทุกคีย์ `contents` ยกเว้น `text` และ `highlights` จะถูกละทิ้งก่อนการโทร `subpages`, `subpageTarget`, `highlights.numSentences` และ `highlights.highlightsPerUrl` ที่เลิกใช้แล้วจะไม่ถูกส่งต่ออีกต่อไป
+
+การบัญชีต้นทุนเป็นแบบแฟลตรีจีสทรี `costPerQuery` ยกเว้น Exa `type: "lite"` ซึ่งบันทึกในราคา Lite ($0.004 ต่อการโทร เทียบกับ $0.007 สำหรับ `auto`) ประเภท `instant` เดิมจะถูกเรียกเก็บเงินแบบไลต์ `fast` ถูกเรียกเก็บเงินเหมือน `auto` Tavily จะเรียกเก็บเงิน `search_depth: "advanced"` ด้วยเครดิตที่มากขึ้นต่อการโทร และความแตกต่างนั้นจะไม่สะท้อนให้เห็นใน `usage.search_cost_usd`
 
 ---
 

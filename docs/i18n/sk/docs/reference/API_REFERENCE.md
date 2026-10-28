@@ -858,47 +858,36 @@ volajúcemu bez relácie (získanie, odstránenie, zrušenie a kontrola `input_f
 
 ---
 
-## API vyhľadávania
+## Hľadať API
 
-Abstrakcia poskytovateľov webového vyhľadávania (Tavily, Brave, Exa, Serper atď.).
+abstrakcia poskytovateľa Web/search (Tavily, Brave, Exa, Serper atď.).
 
-| Metóda | Cesta                  | Popis                                                                                                                    |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/search`           | Zoznam nakonfigurovaných poskytovateľov vyhľadávania a ich možností                                                      |
-| POST   | `/v1/search`           | Spustenie vyhľadávacieho dopytu — telo overuje `v1SearchSchema`, podporuje ukladanie do vyrovnávacej pamäte a zlučovanie |
-| GET    | `/v1/search/analytics` | Štatistiky úspešnosti, latencie a vyrovnávacej pamäte pre jednotlivých poskytovateľov                                    |
+| Metóda | Cesta                  | Popis                                                                                    |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Uveďte zoznam nakonfigurovaných možností + poskytovateľov vyhľadávania                   |
+| POST   | `/v1/search`           | Spustite vyhľadávací dopyt – telo overené `v1SearchSchema`, podporuje caching/coalescing |
+| GET    | `/v1/search/analytics` | Štatistiky hit/latency/cache jednotlivých poskytovateľov                                 |
 
-**Autentifikácia:** API kľúč typu Bearer (`extractApiKey` + `isValidApiKey`). Pravidlá vyhľadávania sa vynucujú prostredníctvom `enforceApiKeyPolicy`.
+**Auth:** Nosič API kľúč (`extractApiKey` + `isValidApiKey`). Zásady vyhľadávania presadzované prostredníctvom `enforceApiKeyPolicy`.
 
-### `provider_options` pre Exa a Tavily
+### Exa a Tavily `provider_options`
 
-Exa a Tavily čítajú polia špecifické pre poskytovateľa z menného priestoru:
-`provider_options.exa` (alebo `provider_options["exa-search"]`) a `provider_options.tavily`
-(alebo `provider_options["tavily-search"]`). Odosielajú sa iba kľúče uvedené nižšie. Každý z nich sa
-kontroluje podľa vlastnej schémy Zod v súbore `open-sse/handlers/search/providerOptionsPassthrough.ts`
-a kľúč s nesprávnym typom sa zahodí. Všetky ostatné kľúče sa ignorujú vrátane autentifikácie, základnej URL,
-`stream` a `outputSchema`. Ploché kľúče používané inými poskytovateľmi (`cx`, `depth`, ...) fungujú
-rovnako ako predtým.
+Exa a Tavily čítajú polia špecifické pre poskytovateľa z vrecka s menným priestorom: `provider_options.exa` (alebo `provider_options["exa-search"]`) a `provider_options.tavily` (alebo `provider_options["tavily-search"]`). Preposielajú sa iba nižšie uvedené klávesy. Každý z nich je porovnaný so svojou vlastnou schémou Zod v `open-sse/handlers/search/providerOptionsPassthrough.ts` a kľúč s nesprávnym typom je vypustený. Všetky ostatné kľúče sú ignorované, vrátane auth, base URL, `stream` a `outputSchema`. Ploché klávesy používané inými poskytovateľmi (`cx`, `depth`, ...) fungujú ako predtým.
 
-| Poskytovateľ | Polia najvyššej úrovne                                                                                                                                                                                                                                                                                                                                                    | Vnorené                                                                                                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ploché primitívne hodnoty), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` zlúčené s predvolenou hodnotou `{ text: true, highlights: true }` |
-| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                        |
+| Poskytovateľ | Polia najvyššej úrovne                                                                                                                                                                                                                                                                                                                                                    | Vnorené                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ploché primitívy), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` zlúčený cez predvolený `{ text: true, highlights: true }` |
+| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                       |
 
-Všeobecné polia majú vždy prednosť: `query`, `max_results`, `filters` (domény), `country` a
-téma odvodená z `search_type`. V Exa hodnota `search_type: "news"` zachová `category: "news"`.
-Tavily akceptuje aj `search_type: "finance"` (`topic: "finance"`).
+Vždy vyhrávajú všeobecné polia: `query`, `max_results`, `filters` (domény), `country` a téma odvodená od `search_type`. Na Exa `search_type: "news"` ponechá `category: "news"`. Tavily akceptuje `search_type: "finance"` (`topic: "finance"`).
 
-Všeobecné pole `time_range` sa teraz prenáša k obom poskytovateľom: Exa dostane `startPublishedDate` (časová
-pečiatka ISO) a Tavily dostane `start_date` (`YYYY-MM-DD`). Explicitný dátum v `provider_options`
-má prednosť pred mapovanou hodnotou.
+Všeobecná `time_range` sa teraz dostáva k obom poskytovateľom: Exa získa `startPublishedDate` (časová značka ISO ) a Tavily získa `start_date` (`YYYY-MM-DD`). Explicitný dátum v `provider_options` prepíše mapovaný dátum.
 
-Výsledky Exa zachovávajú `id`, `highlight_scores`, `summary`, `subpages`, `entities` a `extras` v
-`provider_raw`. Výsledky Tavily zachovávajú `images` a `favicon`.
+Výsledky Exa ponechajú `id`, `highlight_scores`, `summary`, `subpages`, `entities` a `extras` v `provider_raw`. Tavily výsledky zachovávajú `images` a `favicon`.
 
-Účtovanie nákladov naďalej používa plochý register `costPerQuery`. Tavily účtuje
-za `search_depth: "advanced"` viac kreditov na jedno volanie a tento rozdiel sa neodráža v
-`usage.search_cost_usd`.
+Exa `type: "lite"` (Exa 3.0) akceptuje menšiu množinu polí a odmietne celú požiadavku, keď je nastavené akékoľvek iné pole. Pre lite sa pred hovorom zrušia `additionalQueries`, `systemPrompt` a všetky klávesy `contents` okrem `text` a `highlights`. Zastarané `subpages`, `subpageTarget`, `highlights.numSentences` a `highlights.highlightsPerUrl` sa už neposielajú ďalej.
+
+Účtovanie nákladov je plochý register `costPerQuery`, s výnimkou Exa `type: "lite"`, ktorý je zaznamenaný za nízku cenu (0,004 USD za hovor oproti 0,007 USD za `auto`). Starý typ `instant` sa účtuje ako lite; `fast` sa účtuje ako `auto`. Tavily účtuje `search_depth: "advanced"` viac kreditov za hovor a tento rozdiel sa neodráža v `usage.search_cost_usd`.
 
 ---
 

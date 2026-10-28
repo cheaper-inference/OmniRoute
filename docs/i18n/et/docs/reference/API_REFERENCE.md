@@ -849,47 +849,36 @@ seansivälistele kutsujatele (hankimine, kustutamine, tühistamine ja loomisel t
 
 ---
 
-## Otsingu API
+## API
 
-Veebi-/otsinguteenuse pakkujate abstraktsioon (Tavily, Brave, Exa, Serper jne).
+Web/search pakkuja abstraktsioon (Tavily, Brave, Exa, Serper jne).
 
-| Meetod | Tee                    | Kirjeldus                                                                                               |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Loetleb konfigureeritud otsinguteenuse pakkujad ja nende võimalused                                     |
-| POST   | `/v1/search`           | Käivitab otsingupäringu — keha valideerib `v1SearchSchema`, toetab vahemällu salvestamist ja koondamist |
-| GET    | `/v1/search/analytics` | Pakkujapõhine tabamuste, latentsuse ja vahemälu statistika                                              |
+| meetod | Tee                    | Kirjeldus                                                                           |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Loetlege konfigureeritud otsingupakkujate + võimalused                              |
+| POST   | `/v1/search`           | Käivitage otsingupäring – keha kinnitas `v1SearchSchema`, toetab caching/coalescing |
+| GET    | `/v1/search/analytics` | Pakkujapõhine hit/latency/cache statistika                                          |
 
-**Autentimine:** Bearer API-võti (`extractApiKey` + `isValidApiKey`). Otsingureegleid jõustatakse funktsiooni `enforceApiKeyPolicy` kaudu.
+**Auth:** Kandja API võti (`extractApiKey` + `isValidApiKey`). Otsingupoliitika jõustatakse `enforceApiKeyPolicy` kaudu.
 
 ### Exa ja Tavily `provider_options`
 
-Exa ja Tavily loevad pakkujapõhiseid välju nimeruumiga kogumist:
-`provider_options.exa` (või `provider_options["exa-search"]`) ja `provider_options.tavily`
-(või `provider_options["tavily-search"]`). Edastatakse ainult allolevad võtmed. Iga võtit
-kontrollitakse selle enda Zodi skeemi alusel failis `open-sse/handlers/search/providerOptionsPassthrough.ts`
-ning vale tüübiga võti jäetakse välja. Kõiki muid võtmeid eiratakse, sealhulgas autentimise, baas-URL-i,
-`stream` ja `outputSchema` võtmeid. Teiste pakkujate kasutatavad lamedad võtmed (`cx`, `depth`, ...) töötavad
-nagu varem.
+Exa ja Tavily loevad nimeruumiga kotti pakkujaspetsiifilisi välju: `provider_options.exa` (või `provider_options["exa-search"]`) ja `provider_options.tavily` (või `provider_options["tavily-search"]`). Ainult allolevad võtmed edastatakse. Igaüht neist kontrollitakse `open-sse/handlers/search/providerOptionsPassthrough.ts` oma Zod skeemiga ja vale tüüpi võti jäetakse välja. Kõiki muid võtmeid eiratakse, sealhulgas auth, base URL, `stream` ja `outputSchema`. Teiste pakkujate kasutatavad lamedad klahvid (`cx`, `depth`, ...) töötavad nagu varem.
 
-| Pakkuja | Ülataseme väljad                                                                                                                                                                                                                                                                                                                                                          | Pesastatud                                                                                                                                                               |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (lamedad primitiivväärtused), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                   | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` liidetakse vaikeväärtuse `{ text: true, highlights: true }` peale |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                        |
+| Pakkuja | Tipptasemel väljad                                                                                                                                                                                                                                                                                                                                                        | Pesastatud                                                                                                                      |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (lamedad primitiivid), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` liideti vaike- `{ text: true, highlights: true }` |
+| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                               |
 
-Üldised väljad on alati ülimuslikud: `query`, `max_results`, `filters` (domeenid), `country` ja väljast
-`search_type` tuletatud teema. Exa puhul säilitab `search_type: "news"` väärtuse `category: "news"`.
-Tavily aktsepteerib ka väärtust `search_type: "finance"` (`topic: "finance"`).
+Üldväljad võidavad alati: `query`, `max_results`, `filters` (domeenid), `country` ja `search_type` st tuletatud teema. Eksa puhul säilitab `search_type: "news"` `category: "news"`. Tavily aktsepteerib `search_type: "finance"` (`topic: "finance"`).
 
-Üldine `time_range` jõuab nüüd mõlema pakkujani: Exa saab `startPublishedDate` (ISO-
-ajatempel) ja Tavily saab `start_date` (`YYYY-MM-DD`). Võtmes `provider_options` otseselt määratud kuupäev
-alistab vastendatud kuupäeva.
+Üldine `time_range` jõuab nüüd mõlema pakkujani: Exa saab `startPublishedDate` (ISO timestamp ) ja Tavily saab `start_date` (`YYYY-MM-DD`). Täpne kuupäev `provider_options` is alistab kaardistatud kuupäeva.
 
-Exa tulemused säilitavad väljad `id`, `highlight_scores`, `summary`, `subpages`, `entities` ja `extras`
-väljas `provider_raw`. Tavily tulemused säilitavad väljad `images` ja `favicon`.
+Eksa tulemused jätavad `id`, `highlight_scores`, `summary`, `subpages`, `entities` ja `extras` `provider_raw`. Tavily tulemused säilitavad `images` ja `favicon`.
 
-Kulude arvestuseks kasutatakse endiselt lamedat registrit `costPerQuery`. Tavily arvestab
-`search_depth: "advanced"` korral kõne kohta rohkem krediite ning see erinevus ei kajastu väljas
-`usage.search_cost_usd`.
+Exa `type: "lite"` (Exa 3.0) aktsepteerib väiksemat väljade kogumit ja lükkab kogu taotluse tagasi, kui on määratud mõni muu väli. Lite'i puhul jäetakse enne kõnet välja `additionalQueries`, `systemPrompt` ja kõik `contents` -klahvid, välja arvatud `text` ja `highlights`. Aegunud `subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei edastata enam.
+
+Kulude arvestus on ühtne register `costPerQuery`, välja arvatud Exa `type: "lite"`, mis registreeritakse lihthinnaga (0,004 dollarit kõne kohta vs. 0,007 dollarit `auto` puhul). Pärand `instant` tüüpi arveldatakse nagu lite; `fast` arveldatakse nagu `auto`. Tavily esitab `search_depth: "advanced"` le rohkem krediiti kõne kohta ja see erinevus ei kajastu `usage.search_cost_usd`.
 
 ---
 

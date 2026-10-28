@@ -812,47 +812,36 @@ OpenAI-संगत ब्याच प्रशोधन।
 
 ---
 
-## खोज API
+## API खोज्नुहोस्
 
-वेब/खोज प्रदायक अमूर्तीकरण (Tavily, Brave, Exa, Serper, आदि)।
+Web/search प्रदायक अमूर्तता (Tavily, Brave, Exa, Serper, आदि)।
 
-| विधि | पथ                     | विवरण                                                                                              |
+| विधि | बाटो                   | विवरण                                                                                              |
 | ---- | ---------------------- | -------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | कन्फिगर गरिएका खोज प्रदायकहरू र तिनका क्षमताहरूको सूची बनाउँछ                                      |
-| POST | `/v1/search`           | खोज क्वेरी चलाउँछ — अनुरोध बडी `v1SearchSchema` द्वारा मान्य गरिन्छ र क्यासिङ/कोअलेसिङ समर्थन गर्छ |
-| GET  | `/v1/search/analytics` | प्रति-प्रदायक हिट/लेटेन्सी/क्यास तथ्याङ्क                                                          |
+| GET  | `/v1/search`           | कन्फिगर गरिएका खोज प्रदायकहरू + क्षमताहरू सूचीबद्ध गर्नुहोस्                                       |
+| POST | `/v1/search`           | खोज क्वेरी चलाउनुहोस् — `v1SearchSchema` द्वारा प्रमाणित शरीर, caching/coalescing लाई समर्थन गर्दछ |
+| GET  | `/v1/search/analytics` | प्रति-प्रदायक hit/latency/cache तथ्याङ्क                                                           |
 
-**प्रमाणीकरण:** Bearer API कुञ्जी (`extractApiKey` + `isValidApiKey`)। खोज नीति `enforceApiKeyPolicy` मार्फत लागू गरिन्छ।
+**प्रमाण:** वाहक API कुञ्जी (`extractApiKey` + `isValidApiKey`)। खोज नीति `enforceApiKeyPolicy` मार्फत लागू गरियो।
 
-### Exa र Tavily का `provider_options`
+### Exa र Tavily `provider_options`
 
-Exa र Tavily ले नेमस्पेस गरिएको ब्यागबाट प्रदायक-विशिष्ट फिल्डहरू पढ्छन्:
-`provider_options.exa` (वा `provider_options["exa-search"]`) र `provider_options.tavily`
-(वा `provider_options["tavily-search"]`)। तलका कुञ्जीहरू मात्र फर्वार्ड गरिन्छन्। प्रत्येकलाई
-`open-sse/handlers/search/providerOptionsPassthrough.ts` मा रहेको आफ्नै Zod स्किमाविरुद्ध
-जाँच गरिन्छ, र गलत प्रकार भएको कुञ्जी हटाइन्छ। प्रमाणीकरण, आधार URL,
-`stream` र `outputSchema` सहित अन्य कुनै पनि कुञ्जीलाई बेवास्ता गरिन्छ। अन्य प्रदायकहरूले प्रयोग गर्ने समतल कुञ्जीहरू (`cx`, `depth`, ...) पहिलेझैँ
-काम गर्छन्।
+Exa र Tavily ले नेमस्पेस गरिएको झोलाबाट प्रदायक-विशिष्ट क्षेत्रहरू पढ्नुहोस्: `provider_options.exa` (वा `provider_options["exa-search"]`) र `provider_options.tavily` (वा `provider_options["tavily-search"]`)। तलका कुञ्जीहरू मात्र फर्वार्ड गरिएका छन्। प्रत्येकलाई `open-sse/handlers/search/providerOptionsPassthrough.ts` मा आफ्नै Zod स्कीमा विरुद्ध जाँच गरिन्छ, र गलत प्रकारको कुञ्जी छोडिन्छ। auth, base URL, `stream` र `outputSchema` सहित कुनै पनि अन्य कुञ्जीलाई बेवास्ता गरिन्छ। अन्य प्रदायकहरू (`cx`, `depth`, ...) द्वारा प्रयोग गरिएका फ्ल्याट कुञ्जीहरू पहिले जस्तै काम गर्छन्।
 
-| प्रदायक | शीर्ष-स्तरीय फिल्डहरू                                                                                                                                                                                                                                                                                                                                                     | नेस्टेड                                                                                                                                                                       |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (समतल प्रिमिटिभहरू), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` लाई पूर्वनिर्धारित `{ text: true, highlights: true }` माथि मर्ज गरिन्छ |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                             |
+| प्रदायक | शीर्ष-स्तर क्षेत्रहरू                                                                                                                                                                                                                                                                                                                                                     | नेस्टेड                                                                                                                                       |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (सपाट आदिम), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` पूर्वनिर्धारित `{ text: true, highlights: true }` मा मर्ज गरियो |
+| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                             |
 
-जेनेरिक फिल्डहरूले सधैँ प्राथमिकता पाउँछन्: `query`, `max_results`, `filters` (डोमेनहरू), `country` र
-`search_type` बाट प्राप्त विषय। Exa मा, `search_type: "news"` ले `category: "news"` कायम राख्छ।
-Tavily ले `search_type: "finance"` (`topic: "finance"`) पनि स्वीकार गर्छ।
+जेनेरिक क्षेत्रहरू सधैं जित्छन्: `query`, `max_results`, `filters` (डोमेन), `country` र `search_type` बाट व्युत्पन्न विषय। Exa मा, `search_type: "news"` `category: "news"` राख्छ। Tavily ले `search_type: "finance"` (`topic: "finance"`) लाई पनि स्वीकार गर्दछ।
 
-जेनेरिक `time_range` अब दुवै प्रदायकसम्म पुग्छ: Exa ले `startPublishedDate` (ISO
-टाइमस्ट्याम्प) र Tavily ले `start_date` (`YYYY-MM-DD`) प्राप्त गर्छ। `provider_options`
-मा स्पष्ट रूपमा दिइएको मितिले म्याप गरिएको मितिलाई ओभरराइड गर्छ।
+जेनेरिक `time_range` अब दुबै प्रदायकहरूमा पुग्छ: Exa ले `startPublishedDate` (ISO टाइमस्ट्याम्प) र Tavily ले `start_date` (`YYYY-MM-DD`) प्राप्त गर्दछ। `provider_options` मा स्पष्ट मितिले म्याप गरिएकोलाई ओभरराइड गर्छ।
 
-Exa का नतिजाहरूले `id`, `highlight_scores`, `summary`, `subpages`, `entities` र `extras` लाई
-`provider_raw` मा कायम राख्छन्। Tavily का नतिजाहरूले `images` र `favicon` कायम राख्छन्।
+Exa परिणामहरू `id`, `highlight_scores`, `summary`, `subpages`, `entities` र `extras` लाई `provider_raw` मा राख्छन्। Tavily परिणामहरू `images` र `favicon` राख्छन्।
 
-लागत लेखाङ्कन अझै पनि समतल रजिस्ट्री `costPerQuery` नै हो। Tavily ले
-`search_depth: "advanced"` का लागि प्रति कल बढी क्रेडिट बिल गर्छ, र त्यो भिन्नता
-`usage.search_cost_usd` मा प्रतिबिम्बित हुँदैन।
+Exa `type: "lite"` (Exa 3.0) ले फिल्डहरूको सानो सेट स्वीकार गर्छ र कुनै अन्य फिल्ड सेट गर्दा सम्पूर्ण अनुरोध अस्वीकार गर्दछ। लाइटको लागि, `additionalQueries`, `systemPrompt` र `text` र `highlights` बाहेक प्रत्येक `contents` कुञ्जी कल अघि छोडिन्छ। बहिष्कृत `subpages`, `subpageTarget`, `highlights.numSentences` र `highlights.highlightsPerUrl` अब फर्वार्ड गरिने छैन।
+
+लागत लेखा फ्ल्याट रजिस्ट्री `costPerQuery` हो, Exa `type: "lite"` बाहेक, जुन लाइट मूल्यमा रेकर्ड गरिएको छ ($0.004 प्रति कल बनाम $0.007 `auto` को लागि)। लिगेसी `instant` प्रकार लाई लाइट जस्तै बिल गरिएको छ; `fast` `auto` जस्तै बिल गरिन्छ। Tavily ले `search_depth: "advanced"` प्रति कल बढी क्रेडिटमा बिल दिन्छ, र त्यो भिन्नता `usage.search_cost_usd` मा प्रतिबिम्बित हुँदैन।
 
 ---
 

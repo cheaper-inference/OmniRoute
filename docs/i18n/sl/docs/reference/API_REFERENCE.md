@@ -849,47 +849,36 @@ klicatelju brez seje (pridobivanje, brisanje, preklic in preverjanje `input_file
 
 ---
 
-## API za iskanje
+## Iskanje API
 
-Abstrakcija ponudnikov spletnega iskanja (Tavily, Brave, Exa, Serper itd.).
+abstrakcija ponudnika Web/search (Tavily, Brave, Exa, Serper itd.).
 
-| Metoda | Pot                    | Opis                                                                                        |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Prikaže konfigurirane ponudnike iskanja in njihove zmožnosti                                |
-| POST   | `/v1/search`           | Izvede iskalno poizvedbo — telo preveri `v1SearchSchema`, podpira predpomnjenje/združevanje |
-| GET    | `/v1/search/analytics` | Statistični podatki o zadetkih/zakasnitvah/predpomnilniku za posameznega ponudnika          |
+| Metoda | Pot                    | Opis                                                                                  |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Seznam zmožnosti + konfiguriranih ponudnikov iskanja                                  |
+| POST   | `/v1/search`           | Zaženite iskalno poizvedbo — telo potrdi `v1SearchSchema`, podpira caching/coalescing |
+| GET    | `/v1/search/analytics` | Statistika hit/latency/cache za posameznega ponudnika                                 |
 
-**Preverjanje pristnosti:** API-ključ Bearer (`extractApiKey` + `isValidApiKey`). Pravilnik iskanja se uveljavlja prek `enforceApiKeyPolicy`.
+**Auth:** Nosilni ključ API (`extractApiKey` + `isValidApiKey`). Politika iskanja, uveljavljena prek `enforceApiKeyPolicy`.
 
-### `provider_options` za Exa in Tavily
+### Exa in Tavily `provider_options`
 
-Exa in Tavily bereta polja, specifična za ponudnika, iz imensko omejene zbirke:
-`provider_options.exa` (ali `provider_options["exa-search"]`) in `provider_options.tavily`
-(ali `provider_options["tavily-search"]`). Posredujejo se samo spodaj navedeni ključi. Vsak je
-preverjen glede na lastno shemo Zod v `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-ključ napačne vrste pa je zavržen. Vsi drugi ključi so prezrti, vključno s preverjanjem pristnosti, osnovnim URL-jem,
-`stream` in `outputSchema`. Enostopenjski ključi, ki jih uporabljajo drugi ponudniki (`cx`, `depth`, ...), delujejo
-kot prej.
+Exa in Tavily bereta polja, specifična za ponudnika, iz vrečke z imenskim prostorom: `provider_options.exa` (ali `provider_options["exa-search"]`) in `provider_options.tavily` (ali `provider_options["tavily-search"]`). Posredovani so samo spodnji ključi. Vsak se preveri glede na lastno shemo Zod v `open-sse/handlers/search/providerOptionsPassthrough.ts` in ključ z napačnim tipom se izpusti. Vsi drugi ključi so prezrti, vključno z auth, base URL, `stream` in `outputSchema`. Ploščati ključi, ki jih uporabljajo drugi ponudniki (`cx`, `depth`, ...) delujejo kot prej.
 
-| Ponudnik | Polja najvišje ravni                                                                                                                                                                                                                                                                                                                                                      | Ugnezdeno                                                                                                                                                                |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (enostopenjske primitivne vrednosti), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                           | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` združeno s privzeto vrednostjo `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                        |
+| Ponudnik | Polja najvišje ravni                                                                                                                                                                                                                                                                                                                                                      | Ugnezdeno                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ploski primitivi), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` združeno s privzetim `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
 
-Splošna polja imajo vedno prednost: `query`, `max_results`, `filters` (domene), `country` in
-tema, izpeljana iz `search_type`. Pri Exa nastavitev `search_type: "news"` ohrani `category: "news"`.
-Tavily sprejema tudi `search_type: "finance"` (`topic: "finance"`).
+Vedno zmagajo generična polja: `query`, `max_results`, `filters` (domene), `country` in tema, izpeljana iz `search_type`. Na Exa `search_type: "news"` ohrani `category: "news"`. Tavily sprejema tudi `search_type: "finance"` (`topic: "finance"`).
 
-Splošno polje `time_range` se zdaj posreduje obema ponudnikoma: Exa prejme `startPublishedDate` (časovni
-žig ISO), Tavily pa `start_date` (`YYYY-MM-DD`). Izrecno navedeni datum v `provider_options`
-preglasi preslikanega.
+Generični `time_range` zdaj doseže oba ponudnika: Exa dobi `startPublishedDate` (ISO timestamp), Tavily pa `start_date` (`YYYY-MM-DD`). Eksplicitni datum v `provider_options` preglasi preslikanega.
 
-Rezultati Exa v `provider_raw` ohranijo `id`, `highlight_scores`, `summary`, `subpages`, `entities` in
-`extras`. Rezultati Tavily ohranijo `images` in `favicon`.
+Rezultati Exa ohranjajo `id`, `highlight_scores`, `summary`, `subpages`, `entities` in `extras` v `provider_raw`. Rezultati Tavily ohranjajo `images` in `favicon`.
 
-Obračunavanje stroškov še vedno uporablja enostopenjski register `costPerQuery`. Tavily za
-`search_depth: "advanced"` zaračuna več dobropisov na klic, ta razlika pa ni prikazana v
-`usage.search_cost_usd`.
+Exa `type: "lite"` (Exa 3.0) sprejme manjši nabor polj in zavrne celotno zahtevo, ko je nastavljeno katero koli drugo polje. Za lite `additionalQueries`, `systemPrompt` in vsi ključi `contents` razen `text` in `highlights` opuščeni pred klicem. Zastareli `subpages`, `subpageTarget`, `highlights.numSentences` in `highlights.highlightsPerUrl` se ne posredujejo več.
+
+Stroškovno računovodstvo je pavšalni register `costPerQuery`, razen Exa `type: "lite"`, ki se beleži po lahki ceni (0,004 USD na klic v primerjavi z 0,007 USD za `auto`). Podedovana vrsta `instant` se obračunava kot lite; `fast` se obračunava kot `auto`. Tavily zaračuna `search_depth: "advanced"` z več krediti na klic in ta razlika se ne odraža v `usage.search_cost_usd`.
 
 ---
 

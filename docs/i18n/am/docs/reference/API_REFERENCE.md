@@ -828,47 +828,36 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## የፍለጋ API
+## API ፈልግ
 
-የድር/ፍለጋ አቅራቢ ማጠቃለያ ንብርብር (Tavily፣ Brave፣ Exa፣ Serper፣ ወዘተ)።
+Web/search አቅራቢ ማጠቃለያ (Tavily, Brave, Exa, Serper, ወዘተ.)
 
-| ዘዴ   | ዱካ                     | መግለጫ                                                                   |
-| ---- | ---------------------- | ---------------------------------------------------------------------- |
-| GET  | `/v1/search`           | የተዋቀሩ የፍለጋ አቅራቢዎችን እና ችሎታዎቻቸውን ይዘረዝራል                                  |
-| POST | `/v1/search`           | የፍለጋ ጥያቄን ያስኬዳል — የጥያቄው አካል በ`v1SearchSchema` ይረጋገጣል፣ መሸጎጫ/ማዋሃድን ይደግፋል |
-| GET  | `/v1/search/analytics` | ለእያንዳንዱ አቅራቢ የውጤት/የመዘግየት/የመሸጎጫ ስታቲስቲክስ                                 |
+| ዘዴ   | መንገድ                   | መግለጫ                                                                    |
+| ---- | ---------------------- | ----------------------------------------------------------------------- |
+| GET  | `/v1/search`           | የተዋቀሩ የፍለጋ አቅራቢዎች + ችሎታዎችን ይዘርዝሩ                                        |
+| POST | `/v1/search`           | የፍለጋ ጥያቄን አሂድ — አካል በ `v1SearchSchema` የተረጋገጠ፣ caching/coalescing ይደግፋል |
+| GET  | `/v1/search/analytics` | በአንድ አቅራቢ hit/latency/cache ስታቲስቲክስ                                     |
 
-**ማረጋገጫ፦** Bearer API ቁልፍ (`extractApiKey` + `isValidApiKey`)። የፍለጋ መመሪያው በ`enforceApiKeyPolicy` ተግባራዊ ይደረጋል።
+**ማረጋገጫ፡** ተሸካሚ API ቁልፍ (`extractApiKey` + `isValidApiKey`)። የፍለጋ መመሪያ በ `enforceApiKeyPolicy` ተፈጻሚ ነው።
 
-### የExa እና Tavily `provider_options`
+### Exa እና Tavily `provider_options`
 
-Exa እና Tavily ለአቅራቢው የተወሰኑ መስኮችን ከስም ክልል ካለው ስብስብ ያነባሉ፦
-`provider_options.exa` (ወይም `provider_options["exa-search"]`) እና `provider_options.tavily`
-(ወይም `provider_options["tavily-search"]`)። ከታች ያሉት ቁልፎች ብቻ ይተላለፋሉ። እያንዳንዱ
-በ`open-sse/handlers/search/providerOptionsPassthrough.ts` ውስጥ ካለው የራሱ Zod መርሃግብር ጋር
-ይፈተሻል፣ እና የተሳሳተ ዓይነት ያለው ቁልፍ ይወገዳል። ማረጋገጫን፣ መሠረታዊ URLን፣
-`stream`ን እና `outputSchema`ን ጨምሮ ማንኛውም ሌላ ቁልፍ ችላ ይባላል። ሌሎች አቅራቢዎች የሚጠቀሙባቸው ጠፍጣፋ ቁልፎች (`cx`፣ `depth`፣ ...) እንደቀድሞው
-ይሰራሉ።
+Exa እና Tavily አቅራቢ-ተኮር መስኮችን በስም ከተሰየመ ቦርሳ ያንብቡ `provider_options.exa` (ወይም `provider_options["exa-search"]`) እና `provider_options.tavily` (ወይም `provider_options["tavily-search"]`)። ከታች ያሉት ቁልፎች ብቻ ተላልፈዋል. እያንዳንዱ በራሱ Zod schema በ `open-sse/handlers/search/providerOptionsPassthrough.ts` ላይ ምልክት ይደረግበታል፣ እና የተሳሳተ አይነት ያለው ቁልፍ ይጣላል። ማንኛውም ሌላ ቁልፍ ችላ ተብሏል፣ auth፣ ቤዝ URL፣ `stream` እና `outputSchema`. በሌሎች አቅራቢዎች (`cx`, `depth`, ...) የሚጠቀሙት ጠፍጣፋ ቁልፎች እንደበፊቱ ይሰራሉ.
 
-| አቅራቢ   | ከፍተኛ ደረጃ መስኮች                                                                                                                                                                                                                                                                                                                                                             | የተዋረዱ                                                                                                                                                    |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa    | `type`፣ `category`፣ `userLocation`፣ `moderation`፣ `additionalQueries`፣ `objective`፣ `systemPrompt`፣ `compliance` (ጠፍጣፋ መሠረታዊ ዓይነቶች)፣ `startPublishedDate`፣ `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` በነባሪው `{ text: true, highlights: true }` ላይ ይዋሃዳል |
-| Tavily | `search_depth`፣ `chunks_per_source`፣ `time_range`፣ `start_date`፣ `end_date`፣ `include_published_date`፣ `filter_by_published_date`፣ `include_answer`፣ `include_raw_content`፣ `include_images`፣ `include_image_descriptions`፣ `include_favicon`፣ `include_domains_mode`፣ `language`፣ `filter_by_language`፣ `auto_parameters`፣ `exact_match`፣ `include_usage`፣ `safe_search` | —                                                                                                                                                        |
+| አቅራቢ | ከፍተኛ-ደረጃ መስኮች                                                                                                                                                                                                                                                                                                                                                             | ጎጆ                                                                                                                             |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| ምሳሌ  | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives)፣ `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` በነባሪ `{ text: true, highlights: true }` ላይ ተዋህዷል |
+| ታቪሊ  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                              |
 
-አጠቃላይ መስኮቹ ሁልጊዜ ቅድሚያ ያገኛሉ፦ `query`፣ `max_results`፣ `filters` (ጎራዎች)፣ `country` እና ከ
-`search_type` የሚመነጨው ርዕስ። በExa ላይ፣ `search_type: "news"` `category: "news"`ን እንዳለ ያቆያል።
-Tavily `search_type: "finance"`ንም (`topic: "finance"`) ይቀበላል።
+አጠቃላይ መስኮች ሁል ጊዜ ያሸንፋሉ `query`፣ `max_results`፣ `filters` (ጎራዎች)፣ `country` እና ከ `search_type` የተወሰደ ርዕስ። በ Exa ላይ፣ `search_type: "news"` `category: "news"` ን ይይዛል። ታቪሊ ደግሞ `search_type: "finance"` (`topic: "finance"`) ይቀበላል።
 
-አጠቃላዩ `time_range` አሁን ወደ ሁለቱም አቅራቢዎች ይደርሳል፦ Exa `startPublishedDate`ን (የISO
-የጊዜ ማህተም) እና Tavily `start_date`ን (`YYYY-MM-DD`) ያገኛሉ። በ`provider_options`
-ውስጥ በግልጽ የተገለጸ ቀን በካርታ የተዛመደውን ቀን ይተካል።
+አጠቃላይ `time_range` አሁን ሁለቱንም አቅራቢዎች ይደርሳል፡ Exa `startPublishedDate` (ISO timestamp) እና Tavily `start_date` (`YYYY-MM-DD`) ያገኛል። በ `provider_options` ውስጥ ግልጽ የሆነ ቀን ካርታ የተሰራውን ይሽራል።
 
-የExa ውጤቶች `id`፣ `highlight_scores`፣ `summary`፣ `subpages`፣ `entities` እና `extras`ን በ
-`provider_raw` ውስጥ እንዳሉ ያቆያሉ። የTavily ውጤቶች `images`ን እና `favicon`ን እንዳሉ ያቆያሉ።
+የፈተና ውጤቶች `id`, `highlight_scores`, `summary`, `subpages`, `entities` እና `extras` በ `provider_raw` ያስቀምጣሉ። ትክክለኛ ውጤቶች `images` እና `favicon` ይጠብቃሉ።
 
-የወጪ ስሌት አሁንም ጠፍጣፋው መዝገብ `costPerQuery` ነው። Tavily ለ
-`search_depth: "advanced"` በእያንዳንዱ ጥሪ ተጨማሪ ክሬዲቶችን ያስከፍላል፣ እና ያ ልዩነት በ
-`usage.search_cost_usd` ውስጥ አይንጸባረቅም።
+Exa `type: "lite"` (Exa 3.0) አነስተኛ የመስኮች ስብስብ ይቀበላል እና ሌላ ማንኛውም መስክ ሲዘጋጅ ሙሉውን ጥያቄ ውድቅ ያደርጋል። ለሊት፣ `additionalQueries`፣ `systemPrompt` እና `text` እና `highlights` በስተቀር ሁሉም `contents` ቁልፍ ከጥሪው በፊት ይጣላሉ። የተቋረጠው `subpages`፣ `subpageTarget`፣ `highlights.numSentences` እና `highlights.highlightsPerUrl` ከአሁን በኋላ አይተላለፉም።
+
+ወጪ ሒሳብ ጠፍጣፋ መዝገቡ `costPerQuery` ነው፣ ከ Exa `type: "lite"` በስተቀር፣ በቀላል ዋጋ ከተመዘገበው ($0.004 በአንድ ጥሪ ከ $0.007 ለ `auto`)። የቅርስ `instant` አይነት ልክ እንደ ሊት ነው የሚከፈለው; `fast` እንደ `auto` ይከፈላል። በጥሪ ብዙ ክሬዲቶች ላይ Tavily `search_depth: "advanced"` ሂሳብ ያስከፍላል፣ እና ይህ ልዩነት በ `usage.search_cost_usd` ውስጥ አይንጸባረቅም።
 
 ---
 
@@ -1628,10 +1617,10 @@ GET /api/telemetry/summary
 ## በጀት
 
 ```bash
-# ለሁሉም API ቁልፎች የበጀት ሁኔታን ያግኙ
+# Get budget status for all API keys
 GET /api/usage/budget
 
-# በጀት ያዘጋጁ ወይም ያዘምኑ
+# Set or update a budget
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1645,7 +1634,7 @@ Content-Type: application/json
 }
 ```
 
-> **የስኪማ ማስታወሻዎች** (`setBudgetSchema`)፦ `apiKeyId` ያስፈልጋል፤ ከ`dailyLimitUsd`፣ `weeklyLimitUsd` ወይም `monthlyLimitUsd` ቢያንስ አንዱ ከዜሮ መብለጥ አለበት። አማራጭ መስኮች፦ `warningThreshold` (0–1)፣ `resetInterval` (`daily` | `weekly` | `monthly`)፣ `resetTime` (`HH:MM`)። የቆየው `{keyId, limit, period}` ቅርጽ `400 Bad Request`ን ይመልሳል።
+> **የመርሃግብር ማስታወሻዎች** (`setBudgetSchema`): `apiKeyId` ያስፈልጋል; ቢያንስ አንዱ `dailyLimitUsd`፣ `weeklyLimitUsd` ወይም `monthlyLimitUsd` ከዜሮ በላይ መሆን አለበት። አማራጭ መስኮች `warningThreshold` (0–1)፣ `resetInterval` (`daily` | `weekly` | `monthly`)፣ `resetTime` (`HH:MM`)። የቅርስ `{keyId, limit, period}` ቅርፅ `400 Bad Request` ይመልሳል።
 
 ## የቶከን ገደቦች
 

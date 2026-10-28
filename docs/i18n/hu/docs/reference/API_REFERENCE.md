@@ -834,47 +834,36 @@ A `GET /v1/batches` a névtelen hívót `401` válasszal utasítja el még akkor
 
 ---
 
-## Search API
+## Keresés API
 
-Webes/keresési szolgáltatók absztrakciós rétege (Tavily, Brave, Exa, Serper stb.).
+Web/search szolgáltató absztrakció (Tavily, Brave, Exa, Serper stb.).
 
-| Metódus | Útvonal                | Leírás                                                                                                                 |
-| ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | A konfigurált keresési szolgáltatók és képességeik listázása                                                           |
-| POST    | `/v1/search`           | Keresési lekérdezés futtatása — a törzset a `v1SearchSchema` ellenőrzi, támogatja a gyorsítótárazást és az összevonást |
-| GET     | `/v1/search/analytics` | Szolgáltatónkénti találati, késleltetési és gyorsítótár-statisztikák                                                   |
+| Módszer | Útvonal                | Leírás                                                                                                     |
+| ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | Sorolja fel a konfigurált keresési szolgáltatók + képességeit                                              |
+| POST    | `/v1/search`           | Futtasson le egy keresési lekérdezést – a törzset `v1SearchSchema` ellenőrzi, támogatja caching/coalescing |
+| GET     | `/v1/search/analytics` | Szolgáltatónkénti hit/latency/cache statisztika                                                            |
 
-**Hitelesítés:** Bearer API-kulcs (`extractApiKey` + `isValidApiKey`). A keresési házirendet az `enforceApiKeyPolicy` kényszeríti ki.
+**Auth:** Tartó API kulcs (`extractApiKey` + `isValidApiKey`). A keresési szabályzat `enforceApiKeyPolicy` keresztül érvényesítve.
 
 ### Exa és Tavily `provider_options`
 
-Az Exa és a Tavily a szolgáltatóspecifikus mezőket egy névtérrel ellátott tárolóból olvassa:
-`provider_options.exa` (vagy `provider_options["exa-search"]`) és `provider_options.tavily`
-(vagy `provider_options["tavily-search"]`). Csak az alábbi kulcsok kerülnek továbbításra. Mindegyiket
-a saját Zod-sémája alapján ellenőrzi az `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-és a helytelen típusú kulcsokat elveti. Minden más kulcs figyelmen kívül marad, beleértve a hitelesítést, az alap URL-t,
-valamint a `stream` és az `outputSchema` mezőket. A más szolgáltatók által használt egyszerű kulcsok (`cx`, `depth`, ...) továbbra is
-a korábbiak szerint működnek.
+Az Exa és a Tavily beolvassa a szolgáltató-specifikus mezőket egy névteres táskából: `provider_options.exa` (vagy `provider_options["exa-search"]`) és `provider_options.tavily` (vagy `provider_options["tavily-search"]`). Csak az alábbi kulcsok kerülnek továbbításra. Mindegyiket ellenőrzik a saját Zod sémájával `open-sse/handlers/search/providerOptionsPassthrough.ts` ben, és egy nem megfelelő típusú kulcs kerül kidobásra. Minden más kulcs figyelmen kívül marad, beleértve az auth, base URL, `stream` és `outputSchema`. A más szolgáltatók által használt lapos billentyűk (`cx`, `depth`, ...) a korábbiak szerint működnek.
 
-| Szolgáltató | Felső szintű mezők                                                                                                                                                                                                                                                                                                                                                        | Beágyazott                                                                                                                                                                         |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (egyszerű primitív értékek), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}`, az alapértelmezett `{ text: true, highlights: true }` értékekkel egyesítve |
-| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                                  |
+| Szolgáltató | Legfelső szintű mezők                                                                                                                                                                                                                                                                                                                                                     | Beágyazott                                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (lapos primitívek), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` egyesült az alapértelmezett `{ text: true, highlights: true }` vel |
+| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                |
 
-Mindig az általános mezők élveznek elsőbbséget: `query`, `max_results`, `filters` (domainek), `country`, valamint a
-`search_type` alapján származtatott téma. Az Exa esetében a `search_type: "news"` megtartja a `category: "news"` értéket.
-A Tavily a `search_type: "finance"` értéket is elfogadja (`topic: "finance"`).
+Mindig az általános mezők nyernek: `query`, `max_results`, `filters` (domains), `country` és a `search_type` ből származó téma. Az Exa-n a `search_type: "news"` megtartja `category: "news"`. Tavily `search_type: "finance"` (`topic: "finance"`) is elfogadja.
 
-Az általános `time_range` mostantól mindkét szolgáltatóhoz eljut: az Exa a `startPublishedDate` (ISO-
-időbélyeg), a Tavily pedig a `start_date` (`YYYY-MM-DD`) mezőt kapja. A `provider_options` között kifejezetten megadott dátum
-felülírja a leképezett értéket.
+Az általános `time_range` mostantól mindkét szolgáltatót eléri: Exa `startPublishedDate` (ISO timestamp), Tavily pedig `start_date` (`YYYY-MM-DD`) kap. Az explicit dátum `provider_options` ben felülírja a leképezett dátumot.
 
-Az Exa-találatok megőrzik az `id`, `highlight_scores`, `summary`, `subpages`, `entities` és `extras` mezőket a
-`provider_raw` mezőben. A Tavily-találatok megőrzik az `images` és `favicon` mezőket.
+Az exa eredmények `id`, `highlight_scores`, `summary`, `subpages`, `entities` és `extras` `provider_raw` ben tartják . A Tavily eredmények `images` és `favicon` maradnak.
 
-A költségelszámolás továbbra is az egyszerű `costPerQuery` nyilvántartáson alapul. A Tavily a
-`search_depth: "advanced"` használata esetén hívásonként több kreditet számláz, és ez a különbség nem jelenik meg a
-`usage.search_cost_usd` értékében.
+Az Exa `type: "lite"` (Exa 3.0) kisebb mezőket fogad el, és elutasítja a teljes kérést, ha bármely más mező be van állítva. Lite esetén `additionalQueries`, `systemPrompt` és `text` és `highlights` kivételével minden `contents` billentyű eldobásra kerül a hívás előtt. Az elavult `subpages`, `subpageTarget`, `highlights.numSentences` és `highlights.highlightsPerUrl` továbbítása már nem történik meg.
+
+A költségelszámolás a `costPerQuery` lapos regisztrációs adatbázis, kivéve az Exa `type: "lite"`, amely egyszerű áron kerül rögzítésre (hívásonként 0,004 USD, `auto` esetében 0,007 USD). A régi `instant` típus számlázása a lite szerint történik; `fast` számlázása `auto` hasonlóan történik. Tavily hívásonként több kredittel számlázza `search_depth: "advanced"`, és ez a különbség nem jelenik meg `usage.search_cost_usd` ban.
 
 ---
 

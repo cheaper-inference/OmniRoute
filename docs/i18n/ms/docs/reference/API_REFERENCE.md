@@ -849,47 +849,36 @@ pemanggil bukan sesi (dapatkan, padam, batal dan semakan `input_file_id` semasa 
 
 ---
 
-## API Carian
+## Cari API
 
-Abstraksi penyedia web/carian (Tavily, Brave, Exa, Serper, dll.).
+abstraksi penyedia Web/search (Tavily, Brave, Exa, Serper, dll.).
 
-| Kaedah | Laluan                 | Penerangan                                                                                    |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Senaraikan penyedia carian yang dikonfigurasikan + keupayaan                                  |
-| POST   | `/v1/search`           | Jalankan pertanyaan carian — isi disahkan oleh `v1SearchSchema`, menyokong cache/penggabungan |
-| GET    | `/v1/search/analytics` | Statistik hit/kependaman/cache bagi setiap penyedia                                           |
+| Kaedah | Laluan                 | Penerangan                                                                                      |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Senaraikan keupayaan + pembekal carian yang dikonfigurasikan                                    |
+| POST   | `/v1/search`           | Jalankan pertanyaan carian — badan disahkan oleh `v1SearchSchema`, menyokong caching/coalescing |
+| GET    | `/v1/search/analytics` | Statistik hit/latency/cache setiap pembekal                                                     |
 
-**Pengesahan:** Kunci API Bearer (`extractApiKey` + `isValidApiKey`). Dasar carian dikuatkuasakan melalui `enforceApiKeyPolicy`.
+**Pengesahan:** Kunci API pembawa (`extractApiKey` + `isValidApiKey`). Dasar carian dikuatkuasakan melalui `enforceApiKeyPolicy`.
 
-### `provider_options` Exa dan Tavily
+### Exa dan Tavily `provider_options`
 
-Exa dan Tavily membaca medan khusus penyedia daripada bekas beruang nama:
-`provider_options.exa` (atau `provider_options["exa-search"]`) dan `provider_options.tavily`
-(atau `provider_options["tavily-search"]`). Hanya kekunci di bawah dimajukan. Setiap satunya
-disemak berdasarkan skema Zod tersendiri dalam `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-dan kekunci dengan jenis yang salah digugurkan. Sebarang kekunci lain diabaikan, termasuk pengesahan, URL asas,
-`stream` dan `outputSchema`. Kekunci rata yang digunakan oleh penyedia lain (`cx`, `depth`, ...) berfungsi
-seperti sebelumnya.
+Exa dan Tavily membaca medan khusus pembekal daripada beg ruang nama: `provider_options.exa` (atau `provider_options["exa-search"]`) dan `provider_options.tavily` (atau `provider_options["tavily-search"]`). Hanya kekunci di bawah dimajukan. Setiap satu disemak terhadap skema Zod sendiri dalam `open-sse/handlers/search/providerOptionsPassthrough.ts`, dan kunci dengan jenis yang salah digugurkan. Sebarang kunci lain diabaikan, termasuk auth, base URL, `stream` dan `outputSchema`. Kekunci rata yang digunakan oleh pembekal lain (`cx`, `depth`, ...) berfungsi seperti sebelum ini.
 
-| Penyedia | Medan peringkat atas                                                                                                                                                                                                                                                                                                                                                      | Bersarang                                                                                                                                                        |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitif rata), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` digabungkan atas lalai `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                |
+| Pembekal | Medan peringkat atasan                                                                                                                                                                                                                                                                                                                                                    | Bersarang                                                                                                                                  |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitif rata), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` digabungkan ke atas `{ text: true, highlights: true }` lalai |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
 
-Medan generik sentiasa diutamakan: `query`, `max_results`, `filters` (domain), `country` dan
-topik yang diterbitkan daripada `search_type`. Pada Exa, `search_type: "news"` mengekalkan `category: "news"`.
-Tavily turut menerima `search_type: "finance"` (`topic: "finance"`).
+Medan generik sentiasa menang: `query`, `max_results`, `filters` (domain), `country` dan topik yang diperoleh daripada `search_type`. Pada Exa, `search_type: "news"` mengekalkan `category: "news"`. Tavily juga menerima `search_type: "finance"` (`topic: "finance"`).
 
-`time_range` generik kini dihantar kepada kedua-dua penyedia: Exa menerima `startPublishedDate` (cap masa
-ISO) dan Tavily menerima `start_date` (`YYYY-MM-DD`). Tarikh eksplisit dalam `provider_options`
-mengatasi tarikh yang dipetakan.
+`time_range` generik kini mencapai kedua-dua penyedia: Exa mendapat `startPublishedDate` ( cap waktu ISO ) dan Tavily mendapat `start_date` (`YYYY-MM-DD`). Tarikh eksplisit dalam `provider_options` mengatasi tarikh yang dipetakan.
 
-Hasil Exa mengekalkan `id`, `highlight_scores`, `summary`, `subpages`, `entities` dan `extras` dalam
-`provider_raw`. Hasil Tavily mengekalkan `images` dan `favicon`.
+Keputusan Exa mengekalkan `id`, `highlight_scores`, `summary`, `subpages`, `entities` dan `extras` dalam `provider_raw`. Hasil tavily kekalkan `images` dan `favicon`.
 
-Perakaunan kos masih menggunakan daftar rata `costPerQuery`. Tavily mengenakan
-lebih banyak kredit bagi setiap panggilan untuk `search_depth: "advanced"`, dan perbezaan tersebut tidak ditunjukkan dalam
-`usage.search_cost_usd`.
+Exa `type: "lite"` (Exa 3.0) menerima set medan yang lebih kecil dan menolak keseluruhan permintaan apabila mana-mana medan lain ditetapkan. Untuk lite, `additionalQueries`, `systemPrompt` dan setiap kekunci `contents` kecuali `text` dan `highlights` digugurkan sebelum panggilan. `subpages`, `subpageTarget`, `highlights.numSentences` dan `highlights.highlightsPerUrl` yang ditamatkan tidak dimajukan lagi.
+
+Perakaunan kos ialah `costPerQuery` pendaftaran rata , kecuali Exa `type: "lite"`, yang direkodkan pada harga ringkas ($0.004 setiap panggilan berbanding $0.007 untuk `auto`). Jenis `instant` warisan dibilkan seperti lite; `fast` dibilkan seperti `auto`. Tavily mengebil `search_depth: "advanced"` pada lebih banyak kredit setiap panggilan, dan perbezaan itu tidak ditunjukkan dalam `usage.search_cost_usd`.
 
 ---
 

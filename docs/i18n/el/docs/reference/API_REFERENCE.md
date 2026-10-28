@@ -849,47 +849,36 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API αναζήτησης
+## Αναζήτηση API
 
-Αφαίρεση εξάρτησης από συγκεκριμένο πάροχο ιστού/αναζήτησης (Tavily, Brave, Exa, Serper κ.λπ.).
+Αφαίρεση παρόχου Web/search (Tavily, Brave, Exa, Serper, κ.λπ.).
 
-| Μέθοδος | Διαδρομή               | Περιγραφή                                                                                                                   |
-| ------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | Παραθέτει τους διαμορφωμένους παρόχους αναζήτησης και τις δυνατότητές τους                                                  |
-| POST    | `/v1/search`           | Εκτελεί ένα ερώτημα αναζήτησης — το σώμα επικυρώνεται από το `v1SearchSchema` και υποστηρίζει προσωρινή αποθήκευση/συνένωση |
-| GET     | `/v1/search/analytics` | Στατιστικά επιτυχιών/καθυστέρησης/προσωρινής αποθήκευσης ανά πάροχο                                                         |
+| Μέθοδος | Μονοπάτι               | Περιγραφή                                                                                                |
+| ------- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | Καταχωρίστε τις δυνατότητες + διαμορφωμένων παρόχων αναζήτησης                                           |
+| POST    | `/v1/search`           | Εκτελέστε ένα ερώτημα αναζήτησης — σώμα επικυρωμένο από `v1SearchSchema`, υποστηρίζει caching/coalescing |
+| GET     | `/v1/search/analytics` | Στατιστικά hit/latency/cache ανά πάροχο                                                                  |
 
-**Έλεγχος ταυτότητας:** Κλειδί API τύπου Bearer (`extractApiKey` + `isValidApiKey`). Η πολιτική αναζήτησης επιβάλλεται μέσω του `enforceApiKeyPolicy`.
+**Auth:** Κλειδί API φορέα (`extractApiKey` + `isValidApiKey`). Η πολιτική αναζήτησης επιβάλλεται μέσω `enforceApiKeyPolicy`.
 
-### `provider_options` των Exa και Tavily
+### Exa και Tavily `provider_options`
 
-Οι Exa και Tavily διαβάζουν πεδία ειδικά για τον πάροχο από έναν χώρο ονομάτων:
-`provider_options.exa` (ή `provider_options["exa-search"]`) και `provider_options.tavily`
-(ή `provider_options["tavily-search"]`). Προωθούνται μόνο τα παρακάτω κλειδιά. Καθένα
-ελέγχεται βάσει του δικού του σχήματος Zod στο `open-sse/handlers/search/providerOptionsPassthrough.ts`
-και ένα κλειδί λανθασμένου τύπου απορρίπτεται. Οποιοδήποτε άλλο κλειδί αγνοείται, συμπεριλαμβανομένων των στοιχείων ελέγχου ταυτότητας, της βασικής διεύθυνσης URL,
-των `stream` και `outputSchema`. Τα μη εμφωλευμένα κλειδιά που χρησιμοποιούνται από άλλους παρόχους (`cx`, `depth`, ...) λειτουργούν
-όπως πριν.
+Τα Exa και Tavily διαβάζουν πεδία για συγκεκριμένο πάροχο από μια τσάντα ονομάτων: `provider_options.exa` (ή `provider_options["exa-search"]`) και `provider_options.tavily` (ή `provider_options["tavily-search"]`). Μόνο τα παρακάτω κλειδιά προωθούνται. Κάθε ένα ελέγχεται με το δικό του σχήμα Zod στο `open-sse/handlers/search/providerOptionsPassthrough.ts` και ένα κλειδί με λάθος τύπο απορρίπτεται. Οποιοδήποτε άλλο κλειδί αγνοείται, συμπεριλαμβανομένων των auth, base URL, `stream` και `outputSchema`. Τα flat keys που χρησιμοποιούνται από άλλους παρόχους (`cx`, `depth`, ...) λειτουργούν όπως πριν.
 
-| Πάροχος | Πεδία ανώτατου επιπέδου                                                                                                                                                                                                                                                                                                                                                   | Εμφωλευμένα                                                                                                                                                                       |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (μη εμφωλευμένοι πρωτογενείς τύποι), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                            | Το `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` συγχωνεύεται πάνω από την προεπιλογή `{ text: true, highlights: true }` |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                                 |
+| Προμηθευτής | Πεδία ανώτατου επιπέδου                                                                                                                                                                                                                                                                                                                                                   | Φωλιασμένο                                                                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (επίπεδα πρωτόγονα), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` συγχωνεύτηκε πάνω από το προεπιλεγμένο `{ text: true, highlights: true }` |
+| Ταβίλι      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                       |
 
-Τα γενικά πεδία έχουν πάντα προτεραιότητα: `query`, `max_results`, `filters` (τομείς), `country` και το
-θέμα που προκύπτει από το `search_type`. Στο Exa, το `search_type: "news"` διατηρεί το `category: "news"`.
-Το Tavily αποδέχεται επίσης `search_type: "finance"` (`topic: "finance"`).
+Τα γενικά πεδία πάντα κερδίζουν: `query`, `max_results`, `filters` (τομείς), `country` και το θέμα που προέρχεται από `search_type`. Στο Exa, `search_type: "news"` διατηρεί `category: "news"`. Το Tavily δέχεται επίσης `search_type: "finance"` (`topic: "finance"`).
 
-Το γενικό `time_range` μεταβιβάζεται πλέον και στους δύο παρόχους: το Exa λαμβάνει `startPublishedDate` (χρονοσήμανση ISO)
-και το Tavily λαμβάνει `start_date` (`YYYY-MM-DD`). Μια ρητά καθορισμένη ημερομηνία στο `provider_options`
-υπερισχύει της αντιστοιχισμένης.
+Το γενικό `time_range` φτάνει πλέον και στους δύο παρόχους: το Exa παίρνει `startPublishedDate` (ISO timestamp) και το Tavily παίρνει `start_date` (`YYYY-MM-DD`). Μια ρητή ημερομηνία στο `provider_options` υπερισχύει της αντιστοιχισμένης.
 
-Τα αποτελέσματα του Exa διατηρούν τα `id`, `highlight_scores`, `summary`, `subpages`, `entities` και `extras` στο
-`provider_raw`. Τα αποτελέσματα του Tavily διατηρούν τα `images` και `favicon`.
+Τα αποτελέσματα Exa διατηρούν `id`, `highlight_scores`, `summary`, `subpages`, `entities` και `extras` σε `provider_raw`. Τα αποτελέσματα Tavilly διατηρούν `images` και `favicon`.
 
-Η λογιστική κόστους εξακολουθεί να χρησιμοποιεί το μη εμφωλευμένο μητρώο `costPerQuery`. Το Tavily χρεώνει
-το `search_depth: "advanced"` με περισσότερες πιστώσεις ανά κλήση και αυτή η διαφορά δεν αποτυπώνεται στο
-`usage.search_cost_usd`.
+Το Exa `type: "lite"` (Exa 3.0) δέχεται ένα μικρότερο σύνολο πεδίων και απορρίπτει ολόκληρο το αίτημα όταν έχει οριστεί οποιοδήποτε άλλο πεδίο. Για το lite, `additionalQueries`, `systemPrompt` και κάθε πλήκτρο `contents` εκτός από `text` και `highlights` απορρίπτονται πριν από την κλήση. Τα καταργημένα `subpages`, `subpageTarget`, `highlights.numSentences` και `highlights.highlightsPerUrl` δεν προωθούνται πλέον.
+
+Η λογιστική κόστους είναι το επίπεδο μητρώο `costPerQuery`, εκτός από το Exa `type: "lite"`, το οποίο καταγράφεται στην τιμή lite (0,004 $ ανά κλήση έναντι 0,007 $ για `auto`). Ο τύπος `instant` παλαιού τύπου τιμολογείται σαν lite. `fast` τιμολογείται όπως `auto`. Η Tavily χρεώνει `search_depth: "advanced"` με περισσότερες πιστώσεις ανά κλήση και αυτή η διαφορά δεν αντικατοπτρίζεται στο `usage.search_cost_usd`.
 
 ---
 

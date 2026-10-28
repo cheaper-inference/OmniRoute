@@ -849,47 +849,36 @@ wywołującemu spoza sesji (pobieranie, usuwanie, anulowanie oraz sprawdzanie `i
 
 ---
 
-## API wyszukiwania
+## Szukaj API
 
-Abstrakcja dostawców wyszukiwania internetowego (Tavily, Brave, Exa, Serper itd.).
+abstrakcja dostawcy Web/search (Tavily, Brave, Exa, Serper itp.).
 
-| Metoda | Ścieżka                | Opis                                                                                                                         |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Wyświetla skonfigurowanych dostawców wyszukiwania i ich możliwości                                                           |
-| POST   | `/v1/search`           | Uruchamia zapytanie wyszukiwania — treść jest walidowana przez `v1SearchSchema`; obsługuje pamięć podręczną i scalanie żądań |
-| GET    | `/v1/search/analytics` | Statystyki trafień, opóźnień i pamięci podręcznej dla poszczególnych dostawców                                               |
+| Metoda | Ścieżka                | Opis                                                                                                   |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | Wyświetl listę możliwości + skonfigurowanych dostawców wyszukiwania                                    |
+| POST   | `/v1/search`           | Uruchom zapytanie wyszukiwania — treść sprawdzona przez `v1SearchSchema`, obsługuje caching/coalescing |
+| GET    | `/v1/search/analytics` | Statystyki hit/latency/cache dla poszczególnych dostawców                                              |
 
-**Uwierzytelnianie:** klucz API typu Bearer (`extractApiKey` + `isValidApiKey`). Zasady wyszukiwania są egzekwowane za pomocą `enforceApiKeyPolicy`.
+**Autoryzacja:** Klucz API na okaziciela (`extractApiKey` + `isValidApiKey`). Polityka wyszukiwania wymuszona przez `enforceApiKeyPolicy`.
 
-### `provider_options` dla Exa i Tavily
+### Exa i Tavily `provider_options`
 
-Exa i Tavily odczytują pola specyficzne dla dostawcy z przestrzeni nazw:
-`provider_options.exa` (lub `provider_options["exa-search"]`) oraz `provider_options.tavily`
-(lub `provider_options["tavily-search"]`). Przekazywane są wyłącznie poniższe klucze. Każdy z nich jest
-sprawdzany względem własnego schematu Zod w `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-a klucz o nieprawidłowym typie jest odrzucany. Wszystkie pozostałe klucze są ignorowane, w tym dane uwierzytelniające, bazowy adres URL,
-`stream` i `outputSchema`. Płaskie klucze używane przez innych dostawców (`cx`, `depth`, ...) działają
-tak jak wcześniej.
+Exa i Tavily czytają pola specyficzne dla dostawcy z worka z przestrzenią nazw: `provider_options.exa` (lub `provider_options["exa-search"]`) i `provider_options.tavily` (lub `provider_options["tavily-search"]`). Przekazywane są tylko poniższe klucze. Każdy z nich jest sprawdzany pod kątem własnego schematu Zod w `open-sse/handlers/search/providerOptionsPassthrough.ts` i usuwany jest klucz niewłaściwego typu. Każdy inny klucz jest ignorowany, włączając auth, base URL, `stream` i `outputSchema`. Klawisze płaskie używane przez innych dostawców (`cx`, `depth`, ...) działają jak poprzednio.
 
-| Dostawca | Pola najwyższego poziomu                                                                                                                                                                                                                                                                                                                                                  | Zagnieżdżone                                                                                                                                                  |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (płaskie wartości proste), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` scalone z domyślnym `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                             |
+| Dostawca | Pola najwyższego poziomu                                                                                                                                                                                                                                                                                                                                                  | Zagnieżdżone                                                                                                                              |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Przykład | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (płaskie prymitywy), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` połączył się z domyślnym `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                         |
 
-Pola ogólne mają zawsze pierwszeństwo: `query`, `max_results`, `filters` (domeny), `country` oraz
-temat wyprowadzony z `search_type`. W przypadku Exa ustawienie `search_type: "news"` zachowuje `category: "news"`.
-Tavily akceptuje również `search_type: "finance"` (`topic: "finance"`).
+Pola ogólne zawsze wygrywają: `query`, `max_results`, `filters` (domeny), `country` i temat wywodzący się z `search_type`. Na Exa `search_type: "news"` przechowuje `category: "news"`. Tavily akceptuje również `search_type: "finance"` (`topic: "finance"`).
 
-Ogólne pole `time_range` jest teraz przekazywane do obu dostawców: Exa otrzymuje `startPublishedDate` (znacznik czasu
-ISO), a Tavily otrzymuje `start_date` (`YYYY-MM-DD`). Data jawnie określona w `provider_options`
-zastępuje wartość wynikającą z mapowania.
+Ogólna wersja `time_range` dociera teraz do obu dostawców: Exa otrzymuje `startPublishedDate` (znacznik czasu ISO ), a Tavily otrzymuje `start_date` (`YYYY-MM-DD`). Wyraźna data w `provider_options` zastępuje datę zmapowaną.
 
-Wyniki Exa zachowują `id`, `highlight_scores`, `summary`, `subpages`, `entities` oraz `extras` w
-`provider_raw`. Wyniki Tavily zachowują `images` i `favicon`.
+Wyniki Exa zachowują `id`, `highlight_scores`, `summary`, `subpages`, `entities` i `extras` w `provider_raw`. Wyniki Tavily zachowują `images` i `favicon`.
 
-Rozliczanie kosztów nadal korzysta z płaskiego rejestru `costPerQuery`. Tavily nalicza
-więcej kredytów za wywołanie przy ustawieniu `search_depth: "advanced"`, a różnica ta nie jest uwzględniana w
-`usage.search_cost_usd`.
+Exa `type: "lite"` (Exa 3.0) akceptuje mniejszy zestaw pól i odrzuca całe żądanie, gdy ustawione jest inne pole. W przypadku Lite, `additionalQueries`, `systemPrompt` i każdy klawisz `contents` z wyjątkiem `text` i `highlights` są odrzucane przed wywołaniem. Przestarzałe `subpages`, `subpageTarget`, `highlights.numSentences` i `highlights.highlightsPerUrl` nie są już przekazywane.
+
+Rachunek kosztów to rejestr płaski `costPerQuery`, z wyjątkiem Exa `type: "lite"`, który jest rejestrowany według ceny lite (0,004 USD za połączenie w porównaniu z 0,007 USD za `auto`). Starszy typ `instant` jest rozliczany jak Lite; `fast` jest rozliczane jak `auto`. Tavily nalicza `search_depth: "advanced"` więcej kredytów za połączenie, a różnica ta nie jest odzwierciedlona w `usage.search_cost_usd`.
 
 ---
 

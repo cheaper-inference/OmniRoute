@@ -777,47 +777,36 @@ OpenAI နှင့် ကိုက်ညီသော အစုလိုက်�
 
 ---
 
-## ရှာဖွေမှု API
+## API ရှာပါ။
 
-ဝဘ်/ရှာဖွေမှု provider abstraction (Tavily၊ Brave၊ Exa၊ Serper စသည်)။
+Web/search ပံ့ပိုးပေးသူ abstraction (Tavily၊ Brave၊ Exa၊ Serper စသည်ဖြင့်)။
 
-| Method | Path                   | Description                                                                                                                   |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | စီစဉ်သတ်မှတ်ထားသော ရှာဖွေမှု provider များနှင့် လုပ်ဆောင်နိုင်စွမ်းများကို စာရင်းပြုစုခြင်း                                   |
-| POST   | `/v1/search`           | ရှာဖွေမှု query တစ်ခုကို လုပ်ဆောင်ခြင်း — body ကို `v1SearchSchema` ဖြင့် စစ်ဆေးအတည်ပြုပြီး caching/coalescing ကို ပံ့ပိုးသည် |
-| GET    | `/v1/search/analytics` | Provider တစ်ခုချင်းစီအလိုက် hit/latency/cache ကိန်းဂဏန်းများ                                                                  |
+| နည်းလမ်း | မဂ်                    | ဖော်ပြချက်                                                                                              |
+| -------- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| GET      | `/v1/search`           | ပြင်ဆင်သတ်မှတ်ထားသော ရှာဖွေရေးဝန်ဆောင်မှုပေးသူများ + စွမ်းရည်များကို စာရင်းပြုစုပါ။                     |
+| POST     | `/v1/search`           | ရှာဖွေမှုတစ်ခုလုပ်ဆောင်ပါ — `v1SearchSchema` မှအတည်ပြုထားသောကိုယ်ထည်၊ caching/coalescing ကိုပံ့ပိုးသည်။ |
+| GET      | `/v1/search/analytics` | ဝန်ဆောင်မှုပေးသူတိုင်း hit/latency/cache ကိန်းဂဏန်းများ                                                 |
 
-**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)။ ရှာဖွေမှုမူဝါဒကို `enforceApiKeyPolicy` မှတစ်ဆင့် အတည်ပြုကျင့်သုံးသည်။
+**အထောက်အထား-** ထမ်းသူ API သော့ (`extractApiKey` + `isValidApiKey`)။ ရှာဖွေမှုမူဝါဒကို `enforceApiKeyPolicy` မှတစ်ဆင့် ပြဋ္ဌာန်းထားသည်။
 
 ### Exa နှင့် Tavily `provider_options`
 
-Exa နှင့် Tavily တို့သည် provider သီးသန့် field များကို namespace ခွဲထားသော bag မှ ဖတ်ယူသည်-
-`provider_options.exa` (သို့မဟုတ် `provider_options["exa-search"]`) နှင့် `provider_options.tavily`
-(သို့မဟုတ် `provider_options["tavily-search"]`)။ အောက်ပါ key များကိုသာ ဆက်လက်ပေးပို့သည်။ တစ်ခုချင်းစီကို
-`open-sse/handlers/search/providerOptionsPassthrough.ts` ရှိ ၎င်း၏ကိုယ်ပိုင် Zod schema နှင့်
-တိုက်ဆိုင်စစ်ဆေးပြီး type မှားနေသော key ကို ဖယ်ရှားသည်။ auth၊ base URL၊
-`stream` နှင့် `outputSchema` အပါအဝင် အခြားမည်သည့် key ကိုမဆို လျစ်လျူရှုသည်။ အခြား provider များအသုံးပြုသော
-အဆင့်တစ်ခုတည်းရှိ key များ (`cx`, `depth`, ...) သည် ယခင်အတိုင်း အလုပ်လုပ်သည်။
+Exa နှင့် Tavily တို့သည် namespaced bag တစ်ခုမှ ပံ့ပိုးပေးသူ-သတ်သတ်မှတ်မှတ်အကွက်များကို ဖတ်သည်- `provider_options.exa` (သို့မဟုတ် `provider_options["exa-search"]`) နှင့် `provider_options.tavily` (သို့မဟုတ် `provider_options["tavily-search"]`) ။ အောက်ပါသော့များကိုသာ ထပ်ဆင့်ပို့ပါသည်။ တစ်ခုစီကို `open-sse/handlers/search/providerOptionsPassthrough.ts` တွင် ၎င်း၏ကိုယ်ပိုင် Zod schema နှင့် စစ်ဆေးပြီး အမျိုးအစားမှားနေသော သော့တစ်ခု ပြုတ်ကျသွားသည်။ auth၊ base URL၊ `stream` နှင့် `outputSchema` အပါအဝင် အခြားသော့များကို လျစ်လျူရှုထားသည်။ အခြားပံ့ပိုးပေးသူများ (`cx`, `depth`, ... ) သုံးသော flat keys များသည် ယခင်အတိုင်း အလုပ်လုပ်ပါသည်။
 
-| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                                                 |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (အဆင့်တစ်ခုတည်းရှိ primitive များ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                             | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ကို ပုံသေ `{ text: true, highlights: true }` အပေါ် ပေါင်းစပ်သည် |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                      |
+| ပံ့ပိုးပေးသူ | ထိပ်တန်းအဆင့်နယ်ပယ်များ                                                                                                                                                                                                                                                                                                                                                   | သိုက်                                                                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ပြားချပ်ချပ် primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` မူရင်း `{ text: true, highlights: true }` တွင် ပေါင်းစပ်ထားသည်။ |
+| ဗီလီ         | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                             |
 
-ယေဘုယျ field များဖြစ်သည့် `query`, `max_results`, `filters` (domain များ)၊ `country` နှင့်
-`search_type` မှ ဆင်းသက်လာသော topic တို့ကို အမြဲဦးစားပေးသည်။ Exa တွင် `search_type: "news"` သည် `category: "news"` ကို ဆက်လက်ထိန်းသိမ်းသည်။
-Tavily သည် `search_type: "finance"` (`topic: "finance"`) ကိုလည်း လက်ခံသည်။
+ယေဘုယျနယ်ပယ်များသည် အမြဲတမ်းအနိုင်ရသည်- `query`၊ `max_results`၊ `filters` (ဒိုမိန်းများ), `country` နှင့် `search_type` မှ ဆင်းသက်လာသော အကြောင်းအရာ။ Exa တွင် `search_type: "news"` `category: "news"` ထိန်းသိမ်းထားသည်။ Tavily သည် `search_type: "finance"` (`topic: "finance"`) ကိုလည်း လက်ခံသည်။
 
-ယေဘုယျ `time_range` သည် ယခုအခါ provider နှစ်ခုလုံးသို့ ရောက်ရှိသည်- Exa သည် `startPublishedDate` (ISO
-timestamp) ကိုရရှိပြီး Tavily သည် `start_date` (`YYYY-MM-DD`) ကိုရရှိသည်။ `provider_options` ရှိ တိတိကျကျသတ်မှတ်ထားသော ရက်စွဲသည်
-ချိတ်ဆက်သတ်မှတ်ထားသည့်ရက်စွဲကို override လုပ်သည်။
+ယေဘူယျ `time_range` ယခုအခါ ဝန်ဆောင်မှုပေးသူ နှစ်ခုစလုံးသို့ ရောက်ရှိသွားသည်- Exa သည် `startPublishedDate` (ISO timestamp) နှင့် Tavily သည် `start_date` (`YYYY-MM-DD`) ရရှိသည်။ `provider_options` တွင် ပြတ်သားသောရက်စွဲသည် မြေပုံရေးဆွဲထားသော ရက်စွဲကို အစားထိုးသည်။
 
-Exa ရလဒ်များသည် `id`, `highlight_scores`, `summary`, `subpages`, `entities` နှင့် `extras` ကို
-`provider_raw` ထဲတွင် ဆက်လက်ထိန်းသိမ်းသည်။ Tavily ရလဒ်များသည် `images` နှင့် `favicon` ကို ဆက်လက်ထိန်းသိမ်းသည်။
+Exa ရလဒ်များသည် `id`, `highlight_scores`, `summary`, `subpages`, `entities` နှင့် `extras` ကို `provider_raw` တွင် ထားရှိသည်။ Tavily ရလဒ်များသည် `images` နှင့် `favicon` ကို ထိန်းထားသည်။
 
-ကုန်ကျစရိတ်တွက်ချက်မှုသည် အဆင့်တစ်ခုတည်းရှိ registry `costPerQuery` အတိုင်း ဆက်လက်ရှိသည်။ Tavily သည်
-`search_depth: "advanced"` အတွက် call တစ်ကြိမ်လျှင် credit ပိုမိုကောက်ခံသော်လည်း ထိုကွာခြားချက်ကို
-`usage.search_cost_usd` တွင် ထည့်သွင်းဖော်ပြထားခြင်းမရှိပါ။
+Exa `type: "lite"` (Exa 3.0) သည် သေးငယ်သော နယ်ပယ်အစုံကို လက်ခံပြီး အခြားနယ်ပယ်တစ်ခုခုကို သတ်မှတ်သည့်အခါ တောင်းဆိုချက်တစ်ခုလုံးကို ငြင်းပယ်သည်။ Lite၊ `additionalQueries`၊ `systemPrompt` နှင့် `contents` ကီးတိုင်းကို ဖုန်းခေါ်ဆိုမှုမတိုင်မီ `text` နှင့် `highlights` မှလွဲ၍ ကျန်သည်။ ကန့်ကွက်ထားသော `subpages`၊ `subpageTarget`၊ `highlights.numSentences` နှင့် `highlights.highlightsPerUrl` တို့ကို ထပ်ဆင့်မပို့တော့ပါ။
+
+ကုန်ကျစရိတ်စာရင်းအင်းသည် သေးငယ်သောစျေးနှုန်းဖြင့် မှတ်တမ်းတင်ထားသော `type: "lite"` `costPerQuery`(ခေါ်ဆိုမှုတစ်ခုလျှင် $0.004 နှင့် `auto` အတွက် $0.007 ) မှလွဲ၍ အမွေအနှစ် `instant` အမျိုးအစားကို ပေါ့ပျက်ကဲ့သို့ ကောက်ခံပါသည်။ `fast` သည် `auto` ကဲ့သို့ ငွေပေးချေသည်။ Tavily သည် ခေါ်ဆိုမှုတစ်ခုလျှင် ခရက်ဒစ်များပိုမိုဖြင့် `search_depth: "advanced"` ဘေလ်ပေးကာ၊ ထိုကွာခြားချက်ကို `usage.search_cost_usd` တွင် ဖော်ပြမည်မဟုတ်ပါ။
 
 ---
 

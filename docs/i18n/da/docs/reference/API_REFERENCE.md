@@ -851,47 +851,36 @@ kaldere uden en session (hentning, sletning, annullering og kontrollen af `input
 
 ---
 
-## Søge-API
+## Søg API
 
-Abstraktion for web-/søgeudbydere (Tavily, Brave, Exa, Serper osv.).
+Web/search -udbyderabstraktion (Tavily, Brave, Exa, Serper osv.).
 
-| Metode | Sti                    | Beskrivelse                                                                                      |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/search`           | Vis konfigurerede søgeudbydere og funktioner                                                     |
-| POST   | `/v1/search`           | Kør en søgeforespørgsel — body valideres af `v1SearchSchema`, understøtter caching/sammenlægning |
-| GET    | `/v1/search/analytics` | Statistik for træffere, latenstid og cache pr. udbyder                                           |
+| Metode | Sti                    | Beskrivelse                                                                                   |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Liste konfigurerede søgeudbyderes + funktioner                                                |
+| POST   | `/v1/search`           | Kør en søgeforespørgsel — body valideret af `v1SearchSchema`, understøtter caching/coalescing |
+| GET    | `/v1/search/analytics` | hit/latency/cache -statistikker pr. udbyder                                                   |
 
-**Godkendelse:** Bearer-API-nøgle (`extractApiKey` + `isValidApiKey`). Søgepolitikken håndhæves via `enforceApiKeyPolicy`.
+**Auth:** Bærer API nøgle (`extractApiKey` + `isValidApiKey`). Søgepolitik håndhæves via `enforceApiKeyPolicy`.
 
 ### Exa og Tavily `provider_options`
 
-Exa og Tavily læser udbyderspecifikke felter fra en navneinddelt samling:
-`provider_options.exa` (eller `provider_options["exa-search"]`) og `provider_options.tavily`
-(eller `provider_options["tavily-search"]`). Kun nøglerne nedenfor videresendes. Hver af dem
-kontrolleres mod sit eget Zod-skema i `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-og en nøgle med den forkerte type udelades. Alle andre nøgler ignoreres, herunder godkendelse, basis-URL,
-`stream` og `outputSchema`. De flade nøgler, som bruges af andre udbydere (`cx`, `depth`, ...), fungerer
-som før.
+Exa og Tavily læser udbyderspecifikke felter fra en pose med navneafstand: `provider_options.exa` (eller `provider_options["exa-search"]`) og `provider_options.tavily` (eller `provider_options["tavily-search"]`). Kun nedenstående nøgler videresendes. Hver enkelt kontrolleres mod sit eget Zod skema i `open-sse/handlers/search/providerOptionsPassthrough.ts`, og en nøgle med den forkerte type droppes. Enhver anden nøgle ignoreres, inklusive auth, base URL, `stream` og `outputSchema`. De flade nøgler, der bruges af andre udbydere (`cx`, `depth`, ...) fungerer som før.
 
-| Udbyder | Felter på øverste niveau                                                                                                                                                                                                                                                                                                                                                  | Indlejret                                                                                                                                                                 |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flade primitive værdier), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` flettes oven på standardværdien `{ text: true, highlights: true }` |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                         |
+| Udbyder | Felter på øverste niveau                                                                                                                                                                                                                                                                                                                                                  | Indlejret                                                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flade primitiver), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` fusionerede over standard `{ text: true, highlights: true }` |
+| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
 
-De generiske felter har altid forrang: `query`, `max_results`, `filters` (domæner), `country` og det
-emne, der udledes af `search_type`. På Exa bevarer `search_type: "news"` værdien `category: "news"`.
-Tavily accepterer også `search_type: "finance"` (`topic: "finance"`).
+De generiske felter vinder altid: `query`, `max_results`, `filters` (domæner), `country` og emnet afledt af `search_type`. På Exa beholder `search_type: "news"` `category: "news"`. Tavily accepterer også `search_type: "finance"` (`topic: "finance"`).
 
-Det generiske `time_range` når nu begge udbydere: Exa får `startPublishedDate` (ISO-
-tidsstempel), og Tavily får `start_date` (`YYYY-MM-DD`). En eksplicit dato i `provider_options`
-tilsidesætter den tilknyttede dato.
+Den generiske `time_range` når nu begge udbydere: Exa får `startPublishedDate` (ISO timestamp) og Tavily får `start_date` (`YYYY-MM-DD`). En eksplicit dato i `provider_options` tilsidesætter den tilknyttede.
 
-Exa-resultater bevarer `id`, `highlight_scores`, `summary`, `subpages`, `entities` og `extras` i
-`provider_raw`. Tavily-resultater bevarer `images` og `favicon`.
+Exa-resultater holder `id`, `highlight_scores`, `summary`, `subpages`, `entities` og `extras` i `provider_raw`. Tavily resultater holder `images` og `favicon`.
 
-Omkostningsberegningen er fortsat det flade register `costPerQuery`. Tavily fakturerer
-`search_depth: "advanced"` med flere kreditter pr. kald, og denne forskel afspejles ikke i
-`usage.search_cost_usd`.
+Exa `type: "lite"` (Exa 3.0) accepterer et mindre sæt felter og afviser hele anmodningen, når et hvilket som helst andet felt er indstillet. For lite slettes `additionalQueries`, `systemPrompt` og hver `contents` -tast undtagen `text` og `highlights` før opkaldet. De forældede `subpages`, `subpageTarget`, `highlights.numSentences` og `highlights.highlightsPerUrl` videresendes ikke længere.
+
+Omkostningsregnskab er det flade register `costPerQuery`, undtagen Exa `type: "lite"`, som registreres til lite-prisen ($0,004 pr. opkald vs $0,007 for `auto`). Den ældre `instant` type faktureres som lite; `fast` faktureres som `auto`. Tavily fakturerer `search_depth: "advanced"` med flere kreditter pr. opkald, og den forskel afspejles ikke i `usage.search_cost_usd`.
 
 ---
 

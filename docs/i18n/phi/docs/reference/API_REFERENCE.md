@@ -849,46 +849,36 @@ Tinatanggihan ng `GET /v1/batches` ang anonymous na caller gamit ang `401` kahit
 
 ---
 
-## Search API
+## Hanapin API
 
-Abstraction ng web/search provider (Tavily, Brave, Exa, Serper, atbp.).
+Web/search provider abstraction (Tavily, Brave, Exa, Serper, atbp.).
 
-| Paraan | Path                   | Paglalarawan                                                                                               |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Ilista ang mga naka-configure na search provider at mga kakayahan ng mga ito                               |
-| POST   | `/v1/search`           | Magpatakbo ng search query — bina-validate ang body ng `v1SearchSchema`, sumusuporta sa caching/coalescing |
-| GET    | `/v1/search/analytics` | Mga istatistika ng hit/latency/cache para sa bawat provider                                                |
+| Pamamaraan | Daan                   | Paglalarawan                                                                                              |
+| ---------- | ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| GET        | `/v1/search`           | Ilista ang mga naka-configure na search provider + na kakayahan                                           |
+| POST       | `/v1/search`           | Magpatakbo ng query sa paghahanap — body validated by `v1SearchSchema`, sumusuporta sa caching/coalescing |
+| GET        | `/v1/search/analytics` | Bawat provider hit/latency/cache stats                                                                    |
 
-**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Ipinapatupad ang patakaran sa paghahanap sa pamamagitan ng `enforceApiKeyPolicy`.
+**Awth:** Tagadala ng API key (`extractApiKey` + `isValidApiKey`). Ipinatupad ang patakaran sa paghahanap sa pamamagitan ng `enforceApiKeyPolicy`.
 
 ### Exa at Tavily `provider_options`
 
-Binabasa ng Exa at Tavily ang mga field na partikular sa provider mula sa isang namespaced bag:
-`provider_options.exa` (o `provider_options["exa-search"]`) at `provider_options.tavily`
-(o `provider_options["tavily-search"]`). Ang mga key lang sa ibaba ang ipinapasa. Sinusuri ang bawat isa
-gamit ang sarili nitong Zod schema sa `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-at inaalis ang key na may maling uri. Binabalewala ang anumang ibang key, kabilang ang auth, base URL,
-`stream` at `outputSchema`. Gumagana pa rin gaya ng dati ang mga flat key na ginagamit ng ibang provider (`cx`, `depth`, ...).
+Binabasa ng Exa at Tavily ang mga field na partikular sa provider mula sa isang namespaced na bag: `provider_options.exa` (o `provider_options["exa-search"]`) at `provider_options.tavily` (o `provider_options["tavily-search"]`). Ang mga susi lamang sa ibaba ang ipinapasa. Ang bawat isa ay sinusuri laban sa sarili nitong Zod schema sa `open-sse/handlers/search/providerOptionsPassthrough.ts`, at ang isang susi na may maling uri ay nahuhulog. Anumang iba pang susi ay binabalewala, kabilang ang auth, base URL, `stream` at `outputSchema`. Ang mga flat key na ginagamit ng ibang mga provider (`cx`, `depth`, ...) ay gumagana tulad ng dati.
 
-| Provider | Mga top-level field                                                                                                                                                                                                                                                                                                                                                       | Nested                                                                                                                                                               |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (mga flat primitive), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                           | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` na isinasama sa default na `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                    |
+| Provider | Mga patlang sa pinakamataas na antas                                                                                                                                                                                                                                                                                                                                      | Nested                                                                                                                                |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | Pinagsama `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` sa default `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
 
-Palaging may prayoridad ang mga generic field: `query`, `max_results`, `filters` (mga domain), `country` at ang
-topic na hinango mula sa `search_type`. Sa Exa, pinananatili ng `search_type: "news"` ang `category: "news"`.
-Tumatanggap din ang Tavily ng `search_type: "finance"` (`topic: "finance"`).
+Palaging panalo ang mga generic na field: `query`, `max_results`, `filters` (mga domain), `country` at ang paksang hinango mula sa `search_type`. Sa Exa, pinapanatili ng `search_type: "news"` `category: "news"`. Tumatanggap din ang Tavily `search_type: "finance"` (`topic: "finance"`).
 
-Nakararating na ngayon sa parehong provider ang generic na `time_range`: natatanggap ng Exa ang `startPublishedDate` (ISO
-timestamp) at natatanggap ng Tavily ang `start_date` (`YYYY-MM-DD`). Ino-override ng tahasang petsa sa `provider_options`
-ang naka-map na petsa.
+Naabot na ngayon ng generic `time_range` ang parehong provider: Ang Exa ay nakakakuha ng `startPublishedDate` (ISO timestamp) at Tavily ay nakakakuha ng `start_date` (`YYYY-MM-DD`). Ino-override ng isang tahasang petsa sa `provider_options` ang naka-map.
 
-Pinananatili ng mga resulta ng Exa ang `id`, `highlight_scores`, `summary`, `subpages`, `entities` at `extras` sa
-`provider_raw`. Pinananatili ng mga resulta ng Tavily ang `images` at `favicon`.
+Ang mga resulta ng Exa ay nagpapanatili `id`, `highlight_scores`, `summary`, `subpages`, `entities` at `extras` sa `provider_raw`. Ang mga resulta ng Tavily ay nagpapanatili `images` at `favicon`.
 
-Ang pagtutuos ng gastos ay nananatiling flat registry na `costPerQuery`. Sinisingil ng Tavily ang
-`search_depth: "advanced"` nang mas maraming credit sa bawat tawag, at hindi ipinapakita ang pagkakaibang iyon sa
-`usage.search_cost_usd`.
+Ang Exa `type: "lite"` (Exa 3.0) ay tumatanggap ng mas maliit na hanay ng mga field at tinatanggihan ang buong kahilingan kapag nakatakda ang anumang ibang field. Para sa lite, `additionalQueries`, `systemPrompt` at bawat `contents` key maliban `text` at `highlights` ay ibinababa bago ang tawag. Ang hindi na ginagamit na `subpages`, `subpageTarget`, `highlights.numSentences` at `highlights.highlightsPerUrl` ay hindi na naipapasa.
+
+Ang cost accounting ay ang flat registry `costPerQuery`, maliban sa Exa `type: "lite"`, na naitala sa lite na presyo ($0.004 bawat tawag kumpara sa $0.007 para sa `auto`). Ang legacy na uri `instant` ay sinisingil tulad ng lite; `fast` ay sinisingil tulad ng `auto`. Si Tavily ay naniningil ng `search_depth: "advanced"` sa mas maraming credit sa bawat tawag, at ang pagkakaibang iyon ay hindi makikita sa `usage.search_cost_usd`.
 
 ---
 

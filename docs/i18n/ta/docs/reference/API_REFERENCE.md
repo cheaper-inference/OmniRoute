@@ -814,47 +814,36 @@ OpenAI-இணக்கமான தொகுதிச் செயலாக்�
 
 ---
 
-## தேடல் API
+## API தேடுங்கள்
 
-இணைய/தேடல் வழங்குநர் சுருக்க அடுக்கு (Tavily, Brave, Exa, Serper போன்றவை).
+Web/search வழங்குநர் சுருக்கம் (Tavily, Brave, Exa, Serper, முதலியன).
 
-| முறை | பாதை                   | விளக்கம்                                                                                                                   |
-| ---- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | உள்ளமைக்கப்பட்ட தேடல் வழங்குநர்கள் + திறன்களைப் பட்டியலிடுகிறது                                                            |
-| POST | `/v1/search`           | தேடல் வினவலை இயக்குகிறது — உடல் `v1SearchSchema` மூலம் சரிபார்க்கப்படுகிறது, தற்காலிகச் சேமிப்பு/ஒருங்கிணைப்பை ஆதரிக்கிறது |
-| GET  | `/v1/search/analytics` | வழங்குநர் வாரியான வெற்றி/தாமதம்/தற்காலிகச் சேமிப்புப் புள்ளிவிவரங்கள்                                                      |
+| முறை | பாதை                   | விளக்கம்                                                                                            |
+| ---- | ---------------------- | --------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | உள்ளமைக்கப்பட்ட தேடல் வழங்குநர்களின் + திறன்களைப் பட்டியலிடுங்கள்                                   |
+| POST | `/v1/search`           | தேடல் வினவலை இயக்கவும் - `v1SearchSchema` ஆல் சரிபார்க்கப்பட்ட உடல், caching/coalescing ஆதரிக்கிறது |
+| GET  | `/v1/search/analytics` | ஒவ்வொரு வழங்குநருக்கும் hit/latency/cache புள்ளிவிவரங்கள்                                           |
 
-**அங்கீகாரம்:** Bearer API விசை (`extractApiKey` + `isValidApiKey`). தேடல் கொள்கை `enforceApiKeyPolicy` மூலம் செயல்படுத்தப்படுகிறது.
+**அங்கீகாரம்:** தாங்கி API விசை (`extractApiKey` + `isValidApiKey`). தேடல் கொள்கை `enforceApiKeyPolicy` வழியாக செயல்படுத்தப்பட்டது.
 
 ### Exa மற்றும் Tavily `provider_options`
 
-Exa மற்றும் Tavily, பெயர்வெளியிடப்பட்ட தொகுப்பிலிருந்து வழங்குநருக்கே உரிய புலங்களைப் படிக்கின்றன:
-`provider_options.exa` (அல்லது `provider_options["exa-search"]`) மற்றும் `provider_options.tavily`
-(அல்லது `provider_options["tavily-search"]`). கீழே உள்ள விசைகள் மட்டுமே அனுப்பப்படுகின்றன. ஒவ்வொன்றும்
-`open-sse/handlers/search/providerOptionsPassthrough.ts`-இல் உள்ள அதற்குரிய Zod திட்டவடிவத்துடன்
-சரிபார்க்கப்படுகிறது; தவறான வகையைக் கொண்ட விசை நீக்கப்படும். அங்கீகாரம், அடிப்படை URL,
-`stream` மற்றும் `outputSchema` உட்பட வேறு எந்த விசையும் புறக்கணிக்கப்படும். மற்ற வழங்குநர்கள் பயன்படுத்தும்
-தட்டையான விசைகள் (`cx`, `depth`, ...) முன்பு போலவே செயல்படும்.
+Exa மற்றும் Tavily ஒரு பெயர் இடைவெளி பையில் இருந்து வழங்குநர்-குறிப்பிட்ட புலங்களைப் படிக்கவும்: `provider_options.exa` (அல்லது `provider_options["exa-search"]`) மற்றும் `provider_options.tavily` (அல்லது `provider_options["tavily-search"]`). கீழே உள்ள விசைகள் மட்டுமே அனுப்பப்படும். ஒவ்வொன்றும் அதன் சொந்த Zod ஸ்கீமாவிற்கு எதிராக `open-sse/handlers/search/providerOptionsPassthrough.ts` இல் சரிபார்க்கப்பட்டது, மேலும் தவறான வகையுடன் ஒரு விசை கைவிடப்பட்டது. அங்கீகாரம், அடிப்படை URL, `stream` மற்றும் `outputSchema` உட்பட வேறு எந்த விசையும் புறக்கணிக்கப்படும். பிற வழங்குநர்கள் பயன்படுத்தும் பிளாட் கீகள் (`cx`, `depth`, ...) முன்பு போலவே செயல்படும்.
 
-| வழங்குநர் | மேல்நிலைப் புலங்கள்                                                                                                                                                                                                                                                                                                                                                       | உள்ளமைந்தவை                                                                                                                                                                    |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (தட்டையான அடிப்படை மதிப்புகள்), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                 | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` இயல்புநிலையான `{ text: true, highlights: true }` மீது ஒன்றிணைக்கப்படும் |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                              |
+| வழங்குபவர் | உயர்மட்ட புலங்கள்                                                                                                                                                                                                                                                                                                                                                         | கூடு கட்டப்பட்டது                                                                                                                               |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (பிளாட் primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` இயல்புநிலை `{ text: true, highlights: true }` மீது இணைக்கப்பட்டது |
+| தவிலி      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
 
-பொதுவான புலங்களுக்கே எப்போதும் முன்னுரிமை: `query`, `max_results`, `filters` (களங்கள்), `country` மற்றும்
-`search_type`-இலிருந்து பெறப்படும் தலைப்பு. Exa-வில், `search_type: "news"` ஆனது `category: "news"`-ஐத் தக்கவைக்கிறது.
-Tavily, `search_type: "finance"`-ஐயும் (`topic: "finance"`) ஏற்கிறது.
+பொதுவான புலங்கள் எப்போதும் வெற்றி பெறும்: `query`, `max_results`, `filters` (டொமைன்கள்), `country` மற்றும் `search_type` இலிருந்து பெறப்பட்ட தலைப்பு. எக்ஸாவில், `search_type: "news"` `category: "news"` வைத்திருக்கும். Tavily `search_type: "finance"` (`topic: "finance"`) ஐயும் ஏற்றுக்கொள்கிறது.
 
-பொதுவான `time_range` இப்போது இரு வழங்குநர்களையும் சென்றடைகிறது: Exa-க்கு `startPublishedDate` (ISO
-நேரமுத்திரை), Tavily-க்கு `start_date` (`YYYY-MM-DD`) கிடைக்கும். `provider_options`-இல் வெளிப்படையாகக் குறிப்பிடப்பட்ட தேதி
-வரைபடுத்தப்பட்ட தேதியை மீறி முன்னுரிமை பெறும்.
+பொதுவான `time_range` இப்போது இரு வழங்குநர்களையும் சென்றடைகிறது: Exa `startPublishedDate` (ISO நேர முத்திரை) மற்றும் Tavily `start_date` (`YYYY-MM-DD`) பெறுகிறது. `provider_options` இல் ஒரு வெளிப்படையான தேதி மேப் செய்யப்பட்டதை மீறுகிறது.
 
-Exa முடிவுகள் `id`, `highlight_scores`, `summary`, `subpages`, `entities` மற்றும் `extras` ஆகியவற்றை
-`provider_raw`-இல் தக்கவைக்கின்றன. Tavily முடிவுகள் `images` மற்றும் `favicon` ஆகியவற்றைத் தக்கவைக்கின்றன.
+தேர்வு முடிவுகள் `id`, `highlight_scores`, `summary`, `subpages`, `entities` மற்றும் `extras` ஐ `provider_raw` இல் வைத்திருக்கும். Tavily முடிவுகள் `images` மற்றும் `favicon` வைத்திருக்கின்றன.
 
-செலவுக் கணக்கீடு இன்னும் தட்டையான பதிவகமான `costPerQuery`-ஐப் பயன்படுத்துகிறது. Tavily,
-`search_depth: "advanced"`-க்கு ஒவ்வொரு அழைப்பிலும் அதிக கிரெடிட்களை வசூலிக்கிறது; அந்த வேறுபாடு
-`usage.search_cost_usd`-இல் பிரதிபலிக்கப்படுவதில்லை.
+Exa `type: "lite"` (Exa 3.0) ஒரு சிறிய புலங்களை ஏற்றுக்கொள்கிறது மற்றும் வேறு ஏதேனும் புலம் அமைக்கப்படும் போது முழு கோரிக்கையையும் நிராகரிக்கிறது. லைட்டிற்கு, `additionalQueries`, `systemPrompt` மற்றும் `text` மற்றும் `highlights` தவிர ஒவ்வொரு `contents` விசையும் அழைப்புக்கு முன் கைவிடப்படும். நிறுத்தப்பட்ட `subpages`, `subpageTarget`, `highlights.numSentences` மற்றும் `highlights.highlightsPerUrl` ஆகியவை இனி அனுப்பப்படாது.
+
+விலைக் கணக்கியல் என்பது பிளாட் ரெஜிஸ்ட்ரி `costPerQuery` ஆகும், Exa `type: "lite"` தவிர, இது லைட் விலையில் பதிவு செய்யப்படுகிறது (ஒரு அழைப்புக்கு $0.004 மற்றும் `auto` க்கு $0.007). மரபு `instant` வகை லைட் போல் பில் செய்யப்படுகிறது; `fast` என்பது `auto` போல் பில் செய்யப்படுகிறது. Tavily ஒரு அழைப்புக்கு அதிக வரவுகளில் `search_depth: "advanced"` பில் செய்கிறது, மேலும் அந்த வேறுபாடு `usage.search_cost_usd` இல் பிரதிபலிக்காது.
 
 ---
 

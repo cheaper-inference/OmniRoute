@@ -850,47 +850,36 @@ ne sesijos užklausos teikėjui (gaunant, ištrinant, atšaukiant ir kuriant atl
 
 ---
 
-## Paieškos API
+## Ieškoti API
 
-Žiniatinklio / paieškos teikėjų abstrakcija (Tavily, Brave, Exa, Serper ir kt.).
+Web/search teikėjo abstrakcija (Tavily, Brave, Exa, Serper ir kt.).
 
-| Metodas | Kelias                 | Aprašymas                                                                                  |
-| ------- | ---------------------- | ------------------------------------------------------------------------------------------ |
-| GET     | `/v1/search`           | Pateikia sukonfigūruotų paieškos teikėjų ir jų galimybių sąrašą                            |
-| POST    | `/v1/search`           | Vykdo paieškos užklausą — turinį tikrina `v1SearchSchema`, palaikomas podėlis / sujungimas |
-| GET     | `/v1/search/analytics` | Kiekvieno teikėjo rezultatų, delsos ir podėlio statistika                                  |
+| Metodas | Kelias                 | Aprašymas                                                                                     |
+| ------- | ---------------------- | --------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | Sukonfigūruotų paieškos paslaugų teikėjų + galimybių sąrašas                                  |
+| POST    | `/v1/search`           | Vykdykite paieškos užklausą – `v1SearchSchema` patvirtintas kūnas, palaiko caching/coalescing |
+| GET     | `/v1/search/analytics` | Teikėjo hit/latency/cache statistika                                                          |
 
-**Autentifikavimas:** „Bearer“ API raktas (`extractApiKey` + `isValidApiKey`). Paieškos politika užtikrinama naudojant `enforceApiKeyPolicy`.
+**Auth:** Nešiklio API raktas (`extractApiKey` + `isValidApiKey`). Paieškos politika vykdoma naudojant `enforceApiKeyPolicy`.
 
 ### Exa ir Tavily `provider_options`
 
-Exa ir Tavily skaito teikėjui būdingus laukus iš vardų sritimi suskirstyto objekto:
-`provider_options.exa` (arba `provider_options["exa-search"]`) ir `provider_options.tavily`
-(arba `provider_options["tavily-search"]`). Persiunčiami tik toliau nurodyti raktai. Kiekvienas jų
-tikrinamas pagal atskirą Zod schemą faile `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-o netinkamo tipo raktas atmetamas. Visi kiti raktai ignoruojami, įskaitant autentifikavimo duomenis, bazinį URL,
-`stream` ir `outputSchema`. Kitų teikėjų naudojami plokštieji raktai (`cx`, `depth`, ...) veikia
-kaip anksčiau.
+„Exa“ ir „Tavily“ skaito konkretaus teikėjo laukus iš vardų tarpo: `provider_options.exa` (arba `provider_options["exa-search"]`) ir `provider_options.tavily` (arba `provider_options["tavily-search"]`). Persiunčiami tik žemiau esantys raktai. Kiekvienas iš jų patikrinamas pagal savo Zod schemą `open-sse/handlers/search/providerOptionsPassthrough.ts` ir atmetamas netinkamo tipo raktas. Bet koks kitas raktas yra ignoruojamas, įskaitant auth, base URL, `stream` ir `outputSchema`. Kitų tiekėjų naudojami plokšti klavišai (`cx`, `depth`, ...) veikia kaip anksčiau.
 
-| Teikėjas | Aukščiausiojo lygio laukai                                                                                                                                                                                                                                                                                                                                                | Įdėtiniai                                                                                                                                                                  |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (plokščiosios primityviosios reikšmės), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                         | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` sujungiami su numatytąja reikšme `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                          |
+| Teikėjas | Aukščiausio lygio laukai                                                                                                                                                                                                                                                                                                                                                  | Įdėta                                                                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Pvz      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (plokštieji primityvai), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                        | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` sujungta su numatytuoju `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
 
-Bendrieji laukai visada turi pirmenybę: `query`, `max_results`, `filters` (domenai), `country` ir iš
-`search_type` išvedama tema. Exa atveju `search_type: "news"` išlaiko `category: "news"`.
-Tavily taip pat priima `search_type: "finance"` (`topic: "finance"`).
+Visada laimi bendrieji laukai: `query`, `max_results`, `filters` (domenai), `country` ir tema, kilusi iš `search_type`. „Exa“ `search_type: "news"` išlaiko `category: "news"`. Tavily taip pat priima `search_type: "finance"` (`topic: "finance"`).
 
-Bendrasis `time_range` dabar perduodamas abiem teikėjams: Exa gauna `startPublishedDate` (ISO
-laiko žymą), o Tavily gauna `start_date` (`YYYY-MM-DD`). Aiškiai nurodyta data lauke `provider_options`
-turi pirmenybę prieš susietąją.
+Bendrasis `time_range` dabar pasiekia abu teikėjus: Exa gauna `startPublishedDate` (ISO timestamp), o Tavily gauna `start_date` (`YYYY-MM-DD`). Tiksli data `provider_options` viršija susietą datą.
 
-Exa rezultatuose `id`, `highlight_scores`, `summary`, `subpages`, `entities` ir `extras` išlaikomi
-lauke `provider_raw`. Tavily rezultatuose išlaikomi `images` ir `favicon`.
+Exa rezultatai išsaugo `id`, `highlight_scores`, `summary`, `subpages`, `entities` ir `extras` `provider_raw`. Tavily rezultatai išlaiko `images` ir `favicon`.
 
-Sąnaudų apskaitai vis dar naudojamas plokščiasis registras `costPerQuery`. Tavily už
-`search_depth: "advanced"` taiko daugiau kreditų vienam iškvietimui, o šis skirtumas
-`usage.search_cost_usd` neatsispindi.
+Exa `type: "lite"` (Exa 3.0) priima mažesnį laukų rinkinį ir atmeta visą užklausą, kai nustatomas bet kuris kitas laukas. Lite, `additionalQueries`, `systemPrompt` ir kiekvienas `contents` klavišas, išskyrus `text` ir `highlights` atmetamas prieš skambinant. Nebenaudojami `subpages`, `subpageTarget`, `highlights.numSentences` ir `highlights.highlightsPerUrl` nebepersiunčiami.
+
+Sąnaudų apskaita yra fiksuoto registro `costPerQuery`, išskyrus Exa `type: "lite"`, kuri įrašoma pagal paprastą kainą (0,004 USD už skambutį, palyginti su 0,007 USD už `auto`). Pasenęs `instant` tipas apmokestinamas kaip lite; `fast` apmokestinamas kaip `auto`. Tavily apmokestina `search_depth: "advanced"` daugiau kreditų už skambutį ir šis skirtumas neatsispindi `usage.search_cost_usd`.
 
 ---
 

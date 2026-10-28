@@ -849,47 +849,36 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API לחיפוש
+## חפש API
 
-הפשטה עבור ספקי חיפוש באינטרנט (Tavily, Brave, Exa, Serper וכו').
+הפשטה של ספק Web/search (Tavily, Brave, Exa, Serper וכו').
 
-| שיטה | נתיב                   | תיאור                                                                                     |
-| ---- | ---------------------- | ----------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | הצגת ספקי החיפוש המוגדרים והיכולות שלהם                                                   |
-| POST | `/v1/search`           | הרצת שאילתת חיפוש — גוף הבקשה מאומת באמצעות `v1SearchSchema`, עם תמיכה במטמון/איחוד בקשות |
-| GET  | `/v1/search/analytics` | נתוני פגיעות/זמן השהיה/מטמון לכל ספק                                                      |
+| שִׁיטָה | נָתִיב                 | תֵאוּר                                                                            |
+| ------- | ---------------------- | --------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | רשימת ספקי החיפוש המוגדרים יכולות +                                               |
+| POST    | `/v1/search`           | הפעל שאילתת חיפוש - גוף מאומת על ידי `v1SearchSchema`, תומך ב- caching/coalescing |
+| GET     | `/v1/search/analytics` | סטטיסטיקות hit/latency/cache לכל ספק                                              |
 
-**אימות:** מפתח API מסוג Bearer ‏(`extractApiKey` + `isValidApiKey`). מדיניות החיפוש נאכפת באמצעות `enforceApiKeyPolicy`.
+**אישור:** מפתח API נושא (`extractApiKey` + `isValidApiKey`). מדיניות חיפוש נאכפת באמצעות `enforceApiKeyPolicy`.
 
-### אפשרויות `provider_options` של Exa ושל Tavily
+### אקסה וטבילי `provider_options`
 
-Exa ו-Tavily קוראים שדות ייעודיים לספק מתוך מאגר בעל מרחב שמות:
-`provider_options.exa` (או `provider_options["exa-search"]`) ו-`provider_options.tavily`
-(או `provider_options["tavily-search"]`). רק המפתחות שלהלן מועברים הלאה. כל אחד מהם
-נבדק מול סכמת Zod משלו ב-`open-sse/handlers/search/providerOptionsPassthrough.ts`,
-ומפתח מסוג שגוי מושמט. כל מפתח אחר אינו נלקח בחשבון, לרבות אימות, כתובת URL בסיסית,
-`stream` ו-`outputSchema`. המפתחות השטוחים שבהם משתמשים ספקים אחרים (`cx`, `depth`, ...) פועלים
-כמו קודם.
+Exa ו-Tavily קוראים שדות ספציפיים לספק מתוך תיק עם רווחי שם: `provider_options.exa` (או `provider_options["exa-search"]`) ו- `provider_options.tavily` (או `provider_options["tavily-search"]`). רק המפתחות למטה מועברים. כל אחד מהם נבדק מול סכימת Zod משלו ב- `open-sse/handlers/search/providerOptionsPassthrough.ts`, ומפתח עם הסוג הלא נכון נשמט. מתעלמים מכל מפתח אחר, כולל auth, base URL, `stream` ו- `outputSchema`. המקשים השטוחים שבהם משתמשים ספקים אחרים (`cx`, `depth`, ...) עובדים כמו קודם.
 
-| ספק    | שדות ברמה העליונה                                                                                                                                                                                                                                                                                                                                                         | מקוננים                                                                                                                                                         |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ערכים פרימיטיביים שטוחים), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                     | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ממוזג מעל ברירת המחדל `{ text: true, highlights: true }` |
-| Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                               |
+| ספק   | שדות ברמה העליונה                                                                                                                                                                                                                                                                                                                                                         | מקונן                                                                                                                                 |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa   | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (פרימיטיבים שטוחים), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` התמזג על ברירת המחדל `{ text: true, highlights: true }` |
+| טבילי | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
 
-השדות הכלליים תמיד מקבלים עדיפות: `query`, `max_results`, `filters` (דומיינים), `country` והנושא
-הנגזר מ-`search_type`. ב-Exa, ‏`search_type: "news"` משמר את `category: "news"`.
-Tavily מקבל גם `search_type: "finance"` ‏(`topic: "finance"`).
+השדות הגנריים תמיד מנצחים: `query`, `max_results`, `filters` (דומיינים), `country` והנושא הנגזר מ- `search_type`. ב-Exa, `search_type: "news"` שומר על `category: "news"`. טבילי מקבל גם `search_type: "finance"` (`topic: "finance"`).
 
-השדה הכללי `time_range` מגיע כעת לשני הספקים: Exa מקבל `startPublishedDate` (חותמת זמן בפורמט ISO)
-ו-Tavily מקבל `start_date` ‏(`YYYY-MM-DD`). תאריך מפורש ב-`provider_options`
-דורס את התאריך שמופה.
+ה- `time_range` הגנרי מגיע כעת לשני הספקים: Exa מקבל `startPublishedDate` (חותמת זמן ISO ) ו-Tavily מקבל `start_date` (`YYYY-MM-DD`). תאריך מפורש ב- `provider_options` עוקף את המופה.
 
-תוצאות Exa שומרות את `id`, `highlight_scores`, `summary`, `subpages`, `entities` ו-`extras` בתוך
-`provider_raw`. תוצאות Tavily שומרות את `images` ואת `favicon`.
+תוצאות Exa שומרות על `id`, `highlight_scores`, `summary`, `subpages`, `entities` ו- `extras` ב- `provider_raw`. תוצאות טובות לשמור על `images` ו- `favicon`.
 
-חישוב העלויות עדיין משתמש במאגר השטוח `costPerQuery`. ‏Tavily מחייב
-יותר נקודות זכות לכל קריאה עבור `search_depth: "advanced"`, והפרש זה אינו משתקף
-ב-`usage.search_cost_usd`.
+Exa `type: "lite"` (Exa 3.0) מקבל קבוצה קטנה יותר של שדות ודוחה את כל הבקשה כאשר כל שדה אחר מוגדר. עבור lite, `additionalQueries`, `systemPrompt` וכל מקש `contents` מלבד `text` ו- `highlights` נשמטים לפני השיחה. `subpages`, `subpageTarget`, `highlights.numSentences` ו- `highlights.highlightsPerUrl` לא מועברים עוד.
+
+חשבונאות עלויות היא הרישום השטוח `costPerQuery`, מלבד Exa `type: "lite"`, שנרשם במחיר הלייט ($0.004 לשיחה לעומת $0.007 עבור `auto`). סוג `instant` מדור קודם מחויב כמו lite; `fast` מחויב כמו `auto`. Tavily מחייבת `search_depth: "advanced"` יותר זיכויים לכל שיחה, וההבדל הזה לא בא לידי ביטוי ב- `usage.search_cost_usd`.
 
 ---
 
