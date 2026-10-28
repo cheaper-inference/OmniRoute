@@ -37,13 +37,13 @@ Perbandingan fitur objektif dengan router AI open-source populer.
 | **Dukungan tunnel (Cloudflared, Tailscale, Ngrok)** |                     ✅                     |         ❌         |        n/a        |     n/a     |
 | **Lisensi**                                         |                    MIT                     |        MIT         |    proprietary    | proprietary |
 
-## Kapan memilih OmniRoute
+## Kapan harus memilih OmniRoute
 
-- Anda menghosting sendiri dan menginginkan **cakupan provider maksimal** (375 provider, 155 entri katalog gratis/tanpa autentikasi)
-- Anda memerlukan **server MCP bawaan** (tool LLM, memori, skill yang diekspos sebagai tool)
-- Anda memerlukan **protokol A2A** untuk alur kerja antaragen
-- Anda menginginkan **fingerprint stealth** (JA3/JA4) untuk menghindari deteksi oleh CAPTCHA upstream
-- Anda memerlukan **fitur enterprise** (guardrails, evals, audit trail) tanpa tagihan SaaS
+- Anda menghosting sendiri dan menginginkannya** cakupan penyedia maksimum** (377 penyedia, 155 entri katalog free/no-auth )
+- Anda membutuhkan sebuah** server MCP bawaan** (alat LLM, memori, keterampilan diekspos sebagai alat)
+- Anda membutuhkan** protokol A2A** untuk alur kerja agen-ke-agen
+- Anda ingin** siluman sidik jari** (JA3/JA4) untuk menghindari deteksi oleh CAPTCHAs hulu
+- Anda membutuhkan** fitur perusahaan** (pagar pembatas, eval, jejak audit) tanpa tagihan SaaS
 
 ## Kapan memilih LiteLLM
 

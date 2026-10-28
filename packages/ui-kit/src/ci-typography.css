@@ -1,0 +1,82 @@
+/* Public typography roles. These deliberately leave font-size and responsive
+   variants to the component/host. Import through styles.css for font loading. */
+.type-heading,
+:where(.ci-theme) :is(h1, h2, h3, h4, h5, h6, [role="heading"]) {
+  font-family: var(--ci-font-ui);
+  font-weight: var(--ci-font-weight-medium);
+  line-height: var(--ci-type-heading-leading);
+  letter-spacing: var(--ci-type-heading-tracking);
+}
+
+/* Retain the PageHeader public overrides above the generic heading defaults. */
+.ci-page-header__title {
+  font-family: var(--ci-font-display);
+  font-weight: var(--ci-page-title-weight);
+  line-height: var(--ci-page-title-leading);
+}
+
+.ci-dashboard-display {
+  font-family: var(--ci-type-dashboard-display-family);
+  font-weight: var(--ci-type-dashboard-display-weight);
+  line-height: var(--ci-type-dashboard-display-leading);
+}
+
+.type-body {
+  font-family: var(--ci-font-ui);
+  font-weight: var(--ci-font-weight-regular);
+  line-height: var(--ci-type-body-leading);
+  letter-spacing: var(--ci-type-body-tracking);
+}
+
+.type-reading,
+:where(.type-reading) :where(p, li, dd, blockquote, pre, code, kbd, samp),
+:where(.ci-theme) :is(pre, code, kbd, samp) {
+  font-family: var(--ci-font-ui);
+  font-weight: var(--ci-font-weight-regular);
+  line-height: var(--ci-type-reading-leading);
+  letter-spacing: var(--ci-type-reading-tracking);
+}
+
+.type-control,
+:where(.ci-theme) :where(button, label, th, [role="button"], [role="tab"], [role="menuitem"], [role="option"]):where(:not(.ci-select__trigger, .ci-searchable-select__trigger--field)) {
+  font-family: var(--ci-font-ui);
+  font-weight: var(--ci-font-weight-medium);
+  line-height: var(--ci-type-control-leading);
+  letter-spacing: var(--ci-type-control-tracking);
+}
+
+.type-data,
+:where(.ci-theme) :is(input, textarea, td) {
+  font-family: var(--ci-font-ui);
+  font-weight: var(--ci-font-weight-regular);
+  line-height: var(--ci-type-data-leading);
+  letter-spacing: var(--ci-type-data-tracking);
+}
+
+.type-caption,
+:where(.ci-theme) :is(small, figcaption, [role="tooltip"]) {
+  font-family: var(--ci-font-ui);
+  font-weight: var(--ci-font-weight-regular);
+  line-height: var(--ci-type-caption-leading);
+  letter-spacing: var(--ci-type-caption-tracking);
+}
+
+/* Use for standalone numeric metrics at 24px and above. Small numbers inherit
+   the component weight and leading; text-valued stats use heading/text roles. */
+.type-metric {
+  font-family: var(--ci-font-ui);
+  font-weight: var(--ci-font-weight-medium);
+  line-height: var(--ci-type-metric-leading);
+  letter-spacing: var(--ci-type-metric-tracking);
+}
+.type-number,
+.ci-range-calendar__day-button { letter-spacing: 0em; }
+
+.type-control:is([aria-selected="true"], [aria-pressed="true"], [aria-checked="true"], [aria-current], [data-state="checked"], [data-state="active"]),
+:where(.ci-theme) :is(button, [role="tab"], [role="option"], [role="menuitem"], [role="radio"], [role="checkbox"], [role="menuitemcheckbox"], [role="menuitemradio"]):is([aria-selected="true"], [aria-pressed="true"], [aria-checked="true"], [aria-current], [data-state="checked"], [data-state="active"], [data-active]:not([data-active="false"])) {
+  font-weight: var(--ci-font-weight-semibold);
+}
+
+@layer base {
+  :is(.ci-theme, .type-reading, .type-body) :is(strong, b) { font-weight: var(--ci-font-weight-semibold); }
+}

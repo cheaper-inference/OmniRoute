@@ -33,6 +33,7 @@ import {
 import { CODEX_NATIVE_UNPREFIXED_MODELS } from "@omniroute/open-sse/services/model";
 import { isModelSelectable } from "@omniroute/open-sse/services/modelLifecycle";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo";
+import { expandProviderWildcardsInCollection } from "@omniroute/open-sse/services/combo/providerWildcard";
 import {
   prepareBuiltinAutoComboInputs,
   isPaidTierAutoId,
@@ -201,7 +202,7 @@ function yieldCatalogBuildTurn(): Promise<void> {
 export async function getUnifiedModelsResponse(
   request: Request,
   corsHeaders: Record<string, string> = {},
-  options: { scheduleBackgroundRefresh?: BackgroundRefreshScheduler } = {}
+  options: { scheduleBackgroundRefresh?: BackgroundRefreshScheduler; revealHidden?: boolean } = {}
 ) {
   const diagnosticHeaders = getCatalogDiagnosticsHeaders({ request });
 
@@ -235,7 +236,7 @@ export async function getUnifiedModelsResponse(
     return await resolveCachedCatalogResponse(
       request,
       { corsHeaders, diagnosticHeaders },
-      buildCatalogPayload,
+      options.revealHidden ? (req) => buildCatalogPayload(req, true) : buildCatalogPayload,
       {
         // #10831: a disabled router hides auto/* just as hideAutoCombos does, so
         // the two collapse into one cache dimension — the resulting catalogs are
@@ -244,6 +245,7 @@ export async function getUnifiedModelsResponse(
           settingsForAuth?.hideAutoCombos === true || settingsForAuth?.autoRoutingEnabled === false,
         hideNoThinkVariants: settingsForAuth?.hideNoThinkVariants === true,
         scheduleBackgroundRefresh: options.scheduleBackgroundRefresh,
+        revealHidden: options.revealHidden === true,
       }
     );
   } catch (err) {
@@ -262,9 +264,10 @@ export async function getUnifiedModelsResponse(
 }
 
 async function buildCatalogPayload(
-  request: Request
+  request: Request,
+  revealHidden = false
 ): Promise<{ body: string; headers: Record<string, string>; status: number; cacheTTL: number }> {
-  const built = await buildUnifiedModelsResponseCore(request);
+  const built = await buildUnifiedModelsResponseCore(request, {}, revealHidden);
   const body = await built.text();
   const headers: Record<string, string> = {};
   built.headers.forEach((value, key) => {
@@ -290,7 +293,8 @@ async function buildCatalogPayload(
  */
 async function buildUnifiedModelsResponseCore(
   request: Request,
-  corsHeaders: Record<string, string> = {}
+  corsHeaders: Record<string, string> = {},
+  revealHidden = false
 ) {
   const diagnosticHeaders = getCatalogDiagnosticsHeaders({ request });
   // #9147: this builder walks connections + model registries at catalog scale with no
@@ -445,7 +449,7 @@ async function buildUnifiedModelsResponseCore(
     // diverged. Check every key a model could plausibly have been hidden under:
     // the raw key passed in, its resolved canonical provider id, that canonical id's
     // alias, and the compatible-provider-node prefix for either.
-    const isModelHiddenBulk = (
+    const isModelHiddenStrict = (
       providerKey: string | null | undefined,
       modelId: string,
       canonicalProviderId?: string | null,
@@ -464,12 +468,17 @@ async function buildUnifiedModelsResponseCore(
       const isHidden = getHiddenModelsForModality(modality);
       return keysToCheck.some((key) => isHidden(key, modelId));
     };
+    // `revealHidden` (management catalog only) keeps hidden model rows; combos still drop hidden targets.
+    const isModelHiddenBulk: typeof isModelHiddenStrict = (...args) =>
+      !revealHidden && isModelHiddenStrict(...args);
 
     // Get combos
     let combos = [];
     await yieldCatalogBuildTurn();
     try {
       combos = await getCombos();
+      // Match inference before nested resolution and metadata lookup; keep saved wildcards intact.
+      combos = await expandProviderWildcardsInCollection(combos);
     } catch (e) {
       console.log("Could not fetch combos");
     }
@@ -835,11 +844,22 @@ async function buildUnifiedModelsResponseCore(
     const models = [];
     const timestamp = Math.floor(Date.now() / 1000);
     const listedIds = new Set<string>();
+    // The per-key metadata (quota pools, allowAutoCombos, allowCcDiscoveryAliases) must be
+    // resolved before the post-filter context below reads it.
+    const earlyApiKey = extractApiKey(request);
+    let earlyKeyMeta: Awaited<
+      ReturnType<typeof import("@/lib/db/apiKeys").getApiKeyMetadata>
+    > | null = null;
+    if (earlyApiKey) {
+      const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
+      earlyKeyMeta = await getApiKeyMetadata(earlyApiKey);
+    }
     const postFilterContext = {
       connections,
       prefixMode,
       aliasToProviderId,
       hideNoThinkVariants: settings.hideNoThinkVariants === true,
+      allowCcDiscoveryAliases: earlyKeyMeta?.allowCcDiscoveryAliases !== false,
       blockedProviders: settings.blockedProviders,
       // Per-entry `pricing`: a combo is priced as its first visible target.
       pricing: {
@@ -865,27 +885,19 @@ async function buildUnifiedModelsResponseCore(
     // Everything the quota path needs (`combos`, `timestamp`,
     // `buildComboCatalogMetadata`) already exists here, so return before the
     // provider/auto-combo/registry loops start.
-    const earlyApiKey = extractApiKey(request);
-    let earlyKeyMeta: Awaited<
-      ReturnType<typeof import("@/lib/db/apiKeys").getApiKeyMetadata>
-    > | null = null;
-    if (earlyApiKey) {
-      const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
-      earlyKeyMeta = await getApiKeyMetadata(earlyApiKey);
-      if (earlyKeyMeta?.allowedQuotas && earlyKeyMeta.allowedQuotas.length > 0) {
-        const { buildQuotaExclusiveModels } = await import("@/lib/quota/quotaCombos");
-        const quotaModels = await buildQuotaExclusiveModels(
-          earlyKeyMeta.allowedQuotas,
-          combos,
-          timestamp,
-          (c) => buildComboCatalogMetadata(c, combos)
-        );
-        const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
-        return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
-          ...corsHeaders,
-          ...diagnosticHeaders,
-        });
-      }
+    if (earlyKeyMeta?.allowedQuotas && earlyKeyMeta.allowedQuotas.length > 0) {
+      const { buildQuotaExclusiveModels } = await import("@/lib/quota/quotaCombos");
+      const quotaModels = await buildQuotaExclusiveModels(
+        earlyKeyMeta.allowedQuotas,
+        combos,
+        timestamp,
+        (c) => buildComboCatalogMetadata(c, combos)
+      );
+      const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
+      return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
+        ...corsHeaders,
+        ...diagnosticHeaders,
+      });
     }
 
     // #4164: advertise the built-in zero-setup `auto/*` combos at the very top.
@@ -1002,7 +1014,7 @@ async function buildUnifiedModelsResponseCore(
       ) as ComboCatalogTarget[];
       const visibleTargets = comboTargets.filter((target) => {
         const resolved = getComboTargetModelId(target);
-        return resolved ? !isModelHiddenBulk(resolved.providerId, resolved.modelId) : true;
+        return resolved ? !isModelHiddenStrict(resolved.providerId, resolved.modelId) : true;
       });
       if (visibleTargets.length === 0) continue;
 
@@ -1713,7 +1725,8 @@ async function buildUnifiedModelsResponseCore(
       const customModelsMap = (await getAllCustomModels()) as Record<string, unknown>;
       for (const [providerId, rawProviderCustomModels] of Object.entries(customModelsMap)) {
         await maybeYieldCatalogBuild();
-        if (providerUsesCuratedModelsOnly(providerId)) continue;
+        // Curated providers publish no upstream catalog, but an operator-added id is a
+        // local decision: it must reach /v1/models or it is unusable for routing.
         // Skip Gemini — handled by syncedAvailableModels above
         if (providerId === "gemini") continue;
         if (providerId === "reka") continue;
@@ -1747,7 +1760,7 @@ async function buildUnifiedModelsResponseCore(
           if (!modelId) continue;
           if (!isUnifiedChatSourceModelSelectable(canonicalProviderId, { ...model, id: modelId }))
             continue;
-          if (model.isHidden === true) continue;
+          if (model.isHidden === true && !revealHidden) continue;
           if (isModelHiddenBulk(providerId, modelId, canonicalProviderId)) continue;
           if (isExcludedByProviderConnections(canonicalProviderId, modelId)) continue;
           // #6328: apply hidePaidModels to user-defined custom rows too. A local custom

@@ -4,30 +4,13 @@
 
 ---
 
-A megosztott végrehajtható manifesttel, a korlátozott gyermekfolyamat-környezetekkel és a tartós
-Gemini-beállítással kapcsolatban lásd: [CLI-indítási szerződések](./CLI-LAUNCH-CONTRACTS.md).
+A megosztott végrehajtható jegyzék, a korlátozott gyermekkörnyezetek és a perzisztens Gemini beállítás tekintetében lásd [CLI indítási szerződéseit](./CLI-LAUNCH-CONTRACTS.md).
 
-Az OmniRoute `setup-*` parancsok egész családját kínálja, amelyek úgy konfigurálnak egy kódolási
-CLI-t (Codex, Claude Code, OpenCode, Cline, …), hogy az OmniRoute-ot használja háttérrendszerként — így
-az eszköz **egyetlen** végponttal kommunikál, az OmniRoute pedig automatikus tartalékra váltással
-a megfelelő szolgáltatóhoz irányítja a kéréseket. Minden parancs egy futó
-OmniRoute (helyi vagy távoli) **élő** modellkatalógusát olvassa be, és az eszköz saját konfigurációs fájlját írja ki az
-**Ön** gépén. Az API-kulcsra környezeti változón keresztül történik hivatkozás minden olyan esetben, amikor ezt az eszköz
-támogatja. Az alábbiakban külön jelezzük azokat a parancsokat, amelyek tartós, eszközspecifikus környezeti fájlt hoznak létre.
+OmniRoute `setup-*` parancsok családját szállítja, amelyek beállítják a CLI kódolót (Codex, Claude Code, OpenCode, Cline, …), hogy OmniRoute használja háttérként – így az eszköz beszél** egy** végpont és OmniRoute útvonalak a megfelelő szolgáltatóhoz automatikus visszaállítással. Minden parancs beolvassa a** élő** modellkatalógus egy futó OmniRoute ből (helyi vagy távoli), és ráírja az eszköz saját konfigurációs fájlját** a te** gép. A API kulcsra egy környezeti változó hivatkozik, ahol az eszköz támogatja. Az alábbiakban felsoroljuk azokat a parancsokat, amelyek megmaradnak egy tool-local környezetfájlban.
 
-Egy általános indító is rendelkezésre áll — `omniroute run <target>` —, amely a megfelelő
-környezeti változók átadásával indítja el a `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` vagy `gemini`
-eszközt, bármilyen konfiguráció kiírása nélkül. A célok és
-álneveik a kanonikus `bin/cli/cli-manifest.mjs` manifestből származnak
-(`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), és az `omniroute completion` ugyanezeket, a
-manifestből származó célszavakat kínálja fel. A korábbi eszközspecifikus indítók —
-az `omniroute launch` (Claude Code) és az `omniroute launch-codex` (Codex) — továbbra is
-elérhetők.
+Létezik egy általános indító – `omniroute run <target>` – is, amely a megfelelő env-vel `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` vagy `whycodes` fájlokat hozza létre anélkül, hogy bármilyen konfigurációt írna. A célok és álneveik a `bin/cli/cli-manifest.mjs` kanonikus manifestből származnak (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), és `omniroute completion` ugyanazokat a manifeszt-eredetű célszavakat kínálja. A régi eszközönkénti indítók – `omniroute launch` (Claude Code) és `omniroute launch-codex` (Codex) – továbbra is elérhetők.
 
-A szolgáltatók beállítása ugyanebből a helyi vagy távoli környezetből végezhető el. Az
-alábbi, API-központú parancsok elkülönítik a felügyeleti hitelesítést a szolgáltatói
-hitelesítő adatoktól, és soha nem jelenítenek meg hitelesítő adatot strukturált kimenetben:
+A szolgáltató beépítése ugyanabból a local/remote környezetből érhető el. Az alábbi API-first parancsok elkülönítik a felügyeleti hitelesítést a szolgáltatói hitelesítési adatoktól, és soha nem nyomtatnak hitelesítő adatokat a strukturált kimenetben:
 
 ```bash
 omniroute providers add glm --credential-env GLM_API_KEY --name work
@@ -37,119 +20,69 @@ omniroute providers edit <connection-id> --default-model glm/glm-5.2
 omniroute providers remove <connection-id> --yes
 ```
 
-Szkriptekhez lehetőleg a `--credential-stdin` vagy a `--credential-env` kapcsolót használja; a `--credential`
-ellenőrzött helyi használathoz továbbra is elérhető. A `providers remove` parancshoz nem interaktív
-terminálon kötelező a `--yes` kapcsoló, és mind az öt parancs figyelembe veszi az aktív környezetet vagy a
-globális `--base-url`/`--api-key` beállításokat.
+Szkriptek esetén előnyben részesítse `--credential-stdin` vagy `--credential-env`; `--credential` megmarad ellenőrzött helyi használatra. `providers remove` megköveteli `--yes` egy nem interaktív terminálon, és mind az öt parancs tiszteletben tartja az aktív környezetet vagy a globális `--base-url`/`--api-key` beállításokat.
 
-A szolgáltatóválasztók elutasítják a nem egyértelmű azonosító-előtagokat, neveket vagy szolgáltatóneveket; használjon
-teljes kapcsolatazonosítót, ha több kapcsolat is egyezik. A létrehozási és szerkesztési parancsok
-visszaolvassák a mentett kapcsolatot, az eltávolítás pedig ellenőrzi, hogy az többé nem olvasható.
-Az importálás kihagyja a már létező szolgáltató-/névpárokat. Az importált bejegyzések nem írhatják felül
-a CLI számára megadott felügyeleti végpontot, környezetet vagy felügyeleti hitelesítő adatokat.
+A szolgáltatóválasztók elutasítják a kétértelmű ID előtagokat, neveket vagy szolgáltatóneveket; használjon teljes ID kapcsolatot, ha több kapcsolat egyezik. A létrehozási és szerkesztési parancsok visszaolvassák a mentett kapcsolatot, és az eltávolítás ellenőrzi, hogy az már nem olvasható. Az importálás kihagy egy meglévő provider/name párt. Az importált bejegyzések nem írhatják felül a CLI számára biztosított felügyeleti végpontot, környezetet vagy felügyeleti hitelesítési adatokat.
 
-A két leggazdagabb integráció egyszeri, kézzel megírt alapbeállításáról az
-eszközspecifikus részletes útmutatókban olvashat:
+A két leggazdagabb integráció egyszeri, kézzel írott alapbeállításához lásd a szerszámonkénti mélyrepülést:
 
-- [A Claude Code konfigurálása](./CLAUDE-CODE-CONFIGURATION.md)
-- [A Codex CLI konfigurálása](./CODEX-CLI-CONFIGURATION.md)
-- [Távoli mód](./REMOTE-MODE.md) — távoli OmniRoute (VPS / Tailnet) vezérlése a laptopjáról
-- [VS Code Copilot Chat](./VSCODE-COPILOT.md) — az OmniCopilot bővítmény; ezeket a
-  `setup-*` parancsokat közvetlenül a szerkesztőből is futtathatja Ön helyett
+- [Claude kód konfiguráció](./CLAUDE-CODE-CONFIGURATION.md)
+- [Codex CLI konfiguráció](./CODEX-CLI-CONFIGURATION.md)
+- [Távoli mód](./REMOTE-MODE.md) — vezessen távoli OmniRoute (VPS / Tailnet) a laptopjáról
+- [VS Code Copilot Chat](./VSCODE-COPILOT.md) — a OmniCopilot kiterjesztés; ezeket a `setup-*` parancsokat a szerkesztőből is le tudja futtatni
 
 ---
 
-## Főtáblázat
+## Mester asztal
 
-Minden parancs figyelembe veszi az **aktív kontextust** (amely az `omniroute connect` paranccsal állítható be; lásd:
-[Távoli mód](./REMOTE-MODE.md)) vagy a kifejezetten megadott `--remote <url> --api-key <key>` kapcsolókat.
-A „Helyi vagy távoli” megjelölés lent azt jelenti, hogy kapcsolók nélkül a cél a `http://localhost:20128`;
-a `--remote` kapcsolóval (vagy aktív távoli kontextussal) a katalógust arról a
-szerverről tölti le, a konfigurációt pedig helyileg írja ki.
+Minden parancs tiszteletben tartja a** aktív kontextus** (beállítva: `omniroute connect`, lásd [Távoli mód](./REMOTE-MODE.md) ) vagy explicit `--remote <url> --api-key <key>` jelzők. A "helyi vs távoli" az alábbiakat jelenti: zászlók nélkül `http://localhost:20128` t célozza meg; `--remote` vel (vagy egy aktív távoli környezettel) lekéri a katalógust az adott szerverről, és helyileg kiírja a konfigurációt.
 
-| Parancs                    | Eszköz                         | Mit ír ki                                                                                                                                                                                                    | Fő kapcsolók                                                                                                                               | Helyi vagy távoli |
-| -------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `omniroute setup-codex`    | OpenAI Codex CLI               | `~/.codex/<name>.config.toml` — kompatibilis szövegmodellenként egy profil (`codex --profile <name>`)                                                                                                        | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Mindkettő         |
-| `omniroute setup-claude`   | Claude Code                    | `~/.claude/profiles/<name>/settings.json` — egyező modellenként egy profil (`CLAUDE_CONFIG_DIR`)                                                                                                             | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Mindkettő         |
-| `omniroute setup-opencode` | OpenCode (OpenAI-kompatibilis) | `~/.config/opencode/opencode.json` — `omniroute` szolgáltató a katalógus minden modelljével (`opencode -m omniroute/<model>`)                                                                                | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Mindkettő         |
-| `omniroute setup-cline`    | Cline                          | `~/.cline/data/{globalState,secrets}.json` (CLI mód) + kiírja a VS Code-bővítmény beállításait                                                                                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Mindkettő         |
-| `omniroute setup-kilo`     | Kilo Code                      | `~/.local/share/kilo/auth.json` (CLI) + beolvasztja a `kilocode.*` beállításokat a VS Code `settings.json` fájljába, ha az létezik                                                                           | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Mindkettő         |
-| `omniroute setup-continue` | Continue / `cn` CLI            | `~/.continue/config.yaml` — `provider: openai` modellek, kulcs a `${{ secrets.OMNIROUTE_API_KEY }}` használatával                                                                                            | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Mindkettő         |
-| `omniroute setup-cursor`   | Cursor                         | Semmit — kiírja az alkalmazáson belüli lépéseket (a Cursor konfigurációja átláthatatlan SQLite-adatbázisban van)                                                                                             | `--remote` `--api-key` `--only` `--port`                                                                                                   | Mindkettő         |
-| `omniroute setup-roo`      | Roo Code                       | `~/.omniroute/roo-settings.json` (importálási dokumentum) + beállítja a `roo-cline.autoImportSettingsPath` értékét, ha létezik VS Code `settings.json`                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Mindkettő         |
-| `omniroute setup-crush`    | Crush                          | `~/.config/crush/crush.json` — `openai-compat` szolgáltató, kulcs a `$OMNIROUTE_API_KEY` használatával                                                                                                       | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Mindkettő         |
-| `omniroute setup-zed`      | Zed                            | `~/.config/zed/settings.json` — `openai_compatible.omniroute` szolgáltató (legfeljebb 25 eszközhasználatra képes modell), kulcs a `$OMNIROUTE_API_KEY` használatával                                         | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | Mindkettő         |
-| `omniroute setup-goose`    | Goose                          | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + kiírja a környezeti változók beállítási receptjét                                                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mindkettő         |
-| `omniroute setup-aider`    | Aider                          | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + kiírja a környezeti változók beállítási receptjét                                                                                           | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mindkettő         |
-| `omniroute setup-qwen`     | Qwen Code                      | `~/.qwen/settings.json` — V4 `modelProviders.openai` tömb + `OMNIROUTE_API_KEY` a `~/.qwen/.env` fájlban                                                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Mindkettő         |
-| `omniroute setup-5dive`    | 5dive (ügynökflotta)           | Semmit a `$HOME` alatt — egy 5dive **hitelesítési profilt** (`/var/lib/5dive/auth-profiles/<name>/`) ír a `5dive agent auth set` használatával; csak rootként, a flottagazdagépen fut                        | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Mindkettő         |
-| `omniroute run <target>`   | Futásidejű indítás (általános) | Semmit — elindítja a `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` parancsot a megfelelő környezettel és argumentumokkal; a Qwen és a Gemini ideiglenes, elkülönített saját könyvtárat használ | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Mindkettő         |
-| `omniroute launch`         | Claude Code                    | Semmit — elindítja a `claude` parancsot, beállítva az `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` változókat                                                                                                 | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Mindkettő         |
-| `omniroute launch-codex`   | OpenAI Codex CLI               | Semmit — elindítja a `codex` parancsot az `omniroute` szolgáltatóval, amelyet `-c` jelzőkön keresztül ad át                                                                                                  | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Mindkettő         |
+| Parancs                    | Eszköz                         | Amit ír                                                                                                                                                                      | Kulcs zászlók                                                                                                                              | Helyi vs távoli |
+| -------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| `omniroute setup-codex`    | OpenAI Codex CLI               | `~/.codex/<name>.config.toml` – egy profil kompatibilis szövegmodellenként (`codex --profile <name>`)                                                                        | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Mindkét         |
+| `omniroute setup-claude`   | Claude kód                     | `~/.claude/profiles/<name>/settings.json` – egy profil minden egyező modellen (`CLAUDE_CONFIG_DIR`)                                                                          | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Mindkét         |
+| `omniroute setup-opencode` | OpenCode (Openai-kompatibilis) | `~/.config/opencode/opencode.json` — `omniroute` szolgáltató minden katalógusmodellel (`opencode -m omniroute/<model>`)                                                      | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Mindkét         |
+| `omniroute setup-cline`    | Cline                          | `~/.cline/data/{globalState,secrets}.json` (CLI mód) + kiírja VS kódkiterjesztés beállításait                                                                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Mindkét         |
+| `omniroute setup-kilo`     | Kilo kód                       | `~/.local/share/kilo/auth.json` (CLI) + egyesíti `kilocode.*` - t VS kóddal `settings.json` kóddal , ha van                                                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Mindkét         |
+| `omniroute setup-continue` | Folytatás / `cn` CLI           | `~/.continue/config.yaml` — `provider: openai` modellek, kulcs a `${{ secrets.OMNIROUTE_API_KEY }}` keresztül                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Mindkét         |
+| `omniroute setup-cursor`   | Cursor                         | Semmi – kinyomtatja az alkalmazáson belüli lépéseket (Cursor konfigurációja átlátszatlan SQLite)                                                                             | `--remote` `--api-key` `--only` `--port`                                                                                                   | Mindkét         |
+| `omniroute setup-roo`      | Roo Code                       | `~/.omniroute/roo-settings.json` (dokumentum importálása) + beállítja `roo-cline.autoImportSettingsPath`, ha létezik `settings.json` VS kód                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Mindkét         |
+| `omniroute setup-crush`    | Összetörni                     | `~/.config/crush/crush.json` — `openai-compat` szolgáltató, kulcs a `$OMNIROUTE_API_KEY` keresztül                                                                           | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Mindkét         |
+| `omniroute setup-zed`      | Zed                            | `~/.config/zed/settings.json` – `openai_compatible.omniroute` szolgáltató (≤ 25 szerszámmal használható modell), kulcs `$OMNIROUTE_API_KEY` keresztül                        | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | Mindkét         |
+| `omniroute setup-goose`    | Liba                           | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + nyomtat env receptet                                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mindkét         |
+| `omniroute setup-aider`    | Aider                          | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + nyomtat env receptet                                                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mindkét         |
+| `omniroute setup-qwen`     | Qwen kód                       | `~/.qwen/settings.json` — V4 `modelProviders.openai` tömb + `OMNIROUTE_API_KEY` a `~/.qwen/.env`                                                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Mindkét         |
+| `omniroute setup-5dive`    | 5 merülés (ügynökflotta)       | `$HOME` alatt semmi – írja a 5dive** hitelesítési profil** (`/var/lib/5dive/auth-profiles/<name>/`) `5dive agent auth set` n keresztül; root-only, fut a flotta gazdagépen   | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Mindkét         |
+| `omniroute setup-whycodes` | WhyCodes                       | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); az elérési út `$WHYCODES_HOME/config.toml` vagy `~/.whycodes/config.toml`                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mindkét         |
+| `omniroute run <target>`   | Futásidejű indítás (általános) | Semmi – spawn `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` a megfelelő env-vel és arg-okkal; Qwen és Gemini ideiglenes elszigetelt otthont használ | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Mindkét         |
+| `omniroute launch`         | Claude kód                     | Semmi – zqa `claude` t hoz létre `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` beadásával                                                                                      | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Mindkét         |
+| `omniroute launch-codex`   | OpenAI Codex CLI               | Semmi – `codex` jön létre a `omniroute` szolgáltatóval `-c` flageken keresztül                                                                                               | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Mindkét         |
 
-Megjegyzések a jelzőkről (a parancs forráskódjában ellenőrizve):
+Megjegyzések a zászlókkal kapcsolatban (ellenőrizve a parancsforrásban):
 
-- `--remote <url>` — lekéri a katalógust egy távoli OmniRoute-példányról (felülírja a `--port`
-  beállítást és az aktív kontextust). A `--api-key <key>` adja meg az adott
-  kiszolgáló hitelesítő adatát (alapértelmezés szerint az `OMNIROUTE_API_KEY` környezeti változó vagy az aktív kontextus tokenje).
-- `--only <patterns>` — vesszővel elválasztott részkarakterláncok; csak az egyező
-  modellazonosítókat tartja meg (például `--only glm,kimi`). Elérhető a `setup-codex`, `setup-claude`,
-  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed` parancsokon.
-- `--dry-run` — pontosan kiírja, hogy mi lenne kiírva, a fájlrendszer
-  módosítása nélkül. Minden `setup-*` parancson elérhető, **kivéve** a `setup-cursor`
-  parancsot (amely soha nem ír fájlt).
-- `--model <id>` — kötelező (vagy interaktívan választandó) azoknál az eszközöknél,
-  amelyek nem támogatják a modellek automatikus felderítését: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Ezek az eszközök
-  a nem interaktív futtatásokhoz a `--yes` jelzőt is elfogadják (ekkor a `--model` megadása kötelező).
-  A `setup-opencode` a `--model` használatával állítja be az alapértelmezett felső szintű modellt.
-- Az `omniroute run` parancs `--model <id>` beállítása a manifeszt célonkénti huzalozását
-  (`bin/cli/cli-manifest.mjs`) követi: az **aider** a `--model openai/<id>`, az
-  **opencode** pedig a `--model omniroute/<id>` argumentumot kapja (az előtag csak akkor kerül hozzáadásra, ha az azonosító
-  még nem tartalmazza); a **qwen** és a **gemini** változtatás nélkül kapja meg az azonosítót;
-  a **claude** az `ANTHROPIC_MODEL`, a **goose** a `GOOSE_MODEL` változón keresztül,
-  a **codex** pedig `-c model_providers.omniroute.*` argumentumokon keresztül kapja meg. **A Qwen az egyetlen futtatási
-  cél, amelynél kötelező a `--model` megadása** — az `omniroute run qwen` enélkül
-  `2` kilépési kóddal és egyértelmű hibaüzenettel áll le.
-- `--port <port>` — a helyi OmniRoute portja (alapértelmezett: `20128`; a `--remote`
-  megadásakor figyelmen kívül marad). Minden `setup-*` parancson és mindkét indítóparancson elérhető.
-- Az `omniroute run` kilépési kódjai: a gyermek CLI saját kilépési kódját
-  változtatás nélkül továbbítja; `2` = érvénytelen argumentumok (nem támogatott cél, hiányzó kötelező
-  `--model`, konténervédelem); `127` = a célprogram binárisa nincs benne a `PATH` változóban;
-  `130`/`143`/`129`, ha az indítást `SIGINT`/`SIGTERM`/`SIGHUP` szakítja meg;
-  `1` = egyéb futásidejű indítási hiba.
-- A két indítóparancs (`launch`, `launch-codex`) elfogadja a `--profile <name>` jelzőt a
-  `setup-claude` / `setup-codex` által írt profil kiválasztásához, valamint az alapul szolgáló
-  `claude` / `codex` binárisnak továbbadandó argumentumokat.
+- `--remote <url>` — a katalógus lekérése egy távoli OmniRoute ről (felülbírálja `--port` és az aktív környezetet). `--api-key <key>` biztosítja a kiszolgáló hitelesítő adatait (alapértelmezett a `OMNIROUTE_API_KEY` env var, vagy az aktív környezet tokenje).
+- `--only <patterns>` – vesszővel elválasztott részkarakterláncok; csak a megfelelő IDs modellt tartsa meg (pl. `--only glm,kimi`). Elérhető `setup-codex`, `setup-claude`, `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed` alatt.
+- `--dry-run` — pontosan azt nyomtatja ki, amit a fájlrendszer érintése nélkül írna. Minden `setup-*` parancsnál elérhető** kivéve** `setup-cursor` (ami soha nem ír fájlt).
+- `--model <id>` – kötelező (vagy interaktívan kiválasztva) azokhoz az eszközökhöz, amelyek nem rendelkeznek automatikus modellfelderítéssel: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Ezek az eszközök `--yes` is elfogadják a nem interaktív futtatásokhoz (amihez aztán `--model` szükséges). `setup-opencode` `--model` használja az alapértelmezett legfelső szintű modell beállításához.
+- `--model <id>` a `omniroute run` -n követi a jegyzék cél szerinti vezetékezését (`bin/cli/cli-manifest.mjs`):** segítő** kap `--model openai/<id>` és** nyílt kód** `--model omniroute/<id>` (az előtag csak akkor kerül hozzáadásra, ha az azonosító még nem tartalmazza);** qwen** és** Ikrek** szó szerint megkapja az azonosítót;** claude** `ANTHROPIC_MODEL`-n keresztül kapja meg,** liba** `GOOSE_MODEL` keresztül,** miértkódok** `-P omniroute -m <id>` keresztül, és** kódex** keresztül `-c model_providers.omniroute.*` args.**Qwen az egyetlen futtatott cél, amelyhez keményen szükséges `--model`** — `omniroute run qwen` nélküle explicit hibával lép ki `2`.
+- `--port <port>` — helyi OmniRoute port (alapértelmezett `20128`, figyelmen kívül hagyva, ha `--remote` van állítva). Jelen van minden `setup-*` és mindkét indítóeszközön.
+- `omniroute run` kilépési kódok: a gyermek CLI saját kilépési kódja szó szerint terjed; `2` = érvénytelen argumentumok (nem támogatott cél, hiányzik a szükséges `--model`, konténervédő); `127` = a cél bináris nincs a `PATH` ban; `130`/`143`/`129`, ha az indítást `SIGINT`/`SIGTERM`/`SIGHUP` fejezi be ; `1` = egyéb futásidejű indítási hiba.
+- A két indítóprogram (`launch`, `launch-codex`) elfogadja `--profile <name>` `setup-claude` / `setup-codex` által írt profil kiválasztásához, valamint a mögöttes `claude` / `codex` bináris átjelentkezési paramétereit.
 
-Az interaktív választót a beállítási receptek is közösen használják:
+Az interaktív válogatót a beállítási receptek is megosztják:
 
 ```bash
-# Válasszon az aktív helyi vagy távoli modellkatalógusból, és konfigurálja a célt.
+# Pick from the active local or remote model catalog and configure the target.
 omniroute configure claude
 omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
 ```
 
-A `configure` jelenleg a tesztelt recepteknek adja át a végrehajtást a `codex`, `claude`,
-`opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo` és `5dive` esetében.
-A kizárólag IDE-hez tartozó,
-MITM- és csak útmutatóként szolgáló katalógusbejegyzések továbbra is különálló `setup-*`/kézi folyamatok maradnak, és
-nem jelennek meg indítható célként.
+`configure` jelenleg a `codex`, `claude`, `opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo` és `5dive` tesztelt receptjeihez delegálódik . A csak IDE, MITM és csak útmutató katalógusbejegyzések explicit `setup-*`/manuális folyamok maradnak, és nem jelennek meg indítható célként.
 
-> A `setup-opencode` a **könnyűsúlyú, OpenAI-kompatibilis** OpenCode-integráció.
-> Létezik egy funkciógazdagabb beépülőmodul-integráció is — `omniroute setup opencode` —, amely
-> telepíti az `@omniroute/opencode-plugin` csomagot. Ezek különböző parancsok; a fenti táblázat
-> a `setup-opencode` parancsot dokumentálja.
+> `setup-opencode` az** könnyű, openai kompatibilis** OpenCode integráció. Van egy gazdagabb beépülő modul-integráció is – `omniroute setup opencode` –, amely telepíti `@omniroute/opencode-plugin`. Ezek különböző parancsok; a fenti táblázat `setup-opencode` dokumentumokat tartalmazza.
 >
-> A beépülőmodul két csomagban érhető el, OpenCode-főverziónként egyben, mert a két
-> betöltő eltérő belépési pontokat vár:
-> `@omniroute/opencode-plugin` az OpenCode v1-hez és
-> `@omniroute/opencode-plugin-v2` az OpenCode v2-höz. A v2 csomag új
-> (`0.1.0`), és egy még változó gazdaszerződést követ, ezért a katalógustervezetbe az OpenCode által
-> beillesztett struktúrát olvassa ki, ahelyett hogy feltételezne egyet. A telepítéséhez adjon
-> egy `plugins` bejegyzést az `opencode.json` fájlhoz; az `omniroute setup opencode`
-> továbbra is a v1 csomagot telepíti. A beállítások és a hitelesítő adatok keresési sorrendje
-> a csomag README-fájljában található.
+> A beépülő modul két csomagban érkezik, OpenCode majoronként egy, mert a két betöltő eltérő belépési pontokat vár: `@omniroute/opencode-plugin` OpenCode v1-hez és `@omniroute/opencode-plugin-v2` OpenCode v2-hez. A v2 csomag új (`0.1.0`), és egy még mozgó gazdagépszerződést követ, így a OpenCode seeds alakot beolvassa a katalógustervezetbe, nem pedig feltételezi azt. Telepítse úgy, hogy hozzáad egy `plugins` bejegyzést `opencode.json`; `omniroute setup opencode` továbbra is telepíti a v1 csomagot. Az opciók és a hitelesítő adatok keresési sorrendje a README csomagban található.
 
 ---
 
@@ -252,24 +185,23 @@ Ha a profilt nem egyetlen modellre, hanem egy OmniRoute-**kombinációra** irán
 
 ---
 
-## Alap-URL-konvenciók (mely eszközök igénylik a `/v1` útvonalat)
+## Alapvető URL konvenciók (mely eszközökre van szükség `/v1`)
 
-Az OmniRoute az OpenAI-felületet a `/v1`, az Anthropic-felületet a gyökérútvonalon,
-a natív Gemini-felületet pedig a `/v1beta` útvonalon teszi elérhetővé. Minden integráció
-az eszköz által elvárt formára van konfigurálva (a parancs forráskódjában ellenőrizve):
+OmniRoute a OpenAI felületet `/v1` nél, a Anthropic felületet a gyökérnél, és egy natív Gemini felületet `/v1beta` nél. Minden integráció az eszköz által elvárt formához van kötve (ellenőrizve a parancsforrásban):
 
-| Integráció                                                                 | Beállított alap-URL | `/v1`?                                                       |
-| -------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------ |
-| `setup-cline` (`openAiBaseUrl`)                                            | gyökérútvonal       | Nem — a Cline hozzáfűzi a `/v1/chat/completions` útvonalat   |
-| `setup-goose` (`OPENAI_HOST`)                                              | gyökérútvonal       | Nem — a Goose hozzáfűzi az útvonalat                         |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | gyökérútvonal       | Nem — a LiteLLM hozzáfűzi a `/v1/chat/completions` útvonalat |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1` útvonallal    | Igen                                                         |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1` útvonallal    | Igen                                                         |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | gyökérútvonal       | Nem — a Claude Code hozzáfűzi a `/v1/messages` útvonalat     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1` útvonallal    | Igen                                                         |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1` útvonallal    | Igen                                                         |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | gyökérútvonal       | Nem — az SDK hozzáfűzi a `/v1beta/models/…` útvonalat        |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` a hitelesítési profilban)              | gyökérútvonal       | Nem — a Claude Code hozzáfűzi a `/v1/messages` útvonalat     |
+| Integráció                                                                 | Alap URL írva | `/v1`?                                         |
+| -------------------------------------------------------------------------- | ------------- | ---------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | gyökér        | Nem – Cline hozzáfűzi `/v1/chat/completions`   |
+| `setup-goose` (`OPENAI_HOST`)                                              | gyökér        | Nem – Goose hozzáfűzi az utat                  |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | gyökér        | Nem – LiteLLM hozzáfűzi `/v1/chat/completions` |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1`         | Igen                                           |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1`         | Igen                                           |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | gyökér        | Nem – Claude kód hozzáfűzi `/v1/messages`      |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1`         | Igen                                           |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1`         | Igen                                           |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | gyökér        | Nem – a SDK hozzáfűzi `/v1beta/models/…`       |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` a hitelesítési profilban)              | gyökér        | Nem – Claude kód hozzáfűzi `/v1/messages`      |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | `/v1`         | Igen – WhyCodes `/chat/completions` ír         |
 
 ---
 

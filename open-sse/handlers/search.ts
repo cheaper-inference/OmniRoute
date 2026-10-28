@@ -37,6 +37,7 @@ import { buildJinaSearchRequest, extractJinaSearchItems } from "./search/jinaSea
 import * as xSearch from "./search/xSearch.ts";
 import * as xquikSearch from "./search/xquikSearch.ts";
 import * as anysearchSearch from "./search/anysearchSearch.ts";
+import * as kimiSearch from "./search/kimiSearch.ts";
 import * as parallelSearch from "./search/parallelSearch.ts";
 import { freeWebSearch } from "../services/freeWebSearch.ts";
 import { saveCallLog } from "@/lib/usageDb";
@@ -763,6 +764,7 @@ const requestBuilders: Record<string, SearchRequestBuilder> = {
   "perplexity-search": buildPerplexityRequest,
   "exa-search": buildExaRequest,
   "tavily-search": buildTavilyRequest,
+  "kimi-search": kimiSearch.buildKimiSearchRequest,
   "nimble-search": buildNimbleRequest,
   firecrawl: fcSearch.buildFirecrawlSearchRequest,
   "google-pse-search": buildGooglePseRequest,
@@ -1393,6 +1395,7 @@ const responseNormalizers: Record<string, SearchResponseNormalizer> = {
   "perplexity-search": normalizePerplexityResponse,
   "exa-search": normalizeExaResponse,
   "tavily-search": normalizeTavilyResponse,
+  "kimi-search": (data: unknown) => kimiSearch.normalizeKimiSearchResponse(data, makeResult),
   "nimble-search": normalizeNimbleResponse,
   firecrawl: (data: FirecrawlSearchEnvelope, _query: string, searchType: string) =>
     fcSearch.normalizeFirecrawlSearchResponse(data, searchType, makeResult),

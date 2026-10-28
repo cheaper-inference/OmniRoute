@@ -27,13 +27,12 @@ trên runner được lưu trữ, slot Turbopack hầu như luôn ở trạng th
 | swap       | 16 GB                               | `omniroute-113-5` chạy với swap bị tắt (`MemorySwapMax=0`), vì vậy một bản build mất kiểm soát sẽ bị dừng tại giới hạn thay vì khiến cả máy phải dùng swap                                                                                                                                                                                                                                                                                             |
 | `/tmp`     | **tmpfs 12 GB = RAM**               | mọi thứ được lưu ở đó đều chiếm bộ nhớ; dữ liệu còn sót lại được dọn sau 3 giờ                                                                                                                                                                                                                                                                                                                                                                         |
 | CPU        | đã quan sát thấy tải 60 trên 32 lõi | trước khi áp dụng hạn ngạch, một bản build Turbopack (~1166 % CPU) cộng với một bộ kiểm thử coverage trên cùng máy đã làm gián đoạn heartbeat của các listener khác (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                                              |
-| runner     | **6 listener**                      | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` bị vô hiệu hóa (`systemctl enable --now` sẽ kích hoạt lại một runner)                                                                                                                                                                                                                                                                                                                  |
+| runner     | **7 listener** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` cũng mang `omni-build`; `omniroute-113-3/-4/-8` đã bị xóa khỏi repo (2026-10-28)                                                                                                                                                                                                                                                                                                                |
 
 Các giới hạn nằm trong `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` của từng unit
 (các giá trị trước đó được giữ lại dưới tên `override.conf.bak-20261018`) và đã được áp dụng trực tiếp bằng
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — không cần khởi động lại, vì vậy không
-job đang chạy nào bị ảnh hưởng. Các nhãn được thay đổi thông qua API runner
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+job đang chạy nào bị ảnh hưởng. Các nhãn được thay đổi thông qua API runner (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), cũng theo thời gian thực.
 
 ## Cài đặt trình dọn dẹp (một lần, trên máy chủ)
@@ -42,7 +41,7 @@ job đang chạy nào bị ảnh hưởng. Các nhãn được thay đổi thôn
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): mỗi 30 phút, ghi nhật ký vào /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` là bắt buộc: trình dọn dẹp xác minh một đường dẫn đang không được sử dụng bằng một ảnh chụp nhanh duy nhất về các tệp đang mở trước khi xóa đường dẫn đó; nếu không có công cụ này, nó sẽ không xóa gì và sẽ thông báo rõ như vậy (thoát với mã 1). Trước tiên, hãy thử mọi thay đổi bằng `--dry-run` — tùy chọn này in chính xác những gì sẽ được thực hiện và không động đến bất kỳ thứ gì.
@@ -97,8 +96,9 @@ Quy tắc 75 phút không phát hiện được một build mà GitHub đã từ
   bộ nhớ suốt 54 phút tại đó; 8 GB loại bỏ tình trạng điều tiết.
 - **Chủ đích sử dụng ít listener hơn.** Bốn unit OmniRoute đã bị vô hiệu hóa vào 2026-08-29 — mỗi
   listener bổ sung là một tenant khác dùng chung ngân sách bộ nhớ nêu trên. Giới hạn tối đa của
-  janitor là 6 (`MAX_ACTIVE_RUNNERS=6` trong cron): nó đếm mọi `Runner.Listener` trên máy, còn
-  OmniHeuris + OmniMind bổ sung hai listener vào bốn listener của chúng ta.
+  janitor là 8 (`MAX_ACTIVE_RUNNERS=8` trong cron): nó đếm mọi `Runner.Listener` trên máy, còn
+  OmniHeuris + OmniMind bổ sung hai listener vào năm listener của chúng ta.
+- **Các job unit và Vitest vẫn chạy trên runner hosted.** `ci.yml` chỉ gửi các shard unit và job Vitest đến `[self-hosted, omni-ci]` khi biến repository `vars.USE_VPS_TEST_RUNNER` là `true`, và kể cả khi đó cũng chỉ cho các lượt chạy `pull_request` từ cùng repository; fork, `merge_group` và push vẫn ở trên `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Biến này đang là `false`. Ngày 2026-10-28, ba listener `omni-ci` 4 nhân mất 250–270 s cho `npm ci` và mọi shard unit đều chạm giới hạn job 30 phút, so với ~634 s cho một shard hosted, trong khi máy ở mức tải 17–24. Các listener đó đã bị xóa. Không bật lại biến này khi chưa có listener được định cỡ phù hợp cho một shard unit.
 - **Không bao giờ dọn `/tmp` hoặc `_work` thủ công khi bất kỳ runner nào đang bận.** Việc
   kiểm tra rồi xóa với một khoảng trễ giữa hai thao tác là nguyên nhân khiến một job `Build` đang
   chạy bị mất `_work` vào 2026-08-27. Janitor thực hiện việc kiểm tra và xóa trong một bước;
@@ -112,8 +112,7 @@ Quy tắc 75 phút không phát hiện được một build mà GitHub đã từ
 
 ## Luồng hosted (runner do GitHub lưu trữ)
 
-Tài khoản đang sử dụng gói **Pro**: **40 công việc hosted chạy đồng thời**, được dùng chung cho mọi lượt kiểm tra PR,
-mọi workflow được kích hoạt khi push và thiết lập mặc định của CodeQL. Theo số liệu đo ngày 2026-10-18 trong một
+Repository thuộc tổ chức `cheaper-inference`, sử dụng gói **Team**: **60 công việc hosted chạy đồng thời**, được dùng chung cho mọi repository trong tổ chức, mọi lượt kiểm tra PR, mọi workflow được kích hoạt khi push và thiết lập mặc định của CodeQL. Các số liệu dưới đây được đo trên gói **Pro** (40 công việc hosted chạy đồng thời). Theo số liệu đo ngày 2026-10-18 trong một
 chiến dịch merge (~10 lượt merge/giờ trên `release/v3.8.52`): **2.500 lượt chạy workflow được tạo trong
 24 giờ**, 44 lượt push lên nhánh trong 6 giờ, **106 công việc hosted nằm trong hàng đợi** trong khi các lượt kiểm tra PR phải chờ
 hàng giờ và các PR được merge mà không có chúng. Chín workflow được kích hoạt sau mỗi lượt push lên nhánh:
