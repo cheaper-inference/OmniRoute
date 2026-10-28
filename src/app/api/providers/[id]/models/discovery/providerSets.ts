@@ -134,6 +134,9 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // the dashboard only shows static seeds and cannot synchronize the live catalog
   // of vendor-qualified open-weight model IDs (#16979).
   "demonroute",
+  // ParalonCloud — GET https://paraloncloud.com/v1/models is key-gated; the registry
+  // seed is only the offline fallback.
+  "paraloncloud",
 ]);
 
 export function isNamedOpenAIStyleProvider(provider: string): boolean {
