@@ -87038,14 +87038,14 @@
           "updated_at": "2026-10-28T18:39:30.669Z"
         },
         "he": {
-          "source_hash": "e64366e652e3c3900dffef67c5e11e9c2dcdb9132d463626b5273247a80b5a18",
-          "target_hash": "3efe8bdaaeb68918eac2c1270330df67a6ebb7c58e3fbf6445c237fea8801656",
+          "source_hash": "4b8e96c9b80b58f214d71cb3124e0804d3ae27054c89cf5b6eaee69859e6ba5f",
+          "target_hash": "216c3f0f301b72ce969a8e10c07829fc3441f46c0e886922d9d86e1f98d8ddf7",
           "section_hashes": [
             "c7914887e077",
             "93c63cd7c00b",
             "a3b05abae5b3",
             "0ceeab50cf25",
-            "5d6e2e2bb145",
+            "64d016136c15",
             "06ea53631a21",
             "11f6045331b1",
             "fe1aa9211b66",
@@ -87080,7 +87080,7 @@
             "d39016889d36",
             "10eef854ef66"
           ],
-          "updated_at": "2026-10-28T14:01:46.615Z"
+          "updated_at": "2026-10-28T18:53:08.684Z"
         },
         "hi": {
           "source_hash": "4b8e96c9b80b58f214d71cb3124e0804d3ae27054c89cf5b6eaee69859e6ba5f",
@@ -88253,14 +88253,14 @@
           "updated_at": "2026-10-28T18:44:02.813Z"
         },
         "zh-TW": {
-          "source_hash": "e64366e652e3c3900dffef67c5e11e9c2dcdb9132d463626b5273247a80b5a18",
-          "target_hash": "cc721127a63014c48b42297ec40981414d6c713e4d16e1980f9e7f181eb51e79",
+          "source_hash": "4b8e96c9b80b58f214d71cb3124e0804d3ae27054c89cf5b6eaee69859e6ba5f",
+          "target_hash": "003457a860287392ca49399f25effc74628ffe14f703fef195ef4483f8340849",
           "section_hashes": [
             "c7914887e077",
             "93c63cd7c00b",
             "a3b05abae5b3",
             "0ceeab50cf25",
-            "5d6e2e2bb145",
+            "64d016136c15",
             "06ea53631a21",
             "11f6045331b1",
             "fe1aa9211b66",
@@ -88295,7 +88295,7 @@
             "d39016889d36",
             "10eef854ef66"
           ],
-          "updated_at": "2026-10-28T14:06:55.581Z"
+          "updated_at": "2026-10-28T18:53:08.700Z"
         },
         "et": {
           "source_hash": "4b8e96c9b80b58f214d71cb3124e0804d3ae27054c89cf5b6eaee69859e6ba5f",
