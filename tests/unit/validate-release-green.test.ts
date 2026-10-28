@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createReleaseGreenProfileFixture } from "../_helpers/releaseGreenProfileFixture.mjs";
 
 // Pure helpers of the release-green validator (Solution C). The orchestration is
 // guarded behind a direct-run check, so importing the module here is side-effect-free.
@@ -685,12 +686,16 @@ test("one gate can never land in BOTH verdict buckets of the same report (#9985)
   );
 });
 
-test("the real full profile requires workflow audits even when the curated observer reports drift", async () => {
+test("the real full profile requires workflow audits even when the curated observer reports drift", async (t) => {
   const { fileURLToPath } = await import("node:url");
   const { loadFullCiProfile } =
     await import("../../scripts/quality/release-green-static-profile.mjs");
   const { fullCiKindFor } = await import("../../scripts/quality/validate-release-green.mjs");
-  const gates = loadFullCiProfile(fileURLToPath(new URL("../../", import.meta.url)));
+  const fixture = createReleaseGreenProfileFixture(
+    t,
+    fileURLToPath(new URL("../../", import.meta.url))
+  );
+  const gates = loadFullCiProfile(fixture.root);
   const workflow = gates.find((gate) => gate.id === "check:workflows");
   assert.ok(workflow, "the full profile must include workflow auditing");
   assert.equal(workflow.kind, "hard");

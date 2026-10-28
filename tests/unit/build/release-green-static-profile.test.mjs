@@ -11,11 +11,13 @@ import {
   validateFullCiProfile,
   staticGateOutcome,
 } from "../../../scripts/quality/release-green-static-profile.mjs";
+import { createReleaseGreenProfileFixture } from "../../_helpers/releaseGreenProfileFixture.mjs";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 
-test("full static requirements include audit, mutation and translation drift", async () => {
-  const gates = loadFullCiProfile(root);
+test("full static requirements include audit, mutation and translation drift", (t) => {
+  const fixture = createReleaseGreenProfileFixture(t, root);
+  const gates = loadFullCiProfile(fixture.root);
   for (const id of [
     "audit:deps",
     "check:mutation-test-coverage",
@@ -132,8 +134,9 @@ test("an interrupted static process never has complete measurement evidence", ()
   });
 });
 
-test("the real profile has executable absolute boundary arguments", () => {
-  const gate = loadFullCiProfile(root).find((g) => g.id === "check:boundary:ratchet");
+test("the real profile has executable absolute boundary arguments", (t) => {
+  const fixture = createReleaseGreenProfileFixture(t, root);
+  const gate = loadFullCiProfile(fixture.root).find((g) => g.id === "check:boundary:ratchet");
   assert.deepEqual(gate.args, ["run", "check:boundary:ratchet"]);
 });
 
@@ -145,8 +148,19 @@ test("declared required policy cannot be weakened by an old curated drift bucket
   assert.equal(fullCiKindFor("check:circular-deps", [], "drift"), "drift");
 });
 
-test("test-masking receives a fixed base SHA in the full profile", () => {
-  const gate = loadFullCiProfile(root).find((g) => g.id === "check:test-masking");
+test("test-masking receives a fixed base SHA in the full profile", (t) => {
+  const fixture = createReleaseGreenProfileFixture(t, root);
+  const gate = loadFullCiProfile(fixture.root).find((g) => g.id === "check:test-masking");
   assert.match(gate.env.GITHUB_BASE_SHA, /^[0-9a-f]{40}$/);
+  assert.equal(gate.env.GITHUB_BASE_SHA, fixture.baseSha);
+  assert.notEqual(gate.env.GITHUB_BASE_SHA, fixture.headSha);
   assert.equal(gate.env.GITHUB_BASE_REF, undefined);
+});
+
+test("the full profile rejects a checkout without the required base ref", (t) => {
+  const fixture = createReleaseGreenProfileFixture(t, root, { withBase: false });
+  assert.throws(() => loadFullCiProfile(fixture.root), {
+    status: 128,
+    message: /origin\/main/,
+  });
 });
