@@ -32,6 +32,7 @@ interface SyncedCapabilityFlags {
   id?: string;
   supportsThinking?: boolean;
   supportsVision?: boolean;
+  supportsTools?: boolean;
   supportedThinkingEfforts?: string[];
 }
 
@@ -86,9 +87,10 @@ export function buildSyncedCapabilities(
   ownedBy: string
 ): Record<string, boolean | string[]> | undefined {
   const tiers = effectiveEffortTiers(sm, ownedBy);
-  if (!sm.supportsVision && !tiers) return undefined;
+  if (!sm.supportsVision && !tiers && !sm.supportsTools) return undefined;
   return {
     ...(sm.supportsVision ? { vision: true } : {}),
+    ...(sm.supportsTools ? { tool_calling: true } : {}),
     ...(tiers ? { effort_tiers: tiers } : {}),
   };
 }
@@ -104,10 +106,11 @@ export function mergeSyncedCapabilities(
   ownedBy: string
 ): Record<string, unknown> | undefined {
   const tiers = effectiveEffortTiers(sm, ownedBy);
-  if (!sm.supportsVision && !tiers && !existing) return undefined;
+  if (!sm.supportsVision && !tiers && !sm.supportsTools && !existing) return undefined;
   return {
     ...(existing || {}),
     ...(sm.supportsVision ? { vision: true } : {}),
+    ...(sm.supportsTools ? { tool_calling: true } : {}),
     ...(tiers ? { effort_tiers: tiers } : {}),
   };
 }

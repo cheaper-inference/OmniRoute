@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { detectVisionInput, normalizeDiscoveredModels } from "@/lib/providerModels/modelDiscovery";
+import { buildSyncedCapabilities } from "@/app/api/v1/models/syncedCapabilities";
 import {
   parseTranscriptionModel,
   parseSpeechModel,
@@ -156,4 +157,12 @@ test("mistral audio and ocr registries correctly parse mistral models", () => {
   const ocrVersioned = parseOcrModel("mistral-ocr-2503");
   assert.equal(ocrVersioned.provider, "mistral");
   assert.equal(ocrVersioned.model, "mistral-ocr-2503");
+});
+
+test("buildSyncedCapabilities exports tool_calling when model supportsTools", () => {
+  const caps = buildSyncedCapabilities(
+    { id: "mistral-large-latest", supportsTools: true },
+    "mistral"
+  );
+  assert.equal(caps?.tool_calling, true);
 });
