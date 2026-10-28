@@ -1,0 +1,1 @@
+- **fix(sse):** the direct response-start window now scales with request payload size (>512 KB ×2, >2 MB ×3, capped at 180 s; `OMNIROUTE_DIRECT_HEADERS_VOLUME_ADAPTIVE=0` pins the flat window) ([#18404](https://github.com/cheaper-inference/OmniRoute/pull/18404)) — thanks @jjxyxsjr
