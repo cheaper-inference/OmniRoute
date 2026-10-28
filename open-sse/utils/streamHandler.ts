@@ -185,10 +185,14 @@ function hasClientTerminalSseMarker(text: string, clientResponseFormat?: string 
     return true;
   }
 
+  // All three Responses terminal events end the stream: `response.incomplete` (e.g.
+  // max_output_tokens reached) and `response.failed` are as final as
+  // `response.completed`. Recognizing only `completed` appended a synthetic
+  // `response.failed` after a real `response.incomplete` terminal.
   if (isResponsesClientFormat(clientResponseFormat)) {
     return (
-      /(?:^|\r?\n)event:\s*response\.completed\s*(?:\r?\n|$)/.test(text) ||
-      /"type"\s*:\s*"response\.completed"/.test(text)
+      /(?:^|\r?\n)event:\s*response\.(?:completed|incomplete|failed)\s*(?:\r?\n|$)/.test(text) ||
+      /"type"\s*:\s*"response\.(?:completed|incomplete|failed)"/.test(text)
     );
   }
 
