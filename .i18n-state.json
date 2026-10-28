@@ -16449,11 +16449,11 @@
           "updated_at": "2026-10-27T21:28:19.488Z"
         },
         "es": {
-          "source_hash": "09ad906756d3b8e9cb6cef4698df6b12d027f74703302eeb5ab3cc180f7297fe",
-          "target_hash": "d87fedd13532047732ed601f48f30e69512bad353bd1c9f300f5ece97a9e2bb6",
+          "source_hash": "74570955a69d29dfe6fd6374f9f40115154405ce44c00ef0ed1e668ab2077622",
+          "target_hash": "9808ae240c7f127fff12b52591475278a81334feeeefbb0821737c82e4a0d6bd",
           "section_hashes": [
             "67dc4021ab63",
-            "d725191f98e3",
+            "d90522eada50",
             "037c6db3bbb8",
             "7f330c18c808",
             "786d5af09ecf",
@@ -16465,7 +16465,7 @@
             "f837c3522c9f",
             "00edca0fcda6"
           ],
-          "updated_at": "2026-10-26T00:29:32.106Z"
+          "updated_at": "2026-10-28T03:37:18.419Z"
         },
         "et": {
           "source_hash": "74570955a69d29dfe6fd6374f9f40115154405ce44c00ef0ed1e668ab2077622",
