@@ -43,6 +43,31 @@ and review the exact differences, then rerun. Refresh this check after changing
 the candidate contract or installed instructions. Entrypoints that do not read
 this shared module are outside its coverage and must be inventoried separately.
 
+### Updating this instruction contract
+
+For an already authorized contract update, "after integration" means the core,
+checker and canonical templates are incorporated into the exact reviewed local
+candidate; it does not mean that the candidate has already merged publicly.
+Use this order to avoid requiring the new installed contract before it can exist:
+
+1. Review the candidate's protected instruction diff, core/checker/template versions
+   and focused validation. Fixture checks here validate the proposed contract; they
+   do not count as a MATCH of the live installation.
+2. Coordinate the already authorized local activation. Reconfirm real installed
+   paths, original modes and exact preimages; apply only the reviewed installation
+   payload. Unexpected drift requires reconciliation, never an overwrite. Preserve
+   other sessions' ownership and do not execute an automatic install from this gate.
+3. Run the candidate's checker against the actual shared installation and retain all
+   17 MATCH entries, installed path, candidate SHA and reviewed payload hashes. A new
+   candidate or installed change invalidates that receipt.
+4. Complete every other applicable acceptance requirement. Public admission follows
+   the specific protected-surface approval in `protected-surfaces.md` and
+   `merge-gates.md`; local activation and fixture PASS do not authorize a public merge.
+
+Reuse approval already granted for this exact scope; do not request it again merely
+because the local installation follows candidate validation. No step above activates
+instructions by itself.
+
 ## 0a. Admit local heavy work
 
 Before dependency installation, full suites, coverage or build, follow
