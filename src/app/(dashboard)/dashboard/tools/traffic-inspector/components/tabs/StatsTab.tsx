@@ -16,15 +16,13 @@ const StatsCharts = dynamic(() => import("./StatsCharts"), {
 
 function LoadingCharts() {
   const t = useTranslations("trafficInspector");
-  return <div className="p-4 text-sm text-muted-foreground">{t("loadingCharts")}</div>;
+  return <div className="p-4 text-sm text-text-muted">{t("loadingCharts")}</div>;
 }
 
 export function StatsTab({ requests }: StatsTabProps) {
   const t = useTranslations("trafficInspector");
   if (requests.length === 0) {
-    return (
-      <div className="p-4 text-sm text-text-muted">{t("statsNoData")}</div>
-    );
+    return <div className="p-4 text-sm text-text-muted">{t("statsNoData")}</div>;
   }
   return <StatsCharts requests={requests} />;
 }

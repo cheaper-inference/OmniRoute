@@ -2,7 +2,17 @@
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 // next-intl: no local mock — falls through to the real-EN-text default mock in
 // tests/_setup/vitestUiPolyfills.ts. The previous `(key) => key` mock rendered
@@ -10,9 +20,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // lowercase "hard"/"soft" check below (case mismatch: "policyHard" vs "hard"). The real
 // en.json copy for both keys is the plain lowercase word.
 
-const { default: AllocationTable } = await import(
-  "../../../src/app/(dashboard)/dashboard/costs/quota-share/components/AllocationTable"
-);
+const { default: AllocationTable } =
+  await import("../../../src/app/(dashboard)/dashboard/costs/quota-share/components/AllocationTable");
 
 const ALLOCATIONS = [
   { apiKeyId: "key_1", weight: 60, policy: "hard" as const },
@@ -25,8 +34,9 @@ let container: HTMLDivElement | null = null;
 let root: ReturnType<typeof createRoot> | null = null;
 
 async function render(props: Parameters<typeof AllocationTable>[0]) {
-  (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
-    true;
+  (
+    globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+  ).IS_REACT_ACT_ENVIRONMENT = true;
   container = document.createElement("div");
   document.body.appendChild(container);
   await act(async () => {

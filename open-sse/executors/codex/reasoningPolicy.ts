@@ -47,18 +47,20 @@ function clampEffort(model: string, requested: string): string {
 }
 
 /**
- * The Codex Responses API accepts only `effort` and `summary` inside `reasoning`.
- * Client ecosystems send OpenRouter-style keys (`enabled`, `max_tokens`, `exclude`, ...)
- * that the upstream rejects with HTTP 400 "Unknown parameter: 'reasoning.<key>'", so the
- * object is whitelisted before it reaches the wire (#13643). Runs even when no effort was
- * resolved, because the client's original object is forwarded unchanged in that case.
+ * Preserve the Responses reasoning fields intentionally forwarded by this adapter.
+ * The official Codex client emits context: "all_turns" for Responses Lite.
+ * Ref: openai/codex@83086188ae0614bd882818ff1aa23f3194962012
+ * codex-rs/core/src/client.rs:934-951.
+ * Forward explicit caller values; this does not assert support on every backend
+ * model or mode. Leave value validation to the upstream backend.
+ * Strip OpenRouter-only siblings such as enabled, max_tokens, and exclude.
  */
 function whitelistWireReasoning(body: RecordValue): void {
   const wire = body.reasoning;
   if (!wire || typeof wire !== "object" || Array.isArray(wire)) return;
   const record = wire as RecordValue;
   for (const key of Object.keys(record)) {
-    if (key !== "effort" && key !== "summary") delete record[key];
+    if (key !== "effort" && key !== "summary" && key !== "context") delete record[key];
   }
   if (Object.keys(record).length === 0) delete body.reasoning;
 }

@@ -169,7 +169,7 @@ Anropsloggar (om aktiverade) skrivs till `${DATA_DIR}/call_logs/`.
 
 ### chatCore.ts (5977 rader)
 
-Den **huvudsakliga förfrågningshanteraren**. Trots sin storlek har den en tydlig struktur:
+**Den huvudsakliga begäringshanteraren**. Trots sin storlek har den en tydlig struktur:
 
 ```ts
 // Pseudostruktur för chatCore.ts
@@ -178,17 +178,17 @@ export async function handleChat(request: NextRequest) {
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Validering av innehållet
+  // 2. Validering av brödtext
   const body = await parseRequestBody(request);
 
-  // 3. Formatidentifiering + översättning
+  // 3. Formatdetektering + översättning
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Kombinationsdirigering
+  // 4. Combo-routning
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -200,16 +200,16 @@ export async function handleChat(request: NextRequest) {
     }
   }
 
-  // 5. Reservlösning för nödfall
+  // 5. Nödfallsreserv
   return await emergencyFallback(body);
 }
 ```
 
-Trots att den är en enda gigantisk funktion är den organiserad i **kommenterade avsnitt** som motsvarar pipeline-processens fem steg.
+Trots att det är en enda jättefunktion är den organiserad i **kommenterade avsnitt** som motsvarar den femstegiga pipelinen.
 
-### combo.ts (4456 rader kod)
+### combo.ts (4456 LOC)
 
-**Dirigeringsmotorn** som omvandlar en kombination till ordnade mål.
+**Routningsmotorn** som löser upp en combo till ordnade mål.
 
 ```ts
 // services/combo.ts
@@ -226,46 +226,49 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Stöder **19 dirigeringsstrategier** (se `src/shared/constants/routingStrategies.ts`):
+Stöder **20 routningsstrategier** (se `src/shared/constants/routingStrategies.ts`):
 
-| Strategi            | Beteende                                                                            |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| `priority`          | Ordnad lista med första målet först                                                 |
-| `weighted`          | Sannolikhetsbaserat utifrån vikt per mål                                            |
-| `round-robin`       | Växla mellan målen i turordning                                                     |
-| `context-relay`     | Överför kontext mellan mål                                                          |
-| `fill-first`        | Fyll kvoten innan nästa mål används                                                 |
-| `p2c`               | Två slumpmässiga val jämförs                                                        |
-| `random`            | Likformigt slumpmässigt                                                             |
-| `least-used`        | Välj målet med minst användning på senare tid                                       |
-| `cost-optimized`    | Billigaste fungerande målet först                                                   |
-| `reset-aware`       | Tar hänsyn till leverantörernas återställningsfönster                               |
-| `reset-window`      | Dirigering baserad på återställningsfönster                                         |
-| `headroom`          | Mest återstående kvotmarginal först                                                 |
-| `strict-random`     | Verkligt likformigt (ingen kvalitetsviktning)                                       |
-| `auto`              | Använd poängsättning med 16 faktorer (`autoCombo/`)                                 |
-| `lkgp`              | Senast kända fungerande leverantör först                                            |
-| `context-optimized` | Bäst för förfrågningar med lång kontext                                             |
-| `fusion`            | Skicka parallellt till en panel och syntetisera sedan via en bedömare (`fusion.ts`) |
+| Strategi            | Beteende                                                                                 |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| `priority`          | Ordnad lista där första målet väljs först                                                |
+| `weighted`          | Sannolikhetsbaserad efter vikt per mål                                                   |
+| `round-robin`       | Roterar genom målen i ordning                                                            |
+| `context-relay`     | Skickar kontext vidare mellan mål                                                        |
+| `fill-first`        | Fyller kvoten innan byte till nästa                                                      |
+| `p2c`               | Power of two choices                                                                     |
+| `random`            | Likformigt slumpmässig                                                                   |
+| `least-used`        | Väljer det mål med färst nyliga användningar                                             |
+| `cost-optimized`    | Billigaste felfria målet först                                                           |
+| `reset-aware`       | Medveten om leverantörernas återställningsfönster                                        |
+| `reset-window`      | Routning baserad på återställningsfönster                                                |
+| `headroom`          | Störst kvarvarande kvotutrymme först                                                     |
+| `quota-weighted`    | Hoppar över förbrukade konton, lottar sedan efter kvarvarande kvot ÷ pågående belastning |
+| `strict-random`     | Helt likformig (ingen kvalitetsviktning)                                                 |
+| `auto`              | Använder poängsättning med 16 faktorer (`autoCombo/`)                                    |
+| `lkgp`              | Senast kända fungerande leverantör först                                                 |
+| `context-optimized` | Bäst för förfrågningar med lång kontext                                                  |
+| `cache-optimized`   | Fäster varje återanvändbart prompt-prefix vid samma konto (träffar i prompt-cachen)      |
+| `fusion`            | Sprider parallellt till en panel och syntetiserar sedan via en domare (`fusion.ts`)      |
+| `pipeline`          | Kedjar steg – varje måls utdata matar nästa steg                                         |
 
-### base.ts (1170 rader kod)
+### base.ts (1170 LOC)
 
-Den **abstrakta exekveraren** som varje exekverarklass utökar (direkt eller via `DefaultExecutor` och andra underklasser). Den innehåller:
+Den **abstrakta exekveraren** som varje exekverarklass ärver från (direkt eller via `DefaultExecutor` och andra underklasser). Den innehåller:
 
-- `buildUrl()` — standardkonstruktion av URL (underklasser åsidosätter för anpassat beteende)
-- `buildHeaders()` — standardrubriker (autentisering, innehållstyp)
-- `transformRequest()` — vidarebefordrar oförändrat som standard
-- `execute()` — den huvudsakliga HTTP-loopen med återförsök, exponentiell fördröjning och brytare
+- `buildUrl()` — standardkonstruktion av URL (underklasser åsidosätter för anpassad)
+- `buildHeaders()` — standardheaders (autentisering, content-type)
+- `transformRequest()` — skickar vidare oförändrat som standard
+- `execute()` — den huvudsakliga HTTP-loopen med återförsök/backoff/kretsbrytare
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
   // Hanterar alla OpenAI/Anthropic-kompatibla leverantörer
-  // Leverantörer registrerar konfigurationer (URL, autentisering, rubriker) men delar exekveringslogik
+  // Leverantörer registrerar konfigurationer (URL, autentisering, headers) men delar exekverarlogik
 }
 ```
 
-Leverantörsspecifikt beteende (autentiseringsrubriker, bas-URL, versionsrubriker) konfigureras via leverantörsregistret, inte genom separata exekverarklasser.
+Leverantörsspecifikt beteende (autentiseringsheaders, bas-URL, versionsheaders) konfigureras via leverantörsregistret, inte via separata exekverarklasser.
 
 ````
 
@@ -273,52 +276,52 @@ Leverantörsspecifikt beteende (autentiseringsrubriker, bas-URL, versionsrubrike
 
 ## Tjänster (117 moduler)
 
-Tjänster är **fokuserade moduler med ett enda syfte** som handlers kombinerar. De stora kategorierna:
+Tjänster är **fokuserade moduler med ett enda syfte** som handlers komponerar. De stora kategorierna:
 
-### Routning och kombination
+### Routing och combo
 
-- `combo.ts` — startpunkt för kombinationsroutade förfrågningar
-- `services/autoCombo/` — poängsättning med 16 faktorer, 8 automatiska routningsstrategier
-- `wildcardRouter.ts` — matchar jokerteckenrutter (`gpt-*`)
-- `modelFamilyFallback.ts` — T5-reservlösning inom samma familj
+- `combo.ts` — ingångspunkt för combo-routade förfrågningar
+- `services/autoCombo/` — poängsättning med 16 faktorer, 8 automatiska routingstrategier
+- `wildcardRouter.ts` — matchar jokertecken-routes (`gpt-*`)
+- `modelFamilyFallback.ts` — T5-fallback inom modellfamiljen
 
 ### Hastighetsbegränsning och kvot
 
-- `rateLimitManager.ts` — tokenhink per nyckel+leverantör
+- `rateLimitManager.ts` — token bucket per nyckel+leverantör
 - `usage.ts` — registrering av användning
-- `quotaCache.ts` — minnesbaserade ögonblicksbilder av kvoter
+- `quotaCache.ts` — kvotögonblicksbilder i minnet
 
 ### Konto och token
 
-- `tokenRefresh.ts` — OAuth-uppdatering vid 401
-- `accountFallback.ts` — växla till ett alternativt konto
-- `sessionManager.ts` — sessionstillstånd för dialoger i flera steg
+- `tokenRefresh.ts` — OAuth-förnyelse vid 401
+- `accountFallback.ts` — växla till alternativt konto
+- `sessionManager.ts` — sessionstillstånd för flerturssessioner
 
 ### Intelligens
 
-- `intentClassifier.ts` — klassificera förfrågans avsikt
+- `intentClassifier.ts` — klassificera förfrågningens avsikt
 - `taskAwareRouter.ts` — routa efter uppgiftstyp
-- `thinkingBudget.ts` — tilldela tokens för resonemang
-- `contextManager.ts` — infoga routningskontext
+- `thinkingBudget.ts` — allokera thinking-tokens
+- `contextManager.ts` — injicera routingkontext
 
 ### Motståndskraft
 
-- `resilience.ts` — orkestrering av återförsök, backoff och kretsbrytare
-- `emergencyFallback.ts` — reservlösning som sista utväg
-- `modelDeprecation.ts` — routa automatiskt till efterföljande modeller
+- `resilience.ts` — orkestrering av återförsök, backoff och brytare
+- `emergencyFallback.ts` — fallback som sista utväg
+- `modelDeprecation.ts` — auto-routa till efterföljarmodeller
 
 ### Tillstånd
 
 - `signatureCache.ts` — deduplicering efter förfrågningssignatur
-- `volumeDetector.ts` — lastreducering
+- `volumeDetector.ts` — lastavlastning
 - `contextHandoff.ts` — sessionsserialisering
 
 ### Komprimering
 
-- `compression/` (underkatalog) — fullständig komprimeringspipeline
-- 39 filer som omfattar motorer, regelpaket och adaptrar
+- `compression/` (underkatalog) — komplett komprimeringspipeline
+- 39 filer som täcker motorer, regelpaket, adaptrar
 
-### Färdigheter
+### Skills
 
 - (beskrivs i [SKILLS.md](./SKILLS.md))
 
@@ -330,13 +333,13 @@ Tjänster är **fokuserade moduler med ett enda syfte** som handlers kombinerar.
 
 ## Exekverare (150 moduler)
 
-Mestadels en fil per leverantör. Alla exekverarklasser utökar `BaseExecutor` och åsidosätter det som skiljer sig; de övriga modulerna är leverantörsspecifika hjälpare (verktygsscheman, fetch-/TTS-adaptrar och hanterare för egenheter).
+Mestadels en fil per leverantör. Exekverarklasserna utökar alla `BaseExecutor` och åsidosätter det som skiljer sig åt; de övriga modulerna är hjälpmoduler per leverantör (verktygsscheman, fetch/TTS-adaptrar, hanterare för egenheter).
 
-### Gemensamma mönster
+### Vanliga mönster
 
-Leverantörer matchas via `getExecutor(providerId)`, som returnerar den konfigurerade exekveraren. OpenAI-/Anthropic-kompatibla leverantörer använder `DefaultExecutor` (`executors/default.ts`). Leverantörsspecifikt beteende (bas-URL, autentiseringshuvuden, API-version) konfigureras i `open-sse/config/providers/`, medan transformeringar av förfrågningsinnehållet hanteras i `open-sse/translator/`.
+Leverantörer slås upp via `getExecutor(providerId)`, som returnerar den konfigurerade exekveraren. OpenAI/Anthropic-kompatibla leverantörer använder `DefaultExecutor` (`executors/default.ts`). Leverantörsspecifikt beteende (bas-URL, auth-headers, API-version) konfigureras i `open-sse/config/providers/`, medan transformationer av förfrågningskroppar hanteras i `open-sse/translator/`.
 
-**Anpassad URL** anges via leverantörskonfigurationen:
+**Anpassad URL** ställs in via leverantörskonfigurationen:
 
 ```ts
 // Leverantörskonfiguration i open-sse/config/providers/
@@ -346,9 +349,9 @@ export default {
 }
 ````
 
-**Anpassad autentisering** hanteras via leverantörsregistrets autentiseringskonfiguration (API-nyckel, OAuth, huvudprofiler).
+**Anpassad autentisering** hanteras via leverantörsregistrets auth-konfiguration (API-nyckel, OAuth, header-profiler).
 
-**Anpassade transformeringar av förfrågningsinnehållet** (t.ex. att Anthropic separerar `system` från `messages`) registreras per leverantör i `open-sse/translator/`.
+Transformationer av **anpassad förfrågningskropp** (t.ex. att Anthropic separerar `system` från `messages`) registreras per leverantör i `open-sse/translator/`.
 
 ````
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-Matchningen går via `ExecutorRegistry` (`executors/registry.ts`): varje specialiserad exekverare deklareras i den inbyggda tabellen i `executors/index.ts` och registreras via `registerExecutor(alias, instance)` när modulen läses in; `getExecutor()` konsulterar registret och faller tillbaka till en memoiserad `DefaultExecutor` för alla leverantörer utan en specialiserad post. Den fullständiga mappningen alias → exekverare beskrivs av referenstestet `tests/unit/executor-map-golden.test.ts`.
+Uppslagning sker via `ExecutorRegistry` (`executors/registry.ts`): varje specialiserad exekverare deklareras i den inbyggda tabellen i `executors/index.ts` och registreras via `registerExecutor(alias, instance)` vid modulladdning; `getExecutor()` konsulterar registret och faller tillbaka på en memoiserad `DefaultExecutor` för leverantörer utan en specialiserad post. Hela mappningen alias → exekverare karakteriseras av golden-testet `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -483,15 +486,15 @@ Detta hanterar:
 
 `open-sse/config/` innehåller konfigurationslagret:
 
-| Fil                           | Syfte                                                          |
-| ----------------------------- | -------------------------------------------------------------- |
-| `providerRegistry.ts`         | Register över chattmodeller för katalogen med 374 leverantörer |
-| `providerModels.ts`           | Modellalias och formatmappning                                 |
-| `constants.ts`                | Tidsgränser, begränsningar och statuskoder                     |
-| `defaultThinkingSignature.ts` | Standardsignatur för Claude-resonemang                         |
-| `modelStrip.ts` (i services)  | Leverantörsspecifik borttagning av fält                        |
+| Fil                           | Ändamål                                           |
+| ----------------------------- | ------------------------------------------------- |
+| `providerRegistry.ts`         | Chattmodellregister över 377-leverantörskatalogen |
+| `providerModels.ts`           | Modellalias, formatmappning                       |
+| `constants.ts`                | Timeouts, gränser, statuskoder                    |
+| `defaultThinkingSignature.ts` | Standard Claude tänkande signatur                 |
+| `modelStrip.ts` (i tjänster)  | Fältstrippning per leverantör                     |
 
-### Schema för leverantörsregistret
+### Providers registerschema
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Zod-validering vid modulinläsning säkerställer att alla leverantörskonfigurationer är giltiga.
+Zod validering vid modulladdning säkerställer att alla leverantörskonfigurationer är giltiga.
 
 ---
 

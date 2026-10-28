@@ -1,7 +1,16 @@
 // @vitest-environment jsdom
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
+
+// Warm the component modules once, outside the 5 s per-test budget: the first cold transform
+// of the kit (Alert, PageHeader, Table…) can take several seconds on a loaded runner, which
+// made whichever test imported first time out. Assertions are unchanged.
+beforeAll(async () => {
+  await import("../../../src/app/(dashboard)/dashboard/resilience/connections/components/ResilienceConnectionsClient");
+  await import("../../../src/app/(dashboard)/dashboard/resilience/connections/components/ConnectionsTable");
+  await import("../../../src/app/(dashboard)/dashboard/resilience/connections/components/BreakerTimeline");
+}, 60_000);
 
 // next-intl: return the key so we can assert on stable strings. When options are
 // passed, append their JSON so interpolated values (e.g. the degraded banner's

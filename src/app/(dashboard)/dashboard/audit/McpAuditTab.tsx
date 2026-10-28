@@ -2,7 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { DataTableFooter, DataTableShell } from "@omniroute/ui-kit/data-table-shell";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
+import { Badge, Button, Card, EmptyState, Input, Select } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 type McpAuditEntry = {
   id: number;
@@ -95,32 +107,24 @@ export default function McpAuditTab() {
 
   return (
     <div className="space-y-5">
-      <Card className="p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-text-main">{t("mcpAudit")}</h2>
-            <p className="mt-1 text-sm text-text-muted">{t("mcpAuditDesc")}</p>
-            <p className="mt-2 text-xs text-text-muted">
-              {t("showing", { count: data.entries.length, total: data.total })}
-            </p>
-          </div>
-          <button
+      <PageHeader
+        compact
+        title={t("mcpAudit")}
+        description={t("mcpAuditDesc")}
+        actions={
+          <Button
+            variant="outline"
+            icon="refresh"
+            loading={loading}
             onClick={() => {
               void fetchAudit();
               void fetchStats();
             }}
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
           >
-            <span
-              className={`material-symbols-outlined text-[16px] ${loading ? "animate-spin" : ""}`}
-            >
-              refresh
-            </span>
             {t("refresh")}
-          </button>
-        </div>
-      </Card>
+          </Button>
+        }
+      />
 
       {stats && (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -147,21 +151,19 @@ export default function McpAuditTab() {
               icon: "star",
             },
           ].map((item) => (
-            <Card key={item.label} className="px-4 py-3">
-              <div className="flex items-center gap-2 mb-1">
-                <span
-                  className="material-symbols-outlined text-[14px]"
-                  style={{ color: "var(--color-text-muted)" }}
-                >
-                  {item.icon}
-                </span>
-                <span className="text-xs text-text-muted uppercase tracking-wider">
+            <Card key={item.label} padding="none" className="px-4 py-3">
+              <div className="mb-1 flex items-center gap-2">
+                <Icon name={item.icon} size={14} className="text-text-muted" />
+                <span className="text-xs uppercase tracking-wider text-text-muted">
                   {item.label}
                 </span>
               </div>
               <p
-                className="text-lg font-semibold truncate"
-                style={{ color: item.highlight ? "rgb(34,197,94)" : "var(--color-text)" }}
+                className={
+                  item.highlight
+                    ? "truncate text-lg font-semibold text-success"
+                    : "truncate text-lg font-semibold text-text-main"
+                }
               >
                 {item.value}
               </p>
@@ -170,124 +172,115 @@ export default function McpAuditTab() {
         </div>
       )}
 
-      <Card className="p-4">
-        <div className="grid gap-3 md:grid-cols-3">
-          <label className="space-y-1">
-            <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-              {t("tool")}
-            </span>
-            <input
+      <DataTableShell
+        filterAlignment="end"
+        resultCount={data.total}
+        resultLabel={() => t("showing", { count: data.entries.length, total: data.total })}
+        filters={
+          <>
+            <Input
+              label={t("tool")}
               value={toolFilter}
               onChange={(event) => {
                 setOffset(0);
                 setToolFilter(event.target.value);
               }}
               placeholder={t("toolPlaceholder")}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full sm:w-56"
             />
-          </label>
-          <label className="space-y-1">
-            <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-              {t("result")}
-            </span>
-            <select
+            <Select
+              label={t("result")}
               value={successFilter}
               onChange={(event) => {
                 setOffset(0);
                 setSuccessFilter(event.target.value as "all" | "true" | "false");
               }}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full sm:w-44"
             >
               <option value="all">{t("allResults")}</option>
               <option value="true">{t("success")}</option>
               <option value="false">{t("failure")}</option>
-            </select>
-          </label>
-          <div className="flex items-end">
-            <button
+            </Select>
+            <Button
+              variant="ghost"
               onClick={() => {
                 setToolFilter("");
                 setSuccessFilter("all");
                 setOffset(0);
               }}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar"
             >
               {t("clearFilters")}
-            </button>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="overflow-hidden">
+            </Button>
+          </>
+        }
+        pagination={
+          <DataTableFooter
+            pagination={
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setOffset((current) => Math.max(0, current - MCP_PAGE_SIZE))}
+                  disabled={offset === 0 || loading}
+                >
+                  {t("previous")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setOffset((current) => current + MCP_PAGE_SIZE)}
+                  disabled={offset + MCP_PAGE_SIZE >= data.total || loading}
+                >
+                  {t("next")}
+                </Button>
+              </div>
+            }
+          />
+        }
+      >
         {loading ? (
-          <div className="p-8 text-center text-sm text-text-muted">{t("loading")}</div>
+          <TableLoadingState label={t("loading")} />
         ) : data.entries.length === 0 ? (
-          <div className="p-10 text-center">
-            <span className="material-symbols-outlined text-[40px] text-text-muted">terminal</span>
-            <p className="mt-3 text-sm text-text-muted">{t("noMcpEvents")}</p>
-          </div>
+          <EmptyState icon="terminal" title={t("noMcpEvents")} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] text-left text-sm">
-              <thead className="border-b border-border bg-sidebar/40 text-xs uppercase tracking-wider text-text-muted">
-                <tr>
-                  <th className="px-4 py-3 font-medium">{t("timestamp")}</th>
-                  <th className="px-4 py-3 font-medium">{t("tool")}</th>
-                  <th className="px-4 py-3 font-medium">{t("duration")}</th>
-                  <th className="px-4 py-3 font-medium">{t("result")}</th>
-                  <th className="px-4 py-3 font-medium">{t("apiKey")}</th>
-                  <th className="px-4 py-3 font-medium">{t("output")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {data.entries.map((entry) => (
-                  <tr key={entry.id} className="transition-colors hover:bg-sidebar/30">
-                    <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-text-muted">
-                      {new Date(entry.createdAt).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-text-main">{entry.toolName}</td>
-                    <td className="px-4 py-3 text-text-muted">{entry.durationMs}ms</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`rounded-full border px-2 py-1 text-xs font-medium ${
-                          entry.success
-                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                            : "border-red-500/30 bg-red-500/10 text-red-600"
-                        }`}
-                      >
-                        {entry.success ? t("success") : entry.errorCode || t("failure")}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-text-muted">
-                      {entry.apiKeyId || t("notAvailable")}
-                    </td>
-                    <td className="max-w-[280px] truncate px-4 py-3 text-xs text-text-muted">
-                      {entry.outputSummary || t("notAvailable")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table scrollbarLabel={t("mcpAudit")} className="min-w-[860px] text-left">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("timestamp")}</TableHead>
+                <TableHead>{t("tool")}</TableHead>
+                <TableHead>{t("duration")}</TableHead>
+                <TableHead>{t("result")}</TableHead>
+                <TableHead>{t("apiKey")}</TableHead>
+                <TableHead>{t("output")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.entries.map((entry) => (
+                <TableRow key={entry.id}>
+                  <TableCell className="font-mono text-xs text-text-muted">
+                    {new Date(entry.createdAt).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-text-main">
+                    {entry.toolName}
+                  </TableCell>
+                  <TableCell className="text-text-muted">{entry.durationMs}ms</TableCell>
+                  <TableCell>
+                    <Badge size="sm" variant={entry.success ? "success" : "error"}>
+                      {entry.success ? t("success") : entry.errorCode || t("failure")}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-text-muted">
+                    {entry.apiKeyId || t("notAvailable")}
+                  </TableCell>
+                  <TableCell className="max-w-[280px] truncate text-xs text-text-muted">
+                    {entry.outputSummary || t("notAvailable")}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
-      </Card>
-
-      <div className="flex items-center justify-end gap-2">
-        <button
-          onClick={() => setOffset((current) => Math.max(0, current - MCP_PAGE_SIZE))}
-          disabled={offset === 0 || loading}
-          className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
-        >
-          {t("previous")}
-        </button>
-        <button
-          onClick={() => setOffset((current) => current + MCP_PAGE_SIZE)}
-          disabled={offset + MCP_PAGE_SIZE >= data.total || loading}
-          className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
-        >
-          {t("next")}
-        </button>
-      </div>
+      </DataTableShell>
     </div>
   );
 }

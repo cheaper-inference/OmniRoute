@@ -10,77 +10,76 @@ _Laatst bijgewerkt: 2026-06-28_
 
 ## Samenvatting
 
-OmniRoute is een lokale AI-routeringsgateway en een dashboard, gebouwd met Next.js.
-Het biedt één OpenAI-compatibel endpoint (`/v1/*`) en routeert verkeer naar meerdere upstreamproviders, met vertaling, fallback, tokenvernieuwing en gebruiksregistratie.
+OmniRoute is een lokale AI -routeringsgateway en dashboard gebouwd op Next.js. Het biedt een enkel OpenAI-compatibel eindpunt (`/v1/*`) en routeert verkeer over meerdere upstream-providers met vertaling, fallback, tokenvernieuwing en gebruiksregistratie.
 
-Kernfunctionaliteiten:
+Kernmogelijkheden:
 
-- OpenAI-compatibel API-oppervlak voor CLI/tools (375 providers, 154 uitvoeringsmodules)
-- Vertaling van requests/responses tussen providerindelingen
-- Fallback voor modelcombinaties (reeks van meerdere modellen)
-- Gestructureerde combinatiestappen (`provider + model + connection`) met runtimevolgorde op basis van `compositeTiers`
-- Fallback op accountniveau (meerdere accounts per provider)
-- Voorafgaande quotacontrole en quotabewuste P2C-accountselectie in het primaire chatpad
-- Beheer van providerverbindingen via OAuth en API-sleutels (27 OAuth-providermodules)
-- Genereren van embeddings via `/v1/embeddings` (18 providers)
-- Afbeeldingen genereren via `/v1/images/generations` (10+ providers, 20+ modellen)
-- Audiotranscriptie via `/v1/audio/transcriptions` (18 providers)
+- OpenAI-compatibel API oppervlak voor CLI/tools (377 providers, 156 uitvoerdermodules)
+- Request/response -vertaling in verschillende providerformaten
+- Terugval op modelcombinaties (reeks met meerdere modellen)
+- Gestructureerde combostappen (`provider + model + connection`) met runtime-bestelling door `compositeTiers`
+- Terugval op accountniveau (meerdere accounts per provider)
+- Quota-preflight en quotabewuste P2C accountselectie in het hoofdchatpad
+- OAuth + API-sleutel provider verbindingsbeheer (27 OAuth provider modules)
+- Inbedding van generatie via `/v1/embeddings` (18 aanbieders)
+- Beeldgeneratie via `/v1/images/generations` (10 + providers, 20 + modellen)
+- Audiotranscriptie via `/v1/audio/transcriptions` (18 aanbieders)
 - Tekst-naar-spraak via `/v1/audio/speech` (24 ingebouwde providers)
-- Video's genereren via `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Videogeneratie via `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Muziek genereren via `/v1/music/generations` (ComfyUI)
-- Zoeken op het web via `/v1/search` (20 providers)
-- Moderatie via `/v1/moderations`
+- Zoeken op internet via `/v1/search` (20 aanbieders)
+- Moderaties via `/v1/moderations`
 - Herrangschikking via `/v1/rerank`
-- Verwerking van denktags (``) voor redeneermodellen
-- Opschoning van responses voor strikte compatibiliteit met de OpenAI SDK
-- Normalisatie van rollen (developer→system, system→user) voor compatibiliteit tussen providers
-- Conversie van gestructureerde uitvoer (json_schema → Gemini responseSchema)
-- Lokale persistentie voor providers, sleutels, aliassen, combinaties, instellingen en prijzen (122 DB-modules)
-- Registratie van gebruik/kosten en requests
-- Optionele cloudsynchronisatie voor synchronisatie tussen meerdere apparaten en van statusgegevens
-- IP-toestaanlijst/blokkeerlijst voor API-toegangsbeheer
-- Beheer van denkbudgetten (doorgeven/automatisch/aangepast/adaptief)
-- Globale injectie van systeemprompts
-- Sessieregistratie en fingerprinting
-- Uitgebreide snelheidsbeperking per account met providerspecifieke profielen
-- Circuit-breakerpatroon voor weerbaarheid van providers
-- Bescherming tegen thundering herds met mutexvergrendeling
-- Cache voor deduplicatie van requests op basis van handtekeningen
-- Domeinlaag: kostenregels, fallbackbeleid en vergrendelingsbeleid
-- Context Relay: samenvattingen voor sessieoverdracht om continuïteit bij accountrotatie te waarborgen
-- Persistentie van domeinstatus (SQLite-write-through-cache voor fallbacks, budgetten, vergrendelingen en circuit breakers)
-- Beleidsengine voor gecentraliseerde evaluatie van requests (vergrendeling → budget → fallback)
-- Requesttelemetrie met aggregatie van p50/p95/p99-latentie
-- Telemetrie voor combinatiedoelen en historische status van combinatiedoelen via `combo_execution_key` / `combo_step_id`
-- Correlatie-ID (X-Request-Id) voor end-to-endtracering
-- Logging van compliance-audits met opt-out per API-sleutel
-- Evaluatieframework voor kwaliteitsborging van LLM's
-- Statusdashboard met realtime circuit-breakerstatus van providers
-- MCP Server (110 tools) met 3 transportmethoden (stdio/SSE/Streamable HTTP)
+- Denk aan tag-parsing (`<think>...</think>`) voor redeneermodellen
+- Reactie-opschoning voor strikte OpenAI SDK compatibiliteit
+- Rolnormalisatie (ontwikkelaar → systeem, systeem → gebruiker) voor compatibiliteit tussen providers
+- Gestructureerde uitvoerconversie (json_schema → Gemini responseSchema)
+- Lokale persistentie voor providers, sleutels, aliassen, combo's, instellingen, prijzen (122 DB modules)
+- Usage/cost -tracking en verzoekregistratie
+- Optionele cloudsynchronisatie voor multi-device/state synchronisatie
+- IP allowlist/blocklist voor API -toegangscontrole
+- Denken budgetbeheer (passthrough/auto/custom/adaptive)
+- Wereldwijde systeempromptinjectie
+- Sessie volgen en vingerafdrukken maken
+- Verbeterde tarieflimieten per account met providerspecifieke profielen
+- Patroon van stroomonderbrekers voor veerkracht van de provider
+- Bescherming tegen donderende kuddes met mutex-vergrendeling
+- Op handtekeningen gebaseerde cache voor deduplicatie van verzoeken
+- Domeinlaag: kostenregels, fallback-beleid, lock-outbeleid
+- Context Relay: samenvattingen van sessieoverdrachten voor continuïteit van accountrotatie
+- Persistentie van domeinstatus (SQLite -schrijfcache voor fallbacks, budgetten, uitsluitingen, stroomonderbrekers)
+- Beleidsengine voor gecentraliseerde verzoekevaluatie (uitsluiting → budget → fallback)
+- Telemetrie aanvragen met p50/p95/p99 -latentieaggregatie
+- Combo-doeltelemetrie en historische combo-doelgezondheid via `combo_execution_key` / `combo_step_id`
+- Correlatie ID (X-Request-Id) voor end-to-end tracering
+- Compliance auditlogging met opt-out per API sleutel
+- Evaluatiekader voor LLM kwaliteitszorg
+- Gezondheidsdashboard met realtime stroomonderbrekerstatus van de provider
+- MCP Server (110 tools) met 3 transporten (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) met vaardigheden en taaklevenscyclus
-- Geheugensysteem (extractie, injectie, ophalen, samenvatten)
+- Geheugensysteem (extractie, injectie, ophalen, samenvatting)
 - Vaardighedensysteem (register, uitvoerder, sandbox, ingebouwde vaardigheden)
-- MITM-proxy met certificaatbeheer en DNS-afhandeling
-- Middleware ter bescherming tegen promptinjectie
-- Pipeline voor promptcompressie met Caveman, RTK, gestapelde pipelines, compressiecombinaties, taalpakketten en analyses
-- ACP-register (Agent Communication Protocol)
-- Modulaire OAuth-providers (22 afzonderlijke modules onder `src/lib/oauth/providers/`)
-- Scripts voor de-installatie/volledige de-installatie
-- Actie voor herstel van de OAuth-omgeving
-- WebSocket-bridge voor OpenAI-compatibele WS-clients (`/v1/ws`)
-- Beheer van synchronisatietokens (uitgeven/intrekken, downloaden van ETag-versiebeheerde configuratiebundels)
-- GLM Thinking (`glmt`) als volwaardige providervoorinstelling
-- Hybride tokentelling (`/messages/count_tokens` aan providerzijde, met terugval op schatting)
-- Automatisch initialiseren van modelaliassen (30+ normalisaties voor dialecten tussen proxy's bij het opstarten)
-- Veilig uitgaand ophalen met SSRF-bescherming, blokkering van privé-URL's en configureerbare nieuwe pogingen
-- Chatpogingen die rekening houden met afkoelperiodes, met configureerbare `requestRetry` en `maxRetryIntervalSec`
-- Validatie van de runtimeomgeving met Zod tijdens het opstarten
-- Compliance-audit v2 met paginering, CRUD-gebeurtenissen van providers en logging van door SSRF geblokkeerde validaties
+- MITM proxy met certificaatbeheer en DNS -afhandeling
+- Snelle middleware voor injectiebescherming
+- Snelle compressiepijplijn met Caveman, RTK, gestapelde pijplijnen, compressiecombo's, taalpakketten en analyses
+- ACP -register (Agent Communication Protocol).
+- Modulaire OAuth aanbieders (22 individuele modules onder `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall -scripts
+- OAuth milieuherstelactie
+- WebSocket bridge voor OpenAI-compatibele WS clients (`/v1/ws`)
+- Synchronisatietokenbeheer (issue/revoke, download van configuratiebundel met ETag-versie)
+- GLM Thinking (`glmt`) eersteklas providervoorinstelling
+- Hybride token tellen ( `/messages/count_tokens` aan de providerzijde met terugval op schattingen)
+- Automatisch zaaien van modelalias (30 + cross-proxy dialectnormalisaties bij het opstarten)
+- Veilig uitgaand ophalen met SSRF bewaking, privé- URL -blokkering en configureerbaar opnieuw proberen
+- Cooldown-bewuste chatpogingen met configureerbare `requestRetry` en `maxRetryIntervalSec`
+- Runtime-omgevingsvalidatie met Zod bij opstarten
+- Nalevingsaudit v2 met paginering, provider CRUD gebeurtenissen en SSRF-geblokkeerde validatielogboekregistratie
 
 Primair runtimemodel:
 
-- Next.js-approutes onder `src/app/api/*` implementeren zowel dashboard-API's als compatibiliteits-API's
-- Een gedeelde SSE-/routeringskern in `src/sse/*` + `open-sse/*` verwerkt provideruitvoering, vertaling, streaming, fallback en gebruik
+- Next.js app-routes onder `src/app/api/*` implementeren zowel dashboard APIs als compatibiliteit APIs
+- Een gedeelde SSE/routing kern in `src/sse/*` + `open-sse/*` zorgt voor de uitvoering, vertaling, streaming, fallback en gebruik van de provider
 
 ## Referentiediagrammen
 
@@ -114,43 +113,51 @@ de overige zijn gekoppeld vanuit hun domeinspecifieke handleidingen.
 - SLA/control plane van de provider buiten het lokale proces
 - De externe CLI-binaire bestanden zelf (Claude CLI, Codex CLI, enz.)
 
-## Dashboardonderdelen (huidig)
+## Dashboardoppervlak (huidig)
 
 Hoofdpagina's onder `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — snelstart + provideroverzicht
-- `/dashboard/endpoint` — endpointproxy + MCP + A2A + API-endpointtabbladen
-- `/dashboard/providers` — providerverbindingen en referenties
-- `/dashboard/combos` — combostrategieën, sjablonen, stapsgewijze builder, modelrouteringsregels, handmatig opgeslagen volgorde
-- `/dashboard/auto-combo` — Auto Combo Engine: scoringsgewichten, moduspakketten, voorinstellingen voor virtuele fabrieken, telemetrie
+- `/dashboard` — snel aan de slag + overzicht van providers
+- `/dashboard/endpoint` — endpointproxy + tabbladen voor MCP-, A2A- en API-endpoints
+- `/dashboard/providers` — providerverbindingen en aanmeldgegevens
+- `/dashboard/combos` — combinatiestrategieën, sjablonen, stapsgewijze builder, modelrouteringsregels, handmatig opgeslagen volgorde
+- `/dashboard/auto-combo` — Auto Combo Engine: scoringsgewichten, moduspakketten, virtuele fabrieksvoorinstellingen, telemetrie
 - `/dashboard/costs` — kostenaggregatie en inzicht in prijzen
-- `/dashboard/analytics` — gebruiksanalyses, evaluaties, status van combodoelen
-- `/dashboard/limits` — quota- en frequentiebeheer
+- `/dashboard/analytics` — gebruiksanalyses, evaluaties, status van combinatiedoelen
+- `/dashboard/limits` — quota- en snelheidslimieten
 - `/dashboard/cli-tools` — CLI-onboarding, runtimedetectie, configuratiegeneratie
 - `/dashboard/agents` — gedetecteerde ACP-agents + registratie van aangepaste agents
-- `/dashboard/cloud-agents` — in de cloud gehoste agenttaken (Codex Cloud, Devin, Jules) en taaklevenscyclus
-- `/dashboard/skills` — A2A-vaardighedenregister, uitvoering in sandbox, ingebouwde vaardighedencatalogus
-- `/dashboard/memory` — inspectie en ophalen van persistent gespreksgeheugen
-- `/dashboard/webhooks` — uitgaande webhookabonnementen, rotatie van geheimen, statistieken voor nieuwe pogingen
+- `/dashboard/cloud-agents` — taken voor in de cloud gehoste agents (Codex Cloud, Devin, Jules) en taaklevenscyclus
+- `/dashboard/skills` — A2A-skillregister, uitvoering in sandbox, ingebouwde skillcatalogus
+- `/dashboard/memory` — inspectie en opvraging van persistent gespreksgeheugen
+- `/dashboard/webhooks` — uitgaande webhookabonnementen, rotatie van geheimen, statistieken over nieuwe pogingen
 - `/dashboard/batch` — indienen van batchtaken en voortgang
-- `/dashboard/cache` — statistieken voor read-through- en redeneercache, beheer voor verwijdering
-- `/dashboard/playground` — interactieve chatomgeving voor elke geconfigureerde combo of elk geconfigureerd model
-- `/dashboard/changelog` — changelogviewer in de app (geeft `CHANGELOG.md` weer)
+- `/dashboard/cache` — statistieken voor read-through- en redeneercaches, beheer voor het verwijderen van cache-items
+- `/dashboard/playground` — interactieve chatomgeving voor elke geconfigureerde combinatie of elk model
+- `/dashboard/changelog` — changelogviewer in de app (rendert `CHANGELOG.md`)
 - `/dashboard/system` — runtimediagnostiek, versie-informatie, interface voor omgevingsvalidatie
-- `/dashboard/onboarding` — wizard voor de eerste configuratie van nieuwe installaties
-- `/dashboard/media` — experimenteeromgeving voor afbeeldingen, video en muziek
-- `/dashboard/search-tools` — testen van zoekproviders en zoekgeschiedenis
-- `/dashboard/health` — uptime, circuitbreakers, frequentielimieten, sessies met quotabewaking
+- `/dashboard/onboarding` — installatiewizard voor nieuwe installaties bij de eerste uitvoering
+- `/dashboard/media` — playground voor afbeeldingen, video en muziek
+- `/dashboard/search-tools` — testen van zoekproviders en geschiedenis
+- `/dashboard/health` — uptime, circuitbreakers, snelheidslimieten, sessies met quotabewaking
 - `/dashboard/logs` — aanvraag-, proxy-, audit- en consolelogboeken
-- `/dashboard/settings` — tabbladen voor systeeminstellingen (algemeen, routering, standaardwaarden voor combo's, enz.)
+- `/dashboard/settings` — tabbladen met systeeminstellingen (algemeen, routering, standaardwaarden voor combinaties, enz.)
 - `/dashboard/context/caveman` — Caveman-compressieregels, taalpakketten, voorbeeldweergave en uitvoermodus
-- `/dashboard/context/rtk` — RTK-filters voor opdrachtuitvoer, voorbeeldweergave en instellingen voor runtimeveiligheid
-- `/dashboard/context/combos` — benoemde compressiepijplijnen die aan routeringscombo's zijn toegewezen
+- `/dashboard/context/rtk` — RTK-filters voor opdrachtuitvoer, voorbeeldweergave en runtimeveiligheidsinstellingen
+- `/dashboard/context/combos` — benoemde compressiepijplijnen die aan routeringscombinaties zijn toegewezen
 - `/dashboard/translator` — inspectie van de vertaler en voorbeeldweergave van conversie van aanvraagindelingen
-- `/dashboard/audit` — browser voor compliance-auditlogboeken met paginering en gestructureerde metadata
+- `/dashboard/audit` — browser voor nalevingsauditlogboeken met paginering en gestructureerde metagegevens
 - `/dashboard/usage` — gebruiksbrowser per aanvraag, gekoppeld aan `usage_history`
-- `/dashboard/compression` — compressieanalyses, statistieken en pijplijntoewijzing
+- `/dashboard/compression` — compressieanalyses, statistieken en toewijzing van pijplijnen
 - `/dashboard/api-manager` — levenscyclus van API-sleutels en modelmachtigingen
+
+UI-laag: elke pagina wordt binnen één shell gerenderd — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset`
+van de kit en `Sidebar.tsx` en `Header.tsx` van OmniRoute). Pagina's importeren hun
+bouwstenen uit `@/shared/components` (adapters voor de meegeleverde Keak CI UI Kit in
+`packages/ui-kit`) of uit subpaden van kitcomponenten (`@omniroute/ui-kit/table`, `…/page-header`), en
+pictogrammen via `<Icon>` (`ICON_MAP` → Lucide). Het thema (standaard `system`, licht/donker) en de tokens zijn
+afkomstig uit de kit via de bridge in `src/app/globals.css`. Details: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Systeemcontext op hoog niveau
 

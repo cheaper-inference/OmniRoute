@@ -20,13 +20,8 @@ import { join } from "node:path";
 import { t } from "../i18n.mjs";
 import { resolveDataDir } from "../data-dir.mjs";
 import { resolveActiveContext } from "../contexts.mjs";
-import { quoteShellArgs } from "../utils/winShellArgs.mjs";
-import {
-  buildClaudeEnv,
-  resolveLaunchTarget,
-  resolveClaudeSpawn,
-  quoteClaudeArgs,
-} from "./launch.mjs";
+import { quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
+import { buildClaudeEnv, resolveLaunchTarget, resolveClaudeSpawn } from "./launch.mjs";
 
 // Own subdirectory under the shared OmniRoute data dir (honours the DATA_DIR env
 // override, same as every other CLI command — see bin/cli/data-dir.mjs) rather
@@ -327,7 +322,7 @@ export async function runFccClaude(opts = {}, claudeArgs = []) {
 
   console.error(`[fcc-claude] launching ${command} → ${baseUrl}`);
 
-  const child = spawn(command, quoteClaudeArgs(claudeArgs, process.platform), {
+  const child = spawn(command, quoteShellArgsForSpawn(claudeArgs, process.platform, shell), {
     env,
     stdio: "inherit",
     shell,

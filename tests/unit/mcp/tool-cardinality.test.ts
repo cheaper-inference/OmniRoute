@@ -5,8 +5,8 @@
  * and returns a reduced manifest announcing fewer tools to the model,
  * saving tokens in the tool-manifest portion of the context window.
  *
- * The live MCP server registration loop is UNCHANGED — this is a pure
- * utility; activation is a follow-up task.
+ * The utility remains pure; the live MCP server already applies the opt-in
+ * tool filter in createMcpServer() through its registerTool wrapper.
  */
 
 import { test, describe } from "node:test";

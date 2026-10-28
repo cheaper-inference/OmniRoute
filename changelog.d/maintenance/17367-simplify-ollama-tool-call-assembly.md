@@ -1,0 +1,1 @@
+- **refactor(sse):** the Ollama NDJSON transformer assembles streamed tool-call fragments in a typed `appendToolCallDelta()` helper (index reuse, numeric-ID coercion, name/argument concatenation, completed-call ordering) instead of inside the line handler; behaviour is unchanged ([#17367](https://github.com/diegosouzapw/OmniRoute/pull/17367)) — thanks @JxnLexn

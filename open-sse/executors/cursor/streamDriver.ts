@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as zlib from "node:zlib";
 import { promisify } from "node:util";
 
+import { projectCursorError } from "./errorProjection.ts";
 import type { McpToolDefinition } from "../../utils/cursorAgentProtobuf.ts";
 import type { CursorClientPlatform, CursorTodoHistoryItem } from "./builtinToolBridge.ts";
 
@@ -45,17 +46,8 @@ const CONNECT_END_STREAM_FLAG = 0x02;
 
 /** The error an end-of-stream payload reports, or null when it reports none. */
 export function connectEndStreamError(payload: Buffer): string | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(payload.toString("utf8"));
-  } catch {
-    return null;
-  }
-  const error = (parsed as { error?: { code?: unknown; message?: unknown } } | null)?.error;
-  if (!error || typeof error !== "object") return null;
-  const code = typeof error.code === "string" ? error.code : "unknown";
-  const message = typeof error.message === "string" ? `: ${error.message.slice(0, 200)}` : "";
-  return `cursor-agent stream ended with error ${code}${message}`;
+  const error = projectCursorError(payload);
+  return error ? `cursor-agent stream ended with error ${error}` : null;
 }
 
 type DriverContext = {

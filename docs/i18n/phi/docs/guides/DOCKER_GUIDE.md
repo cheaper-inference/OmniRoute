@@ -642,27 +642,29 @@ sudo systemctl enable --now omniroute-update.path
 Inaalis ng service ang request bago mag-pull upang hindi paulit-ulit na tumakbo ang isang nabigong pagpapatakbo. Kapag walang
 `DOCKER_UPDATE_TRIGGER_FILE`, mananatili sa dashboard ang daloy ng manu-manong command.
 
-## Availability: iisang replica lamang ang default na SQLite
+## Availability: ang default SQLite ay single-replica
 
-Ang karaniwang Docker / Kubernetes OmniRoute ay **isang Node process + isang SQLite writer**. **Hindi sinusuportahan** ang high availability sa topolohiyang iyon.
+Ang stock Docker / Kubernetes OmniRoute ay** isang Node na proseso + isang SQLite na manunulat** . Mataas ang availability ay** hindi suportado** sa topology na iyon.
 
-| Limitasyon                            | Kahihinatnan                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Iisang writer                         | **Huwag** magpatakbo ng maraming replica gamit ang iisang SQLite file. Masisira nito ang DB.                                                                                                                                                                                                                                                                                        |
-| Recreate / restart / HEALTHCHECK kill | **Ganap na outage** ng mga kasalukuyang SSE, dashboard session, at in-memory state. Madidiskonekta ang bawat nakakonektang client. Ang mga bagong request habang walang endpoint ay makakatanggap mula sa reverse proxy ng **`502 Bad Gateway: Unknown error`**, hindi ng OmniRoute JSON — hindi ito matutukoy ng mga client bilang naiiba sa isang pagkabigo ng provider (#11015). |
-| Parehong event loop ng `/healthz`     | Maaaring maantala ng abalang catalog o compression tick ang mga probe; pagkatapos ay ire-restart ng maikling timeout ang **nag-iisang** replica.                                                                                                                                                                                                                                    |
+| Pagpigil                                      | Bunga                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nag-iisang manunulat                          | Gawin** hindi** magpatakbo ng maraming replika laban sa parehong SQLite file. Na corrupt ang DB.                                                                                                                                                                                                                                                                              |
+| Muling likhain / i-restart / HEALTHCHECK kill | **Full outage** ng in-flight SSE, mga session sa dashboard, at in-memory na estado. Bawat konektadong kliyente ay bumababa. Ang mga bagong kahilingan sa panahon ng window ng walang laman na endpoint ay nakakakuha ng reverse-proxy**`502 Bad Gateway: Unknown error`** , hindi OmniRoute JSON — hindi ito makilala ng mga kliyente mula sa pagkabigo ng provider (#11015). |
+| Parehong loop ng kaganapan bilang `/healthz`  | Ang isang abalang catalog o compression tick ay maaaring maantala ang mga probe; isang maikling timeout pagkatapos ay i-restart ang** lamang** replika.                                                                                                                                                                                                                       |
 
-**Matrix ng probe** (tingnan din ang [Mga rekomendasyon sa Kubernetes probe](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Probe matrix** (tingnan din [ang mga rekomendasyon sa pagsisiyasat ng Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Probe          | Target                                                     | Huwag gamitin                                                    |
-| -------------- | ---------------------------------------------------------- | ---------------------------------------------------------------- |
-| Liveness       | TCP sa `PORT` (default na `20128`), o soft HTTP `/healthz` | `/api/monitoring/health`                                         |
-| Readiness      | HTTP `GET /healthz`                                        | Maiikling timeout na itinuturing na patay ang abalang event loop |
-| Deep / mga tao | `/api/monitoring/health`                                   | Automated kubelet liveness                                       |
+| Probe         | Target                                                      | Huwag gamitin                                                               |
+| ------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Kasiglahan    | TCP sa `PORT` (default `20128`), o malambot HTTP `/healthz` | `/api/monitoring/health`                                                    |
+| Kahandaan     | HTTP `GET /healthz`                                         | Mahigpit na pag-timeout na itinuturing na abala ang event-loop bilang patay |
+| Malalim / tao | `/api/monitoring/health`                                    | Automated kubelet liveness                                                  |
 
-**Mga upgrade:** asahang madidiskonekta ang bawat session. I-drain ang mga client kung kaya mo; walang rolling update sa default na SQLite. Papalitan din ng Compose `restart: unless-stopped` kasama ng Docker `HEALTHCHECK` ang nag-iisang process kapag Unhealthy ang container — pareho ang lawak ng epekto.
+**Mga upgrade:** asahan na babagsak ang bawat session. Alisin ang mga kliyente kung maaari mo; walang rolling update sa default SQLite. Papalitan din ng mag-compose ang `restart: unless-stopped` plus Docker `HEALTHCHECK` ang tanging proseso kapag hindi malusog ang container — parehong blast radius.
 
-Snippet ng Kubernetes para sa **iisang replica** (kinakailangan ang Recreate; huwag taasan ang `replicas` gamit ang iisang SQLite file):
+Mga ready-made na manifest at isang Helm chart nang live sa `deploy/kubernetes/` at `deploy/helm/omniroute/` — tingnan ang [gabay sa pag-deploy ng Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes snippet para sa a** nag-iisang replika** (Kinakailangan ang muling likhain; huwag itaas `replicas` laban sa isang SQLite file):
 
 ```yaml
 spec:
@@ -689,9 +691,9 @@ spec:
             periodSeconds: 20
 ```
 
-Ang `preStop` sleep ay nagbibigay ng oras sa kube na alisin ang mga Service endpoint bago ang SIGTERM upang hindi na mapunta sa prosesong nagsasara ang **bagong** trapiko. Ang kasalukuyang `/v1/responses` SSE ay binibigyan ng hanggang `SHUTDOWN_TIMEOUT_MS` (default na 30s) upang matapos sa pamamagitan ng heavyweight admission leases (#11015). Ang mga bagong request na umaabot pa rin sa proseso ay makakatanggap ng `503` + `Retry-After: 5`. Ang agwat na walang endpoint habang Recreate hanggang maging Ready ang kapalit ay nananatiling ganap na outage — dulot iyon ng topology ng SQLite, hindi ng maling configuration ng probe.
+Hinahayaan `preStop` sleep si kube na mag-drop ng mga endpoint ng Serbisyo bago SIGTERM kaya** bago** humihinto ang trapiko sa proseso ng namamatay. In-flight `/v1/responses` SSE ay na-drain hanggang `SHUTDOWN_TIMEOUT_MS` (default 30s) sa pamamagitan ng heavyweight admission leases (#11015). Ang mga bagong kahilingan na umaabot pa rin sa proseso ay makakakuha ng `503` + `Retry-After: 5`. Ang Recreate empty-endpoint gap hanggang ang kapalit ay Ready ay nananatiling mahirap na pagkawala — iyon ay ang SQLite topology, hindi isang probe misconfig.
 
-Ang external Postgres / multi-writer HA ay **hindi** isang dokumentadong karaniwang paraan. Kung kailangan mo ng HA, panatilihin ang isang replica o gumamit ng topology na hiwalay na nasubukan at nadokumento ng proyekto. Ang gawain para sa Postgres/MySQL ay nasa [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hangga't hindi pa iyon naipapadala, ang tanging suportadong paraan upang paramihin ang kapasidad para sa **malalaking** `/v1/responses` ay ang N magkakahiwalay na proseso (susunod na seksyon), hindi ang `replicas > 1` sa iisang volume.
+Ang panlabas Postgres / multi-writer HA ay** hindi** isang dokumentadong stock path. Kung kailangan mo ng HA, panatilihin ang isang solong replika o magpatakbo ng topology na sinubukan at naidokumento ng proyekto nang hiwalay. Ang Postgres/MySQL work ay nakatira sa [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hanggang sa nagpapadala iyon, ang tanging suportadong paraan upang dumami** malaki** Ang kapasidad `/v1/responses` ay N independiyenteng mga proseso (susunod na seksyon), hindi `replicas > 1` sa isang volume.
 
 ## Scale-out: N independiyenteng proseso
 

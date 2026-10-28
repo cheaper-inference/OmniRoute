@@ -46,10 +46,10 @@ export const PPLX_SUPPORTED_BLOCK_USE_CASES = [
 // EOF symbol can truncate or hang the Firefox-TLS stream tailer before answer
 // chunks land — which surfaces as "Provider returned empty content".
 export const PPLX_STREAM_EOF_SYMBOL = "event: end_of_stream";
-// Firefox 148 — must match the `firefox_148` TLS profile used by perplexityTlsClient.
+// Firefox 151 — must match the `firefox_151` TLS profile used by perplexityTlsClient.
 // A mismatched UA vs TLS fingerprint is itself a Cloudflare bot signal (issue #2459).
 export const PPLX_USER_AGENT =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:148.0) Gecko/20100101 Firefox/148.0";
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:151.0) Gecko/20100101 Firefox/151.0";
 
 // mode / model_preference pairs — every entry posts mode:"copilot", like the live
 // www.perplexity.ai client does when a model is picked from the catalog.

@@ -24,7 +24,7 @@ type ClaudeEmptyLifecycleLike = {
   stopReason?: string | null;
 };
 
-const CLEAN_EMPTY_STOP_REASONS = new Set(["end_turn", "stop_sequence"]);
+const CLEAN_EMPTY_STOP_REASONS = new Set(["end_turn", "stop_sequence", "refusal"]);
 
 export function shouldAbortEmptyClaudeStream(
   lifecycle: ClaudeEmptyLifecycleLike,

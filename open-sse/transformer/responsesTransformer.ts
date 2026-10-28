@@ -800,9 +800,9 @@ export function createResponsesApiTransformStream(
 
                 if (state.inThinking && content) {
                   emitReasoningDelta(controller, content);
-                  // Pre-existing behaviour (unrelated to #8081): a still-open
-                  // textual <think> block ends this message's handling early.
-                  continue;
+                  // Keep processing this chunk: reasoning text can arrive in
+                  // the same delta as a tool call and/or finish_reason.
+                  content = "";
                 }
               }
 

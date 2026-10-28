@@ -49,16 +49,16 @@ vienkārši darbojas), pārbauda servera darbspēju un izpilda `claude`.
 
 ---
 
-## Atklāšanas aizstājvārdi — parādiet modeļus, kas nav Claude modeļi, `/model` izvēlnē
+## Atklāšanas aizstājējvārdi — modeļu, kas nav Claude, parādīšana `/model` atlasītājā
 
-Claude Code vārtejas modeļu atklāšana uzskaita tikai tos ID, kas sākas ar `claude`
-vai `anthropic`, tāpēc, izmantojot `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`,
-iebūvētā `/model` izvēlne parasti rāda **tikai** OmniRoute Claude/Anthropic modeļus —
-`kimi/kimi-k2.6` vai `glm/glm-5.2` tajā nekad neparādās, lai gan tie tiek pareizi
-maršrutēti.
+Claude Code vārtejas modeļu atklāšana parāda tikai id, kas sākas ar `claude`
+vai `anthropic`, tāpēc ar `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` iebūvētais
+`/model` atlasītājs parasti rāda **tikai** OmniRoute Claude/Anthropic modeļus —
+`kimi/kimi-k2.6` vai `glm/glm-5.2` tajā nekad neparādās, kaut gan maršrutēšana
+ar tiem darbojas bez problēmām.
 
-OmniRoute var atspoguļot jebkuru iespējotu modeli (un kombināciju) ar `claude/…` ID,
-lai tas izietu šo filtru un parādītos izvēlnē:
+OmniRoute var jebkuru ieslēgtu modeli (un combo) spoguļot zem `claude/…` id, lai
+tas izietu cauri šim filtram un parādītos atlasītājā:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -66,33 +66,41 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kad Claude Code atlasāt kādu no tiem, OmniRoute pirms maršrutēšanas noņem
-`claude/` apvalku, atjaunojot īsto ID — autentisks `claude/<real-claude-model>` ID
-(faktiskais Claude OAuth nodrošinātājs) vienmēr tiek atstāts nemainīts.
+Kad Claude Code izvēlaties kādu no šiem, OmniRoute pirms maršrutēšanas noņem
+`claude/` apvalku, atgriežot īsto id — savukārt īsts `claude/<real-claude-model>`
+id (faktiskais Claude OAuth provaiders) vienmēr paliek neskarts.
 
-**Pēc noklusējuma šī funkcija ir izslēgta**, un to kontrolē trīs līmeņu mehānisms
-(priekšroka ir visprecīzākajam iestatījumam), tādēļ parasts OmniRoute nedublē savu
-katalogu klientiem, kuri neizmanto Claude Code:
+Pēc noklusējuma tiek spoguļoti tikai pamata id. Ja ir ieslēgts izvēles funkciju
+karodziņš `CATALOG_MIRROR_REFINEMENTS_ENABLED`, spriešanas piepūles varianti, kurus
+katalogs jau satur (piem., `codex/gpt-6-sol-high`), tiek spoguļoti tāpat kā jebkurš
+cits id, tāpēc Claude Code var izvēlēties konkrētu piepūles līmeni, savukārt
+iebūvētie `auto/*` id, kurus pieprasījuma apstrādes ceļš nevar materializēt, netiek
+spoguļoti. To, vai piepūles varianti vispār tiek uzskaitīti, joprojām nosaka
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — spogulis nekad nepievieno variantu,
+kāda nav pamata katalogā.
 
-| Līmenis       | Atrašanās vieta                                                                             |
-| ------------- | ------------------------------------------------------------------------------------------- |
-| Modelis       | Nodrošinātāja detalizētā lapa → katra modeļa slēdzis „Rādīt Claude Code”                    |
-| Nodrošinātājs | Nodrošinātāja detalizētā lapa → nodrošinātāja līmeņa slēdzis (aptver visus modeļus)         |
-| Globālais     | Iestatījumi → Funkciju karodziņi → `EXPOSE_CC_DISCOVERY_ALIASES` (pēc noklusējuma izslēgts) |
+**Pēc noklusējuma šī iespēja ir izslēgta**, un to kontrolē trīslīmeņu mehānisms
+(uzvar specifiskākais līmenis), tāpēc parasts OmniRoute nekad nedubultē katalogu
+klientiem, kas neizmanto Claude Code:
+
+| Līmenis    | Kur                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------- |
+| Modelis    | Provaiders detaļu lapa → katra modeļa slēdzis "Expose in Claude Code"                  |
+| Provaiders | Provaiders detaļu lapa → provaiders līmeņa slēdzis (aptver visus tā modeļus)           |
+| Globālais  | Iestatījumi → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (pēc noklusējuma izslēgts) |
 
 Vides mainīgais `EXPOSE_CC_DISCOVERY_ALIASES` piespiedu kārtā ieslēdz globālo
-līmeni, un tam ir priekšroka pār informācijas paneļa iestatījumu (ekrānā
-Funkciju karodziņi tiek rādīta piezīme „aktīvs, izmantojot vides mainīgo”, ja tas
-ir spēkā). Nodrošinātāja un modeļa līmeņa slēdži ļauj iestatījumu precizēt —
-piemēram, ja globālais līmenis ir izslēgts, bet Kimi nodrošinātājs ir ieslēgts,
-tiek parādīti tikai Kimi modeļi.
+līmeni un ir prioritārāks par informācijas paneļa iestatījumu (Feature Flags
+ekrānā šādā gadījumā parādās piezīme "active via environment variable").
+Tālāk to precizē provaidera un modeļa līmeņa slēdži — piemēram, globāli
+izslēgts + Kimi provaiders ieslēgts parāda tikai Kimi modeļus.
 
-> ⚠️ **Konteksta loga neatbilstība modeļiem, kas nav Claude modeļi.** Claude Code
-> pieņem, ka jebkuram neatpazītam ID konteksta logs ir 200K (tas nevar nolasīt
-> faktisko logu no `/v1/models`). Modelim ar lielāku logu (piem., Kimi K2 256K)
-> iestatiet `CLAUDE_CODE_AUTO_COMPACT_WINDOW` uz vērtību, kas ir mazāka par modeļa
-> faktisko logu, lai automātiskā saspiešana netiktu aktivizēta priekšlaicīgi.
-> Iepriekš ģenerētajos profilos tas jau ir iestatīts katram modelim atsevišķi.
+> ⚠️ **Konteksta loga neatbilstība modeļiem, kas nav Claude.** Claude Code
+> jebkuram neatpazītam id pieņem 200K konteksta logu (reālo logu no
+> `/v1/models` tas nolasīt nevar). Modelim ar lielāku logu (piem., Kimi K2
+> ar 256K) iestatiet `CLAUDE_CODE_AUTO_COMPACT_WINDOW` uz vērtību, kas mazāka
+> par modeļa reālo logu, lai automātiskā kompaktēšana nesāktos priekšlaicīgi.
+> Iepriekš minētie ģenerētie profili to jau dara katram modelim atsevišķi.
 
 ---
 

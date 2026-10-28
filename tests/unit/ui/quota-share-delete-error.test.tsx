@@ -18,7 +18,17 @@
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
@@ -107,7 +117,8 @@ async function renderComponent() {
 /** Clicks the delete button of the first pool card. */
 async function clickDelete() {
   const btn = [...document.querySelectorAll("button")].find(
-    (b) => b.querySelector("span.material-symbols-outlined")?.textContent?.trim() === "delete"
+    // KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="…"> via <Icon>.
+    (b) => b.querySelector('svg.oi-icon[data-icon="delete"]') !== null
   );
   if (!btn) throw new Error("delete button not rendered");
   await act(async () => {

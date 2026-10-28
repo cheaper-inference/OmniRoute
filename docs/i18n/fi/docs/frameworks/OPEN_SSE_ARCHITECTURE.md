@@ -165,14 +165,14 @@ Kutsulokien artefaktit (jos käytössä) kirjoitetaan hakemistoon `${DATA_DIR}/c
 
 ---
 
-## Keskeisten tiedostojen syväanalyysi
+## Keskeisten tiedostojen syväsukellus
 
 ### chatCore.ts (5977 riviä)
 
-**Pääasiallinen pyyntöjen käsittelijä**. Koostaan huolimatta sillä on selkeä rakenne:
+**Pääpyyntökäsittelijä**. Koostaan huolimatta siinä on selkeä rakenne:
 
 ```ts
-// chatCore.ts-tiedoston pseudorakenne
+// chatCore.ts:n pseudorakenne
 export async function handleChat(request: NextRequest) {
   // 1. Todennus + CORS
   await authenticateRequest(request);
@@ -181,14 +181,14 @@ export async function handleChat(request: NextRequest) {
   // 2. Pyynnön rungon validointi
   const body = await parseRequestBody(request);
 
-  // 3. Muodon tunnistus + muuntaminen
+  // 3. Muodon tunnistus + käännös
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Yhdistelmäreititys
+  // 4. Combo-reititys
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -200,16 +200,16 @@ export async function handleChat(request: NextRequest) {
     }
   }
 
-  // 5. Hätävarareitti
+  // 5. Hätävara (fallback)
   return await emergencyFallback(body);
 }
 ```
 
-Vaikka kyseessä on yksi valtava funktio, se on järjestetty **kommentoituihin osioihin**, jotka vastaavat viisivaiheista käsittelyputkea.
+Vaikka kyseessä on yksi valtava funktio, se on järjestetty **kommentoituihin osioihin**, jotka vastaavat 5-vaiheista käsittelyputkea.
 
-### combo.ts (4456 koodiriviä)
+### combo.ts (4456 riviä)
 
-**Reititysmoottori**, joka ratkaisee yhdistelmän järjestetyiksi kohteiksi.
+**Reititysmoottori**, joka ratkaisee combon järjestetyksi kohdelistaksi.
 
 ```ts
 // services/combo.ts
@@ -219,53 +219,56 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
     try {
       return await handleSingleModel(target, body);
     } catch (err) {
-      log.warn("kohde epäonnistui, yritetään seuraavaa", { target, err });
+      log.warn("target failed, trying next", { target, err });
     }
   }
-  throw new ComboExhaustedError("Kaikki kohteet epäonnistuivat");
+  throw new ComboExhaustedError("All targets failed");
 }
 ```
 
-Tukee **19 reititysstrategiaa** (katso `src/shared/constants/routingStrategies.ts`):
+Tukee **20 reititysstrategiaa** (katso `src/shared/constants/routingStrategies.ts`):
 
-| Strategia           | Toiminta                                                                                      |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| `priority`          | Järjestetty luettelo, jossa ensimmäinen kohde on etusijalla                                   |
-| `weighted`          | Todennäköisyyspohjainen valinta kohdekohtaisten painotusten mukaan                            |
-| `round-robin`       | Kohteiden kiertäminen järjestyksessä                                                          |
-| `context-relay`     | Kontekstin välittäminen kohteiden välillä                                                     |
-| `fill-first`        | Kiintiön täyttäminen ennen seuraavaan siirtymistä                                             |
-| `p2c`               | Kahden vaihtoehdon valintamenetelmä                                                           |
-| `random`            | Tasainen satunnaisvalinta                                                                     |
-| `least-used`        | Valitaan se, jota on käytetty viime aikoina vähiten                                           |
-| `cost-optimized`    | Edullisin toimintakuntoinen kohde ensin                                                       |
-| `reset-aware`       | Huomioi palveluntarjoajan nollausikkunat                                                      |
-| `reset-window`      | Nollausikkunaan perustuva reititys                                                            |
-| `headroom`          | Kohde, jolla on eniten jäljellä olevaa kiintiövaraa, ensin                                    |
-| `strict-random`     | Aidosti tasainen satunnaisvalinta (ei laatupainotusta)                                        |
-| `auto`              | Käyttää 16 tekijän pisteytystä (`autoCombo/`)                                                 |
-| `lkgp`              | Viimeisin tunnetusti toimiva palveluntarjoaja ensin                                           |
-| `context-optimized` | Paras pitkän kontekstin pyynnöille                                                            |
-| `fusion`            | Lähettää pyynnön rinnakkain paneelille ja koostaa sitten vastauksen arvioijalla (`fusion.ts`) |
+| Strategia           | Toiminta                                                                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Järjestetty lista, ensimmäinen kohde ensin                                                                     |
+| `weighted`          | Todennäköisyyspohjainen valinta kohdekohtaisten painojen mukaan                                                |
+| `round-robin`       | Kierrättää kohteita järjestyksessä                                                                             |
+| `context-relay`     | Luovuttaa kontekstin kohteelta toiselle                                                                        |
+| `fill-first`        | Täyttää kiintiön ennen seuraavaan siirtymistä                                                                  |
+| `p2c`               | Kahden vaihtoehdon menetelmä (power of two choices)                                                            |
+| `random`            | Tasainen satunnaisvalinta                                                                                      |
+| `least-used`        | Valitsee vähiten viime aikoina käytetyn                                                                        |
+| `cost-optimized`    | Halvin kunnossa oleva kohde ensin                                                                              |
+| `reset-aware`       | Tietoinen palveluntarjoajien nollausikkunoista                                                                 |
+| `reset-window`      | Nollausikkunoihin perustuva reititys                                                                           |
+| `headroom`          | Eniten jäljellä olevaa kiintiövaraa ensin                                                                      |
+| `quota-weighted`    | Ohittaa loppuun kulutetut tilit ja arpoo sitten jäljellä olevan kiintiön ÷ käsiteltävänä olevan kuorman mukaan |
+| `strict-random`     | Aidosti tasainen (ei laatupainotusta)                                                                          |
+| `auto`              | Käyttää 16 tekijän pisteytystä (`autoCombo/`)                                                                  |
+| `lkgp`              | Viimeksi toimivaksi havaittu palveluntarjoaja ensin                                                            |
+| `context-optimized` | Paras pitkän kontekstin pyyntöihin                                                                             |
+| `cache-optimized`   | Kiinnittää jokaisen uudelleenkäytettävän kehotteen etuliitteen samaan tiliin (prompt-välimuistin osumat)       |
+| `fusion`            | Hajauttaa pyynnön rinnakkain paneelille ja syntetisoi sitten tuomarin avulla (`fusion.ts`)                     |
+| `pipeline`          | Ketjuttaa vaiheet — kunkin kohteen tuloste syötetään seuraavalle                                               |
 
-### base.ts (1170 koodiriviä)
+### base.ts (1170 riviä)
 
-**Abstrakti suorittaja**, jonka jokainen suorittajaluokka laajentaa joko suoraan tai `DefaultExecutor`-luokan ja muiden aliluokkien kautta. Se sisältää seuraavat:
+**Abstrakti executor**, josta kaikki executor-luokat periytyvät (joko suoraan tai `DefaultExecutor`-luokan ja muiden aliluokkien kautta). Se sisältää:
 
-- `buildUrl()` — URL-osoitteen oletusmuodostus (aliluokat korvaavat mukautettua toimintaa varten)
-- `buildHeaders()` — oletusotsakkeet (todennus, sisältötyyppi)
-- `transformRequest()` — oletusarvoisesti välittää pyynnön muuttamattomana
-- `execute()` — HTTP-pääsilmukka uudelleenyrityksineen, viiveineen ja katkaisijamekanismeineen
+- `buildUrl()` — URL:n oletusmuodostus (aliluokat korvaavat sen tarvittaessa mukautetulla toteutuksella)
+- `buildHeaders()` — oletusotsakkeet (todennus, content-type)
+- `transformRequest()` — oletuksena suora läpivienti
+- `execute()` — tärkein HTTP-silmukka, jossa uudelleenyritys/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Käsittelee kaikki OpenAI-/Anthropic-yhteensopivat palveluntarjoajat
-  // Palveluntarjoajat rekisteröivät määritykset (URL, todennus, otsakkeet), mutta jakavat suorituslogiikan
+  // Käsittelee kaikki OpenAI/Anthropic-yhteensopivat palveluntarjoajat
+  // Palveluntarjoajat rekisteröivät konfiguraationsa (URL, todennus, otsakkeet), mutta jakavat saman executor-logiikan
 }
 ```
 
-Palveluntarjoajakohtainen toiminta (todennusotsakkeet, perus-URL-osoite, versio-otsakkeet) määritetään palveluntarjoajarekisterin kautta, ei erillisillä suorittajaluokilla.
+Palveluntarjoajakohtainen käyttäytyminen (todennusotsakkeet, perus-URL, versio-otsakkeet) määritetään palveluntarjoajarekisterin kautta, ei erillisillä executor-luokilla.
 
 ````
 
@@ -273,50 +276,50 @@ Palveluntarjoajakohtainen toiminta (todennusotsakkeet, perus-URL-osoite, versio-
 
 ## Palvelut (117 moduulia)
 
-Palvelut ovat **tarkasti rajattuja, yhden käyttötarkoituksen moduuleja**, joita käsittelijät yhdistelevät. Pääkategoriat:
+Palvelut ovat **keskittyneitä, yhden tarkoituksen moduuleja**, joita käsittelijät koostavat. Suurimmat kategoriat:
 
-### Reititys ja yhdistelmät
+### Reititys ja Combo
 
-- `combo.ts` — yhdistelmäreititettyjen pyyntöjen aloituspiste
+- `combo.ts` — combo-reititettyjen pyyntöjen aloituspiste
 - `services/autoCombo/` — 16 tekijän pisteytys, 8 automaattista reititysstrategiaa
-- `wildcardRouter.ts` — täsmää jokerimerkkireitteihin (`gpt-*`)
-- `modelFamilyFallback.ts` — T5:n malliperheen sisäinen varareititys
+- `wildcardRouter.ts` — täsmäyttää jokerimerkkireitit (`gpt-*`)
+- `modelFamilyFallback.ts` — T5-malliperheen sisäinen varareititys
 
-### Nopeusrajoitukset ja kiintiöt
+### Nopeusrajoitus ja kiintiö
 
-- `rateLimitManager.ts` — avain- ja tarjoajakohtainen token bucket -rajoitus
-- `usage.ts` — käytön kirjaaminen
-- `quotaCache.ts` — muistissa säilytettävät kiintiötilannekuvat
+- `rateLimitManager.ts` — token bucket -rajoitin avainta+palveluntarjoajaa kohden
+- `usage.ts` — käytön kirjaus
+- `quotaCache.ts` — muistinvaraiset kiintiön tilannekuvat
 
-### Tilit ja tunnisteet
+### Tili ja token
 
-- `tokenRefresh.ts` — OAuth-tunnisteen päivitys 401-vastauksen yhteydessä
-- `accountFallback.ts` — vaihtaminen vaihtoehtoiseen tiliin
-- `sessionManager.ts` — monivaiheisen istunnon tila
+- `tokenRefresh.ts` — OAuth-päivitys 401-virheen yhteydessä
+- `accountFallback.ts` — vaihto vaihtoehtoiseen tiliin
+- `sessionManager.ts` — monivuoroisen istunnon tila
 
 ### Älykkyys
 
 - `intentClassifier.ts` — pyynnön tarkoituksen luokittelu
 - `taskAwareRouter.ts` — reititys tehtävätyypin mukaan
-- `thinkingBudget.ts` — päättelytokenien varaaminen
+- `thinkingBudget.ts` — thinking-tokenien varaaminen
 - `contextManager.ts` — reitityskontekstin lisääminen
 
-### Vikasietoisuus
+### Kestävyys
 
-- `resilience.ts` — uudelleenyritysten, viiveiden ja katkaisijoiden orkestrointi
-- `emergencyFallback.ts` — viimeinen varavaihtoehto
-- `modelDeprecation.ts` — automaattinen reititys korvaaviin malleihin
+- `resilience.ts` — uudelleenyritysten, backoffin ja katkaisijoiden orkestrointi
+- `emergencyFallback.ts` — viimesijainen varatoiminto
+- `modelDeprecation.ts` — automaattinen reititys seuraajamalleihin
 
 ### Tila
 
-- `signatureCache.ts` — pyyntöjen duplikaattien poisto allekirjoituksen perusteella
-- `volumeDetector.ts` — kuormituksen rajoittaminen
+- `signatureCache.ts` — kaksoiskappaleiden poisto pyynnön allekirjoituksen perusteella
+- `volumeDetector.ts` — kuormanpurku
 - `contextHandoff.ts` — istunnon serialisointi
 
 ### Pakkaus
 
-- `compression/` (alihakemisto) — täydellinen pakkausputki
-- 39 tiedostoa, jotka kattavat moottorit, sääntökokoelmat ja sovittimet
+- `compression/` (alihakemisto) — täysi pakkausputki
+- 39 tiedostoa, jotka kattavat moottorit, sääntöpaketit ja adapterit
 
 ### Taidot
 
@@ -328,33 +331,33 @@ Palvelut ovat **tarkasti rajattuja, yhden käyttötarkoituksen moduuleja**, joit
 
 ---
 
-## Suorittimet (150 moduulia)
+## Executorit (150 moduulia)
 
-Useimmiten yksi tiedosto tarjoajaa kohden. Kaikki suoritinluokat laajentavat `BaseExecutor`-luokkaa ja ylikirjoittavat toisistaan poikkeavat osat; muut moduulit ovat tarjoajakohtaisia apumoduuleja (työkaluskeemat, fetch/TTS-sovittimet ja erityispiirteiden käsittelijät).
+Enimmäkseen yksi tiedosto palveluntarjoajaa kohden. Executor-luokat perivät kaikki `BaseExecutor`-luokan ja korvaavat vain poikkeavat osat; muut moduulit ovat palveluntarjoajakohtaisia apumoduuleja (työkaluskeemat, fetch/TTS-adapterit, erikoisuuksien käsittelijät).
 
 ### Yleiset mallit
 
-Tarjoajat ratkaistaan funktiolla `getExecutor(providerId)`, joka palauttaa määritetyn suorittimen. OpenAI/Anthropic-yhteensopivat tarjoajat käyttävät `DefaultExecutor`-suoritinta (`executors/default.ts`). Tarjoajakohtainen toiminta (perus-URL, todennusotsakkeet ja API-versio) määritetään hakemistossa `open-sse/config/providers/`, kun taas pyyntörungon muunnokset käsitellään hakemistossa `open-sse/translator/`.
+Palveluntarjoajat ratkaistaan funktiolla `getExecutor(providerId)`, joka palauttaa määritetyn executorin. OpenAI/Anthropic-yhteensopivat palveluntarjoajat käyttävät `DefaultExecutor`-luokkaa (`executors/default.ts`). Palveluntarjoajakohtainen toiminta (perus-URL-osoite, todennusotsakkeet, API-versio) määritetään hakemistossa `open-sse/config/providers/`, kun taas pyyntörunkojen muunnokset käsitellään hakemistossa `open-sse/translator/`.
 
-**Mukautettu URL** asetetaan tarjoajan määrityksissä:
+**Mukautettu URL-osoite** asetetaan palveluntarjoajan määrityksessä:
 
 ```ts
-// Tarjoajan määritys hakemistossa open-sse/config/providers/
+// Palveluntarjoajan määritys hakemistossa open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**Mukautettu todennus** käsitellään tarjoajarekisterin todennusmääritysten kautta (API-avain, OAuth ja otsakeprofiilit).
+**Mukautettu todennus** hoidetaan palveluntarjoajarekisterin todennusmäärityksen kautta (API-avain, OAuth, otsakeprofiilit).
 
-**Mukautetut pyyntörungon** muunnokset (esimerkiksi Anthropic erottaa `system`-arvon `messages`-arvosta) rekisteröidään tarjoajakohtaisesti hakemistossa `open-sse/translator/`.
+**Mukautetun pyyntörungon** muunnokset (esim. Anthropic erottaa `system`-kentän `messages`-kentästä) rekisteröidään palveluntarjoajakohtaisesti hakemistossa `open-sse/translator/`.
 
 ````
 
-### Suoritintehdas
+### Executor-tehdas
 
-`executors/index.ts` vie funktion `getExecutor(providerId)`:
+`executors/index.ts` eksportoi funktion `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-Ratkaisu tapahtuu `ExecutorRegistry`-rekisterin (`executors/registry.ts`) kautta: jokainen erikoistunut suoritin ilmoitetaan tiedoston `executors/index.ts` sisäänrakennetussa taulukossa ja rekisteröidään moduulin latauksen yhteydessä kutsulla `registerExecutor(alias, instance)`; `getExecutor()` tarkistaa rekisterin ja käyttää varavaihtoehtona memoisoitua `DefaultExecutor`-suoritinta kaikille tarjoajille, joilla ei ole erikoistunutta määritystä. Täydellinen alias → suoritin -vastaavuus määritellään golden-testissä `tests/unit/executor-map-golden.test.ts`.
+Ratkaisu kulkee `ExecutorRegistry`-rekisterin kautta (`executors/registry.ts`): jokainen erikoistunut executor määritellään `executors/index.ts`-tiedoston sisäänrakennetussa taulukossa ja rekisteröidään funktiolla `registerExecutor(alias, instance)` moduulin latautuessa; `getExecutor()` tutkii rekisterin ja käyttää varana memoisoitua `DefaultExecutor`-instanssia kaikille palveluntarjoajille, joilla ei ole erikoistunutta merkintää. Koko alias → executor -kuvauksen määrittelee golden-testi `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -479,19 +482,19 @@ Se käsittelee seuraavat:
 
 ---
 
-## Konfiguraatio
+## Kokoonpano
 
-`open-sse/config/` sisältää konfiguraatiokerroksen:
+`open-sse/config/` sisältää määrityskerroksen:
 
-| Tiedosto                      | Tarkoitus                                                  |
-| ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Keskustelumallirekisteri 374 palveluntarjoajan luettelolle |
-| `providerModels.ts`           | Mallien aliakset ja muotomuunnokset                        |
-| `constants.ts`                | Aikakatkaisut, rajat ja tilakoodit                         |
-| `defaultThinkingSignature.ts` | Clauden oletusarvoinen päättelyallekirjoitus               |
-| `modelStrip.ts` (palveluissa) | Palveluntarjoajakohtainen kenttien poistaminen             |
+| Tiedosto                      | Tarkoitus                                             |
+| ----------------------------- | ----------------------------------------------------- |
+| `providerRegistry.ts`         | Chat-mallirekisteri 377-palveluntarjoajan luettelossa |
+| `providerModels.ts`           | Mallialiakset, muotojen kartoitus                     |
+| `constants.ts`                | Aikakatkaisut, rajat, tilakoodit                      |
+| `defaultThinkingSignature.ts` | Oletusarvoinen Claude ajatteleva allekirjoitus        |
+| `modelStrip.ts` (palveluissa) | Palveluntarjoajakohtainen kentän kuorinta             |
 
-### Palveluntarjoajarekisterin skeema
+### Palveluntarjoajan rekisterikaavio
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Moduulin latauksen yhteydessä suoritettava Zod-validointi varmistaa, että kaikki palveluntarjoajien konfiguraatiot ovat kelvollisia.
+Zod tarkistus moduulin latauksen yhteydessä varmistaa, että kaikki palveluntarjoajan asetukset ovat kelvollisia.
 
 ---
 
