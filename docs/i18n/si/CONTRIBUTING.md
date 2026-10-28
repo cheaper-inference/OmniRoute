@@ -175,85 +175,85 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 ## පරීක්ෂණ ධාවනය කිරීම
 
 ```bash
-# සියලුම පරීක්ෂණ (unit + vitest + ecosystem + e2e)
+# සියලු පරීක්ෂණ (ඒකක + vitest + පරිසර පද්ධති + e2e)
 npm run test:all
 
-# තනි පරීක්ෂණ ගොනුවක් (Node.js ස්වදේශීය test runner — බොහෝ පරීක්ෂණ මෙය භාවිත කරයි)
+# තනි පරීක්ෂණ ගොනුවක් (Node.js ස්වදේශීය පරීක්ෂණ ධාවකය — බොහෝ පරීක්ෂණ මෙය භාවිත කරයි)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# ඔබේ වෙනසෙන් බලපෑමට ලක්වූ unit tests පමණක් (CI gate එකේ ඇති TIA selector එකමයි, #8084)
-npm run test:scoped            # අවසන් commit එකේ (හෝ working tree එකේ) වෙනස්කම්
-npm run test:scoped:staged     # staged වෙනස්කම් පමණයි — pre-commit ධාවනයක් සමඟ හොඳින් ගැළපේ
-npm run test:scoped:full       # පළමුව import-graph සිතියම නැවත ගොඩනඟන්න (ගොනු එක් කිරීමෙන්/ගෙනයාමෙන් පසු)
-# Exit 1 + "run the full suite" යන්නෙන් අදහස් වන්නේ hub ගොනුවක් (tsconfig, package.json, …) හෝ
-# සිතියම්ගත නොකළ source එකක් වෙනස් වී ඇති බවයි — selector එක ආරක්ෂිතව අසාර්ථක වන අතර කිසිවිටෙක නිහඬව මඟ නොහරියි.
+# ඔබේ වෙනස්කමෙන් බලපෑමට ලක් වූ ඒකක පරීක්ෂණ පමණි (CI සීමාවට සමාන TIA තේරීම්කාරකය, #8084)
+npm run test:scoped            # අවසන් commit එකේ (හෝ වැඩ කරන tree එකේ) වෙනස්කම්
+npm run test:scoped:staged     # stage කළ වෙනස්කම් පමණි — pre-commit ධාවනයක් සමඟ හොඳින් ගැළපේ
+npm run test:scoped:full       # පළමුව import-graph සිතියම නැවත ගොඩනඟයි (ගොනු එක් කිරීමෙන්/ගෙනයාමෙන් පසු)
+# Exit 1 + "සම්පූර්ණ කට්ටලය ධාවනය කරන්න" යන්නෙන් අදහස් වන්නේ කේන්ද්රීය ගොනුවක් (tsconfig, package.json, …) හෝ
+# සිතියම්ගත නොකළ මූලාශ්රයක් වෙනස් වී ඇති බවයි — තේරීම්කාරකය ආරක්ෂිත ලෙස අසමත් වන අතර කිසි විටෙක නිහඬව මඟ නොහරියි.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (MCP සේවාදායකය, autoCombo, cache)
 npm run test:vitest
 
 # E2E පරීක්ෂණ (Playwright අවශ්යයි)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# Protocol සේවාලාභී E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem අනුකූලතා පරීක්ෂණ
+# පරිසර පද්ධති අනුකූලතා පරීක්ෂණ
 npm run test:ecosystem
 
-# Coverage gate: statements/lines/functions/branches 60%
+# ආවරණ සීමාව: ප්රකාශ/පේළි/ශ්රිත/ශාඛා 60%
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format පරීක්ෂාව
+# Lint + ආකෘති පරීක්ෂාව
 npm run lint
 npm run check
 
-# Gate කළ සැබෑ-upstream combo smoke පරීක්ෂණය (VPS ප්රවේශය + සැබෑ provider credits අවශ්යයි)
-# සැබෑ providers වෙත පිවිසේ — සුළු පිරිවැයක් ඇත. කිසිවිටෙක CI තුළ ධාවනය නොවේ. Gate එක නොමැති විට නිසි ලෙස මඟ හරියි.
-# අවශ්ය දේ: ssh root@192.168.0.15 ප්රවේශය (VPS වෙතින් read-only DB snapshot එකක් source කරයි).
+# සීමා කළ සැබෑ-upstream සංයෝජන මූලික සත්යාපන පරීක්ෂණය (VPS ප්රවේශය + සැබෑ සැපයුම්කරු credits අවශ්යයි)
+# සැබෑ සැපයුම්කරුවන් වෙත ප්රවේශ වේ — සුළු පිරිවැයක් දරයි. CI තුළ කිසි විටෙක ධාවනය නොවේ. සීමාව නොමැති විට නිසි ලෙස මඟ හරියි.
+# අවශ්ය වන්නේ: ssh root@192.168.0.15 ප්රවේශය (VPS වෙතින් read-only DB snapshot එකක් ලබාගනී).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS සජීවී smoke පරීක්ෂණය — සරල Node ESM scripts, සජීවී .15 server එකට සෘජුව පිවිසේ.
-# අවශ්ය දේ: ssh root@192.168.0.15 ප්රවේශය (SSH sqlite හරහා combos සාදා/ඉවත් කරයි).
-# සැබෑ providers වෙත පිවිසේ (සුළු පිරිවැයක්). __live_test__* combos පමණක් සාදයි/මකයි. කිසිවිටෙක CI තුළ ධාවනය නොවේ.
-# .15 මත REQUIRE_API_KEY=false නිසා API key එකක් අවශ්ය නැත, නමුත් සකසා ඇත්නම් COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY අනුගමනය කරයි.
-npm run test:combo:live:vps              # HTTP අවස්ථා 7ක් (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # සැබෑ cross-provider failover අවස්ථාවක් එක් කරයි (මුළු ගණන 8යි)
+# Phase-3 VPS සජීවී මූලික සත්යාපන පරීක්ෂණය — සරල Node ESM scripts, සජීවී .15 සේවාදායකයට ඍජුව ප්රවේශ වේ.
+# අවශ්ය වන්නේ: ssh root@192.168.0.15 ප්රවේශය (SSH sqlite හරහා සංයෝජන සාදා/ඉවත් කරයි).
+# සැබෑ සැපයුම්කරුවන් වෙත ප්රවේශ වේ (සුළු පිරිවැයක්). __live_test__* සංයෝජන පමණක් සාදා/මකයි. CI තුළ කිසි විටෙක ධාවනය නොවේ.
+# .15 හි REQUIRE_API_KEY=false බැවින් API key එකක් අවශ්ය නොවන නමුත්, සකසා ඇත්නම් COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY භාවිත කරයි.
+npm run test:combo:live:vps              # HTTP අවස්ථා 7ක් (ප්රමුඛතාව/round-robin/බරිත/පිරිවැය/fusion/ස්වයංක්රීය + සෞඛ්යය)
+npm run test:combo:live:vps:failover     # සැබෑ හරස්-සැපයුම්කරු failover අවස්ථාවක් එක් කරයි (මුළු ගණන 8)
 ```
 
-Coverage සටහන්:
+ආවරණ සටහන්:
 
-- `npm run test:coverage` ප්රධාන unit test suite එක සඳහා source coverage මනින අතර, `tests/**` බැහැර කර `open-sse/**` ඇතුළත් කරයි
-- Pull requests විසින් statements/lines/functions/branches සඳහා coverage gate එක **60%+** ලෙස පවත්වා ගත යුතුය
-- PR එකක් `src/`, `open-sse/`, `electron/`, හෝ `bin/` තුළ production code වෙනස් කරන්නේ නම්, එම PR එක තුළම automated tests එක් කිරීම හෝ යාවත්කාලීන කිරීම අවශ්යයි
-- `npm run coverage:report` මඟින් නවතම coverage ධාවනයේ සවිස්තරාත්මක ගොනුවෙන්-ගොනුවට වාර්තාව මුද්රණය කරයි
-- `npm run test:coverage:legacy` ඓතිහාසික සැසඳීම සඳහා පැරණි metric එක සුරකියි
-- අදියරගත coverage වැඩිදියුණු කිරීමේ මාර්ග සිතියම සඳහා `docs/ops/COVERAGE_PLAN.md` බලන්න
+- `npm run test:coverage` ප්රධාන ඒකක පරීක්ෂණ කට්ටලය සඳහා මූලාශ්ර ආවරණය මනින අතර, `tests/**` බැහැර කර, `open-sse/**` ඇතුළත් කරයි
+- Pull request මඟින් ප්රකාශ/පේළි/ශ්රිත/ශාඛා සඳහා ආවරණ සීමාව **60%+** ලෙස පවත්වාගත යුතුය
+- PR එකක් `src/`, `open-sse/`, `electron/`, හෝ `bin/` තුළ නිෂ්පාදන කේතය වෙනස් කරන්නේ නම්, එම PR එක තුළම ස්වයංක්රීය පරීක්ෂණ එක් කිරීම හෝ යාවත්කාලීන කිරීම කළ යුතුය
+- `npm run coverage:report` නවතම ආවරණ ධාවනයෙන් ගොනුවෙන්-ගොනුවට සවිස්තර වාර්තාව මුද්රණය කරයි
+- `npm run test:coverage:legacy` ඓතිහාසික සැසඳීම සඳහා පැරණි මිනුම සුරකියි
+- අදියර අනුව ආවරණය වැඩිදියුණු කිරීමේ මාර්ග සිතියම සඳහා `docs/ops/COVERAGE_PLAN.md` බලන්න
 
 ### Pull Request අවශ්යතා
 
-PR එකක් විවෘත කිරීමට පෙර, ඔබ වෙනස් කළ දේ සඳහා අවධානය යොමු කළ චක්රය ධාවනය කිරීමට
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) භාවිත කරන්න.
-සම්පූර්ණ unit suite එක (CI shards 4ක්), Vitest, **60%+** coverage gate එක සහ production build එක
-CI හි වගකීමයි — ඒවා දේශීයව ධාවනය කිරීමෙන් PR පරීක්ෂණ දැනටමත් ලබා නොදෙන අමතර සංඥාවක් නොලැබෙන අතර,
-කුඩා යන්ත්රවලදී එය host එකේ සම්පත් උපරිමයෙන් භාවිත කළ හැක (#8084):
+PR එකක් විවෘත කිරීමට පෙර, ඔබ වෙනස් කළ දේ සඳහා ඉලක්කගත ක්රියාවලිය ධාවනය කිරීමට
+[දායකත්ව Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) භාවිත කරන්න. සම්පූර්ණ ඒකක පරීක්ෂණ කට්ටලය (CI shards 4ක්), Vitest, **60%+** ආවරණ සීමාව සහ
+නිෂ්පාදන build එක CI හි වගකීම වේ — ඒවා දේශීයව ධාවනය කිරීමෙන් PR
+පරීක්ෂාවන් දැනටමත් ලබා නොදෙන අමතර තොරතුරක් නොලැබෙන අතර, කුඩා යන්ත්රවලදී එය host එකේ ධාරිතාව සම්පූර්ණයෙන් භාවිත කළ හැකිය (#8084):
 
-- ඔබේ වෙනස ආවරණය කරන test files ධාවනය කරන්න: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- ඔබේ වෙනස ආවරණය කරන පරීක්ෂණ ගොනු ධාවනය කරන්න: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ධාවනය කරන්න
-- production code වෙනස් වන සෑමවිටම එම PR එක තුළම automated tests ඇතුළත් කරන්න හෝ යාවත්කාලීන කරන්න
-- production code වෙනස් වූ විට වෙනස් කළ හෝ එක් කළ test files PR විස්තරයට ඇතුළත් කරන්න
-- project secrets CI තුළ සකසා ඇති විට PR එකේ SonarQube ප්රතිඵලය පරීක්ෂා කරන්න
+- නිෂ්පාදන කේතය වෙනස් වන සෑම විටම එම PR එක තුළම ස්වයංක්රීය පරීක්ෂණ ඇතුළත් කරන්න හෝ යාවත්කාලීන කරන්න
+- `node:test` ගොනු තුළ, සෑම ඉහළ මට්ටමේ `await` එකක්ම (`await import(...)` වැනි) පළමු `test()` / `describe()` එකට පෙර තබන්න: `--test-force-exit` යටතේ, ඊට පසු ලියාපදිංචි කරන පරීක්ෂණ නිහඬව කිසි විටෙක ධාවනය නොවිය හැකිය (#18045; `npm run check:test-tla-order` මඟින් බලාත්මක කරයි)
+- නිෂ්පාදන කේතය වෙනස් වූ විට, වෙනස් කළ හෝ එක් කළ පරීක්ෂණ ගොනු PR විස්තරයට ඇතුළත් කරන්න
+- ව්යාපෘති රහස් CI තුළ වින්යාස කර ඇති විට PR එකේ SonarQube ප්රතිඵලය පරීක්ෂා කරන්න
 
-වත්මන් පරීක්ෂණ තත්ත්වය: පහත දේ ආවරණය කරන **unit test files 122ක්**:
+වත්මන් පරීක්ෂණ තත්ත්වය: පහත දෑ ආවරණය කරන **ඒකක පරීක්ෂණ ගොනු 122ක්**:
 
-- Provider translators සහ format conversion
-- Rate limiting, circuit breaker සහ resilience
-- Semantic cache, idempotency සහ progress tracking
-- Database මෙහෙයුම් සහ schema (DB modules 21ක්)
-- OAuth flows සහ authentication
-- API endpoint සත්යාපනය (Zod v4)
-- MCP server tools සහ scope enforcement
-- Memory සහ Skills systems
+- සැපයුම්කරු පරිවර්තක සහ ආකෘති පරිවර්තනය
+- අනුපාත සීමා කිරීම, circuit breaker සහ ප්රත්යස්ථතාව
+- අර්ථකථන cache, idempotency සහ ප්රගති නිරීක්ෂණය
+- දත්ත සමුදා මෙහෙයුම් සහ schema (DB modules 21ක්)
+- OAuth ප්රවාහ සහ සත්යාපනය
+- API endpoint වලංගුකරණය (Zod v4)
+- MCP සේවාදායක මෙවලම් සහ scope බලාත්මක කිරීම
+- Memory සහ Skills පද්ධති
 
 ---
 

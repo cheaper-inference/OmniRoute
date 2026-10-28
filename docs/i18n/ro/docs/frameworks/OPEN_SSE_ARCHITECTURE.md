@@ -484,17 +484,17 @@ Acesta gestionează:
 
 ## Configurare
 
-`open-sse/config/` conține stratul de configurare:
+`open-sse/config/` deține stratul de configurare:
 
-| Fișier                        | Scop                                                           |
-| ----------------------------- | -------------------------------------------------------------- |
-| `providerRegistry.ts`         | Registru de modele de chat peste catalogul de 375 de furnizori |
-| `providerModels.ts`           | Aliasuri de modele, mapare de formate                          |
-| `constants.ts`                | Timeout-uri, limite, coduri de stare                           |
-| `defaultThinkingSignature.ts` | Semnătura de gândire Claude implicită                          |
-| `modelStrip.ts` (în services) | Eliminarea câmpurilor per furnizor                             |
+| Fişier                        | Scop                                                          |
+| ----------------------------- | ------------------------------------------------------------- |
+| `providerRegistry.ts`         | Registrul de model de chat prin catalogul de 377 de furnizori |
+| `providerModels.ts`           | Aliasuri de model, mapare a formatului                        |
+| `constants.ts`                | Timeouts, limite, coduri de stare                             |
+| `defaultThinkingSignature.ts` | Semnătură implicită de gândire Claude                         |
+| `modelStrip.ts` (în servicii) | Eliminarea câmpului per furnizor                              |
 
-### Schema registrului de furnizori
+### Schema registrului furnizorului
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Validarea Zod la încărcarea modulului asigură că toate configurațiile furnizorilor sunt valide.
+Validarea Zod la încărcarea modulului asigură că toate configurațiile furnizorului sunt valide.
 
 ---
 

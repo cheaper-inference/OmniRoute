@@ -34,89 +34,89 @@ Clientverzoek
 
 ### Uit
 
-Er wordt geen compressie toegepast. Alle berichten worden ongewijzigd doorgegeven.
+Geen compressie toegepast. Alle berichten worden ongewijzigd doorgegeven.
 
 ### Lite-modus (~15% besparing, <1ms latentie)
 
-De veiligste modus — geen semantische wijzigingen, alleen opschoning van de opmaak:
+De veiligste modus — geen enkele semantische wijziging, alleen opschoning van de opmaak:
 
-| Techniek                 | Beschrijving                                                 |
-| ------------------------ | ------------------------------------------------------------ |
-| `collapseWhitespace`     | Opeenvolgende lege regels en afsluitende spaties samenvoegen |
-| `dedupSystemPrompt`      | Dubbele systeemberichten verwijderen                         |
-| `compressToolResults`    | Uitgebreide tool-/functie-uitvoer comprimeren                |
-| `removeRedundantContent` | Herhaalde instructies verwijderen                            |
-| `replaceImageUrls`       | URI's met base64-afbeeldingsgegevens inkorten                |
+| Techniek                 | Beschrijving                                        |
+| ------------------------ | --------------------------------------------------- |
+| `collapseWhitespace`     | Voeg opeenvolgende lege regels en volgspaties samen |
+| `dedupSystemPrompt`      | Verwijder dubbele systeemberichten                  |
+| `compressToolResults`    | Comprimeer uitgebreide tool-/functie-uitvoer        |
+| `removeRedundantContent` | Verwijder herhaalde instructies                     |
+| `replaceImageUrls`       | Verkort base64-data-URI's van afbeeldingen          |
 
-**Het meest geschikt voor:** Permanent gebruik en veiligheidskritieke workflows.
+**Best geschikt voor:** Altijd-aan-gebruik, veiligheidskritieke workflows.
 
-### Standard-modus (~30% besparing)
+### Standaardmodus (~30% besparing)
 
-Geïnspireerd door [Caveman](https://github.com/JuliusBrussee/caveman) — verwijdert opvulwoorden en omslachtige formuleringen met behoud van de betekenis:
+Geïnspireerd op [Caveman](https://github.com/JuliusBrussee/caveman) — verwijdert stopwoorden en omslachtige formuleringen met behoud van betekenis:
 
-- Verwijdert opvulwoorden ("alstublieft", "ik denk", "eigenlijk", "feitelijk")
-- Kort omslachtige zinnen in ("met als doel om" → "om", "als gevolg van" → "omdat")
-- Verwijdert beleefde afzwakkingen ("Zou je...", "Als je misschien zou kunnen...")
-- Meer dan 30 regex-regels, afgestemd op programmeerprompts
+- Verwijdert stopwoorden ("please", "I think", "basically", "actually")
+- Verdicht omslachtige zinswendingen ("in order to" → "to", "as a result of" → "because")
+- Verwijdert beleefde, aarzelende formuleringen ("Would you mind...", "If you could possibly...")
+- Meer dan 30 regexregels, afgestemd op codeerprompts
 
-**Het meest geschikt voor:** Dagelijkse programmeerworkflows en kostenbewuste teams.
+**Best geschikt voor:** Dagelijkse codeerworkflows, kostenbewuste teams.
 
-### Aggressive-modus (~50% besparing)
+### Agressieve modus (~50% besparing)
 
 Slim geschiedenisbeheer voor lange sessies:
 
-- **Berichtveroudering** — oudere berichten worden steeds verder gecomprimeerd
-- **Compressie van toolresultaten** — lange tooluitvoer wordt afgekapt of weggelaten (eerste/laatste regels,
-  filtering op overeenkomende regels, compactie van JSON-sleutels)
-- **Bewaking van structurele integriteit** — zorgt ervoor dat paren van `tool_use` en `tool_result` consistent blijven
-- **Bewustzijn van het contextvenster** — houdt rekening met tokenlimieten per model
+- **Message Aging** — oudere berichten worden geleidelijk steeds sterker gecomprimeerd
+- **Tool Result Compression** — lange tooluitvoer wordt afgekapt of weggelaten (eerste/laatste
+  regels, filteren op overeenkomende regels, verdichting van JSON-sleutels)
+- **Structural Integrity Guards** — zorgt ervoor dat `tool_use` + `tool_result`-paren consistent blijven
+- **Context Window Awareness** — respecteert tokenlimieten per model
 
-**Het meest geschikt voor:** Langdurige debugsessies en grote codebases.
+**Best geschikt voor:** Langdurige debugsessies, grote codebases.
 
 ### Ultra-modus (~75% besparing)
 
-Maximale compressie voor scenario's waarin tokens van cruciaal belang zijn:
+Maximale compressie voor tokenkritieke scenario's:
 
-- **Heuristisch snoeien** — scoregebaseerd snoeien van tokens uit lopende tekst
-- **Structuurbehoud** — omheinde codeblokken, inlinecode, URL's en identifiers worden
-  gemarkeerd en later letterlijk teruggeplaatst; ze worden nooit gesnoeid
-- **Optionele SLM-laag** — een klein lokaal model kan het snoeiresultaat verfijnen wanneer dit is geconfigureerd
-- Onafhankelijk van de Aggressive-modus: berichtveroudering, compressie van toolresultaten
-  en de fallback-samenvatter worden niet uitgevoerd (alleen een fout in de SLM-laag kan een fallback-pass via
-  Aggressive laten verlopen)
+- **Heuristic Pruning** — scoregebaseerde tokenreductie van proza
+- **Structure Preservation** — omheinde codeblokken, inline code, URL's en identifiers worden
+  als tombstones gemarkeerd en achteraf weer letterlijk teruggevoegd, nooit gereduceerd
+- **Optional SLM tier** — een klein lokaal model kan de reductie indien geconfigureerd verfijnen
+- Onafhankelijk van de Agressieve modus: er wordt geen message aging, compressie van
+  toolresultaten of fallback-samenvatter uitgevoerd (alleen een fout in de SLM-tier kan een
+  fallback-pass via de agressieve modus leiden)
 
-**Het meest geschikt voor:** Wanneer je herhaaldelijk contextlimieten bereikt.
+**Best geschikt voor:** Wanneer je herhaaldelijk tegen contextlimieten aanloopt.
 
-### RTK-modus (upstreambereik van 60-90%)
+### RTK-modus (60-90% upstream-bereik)
 
-De RTK-modus is geoptimaliseerd voor uitgebreide tooluitvoer die voorkomt in sessies met programmeeragents:
+De RTK-modus is geoptimaliseerd voor uitgebreide tooluitvoer die voorkomt in sessies met codeeragents:
 
-- Detecteert opdracht-/uitvoerklassen zoals `git status`, `git diff`, `git log`, testrunners,
-  TypeScript/Vite/Webpack-builds, ESLint/Biome/Prettier, npm-audits/-installaties, Docker-logs, infra-
-  uitvoer en generieke shelluitvoer
-- Past JSON-filterpakketten toe uit `open-sse/services/compression/engines/rtk/filters/`
-- Importeert RTK-filters met TOML-schema v1 uit project- of globale `filters.toml`-bestanden, met validatie
-  via inline-tests en vertrouwenscontrole voor projectbestanden
-- Wordt geleverd met 55 ingebouwde filters en inline-verificatievoorbeelden
-- Verwijdert ANSI-besturingsreeksen, voortgangsbalken, herhaalde regels en niet-relevante ruis
-- Behoudt mislukkingen, fouten, waarschuwingen, gewijzigde bestanden, samenvattingen en het einde van lange uitvoer
-- Ondersteunt projectfilters met vertrouwenscontrole, globale filters en optioneel herstel van geredigeerde onbewerkte uitvoer
+- Detecteert commando-/uitvoerklassen zoals `git status`, `git diff`, `git log`, testrunners,
+  TypeScript/Vite/Webpack-builds, ESLint/Biome/Prettier, npm audit/installaties, Docker-logs,
+  infra-uitvoer en generieke shell-uitvoer
+- Past JSON-filterpakketten toe vanuit `open-sse/services/compression/engines/rtk/filters/`
+- Importeert RTK TOML-schema v1-filters uit project- of globale `filters.toml`-bestanden, met
+  validatie via inline tests en trust-gating voor projectbestanden
+- Wordt geleverd met 56 ingebouwde filters met inline-verify-samples
+- Verwijdert ANSI-stuursequenties, voortgangsbalken, herhaalde regels en ruis waarop geen actie mogelijk is
+- Behoudt failures, errors, waarschuwingen, gewijzigde bestanden, samenvattingen en het einde van lange uitvoer
+- Ondersteunt projectfilters met trust-gating, globale filters en optioneel herstel van geanonimiseerde ruwe uitvoer
 
-**Het meest geschikt voor:** Agentsessies met shell-, build-, test-, git-, grep- en bestandsuitvoertranscripten.
+**Best geschikt voor:** Agentsessies met shell-, build-, test-, git-, grep- en bestandsuitvoertranscripties.
 
-### Stacked-modus (geschikt bereik van 78-95%)
+### Stacked-modus (78-95% toepasbaar bereik)
 
-De Stacked-modus voert meerdere compressie-engines in een deterministische volgorde uit. De standaardpipeline is:
+De Stacked-modus draait meerdere compressie-engines in een deterministische volgorde. De standaardpipeline is:
 
 ```txt
 RTK -> Caveman
 ```
 
-Door die volgorde wordt terminal-/tooluitvoer eerst compact gemaakt, waarna Caveman semantische condensatie toepast op
-de resterende prompt in natuurlijke taal. Stacked-pipelines kunnen globaal worden geconfigureerd of via
-compressiecombo's die aan routeringscombo's zijn toegewezen.
+Die volgorde maakt terminal-/tooluitvoer eerst compact en past daarna de semantische verdichting
+van Caveman toe op de resterende prompt in natuurlijke taal. Stacked-pipelines kunnen globaal
+worden geconfigureerd of via compressiecombo's die aan routingcombo's zijn toegewezen.
 
-**Het meest geschikt voor:** Gemengde context met grote toollogs in combinatie met menselijke instructies of assistentsamenvattingen.
+**Best geschikt voor:** Gemengde context met grote toollogs plus menselijke instructies of samenvattingen van de assistent.
 
 ---
 

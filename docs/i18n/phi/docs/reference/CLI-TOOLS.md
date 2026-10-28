@@ -6,15 +6,15 @@
 
 Huling na-update: 2026-08-23
 
-Sumasama ang OmniRoute sa tatlong kategorya ng mga CLI tool na nakalatag sa tatlong nakalaang dashboard page:
+OmniRoute ay sumasama sa tatlong kategorya ng mga tool CLI na nakakalat sa tatlong nakalaang pahina ng dashboard:
 
-| Page           | Route                   | Konsepto                                                                                           | Bilang               |
-| -------------- | ----------------------- | -------------------------------------------------------------------------------------------------- | -------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Mga coding tool na itinuturo mo sa OmniRoute (Client → CLI → OmniRoute → Provider)                 | 26                   |
-| **CLI Agents** | `/dashboard/cli-agents` | Mga autonomous agent na itinuturo mo sa OmniRoute (parehong daloy, mas malawak na saklaw)          | 10                   |
-| **ACP Agents** | `/dashboard/acp-agents` | Mga CLI na pinapatakbo ng OmniRoute bilang backend sa pamamagitan ng stdio/ACP (baligtad na daloy) | tingnan ang registry |
+| Pahina         | Ruta                    | Konsepto                                                                                      | Bilangin                |
+| -------------- | ----------------------- | --------------------------------------------------------------------------------------------- | ----------------------- |
+| **CLI Code's** | `/dashboard/cli-code`   | Mga tool sa pag-coding na itinuturo mo sa OmniRoute (Client → CLI → OmniRoute → Provider)     | 26                      |
+| **CLI Ahente** | `/dashboard/cli-agents` | Mga autonomous na ahente na itinuturo mo sa OmniRoute (parehong daloy, mas malawak na saklaw) | 11                      |
+| **ACP Ahente** | `/dashboard/acp-agents` | CLIs na lumalabas OmniRoute bilang backend sa pamamagitan ng stdio/ACP (reverse flow)         | tingnan ang pagpapatala |
 
-Nagre-redirect ang mga legacy route sa pamamagitan ng 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Nagre-redirect ang mga legacy na ruta sa pamamagitan ng 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -45,10 +45,7 @@ ACP Agents (baligtad na daloy ng pagpapatakbo):
 
 ## Awtomatikong i-configure gamit ang `setup-*`
 
-Hindi mo kailangang manu-manong isulat ang config ng bawat tool. May kasamang `setup-*`
-command ang OmniRoute para sa bawat sinusuportahang CLI na nagbabasa ng **aktuwal** na
-catalog ng modelo mula sa tumatakbong OmniRoute (lokal o remote) at nagsusulat ng sariling
-config ng tool sa iyong makina:
+Hindi mo kailangang isulat ang config ng bawat tool sa pamamagitan ng kamay. Nagpapadala OmniRoute ng `setup-*` command sa bawat sinusuportahang CLI na nagbabasa ng** mabuhay** model catalog mula sa isang tumatakbong OmniRoute (lokal o remote) at isinulat ang sariling config ng tool sa iyong makina:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -56,54 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Tinatanggap ng bawat isa ang `--remote <url> --api-key <key>` (i-configure ang isang lokal
-na tool laban sa isang remote na OmniRoute), `--dry-run` (i-preview nang walang pagsusulat),
-at `--port`. Ang mga tool na walang awtomatikong pagtuklas ng modelo (Cline, Kilo, Roo,
-Goose, Aider, Qwen, 5dive) ay tumatanggap ng `--model <id>` (at `--yes` para sa mga
-non-interactive na pagpapatakbo). Ang `setup-5dive` lamang ang recipe na hindi nagsusulat
-sa ilalim ng `$HOME`: kino-configure nito ang isang fleet ng 5dive agent sa pamamagitan
-ng pagsusulat ng root-owned na auth profile sa fleet host, kaya muli nitong isinasagawa
-ang sarili sa pamamagitan ng `sudo` at wala itong sariling remote mode. Upang maglunsad
-ng CLI na may wastong env na naka-inject at walang anumang isinusulat na config, gamitin
-ang generic na launcher na `omniroute run <target>` (claude, codex, aider, goose, opencode,
-qwen, gemini — nagmumula ang mga target at alias sa `bin/cli/cli-manifest.mjs`); nananatiling
-available ang mga legacy na launcher para sa bawat tool na `omniroute launch` (Claude Code)
-at `omniroute launch-codex` (Codex). Launch-only ang Gemini CLI: isa itong target ng
-`omniroute run` ngunit wala itong `setup-*`/`configure` recipe.
+Ang bawat isa ay tumatanggap ng `--remote <url> --api-key <key>` (i-configure ang isang lokal na tool laban sa isang remote OmniRoute), `--dry-run` (preview nang hindi nagsusulat), at `--port`. Ang mga tool na walang modelong auto-discovery (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) ay kumukuha ng `--model <id>` (at `--yes` para sa mga non-interactive na pagtakbo). `setup-5dive` ay ang isang recipe na hindi nagsusulat sa ilalim ng `$HOME`: nagko-configure ito ng 5dive agent fleet sa pamamagitan ng pagsusulat ng root-owned na auth profile sa fleet host, kaya muli itong nagsasagawa sa `sudo` at walang sariling remote mode. Para maglunsad ng CLI na may tamang env na na-inject at walang nakasulat na config, gamitin ang generic `omniroute run <target>` launcher (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — ang mga target at alias ay nagmula sa `bin/cli/cli-manifest.mjs`); ang legacy na per-tool launcher `omniroute launch` (Claude Code) at `omniroute launch-codex` (Codex) ay nananatiling available. Gemini CLI ay launch-only: ito ay isang `omniroute run` target ngunit walang `setup-*`/`configure` recipe.
 
-> **Kumpletong sanggunian:** ang pangunahing talahanayan — kung ano ang isinusulat ng bawat command, lahat ng flag,
-> lokal kumpara sa remote, at kung aling mga tool ang nangangailangan ng `/v1` suffix — ay nasa
-> **[Mga Integrasyon ng CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Buong sanggunian:** ang master table — kung ano ang isinusulat ng bawat command, bawat flag, local vs remote, at kung aling mga tool ang gusto ng `/v1` suffix — nakatira sa** [Mga Pagsasama-sama CLI](../guides/CLI-INTEGRATIONS.md)** .
 
-### Pagpapatakbo ng mga ito sa loob ng container
+### Pinapatakbo ang mga ito sa loob ng isang lalagyan
 
-Ang isang `setup-*` command na isinagawa sa loob ng OmniRoute container ay nagsusulat sa
-sariling home ng container, na hindi binabasa ng anumang host CLI at nawawala kasama ng
-container. Natutukoy iyon ng OmniRoute at nag-e-exit nang may `2` at may mga tagubilin sa
-halip na magsulat. Dalawang sinusuportahang paraan ang maaaring gamitin — i-install ang CLI
-sa host at gamitin ang `omniroute connect` sa container, o i-bind-mount ang mga config dir at
-itakda ang `CLI_CONFIG_HOME` (ang compose `host` profile). Ang bawat `setup-*` command,
-kasama ang `omniroute configure` at `omniroute config set`, ay tumatanggap ng
-`--allow-container-write` kapag ang talagang nilalayon mo ay i-configure ang sariling mga
-CLI ng container; ganoon din ang ginagawa ng `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`
-para sa server. Tingnan ang
-[Gabay sa Docker → Pag-configure ng mga host CLI tool](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Ang isang `setup-*` command na ipinatupad sa loob ng OmniRoute container ay nagsusulat sa sariling tahanan ng container, na walang host CLI na nagbabasa at nawawala kasama ng container. Nakikita iyon OmniRoute at lumabas `2` na may mga tagubilin sa halip na magsulat. Dalawang sinusuportahang paraan pasulong — i-install ang CLI sa host at `omniroute connect` sa container, o i-bind-mount ang mga config dirs at itakda `CLI_CONFIG_HOME` (ang compose `host` profile). Ang bawat `setup-*` command, kasama ang `omniroute configure` at `omniroute config set`, ay tumatanggap ng `--allow-container-write` kapag ang pag-configure ng sariling CLIs ng container ay kung ano talaga ang ibig mong sabihin; Ganoon din ang ginagawa ng `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` para sa server. Tingnan ang [Docker Guide → Pag-configure ng host CLI tools](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Ipinapatupad ng **apply endpoint** ng dashboard (`POST /api/cli-tools/apply`) ang parehong
-guard: sa isang container, ang pagsusulat na ang target ay hindi bind-mounted mula sa host
-ay sumasagot ng **`422`** na may `containerEphemeralTarget: true`, ang ligtas na text ng error,
-at — para sa mga tool na may host recipe (claude, codex, opencode, cline, kilo, continue) —
-isang `hostSetupCommand` (hal. `omniroute setup-opencode`) na patatakbuhin sa host sa halip;
-walang isinusulat. Patuloy na gumagana ang `dryRun: true` sa container mode at nagbabalik
-ng na-redact na preview + target path nang hindi ginagalaw ang disk. Ang nilalaman ng preview
-ay hindi isang configuration na naglalaman ng credential na dapat kopyahin o i-import. Mag-apply
-gamit ang orihinal na mga input para sa tool/base URL/API key/model sa host, o gamitin ang
-ipinahiwatig na host-side setup command. Tingnan ang [Seguridad ng configuration ng CLI](../security/CLI-CONFIGURATION.md)
-para sa preview header at request contract. Sinadya ang behavior na ito at pinoprotektahan
-laban sa regression ng `tests/unit/api/cli-tools/apply-container-guard.test.ts` — huwag kailanman
-"ayusin" ang isang 422 sa pamamagitan ng pag-aalis ng guard.
+Ang dashboard** ilapat ang endpoint** (`POST /api/cli-tools/apply`) nagpapatupad ng parehong bantay: sa isang lalagyan, isang sulat na ang target ay hindi naka-bind-mount mula sa host ay sumasagot**`422`** na may `containerEphemeralTarget: true`, ang ligtas na text ng error at — para sa mga tool na may recipe ng host (claude, codex, opencode, cline, kilo, continue) — isang `hostSetupCommand` (eg `omniroute setup-opencode`) na tumakbo sa host sa halip; walang nakasulat. `dryRun: true` ay patuloy na gumagana sa container mode at nagbabalik ng isang na-redact na preview + target na landas nang hindi hinahawakan ang disk. Ang pag-preview ng content ay hindi isang configuration na naglalaman ng kredensyal upang kopyahin o i-import. Mag-apply gamit ang orihinal na mga input ng tool/base URL/API key/model sa host, o gamitin ang ipinahiwatig na command sa pag-setup ng host-side. Tingnan [ang seguridad ng configuration CLI](../security/CLI-CONFIGURATION.md) para sa preview na header at kontrata ng kahilingan. Ang pag-uugaling ito ay sinadya at binabantayan ng `tests/unit/api/cli-tools/apply-container-guard.test.ts` ang regression — hindi kailanman "ayusin" ang isang 422 sa pamamagitan ng pag-alis ng bantay.
 
 ---
 
@@ -183,22 +144,23 @@ Lahat ng tool na lumalabas sa `/dashboard/cli-code`. Ang mga may `baseUrlSupport
 Ang mga tool na may `baseUrlSupport: "partial"` ay nagpapakita ng badge na "⚠ Bahagyang Base URL" sa card ng dashboard.
 ---
 
-## 2. Katalogo ng mga CLI Agent (10 tool)
+## 2. CLI Agents Catalog (11 tool)
 
-Mga autonomous agent na makikita sa `/dashboard/cli-agents`:
+Mga autonomous na ahente na lumalabas sa `/dashboard/cli-agents`:
 
-| id           | pangalan         | vendor                   | suporta sa baseUrl | maaaring i-spawn sa ACP |
-| ------------ | ---------------- | ------------------------ | ------------------ | ----------------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | full               | false                   |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full               | true                    |
-| goose        | Goose            | Block / Linux Foundation | full               | true                    |
-| interpreter  | Open Interpreter | OSS                      | full               | true                    |
-| warp         | Warp AI          | Warp Inc.                | partial            | true                    |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full               | false                   |
-| omp          | Oh My Pi         | OSS                      | full               | true                    |
-| letta        | Letta CLI        | Letta                    | full               | false                   |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                   |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                   |
+| id                 | pangalan               | nagtitinda               | baseUrlSupport | acpSpawnable |
+| ------------------ | ---------------------- | ------------------------ | -------------- | ------------ |
+| hermes-ahente      | Ahente ng Hermes       | Nous Research            | puno na        | mali         |
+| openclaw           | OpenClaw               | OSS (P. Steinberger)     | puno na        | totoo        |
+| gansa              | Gansa                  | Block / Linux Foundation | puno na        | totoo        |
+| interpreter        | Buksan ang Interpreter | OSS                      | puno na        | totoo        |
+| warp               | Warp AI                | Warp Inc.                | bahagyang      | totoo        |
+| ahente-kubyerta    | Deck ng Ahente         | asheshgoplani (OSS)      | puno na        | mali         |
+| omp                | Oh My Pi               | OSS                      | puno na        | totoo        |
+| letta              | Letta CLI              | Letta                    | puno na        | mali         |
+| pangunahing ahente | Punong Ahente          | Prime Intellect (OSS)    | puno na        | mali         |
+| 5dive              | 5dive                  | OSS (5dive-ai)           | puno na        | mali         |
+| whycodes           | WhyCodes               | Bakit Corporation        | puno na        | mali         |
 
 ---
 

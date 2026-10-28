@@ -444,146 +444,104 @@ server/
 
 ---
 
-## 4. `open-sse/` — តំបន់ការងារម៉ាស៊ីនស្ទ្រីម
+## 4. `open-sse/` — កន្លែងធ្វើការរបស់ម៉ាស៊ីនស្ទ្រីម
 
-តំបន់ការងារ npm ដាច់ដោយឡែកដែលបានបោះពុម្ពជា `@omniroute/open-sse`។ វាគ្រប់គ្រងការដំណើរការសំណើ កម្មវិធីប្រតិបត្តិ កម្មវិធីបកប្រែ សេវាកម្ម កម្មវិធីបំប្លែង និងម៉ាស៊ីនមេ MCP។
+ញែកកន្លែងធ្វើការ npm ចេញជា `@omniroute/open-sse`។ ជាម្ចាស់ដំណើរការសំណើ អ្នកប្រតិបត្តិ អ្នកបកប្រែ សេវាកម្ម ប្លែង និងម៉ាស៊ីនមេ MCP ។
 
 ```
 open-sse/
-├── index.ts                ការនាំចេញសាធារណៈ
-├── package.json            ឯកសារកំណត់តំបន់ការងារ
+├── index.ts                Public exports
+├── package.json            Workspace manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 បញ្ជីឈ្មោះអ្នកផ្តល់សេវា ទម្រង់បឋមកថា អត្តសញ្ញាណ …
-├── handlers/               កម្មវិធីដោះស្រាយសំណើ (ការជជែក embeddings អូឌីយ៉ូ រូបភាព …)
-├── executors/              ម៉ូឌុលកម្មវិធីប្រតិបត្តិរបស់អ្នកផ្តល់សេវាចំនួន 156 (ថ្នាក់កម្មវិធីប្រតិបត្តិ + កម្មវិធីជំនួយតាមអ្នកផ្តល់សេវា)
-├── translator/             ការបំប្លែងទ្រង់ទ្រាយ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            កម្មវិធីបំប្លែងស្ទ្រីម Responses API ↔ Chat Completions
-├── services/               ម៉ូឌុលសេវាកម្មជាង 80 (បន្សំ ការបម្រុងទុក កូតា អត្តសញ្ញាណ …)
-├── utils/                  កម្មវិធីជំនួយស្ទ្រីម កម្មវិធីភ្ញៀវ TLS, AWS SigV4, ការទាញយកតាមប្រូកស៊ី …
-└── mcp-server/             ម៉ាស៊ីនមេ MCP (មធ្យោបាយដឹកជញ្ជូន 3 វិសាលភាព 33 ឧបករណ៍ 110)
+├── config/                 Provider registries, header profiles, identity, …
+├── handlers/               Request handlers (chat, embeddings, audio, image, …)
+├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Responses API ↔ Chat Completions stream transformer
+├── services/               80+ service modules (combos, fallback, quotas, identity, …)
+├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
+└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| កម្មវិធីដោះស្រាយ        | គោលបំណង                                                                                               |
-| ----------------------- | ----------------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | បំពង់ដំណើរការជជែកចម្បង (ឃ្លាំងសម្ងាត់ ដែនកំណត់អត្រា ការកំណត់ផ្លូវបន្សំ ការបញ្ជូនទៅកម្មវិធីប្រតិបត្តិ) |
-| `responsesHandler.ts`   | ចំណុចចូល OpenAI Responses API                                                                         |
-| `embeddings.ts`         | Embeddings                                                                                            |
-| `imageGeneration.ts`    | ការបង្កើតរូបភាព                                                                                       |
-| `audioSpeech.ts`        | ការបំប្លែងអត្ថបទទៅជាសំឡេង                                                                             |
-| `audioTranscription.ts` | ការបំប្លែងសំឡេងទៅជាអត្ថបទ                                                                             |
-| `videoGeneration.ts`    | ការបង្កើតវីដេអូ                                                                                       |
-| `musicGeneration.ts`    | ការបង្កើតតន្ត្រី                                                                                      |
-| `rerank.ts`             | ការរៀបលំដាប់ឡើងវិញ                                                                                    |
-| `moderations.ts`        | ការត្រួតពិនិត្យមាតិកា                                                                                 |
-| `search.ts`             | ការស្វែងរកលើបណ្ដាញ                                                                                    |
-| `sseParser.ts`          | កម្មវិធីញែកព្រឹត្តិការណ៍ SSE                                                                          |
-| `usageExtractor.ts`     | ទាញយកចំនួន token ពីស្ទ្រីមប្រភពដើម                                                                    |
-| `responseSanitizer.ts`  | លុបព័ត៌មានរំខានជាក់លាក់របស់អ្នកផ្តល់សេវា                                                              |
-| `responseTranslator.ts` | ស្រទាប់តភ្ជាប់រវាងការឆ្លើយតបរបស់អ្នកផ្តល់សេវា និងស្រទាប់កម្មវិធីបកប្រែ                                |
+| អ្នកដោះស្រាយ            | គោលបំណង                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | បំពង់ជជែកសំខាន់ៗ (ឃ្លាំងសម្ងាត់ កម្រិតអត្រា ការកំណត់ផ្លូវបន្សំ ការបញ្ជូនប្រតិបត្តិករ) |
+| `responsesHandler.ts`   | OpenAI ឆ្លើយតបចំណុចចូល API                                                            |
+| `embeddings.ts`         | ការបង្កប់                                                                             |
+| `imageGeneration.ts`    | ការបង្កើតរូបភាព                                                                       |
+| `audioSpeech.ts`        | អត្ថបទទៅការនិយាយ                                                                      |
+| `audioTranscription.ts` | ការនិយាយទៅអត្ថបទ                                                                      |
+| `videoGeneration.ts`    | ការបង្កើតវីដេអូ                                                                       |
+| `musicGeneration.ts`    | ជំនាន់តន្ត្រី                                                                         |
+| `rerank.ts`             | ចំណាត់ថ្នាក់ឡើងវិញ                                                                    |
+| `moderations.ts`        | ការសម្របសម្រួល                                                                        |
+| `search.ts`             | ការស្វែងរកតាមអ៊ីនធឺណិត                                                                |
+| `sseParser.ts`          | កម្មវិធីញែកព្រឹត្តិការណ៍SSE                                                           |
+| `usageExtractor.ts`     | ដកសញ្ញាសម្ងាត់រាប់ចេញពីស្ទ្រីមខាងលើ                                                   |
+| `responseSanitizer.ts`  | សំឡេងរំខានជាក់លាក់របស់អ្នកផ្ដល់ខ្សែ                                                   |
+| `responseTranslator.ts` | កាវបិទរវាងការឆ្លើយតបរបស់អ្នកផ្តល់សេវា និងស្រទាប់អ្នកបកប្រែ                            |
 
 ### 4.2 `open-sse/executors/`
 
-មានម៉ូឌុលកម្មវិធីប្រតិបត្តិកម្រិតកំពូលចំនួន 156 (`*.ts` ដោយមិនរាប់ `base.ts`, `index.ts` និងការធ្វើតេស្ត — ជាចំនួនដែល
-`npm run check:docs-counts` វាស់វែង)។ ថ្នាក់កម្មវិធីប្រតិបត្តិនីមួយៗពង្រីកពី `BaseExecutor` (`base.ts`)
-ដោយផ្ទាល់ ឬតាមរយៈ `DefaultExecutor` ឬកម្មវិធីប្រតិបត្តិផ្សេងទៀត។ ម៉ូឌុលដែលនៅសល់គឺជា
-កម្មវិធីជំនួយតាមអ្នកផ្តល់សេវា (គ្រោងការណ៍ឧបករណ៍ អាដាប់ទ័រទាញយក/TTS និងកម្មវិធីដោះស្រាយលក្ខណៈពិសេស)។ កម្មវិធីប្រតិបត្តិរួមមាន៖
+156 ម៉ូឌុលប្រតិបត្តិកម្រិតកំពូល (`*.ts` ដក `base.ts`, `index.ts` និងការធ្វើតេស្ត - វិធានការ `npm run check:docs-counts` រាប់) ។ រាល់ថ្នាក់ប្រតិបត្តិករពង្រីក `BaseExecutor` (`base.ts`) ដោយផ្ទាល់ ឬតាមរយៈ `DefaultExecutor` ឬប្រតិបត្តិករផ្សេងទៀត; ម៉ូឌុលដែលនៅសេសសល់គឺជាអ្នកជំនួយពីអ្នកផ្តល់សេវា (គ្រោងការណ៍ឧបករណ៍, អាដាប់ទ័រ fetch/TTS, ឧបករណ៍ដោះស្រាយ quirk) ។ អ្នកប្រតិបត្តិរួមមានៈ
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop` ព្រមទាំង `claudeIdentity.ts`
-(កម្មវិធីជំនួយអត្តសញ្ញាណរួម) និង `index.ts` (បញ្ជីឈ្មោះ)។
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `claudeIdentity.ts` () និងចែករំលែក `devin-desktop` `index.ts`
 
-> ចំណាំ៖ អ្នកផ្តល់សេវាដែលមិនបានរាយនៅទីនេះ ត្រូវបានបម្រើដោយ `default.ts` ដោយប្រើកម្មវិធីប្រតិបត្តិទូទៅ
-> ដែលត្រូវគ្នាជាមួយ OpenAI។ កាតាឡុកអ្នកផ្តល់សេវាពេញលេញ (អ្នកផ្តល់សេវាចំនួន 375) ស្ថិតនៅក្នុង
-> `src/shared/constants/providers.ts`។
+> ចំណាំ៖ អ្នកផ្តល់សេវាដែលមិនបានរាយបញ្ជីនៅទីនេះត្រូវបានបម្រើដោយ `default.ts` ដោយប្រើកម្មវិធីប្រតិបត្តិដែលត្រូវគ្នានឹង OpenAI ទូទៅ។ កាតាឡុកអ្នកផ្តល់សេវាពេញលេញ (អ្នកផ្តល់សេវា 377) រស់នៅក្នុង `src/shared/constants/providers.ts`។
 
 ### 4.3 `open-sse/translator/`
 
-ការបកប្រែបែបមជ្ឈមណ្ឌលនិងសាខា (OpenAI ជាមជ្ឈមណ្ឌល)។
+ការបកប្រែជាមជ្ឈមណ្ឌល និងនិយាយ (OpenAI គឺជាមជ្ឈមណ្ឌល) ។
 
-- **កម្មវិធីបកប្រែសំណើចំនួន 9** (`translator/request/`)៖
-  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
-  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`។
-- **កម្មវិធីបកប្រែការឆ្លើយតបចំនួន 9** (`translator/response/`)៖
-  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
-  `openai-to-claude`។
-- **កម្មវិធីជំនួយចំនួន 9** (`translator/helpers/`)៖
-  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper` ព្រមទាំង
-  ការធ្វើតេស្តកម្មវិធីជំនួយ។
-- **កម្មវិធីជំនួយរូបភាព** (`translator/image/sizeMapper.ts`)។
+- **9 ស្នើសុំអ្នកបកប្រែ** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`។
+- **9 អ្នកបកប្រែឆ្លើយតប** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`។
+- **ជំនួយ 9 នាក់។** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, បូកនឹងការធ្វើតេស្តជំនួយ។
+- **ជំនួយរូបភាព** (`translator/image/sizeMapper.ts`) ។
 - កម្រិតកំពូល៖ `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`។
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — កម្មវិធីបំប្លែង Responses API ↔ Chat
-  Completions ដែលផ្អែកលើ `TransformStream` (ប្រើដោយផ្លូវរួម `responses/`)។
+- `responsesTransformer.ts` — `TransformStream` -based ការឆ្លើយតប API ↔ កម្មវិធីបម្លែងការបញ្ចប់ការជជែក (ប្រើដោយផ្លូវ `responses/` catch-all) ។
 
 ### 4.5 `open-sse/services/`
 
-ចំណុចសំខាន់ៗ (បញ្ជីពេញលេញស្ថិតនៅក្រោម `open-sse/services/`)៖
+គំនួសពណ៌ (បញ្ជីពេញលេញនៅក្រោម `open-sse/services/`):
 
-| ចំណុចយកចិត្តទុកដាក់          | ឯកសារ                                                                                                                                                                                                                                                    |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ការកំណត់ផ្លូវ Combo          | `combo.ts` (យុទ្ធសាស្ត្រ 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                  |
-| ម៉ាស៊ីន Auto Combo           | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| ភាពធន់នឹងបញ្ហា               | `accountFallback.ts` (រយៈពេលរង់ចាំ + ការចាក់សោ), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                   |
-| កូតា                         | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| ឃ្លាំងសម្ងាត់                | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| ភាពឆ្លាតវៃក្នុងការកំណត់ផ្លូវ | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| ការគ្រប់គ្រងម៉ូដែល           | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| ការបង្ហាប់                   | `compression/` — ការតភ្ជាប់ម៉ាស៊ីនបង្ហាប់ពេញលេញ                                                                                                                                                                                                          |
-| ថូខិន + សម័យ                 | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| កម្រិត / manifest            | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / បណ្ដាញ                  | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| ដំណើរការជាបាច់               | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| ការប្រើប្រាស់                | `usage.ts`                                                                                                                                                                                                                                               |
+| កង្វល់                    | ឯកសារ                                                                                                                                                                                                                                                    |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ការកំណត់ផ្លូវរួម          | `combo.ts` (យុទ្ធសាស្រ្តចំនួន 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                             |
+| ម៉ាស៊ីនបន្សំស្វ័យប្រវត្តិ | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| ភាពធន់                    | `accountFallback.ts` ( cooldown + lockout), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                        |
+| កូតា                      | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| ឃ្លាំងសម្ងាត់             | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| កំណត់ផ្លូវឆ្លាតវៃ         | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| ការគ្រប់គ្រងគំរូ          | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| ការបង្ហាប់                | `compression/` - ខ្សែភ្លើងម៉ាស៊ីនបង្ហាប់ពេញលេញ                                                                                                                                                                                                           |
+| វគ្គ Token +              | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| ថ្នាក់ / បង្ហាញ           | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / បណ្តាញ               | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| បាច់                      | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| ការប្រើប្រាស់             | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **ឧបករណ៍ពិសេសចំនួន 110** ត្រូវបានតភ្ជាប់នៅក្នុង `server.ts` (ឧបករណ៍ស្តង់ដារចំនួន 45 នៅក្នុង `schemas/tools.ts` +
-  ម៉ូឌុលអង្គចងចាំ ជំនាញ GitHub-skills ក្រុមធនធាន gamification កម្មវិធីបន្ថែម Notion Obsidian
-  local-corpus និងការបង្ហាប់ — សំណុំរួមត្រូវបានរាប់ដោយ `countUniqueMcpTools`)។
-- **មធ្យោបាយដឹកជញ្ជូន 3**៖ stdio, HTTP Streamable, SSE។
-- **វិសាលភាព 33** ត្រូវបានអនុវត្តនៅពេលដំណើរការ — បញ្ជីមូលដ្ឋានស្ថិតនៅក្នុង `src/shared/constants/mcpScopes.ts` ហើយសំណុំពេញលេញគឺជាសំណុំរួមនៃវិសាលភាពដែលបានប្រកាសដោយម៉ូឌុលឧបករណ៍នីមួយៗ។
-- តារាងសវនកម្ម៖ `mcp_tool_audit` (ត្រូវបានបំពេញដោយ `audit.ts`)។
-- ឯកសារ៖ `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
-  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
-  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  រួមទាំងការធ្វើតេស្តនៅក្រោម `__tests__/`។
+- **ឧបករណ៍ពិសេសចំនួន 110** មានខ្សែនៅក្នុង `server.ts` (45 canonical នៅក្នុងអង្គចងចាំ `schemas/tools.ts` +, ជំនាញ, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus and compression modules — union រាប់ដោយ `countUniqueMcpTools`)។
+- **3 ការដឹកជញ្ជូន** ៖ stdio, HTTP Streamable, SSE។
+- **33 វិសាលភាព** បានអនុវត្តនៅពេលដំណើរការ — បញ្ជីមូលដ្ឋាននៅក្នុង `src/shared/constants/mcpScopes.ts` សំណុំពេញលេញគឺជាសហជីពនៃវិសាលភាពដែលបានប្រកាសដោយម៉ូឌុលឧបករណ៍នីមួយៗ។
+- តារាងសវនកម្ម៖ `mcp_tool_audit` (បញ្ចូលដោយ `audit.ts`)។
+- ឯកសារ៖ `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, បូកនឹងការធ្វើតេស្តក្រោម `__tests__/`។
 - សូមមើល [MCP-SERVER.md](../frameworks/MCP-SERVER.md) សម្រាប់កាតាឡុកឧបករណ៍ពេញលេញ។
 
 ### 4.7 `open-sse/config/`
 
-បញ្ជីចុះឈ្មោះអ្នកផ្តល់សេវា (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), បញ្ជីចុះឈ្មោះម៉ូដែលតាមទម្រង់នីមួយៗ (`audioRegistry.ts`,
-`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
-`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-ឧបករណ៍ជំនួយអត្តសញ្ញាណ (`codexIdentity.ts`, `codexInstructions.ts`,
-`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
-`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-ឧបករណ៍ជំនួយព័ត៌មានសម្ងាត់ (`credentialLoader.ts`, `codexClient.ts`) និងអាដាប់ទ័រ
-ក្លោដ (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
-`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
-`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`)។
+បញ្ជីឈ្មោះអ្នកផ្តល់សេវា (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`) ការចុះបញ្ជីគំរូតាមទម្រង់ (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), ជំនួយអត្តសញ្ញាណ (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts` `toolCloaking.ts`, ជំនួយការបញ្ជាក់ ( `defaultThinkingSignature.ts`, `codexClient.ts`) និងអាដាប់ទ័រពពក (`credentialLoader.ts`,`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`) `registryUtils.ts`
 
 ### 4.8 `open-sse/utils/`
 
-Primitive សម្រាប់ streaming និង helper សម្រាប់ provider៖ `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+ការស្ទ្រីមបុព្វបទ និងអ្នកផ្តល់ជំនួយ៖ `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts` `usageTracking.ts` `progressTracker.ts` `error.ts` `cors.ts` `logger.ts` `requestLogger.ts`, `sleep.ts` `ollamaTransform.ts`
 
 ---
 

@@ -170,26 +170,26 @@ refactor(db): consolidate rate limit tables
 ## 运行测试
 
 ```bash
-# 所有测试（unit + vitest + ecosystem + e2e）
+# 所有测试（单元测试 + vitest + 生态系统 + e2e）
 npm run test:all
 
-# 单个测试文件（Node.js 原生测试运行器——大多数测试使用此运行器）
+# 单个测试文件（Node.js 原生测试运行器——大多数测试使用此方式）
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# 仅运行受更改影响的单元测试（与 CI 门禁使用相同的 TIA 选择器，#8084）
-npm run test:scoped            # 上一次提交中的更改（或工作树中的更改）
-npm run test:scoped:staged     # 仅暂存的更改——适合与提交前运行配合使用
-npm run test:scoped:full       # 首先重建导入图映射（添加/移动文件后）
-# 退出码为 1 且提示“run the full suite”表示某个中心文件（tsconfig、package.json 等）或未映射的源文件发生了更改——
-# 选择器会安全失败，绝不会静默跳过。
+# 仅运行受你的更改影响的单元测试（与 CI 门禁使用相同的 TIA 选择器，#8084）
+npm run test:scoped            # 上一次提交（或工作树）中的更改
+npm run test:scoped:staged     # 仅暂存的更改——很适合与 pre-commit 运行搭配使用
+npm run test:scoped:full       # 先重新构建导入图映射（添加/移动文件后）
+# 退出码 1 +“运行完整测试套件”表示某个枢纽文件（tsconfig、package.json 等）或
+# 未映射的源文件发生了更改——选择器会安全失败，绝不会静默跳过。
 
-# Vitest（MCP server、autoCombo、cache）
+# Vitest（MCP 服务器、autoCombo、缓存）
 npm run test:vitest
 
 # E2E 测试（需要 Playwright）
 npm run test:e2e
 
-# 协议客户端 E2E（MCP transports、A2A）
+# 协议客户端 E2E（MCP 传输、A2A）
 npm run test:protocols:e2e
 
 # 生态系统兼容性测试
@@ -203,51 +203,53 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# 受门禁控制的真实上游组合冒烟测试（需要 VPS 访问权限 + 真实 provider 额度）
-# 会调用真实 provider——会产生少量费用。绝 NEVER 在 CI 中运行。没有门禁时会正常跳过。
-# 需要：ssh root@192.168.0.15 访问权限（从 VPS 获取只读 DB 快照）。
+# 受门控的真实上游组合冒烟测试（需要 VPS 访问权限 + 真实提供者额度）
+# 会调用真实提供者——产生少量费用。绝不在 CI 中运行。未启用门控时会正常跳过。
+# 要求：拥有 ssh root@192.168.0.15 访问权限（从 VPS 获取只读数据库快照）。
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS 实时冒烟测试——纯 Node ESM 脚本，直接调用实时 .15 server。
-# 需要：ssh root@192.168.0.15 访问权限（通过 SSH sqlite 创建/拆除组合）。
-# 会调用真实 provider（少量费用）。仅创建/删除 __live_test__* 组合。绝 NEVER 在 CI 中运行。
-# .15 上的 REQUIRE_API_KEY=false，因此不需要 API key，但如果设置了 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY，则会遵循其配置。
-npm run test:combo:live:vps              # 7 个 HTTP 场景（priority/round-robin/weighted/cost/fusion/auto + health）
-npm run test:combo:live:vps:failover     # 添加一个真实的跨 provider 故障转移场景（共 8 个）
+# 第 3 阶段 VPS 实时冒烟测试——使用纯 Node ESM 脚本，直接调用实时 .15 服务器。
+# 要求：拥有 ssh root@192.168.0.15 访问权限（通过 SSH sqlite 创建/销毁组合）。
+# 会调用真实提供者（产生少量费用）。仅创建/删除 __live_test__* 组合。绝不在 CI 中运行。
+# .15 上的 REQUIRE_API_KEY=false，因此无需 API 密钥，但如果设置了 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY，则会遵循其设置。
+npm run test:combo:live:vps              # 7 个 HTTP 场景（优先级/轮询/加权/成本/融合/自动 + 健康检查）
+npm run test:combo:live:vps:failover     # 添加一个真实的跨提供者故障转移场景（共 8 个）
 ```
 
 覆盖率说明：
 
-- `npm run test:coverage` 测量主单元测试套件的源代码覆盖率，排除 `tests/**`，并包含 `open-sse/**`
-- Pull Request 必须将覆盖率门禁维持在语句/行/函数/分支 **60% 以上**
-- 如果 PR 更改了 `src/`、`open-sse/`、`electron/` 或 `bin/` 中的生产代码，则必须在同一个 PR 中添加或更新自动化测试
-- `npm run coverage:report` 会输出最近一次覆盖率运行的逐文件详细报告
+- `npm run test:coverage` 测量主要单元测试套件的源代码覆盖率，排除 `tests/**`，并包含 `open-sse/**`
+- 拉取请求必须确保语句/行/函数/分支的覆盖率门禁均保持在 **60%+**
+- 如果 PR 更改了 `src/`、`open-sse/`、`electron/` 或 `bin/` 中的生产代码，则必须在同一 PR 中添加或更新自动化测试
+- `npm run coverage:report` 输出最近一次覆盖率运行中逐文件的详细报告
 - `npm run test:coverage:legacy` 保留旧版指标，以便进行历史比较
-- 分阶段覆盖率改进路线图请参阅 `docs/ops/COVERAGE_PLAN.md`
+- 有关分阶段提高覆盖率的路线图，请参阅 `docs/ops/COVERAGE_PLAN.md`
 
-### Pull Request 要求
+### 拉取请求要求
 
-在创建 PR 之前，请使用
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) 为
-所做的更改运行聚焦循环。完整的单元测试套件（4 个 CI 分片）、Vitest、**60% 以上**的覆盖率门禁以及
-生产构建由 CI 负责——在本地运行它们不会提供 PR 检查无法提供的额外信号，并且在较小的机器上可能会使主机过载（#8084）：
+在创建 PR 前，请按照
+[贡献黄金路径](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)，针对你的更改运行聚焦验证循环。
+完整的单元测试套件（4 个 CI 分片）、Vitest、**60%+** 覆盖率门禁以及生产构建均由
+CI 负责——在本地运行这些项目不会提供 PR 检查之外的额外信号，而且可能会耗尽
+配置较低机器的主机资源（#8084）：
 
-- 运行覆盖所做更改的测试文件：`node --import tsx/esm --test tests/unit/<file>.test.ts`
+- 运行覆盖你的更改的测试文件：`node --import tsx/esm --test tests/unit/<file>.test.ts`
 - 运行 `npm run lint`
-- 每当生产代码发生更改时，在同一个 PR 中添加或更新自动化测试
-- 当生产代码发生更改时，在 PR 描述中包含已更改或新增的测试文件
-- 当项目密钥已在 CI 中配置时，检查 PR 上的 SonarQube 结果
+- 每当生产代码发生更改时，都应在同一 PR 中添加或更新自动化测试
+- 在 `node:test` 文件中，将每个顶层 `await`（例如 `await import(...)`）放在第一个 `test()` / `describe()` 之前：使用 `--test-force-exit` 时，在它之后注册的测试可能永远不会运行且不会有任何提示（#18045；由 `npm run check:test-tla-order` 强制执行）
+- 当生产代码发生更改时，在 PR 描述中列出已更改或新增的测试文件
+- 当 CI 中配置了项目密钥时，检查 PR 上的 SonarQube 结果
 
 当前测试状态：**122 个单元测试文件**，覆盖：
 
-- Provider translator 和格式转换
-- 速率限制、熔断器和弹性
-- 语义缓存、幂等性、进度跟踪
-- 数据库操作和 schema（21 个 DB 模块）
+- 提供者转换器和格式转换
+- 速率限制、断路器和弹性能力
+- 语义缓存、幂等性和进度跟踪
+- 数据库操作和架构（21 个数据库模块）
 - OAuth 流程和身份验证
-- API endpoint 验证（Zod v4）
-- MCP server 工具和作用域强制执行
-- Memory 和 Skills 系统
+- API 端点验证（Zod v4）
+- MCP 服务器工具和作用域强制执行
+- 记忆和技能系统
 
 ---
 
