@@ -178,8 +178,11 @@ export async function getTeamUsageLimitStatusForTeam(
   if (team?.status !== "active") return null;
   if (!team?.maxBudgetUsd || !team.budgetDuration || !team.budgetResetAt) return null;
   team = advanceTeamBudgetWindow(team, nowMs);
+  // Reassigning `team` drops the null-narrowing of the guard above, so read the budget
+  // fields from the advanced row and re-check them (same condition, no behaviour change).
+  const { maxBudgetUsd, budgetDuration } = team;
   const windowStartIso = getTeamBudgetWindowStart(team);
-  if (!windowStartIso || !team.budgetResetAt) return null;
+  if (!maxBudgetUsd || !budgetDuration || !windowStartIso || !team.budgetResetAt) return null;
   const spend = await getCommittedTeamEstimatedListCostUsd(
     team.id,
     windowStartIso,
@@ -189,8 +192,8 @@ export async function getTeamUsageLimitStatusForTeam(
     teamId: team.id,
     teamName: team.name,
     enforcementMode: "soft_committed_usage",
-    maxBudgetUsd: team.maxBudgetUsd,
-    budgetDuration: team.budgetDuration,
+    maxBudgetUsd,
+    budgetDuration,
     windowStartIso,
     resetAtIso: team.budgetResetAt,
     estimatedListCostUsd: spend.estimatedListCostUsd,
@@ -198,7 +201,7 @@ export async function getTeamUsageLimitStatusForTeam(
     subscriptionQuotaUsed: null,
     compressionSavingsUsd: null,
     hasUnpricedUsage: spend.hasUnpricedUsage,
-    exceeded: spend.estimatedListCostUsd >= team.maxBudgetUsd || spend.hasUnpricedUsage,
+    exceeded: spend.estimatedListCostUsd >= maxBudgetUsd || spend.hasUnpricedUsage,
   };
 }
 
