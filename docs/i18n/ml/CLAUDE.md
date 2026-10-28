@@ -1,6 +1,6 @@
 # CLAUDE.md (മലയാളം)
 
-🌐 **Languages:** 🇺🇸 [English](../../../CLAUDE.md) · 🇪🇹 [am](../am/CLAUDE.md) · 🇸🇦 [ar](../ar/CLAUDE.md) · 🇦🇿 [az](../az/CLAUDE.md) · 🇧🇬 [bg](../bg/CLAUDE.md) · 🇧🇩 [bn](../bn/CLAUDE.md) · 🇨🇿 [cs](../cs/CLAUDE.md) · 🇩🇰 [da](../da/CLAUDE.md) · 🇩🇪 [de](../de/CLAUDE.md) · 🇬🇷 [el](../el/CLAUDE.md) · 🇪🇸 [es](../es/CLAUDE.md) · 🇪🇪 [et](../et/CLAUDE.md) · 🇮🇷 [fa](../fa/CLAUDE.md) · 🇫🇮 [fi](../fi/CLAUDE.md) · 🇫🇷 [fr](../fr/CLAUDE.md) · 🇮🇪 [ga](../ga/CLAUDE.md) · 🇮🇳 [gu](../gu/CLAUDE.md) · 🇳🇬 [ha](../ha/CLAUDE.md) · 🇮🇱 [he](../he/CLAUDE.md) · 🇮🇳 [hi](../hi/CLAUDE.md) · 🇭🇷 [hr](../hr/CLAUDE.md) · 🇭🇺 [hu](../hu/CLAUDE.md) · 🇦🇲 [hy](../hy/CLAUDE.md) · 🇮🇩 [id](../id/CLAUDE.md) · 🇳🇬 [ig](../ig/CLAUDE.md) · 🇮🇹 [it](../it/CLAUDE.md) · 🇯🇵 [ja](../ja/CLAUDE.md) · 🇬🇪 [ka](../ka/CLAUDE.md) · 🇰🇭 [km](../km/CLAUDE.md) · 🇮🇳 [kn](../kn/CLAUDE.md) · 🇰🇷 [ko](../ko/CLAUDE.md) · 🇱🇹 [lt](../lt/CLAUDE.md) · 🇱🇻 [lv](../lv/CLAUDE.md) · 🇮🇳 [mr](../mr/CLAUDE.md) · 🇲🇾 [ms](../ms/CLAUDE.md) · 🇲🇹 [mt](../mt/CLAUDE.md) · 🇲🇲 [my](../my/CLAUDE.md) · 🇳🇵 [ne](../ne/CLAUDE.md) · 🇳🇱 [nl](../nl/CLAUDE.md) · 🇳🇴 [no](../no/CLAUDE.md) · 🇮🇳 [or](../or/CLAUDE.md) · 🇮🇳 [pa](../pa/CLAUDE.md) · 🇵🇭 [phi](../phi/CLAUDE.md) · 🇵🇱 [pl](../pl/CLAUDE.md) · 🇵🇹 [pt](../pt/CLAUDE.md) · 🇧🇷 [pt-BR](../pt-BR/CLAUDE.md) · 🇷🇴 [ro](../ro/CLAUDE.md) · 🇷🇺 [ru](../ru/CLAUDE.md) · 🇱🇰 [si](../si/CLAUDE.md) · 🇸🇰 [sk](../sk/CLAUDE.md) · 🇸🇮 [sl](../sl/CLAUDE.md) · 🇷🇸 [sr](../sr/CLAUDE.md) · 🇸🇪 [sv](../sv/CLAUDE.md) · 🇰🇪 [sw](../sw/CLAUDE.md) · 🇮🇳 [ta](../ta/CLAUDE.md) · 🇮🇳 [te](../te/CLAUDE.md) · 🇹🇭 [th](../th/CLAUDE.md) · 🇹🇷 [tr](../tr/CLAUDE.md) · 🇺🇦 [uk-UA](../uk-UA/CLAUDE.md) · 🇵🇰 [ur](../ur/CLAUDE.md) · 🇺🇿 [uz](../uz/CLAUDE.md) · 🇻🇳 [vi](../vi/CLAUDE.md) · 🇳🇬 [yo](../yo/CLAUDE.md) · 🇨🇳 [zh-CN](../zh-CN/CLAUDE.md) · 🇹🇼 [zh-TW](../zh-TW/CLAUDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../CLAUDE.md) · 🇪🇹 [am](../am/CLAUDE.md) · 🇸🇦 [ar](../ar/CLAUDE.md) · 🇦🇿 [az](../az/CLAUDE.md) · 🇧🇬 [bg](../bg/CLAUDE.md) · 🇧🇩 [bn](../bn/CLAUDE.md) · 🇧🇦 [bs](../bs/CLAUDE.md) · 🇨🇿 [cs](../cs/CLAUDE.md) · 🇩🇰 [da](../da/CLAUDE.md) · 🇩🇪 [de](../de/CLAUDE.md) · 🇬🇷 [el](../el/CLAUDE.md) · 🇪🇸 [es](../es/CLAUDE.md) · 🇪🇪 [et](../et/CLAUDE.md) · 🇮🇷 [fa](../fa/CLAUDE.md) · 🇫🇮 [fi](../fi/CLAUDE.md) · 🇫🇷 [fr](../fr/CLAUDE.md) · 🇮🇪 [ga](../ga/CLAUDE.md) · 🇮🇳 [gu](../gu/CLAUDE.md) · 🇳🇬 [ha](../ha/CLAUDE.md) · 🇮🇱 [he](../he/CLAUDE.md) · 🇮🇳 [hi](../hi/CLAUDE.md) · 🇭🇷 [hr](../hr/CLAUDE.md) · 🇭🇺 [hu](../hu/CLAUDE.md) · 🇦🇲 [hy](../hy/CLAUDE.md) · 🇮🇩 [id](../id/CLAUDE.md) · 🇳🇬 [ig](../ig/CLAUDE.md) · 🇮🇹 [it](../it/CLAUDE.md) · 🇯🇵 [ja](../ja/CLAUDE.md) · 🇬🇪 [ka](../ka/CLAUDE.md) · 🇰🇭 [km](../km/CLAUDE.md) · 🇮🇳 [kn](../kn/CLAUDE.md) · 🇰🇷 [ko](../ko/CLAUDE.md) · 🇱🇹 [lt](../lt/CLAUDE.md) · 🇱🇻 [lv](../lv/CLAUDE.md) · 🇮🇳 [mr](../mr/CLAUDE.md) · 🇲🇾 [ms](../ms/CLAUDE.md) · 🇲🇹 [mt](../mt/CLAUDE.md) · 🇲🇲 [my](../my/CLAUDE.md) · 🇳🇵 [ne](../ne/CLAUDE.md) · 🇳🇱 [nl](../nl/CLAUDE.md) · 🇳🇴 [no](../no/CLAUDE.md) · 🇮🇳 [or](../or/CLAUDE.md) · 🇮🇳 [pa](../pa/CLAUDE.md) · 🇵🇭 [phi](../phi/CLAUDE.md) · 🇵🇱 [pl](../pl/CLAUDE.md) · 🇵🇹 [pt](../pt/CLAUDE.md) · 🇧🇷 [pt-BR](../pt-BR/CLAUDE.md) · 🇷🇴 [ro](../ro/CLAUDE.md) · 🇷🇺 [ru](../ru/CLAUDE.md) · 🇱🇰 [si](../si/CLAUDE.md) · 🇸🇰 [sk](../sk/CLAUDE.md) · 🇸🇮 [sl](../sl/CLAUDE.md) · 🇷🇸 [sr](../sr/CLAUDE.md) · 🇸🇪 [sv](../sv/CLAUDE.md) · 🇰🇪 [sw](../sw/CLAUDE.md) · 🇮🇳 [ta](../ta/CLAUDE.md) · 🇮🇳 [te](../te/CLAUDE.md) · 🇹🇭 [th](../th/CLAUDE.md) · 🇹🇷 [tr](../tr/CLAUDE.md) · 🇺🇦 [uk-UA](../uk-UA/CLAUDE.md) · 🇵🇰 [ur](../ur/CLAUDE.md) · 🇺🇿 [uz](../uz/CLAUDE.md) · 🇻🇳 [vi](../vi/CLAUDE.md) · 🇳🇬 [yo](../yo/CLAUDE.md) · 🇨🇳 [zh-CN](../zh-CN/CLAUDE.md) · 🇹🇼 [zh-TW](../zh-TW/CLAUDE.md)
 
 ---
 
@@ -11,17 +11,12 @@
 PII സംബന്ധിച്ച പഠനങ്ങൾ). അത് പൂർണ്ണമായി വായിക്കുക; പ്രോജക്റ്റ് നിയമങ്ങൾ ഇവിടെ വീണ്ടും ചേർക്കരുത്. താഴെയുള്ളതെല്ലാം
 Claude Code-ന് മാത്രം ബാധകമാണ് — `AGENTS.md`-ൽ ഇതിനകം നിർവചിച്ചിട്ടുള്ള നിയമങ്ങളുടെ പ്രവർത്തനപരമായ പരിഷ്കരണങ്ങൾ.
 
-## Worktree ഒറ്റപ്പെടുത്തൽ — Claude Code-നുള്ള പ്രത്യേക നിർദ്ദേശങ്ങൾ
+## Worktree ഐസൊലേഷൻ — Claude Code-ന് പ്രത്യേകമായ കാര്യങ്ങൾ
 
-പൂർണ്ണമായ നിർബന്ധിത worktree പ്രോട്ടോക്കോൾ (base branch സ്ഥിരീകരണം, `.claude/worktrees/` കാനോണിക്കൽ
-പാത, `cp -al` node_modules, നീക്കംചെയ്യൽ നിയമങ്ങൾ) `AGENTS.md` → Git Workflow → "Worktree
-isolation" എന്നതിലുണ്ട്. Claude Code-നുള്ള പ്രത്യേക കാര്യങ്ങൾ:
+പൂർണ്ണമായ നിർബന്ധിത worktree പ്രോട്ടോക്കോൾ (ബേസ്-ബ്രാഞ്ച് സ്ഥിരീകരണം, `.claude/worktrees/` ക്യാനോണിക്കൽ പാത, `cp -al` node_modules, ടിയർഡൗൺ നിയമങ്ങൾ) [`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)-ൽ ആണ് (`AGENTS.md` → Git വർക്ക്ഫ്ലോ → "Worktree ഐസൊലേഷൻ" എന്നതിൽ സംഗ്രഹിച്ചിരിക്കുന്നു). Claude Code-ന് പ്രത്യേകമായ കാര്യങ്ങൾ:
 
-- ഓപ്പറേറ്റർ ഇതിനകം അറിയിച്ചിട്ടില്ലെങ്കിൽ, `AskUserQuestion` വഴി base branch സ്ഥിരീകരിക്കുക
-  (കർശന നിയമം #19).
-- നേറ്റീവ് `EnterWorktree` ടൂൾ ഉപയോഗിക്കുന്നതിന് മുൻഗണന നൽകുക — അത് ഇതിനകം
-  `.claude/worktrees/`-ന് കീഴിലാണ് worktree-കൾ സൃഷ്ടിക്കുന്നത് (കാനോണിക്കൽ പാത). രേഖപ്പെടുത്തിയ `git
-worktree add` കമാൻഡ് ഉപയോഗിച്ച് worktree സൃഷ്ടിച്ചശേഷം, അതിന്റെ `path` ഉപയോഗിച്ച് `EnterWorktree` വിളിക്കുക.
+- ഓപ്പറേറ്റർ ഇതിനകം നിങ്ങളോട് പറഞ്ഞിട്ടില്ലെങ്കിൽ, `AskUserQuestion` വഴി (Hard Rule #19) ഓപ്പറേറ്ററോട് ബേസ് ബ്രാഞ്ച് സ്ഥിരീകരിക്കുക.
+- നേറ്റീവ് `EnterWorktree` ടൂൾ തന്നെ തിരഞ്ഞെടുക്കുക — അത് ഇതിനകം `.claude/worktrees/`-ലാണ് (ക്യാനോണിക്കൽ പാത) worktree-കൾ സൃഷ്ടിക്കുന്നത്. ഡോക്യുമെന്റ് ചെയ്തിരിക്കുന്ന `git worktree add` കമാൻഡ് ഉപയോഗിച്ച് worktree സൃഷ്ടിച്ച ശേഷം, അതിന്റെ `path` ഉപയോഗിച്ച് `EnterWorktree` വിളിക്കുക.
 
 ## സെഷനുകൾക്കിടയിലെ സുരക്ഷ — Claude Code-നുള്ള പ്രത്യേക നിർദ്ദേശങ്ങൾ
 

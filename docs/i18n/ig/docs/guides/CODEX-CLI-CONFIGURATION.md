@@ -1,6 +1,6 @@
 # Codex CLI — Configuration with OmniRoute (Igbo)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/CODEX-CLI-CONFIGURATION.md) · 🇪🇹 [am](../../../am/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇦 [ar](../../../ar/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇦🇿 [az](../../../az/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇬 [bg](../../../bg/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇩 [bn](../../../bn/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇨🇿 [cs](../../../cs/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇩🇰 [da](../../../da/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇩🇪 [de](../../../de/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇬🇷 [el](../../../el/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇪🇸 [es](../../../es/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇪🇪 [et](../../../et/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇷 [fa](../../../fa/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇫🇮 [fi](../../../fi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇫🇷 [fr](../../../fr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇪 [ga](../../../ga/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [gu](../../../gu/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇬 [ha](../../../ha/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇱 [he](../../../he/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [hi](../../../hi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇭🇷 [hr](../../../hr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇭🇺 [hu](../../../hu/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇦🇲 [hy](../../../hy/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇩 [id](../../../id/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇹 [it](../../../it/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇯🇵 [ja](../../../ja/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇬🇪 [ka](../../../ka/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇭 [km](../../../km/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [kn](../../../kn/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇷 [ko](../../../ko/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇹 [lt](../../../lt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇻 [lv](../../../lv/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [ml](../../../ml/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [mr](../../../mr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇾 [ms](../../../ms/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇹 [mt](../../../mt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇲 [my](../../../my/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇵 [ne](../../../ne/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇱 [nl](../../../nl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇴 [no](../../../no/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [or](../../../or/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [pa](../../../pa/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇭 [phi](../../../phi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇱 [pl](../../../pl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇹 [pt](../../../pt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇴 [ro](../../../ro/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇺 [ru](../../../ru/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇰 [si](../../../si/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇰 [sk](../../../sk/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇮 [sl](../../../sl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇸 [sr](../../../sr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇪 [sv](../../../sv/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇪 [sw](../../../sw/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [ta](../../../ta/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [te](../../../te/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇭 [th](../../../th/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇷 [tr](../../../tr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇰 [ur](../../../ur/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇺🇿 [uz](../../../uz/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇻🇳 [vi](../../../vi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇬 [yo](../../../yo/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CODEX-CLI-CONFIGURATION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/CODEX-CLI-CONFIGURATION.md) · 🇪🇹 [am](../../../am/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇦 [ar](../../../ar/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇦🇿 [az](../../../az/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇬 [bg](../../../bg/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇩 [bn](../../../bn/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇦 [bs](../../../bs/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇨🇿 [cs](../../../cs/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇩🇰 [da](../../../da/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇩🇪 [de](../../../de/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇬🇷 [el](../../../el/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇪🇸 [es](../../../es/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇪🇪 [et](../../../et/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇷 [fa](../../../fa/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇫🇮 [fi](../../../fi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇫🇷 [fr](../../../fr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇪 [ga](../../../ga/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [gu](../../../gu/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇬 [ha](../../../ha/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇱 [he](../../../he/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [hi](../../../hi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇭🇷 [hr](../../../hr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇭🇺 [hu](../../../hu/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇦🇲 [hy](../../../hy/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇩 [id](../../../id/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇹 [it](../../../it/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇯🇵 [ja](../../../ja/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇬🇪 [ka](../../../ka/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇭 [km](../../../km/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [kn](../../../kn/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇷 [ko](../../../ko/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇹 [lt](../../../lt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇻 [lv](../../../lv/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [ml](../../../ml/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [mr](../../../mr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇾 [ms](../../../ms/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇹 [mt](../../../mt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇲 [my](../../../my/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇵 [ne](../../../ne/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇱 [nl](../../../nl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇴 [no](../../../no/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [or](../../../or/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [pa](../../../pa/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇭 [phi](../../../phi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇱 [pl](../../../pl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇹 [pt](../../../pt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇴 [ro](../../../ro/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇺 [ru](../../../ru/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇰 [si](../../../si/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇰 [sk](../../../sk/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇮 [sl](../../../sl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇸 [sr](../../../sr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇪 [sv](../../../sv/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇪 [sw](../../../sw/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [ta](../../../ta/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [te](../../../te/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇭 [th](../../../th/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇷 [tr](../../../tr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇰 [ur](../../../ur/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇺🇿 [uz](../../../uz/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇻🇳 [vi](../../../vi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇬 [yo](../../../yo/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CODEX-CLI-CONFIGURATION.md)
 
 ---
 
@@ -274,30 +274,47 @@ codex -p chat     # cx/gpt-5.5, atọrọghị mgbalị (ndabara sava)
 
 ---
 
-## Imepụta profaịlụ na-akpaghị aka site na `omniroute setup-codex`
+## Iji `omniroute setup-codex` mepụta profaịlụ na-akpaghị aka
 
-Ọ bụrụ na ị na-agba OmniRoute na VPS, ị nwere ike imepụta faịlụ profaịlụ na-akpaghị aka site na katalọgụ ụdị dị ndụ:
+Ọ bụrụ na ị na-agba OmniRoute na VPS, ị nwere ike imepụta faịlụ profaịlụ na-akpaghị aka site na katalọgụ model dị ugbu a:
 
 ```bash
-# Site na VPS (na-eji OmniRoute mpaghara na ọdụ ụgbọ mmiri 20128)
+# Site na VPS (na-eji OmniRoute mpaghara na port 20128)
 omniroute setup-codex
 
 # Site na igwe ọ bụla — tụọ ya aka na VPS gị
 omniroute setup-codex --remote http://100.x.x.x:20128 --api-key sk-xxx
 
-# Lelee ihe ga-apụta n'ebughị ụzọ dee faịlụ
+# Lelee ihe ga-apụta n'ebughị faịlụ
 omniroute setup-codex --remote http://100.x.x.x:20128 --dry-run
 
 # Mepụta naanị profaịlụ GLM na Kimi
 omniroute setup-codex --only glm,kimi
 
-# Dee na ndekọ ahaziri iche
+# Dee ha na ndekọ ahaziri iche
 omniroute setup-codex --codex-home /path/to/.codex
 ```
 
-Iwu ahụ na-eweta `/v1/models`, na-eji profaịlụ ahaziri nke ọma maka ụdị ndị amaara, na-eji metadata katalọgụ dị ka ndabere maka ụdị ederede ndị ọzọ dakọtara, ma na-ede `~/.codex/<name>.config.toml` maka nke ọ bụla. Ọ bụ idempotent — ọ dị nchebe ịgba ya ọzọ.
+Iwu ahụ na-eweta `/v1/models`, na-eji profaịlụ ahaziri nke ọma maka model ndị amaara, na-adabere na metadata katalọgụ maka model ederede ndị ọzọ dakọtara, ma na-ede `~/.codex/<name>.config.toml` maka nke ọ bụla. Ọ bụ idempotent — ọ dị mma ịgba ya ọzọ.
 
-OmniRoute nwekwara ike **imekọrịta na-akpaghị aka** otu faịlụ profaịlụ ndị a mgbe nchọpụta/mbubata ụdị nke onye na-eweta ọrụ gara nke ọma gbanwere katalọgụ dị ndụ. Nke a bụ ihe **ị ga-ahọrọ iji ma agbanyụrụ ya na ndabara**: gbanye ya site na **dashboard CLI Code** ("Mmekọrịta profaịlụ CLI na-akpaghị aka" → Codex), ma ọ bụ tọọ `OMNIROUTE_AUTO_SYNC_CODEX_PROFILES=true` (ọ na-asọpụrụkwa `CLI_ALLOW_CONFIG_WRITES`, nke agbanyere na ndabara). Mgbe agbanyere ya, ọ na-ede naanị faịlụ profaịlụ `~/.codex/*.config.toml` dị iche iche; ọ naghị agbanwe `~/.codex/config.toml` nke na-arụ ọrụ/nke ndabara, ntọala Codex-lb, nkwenye njirimara, ma ọ bụ nhọrọ onye na-eweta ọrụ.
+Ọ bụrụ na `config.toml` bụ isi enweghị nkọwa `model_providers.omniroute`, ịkpọ
+`setup-codex` kpọmkwem ga-etinye nkọwa ahụ n'ime overlay ọ bụla emepụtara, na-eji endpoint
+mpaghara ma ọ bụ remote ahọpụtara. Ọ naghị agbanwe faịlụ bụ isi. A ga-eketa nkọwa provider
+dị adị, gụnyere endpoint ya na ntọala authentication ya. TOML bụ isi na-adịghị irè
+ga-akwụsị mmepụta tupu e dee profaịlụ.
+
+Mgbe ị nyere `--api-key` ma ọ bụ `OMNIROUTE_API_KEY`, provider akọwapụtara ọhụrụ ga-arụtụ aka na
+`env_key = "OMNIROUTE_API_KEY"`; a naghị echekwa key ahụ n'onwe ya ma ọ bụ bipụta ya na
+nlele tupu ide. Tọọ variable ahụ na environment ebe ị na-ebido Codex. Ọ bụrụ na enyeghị
+key, nkọwa ọhụrụ ahụ agaghị achọ key, maka instance OmniRoute
+ahaziri ịnakwere arịrịọ na-enweghị authentication.
+
+Auto-sync katalọgụ a na-ahọrọ isonye na ya nke akọwara n'okpuru na-echekwa nkọwa provider ndị dịlarị
+n'ime overlay mana ọ naghị ebido ntọala provider ọhụrụ; buru ụzọ hazie provider
+site na setup kpọmkwem ma ọ bụ dashboard. A naghị egosi ntọala provider ndị dị adị
+na nlele dry-run n'ihi na ha nwere ike ịnwe credentials ndị operator na-elekọta.
+
+OmniRoute nwekwara ike ime **auto-sync** nke otu faịlụ profaịlụ ndị a mgbe nchọpụta/mbubata model provider gara nke ọma gbanwere katalọgụ dị ugbu a. Nke a bụ **ihe a ga-ahọrọ isonye na ya ma agbanyụghị ya na ndabara**: gbanye ya site na **CLI Code dashboard** ("CLI profile auto-sync" → Codex), ma ọ bụ tọọ `OMNIROUTE_AUTO_SYNC_CODEX_PROFILES=true` (ọ na-asọpụrụkwa `CLI_ALLOW_CONFIG_WRITES`, nke agbanyere na ndabara). Mgbe agbanyere ya, ọ na-ede naanị faịlụ profaịlụ `~/.codex/*.config.toml` dị iche iche; ọ dịghị mgbe ọ na-agbanwe `~/.codex/config.toml` nke na-arụ ọrụ/ndabara, ntọala Codex-lb, auth, ma ọ bụ nhọrọ provider.
 
 ---
 
@@ -394,7 +411,7 @@ region  = "us-east-1"
 
 ---
 
-## Ọtụtụ sava
+## Sava ọtụtụ
 
 ```toml
 [model_providers.omniroute-main]

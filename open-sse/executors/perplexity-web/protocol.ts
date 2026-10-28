@@ -46,10 +46,10 @@ export const PPLX_SUPPORTED_BLOCK_USE_CASES = [
 // EOF symbol can truncate or hang the Firefox-TLS stream tailer before answer
 // chunks land — which surfaces as "Provider returned empty content".
 export const PPLX_STREAM_EOF_SYMBOL = "event: end_of_stream";
-// Firefox 148 — must match the `firefox_148` TLS profile used by perplexityTlsClient.
+// Firefox 151 — must match the `firefox_151` TLS profile used by perplexityTlsClient.
 // A mismatched UA vs TLS fingerprint is itself a Cloudflare bot signal (issue #2459).
 export const PPLX_USER_AGENT =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:148.0) Gecko/20100101 Firefox/148.0";
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:151.0) Gecko/20100101 Firefox/151.0";
 
 // mode / model_preference pairs — every entry posts mode:"copilot", like the live
 // www.perplexity.ai client does when a model is picked from the catalog.
@@ -101,12 +101,32 @@ export const XML_DECL_RE = /<[?]xml[^?]*[?]>/g;
 export const RESPONSE_TAG_RE = /<\/?response\b[^>]*>/gi;
 export const MULTI_NL = /\n{3,}/g;
 
+// A citation marker and a subscript are spelled the same way, so citation
+// cleanup has to skip anything that is code: fenced blocks, <tool> payloads and
+// inline spans. Order matters — closed regions first, then the unterminated
+// tails (a stream cut off mid-answer), and the inline span last so the third
+// backtick of a fence is never taken for an empty `` span.
+export const CODE_SPAN_RE =
+  /(```[\s\S]*?```|<tool>[\s\S]*?<\/tool>|```[\s\S]*$|<tool>[\s\S]*$|`[^`\n]+`)/g;
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+// cleanResponse() runs over the whole answer before tool mode parses <tool>
+// text into tool_calls, so an unguarded CITATION_RE turned `arr[0]` into `arr`
+// in rendered code blocks and in tool-call arguments alike (#14121).
+export function stripCitations(text: string): string {
+  // String.split with a capturing group interleaves the delimiters at odd
+  // indices; those are the protected regions and pass through untouched.
+  return text
+    .split(CODE_SPAN_RE)
+    .map((part, i) => (i % 2 === 1 ? part : part.replace(CITATION_RE, "")))
+    .join("");
+}
 
 export function cleanResponse(text: string, strip = true): string {
   let t = text;
   t = t.replace(XML_DECL_RE, "");
-  t = t.replace(CITATION_RE, "");
+  t = stripCitations(t);
   t = t.replace(GROK_TAG_RE, "");
   t = t.replace(GROK_SELF_RE, "");
   t = t.replace(RESPONSE_TAG_RE, "");

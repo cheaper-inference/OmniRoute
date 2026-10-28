@@ -1,16 +1,16 @@
 # Embedded Services (ไทย)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
 
 ---
 
 > **เวอร์ชัน:** v3.8.44
-> **อัปเดตล่าสุด:** 2026-07-03
-> **กลุ่มเป้าหมาย:** วิศวกรที่เพิ่ม บำรุงรักษา หรือแก้ไขข้อบกพร่องของบริการแบบฝังตัว (9Router, CLIProxyAPI, Mux, Bifrost)
+> **อัปเดตล่าสุด:** 2026-09-16
+> **กลุ่มผู้อ่าน:** วิศวกรที่เพิ่ม ดูแลรักษา หรือแก้ไขข้อบกพร่องของบริการแบบฝังตัว (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua)
 
-บริการแบบฝังตัวคือเครื่องมือกระบวนการ sidecar ที่ติดตั้งภายในเครื่อง ซึ่ง OmniRoute ทำหน้าที่ติดตั้ง กำกับดูแล และ
-เปิดให้ใช้งานเป็นเป้าหมายการกำหนดเส้นทางระดับเฟิร์สคลาส บริการเหล่านี้แตกต่างจากผู้ให้บริการภายนอก (ซึ่งเข้าถึงผ่านอินเทอร์เน็ต
-โดยใช้คีย์ API) ตรงที่ทำงานอยู่บนเครื่องเดียวกับ OmniRoute และสื่อสารกันผ่าน loopback
+บริการแบบฝังตัวคือเครื่องมือแบบ sidecar ที่ติดตั้งภายในเครื่อง ซึ่ง OmniRoute ทำหน้าที่ติดตั้ง ควบคุมดูแล และ
+เปิดให้ใช้งานเป็นเป้าหมายการกำหนดเส้นทางระดับเฟิร์สคลาส บริการเหล่านี้ต่างจากผู้ให้บริการภายนอก (ซึ่งเข้าถึงผ่านอินเทอร์เน็ต
+โดยใช้ API keys) ตรงที่บริการแบบฝังตัวจะทำงานบนเครื่องเดียวกับ OmniRoute และสื่อสารกันผ่าน loopback
 
 ---
 
@@ -29,35 +29,37 @@
 
 ## 1. ภาพรวม
 
-### เหตุใดจึงใช้บริการแบบฝังตัว?
+### เหตุใดจึงต้องมีบริการแบบฝังตัว?
 
-มีบริการแบบฝังตัวห้ารายการ:
+มีบริการแบบฝังตัวทั้งหมดเจ็ดรายการ:
 
-| บริการ          | แพ็กเกจ npm                           | พอร์ตเริ่มต้น | วัตถุประสงค์                                                                                                                                                                                                                  |
-| --------------- | ------------------------------------- | :-----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                             |     20130     | เราเตอร์ AI ที่ OmniRoute สามารถใช้เป็นผู้ให้บริการย่อย โมเดลต่าง ๆ จะเปิดให้ใช้งานในรูปแบบ `9router/{sub}/{model}`                                                                                                           |
-| **CLIProxyAPI** | ไบนารีจาก GitHub release (`cliproxy`) |     8317      | อะแดปเตอร์พร็อกซีภายในเครื่องสำหรับโฟลว์การยืนยันตัวตนของ Anthropic CLI ให้การกำหนดเส้นทางสำรองเมื่อโทเค็น OAuth หมดอายุ                                                                                                      |
-| **Mux**         | `mux` (`mux server` แบบ headless)     |     8322      | ดีมอนจัดการเวิร์กโฟลว์เอเจนต์ภายในเครื่อง (coder/mux) — จัดการเฉพาะวงจรชีวิตเท่านั้น ไม่ใช่เป้าหมายการกำหนดเส้นทาง (ไม่มีการพร็อกซี LLM)                                                                                      |
-| **Bifrost**     | `@maximhq/bifrost`                    |     8080      | แบ็กเอนด์รีเลย์เกตเวย์ AI ที่เขียนด้วย Go เมื่อทำงานอยู่ ระบบจะเลือกใช้งานโดยอัตโนมัติผ่านเส้นทางรีเลย์ (`/v1/relay/`)                                                                                                        |
-| **Dario**       | `@askalf/dario`                       |     3456      | พร็อกซีสำหรับการสมัครใช้งาน Claude — ทางเลือก/ระบบสำรองแทน CLIProxyAPI สำหรับทราฟฟิกที่มีรูปแบบ Claude Code โดยคีย์ที่ฉีดเข้าไปจะกลายเป็น `DARIO_ADMIN_TOKEN` เพื่อควบคุมสิทธิ์เข้าถึง control plane ของ OAuth ที่ `/admin/*` |
+| บริการ          | แพ็กเกจ npm                           | พอร์ตเริ่มต้น | วัตถุประสงค์                                                                                                                                                                                                                                                                                                                                         |
+| --------------- | ------------------------------------- | :-----------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                             |     20130     | เราเตอร์ AI ที่ OmniRoute สามารถใช้เป็นผู้ให้บริการย่อย โมเดลจะแสดงในรูปแบบ `9router/{sub}/{model}`                                                                                                                                                                                                                                                  |
+| **CLIProxyAPI** | ไบนารีจาก GitHub release (`cliproxy`) |     8317      | อะแดปเตอร์พร็อกซีภายในเครื่องสำหรับโฟลว์การยืนยันตัวตนของ Anthropic CLI รองรับการกำหนดเส้นทางสำรองเมื่อโทเค็น OAuth หมดอายุ                                                                                                                                                                                                                          |
+| **Mux**         | `mux` (`mux server` แบบ headless)     |     8322      | ดีมอนจัดการประสานงานเอเจนต์ภายในเครื่อง (coder/mux) จัดการเฉพาะวงจรชีวิตเท่านั้น — ไม่ใช่เป้าหมายการกำหนดเส้นทาง (ไม่มีการพร็อกซี LLM)                                                                                                                                                                                                               |
+| **Bifrost**     | `@maximhq/bifrost`                    |     8080      | แบ็กเอนด์รีเลย์เกตเวย์ AI ที่เขียนด้วย Go เมื่อทำงานอยู่ เส้นทางรีเลย์ (`/v1/relay/`) จะเลือกใช้โดยอัตโนมัติ                                                                                                                                                                                                                                         |
+| **Dario**       | `@askalf/dario`                       |     3456      | พร็อกซีการสมัครใช้งาน Claude — ทางเลือก/ระบบสำรองแทน CLIProxyAPI สำหรับทราฟฟิกที่มีรูปแบบ Claude Code โดยคีย์ที่แทรกจะกลายเป็น `DARIO_ADMIN_TOKEN` ซึ่งใช้ควบคุมการเข้าถึงระนาบควบคุม OAuth ที่ `/admin/*`                                                                                                                                           |
+| **open-wa**     | `@open-wa/wa-automate`                |     8323      | ระบบอัตโนมัติสำหรับ WhatsApp Web (Chromium แบบ headless ผ่าน Puppeteer) จัดการเฉพาะวงจรชีวิตเท่านั้น — ไม่ใช่เป้าหมายการกำหนดเส้นทาง                                                                                                                                                                                                                 |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                  |     20135     | ไซด์คาร์สำหรับบีบอัดพรอมป์ — ใช้โมเดล ONNX ของ LLMLingua-2 จริง (พอร์ต JS/TS ของอัลกอริทึมจาก Microsoft) `open-sse/services/compression/engines/llmlingua/index.ts` จะส่ง `/compress` ไปยังบริการนี้ผ่าน HTTP และย้อนกลับไปใช้แบ็กเอนด์ worker-thread ภายในโปรเซสเมื่อไซด์คาร์หยุดทำงาน จัดการเฉพาะวงจรชีวิตเท่านั้น — ไม่ใช่เป้าหมายการกำหนดเส้นทาง |
 
-บริการทั้งห้ารายการใช้โมเดลการกำกับดูแลเดียวกัน:
+บริการทั้งเจ็ดใช้รูปแบบการควบคุมดูแลเดียวกัน:
 
-- OmniRoute ติดตั้งบริการเหล่านี้ไว้ภายใต้ `DATA_DIR/services/{name}/` (แยกออกจาก `package.json` ของ OmniRoute)
-- OmniRoute เริ่มต้นและเฝ้าติดตามบริการเหล่านี้ในฐานะกระบวนการลูก
-- OmniRoute ฉีดคีย์ API ชั่วคราวเข้าไปในสภาพแวดล้อมของกระบวนการลูก และหมุนเวียนคีย์โดยไม่ต้องหยุดให้บริการ (ในกรณีที่รองรับ)
-- เส้นทางการจัดการทั้งหมด (`/api/services/*`) เป็นแบบ **LOCAL_ONLY** — เข้าถึงได้จาก loopback เท่านั้น (กฎตายตัวข้อที่ #17)
+- OmniRoute ติดตั้งบริการไว้ภายใต้ `DATA_DIR/services/{name}/` (แยกออกจาก `package.json` ของ OmniRoute)
+- OmniRoute สร้างและตรวจสอบบริการเหล่านี้ในฐานะโปรเซสลูก
+- OmniRoute แทรกคีย์ API ชั่วคราวลงในสภาพแวดล้อมของโปรเซสลูกและหมุนเวียนคีย์โดยไม่มีช่วงหยุดทำงาน (เมื่อรองรับ)
+- เส้นทางการจัดการทั้งหมด (`/api/services/*`) เป็น **LOCAL_ONLY** — เข้าถึงได้จากลูปแบ็กเท่านั้น (กฎตายตัวข้อ #17)
 
 ### การตัดสินใจสำคัญ (จากแผนการออกแบบ)
 
-| การตัดสินใจ                                   | ค่า                                                                     |
-| --------------------------------------------- | ----------------------------------------------------------------------- |
-| การเข้าถึง UI ดั้งเดิมของ 9Router จากแดชบอร์ด | พร็อกซีย้อนกลับที่ `/dashboard/providers/services/9router/embed/*`      |
-| กลไกการติดตั้ง                                | `npm install {package}` ผ่าน `execFile` (ไม่มีการแทรกคำสั่ง shell)      |
-| รูปแบบการใช้งาน                               | ลงทะเบียนผู้ให้บริการเป็น `9router/{sub}/{model}` ในกลไกการกำหนดเส้นทาง |
-| การจัดการคีย์ API                             | OmniRoute สร้าง เข้ารหัสขณะจัดเก็บ (AES-256-GCM) และฉีดผ่าน env         |
-| ตำแหน่งแดชบอร์ด                               | `/dashboard/providers/services` (สามแท็บ)                               |
-| การเริ่มต้นอัตโนมัติ                          | สวิตช์เปิด/ปิดต่อบริการ โดยค่าเริ่มต้นเป็นปิด                           |
+| การตัดสินใจ                                   | ค่า                                                                           |
+| --------------------------------------------- | ----------------------------------------------------------------------------- |
+| การเข้าถึง UI ดั้งเดิมของ 9Router จากแดชบอร์ด | รีเวิร์สพร็อกซีที่ `/dashboard/providers/services/9router/embed/*`            |
+| กลไกการติดตั้ง                                | `npm install {package}` ผ่าน `execFile` (ไม่มีการแทรกค่าผ่านเชลล์)            |
+| รูปแบบการใช้งาน                               | ลงทะเบียนผู้ให้บริการเป็น `9router/{sub}/{model}` ในเอนจินกำหนดเส้นทาง        |
+| การจัดการคีย์ API                             | OmniRoute สร้าง เข้ารหัสขณะจัดเก็บ (AES-256-GCM) และแทรกผ่านตัวแปรสภาพแวดล้อม |
+| ตำแหน่งแดชบอร์ด                               | `/dashboard/providers/services` (สามแท็บ)                                     |
+| การเริ่มทำงานอัตโนมัติ                        | สวิตช์แยกสำหรับแต่ละบริการ โดยค่าเริ่มต้นเป็นปิด                              |
 
 ---
 
@@ -67,18 +69,18 @@
 ┌────────────────────────────────────────────────────────────────────┐
 │  ชั้น 1 — UI                                                       │
 │  /dashboard/providers/services  (แท็บ: CLIProxyAPI | 9Router | Mux)│
-│  ล็อกแบบสด (SSE), เริ่ม/หยุด/รีสตาร์ต/อัปเดต, การตั้งค่า, ติดตั้ง │
+│  ล็อกสด (SSE), เริ่ม/หยุด/เริ่มใหม่/อัปเดต, การตั้งค่า, ติดตั้ง    │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               โครงหลัก + การกำหนดเส้นทางแท็บด้วย ?tab=│
+│    ├── page.tsx               เชลล์ + การกำหนดเส้นทางแท็บด้วย ?tab=│
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
 │                               ServiceLogsPanel, ApiKeyCard, ...    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP (การเรียกใช้ Next.js fetch)
+                       │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  ชั้น 2 — API (LOCAL_ONLY — เฉพาะ loopback)                        │
+│  ชั้น 2 — API (LOCAL_ONLY — เฉพาะลูปแบ็ก)                         │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -87,72 +89,75 @@
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (พร็อกซีย้อนกลับ HTTP + WebSocket → upstream ของ 9Router)       │
+│    (พร็อกซี HTTP + WebSocket แบบย้อนกลับ → อัปสตรีม 9Router)       │
 │                                                                    │
-│  ด่านตรวจสอบ: LOCAL_ONLY_API_PREFIXES มี "/api/services/" และ      │
+│  เกต: LOCAL_ONLY_API_PREFIXES มี "/api/services/" และ              │
 │        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ การเรียกใช้ภายในโปรเซส
 ┌──────────────────────▼─────────────────────────────────────────────┐
 │  ชั้น 3 — ServiceSupervisor (src/lib/services/)                    │
 │                                                                    │
-│  ServiceSupervisor.ts   ตัวควบคุมบริการทั่วไป (child_process.spawn)│
+│  ServiceSupervisor.ts   ตัวควบคุมทั่วไป (child_process.spawn)      │
 │    ├── ติดตั้ง:    execFile('npm', ['install', pkg, '--prefix'])    │
 │    ├── เริ่ม:      spawn(node, [entrypoint], {env, cwd})           │
-│    ├── คีย์ API:   crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
+│    ├── คีย์ API:   crypto.randomBytes(32) → env NINEROUTER_API_KEY │
 │    ├── พอร์ต:      20130 สำหรับ 9Router (กำหนดค่าได้)              │
-│    ├── ล็อก:       บัฟเฟอร์วงแหวน stdio ขนาด 5 MB → เหตุการณ์ SSE │
-│    ├── สุขภาพ:     HTTP GET /health ทุก 2–5 วินาที, กู้คืนเมื่อจำเป็น│
+│    ├── ล็อก:       บัฟเฟอร์วงแหวน stdio 5 MB → เหตุการณ์ SSE      │
+│    ├── สุขภาพ:     HTTP GET /health ทุก 2–5 วินาที, กู้คืนแบบ lazy│
 │    └── วงจรชีวิต:  SIGTERM 15 วินาที → SIGKILL                    │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       บูตสแตรป SERVICES[] ทั้งหมดเมื่อเริ่มโปรเซส   │
+│  bootstrap.ts       บูตสแตรป SERVICES[] ทั้งหมดเมื่อโปรเซสเริ่มต้น│
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       GET /v1/models เป็นระยะ → ตาราง service_models │
-│  ringBuffer.ts      บัฟเฟอร์ล็อกแบบวงกลม (5 MB ต่อบริการ)         │
-│  healthCheck.ts     โพรบสุขภาพ HTTP แบบสำรวจเป็นระยะ              │
-│  installers/        ninerouter.ts, cliproxy.ts, mux.ts             │
+│  modelSync.ts       GET /v1/models เป็นระยะ → ตาราง service_models│
+│  ringBuffer.ts      บัฟเฟอร์ล็อกแบบวงกลม (5 MB ต่อบริการ)          │
+│  healthCheck.ts     โพรบสุขภาพ HTTP แบบสำรวจเป็นระยะ               │
+│  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
 │                      (อะแดปเตอร์ตัวติดตั้ง)                        │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP ที่เข้ากันได้กับ OpenAI (loopback)
+                       │ HTTP ที่เข้ากันได้กับ OpenAI (ลูปแบ็ก)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  ชั้น 4 — ผู้ให้บริการ / การกำหนดเส้นทาง                           │
+│  ชั้น 4 — ผู้ให้บริการ / การกำหนดเส้นทาง                          │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    ค้นหาพอร์ตและคีย์ API ใหม่ในแต่ละคำขอ (ไม่มีการแคช)             │
-│    ตัดคำนำหน้า "9router/" ออกจาก ID โมเดลก่อนส่งผ่านพร็อกซี        │
-│    ส่งคืน 503 service_not_running หากตัวควบคุมไม่ได้อยู่ในสถานะ "running"│
+│    ค้นหาพอร์ตและคีย์ API ใหม่สำหรับแต่ละคำขอ (ไม่มีการแคช)         │
+│    ตัดคำนำหน้า "9router/" ออกจากรหัสโมเดลก่อนส่งผ่านพร็อกซี        │
+│    ส่งคืน 503 service_not_running หากตัวควบคุมไม่ได้อยู่ในสถานะ    │
+│    "running"                                                       │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
 │    รายการสำหรับ "9router": isEmbeddedService: true                 │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
 │    จัดเก็บโมเดลเป็น "9router/{sub}/{model}" (มีคำนำหน้า)           │
-│    ซิงก์ทุก 5 นาทีโดย modelSync.ts                                 │
+│    ซิงค์ทุก 5 นาทีโดย modelSync.ts                                 │
 │                                                                    │
-│  Mux ได้รับการจัดการเฉพาะวงจรชีวิตเท่านั้น (ชั้น 1-3) — เป็นดีมอน │
-│  สำหรับประสานงานเอเจนต์ ไม่ใช่พร็อกซี LLM จึงไม่มี executor/       │
-│  provider ในชั้น 4 และไม่เคยเป็นเป้าหมายของการกำหนดเส้นทาง        │
+│  Mux มีการจัดการเฉพาะวงจรชีวิตเท่านั้น (ชั้น 1-3) — เป็นเดมอน      │
+│  สำหรับประสานงานเอเจนต์ ไม่ใช่พร็อกซี LLM จึงไม่มีรายการ executor/│
+│  provider ในชั้น 4 และไม่เคยเป็นเป้าหมายการกำหนดเส้นทาง           │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### ไฟล์ต้นฉบับที่สำคัญ
+### ไฟล์ต้นฉบับหลัก
 
-| ไฟล์                                        | บทบาท                                                          |
-| ------------------------------------------- | -------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | คลาสหลัก: วงจรชีวิต, ล็อก, สถานะระบบ, บัฟเฟอร์แบบวงแหวน        |
-| `src/lib/services/bootstrap.ts`             | การลงทะเบียนระดับโปรเซสและการเริ่มต้นอัตโนมัติ                 |
-| `src/lib/services/registry.ts`              | แมปซิงเกิลตัน `tool → supervisor`                              |
-| `src/lib/services/apiKey.ts`                | การสร้างคีย์, การเข้ารหัส AES-256-GCM ขณะจัดเก็บ               |
-| `src/lib/services/modelSync.ts`             | การซิงค์โมเดลเป็นระยะ (5 นาที) + ตามคำขอ                       |
-| `src/lib/services/ringBuffer.ts`            | บัฟเฟอร์บันทึกแบบวงกลมขนาด 5 MB พร้อมการสมัครรับข้อมูลผ่าน SSE |
-| `src/lib/services/healthCheck.ts`           | การตรวจสอบสถานะผ่าน HTTP (กำหนดช่วงเวลาได้)                    |
-| `src/lib/services/installers/ninerouter.ts` | การติดตั้ง/อัปเดต/ถอนการติดตั้ง 9Router ผ่าน npm               |
-| `src/lib/services/installers/cliproxy.ts`   | การติดตั้ง/อัปเดต/ถอนการติดตั้ง CLIProxyAPI ผ่าน npm           |
-| `src/lib/services/installers/mux.ts`        | การติดตั้ง/อัปเดต/ถอนการติดตั้ง Mux ผ่าน npm                   |
-| `src/app/api/services/9router/_lib.ts`      | ฟังก์ชันตัวช่วย `getOrInitSupervisor()`                        |
-| `src/app/api/services/[name]/logs/route.ts` | เอนด์พอยต์บันทึก SSE ที่ใช้ร่วมกัน                             |
-| `open-sse/executors/ninerouter.ts`          | ตัวดำเนินการของผู้ให้บริการ (เลเยอร์ 4)                        |
+| ไฟล์                                        | บทบาท                                                       |
+| ------------------------------------------- | ----------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | คลาสหลัก: วงจรชีวิต, ล็อก, สถานะการทำงาน, บัฟเฟอร์แบบวงแหวน |
+| `src/lib/services/bootstrap.ts`             | การลงทะเบียนระดับโปรเซสและการเริ่มต้นอัตโนมัติ              |
+| `src/lib/services/registry.ts`              | แมปซิงเกิลตัน `tool → supervisor`                           |
+| `src/lib/services/apiKey.ts`                | การสร้างคีย์, การเข้ารหัสขณะจัดเก็บด้วย AES-256-GCM         |
+| `src/lib/services/modelSync.ts`             | การซิงค์โมเดลเป็นระยะ (5 นาที) + ตามคำขอ                    |
+| `src/lib/services/ringBuffer.ts`            | บัฟเฟอร์บันทึกแบบวงกลมขนาด 5 MB พร้อมการสมัครรับข้อมูล SSE  |
+| `src/lib/services/healthCheck.ts`           | การตรวจสอบสถานะผ่าน HTTP (กำหนดช่วงเวลาได้)                 |
+| `src/lib/services/installers/ninerouter.ts` | การติดตั้ง/อัปเดต/ถอนการติดตั้ง 9Router ด้วย npm            |
+| `src/lib/services/installers/cliproxy.ts`   | การติดตั้ง/อัปเดต/ถอนการติดตั้ง CLIProxyAPI ด้วย npm        |
+| `src/lib/services/installers/mux.ts`        | การติดตั้ง/อัปเดต/ถอนการติดตั้ง Mux ด้วย npm                |
+| `src/lib/services/installers/openwa.ts`     | การติดตั้ง/อัปเดต/ถอนการติดตั้ง open-wa ด้วย npm            |
+| `src/lib/services/installers/llmlingua.ts`  | การติดตั้ง/อัปเดต/ถอนการติดตั้ง LLMLingua ด้วย npm          |
+| `src/app/api/services/9router/_lib.ts`      | ฟังก์ชันช่วยเหลือ `getOrInitSupervisor()`                   |
+| `src/app/api/services/[name]/logs/route.ts` | เอนด์พอยต์บันทึก SSE ที่ใช้ร่วมกัน                          |
+| `open-sse/executors/ninerouter.ts`          | ตัวดำเนินการของผู้ให้บริการ (เลเยอร์ 4)                     |
 
 ---
 
@@ -208,15 +213,15 @@ race condition เช่น เมื่อการเริ่มต้นอ�
 
 ## 4. เอกสารอ้างอิง API
 
-ทุก route ภายใต้ `/api/services/` เป็น **LOCAL_ONLY** (เฉพาะ loopback เท่านั้น ตามกฎบังคับ #17)
-คำขอที่ไม่ได้มาจาก loopback จะได้รับ `403 LOCAL_ONLY` โดยไม่คำนึงถึง auth token
+เส้นทางทั้งหมดภายใต้ `/api/services/` เป็นแบบ **LOCAL_ONLY** (อนุญาตเฉพาะ loopback เท่านั้น ตามกฎบังคับ #17)
+คำขอที่ไม่ได้มาจาก loopback จะได้รับ `403 LOCAL_ONLY` โดยไม่คำนึงถึงโทเค็นการยืนยันตัวตน
 
-### 4.1 endpoint ของ 9Router (11 route)
+### 4.1 เอนด์พอยต์ของ 9Router (11 เส้นทาง)
 
 #### `POST /api/services/9router/install`
 
-ติดตั้ง 9Router จาก npm สร้าง `DATA_DIR/services/9router/` พร้อมด้วย
-`package.json` และ `node_modules/` ของตัวเอง โดยไม่ขัดแย้งกับ dependency ของ OmniRoute
+ติดตั้ง 9Router จาก npm โดยสร้าง `DATA_DIR/services/9router/` พร้อม
+`package.json` และ `node_modules/` ของตัวเอง จึงไม่ขัดแย้งกับ dependencies ของ OmniRoute
 
 **เนื้อหาคำขอ** (ทั้งหมดเป็นตัวเลือก):
 
@@ -224,20 +229,20 @@ race condition เช่น เมื่อการเริ่มต้นอ�
 { "version": "latest" }
 ```
 
-| ฟิลด์     | ชนิด     | ค่าเริ่มต้น | คำอธิบาย                                  |
-| --------- | -------- | ----------- | ----------------------------------------- |
-| `version` | `string` | `"latest"`  | แท็กเวอร์ชัน npm หรือ semver ที่จะติดตั้ง |
+| ฟิลด์     | ชนิด     | ค่าเริ่มต้น | คำอธิบาย                                       |
+| --------- | -------- | ----------- | ---------------------------------------------- |
+| `version` | `string` | `"latest"`  | แท็กเวอร์ชัน npm หรือ semver ที่ต้องการติดตั้ง |
 
 **การตอบกลับ:**
 
-| สถานะ | คำอธิบาย                                                           |
-| ----- | ------------------------------------------------------------------ |
-| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`             |
-| `400` | เนื้อหาคำขอไม่ถูกต้อง (การตรวจสอบความถูกต้องด้วย Zod ล้มเหลว)      |
-| `409` | กำลังติดตั้งอยู่แล้ว (มีการถือครองล็อก)                            |
-| `500` | การติดตั้ง npm ล้มเหลว — ดูข้อผิดพลาดที่เข้าใจง่ายได้จาก `message` |
+| สถานะ | คำอธิบาย                                                                      |
+| ----- | ----------------------------------------------------------------------------- |
+| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                        |
+| `400` | เนื้อหาคำขอไม่ถูกต้อง (การตรวจสอบด้วย Zod ล้มเหลว)                            |
+| `409` | กำลังติดตั้งอยู่แล้ว (ล็อกถูกถือครองอยู่)                                     |
+| `500` | การติดตั้งด้วย npm ล้มเหลว — ดูข้อความแสดงข้อผิดพลาดที่เข้าใจง่ายใน `message` |
 
-**หมายเหตุ:** ใช้ `execFile('npm', [...])` — ไม่มี shell และไม่มี interpolation (กฎบังคับ #13)
+**หมายเหตุ:** ใช้ `execFile('npm', [...])` — ไม่มี shell และไม่มีการแทรกค่า (ตามกฎบังคับ #13)
 ข้อผิดพลาด EACCES จะแสดงเป็นข้อความที่เข้าใจง่าย
 
 ---
@@ -245,17 +250,17 @@ race condition เช่น เมื่อการเริ่มต้นอ�
 #### `POST /api/services/9router/start`
 
 เริ่มต้น 9Router โดยลงทะเบียน supervisor หากยังไม่ได้ลงทะเบียน จากนั้นเรียก
-`supervisor.start()` การดำเนินการเป็นแบบ idempotent หากกำลังทำงานอยู่แล้ว
+`supervisor.start()` การเรียกซ้ำขณะที่กำลังทำงานอยู่จะไม่ก่อให้เกิดผลเพิ่มเติม
 
 **เนื้อหาคำขอ:** ไม่มี
 
 **การตอบกลับ:**
 
-| สถานะ | คำอธิบาย                                                     |
-| ----- | ------------------------------------------------------------ |
-| `200` | ออบเจ็กต์ `ServiceStatus` (ดู schema ด้านล่าง)               |
-| `409` | ยังไม่ได้ติดตั้ง 9Router (`status: "not_installed"`)         |
-| `503` | การเริ่มต้นล้มเหลว (ข้อผิดพลาดของกระบวนการ — ดู `lastError`) |
+| สถานะ | คำอธิบาย                                                    |
+| ----- | ----------------------------------------------------------- |
+| `200` | ออบเจ็กต์ `ServiceStatus` (ดู schema ด้านล่าง)              |
+| `409` | ยังไม่ได้ติดตั้ง 9Router (`status: "not_installed"`)        |
+| `503` | การเริ่มต้นล้มเหลว (ข้อผิดพลาดของ process — ดู `lastError`) |
 
 **Schema ของ ServiceStatus:**
 
@@ -275,8 +280,8 @@ race condition เช่น เมื่อการเริ่มต้นอ�
 
 #### `POST /api/services/9router/stop`
 
-หยุด 9Router อย่างเหมาะสม โดยส่ง SIGTERM รอ 15 วินาที จากนั้นส่ง SIGKILL หากกระบวนการ
-ยังทำงานอยู่ การดำเนินการเป็นแบบ idempotent หากหยุดอยู่แล้ว
+หยุด 9Router อย่างเหมาะสม โดยส่ง SIGTERM รอ 15 วินาที แล้วส่ง SIGKILL หาก process ยังคงทำงานอยู่
+การเรียกซ้ำเมื่อหยุดอยู่แล้วจะไม่ก่อให้เกิดผลเพิ่มเติม
 
 **เนื้อหาคำขอ:** ไม่มี
 
@@ -285,13 +290,13 @@ race condition เช่น เมื่อการเริ่มต้นอ�
 | สถานะ | คำอธิบาย                           |
 | ----- | ---------------------------------- |
 | `200` | `ServiceStatus` (state: "stopped") |
-| `503` | การหยุดล้มเหลวโดยไม่คาดคิด         |
+| `503` | การหยุดทำงานล้มเหลวโดยไม่คาดคิด    |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-เทียบเท่ากับการเรียก `stop()` แล้วตามด้วย `start()` ภายใต้ล็อกการดำเนินการ
+เทียบเท่ากับการเรียก `stop()` แล้วตามด้วย `start()` ภายใต้ operation lock
 
 **เนื้อหาคำขอ:** ไม่มี
 
@@ -301,9 +306,9 @@ race condition เช่น เมื่อการเริ่มต้นอ�
 
 #### `POST /api/services/9router/update`
 
-อัปเดต 9Router เป็นเวอร์ชัน npm ที่ใหม่กว่า หาก service กำลังทำงานอยู่ ระบบจะหยุด
-service ก่อน แล้วเรียกใช้การติดตั้ง npm (ติดตั้งเวอร์ชันใหม่กว่าแทนที่ในตำแหน่งเดิม)
-จากนั้นเริ่มต้น service ใหม่
+อัปเดต 9Router เป็น npm เวอร์ชันที่ใหม่กว่า หาก service กำลังทำงานอยู่ จะหยุด
+service ก่อน จากนั้นเรียกใช้ npm install (ติดตั้งเวอร์ชันที่ใหม่กว่าในตำแหน่งเดิม) แล้วจึง
+เริ่ม service ใหม่
 
 **เนื้อหาคำขอ** (ทั้งหมดเป็นตัวเลือก):
 
@@ -316,16 +321,16 @@ service ก่อน แล้วเรียกใช้การติดต�
 | สถานะ | คำอธิบาย                                                        |
 | ----- | --------------------------------------------------------------- |
 | `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400` | เนื้อหาไม่ถูกต้อง                                               |
-| `500` | การอัปเดต npm ล้มเหลว                                           |
+| `400` | เนื้อหาคำขอไม่ถูกต้อง                                           |
+| `500` | การอัปเดตด้วย npm ล้มเหลว                                       |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-สร้าง API key ใหม่สำหรับ 9Router เข้ารหัสสำหรับการจัดเก็บ และรีสตาร์ตบริการ
-(หากกำลังทำงานอยู่) เพื่อให้บริการอ่านคีย์ใหม่จากสภาพแวดล้อม คีย์เก่าจะถูก
-ยกเลิกทันที
+สร้าง API key ใหม่สำหรับ 9Router เข้ารหัสเมื่อจัดเก็บ และเริ่ม service ใหม่
+(หากกำลังทำงานอยู่) เพื่อให้ service โหลด key ใหม่จาก environment โดย key เก่า
+จะถูกยกเลิกทันที
 
 **เนื้อหาคำขอ:** ไม่มี
 
@@ -334,25 +339,25 @@ service ก่อน แล้วเรียกใช้การติดต�
 | สถานะ | คำอธิบาย                                   |
 | ----- | ------------------------------------------ |
 | `200` | `{ keyRotated: true, restarted: boolean }` |
-| `500` | การหมุนเวียนคีย์ล้มเหลว                    |
+| `500` | การหมุนเวียน key ล้มเหลว                   |
 
-**ความปลอดภัย:** คีย์ใหม่จะไม่ถูกส่งกลับในการตอบกลับเด็ดขาด (ไม่มีการรั่วไหลของข้อมูลรับรอง)
-โดยจะถูกจัดเก็บแบบเข้ารหัส (AES-256-GCM) ในตาราง `version_manager`
+**ความปลอดภัย:** ระบบจะไม่ส่งคืน key ใหม่ในการตอบกลับ (เพื่อป้องกัน credential รั่วไหล)
+โดยจะจัดเก็บแบบเข้ารหัส (AES-256-GCM) ในตาราง `version_manager`
 
 ---
 
 #### `GET /api/services/9router/status`
 
-ส่งคืนสถานะแบบเรียลไทม์ร่วมกับสถานะจาก DB ซึ่งรวมถึงข้อมูลเมตาของเวอร์ชันและตัวอย่าง API key
+ส่งคืนสถานะแบบรวมจากข้อมูลสดและ DB ซึ่งรวมถึง metadata ของเวอร์ชันและตัวอย่าง API key
 
 **การตอบกลับ:**
 
-| สถานะ | คำอธิบาย           |
-| ----- | ------------------ |
-| `200` | ดูสคีมาด้านล่าง    |
-| `500` | อ่านสถานะไม่สำเร็จ |
+| สถานะ | คำอธิบาย            |
+| ----- | ------------------- |
+| `200` | ดู schema ด้านล่าง  |
+| `500` | การอ่านสถานะล้มเหลว |
 
-**สคีมาการตอบกลับ:**
+**Schema การตอบกลับ:**
 
 ```json
 {
@@ -376,8 +381,8 @@ service ก่อน แล้วเรียกใช้การติดต�
 
 #### `POST /api/services/9router/auto-start`
 
-สลับสถานะการเริ่มต้นอัตโนมัติ เมื่อ `enabled: true` บริการจะเริ่มทำงานโดยอัตโนมัติ
-ในครั้งถัดไปที่ OmniRoute บูต (หากติดตั้งบริการแล้ว)
+สลับค่าแฟล็กการเริ่มต้นอัตโนมัติ เมื่อ `enabled: true` service จะเริ่มทำงานโดยอัตโนมัติ
+ในครั้งถัดไปที่ OmniRoute บูต (หากติดตั้ง service แล้ว)
 
 **เนื้อหาคำขอ:**
 
@@ -390,30 +395,30 @@ service ก่อน แล้วเรียกใช้การติดต�
 | สถานะ | คำอธิบาย              |
 | ----- | --------------------- |
 | `200` | `{ autoStart: true }` |
-| `400` | เนื้อหาไม่ถูกต้อง     |
+| `400` | เนื้อหาคำขอไม่ถูกต้อง |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-สตรีม SSE ของบันทึกแบบเรียลไทม์จากบัฟเฟอร์วงแหวน stdout/stderr ของ 9Router
+สตรีม SSE ของ log แบบสดจาก ring buffer ของ stdout/stderr ของ 9Router
 
-**พารามิเตอร์คิวรี:**
+**พารามิเตอร์ query:**
 
-| พารามิเตอร์ | ชนิด      | ค่าเริ่มต้น | คำอธิบาย                                                                          |
-| ----------- | --------- | ----------- | --------------------------------------------------------------------------------- |
-| `tail`      | `integer` | 200         | จำนวนบรรทัดย้อนหลังที่จะส่งก่อน (สูงสุด 1000)                                     |
-| `filter`    | `string`  | ไม่มี       | ตัวกรองสตริงย่อยแบบไม่คำนึงถึงตัวพิมพ์เล็ก-ใหญ่ (ไม่ใช้ regex — ปลอดภัยจาก ReDoS) |
+| พารามิเตอร์ | ชนิด      | ค่าเริ่มต้น | คำอธิบาย                                                                            |
+| ----------- | --------- | ----------- | ----------------------------------------------------------------------------------- |
+| `tail`      | `integer` | 200         | จำนวนบรรทัดย้อนหลังที่จะส่งก่อน (สูงสุด 1000)                                       |
+| `filter`    | `string`  | ไม่มี       | ตัวกรอง substring แบบไม่คำนึงถึงตัวพิมพ์เล็ก-ใหญ่ (ไม่ใช้ regex — ปลอดภัยจาก ReDoS) |
 
 **เหตุการณ์ SSE:**
 
-| เหตุการณ์   | ข้อมูล      | คำอธิบาย                       |
-| ----------- | ----------- | ------------------------------ |
-| `snapshot`  | `LogLine[]` | ส่วนท้ายของประวัติเริ่มต้น     |
-| `log`       | `LogLine`   | บรรทัดบันทึกแบบเรียลไทม์       |
-| `heartbeat` | `{}`        | รักษาการเชื่อมต่อทุก 15 วินาที |
+| เหตุการณ์   | ข้อมูล      | คำอธิบาย                     |
+| ----------- | ----------- | ---------------------------- |
+| `snapshot`  | `LogLine[]` | ข้อมูลย้อนหลังเริ่มต้น       |
+| `log`       | `LogLine`   | บรรทัด log แบบสด             |
+| `heartbeat` | `{}`        | ส่ง keep-alive ทุก 15 วินาที |
 
-**สคีมา LogLine:**
+**Schema ของ LogLine:**
 
 ```json
 {
@@ -429,29 +434,29 @@ service ก่อน แล้วเรียกใช้การติดต�
 | ----- | --------------------------------------------- |
 | `200` | `text/event-stream`                           |
 | `400` | พารามิเตอร์ `filter` ยาวเกินไป (> 200 อักขระ) |
-| `404` | ไม่พบบริการ (ไม่ได้ลงทะเบียน supervisor)      |
+| `404` | ไม่พบบริการ (ยังไม่ได้ลงทะเบียน supervisor)   |
 
 ---
 
 ### 4.2 ปลายทาง CLIProxyAPI (10 เส้นทาง)
 
-CLIProxyAPI มีรูปแบบปลายทางเหมือนกับ 9Router ยกเว้น `rotate-key` และมี
-`accounts`, `provider-expose` และ `auto-restart-adopted` เพิ่มเข้ามา ขณะนี้ระบบจะได้รับ
-API key สำหรับ data plane โดยเฉพาะซึ่งถูกแทรกในขณะเริ่มโปรเซส (`needsApiKey: true` ใน
-`bootstrap.ts` และใช้สำหรับซิงค์โมเดล) ส่วน `status` จะมีฟิลด์น้อยกว่า
+CLIProxyAPI มีรูปแบบปลายทางเหมือนกับ 9Router แต่ไม่มี `rotate-key` และเพิ่ม
+`accounts`, `provider-expose` และ `auto-restart-adopted` ขณะนี้ CLIProxyAPI จะได้รับ
+คีย์ API สำหรับ data plane โดยเฉพาะ ซึ่งฉีดเข้ามาเมื่อสร้างโปรเซส (`needsApiKey: true` ใน
+`bootstrap.ts` และใช้สำหรับซิงค์โมเดล) ส่วน `status` มีฟิลด์น้อยกว่า
 
 | เมธอด  | พาธ                                 | คำอธิบาย                                      |
 | ------ | ----------------------------------- | --------------------------------------------- |
 | `POST` | `/api/services/cliproxy/install`    | ติดตั้ง CLIProxyAPI จาก npm                   |
-| `POST` | `/api/services/cliproxy/start`      | เริ่ม CLIProxyAPI                             |
+| `POST` | `/api/services/cliproxy/start`      | เริ่มต้น CLIProxyAPI                          |
 | `POST` | `/api/services/cliproxy/stop`       | หยุด CLIProxyAPI                              |
-| `POST` | `/api/services/cliproxy/restart`    | รีสตาร์ต CLIProxyAPI                          |
-| `POST` | `/api/services/cliproxy/update`     | อัปเดตเป็นเวอร์ชันใหม่กว่า                    |
+| `POST` | `/api/services/cliproxy/restart`    | เริ่มต้น CLIProxyAPI ใหม่                     |
+| `POST` | `/api/services/cliproxy/update`     | อัปเดตเป็นเวอร์ชันที่ใหม่กว่า                 |
 | `GET`  | `/api/services/cliproxy/status`     | สถานะแบบเรียลไทม์ + DB (ไม่มี `apiKeyMasked`) |
-| `POST` | `/api/services/cliproxy/auto-start` | สลับสถานะการเริ่มต้นอัตโนมัติ                 |
+| `POST` | `/api/services/cliproxy/auto-start` | เปิด/ปิดการเริ่มต้นอัตโนมัติ                  |
 
-ปลายทางร่วม `GET /api/services/{name}/logs` (ดู §4.1) ใช้งานได้กับบริการ
-ทั้งสี่รายการโดยใช้เซกเมนต์แบบไดนามิก `[name]`
+ปลายทางที่ใช้ร่วมกัน `GET /api/services/{name}/logs` (ดู §4.1) ใช้งานได้กับ
+บริการทั้งสี่รายการผ่านเซกเมนต์ไดนามิก `[name]`
 
 ---
 
@@ -459,56 +464,125 @@ API key สำหรับ data plane โดยเฉพาะซึ่งถู
 
 Mux มีรูปแบบปลายทางเหมือนกับ CLIProxyAPI — ไม่มีเส้นทาง `rotate-key` ในพื้นผิว API
 (โทเค็น bearer ถูกสร้างด้วยวิธีเดียวกับของ 9Router ผ่าน
-`getOrCreateApiKey("mux")` และถูกแทรกผ่านตัวแปรสภาพแวดล้อม `MUX_SERVER_AUTH_TOKEN` แต่
-ยังไม่มีปลายทางเฉพาะสำหรับการหมุนเวียนคีย์) Mux ได้รับการจัดการเฉพาะวงจรชีวิตเท่านั้น กล่าวคือ
-ต่างจาก 9Router ตรงที่ไม่มีตัวดำเนินการ Layer 4 และไม่เคยถูกลงทะเบียนเป็นผู้ให้บริการกำหนดเส้นทาง
+`getOrCreateApiKey("mux")` และฉีดผ่านตัวแปรสภาพแวดล้อม `MUX_SERVER_AUTH_TOKEN` แต่
+ยังไม่มีปลายทางสำหรับหมุนเวียนคีย์โดยเฉพาะ) Mux ได้รับการจัดการเฉพาะวงจรชีวิตเท่านั้น:
+ต่างจาก 9Router ตรงที่ไม่มี executor ของ Layer 4 และไม่เคยถูกลงทะเบียนเป็นผู้ให้บริการกำหนดเส้นทาง
 
 | เมธอด  | พาธ                            | คำอธิบาย                           |
 | ------ | ------------------------------ | ---------------------------------- |
 | `POST` | `/api/services/mux/install`    | ติดตั้ง Mux จาก npm (`npm i mux`)  |
-| `POST` | `/api/services/mux/start`      | เริ่ม Mux (`mux server`)           |
+| `POST` | `/api/services/mux/start`      | เริ่มต้น Mux (`mux server`)        |
 | `POST` | `/api/services/mux/stop`       | หยุด Mux                           |
-| `POST` | `/api/services/mux/restart`    | รีสตาร์ต Mux                       |
+| `POST` | `/api/services/mux/restart`    | เริ่มต้น Mux ใหม่                  |
 | `POST` | `/api/services/mux/update`     | อัปเดตเป็นเวอร์ชัน npm ที่ใหม่กว่า |
 | `GET`  | `/api/services/mux/status`     | สถานะแบบเรียลไทม์ + DB             |
-| `POST` | `/api/services/mux/auto-start` | สลับสถานะการเริ่มต้นอัตโนมัติ      |
+| `POST` | `/api/services/mux/auto-start` | เปิด/ปิดการเริ่มต้นอัตโนมัติ       |
 
 ---
 
 ### 4.4 ปลายทาง Bifrost (8 เส้นทาง)
 
-Bifrost เป็นแบ็กเอนด์รีเลย์ AI gateway ที่เขียนด้วย Go (`@maximhq/bifrost`) โดยใช้
+Bifrost เป็นแบ็กเอนด์รีเลย์เกตเวย์ AI ที่เขียนด้วย Go (`@maximhq/bifrost`) โดยใช้
 รูปแบบปลายทางเดียวกับ CLIProxyAPI (ไม่มี `rotate-key` — Bifrost จัดการคีย์ของผู้ให้บริการ
-ด้วยตนเองใน `config.json` ภายใต้ `-app-dir`)
+ด้วยตัวเองใน `config.json` ภายใต้ `-app-dir`)
 
-| เมธอด  | พาธ                                | คำอธิบาย                                                            |
-| ------ | ---------------------------------- | ------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | ติดตั้ง Bifrost จาก npm (`@maximhq/bifrost`)                        |
-| `POST` | `/api/services/bifrost/start`      | เริ่ม Bifrost บนพอร์ต 8080 (ค่าเริ่มต้น)                            |
-| `POST` | `/api/services/bifrost/stop`       | หยุด Bifrost                                                        |
-| `POST` | `/api/services/bifrost/restart`    | เริ่ม Bifrost ใหม่                                                  |
-| `POST` | `/api/services/bifrost/update`     | อัปเดตเป็นเวอร์ชันที่ใหม่กว่า                                       |
-| `GET`  | `/api/services/bifrost/status`     | สถานะแบบเรียลไทม์ + สถานะ DB                                        |
-| `POST` | `/api/services/bifrost/auto-start` | เปิด/ปิดการเริ่มทำงานอัตโนมัติ                                      |
-| `GET`  | `/api/services/bifrost/logs`       | ส่วนท้ายของล็อกแบบ SSE (ผ่านไดนามิกรูต `[name]/logs` ที่ใช้ร่วมกัน) |
+| เมธอด  | พาธ                                | คำอธิบาย                                                                       |
+| ------ | ---------------------------------- | ------------------------------------------------------------------------------ |
+| `POST` | `/api/services/bifrost/install`    | ติดตั้ง Bifrost จาก npm (`@maximhq/bifrost`)                                   |
+| `POST` | `/api/services/bifrost/start`      | เริ่มต้น Bifrost บนพอร์ต 8080 (ค่าเริ่มต้น)                                    |
+| `POST` | `/api/services/bifrost/stop`       | หยุด Bifrost                                                                   |
+| `POST` | `/api/services/bifrost/restart`    | เริ่มต้น Bifrost ใหม่                                                          |
+| `POST` | `/api/services/bifrost/update`     | อัปเดตเป็นเวอร์ชันที่ใหม่กว่า                                                  |
+| `GET`  | `/api/services/bifrost/status`     | สถานะแบบเรียลไทม์ + DB                                                         |
+| `POST` | `/api/services/bifrost/auto-start` | เปิด/ปิดการเริ่มต้นอัตโนมัติ                                                   |
+| `GET`  | `/api/services/bifrost/logs`       | ติดตามส่วนท้ายของล็อกผ่าน SSE (ผ่านเส้นทางไดนามิก `[name]/logs` ที่ใช้ร่วมกัน) |
 
-**การเชื่อมโยงการกำหนดเส้นทาง:** เมื่อไม่ได้ตั้งค่า `BIFROST_BASE_URL` และอินสแตนซ์ Bifrost
+**การเชื่อมต่อระบบกำหนดเส้นทาง:** เมื่อไม่ได้ตั้งค่า `BIFROST_BASE_URL` และอินสแตนซ์ Bifrost
 ที่อยู่ภายใต้การควบคุมกำลังทำงาน `getBifrostRoutingConfig()` (ใน `routingBackend.ts`) จะใช้
 `http://127.0.0.1:{port}` เป็น URL ฐานของรีเลย์โดยอัตโนมัติ ตัวแปรสภาพแวดล้อม
-`BIFROST_BASE_URL` ที่กำหนดไว้อย่างชัดเจนจะมีลำดับความสำคัญเหนือกว่าเสมอ
+`BIFROST_BASE_URL` ที่กำหนดไว้อย่างชัดเจนจะมีลำดับความสำคัญสูงกว่าเสมอ
 
 ---
 
-### 4.5 เอนด์พอยต์ Dario (12 รูต)
+### 4.5 ปลายทาง Dario (12 เส้นทาง)
 
-มีรูปแบบวงจรชีวิตเช่นเดียวกับบริการอื่นๆ (`install`, `start`, `stop`, `restart`,
-`update`, `status`, `auto-start`, `auto-restart-adopted`) พร้อมส่วนควบคุม OAuth
-ภายใต้ `admin/` ที่ต้องใช้โทเค็น: `admin/accounts`, `admin/import-from-omniroute`,
-`admin/login-start`, `admin/login-complete` (ทั้งหมดอยู่ภายใต้การป้องกันด้วย `DARIO_ADMIN_TOKEN`)
+มีรูปแบบวงจรชีวิตเหมือนกับบริการอื่น ๆ (`install`, `start`, `stop`, `restart`,
+`update`, `status`, `auto-start`, `auto-restart-adopted`) พร้อมด้วย control plane
+OAuth ที่จำกัดการเข้าถึงด้วยโทเค็นภายใต้ `admin/`: `admin/accounts`, `admin/import-from-omniroute`,
+`admin/login-start`, `admin/login-complete` (ทั้งหมดได้รับการป้องกันด้วย `DARIO_ADMIN_TOKEN`)
 
-### 4.6 รีเวิร์สพร็อกซี (การฝังแดชบอร์ด 9Router)
+### 4.6 ปลายทาง open-wa (7 เส้นทาง)
 
-แดชบอร์ดฝัง UI เว็บของ 9Router ไว้ภายใน iframe ผ่านรีเวิร์สพร็อกซีภายในที่:
+open-wa (`@open-wa/wa-automate`) ควบคุมอินสแตนซ์ Chromium แบบ headless (ผ่าน
+Puppeteer) เพื่อทำงานอัตโนมัติกับ WhatsApp Web โดยใช้รูปแบบปลายทางเดียวกับ Mux (ยังไม่มี
+เส้นทาง `rotate-key`) ระบบจัดการเฉพาะวงจรชีวิตเท่านั้น — ไม่ใช่เป้าหมายการกำหนดเส้นทาง
+และไม่มีรายการ executor/ผู้ให้บริการของ Layer 4
+
+| เมธอด  | พาธ                               | คำอธิบาย                                                    |
+| ------ | --------------------------------- | ----------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | ติดตั้ง open-wa จาก npm (`@open-wa/wa-automate`)            |
+| `POST` | `/api/services/openwa/start`      | เริ่ม open-wa บนพอร์ต 8323 (ค่าเริ่มต้น)                    |
+| `POST` | `/api/services/openwa/stop`       | หยุด open-wa                                                |
+| `POST` | `/api/services/openwa/restart`    | เริ่ม open-wa ใหม่                                          |
+| `POST` | `/api/services/openwa/update`     | อัปเดตเป็นเวอร์ชันที่ใหม่กว่า                               |
+| `GET`  | `/api/services/openwa/status`     | สถานะแบบสด + สถานะ DB                                       |
+| `POST` | `/api/services/openwa/auto-start` | เปิด/ปิดการเริ่มอัตโนมัติ                                   |
+| `GET`  | `/api/services/openwa/logs`       | ส่วนท้ายของบันทึกแบบ SSE (ผ่านไดนามิกรูตร่วม `[name]/logs`) |
+
+**คีย์ API:** แทรกผ่าน `WA_KEY` — การแทนที่ด้วยตัวแปรสภาพแวดล้อมทั่วไปของ open-wa
+ที่ขึ้นต้นด้วย `WA_*` จะแมปค่านี้ไปยังตัวเลือก CLI `--key`/`-k`
+(`dist/cli/setup.js::envArgs()` ซึ่งตรวจสอบแล้วกับแพ็กเกจเวอร์ชัน 4.76.0
+ที่ติดตั้งอยู่) โดยเติมคำนำหน้า `ow_` เมื่อสร้างด้วย `generateServiceApiKey()` open-wa
+จะอ่านคีย์กลับจากส่วนหัว HTTP `key`/`api_key` (ไม่ใช่ `Authorization:
+Bearer`); `/api-docs*` ได้รับการยกเว้นจากการตรวจสอบอย่างชัดเจน
+(`setupAuthenticationLayer` ใน `dist/cli/server.js`) ดังนั้นโพรบตรวจสอบสถานะ
+จึงไม่ต้องใช้ส่วนหัวสำหรับการยืนยันตัวตน
+
+**การจับคู่:** open-wa เป็นซอฟต์แวร์ที่ไม่เป็นทางการและไม่มีความเกี่ยวข้องกับ WhatsApp —
+หมายเลขที่เชื่อมต่อมีความเสี่ยงที่จะถูก WhatsApp แบนจากระบบตรวจจับการทำงานอัตโนมัติของ WhatsApp เอง
+เมื่อเริ่มต้นครั้งแรก โค้ด QR สำหรับจับคู่จะถูกพิมพ์ไปยัง stdout และแสดงผ่าน
+แผง Logs/สตรีม SSE ที่มีอยู่ — การผสานรวมนี้ยังไม่มีเอนด์พอยต์สำหรับรูปภาพ QR
+โดยเฉพาะ
+
+---
+
+### 4.7 เอนด์พอยต์ LLMLingua (8 รูต)
+
+LLMLingua เป็นไซด์คาร์สำหรับบีบอัดพรอมป์ที่ครอบ `@atjsh/llmlingua-2` (โมเดล
+จำแนกโทเค็น ONNX จริง ซึ่งดาวน์โหลดจาก Hugging Face เมื่อเรียก
+`/compress` ครั้งแรก) โดยใช้รูปแบบเอนด์พอยต์เดียวกับ Bifrost (ไม่มีคีย์ API —
+`needsApiKey: false` และไม่จัดการข้อมูลประจำตัวใดๆ)
+
+| เมธอด  | พาธ                                            | คำอธิบาย                                                                                       |
+| ------ | ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | ติดตั้ง `@atjsh/llmlingua-2` + แพ็กเกจที่เกี่ยวข้องผ่าน npm และเขียนสคริปต์เซิร์ฟเวอร์ไซด์คาร์ |
+| `POST` | `/api/services/llmlingua/start`                | เริ่มไซด์คาร์บนพอร์ต 20135 (ค่าเริ่มต้น)                                                       |
+| `POST` | `/api/services/llmlingua/stop`                 | หยุดไซด์คาร์                                                                                   |
+| `POST` | `/api/services/llmlingua/restart`              | เริ่มไซด์คาร์ใหม่                                                                              |
+| `POST` | `/api/services/llmlingua/update`               | อัปเดตเป็นแพ็กเกจเวอร์ชันที่ใหม่กว่า                                                           |
+| `GET`  | `/api/services/llmlingua/status`               | สถานะแบบสด + สถานะ DB                                                                          |
+| `POST` | `/api/services/llmlingua/auto-start`           | เปิด/ปิดการเริ่มอัตโนมัติ                                                                      |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | เปิด/ปิดการเริ่มใหม่อัตโนมัติสำหรับอินสแตนซ์ที่รับช่วงมา (มีอยู่ก่อนแล้ว)                      |
+| `GET`  | `/api/services/llmlingua/logs`                 | ส่วนท้ายของบันทึกแบบ SSE (ผ่านไดนามิกรูตร่วม `[name]/logs`)                                    |
+
+**สัญญาของไซด์คาร์:** สคริปต์เซิร์ฟเวอร์เปิดให้ใช้ `GET /health` (ตอบกลับทันที —
+ไม่รอโมเดล) และ `POST /compress` (`{ text, rate }` →
+`{ text, compressed, ratio }`) โมเดลจะโหลดแบบ Lazy เมื่อเรียก
+`/compress` ครั้งแรก
+
+**การเชื่อมต่อระบบบีบอัด:** `httpSidecarBackend` ของ
+`open-sse/services/compression/engines/llmlingua/index.ts`
+เรียก `LLMLINGUA_BASE_URL` (ค่าเริ่มต้น
+`http://127.0.0.1:20135`) และจะยอมรับการตอบกลับของไซด์คาร์เฉพาะเมื่อผลลัพธ์
+สั้นกว่าข้อมูลนำเข้าอย่างชัดเจนเท่านั้น หากเกิดความล้มเหลวใดๆ (ไม่ได้ทำงาน หมดเวลา
+หรือการตอบกลับที่ไม่มีการเปลี่ยนแปลง) ระบบจะย้อนกลับไปใช้แบ็กเอนด์เธรดผู้ปฏิบัติงานภายในโปรเซส (`./worker.ts`)
+
+---
+
+### 4.8 พร็อกซีย้อนกลับ (การฝังแดชบอร์ด 9Router)
+
+แดชบอร์ดฝังเว็บ UI ของ 9Router ภายใน iframe ผ่านพร็อกซีย้อนกลับภายใน
+ที่:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
@@ -516,18 +590,18 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 พร็อกซีนี้:
 
-- ส่งต่อคำขอไปยัง `http://127.0.0.1:{port}/{path}` (เฉพาะลูปแบ็กเท่านั้น)
-- ตัดส่วนหัว `cookie` และ `authorization` ที่เข้ามาออก (ไม่มีการรั่วไหลของเซสชัน OmniRoute)
+- ส่งต่อคำขอไปยัง `http://127.0.0.1:{port}/{path}` (เฉพาะลูปแบ็ก)
+- ลบส่วนหัว `cookie` และ `authorization` ที่เข้ามา (ป้องกันการรั่วไหลของเซสชัน OmniRoute)
 - แทรก `Authorization: Bearer {apiKey}` สำหรับการยืนยันตัวตนกับ 9Router
-- ตัด `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` ออกจากการตอบกลับ
-- เขียนการตอบกลับ HTML ใหม่เพื่อแทรก `<base href>` และปรับพาธสัมบูรณ์ให้อยู่ในรูปแบบมาตรฐาน (`/foo` → `/dashboard/.../embed/foo`)
+- ลบ `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` ออกจากการตอบกลับ
+- เขียนการตอบกลับ HTML ใหม่เพื่อแทรก `<base href>` และปรับพาธสัมบูรณ์ให้เป็นมาตรฐาน (`/foo` → `/dashboard/.../embed/foo`)
 
 การอัปเกรด WebSocket สำหรับแดชบอร์ดที่ฝังไว้จะได้รับการจัดการโดยเซิร์ฟเวอร์คู่กันบน
 พอร์ตเฉพาะ (ดู `src/lib/services/embedWsProxy.ts`)
 
-**ความปลอดภัย:** รูตของพร็อกซีสำหรับการฝังถูกจัดประเภทไว้ภายใต้ `LOCAL_ONLY_API_PREFIXES`
-และสามารถเข้าถึงได้จากลูปแบ็กเท่านั้น ผู้โจมตีที่ได้รับ JWT ผ่านทันเนล
-Cloudflare/Ngrok จะไม่สามารถพร็อกซีเข้าไปยังบริการที่ฝังไว้ได้
+**ความปลอดภัย:** รูตพร็อกซีสำหรับการฝังถูกจัดประเภทไว้ภายใต้ `LOCAL_ONLY_API_PREFIXES`
+และสามารถเข้าถึงได้จากลูปแบ็กเท่านั้น ผู้โจมตีที่ได้รับ JWT ผ่าน
+ท่อเชื่อม Cloudflare/Ngrok จะไม่สามารถใช้พร็อกซีเพื่อเข้าถึงบริการที่ฝังไว้ได้
 
 ---
 

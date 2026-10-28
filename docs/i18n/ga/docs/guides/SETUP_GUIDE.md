@@ -1,6 +1,6 @@
 # 📖 Setup Guide — OmniRoute (Gaeilge)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/SETUP_GUIDE.md) · 🇪🇹 [am](../../../am/docs/guides/SETUP_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/guides/SETUP_GUIDE.md) · 🇦🇿 [az](../../../az/docs/guides/SETUP_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/guides/SETUP_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/guides/SETUP_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/guides/SETUP_GUIDE.md) · 🇩🇰 [da](../../../da/docs/guides/SETUP_GUIDE.md) · 🇩🇪 [de](../../../de/docs/guides/SETUP_GUIDE.md) · 🇬🇷 [el](../../../el/docs/guides/SETUP_GUIDE.md) · 🇪🇸 [es](../../../es/docs/guides/SETUP_GUIDE.md) · 🇪🇪 [et](../../../et/docs/guides/SETUP_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/guides/SETUP_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/guides/SETUP_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/guides/SETUP_GUIDE.md) · 🇮🇱 [he](../../../he/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/guides/SETUP_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/guides/SETUP_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/guides/SETUP_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/guides/SETUP_GUIDE.md) · 🇮🇩 [id](../../../id/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/guides/SETUP_GUIDE.md) · 🇮🇹 [it](../../../it/docs/guides/SETUP_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/guides/SETUP_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/guides/SETUP_GUIDE.md) · 🇰🇭 [km](../../../km/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/guides/SETUP_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/guides/SETUP_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/guides/SETUP_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/guides/SETUP_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/guides/SETUP_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/guides/SETUP_GUIDE.md) · 🇲🇲 [my](../../../my/docs/guides/SETUP_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/guides/SETUP_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/guides/SETUP_GUIDE.md) · 🇳🇴 [no](../../../no/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [or](../../../or/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/guides/SETUP_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/guides/SETUP_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/guides/SETUP_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/guides/SETUP_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/SETUP_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/guides/SETUP_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/guides/SETUP_GUIDE.md) · 🇱🇰 [si](../../../si/docs/guides/SETUP_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/guides/SETUP_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/guides/SETUP_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/guides/SETUP_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/guides/SETUP_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [te](../../../te/docs/guides/SETUP_GUIDE.md) · 🇹🇭 [th](../../../th/docs/guides/SETUP_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/guides/SETUP_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/SETUP_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/guides/SETUP_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/guides/SETUP_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/guides/SETUP_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/SETUP_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/SETUP_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/SETUP_GUIDE.md) · 🇪🇹 [am](../../../am/docs/guides/SETUP_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/guides/SETUP_GUIDE.md) · 🇦🇿 [az](../../../az/docs/guides/SETUP_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/guides/SETUP_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/guides/SETUP_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/guides/SETUP_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/guides/SETUP_GUIDE.md) · 🇩🇰 [da](../../../da/docs/guides/SETUP_GUIDE.md) · 🇩🇪 [de](../../../de/docs/guides/SETUP_GUIDE.md) · 🇬🇷 [el](../../../el/docs/guides/SETUP_GUIDE.md) · 🇪🇸 [es](../../../es/docs/guides/SETUP_GUIDE.md) · 🇪🇪 [et](../../../et/docs/guides/SETUP_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/guides/SETUP_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/guides/SETUP_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/guides/SETUP_GUIDE.md) · 🇮🇱 [he](../../../he/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/guides/SETUP_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/guides/SETUP_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/guides/SETUP_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/guides/SETUP_GUIDE.md) · 🇮🇩 [id](../../../id/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/guides/SETUP_GUIDE.md) · 🇮🇹 [it](../../../it/docs/guides/SETUP_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/guides/SETUP_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/guides/SETUP_GUIDE.md) · 🇰🇭 [km](../../../km/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/guides/SETUP_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/guides/SETUP_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/guides/SETUP_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/guides/SETUP_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/guides/SETUP_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/guides/SETUP_GUIDE.md) · 🇲🇲 [my](../../../my/docs/guides/SETUP_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/guides/SETUP_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/guides/SETUP_GUIDE.md) · 🇳🇴 [no](../../../no/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [or](../../../or/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/guides/SETUP_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/guides/SETUP_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/guides/SETUP_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/guides/SETUP_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/SETUP_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/guides/SETUP_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/guides/SETUP_GUIDE.md) · 🇱🇰 [si](../../../si/docs/guides/SETUP_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/guides/SETUP_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/guides/SETUP_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/guides/SETUP_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/guides/SETUP_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [te](../../../te/docs/guides/SETUP_GUIDE.md) · 🇹🇭 [th](../../../th/docs/guides/SETUP_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/guides/SETUP_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/SETUP_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/guides/SETUP_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/guides/SETUP_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/guides/SETUP_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/SETUP_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/SETUP_GUIDE.md)
 
 ---
 
@@ -136,23 +136,23 @@ omniroute providers validate
 
 ---
 
-## Cumraíocht na hUirlise CLI
+## Cumraíocht Uirlis CLI
 
 ### 1) Ceangail Soláthraithe agus Cruthaigh Eochair API
 
-1. Oscail Deais → `Providers` agus ceangail soláthraí amháin ar a laghad (OAuth nó eochair API).
-2. Oscail Deais → `Endpoints` agus cruthaigh eochair API.
-3. (Roghnach) Oscail Deais → `Combos` agus socraigh do shlabhra cúltaca.
+1. Oscail Dashboard → `Providers` agus ceangail soláthraí amháin ar a laghad (OAuth nó eochair API).
+2. Oscail Dashboard → `Endpoints` agus cruthaigh eochair API.
+3. (Roghnach) Oscail Dashboard → `Combos` agus socraigh do shlabhra cúltaca.
 
-### 2) Dírigh d’Uirlis Ríomhchláraithe
+### 2) Cumraigh d’Uirlis Ríomhchláraithe
 
 ```txt
-Bun-URL:   http://localhost:20128/v1
+Bun-URL: http://localhost:20128/v1
 Eochair API:  [cóipeáil ón leathanach Endpoint]
-Samhail:   if/qwen3.8-max-preview (nó aon réimír soláthraí/samhla)
+Samhail:    if/qwen3.8-max-preview (nó réimír soláthraí/samhla ar bith)
 ```
 
-Mura féidir le d’eagarthóir `Authorization: Bearer ...` a sheoladh, úsáid an bun-URL comhoiriúnachta comharthaithe ina ionad:
+Mura féidir le d’eagarthóir `Authorization: Bearer ...` a sheoladh, bain úsáid as an mbonn comhoiriúnachta tokenaithe ina ionad:
 
 ```txt
 Bun-URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -166,34 +166,35 @@ Oibríonn sé le Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, agus
 #### Uathchumraigh le `setup-*`
 
 In ionad an bun-URL agus an eochair a ghreamú de láimh, lig do OmniRoute cumraíocht
-féin gach uirlise a scríobh ón gcatalóg bheo samhlacha. Ordú amháin in aghaidh na huirlise:
+gach uirlise a scríobh ón gcatalóg bheo samhlacha. Ordú amháin in aghaidh na huirlise:
 
 ```bash
-omniroute setup-codex        # Próifílí ~/.codex/<name>.config.toml
+omniroute setup-codex        # próifílí ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (comhoiriúnach le OpenAI)
-omniroute setup-cline        # Socruithe Cline CLI + eisínteacht VS Code
+omniroute setup-cline        # socruithe Cline CLI + eisínteacht VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Priontálann sé céimeanna Cursor laistigh den aip
-omniroute setup-roo          # Iompórtáil Roo Code + pointeoir autoImport
+omniroute setup-cursor       # priontálann sé céimeanna Cursor laistigh den aip
+omniroute setup-roo          # iompórtáil Roo Code + pointeoir autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
 Glacann gach ceann acu le `--remote <url> --api-key <key>` chun uirlis áitiúil a chumrú i gcoinne
-OmniRoute **cianda**, chomh maith le `--dry-run` chun réamhamharc a fháil. Chun CLI a sheoladh leis an
+OmniRoute **cianda**, chomh maith le `--dry-run` chun réamhamharc a dhéanamh. Chun CLI a thosú leis an
 timpeallacht cheart insteallta agus gan aon chumraíocht a scríobh ar chor ar bith, úsáid an tosaitheoir ginearálta
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
 tá na tosaitheoirí oidhreachta in aghaidh na huirlise `omniroute launch` (Claude Code) agus
 `omniroute launch-codex` (Codex) ar fáil fós.
 
-Chun an tábla iomlán a fheiceáil (an méid a scríobhann gach ordú, gach bratach, áitiúil i gcomparáid le cianda, coinbhinsiúin
-`/v1` an bhun-URL), féach **[Comhtháthuithe CLI](./CLI-INTEGRATIONS.md)**.
+Chun an tábla iomlán a fheiceáil (cad a scríobhann gach ordú, gach bratach, áitiúil i gcomparáid le cianda, coinbhinsiúin
+`/v1` don bhun-URL), féach **[Comhtháthuithe CLI](./CLI-INTEGRATIONS.md)**.
 
-Le haghaidh cumraíocht mhionsonraithe in aghaidh na huirlise (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, agus tuilleadh), féach an **[Treoir d’Uirlisí CLI](../reference/CLI-TOOLS.md)** tiomnaithe.
+Le haghaidh cumraíocht mhionsonraithe de réir uirlise (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, agus tuilleadh), féach an **[Treoir d’Uirlisí CLI](../reference/CLI-TOOLS.md)** tiomnaithe.
 
 ---
 
@@ -324,7 +325,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Teimpléad Void Linux (xbps-src)
 
-Más úsáideoir Void Linux thú, is féidir leat pacáiste dúchasach a thógáil le `xbps-src`. Sábháil an bloc seo mar `srcpkgs/omniroute/template`:
+D’úsáideoirí Void Linux, is féidir leat pacáiste dúchasach a thógáil le `xbps-src`. Sábháil an bloc seo mar `srcpkgs/omniroute/template`:
 
 ```bash
 # Comhad teimpléid le haghaidh 'omniroute'
@@ -333,7 +334,7 @@ version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Geata uilíoch AI le ródú cliste do sholáthraithe iomadúla LLM"
+short_desc="Geata uilíoch IS le ródú cliste do sholáthraithe iomadúla LLM"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"

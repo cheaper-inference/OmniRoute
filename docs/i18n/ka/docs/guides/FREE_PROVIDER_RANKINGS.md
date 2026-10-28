@@ -1,6 +1,6 @@
 # Free Provider Rankings (Arena ELO) (ქართული)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇦 [bs](../../../bs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
 
 ---
 
@@ -11,32 +11,19 @@
 
 ---
 
-## რას წარმოადგენს
+## რა არის
 
-OmniRoute-ში რეგისტრირებულია 329 პროვაიდერი, მათ შორის კატალოგის 155 ჩანაწერი, რომლებიც მონიშნულია, როგორც **უფასო/ავტორიზაციის გარეშე**
-(ავტორიზაციის გარეშე,
-უფასო დონის OAuth ან უფასო დონის API გასაღები — იხილეთ
-[უფასო დონეების გზამკვლევი](../getting-started/FREE-TIERS-GUIDE.md) და სრული
-[უფასო დონეების დირექტორია](../reference/FREE_TIERS.md)). თუმცა გასათვალისწინებელია ერთი რამ: უფასო პროვაიდერების
-მოდელების ხარისხი უკიდურესად განსხვავდება. ავტორიზაციის არმომთხოვნი პროვაიდერი, რომელიც მოწინავე მოდელს გთავაზობთ, გაცილებით უფრო სასარგებლოა,
-ვიდრე პროვაიდერი, რომელიც მცირე ზომის მოძველებულ მოდელს გთავაზობთ.
+OmniRoute რეგისტრირებს 377 პროვაიდერს, მათ შორის 155 კატალოგის ჩანაწერი მონიშნულია**free/no-auth** (no-auth, free-tier OAuth, ან free-tier API key — იხილეთ [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) და სრული [Free Tiers დირექტორია](../reference/FREE_TIERS.md) ). დაჭერა: უფასო პროვაიდერები რადიკალურად განსხვავდებიან მოდელის ხარისხით. არაავტორისტული პროვაიდერი, რომელიც ემსახურება სასაზღვრო მოდელს, ბევრად უფრო სასარგებლოა, ვიდრე მცირე მოძველებულ მოდელს ემსახურება.
 
-**Free Provider Rankings** პასუხობს კითხვას — „**რომელი უფასო პროვაიდერი მაძლევს საუკეთესო მოდელს?**“ — თითოეული
-უფასო პროვაიდერის კატალოგის **Arena AI-ის ლიდერბორდიდან** მიღებულ
-**საზოგადოების მიერ შეგროვებულ ხარისხის ქულებთან** გაერთიანებით (ადამიანის უპირატესობაზე დაფუძნებული ELO — იგივე პრინციპი, რომელიც LMArena-ს
-ჩატბოტების არენას უდევს საფუძვლად). შემდეგ პროვაიდერები რეიტინგში მათი **საუკეთესო უფასო მოდელის** სიძლიერის მიხედვით ლაგდებიან.
+**უფასო პროვაიდერის რეიტინგი** პასუხები"** რომელი უფასო პროვაიდერი მაძლევს საუკეთესო მოდელს?** თითოეული უფასო პროვაიდერის კატალოგში შეერთებით** ბრბოდან მიღებული ხარისხის ქულები** დან** Arena AI ლიდერბორდი** (ადამიანის უპირატესობის ELO, იგივე იდეა LMARena chatbot არენის უკან). შემდეგ პროვაიდერები ფასდებიან მათი სიძლიერის მიხედვით** საუკეთესო უფასო მოდელი** .
 
-რეიტინგი სამი რეალური წყაროდან გამოითვლება:
+რეიტინგი გამოითვლება სამი რეალური წყაროდან:
 
-1. უფასო პროვაიდერების სიები — `NOAUTH_PROVIDERS`, ასევე `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` ჩანაწერები, რომლებიც მონიშნულია `hasFree`-ით
-   (`src/shared/constants/providers.ts`).
-2. თითოეული პროვაიდერის მოდელების კატალოგი პროვაიდერთა რეესტრიდან
-   (`open-sse/config/providerRegistry.ts`).
-3. ELO-დან მიღებული, ამოცანასთან შესაბამისობის ქულები, რომლებსაც Arena ELO-ს სინქრონიზაციის ძრავა
-   `model_intelligence` მონაცემთა ბაზის ცხრილში ინახავს (`src/lib/arenaEloSync.ts`).
+1. უფასო პროვაიდერების სიები — `NOAUTH_PROVIDERS`, პლუს `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ჩანაწერები დროშით მონიშნული `hasFree` (`src/shared/constants/providers.ts`).
+2. თითოეული პროვაიდერის მოდელის კატალოგი პროვაიდერის რეესტრიდან (`open-sse/config/providerRegistry.ts`).
+3. ELO-დან მიღებული ამოცან-fit ქულები ინახება `model_intelligence` DB ცხრილში Arena ELO სინქრონიზაციის ძრავით (`src/lib/arenaEloSync.ts`).
 
-გაერთიანების ლოგიკა განთავსებულია `src/lib/freeProviderRankings.ts`-ში.
+შეერთების ლოგიკა ცხოვრობს `src/lib/freeProviderRankings.ts` ში.
 
 ---
 
@@ -122,94 +109,104 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ## როგორ მუშაობს ქულები
 
-### წყარო: Arena AI-ის რეიტინგის ცხრილი
+### წყარო: Arena AI ლიდერბორდი
 
-Arena ELO-ის სინქრონიზაციის ძრავა (`src/lib/arenaEloSync.ts`) Arena AI-ის რეიტინგის ცხრილის API-დან
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) იღებს ორ რეიტინგის ცხრილს — `text`
-და `code`. რეიტინგის ცხრილის თითოეული ჩანაწერი შეიცავს მოდელის სახელს, მომწოდებელს, ELO `score`-ს, ნდობის ინტერვალსა და ხმების რაოდენობას.
+Arena ELO სინქრონიზაციის ძრავა (`src/lib/arenaEloSync.ts`) იღებს ორ ლიდერბორდს — `text`
+და `code` — Arena AI ლიდერბორდის API-დან
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). როდესაც ეს API არ აბრუნებს
+გამოსადეგ ცხრილს, ძრავა სარეზერვო წყაროდ იყენებს ოფიციალურ `lmarena-ai/leaderboard-dataset`-ს
+Hugging Face-ის datasets-server-ზე (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` აბრუნებს `activeSource`-ს, `lastError`-სა და
+`lastFailedAt`-ს. ლიდერბორდის თითოეული ჩანაწერი
+შეიცავს მოდელის სახელს, ვენდორს, ELO `score`-ს, ნდობის ინტერვალსა და ხმების რაოდენობას.
 
-რეიტინგის ცხრილის კატეგორიები OmniRoute-ის ამოცანების კატეგორიებს შემდეგნაირად შეესაბამება:
+ლიდერბორდის კატეგორიები შეესაბამება OmniRoute-ის ამოცანების კატეგორიებს:
 
-| Arena-ს რეიტინგის ცხრილი | OmniRoute-ის ამოცანების კატეგორიები               |
-| ------------------------ | ------------------------------------------------- |
-| `text`                   | `default`, `review`, `documentation`, `debugging` |
-| `code`                   | `coding`                                          |
+| Arena ლიდერბორდი | OmniRoute-ის ამოცანის კატეგორიები                 |
+| ---------------- | ------------------------------------------------- |
+| `text`           | `default`, `review`, `documentation`, `debugging` |
+| `code`           | `coding`                                          |
 
 ### ნორმალიზაცია (ამოცანასთან შესაბამისობის ქულა)
 
-ნედლი ELO ქულები თითოეული რეიტინგის ცხრილისთვის ნორმალიზდება **ამოცანასთან შესაბამისობის მნიშვნელობად `[0.4, 0.98]` დიაპაზონში**:
+ნედლი ELO ქულები თითოეული ლიდერბორდისთვის ნორმალიზდება **ამოცანასთან შესაბამისობის მნიშვნელობად `[0.4, 0.98]` დიაპაზონში**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-ქულა არასდროს აღწევს `0`-ს ან `1`-ს, რაც მომხმარებლის მიერ განსაზღვრული ჩანაცვლებებისთვის თავისუფალ დიაპაზონს ტოვებს. ეს არის `score` ველი, რომელსაც API-ის პასუხში ხედავთ, და საინფორმაციო დაფაზე ნაჩვენები ნიშნული.
+ქულა არასდროს აღწევს `0`-ს ან `1`-ს, რაც ტოვებს სივრცეს მომხმარებლის ხელით ცვლილებებისთვის. ეს არის
+`score` ველი, რომელსაც API-ის პასუხში ხედავთ, და იარლიყი, რომელიც დაშბორდზეა ნაჩვენები.
 
-### სანდოობა
+### ნდობა
 
-თითოეულ ჩანაწერს Arena-ზე მიცემული ხმების რაოდენობის მიხედვით სანდოობის დონე ენიჭება:
+თითოეული ჩანაწერი იღებს ნდობის დონეს Arena-ს ხმების რაოდენობის მიხედვით:
 
-| სანდოობა | ხმები   |
+| ნდობა    | ხმები   |
 | -------- | ------- |
 | `high`   | ≥ 5,000 |
 | `medium` | ≥ 1,000 |
 | `low`    | < 1,000 |
 
-### შენახვა და განახლების სიხშირე
+### შენახვა და აქტუალურობა
 
-ნორმალიზებული ჩანაწერები იწერება მონაცემთა ბაზის `model_intelligence` ცხრილში
-`source = "arena_elo"` მნიშვნელობით (`src/lib/db/modelIntelligence.ts`). ჩანაწერებს **ვადა
-7 დღის შემდეგ გასდის**, ამიტომ მომწოდებელი, რომელიც სინქრონიზაციას შეწყვეტს, საბოლოოდ გაქრება და მოძველებული მონაცემები აღარ იქნება გამოყენებული.
+ნორმალიზებული ჩანაწერები იწერება `model_intelligence` DB ცხრილში
+`source = "arena_elo"` მნიშვნელობით (`src/lib/db/modelIntelligence.ts`). ჩანაწერებს **ვადა ეწურებათ
+7 დღის შემდეგ**, ასე რომ პროვაიდერი, რომელიც წყვეტს სინქრონიზაციას, საბოლოოდ ქრება სიიდან
+და არ აწვდის მოძველებულ მონაცემებს.
 
 სინქრონიზაცია **ნაგულისხმევად ჩართულია**:
 
-- ის ერთხელ სრულდება სერვერის გაშვებისას, შემდეგ კი პერიოდული ტაიმერით
-  (`src/lib/arenaEloSync.ts`, დაკავშირებულია `src/instrumentation-node.ts`-დან).
-- ის **არ აბლოკირებს მუშაობას და არასდროს იწვევს კრიტიკულ შეცდომას** — თუ გარე წყაროდან მონაცემების მიღება ვერ მოხერხდება, OmniRoute მუშაობას აგრძელებს, ხოლო რეიტინგებში უბრალოდ ბოლო წარმატებით მიღებული მონაცემები (ან ცარიელი მდგომარეობა) გამოჩნდება.
+- ის ეშვება ერთხელ სერვერის გაშვებისას, შემდეგ კი პერიოდული ტაიმერით
+  (`src/lib/arenaEloSync.ts`, დაკავშირებული `src/instrumentation-node.ts`-იდან).
+- ის **არ აბლოკავს და არასდროს არის ფატალური** — თუ აღმავალი მოთხოვნა ვერ შესრულდება, OmniRoute განაგრძობს
+  მუშაობას, ხოლო რეიტინგები უბრალოდ აჩვენებს ბოლო წარმატებულ მონაცემებს (ან ცარიელ მდგომარეობას).
 
-მას ორი გარემოს ცვლადი აკონტროლებს (დოკუმენტირებულია
+ორი გარემოს ცვლადი მართავს მას (დოკუმენტირებულია
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)-ში):
 
-| ცვლადი                    | ნაგულისხმევი   | დანიშნულება                                            |
-| ------------------------- | -------------- | ------------------------------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`         | გამავალი სინქრონიზაციის გამოსართავად მიუთითეთ `false`. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24სთ) | სინქრონიზაციის ინტერვალი, წამებში.                     |
+| ცვლადი                    | ნაგულისხმევი  | დანიშნულება                                              |
+| ------------------------- | ------------- | -------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | დააყენეთ `false` გამავალი სინქრონიზაციიდან გამოსართავად. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | სინქრონიზაციის ინტერვალი წამებში.                        |
 
 ### ხელით სინქრონიზაცია / სტატუსი / გასუფთავება
 
-ოპერატორებისთვის ავთენტიფიცირებული მართვის საბოლოო წერტილი ხელით კონტროლს უზრუნველყოფს
-(`src/app/api/intelligence/sync/route.ts` — საჭიროებს მართვის ავთენტიფიკაციას):
+ოპერატორებისთვის ავტორიზებული მართვის ენდპოინტი იძლევა ხელით მართვის საშუალებას
+(`src/app/api/intelligence/sync/route.ts` — საჭიროებს მართვის ავტორიზაციას):
 
 ```
-GET    /api/intelligence/sync          # სინქრონიზაციის მიმდინარე სტატუსი (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # ხელით სინქრონიზაციის გაშვება; სხეული: { "dryRun": true } ჩაწერის გარეშე წინასწარი ნახვისთვის
-DELETE /api/intelligence/sync          # ყველა სინქრონიზებული arena_elo ინტელექტუალური ჩანაწერის გასუფთავება
+GET    /api/intelligence/sync          # მიმდინარე სინქრონიზაციის სტატუსი (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # ხელით სინქრონიზაციის გაშვება; body: { "dryRun": true } ჩაწერის გარეშე გადასახედად
+DELETE /api/intelligence/sync          # ყველა სინქრონიზებული arena_elo intelligence ჩანაწერის წაშლა
 ```
 
-თუ რეიტინგების გვერდი ცარიელია, ხელით შესრულებული `POST /api/intelligence/sync` (ან უბრალოდ
-სერვერის გადატვირთვა) მას ხელახლა შეავსებს.
+თუ რეიტინგების გვერდი ცარიელია, ხელით `POST /api/intelligence/sync` (ან უბრალოდ
+სერვერის გადატვირთვა) ხელახლა შეავსებს მას.
 
-### მოდელების რეიტინგის ცხრილთან შესაბამისობის დადგენა
+### მოდელების შესაბამება ლიდერბორდთან
 
-რეესტრის მოდელების ID-ები და Arena-ს მოდელების სახელები ყოველთვის ზუსტად არ ემთხვევა. რეიტინგი იყენებს
-მოქნილ შესაბამისობის დადგენას (`findMatchingIntelligence` ფაილში `src/lib/freeProviderRankings.ts`):
+რეესტრის მოდელის ID-ები და Arena-ს მოდელის სახელები ყოველთვის ზუსტად არ ემთხვევა ერთმანეთს.
+რეიტინგი იყენებს მოქნილ შესაბამებას (`findMatchingIntelligence` — `src/lib/freeProviderRankings.ts`-ში):
 
-1. ზუსტი შესაბამისობა ნორმალიზებული მოდელის ID-ის მიხედვით.
-2. შესაბამისობა ბოლოში არსებული ვერსიის სუფიქსის მოცილების შემდეგ (მაგ., `kimi-k2.6` → `kimi-k2`).
-3. პრეფიქსით შესაბამისობა (რეიტინგის ცხრილში მოდელის სახელი რეესტრის ID-ის პრეფიქსია).
+1. ზუსტი დამთხვევა ნორმალიზებული მოდელის ID-ზე.
+2. დამთხვევა ბოლოში მყოფი ვერსიის სუფიქსის მოცილების შემდეგ (მაგ. `kimi-k2.6` → `kimi-k2`).
+3. პრეფიქსური დამთხვევა (ლიდერბორდის მოდელის სახელი რეესტრის ID-ის პრეფიქსია).
 
-სინქრონიზაციის მხარეს ცნობილი მომწოდებლების პრეფიქსები (`anthropic/`, `openai/`, `google/`, …)
-იშლება, ხოლო მეტსახელების მცირე რუკა კანონიკურ სახელებს OmniRoute-ის შიგნით გამოყენებულ ვარიანტებად აფართოებს, რათა მოდელები ნებისმიერი სახელით მოძებნადი დარჩეს.
+სინქრონიზაციის მხარეს ცნობილი ვენდორის პრეფიქსები (`anthropic/`, `openai/`, `google/`, …)
+იშლება, ხოლო მცირე ფსევდონიმების რუკა კანონიკურ სახელებს იმ ვარიანტებად ავრცელებს,
+რომლებსაც OmniRoute შინაგანად იყენებს, ასე რომ მოდელები ნებისმიერი სახელით მოსაძებნად რჩება.
 
-### როგორ დგინდება მომწოდებლის რეიტინგი
+### როგორ ფასდება პროვაიდერი
 
-თითოეული უფასო მომწოდებლისთვის ძრავა მის კატალოგში არსებულ ყველა მოდელს აფასებს, შემდეგ კი:
+თითოეული უფასო პროვაიდერისთვის ძრავა აფასებს მისი კატალოგის ყველა მოდელს, შემდეგ კი:
 
-- **საუკეთესო მოდელი** = მომწოდებლის ყველაზე მაღალი ქულის მქონე მოდელი.
-- **საშ. ქულა** = მომწოდებლის ყველა შეფასებული მოდელის ქულების საშუალო მნიშვნელობა.
-- **მოდელები** = მომწოდებლის იმ მოდელების რაოდენობა, რომლებსაც Arena-ს ქულა ჰქონდათ.
+- **საუკეთესო მოდელი** = პროვაიდერის ყველაზე მაღალქულიანი მოდელი.
+- **საშუალო ქულა** = ამ პროვაიდერის ყველა შეფასებული მოდელის საშუალო ქულა.
+- **მოდელები** = პროვაიდერის რამდენ მოდელს ჰქონდა Arena-ს ქულა.
 
-მომწოდებლები ჯერ **საუკეთესო მოდელის ქულის**, შემდეგ კი საშუალო ქულის მიხედვით ლაგდება. ამგვარად უპირატესობა ენიჭება მომწოდებელს, რომელიც სულ მცირე ერთ ძლიერ უფასო მოდელს მაინც სთავაზობს.
+პროვაიდერები ჯერ ილაგდება **საუკეთესო მოდელის ქულის** მიხედვით, შემდეგ — საშუალო ქულის. ეს
+აჯილდოებს პროვაიდერს, რომელიც გვთავაზობს მინიმუმ ერთ ძლიერ უფასო მოდელს.
 
 ---
 

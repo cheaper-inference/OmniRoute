@@ -1,6 +1,6 @@
 # RTK Compression (አማርኛ)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
 
 ---
 
@@ -23,22 +23,24 @@ rtk -> caveman
 ክልል፦             1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## የሚያመቃቸው ነገሮች
+## የሚጨምቀው
 
-አብሮገነቡ ካታሎግ በአሁኑ ጊዜ በእነዚህ ምድቦች ውስጥ 49 ማጣሪያዎችን ይዟል፦
+የተገነባው ካታሎግ በአሁኑ ጊዜ 56 ማጣሪያዎችን በእነዚህ ምድቦች ስር ይዞ ይመጣል፦
 
 | ምድብ       | ምሳሌዎች                                                         |
 | --------- | ------------------------------------------------------------- |
-| `git`     | `git status`፣ `git branch`፣ `git diff`፣ `git log`             |
-| `test`    | Vitest፣ Jest፣ Pytest፣ Playwright፣ የGo ሙከራዎች፣ የCargo ሙከራዎች     |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest፣ Jest፣ Pytest፣ PHPUnit፣ Playwright፣ Go፣ Cargo ሙከራዎች    |
 | `build`   | TypeScript፣ ESLint፣ Biome፣ Prettier፣ Vite፣ Webpack፣ Turbo፣ Nx |
 | `package` | `npm install`፣ `npm audit`፣ `pip`፣ `uv sync`፣ Poetry፣ Bundler |
-| `shell`   | `ls`፣ `find`፣ `grep`፣ አጠቃላይ የሼል ምዝግቦች                         |
-| `docker`  | `docker ps`፣ የDocker ምዝግቦች                                    |
+| `shell`   | `ls`፣ `find`፣ `grep`፣ አጠቃላይ የshell ምዝግብ ማስታወሻዎች               |
+| `docker`  | `docker ps`፣ Docker ምዝግብ ማስታወሻዎች                              |
 | `infra`   | Terraform፣ OpenTofu፣ `systemctl status`                       |
-| `generic` | የJSON ውጤት፣ የቁልል ዱካዎች፣ የአጠቃላይ ውጤት ምትክ                          |
+| `generic` | JSON ውጤት፣ stack traces፣ አጠቃላይ የውጤት መተኪያ (fallback)            |
 
-በ`open-sse/services/compression/engines/rtk/commandDetector.ts` ውስጥ ያለው ፈላጊ ማጣሪያ ከመመረጡ በፊት ውጤቱን ይመድባል። የትዕዛዝ ክፍል ብቻውን በቂ በማይሆንበት ጊዜ ማጣሪያዎች በትዕዛዝ ንድፍ ወይም በውጤት regex መሠረትም ማዛመድ ይችላሉ።
+በ`open-sse/services/compression/engines/rtk/commandDetector.ts` ውስጥ ያለው ማወቂያ (detector)
+ከማጣሪያ ምርጫ በፊት ውጤቱን ይመድባል። የትዕዛዝ ክፍል (command class) በቂ ካልሆነ ማጣሪያዎች
+በትዕዛዝ ንድፍ ወይም በውጤት regex ማዛመድ ይችላሉ።
 
 ## የማጣሪያ መፍትሔ ሂደት
 
@@ -300,15 +302,15 @@ DATA_DIR/rtk/raw-output/
 AWS access keys፣ እና በምደባ ቅርጽ የተጻፉ `token=...`፣ `secret=...`፣ `password=...` እሴቶችን ያካትታል። ትንታኔዎች
 የማመሳከሪያ id፣ መጠን እና hash metadata ብቻ ያከማቻሉ።
 
-## የማረጋገጫ በር
+## የማረጋገጫ ጌት
 
-የተመረጠው የማረጋገጫ በር ወደ ውጫዊ ትዕዛዞች ሳይወጣ አብረው የተካተቱ የinline filter ሙከራዎችን ያስኬዳል፦
+የተወሰነው (focused) የማረጋገጫ ጌት ውስጣዊ የተገነቡ የውስጣዊ መስመር (inline) ማጣሪያ ሙከራዎችን ወደ ውጫዊ ትእዛዞች ሳይወጣ (shell out) ያስኬዳል፦
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
 ```
 
-ሰፋ ያለው የRTK በር፦
+ሰፊው የ RTK ጌት ይህ ነው፦
 
 ```bash
 node --import tsx/esm --test \
@@ -317,7 +319,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-ከመልቀቅዎ በፊት ሰፊውን የማመቂያ በር ያስኪዱ፦
+ሰፊውን የማጽጃ (compression) ጌት ከመልቀቅ (release) በፊት ያስኬዱ፦
 
 ```bash
 node --import tsx/esm --test \
@@ -340,19 +342,19 @@ node --import tsx/esm --test \
 
 ## የጥንካሬ ደረጃዎች (v3.8.16+)
 
-RTK በ**ማመቅ ጥብቅነት** እና **ደህንነት** መካከል ሚዛን የሚጠብቁ **3 የጥንካሬ ደረጃዎችን** ይደግፋል። ደረጃው በengine config ውስጥ ባለው `config.intensity` በኩል ይዘጋጃል።
+RTK በ**ኮምፕሬሽን ማጠናከር** እና በ**ደህንነት** መካከል ሚዛን የሚሰጡ **3 የጥንካሬ ደረጃዎችን** ይደግፋል። ደረጃው በእንጂኑ ኮንፊግ ውስጥ ባለው `config.intensity` ይወሰናል።
 
 ### 3ቱ ደረጃዎች
 
-| ደረጃ              | የመቁረጫ ገደብ     | የtoken ቁጠባ | አደጋ      | በጣም የሚመችበት                 |
-| ---------------- | ------------- | ---------- | -------- | -------------------------- |
-| `minimal`        | በክፍል 24 መስመሮች | ~20-40%    | በጣም ዝቅተኛ | ወሳኝ context ያለው production |
-| `standard` (ነባሪ) | በክፍል 24 መስመሮች | ~50-70%    | ዝቅተኛ     | ዕለታዊ የኮድ አጻጻፍ sessions     |
-| `aggressive`     | በክፍል 16 መስመሮች | ~70-90%    | መካከለኛ    | ረጅም sessions፣ ከፍተኛ ቁጠባ     |
+| ደረጃ              | የማጭበርበር ገደብ   | የቶከን ቁጠባ | አደጋ      | ምርጥ የሚሆንለት              |
+| ---------------- | ------------- | -------- | -------- | ----------------------- |
+| `minimal`        | በክፍል 24 መስመሮች | ~20-40%  | በጣም ዝቅተኛ | ወሳኝ አውድ ያለው ምርት         |
+| `standard` (ነባሪ) | በክፍል 24 መስመሮች | ~50-70%  | ዝቅተኛ     | የዕለት ተዕለት ኮዲንግ ክፍለ ጊዜዎች |
+| `aggressive`     | በክፍል 16 መስመሮች | ~70-90%  | መካከለኛ    | ረጅም ክፍለ ጊዜዎች፣ ከፍተኛ ቁጠባ  |
 
-### መቁረጡ የሚከሰትበት ቦታ
+### ማጭበርበሩ የሚሆንበት ቦታ
 
-የመቁረጫ ገደቡ `lineFilter.ts`ን ይነካል፦
+የማጭበርበሩ ገደብ `lineFilter.ts` ላይ ተጽእኖ ይኖረዋል፦
 
 ```ts
 // ከ open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -360,39 +362,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-የእያንዳንዱ ክፍል **መጀመሪያ** እና **መጨረሻ** ሁለቱም ይጠበቃሉ፤ መቁረጡ ሲጀምር መካከለኛው ይዘት ይወገዳል።
+የእያንዳንዱ ክፍል **መጀመሪያ** (head) እና **መጨረሻ** (tail) ሁለቱም ይቆያሉ፤ ማጭበርበር ሲጀምር መካከለኛው ይዘት ይጣላል።
 
-### የሚቀረው እና የሚቆረጠው
+### ምን ይቆያል እና ምን ይቆረጣል
 
-| ይዘት                  | minimal  | standard | aggressive |
-| -------------------- | -------- | -------- | ---------- |
-| ስህተቶች / stack traces | ✅ ይጠበቃል | ✅ ይጠበቃል | ✅ ይጠበቃል   |
-| የሙከራ ውድቀቶች           | ✅ ይጠበቃል | ✅ ይጠበቃል | ✅ ይጠበቃል   |
-| የbuild ስህተቶች         | ✅ ይጠበቃል | ✅ ይጠበቃል | ✅ ይጠበቃል   |
-| የተሳኩ ሙከራዎች (ዝርዝር)    | ✅ ይጠበቃል | 🟡 ይታመቃል | 🟡 ይታመቃል   |
-| መደበኛ ውጤት (info logs) | 🟡 ይታመቃል | 🟡 ይታመቃል | ❌ ይወገዳል   |
-| የሂደት አሞሌዎች           | 🟡 ይታመቃል | ❌ ይወገዳል | ❌ ይወገዳል   |
-| Banner / ASCII art   | 🟡 ይታመቃል | ❌ ይወገዳል | ❌ ይወገዳል   |
+| ይዘት                     | minimal  | standard | aggressive |
+| ----------------------- | -------- | -------- | ---------- |
+| ስህተቶች / stack traces    | ✅ ቆይቷል  | ✅ ቆይቷል  | ✅ ቆይቷል    |
+| የሙከራ ውድቀቶች              | ✅ ቆይቷል  | ✅ ቆይቷል  | ✅ ቆይቷል    |
+| የbuild ስህተቶች            | ✅ ቆይቷል  | ✅ ቆይቷል  | ✅ ቆይቷል    |
+| የተሳኩ ሙከራዎች (ዝርዝር)       | ✅ ቆይቷል  | 🟡 ተጠምዟል | 🟡 ተጠምዟል   |
+| የተለመደ ውጤት (የመረጃ ምዝገባዎች) | 🟡 ተጠምዟል | 🟡 ተጠምዟል | ❌ ተጥሏል    |
+| የእድገት አሞሌዎች             | 🟡 ተጠምዟል | ❌ ተጥሏል  | ❌ ተጥሏል    |
+| ባነር / ASCII art         | 🟡 ተጠምዟል | ❌ ተጥሏል  | ❌ ተጥሏል    |
 
 ### ትክክለኛውን ጥንካሬ መምረጥ
 
 ```
-                  contextን ማጣት አስከፊ ነው?
+                  አውድ ማጣት አደገኛ ነው?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    አዎ           አይ          እርግጠኛ አይደለሁም
+     አዎ          አይ       እርግጠኛ አይደለሁም
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      throughput     መጀመሪያ `standard`ን
-      │      ምን ያህል ወሳኝ ነው? ይሞክሩ (ለ80%
-      │           │          ሁኔታዎች ይሰራል)
+      │      አፈጻጸም ምን ያህል    መጀመሪያ `standard` ይሞክሩ
+      │      ወሳኝ ነው?         (ለ80% ጉዳዮች
+      │           │          ይሰራል)
       │      ┌────┴────┐
       │      │         │
-      │     ዝቅተኛ    ከፍተኛ
+      │     ዝቅተኛ      ከፍተኛ
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -402,7 +404,7 @@ config.intensity === "aggressive" ? 16 : 24,
 
 ### ጥንካሬን ማዋቀር
 
-**ለእያንዳንዱ combo** (በcombo config ውስጥ)፦
+**በእያንዳንዱ ኮምቦ** (በኮምቦ ኮንፊግ ውስጥ)፦
 
 ```json
 {
@@ -415,11 +417,11 @@ config.intensity === "aggressive" ? 16 : 24,
 }
 ```
 
-**በፕሮግራም**፦
+**በፕሮግራም አገባብ**፦
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`)
-`CompressionEngine` ነው እና `updateConfig` method የለውም። የengineውን config
-በምትኩ በregistry helper በኩል ያዘምኑ፦
+`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) አንድ
+`CompressionEngine` ነው እና `updateConfig` የሚባል ዘዴ የለውም። ስለዚህ የእንጂኑን ኮንፊግ
+ለማዘመን በregistry ረዳት ተግባር በኩል ይጠቀሙ፦
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -429,7 +431,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### ውጤቱን ማረጋገጥ
 
-filterዎ በመረጡት ጥንካሬ ደህንነቱ የተጠበቀ መሆኑን ለማረጋገጥ **የማረጋገጫ በር**ን (ከታች ይመልከቱ) ይጠቀሙ፦
+ማጣሪያዎ በመረጡት ጥንካሬ ደረጃ ደህና መሆኑን ለማረጋገጥ **Verify Gate** (ከታች ይመልከቱ) ይጠቀሙ፦
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

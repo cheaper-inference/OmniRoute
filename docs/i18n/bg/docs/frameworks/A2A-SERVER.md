@@ -1,6 +1,6 @@
 # OmniRoute A2A Server Documentation (Български)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
 
 ---
 
@@ -47,7 +47,7 @@ A2A се управлява чрез превключвателя **Крайни
 
 ### `message/send` — Синхронно изпълнение
 
-Изпраща съобщение към умение и изчаква пълния отговор.
+Изпраща съобщение до умение и изчаква пълния отговор.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+За `smart-routing`, `metadata.combo` изрично замества
+`metadata.model` за заявката към шлюза; то се изпраща като действителния `model`,
+а не като игнорирано JSON поле `x-combo`. Обичайното удостоверяване чрез API ключ на шлюза и
+упълномощаването за всяка цел продължават да се прилагат. Невалидна или празна комбинация се отхвърля.
+
+Резултатът предоставя `requested_combo` (намерението на извикващия), `dispatched_model`
+(действителната заявка към шлюза), `response_model` (отговорът на шлюза) и
+`confirmed_combo`. Последното поле е `null`, освен ако шлюзът изрично не
+идентифицира комбинация. Дневниците с решения на A2A приписват изпълнението само на
+потвърдена комбинация, като запазват непотвърдената заявка като `requestedCombo`.
+
 **Отговор:**
 
 ```json
@@ -76,28 +87,21 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE поточно предаване
+### `message/stream` — Поточно предаване чрез SSE
 
 Същото като `message/send`, но връща Server-Sent Events за поточно предаване в реално време.
 
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Налични умения
 
-OmniRoute предоставя 6 A2A умения, свързани в `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Всеки модул за умение се намира в `src/lib/a2a/skills/`.
+OmniRoute разкрива 6 A2A умения, свързани в `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Всеки модул за умения живее в `src/lib/a2a/skills/`.
 
-| Умение                      | ID                   | Описание                                                                                                                                                            | Етикети                    | Примери                                            |
-| :-------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------------------- |
-| Интелигентно маршрутизиране | `smart-routing`      | Маршрутизира подкана през оптималния доставчик/комбинация, използвайки механизма за комбинации и оценяване на OmniRoute                                             | маршрутизиране, доставчици | „Маршрутизирай тази подкана чрез най-добрия модел“ |
-| Управление на квотите       | `quota-management`   | Отчита състоянието на квотите за всеки доставчик и помага на извикващите страни да решат кога да ограничат заявките или да превключат към друг доставчик            | квота, доставчици          | „Провери квотата за anthropic“                     |
-| Откриване на доставчици     | `provider-discovery` | Изброява инсталираните доставчици с техните възможности, индикатори за безплатно ниво и OAuth състояние                                                             | доставчици, откриване      | „Какви доставчици са налични?“                     |
-| Анализ на разходите         | `cost-analysis`      | Оценява разходите за заявка/разговор въз основа на каталога и скорошното потребление                                                                                | разходи, потребление       | „Оцени разходите за този разговор“                 |
-| Отчет за състоянието        | `health-report`      | Обобщава състоянието на прекъсвача на веригата, периода за изчакване и блокирането за всеки доставчик                                                               | състояние, устойчивост     | „Покажи състоянието на всички доставчици“          |
-| Списък с възможности        | `list-capabilities`  | Връща пълния каталог с 45 Agent Skills записа (23 API + 21 CLI + 1 конфигурационен) като markdown таблица с директни SKILL.md URL адреси за инжектиране на контекст | каталог, откриване, умения | „Покажи всички възможности на OmniRoute“           |
+| Умение                      | ID                   | Описание                                                                                                                                                               | Етикети                    | Примери                                                      |
+| :-------------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :----------------------------------------------------------- |
+| Интелигентно маршрутизиране | `smart-routing`      | Насочва подкана през оптималния provider/combo, използвайки + точкуването на комбинираната машина на OmniRoute                                                         | маршрутизиране, доставчици | „Маршрутизиране на тази подкана чрез най-добрия модел“       |
+| Управление на квоти         | `quota-management`   | Отчита състоянието на квотата за всеки доставчик, помага на обаждащите се да решат кога да throttle/switch                                                             | квота, доставчици          | „Проверете квотата за антропик“                              |
+| Откриване на доставчик      | `provider-discovery` | Списъци с инсталирани доставчици с възможности, флагове за безплатни нива, състояние OAuth                                                                             | доставчици, откритие       | „Какви доставчици са налични?“                               |
+| Анализ на разходите         | `cost-analysis`      | Оценява цената на request/conversation като се има предвид скорошното използване + в каталога                                                                          | цена, използване           | „Приблизителна цена за този разговор“                        |
+| Здравен доклад              | `health-report`      | Агрегати прекъсвач, охлаждане, състояние на блокиране за всеки доставчик                                                                                               | здраве, устойчивост        | „Показване на здравословното състояние на всички доставчици“ |
+| Списък с възможности        | `list-capabilities`  | Връща пълния каталог с умения на агент с 45 записа (23 API + 21 CLI + 1 конфигурация) като таблица за маркиране с необработен SKILL.md URLs за инжектиране на контекст | каталог, откритие, умения  | „Избройте всички OmniRoute възможности“                      |
 
-> Картата на агента трябва да се поддържа синхронизирана с актуалния каталог от 352 доставчика; броят на доставчиците и метаданните за безплатен достъп/достъп без удостоверяване се извличат от регистъра по време на изпълнение.
+> Картата на агента трябва да се поддържа в съответствие с живия каталог на 377 доставчици; броят на доставчиците и free/no-auth метаданните се извличат от регистъра по време на изпълнение.
 
-### Подробности за умението `list-capabilities`
+### `list-capabilities` Подробности за умение
 
-Умението `list-capabilities` е особено полезно за външни агенти, които трябва да открият какво предоставя OmniRoute, преди да изпратят API извиквания. То връща артефакт със структурирана markdown таблица:
+Умението `list-capabilities` е особено полезно за външни агенти, които трябва да открият какво излага OmniRoute, преди да изпратят API повиквания. Той връща структуриран артефакт на таблица за маркиране:
 
 ```
-| ID | Име | Категория | Област | Крайни точки/команди | Директен URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Удостоверяване и сесии | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Всеки ред включва колоната `rawUrl`, така че агентите да могат незабавно да извлекат пълния SKILL.md. Полето `metadata.totalSkills` отразява размера на каталога (днес 45). Имплементация: `src/lib/a2a/skills/listCapabilities.ts`. Вижте също [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Всеки ред включва колоната `rawUrl`, така че агентите могат незабавно да извлекат пълния SKILL.md. Полето `metadata.totalSkills` отразява размера на каталога (45 днес). Внедряване: `src/lib/a2a/skills/listCapabilities.ts`. Вижте също [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -262,9 +266,9 @@ JSON-RPC крайната точка `/a2a` е каноничната входн
 
 ---
 
-## Примери за интеграция
+## Примери за интегриране
 
-### Python (requests)
+### Python (заявки)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (извличане)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

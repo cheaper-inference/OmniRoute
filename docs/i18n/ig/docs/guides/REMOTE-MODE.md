@@ -1,6 +1,6 @@
 # Remote Mode (Igbo)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -239,171 +239,147 @@ na-arụ ọrụ.
 
 ---
 
-## Ijikwa token
+## Njikwa tokens
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ na-ebipụta ihe nzuzo ahụ OTU UGBO — detuo ya ugbu a
-omniroute tokens list                 # ezoro akụkụ ya: id, aha, scope, prefix, ọnọdụ, ụbọchị ngwụcha
+#   ↳ na-egosi nzuzo OTU — detuo ya ugbu a
+omniroute tokens list                 # ezoro: id, name, scope, prefix, status, expiry
 omniroute tokens revoke <id|prefix>   # kagbuo ozugbo
-omniroute tokens scopes               # kọwaa scope atọ ahụ
+omniroute tokens scopes               # kọwaa ókè atọ
 ```
 
-Iwu `tokens` chọrọ nzere **admin**. Ị nwekwara ike ijikwa token n’ime
-ogwe njikwa n’okpuru **Ntọala → Token Nnweta** (mepụta, kagbuo, detuo naanị otu ugboro).
+Iwu `tokens` chọrọ akaụntụ **admin**. Ịkwadokwa nwere ike ijikwa tokens na dashboard n'okpuru **Settings → Access Tokens** (mepụta, kagbuo, detuo-otu-ugboro).
+
+A pụghị ịmepụta token nwere ọkwa karịa onye mepụtara ya nwere. Token `admin` naanị onye nchịkwa nwere ike imepụta ya: dashboard session, CLI nke ime ụlọ n'otu server ahụ, ma ọ bụ `omniroute connect` na paswọọdụ. Credentials igwe (access token `admin`, ma ọ bụ igodo API nwere `manage`/`admin` scope) nwere ike imepụta tokens `write` na `read` naanị; ọ bụrụ na ha chọọ `--scope admin`, ha na-alọghachi `403`. Ịkwụsị ịbanye abụghị ihe na-emeghe imepụta: access token nke scope ọ bụla bụ credential route ndị chọrọ ntinye mgbe niile na-anabata, ya mere oku anonymous na-enweta `401` n'scope ọ bụla.
 
 ---
 
-## Ịhazigharị CLI ide koodu site na katalọgụ dịpụrụ adịpụ
+## Ịtọ CLI coding site na katalọgụ dị anya
 
-`omniroute configure` na-agụ katalọgụ model dị ndụ nke **sava na-arụ ọrụ** ma dee
-nhazi n’igwe **gị**.
+`omniroute configure` na-agụ katalọgụ model dị ndụ nke **server na-arụ ọrụ** ma na-ede config na **kọmputa gị**.
 
 ```bash
 omniroute configure codex
-#   Ndị na-eweta: glm, kmc, ollamacloud, opencode-go, …
-#   Onye na-eweta: glm
-#   ID model: glm/glm-5.2
+#   Ndị na-enye ọrụ: glm, kmc, ollamacloud, opencode-go, …
+#   Provider: glm
+#   Model id: glm/glm-5.2
 #   ✔ Edere ~/.codex/glm52.config.toml
 #   Jiri ya:  codex --profile glm52
 
 # na-enweghị mmekọrịta
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# debe model a na-ejikarị eme ihe n’elu ihe nhọpụta mmekọrịta
+# debe model a na-eji oge niile n'elu nhọrọ mmekọrịta
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Ihe nhọpụta ahụ na-edobe naanị ID model (ọ bụghị URL ma ọ bụ nzere) n’ime faịlụ
-`model-preferences.json` mpaghara, nke e kewara dịka context na ebumnuche CLI si dị. A na-egosi
-ndị ọkacha mmasị tupu nhọrọ ndị na-adịbeghị anya; jiri `--unfavorite` wepụ model ahọpụtara
-na ndepụta context/ebumnuche ahụ.
+Onye nhọrọ na-echekwa naanị model IDs (ọ bụghị URLs ma ọ bụ credentials) na faịlụ `model-preferences.json` nke ime ụlọ, nke kewara site na context na CLI target. A na-egosi ndị ahọrọ tupu nhọrọ ndị dị nso; jiri `--unfavorite` iwepụ model ahọrọ site na ndepụta context/target ahụ.
 
-Profaịlụ e dere na-ezo aka na igodo inference site na env var
-(`OMNIROUTE_API_KEY`) — a naghị ede ihe nzuzo ahụ na diski. Maka nhazi mbụ
-nke Codex a na-eme naanị otu ugboro (ngọngọ `[model_providers.omniroute]`), lee
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Profaịlụ edere na-ezo aka n'igodo inference site na env var (`OMNIROUTE_API_KEY`). A naghị ede nzuzo na disk. Maka nhazi Codex nke mbụ otu ugboro (`[model_providers.omniroute]` block), lee [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Ịmalite CLI ka ọ rụọ ọrụ megide sava dịpụrụ adịpụ (edeghị nhazi)
+### Ịmalite CLI megide nke dị anya (enweghị config edere)
 
-`omniroute run <target>` na-asọpụrụkwa context na-arụ ọrụ: a na-etinye URL ntọala dịpụrụ adịpụ
-na nzere context n’ime process e bidoro naanị.
+`omniroute run <target>` na-erubekwa context na-arụ ọrụ: a na-etinye base URL dị anya na context credential naanị n'usoro a malitere.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → sava dịpụrụ adịpụ
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → remote
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Lelee kpọmkwem ihe a ga-amalite (naanị AHA IGODO env, ọ bụghị uru ha):
+# Lelee ihe a ga-amalite nke ọma (naanị aha env KEY, ọ bụghị uru):
 omniroute run codex --dry-run --json
 ```
 
-Ebumnuche: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(otu isi mmalite: `bin/cli/cli-manifest.mjs`). Qwen na Gemini na-eji
-home nwa oge e kewapụrụ iche nke a na-ewepụ mgbe ọ kwụsịrị, ya mere mmalite ahụ anaghị emetụ —
-ma ọ bụ hapụ data n’ime — nhazi ngwaọrụ nkeonwe gị.
+Targets: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (isi otu: `bin/cli/cli-manifest.mjs`). Qwen na Gemini na-agba ọsọ n'ụlọ nwa oge dị iche nke a na-ehichapụ mgbe ọ pụpụrụ, ya mere mmalite ahụ anaghị emetụ ma ọ bụ ịpụta n'ime nhazi ngwaọrụ onwe gị.
 
 ### Iwu nhazi maka CLI ọ bụla
 
-CLI ọ bụla akwadoro nwere iwu nhazi maara maka sava dịpụrụ adịpụ (ha niile na-asọpụrụ
-context na-arụ ọrụ, ma ọ bụ `--remote <url> --api-key <key>`):
+CLI ọ bụla a na-akwado nwere iwu nhazi nke ama maka dị anya (ha niile na-erube context na-arụ ọrụ, ma ọ bụ `--remote <url> --api-key <key>`):
 
-| CLI         | Iwu                        | Ihe ọ na-ede                                                                                                                                                                  |
-| ----------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | profaịlụ `~/.codex/<name>.config.toml` (otu maka model ọ bụla)                                                                                                                |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (otu maka model ọ bụla)                                                                                                             |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — provider `omniroute` dakọtara na openai, nke nwere model katalọgụ niile (gbaa `opencode -m omniroute/<model>`)                           |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (ọnọdụ CLI) + na-ebipụta ntọala ndọtị VS Code a ga-mado (dakọtara na OpenAI, Base URL **na-enweghị** `/v1`)                        |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + ntọala VS Code `kilocode.*` — dakọtara na OpenAI, Base URL **nwere** `/v1`                                                            |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + CLI `cn`) — `provider: openai`, `apiBase` **nwere** `/v1`, igodo site na `${{ secrets.OMNIROUTE_API_KEY }}`                    |
-| Cursor      | `omniroute setup-cursor`   | na-ebipụta usoro a ga-eme n'ime ngwa (Settings → Models → Override OpenAI Base URL **nwere** `/v1` + igodo + model). Nhazi Cursor bụ SQLite zoro ezo — naanị panel nkata      |
-| Roo Code    | `omniroute setup-roo`      | na-ede JSON mbubata Roo (`~/.omniroute/roo-settings.json`) + na-ahazi `roo-cline.autoImportSettingsPath` + na-ebipụta usoro UI (dakọtara na OpenAI, Base URL **nwere** `/v1`) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — provider `openai-compat`, `base_url` **nwere** `/v1`, igodo site na `$OMNIROUTE_API_KEY`                                                       |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **na-enweghị** `/v1` + `GOOSE_MODEL`) + usoro env                                                      |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **na-enweghị** `/v1` + `model: openai/<id>`) + usoro env (`aider --message --yes`)                                                     |
-| Qwen Code   | `omniroute setup-qwen`     | ntinye V4 `modelProviders.openai` na `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` n'ime `~/.qwen/.env`                                                                       |
+| CLI         | Iwu                        | Ihe ọ na-ede                                                                                                                                                                |
+| ----------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | profaịlụ `~/.codex/<name>.config.toml` (maka model ọ bụla)                                                                                                                  |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (maka model ọ bụla)                                                                                                               |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`: onye na-enye ọrụ `omniroute` dabara na openai nwere model katalọgụ niile (gbaa `opencode -m omniroute/<model>`)                         |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (ụdị CLI) + na-ebipụta ntọala extension VS Code iji wunye (dabara na OpenAI, Base URL **na-enweghị** `/v1`)                      |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + ntọala VS Code `kilocode.*`: dabara na OpenAI, Base URL **nwere** `/v1`                                                             |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI): `provider: openai`, `apiBase` **nwere** `/v1`, igodo site na `${{ secrets.OMNIROUTE_API_KEY }}`                   |
+| Cursor      | `omniroute setup-cursor`   | na-ebipụta usoro n'ime app (Settings → Models → Override OpenAI Base URL **nwere** `/v1` + igodo + model). Config Cursor bụ SQLite a na-amaghị, ya mere chat panel naanị    |
+| Roo Code    | `omniroute setup-roo`      | na-ede Roo import JSON (`~/.omniroute/roo-settings.json`) + na-etinye `roo-cline.autoImportSettingsPath` + na-ebipụta usoro UI (dabara na OpenAI, Base URL **nwere** `/v1`) |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`: onye na-enye ọrụ `openai-compat`, `base_url` **nwere** `/v1`, igodo site na `$OMNIROUTE_API_KEY`                                              |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`: `language_models.openai_compatible.omniroute`, `api_url` **nwere** `/v1`, Zed na-agụ igodo site na `$OMNIROUTE_API_KEY` (a naghị ede ya)     |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **na-enweghị** `/v1` + `GOOSE_MODEL`) + env recipe                                                   |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **na-enweghị** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                                  |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` entry + `OMNIROUTE_API_KEY` na `~/.qwen/.env`                                                                            |
 
 ```bash
-# OpenCode (provider dakọtara na openai, model katalọgụ niile, VPS dị anya)
+# OpenCode (onye na-enye ọrụ dabara na openai, model katalọgụ niile, VPS dị anya)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # debe naanị model ndị dabara
-opencode -m omniroute/glm/glm-5.2 "..."          # buru ụzọ export OMNIROUTE_API_KEY
+omniroute setup-opencode --only glm,kimi        # debe naanị model dabara adaba
+opencode -m omniroute/glm/glm-5.2 "..."          # bupụ OMNIROUTE_API_KEY tupu
 ```
 
-> OpenCode nwekwara njikọta **plugin** bara ụba karị: `omniroute setup opencode`
-> (ugbu a ọ na-akwado nke dị anya site na `--remote`) na-etinye `@omniroute/opencode-plugin`.
-> `setup-opencode` bụ nhọrọ ọzọ dị mfe nke dakọtara na openai. A na-ezo aka na igodo API
-> site na `{env:OMNIROUTE_API_KEY}` — anaghị ede ya na diski ma ọlị.
+> OpenCode nwekwara ihe mgbakwunye **plugin** bara ụba: `omniroute setup opencode` (nke nwere ike ịma dị anya ugbu a site na `--remote`) na-atụ `@omniroute/opencode-plugin`.
+> `setup-opencode` bụ nhọrọ ọzọ dị mfe dabara na openai. A na-ezo aka na igodo API site na `{env:OMNIROUTE_API_KEY}`, a naghị ede ya na disk.
 >
-> Na OpenCode v2, jiri `@omniroute/opencode-plugin-v2` kama: otu katalọgụ ahụ,
-> mana nkwekọrịta loader dị iche. Ọ na-agụ igodo ahụ site n'ebe OpenCode n'onwe ya
-> na-edobe nzere mgbe ejikọrọ njikọta ahụ, ya mere gateway dị anya anaghị achọ igodo
-> ọ bụla n'ime `opencode.json`.
+> Na OpenCode v2, jiri `@omniroute/opencode-plugin-v2` kama ya: katalọgụ otu, nkwekọrịta loader dị iche. Ọ na-agụ igodo site na ụlọakụ credential nke OpenCode n'onwe ya mgbe a jikọrọ njikọ, ya mere gateway dị anya na-enweghị ihe achọrọ igodo n'ime `opencode.json`.
 
 ---
 
-## Ijikwa contexts (ịgbanwee n'etiti sava)
+## Ijikwaa contexts (ịgbanwe n'etiti sava)
 
-**Context** bụ sava echekwara (baseUrl + credential + scope). `omniroute connect`
-na-emepụta otu ma mee ka ọ bụrụ nke na-arụ ọrụ; site mgbe ahụ gaa n'ihu, iwu ọ bụla na-ezubere ya. Jikwaa ma
-gbanwee n'etiti ha site na `omniroute contexts`:
+A **context** bụ sava echekwara (baseUrl + credential + scope). `omniroute connect` na-emepụta otu ma mee ka ọ rụọ ọrụ; site mgbe ahụ gaa n'ihu, iwu ọ bụla na-elekwasị anya na ya. Jikwaa ma gbanwee n'etiti ha na `omniroute contexts`:
 
 ```bash
-omniroute contexts list            # contexts niile; a na-eji ● akara nke na-arụ ọrụ
-omniroute contexts current         # sava na-arụ ọrụ, ọnọdụ auth, scope
+omniroute contexts list            # all contexts; the active one is marked ●
+omniroute contexts current         # the active server, auth status, scope
 ```
 
 ```text
-  | Aha     | URL Ntọala                | Auth  | Scope | Nkọwa
-● | vps     | http://100.67.86.91:20128 | token | admin | OmniRoute dị anya (…)
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | Remote OmniRoute (…)
   | default | http://localhost:20128    | ✗     |       |
 ```
 
-**Gbanwee sava** — iwu ọ bụla sochirinụ na-agbaso context na-arụ ọrụ:
+**Gbanwee sava** — iwu ọ bụla na-esote na-agbaso context na-arụ ọrụ:
 
 ```bash
-omniroute contexts use vps         # → iwu niile na-aga ugbu a na VPS dị anya
-omniroute tokens list              #   (na-arụ ọrụ megide VPS)
+omniroute contexts use vps         # → all commands now hit the remote VPS
+omniroute tokens list              #   (na-agba ọsọ megide VPS)
 
-omniroute contexts use default     # → laghachi na localhost
-omniroute tokens list              #   (na-arụ ọrụ megide sava mpaghara)
+omniroute contexts use default     # → back to localhost
+omniroute tokens list              #   (na-agba ọsọ megide sava mpaghara)
 ```
 
-**Tinye context n'onwe gị** (kama iji `connect`), nyochaa, ma ọ bụ nyegharịa aha:
+**Tinye context n'onwe gị** (n'ọnọdụ `connect`), nyochaa, ma ọ bụ gbanwee aha:
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
-  --access-token oma_live_xxxx --scope write --description "igbe staging"
-omniroute contexts show staging    # nkọwa zuru ezu maka otu context
+  --access-token oma_live_xxxx --scope write --description "staging box"
+omniroute contexts show staging    # full details for one context
 omniroute contexts rename staging stg
 ```
 
-**Wepụ context** — ọ na-arịọ nkwenye; tinye `--yes` ka ịwụfee ya
-(a chọrọ nke a maka scripts / shells ndị na-abụghị interactive, nke ga-ajụ n'enweghị nsogbu ma ọ bụghị ya):
+**Wepụ context** — na-arịọ maka nkwenye; gafere `--yes` ka ịwụpụ ya (achọrọ maka scripts / shells na-abụghị interactive, nke na-ajụ n'enweghị nsogbu):
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> Enweghị ike iwepụ `default` (localhost). Iwepụ context na-arụ ọrụ na-eme ka e jiri
-> `default` dochie ya. Ndụmọdụ: iwepụ context na-ehichapụ naanị credential echekwara **na mpaghara** —
-> kagbuo token ahụ na sava site na `omniroute tokens revoke <id>` iji
-> kwụsị ohere n'ezie.
+> `default` (localhost) enweghị ike iwepụ. Iwepụ context na-arụ ọrụ na-alaghachi na `default`. Ndụmọdụ: iwepụ context na-ewepụ naanị credential **mpaghara** echekwara — kagbuo token ahụ na sava ahụ na `omniroute tokens revoke <id>` iji gbuo ohere n'ezie.
 
-**Mbupụ / mbubata** contexts (dịka ọmụmaatụ, iji bugharịa ha n'etiti igwe). Contexts ọhụrụ na-echekwa
-naanị ntụaka keychain; anaghị edetụ credentials n'ime mbupụ ahụ mgbe keychain nke OS
-dị:
+**Export / import** contexts (dịka ọmụmaatụ, iji bufee ha n'etiti igwe). Exports na-ewepụ credentials na ndabara, gụnyere credentials echekwara site na nkwado faịlụ. Jiri `--include-secrets` n'ụzọ doro anya mgbe achọrọ nkwado nwere ike ibugharị nke nwere credential:
 
 ```bash
-omniroute contexts export --out contexts.json     # ndabara: stdout
-omniroute contexts import contexts.json            # degharịa ihe dị; jiri --merge idowe ndị dị ugbu a
-omniroute contexts migrate --yes                  # bugharịa legacy plaintext tokens gaa na keychain
+omniroute contexts export --out contexts.json     # ezoro ezo; ebe nchekwa ndabara: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # dee n'elu; --merge iji debe ndị dị adị
+omniroute contexts migrate --yes                  # bufee tokens plaintext ochie na keychain
 ```
 
-Na sistemụ headless na-enweghị keychain OS a pụrụ iji, CLI na-eji
-`config.json` nwere mode `0600` kama ya ma bipụta ịdọ aka ná ntị otu ugboro. Were mbupụ sitere na
-ụzọ nnọchi ahụ (yana legacy config ọ bụla tupu migration) dị ka ihe nzuzo.
+`--include-secrets` na-edozi ntụaka keychain tupu exporting ma na-ada ma ọ bụrụ na enweghị ike ịgụ credential ọ bụla akpọrọ aha. `--no-secrets` na-ebute ụzọ mgbe niile. A na-ede faịlụ export n'ụzọ atomic na mode `0600`. Were export nwere ihe nzuzo doro anya dị ka ihe nzuzo. Na sistemụ na-enweghị isi na-enweghị keychain OS nwere ike iji, CLI na-alaghachi na `config.json` na mode `0600` ma na-ebipụta ịdọ aka ná ntị otu oge; export ndabara na-anọgide na-ezoro ezo na mode a.
 
 ---
 

@@ -1,6 +1,6 @@
 # Free Provider Rankings (Arena ELO) (Suomi)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇦 [bs](../../../bs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
 
 ---
 
@@ -12,30 +12,17 @@
 
 ## Mikä se on
 
-OmniRoute rekisteröi 329 palveluntarjoajaa, joista 155 luettelomerkintää on merkitty **ilmaisiksi / tunnistautumista vaatimattomiksi**
-(ei tunnistautumista,
-ilmaisen tason OAuth tai ilmaisen tason API-avain — katso
-[Ilmaisten tasojen opas](../getting-started/FREE-TIERS-GUIDE.md) ja kattava
-[Ilmaisten tasojen hakemisto](../reference/FREE_TIERS.md)). Haasteena on, että ilmaisten palveluntarjoajien
-mallien laatu vaihtelee huomattavasti. Tunnistautumista vaatimaton palveluntarjoaja, joka tarjoaa huipputason mallia, on paljon hyödyllisempi
-kuin pieniä vanhoja malleja tarjoava palveluntarjoaja.
+OmniRoute rekisteröi 377 palveluntarjoajaa, joista 155 on merkitty**free/no-auth** (no-auth, free-tier OAuth tai free-tier API -avain – katso [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) ja täydellinen [Free Tiers -hakemisto](../reference/FREE_TIERS.md) ). Saalis: ilmaiset palveluntarjoajat vaihtelevat valtavasti mallien laadussa. Valmentamaton palveluntarjoaja, joka palvelee rajamallia, on paljon hyödyllisempi kuin pieni vanha malli.
 
-**Ilmaisten palveluntarjoajien sijoitukset** vastaa kysymykseen "**mikä ilmainen palveluntarjoaja antaa minulle parhaan mallin?**"
-yhdistämällä kunkin ilmaisen palveluntarjoajan luettelon **joukkoistetusta laadunarvioinnista saatuihin pisteisiin**
-**Arena AI -tulostaulukosta** (ihmisten mieltymyksiin perustuva ELO, sama periaate kuin LMArenan
-chatbottiareenassa). Palveluntarjoajat asetetaan tämän jälkeen järjestykseen niiden **parhaan ilmaisen mallin** vahvuuden perusteella.
+**Ilmaiset palveluntarjoajan sijoitukset** vastauksia"** mikä ilmainen tarjoaja tarjoaa minulle parhaan mallin?** " liittymällä jokaisen ilmaisen palveluntarjoajan luetteloon** joukkolähteet laatupisteet** alkaen** Arena AI tulostaulukko** (ihmis-preference ELO, sama idea LMArena-chatbot-areenan takana). Palveluntarjoajat luokitellaan sitten niiden vahvuuden mukaan** paras ilmainen malli** .
 
-Sijoitus lasketaan kolmesta todellisesta lähteestä:
+Sijoitus on laskettu kolmesta todellisesta lähteestä:
 
-1. Ilmaisten palveluntarjoajien luettelot — `NOAUTH_PROVIDERS` sekä `OAUTH_PROVIDERS`- /
-   `APIKEY_PROVIDERS`-merkinnät, joiden `hasFree`-merkintä on käytössä
-   (`src/shared/constants/providers.ts`).
-2. Kunkin palveluntarjoajan malliluettelo palveluntarjoajarekisteristä
-   (`open-sse/config/providerRegistry.ts`).
-3. ELO-pisteistä johdetut tehtäväsoveltuvuuspisteet, jotka Arena ELO -synkronointimoottori tallentaa
-   `model_intelligence`-tietokantatauluun (`src/lib/arenaEloSync.ts`).
+1. Ilmaisten palveluntarjoajien luettelot — `NOAUTH_PROVIDERS` sekä `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` -merkinnät merkitty `hasFree` (`src/shared/constants/providers.ts`).
+2. Jokaisen toimittajan malliluettelo toimittajarekisteristä (`open-sse/config/providerRegistry.ts`).
+3. Arena ELO -synkronointimoottorin (`src/lib/arenaEloSync.ts`) `model_intelligence` DB -taulukkoon tallentamat ELO-pohjaiset tehtävänsovituspisteet.
 
-Yhdistämislogiikka sijaitsee tiedostossa `src/lib/freeProviderRankings.ts`.
+Liitoslogiikka elää `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -119,101 +106,105 @@ Vastauksen rakenne:
 
 ---
 
-## Miten pisteet toimivat
+## Miten pistemäärät toimivat
 
 ### Lähde: Arena AI -tulostaulukko
 
 Arena ELO -synkronointimoottori (`src/lib/arenaEloSync.ts`) hakee kaksi tulostaulukkoa — `text`
-ja `code` — Arena AI -tulostaulukon API:sta
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Jokainen tulostaulukon tietue
-sisältää mallin nimen, toimittajan, ELO-`score`-arvon, luottamusvälin ja äänten määrän.
+ja `code` — Arena AI -tulostaulukko-API:sta
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Kun kyseinen API ei palauta
+käyttökelpoista taulukkoa, moottori turvautuu viralliseen `lmarena-ai/leaderboard-dataset`-aineistoon
+Hugging Face -datasets-serverillä (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` raportoi kentät `activeSource`, `lastError` ja
+`lastFailedAt`. Jokainen tulostaulukkomerkintä
+sisältää mallin nimen, toimittajan, ELO-`score`-pistemäärän, luottamusvälin ja äänimäärän.
 
-Tulostaulukoiden luokat yhdistetään OmniRouten tehtäväluokkiin seuraavasti:
+Tulostaulukoiden kategoriat vastaavat OmniRouten tehtäväkategorioita:
 
-| Arena-tulostaulukko | OmniRouten tehtäväluokat                          |
+| Arena-tulostaulukko | OmniRouten tehtäväkategoriat                      |
 | ------------------- | ------------------------------------------------- |
 | `text`              | `default`, `review`, `documentation`, `debugging` |
 | `code`              | `coding`                                          |
 
-### Normalisointi (tehtävään soveltuvuuden pisteet)
+### Normalisointi (tehtäväsoveltuvuuspisteet)
 
-Raaka-ELO-pisteet normalisoidaan tulostaulukohtaisesti **tehtävään soveltuvuuden arvoksi välillä `[0.4, 0.98]`**:
+Raat ELO-pistemäärät normalisoidaan tulostaulukokohtaisesti **tehtäväsoveltuvuusarvoksi välillä `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Pistemäärä ei koskaan saavuta arvoa `0` tai `1`, joten käyttäjän ohituksille jää liikkumavaraa. Tämä on
-API-vastauksessa näkyvä `score`-kenttä sekä hallintapaneelissa näkyvä tunniste.
+Pistemäärä ei koskaan saavuta arvoa `0` tai `1`, joten käyttäjien omiin ohituksiin jää
+liikkumavaraa. Tämä on se `score`-kenttä, jonka näet API-vastauksessa, ja hallintapaneelissa näkyvä selite.
 
 ### Luottamustaso
 
-Jokaiselle tietueelle määritetään luottamustaso Arenan äänimäärän perusteella:
+Jokainen merkintä saa luottamustason Arenan äänimäärän perusteella:
 
-| Luottamustaso | Ääniä   |
+| Luottamustaso | Äänet   |
 | ------------- | ------- |
-| `high`        | ≥ 5 000 |
-| `medium`      | ≥ 1 000 |
-| `low`         | < 1 000 |
+| `high`        | ≥ 5,000 |
+| `medium`      | ≥ 1,000 |
+| `low`         | < 1,000 |
 
-### Tallennus ja tietojen ajantasaisuus
+### Tallennus ja tietojen tuoreus
 
-Normalisoidut tietueet kirjoitetaan tietokannan `model_intelligence`-tauluun arvolla
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Tietueet **vanhenevat
-7 päivän kuluttua**, joten synkronoinnin lopettava palveluntarjoaja poistuu lopulta tiedoista vanhentuneiden
-tietojen näyttämisen sijaan.
+Normalisoidut merkinnät kirjoitetaan `model_intelligence`-tietokantataulukkoon arvolla
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Merkinnät **vanhenevat
+7 päivän kuluttua**, joten synkronoinnin lopettanut palveluntarjoaja putoaa ajan myötä pois
+listalta sen sijaan, että se tarjoaisi vanhentunutta tietoa.
 
-Synkronointi on **oletusarvoisesti käytössä**:
+Synkronointi on **oletuksena käytössä**:
 
-- Se suoritetaan kerran palvelimen käynnistyessä ja sen jälkeen säännöllisin väliajoin
-  (`src/lib/arenaEloSync.ts`, kytkentä tiedostossa `src/instrumentation-node.ts`).
-- Se **ei estä toimintaa eikä koskaan aiheuta vakavaa virhettä** — jos tietojen haku lähteestä epäonnistuu, OmniRoute jatkaa
-  toimintaansa ja sijoituksissa näytetään vain viimeisimmät onnistuneesti haetut tiedot (tai tyhjä tila).
+- Se suoritetaan kerran palvelimen käynnistyessä ja sen jälkeen määräajoin ajastimella
+  (`src/lib/arenaEloSync.ts`, kytketty tiedostossa `src/instrumentation-node.ts`).
+- Se on **ei-estävä eikä koskaan kriittinen** — jos haku ulkoisesta lähteestä epäonnistuu, OmniRoute jatkaa
+  toimintaansa ja sijoitukset näyttävät yksinkertaisesti viimeisimmät toimivat tiedot (tai tyhjän tilan).
 
-Sitä hallitaan kahdella ympäristömuuttujalla (dokumentoitu tiedostossa
+Kahta ympäristömuuttujaa käytetään sen ohjaamiseen (dokumentoitu kohdassa
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Muuttuja                  | Oletusarvo     | Tarkoitus                                                                  |
-| ------------------------- | -------------- | -------------------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`         | Aseta arvoksi `false`, jos haluat poistaa lähtevän synkronoinnin käytöstä. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 h) | Synkronointiväli sekunteina.                                               |
+| Muuttuja                  | Oletus        | Tarkoitus                                                 |
+| ------------------------- | ------------- | --------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Aseta arvoon `false` kieltääksesi lähtevän synkronoinnin. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Synkronointiväli sekunteina.                              |
 
 ### Manuaalinen synkronointi / tila / tyhjennys
 
-Operaattoreille todennettu hallintapäätepiste tarjoaa manuaalisen hallinnan
-(`src/app/api/intelligence/sync/route.ts` — edellyttää hallintatodennusta):
+Operaattoreille on käytettävissä todennettu hallintapäätepiste, joka tarjoaa manuaalisen ohjauksen
+(`src/app/api/intelligence/sync/route.ts` — vaatii hallintatunnistautumisen):
 
 ```
-GET    /api/intelligence/sync          # synkronoinnin nykyinen tila (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # käynnistä manuaalinen synkronointi; runko: { "dryRun": true } esikatselua varten ilman kirjoittamista
-DELETE /api/intelligence/sync          # tyhjennä kaikki synkronoidut arena_elo-älytietueet
+GET    /api/intelligence/sync          # synkronoinnin nykytila (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # käynnistä manuaalinen synkronointi; runko: { "dryRun": true } esikatseluun ilman kirjoitusta
+DELETE /api/intelligence/sync          # tyhjennä kaikki synkronoidut arena_elo-tietomerkinnät
 ```
 
-Jos sijoitussivu on tyhjä, manuaalinen `POST /api/intelligence/sync` (tai pelkkä
+Jos sijoitussivu on tyhjä, manuaalinen `POST /api/intelligence/sync`-pyyntö (tai yksinkertaisesti
 palvelimen uudelleenkäynnistys) täyttää sen uudelleen.
 
 ### Mallien yhdistäminen tulostaulukkoon
 
-Rekisterin mallitunnukset ja Arenan mallien nimet eivät aina vastaa täysin toisiaan. Sijoituksissa käytetään
-joustavaa vastaavuushakua (`findMatchingIntelligence` tiedostossa `src/lib/freeProviderRankings.ts`):
+Rekisterin mallitunnukset ja Arenan mallinimet eivät aina vastaa toisiaan täsmälleen. Sijoituksissa käytetään
+joustavaa yhdistämistä (`findMatchingIntelligence` tiedostossa `src/lib/freeProviderRankings.ts`):
 
-1. Normalisoidun mallitunnuksen täsmällinen vastaavuus.
-2. Vastaavuus lopussa olevan versiotunnisteen poistamisen jälkeen (esim. `kimi-k2.6` → `kimi-k2`).
-3. Etuliitteen vastaavuus (tulostaulukon mallin nimi on rekisteritunnuksen etuliite).
+1. Tarkka osuma normalisoituun mallitunnukseen.
+2. Osuma lopun versiopäätteen poistamisen jälkeen (esim. `kimi-k2.6` → `kimi-k2`).
+3. Etuliiteosuma (tulostaulukon mallinimi on rekisteritunnuksen etuliite).
 
-Synkronoinnin yhteydessä tunnetut toimittajien etuliitteet (`anthropic/`, `openai/`, `google/`, …)
-poistetaan ja pieni aliasmääritys laajentaa kanoniset nimet OmniRouten sisäisesti käyttämiin
-muunnelmiin, joten mallit löytyvät kaikilla nimillä.
+Synkronointipuolella tunnetut toimittajaetuliitteet (`anthropic/`, `openai/`, `google/`, …)
+poistetaan, ja pieni aliaskartta laajentaa kanoniset nimet niihin muotoihin, joita OmniRoute käyttää
+sisäisesti, joten mallit ovat löydettävissä millä tahansa nimellä.
 
 ### Miten palveluntarjoaja sijoitetaan
 
-Moottori pisteyttää kunkin ilmaisen palveluntarjoajan kaikki luettelossa olevat mallit, minkä jälkeen:
+Moottori pisteyttää jokaisen ilmaisen palveluntarjoajan katalogin kaikki mallit, minkä jälkeen:
 
-- **Paras malli** = palveluntarjoajan parhaiten pisteytetty malli.
-- **Keskimääräinen pistemäärä** = palveluntarjoajan kaikkien pisteytettyjen mallien pisteiden keskiarvo.
-- **Mallit** = niiden palveluntarjoajan mallien määrä, joilla oli Arena-pistemäärä.
+- **Huippumalli** = palveluntarjoajan korkeimmin pisteytetty malli.
+- **Keskiarvo** = kyseisen palveluntarjoajan kaikkien pisteytettyjen mallien pistemäärän keskiarvo.
+- **Mallit** = kuinka monella palveluntarjoajan mallista oli Arena-pistemäärä.
 
-Palveluntarjoajat järjestetään ensin **parhaan mallin pistemäärän** ja sitten keskimääräisen pistemäärän mukaan. Tämä palkitsee
+Palveluntarjoajat järjestetään ensisijaisesti **huippumallin pistemäärän** ja toissijaisesti keskiarvopistemäärän mukaan. Tämä palkitsee
 palveluntarjoajan, joka tarjoaa vähintään yhden vahvan ilmaisen mallin.
 
 ---

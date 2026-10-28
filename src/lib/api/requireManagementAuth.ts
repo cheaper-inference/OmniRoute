@@ -56,7 +56,7 @@ export async function requireManagementAuth(
   if (request === undefined || request === null) {
     return null;
   }
-  if (!options.alwaysRequireAuth && !(await isAuthRequired(request))) {
+  if (!options.alwaysRequireAuth && !(await isAuthRequired(request, { ignorePublicRoute: true }))) {
     return null;
   }
 
@@ -161,4 +161,18 @@ export async function requireManagementAuth(
     message: "Authentication required",
     type: "invalid_request",
   });
+}
+
+/**
+ * A key holding a management scope (`manage` / `admin`) is accepted by the always-protected tier,
+ * so creating one, granting the scope, or handing out its secret (regenerate / reveal) needs a
+ * real credential even with login disabled — otherwise an anonymous caller mints its way past
+ * that tier. Inference-only keys keep the open-mode behaviour (`null` here).
+ */
+export async function requireCredentialForManagementScopedKey(
+  request: Request,
+  scopes: readonly string[] | null | undefined
+): Promise<Response | null> {
+  if (!hasManageScopeShared(scopes ?? [])) return null;
+  return requireManagementAuth(request, { alwaysRequireAuth: true });
 }

@@ -9,21 +9,23 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-attempt-logging-test-"));
 process.env.DATA_DIR = testDataDir;
 
 const coreDb = await import("../../src/lib/db/core.ts");
-const { getCallLogById } = await import("../../src/lib/usage/callLogs.ts");
+const { getCallLogById, getCallLogs } = await import("../../src/lib/usage/callLogs.ts");
 const { persistAttemptLogs } = await import("../../open-sse/handlers/chatCore/attemptLogging.ts");
 const { getAuditLog } = await import("../../src/lib/compliance/index.ts");
 
-type CodexRotationEnvelope = {
+type CallLogEnvelope = {
   _omniroute?: {
     codexAccountRotation?: {
       initialConnectionId: unknown;
       finalConnectionId: unknown;
     };
+    geminiPromptCache?: Record<string, unknown>;
   };
 };
 
@@ -57,18 +59,28 @@ function baseCtx(overrides: Record<string, unknown> = {}) {
   } as Parameters<typeof persistAttemptLogs>[1];
 }
 
-async function pollForCallLog(id: string, tries = 120) {
-  for (let i = 0; i < tries; i++) {
-    const row = await getCallLogById(id);
-    if (row) return row as Record<string, unknown>;
+async function pollForCallLog(traceId: string, timeoutMs = CALL_LOG_SETTLE_TIMEOUT_MS) {
+  // #14451: call_logs.id is a fresh UUID. The dashboard traceId is stored on
+  // correlation_id so a test can still find the attempt without sharing a PK.
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const rows = await getCallLogs({ correlationId: traceId, limit: 5 });
+    if (rows[0]?.id && rows[0].detailState === "ready") {
+      const row = await getCallLogById(rows[0].id);
+      if (row) return row as Record<string, unknown>;
+    }
     await new Promise((r) => setTimeout(r, 20));
   }
   return null;
 }
 
-function getCodexAccountRotation(value: unknown) {
+function getOmniRouteMeta(value: unknown) {
   if (!value || typeof value !== "object") return undefined;
-  return (value as CodexRotationEnvelope)._omniroute?.codexAccountRotation;
+  return (value as CallLogEnvelope)._omniroute;
+}
+
+function getCodexAccountRotation(value: unknown) {
+  return getOmniRouteMeta(value)?.codexAccountRotation;
 }
 
 before(async () => {
@@ -129,6 +141,37 @@ test("cacheSource 'semantic' is preserved", async () => {
   assert.equal(row.cacheSource, "semantic");
 });
 
+test("persists bounded Gemini cache evidence under request and response _omniroute metadata", async () => {
+  const id = "attempt-gemini-cache-1";
+  const geminiPromptCache = {
+    schemaVersion: 1,
+    mode: "implicit",
+    evidence: "hit",
+    providerCounters: { cachedContentTokenCount: 40_929 },
+    prefixBoundary: "unknown",
+    prefixMethod: "unavailable",
+  };
+
+  persistAttemptLogs(
+    {
+      status: 200,
+      tokens: { prompt_tokens: 46_212, cached_tokens: 40_929 },
+      responseBody: { candidates: [] },
+      geminiPromptCache,
+    },
+    baseCtx({
+      pendingRequestId: id,
+      provider: "antigravity",
+      model: "gemini-3.7-flash-tiered",
+    })
+  );
+
+  const row = await pollForCallLog(id);
+  assert.ok(row, "call log row should be persisted");
+  assert.deepEqual(getOmniRouteMeta(row.requestBody)?.geminiPromptCache, geminiPromptCache);
+  assert.deepEqual(getOmniRouteMeta(row.responseBody)?.geminiPromptCache, geminiPromptCache);
+});
+
 test("connectionId falls back to credentials.connectionId when null, and error is persisted", async () => {
   const id = "attempt-fallback-1";
   persistAttemptLogs(
@@ -174,6 +217,38 @@ test("duplicate tool_calls in the assembled body writes provider.spec_violation 
   );
 });
 
+test("video-observed duplicate tool calls retain an audit verdict without retaining the tool name", () => {
+  const privateName = "PRIVATE_VIDEO_TRANSCRIPT_IN_TOOL_NAME";
+  persistAttemptLogs(
+    {
+      status: 200,
+      responseBody: {
+        choices: [
+          {
+            message: {
+              tool_calls: [
+                { function: { name: privateName, arguments: "{}" } },
+                { function: { name: privateName, arguments: "{}" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    baseCtx({
+      pendingRequestId: "attempt-spec-video-1",
+      skillRequestId: "skill-spec-video-1",
+      videoContentRemoved: true,
+    })
+  );
+  const rows = getAuditLog({ action: "provider.spec_violation", requestId: "skill-spec-video-1" });
+  assert.equal(rows.length, 1);
+  const details = rows[0]?.details;
+  assert.ok(details && typeof details === "object");
+  assert.equal((details as { violation?: string }).violation, "duplicate tool_calls entry");
+  assert.equal(JSON.stringify(rows).includes(privateName), false);
+});
+
 test("unique tool_calls do not write provider.spec_violation audit", () => {
   persistAttemptLogs(
     {
@@ -200,11 +275,11 @@ test("unique tool_calls do not write provider.spec_violation audit", () => {
   assert.equal(rows.length, 0);
 });
 
-// #13481: Combo attempts must use traceId as the log id, not pendingRequestId.
-// When a combo fails over, each attempt has a unique traceId but shares the
-// same pendingRequestId. Using pendingRequestId as the log id caused a UNIQUE
-// constraint violation — only the first (failed) attempt was logged.
-test("combo attempt uses traceId as the log id, not pendingRequestId", async () => {
+// #13481: combo attempts share pendingRequestId and must still land as separate
+// rows. #14451: those rows are no longer keyed by traceId (a short prefix
+// collided, and a reused id overwrites the artifact file). The dashboard token
+// is stored on correlation_id; the SQLite primary key is a generated UUID.
+test("combo attempts that share pendingRequestId both land, keyed independently of traceId", async () => {
   const traceId = "combo-trace-attempt-2";
   const pendingRequestId = "combo-shared-request-id";
   persistAttemptLogs(
@@ -217,7 +292,9 @@ test("combo attempt uses traceId as the log id, not pendingRequestId", async () 
     })
   );
   const row = await pollForCallLog(traceId);
-  assert.ok(row, "call log row should be persisted with traceId as id");
+  assert.ok(row, "call log row should be persisted for this attempt");
+  assert.notEqual(row.id, traceId);
+  assert.equal(row.correlationId, traceId);
   assert.equal(row.status, 200);
   assert.equal(row.comboStepId, "my-combo-model-2");
 
@@ -234,5 +311,7 @@ test("combo attempt uses traceId as the log id, not pendingRequestId", async () 
   );
   const row2 = await pollForCallLog(traceId2);
   assert.ok(row2, "second combo attempt should also be persisted");
+  assert.notEqual(row2.id, row.id);
+  assert.equal(row2.correlationId, traceId2);
   assert.equal(row2.comboStepId, "my-combo-model-3");
 });

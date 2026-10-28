@@ -1,31 +1,31 @@
 # Authorization Guide (Українська)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
 
 ---
 
 > **Джерело істини:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Останнє оновлення:** 2026-06-28 — v3.8.40
+> **Останнє оновлення:** 22.09.2026 — простори імен області вказують на MCP-SERVER.md
 
-OmniRoute має конвеєр авторизації з урахуванням маршрутів, який контролює кожен API-запит. Класифікація є **детермінованою** та **закритою за замовчуванням** — усе, що неможливо класифікувати, отримує клас `MANAGEMENT` і вимагає сесії або токена рівня керування. На цій сторінці пояснюється модель для інженерів, які супроводжують маршрути або проєктують нові кінцеві точки.
+OmniRoute має конвеєр авторизації, що враховує маршрути та захищає кожен запит API. Класифікація є **детермінованою** та **закривається при збої** — все, що не може бути класифіковано, стає `MANAGEMENT` і вимагає сесії або токена рівня управління. Ця сторінка пояснює модель для інженерів, які підтримують маршрути або розробляють нові кінцеві точки.
 
-![Конвеєр AuthZ (3 класи маршрутів + оцінювання політик)](../diagrams/exported/authz-pipeline.svg)
+![Конвеєр AuthZ (3 класи маршрутів + оцінка політики)](../diagrams/exported/authz-pipeline.svg)
 
 > Джерело: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## Два режими автентифікації
 
-### 1. API-ключ (Bearer)
+### 1. Ключ API (Bearer)
 
-Використовується для клієнтських API, сумісних з OpenAI/Anthropic/Gemini, а також для деяких маршрутів керування, коли ключ має область дії `manage`.
+Використовується для клієнтських API, сумісних з OpenAI/Anthropic/Gemini, а також для кількох маршрутів керування, коли ключ має область дії `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Перевіряється функціями `isValidApiKey()` / `extractApiKey()` у `src/sse/services/auth.ts` і повторно експортується через `src/shared/utils/apiAuth.ts`. Валідатор також приймає змінні середовища `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` як постійні ключі наскрізного доступу (issue #1350).
+Перевіряється за допомогою `isValidApiKey()` / `extractApiKey()` у `src/sse/services/auth.ts` і повторно експортується через `src/shared/utils/apiAuth.ts`. Валідатор також приймає змінні середовища `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` як постійні ключі наскрізного доступу (задача #1350).
 
-### 2. Сесія панелі керування (cookie auth_token)
+### 2. Сеанс панелі керування (cookie auth_token)
 
 Для сторінок панелі керування та адміністративних операцій.
 
@@ -33,54 +33,130 @@ Authorization: Bearer <api-key>
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Cookie є сесією лише тоді, коли JWT успішно перевірено **і** він містить `authenticated: true`
+Cookie вважається сеансом лише тоді, коли JWT успішно проходить перевірку **і** містить `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Кожен
-споживач цього cookie (захисник маршруту, оновлення конвеєра авторизації, встановлення
-з’єднання WebSocket, сервер даних у реальному часі, `/api/settings/require-login`,
-`/api/auth/status`) використовує цей допоміжний засіб. Існують й інші JWT, підписані
-за допомогою `JWT_SECRET`: механізм наскрізного доступу Cursor CLI створює для власників
-ключів токени `iss "omniroute" / aud "cursor-cli"`, які ніколи не є сесіями
+споживач цього cookie (захисник маршрутів панелі керування (`isDashboardSessionAuthenticated()`), оновлення в конвеєрі авторизації, рукостискання WebSocket, сервер обміну даними в реальному часі, `/api/settings/require-login`, `/api/auth/status`) використовує цей допоміжний засіб.
+Існують й інші JWT, підписані за допомогою `JWT_SECRET`: механізм наскрізного доступу Cursor CLI створює для власників ключів токени
+`iss "omniroute" / aud "cursor-cli"`, які ніколи не є сеансами
 (#13298).
 
-Перевіряється функцією `isDashboardSessionAuthenticated()` у `src/shared/utils/apiAuth.ts`. Конвеєр автоматично оновлює JWT, коли до завершення його 30-денного терміну дії залишається менше ніж 7 днів.
+Перевіряється за допомогою `isDashboardSessionAuthenticated()` у `src/shared/utils/apiAuth.ts`. Конвеєр автоматично оновлює JWT, коли до завершення його 30-денного строку дії залишається менш ніж 7 днів.
 
-Деякі маршрути керування приймають **будь-який** із цих режимів: cookie АБО `Bearer <key>`, якщо API-ключ має область дії `manage` (або `admin`). Саме це забезпечує робочий процес «налаштування через API-виклики», доданий у v3.8.
+Сеанс також може завершитися до спливу 30 днів, оскільки кожен засіб створення використовує `mintDashboardSessionToken` (час створення `iat` та ідентифікатор `jti`), а засіб перевірки перевіряє два налаштування: `sessionsValidAfter`, яке встановлюється після зміни пароля, через що всі сеанси, створені до цього моменту, перестають проходити перевірку (браузер, у якому було змінено пароль, отримує новий cookie), і `revokedDashboardSessions`, до якого `POST /api/auth/logout` додає `jti` сеансу, з якого було виконано вихід. Сеанси, створені старішою версією, не містять жодної з цих заяв і залишаються дійсними до першої зміни пароля. Якщо налаштування неможливо прочитати, сеанс не вважається надійним.
 
-#### Необов’язковий шлюз входу OIDC (#6973)
+Деякі маршрути керування приймають **будь-який** із двох режимів: cookie АБО `Bearer <key>`, якщо ключ API має область дії `manage` (або `admin`). Саме це забезпечує робочий процес «налаштування за допомогою викликів API», доданий у v3.8.
 
-Адміністративний вхід до панелі керування також підтримує **опціональний** процес OIDC (OpenID Connect)
-поряд зі стандартним входом за паролем — вхід за паролем ніколи не вилучається, а лише
+#### Необов’язковий шлюз входу через OIDC (#6973)
+
+Вхід адміністратора до панелі керування також підтримує **необов’язковий** потік OIDC (OpenID Connect)
+разом зі стандартним входом за паролем — вхід за паролем ніколи не видаляється, а лише
 доповнюється:
 
-- Вимкнено, якщо `settings.oidcEnabled !== true` **або** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` налаштовано не всі (Налаштування → Автентифікація).
-  Інакше `GET /api/auth/oidc/login` повертає `400`.
+- Вимкнено, якщо `settings.oidcEnabled === true` **не виконується** або
+  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` налаштовані не всі
+  (Налаштування → Автентифікація). Інакше `GET /api/auth/oidc/login` повертає `400`.
 - `GET /api/auth/oidc/login` визначає `authorization_endpoint` із
-  `/.well-known/openid-configuration` емітента (у разі невдачі використовує
-  `<issuer>/authorize`), формує URI перенаправлення на основі вхідного запиту
-  (з урахуванням `x-forwarded-proto`) і перенаправляє до IdP із випадковим значенням `state`,
-  збереженим у cookie `oidc_state` з атрибутом `httpOnly`.
-- `GET /api/auth/oidc/callback` перевіряє `state`, обмінює код авторизації
-  та перевіряє підпис ID-токена через JWKS емітента
-  (`createRemoteJWKSet` із `jose`, кешований для кожного URI JWKS) із перевірками
-  `issuer`/`audience`. Необов’язковий список дозволених значень `oidcAllowedSubjects`
-  зіставляється з твердженням `sub` токена або його твердженням `email` — твердження
-  електронної пошти враховується лише тоді, коли `email_verified === true`, тому
-  неперевірена адреса електронної пошти в IdP ніколи не зможе пройти цей шлюз.
-- У разі успіху створюється **точно такий самий** 30-денний JWT `auth_token`, який
-  видається під час входу за паролем (`src/app/api/auth/login/route.ts`), тому решта
-  конвеєра сесії панелі керування (автоматичне оновлення, атрибути cookie) залишається
-  без змін — OIDC замінює лише спосіб створення cookie, а не права, які він надає.
+  `/.well-known/openid-configuration` постачальника, що видає токени (а за
+  відсутності використовує `<issuer>/authorize`), формує URI переспрямування
+  на основі вхідного запиту (з урахуванням `x-forwarded-proto`) і переспрямовує
+  до IdP із випадковим `state`, збереженим у файлі cookie `oidc_state` з
+  атрибутом `httpOnly`.
+- `GET /api/auth/oidc/callback` перевіряє `state`, обмінює код авторизації та
+  перевіряє підпис ID-токена через JWKS постачальника (`createRemoteJWKSet` із
+  `jose`, кешований для кожного URI JWKS) із перевірками `issuer`/`audience`.
+  Для допуску до панелі керування потрібен непорожній список
+  `oidcAllowedSubjects`, політика `oidcAdmissionClaim` або обидва варіанти.
+  Список суб’єктів зіставляється із `sub` або `email`, лише коли
+  `email_verified === true`. Необов’язкова політика тверджень приймає шлях до
+  твердження ID-токена, розділений крапками (наприклад, `realm_access.roles`),
+  і масив прийнятних значень; отримане твердження має бути масивом рядків, що
+  містить принаймні одне прийнятне значення. Якщо налаштовано обидві політики,
+  обидві мають пройти перевірку. Відсутні або неправильно сформовані твердження
+  призводять до відмови, а без жодної з політик зворотний виклик відхиляє вхід
+  (`not_configured`). Наявні конфігурації лише зі списком суб’єктів і надалі
+  працюють без змін.
+- Keycloak зазвичай зіставляє ролі області з токенами доступу, але не
+  обов’язково з ID-токенами. Щоб вимагати роль області `admin`, налаштуйте для
+  цього клієнта перетворювач протоколу, який включає `realm_access.roles` до
+  його **ID-токена**, а потім установіть `oidcAdmissionClaim` у
+  `{ "path": "realm_access.roles", "values": ["admin"] }`. Перш ніж вмикати
+  допуск лише за роллю, перевірте фактичне твердження ID-токена для цього
+  клієнта; застосунок не зчитує ролі з токена доступу. Відмова у видачі токена
+  на боці IdP може доповнювати цю перевірку на боці застосунку, але не замінює
+  її.
+- У разі успіху створюється **точно такий самий** 30-денний JWT `auth_token`,
+  який видає вхід за паролем (`src/app/api/auth/login/route.ts`), тому решта
+  конвеєра сеансу панелі керування (автоматичне оновлення, атрибути файлів
+  cookie) залишається без змін — OIDC замінює лише спосіб створення файла
+  cookie, а не права, які він надає. Зміни ролей або груп IdP не анулюють
+  наявні сеанси OmniRoute; час їхнього існування, як і раніше, визначається
+  виходом, зміною пароля або завершенням терміну дії сеансу.
+- Кожен параметр `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) входить до
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  відповідає `400 PASSWORD_REQUIRED`, якщо тіло запиту не містить пароль
+  керування в `currentPassword` (`401 PASSWORD_MISMATCH`, якщо він
+  неправильний). `oidcDisablePasswordLogin` забороняє _вхід_ за паролем
+  (`POST /api/auth/login`), але зберігає хеш пароля, а повторна автентифікація
+  й надалі звіряє `currentPassword` із ним.
+- `corsOrigins` і `bruteForceProtection` також входять до
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: послаблення будь-якого з них послаблює
+  захист входу, тому для них потрібна така сама повторна автентифікація через
+  `currentPassword` (вкладка «Безпека» запитує його), а імпорт JSON їх
+  відкидає.
+- Кожен ключ політики безпеки — записи `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  кожен ключ `oidc*` і стан сеансу панелі керування — у
+  `PATCH /api/settings` доступний **лише оператору**: API-ключ з областю
+  `manage` або токен доступу `oma_` відхиляється з кодом `403`, навіть якщо
+  надсилає правильний `currentPassword`, а відмову реєструє аудит як
+  `settings.update_failed` із `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` у `src/lib/api/operatorCredential.ts`).
+  Звичайні налаштування (тема, параметри відображення) залишаються доступними
+  для запису за допомогою ключа `manage` або токена доступу `admin`. Для кожної
+  зміни самого `/api/settings` (а також `/api/settings/require-login`) також
+  потрібна область токена доступу `admin` (`ADMIN_MUTATION_EXACT_PATHS` у
+  `src/server/authz/accessScopes.ts`, точний збіг шляху); для `GET` залишається
+  область `read`, а інші підмаршрути `/api/settings/*` (проксі, типові
+  параметри комбінацій, псевдоніми моделей, стиснення, очищення…) зберігають
+  область `write`, визначену за методом.
+- `POST /api/settings/import-json` пропускає цю повторну автентифікацію, тому
+  перед записом відкидає кожен ключ із `IMPORT_STRIPPED_SETTINGS_KEYS` (той
+  самий файл): пароль і `currentPassword`, кожен запис
+  `SECURITY_IMPACTING_SETTINGS_KEYS` і стан сеансу панелі керування
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Отже, імпорт старішої
+  резервної копії не може відновити сеанс, який уже завершила зміна пароля або
+  вихід.
 
 ## Класи маршрутів
 
-`src/server/authz/types.ts` визначає три класи; будь-який маршрут, який неможливо класифікувати детерміновано, за замовчуванням належить до `MANAGEMENT`.
+`src/server/authz/types.ts` визначає три класи. Будь-який маршрут, який неможливо детерміновано класифікувати, за замовчуванням відноситься до `MANAGEMENT`.
 
-| Клас         | Опис                                                                                                                                                                    | Необхідна автентифікація                                                   |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `PUBLIC`     | Явно безпечні маршрути — вхід, вихід, стан, ініціалізація, перевірка працездатності, початкове налаштування.                                                            | Не потрібна                                                                |
-| `CLIENT_API` | Кінцеві точки обслуговування моделей — `/api/v1/*`, `/api/v1beta/*`, а також псевдоніми `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-ключ, коли ефективний прапорець функції `REQUIRE_API_KEY` увімкнено |
-| `MANAGEMENT` | Сторінки панелі керування, налаштування, провайдери, ключі, адміністративні й діагностичні кінцеві точки.                                                               | Сесія панелі керування АБО Bearer зі сферою доступу `manage`               |
+| Клас         | Опис                                                                                                                                                               | Потрібна автентифікація                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `PUBLIC`     | Явно безпечні маршрути: вхід, вихід, статус, ініціалізація, перевірка стану, початкове налаштування під час онбордингу.                                            | Не потрібна                                                            |
+| `CLIENT_API` | Ендпоінти обслуговування моделей: `/api/v1/*`, `/api/v1beta/*`, а також псевдоніми `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Ключ Bearer, коли увімкнено чинний прапорець функції `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Сторінки панелі керування, налаштування, провайдери, ключі, ендпоінти адміністрування та діагностики.                                                              | Сеанс панелі АБО Bearer з областю `manage`                             |
+
+Деякі дії `MANAGEMENT` доступні **лише оператору**: ключа з областю `manage` для них недостатньо.
+Експорт збережених облікових даних (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), відновлення резервної копії поверх поточних даних
+(`POST /api/db-backups/import`, включно з `dryRun=true`, `POST /api/db-backups` з відновленням за id,
+`POST /api/settings/import-json`), а також видалення точок відновлення (очищення через `DELETE /api/db-backups`
+і `PATCH /api/db-backups`, оскільки збережене цим методом сховище керує автоматичним очищенням
+після кожного резервного копіювання) вимагають сеансу панелі, локального суб'єкта CLI або вимкненого входу.
+Видача токена синхронізації (`POST /api/sync/tokens`) і створення CLI-токена доступу з областю `admin`
+(`POST /api/cli/tokens`) вимагають сеансу панелі або локального суб'єкта CLI в усіх режимах входу.
+Ключі API будь-якої області та токени доступу `oma_` не є операторськими обліковими даними: якщо потрібні
+права оператора, вони отримують `403`. Перевірка виконується в `src/lib/api/operatorCredential.ts`
+(`resolveOperatorCredential()` / `requireOperatorCredential()`). Зміна налаштувань входу також доступна
+лише оператору: `POST /api/settings/require-login` (задати пароль керування або перемкнути `requireLogin`)
+приймає лише ці облікові дані, коли пароль уже існує. Вікно початкового налаштування (пароля ще немає)
+не змінюється. Сеанс панелі для заміни пароля має передати `currentPassword` (`403`, якщо його немає
+або він невірний; фіксується в аудиті як `settings.update_failed`). Локальний CLI та екземпляр з вимкненим
+входом зберігають шлях відновлення і можуть задати пароль без нього, оскільки обидва прив'язані до хоста,
+якому належить каталог даних.
 
 ## Конвеєр
 
@@ -199,38 +275,60 @@ export async function POST(request: Request) {
 
 Вибирайте набір за формою, а не за зручністю. Один маршрут слід додавати до `PUBLIC_API_ROUTES_EXACT` (або до `PUBLIC_READONLY_CORS_API_ROUTES`, якщо він призначений лише для GET); лише справжнє піддерево слід додавати до `PUBLIC_API_ROUTE_PREFIXES`, і воно **має закінчуватися на `/`**. Додавання окремого маршруту до списку префіксів також робить публічним кожен суміжний шлях, що має такі самі початкові символи, — включно зі спорідненими маршрутами з динамічними сегментами, доданими пізніше (GHSA-74g9-q8f6-793h). Оновіть модульні тести в `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` і `tests/unit/authz/classify.test.ts`.
 
-## Області доступу
+## Області видимості (Scopes)
 
-Ключі API містять масив `scopes` (зберігається у форматі JSON у `api_keys.scopes`, див. `src/lib/db/apiKeys.ts`).
+Три простори імен. Кожен перевіряльник читає лише власні рядки. Порівняння,
+включно з тим, чому `manage` не проходить `scopeMatches` для `read:compression` і чому
+токен доступу `read` не може `PATCH /api/keys/{id}`, знаходиться в
+[Три простори імен областей видимості](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-### Область керування
+Ключі API містять масив `scopes` (зберігається як JSON у `api_keys.scopes`, див. `src/lib/db/apiKeys.ts`).
 
-- `manage` / `admin` — надає ключу доступ до кінцевих точок API керування, коли його надіслано як Bearer-токен.
+### Область видимості управління
 
-### Області MCP (`src/shared/constants/mcpScopes.ts`)
+- `manage` / `admin` — `hasManageScope`. Доступ Bearer до маршрутів API управління.
+- `mcp:connect`, `self:usage`, `self:account-quota` та
+  `policy:bypass-provider-quota` є адитивними областями видимості з точним збігом. Вони знаходяться
+  поза `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` відкриває лише
+  не-зворотний виріз `/api/mcp/`.
 
-Кожен інструмент MCP потребує певних областей доступу через `MCP_TOOL_SCOPES`. Повний список (`MCP_SCOPE_LIST`):
+### Області видимості інструментів MCP
 
-```
-read:health, read:combos, write:combos, read:quota, read:usage,
-read:models, execute:completions, execute:search, write:budget,
-write:resilience, pricing:write, read:cache, write:cache,
-read:compression, write:compression, read:proxies
-```
+Каталог та правила відповідності (ідентичний рядок або надана область видимості, що закінчується на `*`):
+[Області видимості інструментів MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
+`MCP_SCOPE_LIST` у `src/shared/constants/mcpScopes.ts` є оригінальною типізованою
+підмножиною, а не повним каталогом. Примусове виконання відбувається в
+`open-sse/mcp-server/scopeEnforcement.ts` після того, як `resolveCallerScopeContext()`
+розв'язує області видимості з інформації про автентифікацію MCP, метаданих запиту або `OMNIROUTE_MCP_SCOPES`.
+Воно залишається вимкненим, якщо `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 
-Під час перевірки областей доступу в `open-sse/mcp-server/server.ts` список областей кожного інструмента передається до
-`evaluateToolScopes()` після того, як `resolveCallerScopeContext()` визначить області доступу з інформації автентифікації MCP,
-метаданих запиту або `OMNIROUTE_MCP_SCOPES`.
+### Області видимості токенів доступу
 
-## Перемикач обов’язкової автентифікації
+`read` / `write` / `admin` на токенах `oma_live_…`, ранжовані за `scopeSatisfies`
+(`src/lib/accessTokens/scopes.ts`). Цей ранг застосовується лише до облікових даних токена доступу.
+Див. [Автентифікація управління](../guides/MANAGEMENT-AUTH.md).
 
-`isAuthRequired()` у `src/shared/utils/apiAuth.ts` визначає, чи застосовується **будь-яка** автентифікація для запиту:
+## Перемикач обов'язкової автентифікації
 
-- `settings.requireLogin === false` → автентифікацію глобально вимкнено.
-- Якщо пароль не налаштовано **і** змінну середовища `INITIAL_PASSWORD` не задано → режим початкового налаштування дозволяє роботу майстра адаптації та запити зі зворотного інтерфейсу, але для запитів із зовнішньої мережі все одно потрібні облікові дані.
-- Будь-яка помилка БД → доступ блокується (безпека за замовчуванням).
+`isAuthRequired()` у `src/shared/utils/apiAuth.ts` визначає, чи застосовується **будь-яка** автентифікація до запиту:
 
-Для перевірки ключів клієнтського API використовується `isRequireApiKeyEnabled()` із `src/shared/utils/featureFlags.ts`, а не безпосереднє читання `process.env.REQUIRE_API_KEY`. Це важливо для розгорнутих екземплярів: перемикання `REQUIRE_API_KEY` у Dashboard → Feature Flags зберігає перевизначення в БД і негайно впливає на `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` та інші перевірки автентифікації клієнтського API, які використовують цей допоміжний засіб. Якщо сховище прапорців функцій неможливо прочитати, автентифікація клієнтського API блокує доступ за замовчуванням і вимагає ключ.
+- `settings.requireLogin === false` → автентифікація вимкнена глобально, окрім завжди захищеного рівня
+  (див. [Рівні захисту маршрутів](../security/ROUTE_GUARD_TIERS.md)) та викликів, які видають облікові дані,
+  що їх приймає система. Для них потрібні ті самі облікові дані, що й за увімкненого входу: видача токенів
+  синхронізації, видача CLI-токенів доступу з будь-якою областю, а також створення ключа API з областю
+  `manage`/`admin`, надання такої області ключу, перевипуск або показ такого ключа
+  (`requireCredentialForManagementScopedKey()` у `src/lib/api/requireManagementAuth.ts`). Ключі лише
+  для інференсу лишаються відкритими.
+- Пароль не задано **і** немає змінної середовища `INITIAL_PASSWORD` → режим початкового налаштування дозволяє
+  майстер онбордингу та запити з loopback, але запити із зовнішньої мережі, як і раніше, потребують облікових даних.
+- Будь-яка помилка БД → відмова (безпечне за замовчуванням поводження, fail closed).
+
+Перевірка клієнтських ключів API використовує `isRequireApiKeyEnabled()` у `src/shared/utils/featureFlags.ts`,
+а не пряме читання `process.env.REQUIRE_API_KEY`. Це важливо для розгорнутих екземплярів: перемикання
+`REQUIRE_API_KEY` у Dashboard → Feature Flags зберігає перевизначення в БД і одразу впливає на `/v1/*`,
+`/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` та інші перевірки клієнтського API,
+які використовують цей помічник. Якщо сховище прапорців функцій не читається, автентифікація клієнтського API
+відмовляє і вимагає ключ.
 
 ## Несумісна зміна — v3.8.0
 
@@ -269,6 +367,6 @@ x-omniroute-auth-scopes:    список, розділений комами
 ## Дивіться також
 
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — маркер автентифікації для кожної кінцевої точки
-- [COMPLIANCE.md](../security/COMPLIANCE.md) — журнал аудиту подій автентифікації
-- [MCP-SERVER.md](../frameworks/MCP-SERVER.md) — подробиці перевірки областей доступу MCP
+- [COMPLIANCE.md](../security/COMPLIANCE.md) — журнал аудиту для подій автентифікації
+- [MCP-SERVER.md](../frameworks/MCP-SERVER.md#three-scope-namespaces) — три простори імен області видимості та каталог MCP tool-scope
 - Джерело: `src/server/authz/`, `src/lib/api/requireManagementAuth.ts`

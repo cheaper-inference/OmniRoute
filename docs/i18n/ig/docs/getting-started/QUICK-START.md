@@ -1,10 +1,10 @@
 # Quick Start: Get OmniRoute Running in 3 Minutes (Igbo)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/QUICK-START.md) · 🇪🇹 [am](../../../am/docs/getting-started/QUICK-START.md) · 🇸🇦 [ar](../../../ar/docs/getting-started/QUICK-START.md) · 🇦🇿 [az](../../../az/docs/getting-started/QUICK-START.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/QUICK-START.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/QUICK-START.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/QUICK-START.md) · 🇩🇰 [da](../../../da/docs/getting-started/QUICK-START.md) · 🇩🇪 [de](../../../de/docs/getting-started/QUICK-START.md) · 🇬🇷 [el](../../../el/docs/getting-started/QUICK-START.md) · 🇪🇸 [es](../../../es/docs/getting-started/QUICK-START.md) · 🇪🇪 [et](../../../et/docs/getting-started/QUICK-START.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/QUICK-START.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/QUICK-START.md) · 🇫🇷 [fr](../../../fr/docs/getting-started/QUICK-START.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/QUICK-START.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/QUICK-START.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/QUICK-START.md) · 🇮🇱 [he](../../../he/docs/getting-started/QUICK-START.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/QUICK-START.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/QUICK-START.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/QUICK-START.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/QUICK-START.md) · 🇮🇩 [id](../../../id/docs/getting-started/QUICK-START.md) · 🇮🇹 [it](../../../it/docs/getting-started/QUICK-START.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/QUICK-START.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/QUICK-START.md) · 🇰🇭 [km](../../../km/docs/getting-started/QUICK-START.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/QUICK-START.md) · 🇰🇷 [ko](../../../ko/docs/getting-started/QUICK-START.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/QUICK-START.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/QUICK-START.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/QUICK-START.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/QUICK-START.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/QUICK-START.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/QUICK-START.md) · 🇲🇲 [my](../../../my/docs/getting-started/QUICK-START.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/QUICK-START.md) · 🇳🇱 [nl](../../../nl/docs/getting-started/QUICK-START.md) · 🇳🇴 [no](../../../no/docs/getting-started/QUICK-START.md) · 🇮🇳 [or](../../../or/docs/getting-started/QUICK-START.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/QUICK-START.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/QUICK-START.md) · 🇵🇱 [pl](../../../pl/docs/getting-started/QUICK-START.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/QUICK-START.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/QUICK-START.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/QUICK-START.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/QUICK-START.md) · 🇱🇰 [si](../../../si/docs/getting-started/QUICK-START.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/QUICK-START.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/QUICK-START.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/QUICK-START.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/QUICK-START.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/QUICK-START.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/QUICK-START.md) · 🇮🇳 [te](../../../te/docs/getting-started/QUICK-START.md) · 🇹🇭 [th](../../../th/docs/getting-started/QUICK-START.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/QUICK-START.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/QUICK-START.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/QUICK-START.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/QUICK-START.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/QUICK-START.md) · 🇳🇬 [yo](../../../yo/docs/getting-started/QUICK-START.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/QUICK-START.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/QUICK-START.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/QUICK-START.md) · 🇪🇹 [am](../../../am/docs/getting-started/QUICK-START.md) · 🇸🇦 [ar](../../../ar/docs/getting-started/QUICK-START.md) · 🇦🇿 [az](../../../az/docs/getting-started/QUICK-START.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/QUICK-START.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/QUICK-START.md) · 🇧🇦 [bs](../../../bs/docs/getting-started/QUICK-START.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/QUICK-START.md) · 🇩🇰 [da](../../../da/docs/getting-started/QUICK-START.md) · 🇩🇪 [de](../../../de/docs/getting-started/QUICK-START.md) · 🇬🇷 [el](../../../el/docs/getting-started/QUICK-START.md) · 🇪🇸 [es](../../../es/docs/getting-started/QUICK-START.md) · 🇪🇪 [et](../../../et/docs/getting-started/QUICK-START.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/QUICK-START.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/QUICK-START.md) · 🇫🇷 [fr](../../../fr/docs/getting-started/QUICK-START.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/QUICK-START.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/QUICK-START.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/QUICK-START.md) · 🇮🇱 [he](../../../he/docs/getting-started/QUICK-START.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/QUICK-START.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/QUICK-START.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/QUICK-START.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/QUICK-START.md) · 🇮🇩 [id](../../../id/docs/getting-started/QUICK-START.md) · 🇮🇹 [it](../../../it/docs/getting-started/QUICK-START.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/QUICK-START.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/QUICK-START.md) · 🇰🇭 [km](../../../km/docs/getting-started/QUICK-START.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/QUICK-START.md) · 🇰🇷 [ko](../../../ko/docs/getting-started/QUICK-START.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/QUICK-START.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/QUICK-START.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/QUICK-START.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/QUICK-START.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/QUICK-START.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/QUICK-START.md) · 🇲🇲 [my](../../../my/docs/getting-started/QUICK-START.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/QUICK-START.md) · 🇳🇱 [nl](../../../nl/docs/getting-started/QUICK-START.md) · 🇳🇴 [no](../../../no/docs/getting-started/QUICK-START.md) · 🇮🇳 [or](../../../or/docs/getting-started/QUICK-START.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/QUICK-START.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/QUICK-START.md) · 🇵🇱 [pl](../../../pl/docs/getting-started/QUICK-START.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/QUICK-START.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/QUICK-START.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/QUICK-START.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/QUICK-START.md) · 🇱🇰 [si](../../../si/docs/getting-started/QUICK-START.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/QUICK-START.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/QUICK-START.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/QUICK-START.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/QUICK-START.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/QUICK-START.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/QUICK-START.md) · 🇮🇳 [te](../../../te/docs/getting-started/QUICK-START.md) · 🇹🇭 [th](../../../th/docs/getting-started/QUICK-START.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/QUICK-START.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/QUICK-START.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/QUICK-START.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/QUICK-START.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/QUICK-START.md) · 🇳🇬 [yo](../../../yo/docs/getting-started/QUICK-START.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/QUICK-START.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/QUICK-START.md)
 
 ---
 
-> **Na nkenke**: Wụnye → Jikọọ onye na-eweta ọrụ efu → Tụnye IDE gị aka na OmniRoute. Emechaala.
+> **TL;DR**: Wụnye → Jikọọ onye na-eweta ọrụ tozuru etozu → Tụnye IDE gị aka na OmniRoute. Emechara.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute na-amalite na `http://localhost:20128`. Dashboard ga-emeghe na-akpagh�
 
 ---
 
-## Nzọụkwụ 3: Jikọọ Onye Na-eweta Ọrụ Efu
+## Nzọụkwụ 3: Jikọọ Onye Na-enye Ọrụ Tozuru Etọ
 
-Ị nwere ike iji OmniRoute **n'akwụghị ụgwọ ọ bụla** site na ijikọ onye na-eweta ọrụ efu.
+Họrọ onye na-enye ọrụ nke usoro na oke ojiji ya dabara na mkpa gị. Na **Dashboard → Providers**, jikọọ akaụntụ nke gị ma ọ bụ igodo API, wee nwalee njikọ ahụ. A naghị ekwe nkwa nnweta n'efu ma ọ bụ nnweta na-enweghị igodo.
 
-### Nhọrọ A: Kiro (Claude Efu — Achọghị Kaadị Ebe E Si Enweta Ego)
-
-1. Mepee dashboard na `http://localhost:20128`
-2. Gaa na **Ndị Na-eweta Ọrụ** → **Tinye Onye Na-eweta Ọrụ**
-3. Họrọ **Kiro AI**
-4. Pịa **Jikọọ** (achọghị API key!)
-5. Emechaala! Ị nwerezi ohere efu iji ụdị Claude.
-
-### Nhọrọ B: OpenCode Free (Achọghị Nyocha Njirimara)
-
-1. Mepee dashboard na `http://localhost:20128`
-2. Gaa na **Ndị Na-eweta Ọrụ** → **Tinye Onye Na-eweta Ọrụ**
-3. Họrọ **OpenCode Free**
-4. Pịa **Jikọọ** (achọghị API key!)
-5. Emechaala! Ị nwerezi ohere efu iji ọtụtụ ụdị.
-
-### Nhọrọ C: Pollinations (Achọghị Key)
-
-1. Mepee dashboard na `http://localhost:20128`
-2. Gaa na **Ndị Na-eweta Ọrụ** → **Tinye Onye Na-eweta Ọrụ**
-3. Họrọ **Pollinations**
-4. Pịa **Jikọọ** (achọghị API key!)
-5. Emechaala! Ị nwerezi ohere efu iji GPT-5, Claude, Gemini, na ndị ọzọ.
+Na ndabara, `auto` anaghị etinye ndị na-enye ọrụ akara `tos: avoid`, gụnyere Kiro. Ijikọọ akaụntụ anaghị agbanwe iwu ahụ. Nhọrọ ikere òkè dị na **Dashboard → Combos** na-emetụta ngwakọta auto niile. Tụlee [Ntuziaka maka Ọkwa Ojiji N'efu](./FREE-TIERS-GUIDE.md) tupu ịhọrọ onye na-enye ọrụ.
 
 ---
 
@@ -152,10 +130,10 @@ Otu command a na-amalitekwa CLI ndị ọzọ site na generic launcher — `omni
 
 ## Gịnị Na-esote?
 
-- **[Ntuziaka Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Kwe ka OmniRoute họrọ AI kacha mma maka gị
-- **[Ntuziaka Ndị Na-eweta Ọrụ](./PROVIDERS-GUIDE.md)** — Jikọọ ndị na-eweta ọrụ ndị ọzọ (efu na ndị a na-akwụ ụgwọ)
-- **[Ntuziaka Free Tiers](./FREE-TIERS-GUIDE.md)** — Nweta AI efu na-enweghị kaadị ebe e si enweta ego
-- **[Nchọpụta na Ndozi Nsogbu](../guides/TROUBLESHOOTING.md)** — Dozie nsogbu ndị a na-ahụkarị
+- **[Ntuziaka Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Kwe ka OmniRoute họpụtara gị AI kacha mma
+- **[Ntuziaka Ndị Na-enye Ọrụ](./PROVIDERS-GUIDE.md)** — Jikọọ ndị ọzọ na-enye ọrụ (n'efu na nke a na-akwụ ụgwọ)
+- **[Ntuziaka Ọkwa N'efu](./FREE-TIERS-GUIDE.md)** — Nyochaa usoro ndị na-enye ọrụ na oke ọkwa n'efu
+- **[Idozi Nsogbu](../guides/TROUBLESHOOTING.md)** — Dozie nsogbu ndị a na-ahụkarị
 
 ---
 
@@ -163,23 +141,23 @@ Otu command a na-amalitekwa CLI ndị ọzọ site na generic launcher — `omni
 
 ### "Achọrọ m API key?"
 
-**Mba!** Ị nwere ike iji ndị na-eweta ọrụ efu (Kiro, OpenCode Free, Pollinations) na-enweghị API key ọ bụla. Naanị jikọọ ha na dashboard.
+API key nke OmniRoute na-eme ka ngwaọrụ gị mata onwe ha. Ihe nzere maka ọrụ ndị dị n'elu dabere na provider: ụfọdụ chọrọ API key ma ọ bụ ịbanye na akaụntụ. Anaghị ekwe nkwa na ohere n'efu ga-adị.
 
 ### "Gịnị bụ `auto`?"
 
-`auto` na-agwa OmniRoute ka ọ họrọ onye na-eweta ọrụ kacha mma maka arịrịọ ọ bụla na-akpaghị aka. Ọ na-atụle ọsọ, ọnụahịa, ogo, na ịdị adị. Lee [Ntuziaka Auto-Combo](./AUTO-COMBO-GUIDE.md) maka nkọwa.
+`auto` na-agwa OmniRoute ka ọ họrọ provider kacha mma na-akpaghị aka maka arịrịọ ọ bụla. Ọ na-atụle ọsọ, ọnụahịa, ogo, na ịdị adị. Lee [Nduzi Auto-Combo](./AUTO-COMBO-GUIDE.md) maka nkọwa ndị ọzọ.
 
-### "Ego ole ka ọ na-efu?"
+### "Ego ole ka ọ na-eri?"
 
-OmniRoute n'onwe ya bụ **n'efu ma bụrụ open-source**. Naanị ndị na-eweta ọrụ ị na-eji ka ị ga-akwụ ụgwọ maka ha. Ọtụtụ ndị na-eweta ọrụ nwere free tiers — lee [Ntuziaka Free Tiers](./FREE-TIERS-GUIDE.md).
+OmniRoute n'onwe ya bụ **n'efu ma bụrụ open-source**. Naanị ndị provider ị na-eji ka ị na-akwụ ụgwọ maka ha. Ọtụtụ provider nwere ọkwa ojiji n'efu — lee [Nduzi Ọkwa Ojiji N'efu](./FREE-TIERS-GUIDE.md).
 
 ### "Enwere m ike iji ya na Claude Code / Cursor / Copilot?"
 
-**Ee!** OmniRoute na-arụ ọrụ na ngwaọrụ ọ bụla na-akwado usoro OpenAI. Naanị hazie base URL ka ọ bụrụ `http://localhost:20128/v1`. Lee [Ntuziaka Ngwaọrụ CLI](../reference/CLI-TOOLS.md) maka ntuziaka nhazi akọwapụtara.
+**Ee!** OmniRoute na-arụ ọrụ na ngwaọrụ ọ bụla na-akwado usoro OpenAI. Naanị debe base URL ka ọ bụrụ `http://localhost:20128/v1`. Lee [Nduzi Ngwaọrụ CLI](../reference/CLI-TOOLS.md) maka ntuziaka nhazi kpọmkwem.
 
-### "Gịnị ma ọ bụrụ na onye na-eweta ọrụ akwụsị ịrụ ọrụ?"
+### "Gịnị ga-eme ma ọ bụrụ na otu provider akwụsị ịrụ ọrụ?"
 
-OmniRoute na-awụfe ndị na-eweta ọrụ dara ada na-akpaghị aka wee nwalee nke na-esote. Ọ dịghị ihe ị ga-eme. Lee [Ntuziaka Auto-Combo](./AUTO-COMBO-GUIDE.md) maka nkọwa.
+OmniRoute na-amafere ndị provider dara ada na-akpaghị aka ma nwalee nke na-esote. Ọ dịghị ihe ị ga-eme. Lee [Nduzi Auto-Combo](./AUTO-COMBO-GUIDE.md) maka nkọwa ndị ọzọ.
 
 ---
 

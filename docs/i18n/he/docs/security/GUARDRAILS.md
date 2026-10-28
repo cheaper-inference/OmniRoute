@@ -1,26 +1,33 @@
 # Guardrails (עברית)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/GUARDRAILS.md) · 🇪🇹 [am](../../../am/docs/security/GUARDRAILS.md) · 🇸🇦 [ar](../../../ar/docs/security/GUARDRAILS.md) · 🇦🇿 [az](../../../az/docs/security/GUARDRAILS.md) · 🇧🇬 [bg](../../../bg/docs/security/GUARDRAILS.md) · 🇧🇩 [bn](../../../bn/docs/security/GUARDRAILS.md) · 🇨🇿 [cs](../../../cs/docs/security/GUARDRAILS.md) · 🇩🇰 [da](../../../da/docs/security/GUARDRAILS.md) · 🇩🇪 [de](../../../de/docs/security/GUARDRAILS.md) · 🇬🇷 [el](../../../el/docs/security/GUARDRAILS.md) · 🇪🇸 [es](../../../es/docs/security/GUARDRAILS.md) · 🇪🇪 [et](../../../et/docs/security/GUARDRAILS.md) · 🇮🇷 [fa](../../../fa/docs/security/GUARDRAILS.md) · 🇫🇮 [fi](../../../fi/docs/security/GUARDRAILS.md) · 🇫🇷 [fr](../../../fr/docs/security/GUARDRAILS.md) · 🇮🇪 [ga](../../../ga/docs/security/GUARDRAILS.md) · 🇮🇳 [gu](../../../gu/docs/security/GUARDRAILS.md) · 🇳🇬 [ha](../../../ha/docs/security/GUARDRAILS.md) · 🇮🇳 [hi](../../../hi/docs/security/GUARDRAILS.md) · 🇭🇷 [hr](../../../hr/docs/security/GUARDRAILS.md) · 🇭🇺 [hu](../../../hu/docs/security/GUARDRAILS.md) · 🇦🇲 [hy](../../../hy/docs/security/GUARDRAILS.md) · 🇮🇩 [id](../../../id/docs/security/GUARDRAILS.md) · 🇳🇬 [ig](../../../ig/docs/security/GUARDRAILS.md) · 🇮🇹 [it](../../../it/docs/security/GUARDRAILS.md) · 🇯🇵 [ja](../../../ja/docs/security/GUARDRAILS.md) · 🇬🇪 [ka](../../../ka/docs/security/GUARDRAILS.md) · 🇰🇭 [km](../../../km/docs/security/GUARDRAILS.md) · 🇮🇳 [kn](../../../kn/docs/security/GUARDRAILS.md) · 🇰🇷 [ko](../../../ko/docs/security/GUARDRAILS.md) · 🇱🇹 [lt](../../../lt/docs/security/GUARDRAILS.md) · 🇱🇻 [lv](../../../lv/docs/security/GUARDRAILS.md) · 🇮🇳 [ml](../../../ml/docs/security/GUARDRAILS.md) · 🇮🇳 [mr](../../../mr/docs/security/GUARDRAILS.md) · 🇲🇾 [ms](../../../ms/docs/security/GUARDRAILS.md) · 🇲🇹 [mt](../../../mt/docs/security/GUARDRAILS.md) · 🇲🇲 [my](../../../my/docs/security/GUARDRAILS.md) · 🇳🇵 [ne](../../../ne/docs/security/GUARDRAILS.md) · 🇳🇱 [nl](../../../nl/docs/security/GUARDRAILS.md) · 🇳🇴 [no](../../../no/docs/security/GUARDRAILS.md) · 🇮🇳 [or](../../../or/docs/security/GUARDRAILS.md) · 🇮🇳 [pa](../../../pa/docs/security/GUARDRAILS.md) · 🇵🇭 [phi](../../../phi/docs/security/GUARDRAILS.md) · 🇵🇱 [pl](../../../pl/docs/security/GUARDRAILS.md) · 🇵🇹 [pt](../../../pt/docs/security/GUARDRAILS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/GUARDRAILS.md) · 🇷🇴 [ro](../../../ro/docs/security/GUARDRAILS.md) · 🇷🇺 [ru](../../../ru/docs/security/GUARDRAILS.md) · 🇱🇰 [si](../../../si/docs/security/GUARDRAILS.md) · 🇸🇰 [sk](../../../sk/docs/security/GUARDRAILS.md) · 🇸🇮 [sl](../../../sl/docs/security/GUARDRAILS.md) · 🇷🇸 [sr](../../../sr/docs/security/GUARDRAILS.md) · 🇸🇪 [sv](../../../sv/docs/security/GUARDRAILS.md) · 🇰🇪 [sw](../../../sw/docs/security/GUARDRAILS.md) · 🇮🇳 [ta](../../../ta/docs/security/GUARDRAILS.md) · 🇮🇳 [te](../../../te/docs/security/GUARDRAILS.md) · 🇹🇭 [th](../../../th/docs/security/GUARDRAILS.md) · 🇹🇷 [tr](../../../tr/docs/security/GUARDRAILS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/GUARDRAILS.md) · 🇵🇰 [ur](../../../ur/docs/security/GUARDRAILS.md) · 🇺🇿 [uz](../../../uz/docs/security/GUARDRAILS.md) · 🇻🇳 [vi](../../../vi/docs/security/GUARDRAILS.md) · 🇳🇬 [yo](../../../yo/docs/security/GUARDRAILS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/GUARDRAILS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/GUARDRAILS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/GUARDRAILS.md) · 🇪🇹 [am](../../../am/docs/security/GUARDRAILS.md) · 🇸🇦 [ar](../../../ar/docs/security/GUARDRAILS.md) · 🇦🇿 [az](../../../az/docs/security/GUARDRAILS.md) · 🇧🇬 [bg](../../../bg/docs/security/GUARDRAILS.md) · 🇧🇩 [bn](../../../bn/docs/security/GUARDRAILS.md) · 🇧🇦 [bs](../../../bs/docs/security/GUARDRAILS.md) · 🇨🇿 [cs](../../../cs/docs/security/GUARDRAILS.md) · 🇩🇰 [da](../../../da/docs/security/GUARDRAILS.md) · 🇩🇪 [de](../../../de/docs/security/GUARDRAILS.md) · 🇬🇷 [el](../../../el/docs/security/GUARDRAILS.md) · 🇪🇸 [es](../../../es/docs/security/GUARDRAILS.md) · 🇪🇪 [et](../../../et/docs/security/GUARDRAILS.md) · 🇮🇷 [fa](../../../fa/docs/security/GUARDRAILS.md) · 🇫🇮 [fi](../../../fi/docs/security/GUARDRAILS.md) · 🇫🇷 [fr](../../../fr/docs/security/GUARDRAILS.md) · 🇮🇪 [ga](../../../ga/docs/security/GUARDRAILS.md) · 🇮🇳 [gu](../../../gu/docs/security/GUARDRAILS.md) · 🇳🇬 [ha](../../../ha/docs/security/GUARDRAILS.md) · 🇮🇳 [hi](../../../hi/docs/security/GUARDRAILS.md) · 🇭🇷 [hr](../../../hr/docs/security/GUARDRAILS.md) · 🇭🇺 [hu](../../../hu/docs/security/GUARDRAILS.md) · 🇦🇲 [hy](../../../hy/docs/security/GUARDRAILS.md) · 🇮🇩 [id](../../../id/docs/security/GUARDRAILS.md) · 🇳🇬 [ig](../../../ig/docs/security/GUARDRAILS.md) · 🇮🇹 [it](../../../it/docs/security/GUARDRAILS.md) · 🇯🇵 [ja](../../../ja/docs/security/GUARDRAILS.md) · 🇬🇪 [ka](../../../ka/docs/security/GUARDRAILS.md) · 🇰🇭 [km](../../../km/docs/security/GUARDRAILS.md) · 🇮🇳 [kn](../../../kn/docs/security/GUARDRAILS.md) · 🇰🇷 [ko](../../../ko/docs/security/GUARDRAILS.md) · 🇱🇹 [lt](../../../lt/docs/security/GUARDRAILS.md) · 🇱🇻 [lv](../../../lv/docs/security/GUARDRAILS.md) · 🇮🇳 [ml](../../../ml/docs/security/GUARDRAILS.md) · 🇮🇳 [mr](../../../mr/docs/security/GUARDRAILS.md) · 🇲🇾 [ms](../../../ms/docs/security/GUARDRAILS.md) · 🇲🇹 [mt](../../../mt/docs/security/GUARDRAILS.md) · 🇲🇲 [my](../../../my/docs/security/GUARDRAILS.md) · 🇳🇵 [ne](../../../ne/docs/security/GUARDRAILS.md) · 🇳🇱 [nl](../../../nl/docs/security/GUARDRAILS.md) · 🇳🇴 [no](../../../no/docs/security/GUARDRAILS.md) · 🇮🇳 [or](../../../or/docs/security/GUARDRAILS.md) · 🇮🇳 [pa](../../../pa/docs/security/GUARDRAILS.md) · 🇵🇭 [phi](../../../phi/docs/security/GUARDRAILS.md) · 🇵🇱 [pl](../../../pl/docs/security/GUARDRAILS.md) · 🇵🇹 [pt](../../../pt/docs/security/GUARDRAILS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/GUARDRAILS.md) · 🇷🇴 [ro](../../../ro/docs/security/GUARDRAILS.md) · 🇷🇺 [ru](../../../ru/docs/security/GUARDRAILS.md) · 🇱🇰 [si](../../../si/docs/security/GUARDRAILS.md) · 🇸🇰 [sk](../../../sk/docs/security/GUARDRAILS.md) · 🇸🇮 [sl](../../../sl/docs/security/GUARDRAILS.md) · 🇷🇸 [sr](../../../sr/docs/security/GUARDRAILS.md) · 🇸🇪 [sv](../../../sv/docs/security/GUARDRAILS.md) · 🇰🇪 [sw](../../../sw/docs/security/GUARDRAILS.md) · 🇮🇳 [ta](../../../ta/docs/security/GUARDRAILS.md) · 🇮🇳 [te](../../../te/docs/security/GUARDRAILS.md) · 🇹🇭 [th](../../../th/docs/security/GUARDRAILS.md) · 🇹🇷 [tr](../../../tr/docs/security/GUARDRAILS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/GUARDRAILS.md) · 🇵🇰 [ur](../../../ur/docs/security/GUARDRAILS.md) · 🇺🇿 [uz](../../../uz/docs/security/GUARDRAILS.md) · 🇻🇳 [vi](../../../vi/docs/security/GUARDRAILS.md) · 🇳🇬 [yo](../../../yo/docs/security/GUARDRAILS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/GUARDRAILS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/GUARDRAILS.md)
 
 ---
 
 > **מקור האמת:** `src/lib/guardrails/`
-> **עדכון אחרון:** 2026-08-29 — v3.8.51 (מקור התמליל של Video Bridge מוצהר על ידי הקורא,
-> ועדיין אינו מאומת על ידי השרת — הובהר בהתאם ל-#11661)
+> **עודכן לאחרונה:** 2026-10-17 — v3.8.52 (נוסף [כיסוי ומגבלות](#coverage-and-limits):
+> אילו נתיבים ומסלולי תגובה ההוקים מגיעים אליהם, כותרות ההשבתה הממוזגות (#16412), מצב חסימת
+> הזרקה כגבול מחייב (#16413), ומה רואה תגובה לפני post-call)
 
-מנגנוני הגנה אוכפים בטיחות, מדיניות והתמרות תוכן בגבול
-שבין OmniRoute לספקים במעלה הזרם. כל מנגנון הגנה יכול לבדוק (ובאופן
-אופציונלי לדחות, להתמיר או להוסיף הערות אל) מטעני בקשות (`preCall`) ותגובות
-במעלה הזרם (`postCall`).
+Guardrails אוכפים בטיחות, מדיניות וטרנספורמציות תוכן בגבול שבין
+OmniRoute לספקי upstream. כל guardrail יכול לבדוק (ובאופן אופציונלי
+לדחות, להמיר או להוסיף הערות על) מטעני בקשות (`preCall`) ותגובות
+מספקי upstream (`postCall`).
 
-המערכת פועלת בגישת **fail-open**: אם מנגנון הגנה זורק חריגה במהלך הביצוע, הרישום
-מתעד את השגיאה וממשיך למנגנון ההגנה הבא במקום להכשיל את
-הבקשה. חסימה היא החלטה מפורשת (`block: true`), ולעולם אינה מתרחשת בטעות.
+המערכת היא **fail-open**: אם guardrail זורק שגיאה במהלך הביצוע, הרג'יסטרי
+מתעד את השגיאה וממשיך ל-guardrail הבא במקום להכשיל את הבקשה. חסימה היא
+החלטה מפורשת (`block: true`), לעולם לא תאונה.
+היוצא מן הכלל היחיד הוא בקשה שבוטלה: כאשר ה-`signal` של הקורא מבוטל,
+guardrail שזורק שגיאה דוחה את ריצת ה-hook במקום לדלג.
 
-## מנגנוני הגנה מובנים
+ההוקים **לא** רצים בכל נתיב או על כל תגובה. קראו
+[כיסוי ומגבלות](#coverage-and-limits) לפני הסתמכות על guardrail כבקרת
+אבטחה.
 
-בעת הייבוא, הרישום טוען אוטומטית שישה מנגנוני הגנה לפי סדר עדיפות
-(ראו `registry.ts` → `registerDefaultGuardrails()`):
+## Guardrails מובנים
+
+הרג'יסטרי טוען אוטומטית שישה guardrails בסדר עדיפויות בעת הייבוא
+(ראו `registry.ts` ← `registerDefaultGuardrails()`):
 
 | עדיפות | שם                  | שלב(ים)        | קובץ                  |
 | ------ | ------------------- | -------------- | --------------------- |
@@ -31,108 +38,137 @@
 | `20`   | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`   | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-מספרי עדיפות נמוכים יותר מופעלים **ראשונים**.
+מספרי עדיפות נמוכים יותר רצים **קודם**.
 
-### Vision Bridge (`visionBridge.ts`) — גשר מודאליות PR-1
+### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-מיירט בקשות הכוללות תמונות ומיועדות ל**מודלים ללא יכולות ראייה**, ומנתב
-מחדש את הבקשה כולה למודל בעל יכולות ראייה, או מחליף את חלקי התמונה
-בתיאורי טקסט שהופקו על ידי מודל ראייה הניתן להגדרה לפני הקריאה
-במעלה הזרם. כך ספקים התומכים בטקסט בלבד יכולים לטפל בשקיפות
-במטענים רב-מודאליים.
+למודל הבסיס GLM 5.3 ול-`glm-5.3-{low,high,max}` יש מטא-דאטה מפורש של
+`supportsVision:false` ברג'יסטרי/במפרט. וריאנטי GLM 5.3 Flash
+נשארים מודלים עם ראייה מובנית (native-vision). נתיב `/v1/messages` של
+Claude Code נכנס לשרשרת ה-guardrails המשותפת של `handleChat` בשלב ה-pre-call
+**לפני** התרגום מ-Claude ל-OpenAI; תמונות של תוצאות כלי `Read` מקוננות חייבות
+לעבור תיאור או טיפול לפני שהתרגום מעביר אותן לתוכן `image_url` של OpenAI (#17069).
+
+מיירט בקשות נושאות תמונות המיועדות ל**מודלים ללא ראייה** ומנתב מחדש
+את כל הבקשה למודל בעל יכולת ראייה, או מחליף את חלקי התמונה
+בתיאורי טקסט המופקים על ידי מודל ראייה הניתן להגדרה לפני
+קריאת ה-upstream. זה מאפשר לספקים טקסט-בלבד לטפל באופן שקוף
+במטענים מולטי-מודאליים.
 
 זרימה:
 
-1. דלגו אם מודל היעד כבר תומך בראייה (אלא אם הוא מופיע ברשימת
-   הגישור הכפוי `isVisionBridgeForcedModel`).
-2. חלצו חלקי תמונה באמצעות `extractImageParts(messages)`
-   (`visionBridgeHelpers.ts`), שמעבירה את הטיפול ל**גלאי המדיה
-   המאוחד** `detectMediaParts()` שב-`open-sse/utils/mediaParts.ts` — מקור
-   האמת היחיד המשותף למסנן התאימות המשולב.
-   החילוץ מוגבל ברשימת היתרים לחלקים ברמה העליונה מהצורות
-   ש-`replaceImageParts` יכול לשלב בחזרה (חוזה החילוץ↔ההחלפה): OpenAI
-   `image_url`, מקור base64 של Anthropic מסוג `source.type:"base64"`, כתובת URL של Anthropic
-   מסוג `source.type:"url"`, ו-Responses API `input_image`. התאמות מקוננות
-   וצורות המשמשות כאינדיקטורים בלבד שייכות למסנן המשולב ולעולם אינן מחולצות.
-   דלגו אם לא נמצאו תמונות.
-3. פתרו את תצורת זמן הריצה באמצעות `resolveVisionBridgeRuntimeSettings()`
-   (`src/shared/constants/modalityBridgeDefaults.ts`): למפתחות ההגדרות החדשים `modalityBridge*`
-   יש קדימות; המפתחות הישנים `visionBridge*` נשארים כ**חלופה למחזור
-   אחד** (חלון חזרה לאחור). דלגו לפני מעבר כלשהו על המדיה כאשר
-   הגשר מושבת.
-4. בורר המצבים (`modalityBridgeVisionMode`, ראו טבלה להלן) מחליט
-   בין ניתוב מחדש לתיאור. ניתוב מחדש מחזיר `modifiedPayload` שבו רק `model`
-   הוחלף, יחד עם מטא-נתונים `{ rerouted, fromModel, toModel, imagesKept }`.
-5. נתיב התיאור: הגבילו את התמונות ל-`maxImages`, הרכיבו את ההנחיה המודעת למשימה,
-   בדקו את מטמון התיאורים, קראו למודל הראייה **במקביל**
-   (`Promise.allSettled`), והזריקו במקומן חלקי טקסט מסוג `[Image N]: <description>`.
-   תיאור שנכשל מניב `null`, וחלק התמונה המקורי **נשמר** (#4012) — למעט
-   נתיב התיאור המשולב, שבו, אם כל ניסיונות התיאור נכשלו, מערכת מאומתת במעלה הזרם
-   שאינה תומכת בראייה מקבלת במקום זאת מציין מקום
-   `(unavailable — no vision-capable provider connected)` (#8430).
-6. החזירו `modifiedPayload` ומטא-נתונים (`imagesProcessed`, `descriptions`,
+1. דלג אם מודל היעד כבר תומך בראייה (אלא אם הוא מופיע ברשימת
+   ה-bridge הכפויה `isVisionBridgeForcedModel`).
+2. חלץ חלקי תמונה באמצעות `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), המאציל ל**גלאי המדיה
+   המאוחד** `detectMediaParts()` ב-`open-sse/utils/mediaParts.ts` —
+   מקור האמת היחיד המשותף עם מסנן תאימות ה-combo.
+   החילוץ מוגבל ברשימת היתרים (allowlist) לצורות ש-`replaceImageParts` יכול לשלב
+   בחזרה (חוזה ה-extract↔replace): `image_url` של OpenAI,
+   `source.type:"base64"` של Anthropic base64, `source.type:"url"` של
+   Anthropic URL, ו-`input_image` של Responses API.
+   תמונות תואמות המקוננות בתוך `tool_result.content` של
+   Claude Code ובתוצאות כלי Responses מחולצות גם הן ומוחלפות
+   בנתיביהן המקוריים; צורות שהן אינדיקטור-בלבד הן חומר של מסנן
+   ה-combo ואינן מחולצות.
+   דלג אם לא נמצאו.
+3. פתור את קונפיגורציית זמן הריצה באמצעות `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): מפתחות ההגדרות החדשים
+   `modalityBridge*` גוברים; מפתחות ה-legacy `visionBridge*` נשארים
+   **fallback למחזור אחד** (חלון rollback). דלג לפני כל מעבר מדיה כאשר
+   ה-bridge מושבת.
+4. בורר המצב (`modalityBridgeVisionMode`, ראו טבלה למטה) מחליט בין
+   ניתוב מחדש לתיאור. ניתוב מחדש מחזיר `modifiedPayload` שבו רק ה-`model`
+   הוחלף, בתוספת מטא `{ rerouted, fromModel, toModel, imagesKept }`.
+5. מסלול תיאור: הגבל תמונות ל-`maxImages`, חבר את הפרומפט המודע-למשימה,
+   התייעץ עם מטמון התיאור, קרא למודל הראייה **במקביל**
+   (`Promise.allSettled`), והזרק חלקי טקסט `[Image N]: <description>`
+   במקומן. תיאור כושל מניב `null`: התמונה הגולמית נשמרת עבור
+   יעדים לא ידועים/בעלי ראייה (#4012), אבל **יעד ישיר טקסט-בלבד
+   מאושר** או combo ללא ראייה מקבל שארית טקסט מפורשת
+   `(unavailable — no vision-capable provider connected)` עבור
+   כל תמונה שלא תוארה, כולל כשלים חלקיים ותמונות מעבר
+   לתקרת קריאות התיאור (#17069). ה-fallback הקיים של תיאור combo
+   שכשל במלואו נשאר במקומו (#8430).
+6. החזר `modifiedPayload` + מטא (`imagesProcessed`, `descriptions`,
    `processingTimeMs`, `visionModel`).
 
-#### בורר מצבים (`modalityBridgeVisionMode`)
+#### בורר המצב (`modalityBridgeVisionMode`)
 
-| מצב        | ברירת מחדל | התנהגות                                                                                                                                                                                                                                |
-| ---------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔          | היוריסטיקה הישנה, ללא שינוי (#6640/#7204): מודלים שאינם משולבים או מודלי `auto/` מנותבים מחדש למודל הראייה הטוב ביותר, אלא אם למודל המקורי כבר יש פרטי גישה שמישים (ואז מתבצע תיאור); יעדים משולבים תמיד משתמשים בתיאור.               |
-| `describe` |            | תמיד לבצע תיאור — מדלגים לחלוטין על בלוק הניתוב מחדש; המודל שבחר המשתמש תמיד עונה.                                                                                                                                                     |
-| `reroute`  |            | כפיית ניתוב מחדש: מעקף השמירה על מודל בעל פרטי גישה. בדיקת פרטי הגישה של **יעד** הניתוב מחדש עדיין חלה — כאשר אין יעד ראייה שמיש, הבקשה עוברת לנתיב התיאור, כך שתמונות גולמיות לעולם אינן מגיעות למערכת קצה התומכת בטקסט בלבד (#8430). |
+| מצב        | ברירת מחדל | התנהגות                                                                                                                                                                                                        |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔          | היוריסטיקה מדור קודם, ללא שינוי (#6640/#7204): מודלים שאינם קומבו/`auto/` מנותבים מחדש למודל הראייה הטוב ביותר, אלא אם למודל המקורי כבר יש אישורים שמישים (ואז מתבצע תיאור); יעדי קומבו תמיד מתארים.           |
+| `describe` |            | תמיד תיאור — בלוק הניתוב מחדש מדולג לחלוטין; המודל שבחר המשתמש תמיד עונה.                                                                                                                                      |
+| `reroute`  |            | אילוץ ניתוב מחדש: שומר שמירת-המודל-בעל-האישורים עוקף. שומר האישורים של **יעד** הניתוב מחדש עדיין חל — כאשר לא קיים יעד ראייה שמיש, הגשר חוסם עם שגיאה ברורה במקום לתאר או לשלוח תמונות גולמיות ליעד טקסט-בלבד. |
 
-מצבים כפויים מבצעים קיצור דרך **לפני** הפעלת ההיוריסטיקה האוטומטית; ההתנהגות של `auto`
-זהה ברמת הבתים למנגנון ההגנה שלפני PR-1.
+מצבים מאולצים מקצרים את הדרך **לפני** שההיוריסטיקה האוטומטית רצה; התנהגות `auto`
+זהה בית-אחר-בית לשומר-הגבול שקדם ל-PR-1.
 
-#### הנחיית תיאור מודעת למשימה (`modalityBridgeVisionTaskAware`)
+#### טווח מפתח API (`visionBridgeKeyScope.ts`)
 
-ברירת המחדל היא **true**. הפונקציה `composeVisionPrompt()` (`visionBridgeHelpers.ts`) מוסיפה
-את הטקסט של **הודעת המשתמש האחרונה** (מקוצר ל-500 תווים) להנחיית
-התיאור הבסיסית, מכוונת את התיאור למה שהמשתמש ביקש בפועל
-(דפוס codex-vision-proxy) ומבקשת ממודל הראייה לתמלל טקסט
-גלוי. כאשר הדגל כבוי — או כשאין טקסט מהמשתמש — נעשה שימוש בהנחיה הבסיסית ללא שינוי.
+כאשר מפתח ה-API של המתקשר מגביל את `allowedConnections`, מאגרי מכסה
+(`allowedQuotas`) או מודלים (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), הגשר בוחר רק
+מודלי ניתוב-מחדש ותיאור שהמפתח רשאי להשתמש בהם, על חיבורים שהמפתח רשאי
+להשתמש בהם. קריאת התיאור תמיד עוברת לאחר מכן דרך לולאת-העצמי (self-loop) של
+OmniRoute עם כותרת `x-omniroute-self-loop-key-id`, כך שבקשת הצ'אט המקבלת
+אוכפת שוב את מדיניות החיבורים והמודלים של אותו מפתח. `enforceApiKeyPolicy()`
+מכבדת את הכותרת הזו רק יחד עם ה-bearer של לולאת-העצמי, כך שהיא יכולה רק
+לצמצם גישה, ומזהה שלא נפתר נדחה.
 
-לולאת התיאור העצמית שולחת תמיד בבקשה תואמת-OpenAI משלה (`callVisionModelSingle()`
-ב-`visionBridgeHelpers.ts`) את `image_url.detail: "high"` —
-ללא תנאי, עבור כל קורא/ספק, וללא תלות באות כלשהו מהלקוח.
-דגימה ברמת פירוט נמוכה פוגעת בדיוק ה-OCR בדיוק במשימת תמלול הטקסט
-שהנחיה זו מבקשת, ולכן קריאת התיאור עצמה תמיד מבקשת רמת פירוט גבוהה,
-ללא קשר לרמת הפירוט שבה השתמשה הבקשה הנכנסת המקורית. הדבר משפיע
-רק על גוף בקשת התיאור הפנימית; הוא אינו משנה את האופן שבו
-OmniRoute מעביר את `image_url.detail` של הקורא בבקשה הראשית —
-ברירת המחדל הזו מוחלת בנפרד, ורק עבור לקוחות OpenCode שזוהו, בתוך
-`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). לענף
-תבנית-ההעברה של Anthropic בלולאת התיאור העצמית אין שדה `detail`,
-והוא אינו מושפע מאף אחת מברירות המחדל.
+אם אין מודל ראייה מותר עבור המפתח, **יעד טקסט-בלבד מאושש** דוחה את בקשת
+התמונה מקומית עם HTTP 400 ברור במקום להעביר בתי תמונה ל-upstream שאינו
+מסוגל (#17069). עבור יעדים עם יכולת ראייה לא ידועה או מובנית, נתיב התיאור
+שומר על התנהגות ה-fail-open הקודמת שלו (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+בקשות ללא מפתח, ומפתחות ללא ההגבלות הללו, מתנהגים בדיוק כמו קודם.
 
-#### מגבלת פלט התיאור (`modalityBridgeVisionMaxChars`)
+#### פרומפט תיאור מודע-משימה (`modalityBridgeVisionTaskAware`)
+
+ברירת מחדל **true**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) מוסיפה
+את הטקסט של **הודעת המשתמש האחרונה** (חתוך ל-500 תווים) לפרומפט התיאור הבסיסי,
+מכוונת את התיאור למה שהמשתמש באמת שאל (דפוס codex-vision-proxy) ומבקשת
+ממודל הראייה לתעתק טקסט נראה. כשהדגל כבוי — או שאין טקסט משתמש — הפרומפט
+הבסיסי משמש ללא שינוי.
+
+בקשת התואמת-OpenAI של לולאת-העצמי של התיאור עצמה (`callVisionModelSingle()`
+ב-`visionBridgeHelpers.ts`) תמיד מבקשת `image_url.detail: "high"` —
+ללא תנאי, עבור כל מתקשר/ספק, לא מותנית בשום אות לקוח.
+דגימה ברמת פירוט נמוכה פוגעת בדיוק ה-OCR בדיוק עבור משימת תעתוק הטקסט
+שפרומפט זה מבקש, ולכן קריאת התיאור עצמה תמיד מבקשת פירוט גבוה ללא קשר
+לרמת הפירוט שבה השתמשה הבקשה הנכנסת המקורית. זה משפיע רק על גוף בקשת
+התיאור הפנימית; זה לא משנה כיצד OmniRoute מעביר את `image_url.detail`
+של המתקשר עצמו בבקשה הראשית — ברירת מחדל זו מוחלת בנפרד, ורק עבור לקוחות
+OpenCode מזוהים, ב-`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`).
+לענף פורמט-התיל (wire-format) של Anthropic בלולאת-העצמי של התיאור אין שדה
+`detail` והוא אינו מושפע מאף אחת מברירות המחדל.
+
+#### תקרת פלט תיאור (`modalityBridgeVisionMaxChars`)
 
 | מפתח                           | ברירת מחדל | טווח             |
 | ------------------------------ | ---------- | ---------------- |
 | `modalityBridgeVisionMaxChars` | `0`        | `0` או 100–50000 |
 
-`0` (ברירת המחדל) פירושו **ללא מגבלה** — התיאור שמוחזר על ידי
-`callVisionModel()` מועבר ללא שינוי, תוך שימור ההתנהגות הקיימת.
-כל ערך בטווח 100–50000 חותך את התיאור ומוסיף סיומת `…` לפני שהוא
-משולב בחזרה בתור `[Image N]: <description>`
+`0` (ברירת מחדל) משמעו **ללא תקרה** — התיאור המוחזר מ-`callVisionModel()`
+מועבר ללא שינוי, תוך שמירה על ההתנהגות הקיימת. כל ערך בטווח 100–50000
+חותך את התיאור עם סיומת `…` לפני שהוא משובץ בחזרה כ-`[Image N]: <description>`
 (`VisionBridgeGuardrail.preCall()` ב-`src/lib/guardrails/visionBridge.ts`).
-הגדילו ערך זה עבור משימות OCR עתירות פרטים שבהן המודל שבהמשך התהליך
-זקוק לתמלול המלא; הקטינו אותו כדי להגביל את השימוש בטוקנים במודלי ראייה
-פטפטניים. השדה בלוח הבקרה נמצא בחלונית המתקדמת של לשונית הראייה
-(`modality-bridge-max-chars` ב-`ModalityBridgeVisionTab.tsx`) ומצמיד כל
-ערך בין 1 ל-99 לרצפה של 100, תוך השארת `0` מפורש ללא שינוי —
-`0` הוא ערך Zod תקף בפני עצמו
+העלו ערך זה עבור משימות OCR עתירות-פירוט שבהן המודל במורד הזרם זקוק
+לתעתוק המלא; הורידו אותו כדי לתחום שימוש בטוקנים במודלי ראייה מדברים.
+שדה לוח-הבקרה נמצא בחלונית המתקדמת של לשונית הראייה
+(`modality-bridge-max-chars` ב-`ModalityBridgeVisionTab.tsx`) ומהדק כל ערך
+בין 1 ל-99 כלפי מעלה לרצפת 100, תוך השארת `0` מפורש ללא שינוי — `0` הוא
+ערך Zod תקף בזכות עצמו
 (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), ולא רק
 ברירת המחדל של "לא הוגדר".
 
-#### מטמון תיאורים (`modalityBridge/bridgeCache.ts`)
+#### מטמון תיאור (`modalityBridge/bridgeCache.ts`)
 
-מטמון LRU + TTL בזיכרון עבור פלטי תיאור, המשותף לכלל התהליך.
+מטמון LRU + TTL בזיכרון עבור פלטי תיאור, משותף לכל התהליך.
 מפתח = `sha256(imageRef + composedPrompt + configuredBridgeModel)` עם
-מסגור באמצעות קידומת אורך (ללא התנגשויות בין גבולות שדות). רכיב המודל הוא
-מודל הגשר **שהוגדר**, ולא המודל שהשיב בפועל —
-`callVisionModel` עשוי לעבור פנימית לחלופה, ויצירת מפתח לכל ניסיון הייתה
-מפצלת את המטמון. תיאורים שנכשלו לעולם אינם נשמרים במטמון. הגדרות:
+מסגור קידומת-אורך (ללא התנגשויות גבול-שדות). רכיב המודל הוא מודל הגשר
+**המוגדר**, לא המודל שבאמת ענה — `callVisionModel` עשויה לנסוג פנימית,
+ומיקוח לפי ניסיון היה מפצל את המטמון. תיאורים כושלים לעולם אינם נשמרים
+במטמון. הגדרות:
 
 | מפתח                            | ברירת מחדל | טווח    |
 | ------------------------------- | ---------- | ------- |
@@ -140,144 +176,138 @@ OmniRoute מעביר את `image_url.detail` של הקורא בבקשה הראש
 | `modalityBridgeCacheTtlMinutes` | `60`       | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`      | 10–5000 |
 
-#### נרמול תמונות מרוחקות (תיאור בלולאה עצמית/אחזור base64)
+#### נורמליזציה של תמונה מרוחקת (שליפת describe/base64 דרך self-loop)
 
-כאשר הגשר מאחזר בעצמו תמונה **מרוחקת** — קריאת התיאור העצמית של Anthropic
-והמרת ה-base64 בתבנית-ההעברה של claude
-(`ensureBase64ImagesForClaudeWire`), שתיהן באמצעות
-`fetchRemoteImageAsDataUri()` ב-`visionBridgeHelpers.ts` — ה-URI של הנתונים
-שמתקבל מועבר דרך `normalizeDataUri()`
-(`open-sse/utils/imageNormalize.ts`) לפני שהוא מוטמע בבקשה למודל הראייה.
-תמונות גדולות מדי מוקטנות כך שה**צלע הארוכה תהיה 2048px** (בהתאם
-למגבלת שינוי הגודל ש-OpenAI/Anthropic כבר מחילים בצד השרת), ובכך מצטמצמים
-נפח ההעלאה וזמן ההשהיה בלי לשנות את מה שמודל הראייה רואה. שינוי הגודל
-משתמש ב-`sharp`, שנטען באמצעות ייבוא דינמי: בפלטפורמה שבה הטעינה של
-הקובץ הבינארי המקורי שלו נכשלת, `normalizeDataUri()` **לעולם אינו זורק חריגה** —
-הוא חוזר להעברה ללא שינוי של הבתים המקוריים, כך שנתיב התיאור/המרת ה-base64
-ממשיך תמיד לפעול. גם בתים שאינם תמונה (אחזור שלא החזיר תמונה הניתנת
-לפענוח) מועברים ללא שינוי. נרמול זה מוגבל לתמונות שהגשר מאחזר עבור
-הקריאה העצמית שלו — הוא לעולם אינו מוחל על מטען ההעברה הגולמי של הקורא,
-בהתאם לעיקרון שלפיו שינוי מתבצע רק בהצטרפות מפורשת (כלל מחייב מס' 20).
+כאשר הגשר שולף בעצמו תמונה **מרוחקת** — הקריאה העצמית (self-call) של describe מסוג Anthropic וההמרה ל-base64 בפורמט claude-wire
+(`ensureBase64ImagesForClaudeWire`), שניהם דרך
+`fetchRemoteImageAsDataUri()` ב-`visionBridgeHelpers.ts` — ה-data URI
+המתקבל מועבר דרך `normalizeDataUri()`
+(`open-sse/utils/imageNormalize.ts`) לפני שהוא מוטמע בבקשה למודל הראייה. תמונות גדולות מדי מוקטנות ל**קצה ארוך של 2048px** (בהתאמה לתקרת שינוי הגודל ש-OpenAI/Anthropic כבר מחילים בצד השרת), מה שמצמצם את נפח הבתים וזמן ההשהיה של ההעלאה מבלי לשנות את מה שמודל הראייה רואה. שינוי הגודל
+משתמש ב-`sharp`, שנטען באמצעות import דינמי: בפלטפורמה שבה הבינארי הטבעי שלו
+נכשל בטעינה, `normalizeDataUri()` **לעולם לא זורק** — הוא נסוג
+ל-passthrough של הבתים המקוריים, כך שמסלול ה-describe/המרת base64 ממשיך תמיד לעבוד. בתים שאינם תמונה (fetch שלא החזיר
+תמונה הניתנת לפענוח) מועברים גם הם ללא שינוי. הנורמליזציה הזו
+מוגבלת לתמונות שהגשר שולף עבור הקריאה העצמית שלו — היא לעולם לא
+מוחלת על ה-payload הגולמי של המתקשר, בעקביות עם
+עקרון המוטציה באישור מפורש בלבד (כלל קשיח מס' 20).
 
 #### סכמת הגדרות + מיגרציה
 
-המפתחות החדשים מסוג `modalityBridge*` מאומתים באמצעות Zod בתוך
-`updateSettingsSchema`
+המפתחות החדשים `modalityBridge*` מאומתים באמצעות Zod ב-`updateSettingsSchema`
 (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
 `modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
 `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
 `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
-`modalityBridgeVisionMaxChars`, שלישיית `modalityBridgeCache*`, וקבוצת
-`modalityBridgeAudio*` המשמשת את גשר האודיו. המיגרציה
-`141_modality_bridge_settings.sql` מעתיקה ערכי `visionBridge*` ישנים
-למפתחות החדשים התואמים (באופן אידמפוטנטי, ולעולם אינה דורסת ערך
-`modalityBridge*` שהוגדר על ידי מפעיל); המפתחות הישנים ממשיכים להתקבל
-כחלופת קריאה במשך מחזור גרסה אחד.
+`modalityBridgeVisionMaxChars`, השלישייה `modalityBridgeCache*`, וקבוצת
+`modalityBridgeAudio*` שבשימוש ה-Audio Bridge. המיגרציה
+`141_modality_bridge_settings.sql` מעתיקה ערכי `visionBridge*` מדור קודם
+קיימים למפתחות החדשים התואמים (אידמפוטנטית, לעולם לא דורסת
+ערך `modalityBridge*` שהוגדר על ידי המפעיל); מפתחות הדור הקודם ממשיכים להתקבל
+כ-fallback לקריאה למשך מחזור שחרור אחד.
 
 #### כותרת שקיפות + סטטיסטיקות
 
-תגובות שעברו שינוי באמצעות תיאור כוללות
+תגובות שעברו טרנספורמציית describe נושאות
 `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
 (נבנית על ידי `buildModalityBridgeHeader()` ב-`modalityBridge/bridgeStats.ts`,
-ומוחלת על ידי `withModalityBridgeHeader()` ב-`src/sse/handlers/chatHelpers.ts`).
-בקשות שנותבו מחדש אינן מקבלות **שום** כותרת — המטען לא השתנה והחלפת המודל
-כבר גלויה בשדה `model` שבגוף התגובה.
+ומוטבעת על ידי `withModalityBridgeHeader()` ב-`src/sse/handlers/chatHelpers.ts`).
+בקשות שנותבו מחדש מקבלות **לא** כותרת — ה-payload נותר ללא שינוי והחלפת המודל
+כבר נראית בשדה `model` בגוף התגובה.
 
-`GET /api/modality-bridge/stats` (אימות ניהולי, באותה רמה כמו
-`GET /api/settings`) מחזיר את המונים בזיכרון לכל אופנוּת
+`GET /api/modality-bridge/stats` (אימות ניהול, באותה רמה כמו
+`GET /api/settings`) מחזיר את המונים בזיכרון לפי מודאליות
 `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
 latencySamples, averageLatencyMs, lastUsedAt }` עבור `vision`, `audio` ו-
-`video`. החישוב של `averageLatencyMs` משתמש ב-`latencySamples`, ולא בכל
-הניסיונות, כמכנה; פעולה ללא מדידת זמן אינה ממציאה דגימה של אפס
-אלפיות שנייה. `bridged` נשאר הכינוי התואם לאחור להמרות מוצלחות;
-ניסיונות שנכשלו אינם מגדילים אותו.
-המונים מתאפסים בעת הפעלה מחדש של התהליך, במכוון
+`video`. `averageLatencyMs` משתמש ב-`latencySamples`, ולא בכל הניסיונות, כמכנה
+שלו; פעולה ללא מדידת זמן אינה ממציאה דגימה של אפס מילישניות.
+`bridged` נשאר הכינוי התואם לאחור עבור המרות
+מוצלחות; ניסיונות כושלים אינם מגדילים אותו.
+המונים מתאפסים בהפעלה מחדש של התהליך, בכוונה תחילה
 (טלמטריה, לא הנהלת חשבונות).
 
 #### תצורת לוח הבקרה
 
 דף לוח הבקרה הייעודי הוא
-`/dashboard/settings/modality-bridge`. הלשוניות `Vision`,‏ `Audio`
-ו-`Video`, שניתן לפנות אליהן באמצעות URL, משמרות את פרמטרי השאילתה בעת החלפת הערך `tab`.
-הלשונית Vision מציגה הפעלה, מצב, בחירת מודל (כולל ברירת המחדל
-האוטומטית), הנחיות תלויות-משימה, מגבלות מתקדמות של זמן קצוב/תמונה/אורך תיאור/מטמון,
-מוני זמן ריצה ובקשת דוגמה מוגנת. גם הלשונית Audio פעילה: היא מציגה
-הפעלה, בורר מודלים ל-STT בלבד עם אפשרות אוטומטית, מגבלות זמן קצוב/אורך מרבי של מקטע,
-מוני אודיו ובדיקת דוגמה מסוג `input_audio`. הלשונית Video מתפקדת: היא מדווחת
-על מצב זמן הריצה של FFmpeg/ffprobe — אחד מארבעה מצבי ממשק מפורשים (`unknown` בזמן
-שהבדיקה מתבצעת או אם לא ניתן היה להשלימה, `restricted` במארח לוח בקרה שאינו loopback
-שבו הבדיקה מדולגת בצד הלקוח, `unavailable` לאחר שבוצעה בדיקה ואושר שהכלים חסרים,
-או `available` יחד עם גרסאות FFmpeg/ffprobe) — שומרת
-מגבלות הפעלה/מודל/פריימים/וידאו/זמן קצוב, מסננת את בורר המודלים למודלים
-בעלי יכולות ראייה ומציגה מוני וידאו.
+`/dashboard/settings/modality-bridge`. הכרטיסיות `Vision`, `Audio` ו-
+`Video` שלו, הניתנות לכתובת ישירה ב-URL, שומרות על פרמטרי שאילתה בעת החלפת ערך ה-`tab`.
+כרטיסיית ה-Vision חושפת הפעלה, מצב, בחירת מודל (כולל ברירת המחדל
+האוטומטית), פרומפטינג מודע-משימה, מגבלות מתקדמות של timeout/תמונה/אורך תיאור/מטמון,
+מוני זמן ריצה, ובקשת דוגמה מוגנת. גם כרטיסיית ה-Audio פעילה: היא חושפת
+הפעלה, בורר מודלים של STT בלבד עם Auto, מגבלות timeout/אורך קטע מקסימלי, מוני
+אודיו, ובדיקת דוגמה של `input_audio`. כרטיסיית ה-Video פונקציונלית: היא מדווחת
+על מצב זמן הריצה של FFmpeg/ffprobe — אחד מארבעה מצבי UI מפורשים (`unknown` בזמן
+שהבדיקה מתבצעת או שלא הצליחה להסתיים, `restricted` במארח לוח בקרה שאינו
+loopback שבו הבדיקה מדולגת בצד הלקוח, `unavailable` לאחר שנבדק ואושר כחסר,
+או `available` עם גרסאות FFmpeg/ffprobe) — שומרת
+מגבלות הפעלה/מודל/פריימים/וידאו/timeout, מסננת את בורר המודלים למודלים בעלי
+יכולת ראייה, וחושפת מוני וידאו.
 
-כרטיס Vision Bridge הקודם תחת הגדרות AI הוא קישור תאימות אל
-הדף החדש; הוא אינו מחזיק עוד עותק נוסף של הטופס. Media Providers כולל גם
-קישורים מתהליכי העבודה Image-to-Text ו-Speech-to-Text ללשוניות המתאימות ב-Modality
-Bridge, מבלי להסיר את סביבת הניסוי הקיימת של Speech-to-Text.
+כרטיס ה-Vision Bridge לשעבר תחת הגדרות ה-AI הוא קישור תאימות לדף
+החדש; הוא כבר לא מחזיק עותק שני של הטופס. Media Providers גם
+מקשר זרימות עבודה של Image-to-Text ו-Speech-to-Text לכרטיסיות ה-Modality
+Bridge התואמות מבלי להסיר את סביבת הניסיון הקיימת של Speech-to-Text.
 
-**עקיפת בקרת קבלה בלולאה עצמית:** כאשר קריאת התיאור מנותבת דרך
-לולאת `/v1` העצמית של OmniRoute (מודל ספק לא סטנדרטי), בקשת המשנה שולחת
-`x-omniroute-admission-bypass: internal` ומאומתת באמצעות פרטי ההזדהות שנפתרו
-עבור הלולאה העצמית — ערך הסמן המקומי `sk_omniroute` במצב מקומי, או
-מפתח משתנה הסביבה `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` שהוגדר בידי המפעיל (#1350), כך
-שפריסות עם `REQUIRE_API_KEY=true` עדיין יכולות להריץ את קריאת התיאור. העקיפה
-מכובדת רק עבור פרטי ההזדהות המדויקים האלה, ולכן לקוחות חיצוניים אינם יכולים להשתמש
-בכותרת כדי לדלג על בקרת הקבלה.
+**עקיפת בקרת קבלה של self-loop:** כאשר קריאת ה-describe מנותבת דרך ה-self-loop
+`/v1` של OmniRoute עצמו (מודל ספק לא סטנדרטי), בקשת המשנה שולחת
+`x-omniroute-admission-bypass: internal` ומאומתת עם אישור ה-self-loop
+שנפתר — ה-sentinel המקומי `sk_omniroute` במצב מקומי, או
+מפתח הסביבה `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` שהוגדר על ידי המפעיל (#1350) כך
+שפריסות עם `REQUIRE_API_KEY=true` עדיין יכולות להריץ את קריאת ה-describe. העקיפה
+מכובדת רק עבור אותם אישורים מדויקים, כך שלקוחות חיצוניים אינם יכולים
+להשתמש בכותרת כדי לדלג על בקרת הקבלה.
 
-ברירות המחדל הישנות נמצאות ב-`src/shared/constants/visionBridgeDefaults.ts`;
-ברירות המחדל החדשות של מצב/תלות במשימה/מטמון ופותר ההגדרות נמצאים ב-
-`src/shared/constants/modalityBridgeDefaults.ts`. מנגנון ההגנה חושף אפשרות בנאי
-`deps`, כדי שבדיקות יוכלו להזריק מימושים מדומים של `getSettings` ושל
+ברירות המחדל מדור קודם נמצאות ב-`src/shared/constants/visionBridgeDefaults.ts`;
+ברירות המחדל החדשות של מצב/מודע-משימה/מטמון וה-settings resolver
+נמצאות ב-`src/shared/constants/modalityBridgeDefaults.ts`. ה-guardrail חושף
+אפשרות בנאי `deps` כך שבדיקות יכולות להזריק מימושים מזויפים של `getSettings` ו-
 `callVisionModel`.
 
-### גשר אודיו (`audioBridge.ts`) — Modality Bridge PR-3
+### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-מיירט בקשות צ'אט המכילות אודיו לפני שהן מגיעות ליעד שלא ידוע
-כתומך בקלט אודיו. הוא לעולם אינו מנתב מחדש את בקשת הצ'אט: חלקי האודיו
-מתומללים דרך נקודת הקצה הקיימת, התואמת ל-OpenAI ומבוססת multipart, ומודל
-הצ'אט שנבחר ממשיך עם תמלילי טקסט.
+מיירט בקשות צ'אט נושאות-אודיו לפני שהן מגיעות ליעד שלא
+ידוע כמקבל קלט אודיו. הוא לעולם לא מנתב מחדש את בקשת הצ'אט: חלקי האודיו
+מתומללים דרך נקודת הקצה הקיימת התואמת-OpenAI מסוג multipart ומודל
+הצ'אט הנבחר ממשיך עם התמלילים הטקסטואליים.
 
-תהליך:
+זרימה:
 
-1. פתרו את `supportsAudio` באמצעות `getResolvedModelCapabilities()`. מטא-נתונים
-   מפורשים של מרשם הספקים מקבלים עדיפות, אחריהם מטא-נתונים סטטיים של המודל, ואז
-   `modalities_input` המסונכרן. רשימת קלט מוצהרת שאינה כוללת `audio` מחזירה `false`;
-   היעדר ראיות ליכולת מחזיר `null`. גם `false` וגם `null` מפעילים את הגשר
-   השמרני, בעוד `true` עוקף אותו.
-2. פתרו את הגדרות `modalityBridgeAudio*` וחלצו מכל הודעה חלקי אודיו
-   הניתנים לשילוב ברמה העליונה, באמצעות הגלאי המשותף `detectMediaParts()`.
-   תבניות התעבורה הנתמכות הן `input_audio` ו-`audio_url` של OpenAI, וכן
-   `source.media_type: "audio/*"`. אודיו מקונן מזוהה לצורכי ניתוב, אך אינו
-   מוסר בנתיב השילוב. העבודה מוגבלת על ידי `modalityBridgeAudioMaxClips`;
-   חלקים מאוחרים יותר נשארים ללא שינוי.
-3. כבדו `provider/model` שהוגדר, או אפשרו ל-`selectAudioBridgeModel()` לעבור על
-   `AUDIO_TRANSCRIPTION_PROVIDERS` לפי סדר קטלוג יציב ולבחור את המודל הראשון
-   שעבורו קיימים פרטי הזדהות שמישים של ספק פעיל.
-4. `callAudioTranscription()` ממירה אודיו מסוג base64/data-URI ל-`file` מסוג multipart,
-   או מורידה `audio_url` מרוחק דרך מנגנון ההגנה ליציאות ציבוריות בלבד,
-   עם הצמדת DNS ומגבלה של 25 MB. לאחר מכן היא שולחת בקשת POST עם הקובץ והמודל
-   שנבחר אל הלולאה העצמית המקומית `/v1/audio/transcriptions`, עם אימות באמצעות
-   `resolveSelfLoopBearer()`. נתיב התמלול הקיים מבצע חיפוש רגיל של פרטי הזדהות,
-   טיפול בתקופת צינון/הגבלת קצב ושיגור לספק.
+1. `supportsAudio` מפוענח באמצעות `getResolvedModelCapabilities()`. מטא-דאטה מפורש
+   מרישום הספקים (provider registry) גובר, אחריו מטא-דאטה סטטי של המודל, ואחריו
+   `modalities_input` מסונכרן. רשימת קלטים מוצהרת ללא `audio` נחשבת ל-`false`;
+   היעדר ראיות ליכולת נשאר `null`. גם `false` וגם `null` מפעילים את הגשר השמרני,
+   בעוד `true` עוקף אותו.
+2. ההגדרות `modalityBridgeAudio*` מפוענחות, וחלקי אודיו ברמה העליונה הניתנים
+   לחיתוך מחולצים מכל הודעה באמצעות הגלאי המשותף `detectMediaParts()`. צורות
+   ה-wire הנתמכות הן `input_audio`, `audio_url` ו-`source.media_type: "audio/*"`
+   של OpenAI. אודיו מקונן מזוהה לצורך ניתוב אך אינו מוסר בנתיב החיתוך (splice).
+   נפח העבודה מוגבל על ידי `modalityBridgeAudioMaxClips`; חלקים מאוחרים יותר
+   נשארים ללא שינוי.
+3. `provider/model` מוגדר מכובד; אחרת, `selectAudioBridgeModel()` עובר על
+   `AUDIO_TRANSCRIPTION_PROVIDERS` בסדר קטלוג יציב ובוחר את המודל הראשון עם
+   אישור ספק פעיל שמיש.
+4. `callAudioTranscription()` ממיר אודיו מסוג base64/data-URI ל-`file` של
+   multipart, או מוריד `audio_url` מרוחק דרך שומר התעבורה היוצאת ליעדים ציבוריים
+   בלבד, עם הצמדת DNS וגבול של 25 MB. לאחר מכן הוא שולח ב-POST את הקובץ ואת
+   המודל הנבחר אל ה-self-loop המקומי `/v1/audio/transcriptions`, באימות של
+   `resolveSelfLoopBearer()`. נתיב התמלול הקיים מבצע חיפוש אישורים רגיל, טיפול
+   ב-cooldown ובמגבלות קצב (rate-limit), ושיגור לספק.
 5. קריאות מוצלחות מחליפות את החלקים שלהן ב-`[Audio N]: <transcript>`. הקריאות
-   מופעלות באמצעות `Promise.allSettled`: כשל יחיד משמר את חלק האודיו המקורי
-   שלו (חוזה #4012). אם כל הקריאות נכשלות והוכח כי היעד הוא
-   `supportsAudio === false`, החלקים הופכים ל-
-   `[Audio N]: (unavailable — no STT provider connected)` (חוזה #8430). עבור
-   יעד לא ידוע (`null`), תוצאה שבה כל הקריאות נכשלו נשארת ללא שינוי. יעד
-   שהוכח כיעד טקסט בלבד ושאין עבורו פרטי הזדהות שמישים של STT מקבל את אותו
-   מציין מקום מפורש, מבלי להוציא קריאת רשת.
+   רצות עם `Promise.allSettled`: כשל בודד משמר את חלק האודיו המקורי שלו (חוזה
+   #4012). אם כל הקריאות נכשלות והיעד הוכח כ-`supportsAudio === false`, החלקים
+   הופכים ל-`[Audio N]: (unavailable — no STT provider connected)` (חוזה #8430).
+   עבור יעד לא ידוע (`null`), תוצאה של כשל מוחלט נשארת ללא שינוי. יעד שהוכח
+   כטקסט-בלבד וללא אישור STT שמיש מקבל את אותו stub מפורש מבלי לבצע קריאת רשת
+   כלשהי.
 
-תמלולים מוצלחים משתמשים במטמון LRU/TTL הכלל-תהליכי של Modality Bridge. המפתח
-משלב את הפניית האודיו, את תווית הפעולה היציבה `audio-transcription`
-ואת מודל ה-STT שנבחר; כשלים לעולם אינם נשמרים במטמון. ניסיונות אודיו מעדכנים
-את המונים המשותפים `bridged`,‏ `cacheHits`,‏ `failures` ו-`lastUsedAt`.
-תגובות שעברו המרה כוללות
+תמלולים מוצלחים משתמשים במטמון ה-LRU/TTL של Modality Bridge ברמת התהליך כולו.
+המפתח משלב את הפניית האודיו, את תווית הפעולה היציבה `audio-transcription`, ואת
+מודל ה-STT הנבחר; כשלים לעולם אינם נשמרים במטמון. ניסיונות אודיו מעדכנים את
+המונים המשותפים `bridged`, `cacheHits`, `failures` ו-`lastUsedAt`. תגובות שעברו
+טרנספורמציה נושאות את
 `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; בקשות
-שלא שונו אינן מקבלות מקטע Audio Bridge.
+שלא עברו שינוי אינן מקבלות מקטע Audio Bridge.
 
-הגדרות זמן הריצה מגובות במסד נתונים ומאומתות באמצעות Zod:
+הגדרות זמן הריצה מגובות בסיס נתונים ומאומתות באמצעות Zod:
 
 | מפתח                          | ברירת מחדל | טווח                |
 | ----------------------------- | ---------- | ------------------- |
@@ -286,321 +316,255 @@ Bridge, מבלי להסיר את סביבת הניסוי הקיימת של Speec
 | `modalityBridgeAudioTimeout`  | `60000`    | 1000–300000         |
 | `modalityBridgeAudioMaxClips` | `3`        | 1–10                |
 
-המטמון המשותף נשאר בשליטת `modalityBridgeCacheEnabled`,
+המטמון המשותף ממשיך להישלט על ידי `modalityBridgeCacheEnabled`,
 `modalityBridgeCacheTtlMinutes` ו-`modalityBridgeCacheMaxEntries`.
 
 ### גשר וידאו (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-מיירט חלקי וידאו ברמה העליונה ב-`messages` של Chat Completions וב-`input` של Responses
-API, לפני שמתבצעת קריאה ליעד שאין לו תמיכה מובנית ידועה בווידאו.
-התבניות הנתמכות הן `input_video`,‏ `video_url`,‏ `video_source`, כתובות URL מסוג HTTPS,
-ו-URI נתונים מסוג `data:video/*;base64,...`. שמות קבצים רגילים בתוך טקסט אינם נחשבים
+מיירט חלקי וידאו ברמה העליונה ב-`messages` של Chat Completions וב-`input` של
+Responses API, לפני שמתבצעת קריאה ליעד ללא תמיכת וידאו מקורית ידועה. הצורות
+הנתמכות הן `input_video`, `video_url`, `video_source`, כתובות HTTPS, ו-data
+URIs מסוג `data:video/*;base64,...`. שמות קבצים רגילים בתוך טקסט אינם נחשבים
 לווידאו.
 
-`VideoBridgeGuardrail.preCall` ‏(`videoBridge.ts`) אחראי על מעבר על הבקשה, על
-בדיקת היכולת/המדיניות, על הצבירה לכל בקשה ועל מטען התגובה.
-העבודה לכל סרטון — השגת הנתונים, מטמון התוצאה המלאה, תיאור רצף פריימים
-(המשלב תמלול שמע כלשהו שהוצהר על ידי הקורא), ומדדים/ביטול/ניקוי לכל ניסיון —
-מוסתרת מאחורי `processVideoPart` ב-`videoBridgePipeline.ts`, שנקראת פעם אחת
-לכל חלק וידאו בתוך הלולאה של `preCall`.
-מודול זה מגדיר גם את גבולות היציאות המפורשים `VideoMediaBrokerPort`
-(השגת בתים וחילוץ פריימים שנדגמו), `VideoAudioTranscriptionPort`
-(שילוב תמלול שמע שהוצהר על ידי הקורא עם כתוביות הפריימים שנדגמו), וכן
-`VideoDrilldownPort` (גבול ההתמדה של התעמקות בפריימים; עדיין אינו מחובר
-ל-`processVideoPart` — כיום רק הנתיב הנפרד `/api/modality-bridge/video/drilldown`
-כותב רשומות התעמקות).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) אחראי על מעבר הבקשה, בדיקת
+היכולת/המדיניות, הצבירה לכל בקשה, ומטען התגובה. העבודה לכל סרטון — ההשגה, מטמון
+התוצאה השלמה, תיאור רצף פריימים (המשלב כל תמלול אודיו שהוכרז על ידי המתקשר),
+ומדדים/ביטול/ניקוי לכל ניסיון — מוסתרת מאחורי `processVideoPart` ב-
+`videoBridgePipeline.ts`, הנקרא פעם אחת עבור כל חלק וידאו בתוך הלולאה של
+`preCall`. מודול זה מגדיר גם את גבולות הפורטים המפורשים `VideoMediaBrokerPort`
+(השגת בתים וחילוץ פריימים מדוגמים), `VideoAudioTranscriptionPort` (שילוב תמלול
+אודיו שהוכרז על ידי המתקשר עם הכיתובים המדוגמים), ו-`VideoDrilldownPort` (גבול
+השמירה של drill-down לפריימים; עדיין אינו מחובר ל-`processVideoPart` — רק
+הנתיב הנפרד `/api/modality-bridge/video/drilldown` כותב ערכי drill-down כיום).
 
-נתיב הבקשה הציבורי `/v1` לעולם אינו מייבא או מפעיל תהליך משנה. סרטונים מרוחקים
-מורדים תחת מגבלה של 50 MiB; לסרטוני base64 מוטבעים יש מגבלה שמרנית של 36 MiB
-מפוענחים לכל סרטון, כדי שמעטפת המודל/ההודעות/המסגור תוכל להישאר בתוך מגבלת הקבלה
-של בקשת JSON ציבורית, העומדת על 50 MiB. אומדני האורך המוטבע והגודל המפוענח
-נבדקים לפני ההקצאה. נדרש HTTPS בכתובת ה-URL המרוחקת הראשונית ובכל הפניה מחדש,
-באמצעות מנגנון ההגנה הקיים לתקשורת יוצאת ציבורית בלבד עם הצמדת DNS. לאחר מכן
-הבתים חוצים את גבול הברוקר הפנימי המדויק `POST /api/modality-bridge/video/extract`.
-נתיב זה הוא גם `LOCAL_ONLY` וגם `SPAWN_CAPABLE`, מקבל רק בקשה מאומתת לכל תהליך
-מלולאת משוב מהימנה, ולעולם אינו מקבל כתובת URL, נתיב מערכת קבצים, קובץ הפעלה
-או רשימת ארגומנטים. צינור מגבלת גודל הגוף של ה-API וקורא הגוף המצטבר של המטפל
-אוכפים באופן בלתי תלוי מגבלת קלט של 50 MiB לברוקר. התור המוגבל שלו מפעיל חילוץ
-אחד בכל פעם, מאפשר ארבע עבודות ממתינות ומגביל את הקלט הממתין ל-100 MiB.
+נתיב הבקשה הציבורי `/v1` לעולם אינו מייבא או מפעיל תת-תהליך (subprocess).
+סרטונים מרוחקים מורדים תחת גבול של 50 MiB; לסרטוני base64 מוטבעים יש תקרה
+שמרנית של 36 MiB בגודל מפוענח לכל סרטון, כך שמעטפת המודל/ההודעות/המיסגור יכולה
+להישאר בתוך גבול הקבלה של בקשות JSON ציבוריות, 50 MiB. האורך המוטבע והערכות
+הגודל המפוענח נבדקים לפני הקצאה. נדרש HTTPS עבור כתובת ה-URL המרוחקת הראשונית
+ועבור כל הפניה מחדש, באמצעות שומר התעבורה היוצאת ליעדים ציבוריים בלבד הקיים,
+עם הצמדת DNS. הבתים חוצים לאחר מכן את גבול ה-broker הפנימי המדויק
+`POST /api/modality-bridge/video/extract`. נתיב זה הוא גם `LOCAL_ONLY` וגם
+`SPAWN_CAPABLE`, מקבל רק בקשה מאומתת לכל תהליך מ-loopback מהימן, ולעולם אינו
+מקבל URL, נתיב מערכת קבצים, קובץ הפעלה או רשימת ארגומנטים. צינור גודל הגוף של
+ה-API וקורא הגוף האינקרמנטלי של המטפל אוכפים באופן עצמאי תקרת קלט broker של
+50 MiB. התור החסום שלו מריץ חילוץ אחד בכל פעם, מאפשר ארבע משימות ממתינות,
+ומגביל את הקלט הממתין ל-100 MiB.
 
-בתוך הברוקר, `ffprobe` קורא קובץ מקומי פרטי; רשימת הפורמטים המורשים הקבועה
-אינה כוללת פורמטים של רשימות השמעה ומניפסטים. עבור קונטיינרים מותרים ממשפחת
-MOV, הפניות חיצוניות לנתוני MOV נשארות מושבתות כברירת מחדל, והפקודה הקבועה
-אינה מפעילה אותן. גם `ffprobe` וגם `ffmpeg` משתמשים ברשימת פרוטוקולים מורשים
-הכוללת `file` בלבד, בתהליכון אחד, במערכי ארגומנטים קבועים וללא מעטפת, וקובצי
-ההפעלה מאותרים מתוך `PATH`. זרמי תמונת עטיפה מצורפת אינם מועמדים הניתנים לניגון.
-כל הזרמים הניתנים לניגון חייבים לעמוד במגבלות, וזרם ברירת מחדל מפורש מקבל עדיפות
-לפני הנסיגה הדטרמיניסטית לזרם בעל האינדקס הנמוך ביותר. סרטונים מוגבלים ל-600
-שניות, ל-8,192 פיקסלים בכל ממד ול-33,554,432 פיקסלי מקור. FFmpeg דוגם 1–16
-פריימי JPEG בנקודות האמצע, מקטין את הצלע הארוכה ל-1,024 פיקסלים לכל היותר בלי
-להגדיל קלטים קטנים יותר, ולעולם אינו מקבל כתובת URL. כברירת מחדל, הדגימה היא
-`uniform`. המדיניות האופציונלית `scene_aware` והמדיניות הניסיונית
-`segment_aware` מבצעות מעבר FFmpeg קבוע נוסף אחד על הזרם המקומי שכבר אומת,
-בוחרות חותמות זמן מוגבלות של סצנות מ-`showinfo`, ובמקרה של כשל בגלאי, חריגה
-מזמן, פלט פגום או קבוצת מועמדים ריקה, נסוגות באופן דטרמיניסטי לאותן נקודות
-אמצע אחידות. מצב מודע-מקטעים מקצה דגימות נקודת אמצע באופן יחסי למרווחי הסצנות
-שאומתו; הראיות של מצב מודע-מקטעים והתנהגות הנסיגה מפורטות להלן. המגבלה הקשיחה
-של 16 פריימים מוחלת לאחר הבחירה בכל מדיניות. כאשר לבקשה מודעת-סצנות יש תקציב
-של פריים אחד בלבד, היא משתמשת בנקודת האמצע האחידה של הסרטון המלא הפעיל או של
-חלון המיקוד, ומדווחת `policyEffective: uniform`: פריים סצנה יחיד שנבחר אינו יכול
-לשמר את שני הקצוות הזמניים. הקורא רשאי לספק חלון מיקוד סופי אופציונלי
-(`start`/`end` בשניות); הגבולות מוגבלים למשך המדיה, חלונות הפוכים או שאינם
-סופיים נדחים, וכל מדיניות הדגימה מופעלת רק בתוך המרווח המנורמל. החלון שנוצר
-נכלל במטא-נתונים של הדגימה ובקידומת התיאור הבלתי מהימנה, כדי שמודלים בהמשך
-השרשרת יוכלו להבחין בין קטע ממוקד לבין ציר הזמן המלא.
+בתוך המתווך, `ffprobe` קורא קובץ מקומי פרטי; רשימת ההיתרים הקבועה של
+הפורמטים אינה כוללת פורמטים של רשימות השמעה ומניפסטים. עבור קונטיינרים מותרים
+ממשפחת MOV, הפניות חיצוניות לנתוני MOV נשארות מושבתות כברירת מחדל, והפקודה
+הקבועה אינה מפעילה אותן. גם `ffprobe` וגם `ffmpeg` משתמשים ברשימת היתרים
+לפרוטוקול `file` בלבד, בתהליכון אחד, במערכי ארגומנטים קבועים, ללא מעטפת,
+ובקובצי הפעלה שמאותרים מתוך `PATH`. זרמי תמונת עטיפה מצורפת אינם מועמדים
+להפעלה. כל הזרמים הניתנים להפעלה חייבים לעמוד במגבלות, וזרם ברירת מחדל מפורש
+מקבל עדיפות לפני ברירת המחדל הדטרמיניסטית בעלת האינדקס הנמוך ביותר.
+סרטונים מוגבלים ל-600 שניות, ל-8,192 פיקסלים בכל ממד ול-33,554,432 פיקסלים
+במקור. FFmpeg דוגם 1–16 פריימים מסוג JPEG מנקודות האמצע, מקטין את הצלע
+הארוכה ל-1,024 פיקסלים לכל היותר בלי להגדיל קלטים קטנים יותר, ולעולם אינו
+מקבל כתובת URL. ברירת המחדל של הדגימה היא `uniform`. המדיניות האופציונלית
+`scene_aware` והמדיניות הניסיונית `segment_aware` מבצעות מעבר FFmpeg קבוע
+נוסף על הזרם המקומי שכבר אומת, בוחרות חותמות זמן תחומות של סצנות מתוך
+`showinfo`, ובמקרה של כשל בגלאי, חריגה ממגבלת הזמן, פלט פגום או קבוצת מועמדים
+ריקה, חוזרות באופן דטרמיניסטי לאותן נקודות אמצע אחידות. מצב מודע למקטעים
+מקצה דגימות מנקודות אמצע באופן יחסי למרווחי הסצנות שאומתו; הראיות של מצב
+מודע למקטעים והתנהגות הנסיגה מפורטות להלן. התקרה הקשיחה של 16 פריימים
+מוחלת לאחר הבחירה בכל מדיניות. כאשר לבקשה מודעת לסצנות יש תקציב של פריים
+אחד בלבד, היא משתמשת בנקודת האמצע האחידה של הסרטון המלא הפעיל או של חלון
+המיקוד, ומדווחת `policyEffective: uniform`: פריים סצנה יחיד שנבחר אינו יכול
+לשמר את שני קצוות ציר הזמן. הקורא רשאי לספק באופן אופציונלי חלון מיקוד סופי
+(`start`/`end` בשניות); הגבולות מוגבלים למשך המדיה, חלונות הפוכים או לא-סופיים
+נדחים, וכל מדיניות הדגימה מתבצעת רק בתוך המרווח המנורמל. החלון שנוצר נכלל
+במטא-נתוני הדגימה ובקידומת התיאור הבלתי מהימנה, כדי שמודלים בהמשך התהליך
+יוכלו להבחין בין קטע ממוקד לבין ציר הזמן המלא.
 
-מיקוד סמנטי של כתוביות הוא הגדרה נפרדת ומפורשת. מצב הניתוח `full`, המוגדר
-כברירת מחדל, משמר את הנחיית הפריימים הקיימת ולעולם אינו מעביר טקסט מהבקשה
-למודל הכתוביות. במצב `focused`, הגשר קורא רק את ה-`text`/`input_text` האחרון
-שאינו ריק ושנכתב על ידי משתמש, מתוך אותו קונטיינר של Chat או Responses, מנרמל
-אותו ל-NFC, מכווץ תווי בקרה ורווחים ומגביל אותו ל-500 נקודות קוד Unicode.
-תוצאה ריקה נסוגה להנחיית `full` המדויקת. רמז שמיש עובר סריאליזציה כ-JSON בבלוק
-ייעודי של הקשר משתמש בלתי מהימן, ורשאי רק לתעדף פרטים הניתנים לצפייה; הוא אינו
-יכול לעקוף את האזהרה הנפרדת מפני ציות להוראות הנראות או נשמעות במדיה. מיקוד
+מיקוד סמנטי של כיתוב הוא הגדרה נפרדת ומפורשת. מצב הניתוח `full`, שהוא ברירת
+המחדל, משמר את הנחיית הפריימים הקיימת ולעולם אינו מעביר טקסט מהבקשה למודל
+הכיתוב. במצב `focused`, הגשר קורא רק את `text`/`input_text` האחרון שאינו ריק
+ושנכתב בידי המשתמש, מתוך אותו קונטיינר של Chat או Responses, מנרמל אותו
+ל-NFC, מכווץ תווי בקרה ורווחים, ומגביל אותו ל-500 נקודות קוד של Unicode.
+תוצאה ריקה חוזרת להנחיית `full` המדויקת. רמז שמיש מסודר כ-JSON בבלוק ייעודי
+של הקשר משתמש בלתי מהימן, ורשאי רק לתעדף פרטים הניתנים לצפייה; הוא אינו יכול
+לעקוף את האזהרה הנפרדת שלא לפעול לפי הוראות הנראות או נשמעות במדיה. מיקוד
 טקסטואלי לעולם אינו מסיק `start`/`end` ואינו משנה את הדוגם הזמני.
 
 #### ראיות מבניות למקטעים FU-07
 
-`segment_aware` משתמש במעבר קדם-ניתוח מוגבל אחד על זרם הווידאו המקומי שכבר
-אומת. שרשרת המסננים הקבועה מקטינה תחילה לרוחב של 320 פיקסלים לכל היותר, מזהה
-שינויי סצנה ומרווחים קפואים, ולאחר מכן דוגמת בקצב של פריים אחד לשנייה לצורך
-מדידת טשטוש, בהיקות ממוצעת ומידע מרחבי/זמני. המעבר מוגבל ל-600 דגימות מבניות,
-לתהליכון FFmpeg/מסנן אחד, לאותו פרוטוקול `file` בלבד ולאותן רשימות קונטיינרים
-מורשים, למגבלת פלט תהליך של 1 MiB ולכל היותר 30 שניות בתוך מנגנון הביטול/המועד
-האחרון המשותף של הברוקר. הוא לעולם אינו מקבל מהבקשה פקודה, מסנן, נתיב או כתובת
-URL.
+`segment_aware` משתמש במעבר קדם-ניתוח תחום אחד על זרם הווידאו המקומי שכבר
+אומת. שרשרת המסננים הקבועה מקטינה תחילה את הרוחב ל-320 פיקסלים לכל היותר,
+מזהה שינויי סצנה ומרווחים קפואים, ולאחר מכן דוגמת פריים אחד לשנייה לצורך
+טשטוש, בהיקות ממוצעת ומידע מרחבי/זמני. המעבר מוגבל ל-600 דגימות מבניות,
+לתהליכון FFmpeg/מסנן אחד, לאותן רשימות היתרים לפרוטוקול `file` בלבד
+ולקונטיינרים, למגבלת פלט תהליך של 1 MiB ולכל היותר 30 שניות בתוך מנגנון
+הביטול/המועד האחרון המשותף של המתווך. הוא לעולם אינו מקבל פקודה, מסנן, נתיב
+או כתובת URL מהבקשה.
 
-הערכים המבניים הם ראיות דגימה דטרמיניסטיות, ולא הבנה סמנטית של הווידאו. הם אינם מסיקים נושאים, פעולות, כתוביות, דיבור או כוונת משתמש. גבולות סצנה וקיפאון יוצרים מקטעים; כיסוי קיפאון, טשטוש, חשיפה, פירוט מרחבי ושינוי בזמן משפיעים רק על אופן הקצאת התקציב הקיים של 1–16 פריימים. מקטע שקפא לחלוטין מוגבל לפריים אחד, בעוד שמקטעים שאינם קפואים מתחרים על יתרת התקציב. כאשר מספר הגבולות גדול ממספר הפריימים, נשמר כיסוי אחיד של ציר הזמן, כך שמעברים מהירים בתחילת הסרטון לא יוכלו להסתיר מקטע ארוך בסופו. גבולות סצנה המצויים בתוך רזולוציית הניתוח של שנייה אחת מגבול קיפאון מאוחדים.
+הערכים המבניים הם ראיות דגימה דטרמיניסטיות, ולא הבנה סמנטית של הווידאו. הם
+אינם מסיקים נושאים, פעולות, כתוביות, דיבור או כוונת משתמש. גבולות של סצנות
+וקיפאון יוצרים מקטעים; כיסוי קיפאון, טשטוש, חשיפה, פירוט מרחבי ושינוי זמני
+משפיעים רק על אופן הקצאת התקציב הקיים של 1–16 פריימים. מקטע שקפוא לחלוטין
+מוגבל לפריים אחד, בעוד שמקטעים שאינם קפואים מתחרים על התקציב הנותר. כאשר
+מספר הגבולות גדול ממספר הפריימים, נשמר כיסוי אחיד של ציר הזמן, כדי שמעברים
+מהירים בתחילתו לא יסתירו מקטע ארוך בסופו. גבולות סצנה שנמצאים בתוך רזולוציית
+הניתוח של שנייה אחת מגבול קיפאון ממוזגים.
 
-מסננים חסרים, ראיות פגומות/ריקות, שגיאת גלאי או חריגה ממגבלת הזמן של הניתוח המקדים גורמים למעבר פתוח למדיניות נקודת האמצע האחידה המדויקת. ביטול מצד הקורא או מועד אחרון של הברוקר אינם גורמים למעבר פתוח: הם מסיימים את תהליך המשנה הפעיל, מונעים חילוץ פריימים בהמשך, ועץ הקבצים הזמני הפרטי מוסר ב-`finally`.
+מסננים חסרים, ראיות פגומות/ריקות, שגיאת גלאי או חריגה ממגבלת הזמן של
+קדם-הניתוח התחום גורמים לנסיגה פתוחה אל מדיניות נקודות האמצע האחידות
+המדויקת. ביטול מצד הקורא או הגעה למועד האחרון של המתווך אינם גורמים לנסיגה
+פתוחה: הם מסיימים את תת-התהליך הפעיל, מונעים חילוץ פריימים בהמשך, והעץ הזמני
+הפרטי מוסר בתוך `finally`.
 
-`scripts/perf/video-bridge-fu07-eval.ts` יוצר תרחישי בדיקה דטרמיניסטיים אמיתיים של FFmpeg עבור חיסכון בקריאות ליצירת כתוביות לאחר הסרת כפילויות, הקצאת תקציב לתנועה צפופה, ראיות טשטוש/חשיפה/SI-TI, מעברים מהירים עם זנב ארוך ותוצאות חיוביות כוזבות עקב דהייה הדרגתית. הוא מתעד את זמן הקיר של הניתוח המקדים, ובמקומות שבהם `/usr/bin/time` זמין, גם את זמן ה-CPU של תהליך הצאצא ואת שיא ה-RSS. בדיקות האיכות שלו הן אורקלים מבניים בלבד. איכות אמיתית של מודל הכתוביות נותרת במצב `HOLD`, משום שלרתמה זו אין נקודת קצה מורשית או שופט מוקפא. גם החיסכון הכספי נותר במצב `HOLD`, אלא אם `--caption-cost-per-call-usd` מספק אומדן חיובי מפורש של עלות לכל קריאה; הסקריפט לעולם אינו ממציא אף אחת מהתוצאות.
+`scripts/perf/video-bridge-fu07-eval.ts` יוצר מתקני בדיקה דטרמיניסטיים של
+FFmpeg אמיתי עבור חיסכון בקריאות לכיתוב לאחר הסרת כפילויות, הקצאת תקציב
+לתנועה צפופה, ראיות טשטוש/חשיפה/SI-TI, חיתוכים מהירים עם מקטע סיום ארוך
+ותוצאות חיוביות שגויות של דהייה הדרגתית. הוא מתעד את זמן השעון של
+קדם-הניתוח, ובמקומות שבהם `/usr/bin/time` זמין, גם את זמן המעבד של תהליך הבן
+ואת שיא ה-RSS. בדיקות האיכות שלו הן אורקלים מבניים בלבד. איכות מודל הכיתוב
+האמיתי נשארת `HOLD`, משום שלרתמה זו אין נקודת קצה מורשית או שופט קפוא. גם
+החיסכון הכספי נשאר `HOLD`, אלא אם `--caption-cost-per-call-usd` מספק אומדן
+חיובי ומפורש של עלות לכל קריאה; הסקריפט לעולם אינו ממציא אף אחת מהתוצאות.
 
-כל פריים מוגבל ל-4 MiB, כל הפריימים הגולמיים יחד מוגבלים ל-23 MiB, ותגובת הברוקר שעברה סריאליזציה מוגבלת ל-32 MiB. ספרייה זמנית פרטית מוסרת ב-`finally`. OmniRoute אינו כולל עותק מובנה של FFmpeg ואינו מקבל נתיב מותאם אישית לקובץ ההפעלה. לפני יצירת הכתוביות, הגשר מחיל מעבר שמרני להסרת כפילויות חזותיות: כל JPEG מצומצם למאגר גווני אפור בגודל 16×16 ומושווה רק לפריים האחרון שנשמר. עבור תקציב כתוביות מבוקש הגדול מפריים אחד, החילוץ מספק מאגר מועמדים מוגבל של עד פי שניים מהתקציב, ולעולם לא יותר מ-16 פריימים. התקרה המבוקשת מוחלת רק לאחר הסרת הכפילויות, כאשר המועמד הראשון והמועמד האחרון שנבחרו נשמרים במהלך הדילול הסופי אם התקציב הוא שניים לפחות. מדיניות
-`grayscale-16x16-mean-cells-v2` בעלת הגרסה משתמשת בערך הגדול מבין ההפרש הממוצע בעוצמת ההארה לבין שיעור התאים בתמונה הממוזערת שההפרש המנורמל שלהם הוא לפחות 0.05. סף הכפילות הוא הקבוע 0.04, שנבחר לצורך יכולת חיזוי ולא נחשף כהגדרת זמן ריצה. אות משני זה, בעל ניגודיות גבוהה, משמר תנועה קטנה ושינויים בטקסט גלוי שהשוואה המבוססת על ממוצע בלבד עלולה להסתיר. שגיאות במשווה או במפענח גורמות למעבר פתוח ומשמרות את הכיסוי. מטא-נתוני הפלט מפרידים בין מועמדים שחולצו, פריימים שנעשה בהם שימוש בהצלחה וכפילויות חזותיות שהוסרו.
+כל פריים מוגבל ל־4 MiB, כל הפריימים הגולמיים יחד ל־23 MiB, והתגובה המסורלת של הברוקר ל־32 MiB. ספרייה זמנית פרטית מוסרת בתוך `finally`. OmniRoute אינו כולל בחבילתו את FFmpeg ואינו מקבל נתיב קובץ הפעלה מותאם אישית. לפני יצירת הכיתובים, הגשר מבצע מעבר שמרני לביטול כפילויות חזותיות: כל JPEG מוקטן למאגר גווני אפור בגודל 16×16 ומושווה רק מול הפריים האחרון שנשמר. עבור תקציב כיתובים מבוקש הגדול מפריים אחד, החילוץ מספק מאגר מועמדים חסום של עד פי שניים מאותו תקציב ולעולם לא יותר מ־16 פריימים. התקרה המבוקשת מוחלת רק לאחר ביטול הכפילויות, כאשר המועמד הראשון והמועמד האחרון שנבחרו נשמרים במהלך הדילול הסופי כאשר התקציב הוא לפחות שניים. מדיניות ה־`grayscale-16x16-mean-cells-v2` בעלת ניהול הגרסאות משתמשת בערך הגדול מבין השניים: דלתת הבהירות הממוצעת (mean luma delta), ויחס תאי התמונה הממוזערת שהדלתא המנורמלת שלהם היא לפחות 0.05. סף הכפילות הוא הקבוע 0.04, שנבחר לצורך יכולת חיזוי ואינו חשוף כהגדרת זמן ריצה. אות משני זה בעל הניגודיות הגבוהה משמר תנועה קטנה ושינויי טקסט גלוי שהשוואה מבוססת־ממוצע בלבד עלולה להסתיר. שגיאות במשווה או במפענח מטופלות ככשל פתוח (fail open) ושומרות על הכיסוי. מטא־נתוני הפלט מפרידים בין מועמדים שחולצו, פריימים ששימשו בהצלחה, וכפילויות חזותיות שהושמטו.
 
-חלק וידאו שסומן במפורש רשאי לבקש גיליון תמונות ממוזערות עם חותמות זמן. הגשר בונה רשת JPEG בת עד 4 עמודות ו-16 פריימים. בכל תא של 512 פיקסלים נצרבת חותמת הזמן של המקור בתוך פס תחתון בעל ניגודיות גבוהה, ואותן חותמות זמן נשמרות גם במטא-נתונים טקסטואליים לצורך שיוך וביקורת בהמשך העיבוד. קובץ ה-JPEG המלא נותר מוגבל ל-32 MiB. אם `sharp` אינו מצליח לפענח או להרכיב את הרשת, הגשר חוזר להשתמש בפריימי ה-JPEG הנפרדים; ביטול מצד הלקוח עדיין מתפשט דרך פעולת יצירת הגיליון.
+חלק וידאו המסומן במפורש רשאי לבקש דף מגע חתום־זמן. הגשר בונה לכל היותר רשת JPEG של 4 עמודות ו־16 פריימים. כל תא בן 512 פיקסלים צורב את חותמת הזמן של מקורו לתוך פס תחתון בעל ניגודיות גבוהה, בעוד שאותן חותמות זמן נשמרות במטא־נתונים טקסטואליים לצורך שיוך וביקורת במורד הזרם. קובץ ה־JPEG המלא נשאר מוגבל ל־32 MiB. אם `sharp` אינו מצליח לפענח או להרכיב את הרשת, הגשר נסוג לפריימי ה־JPEG הבודדים; ביטול מצד לקוח עדיין מופץ דרך פעולת דף המגע.
 
-ראיות לקידום מופרדות במכוון מהמיקרו-בנצ'מרק הסינתטי להרכבה. `scripts/perf/video-bridge-contact-sheet-eval.ts` מגדיר רתמת A/B בעלת סכימה עם גרסאות עבור מודלי ראייה אמיתיים התואמים ל-OpenAI. היא מודדת טוקנים שדווחו על ידי הספק, זמן השהיה מקצה לקצה לפי זמן קיר — לרבות הרכבת הגיליון — מספר הקריאות למודל ושימור עובדות המוגדרות במניפסט. תגובות המודל הגולמיות אינן נכתבות לדוח; נשמרים רק תקצירי SHA-256 ומזהי עובדות תואמות. הרתמה אינה מבצעת שום קריאת רשת או קריאה בתשלום למודל אלא אם מועבר `--execute-real` ומוגדרים `--model`,‏ `OMNIROUTE_BASE_URL` ו-`OMNIROUTE_API_KEY`. ללא הרצה אמיתית ומפורשת זו, ההכרעה הניתנת לקריאת מכונה נותרת `HOLD`; מדידות סינתטיות של מטען/מספר קריאות בלבד אינן מהוות ראיות לקידום.
+ראיות קידום מופרדות בכוונה ממבחן הביצועים המיקרו הסינתטי של ההרכבה. `scripts/perf/video-bridge-contact-sheet-eval.ts` מגדיר מסגרת בדיקות A/B בעלת סכימה מנוהלת־גרסאות עבור מודלי ראייה אמיתיים התואמים ל־OpenAI. היא מודדת אסימונים (tokens) כפי שדווחו על ידי הספק, השהיית שעון מקצה לקצה (כולל הרכבת דף המגע), מספר קריאות למודל, ושימור עובדות כפי שהוגדר במניפסט. תגובות גולמיות של המודל אינן נכתבות לדוח; נשמרים רק תקצירי SHA-256 ומזהי עובדות שהותאמו. מסגרת הבדיקה אינה מבצעת קריאת רשת או קריאה למודל בתשלום אלא אם הועבר `--execute-real` והוגדרו `--model`, `OMNIROUTE_BASE_URL` ו־`OMNIROUTE_API_KEY`. ללא אותה הרצה אמיתית מפורשת, פסק הדין הקריא־מכונה שלה נשאר `HOLD`; מדידות סינתטיות של מטען (payload) ומספר קריאות בלבד אינן ראיית קידום.
 
-קוראים רשאים לצרף מערך `transcript.cues` אופציונלי לחלק וידאו נתמך כאשר כבר מצוי ברשותם טקסט מסונכרן. כל רמז חייב לכלול `text`, מרווח `start`/`end` סופי הנמצא בתוך משך הזמן שנבדק, וכן `source` מרשימה מאושרת (`client`,‏ `embedded` או `audio-bridge`); ברירת המחדל של `confidence` היא `1`, ועליו להישאר בין `0` ל-`1`. רמזים כפולים זהים לחלוטין מאוחדים. OmniRoute לעולם אינו מתחיל תמלול מתוך מטא-נתונים אלה: רמזים שאומתו מועתקים לתוצאה המתוארת יחד עם המקור, רמת הביטחון והמרווח, ומוצגים כתצפיות בלתי מהימנות לצד כתוביות הפריימים. טקסט לא תקין, מחוץ לטווח או חסר מקור מוכח נדחה במקום להיות משולב בזרם הכתוביות. השדה `source` מוצהר כעת על ידי הקורא ואינו מאומת על ידי השרת: OmniRoute אוכף שהערך הוא אחת משלוש המחרוזות המותרות, אך עדיין אינו מאשר באופן קריפטוגרפי שתווית `embedded` או `audio-bridge` אכן הגיעה מחילוץ בבעלות השרת. יש להתייחס אל `source` כרמז בלתי מהימן עד שהאימות הזה ייושם; אין לבסס עליו החלטות הרשאה.
+מתקשרים רשאים לצרף מערך `transcript.cues` אופציונלי לחלק וידאו נתמך כאשר ברשותם כבר טקסט מיושר. כל רמז (cue) חייב לשאת `text`, מרווח `start`/`end` סופי בתוך משך הזמן שנמדד, ו־`source` מרשימת ההיתר (`client`, `embedded`, או `audio-bridge`); `confidence` מוגדר כברירת מחדל ל־`1` וחייב להישאר בין `0` ל־`1`. רמזים כפולים זהים מכווצים. OmniRoute לעולם אינו מתחיל תמלול ממטא־נתונים אלה: רמזים שאומתו מועתקים לתוצאה המתוארת עם המקור, רמת הביטחון והמרווח, ומוצגים כתצפיות לא מהימנות לצד כיתובי הפריימים. טקסט לא תקין, מחוץ לטווח או חסר מקור (provenance) נדחה במקום להתערבב לתוך זרם הכיתובים. שני ערוצי התמלול בגוף הבקשה מנרמלים כל מקור מסופק ל־`client`, כולל תוויות `embedded` או `audio-bridge` שהוצהרו עצמית. רק מתאם בבעלות השרת יכול להקצות תוויות מהימנות אלה באמצעות הארגומנט `trustedSource` הנגיש מקוד בלבד; שדה JSON בבקשה אינו יכול להגיע לארגומנט זה. טקסט התמלול נשאר תוכן נגזר ממדיה שאינו מהימן, ללא קשר למקורו, ולעולם אינו רשאי לקבוע הרשאה.
 
-קורא מתקדם רשאי לספק רצועת `audioTranscript` שכבר אושרה
-עבור אותו סרטון. נקודת האיחוד מפעילה תצפיות חזותיות וקוליות תחת
-מועד אחרון ואות ביטול משותפים, מסדרת אותן על ציר זמן משותף, מאחדת
-כפילויות זהות לחלוטין, ומדווחת על תוצאה חלקית כאשר רק צד אחד מצליח.
-`audioTranscript` לא תקין מוביל לתוצאה החלקית הזו — התיאור החזותי
-נשמר וענף השמע מתעד קוד כשל שעבר סינון — במקום להכשיל את הסרטון כולו.
-הזמינות של כל ענף, דגל התוצאה החלקית וקודי הכשל שעברו סינון נשמרים בתוצאה
-המתוארת, במטא-נתונים של מנגנון ההגנה (`audioFusionRuns`/`audioFusionPartials`/
-`audioFusionFailureCodes`), במטא-נתונים של מטמון התוצאות ובמוני האיחוד
-של הגשר. נתיב ברירת המחדל של Video Bridge אינו מפעיל המרת דיבור לטקסט
-ואינו מוריד עותק מדיה נוסף; ללא הרצועה המפורשת הזו, הוא נשאר
-במצב וידאו בלבד.
+מתקשר מתקדם רשאי לספק רצועת `audioTranscript` עבור אותו וידאו; היא נחשבת לטקסט שסופק על ידי הלקוח, ולא להוכחה לתמלול מצד השרת. תפר המיזוג מריץ תצפיות חזותיות ושמעיות תחת מועד סופי אחד ואות ביטול אחד, מסדר אותן על ציר זמן משותף, מכווץ כפילויות זהות, ומדווח תוצאה חלקית כאשר רק צד אחד מצליח. `audioTranscript` לא תקין מתדרדר לאותה תוצאה חלקית — התיאור החזותי נשמר וענף השמע מתעד קוד כשל מטוהר — במקום להכשיל את כל הווידאו. זמינות לפי ענף, דגל החלקיות וקודי הכשל המטוהרים נשמרים בתוצאה המתוארת, במטא־נתוני מעקה הבטיחות (`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`), במטא־נתוני מטמון התוצאות, ובמוני המיזוג של הגשר. נתיב ברירת המחדל של Video Bridge אינו מפעיל המרת דיבור־לטקסט ואינו מוריד עותק מדיה שני; ללא אותה רצועה מפורשת, הוא נשאר וידאו בלבד.
 
-**שמירת תמלילים (#12150 P1).** הדבר חל אוטומטית בכל פעם שבה
-Video Bridge (שהשימוש בו עצמו דורש הצטרפות מפורשת) מעבד רמז תמליל — אין דגל
-שמירה נפרד. כאשר בקשה מעבדת רמז תמליל כלשהו (`transcript` שהוצהר
-על ידי הקורא או `audioTranscript` שאוחד), מנגנון ההגנה מסמן אותה בתור
-`videoBridgeObserved` ומפיק עותק צל מושחר של תיאור הסרטון —
-עיבוד זהה שבו גוף הטקסט החופשי של כל רמז מוחלף ב-
-`[redacted-video-transcript]`, אשר נבנה באמצעות החלפת שדה הרמז המובנה
-לפני הרכבת המחרוזת (ולעולם לא באמצעות ניתוח הטקסט השטוח, כך ששום תוכן
-של רמז — עוין או רגיל, לרבות גופים המכילים `]` כגון
-`[inaudible]`/`[music]` — אינו יכול לשרוד). גוף הבקשה המתמיד ביומן הקריאות מחליף
-כל חלק טקסט שמקורו בווידאו בעותק הצל המושחר הזה, בהתאמה לפי שוויון
-תוכן; העוגן `fullText` נקרא מחדש ממטען מנגנון ההגנה שהושלם לפני הקריאה,
-כך שההתאמה עדיין מצליחה לאחר שמנגנוני הגנה מאוחרים יותר בשרשרת (ממסכי PII
-ופרטי הגישה, בעדיפויות 10/95) משכתבים את טקסט התיאור במקום, ולאחר
-שהזרקת הנחיית מערכת/העברת הקשר/זיכרון מעצבת מחדש את מערך ההודעות. הגוף
-שנשלח במעלה הזרם אל המודל נותר ללא שינוי. בקשה שנצפתה גם אינה מאכלסת
-זיכרון מתמיד כלשהו (מדלגים הן על חילוץ שמקורו בבקשה והן על חילוץ שמקורו בתגובה),
-כך שהתשובה של המודל עצמו אינה יכולה להעתיק טקסט מהתמליל אל הזיכרון.
+**שמירת תמליל (#12150 P1).** הדבר חל אוטומטית בכל פעם ש-Video Bridge (שהוא עצמו opt-in) מרנדר רמז תמליל (cue) — אין דגל שמירה נפרד. כאשר בקשה מרנדרת רמז תמליל כלשהו (`transcript` שהוכרז על ידי המתקשר או `audioTranscript` ממוזג), מנגנון ה-guardrail מסמן אותה כ-`videoBridgeObserved` ומייצר צל מצונזר של תיאור הווידאו — רינדור זהה שבו גוף הטקסט החופשי של כל רמז מוחלף ב-`[redacted-video-transcript]`, הבנוי על ידי החלפת שדה הרמז המובנה לפני הרכבת המחרוזת (לעולם לא על ידי פענוח הטקסט השטוח, כך שאף תוכן רמז — עוין או רגיל, כולל גופות המכילים `]` כמו `[inaudible]`/`[music]` — לא יכול לשרוד). גוף הבקשה הנשמר ביומן הקריאות מחליף כל חלק טקסט שמקורו בווידאו באותו צל מצונזר, תוך התאמה לפי שוויון תוכן; עוגן ה-`fullText` נקרא מחדש ממטען ה-guardrail המוגמר שלפני הקריאה, כך שההתאמה עדיין מצליחה גם לאחר שרכיבי guardrail מאוחרים יותר בשרשרת (ממסכי ה-PII והאישורים, עדיפויות 10/95) משכתבים את טקסט התיאור במקום, ולאחר שהזרקת system-prompt/handoff/memory מעצבת מחדש את מערך ההודעות. הגוף הנשלח במעלה הזרם (upstream) למודל אינו משתנה. בקשה שנצפתה גם אינה מאכלסת זיכרון (Memory) מתמשך כלשהו (החילוץ שמקורו בבקשה וזה שמקורו בתגובה כאחד מדולגים), כך שהתשובה של המודל עצמו אינה יכולה להדהד טקסט תמליל לתוך הזיכרון.
 
-משטחי שמירה שעדיין פתוחים ומתועדים להמשך טיפול (**P2**, #12430): תמונת המצב
-הגולמית של בקשת הלקוח מלפני מנגנון ההגנה בארטיפקט היומן המפורט;
-המשך באמצעות `previous_response_id` שנכשל באופן סגור; פעולות שיגור פנימיות
-של הנחיות נגזרות, המטמיעות את התמליל בתוך הנחיית מחרוזת מסונתזת
-(שלבי צינור עיבוד, העברת הקשר); וגוף התגובה / עותק המטמון הסמנטי
-של תשובת מודל המצטטת את התמליל. אלה הם משטחים גולמיים/מסוג תגובה או
-משטחים הדורשים הצטרפות מפורשת, הנמצאים מחוץ להיקף גוף הבקשה המתמיד + הזיכרון של P1.
+**שדות וידאו גולמיים (#12430).** כאשר הגשר מופעל ותמיכת וידאו מקורית אינה ידועה או נעדרת, שדות `transcript`/`audioTranscript` מוגדרים מפעילים גם הם את `videoBridgeObserved`, אפילו לאחר כשל בתיאור או מגבלת `maxVideos`. `null` ומחרוזות ריקות נחשבים; שדות נעדרים ומטא-דאטה שאינה וידאו — לא. עותקים נשמרים מצנזרים שדות אלה או משמיטים את הבקשה, ומטמונים/זיכרון נעקפים.
 
-מחזור החיים הפנימי של `/api/modality-bridge/video/drilldown` הוא מצע מטמון
-נפרד המאומת באמצעות loopback/אסימון. כל פעולה דורשת גם מזהה קנוני ואטום
-של ישות עיקרית. לפני הפעלת קורא בסביבת ייצור, עליו לגזור את המזהה הזה
-מהדייר המאומת, ואסור לו לעולם להעביר ערך שנבחר על ידי הלקוח.
-מפתחות המטמון קושרים את הישות העיקרית הזו למזהי הפעלה והפניית וידאו קנוניים,
-מאחסנים רק את המפתחות שלהם שנגזרו באמצעות SHA-256, ומגבילים הן קריאות
-והן מחיקה לאותה ישות עיקרית. המטמון מאחסן לכל היותר 16 מסגרות JPEG נגזרות
-בכל רשומה, מפוגג אותן לאחר עשר דקות, ותומך בקריאות `start`/`end`
-מוגבלות או במחיקה מפורשת של הפעלה.
+בנתיבי הגיבוי האלה, רמזי מתקשר תקפים הופכים לחלקי `text`/`input_text` נתמכים במקום שדות ספק לא סטנדרטיים. שני הטראקים שסופקו בבקשה נשארים תצפיות `client` לא מהימנות, עם אזהרה מפורשת שהווידאו לא תואר ושחותמות הזמן לא אומתו מול המדיה. תקציבי 256-הרמזים/64-KiB הכולל ותקציב כל-רמז הקיימים חלים על שני הטראקים יחד; חותמות זמן חייבות להתאים לתקרת 600 השניות של הברוקר ולכל חלון מיקוד שסופק. טראקים לא תקפים מושלכים, ואינם מועברים כטקסט שרירותי; טראק אח תקף עדיין יכול לשמש אלא אם התקציב המשולב שלהם נחצה. שדות null/ריקים אינם מוסיפים טקסט. גיבוי זה אינו מוסיף שליפת מדיה או תמלול. שדות הרחבת תמליל מוסרים מנושא הווידאו של הגיבוי ומאובייקטי ה-`video_url`/`source` שלו. רשימת ההיתרים של תקשורת OpenAI נשארת מחמירה; נושאי וידאו עם מקוריות לא-ידועה נשארים זמינים ויעדי טקסט-בלבד ידועים שומרים על סמנים בטוחים. צללי צנזור מובנים מגנים על טקסט התמליל המצורף, בעוד הבקשה המקורית שבבעלות המתקשר נשארת ללא שינוי. יעדים עם תמיכה מקורית וגשרים מושבתים שומרים על התנהגות העקיפה הקיימת שלהם.
 
-כל ישות עיקרית מוגבלת ל-16 רשומות ול-64 MiB של נתוני JPEG קנוניים. מגבלות
-אלה אינן תלויות בתקרה הגלובלית של 64 רשומות/256 MiB: לחץ על מכסת הישות
-העיקרית מפנה רק את הרשומות של אותה ישות עיקרית לפי סדר השימוש האחרון,
-לפני שנשקל פינוי LRU גלובלי. רשומות שפג תוקפן מסולקות הן מהחישוב של הישות
-העיקרית והן מהחישוב הגלובלי בעת פעילות מטמון, בעוד שביטול וכשל אימות אינם
-מבצעים commit להחלפה חלקית.
+עותקים נשמרים נוספים משתמשים באותו אות בקשה-נצפתה. תצלום בקשת-הלקוח הגולמי שלפני ה-guardrail, הבקשה הממתינה שבזיכרון, ויומן הבקשות-הנדחות המוקדם מחליפים באופן מבני שדות תמליל בחלקי וידאו; פרומפטים מחרוזתיים שסונתזו על ידי שלבי ה-pipeline והעברת ההקשר מצונזרים ב-sink של גוף הבקשה הנשמר. הסמן `video_content_removed` הנשמר גורם להמשך `previous_response_id` להיכשל באופן סגור (fail closed) במקום לשחזר טקסט שהושלך בכוונה. אם בקשה נצפתה מאבדת את צל הצנזור שלה ברמת החלק לפני הרישום ביומן, או שאפילו אחד מכמה צלי וידאו נכשל בהתאמה לאחר מוטציות מאוחרות של הבקשה, גוף הבקשה הנשמר מושמט לחלוטין במקום לשמור תמליל מצונזר חלקית.
 
-המטמון דוחה Base64 שאינו קנוני, ריפוד עודף, מדיה שאינה JPEG, קובצי JPEG פגומים או
-קטועים, וקובצי JPEG שמפיקים אזהרה במהלך פענוח תמונה מלאה ומוגבל באמצעות `sharp`.
-הוא מקודד מחדש כל תמונה שהתקבלה כ-JPEG קנוני, גוזר רוחב וגובה מהבתים המפוענחים
-במקום לתת אמון בשדות שסיפק הקורא, ומשליך בתים פוליגלוטיים נגררים במקום לשמור
-אותם. רק המאגר הדחוס, הקנוני והמוגבל מחויב בשתי המכסות. מגבלת תעבורת ה-JSON
-כוללת את תקורת Base64 עבור תקרת קלט מפוענח של 32 MiB. כל
-נגזרת מאוחסנת מתעדת את פורמט/רזולוציית ה-JPEG המאומתים שלה, מדיניות הדגימה,
-גרסת הנגזרת, זמן היצירה, גיבוב התוכן שחושב בשרת והפניית האב המגובבת,
-וכן את גיבוב תוכן האב של הקורא המהימן. הביטול נבדק
-בין שלבי פענוח/גיבוב אסינכרוניים ולפני ה-commit האטומי למטמון.
+עבור בקשה נצפתה, תגובת מודל עלולה לצטט כל חלק מהתמליל ללא גבול רמז מובנה. לכן ה-`responseBody` הנשמר שלה ביומן הקריאות מוחלף בסמן השמטה; ארטיפקט ה-pipeline המפורט (שיכול לכלול גופי upstream/לקוח ומקטעי זרם) אינו נשמר. מטמונים סמנטיים, של idempotency ושל reasoning-replay עוקפים קריאות וכתיבות עבור אותה בקשה. בקשת הספק והתגובה הנראית ללקוח נשארות ללא שינוי. בתי keepalive מוקדמים מרוקנים מהחוצץ הזמני כאשר הארטיפקט המפורט מושמט. אזהרת ה-EventStream הפגום של Kiro מדווחת רק על מספר בתי המטען, לעולם לא על תוכנו או על השגיאה הגולמית של מנתח ה-JSON.
+הדבר אינו טוען שכל אבחון ספק/תוסף שאינו קשור נבדק; הסריקה הרחבה יותר של ה-sinks הנשמרים נעקבת ב-#11658.
 
-מקבץ זה עדיין אינו מחבר מפיק בסביבת ייצור לנתיב ואינו
-מספק בחירת וריאנטים ברזולוציות מרובות. לפיכך, נתיב הבקשה השקוף של Video Bridge
-אינו מוסיף עבודה, בעוד שגזירת ישות עיקרית הקשורה לדייר
-ומחזור החיים המלא ברזולוציות מרובות של FU-08 נותרים עבודת המשך מפורשת,
-במקום להיות מתועדים כהתנהגות שהושלמה.
+מחזור החיים של ה-`/api/modality-bridge/video/drilldown` הפנימי הוא תשתית מטמון נפרדת, המאומתת באמצעות loopback/טוקן. כל פעולה דורשת גם מזהה principal אטום וקנוני. לפני שמתקשר ייצור מופעל, עליו לגזור מזהה זה מהדייר (tenant) המאומת ואסור לו לעולם להעביר ערך שנבחר על ידי הלקוח. מפתחות המטמון קושרים את אותו principal למזהי session ומזהי ייחוס-ווידאו קנוניים, מאחסנים רק את המפתחות הנגזרים מ-SHA-256 שלהם, ומגבילים גם את הקריאות וגם את המחיקה לאותו principal. המטמון מאחסן לכל היותר 16 פריימי JPEG נגזרים לכל רשומה, מפקיע את תוקפם לאחר עשר דקות, ותומך בקריאות `start`/`end` חסומות או במחיקת session מפורשת.
 
-פריימים מקבלים כיתובים באופן סדרתי באמצעות מודל ה-Video שהוגדר. עקיפת
-Video ריקה יורשת את הגדרת Vision; אם שתיהן ריקות, הנתב האוטומטי של Vision
-בוחר את המודל האפקטיבי שתומך בראייה. כיתובים מוצלחים מחליפים את החלק המקורי
-בקידומת היציבה `[Video description:`, שגם מסמנת את הטקסט כתצפית לא מהימנה
-שנגזרה ממדיה ומורה למודלים בהמשך השרשרת שלא לציית להוראות שנמצאו במדיה.
-מפתחות מטמון הכיתובים לפריימים כוללים את בתי ה-JPEG, ההנחיה, חותמת הזמן
-והמודל האפקטיבי; רק כיתובים מוצלחים נשמרים במטמון. רשומות המטמון שומרות את
-מודל המקור שהצליח בפועל, לרבות מודל חלופי; הגשר מדווח על `mixed` כאשר פריימים
-שונים הופקו בידי מודלים שונים. פגיעה במטמון עושה שימוש חוזר בזהות המקור הזו
-במקום לתייג אותה מחדש כתוכנית הניתוב המבוקשת. מטמון התוצאות לסרטון השלם
-ממופתֵח לפי כל קלט שמשנה את הפלט — ההנחיה, המודל האפקטיבי, מדיניות הדגימה,
-מספר הפריימים, מצב הניתוח הסמנטי, טביעת ה-SHA-256 של רמז המיקוד המנורמל,
-חלון המיקוד, `transcript`,‏ `audioTranscript` ודגל גיליון התמונות — כך ששינוי
-של כל אחד מהממדים האלה גורם להחטאה במטמון ולעולם לא לשימוש חוזר מיושן.
-גם גרסת מדיניות מניעת הכפילויות החזותיות, הסף ומספר הפריימים המועמדים המוגבל
-מופיעים במפורש במפתח ובמטא-נתונים של מטמון התוצאות; לכן שינוי מדיניות אינו
-יכול לעשות שימוש חוזר בתיאור מיושן של הסרטון השלם. מטא-נתוני v4 של מטמון
-התוצאות שומרים את המצב ואת טביעת האצבע, ולעולם לא את משימת המשתמש הגולמית.
-מטא-נתוני מנגנון ההגנה מדווחים הן על מצב הניתוח המבוקש והן על המצב האפקטיבי;
-מצב `focused` שהתבקש ללא טקסט משתמש שמיש מדווח בפועל כ-`full`.
+כל principal מוגבל ל-16 רשומות ול-64 MiB של נתוני JPEG קנוניים. מגבלות אלה בלתי תלויות בתקרה הגלובלית של 64 רשומות/256 MiB: לחץ מכסה של principal מפנה רק את הרשומות שהשימוש בהן היה הכי מזמן (least-recently-used) של אותו principal לפני ששוקלים פינוי LRU גלובלי. רשומות שפג תוקפן נסרקות הן מחשבונאות ה-principal והן מהגלובלית בעת פעילות מטמון, בעוד ביטול וכשל אימות אינם מתחייבים להחלפה חלקית.
 
-מנגנון ההגנה מחלץ כל חלק וידאו נתמך, אך אינו מתאר יותר מאשר
-`modalityBridgeVideoMaxVideos`. עבור יעד שהוכח כי
-`supportsVideo === false`, סרטונים שנכשלו או חרגו מהמגבלה הופכים לסמני טקסט
-בטוחים ומפורשים, כך ששום וידאו גולמי אינו נשאר. כאשר היכולת אינה ידועה, חלקים
-אלה נשארים ללא שינוי. יעדים עם `supportsVideo === true` עוקפים את הגשר.
-אות הביטול של בקשת הלקוח מתפשט דרך ההורדה, תור המתווך, תהליכי המשנה וקריאות
-הכיתוב; ביטולים עוצרים בין סרטונים ולעולם אינם נכשלים באופן שמאפשר למדיה
-גולמית לעבור.
+המטמון דוחה Base64 לא-קנוני, ריפוד עודף, מדיה שאינה JPEG, קובצי JPEG פגומים או קטועים, וקובצי JPEG שמפיקים אזהרה במהלך פענוח `sharp` חסום של התמונה המלאה. הוא מקודד מחדש כל תמונה שהתקבלה כ-JPEG קנוני, מפיק את הרוחב והגובה מהבתים המפוענחים במקום לסמוך על שדות המתקשר, ומשליך כל בתים פוליגלוטיים נגררים במקום לשמור אותם. רק הבאפר הדחוס הקנוני החסום נספר כנגד שתי המכסות. מגבלת ה-JSON ב-wire כוללת את תקורת ה-Base64 עבור תקרת קלט מפוענח של 32 MiB. כל נגזרת מאוחסנת מתעדת את פורמט/רזולוציית ה-JPEG המאומתים שלה, את מדיניות הדגימה, את גרסת הנגזרת, את זמן היצירה, את גיבוב התוכן שחושב בשרת, ואת הפניית ההורה המגובבת בתוספת גיבוב תוכן-ההורה של המתקשר המהימן. הביטול נבדק בין שלבי הפענוח/הגיבוב האסינכרוניים לפני ה-commit האטומי למטמון.
 
-הגדרות זמן הריצה מגובות במסד נתונים ומאומתות באמצעות Zod:
+המקטע הזה עדיין אינו מחבר מפיק ייצור (producer) לנתיב ואינו מספק בחירת וריאנטים מרובת-רזולוציות. נתיב הבקשה השקוף של Video Bridge אינו גורר לכן עבודה נוספת, בעוד גזירת ה-principal הקשורה לדייר (tenant) ומחזור-החיים המלא מרובה-הרזולוציות של FU-08 נותרים עבודת המשך מפורשת ואינם מתועדים כהתנהגות שהושלמה.
 
-| מפתח                                | ברירת מחדל  | טווח / התנהגות                                                                          |
-| ----------------------------------- | ----------- | --------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`     | זמן ריצה אופציונלי, המחייב הצטרפות מפורשת                                               |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` משמר כיתובים כלליים; `focused` משתמש בהקשר מוגבל ולא מהימן מהודעת המשתמש האחרונה |
-| `modalityBridgeVideoModel`          | `""`        | יורש את המודל של Vision Bridge                                                          |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                    |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`,‏ `scene_aware` או `segment_aware` יחסי; כשל בגלאי גורם לחזרה ל-`uniform`     |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                     |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 מילישניות                                                                   |
+הפריימים מקבלים כיתוב ברצף עם מודל הווידאו המוגדר. דריסת Video ריקה יורשת את הגדרת ה-Vision; אם שתיהן ריקות, ה-auto-router של Vision בוחר את המודל האפקטיבי התומך-ראייה. כיתובים מוצלחים מחליפים את החלק המקורי בקידומת יציבה `[Video description:` שגם מסמנת את הטקסט כתצפית לא-מהימנה הנגזרת ממדיה ואומרת למודלים downstream לא לציית להוראות הנמצאות במדיה. מפתחות המטמון של כיתובי-פריימים כוללים את בתי ה-JPEG, הפרומפט, חותמת-הזמן והמודל האפקטיבי; רק כיתובים מוצלחים נשמרים במטמון. רשומות המטמון שומרות את מודל ה-producer המוצלח בפועל, כולל מודל גיבוי; הגשר מדווח `mixed` כאשר פריימים שונים הופקו על ידי מודלים שונים. פגיעת מטמון עושה שימוש חוזר בזהות ה-producer ההיא במקום לתייג אותה מחדש כתוכנית הניתוב המבוקשת. מטמון התוצאות של הווידאו השלם ממותח (keyed) על כל קלט שמשנה את הפלט — הפרומפט, המודל האפקטיבי, מדיניות הדגימה, מספר הפריימים, מצב הניתוח הסמנטי, טביעת-האצבע SHA-256 של רמז המיקוד המנורמל, חלון המיקוד, `transcript`, `audioTranscript`, ודגל ה-contact-sheet — כך ששינוי כל אחד מהממדים האלה הוא החטאת מטמון, ולעולם לא שימוש חוזר מיושן. גרסת מדיניות ה-dedup החזותי, הסף, ומספר פריימי-המועמדים החסום מופיעים גם הם באופן מפורש במפתח מטמון-התוצאות ובמטא-דאטה; לכן שינוי מדיניות לא יכול לעשות שימוש חוזר בתיאור וידאו-שלם מיושן. המטא-דאטה של מטמון-התוצאות v4 שומר את המצב ואת טביעת-האצבע, ולעולם לא את משימת המשתמש הגולמית. מטא-הדאטה של מעקה-הבטיחות מדווח גם על מצב הניתוח המבוקש וגם על האפקטיבי; מצב `focused` מבוקש ללא טקסט-משתמש שמיש מדווח כאפקטיבית `full`.
 
-ערכי זמן קצוב ישנים של Video שנשמרו ושעולים על 120 שניות מוגבלים למועד הסופי
-של המתווך; כתיבות חדשות של הגדרות מעל למגבלה זו נדחות.
-`GET /api/modality-bridge/video/runtime` דורש מקומיות loopback מהימנה ומוחתמת
-לפני אימות או בדיקת זמן הריצה, ולאחר מכן דורש הרשאת ניהול. הוא מחזיר רק את
-`available`, גרסאות FFmpeg/ffprobe שעברו טיהור וסיבה קבועה כאשר זמן הריצה אינו
-זמין. נקודת הקצה הפנימית לחילוץ אינה API ציבורי להעלאה: רוויה של התור מחזירה
-`503` יחד עם `Retry-After`, ניתוק של המתקשר מחזיר `499`, והמועד הסופי הקבוע
-של המתווך מחזיר `504`. תגובות שהומרו מוסיפות
+מעקה-הבטיחות מחלץ כל חלק וידאו נתמך אך מתאר לא יותר מ-`modalityBridgeVideoMaxVideos`. עבור יעד שהוכח כבעל `supportsVideo === false`, סרטונים שנכשלו וחורגים מהמגבלה הופכים לסמני טקסט בטוחים ומפורשים כך שאף וידאו גולמי לא שורד. כאשר היכולת לא ידועה, החלקים האלה שומרים על מנשא הווידאו שלהם; כל תמלול גיבוי עוקב אחר המרת הטקסט החסומה שלמעלה. יעדים עם `supportsVideo === true` עוקפים את הגשר. אות הביטול של בקשת הלקוח מופץ דרך ההורדה, תור ה-broker, תתי-התהליכים וקריאות הכיתוב; ביטולים עוצרים בין סרטונים ולעולם אינם נכשלים למצב פתוח שחושף מדיה גולמית.
+
+הגדרות זמן-הריצה מגובות-DB ומאומתות באמצעות Zod:
+
+| מפתח                                | ברירת מחדל  | טווח / התנהגות                                                                       |
+| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------ |
+| `modalityBridgeVideoEnabled`        | `false`     | אופציונלי בזמן-ריצה, opt-in                                                          |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` שומר על כיתובים גנריים; `focused` משתמש בהקשר חסום ולא-מהימן של המשתמש האחרון |
+| `modalityBridgeVideoModel`          | `""`        | יורש את מודל Vision Bridge                                                           |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                 |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware`, או `segment_aware` יחסי; כשל בגלאי חוזר ל-`uniform`        |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                  |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                       |
+
+ערכי timeout מדור-קודם (legacy) של Video שנשמרו מעל 120 שניות מוצמדים לדדליין ה-broker; כתיבות הגדרות חדשות מעל המגבלה ההיא נדחות.
+`GET /api/modality-bridge/video/runtime` דורש לוקאליות loopback חתומה ומהימנה לפני אימות או בדיקת זמן-ריצה, ולאחר מכן דורש אימות ניהול. הוא מחזיר רק `available`, גרסאות FFmpeg/ffprobe מטוהרות, וסיבה קבועה כאשר זמן-הריצה אינו זמין. נקודת הקצה הפנימית לחילוץ אינה API העלאה ציבורי: רוויית תור מחזירה `503` בתוספת `Retry-After`, ניתוק מתקשר מחזיר `499`, והדדליין הקבוע של ה-broker מחזיר `504`. תגובות שהומרו מוסיפות
 `video->text;model=<visionModel>;parts=<videos>` לכותרת המרכזית
 `x-omniroute-modality-bridge` מבלי להסיר מקטעי Vision או Audio.
 
-### מסכת PII‏ (`piiMasker.ts`)
+### PII Masker (`piiMasker.ts`)
 
-פועלת ב**שני** השלבים.
+פועל ב**שני** השלבים.
 
-- **`preCall`** משכפל את המטען, עובר על `system`,‏ `messages`,‏ `input`
-  ו-`prompt` (לרבות פריטי מחרוזת פשוטים), ומחיל את `processPII()` (מתוך
-  `@/shared/utils/inputSanitizer`) על שדות `content`/`text` מסוג מחרוזת. כאשר
-  `PII_REDACTION_ENABLED=true`, פרטי PII שזוהו מושחרים במטען היוצא. פעולה זו
-  אינה תלויה ב-`INPUT_SANITIZER_MODE` (השולט רק במדיניות הזרקת הנחיות). כאשר
-  ההשחרה כבויה, הקריאה מתעדת את מנייני הזיהויים מבלי לשכתב את התוכן.
-- **`postCall`** מבצע שכפול עמוק של התגובה, מריץ את `sanitizePIIResponse()`
-  יחד עם המסכה למבנה Responses API‏ (`maskResponsesOutput` — מכסה את
-  `output_text` ואת `output[].content[].text`). אם מתבצעת השחרה כלשהי, התגובה
-  ששונתה מחליפה את המקורית.
+- **`preCall`** משכפל את ה-payload, עובר על `system`, `messages`, `input` ו-`prompt` (כולל פריטים שהם מחרוזות פשוטות), ומחיל את `processPII()` (מתוך `@/shared/utils/inputSanitizer`) על שדות `content`/`text` מסוג מחרוזת. כאשר `PII_REDACTION_ENABLED=true`, מידע PII שזוהה מושחר ב-payload היוצא. זה בלתי תלוי ב-`INPUT_SANITIZER_MODE` (ששולט רק במדיניות הזרקת פרומפטים). כשההשחרה כבויה, הקריאה מתעדת ספירות זיהוי מבלי לשכתב את התוכן.
+- **`postCall`** משכפל לעומק את התגובה, מריץ את `sanitizePIIResponse()` יחד עם מטשטש צורת-ה-Responses-API (`maskResponsesOutput` — מכסה את `output_text` ואת `output[].content[].text`). אם מתבצעת השחרה כלשהי, התגובה המשונתה מחליפה את המקורית.
 
-מנגנון ההגנה לעולם אינו חוסם; הוא רק מוסיף הערות (`meta.detections`,
-`meta.redacted`) או משכתב.
+מנגנון ההגנה לעולם אינו חוסם; הוא רק מוסיף ביאורים (`meta.detections`, `meta.redacted`) או משכתב.
 
-### הזרקת הנחיות (`promptInjection.ts`)
+#### בחירה לפי סוג, תבניות מותאמות אישית ומוני זיהוי
 
-מזהה מבנים עוינים בתוכן שסופק בידי המשתמש ואוכף את המדיניות שהוגדרה.
-ההתנהגות נקבעת לפי משתני סביבה ואפשרויות הבנאי:
+**לוח בקרה → הגדרות → אבטחה → טשטוש PII** בוחר _מה_ יוטשטש. הוא אינו מפעיל את הטשטוש: זה עדיין נקבע על ידי `PII_REDACTION_ENABLED` (בקשה) ו-`PII_RESPONSE_SANITIZATION` (תגובה + SSE), שניהם כבויים כברירת מחדל.
 
-| הגדרה    | משתנה סביבה                                                                                             | ברירת מחדל | השפעה                                                                                                                                                                 |
-| -------- | ------------------------------------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| מופעל    | `INPUT_SANITIZER_ENABLED`                                                                               | `true`     | כאשר הערך הוא `false`, מנגנון ההגנה מסיים את פעולתו באופן מיידי.                                                                                                      |
-| מצב      | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                         | `warn`     | מדיניות הזרקה: `block`,‏ `warn` או `log`. (הערך `redact` נתמך לצורך תאימות לאחור, אך **אינו** מסיר טקסט הזרקה; שכתוב PII בבקשה נשלט באמצעות `PII_REDACTION_ENABLED`.) |
-| סף חסימה | האפשרות `blockThreshold` /‏ `INPUT_SANITIZER_BLOCK_THRESHOLD` (כינוי `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`     | דרגת החומרה המזערית הנדרשת לחסימה. בדרגת `medium` מתבצעת צפייה בלבד כברירת מחדל.                                                                                      |
+- **בחירה לפי סוג** — המזהים המובנים מפורטים ב-`src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). ערך לא-מוגדר פירושו כל הסוגים (ההתנהגות מלפני שהגדרה זו הייתה קיימת). התבנית `ssn_us` של מנוע הבקשות ממופה אל `ssn`. תבניות-העל (Minimal, Standard, Financial, Brazilian, USA, Full) רק ממלאות את תיבות הסימון בממשק המשתמש.
+- **תבניות מותאמות אישית** — עד 20 תבניות regex או תווים כלליים (`*` = עד 64 תווים שאינם רווח, `?` = תו אחד). התאמות הופכות ל-`[CUSTOM_REDACTED]`. כל תבנית עוברת דרך `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): לכל היותר 500 תווים, דגלים מוגבלים ל-`g i m s u`, חייבת להתקמפל, חייבת לעבור את `safe-regex` (בדיקת backtracking קטסטרופלי), ואסור שהתאים מחרוזת ריקה או מציין-מקום של השחרה. תבנית שנכשלת נדחית בעת שמירה ובעת בדיקה, ושורה מאוחסנת שנכשלת מדולגת בזמן ריצה במקום לעבור קומפילציה. תבניות מותאמות אישית רצות רק כשהטשטוש פעיל.
+- **מוני זיהוי** — ספירות לפי סוג (לעולם לא הערכים שהותאמו), נשמרות בזיכרון ומתאפסות בהפעלה מחדש (`src/lib/pii/piiDetectionStats.ts`). הן עולות רק כשהטשטוש פעיל.
 
-**סדר הקדימות של המצבים** (`getMode`):‏ `options.mode` של הקורא →
-**דריסת דגל תכונה במסד הנתונים** עבור `INJECTION_GUARD_MODE` (לוח מחוונים → הגדרות →
-דגלי תכונות) → משתנה הסביבה `INJECTION_GUARD_MODE` → משתנה הסביבה `INPUT_SANITIZER_MODE` →
-`warn`. לפיכך, דריסה דרך לוח המחוונים גוברת על משתני הסביבה, כך שממשק המשתמש של דגלי
-התכונות שולט בזמן אמת במנגנון ההגנה הפעיל (ללא הפעלה מחדש). הקריאה ממסד הנתונים בטוחה במקרה של כשל:
-אם מתרחשת שגיאה, מנגנון ההגנה חוזר להתנהגות המבוססת על משתני הסביבה, וכאשר לא
-מוגדרת דריסה, ההתנהגות זהה לחלוטין לזו של הכרעה המבוססת על משתני סביבה בלבד.
+ההגדרות מאוחסנות בטבלת `key_value` (מרחב שמות `pii_settings`, `src/lib/db/piiSettings.ts`) ונקראות דרך מטמון של שנייה אחת. API:
 
-מקורות הזיהוי:
+| מתודה  | נתיב                     | מטרה                                                            |
+| ------ | ------------------------ | --------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | מצב הדגלים, `enabledTypes`, `customPatterns`, מוני זיהוי        |
+| `PUT`  | `/api/settings/pii`      | החלפת `enabledTypes` (`null` = כל הסוגים) ו/או `customPatterns` |
+| `POST` | `/api/settings/pii/test` | הרצת ניסוי של תבנית אחת כנגד דגימה של עד 8 KB; דבר לא נשמר      |
 
-1. `sanitizeRequest()` מתוך `@/shared/utils/inputSanitizer` (מערך גלאים משותף
-   המשמש במקומות נוספים בצינור העיבוד).
-2. `DEFAULT_GUARD_PATTERNS` המובנים (כעת `system_override_inline` ו-
-   `markdown_system_block`, שניהם בדרגת חומרה `high`).
-3. `customPatterns` אופציונליים המועברים דרך אפשרויות הבנאי (מחרוזות, ביטויים רגולריים
-   או רשומות `{ name, pattern, severity }`).
+כל שלוש המתודות דורשות אימות ניהולי ומאמתות את גוף הבקשה באמצעות Zod (`src/shared/validation/schemas/piiSettings.ts`).
 
-כאשר `mode === "block"` **וגם** לפחות זיהוי אחד עומד בסף
-החומרה, `preCall` מחזירה `{ block: true, message: "Request rejected:
-suspicious content detected" }`. במצבים `warn`/`log`, מנגנון ההגנה מתעד ביומן אך
-מאפשר את הקריאה. פונקציית העזר המשותפת `evaluatePromptInjection()` מיוצאת גם היא
-עבור קוראים שצריכים להעריך הנחיות מבלי לעבור דרך הרישום.
+### הזרקת פרומפטים (`promptInjection.ts`)
 
-**מגבלת סריקה (v3.8.20):** הגלאי בודק רק את **16 הק״ב הראשונים** של
-טקסט ההנחיות המאוחד — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16,384 בתים) בתוך
-`src/shared/utils/inputSanitizer.ts`. גם `detectInjection()` וגם
-`evaluatePromptInjection()` מפעילות `slice(0, MAX_INJECTION_SCAN_BYTES)` לפני הרצת
-לולאת התבניות. הנחיות הזרקה נמצאות בסמוך לתחילת הקלט, ולכן הגבלה זו מצמצמת את צריכת המעבד/GC של ביטויים רגולריים במטענים בגודל מאות ק״ב, מבלי להחליש את הזיהוי (ראו
-#3932, #4041).
+מזהה מבנים עוינים בתוכן שמסופק על ידי המשתמש ואוכף את המדיניות המוגדרת. ההתנהגות מונחית על ידי משתני סביבה ואפשרויות constructor:
 
-### ממסך פרטי גישה (`credentialMasker.ts`)
+| הגדרה    | משתנה סביבה                                                                                            | ברירת מחדל | השפעה                                                                                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| מופעל    | `INPUT_SANITIZER_ENABLED`                                                                              | `true`     | כאשר `false`, מנגנון ההגנה מבצע short-circuit.                                                                                                                  |
+| מצב      | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                        | `warn`     | מדיניות הזרקה: `block`, `warn`, או `log`. (`redact` מתקבל לצורך תאימות לאחור אך **אינו** מסיר טקסט הזרקה; שכתוב PII בבקשה נשלט על ידי `PII_REDACTION_ENABLED`.) |
+| סף חסימה | אפשרות `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (כינוי: `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`     | החומרה המינימלית הנדרשת לחסימה. חומרת Medium היא צפייה-בלבד בברירת המחדל.                                                                                       |
 
-פועל **בשני** השלבים, אחרון בשרשרת ברירת המחדל (עדיפות `95`). משחיר
-תבניות מוכרות של מפתחות API / אסימוני סוד מתוך המטען היוצא (תוכן
-הודעות, ארגומנטים של קריאות לכלים ותוצאות כלים) **וגם** מתוך תגובת הספק, כך שפרטי
-גישה שהודבקו בהנחיה (או הוחזרו כהד על ידי תוצאת כלי) אינם דולפים
-לספק החיצוני או בחזרה ללקוח.
+**סדר קדימות של המצב** (`getMode`): `options.mode` של הקורא → **דריסת דגל-תכונה ממסד הנתונים** של `INJECTION_GUARD_MODE` (לוח בקרה → הגדרות → דגלי תכונות) → משתנה הסביבה `INJECTION_GUARD_MODE` → משתנה הסביבה `INPUT_SANITIZER_MODE` → `warn`. לכן דריסה מלוח הבקרה גוברת על משתני הסביבה, כך שממשק דגלי התכונות שולט במנגנון ההגנה הפועל בזמן אמת (ללא הפעלה מחדש). הקריאה ממסד הנתונים היא fail-safe: אם היא נכשלת, מנגנון ההגנה חוזר להתנהגות מבוססת משתני-הסביבה, וכאשר לא מוגדרת דריסה, ההתנהגות זהה לרזולוציה מבוססת-משתני-סביבה בלבד.
 
-- **הצטרפות מפורשת בלבד**, בהתאם למוסכמה של השחרת PII (בסמוך לכלל קשיח מס׳ 20):
+מקורות זיהוי:
+
+1. `sanitizeRequest()` מתוך `@/shared/utils/inputSanitizer` (סט הגלאים המשותף המשמש במקומות אחרים ב-pipeline).
+2. `DEFAULT_GUARD_PATTERNS` מובנים (כרגע `system_override_inline` ו-`markdown_system_block`, שניהם בחומרה `high`).
+3. `customPatterns` אופציונליים המועברים דרך אפשרויות ה-constructor (מחרוזות, regex, או רשומות `{ name, pattern, severity }`).
+
+כאשר `mode === "block"` **וגם** לפחות זיהוי אחד עומד בסף החומרה,
+`preCall` מחזיר `{ block: true, message: "Request rejected:
+suspicious content detected" }`. במצבי `warn`/`log` מנגנון ההגנה רושם ליומן
+אך מאפשר את הקריאה. פונקציית העזר המשותפת `evaluatePromptInjection()` מיוצאת
+גם היא עבור מתקשרים שצריכים להעריך prompts מבלי לעבור דרך ה-registry.
+
+**גבול הסריקה (v3.8.20):** הגלאי בודק רק את **16 ה-KB הראשונים** של
+טקסט ה-prompt המחובר — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 בתים)
+ב-`src/shared/utils/inputSanitizer.ts`. גם `detectInjection()` וגם
+`evaluatePromptInjection()` מבצעים `slice(0, MAX_INJECTION_SCAN_BYTES)` לפני
+הרצת לולאת הדפוסים. הוראות הזרקה (injection) ממוקמות בדרך כלל סמוך לראש הקלט,
+ולכן זה מגביל את צריכת ה-CPU/GC של הביטויים הרגולריים על payloads של מאות KB
+מרובות מבלי להחליש את הזיהוי (ראו #3932, #4041).
+
+### הסוואת פרטי גישה (`credentialMasker.ts`)
+
+רץ ב**שני** השלבים, אחרון בשרשרת ברירת המחדל (עדיפות `95`). מסווה
+דפוסים מוכרים של מפתחות API / טוקנים סודיים מה-payload היוצא (תוכן ההודעה,
+ארגומנטים של קריאות כלים, תוצאות כלים) **וגם** מתשובת הספק, כך שפרטי גישה
+שהודבקו ב-prompt (או הוחזרו כהד על ידי תוצאת כלי) לא ידלפו לספק שמעלה הזרם
+או בחזרה ללקוח.
+
+- **Opt-in בלבד**, באותה מוסכמה כמו הסוואת PII (סמוך לכלל הקשיח מס' 20):
   מושבת אלא אם `settings.credentialRedactionEnabled === true` **או**
-  `CREDENTIAL_REDACTION_ENABLED=true`. כאשר הוא כבוי, מנגנון ההגנה אינו מבצע דבר —
-  הוא לעולם אינו חוסם ולעולם אינו משכתב.
-- `redactCredentials()` עוברת על כל עץ המטען/התגובה (`walkValue()`,
-  באופן בטוח מפני זיהום אב־טיפוס ומפני מחזורים באמצעות `WeakSet`) ומחליפה התאמות במציין מיקום
-  `[REDACTED:<type>]`, תוך שכפול רק של הענפים שהשתנו בפועל.
-- `CREDENTIAL_PATTERNS` מכסה מפתחות של ספקי LLM ‏(OpenAI, OpenAI-proj,
-  Anthropic, Google, Hugging Face, Replicate), אסימוני VCS/SaaS ‏(GitHub, Slack,
-  Linear, Notion, npm, Postman, Discord), מפתחות תשלום (Stripe, Square), מפתחות
-  ענן (מפתח גישה של AWS,‏ Twilio, SendGrid, Mailgun), מפתחות פרטיים / JWT,
-  מחרוזות חיבור המכילות פרטי גישה (`mongodb://user:pass@...` וכו׳), וכן
-  תבנית כללית של ערכי כותרות `Authorization`/`x-api-key`/`api-key`/`apikey`.
-  מפתחות במבנה כותרת (`authorization`,‏ `x-api-key`,‏ `api-key`,
-  `apikey`) מושחרים באופן מבני (הערך בלבד, בעוד שקידומת הסכימה, כגון
-  `Bearer `/`Basic `, נשמרת), ולא באמצעות הביטוי הרגולרי הכללי לטקסט.
-- מנגנון ההגנה לעולם אינו חוסם; הוא רק משכתב (`modifiedPayload` /
-  `modifiedResponse`) ומוסיף הערות (`meta.credentialsRedacted`,‏ `meta.count`).
+  `CREDENTIAL_REDACTION_ENABLED=true`. כשהוא כבוי, מנגנון ההגנה הוא no-op —
+  הוא לעולם לא חוסם ולעולם לא משכתב.
+- `redactCredentials()` עובר על כל עץ ה-payload/התשובה (`walkValue()`,
+  בטוח מפני prototype pollution, בטוח מפני מעגלים באמצעות `WeakSet`) ומחליף
+  התאמות ב-placeholder מסוג `[REDACTED:<type>]`, תוך שיבוט רק של הענפים
+  שבאמת השתנו.
+- `CREDENTIAL_PATTERNS` מכסה מפתחות של ספקי LLM (OpenAI, OpenAI-proj,
+  Anthropic, Google, Hugging Face, Replicate), טוקנים של VCS/SaaS (GitHub,
+  Slack, Linear, Notion, npm, Postman, Discord), מפתחות תשלום (Stripe,
+  Square), מפתחות ענן (AWS access key, Twilio, SendGrid, Mailgun), מפתחות
+  פרטיים / JWTs, מחרוזות חיבור הנושאות פרטי גישה (`mongodb://user:pass@...`
+  וכד'), ודפוס גנרי של ערך-כותרת `Authorization`/`x-api-key`/`api-key`/`apikey`.
+  מפתחות בצורת כותרת (`authorization`, `x-api-key`, `api-key`, `apikey`)
+  מוסווים באופן מבני (הערך בלבד, עם שמירת קידומת הסכימה כמו `Bearer `/`Basic `)
+  ולא באמצעות הביטוי הרגולרי הטקסטואלי הגנרי.
+- מנגנון ההגנה לעולם לא חוסם; הוא רק משכתב (`modifiedPayload` /
+  `modifiedResponse`) ומוסיף אנוטציות (`meta.credentialsRedacted`, `meta.count`).
 
-הגנת רגרסיה: `tests/unit/credential-masker-guardrail.test.ts`.
+בדיקת רגרסיה: `tests/unit/credential-masker-guardrail.test.ts`.
 
-## חוזה בסיס (`base.ts`)
+## חוזה הבסיס (`base.ts`)
 
 ```typescript
 class BaseGuardrail {
@@ -616,7 +580,7 @@ class BaseGuardrail {
 }
 
 interface GuardrailResult<TValue = unknown> {
-  block?: boolean; // true עוצר מיד את השרשרת
+  block?: boolean; // true מקצר את השרשרת
   message?: string; // מוצג בעת חסימה
   meta?: Record<string, unknown> | null;
   modifiedPayload?: TValue; // מוחזר על ידי preCall כדי לשכתב את הבקשה
@@ -639,108 +603,151 @@ interface GuardrailContext {
 }
 ```
 
-מנגנון הגנה מסמן "ללא שינוי" באמצעות החזרת `void`, `{}`, או
+מנגנון הגנה מסמן "אין שינוי" על ידי החזרת `void`, `{}`, או
 `{ block: false }`. החזרת `modifiedPayload`/`modifiedResponse` מחליפה
-את הערך שזורם בשרשרת עבור מנגנוני ההגנה שבהמשך.
-`signal?: AbortSignal` מעביר אל מנגנוני ההגנה את מחזור החיים של הקורא. ביטול בקשה הוא החרגת fail-open מכוונת: גשרי מדיה מפסיקים את העבודה ומבצעים ניקוי מבלי לשחזר מדיה גולמית ליעד שידוע כי אינו תומך בה.
+את הערך הזורם דרך השרשרת עבור מנגנוני ההגנה שבהמשך.
+`signal?: AbortSignal` מעביר את מחזור החיים של הקורא לתוך מנגנוני ההגנה. ביטול בקשה הוא חריגת ה-fail-open המכוונת: גשרי מדיה מפסיקים את העבודה ומנקים מבלי לשחזר מדיה גולמית ליעד שידוע שאינו תומך בה.
 
-## מרשם (`registry.ts`)
+## המרשם (`registry.ts`)
 
-היחידון `guardrailRegistry` חושף:
+הסינגלטון `guardrailRegistry` חושף:
 
-- `register(guardrail)` — מוסיף מנגנון הגנה (או מחליף לפי שם מנורמל) וממיין
-  מחדש לפי `priority` בסדר עולה.
-- `clear()` / `list()` — כלי עזר ניהוליים.
+- `register(guardrail)` — מוסיף (או מחליף לפי שם מנורמל) מנגנון הגנה
+  וממיין מחדש לפי `priority` עולה.
+- `clear()` / `list()` — פונקציות עזר ניהוליות.
 - `runPreCallHooks(payload, context)` — עובר על מנגנוני ההגנה הפעילים, מעביר את
-  המטען דרך `modifiedPayload`, ועוצר ב-`block: true` הראשון.
+  ה-payload דרך `modifiedPayload`, ועוצר ב-`block: true` הראשון.
 - `runPostCallHooks(response, context)` — אותה זרימה בצד התגובה.
-- `resetGuardrailsForTests({ registerDefaults })` — מנקה את המצב, ולפי הצורך
+- `resetGuardrailsForTests({ registerDefaults })` — מנקה את המצב ואופציונלית
   רושם מחדש את ברירות המחדל לצורך בידוד נקי של בדיקות.
 
-שני המריצים מחזירים `{ blocked, payload|response, results, guardrail?, message? }`
+שני ה-runners מחזירים `{ blocked, payload|response, results, guardrail?, message? }`
 כאשר `results` הוא מערך של רשומות `GuardrailExecutionResult` הכוללות
-את השדות `blocked`, `skipped`, `modified`, `error` ו-`meta` לכל מנגנון הגנה,
-ושימושיות למעקב.
+שדות `blocked`, `skipped`, `modified`, `error` ו-`meta` לכל מנגנון הגנה,
+שימושיים למעקב.
 
-### השבתת מנגנוני הגנה לכל בקשה
+### השבתת מנגנוני הגנה לפי בקשה
 
-`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` אוסף רשימה
-ללא כפילויות של שמות מנגנוני הגנה שיש לדלג עליהם עבור הבקשה הנוכחית.
-המקורות (כולם אופציונליים וכולם ממוזגים):
+`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` מקבצת
+רשימה מנוקת-כפילויות של שמות מנגנוני הגנה שיש לדלג עליהם בבקשה
+הנוכחית. קיימים חמישה ערוצים, הנקראים בסדר זה וממוזגים לרשימה אחת
+(המופע הראשון מנצח בעת ניקוי הכפילויות):
 
-- `apiKeyInfo.disabledGuardrails`
-- `disabledGuardrails` בגוף הבקשה (ברמה העליונה)
-- `metadata.disabledGuardrails` בגוף הבקשה
-- הכותרת `x-omniroute-disabled-guardrails` (או הכותרת הישנה
-  `x-disabled-guardrails`)
+1. `apiKeyInfo.disabledGuardrails`
+2. `disabledGuardrails` בגוף הבקשה (רמה עליונה)
+3. `metadata.disabledGuardrails` בגוף הבקשה (רק כאשר `metadata` הוא אובייקט)
+4. כותרת `x-omniroute-disabled-guardrails`
+5. כותרת מדור קודם `x-disabled-guardrails`
 
-הערכים יכולים להיות מערכי מחרוזות או מחרוזת מופרדת בפסיקים; השמות
-מנורמלים ל-kebab-case באותיות קטנות (`pii_masker` → `pii-masker`). התוצאה
-מועברת דרך `context.disabledGuardrails` אל המרשם, שמדלג על
-מנגנוני הגנה תואמים (`skipped: true` בתוך `results`).
+כל חמשת הערוצים ממוזגים, כולל שתי הכותרות: שליחת
+`x-omniroute-disabled-guardrails` ו-`x-disabled-guardrails` יחד מדלגת על איחוד
+הרשימות שלהן, וכותרת מודרנית ריקה כבר לא מסתירה את זו מדור הקודם
+([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412), תוקן ב-
+[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
+
+הערכים יכולים להיות מערכים של מחרוזות או מחרוזת מופרדת בפסיקים; השמות נחתכים
+ומנורמלים ל-kebab-case באותיות קטנות (`pii_masker` → `pii-masker`), וערכים
+ריקים נזרקים. התוצאה מועברת דרך `context.disabledGuardrails`
+למרשם, שמדלג על מנגנוני הגנה תואמים (`skipped: true` ב-`results`).
+
+רשימת ההשבתה משפיעה רק על **המרשם**. מצב `block` של הזרקת פרומפטים
+הוא גבול חובה: ה-middleware של injection-guard
+(`src/middleware/promptInjectionGuard.ts`) קורא ל-`evaluatePromptInjection()`
+ללא רשימת השבתה הנשלטת על ידי הקורא (קריאת ה-`resolveDisabledGuardrails({ body })`
+המתה שבעבר בוצעה הוסרה ב-
+[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934)), כך שבקשה
+שמשביתה את `prompt-injection` עדיין נדחית במצב `block`. זהו תכנון
+מכוון. ערוצי ההשבתה נשלטים על ידי הקורא (גוף הבקשה,
+metadata, כותרות), ואסור שקורא יוכל לכבות מנגנון אבטחה
+שהמפעיל הגדיר
+([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). איחוד
+הכותרות מ-[#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
+משנה רק אילו מנגנוני הגנה של המרשם מדולגים; הוא לא מאפשר ללקוח
+לעקוף את ה-middleware. מדיניות מנגנוני הגנה חובה לפי מפתח ולפי קבוצה
+נעקבת ב-RFC של v4 [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417).
+ראו [כיסוי ומגבלות](#coverage-and-limits).
 
 ## סדר הביצוע
 
-עבור כל בקשה שעוברת דרך `src/sse/handlers/chat.ts` ודרך
-`open-sse/handlers/chatCore.ts`:
+עבור כל בקשה הזורמת דרך `src/sse/handlers/chat.ts` ו-`open-sse/handlers/chatCore.ts` (נתיבי משפחת הצ'אט הרשומים תחת [כיסוי ומגבלות](#coverage-and-limits)):
 
-1. `resolveDisabledGuardrails(...)` בונה את רשימת הדילוג ממפתח ה-API, מגוף הבקשה
-   ומהכותרות.
-2. `guardrailRegistry.runPreCallHooks(body, ctx)` מפעיל את מנגנוני ההגנה לפי סדר
-   עדיפויות עולה:
-   - מנגנוני הגנה מושבתים מתועדים כ-`skipped`.
-   - ה-`preCall` של כל מנגנון הגנה עשוי לשכתב את המטען באמצעות `modifiedPayload`.
-   - המופע הראשון של `block: true` עוצר את השרשרת, וה-handler מחזיר
-     תגובת דחייה של מנגנון ההגנה.
-3. המטען (שייתכן ששוכתב) מועבר לניתוב משולב ולשליחה לשירות שבמעלה הזרם.
-4. לאחר הרכבת התגובה, `guardrailRegistry.runPostCallHooks(...)`
-   מפעיל את אותה שרשרת על התגובה. `block: true` בשלב זה מבטל את התגובה
-   משירות מעלה הזרם.
+1. `resolveDisabledGuardrails(...)` בונה את רשימת הדילוגים מתוך מפתח ה-API, גוף הבקשה והכותרות.
+2. `guardrailRegistry.runPreCallHooks(body, ctx)` מריץ את ה-guardrails בסדר עדיפות עולה:
+   - guardrails מושבתים נרשמים כ-`skipped`.
+   - ה-`preCall` של כל guardrail רשאי לשכתב את ה-payload באמצעות `modifiedPayload`.
+   - ה-`block: true` הראשון מנתק את השרשרת (short-circuit) וה-handler מחזיר תגובת דחייה של guardrail.
+3. ה-payload (שאולי שוכתב) זורם לתוך ניתוב ה-combo והשיגור ל-upstream.
+4. **עבור non-streaming בלבד:** לאחר שהתגובה מורכבת, `guardrailRegistry.runPostCallHooks(...)` מריץ את אותה שרשרת על התגובה. `block: true` כאן משמיט את תגובת ה-upstream ומחזיר HTTP 400. תגובות מוזרמות (streamed) מדלגות על שלב זה לחלוטין.
 
-מנגנוני הגנה שזורקים חריגה מתועדים עם `error: <message>` ונרשמים ביומן באמצעות
-`logger.warn`, אך השרשרת ממשיכה — זהו תכנון מסוג fail-open.
+guardrails שזורקים שגיאה נרשמים עם `error: <message>` ונכתבים ביומן דרך `logger.warn`, אך השרשרת ממשיכה — fail-open מתוך תכנון.
+
+## כיסוי ומגבלות
+
+רישום ה-guardrails מחובר לצינור (pipeline) הצ'אט בלבד. מגבלות אלו מוצמדות על ידי `tests/unit/guardrail-pipeline-wiring-characterization.test.ts` ו-`tests/unit/guardrail-pipeline-characterization.test.ts`; עדכנו את הבדיקות הללו באופן מכוון כאשר ההתנהגות משתנה.
+
+### היכן ה-hooks רצים
+
+| Hook / בקרה                               | רץ על                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runPreCallHooks`                         | בקשות המטופלות על ידי `handleChat` (`src/sse/handlers/chat.ts`): `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses` (וגם `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*`, ופרוקסי הצ'אט של Telegram. כמו כן נקודת הקצה לבדיקה של הדשבורד `/api/guardrails/test`. חסימת pre-call מחזירה HTTP 400. |
+| `runPostCallHooks`                        | תגובות צ'אט מסוג **non-streaming** בלבד (`open-sse/handlers/chatCore/nonStreamingResponse.ts`). תגובות מוזרמות לעולם אינן מגיעות אליו.                                                                                                                                                                                                                                                                                        |
+| PII בסטרימינג                             | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`), מחובר בצינור ב-`streamingPipeline.ts` כאשר `PII_RESPONSE_SANITIZATION` פעיל. זה אינו guardrail, ולכן ערוצי ההשבתה אינם משפיעים עליו.                                                                                                                                                                                                                            |
+| middleware של injection-guard (מדור קודם) | כל נתיב `/v1` הנושא prompt, כולל משפחת הצ'אט (ראו [כיסוי נתיבים](#injection-guard-route-coverage--red-team-phase-8--block-d)). הזרקת prompt בלבד.                                                                                                                                                                                                                                                                             |
+
+### מה לא מכוסה
+
+- **נתיבי מדיה, embeddings ונתונים** (`/v1/images/*`, `/v1/embeddings`, `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/rerank`, `/v1/search`, `/v1/moderations`) לעולם אינם מגיעים לרישום. לא רצים שם מיסוך PII, מיסוך אישורים (credentials) או גשר מודאליות. הבדיקה היחידה שלהם היא ה-middleware הישן של injection-guard.
+- **תגובות מוזרמות** אינן מקבלות guardrails של post-call: אין `pii-masker` או `credential-masker` של post-call, ואין חסימת post-call. רק טרנספורם ה-PII של הסטרימינג חל (כאשר `PII_RESPONSE_SANITIZATION` פעיל). אישור (credential) המוחזר בתגובה מוזרמת אינו מטושטש.
+- **ערוצי השבתה מול ה-middleware (מתוך תכנון):** ה-middleware מעריך הזרקת prompt בקריאה משלו ל-`evaluatePromptInjection()`, מבלי להעביר רשימת השבתות הנשלטת על ידי המתקשר. מצב `block` הוא גבול חובה שהשבתות הנשלטות על ידי המתקשר אינן יכולות לעקוף, כולל בנתיבי משפחת הצ'אט ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). השבתת `prompt-injection` רק מדלגת על ה-guardrail של הרישום.
+
+### מה רואה תגובה לפני ה-post-call
+
+בנתיב ה-non-streaming הסדר הוא: חילוץ זיכרון → ביצוע כלים מובנים → guardrails של post-call → יציאת חסימת post-call → אחסון במטמון סמנטי (semantic-cache).
+
+- **חילוץ זיכרון** ו**הרצת כלים** רואים את התגובה לפני שמנגנוני ההגנה שלאחר הקריאה (post-call) יכולים לשכתב או לחסום אותה. החל מ-[#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401), חילוץ הזיכרון מעביר את הטקסט שחולץ דרך `sanitizePII` כאשר `PII_RESPONSE_SANITIZATION` מופעל (הן בסטרימינג והן במצב לא-סטרימינג), אבל תגובה שמנגנוני ה-post-call חוסמים מאוחר יותר עדיין כבר הוצעה לזיכרון ולכלים.
+- **המטמון הסמנטי** מאחסן את התגובה לאחר ה-post-call, כך שהוא מאחסן את התגובה המשוכתבת, ותגובה חסומה לעולם אינה נשמרת במטמון. רשומות המטמון ממופות לפי מפתח API.
 
 ## תצורה
 
-משתני סביבה שנקראים על ידי מנגנוני ההגנה המובנים:
+משתני סביבה הנקראים על ידי מנגנוני ההגנה המובנים:
 
-| משתנה                                 | בשימוש על ידי             | השפעה                                                                                    |
-| ------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`        | יש להגדיר `false` כדי להשבית לחלוטין את הזיהוי.                                          |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`        | מדיניות הזרקה: `warn`,‏ `block` או `log`. הערך הישן `redact` אינו משכתב טקסט של הזרקה.   |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`        | מצב מגן ההזרקה; משמש גם כדגל תכונה במסד הנתונים אשר **דורס** את משתני הסביבה (DB > ENV). |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`        | רמת החומרה המזערית שאותה `MODE=block` דוחה: `high` (ברירת המחדל), `medium` או `low`.     |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`        | כינוי ישן עבור `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                        |
-| `PII_REDACTION_ENABLED`               | `pii-masker`              | כאשר הערך הוא `true`, מידע אישי מזהה בבקשה מושחר (ללא תלות במצב ההזרקה).                 |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (במורד הזרם) | שולט בהתנהגות המיסוך בצד התגובה.                                                         |
+| משתנה                                 | בשימוש על ידי            | השפעה                                                                                   |
+| ------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`       | הגדירו `false` כדי להשבית את הזיהוי לחלוטין.                                            |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`       | מדיניות הזרקה: `warn`, `block`, או `log`. הערך הישן `redact` אינו משכתב את טקסט ההזרקה. |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`       | מצב עבור שומר ההזרקה; גם דגל תכונה ב־DB ש**עוקף** את משתני הסביבה (DB > ENV).           |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`       | רמת החומרה המינימלית ש־`MODE=block` דוחה: `high` (ברירת מחדל), `medium`, או `low`.      |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`       | כינוי legacy עבור `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                    |
+| `PII_REDACTION_ENABLED`               | `pii-masker`             | כאשר `true`, PII בבקשה מושחר (ללא תלות במצב ההזרקה).                                    |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (מורד הזרם) | שולט בהתנהגות ה־masker בצד התגובה.                                                      |
 
 מנגנוני ההגנה של Modality Bridge קוראים את תצורת זמן הריצה ממאגר ההגדרות
-המגובה במסד הנתונים (`getSettings()`), ולא ממשתני סביבה. המפתחות הראשיים של Vision הם
-`modalityBridgeVisionEnabled`,‏ `modalityBridgeVisionMode`,
-`modalityBridgeVisionModel`,‏ `modalityBridgeVisionTaskAware`,
-`modalityBridgeVisionPrompt`,‏ `modalityBridgeVisionTimeout`,
-`modalityBridgeVisionMaxImages`,‏ `modalityBridgeVisionMaxChars`,
-`modalityBridgeCacheEnabled`,‏ `modalityBridgeCacheTtlMinutes` ו-
-`modalityBridgeCacheMaxEntries`. המפתחות הישנים
-`visionBridge*` מתקבלים רק כמנגנון הגיבוי המתועד לקריאה במחזור אחד;
-כתיבות מלוח הבקרה משתמשות במפתחות הראשיים. ברירות המחדל ופותר מנגנון הגיבוי
-נמצאים ב-`src/shared/constants/modalityBridgeDefaults.ts`, בעוד שהקבועים הישנים
-נשמרים ב-`src/shared/constants/visionBridgeDefaults.ts`.
+המגובה ב־DB (`getSettings()`), ולא ממשתני סביבה. המפתחות הראשיים של Vision
+הם `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`,
+`modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`,
+`modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`,
+`modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`,
+`modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` ו־
+`modalityBridgeCacheMaxEntries`. מפתחות ה־legacy מסוג
+`visionBridge*` מתקבלים רק כ־fallback קריאה למחזור אחד כמתועד;
+כתיבות מהדשבורד משתמשות במפתחות הראשיים. ברירות המחדל וה־resolver של ה־fallback
+נמצאים ב־`src/shared/constants/modalityBridgeDefaults.ts`, וקבועי ה־legacy
+נשמרים ב־`src/shared/constants/visionBridgeDefaults.ts`.
 
-אודיו משתמש ב-`modalityBridgeAudioEnabled`,‏ `modalityBridgeAudioModel`,
-`modalityBridgeAudioTimeout` וב-`modalityBridgeAudioMaxClips`, יחד עם הגדרות
-`modalityBridgeCache*` המשותפות. לאודיו אין מנגנון גיבוי למפתחות ישנים, משום
-שמפתחות אלה הוצגו יחד עם הסכימה של Modality Bridge.
+Audio משתמש ב־`modalityBridgeAudioEnabled`, `modalityBridgeAudioModel`,
+`modalityBridgeAudioTimeout` ו־`modalityBridgeAudioMaxClips`, בתוספת הגדרות
+ה־`modalityBridgeCache*` המשותפות. ל־Audio אין fallback למפתחות legacy מכיוון
+שמפתחות אלה הוצגו יחד עם סכמת Modality Bridge.
 
-וידאו משתמש ב-`modalityBridgeVideoEnabled`,‏ `modalityBridgeVideoAnalysisMode`,
+Video משתמש ב־`modalityBridgeVideoEnabled`, `modalityBridgeVideoAnalysisMode`,
 `modalityBridgeVideoModel`,
-`modalityBridgeVideoFrameCount`,‏ `modalityBridgeVideoSamplingPolicy`,
-`modalityBridgeVideoMaxVideos` וב-
-`modalityBridgeVideoTimeout`, יחד עם הגדרות `modalityBridgeCache*` המשותפות.
-הוא מושבת כברירת מחדל משום ש-FFmpeg/ffprobe הם תלויות תפעוליות אופציונליות,
-והוספת כיתובים לפריימים מגדילה את זמן ההשהיה ואת עלות המודל.
+`modalityBridgeVideoFrameCount`, `modalityBridgeVideoSamplingPolicy`,
+`modalityBridgeVideoMaxVideos` ו־
+`modalityBridgeVideoTimeout`, בתוספת הגדרות ה־`modalityBridgeCache*` המשותפות.
+הוא מושבת כברירת מחדל מכיוון ש־FFmpeg/ffprobe הם תלויות תפעוליות
+אופציונליות וכיתוב פריימים מוסיף השהייה ועלות מודל.
 
-## מנגנוני הגנה מותאמים אישית
+## מגני בטיחות מותאמים אישית
 
 ```typescript
 import { BaseGuardrail, guardrailRegistry } from "@/lib/guardrails";
@@ -763,11 +770,11 @@ guardrailRegistry.register(new BudgetGuardrail());
 
 שלבים:
 
-1. צרו את `src/lib/guardrails/myGuardrail.ts` כך שירחיב את `BaseGuardrail`.
-2. ממשו את `preCall` ו/או את `postCall`.
-3. בצעו רישום בזמן הייבוא (הוספה מתוך `registerDefaultGuardrails`) או
+1. צרו את `src/lib/guardrails/myGuardrail.ts` בהרחבת `BaseGuardrail`.
+2. ממשו את `preCall` ו/או `postCall`.
+3. רשמו בזמן הייבוא (push מתוך `registerDefaultGuardrails`) או
    קראו ל-`guardrailRegistry.register(...)` בזמן ריצה — הרישום מחליף
-   כל מנגנון הגנה קודם בעל אותו שם מנורמל.
+   כל מגן קודם בעל אותו שם מנורמל.
 4. הוסיפו בדיקות תחת `tests/unit/` (דוגמאות קיימות:
    `tests/unit/guardrails-registry.test.ts`,
    `tests/unit/prompt-injection-guard.test.ts`,
@@ -775,57 +782,58 @@ guardrailRegistry.register(new BudgetGuardrail());
 
 ## בדיקות
 
-השתמשו ב-`resetGuardrailsForTests()` בין הבדיקות כדי להתחיל ממצב ידוע.
-העבירו `{ registerDefaults: false }` כדי להתחיל עם רישום ריק ולרשום
-רק את מנגנוני ההגנה הנבדקים. Vision Bridge תומך בהזרקת תלויות
-(`deps.getSettings`, `deps.callVisionModel`); ‏Audio Bridge חושף נקודות חיבור
-מקבילות עבור הגדרות, יכולות, בחירת מודל STT, בדיקות פרטי גישה ותמלול.
-לכן הבדיקות יכולות להפעיל את שני התהליכים ללא גישה למסד נתונים
+השתמשו ב-`resetGuardrailsForTests()` בין בדיקות כדי להתחיל ממצב ידוע.
+העבירו `{ registerDefaults: false }` כדי להתחיל עם רישום ריק ולרשום רק
+את מגני הבטיחות שבבדיקה. Vision Bridge מקבל הזרקת תלויות
+(`deps.getSettings`, `deps.callVisionModel`); Audio Bridge חושף את נקודות
+התפר המקבילות עבור הגדרות, יכולות, בחירת מודל STT, בדיקות אישורים
+ותמלול. לכן הבדיקות יכולות לתרגל את שני הזרמים ללא גישה למסד נתונים
 או לרשת.
 
 ## ראו גם
 
 - `src/lib/guardrails/` — מימוש
-- `src/shared/utils/inputSanitizer.ts` — גלאי משותף שמפעיל
-  זיהוי הזרקת הנחיות ומיסוך PII
-- `src/shared/constants/visionBridgeDefaults.ts` — ברירות המחדל של Vision Bridge
-  ורשימת המודלים שבהם השימוש בגשר נכפה
-- `src/shared/constants/modalityBridgeDefaults.ts` — ברירות מחדל משותפות בזמן ריצה עבור Vision/Audio
-- `docs/architecture/RESILIENCE_GUIDE.md` — שכבה אורתוגונלית (מפסק זרם, תקופות צינון)
-- `docs/reference/ENVIRONMENT.md` — הפניה מלאה למשתני סביבה
+- `src/shared/utils/inputSanitizer.ts` — גלאי משותף המפעיל את זיהוי
+  הזרקת הפרומפטים ואת מיסוך ה-PII
+- `src/shared/constants/visionBridgeDefaults.ts` — ברירות המחדל של
+  Vision Bridge ורשימת המודלים של הגשר הכפוי
+- `src/shared/constants/modalityBridgeDefaults.ts` — ברירות מחדל משותפות של זמן ריצה עבור Vision/Audio
+- `docs/architecture/RESILIENCE_GUIDE.md` — שכבה אורתוגונלית (circuit breaker, תקופות צינון)
+- `docs/reference/ENVIRONMENT.md` — מקור מידע מלא על משתני סביבה
 
-## כיסוי נתיבים ובדיקות צוות אדום למנגנון ההגנה מפני הזרקה (שלב 8 · בלוק D)
+## כיסוי הנתיבים של מגן ההזרקה ורד-טים (שלב 8 · בלוק D)
 
-מנגנון ההגנה מפני הזרקה (`createInjectionGuard` / `withInjectionGuard`) מכסה את כל הנתיבים
-שמקבלים הנחיות משתמש. הוא מכבד את `INJECTION_GUARD_MODE` (ברירת המחדל `warn` = רישום בלבד;
-`block` = החזרת HTTP 400 עם `SECURITY_001`).
+מגן ההזרקה (`createInjectionGuard` / `withInjectionGuard`) מכסה את כל הנתיבים
+שמקבלים פרומפטים של משתמשים. הוא פועל לפי `INJECTION_GUARD_MODE` (ברירת מחדל `warn` = רישום בלבד;
+`block` = מחזיר HTTP 400 `SECURITY_001`).
 
 | סוג         | נתיבים                                                                                                                                               | מצב ברירת מחדל |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
 | טקסט (קיים) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | warn           |
-| יצירתי      | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn           |
+| גנרטיבי     | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn           |
 | נתונים      | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | warn           |
 
-חילוץ טקסט (`extractMessageContents`) מכסה את `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`.
+חילוץ הטקסט (`extractMessageContents`) מכסה את `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`.
 
-**צוות אדום (מדי לילה, `nightly-llm-security.yml`):** ‏promptfoo מאמת שכל נתיב חוסם
-את קורפוס OWASP-LLM כאשר `INJECTION_GUARD_MODE=block`; ‏garak מריץ בדיקות חדירה (ומדלג ללא סוד).
-`moderations` נכלל למען העקביות — מפעילים במצב חסימה יכולים להחריג אותו באמצעות
-`resolveDisabledGuardrails`.
+**רד-טים (לילי, `nightly-llm-security.yml`):** promptfoo מאמת שכל נתיב חוסם
+את קורפוס ה-OWASP-LLM תחת `INJECTION_GUARD_MODE=block`; garak מריץ probes (מדלג ללא secret).
+`moderations` נכלל לשם עקביות. מצב block הוא גבול מחייב: `evaluatePromptInjection()`
+מתעלם מרשימת ההשבתה לבקשה-בודדת שה-middleware מעביר לו, כך ש-`disabledGuardrails`
+**אינו** פוטר נתיב ממנו ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
 
-תהליך העבודה הלילי (`.github/workflows/nightly-llm-security.yml`, ‏cron + הפעלה ידנית)
-כולל שתי משימות:
+לתהליך העבודה הלילי (`.github/workflows/nightly-llm-security.yml`, cron + הפעלה
+ידנית) שתי עבודות (jobs):
 
-- **`promptfoo-guard` (חוסמת)** — מריצה את `promptfoo eval -c promptfooconfig.yaml`
-  עם `INJECTION_GUARD_MODE=block`. כל מקרה עוין (למשל "התעלם מכל
-  ההוראות הקודמות…", פריצות בסגנון DAN) מוודא שהתשובה מכילה
-  `error.code === "SECURITY_001"`, כלומר שמנגנון ההגנה אכן דחה את הבקשה.
-- **`garak` (מייעצת)** — מריצה את garak עם `--probes promptinject,dan,leakreplay`
-  מול מופע OmniRoute מקומי (`http://localhost:20128/v1`). ההרצה מותנית בסוד
-  של ספק (`PROMPTFOO_PROVIDER_KEY`); היא מדלגת בצורה תקינה בהיעדרו ומסתיימת בסיומת
-  `|| true`, כך שהיא מדווחת מבלי להכשיל את CI.
+- **`promptfoo-guard` (חוסם)** — מריץ `promptfoo eval -c promptfooconfig.yaml`
+  עם `INJECTION_GUARD_MODE=block`. כל מקרה עוין (למשל "ignore all
+  previous instructions…", פריצות-עקיפה בסגנון DAN) מוודא שהתגובה נושאת
+  `error.code === "SECURITY_001"`, כלומר שהמגן אכן דחה את הבקשה.
+- **`garak` (מייעץ)** — מריץ garak `--probes promptinject,dan,leakreplay`
+  כנגד מופע מקומי של OmniRoute (`http://localhost:20128/v1`). מותנה
+  ב-secret של הספק (`PROMPTFOO_PROVIDER_KEY`); מדלג באלגנטיות ומסומן בסיומת
+  `|| true`, כך שהוא מדווח מבלי להפיל את ה-CI.
 
-הכיסוי של פונקציית העזר של מנגנון ההגנה (`createInjectionGuard` / `withInjectionGuard`)
-משתרע על כל נתיב `/v1` שמכיל הנחיה; טקסט ההנחיה נשלף מתוך
-`messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` באמצעות
-`extractMessageContents()` שב-`src/shared/utils/inputSanitizer.ts`.
+כיסוי פונקציית העזר של המגן (`createInjectionGuard` / `withInjectionGuard`)
+משתרע על כל נתיב `/v1` הנושא פרומפט; טקסט הפרומפט נשלף מתוך
+`messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`
+באמצעות `extractMessageContents()` ב-`src/shared/utils/inputSanitizer.ts`.

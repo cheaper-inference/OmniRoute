@@ -1,6 +1,7 @@
 import { classifyHostLocality } from "@/server/authz/routeGuard";
 import { PEER_IP_HEADER } from "@/server/authz/headers";
 import { resolveStampedPeer } from "@/server/authz/peerStamp";
+import { getTrustProxyMode } from "./trustProxyMode";
 
 export type PublicOriginSource =
   "configured" | "trusted-forwarded" | "request-url" | "direct-local-host";
@@ -92,7 +93,7 @@ function sanitizeForwardedProto(proto: string | null): "http" | "https" | null {
   return null;
 }
 
-function sanitizeForwardedHost(host: string | null): string | null {
+export function sanitizeForwardedHost(host: string | null): string | null {
   const trimmed = host?.trim();
   if (!trimmed) return null;
   if (/[/\\\s\x00-\x1f\x7f]/.test(trimmed)) return null;
@@ -113,18 +114,8 @@ function sanitizeForwardedHost(host: string | null): string | null {
   }
 }
 
-function trustProxyMode(): "none" | "loopback" | "private" {
-  const raw = process.env.OMNIROUTE_TRUST_PROXY?.trim().toLowerCase();
-  if (!raw || ["0", "false", "none", "off", "no", "disable", "disabled"].includes(raw)) {
-    return "none";
-  }
-  if (["true", "1", "loopback"].includes(raw)) return "loopback";
-  if (raw === "private" || raw === "lan") return "private";
-  return "none";
-}
-
 export function trustsForwardedHeaders(request: Request): boolean {
-  const mode = trustProxyMode();
+  const mode = getTrustProxyMode();
   if (mode === "none") return false;
 
   const peer = resolveStampedPeer(

@@ -1,6 +1,6 @@
 # AgentBridge (العربية)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/AGENTBRIDGE.md) · 🇪🇹 [am](../../../am/docs/frameworks/AGENTBRIDGE.md) · 🇦🇿 [az](../../../az/docs/frameworks/AGENTBRIDGE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/AGENTBRIDGE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/AGENTBRIDGE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/AGENTBRIDGE.md) · 🇩🇰 [da](../../../da/docs/frameworks/AGENTBRIDGE.md) · 🇩🇪 [de](../../../de/docs/frameworks/AGENTBRIDGE.md) · 🇬🇷 [el](../../../el/docs/frameworks/AGENTBRIDGE.md) · 🇪🇸 [es](../../../es/docs/frameworks/AGENTBRIDGE.md) · 🇪🇪 [et](../../../et/docs/frameworks/AGENTBRIDGE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/AGENTBRIDGE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/AGENTBRIDGE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/AGENTBRIDGE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/AGENTBRIDGE.md) · 🇮🇱 [he](../../../he/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/AGENTBRIDGE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/AGENTBRIDGE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/AGENTBRIDGE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/AGENTBRIDGE.md) · 🇮🇩 [id](../../../id/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/AGENTBRIDGE.md) · 🇮🇹 [it](../../../it/docs/frameworks/AGENTBRIDGE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/AGENTBRIDGE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/AGENTBRIDGE.md) · 🇰🇭 [km](../../../km/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/AGENTBRIDGE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/AGENTBRIDGE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/AGENTBRIDGE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/AGENTBRIDGE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/AGENTBRIDGE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/AGENTBRIDGE.md) · 🇲🇲 [my](../../../my/docs/frameworks/AGENTBRIDGE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/AGENTBRIDGE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/AGENTBRIDGE.md) · 🇳🇴 [no](../../../no/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [or](../../../or/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/AGENTBRIDGE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/AGENTBRIDGE.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/AGENTBRIDGE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/AGENTBRIDGE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/AGENTBRIDGE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/AGENTBRIDGE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/AGENTBRIDGE.md) · 🇱🇰 [si](../../../si/docs/frameworks/AGENTBRIDGE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/AGENTBRIDGE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/AGENTBRIDGE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/AGENTBRIDGE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/AGENTBRIDGE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [te](../../../te/docs/frameworks/AGENTBRIDGE.md) · 🇹🇭 [th](../../../th/docs/frameworks/AGENTBRIDGE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/AGENTBRIDGE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/AGENTBRIDGE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/AGENTBRIDGE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/AGENTBRIDGE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/AGENTBRIDGE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/AGENTBRIDGE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/AGENTBRIDGE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/AGENTBRIDGE.md) · 🇪🇹 [am](../../../am/docs/frameworks/AGENTBRIDGE.md) · 🇦🇿 [az](../../../az/docs/frameworks/AGENTBRIDGE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/AGENTBRIDGE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/AGENTBRIDGE.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/AGENTBRIDGE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/AGENTBRIDGE.md) · 🇩🇰 [da](../../../da/docs/frameworks/AGENTBRIDGE.md) · 🇩🇪 [de](../../../de/docs/frameworks/AGENTBRIDGE.md) · 🇬🇷 [el](../../../el/docs/frameworks/AGENTBRIDGE.md) · 🇪🇸 [es](../../../es/docs/frameworks/AGENTBRIDGE.md) · 🇪🇪 [et](../../../et/docs/frameworks/AGENTBRIDGE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/AGENTBRIDGE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/AGENTBRIDGE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/AGENTBRIDGE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/AGENTBRIDGE.md) · 🇮🇱 [he](../../../he/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/AGENTBRIDGE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/AGENTBRIDGE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/AGENTBRIDGE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/AGENTBRIDGE.md) · 🇮🇩 [id](../../../id/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/AGENTBRIDGE.md) · 🇮🇹 [it](../../../it/docs/frameworks/AGENTBRIDGE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/AGENTBRIDGE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/AGENTBRIDGE.md) · 🇰🇭 [km](../../../km/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/AGENTBRIDGE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/AGENTBRIDGE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/AGENTBRIDGE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/AGENTBRIDGE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/AGENTBRIDGE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/AGENTBRIDGE.md) · 🇲🇲 [my](../../../my/docs/frameworks/AGENTBRIDGE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/AGENTBRIDGE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/AGENTBRIDGE.md) · 🇳🇴 [no](../../../no/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [or](../../../or/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/AGENTBRIDGE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/AGENTBRIDGE.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/AGENTBRIDGE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/AGENTBRIDGE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/AGENTBRIDGE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/AGENTBRIDGE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/AGENTBRIDGE.md) · 🇱🇰 [si](../../../si/docs/frameworks/AGENTBRIDGE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/AGENTBRIDGE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/AGENTBRIDGE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/AGENTBRIDGE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/AGENTBRIDGE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [te](../../../te/docs/frameworks/AGENTBRIDGE.md) · 🇹🇭 [th](../../../th/docs/frameworks/AGENTBRIDGE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/AGENTBRIDGE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/AGENTBRIDGE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/AGENTBRIDGE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/AGENTBRIDGE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/AGENTBRIDGE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/AGENTBRIDGE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/AGENTBRIDGE.md)
 
 ---
 
@@ -16,34 +16,34 @@ AgentBridge هو وكيل MITM (الرجل في المنتصف) الخاص بـ 
 
 ### ما هو AgentBridge؟
 
-عندما يُجري وكيل في بيئة تطوير متكاملة (مثل GitHub Copilot أو Cursor أو Claude Code) استدعاءً لواجهة API، فإنه يتصل مباشرةً بموفّر الذكاء الاصطناعي الرئيسي (OpenAI أو Anthropic أو غيرهما). يعترض AgentBridge هذا الاتصال بشفافية على مستوى TLS — من دون الحاجة إلى أي تغيير في إعدادات الوكيل — ويعيد كتابة الطلب ليمر عبر OmniRoute.
+عندما يقوم وكيل IDE (على سبيل المثال، GitHub Copilot، Cursor، Claude Code) بإجراء استدعاء API ، فإنه يتصل مباشرة بموفر AI الرئيسي (OpenAI، Anthropic، وما إلى ذلك). يعترض AgentBridge هذا الاتصال بشفافية على مستوى TLS - دون الحاجة إلى أي تغيير في تكوين الوكيل - ويعيد كتابة الطلب من خلال OmniRoute.
 
-وهذا يعني أنه يمكنك:
+هذا يعني أنه يمكنك:
 
-- **إعادة توجيه أي وكيل إلى أي موفّر**: هل يتواصل Copilot مع OpenAI؟ أعد توجيهه إلى Anthropic Claude أو Gemini أو أي موفّر من موفّري OmniRoute البالغ عددهم 352.
-- **تطبيق تعيينات النماذج**: `gemini-3-flash` ← `claude-sonnet-4.7` بشفافية على مستوى المعالج.
-- **مراقبة جميع حركات مرور الوكلاء**: يُنشر كل طلب معترض في [فاحص حركة المرور](./TRAFFIC_INSPECTOR.md).
-- **تطبيق إمكانات المرونة في OmniRoute**: يعمل التوجيه المجمّع وقواطع الدوائر وآليات الرجوع الاحتياطي وتتبع التكلفة أيضًا مع حركة مرور وكلاء بيئات التطوير المتكاملة.
+- **إعادة توجيه أي وكيل إلى أي مزود** : Copilot يتحدث إلى OpenAI؟ أعد توجيهه إلى Anthropic Claude أو Gemini أو أي من موفري OmniRoute الـ 377.
+- **تطبيق تعيينات النموذج** : `gemini-3-flash` → `claude-sonnet-4.7` بشفافية على مستوى المعالج.
+- **مراقبة كل حركة مرور الوكيل** : يتم نشر كل طلب يتم اعتراضه إلى [مفتش المرور](./TRAFFIC_INSPECTOR.md).
+- **تطبيق مرونة OmniRoute** : توجيه التحرير والسرد، وقواطع الدائرة، والاحتياطيات، وتتبع التكلفة لحركة مرور وكيل IDE أيضًا.
 
-### الموقع التنافسي مقارنةً بالسوق
+### تحديد المواقع مقابل السوق
 
-| الميزة                  | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity             |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot          |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)              |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex            |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE              |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries          |    —    |    ✓     |        —        |             ✓             |
-| Claude Code             |    —    |    —     |        ✓        |             ✓             |
-| Open Code               |    —    |    —     |        ✓        |             ✓             |
-| Trae                    |    —    |    —     |        —        |       🔍 قيد البحث        |
-| واجهة لوحة المعلومات    |    ✓    |    ✗     |        ✗        |             ✓             |
-| فاحص حركة المرور        |    ✗    |    ✗     |        ✓        |             ✓             |
-| توجيه OmniRoute         |    ✗    |    ✗     |        ✗        |             ✓             |
-| واجهة تعيين النماذج     |    ✗    |    ✗     |        ✗        |             ✓             |
-| قائمة التجاوز           |    ✗    |    ✗     |        ✓        |             ✓             |
-| شهادة CA للجهة الرئيسية |    ✗    |    ✗     |        ✓        |             ✓             |
+| ميزة                     | 9جهاز التوجيه | مكافحة واجهة برمجة التطبيقات | LLM-interceptor | **OmniRoute AgentBridge** |
+| ------------------------ | :-----------: | :--------------------------: | :-------------: | :-----------------------: |
+| Antigravity              |       ✓       |              ✓               |        —        |             ✓             |
+| GitHub Copilot           |       ✓       |              ✓               |        —        |             ✓             |
+| Kiro (AWS)               |       ✓       |              ✓               |        —        |             ✓             |
+| OpenAI Codex             |       —       |              ✓               |        —        |             ✓             |
+| Cursor IDE               |       ✓       |              ✓               |        —        |             ✓             |
+| صناعات Zed               |       —       |              ✓               |        —        |             ✓             |
+| كود Claude               |       —       |              —               |        ✓        |             ✓             |
+| افتح الكود               |       —       |              —               |        ✓        |             ✓             |
+| تراي                     |       —       |              —               |        —        |        🔍 التحقيق         |
+| لوحة القيادة UI          |       ✓       |              ✗               |        ✗        |             ✓             |
+| مفتش المرور              |       ✗       |              ✗               |        ✓        |             ✓             |
+| توجيه OmniRoute          |       ✗       |              ✗               |        ✗        |             ✓             |
+| رسم الخرائط النموذجية UI |       ✗       |              ✗               |        ✗        |             ✓             |
+| قائمة التجاوز            |       ✗       |              ✗               |        ✓        |             ✓             |
+| شهادة CA المنبع          |       ✗       |              ✗               |        ✓        |             ✓             |
 
 ---
 
@@ -189,68 +189,68 @@ AGENTBRIDGE_UPSTREAM_CA_CERT=/path/to/corporate-ca.pem
 
 استخدم بطاقة خادم AgentBridge في `/dashboard/tools/agent-bridge`:
 
-| الإجراء             | الوصف                                                                     |
-| ------------------- | ------------------------------------------------------------------------- |
-| تشغيل الخادم        | يشغّل `src/mitm/server.cjs` على المنفذ 443                                |
-| إيقاف الخادم        | يوقف العملية الفرعية بصورة سليمة                                          |
-| إعادة تشغيل الخادم  | إيقاف + تشغيل (لالتقاط تغييرات الوجهة)                                    |
-| الوثوق بالشهادة     | يثبّت `DATA_DIR/mitm/ca.crt` في مخزن الثقة لنظام التشغيل                  |
-| تنزيل الشهادة       | ينزّل `ca.crt` للتثبيت اليدوي                                             |
-| إعادة إنشاء الشهادة | ينشئ زوج مفاتيح جديدًا لسلطة التصديق (تُبطَل جميع شهادات الوكلاء الحالية) |
+| الإجراء             | الوصف                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| تشغيل الخادم        | يُشغّل `src/mitm/server.cjs` على المنفذ 443. ضمن نموذج المرجع المصدّق الجذري، يُنشئ `ca.crt` عند أول تشغيل ويضيف الشهادة النشطة إلى مخزن الثقة عند توفر كلمة مرور sudo                                                                                                                                                                                                                             |
+| إيقاف الخادم        | يُوقف العملية الفرعية بأمان                                                                                                                                                                                                                                                                                                                                                                        |
+| إعادة تشغيل الخادم  | إيقاف + تشغيل (لالتقاط تغييرات الوجهة والشهادة المُعاد إنشاؤها)                                                                                                                                                                                                                                                                                                                                    |
+| الوثوق بالشهادة     | يُثبّت الشهادة النشطة في مخزن الثقة لنظام التشغيل: `DATA_DIR/mitm/ca.crt` ضمن نموذج المرجع المصدّق الجذري، و`DATA_DIR/mitm/server.crt` في تثبيت الشهادة الطرفية القديم                                                                                                                                                                                                                             |
+| تنزيل الشهادة       | يُنزّل الشهادة النشطة لتثبيتها يدويًا (`omniroute-mitm-ca.crt` = `ca.crt`، أو `omniroute-mitm.crt` = `server.crt` في تثبيت الشهادة الطرفية القديم)                                                                                                                                                                                                                                                 |
+| إعادة إنشاء الشهادة | لا يُغيّر نموذج الشهادة مطلقًا. تثبيت الشهادة الطرفية القديم: يُنشئ `server.crt`/`server.key` جديدين (أعِد تشغيل الخادم لاستخدامهما). نموذج المرجع المصدّق الجذري: يُدوّر `ca.crt`/`ca.key`، ويُرفض ذلك أثناء تشغيل الخادم؛ تُزال الثقة أولًا من المرجع المصدّق القديم الموثوق به (يتطلب كلمة مرور sudo)، وإلا تُلغى عملية التدوير. يجب على العملاء الوثوق بالمرجع المصدّق الجديد مرة أخرى بعد ذلك |
 
 ### 3.2 الوثوق بالشهادة
 
-يجب أن يثق نظام التشغيل بشهادة سلطة التصديق الخاصة بـ AgentBridge قبل أن تقبل بيئات التطوير المتكاملة اتصال MITM.
+يجب أن يثق نظام التشغيل بشهادة المرجع المصدّق الخاصة بـ AgentBridge قبل أن تقبل بيئات التطوير المتكاملة اتصال MITM.
 
-**Linux (NSS — Chrome/Firefox):**
+**Linux ‏(NSS — Chrome/Firefox):**
 
 ```bash
 certutil -A -d sql:$HOME/.pki/nssdb -n "OmniRoute AgentBridge" -t CT,, -i ~/.omniroute/mitm/ca.crt
 ```
 
-**macOS (سلسلة المفاتيح):**
+**macOS ‏(Keychain):**
 
 ```bash
 sudo security add-trusted-cert -d -r trustRoot \
   -k /Library/Keychains/System.keychain ~/.omniroute/mitm/ca.crt
 ```
 
-**Windows (certmgr):**
+**Windows ‏(certmgr):**
 
 ```powershell
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-أو استخدم زر "الوثوق بالشهادة" في لوحة المعلومات (يشغّل الأمر المناسب لنظام التشغيل لديك، مع مطالبة sudo عند الحاجة).
+أو استخدم زر "الوثوق بالشهادة" في لوحة المعلومات (يُشغّل الأمر المناسب لنظام التشغيل لديك، مع مطالبة بإدخال كلمة مرور sudo عند الحاجة).
 
-#### تتجاهل بيئات التطوير المتكاملة المستندة إلى Electron مخزن الثقة لنظام التشغيل (`NODE_EXTRA_CA_CERTS`)
+#### تتجاهل بيئات التطوير المتكاملة المبنية على Electron مخزن الثقة لنظام التشغيل (`NODE_EXTRA_CA_CERTS`)
 
-تضم بعض بيئات التطوير المتكاملة — ولا سيما **Antigravity IDE**، وغيرها من التطبيقات المشتقة من Electron / VS Code —
-بيئة تشغيل Node.js خاصة بها **لا تستعلم من مخزن الثقة لنظام التشغيل** عند إجراء طلبات
-`fetch`/HTTPS الصادرة. تكفي الثقة بسلطة التصديق على مستوى نظام التشغيل/NSS للواجهة **الخلفية** الأصلية
-لبيئة التطوير المتكاملة (مثل خادم لغة Go الذي يستخدم حزمة سلطات التصديق لنظام التشغيل)، لكن **واجهة Electron الأمامية**
-ستظل تفشل في TLS — ويظهر ذلك على هيئة _تسجيل خروج_ من التطبيق أو عرض _"خطأ في الاتصال"_
-مع أن سجل MITM يبيّن أن استدعاءات التمهيد الخاصة بالواجهة الخلفية تُرجع `200`. يلزم تنفيذ خطوتين،
+تتضمن بعض بيئات التطوير المتكاملة — وأبرزها **Antigravity IDE**، وغيرها من التطبيقات المشتقة من Electron / VS Code —
+بيئة تشغيل Node.js خاصة بها **لا تستشير مخزن الثقة لنظام التشغيل** لاتصالات
+`fetch`/HTTPS الصادرة. يكفي الوثوق بالمرجع المصدّق على مستوى نظام التشغيل/NSS للواجهة **الخلفية** الأصلية لبيئة التطوير المتكاملة
+(مثل خادم لغة مكتوب بلغة Go يستخدم حزمة المراجع المصدّقة لنظام التشغيل)، لكن **واجهة Electron الأمامية** ستظل
+تفشل في TLS — ويظهر ذلك كما لو أن المستخدم قد _سُجّل خروجه_ من التطبيق أو كرسالة _"خطأ في الاتصال"_
+رغم أن سجل MITM يعرض استدعاءات التمهيد الخاصة بالواجهة الخلفية وهي تُرجع `200`. يلزم تنفيذ خطوتين،
 وكلتاهما مهمتان:
 
-1. وجّه بيئة التشغيل إلى سلطة التصديق صراحةً:
+1. وجّه بيئة التشغيل إلى المرجع المصدّق صراحةً:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
 2. **شغّل بيئة التطوير المتكاملة من تلك الصدفة.** لا يؤدي تشغيلها من أيقونة سطح المكتب / Dock / قائمة Start
-   إلى توريث متغيرات البيئة المصدّرة من الصدفة، كما لا يُطبَّق `~/.config/environment.d/*.conf` إلا بعد
-   تسجيل دخول رسومي جديد. أغلق بيئة التطوير المتكاملة بالكامل أولًا — فقفل المثيل الفردي في Electron يعني أن التشغيل
-   الثاني يركّز على العملية الحالية فحسب، ويُتجاهل متغير البيئة الجديد.
+   إلى توارث متغيرات الصدفة المصدّرة، ولا ينطبق `~/.config/environment.d/*.conf` إلا بعد
+   تسجيل دخول رسومي جديد. أغلق بيئة التطوير المتكاملة بالكامل أولًا — إذ يعني قفل النسخة المفردة في Electron أن التشغيل
+   الثاني لا يفعل سوى نقل التركيز إلى العملية الحالية، وبالتالي يتم تجاهل البيئة الجديدة.
 
-تظل خطوة الثقة على مستوى نظام التشغيل + NSS أعلاه ضرورية (إذ تقرأ حزمة شبكة Chromium التي تستخدمها بعض
-تدفقات المصادقة مخزن NSS الخاص بكل مستخدم، ولديها دبابيس ثابتة خاصة بها لـ `*.googleapis.com` يمكن
-لسلطة تصديق موثوق بها محليًا تجاوزها). يغطي `NODE_EXTRA_CA_CERTS` مسار `fetch` الخاص بـ Node إضافةً إلى ذلك.
+تظل خطوة الثقة على مستوى نظام التشغيل + NSS المذكورة أعلاه ضرورية (إذ تقرأ مكدسة شبكة Chromium التي تستخدمها بعض تدفقات
+المصادقة مخزن NSS الخاص بالمستخدم، ولديها عمليات تثبيت ثابتة خاصة بها لـ `*.googleapis.com` يتجاوزها
+مرجع مصدّق موثوق به محليًا). ويغطي `NODE_EXTRA_CA_CERTS` مسار `fetch` في Node بالإضافة إلى ذلك.
 
 ### 3.3 توجيه DNS
 
-لكل وكيل تريد اعتراضه، يجب أن تُحل أسماء مضيف API الخاص به إلى `127.0.0.1`. يدير AgentBridge إدخالات `/etc/hosts` تلقائيًا عند تبديل DNS لوكيل في معالج الإعداد.
+لكل وكيل تريد اعتراضه، يجب أن تُحل أسماء مضيفات واجهة API الخاصة به إلى `127.0.0.1`. يدير AgentBridge إدخالات `/etc/hosts` تلقائيًا عند تبديل DNS لأحد الوكلاء في معالج الإعداد.
 
-مثال على إدخالات `/etc/hosts` الخاصة بـ GitHub Copilot:
+مثال على إدخالات `/etc/hosts` لـ GitHub Copilot:
 
 ```
 127.0.0.1 api.githubcopilot.com
@@ -259,65 +259,74 @@ certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 
 ### 3.4 تعيين النماذج
 
-استخدم جدول تعيين النماذج في بطاقة كل وكيل لتعريف تعيينات المصدر → الوجهة:
+استخدم جدول تعيين النماذج في بطاقة كل وكيل لتعريف تعيينات المصدر ← الوجهة:
 
 | نموذج المصدر (الأصلي للوكيل) | نموذج الوجهة (OmniRoute) |
 | ---------------------------- | ------------------------ |
 | `gpt-4o`                     | `claude-sonnet-4.7`      |
 | `*` (حرف بدل)                | `claude-haiku-4.7`       |
 
-يعيّن حرف البدل `*` أي نموذج غير معروف إلى الوجهة المحددة. ويُحفَظ ذلك في جدول `agent_bridge_mappings`.
+يُعيّن حرف البدل `*` أي نموذج غير معروف إلى الوجهة المحددة. وتُحفظ التعيينات في جدول `agent_bridge_mappings`.
 
-> **تلميح — اكتشف معرّفات النماذج الحقيقية للوكيل.** قد ترسل بيئة التطوير المتكاملة أسماء نماذج تختلف عن
-> تسميات واجهتها، وقد تتغير هذه الأسماء بين الإصدارات الرئيسية. على سبيل المثال، يرسل **Antigravity 2**
+> **نصيحة — اكتشف معرّفات النماذج الفعلية للوكيل.** قد ترسل بيئة التطوير المتكاملة أسماء نماذج تختلف عن
+> التسميات الظاهرة في واجهتها، وقد تتغير هذه الأسماء بين الإصدارات الرئيسية. على سبيل المثال، يرسل **Antigravity 2**
 > القيم `gemini-3.1-pro-low` و`gemini-pro-agent` و`gemini-3.1-flash-lite` عبر الشبكة — وليس
-> `gemini-2.5-pro` الظاهر في الوثائق الأقدم. أرسل محادثة واحدة من دون تعيين مطابق: سيسجّل MITM
-> قيمة `model:` الواردة بالضبط ويمرر الطلب كما هو. عيّن تلك القيمة الحرفية، وحينها سيُعترض
-> الطلب التالي ويُوجَّه إلى وجهتك.
+> `gemini-2.5-pro` الظاهر في الوثائق القديمة. أرسل محادثة واحدة دون وجود تعيين مطابق: ستسجّل طبقة MITM
+> القيمة الواردة الدقيقة للحقل `model:` وتمرّر الطلب كما هو. عيّن تلك القيمة الحرفية، وعندئذٍ سيُعترض
+> الطلب التالي ويُوجَّه إلى هدفك.
 
-### 3.5 إشعار المخاطر
+### 3.5 إشعار بالمخاطر
 
-يعترض AgentBridge بيانات الاعتماد (رموز OAuth المميزة ومفاتيح API) التي تستخدمها بيئة التطوير المتكاملة للمصادقة لدى المزوّدين المنبعين. **تُخفى هذه البيانات قبل تسجيلها** (راجع §2.7)، لكنها تكون مرئية لطبقة MITM في OmniRoute. يعرض أول تفعيل لكل وكيل نافذة إشعار مخاطر يمكن إغلاقها.
+يعترض AgentBridge بيانات الاعتماد (رموز OAuth المميزة، ومفاتيح API) التي تستخدمها بيئة التطوير المتكاملة للمصادقة مع موفّري الخدمات الأساسيين. تُخفى هذه البيانات **قبل تسجيلها** (راجع §2.7)، لكنها تكون مرئية لطبقة MITM في OmniRoute. عند التفعيل الأول لكل وكيل، تظهر نافذة إشعار بالمخاطر يمكن إغلاقها.
 
 ### 3.6 الصيانة والتشخيص
 
-تعرض لوحة المعلومات بطاقة **الصيانة والتشخيص** (`AgentBridgeMaintenanceCard`، في `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) التي تُظهر مسارات MITM التشغيلية التي لم تكن لها واجهة مستخدم سابقًا. عنوانها الفرعي: _"اختبر ذاتيًا مسار الالتقاط، وتراجع عن حالة النظام المتبقية، وانقل إعدادك بين الأجهزة."_ توجد الدوال المساعدة للعميل الخاصة بالبطاقة في `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+تعرض لوحة المعلومات بطاقة **الصيانة والتشخيص** (`AgentBridgeMaintenanceCard`، في `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) التي تتيح مسارات MITM التشغيلية التي لم تكن لها واجهة مستخدم سابقًا. عنوانها الفرعي: _"اختبر مسار الالتقاط ذاتيًا، وتراجع عن حالة النظام المتبقية، وانقل إعدادك بين الأجهزة."_ توجد الدوال المساعدة للعميل الخاصة بالبطاقة في `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| الزر                | المسار                                 | وظيفته                                                                                                                                                                                          |
-| ------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **التشخيص**         | `GET /api/tools/agent-bridge/diagnose` | يشغّل الاختبار الذاتي لمسار الالتقاط ويعرض تقريرًا لكل فحص (✓/✗ + تلميح للمعالجة).                                                                                                              |
-| **الإصلاح**         | `POST /api/tools/agent-bridge/repair`  | يتراجع عن حالة نظام MITM المتروكة بسبب تعطل أو SIGKILL (إدخالات انتحال DNS، وشهادة CA الجذرية، ووكيل النظام). متكرر التنفيذ بأمان — يُبلغ بأنه «لا يوجد شيء لإصلاحه» عندما تكون الحالة سليمة.   |
-| **إزالة CA**        | `DELETE /api/tools/agent-bridge/cert`  | يلغي الثقة بشهادة CA الجذرية لـ MITM ويزيلها من مخزن الثقة في نظام التشغيل (إجراء صريح ومتكرر التنفيذ بأمان). يظهر فقط عندما تكون CA موثوقة حاليًا؛ ويتطلب تأكيدًا مضمّنًا «هل تريد إزالة CA؟». |
-| **تصدير الإعداد**   | `GET /api/tools/agent-bridge/config`   | ينزّل ملف JSON للإعداد القابل للنقل (راجع §3.7).                                                                                                                                                |
-| **استيراد الإعداد** | `POST /api/tools/agent-bridge/config`  | يرفع ملف JSON لإعداد تم تصديره مسبقًا (راجع §3.7).                                                                                                                                              |
+| الزر                  | المسار                                 | وظيفته                                                                                                                                                                                            |
+| --------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **تشخيص**             | `GET /api/tools/agent-bridge/diagnose` | يشغّل الاختبار الذاتي لمسار الالتقاط ويعرض تقريرًا لكل فحص (✓/✗ + تلميح للمعالجة).                                                                                                                |
+| **إصلاح**             | `POST /api/tools/agent-bridge/repair`  | يتراجع عن حالة نظام MITM اليتيمة (إدخالات انتحال DNS، وشهادة CA الجذرية، ووكيل النظام) التي خلّفها تعطل أو SIGKILL. العملية متكررة آمنة — ويعرض "لا يوجد ما يلزم إصلاحه" عندما تكون الحالة سليمة. |
+| **إزالة CA**          | `DELETE /api/tools/agent-bridge/cert`  | يلغي الثقة بشهادة CA الجذرية لـMITM ويزيلها من مخزن الثقة في نظام التشغيل (إجراء صريح ومتكرر آمن). يظهر فقط عندما تكون CA موثوقة حاليًا؛ ويتطلب تأكيدًا مضمنًا بعنوان "إزالة CA؟".                |
+| **تصدير الإعدادات**   | `GET /api/tools/agent-bridge/config`   | ينزّل ملف JSON المحمول للإعدادات (راجع §3.7).                                                                                                                                                     |
+| **استيراد الإعدادات** | `POST /api/tools/agent-bridge/config`  | يرفع ملف JSON للإعدادات جرى تصديره سابقًا (راجع §3.7).                                                                                                                                            |
 
-**فحوصات التشخيص** (`summarizeDiagnostics()` في `src/mitm/inspector/diagnostics.ts`). يشغّل المسار الاستقصاء ذا التأثيرات الجانبية لكل فحص ويمرر القيم المنطقية إلى أداة التلخيص النقية؛ ثم يُرجع حكمًا واحدًا باسم `healthy` مع تلميح لكل حالة فشل:
+تحتوي كل بطاقة وكيل أيضًا على زر **استعادة الإعداد الافتراضي** الخاص بها (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) — وهو إجراء تراجع بنقرة واحدة لكل وكيل، يلغي انتحال مضيفي
+ذلك الوكيل فقط، ويمسح تعيينات النماذج المحفوظة، ويعيد تعيين حالة `dns_enabled`/`setup_completed`
+الخاصة به، بحيث تتصل بيئة التطوير المتكاملة مجددًا بالخدمة الأساسية الحقيقية بعد إعادة تشغيلها بالكامل. ولا يؤثر ذلك في
+خادم MITM المشترك أو شهادة CA الجذرية (فقد تظل الوكلاء الأخرى تعتمد عليهما) — إذ يظلان متاحين
+عبر بطاقة الخادم وإجراء **إزالة CA** أعلاه. وفي Windows، ينفّذ أيضًا، بأفضل جهد ممكن،
+`ipconfig /flushdns`، لأن عميل DNS في Windows يخزّن إدخالات ملف hosts مؤقتًا ولن يتجاهل
+إدخال انتحال أُزيل للتو بخلاف ذلك.
 
-| اسم الفحص          | ما يتحقق منه                                                | التلميح عند الفشل                                                                                                                                     |
-| ------------------ | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | عملية خادم MITM نشطة                                        | «خادم MITM لا يعمل. شغّله من علامة تبويب AgentBridge.»                                                                                                |
-| `server-reachable` | خادم MITM يقبل الاتصالات على منفذه (فحص TCP)                | «خادم MITM لا يقبل الاتصالات على منفذه. تحقق من أن المنفذ متاح وأن لديك صلاحيات الربط به.»                                                            |
-| `cert-exists`      | تم إنشاء شهادة MITM على القرص                               | «لم يتم إنشاء شهادة MITM بعد. أنشئ واحدة من علامة تبويب AgentBridge.»                                                                                 |
-| `cert-trusted`     | شهادة CA الجذرية لـ MITM موجودة في مخزن الثقة لنظام التشغيل | «شهادة CA الجذرية لـ MITM غير موثوقة في مخزن نظام التشغيل، ولذلك سيفشل اعتراض TLS. امنح الشهادة الثقة من علامة تبويب AgentBridge.»                    |
-| `dns-configured`   | أسماء المضيفين المستهدفة منتحلة في `/etc/hosts`             | «أسماء المضيفين المستهدفة غير منتحلة في /etc/hosts، ولذلك لا تصل حركة المرور إلى الوكيل مطلقًا. فعّل DNS للوكيل أو الوكلاء الذين تريد التقاط حركتهم.» |
+**فحوص التشخيص** (`summarizeDiagnostics()` في `src/mitm/inspector/diagnostics.ts`). يشغّل المسار الفحص ذا التأثيرات الجانبية لكل منها، ويمرّر القيم المنطقية إلى دالة التلخيص الخالصة؛ ثم يعيد حكمًا واحدًا باسم `healthy` مع تلميح لكل حالة فشل:
 
-**شعار الحالة المتروكة:** عندما تكتشف الصفحة حالة متروكة بسبب تعطل (انتحال DNS /‏ CA / وكيل النظام)، تعرض البطاقة شعارًا كهرمانيًا — _«تركت جلسة سابقة حالةً في النظام (انتحال DNS أو CA أو وكيل النظام). شغّل الإصلاح لتنظيفها.»_ — وتبرز زر **الإصلاح**. يمثّل `Repair` النظير على مستوى التطبيق للعلامة `--cleanup` الخاصة بـ ProxyBridge (إذ يفوّض المهمة إلى `repairMitm()` في `src/mitm/manager.ts`).
+| اسم الفحص          | ما يتحقق منه                                                 | التلميح عند الفشل                                                                                                                                        |
+| ------------------ | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | عملية خادم MITM نشطة                                         | "خادم MITM لا يعمل. شغّله من علامة تبويب AgentBridge."                                                                                                   |
+| `server-reachable` | يقبل خادم MITM الاتصالات على منفذه (فحص TCP)                 | "لا يقبل خادم MITM الاتصالات على منفذه. تحقق من أن المنفذ متاح ومن امتلاكك صلاحيات الربط به."                                                            |
+| `cert-exists`      | جرى إنشاء شهادة MITM على القرص                               | "لم تُنشأ أي شهادة MITM بعد. أنشئ واحدة من علامة تبويب AgentBridge."                                                                                     |
+| `cert-trusted`     | شهادة CA الجذرية لـMITM موجودة في مخزن الثقة في نظام التشغيل | "شهادة CA الجذرية لـMITM غير موثوقة في مخزن نظام التشغيل، ولذلك سيفشل اعتراض TLS. امنح الشهادة الثقة من علامة تبويب AgentBridge."                        |
+| `dns-configured`   | أسماء المضيفين المستهدفين منتحلة في `/etc/hosts`             | "أسماء المضيفين المستهدفين غير منتحلة في /etc/hosts، ولذلك لا تصل حركة البيانات إلى الوكيل. فعّل DNS للوكيل أو الوكلاء الذين تريد التقاط حركة بياناتهم." |
 
-> تُترك شهادة CA الجذرية لـ MITM مثبتةً عبر عمليات الإيقاف/التشغيل لتجنب مطالبات sudo
-> المتكررة (وهو السلوك نفسه في mitmproxy/Charles)، ولذلك فإن إزالتها تتم عبر إجراء
-> **إزالة CA** صريح بدلًا من حدوث ذلك تلقائيًا عند الإيقاف.
+**شريط الحالة اليتيمة:** عندما تكتشف الصفحة حالة خلّفها تعطل (انتحال DNS أو CA أو وكيل النظام)، تعرض البطاقة شريطًا كهرمانيًا — _"خلّفت جلسة سابقة حالة في النظام (انتحال DNS أو CA أو وكيل النظام). شغّل «إصلاح» لتنظيفها."_ — وتُبرز زر **إصلاح**. يُعد `Repair` النظير على طبقة التطبيق للعلامة `--cleanup` في ProxyBridge (إذ يفوّض التنفيذ إلى `repairMitm()` في `src/mitm/manager.ts`).
 
-### 3.7 استيراد/تصدير الإعداد القابل للنقل
+> تظل شهادة CA الجذرية الخاصة بـ MITM مثبّتة عبر عمليات الإيقاف/التشغيل لتجنب مطالبات sudo
+> المتكررة (وهو السلوك نفسه المتبع في mitmproxy/Charles)، لذا فإن إزالتها تتم عبر إجراء صريح
+> باسم **إزالة CA** بدلًا من حدوث ذلك تلقائيًا عند الإيقاف.
 
-يستطيع AgentBridge إجراء تسلسل للحالة **القابلة للضبط بواسطة المشغّل** في كتلة JSON ذات إصدار محدد، بحيث يمكن نسخ الإعداد عبر الأجهزة. أداة التسلسل هي `src/lib/inspector/configPortability.ts` ‏(`exportConfig()` / `importConfig()`)، ويجري التحقق منها بواسطة `AgentBridgeConfigSchema`.
+### 3.7 استيراد/تصدير الإعدادات القابلة للنقل
 
-يتضمن التصدير ثلاثة أجزاء بالضبط (لا يتم تصدير الإعدادات الافتراضية المضمّنة **عمدًا**، بحيث لا يؤدي الاستيراد مطلقًا إلى تكرارها أو التعارض معها):
+يمكن لـ AgentBridge إجراء تسلسل للحالة **القابلة للضبط بواسطة المشغّل** وتحويلها إلى كتلة JSON ذات إصدار، بحيث يمكن تكرار الإعداد عبر أجهزة متعددة. توجد أداة إجراء التسلسل في `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`)، ويجري التحقق منها بواسطة `AgentBridgeConfigSchema`.
 
-| الحقل            | المصدر                                                            | ملاحظات                                                         |
-| ---------------- | ----------------------------------------------------------------- | --------------------------------------------------------------- |
-| `bypassPatterns` | أنماط التجاوز المعرّفة من المستخدم (`agent_bridge_bypass`)        | تُستبعد الأنماط الافتراضية الخاصة بالمصارف/الجهات الحكومية/okta |
-| `customHosts`    | المضيفون المخصصون في Traffic Inspector (`inspector_custom_hosts`) | كل عنصر: `{ host, kind: "llm"\|"app"\|"custom", label? }`       |
-| `agentMappings`  | تعيينات النماذج لكل وكيل (`agent_bridge_mappings`)                | `{ [agentId]: [{ source, target }] }` لكل وكيل لديه تعيينات     |
+يتضمن التصدير ثلاثة أجزاء بالضبط (الإعدادات الافتراضية المضمنة **لا** يتم تصديرها عمدًا، لذا لا يؤدي الاستيراد مطلقًا إلى تكرارها أو التعارض معها):
+
+| الحقل            | المصدر                                                            | ملاحظات                                                     |
+| ---------------- | ----------------------------------------------------------------- | ----------------------------------------------------------- |
+| `bypassPatterns` | أنماط التجاوز المحددة من المستخدم (`agent_bridge_bypass`)         | تُستبعد أنماط bank/gov/okta الافتراضية                      |
+| `customHosts`    | المضيفون المخصصون في Traffic Inspector (`inspector_custom_hosts`) | كل عنصر: `{ host, kind: "llm"\|"app"\|"custom", label? }`   |
+| `agentMappings`  | تعيينات النماذج لكل وكيل (`agent_bridge_mappings`)                | `{ [agentId]: [{ source, target }] }` لكل وكيل لديه تعيينات |
 
 ```jsonc
 // GET /api/tools/agent-bridge/config
@@ -331,13 +340,13 @@ certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 }
 ```
 
-**سلوك الاستيراد** (`POST /api/tools/agent-bridge/config`): تحل أنماط التجاوز والتعيينات الخاصة بكل وكيل **محل القيم السابقة بالكامل**؛ بينما تُضاف أسماء المضيفين المخصصة **بشكل متكرر التنفيذ بأمان** (`INSERT OR IGNORE`). توضح الاستجابة عدد العناصر التي تم تطبيقها من كل نوع:
+**سلوك الاستيراد** (`POST /api/tools/agent-bridge/config`): تُستبدل أنماط التجاوز والتعيينات الخاصة بكل وكيل **بالكامل**؛ ويُضاف المضيفون المخصصون **بطريقة تكرارية آمنة** (`INSERT OR IGNORE`). وتوضح الاستجابة عدد العناصر التي تم تطبيقها من كل نوع:
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-ما **لا** يتضمنه ملف الإعدادات: حالة تشغيل الخادم، ومسارات الشهادات، وحالة DNS لكل وكيل، ومسار مرجع التصديق (CA) الرئيسي، وإعدادات TPROXY — فهذه حالات خاصة بالمضيف/وقت التشغيل، وليست تفضيلات قابلة للنقل.
+ما **لا** تتضمنه الإعدادات: حالة تشغيل الخادم، ومسارات الشهادات، وحالة DNS الخاصة بكل وكيل، ومسار CA الصادر من المنبع، وإعدادات TPROXY — فهذه تمثل حالة المضيف/وقت التشغيل وليست تفضيلات قابلة للنقل.
 
 ---
 
@@ -497,37 +506,38 @@ ipconfig /flushdns
 
 ## §7 مرجع API
 
-جميع المسارات من النوع `LOCAL_ONLY` (مقتصرة على واجهة الاسترجاع، ويُفرض ذلك قبل المصادقة) و`SPAWN_CAPABLE`. راجع `src/server/authz/routeGuard.ts`.
+جميع المسارات هي `LOCAL_ONLY` (مقتصرة على واجهة loopback، ويُفرَض ذلك قبل المصادقة) و`SPAWN_CAPABLE`. راجع `src/server/authz/routeGuard.ts`.
 
 المسار الأساسي: `/api/tools/agent-bridge/`
 
 | الطريقة             | المسار                                         | الوصف                                                                                                                     |
 | ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | حالة الخادم العامة + حالة الكشف/التشغيل لكل وكيل                                                                          |
-| GET                 | `/api/tools/agent-bridge/agents`               | سرد الوكلاء المسجّلين (المعرّف، الاسم، المضيفون، قابلية التشغيل، الحالة)                                                  |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | حالة وكيل واحد (إعدادات الهدف + الكشف + الحالة المخزّنة)                                                                  |
+| GET                 | `/api/tools/agent-bridge/state`                | حالة الخادم العامة + حالة الاكتشاف/التشغيل لكل وكيل                                                                       |
+| GET                 | `/api/tools/agent-bridge/agents`               | عرض الوكلاء المسجّلين (المعرّف، الاسم، المضيفون، قابلية الاستخدام، الحالة)                                                |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | حالة وكيل واحد (إعدادات الهدف + الاكتشاف + الحالة المخزّنة)                                                               |
 | PATCH               | `/api/tools/agent-bridge/agents/{id}`          | تحديث `setup_completed` للوكيل                                                                                            |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | تشغيل فحص الكشف للوكيل (`installed`، `version?`، `path?`)                                                                 |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | تشغيل فحص اكتشاف للوكيل (`installed`، و`version?`، و`path?`)                                                              |
 | POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | تمكين/تعطيل DNS للوكيل (`{enabled: boolean}`)                                                                             |
 | GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | تعيينات النماذج للوكيل                                                                                                    |
 | PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | استبدال تعيينات النماذج                                                                                                   |
-| POST                | `/api/tools/agent-bridge/server`               | بدء/إيقاف/إعادة تشغيل الخادم (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                      |
-| GET                 | `/api/tools/agent-bridge/cert`                 | حالة الشهادة (`exists`، `trusted`، `path`)                                                                                |
-| POST                | `/api/tools/agent-bridge/cert`                 | الوثوق بسلطة الشهادات الجذرية لـ MITM (تثبيتها)                                                                           |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | إلغاء الوثوق بسلطة الشهادات الجذرية لـ MITM (إزالتها) — عملية متكررة آمنة (راجع §3.6)                                     |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | إعادة إنشاء شهادة MITM ذاتية التوقيع                                                                                      |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | بث شهادة PEM لتنزيلها                                                                                                     |
-| GET                 | `/api/tools/agent-bridge/bypass`               | سرد أنماط التجاوز (`default` + `user`)                                                                                    |
-| POST                | `/api/tools/agent-bridge/bypass`               | استبدال أنماط التجاوز المحددة من المستخدم بالكامل                                                                         |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | إزالة نمط تجاوز واحد محدد من المستخدم                                                                                     |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | استعادة الإعداد الافتراضي: إلغاء انتحال DNS لهذا الوكيل، ومسح تعييناته، وإعادة تعيين حالته (راجع §3.6)                    |
+| POST                | `/api/tools/agent-bridge/server`               | تشغيل/إيقاف/إعادة تشغيل الخادم (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                    |
+| GET                 | `/api/tools/agent-bridge/cert`                 | حالة الشهادة (`exists`، و`trusted`، و`path`)                                                                              |
+| POST                | `/api/tools/agent-bridge/cert`                 | الوثوق بالمرجع المصدّق الجذري لـ MITM (تثبيته)                                                                            |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | إلغاء الوثوق بالمرجع المصدّق الجذري لـ MITM (إزالته) — عملية تكرارية آمنة (راجع §3.6)                                     |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | إعادة إنشاء الشهادة النشطة دون تغيير نموذج الشهادات (شهادة طرفية قديمة، أو تدوير المرجع المصدّق الجذري — راجع §3.1)       |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | بث شهادة PEM النشطة لتنزيلها (`ca.crt` ضمن نموذج المرجع المصدّق الجذري، و`server.crt` في تثبيت يستخدم شهادة طرفية قديمة)  |
+| GET                 | `/api/tools/agent-bridge/bypass`               | عرض أنماط التجاوز (`default` + `user`)                                                                                    |
+| POST                | `/api/tools/agent-bridge/bypass`               | استبدال جميع أنماط التجاوز المعرّفة من المستخدم                                                                           |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | إزالة نمط تجاوز واحد معرّف من المستخدم                                                                                    |
 | GET                 | `/api/tools/agent-bridge/diagnose`             | اختبار ذاتي لمسار الالتقاط (راجع §3.6)                                                                                    |
 | POST                | `/api/tools/agent-bridge/repair`               | التراجع عن حالة نظام MITM اليتيمة (راجع §3.6)                                                                             |
 | GET                 | `/api/tools/agent-bridge/config`               | تصدير إعدادات JSON قابلة للنقل (راجع §3.7)                                                                                |
 | POST                | `/api/tools/agent-bridge/config`               | استيراد إعدادات JSON قابلة للنقل (راجع §3.7)                                                                              |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | الحصول على مسار سلطة الشهادات المنبع المُعدّ                                                                              |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | التحقق من مسار سلطة الشهادات المنبع وحفظه                                                                                 |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | التحقق فقط (تشغيل تجريبي) من مسار سلطة شهادات منبع — دون حفظه                                                             |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | وضع الالتقاط لفك التشفير الشفاف عبر TPROXY — راجع `docs/security/MITM-TPROXY-DECRYPT.md` (ضمن git؛ غير مُضمّن في `/docs`) |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | الحصول على مسار المرجع المصدّق الرئيسي المُعدّ                                                                            |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | التحقق من مسار المرجع المصدّق الرئيسي وحفظه                                                                               |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | التحقق فقط (تشغيل تجريبي) من مسار مرجع مصدّق رئيسي — دون حفظ                                                              |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | وضع الالتقاط لفك التشفير الشفاف عبر TPROXY — راجع `docs/security/MITM-TPROXY-DECRYPT.md` (في git؛ غير مُضمَّن في `/docs`) |
 
 مخططات OpenAPI الكاملة: `docs/openapi.yaml` ← الوسم `AgentBridge`.
 

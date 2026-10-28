@@ -1,6 +1,6 @@
 # RTK Compression (עברית)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
 
 ---
 
@@ -27,24 +27,24 @@ RTK במקור מדווח על חיסכון של `60-90%` בפלט פקודות.
 טווח:          1 - (1 - 0.60..0.90) * (1 - 0.46) = חיסכון של 78.4-94.6%
 ```
 
-## מה נדחס
+## מה הוא מכווץ
 
-הקטלוג המובנה כולל כעת 49 מסננים בקטגוריות הבאות:
+הקטלוג המובנה כולל כעת 56 מסננים בקטגוריות הבאות:
 
 | קטגוריה   | דוגמאות                                                       |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, בדיקות Go, בדיקות Cargo     |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, בדיקות Cargo   |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, יומני מעטפת כלליים                      |
+| `shell`   | `ls`, `find`, `grep`, יומני shell גנריים                      |
 | `docker`  | `docker ps`, יומני Docker                                     |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | פלט JSON, מעקבי מחסנית, מסנן ברירת מחדל לפלט כללי             |
+| `generic` | פלט JSON, מעקבי מחסנית, מסלול גיבוי לפלט גנרי                 |
 
-המזהה שב-`open-sse/services/compression/engines/rtk/commandDetector.ts` מסווג את הפלט
-לפני בחירת המסנן. מסננים יכולים גם לבצע התאמה לפי תבנית פקודה או ביטוי רגולרי של פלט כאשר סיווג
-פקודה אינו מספיק.
+הגלאי ב-`open-sse/services/compression/engines/rtk/commandDetector.ts` מסווג את הפלט
+לפני בחירת המסנן. מסננים יכולים גם להתאים לפי תבנית פקודה או ביטוי רגולרי של הפלט
+כאשר מחלקת הפקודה לבדה אינה מספיקה.
 
 ## פתרון מסננים
 
@@ -354,15 +354,15 @@ node --import tsx/esm --test \
 
 ## רמות עוצמה (v3.8.16+)
 
-RTK תומך ב-**3 רמות עוצמה** שמאזנות בין **אגרסיביות הדחיסה** לבין **בטיחות**. הרמה מוגדרת באמצעות `config.intensity` בתצורת המנוע.
+RTK תומך ב-**3 רמות עוצמה** היוצרות איזון בין **אגרסיביות הדחיסה** לבין **בטיחות**. הרמה נקבעת דרך `config.intensity` בתצורת המנוע.
 
 ### 3 הרמות
 
-| רמה                     | סף קיטום          | חיסכון באסימונים | סיכון     | מתאים במיוחד עבור          |
-| ----------------------- | ----------------- | ---------------- | --------- | -------------------------- |
-| `minimal`               | 24 שורות לכל מקטע | ~20-40%          | נמוך מאוד | ייצור עם הקשר קריטי        |
-| `standard` (ברירת מחדל) | 24 שורות לכל מקטע | ~50-70%          | נמוך      | הפעלות תכנות יומיות        |
-| `aggressive`            | 16 שורות לכל מקטע | ~70-90%          | בינוני    | הפעלות ארוכות, חיסכון מרבי |
+| רמה                     | סף קיטום          | חיסכון בטוקנים | סיכון     | מתאים במיוחד עבור            |
+| ----------------------- | ----------------- | -------------- | --------- | ---------------------------- |
+| `minimal`               | 24 שורות לכל מקטע | ~20-40%        | נמוך מאוד | סביבת ייצור עם הקשר קריטי    |
+| `standard` (ברירת מחדל) | 24 שורות לכל מקטע | ~50-70%        | נמוך      | סשנים יומיומיים של כתיבת קוד |
+| `aggressive`            | 16 שורות לכל מקטע | ~70-90%        | בינוני    | סשנים ארוכים, חיסכון מקסימלי |
 
 ### היכן מתבצע הקיטום
 
@@ -374,39 +374,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-גם **ההתחלה** וגם **הסוף** של כל מקטע נשמרים; התוכן שבאמצע מושמט כאשר הקיטום מופעל.
+ה**חלק העליון** וה**חלק התחתון** של כל מקטע נשמרים; התוכן שבאמצע מושמט כאשר הקיטום נכנס לפעולה.
 
-### מה נשאר לעומת מה שנחתך
+### מה נשמר לעומת מה נחתך
 
 | תוכן                     | minimal  | standard | aggressive |
 | ------------------------ | -------- | -------- | ---------- |
-| שגיאות / עקבות מחסנית    | ✅ נשמר  | ✅ נשמר  | ✅ נשמר    |
-| כישלונות בדיקות          | ✅ נשמר  | ✅ נשמר  | ✅ נשמר    |
-| שגיאות בנייה             | ✅ נשמר  | ✅ נשמר  | ✅ נשמר    |
+| שגיאות / מעקבי מחסנית    | ✅ נשמר  | ✅ נשמר  | ✅ נשמר    |
+| כשלונות בבדיקות          | ✅ נשמר  | ✅ נשמר  | ✅ נשמר    |
+| שגיאות build             | ✅ נשמר  | ✅ נשמר  | ✅ נשמר    |
 | בדיקות שעברו (פלט מפורט) | ✅ נשמר  | 🟡 מכווץ | 🟡 מכווץ   |
-| פלט שגרתי (יומני מידע)   | 🟡 מכווץ | 🟡 מכווץ | ❌ מושמט   |
+| פלט שגרתי (לוגי מידע)    | 🟡 מכווץ | 🟡 מכווץ | ❌ מושמט   |
 | פסי התקדמות              | 🟡 מכווץ | ❌ מושמט | ❌ מושמט   |
-| כרזה / אמנות ASCII       | 🟡 מכווץ | ❌ מושמט | ❌ מושמט   |
+| באנר / אמנות ASCII       | 🟡 מכווץ | ❌ מושמט | ❌ מושמט   |
 
-### בחירת העוצמה הנכונה
+### בחירת רמת העוצמה המתאימה
 
 ```
-                  האם אובדן הקשר יהיה הרסני?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     כן          לא         לא בטוחים
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      עד כמה קריטי    נסו תחילה את `standard`
-      │      קצב העיבוד?     (מתאים ל-80% מן
-      │           │          המקרים)
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │    נמוך       גבוה
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -414,9 +414,9 @@ config.intensity === "aggressive" ? 16 : 24,
       └──────┴─────────┘
 ```
 
-### הגדרת העוצמה
+### קביעת רמת העוצמה
 
-**לכל שילוב** (בתצורת השילוב):
+**לפי קומבו** (בתצורת הקומבו):
 
 ```json
 {
@@ -431,9 +431,9 @@ config.intensity === "aggressive" ? 16 : 24,
 
 **באופן תכנותי**:
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) הוא
-`CompressionEngine` ואין לו מתודת `updateConfig`. במקום זאת, עדכנו את תצורת המנוע
-באמצעות כלי העזר של הרישום:
+`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) הוא מסוג
+`CompressionEngine` ואין לו מתודת `updateConfig`. במקום זאת, יש לעדכן את תצורת
+המנוע דרך פונקציית העזר של ה-registry:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -441,16 +441,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### אימות ההשפעה
+### בדיקת ההשפעה
 
-השתמשו ב-**שער האימות** (ראו להלן) כדי לוודא שהמסנן בטוח בעוצמה שבחרתם:
+השתמשו ב-**Verify Gate** (ראו להלן) כדי לוודא שהמסנן שלכם בטוח ברמת העוצמה שבחרתם:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("המסננים נכשלו בעוצמה אגרסיבית");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

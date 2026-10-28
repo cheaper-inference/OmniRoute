@@ -1,6 +1,6 @@
 # OmniRoute A2A Server Documentation (Magyar)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
 
 ---
 
@@ -47,7 +47,7 @@ HTTP 503 választ adnak a `-32000` JSON-RPC hibakóddal.
 
 ### `message/send` — Szinkron végrehajtás
 
-Üzenetet küld egy készségnek, és megvárja a teljes választ.
+Üzenetet küld egy képességnek, és megvárja a teljes választ.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+A `smart-routing` esetében a `metadata.combo` a `metadata.model` explicit felülbírálása az átjárókérésben; a rendszer a tényleges `model` értékeként küldi el, nem pedig figyelmen kívül hagyott `x-combo` JSON-mezőként. Az átjáró szokásos API-kulcsos és célpontonkénti engedélyezése továbbra is érvényes. Az érvénytelen vagy üres kombinációt a rendszer elutasítja.
+
+Az eredmény tartalmazza a `requested_combo` (a hívó szándéka), a `dispatched_model` (az átjárónak ténylegesen küldött kérés), a `response_model` (az átjáró válasza) és a `confirmed_combo` mezőket. Az utolsó mező értéke `null`, kivéve, ha az átjáró kifejezetten azonosít egy kombinációt. Az A2A döntési naplók csak megerősített kombinációhoz rendelik hozzá a végrehajtást, a meg nem erősített kérést pedig `requestedCombo` értékként őrzik meg.
+
 **Válasz:**
 
 ```json
@@ -76,22 +80,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -146,33 +143,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Elérhető képességek
+## Rendelkezésre álló készségek
 
-Az OmniRoute 6 A2A-képességet tesz elérhetővé, amelyek a `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` fájlban vannak bekötve. Minden képességmodul a `src/lib/a2a/skills/` könyvtárban található.
+OmniRoute 6 A2A képességet tesz közzé `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ben. Minden készségmodul `src/lib/a2a/skills/` ben található.
 
-| Képesség                 | ID                   | Leírás                                                                                                                                                                           | Címkék                            | Példák                                           |
-| :----------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- | :----------------------------------------------- |
-| Intelligens útválasztás  | `smart-routing`      | Az OmniRoute kombinációs motorja és pontozása segítségével az optimális szolgáltatón vagy kombináción keresztül továbbít egy promptot                                            | útválasztás, szolgáltatók         | „Irányítsd ezt a promptot a legjobb modellen át” |
-| Kvótakezelés             | `quota-management`   | Jelenti a szolgáltatónkénti kvótaállapotot, és segít a hívóknak eldönteni, mikor kell korlátozni vagy szolgáltatót váltani                                                       | kvóta, szolgáltatók               | „Ellenőrizd az anthropic kvótáját”               |
-| Szolgáltatók felderítése | `provider-discovery` | Felsorolja a telepített szolgáltatókat a képességeikkel, az ingyenes csomagra vonatkozó jelzőkkel és az OAuth-állapottal                                                         | szolgáltatók, felderítés          | „Milyen szolgáltatók érhetők el?”                |
-| Költségelemzés           | `cost-analysis`      | A katalógus és a közelmúltbeli használat alapján megbecsüli egy kérés vagy beszélgetés költségét                                                                                 | költség, használat                | „Becsüld meg ennek a beszélgetésnek a költségét” |
-| Állapotjelentés          | `health-report`      | Szolgáltatónként összesíti az áramkör-megszakító, a várakozási idő és a kizárás állapotát                                                                                        | állapot, reziliencia              | „Mutasd az összes szolgáltató állapotát”         |
-| Képességek listázása     | `list-capabilities`  | Egy markdown-táblázatként adja vissza a teljes, 45 elemből álló Agent Skills-katalógust (23 API + 21 CLI + 1 konfiguráció), nyers SKILL.md URL-ekkel a kontextus beillesztéséhez | katalógus, felderítés, képességek | „Sorold fel az OmniRoute összes képességét”      |
+| Ügyesség                | ID                   | Leírás                                                                                                                                                                           | Címkék                           | Példák                                                   |
+| :---------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------------------- |
+| Intelligens útválasztás | `smart-routing`      | A prompt az optimális provider/combo keresztül irányítja OmniRoute kombinált motorjának + pontozását                                                                             | útválasztás, szolgáltatók        | "Route this prompt via the best model"                   |
+| Kvótakezelés            | `quota-management`   | Szolgáltatónkénti kvótaállapotot jelent, segít a hívóknak eldönteni, hogy mikor kell throttle/switch tenni                                                                       | kvóta, szolgáltatók              | "Check quot for anthropic"                               |
+| Szolgáltató felfedezése | `provider-discovery` | Felsorolja a telepített szolgáltatókat képességekkel, szabadszintű jelzőkkel és OAuth állapottal                                                                                 | szolgáltatók, felfedezés         | – Milyen szolgáltatók érhetők el?                        |
+| Költségelemzés          | `cost-analysis`      | Egy request/conversation becsült költsége a + katalógus legutóbbi használatának függvényében                                                                                     | költség, használat               | "A beszélgetés becsült költsége"                         |
+| Egészségügyi jelentés   | `health-report`      | Aggregálja a megszakítót, a lehűlést, a lezárási állapotot szolgáltatónként                                                                                                      | egészség, rugalmasság            | "Minden szolgáltató egészségi állapotának megjelenítése" |
+| Képességek listázása    | `list-capabilities`  | Visszaadja a teljes, 45 bejegyzésből álló Agent Skills katalógust (23 API + 21 CLI + 1 konfiguráció) leértékelési táblázatként nyers SKILL.md URLs vel a kontextus-injektáláshoz | katalógus, felfedezés, készségek | "List all OmniRoute képességek"                          |
 
-> Az Agent Card tartalmát összhangban kell tartani az aktuális, 352 szolgáltatót tartalmazó katalógussal; a szolgáltatók száma, valamint az ingyenes és hitelesítést nem igénylő használatra vonatkozó metaadatok a futásidejű nyilvántartásból származnak.
+> Az ügynökkártyát összhangban kell tartani az élő 377-es szolgáltatókatalógussal; A szolgáltatók száma és free/no-auth metaadatok a futásidejű beállításjegyzékből származnak.
 
-### A `list-capabilities` képesség részletei
+### `list-capabilities` Skill Detail
 
-A `list-capabilities` képesség különösen hasznos azon külső ügynökök számára, amelyeknek az API-hívások elküldése előtt fel kell deríteniük, mit tesz elérhetővé az OmniRoute. Egy strukturált markdown-táblázatot ad vissza artefaktumként:
+A `list-capabilities` készség különösen hasznos a külső ügynökök számára, akiknek fel kell fedezniük, hogy OmniRoute mit tesz közzé API hívások küldése előtt. Strukturált leértékelési táblázatot ad vissza:
 
 ```
-| ID | Név | Kategória | Terület | Végpontok/parancsok | Nyers URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Hitelesítés és munkamenetek | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Minden sor tartalmazza a `rawUrl` oszlopot, így az ügynökök azonnal lekérhetik a teljes SKILL.md fájlt. A `metadata.totalSkills` mező a katalógus méretét tükrözi (jelenleg 45). Megvalósítás: `src/lib/a2a/skills/listCapabilities.ts`. Lásd még: [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Minden sor tartalmazza a `rawUrl` oszlopot, így az ügynökök azonnal lekérhetik a teljes SKILL.md. A `metadata.totalSkills` mező tükrözi a katalógus méretet (ma 45). Megvalósítás: `src/lib/a2a/skills/listCapabilities.ts`. Lásd még: [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -264,7 +261,7 @@ beküldve → folyamatban → befejezve
 
 ## Integrációs példák
 
-### Python (requests)
+### Python (kérések)
 
 ```python
 import requests
@@ -283,7 +280,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (elhozni)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

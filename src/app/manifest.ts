@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { PWA_THEME_COLORS } from "@/shared/constants/pwaThemeColors";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -9,8 +10,10 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "any",
-    background_color: "#0b0f1a",
-    theme_color: "#0b0f1a",
+    // The manifest holds one colour: the kit's default (light) background. Dark-scheme
+    // browsers get the dark one from the per-media viewport theme-color in layout.tsx.
+    background_color: PWA_THEME_COLORS.light,
+    theme_color: PWA_THEME_COLORS.light,
     categories: ["developer-tools", "productivity", "utilities"],
     lang: "en",
     dir: "ltr",

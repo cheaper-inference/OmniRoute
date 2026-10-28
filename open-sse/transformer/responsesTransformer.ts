@@ -1,4 +1,5 @@
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
+import { ToolCallLifecycle } from "../translator/response/openai-responses/toolCallLifecycle.ts";
 import { shouldParseTextualReasoningTags } from "../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../utils/reasoningFields.ts";
 import {
@@ -7,6 +8,8 @@ import {
 } from "../utils/reasoningPlaceholder.ts";
 import * as fs from "fs";
 import * as path from "path";
+import { plaintextCollaborationFields } from "../translator/response/openai-responses/collaborationPlaintextMarker.ts";
+import { finalizeResponsesTerminalStatus } from "../translator/helpers/responsesTerminalStatus.ts";
 
 // #10223: threshold for detecting corrupted request_id fields. Normal
 // request IDs are <100 chars. DeepSeek's SSE encoder bug produces 200+
@@ -113,6 +116,16 @@ function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageRecord |
     usageNumber(inputDetails.cacheReadTokens) ??
     usageNumber(beforeInputDetails.cached_tokens) ??
     0;
+  const cacheCreationTokens =
+    usageNumber(source.cache_creation_input_tokens) ??
+    usageNumber(source.cache_write_tokens) ??
+    usageNumber(inputDetails.cache_creation_tokens) ??
+    usageNumber(inputDetails.cache_write_tokens) ??
+    usageNumber(beforeInputDetails.cache_creation_tokens) ??
+    usageNumber(beforeInputDetails.cache_write_tokens);
+  const cacheCreationInPrompt = [inputDetails, beforeInputDetails]
+    .map((details) => details.cache_creation_in_prompt)
+    .find((flag): flag is boolean => typeof flag === "boolean");
   const outputTokens =
     usageNumber(source.output_tokens) ??
     usageNumber(source.completion_tokens) ??
@@ -135,7 +148,13 @@ function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageRecord |
 
   return {
     input_tokens: inputTokens,
-    input_tokens_details: { cached_tokens: cachedTokens },
+    input_tokens_details: {
+      cached_tokens: cachedTokens,
+      ...(cacheCreationTokens !== undefined ? { cache_creation_tokens: cacheCreationTokens } : {}),
+      ...(cacheCreationTokens !== undefined && cacheCreationInPrompt !== undefined
+        ? { cache_creation_in_prompt: cacheCreationInPrompt }
+        : {}),
+    },
     output_tokens: outputTokens,
     output_tokens_details: { reasoning_tokens: reasoningTokens },
     total_tokens: totalTokens,
@@ -192,9 +211,13 @@ export function createResponsesLogger(model, logsDir = null) {
 export function createResponsesApiTransformStream(
   logger = null,
   keepaliveIntervalMs = 3000,
-  options: { customToolNames?: Iterable<string> } = {}
+  options: {
+    customToolNames?: Iterable<string>;
+    toolSchemas?: ReadonlyMap<string, unknown> | null;
+    requestToolIdentityMap?: ReadonlyMap<string, unknown> | null;
+  } = {}
 ) {
-  const customToolNames = new Set(options.customToolNames || []);
+  const lifecycle = new ToolCallLifecycle(options);
   const state = {
     seq: 0,
     responseId: `resp_${Date.now()}`,
@@ -215,7 +238,6 @@ export function createResponsesApiTransformStream(
     funcNames: {},
     funcCallIds: {},
     funcItemAdded: {},
-    funcItemTypes: {},
     funcArgsDone: {},
     funcItemDone: {},
     // Cached at first computation (see toolCallOutputIndexBase) so every
@@ -232,6 +254,7 @@ export function createResponsesApiTransformStream(
     buffer: "",
     completedSent: false,
     usage: null,
+    finishReason: null as string | null,
     keepaliveTimer: null,
     // #6906: true once a finish_reason chunk closed all output items but deferred
     // response.completed — a trailing usage-only chunk (choices: [], usage: {...}) may
@@ -361,6 +384,24 @@ export function createResponsesApiTransformStream(
     }
   };
 
+  // #13693: post-close content (deepseek/Kimi upstreams interleave text after
+  // a real tool_call) must not land on an already-done message item — Codex
+  // CLI aborts on "OutputTextDelta without active item". Allocate the next
+  // free output_index instead, avoiding reasoning, messages and cached
+  // tool-call indexes.
+  const nextFreeMessageIndex = (requestedIdx) => {
+    let candidate = normalizeOutputIndex(requestedIdx);
+    const allocatedToolIndexes = new Set(
+      Object.values(state.funcOutputIndex || {}).map((v) => normalizeOutputIndex(v))
+    );
+    const claimed = (i) =>
+      state.msgItemAdded[i] ||
+      allocatedToolIndexes.has(i) ||
+      (state.reasoningId && i === normalizeOutputIndex(state.reasoningIndex));
+    while (claimed(candidate)) candidate += 1;
+    return candidate;
+  };
+
   const closeMessage = (controller, idx) => {
     if (state.msgItemAdded[idx] && !state.msgItemDone[idx]) {
       state.msgItemDone[idx] = true;
@@ -424,27 +465,32 @@ export function createResponsesApiTransformStream(
     return state.funcOutputIndex[tcIdx];
   };
 
-  const emitToolCallAdded = (controller, idx) => {
-    if (state.funcItemAdded[idx] || !state.funcCallIds[idx]) return false;
-
-    const customTool = customToolNames.has(state.funcNames[idx] || "");
-    const itemType = customTool ? "custom_tool_call" : "function_call";
-    state.funcItemTypes[idx] = itemType;
+  const emitToolCallAdded = (controller, idx, terminal = false) => {
+    if (state.funcItemAdded[idx] || !state.funcCallIds[idx]) return;
+    const selection = lifecycle.select(idx, state.funcNames[idx] || "", terminal);
+    if (!selection) return;
     state.funcItemAdded[idx] = true;
-
     emit(controller, "response.output_item.added", {
       type: "response.output_item.added",
       output_index: state.funcOutputIndex[idx],
       item: {
         id: `fc_${state.funcCallIds[idx]}`,
-        type: itemType,
-        ...(customTool ? { input: "" } : { arguments: "" }),
+        type: selection.custom ? "custom_tool_call" : "function_call",
+        ...(selection.custom ? { input: "" } : { arguments: "" }),
         call_id: state.funcCallIds[idx],
-        name: state.funcNames[idx] || "",
+        name: selection.name,
+        ...(selection.namespace ? { namespace: selection.namespace } : {}),
         status: "in_progress",
       },
     });
-    return true;
+    if (state.funcArgsBuf[idx] && !selection.custom) {
+      emit(controller, "response.function_call_arguments.delta", {
+        type: "response.function_call_arguments.delta",
+        item_id: `fc_${state.funcCallIds[idx]}`,
+        output_index: state.funcOutputIndex[idx],
+        delta: state.funcArgsBuf[idx],
+      });
+    }
   };
 
   const closeToolCall = (controller, idx, recordAsCompleted = true) => {
@@ -452,9 +498,9 @@ export function createResponsesApiTransformStream(
     if (callId && !state.funcItemDone[idx]) {
       const normalizedIndex = state.funcOutputIndex[idx];
       let args = state.funcArgsBuf[idx] || "{}";
-      const toolName = state.funcNames[idx] || "";
-      emitToolCallAdded(controller, idx);
-      const isCustomTool = state.funcItemTypes[idx] === "custom_tool_call";
+      emitToolCallAdded(controller, idx, true);
+      const selection = lifecycle.get(idx)!;
+      const isCustomTool = selection.custom;
 
       // Fix #1674 & #1852: Final cleanup of empty string and empty array placeholders.
       // Custom-tool input is intentionally allowed to be an empty string.
@@ -506,7 +552,8 @@ export function createResponsesApiTransformStream(
           type: "custom_tool_call",
           input: rawInput,
           call_id: callId,
-          name: toolName,
+          name: selection.name,
+          ...(selection.namespace ? { namespace: selection.namespace } : {}),
           status: "completed",
         };
       } else {
@@ -521,10 +568,14 @@ export function createResponsesApiTransformStream(
           type: "function_call",
           arguments: args,
           call_id: callId,
-          name: toolName,
+          name: selection.name,
+          ...(selection.namespace ? { namespace: selection.namespace } : {}),
           status: "completed",
         };
       }
+
+      // Preserve the published identity when adding the collaboration plaintext marker.
+      Object.assign(funcItem, plaintextCollaborationFields(funcItem.namespace, funcItem.name));
 
       emit(controller, "response.output_item.done", {
         type: "response.output_item.done",
@@ -565,12 +616,18 @@ export function createResponsesApiTransformStream(
         response.usage = state.usage;
       }
 
-      emit(controller, "response.completed", {
-        type: "response.completed",
+      const eventType = finalizeResponsesTerminalStatus(response, state.finishReason);
+      emit(controller, eventType, {
+        type: eventType,
         response,
       });
     }
   };
+
+  // Fed to transform() from flush() so a message left in the buffer without its
+  // blank-line terminator (upstream closed right after the last `data:` line) still
+  // goes through the normal per-message path instead of being silently dropped.
+  const SSE_MESSAGE_TERMINATOR = encoder.encode("\n\n");
 
   return new TransformStream(
     {
@@ -596,7 +653,7 @@ export function createResponsesApiTransformStream(
       },
       transform(chunk, controller) {
         const text = decoder.decode(chunk, { stream: true });
-        logger?.logInput(text.trim());
+        if (text.trim()) logger?.logInput(text.trim());
         state.buffer += text;
 
         const messages = state.buffer.split("\n\n");
@@ -743,9 +800,9 @@ export function createResponsesApiTransformStream(
 
                 if (state.inThinking && content) {
                   emitReasoningDelta(controller, content);
-                  // Pre-existing behaviour (unrelated to #8081): a still-open
-                  // textual <think> block ends this message's handling early.
-                  continue;
+                  // Keep processing this chunk: reasoning text can arrive in
+                  // the same delta as a tool call and/or finish_reason.
+                  content = "";
                 }
               }
 
@@ -754,7 +811,12 @@ export function createResponsesApiTransformStream(
                 // Use a distinct output_index for the message when reasoning was
                 // emitted, so the message item does not collide with the
                 // reasoning item's output_index.
-                const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
+                let msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
+                // #13693: a done item must never receive new deltas — re-home
+                // the text on a fresh message item instead.
+                if (state.msgItemDone[msgIdx]) {
+                  msgIdx = nextFreeMessageIndex(msgIdx);
+                }
 
                 // Fix for #1211: Strip leading double-newlines / blank spaces from the very first text chunk
                 if (!state.msgTextBuf[msgIdx]) {
@@ -832,7 +894,7 @@ export function createResponsesApiTransformStream(
                 delete state.funcNames[tcIdx];
                 delete state.funcArgsBuf[tcIdx];
                 delete state.funcItemAdded[tcIdx];
-                delete state.funcItemTypes[tcIdx];
+                lifecycle.reset(tcIdx);
                 delete state.funcArgsDone[tcIdx];
                 delete state.funcItemDone[tcIdx];
                 // Deliberately keep funcOutputIndex[tcIdx]: the replacement call
@@ -841,30 +903,15 @@ export function createResponsesApiTransformStream(
                 // msgItemAdded state shifted mid-turn).
               }
 
-              if (funcName) state.funcNames[tcIdx] = funcName;
-
-              if (!state.funcCallIds[tcIdx] && newCallId) {
-                state.funcCallIds[tcIdx] = newCallId;
+              if (funcName) {
+                state.funcNames[tcIdx] = lifecycle.appendName(
+                  tcIdx,
+                  state.funcNames[tcIdx],
+                  funcName
+                );
               }
-
-              // The provider may send the call id before the function name. Defer the
-              // lifecycle item until the name is available so custom calls are not first
-              // announced as function calls.
-              if (state.funcCallIds[tcIdx] && state.funcNames[tcIdx]) {
-                const itemAdded = emitToolCallAdded(controller, tcIdx);
-                if (
-                  itemAdded &&
-                  state.funcItemTypes[tcIdx] !== "custom_tool_call" &&
-                  state.funcArgsBuf[tcIdx]
-                ) {
-                  emit(controller, "response.function_call_arguments.delta", {
-                    type: "response.function_call_arguments.delta",
-                    item_id: `fc_${state.funcCallIds[tcIdx]}`,
-                    output_index: outputIndex,
-                    delta: state.funcArgsBuf[tcIdx],
-                  });
-                }
-              }
+              if (!state.funcCallIds[tcIdx] && newCallId) state.funcCallIds[tcIdx] = newCallId;
+              emitToolCallAdded(controller, tcIdx);
 
               if (!state.funcArgsBuf[tcIdx]) state.funcArgsBuf[tcIdx] = "";
 
@@ -894,7 +941,7 @@ export function createResponsesApiTransformStream(
                   refCallId &&
                   emittedDelta &&
                   state.funcItemAdded[tcIdx] &&
-                  state.funcItemTypes[tcIdx] !== "custom_tool_call"
+                  lifecycle.get(tcIdx)?.custom !== true
                 ) {
                   emit(controller, "response.function_call_arguments.delta", {
                     type: "response.function_call_arguments.delta",
@@ -909,6 +956,8 @@ export function createResponsesApiTransformStream(
 
           // Handle finish_reason
           if (choice.finish_reason) {
+            // Read by sendCompleted() → finalizeResponsesTerminalStatus (length/filter → incomplete).
+            state.finishReason = choice.finish_reason;
             for (const i in state.msgItemAdded) closeMessage(controller, i);
             closeReasoning(controller);
             for (const i in state.funcCallIds) closeToolCall(controller, i);
@@ -934,6 +983,13 @@ export function createResponsesApiTransformStream(
         // emitted within transform(), so normally there is nothing left; this
         // only releases a terminating truncated byte and frees the decoder.
         state.buffer += decoder.decode();
+        // Drain a final message that arrived without its "\n\n" terminator — typically
+        // the last text delta, the finish_reason chunk or the usage chunk. Must run
+        // BEFORE the close/complete calls below; sendCompleted() is idempotent
+        // (completedSent guard), so a drained finish_reason+usage chunk that already
+        // completes the response does not produce a second response.completed.
+        // Web Streams invokes transformer methods with `this` = the transformer object.
+        if (state.buffer.trim()) this.transform(SSE_MESSAGE_TERMINATOR, controller);
         // Clear keepalive timer
         if (state.keepaliveTimer) {
           clearInterval(state.keepaliveTimer);

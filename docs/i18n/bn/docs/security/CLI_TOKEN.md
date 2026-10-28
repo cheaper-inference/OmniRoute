@@ -1,6 +1,6 @@
 # CLI Machine-ID Token (বাংলা)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/CLI_TOKEN.md) · 🇪🇹 [am](../../../am/docs/security/CLI_TOKEN.md) · 🇸🇦 [ar](../../../ar/docs/security/CLI_TOKEN.md) · 🇦🇿 [az](../../../az/docs/security/CLI_TOKEN.md) · 🇧🇬 [bg](../../../bg/docs/security/CLI_TOKEN.md) · 🇨🇿 [cs](../../../cs/docs/security/CLI_TOKEN.md) · 🇩🇰 [da](../../../da/docs/security/CLI_TOKEN.md) · 🇩🇪 [de](../../../de/docs/security/CLI_TOKEN.md) · 🇬🇷 [el](../../../el/docs/security/CLI_TOKEN.md) · 🇪🇸 [es](../../../es/docs/security/CLI_TOKEN.md) · 🇪🇪 [et](../../../et/docs/security/CLI_TOKEN.md) · 🇮🇷 [fa](../../../fa/docs/security/CLI_TOKEN.md) · 🇫🇮 [fi](../../../fi/docs/security/CLI_TOKEN.md) · 🇫🇷 [fr](../../../fr/docs/security/CLI_TOKEN.md) · 🇮🇪 [ga](../../../ga/docs/security/CLI_TOKEN.md) · 🇮🇳 [gu](../../../gu/docs/security/CLI_TOKEN.md) · 🇳🇬 [ha](../../../ha/docs/security/CLI_TOKEN.md) · 🇮🇱 [he](../../../he/docs/security/CLI_TOKEN.md) · 🇮🇳 [hi](../../../hi/docs/security/CLI_TOKEN.md) · 🇭🇷 [hr](../../../hr/docs/security/CLI_TOKEN.md) · 🇭🇺 [hu](../../../hu/docs/security/CLI_TOKEN.md) · 🇦🇲 [hy](../../../hy/docs/security/CLI_TOKEN.md) · 🇮🇩 [id](../../../id/docs/security/CLI_TOKEN.md) · 🇳🇬 [ig](../../../ig/docs/security/CLI_TOKEN.md) · 🇮🇹 [it](../../../it/docs/security/CLI_TOKEN.md) · 🇯🇵 [ja](../../../ja/docs/security/CLI_TOKEN.md) · 🇬🇪 [ka](../../../ka/docs/security/CLI_TOKEN.md) · 🇰🇭 [km](../../../km/docs/security/CLI_TOKEN.md) · 🇮🇳 [kn](../../../kn/docs/security/CLI_TOKEN.md) · 🇰🇷 [ko](../../../ko/docs/security/CLI_TOKEN.md) · 🇱🇹 [lt](../../../lt/docs/security/CLI_TOKEN.md) · 🇱🇻 [lv](../../../lv/docs/security/CLI_TOKEN.md) · 🇮🇳 [ml](../../../ml/docs/security/CLI_TOKEN.md) · 🇮🇳 [mr](../../../mr/docs/security/CLI_TOKEN.md) · 🇲🇾 [ms](../../../ms/docs/security/CLI_TOKEN.md) · 🇲🇹 [mt](../../../mt/docs/security/CLI_TOKEN.md) · 🇲🇲 [my](../../../my/docs/security/CLI_TOKEN.md) · 🇳🇵 [ne](../../../ne/docs/security/CLI_TOKEN.md) · 🇳🇱 [nl](../../../nl/docs/security/CLI_TOKEN.md) · 🇳🇴 [no](../../../no/docs/security/CLI_TOKEN.md) · 🇮🇳 [or](../../../or/docs/security/CLI_TOKEN.md) · 🇮🇳 [pa](../../../pa/docs/security/CLI_TOKEN.md) · 🇵🇭 [phi](../../../phi/docs/security/CLI_TOKEN.md) · 🇵🇱 [pl](../../../pl/docs/security/CLI_TOKEN.md) · 🇵🇹 [pt](../../../pt/docs/security/CLI_TOKEN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CLI_TOKEN.md) · 🇷🇴 [ro](../../../ro/docs/security/CLI_TOKEN.md) · 🇷🇺 [ru](../../../ru/docs/security/CLI_TOKEN.md) · 🇱🇰 [si](../../../si/docs/security/CLI_TOKEN.md) · 🇸🇰 [sk](../../../sk/docs/security/CLI_TOKEN.md) · 🇸🇮 [sl](../../../sl/docs/security/CLI_TOKEN.md) · 🇷🇸 [sr](../../../sr/docs/security/CLI_TOKEN.md) · 🇸🇪 [sv](../../../sv/docs/security/CLI_TOKEN.md) · 🇰🇪 [sw](../../../sw/docs/security/CLI_TOKEN.md) · 🇮🇳 [ta](../../../ta/docs/security/CLI_TOKEN.md) · 🇮🇳 [te](../../../te/docs/security/CLI_TOKEN.md) · 🇹🇭 [th](../../../th/docs/security/CLI_TOKEN.md) · 🇹🇷 [tr](../../../tr/docs/security/CLI_TOKEN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CLI_TOKEN.md) · 🇵🇰 [ur](../../../ur/docs/security/CLI_TOKEN.md) · 🇺🇿 [uz](../../../uz/docs/security/CLI_TOKEN.md) · 🇻🇳 [vi](../../../vi/docs/security/CLI_TOKEN.md) · 🇳🇬 [yo](../../../yo/docs/security/CLI_TOKEN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CLI_TOKEN.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CLI_TOKEN.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/CLI_TOKEN.md) · 🇪🇹 [am](../../../am/docs/security/CLI_TOKEN.md) · 🇸🇦 [ar](../../../ar/docs/security/CLI_TOKEN.md) · 🇦🇿 [az](../../../az/docs/security/CLI_TOKEN.md) · 🇧🇬 [bg](../../../bg/docs/security/CLI_TOKEN.md) · 🇧🇦 [bs](../../../bs/docs/security/CLI_TOKEN.md) · 🇨🇿 [cs](../../../cs/docs/security/CLI_TOKEN.md) · 🇩🇰 [da](../../../da/docs/security/CLI_TOKEN.md) · 🇩🇪 [de](../../../de/docs/security/CLI_TOKEN.md) · 🇬🇷 [el](../../../el/docs/security/CLI_TOKEN.md) · 🇪🇸 [es](../../../es/docs/security/CLI_TOKEN.md) · 🇪🇪 [et](../../../et/docs/security/CLI_TOKEN.md) · 🇮🇷 [fa](../../../fa/docs/security/CLI_TOKEN.md) · 🇫🇮 [fi](../../../fi/docs/security/CLI_TOKEN.md) · 🇫🇷 [fr](../../../fr/docs/security/CLI_TOKEN.md) · 🇮🇪 [ga](../../../ga/docs/security/CLI_TOKEN.md) · 🇮🇳 [gu](../../../gu/docs/security/CLI_TOKEN.md) · 🇳🇬 [ha](../../../ha/docs/security/CLI_TOKEN.md) · 🇮🇱 [he](../../../he/docs/security/CLI_TOKEN.md) · 🇮🇳 [hi](../../../hi/docs/security/CLI_TOKEN.md) · 🇭🇷 [hr](../../../hr/docs/security/CLI_TOKEN.md) · 🇭🇺 [hu](../../../hu/docs/security/CLI_TOKEN.md) · 🇦🇲 [hy](../../../hy/docs/security/CLI_TOKEN.md) · 🇮🇩 [id](../../../id/docs/security/CLI_TOKEN.md) · 🇳🇬 [ig](../../../ig/docs/security/CLI_TOKEN.md) · 🇮🇹 [it](../../../it/docs/security/CLI_TOKEN.md) · 🇯🇵 [ja](../../../ja/docs/security/CLI_TOKEN.md) · 🇬🇪 [ka](../../../ka/docs/security/CLI_TOKEN.md) · 🇰🇭 [km](../../../km/docs/security/CLI_TOKEN.md) · 🇮🇳 [kn](../../../kn/docs/security/CLI_TOKEN.md) · 🇰🇷 [ko](../../../ko/docs/security/CLI_TOKEN.md) · 🇱🇹 [lt](../../../lt/docs/security/CLI_TOKEN.md) · 🇱🇻 [lv](../../../lv/docs/security/CLI_TOKEN.md) · 🇮🇳 [ml](../../../ml/docs/security/CLI_TOKEN.md) · 🇮🇳 [mr](../../../mr/docs/security/CLI_TOKEN.md) · 🇲🇾 [ms](../../../ms/docs/security/CLI_TOKEN.md) · 🇲🇹 [mt](../../../mt/docs/security/CLI_TOKEN.md) · 🇲🇲 [my](../../../my/docs/security/CLI_TOKEN.md) · 🇳🇵 [ne](../../../ne/docs/security/CLI_TOKEN.md) · 🇳🇱 [nl](../../../nl/docs/security/CLI_TOKEN.md) · 🇳🇴 [no](../../../no/docs/security/CLI_TOKEN.md) · 🇮🇳 [or](../../../or/docs/security/CLI_TOKEN.md) · 🇮🇳 [pa](../../../pa/docs/security/CLI_TOKEN.md) · 🇵🇭 [phi](../../../phi/docs/security/CLI_TOKEN.md) · 🇵🇱 [pl](../../../pl/docs/security/CLI_TOKEN.md) · 🇵🇹 [pt](../../../pt/docs/security/CLI_TOKEN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CLI_TOKEN.md) · 🇷🇴 [ro](../../../ro/docs/security/CLI_TOKEN.md) · 🇷🇺 [ru](../../../ru/docs/security/CLI_TOKEN.md) · 🇱🇰 [si](../../../si/docs/security/CLI_TOKEN.md) · 🇸🇰 [sk](../../../sk/docs/security/CLI_TOKEN.md) · 🇸🇮 [sl](../../../sl/docs/security/CLI_TOKEN.md) · 🇷🇸 [sr](../../../sr/docs/security/CLI_TOKEN.md) · 🇸🇪 [sv](../../../sv/docs/security/CLI_TOKEN.md) · 🇰🇪 [sw](../../../sw/docs/security/CLI_TOKEN.md) · 🇮🇳 [ta](../../../ta/docs/security/CLI_TOKEN.md) · 🇮🇳 [te](../../../te/docs/security/CLI_TOKEN.md) · 🇹🇭 [th](../../../th/docs/security/CLI_TOKEN.md) · 🇹🇷 [tr](../../../tr/docs/security/CLI_TOKEN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CLI_TOKEN.md) · 🇵🇰 [ur](../../../ur/docs/security/CLI_TOKEN.md) · 🇺🇿 [uz](../../../uz/docs/security/CLI_TOKEN.md) · 🇻🇳 [vi](../../../vi/docs/security/CLI_TOKEN.md) · 🇳🇬 [yo](../../../yo/docs/security/CLI_TOKEN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CLI_TOKEN.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CLI_TOKEN.md)
 
 ---
 
@@ -43,20 +43,27 @@ OmniRoute CLI কমান্ডগুলো `x-omniroute-cli-token` রিক�
 | **`always`-সুরক্ষিত অংশ এড়ানোর সুযোগ নেই** | CLI টোকেন পরীক্ষা করার আগে `isAlwaysProtectedPath()` মূল্যায়ন করা হয়। `/api/shutdown` এবং `/api/settings/database`-এর জন্য সবসময় JWT আবশ্যক।                                                                             |
 | **এক্সপোর্ট-অযোগ্য**                        | টোকেন কখনোই ডিস্কে লেখা বা লগ করা হয় না।                                                                                                                                                                                   |
 
-## ডিফল্ট salt (প্রতিটি ইনস্টলে এলোমেলো)
+## ডিফল্ট সল্ট (প্রতি ইনস্টলে র্যান্ডম)
 
-`OMNIROUTE_CLI_SALT` সেট করা না থাকলে, salt হিসেবে একটি এলোমেলো 64-অক্ষরের হেক্স
-স্ট্রিং একবার তৈরি করা হয় এবং `<DATA_DIR>/cli-token-salt.json`-এ (`0600` মোডে)
-স্থায়ীভাবে সংরক্ষণ করা হয়—রিপোজিটরিতে অন্তর্ভুক্ত লিটারেল
-`omniroute-cli-auth-v1` নয়। `src/lib/machineToken.ts`-এর `getActiveSalt()` এবং
-`bin/cli/utils/cliToken.mjs`-এ থাকা এর সমতুল্য বাস্তবায়ন—উভয়ই একই ফাইল পড়ে,
-ফলে এই ইনস্টলের সার্ভার এবং CLI-এর প্রতিটি আহ্বান একই মানে একীভূত হয়; কেবল তখনই
-রিপোজিটরিতে অন্তর্ভুক্ত লিটারেলটি সর্বশেষ বিকল্প হিসেবে ব্যবহৃত হয়, যখন এখনো
-স্থায়ীভাবে সংরক্ষিত বা এনভায়রনমেন্ট salt নির্ধারণ করা সম্ভব হয়নি (উদাহরণস্বরূপ,
-সার্ভার কখনো চালানো হয়নি এমন একটি নতুন শুধু-CLI ইনস্টল)। এটি পুরোনো স্থির লিটারেল
-ডিফল্টের একটি দুর্বলতা দূর করে: `/etc/machine-id` সাধারণত সবার জন্য পাঠযোগ্য,
-তাই অন্যথায় যেকোনো স্থানীয় ব্যবহারকারী `OMNIROUTE_CLI_SALT` কখনো সেট না করা
-প্রতিটি ইনস্টলের জন্য একই টোকেন তৈরি করতে পারত।
+`OMNIROUTE_CLI_SALT` সেট করা না থাকলে, সল্টটি একটি র্যান্ডম 64-অক্ষরের হেক্স স্ট্রিং,
+যা একবার তৈরি করা হয় এবং `<DATA_DIR>/cli-token-salt.json`-এ (`0600` মোডে) সংরক্ষণ করা হয় —
+রিপোজিটরিতে অন্তর্ভুক্ত লিটারেল `omniroute-cli-auth-v1` নয়। `src/lib/machineToken.ts`-এর
+`getActiveSalt()` এবং `bin/cli/utils/cliToken.mjs`-এ থাকা এর প্রতিরূপ—উভয়ই একই
+ফাইল পড়ে, তাই সার্ভার এবং এই ইনস্টলের প্রতিটি CLI আহ্বান একই মানে একীভূত হয়;
+রিপোজিটরিতে অন্তর্ভুক্ত লিটারেলটি কেবল সর্বশেষ বিকল্প হিসেবে ব্যবহৃত হয়, যখন এখনও
+কোনো সংরক্ষিত বা env সল্ট স্থাপন করা যায়নি (উদাহরণস্বরূপ, সার্ভার কখনও চালু হওয়ার
+আগে একটি নতুন শুধুমাত্র-CLI ইনস্টল)। এটি পুরোনো স্থির লিটারেল ডিফল্টের একটি দুর্বলতা
+দূর করে: `/etc/machine-id` সাধারণত সবার জন্য পাঠযোগ্য, ফলে অন্যথায় যেকোনো স্থানীয়
+ব্যবহারকারী `OMNIROUTE_CLI_SALT` সেট না করা প্রতিটি ইনস্টলের জন্য একই টোকেন
+উদ্ভূত করতে পারতেন।
+
+সল্টটি পড়া বা তৈরি করা না গেলে, সামঞ্জস্যতার ফলব্যাক ব্যবহারের আগে সার্ভার এবং CLI
+উভয়ই প্রতি প্রসেসে একটি সতর্কতা নির্গত করে। সতর্কতায় কোনো সল্ট, টোকেন, ফাইলসিস্টেম
+পাথ বা অপরিশোধিত ত্রুটি থাকে না। `DATA_DIR`-এ অ্যাক্সেস পুনরুদ্ধার করুন অথবা
+`OMNIROUTE_CLI_SALT` সেট করুন, তারপর প্রভাবিত প্রসেসটি পুনরায় চালু করুন। সতর্কতাটি
+ব্যর্থতাকে দৃশ্যমান করে; এটি পাবলিক ফলব্যাক সল্টকে ব্যক্তিগত করে না বা CLI
+প্রমাণীকরণ নিষ্ক্রিয় করে না। বিদ্যমান বৈধ সংরক্ষিত সল্ট এবং সুস্পষ্ট এনভায়রনমেন্ট
+ওভাররাইডগুলো তাদের আগের টোকেন মান বজায় রাখে।
 
 ## সল্ট রোটেশন
 

@@ -1,6 +1,6 @@
 # Memory System (Lietuvių)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MEMORY.md) · 🇪🇹 [am](../../../am/docs/frameworks/MEMORY.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MEMORY.md) · 🇦🇿 [az](../../../az/docs/frameworks/MEMORY.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MEMORY.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MEMORY.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MEMORY.md) · 🇩🇰 [da](../../../da/docs/frameworks/MEMORY.md) · 🇩🇪 [de](../../../de/docs/frameworks/MEMORY.md) · 🇬🇷 [el](../../../el/docs/frameworks/MEMORY.md) · 🇪🇸 [es](../../../es/docs/frameworks/MEMORY.md) · 🇪🇪 [et](../../../et/docs/frameworks/MEMORY.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MEMORY.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MEMORY.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MEMORY.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MEMORY.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MEMORY.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MEMORY.md) · 🇮🇱 [he](../../../he/docs/frameworks/MEMORY.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MEMORY.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MEMORY.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MEMORY.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MEMORY.md) · 🇮🇩 [id](../../../id/docs/frameworks/MEMORY.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MEMORY.md) · 🇮🇹 [it](../../../it/docs/frameworks/MEMORY.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MEMORY.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MEMORY.md) · 🇰🇭 [km](../../../km/docs/frameworks/MEMORY.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MEMORY.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MEMORY.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MEMORY.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MEMORY.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MEMORY.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MEMORY.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MEMORY.md) · 🇲🇲 [my](../../../my/docs/frameworks/MEMORY.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MEMORY.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MEMORY.md) · 🇳🇴 [no](../../../no/docs/frameworks/MEMORY.md) · 🇮🇳 [or](../../../or/docs/frameworks/MEMORY.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MEMORY.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MEMORY.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MEMORY.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MEMORY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MEMORY.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MEMORY.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MEMORY.md) · 🇱🇰 [si](../../../si/docs/frameworks/MEMORY.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MEMORY.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MEMORY.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MEMORY.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MEMORY.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MEMORY.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MEMORY.md) · 🇮🇳 [te](../../../te/docs/frameworks/MEMORY.md) · 🇹🇭 [th](../../../th/docs/frameworks/MEMORY.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MEMORY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MEMORY.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MEMORY.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MEMORY.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MEMORY.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MEMORY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MEMORY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MEMORY.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MEMORY.md) · 🇪🇹 [am](../../../am/docs/frameworks/MEMORY.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MEMORY.md) · 🇦🇿 [az](../../../az/docs/frameworks/MEMORY.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MEMORY.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MEMORY.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/MEMORY.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MEMORY.md) · 🇩🇰 [da](../../../da/docs/frameworks/MEMORY.md) · 🇩🇪 [de](../../../de/docs/frameworks/MEMORY.md) · 🇬🇷 [el](../../../el/docs/frameworks/MEMORY.md) · 🇪🇸 [es](../../../es/docs/frameworks/MEMORY.md) · 🇪🇪 [et](../../../et/docs/frameworks/MEMORY.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MEMORY.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MEMORY.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MEMORY.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MEMORY.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MEMORY.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MEMORY.md) · 🇮🇱 [he](../../../he/docs/frameworks/MEMORY.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MEMORY.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MEMORY.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MEMORY.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MEMORY.md) · 🇮🇩 [id](../../../id/docs/frameworks/MEMORY.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MEMORY.md) · 🇮🇹 [it](../../../it/docs/frameworks/MEMORY.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MEMORY.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MEMORY.md) · 🇰🇭 [km](../../../km/docs/frameworks/MEMORY.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MEMORY.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MEMORY.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MEMORY.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MEMORY.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MEMORY.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MEMORY.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MEMORY.md) · 🇲🇲 [my](../../../my/docs/frameworks/MEMORY.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MEMORY.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MEMORY.md) · 🇳🇴 [no](../../../no/docs/frameworks/MEMORY.md) · 🇮🇳 [or](../../../or/docs/frameworks/MEMORY.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MEMORY.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MEMORY.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MEMORY.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MEMORY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MEMORY.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MEMORY.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MEMORY.md) · 🇱🇰 [si](../../../si/docs/frameworks/MEMORY.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MEMORY.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MEMORY.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MEMORY.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MEMORY.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MEMORY.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MEMORY.md) · 🇮🇳 [te](../../../te/docs/frameworks/MEMORY.md) · 🇹🇭 [th](../../../th/docs/frameworks/MEMORY.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MEMORY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MEMORY.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MEMORY.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MEMORY.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MEMORY.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MEMORY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MEMORY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MEMORY.md)
 
 ---
 
@@ -168,34 +168,36 @@ Lentelėje `memory_vec_meta` (migracija `083_memory_vec.sql`) saugoma:
 ## Nustatymų plėtinys
 
 Devyni įterpinių ir vektorių laukai pasiekiami `MemorySettingsExtended`, esančiame
-`src/shared/schemas/memory.ts`, ir išsaugomi per `src/lib/db/settings.ts`:
+`src/shared/schemas/memory.ts`, ir išsaugomi naudojant `src/lib/db/settings.ts`:
 
-| Laukas                   | Tipas                                              | Numatytoji reikšmė | Aprašymas                                                             |
-| ------------------------ | -------------------------------------------------- | ------------------ | --------------------------------------------------------------------- |
-| `embeddingSource`        | `"remote" \| "static" \| "transformers" \| "auto"` | `"auto"`           | Kurį įterpinių šaltinį naudoti                                        |
-| `embeddingProviderModel` | `string \| null`                                   | `null`             | Teikėjas / modelis `provider/model` formatu                           |
-| `customBaseUrl`          | `string \| null`                                   | `null`             | Tik atminčiai skirtas su OpenAI suderinamo galinio taško bazinis URL  |
-| `customModelId`          | `string \| null`                                   | `null`             | Pasirinktiniam galiniam taškui siunčiamas modelio ID                  |
-| `transformersEnabled`    | `boolean`                                          | `false`            | Pasirinktinis Transformers.js naudojimas (MiniLM, ~400MB)             |
-| `staticEnabled`          | `boolean`                                          | `false`            | Pasirinktinis vietinio statinio potion-base-8M modelio naudojimas     |
-| `rerankEnabled`          | `boolean`                                          | `false`            | Įjungti pakartotinio reitingavimo veiksmą (prideda +200-500ms/req)    |
-| `rerankProviderModel`    | `string \| null`                                   | `null`             | Pakartotinio reitingavimo teikėjas / modelis `provider/model` formatu |
-| `vectorStore`            | `"sqlite-vec" \| "qdrant" \| "auto"`               | `"auto"`           | Kurią vektorių posistemę naudoti                                      |
+| Laukas                   | Tipas                                              | Numatytoji reikšmė | Aprašymas                                                               |
+| ------------------------ | -------------------------------------------------- | ------------------ | ----------------------------------------------------------------------- |
+| `embeddingSource`        | `"remote" \| "static" \| "transformers" \| "auto"` | `"auto"`           | Kurį įterpinių šaltinį naudoti                                          |
+| `embeddingProviderModel` | `string \| null`                                   | `null`             | Teikėjas / modelis `provider/model` formatu                             |
+| `customBaseUrl`          | `string \| null`                                   | `null`             | Tik atminčiai skirto su OpenAI suderinamo galinio taško bazinis URL     |
+| `customModelId`          | `string \| null`                                   | `null`             | Pasirinktiniam galiniam taškui siunčiamas modelio ID                    |
+| `transformersEnabled`    | `boolean`                                          | `false`            | Pasirenkamasis Transformers.js naudojimas (MiniLM, ~400 MB)             |
+| `staticEnabled`          | `boolean`                                          | `false`            | Pasirenkamasis vietinio statinio potion-base-8M modelio naudojimas      |
+| `rerankEnabled`          | `boolean`                                          | `false`            | Įjungti pakartotinio reitingavimo etapą (prideda +200–500 ms užklausai) |
+| `rerankProviderModel`    | `string \| null`                                   | `null`             | Pakartotinio reitingavimo teikėjas / modelis `provider/model` formatu   |
 
-Jie pasiekiami per `GET /PUT /api/settings/memory` (schema `MemorySettingsExtendedSchema`).
+`rerankProviderModel` nustatomas naudojant `POST /v1/rerank` (iškviečiama per vietinio ciklo sąsają), todėl priimama bet kokia šio maršruto palaikoma reikšmė: atrinktas debesijos pakartotinio reitingavimo modelis (`cohere/rerank-v3.5`, `jina-ai/jina-reranker-v3.5`, …) arba su OpenAI suderinamas teikėjo mazgas, nurodytas kaip `<node-prefix>/<model>` (pvz., `skilled-mini/bge-reranker-v2-m3`, skirtas TEI / Infinity serveriui). Vietinio ciklo mazgai ir pagrindinių kompiuterių vardai, išvardyti `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (pvz., Docker / Compose paslaugos pavadinimas), visada yra tinkami; kitame pagrindiniame kompiuteryje (LAN, Tailscale) esančiam mazgui papildomai reikia `RERANK_REMOTE_PROVIDER_NODES` funkcijos vėliavėlės ir jis turi atitikti teikėjo siunčiamųjų URL politiką — žr. [Funkcijų vėliavėlės](../reference/FEATURE_FLAGS.md). Valdymo skydelio parinkiklyje pateikiami atrinkti teikėjai ir vietiniai mazgai; bet kurią galiojančią `provider/model` eilutę galima nustatyti tiesiogiai naudojant `PUT /api/settings/memory`.
+| `vectorStore` | `"sqlite-vec" \| "qdrant" \| "auto"` | `"auto"` | Kurią vektorių posistemę naudoti |
 
-Naudojant `remote` šaltinį, Memory taip pat priima pasirinktinius `customBaseUrl` ir
+Šie laukai pasiekiami per `GET /PUT /api/settings/memory` (schema `MemorySettingsExtendedSchema`).
+
+Naudojant `remote` šaltinį, Memory taip pat priima pasirenkamus `customBaseUrl` ir
 `customModelId` nustatymus. Kartu jie parenka su OpenAI suderinamą `/embeddings`
-galinį tašką ir modelį nekeičiant visuotinio įterpinių registro. Prieš naudojimą
-galinis taškas normalizuojamas ir patikrinamas pagal teikėjo išeinančių URL politiką:
-būtinas HTTP(S), įterptieji prisijungimo duomenys ir užklausų eilutės atmetami, o
-debesijos metaduomenų adresai lieka blokuojami. Tuščios reikšmės išsaugo pasirinktą
-registro teikėją. Valdymo skydui grąžinamos klaidos yra išvalomos, o galinio taško
+galinį tašką ir modelį, nekeičiant visuotinio įterpinių registro. Prieš naudojimą
+galinis taškas normalizuojamas ir patikrinamas pagal teikėjo siunčiamųjų URL politiką:
+būtinas HTTP(S), į URL įtraukti prisijungimo duomenys ir užklausų eilutės atmetami,
+o debesijos metaduomenų adresai lieka užblokuoti. Tuščios reikšmės išsaugo pasirinktą
+registro teikėją. Valdymo skydeliui grąžinamos klaidos yra išvalomos, o galinio taško
 prisijungimo duomenys niekada neregistruojami žurnaluose.
 
-> **TODO (D20):** `global` aprėptis (atminčių bendrinimas tarp visų API raktų)
-> šiame leidime neįgyvendinta. Tam reikalingi schemos pakeitimai ir visuotinis
-> paieškos kelias. Sekti atskirai.
+> **TODO (D20):** `global` aprėptis (atminčių bendrinimas tarp visų API raktų) šiame
+> leidime neįgyvendinta. Tam reikia schemos pakeitimų ir visuotinio paieškos
+> kelio. Sekti atskirai.
 
 ## Saugojimo sluoksniai
 
@@ -905,10 +907,10 @@ reikšmę (`false`).
 
 ## MemoryBackend teikėjo šablonas
 
-> **Patikimas šaltinis:** `src/lib/memory/backend.ts`, `src/lib/memory/genericBackend.ts`, `src/lib/memory/manager.ts`
+> **Pagrindinis šaltinis:** `src/lib/memory/backend.ts`, `src/lib/memory/genericBackend.ts`, `src/lib/memory/manager.ts`
 > **Testai:** `src/lib/memory/__tests__/generic-backend.test.ts`
 
-MemoryBackend teikėjo šablonas esamam prisiminimų varikliui suteikia **keičiamą posistemių abstrakcijos sluoksnį**. Užuot buvusi susieta su vienu saugyklos įgyvendinimu, prisiminimų sistema dabar palaiko kelias posistemes (SQLite, Obsidian, Notion, pasirinktines HTTP posistemes) ir konfigūruojamą nukreipimą į pagrindinę bei atsargines posistemes.
+MemoryBackend teikėjo šablonas esamą atminties variklį papildo **keičiamu abstrakcijos sluoksniu**. Užuot buvusi susieta su viena saugyklos realizacija, atminties sistema dabar palaiko kelias vidines sistemas (SQLite, Obsidian, Notion, tinkintas HTTP vidines sistemas) ir leidžia konfigūruoti pagrindinį bei atsarginį užklausų nukreipimą.
 
 ### Architektūra
 
@@ -920,24 +922,26 @@ MemoryBackend teikėjo šablonas esamam prisiminimų varikliui suteikia **keiči
                        │
 ┌──────────────────────▼───────────────────────────────────┐
 │                   MemoryManager                           │
-│      Vienetinis koordinatorius (manager.ts)               │
+│        Vienetinis koordinatorius (manager.ts)             │
 │                                                          │
-│  Pagrindinė ──► Posistemė A  (pvz., SQLite)              │
-│  Atsarginė  ──► Posistemė B  (pvz., Obsidian)            │
-│                 Posistemė C  (pvz., Notion per GenericBackend) │
+│  Pagrindinė ──► Vidinė sistema A  (pvz., SQLite)         │
+│  Atsarginė  ──► Vidinė sistema B  (pvz., Obsidian)       │
+│                 Vidinė sistema C  (pvz., Notion per       │
+│                                    GenericBackend)        │
 └──────────────────────┬───────────────────────────────────┘
                        │
         ┌──────────────┼──────────────┐
         ▼              ▼              ▼
 ┌────────────┐ ┌────────────┐ ┌──────────────────┐
 │ SQLite     │ │ Obsidian   │ │ GenericMemory    │
-│ posistemė  │ │ posistemė  │ │ posistemė (HTTP) │
+│ vidinė     │ │ vidinė     │ │ vidinė sistema  │
+│ sistema    │ │ sistema    │ │ (HTTP)           │
 └────────────┘ └────────────┘ └──────────────────┘
 ```
 
 #### Pagrindinė sąsaja (`backend.ts`)
 
-Kiekviena posistemė turi įgyvendinti `MemoryBackend` sąsają:
+Kiekviena vidinė sistema turi įgyvendinti `MemoryBackend` sąsają:
 
 ```typescript
 interface MemoryBackend {
@@ -954,10 +958,10 @@ interface MemoryBackend {
   // Paieška
   search(config: SearchConfig): Promise<Memory[]>;
 
-  // Būklė
+  // Būsena
   health(): Promise<HealthCheckResult>;
 
-  // Gyvavimo ciklas (pasirinktinis)
+  // Gyvavimo ciklas (neprivaloma)
   initialize?(): Promise<void>;
   shutdown?(): Promise<void>;
 }
@@ -967,41 +971,41 @@ interface MemoryBackend {
 
 Vienetinis koordinatorius, kuris:
 
-- **Registruoja** posistemes naudodamas `register(backend)` — iškviečiama paleidžiant iš `index.ts`
-- **Konfigūruoja** pagrindinę ir atsargines posistemes naudodamas `configure(primary, fallbacks)`
-- **Nukreipia** CRUD operacijas / paiešką į pagrindinę posistemę, o gedimo atveju naudoja atsarginių posistemių grandinę
-- **Periodiškai tikrina** visų posistemių būklę
+- **Registruoja** vidines sistemas per `register(backend)` — iškviečiama paleidimo metu iš `index.ts`
+- **Konfigūruoja** pagrindinę ir atsargines sistemas per `configure(primary, fallbacks)`
+- **Nukreipia** CRUD operacijas ir paiešką į pagrindinę sistemą, o įvykus klaidai naudoja atsarginių sistemų grandinę
+- Periodiškai atlieka visų vidinių sistemų **būsenos patikras**
 
 **Atsarginio veikimo elgsena:**
 
-| Operacija | Pagrindinė                  | Atsarginės                        |
-| --------- | --------------------------- | --------------------------------- |
-| `create`  | ✅ Tik pagrindinė           | ❌                                |
-| `get`     | ✅ Pirma bandoma pagrindinė | ✅ Jei nerasta, bandoma atsarginė |
-| `update`  | ✅ Tik pagrindinė           | ✅ Asinchroninis sinchronizavimas |
-| `delete`  | ✅ Tik pagrindinė           | ✅ Asinchroninis sinchronizavimas |
-| `list`    | ✅ Tik pagrindinė           | ❌                                |
-| `search`  | ✅ Pirma pagrindinė         | ✅ Klaidos atveju — atsarginė     |
+| Operacija | Pagrindinė sistema               | Atsarginės sistemos                              |
+| --------- | -------------------------------- | ------------------------------------------------ |
+| `create`  | ✅ Tik pagrindinė sistema        | ❌                                               |
+| `get`     | ✅ Pirmiausia bandoma pagrindinė | ✅ Atsarginė, jei grąžinama null                 |
+| `update`  | ✅ Tik pagrindinė sistema        | ✅ Foninis sinchronizavimas nelaukiant rezultato |
+| `delete`  | ✅ Tik pagrindinė sistema        | ✅ Foninis sinchronizavimas nelaukiant rezultato |
+| `list`    | ✅ Tik pagrindinė sistema        | ❌                                               |
+| `search`  | ✅ Pirmiausia pagrindinė sistema | ✅ Įvykus klaidai naudojama atsarginė            |
 
 #### GenericMemoryBackend (`genericBackend.ts`)
 
-Bendro pobūdžio HTTP jungtis, pritaikanti bet kokią REST API kaip MemoryBackend. Naudinga šioms sistemoms:
+Bendroji HTTP jungtis, pritaikanti bet kurią REST API kaip MemoryBackend. Naudinga šioms sistemoms:
 
-- **Notion** — prisijunkite per Notion API
-- **Obsidian** — prisijunkite per Obsidian Local REST API
-- **Pasirinktinės posistemės** — bet kuri paslauga, pateikianti REST principus atitinkančią prisiminimų API
+- **Notion** — prisijungimas per Notion API
+- **Obsidian** — prisijungimas per Obsidian Local REST API
+- **Tinkintos vidinės sistemos** — bet kuri paslauga, teikianti REST principus atitinkančią atminties API
 
 **Konfigūracija:**
 
 ```typescript
 interface GenericBackendConfig {
-  baseUrl: string;           // Bazinis vidinės sistemos API URL
+  baseUrl: string;           // Vidinės sistemos API bazinis URL
   apiKey?: string;           // Bearer prieigos raktas autentifikavimui
-  headers?: Record<string, string>;  // Pasirinktinės HTTP antraštės
+  headers?: Record<string, string>;  // Tinkintos HTTP antraštės
   timeout?: number;          // Užklausos skirtasis laikas (numatytoji reikšmė: 30000ms)
-  backendType?: string;      // Registravimui žurnale
+  backendType?: string;      // Skirta žurnalams
 
-  // Galinių taškų perrašymai (numatytosios reikšmės naudoja REST konvencijas)
+  // Galinių taškų perrašymai (numatytosios reikšmės naudoja REST susitarimus)
   endpoints?: {
     search?: string;   // numatytoji reikšmė: "/memories/search"
     create?: string;   // numatytoji reikšmė: "/memories"
@@ -1035,7 +1039,7 @@ createKnownBackend("notion"); // → GenericMemoryBackend, nukreipta į api.noti
 
 ##### SQLiteBackend (`sqliteBackend.ts`)
 
-Numatytoji pagrindinė vidinė sistema. Apgaubia esamą SQLite pagrįstą atminties saugyklą, naudodama `src/lib/memory/store.ts`. Automatiškai užregistruojama paleidimo metu.
+Numatytoji pagrindinė vidinė sistema. Ji apgaubia esamą SQLite pagrįstą atminties saugyklą, naudojančią `src/lib/memory/store.ts`. Automatiškai registruojama paleidimo metu.
 
 ```typescript
 import { sqliteBackend } from "./sqliteBackend";
@@ -1046,15 +1050,74 @@ memoryManager.register(sqliteBackend);
 
 Apgaubia esamą Obsidian integraciją (`src/lib/memory/obsidianBackend.ts`). Prisijungia prie Obsidian saugyklos per Obsidian Local REST API.
 
+##### ClaudeMemBackend (`claudeMemBackend.ts`)
+
+Adapteris vietiniam [claude-mem](https://github.com/thedotmack/claude-mem) procesui — tai
+Claude Code / Codex / Cursor atminties įskiepis, kuris fiksuoja programavimo seansus kaip „stebėjimus“.
+Jį užregistravus, `/api/memory` REST maršrutai ir A2A atminties paieška gali skaityti ir rašyti
+tą pačią saugyklą, kurią užpildo claude-mem kabliai.
+
+Procesas susiejamas tik su grįžtamojo ryšio sąsaja, kurią `GenericMemoryBackend` SSRF apsauga sąmoningai atmeta.
+Šis adapteris tos apsaugos nesušvelnina: pagrindinio kompiuterio adresas yra tiesiogiai nustatytas kaip `127.0.0.1`, o konfigūracijos
+schema (`ClaudeMemBackendConfigSchema`, `.strict()`) priima tik:
+
+| Raktas      | Tipas    | Numatytoji reikšmė | Pastabos                                                                                                                        |
+| ----------- | -------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `port`      | skaičius | —                  | Privalomas, 1024–65535. claude-mem proceso prievadas iš jo nustatymų failo (numatytoji reikšmė `37700 + uid % 100`).            |
+| `project`   | eilutė   | —                  | Naudotinas claude-mem projektas. Jei nenustatyta → kiekvienas OmniRoute API raktas susiejamas su atskiru projektu (`apiKeyId`). |
+| `timeoutMs` | skaičius | `5000`             | Kiekvienos užklausos skirtasis laikas, 100–30000.                                                                               |
+
+Įjunkite jį naudodami `PUT /api/settings/memory` ir paleiskite OmniRoute iš naujo (posistemės registruojamos
+vieną kartą, funkcijoje `initMemoryBackends()`):
+
+```json
+{
+  "backendConfigs": { "claude-mem": { "port": 37701, "project": "OmniRoute" } },
+  "fallbackBackends": ["claude-mem"]
+}
+```
+
+Norėdami naudoti jį kaip REST API saugyklą, vietoj to nustatykite `"primaryBackend": "claude-mem"`. Netinkama
+konfigūracija įrašoma į žurnalą (`claude-mem.backend.invalid_config`) ir praleidžiama, todėl SQLite lieka pagrindine posisteme.
+
+Susiejimas ir apribojimai:
+
+- ID yra `claude-mem:<observationId>`; `get`/`delete` ignoruoja kitų posistemių ID neatlikdami
+  tinklo užklausos.
+- `create` → `POST /api/memory/save`; OmniRoute laukai (`apiKeyId`, `sessionId`, `type`,
+  `key`, `metadata`) perduodami claude-mem lauke `metadata.omniroute` ir nuskaitant atkuriami.
+- `search` → `GET /api/search?format=json&type=observations`, apkarpoma iki `maxTokens`
+  (simbolių skaičius / 4). `list` → proceso puslapiuojama stebėjimų galutinė sąsaja (`total` yra apatinė riba — procesas
+  grąžina `hasMore`, o ne skaičių).
+- Kabliais užfiksuoti stebėjimai susiejami taip: `discovery` → `factual`, `decision` → `procedural`, o
+  `bugfix`/`feature`/`refactor`/`change` → `episodic`.
+- **Atnaujinimai nepalaikomi** (`update()` grąžina `false`; stebėjimai yra nekintami), taip pat **nepalaikomas TTL**
+  (`expiresAt` ignoruojamas). claude-mem pašalina vienodų įrašymo operacijų dublikatus, užuot pagal `key` įterpusi naują arba atnaujinusi esamą įrašą.
+- Raginimų įterpimas (`retrieval.ts`) ir `omniroute_memory_*` MCP įrankiai vis dar skaito SQLite
+  tiesiogiai — jie nenaudoja `memoryManager`, todėl ši posistemė jiems duomenų neteikia.
+
+**claude-mem LLM iškvietimų nukreipimas per OmniRoute.** claude-mem glaudina stebėjimus
+naudodama LLM (numatytoji reikšmė: Claude Agent SDK). Jos `openai-compatible` teikėją galima nukreipti
+į OmniRoute ir taip pasinaudoti kombinacijų atsarginiu perjungimu bei išlaidų stebėjimu. Faile `~/.claude-mem/settings.json`:
+
+```json
+{
+  "CLAUDE_MEM_PROVIDER": "openai-compatible",
+  "CLAUDE_MEM_OPENAI_COMPAT_BASE_URL": "http://localhost:20128/v1",
+  "CLAUDE_MEM_OPENAI_COMPAT_API_KEY": "<OmniRoute API raktas>",
+  "CLAUDE_MEM_OPENAI_COMPAT_MODEL": "<OmniRoute modelis arba kombinacija>"
+}
+```
+
 ### Nustatymai
 
-Atminties vidinės sistemos nustatymai saugomi programos nustatymų lentelėje ir valdomi per `src/lib/memory/settings.ts`:
+Atminties posistemės nustatymai saugomi programos nustatymų lentelėje ir valdomi naudojant `src/lib/memory/settings.ts`:
 
-| Nustatymas                     | Aplinkos / konfigūracijos raktas | Numatytoji reikšmė | Aprašymas                                             |
-| ------------------------------ | -------------------------------- | ------------------ | ----------------------------------------------------- |
-| Pagrindinė vidinė sistema      | `memoryPrimaryBackend`           | `"sqlite"`         | Pagrindinės vidinės sistemos ID                       |
-| Atsarginės vidinės sistemos    | `memoryFallbackBackends`         | `[]`               | Sutvarkyti atsarginių vidinių sistemų ID              |
-| Vidinių sistemų konfigūracijos | `memoryBackendConfigs`           | `{}`               | Kiekvienos vidinės sistemos konfigūracijos perrašymai |
+| Nustatymas                | Aplinkos / konfigūracijos raktas | Numatytoji reikšmė | Aprašymas                                     |
+| ------------------------- | -------------------------------- | ------------------ | --------------------------------------------- |
+| Pagrindinė posistemė      | `memoryPrimaryBackend`           | `"sqlite"`         | Pagrindinės posistemės ID                     |
+| Atsarginės posistemės     | `memoryFallbackBackends`         | `[]`               | Sutvarkytas atsarginių posistemių ID sąrašas  |
+| Posistemių konfigūracijos | `memoryBackendConfigs`           | `{}`               | Kiekvienos posistemės konfigūracijos perrašos |
 
 Nustatymai normalizuojami naudojant `normalizeMemorySettings()` ir talpinami podėlyje funkcijoje `getMemorySettings()`.
 
@@ -1062,23 +1125,24 @@ Nustatymai normalizuojami naudojant `normalizeMemorySettings()` ir talpinami pod
 
 ```
 Programos paleidimas
-  → index.ts importai (šalutinis poveikis): užregistruoja SQLiteBackend
+  → index.ts importai (šalutinis poveikis): užregistruojama SQLiteBackend
   → initMemoryBackends() iškviečiama iš programos gyvavimo ciklo:
-      1. Įkelti nustatymus (getMemorySettings)
-      2. Sukonfigūruoti pagrindinę ir atsargines sistemas
-      3. Inicializuoti visas vidines sistemas (būklės patikra)
-      4. Paruošta užklausoms
+      1. Įkeliami nustatymai (getMemorySettings)
+      1b. Užregistruojamos pasirinktinės posistemės, esančios backendConfigs (claude-mem)
+      2. Sukonfigūruojama pagrindinė ir atsarginės posistemės
+      3. Inicializuojamos visos posistemės (būklės patikra)
+      4. Pasirengta užklausoms
 ```
 
-### Naujos vidinės sistemos pridėjimas
+### Naujos posistemės pridėjimas
 
 1. **Įgyvendinkite `MemoryBackend`** sąsają faile `src/lib/memory/<name>Backend.ts`
 2. **Eksportuokite** iš `src/lib/memory/index.ts`
 3. **Užregistruokite** naudodami `memoryManager.register(yourBackend)` paleidimo metu
-4. **Sukonfigūruokite** per nustatymus: nustatykite `memoryPrimaryBackend` į savo vidinės sistemos ID
-5. **Testuokite**, naudodami `src/lib/memory/__tests__/generic-backend.test.ts` kaip pavyzdį
+4. **Sukonfigūruokite** nustatymuose: nustatykite `memoryPrimaryBackend` į savo posistemės ID
+5. **Testuokite**, kaip pavyzdį naudodami `src/lib/memory/__tests__/generic-backend.test.ts`
 
-#### Pavyzdys: Brain vidinė sistema
+#### Pavyzdys: Brain posistemė
 
 ```typescript
 import { createGenericMemoryBackend } from "./genericBackend";
@@ -1096,7 +1160,7 @@ const brainBackend = createGenericMemoryBackend("brain", "BK-Brain", {
 memoryManager.register(brainBackend);
 ```
 
-### Patikrinimas
+### Tikrinimas
 
 #### Vienetų testai
 
@@ -1107,16 +1171,16 @@ npx vitest run src/lib/memory/__tests__/generic-backend.test.ts --reporter=verbo
 Tikėtinas rezultatas: **35 testai, visi sėkmingi**, apimantys:
 
 - Konstruktorių (2)
-- Būklės patikrą (4) — sėkmę, 500 klaidą, tinklo klaidą, delsą
-- Inicializavimą (2) — sėkmę, nesėkmę
-- Sukūrimą (2) — numatytąjį galinį tašką, pasirinktinį galinį tašką
-- Gavimą (4) — sėkmę, 404 → null, ne 404 išimties išmetimą, pasirinktinius kelio parametrus
-- Atnaujinimą (2) — sėkmę, 404 → false
-- Šalinimą (2) — sėkmę, 404 → false
-- Sąrašo gavimą (2) — užklausos parametrus, pasirinktinius parametrų pavadinimus
-- Paiešką (3) — užklausos parametrus, pasirinktinį galinį tašką, parinkčių serializavimą
-- Autentifikavimo antraštes (2) — Bearer prieigos raktą, pasirinktines antraštes
-- Kūrimo funkciją (1)
+- Būklės patikrą (4) — sėkmė, 500 klaida, tinklo klaida, delsa
+- Inicializavimą (2) — sėkmė, nesėkmė
+- Sukūrimą (2) — numatytoji galutinė sąsaja, pasirinktinė galutinė sąsaja
+- Gavimą (4) — sėkmė, 404 → null, ne 404 klaidos išmetimas, pasirinktiniai kelio parametrai
+- Atnaujinimą (2) — sėkmė, 404 → false
+- Ištrynimą (2) — sėkmė, 404 → false
+- Sąrašo gavimą (2) — užklausos parametrai, pasirinktiniai parametrų pavadinimai
+- Paiešką (3) — užklausos parametrai, pasirinktinė galutinė sąsaja, parinkčių serializavimas
+- Autentifikavimo antraštes (2) — Bearer prieigos raktas, pasirinktinės antraštės
+- Gamyklą (1)
 
 #### Tipų patikra
 

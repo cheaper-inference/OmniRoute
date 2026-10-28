@@ -1,6 +1,6 @@
 # Remote Mode (ქართული)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -247,56 +247,48 @@ xAI-ის ან Grok CLI-ის დაკავშირებისას `14
 
 ---
 
-## ტოკენების მართვა
+## Token-ების მართვა
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ საიდუმლოს ბეჭდავს მხოლოდ ერთხელ — დააკოპირეთ ახლავე
-omniroute tokens list                 # შენიღბული: id, სახელი, scope, პრეფიქსი, სტატუსი, ვადის გასვლა
-omniroute tokens revoke <id|prefix>   # დაუყოვნებლივ გაუქმება
-omniroute tokens scopes               # სამი scope-ის განმარტება
+#   ↳ აჩვენებს საიდუმლოს ერთხელ — დააკოპირეთ ახლავე
+omniroute tokens list                 # ნიღბიანი: id, name, scope, prefix, status, expiry
+omniroute tokens revoke <id|prefix>   # მაშინვე გააუქმეთ
+omniroute tokens scopes               # ახსენით სამივე scope
 ```
 
-`tokens` ბრძანებებს **ადმინისტრატორის** ავტორიზაციის მონაცემები სჭირდება. ტოკენების
-მართვა ასევე შეგიძლიათ დაფაზე, **პარამეტრები → წვდომის ტოკენები** განყოფილებაში
-(შექმნა, გაუქმება, ერთჯერადი კოპირება).
+`tokens` ბრძანებები მოითხოვს **admin** credential-ს. token-ების მართვა ასევე შესაძლებელია დაფაში, **Settings → Access Tokens**-ში (შექმნა, გაუქმება, ერთჯერადი კოპირება).
+
+token არასდროს შეიძლება გაიცეს უფრო მეტი პრივილეგიით, ვიდრე მისი შემქმნელი ფლობს. `admin` token-ს მხოლოდ ოპერატორი ქმნის — დაფის სესია, სერვერზე ლოკალური CLI ან `omniroute connect` პაროლით. მანქანური credential-ები (`admin` წვდომის token ან `manage`/`admin` scope-ის API გასაღები) მხოლოდ `write` და `read` token-ების გაცემას შეძლებენ — თუ მათ `--scope admin` სთხოვენ, აბრუნებენ `403`-ს. შესვლის გამორთვა არ ხსნის token-ების გაცემას: ნებისმიერი scope-ის წვდომის token არის credential, რომელსაც ყოველთვის ავთენტიფიცირებული მარშრუტები იღებენ, ამიტომ ანონიმური გამოძახება ნებისმიერ scope-ზე იღებს `401`-ს.
 
 ---
 
-## კოდირების CLI-ის კონფიგურაცია დისტანციური კატალოგიდან
+## CLI-ის კონფიგურაცია დისტანციური კატალოგიდან
 
-`omniroute configure` კითხულობს **აქტიური სერვერის** მოდელების მიმდინარე კატალოგს
-და კონფიგურაციას **თქვენს** მანქანაზე წერს.
+`omniroute configure` კითხულობს **აქტიური სერვერის** ცოცხალ მოდელების კატალოგს და წერს კონფიგურაციას **თქვენს** მანქანაზე.
 
 ```bash
 omniroute configure codex
-#   პროვაიდერები: glm, kmc, ollamacloud, opencode-go, …
-#   პროვაიდერი: glm
-#   მოდელის id: glm/glm-5.2
-#   ✔ ჩაიწერა ~/.codex/glm52.config.toml
-#   გამოყენება:  codex --profile glm52
+#   Providers: glm, kmc, ollamacloud, opencode-go, …
+#   Provider: glm
+#   Model id: glm/glm-5.2
+#   ✔ Wrote ~/.codex/glm52.config.toml
+#   Use it:  codex --profile glm52
 
 # არაინტერაქტიული
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# ხშირად გამოყენებული მოდელის ინტერაქტიული ამომრჩევლის თავში დატოვება
+# ხშირად გამოყენებული მოდელი ინტერაქტიული ამრჩევის ზედა ნაწილში შეინახეთ
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-ამომრჩეველი ლოკალურ `model-preferences.json` ფაილში ინახავს მხოლოდ მოდელის ID-ებს
-(არასდროს URL-ებს ან ავტორიზაციის მონაცემებს), კონტექსტისა და CLI სამიზნის მიხედვით.
-რჩეულები უახლეს არჩევანებამდე გამოჩნდება; არჩეული მოდელის ამ კონტექსტის/სამიზნის
-სიიდან ამოსაღებად გამოიყენეთ `--unfavorite`.
+ამრჩევი ლოკალურ `model-preferences.json` ფაილში ინახავს მხოლოდ მოდელის ID-ებს (არასდროს URL-ებს ან credential-ებს), კონტექსტისა და CLI სამიზნის მიხედვით შემოფარგლულს. რჩეულები ჩნდება ბოლო არჩევანების წინ; გამოიყენეთ `--unfavorite` არჩეული მოდელის ამ კონტექსტის/სამიზნის სიიდან მოსაშორებლად.
 
-ჩაწერილი პროფილი ინფერენსის გასაღებს env var-ის მეშვეობით მიმართავს
-(`OMNIROUTE_API_KEY`) — საიდუმლო დისკზე არასდროს იწერება. Codex-ის ერთჯერადი
-საბაზისო გამართვისთვის (`[model_providers.omniroute]` ბლოკი) იხილეთ
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+ჩაწერილი პროფილი inference გასაღებს მიმართავს გარემოს ცვლადით (`OMNIROUTE_API_KEY`) — საიდუმლო არასდროს იწერება დისკზე. Codex-ის ერთჯერადი ძირითადი დაყენებისთვის (`[model_providers.omniroute]` ბლოკი) იხილეთ [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### CLI-ის გაშვება დისტანციურ სერვერთან (კონფიგურაციის ჩაწერის გარეშე)
+### CLI-ის გაშვება დისტანციურზე (კონფიგურაციის ფაილის ჩაწერის გარეშე)
 
-`omniroute run <target>` ასევე ითვალისწინებს აქტიურ კონტექსტს: დისტანციური საბაზისო
-URL და კონტექსტის ავტორიზაციის მონაცემები მხოლოდ გაშვებულ პროცესში ინექცირდება.
+`omniroute run <target>` ასევე ითვალისწინებს აქტიურ context-ს: დისტანციური base URL და context-ის credential შეიყვანება მხოლოდ გაშვებულ პროცესში.
 
 ```bash
 omniroute connect 192.168.0.15
@@ -304,113 +296,103 @@ omniroute run claude   --model openai/gpt-5.4          # Claude Code → დი�
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# ზუსტად იმის წინასწარი ნახვა, რაც გაეშვებოდა (მხოლოდ env გასაღებების სახელები, არასდროს მნიშვნელობები):
+# ზუსტად რა გაეშვება, წინასწარი ნახვა (მხოლოდ env ᲡᲐᲮᲔᲚᲔᲑᲘ, არასდროს მნიშვნელობები):
 omniroute run codex --dry-run --json
 ```
 
-სამიზნეები: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(ერთიანი წყარო: `bin/cli/cli-manifest.mjs`). Qwen და Gemini მუშაობენ დროებით,
-იზოლირებულ home-ში, რომელიც გასვლისას იშლება, ამიტომ გაშვება თქვენს პირად
-ხელსაწყოთა კონფიგურაციას არასდროს ეხება — და არც მასში ჟონავს.
+სამიზნეები: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (ერთი წყარო: `bin/cli/cli-manifest.mjs`). Qwen და Gemini მუშაობს დროებითი, იზოლირებული home-ით, რომელიც გასვლისას იშლება, რათა გაშვება არასდროს შეეხოს თქვენს პირად ინსტრუმენტების კონფიგურაციას და არ გაჟონოს მასში.
 
-### თითოეული CLI-ის გამართვის ბრძანებები
+### დაყენების ბრძანებები CLI-ის მიხედვით
 
-თითოეულ მხარდაჭერილ CLI-ს აქვს დისტანციური გარემოს მცოდნე გამართვის ბრძანება
-(ყველა ითვალისწინებს აქტიურ კონტექსტს ან `--remote <url> --api-key <key>`-ს):
+თითოეულ მხარდაჭერილ CLI-ს აქვს დისტანციის გათვალისწინებით დაყენების ბრძანება (ყველა ითვალისწინებს აქტიურ context-ს ან `--remote <url> --api-key <key>`-ს):
 
-| CLI         | ბრძანება                   | რას წერს                                                                                                                                                                                                           |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` პროფილები (თითოეული მოდელისთვის)                                                                                                                                                     |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (თითოეული მოდელისთვის)                                                                                                                                                   |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — `omniroute` OpenAI-თან თავსებადი პროვაიდერი კატალოგის ყველა მოდელით (გაუშვით `opencode -m omniroute/<model>`)                                                                 |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI რეჟიმი) + ამოსაბეჭდად გამოაქვს VS Code გაფართოების პარამეტრები ჩასასმელად (OpenAI-თან თავსებადი, საბაზისო URL `/v1`-ის **გარეშე**)                                 |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code-ის `kilocode.*` პარამეტრები — OpenAI-თან თავსებადი, საბაზისო URL `/v1`-ით                                                                                          |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` `/v1`-ით, გასაღები `${{ secrets.OMNIROUTE_API_KEY }}`-ის მეშვეობით                                                        |
-| Cursor      | `omniroute setup-cursor`   | ამოსაბეჭდად გამოაქვს აპში შესასრულებელი ნაბიჯები (პარამეტრები → მოდელები → OpenAI-ის საბაზისო URL-ის ჩანაცვლება `/v1`-ით + გასაღები + მოდელი). Cursor-ის კონფიგურაცია გაუმჭვირვალე SQLite-ია — მხოლოდ ჩატის პანელი |
-| Roo Code    | `omniroute setup-roo`      | წერს Roo-ს იმპორტის JSON-ს (`~/.omniroute/roo-settings.json`) + აყენებს `roo-cline.autoImportSettingsPath`-ს + ამოსაბეჭდად გამოაქვს UI-ში შესასრულებელი ნაბიჯები (OpenAI-თან თავსებადი, საბაზისო URL `/v1`-ით)     |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` პროვაიდერი, `base_url` `/v1`-ით, გასაღები `$OMNIROUTE_API_KEY`-ის მეშვეობით                                                                                         |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` `/v1`-ის **გარეშე** + `GOOSE_MODEL`) + გარემოს ცვლადების ინსტრუქცია                                                                         |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` `/v1`-ის **გარეშე** + `model: openai/<id>`) + გარემოს ცვლადების ინსტრუქცია (`aider --message --yes`)                                                                        |
-| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4-ის `modelProviders.openai` ჩანაწერი + `OMNIROUTE_API_KEY` ფაილში `~/.qwen/.env`                                                                                                         |
+| CLI         | ბრძანება                   | რას წერს                                                                                                                                                                                |
+| ----------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` პროფილები (მოდელის მიხედვით)                                                                                                                              |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (მოდელის მიხედვით)                                                                                                                            |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — openai-თან თავსებადი `omniroute` provider კატალოგის ყველა მოდელით (გაუშვით `opencode -m omniroute/<model>`)                                        |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI რეჟიმი) + ბეჭდავს VS Code გაფართოების პარამეტრებს ჩასასმელად (OpenAI-compatible, Base URL **`/v1`-ის გარეშე**)                          |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` პარამეტრები — OpenAI-compatible, Base URL **`/v1`-ით**                                                                     |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **`/v1`-ით**, გასაღები `${{ secrets.OMNIROUTE_API_KEY }}`-ით                                   |
+| Cursor      | `omniroute setup-cursor`   | ბეჭდავს ნაბიჯებს აპლიკაციაში (Settings → Models → Override OpenAI Base URL **`/v1`-ით** + გასაღები + მოდელი). Cursor-ის კონფიგურაცია არაგამჭვირვალე SQLite-ია — მხოლოდ chat პანელისთვის |
+| Roo Code    | `omniroute setup-roo`      | წერს Roo იმპორტის JSON-ს (`~/.omniroute/roo-settings.json`) + ადგენს `roo-cline.autoImportSettingsPath`-ს + ბეჭდავს UI ნაბიჯებს (OpenAI-compatible, Base URL **`/v1`-ით**)              |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` provider, `base_url` **`/v1`-ით**, გასაღები `$OMNIROUTE_API_KEY`-ით                                                                      |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **`/v1`-ით**, გასაღებს Zed კითხულობს `$OMNIROUTE_API_KEY`-იდან (არასდროს იწერება)              |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **`/v1`-ის გარეშე** + `GOOSE_MODEL`) + env რეცეპტი                                                               |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **`/v1`-ის გარეშე** + `model: openai/<id>`) + env რეცეპტი (`aider --message --yes`)                                                              |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` ჩანაწერი + `OMNIROUTE_API_KEY` `~/.qwen/.env`-ში                                                                                     |
 
 ```bash
-# OpenCode (OpenAI-თან თავსებადი პროვაიდერი, კატალოგის ყველა მოდელი, დისტანციური VPS)
+# OpenCode (openai-თან თავსებადი provider, კატალოგის ყველა მოდელი, დისტანციური VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # მხოლოდ შესაბამისი მოდელების დატოვება
-opencode -m omniroute/glm/glm-5.2 "..."          # ჯერ OMNIROUTE_API_KEY-ის ექსპორტი
+omniroute setup-opencode --only glm,kimi        # დატოვე მხოლოდ შესაბამისი მოდელები
+opencode -m omniroute/glm/glm-5.2 "..."          # ჯერ ექსპორტი OMNIROUTE_API_KEY
 ```
 
-> OpenCode-ს ასევე აქვს უფრო ფუნქციური **მოდულის** ინტეგრაცია: `omniroute setup opencode`
-> (`--remote`-ის მეშვეობით ახლა დისტანციურ რეჟიმსაც უჭერს მხარს), რომელიც აყენებს `@omniroute/opencode-plugin`-ს.
-> `setup-opencode` არის მსუბუქი, OpenAI-თან თავსებადი ალტერნატივა. API გასაღები
-> მითითებულია `{env:OMNIROUTE_API_KEY}`-ის მეშვეობით — ის არასოდეს იწერება დისკზე.
+> OpenCode-ს ასევე აქვს უფრო მდიდარი **plugin** ინტეგრაცია: `omniroute setup opencode`
+> (უკვე დისტანციისთვის მორგებული `--remote`-ით) აყენებს `@omniroute/opencode-plugin`-ს.
+> `setup-opencode` არის მსუბუქი openai-თან თავსებადი ალტერნატივა. API გასაღები მიმართულია
+> `{env:OMNIROUTE_API_KEY}`-ით — არასდროს იწერება დისკზე.
 >
-> OpenCode v2-ში მის ნაცვლად გამოიყენეთ `@omniroute/opencode-plugin-v2`: იგივე კატალოგი,
-> განსხვავებული ჩამტვირთავის კონტრაქტი. როდესაც ინტეგრაცია დაკავშირებულია, ის გასაღებს OpenCode-ის საკუთარი ავტორიზაციის მონაცემების
-> საცავიდან კითხულობს, ამიტომ დისტანციური კარიბჭისთვის `opencode.json`-ში გასაღები საერთოდ არ არის საჭირო.
+> OpenCode v2-ზე გამოიყენეთ `@omniroute/opencode-plugin-v2` მის ნაცვლად: იგივე კატალოგი,
+> სხვა loader კონტრაქტი. ის გასაღებს კითხულობს OpenCode-ის საკუთარი credential საცავიდან,
+> როცა ინტეგრაცია დაკავშირებულია, ასე რომ დისტანციურ gateway-ს `opencode.json`-ში საერთოდ
+> არ სჭირდება გასაღები.
 
 ---
 
 ## კონტექსტების მართვა (სერვერებს შორის გადართვა)
 
-**კონტექსტი** არის შენახული სერვერი (baseUrl + ავტორიზაციის მონაცემი + წვდომის დონე). `omniroute connect`
-ქმნის კონტექსტს და ააქტიურებს მას; ამის შემდეგ ყველა ბრძანება სწორედ ამ სერვერზე სრულდება. მართეთ
-კონტექსტები და გადაერთეთ მათ შორის `omniroute contexts`-ის მეშვეობით:
+**კონტექსტი** არის შენახული სერვერი (baseUrl + სერთიფიკატი + scope). `omniroute connect` ქმნის მას და აქტიურს ხდის; ამის შემდეგ ყველა ბრძანება მასზეა მიმართული. მართეთ და გადართეთ მათ შორის `omniroute contexts`-ის გამოყენებით:
 
 ```bash
-omniroute contexts list            # ყველა კონტექსტი; აქტიური მონიშნულია ●-ით
-omniroute contexts current         # აქტიური სერვერი, ავტორიზაციის სტატუსი, წვდომის დონე
+omniroute contexts list            # all contexts; the active one is marked ●
+omniroute contexts current         # the active server, auth status, scope
 ```
 
 ```text
-  | სახელი  | საბაზისო URL              | ავტორიზაცია | წვდომა | აღწერა
-● | vps     | http://100.67.86.91:20128 | token       | admin  | დისტანციური OmniRoute (…)
-  | default | http://localhost:20128    | ✗           |        |
+  | სახელი   | ბაზის URL                 | ავთ.  | Scope | აღწერა
+● | vps     | http://100.67.86.91:20128 | token | admin | დისტანციური OmniRoute (…)
+  | default | http://localhost:20128    | ✗     |       |
 ```
 
-**სერვერებს შორის გადართვა** — ყოველი შემდგომი ბრძანება აქტიურ კონტექსტს მიჰყვება:
+**სერვერების გადართვა** — ყოველი მომდევნო ბრძანება მიჰყვება აქტიურ კონტექსტს:
 
 ```bash
-omniroute contexts use vps         # → ახლა ყველა ბრძანება დისტანციურ VPS-ზე სრულდება
-omniroute tokens list              #   (სრულდება VPS-ის მიმართ)
+omniroute contexts use vps         # → all commands now hit the remote VPS
+omniroute tokens list              #   (მუშაობს VPS-ის წინააღმდეგ)
 
-omniroute contexts use default     # → დაბრუნება localhost-ზე
-omniroute tokens list              #   (სრულდება ლოკალური სერვერის მიმართ)
+omniroute contexts use default     # → back to localhost
+omniroute tokens list              #   (მუშაობს ლოკალური სერვერის წინააღმდეგ)
 ```
 
-**კონტექსტის ხელით დამატება** (`connect`-ის ნაცვლად), დათვალიერება ან სახელის გადარქმევა:
+**კონტექსტის ხელით დამატება** (`connect`-ის ნაცვლად), შემოწმება ან გადარქმევა:
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
   --access-token oma_live_xxxx --scope write --description "staging box"
-omniroute contexts show staging    # ერთი კონტექსტის სრული დეტალები
+omniroute contexts show staging    # სრული დეტალები ერთი კონტექსტისთვის
 omniroute contexts rename staging stg
 ```
 
-**კონტექსტის წაშლა** — ითხოვს დადასტურებას; მის გამოსატოვებლად მიუთითეთ `--yes`
-(აუცილებელია სკრიპტებისთვის / არაინტერაქციული გარსებისთვის, რომლებიც წინააღმდეგ შემთხვევაში უსაფრთხოდ უარყოფენ მოქმედებას):
+**კონტექსტის წაშლა** — ითხოვს დადასტურებას; გამოიყენეთ `--yes` მის გამოსატოვებლად (საჭიროა სკრიპტებისთვის / არაინტერაქტიული გარსებისთვის, რომლებიც სხვა შემთხვევაში უსაფრთხოდ უარს ამბობენ):
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> `default`-ის (localhost) წაშლა შეუძლებელია. აქტიური კონტექსტის წაშლისას სისტემა
-> `default`-ზე ბრუნდება. რჩევა: კონტექსტის წაშლა მხოლოდ **ლოკალურად** შენახულ ავტორიზაციის მონაცემს შლის —
-> წვდომის რეალურად გასაუქმებლად სერვერზე ტოკენი გააუქმეთ ბრძანებით `omniroute tokens revoke <id>`.
+> `default` (localhost) ვერ წაიშლება. აქტიური კონტექსტის წაშლა `default`-ზე ბრუნდება. რჩევა: კონტექსტის წაშლა მხოლოდ შლის **ლოკალურად** შენახულ სერთიფიკატს — გააუქმეთ ტოკენი სერვერზე `omniroute tokens revoke <id>`-ის გამოყენებით წვდომის სრულად გასაუქმებლად.
 
-კონტექსტების **ექსპორტი / იმპორტი** (მაგალითად, მათ სხვა კომპიუტერზე გადასატანად). ახალი კონტექსტებისთვის
-ინახება მხოლოდ keychain-ის მითითება; როდესაც OS-ის keychain ხელმისაწვდომია,
-ავტორიზაციის მონაცემები ექსპორტში არ კოპირდება:
+**კონტექსტების ექსპორტი / იმპორტი** (მაგ., მათი მანქანებს შორის გადასატანად). ექსპორტი ნაგულისხმევად გამოტოვებს სერთიფიკატებს, მათ შორის ფაილის სარეზერვო ასლის მიერ შენახულ სერთიფიკატებს. გამოიყენეთ `--include-secrets` მკაფიოდ, როდესაც საჭიროა პორტატული სერთიფიკატების შემცველი სარეზერვო ასლი:
 
 ```bash
-omniroute contexts export --out contexts.json     # ნაგულისხმევი: stdout
-omniroute contexts import contexts.json            # გადაწერა; არსებულის შესანარჩუნებლად გამოიყენეთ --merge
-omniroute contexts migrate --yes                  # ძველი ღია ტექსტის ტოკენების keychain-ში გადატანა
+omniroute contexts export --out contexts.json     # რედაქტირებული; ნაგულისხმევი დანიშნულება: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # გადაწერა; --merge არსებულის შესანარჩუნებლად
+omniroute contexts migrate --yes                  # ძველი plaintext ტოკენების გადატანა keychain-ში
 ```
 
-headless სისტემებზე, სადაც OS-ის გამოსადეგი keychain არ არის ხელმისაწვდომი, CLI
-იყენებს `config.json`-ს `0600` რეჟიმით და ერთჯერად გაფრთხილებას აჩვენებს. ამ
-სარეზერვო მექანიზმიდან მიღებული ექსპორტები (და მიგრაციამდე არსებული ნებისმიერი ძველი კონფიგურაცია) საიდუმლო მასალად მიიჩნიეთ.
+`--include-secrets` აგვარებს keychain-ის მითითებებს ექსპორტამდე და ვერ ხერხდება, თუ რომელიმე მითითებული სერთიფიკატის წაკითხვა შეუძლებელია. `--no-secrets` ყოველთვის უპირატესია. ექსპორტის ფაილები იწერება ატომურად `0600` რეჟიმით. განიხილეთ მკაფიო საიდუმლოების შემცველი ექსპორტი, როგორც საიდუმლო მასალა. უსათაურო სისტემებზე გამოსაყენებელი OS keychain-ის გარეშე, CLI ბრუნდება `config.json`-ზე `0600` რეჟიმით და ბეჭდავს ერთჯერად გაფრთხილებას; ნაგულისხმევი ექსპორტი რჩება რედაქტირებული ამ რეჟიმში.
 
 ---
 

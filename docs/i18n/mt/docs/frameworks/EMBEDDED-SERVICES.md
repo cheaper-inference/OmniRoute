@@ -1,16 +1,16 @@
 # Embedded Services (Malti)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
 
 ---
 
 > **Verżjoni:** v3.8.44
-> **Aġġornat l-aħħar:** 2026-07-03
-> **Udjenza:** Inġiniera li jżidu, iżommu, jew jiddibaggjaw servizzi integrati (9Router, CLIProxyAPI, Mux, Bifrost).
+> **Aġġornat l-aħħar:** 2026-09-16
+> **Udjenza:** Inġiniera li jżidu, iżommu, jew jiddebaggjaw servizzi inkorporati (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
 
-Is-servizzi integrati huma għodod sidecar ta’ proċessi installati lokalment li OmniRoute jinstalla, jissorvelja, u
+Is-servizzi inkorporati huma għodod sidecar ta’ proċessi installati lokalment li OmniRoute jinstalla, jissorvelja, u
 jesponi bħala miri tar-routing tal-ewwel klassi. Għall-kuntrarju tal-fornituri esterni (li jiġu aċċessati permezz tal-internet
-b’API keys), is-servizzi integrati jaħdmu fuq l-istess magna bħal OmniRoute u jikkomunikaw permezz tal-loopback.
+bl-użu ta’ API keys), is-servizzi inkorporati jitħaddmu fuq l-istess magna bħal OmniRoute u jikkomunikaw permezz tal-loopback.
 
 ---
 
@@ -31,33 +31,35 @@ b’API keys), is-servizzi integrati jaħdmu fuq l-istess magna bħal OmniRoute 
 
 ### Għaliex servizzi integrati?
 
-Hemm ħames servizzi integrati:
+Hemm seba' servizzi integrati:
 
-| Servizz         | Pakkett npm                                      | Port predefinit | Għan                                                                                                                                                                                                                                  |
-| --------------- | ------------------------------------------------ | :-------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                        |      20130      | Router tal-AI li OmniRoute jista’ juża bħala sottofornitur. Mudelli esposti bħala `9router/{sub}/{model}`                                                                                                                             |
-| **CLIProxyAPI** | Binarju tar-rilaxx ta’ GitHub (`cliproxy`)       |      8317       | Adapter proxy lokali għall-flussi ta’ awtentikazzjoni tal-Anthropic CLI. Jipprovdi routing alternattiv meta jiskadu t-tokens OAuth                                                                                                    |
-| **Mux**         | `mux` (`mux server` mingħajr interfaċċa grafika) |      8322       | Daemon lokali għall-orkestrazzjoni tal-aġenti (coder/mux). Immaniġġjat biss tul iċ-ċiklu tal-ħajja — mhuwiex mira tar-routing (l-ebda proxying tal-LLM).                                                                              |
-| **Bifrost**     | `@maximhq/bifrost`                               |      8080       | Backend relay ta’ gateway tal-AI miktub bil-Go. Meta jkun qed jaħdem, jintgħażel awtomatikament mir-rotta relay (`/v1/relay/`)                                                                                                        |
-| **Dario**       | `@askalf/dario`                                  |      3456       | Proxy ta’ abbonament Claude — alternattiva/failover għal CLIProxyAPI għal traffiku fil-format ta’ Claude Code; iċ-ċavetta injettata ssir `DARIO_ADMIN_TOKEN` li tikkontrolla l-aċċess għall-pjan ta’ kontroll OAuth `/admin/*` tiegħu |
+| Servizz         | Pakkett npm                                      | Port predefinit | Għan                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------ | :-------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                        |      20130      | Router tal-IA li OmniRoute jista' juża bħala sottoproveditur. Il-mudelli jiġu esposti bħala `9router/{sub}/{model}`                                                                                                                                                                                                                                                                                            |
+| **CLIProxyAPI** | Binarju tar-rilaxx ta' GitHub (`cliproxy`)       |      8317       | Adattatur proxy lokali għall-flussi ta' awtentikazzjoni tal-Anthropic CLI. Jipprovdi routing alternattiv meta jiskadu t-tokens OAuth                                                                                                                                                                                                                                                                           |
+| **Mux**         | `mux` (`mux server` mingħajr interfaċċa grafika) |      8322       | Daemon lokali għall-orkestrazzjoni tal-aġenti (coder/mux). Jiġi ġestit biss iċ-ċiklu tal-ħajja tiegħu — mhuwiex destinazzjoni tar-routing (ebda proxying tal-LLM).                                                                                                                                                                                                                                             |
+| **Bifrost**     | `@maximhq/bifrost`                               |      8080       | Backend relay ta' gateway tal-IA bil-Go. Meta jkun qed jaħdem, jintgħażel awtomatikament mir-rotta relay (`/v1/relay/`)                                                                                                                                                                                                                                                                                        |
+| **Dario**       | `@askalf/dario`                                  |      3456       | Proxy għall-abbonament ta' Claude — alternattiva/failover għal CLIProxyAPI għal traffiku fl-għamla ta' Claude Code; iċ-ċavetta injettata ssir `DARIO_ADMIN_TOKEN`, li tikkontrolla l-aċċess għall-pjan ta' kontroll OAuth `/admin/*` tiegħu                                                                                                                                                                    |
+| **open-wa**     | `@open-wa/wa-automate`                           |      8323       | Awtomazzjoni ta' WhatsApp Web (Chromium mingħajr interfaċċa grafika permezz ta' Puppeteer). Jiġi ġestit biss iċ-ċiklu tal-ħajja tiegħu — mhuwiex destinazzjoni tar-routing.                                                                                                                                                                                                                                    |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                             |      20135      | Servizz sidecar għall-kompressjoni tal-prompts — mudell ONNX reali LLMLingua-2 (port JS/TS tal-algoritmu ta' Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` jibgħat `/compress` lejh permezz ta' HTTP, u jaqleb għall-backend tal-worker thread fl-istess proċess meta s-sidecar ma jkunx disponibbli. Jiġi ġestit biss iċ-ċiklu tal-ħajja tiegħu — mhuwiex destinazzjoni tar-routing. |
 
-Il-ħames servizzi kollha jsegwu l-istess mudell ta’ superviżjoni:
+Is-seba' kollha jsegwu l-istess mudell ta' superviżjoni:
 
-- OmniRoute jinstallahom taħt `DATA_DIR/services/{name}/` (iżolati mill-`package.json` ta’ OmniRoute stess)
-- OmniRoute iniedihom u jimmonitorjahom bħala proċessi tfal
-- OmniRoute jinjetta API key effimera fl-ambjent tal-proċess tifel u jdawwarha mingħajr waqfien tas-servizz (fejn applikabbli)
+- OmniRoute jinstallahom taħt `DATA_DIR/services/{name}/` (iżolati mill-`package.json` ta' OmniRoute stess)
+- OmniRoute iniedihom u jimmonitorjahom bħala proċessi sekondarji
+- OmniRoute jinjetta ċavetta API temporanja fl-ambjent tal-proċess sekondarju u jdawwarha mingħajr waqfien tas-servizz (fejn applikabbli)
 - Ir-rotot kollha tal-ġestjoni (`/api/services/*`) huma **LOCAL_ONLY** — aċċessibbli biss mil-loopback (regola stretta #17)
 
 ### Deċiżjonijiet ewlenin (mill-pjan tad-disinn)
 
-| Deċiżjoni                                         | Valur                                                                                  |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Aċċess mid-dashboard għall-UI nattiva ta’ 9Router | Reverse proxy f’`/dashboard/providers/services/9router/embed/*`                        |
-| Mekkaniżmu tal-installazzjoni                     | `npm install {package}` permezz ta’ `execFile` (mingħajr interpolazzjoni tax-shell)    |
-| Mod tal-konsum                                    | Fornitur irreġistrat bħala `9router/{sub}/{model}` fil-magna tar-routing               |
-| Ġestjoni tal-API key                              | OmniRoute jiġġenera, jikkripta waqt il-ħażna (AES-256-GCM), u jinjetta permezz tal-env |
-| Post fid-dashboard                                | `/dashboard/providers/services` (tliet tabs)                                           |
-| Tnedija awtomatika                                | Toggle għal kull servizz, mitfi b’mod predefinit                                       |
+| Deċiżjoni                                         | Valur                                                                                     |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Aċċess mid-dashboard għall-UI nattiva ta' 9Router | Reverse proxy f'`/dashboard/providers/services/9router/embed/*`                           |
+| Mekkaniżmu tal-installazzjoni                     | `npm install {package}` permezz ta' `execFile` (mingħajr interpolazzjoni tas-shell)       |
+| Modalità tal-użu                                  | Il-proveditur irreġistrat bħala `9router/{sub}/{model}` fil-magna tar-routing             |
+| Ġestjoni taċ-ċavetta API                          | OmniRoute jiġġenera, jikkripta waqt il-ħżin (AES-256-GCM), u jinjetta permezz tal-ambjent |
+| Post fid-dashboard                                | `/dashboard/providers/services` (tliet tabs)                                              |
+| Tnedija awtomatika                                | Toggle għal kull servizz, diżattivat b'mod predefinit                                     |
 
 ---
 
@@ -67,16 +69,16 @@ Il-ħames servizzi kollha jsegwu l-istess mudell ta’ superviżjoni:
 ┌────────────────────────────────────────────────────────────────────┐
 │  Saff 1 — UI                                                       │
 │  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
-│  Reġistri diretti (SSE), Start/Stop/Restart/Update, Settings, Install│
+│  Logs diretti (SSE), Bidu/Waqfien/Bidu mill-ġdid/Aġġornament, Settings, Installazzjoni│
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Qoxra + rotta tat-tabs permezz ta' ?tab=│
+│    ├── page.tsx               Qoxra + routing tat-tabs permezz ta' ?tab=│
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
 │                               ServiceLogsPanel, ApiKeyCard, ...    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP (Next.js fetch)
+                       │ HTTP (fetch ta' Next.js)
 ┌──────────────────────▼─────────────────────────────────────────────┐
 │  Saff 2 — API (LOCAL_ONLY — loopback biss)                         │
 │                                                                    │
@@ -87,10 +89,10 @@ Il-ħames servizzi kollha jsegwu l-istess mudell ta’ superviżjoni:
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (reverse proxy HTTP + WebSocket → servizz upstream ta' 9Router) │
+│    (proxy invers HTTP + WebSocket → upstream ta' 9Router)          │
 │                                                                    │
 │  Kontroll: LOCAL_ONLY_API_PREFIXES jinkludi "/api/services/" u     │
-│        "/dashboard/providers/services/*/embed/"                    │
+│            "/dashboard/providers/services/*/embed/"                │
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ sejħiet fl-istess proċess
 ┌──────────────────────▼─────────────────────────────────────────────┐
@@ -101,39 +103,38 @@ Il-ħames servizzi kollha jsegwu l-istess mudell ta’ superviżjoni:
 │    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
 │    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
 │    ├── port:       20130 għal 9Router (konfigurabbli)              │
-│    ├── logs:       buffer ċirkolari stdio ta' 5 MB → avvenimenti SSE│
+│    ├── logs:       buffer ċirkolari ta' stdio ta' 5 MB → avvenimenti SSE│
 │    ├── health:     HTTP GET /health kull 2–5 s, irkupru għażżien   │
 │    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Jibda s-SERVICES[] kollha fil-bidu tal-proċess │
+│  bootstrap.ts       Jibda s-SERVICES[] kollha mal-bidu tal-proċess│
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       GET /v1/models perjodiku → tabella service_models│
-│  ringBuffer.ts      Buffer ċirkolari tar-reġistri (5 MB għal kull servizz)│
-│  healthCheck.ts     Sonda HTTP perjodika tal-istat tas-servizz     │
-│  installers/        ninerouter.ts, cliproxy.ts, mux.ts             │
+│  modelSync.ts       GET perjodiku /v1/models → tabella service_models│
+│  ringBuffer.ts      Buffer ċirkolari tal-logs (5 MB għal kull servizz)│
+│  healthCheck.ts     Sonda tas-saħħa HTTP b'polling                 │
+│  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
 │                      (adapters tal-installatur)                    │
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP kompatibbli ma' OpenAI (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Saff 4 — Fornitur / Rotot                                         │
+│  Saff 4 — Fornitur / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Jerġa' jfittex il-port u ċ-ċavetta API għal kull talba (mingħajr cache).│
-│    Ineħħi l-prefiss "9router/" mill-id tal-mudell qabel il-proxying.│
-│    Jirritorna 503 service_not_running jekk is-superviżur mhuwiex fi "running".│
+│    Jerġa' jfittex il-port u l-API key għal kull talba (mingħajr caching).│
+│    Ineħħi l-prefiss "9router/" mill-ID tal-mudell qabel il-proxying.│
+│    Jirritorna 503 service_not_running jekk is-superviżur ma jkunx fi "running".│
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
 │    Entrata għal "9router": isEmbeddedService: true                 │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Il-mudelli jinħażnu bħala "9router/{sub}/{model}" (bi prefiss). │
-│    Jiġu sinkronizzati kull 5 minuti minn modelSync.ts.             │
+│    Mudelli maħżuna bħala "9router/{sub}/{model}" (bi prefiss).     │
+│    Sinkronizzati kull 5 minuti minn modelSync.ts.                  │
 │                                                                    │
-│  Mux huwa ġestit BISS matul iċ-ċiklu tal-ħajja (Saffi 1-3) — huwa │
-│  daemon għall-orkestrazzjoni tal-aġenti, mhux proxy LLM, għalhekk  │
-│  ma għandu l-ebda entrata executor/fornitur fis-Saff 4 u qatt ma  │
-│  jkun mira tar-rotot.                                              │
+│  Mux huwa mmaniġġjat BISS tul iċ-ċiklu tal-ħajja (Saffi 1-3) — huwa daemon│
+│  għall-orkestrazzjoni tal-aġenti, mhux proxy LLM, għalhekk m'għandux entrata│
+│  ta' eżekutur/fornitur fis-Saff 4 u qatt ma jkun mira tar-routing. │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -142,17 +143,19 @@ Il-ħames servizzi kollha jsegwu l-istess mudell ta’ superviżjoni:
 | Fajl                                        | Rwol                                                                |
 | ------------------------------------------- | ------------------------------------------------------------------- |
 | `src/lib/services/ServiceSupervisor.ts`     | Klassi ewlenija: ċiklu tal-ħajja, lock, saħħa, ring buffer          |
-| `src/lib/services/bootstrap.ts`             | Reġistrazzjoni fil-livell tal-proċess u startjar awtomatiku         |
+| `src/lib/services/bootstrap.ts`             | Reġistrazzjoni fil-livell tal-proċess u bidu awtomatiku             |
 | `src/lib/services/registry.ts`              | Mappa singleton `tool → supervisor`                                 |
-| `src/lib/services/apiKey.ts`                | Ġenerazzjoni taċ-ċwievet, kriptaġġ AES-256-GCM waqt il-ħażna        |
-| `src/lib/services/modelSync.ts`             | Sinkronizzazzjoni perjodika tal-mudelli (5 min) + fuq talba         |
-| `src/lib/services/ringBuffer.ts`            | Buffer ċirkolari tal-logs ta’ 5 MB b’abbonament SSE                 |
+| `src/lib/services/apiKey.ts`                | Ġenerazzjoni taċ-ċavetta, kriptaġġ AES-256-GCM waqt il-ħażna        |
+| `src/lib/services/modelSync.ts`             | Sinkronizzazzjoni perjodika tal-mudelli (5 minuti) + fuq talba      |
+| `src/lib/services/ringBuffer.ts`            | Buffer ċirkolari tar-reġistru ta’ 5 MB b’abbonament SSE             |
 | `src/lib/services/healthCheck.ts`           | Verifika tas-saħħa permezz ta’ HTTP (intervall konfigurabbli)       |
 | `src/lib/services/installers/ninerouter.ts` | Installazzjoni/aġġornament/diżinstallazzjoni b’npm għal 9Router     |
 | `src/lib/services/installers/cliproxy.ts`   | Installazzjoni/aġġornament/diżinstallazzjoni b’npm għal CLIProxyAPI |
 | `src/lib/services/installers/mux.ts`        | Installazzjoni/aġġornament/diżinstallazzjoni b’npm għal Mux         |
+| `src/lib/services/installers/openwa.ts`     | Installazzjoni/aġġornament/diżinstallazzjoni b’npm għal open-wa     |
+| `src/lib/services/installers/llmlingua.ts`  | Installazzjoni/aġġornament/diżinstallazzjoni b’npm għal LLMLingua   |
 | `src/app/api/services/9router/_lib.ts`      | Funzjoni awżiljarja `getOrInitSupervisor()`                         |
-| `src/app/api/services/[name]/logs/route.ts` | Endpoint kondiviż għal-logs SSE                                     |
+| `src/app/api/services/[name]/logs/route.ts` | Endpoint kondiviż tar-reġistri SSE                                  |
 | `open-sse/executors/ninerouter.ts`          | Eżekutur tal-fornitur (Saff 4)                                      |
 
 ---
@@ -216,8 +219,8 @@ Talbiet mhux minn loopback jirċievu `403 LOCAL_ONLY` irrispettivament mit-token
 
 #### `POST /api/services/9router/install`
 
-Jinstalla 9Router minn npm. Joħloq `DATA_DIR/services/9router/` bil-`package.json`
-u n-`node_modules/` tiegħu stess. Ma joħloqx kunflitt mad-dipendenzi ta’ OmniRoute.
+Installa 9Router minn npm. Joħloq `DATA_DIR/services/9router/` bil-`package.json`
+u n-`node_modules/` tiegħu stess. Ma joħloqx kunflitt mad-dipendenzi ta’ OmniRoute stess.
 
 **Korp tat-talba** (kollha fakultattivi):
 
@@ -225,16 +228,16 @@ u n-`node_modules/` tiegħu stess. Ma joħloqx kunflitt mad-dipendenzi ta’ Omn
 { "version": "latest" }
 ```
 
-| Kamp      | Tip      | Default    | Deskrizzjoni                                        |
-| --------- | -------- | ---------- | --------------------------------------------------- |
-| `version` | `string` | `"latest"` | tag tal-verżjoni npm jew semver biex jiġi installat |
+| Kamp      | Tip      | Valur prestabbilit | Deskrizzjoni                                        |
+| --------- | -------- | ------------------ | --------------------------------------------------- |
+| `version` | `string` | `"latest"`         | Tag tal-verżjoni npm jew semver biex jiġi installat |
 
-**Risposti:**
+**Tweġibiet:**
 
 | Status | Deskrizzjoni                                                                  |
 | ------ | ----------------------------------------------------------------------------- |
 | `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                        |
-| `400`  | Korp tat-talba invalidu (falliment tal-validazzjoni Zod)                      |
+| `400`  | Korp tat-talba invalidu (falliment tal-validazzjoni ta’ Zod)                  |
 | `409`  | L-installazzjoni diġà għaddejja (il-lock huwa miżmum)                         |
 | `500`  | L-installazzjoni npm falliet — ara `message` għal żball faċli biex jinftiehem |
 
@@ -245,18 +248,18 @@ L-iżbalji EACCES jintwerew bħala messaġġi faċli biex jinftiehmu.
 
 #### `POST /api/services/9router/start`
 
-Jistartja 9Router. Jirreġistra supervisor jekk għadu mhux irreġistrat, imbagħad isejjaħ
+Jibda 9Router. Jirreġistra supervisor jekk għadu mhux irreġistrat, imbagħad isejjaħ
 `supervisor.start()`. Huwa idempotenti meta jkun diġà qed jaħdem.
 
-**Korp tat-talba:** xejn
+**Korp tat-talba:** ebda wieħed
 
-**Risposti:**
+**Tweġibiet:**
 
-| Status | Deskrizzjoni                                            |
-| ------ | ------------------------------------------------------- |
-| `200`  | Oġġett `ServiceStatus` (ara l-iskema hawn taħt)         |
-| `409`  | 9Router mhuwiex installat (`status: "not_installed"`)   |
-| `503`  | L-istartjar falla (żball fil-proċess — ara `lastError`) |
+| Status | Deskrizzjoni                                          |
+| ------ | ----------------------------------------------------- |
+| `200`  | Oġġett `ServiceStatus` (ara l-iskema hawn taħt)       |
+| `409`  | 9Router mhuwiex installat (`status: "not_installed"`) |
+| `503`  | Il-bidu falla (żball tal-proċess — ara `lastError`)   |
 
 **Skema ta’ ServiceStatus:**
 
@@ -276,34 +279,34 @@ Jistartja 9Router. Jirreġistra supervisor jekk għadu mhux irreġistrat, imbag�
 
 #### `POST /api/services/9router/stop`
 
-Iwaqqaf 9Router b’mod gradwali. Jibgħat SIGTERM, jistenna 15 s, imbagħad SIGKILL jekk ikun għadu ħaj.
+Iwaqqaf 9Router b’mod gradwali. Jibgħat SIGTERM, jistenna 15-il s, imbagħad SIGKILL jekk ikun għadu attiv.
 Huwa idempotenti meta jkun diġà mwaqqaf.
 
-**Korp tat-talba:** xejn
+**Korp tat-talba:** ebda wieħed
 
-**Risposti:**
+**Tweġibiet:**
 
-| Status | Deskrizzjoni                       |
-| ------ | ---------------------------------- |
-| `200`  | `ServiceStatus` (state: "stopped") |
-| `503`  | Il-waqfien falla bla mistenni      |
+| Status | Deskrizzjoni                         |
+| ------ | ------------------------------------ |
+| `200`  | `ServiceStatus` (state: "stopped")   |
+| `503`  | Il-waqfien falla b’mod mhux mistenni |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Ekwivalenti għal `stop()` segwit minn `start()` taħt il-lock tal-operazzjonijiet.
+Ekwivalenti għal `stop()` segwit minn `start()` taħt il-lock tal-operazzjoni.
 
-**Korp tat-talba:** xejn
+**Korp tat-talba:** ebda wieħed
 
-**Risposti:** l-istess bħal `start` (jirritorna l-`ServiceStatus` finali).
+**Tweġibiet:** l-istess bħal `start` (jirritorna l-`ServiceStatus` finali).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-Jaġġorna 9Router għal verżjoni npm aktar ġdida. Jekk is-servizz ikun qed jaħdem, l-ewwel
-jitwaqqaf, titħaddem l-installazzjoni npm (li tinstalla l-verżjoni aktar ġdida fl-istess post), u mbagħad
+Jaġġorna 9Router għal verżjoni npm aktar ġdida. Jekk is-servizz ikun qed jaħdem, jitwaqqaf
+l-ewwel, titħaddem l-installazzjoni npm (bil-verżjoni l-aktar ġdida tiġi installata fl-istess post), u mbagħad
 is-servizz jerġa’ jinbeda.
 
 **Korp tat-talba** (kollha fakultattivi):
@@ -312,7 +315,7 @@ is-servizz jerġa’ jinbeda.
 { "version": "latest" }
 ```
 
-**Risposti:**
+**Tweġibiet:**
 
 | Status | Deskrizzjoni                                                    |
 | ------ | --------------------------------------------------------------- |
@@ -324,36 +327,36 @@ is-servizz jerġa’ jinbeda.
 
 #### `POST /api/services/9router/rotate-key`
 
-Jiġġenera ċavetta API ġdida għal 9Router, jikkriptaha waqt il-ħażna, u jerġa’ jibda s-servizz
-(jekk ikun qed jaħdem) sabiex juża ċ-ċavetta l-ġdida mill-ambjent tiegħu. Iċ-ċavetta l-qadima
+Jiġġenera API key ġdida għal 9Router, jikkriptaha waqt li tkun maħżuna, u jerġa’ jibda s-servizz
+(jekk ikun qed jaħdem) sabiex juża l-key l-ġdida mill-ambjent tiegħu. Il-key l-antika
 tiġi invalidata minnufih.
 
-**Korp tat-talba:** xejn
+**Korp tat-talba:** ebda wieħed
 
-**Risposti:**
+**Tweġibiet:**
 
 | Status | Deskrizzjoni                               |
 | ------ | ------------------------------------------ |
 | `200`  | `{ keyRotated: true, restarted: boolean }` |
 | `500`  | Ir-rotazzjoni falliet                      |
 
-**Sigurtà:** Iċ-ċavetta l-ġdida qatt ma tintbagħat lura fir-risposta (l-ebda żvelar ta’ kredenzjali).
-Tinħażen kriptata (AES-256-GCM) fit-tabella `version_manager`.
+**Sigurtà:** Il-key l-ġdida qatt ma tiġi rritornata fit-tweġiba (ebda tnixxija ta’ kredenzjali).
+Tinħażen ikkriptata (AES-256-GCM) fit-tabella `version_manager`.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Jirritorna status ikkombinat f’ħin reali + mid-DB, inklużi l-metadata tal-verżjoni u previżjoni taċ-ċavetta API.
+Jirritorna status ikkombinat f’ħin reali + mid-DB, inklużi l-metadata tal-verżjoni u previżjoni tal-API key.
 
-**Risposti:**
+**Tweġibiet:**
 
-| Status | Deskrizzjoni              |
-| ------ | ------------------------- |
-| `200`  | Ara l-iskema hawn taħt    |
-| `500`  | Il-qari tal-istatus falla |
+| Status | Deskrizzjoni             |
+| ------ | ------------------------ |
+| `200`  | Ara l-iskema hawn taħt   |
+| `500`  | Il-qari tal-status falla |
 
-**Skema tar-risposta:**
+**Skema tat-tweġiba:**
 
 ```json
 {
@@ -377,8 +380,8 @@ Jirritorna status ikkombinat f’ħin reali + mid-DB, inklużi l-metadata tal-ve
 
 #### `POST /api/services/9router/auto-start`
 
-Jattiva jew jiddiżattiva l-indikatur tal-istartjar awtomatiku. Meta `enabled: true`, is-servizz jibda awtomatikament
-id-darba li jmiss li OmniRoute jistartja (jekk is-servizz ikun installat).
+Jixgħel jew jitfi l-flag tal-bidu awtomatiku. Meta `enabled: true`, is-servizz jibda awtomatikament
+id-darba li jmiss li OmniRoute jibda (jekk is-servizz ikun installat).
 
 **Korp tat-talba:**
 
@@ -386,7 +389,7 @@ id-darba li jmiss li OmniRoute jistartja (jekk is-servizz ikun installat).
 { "enabled": true }
 ```
 
-**Risposti:**
+**Tweġibiet:**
 
 | Status | Deskrizzjoni          |
 | ------ | --------------------- |
@@ -397,22 +400,22 @@ id-darba li jmiss li OmniRoute jistartja (jekk is-servizz ikun installat).
 
 #### `GET /api/services/9router/logs`
 
-Fluss SSE ta’ logs f’ħin reali mill-buffer ċirkolari ta’ stdout/stderr ta’ 9Router.
+Fluss SSE ta’ logs f’ħin reali mill-ring buffer ta’ stdout/stderr ta’ 9Router.
 
 **Parametri tal-query:**
 
-| Param    | Tip       | Default | Deskrizzjoni                                                                              |
-| -------- | --------- | ------- | ----------------------------------------------------------------------------------------- |
-| `tail`   | `integer` | 200     | Kemm-il linja storika għandha tintbagħat l-ewwel (massimu ta’ 1000)                       |
-| `filter` | `string`  | xejn    | Filtru ta’ substring li ma jqisx il-kobor tal-ittri (mingħajr regex — sikur kontra ReDoS) |
+| Param    | Tip       | Valur prestabbilit | Deskrizzjoni                                                                                    |
+| -------- | --------- | ------------------ | ----------------------------------------------------------------------------------------------- |
+| `tail`   | `integer` | 200                | Kemm-il linja storika għandha tintbagħat l-ewwel (massimu 1000)                                 |
+| `filter` | `string`  | ebda wieħed        | Filtru ta’ substring mhux sensittiv għall-każ tal-ittri (mingħajr regex — protett kontra ReDoS) |
 
 **Avvenimenti SSE:**
 
 | Avveniment  | Data        | Deskrizzjoni              |
 | ----------- | ----------- | ------------------------- |
-| `snapshot`  | `LogLine[]` | Il-parti storika inizjali |
-| `log`       | `LogLine`   | Linja ta’ log f’ħin reali |
-| `heartbeat` | `{}`        | Keep-alive kull 15 s      |
+| `snapshot`  | `LogLine[]` | Tmiem storiku inizjali    |
+| `log`       | `LogLine`   | Linja tal-log f’ħin reali |
+| `heartbeat` | `{}`        | Keep-alive kull 15-il s   |
 
 **Skema ta’ LogLine:**
 
@@ -424,93 +427,163 @@ Fluss SSE ta’ logs f’ħin reali mill-buffer ċirkolari ta’ stdout/stderr t
 }
 ```
 
-**Risposti:**
+**Tweġibiet:**
 
-| Status | Deskrizzjoni                                             |
-| ------ | -------------------------------------------------------- |
-| `200`  | `text/event-stream`                                      |
-| `400`  | Il-parametru `filter` huwa twil wisq (> 200 karattru)    |
-| `404`  | Is-servizz ma nstabx (is-superviżur mhuwiex irreġistrat) |
+| Status | Deskrizzjoni                                          |
+| ------ | ----------------------------------------------------- |
+| `200`  | `text/event-stream`                                   |
+| `400`  | Il-parametru `filter` huwa twil wisq (> 200 karattru) |
+| `404`  | Is-servizz ma nstabx (is-superviżur mhux irreġistrat) |
 
 ---
 
 ### 4.2 Endpoints ta’ CLIProxyAPI (10 rotot)
 
-CLIProxyAPI għandu l-istess struttura ta’ endpoints bħal 9Router minbarra `rotate-key`, flimkien ma’
+CLIProxyAPI għandu l-istess struttura ta’ endpoints bħal 9Router mingħajr `rotate-key`, flimkien ma’
 `accounts`, `provider-expose` u `auto-restart-adopted`. Issa jirċievi
-ċavetta API ddedikata tal-pjan tad-data li tiġi injettata waqt l-istartjar (`needsApiKey: true` f’
-`bootstrap.ts`, użata għas-sinkronizzazzjoni tal-mudelli); `status` jinkludi inqas fields.
+ċavetta API ddedikata għall-pjan tad-data, injettata mat-tnedija (`needsApiKey: true` f’
+`bootstrap.ts`, użata għas-sinkronizzazzjoni tal-mudelli); `status` jinkludi inqas oqsma.
 
-| Metodu | Path                                | Deskrizzjoni                                          |
-| ------ | ----------------------------------- | ----------------------------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | Installa CLIProxyAPI minn npm                         |
-| `POST` | `/api/services/cliproxy/start`      | Ibda CLIProxyAPI                                      |
-| `POST` | `/api/services/cliproxy/stop`       | Waqqaf CLIProxyAPI                                    |
-| `POST` | `/api/services/cliproxy/restart`    | Erġa’ ibda CLIProxyAPI                                |
-| `POST` | `/api/services/cliproxy/update`     | Aġġorna għal verżjoni aktar ġdida                     |
-| `GET`  | `/api/services/cliproxy/status`     | Status f’ħin reali + mid-DB (mingħajr `apiKeyMasked`) |
-| `POST` | `/api/services/cliproxy/auto-start` | Attiva jew iddiżattiva l-istartjar awtomatiku         |
+| Metodu | Mogħdija                            | Deskrizzjoni                                     |
+| ------ | ----------------------------------- | ------------------------------------------------ |
+| `POST` | `/api/services/cliproxy/install`    | Installa CLIProxyAPI minn npm                    |
+| `POST` | `/api/services/cliproxy/start`      | Ibda CLIProxyAPI                                 |
+| `POST` | `/api/services/cliproxy/stop`       | Waqqaf CLIProxyAPI                               |
+| `POST` | `/api/services/cliproxy/restart`    | Erġa’ ibda CLIProxyAPI                           |
+| `POST` | `/api/services/cliproxy/update`     | Aġġorna għal verżjoni aktar ġdida                |
+| `GET`  | `/api/services/cliproxy/status`     | Status dirett + tad-DB (mingħajr `apiKeyMasked`) |
+| `POST` | `/api/services/cliproxy/auto-start` | Ixgħel jew itfi l-bidu awtomatiku                |
 
 L-endpoint kondiviż `GET /api/services/{name}/logs` (ara §4.1) jaħdem għall-
-erba’ servizzi kollha billi juża s-segment dinamiku `[name]`.
+erba’ servizzi kollha permezz tas-segment dinamiku `[name]`.
 
 ---
 
 ### 4.3 Endpoints ta’ Mux (8 rotot)
 
-Mux għandu l-istess struttura ta’ endpoints bħal CLIProxyAPI — mingħajr rotta `rotate-key` fil-wiċċ
-tal-API (il-bearer token jiġi ġġenerat bl-istess mod bħal dak ta’ 9Router permezz ta’
-`getOrCreateApiKey("mux")` u injettat permezz tal-varjabbli tal-ambjent `MUX_SERVER_AUTH_TOKEN`, iżda
-għad m’hemmx endpoint iddedikat għar-rotazzjoni). Mux huwa ġestit biss tul iċ-ċiklu tal-ħajja tiegħu: għall-kuntrarju
-ta’ 9Router, m’għandux eżekutur ta’ Layer 4 u qatt ma jiġi rreġistrat bħala fornitur tar-routing.
+Mux għandu l-istess struttura ta’ endpoints bħal CLIProxyAPI — l-ebda rotta `rotate-key` fis-superfiċje
+tal-API (it-token bearer jiġi ġġenerat bl-istess mod bħal dak ta’ 9Router permezz ta’
+`getOrCreateApiKey("mux")` u jiġi injettat permezz tal-varjabbli tal-ambjent `MUX_SERVER_AUTH_TOKEN`, iżda
+għad m’hemmx endpoint iddedikat għar-rotazzjoni). Mux huwa ġestit biss tul iċ-ċiklu tal-ħajja: għall-kuntrarju
+ta’ 9Router, m’għandux eżekutur tas-Saff 4 u qatt ma jiġi rreġistrat bħala fornitur tar-routing.
 
-| Metodu | Path                           | Deskrizzjoni                                  |
-| ------ | ------------------------------ | --------------------------------------------- |
-| `POST` | `/api/services/mux/install`    | Installa Mux minn npm (`npm i mux`)           |
-| `POST` | `/api/services/mux/start`      | Ibda Mux (`mux server`)                       |
-| `POST` | `/api/services/mux/stop`       | Waqqaf Mux                                    |
-| `POST` | `/api/services/mux/restart`    | Erġa’ ibda Mux                                |
-| `POST` | `/api/services/mux/update`     | Aġġorna għal verżjoni npm aktar ġdida         |
-| `GET`  | `/api/services/mux/status`     | Status f’ħin reali + mid-DB                   |
-| `POST` | `/api/services/mux/auto-start` | Attiva jew iddiżattiva l-istartjar awtomatiku |
+| Metodu | Mogħdija                       | Deskrizzjoni                          |
+| ------ | ------------------------------ | ------------------------------------- |
+| `POST` | `/api/services/mux/install`    | Installa Mux minn npm (`npm i mux`)   |
+| `POST` | `/api/services/mux/start`      | Ibda Mux (`mux server`)               |
+| `POST` | `/api/services/mux/stop`       | Waqqaf Mux                            |
+| `POST` | `/api/services/mux/restart`    | Erġa’ ibda Mux                        |
+| `POST` | `/api/services/mux/update`     | Aġġorna għal verżjoni npm aktar ġdida |
+| `GET`  | `/api/services/mux/status`     | Status dirett + tad-DB                |
+| `POST` | `/api/services/mux/auto-start` | Ixgħel jew itfi l-bidu awtomatiku     |
 
 ---
 
 ### 4.4 Endpoints ta’ Bifrost (8 rotot)
 
-Bifrost huwa backend relay ta’ gateway tal-AI miktub bil-Go (`@maximhq/bifrost`). Juża l-istess
+Bifrost huwa backend relay ta’ gateway tal-IA miktub bil-Go (`@maximhq/bifrost`). Juża l-istess
 struttura ta’ endpoints bħal CLIProxyAPI (mingħajr `rotate-key` — Bifrost jimmaniġġja ċ-ċwievet
-tal-fornituri tiegħu stess f’`config.json` taħt il-`-app-dir` tiegħu).
+tal-fornituri tiegħu stess f’`config.json` taħt `-app-dir`).
 
-| Metodu | Mogħdija                           | Deskrizzjoni                                                                       |
-| ------ | ---------------------------------- | ---------------------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | Installa Bifrost minn npm (`@maximhq/bifrost`)                                     |
-| `POST` | `/api/services/bifrost/start`      | Ibda Bifrost fuq il-port 8080 (default)                                            |
-| `POST` | `/api/services/bifrost/stop`       | Waqqaf Bifrost                                                                     |
-| `POST` | `/api/services/bifrost/restart`    | Erġa' ibda Bifrost                                                                 |
-| `POST` | `/api/services/bifrost/update`     | Aġġorna għal verżjoni aktar ġdida                                                  |
-| `GET`  | `/api/services/bifrost/status`     | Status dirett + tad-DB                                                             |
-| `POST` | `/api/services/bifrost/auto-start` | Ixgħel jew itfi l-bidu awtomatiku                                                  |
-| `GET`  | `/api/services/bifrost/logs`       | Tmiem tal-log permezz ta' SSE (permezz tar-rotta dinamika kondiviża `[name]/logs`) |
+| Metodu | Mogħdija                           | Deskrizzjoni                                                                      |
+| ------ | ---------------------------------- | --------------------------------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | Installa Bifrost minn npm (`@maximhq/bifrost`)                                    |
+| `POST` | `/api/services/bifrost/start`      | Ibda Bifrost fuq il-port 8080 (predefinit)                                        |
+| `POST` | `/api/services/bifrost/stop`       | Waqqaf Bifrost                                                                    |
+| `POST` | `/api/services/bifrost/restart`    | Erġa’ ibda Bifrost                                                                |
+| `POST` | `/api/services/bifrost/update`     | Aġġorna għal verżjoni aktar ġdida                                                 |
+| `GET`  | `/api/services/bifrost/status`     | Status dirett + tad-DB                                                            |
+| `POST` | `/api/services/bifrost/auto-start` | Ixgħel jew itfi l-bidu awtomatiku                                                 |
+| `GET`  | `/api/services/bifrost/logs`       | Tmiem dirett tal-log permezz ta’ SSE (bir-rotta dinamika kondiviża `[name]/logs`) |
 
-**Konfigurazzjoni tar-routing:** Meta `BIFROST_BASE_URL` ma jkunx issettjat u l-istanza sorveljata ta' Bifrost
-tkun qed taħdem, `getBifrostRoutingConfig()` (f'`routingBackend.ts`) juża awtomatikament
+**Konfigurazzjoni tar-routing:** Meta `BIFROST_BASE_URL` ma jkunx issettjat u l-istanza sorveljata ta’ Bifrost
+tkun qed taħdem, `getBifrostRoutingConfig()` (f’`routingBackend.ts`) juża awtomatikament
 `http://127.0.0.1:{port}` bħala l-URL bażi tar-relay. Varjabbli tal-ambjent `BIFROST_BASE_URL` espliċitu
-dejjem jieħu preċedenza.
+dejjem jingħata prijorità.
 
 ---
 
-### 4.5 Endpoints ta' Dario (12-il rotta)
+### 4.5 Endpoints ta’ Dario (12-il rotta)
 
 L-istess struttura taċ-ċiklu tal-ħajja bħas-servizzi l-oħra (`install`, `start`, `stop`, `restart`,
-`update`, `status`, `auto-start`, `auto-restart-adopted`) flimkien ma' saff ta' kontroll OAuth
-protett b'token taħt `admin/`: `admin/accounts`, `admin/import-from-omniroute`,
+`update`, `status`, `auto-start`, `auto-restart-adopted`) flimkien ma’ pjan ta’ kontroll OAuth
+protett b’token taħt `admin/`: `admin/accounts`, `admin/import-from-omniroute`,
 `admin/login-start`, `admin/login-complete` (kollha protetti minn `DARIO_ADMIN_TOKEN`).
 
-### 4.6 Reverse proxy (inkorporazzjoni tad-dashboard ta' 9Router)
+### 4.6 Endpoints ta’ open-wa (7 rotot)
 
-Id-dashboard jinkorpora l-UI web ta' 9Router f'iframe permezz ta' reverse proxy intern
-f':
+open-wa (`@open-wa/wa-automate`) iħaddem istanza ta’ Chromium mingħajr interfaċċa grafika (permezz ta’
+Puppeteer) biex jawtomatizza WhatsApp Web. Juża l-istess struttura ta’ endpoints bħal Mux (għad m’hemmx
+rotta `rotate-key`). Huwa ġestit biss tul iċ-ċiklu tal-ħajja — mhuwiex destinazzjoni tar-routing,
+u m’għandux eżekutur tas-Saff 4 jew entrata ta’ fornitur.
+
+| Metodu | Mogħdija                          | Deskrizzjoni                                                               |
+| ------ | --------------------------------- | -------------------------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | Installa open-wa minn npm (`@open-wa/wa-automate`)                         |
+| `POST` | `/api/services/openwa/start`      | Ibda open-wa fuq il-port 8323 (predefinit)                                 |
+| `POST` | `/api/services/openwa/stop`       | Waqqaf open-wa                                                             |
+| `POST` | `/api/services/openwa/restart`    | Erġa’ ibda open-wa                                                         |
+| `POST` | `/api/services/openwa/update`     | Aġġorna għal verżjoni aktar ġdida                                          |
+| `GET`  | `/api/services/openwa/status`     | Status dirett + tad-DB                                                     |
+| `POST` | `/api/services/openwa/auto-start` | Attiva jew iddiżattiva l-istartjar awtomatiku                              |
+| `GET`  | `/api/services/openwa/logs`       | Tarf tar-reġistru SSE (permezz tar-rotta dinamika kondiviża `[name]/logs`) |
+
+**Ċavetta tal-API:** injettata bħala `WA_KEY` — is-sovrastruttura ġenerika ta’
+open-wa għall-varjabbli tal-ambjent bil-prefiss `WA_*` timmappjaha mal-għażla
+CLI `--key`/`-k` (`dist/cli/setup.js::envArgs()`, ivverifikata mal-pakkett
+4.76.0 installat). Tiġi prefissata b’`ow_` meta tiġi ġġenerata minn
+`generateServiceApiKey()`. open-wa jerġa’ jaqra ċ-ċavetta minn header HTTP
+`key`/`api_key` (mhux `Authorization: Bearer`); `/api-docs*` huwa espliċitament
+eżentat mill-verifika (`setupAuthenticationLayer` f’`dist/cli/server.js`),
+għalhekk is-sonda tas-saħħa ma teħtieġ l-ebda header ta’ awtentikazzjoni.
+
+**Tqabbil:** open-wa mhuwiex uffiċjali u m’għandu l-ebda affiljazzjoni ma’
+WhatsApp — in-numru konness għandu riskju li jiġi pprojbit minħabba s-sejbien
+tal-awtomatizzazzjoni minn WhatsApp stess. Fl-ewwel startjar, il-kodiċi QR
+tat-tqabbil jiġi stampat fuq stdout u jintwera permezz tal-pannell eżistenti
+tar-Reġistri/fluss SSE — għad m’hemm l-ebda endpoint iddedikat għall-immaġni QR
+f’din l-integrazzjoni.
+
+---
+
+### 4.7 Endpoints ta’ LLMLingua (8 rotot)
+
+LLMLingua huwa sidecar għall-kompressjoni tal-prompts li jgeżwer
+`@atjsh/llmlingua-2` (mudell reali ta’ klassifikazzjoni tat-tokens ONNX,
+imniżżel minn Hugging Face mal-ewwel sejħa lil `/compress`). Juża l-istess
+forma ta’ endpoint bħal Bifrost (mingħajr ċavetta tal-API — `needsApiKey:
+false`, qatt ma jimmaniġġja kredenzjali).
+
+| Metodu | Mogħdija                                       | Deskrizzjoni                                                                                        |
+| ------ | ---------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | Installa `@atjsh/llmlingua-2` + il-pakketti peer b’npm, u ikteb l-iskript tas-server sidecar        |
+| `POST` | `/api/services/llmlingua/start`                | Ibda s-sidecar fuq il-port 20135 (predefinit)                                                       |
+| `POST` | `/api/services/llmlingua/stop`                 | Waqqaf is-sidecar                                                                                   |
+| `POST` | `/api/services/llmlingua/restart`              | Erġa’ ibda s-sidecar                                                                                |
+| `POST` | `/api/services/llmlingua/update`               | Aġġorna għall-verżjoni l-aktar ġdida tal-pakkett                                                    |
+| `GET`  | `/api/services/llmlingua/status`               | Status dirett + tad-DB                                                                              |
+| `POST` | `/api/services/llmlingua/auto-start`           | Attiva jew iddiżattiva l-istartjar awtomatiku                                                       |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Attiva jew iddiżattiva l-istartjar awtomatiku mill-ġdid ta’ istanza adottata (eżistenti minn qabel) |
+| `GET`  | `/api/services/llmlingua/logs`                 | Tarf tar-reġistru SSE (permezz tar-rotta dinamika kondiviża `[name]/logs`)                          |
+
+**Kuntratt tas-sidecar:** l-iskript tas-server jesponi `GET /health`
+(istantanju — ma jistenniex il-mudell) u `POST /compress` (`{ text, rate }` →
+`{ text, compressed, ratio }`). Il-mudell jitgħabba b’mod differit mal-ewwel
+sejħa lil `/compress`.
+
+**Konnessjoni tal-kompressjoni:** `httpSidecarBackend` ta’
+`open-sse/services/compression/engines/llmlingua/index.ts` isejjaħ lil
+`LLMLINGUA_BASE_URL` (predefinit għal `http://127.0.0.1:20135`) u jaċċetta
+r-rispons tas-sidecar biss meta dan ikun strettament iqsar mill-input; kwalunkwe
+falliment (mhux qed jaħdem, skadenza tal-ħin, rispons li ma jagħmel xejn)
+jaqa’ lura fuq il-backend tal-worker thread fil-proċess (`./worker.ts`).
+
+---
+
+### 4.8 Proxy invers (inkorporazzjoni tad-dashboard ta’ 9Router)
+
+Id-dashboard jinkorpora l-interfaċċa web ta’ 9Router ġewwa iframe permezz ta’
+proxy invers intern f’dan l-indirizz:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
@@ -519,17 +592,18 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 Dan il-proxy:
 
 - Jgħaddi t-talba lil `http://127.0.0.1:{port}/{path}` (loopback biss)
-- Ineħħi l-headers `cookie` u `authorization` li jkunu deħlin (mingħajr tnixxija tas-sessjoni ta' OmniRoute)
-- Jinjetta `Authorization: Bearer {apiKey}` għall-awtentikazzjoni ta' 9Router
-- Ineħħi `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` mir-risposta
-- Jikteb mill-ġdid ir-risposti HTML biex jinjetta `<base href>` u jinnormalizza l-mogħdijiet assoluti (`/foo` → `/dashboard/.../embed/foo`)
+- Ineħħi l-headers `cookie` u `authorization` deħlin (l-ebda tnixxija tas-sessjoni ta’ OmniRoute)
+- Jinjetta `Authorization: Bearer {apiKey}` għall-awtentikazzjoni ta’ 9Router
+- Ineħħi `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` mir-rispons
+- Jikteb mill-ġdid ir-risponsi HTML biex jinjetta `<base href>` u jinnormalizza l-mogħdijiet assoluti (`/foo` → `/dashboard/.../embed/foo`)
 
-L-upgrades ta' WebSocket għad-dashboard inkorporat jiġu ġestiti minn server anċillari fuq
-port iddedikat (ara `src/lib/services/embedWsProxy.ts`).
+L-upgrades tal-WebSocket għad-dashboard inkorporat jiġu mmaniġġjati minn server
+akkumpanjatur fuq port iddedikat (ara `src/lib/services/embedWsProxy.ts`).
 
-**Sigurtà:** Ir-rotot tal-proxy tal-inkorporazzjoni huma kklassifikati taħt `LOCAL_ONLY_API_PREFIXES`
-u jistgħu jintlaħqu biss mil-loopback. Attakkant li jikseb JWT permezz ta'
-mina Cloudflare/Ngrok ma jistax juża l-proxy biex jidħol fis-servizzi inkorporati.
+**Sigurtà:** Ir-rotot tal-proxy tal-inkorporazzjoni huma kklassifikati taħt
+`LOCAL_ONLY_API_PREFIXES` u jistgħu jiġu aċċessati biss minn loopback. Attakkant
+li jikseb JWT permezz ta’ mina Cloudflare/Ngrok ma jistax juża proxy biex
+jaċċessa s-servizzi inkorporati.
 
 ---
 

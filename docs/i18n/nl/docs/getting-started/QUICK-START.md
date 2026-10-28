@@ -1,10 +1,10 @@
 # Quick Start: Get OmniRoute Running in 3 Minutes (Nederlands)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/QUICK-START.md) · 🇪🇹 [am](../../../am/docs/getting-started/QUICK-START.md) · 🇸🇦 [ar](../../../ar/docs/getting-started/QUICK-START.md) · 🇦🇿 [az](../../../az/docs/getting-started/QUICK-START.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/QUICK-START.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/QUICK-START.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/QUICK-START.md) · 🇩🇰 [da](../../../da/docs/getting-started/QUICK-START.md) · 🇩🇪 [de](../../../de/docs/getting-started/QUICK-START.md) · 🇬🇷 [el](../../../el/docs/getting-started/QUICK-START.md) · 🇪🇸 [es](../../../es/docs/getting-started/QUICK-START.md) · 🇪🇪 [et](../../../et/docs/getting-started/QUICK-START.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/QUICK-START.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/QUICK-START.md) · 🇫🇷 [fr](../../../fr/docs/getting-started/QUICK-START.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/QUICK-START.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/QUICK-START.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/QUICK-START.md) · 🇮🇱 [he](../../../he/docs/getting-started/QUICK-START.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/QUICK-START.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/QUICK-START.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/QUICK-START.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/QUICK-START.md) · 🇮🇩 [id](../../../id/docs/getting-started/QUICK-START.md) · 🇳🇬 [ig](../../../ig/docs/getting-started/QUICK-START.md) · 🇮🇹 [it](../../../it/docs/getting-started/QUICK-START.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/QUICK-START.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/QUICK-START.md) · 🇰🇭 [km](../../../km/docs/getting-started/QUICK-START.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/QUICK-START.md) · 🇰🇷 [ko](../../../ko/docs/getting-started/QUICK-START.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/QUICK-START.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/QUICK-START.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/QUICK-START.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/QUICK-START.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/QUICK-START.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/QUICK-START.md) · 🇲🇲 [my](../../../my/docs/getting-started/QUICK-START.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/QUICK-START.md) · 🇳🇴 [no](../../../no/docs/getting-started/QUICK-START.md) · 🇮🇳 [or](../../../or/docs/getting-started/QUICK-START.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/QUICK-START.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/QUICK-START.md) · 🇵🇱 [pl](../../../pl/docs/getting-started/QUICK-START.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/QUICK-START.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/QUICK-START.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/QUICK-START.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/QUICK-START.md) · 🇱🇰 [si](../../../si/docs/getting-started/QUICK-START.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/QUICK-START.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/QUICK-START.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/QUICK-START.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/QUICK-START.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/QUICK-START.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/QUICK-START.md) · 🇮🇳 [te](../../../te/docs/getting-started/QUICK-START.md) · 🇹🇭 [th](../../../th/docs/getting-started/QUICK-START.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/QUICK-START.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/QUICK-START.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/QUICK-START.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/QUICK-START.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/QUICK-START.md) · 🇳🇬 [yo](../../../yo/docs/getting-started/QUICK-START.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/QUICK-START.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/QUICK-START.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/QUICK-START.md) · 🇪🇹 [am](../../../am/docs/getting-started/QUICK-START.md) · 🇸🇦 [ar](../../../ar/docs/getting-started/QUICK-START.md) · 🇦🇿 [az](../../../az/docs/getting-started/QUICK-START.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/QUICK-START.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/QUICK-START.md) · 🇧🇦 [bs](../../../bs/docs/getting-started/QUICK-START.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/QUICK-START.md) · 🇩🇰 [da](../../../da/docs/getting-started/QUICK-START.md) · 🇩🇪 [de](../../../de/docs/getting-started/QUICK-START.md) · 🇬🇷 [el](../../../el/docs/getting-started/QUICK-START.md) · 🇪🇸 [es](../../../es/docs/getting-started/QUICK-START.md) · 🇪🇪 [et](../../../et/docs/getting-started/QUICK-START.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/QUICK-START.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/QUICK-START.md) · 🇫🇷 [fr](../../../fr/docs/getting-started/QUICK-START.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/QUICK-START.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/QUICK-START.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/QUICK-START.md) · 🇮🇱 [he](../../../he/docs/getting-started/QUICK-START.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/QUICK-START.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/QUICK-START.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/QUICK-START.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/QUICK-START.md) · 🇮🇩 [id](../../../id/docs/getting-started/QUICK-START.md) · 🇳🇬 [ig](../../../ig/docs/getting-started/QUICK-START.md) · 🇮🇹 [it](../../../it/docs/getting-started/QUICK-START.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/QUICK-START.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/QUICK-START.md) · 🇰🇭 [km](../../../km/docs/getting-started/QUICK-START.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/QUICK-START.md) · 🇰🇷 [ko](../../../ko/docs/getting-started/QUICK-START.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/QUICK-START.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/QUICK-START.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/QUICK-START.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/QUICK-START.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/QUICK-START.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/QUICK-START.md) · 🇲🇲 [my](../../../my/docs/getting-started/QUICK-START.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/QUICK-START.md) · 🇳🇴 [no](../../../no/docs/getting-started/QUICK-START.md) · 🇮🇳 [or](../../../or/docs/getting-started/QUICK-START.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/QUICK-START.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/QUICK-START.md) · 🇵🇱 [pl](../../../pl/docs/getting-started/QUICK-START.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/QUICK-START.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/QUICK-START.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/QUICK-START.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/QUICK-START.md) · 🇱🇰 [si](../../../si/docs/getting-started/QUICK-START.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/QUICK-START.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/QUICK-START.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/QUICK-START.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/QUICK-START.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/QUICK-START.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/QUICK-START.md) · 🇮🇳 [te](../../../te/docs/getting-started/QUICK-START.md) · 🇹🇭 [th](../../../th/docs/getting-started/QUICK-START.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/QUICK-START.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/QUICK-START.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/QUICK-START.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/QUICK-START.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/QUICK-START.md) · 🇳🇬 [yo](../../../yo/docs/getting-started/QUICK-START.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/QUICK-START.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/QUICK-START.md)
 
 ---
 
-> **TL;DR**: Installeren → Een gratis provider verbinden → Je IDE naar OmniRoute verwijzen. Klaar.
+> **TL;DR**: Installeer → Verbind een geschikte provider → Laat je IDE naar OmniRoute verwijzen. Klaar.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute start op `http://localhost:20128`. Het dashboard wordt automatisch geo
 
 ---
 
-## Stap 3: Een gratis provider verbinden
+## Stap 3: Verbind een geschikte provider
 
-Je kunt OmniRoute **geheel kosteloos gebruiken** door een gratis provider te verbinden.
+Kies een provider waarvan de voorwaarden en het quotum bij uw behoeften passen. Verbind in **Dashboard → Providers** uw eigen account of API-sleutel en test vervolgens de verbinding. Gratis toegang en beschikbaarheid zonder sleutel zijn niet gegarandeerd.
 
-### Optie A: Kiro (gratis Claude — geen creditcard)
-
-1. Open het dashboard op `http://localhost:20128`
-2. Ga naar **Providers** → **Provider toevoegen**
-3. Selecteer **Kiro AI**
-4. Klik op **Verbinden** (geen API-sleutel nodig!)
-5. Klaar! Je hebt nu gratis toegang tot Claude-modellen.
-
-### Optie B: OpenCode Free (geen authenticatie)
-
-1. Open het dashboard op `http://localhost:20128`
-2. Ga naar **Providers** → **Provider toevoegen**
-3. Selecteer **OpenCode Free**
-4. Klik op **Verbinden** (geen API-sleutel nodig!)
-5. Klaar! Je hebt nu gratis toegang tot meerdere modellen.
-
-### Optie C: Pollinations (geen sleutel nodig)
-
-1. Open het dashboard op `http://localhost:20128`
-2. Ga naar **Providers** → **Provider toevoegen**
-3. Selecteer **Pollinations**
-4. Klik op **Verbinden** (geen API-sleutel nodig!)
-5. Klaar! Je hebt nu gratis toegang tot GPT-5, Claude, Gemini en meer.
+`auto` sluit providers die zijn gemarkeerd met `tos: avoid`, waaronder Kiro, standaard uit. Het verbinden van een account verandert dit beleid niet. De opt-in in **Dashboard → Combos** geldt voor alle automatische combo's. Raadpleeg de [Handleiding voor gratis niveaus](./FREE-TIERS-GUIDE.md) voordat u een provider kiest.
 
 ---
 
@@ -152,9 +130,9 @@ Je kunt de details van het verzoek bekijken door in de linkerzijbalk op [Monitor
 
 ## Wat nu?
 
-- **[Auto-Combo-handleiding](./AUTO-COMBO-GUIDE.md)** — Laat OmniRoute de beste AI voor je kiezen
-- **[Providerhandleiding](./PROVIDERS-GUIDE.md)** — Verbind meer providers (gratis en betaald)
-- **[Handleiding voor gratis abonnementen](./FREE-TIERS-GUIDE.md)** — Krijg gratis AI zonder creditcard
+- **[Handleiding voor Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Laat OmniRoute de beste AI voor je kiezen
+- **[Handleiding voor providers](./PROVIDERS-GUIDE.md)** — Koppel meer providers (gratis en betaald)
+- **[Handleiding voor gratis abonnementen](./FREE-TIERS-GUIDE.md)** — Bekijk de voorwaarden van providers en de limieten van gratis abonnementen
 - **[Probleemoplossing](../guides/TROUBLESHOOTING.md)** — Los veelvoorkomende problemen op
 
 ---
@@ -163,23 +141,23 @@ Je kunt de details van het verzoek bekijken door in de linkerzijbalk op [Monitor
 
 ### "Heb ik een API-sleutel nodig?"
 
-**Nee!** Je kunt gratis providers (Kiro, OpenCode Free en Pollinations) zonder API-sleutel gebruiken. Verbind ze eenvoudig via het dashboard.
+De OmniRoute API-sleutel verifieert je tools. De vereiste toegangsgegevens voor upstreamproviders verschillen per provider: sommige vereisen een API-sleutel of aanmelding bij een account. Gratis toegang is niet gegarandeerd.
 
 ### "Wat is `auto`?"
 
-`auto` geeft OmniRoute de opdracht om automatisch voor elk verzoek de beste provider te kiezen. Daarbij wordt rekening gehouden met snelheid, kosten, kwaliteit en beschikbaarheid. Zie de [Auto-Combo-handleiding](./AUTO-COMBO-GUIDE.md) voor meer informatie.
+`auto` laat OmniRoute automatisch de beste provider voor elk verzoek kiezen. Daarbij wordt rekening gehouden met snelheid, kosten, kwaliteit en beschikbaarheid. Raadpleeg de [handleiding voor Auto-Combo](./AUTO-COMBO-GUIDE.md) voor meer informatie.
 
 ### "Hoeveel kost het?"
 
-OmniRoute zelf is **gratis en opensource**. Je betaalt alleen voor de providers die je gebruikt. Veel providers hebben gratis abonnementen — zie de [Handleiding voor gratis abonnementen](./FREE-TIERS-GUIDE.md).
+OmniRoute zelf is **gratis en opensource**. Je betaalt alleen voor de providers die je gebruikt. Veel providers hebben gratis abonnementen — raadpleeg de [handleiding voor gratis abonnementen](./FREE-TIERS-GUIDE.md).
 
 ### "Kan ik het gebruiken met Claude Code / Cursor / Copilot?"
 
-**Ja!** OmniRoute werkt met elke tool die de OpenAI-indeling ondersteunt. Stel de basis-URL eenvoudig in op `http://localhost:20128/v1`. Zie de [Handleiding voor CLI-tools](../reference/CLI-TOOLS.md) voor specifieke installatie-instructies.
+**Ja!** OmniRoute werkt met elke tool die de OpenAI-indeling ondersteunt. Stel de basis-URL simpelweg in op `http://localhost:20128/v1`. Raadpleeg de [handleiding voor CLI-tools](../reference/CLI-TOOLS.md) voor specifieke installatie-instructies.
 
 ### "Wat gebeurt er als een provider uitvalt?"
 
-OmniRoute slaat providers die niet werken automatisch over en probeert de volgende. Je hoeft niets te doen. Zie de [Auto-Combo-handleiding](./AUTO-COMBO-GUIDE.md) voor meer informatie.
+OmniRoute slaat niet-werkende providers automatisch over en probeert de volgende. Je hoeft niets te doen. Raadpleeg de [handleiding voor Auto-Combo](./AUTO-COMBO-GUIDE.md) voor meer informatie.
 
 ---
 

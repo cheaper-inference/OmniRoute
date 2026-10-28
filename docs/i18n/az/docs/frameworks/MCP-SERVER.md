@@ -1,6 +1,6 @@
 # OmniRoute MCP Server Documentation (Azərbaycan dili)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MCP-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/MCP-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MCP-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MCP-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MCP-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MCP-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/MCP-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/MCP-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/MCP-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/MCP-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/MCP-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MCP-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MCP-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MCP-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MCP-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MCP-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MCP-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MCP-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MCP-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MCP-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/MCP-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MCP-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MCP-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MCP-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MCP-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MCP-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MCP-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MCP-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MCP-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/MCP-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MCP-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MCP-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MCP-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MCP-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MCP-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MCP-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MCP-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MCP-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MCP-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/MCP-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MCP-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MCP-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MCP-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MCP-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/MCP-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/MCP-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MCP-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MCP-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MCP-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MCP-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MCP-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MCP-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MCP-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MCP-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/MCP-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MCP-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MCP-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MCP-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/MCP-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MCP-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/MCP-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/MCP-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/MCP-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/MCP-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/MCP-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MCP-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MCP-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MCP-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MCP-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MCP-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MCP-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MCP-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MCP-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MCP-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/MCP-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MCP-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MCP-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MCP-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MCP-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MCP-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MCP-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MCP-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MCP-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/MCP-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MCP-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MCP-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MCP-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MCP-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MCP-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MCP-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MCP-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MCP-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MCP-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/MCP-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MCP-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MCP-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MCP-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MCP-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/MCP-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/MCP-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MCP-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MCP-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MCP-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MCP-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MCP-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MCP-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MCP-SERVER.md)
 
 ---
 
@@ -71,6 +71,16 @@ curl -i \
 ```
 
 `manage` əhatə dairəsi olmayan açar (və ya Bearer olmadıqda) `403 LOCAL_ONLY` qaytarır. Qonşu `/api/cli-tools/runtime/*` prefiksi üçün yan keçmə qəsdən MÜMKÜN DEYİL — [Route Guard səviyyələri — manage əhatə dairəsi üçün istisna](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) bölməsinə baxın.
+
+### Origin yoxlaması
+
+Autentifikasiyadan sonra `/api/mcp/*` ünvanına gələn hər sorğunun — transportların və `status`, `tools`, `audit`, `restart` kimi idarəetmə marşrutlarının — `Origin` başlığı çağıranın kim olmasından asılı olmayaraq (API açarı, CLI tokeni, dashboard sessiyası və ya giriş söndürüldükdə anonim loopback) yoxlanılır. Bu, MCP Streamable HTTP spesifikasiyasının tələb etdiyi DNS rebinding müdafiəsidir.
+
+- **`Origin` başlığı yoxdur** → icazə verilir. OmniRoute CLI, SDK və IDE müştəriləri bu başlığı göndərmir.
+- **İcazə verilən `Origin`** → istənilən portda `localhost` / `127.0.0.1` / `[::1]` və ya OmniRoute-un öz ictimai origin-i: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, etibarlı əks proksinin ötürdüyü origin (`OMNIROUTE_TRUST_PROXY`, yalnız base URL təyin edilmədikdə) və ya birbaşa müraciət edilən loopback/LAN IP hostu. Təkcə `Host` başlığı heç vaxt origin-i etibarlı etmir.
+- **`null` daxil olmaqla istənilən digər `Origin`** → JSON-RPC xəta gövdəsi ilə `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Etibarlı CSRF tokeni təqdim edən dashboard sessiyası, digər dashboard yazmalarında olduğu kimi, qəbul olunmağa davam edir.
+
+Əks proksi arxasında təqdim olunan brauzer MCP müştərisinə `OMNIROUTE_PUBLIC_BASE_URL` lazımdır; digər origin-lər üçün icazə siyahısı yoxdur. CORS ilkin sorğusu (`OPTIONS`) Origin baxımından yoxlanılmır; ondan sonrakı sorğu yoxlanılır.
 
 ## IDE Konfiqurasiyası
 
@@ -289,8 +299,114 @@ Həm SSE, həm də Axınlı HTTP nəqliyyatları MCP serveri Parametrlərdə (`m
 
 ## Autentifikasiya və əhatə dairələri
 
-MCP alətləri API açarı əhatə dairələri vasitəsilə autentifikasiya olunur. Əhatə dairələrinin tətbiqi
-`open-sse/mcp-server/scopeEnforcement.ts` faylında mərkəzləşdirilib. Hər bir alət xüsusi əhatə dairələri tələb edir:
+MCP alət çağırışları əhatə dairəsi sətirlərini çağıran tərəfdən oxuyur. Bu yoxlama üç
+müstəqil ad fəzasından biridir. Bir yoxlayıcıdan keçmək digərlərindən keçmək demək deyil.
+Qaydalar üçün [Üç əhatə dairəsi ad fəzası](#three-scope-namespaces) bölməsinə baxın.
+Alət kataloqu [MCP alət əhatə dairələri](#mcp-tool-scopes) bölməsindədir.
+
+### Üç əhatə dairəsi ad fəzası
+
+API açarındakı `manage`, MCP alətindəki `read:compression` və
+`oma_live_…` giriş tokenindəki `read` üç fərqli icazədir. Dəyişiklik edən
+idarəetmə marşrutuna `read` giriş tokeni göndərən çağıranlar HTTP 403
+`Access token scope 'read' is insufficient; 'write' required.`
+xətası alır. Bu dərəcələndirmə `scopeSatisfies` vasitəsilə aparılır. O, MCP cədvəlinə
+müraciət etmir və MCP uyğunlaşdırıcısı da ona müraciət etmir.
+
+| Ad fəzası                        | Etimadnamə                                                           | Yoxlayıcı                      | Uğurlu yoxlamanın icazə verdiyi əməl                        |
+| :------------------------------- | :------------------------------------------------------------------- | :----------------------------- | :---------------------------------------------------------- |
+| API açarının idarə edilməsi      | `api_keys.scopes`                                                    | `hasManageScope`               | Həmin Bearer açarı üçün idarəetmə REST interfeysi           |
+| API açarının əlavə əhatə dairəsi | eyni massiv, bir dəqiq sətir                                         | aşağıda adı göstərilən köməkçi | Yalnız həmin bir imkan                                      |
+| MCP alət əhatə dairələri         | eyni massiv, əks halda MCP `_meta`, əks halda `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | Məcburi tətbiq aktiv olduqdan sonra həmin alət              |
+| Giriş tokeni                     | `oma_live_…`                                                         | `scopeSatisfies`               | Metodu və yolu həmin dərəcəni tələb edən idarəetmə marşrutu |
+
+Hər etimadnamənin yaradılması
+[İdarəetmə autentifikasiyası](../guides/MANAGEMENT-AUTH.md) bölməsində izah edilir.
+
+#### API açarı əhatə dairələri
+
+Bir `api_keys.scopes` massivi iki işi yerinə yetirir. Onlar fərqli funksiyalardan istifadə edir.
+
+**İdarəetmə REST interfeysi.** `manage` və `admin`,
+`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) üzvləridir.
+Həmin açar üçün idarəetmə marşrutlarına icazə verən funksiya `hasManageScope`-dur. `admin`
+həmin marşrutlarda idarəetmə imkanına malikdir. Buradakı `admin` sözü
+giriş tokeninin dərəcəsi deyil və MCP alət əhatə dairələrinə genişlənmir.
+
+**Əlavə sətirlər.** Hər biri dəqiq üzvlük yoxlamasıdır və hər biri
+`MANAGEMENT_API_KEY_SCOPES` xaricində qalır.
+
+| Əhatə dairəsi                  | Uğurlu yoxlamanın icazə verdiyi əməl                                                                                                                                                 |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Yalnız geri döngə olmayan `/api/mcp/` üçün LOCAL_ONLY istisnası (`hasMcpConnectOrManageScope`). `manage` və ya `admin` olan açar da bu istisna yoxlamasından keçir.                  |
+| `self:usage`                   | Bu açar üçün `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` yaradılma zamanı bu əhatə dairəsini əlavə edir (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Həmin status məlumatındakı yuxarı axın hesab kvotaları (`src/lib/usage/apiKeySelfService.ts`). Status marşrutu yenə də `self:usage` tələb edir.                                      |
+| `policy:bypass-provider-quota` | Bu açarın inferensiya çağırışları provayder kvotası siyasətindən yan keçir (`src/sse/handlers/chat.ts` daxilində `hasProviderQuotaBypassScope`).                                     |
+
+#### Uyğunlaşdırma
+
+Kataloq [MCP alət əhatə dairələri](#mcp-tool-scopes) bölməsindəki cədvəldir.
+`src/shared/constants/mcpScopes.ts` daxilindəki `MCP_SCOPE_LIST`-ə həmin kataloq kimi
+yanaşmayın: o, ilkin tipləndirilmiş alt çoxluqdur. Sonradan əlavə edilmiş alətlər onun yanında
+əlavə əhatə dairələri elan edir (`read:notion`, `read:skills`, `read:local-corpus` və
+cədvəlin qalan hissəsi).
+
+`open-sse/mcp-server/scopeEnforcement.ts` daxilindəki `evaluateToolScopes`, tələb olunan
+hər bir əhatə dairəsi verilmiş əhatə dairələrindən biri ilə uyğun gəldikdə çağırışa icazə verir:
+
+- `*` tələb olunan bütün əhatə dairələrinə uyğun gəlir.
+- Sonu `*` ilə bitən verilmiş əhatə dairəsi, ulduzdan əvvəlki prefikslə başlayan
+  tələb olunan əhatə dairəsinə uyğun gəlir. `read:*`, `read:compression` ilə uyğun gəlir.
+- Digər bütün verilmiş əhatə dairələri yalnız eyni tələb olunan sətirlə uyğun gəlir.
+
+Əhatə dairələri `["manage"]` olan açar `read:compression` üçün `scopeMatches`
+yoxlamasından keçmir. Eyni çağırış üçün verilmiş yeganə sətirlər `admin`, `mcp:connect`,
+`read` və ya `write` olduqda da yoxlama uğursuz olur. Sonda yerləşən `*` istisna olmaqla,
+MCP alət əhatə dairələri arasında heç bir iyerarxiya yoxdur.
+
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` olmadıqca məcburi tətbiq deaktivdir (standart dəyər
+`false`). O deaktiv olduqda `evaluateToolScopes` çağırışa icazə verir və kataloqu
+ötürür. Aktiv olduqda HTTP, Bearer açarının `api_keys.scopes` dəyərini `authInfo` kimi
+istifadə edir ([Açar üzrə HTTP əhatə dairəsinin bağlanması](#per-key-http-scope-binding-7895)
+bölməsinə baxın). Heç bir açar əhatə dairəsi müəyyən edilmədikdə verilmiş çoxluq əvvəlcə
+MCP `_meta`, sonra isə `OMNIROUTE_MCP_SCOPES` dəyərinə keçir.
+
+#### Giriş tokeninin əhatə dairələri
+
+`oma_live_…` tokenləri (`src/lib/accessTokens/scopes.ts`) `read`, `write`
+və ya `admin` daşıyır. `scopeSatisfies` dərəcələndirmədir: `admin`, `write` və `read`
+səlahiyyətlərini, `write` isə `read` səlahiyyətini əhatə edir. Naməlum əhatə dairələri
+heç bir icazə vermir.
+
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) həmin dərəcəni
+`inferRequiredScope` (`src/server/authz/accessScopes.ts`) ilə müqayisə edir:
+
+- `GET`, `HEAD` və `OPTIONS` metodları `read` tələb edir.
+- Bütün digər metodlar `write` tələb edir.
+- `ADMIN_SCOPE_PREFIXES` daxilindəki yollar hər metod üçün `admin` tələb edir. `/api/mcp`
+  həmin siyahıdadır, buna görə də `write` giriş tokeni MCP HTTP səthini çağıra bilmir.
+- `ADMIN_MUTATION_PREFIXES` daxilindəki yollar yalnız dəyişiklik əməliyyatları üçün `admin` tələb edir.
+- `ADMIN_MUTATION_EXACT_PATHS` daxilindəki yollar (`/api/settings`,
+  `/api/settings/require-login`) yalnız dəyişiklik əməliyyatları və yalnız həmin
+  dəqiq yol üçün `admin` tələb edir — digər `/api/settings/*` alt marşrutları üçün
+  `write` tələbi qüvvədə qalır.
+
+`PATCH /api/keys/{id}` mutasiya əməliyyatıdır və həmin admin siyahılarında yoxdur, buna görə də
+`read` tokeni 403 cavabı alır:
+`Access token scope 'read' is insufficient; 'write' required.`
+`write` və ya `admin` giriş tokeni bu marşrutun tələblərini ödəyir. İdarəetmə panelinin JWT-si,
+loopback CLI machine-id tokeni və `manage` və ya `admin` səlahiyyətinə malik API açarı
+digər şaxələrdən keçir və bu dərəcə ilə məhdudlaşdırılmır.
+
+`/api/mcp` üçün `scopeSatisfies` yoxlamasından keçən giriş tokeni yalnız
+idarəetmə keçidini keçmiş olur. Alət çağırışları yenə də API açarı
+səlahiyyətlərinə qarşı `scopeMatches` yoxlamasını icra edir. Giriş tokeninin dərəcəsi `scopeMatches`
+üçün giriş parametrinə daxil deyil.
+
+### MCP alətlərinin səlahiyyətləri
+
+Səlahiyyətlərin tətbiqi `open-sse/mcp-server/scopeEnforcement.ts` faylında mərkəzləşdirilib.
+Hər bir alət konkret səlahiyyətlər tələb edir:
 
 | Əhatə dairəsi         | Alətlər                                                                                                                                                                       |
 | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -328,52 +444,65 @@ MCP alətləri API açarı əhatə dairələri vasitəsilə autentifikasiya olun
 | `write:obsidian`      | 9 yazma aləti — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                             |
 
-Wildcard əhatə dairələri dəstəklənir: `read:*` bütün oxuma əhatə dairələrini, `*` isə tam giriş imkanı verir.
+Joker simvollu əhatə dairələri dəstəklənir: `read:*` bütün oxuma əhatə dairələrini, `*` isə tam girişi təmin edir.
 
-### `mcp:connect` — məhdud marşrut imkanı (#7895)
+### `mcp:connect` — dar marşrut imkanı (#7895)
 
-HTTP/SSE MCP nəqliyyatına (`/api/mcp/*`) loopback olmayan ünvandan çatmaq üçün
-`/api/mcp/` LOCAL_ONLY istisnası tələb olunur (baxın: `docs/security/ROUTE_GUARD_TIERS.md`). Əvvəllər
+Dövrəvi olmayan interfeysdən HTTP/SSE MCP nəqliyyatına (`/api/mcp/*`) çatmaq üçün
+`/api/mcp/` LOCAL_ONLY istisnası tələb olunur (bax: `docs/security/ROUTE_GUARD_TIERS.md`). Tarixən
 bu istisna yalnız tam `manage`/`admin` əhatə dairəsinə malik API açarını qəbul edirdi — bu isə
 yalnız MCP ilə əlaqə saxlamalı olan çağıran üçün həddindən artıq geniş idi. `src/shared/constants/managementScopes.ts` indi
 `MCP_CONNECT_SCOPE = "mcp:connect"` ixrac edir: yalnız
-`src/server/authz/policies/management.ts` daxilindəki `/api/mcp/` keçidinə icazə verən, əlavə edilə bilən məhdud əhatə dairəsi (`SELF_USAGE_SCOPE` ilə eyni presedentə əsasən) — bu,
-digər idarəetmə marşrutlarına heç bir giriş vermir və qəsdən `MANAGEMENT_API_KEY_SCOPES` siyahısından KƏNARDA saxlanılır. `manage`/`admin`
-əhatə dairəsinə malik açar yenə də istisnadan dəyişiklik olmadan keçir; `mcp:connect` yalnız
-uzaqdan MCP çağırışları edən tərəflər üçün `hasMcpConnectOrManageScope()` vasitəsilə yoxlanılan, daha aşağı imtiyazlı alternativdir.
+`src/server/authz/policies/management.ts` daxilindəki `/api/mcp/` keçidinə icazə verən əlavə, dar əhatə dairəsi (`SELF_USAGE_SCOPE` ilə eyni presedentə əsaslanır) — bu,
+heç bir başqa idarəetmə marşrutuna giriş vermir
+və qəsdən `MANAGEMENT_API_KEY_SCOPES` xaricində saxlanılır. `manage`/`admin` əhatə dairəsinə malik açar
+istisnadan əvvəlki kimi keçməyə davam edir; `mcp:connect`, uzaqdan yalnız MCP istifadə edən çağıranlar üçün
+`hasMcpConnectOrManageScope()` vasitəsilə yoxlanılan daha aşağı imtiyazlı alternativdir.
 
-### Hər açar üzrə HTTP əhatə dairəsinin əlaqələndirilməsi (#7895)
+### Hər açar üçün HTTP əhatə dairəsinin əlaqələndirilməsi (#7895)
 
-HTTP/SSE üzərindən `open-sse/mcp-server/httpTransport.ts` indi çağıranın faktiki
+HTTP/SSE üzərindən `open-sse/mcp-server/httpTransport.ts` indi çağıranın həqiqi
 `api_keys.scopes` dəyərini `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-vasitəsilə müəyyən edir və onu MCP SDK-sının `transport.handleRequest(req, { authInfo })` funksiyasına ötürür; beləliklə,
+vasitəsilə müəyyən edir və onu MCP SDK-nın `transport.handleRequest(req, { authInfo })` metoduna ötürür; beləliklə,
 hər alət çağırışına çatan `extra.authInfo.scopes` Bearer açarının öz əhatə dairələrini əks etdirir.
-`scopeEnforcement.ts` faylındakı `resolveCallerScopeContext()` artıq `authInfo` məlumatına
-`_meta` və `OMNIROUTE_MCP_SCOPES` mühit dəyişəni ehtiyat variantından daha yüksək prioritet verirdi — bu dəyişiklik sadəcə HTTP üzərindən əvvəllər məlumatlandırılmayan həmin ilk,
+`scopeEnforcement.ts` daxilindəki `resolveCallerScopeContext()` artıq `authInfo` mənbəyinə
+`_meta` və `OMNIROUTE_MCP_SCOPES` mühit ehtiyat variantından üstünlük verirdi — bu dəyişiklik yalnız HTTP üzərindən əvvəllər məlumat almayan həmin birinci,
 ən yüksək prioritetli mənbəni doldurur. Heç bir API açarı müəyyən edilmədikdə
-(başlıq yoxdur və ya açar etibarsızdır), `authInfo` `undefined` olaraq qalır və müəyyənləşdirmə prosesi dəyişiklik olmadan mövcud
-`meta`/mühit dəyişəni zəncirinə keçir. Bu, `OMNIROUTE_MCP_ENFORCE_SCOPES` üçün standart
-dəyəri DƏYİŞMİR — tətbiqetmə yenə də açıq şəkildə aktivləşdirilməlidir; bu dəyişiklik yalnız
-aktivləşdirildikdən sonra hər açar üzrə yolun üstünlük qazanmasını təmin edir. stdio hər çağıran üzrə ayrıca identikliyə malik deyil (baxın:
-`mcpCallerIdentity.ts`) və bu dəyişiklikdən təsirlənmir — o, `_meta`/mühit dəyişəni ehtiyat zəncirindən istifadə etməyə davam edir.
+(başlıq yoxdur, açar etibarsızdır), `authInfo` `undefined` olaraq qalır və müəyyənləşdirmə dəyişmədən mövcud
+`meta`/mühit zəncirinə keçir. stdio hər çağıran üçün ayrıca identikliyə malik deyil (bax:
+`mcpCallerIdentity.ts`) və bu dəyişiklikdən təsirlənmir — o, `_meta`/mühit ehtiyat zəncirində qalır.
+
+**Dar əhatə dairəli HTTP/SSE çağıranları üçün tətbiqetmə
+`OMNIROUTE_MCP_ENFORCE_SCOPES` dəyərindən asılı olmayaraq məcburi aktivləşdirilir.** `OMNIROUTE_MCP_ENFORCE_SCOPES` üçün standart `false` dəyəri yalnız
+əhatə dairəsinin tətbiq ediləcəyi hər çağırana aid ayrıca identikliyin olmadığı yerli/stdio tək operatorlu iş axını üçün
+təhlükəsizdir. `open-sse/mcp-server/server.ts::withScopeEnforcement()` hər alət üzrə əhatə dairəsinin
+tətbiqini qeyd-şərtsiz aktivləşdirir (`scopeEnforcement.ts` daxilindəki `shouldForceScopeEnforcement()`),
+əgər `resolveCallerScopeContext()`
+`source === "authInfo"` müəyyən edibsə (yəni hər açara aid real HTTP Authorization başlığı, yalnız HTTP/SSE) VƏ həmin
+açar tam `manage`/`admin` əhatə dairəsinə malik deyilsə. Bu, YALNIZ
+dar `mcp:connect` keçid əhatə dairəsinə malik açarın — yuxarıda yalnız
+`/api/mcp/` LOCAL_ONLY istisnasına icazə verdiyi sənədləşdirilən — operator uzaqdan/dövrəvi olmayan MCP girişini
+aktivləşdirdikdən sonra sadəcə `OMNIROUTE_MCP_ENFORCE_SCOPES` standart olaraq
+`false` təqdim edildiyinə görə bütün MCP alətlərini çağıra bilməsi boşluğunu aradan qaldırır. HTTP üzərindən tam `manage`/`admin` açarı və bütün stdio/yerli çağıranlar
+mövcud `OMNIROUTE_MCP_ENFORCE_SCOPES` ilə şərtləndirilən davranışı dəyişmədən saxlayır.
 
 ---
 
 ## Mühit Dəyişənləri
 
-| Dəyişən                                 | Standart                                | Təyinat                                                                                                                                                  |
-| :-------------------------------------- | :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                | MCP serverinin OmniRoute daxili API-lərinə müraciət edərkən istifadə etdiyi əsas URL                                                                     |
-| `OMNIROUTE_API_KEY`                     | (boş)                                   | Daxili API çağırışlarına `Authorization: Bearer` kimi ötürülən API açarı                                                                                 |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (yalnız `"true"` aktivləşdirir) | Aktiv olduqda çatışmayan əhatə dairələri alət çağırışlarını rədd edir və audit jurnalına `scope_denied:<reason>` qeydini yazır                           |
-| `OMNIROUTE_MCP_SCOPES`                  | (boş)                                   | Standart olaraq «əlçatan» hesab edilən, vergüllə ayrılmış əhatə dairələri siyahısı (çağıran tərəf öz əhatə dairələrini təqdim etmədikdə istifadə olunur) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (təyin edilməyib = aktivdir)            | `0/false/off/no` olaraq təyin edildikdə qeydiyyat zamanı MCP təsvirlərinin sıxılmasını deaktiv edir                                                      |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (təyin edilməyib = aktivdir)            | Yuxarıdakı eyni keçid üçün alternativ alias                                                                                                              |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                 | Daxili idarəetmə oxumaları (sağlamlıq, dayanıqlılıq, kombinasiyalar, kvota, istifadə) üçün dayandırma müddəti                                            |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                 | Provayderi gözləyən keçidlər (`route_request`, `web_search`, `web_fetch`) üçün dayandırma müddəti                                                        |
-| `MCP_TOOL_DENY`                         | (təyin edilməyib = filtr yoxdur)        | `tools/list` siyahısından çıxarılacaq, vergüllə ayrılmış alət adları (alət sayının azaldılması — aşağıya baxın)                                          |
-| `MCP_TOOL_ALLOW`                        | (təyin edilməyib = filtr yoxdur)        | Yalnız saxlanılacaq, vergüllə ayrılmış alət adları (icazə siyahısı rejimi — aşağıya baxın)                                                               |
-| `DATA_DIR`                              | `~/.omniroute`                          | Ürək döyüntüsü faylı `${DATA_DIR}/runtime/mcp-heartbeat.json` ünvanına yazılır                                                                           |
+| Dəyişən                                 | Standart dəyər                       | Məqsəd                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :-------------------------------------- | :----------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`             | MCP serverinin OmniRoute daxili API-lərinə müraciət edərkən istifadə etdiyi əsas URL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `OMNIROUTE_API_KEY`                     | (boş)                                | Daxili API çağırışlarına `Authorization: Bearer` kimi ötürülən API açarı                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (yalnız `"true"` aktiv edir) | Aktiv olduqda çatışmayan əhatə dairələri alət çağırışlarını rədd edir və audit jurnalına `scope_denied:<reason>` yazır. Tam `manage`/`admin` əhatə dairəsi olmayan, hər açara aid Authorization başlığından müəyyən edilmiş istənilən HTTP/SSE çağırışçısı (`source === "authInfo"`) üçün bu bayraqdan asılı olmayaraq məcburi yoxlama HƏMÇİNİN aktiv edilir — məsələn, yalnız məhdud `mcp:connect` yan keçid əhatə dairəsinə malik açar üçün — buna görə də bu standart dəyər yalnız lokal/stdio tək operatorlu iş axını üçün təhlükəsizdir, uzaq qeyri-loopback giriş üçün isə heç vaxt təhlükəsiz deyil |
+| `OMNIROUTE_MCP_SCOPES`                  | (boş)                                | Standart olaraq "mövcud" hesab edilən əhatə dairələrinin vergüllə ayrılmış icazə siyahısı (çağırışçı öz əhatə dairələrini təqdim etmədikdə istifadə olunur)                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (təyin edilməyib = aktivdir)         | `0/false/off/no` dəyərinə təyin edildikdə, qeydiyyat zamanı MCP təsvirlərinin sıxılmasını deaktiv edir                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (təyin edilməyib = aktivdir)         | Yuxarıdakı eyni keçid üçün alternativ ləqəb                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                              | Daxili idarəetmə oxumaları (sağlamlıq, dayanıqlılıq, kombinasiyalar, kvota, istifadə) üçün dayandırma vaxtı limiti                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                              | Provayderi gözləyən keçidlər (`route_request`, `web_search`, `web_fetch`) üçün dayandırma vaxtı limiti                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `MCP_TOOL_DENY`                         | (təyin edilməyib = filtr yoxdur)     | `tools/list` siyahısından çıxarılacaq alət adlarının vergüllə ayrılmış siyahısı (alət sayının azaldılması — aşağıya baxın)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `MCP_TOOL_ALLOW`                        | (təyin edilməyib = filtr yoxdur)     | Yalnız saxlanılacaq vergüllə ayrılmış alət adları (icazə siyahısı rejimi — aşağıya baxın)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `DATA_DIR`                              | `~/.omniroute`                       | Ürək döyüntüsü faylı `${DATA_DIR}/runtime/mcp-heartbeat.json` ünvanına yazılır                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ---
 

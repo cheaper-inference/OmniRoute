@@ -18,7 +18,6 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import type { SqliteAdapter } from "./adapters/types";
-import { DEFAULT_DATABASE_SETTINGS } from "@/types/databaseSettings";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import {
   LEGACY_VERSION_SLOT_MIGRATIONS,
@@ -34,6 +33,7 @@ import {
   type PreMigrationBackupReceipt,
 } from "./migrationRunner/preMigrationBackup";
 import {
+  applyMigrationSkippingExistingColumns,
   detectNameMismatches,
   getPlausiblePendingCount,
   hasColumn,
@@ -603,6 +603,33 @@ function isSchemaAlreadyApplied(
       // bare ADD COLUMN would throw. Keyed by version — a stale number here would answer for
       // another migration's schema and skip it.
       return hasColumn(db, "proxy_logs", "proxy_name");
+    case "183":
+      // Same shape as 179/181: ensureProxyLogsColumns may have added
+      // rotation_account at boot. Keyed by version only — a stale number here
+      // would answer for another migration's schema and skip it.
+      return hasColumn(db, "proxy_logs", "rotation_account");
+    case "184":
+      // Same shape as 179/181/183: ensureProxyLogsColumns may have added
+      // correlation_id at boot. Keyed by version only — a stale number here
+      // would answer for another migration's schema and skip it.
+      return hasColumn(db, "proxy_logs", "correlation_id");
+    case "187":
+      // Same shape as 179/181/183/184: ensureProxyLogsColumns may have added
+      // attempt_number at boot. Keyed by version only — a stale number here
+      // would answer for another migration's schema and skip it.
+      return hasColumn(db, "proxy_logs", "attempt_number");
+    case "194":
+      // Same shape as 179/181/183/184/187: ensureProxyLogsColumns may have
+      // added headers_ms at boot. Keyed by version only.
+      return hasColumn(db, "proxy_logs", "headers_ms");
+    case "212":
+      // Provider-reported cost columns (#16087, renumbered 206 -> 212: the 206 slot
+      // went to 206_codex_wakeup_tasks first). A DB that already applied the old
+      // 206 file has both columns, and a bare ADD COLUMN would throw on the re-run.
+      return (
+        hasColumn(db, "usage_history", "provider_credits") &&
+        hasColumn(db, "usage_history", "provider_cost_usd")
+      );
     default:
       return false;
   }
@@ -620,6 +647,31 @@ function applyApiKeyLifecycleMigration(db: SqliteAdapter): void {
     CREATE INDEX IF NOT EXISTS idx_api_keys_revoked_at ON api_keys(revoked_at);
     CREATE INDEX IF NOT EXISTS idx_api_keys_expires_at ON api_keys(expires_at);
   `);
+}
+
+// 207_remove_opencode_free_provider reads every credential column of provider_connections to
+// tell keyed OpenCode rows (moved to opencode-zen) from keyless ones (dropped). Those columns
+// come from the core.ts table definition, not from a numbered migration, so a database whose
+// provider_connections predates them aborted the whole migration run with "no such column".
+// Add the missing nullable TEXT columns first; an existing column is left untouched.
+const OPENCODE_FREE_REMOVAL_CREDENTIAL_COLUMNS = [
+  "api_key",
+  "access_token",
+  "refresh_token",
+  "id_token",
+  "provider_specific_data",
+] as const;
+
+function ensureOpencodeFreeRemovalColumns(db: SqliteAdapter): void {
+  if (!hasTable(db, "provider_connections")) return;
+  for (const column of OPENCODE_FREE_REMOVAL_CREDENTIAL_COLUMNS) {
+    ensureColumn(
+      db,
+      "provider_connections",
+      column,
+      `ALTER TABLE provider_connections ADD COLUMN ${column} TEXT`
+    );
+  }
 }
 
 function isSearchRequestTypeMigration(migration: { version: string; name: string }): boolean {
@@ -1058,6 +1110,7 @@ export function runMigrations(
   for (const migration of pending) {
     if (isDeferredUnsupportedMigration(db, migration)) continue;
 
+    let genericSql: string | null = null;
     const applyMigration = db.transaction(() => {
       if (atomicPhysicalReplays.has(migration.version)) {
         const removed = db
@@ -1082,7 +1135,11 @@ export function runMigrations(
       } else if (migration.version === "042") {
         applyCompressionCombosMigration(db, migration.path);
       } else {
+        if (migration.name === "remove_opencode_free_provider") {
+          ensureOpencodeFreeRemovalColumns(db);
+        }
         const sql = fs.readFileSync(migration.path, "utf-8");
+        genericSql = sql;
         db.exec(sql);
       }
       db.prepare("INSERT INTO _omniroute_migrations (version, name) VALUES (?, ?)").run(
@@ -1101,15 +1158,11 @@ export function runMigrations(
         message.includes("duplicate column name") &&
         !atomicPhysicalReplays.has(migration.version)
       ) {
-        const applyMarkerOnly = db.transaction(() => {
-          db.prepare(
-            "INSERT OR IGNORE INTO _omniroute_migrations (version, name) VALUES (?, ?)"
-          ).run(migration.version, migration.name);
-        });
-        applyMarkerOnly();
+        const skipped = applyMigrationSkippingExistingColumns(db, migration, genericSql);
         count += 1;
         console.log(
-          `[Migration] Applied (column pre-exists): ${migration.version}_${migration.name}`
+          `[Migration] Applied (column pre-exists): ${migration.version}_${migration.name}` +
+            (skipped.length > 0 ? ` (skipped existing: ${skipped.join(", ")})` : "")
         );
       } else {
         console.error(`[Migration] FAILED: ${migration.version}_${migration.name} — ${message}`);
@@ -1127,41 +1180,15 @@ export function runMigrations(
     console.log(`[Migration] ${count} migration(s) applied successfully.`);
   }
 
-  // After applying all migrations, insert default settings if we just ran migration 46
-  try {
-    if (appliedRecords.some((m) => m.name.startsWith("051_"))) {
-      insertDefaultDatabaseSettings(db);
-    }
-  } catch (error) {
-    console.error("Error inserting default database settings:", error);
-  }
+  // #17186: the "insert default settings after migration 051" guard that used
+  // to live here was unreachable — `name` is the filename's SECOND capture group
+  // (text after the numeric prefix), so it never starts with "051_". The seeded
+  // defaults were also redundant: the read path (optimizationSettings.ts) merges
+  // DEFAULT_DATABASE_SETTINGS on read, so absent rows are the normal case.
+  // Removed along with the dead insertDefaultDatabaseSettings() helper and its
+  // now-unused import.
 
   return count;
-}
-
-function insertDefaultDatabaseSettings(db: SqliteAdapter) {
-  const tx = db.transaction(() => {
-    // Insert all default settings
-    for (const [section, values] of Object.entries(DEFAULT_DATABASE_SETTINGS)) {
-      for (const [key, value] of Object.entries(values as Record<string, unknown>)) {
-        db.prepare("INSERT OR IGNORE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-          "databaseSettings",
-          `${section}.${key}`,
-          JSON.stringify(value)
-        );
-      }
-    }
-  });
-
-  // Run in an immediate transaction to avoid nested transactions
-  try {
-    runImmediateTransaction(db, () => {
-      tx();
-    });
-  } catch (error) {
-    console.error("Transaction error inserting default settings:", error);
-    throw error;
-  }
 }
 
 /**

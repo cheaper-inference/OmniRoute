@@ -46,6 +46,9 @@ const NEEDS_CORE_PROTOCOLS: ReadonlySet<RawProxyProtocol> = new Set<RawProxyProt
   "snell",
 ]);
 
+export type NodeSource =
+  { kind: "object"; value: Record<string, unknown> } | { kind: "uri"; value: string };
+
 export interface SubscriptionNode {
   name: string;
   type: DirectProxyType;
@@ -54,6 +57,8 @@ export interface SubscriptionNode {
   username?: string;
   password?: string;
   rawProtocol: RawProxyProtocol;
+  /** Original node definition as supplied: memory-only, never persisted. */
+  source?: NodeSource;
 }
 
 export interface NeedsCoreNode {
@@ -62,6 +67,8 @@ export interface NeedsCoreNode {
   host?: string;
   port?: number;
   detail: string;
+  /** Original node definition as supplied: memory-only, never persisted. */
+  source?: NodeSource;
 }
 
 export interface ParsedSubscription {
@@ -121,6 +128,7 @@ function nodeFromClashObject(
       username: typeof obj.username === "string" && obj.username ? obj.username : undefined,
       password: typeof obj.password === "string" && obj.password ? obj.password : undefined,
       rawProtocol: type as RawProxyProtocol,
+      source: { kind: "object", value: obj },
     };
   }
   if (NEEDS_CORE_PROTOCOLS.has(type)) {
@@ -130,9 +138,20 @@ function nodeFromClashObject(
       host,
       port,
       detail: `${type}://${host}:${port}`,
+      source: { kind: "object", value: obj },
     };
   }
   return null;
+}
+
+function decodeNodeLabel(hash: string): string {
+  const label = hash.replace(/^#/, "");
+  try {
+    return decodeURIComponent(label);
+  } catch {
+    // A literal percent in a display name must not invalidate the subscription.
+    return label;
+  }
 }
 
 function nodeFromUri(uri: string): SubscriptionNode | NeedsCoreNode | null {
@@ -148,7 +167,7 @@ function nodeFromUri(uri: string): SubscriptionNode | NeedsCoreNode | null {
   // host:port (`vmess://eyJhZGQiOi...`). Handle it BEFORE the host/port check.
   if (scheme === "vmess") {
     const b64 = (parsed.pathname || "").replace(/^\//, "");
-    const tag = decodeURIComponent((parsed.hash || "").replace(/^#/, ""));
+    const tag = decodeNodeLabel(parsed.hash);
     const name = tag || `vmess-${(parsed.hostname || "").slice(0, 8) || "node"}`;
     let host = parsed.hostname || undefined;
     let port = parsed.port ? Number(parsed.port) : undefined;
@@ -170,12 +189,14 @@ function nodeFromUri(uri: string): SubscriptionNode | NeedsCoreNode | null {
       host,
       port,
       detail,
+      source: { kind: "uri", value: uri },
     };
   }
 
-  const name = decodeURIComponent(parsed.hash.replace(/^#/, "")) || parsed.hostname;
+  const name = decodeNodeLabel(parsed.hash) || parsed.hostname;
   const host = parsed.hostname;
-  const port = Number(parsed.port);
+  const defaultPort = scheme === "http" ? 80 : scheme === "https" ? 443 : 0;
+  const port = parsed.port ? Number(parsed.port) : defaultPort;
   if (!host || !port) return null;
 
   if (DIRECT_TYPES.has(scheme)) {
@@ -187,6 +208,7 @@ function nodeFromUri(uri: string): SubscriptionNode | NeedsCoreNode | null {
       username: parsed.username ? decodeUserinfo(parsed.username) : undefined,
       password: parsed.password ? decodeUserinfo(parsed.password) : undefined,
       rawProtocol: scheme as RawProxyProtocol,
+      source: { kind: "uri", value: uri },
     };
   }
 
@@ -200,6 +222,7 @@ function nodeFromUri(uri: string): SubscriptionNode | NeedsCoreNode | null {
       host,
       port,
       detail: `ss://${host}:${port}`,
+      source: { kind: "uri", value: uri },
     };
   }
 
@@ -210,6 +233,7 @@ function nodeFromUri(uri: string): SubscriptionNode | NeedsCoreNode | null {
       host,
       port,
       detail: `${scheme}://${host}:${port}`,
+      source: { kind: "uri", value: uri },
     };
   }
 
@@ -308,6 +332,15 @@ export function parseSubscription(body: string): ParsedSubscription {
   }
 
   return { nodes: [], needsCore: [], format: "unknown" };
+}
+
+/**
+ * Refuse unrecognized content before sync: `format: "unknown"` carries no
+ * usable node. Every recognized format (including `empty` and a
+ * valid-but-nodeless feed) passes and keeps the current path.
+ */
+export function isUsableSubscriptionContent(parsed: ParsedSubscription): boolean {
+  return parsed.format !== "unknown";
 }
 
 /** Redacted node summary for storage/display (no secrets). */

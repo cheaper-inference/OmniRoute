@@ -1,4 +1,7 @@
-import { getUpstreamTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
+import {
+  getUpstreamTimeoutConfig,
+  readStreamActiveTimeoutOverrideMs,
+} from "@/shared/utils/runtimeTimeouts";
 import { resolvePublicCred } from "../utils/publicCreds.ts";
 import type { LegacyProvider } from "./providerRegistry.ts";
 import { loadProviderCredentials } from "./credentialLoader.ts";
@@ -29,9 +32,19 @@ export const STREAM_IDLE_TIMEOUT_MS = upstreamTimeouts.streamIdleTimeoutMs;
 export const STREAM_DISCONNECT_GRACE_PERIOD_MS = upstreamTimeouts.streamDisconnectGracePeriodMs;
 
 // Hard cap for a connected upstream stream. This timer never resets on
-// upstream byte activity and is independent of REQUEST_TIMEOUT_MS. Set
-// STREAM_ACTIVE_TIMEOUT_MS=0 to disable it.
+// upstream byte activity and is independent of REQUEST_TIMEOUT_MS. Left unset,
+// a target that declares a longer budget raises its own cap above the default
+// (resolveStreamActiveTimeoutMs). A positive STREAM_ACTIVE_TIMEOUT_MS is a hard
+// cap for every target; 0 disables it.
 export const STREAM_ACTIVE_TIMEOUT_MS = upstreamTimeouts.streamActiveTimeoutMs;
+// The operator's own value, or undefined when unset (see readStreamActiveTimeoutOverrideMs).
+export const STREAM_ACTIVE_TIMEOUT_OVERRIDE_MS = readStreamActiveTimeoutOverrideMs(process.env);
+// Re-exported so the engine reads them through this module instead of importing src.
+export {
+  DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
+  MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
+  MAX_TIMER_TIMEOUT_MS,
+} from "@/shared/utils/runtimeTimeouts";
 
 // Timeout for the first non-ping SSE event. Inherits REQUEST_TIMEOUT_MS when
 // set, unless STREAM_READINESS_TIMEOUT_MS is specified directly. This must stay
@@ -319,14 +332,20 @@ export const DEFAULT_API_LIMITS = {
 // Skip patterns - requests containing these texts will bypass provider
 export const SKIP_PATTERNS = ["Please write a 5-10 word title for the following conversation:"];
 
-// Default maximum number of tools allowed in a request (OpenAI default)
-export const MAX_TOOLS_LIMIT = 128;
+// Default maximum number of tools allowed in a request (OpenAI default).
+// Override with OMNIROUTE_MAX_TOOLS_LIMIT (positive integers only); any other
+// value (zero, negative, fractional, non-numeric) falls back to 128.
+const maxToolsLimitOverride = envInt("OMNIROUTE_MAX_TOOLS_LIMIT", 128);
+export const MAX_TOOLS_LIMIT =
+  Number.isInteger(maxToolsLimitOverride) && maxToolsLimitOverride > 0
+    ? maxToolsLimitOverride
+    : 128;
 
 // ── Credential Health Check ────────────────────────────────────────
 
 /**
  * Interval (ms) for the background credential health check scheduler.
- * Default: 300000 (5 minutes). Minimum: 10000 (10 seconds).
+ * Default: 3600000 (60 minutes). Minimum: 10000 (10 seconds).
  */
 export const CREDENTIAL_HEALTH_CHECK_INTERVAL = (() => {
   const raw = process.env.CREDENTIAL_HEALTH_CHECK_INTERVAL;
@@ -334,7 +353,7 @@ export const CREDENTIAL_HEALTH_CHECK_INTERVAL = (() => {
     const parsed = Number(raw);
     if (Number.isFinite(parsed) && parsed >= 10_000) return parsed;
   }
-  return 300_000;
+  return 3_600_000;
 })();
 
 /**
@@ -365,11 +384,15 @@ export const CREDENTIAL_HEALTH_CACHE_TTL = (() => {
  *   as soon as this many bytes accumulate, regardless of the timer.
  * - EARLY_RETRY_MAX: max transparent re-opens of the upstream stream while the
  *   holdback is still uncommitted (free-claude-code uses 5 total attempts = 4 retries).
+ * - EMPTY_TURN_RETRY_MAX: max bounded retries of a translated stream turn that ends
+ *   with no usable content (same family: bounded retries of a failing stream
+ *   before anything is exposed to the client).
  */
 export const STREAM_RECOVERY = {
   HOLDBACK_MS: 750,
   BUFFER_MAX_BYTES: 65536,
   EARLY_RETRY_MAX: 4,
+  EMPTY_TURN_RETRY_MAX: 4,
   /**
    * Minimum character overlap `trimContinuationOverlap` must find between the
    * already-emitted text and a mid-stream continuation for the continuation to be

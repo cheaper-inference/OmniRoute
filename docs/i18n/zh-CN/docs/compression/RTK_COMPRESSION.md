@@ -1,6 +1,6 @@
 # RTK Compression (中文 (简体))
 
-🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
 
 ---
 
@@ -25,20 +25,22 @@ Caveman 输入：     节省 46%
 
 ## 压缩内容
 
-内置目录目前包含 49 个过滤器，涵盖以下类别：
+内置目录目前提供 56 个过滤器，涵盖以下类别：
 
 | 类别      | 示例                                                          |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`、`git branch`、`git diff`、`git log`             |
-| `test`    | Vitest、Jest、Pytest、Playwright、Go 测试、Cargo 测试         |
+| `test`    | Vitest、Jest、Pytest、PHPUnit、Playwright、Go、Cargo 测试     |
 | `build`   | TypeScript、ESLint、Biome、Prettier、Vite、Webpack、Turbo、Nx |
 | `package` | `npm install`、`npm audit`、`pip`、`uv sync`、Poetry、Bundler |
-| `shell`   | `ls`、`find`、`grep`、通用 Shell 日志                         |
+| `shell`   | `ls`、`find`、`grep`、通用 shell 日志                         |
 | `docker`  | `docker ps`、Docker 日志                                      |
 | `infra`   | Terraform、OpenTofu、`systemctl status`                       |
-| `generic` | JSON 输出、堆栈跟踪、通用输出后备方案                         |
+| `generic` | JSON 输出、堆栈跟踪、通用输出回退                             |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` 中的检测器会在选择过滤器之前对输出进行分类。当命令类别不足以进行匹配时，过滤器还可以通过命令模式或输出正则表达式进行匹配。
+位于 `open-sse/services/compression/engines/rtk/commandDetector.ts` 的检测器会在选择
+过滤器之前对输出进行分类。当仅凭命令类别不足以判断时，过滤器还可以通过命令模式或
+输出正则表达式进行匹配。
 
 ## 过滤器解析
 
@@ -300,13 +302,13 @@ AWS 访问密钥，以及赋值形式的 `token=...`、`secret=...`、`password=
 
 ## 验证门禁
 
-聚焦验证门禁会运行内置的内联过滤器测试，而不会通过 shell 调用外部命令：
+聚焦的验证门禁运行内置的内联过滤器测试，无需调用外部命令：
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
 ```
 
-更全面的 RTK 门禁为：
+更广泛的 RTK 门禁为：
 
 ```bash
 node --import tsx/esm --test \
@@ -315,7 +317,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-发布前请运行完整的压缩门禁：
+在发布前运行完整的压缩门禁：
 
 ```bash
 node --import tsx/esm --test \
@@ -342,15 +344,15 @@ RTK 支持 **3 个强度级别**，用于在**压缩激进程度**与**安全性
 
 ### 3 个级别
 
-| 级别               | 截断阈值       | token 节省量 | 风险 | 最适合                     |
-| ------------------ | -------------- | ------------ | ---- | -------------------------- |
-| `minimal`          | 每个分段 24 行 | ~20-40%      | 极低 | 具有关键上下文的生产环境   |
-| `standard`（默认） | 每个分段 24 行 | ~50-70%      | 低   | 日常编码会话               |
-| `aggressive`       | 每个分段 16 行 | ~70-90%      | 中等 | 长会话、最大程度节省 token |
+| 级别               | 截断阈值       | Token 节省率 | 风险 | 最佳适用场景           |
+| ------------------ | -------------- | ------------ | ---- | ---------------------- |
+| `minimal`          | 每个区段 24 行 | ~20-40%      | 极低 | 含关键上下文的生产环境 |
+| `standard`（默认） | 每个区段 24 行 | ~50-70%      | 低   | 日常编码会话           |
+| `aggressive`       | 每个区段 16 行 | ~70-90%      | 中   | 长时间会话，最大化节省 |
 
 ### 截断发生的位置
 
-截断阈值会影响 `lineFilter.ts`：
+截断阈值作用于 `lineFilter.ts`：
 
 ```ts
 // 来自 open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -358,9 +360,9 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-每个分段的**开头**和**结尾**都会保留；触发截断时，中间内容会被丢弃。
+每个区段的**头部**和**尾部**都会被保留；当触发截断时，中间内容会被丢弃。
 
-### 保留与截断的内容
+### 保留内容与裁剪内容
 
 | 内容                 | minimal | standard | aggressive |
 | -------------------- | ------- | -------- | ---------- |
@@ -379,18 +381,18 @@ config.intensity === "aggressive" ? 16 : 24,
                   │
       ┌───────────┼───────────┐
       │           │           │
-     是           否         不确定
+      是          否          不确定
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      吞吐量有多      先尝试 `standard`
-      │      重要？          （适用于 80% 的
-      │           │          情况）
+      │       吞吐量是否       先尝试 `standard`
+      │       至关重要？      （适用于 80% 的
+      │           │           情况）
       │      ┌────┴────┐
       │      │         │
-      │     低         高
+      │      低        高
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -400,7 +402,7 @@ config.intensity === "aggressive" ? 16 : 24,
 
 ### 配置强度
 
-**按组合配置**（在组合配置中）：
+**按 combo 设置**（在 combo 配置中）：
 
 ```json
 {
@@ -413,11 +415,10 @@ config.intensity === "aggressive" ? 16 : 24,
 }
 ```
 
-**通过编程方式**：
+**以编程方式**：
 
 `rtkEngine`（`@omniroute/open-sse/services/compression/engines/rtk`）是一个
-`CompressionEngine`，且没有 `updateConfig` 方法。请改为通过注册表辅助函数
-更新引擎配置：
+`CompressionEngine`，没有 `updateConfig` 方法。请改用注册表辅助函数来更新引擎配置：
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -427,14 +428,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### 验证效果
 
-使用**验证门禁**（见下文）确认过滤器在所选强度下是安全的：
+使用**验证门禁（Verify Gate）**（见下文）确认过滤器在你选择的强度下是安全的：
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("过滤器在 aggressive 强度下未通过");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

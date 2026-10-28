@@ -1,6 +1,6 @@
 # Monitoring & Observability Guide (Bahasa Indonesia)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../ops/MONITORING_GUIDE.md) · 🇪🇹 [am](../../../am/docs/ops/MONITORING_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/ops/MONITORING_GUIDE.md) · 🇦🇿 [az](../../../az/docs/ops/MONITORING_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/ops/MONITORING_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/ops/MONITORING_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/ops/MONITORING_GUIDE.md) · 🇩🇰 [da](../../../da/docs/ops/MONITORING_GUIDE.md) · 🇩🇪 [de](../../../de/docs/ops/MONITORING_GUIDE.md) · 🇬🇷 [el](../../../el/docs/ops/MONITORING_GUIDE.md) · 🇪🇸 [es](../../../es/docs/ops/MONITORING_GUIDE.md) · 🇪🇪 [et](../../../et/docs/ops/MONITORING_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/ops/MONITORING_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/ops/MONITORING_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/ops/MONITORING_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/ops/MONITORING_GUIDE.md) · 🇮🇱 [he](../../../he/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/ops/MONITORING_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/ops/MONITORING_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/ops/MONITORING_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/ops/MONITORING_GUIDE.md) · 🇮🇹 [it](../../../it/docs/ops/MONITORING_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/ops/MONITORING_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/ops/MONITORING_GUIDE.md) · 🇰🇭 [km](../../../km/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/ops/MONITORING_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/ops/MONITORING_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/ops/MONITORING_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/ops/MONITORING_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/ops/MONITORING_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/ops/MONITORING_GUIDE.md) · 🇲🇲 [my](../../../my/docs/ops/MONITORING_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/ops/MONITORING_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/ops/MONITORING_GUIDE.md) · 🇳🇴 [no](../../../no/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [or](../../../or/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/ops/MONITORING_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/ops/MONITORING_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/ops/MONITORING_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/ops/MONITORING_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/MONITORING_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/ops/MONITORING_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/ops/MONITORING_GUIDE.md) · 🇱🇰 [si](../../../si/docs/ops/MONITORING_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/ops/MONITORING_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/ops/MONITORING_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/ops/MONITORING_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/ops/MONITORING_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [te](../../../te/docs/ops/MONITORING_GUIDE.md) · 🇹🇭 [th](../../../th/docs/ops/MONITORING_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/ops/MONITORING_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/MONITORING_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/ops/MONITORING_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/ops/MONITORING_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/ops/MONITORING_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/MONITORING_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/MONITORING_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../ops/MONITORING_GUIDE.md) · 🇪🇹 [am](../../../am/docs/ops/MONITORING_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/ops/MONITORING_GUIDE.md) · 🇦🇿 [az](../../../az/docs/ops/MONITORING_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/ops/MONITORING_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/ops/MONITORING_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/ops/MONITORING_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/ops/MONITORING_GUIDE.md) · 🇩🇰 [da](../../../da/docs/ops/MONITORING_GUIDE.md) · 🇩🇪 [de](../../../de/docs/ops/MONITORING_GUIDE.md) · 🇬🇷 [el](../../../el/docs/ops/MONITORING_GUIDE.md) · 🇪🇸 [es](../../../es/docs/ops/MONITORING_GUIDE.md) · 🇪🇪 [et](../../../et/docs/ops/MONITORING_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/ops/MONITORING_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/ops/MONITORING_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/ops/MONITORING_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/ops/MONITORING_GUIDE.md) · 🇮🇱 [he](../../../he/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/ops/MONITORING_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/ops/MONITORING_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/ops/MONITORING_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/ops/MONITORING_GUIDE.md) · 🇮🇹 [it](../../../it/docs/ops/MONITORING_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/ops/MONITORING_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/ops/MONITORING_GUIDE.md) · 🇰🇭 [km](../../../km/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/ops/MONITORING_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/ops/MONITORING_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/ops/MONITORING_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/ops/MONITORING_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/ops/MONITORING_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/ops/MONITORING_GUIDE.md) · 🇲🇲 [my](../../../my/docs/ops/MONITORING_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/ops/MONITORING_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/ops/MONITORING_GUIDE.md) · 🇳🇴 [no](../../../no/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [or](../../../or/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/ops/MONITORING_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/ops/MONITORING_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/ops/MONITORING_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/ops/MONITORING_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/MONITORING_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/ops/MONITORING_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/ops/MONITORING_GUIDE.md) · 🇱🇰 [si](../../../si/docs/ops/MONITORING_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/ops/MONITORING_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/ops/MONITORING_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/ops/MONITORING_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/ops/MONITORING_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [te](../../../te/docs/ops/MONITORING_GUIDE.md) · 🇹🇭 [th](../../../th/docs/ops/MONITORING_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/ops/MONITORING_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/MONITORING_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/ops/MONITORING_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/ops/MONITORING_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/ops/MONITORING_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/MONITORING_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/MONITORING_GUIDE.md)
 
 ---
 
@@ -103,14 +103,14 @@ Per kombo:
 
 OmniRoute menyediakan **dua** endpoint kesehatan HTTP. Keduanya tidak dapat saling menggantikan untuk orkestrator.
 
-| Jalur                        | Tujuan                                                             | Beban                                     | Digunakan untuk                                                           |
-| ---------------------------- | ------------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------------------- |
-| `GET /healthz`               | Liveness/readiness siklus hidup (`ok` / `starting` / `stopping`)   | Ringan (hanya penanda fase)               | **Readiness** Kubernetes; **liveness** ringan jika harus menggunakan HTTP |
-| `GET /api/monitoring/health` | Ringkasan mendalam sistem + penyedia (DB, heap, jumlah katalog, …) | Berat (pekerjaan DB / pemantauan sinkron) | Dasbor, pemeriksaan mendalam blackbox, healthcheck bawaan Docker          |
+| Path                         | Tujuan                                                             | Beban                                     | Gunakan untuk                                                                 |
+| ---------------------------- | ------------------------------------------------------------------ | ----------------------------------------- | ----------------------------------------------------------------------------- |
+| `GET /healthz`               | Liveness/readiness siklus hidup (`ok` / `starting` / `stopping`)   | Ringan (hanya flag fase)                  | **Readiness** Kubernetes; **liveness** lunak jika Anda harus menggunakan HTTP |
+| `GET /api/monitoring/health` | Ringkasan mendalam sistem + penyedia (DB, heap, jumlah katalog, …) | Berat (pekerjaan DB / pemantauan sinkron) | Dasbor, pemeriksaan mendalam blackbox, healthcheck bawaan Docker              |
 
-> **Catatan:** Matriks kesehatan penyedia, masalah autopilot, pemantau kuota, kesehatan token, dan detail latensi di luar `/api/monitoring/health` tersedia melalui **alat MCP** `observability_snapshot` atau halaman **dasbor** — tidak ada rute REST khusus untuk hal-hal tersebut.
+> **Catatan:** Matriks kesehatan penyedia, masalah autopilot, monitor kuota, kesehatan token, dan detail latensi di luar `/api/monitoring/health` tersedia melalui **alat MCP** `observability_snapshot` atau halaman **dasbor** — tidak ada rute REST khusus untuk hal-hal tersebut.
 
-Kedua rute berjalan pada **event loop Node yang sama** dengan penanganan permintaan. Jalur yang terikat CPU (pemrosesan katalog besar `GET /v1/models`, kompresi konteks panjang / penghitungan token) dapat menunda **semua** handler HTTP, termasuk `/healthz`. Event loop sibuk ≠ proses mati. Utamakan memperbaiki proses yang menghabiskan sumber daya; penyesuaian probe hanya mengurangi penghentian yang keliru.
+Kedua rute berjalan pada **event loop Node yang sama** dengan penanganan permintaan. Jalur yang terikat CPU (pekerjaan katalog `GET /v1/models` yang besar, kompresi konteks panjang / penghitungan token) dapat menunda **semua** handler HTTP, termasuk `/healthz`. Event loop sibuk ≠ proses mati. Sebaiknya perbaiki proses yang menghabiskan sumber daya; penyesuaian probe hanya mengurangi penghentian yang keliru.
 
 ### Probe orkestrator ringan
 
@@ -155,38 +155,41 @@ Respons:
 
 #### `credentialHealth`: cache probe vs `test_status` SQLite
 
-`GET /api/monitoring/health` → `credentialHealth` adalah **pengukur cache probe dalam memori**, bukan dump langsung dari `provider_connections.test_status`. Setelah #12532, jalur permintaan hanya membaca `getCachedCredentialHealthSummary()`; probe latar belakang memperbarui cache di luar event loop.
+`GET /api/monitoring/health` → `credentialHealth` adalah **gauge cache probe dalam memori**,
+bukan dump langsung dari `provider_connections.test_status`. Setelah #12532, jalur
+permintaan hanya membaca `getCachedCredentialHealthSummary()`; probe latar belakang
+memperbarui cache di luar event loop.
 
-| Lapisan                 | Lokasi                                                                | Artinya                                                                                                                                                                                                                       |
-| ----------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pengukur cache probe    | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Hasil probe kesehatan kredensial terakhir yang masih tersimpan dalam memori proses. `source` selalu bernilai `probe-cache`.                                                                                                   |
-| Detail koneksi gagal    | `credentialHealth.failedConnections`                                  | Tersedia **hanya ketika `failed > 0`**. Daftar terbatas baris cache dengan `status=error` (`connectionId`, `status`, `lastError` / `lastErrorType` yang telah disanitasi). `failedOmitted` ditetapkan ketika daftar dibatasi. |
-| Status persisten SQLite | `credentialHealth.staleDbNonOkCount`                                  | Jumlah baris koneksi **aktif** (`is_active=1`) yang `test_status` persistennya merupakan nilai non-ok yang diketahui (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                       |
+| Lapisan              | Lokasi                                                                | Artinya                                                                                                                                                                                                                   |
+| -------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gauge cache probe    | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Hasil probe kesehatan kredensial terakhir yang masih disimpan dalam memori proses. `source` selalu bernilai `probe-cache`.                                                                                                |
+| Detail koneksi gagal | `credentialHealth.failedConnections`                                  | Tersedia **hanya jika `failed > 0`**. Daftar terbatas baris cache dengan `status=error` (`connectionId`, `status`, `lastError` / `lastErrorType` yang telah disanitasi). `failedOmitted` ditetapkan jika daftar dibatasi. |
+| Status sticky SQLite | `credentialHealth.staleDbNonOkCount`                                  | Jumlah baris koneksi **aktif** (`is_active=1`) yang `test_status` tersimpannya merupakan nilai non-ok yang dikenal (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                     |
 
-Kedua lapisan tersebut memang dapat berbeda:
+Kedua lapisan dapat sengaja memberikan hasil yang berbeda:
 
-- Pengukur `failed=0` sementara `staleDbNonOkCount>0` — SQLite masih memiliki
-  `test_status` persisten (misalnya `expired` atau `credits_exhausted`) yang tidak
+- Gauge `failed=0` sementara `staleDbNonOkCount>0` — SQLite masih memiliki
+  `test_status` sticky (misalnya `expired` atau `credits_exhausted`) yang tidak
   dihitung sebagai `status=error` oleh snapshot cache probe terbaru.
-- Pengukur `failed>0` sementara SQLite terlihat sehat — probe terbaru gagal dan
-  telah disimpan dalam cache; baris DB belum diperbarui, atau kemudian telah dihapus.
+- Gauge `failed>0` sementara SQLite tampak sehat — probe terbaru gagal dan
+  disimpan dalam cache; baris DB belum diperbarui, atau kemudian telah dibersihkan.
 
-Jangan membuat peringatan hanya berdasarkan `provider_connections.test_status` saat melakukan scraping terhadap
+Jangan buat peringatan hanya berdasarkan `provider_connections.test_status` saat mengambil data dari
 endpoint ini. Gunakan `failed` + `failedConnections` untuk kegagalan probe langsung, dan
-`staleDbNonOkCount` ketika Anda memerlukan jumlah status persisten yang tetap tersimpan.
+`staleDbNonOkCount` ketika Anda memerlukan jumlah status sticky yang tersimpan.
 
 ### Rekomendasi probe Kubernetes
 
-OmniRoute adalah **satu proses Node** (satu event loop). `HEALTHCHECK` Docker bawaan menargetkan `/healthz` yang ringan. `/api/monitoring/health` **terlalu berat** untuk interval liveness kubelet.
+OmniRoute adalah **satu proses Node** (satu event loop). `HEALTHCHECK` Docker standar menargetkan `/healthz` yang ringan. `/api/monitoring/health` **terlalu berat** untuk interval liveness kubelet.
 
-| Probe                  | Target yang direkomendasikan                                                               | Catatan                                                                                                                                                                                                                                                                                                                                                                                               |
-| ---------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Startup**            | HTTP `GET /healthz` dengan `failureThreshold` yang panjang (atau `startPeriod` yang besar) | Cold start + migrasi SQLite dapat memerlukan waktu lebih dari beberapa detik                                                                                                                                                                                                                                                                                                                          |
-| **Readiness**          | HTTP `GET /healthz`                                                                        | Siklus hidup `ok` / `starting` / `stopping` (200 vs 503). Tetap berfluktuasi jika loop terblokir CPU. **Respons 200 yang memerlukan beberapa detik bukanlah kondisi sehat** (#10303) — ini berarti event loop kekurangan waktu eksekusi sebelum handler 3-byte dijalankan                                                                                                                             |
-| **Liveness**           | HTTP `GET /livez`, **atau TCP** pada port layanan utama (`PORT`, default `20128`)          | `/livez` hanya menunjukkan bahwa proses aktif (selalu 200 jika handler berjalan). Endpoint ini tetap berbagi event loop — sibuk ≠ mati, dan tidak mendeteksi kekurangan waktu eksekusi event loop (#10303) lebih baik daripada TCP. Pilih **TCP** jika probe HTTP mengalami timeout di bawah beban katalog/kompresi; dalam kedua kasus, **jangan** hentikan pod akibat event loop yang macet sebentar |
-| **Kesehatan mendalam** | `GET /api/monitoring/health` dari pemeriksa eksternal                                      | Bukan untuk `livenessProbe` kubelet / `readinessProbe` yang ketat                                                                                                                                                                                                                                                                                                                                     |
+| Probe                    | Target yang direkomendasikan                                                               | Catatan                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Startup**              | HTTP `GET /healthz` dengan `failureThreshold` yang panjang (atau `startPeriod` yang besar) | Cold start + migrasi SQLite dapat memerlukan waktu lebih dari beberapa detik                                                                                                                                                                                                                                                                                                                         |
+| **Readiness**            | HTTP `GET /healthz`                                                                        | Siklus hidup `ok` / `starting` / `stopping` (200 vs 503). Tetap berubah-ubah jika loop terblokir CPU. Respons **200 yang memerlukan beberapa detik bukan berarti sehat** (#10303) — itu berarti event loop mengalami starvation sebelum handler 3 byte dijalankan                                                                                                                                    |
+| **Liveness**             | HTTP `GET /livez`, **atau TCP** pada port layanan utama (`PORT`, default `20128`)          | `/livez` hanya menunjukkan bahwa proses masih hidup (selalu 200 jika handler berjalan). Endpoint ini tetap menggunakan event loop yang sama — sibuk ≠ mati, dan tidak mendeteksi event-loop starvation (#10303) lebih baik daripada TCP. Pilih **TCP** jika probe HTTP mengalami timeout di bawah beban katalog/kompresi; dalam kedua kasus, **jangan** hentikan pod akibat event-loop stall singkat |
+| **Pemeriksaan mendalam** | `GET /api/monitoring/health` dari pemeriksa eksternal                                      | Bukan untuk `livenessProbe` kubelet / `readinessProbe` berinterval ketat                                                                                                                                                                                                                                                                                                                             |
 
-Contoh bentuk (sesuaikan ambang batas dengan beban cold-start dan kompresi Anda):
+Contoh struktur (sesuaikan ambang batas dengan beban cold-start dan kompresi Anda):
 
 ```yaml
 ports:
@@ -212,19 +215,50 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Saat event loop macet, HTTP /livez masih dapat mengalami timeout. TCP adalah
+  # Saat event-loop stall, HTTP /livez masih dapat mengalami timeout. TCP adalah
   # alternatif yang lebih konservatif:
   # tcpSocket:
   #   port: http
 ```
 
-**Jangan** arahkan **liveness** kubelet ke `/api/monitoring/health`. Jalur tersebut melakukan pekerjaan DB/pemantauan yang nyata dan akan menghasilkan positif palsu saat berada di bawah beban.
+**Jangan** arahkan **liveness** kubelet ke `/api/monitoring/health`. Path tersebut melakukan pekerjaan DB/pemantauan yang nyata dan akan menghasilkan false positive saat berada di bawah beban.
 
-Terkait: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (probe saat event loop sibuk), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (monopoli CPU oleh penetapan harga katalog), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (monopoli CPU oleh penghitungan token kompresi).
+Terkait: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (probe saat event loop sibuk), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (beban berat penetapan harga katalog), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (beban berat penghitungan token kompresi).
 
-### Pekerjaan jalur permintaan opsional (memori, keterampilan, penyegaran token)
+### Watchdog systemd (event loop yang membeku)
 
-Ekstraksi memori, injeksi keterampilan, dan penyegaran token OAuth berbagi **event loop Node utama** dengan `/healthz`. Semuanya merupakan fitur yang dapat diaktifkan/nonaktifkan melalui dasbor (`memoryEnabled`, `skillsEnabled`), bukan kumpulan worker. Lihat [Lingkungan — biaya event loop](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Pada host systemd, OmniRoute memberi tahu manajer layanan ketika sudah siap dan terus mengirimkan ping, sehingga server dengan event loop yang macet akan dihentikan dan dimulai ulang alih-alih tetap berjalan tetapi tidak merespons. Ping berasal dari event loop milik server sendiri: ketika event loop terblokir, ping berhenti, lalu systemd memulai ulang layanan setelah `WatchdogSec` berlalu tanpa menerima ping.
+
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) sudah menulis unit pengguna dengan konfigurasi ini. Unit yang Anda tulis sendiri (`Type=simple` secara default) tidak memiliki watchdog, jadi tambahkan baris berikut ke bagian `[Service]`:
+
+```ini
+[Service]
+Type=notify
+NotifyAccess=all
+WatchdogSec=180
+TimeoutStartSec=300
+```
+
+Unit yang dihasilkan menetapkan `Restart=on-failure`, jadi tambahkan juga baris tersebut — tanpanya, watchdog hanya menghentikan layanan yang macet dan tidak memulai ulang layanan tersebut.
+
+- `Type=notify`: layanan dianggap "dimulai" ketika server mengirimkan `READY=1`, bukan ketika proses melakukan fork. `TimeoutStartSec` membatasi durasi startup yang lambat.
+- `NotifyAccess=all`: ping dikirim oleh proses server, yang merupakan proses anak dari supervisor `omniroute serve`.
+- `WatchdogSec`: ping dikirim setiap 60 detik, jadi gunakan **120 atau lebih**. Nilai yang lebih kecil akan memulai ulang server yang sebenarnya sehat.
+- Jalankan `omniroute serve` di foreground. `--daemon` memisahkan server dari cgroup unit dan handshake notifikasi tidak pernah selesai.
+
+Periksa apakah watchdog aktif setelah layanan dimulai ulang:
+
+```bash
+systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
+```
+
+`WatchdogUSec` menampilkan jeda yang dikonfigurasi dan `WatchdogTimestamp` bergerak maju setiap menit. Mulai ulang yang disebabkan oleh watchdog dicatat sebagai `Result=watchdog`. Untuk menonaktifkan ping tanpa mengubah unit, tetapkan `OMNIROUTE_DISABLE_SD_NOTIFY=1`; tanpa `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows), tidak ada yang dikirim.
+
+Watchdog hanya memeriksa apakah event loop terus berjalan. Server yang lambat tetapi masih terus berjalan tidak akan dimulai ulang.
+
+### Pekerjaan opsional pada jalur permintaan (memori, skill, penyegaran token)
+
+Ekstraksi memori, injeksi keterampilan, dan penyegaran token OAuth berbagi **event loop Node utama** dengan `/healthz`. Fitur-fitur tersebut dapat diaktifkan atau dinonaktifkan melalui dasbor (`memoryEnabled`, `skillsEnabled`), bukan merupakan worker pool. Lihat [Lingkungan — biaya event loop](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
 ### Kesehatan Penyedia
 

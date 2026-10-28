@@ -1,6 +1,6 @@
 # RTK Compression (Gaeilge)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
 
 ---
 
@@ -27,24 +27,24 @@ Cruachta:       1 - (1 - 0.80) * (1 - 0.46) = coigilteas 89.2%
 Raon:           1 - (1 - 0.60..0.90) * (1 - 0.46) = coigilteas 78.4-94.6%
 ```
 
-## An Méid a Chomhbhrúnn Sé
+## Cad a Chomhbhrúíonn Sé
 
-Faoi láthair, tá 49 scagaire sna catagóirí seo a leanas sa chatalóg ionsuite:
+Seolann an catalóg ionsuite 56 scagaire faoi láthair sna catagóirí seo:
 
-| Catagóir  | Samplaí                                                           |
-| --------- | ----------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                 |
-| `test`    | Vitest, Jest, Pytest, Playwright, tástálacha Go, tástálacha Cargo |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
-| `shell`   | `ls`, `find`, `grep`, logaí ginearálta blaosc                     |
-| `docker`  | `docker ps`, logaí Docker                                         |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                           |
-| `generic` | Aschur JSON, rianta cruaiche, cúltaca ginearálta aschuir          |
+| Catagóir  | Samplaí                                                             |
+| --------- | ------------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                   |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, tástálacha Go agus Cargo |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx       |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler       |
+| `shell`   | `ls`, `find`, `grep`, logaí ginearálta blaosce                      |
+| `docker`  | `docker ps`, logaí Docker                                           |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                             |
+| `generic` | aschur JSON, rianuithe cruache, cúltaca ginearálta aschuir          |
 
-Aicmíonn an brathadóir in `open-sse/services/compression/engines/rtk/commandDetector.ts` aschur
-sula roghnaítear scagaire. Is féidir le scagairí meaitseáil de réir patrún ordaithe nó slonn ionadaíochta aschuir freisin nuair
-nach leor aicme ordaithe.
+Déanann an braiteoir i `open-sse/services/compression/engines/rtk/commandDetector.ts` an t-aschur a rangú
+sula roghnaítear scagaire. Is féidir le scagairí meaitseáil a dhéanamh freisin de réir patrún ordaithe nó
+regex aschuir nuair nach leor aicme ordaithe.
 
 ## Réiteach Scagairí
 
@@ -353,19 +353,19 @@ node --import tsx/esm --test \
 
 ## Leibhéil Déine (v3.8.16+)
 
-Tacaíonn RTK le **3 leibhéal déine** a dhéanann comhréiteach idir **ionsaitheacht an chomhbhrúite** agus **sábháilteacht**. Socraítear an leibhéal trí `config.intensity` i gcumraíocht an innill.
+Tacaíonn RTK le **3 leibhéal déine** a dhéanann idirbheartaíocht idir **ionsaitheacht an chomhbhrúite** agus **an tsábháilteacht**. Socraítear an leibhéal trí `config.intensity` i gcumraíocht an innill.
 
 ### Na 3 Leibhéal
 
-| Leibhéal                 | Tairseach teasctha      | Coigilteas comharthaí | Riosca    | Is fearr le haghaidh                   |
-| ------------------------ | ----------------------- | --------------------- | --------- | -------------------------------------- |
-| `minimal`                | 24 líne in aghaidh ailt | ~20-40%               | An-íseal  | Táirgeadh le comhthéacs ríthábhachtach |
-| `standard` (réamhshocrú) | 24 líne in aghaidh ailt | ~50-70%               | Íseal     | Seisiúin laethúla códaithe             |
-| `aggressive`             | 16 líne in aghaidh ailt | ~70-90%               | Measartha | Seisiúin fhada, coigilteas uasta       |
+| Leibhéal                     | Tairseach teasctha             | Coigilteas comharthaí | Riosca   | Is fearr do                        |
+| ---------------------------- | ------------------------------ | --------------------- | -------- | ---------------------------------- |
+| `minimal`                    | 24 líne in aghaidh na rannóige | ~20-40%               | An-íseal | Táirgeadh le comhthéacs criticiúil |
+| `standard` (réamhshocraithe) | 24 líne in aghaidh na rannóige | ~50-70%               | Íseal    | Seisiúin chódaithe laethúla        |
+| `aggressive`                 | 16 líne in aghaidh na rannóige | ~70-90%               | Meánach  | Seisiúin fhada, uaschoigilteas     |
 
-### An Áit a dtarlaíonn an Teascadh
+### Cá dTarlaíonn an Teascadh
 
-Téann tairseach an teasctha i bhfeidhm ar `lineFilter.ts`:
+Bíonn tionchar ag an tairseach teasctha ar `lineFilter.ts`:
 
 ```ts
 // Ó open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -373,50 +373,50 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Caomhnaítear **ceann** agus **deireadh** gach ailt; caitear amach an t-ábhar sa lár nuair a chuirtear an teascadh i bhfeidhm.
+Caomhnaítear **ceann** agus **eireaball** gach rannóige araon; scartáiltear an t-ábhar sa lár nuair a théann an teascadh i bhfeidhm.
 
-### An Méid a Fhanann i gComparáid leis an Méid a Ghearrtar
+### Cad a Fhanann vs. Cad a Ghearrtar Amach
 
-| Ábhar                          | minimal        | standard       | aggressive     |
-| ------------------------------ | -------------- | -------------- | -------------- |
-| Earráidí / loirg chruaiche     | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
-| Teipeanna tástála              | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
-| Earráidí tógála                | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
-| Tástálacha rathúla (foclach)   | ✅ caomhnaithe | 🟡 comhdhlúite | 🟡 comhdhlúite |
-| Gnáth-aschur (logaí faisnéise) | 🟡 comhdhlúite | 🟡 comhdhlúite | ❌ caite amach |
-| Barraí dul chun cinn           | 🟡 comhdhlúite | ❌ caite amach | ❌ caite amach |
-| Meirge / ealaín ASCII          | 🟡 comhdhlúite | ❌ caite amach | ❌ caite amach |
+| Ábhar                              | minimal        | standard       | aggressive     |
+| ---------------------------------- | -------------- | -------------- | -------------- |
+| Earráidí / rianuithe cruache       | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
+| Teipeanna tástála                  | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
+| Earráidí tógála                    | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
+| Pasanna tástála (fairsing)         | ✅ caomhnaithe | 🟡 fillte      | 🟡 fillte      |
+| Aschur gnáthaimh (logaí faisnéise) | 🟡 fillte      | 🟡 fillte      | ❌ scartáilte  |
+| Barraí dul chun cinn               | 🟡 fillte      | ❌ scartáilte  | ❌ scartáilte  |
+| Meirge / ealaín ASCII              | 🟡 fillte      | ❌ scartáilte  | ❌ scartáilte  |
 
 ### An Déine Cheart a Roghnú
 
 ```
-                  An tubaisteach é comhthéacs a chailleadh?
-                  │
-      ┌───────────┼───────────┐
-      │           │           │
-    IS EA       NÍ HEA      NÍLIM CINNTE
-      │           │           │
-      ▼           │           │
-   minimal        │           │
-      │           │           │
-      │           ▼           ▼
-      │      Cé chomh       Bain triail as `standard` ar dtús
-      │      ríthábhachtach  (oibríonn sé i 80% de na
-      │      is atá tréchur? cásanna)
-      │           │
-      │      ┌────┴────┐
-      │      │         │
-      │    ÍSEAL      ARD
-      │      │         │
-      │      ▼         ▼
-      │   standard   aggressive
-      │      │         │
-      └──────┴─────────┘
+        An mbeadh sé tubaisteach comhthéacs a chailleadh?
+                              │
+      ┌───────────────────────┼───────────────────┐
+      │                       │                   │
+     TÁ                      NÍL             NÍL A FHIOS
+      │                       │                   │
+      ▼                       │                   │
+   minimal                    │                   │
+      │                       │                   │
+      │                       ▼                   ▼
+      │           Cé chomh criticiúil     Bain triail as
+      │           atá an trídput?         `standard` ar dtús
+      │                       │           (oibríonn sé do
+      │                       │            80% de chásanna)
+      │               ┌───────┴───────┐
+      │               │               │
+      │             ÍSEAL            ARD
+      │               │               │
+      │               ▼               ▼
+      │            standard       aggressive
+      │               │               │
+      └───────────────┴───────────────┘
 ```
 
-### Déine a Chumrú
+### An Déine a Chumrú
 
-**De réir teaglama** (i gcumraíocht an teaglama):
+**In aghaidh an chombo** (i gcumraíocht an chombo):
 
 ```json
 {
@@ -431,8 +431,9 @@ Caomhnaítear **ceann** agus **deireadh** gach ailt; caitear amach an t-ábhar s
 
 **Go ríomhchláraithe**:
 
-Is `CompressionEngine` é `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) agus níl modh `updateConfig` aige. Nuashonraigh cumraíocht innill
-trí chúntóir na clárlainne ina ionad sin:
+Is `CompressionEngine` é `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`)
+agus níl modh `updateConfig` aige. Nuashonraigh cumraíocht innill trí
+chabhróir an chlárlainne ina áit sin:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -442,7 +443,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### An Éifeacht a Fhíorú
 
-Úsáid an **Geata Fíoraithe** (féach thíos) chun a dheimhniú go bhfuil do scagaire sábháilte ag an déine atá roghnaithe agat:
+Bain úsáid as an **Geata Fíoraithe** (féach thíos) le deimhniú go bhfuil do scagaire sábháilte ag an déine atá roghnaithe agat:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

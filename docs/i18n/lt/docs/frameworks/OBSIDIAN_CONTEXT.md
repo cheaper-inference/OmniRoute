@@ -1,6 +1,6 @@
 # Obsidian Context Source (Lietuvių)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇹 [am](../../../am/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇿 [az](../../../az/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇰 [da](../../../da/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇪 [de](../../../de/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇷 [el](../../../el/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇸 [es](../../../es/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇪 [et](../../../et/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇱 [he](../../../he/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇩 [id](../../../id/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇹 [it](../../../it/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇭 [km](../../../km/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇲 [my](../../../my/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇴 [no](../../../no/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [or](../../../or/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇰 [si](../../../si/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [te](../../../te/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇭 [th](../../../th/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OBSIDIAN_CONTEXT.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇹 [am](../../../am/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇿 [az](../../../az/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇰 [da](../../../da/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇪 [de](../../../de/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇷 [el](../../../el/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇸 [es](../../../es/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇪 [et](../../../et/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇱 [he](../../../he/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇩 [id](../../../id/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇹 [it](../../../it/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇭 [km](../../../km/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇲 [my](../../../my/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇴 [no](../../../no/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [or](../../../or/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇰 [si](../../../si/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [te](../../../te/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇭 [th](../../../th/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OBSIDIAN_CONTEXT.md)
 
 ---
 
@@ -31,72 +31,89 @@ Klientas (`src/lib/obsidian/api.ts`) papildo Local REST API šiomis funkcijomis:
 
 ## Sąranka
 
-Obsidian prieigos raktui ar baziniam URL **nėra aplinkos kintamojo** — abu saugomi
-SQLite lentelėje `key_value` (vardų sritis `obsidian`) naudojant
-`src/lib/db/obsidian.ts`. Prieigos raktas yra **šifruojamas saugojimo vietoje** (AES-256-GCM, išlaikant
-atgalinio suderinamumo atsarginį paprastojo teksto variantą). Konfigūruokite galinio punkto valdymo skydelio
-skirtuke **Konteksto šaltiniai** (`ObsidianSourceCard`) arba naudodami nustatymų REST API.
+Obsidian prieigos raktui ar baziniam URL **nėra jokio aplinkos kintamojo** — abu saugomi
+SQLite lentelėje `key_value` (vardų srityje `obsidian`) naudojant
+`src/lib/db/obsidian.ts`. Prieigos raktas **saugomas užšifruotas** (AES-256-GCM, su
+atgalinio suderinamumo atsarginiu mechanizmu, naudojančiu atvirąjį tekstą). Konfigūruokite
+Endpoint valdymo skydelio kortelėje **Context Sources** (`ObsidianSourceCard`) arba
+naudodami nustatymų REST API.
 
 > [!IMPORTANT]
 > **Obsidian Local REST API** papildinys turi būti įdiegtas ir paleistas. Jo REST
-> sąsaja klausosi adresu **HTTP `127.0.0.1:27123`** (numatytasis bazinis URL). Prievadas `27124`
-> yra _atskiras_ MCP/HTTPS galinis punktas, kurį nustatymų maršrutas aiškiai atmeta.
-> Jungdamiesi iš kito įrenginio naudokite `http://<tailscale-ip>:27123`.
+> sąsaja klausosi adresu **HTTP `127.0.0.1:27123`** (numatytasis bazinis URL). Prievadas
+> `27124` yra _atskiras_ MCP/HTTPS galinis taškas, todėl nustatymų maršrutas jį aiškiai
+> atmeta. Jei jungiatės iš kito įrenginio, naudokite `http://<tailscale-ip>:27123`.
 
 ### Konfigūracijos raktai (SQLite `key_value`, vardų sritis `obsidian`)
 
-| Raktas            | Paskirtis                                                         | Šifruojama |
+| Raktas            | Paskirtis                                                         | Užšifruota |
 | ----------------- | ----------------------------------------------------------------- | ---------- |
-| `api_key`         | Local REST API prieigos raktas                                    | taip       |
+| `api_key`         | Local REST API nešiklio prieigos raktas                           | taip       |
 | `base_url`        | REST bazinis URL (numatytasis `http://127.0.0.1:27123`)           | ne         |
-| `vault_path`      | Absoliutus kelias į saugyklos katalogą (sinchronizavimui)         | ne         |
+| `vault_path`      | Absoliutus saugyklos katalogo kelias (sinchronizavimui)           | ne         |
 | `webdav_username` | Sugeneruotas WebDAV naudotojo vardas (saugyklos sinchronizavimui) | ne         |
 | `webdav_password` | Sugeneruotas WebDAV slaptažodis (saugyklos sinchronizavimui)      | taip       |
-| `webdav_enabled`  | Ar įjungtas WebDAV saugyklos sinchronizavimas                     | ne         |
+| `webdav_enabled`  | Ar įjungtas saugyklos sinchronizavimas per WebDAV                 | ne         |
 
-### Konfigūravimas per REST
+### Konfigūravimas naudojant REST
 
 ```bash
-# Išsaugomas ir patikrinamas Local REST API prieigos raktas (POST patikrina atlikdamas būsenos užklausą)
+# Įrašyti ir patikrinti Local REST API prieigos raktą (POST tikrina pateikdamas būsenos užklausą)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
 
-# Patikrinama ryšio būsena (grąžinami connected, hasToken, baseUrl, vaultPath)
+# Patikrinti ryšio būseną (grąžina connected, hasToken, baseUrl, vaultPath)
 curl http://localhost:20128/api/settings/obsidian
 
-# Atsijungiama (pašalinamas išsaugotas prieigos raktas)
+# Atsijungti (pašalina išsaugotą prieigos raktą)
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Visiems metodams reikalingas autentifikavimas valdymo skydelyje. `POST` atmeta bet kokį URL, naudojantį prievadą `27124`,
-ir prieš išsaugodamas patikrina prieigos raktą, iškviesdamas Local REST API būsenos galinį punktą.
+Visiems metodams reikalingas autentifikavimas valdymo skydelyje. `POST` atmeta bet kokį
+URL, naudojantį prievadą `27124`, ir prieš išsaugodamas patikrina prieigos raktą,
+iškviesdamas Local REST API būsenos galinį tašką.
 
-### WebDAV saugyklos sinchronizavimas
+### Saugyklos sinchronizavimas per WebDAV
 
 `src/app/api/settings/obsidian/webdav/route.ts` valdo pasirinktinį WebDAV pagrįstą
-saugyklos sinchronizavimą (vykdomą naudojant `src/lib/obsidianSync.ts`). Jį įjungus, OmniRoute nurodomas
-vietinis saugyklos katalogas ir sugeneruojama atsitiktinė WebDAV naudotojo vardo bei slaptažodžio pora:
+saugyklos sinchronizavimą (kurį vykdo `src/lib/obsidianSync.ts`). Jį įjungus, OmniRoute
+nurodomas vietinis saugyklos katalogas ir sugeneruojama atsitiktinė WebDAV naudotojo
+vardo bei slaptažodžio pora:
 
 ```bash
-# Įjungiamas WebDAV sinchronizavimas saugyklos katalogui (sugeneruojamas naudotojo vardas ir slaptažodis)
+# Įjungti WebDAV sinchronizavimą saugyklos katalogui (sugeneruoja naudotojo vardą ir slaptažodį)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# Gaunama WebDAV sinchronizavimo būsena (prisijungimo duomenys grąžinami tik tada, kai sinchronizavimas įjungtas)
+# Gauti WebDAV sinchronizavimo būseną (prisijungimo duomenys grąžinami tik tada, kai sinchronizavimas įjungtas)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# Išjungiamas WebDAV sinchronizavimas (pašalinami prisijungimo duomenys ir valdomas .stignore)
+# Išjungti WebDAV sinchronizavimą (pašalina prisijungimo duomenis ir valdomą .stignore)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
-### Atskiro API rakto konteksto šaltinis (pasirinktinis)
+### Kiekvienam API raktui atskiras konteksto šaltinis (pasirinktinai)
 
-Obsidian konfigūraciją galima apriboti **atskiru API raktu** naudojant lentelę `api_key_context_sources`
-(`src/lib/db/apiKeyContextSources.ts`). Kai MCP iškvietime perduodamas autentifikuoto API
-rakto ID, `getObsidianConfigForApiKey()` teikia pirmenybę to rakto nuosavam prieigos raktui / baziniam URL / saugyklos keliui
-(`source: "api_key"`), o jei jų nėra, naudoja visuotinę konfigūraciją (`source: "global"`).
+Obsidian konfigūracija gali būti apribota **kiekvienam API raktui atskirai**, naudojant
+lentelę `api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Kai MCP
+iškvietime pateikiamas autentifikuoto API rakto ID, `getObsidianConfigForApiKey()`
+pirmenybę teikia tam raktui priklausančiam prieigos raktui, baziniam URL ir saugyklos
+keliui (`source: "api_key"`), o kitu atveju naudoja visuotinę konfigūraciją
+(`source: "global"`).
+
+Prieš nuskaitydami šią konfigūraciją, su sinchronizavimu nesusiję MCP įrankiai turi
+nustatyti iškvietėjo tapatybę. Tapatybės neturintis iškvietėjas gauna pranešimą
+`Obsidian API prieigos raktas nesukonfigūruotas`, o saugyklos užklausa nesiunčiama.
+HTTP iškvietėjų tapatybė nustatoma pagal jų užklausos prisijungimo duomenis; stdio
+iškvietėjų tapatybė gali būti nustatyta naudojant `OMNIROUTE_API_KEY` arba
+`ROUTER_API_KEY`. HTTP iškvietėjas, kurio tapatybės nustatyti nepavyko, negali perimti
+serverio aplinkos tapatybės. Vien rezervuoti ID prieigos nesuteikia; vis dar palaikomas
+galiojantis aplinkos prisijungimo duomuo, nustatomas kaip `env-key`. Autentifikuotiems
+raktams, neturintiems atskiros Obsidian konfigūracijos, ir toliau naudojama visuotinė
+atsarginė konfigūracija. Keturi įrankiai `obsidian_sync_*` išlaiko savo atskirą
+sinchronizavimo prieigos rakto veikseną.
 
 ## MCP įrankiai (22)
 

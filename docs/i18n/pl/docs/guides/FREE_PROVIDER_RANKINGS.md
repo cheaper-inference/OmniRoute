@@ -1,4 +1,9 @@
+# Free Provider Rankings (Arena ELO) (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇦 [bs](../../../bs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
+
 ---
+
 title: "Rankingi darmowych providerów (Arena ELO)"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -13,31 +18,19 @@ lastUpdated: 2026-06-28
 
 ---
 
-## Czym to jest
+## Co to jest
 
-OmniRoute agreguje 329 wpisów katalogu providerów, z których wiele udostępnia **darmowy tier** (no-auth,
-darmowy OAuth albo darmowy klucz API — zobacz
-[Przewodnik Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) oraz pełny
-[katalog Free Tiers](../reference/FREE_TIERS.md)). Haczyk: darmowi providerzy różnią się
-jakością modeli diametralnie. Provider no-auth z modelem frontierowym jest znacznie bardziej użyteczny
-niż taki z małym, legacy modelem.
+OmniRoute rejestruje 377 dostawców, w tym 155 zaznaczonych wpisów w katalogu**free/no-auth** (no-auth, free-tier OAuth lub free-tier API key — zobacz [Przewodnik po bezpłatnych poziomach](../getting-started/FREE-TIERS-GUIDE.md) i pełny [katalog bezpłatnych poziomów](../reference/FREE_TIERS.md) ). Haczyk: bezpłatni dostawcy różnią się znacznie jakością modeli. Dostawca bez uwierzytelnienia obsługujący model graniczny jest znacznie bardziej przydatny niż dostawca obsługujący mały, starszy model.
 
-**Free Provider Rankings** odpowiada na pytanie „**który darmowy provider daje mi najlepszy model?**”,
-łącząc katalog każdego darmowego providera z **crowd-sourcingowymi ocenami jakości** z
-**rankingu Arena AI** (ELO oparte na preferencjach ludzi — ta sama idea co arena chatbotów
-LMArena). Providery są następnie rankingowane według siły ich **najlepszego darmowego modelu**.
+**Darmowe rankingi dostawców** odpowiedzi”** który bezpłatny dostawca oferuje mi najlepszy model?** ", dołączając do katalogu każdego bezpłatnego dostawcy za pomocą** Wyniki jakości pochodzące z crowdsourcingu** z** Tablica liderów areny AI** (human-preference ELO, ten sam pomysł stojący za areną chatbotów LMArena). Dostawcy są następnie uszeregowani według siły swoich usług** najlepszy darmowy model** .
 
-Ranking jest wyliczany z trzech rzeczywistych źródeł:
+Ranking tworzony jest na podstawie trzech rzeczywistych źródeł:
 
-1. Listy darmowych providerów — `NOAUTH_PROVIDERS` oraz wpisy `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` z flagą `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Katalog modeli każdego providera z rejestru providerów
-   (`open-sse/config/providerRegistry.ts`).
-3. Wyniki task-fit pochodzące z ELO, przechowywane w tabeli DB `model_intelligence` przez
-   silnik synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`).
+1. Listy bezpłatnych dostawców — `NOAUTH_PROVIDERS` oraz wpisy `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` oznaczone jako `hasFree` (`src/shared/constants/providers.ts`).
+2. Katalog modeli każdego dostawcy z rejestru dostawców (`open-sse/config/providerRegistry.ts`).
+3. Wyniki dopasowania zadań pochodzące z ELO przechowywane w tabeli `model_intelligence` DB przez silnik synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Logika join żyje w `src/lib/freeProviderRankings.ts`.
+Logika łączenia znajduje się w `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -126,97 +119,102 @@ Kształt odpowiedzi:
 ### Źródło: ranking Arena AI
 
 Silnik synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`) pobiera dwa rankingi — `text`
-oraz `code` — z API rankingu Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Każdy wpis rankingu
-niesie nazwę modelu, vendora, ELO `score`, przedział ufności oraz liczbę głosów.
+i `code` — z API rankingu Arena AI
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Gdy to API nie zwraca
+użytecznego rankingu, silnik korzysta z oficjalnego zestawu danych `lmarena-ai/leaderboard-dataset`
+na serwerze datasets-server Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` zgłasza `activeSource`, `lastError` i
+`lastFailedAt`. Każdy wpis rankingu zawiera nazwę modelu, dostawcę, wynik ELO `score`,
+przedział ufności oraz liczbę głosów.
 
-Kategorie rankingu mapują się na kategorie zadań OmniRoute:
+Kategorie rankingu są mapowane na kategorie zadań OmniRoute:
 
 | Ranking Arena | Kategorie zadań OmniRoute                         |
 | ------------- | ------------------------------------------------- |
 | `text`        | `default`, `review`, `documentation`, `debugging` |
 | `code`        | `coding`                                          |
 
-### Normalizacja (wynik task-fit)
+### Normalizacja (wynik dopasowania do zadania)
 
-Surowe wyniki ELO są normalizowane per ranking do **wartości task-fit w `[0.4, 0.98]`**:
+Surowe wyniki ELO są normalizowane dla każdego rankingu do **wartości dopasowania do zadania w zakresie `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Wynik nigdy nie osiąga `0` ani `1`, zostawiając zapas na nadpisania użytkownika. To jest
-pole `score`, które widzisz w odpowiedzi API oraz etykieta na dashboardzie.
+Wynik nigdy nie osiąga `0` ani `1`, pozostawiając margines na nadpisania użytkownika. To jest
+pole `score`, które widzisz w odpowiedzi API, oraz etykieta wyświetlana na pulpicie.
 
-### Confidence (pewność)
+### Poziom ufności
 
-Każdy wpis dostaje poziom confidence na podstawie liczby głosów Arena:
+Każdy wpis otrzymuje poziom ufności na podstawie liczby głosów Arena:
 
-| Pewność  | Głosy   |
-| -------- | ------- |
-| `high`   | ≥ 5,000 |
-| `medium` | ≥ 1,000 |
-| `low`    | < 1,000 |
+| Poziom ufności | Głosy   |
+| -------------- | ------- |
+| `high`         | ≥ 5,000 |
+| `medium`       | ≥ 1,000 |
+| `low`          | < 1,000 |
 
-### Przechowywanie i świeżość
+### Przechowywanie i aktualność
 
-Znormalizowane wpisy trafiają do tabeli DB `model_intelligence` z
+Znormalizowane wpisy są zapisywane w tabeli bazy danych `model_intelligence` z
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Wpisy **wygasają po
-7 dniach**, więc provider, który przestanie się synchronizować, w końcu wypada zamiast serwować
-przestarzałe dane.
+7 dniach**, więc dostawca, który przestaje się synchronizować, ostatecznie znika z zestawienia,
+zamiast serwować nieaktualne dane.
 
 Synchronizacja jest **domyślnie włączona**:
 
-- Uruchamia się raz przy starcie serwera, a potem na okresowym timerze
-  (`src/lib/arenaEloSync.ts`, podpięte z `src/server-init.ts`).
-- Jest **nieblokująca i nigdy nie jest fatalna** — jeśli fetch upstreamu się nie uda, OmniRoute dalej
-  działa, a rankingi po prostu pokazują ostatnie dobre dane (albo stan pusty).
+- Uruchamia się raz przy starcie serwera, a następnie cyklicznie
+  (`src/lib/arenaEloSync.ts`, podłączona z `src/instrumentation-node.ts`).
+- Jest **nieblokująca i nigdy nie powoduje błędu krytycznego** — jeśli pobranie ze źródła
+  nadrzędnego się nie powiedzie, OmniRoute działa dalej, a rankingi po prostu pokazują
+  ostatnie poprawne dane (lub stan pusty).
 
-Sterują nią dwie zmienne środowiskowe (opisane w
+Kontrolują ją dwie zmienne środowiskowe (udokumentowane w
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Zmienna                   | Domyślnie     | Cel                                                       |
-| ------------------------- | ------------- | --------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Ustaw na `false`, aby wyłączyć wychodzącą synchronizację. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Interwał synchronizacji w sekundach.                      |
+| Zmienna                   | Domyślnie     | Przeznaczenie                                                   |
+| ------------------------- | ------------- | --------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Ustaw na `false`, aby zrezygnować z synchronizacji wychodzącej. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Interwał synchronizacji, w sekundach.                           |
 
 ### Ręczna synchronizacja / status / czyszczenie
 
-Dla operatorów uwierzytelniony endpoint managementu udostępnia ręczną kontrolę
-(`src/app/api/intelligence/sync/route.ts` — wymaga management auth):
+Dla operatorów uwierzytelniony punkt końcowy zarządzania udostępnia ręczną kontrolę
+(`src/app/api/intelligence/sync/route.ts` — wymaga uwierzytelnienia zarządzania):
 
 ```
-GET    /api/intelligence/sync          # current sync status (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # trigger a manual sync; body: { "dryRun": true } to preview without writing
-DELETE /api/intelligence/sync          # clear all synced arena_elo intelligence entries
+GET    /api/intelligence/sync          # bieżący status synchronizacji (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # wyzwala ręczną synchronizację; treść: { "dryRun": true } dla podglądu bez zapisu
+DELETE /api/intelligence/sync          # usuwa wszystkie zsynchronizowane wpisy intelligence arena_elo
 ```
 
-Jeśli strona rankingów jest pusta, ręczny `POST /api/intelligence/sync` (albo po prostu
-restart serwera) uzupełnia ją ponownie.
+Jeśli strona rankingów jest pusta, ręczne `POST /api/intelligence/sync` (lub po prostu
+ponowne uruchomienie serwera) ponownie ją wypełni.
 
 ### Dopasowywanie modeli do rankingu
 
-ID modeli w rejestrze i nazwy modeli Arena nie zawsze pasują dokładnie. Ranking używa
-elastycznego dopasowania (`findMatchingIntelligence` w `src/lib/freeProviderRankings.ts`):
+Identyfikatory modeli w rejestrze i nazwy modeli Arena nie zawsze są dokładnie takie same.
+Ranking używa elastycznego dopasowywania (`findMatchingIntelligence` w `src/lib/freeProviderRankings.ts`):
 
-1. Dokładne dopasowanie znormalizowanego ID modelu.
-2. Dopasowanie po usunięciu końcówki wersji (np. `kimi-k2.6` → `kimi-k2`).
-3. Dopasowanie prefiksu (nazwa modelu z rankingu jest prefiksem ID w rejestrze).
+1. Dokładne dopasowanie znormalizowanego identyfikatora modelu.
+2. Dopasowanie po usunięciu końcowego sufiksu wersji (np. `kimi-k2.6` → `kimi-k2`).
+3. Dopasowanie prefiksu (nazwa modelu z rankingu jest prefiksem identyfikatora w rejestrze).
 
-Po stronie sync znane prefiksy vendorów (`anthropic/`, `openai/`, `google/`, …) są
-usuwane, a mała mapa aliasów rozwija kanoniczne nazwy do wariantów używanych wewnętrznie
-przez OmniRoute, dzięki czemu modele da się znaleźć pod dowolną nazwą.
+Po stronie synchronizacji znane prefiksy dostawców (`anthropic/`, `openai/`, `google/`, …)
+są usuwane, a niewielka mapa aliasów rozwija kanoniczne nazwy do wariantów używanych
+wewnętrznie przez OmniRoute, dzięki czemu modele pozostają odnajdywalne pod dowolną nazwą.
 
-### Jak rankingowany jest provider
+### Jak uszeregowany jest dostawca
 
-Dla każdego darmowego providera silnik ocenia każdy model w jego katalogu, a następnie:
+Dla każdego darmowego dostawcy silnik ocenia każdy model w jego katalogu, a następnie:
 
-- **Top Model** = model providera z najwyższym wynikiem.
-- **Avg Score** = średni wynik ze wszystkich ocenionych modeli tego providera.
-- **Models** = ile modeli providera miało wynik Arena.
+- **Najlepszy model** = model dostawcy z najwyższym wynikiem.
+- **Średni wynik** = średnia wyników wszystkich ocenionych modeli tego dostawcy.
+- **Modele** = liczba modeli dostawcy, które miały wynik Arena.
 
-Providery są sortowane najpierw według **wyniku top-model**, potem według średniego wyniku. To premiuje
-providera, który oferuje przynajmniej jeden silny darmowy model.
+Dostawcy są sortowani najpierw według **wyniku najlepszego modelu**, a następnie według
+średniego wyniku. To premiuje dostawcę, który oferuje co najmniej jeden mocny darmowy model.
 
 ---
 

@@ -9,6 +9,7 @@ import { convertResponsesApiFormat } from "../translator/helpers/responsesApiHel
 import { collectResponsesCustomToolNames } from "../translator/request/openai-responses/additionalTools.ts";
 import { createResponsesApiTransformStream } from "../transformer/responsesTransformer.ts";
 import { createSseHeartbeatTransform, HEARTBEAT_SHAPES } from "../utils/sseHeartbeat.ts";
+import { extractToolSchemaMap } from "../translator/response/openai-responses/toolSchemas.ts";
 import { SSE_HEARTBEAT_INTERVAL_MS } from "../config/constants.ts";
 
 /**
@@ -46,6 +47,16 @@ export async function handleResponsesCore({
     modelInfo?.provider,
     modelInfo?.model
   );
+
+  // #14154 — capture the #7936 {namespace, name} identity ledger BEFORE
+  // handleChatCore dispatches: extractRequestToolIdentityMap() deletes this
+  // side channel from the same object once the request is translated, so it
+  // must be read here to reach the response transform stream below.
+  const requestToolIdentityMap =
+    (convertedBody as { _namespaceToolIdentityMap?: Map<string, unknown> })
+      ._namespaceToolIdentityMap ?? null;
+
+  const toolSchemas = extractToolSchemaMap(convertedBody);
 
   // Ensure stream is enabled
   convertedBody.stream = true;
@@ -86,7 +97,11 @@ export async function handleResponsesCore({
   }
 
   // Transform SSE stream to Responses API format (no logging in worker)
-  const transformStream = createResponsesApiTransformStream(null, undefined, { customToolNames });
+  const transformStream = createResponsesApiTransformStream(null, undefined, {
+    customToolNames,
+    requestToolIdentityMap,
+    toolSchemas,
+  });
   const transformedBody = response.body.pipeThrough(transformStream).pipeThrough(
     createSseHeartbeatTransform({
       signal,

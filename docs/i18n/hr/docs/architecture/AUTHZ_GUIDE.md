@@ -1,15 +1,15 @@
 # Authorization Guide (Hrvatski)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
 
 ---
 
 > **Izvor istine:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Posljednje ažuriranje:** 2026-06-28 — v3.8.40
+> **Zadnje ažurirano:** 2026-09-22 — prostori naziva opsega upućuju na MCP-SERVER.md
 
-OmniRoute ima autorizacijski cjevovod koji uzima u obzir rute i kontrolira svaki API zahtjev. Klasifikacija je **deterministička** i **zatvorena u slučaju pogreške** — sve što se ne može klasificirati završava kao `MANAGEMENT` i zahtijeva sesiju ili token s ovlastima za upravljanje. Ova stranica objašnjava model inženjerima koji održavaju rute ili dizajniraju nove krajnje točke.
+OmniRoute ima autorizacijski cjevovod svjestan ruta koji štiti svaki API zahtjev. Klasifikacija je **deterministička** i **zatvorena u slučaju kvara** — sve što se ne može klasificirati završava kao `MANAGEMENT` i zahtijeva sesiju ili token upravljačke razine. Ova stranica objašnjava model za inženjere koji održavaju rute ili dizajniraju nove krajnje točke.
 
-![Autorizacijski cjevovod (3 klase ruta + evaluacija pravila)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ cjevovod (3 klase ruta + evaluacija politike)](../diagrams/exported/authz-pipeline.svg)
 
 > Izvor: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -23,63 +23,121 @@ Upotrebljava se za klijentske API-je kompatibilne s OpenAI/Anthropic/Gemini te z
 Authorization: Bearer <api-key>
 ```
 
-Provjerava se funkcijama `isValidApiKey()` / `extractApiKey()` u `src/sse/services/auth.ts`, koje se ponovno izvoze putem `src/shared/utils/apiAuth.ts`. Validator također prihvaća varijable okruženja `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` kao trajne ključeve za izravno prosljeđivanje (problem #1350).
+Provjerava se funkcijama `isValidApiKey()` / `extractApiKey()` u `src/sse/services/auth.ts` te se ponovno izvozi putem `src/shared/utils/apiAuth.ts`. Validator također prihvaća varijable okruženja `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` kao trajne ključeve za prosljeđivanje (problem #1350).
 
 ### 2. Sesija nadzorne ploče (kolačić auth_token)
 
 Za stranice nadzorne ploče i administratorske operacije.
 
 ```
-Cookie: auth_token=<JWT potpisan s JWT_SECRET>
+Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
 Kolačić predstavlja sesiju samo kada je JWT uspješno provjeren **i** sadrži `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Svaki
-potrošač kolačića (čuvar rute, osvježavanje autorizacijskog cjevovoda, WebSocket rukovanje, poslužitelj
-uživo, `/api/settings/require-login`, `/api/auth/status`) prolazi kroz taj pomoćni program.
-Postoje i drugi JWT-ovi potpisani s `JWT_SECRET` — izravno prosljeđivanje za Cursor CLI izdaje
+potrošač kolačića (zaštita ruta nadzorne ploče (`isDashboardSessionAuthenticated()`), osvježavanje autorizacijskog cjevovoda, WebSocket rukovanje, poslužitelj uživo,
+`/api/settings/require-login`, `/api/auth/status`) prolazi kroz taj pomoćni element.
+Postoje i drugi JWT-ovi potpisani s `JWT_SECRET` — prosljeđivanje za Cursor CLI izdaje
 tokene `iss "omniroute" / aud "cursor-cli"` vlasnicima ključeva — i oni nikada nisu sesije
 (#13298).
 
-Provjerava se funkcijom `isDashboardSessionAuthenticated()` u `src/shared/utils/apiAuth.ts`. Cjevovod automatski osvježava JWT kada mu je preostalo manje od 7 dana od ukupnog trajanja od 30 dana.
+Provjerava se funkcijom `isDashboardSessionAuthenticated()` u `src/shared/utils/apiAuth.ts`. Cjevovod automatski osvježava JWT kada mu preostane manje od 7 dana od njegova 30-dnevnog roka valjanosti.
 
-Neke rute za upravljanje prihvaćaju **bilo koji** način: kolačić ILI `Bearer <key>` kada API ključ ima opseg `manage` (ili `admin`). To omogućuje tijek rada „konfigurabilno putem API poziva” dodan u v3.8.
+Sesija može završiti i prije isteka tih 30 dana jer svaki izdavatelj prolazi kroz `mintDashboardSessionToken` (vrijeme izdavanja `iat` i identifikator `jti`), a verifikator provjerava dvije postavke: `sessionsValidAfter`, koja se postavlja pri promjeni lozinke kako bi se prestale potvrđivati sve sesije izdane prije tog trenutka (preglednik u kojem je lozinka promijenjena dobiva novi kolačić), i `revokedDashboardSessions`, kojoj `POST /api/auth/logout` dodaje `jti` odjavljene sesije. Sesije izdane u starijem izdanju ne sadrže nijednu od tih tvrdnji i ostaju valjane do prve promjene lozinke. Ako se postavke ne mogu pročitati, sesija se ne smatra pouzdanom.
 
-#### Neobavezna OIDC prijava (#6973)
+Neke rute za upravljanje prihvaćaju **bilo koji** način: kolačić ILI `Bearer <key>` kada API ključ ima opseg `manage` (ili `admin`). To omogućuje tijek rada „podesivo putem API poziva” dodan u v3.8.
 
-Administratorska prijava na nadzornu ploču također podržava **opcijski** tijek OIDC-a (OpenID Connect)
+#### Neobavezni uvjet prijave putem OIDC-a (#6973)
+
+Administratorska prijava na nadzornu ploču također podržava **izborni** tijek OIDC-a (OpenID Connect)
 uz zadanu prijavu lozinkom — prijava lozinkom nikada se ne uklanja, već se samo
 nadopunjuje:
 
-- Onemogućeno je osim ako vrijedi `settings.oidcEnabled === true` **i** ako su
-  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` svi konfigurirani (Postavke → Autentifikacija).
+- Onemogućeno je osim ako je `settings.oidcEnabled === true` **i** ako su
+  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` konfigurirani (Postavke → Autentikacija).
   U suprotnom `GET /api/auth/oidc/login` vraća `400`.
 - `GET /api/auth/oidc/login` otkriva `authorization_endpoint` iz
-  izdavateljeve konfiguracije `/.well-known/openid-configuration` (uz pričuvnu vrijednost
-  `<issuer>/authorize`), izrađuje URI za preusmjeravanje iz dolaznog zahtjeva
-  (uzimajući u obzir `x-forwarded-proto`) i preusmjerava na IdP s nasumičnim `state`
-  pohranjenim u `httpOnly` kolačiću `oidc_state`.
+  izdavateljeve konfiguracije `/.well-known/openid-configuration` (uz pričuvnu
+  vrijednost `<issuer>/authorize`), izrađuje URI za preusmjeravanje iz dolaznog
+  zahtjeva (uz podršku za `x-forwarded-proto`) i preusmjerava na IdP s nasumičnim
+  `state` pohranjenim u `httpOnly` kolačiću `oidc_state`.
 - `GET /api/auth/oidc/callback` provjerava `state`, razmjenjuje autorizacijski
-  kôd i provjerava potpis ID tokena putem izdavateljeva JWKS-a
-  (`createRemoteJWKSet` iz paketa `jose`, predmemoriran po URI-ju JWKS-a), uz provjere
-  `issuer`/`audience`. Neobavezan popis dopuštenih vrijednosti `oidcAllowedSubjects` uspoređuje se s
-  tvrdnjom `sub` ili tvrdnjom `email` tokena — tvrdnja e-pošte uzima se u obzir samo kada je
-  `email_verified === true`, pa neprovjerena adresa e-pošte kod IdP-a nikada ne može proći
-  provjeru.
-- Nakon uspješne provjere izdaje se **potpuno isti** 30-dnevni JWT `auth_token` koji izdaje prijava
-  lozinkom (`src/app/api/auth/login/route.ts`), tako da ostatak
-  cjevovoda sesije nadzorne ploče (automatsko osvježavanje, zastavice kolačića) ostaje nepromijenjen —
-  OIDC mijenja samo način izdavanja kolačića, a ne ovlasti koje on daje.
+  kod i provjerava potpis ID tokena putem izdavateljeva JWKS-a
+  (`jose`-ov `createRemoteJWKSet`, predmemoriran po JWKS URI-ju) uz provjere
+  `issuer`/`audience`. Pristup nadzornoj ploči zahtijeva neprazan popis
+  `oidcAllowedSubjects`, pravilo `oidcAdmissionClaim` ili oboje. Popis subjekata
+  uspoređuje `sub` ili `email` samo kada je `email_verified === true`. Neobavezno
+  pravilo tvrdnje prima putanju tvrdnje ID tokena odvojenu točkama (na primjer,
+  `realm_access.roles`) i niz prihvaćenih vrijednosti; razriješena tvrdnja mora
+  biti niz znakovnih nizova koji sadržava barem jednu prihvaćenu vrijednost. Ako
+  su konfigurirana oba pravila, oba moraju proći. Nedostajuće ili neispravne
+  tvrdnje rezultiraju odbijanjem pristupa, a bez ijednog pravila povratni poziv
+  odbija prijavu (`not_configured`). Postojeće konfiguracije koje se temelje samo
+  na subjektima nastavljaju raditi bez promjena.
+- Keycloak u pravilu mapira uloge područja u pristupne tokene, ali ne nužno i u
+  ID tokene. Kako biste zahtijevali ulogu područja `admin`, konfigurirajte
+  preslikavatelj protokola za ovaj klijent koji uključuje `realm_access.roles`
+  u njegov **ID token**, a zatim postavite `oidcAdmissionClaim` na
+  `{ "path": "realm_access.roles", "values": ["admin"] }`. Prije omogućivanja
+  pristupa samo na temelju uloge provjerite stvarnu tvrdnju ID tokena za ovaj
+  klijent; aplikacija ne čita uloge iz pristupnog tokena. Odbijanje tokena na
+  strani IdP-a može nadopuniti ovu provjeru na strani aplikacije, ali je ne može
+  zamijeniti.
+- U slučaju uspjeha izdaje se **potpuno isti** 30-dnevni `auth_token` JWT koji
+  izdaje prijava lozinkom (`src/app/api/auth/login/route.ts`), pa ostatak
+  procesa sesije nadzorne ploče (automatsko osvježavanje, oznake kolačića) ostaje
+  nepromijenjen — OIDC zamjenjuje samo način izdavanja kolačića, a ne prava koja
+  on dodjeljuje. Promjene uloga/grupa IdP-a ne poništavaju postojeće OmniRoute
+  sesije; odjava, promjena lozinke ili istek sesije i dalje određuju njihov
+  životni vijek.
+- Svaka postavka `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) nalazi se u
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  odgovara s `400 PASSWORD_REQUIRED` osim ako tijelo sadrži administratorsku
+  lozinku kao `currentPassword` (`401 PASSWORD_MISMATCH` kada je netočna).
+  `oidcDisablePasswordLogin` onemogućuje _prijavu_ lozinkom
+  (`POST /api/auth/login`), ali zadržava pohranjeni sažetak lozinke, a ponovna
+  autentikacija i dalje provjerava `currentPassword` u odnosu na njega.
+- `corsOrigins` i `bruteForceProtection` također se nalaze u
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: ublažavanje bilo koje od tih postavki
+  slabi zaštitu prijave, pa zahtijevaju istu ponovnu autentikaciju putem
+  `currentPassword` (kartica Sigurnost traži tu lozinku), a JSON uvoz ih
+  izostavlja.
+- Svaki ključ sigurnosnog pravila — stavke u `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  svaki ključ `oidc*` i stanje sesije nadzorne ploče — dostupan je **samo
+  operatoru** na `PATCH /api/settings`: API ključ s opsegom za upravljanje ili
+  pristupni token `oma_` odbija se s `403` čak i kada šalje ispravan
+  `currentPassword`, a odbijanje se bilježi u zapisnik nadzora kao
+  `settings.update_failed` s `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` u `src/lib/api/operatorCredential.ts`).
+  Obične postavke (tema, postavke prikaza) ostaju dostupne za zapisivanje ključu
+  `manage` ili pristupnom tokenu `admin`. Svaka izmjena samog `/api/settings`
+  (kao i `/api/settings/require-login`) također zahtijeva opseg pristupnog tokena
+  `admin` (`ADMIN_MUTATION_EXACT_PATHS` u `src/server/authz/accessScopes.ts`,
+  podudaranje točne putanje); `GET` ostaje `read`, a ostale podrute
+  `/api/settings/*` (proxyji, zadane vrijednosti kombinacija, pseudonimi modela,
+  kompresija, čišćenja…) zadržavaju opseg `write` izveden iz metode.
+- `POST /api/settings/import-json` preskače tu ponovnu autentikaciju, pa prije
+  zapisivanja izostavlja svaki ključ iz `IMPORT_STRIPPED_SETTINGS_KEYS` (ista
+  datoteka): lozinku i `currentPassword`, svaku stavku iz
+  `SECURITY_IMPACTING_SETTINGS_KEYS` te stanje sesije nadzorne ploče
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Uvoz starije sigurnosne
+  kopije stoga ne može ponovno aktivirati sesiju koju je promjena lozinke ili
+  odjava već prekinula.
 
 ## Klase ruta
 
-`src/server/authz/types.ts` definira tri klase; svaka ruta koju nije moguće deterministički klasificirati zadano se svrstava u `MANAGEMENT`.
+`src/server/authz/types.ts` definira tri klase; svaka ruta koju nije moguće deterministički klasificirati pada na `MANAGEMENT`.
 
-| Klasa        | Opis                                                                                                                                                               | Potrebna autentikacija                                              |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| `PUBLIC`     | Izričito sigurne rute — prijava, odjava, status, inicijalizacija, provjera stanja, početno postavljanje.                                                           | Nije potrebna                                                       |
-| `CLIENT_API` | Krajnje točke za posluživanje modela — `/api/v1/*`, `/api/v1beta/*`, uz pseudonime `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer ključ kada je efektivna značajka `REQUIRE_API_KEY` omogućena |
-| `MANAGEMENT` | Stranice nadzorne ploče, postavke, pružatelji usluga, ključevi te administratorske i dijagnostičke krajnje točke.                                                  | Sesija nadzorne ploče ILI Bearer s opsegom `manage`                 |
+| Klasa        | Opis                                                                                                                                                          | Potrebna autentifikacija                                              |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `PUBLIC`     | Izričito sigurne rute — prijava, odjava, status, inicijalizacija, health, bootstrap uvođenja.                                                                 | Nema                                                                  |
+| `CLIENT_API` | Krajnje točke za posluživanje modela — `/api/v1/*`, `/api/v1beta/*` te aliasi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer ključ kada je omogućena učinkovita zastavica `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Stranice nadzorne ploče, postavke, pružatelji, ključevi, administrativne i dijagnostičke krajnje točke.                                                       | Sesija nadzorne ploče ILI Bearer s opsegom `manage`                   |
+
+Nekoliko radnji `MANAGEMENT` je **samo za operatora**: ključ `manage` nije dovoljan. Izvoz pohranjenih vjerodajnica (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), vraćanje sigurnosne kopije preko živih podataka (`POST /api/db-backups/import`, uključujući `dryRun=true`, `POST /api/db-backups` vraćanje po id-u, `POST /api/settings/import-json`) i uništavanje točaka vraćanja (čišćenje putem `DELETE /api/db-backups` i također `PATCH /api/db-backups`, jer zadržavanje koje spremi pokreće automatsko orezivanje nakon svake sigurnosne kopije) zahtijevaju sesiju nadzorne ploče, lokalni CLI subjekt ili onemogućenu prijavu. Izdavanje sinkronizacijskog tokena (`POST /api/sync/tokens`) i kovanje CLI pristupnog tokena s opsegom `admin` (`POST /api/cli/tokens`) zahtijevaju sesiju nadzorne ploče ili lokalni CLI subjekt u svim načinima prijave. API ključevi bilo kojeg opsega i `oma_` pristupni tokeni nisu operatorske vjerodajnice: kad se traži operatorska vjerodajnica, dobivaju `403`. Provjera se nalazi u `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Promjena postavki prijave također je rezervirana za operatora: `POST /api/settings/require-login` (postavljanje lozinke za upravljanje / prebacivanje `requireLogin`) prihvaća samo te vjerodajnice kada lozinka već postoji — prozor prvog pokretanja (još bez lozinke) ostaje nepromijenjen — a sesija nadzorne ploče mora poslati `currentPassword` kako bi zamijenila lozinku (`403` ako nedostaje ili je pogrešna, bilježi se kao `settings.update_failed`). Lokalni CLI i instanca s onemogućenom prijavom zadržavaju put oporavka i mogu postaviti lozinku bez nje, jer su obje vezane za host koji posjeduje podatkovni direktorij.
 
 ## Cjevovod
 
@@ -202,36 +260,46 @@ Odaberite skup prema obliku, a ne prema praktičnosti. Jedna ruta ide u `PUBLIC_
 
 ## Opsezi
 
-API ključevi sadrže polje `scopes` (pohranjeno kao JSON u `api_keys.scopes`, pogledajte `src/lib/db/apiKeys.ts`).
+Tri imenska prostora. Svaki provjerivač čita samo vlastite nizove. Usporedba,
+uključujući zašto `manage` ne uspijeva `scopeMatches` za `read:compression` i zašto
+pristupni token `read` ne može `PATCH /api/keys/{id}`, nalazi se u
+[Tri imenska prostora opsega](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-### Opseg upravljanja
+API ključevi sadrže `scopes` niz (pohranjen kao JSON u `api_keys.scopes`, pogledajte `src/lib/db/apiKeys.ts`).
 
-- `manage` / `admin` — ključu omogućuje pristup krajnjim točkama API-ja za upravljanje kada se šalje kao Bearer.
+### Upravljački opseg
 
-### MCP opsezi (`src/shared/constants/mcpScopes.ts`)
+- `manage` / `admin` — `hasManageScope`. Nositeljski pristup rutama upravljačkog API-ja.
+- `mcp:connect`, `self:usage`, `self:account-quota` i
+  `policy:bypass-provider-quota` su aditivni opsezi s točnim podudaranjem. Nalaze se
+  izvan `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` otvara samo
+  `/api/mcp/` izuzetak koji nije povratna veza.
 
-Svaki MCP alat zahtijeva određene opsege putem `MCP_TOOL_SCOPES`. Cjelovit popis (`MCP_SCOPE_LIST`):
+### Opsezi MCP alata
 
-```
-read:health, read:combos, write:combos, read:quota, read:usage,
-read:models, execute:completions, execute:search, write:budget,
-write:resilience, pricing:write, read:cache, write:cache,
-read:compression, write:compression, read:proxies
-```
+Katalog i pravila podudaranja (identičan niz znakova, ili dodijeljeni opseg koji završava s `*`):
+[Opsezi MCP alata](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
+`MCP_SCOPE_LIST` u `src/shared/constants/mcpScopes.ts` je izvorni tipizirani
+podskup, a ne taj potpuni katalog. Provedba se izvršava u
+`open-sse/mcp-server/scopeEnforcement.ts` nakon što `resolveCallerScopeContext()`
+razriješi opsege iz MCP informacija o autentifikaciji, metapodataka zahtjeva ili
+`OMNIROUTE_MCP_SCOPES`. Ostaje isključena osim ako `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 
-Provedba opsega u `open-sse/mcp-server/server.ts` prosljeđuje popis opsega svakog alata funkciji
-`evaluateToolScopes()` nakon što `resolveCallerScopeContext()` razriješi opsege iz podataka za MCP autentifikaciju,
-metapodataka zahtjeva ili `OMNIROUTE_MCP_SCOPES`.
+### Opsezi pristupnog tokena
 
-## Prekidač za obveznu autentifikaciju
+`read` / `write` / `admin` na `oma_live_…` tokenima, rangirani prema `scopeSatisfies`
+(`src/lib/accessTokens/scopes.ts`). Ovaj rang se primjenjuje samo na
+vjerodajnicu pristupnog tokena. Pogledajte [Upravljačka autentifikacija](../guides/MANAGEMENT-AUTH.md).
 
-`isAuthRequired()` u `src/shared/utils/apiAuth.ts` određuje provodi li se **ikakva** autentifikacija za zahtjev:
+## Prekidač za zahtijevanu autentifikaciju
 
-- `settings.requireLogin === false` → autentifikacija je globalno onemogućena.
-- Nije konfigurirana lozinka **i** ne postoji varijabla okruženja `INITIAL_PASSWORD` → početni način rada dopušta čarobnjak za uvođenje i zahtjeve s povratne petlje, ali zahtjevi iz izložene mreže i dalje zahtijevaju vjerodajnice.
-- Bilo koja pogreška baze podataka → pristup se odbija (sigurno prema zadanim postavkama).
+`isAuthRequired()` u `src/shared/utils/apiAuth.ts` odlučuje hoće li se za zahtjev provoditi **bilo kakva** autentifikacija:
 
-Provedba API ključa klijenta koristi `isRequireApiKeyEnabled()` u `src/shared/utils/featureFlags.ts`, a ne izravno čitanje `process.env.REQUIRE_API_KEY`. To je važno za implementirane instance: promjena postavke `REQUIRE_API_KEY` u Dashboard → Feature Flags pohranjuje nadjačavanje u bazu podataka i odmah utječe na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` i druge provjere autentifikacije klijentskog API-ja koje koriste isti pomoćni element. Ako se spremište zastavica značajki ne može čitati, autentifikacija klijentskog API-ja odbija pristup i zahtijeva ključ.
+- `settings.requireLogin === false` → autentifikacija je globalno isključena, osim za trajno zaštićenu razinu (vidi [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) i pozive koji izdaju vjerodajnicu koju ona prihvaća; oni zahtijevaju istu vjerodajnicu kao i pri uključenoj prijavi: izdavanje sinkronizacijskih tokena, kovanje CLI pristupnih tokena bilo kojeg opsega te stvaranje API ključa s opsegom `manage`/`admin`, dodjeljivanje tog opsega ključu, regeneriranje ili prikaz takvog ključa (`requireCredentialForManagementScopedKey()` u `src/lib/api/requireManagementAuth.ts`). Ključevi samo za inferenciju ostaju otvoreni.
+- Nije postavljena lozinka **i** nije postavljena okolinska varijabla `INITIAL_PASSWORD` → bootstrap način dopušta čarobnjak za postavljanje i zahtjeve s loopbacka, ali mrežni zahtjevi izvana i dalje zahtijevaju vjerodajnice.
+- Svaka pogreška baze → zatvoreno (secure-by-default).
+
+Provedba API ključa klijenta koristi `isRequireApiKeyEnabled()` u `src/shared/utils/featureFlags.ts`, a ne izravno čitanje `process.env.REQUIRE_API_KEY`. To je važno za instalirane instance: prebacivanje `REQUIRE_API_KEY` u Dashboard → Feature Flags sprema nadjačavanje u bazu i odmah utječe na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` i druge provjere autentifikacije klijentskog API-ja koje dijele ovaj pomoćnik. Ako se spremište zastavica ne može pročitati, autentifikacija klijentskog API-ja zatvara se i zahtijeva ključ.
 
 ## Nekompatibilna promjena — v3.8.0
 
@@ -267,9 +335,9 @@ x-omniroute-auth-scopes:    popis odvojen zarezima
 
 Upotrijebite `assertAuth(req, expectedClass)` unutar rukovatelja — izbacuje `AuthzAssertionError` s kodom `AUTHZ_NOT_INITIALIZED` ako je međuprogram zaobiđen (korisno za otkrivanje regresija konfiguracije u testovima).
 
-## Pogledajte također
+## Vidi također
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — oznaka autentifikacije po krajnjoj točki
-- [COMPLIANCE.md](../security/COMPLIANCE.md) — zapisnik revizije za događaje autentifikacije
-- [MCP-SERVER.md](../frameworks/MCP-SERVER.md) — pojedinosti o provođenju MCP opsega
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — oznaka autorizacije po krajnjoj točki
+- [COMPLIANCE.md](../security/COMPLIANCE.md) — revizijski zapisnik za događaje autorizacije
+- [MCP-SERVER.md](../frameworks/MCP-SERVER.md#three-scope-namespaces) — tri imenska prostora opsega i MCP katalog opsega alata
 - Izvor: `src/server/authz/`, `src/lib/api/requireManagementAuth.ts`

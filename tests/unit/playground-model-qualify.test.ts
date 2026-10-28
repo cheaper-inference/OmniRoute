@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { qualifyPlaygroundModel } =
+const { qualifyPlaygroundModel, resolveLlmPlaygroundEndpoint } =
   await import("../../src/app/(dashboard)/dashboard/media-providers/components/LlmChatCard.tsx");
 
 // #3050 — vendor-namespaced model ids already contain a "/", so the old
@@ -32,10 +32,19 @@ test("qualifyPlaygroundModel returns the model unchanged without a providerId", 
   assert.equal(qualifyPlaygroundModel("", "nim"), "");
 });
 
-test("OpenCode Free playground uses its routing alias instead of the reserved provider id", async () => {
+test("provider playground uses native Responses for both ChatGPT Web Codex prefixes", () => {
+  assert.equal(resolveLlmPlaygroundEndpoint("cgpt-codex/think"), "/api/v1/responses");
+  assert.equal(resolveLlmPlaygroundEndpoint("chatgpt-web-codex/high"), "/api/v1/responses");
+  assert.equal(resolveLlmPlaygroundEndpoint("openai/gpt-5"), "/api/v1/chat/completions");
+});
+
+test("a no-auth provider playground uses its routing alias instead of the provider id", async () => {
   const { getProviderAlias } = await import("../../src/shared/constants/providers.ts");
-  assert.equal(getProviderAlias("opencode"), "oc");
-  assert.equal(qualifyPlaygroundModel("big-pickle", getProviderAlias("opencode")), "oc/big-pickle");
+  assert.equal(getProviderAlias("uncloseai"), "unc");
+  assert.equal(
+    qualifyPlaygroundModel("some-model", getProviderAlias("uncloseai")),
+    "unc/some-model"
+  );
 });
 
 test("qualifyPlaygroundModel inserts the provider after the no-think prefix, not before it", () => {

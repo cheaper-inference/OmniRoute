@@ -1,6 +1,6 @@
 # Free Provider Rankings (Arena ELO) (Dansk)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇦 [bs](../../../bs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
 
 ---
 
@@ -13,30 +13,17 @@
 
 ## Hvad det er
 
-OmniRoute registrerer 329 udbydere, herunder 155 katalogposter markeret som **gratis/uden godkendelse**
-(uden godkendelse,
-OAuth på gratisniveau eller API-nøgle på gratisniveau — se
-[Vejledning til gratisniveauer](../getting-started/FREE-TIERS-GUIDE.md) og den komplette
-[mappe over gratisniveauer](../reference/FREE_TIERS.md)). Udfordringen er, at gratis udbyderes
-modelkvalitet varierer meget. En udbyder uden godkendelse, der tilbyder en banebrydende model, er langt mere nyttig
-end en, der tilbyder en lille ældre model.
+OmniRoute registrerer 377 udbydere, herunder 155 katalogposter markeret**free/no-auth** (no-auth, free-tier OAuth eller free-tier API nøgle - se [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) og hele [Free Tiers-biblioteket](../reference/FREE_TIERS.md) ). Fangsten: gratis udbydere varierer meget i modelkvalitet. En udbyder uden godkendelse, der betjener en grænsemodel, er langt mere nyttig end en, der betjener en lille ældre model.
 
-**Rangering af gratis udbydere** besvarer spørgsmålet "**hvilken gratis udbyder giver mig den bedste model?**" ved at
-sammenkoble hver gratis udbyders katalog med **crowdsourcede kvalitetsscorer** fra
-**Arena AI-resultatlisten** (ELO baseret på menneskelige præferencer, samme idé som bag LMArena-
-chatbotarenaen). Udbyderne rangeres derefter efter styrken af deres **bedste gratis model**.
+**Gratis udbyderrangeringer** svar"** hvilken gratis udbyder giver mig den bedste model?** " ved at deltage i hver gratis udbyders katalog med** crowd-sourced kvalitetsresultater** fra** Arena AI leaderboard** (human-preference ELO, den samme idé bag LMArena chatbot arenaen). Udbydere bliver derefter rangeret efter styrken af deres** bedste gratis model** .
 
-Rangeringen beregnes ud fra tre reelle kilder:
+Rangeringen er beregnet ud fra tre rigtige kilder:
 
-1. Listerne over gratis udbydere — `NOAUTH_PROVIDERS` samt poster i `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS`, der er markeret med `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Hver udbyders modelkatalog fra udbyderregistret
-   (`open-sse/config/providerRegistry.ts`).
-3. ELO-afledte scorer for opgaveegnethed, som gemmes i DB-tabellen `model_intelligence` af
-   Arena ELO-synkroniseringsmotoren (`src/lib/arenaEloSync.ts`).
+1. De gratis udbyderlister — `NOAUTH_PROVIDERS` plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` -indgange markeret med `hasFree` (`src/shared/constants/providers.ts`).
+2. Hver udbyders modelkatalog fra udbyderregistret (`open-sse/config/providerRegistry.ts`).
+3. ELO-afledte opgavetilpasningsscore gemt i `model_intelligence` DB tabellen af Arena ELO synkroniseringsmotoren (`src/lib/arenaEloSync.ts`).
 
-Sammenkoblingslogikken findes i `src/lib/freeProviderRankings.ts`.
+Join logikken lever i `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -120,14 +107,19 @@ opgaveegnethed (se nedenfor). Udbydere uden modeller med scorer udelades fra sva
 
 ---
 
-## Sådan fungerer scorerne
+## Sådan fungerer scores
 
-### Kilde: Arena AI-ranglisten
+### Kilde: Arena AI-rangliste
 
 Arena ELO-synkroniseringsmotoren (`src/lib/arenaEloSync.ts`) henter to ranglister — `text`
-og `code` — fra API'et til Arena AI-ranglisten
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Hver post på ranglisten
-indeholder et modelnavn, en leverandør, en ELO-`score`, et konfidensinterval og et antal stemmer.
+og `code` — fra Arena AI-ranglistens API
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Når det API ikke returnerer
+nogen brugbar rangliste, falder motoren tilbage på det officielle
+`lmarena-ai/leaderboard-dataset` på Hugging Faces datasets-server
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`);
+`GET /api/intelligence/sync` rapporterer `activeSource`, `lastError` og `lastFailedAt`.
+Hver rangliste-post indeholder et modelnavn, en udbyder, en ELO-`score`, et
+konfidensinterval og et stemmetal.
 
 Ranglistekategorier knyttes til OmniRoute-opgavekategorier:
 
@@ -136,16 +128,17 @@ Ranglistekategorier knyttes til OmniRoute-opgavekategorier:
 | `text`          | `default`, `review`, `documentation`, `debugging` |
 | `code`          | `coding`                                          |
 
-### Normalisering (score for opgaveegnethed)
+### Normalisering (task-fit-score)
 
-Rå ELO-scorer normaliseres pr. rangliste til en **værdi for opgaveegnethed i `[0.4, 0.98]`**:
+Rå ELO-scores normaliseres pr. rangliste til en **task-fit-værdi i `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Scoren når aldrig `0` eller `1`, hvilket giver plads til brugertilsidesættelser. Dette er
-feltet `score`, som du ser i API-svaret, og etiketten, der vises på kontrolpanelet.
+Scoren når aldrig `0` eller `1`, hvilket efterlader plads til brugerdefinerede
+tilsidesættelser. Dette er det `score`-felt, du ser i API-svaret, og den etiket, der
+vises på dashboardet.
 
 ### Konfidens
 
@@ -157,65 +150,66 @@ Hver post får et konfidensniveau baseret på antallet af Arena-stemmer:
 | `medium`  | ≥ 1.000 |
 | `low`     | < 1.000 |
 
-### Lagring og aktualitet
+### Lagring og friskhed
 
 Normaliserede poster skrives til DB-tabellen `model_intelligence` med
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Poster **udløber efter
-7 dage**, så en leverandør, der holder op med at synkronisere, med tiden fjernes i stedet for at levere
-forældede data.
+7 dage**, så en udbyder, der holder op med at synkronisere, til sidst falder ud i stedet
+for at servere forældede data.
 
 Synkroniseringen kører **som standard**:
 
-- Den kører én gang ved serverens opstart og derefter via en periodisk timer
-  (`src/lib/arenaEloSync.ts`, forbundet fra `src/instrumentation-node.ts`).
-- Den er **ikke-blokerende og aldrig fatal** — hvis hentningen fra den eksterne tjeneste mislykkes, fortsætter OmniRoute
-  med at køre, og ranglisterne viser blot de seneste gyldige data (eller en tom tilstand).
+- Den kører én gang ved serveropstart og derefter på en periodisk timer
+  (`src/lib/arenaEloSync.ts`, tilkoblet fra `src/instrumentation-node.ts`).
+- Den er **ikke-blokerende og aldrig fatal** — hvis hentningen fra kilden mislykkes,
+  fortsætter OmniRoute med at køre, og ranglisterne viser blot de senest gyldige data
+  (eller en tom tilstand).
 
 To miljøvariabler styrer den (dokumenteret i
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Variabel                  | Standardværdi | Formål                                                           |
-| ------------------------- | ------------- | ---------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Indstil til `false` for at fravælge den udgående synkronisering. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24t) | Synkroniseringsinterval i sekunder.                              |
+| Variabel                  | Standard           | Formål                                                       |
+| ------------------------- | ------------------ | ------------------------------------------------------------ |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`             | Sæt til `false` for at fravælge den udgående synkronisering. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 timer) | Synkroniseringsinterval i sekunder.                          |
 
 ### Manuel synkronisering / status / rydning
 
-For operatører giver et godkendt administrationsendepunkt mulighed for manuel styring
+For operatører giver et godkendt administrationsendepunkt manuel kontrol
 (`src/app/api/intelligence/sync/route.ts` — kræver administrationsgodkendelse):
 
 ```
 GET    /api/intelligence/sync          # aktuel synkroniseringsstatus (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # udløs en manuel synkronisering; body: { "dryRun": true } for at få vist et eksempel uden at skrive
-DELETE /api/intelligence/sync          # ryd alle synkroniserede arena_elo-intelligensposter
+POST   /api/intelligence/sync          # udløs en manuel synkronisering; body: { "dryRun": true } for at forhåndsvise uden at skrive
+DELETE /api/intelligence/sync          # ryd alle synkroniserede arena_elo-intelligence-poster
 ```
 
-Hvis ranglistesiden er tom, udfyldes den igen ved et manuelt `POST /api/intelligence/sync` (eller blot
-ved at genstarte serveren).
+Hvis ranglistesiden er tom, genopfylder en manuel `POST /api/intelligence/sync` (eller
+blot en genstart af serveren) den.
 
-### Matchning af modeller med ranglisten
+### Matchning af modeller til ranglisten
 
-Model-id'er i registret og Arena-modelnavne stemmer ikke altid nøjagtigt overens. Rangeringen bruger
+Registrets model-ID'er og Arena-modelnavne matcher ikke altid præcist. Rangeringen bruger
 fleksibel matchning (`findMatchingIntelligence` i `src/lib/freeProviderRankings.ts`):
 
-1. Nøjagtigt match med det normaliserede model-id.
+1. Eksakt match på det normaliserede model-ID.
 2. Match efter fjernelse af et efterstillet versionssuffiks (f.eks. `kimi-k2.6` → `kimi-k2`).
-3. Præfiksmatch (et modelnavn på ranglisten er et præfiks for register-id'et).
+3. Præfiksmatch (et rangliste-modelnavn er et præfiks for registrets ID).
 
-På synkroniseringssiden fjernes kendte leverandørpræfikser (`anthropic/`, `openai/`, `google/`, …),
-og en lille aliasoversigt udvider kanoniske navne til de varianter, OmniRoute bruger
-internt, så modeller fortsat kan findes under ethvert navn.
+På synkroniseringssiden fjernes kendte udbyderpræfikser (`anthropic/`, `openai/`,
+`google/`, …), og et lille alias-kort udvider kanoniske navne til de varianter, OmniRoute
+bruger internt, så modellerne kan findes under ethvert navn.
 
-### Sådan rangeres en leverandør
+### Sådan rangeres en udbyder
 
-For hver gratis leverandør scorer motoren alle modeller i leverandørens katalog og derefter:
+For hver gratis udbyder scorer motoren hver model i dens katalog og derefter:
 
-- **Bedste model** = leverandørens model med den højeste score.
-- **Gennemsnitlig score** = gennemsnitsscoren på tværs af alle leverandørens scorede modeller.
-- **Modeller** = hvor mange af leverandørens modeller der havde en Arena-score.
+- **Topmodel** = udbyderens højst scorende model.
+- **Gennemsnitsscore** = middelscoren på tværs af alle udbyderens scorede modeller.
+- **Modeller** = hvor mange af udbyderens modeller der havde en Arena-score.
 
-Leverandører sorteres først efter **scoren for den bedste model** og derefter efter gennemsnitlig score. Dette belønner en
-leverandør, der tilbyder mindst én stærk gratis model.
+Udbydere sorteres først efter **topmodel-score** og derefter efter gennemsnitsscore.
+Dette belønner en udbyder, der leverer mindst én stærk gratis model.
 
 ---
 

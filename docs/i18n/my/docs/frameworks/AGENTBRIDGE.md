@@ -1,6 +1,6 @@
 # AgentBridge (မြန်မာ)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/AGENTBRIDGE.md) · 🇪🇹 [am](../../../am/docs/frameworks/AGENTBRIDGE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/AGENTBRIDGE.md) · 🇦🇿 [az](../../../az/docs/frameworks/AGENTBRIDGE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/AGENTBRIDGE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/AGENTBRIDGE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/AGENTBRIDGE.md) · 🇩🇰 [da](../../../da/docs/frameworks/AGENTBRIDGE.md) · 🇩🇪 [de](../../../de/docs/frameworks/AGENTBRIDGE.md) · 🇬🇷 [el](../../../el/docs/frameworks/AGENTBRIDGE.md) · 🇪🇸 [es](../../../es/docs/frameworks/AGENTBRIDGE.md) · 🇪🇪 [et](../../../et/docs/frameworks/AGENTBRIDGE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/AGENTBRIDGE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/AGENTBRIDGE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/AGENTBRIDGE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/AGENTBRIDGE.md) · 🇮🇱 [he](../../../he/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/AGENTBRIDGE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/AGENTBRIDGE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/AGENTBRIDGE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/AGENTBRIDGE.md) · 🇮🇩 [id](../../../id/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/AGENTBRIDGE.md) · 🇮🇹 [it](../../../it/docs/frameworks/AGENTBRIDGE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/AGENTBRIDGE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/AGENTBRIDGE.md) · 🇰🇭 [km](../../../km/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/AGENTBRIDGE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/AGENTBRIDGE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/AGENTBRIDGE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/AGENTBRIDGE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/AGENTBRIDGE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/AGENTBRIDGE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/AGENTBRIDGE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/AGENTBRIDGE.md) · 🇳🇴 [no](../../../no/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [or](../../../or/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/AGENTBRIDGE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/AGENTBRIDGE.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/AGENTBRIDGE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/AGENTBRIDGE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/AGENTBRIDGE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/AGENTBRIDGE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/AGENTBRIDGE.md) · 🇱🇰 [si](../../../si/docs/frameworks/AGENTBRIDGE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/AGENTBRIDGE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/AGENTBRIDGE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/AGENTBRIDGE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/AGENTBRIDGE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [te](../../../te/docs/frameworks/AGENTBRIDGE.md) · 🇹🇭 [th](../../../th/docs/frameworks/AGENTBRIDGE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/AGENTBRIDGE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/AGENTBRIDGE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/AGENTBRIDGE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/AGENTBRIDGE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/AGENTBRIDGE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/AGENTBRIDGE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/AGENTBRIDGE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/AGENTBRIDGE.md) · 🇪🇹 [am](../../../am/docs/frameworks/AGENTBRIDGE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/AGENTBRIDGE.md) · 🇦🇿 [az](../../../az/docs/frameworks/AGENTBRIDGE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/AGENTBRIDGE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/AGENTBRIDGE.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/AGENTBRIDGE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/AGENTBRIDGE.md) · 🇩🇰 [da](../../../da/docs/frameworks/AGENTBRIDGE.md) · 🇩🇪 [de](../../../de/docs/frameworks/AGENTBRIDGE.md) · 🇬🇷 [el](../../../el/docs/frameworks/AGENTBRIDGE.md) · 🇪🇸 [es](../../../es/docs/frameworks/AGENTBRIDGE.md) · 🇪🇪 [et](../../../et/docs/frameworks/AGENTBRIDGE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/AGENTBRIDGE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/AGENTBRIDGE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/AGENTBRIDGE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/AGENTBRIDGE.md) · 🇮🇱 [he](../../../he/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/AGENTBRIDGE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/AGENTBRIDGE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/AGENTBRIDGE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/AGENTBRIDGE.md) · 🇮🇩 [id](../../../id/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/AGENTBRIDGE.md) · 🇮🇹 [it](../../../it/docs/frameworks/AGENTBRIDGE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/AGENTBRIDGE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/AGENTBRIDGE.md) · 🇰🇭 [km](../../../km/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/AGENTBRIDGE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/AGENTBRIDGE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/AGENTBRIDGE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/AGENTBRIDGE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/AGENTBRIDGE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/AGENTBRIDGE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/AGENTBRIDGE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/AGENTBRIDGE.md) · 🇳🇴 [no](../../../no/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [or](../../../or/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/AGENTBRIDGE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/AGENTBRIDGE.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/AGENTBRIDGE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/AGENTBRIDGE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/AGENTBRIDGE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/AGENTBRIDGE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/AGENTBRIDGE.md) · 🇱🇰 [si](../../../si/docs/frameworks/AGENTBRIDGE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/AGENTBRIDGE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/AGENTBRIDGE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/AGENTBRIDGE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/AGENTBRIDGE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [te](../../../te/docs/frameworks/AGENTBRIDGE.md) · 🇹🇭 [th](../../../th/docs/frameworks/AGENTBRIDGE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/AGENTBRIDGE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/AGENTBRIDGE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/AGENTBRIDGE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/AGENTBRIDGE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/AGENTBRIDGE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/AGENTBRIDGE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/AGENTBRIDGE.md)
 
 ---
 
@@ -14,36 +14,36 @@ AgentBridge သည် IDE AI agent များထံမှ HTTPS traffic ကိ
 
 ## §1 ခြုံငုံသုံးသပ်ချက်
 
-### AgentBridge ဆိုတာဘာလဲ?
+### AgentBridge ဆိုတာ ဘာလဲ ?
 
-IDE agent တစ်ခု (ဥပမာ GitHub Copilot, Cursor, Claude Code) က API ခေါ်ဆိုမှုတစ်ခု ပြုလုပ်သည့်အခါ၊ ၎င်းသည် upstream AI provider (OpenAI, Anthropic စသည်) ထံ တိုက်ရိုက်ချိတ်ဆက်သည်။ AgentBridge သည် agent ၏ configuration ကို ပြောင်းလဲရန် မလိုအပ်ဘဲ TLS အဆင့်တွင် ထိုချိတ်ဆက်မှုကို ပွင့်လင်းစွာ ကြားဖြတ်ဖမ်းယူပြီး request ကို OmniRoute မှတစ်ဆင့် ပြန်လည်ရေးသားပေးသည်။
+IDE အေးဂျင့် (ဥပမာ GitHub Copilot, Cursor, Claude Code) သည် API ခေါ်ဆိုသောအခါ၊ ၎င်းသည် အထက်ရေစီးကြောင်း AI ဝန်ဆောင်မှုပေးသူ (OpenAI၊ Anthropic စသည်ဖြင့်) နှင့် တိုက်ရိုက်ချိတ်ဆက်သည်။ AgentBridge မည်သည့်အေးဂျင့်ဖွဲ့စည်းပုံပုံစံကိုမှ ပြောင်းလဲရန်မလိုအပ်ဘဲ TLS အဆင့်တွင် ပွင့်လင်းမြင်သာစွာချိတ်ဆက်မှုကို ကြားဖြတ်ပြီး OmniRoute မှတစ်ဆင့် တောင်းဆိုမှုကို ပြန်လည်ရေးသားသည်။
 
-ထို့ကြောင့် အောက်ပါတို့ကို လုပ်ဆောင်နိုင်သည်-
+ဆိုလိုသည်မှာ သင်လုပ်နိုင်သည်-
 
-- **မည်သည့် agent ကိုမဆို မည်သည့် provider ထံမဆို လမ်းကြောင်းပြန်ညွှန်းနိုင်သည်**: Copilot က OpenAI နှင့် ဆက်သွယ်နေပါသလား? ၎င်းကို Anthropic Claude, Gemini သို့မဟုတ် OmniRoute ၏ provider 352 ခုအနက် မည်သည့် provider ထံမဆို ပြန်ညွှန်းနိုင်သည်။
-- **Model mapping များ အသုံးချနိုင်သည်**: handler အဆင့်တွင် `gemini-3-flash` → `claude-sonnet-4.7` သို့ ပွင့်လင်းစွာ mapping ပြုလုပ်နိုင်သည်။
-- **Agent traffic အားလုံးကို စောင့်ကြည့်နိုင်သည်**: ကြားဖြတ်ဖမ်းယူထားသော request တိုင်းကို [Traffic Inspector](./TRAFFIC_INSPECTOR.md) ထံ ထုတ်လွှင့်ပေးသည်။
-- **OmniRoute ၏ ခံနိုင်ရည်စွမ်းရည်များကို အသုံးချနိုင်သည်**: combo routing, circuit breaker များ၊ fallback များနှင့် ကုန်ကျစရိတ်ခြေရာခံခြင်းတို့သည် IDE agent traffic အတွက်လည်း အလုပ်လုပ်သည်။
+- **မည်သည့်အေးဂျင့်ကိုမဆို ဝန်ဆောင်မှုပေးသူထံ ပြန်ပြောင်းပါ။** : Copilot OpenAI နဲ့ စကားပြောနေတာလား။ Anthropic Claude၊ Gemini သို့မဟုတ် OmniRoute's 377 ဝန်ဆောင်မှုပေးသူများထံ ပြန်ညွှန်းပါ။
+- **မော်ဒယ်မြေပုံများကို အသုံးပြုပါ။** ကိုင်တွယ်သူအဆင့်တွင် : `gemini-3-flash` → `claude-sonnet-4.7` ပွင့်လင်းမြင်သာစွာ။
+- **အေးဂျင့်လမ်းကြောင်းအားလုံးကို စောင့်ကြည့်ပါ။** : ကြားဖြတ်တောင်းဆိုမှုတိုင်းကို [ယာဉ်ထိန်းစစ်ဆေးရေးမှူး](./TRAFFIC_INSPECTOR.md) ထံ လွှင့်တင်ထားသည်။
+- **OmniRoute ခံနိုင်ရည်အားသုံးပါ။** IDE အေးဂျင့်အသွားအလာအတွက် ပေါင်းစပ်လမ်းကြောင်း၊ circuit breakers၊ fallbacks နှင့် ကုန်ကျစရိတ်ခြေရာခံခြင်း လုပ်ဆောင်သည်။
 
-### စျေးကွက်ရှိ အခြားထုတ်ကုန်များနှင့် နှိုင်းယှဉ်ထားသည့် ရပ်တည်ချက်
+### စျေးကွက်အနေအထားနှင့်
 
-| လုပ်ဆောင်ချက်           | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity             |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot          |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)              |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex            |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE              |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries          |    —    |    ✓     |        —        |             ✓             |
-| Claude Code             |    —    |    —     |        ✓        |             ✓             |
-| Open Code               |    —    |    —     |        ✓        |             ✓             |
-| Trae                    |    —    |    —     |        —        |    🔍 စုံစမ်းလေ့လာနေဆဲ    |
-| Dashboard UI            |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector       |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute routing       |    ✗    |    ✗     |        ✗        |             ✓             |
-| Model mapping UI        |    ✗    |    ✗     |        ✗        |             ✓             |
-| Bypass စာရင်း           |    ✗    |    ✗     |        ✓        |             ✓             |
-| Upstream CA certificate |    ✗    |    ✗     |        ✓        |             ✓             |
+| ထူးခြားချက်              | 9 router | anti-api | llm-ကြားဖြတ်ကိရိယာ | **OmniRoute AgentBridge** |
+| ------------------------ | :------: | :------: | :----------------: | :-----------------------: |
+| Antigravity              |    ✓     |    ✓     |         —          |             ✓             |
+| GitHub Copilot           |    ✓     |    ✓     |         —          |             ✓             |
+| Kiro (AWS)               |    ✓     |    ✓     |         —          |             ✓             |
+| OpenAI Codex             |    —     |    ✓     |         —          |             ✓             |
+| Cursor IDE               |    ✓     |    ✓     |         —          |             ✓             |
+| Zed စက်မှုလုပ်ငန်း       |    —     |    ✓     |         —          |             ✓             |
+| Claude ကုဒ်              |    —     |    —     |         ✓          |             ✓             |
+| Code ကိုဖွင့်ပါ။         |    —     |    —     |         ✓          |             ✓             |
+| ထရေ                      |    —     |    —     |         —          |  🔍 စုံစမ်းစစ်ဆေးခြင်း။   |
+| ဒက်ရှ်ဘုတ် UI            |    ✓     |    ✗     |         ✗          |             ✓             |
+| ယာဉ်ထိန်းစစ်ဆေးရေးမှူး   |    ✗     |    ✗     |         ✓          |             ✓             |
+| OmniRoute လမ်းကြောင်း    |    ✗     |    ✗     |         ✗          |             ✓             |
+| မော်ဒယ်မြေပုံဆွဲခြင်း UI |    ✗     |    ✗     |         ✗          |             ✓             |
+| စာရင်းရှောင်ပါ။          |    ✗     |    ✗     |         ✓          |             ✓             |
+| ရေဆန် CA လက်မှတ်         |    ✗     |    ✗     |         ✓          |             ✓             |
 
 ---
 
@@ -189,18 +189,18 @@ proxy authentication အပါအဝင် မျှဝေထားသည့် 
 
 `/dashboard/tools/agent-bridge` ရှိ AgentBridge Server Card ကို အသုံးပြုပါ-
 
-| လုပ်ဆောင်ချက်                      | ဖော်ပြချက်                                                                                           |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| ဆာဗာစတင်ရန်                        | Port 443 တွင် `src/mitm/server.cjs` ကို စတင်လုပ်ဆောင်စေသည်                                           |
-| ဆာဗာရပ်တန့်ရန်                     | Child process ကို စနစ်တကျ ပိတ်သည်                                                                    |
-| ဆာဗာပြန်လည်စတင်ရန်                 | ရပ်တန့်ခြင်း + စတင်ခြင်း (target ပြောင်းလဲမှုများကို ထည့်သွင်းအသုံးပြုသည်)                           |
-| Certificate ကို ယုံကြည်ရန်         | `DATA_DIR/mitm/ca.crt` ကို OS trust store ထဲသို့ ထည့်သွင်းသည်                                        |
-| Certificate ကို ဒေါင်းလုဒ်ရန်      | ကိုယ်တိုင်ထည့်သွင်းရန် `ca.crt` ကို ဒေါင်းလုဒ်လုပ်သည်                                                |
-| Certificate ကို ပြန်လည်ထုတ်လုပ်ရန် | CA keypair အသစ်တစ်ခု ဖန်တီးသည် (ရှိပြီးသား agent တစ်ခုချင်းစီ၏ certificate အားလုံး အကျုံးမဝင်တော့ပါ) |
+| လုပ်ဆောင်ချက်                      | ဖော်ပြချက်                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ဆာဗာကို စတင်ရန်                    | Port 443 တွင် `src/mitm/server.cjs` ကို စတင်ပေးသည်။ Root-CA ပုံစံအောက်တွင် ပထမဆုံးစတင်ချိန်၌ `ca.crt` ကို ဖန်တီးပြီး sudo စကားဝှက်ရရှိနိုင်ပါက လက်ရှိအသုံးပြုနေသော certificate ကို ယုံကြည်စိတ်ချရသောအဖြစ် သတ်မှတ်ပေးသည်                                                                                                                                                                                                                           |
+| ဆာဗာကို ရပ်တန့်ရန်                 | Child process ကို စနစ်တကျ ပိတ်ပေးသည်                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ဆာဗာကို ပြန်လည်စတင်ရန်             | ရပ်တန့်ခြင်း + စတင်ခြင်း (ပြောင်းလဲထားသော target များနှင့် အသစ်ပြန်လည်ထုတ်လုပ်ထားသော certificate ကို အသုံးပြုသည်)                                                                                                                                                                                                                                                                                                                                 |
+| Certificate ကို ယုံကြည်ရန်         | လက်ရှိအသုံးပြုနေသော certificate ကို OS trust store ထဲသို့ ထည့်သွင်းသည်- root-CA ပုံစံတွင် `DATA_DIR/mitm/ca.crt`၊ legacy-leaf ထည့်သွင်းမှုတွင် `DATA_DIR/mitm/server.crt`                                                                                                                                                                                                                                                                         |
+| Certificate ကို ဒေါင်းလုဒ်ရန်      | ကိုယ်တိုင်ထည့်သွင်းရန်အတွက် လက်ရှိအသုံးပြုနေသော certificate ကို ဒေါင်းလုဒ်လုပ်သည် (`omniroute-mitm-ca.crt` = `ca.crt`၊ သို့မဟုတ် legacy-leaf ထည့်သွင်းမှုတွင် `omniroute-mitm.crt` = `server.crt`)                                                                                                                                                                                                                                                |
+| Certificate ကို ပြန်လည်ထုတ်လုပ်ရန် | Certificate ပုံစံကို မည်သည့်အခါမျှ မပြောင်းလဲပါ။ Legacy-leaf ထည့်သွင်းမှု- `server.crt`/`server.key` အသစ်ကို ထုတ်ပေးသည် (၎င်းကို အသုံးပြုစေရန် ဆာဗာကို ပြန်လည်စတင်ပါ)။ Root-CA ပုံစံ- `ca.crt`/`ca.key` ကို အသစ်ပြောင်းလဲသည်၊ ဆာဗာလည်ပတ်နေစဉ် ငြင်းပယ်မည်ဖြစ်သည်။ ယုံကြည်ထားသော CA အဟောင်းကို ဦးစွာ ယုံကြည်မှုဖယ်ရှားသည် (sudo စကားဝှက်လိုအပ်သည်)၊ သို့မဟုတ် အသစ်ပြောင်းလဲမှုကို ပယ်ဖျက်သည်။ ထို့နောက် client များသည် CA အသစ်ကို ထပ်မံယုံကြည်ရမည် |
 
-### 3.2 Certificate ကို ယုံကြည်စိတ်ချရအဖြစ် သတ်မှတ်ခြင်း
+### 3.2 Certificate ကို ယုံကြည်စိတ်ချရသောအဖြစ် သတ်မှတ်ခြင်း
 
-IDE များက MITM ချိတ်ဆက်မှုကို လက်ခံနိုင်ရန် AgentBridge CA certificate ကို OS က ယုံကြည်စိတ်ချရအဖြစ် သတ်မှတ်ထားရမည်။
+IDE များက MITM ချိတ်ဆက်မှုကို လက်မခံမီ AgentBridge CA certificate ကို OS က ယုံကြည်ထားရမည်။
 
 **Linux (NSS — Chrome/Firefox):**
 
@@ -221,35 +221,23 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-သို့မဟုတ် dashboard ရှိ "Certificate ကို ယုံကြည်ရန်" ခလုတ်ကို အသုံးပြုပါ (သင့် OS အတွက် သင့်လျော်သည့် command ကို လုပ်ဆောင်ပြီး လိုအပ်ပါက sudo prompt ပြသမည်)။
+သို့မဟုတ် dashboard ရှိ "Trust Cert" ခလုတ်ကို အသုံးပြုပါ (လိုအပ်ပါက sudo တောင်းဆိုချက်နှင့်အတူ သင့် OS အတွက် သင့်လျော်သော command ကို လုပ်ဆောင်ပေးသည်)။
 
-#### Electron အခြေခံ IDE များသည် OS trust store ကို လျစ်လျူရှုသည် (`NODE_EXTRA_CA_CERTS`)
+#### Electron အခြေပြု IDE များသည် OS trust store ကို လျစ်လျူရှုသည် (`NODE_EXTRA_CA_CERTS`)
 
-အချို့ IDE များ — အထူးသဖြင့် **Antigravity IDE** နှင့် အခြား Electron / VS Code မှ ဆင်းသက်လာသော app များ — သည် outbound
-`fetch`/HTTPS အတွက် **OS trust store ကို စစ်ဆေးအသုံးမပြုသည့်** ကိုယ်ပိုင် Node.js runtime ကို ပူးတွဲထည့်သွင်းထားသည်။
-OS/NSS အဆင့်တွင် CA ကို ယုံကြည်စိတ်ချရအဖြစ် သတ်မှတ်ခြင်းသည် IDE ၏ မူရင်း **backend**
-(ဥပမာ OS CA bundle ကို အသုံးပြုသည့် Go language server) အတွက် လုံလောက်သော်လည်း **Electron frontend** တွင်
-TLS ဆက်လက်ပျက်ကွက်နေမည် — MITM log တွင် backend ၏ bootstrap call များက `200` ပြန်ပေးနေသော်လည်း
-app တွင် _အကောင့်မှ ထွက်ထားသည်_ ဟု ပြသခြင်း သို့မဟုတ် _"ချိတ်ဆက်မှု အမှား"_ ကို ပြသခြင်းအဖြစ်
-ပေါ်လာသည်။ အဆင့်နှစ်ဆင့် လိုအပ်ပြီး နှစ်ခုစလုံး အရေးကြီးသည်-
+အချို့ IDE များ — အထူးသဖြင့် **Antigravity IDE** နှင့် အခြား Electron / VS Code မှ ဆင်းသက်လာသော app များ — သည် အပြင်သို့သွားသော `fetch`/HTTPS အတွက် **OS trust store ကို စစ်ဆေးအသုံးမပြုသည့်** ၎င်းတို့၏ကိုယ်ပိုင် Node.js runtime ကို တစ်ပါတည်းထည့်သွင်းထားသည်။ OS/NSS အဆင့်တွင် CA ကို ယုံကြည်ထားခြင်းသည် IDE ၏ မူရင်း **backend** အတွက် လုံလောက်သည် (ဥပမာ OS CA bundle ကို အသုံးပြုသည့် Go language server)၊ သို့သော် **Electron frontend** တွင် TLS မအောင်မြင်သေးပါ — MITM log တွင် backend ၏ bootstrap ခေါ်ဆိုမှုများက `200` ပြန်ပေးနေသော်လည်း app သည် _အကောင့်မှ ထွက်ထားသည့်_ အခြေအနေအဖြစ် သို့မဟုတ် _"ချိတ်ဆက်မှုအမှား"_ ကို ပြသသည့်အနေဖြင့် ပေါ်လာသည်။ အဆင့်နှစ်ဆင့် လိုအပ်ပြီး နှစ်ခုလုံး အရေးကြီးသည်-
 
-1. Runtime ကို CA ထံ တိတိကျကျ ညွှန်ပေးပါ-
+1. Runtime ကို CA သို့ တိတိကျကျ ညွှန်ပါ-
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **ထို shell မှ IDE ကို စတင်ပါ။** Desktop icon / Dock / Start menu မှ စတင်ခြင်းသည်
-   shell export များကို **ဆက်ခံမည်မဟုတ်ပါ**။ ထို့ပြင် `~/.config/environment.d/*.conf` သည်
-   graphical login အသစ်ပြုလုပ်ပြီးမှသာ သက်ရောက်သည်။ IDE ကို ဦးစွာ အပြည့်အဝ ပိတ်ပါ — Electron ၏ singleton lock ကြောင့်
-   ဒုတိယအကြိမ် စတင်ခြင်းသည် ရှိပြီးသား process ကိုသာ focus လုပ်ပြီး environment အသစ်ကို လျစ်လျူရှုမည်ဖြစ်သည်။
+2. **အဆိုပါ shell မှ IDE ကို စတင်ပါ။** Desktop icon / Dock / Start menu မှ စတင်ခြင်းသည် shell export များကို ဆက်ခံမည် **မဟုတ်** သည့်အပြင် `~/.config/environment.d/*.conf` သည် graphical login အသစ်ပြုလုပ်ပြီးမှသာ သက်ရောက်သည်။ IDE ကို ဦးစွာ အပြည့်အဝ ပိတ်ပါ — Electron ၏ singleton lock ကြောင့် ဒုတိယအကြိမ် စတင်ခြင်းသည် ရှိပြီးသား process ကိုသာ အာရုံစိုက်စေပြီး environment အသစ်ကို လျစ်လျူရှုမည်ဖြစ်သည်။
 
-အထက်ပါ OS-trust + NSS အဆင့်သည် ဆက်လက်လိုအပ်သည် (အချို့ auth
-flow များက အသုံးပြုသည့် Chromium network stack သည် အသုံးပြုသူတစ်ဦးချင်းစီ၏ NSS store ကို ဖတ်ရှုပြီး
-စက်တွင်းမှ ယုံကြည်ထားသော CA က override လုပ်ပေးနိုင်သည့် `*.googleapis.com` အတွက် ကိုယ်ပိုင် static pin များလည်း ရှိသည်)။
-`NODE_EXTRA_CA_CERTS` သည် ထိုအဆင့်အပြင် Node `fetch` လမ်းကြောင်းကိုပါ လွှမ်းခြုံပေးသည်။
+အထက်ပါ OS-trust + NSS အဆင့်သည် လိုအပ်နေဆဲဖြစ်သည် (အချို့သော auth flow များက အသုံးပြုသည့် Chromium network stack သည် user တစ်ဦးချင်းစီ၏ NSS store ကို ဖတ်ရှုပြီး၊ စက်တွင်းမှ ယုံကြည်ထားသော CA က အစားထိုးလွှမ်းမိုးနိုင်သည့် `*.googleapis.com` အတွက် ၎င်း၏ကိုယ်ပိုင် static pin များလည်း ရှိသည်)။ `NODE_EXTRA_CA_CERTS` သည် ၎င်းအပြင် Node `fetch` လမ်းကြောင်းကို ဖြည့်ဆည်းပေးသည်။
 
 ### 3.3 DNS လမ်းကြောင်းသတ်မှတ်ခြင်း
 
-ကြားဖြတ်ရယူလိုသော agent တစ်ခုချင်းစီအတွက် ၎င်း၏ API host(များ) သည် `127.0.0.1` သို့ resolve ဖြစ်ရမည်။ Setup Wizard တွင် agent တစ်ခုအတွက် DNS ကို အဖွင့်/အပိတ် ပြောင်းသည့်အခါ AgentBridge က `/etc/hosts` entry များကို အလိုအလျောက် စီမံပေးသည်။
+ကြားဖြတ်ရယူလိုသော agent တစ်ခုစီအတွက် ၎င်း၏ API host များသည် `127.0.0.1` သို့ resolve လုပ်ရမည်။ Setup Wizard တွင် agent တစ်ခုအတွက် DNS ကို အဖွင့်/အပိတ် ပြုလုပ်သည့်အခါ AgentBridge သည် `/etc/hosts` entry များကို အလိုအလျောက် စီမံပေးသည်။
 
 GitHub Copilot အတွက် `/etc/hosts` entry နမူနာများ-
 
@@ -260,66 +248,74 @@ GitHub Copilot အတွက် `/etc/hosts` entry နမူနာများ-
 
 ### 3.4 Model mapping
 
-အရင်းအမြစ် → ပစ်မှတ် mapping များကို သတ်မှတ်ရန် agent card တစ်ခုချင်းစီရှိ Model Mapping Table ကို အသုံးပြုပါ-
+Source → target mapping များ သတ်မှတ်ရန် agent card တစ်ခုစီရှိ Model Mapping Table ကို အသုံးပြုပါ-
 
-| အရင်းအမြစ် model (agent မူရင်း) | ပစ်မှတ် model (OmniRoute) |
-| ------------------------------- | ------------------------- |
-| `gpt-4o`                        | `claude-sonnet-4.7`       |
-| `*` (wildcard)                  | `claude-haiku-4.7`        |
+| မူရင်း model (agent ၏ မူလ model) | ပစ်မှတ် model (OmniRoute) |
+| -------------------------------- | ------------------------- |
+| `gpt-4o`                         | `claude-sonnet-4.7`       |
+| `*` (wildcard)                   | `claude-haiku-4.7`        |
 
-Wildcard `*` သည် အသိအမှတ်မပြုသော model မည်သည့်အမျိုးအစားကိုမဆို သတ်မှတ်ထားသည့် target ထံ map လုပ်သည်။ `agent_bridge_mappings` table တွင် အမြဲတမ်းသိမ်းဆည်းထားသည်။
+Wildcard `*` သည် အသိအမှတ်မပြုသော မည်သည့် model ကိုမဆို သတ်မှတ်ထားသော target သို့ mapping လုပ်ပေးသည်။ `agent_bridge_mappings` table တွင် အမြဲတမ်းသိမ်းဆည်းထားသည်။
 
-> **အကြံပြုချက် — agent ၏ အမှန်တကယ် model ID များကို ရှာဖွေပါ။** IDE တစ်ခုသည် ၎င်း၏
-> UI label များနှင့် ကွဲပြားပြီး major version များအကြား ပြောင်းလဲနိုင်သော model အမည်များကို ပေးပို့နိုင်သည်။ ဥပမာ **Antigravity 2** သည်
-> ယခင် docs များတွင် ပြထားသော `gemini-2.5-pro` မဟုတ်ဘဲ `gemini-3.1-pro-low`, `gemini-pro-agent` နှင့်
-> `gemini-3.1-flash-lite` ကို network မှတစ်ဆင့် ပေးပို့သည်။ ကိုက်ညီသော mapping မရှိဘဲ chat တစ်ခု ပေးပို့ပါ-
-> MITM သည် ဝင်လာသည့် `model:` အတိအကျကို log မှတ်တမ်းတင်ပြီး request ကို ဖြတ်သန်းခွင့်ပေးမည်။ ထို literal value ကို map လုပ်ပါ၊ ထို့နောက်
-> နောက်ထပ် request ကို ကြားဖြတ်ရယူပြီး သင့် target ထံ လမ်းကြောင်းပြောင်းပေးမည်။
+> **အကြံပြုချက် — agent ၏ အမှန်တကယ် model ID များကို ရှာဖွေပါ။** IDE တစ်ခုသည်
+> ၎င်း၏ UI label များနှင့် မတူညီသည့်အပြင် major version များအလိုက် ပြောင်းလဲသည့် model အမည်များကို ပေးပို့နိုင်သည်။ ဥပမာ **Antigravity 2** သည်
+> ချိတ်ဆက်မှုမှတစ်ဆင့် `gemini-3.1-pro-low`, `gemini-pro-agent` နှင့် `gemini-3.1-flash-lite` တို့ကို ပေးပို့သည် —
+> docs အဟောင်းများတွင် ပြထားသည့် `gemini-2.5-pro` ကို မပို့ပါ။ ကိုက်ညီသည့် mapping မရှိဘဲ chat တစ်ခု ပေးပို့ပါ။ MITM သည်
+> ဝင်လာသော `model:` အတိအကျကို log မှတ်တမ်းတင်ပြီး request ကို ဆက်လက်ပေးပို့မည်။ ထိုတန်ဖိုးအတိအကျကို mapping လုပ်ပါ၊ ထို့နောက်
+> နောက် request ကို ကြားဖြတ်ရယူပြီး သင့် target သို့ route လုပ်ပေးမည်။
 
-### 3.5 အန္တရာယ် အသိပေးချက်
+### 3.5 အန္တရာယ်ဆိုင်ရာ အသိပေးချက်
 
-AgentBridge သည် upstream provider များနှင့် စစ်မှန်ကြောင်းအတည်ပြုရန် IDE က အသုံးပြုသည့် credential များ (OAuth token များ၊ API key များ) ကို ကြားဖြတ်ရယူသည်။ ၎င်းတို့ကို **log မှတ်တမ်းမတင်မီ ဖုံးကွယ်ထားသည်** (§2.7 ကို ကြည့်ပါ)၊ သို့သော် OmniRoute ၏ MITM layer တွင် မြင်နိုင်သည်။ Agent တစ်ခုချင်းစီကို ပထမဆုံး activate လုပ်သောအခါ ပိတ်နိုင်သည့် အန္တရာယ်အသိပေး modal တစ်ခုကို ပြသသည်။
+AgentBridge သည် upstream provider များနှင့် authentication ပြုလုပ်ရန် IDE က အသုံးပြုသော credential များ (OAuth token များ၊ API key များ) ကို ကြားဖြတ်ရယူသည်။ ၎င်းတို့ကို **log မမှတ်တမ်းတင်မီ ဖုံးကွယ်ထားသည်** (§2.7 ကိုကြည့်ပါ)၊ သို့သော် OmniRoute ၏ MITM layer က မြင်နိုင်သည်။ agent တစ်ခုစီကို ပထမဆုံး activate လုပ်သည့်အခါ ပိတ်နိုင်သော အန္တရာယ်အသိပေးချက် modal တစ်ခုကို ပြသသည်။
 
-### 3.6 ထိန်းသိမ်းခြင်းနှင့် ပြဿနာရှာဖွေစစ်ဆေးခြင်း
+### 3.6 ပြုပြင်ထိန်းသိမ်းမှုနှင့် ရောဂါရှာဖွေစစ်ဆေးမှု
 
-Dashboard တွင် ယခင်က UI မရှိခဲ့သည့် လုပ်ငန်းလည်ပတ်မှုဆိုင်ရာ MITM route များကို ဖော်ပြပေးသော **Maintenance & Diagnostics** card (`AgentBridgeMaintenanceCard`၊ `src/app/(dashboard)/dashboard/tools/agent-bridge/components/` တွင်) ပါရှိသည်။ ၎င်း၏ စာတန်းငယ်မှာ _"ဖမ်းယူမှု pipeline ကို ကိုယ်တိုင်စမ်းသပ်ပါ၊ ကျန်ရှိနေသော system state ကို ပြန်ဖျက်ပါ၊ သင့် setup ကို စက်များအကြား ရွှေ့ပြောင်းပါ။"_ ဖြစ်သည်။ Card client helper များသည် `src/lib/inspector/agentBridgeMaintenanceApi.ts` တွင် ရှိသည်။
+dashboard တွင် ယခင်က UI မရှိခဲ့သော လုပ်ငန်းလည်ပတ်ဆိုင်ရာ MITM route များကို ဖော်ပြပေးသည့် **Maintenance & Diagnostics** card (`AgentBridgeMaintenanceCard`၊ `src/app/(dashboard)/dashboard/tools/agent-bridge/components/` အတွင်း) ပါရှိသည်။ ၎င်း၏ subtitle မှာ _"ဖမ်းယူရေး pipeline ကို ကိုယ်တိုင်စမ်းသပ်ပါ၊ ကျန်ရှိနေသော system state ကို ပြန်ဖျက်ပါ၊ ထို့ပြင် သင့် setup ကို စက်များအကြား ရွှေ့ပြောင်းပါ။"_ ဖြစ်သည်။ card ၏ client helper များသည် `src/lib/inspector/agentBridgeMaintenanceApi.ts` တွင် ရှိသည်။
 
-| ခလုတ်                  | Route                                  | လုပ်ဆောင်ပုံ                                                                                                                                                                                                                |
-| ---------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **စစ်ဆေးရန်**          | `GET /api/tools/agent-bridge/diagnose` | capture-pipeline ကိုယ်တိုင်စမ်းသပ်မှုကို လုပ်ဆောင်ပြီး စစ်ဆေးမှုတစ်ခုချင်းစီအလိုက် အစီရင်ခံစာ (✓/✗ + ဖြေရှင်းနည်းအကြံပြုချက်) ကို ပြသသည်။                                                                                   |
-| **ပြုပြင်ရန်**         | `POST /api/tools/agent-bridge/repair`  | crash သို့မဟုတ် SIGKILL ကြောင့် ကျန်ရစ်ခဲ့သော ပိုင်ရှင်မဲ့ MITM စနစ်အခြေအနေ (DNS spoof entry များ၊ root CA၊ system proxy) ကို ပြန်ဖျက်ပေးသည်။ Idempotent ဖြစ်ပြီး အခြေအနေရှင်းလင်းနေပါက "ပြုပြင်ရန် မရှိပါ" ဟု အစီရင်ခံသည်။ |
-| **CA ဖယ်ရှားရန်**      | `DELETE /api/tools/agent-bridge/cert`  | OS trust store ထဲမှ MITM root CA ကို မယုံကြည်တော့အောင် ပြုလုပ်ပြီး ဖယ်ရှားသည် (တိကျစွာတောင်းဆိုရပြီး idempotent ဖြစ်သည်)။ CA ကို လက်ရှိယုံကြည်ထားသည့်အခါမှသာ ပြသပြီး inline "CA ကို ဖယ်ရှားမည်လား?" အတည်ပြုချက် လိုအပ်သည်။  |
-| **Config ထုတ်ယူရန်**   | `GET /api/tools/agent-bridge/config`   | သယ်ဆောင်အသုံးပြုနိုင်သော config JSON ကို ဒေါင်းလုဒ်လုပ်သည် (§3.7 ကို ကြည့်ပါ)။                                                                                                                                              |
-| **Config တင်သွင်းရန်** | `POST /api/tools/agent-bridge/config`  | ယခင်က ထုတ်ယူထားသော config JSON ကို အပ်လုဒ်လုပ်သည် (§3.7 ကို ကြည့်ပါ)။                                                                                                                                                       |
+| ခလုတ်             | Route                                  | လုပ်ဆောင်ချက်                                                                                                                                                                                                         |
+| ----------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diagnose**      | `GET /api/tools/agent-bridge/diagnose` | ဖမ်းယူရေး pipeline ၏ self-test ကို လုပ်ဆောင်ပြီး စစ်ဆေးချက်တစ်ခုချင်းစီအတွက် အစီရင်ခံစာ (✓/✗ + ဖြေရှင်းပြုပြင်ရန် အကြံပြုချက်) ကို ပြသသည်။                                                                            |
+| **Repair**        | `POST /api/tools/agent-bridge/repair`  | crash သို့မဟုတ် SIGKILL ကြောင့် ကျန်ခဲ့သော ပိုင်ရှင်မဲ့ MITM system state (DNS spoof entry များ၊ root CA၊ system proxy) ကို ပြန်ဖျက်သည်။ Idempotent ဖြစ်ပြီး state ရှင်းလင်းနေပါက "ပြုပြင်ရန် မရှိပါ" ဟု အစီရင်ခံသည်။ |
+| **Remove CA**     | `DELETE /api/tools/agent-bridge/cert`  | OS trust store မှ MITM root CA ကို ယုံကြည်မှုရုပ်သိမ်းပြီး ဖယ်ရှားသည် (ရှင်းလင်းတိကျပြီး idempotent ဖြစ်သည်)။ CA ကို လက်ရှိယုံကြည်ထားသည့်အခါမှသာ ပြသပြီး inline "CA ကို ဖယ်ရှားမလား?" အတည်ပြုချက် လိုအပ်သည်။          |
+| **Export config** | `GET /api/tools/agent-bridge/config`   | ရွှေ့ပြောင်းအသုံးပြုနိုင်သော config JSON ကို download လုပ်သည် (§3.7 ကိုကြည့်ပါ)။                                                                                                                                      |
+| **Import config** | `POST /api/tools/agent-bridge/config`  | ယခင်က export လုပ်ထားသော config JSON ကို upload လုပ်သည် (§3.7 ကိုကြည့်ပါ)။                                                                                                                                             |
 
-**Diagnostics စစ်ဆေးမှုများ** (`src/mitm/inspector/diagnostics.ts` ရှိ `summarizeDiagnostics()`)။ Route သည် တစ်ခုချင်းစီအတွက် အကျိုးသက်ရောက်မှုရှိသော probe ကို လုပ်ဆောင်ပြီး boolean များကို pure summarizer ထဲသို့ ထည့်ပေးသည်။ `healthy` ဆုံးဖြတ်ချက်တစ်ခုတည်းနှင့် မအောင်မြင်မှုတစ်ခုချင်းစီအတွက် အကြံပြုချက်ကို ပြန်ပေးသည်-
+agent card တစ်ခုစီတွင် ၎င်း၏ကိုယ်ပိုင် **Restore default** ခလုတ် (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) လည်း ပါရှိသည် — agent တစ်ခုချင်းစီအလိုက် click တစ်ချက်ဖြင့် ပြန်ဖျက်နိုင်ပြီး ထို
+agent ၏ host များကိုသာ spoof လုပ်ထားခြင်းမှ ပြန်ဖြုတ်ကာ သိမ်းထားသော model mapping များကို ရှင်းလင်းပြီး ၎င်း၏ `dns_enabled`/`setup_completed`
+state ကို reset လုပ်သည်။ ထို့ကြောင့် IDE ကို အပြည့်အဝ restart လုပ်ပြီးနောက် အမှန်တကယ် upstream နှင့် ပြန်လည်ဆက်သွယ်မည်။ ၎င်းသည် မျှဝေအသုံးပြုထားသော
+MITM server သို့မဟုတ် root CA ကို **မထိပါ** (အခြား agent များက ၎င်းတို့အပေါ် မှီခိုနေနိုင်သည်) — ၎င်းတို့ကို
+Server Card နှင့် အထက်ပါ **Remove CA** action မှတစ်ဆင့် ဆက်လက်အသုံးပြုနိုင်သည်။
+Windows တွင်လည်း best-effort အနေဖြင့် `ipconfig /flushdns` ကို လုပ်ဆောင်သည်။ အကြောင်းမှာ Windows DNS Client သည် hosts-file entry များကို cache လုပ်ထားပြီး
+အသစ်ဖယ်ရှားထားသော spoof ကို ထိုသို့မလုပ်ပါက ချက်ချင်းမဖယ်ရှားနိုင်သောကြောင့် ဖြစ်သည်။
 
-| စစ်ဆေးမှုအမည်      | အတည်ပြုစစ်ဆေးသည့်အရာ                                                    | မအောင်မြင်ပါက အကြံပြုချက်                                                                                                                                   |
-| ------------------ | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | MITM server process လည်ပတ်နေခြင်း                                       | "MITM server လည်ပတ်မနေပါ။ AgentBridge tab မှ စတင်ပါ။"                                                                                                       |
-| `server-reachable` | MITM server က ၎င်း၏ port တွင် connection များကို လက်ခံခြင်း (TCP probe) | "MITM server က ၎င်း၏ port တွင် connection များကို လက်မခံပါ။ port အားလပ်နေကြောင်းနှင့် ၎င်းကို bind လုပ်ရန် သင့်တွင် အခွင့်အရေးများရှိကြောင်း စစ်ဆေးပါ။"     |
-| `cert-exists`      | MITM certificate ကို disk ပေါ်တွင် ထုတ်လုပ်ပြီးဖြစ်ခြင်း                | "MITM certificate ကို မထုတ်လုပ်ရသေးပါ။ AgentBridge tab မှ တစ်ခုထုတ်လုပ်ပါ။"                                                                                 |
-| `cert-trusted`     | MITM root CA သည် OS trust store ထဲတွင် ရှိခြင်း                         | "MITM root CA ကို OS store က မယုံကြည်သောကြောင့် TLS ကြားဖြတ်ဖမ်းယူမှု မအောင်မြင်ပါမည်။ AgentBridge tab မှ certificate ကို ယုံကြည်အောင် ပြုလုပ်ပါ။"          |
-| `dns-configured`   | ပစ်မှတ် hostname များကို `/etc/hosts` တွင် spoof လုပ်ထားခြင်း           | "ပစ်မှတ် hostname များကို /etc/hosts တွင် spoof မလုပ်ထားသောကြောင့် traffic သည် proxy သို့ လုံးဝမရောက်ရှိပါ။ ဖမ်းယူလိုသည့် agent များအတွက် DNS ကို ဖွင့်ပါ။" |
+**ရောဂါရှာဖွေစစ်ဆေးချက်များ** (`src/mitm/inspector/diagnostics.ts` ရှိ `summarizeDiagnostics()`)။ route သည် တစ်ခုချင်းစီအတွက် ဘေးထွက်သက်ရောက်မှုရှိသော probe ကို လုပ်ဆောင်ပြီး boolean တန်ဖိုးများကို pure summarizer သို့ ထည့်ပေးသည်။ `healthy` စီရင်ချက်တစ်ခုနှင့် failure တစ်ခုချင်းစီအတွက် အကြံပြုချက်ကို ပြန်ပေးသည်-
 
-**ပိုင်ရှင်မဲ့အခြေအနေ banner:** စာမျက်နှာက crash ကြောင့် ကျန်ရစ်ခဲ့သော အခြေအနေ (DNS spoof / CA / system proxy) ကို တွေ့ရှိသောအခါ card တွင် ပယင်းရောင် banner — _"ယခင် session တစ်ခုက စနစ်အခြေအနေ (DNS spoof၊ CA သို့မဟုတ် system proxy) ကို ချန်ထားခဲ့သည်။ ၎င်းကို ရှင်းလင်းရန် ပြုပြင်ရန်ကို လုပ်ဆောင်ပါ။"_ — ကို ပြသပြီး **ပြုပြင်ရန်** ခလုတ်ကို ထင်ရှားစေသည်။ `Repair` သည် ProxyBridge ၏ `--cleanup` flag နှင့် application layer အဆင့်တွင် တူညီသည့်အရာဖြစ်သည် (`src/mitm/manager.ts` ရှိ `repairMitm()` သို့ လွှဲပေးသည်)။
+| စစ်ဆေးချက်အမည်     | စစ်ဆေးအတည်ပြုသည့်အရာ                                                                 | မအောင်မြင်သည့်အခါ အကြံပြုချက်                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | MITM server process လည်ပတ်နေခြင်း ရှိ၊ မရှိ                                          | "MITM server မလည်ပတ်နေပါ။ AgentBridge tab မှ စတင်ပါ။"                                                                                                      |
+| `server-reachable` | MITM server က ၎င်း၏ port ပေါ်ရှိ connection များကို လက်ခံခြင်း ရှိ၊ မရှိ (TCP probe) | "MITM server သည် ၎င်း၏ port ပေါ်ရှိ connection များကို လက်မခံပါ။ port သည် လွတ်နေကြောင်းနှင့် ၎င်းကို bind လုပ်ရန် သင့်တွင် privilege ရှိကြောင်း စစ်ဆေးပါ။" |
+| `cert-exists`      | MITM certificate ကို disk ပေါ်တွင် generate လုပ်ပြီးခြင်း ရှိ၊ မရှိ                  | "MITM certificate ကို မ generate ရသေးပါ။ AgentBridge tab မှ တစ်ခု generate လုပ်ပါ။"                                                                        |
+| `cert-trusted`     | MITM root CA သည် OS trust store တွင် ရှိ၊ မရှိ                                       | "MITM root CA ကို OS store က မယုံကြည်သဖြင့် TLS interception မအောင်မြင်ပါ။ AgentBridge tab မှ certificate ကို ယုံကြည်မှုပေးပါ။"                            |
+| `dns-configured`   | target hostname များကို `/etc/hosts` တွင် spoof လုပ်ထားခြင်း ရှိ၊ မရှိ               | "target hostname များကို /etc/hosts တွင် spoof မလုပ်ထားသဖြင့် traffic သည် proxy သို့ မရောက်ပါ။ သင်ဖမ်းယူလိုသော agent များအတွက် DNS ကို enable လုပ်ပါ။"     |
 
-> ထပ်ခါတလဲလဲ sudo prompt များကို ရှောင်ရှားရန် MITM root CA ကို stop/start များအကြား
-> ဆက်လက်ထည့်သွင်းထားသည် (mitmproxy/Charles နှင့် တူညီသော လုပ်ဆောင်ပုံဖြစ်သည်)။ ထို့ကြောင့် ၎င်းကို ဖယ်ရှားခြင်းသည်
-> stop လုပ်သည့်အခါ အလိုအလျောက်ဖြစ်ပေါ်သည့်အရာမဟုတ်ဘဲ တိကျစွာတောင်းဆိုရသော **CA ဖယ်ရှားရန်**
-> လုပ်ဆောင်ချက်ဖြစ်သည်။
+**ပိုင်ရှင်မဲ့ state banner:** page က crash ကြောင့် ကျန်ခဲ့သော state (DNS spoof / CA / system proxy) ကို တွေ့ရှိသည့်အခါ card တွင် amber banner တစ်ခု — _"ယခင် session တစ်ခုက system state (DNS spoof၊ CA သို့မဟုတ် system proxy) ကို ချန်ထားခဲ့သည်။ ၎င်းကို ရှင်းလင်းရန် Repair ကို လုပ်ဆောင်ပါ။"_ — ကို ပြသပြီး **Repair** ခလုတ်ကို highlight လုပ်သည်။ `Repair` သည် ProxyBridge ၏ `--cleanup` flag နှင့်ညီမျှသော application-layer လုပ်ဆောင်ချက်ဖြစ်သည် (`src/mitm/manager.ts` ရှိ `repairMitm()` သို့ delegate လုပ်သည်)။
 
-### 3.7 သယ်ဆောင်အသုံးပြုနိုင်သော config တင်သွင်းခြင်း/ထုတ်ယူခြင်း
+> MITM root CA ကို ထပ်ခါတလဲလဲ sudo အတည်ပြုချက်တောင်းခံမှုများ မဖြစ်စေရန် stop/start ပြုလုပ်ပြီးနောက်တွင်လည်း ဆက်လက်ထည့်သွင်းထားသည်
+> (mitmproxy/Charles နှင့် တူညီသော လုပ်ဆောင်ပုံဖြစ်သည်)။ ထို့ကြောင့် ၎င်းကို ဖယ်ရှားခြင်းသည် stop ပြုလုပ်သည့်အခါ အလိုအလျောက် ဖြစ်ပေါ်သည့်အရာမဟုတ်ဘဲ သီးခြား
+> **CA ဖယ်ရှားရန်** လုပ်ဆောင်ချက်ဖြစ်သည်။
 
-စက်တစ်လုံးတွင် ပြုလုပ်ထားသော setup ကို အခြားစက်များတွင် ပုံတူပြုလုပ်နိုင်ရန် AgentBridge သည် **အော်ပရေတာက ချိန်ညှိနိုင်သော** အခြေအနေကို version ပါသည့် JSON blob အဖြစ် serialize လုပ်နိုင်သည်။ Serializer သည် `src/lib/inspector/configPortability.ts` ရှိ (`exportConfig()` / `importConfig()`) ဖြစ်ပြီး `AgentBridgeConfigSchema` ဖြင့် validate လုပ်ထားသည်။
+### 3.7 နေရာအမျိုးမျိုးသို့ သယ်ဆောင်အသုံးပြုနိုင်သော config တင်သွင်းခြင်း/တင်ပို့ခြင်း
 
-Export တွင် အပိုင်းသုံးခုတိတိ ပါဝင်သည် (ထည့်သွင်းပါရှိပြီးသား default များကို ရည်ရွယ်ချက်ရှိရှိ **မထုတ်ယူပါ**။ ထို့ကြောင့် import လုပ်ခြင်းက ၎င်းတို့ကို မိတ္တူပွားခြင်း သို့မဟုတ် ၎င်းတို့နှင့် ပဋိပက္ခဖြစ်ခြင်း လုံးဝမရှိပါ)-
+AgentBridge သည် စက်တစ်လုံးတွင် ပြင်ဆင်ထားသည့် setup ကို အခြားစက်များတွင် ထပ်တူပုံတူ ပြုလုပ်နိုင်စေရန် **အော်ပရေတာက ချိန်ညှိနိုင်သော** state ကို version ပါဝင်သည့် JSON blob အဖြစ် serialize ပြုလုပ်နိုင်သည်။ Serializer မှာ `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`) ဖြစ်ပြီး `AgentBridgeConfigSchema` ဖြင့် စစ်ဆေးအတည်ပြုထားသည်။
 
-| Field            | အရင်းအမြစ်                                                            | မှတ်ချက်များ                                                           |
-| ---------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `bypassPatterns` | အသုံးပြုသူသတ်မှတ်ထားသော bypass pattern များ (`agent_bridge_bypass`)   | မူလ bank/gov/okta pattern များကို မထည့်သွင်းပါ                         |
-| `customHosts`    | Traffic Inspector custom host များ (`inspector_custom_hosts`)         | တစ်ခုချင်းစီမှာ- `{ host, kind: "llm"\|"app"\|"custom", label? }`      |
-| `agentMappings`  | agent တစ်ခုချင်းစီအလိုက် model mapping များ (`agent_bridge_mappings`) | mapping ရှိသော agent တိုင်းအတွက် `{ [agentId]: [{ source, target }] }` |
+Export တွင် အောက်ပါ အစိတ်အပိုင်းသုံးခုသာ အတိအကျ ပါဝင်သည် (ထည့်သွင်းပြီးသား မူလ default များကို ရည်ရွယ်ချက်ရှိရှိ **မတင်ပို့ပါ**။ ထို့ကြောင့် import ပြုလုပ်ခြင်းက ၎င်းတို့ကို ဘယ်တော့မှ ထပ်ပွားစေခြင်း သို့မဟုတ် ဆန့်ကျင်စေခြင်း မရှိပါ)။
+
+| Field            | ရင်းမြစ်                                                              | မှတ်ချက်များ                                                                    |
+| ---------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `bypassPatterns` | အသုံးပြုသူသတ်မှတ် bypass pattern များ (`agent_bridge_bypass`)         | မူလ bank/gov/okta pattern များကို ချန်လှပ်ထားသည်                                |
+| `customHosts`    | Traffic Inspector ၏ စိတ်ကြိုက် host များ (`inspector_custom_hosts`)   | တစ်ခုစီသည် `{ host, kind: "llm"\|"app"\|"custom", label? }` ဖြစ်သည်             |
+| `agentMappings`  | agent တစ်ခုချင်းစီအလိုက် model mapping များ (`agent_bridge_mappings`) | mapping ရှိသည့် agent တိုင်းအတွက် `{ [agentId]: [{ source, target }] }` ဖြစ်သည် |
 
 ```jsonc
 // GET /api/tools/agent-bridge/config
@@ -333,13 +329,13 @@ Export တွင် အပိုင်းသုံးခုတိတိ ပါ�
 }
 ```
 
-**Import လုပ်ဆောင်ပုံ** (`POST /api/tools/agent-bridge/config`)- bypass pattern များနှင့် agent တစ်ခုချင်းစီအလိုက် mapping များကို **တစ်ခုလုံး အစားထိုးသည်**။ custom host များကို **idempotent ပုံစံဖြင့်** ထည့်သွင်းသည် (`INSERT OR IGNORE`)။ Response သည် အမျိုးအစားတစ်ခုချင်းစီအလိုက် မည်မျှအသုံးချခဲ့သည်ကို အစီရင်ခံသည်-
+**Import လုပ်ဆောင်ပုံ** (`POST /api/tools/agent-bridge/config`)− bypass pattern များနှင့် agent တစ်ခုချင်းစီအလိုက် mapping များကို **အားလုံးအစားထိုးသည်**။ စိတ်ကြိုက် host များကိုမူ **ထပ်ခါတလဲလဲ ပြုလုပ်လျှင်လည်း ရလဒ်မပြောင်းလဲစေသောပုံစံဖြင့်** (`INSERT OR IGNORE`) ထည့်သွင်းသည်။ Response တွင် အမျိုးအစားတစ်ခုစီအတွက် မည်မျှ အသုံးချခဲ့သည်ကို ဖော်ပြသည်။
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-config ထဲတွင် **မပါဝင်သော** အရာများမှာ server လည်ပတ်နေမှုအခြေအနေ၊ cert path များ၊ agent တစ်ခုချင်းစီ၏ DNS အခြေအနေ၊ upstream CA path နှင့် TPROXY setting များဖြစ်သည် — ၎င်းတို့သည် အခြားနေရာသို့ သယ်ဆောင်အသုံးပြုနိုင်သော preference များမဟုတ်ဘဲ host/runtime အခြေအနေများဖြစ်သည်။
+Config တွင် **မပါဝင်သော** အရာများမှာ server လည်ပတ်နေမှု state၊ cert path များ၊ agent တစ်ခုချင်းစီအလိုက် DNS state၊ upstream CA path နှင့် TPROXY setting များဖြစ်သည်။ ၎င်းတို့သည် နေရာအမျိုးမျိုးသို့ သယ်ဆောင်နိုင်သော preference များမဟုတ်ဘဲ host/runtime state များဖြစ်သည်။
 
 ---
 
@@ -497,41 +493,42 @@ AgentBridge က ကြားဖြတ်ဖမ်းယူသော်လည်�
 
 ---
 
-## §7 API ကိုးကားချက်
+## §7 API အကိုးအကား
 
-Route အားလုံးသည် `LOCAL_ONLY` (loopback တွင်သာ အသုံးပြုနိုင်ပြီး auth မတိုင်မီ အတည်ပြုကန့်သတ်ထားသည်) နှင့် `SPAWN_CAPABLE` ဖြစ်သည်။ `src/server/authz/routeGuard.ts` ကို ကြည့်ပါ။
+Route အားလုံးသည် `LOCAL_ONLY` (loopback မှသာ ဝင်ရောက်နိုင်ပြီး auth မတိုင်မီ စစ်ဆေးအတည်ပြုသည်) နှင့် `SPAWN_CAPABLE` ဖြစ်သည်။ `src/server/authz/routeGuard.ts` ကို ကြည့်ပါ။
 
 အခြေခံ path: `/api/tools/agent-bridge/`
 
-| နည်းလမ်း            | လမ်းကြောင်း                                    | ဖော်ပြချက်                                                                                                                                                    |
+| Method              | Path                                           | ဖော်ပြချက်                                                                                                                                                    |
 | ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | ဆာဗာတစ်ခုလုံး၏ အခြေအနေ + agent တစ်ခုချင်းစီ၏ ရှာဖွေတွေ့ရှိမှု/အခြေအနေ                                                                                         |
-| GET                 | `/api/tools/agent-bridge/agents`               | မှတ်ပုံတင်ထားသော agent များစာရင်း (id, အမည်, host များ, အသုံးပြုနိုင်ခြေ၊ အခြေအနေ)                                                                            |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | agent တစ်ခု၏ အခြေအနေ (ပစ်မှတ် config + ရှာဖွေတွေ့ရှိမှု + သိမ်းဆည်းထားသော အခြေအနေ)                                                                            |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | agent အတွက် `setup_completed` ကို အပ်ဒိတ်လုပ်ရန်                                                                                                              |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | agent အတွက် ရှာဖွေစစ်ဆေးမှုကို လုပ်ဆောင်ရန် (`installed`, `version?`, `path?`)                                                                                |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | agent အတွက် DNS ကို ဖွင့်ရန်/ပိတ်ရန် (`{enabled: boolean}`)                                                                                                   |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | agent အတွက် မော်ဒယ် mapping များ                                                                                                                              |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | မော်ဒယ် mapping များကို အစားထိုးရန်                                                                                                                           |
-| POST                | `/api/tools/agent-bridge/server`               | ဆာဗာကို စတင်ရန်/ရပ်တန့်ရန်/ပြန်လည်စတင်ရန် (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                             |
-| GET                 | `/api/tools/agent-bridge/cert`                 | လက်မှတ်အခြေအနေ (`exists`, `trusted`, `path`)                                                                                                                  |
-| POST                | `/api/tools/agent-bridge/cert`                 | MITM root CA ကို ယုံကြည်စိတ်ချရအဖြစ် သတ်မှတ်ရန် (ထည့်သွင်းရန်)                                                                                                |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | MITM root CA ကို ယုံကြည်စိတ်ချရမှုမှ ဖယ်ရှားရန် (ဖယ်ရှားရန်) — ထပ်ခါတလဲလဲ ခေါ်ဆိုနိုင်သည် (§3.6 ကို ကြည့်ပါ)                                                  |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | ကိုယ်တိုင်လက်မှတ်ထိုးထားသော MITM လက်မှတ်ကို ပြန်လည်ဖန်တီးရန်                                                                                                  |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | ဒေါင်းလုဒ်လုပ်ရန် PEM လက်မှတ်ကို stream လုပ်ရန်                                                                                                               |
-| GET                 | `/api/tools/agent-bridge/bypass`               | ကျော်ဖြတ်မှု pattern များစာရင်း (`default` + `user`)                                                                                                          |
-| POST                | `/api/tools/agent-bridge/bypass`               | အသုံးပြုသူသတ်မှတ်ထားသော ကျော်ဖြတ်မှု pattern အားလုံးကို အစားထိုးရန်                                                                                           |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | အသုံးပြုသူသတ်မှတ်ထားသော ကျော်ဖြတ်မှု pattern တစ်ခုကို ဖယ်ရှားရန်                                                                                              |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | ဖမ်းယူမှု pipeline ကိုယ်တိုင်စမ်းသပ်မှု (§3.6 ကို ကြည့်ပါ)                                                                                                    |
-| POST                | `/api/tools/agent-bridge/repair`               | ကျန်ရစ်နေသော MITM စနစ်အခြေအနေကို ပြန်လည်ဖယ်ရှားရန် (§3.6 ကို ကြည့်ပါ)                                                                                         |
-| GET                 | `/api/tools/agent-bridge/config`               | သယ်ဆောင်အသုံးပြုနိုင်သော config JSON ကို ထုတ်ယူရန် (§3.7 ကို ကြည့်ပါ)                                                                                         |
-| POST                | `/api/tools/agent-bridge/config`               | သယ်ဆောင်အသုံးပြုနိုင်သော config JSON ကို ထည့်သွင်းရန် (§3.7 ကို ကြည့်ပါ)                                                                                      |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | စီစဉ်သတ်မှတ်ထားသော upstream CA လမ်းကြောင်းကို ရယူရန်                                                                                                          |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | upstream CA လမ်းကြောင်းကို အတည်ပြုစစ်ဆေးပြီး သိမ်းဆည်းရန်                                                                                                     |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | upstream CA လမ်းကြောင်းကို အတည်ပြုစစ်ဆေးရုံသာ (dry-run) လုပ်ရန် — သိမ်းဆည်းမည်မဟုတ်ပါ                                                                         |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY ပွင့်လင်းမြင်သာသော decrypt ဖမ်းယူမှု mode — `docs/security/MITM-TPROXY-DECRYPT.md` ကို ကြည့်ပါ (git ထဲတွင်သာရှိပြီး `/docs` ထဲသို့ compile မလုပ်ထားပါ) |
+| GET                 | `/api/tools/agent-bridge/state`                | ကမ္ဘာလုံးဆိုင်ရာ server state + agent တစ်ခုချင်းစီ၏ detection/status                                                                                          |
+| GET                 | `/api/tools/agent-bridge/agents`               | မှတ်ပုံတင်ထားသော agent များကို စာရင်းပြုစုခြင်း (id, name, hosts, viability, state)                                                                           |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Agent တစ်ခု၏ state (target config + detection + သိမ်းဆည်းထားသော state)                                                                                        |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Agent အတွက် `setup_completed` ကို အပ်ဒိတ်လုပ်ခြင်း                                                                                                            |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Agent အတွက် detection probe ကို လုပ်ဆောင်ခြင်း (`installed`, `version?`, `path?`)                                                                             |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Agent အတွက် DNS ကို ဖွင့်/ပိတ်ခြင်း (`{enabled: boolean}`)                                                                                                    |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Agent အတွက် model mapping များ                                                                                                                                |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Model mapping များကို အစားထိုးခြင်း                                                                                                                           |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | မူလအခြေအနေသို့ ပြန်ထားခြင်း—ဤ agent ၏ DNS spoofing ကို ဖြုတ်ခြင်း၊ ၎င်း၏ mapping များကို ရှင်းလင်းခြင်းနှင့် state ကို ပြန်လည်သတ်မှတ်ခြင်း (§3.6 ကို ကြည့်ပါ) |
+| POST                | `/api/tools/agent-bridge/server`               | Server ကို စတင်/ရပ်တန့်/ပြန်လည်စတင်ခြင်း (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                              |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Cert အခြေအနေ (`exists`, `trusted`, `path`)                                                                                                                    |
+| POST                | `/api/tools/agent-bridge/cert`                 | MITM root CA ကို ယုံကြည်ရန် သတ်မှတ်ခြင်း (ထည့်သွင်းခြင်း)                                                                                                     |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | MITM root CA ကို ယုံကြည်မှုမှ ပယ်ဖျက်ခြင်း (ဖယ်ရှားခြင်း)—idempotent ဖြစ်သည် (§3.6 ကို ကြည့်ပါ)                                                               |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Cert model ကို မပြောင်းလဲဘဲ လက်ရှိအသုံးပြုနေသော cert ကို ပြန်လည်ထုတ်လုပ်ခြင်း (legacy leaf သို့မဟုတ် root-CA rotation—§3.1 ကို ကြည့်ပါ)                       |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | လက်ရှိအသုံးပြုနေသော PEM cert ကို download လုပ်ရန် stream ပြုလုပ်ခြင်း (root-CA model တွင် `ca.crt`၊ legacy-leaf install တွင် `server.crt`)                    |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Bypass pattern များကို စာရင်းပြုစုခြင်း (`default` + `user`)                                                                                                  |
+| POST                | `/api/tools/agent-bridge/bypass`               | အသုံးပြုသူသတ်မှတ်ထားသော bypass pattern အားလုံးကို အစားထိုးခြင်း                                                                                               |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | အသုံးပြုသူသတ်မှတ်ထားသော bypass pattern တစ်ခုကို ဖယ်ရှားခြင်း                                                                                                  |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Capture-pipeline ကိုယ်တိုင်စမ်းသပ်စစ်ဆေးမှု (§3.6 ကို ကြည့်ပါ)                                                                                                |
+| POST                | `/api/tools/agent-bridge/repair`               | ပိုင်ရှင်မဲ့ဖြစ်နေသော MITM system state ကို ပြန်လည်ဖြေလျှော့ခြင်း (§3.6 ကို ကြည့်ပါ)                                                                          |
+| GET                 | `/api/tools/agent-bridge/config`               | သယ်ဆောင်အသုံးပြုနိုင်သော config JSON ကို export လုပ်ခြင်း (§3.7 ကို ကြည့်ပါ)                                                                                  |
+| POST                | `/api/tools/agent-bridge/config`               | သယ်ဆောင်အသုံးပြုနိုင်သော config JSON ကို import လုပ်ခြင်း (§3.7 ကို ကြည့်ပါ)                                                                                  |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | ပြင်ဆင်သတ်မှတ်ထားသော upstream CA path ကို ရယူခြင်း                                                                                                            |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Upstream CA path ကို အတည်ပြုစစ်ဆေးပြီး သိမ်းဆည်းခြင်း                                                                                                         |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Upstream CA path ကို အတည်ပြုစစ်ဆေးရုံသာ (dry-run) လုပ်ခြင်း—သိမ်းဆည်းမည်မဟုတ်ပါ                                                                               |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY transparent-decrypt capture mode—`docs/security/MITM-TPROXY-DECRYPT.md` ကို ကြည့်ပါ (git တွင်သာရှိပြီး `/docs` ထဲသို့ compile မလုပ်ထားပါ)              |
 
-OpenAPI schema အပြည့်အစုံ- `docs/openapi.yaml` → tag `AgentBridge`။
+OpenAPI schema အပြည့်အစုံ: `docs/openapi.yaml` → tag `AgentBridge`.
 
 ---
 

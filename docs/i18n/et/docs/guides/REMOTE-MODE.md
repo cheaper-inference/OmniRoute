@@ -1,6 +1,6 @@
 # Remote Mode (Eesti)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -242,55 +242,48 @@ kuvatakse aktiivne.
 
 ---
 
-## Pääsmike haldamine
+## Tokenite haldamine
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ väljastab saladuse ÜHE KORRA — kopeerige see kohe
-omniroute tokens list                 # maskitud: ID, nimi, ulatus, prefiks, olek, aegumine
-omniroute tokens revoke <id|prefix>   # tühistab kohe
-omniroute tokens scopes               # selgitab kolme ulatust
+#   ↳ kuvab saladuse ÜKS kord — kopeeri see kohe
+omniroute tokens list                 # maskeeritud: id, nimi, scope, eesliide, staatus, aegumine
+omniroute tokens revoke <id|prefix>   # tühista kohe
+omniroute tokens scopes               # selgitab kolme scope-ulatust
 ```
 
-`tokens`-käsud nõuavad **administraatori** identimisteavet. Pääsmikke saab hallata ka
-juhtpaneeli jaotises **Seaded → Juurdepääsupääsmikud** (loomine, tühistamine, ühekordne kopeerimine).
+`tokens`-käsud nõuavad **admin**-mandaati. Tokeneid saab hallata ka armatuurlaual jaotises **Seaded → Juurdepääsutokenid** (loo, tühista, kopeeri üks kord).
+
+Tokenit ei saa kunagi väljastada suurema õiguse ulatusega, kui selle looja omab. `admin`-tokeni saab luua ainult operaator: armatuurlaua seanss, kohalik CLI serveril endal või `omniroute connect` parooliga. Masinmandaadid (`admin`-juurdepääsutoken või API-võti `manage`/`admin`-ulatusega) saavad väljastada ainult `write`- ja `read`-tokeneid. Kui nad küsivad `--scope admin`, tagastatakse `403`. Sisselogimise väljalülitamine ei ava tokenite väljastamist: mis tahes ulatusega juurdepääsutoken on mandaat, mida alati autenditud marsruudid aktsepteerivad, seega saab anonüümne kutse igas ulatuses vastuseks `401`.
 
 ---
 
-## Kodeerimise CLI konfigureerimine kaugkataloogist
+## Kodeerimis-CLI seadistamine kaugkataloogist
 
-`omniroute configure` loeb **aktiivse serveri** reaalajas mudelikataloogi ja kirjutab
-konfiguratsiooni **teie** masinasse.
+`omniroute configure` loeb **aktiivse serveri** reaalajas mudelikataloogi ja kirjutab konfiguratsiooni **sinu** masinasse.
 
 ```bash
 omniroute configure codex
-#   Providers: glm, kmc, ollamacloud, opencode-go, …
-#   Provider: glm
-#   Model id: glm/glm-5.2
-#   ✔ Wrote ~/.codex/glm52.config.toml
-#   Use it:  codex --profile glm52
+#   Pakkujad: glm, kmc, ollamacloud, opencode-go, …
+#   Pakkuja: glm
+#   Mudeli ID: glm/glm-5.2
+#   ✔ Kirjutatud ~/.codex/glm52.config.toml
+#   Kasutamine:  codex --profile glm52
 
 # mitteinteraktiivne
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# hoidke sageli kasutatav mudel interaktiivse valija ülaosas
+# hoia sageli kasutatav mudel interaktiivse valiku ülaosas
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Valija säilitab kohalikus failis `model-preferences.json` ainult mudeli-ID-sid
-(mitte kunagi URL-e ega identimisteavet), rühmitatuna konteksti ja CLI-sihtmärgi järgi. Lemmikuid
-kuvatakse enne hiljutisi valikuid; kasutage `--unfavorite`, et eemaldada valitud mudel
-selle konteksti/sihtmärgi loendist.
+Valija hoiab kohalikus failis `model-preferences.json` ainult mudeli ID-sid (mitte kunagi URL-e ega mandaate), piiritletuna konteksti ja CLI sihtkoha järgi. Lemmikud kuvatakse enne viimaseid valikuid. Kasuta `--unfavorite`, et eemaldada valitud mudel selle konteksti/sihtkoha loendist.
 
-Kirjutatud profiil viitab järeldusvõtmele keskkonnamuutuja
-(`OMNIROUTE_API_KEY`) kaudu — saladust ei kirjutata kunagi kettale. Codexi ühekordse
-baasseadistuse (`[model_providers.omniroute]` plokk) kohta vaadake
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Kirjutatud profiil viitab järeldusvõtmele keskkonnamuutuja `OMNIROUTE_API_KEY` kaudu. Saladust ei kirjutata kunagi kettale. Ühekordse Codexi baasseadistuse (`[model_providers.omniroute]` plokk) kohta vt [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
 ### CLI käivitamine kaugserveri vastu (konfiguratsiooni ei kirjutata)
 
-`omniroute run <target>` arvestab samuti aktiivse kontekstiga: kaugserveri baas-URL
-ja konteksti identimisteave sisestatakse ainult käivitatud protsessi.
+`omniroute run <target>` arvestab samuti aktiivset konteksti: kaugserveri baas-URL ja konteksti mandaat süstitakse ainult käivitatavasse protsessi.
 
 ```bash
 omniroute connect 192.168.0.15
@@ -298,113 +291,102 @@ omniroute run claude   --model openai/gpt-5.4          # Claude Code → kaugser
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Eelvaade täpselt sellest, mis käivitataks (ainult keskkonnamuutujate VÕTMETE NIMED, mitte kunagi väärtused):
+# Eelvaata täpselt, mis käivitataks (ainult keskkonnamuutujate nimed, mitte väärtused):
 omniroute run codex --dry-run --json
 ```
 
-Sihtmärgid: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(ainus allikas: `bin/cli/cli-manifest.mjs`). Qwen ja Gemini töötavad ajutise
-isoleeritud kodukataloogiga, mis eemaldatakse väljumisel, seega ei puuduta käivitamine kunagi
-teie isiklikku tööriistakonfiguratsiooni ega lekita sinna midagi.
+Sihtkohad: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (ainus allikas: `bin/cli/cli-manifest.mjs`). Qwen ja Gemini töötavad ajutises isoleeritud kodukataloogis, mis eemaldatakse väljumisel, nii et käivitamine ei puuduta kunagi sinu isiklikku tööriistade konfiguratsiooni ega lekkida sellesse.
 
-### CLI-põhised seadistuskäsud
+### CLI-spetsiifilised seadistuskäsud
 
-Igal toetatud CLI-l on kaugserveriteadlik seadistuskäsk (kõik arvestavad aktiivse
-kontekstiga või parameetritega `--remote <url> --api-key <key>`):
+Igal toetatud CLI-l on kaugteadlik seadistuskäsk (kõik arvestavad aktiivset konteksti või `--remote <url> --api-key <key>`):
 
-| CLI         | Käsk                       | Mida see kirjutab                                                                                                                                                                         |
-| ----------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` profiilid (iga mudeli kohta)                                                                                                                                |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (iga mudeli kohta)                                                                                                                              |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — OpenAI-ga ühilduv `omniroute` teenusepakkuja koos kõigi kataloogi mudelitega (käivita `opencode -m omniroute/<model>`)                               |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI-režiim) + kuvab kleepimiseks VS Code'i laienduse sätted (OpenAI-ga ühilduv, baas-URL **ilma** `/v1`-ta)                                   |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code'i `kilocode.*` sätted — OpenAI-ga ühilduv, baas-URL **koos** `/v1`-ga                                                                     |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **koos** `/v1`-ga, võti `${{ secrets.OMNIROUTE_API_KEY }}` kaudu                                 |
-| Cursor      | `omniroute setup-cursor`   | kuvab rakenduses tehtavad sammud (Settings → Models → Override OpenAI Base URL **koos** `/v1`-ga + võti + mudel). Cursori konfiguratsioon on läbipaistmatu SQLite — ainult vestluspaneel  |
-| Roo Code    | `omniroute setup-roo`      | kirjutab Roo impordi-JSON-i (`~/.omniroute/roo-settings.json`) + määrab `roo-cline.autoImportSettingsPath` + kuvab kasutajaliidese sammud (OpenAI-ga ühilduv, baas-URL **koos** `/v1`-ga) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` teenusepakkuja, `base_url` **koos** `/v1`-ga, võti `$OMNIROUTE_API_KEY` kaudu                                                              |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **ilma** `/v1`-ta + `GOOSE_MODEL`) + keskkonnamuutujate juhis                                                      |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **ilma** `/v1`-ta + `model: openai/<id>`) + keskkonnamuutujate juhis (`aider --message --yes`)                                                     |
-| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` kirje + `OMNIROUTE_API_KEY` failis `~/.qwen/.env`                                                                                      |
+| CLI         | Käsk                       | Mida see kirjutab                                                                                                                                                                                             |
+| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` profiilid (mudeli kaupa)                                                                                                                                                        |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (mudeli kaupa)                                                                                                                                                      |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`: pakkuja `omniroute` openai-ga ühilduva API-ga ja kõigi kataloogi mudelitega (käivita `opencode -m omniroute/<model>`)                                                     |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI režiim) + prindib VS Code laienduse seaded kleepimiseks (OpenAI-ga ühilduv, Base URL **ilma** `/v1`-ta)                                                       |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` seaded: OpenAI-ga ühilduv, Base URL **koos** `/v1`-ga                                                                                            |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI): `provider: openai`, `apiBase` **koos** `/v1`-ga, võti `${{ secrets.OMNIROUTE_API_KEY }}` kaudu                                                      |
+| Cursor      | `omniroute setup-cursor`   | prindib rakenduse sammud (Settings → Models → Override OpenAI Base URL **koos** `/v1`-ga + võti + mudel). Cursori konfiguratsioon on läbipaistmatu SQLite-andmebaas, seega kehtib see ainult vestluspaneelile |
+| Roo Code    | `omniroute setup-roo`      | kirjutab Roo importfaili JSON-vormingus (`~/.omniroute/roo-settings.json`) + seab `roo-cline.autoImportSettingsPath` + prindib kasutajaliidese sammud (OpenAI-ga ühilduv, Base URL **koos** `/v1`-ga)         |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`: pakkuja `openai-compat`, `base_url` **koos** `/v1`-ga, võti `$OMNIROUTE_API_KEY` kaudu                                                                                          |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`: `language_models.openai_compatible.omniroute`, `api_url` **koos** `/v1`-ga, Zed loeb võtme `$OMNIROUTE_API_KEY`-st (ei kirjutata kunagi)                                       |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **ilma** `/v1`-ta + `GOOSE_MODEL`) + env-retsept                                                                                       |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **ilma** `/v1`-ta + `model: openai/<id>`) + env-retsept (`aider --message --yes`)                                                                                      |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json`, V4 kirje `modelProviders.openai` + `OMNIROUTE_API_KEY` failis `~/.qwen/.env`                                                                                                         |
 
 ```bash
-# OpenCode (OpenAI-ga ühilduv teenusepakkuja, kõik kataloogi mudelid, kaug-VPS)
+# OpenCode (openai-ga ühilduv pakkuja, kõik kataloogi mudelid, kaug-VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # säilita ainult sobivad mudelid
-opencode -m omniroute/glm/glm-5.2 "..."          # ekspordi esmalt OMNIROUTE_API_KEY
+omniroute setup-opencode --only glm,kimi        # jäta alles ainult sobivad mudelid
+opencode -m omniroute/glm/glm-5.2 "..."          # ekspordi enne OMNIROUTE_API_KEY
 ```
 
-> OpenCode'il on ka võimalusterohkem **plugin**-integratsioon: `omniroute setup opencode`
-> (nüüd `--remote` kaudu kaugühenduse toega) installib paketi `@omniroute/opencode-plugin`.
-> `setup-opencode` on kergekaaluline OpenAI-ga ühilduv alternatiiv. API-võtmele
-> viidatakse kujul `{env:OMNIROUTE_API_KEY}` — seda ei kirjutata kunagi kettale.
+> OpenCodel on ka rikkalikum **plugini** integratsioon: `omniroute setup opencode`
+> (nüüd kaugteadlik `--remote` kaudu) paigaldab paketi `@omniroute/opencode-plugin`.
+> `setup-opencode` on kergem openai-ga ühilduv alternatiiv. API-võtit viidatakse
+> `{env:OMNIROUTE_API_KEY}` kaudu ega kirjutata seda kunagi kettale.
 >
-> OpenCode v2 puhul kasuta selle asemel `@omniroute/opencode-plugin-v2`: sama kataloog,
-> erinev laadimisleping. Kui integratsioon on ühendatud, loeb see võtme OpenCode'i enda
-> mandaadihoidlast, seega ei vaja kauglüüs failis `opencode.json` üldse võtit.
+> OpenCode v2 puhul kasuta selle asemel paketti `@omniroute/opencode-plugin-v2`: sama kataloog,
+> aga teine laadimislepe. See loeb võtme OpenCode enda mandaatide hoidlast, kui integratsioon on
+> ühendatud, seega kaugväravale pole `opencode.json`-is üldse vaja võtit.
 
 ---
 
-## Kontekstide haldamine (serverite vahel vahetamine)
+## Kontekstide haldamine (serverite vahetamine)
 
-**Kontekst** on salvestatud server (baseUrl + mandaat + ulatus). `omniroute connect`
-loob selle ja muudab aktiivseks; edaspidi on kõik käsud suunatud sellele. Kontekste saab hallata ja
-nende vahel vahetada käsuga `omniroute contexts`:
+**Kontekst** on salvestatud server (baseUrl + mandaat + ulatus). `omniroute connect` loob selle ja muudab aktiivseks; sellest alates on iga käsk suunatud sellele. Hallake ja vahetage nende vahel käsuga `omniroute contexts`:
 
 ```bash
-omniroute contexts list            # kõik kontekstid; aktiivne on tähistatud sümboliga ●
-omniroute contexts current         # aktiivne server, autentimise olek ja ulatus
+omniroute contexts list            # kõik kontekstid; aktiivne on märgitud ●
+omniroute contexts current         # aktiivne server, autentimise staatus, ulatus
 ```
 
 ```text
-  | Nimi    | Baas-URL                  | Autentimine | Ulatus | Kirjeldus
-● | vps     | http://100.67.86.91:20128 | token       | admin  | Kaug-OmniRoute (…)
-  | default | http://localhost:20128    | ✗           |        |
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | Remote OmniRoute (…)
+  | default | http://localhost:20128    | ✗     |       |
 ```
 
-**Serverite vahetamine** — kõik järgnevad käsud kasutavad aktiivset konteksti:
+**Vaheta servereid** — iga järgnev käsk järgib aktiivset konteksti:
 
 ```bash
-omniroute contexts use vps         # → kõik käsud kasutavad nüüd kaug-VPS-i
-omniroute tokens list              #   (käivitatakse VPS-i suhtes)
+omniroute contexts use vps         # → kõik käsud tabavad nüüd kauget VPS-i
+omniroute tokens list              #   (käivitub VPS-i vastu)
 
 omniroute contexts use default     # → tagasi localhosti
-omniroute tokens list              #   (käivitatakse kohaliku serveri suhtes)
+omniroute tokens list              #   (käivitub kohaliku serveri vastu)
 ```
 
-**Konteksti käsitsi lisamine** (`connect` asemel), vaatamine või ümbernimetamine:
+**Lisa kontekst käsitsi** (`connect` asemel), kontrolli või nimeta ümber:
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
   --access-token oma_live_xxxx --scope write --description "staging box"
-omniroute contexts show staging    # ühe konteksti täielikud üksikasjad
+omniroute contexts show staging    # ühe konteksti täielikud detailid
 omniroute contexts rename staging stg
 ```
 
-**Konteksti eemaldamine** — küsib kinnitust; kinnituse vahelejätmiseks lisage `--yes`
-(skriptides ja mitteinteraktiivsetes kestades nõutav, sest muidu keeldutakse turvaliselt):
+**Eemalda kontekst** — küsib kinnitust; `--yes` möödub sellest (vajalik skriptide / mitteinteraktiivsete kestade jaoks, mis muidu keelduvad ohutult):
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> Konteksti `default` (localhost) ei saa eemaldada. Aktiivse konteksti eemaldamisel võetakse
-> kasutusele `default`. Näpunäide: konteksti eemaldamine kustutab ainult **kohalikult** salvestatud mandaadi —
-> juurdepääsu tegelikuks lõpetamiseks tühistage token serveris käsuga `omniroute tokens revoke <id>`.
+> `default` (localhost) ei saa eemaldada. Aktiivse konteksti eemaldamine taastab `default` konteksti. Nõuanne: konteksti eemaldamine kustutab ainult **kohaliku** salvestatud mandaadi — juurdepääsu lõplikuks tapmiseks tühista token serveris käsuga `omniroute tokens revoke <id>`.
 
-Kontekstide **eksportimine/importimine** (nt nende teisaldamiseks masinate vahel). Uute kontekstide puhul säilitatakse
-ainult võtmerõnga viide; mandaate ei kopeerita eksporti, kui operatsioonisüsteemi
-võtmerõngas on saadaval:
+**Ekspordi / impordi** kontekste (nt nende liigutamiseks masinate vahel). Ekspordid jätavad vaikimisi mandaadid välja, sealhulgas faili varu poolt salvestatud mandaadid. Kasuta `--include-secrets` selgesõnaliselt, kui on vaja kaasaskantavat mandaate sisaldavat varukoopiat:
 
 ```bash
-omniroute contexts export --out contexts.json     # vaikimisi: stdout
-omniroute contexts import contexts.json            # kirjuta üle; olemasolevate säilitamiseks kasuta --merge
-omniroute contexts migrate --yes                  # teisalda pärandteksti lihtteksttokenid võtmerõngasse
+omniroute contexts export --out contexts.json     # redigeeritud; vaikimisi sihtkoht: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # kirjutab üle; --merge olemasolevate säilitamiseks
+omniroute contexts migrate --yes                  # liiguta vanad lihtteksti tokenid võtmehoidjasse
 ```
 
-Ilma kasutatava operatsioonisüsteemi võtmerõngata käsurealiideseta süsteemides kasutab CLI varuvariandina
-faili `config.json` režiimiga `0600` ja kuvab ühekordse hoiatuse. Käsitlege selle
-varuvariandi eksporte (ja migreerimiseelset pärandkonfiguratsiooni) salajase materjalina.
+`--include-secrets` lahendab võtmehoidja viited enne eksportimist ja ebaõnnestub, kui mõnda viidatud mandaati ei saa lugeda. `--no-secrets` on alati ülimuslik. Ekspordifailid kirjutatakse aatomiliselt režiimiga `0600`. Käsitlege selgesõnalist saladusi sisaldavat eksporti kui salajast materjali. Peata süsteemides, kus puudub kasutatav OS-i võtmehoidja, langeb CLI tagasi `config.json` failile režiimiga `0600` ja prindib ühekordse hoiatuse; vaikimisi eksport jääb selles režiimis redigeerituks.
 
 ---
 

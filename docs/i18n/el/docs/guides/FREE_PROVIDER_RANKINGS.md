@@ -1,6 +1,6 @@
 # Free Provider Rankings (Arena ELO) (Ελληνικά)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇦 [bs](../../../bs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
 
 ---
 
@@ -11,32 +11,19 @@
 
 ---
 
-## Τι είναι
+## Τι Είναι
 
-Το OmniRoute καταχωρίζει 329 παρόχους, συμπεριλαμβανομένων 155 καταχωρίσεων καταλόγου που επισημαίνονται ως **δωρεάν/χωρίς έλεγχο ταυτότητας**
-(χωρίς έλεγχο ταυτότητας,
-OAuth δωρεάν βαθμίδας ή κλειδί API δωρεάν βαθμίδας — ανατρέξτε στον
-[Οδηγό δωρεάν βαθμίδων](../getting-started/FREE-TIERS-GUIDE.md) και στον πλήρη
-[Κατάλογο δωρεάν βαθμίδων](../reference/FREE_TIERS.md)). Το μειονέκτημα: οι δωρεάν πάροχοι διαφέρουν
-δραματικά ως προς την ποιότητα των μοντέλων. Ένας πάροχος χωρίς έλεγχο ταυτότητας που προσφέρει ένα μοντέλο αιχμής είναι πολύ πιο χρήσιμος
-από έναν πάροχο που προσφέρει ένα μικρό παλαιότερο μοντέλο.
+OmniRoute καταχωρεί 377 παρόχους, συμπεριλαμβανομένων 155 καταχωρήσεων καταλόγου με επισήμανση**free/no-auth** (χωρίς ταυτότητα, κλειδί OAuth ελεύθερης βαθμίδας ή API ελεύθερης βαθμίδας — δείτε τον [Οδηγό Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) και τον πλήρη [κατάλογο Free Tiers](../reference/FREE_TIERS.md) ). Η σύλληψη: οι δωρεάν πάροχοι διαφέρουν σε μεγάλο βαθμό ως προς την ποιότητα του μοντέλου. Ένας πάροχος χωρίς εξουσιοδότηση που εξυπηρετεί ένα μοντέλο συνόρων είναι πολύ πιο χρήσιμος από έναν πάροχο που εξυπηρετεί ένα μικρό παλαιού τύπου μοντέλο.
 
-Η **Κατάταξη δωρεάν παρόχων** απαντά στην ερώτηση «**ποιος δωρεάν πάροχος μού προσφέρει το καλύτερο μοντέλο;**»,
-συνδυάζοντας τον κατάλογο κάθε δωρεάν παρόχου με **βαθμολογίες ποιότητας από το πλήθος** από τον
-**πίνακα κατάταξης του Arena AI** (ELO ανθρώπινης προτίμησης, η ίδια ιδέα στην οποία βασίζεται το
-chatbot arena του LMArena). Στη συνέχεια, οι πάροχοι κατατάσσονται με βάση την ισχύ του **καλύτερου δωρεάν μοντέλου** τους.
+**Δωρεάν κατάταξη παρόχων** απαντήσεις"** ποιος δωρεάν πάροχος μου δίνει το καλύτερο μοντέλο;** " μπαίνοντας στον κατάλογο κάθε δωρεάν παρόχου με** βαθμολογίες ποιότητας με βάση το πλήθος** από το** Arena AI leaderboard** (human-preference ELO, η ίδια ιδέα πίσω από την αρένα chatbot LMArena). Στη συνέχεια, οι πάροχοι κατατάσσονται με βάση τη δύναμή τους** το καλύτερο δωρεάν μοντέλο** .
 
 Η κατάταξη υπολογίζεται από τρεις πραγματικές πηγές:
 
-1. Τις λίστες δωρεάν παρόχων — `NOAUTH_PROVIDERS`, καθώς και καταχωρίσεις `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` που επισημαίνονται με `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Τον κατάλογο μοντέλων κάθε παρόχου από το μητρώο παρόχων
-   (`open-sse/config/providerRegistry.ts`).
-3. Βαθμολογίες καταλληλότητας για εργασίες, οι οποίες προκύπτουν από το ELO και αποθηκεύονται στον πίνακα ΒΔ `model_intelligence` από τη
-   μηχανή συγχρονισμού Arena ELO (`src/lib/arenaEloSync.ts`).
+1. Οι λίστες δωρεάν παρόχου — `NOAUTH_PROVIDERS`, συν καταχωρίσεις `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` με σημαία `hasFree` (`src/shared/constants/providers.ts`).
+2. Κατάλογος μοντέλων κάθε παρόχου από το μητρώο παρόχων (`open-sse/config/providerRegistry.ts`).
+3. Οι βαθμολογίες προσαρμογής εργασιών που προέρχονται από το ELO αποθηκεύονται στον πίνακα `model_intelligence` DB από τη μηχανή συγχρονισμού Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Η λογική συνένωσης βρίσκεται στο `src/lib/freeProviderRankings.ts`.
+Η λογική σύνδεσης ζει στο `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -120,25 +107,29 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ---
 
-## Πώς λειτουργούν οι βαθμολογίες
+## Πώς Λειτουργούν οι Βαθμολογίες
 
-### Πηγή: πίνακας κατάταξης Arena AI
+### Πηγή: Κατάταξη Arena AI
 
-Η μηχανή συγχρονισμού Arena ELO (`src/lib/arenaEloSync.ts`) ανακτά δύο πίνακες κατάταξης — `text`
-και `code` — από το API του πίνακα κατάταξης Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Κάθε καταχώριση πίνακα κατάταξης
-περιλαμβάνει όνομα μοντέλου, πάροχο, `score` ELO, διάστημα εμπιστοσύνης και αριθμό ψήφων.
+Η μηχανή συγχρονισμού Arena ELO (`src/lib/arenaEloSync.ts`) ανακτά δύο κατατάξεις — `text`
+και `code` — από το API κατάταξης του Arena AI
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Όταν αυτό το API δεν επιστρέφει
+χρησιμοποιήσιμη κατάταξη, η μηχανή υποχωρεί στο επίσημο `lmarena-ai/leaderboard-dataset` στον
+datasets-server του Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0· `overall` → `text`,
+`coding` → `code`)· το `GET /api/intelligence/sync` αναφέρει τα `activeSource`, `lastError` και
+`lastFailedAt`. Κάθε εγγραφή κατάταξης
+φέρει όνομα μοντέλου, προμηθευτή, `score` ELO, διάστημα εμπιστοσύνης και αριθμό ψήφων.
 
-Οι κατηγορίες του πίνακα κατάταξης αντιστοιχίζονται στις κατηγορίες εργασιών του OmniRoute:
+Οι κατηγορίες της κατάταξης αντιστοιχίζονται σε κατηγορίες εργασιών του OmniRoute:
 
-| Πίνακας κατάταξης Arena | Κατηγορίες εργασιών OmniRoute                     |
-| ----------------------- | ------------------------------------------------- |
-| `text`                  | `default`, `review`, `documentation`, `debugging` |
-| `code`                  | `coding`                                          |
+| Κατάταξη Arena | Κατηγορίες εργασιών OmniRoute                     |
+| -------------- | ------------------------------------------------- |
+| `text`         | `default`, `review`, `documentation`, `debugging` |
+| `code`         | `coding`                                          |
 
-### Κανονικοποίηση (βαθμολογία καταλληλότητας για την εργασία)
+### Κανονικοποίηση (βαθμός καταλληλότητας εργασίας)
 
-Οι ακατέργαστες βαθμολογίες ELO κανονικοποιούνται ανά πίνακα κατάταξης σε μια **τιμή καταλληλότητας για την εργασία στο `[0.4, 0.98]`**:
+Οι ακατέργαστες βαθμολογίες ELO κανονικοποιούνται ανά κατάταξη σε μια **τιμή καταλληλότητας εργασίας στο `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
@@ -149,73 +140,73 @@ taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 
 ### Εμπιστοσύνη
 
-Κάθε καταχώριση λαμβάνει ένα επίπεδο εμπιστοσύνης βάσει του αριθμού ψήφων στο Arena:
+Κάθε εγγραφή λαμβάνει ένα επίπεδο εμπιστοσύνης με βάση τον αριθμό ψήφων στο Arena:
 
 | Εμπιστοσύνη | Ψήφοι   |
 | ----------- | ------- |
-| `high`      | ≥ 5,000 |
-| `medium`    | ≥ 1,000 |
-| `low`       | < 1,000 |
+| `high`      | ≥ 5.000 |
+| `medium`    | ≥ 1.000 |
+| `low`       | < 1.000 |
 
-### Αποθήκευση και επικαιρότητα
+### Αποθήκευση και φρεσκάδα δεδομένων
 
-Οι κανονικοποιημένες καταχωρίσεις εγγράφονται στον πίνακα `model_intelligence` της βάσης δεδομένων με
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Οι καταχωρίσεις **λήγουν μετά από
-7 ημέρες**, ώστε ένας πάροχος που σταματά να συγχρονίζεται τελικά να αφαιρείται, αντί να παρέχει
+Οι κανονικοποιημένες εγγραφές εγγράφονται στον πίνακα βάσης δεδομένων `model_intelligence` με
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Οι εγγραφές **λήγουν μετά από
+7 ημέρες**, ώστε ένας πάροχος που σταματά να συγχρονίζεται να απομακρύνεται τελικά αντί να σερβίρει
 παρωχημένα δεδομένα.
 
-Ο συγχρονισμός εκτελείται **από προεπιλογή**:
+Ο συγχρονισμός εκτελείται **ενεργοποιημένος από προεπιλογή**:
 
-- Εκτελείται μία φορά κατά την εκκίνηση του διακομιστή και, στη συνέχεια, βάσει περιοδικού χρονοδιακόπτη
+- Εκτελείται μία φορά κατά την εκκίνηση του διακομιστή και στη συνέχεια με περιοδικό χρονοδιακόπτη
   (`src/lib/arenaEloSync.ts`, συνδεδεμένο από το `src/instrumentation-node.ts`).
-- Είναι **μη αποκλειστικός και ποτέ κρίσιμος** — αν αποτύχει η ανάκτηση από την εξωτερική πηγή, το OmniRoute συνεχίζει
-  να λειτουργεί και οι κατατάξεις απλώς εμφανίζουν τα τελευταία έγκυρα δεδομένα (ή μια κενή κατάσταση).
+- Είναι **μη αποκλειστικός και ποτέ μοιραίος** — αν η ανάκτηση από την ανοδική πηγή αποτύχει, το OmniRoute συνεχίζει
+  να λειτουργεί και οι κατατάξεις απλώς δείχνουν τα τελευταία έγκυρα δεδομένα (ή μια κενή κατάσταση).
 
-Δύο μεταβλητές περιβάλλοντος τον ελέγχουν (τεκμηριώνονται στο
+Δύο μεταβλητές περιβάλλοντος τον ελέγχουν (τεκμηριωμένες στο
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Μεταβλητή                 | Προεπιλογή        | Σκοπός                                                                   |
-| ------------------------- | ----------------- | ------------------------------------------------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`            | Ορίστε την σε `false` για να εξαιρεθείτε από τον εξερχόμενο συγχρονισμό. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 ώρες) | Διάστημα συγχρονισμού, σε δευτερόλεπτα.                                  |
+| Μεταβλητή                 | Προεπιλογή    | Σκοπός                                                         |
+| ------------------------- | ------------- | -------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Ορίστε σε `false` για εξαίρεση από τον εξερχόμενο συγχρονισμό. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24ω) | Διάστημα συγχρονισμού, σε δευτερόλεπτα.                        |
 
 ### Χειροκίνητος συγχρονισμός / κατάσταση / εκκαθάριση
 
-Για τους διαχειριστές, ένα πιστοποιημένο τελικό σημείο διαχείρισης παρέχει χειροκίνητο έλεγχο
+Για τους διαχειριστές, ένα πιστοποιημένο endpoint διαχείρισης εκθέτει χειροκίνητο έλεγχο
 (`src/app/api/intelligence/sync/route.ts` — απαιτεί έλεγχο ταυτότητας διαχείρισης):
 
 ```
 GET    /api/intelligence/sync          # τρέχουσα κατάσταση συγχρονισμού (enabled, lastSync, nextSync, intervalMs)
 POST   /api/intelligence/sync          # ενεργοποίηση χειροκίνητου συγχρονισμού· σώμα: { "dryRun": true } για προεπισκόπηση χωρίς εγγραφή
-DELETE /api/intelligence/sync          # εκκαθάριση όλων των συγχρονισμένων καταχωρίσεων πληροφοριών arena_elo
+DELETE /api/intelligence/sync          # εκκαθάριση όλων των συγχρονισμένων εγγραφών intelligence arena_elo
 ```
 
 Αν η σελίδα κατατάξεων είναι κενή, ένα χειροκίνητο `POST /api/intelligence/sync` (ή απλώς
-η επανεκκίνηση του διακομιστή) τη συμπληρώνει ξανά.
+μια επανεκκίνηση του διακομιστή) την ξαναγεμίζει.
 
-### Αντιστοίχιση μοντέλων με τον πίνακα κατάταξης
+### Αντιστοίχιση μοντέλων με την κατάταξη
 
-Τα αναγνωριστικά μοντέλων του μητρώου και τα ονόματα μοντέλων του Arena δεν αντιστοιχούν πάντα ακριβώς. Η κατάταξη χρησιμοποιεί
+Τα αναγνωριστικά μοντέλων του μητρώου και τα ονόματα μοντέλων του Arena δεν ταιριάζουν πάντα ακριβώς. Η κατάταξη χρησιμοποιεί
 ευέλικτη αντιστοίχιση (`findMatchingIntelligence` στο `src/lib/freeProviderRankings.ts`):
 
-1. Ακριβής αντιστοίχιση με το κανονικοποιημένο αναγνωριστικό μοντέλου.
-2. Αντιστοίχιση μετά την αφαίρεση ενός τελικού επιθήματος έκδοσης (π.χ. `kimi-k2.6` → `kimi-k2`).
-3. Αντιστοίχιση προθέματος (ένα όνομα μοντέλου του πίνακα κατάταξης αποτελεί πρόθεμα του αναγνωριστικού στο μητρώο).
+1. Ακριβής αντιστοίχιση στο κανονικοποιημένο αναγνωριστικό μοντέλου.
+2. Αντιστοίχιση μετά την αφαίρεση ενός καταληκτικού επιθέματος έκδοσης (π.χ. `kimi-k2.6` → `kimi-k2`).
+3. Αντιστοίχιση προθέματος (ένα όνομα μοντέλου της κατάταξης αποτελεί πρόθεμα του αναγνωριστικού μητρώου).
 
-Στην πλευρά του συγχρονισμού, τα γνωστά προθέματα παρόχων (`anthropic/`, `openai/`, `google/`, …)
-αφαιρούνται και ένας μικρός χάρτης ψευδωνύμων επεκτείνει τα κανονικά ονόματα στις παραλλαγές που χρησιμοποιεί το OmniRoute
+Στην πλευρά του συγχρονισμού, τα γνωστά προθέματα προμηθευτών (`anthropic/`, `openai/`, `google/`, …)
+αφαιρούνται και ένας μικρός χάρτης ψευδωνύμων επεκτείνει τα κανονικά ονόματα στις παραλλαγές που το OmniRoute χρησιμοποιεί
 εσωτερικά, ώστε τα μοντέλα να παραμένουν ανιχνεύσιμα με οποιοδήποτε όνομα.
 
 ### Πώς κατατάσσεται ένας πάροχος
 
-Για κάθε δωρεάν πάροχο, η μηχανή βαθμολογεί κάθε μοντέλο στον κατάλογό του και, στη συνέχεια:
+Για κάθε δωρεάν πάροχο, η μηχανή βαθμολογεί κάθε μοντέλο στον κατάλογό του και στη συνέχεια:
 
 - **Κορυφαίο μοντέλο** = το μοντέλο του παρόχου με την υψηλότερη βαθμολογία.
-- **Μέση βαθμολογία** = η μέση βαθμολογία όλων των βαθμολογημένων μοντέλων αυτού του παρόχου.
+- **Μέση βαθμολογία** = η μέση βαθμολογία σε όλα τα βαθμολογημένα μοντέλα του συγκεκριμένου παρόχου.
 - **Μοντέλα** = πόσα από τα μοντέλα του παρόχου είχαν βαθμολογία Arena.
 
-Οι πάροχοι ταξινομούνται πρώτα βάσει της **βαθμολογίας του κορυφαίου μοντέλου** και, στη συνέχεια, βάσει της μέσης βαθμολογίας. Αυτό επιβραβεύει έναν
-πάροχο που διαθέτει τουλάχιστον ένα ισχυρό δωρεάν μοντέλο.
+Οι πάροχοι ταξινομούνται πρώτα κατά **βαθμολογία κορυφαίου μοντέλου** και στη συνέχεια κατά μέση βαθμολογία. Αυτό επιβραβεύει
+έναν πάροχο που προσφέρει τουλάχιστον ένα ισχυρό δωρεάν μοντέλο.
 
 ---
 

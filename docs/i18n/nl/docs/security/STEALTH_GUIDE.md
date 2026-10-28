@@ -1,6 +1,6 @@
 # Stealth Guide (Nederlands)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/STEALTH_GUIDE.md) · 🇪🇹 [am](../../../am/docs/security/STEALTH_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/security/STEALTH_GUIDE.md) · 🇦🇿 [az](../../../az/docs/security/STEALTH_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/security/STEALTH_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/security/STEALTH_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/security/STEALTH_GUIDE.md) · 🇩🇰 [da](../../../da/docs/security/STEALTH_GUIDE.md) · 🇩🇪 [de](../../../de/docs/security/STEALTH_GUIDE.md) · 🇬🇷 [el](../../../el/docs/security/STEALTH_GUIDE.md) · 🇪🇸 [es](../../../es/docs/security/STEALTH_GUIDE.md) · 🇪🇪 [et](../../../et/docs/security/STEALTH_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/security/STEALTH_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/security/STEALTH_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/security/STEALTH_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/security/STEALTH_GUIDE.md) · 🇮🇱 [he](../../../he/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/security/STEALTH_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/security/STEALTH_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/security/STEALTH_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/security/STEALTH_GUIDE.md) · 🇮🇩 [id](../../../id/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/security/STEALTH_GUIDE.md) · 🇮🇹 [it](../../../it/docs/security/STEALTH_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/security/STEALTH_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/security/STEALTH_GUIDE.md) · 🇰🇭 [km](../../../km/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/security/STEALTH_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/security/STEALTH_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/security/STEALTH_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/security/STEALTH_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/security/STEALTH_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/security/STEALTH_GUIDE.md) · 🇲🇲 [my](../../../my/docs/security/STEALTH_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/security/STEALTH_GUIDE.md) · 🇳🇴 [no](../../../no/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [or](../../../or/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/security/STEALTH_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/security/STEALTH_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/security/STEALTH_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/security/STEALTH_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/STEALTH_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/security/STEALTH_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/security/STEALTH_GUIDE.md) · 🇱🇰 [si](../../../si/docs/security/STEALTH_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/security/STEALTH_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/security/STEALTH_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/security/STEALTH_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/security/STEALTH_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [te](../../../te/docs/security/STEALTH_GUIDE.md) · 🇹🇭 [th](../../../th/docs/security/STEALTH_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/security/STEALTH_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/STEALTH_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/security/STEALTH_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/security/STEALTH_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/security/STEALTH_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/STEALTH_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/STEALTH_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/STEALTH_GUIDE.md) · 🇪🇹 [am](../../../am/docs/security/STEALTH_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/security/STEALTH_GUIDE.md) · 🇦🇿 [az](../../../az/docs/security/STEALTH_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/security/STEALTH_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/security/STEALTH_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/security/STEALTH_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/security/STEALTH_GUIDE.md) · 🇩🇰 [da](../../../da/docs/security/STEALTH_GUIDE.md) · 🇩🇪 [de](../../../de/docs/security/STEALTH_GUIDE.md) · 🇬🇷 [el](../../../el/docs/security/STEALTH_GUIDE.md) · 🇪🇸 [es](../../../es/docs/security/STEALTH_GUIDE.md) · 🇪🇪 [et](../../../et/docs/security/STEALTH_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/security/STEALTH_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/security/STEALTH_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/security/STEALTH_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/security/STEALTH_GUIDE.md) · 🇮🇱 [he](../../../he/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/security/STEALTH_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/security/STEALTH_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/security/STEALTH_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/security/STEALTH_GUIDE.md) · 🇮🇩 [id](../../../id/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/security/STEALTH_GUIDE.md) · 🇮🇹 [it](../../../it/docs/security/STEALTH_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/security/STEALTH_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/security/STEALTH_GUIDE.md) · 🇰🇭 [km](../../../km/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/security/STEALTH_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/security/STEALTH_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/security/STEALTH_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/security/STEALTH_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/security/STEALTH_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/security/STEALTH_GUIDE.md) · 🇲🇲 [my](../../../my/docs/security/STEALTH_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/security/STEALTH_GUIDE.md) · 🇳🇴 [no](../../../no/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [or](../../../or/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/security/STEALTH_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/security/STEALTH_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/security/STEALTH_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/security/STEALTH_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/STEALTH_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/security/STEALTH_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/security/STEALTH_GUIDE.md) · 🇱🇰 [si](../../../si/docs/security/STEALTH_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/security/STEALTH_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/security/STEALTH_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/security/STEALTH_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/security/STEALTH_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [te](../../../te/docs/security/STEALTH_GUIDE.md) · 🇹🇭 [th](../../../th/docs/security/STEALTH_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/security/STEALTH_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/STEALTH_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/security/STEALTH_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/security/STEALTH_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/security/STEALTH_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/STEALTH_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/STEALTH_GUIDE.md)
 
 ---
 
@@ -20,36 +20,68 @@ Stealth-functies bestaan zodat OmniRoute kan fungeren als compatibiliteitslaag t
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Permanente `wreq-js`-sessies worden per accountscope en opgeloste proxy lazy aangemaakt. De procesbrede `TlsClient`-pool bevat maximaal 128 sessies die zich voordoen als **Chrome 124 op macOS** voor upstreams achter Cloudflare. `TlsClient.fetch()` stopt veilig met een fout wanneer de native runtime niet beschikbaar is; een aanroeper kan buiten deze wrapper expliciet een fallback selecteren.
+Persistente `wreq-js`-sessies worden per accountscope en opgeloste proxy pas aangemaakt wanneer ze nodig zijn. De
+procesbrede `TlsClient` beheert maximaal 128 sessies die zich voordoen als **Chrome 124 op macOS** voor
+upstreams achter Cloudflare. `TlsClient.fetch()` weigert veilig wanneer de native runtime niet
+beschikbaar is; een aanroeper kan buiten deze wrapper expliciet een fallback selecteren.
 
 - Sessieprofiel: `browser: "chrome_124", os: "macos"`
 - Proxyresolutie (prioriteit): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (ook in kleine letters)
 - Time-out: `TLS_CLIENT_TIMEOUT_MS` (overgenomen van `FETCH_TIMEOUT_MS`, standaard 600000)
-- De `wreq-js`-respons is compatibel met fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Watchdog voor de eerste byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()` wordt voltooid zodra de upstreamheaders binnenkomen, waardoor `TLS_CLIENT_TIMEOUT_MS` alleen geen grens kan stellen aan een body die nooit een eerste byte oplevert. `guardTlsFirstByte()` laat de eerste `read()` van de body wedijveren met `TLS_FIRST_BYTE_WATCHDOG_MS` (standaard `10000`; `0` schakelt deze uit); een gezonde body blijft onaangetast, terwijl bij een vastgelopen body de wreq-reader wordt geannuleerd en de bestaande TLS-fallbacklogica van `proxyFetch` kan terugvallen op de directe/proxydispatcher (een verzoek dat niet veilig opnieuw kan worden afgespeeld, bijvoorbeeld een POST met een body, genereert nog steeds een fout in plaats van stilzwijgend opnieuw te worden geprobeerd).
+- De Response van `wreq-js` is fetch-compatibel (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Watchdog voor de eerste byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  wordt afgerond zodra de upstreamheaders arriveren, waardoor alleen `TLS_CLIENT_TIMEOUT_MS` geen
+  bovengrens kan stellen aan een body die nooit een eerste byte oplevert. `guardTlsFirstByte()` laat
+  de eerste `read()` van de body wedijveren met `TLS_FIRST_BYTE_WATCHDOG_MS` (standaard `10000`,
+  `0` schakelt deze uit); een gezonde body wordt niet beïnvloed, terwijl bij een vastgelopen body
+  de wreq-reader wordt geannuleerd en de bestaande TLS-fallbacklogica van `proxyFetch` kan
+  terugvallen op de directe/proxydispatcher (een verzoek dat niet veilig opnieuw kan worden
+  afgespeeld, bijvoorbeeld een POST met een body, genereert nog steeds een fout in plaats van
+  stilzwijgend opnieuw te worden geprobeerd).
 
 ### Transport voor webcookieproviders — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` is de gedeelde adapter voor de vijf gespecialiseerde webcookietransporten hieronder. Elke dunne providerwrapper selecteert een browser-/OS-profiel. De adapter gebruikt de enkele wreq-runtimeloader en transportpool in `open-sse/utils/tlsClient.ts`, gesleuteld op profiel + OS + opgeloste proxy, terwijl elk verzoek `cookieMode: "ephemeral"` gebruikt. Accounts en verzoeken delen daardoor verbindingen op transportniveau, maar nooit een wreq-sessie of cookiejar.
+`open-sse/services/tlsClientBase.ts` is de gedeelde adapter voor de vijf onderstaande
+gespecialiseerde webcookietransports. Elke dunne providerwrapper selecteert een browser-/OS-profiel.
+De adapter gebruikt de ene wreq-runtime-loader en transportpool in `open-sse/utils/tlsClient.ts`,
+gesleuteld op profiel + OS + opgeloste proxy, terwijl elk verzoek `cookieMode: "ephemeral"`
+gebruikt. Accounts en verzoeken delen daardoor verbindingen op transportniveau, maar nooit een
+wreq-sessie of cookiejar.
 
 | Provider   | Profiel       | Geëmuleerd OS | Beleid voor einde van stream        |
 | ---------- | ------------- | ------------- | ----------------------------------- |
 | Claude     | `chrome_146`  | Linux         | neem `[DONE]` op                    |
-| Perplexity | `firefox_148` | macOS         | neem `event: end_of_stream` op      |
+| Perplexity | `firefox_151` | macOS         | neem `event: end_of_stream` op      |
 | Grok       | `chrome_146`  | Linux         | sluit `[DONE]` uit                  |
 | Notion     | `chrome_146`  | Windows       | neem `[DONE]` op                    |
 | LMArena    | `chrome_146`  | Windows       | geen sentinel; sluit bij native EOF |
 
-- Streaming verwerkt de native `ReadableStream` van de respons rechtstreeks; er wordt geen tijdelijk bestand of sidecar aangemaakt.
-- Er worden maximaal 256 initiële bytes geïnspecteerd voordat een stream beschikbaar wordt gesteld. SSE-providers bufferen niet-SSE-fouten; Grok/LMArena zetten Cloudflare-challenges om naar `403` en HTML-tussenpagina's naar `502`.
-- De native time-out van het verzoek blijft ingekapseld door een absolute harde JS-deadline. Een vastgelopen verzoek maakt alleen het betrokken transport voor profiel/OS/proxy ongeldig en sluit dit voordat het bij het volgende verzoek opnieuw wordt aangemaakt.
-- De prioriteit voor proxyresolutie is per aanroep `proxyUrl` → verzoekgebonden account-/dashboardcontext → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (inclusief varianten in kleine letters). Resolutiefouten stoppen veilig met een fout in plaats van een directe verbinding te laten uitlekken. LMArena voert de resolutie bewust uit tegen `arena.ai`.
-- `byteResponse` retourneert een op inhoudstype gebaseerde `data:`-URL zonder UTF-8-corruptie.
-- Fouten zijn `TlsClientUnavailableError` (package/add-on niet beschikbaar), `TlsClientHangError` (deadline overschreden) en `WreqTransportCapacityError` (de gedeelde foutcode voor sessiecapaciteit) wanneer alle 128 begrensde profiel-/OS-/proxyslots actief zijn of worden gesloten.
+- Streaming gebruikt de native `ReadableStream` van de respons rechtstreeks; er wordt geen
+  tijdelijk bestand of sidecar aangemaakt.
+- Maximaal 256 initiële bytes worden geïnspecteerd voordat een stream beschikbaar wordt gesteld.
+  SSE-providers bufferen niet-SSE-fouten; Grok/LMArena wijzen Cloudflare-challenges toe aan `403`
+  en HTML-tussenpagina's aan `502`.
+- De time-out van het native verzoek blijft omgeven door een absolute harde JS-deadline. Bij
+  vastlopen wordt alleen het betrokken profiel-/OS-/proxytransport ongeldig gemaakt en gesloten,
+  waarna het bij het volgende verzoek opnieuw wordt aangemaakt.
+- De prioriteit voor proxyresolutie is `proxyUrl` per aanroep → account-/dashboardcontext binnen het
+  verzoek → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (inclusief varianten in kleine letters).
+  Resolutiefouten leiden tot veilige weigering in plaats van het lekken van een directe verbinding.
+  LMArena voert de resolutie bewust uit ten opzichte van `arena.ai`.
+- `byteResponse` retourneert een `data:`-URL met het juiste inhoudstype, zonder UTF-8-beschadiging.
+- Fouten zijn `TlsClientUnavailableError` (pakket/add-on niet beschikbaar), `TlsClientHangError`
+  (deadline overschreden) en `WreqTransportCapacityError` (de gedeelde foutcode voor
+  sessiecapaciteit) wanneer alle 128 begrensde profiel-/OS-/proxyslots actief zijn of worden
+  gesloten.
 
-De generieke `TlsClient`-sessie hierboven blijft gespecialiseerd voor permanente, browsergestuurde cookiestatus. Beide paden hergebruiken één gecachte wreq-moduleloader en proceslevenscyclushook; hun pools blijven gescheiden omdat hun cookielevensduren bewust verschillen.
+De generieke `TlsClient`-sessie hierboven blijft gespecialiseerd in persistente, browsergebaseerde
+cookiestatus. Beide paden hergebruiken één gecachte wreq-module-loader en proceslevenscyclus-hook;
+hun pools blijven gescheiden omdat hun cookielevensduren bewust van elkaar verschillen.
 
-De profielen worden door het vastgezette package ondersteund, maar daadwerkelijke WAF-acceptatie kan onafhankelijk van lokale contracttests veranderen. Valideer wijzigingen in fingerprints met een expliciet geautoriseerd liveaccount voordat je pariteit met een upstreambrowser claimt.
+De profielen worden ondersteund door het vastgezette pakket, maar daadwerkelijke WAF-acceptatie kan
+onafhankelijk van lokale contracttests veranderen. Valideer wijzigingen in fingerprints met een
+expliciet geautoriseerd liveaccount voordat gelijkwaardigheid met een upstreambrowser wordt
+geclaimd.
 
 ---
 
@@ -98,7 +130,7 @@ Toegepast op: `system`-blokken, alle `messages[].content` en `tools[].descriptio
 
 Voor Anthropic-relays van derden die uitsluitend ‘echt Claude Code’-verkeer accepteren:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` standaard
@@ -222,15 +254,15 @@ Alle MITM-endpoints vereisen beheerauthenticatie (`requireCliToolsAuth`). Het su
 
 | Variabele                | Standaardwaarde                                                 |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.149.0 (Windows 10.0.26200; x64)`                   |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
+| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
 | `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
 | `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
 | `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
 
-Gebruikt door `open-sse/executors/base.ts::buildHeaders()` via dynamische opzoeking. **Verhoog deze wanneer providers nieuwe CLI-versies uitbrengen** — verouderde UA-tekenreeksen worden uiteindelijk geweigerd als verouderde clients.
+Worden gebruikt door `open-sse/executors/base.ts::buildHeaders()` via dynamische opzoeking. **Werk deze bij wanneer providers nieuwe CLI-versies uitbrengen** — verouderde UA-tekenreeksen worden uiteindelijk geweigerd omdat ze van verouderde clients afkomstig zijn.
 
 ## Schakelaars voor CLI-compatibiliteitsmodus (`.env.example` sectie 13)
 

@@ -1,6 +1,6 @@
 # Providers — ChatGPT Web (Codex) (తెలుగు)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../providers/CHATGPT_WEB.md) · 🇪🇹 [am](../../../am/docs/providers/CHATGPT_WEB.md) · 🇸🇦 [ar](../../../ar/docs/providers/CHATGPT_WEB.md) · 🇦🇿 [az](../../../az/docs/providers/CHATGPT_WEB.md) · 🇧🇬 [bg](../../../bg/docs/providers/CHATGPT_WEB.md) · 🇧🇩 [bn](../../../bn/docs/providers/CHATGPT_WEB.md) · 🇨🇿 [cs](../../../cs/docs/providers/CHATGPT_WEB.md) · 🇩🇰 [da](../../../da/docs/providers/CHATGPT_WEB.md) · 🇩🇪 [de](../../../de/docs/providers/CHATGPT_WEB.md) · 🇬🇷 [el](../../../el/docs/providers/CHATGPT_WEB.md) · 🇪🇸 [es](../../../es/docs/providers/CHATGPT_WEB.md) · 🇪🇪 [et](../../../et/docs/providers/CHATGPT_WEB.md) · 🇮🇷 [fa](../../../fa/docs/providers/CHATGPT_WEB.md) · 🇫🇮 [fi](../../../fi/docs/providers/CHATGPT_WEB.md) · 🇫🇷 [fr](../../../fr/docs/providers/CHATGPT_WEB.md) · 🇮🇪 [ga](../../../ga/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [gu](../../../gu/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [ha](../../../ha/docs/providers/CHATGPT_WEB.md) · 🇮🇱 [he](../../../he/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [hi](../../../hi/docs/providers/CHATGPT_WEB.md) · 🇭🇷 [hr](../../../hr/docs/providers/CHATGPT_WEB.md) · 🇭🇺 [hu](../../../hu/docs/providers/CHATGPT_WEB.md) · 🇦🇲 [hy](../../../hy/docs/providers/CHATGPT_WEB.md) · 🇮🇩 [id](../../../id/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [ig](../../../ig/docs/providers/CHATGPT_WEB.md) · 🇮🇹 [it](../../../it/docs/providers/CHATGPT_WEB.md) · 🇯🇵 [ja](../../../ja/docs/providers/CHATGPT_WEB.md) · 🇬🇪 [ka](../../../ka/docs/providers/CHATGPT_WEB.md) · 🇰🇭 [km](../../../km/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [kn](../../../kn/docs/providers/CHATGPT_WEB.md) · 🇰🇷 [ko](../../../ko/docs/providers/CHATGPT_WEB.md) · 🇱🇹 [lt](../../../lt/docs/providers/CHATGPT_WEB.md) · 🇱🇻 [lv](../../../lv/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [ml](../../../ml/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [mr](../../../mr/docs/providers/CHATGPT_WEB.md) · 🇲🇾 [ms](../../../ms/docs/providers/CHATGPT_WEB.md) · 🇲🇹 [mt](../../../mt/docs/providers/CHATGPT_WEB.md) · 🇲🇲 [my](../../../my/docs/providers/CHATGPT_WEB.md) · 🇳🇵 [ne](../../../ne/docs/providers/CHATGPT_WEB.md) · 🇳🇱 [nl](../../../nl/docs/providers/CHATGPT_WEB.md) · 🇳🇴 [no](../../../no/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [or](../../../or/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [pa](../../../pa/docs/providers/CHATGPT_WEB.md) · 🇵🇭 [phi](../../../phi/docs/providers/CHATGPT_WEB.md) · 🇵🇱 [pl](../../../pl/docs/providers/CHATGPT_WEB.md) · 🇵🇹 [pt](../../../pt/docs/providers/CHATGPT_WEB.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/providers/CHATGPT_WEB.md) · 🇷🇴 [ro](../../../ro/docs/providers/CHATGPT_WEB.md) · 🇷🇺 [ru](../../../ru/docs/providers/CHATGPT_WEB.md) · 🇱🇰 [si](../../../si/docs/providers/CHATGPT_WEB.md) · 🇸🇰 [sk](../../../sk/docs/providers/CHATGPT_WEB.md) · 🇸🇮 [sl](../../../sl/docs/providers/CHATGPT_WEB.md) · 🇷🇸 [sr](../../../sr/docs/providers/CHATGPT_WEB.md) · 🇸🇪 [sv](../../../sv/docs/providers/CHATGPT_WEB.md) · 🇰🇪 [sw](../../../sw/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [ta](../../../ta/docs/providers/CHATGPT_WEB.md) · 🇹🇭 [th](../../../th/docs/providers/CHATGPT_WEB.md) · 🇹🇷 [tr](../../../tr/docs/providers/CHATGPT_WEB.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/providers/CHATGPT_WEB.md) · 🇵🇰 [ur](../../../ur/docs/providers/CHATGPT_WEB.md) · 🇺🇿 [uz](../../../uz/docs/providers/CHATGPT_WEB.md) · 🇻🇳 [vi](../../../vi/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [yo](../../../yo/docs/providers/CHATGPT_WEB.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/providers/CHATGPT_WEB.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/providers/CHATGPT_WEB.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../providers/CHATGPT_WEB.md) · 🇪🇹 [am](../../../am/docs/providers/CHATGPT_WEB.md) · 🇸🇦 [ar](../../../ar/docs/providers/CHATGPT_WEB.md) · 🇦🇿 [az](../../../az/docs/providers/CHATGPT_WEB.md) · 🇧🇬 [bg](../../../bg/docs/providers/CHATGPT_WEB.md) · 🇧🇩 [bn](../../../bn/docs/providers/CHATGPT_WEB.md) · 🇧🇦 [bs](../../../bs/docs/providers/CHATGPT_WEB.md) · 🇨🇿 [cs](../../../cs/docs/providers/CHATGPT_WEB.md) · 🇩🇰 [da](../../../da/docs/providers/CHATGPT_WEB.md) · 🇩🇪 [de](../../../de/docs/providers/CHATGPT_WEB.md) · 🇬🇷 [el](../../../el/docs/providers/CHATGPT_WEB.md) · 🇪🇸 [es](../../../es/docs/providers/CHATGPT_WEB.md) · 🇪🇪 [et](../../../et/docs/providers/CHATGPT_WEB.md) · 🇮🇷 [fa](../../../fa/docs/providers/CHATGPT_WEB.md) · 🇫🇮 [fi](../../../fi/docs/providers/CHATGPT_WEB.md) · 🇫🇷 [fr](../../../fr/docs/providers/CHATGPT_WEB.md) · 🇮🇪 [ga](../../../ga/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [gu](../../../gu/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [ha](../../../ha/docs/providers/CHATGPT_WEB.md) · 🇮🇱 [he](../../../he/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [hi](../../../hi/docs/providers/CHATGPT_WEB.md) · 🇭🇷 [hr](../../../hr/docs/providers/CHATGPT_WEB.md) · 🇭🇺 [hu](../../../hu/docs/providers/CHATGPT_WEB.md) · 🇦🇲 [hy](../../../hy/docs/providers/CHATGPT_WEB.md) · 🇮🇩 [id](../../../id/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [ig](../../../ig/docs/providers/CHATGPT_WEB.md) · 🇮🇹 [it](../../../it/docs/providers/CHATGPT_WEB.md) · 🇯🇵 [ja](../../../ja/docs/providers/CHATGPT_WEB.md) · 🇬🇪 [ka](../../../ka/docs/providers/CHATGPT_WEB.md) · 🇰🇭 [km](../../../km/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [kn](../../../kn/docs/providers/CHATGPT_WEB.md) · 🇰🇷 [ko](../../../ko/docs/providers/CHATGPT_WEB.md) · 🇱🇹 [lt](../../../lt/docs/providers/CHATGPT_WEB.md) · 🇱🇻 [lv](../../../lv/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [ml](../../../ml/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [mr](../../../mr/docs/providers/CHATGPT_WEB.md) · 🇲🇾 [ms](../../../ms/docs/providers/CHATGPT_WEB.md) · 🇲🇹 [mt](../../../mt/docs/providers/CHATGPT_WEB.md) · 🇲🇲 [my](../../../my/docs/providers/CHATGPT_WEB.md) · 🇳🇵 [ne](../../../ne/docs/providers/CHATGPT_WEB.md) · 🇳🇱 [nl](../../../nl/docs/providers/CHATGPT_WEB.md) · 🇳🇴 [no](../../../no/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [or](../../../or/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [pa](../../../pa/docs/providers/CHATGPT_WEB.md) · 🇵🇭 [phi](../../../phi/docs/providers/CHATGPT_WEB.md) · 🇵🇱 [pl](../../../pl/docs/providers/CHATGPT_WEB.md) · 🇵🇹 [pt](../../../pt/docs/providers/CHATGPT_WEB.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/providers/CHATGPT_WEB.md) · 🇷🇴 [ro](../../../ro/docs/providers/CHATGPT_WEB.md) · 🇷🇺 [ru](../../../ru/docs/providers/CHATGPT_WEB.md) · 🇱🇰 [si](../../../si/docs/providers/CHATGPT_WEB.md) · 🇸🇰 [sk](../../../sk/docs/providers/CHATGPT_WEB.md) · 🇸🇮 [sl](../../../sl/docs/providers/CHATGPT_WEB.md) · 🇷🇸 [sr](../../../sr/docs/providers/CHATGPT_WEB.md) · 🇸🇪 [sv](../../../sv/docs/providers/CHATGPT_WEB.md) · 🇰🇪 [sw](../../../sw/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [ta](../../../ta/docs/providers/CHATGPT_WEB.md) · 🇹🇭 [th](../../../th/docs/providers/CHATGPT_WEB.md) · 🇹🇷 [tr](../../../tr/docs/providers/CHATGPT_WEB.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/providers/CHATGPT_WEB.md) · 🇵🇰 [ur](../../../ur/docs/providers/CHATGPT_WEB.md) · 🇺🇿 [uz](../../../uz/docs/providers/CHATGPT_WEB.md) · 🇻🇳 [vi](../../../vi/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [yo](../../../yo/docs/providers/CHATGPT_WEB.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/providers/CHATGPT_WEB.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/providers/CHATGPT_WEB.md)
 
 ---
 
@@ -34,24 +34,25 @@
 
 ## డ్యాష్బోర్డ్ సెటప్
 
-1. **ChatGPT Web (Codex)** ప్రొవైడర్ను తెరిచి ఒక కనెక్షన్ను జోడించండి.
+1. **ChatGPT Web (Codex)** ప్రొవైడర్ను తెరిచి, ఒక కనెక్షన్ను జోడించండి.
 2. పూర్తి ChatGPT Cookie హెడర్, టన్నెల్ ID, రన్టైమ్ కీ మరియు కస్టమ్ కనెక్టర్
    పేరును అతికించండి. కొత్త టూల్-సామర్థ్య సెటప్లు తప్పనిసరిగా సరిగ్గా
-   `OmniRoute Codex v2` అనే పేరుతో కొత్తగా సృష్టించిన కనెక్టర్ను ఉపయోగించాలి; Authenticationను Noneకు, Permissionsను Allow all
+   `OmniRoute Codex v2` అనే పేరుతో కొత్తగా సృష్టించిన కనెక్టర్ను ఉపయోగించాలి; Authenticationను Noneకు మరియు Permissionsను Allow all
    actionsకు సెట్ చేయాలి.
 3. కనెక్షన్ తనిఖీని అమలు చేయండి. OmniRoute బ్రౌజర్ ఆధారిత Temporary Chatను తెరిచి,
-   ఖాతాకు Sol మరియు Pro అందుబాటులో ఉన్నాయో లేదో గుర్తిస్తుంది.
+   ఆ ఖాతాకు Sol మరియు Pro అందుబాటులో ఉన్నాయో లేదో గుర్తిస్తుంది.
 4. కనెక్షన్ను సేవ్ చేయండి. OmniRoute అతికించిన కుకీని ధృవీకరించిన
-   Playwright స్టోరేజ్ స్థితితో భర్తీ చేసి, ఎన్క్రిప్ట్ చేసిన
+   Playwright స్టోరేజ్ స్టేట్తో భర్తీ చేసి, ఎన్క్రిప్ట్ చేసిన
    క్రెడెన్షియల్ అబ్స్ట్రాక్షన్ ద్వారా రన్టైమ్ కీతో పాటు దానిని నిల్వ చేస్తుంది.
 
 విజయవంతంగా సేవ్ చేసిన తర్వాత ముడి కుకీ నిల్వ చేయబడదు. సెషన్ గడువు ముగిసినప్పుడు,
-కనెక్షన్ను తెరిచి, కొత్త పూర్తి Cookie హెడర్ను అతికించి, తనిఖీని మళ్లీ అమలు చేయండి. సవరణ డైలాగ్లోని డాక్టర్ స్థితి
-బ్రౌజర్, స్టోరేజ్ స్థితి, సైన్-ఇన్, Temporary Chat, టన్నెల్,
-కనెక్టర్ మరియు టూల్ రౌండ్-ట్రిప్ను విడివిడిగా నివేదిస్తుంది.
+కనెక్షన్ను తెరిచి, తాజా పూర్తి Cookie హెడర్ను అతికించి, తనిఖీని మళ్లీ అమలు చేయండి. ఎడిట్ డైలాగ్లోని డాక్టర్ స్టేటస్
+బ్రౌజర్, స్టోరేజ్ స్టేట్, సైన్-ఇన్, Temporary Chat, టన్నెల్,
+కనెక్టర్ మరియు టూల్ రౌండ్-ట్రిప్ స్థితులను విడివిడిగా నివేదిస్తుంది. సెషన్లు మారినప్పుడు కుకీ అప్డేట్లను ఆటోమేట్ చేయడానికి,
+[బ్రౌజర్ సెషన్ సింక్ ఎక్స్టెన్షన్](../guides/SESSION-SYNC-EXTENSION.md)లోని అనుబంధ టూల్ను చూడండి.
 
-> నిజమైన కుకీ, రన్టైమ్ కీ, స్టోరేజ్ స్థితి లేదా సామర్థ్య టోకెన్ను ఎప్పుడూ కమిట్ చేయవద్దు. పరీక్ష మరియు
-> డాక్యుమెంటేషన్ విలువలు ఎల్లప్పుడూ ప్లేస్హోల్డర్లుగా ఉండాలి.
+> నిజమైన కుకీ, రన్టైమ్ కీ, స్టోరేజ్ స్టేట్ లేదా కెపబిలిటీ టోకెన్ను ఎప్పుడూ కమిట్ చేయవద్దు. పరీక్ష మరియు
+> డాక్యుమెంటేషన్ విలువలు ఎల్లప్పుడూ ప్లేస్హోల్డర్లుగానే ఉండాలి.
 
 ## మోడళ్లు మరియు కాంబోలు
 
@@ -128,7 +129,7 @@ noVNC నిలిపివేయబడి ఉంటుంది.
 
 ## ధృవీకరణ
 
-విరమింపజేసిన ప్రొవైడర్ను ప్రారంభించకుండా ప్రొవైడర్ నియంత్రణలను అమలు చేయండి:
+విరమింపజేసిన ప్రొవైడర్ను అమలు చేయకుండా ప్రొవైడర్ నియంత్రణలను అమలు చేయండి:
 
 ```bash
 node --import tsx/esm --test \\
@@ -137,7 +138,7 @@ node --import tsx/esm --test \\
   tests/unit/chatgpt-web-environment-double-unescape.test.ts
 ```
 
-విరమణకు సంబంధించిన రిగ్రెషన్ రక్షణలు వీటిలో ఉన్నాయి:
+విరమణ రిగ్రెషన్ రక్షణలు వీటిలో ఉన్నాయి:
 
 - `tests/unit/chatgpt-web-retirement.test.ts`
 - `tests/unit/chatgpt-web-runtime-block.test.ts`

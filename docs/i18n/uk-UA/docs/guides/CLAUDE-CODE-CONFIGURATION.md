@@ -1,6 +1,6 @@
 # Claude Code CLI — Configuration with OmniRoute (Українська)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇹 [am](../../../am/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇿 [az](../../../az/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇰 [da](../../../da/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇪 [de](../../../de/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇷 [el](../../../el/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇸 [es](../../../es/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇪 [et](../../../et/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇱 [he](../../../he/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇩 [id](../../../id/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇹 [it](../../../it/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇭 [km](../../../km/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇲 [my](../../../my/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇴 [no](../../../no/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [or](../../../or/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇰 [si](../../../si/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [te](../../../te/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇭 [th](../../../th/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLAUDE-CODE-CONFIGURATION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇹 [am](../../../am/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇿 [az](../../../az/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇦 [bs](../../../bs/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇰 [da](../../../da/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇪 [de](../../../de/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇷 [el](../../../el/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇸 [es](../../../es/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇪 [et](../../../et/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇱 [he](../../../he/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇩 [id](../../../id/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇹 [it](../../../it/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇭 [km](../../../km/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇲 [my](../../../my/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇴 [no](../../../no/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [or](../../../or/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇰 [si](../../../si/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [te](../../../te/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇭 [th](../../../th/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLAUDE-CODE-CONFIGURATION.md)
 
 ---
 
@@ -48,55 +48,63 @@ Claude Code взаємодіє з **Anthropic Messages API** і спрямову
 
 ---
 
-## Псевдоніми виявлення — показ моделей, відмінних від Claude, у засобі вибору `/model`
+## Аліаси виявлення — відображення моделей, відмінних від Claude, у виборі `/model`
 
-Механізм виявлення моделей шлюзу в Claude Code показує лише ідентифікатори, що починаються з `claude`
-або `anthropic`, тому за `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` вбудований
-засіб вибору `/model` зазвичай показує **лише** моделі Claude/Anthropic з OmniRoute —
-`kimi/kimi-k2.6` або `glm/glm-5.2` не з'являться, хоча маршрутизація для них працює належним чином.
+Механізм виявлення моделей шлюзу Claude Code показує лише ідентифікатори, що починаються з `claude`
+або `anthropic`, тож із `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` вбудований
+засіб вибору `/model` зазвичай показує **лише** моделі Claude/Anthropic від OmniRoute —
+`kimi/kimi-k2.6` або `glm/glm-5.2` ніколи не з'являються, хоча маршрутизація для них працює чудово.
 
-OmniRoute може віддзеркалювати будь-яку ввімкнену модель (і комбінацію) під ідентифікатором `claude/…`, щоб вона
-проходила цей фільтр і з'являлася в засобі вибору:
+OmniRoute може дзеркально відображати будь-яку ввімкнену модель (і комбо) під ідентифікатором `claude/…`, щоб вона
+проходила цей фільтр і з'являлася у виборі:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<комбінація "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Коли ви вибираєте один із цих варіантів у Claude Code, OmniRoute видаляє обгортку `claude/`,
-повертаючи справжній ідентифікатор перед маршрутизацією, — справжній ідентифікатор `claude/<real-claude-model>`
-(фактичного постачальника Claude OAuth) завжди залишається без змін.
+Коли ви обираєте один із них у Claude Code, OmniRoute знімає обгортку `claude/`
+і повертає справжній ідентифікатор перед маршрутизацією — справжній ідентифікатор `claude/<real-claude-model>`
+(фактичний провайдер Claude OAuth) завжди залишається недоторканим.
 
-**За замовчуванням цю функцію вимкнено**, і вона керується трирівневим механізмом
-(перевагу має найконкретніше налаштування), тому звичайний OmniRoute не подвоює свій каталог
-для клієнтів, які не використовують Claude Code:
+За замовчуванням дзеркалюються лише базові ідентифікатори. Із увімкненим opt-in
+прапорцем функції `CATALOG_MIRROR_REFINEMENTS_ENABLED` варіанти рівня міркувань,
+які каталог уже містить (напр., `codex/gpt-6-sol-high`), дзеркалюються як будь-який інший
+ідентифікатор, тож Claude Code може вибрати явний рівень зусиль, а вбудовані ідентифікатори `auto/*`,
+які шлях запиту не може матеріалізувати, не дзеркалюються. Чи взагалі показуються варіанти
+рівнів зусиль, як і раніше визначає `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` —
+дзеркало ніколи не додає варіант, якого немає в базовому каталозі.
 
-| Рівень       | Де                                                                                                 |
-| ------------ | -------------------------------------------------------------------------------------------------- |
-| Модель       | Сторінка відомостей про постачальника → перемикач "Показувати в Claude Code" для кожної моделі     |
-| Постачальник | Сторінка відомостей про постачальника → перемикач на рівні постачальника (охоплює всі його моделі) |
-| Глобальний   | Налаштування → Прапорці функцій → `EXPOSE_CC_DISCOVERY_ALIASES` (за замовчуванням вимкнено)        |
+**Це вимкнено за замовчуванням** і керується трирівневим механізмом (найконкретніший
+рівень має пріоритет), тож звичайний OmniRoute ніколи не подвоює свій каталог для клієнтів,
+які не використовують Claude Code:
+
+| Рівень     | Де                                                                                          |
+| ---------- | ------------------------------------------------------------------------------------------- |
+| Модель     | Сторінка деталей провайдера → перемикач «Expose in Claude Code» для кожної моделі           |
+| Провайдер  | Сторінка деталей провайдера → перемикач на рівні провайдера (охоплює всі його моделі)       |
+| Глобальний | Налаштування → Прапорці функцій → `EXPOSE_CC_DISCOVERY_ALIASES` (за замовчуванням вимкнено) |
 
 Змінна середовища `EXPOSE_CC_DISCOVERY_ALIASES` примусово вмикає глобальний рівень
-і має пріоритет над перевизначенням із панелі керування (коли вона активна, на екрані «Прапорці функцій»
-відображається примітка «активовано через змінну середовища»). Налаштування для окремих постачальників
-і моделей додатково уточнюють поведінку — наприклад, якщо глобальний рівень вимкнено, а постачальника Kimi
-увімкнено, будуть показані лише моделі Kimi.
+і має пріоритет над перевизначенням у панелі керування (екран «Прапорці функцій» у цьому разі
+показує примітку «активно через змінну середовища»). Перемикачі на рівні провайдера та
+моделі далі уточнюють це — наприклад, глобально вимкнено + провайдер Kimi увімкнено відкриває
+лише моделі Kimi.
 
-> ⚠️ **Невідповідність розміру вікна для моделей, відмінних від Claude.** Claude Code передбачає контекстне
-> вікно розміром 200K для будь-якого нерозпізнаного ідентифікатора (він не може зчитати фактичний розмір вікна з
-> `/v1/models`). Для моделі з більшим вікном (наприклад, 256K у Kimi K2) задайте
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` значення, менше за фактичний розмір вікна моделі, щоб
+> ⚠️ **Невідповідність контекстного вікна у моделях, відмінних від Claude.** Claude Code припускає контекстне
+> вікно 200K для будь-якого ідентифікатора, який він не розпізнає (він не може прочитати реальне вікно з
+> `/v1/models`). Для моделі з більшим вікном (напр., 256K у Kimi K2) встановіть
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` на значення нижче реального вікна моделі, щоб
 > автоматичне стиснення не спрацьовувало передчасно. Згенеровані вище профілі вже
-> налаштовують це окремо для кожної моделі.
+> роблять це для кожної моделі.
 
 ---
 
-## Блок початкового налаштування на панелі керування
+## Блок адаптації на панелі керування
 
-Картка інструмента Claude (**Панель керування → Код CLI**) відображає точний фрагмент `settings.json`
-для цього екземпляра поруч із кнопкою інформації про псевдонім виявлення, а також кнопку копіювання:
+Картка інструмента Claude (**Панель керування → CLI Code**) відображає точний фрагмент `settings.json`
+для цього екземпляра поруч із кнопкою інформації про псевдонім виявлення та кнопкою копіювання:
 
 ```jsonc
 {
@@ -109,24 +117,38 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 ```
 
 Базова URL-адреса — це адреса, визначена карткою (включно з указаним вами користувацьким перевизначенням), уже
-нормалізована — без суфікса `/v1` і кінцевої скісної риски. **Ключ ніколи не відображається**: блок містить
+нормалізована — без суфікса `/v1` і без кінцевої похилої риски. **Ключ ніколи не відображається**: блок містить
 заповнювач, тому знімок екрана або вставлений фрагмент не може розкрити ключ. Замініть заповнювач своїм ключем.
 
-Додайте `CLAUDE_CODE_AUTO_COMPACT_WINDOW` до того самого блоку `env` для будь-якої моделі, реальне
+Додайте `CLAUDE_CODE_AUTO_COMPACT_WINDOW` у той самий блок `env` для будь-якої моделі, реальне
 контекстне вікно якої не дорівнює 200K — Claude Code припускає 200K для кожного нерозпізнаного ідентифікатора, тому
-без цього автоматичне ущільнення спрацьовує в неправильний момент (див. попередження в попередньому розділі).
-Конструктор фрагмента також приймає це значення, тому викликальний код, якому відомий розмір вікна цільової моделі,
+інакше автоматичне ущільнення спрацьовує в неправильний момент (див. попередження в попередньому розділі).
+Конструктор фрагмента також приймає це значення, тому викликач, якому відомий розмір контекстного вікна цільової моделі,
 може вказати його безпосередньо.
 
 Джерело: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (чистий
 конструктор, покритий модульними тестами), що відображається компонентом `ClaudeGatewayOnboardingBlock`.
+
+### Закріплення одного облікового запису (необов’язково)
+
+Щоб спрямовувати кожен запит Claude Code через один конкретний обліковий запис постачальника, додайте
+заголовок `x-omniroute-connection` через `ANTHROPIC_CUSTOM_HEADERS` у тому самому блоці `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Скопіюйте ідентифікатор із мітки `xxxxxxxx…` у рядку підключення на сторінці постачальника. Закріплення
+застосовується лише до ідентифікаторів окремих моделей (`provider/model`), а не до комбінацій. Точну
+поведінку резервного вибору див. у розділі
+[Закріплення облікового запису для кожного запиту](../reference/API_REFERENCE.md#account-pinning-per-request).
 
 ---
 
 ## Профілі (`CLAUDE_CONFIG_DIR`)
 
 Claude Code **не має вбудованих файлів профілів** (на відміну від `~/.codex/<name>.config.toml` у Codex).
-Ідіоматичний механізм — `CLAUDE_CONFIG_DIR`: окремий каталог конфігурації для кожного
+Ідіоматичним механізмом є `CLAUDE_CONFIG_DIR` — окремий каталог конфігурації для кожного
 профілю, кожен із власними `settings.json`, обліковими даними, історією та кешем.
 
 `omniroute setup-claude` отримує актуальний каталог `/v1/models` і записує по одному
@@ -149,17 +171,17 @@ Claude Code **не має вбудованих файлів профілів** (
 ```
 
 > **Токен автентифікації ніколи не записується до профілю.** Запускайте за допомогою
-> `omniroute launch --profile <name>` (команда підставляє `ANTHROPIC_AUTH_TOKEN` з
+> `omniroute launch --profile <name>` (ця команда підставляє `ANTHROPIC_AUTH_TOKEN` з
 > активного контексту) або самостійно експортуйте `ANTHROPIC_AUTH_TOKEN` і виконайте
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Автоматична синхронізація після виявлення моделей (за бажанням).** OmniRoute може автоматично повторно створювати ті самі
-файли `~/.claude/profiles/<name>/settings.json` щоразу, коли синхронізація моделей постачальника
-змінює актуальний каталог, — отже, нові або перейменовані моделі отримують профілі без повторного запуску
-команди. За замовчуванням цю функцію **вимкнено**: увімкніть її на **панелі керування «Код CLI»** («Автосинхронізація
-профілів CLI» → Claude Code) або встановіть `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (також ураховується
-`CLI_ALLOW_CONFIG_WRITES`, яку за замовчуванням увімкнено). Коли цю функцію ввімкнено, вона записує лише файли профілів і ніколи не
-змінює активну чи стандартну конфігурацію Claude, автентифікацію або `~/.claude/settings.json`.
+**Автоматична синхронізація після виявлення моделей (за бажанням).** OmniRoute може автоматично повторно генерувати ті самі
+файли `~/.claude/profiles/<name>/settings.json` щоразу, коли синхронізація моделей провайдера
+змінює актуальний каталог, — тож нові або перейменовані моделі отримують профілі без повторного виконання
+команди. За замовчуванням цю функцію **вимкнено**: увімкніть її на **панелі CLI Code** («Автоматична
+синхронізація профілів CLI» → Claude Code) або встановіть `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (також враховується
+`CLI_ALLOW_CONFIG_WRITES`, яку за замовчуванням увімкнено). Коли цю функцію ввімкнено, вона записує лише файли профілів і ніколи
+не змінює вашу активну чи стандартну конфігурацію Claude, дані автентифікації або `~/.claude/settings.json`.
 
 ### Створення та використання профілів
 
@@ -170,8 +192,12 @@ omniroute setup-claude
 # Віддалений VPS (вбудовує URL-адресу VPS у кожен профіль)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
-# Лише деякі постачальники
+# Лише деякі провайдери
 omniroute setup-claude --only glm,kimi
+
+# Також записувати профілі для локальних CLI-провайдерів (zcode, auggie, devin-cli-agentic,
+# codex-app-server), не виявлених на цьому хості (за замовчуванням пропускаються для локальної цілі)
+omniroute setup-claude --include-local
 
 # Попередній перегляд без запису
 omniroute setup-claude --dry-run

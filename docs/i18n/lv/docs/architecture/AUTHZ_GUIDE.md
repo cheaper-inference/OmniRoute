@@ -1,15 +1,15 @@
 # Authorization Guide (Latviešu)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
 
 ---
 
 > **Patiesības avots:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Pēdējoreiz atjaunināts:** 2026-06-28 — v3.8.40
+> **Pēdējoreiz atjaunināts:** 2026-09-22 — tvēruma nosaukumvietas norāda uz MCP-SERVER.md
 
-OmniRoute izmanto maršrutus apzinošu autorizācijas konveijeru, kas kontrolē katru API pieprasījumu. Klasifikācija ir **deterministiska** un **kļūmes gadījumā slēgta** — viss, ko nevar klasificēt, tiek klasificēts kā `MANAGEMENT`, un tam ir nepieciešama sesija vai pārvaldības līmeņa pilnvara. Šajā lapā ir izskaidrots modelis inženieriem, kuri uztur maršrutus vai izstrādā jaunus galapunktus.
+OmniRoute ir maršrutu apzinoša autorizācijas cauruļvads, kas aizsargā katru API pieprasījumu. Klasifikācija ir **deterministiska** un **slēgta kļūmes gadījumā** — viss, ko nevar klasificēt, nonāk kā `MANAGEMENT` un prasa sesiju vai pārvaldības līmeņa pilnvaru. Šī lapa izskaidro modeli inženieriem, kas uztur maršrutus vai izstrādā jaunus galapunktus.
 
-![AuthZ konveijers (3 maršrutu klases + politiku izvērtēšana)](../diagrams/exported/authz-pipeline.svg)
+![Autorizācijas cauruļvads (3 maršrutu klases + politikas novērtēšana)](../diagrams/exported/authz-pipeline.svg)
 
 > Avots: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -23,9 +23,9 @@ Tiek izmantota ar OpenAI/Anthropic/Gemini saderīgajām klientu API un dažiem p
 Authorization: Bearer <api-key>
 ```
 
-To validē `isValidApiKey()` / `extractApiKey()` failā `src/sse/services/auth.ts`, un tā tiek atkārtoti eksportēta, izmantojot `src/shared/utils/apiAuth.ts`. Validētājs pieņem arī vides mainīgos `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` kā pastāvīgas tranzīta atslēgas (problēma #1350).
+To validē `isValidApiKey()` / `extractApiKey()` failā `src/sse/services/auth.ts`, un tā tiek atkārtoti eksportēta, izmantojot `src/shared/utils/apiAuth.ts`. Validators pieņem arī vides mainīgos `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` kā pastāvīgas caurlaides atslēgas (problēma #1350).
 
-### 2. Informācijas paneļa sesija (`auth_token` sīkdatne)
+### 2. Informācijas paneļa sesija (auth_token sīkfails)
 
 Informācijas paneļa lapām un administratora darbībām.
 
@@ -33,53 +33,112 @@ Informācijas paneļa lapām un administratora darbībām.
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Sīkdatne ir sesija tikai tad, ja JWT ir sekmīgi pārbaudīts **un** satur `authenticated: true`
+Sīkfails ir sesija tikai tad, ja JWT ir sekmīgi verificēts **un** satur `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Katrs
-sīkdatnes patērētājs (maršruta aizsargs, authz konveijera atsvaidzināšana, WebSocket rokasspiediens, tiešraides
+sīkfaila patērētājs (informācijas paneļa maršruta aizsargs (`isDashboardSessionAuthenticated()`), autorizācijas konveijera atsvaidzināšana, WebSocket savienojuma izveide, reāllaika
 serveris, `/api/settings/require-login`, `/api/auth/status`) izmanto šo palīgfunkciju.
-Pastāv arī citi JWT, kas parakstīti ar `JWT_SECRET` — Cursor CLI tranzīta mehānisms atslēgu
-turētājiem izveido pilnvaras ar `iss "omniroute" / aud "cursor-cli"` —, un tie nekad nav sesijas
+Pastāv arī citi JWT, kas parakstīti ar `JWT_SECRET` — Cursor CLI caurlaides mehānisms atslēgu
+turētājiem izsniedz marķierus ar `iss "omniroute" / aud "cursor-cli"` — un tie nekad nav sesijas
 (#13298).
 
-To pārbauda `isDashboardSessionAuthenticated()` failā `src/shared/utils/apiAuth.ts`. Konveijers automātiski atsvaidzina JWT, ja līdz tā 30 dienu derīguma termiņa beigām ir atlikušas mazāk nekā 7 dienas.
+To verificē `isDashboardSessionAuthenticated()` failā `src/shared/utils/apiAuth.ts`. Konveijers automātiski atsvaidzina JWT, ja no tā 30 dienu derīguma termiņa ir atlikušas mazāk nekā 7 dienas.
 
-Daži pārvaldības maršruti pieņem **jebkuru** no abiem režīmiem: sīkdatni VAI `Bearer <key>`, ja API atslēgai ir tvērums `manage` (vai `admin`). Tas nodrošina darbplūsmu „konfigurējams, izmantojot API izsaukumus”, kas tika pievienota versijā v3.8.
+Sesija var beigties arī pirms tās 30 dienu termiņa beigām, jo katrs izsniedzējs izmanto `mintDashboardSessionToken` (izsniegšanas laiks `iat` un identifikators `jti`), un verificētājs pārbauda divus iestatījumus: `sessionsValidAfter`, kas tiek iestatīts paroles maiņas laikā, lai visas pirms tam izsniegtās sesijas vairs netiktu verificētas (pārlūkprogramma, kurā parole tika mainīta, saņem jaunu sīkfailu), un `revokedDashboardSessions`, kuram `POST /api/auth/logout` pievieno tās sesijas `jti`, no kuras lietotājs ir izrakstījies. Vecākā laidienā izsniegtās sesijas nesatur nevienu no šīm pretenzijām un paliek derīgas līdz pirmajai paroles maiņai. Ja iestatījumus nevar nolasīt, sesija netiek uzskatīta par uzticamu.
 
-#### Neobligāta OIDC pieteikšanās piekļuves kontrole (#6973)
+Daži pārvaldības maršruti pieņem **jebkuru** no abiem režīmiem: sīkfailu VAI `Bearer <key>`, ja API atslēgai ir tvērums `manage` (vai `admin`). Tas nodrošina versijā v3.8 pievienoto darbplūsmu „konfigurējams, izmantojot API izsaukumus”.
 
-Informācijas paneļa administratora pieteikšanās atbalsta arī **brīvprātīgi iespējojamu** OIDC (OpenID Connect) plūsmu
-līdzās noklusējuma pieteikšanās metodei ar paroli — pieteikšanās ar paroli nekad netiek noņemta, bet tikai
+#### Neobligāts OIDC pieteikšanās ierobežojums (#6973)
+
+Informācijas paneļa administratora pieteikšanās līdztekus noklusējuma pieteikšanās iespējai ar paroli atbalsta arī **brīvprātīgi iespējojamu** OIDC (OpenID Connect) plūsmu — pieteikšanās ar paroli nekad netiek noņemta, bet tikai
 papildināta:
 
-- Tā ir atspējota, ja vien `settings.oidcEnabled === true` **un** visi parametri `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` nav konfigurēti (Iestatījumi → Autentifikācija).
+- Atspējots, ja vien `settings.oidcEnabled === true` **un** nav konfigurēti visi
+  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` (Iestatījumi → Autentifikācija).
   Pretējā gadījumā `GET /api/auth/oidc/login` atgriež `400`.
 - `GET /api/auth/oidc/login` nosaka `authorization_endpoint` no izdevēja
-  `/.well-known/openid-configuration` (atkāpvariantā izmanto
+  `/.well-known/openid-configuration` (ja tas neizdodas, izmanto
   `<issuer>/authorize`), izveido novirzīšanas URI no ienākošā pieprasījuma
   (ņemot vērā `x-forwarded-proto`) un novirza uz IdP ar nejauši ģenerētu `state`,
-  kas tiek glabāts `httpOnly` sīkdatnē `oidc_state`.
-- `GET /api/auth/oidc/callback` validē `state`, apmaina autorizācijas
-  kodu un pārbauda ID pilnvaras parakstu, izmantojot izdevēja JWKS
-  (`jose` funkciju `createRemoteJWKSet`, kas tiek kešota katram JWKS URI), kā arī veicot `issuer`/`audience`
-  pārbaudes. Neobligāts `oidcAllowedSubjects` atļauto vērtību saraksts tiek salīdzināts ar pilnvaras
-  deklarāciju `sub` vai deklarāciju `email` — e-pasta deklarācija tiek ņemta vērā tikai tad, ja
-  `email_verified === true`, tādēļ IdP nepārbaudīta e-pasta adrese nekad nevar izturēt
-  piekļuves pārbaudi.
-- Veiksmes gadījumā tiek izveidots **tieši tāds pats** 30 dienu `auth_token` JWT, kādu izsniedz pieteikšanās
-  ar paroli (`src/app/api/auth/login/route.ts`), tādēļ pārējais
-  informācijas paneļa sesijas konveijers (automātiskā atsvaidzināšana, sīkdatņu karodziņi) paliek nemainīgs —
-  OIDC aizstāj tikai sīkdatnes izveides veidu, nevis tās piešķirtās tiesības.
+  kas glabājas `httpOnly` sīkfailā `oidc_state`.
+- `GET /api/auth/oidc/callback` validē `state`, apmaina autorizācijas kodu
+  un pārbauda ID marķiera parakstu, izmantojot izdevēja JWKS
+  (`jose` funkciju `createRemoteJWKSet`, kešotu katram JWKS URI), kā arī veic
+  `issuer`/`audience` pārbaudes. Piekļuve informācijas panelim pieprasa aizpildītu
+  `oidcAllowedSubjects` sarakstu, `oidcAdmissionClaim` politiku vai abus.
+  Subjektu saraksts salīdzina `sub` vai `email` tikai tad, ja
+  `email_verified === true`. Neobligātā atribūtu politika pieņem ar punktiem
+  atdalītu ID marķiera atribūta ceļu (piemēram, `realm_access.roles`) un
+  pieņemamo vērtību masīvu; atrisinātajam atribūtam jābūt virkņu masīvam, kas
+  satur vismaz vienu pieņemamo vērtību. Ja ir konfigurētas abas politikas,
+  abām pārbaudēm jābūt sekmīgām. Trūkstoši vai nepareizi veidoti atribūti drošā
+  veidā liedz piekļuvi, un, ja nav nevienas politikas, atzvanīšanas punkts
+  atsaka pieteikšanos (`not_configured`). Esošās konfigurācijas, kurās norādīti
+  tikai subjekti, turpina darboties bez izmaiņām.
+- Keycloak parasti kartē realm lomas piekļuves marķieros, nevis obligāti ID
+  marķieros. Lai pieprasītu realm lomu `admin`, konfigurējiet šim klientam
+  protokola kartētāju, kas tā **ID marķierī** iekļauj `realm_access.roles`, un pēc
+  tam iestatiet `oidcAdmissionClaim` uz `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Pirms iespējojat piekļuvi tikai pēc lomas, pārbaudiet šī klienta faktisko
+  ID marķiera atribūtu; lietojumprogramma nelasa piekļuves marķiera lomas.
+  Marķiera izsniegšanas atteikums IdP pusē var papildināt šo pārbaudi
+  lietojumprogrammas pusē, bet nevar to aizstāt.
+- Sekmīgas pieteikšanās gadījumā tiek izveidots **tieši tāds pats** 30 dienu
+  `auth_token` JWT, kādu izsniedz pieteikšanās ar paroli
+  (`src/app/api/auth/login/route.ts`), tāpēc pārējā informācijas paneļa sesijas
+  apstrādes ķēde (automātiskā atsvaidzināšana, sīkfailu karodziņi) paliek
+  nemainīga — OIDC aizstāj tikai sīkfaila izveides veidu, nevis tā piešķirtās
+  tiesības. IdP lomu vai grupu izmaiņas nepadara esošās OmniRoute sesijas
+  nederīgas; to darbības laiku joprojām nosaka atteikšanās, paroles maiņa vai
+  sesijas termiņa beigas.
+- Katrs `oidc*` iestatījums (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) ir iekļauts
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  atbild ar `400 PASSWORD_REQUIRED`, ja vien pieprasījuma pamattekstā pārvaldības
+  parole nav norādīta kā `currentPassword` (ja tā ir nepareiza, tiek atgriezts
+  `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin` liedz _pieteikšanos_ ar
+  paroli (`POST /api/auth/login`), taču saglabā glabāto paroles jaucējvērtību,
+  un atkārtotā autentifikācija joprojām salīdzina `currentPassword` ar to.
+- Arī `corsOrigins` un `bruteForceProtection` ir iekļauti
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: jebkura no tiem prasību mīkstināšana vājina
+  pieteikšanās aizsardzību, tāpēc tiem nepieciešama tā pati atkārtotā
+  autentifikācija ar `currentPassword` (cilnē Drošība tas tiek pieprasīts), un
+  JSON importēšanas laikā tie tiek atmesti.
+- Katra drošības politikas atslēga — `SECURITY_IMPACTING_SETTINGS_KEYS` ieraksti,
+  katra `oidc*` atslēga un informācijas paneļa sesijas stāvoklis — pieprasījumā
+  `PATCH /api/settings` ir pieejama **tikai operatoram**: API atslēga ar `manage`
+  tvērumu vai `oma_` piekļuves marķieris tiek noraidīts ar `403` pat tad, ja tas
+  nosūta pareizo `currentPassword`, un atteikums tiek reģistrēts audita žurnālā
+  kā `settings.update_failed` ar `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` failā `src/lib/api/operatorCredential.ts`).
+  Parastos iestatījumus (motīvu, attēlošanas preferences) joprojām var mainīt ar
+  `manage` atslēgu vai `admin` piekļuves marķieri. Katra paša `/api/settings`
+  modificēšanas darbība (kā arī `/api/settings/require-login` modificēšana)
+  pieprasa arī piekļuves marķiera `admin` tvērumu
+  (`ADMIN_MUTATION_EXACT_PATHS` failā `src/server/authz/accessScopes.ts`, precīza
+  ceļa atbilstība); `GET` joprojām nepieciešams `read`, bet pārējie
+  `/api/settings/*` apakšmaršruti (starpniekserveri, kombināciju noklusējumi,
+  modeļu aizstājvārdi, saspiešana, tīrīšana…) saglabā no metodes atvasināto
+  `write` tvērumu.
+- `POST /api/settings/import-json` izlaiž šo atkārtoto autentifikāciju, tāpēc pirms
+  rakstīšanas tas atmet katru `IMPORT_STRIPPED_SETTINGS_KEYS` atslēgu (tajā pašā
+  failā): paroli un `currentPassword`, katru `SECURITY_IMPACTING_SETTINGS_KEYS`
+  ierakstu un informācijas paneļa sesijas stāvokli (`sessionsValidAfter`,
+  `revokedDashboardSessions`). Tādēļ vecākas dublējumkopijas importēšana nevar
+  atjaunot sesiju, kuru jau izbeidza paroles maiņa vai atteikšanās.
 
 ## Maršrutu klases
 
-`src/server/authz/types.ts` definē trīs klases; jebkurš maršruts, kuru nevar deterministiski klasificēt, pēc noklusējuma tiek klasificēts kā `MANAGEMENT`.
+`src/server/authz/types.ts` definē trīs klases. Jebkurš maršruts, ko nevar deterministiski klasificēt, pēc noklusējuma tiek piešķirts `MANAGEMENT`.
 
-| Klase        | Apraksts                                                                                                                                                             | Nepieciešamā autentifikācija                                                         |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `PUBLIC`     | Nepārprotami droši maršruti — pieteikšanās, atteikšanās, statuss, inicializācija, darbspējas pārbaude, sākotnējā iestatīšana.                                        | Nav                                                                                  |
-| `CLIENT_API` | Modeļu apkalpošanas galapunkti — `/api/v1/*`, `/api/v1beta/*`, kā arī aizstājējvārdi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer atslēga, ja ir iespējots efektīvais `REQUIRE_API_KEY` funkcionalitātes karogs |
-| `MANAGEMENT` | Informācijas paneļa lapas, iestatījumi, nodrošinātāji, atslēgas, administrēšanas un diagnostikas galapunkti.                                                         | Informācijas paneļa sesija VAI Bearer ar `manage` tvērumu                            |
+| Klase        | Apraksts                                                                                                                                                          | Nepieciešamā autentifikācija                                          |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `PUBLIC`     | Skaidri drošie maršruti: pieteikšanās, izrakstīšanās, statuss, inicializācija, veselības pārbaude un onboarding bootstrap.                                        | Nav                                                                   |
+| `CLIENT_API` | Modeļu apkalpošanas galapunkti: `/api/v1/*`, `/api/v1beta/*`, kā arī aizstājvārdi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer atslēga, kad ir iespējots funkciju karodziņš `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Infopaneļa lapas, iestatījumi, pakalpojumu sniedzēji, atslēgas, administratīvie un diagnostikas galapunkti.                                                       | Infopaneļa sesija VAI Bearer ar `manage` darbības jomu                |
+
+Dažas `MANAGEMENT` darbības ir **tikai operatoram**: viena `manage` atslēga nepietiek. Saglabāto pilnvaru eksports (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), dublējuma atjaunošana pār pašreizējiem datiem (`POST /api/db-backups/import`, ieskaitot `dryRun=true`, `POST /api/db-backups` atjaunošana pēc id, `POST /api/settings/import-json`) un atjaunošanas punktu iznīcināšana (`DELETE /api/db-backups` tīrīšana, kā arī `PATCH /api/db-backups`, jo saglabātais glabāšanas laiks vada automātisko tīrīšanu pēc katras dublējuma kopijas) prasa infopaneļa sesiju, vietējo CLI identitāti vai to, ka pieteikšanās ir atspējota. Sinhronizācijas žetona izdošana (`POST /api/sync/tokens`) un `admin` darbības jomas CLI piekļuves žetona izveide (`POST /api/cli/tokens`) prasa infopaneļa sesiju vai vietējo CLI identitāti jebkurā pieteikšanās režīmā. API atslēgas jebkurā darbības jomā un `oma_` piekļuves žetoni nav operatora pilnvaras: tiem atgriež `403`, kad tāda nepieciešama. Pārbaude atrodas failā `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Pieteikšanās iestatījumu maiņa arī ir tikai operatoram: `POST /api/settings/require-login` (iestatīt pārvaldības paroli / pārslēgt `requireLogin`) pieņem šīs pilnvaras tikai tad, kad parole jau ir. Sākotnējās iestatīšanas bootstrap logs (paroles vēl nav) nemainās, un infopaneļa sesijai, lai aizstātu paroli, jānosūta `currentPassword` (`403`, ja tā trūkst vai ir nepareiza, reģistrēts kā `settings.update_failed`). Vietējais CLI un instance ar atspējotu pieteikšanos saglabā atjaunošanas ceļu un drīkst iestatīt paroli bez tā, jo abi ir piesaistīti resursdatoram, kas pieder datu direktorijai.
 
 ## Konveijers
 
@@ -200,38 +259,45 @@ Veiksmes gadījumā `requireManagementAuth()` atgriež `null`, bet kļūdas gad�
 
 Izvēlieties kopu pēc struktūras, nevis ērtības. Viens maršruts jāievieto `PUBLIC_API_ROUTES_EXACT` (vai `PUBLIC_READONLY_CORS_API_ROUTES`, ja atļauts tikai GET); tikai īsts apakškoks jāievieto `PUBLIC_API_ROUTE_PREFIXES`, un tam **obligāti jābeidzas ar `/`**. Ievietojot vienu maršrutu prefiksu sarakstā, tiek publicēts arī katrs blakus esošais ceļš ar tādiem pašiem sākuma simboliem — tostarp vēlāk pievienoti dinamisko segmentu līdzvērtīgie maršruti (GHSA-74g9-q8f6-793h). Atjauniniet vienībtestus failos `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` un `tests/unit/authz/classify.test.ts`.
 
-## Tvērumi
+## Darbības jomas
 
-API atslēgām ir `scopes` masīvs (saglabāts kā JSON laukā `api_keys.scopes`; skatiet `src/lib/db/apiKeys.ts`).
+Trīs nosaukumvietas. Katrs pārbaudītājs lasa tikai savas virknes. Salīdzinājums,
+tostarp tas, kāpēc `manage` neiztur `scopeMatches` pārbaudi attiecībā uz `read:compression` un kāpēc `read` piekļuves marķieris nevar `PATCH /api/keys/{id}`, ir
+[Trīs darbības jomu nosaukumvietas](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-### Pārvaldības tvērums
+API atslēgas satur `scopes` masīvu (saglabāts kā JSON failā `api_keys.scopes`, skatīt `src/lib/db/apiKeys.ts`).
 
-- `manage` / `admin` — piešķir atslēgai piekļuvi pārvaldības API galapunktiem, ja tā tiek nosūtīta kā Bearer pilnvara.
+### Pārvaldības darbības joma
 
-### MCP tvērumi (`src/shared/constants/mcpScopes.ts`)
+- `manage` / `admin` — `hasManageScope`. Nesēja piekļuve pārvaldības API maršrutiem.
+- `mcp:connect`, `self:usage`, `self:account-quota` un
+  `policy:bypass-provider-quota` ir aditīvas precīzas atbilstības darbības jomas. Tās atrodas ārpus `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` atver tikai
+  `/api/mcp/` bezcilpas izgriezumu.
 
-Katram MCP rīkam ir nepieciešami konkrēti tvērumi, kas definēti, izmantojot `MCP_TOOL_SCOPES`. Pilns saraksts (`MCP_SCOPE_LIST`):
+### MCP rīku darbības jomas
 
-```
-read:health, read:combos, write:combos, read:quota, read:usage,
-read:models, execute:completions, execute:search, write:budget,
-write:resilience, pricing:write, read:cache, write:cache,
-read:compression, write:compression, read:proxies
-```
+Katalogs un atbilstības noteikumi (identiska virkne vai piešķirta darbības joma, kas beidzas ar `*`):
+[MCP rīku darbības jomas](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
+`MCP_SCOPE_LIST` failā `src/shared/constants/mcpScopes.ts` ir oriģinālā tipizētā
+apakškopa, nevis pilns katalogs. Izpilde notiek
+`open-sse/mcp-server/scopeEnforcement.ts` pēc tam, kad `resolveCallerScopeContext()` atrisina darbības jomas no MCP autentifikācijas informācijas, pieprasījuma metadatiem vai `OMNIROUTE_MCP_SCOPES`.
+Tā paliek izslēgta, ja vien `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 
-Tvērumu piemērošana failā `open-sse/mcp-server/server.ts` nodod katra rīka tvērumu sarakstu funkcijai
-`evaluateToolScopes()` pēc tam, kad `resolveCallerScopeContext()` ir noteikusi tvērumus no MCP autentifikācijas informācijas,
-pieprasījuma metadatiem vai `OMNIROUTE_MCP_SCOPES`.
+### Piekļuves marķiera darbības jomas
 
-## Autentifikācijas prasības pārslēgs
+`read` / `write` / `admin` uz `oma_live_…` marķieriem, ranžēti pēc `scopeSatisfies`
+(`src/lib/accessTokens/scopes.ts`). Šis rangs attiecas tikai uz piekļuves marķiera
+akreditācijas datiem. Skatīt [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md).
+
+## Nepieciešamās autentifikācijas slēdzis
 
 `isAuthRequired()` failā `src/shared/utils/apiAuth.ts` nosaka, vai pieprasījumam tiek piemērota **jebkāda** autentifikācija:
 
-- `settings.requireLogin === false` → autentifikācija ir globāli atspējota.
-- Nav konfigurēta parole **un** nav vides mainīgā `INITIAL_PASSWORD` → sāknēšanas režīms atļauj sākotnējās iestatīšanas vedni un lokālās atgriezeniskās cilpas pieprasījumus, taču no tīkla pieejamiem pieprasījumiem joprojām ir nepieciešami akreditācijas dati.
-- Jebkura DB kļūda → piekļuve tiek liegta (drošība pēc noklusējuma).
+- `settings.requireLogin === false` → autentifikācija ir globāli atspējota, izņemot vienmēr aizsargāto līmeni (skat. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) un izsaukumus, kas izsniedz pilnvaru, ko tā pieņem. Tiem nepieciešama tā pati pilnvara, kāda ir nepieciešama, ja pieteikšanās ir ieslēgta: sinhronizācijas žetonu izdošana, CLI piekļuves žetonu izdošana jebkurā darbības jomā un API atslēgas izveide ar `manage`/`admin` darbības jomu, šīs darbības jomas piešķiršana atslēgai vai tādas atslēgas regenerēšana vai parādīšana (`requireCredentialForManagementScopedKey()` failā `src/lib/api/requireManagementAuth.ts`). Atslēgas tikai secinājumiem paliek atvērtas.
+- Parole nav konfigurēta **un** nav vides mainīgā `INITIAL_PASSWORD` → bootstrap režīms atļauj iestatīšanas vedni un loopback pieprasījumus, bet ārējie tīkla pieprasījumi joprojām prasa pilnvaras.
+- Jebkura DB kļūda → bloķē piekļuvi (drošs pēc noklusējuma).
 
-Klienta API atslēgas prasības piemērošanai tiek izmantota `isRequireApiKeyEnabled()` failā `src/shared/utils/featureFlags.ts`, nevis tieša `process.env.REQUIRE_API_KEY` nolasīšana. Tas ir svarīgi izvietotām instancēm: pārslēdzot `REQUIRE_API_KEY` sadaļā Dashboard → Feature Flags, DB tiek saglabāta pārrakstīšanas vērtība, kas nekavējoties ietekmē `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` un citas klienta API autentifikācijas pārbaudes, kurās tiek izmantota šī palīgfunkcija. Ja funkciju karodziņu krātuvi nevar nolasīt, klienta API autentifikācija liedz piekļuvi un pieprasa atslēgu.
+Klienta API atslēgu piemērošanai izmanto `isRequireApiKeyEnabled()` no `src/shared/utils/featureFlags.ts`, nevis tiešu `process.env.REQUIRE_API_KEY` nolasīšanu. Tas ir svarīgi izvietotām instancēm: `REQUIRE_API_KEY` pārslēgšana Dashboard → Feature Flags saglabā DB pārrakstījumu un tūlīt ietekmē `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` un citas klienta API autentifikācijas pārbaudes, kas izmanto šo palīgfunkciju. Ja funkciju karodziņu krātuvi nevar nolasīt, klienta API autentifikācija bloķē piekļuvi un prasa atslēgu.
 
 ## Nesaderīgas izmaiņas — v3.8.0
 
@@ -267,9 +333,9 @@ x-omniroute-auth-scopes:    ar komatiem atdalīts saraksts
 
 Apdarinātājos izmantojiet `assertAuth(req, expectedClass)` — tas izmet `AuthzAssertionError` ar kodu `AUTHZ_NOT_INITIALIZED`, ja starpprogrammatūra tika apieta (tas palīdz testos konstatēt konfigurācijas regresijas).
 
-## Skatiet arī
+## Skatīt arī
 
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — autentifikācijas marķieris katram galapunktam
-- [COMPLIANCE.md](../security/COMPLIANCE.md) — autentifikācijas notikumu audita žurnāls
-- [MCP-SERVER.md](../frameworks/MCP-SERVER.md) — detalizēta informācija par MCP tvērumu piemērošanu
+- [COMPLIANCE.md](../security/COMPLIANCE.md) — audita žurnāls autentifikācijas notikumiem
+- [MCP-SERVER.md](../frameworks/MCP-SERVER.md#three-scope-namespaces) — trīs darbības jomas nosaukumvietas un MCP rīku darbības jomas katalogs
 - Avots: `src/server/authz/`, `src/lib/api/requireManagementAuth.ts`

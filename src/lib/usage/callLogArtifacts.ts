@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { RequestPipelinePayloads } from "@omniroute/open-sse/utils/requestLogger.ts";
-import { resolveDataDir } from "../dataPaths";
+import { resolveWritableDataDir } from "../dataPaths";
 import { getCallLogPipelineMaxSizeBytes, isChatDebugFileEnabled } from "../logEnv";
 import {
   CALL_LOG_SIZE_LIMIT_REASON as SIZE_LIMIT_EXCEEDED_REASON,
@@ -13,10 +13,38 @@ import {
 const isCloud = typeof globalThis.caches === "object" && globalThis.caches !== null;
 const isBuildPhase =
   process.env.NEXT_PHASE === "phase-production-build" || process.env.OMNIROUTE_BUILDING === "1";
-const DATA_DIR = resolveDataDir({ isCloud });
 
-export const CALL_LOGS_DIR = isCloud ? null : path.join(DATA_DIR, "call_logs");
+/**
+ * Directory holding per-request artifact files. Resolved lazily on every call
+ * so a test-context redirect picked up after import (see `resolveWritableDataDir`)
+ * carries the artifacts along with the database instead of leaving them in the
+ * operator's real data directory.
+ */
+export function getCallLogsDir(): string | null {
+  if (isCloud) return null;
+  return path.join(resolveWritableDataDir({ isCloud }), "call_logs");
+}
 export const MAX_CALL_LOG_ARTIFACT_BYTES = 512 * 1024;
+
+// Artifacts hold full request/response bodies (prompts, tool output): keep them
+// owner-only regardless of the process umask, as defense in depth on top of the
+// private DATA_DIR (bind-mounted or externally created DATA_DIRs skip that chmod).
+const PRIVATE_DIR_MODE = 0o700;
+const PRIVATE_FILE_MODE = 0o600;
+let callLogsRootTightened = false;
+
+function ensurePrivateArtifactDir(rootDir: string, dir: string) {
+  fs.mkdirSync(dir, { recursive: true, mode: PRIVATE_DIR_MODE });
+  if (callLogsRootTightened) return;
+  try {
+    // Tighten a root created before this hardening; only the subtree OmniRoute owns,
+    // never the operator-configured DATA_DIR itself.
+    fs.chmodSync(rootDir, PRIVATE_DIR_MODE);
+  } catch {
+    // Best effort (e.g. a root owned by another UID): the artifact file itself is still 0600.
+  }
+  callLogsRootTightened = true;
+}
 
 // Re-exported for backward compatibility: consumers (completedRequestDetails.ts)
 // import this marker check from here. Definition now lives in the shared
@@ -59,7 +87,8 @@ function preserveErrorForSizeLimit(error: unknown): unknown {
   return `${truncateUtf8(serialized, MAX_PRESERVED_ERROR_BYTES)} ${ERROR_TRUNCATED_FOR_SIZE_LIMIT}`;
 }
 
-export type CallLogDetailState = "none" | "ready" | "missing" | "corrupt" | "legacy-inline";
+export type CallLogDetailState =
+  "none" | "pending" | "ready" | "missing" | "corrupt" | "legacy-inline";
 
 export type CallLogArtifact = {
   schemaVersion: 5;
@@ -165,6 +194,13 @@ function omitOversizedPipeline(artifact: CallLogArtifact): CallLogArtifact {
   };
 }
 
+// Test-only export: the real byte budget for an artifact, so budget
+// assertions measure against the same cap the ladder enforces instead of a
+// hardcoded byte count.
+export function getArtifactMaxBytesForTest(artifact: CallLogArtifact): number {
+  return getArtifactMaxBytes(artifact);
+}
+
 function getArtifactMaxBytes(artifact: CallLogArtifact): number {
   return artifact.pipeline ? getCallLogPipelineMaxSizeBytes() : MAX_CALL_LOG_ARTIFACT_BYTES;
 }
@@ -200,9 +236,10 @@ function buildMinimalArtifactForSizeLimit(artifact: CallLogArtifact) {
  * `clientResponse`), so evicting it to keep `requestBody` traded the whole
  * upstream exchange -- including the only record of what the provider
  * actually answered -- for a raw client prompt the pipeline already holds a
- * translated copy of. Bodies go first now, and `pipeline` survives one stage
- * longer; the previous order is still reached when dropping the bodies alone
- * is not enough.
+ * translated copy of. The request body goes first on its own now (it is the
+ * usual cap-tripper and the least diagnostic side), then both bodies, and
+ * `pipeline` survives one stage longer; the previous order is still reached
+ * when dropping the request body alone is not enough.
  *
  * Two consumers depend on that ordering, not just human diagnosis:
  * `resolvePreviousResponseState` (db/responsesContinuationStore.ts) rebuilds
@@ -213,15 +250,26 @@ function buildMinimalArtifactForSizeLimit(artifact: CallLogArtifact) {
  * `pipeline.providerResponse` in preference to `responseBody`.
  */
 function buildSizeLimitStages(artifact: CallLogArtifact): Array<() => unknown> {
-  const omitBodies = <T extends object>(value: T) => ({
+  // One parametrized helper for both body-omission stages: request-only keeps
+  // the response verbatim, both-bodies drops it too. Single spread + single
+  // error-preservation call, so the two stages cannot drift apart.
+  const omitBodies = <T extends object>(value: T, keepResponse = false) => ({
     ...value,
     requestBody: OMITTED_FOR_SIZE_LIMIT,
-    responseBody: OMITTED_FOR_SIZE_LIMIT,
+    responseBody: keepResponse
+      ? (value as { responseBody: unknown }).responseBody
+      : OMITTED_FOR_SIZE_LIMIT,
     error: preserveErrorForSizeLimit(artifact.error),
   });
 
   return [
     () => truncateArtifactForStorage(artifact),
+    // Request body alone: the usual cap-tripper (multi-hundred-KB client
+    // prompts) and the least diagnostic once the pipeline holds a translated
+    // copy of it. Worth a stage only when there is a pipeline to keep in
+    // exchange -- without one it produces the same bytes as a later stage, so
+    // it is left out rather than costing a redundant stringify.
+    ...(artifact.pipeline ? [() => omitBodies(artifact, true)] : []),
     // Bodies alone: worth a stage only when there is a pipeline to keep in
     // exchange. Without one it produces the same bytes as the stage two lines
     // below, so it is left out rather than costing a redundant stringify.
@@ -272,9 +320,10 @@ export function writeCallArtifact(
   artifact: CallLogArtifact,
   relativePath = buildArtifactRelativePath(artifact.summary.timestamp, artifact.summary.id)
 ): CallLogArtifactWriteResult | null {
-  if (!CALL_LOGS_DIR || isBuildPhase) return null;
+  const logsDir = getCallLogsDir();
+  if (!logsDir || isBuildPhase) return null;
 
-  const absPath = path.join(CALL_LOGS_DIR, relativePath);
+  const absPath = path.join(logsDir, relativePath);
   const tmpPath = `${absPath}.${process.pid}.${Date.now()}.tmp`;
 
   try {
@@ -284,8 +333,9 @@ export function writeCallArtifact(
     // so artifact bookkeeping is not treated as password hashing by static analysis.
     const fileChecksum = computeArtifactChecksum(serialized);
 
-    fs.mkdirSync(path.dirname(absPath), { recursive: true });
-    fs.writeFileSync(tmpPath, serialized);
+    ensurePrivateArtifactDir(logsDir, path.dirname(absPath));
+    // The mode is applied at creation and survives the atomic rename.
+    fs.writeFileSync(tmpPath, serialized, { mode: PRIVATE_FILE_MODE });
     fs.renameSync(tmpPath, absPath);
 
     return {
@@ -308,12 +358,16 @@ export function readCallArtifact(relativePath: string | null): {
   artifact: CallLogArtifact | null;
   state: "ready" | "missing" | "corrupt";
 } {
-  if (!CALL_LOGS_DIR || !relativePath) {
+  if (!relativePath) {
+    return { artifact: null, state: "missing" };
+  }
+  const logsDir = getCallLogsDir();
+  if (!logsDir) {
     return { artifact: null, state: "missing" };
   }
 
   try {
-    const absPath = path.join(CALL_LOGS_DIR, relativePath);
+    const absPath = path.join(logsDir, relativePath);
     if (!fs.existsSync(absPath)) {
       return { artifact: null, state: "missing" };
     }
@@ -327,7 +381,10 @@ export function readCallArtifact(relativePath: string | null): {
   }
 }
 
-export function deleteCallArtifact(relativePath: string | null, baseDir = CALL_LOGS_DIR): boolean {
+export function deleteCallArtifact(
+  relativePath: string | null,
+  baseDir: string | null = getCallLogsDir()
+): boolean {
   if (!baseDir || !relativePath) return false;
 
   try {
@@ -349,7 +406,7 @@ export function deleteCallArtifact(relativePath: string | null, baseDir = CALL_L
   }
 }
 
-export function cleanupEmptyCallLogDirs(baseDir = CALL_LOGS_DIR) {
+export function cleanupEmptyCallLogDirs(baseDir: string | null = getCallLogsDir()) {
   if (!baseDir || !fs.existsSync(baseDir)) return;
 
   try {
@@ -366,7 +423,7 @@ export function cleanupEmptyCallLogDirs(baseDir = CALL_LOGS_DIR) {
   }
 }
 
-export function listCallLogArtifactFiles(baseDir = CALL_LOGS_DIR) {
+export function listCallLogArtifactFiles(baseDir: string | null = getCallLogsDir()) {
   if (!baseDir || !fs.existsSync(baseDir)) return [];
 
   return fs
@@ -397,7 +454,7 @@ export function listCallLogArtifactFiles(baseDir = CALL_LOGS_DIR) {
 }
 
 export function purgeCallLogArtifactDirectory(
-  baseDir = CALL_LOGS_DIR
+  baseDir: string | null = getCallLogsDir()
 ): PurgeCallLogArtifactDirectoryResult {
   const result = { deletedArtifacts: 0, errors: 0 };
   if (!baseDir || !fs.existsSync(baseDir)) return result;

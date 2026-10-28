@@ -1,6 +1,6 @@
 # AgentBridge (Deutsch)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/AGENTBRIDGE.md) · 🇪🇹 [am](../../../am/docs/frameworks/AGENTBRIDGE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/AGENTBRIDGE.md) · 🇦🇿 [az](../../../az/docs/frameworks/AGENTBRIDGE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/AGENTBRIDGE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/AGENTBRIDGE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/AGENTBRIDGE.md) · 🇩🇰 [da](../../../da/docs/frameworks/AGENTBRIDGE.md) · 🇬🇷 [el](../../../el/docs/frameworks/AGENTBRIDGE.md) · 🇪🇸 [es](../../../es/docs/frameworks/AGENTBRIDGE.md) · 🇪🇪 [et](../../../et/docs/frameworks/AGENTBRIDGE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/AGENTBRIDGE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/AGENTBRIDGE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/AGENTBRIDGE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/AGENTBRIDGE.md) · 🇮🇱 [he](../../../he/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/AGENTBRIDGE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/AGENTBRIDGE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/AGENTBRIDGE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/AGENTBRIDGE.md) · 🇮🇩 [id](../../../id/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/AGENTBRIDGE.md) · 🇮🇹 [it](../../../it/docs/frameworks/AGENTBRIDGE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/AGENTBRIDGE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/AGENTBRIDGE.md) · 🇰🇭 [km](../../../km/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/AGENTBRIDGE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/AGENTBRIDGE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/AGENTBRIDGE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/AGENTBRIDGE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/AGENTBRIDGE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/AGENTBRIDGE.md) · 🇲🇲 [my](../../../my/docs/frameworks/AGENTBRIDGE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/AGENTBRIDGE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/AGENTBRIDGE.md) · 🇳🇴 [no](../../../no/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [or](../../../or/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/AGENTBRIDGE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/AGENTBRIDGE.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/AGENTBRIDGE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/AGENTBRIDGE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/AGENTBRIDGE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/AGENTBRIDGE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/AGENTBRIDGE.md) · 🇱🇰 [si](../../../si/docs/frameworks/AGENTBRIDGE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/AGENTBRIDGE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/AGENTBRIDGE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/AGENTBRIDGE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/AGENTBRIDGE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [te](../../../te/docs/frameworks/AGENTBRIDGE.md) · 🇹🇭 [th](../../../th/docs/frameworks/AGENTBRIDGE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/AGENTBRIDGE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/AGENTBRIDGE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/AGENTBRIDGE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/AGENTBRIDGE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/AGENTBRIDGE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/AGENTBRIDGE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/AGENTBRIDGE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/AGENTBRIDGE.md) · 🇪🇹 [am](../../../am/docs/frameworks/AGENTBRIDGE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/AGENTBRIDGE.md) · 🇦🇿 [az](../../../az/docs/frameworks/AGENTBRIDGE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/AGENTBRIDGE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/AGENTBRIDGE.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/AGENTBRIDGE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/AGENTBRIDGE.md) · 🇩🇰 [da](../../../da/docs/frameworks/AGENTBRIDGE.md) · 🇬🇷 [el](../../../el/docs/frameworks/AGENTBRIDGE.md) · 🇪🇸 [es](../../../es/docs/frameworks/AGENTBRIDGE.md) · 🇪🇪 [et](../../../et/docs/frameworks/AGENTBRIDGE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/AGENTBRIDGE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/AGENTBRIDGE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/AGENTBRIDGE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/AGENTBRIDGE.md) · 🇮🇱 [he](../../../he/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/AGENTBRIDGE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/AGENTBRIDGE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/AGENTBRIDGE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/AGENTBRIDGE.md) · 🇮🇩 [id](../../../id/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/AGENTBRIDGE.md) · 🇮🇹 [it](../../../it/docs/frameworks/AGENTBRIDGE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/AGENTBRIDGE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/AGENTBRIDGE.md) · 🇰🇭 [km](../../../km/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/AGENTBRIDGE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/AGENTBRIDGE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/AGENTBRIDGE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/AGENTBRIDGE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/AGENTBRIDGE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/AGENTBRIDGE.md) · 🇲🇲 [my](../../../my/docs/frameworks/AGENTBRIDGE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/AGENTBRIDGE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/AGENTBRIDGE.md) · 🇳🇴 [no](../../../no/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [or](../../../or/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/AGENTBRIDGE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/AGENTBRIDGE.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/AGENTBRIDGE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/AGENTBRIDGE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/AGENTBRIDGE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/AGENTBRIDGE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/AGENTBRIDGE.md) · 🇱🇰 [si](../../../si/docs/frameworks/AGENTBRIDGE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/AGENTBRIDGE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/AGENTBRIDGE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/AGENTBRIDGE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/AGENTBRIDGE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [te](../../../te/docs/frameworks/AGENTBRIDGE.md) · 🇹🇭 [th](../../../th/docs/frameworks/AGENTBRIDGE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/AGENTBRIDGE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/AGENTBRIDGE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/AGENTBRIDGE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/AGENTBRIDGE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/AGENTBRIDGE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/AGENTBRIDGE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/AGENTBRIDGE.md)
 
 ---
 
@@ -16,34 +16,34 @@ AgentBridge ist der MITM-Proxy (Man-in-the-Middle) von OmniRoute, der HTTPS-Date
 
 ### Was ist AgentBridge?
 
-Wenn ein IDE-Agent (z. B. GitHub Copilot, Cursor oder Claude Code) einen API-Aufruf durchführt, verbindet er sich direkt mit dem vorgeschalteten KI-Anbieter (OpenAI, Anthropic usw.). AgentBridge fängt diese Verbindung transparent auf TLS-Ebene ab — ohne dass Änderungen an der Agentenkonfiguration erforderlich sind — und leitet die Anfrage über OmniRoute um.
+Wenn ein IDE Agent (z. B. GitHub, Copilot, Cursor, Claude -Code) einen API -Aufruf tätigt, stellt er eine direkte Verbindung zum Upstream AI Anbieter (OpenAI, Anthropic usw.) her. AgentBridge fängt diese Verbindung transparent auf der TLS Ebene ab – ohne dass eine Änderung der Agentenkonfiguration erforderlich ist – und schreibt die Anfrage über OmniRoute neu.
 
-Damit können Sie:
+Das bedeutet, dass Sie:
 
-- **Jeden Agenten zu jedem Anbieter umleiten**: Copilot kommuniziert mit OpenAI? Leiten Sie ihn zu Anthropic Claude, Gemini oder einem der 352 Anbieter von OmniRoute um.
-- **Modellzuordnungen anwenden**: `gemini-3-flash` → `claude-sonnet-4.7` transparent auf Handler-Ebene.
-- **Den gesamten Agentendatenverkehr beobachten**: Jede abgefangene Anfrage wird im [Traffic Inspector](./TRAFFIC_INSPECTOR.md) veröffentlicht.
-- **Die Ausfallsicherheit von OmniRoute nutzen**: Kombinations-Routing, Leistungsschalter, Fallbacks und Kostenverfolgung funktionieren auch für den Datenverkehr von IDE-Agenten.
+- **Leiten Sie jeden Agenten an einen beliebigen Anbieter um** : Copilot redet mit OpenAI? Leiten Sie es an Anthropic Claude, Gemini oder einen der 377 Anbieter von OmniRoute weiter.
+- **Modellzuordnungen anwenden** : `gemini-3-flash` → `claude-sonnet-4.7` transparent auf Handlerebene.
+- **Beobachten Sie den gesamten Agentenverkehr** : Jede abgefangene Anfrage wird an den [Verkehrsinspektor](./TRAFFIC_INSPECTOR.md) veröffentlicht.
+- **Wenden Sie OmniRoute Resilienz an** : Combo-Routing, Leistungsschalter, Fallbacks und Kostenverfolgung funktionieren auch für IDE -Agentenverkehr.
 
-### Positionierung im Marktvergleich
+### Positionierung vs. Markt
 
-| Funktion                                 | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ---------------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                              |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                           |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                               |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                             |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                               |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                           |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                              |    —    |    —     |        ✓        |             ✓             |
-| Open Code                                |    —    |    —     |        ✓        |             ✓             |
-| Trae                                     |    —    |    —     |        —        |    🔍 Wird untersucht     |
-| Dashboard-Benutzeroberfläche             |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector                        |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute-Routing                        |    ✗    |    ✗     |        ✗        |             ✓             |
-| Benutzeroberfläche für Modellzuordnungen |    ✗    |    ✗     |        ✗        |             ✓             |
-| Umgehungsliste                           |    ✗    |    ✗     |        ✓        |             ✓             |
-| Vorgeschaltetes CA-Zertifikat            |    ✗    |    ✗     |        ✓        |             ✓             |
+| Besonderheit            | 9router | Anti-API | llm-Abfangjäger | **OmniRoute AgentBridge** |
+| ----------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity             |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot          |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)              |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex            |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE              |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries          |    —    |    ✓     |        —        |             ✓             |
+| Claude -Code            |    —    |    —     |        ✓        |             ✓             |
+| Code öffnen             |    —    |    —     |        ✓        |             ✓             |
+| Trae                    |    —    |    —     |        —        |       🔍 ermittelt        |
+| Armaturenbrett UI       |    ✓    |    ✗     |        ✗        |             ✓             |
+| Verkehrsinspektor       |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute Routing       |    ✗    |    ✗     |        ✗        |             ✓             |
+| Modellzuordnung UI      |    ✗    |    ✗     |        ✗        |             ✓             |
+| Bypass-Liste            |    ✗    |    ✗     |        ✓        |             ✓             |
+| Upstream- CA Zertifikat |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 
@@ -189,14 +189,14 @@ gemeinsame Sperrliste für Hop-by-Hop- und Framing-Header (einschließlich Proxy
 
 Verwenden Sie die AgentBridge-Serverkarte unter `/dashboard/tools/agent-bridge`:
 
-| Aktion                   | Beschreibung                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Server starten           | Startet `src/mitm/server.cjs` auf Port 443                                                             |
-| Server stoppen           | Beendet den untergeordneten Prozess ordnungsgemäß                                                      |
-| Server neu starten       | Stoppen + starten (übernimmt Änderungen an den Zielmodellen)                                           |
-| Zertifikat vertrauen     | Installiert `DATA_DIR/mitm/ca.crt` im Vertrauensspeicher des Betriebssystems                           |
-| Zertifikat herunterladen | Lädt `ca.crt` zur manuellen Installation herunter                                                      |
-| Zertifikat neu erzeugen  | Erstellt ein neues CA-Schlüsselpaar (alle vorhandenen agentenspezifischen Zertifikate werden ungültig) |
+| Aktion                    | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Server starten            | Startet `src/mitm/server.cjs` auf Port 443. Beim Root-CA-Modell wird beim ersten Start `ca.crt` erstellt und dem aktiven Zertifikat vertraut, sofern ein sudo-Passwort verfügbar ist                                                                                                                                                                                                                                                                                                          |
+| Server stoppen            | Fährt den untergeordneten Prozess ordnungsgemäß herunter                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Server neu starten        | Stoppen + starten (übernimmt Änderungen an Zielen und ein neu generiertes Zertifikat)                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Zertifikat vertrauen      | Installiert das aktive Zertifikat im Vertrauensspeicher des Betriebssystems: `DATA_DIR/mitm/ca.crt` beim Root-CA-Modell, `DATA_DIR/mitm/server.crt` bei einer älteren Leaf-Installation                                                                                                                                                                                                                                                                                                       |
+| Zertifikat herunterladen  | Lädt das aktive Zertifikat zur manuellen Installation herunter (`omniroute-mitm-ca.crt` = `ca.crt` oder `omniroute-mitm.crt` = `server.crt` bei einer älteren Leaf-Installation)                                                                                                                                                                                                                                                                                                              |
+| Zertifikat neu generieren | Ändert niemals das Zertifikatmodell. Ältere Leaf-Installation: Stellt ein neues `server.crt`/`server.key` aus (starten Sie den Server neu, damit es ausgeliefert wird). Root-CA-Modell: Rotiert `ca.crt`/`ca.key`; wird verweigert, solange der Server läuft. Einer zuvor als vertrauenswürdig eingestuften alten CA wird zunächst das Vertrauen entzogen (erfordert das sudo-Passwort), andernfalls wird die Rotation abgebrochen. Clients müssen der neuen CA anschließend erneut vertrauen |
 
 ### 3.2 Dem Zertifikat vertrauen
 
@@ -221,37 +221,36 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Alternativ können Sie die Schaltfläche „Zertifikat vertrauen“ im Dashboard verwenden (führt den passenden Befehl für Ihr Betriebssystem aus und zeigt bei Bedarf eine sudo-Abfrage an).
+Alternativ können Sie die Schaltfläche „Zertifikat vertrauen“ im Dashboard verwenden (führt den für Ihr Betriebssystem geeigneten Befehl aus und fordert bei Bedarf zur Eingabe des sudo-Passworts auf).
 
 #### Electron-basierte IDEs ignorieren den Vertrauensspeicher des Betriebssystems (`NODE_EXTRA_CA_CERTS`)
 
 Einige IDEs — insbesondere **Antigravity IDE** und andere von Electron / VS Code abgeleitete Anwendungen — enthalten
-eine eigene Node.js-Laufzeit, die für ausgehende `fetch`-/HTTPS-Anfragen **nicht den Vertrauensspeicher des Betriebssystems verwendet**.
-Der CA auf Betriebssystem-/NSS-Ebene zu vertrauen, reicht für das native **Backend** der IDE aus
-(z. B. einen Go-Sprachserver, der das CA-Bundle des Betriebssystems verwendet), aber das **Electron-Frontend**
-wird weiterhin an TLS scheitern — dies zeigt sich dadurch, dass die Anwendung _abgemeldet_ ist oder einen
-_"Verbindungsfehler"_ anzeigt, obwohl das MITM-Protokoll zeigt, dass die Bootstrap-Aufrufe des Backends `200`
-zurückgeben. Zwei Schritte sind erforderlich, und beide sind wichtig:
+ihre eigene Node.js-Laufzeitumgebung, die bei ausgehenden
+`fetch`-/HTTPS-Anfragen **nicht auf den Vertrauensspeicher des Betriebssystems zugreift**. Das Vertrauen der CA auf Betriebssystem-/NSS-Ebene reicht für das native **Backend**
+der IDE aus (z. B. einen Go-Sprachserver, der das CA-Bundle des Betriebssystems verwendet), aber das **Electron-Frontend** wird
+weiterhin an TLS scheitern — dies äußert sich darin, dass die Anwendung als _abgemeldet_ erscheint oder einen _„Verbindungsfehler“_
+anzeigt, obwohl das MITM-Protokoll zeigt, dass die Bootstrap-Aufrufe des Backends `200` zurückgeben. Zwei Schritte sind
+erforderlich, und beide sind wichtig:
 
-1. Verweisen Sie die Laufzeit explizit auf die CA:
+1. Verweisen Sie die Laufzeitumgebung ausdrücklich auf die CA:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **Starten Sie die IDE aus dieser Shell.** Beim Start über das Desktop-Symbol / Dock / Startmenü
-   werden Shell-Exporte **nicht** übernommen, und `~/.config/environment.d/*.conf` gilt erst nach
-   einer neuen grafischen Anmeldung. Beenden Sie die IDE zuvor vollständig — aufgrund der Singleton-Sperre
-   von Electron fokussiert ein zweiter Start lediglich den bestehenden Prozess, und die neue Umgebung wird ignoriert.
+2. **Starten Sie die IDE aus dieser Shell.** Beim Start über das Desktopsymbol / Dock / Startmenü
+   werden Shell-Exporte **nicht** übernommen, und `~/.config/environment.d/*.conf` wird erst nach
+   einer neuen grafischen Anmeldung angewendet. Beenden Sie die IDE zunächst vollständig — aufgrund der Singleton-Sperre von Electron fokussiert ein zweiter
+   Start lediglich den vorhandenen Prozess, und die neue Umgebung wird ignoriert.
 
-Der oben beschriebene Schritt für das Vertrauen auf Betriebssystemebene + NSS bleibt erforderlich (der von einigen
-Authentifizierungsabläufen verwendete Chromium-Netzwerk-Stack liest den benutzerspezifischen NSS-Speicher und besitzt
-eigene statische Pins für `*.googleapis.com`, die von einer lokal als vertrauenswürdig eingestuften CA überschrieben werden).
-`NODE_EXTRA_CA_CERTS` deckt zusätzlich den Node-`fetch`-Pfad ab.
+Der oben beschriebene Schritt für das Betriebssystemvertrauen + NSS bleibt erforderlich (der von einigen Authentifizierungsabläufen verwendete
+Chromium-Netzwerk-Stack liest den benutzerspezifischen NSS-Speicher und verfügt über eigene statische Pins für `*.googleapis.com`, die eine
+lokal als vertrauenswürdig eingestufte CA überschreibt). `NODE_EXTRA_CA_CERTS` deckt zusätzlich den Node-`fetch`-Pfad ab.
 
 ### 3.3 DNS-Routing
 
-Für jeden Agenten, dessen Datenverkehr Sie abfangen möchten, müssen dessen API-Hosts auf `127.0.0.1` aufgelöst werden. AgentBridge verwaltet die Einträge in `/etc/hosts` automatisch, wenn Sie im Einrichtungsassistenten DNS für einen Agenten aktivieren oder deaktivieren.
+Für jeden Agenten, den Sie abfangen möchten, müssen dessen API-Hosts zu `127.0.0.1` aufgelöst werden. AgentBridge verwaltet `/etc/hosts`-Einträge automatisch, wenn Sie im Einrichtungsassistenten DNS für einen Agenten aktivieren oder deaktivieren.
 
-Beispieleinträge in `/etc/hosts` für GitHub Copilot:
+Beispielhafte `/etc/hosts`-Einträge für GitHub Copilot:
 
 ```
 127.0.0.1 api.githubcopilot.com
@@ -267,58 +266,67 @@ Verwenden Sie die Modellzuordnungstabelle in jeder Agentenkarte, um Zuordnungen 
 | `gpt-4o`                            | `claude-sonnet-4.7`    |
 | `*` (Platzhalter)                   | `claude-haiku-4.7`     |
 
-Der Platzhalter `*` ordnet jedes unbekannte Modell dem angegebenen Zielmodell zu. Die Zuordnungen werden in der Tabelle `agent_bridge_mappings` gespeichert.
+Der Platzhalter `*` ordnet jedes unbekannte Modell dem angegebenen Ziel zu. Wird in der Tabelle `agent_bridge_mappings` gespeichert.
 
 > **Tipp — ermitteln Sie die tatsächlichen Modell-IDs des Agenten.** Eine IDE kann Modellnamen senden, die von
 > ihren UI-Bezeichnungen abweichen und sich zwischen Hauptversionen ändern. Beispielsweise sendet **Antigravity 2**
-> `gemini-3.1-pro-low`, `gemini-pro-agent` und `gemini-3.1-flash-lite` über die Verbindung — nicht das in älteren
-> Dokumentationen angegebene `gemini-2.5-pro`. Senden Sie eine Chatnachricht, ohne dass eine passende Zuordnung
-> vorhanden ist: Das MITM protokolliert den exakten eingehenden Wert `model:` und leitet die Anfrage unverändert
-> weiter. Ordnen Sie diesen exakten Wert zu; die nächste Anfrage wird dann abgefangen und an Ihr Ziel weitergeleitet.
+> `gemini-3.1-pro-low`, `gemini-pro-agent` und `gemini-3.1-flash-lite` über die Verbindung — nicht das in
+> älteren Dokumentationen angegebene `gemini-2.5-pro`. Senden Sie eine einzelne Chat-Anfrage, ohne dass eine passende Zuordnung eingerichtet ist: Der MITM
+> protokolliert den exakten eingehenden Wert für `model:` und leitet die Anfrage unverändert weiter. Ordnen Sie diesen Literalwert zu; die
+> nächste Anfrage wird dann abgefangen und an Ihr Ziel weitergeleitet.
 
 ### 3.5 Risikohinweis
 
 AgentBridge fängt Anmeldedaten (OAuth-Token, API-Schlüssel) ab, die die IDE zur Authentifizierung bei vorgelagerten Anbietern verwendet. Diese werden **vor der Protokollierung maskiert** (siehe §2.7), sind jedoch für die MITM-Schicht von OmniRoute sichtbar. Bei der ersten Aktivierung jedes Agenten wird ein ausblendbarer modaler Risikohinweis angezeigt.
 
-### 3.6 Wartung & Diagnose
+### 3.6 Wartung und Diagnose
 
-Das Dashboard enthält eine Karte für **Wartung & Diagnose** (`AgentBridgeMaintenanceCard` in `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), die operative MITM-Routen zugänglich macht, für die zuvor keine Benutzeroberfläche vorhanden war. Ihr Untertitel lautet: _„Testen Sie die Erfassungspipeline selbst, machen Sie verbliebene Systemzustände rückgängig und übertragen Sie Ihre Einrichtung zwischen Rechnern.“_ Die Client-Hilfsfunktionen der Karte befinden sich in `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+Das Dashboard enthält eine Karte für **Wartung und Diagnose** (`AgentBridgeMaintenanceCard` in `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`), über die operative MITM-Routen zugänglich sind, für die es zuvor keine Benutzeroberfläche gab. Ihr Untertitel lautet: _„Führen Sie einen Selbsttest der Erfassungspipeline durch, machen Sie verbliebene Systemzustände rückgängig und übertragen Sie Ihre Einrichtung zwischen Rechnern.“_ Die Client-Hilfsfunktionen der Karte befinden sich in `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| Schaltfläche      | Route                                  | Funktion                                                                                                                                                                                                                                                             |
-| ----------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Diagnose**      | `GET /api/tools/agent-bridge/diagnose` | Führt den Selbsttest der Erfassungspipeline aus und zeigt einen Bericht für jede Prüfung an (✓/✗ + Hinweis zur Fehlerbehebung).                                                                                                                                      |
-| **Repair**        | `POST /api/tools/agent-bridge/repair`  | Macht verwaiste MITM-Systemzustände rückgängig (DNS-Spoofing-Einträge, Root-CA, System-Proxy), die nach einem Absturz oder SIGKILL zurückgeblieben sind. Idempotent — meldet „Nothing to repair“, wenn der Zustand sauber ist.                                       |
-| **Remove CA**     | `DELETE /api/tools/agent-bridge/cert`  | Hebt das Vertrauen in die MITM-Root-CA auf und entfernt sie aus dem Vertrauensspeicher des Betriebssystems (explizit, idempotent). Wird nur angezeigt, wenn die CA derzeit als vertrauenswürdig eingestuft ist; erfordert eine direkte Bestätigung mit „Remove CA?“. |
-| **Export config** | `GET /api/tools/agent-bridge/config`   | Lädt die portable Konfigurations-JSON herunter (siehe §3.7).                                                                                                                                                                                                         |
-| **Import config** | `POST /api/tools/agent-bridge/config`  | Lädt eine zuvor exportierte Konfigurations-JSON hoch (siehe §3.7).                                                                                                                                                                                                   |
+| Schaltfläche                  | Route                                  | Funktion                                                                                                                                                                                                                                           |
+| ----------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diagnose**                  | `GET /api/tools/agent-bridge/diagnose` | Führt den Selbsttest der Erfassungspipeline aus und zeigt einen Bericht für jede Prüfung an (✓/✗ + Hinweis zur Behebung).                                                                                                                          |
+| **Reparieren**                | `POST /api/tools/agent-bridge/repair`  | Macht verwaiste MITM-Systemzustände (DNS-Spoof-Einträge, Root-CA, System-Proxy) rückgängig, die nach einem Absturz oder SIGKILL zurückgeblieben sind. Idempotent — meldet „Nichts zu reparieren“, wenn der Zustand bereinigt ist.                  |
+| **CA entfernen**              | `DELETE /api/tools/agent-bridge/cert`  | Hebt das Vertrauen in die MITM-Root-CA auf und entfernt sie aus dem Vertrauensspeicher des Betriebssystems (explizit, idempotent). Wird nur angezeigt, wenn der CA derzeit vertraut wird; erfordert eine eingebettete Bestätigung „CA entfernen?“. |
+| **Konfiguration exportieren** | `GET /api/tools/agent-bridge/config`   | Lädt die portable Konfigurations-JSON-Datei herunter (siehe §3.7).                                                                                                                                                                                 |
+| **Konfiguration importieren** | `POST /api/tools/agent-bridge/config`  | Lädt eine zuvor exportierte Konfigurations-JSON-Datei hoch (siehe §3.7).                                                                                                                                                                           |
+
+Jede Agentenkarte verfügt außerdem über eine eigene Schaltfläche **Standard wiederherstellen** (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) — eine Ein-Klick-Rückgängig-Funktion pro Agent, die nur das Spoofing der Hosts dieses
+Agenten aufhebt, seine gespeicherten Modellzuordnungen löscht und seinen Zustand für `dns_enabled`/`setup_completed`
+zurücksetzt, sodass die IDE nach einem vollständigen Neustart wieder mit dem echten vorgelagerten Dienst kommuniziert. Sie wirkt sich **nicht** auf den
+gemeinsam genutzten MITM-Server oder die Root-CA aus (andere Agenten können weiterhin von ihnen abhängen) — diese bleiben
+über die Serverkarte und die oben genannte Aktion **CA entfernen** erreichbar. Unter Windows wird außerdem nach bestem Bemühen
+`ipconfig /flushdns` ausgeführt, da der Windows-DNS-Client Einträge aus der Hosts-Datei zwischenspeichert und einen
+soeben entfernten Spoof andernfalls nicht verwirft.
 
 **Diagnoseprüfungen** (`summarizeDiagnostics()` in `src/mitm/inspector/diagnostics.ts`). Die Route führt für jede Prüfung den effektbehafteten Test aus und übergibt die booleschen Werte an die reine Zusammenfassungsfunktion; zurückgegeben werden ein einzelnes `healthy`-Urteil sowie ein Hinweis für jeden Fehler:
 
-| Prüfungsname       | Was geprüft wird                                                         | Hinweis bei einem Fehler                                                                                                                                                                                                                  |
-| ------------------ | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | Der MITM-Serverprozess ist aktiv                                         | „Der MITM-Server wird nicht ausgeführt. Starten Sie ihn über die Registerkarte AgentBridge.“                                                                                                                                              |
-| `server-reachable` | Der MITM-Server akzeptiert Verbindungen an seinem Port (TCP-Test)        | „Der MITM-Server akzeptiert an seinem Port keine Verbindungen. Prüfen Sie, ob der Port frei ist und ob Sie über die erforderlichen Berechtigungen zum Binden verfügen.“                                                                   |
-| `cert-exists`      | Das MITM-Zertifikat wurde auf dem Datenträger generiert                  | „Es wurde noch kein MITM-Zertifikat generiert. Generieren Sie eines über die Registerkarte AgentBridge.“                                                                                                                                  |
-| `cert-trusted`     | Die MITM-Root-CA befindet sich im Vertrauensspeicher des Betriebssystems | „Die MITM-Root-CA wird vom Vertrauensspeicher des Betriebssystems nicht als vertrauenswürdig eingestuft, daher schlägt die TLS-Interception fehl. Stufen Sie das Zertifikat über die Registerkarte AgentBridge als vertrauenswürdig ein.“ |
-| `dns-configured`   | Zielhostnamen werden in `/etc/hosts` gespooft                            | „Zielhostnamen werden in /etc/hosts nicht gespooft, sodass der Datenverkehr den Proxy nie erreicht. Aktivieren Sie DNS für die Agents, deren Datenverkehr Sie erfassen möchten.“                                                          |
+| Prüfungsname       | Was geprüft wird                                                         | Hinweis bei einem Fehler                                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | Der MITM-Serverprozess ist aktiv                                         | „Der MITM-Server wird nicht ausgeführt. Starten Sie ihn über den AgentBridge-Tab.“                                                                                                                        |
+| `server-reachable` | Der MITM-Server akzeptiert Verbindungen an seinem Port (TCP-Test)        | „Der MITM-Server akzeptiert keine Verbindungen an seinem Port. Prüfen Sie, ob der Port frei ist und ob Sie über die Berechtigungen verfügen, ihn zu binden.“                                              |
+| `cert-exists`      | Das MITM-Zertifikat wurde auf dem Datenträger erzeugt                    | „Es wurde noch kein MITM-Zertifikat erzeugt. Erzeugen Sie eines über den AgentBridge-Tab.“                                                                                                                |
+| `cert-trusted`     | Die MITM-Root-CA befindet sich im Vertrauensspeicher des Betriebssystems | „Die MITM-Root-CA wird vom Vertrauensspeicher des Betriebssystems nicht als vertrauenswürdig eingestuft, daher schlägt die TLS-Interception fehl. Vertrauen Sie dem Zertifikat über den AgentBridge-Tab.“ |
+| `dns-configured`   | Zielhostnamen sind in `/etc/hosts` gespooft                              | „Zielhostnamen sind in /etc/hosts nicht gespooft, daher erreicht der Datenverkehr den Proxy nie. Aktivieren Sie DNS für die Agenten, deren Datenverkehr Sie erfassen möchten.“                            |
 
-**Banner für verwaisten Zustand:** Wenn die Seite einen nach einem Absturz zurückgebliebenen Zustand erkennt (DNS-Spoofing / CA / System-Proxy), zeigt die Karte ein gelbes Banner an — _„Eine vorherige Sitzung hat einen Systemzustand zurückgelassen (DNS-Spoofing, CA oder System-Proxy). Führen Sie Repair aus, um ihn zu bereinigen.“_ — und hebt die Schaltfläche **Repair** hervor. `Repair` ist das Gegenstück auf Anwendungsebene zum ProxyBridge-Flag `--cleanup` (es delegiert an `repairMitm()` in `src/mitm/manager.ts`).
+**Banner für verwaisten Zustand:** Wenn die Seite einen nach einem Absturz zurückgebliebenen Zustand erkennt (DNS-Spoofing / CA / System-Proxy), zeigt die Karte ein bernsteinfarbenes Banner an — _„Eine vorherige Sitzung hat einen Systemzustand zurückgelassen (DNS-Spoofing, CA oder System-Proxy). Führen Sie Reparieren aus, um ihn zu bereinigen.“_ — und hebt die Schaltfläche **Reparieren** hervor. `Repair` ist das Pendant auf Anwendungsebene zum `--cleanup`-Flag von ProxyBridge (es delegiert an `repairMitm()` in `src/mitm/manager.ts`).
 
-> Die MITM-Root-CA bleibt über Stopp/Start hinweg installiert, um wiederholte sudo-
-> Eingabeaufforderungen zu vermeiden (dasselbe Verhalten wie bei mitmproxy/Charles). Daher ist das Entfernen eine explizite
-> **Remove CA**-Aktion und erfolgt nicht automatisch beim Stoppen.
+> Die MITM-Root-CA bleibt über Stopps/Starts hinweg installiert, um wiederholte sudo-
+> Abfragen zu vermeiden (dasselbe Verhalten wie bei mitmproxy/Charles). Daher wird sie über
+> die explizite Aktion **CA entfernen** entfernt und nicht automatisch beim Stoppen.
 
 ### 3.7 Import/Export portabler Konfigurationen
 
-AgentBridge kann den **vom Betreiber anpassbaren** Zustand in ein versioniertes JSON-Objekt serialisieren, sodass eine Einrichtung auf mehreren Rechnern repliziert werden kann. Der Serializer ist `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`) und wird durch `AgentBridgeConfigSchema` validiert.
+AgentBridge kann den durch den **Betreiber anpassbaren** Zustand in ein versioniertes JSON-Objekt serialisieren, sodass eine Konfiguration auf anderen Rechnern repliziert werden kann. Der Serializer befindet sich unter `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`) und wird durch `AgentBridgeConfigSchema` validiert.
 
-Der Export umfasst genau drei Bestandteile (integrierte Standardwerte werden absichtlich **NICHT** exportiert, damit sie beim Importieren weder dupliziert werden noch mit den importierten Werten in Konflikt geraten):
+Der Export enthält genau drei Bestandteile (integrierte Standardwerte werden bewusst **NICHT** exportiert, damit sie beim Importieren niemals dupliziert werden oder mit importierten Werten in Konflikt geraten):
 
-| Feld             | Quelle                                                                    | Hinweise                                                                          |
-| ---------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `bypassPatterns` | benutzerdefinierte Umgehungsmuster (`agent_bridge_bypass`)                | Standardmuster für Banken/Behörden/Okta sind ausgeschlossen                       |
-| `customHosts`    | benutzerdefinierte Hosts des Traffic Inspector (`inspector_custom_hosts`) | jeweils: `{ host, kind: "llm"\|"app"\|"custom", label? }`                         |
-| `agentMappings`  | agentspezifische Modellzuordnungen (`agent_bridge_mappings`)              | `{ [agentId]: [{ source, target }] }` für jeden Agent mit vorhandenen Zuordnungen |
+| Feld             | Quelle                                                                     | Hinweise                                                                |
+| ---------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `bypassPatterns` | benutzerdefinierte Umgehungsmuster (`agent_bridge_bypass`)                 | standardmäßige Muster für Banken, Behörden und Okta sind ausgeschlossen |
+| `customHosts`    | benutzerdefinierte Hosts des Traffic Inspectors (`inspector_custom_hosts`) | jeweils: `{ host, kind: "llm"\|"app"\|"custom", label? }`               |
+| `agentMappings`  | agentenspezifische Modellzuordnungen (`agent_bridge_mappings`)             | `{ [agentId]: [{ source, target }] }` für jeden Agenten mit Zuordnungen |
 
 ```jsonc
 // GET /api/tools/agent-bridge/config
@@ -332,13 +340,13 @@ Der Export umfasst genau drei Bestandteile (integrierte Standardwerte werden abs
 }
 ```
 
-**Importverhalten** (`POST /api/tools/agent-bridge/config`): Umgehungsmuster und agentspezifische Zuordnungen werden **vollständig ersetzt**; benutzerdefinierte Hosts werden **idempotent** hinzugefügt (`INSERT OR IGNORE`). Die Antwort gibt an, wie viele Elemente jedes Typs angewendet wurden:
+**Importverhalten** (`POST /api/tools/agent-bridge/config`): Umgehungsmuster und agentenspezifische Zuordnungen werden **vollständig ersetzt**; benutzerdefinierte Hosts werden **idempotent** hinzugefügt (`INSERT OR IGNORE`). Die Antwort gibt an, wie viele Einträge jeweils angewendet wurden:
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Was **NICHT** in der Konfiguration enthalten ist: Serverbetriebsstatus, Zertifikatspfade, agentenspezifischer DNS-Status, Pfad zur Upstream-CA und TPROXY-Einstellungen – dabei handelt es sich um Host-/Laufzeitstatus, nicht um portable Einstellungen.
+Was **NICHT** in der Konfiguration enthalten ist: Serverbetriebsstatus, Zertifikatspfade, agentenspezifischer DNS-Status, Pfad zur Upstream-CA und TPROXY-Einstellungen – dabei handelt es sich um Host-/Laufzeitzustände und nicht um portable Einstellungen.
 
 ---
 
@@ -498,37 +506,38 @@ Wenn AgentBridge Anfragen abfängt, aber alle Anfragen fehlschlagen:
 
 ## §7 API-Referenz
 
-Alle Routen sind `LOCAL_ONLY` (nur Loopback, vor der Authentifizierung erzwungen) und `SPAWN_CAPABLE`. Siehe `src/server/authz/routeGuard.ts`.
+Alle Routen sind `LOCAL_ONLY` (nur Loopback; wird vor der Authentifizierung erzwungen) und `SPAWN_CAPABLE`. Siehe `src/server/authz/routeGuard.ts`.
 
 Basispfad: `/api/tools/agent-bridge/`
 
-| Methode             | Pfad                                           | Beschreibung                                                                                                                            |
-| ------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | Globaler Serverstatus + Erkennungs-/Statusinformationen pro Agent                                                                       |
-| GET                 | `/api/tools/agent-bridge/agents`               | Registrierte Agents auflisten (ID, Name, Hosts, Verwendbarkeit, Status)                                                                 |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Status eines Agents (Zielkonfiguration + Erkennung + gespeicherter Status)                                                              |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | `setup_completed` für den Agent aktualisieren                                                                                           |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Erkennungsprüfung für den Agent ausführen (`installed`, `version?`, `path?`)                                                            |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | DNS für den Agent aktivieren/deaktivieren (`{enabled: boolean}`)                                                                        |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Modellzuordnungen für den Agent                                                                                                         |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Modellzuordnungen ersetzen                                                                                                              |
-| POST                | `/api/tools/agent-bridge/server`               | Server starten/stoppen/neu starten (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                              |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Zertifikatsstatus (`exists`, `trusted`, `path`)                                                                                         |
-| POST                | `/api/tools/agent-bridge/cert`                 | MITM-Root-CA als vertrauenswürdig einstufen (installieren)                                                                              |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | Vertrauen in die MITM-Root-CA aufheben (entfernen) — idempotent (siehe §3.6)                                                            |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Selbstsigniertes MITM-Zertifikat neu generieren                                                                                         |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | PEM-Zertifikat zum Herunterladen streamen                                                                                               |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Umgehungsmuster auflisten (`default` + `user`)                                                                                          |
-| POST                | `/api/tools/agent-bridge/bypass`               | Benutzerdefinierte Umgehungsmuster vollständig ersetzen                                                                                 |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Ein einzelnes benutzerdefiniertes Umgehungsmuster entfernen                                                                             |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Selbsttest der Erfassungspipeline (siehe §3.6)                                                                                          |
-| POST                | `/api/tools/agent-bridge/repair`               | Verwaisten MITM-Systemstatus rückgängig machen (siehe §3.6)                                                                             |
-| GET                 | `/api/tools/agent-bridge/config`               | Portable Konfiguration als JSON exportieren (siehe §3.7)                                                                                |
-| POST                | `/api/tools/agent-bridge/config`               | Portable JSON-Konfiguration importieren (siehe §3.7)                                                                                    |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Pfad der konfigurierten Upstream-CA abrufen                                                                                             |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Pfad der Upstream-CA validieren + dauerhaft speichern                                                                                   |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Pfad einer Upstream-CA nur validieren (Testlauf) — wird nicht dauerhaft gespeichert                                                     |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Transparenter TPROXY-Entschlüsselungs-Erfassungsmodus — siehe `docs/security/MITM-TPROXY-DECRYPT.md` (git; nicht in `/docs` kompiliert) |
+| Methode             | Pfad                                           | Beschreibung                                                                                                                               |
+| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET                 | `/api/tools/agent-bridge/state`                | Globaler Serverstatus + Erkennungs-/Statusinformationen pro Agent                                                                          |
+| GET                 | `/api/tools/agent-bridge/agents`               | Registrierte Agenten auflisten (ID, Name, Hosts, Funktionsfähigkeit, Status)                                                               |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Status eines Agenten (Zielkonfiguration + Erkennung + gespeicherter Status)                                                                |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | `setup_completed` für den Agenten aktualisieren                                                                                            |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Erkennungsprüfung für den Agenten ausführen (`installed`, `version?`, `path?`)                                                             |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | DNS für den Agenten aktivieren/deaktivieren (`{enabled: boolean}`)                                                                         |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Modellzuordnungen für den Agenten                                                                                                          |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Modellzuordnungen ersetzen                                                                                                                 |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Standard wiederherstellen: DNS-Spoofing für diesen Agenten aufheben, seine Zuordnungen löschen und seinen Status zurücksetzen (siehe §3.6) |
+| POST                | `/api/tools/agent-bridge/server`               | Server starten/stoppen/neu starten (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                 |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Zertifikatsstatus (`exists`, `trusted`, `path`)                                                                                            |
+| POST                | `/api/tools/agent-bridge/cert`                 | MITM-Root-CA als vertrauenswürdig einstufen (installieren)                                                                                 |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | Vertrauen in die MITM-Root-CA aufheben (entfernen) — idempotent (siehe §3.6)                                                               |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Aktives Zertifikat neu generieren, ohne das Zertifikatsmodell zu ändern (Legacy-Leaf oder Root-CA-Rotation — siehe §3.1)                   |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Aktives PEM-Zertifikat zum Herunterladen streamen (`ca.crt` beim Root-CA-Modell, `server.crt` bei einer Legacy-Leaf-Installation)          |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Umgehungsmuster auflisten (`default` + `user`)                                                                                             |
+| POST                | `/api/tools/agent-bridge/bypass`               | Benutzerdefinierte Umgehungsmuster vollständig ersetzen                                                                                    |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Ein einzelnes benutzerdefiniertes Umgehungsmuster entfernen                                                                                |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Selbsttest der Erfassungspipeline (siehe §3.6)                                                                                             |
+| POST                | `/api/tools/agent-bridge/repair`               | Verwaisten MITM-Systemzustand rückgängig machen (siehe §3.6)                                                                               |
+| GET                 | `/api/tools/agent-bridge/config`               | Portable Konfiguration als JSON exportieren (siehe §3.7)                                                                                   |
+| POST                | `/api/tools/agent-bridge/config`               | Portable JSON-Konfiguration importieren (siehe §3.7)                                                                                       |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Konfigurierten Pfad zur Upstream-CA abrufen                                                                                                |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Pfad zur Upstream-CA validieren + dauerhaft speichern                                                                                      |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Pfad zu einer Upstream-CA nur validieren (Probelauf) — wird nicht dauerhaft gespeichert                                                    |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Transparenter TPROXY-Decrypt-Erfassungsmodus — siehe `docs/security/MITM-TPROXY-DECRYPT.md` (git; nicht in `/docs` kompiliert)             |
 
 Vollständige OpenAPI-Schemas: `docs/openapi.yaml` → Tag `AgentBridge`.
 

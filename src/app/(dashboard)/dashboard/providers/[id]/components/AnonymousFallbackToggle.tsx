@@ -1,8 +1,10 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 // Issue #8935 — per-provider opt-out for the synthetic anonymous (no-auth)
 // credential fallback on API-key providers whose static definition declares
-// anonymousFallback: true (opencode-go, opencode-zen, pollinations, kilocode).
+// anonymousFallback: true (pollinations, kilocode).
 // Default ON (fallback enabled) when the setting is absent, so existing
 // behavior is preserved for everyone who does not opt out. True no-auth
 // providers (NOAUTH_PROVIDERS / WEB_COOKIE_PROVIDERS) never see this control —
@@ -11,7 +13,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { Card, Toggle } from "@/shared/components";
 import { getProviderAlias, getProviderById } from "@/shared/constants/providers";
 import { useNotificationStore } from "@/store/notificationStore";
 import { providerText } from "../providerPageHelpers";
@@ -161,8 +163,8 @@ export default function AnonymousFallbackToggle({
   return (
     <Card>
       <div className="flex items-center gap-3">
-        <div className="inline-flex shrink-0 items-center justify-center w-10 h-10 rounded-full bg-sky-500/10 text-sky-500">
-          <span className="material-symbols-outlined text-[20px]">key_off</span>
+        <div className="inline-flex shrink-0 items-center justify-center w-10 h-10 rounded-full bg-info/10 text-info">
+          <Icon name="key_off" size={20} />
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-sm font-semibold">{title}</h2>
@@ -174,22 +176,12 @@ export default function AnonymousFallbackToggle({
             )}
           </p>
         </div>
-        <button
-          type="button"
-          aria-pressed={fallbackEnabled}
-          aria-label={title}
+        <Toggle
+          checked={fallbackEnabled}
+          ariaLabel={title}
           disabled={saving}
-          onClick={() => handleToggle(!fallbackEnabled)}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
-            fallbackEnabled ? "bg-sky-500" : "bg-black/[0.12] dark:bg-white/[0.15]"
-          }`}
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-              fallbackEnabled ? "translate-x-[26px]" : "translate-x-[3px]"
-            }`}
-          />
-        </button>
+          onChange={(next) => handleToggle(next)}
+        />
       </div>
     </Card>
   );

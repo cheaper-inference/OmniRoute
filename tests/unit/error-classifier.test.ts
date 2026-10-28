@@ -566,3 +566,22 @@ test("isAnthropicRequestNotAllowed / isAnthropicOAuthProvider helpers", () => {
   assert.equal(isAnthropicOAuthProvider("anthropic"), false);
   assert.equal(isAnthropicOAuthProvider(null), false);
 });
+
+test("#17043: Claude native weekly 429 is quota exhaustion, not an RPM throttle", () => {
+  const payload = {
+    error: { message: "This request would exceed your account's rate limit" },
+  };
+  assert.equal(
+    classifyProviderError(429, payload, "claude"),
+    PROVIDER_ERROR_TYPES.QUOTA_EXHAUSTED
+  );
+  assert.equal(
+    classifyProviderError(429, payload, "openai"),
+    PROVIDER_ERROR_TYPES.RATE_LIMITED,
+    "do not broaden the Claude-specific long-window signal to API-key providers"
+  );
+  assert.equal(
+    classifyProviderError(429, { error: { message: "Too many requests per minute" } }, "claude"),
+    PROVIDER_ERROR_TYPES.RATE_LIMITED
+  );
+});

@@ -1,6 +1,6 @@
 # AgentBridge (Igbo)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/AGENTBRIDGE.md) · 🇪🇹 [am](../../../am/docs/frameworks/AGENTBRIDGE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/AGENTBRIDGE.md) · 🇦🇿 [az](../../../az/docs/frameworks/AGENTBRIDGE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/AGENTBRIDGE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/AGENTBRIDGE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/AGENTBRIDGE.md) · 🇩🇰 [da](../../../da/docs/frameworks/AGENTBRIDGE.md) · 🇩🇪 [de](../../../de/docs/frameworks/AGENTBRIDGE.md) · 🇬🇷 [el](../../../el/docs/frameworks/AGENTBRIDGE.md) · 🇪🇸 [es](../../../es/docs/frameworks/AGENTBRIDGE.md) · 🇪🇪 [et](../../../et/docs/frameworks/AGENTBRIDGE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/AGENTBRIDGE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/AGENTBRIDGE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/AGENTBRIDGE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/AGENTBRIDGE.md) · 🇮🇱 [he](../../../he/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/AGENTBRIDGE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/AGENTBRIDGE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/AGENTBRIDGE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/AGENTBRIDGE.md) · 🇮🇩 [id](../../../id/docs/frameworks/AGENTBRIDGE.md) · 🇮🇹 [it](../../../it/docs/frameworks/AGENTBRIDGE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/AGENTBRIDGE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/AGENTBRIDGE.md) · 🇰🇭 [km](../../../km/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/AGENTBRIDGE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/AGENTBRIDGE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/AGENTBRIDGE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/AGENTBRIDGE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/AGENTBRIDGE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/AGENTBRIDGE.md) · 🇲🇲 [my](../../../my/docs/frameworks/AGENTBRIDGE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/AGENTBRIDGE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/AGENTBRIDGE.md) · 🇳🇴 [no](../../../no/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [or](../../../or/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/AGENTBRIDGE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/AGENTBRIDGE.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/AGENTBRIDGE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/AGENTBRIDGE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/AGENTBRIDGE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/AGENTBRIDGE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/AGENTBRIDGE.md) · 🇱🇰 [si](../../../si/docs/frameworks/AGENTBRIDGE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/AGENTBRIDGE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/AGENTBRIDGE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/AGENTBRIDGE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/AGENTBRIDGE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [te](../../../te/docs/frameworks/AGENTBRIDGE.md) · 🇹🇭 [th](../../../th/docs/frameworks/AGENTBRIDGE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/AGENTBRIDGE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/AGENTBRIDGE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/AGENTBRIDGE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/AGENTBRIDGE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/AGENTBRIDGE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/AGENTBRIDGE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/AGENTBRIDGE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/AGENTBRIDGE.md) · 🇪🇹 [am](../../../am/docs/frameworks/AGENTBRIDGE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/AGENTBRIDGE.md) · 🇦🇿 [az](../../../az/docs/frameworks/AGENTBRIDGE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/AGENTBRIDGE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/AGENTBRIDGE.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/AGENTBRIDGE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/AGENTBRIDGE.md) · 🇩🇰 [da](../../../da/docs/frameworks/AGENTBRIDGE.md) · 🇩🇪 [de](../../../de/docs/frameworks/AGENTBRIDGE.md) · 🇬🇷 [el](../../../el/docs/frameworks/AGENTBRIDGE.md) · 🇪🇸 [es](../../../es/docs/frameworks/AGENTBRIDGE.md) · 🇪🇪 [et](../../../et/docs/frameworks/AGENTBRIDGE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/AGENTBRIDGE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/AGENTBRIDGE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/AGENTBRIDGE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/AGENTBRIDGE.md) · 🇮🇱 [he](../../../he/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/AGENTBRIDGE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/AGENTBRIDGE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/AGENTBRIDGE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/AGENTBRIDGE.md) · 🇮🇩 [id](../../../id/docs/frameworks/AGENTBRIDGE.md) · 🇮🇹 [it](../../../it/docs/frameworks/AGENTBRIDGE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/AGENTBRIDGE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/AGENTBRIDGE.md) · 🇰🇭 [km](../../../km/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/AGENTBRIDGE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/AGENTBRIDGE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/AGENTBRIDGE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/AGENTBRIDGE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/AGENTBRIDGE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/AGENTBRIDGE.md) · 🇲🇲 [my](../../../my/docs/frameworks/AGENTBRIDGE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/AGENTBRIDGE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/AGENTBRIDGE.md) · 🇳🇴 [no](../../../no/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [or](../../../or/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/AGENTBRIDGE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/AGENTBRIDGE.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/AGENTBRIDGE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/AGENTBRIDGE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/AGENTBRIDGE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/AGENTBRIDGE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/AGENTBRIDGE.md) · 🇱🇰 [si](../../../si/docs/frameworks/AGENTBRIDGE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/AGENTBRIDGE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/AGENTBRIDGE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/AGENTBRIDGE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/AGENTBRIDGE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/AGENTBRIDGE.md) · 🇮🇳 [te](../../../te/docs/frameworks/AGENTBRIDGE.md) · 🇹🇭 [th](../../../th/docs/frameworks/AGENTBRIDGE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/AGENTBRIDGE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/AGENTBRIDGE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/AGENTBRIDGE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/AGENTBRIDGE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/AGENTBRIDGE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/AGENTBRIDGE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/AGENTBRIDGE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/AGENTBRIDGE.md)
 
 ---
 
@@ -12,38 +12,38 @@ AgentBridge bụ proxy MITM (Man-in-the-Middle) nke OmniRoute, nke na-egbochi ok
 
 ---
 
-## §1 Nchịkọta
+## Nchịkọta §1
 
-### Gịnị bụ AgentBridge?
+### Kedu ihe bụ AgentBridge?
 
-Mgbe onye nnọchi anya IDE (dịka GitHub Copilot, Cursor, Claude Code) na-eme oku API, ọ na-ejikọta ozugbo na onye na-eweta AI dị n’elu (OpenAI, Anthropic, wdg.). AgentBridge na-egbochi njikọ ahụ n’enweghị ihe onye ọrụ ga-achọpụta na ọkwa TLS — na-achọghị mgbanwe nhazi ọ bụla n’aka onye nnọchi anya — ma degharịa arịrịọ ahụ ka ọ gafee na OmniRoute.
+Mgbe onye nnọchite IDE (dịka, GitHub Copilot, Cursor, koodu Claude ) kpọrọ oku API, ọ na-ejikọ ozugbo na onye na-eweta AI dị elu (OpenAI, Anthropic, wdg). AgentBridge na-egbochi njikọ ahụ n'ụzọ doro anya na ọkwa TLS - na-achọghị mgbanwe nhazi ọ bụla - ma degharịa arịrịọ ahụ site na OmniRoute.
 
 Nke a pụtara na ị nwere ike:
 
-- **Tụgharịa onye nnọchi anya ọ bụla gaa na onye na-eweta ọ bụla**: Copilot na-ekwurịta okwu na OpenAI? Duzie ya gaa na Anthropic Claude, Gemini, ma ọ bụ onye ọ bụla n’ime ndị na-eweta 352 nke OmniRoute.
-- **Tinye mapịng ụdịdị**: `gemini-3-flash` → `claude-sonnet-4.7` n’enweghị ihe onye ọrụ ga-achọpụta n’ọkwa handler.
-- **Lelee okporo niile nke ndị nnọchi anya**: a na-ebipụta arịrịọ ọ bụla e gbochiri na [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Tinye nkwụsi ike nke OmniRoute**: ntụgharị ụzọ ngwakọta, circuit breakers, fallbacks, na nsuso ụgwọ na-arụkwa ọrụ maka okporo ndị nnọchi anya IDE.
+- **Bugharịa onye ọrụ ọ bụla na onye na-eweta ọ bụla** : Copilot na-agwa OpenAI? Bugharịa ya na Anthropic Claude, Gemini, ma ọ bụ nke ọ bụla n'ime ndị na-eweta OmniRoute 377.
+- **Tinye eserese ngosi** : `gemini-3-flash` → `claude-sonnet-4.7` n'ụzọ doro anya na ọkwa njikwa.
+- **Lelee okporo ụzọ ndị nnọchi anya niile** : A na-ebipụta arịrịọ ọ bụla anabatara n'aka [onye nyocha okporo ụzọ](./TRAFFIC_INSPECTOR.md).
+- **Tinye OmniRoute** : combo routing, sekit breakers, fallbacks, na ọnụ ahịa nsochi ọrụ maka IDE nnọchite okporo ụzọ kwa.
 
-### Ọnọdụ ya ma e jiri ya tụnyere ahịa
+### Ndokwa vs. ahịa
 
-| Njirimara              | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ---------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity            |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot         |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)             |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex           |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE             |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries         |    —    |    ✓     |        —        |             ✓             |
-| Claude Code            |    —    |    —     |        ✓        |             ✓             |
-| Open Code              |    —    |    —     |        ✓        |             ✓             |
-| Trae                   |    —    |    —     |        —        |   🔍 A ka na-enyocha ya   |
-| UI Dashboard           |    ✓    |    ✗     |        ✗        |             ✓             |
-| Onye Nyocha Okporo     |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ntugharị ụzọ OmniRoute |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI mapịng ụdịdị        |    ✗    |    ✗     |        ✗        |             ✓             |
-| Ndepụta ngafe          |    ✗    |    ✗     |        ✓        |             ✓             |
-| Asambodo CA dị n’elu   |    ✗    |    ✗     |        ✓        |             ✓             |
+| Njirimara              | 9 router | mgbochi api | lm-interceptor | **OmniRoute AgentBridge** |
+| ---------------------- | :------: | :---------: | :------------: | :-----------------------: |
+| Antigravity            |    ✓     |      ✓      |       —        |             ✓             |
+| GitHub Copilot         |    ✓     |      ✓      |       —        |             ✓             |
+| Kiro (AWS)             |    ✓     |      ✓      |       —        |             ✓             |
+| OpenAI Codex           |    —     |      ✓      |       —        |             ✓             |
+| Cursor IDE             |    ✓     |      ✓      |       —        |             ✓             |
+| Zed Industries         |    —     |      ✓      |       —        |             ✓             |
+| koodu Claude           |    —     |      —      |       ✓        |             ✓             |
+| Mepee koodu            |    —     |      —      |       ✓        |             ✓             |
+| Trae                   |    —     |      —      |       —        |        🔍 Inyocha         |
+| Dashboard UI           |    ✓     |      ✗      |       ✗        |             ✓             |
+| Onye nyocha okporo ụzọ |    ✗     |      ✗      |       ✓        |             ✓             |
+| okporo OmniRoute       |    ✗     |      ✗      |       ✗        |             ✓             |
+| Ụdị nkewa UI           |    ✗     |      ✗      |       ✗        |             ✓             |
+| Ndepụta uzo ngafe      |    ✗     |      ✗      |       ✓        |             ✓             |
+| Asambodo CA elu        |    ✗     |      ✗      |       ✓        |             ✓             |
 
 ---
 
@@ -189,18 +189,18 @@ ndepụta mgbochi hop-by-hop/framing a na-ekekọrịta (gụnyere nyocha njirim
 
 Jiri Kaadị Sava AgentBridge dị na `/dashboard/tools/agent-bridge`:
 
-| Omume                 | Nkọwa                                                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------------------------- |
-| Malite Sava           | Na-amalite `src/mitm/server.cjs` na ọdụ ụgbọ mmiri 443                                                |
-| Kwụsị Sava            | Na-emechi usoro nwa ahụ nke ọma                                                                       |
-| Malitegharị Sava      | Kwụsị + malite (na-etinye mgbanwe ndị e mere na ebumnuche n'ọrụ)                                      |
-| Tụkwasị Asambodo Obi  | Na-etinye `DATA_DIR/mitm/ca.crt` n'ebe OS na-edobe asambodo ntụkwasị obi                              |
-| Budata Asambodo       | Na-ebudata `ca.crt` maka iji aka wụnye ya                                                             |
-| Mepụtaghachi Asambodo | Na-emepụta ụzọ igodo CA ọhụrụ (asambodo niile dị ugbu a nke onye nnọchi anya ọ bụla agaghịzi adị irè) |
+| Omume                | Nkọwa                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Malite Sava          | Na-ebido `src/mitm/server.cjs` na ọdụ ụgbọ mmiri 443. N'okpuru usoro root-CA, ọ na-emepụta `ca.crt` mgbe a malitere ya na nke mbụ ma tụkwasị asambodo na-arụ ọrụ obi ma ọ bụrụ na okwuntughe sudo dị                                                                                                                                                                                                                      |
+| Kwụsị Sava           | Na-emechi usoro nwa ahụ nke ọma                                                                                                                                                                                                                                                                                                                                                                                           |
+| Malite Sava Ọzọ      | Kwụsị + malite (na-etinye mgbanwe ndị e mere na ebumnuche na asambodo e mepụtagharịrị n'ọrụ)                                                                                                                                                                                                                                                                                                                              |
+| Tụkwasị Asambodo Obi | Na-etinye asambodo na-arụ ọrụ n'ebe OS na-edowe asambodo ndị a tụkwasịrị obi: `DATA_DIR/mitm/ca.crt` n'okpuru usoro root-CA, `DATA_DIR/mitm/server.crt` na nrụnye legacy-leaf                                                                                                                                                                                                                                             |
+| Budata Asambodo      | Na-ebudata asambodo na-arụ ọrụ maka iji aka tinye ya (`omniroute-mitm-ca.crt` = `ca.crt`, ma ọ bụ `omniroute-mitm.crt` = `server.crt` na nrụnye legacy-leaf)                                                                                                                                                                                                                                                              |
+| Mepụta Asambodo Ọzọ  | Ọ naghị agbanwe usoro asambodo ma ọlị. Nrụnye legacy-leaf: na-emepụta `server.crt`/`server.key` ọhụrụ (malite sava ọzọ ka o jiri ya rụọ ọrụ). Usoro root-CA: na-agbanwe `ca.crt`/`ca.key`, a ga-ajụ ime nke a mgbe sava na-arụ ọrụ; a ga-ebu ụzọ wepụ ntụkwasị obi n'aka CA ochie a tụkwasịrị obi (ọ chọrọ okwuntughe sudo), ma ọ bụghị ya, a ga-akwụsị mgbanwe ahụ. Ndị ahịa ga-atụkwasị CA ọhụrụ ahụ obi ọzọ ma emechaa |
 
 ### 3.2 Tụkwasị asambodo ahụ obi
 
-OS ga-atụkwasịrịrị asambodo CA nke AgentBridge obi tupu IDE anabata njikọ MITM ahụ.
+OS ga-atụkwasịrịrị asambodo CA nke AgentBridge obi tupu IDE anabata njikọ MITM.
 
 **Linux (NSS — Chrome/Firefox):**
 
@@ -221,104 +221,113 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Ma ọ bụ jiri bọtịnụ "Tụkwasị Asambodo Obi" dị na dashboard (ọ na-eme iwu kwesịrị ekwesị maka OS gị, tinyere arịrịọ sudo ma ọ bụrụ na achọrọ ya).
+Ma ọ bụ jiri bọtịnụ "Tụkwasị Asambodo Obi" dị na dashboard (ọ na-agba iwu kwesịrị ekwesị maka OS gị, yana arịrịọ sudo ma ọ bụrụ na ọ dị mkpa).
 
-#### IDE ndị dabeere na Electron anaghị eji ebe OS na-edobe asambodo ntụkwasị obi (`NODE_EXTRA_CA_CERTS`)
+#### IDE ndị dabere na Electron na-eleghara ebe OS na-edowe asambodo ndị a tụkwasịrị obi anya (`NODE_EXTRA_CA_CERTS`)
 
-Ụfọdụ IDE — karịsịa **Antigravity IDE**, na ngwa ndị ọzọ sitere na Electron / VS Code — na-etinye
-runtime Node.js nke ha, nke **na-adịghị eleba anya n'ebe OS na-edobe asambodo ntụkwasị obi** maka
-`fetch`/HTTPS na-apụ apụ. Ịtụkwasị CA obi n'ọkwa OS/NSS zuru ezu maka **backend** nke IDE
-dị ka ọ dị n'ime sistemụ (dịka ọmụmaatụ, sava asụsụ Go, nke na-eji ngwugwu CA nke OS), mana
-**frontend Electron** ka ga-enwe ọdịda TLS — nke a na-apụta dịka a _kpọpụla onye ọrụ_ na ngwa ahụ
-ma ọ bụ na ọ na-egosi _"njehie njikọ"_ n'agbanyeghị na ndekọ MITM na-egosi na oku mbido nke
-backend na-eweghachi `200`. A chọrọ usoro abụọ, ha abụọ dịkwa mkpa:
+Ụfọdụ IDE — ọkachasị **Antigravity IDE**, na ngwa ndị ọzọ sitere na Electron / VS Code — nwere
+runtime Node.js nke ha nke **na-adịghị enyocha ebe OS na-edowe asambodo ndị a tụkwasịrị obi** maka
+`fetch`/HTTPS na-apụ apụ. Ịtụkwasị CA obi n'ọkwa OS/NSS ezuola maka **backend** ebumpụta ụwa nke IDE
+(dịka ọmụmaatụ, sava asụsụ Go, nke na-eji nchịkọta CA nke OS), mana **frontend Electron** ka ga-enwe
+ọdịda TLS — nke a na-apụta dị ka ngwa ahụ _apụla na akaụntụ_ ma ọ bụ na-egosi _"njehie njikọ"_
+ọ bụ ezie na ndekọ MITM na-egosi na oku mmalite nke backend na-eweghachi `200`. A chọrọ usoro abụọ,
+ha abụọ dịkwa mkpa:
 
-1. Tụnye runtime aka na CA ahụ kpọmkwem:
+1. Gosi runtime ebe CA dị kpọmkwem:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **Si na shell ahụ malite IDE.** Ịmalite ya site na akara ngosi desktop / Dock / menu Start
-   **anaghị** eketa exports nke shell, ebe `~/.config/environment.d/*.conf` na-amalite ịrụ ọrụ naanị
-   mgbe nbanye eserese ọhụrụ gasịrị. Buru ụzọ mechie IDE kpamkpam — mkpọchi singleton nke Electron
-   pụtara na mbido nke abụọ ga-elekwasị naanị anya n'usoro dị ugbu a, a ga-elegharakwa gburugburu ọhụrụ ahụ anya.
+2. **Malite IDE site na shell ahụ.** Ịmalite ya site na akara ngosi desktọpụ / Dock / menu Start
+   **anaghị** eketa exports nke shell, `~/.config/environment.d/*.conf` na-amalitekwa ịrụ ọrụ naanị
+   mgbe ị banyere ọzọ na nnọkọ eserese ọhụrụ. Mechie IDE kpamkpam na mbụ — mkpọchi singleton nke Electron
+   pụtara na mmalite nke abụọ ga-elekwasị naanị anya na usoro dị adị, a ga-elegharịa gburugburu ọhụrụ ahụ anya.
 
-Usoro OS-trust + NSS dị n'elu ka dị mkpa (ngwugwu netwọkụ Chromium nke ụfọdụ usoro
-njirimara na-eji na-agụ ebe NSS nke onye ọrụ ọ bụla na-edobe asambodo, ma nwee pin static nke ya
-maka `*.googleapis.com` nke CA a tụkwasịrị obi n'ime mpaghara ahụ na-akagbu). `NODE_EXTRA_CA_CERTS`
-na-ekpuchi ụzọ `fetch` nke Node n'elu nke ahụ.
+Usoro ntụkwasị obi OS + NSS dị n'elu ka dị mkpa (usoro netwọkụ Chromium nke ụfọdụ usoro
+nnwapụta na-eji na-agụ ebe NSS nke onye ọrụ na-edowe asambodo, o nwekwara pins static nke ya maka
+`*.googleapis.com` nke CA a tụkwasịrị obi n'ime igwe na-akagbu). `NODE_EXTRA_CA_CERTS` na-ekpuchi
+ụzọ Node `fetch` n'elu ya.
 
-### 3.3 Nduzi DNS
+### 3.3 Ndugharị DNS
 
-Maka onye nnọchi anya ọ bụla ịchọrọ ijide, host API ya ga-edozirịrị gaa na `127.0.0.1`. AgentBridge na-ejikwa ndenye `/etc/hosts` na-akpaghị aka mgbe ị gbanwere DNS maka onye nnọchi anya na Ọkachamara Nhazi.
+Maka agent ọ bụla ịchọrọ ijide, host API ya ga-edozi gaa na `127.0.0.1`. AgentBridge na-ejikwa ndenye `/etc/hosts` na-akpaghị aka mgbe ị gbanyere ma ọ bụ gbanyụọ DNS maka agent n'ime Ọkachamara Nhazi.
 
-Ọmụmaatụ ndenye `/etc/hosts` maka GitHub Copilot:
+Ihe atụ ndenye `/etc/hosts` maka GitHub Copilot:
 
 ```
 127.0.0.1 api.githubcopilot.com
 127.0.0.1 copilot-proxy.githubusercontent.com
 ```
 
-### 3.4 Nhazi njikọ model
+### 3.4 Njikọ model
 
-Jiri Tebụl Nhazi Njikọ Model dị na kaadị onye nnọchi anya ọ bụla kọwaa njikọ source → target:
+Jiri Tebụl Njikọ Model dị na kaadị agent ọ bụla kọwaa njikọ site na isi mmalite → ebumnuche:
 
-| Model isi mmalite (nke onye nnọchi anya) | Model ebumnuche (OmniRoute) |
-| ---------------------------------------- | --------------------------- |
-| `gpt-4o`                                 | `claude-sonnet-4.7`         |
-| `*` (wildcard)                           | `claude-haiku-4.7`          |
+| Model isi mmalite (nke agent n'onwe ya) | Model ebumnuche (OmniRoute) |
+| --------------------------------------- | --------------------------- |
+| `gpt-4o`                                | `claude-sonnet-4.7`         |
+| `*` (wildcard)                          | `claude-haiku-4.7`          |
 
-Wildcard `*` na-ejikọta model ọ bụla a na-amaghị na ebumnuche akọwapụtara. A na-echekwa ya na tebụl `agent_bridge_mappings`.
+Wildcard `*` na-ejikọta model ọ bụla a na-amataghị na ebumnuche akọwapụtara. A na-echekwa ya n'ime tebụl `agent_bridge_mappings`.
 
-> **Ndụmọdụ — chọpụta ezigbo ID model nke onye nnọchi anya.** IDE nwere ike izipu aha model dị iche na
-> akara ndị dị na UI ya, aha ndị ahụ nwekwara ike ịgbanwe n'etiti ụdị nsụgharị ukwu. Dịka ọmụmaatụ,
-> **Antigravity 2** na-eziga `gemini-3.1-pro-low`, `gemini-pro-agent`, na `gemini-3.1-flash-lite`
-> site na netwọkụ — ọ bụghị `gemini-2.5-pro` egosiri na dọkụmentị ochie. Zipụ otu nkata mgbe
-> enweghị nhazi njikọ dabara adaba: MITM ga-edekọ `model:` batara kpọmkwem ma hapụ arịrịọ ahụ ka ọ gafee.
-> Jikọta uru ahụ kpọmkwem, mgbe ahụ a ga-ejide arịrịọ na-esote ma duzie ya gaa na ebumnuche gị.
+> **Ndụmọdụ — chọpụta ezigbo ID ụdị nke agent ahụ.** IDE nwere ike izipu aha ụdị ndị dị iche na
+> akara aha dị na UI ya, ndị ahụ nwekwara ike ịgbanwe n'etiti ụdị ukwu. Dịka ọmụmaatụ, **Antigravity 2** na-eziga
+> `gemini-3.1-pro-low`, `gemini-pro-agent`, na `gemini-3.1-flash-lite` site na netwọkụ — ọ bụghị
+> `gemini-2.5-pro` nke egosiri na dọkụmentị ochie. Ziga otu nkata mgbe enweghị mapping kwekọrọ etinyere: MITM
+> ga-edekọ `model:` batara kpọmkwem ma nyefee arịrịọ ahụ ka ọ gafere. Tinye uru ahụ kpọmkwem na mapping, mgbe ahụ
+> a ga-ejide arịrịọ na-esote ma ziga ya na target gị.
 
-### 3.5 Ọkwa banyere ihe ize ndụ
+### 3.5 Ọkwa gbasara ihe ize ndụ
 
-AgentBridge na-ejide nzere (token OAuth, igodo API) nke IDE na-eji egosi ndị na-eweta ọrụ dị n'elu njirimara ya. A na-**ekpuchi ha tupu e dekọọ ha** (lee §2.7), mana oyi akwa MITM nke OmniRoute nwere ike ịhụ ha. Mgbe a na-eme ka onye nnọchi anya ọ bụla rụọ ọrụ nke mbụ, a na-egosi modal ọkwa ihe ize ndụ nke enwere ike imechi.
+AgentBridge na-ejide credentials (OAuth tokens, API keys) nke IDE na-eji akwado njirimara ya n'aka ndị na-eweta ọrụ upstream. A na-**ekpuchi ha tupu e dekọọ ha** (lee §2.7), mana oyi akwa MITM nke OmniRoute nwere ike ịhụ ha. Mgbe a na-arụ ọrụ agent ọ bụla na nke mbụ, a na-egosi modal ọkwa gbasara ihe ize ndụ nke enwere ike imechi.
 
-### 3.6 Nlekọta & Nchọpụta Nsogbu
+### 3.6 Nlekọta & Nchọpụta nsogbu
 
-Dashboard ahụ na-egosi kaadị **Nlekọta & Nchọpụta Nsogbu** (`AgentBridgeMaintenanceCard`, dị na `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) nke na-eme ka ụzọ ọrụ MITM ndị na-enweghị UI na mbụ pụta ìhè. Ndepụta okwu nta ya bụ: _"Nwalee pipeline njide n'onwe ya, kagbuo ọnọdụ sistemụ fọdụrụ, ma bugharịa nhazi gị n'etiti igwe."_ Ihe enyemaka client nke kaadị ahụ dị na `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+Dashboard ahụ na-egosi kaadị **Nlekọta & Nchọpụta nsogbu** (`AgentBridgeMaintenanceCard`, dị na `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) nke na-eme ka ụzọ MITM eji arụ ọrụ, ndị na-enweghị UI na mbụ, pụta ìhè. Subtitle ya bụ: _"Nwalee pipeline njide ahụ n'onwe ya, kagbuo ọnọdụ sistemụ fọdụrụ, ma bugharịa nhazi gị n'etiti igwe."_ Client helpers nke kaadị ahụ dị na `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| Bọtịnụ           | Ụzọ                                    | Ihe ọ na-eme                                                                                                                                                                                                                 |
-| ---------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Nyochaa**      | `GET /api/tools/agent-bridge/diagnose` | Na-eme nnwale-onwe nke capture-pipeline ma gosipụta akụkọ maka nyocha ọ bụla (✓/✗ + ntụnye maka idozi nsogbu).                                                                                                               |
-| **Dozie**        | `POST /api/tools/agent-bridge/repair`  | Na-eweghachi ọnọdụ sistemụ MITM fọdụrụ n’enweghị onye na-achịkwa ya (ndekọ DNS spoof, root CA, proxy sistemụ) nke mkpọka ma ọ bụ SIGKILL hapụrụ. Ọ bụ idempotent — ọ na-akọ "Ọ dịghị ihe a ga-edozi" mgbe ọnọdụ ahụ dị ọcha. |
-| **Wepụ CA**      | `DELETE /api/tools/agent-bridge/cert`  | Na-ewepụ ntụkwasị obi ma wepụkwa MITM root CA na ebe OS na-edobe asambodo ntụkwasị obi (n'ụzọ doro anya, idempotent). A na-egosi ya naanị mgbe a tụkwasịrị CA obi ugbu a; ọ chọrọ nkwenye "Wepụ CA?" n’otu ahịrị.            |
-| **Bupụ nhazi**   | `GET /api/tools/agent-bridge/config`   | Na-ebudata JSON nhazi a pụrụ ibugharị (lee §3.7).                                                                                                                                                                            |
-| **Bubata nhazi** | `POST /api/tools/agent-bridge/config`  | Na-ebugote JSON nhazi e buburu na mbụ (lee §3.7).                                                                                                                                                                            |
+| Bọtịnụ             | Ụzọ                                    | Ihe ọ na-eme                                                                                                                                                                                                     |
+| ------------------ | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Chọpụta nsogbu** | `GET /api/tools/agent-bridge/diagnose` | Na-eme nnwale onwe nke capture-pipeline ma gosi akụkọ maka nyocha ọ bụla (✓/✗ + ntụnye ndozi).                                                                                                                   |
+| **Dozie**          | `POST /api/tools/agent-bridge/repair`  | Na-akagbu ọnọdụ sistemụ MITM na-enweghị onye na-elekọta ya (ndekọ DNS spoof, root CA, system proxy) nke crash ma ọ bụ SIGKILL hapụrụ. Ọ bụ idempotent — na-akọ "Ọ nweghị ihe a ga-edozi" mgbe ọnọdụ ahụ dị ọcha. |
+| **Wepụ CA**        | `DELETE /api/tools/agent-bridge/cert`  | Na-akwụsị ịtụkwasị MITM root CA obi ma wepụ ya na OS trust store (n'ụzọ doro anya, idempotent). A na-egosi ya naanị mgbe a tụkwasịrị CA ahụ obi ugbu a; ọ chọrọ nkwenye inline "Wepụ CA?".                       |
+| **Bupụ config**    | `GET /api/tools/agent-bridge/config`   | Na-ebudata config JSON enwere ike ibugharị (lee §3.7).                                                                                                                                                           |
+| **Bubata config**  | `POST /api/tools/agent-bridge/config`  | Na-ebugote config JSON e bupụrụ na mbụ (lee §3.7).                                                                                                                                                               |
 
-**Nyocha nchọpụta nsogbu** (`summarizeDiagnostics()` dị na `src/mitm/inspector/diagnostics.ts`). Ụzọ ahụ na-eme probe nwere mmetụta maka nke ọ bụla ma nyefee ụkpụrụ boolean ndị ahụ n’aka summarizer dị ọcha; ọ na-eweghachi otu mkpebi `healthy` tinyere ntụnye maka ọdịda nke ọ bụla:
+Kaadị agent ọ bụla nwekwara bọtịnụ **Weghachite ndabara** nke ya (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) — mmegharị otu ọpịpị, maka agent ọ bụla, nke na-ewepụ spoof naanị na
+hosts nke agent ahụ, na-ehichapụ model mappings ya echekwara, ma tọgharịa ọnọdụ `dns_enabled`/`setup_completed`
+ya, ka IDE wee malite ịgwa ezigbo upstream okwu ọzọ ozugbo ebidogharịrị ya kpamkpam. Ọ **naghị** emetụ
+MITM server ma ọ bụ root CA nke a na-ekekọrịta aka (agents ndị ọzọ ka nwere ike ịdabere na ha) — ndị ahụ ka nwere ike iru
+site na Server Card na omume **Wepụ CA** dị n'elu. Na Windows, ọ na-agbalịkwa ime
+`ipconfig /flushdns`, n'ihi na Windows DNS Client na-echekwa ndenye hosts-file na cache ma ọ gaghị ewepụ
+spoof e wepụrụ ozugbo ma emeghị nke a.
 
-| Aha nyocha         | Ihe ọ na-enyocha                                        | Ntụnye mgbe ọ dara                                                                                                                                  |
-| ------------------ | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | Usoro sava MITM na-arụ ọrụ                              | "Sava MITM anaghị arụ ọrụ. Malite ya site na taabụ AgentBridge."                                                                                    |
-| `server-reachable` | Sava MITM na-anabata njikọ na port ya (TCP probe)       | "Sava MITM anaghị anabata njikọ na port ya. Lelee na port ahụ dị ohere nakwa na i nwere ikike ijikọ ya."                                            |
-| `cert-exists`      | E mepụtala asambodo MITM na diski                       | "E mepụtabeghị asambodo MITM ọ bụla. Mepụta otu site na taabụ AgentBridge."                                                                         |
-| `cert-trusted`     | MITM root CA dị n’ebe OS na-edobe asambodo ntụkwasị obi | "Ebe OS na-edobe asambodo ntụkwasị obi atụkwasịghị MITM root CA obi, ya mere njide TLS ga-ada. Tụkwasị asambodo ahụ obi site na taabụ AgentBridge." |
-| `dns-configured`   | E mere spoof nke target hostnames na `/etc/hosts`       | "E meghị spoof nke target hostnames na /etc/hosts, ya mere traffic anaghị erute proxy. Kwado DNS maka agent ndị ịchọrọ ijide."                      |
+**Nnyocha nchọpụta nsogbu** (`summarizeDiagnostics()` dị na `src/mitm/inspector/diagnostics.ts`). Ụzọ ahụ na-eme probe nwere mmetụta maka nke ọ bụla ma tinye booleans ndị ahụ n'ime pure summarizer; a na-eweghachi otu mkpebi `healthy` yana ntụnye maka ọdịda ọ bụla:
 
-**Ọkwa orphaned-state:** mgbe peeji ahụ chọpụtara ọnọdụ mkpọka hapụrụ (DNS spoof / CA / proxy sistemụ), kaadị ahụ na-egosi ọkwa agba amber — _"Oge ọrụ gara aga hapụrụ ọnọdụ sistemụ (DNS spoof, CA, ma ọ bụ proxy sistemụ). Gbaa Dozie ka ihichapụ ya."_ — ma mee ka bọtịnụ **Dozie** pụta ìhè. `Repair` bụ ihe kwekọrọ na flag `--cleanup` nke ProxyBridge n’ọkwa ngwa (ọ na-enyefe ọrụ ahụ na `repairMitm()` dị na `src/mitm/manager.ts`).
+| Aha nyocha         | Ihe ọ na-enyocha                                       | Ndụmọdụ mgbe ọ dara                                                                                                                |
+| ------------------ | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | Process MITM server na-arụ ọrụ                         | "MITM server anaghị arụ ọrụ. Bido ya site na taabụ AgentBridge."                                                                   |
+| `server-reachable` | MITM server na-anabata njikọ na port ya (TCP probe)    | "MITM server anaghị anabata njikọ na port ya. Lelee na port ahụ dị ohere nakwa na i nwere ikike ijikọ ya."                         |
+| `cert-exists`      | E mepụtala certificate MITM na disk                    | "E mepụtabeghị certificate MITM ọ bụla. Mepụta otu site na taabụ AgentBridge."                                                     |
+| `cert-trusted`     | MITM root CA dị na OS trust store                      | "OS store atụkwasịghị MITM root CA obi, ya mere njide TLS ga-ada. Tụkwasị certificate ahụ obi site na taabụ AgentBridge."          |
+| `dns-configured`   | E tinyela spoof na target hostnames n'ime `/etc/hosts` | "E tinyebeghị spoof na target hostnames n'ime /etc/hosts, ya mere traffic anaghị eru proxy. Kwado DNS maka agent(s) ịchọrọ ijide." |
 
-> A na-ahapụ MITM root CA ka ọ nọgide arụnyere n’agbanyeghị nkwụsị/mmalite iji zere arịrịọ sudo
-> ugboro ugboro (otu omume ahụ mitmproxy/Charles na-eji), ya mere iwepụ ya bụ ọrụ
+**Banner ọnọdụ na-enweghị onye na-elekọta ya:** mgbe peeji ahụ chọpụtara ọnọdụ crash hapụrụ (DNS spoof / CA / system proxy), kaadị ahụ na-egosi banner amber — _"Session gara aga hapụrụ ọnọdụ sistemụ (DNS spoof, CA, ma ọ bụ system proxy). Mee Dozie iji kpochapụ ya."_ — ma mee ka bọtịnụ **Dozie** pụta ìhè. `Repair` bụ application-layer analogue nke flag `--cleanup` nke ProxyBridge (ọ na-enyefe ọrụ ahụ na `repairMitm()` dị na `src/mitm/manager.ts`).
+
+> A na-edobe CA mgbọrọgwụ MITM ka ọ dịgide mgbe a kwụsịrị/maliteghachiri ya iji zere arịrịọ sudo
+> ugboro ugboro (otu omume ahụ dị na mitmproxy/Charles), ya mere iwepụ ya bụ omume
 > **Wepụ CA** doro anya kama ịbụ ihe na-eme na-akpaghị aka mgbe a kwụsịrị ya.
 
-### 3.7 Mbubata/mbupụ nhazi a pụrụ ibugharị
+### 3.7 Mbubata/mbupụ nhazi enwere ike ibugharị
 
-AgentBridge nwere ike ịtụgharị ọnọdụ **onye na-arụ ọrụ nwere ike ịhazigharị** ka ọ bụrụ ngwugwu JSON nwere ụdị mbipụta, ka e nwee ike imepụtaghachi nhazi ahụ n’igwe dị iche iche. Serializer ahụ bụ `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), nke `AgentBridgeConfigSchema` na-enyocha.
+AgentBridge nwere ike ịtụgharị ọnọdụ ndị **onye njikwa nwere ike ịgbanwe** ka ọ bụrụ data JSON nwere ụdị mbipụta, ka e nwee ike imepụtaghachi otu nhazi ahụ n'igwe dị iche iche. Serializer ahụ bụ `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), nke `AgentBridgeConfigSchema` na-enyocha.
 
-Mbupụ ahụ nwere kpọmkwem akụkụ atọ (a kpachapụrụ anya **ỊGHỊ** ebupụ ụkpụrụ ndabara arụnyere n’ime ya, ka mbubata ghara imepụtaghachi ha ugboro abụọ ma ọ bụ ịlụso ha ọgụ):
+Mbupụ ahụ nwere kpọmkwem akụkụ atọ (a na-ama ụma **AGHỊ** ebupụ ndabara ndị arụnyere n'ime ya, ka mbubata ghara imepụtaghachi ha ugboro abụọ ma ọ bụ megide ha):
 
-| Field            | Isi mmalite                                                   | Nkọwa                                                                  |
-| ---------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `bypassPatterns` | bypass patterns onye ọrụ kọwara (`agent_bridge_bypass`)       | ewepụrụ pattern ndabara nke bank/gov/okta                              |
-| `customHosts`    | custom hosts nke Traffic Inspector (`inspector_custom_hosts`) | nke ọ bụla: `{ host, kind: "llm"\|"app"\|"custom", label? }`           |
-| `agentMappings`  | model mappings nke agent ọ bụla (`agent_bridge_mappings`)     | `{ [agentId]: [{ source, target }] }` maka agent ọ bụla nwere mappings |
+| Fịldụ            | Isi mmalite                                                   | Nkọwa                                                               |
+| ---------------- | ------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `bypassPatterns` | ụkpụrụ ngafe onye ọrụ kọwara (`agent_bridge_bypass`)          | ewepụrụ ụkpụrụ ndabara bank/gov/okta                                |
+| `customHosts`    | host omenala nke Traffic Inspector (`inspector_custom_hosts`) | nke ọ bụla: `{ host, kind: "llm"\|"app"\|"custom", label? }`        |
+| `agentMappings`  | njikọ model nke agent ọ bụla (`agent_bridge_mappings`)        | `{ [agentId]: [{ source, target }] }` maka agent ọ bụla nwere njikọ |
 
 ```jsonc
 // GET /api/tools/agent-bridge/config
@@ -332,13 +341,13 @@ Mbupụ ahụ nwere kpọmkwem akụkụ atọ (a kpachapụrụ anya **ỊGHỊ
 }
 ```
 
-**Omume mbubata** (`POST /api/tools/agent-bridge/config`): bypass patterns na mappings nke agent ọ bụla **na-anọchi ihe niile**; a na-agbakwunye custom hosts **n’ụzọ idempotent** (`INSERT OR IGNORE`). Nzaghachi ahụ na-akọ ole n’ime nke ọ bụla etinyere:
+**Omume mbubata** (`POST /api/tools/agent-bridge/config`): ụkpụrụ ngafe na njikọ model nke agent ọ bụla na-anọchi ndị dịbu **kpamkpam**; a na-agbakwunye host omenala n'ụzọ **idempotent** (`INSERT OR IGNORE`). Nzaghachi ahụ na-akọ ọnụọgụ nke ọ bụla etinyere:
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Ihe ndị **NA-ADỊGHỊ** na nhazi ahụ: ọnọdụ ọrụ sava, ụzọ faịlụ asambodo, ọnọdụ DNS nke onye nnọchi anya ọ bụla, ụzọ upstream CA, na ntọala TPROXY — ihe ndị ahụ bụ ọnọdụ host/runtime, ọ bụghị mmasị ndị enwere ike ibugharị.
+Ihe **NA-ADỊGHỊ** na nhazi ahụ: ọnọdụ ma sava ọ na-arụ ọrụ, ụzọ cert, ọnọdụ DNS nke agent ọ bụla, ụzọ CA upstream, na ntọala TPROXY — ihe ndị ahụ bụ ọnọdụ host/runtime, ọ bụghị mmasị enwere ike ibugharị.
 
 ---
 
@@ -498,39 +507,40 @@ Nchọpụta akpaka na-eji ụzọ nrụnye ndị a na-ejikarị. Ọ bụrụ n
 
 ## §7 Ntụaka API
 
-Ụzọ niile bụ `LOCAL_ONLY` (naanị loopback, a na-amanye ya tupu auth) na `SPAWN_CAPABLE`. Lee `src/server/authz/routeGuard.ts`.
+Ụzọ niile bụ `LOCAL_ONLY` (naanị loopback, a na-amanye nke a tupu nyocha ikike) na `SPAWN_CAPABLE`. Lee `src/server/authz/routeGuard.ts`.
 
 Ụzọ ntọala: `/api/tools/agent-bridge/`
 
-| Usoro               | Ụzọ                                            | Nkọwa                                                                                                                                               |
-| ------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | Ọnọdụ sava zuru ụwa ọnụ + nchọpụta/ọnọdụ nke onye nnọchi anya ọ bụla                                                                                |
-| GET                 | `/api/tools/agent-bridge/agents`               | Ndepụta ndị nnọchi anya edebanyere aha (id, aha, hosts, ikike ịrụ ọrụ, ọnọdụ)                                                                       |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Ọnọdụ otu onye nnọchi anya (nhazi ebumnuche + nchọpụta + ọnọdụ echekwara)                                                                           |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Melite `setup_completed` maka onye nnọchi anya                                                                                                      |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Gbaa nyocha nchọpụta maka onye nnọchi anya (`installed`, `version?`, `path?`)                                                                       |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Gbanye/gبanyụọ DNS maka onye nnọchi anya (`{enabled: boolean}`)                                                                                     |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Njikọ ụdị maka onye nnọchi anya                                                                                                                     |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Dochie njikọ ụdị                                                                                                                                    |
-| POST                | `/api/tools/agent-bridge/server`               | Malite/kwụsị/malitegharịa sava (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                              |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Ọnọdụ asambodo (`exists`, `trusted`, `path`)                                                                                                        |
-| POST                | `/api/tools/agent-bridge/cert`                 | Tụkwasị MITM root CA obi (wụnye ya)                                                                                                                 |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | Wepụ ntụkwasị obi na MITM root CA (wepụ ya) — idempotent (lee §3.6)                                                                                 |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Mepụta asambodo MITM nke aka ya bịanyere aka ọzọ                                                                                                    |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | Zipụ asambodo PEM dịka iyi data maka nbudata                                                                                                        |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Depụta ụkpụrụ ngafe (`default` + `user`)                                                                                                            |
-| POST                | `/api/tools/agent-bridge/bypass`               | Dochie ụkpụrụ ngafe ndị onye ọrụ kọwara n'ozuzu ha                                                                                                  |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Wepụ otu ụkpụrụ ngafe onye ọrụ kọwara                                                                                                               |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Nnwale onwe nke usoro njide (lee §3.6)                                                                                                              |
-| POST                | `/api/tools/agent-bridge/repair`               | Kagbuo ọnọdụ sistemụ MITM nke fọdụrụ n'enweghị njikọ (lee §3.6)                                                                                     |
-| GET                 | `/api/tools/agent-bridge/config`               | Bupụ nhazi JSON enwere ike ibugharị (lee §3.7)                                                                                                      |
-| POST                | `/api/tools/agent-bridge/config`               | Bubata nhazi JSON enwere ike ibugharị (lee §3.7)                                                                                                    |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Nweta ụzọ upstream CA ahaziri                                                                                                                       |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Nyochaa + chekwaa ụzọ upstream CA                                                                                                                   |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Nyochaa naanị (dry-run) ụzọ upstream CA — anaghị echekwa ya                                                                                         |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Ụdị njide TPROXY nke na-eme mkpochapụ izo ya ezo n'ụzọ doro anya — lee `docs/security/MITM-TPROXY-DECRYPT.md` (git; anaghị etinye ya n'ime `/docs`) |
+| Usoro               | Ụzọ                                            | Nkọwa                                                                                                                         |
+| ------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | Ọnọdụ sava zuru ụwa ọnụ + nchọpụta/ọnọdụ nke onye nnọchi anya ọ bụla                                                          |
+| GET                 | `/api/tools/agent-bridge/agents`               | Depụta ndị nnọchi anya edebanyere aha (id, aha, ndị nnabata, ike ịrụ ọrụ, ọnọdụ)                                              |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Ọnọdụ otu onye nnọchi anya (nhazi ebumnuche + nchọpụta + ọnọdụ echekwara)                                                     |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Melite `setup_completed` maka onye nnọchi anya                                                                                |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Gbaa nyocha nchọpụta maka onye nnọchi anya (`installed`, `version?`, `path?`)                                                 |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Gbanye/gbanyụọ DNS maka onye nnọchi anya (`{enabled: boolean}`)                                                               |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Njikọ ụdịdị maka onye nnọchi anya                                                                                             |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Dochie njikọ ụdịdị                                                                                                            |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Weghachite ndabara: wepụ ngbanwe adịgboroja DNS nke onye nnọchi anya a, hichapụ njikọ ya, tọgharịa ọnọdụ ya (lee §3.6)        |
+| POST                | `/api/tools/agent-bridge/server`               | Malite/kwụsị/malitegharịa sava (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                        |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Ọnọdụ asambodo (`exists`, `trusted`, `path`)                                                                                  |
+| POST                | `/api/tools/agent-bridge/cert`                 | Tụkwasị MITM root CA obi (wụnye ya)                                                                                           |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | Kwụsị ịtụkwasị MITM root CA obi (wepụ ya) — idempotent (lee §3.6)                                                             |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Mepụta asambodo nọ n'ọrụ ọzọ n'agbanweghị ụdị asambodo ahụ (legacy leaf, ma ọ bụ ntụgharị root-CA — lee §3.1)                 |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Ziga asambodo PEM nọ n'ọrụ dị ka iyi maka nbudata (`ca.crt` n'okpuru ụdị root-CA, `server.crt` na nrụnye legacy-leaf)         |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Depụta ụkpụrụ ngafe (`default` + `user`)                                                                                      |
+| POST                | `/api/tools/agent-bridge/bypass`               | Dochie ụkpụrụ ngafe ndị onye ọrụ kọwara n'ozuzu ha                                                                            |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Wepụ otu ụkpụrụ ngafe onye ọrụ kọwara                                                                                         |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Nnwale onwe nke pipeline njide (lee §3.6)                                                                                     |
+| POST                | `/api/tools/agent-bridge/repair`               | Kagbuo ọnọdụ sistemụ MITM fọdụrụ n'enweghị onye nwe ya (lee §3.6)                                                             |
+| GET                 | `/api/tools/agent-bridge/config`               | Bupụ JSON nhazi enwere ike ibugharị (lee §3.7)                                                                                |
+| POST                | `/api/tools/agent-bridge/config`               | Bubata JSON nhazi enwere ike ibugharị (lee §3.7)                                                                              |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Nweta ụzọ upstream CA ahaziri                                                                                                 |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Nyochaa + chekwaa ụzọ upstream CA                                                                                             |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Naanị nyochaa (dry-run) ụzọ upstream CA — anaghị echekwa ya                                                                   |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Ọnọdụ njide transparent-decrypt nke TPROXY — lee `docs/security/MITM-TPROXY-DECRYPT.md` (git; anaghị etinye ya n'ime `/docs`) |
 
-Schema OpenAPI zuru ezu: `docs/openapi.yaml` → mkpado `AgentBridge`.
+Schemas OpenAPI zuru ezu: `docs/openapi.yaml` → mkpado `AgentBridge`.
 
 ---
 

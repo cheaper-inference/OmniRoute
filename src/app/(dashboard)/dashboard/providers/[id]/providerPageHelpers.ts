@@ -10,6 +10,8 @@ import {
   MODEL_COMPAT_PROTOCOL_KEYS,
   type ModelCompatProtocolKey,
 } from "@/shared/constants/modelCompat";
+import { type ModelSupportedEndpoint } from "@/shared/constants/modelSupportedEndpoints";
+import { isHiddenForModality } from "@/shared/utils/modelVisibility";
 import {
   getClaudeCodeCompatibleRequestDefaults as _getClaudeCodeCompatibleRequestDefaults,
   getCodexRequestDefaults as _getCodexRequestDefaults,
@@ -82,13 +84,20 @@ export type CompatModelRow = {
   source?: string;
   apiFormat?: string;
   supportedEndpoints?: string[];
+  endpointCapabilitySource?: string;
   normalizeToolCallId?: boolean;
   preserveOpenAIDeveloperRole?: boolean;
   isHidden?: boolean;
+  /** #12172: per-modality visibility overrides (`{ chat: true }`) — see `isHiddenForModality`. */
+  hiddenModalities?: Record<string, boolean>;
   upstreamHeaders?: Record<string, string>;
   compatByProtocol?: CompatByProtocolMap;
   /** #2905: per-model upstream wire-format override. */ targetFormat?: string;
   /** #4125: manual context-window override (tokens), when set. */ contextWindowOverride?: number;
+  /** Manual output-token-limit override (tokens), when set. Same persistence
+   * path as contextWindowOverride but via maxOutputTokenOverride / the
+   * `max_output_tokens` model-capability-override key. */
+  maxOutputTokenOverride?: number;
   /** #1904: manual vision-capability override for custom models whose upstream
    * discovery metadata doesn't self-report an image input modality. */
   supportsVision?: boolean;
@@ -115,6 +124,23 @@ export function targetFormatBadgeI18nKey(value: string): string | null {
   return TARGET_FORMAT_BADGE_I18N_KEYS[value] ?? null;
 }
 
+const GENERATION_FORMAT_ENDPOINTS: Record<string, ModelSupportedEndpoint[]> = {
+  "images-generations": ["images"],
+  video: ["videos"],
+};
+
+/**
+ * #17071 — endpoint ticks to apply when the custom-model API Format changes, or null to keep
+ * them. A generation format replaces the form's default "chat" tick (else the row advertises
+ * chat for an image/video-only model); leaving one restores the "chat" default.
+ */
+export function endpointsForApiFormatChange(
+  from: string,
+  to: string
+): ModelSupportedEndpoint[] | null {
+  return GENERATION_FORMAT_ENDPOINTS[to] ?? (GENERATION_FORMAT_ENDPOINTS[from] ? ["chat"] : null);
+}
+
 /** #5442 — badge for add-credential validation; unsupported → neutral N/A (not red Invalid). */
 export function validationBadgeProps(result: string): {
   variant: "success" | "error" | "info";
@@ -125,6 +151,22 @@ export function validationBadgeProps(result: string): {
   if (result === "unsupported")
     return { variant: "info", labelKey: "notApplicable", fallback: "N/A" };
   return { variant: "error", labelKey: "invalid", fallback: "Invalid" };
+}
+
+/**
+ * Extract a human-readable reason from a validate/test response `error` field. The
+ * field is a bare string for validator results but an `{ code, message }` envelope
+ * for pipeline rejections (403 LOCAL_ONLY, AUTH_*) — swallowing the envelope made a
+ * reverse-proxied dashboard's Check button show a bare "Invalid" with no reason.
+ */
+export function validationErrorMessage(error: unknown): string | null {
+  if (typeof error === "string" && error.trim()) return error;
+  if (error && typeof error === "object") {
+    const { message, code } = error as { message?: unknown; code?: unknown };
+    if (typeof message === "string" && message.trim()) return message;
+    if (typeof code === "string" && code.trim()) return code;
+  }
+  return null;
 }
 
 /** A single model's outcome from a `/api/models/test-all` response. */
@@ -161,15 +203,21 @@ export function evaluateTestAllEntry(
         isTimeout?: boolean;
         isTransient?: boolean;
         isQuota?: boolean;
+        skipped?: boolean;
       }
     | null
     | undefined,
   autoHideFailed: boolean
 ): TestAllModelOutcome {
   const ok = entry?.status === "ok";
-  const transient = [entry?.rateLimited, entry?.isTimeout, entry?.isTransient, entry?.isQuota].some(
-    Boolean
-  );
+  // #14780: a skipped probe (web-session provider) was never dispatched — keep it visible.
+  const transient = [
+    entry?.rateLimited,
+    entry?.isTimeout,
+    entry?.isTransient,
+    entry?.isQuota,
+    entry?.skipped,
+  ].some(Boolean);
   return {
     status: ok ? "ok" : "error",
     // #9511: quota errors (isQuota) are surfaced on the icon but kept visible
@@ -262,7 +310,7 @@ export const DEFAULT_PROVIDER_BASE_URLS: Record<string, string> = {
   "azure-openai": "https://example-resource.openai.azure.com",
   "azure-ai": "https://example-resource.services.ai.azure.com/openai/v1",
   "bailian-coding-plan": "https://token-plan.ap-southeast-1.maas.aliyuncs.com/apps/anthropic/v1",
-  "xiaomi-mimo": "https://token-plan-sgp.xiaomimimo.com/v1",
+  "xiaomi-mimo": "https://api.xiaomimimo.com/v1",
   siliconflow: "https://api.siliconflow.com/v1",
   "searxng-search": "http://localhost:8888/search",
   firecrawl: "https://api.firecrawl.dev",
@@ -514,16 +562,26 @@ export function buildCompatMap(rows: CompatModelRow[]): CompatModelMap {
   return m;
 }
 
+/** The endpoint/modality this dashboard hides models from — see `readActiveHiddenFlag`. */
+const DASHBOARD_MODEL_MODALITY = "chat";
+
 export function getDisplayModelAlias(modelId: string, alias?: string | null): string | null {
   const trimmed = typeof alias === "string" ? alias.trim() : "";
   if (!trimmed || trimmed === modelId) return null;
   return trimmed;
 }
 
+/**
+ * #12172: this page manages Chat models only, and its hide/unhide PATCH sends
+ * `modality: "chat"` — so the stored flag lives in `hiddenModalities.chat`, not in the
+ * legacy all-modalities `isHidden`. Reading only the legacy flag made the eye toggle,
+ * "Hide all" and the Hidden filter silently report every model as visible.
+ */
 function readActiveHiddenFlag(row: CompatModelRow | undefined): boolean | undefined {
   if (!row) return undefined;
-  if (Object.prototype.hasOwnProperty.call(row, "isHidden")) {
-    return Boolean(row.isHidden);
+  const hasScopedFlag = row.hiddenModalities?.[DASHBOARD_MODEL_MODALITY] !== undefined;
+  if (hasScopedFlag || Object.prototype.hasOwnProperty.call(row, "isHidden")) {
+    return isHiddenForModality(row, DASHBOARD_MODEL_MODALITY);
   }
   return undefined;
 }
@@ -662,6 +720,33 @@ export function getCodexFingerprintMode(providerSpecificData: unknown): CodexFin
   return (CODEX_FINGERPRINT_MODE_VALUES as readonly string[]).includes(normalized)
     ? (normalized as CodexFingerprintModeValue)
     : "session";
+}
+
+export const CODEX_PROMPT_CACHE_KEY_SCOPE_VALUES = ["client", "thread"] as const;
+export type CodexPromptCacheKeyScopeValue = (typeof CODEX_PROMPT_CACHE_KEY_SCOPE_VALUES)[number];
+
+export function getCodexPromptCacheKeyScope(
+  providerSpecificData: unknown
+): CodexPromptCacheKeyScopeValue {
+  const data =
+    providerSpecificData &&
+    typeof providerSpecificData === "object" &&
+    !Array.isArray(providerSpecificData)
+      ? (providerSpecificData as Record<string, unknown>)
+      : undefined;
+  const raw = data?.codexPromptCacheKeyScope;
+  const normalized = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+  return normalized === "thread" ? "thread" : "client";
+}
+
+export function getCodexPromptCacheKeyScopeLabel(
+  t: ProviderMessageTranslator,
+  value: CodexPromptCacheKeyScopeValue
+): string {
+  if (value === "thread") {
+    return providerText(t, "codexPromptCacheKeyScopeThread", "Thread — match the converged thread");
+  }
+  return providerText(t, "codexPromptCacheKeyScopeClient", "Client — forward the client's key");
 }
 
 export function getCodexFingerprintModeLabel(
@@ -1027,4 +1112,23 @@ export function getHeaderIconProviderId(
     return "anthropic-m";
   }
   return providerInfoId;
+}
+
+/**
+ * #4125: parse the free-text "Context Window Override" field. Blank → no override
+ * (`value: null`, not an error). A non-empty value must be a positive whole number of
+ * tokens; anything else is rejected.
+ *
+ * Lives here rather than in one section because #14337 gives synced/imported rows the
+ * same control: two copies of this rule would be two places for "blank clears" and
+ * "zero is invalid" to drift apart.
+ */
+export function parseContextWindowOverrideInput(raw: string): {
+  value: number | null;
+  invalid: boolean;
+} {
+  const trimmed = raw.trim();
+  if (!trimmed) return { value: null, invalid: false };
+  if (!/^\d+$/.test(trimmed) || Number(trimmed) <= 0) return { value: null, invalid: true };
+  return { value: Number(trimmed), invalid: false };
 }

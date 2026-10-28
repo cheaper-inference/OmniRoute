@@ -1,6 +1,6 @@
 # OmniRoute A2A Server Documentation (Azərbaycan dili)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
 
 ---
 
@@ -43,11 +43,11 @@ A2A **Endpoints → A2A** keçidi ilə idarə olunur və standart olaraq deaktiv
 
 ---
 
-## JSON-RPC 2.0 metodları
+## JSON-RPC 2.0 Metodları
 
-### `message/send` — Sinxron icra
+### `message/send` — Sinxron İcra
 
-Bacarıqa mesaj göndərir və tam cavabı gözləyir.
+Bacarıq moduluna mesaj göndərir və tam cavabı gözləyir.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` üçün `metadata.combo`, şlüz sorğusunda `metadata.model` dəyərini açıq şəkildə əvəz edir; o, nəzərə alınmayan `x-combo` JSON sahəsi kimi deyil, həqiqi `model` kimi göndərilir. Şlüzün standart API açarı və hər bir hədəf üzrə avtorizasiya qaydaları qüvvədə qalır. Yanlış və ya boş kombinasiya rədd edilir.
+
+Nəticə `requested_combo` (çağıranın niyyəti), `dispatched_model` (faktiki şlüz sorğusu), `response_model` (şlüz cavabı) və `confirmed_combo` sahələrini təqdim edir. Şlüz kombinasiyanı açıq şəkildə müəyyən etmədikdə sonuncu sahə `null` olur. A2A qərar jurnalları icranı yalnız təsdiqlənmiş kombinasiyaya aid edir və təsdiqlənməmiş sorğunu `requestedCombo` kimi saxlayır.
+
 **Cavab:**
 
 ```json
@@ -76,30 +80,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE axını
+### `message/stream` — SSE Axın Ötürməsi
 
-`message/send` ilə eynidir, lakin real vaxt axını üçün server tərəfindən göndərilən hadisələri qaytarır.
+`message/send` ilə eynidir, lakin real vaxt rejimində axın ötürməsi üçün Server-Sent Events qaytarır.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +113,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE hadisələri:**
+**SSE Hadisələri:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +123,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Tapşırıq statusunun sorğulanması
+### `tasks/get` — Tapşırıq Statusunun Sorğulanması
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +132,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Tapşırığın ləğv edilməsi
+### `tasks/cancel` — Tapşırığın Ləğv Edilməsi
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,33 +143,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Mövcud bacarıqlar
+## Mövcud Bacarıqlar
 
-OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` daxilində qoşulmuş 6 A2A bacarığını təqdim edir. Hər bir bacarıq modulu `src/lib/a2a/skills/` daxilində yerləşir.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` də simli 6 A2A bacarığını ifşa edir. Hər bir bacarıq modulu `src/lib/a2a/skills/`-də yaşayır.
 
-| Bacarıq                     | ID                   | Təsvir                                                                                                                                                                              | Teqlər                         | Nümunələr                                         |
-| :-------------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :------------------------------------------------ |
-| Ağıllı marşrutlaşdırma      | `smart-routing`      | OmniRoute-un kombinasiya mühərriki və qiymətləndirməsindən istifadə edərək sorğunu optimal provayder/kombinasiya vasitəsilə yönləndirir                                             | marşrutlaşdırma, provayderlər  | "Bu sorğunu ən yaxşı model vasitəsilə yönləndir"  |
-| Kvotanın idarə edilməsi     | `quota-management`   | Hər provayder üzrə kvota vəziyyətini bildirir, çağıran tərəflərə sürəti nə vaxt məhdudlaşdırmaq və ya provayderi dəyişmək barədə qərar verməyə kömək edir                           | kvota, provayderlər            | "anthropic üçün kvotanı yoxla"                    |
-| Provayderlərin aşkarlanması | `provider-discovery` | Quraşdırılmış provayderləri imkanları, pulsuz səviyyə göstəriciləri və OAuth statusu ilə birlikdə sadalayır                                                                         | provayderlər, aşkarlama        | "Hansı provayderlər mövcuddur?"                   |
-| Xərc təhlili                | `cost-analysis`      | Kataloq və son istifadə məlumatları əsasında sorğunun/söhbətin xərcini təxmin edir                                                                                                  | xərc, istifadə                 | "Bu söhbətin xərcini təxmin et"                   |
-| Sağlamlıq hesabatı          | `health-report`      | Hər provayder üzrə dövrəqıranın, gözləmə müddətinin və kilidlənmə vəziyyətinin ümumi görünüşünü təqdim edir                                                                         | sağlamlıq, dayanıqlılıq        | "Bütün provayderlərin sağlamlıq statusunu göstər" |
-| İmkanların siyahısı         | `list-capabilities`  | Kontekst daxil edilməsi üçün xam SKILL.md URL-ləri ilə birlikdə 45 elementdən ibarət tam Agent Skills kataloqunu (23 API + 21 CLI + 1 konfiqurasiya) markdown cədvəli kimi qaytarır | kataloq, aşkarlama, bacarıqlar | "Bütün OmniRoute imkanlarını sadala"              |
+| Bacarıq                | ID                   | Təsvir                                                                                                                                                     | Teqlər                        | Nümunələr                                             |
+| :--------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :---------------------------------------------------- |
+| Ağıllı marşrutlaşdırma | `smart-routing`      | OmniRoute-nin kombin mühərriki + hesabından istifadə edərək, optimal provider/combo vasitəsilə sorğu yönləndirir                                           | marşrutlaşdırma, provayderlər | "Bu əmri ən yaxşı model vasitəsilə yönləndirin"       |
+| Kvota İdarəetmə        | `quota-management`   | Provayderə görə kvota vəziyyəti haqqında hesabat verir, zəng edənlərə nə vaxt throttle/switch qərarına gəlməyə kömək edir                                  | kvota, provayderlər           | "Antropik üçün kvotanı yoxlayın"                      |
+| Provayder kəşfi        | `provider-discovery` | İmkanları, sərbəst səviyyəli bayraqları, OAuth statusu olan quraşdırılmış provayderləri siyahıya alır                                                      | təminatçılar, kəşf            | "Hansı provayderlər mövcuddur?"                       |
+| Xərclərin təhlili      | `cost-analysis`      | Kataloq + son istifadəni nəzərə alaraq request/conversation nın qiymətini təxmin edir                                                                      | xərc, istifadə                | "Bu söhbətin təxmini dəyəri"                          |
+| Sağlamlıq Hesabatı     | `health-report`      | Bir provayder üçün dövrə açarı, soyuducu, kilidləmə vəziyyəti                                                                                              | sağlamlıq, dözümlülük         | "Bütün provayderlərin sağlamlıq vəziyyətini göstərin" |
+| Bacarıqların siyahısı  | `list-capabilities`  | Tam 45 girişli Agent Bacarıqları kataloqunu (23 API + 21 CLI + 1 konfiqurasiya) kontekst inyeksiyası üçün xam SKILL.md URLs ilə qeyd cədvəli kimi qaytarır | kataloq, kəşf, bacarıqlar     | "Bütün OmniRoute imkanlarını sadalayın"               |
 
-> Agent Kartı aktual 352 provayderdən ibarət kataloqla uyğun saxlanmalıdır; provayderlərin sayı və pulsuz/autentifikasiya tələb etməyən seçimlərə dair metadata icra vaxtı reyestrindən əldə edilir.
+> Agent Kartı canlı 377 provayder kataloqu ilə uyğunlaşdırılmalıdır; provayder sayları və free/no-auth metadata icra vaxtı reyestrindən əldə edilir.
 
-### `list-capabilities` bacarığının təfərrüatları
+### `list-capabilities` Bacarıq Təfərrüatı
 
-`list-capabilities` bacarığı API çağırışları göndərməzdən əvvəl OmniRoute-un təqdim etdiyi imkanları aşkarlamalı olan xarici agentlər üçün xüsusilə faydalıdır. O, strukturlaşdırılmış markdown cədvəl artefaktı qaytarır:
+`list-capabilities` bacarığı API zəngləri göndərməzdən əvvəl OmniRoute nələri ifşa etdiyini kəşf etməli olan xarici agentlər üçün xüsusilə faydalıdır. Strukturlaşdırılmış işarələmə cədvəli artefaktını qaytarır:
 
 ```
-| ID | Ad | Kateqoriya | Sahə | Son nöqtələr/Əmrlər | Xam URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentifikasiya və sessiyalar | api | autentifikasiya | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Hər sətirdə `rawUrl` sütunu var ki, agentlər tam SKILL.md faylını dərhal əldə edə bilsinlər. `metadata.totalSkills` sahəsi kataloqun ölçüsünü əks etdirir (hazırda 45). İmplementasiya: `src/lib/a2a/skills/listCapabilities.ts`. Həmçinin [AGENT-SKILLS.md](./AGENT-SKILLS.md) sənədinə baxın.
+Hər bir sıra `rawUrl` sütununu ehtiva edir ki, agentlər dərhal tam SKILL.md əldə edə bilsinlər. `metadata.totalSkills` sahəsi kataloq ölçüsünü əks etdirir (bu gün 45). İcra: `src/lib/a2a/skills/listCapabilities.ts`. Həmçinin baxın [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -264,7 +261,7 @@ təqdim edilib → icra olunur → tamamlanıb
 
 ## İnteqrasiya nümunələri
 
-### Python (requests)
+### Python (istəklər)
 
 ```python
 import requests
@@ -283,7 +280,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (gətirmək)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

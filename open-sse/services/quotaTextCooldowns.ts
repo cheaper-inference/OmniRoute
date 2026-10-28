@@ -41,10 +41,15 @@ export function isSubscriptionQuotaText(lower: string, provider?: string | null)
     lower.includes("plan's set usage limit") ||
     lower.includes("plan limit exceeded") ||
     lower.includes("usage limit exceeded") ||
-    // Native Claude OAuth uses this otherwise-generic 429 wording for an
-    // exhausted subscription window. Keep it provider-scoped: other upstreams
-    // can use the same phrase for a short RPM throttle.
-    (provider === "claude" && lower.includes("this request would exceed your account's rate limit"))
+    // Native Claude uses this wording for a long-window quota 429. Fresh quota
+    // evidence decides model versus connection scope; other providers may use
+    // the same phrase for a short RPM throttle.
+    (provider === "claude" &&
+      lower.includes("this request would exceed your account's rate limit")) ||
+    // Native Claude returns this 429 once the account's monthly extra-usage spend cap is reached.
+    // It clears only when the billing month rolls over or the cap is raised, so it must park the
+    // connection like any other long-window quota instead of falling into the ~5s generic backoff.
+    (provider === "claude" && lower.includes("monthly spend limit"))
   );
 }
 
@@ -65,12 +70,12 @@ export const SUBSCRIPTION_QUOTA_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 export function buildSubscriptionQuotaFallback(
   errorStr: string,
   getUpstreamRetryHintMs: () => number | null,
-  parseRetryFromErrorText: (text: string) => number | null,
+  parseRetryFromErrorText: (text: string, provider?: string | null) => number | null,
   provider?: string | null
 ): QuotaTextFallback | null {
   if (!isSubscriptionQuotaText(errorStr.toLowerCase(), provider)) return null;
   const hintMs = getUpstreamRetryHintMs();
-  const bodyHint = parseRetryFromErrorText(errorStr);
+  const bodyHint = parseRetryFromErrorText(errorStr, provider);
   return {
     shouldFallback: true,
     cooldownMs: hintMs ?? SUBSCRIPTION_QUOTA_COOLDOWN_MS,
@@ -114,10 +119,16 @@ const MAX_WEEKLY_QUOTA_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function buildWeeklyQuotaFallback(
   errorStr: string,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  provider?: string | null
 ): QuotaTextFallback | null {
   if (!isWeeklyUsageLimitText(errorStr.toLowerCase())) return null;
-  const parsedResetMs = parseDayGranularityResetMs(errorStr, MAX_WEEKLY_QUOTA_COOLDOWN_MS, nowMs);
+  const parsedResetMs = parseDayGranularityResetMs(
+    errorStr,
+    MAX_WEEKLY_QUOTA_COOLDOWN_MS,
+    nowMs,
+    provider
+  );
   const cooldownMs =
     typeof parsedResetMs === "number" && parsedResetMs > 0
       ? parsedResetMs

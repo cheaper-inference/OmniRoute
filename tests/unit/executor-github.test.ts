@@ -119,7 +119,7 @@ test("GithubExecutor.buildUrl routes gpt-5.6-sol/terra/luna to /responses (regre
   }
 });
 
-test("GithubExecutor.transformRequest injects JSON response instructions for Claude and strips reasoning fields", () => {
+test("GithubExecutor.transformRequest strips reasoning fields for Claude, and leaves response_format untouched now that any claude-named id is native (#14575)", () => {
   const executor = new GithubExecutor();
   const body = {
     response_format: {
@@ -136,16 +136,22 @@ test("GithubExecutor.transformRequest injects JSON response instructions for Cla
       // Trailing user turn: dropTrailingAssistantPrefill (9router#2143) strips a
       // conversation that ends in "assistant", which would otherwise remove the very
       // message this test inspects below. Keep the array ending in "user" so this test
-      // stays focused on response_format injection + reasoning-field stripping.
+      // stays focused on reasoning-field stripping.
       { role: "user", content: "thanks" },
     ],
   };
 
+  // #14575: getModelTargetFormat("gh", ...) now resolves "claude" for ANY claude-named
+  // id (registered or not) — mirroring buildUrl()'s own unconditional /claude/i routing
+  // to the Anthropic-native /v1/messages endpoint. So "claude-sonnet-4" is native now
+  // (see github-copilot-claude-native-messages.test.ts) and the response_format-as-
+  // system-prompt workaround (applyChatCompletionsOnlyQuirks, gated on !isClaudeNative)
+  // is unreachable for it — response_format passes through untouched. Reasoning-field
+  // stripping happens unconditionally above that gate, so it still applies.
   const result = executor.transformRequest("claude-sonnet-4", body, true, {});
 
-  assert.equal(result.response_format, undefined);
-  assert.equal(result.messages[0].role, "system");
-  assert.match(result.messages[0].content, /Respond only with valid JSON/);
+  assert.deepEqual(result.response_format, { type: "json_object" });
+  assert.equal(result.messages[0].role, "user");
   assert.equal(result.messages[2].reasoning_text, undefined);
   assert.equal(result.messages[2].reasoning_content, undefined);
 });
@@ -182,13 +188,16 @@ test("GithubExecutor.transformRequest sanitizes Anthropic-shape content parts (t
     ],
   };
 
-  // Use an unregistered claude-* id (not "claude-sonnet-4.6"/etc.) so
-  // getModelTargetFormat("gh", ...) resolves to null and this stays on the
-  // /chat/completions path this test targets. Registered claude-* ids now
-  // carry targetFormat:"claude" (native /v1/messages — port of
-  // decolua/9router#2608, see github-copilot-claude-native-messages.test.ts)
-  // and intentionally skip this sanitization.
-  const result = executor.transformRequest("claude-sonnet-4", body, true, {});
+  // Use a non-claude-named id so getModelTargetFormat("gh", ...) does NOT resolve
+  // "claude" and this stays on the /chat/completions path this test targets. #14575
+  // made getModelTargetFormat resolve "claude" for ANY claude-named id (registered
+  // or not, mirroring buildUrl()'s own unconditional /claude/i routing to the
+  // Anthropic-native /v1/messages endpoint), so a claude-named id — even an
+  // unregistered one like the former "claude-sonnet-4" here — is now native and
+  // intentionally skips this /chat/completions-only sanitization (see
+  // github-copilot-claude-native-messages.test.ts). The sanitization itself still
+  // matters for any other model whose client sends Anthropic-shape content parts.
+  const result = executor.transformRequest("gpt-4o", body, true, {});
 
   // user message keeps text + image_url parts untouched
   assert.equal(result.messages[0].content[0].type, "text");
@@ -283,8 +292,8 @@ test("GithubExecutor.buildHeaders prefers Copilot token and sets GitHub-specific
   assert.equal(headers.Authorization, "Bearer copilot-token");
   assert.equal(headers.Accept, "text/event-stream");
   // Copilot CLI wire identity (matches the `copilot` npm package, not VS Code).
-  assert.equal(headers["editor-version"], "copilot/1.0.81-6");
-  assert.equal(headers["user-agent"], "copilot/1.0.81-6");
+  assert.equal(headers["editor-version"], "copilot/1.0.91");
+  assert.equal(headers["user-agent"], `copilot/1.0.91 (${process.platform}) term/unknown`);
   assert.equal(headers["x-github-api-version"], "2026-08-01");
   assert.equal(headers["openai-intent"], "conversation-agent");
   assert.equal(headers["copilot-integration-id"], "copilot-developer-cli");
@@ -292,7 +301,7 @@ test("GithubExecutor.buildHeaders prefers Copilot token and sets GitHub-specific
   assert.equal(headers["copilot-harness-id"], "copilot-sdk");
   assert.equal(headers["X-Initiator"], "user");
   assert.ok(headers["x-request-id"]);
-  // CLI 1.0.81-6 correlation headers.
+  // CLI 1.0.88 correlation headers.
   assert.ok(headers["x-client-machine-id"], "stable per-install machine id present");
   assert.ok(headers["x-interaction-id"], "per-call interaction id present");
   assert.ok(headers["x-client-session-id"], "per-conversation session id present");
@@ -575,6 +584,37 @@ test("GithubExecutor.transformRequest strips temperature for gpt-5.4 (port from 
     {}
   );
   assert.equal(kept.temperature, 0.7, "temperature must be preserved for non-gpt-5.4 models");
+});
+
+test("GithubExecutor.transformRequest strips temperature for Copilot GPT-5.4+ and GPT-6 ids on chat and Responses bodies", () => {
+  // gpt-5.6-* and gpt-6-astra ship in the GitHub registry and Copilot rejects
+  // `temperature` for them with HTTP 400, exactly like gpt-5.4.
+  const executor = new GithubExecutor();
+
+  for (const model of ["gpt-5.6-sol", "gpt-5.6-luna", "gpt-6-astra", "gpt-6.1-sol"]) {
+    const responsesBody = {
+      input: [{ role: "user", content: "hello" }],
+      temperature: 0.7,
+      max_output_tokens: 1024,
+    };
+    const out = executor.transformRequest(model, responsesBody, true, {});
+    assert.equal("temperature" in out, false, `${model}: Responses body must lose temperature`);
+    assert.equal(out.max_output_tokens, 1024, `${model}: other params must survive`);
+    assert.equal(responsesBody.temperature, 0.7, `${model}: caller body must not be mutated`);
+
+    const chatBody = { temperature: 0.4, messages: [{ role: "user", content: "hi" }] };
+    const chatOut = executor.transformRequest(model, chatBody, true, {});
+    assert.equal("temperature" in chatOut, false, `${model}: chat body must lose temperature`);
+    assert.equal(chatBody.temperature, 0.4, `${model}: caller chat body must not be mutated`);
+  }
+
+  const kept = executor.transformRequest(
+    "gpt-5.3-codex",
+    { input: [{ role: "user", content: "hello" }], temperature: 0.7 },
+    true,
+    {}
+  );
+  assert.equal(kept.temperature, 0.7, "gpt-5.3-codex must keep temperature");
 });
 
 test("GithubExecutor.transformRequest strips invalid synthetic Responses reasoning ids", () => {

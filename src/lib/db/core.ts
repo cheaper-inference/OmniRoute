@@ -20,6 +20,7 @@ import { isNextBuildPhase } from "../buildPhase";
 import { runMigrations } from "./migrationRunner";
 import { runDbHealthCheck, getPagerCorruption } from "./healthCheck";
 import { createManagedDbBackup as writeManagedDbBackup } from "./managedBackup";
+import { DB_SECRET_DIR_MODE, hardenDbFilePermissions } from "./filePermissions";
 import { createDbHealthCoordinator, runDbHealthInChild } from "./healthCheckRunner";
 import { resetAllDbModuleState } from "./stateReset";
 import { parseStoredPayload } from "../logPayloads";
@@ -38,6 +39,7 @@ import {
   type CallLogArtifact,
 } from "../usage/callLogArtifacts";
 import { migrateLegacyEncryptedString } from "./encryption";
+import { serializeJsonField } from "./providers/columns";
 import { invalidateDbCache } from "./readCache";
 import { rowToCamel } from "./caseMapping";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
@@ -141,6 +143,8 @@ const CRITICAL_DB_TABLES: CriticalTableSpec[] = [
   { table: "provider_nodes", maxRows: 5_000 },
   { table: "combos", maxRows: 5_000 },
   { table: "api_keys", maxRows: 5_000 },
+  { table: "teams", maxRows: 5_000 },
+  { table: "api_key_billing_team_history", maxRows: 20_000 },
   { table: "proxy_registry", maxRows: 5_000 },
   { table: "proxy_assignments", maxRows: 10_000 },
   { table: "model_combo_mappings", maxRows: 5_000 },
@@ -202,7 +206,7 @@ function openSqliteDatabase(sqliteFile: string, options?: Record<string, unknown
 // Ensure data directory exists — with fallback for restricted home directories (#133)
 if (!isCloud && !fs.existsSync(DATA_DIR)) {
   try {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.mkdirSync(DATA_DIR, { recursive: true, mode: DB_SECRET_DIR_MODE });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(
@@ -320,6 +324,8 @@ const SCHEMA_SQL = `
     account_key TEXT,
     account_label TEXT,
     account_label_priority INTEGER DEFAULT 0,
+    billing_team_id TEXT,
+    team_rollup_processed_at TEXT,
     api_key_id TEXT,
     api_key_name TEXT,
     tokens_input INTEGER DEFAULT 0,
@@ -338,6 +344,7 @@ const SCHEMA_SQL = `
   CREATE INDEX IF NOT EXISTS idx_uh_timestamp ON usage_history(timestamp);
   CREATE INDEX IF NOT EXISTS idx_uh_provider ON usage_history(provider);
   CREATE INDEX IF NOT EXISTS idx_uh_model ON usage_history(model);
+  CREATE INDEX IF NOT EXISTS idx_uh_connection_timestamp ON usage_history(connection_id, timestamp);
 
   CREATE TABLE IF NOT EXISTS call_logs (
     id TEXT PRIMARY KEY,
@@ -375,7 +382,9 @@ const SCHEMA_SQL = `
     has_response_body INTEGER DEFAULT 0,
     has_pipeline_details INTEGER DEFAULT 0,
     request_summary TEXT,
-    correlation_id TEXT
+    correlation_id TEXT,
+    added_wait_ms INTEGER DEFAULT NULL,
+    added_wait_cause TEXT DEFAULT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_cl_timestamp ON call_logs(timestamp);
   CREATE INDEX IF NOT EXISTS idx_cl_status ON call_logs(status);
@@ -1207,7 +1216,21 @@ export function getDbInstance(): SqliteDatabase {
             `Original error: ${message}`
         );
       }
-      if (!retryProbeIfTransient(sqliteFile, e, openSqliteDatabase, closeProbeIfSafe)) {
+      const probeOutcome = retryProbeIfTransient(
+        sqliteFile,
+        e,
+        openSqliteDatabase,
+        closeProbeIfSafe
+      );
+      if (probeOutcome === "readonly" || probeOutcome === "transient_exhausted") {
+        // #17995: neither proves corruption — fail closed, leave the DB untouched.
+        throw new Error(
+          `[DB] Could not probe ${sqliteFile} (${probeOutcome}); the database was left untouched. ` +
+            `Check that the data volume is writable and no other process holds the lock, then restart. ` +
+            `Original error: ${message}`
+        );
+      }
+      if (probeOutcome === "not_transient") {
         preservedCriticalState = captureCriticalDbState(sqliteFile);
         // SAFETY: Never delete the database — rename to backup so data can be recovered.
         // The old code would silently destroy all user data on any probe failure.
@@ -1356,6 +1379,8 @@ export function getDbInstance(): SqliteDatabase {
     // gate on its own way through, recursing without end (each recursion opens
     // its own real DB connection and re-runs migrations-check, so this is a
     // real resource-exhaustion loop, not just a deep call stack). #13717 rework.
+    // Owner-only DB + -wal/-shm (also repairs a 0644 file from an older install).
+    hardenDbFilePermissions(sqliteFile);
     setDb(db);
   } catch (error) {
     try {
@@ -1580,7 +1605,8 @@ function migrateFromJson(db: SqliteDatabase, jsonPath: string) {
           rate_limited_until, health_check_interval, last_health_check_at,
           last_tested, api_key, id_token, provider_specific_data,
           expires_in, display_name, global_priority, default_model,
-          token_type, consecutive_use_count, rate_limit_protection, last_used_at, created_at, updated_at
+          token_type, consecutive_use_count, rate_limit_protection, last_used_at,
+          rate_limit_overrides_json, created_at, updated_at
         ) VALUES (
           @id, @provider, @authType, @name, @email, @priority, @isActive,
           @accessToken, @refreshToken, @expiresAt, @tokenExpiresAt,
@@ -1589,11 +1615,25 @@ function migrateFromJson(db: SqliteDatabase, jsonPath: string) {
           @rateLimitedUntil, @healthCheckInterval, @lastHealthCheckAt,
           @lastTested, @apiKey, @idToken, @providerSpecificData,
           @expiresIn, @displayName, @globalPriority, @defaultModel,
-          @tokenType, @consecutiveUseCount, @rateLimitProtection, @lastUsedAt, @createdAt, @updatedAt
+          @tokenType, @consecutiveUseCount, @rateLimitProtection, @lastUsedAt,
+          @rateLimitOverridesJson, @createdAt, @updatedAt
         )
       `);
+      const selectExistingOverrides = db.prepare(
+        "SELECT rate_limit_overrides_json FROM provider_connections WHERE id = ?"
+      );
 
       for (const conn of data.providerConnections || []) {
+        // Preserve operator overrides when db.json carries none: INSERT OR
+        // REPLACE would otherwise reset the column to NULL. Executed inside
+        // the transaction and reinjected into the INSERT — never a 2nd UPDATE.
+        const hasOverrides = conn.rateLimitOverrides != null;
+        let rateLimitOverridesJson = serializeJsonField(conn.rateLimitOverrides);
+        if (!hasOverrides && typeof conn.id === "string") {
+          const existing = selectExistingOverrides.get(conn.id) as
+            { rate_limit_overrides_json: string | null } | undefined;
+          if (existing) rateLimitOverridesJson = existing.rate_limit_overrides_json;
+        }
         insertConn.run({
           id: conn.id,
           provider: conn.provider,
@@ -1633,6 +1673,7 @@ function migrateFromJson(db: SqliteDatabase, jsonPath: string) {
           lastUsedAt: conn.lastUsedAt || null,
           rateLimitProtection:
             conn.rateLimitProtection === true || conn.rateLimitProtection === 1 ? 1 : 0,
+          rateLimitOverridesJson,
           createdAt: conn.createdAt || new Date().toISOString(),
           updatedAt: conn.updatedAt || new Date().toISOString(),
         });

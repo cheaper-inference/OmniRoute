@@ -1,5 +1,5 @@
 # ── Multi-stage Dockerfile for Native Bun Runtime (web-latest-bun) ───────────
-FROM oven/bun:1.4.2-slim AS base
+FROM oven/bun:1.4.3-slim AS base
 WORKDIR /app
 
 RUN apt-get update \
@@ -49,6 +49,10 @@ ENV OMNIROUTE_BASE_PATH=$OMNIROUTE_BASE_PATH
 ARG DASHBOARD_ALLOW_EMBED=""
 ENV DASHBOARD_ALLOW_EMBED=$DASHBOARD_ALLOW_EMBED
 
+# Webpack builds skip the persistent cache unless this is 1 (see next.config.mjs).
+ARG OMNIROUTE_WEBPACK_BUILD_CACHE=""
+ENV OMNIROUTE_WEBPACK_BUILD_CACHE=$OMNIROUTE_WEBPACK_BUILD_CACHE
+
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
@@ -56,12 +60,12 @@ ENV NODE_ENV=production
 RUN bun run --quiet build
 
 # ── Runner Base stage (100% Bun Native Production Runtime) ──────────────────
-FROM oven/bun:1.4.2-slim AS runner-base
+FROM oven/bun:1.4.3-slim AS runner-base
 
 LABEL org.opencontainers.image.title="omniroute" \
   org.opencontainers.image.description="Unified AI proxy — route any LLM through one endpoint (Bun Native)" \
   org.opencontainers.image.url="https://omniroute.online" \
-  org.opencontainers.image.source="https://github.com/diegosouzapw/OmniRoute" \
+  org.opencontainers.image.source="https://github.com/cheaper-inference/OmniRoute" \
   org.opencontainers.image.licenses="MIT"
 
 WORKDIR /app
@@ -118,7 +122,6 @@ RUN apt-get update \
      chromium-driver \
      fonts-liberation \
      libasound2t64 \
-     gconf-service \
      libatk-bridge2.0-0 \
      libatk1.0-0 \
      libc6 \
@@ -134,8 +137,8 @@ RUN apt-get update \
      libnspr4 \
      libnss3 \
      libpango-1.0-0 \
-     pangocairo-1.0-0 \
-     stdc++6 \
+     libpangocairo-1.0-0 \
+     libstdc++6 \
      libx11-6 \
      libx11-xcb1 \
      libxcb1 \
@@ -152,7 +155,6 @@ RUN apt-get update \
      ca-certificates \
      fonts-gargi \
      fonts-ipafont-gothic \
-     fonts-kacst \
      fonts-thai-tlwg \
      fonts-wqy-zenhei \
   && rm -rf /var/lib/apt/lists/*

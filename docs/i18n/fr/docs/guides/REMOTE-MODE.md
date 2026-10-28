@@ -1,6 +1,6 @@
 # Remote Mode (Français)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -248,167 +248,162 @@ active.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ affiche le secret UNE SEULE FOIS — copiez-le maintenant
-omniroute tokens list                 # masqués : identifiant, nom, portée, préfixe, statut, expiration
-omniroute tokens revoke <id|prefix>   # révoquer immédiatement
-omniroute tokens scopes               # expliquer les trois portées
+#   ↳ affiche le secret UNE seule fois : copiez-le maintenant
+omniroute tokens list                 # masqués : id, nom, portée, préfixe, statut, expiration
+omniroute tokens revoke <id|prefix>   # révoque immédiatement
+omniroute tokens scopes               # explique les trois portées
 ```
 
-Les commandes `tokens` nécessitent un identifiant **administrateur**. Vous pouvez également gérer les jetons dans
-le tableau de bord sous **Paramètres → Jetons d’accès** (création, révocation, copie unique).
+Les commandes `tokens` exigent un identifiant **admin**. Vous pouvez aussi gérer les jetons dans le tableau de bord, sous **Paramètres → Jetons d'accès** (créer, révoquer, copier une seule fois).
+
+Un jeton ne peut jamais être créé avec plus de privilèges que n'en possède son créateur. Un jeton `admin` ne peut être créé que par l'opérateur : la session du tableau de bord, la CLI locale sur le serveur lui-même, ou `omniroute connect` avec le mot de passe. Les identifiants machine (un jeton d'accès `admin`, ou une clé d'API de portée `manage`/`admin`) ne peuvent créer que des jetons `write` et `read` ; demander `--scope admin` renvoie `403`. Désactiver la connexion n'ouvre pas la création : un jeton d'accès de n'importe quelle portée est un identifiant que les routes toujours authentifiées acceptent, si bien qu'un appel anonyme reçoit `401` quelle que soit la portée.
 
 ---
 
-## Configuration d’une CLI de programmation à partir du catalogue distant
+## Configurer une CLI de code depuis le catalogue distant
 
-`omniroute configure` lit le catalogue de modèles en direct du **serveur actif** et écrit
-une configuration sur **votre** machine.
+`omniroute configure` lit le catalogue de modèles en direct du **serveur actif** et écrit une configuration sur **votre** machine.
 
 ```bash
 omniroute configure codex
 #   Fournisseurs : glm, kmc, ollamacloud, opencode-go, …
 #   Fournisseur : glm
 #   Identifiant du modèle : glm/glm-5.2
-#   ✔ Écriture effectuée dans ~/.codex/glm52.config.toml
+#   ✔ Écrit ~/.codex/glm52.config.toml
 #   Utilisation :  codex --profile glm52
 
-# mode non interactif
+# non interactif
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# conserver un modèle fréquemment utilisé en haut du sélecteur interactif
+# garder un modèle fréquemment utilisé en tête du sélecteur interactif
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Le sélecteur conserve uniquement les identifiants de modèles (jamais les URL ni les identifiants d’accès) dans le fichier local
-`model-preferences.json`, avec une portée définie par contexte et par CLI cible. Les favoris sont
-affichés avant les sélections récentes ; utilisez `--unfavorite` pour retirer un modèle sélectionné
-de la liste de ce contexte/cette cible.
+Le sélecteur ne conserve que les identifiants de modèle (jamais d'URL ni d'identifiants) dans le fichier local `model-preferences.json`, par contexte et par cible CLI. Les favoris s'affichent avant les sélections récentes ; utilisez `--unfavorite` pour retirer un modèle sélectionné de cette liste de contexte/cible.
 
-Le profil écrit référence la clé d’inférence au moyen d’une variable d’environnement
-(`OMNIROUTE_API_KEY`) — le secret n’est jamais écrit sur le disque. Pour la configuration initiale
-unique de Codex (le bloc `[model_providers.omniroute]`), consultez
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Le profil écrit référence la clé d'inférence par une variable d'environnement (`OMNIROUTE_API_KEY`) : le secret n'est jamais écrit sur le disque. Pour la configuration de base unique de Codex (le bloc `[model_providers.omniroute]`), voir [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Lancement d’une CLI sur le serveur distant (sans écrire de configuration)
+### Lancer une CLI contre le serveur distant (sans écrire de configuration)
 
-`omniroute run <target>` respecte également le contexte actif : l’URL de base distante
-et l’identifiant d’accès du contexte sont injectés uniquement dans le processus lancé.
+`omniroute run <target>` tient aussi compte du contexte actif : l'URL de base distante et l'identifiant du contexte ne sont injectés que dans le processus lancé.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → serveur distant
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → distant
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Prévisualiser précisément ce qui serait lancé (uniquement les NOMS DES CLÉS d’environnement, jamais leurs valeurs) :
+# Aperçu exact de ce qui serait lancé (noms des variables d'environnement uniquement, jamais les valeurs) :
 omniroute run codex --dry-run --json
 ```
 
 Cibles : `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(source unique : `bin/cli/cli-manifest.mjs`). Qwen et Gemini s’exécutent avec un
-répertoire personnel temporaire isolé, supprimé à la fermeture, de sorte que le lancement ne modifie jamais —
-et ne divulgue rien dans — la configuration personnelle de vos outils.
+(source unique : `bin/cli/cli-manifest.mjs`). Qwen et Gemini s'exécutent dans un répertoire personnel temporaire isolé, supprimé à la sortie, de sorte que le lancement ne touche jamais votre configuration personnelle des outils et n'y fuite pas.
 
-### Commandes de configuration propres à chaque CLI
+### Commandes de configuration par CLI
 
-Chaque CLI prise en charge dispose d’une commande de configuration compatible avec les serveurs distants (toutes respectent le contexte
-actif, ou `--remote <url> --api-key <key>`) :
+Chaque CLI prise en charge dispose d'une commande de configuration compatible avec le serveur distant (toutes respectent le contexte actif, ou `--remote <url> --api-key <key>`) :
 
-| CLI         | Commande                   | Ce qui est écrit                                                                                                                                                                                                               |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Codex       | `omniroute setup-codex`    | Profils `~/.codex/<name>.config.toml` (par modèle)                                                                                                                                                                             |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (par modèle)                                                                                                                                                                         |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — le fournisseur `omniroute` compatible avec OpenAI, avec chaque modèle du catalogue (exécutez `opencode -m omniroute/<model>`)                                                             |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (mode CLI) + affiche les paramètres de l’extension VS Code à coller (compatible avec OpenAI, URL de base **sans** `/v1`)                                                            |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + paramètres VS Code `kilocode.*` — compatible avec OpenAI, URL de base **avec** `/v1`                                                                                                   |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + CLI `cn`) — `provider: openai`, `apiBase` **avec** `/v1`, clé via `${{ secrets.OMNIROUTE_API_KEY }}`                                                                            |
-| Cursor      | `omniroute setup-cursor`   | affiche les étapes dans l’application (Settings → Models → Override OpenAI Base URL **avec** `/v1` + clé + modèle). La configuration de Cursor est une base SQLite opaque — panneau de discussion uniquement                   |
-| Roo Code    | `omniroute setup-roo`      | écrit un fichier JSON d’importation Roo (`~/.omniroute/roo-settings.json`) + définit `roo-cline.autoImportSettingsPath` + affiche les étapes dans l’interface utilisateur (compatible avec OpenAI, URL de base **avec** `/v1`) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — fournisseur `openai-compat`, `base_url` **avec** `/v1`, clé via `$OMNIROUTE_API_KEY`                                                                                                            |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **sans** `/v1` + `GOOSE_MODEL`) + instructions pour les variables d’environnement                                                                       |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **sans** `/v1` + `model: openai/<id>`) + instructions pour les variables d’environnement (`aider --message --yes`)                                                                      |
-| Qwen Code   | `omniroute setup-qwen`     | Entrée V4 `modelProviders.openai` dans `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` dans `~/.qwen/.env`                                                                                                                       |
+| CLI         | Commande                   | Ce qu'elle écrit                                                                                                                                                                                          |
+| ----------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | profils `~/.codex/<name>.config.toml` (par modèle)                                                                                                                                                        |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (par modèle)                                                                                                                                                    |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` : le fournisseur `omniroute` compatible openai, avec chaque modèle du catalogue (lancez `opencode -m omniroute/<model>`)                                               |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (mode CLI) + affiche les paramètres de l'extension VS Code à coller (compatible OpenAI, Base URL **sans** `/v1`)                                               |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + paramètres VS Code `kilocode.*` : compatible OpenAI, Base URL **avec** `/v1`                                                                                      |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + CLI `cn`) : `provider: openai`, `apiBase` **avec** `/v1`, clé via `${{ secrets.OMNIROUTE_API_KEY }}`                                                       |
+| Cursor      | `omniroute setup-cursor`   | affiche les étapes dans l'application (Paramètres → Modèles → Override OpenAI Base URL **avec** `/v1` + clé + modèle). La configuration de Cursor est une base SQLite opaque : panneau de chat uniquement |
+| Roo Code    | `omniroute setup-roo`      | écrit un JSON d'import Roo (`~/.omniroute/roo-settings.json`), définit `roo-cline.autoImportSettingsPath` et affiche les étapes de l'interface (compatible OpenAI, Base URL **avec** `/v1`)               |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` : fournisseur `openai-compat`, `base_url` **avec** `/v1`, clé via `$OMNIROUTE_API_KEY`                                                                                       |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` : `language_models.openai_compatible.omniroute`, `api_url` **avec** `/v1`, clé lue par Zed depuis `$OMNIROUTE_API_KEY` (jamais écrite)                                      |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **sans** `/v1` + `GOOSE_MODEL`) + recette d'environnement                                                                          |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **sans** `/v1` + `model: openai/<id>`) + recette d'environnement (`aider --message --yes`)                                                                         |
+| Qwen Code   | `omniroute setup-qwen`     | entrée `modelProviders.openai` V4 dans `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` dans `~/.qwen/.env`                                                                                                  |
 
 ```bash
-# OpenCode (fournisseur compatible avec OpenAI, tous les modèles du catalogue, VPS distant)
+# OpenCode (fournisseur compatible openai, tous les modèles du catalogue, VPS distant)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # conserver uniquement les modèles correspondants
-opencode -m omniroute/glm/glm-5.2 "..."          # exporter d’abord OMNIROUTE_API_KEY
+omniroute setup-opencode --only glm,kimi        # ne garder que les modèles correspondants
+opencode -m omniroute/glm/glm-5.2 "..."          # exportez d'abord OMNIROUTE_API_KEY
 ```
 
-> OpenCode dispose également d’une intégration **plugin** plus riche : `omniroute setup opencode`
-> (désormais compatible avec les environnements distants via `--remote`) installe `@omniroute/opencode-plugin`.
-> `setup-opencode` est l’alternative légère compatible avec OpenAI. La clé API
-> est référencée via `{env:OMNIROUTE_API_KEY}` — elle n’est jamais écrite sur le disque.
+> OpenCode dispose aussi d'une intégration **plugin** plus riche : `omniroute setup opencode`
+> (désormais compatible avec le serveur distant via `--remote`) installe `@omniroute/opencode-plugin`.
+> `setup-opencode` est l'alternative légère compatible openai. La clé d'API est référencée via
+> `{env:OMNIROUTE_API_KEY}` et n'est jamais écrite sur le disque.
 >
-> Sur OpenCode v2, utilisez plutôt `@omniroute/opencode-plugin-v2` : même catalogue,
-> mais contrat de chargement différent. Il lit la clé depuis le propre magasin
-> d’identifiants d’OpenCode lorsque l’intégration est connectée ; une passerelle distante
-> ne nécessite donc aucune clé dans `opencode.json`.
+> Sur OpenCode v2, utilisez plutôt `@omniroute/opencode-plugin-v2` : même catalogue, mais un
+> contrat de chargement différent. Il lit la clé dans le magasin d'identifiants propre à OpenCode
+> lorsque l'intégration est connectée, de sorte qu'une passerelle distante n'a besoin d'aucune clé
+> dans `opencode.json`.
 
 ---
 
 ## Gestion des contextes (basculer entre les serveurs)
 
 Un **contexte** est un serveur enregistré (baseUrl + identifiant + portée). `omniroute connect`
-en crée un et l’active ; dès lors, toutes les commandes le ciblent. Gérez les contextes
-et basculez entre eux avec `omniroute contexts` :
+en crée un et le rend actif ; à partir de ce moment, chaque commande le cible. Gérez et
+basculez entre eux avec `omniroute contexts` :
 
 ```bash
-omniroute contexts list            # tous les contextes ; celui qui est actif est marqué d’un ●
-omniroute contexts current         # le serveur actif, l’état de l’authentification et la portée
+omniroute contexts list            # tous les contextes ; l'actif est marqué ●
+omniroute contexts current         # le serveur actif, le statut d'authentification, la portée
 ```
 
 ```text
-  | Nom     | URL de base               | Auth  | Portée | Description
-● | vps     | http://100.67.86.91:20128 | token | admin  | OmniRoute distant (…)
-  | default | http://localhost:20128    | ✗     |        |
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | OmniRoute distant (…)
+  | default | http://localhost:20128    | ✗     |       |
 ```
 
-**Basculer entre les serveurs** — toutes les commandes suivantes utilisent le contexte actif :
+**Changer de serveur** — chaque commande suivante utilise le contexte actif :
 
 ```bash
-omniroute contexts use vps         # → toutes les commandes ciblent désormais le VPS distant
-omniroute tokens list              #   (s’exécute sur le VPS)
+omniroute contexts use vps         # → toutes les commandes ciblent maintenant le VPS distant
+omniroute tokens list              #   (s'exécute sur le VPS)
 
 omniroute contexts use default     # → retour à localhost
-omniroute tokens list              #   (s’exécute sur le serveur local)
+omniroute tokens list              #   (s'exécute sur le serveur local)
 ```
 
-**Ajouter manuellement un contexte** (au lieu d’utiliser `connect`), l’inspecter ou le renommer :
+**Ajouter un contexte manuellement** (au lieu de `connect`), inspecter ou renommer :
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
-  --access-token oma_live_xxxx --scope write --description "serveur de préproduction"
-omniroute contexts show staging    # détails complets d’un contexte
+  --access-token oma_live_xxxx --scope write --description "boîte de staging"
+omniroute contexts show staging    # détails complets pour un contexte
 omniroute contexts rename staging stg
 ```
 
-**Supprimer un contexte** — demande une confirmation ; utilisez `--yes` pour l’ignorer
-(requis pour les scripts et les shells non interactifs, qui refusent autrement l’opération en toute sécurité) :
+**Supprimer un contexte** — demande confirmation ; passez `--yes` pour l'ignorer
+(requis pour les scripts / shells non interactifs, qui refusent sinon en toute sécurité) :
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> `default` (localhost) ne peut pas être supprimé. La suppression du contexte actif entraîne
-> le retour à `default`. Conseil : supprimer un contexte efface uniquement l’identifiant
-> enregistré **localement** — révoquez le jeton sur le serveur avec `omniroute tokens revoke <id>`
-> pour supprimer réellement l’accès.
+> Le contexte `default` (localhost) ne peut pas être supprimé. La suppression du contexte actif entraîne un retour
+> au contexte `default`. Astuce : la suppression d'un contexte ne fait que supprimer l'identifiant enregistré **localement** —
+> révoquez le jeton sur le serveur avec `omniroute tokens revoke <id>` pour réellement
+> couper l'accès.
 
-**Exporter / importer** des contextes (par exemple pour les transférer entre des machines). Les nouveaux contextes
-ne conservent qu’une référence au trousseau ; les identifiants ne sont pas inclus dans l’exportation lorsque le
-trousseau du système d’exploitation est disponible :
+**Exporter / importer** des contextes (par exemple, pour les déplacer entre machines). Les exportations omettent
+les identifiants par défaut, y compris les identifiants stockés par le mécanisme de secours basé sur fichier. Utilisez
+`--include-secrets` explicitement lorsqu'une sauvegarde portable contenant des identifiants est nécessaire :
 
 ```bash
-omniroute contexts export --out contexts.json     # par défaut : stdout
-omniroute contexts import contexts.json            # écrase les données ; --merge conserve celles qui existent
-omniroute contexts migrate --yes                  # déplace les anciens jetons en texte brut vers le trousseau
+omniroute contexts export --out contexts.json     # expurgé ; destination par défaut : stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # écraser ; --merge pour conserver les existants
+omniroute contexts migrate --yes                  # déplacer les jetons en texte clair hérités vers le trousseau
 ```
 
-Sur les systèmes sans interface graphique ne disposant pas d’un trousseau de système d’exploitation utilisable, la CLI utilise
-`config.json` avec le mode `0600` et affiche un avertissement unique. Traitez les exportations provenant
-de cette solution de secours (ainsi que toute ancienne configuration antérieure à la migration) comme des données secrètes.
+`--include-secrets` résout les références du trousseau avant l'exportation et échoue si un
+identifiant référencé ne peut pas être lu. `--no-secrets` a toujours la priorité.
+Les fichiers d'exportation sont écrits de manière atomique avec le mode `0600`. Traitez une exportation explicite
+contenant des secrets comme un matériel secret. Sur les systèmes sans interface graphique et sans trousseau de clés OS utilisable,
+la CLI utilise `config.json` avec le mode `0600` et affiche un
+avertissement unique ; une exportation par défaut reste expurgée dans ce mode.
 
 ---
 

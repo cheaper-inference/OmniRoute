@@ -11,7 +11,10 @@ test("playground config: adds Provider + Model selects reusing translator hooks"
   const src = read("src/app/(dashboard)/dashboard/playground/components/StudioConfigPane.tsx");
   assert.ok(src.includes("useProviderOptions"), "reuses useProviderOptions");
   assert.ok(src.includes("useAvailableModels"), "reuses useAvailableModels");
-  assert.ok(src.includes('update("provider"'), "writes provider into ConfigState");
+  // Provider/model writes are exercised through real change events in
+  // ui/playground-config-state-regression.test.tsx; this only pins that the
+  // selected provider still lands in ConfigState.
+  assert.ok(src.includes("provider: nextProvider"), "writes provider into ConfigState");
   assert.ok(src.includes("provider?: string"), "ConfigState gains provider");
 });
 

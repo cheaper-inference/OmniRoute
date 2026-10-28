@@ -1,0 +1,1 @@
+- **docs(i18n):** the 66 `docs/reference/ENVIRONMENT.md` mirrors carry the `OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS` row #17074 added, so the source no longer shows as translation drift.

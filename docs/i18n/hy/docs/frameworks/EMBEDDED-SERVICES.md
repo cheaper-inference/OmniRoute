@@ -1,16 +1,16 @@
 # Embedded Services (Հայերեն)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
 
 ---
 
-> **Տարբերակ՝** v3.8.44
-> **Վերջին թարմացումը՝** 2026-07-03
-> **Լսարանը՝** Ներկառուցված ծառայություններ (9Router, CLIProxyAPI, Mux, Bifrost) ավելացնող, սպասարկող կամ վրիպազերծող ինժեներներ։
+> **Տարբերակ․** v3.8.44
+> **Վերջին թարմացումը․** 2026-09-16
+> **Թիրախային լսարան․** Ներդրված ծառայություններ (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua) ավելացնող, սպասարկող կամ վրիպազերծող ինժեներներ։
 
-Ներկառուցված ծառայությունները տեղային տեղադրվող ուղեկից գործընթացային գործիքներ են, որոնք OmniRoute-ը տեղադրում, վերահսկում և
-ներկայացնում է որպես լիարժեք երթուղավորման թիրախներ։ Ի տարբերություն արտաքին մատակարարների (որոնց հասանելիությունն իրականացվում է համացանցի միջոցով՝
-API բանալիներով), ներկառուցված ծառայություններն աշխատում են OmniRoute-ի հետ նույն մեքենայի վրա և հաղորդակցվում loopback-ի միջոցով։
+Ներդրված ծառայությունները տեղային եղանակով տեղադրվող ուղեկից գործընթացային գործիքներ են, որոնք OmniRoute-ը տեղադրում, վերահսկում և
+տրամադրում է որպես լիարժեք երթուղավորման թիրախներ։ Ի տարբերություն արտաքին մատակարարների (որոնց հասանելիությունը համացանցի միջոցով է՝
+API բանալիներով), ներդրված ծառայություններն աշխատում են OmniRoute-ի հետ նույն մեքենայի վրա և հաղորդակցվում loopback-ի միջոցով։
 
 ---
 
@@ -27,37 +27,39 @@ API բանալիներով), ներկառուցված ծառայությունն
 
 ---
 
-## 1. Ընդհանուր նկարագրություն
+## 1. Ընդհանուր ակնարկ
 
-### Ինչո՞ւ օգտագործել ներկառուցված ծառայություններ։
+### Ինչո՞ւ ներդրված ծառայություններ։
 
-Ներկառուցված է հինգ ծառայություն՝
+Ներդրված են յոթ ծառայություններ.
 
-| Ծառայություն    | npm փաթեթ                                      | Լռելյայն պորտ | Նպատակ                                                                                                                                                                                                                                      |
-| --------------- | ---------------------------------------------- | :-----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                      |     20130     | AI երթուղիչ, որը OmniRoute-ը կարող է օգտագործել որպես ենթամատակարար։ Մոդելները հասանելի են որպես `9router/{sub}/{model}`                                                                                                                    |
-| **CLIProxyAPI** | GitHub թողարկման բինար ֆայլ (`cliproxy`)       |     8317      | Տեղային պրոքսի ադապտեր Anthropic CLI նույնականացման հոսքերի համար։ Ապահովում է պահուստային երթուղավորում, երբ OAuth նշանների վավերականության ժամկետը լրանում է                                                                              |
-| **Mux**         | `mux` (առանց գրաֆիկական միջերեսի `mux server`) |     8322      | Տեղային գործակալների նվագախմբման դև (coder/mux)։ Միայն կենսափուլի կառավարմամբ՝ երթուղավորման թիրախ չէ (LLM պրոքսավորում չկա)։                                                                                                               |
-| **Bifrost**     | `@maximhq/bifrost`                             |     8080      | Go AI դարպասի վերահաղորդման հետին համակարգ։ Աշխատելիս ինքնաշխատ ընտրվում է վերահաղորդման երթուղու (`/v1/relay/`) կողմից                                                                                                                     |
-| **Dario**       | `@askalf/dario`                                |     3456      | Claude բաժանորդագրության պրոքսի՝ CLIProxyAPI-ի այլընտրանք/պահուստային տարբերակ Claude-Code ձևաչափով տրաֆիկի համար․ ներարկված բանալին դառնում է `DARIO_ADMIN_TOKEN`՝ սահմանափակելով դրա `/admin/*` OAuth կառավարման հարթակի հասանելիությունը |
+| Ծառայություն    | npm փաթեթ                                      | Լռելյայն պորտ | Նպատակ                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------- | ---------------------------------------------- | :-----------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                      |     20130     | AI երթուղիչ, որը OmniRoute-ը կարող է օգտագործել որպես ենթամատակարար։ Մոդելները հասանելի են `9router/{sub}/{model}` ձևաչափով                                                                                                                                                                                                                                                                                                  |
+| **CLIProxyAPI** | GitHub թողարկման բինար ֆայլ (`cliproxy`)       |     8317      | Տեղային պրոքսի ադապտեր Anthropic CLI-ի նույնականացման հոսքերի համար։ Ապահովում է պահուստային երթուղավորում, երբ OAuth տոկենների ժամկետը լրանում է                                                                                                                                                                                                                                                                            |
+| **Mux**         | `mux` (առանց գրաֆիկական միջերեսի `mux server`) |     8322      | Տեղային գործակալների կազմակերպման դևոն (coder/mux)։ Կառավարվում է միայն կենսացիկլը՝ այն երթուղավորման թիրախ չէ (LLM պրոքսավորում չի իրականացնում)։                                                                                                                                                                                                                                                                           |
+| **Bifrost**     | `@maximhq/bifrost`                             |     8080      | Go-ով գրված AI դարպասի փոխանցման հետին համակարգ։ Աշխատելիս այն ինքնաշխատ ընտրվում է փոխանցման երթուղու (`/v1/relay/`) կողմից                                                                                                                                                                                                                                                                                                 |
+| **Dario**       | `@askalf/dario`                                |     3456      | Claude բաժանորդագրության պրոքսի՝ CLIProxyAPI-ի այլընտրանքային/խափանման դեպքում կիրառվող տարբերակ Claude-Code-ի ձևաչափով թրաֆիկի համար․ ներարկված բանալին դառնում է `DARIO_ADMIN_TOKEN`՝ սահմանափակելով դրա `/admin/*` OAuth կառավարման հարթակի հասանելիությունը                                                                                                                                                              |
+| **open-wa**     | `@open-wa/wa-automate`                         |     8323      | WhatsApp Web-ի ավտոմատացում (առանց գրաֆիկական միջերեսի Chromium՝ Puppeteer-ի միջոցով)։ Կառավարվում է միայն կենսացիկլը՝ այն երթուղավորման թիրախ չէ։                                                                                                                                                                                                                                                                           |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                           |     20135     | Հուշումների սեղմման օժանդակ ծառայություն՝ իրական LLMLingua-2 ONNX մոդելով (Microsoft-ի ալգորիթմի JS/TS տեղափոխում)։ `open-sse/services/compression/engines/llmlingua/index.ts`-ը HTTP-ի միջոցով `/compress` հարցումն ուղղորդում է դեպի այն՝ օժանդակ ծառայության անհասանելիության դեպքում անցնելով գործընթացի ներսում գործող աշխատանքային հոսքի հետին համակարգին։ Կառավարվում է միայն կենսացիկլը՝ այն երթուղավորման թիրախ չէ։ |
 
-Բոլոր հինգը հետևում են վերահսկման նույն մոդելին՝
+Բոլոր յոթ ծառայությունները հետևում են վերահսկման նույն մոդելին.
 
-- OmniRoute-ը դրանք տեղադրում է `DATA_DIR/services/{name}/` պանակում (մեկուսացված OmniRoute-ի սեփական `package.json`-ից)
+- OmniRoute-ը դրանք տեղադրում է `DATA_DIR/services/{name}/`-ում (OmniRoute-ի սեփական `package.json`-ից մեկուսացված)
 - OmniRoute-ը դրանք գործարկում և վերահսկում է որպես ենթագործընթացներ
-- OmniRoute-ը ժամանակավոր API բանալի է ներարկում ենթագործընթացի միջավայր և փոխարինում է այն առանց աշխատանքի ընդհատման (կիրառելի դեպքերում)
-- Կառավարման բոլոր երթուղիները (`/api/services/*`) **LOCAL_ONLY** են՝ հասանելի են միայն loopback-ից (խիստ կանոն #17)
+- OmniRoute-ը ժամանակավոր API բանալի է ներարկում ենթագործընթացի միջավայր և այն փոխարինում է առանց աշխատանքի ընդհատման (որտեղ կիրառելի է)
+- Կառավարման բոլոր երթուղիները (`/api/services/*`) **LOCAL_ONLY** են՝ հասանելի միայն հետադարձ կապի միջերեսից (խիստ կանոն #17)
 
 ### Հիմնական որոշումներ (նախագծման պլանից)
 
-| Որոշում                                                   | Արժեք                                                                                         |
-| --------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 9Router-ի բնիկ UI-ի հասանելիությունը կառավարման վահանակից | Հակադարձ պրոքսի՝ `/dashboard/providers/services/9router/embed/*` հասցեում                     |
-| Տեղադրման մեխանիզմ                                        | `npm install {package}`՝ `execFile`-ի միջոցով (առանց shell միջարկման)                         |
-| Օգտագործման ռեժիմ                                         | Մատակարարը երթուղավորման շարժիչում գրանցված է որպես `9router/{sub}/{model}`                   |
-| API բանալիների կառավարում                                 | OmniRoute-ը ստեղծում, գաղտնագրում է պահպանման ժամանակ (AES-256-GCM) և ներարկում env-ի միջոցով |
-| Կառավարման վահանակի գտնվելու վայրը                        | `/dashboard/providers/services` (երեք ներդիր)                                                 |
-| Ինքնագործարկում                                           | Փոխարկիչ յուրաքանչյուր ծառայության համար, լռելյայն՝ OFF                                       |
+| Որոշում                                                           | Արժեք                                                                                            |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 9Router-ի ներկառուցված UI-ի հասանելիությունը կառավարման վահանակից | Հակադարձ պրոքսի՝ `/dashboard/providers/services/9router/embed/*` հասցեում                        |
+| Տեղադրման մեխանիզմ                                                | `npm install {package}`՝ `execFile`-ի միջոցով (առանց shell ինտերպոլյացիայի)                      |
+| Օգտագործման ռեժիմ                                                 | Մատակարարը գրանցվում է որպես `9router/{sub}/{model}` երթուղավորման շարժիչում                     |
+| API բանալու կառավարում                                            | OmniRoute-ը ստեղծում, հանգստի վիճակում գաղտնագրում (AES-256-GCM) և ներարկում է այն env-ի միջոցով |
+| Կառավարման վահանակի տեղադրություն                                 | `/dashboard/providers/services` (երեք ներդիր)                                                    |
+| Ինքնաշխատ մեկնարկ                                                 | Փոխարկիչ՝ յուրաքանչյուր ծառայության համար, լռելյայն՝ OFF                                         |
 
 ---
 
@@ -65,9 +67,9 @@ API բանալիներով), ներկառուցված ծառայությունն
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Շերտ 1 — UI                                                       │
+│  Շերտ 1 — Օգտատիրոջ միջերես                                       │
 │  /dashboard/providers/services  (ներդիրներ՝ CLIProxyAPI | 9Router | Mux)│
-│  Ուղիղ մատյաններ (SSE), Գործարկել/Կանգնեցնել/Վերագործարկել/Թարմացնել, Կարգավորումներ, Տեղադրել│
+│  Իրական ժամանակի մատյաններ (SSE), գործարկում/կանգնեցում/վերագործարկում/թարմացում, կարգավորումներ, տեղադրում│
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
 │    ├── page.tsx               Կաղապար + ներդիրների երթուղավորում՝ ըստ ?tab=│
@@ -87,72 +89,74 @@ API բանալիներով), ներկառուցված ծառայությունն
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (հակադարձ HTTP + WebSocket proxy → 9Router upstream)            │
+│    (հակադարձ HTTP + WebSocket պրոքսի → 9Router upstream)           │
 │                                                                    │
 │  Դարպաս՝ LOCAL_ONLY_API_PREFIXES-ը ներառում է "/api/services/" և   │
-│        "/dashboard/providers/services/*/embed/"                    │
+│          "/dashboard/providers/services/*/embed/"                  │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ գործընթացի ներսում կանչեր
+                       │ ներկառուցված կանչեր
 ┌──────────────────────▼─────────────────────────────────────────────┐
 │  Շերտ 3 — ServiceSupervisor (src/lib/services/)                    │
 │                                                                    │
 │  ServiceSupervisor.ts   Ընդհանուր վերահսկիչ (child_process.spawn)  │
-│    ├── տեղադրում՝ execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── գործարկում՝ spawn(node, [entrypoint], {env, cwd})           │
+│    ├── տեղադրում՝ execFile('npm', ['install', pkg, '--prefix'])     │
+│    ├── գործարկում՝ spawn(node, [entrypoint], {env, cwd})            │
 │    ├── api_key՝    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
 │    ├── պորտ՝       20130՝ 9Router-ի համար (կարգավորելի)            │
 │    ├── մատյաններ՝  stdio օղակաձև բուֆեր՝ 5 MB → SSE իրադարձություններ│
-│    ├── առողջություն՝ HTTP GET /health յուրաքանչյուր 2–5 վրկ., ծույլ վերականգնում│
-│    └── կենսացիկլ՝  SIGTERM 15 վրկ. → SIGKILL                       │
+│    ├── առողջություն՝ HTTP GET /health՝ յուրաքանչյուր 2–5 վրկ․, ծույլ վերականգնում│
+│    └── կենսացիկլ՝  SIGTERM 15 վրկ․ → SIGKILL                       │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Գործընթացի մեկնարկին նախապատրաստում է բոլոր SERVICES[]-ը│
+│  bootstrap.ts       Գործընթացի մեկնարկին սկզբնավորում է բոլոր SERVICES[]-ը│
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
 │  modelSync.ts       Պարբերական GET /v1/models → service_models աղյուսակ│
-│  ringBuffer.ts      Օղակաձև մատյանային բուֆեր (5 MB յուրաքանչյուր ծառայության համար)│
+│  ringBuffer.ts      Օղակաձև մատյանային բուֆեր (5 MB՝ յուրաքանչյուր ծառայության համար)│
 │  healthCheck.ts     Պարբերական HTTP առողջության ստուգում            │
-│  installers/        ninerouter.ts, cliproxy.ts, mux.ts             │
-│                      (տեղադրիչի ադապտերներ)                        │
+│  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
+│                      (տեղադրիչների ադապտերներ)                     │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ OpenAI-համատեղելի HTTP (loopback)
+                       │ OpenAI-ի հետ համատեղելի HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Շերտ 4 — Մատակարար / Երթուղավորում                                │
+│  Շերտ 4 — Պրովայդեր / երթուղավորում                                │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
 │    Յուրաքանչյուր հարցման համար կրկին որոնում է պորտը և API բանալին (առանց քեշավորման)։│
-│    Proxy-ավորումից առաջ մոդելի id-ից հեռացնում է "9router/" նախածանցը։│
+│    Պրոքսիավորումից առաջ մոդելի id-ից հեռացնում է "9router/" նախածանցը։│
 │    Վերադարձնում է 503 service_not_running, եթե վերահսկիչը "running" վիճակում չէ։│
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    "9router"-ի գրառում՝ isEmbeddedService: true                    │
+│    Գրառում "9router"-ի համար՝ isEmbeddedService: true              │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
 │    Մոդելները պահվում են որպես "9router/{sub}/{model}" (նախածանցով)։│
 │    modelSync.ts-ի միջոցով համաժամացվում են յուրաքանչյուր 5 րոպեն մեկ։│
 │                                                                    │
-│  Mux-ի համար կառավարվում է ՄԻԱՅՆ կենսացիկլը (Շերտեր 1-3) — այն գործակալների│
-│  համակարգման daemon է, ոչ թե LLM proxy, ուստի չունի Շերտ 4-ի       │
-│  executor/provider գրառում և երբեք երթուղավորման թիրախ չէ։          │
+│  Mux-ի ՄԻԱՅՆ կենսացիկլն է կառավարվում (շերտեր 1-3). այն գործակալների│
+│  նվագախմբման դև է, ոչ թե LLM պրոքսի, ուստի չունի 4-րդ շերտի        │
+│  executor/provider գրառում և երբեք երթուղավորման թիրախ չէ։         │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Հիմնական սկզբնաղբյուր ֆայլեր
 
-| Ֆայլ                                        | Դեր                                                               |
-| ------------------------------------------- | ----------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Հիմնական դաս՝ կենսացիկլ, կողպում, առողջական վիճակ, օղակաձև բուֆեր |
-| `src/lib/services/bootstrap.ts`             | Գործընթացի մակարդակի գրանցում և ավտոմատ մեկնարկ                   |
-| `src/lib/services/registry.ts`              | Սինգլտոն քարտեզ՝ `tool → supervisor`                              |
-| `src/lib/services/apiKey.ts`                | Բանալու գեներացում, AES-256-GCM գաղտնագրում՝ պահպանման ժամանակ    |
-| `src/lib/services/modelSync.ts`             | Մոդելների պարբերական համաժամացում (5 րոպե) + ըստ պահանջի          |
-| `src/lib/services/ringBuffer.ts`            | 5 ՄԲ ծավալով օղակաձև մատյանային բուֆեր՝ SSE բաժանորդագրությամբ    |
-| `src/lib/services/healthCheck.ts`           | HTTP առողջական վիճակի ստուգում (կարգավորվող ընդմիջում)            |
-| `src/lib/services/installers/ninerouter.ts` | 9Router-ի npm տեղադրում/թարմացում/հեռացում                        |
-| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPI-ի npm տեղադրում/թարմացում/հեռացում                    |
-| `src/lib/services/installers/mux.ts`        | Mux-ի npm տեղադրում/թարմացում/հեռացում                            |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` օժանդակ ֆունկցիա                          |
-| `src/app/api/services/[name]/logs/route.ts` | Համօգտագործվող SSE մատյանների վերջնակետ                           |
-| `open-sse/executors/ninerouter.ts`          | Մատակարարի կատարիչ (Շերտ 4)                                       |
+| Ֆայլ                                        | Դեր                                                         |
+| ------------------------------------------- | ----------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | Հիմնական դաս՝ կենսացիկլ, կողպում, վիճակ, օղակաձև բուֆեր     |
+| `src/lib/services/bootstrap.ts`             | Գործընթացի մակարդակի գրանցում և ավտոմեկնարկ                 |
+| `src/lib/services/registry.ts`              | Սինգլթոն քարտեզ՝ `tool → supervisor`                        |
+| `src/lib/services/apiKey.ts`                | Բանալիի ստեղծում, AES-256-GCM գաղտնագրում պահպանման ժամանակ |
+| `src/lib/services/modelSync.ts`             | Մոդելների պարբերական համաժամացում (5 րոպե) + ըստ պահանջի    |
+| `src/lib/services/ringBuffer.ts`            | 5 ՄԲ օղակաձև մատյանային բուֆեր՝ SSE բաժանորդագրությամբ      |
+| `src/lib/services/healthCheck.ts`           | HTTP վիճակի ստուգում (կարգավորվող պարբերականությամբ)        |
+| `src/lib/services/installers/ninerouter.ts` | npm-ով տեղադրում/թարմացում/հեռացում 9Router-ի համար         |
+| `src/lib/services/installers/cliproxy.ts`   | npm-ով տեղադրում/թարմացում/հեռացում CLIProxyAPI-ի համար     |
+| `src/lib/services/installers/mux.ts`        | npm-ով տեղադրում/թարմացում/հեռացում Mux-ի համար             |
+| `src/lib/services/installers/openwa.ts`     | npm-ով տեղադրում/թարմացում/հեռացում open-wa-ի համար         |
+| `src/lib/services/installers/llmlingua.ts`  | npm-ով տեղադրում/թարմացում/հեռացում LLMLingua-ի համար       |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` օժանդակ ֆունկցիա                    |
+| `src/app/api/services/[name]/logs/route.ts` | Համօգտագործվող SSE մատյանների վերջնակետ                     |
+| `open-sse/executors/ninerouter.ts`          | Մատակարարի կատարիչ (շերտ 4)                                 |
 
 ---
 
@@ -209,55 +213,55 @@ API բանալիներով), ներկառուցված ծառայությունն
 ## 4. API տեղեկատու
 
 `/api/services/`-ի ներքո գտնվող բոլոր երթուղիները **LOCAL_ONLY** են (միայն loopback, խիստ կանոն #17)։
-Ոչ loopback հարցումները ստանում են `403 LOCAL_ONLY`՝ անկախ վավերացման թոքենից։
+Ոչ loopback հարցումները ստանում են `403 LOCAL_ONLY`՝ անկախ նույնականացման թոքենից։
 
 ### 4.1 9Router-ի վերջնակետեր (11 երթուղի)
 
 #### `POST /api/services/9router/install`
 
-Տեղադրում է 9Router-ը npm-ից։ Ստեղծում է `DATA_DIR/services/9router/`՝ իր սեփական
+Տեղադրում է 9Router-ը npm-ից։ Ստեղծում է `DATA_DIR/services/9router/` պանակը՝ իր սեփական
 `package.json`-ով և `node_modules/`-ով։ Չի հակասում OmniRoute-ի սեփական կախվածություններին։
 
-**Հարցման մարմին** (բոլոր դաշտերը կամընտիր են)․
+**Հարցման մարմին** (բոլոր դաշտերը կամընտիր են).
 
 ```json
 { "version": "latest" }
 ```
 
-| Դաշտ      | Տեսակ    | Լռելյայն   | Նկարագրություն                           |
-| --------- | -------- | ---------- | ---------------------------------------- |
-| `version` | `string` | `"latest"` | տեղադրվելիք npm տարբերակի թեգ կամ semver |
+| Դաշտ      | Տեսակ    | Լռելյայն   | Նկարագրություն                              |
+| --------- | -------- | ---------- | ------------------------------------------- |
+| `version` | `string` | `"latest"` | Տեղադրվելիք npm տարբերակի թեգը կամ semver-ը |
 
-**Պատասխաններ․**
+**Պատասխաններ.**
 
-| Կարգավիճակ | Նկարագրություն                                           |
-| ---------- | -------------------------------------------------------- |
-| `200`      | `{ ok: true, installedVersion: "x.y.z", path: "..." }`   |
-| `400`      | Անվավեր հարցման մարմին (Zod վավերացման ձախողում)         |
-| `409`      | Արդեն տեղադրվում է (կողպեքը զբաղված է)                   |
-| `500`      | npm տեղադրումը ձախողվել է — պարզ սխալը տես `message`-ում |
+| Կարգավիճակ | Նկարագրություն                                         |
+| ---------- | ------------------------------------------------------ |
+| `200`      | `{ ok: true, installedVersion: "x.y.z", path: "..." }` |
+| `400`      | Անվավեր հարցման մարմին (Zod վավերացման ձախողում)       |
+| `409`      | Տեղադրումն արդեն ընթացքի մեջ է (կողպումն ակտիվ է)      |
+| `500`      | npm install-ը ձախողվեց. պարզ սխալի համար տես `message` |
 
-**Նշումներ․** Օգտագործում է `execFile('npm', [...])`՝ առանց shell-ի և ինտերպոլյացիայի (խիստ կանոն #13)։
-EACCES սխալները ներկայացվում են հասկանալի հաղորդագրությունների տեսքով։
+**Նշումներ.** Օգտագործում է `execFile('npm', [...])`՝ առանց shell-ի և ինտերպոլացիայի (խիստ կանոն #13)։
+EACCES սխալները ներկայացվում են հասկանալի հաղորդագրություններով։
 
 ---
 
 #### `POST /api/services/9router/start`
 
-Գործարկում է 9Router-ը։ Գրանցում է վերահսկիչ, եթե այն դեռ գրանցված չէ, ապա կանչում է
-`supervisor.start()`։ Իդեմպոտենտ է, երբ արդեն աշխատում է։
+Գործարկում է 9Router-ը։ Եթե վերահսկիչը դեռ գրանցված չէ, գրանցում է այն, ապա կանչում է
+`supervisor.start()`։ Իդեմպոտենտ է, երբ ծառայությունն արդեն աշխատում է։
 
-**Հարցման մարմին․** չկա
+**Հարցման մարմին.** չկա
 
-**Պատասխաններ․**
+**Պատասխաններ.**
 
-| Կարգավիճակ | Նկարագրություն                                         |
-| ---------- | ------------------------------------------------------ |
-| `200`      | `ServiceStatus` օբյեկտ (տես ստորև բերված սխեման)       |
-| `409`      | 9Router-ը տեղադրված չէ (`status: "not_installed"`)     |
-| `503`      | Մեկնարկը ձախողվել է (գործընթացի սխալ՝ տես `lastError`) |
+| Կարգավիճակ | Նկարագրություն                                           |
+| ---------- | -------------------------------------------------------- |
+| `200`      | `ServiceStatus` օբյեկտ (տե՛ս ստորև բերված սխեման)        |
+| `409`      | 9Router-ը տեղադրված չէ (`status: "not_installed"`)       |
+| `503`      | Գործարկումը ձախողվեց (գործընթացի սխալ՝ տե՛ս `lastError`) |
 
-**ServiceStatus սխեմա․**
+**ServiceStatus սխեմա.**
 
 ```json
 {
@@ -275,69 +279,69 @@ EACCES սխալները ներկայացվում են հասկանալի հաղ�
 
 #### `POST /api/services/9router/stop`
 
-Կոկիկ կերպով կանգնեցնում է 9Router-ը։ Ուղարկում է SIGTERM, սպասում 15 վ, ապա ուղարկում
-SIGKILL, եթե գործընթացը դեռ գործում է։ Իդեմպոտենտ է, երբ արդեն կանգնեցված է։
+Սահուն կանգնեցնում է 9Router-ը։ Ուղարկում է SIGTERM, սպասում 15 վրկ, ապա ուղարկում SIGKILL, եթե գործընթացը դեռ ակտիվ է։
+Իդեմպոտենտ է, երբ ծառայությունն արդեն կանգնեցված է։
 
-**Հարցման մարմին․** չկա
+**Հարցման մարմին.** չկա
 
-**Պատասխաններ․**
+**Պատասխաններ.**
 
 | Կարգավիճակ | Նկարագրություն                       |
 | ---------- | ------------------------------------ |
 | `200`      | `ServiceStatus` (`state: "stopped"`) |
-| `503`      | Կանգնեցումն անսպասելիորեն ձախողվել է |
+| `503`      | Կանգնեցումն անսպասելիորեն ձախողվեց   |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Համարժեք է գործողությունների կողպեքի ներքո նախ `stop()`, ապա `start()` կանչելուն։
+Գործողության կողպման ներքո համարժեք է `stop()`, ապա՝ `start()` կանչելուն։
 
-**Հարցման մարմին․** չկա
+**Հարցման մարմին.** չկա
 
-**Պատասխաններ․** նույնն են, ինչ `start`-ի համար (վերադարձնում է վերջնական `ServiceStatus`-ը)։
+**Պատասխաններ.** նույնն են, ինչ `start`-ի դեպքում (վերադարձնում է վերջնական `ServiceStatus`-ը)։
 
 ---
 
 #### `POST /api/services/9router/update`
 
-Թարմացնում է 9Router-ը՝ npm-ի ավելի նոր տարբերակի։ Եթե ծառայությունն աշխատում է, այն նախ
-կանգնեցվում է, կատարվում է npm տեղադրում (ավելի նոր տարբերակը տեղում տեղադրելով), ապա
+Թարմացնում է 9Router-ը մինչև npm-ի ավելի նոր տարբերակ։ Եթե ծառայությունն աշխատում է, այն նախ
+կանգնեցվում է, գործարկվում է npm install-ը (տեղում տեղադրելով ավելի նոր տարբերակը), ապա
 ծառայությունը վերագործարկվում է։
 
-**Հարցման մարմին** (բոլոր դաշտերը կամընտիր են)․
+**Հարցման մարմին** (բոլոր դաշտերը կամընտիր են).
 
 ```json
 { "version": "latest" }
 ```
 
-**Պատասխաններ․**
+**Պատասխաններ.**
 
 | Կարգավիճակ | Նկարագրություն                                                  |
 | ---------- | --------------------------------------------------------------- |
 | `200`      | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
 | `400`      | Անվավեր մարմին                                                  |
-| `500`      | npm թարմացումը ձախողվել է                                       |
+| `500`      | npm թարմացումը ձախողվեց                                         |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-Ստեղծում է նոր API բանալի 9Router-ի համար, կոդավորում է այն պահպանման վիճակում և վերագործարկում է ծառայությունը
+Ստեղծում է նոր API բանալի 9Router-ի համար, գաղտնագրում է այն պահպանման ժամանակ և վերագործարկում ծառայությունը
 (եթե այն աշխատում է), որպեսզի ծառայությունն իր միջավայրից ստանա նոր բանալին։ Հին բանալին
 անմիջապես անվավեր է դառնում։
 
-**Հարցման մարմին՝** չկա
+**Հարցման մարմին.** չկա
 
-**Պատասխաններ՝**
+**Պատասխաններ.**
 
 | Կարգավիճակ | Նկարագրություն                             |
 | ---------- | ------------------------------------------ |
 | `200`      | `{ keyRotated: true, restarted: boolean }` |
-| `500`      | Պտտումը ձախողվեց                           |
+| `500`      | Բանալու փոխարինումը ձախողվեց               |
 
-**Անվտանգություն՝** Նոր բանալին երբեք չի վերադարձվում պատասխանում (հավատարմագրերի արտահոսք չկա)։
-Այն պահվում է կոդավորված ձևով (AES-256-GCM)՝ `version_manager` աղյուսակում։
+**Անվտանգություն.** Նոր բանալին երբեք չի վերադարձվում պատասխանում (նույնականացման տվյալների արտահոսք չկա)։
+Այն գաղտնագրված (AES-256-GCM) պահվում է `version_manager` աղյուսակում։
 
 ---
 
@@ -345,14 +349,14 @@ SIGKILL, եթե գործընթացը դեռ գործում է։ Իդեմպոտե
 
 Վերադարձնում է համակցված ընթացիկ + DB կարգավիճակը՝ ներառյալ տարբերակի մետատվյալները և API բանալու նախադիտումը։
 
-**Պատասխաններ՝**
+**Պատասխաններ.**
 
 | Կարգավիճակ | Նկարագրություն                  |
 | ---------- | ------------------------------- |
 | `200`      | Տե՛ս ստորև բերված սխեման        |
 | `500`      | Կարգավիճակի ընթերցումը ձախողվեց |
 
-**Պատասխանի սխեմա՝**
+**Պատասխանի սխեմա.**
 
 ```json
 {
@@ -376,16 +380,16 @@ SIGKILL, եթե գործընթացը դեռ գործում է։ Իդեմպոտե
 
 #### `POST /api/services/9router/auto-start`
 
-Փոխարկում է ավտոմեկնարկի դրոշակը։ Երբ `enabled: true`, ծառայությունն ավտոմատ մեկնարկում է
-OmniRoute-ի հաջորդ գործարկման ժամանակ (եթե ծառայությունը տեղադրված է)։
+Միացնում կամ անջատում է ավտոմատ գործարկման դրոշը։ Երբ `enabled: true`, ծառայությունն ավտոմատ գործարկվում է
+OmniRoute-ի հաջորդ մեկնարկի ժամանակ (եթե ծառայությունը տեղադրված է)։
 
-**Հարցման մարմին՝**
+**Հարցման մարմին.**
 
 ```json
 { "enabled": true }
 ```
 
-**Պատասխաններ՝**
+**Պատասխաններ.**
 
 | Կարգավիճակ | Նկարագրություն        |
 | ---------- | --------------------- |
@@ -396,24 +400,24 @@ OmniRoute-ի հաջորդ գործարկման ժամանակ (եթե ծառայ
 
 #### `GET /api/services/9router/logs`
 
-9Router-ի stdout/stderr օղակաձև բուֆերից ընթացիկ գրանցամատյանների SSE հոսք։
+9Router-ի stdout/stderr օղակաձև բուֆերից ընթացիկ մատյանների SSE հոսք։
 
-**Հարցման պարամետրեր՝**
+**Հարցման պարամետրեր.**
 
-| Պարամետր | Տեսակ     | Լռելյայն | Նկարագրություն                                                                               |
-| -------- | --------- | -------- | -------------------------------------------------------------------------------------------- |
-| `tail`   | `integer` | 200      | Սկզբում ուղարկվող պատմական տողերի քանակը (առավելագույնը՝ 1000)                               |
-| `filter` | `string`  | չկա      | Մեծատառ/փոքրատառից անկախ ենթատողի զտիչ (առանց կանոնավոր արտահայտության՝ պաշտպանված ReDoS-ից) |
+| Պարամետր | Տեսակ     | Լռելյայն | Նկարագրություն                                                     |
+| -------- | --------- | -------- | ------------------------------------------------------------------ |
+| `tail`   | `integer` | 200      | Սկզբում ուղարկվող պատմական տողերի քանակը (առավելագույնը՝ 1000)     |
+| `filter` | `string`  | չկա      | Ռեգիստրից անկախ ենթատողի զտիչ (առանց regex-ի՝ պաշտպանված ReDoS-ից) |
 
-**SSE իրադարձություններ՝**
+**SSE իրադարձություններ.**
 
-| Իրադարձություն | Տվյալներ    | Նկարագրություն                             |
-| -------------- | ----------- | ------------------------------------------ |
-| `snapshot`     | `LogLine[]` | Սկզբնական պատմական վերջնամաս               |
-| `log`          | `LogLine`   | Ընթացիկ գրանցամատյանի տող                  |
-| `heartbeat`    | `{}`        | Կապի պահպանում՝ յուրաքանչյուր 15 վրկ-ը մեկ |
+| Իրադարձություն | Տվյալներ    | Նկարագրություն                      |
+| -------------- | ----------- | ----------------------------------- |
+| `snapshot`     | `LogLine[]` | Սկզբնական պատմական վերջնամաս        |
+| `log`          | `LogLine`   | Մատյանի ընթացիկ տող                 |
+| `heartbeat`    | `{}`        | Կապի պահպանում յուրաքանչյուր 15 վրկ |
 
-**LogLine սխեմա՝**
+**LogLine սխեմա.**
 
 ```json
 {
@@ -423,7 +427,7 @@ OmniRoute-ի հաջորդ գործարկման ժամանակ (եթե ծառայ
 }
 ```
 
-**Պատասխաններ՝**
+**Պատասխաններ.**
 
 | Կարգավիճակ | Նկարագրություն                                   |
 | ---------- | ------------------------------------------------ |
@@ -433,82 +437,156 @@ OmniRoute-ի հաջորդ գործարկման ժամանակ (եթե ծառայ
 
 ---
 
-### 4.2 CLIProxyAPI-ի վերջնակետերը (10 երթուղի)
+### 4.2 CLIProxyAPI վերջնակետեր (10 երթուղի)
 
-CLIProxyAPI-ն ունի վերջնակետերի նույն կառուցվածքը, ինչ 9Router-ը՝ բացառությամբ `rotate-key`-ի, և հավելյալ
-`accounts`, `provider-expose` ու `auto-restart-adopted` վերջնակետերով։ Այժմ գործարկման պահին այն ստանում է
-տվյալների հարթության հատուկ API բանալի (`needsApiKey: true`՝
-`bootstrap.ts`-ում, որն օգտագործվում է մոդելների համաժամացման համար)։ `status`-ը ներառում է ավելի քիչ դաշտեր։
+CLIProxyAPI-ն ունի նույն վերջնակետային կառուցվածքը, ինչ 9Router-ը՝ առանց `rotate-key`-ի, սակայն
+ավելացված են `accounts`, `provider-expose` և `auto-restart-adopted`։ Այժմ այն գործարկման
+ժամանակ ստանում է ներարկված՝ տվյալների հարթության համար նախատեսված առանձին API բանալի
+(`needsApiKey: true`՝ `bootstrap.ts`-ում, որն օգտագործվում է մոդելների համաժամացման համար)։
+`status`-ը ներառում է ավելի քիչ դաշտեր։
 
 | Մեթոդ  | Ուղի                                | Նկարագրություն                                   |
 | ------ | ----------------------------------- | ------------------------------------------------ |
 | `POST` | `/api/services/cliproxy/install`    | Տեղադրել CLIProxyAPI-ն npm-ից                    |
-| `POST` | `/api/services/cliproxy/start`      | Մեկնարկել CLIProxyAPI-ն                          |
+| `POST` | `/api/services/cliproxy/start`      | Գործարկել CLIProxyAPI-ն                          |
 | `POST` | `/api/services/cliproxy/stop`       | Կանգնեցնել CLIProxyAPI-ն                         |
 | `POST` | `/api/services/cliproxy/restart`    | Վերագործարկել CLIProxyAPI-ն                      |
 | `POST` | `/api/services/cliproxy/update`     | Թարմացնել ավելի նոր տարբերակի                    |
 | `GET`  | `/api/services/cliproxy/status`     | Ընթացիկ + DB կարգավիճակ (առանց `apiKeyMasked`-ի) |
-| `POST` | `/api/services/cliproxy/auto-start` | Փոխարկել ավտոմեկնարկը                            |
+| `POST` | `/api/services/cliproxy/auto-start` | Միացնել կամ անջատել ավտոմատ գործարկումը          |
 
-Ընդհանուր `GET /api/services/{name}/logs` վերջնակետն (տե՛ս §4.1) աշխատում է բոլոր
+Ընդհանուր `GET /api/services/{name}/logs` վերջնակետը (տե՛ս §4.1) աշխատում է բոլոր
 չորս ծառայությունների համար՝ օգտագործելով `[name]` դինամիկ հատվածը։
 
 ---
 
-### 4.3 Mux-ի վերջնակետերը (8 երթուղի)
+### 4.3 Mux վերջնակետեր (8 երթուղի)
 
-Mux-ն ունի վերջնակետերի նույն կառուցվածքը, ինչ CLIProxyAPI-ն. API
-մակերեսում `rotate-key` երթուղի չկա (կրողի թոքենը ստեղծվում է նույն եղանակով, ինչ 9Router-ինը՝
-`getOrCreateApiKey("mux")`-ի միջոցով, և ներդրվում է `MUX_SERVER_AUTH_TOKEN` միջավայրի փոփոխականի միջոցով, սակայն
-առանձին պտտման վերջնակետ դեռ չկա)։ Mux-ը կառավարվում է միայն կենսացիկլի մակարդակում. ի տարբերություն
-9Router-ի՝ այն չունի 4-րդ շերտի կատարիչ և երբեք չի գրանցվում որպես երթուղավորման մատակարար։
+Mux-ն ունի նույն վերջնակետային կառուցվածքը, ինչ CLIProxyAPI-ն՝ API-ի
+մակերեսում առանց `rotate-key` երթուղու (կրողի թոքենը ստեղծվում է նույն եղանակով, ինչ
+9Router-ինը՝ `getOrCreateApiKey("mux")`-ի միջոցով, և ներարկվում է
+`MUX_SERVER_AUTH_TOKEN` միջավայրի փոփոխականի միջոցով, սակայն դրա պարբերական փոփոխման
+համար առանձին վերջնակետ դեռ չկա)։ Mux-ի համար կառավարվում է միայն կենսացիկլը․ ի
+տարբերություն 9Router-ի՝ այն չունի 4-րդ շերտի կատարիչ և երբեք չի գրանցվում որպես
+երթուղավորման մատակարար։
 
-| Մեթոդ  | Ուղի                           | Նկարագրություն                      |
-| ------ | ------------------------------ | ----------------------------------- |
-| `POST` | `/api/services/mux/install`    | Տեղադրել Mux-ը npm-ից (`npm i mux`) |
-| `POST` | `/api/services/mux/start`      | Մեկնարկել Mux-ը (`mux server`)      |
-| `POST` | `/api/services/mux/stop`       | Կանգնեցնել Mux-ը                    |
-| `POST` | `/api/services/mux/restart`    | Վերագործարկել Mux-ը                 |
-| `POST` | `/api/services/mux/update`     | Թարմացնել npm-ի ավելի նոր տարբերակի |
-| `GET`  | `/api/services/mux/status`     | Ընթացիկ + DB կարգավիճակ             |
-| `POST` | `/api/services/mux/auto-start` | Փոխարկել ավտոմեկնարկը               |
+| Մեթոդ  | Ուղի                           | Նկարագրություն                          |
+| ------ | ------------------------------ | --------------------------------------- |
+| `POST` | `/api/services/mux/install`    | Տեղադրել Mux-ը npm-ից (`npm i mux`)     |
+| `POST` | `/api/services/mux/start`      | Գործարկել Mux-ը (`mux server`)          |
+| `POST` | `/api/services/mux/stop`       | Կանգնեցնել Mux-ը                        |
+| `POST` | `/api/services/mux/restart`    | Վերագործարկել Mux-ը                     |
+| `POST` | `/api/services/mux/update`     | Թարմացնել npm-ի ավելի նոր տարբերակի     |
+| `GET`  | `/api/services/mux/status`     | Ընթացիկ + DB կարգավիճակ                 |
+| `POST` | `/api/services/mux/auto-start` | Միացնել կամ անջատել ավտոմատ գործարկումը |
 
 ---
 
-### 4.4 Bifrost-ի վերջնակետերը (8 երթուղի)
+### 4.4 Bifrost վերջնակետեր (8 երթուղի)
 
-Bifrost-ը Go-ով գրված AI-դարպասի վերահաղորդման հետնամաս է (`@maximhq/bifrost`)։ Այն օգտագործում է վերջնակետերի նույն
-կառուցվածքը, ինչ CLIProxyAPI-ն (առանց `rotate-key`-ի. Bifrost-ն ինքն է կառավարում իր մատակարարների
-բանալիները `config.json`-ում՝ իր `-app-dir`-ի ներքո)։
+Bifrost-ը Go-ով գրված AI-անցուղու վերահաղորդիչ բեքենդ է (`@maximhq/bifrost`)։ Այն
+օգտագործում է նույն վերջնակետային կառուցվածքը, ինչ CLIProxyAPI-ն (առանց `rotate-key`-ի․
+Bifrost-ն ինքն է կառավարում իր մատակարարների բանալիները `config.json`-ում՝ իր
+`-app-dir`-ի ներքո)։
 
 | Մեթոդ  | Ուղի                               | Նկարագրություն                                                           |
 | ------ | ---------------------------------- | ------------------------------------------------------------------------ |
 | `POST` | `/api/services/bifrost/install`    | Տեղադրել Bifrost-ը npm-ից (`@maximhq/bifrost`)                           |
-| `POST` | `/api/services/bifrost/start`      | Գործարկել Bifrost-ը 8080 պորտում (լռելյայն)                              |
+| `POST` | `/api/services/bifrost/start`      | Գործարկել Bifrost-ը 8080 պորտի վրա (լռելյայն)                            |
 | `POST` | `/api/services/bifrost/stop`       | Կանգնեցնել Bifrost-ը                                                     |
 | `POST` | `/api/services/bifrost/restart`    | Վերագործարկել Bifrost-ը                                                  |
 | `POST` | `/api/services/bifrost/update`     | Թարմացնել ավելի նոր տարբերակի                                            |
-| `GET`  | `/api/services/bifrost/status`     | Ընթացիկ + ՏԲ կարգավիճակ                                                  |
-| `POST` | `/api/services/bifrost/auto-start` | Միացնել կամ անջատել ինքնագործարկումը                                     |
-| `GET`  | `/api/services/bifrost/logs`       | SSE մատյանի վերջնամաս (ընդհանուր `[name]/logs` դինամիկ երթուղու միջոցով) |
+| `GET`  | `/api/services/bifrost/status`     | Ընթացիկ + DB կարգավիճակ                                                  |
+| `POST` | `/api/services/bifrost/auto-start` | Միացնել կամ անջատել ավտոմատ գործարկումը                                  |
+| `GET`  | `/api/services/bifrost/logs`       | SSE մատյանի վերջնամաս (`[name]/logs` ընդհանուր դինամիկ երթուղու միջոցով) |
 
-**Երթուղայնացման կապակցում․** Երբ `BIFROST_BASE_URL`-ը սահմանված չէ, իսկ վերահսկվող Bifrost
-օրինակը գործարկված է, `getBifrostRoutingConfig()`-ը (`routingBackend.ts`-ում) ավտոմատ կերպով
-օգտագործում է `http://127.0.0.1:{port}`-ը որպես ռելեի բազային URL։ Հստակ սահմանված `BIFROST_BASE_URL` միջավայրի
-փոփոխականը միշտ գերակայություն ունի։
+**Երթուղավորման միացում․** Երբ `BIFROST_BASE_URL`-ը սահմանված չէ, իսկ վերահսկվող Bifrost
+օրինակը գործում է, `getBifrostRoutingConfig()`-ը (`routingBackend.ts`-ում) ինքնաբերաբար
+օգտագործում է `http://127.0.0.1:{port}`-ը՝ որպես վերահաղորդիչի բազային URL։ Բացահայտորեն
+սահմանված `BIFROST_BASE_URL` միջավայրի փոփոխականը միշտ գերակայություն ունի։
 
 ---
 
-### 4.5 Dario-ի վերջնակետերը (12 երթուղի)
+### 4.5 Dario վերջնակետեր (12 երթուղի)
 
 Կենսացիկլի կառուցվածքը նույնն է, ինչ մյուս ծառայություններինը (`install`, `start`, `stop`, `restart`,
-`update`, `status`, `auto-start`, `auto-restart-adopted`), ինչպես նաև թոքենով պաշտպանված OAuth
-կառավարման հարթակ՝ `admin/`-ի ներքո՝ `admin/accounts`, `admin/import-from-omniroute`,
-`admin/login-start`, `admin/login-complete` (բոլորը՝ `DARIO_ADMIN_TOKEN`-ով պաշտպանված)։
+`update`, `status`, `auto-start`, `auto-restart-adopted`), և ներառում է նաև թոքենով
+պաշտպանված OAuth կառավարման հարթակ `admin/`-ի ներքո՝ `admin/accounts`,
+`admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (բոլորը՝
+`DARIO_ADMIN_TOKEN`-ով պաշտպանված)։
 
-### 4.6 Հակադարձ պրոքսի (9Router-ի կառավարման վահանակի ներկառուցում)
+### 4.6 open-wa վերջնակետեր (7 երթուղի)
 
-Կառավարման վահանակը ներքին հակադարձ պրոքսիի միջոցով iframe-ի ներսում ներկառուցում է 9Router-ի վեբ միջերեսը՝
+open-wa-ն (`@open-wa/wa-automate`) կառավարում է առանց գրաֆիկական միջերեսի Chromium-ի
+օրինակ (Puppeteer-ի միջոցով)՝ WhatsApp Web-ն ավտոմատացնելու համար։ Այն օգտագործում է
+նույն վերջնակետային կառուցվածքը, ինչ Mux-ը (առայժմ առանց `rotate-key` երթուղու)։
+Դրա համար կառավարվում է միայն կենսացիկլը․ այն երթուղավորման թիրախ չէ և չունի 4-րդ
+շերտի կատարիչի/մատակարարի գրառում։
+
+| Մեթոդ  | Ուղի                              | Նկարագրություն                                                           |
+| ------ | --------------------------------- | ------------------------------------------------------------------------ |
+| `POST` | `/api/services/openwa/install`    | Տեղադրել open-wa-ն npm-ից (`@open-wa/wa-automate`)                       |
+| `POST` | `/api/services/openwa/start`      | Գործարկել open-wa-ն 8323 պորտում (լռելյայն)                              |
+| `POST` | `/api/services/openwa/stop`       | Կանգնեցնել open-wa-ն                                                     |
+| `POST` | `/api/services/openwa/restart`    | Վերագործարկել open-wa-ն                                                  |
+| `POST` | `/api/services/openwa/update`     | Թարմացնել ավելի նոր տարբերակի                                            |
+| `GET`  | `/api/services/openwa/status`     | Ընթացիկ + ՏԲ կարգավիճակ                                                  |
+| `POST` | `/api/services/openwa/auto-start` | Միացնել կամ անջատել ավտոմեկնարկը                                         |
+| `GET`  | `/api/services/openwa/logs`       | SSE մատյանի վերջնամաս (ընդհանուր `[name]/logs` դինամիկ երթուղու միջոցով) |
+
+**API բանալի․** ներդրվում է որպես `WA_KEY` — open-wa-ի ընդհանուր՝ `WA_*` նախածանցով միջավայրի
+վերասահմանումը այն կապակցում է `--key`/`-k` CLI ընտրանքին
+(`dist/cli/setup.js::envArgs()`, ստուգված տեղադրված 4.76.0
+փաթեթի նկատմամբ)։ `generateServiceApiKey()`-ի միջոցով ստեղծվելիս ստանում է `ow_` նախածանց։ open-wa-ն
+բանալին կարդում է `key`/`api_key` HTTP վերնագրից (ոչ թե `Authorization:
+Bearer`-ից)․ `/api-docs*`-ը բացահայտորեն ազատված է ստուգումից
+(`setupAuthenticationLayer`՝ `dist/cli/server.js`-ում), ուստի առողջության ստուգմանը
+նույնականացման վերնագիր անհրաժեշտ չէ։
+
+**Զուգակցում․** open-wa-ն ոչ պաշտոնական է և կապված չէ WhatsApp-ի հետ․
+միացված համարը կարող է արգելափակվել WhatsApp-ի սեփական ավտոմատացման հայտնաբերման պատճառով։
+Առաջին գործարկման ժամանակ զուգակցման QR կոդը տպվում է stdout-ում և հասանելի է դառնում
+գոյություն ունեցող Մատյաններ վահանակի/SSE հոսքի միջոցով․ այս ինտեգրման մեջ դեռևս
+QR պատկերի համար առանձին վերջնակետ չկա։
+
+---
+
+### 4.7 LLMLingua վերջնակետեր (8 երթուղի)
+
+LLMLingua-ն հրահանգների սեղմման կողմնակի ծառայություն է, որը փաթաթում է `@atjsh/llmlingua-2`-ը (իրական
+ONNX թոքենների դասակարգման մոդել, որն առաջին
+`/compress` կանչի ժամանակ ներբեռնվում է Hugging Face-ից)։ Այն օգտագործում է Bifrost-ի վերջնակետերի նույն կառուցվածքը (առանց API բանալու՝
+`needsApiKey: false`, այն երբեք հավատարմագրեր չի մշակում)։
+
+| Մեթոդ  | Ուղի                                           | Նկարագրություն                                                                                              |
+| ------ | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | npm-ի միջոցով տեղադրել `@atjsh/llmlingua-2`-ը + կախյալ փաթեթները, գրել կողմնակի ծառայության սերվերի սկրիպտը |
+| `POST` | `/api/services/llmlingua/start`                | Գործարկել կողմնակի ծառայությունը 20135 պորտում (լռելյայն)                                                   |
+| `POST` | `/api/services/llmlingua/stop`                 | Կանգնեցնել կողմնակի ծառայությունը                                                                           |
+| `POST` | `/api/services/llmlingua/restart`              | Վերագործարկել կողմնակի ծառայությունը                                                                        |
+| `POST` | `/api/services/llmlingua/update`               | Թարմացնել փաթեթի ավելի նոր տարբերակի                                                                        |
+| `GET`  | `/api/services/llmlingua/status`               | Ընթացիկ + ՏԲ կարգավիճակ                                                                                     |
+| `POST` | `/api/services/llmlingua/auto-start`           | Միացնել կամ անջատել ավտոմեկնարկը                                                                            |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Միացնել կամ անջատել կցված (նախապես գոյություն ունեցող) օրինակի ավտոմատ վերագործարկումը                      |
+| `GET`  | `/api/services/llmlingua/logs`                 | SSE մատյանի վերջնամաս (ընդհանուր `[name]/logs` դինամիկ երթուղու միջոցով)                                    |
+
+**Կողմնակի ծառայության պայմանագիր․** սերվերի սկրիպտը տրամադրում է `GET /health` (ակնթարթային՝
+մոդելին չի սպասում) և `POST /compress` (`{ text, rate }` →
+`{ text, compressed, ratio }`)։ Մոդելը ծուլորեն բեռնվում է առաջին
+`/compress` կանչի ժամանակ։
+
+**Սեղմման կապակցում․** `open-sse/services/compression/engines/llmlingua/index.ts`-ի
+`httpSidecarBackend`-ը կանչում է `LLMLINGUA_BASE_URL`-ը (լռելյայն՝
+`http://127.0.0.1:20135`) և կողմնակի ծառայության պատասխանը ընդունում է միայն այն դեպքում, երբ այն
+մուտքային տվյալից խիստ ավելի կարճ է․ ցանկացած ձախողման դեպքում (չի աշխատում, ժամանակի սպառում, ոչինչ չփոխող
+պատասխան) օգտագործվում է ընթացիկ պրոցեսի worker-thread հետնամասը (`./worker.ts`)։
+
+---
+
+### 4.8 Հակադարձ պրոքսի (9Router կառավարման վահանակի ներկառուցում)
+
+Կառավարման վահանակը 9Router-ի վեբ միջերեսը ներկառուցում է iframe-ի մեջ՝ ներքին հակադարձ
+պրոքսիի միջոցով հետևյալ հասցեում․
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
@@ -516,18 +594,18 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 Այս պրոքսին՝
 
-- Փոխանցում է հարցումը դեպի `http://127.0.0.1:{port}/{path}` (միայն loopback)
-- Հեռացնում է մուտքային `cookie` և `authorization` վերնագրերը (OmniRoute-ի աշխատաշրջանի արտահոսք չկա)
-- Ավելացնում է `Authorization: Bearer {apiKey}`՝ 9Router-ի նույնականացման համար
+- Հարցումը փոխանցում է `http://127.0.0.1:{port}/{path}` հասցեին (միայն loopback)
+- Հեռացնում է մուտքային `cookie` և `authorization` վերնագրերը (OmniRoute-ի նստաշրջանի արտահոսք չկա)
+- 9Router-ի նույնականացման համար ներդնում է `Authorization: Bearer {apiKey}`
 - Պատասխանից հեռացնում է `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
-- Վերագրում է HTML պատասխանները՝ `<base href>` ներարկելու և բացարձակ ուղիները նորմալացնելու համար (`/foo` → `/dashboard/.../embed/foo`)
+- Վերաշարադրում է HTML պատասխանները՝ `<base href>` ներդնելու և բացարձակ ուղիները նորմալացնելու համար (`/foo` → `/dashboard/.../embed/foo`)
 
-Ներկառուցված կառավարման վահանակի WebSocket-ի թարմացումները մշակվում են առանձին
-պորտում գործող ուղեկից սերվերի միջոցով (տե՛ս `src/lib/services/embedWsProxy.ts`)։
+Ներկառուցված կառավարման վահանակի WebSocket-ի մակարդակի բարձրացումները մշակվում են առանձին
+պորտում աշխատող ուղեկից սերվերի կողմից (տե՛ս `src/lib/services/embedWsProxy.ts`)։
 
-**Անվտանգություն․** Ներկառուցման պրոքսիի երթուղիները դասակարգված են `LOCAL_ONLY_API_PREFIXES`-ի ներքո
-և հասանելի են միայն loopback-ից։ Cloudflare/Ngrok թունելի միջոցով JWT ձեռք բերած
-հարձակվողը չի կարող պրոքսիի միջոցով մուտք գործել ներկառուցված ծառայություններ։
+**Անվտանգություն․** Ներկառուցման պրոքսի երթուղիները դասակարգված են `LOCAL_ONLY_API_PREFIXES`-ի ներքո
+և հասանելի են միայն loopback-ից։ Cloudflare/Ngrok թունելի միջոցով JWT ստացած
+հարձակվողը չի կարող ներկառուցված ծառայությունների համար պրոքսավորում կատարել։
 
 ---
 

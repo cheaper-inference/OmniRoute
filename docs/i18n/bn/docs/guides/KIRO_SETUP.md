@@ -1,6 +1,6 @@
 # Kiro Setup Guide (বাংলা)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/KIRO_SETUP.md) · 🇪🇹 [am](../../../am/docs/guides/KIRO_SETUP.md) · 🇸🇦 [ar](../../../ar/docs/guides/KIRO_SETUP.md) · 🇦🇿 [az](../../../az/docs/guides/KIRO_SETUP.md) · 🇧🇬 [bg](../../../bg/docs/guides/KIRO_SETUP.md) · 🇨🇿 [cs](../../../cs/docs/guides/KIRO_SETUP.md) · 🇩🇰 [da](../../../da/docs/guides/KIRO_SETUP.md) · 🇩🇪 [de](../../../de/docs/guides/KIRO_SETUP.md) · 🇬🇷 [el](../../../el/docs/guides/KIRO_SETUP.md) · 🇪🇸 [es](../../../es/docs/guides/KIRO_SETUP.md) · 🇪🇪 [et](../../../et/docs/guides/KIRO_SETUP.md) · 🇮🇷 [fa](../../../fa/docs/guides/KIRO_SETUP.md) · 🇫🇮 [fi](../../../fi/docs/guides/KIRO_SETUP.md) · 🇫🇷 [fr](../../../fr/docs/guides/KIRO_SETUP.md) · 🇮🇪 [ga](../../../ga/docs/guides/KIRO_SETUP.md) · 🇮🇳 [gu](../../../gu/docs/guides/KIRO_SETUP.md) · 🇳🇬 [ha](../../../ha/docs/guides/KIRO_SETUP.md) · 🇮🇱 [he](../../../he/docs/guides/KIRO_SETUP.md) · 🇮🇳 [hi](../../../hi/docs/guides/KIRO_SETUP.md) · 🇭🇷 [hr](../../../hr/docs/guides/KIRO_SETUP.md) · 🇭🇺 [hu](../../../hu/docs/guides/KIRO_SETUP.md) · 🇦🇲 [hy](../../../hy/docs/guides/KIRO_SETUP.md) · 🇮🇩 [id](../../../id/docs/guides/KIRO_SETUP.md) · 🇳🇬 [ig](../../../ig/docs/guides/KIRO_SETUP.md) · 🇮🇹 [it](../../../it/docs/guides/KIRO_SETUP.md) · 🇯🇵 [ja](../../../ja/docs/guides/KIRO_SETUP.md) · 🇬🇪 [ka](../../../ka/docs/guides/KIRO_SETUP.md) · 🇰🇭 [km](../../../km/docs/guides/KIRO_SETUP.md) · 🇮🇳 [kn](../../../kn/docs/guides/KIRO_SETUP.md) · 🇰🇷 [ko](../../../ko/docs/guides/KIRO_SETUP.md) · 🇱🇹 [lt](../../../lt/docs/guides/KIRO_SETUP.md) · 🇱🇻 [lv](../../../lv/docs/guides/KIRO_SETUP.md) · 🇮🇳 [ml](../../../ml/docs/guides/KIRO_SETUP.md) · 🇮🇳 [mr](../../../mr/docs/guides/KIRO_SETUP.md) · 🇲🇾 [ms](../../../ms/docs/guides/KIRO_SETUP.md) · 🇲🇹 [mt](../../../mt/docs/guides/KIRO_SETUP.md) · 🇲🇲 [my](../../../my/docs/guides/KIRO_SETUP.md) · 🇳🇵 [ne](../../../ne/docs/guides/KIRO_SETUP.md) · 🇳🇱 [nl](../../../nl/docs/guides/KIRO_SETUP.md) · 🇳🇴 [no](../../../no/docs/guides/KIRO_SETUP.md) · 🇮🇳 [or](../../../or/docs/guides/KIRO_SETUP.md) · 🇮🇳 [pa](../../../pa/docs/guides/KIRO_SETUP.md) · 🇵🇭 [phi](../../../phi/docs/guides/KIRO_SETUP.md) · 🇵🇱 [pl](../../../pl/docs/guides/KIRO_SETUP.md) · 🇵🇹 [pt](../../../pt/docs/guides/KIRO_SETUP.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/KIRO_SETUP.md) · 🇷🇴 [ro](../../../ro/docs/guides/KIRO_SETUP.md) · 🇷🇺 [ru](../../../ru/docs/guides/KIRO_SETUP.md) · 🇱🇰 [si](../../../si/docs/guides/KIRO_SETUP.md) · 🇸🇰 [sk](../../../sk/docs/guides/KIRO_SETUP.md) · 🇸🇮 [sl](../../../sl/docs/guides/KIRO_SETUP.md) · 🇷🇸 [sr](../../../sr/docs/guides/KIRO_SETUP.md) · 🇸🇪 [sv](../../../sv/docs/guides/KIRO_SETUP.md) · 🇰🇪 [sw](../../../sw/docs/guides/KIRO_SETUP.md) · 🇮🇳 [ta](../../../ta/docs/guides/KIRO_SETUP.md) · 🇮🇳 [te](../../../te/docs/guides/KIRO_SETUP.md) · 🇹🇭 [th](../../../th/docs/guides/KIRO_SETUP.md) · 🇹🇷 [tr](../../../tr/docs/guides/KIRO_SETUP.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/KIRO_SETUP.md) · 🇵🇰 [ur](../../../ur/docs/guides/KIRO_SETUP.md) · 🇺🇿 [uz](../../../uz/docs/guides/KIRO_SETUP.md) · 🇻🇳 [vi](../../../vi/docs/guides/KIRO_SETUP.md) · 🇳🇬 [yo](../../../yo/docs/guides/KIRO_SETUP.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/KIRO_SETUP.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/KIRO_SETUP.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/KIRO_SETUP.md) · 🇪🇹 [am](../../../am/docs/guides/KIRO_SETUP.md) · 🇸🇦 [ar](../../../ar/docs/guides/KIRO_SETUP.md) · 🇦🇿 [az](../../../az/docs/guides/KIRO_SETUP.md) · 🇧🇬 [bg](../../../bg/docs/guides/KIRO_SETUP.md) · 🇧🇦 [bs](../../../bs/docs/guides/KIRO_SETUP.md) · 🇨🇿 [cs](../../../cs/docs/guides/KIRO_SETUP.md) · 🇩🇰 [da](../../../da/docs/guides/KIRO_SETUP.md) · 🇩🇪 [de](../../../de/docs/guides/KIRO_SETUP.md) · 🇬🇷 [el](../../../el/docs/guides/KIRO_SETUP.md) · 🇪🇸 [es](../../../es/docs/guides/KIRO_SETUP.md) · 🇪🇪 [et](../../../et/docs/guides/KIRO_SETUP.md) · 🇮🇷 [fa](../../../fa/docs/guides/KIRO_SETUP.md) · 🇫🇮 [fi](../../../fi/docs/guides/KIRO_SETUP.md) · 🇫🇷 [fr](../../../fr/docs/guides/KIRO_SETUP.md) · 🇮🇪 [ga](../../../ga/docs/guides/KIRO_SETUP.md) · 🇮🇳 [gu](../../../gu/docs/guides/KIRO_SETUP.md) · 🇳🇬 [ha](../../../ha/docs/guides/KIRO_SETUP.md) · 🇮🇱 [he](../../../he/docs/guides/KIRO_SETUP.md) · 🇮🇳 [hi](../../../hi/docs/guides/KIRO_SETUP.md) · 🇭🇷 [hr](../../../hr/docs/guides/KIRO_SETUP.md) · 🇭🇺 [hu](../../../hu/docs/guides/KIRO_SETUP.md) · 🇦🇲 [hy](../../../hy/docs/guides/KIRO_SETUP.md) · 🇮🇩 [id](../../../id/docs/guides/KIRO_SETUP.md) · 🇳🇬 [ig](../../../ig/docs/guides/KIRO_SETUP.md) · 🇮🇹 [it](../../../it/docs/guides/KIRO_SETUP.md) · 🇯🇵 [ja](../../../ja/docs/guides/KIRO_SETUP.md) · 🇬🇪 [ka](../../../ka/docs/guides/KIRO_SETUP.md) · 🇰🇭 [km](../../../km/docs/guides/KIRO_SETUP.md) · 🇮🇳 [kn](../../../kn/docs/guides/KIRO_SETUP.md) · 🇰🇷 [ko](../../../ko/docs/guides/KIRO_SETUP.md) · 🇱🇹 [lt](../../../lt/docs/guides/KIRO_SETUP.md) · 🇱🇻 [lv](../../../lv/docs/guides/KIRO_SETUP.md) · 🇮🇳 [ml](../../../ml/docs/guides/KIRO_SETUP.md) · 🇮🇳 [mr](../../../mr/docs/guides/KIRO_SETUP.md) · 🇲🇾 [ms](../../../ms/docs/guides/KIRO_SETUP.md) · 🇲🇹 [mt](../../../mt/docs/guides/KIRO_SETUP.md) · 🇲🇲 [my](../../../my/docs/guides/KIRO_SETUP.md) · 🇳🇵 [ne](../../../ne/docs/guides/KIRO_SETUP.md) · 🇳🇱 [nl](../../../nl/docs/guides/KIRO_SETUP.md) · 🇳🇴 [no](../../../no/docs/guides/KIRO_SETUP.md) · 🇮🇳 [or](../../../or/docs/guides/KIRO_SETUP.md) · 🇮🇳 [pa](../../../pa/docs/guides/KIRO_SETUP.md) · 🇵🇭 [phi](../../../phi/docs/guides/KIRO_SETUP.md) · 🇵🇱 [pl](../../../pl/docs/guides/KIRO_SETUP.md) · 🇵🇹 [pt](../../../pt/docs/guides/KIRO_SETUP.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/KIRO_SETUP.md) · 🇷🇴 [ro](../../../ro/docs/guides/KIRO_SETUP.md) · 🇷🇺 [ru](../../../ru/docs/guides/KIRO_SETUP.md) · 🇱🇰 [si](../../../si/docs/guides/KIRO_SETUP.md) · 🇸🇰 [sk](../../../sk/docs/guides/KIRO_SETUP.md) · 🇸🇮 [sl](../../../sl/docs/guides/KIRO_SETUP.md) · 🇷🇸 [sr](../../../sr/docs/guides/KIRO_SETUP.md) · 🇸🇪 [sv](../../../sv/docs/guides/KIRO_SETUP.md) · 🇰🇪 [sw](../../../sw/docs/guides/KIRO_SETUP.md) · 🇮🇳 [ta](../../../ta/docs/guides/KIRO_SETUP.md) · 🇮🇳 [te](../../../te/docs/guides/KIRO_SETUP.md) · 🇹🇭 [th](../../../th/docs/guides/KIRO_SETUP.md) · 🇹🇷 [tr](../../../tr/docs/guides/KIRO_SETUP.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/KIRO_SETUP.md) · 🇵🇰 [ur](../../../ur/docs/guides/KIRO_SETUP.md) · 🇺🇿 [uz](../../../uz/docs/guides/KIRO_SETUP.md) · 🇻🇳 [vi](../../../vi/docs/guides/KIRO_SETUP.md) · 🇳🇬 [yo](../../../yo/docs/guides/KIRO_SETUP.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/KIRO_SETUP.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/KIRO_SETUP.md)
 
 ---
 
@@ -112,30 +112,42 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## API-কী ইমপোর্ট প্রবাহ
+## API-কী ইমপোর্ট প্রক্রিয়া
 
-API-কী প্রমাণীকরণ দীর্ঘমেয়াদি Kiro / AWS CodeWhisperer bearer ক্রেডেনশিয়ালের জন্য ব্যবহৃত হয়। এটি OAuth রিফ্রেশ ব্যবহার করে না, তাই শেয়ার করা OIDC সেশন অবৈধ হয়ে যাওয়ার সমস্যা এড়ায়।
+API-কী প্রমাণীকরণ দীর্ঘমেয়াদি Kiro / AWS CodeWhisperer বেয়ারার ক্রেডেনশিয়ালের জন্য। এটি
+OAuth রিফ্রেশ ব্যবহার করে না, তাই শেয়ার করা OIDC সেশন অকার্যকর হয়ে যাওয়ার সমস্যা এড়ায়।
 
 ### ড্যাশবোর্ড
 
-1. **Dashboard -> Providers -> Kiro** খুলুন।
-2. **API Key** নির্বাচন করুন।
-3. API কী এবং ঐচ্ছিক AWS অঞ্চল (`us-east-1` ডিফল্ট) পেস্ট করুন।
-4. OmniRoute কীটি যাচাই করে এবং সংযোগটি সংরক্ষণ করে।
+1. **ড্যাশবোর্ড -> প্রোভাইডার -> Kiro** খুলুন।
+2. **API Key** বেছে নিন।
+3. API কী পেস্ট করুন এবং AWS অঞ্চল নির্বাচন করুন: **স্বয়ংক্রিয় শনাক্তকরণ** (ডিফল্ট), **US East
+   (N. Virginia)** অথবা **Europe (Frankfurt)**।
+4. OmniRoute কী-টি যাচাই করে এবং যে অঞ্চলে কী-টি কাজ করে, সেই অঞ্চলে পিন করা অবস্থায় সংযোগটি
+   সংরক্ষণ করে।
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region`-এ `auto` (ডিফল্ট), `us-east-1` অথবা `eu-central-1` গ্রহণযোগ্য; অন্য যেকোনো মান
+HTTP 400 সহ প্রত্যাখ্যাত হয়।
 
 ### অভ্যন্তরীণ চুক্তি
 
-API রুটটি `KiroService.validateApiKey()` কল করে কীটি যাচাই করে, যা অঞ্চল-সামঞ্জস্যপূর্ণ CodeWhisperer/Amazon Q এন্ডপয়েন্টের বিপরীতে `ListAvailableProfiles` ব্যবহার করে এবং একটি `profileArn` নির্ধারণ করে।
+API রুটটি `KiroService.validateApiKey()` কল করে কী-টি যাচাই করে, যা
+`GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+কল করে (API-কী ইনফারেন্সের জন্য Amazon Q সারফেস এটি ব্যবহার করে), প্রতি অঞ্চলের জন্য 10 সেকেন্ড সময়সীমাসহ।
+`auto` মোডে এটি প্রথমে `us-east-1`, তারপর `eu-central-1` চেষ্টা করে এবং কী-টি গ্রহণকারী প্রথম অঞ্চলটি
+সংরক্ষণ করে। প্রতিটি সম্ভাব্য অঞ্চলে প্রত্যাখ্যাত হওয়া কী-এর ইমপোর্ট
+HTTP 400 সহ ব্যর্থ হয়। এরপর ঐচ্ছিক `profileArn` শনাক্ত করতে সর্বোচ্চ প্রচেষ্টার ভিত্তিতে
+`ListAvailableProfiles` কল করা হয় (বেশিরভাগ API কী-এর ক্ষেত্রে AWS এটি অনুমোদন করে না)।
 
-সংরক্ষিত সংযোগটি নিম্নলিখিতটি ব্যবহার করে:
+সংরক্ষিত সংযোগটি ব্যবহার করে:
 
 ```json
 {
@@ -148,7 +160,13 @@ API রুটটি `KiroService.validateApiKey()` কল করে কীটি
 }
 ```
 
-রানটাইমে, `KiroExecutor.buildHeaders()` কীটিকে `Authorization: Bearer <key>` হিসেবে পাঠায় এবং `tokentype: API_KEY` যোগ করে। কোটা/প্রোফাইল কলগুলো একই মার্কার ব্যবহার করে, যাতে AWS bearer-টিকে OIDC বা সামাজিক অ্যাক্সেস টোকেনের পরিবর্তে একটি দীর্ঘমেয়াদি API কী হিসেবে বিবেচনা করে।
+রানটাইমে, `KiroExecutor.buildHeaders()` কী-টি
+`Authorization: Bearer <key>` হিসেবে পাঠায় এবং `tokentype: API_KEY` যোগ করে। কোটা/প্রোফাইল কলগুলো
+একই মার্কার ব্যবহার করে, যাতে AWS বেয়ারারটিকে OIDC বা সোশ্যাল অ্যাক্সেস টোকেনের পরিবর্তে
+একটি দীর্ঘমেয়াদি API কী হিসেবে বিবেচনা করে। `KiroExecutor.execute()` API-কী ইনফারেন্স শুধু
+`https://q.<region>.amazonaws.com/generateAssistantResponse`-এ পাঠায় — `us-east-1`
+সহ — কারণ Kiro IDE গেটওয়ে `TokenType=API_KEY` প্রত্যাখ্যান করে এবং
+`codewhisperer.us-east-1` API-কী পেলোডকে অবৈধ অনুরোধের বডি হিসেবে প্রত্যাখ্যান করে (HTTP 400)।
 
 ---
 

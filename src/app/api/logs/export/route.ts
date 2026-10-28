@@ -2,6 +2,14 @@ import { countCallLogsSince, iterateCallLogsSince } from "@/lib/usage/callLogs";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { countProxyLogsSince, iterateProxyLogsSince } from "@/lib/db/proxyLogs";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { logger } from "@/shared/utils/logger";
+import {
+  LOG_EXPORT_DEFAULT_ROWS,
+  LOG_EXPORT_MAX_ROWS,
+  buildLogExportHeaders,
+} from "@/shared/utils/logExport";
+
+const log = logger.child({ module: "logs-export" });
 
 /**
  * GET /api/logs/export — export logs as JSON (streamed)
@@ -26,11 +34,83 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
  *  - Pretty-printing stays removed (callers that need formatting can
  *    pretty-print client-side).
  *  - BREAKING (documented in changelog): `limit` still defaults to 10,000 —
- *    exports that previously returned every row are silently truncated
+ *    exports that previously returned every row are truncated with cap metadata
  *    unless the caller passes a larger `limit`.
  */
-const MAX_ROWS = 50_000;
-const DEFAULT_ROWS = 10_000;
+const MAX_ROWS = LOG_EXPORT_MAX_ROWS;
+const DEFAULT_ROWS = LOG_EXPORT_DEFAULT_ROWS;
+
+/**
+ * Build the streamed JSON body for a log export.
+ *
+ * Streams one row at a time — the row source (`rows`) is a cursor/generator
+ * bounded by SQL LIMIT. `capped`/`limit`/`totalAvailable` travel in the
+ * HEADER (not a trailer, as before) so a client consuming the stream
+ * incrementally learns about truncation before it has processed every row.
+ * `estimatedCount` is known before iteration; the authoritative `count` is
+ * appended after the rows, including when hydration fails partway through.
+ */
+function buildLogExportStream({
+  rows,
+  header,
+  logType,
+  hours,
+}: {
+  rows: AsyncIterable<unknown> | Iterable<unknown>;
+  header: Record<string, unknown>;
+  logType: string;
+  hours: number;
+}): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    async start(controller) {
+      // header ends with `}`, we strip it to append `,"logs":[...]}`
+      controller.enqueue(encoder.encode(JSON.stringify(header).slice(0, -1) + ',"logs":['));
+      let index = 0;
+      let streamError: unknown = null;
+      try {
+        for await (const row of rows) {
+          if (index > 0) controller.enqueue(encoder.encode(","));
+          controller.enqueue(encoder.encode(JSON.stringify(row)));
+          index++;
+        }
+      } catch (err) {
+        // #13999: the row source (a DB cursor/generator) can throw partway through
+        // iteration, after headers and some rows have already gone out over the wire.
+        // Letting the exception propagate out of an async `start()` auto-errors the
+        // underlying Web ReadableStream, but once that stream is bridged onto a real
+        // Node HTTP response (as any Node-based adapter does), a source error does not
+        // end or destroy the destination response — the client's fetch() never resolves
+        // and never rejects, and it hangs forever (proven by
+        // tests/unit/repro-13999-mid-stream-error.test.ts). Instead of erroring the
+        // stream, close the JSON document out cleanly with a trailing `error`/`emitted`
+        // marker so the HTTP response always completes, and log the failure server-side.
+        streamError = err;
+        log.error(
+          { err, emitted: index, type: logType, hours },
+          "logs export stream failed mid-iteration"
+        );
+      }
+      controller.enqueue(encoder.encode("]"));
+      if (streamError) controller.enqueue(encoder.encode(errorTail(index, streamError)));
+      controller.enqueue(encoder.encode(`,"count":${index}}\n`));
+      controller.close();
+    },
+  });
+}
+
+/**
+ * `,"emitted":N,"error":"..."` — the failure fields before the final count.
+ */
+function errorTail(emitted: number, streamError: unknown): string {
+  const tail = JSON.stringify({
+    emitted,
+    error: sanitizeErrorMessage(
+      streamError instanceof Error ? streamError.message : String(streamError)
+    ),
+  });
+  return "," + tail.slice(1, -1);
+}
 
 export async function GET(request: Request) {
   const authError = await requireManagementAuth(request);
@@ -70,34 +150,16 @@ export async function GET(request: Request) {
     const count = Math.min(totalAvailable, limit);
     const filename = `omniroute-${tableName}-${hours}h-${new Date().toISOString().slice(0, 10)}.json`;
 
-    // Stream the JSON response one row at a time — the row source itself
-    // (`rows`) is a cursor/generator bounded by SQL LIMIT, so peak memory is
-    // bounded by one hydrated row, not the full matching set (#13123).
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      async start(controller) {
-        // `capped`/`limit`/`totalAvailable` are written into the HEADER (not
-        // just a trailer at the end, as before) so a client consuming the
-        // stream incrementally learns about truncation before it has
-        // processed every row. Only present when the export is actually
-        // capped, matching the previous (trailer-only) contract shape.
-        const header = JSON.stringify({
-          count,
-          hours,
-          type: logType,
-          ...(capped ? { capped: true, limit, totalAvailable } : {}),
-        });
-        // header ends with `}`, we strip it to append `,"logs":[...]}`
-        controller.enqueue(encoder.encode(header.slice(0, -1) + ',"logs":['));
-        let index = 0;
-        for await (const row of rows) {
-          if (index > 0) controller.enqueue(encoder.encode(","));
-          controller.enqueue(encoder.encode(JSON.stringify(row)));
-          index++;
-        }
-        controller.enqueue(encoder.encode("]}\n"));
-        controller.close();
+    const stream = buildLogExportStream({
+      rows,
+      header: {
+        estimatedCount: count,
+        hours,
+        type: logType,
+        ...(capped ? { capped: true, limit, totalAvailable } : {}),
       },
+      logType,
+      hours,
     });
 
     return new Response(stream, {
@@ -105,6 +167,10 @@ export async function GET(request: Request) {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Content-Disposition": `attachment; filename="${filename}"`,
+        // #13999: mirror the cap metadata in headers so a client that saves the body as a
+        // Blob (the dashboard Export button) can warn without parsing the full document.
+        // Headers precede hydration: their count is explicitly an estimate.
+        ...buildLogExportHeaders({ count, limit, totalAvailable }),
       },
     });
   } catch (error) {

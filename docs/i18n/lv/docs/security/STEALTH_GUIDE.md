@@ -1,6 +1,6 @@
 # Stealth Guide (Latviešu)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/STEALTH_GUIDE.md) · 🇪🇹 [am](../../../am/docs/security/STEALTH_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/security/STEALTH_GUIDE.md) · 🇦🇿 [az](../../../az/docs/security/STEALTH_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/security/STEALTH_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/security/STEALTH_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/security/STEALTH_GUIDE.md) · 🇩🇰 [da](../../../da/docs/security/STEALTH_GUIDE.md) · 🇩🇪 [de](../../../de/docs/security/STEALTH_GUIDE.md) · 🇬🇷 [el](../../../el/docs/security/STEALTH_GUIDE.md) · 🇪🇸 [es](../../../es/docs/security/STEALTH_GUIDE.md) · 🇪🇪 [et](../../../et/docs/security/STEALTH_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/security/STEALTH_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/security/STEALTH_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/security/STEALTH_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/security/STEALTH_GUIDE.md) · 🇮🇱 [he](../../../he/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/security/STEALTH_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/security/STEALTH_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/security/STEALTH_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/security/STEALTH_GUIDE.md) · 🇮🇩 [id](../../../id/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/security/STEALTH_GUIDE.md) · 🇮🇹 [it](../../../it/docs/security/STEALTH_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/security/STEALTH_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/security/STEALTH_GUIDE.md) · 🇰🇭 [km](../../../km/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/security/STEALTH_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/security/STEALTH_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/security/STEALTH_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/security/STEALTH_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/security/STEALTH_GUIDE.md) · 🇲🇲 [my](../../../my/docs/security/STEALTH_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/security/STEALTH_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/security/STEALTH_GUIDE.md) · 🇳🇴 [no](../../../no/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [or](../../../or/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/security/STEALTH_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/security/STEALTH_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/security/STEALTH_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/security/STEALTH_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/STEALTH_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/security/STEALTH_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/security/STEALTH_GUIDE.md) · 🇱🇰 [si](../../../si/docs/security/STEALTH_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/security/STEALTH_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/security/STEALTH_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/security/STEALTH_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/security/STEALTH_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [te](../../../te/docs/security/STEALTH_GUIDE.md) · 🇹🇭 [th](../../../th/docs/security/STEALTH_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/security/STEALTH_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/STEALTH_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/security/STEALTH_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/security/STEALTH_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/security/STEALTH_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/STEALTH_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/STEALTH_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/STEALTH_GUIDE.md) · 🇪🇹 [am](../../../am/docs/security/STEALTH_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/security/STEALTH_GUIDE.md) · 🇦🇿 [az](../../../az/docs/security/STEALTH_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/security/STEALTH_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/security/STEALTH_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/security/STEALTH_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/security/STEALTH_GUIDE.md) · 🇩🇰 [da](../../../da/docs/security/STEALTH_GUIDE.md) · 🇩🇪 [de](../../../de/docs/security/STEALTH_GUIDE.md) · 🇬🇷 [el](../../../el/docs/security/STEALTH_GUIDE.md) · 🇪🇸 [es](../../../es/docs/security/STEALTH_GUIDE.md) · 🇪🇪 [et](../../../et/docs/security/STEALTH_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/security/STEALTH_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/security/STEALTH_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/security/STEALTH_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/security/STEALTH_GUIDE.md) · 🇮🇱 [he](../../../he/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/security/STEALTH_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/security/STEALTH_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/security/STEALTH_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/security/STEALTH_GUIDE.md) · 🇮🇩 [id](../../../id/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/security/STEALTH_GUIDE.md) · 🇮🇹 [it](../../../it/docs/security/STEALTH_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/security/STEALTH_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/security/STEALTH_GUIDE.md) · 🇰🇭 [km](../../../km/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/security/STEALTH_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/security/STEALTH_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/security/STEALTH_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/security/STEALTH_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/security/STEALTH_GUIDE.md) · 🇲🇲 [my](../../../my/docs/security/STEALTH_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/security/STEALTH_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/security/STEALTH_GUIDE.md) · 🇳🇴 [no](../../../no/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [or](../../../or/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/security/STEALTH_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/security/STEALTH_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/security/STEALTH_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/security/STEALTH_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/STEALTH_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/security/STEALTH_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/security/STEALTH_GUIDE.md) · 🇱🇰 [si](../../../si/docs/security/STEALTH_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/security/STEALTH_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/security/STEALTH_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/security/STEALTH_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/security/STEALTH_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [te](../../../te/docs/security/STEALTH_GUIDE.md) · 🇹🇭 [th](../../../th/docs/security/STEALTH_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/security/STEALTH_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/STEALTH_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/security/STEALTH_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/security/STEALTH_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/security/STEALTH_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/STEALTH_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/STEALTH_GUIDE.md)
 
 ---
 
@@ -16,60 +16,60 @@ Maskēšanās funkcijas pastāv, lai OmniRoute varētu darboties kā saderības 
 
 ---
 
-## TLS pirkstu nospiedumu veidošanas slānis
+## TLS digitālnospiedumu slānis
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Pastāvīgas `wreq-js` sesijas tiek izveidotas atlikti katram konta tvērumam un atrisinātajam starpniekserverim. Procesa mēroga `TlsClient` pūlā ir ne vairāk kā 128 sesijas, kas augšupējiem pakalpojumiem aiz Cloudflare imitē **Chrome 124 operētājsistēmā macOS**. `TlsClient.fetch()` pārtrauc darbību, ja vietējā izpildvide nav pieejama; izsaucējs var nepārprotami atlasīt atkāpšanās variantu ārpus šī ietinēja.
+Pastāvīgas `wreq-js` sesijas tiek izveidotas atlikti katram konta tvērumam un atrisinātajam starpniekserverim. Procesa mēroga `TlsClient` pūlā ir ne vairāk kā 128 sesijas, kas augšupējiem pakalpojumiem aiz Cloudflare atdarina **Chrome 124 operētājsistēmā macOS**. `TlsClient.fetch()` droši pārtrauc darbību, ja vietējā izpildlaika vide nav pieejama; izsaucējs var tieši izvēlēties atkāpšanās risinājumu ārpus šī ietinēja.
 
 - Sesijas profils: `browser: "chrome_124", os: "macos"`
-- Starpniekservera noteikšana (prioritārā secībā): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (arī ar mazajiem burtiem)
-- Noildze: `TLS_CLIENT_TIMEOUT_MS` (manto no `FETCH_TIMEOUT_MS`, noklusējums — 600000)
+- Starpniekservera atrisināšana (prioritātes secībā): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (arī ar mazajiem burtiem)
+- Taimauts: `TLS_CLIENT_TIMEOUT_MS` (manto no `FETCH_TIMEOUT_MS`, noklusējums 600000)
 - `wreq-js` Response ir saderīga ar fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Pirmā baita uzraugs (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  tiek izpildīts, tiklīdz saņemtas augšupējā pakalpojuma galvenes, tādēļ `TLS_CLIENT_TIMEOUT_MS` vien nevar ierobežot
-  pamattekstu, kas nekad neatgriež pirmo baitu. `guardTlsFirstByte()` sacenšas ar pamatteksta pirmo `read()`
-  par izpildi `TLS_FIRST_BYTE_WATCHDOG_MS` laikā (noklusējums `10000`, `0` to atspējo); darbspējīgs pamatteksts
-  netiek ietekmēts, savukārt iestrēdzis pamatteksts atceļ wreq lasītāju un ļauj `proxyFetch` esošajai
-  TLS atkāpšanās loģikai pāriet uz tiešo/starpniekservera dispečeru (atkārtotai atskaņošanai nedrošs pieprasījums, piem.,
-  POST ar pamattekstu, joprojām izmet kļūdu, nevis tiek nemanāmi atkārtots).
+  tiek atrisināts, tiklīdz pienāk augšupējā pakalpojuma galvenes, tāpēc `TLS_CLIENT_TIMEOUT_MS` viens pats nevar ierobežot
+  ķermeni, kas nekad neatgriež pirmo baitu. `guardTlsFirstByte()` sacensina ķermeņa pirmo `read()`
+  ar `TLS_FIRST_BYTE_WATCHDOG_MS` (noklusējums `10000`, `0` to atspējo); vesels ķermenis
+  netiek ietekmēts, savukārt iestrēdzis ķermenis atceļ wreq lasītāju un ļauj `proxyFetch` esošajai
+  TLS atkāpšanās loģikai pāriet uz tiešo/starpniekservera dispečeru (pieprasījums, kuru nav droši atkārtoti atskaņot, piemēram,
+  POST ar ķermeni, joprojām izraisa kļūdu, nevis tiek nemanāmi atkārtots).
 
-### Tīmekļa sīkdatņu pakalpojumu sniedzēju transports — wreq-js 3.2.0
+### Tīmekļa sīkdatņu nodrošinātāja transports — wreq-js 3.2.0
 
 `open-sse/services/tlsClientBase.ts` ir kopīgais adapteris pieciem tālāk norādītajiem specializētajiem
-tīmekļa sīkdatņu transportiem. Katrs plānais pakalpojumu sniedzēja ietinējs atlasa pārlūkprogrammas/OS profilu. Adapteris
-izmanto vienoto wreq izpildvides ielādētāju un transporta pūlu no `open-sse/utils/tlsClient.ts`, kas indeksēts pēc
-profila + OS + atrisinātā starpniekservera, savukārt katrs pieprasījums izmanto `cookieMode: "ephemeral"`. Tādējādi konti un
+tīmekļa sīkdatņu transportiem. Katrs vienkāršotais nodrošinātāja ietinējs izvēlas pārlūka/OS profilu. Adapteris
+izmanto vienoto wreq izpildlaika ielādētāju un transporta pūlu failā `open-sse/utils/tlsClient.ts`, kam
+atslēga tiek veidota pēc profila + OS + atrisinātā starpniekservera, savukārt katrs pieprasījums izmanto `cookieMode: "ephemeral"`. Tādēļ konti un
 pieprasījumi koplieto transporta līmeņa savienojumus, bet nekad nekoplieto wreq sesiju vai sīkdatņu krātuvi.
 
-| Pakalpojumu sniedzējs | Profils       | Emulētā OS | Straumes EOF politika                       |
-| --------------------- | ------------- | ---------- | ------------------------------------------- |
-| Claude                | `chrome_146`  | Linux      | iekļaut `[DONE]`                            |
-| Perplexity            | `firefox_148` | macOS      | iekļaut `event: end_of_stream`              |
-| Grok                  | `chrome_146`  | Linux      | neiekļaut `[DONE]`                          |
-| Notion                | `chrome_146`  | Windows    | iekļaut `[DONE]`                            |
-| LMArena               | `chrome_146`  | Windows    | nav kontrollieluma; aizvērt pie vietējā EOF |
+| Nodrošinātājs | Profils       | Emulētā OS | Straumes EOF politika                 |
+| ------------- | ------------- | ---------- | ------------------------------------- |
+| Claude        | `chrome_146`  | Linux      | iekļaut `[DONE]`                      |
+| Perplexity    | `firefox_151` | macOS      | iekļaut `event: end_of_stream`        |
+| Grok          | `chrome_146`  | Linux      | neiekļaut `[DONE]`                    |
+| Notion        | `chrome_146`  | Windows    | iekļaut `[DONE]`                      |
+| LMArena       | `chrome_146`  | Windows    | nav marķiera; aizvērt pie vietējā EOF |
 
 - Straumēšana tieši patērē vietējās atbildes `ReadableStream`; netiek izveidots ne pagaidu fails, ne blakusprocess.
-- Pirms straumes nodošanas tiek pārbaudīti līdz 256 sākotnējiem baitiem. SSE pakalpojumu sniedzēji buferē kļūdas, kas nav SSE;
-  Grok/LMArena kartē Cloudflare pārbaudes uz `403`, bet HTML starplapas — uz `502`.
-- Vietējā pieprasījuma noildzi joprojām aptver absolūts JS stingrais termiņš. Iestrēgšana padara nederīgu
-  un aizver tikai ietekmēto profila/OS/starpniekservera transportu, pirms nākamais pieprasījums to izveido no jauna.
-- Starpniekservera noteikšanas prioritāte ir katra izsaukuma `proxyUrl` → pieprasījuma tvēruma konta/informācijas paneļa konteksts →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (tostarp varianti ar mazajiem burtiem). Atrisināšanas kļūdas pārtrauc
-  darbību, nevis pieļauj tiešā savienojuma noplūdi. LMArena apzināti veic atrisināšanu pret `arena.ai`.
-- `byteResponse` atgriež atbilstoši satura tipam formatētu `data:` URL bez UTF-8 bojājumiem.
+- Pirms straumes nodošanas tiek pārbaudīti līdz 256 sākotnējiem baitiem. SSE nodrošinātāji buferē kļūdas, kas nav SSE;
+  Grok/LMArena Cloudflare pārbaudes kartē uz `403`, bet HTML starplapas — uz `502`.
+- Vietējā pieprasījuma taimautu joprojām aptver absolūts JS stingrais termiņš. Iestrēgšana padara nederīgu
+  un aizver tikai skarto profila/OS/starpniekservera transportu, pirms nākamais pieprasījums to izveido no jauna.
+- Starpniekservera atrisināšanas prioritāte ir katra izsaukuma `proxyUrl` → pieprasījuma tvēruma konta/informācijas paneļa konteksts →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (tostarp varianti ar mazajiem burtiem). Atrisināšanas kļūdas droši pārtrauc darbību,
+  nevis pieļauj tiešā savienojuma noplūdi. LMArena apzināti veic atrisināšanu pret `arena.ai`.
+- `byteResponse` atgriež saturam atbilstoši tipizētu `data:` URL bez UTF-8 bojājumiem.
 - Kļūdas ir `TlsClientUnavailableError` (pakotne/papildmodulis nav pieejams), `TlsClientHangError`
-  (pārsniegts termiņš) un `WreqTransportCapacityError` (koplietotais sesiju ietilpības kļūdas kods),
+  (termiņš pārsniegts) un `WreqTransportCapacityError` (koplietotās sesiju ietilpības kļūdas kods),
   ja visas 128 ierobežotās profila/OS/starpniekservera vietas ir aktīvas vai tiek aizvērtas.
 
-Iepriekš minētā vispārīgā `TlsClient` sesija joprojām ir specializēta pastāvīgam pārlūkprogrammas atbalstītam sīkdatņu
+Iepriekš minētais vispārīgais `TlsClient` joprojām ir specializēts pastāvīgam, pārlūka nodrošinātam sīkdatņu
 stāvoklim. Abi ceļi atkārtoti izmanto vienu kešotu wreq moduļa ielādētāju un procesa dzīves cikla āķi; to pūli paliek
-nodalīti, jo to sīkdatņu dzīves ilgumi ir apzināti atšķirīgi.
+nodalīti, jo to sīkdatņu dzīves cikli ir apzināti atšķirīgi.
 
-Profili tiek atbalstīti ar fiksēto pakotni, taču faktiskā WAF pieņemšana var mainīties neatkarīgi
-no vietējiem līguma testiem. Pirms apgalvojat paritāti ar augšupējo pārlūkprogrammu, pārbaudiet pirkstu nospiedumu izmaiņas,
-izmantojot nepārprotami autorizētu aktīvu kontu.
+Profili tiek atbalstīti piesaistītajā pakotnes versijā, taču faktiskā WAF akceptēšana var mainīties neatkarīgi
+no lokālajiem līguma testiem. Pirms apgalvot paritāti ar augšupējo pārlūku, pārbaudiet digitālnospiedumu izmaiņas,
+izmantojot nepārprotami autorizētu reālu kontu.
 
 ---
 
@@ -118,7 +118,7 @@ Tiek lietots: `system` blokiem, visam `messages[].content` saturam un `tools[].d
 
 Trešo pušu Anthropic relejiem, kas pieņem tikai „īstu Claude Code” datplūsmu:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` pēc noklusējuma
@@ -240,10 +240,10 @@ Visiem MITM galapunktiem ir nepieciešama pārvaldības autentifikācija (`requi
 
 ## User-Agent pārrakstīšana — vides mainīgie (`.env.example` 12. sadaļa)
 
-| Mainīgais                | Noklusējums                                                     |
+| Mainīgais                | Noklusējuma vērtība                                             |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.149.0 (Windows 10.0.26200; x64)`                   |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
+| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
 | `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |

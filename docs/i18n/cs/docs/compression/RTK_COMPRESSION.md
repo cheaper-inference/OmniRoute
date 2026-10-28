@@ -1,6 +1,6 @@
 # RTK Compression (Čeština)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
 
 ---
 
@@ -29,22 +29,22 @@ Rozsah:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Co komprimuje
 
-Vestavěný katalog v současnosti obsahuje 49 filtrů napříč těmito kategoriemi:
+Vestavěný katalog aktuálně obsahuje 56 filtrů v těchto kategoriích:
 
-| Kategorie | Příklady                                                         |
-| --------- | ---------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                |
-| `test`    | Vitest, Jest, Pytest, Playwright, testy Go, testy Cargo          |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx    |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler    |
-| `shell`   | `ls`, `find`, `grep`, obecné protokoly shellu                    |
-| `docker`  | `docker ps`, protokoly Dockeru                                   |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                          |
-| `generic` | Výstup JSON, trasování zásobníku, záložní filtr obecného výstupu |
+| Kategorie | Příklady                                                      |
+| --------- | ------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testy    |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
+| `shell`   | `ls`, `find`, `grep`, obecné logy shellu                      |
+| `docker`  | `docker ps`, logy Dockeru                                     |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
+| `generic` | JSON výstup, stack traces, obecný výstupní fallback           |
 
 Detektor v `open-sse/services/compression/engines/rtk/commandDetector.ts` klasifikuje výstup
-před výběrem filtru. Filtry mohou také odpovídat podle vzoru příkazu nebo regulárního výrazu výstupu, pokud
-samotná třída příkazu nestačí.
+před výběrem filtru. Filtry mohou také odpovídat vzoru příkazu nebo regulárnímu výrazu výstupu,
+když třída příkazu nestačí.
 
 ## Vyhodnocování filtrů
 
@@ -314,15 +314,15 @@ Před uložením jsou citlivé údaje redigovány, včetně běžných bearer to
 přístupových klíčů AWS a hodnot ve stylu přiřazení `token=...`, `secret=...`, `password=...`. Analytika
 ukládá pouze ID ukazatele, velikost a metadata hashe.
 
-## Ověřovací brána
+## Verify Gate
 
-Cílená ověřovací brána spouští vestavěné inline testy filtrů bez volání externích příkazů prostředí:
+Zaměřená verify gate spouští vestavěné inline testy filtrů bez volání externích příkazů:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
 ```
 
-Širší brána RTK je:
+Širší RTK gate je:
 
 ```bash
 node --import tsx/esm --test \
@@ -331,7 +331,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-Před vydáním spusťte širokou bránu komprese:
+Před vydáním spusťte širokou compression gate:
 
 ```bash
 node --import tsx/esm --test \
@@ -354,17 +354,17 @@ node --import tsx/esm --test \
 
 ## Úrovně intenzity (v3.8.16+)
 
-RTK podporuje **3 úrovně intenzity**, které vyvažují **agresivitu komprese** a **bezpečnost**. Úroveň se nastavuje pomocí `config.intensity` v konfiguraci enginu.
+RTK podporuje **3 úrovně intenzity**, které představují kompromis mezi **agresivitou komprese** a **bezpečností**. Úroveň se nastavuje pomocí `config.intensity` v konfiguraci enginu.
 
 ### 3 úrovně
 
-| Úroveň               | Práh zkrácení     | Úspora tokenů | Riziko      | Nejvhodnější použití                    |
-| -------------------- | ----------------- | ------------- | ----------- | --------------------------------------- |
-| `minimal`            | 24 řádků na sekci | ~20-40%       | Velmi nízké | Produkce s kriticky důležitým kontextem |
-| `standard` (výchozí) | 24 řádků na sekci | ~50-70%       | Nízké       | Každodenní programovací relace          |
-| `aggressive`         | 16 řádků na sekci | ~70-90%       | Střední     | Dlouhé relace, maximální úspora         |
+| Úroveň               | Práh zkrácení     | Úspora tokenů | Riziko      | Vhodné pro                      |
+| -------------------- | ----------------- | ------------- | ----------- | ------------------------------- |
+| `minimal`            | 24 řádků na sekci | ~20-40%       | Velmi nízké | Produkce s kritickým kontextem  |
+| `standard` (výchozí) | 24 řádků na sekci | ~50-70%       | Nízké       | Každodenní programování         |
+| `aggressive`         | 16 řádků na sekci | ~70-90%       | Střední     | Dlouhá sezení, maximální úspory |
 
-### Kde dochází ke zkrácení
+### Kde dochází ke zkracování
 
 Práh zkrácení ovlivňuje `lineFilter.ts`:
 
@@ -374,36 +374,36 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Zachovává se **začátek** i **konec** každé sekce; při aktivaci zkrácení je prostřední obsah odstraněn.
+Zachován je **začátek** i **konec** každé sekce; prostřední obsah se při zkrácení zahodí.
 
-### Co zůstává a co se odstraňuje
+### Co zůstává vs. co se odstraňuje
 
-| Obsah                       | minimal      | standard      | aggressive    |
-| --------------------------- | ------------ | ------------- | ------------- |
-| Chyby / trasování zásobníku | ✅ zachováno | ✅ zachováno  | ✅ zachováno  |
-| Selhání testů               | ✅ zachováno | ✅ zachováno  | ✅ zachováno  |
-| Chyby sestavení             | ✅ zachováno | ✅ zachováno  | ✅ zachováno  |
-| Úspěšné testy (podrobné)    | ✅ zachováno | 🟡 sloučeno   | 🟡 sloučeno   |
-| Rutinní výstup (info logy)  | 🟡 sloučeno  | 🟡 sloučeno   | ❌ odstraněno |
-| Ukazatele průběhu           | 🟡 sloučeno  | ❌ odstraněno | ❌ odstraněno |
-| Banner / ASCII grafika      | 🟡 sloučeno  | ❌ odstraněno | ❌ odstraněno |
+| Obsah                      | minimal      | standard     | aggressive   |
+| -------------------------- | ------------ | ------------ | ------------ |
+| Chyby / stack trace        | ✅ zachováno | ✅ zachováno | ✅ zachováno |
+| Selhání testů              | ✅ zachováno | ✅ zachováno | ✅ zachováno |
+| Chyby sestavení            | ✅ zachováno | ✅ zachováno | ✅ zachováno |
+| Úspěšné testy (podrobné)   | ✅ zachováno | 🟡 sbaleno   | 🟡 sbaleno   |
+| Rutinní výstup (info logy) | 🟡 sbaleno   | 🟡 sbaleno   | ❌ zahozeno  |
+| Indikátory průběhu         | 🟡 sbaleno   | ❌ zahozeno  | ❌ zahozeno  |
+| Bannery / ASCII art        | 🟡 sbaleno   | ❌ zahozeno  | ❌ zahozeno  |
 
 ### Výběr správné intenzity
 
 ```
-                  Je ztráta kontextu katastrofická?
+                  Je ztráta kontextu katastrofální?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    ANO          NE         NEVÍTE
+     ANO          NE         NEVÍM
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
       │      Jak kritická    Nejprve zkuste `standard`
-      │      je propustnost? (funguje v 80 %
-      │           │          případů)
+      │      je propustnost? (funguje v 80 % případů)
+      │           │
       │      ┌────┴────┐
       │      │         │
       │    NÍZKÁ     VYSOKÁ
@@ -416,7 +416,7 @@ Zachovává se **začátek** i **konec** každé sekce; při aktivaci zkrácení
 
 ### Konfigurace intenzity
 
-**Pro jednotlivé combo** (v konfiguraci combo):
+**Na úrovni komba** (v konfiguraci komba):
 
 ```json
 {
@@ -432,8 +432,8 @@ Zachovává se **začátek** i **konec** každé sekce; při aktivaci zkrácení
 **Programově**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je
-`CompressionEngine` a nemá metodu `updateConfig`. Konfiguraci enginu
-místo toho aktualizujte pomocí pomocné funkce registru:
+`CompressionEngine` a nemá metodu `updateConfig`. Konfiguraci enginu místo toho
+aktualizujte pomocí pomocné funkce registru:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -443,14 +443,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Ověření účinku
 
-Pomocí **ověřovací brány** (viz níže) potvrďte, že je filtr při zvolené intenzitě bezpečný:
+Pomocí **Verify Gate** (viz níže) ověřte, že je váš filtr při zvolené intenzitě bezpečný:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filtry selhaly při agresivní intenzitě");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 
