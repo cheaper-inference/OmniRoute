@@ -119,25 +119,75 @@ export function isExplicitTokenRateLimitError(
   return EXPLICIT_TPM_PATTERNS.some((pattern) => pattern.test(text));
 }
 
-export function evaluateAvalancheRisk(ctx: AvalancheEvaluationContext): AvalancheRiskResult {
-  const settings = resolveAvalancheSettings();
-  const promptTokens =
-    typeof ctx.promptTokens === "number" && ctx.promptTokens >= 0 ? ctx.promptTokens : 0;
-  const attempt =
-    typeof ctx.fallbackAttemptCount === "number" && ctx.fallbackAttemptCount >= 0
-      ? ctx.fallbackAttemptCount
-      : 0;
-  const provider = ctx.provider || "unknown";
-  const model = ctx.model || "unknown";
+function nonNegativeOrZero(value: number | null | undefined): number {
+  return typeof value === "number" && value >= 0 ? value : 0;
+}
 
-  if (!settings.enabled) {
+function noAvalancheRisk(promptTokens: number): AvalancheRiskResult {
+  return {
+    isAvalancheRisk: false,
+    shouldSuppressFallback: false,
+    suggestedCooldownMs: 0,
+    promptTokens,
+  };
+}
+
+/** HTTP 429 branch: explicit TPM limit, massive payload, or oversized payload past the retry budget. */
+function evaluateRateLimitAvalanche(
+  ctx: AvalancheEvaluationContext,
+  settings: AvalancheSettings,
+  promptTokens: number,
+  label: string
+): AvalancheRiskResult | null {
+  // 2a. Explicit TPM / Token Limit in error body or metric
+  if (isExplicitTokenRateLimitError(ctx.status, ctx.errorText, ctx.provider, ctx.model)) {
     return {
-      isAvalancheRisk: false,
-      shouldSuppressFallback: false,
-      suggestedCooldownMs: 0,
+      isAvalancheRisk: true,
+      reason: "explicit_tpm_limit",
+      shouldSuppressFallback: true,
+      suggestedCooldownMs: settings.burstCooldownMs,
       promptTokens,
+      explanation: `[OmniRoute Anti-Avalanche] Token rate limit (TPM/token count) hit for ${label}. Cascading fallback suppressed across remaining keys to protect pool.`,
     };
   }
+
+  // 2b. Massive payload (>= 100k tokens)
+  if (promptTokens >= settings.massiveThreshold) {
+    return {
+      isAvalancheRisk: true,
+      reason: "oversized_payload_rate_limit",
+      shouldSuppressFallback: true,
+      suggestedCooldownMs: settings.burstCooldownMs,
+      promptTokens,
+      explanation: `[OmniRoute Anti-Avalanche] Massive payload (~${promptTokens} tokens) hit rate limit on ${label}. Cascading fallback suppressed to prevent key exhaustion.`,
+    };
+  }
+
+  // 2c. Oversized payload (>= 50k tokens) with bounded retry limit
+  if (promptTokens >= settings.tokenThreshold) {
+    const attempt = nonNegativeOrZero(ctx.fallbackAttemptCount);
+    const shouldSuppress = attempt >= settings.maxRetries;
+    return {
+      isAvalancheRisk: true,
+      reason: "oversized_payload_rate_limit",
+      shouldSuppressFallback: shouldSuppress,
+      suggestedCooldownMs: settings.burstCooldownMs,
+      promptTokens,
+      explanation: shouldSuppress
+        ? `[OmniRoute Anti-Avalanche] Large payload (~${promptTokens} tokens) hit rate limit on ${label} across ${attempt + 1} attempt(s). Cascading fallback suppressed.`
+        : undefined,
+    };
+  }
+
+  return null;
+}
+
+export function evaluateAvalancheRisk(ctx: AvalancheEvaluationContext): AvalancheRiskResult {
+  const settings = resolveAvalancheSettings();
+  const promptTokens = nonNegativeOrZero(ctx.promptTokens);
+  if (!settings.enabled) return noAvalancheRisk(promptTokens);
+
+  const label = `${ctx.provider || "unknown"}/${ctx.model || "unknown"}`;
 
   // 1. HTTP 400: Context length / overflow
   if (ctx.status === 400 && isContextOverflow400(ctx.errorText)) {
@@ -147,58 +197,17 @@ export function evaluateAvalancheRisk(ctx: AvalancheEvaluationContext): Avalanch
       shouldSuppressFallback: true,
       suggestedCooldownMs: 0,
       promptTokens,
-      explanation: `[OmniRoute Anti-Avalanche] Context length exceeded for ${provider}/${model}. Cascading fallback across same-model accounts suppressed.`,
+      explanation: `[OmniRoute Anti-Avalanche] Context length exceeded for ${label}. Cascading fallback across same-model accounts suppressed.`,
     };
   }
 
   // 2. HTTP 429: Rate limited
   if (ctx.status === 429) {
-    // 2a. Explicit TPM / Token Limit in error body or metric
-    if (isExplicitTokenRateLimitError(ctx.status, ctx.errorText, ctx.provider, ctx.model)) {
-      return {
-        isAvalancheRisk: true,
-        reason: "explicit_tpm_limit",
-        shouldSuppressFallback: true,
-        suggestedCooldownMs: settings.burstCooldownMs,
-        promptTokens,
-        explanation: `[OmniRoute Anti-Avalanche] Token rate limit (TPM/token count) hit for ${provider}/${model}. Cascading fallback suppressed across remaining keys to protect pool.`,
-      };
-    }
-
-    // 2b. Massive payload (>= 100k tokens)
-    if (promptTokens >= settings.massiveThreshold) {
-      return {
-        isAvalancheRisk: true,
-        reason: "oversized_payload_rate_limit",
-        shouldSuppressFallback: true,
-        suggestedCooldownMs: settings.burstCooldownMs,
-        promptTokens,
-        explanation: `[OmniRoute Anti-Avalanche] Massive payload (~${promptTokens} tokens) hit rate limit on ${provider}/${model}. Cascading fallback suppressed to prevent key exhaustion.`,
-      };
-    }
-
-    // 2c. Oversized payload (>= 50k tokens) with bounded retry limit
-    if (promptTokens >= settings.tokenThreshold) {
-      const shouldSuppress = attempt >= settings.maxRetries;
-      return {
-        isAvalancheRisk: true,
-        reason: "oversized_payload_rate_limit",
-        shouldSuppressFallback: shouldSuppress,
-        suggestedCooldownMs: settings.burstCooldownMs,
-        promptTokens,
-        explanation: shouldSuppress
-          ? `[OmniRoute Anti-Avalanche] Large payload (~${promptTokens} tokens) hit rate limit on ${provider}/${model} across ${attempt + 1} attempt(s). Cascading fallback suppressed.`
-          : undefined,
-      };
-    }
+    const rateLimitRisk = evaluateRateLimitAvalanche(ctx, settings, promptTokens, label);
+    if (rateLimitRisk) return rateLimitRisk;
   }
 
-  return {
-    isAvalancheRisk: false,
-    shouldSuppressFallback: false,
-    suggestedCooldownMs: 0,
-    promptTokens,
-  };
+  return noAvalancheRisk(promptTokens);
 }
 
 export function formatAntiAvalancheMessage(
