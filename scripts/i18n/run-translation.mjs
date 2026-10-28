@@ -620,8 +620,10 @@ export function chunkMarkdown(markdown, maxChars = 6000) {
   const sections = [];
   let buf = [];
   let size = 0;
+  let fence = null;
   for (const line of lines) {
-    if (line.startsWith("## ") && size > maxChars * 0.5) {
+    fence = fenceAfterLine(fence, line);
+    if (!fence && line.startsWith("## ") && size > maxChars * 0.5) {
       sections.push(buf.join("\n"));
       buf = [line];
       size = line.length;
@@ -638,6 +640,23 @@ export function chunkMarkdown(markdown, maxChars = 6000) {
 
 const FENCE_LINE = /^\s*(```|~~~)/;
 
+// A closing fence must use the opener's character, be at least as long and
+// contain only trailing whitespace. Other delimiter-shaped lines remain code.
+// Keep indentation conservative so fenced examples nested inside lists stay whole.
+function fenceAfterLine(fence, line) {
+  const match = line.replace(/\r$/, "").match(/^\s*(`{3,}|~{3,})(.*)$/);
+  if (fence) {
+    return match &&
+      match[1][0] === fence[0] &&
+      match[1].length >= fence.length &&
+      /^[ \t]*$/.test(match[2])
+      ? null
+      : fence;
+  }
+  // Backtick fences cannot contain a backtick in their info string.
+  return match && (match[1][0] === "~" || !match[2].includes("`")) ? match[1] : null;
+}
+
 // Groups a section into blocks — a whole fenced code block, a heading-led run,
 // or a paragraph ending at a blank line — and packs them greedily. A block that
 // is itself larger than maxChars stays whole: cutting mid-paragraph or inside a
@@ -645,22 +664,21 @@ const FENCE_LINE = /^\s*(```|~~~)/;
 function splitOversizedSection(section, maxChars) {
   const blocks = [];
   let block = [];
-  let inFence = false;
+  let fence = null;
   for (const line of section.split("\n")) {
-    const isFence = FENCE_LINE.test(line);
-    if (inFence) {
+    const previousFence = fence;
+    fence = fenceAfterLine(fence, line);
+    if (previousFence) {
       block.push(line);
-      if (isFence) {
-        inFence = false;
+      if (!fence) {
         blocks.push(block);
         block = [];
       }
       continue;
     }
-    if (isFence) {
+    if (fence) {
       if (block.length) blocks.push(block);
       block = [line];
-      inFence = true;
       continue;
     }
     if (/^##+ /.test(line) && block.length) {
@@ -742,9 +760,11 @@ export function joinTranslatedChunks(parts) {
       out = parts[i];
       continue;
     }
-    const nextFirst = parts[i].trimStart().split("\n")[0] ?? "";
+    // Strip blank lines at the seam, preserving indentation on the first content line.
+    const next = parts[i].replace(/^(?:[ \t]*\r?\n)+/, "");
+    const nextFirst = next.split("\n")[0] ?? "";
     const seam = endsInsideItemRun(out) && ITEM_LINE.test(nextFirst) ? "\n" : "\n\n";
-    out = out.trimEnd() + seam + parts[i].trimStart();
+    out = out.trimEnd() + seam + next;
   }
   return out;
 }
@@ -960,23 +980,39 @@ export async function resolveSectionPlan({ task, state, opts, sections }) {
   return planSectionReuse({ previousHashes, previousSections, sections, mirrorSections });
 }
 
-export async function translateBody(body, localeEntry, backend) {
-  const englishName = localeEntry.english ?? localeEntry.name;
-  const native = localeEntry.native ?? localeEntry.name;
-  const system = SYSTEM_PROMPT(englishName, native);
-  const chunks = chunkMarkdown(body);
-  const translated = [];
-  for (let i = 0; i < chunks.length; i++) {
-    const messages = [
-      { role: "system", content: system },
-      { role: "user", content: chunks[i] },
-    ];
-    let checked;
+// A chunk the validator keeps rejecting used to be retried CHUNK_ATTEMPTS times on the same
+// model and then fail the whole doc: the model chain only engaged on HTTP errors. On
+// 2026-10-27 the fallback model cut large tables right after the header row under load
+// ("table rows 1/9") and one USER_GUIDE run spent 6.6 h on retries. A rejected chunk now
+// falls through the chain (each level keeps the rest of the chain for HTTP fallback), and
+// when every model rejects a large chunk it is re-split on the same safe seams as
+// chunkMarkdown (headings, paragraphs, table rows) and translated piece by piece.
+const SPLIT_DEPTH = 2;
+const SPLIT_MIN_CHARS = 1500;
+
+export async function translateChunk(
+  chunk,
+  system,
+  backend,
+  { call = callChat, label = "chunk", depth = 0 } = {}
+) {
+  const messages = [
+    { role: "system", content: system },
+    { role: "user", content: chunk },
+  ];
+  const chain = [backend.model, ...(backend.fallbackModels ?? [])].filter(Boolean);
+  let checked;
+  for (let level = 0; level < chain.length; level++) {
+    const levelBackend = {
+      ...backend,
+      model: chain[level],
+      fallbackModels: chain.slice(level + 1),
+    };
     for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
-      checked = validateTranslatedChunk(chunks[i], await callChat(messages, backend));
-      if (checked.problems.length === 0) break;
+      checked = validateTranslatedChunk(chunk, await call(messages, levelBackend));
+      if (checked.problems.length === 0) return checked.text;
       logWarn(
-        `  chunk ${i + 1}/${chunks.length} rejected (attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
+        `  ${label} rejected (${chain[level]}, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
       );
       if (attempt < CHUNK_ATTEMPTS) {
         messages.push(
@@ -991,15 +1027,43 @@ export async function translateBody(body, localeEntry, backend) {
         );
       }
     }
-    if (checked.problems.length > 0) {
-      throw new Error(
-        `chunk ${i + 1}/${chunks.length} failed validation: ${checked.problems.join("; ")}`
+  }
+  if (depth < SPLIT_DEPTH && chunk.length > SPLIT_MIN_CHARS) {
+    const pieces = chunkMarkdown(chunk, Math.ceil(chunk.length / 2));
+    if (pieces.length > 1) {
+      logWarn(
+        `  ${label} split into ${pieces.length} smaller pieces after every model rejected it`
       );
+      const parts = [];
+      for (let p = 0; p < pieces.length; p++) {
+        parts.push(
+          await translateChunk(pieces[p], system, backend, {
+            call,
+            label: `${label}.${p + 1}`,
+            depth: depth + 1,
+          })
+        );
+      }
+      return joinTranslatedChunks(parts);
     }
-    translated.push(checked.text);
+  }
+  throw new Error(`${label} failed validation: ${checked.problems.join("; ")}`);
+}
+
+export async function translateBody(body, localeEntry, backend) {
+  const englishName = localeEntry.english ?? localeEntry.name;
+  const native = localeEntry.native ?? localeEntry.name;
+  const system = SYSTEM_PROMPT(englishName, native);
+  const chunks = chunkMarkdown(body);
+  const translated = [];
+  for (let i = 0; i < chunks.length; i++) {
+    const text = await translateChunk(chunks[i], system, backend, {
+      label: `chunk ${i + 1}/${chunks.length}`,
+    });
+    translated.push(text);
     if (chunks.length > 1) {
       logInfo(
-        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${checked.text.length} chars)`
+        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${text.length} chars)`
       );
     }
   }
