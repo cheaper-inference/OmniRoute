@@ -5666,6 +5666,7 @@
     "allModelsAlreadyImported": "Bütün modellər artıq idxal edilib",
     "noNewModelsToImport": "İdxal ediləcək yeni model yoxdur — bütün modellər artıq reyestrdə və ya fərdi modellər siyahısındadır",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Model aşkarlanması uğursuz oldu {time}",
     "skippingExistingModels": "Mövcud olan {count} model buraxılır",
     "autoSync": "Avtomatik sinxronizasiya",
     "autoSyncShort": "Sinxronizasiya et",

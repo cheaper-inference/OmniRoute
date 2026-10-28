@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "అన్ని మోడళ్లు ఇప్పటికే దిగుమతి చేయబడ్డాయి",
     "noNewModelsToImport": "దిగుమతి చేయడానికి కొత్త మోడళ్లు లేవు — అన్ని మోడళ్లు ఇప్పటికే రిజిస్ట్రీ లేదా అనుకూల మోడళ్ల జాబితాలో ఉన్నాయి",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "మోడల్ డిస్కవరీ విఫలమైంది {time}",
     "skippingExistingModels": "ఇప్పటికే ఉన్న {count} మోడళ్లను దాటవేస్తోంది",
     "autoSync": "ఆటో-సింక్",
     "autoSyncShort": "సింక్ చేయండి",

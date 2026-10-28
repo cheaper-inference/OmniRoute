@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "A ti ṣàgbéwọlé gbogbo àwọn módẹ́lì tẹ́lẹ̀",
     "noNewModelsToImport": "Kò sí módẹ́lì tuntun láti ṣàgbéwọlé — gbogbo àwọn módẹ́lì ti wà nínú ìforúkọsílẹ̀ tàbí àkójọ àwọn módẹ́lì àdáni",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Ikuna iwara ako {time}",
     "skippingExistingModels": "Ń foju kọ àwọn módẹ́lì {count} tó ti wà",
     "autoSync": "Ìmúdọ́gba Aládàáṣiṣẹ́",
     "autoSyncShort": "Múdọ́gba",

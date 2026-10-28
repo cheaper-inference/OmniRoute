@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway បន្តរីកចម្រើនឥតឈប់ឈរ
+## 📈 The Gateway បន្តរីកចម្រើន
 
 <div align="center">
 
-|                                     |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
-| ----------------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 អ្នកផ្តល់សេវា                    |            352             |   **358**   |          376          |
-| 🧠 លេខសម្គាល់ម៉ូដែលជជែកតែមួយ        |            1320            |  **1374**   |         1475          |
-| 🖼️ ស្ពាន Modality                   | 🆕 រូបភាព + សំឡេង + វីដេអូ |      ✓      |           ✓           |
-| 📡 កាតាឡុកឥតគិតថ្លៃ Radar           |      🆕 ជម្រើសចូលរួម       |      ✓      |           ✓           |
-| ⚖️ ការកំណត់ពេលវេលាដោយផ្អែកលើ Quota  |       🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 ទិន្នន័យ telemetry របស់ Quota    |         🆕 ផ្ទាល់          |      ✓      |           ✓           |
-| 🧰 របៀប headless                    |             —              |      —      | 🆕 `serve --headless` |
-| 🛤️ ហេដ្ឋារចនាសម្ព័ន្ធ rail របស់ LTS |             —              |      —      |   🆕 ឆានែលចេញផ្សាយ    |
-| 🔎 API ស្វែងរកម៉ូដែល                |             —              |      —      | 🆕 `/v1/models/query` |
+|                               |             v3.8.50              | **v3.8.51** |      `v3.8.53+`       |
+| ----------------------------- | :------------------------------: | :---------: | :-------------------: |
+| អ្នកផ្តល់សេវា🌐               |               352                |   **358**   |          376          |
+| 🧠 គំរូជជែកតែមួយគត់ IDs       |               1320               |  **1374**   |         1475          |
+| 🖼️ ស្ពាន Modality             | 🆕 ចក្ខុវិស័យ + អូឌីយ៉ូ + វីដេអូ |      ✓      |           ✓           |
+| 📡 រ៉ាដាកាតាឡុកឥតគិតថ្លៃ      |          🆕 ជ្រើសរើសចូល          |      ✓      |           ✓           |
+| ⚖️ ការកំណត់កាលវិភាគយល់ដឹងកូតា |         🆕 កូតា-ចែករំលែក         |      ✓      |           ✓           |
+| 📊 Quota telemetry            |      🆕 បានផ្សាយបន្តផ្ទាល់       |      ✓      |           ✓           |
+| 🧰 របៀបគ្មានក្បាល             |                —                 |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS ផ្លូវដែកអ៊ីនហ្វ្រា     |                —                 |      —      |   🆕 ឆានែលចេញផ្សាយ    |
+| ការរកឃើញគំរូ🔎 API            |                —                 |      —      | 🆕 `/v1/models/query` |
 
-**→ [ផែនទីផ្លូវ (Roadmap)](ROADMAP.md) — កំពុងធ្វើដំណើរតាមផ្លូវដែកទៅកាន់ `v3.9.0 LTS`**
+**→ [ផែនទីផ្លូវ](ROADMAP.md) — ជិះផ្លូវដែកទៅ `v3.9.0 LTS`**
 
 </div>
 
@@ -612,59 +612,58 @@ Radar គឺជាមុខងារដែលត្រូវជ្រើសរ�
 
 <div align="center">
 
-## 🤖 CLI និងភ្នាក់ងារសរសេរកូដដែលឆបគ្នា
+## 🤖 ឆបគ្នា CLIs & ភ្នាក់ងារសរសេរកូដ
 
-> ការកំណត់រចនាសម្ព័ន្ធតែមួយ — `http://localhost:20128/v1` — ហើយ AI IDE ឬ CLI **ទាំងអស់** ដំណើរការលើម៉ូដែលឥតគិតថ្លៃ និងតម្លៃទាប។
+> ការកំណត់រចនាសម្ព័ន្ធមួយ — `http://localhost:20128/v1` — និង** រាល់** AI IDE ឬ CLI ដំណើរការលើម៉ូដែលឥតគិតថ្លៃ និងតម្លៃទាប។
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude កូដ </b></sub><br/><sub> </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b> Kilo Code </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b> កូដសួនសត្វ </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b> បន្ត </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b> Aider </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> រោងចក្រ Droid </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b> Smelt </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Pi </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok សង់</b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b> ភ្នាក់ងារ Hermes </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b> Goose </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b> បើកអ្នកបកប្រែ</b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ ក៏ដំណើរការជាមួយ</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>ឧបករណ៍ណាមួយដែលឆបគ្នាជាមួយ OpenAI</b>
+<b>＋ ក៏ដំណើរការជាមួយ </b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b> ឧបករណ៍ណាមួយដែលត្រូវគ្នាជាមួយ OpenAI </b>
 </div>
 
-<sub>📖 ការដំឡើងតាមឧបករណ៍នីមួយៗសម្រាប់ឧបករណ៍ទាំង 37 (CLI Code ចំនួន 27 + CLI Agents ចំនួន 10) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 កម្មវិធីជំនួយ OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 ការដំឡើងឧបករណ៍នីមួយៗសម្រាប់ឧបករណ៍ទាំង 38 (27 CLI Code's + 11 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**បើកដំណើរការ CLI ដែលគាំទ្រណាមួយតាមរយៈ OmniRoute ដោយប្រើពាក្យបញ្ជាតែមួយ** — មិនសរសេរឯកសារកំណត់រចនាសម្ព័ន្ធទេ,
-ព័ត៌មានសម្ងាត់ត្រូវបានបញ្ចូលសម្រាប់ដំណើរការនីមួយៗ ហើយ Qwen/Gemini ទទួលបានថត home ដាច់ដោយឡែកបណ្ដោះអាសន្ន៖
+**បើកដំណើរការ CLI ដែលគាំទ្រតាមរយៈ OmniRoute ក្នុងពាក្យបញ្ជាមួយ។** - គ្មានឯកសារកំណត់រចនាសម្ព័ន្ធដែលបានសរសេរ លិខិតសម្គាល់ដែលបានចាក់ក្នុងមួយដំណើរការ Qwen/Gemini ទទួលបានផ្ទះដាច់ស្រយាលដែលបោះចោល៖
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -675,13 +674,11 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# ឬជ្រើសរើសអ្នកផ្ដល់សេវា+ម៉ូដែលតាមរបៀបអន្តរកម្ម ហើយសរសេរការកំណត់រចនាសម្ព័ន្ធផ្ទាល់ខ្លួនរបស់ឧបករណ៍៖
-omniroute configure codex          # ក៏មាន៖ claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider+model interactively and write the tool's own config:
+omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-ពាក្យបញ្ជានីមួយៗគោរពតាមបរិបទ remote ដែលកំពុងសកម្ម (`omniroute connect <host>`), `--dry-run`
-បង្ហាញជាមុននូវ env/args ពិតប្រាកដដោយមិនប្រតិបត្តិ ហើយ `--api-key-env NAME` រក្សាព័ត៌មានសម្ងាត់មិនឱ្យចូល
-ក្នុងប្រវត្តិ shell របស់អ្នក។ → [ការរួមបញ្ចូល CLI](docs/guides/CLI-INTEGRATIONS.md)
+ពាក្យបញ្ជានីមួយៗផ្តល់កិត្តិយសដល់បរិបទពីចម្ងាយសកម្ម (`omniroute connect <host>`) `--dry-run` មើលជាមុន env/args ពិតប្រាកដដោយមិនចាំបាច់ប្រតិបត្តិ ហើយ `--api-key-env NAME` រក្សាការសម្ងាត់ចេញពីប្រវត្តិសែលរបស់អ្នក។ → [CLI សមាហរណកម្ម](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
@@ -756,92 +753,80 @@ omniroute configure codex          # ក៏មាន៖ claude opencode qwen aid
 
 <div align="center">
 
-## 🖥️ កន្លែងដែល OmniRoute ដំណើរការ — គ្រប់ទីកន្លែង
+## 🖥️ កន្លែងដែល OmniRoute រត់ — នៅគ្រប់ទីកន្លែង
 
 </div>
 
-> កម្មវិធីដដែល ម៉ាស៊ីនរបស់អ្នក ច្បាប់របស់អ្នក។ ចាប់ពីការដំឡើង npm ជាសកល រហូតដល់ **ទូរសព្ទរបស់អ្នក** តាមរយៈ Termux។
+> កម្មវិធីដូចគ្នា ម៉ាស៊ីនរបស់អ្នក ច្បាប់របស់អ្នក។ ពី npm សកលដំឡើងទៅ** ទូរស័ព្ទរបស់អ្នក។** តាមរយៈ Termux ។
 
 <table>
-  <tr><th align="left">វេទិកា</th><th align="left">ការដំឡើង</th><th align="left">ចំណុចលេចធ្លោ</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (ជាសកល)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">ពាក្យបញ្ជាតែមួយ ប្រើបានលើ OS ណាមួយ</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">ស្ថាបត្យកម្មច្រើន <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>កុំព្យូទ័រលើតុ (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">ផ្ទាំង native + ថាសប្រព័ន្ធ — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>របារម៉ឺនុយ (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">ត្រួតពិនិត្យ និងធ្វើបច្ចុប្បន្នភាពម៉ាស៊ីនមេដោយស្វ័យប្រវត្តិ — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>native <code>arm64</code></td><td align="left">Raspberry Pi, ម៉ាស៊ីនមេ ARM, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">ដំណើរការ <b>នៅលើទូរសព្ទរបស់អ្នក</b> 24/7 ដោយមិនត្រូវការ root</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"បន្ថែមទៅអេក្រង់ដើម"</td><td align="left">ពេញអេក្រង់ ប្រើក្រៅបណ្តាញ និងអាចដំឡើងពីកម្មវិធីរុករកបាន</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>កម្មវិធីជំនួយ OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">ការរួមបញ្ចូល native ជាមួយ OpenCode</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>ដំឡើងផ្នែកបន្ថែម <b>OmniCopilot</b></td><td align="left">គ្រប់ម៉ូដែល OmniRoute នៅក្នុងឧបករណ៍ជ្រើសរើស Copilot Chat native — កំណែ stable និង Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>ពីកូដប្រភព</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">កែសម្រួលវា និងចូលរួមចំណែក</td></tr>
+  <tr><th align="left"> វេទិកា</th><th align="left"> ដំឡើង </th><th align="left"></th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (សកល)</b></td><td align="left" nowrap><code> npm ដំឡើង -g omniroute </code></td><td align="left"> ពាក្យបញ្ជាមួយ OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (សកល)</b></td><td align="left" nowrap><code> bun បន្ថែម -g omniroute </code></td><td align="left"> tarball បញ្ជីឈ្មោះដូចគ្នា ដំឡើងលឿនជាងមុន </td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker រត់ … diegosouzapw/omniroute</code></td><td align="left"> ពហុarch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> ផ្ទៃតុ (Electron)</b></td><td align="left" nowrap><code> npm ដំណើរការអេឡិចត្រុង៖ បង្កើត </code></td><td align="left"> ផ្ទាំងប្រព័ន្ធ + បង្អួចដើម — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b> Menu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code> brew ដំឡើង --cask zoispag/tap/omniroute-tray</code></td><td align="left"> គ្រប់គ្រង &amp; ធ្វើបច្ចុប្បន្នភាព </tr> លើម៉ាស៊ីនមេ — <b>macOS</b></td>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> ដើមកំណើត <code> arm64 </code></td><td align="left"> Raspberry Pi, ម៉ាស៊ីនមេ ARM, Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg ដំឡើង nodejs && npx -y omniroute </code></td><td align="left"> ដំណើរការ <b> នៅលើទូរសព្ទរបស់អ្នក </b>, 24/7, no root </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"បន្ថែមទៅអេក្រង់ដើម"</td><td align="left"> ពេញអេក្រង់ ក្រៅបណ្តាញ ដំឡើងពីកម្មវិធីរុករក </td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode កម្មវិធីជំនួយ </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> ការរួមបញ្ចូល zqn OpenCode </td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS កូដ Copilot ជជែក </b></td><td align="left" nowrap> ដំឡើង <b>OmniCopilot</b> ផ្នែកបន្ថែម </td><td align="left"> រាល់គំរូ OmniRoute នៅក្នុងកម្មវិធីជ្រើសរើស Copilot Chat ដើម — មានស្ថេរភាព &amp; អ្នកខាងក្នុង </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> ពីប្រភព </b></td><td align="left" nowrap><code> npm ដំឡើង && npm ដំណើរការ dev </code></td><td align="left"> Hack នៅលើវា រួមចំណែក </td></tr>
 </table>
 
-<sub>📖 [មគ្គុទ្ទេសក៍ Docker](docs/guides/DOCKER_GUIDE.md) · [កុំព្យូទ័រលើតុ](electron/README.md) · [ថាសរបារម៉ឺនុយ](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker Guide](docs/guides/DOCKER_GUIDE.md) · [ផ្ទៃតុ](electron/README.md) · [ថាសរបារម៉ឺនុយ](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 ថ្មី៖ OmniRoute នៅខាងក្នុង Copilot Chat native របស់ VS Code
+### 🧩 ថ្មី៖ OmniRoute នៅខាងក្នុង VS Code ដើមរបស់ Copilot Chat
 
 </div>
 
-> គ្មានរបារចំហៀងថ្មី គ្មាន UI ជជែកថ្មី — គ្រប់ម៉ូដែលដែល OmniRoute ផ្តល់ នឹងបង្ហាញដោយផ្ទាល់ក្នុង
-> **ឧបករណ៍ជ្រើសរើសម៉ូដែល Copilot Chat ដែលអ្នកកំពុងប្រើស្រាប់**។ ចាប់តាំងពី VS Code 1.122 មក ម៉ូដែលរបស់អ្នកផ្តល់សេវាអាចដំណើរការ
-> ដោយមិនចាំបាច់ចូលគណនី GitHub ឬមានការជាវ Copilot ទេ — របៀប agent ការហៅឧបករណ៍ និង vision
-> ដោយឥតគិតថ្លៃ។
+> គ្មានរបារចំហៀងថ្មី គ្មានការជជែកថ្មី UI — គ្រប់ម៉ូដែល OmniRoute បម្រើបង្ហាញឡើងនៅខាងស្ដាំ**Copilot កម្មវិធីជ្រើសរើសម៉ូដែលជជែកដែលអ្នកបានប្រើរួចហើយ** . ចាប់តាំងពីលេខកូដ VS 1.122 ម៉ូដែលអ្នកផ្តល់សេវាដំណើរការដោយគ្មានការចុះឈ្មោះ GitHub ឬការជាវ Copilot — របៀបភ្នាក់ងារ ការហៅឧបករណ៍ និងការមើលឃើញដោយឥតគិតថ្លៃ។
 
-ដំឡើងផ្នែកបន្ថែម **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** រួចចង្អុលវា
-ទៅម៉ាស៊ីនមេ OmniRoute របស់អ្នក (តម្លៃលំនាំដើមគឺ `localhost:20128`) បន្ទាប់មកបើក Copilot Chat → ឧបករណ៍ជ្រើសរើសម៉ូដែល
-→ **គ្រប់គ្រងម៉ូដែល…** → **OmniRoute**។
+ដំឡើង** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** ផ្នែកបន្ថែម ចង្អុលវានៅម៉ាស៊ីន OmniRoute របស់អ្នក (លំនាំដើមទៅ `localhost:20128`) បន្ទាប់មកបើក Copilot Chat → model picker →** គ្រប់គ្រងម៉ូដែល...** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">ហាង</th><th align="left">តំណ</th><th align="left">ដំណើរការជាមួយ</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">ដំឡើង →</a></td><td align="left">VS Code — កំណែ stable និង Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">ដំឡើង →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"> ធ្វើការជាមួយ </th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> ដំឡើង →</a ></td >< td តម្រឹម ="ឆ្វេង">VS កូដ — មានស្ថេរភាព &amp; អ្នកខាងក្នុង </td></tr>
+  <tr><td align="left" nowrap>🔓 <b> បើក VSX ចុះឈ្មោះ</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> ដំឡើង →</a ></td >< td ="ឆ្វេង">Cursor, Windsurf, VSCodium </td> Theia </tr> code-server, Gitpod, Antigravity, Kiro…
 </table>
 
-ពីខាងក្នុងកម្មវិធីកែសម្រួល៖ បើកទិដ្ឋភាព **Extensions** ស្វែងរក **"OmniRoute"** ហើយចុច **Install**
-— វាដំណើរការដូចគ្នានៅលើហាងទាំងពីរ។ កូដប្រភព បញ្ហា និងសៀវភៅណែនាំការចេញផ្សាយ មាននៅ
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)។
+ពីខាងក្នុងកម្មវិធីនិពន្ធ៖ បើកឯកសារ** ផ្នែកបន្ថែម** មើល, ស្វែងរក** "OmniRoute"** , ចុច** ដំឡើង** - ដំណើរការដូចគ្នានៅលើហាងទាំងពីរ។ ប្រភព បញ្ហា និងសៀវភៅរត់ការបោះពុម្ពផ្សាយផ្ទាល់នៅ [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) ។
 
-<sub>📖 [មគ្គុទ្ទេសក៍ VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — ការរៀបចំ អ្វីដែលឧបករណ៍ជ្រើសរើសបង្ហាញ ផ្ទាំងគ្រប់គ្រងក្នុងថេប និងការដោះស្រាយបញ្ហា</sub>
+<sub>📖 [VS កូដ Copilot មគ្គុទ្ទេសក៍ជជែក](docs/guides/VSCODE-COPILOT.md) — ការរៀបចំ, អ្វីដែលអ្នកជ្រើសរើសបង្ហាញ, ផ្ទាំងគ្រប់គ្រង-in-a-tab, ការដោះស្រាយបញ្ហា</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 ថ្មី៖ OmniRouteTray — ច្រកទ្វាររបស់អ្នក ដែលស្ថិតនៅក្នុងរបារម៉ឺនុយ
+### 🎩 ថ្មី៖ OmniRouteTray — ច្រកផ្លូវរបស់អ្នក រស់នៅក្នុងរបារម៉ឺនុយ
 
 </div>
 
-> `omniroute serve` ដំណើរការបានល្អបំផុតនៅពេលវាបើកជានិច្ច។ **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> ប្រែក្លាយវាទៅជាកម្មវិធីរបារម៉ឺនុយសម្រាប់ macOS ដែលរៀបចំម្តងហើយលែងបារម្ភ៖ វាចាប់ផ្ដើមម៉ាស៊ីនមេ រក្សាវាឱ្យដំណើរការ
-> ឆ្លងកាត់ការចាប់ផ្ដើមម៉ាស៊ីនឡើងវិញ ធ្វើបច្ចុប្បន្នភាពនៅនឹងកន្លែង និងធ្វើឱ្យអ្នកអាចមើលកញ្ចប់កំណត់ token ផ្ទាល់របស់អ្នកបានដោយចុចតែមួយដង — **មិនចាំបាច់
-> ទុកផ្ទាំង terminal ឱ្យបើក និងមិនចាំបាច់តាមមើលថែ `npm install -g omniroute` ទេ។**
+> `omniroute serve` គឺសប្បាយចិត្តបំផុតនៅពេលដែលវាតែងតែបើក។** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** ប្រែក្លាយវាទៅជាកម្មវិធីរបារម៉ឺនុយកំណត់ហើយបំភ្លេចចោលសម្រាប់ macOS: វាចាប់ផ្តើមម៉ាស៊ីនមេ រក្សាវាឱ្យនៅរស់ឡើងវិញ ធ្វើឱ្យទាន់សម័យវានៅនឹងកន្លែង ហើយដាក់ថវិកាថូខឹនបន្តផ្ទាល់របស់អ្នកដោយចុចតែម្តង —** គ្មានបង្អួចស្ថានីយបានបើកទេ គ្មាន `npm install -g omniroute` សម្រាប់មើលកូនទេ។**
 
-បង្កើតឡើងជាមួយ [Tauri v2](https://v2.tauri.app/) (ស្នូល Rust ដែលតូចស្ទើរតែអាចមិនគិតដល់) វាភ្ជាប់មកជាមួយ
-Node 24 runtime ដែលបានចុះហត្ថលេខារបស់ខ្លួន និងគ្រប់គ្រងការដំឡើង OmniRoute ដែលជាកម្មសិទ្ធិរបស់កម្មវិធី ដូច្នេះវាមិនដែលប៉ះទង្គិចជាមួយ
-`node`/`bun` ជាសកលរបស់អ្នកទេ។ វា **ចែករំលែកការកំណត់រចនាសម្ព័ន្ធ និងមូលដ្ឋានទិន្នន័យ `~/.omniroute/` ដែលមានស្រាប់របស់អ្នក** — ដូច្នេះវាជា
-OmniRoute ដដែលដែលអ្នកកំពុងដំណើរការ គ្រាន់តែពាក់មួកប៉ុណ្ណោះ។ 🎩
+បង្កើតឡើងដោយ [Tauri v2](https://v2.tauri.app/) (ស្នូល Rust ទំហំនៃកំហុសបង្គត់) វាបញ្ជូនពេលវេលាដំណើរការ Node 24 ដែលបានចុះហត្ថលេខាដោយខ្លួនឯង និងគ្រប់គ្រងការដំឡើង OmniRoute ជាកម្មសិទ្ធិរបស់កម្មវិធី ដូច្នេះវាមិនដែលប្រឆាំងនឹង `node`/`bun` សកលរបស់អ្នកទេ។ វា។** ចែករំលែកការកំណត់រចនាសម្ព័ន្ធ `~/.omniroute/` ដែលមានស្រាប់ និងមូលដ្ឋានទិន្នន័យរបស់អ្នក។** - ដូច្នេះវាដូចគ្នានឹង OmniRoute ដែលអ្នកបានរត់រួចហើយ ដោយគ្រាន់តែពាក់មួក។ 🎩
 
 <table>
-  <tr><th align="left">អ្វីដែលវាធ្វើ</th><th align="left">របៀបធ្វើ</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>ត្រួតពិនិត្យម៉ាស៊ីនមេ</b></td><td align="left">បង្កើតដំណើរការ <code>omniroute serve</code> និងប្រើ instance ដែលកំពុងដំណើរការស្រាប់ ជំនួសឱ្យការបង្កើតវាស្ទួន</td></tr>
-  <tr><td align="left" nowrap>📊 <b>ការប្រើប្រាស់ផ្ទាល់ ដែលអាចមើលឃើញភ្លាមៗ</b></td><td align="left">របារកូតារបស់អ្នកផ្តល់សេវា ដែនកំណត់ប្រចាំសម័យ/ប្រចាំសប្ដាហ៍របស់ Claude ជាមួយការរាប់ថយក្រោយរហូតដល់កំណត់ឡើងវិញ និងការបែងចែកចំណាយរយៈពេល 30 ថ្ងៃ</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>ធ្វើបច្ចុប្បន្នភាពនៅនឹងកន្លែងដោយស្វ័យប្រវត្តិ</b></td><td align="left">ការដំឡើងជាដំណាក់កាល ការប្តូរបែប atomic និងត្រឡប់ទៅកំណែមុននៅពេលបរាជ័យ — តែងតែប្រើកំណែចេញផ្សាយថ្មីបំផុត</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>ចាប់ផ្ដើមពេលចូលប្រព័ន្ធ</b></td><td align="left">អាចជ្រើសរើសឱ្យដំណើរការពេលចូលប្រព័ន្ធបាន; មានតែក្នុងថាសប៉ុណ្ណោះ គ្មានរូបតំណាងក្នុង dock</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>ការវិនិច្ឆ័យ និងកំណត់ហេតុ</b></td><td align="left">ការវិនិច្ឆ័យដោយចុចតែមួយដង និងការចូលប្រើកំណត់ហេតុម៉ាស៊ីនមេ</td></tr>
+  <tr><th align="left"></th><th align="left"> របៀប </th></tr>
+  <tr><td align="left" nowrap>🟢 <b> គ្រប់គ្រងម៉ាស៊ីនមេ</b></td><td align="left"> Spawns <code> omniroute បម្រើ</code> ទទួលយកឧទាហរណ៍ដែលកំពុងដំណើរការរួចហើយជំនួសឱ្យការស្ទួនវា</td></tr>
+  <tr><td align="left" nowrap>📊 <b> ការប្រើប្រាស់ផ្ទាល់ភ្លាមៗ </b></td><td align="left"> របារកូតាអ្នកផ្តល់សេវា ដែនកំណត់ Claude session/weekly ជាមួយនឹងការកំណត់ការរាប់ថយក្រោយឡើងវិញ ការបំបែកការចំណាយរយៈពេល 30 ថ្ងៃ</td></tr>
+  <tr><td align="left" nowrap>🔄 <b> ការធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិនៅកន្លែង </b></td><td align="left"> ការដំឡើងជាដំណាក់កាល ការផ្លាស់ប្តូរអាតូមិក ការវិលត្រឡប់មកវិញនៅលើការបរាជ័យ — តែងតែនៅលើការចេញផ្សាយថ្មីបំផុត </td></tr>
+  <tr><td align="left" nowrap>🚀 <b> ចាប់ផ្តើមនៅលើការចូល </b></td><td align="left"> បើកដំណើរការស្រេចចិត្តនៅពេលចូល។ តែថាសប៉ុណ្ណោះ គ្មានរូបតំណាងចត </td></tr>
+  <tr><td align="left" nowrap>🩺 <b> វេជ្ជបណ្ឌិត &amp; កំណត់ហេតុ</b></td><td align="left"> ការវិនិច្ឆ័យដោយចុចតែម្តង និងការចូលប្រើកំណត់ហេតុម៉ាស៊ីនមេ</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>ចូលចិត្តទាញយកមែនទេ? យកឯកសារ <code>.dmg</code> ចុងក្រោយបំផុតពី
-<a href="https://github.com/zoispag/omniroute-tray/releases">ការចេញផ្សាយ</a>។ កូដប្រភព បញ្ហា និងឯកសារ
-ណែនាំអំពីការបង្កើត មាននៅ <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>។
-<br/>💛 គម្រោងសហគមន៍ដោយ <a href="https://github.com/zoispag">@zoispag</a> — មិនមែនជាការចេញផ្សាយ OmniRoute ផ្លូវការទេ។</sub>
+<sub> ចូលចិត្តការទាញយក? ចាប់យក <code>.dmg </code> ចុងក្រោយបំផុតពី
+<a href="https://github.com/zoispag/omniroute-tray/releases"> ចេញផ្សាយ </a>។ ប្រភព បញ្ហា និងបង្កើត
+ឯកសាររស់នៅ <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>។
+<br/>💛 គម្រោងសហគមន៍ដោយ <a href="https://github.com/zoispag">@zoispag </a> — មិនមែនជាការចេញផ្សាយ OmniRoute ផ្លូវការទេ។</sub>
 
 <br/>
 

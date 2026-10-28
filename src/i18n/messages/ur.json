@@ -5589,6 +5589,7 @@
     "allModelsAlreadyImported": "تمام ماڈلز پہلے ہی درآمد کیے جا چکے ہیں",
     "noNewModelsToImport": "درآمد کرنے کے لیے کوئی نیا ماڈل نہیں — تمام ماڈلز پہلے ہی رجسٹری یا حسبِ ضرورت ماڈلز کی فہرست میں موجود ہیں",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "ماڈل دریافت ناکام {time}",
     "skippingExistingModels": "پہلے سے موجود {count} ماڈلز چھوڑے جا رہے ہیں",
     "autoSync": "خودکار مطابقت پذیری",
     "autoSyncShort": "مطابقت پذیری",

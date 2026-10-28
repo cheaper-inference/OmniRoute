@@ -65,21 +65,21 @@
 
 <br/>
 
-## 📈 Leanann an Geata ag Fás
+## 📈 Coinníonn an Geata ag Fás
 
 <div align="center">
 
-|                                        |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| -------------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Soláthraithe                        |           352           |   **358**   |          376          |
-| 🧠 Aitheantóirí uathúla samhail comhrá |          1320           |  **1374**   |         1475          |
-| 🖼️ Droichead Modhalachta               | 🆕 fís + fuaim + físeán |      ✓      |           ✓           |
-| 📡 Catalóg saor in aisce Radar         |       🆕 roghnach       |      ✓      |           ✓           |
-| ⚖️ Sceidealú cuóta-fhiosach            |     🆕 Cuóta-Roinnt     |      ✓      |           ✓           |
-| 📊 Teiliméadracht chuóta               |         🆕 beo          |      ✓      |           ✓           |
-| 🧰 Mód headless                        |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ Infra iarnróid LTS                  |            —            |      —      |  🆕 cainéil eisiúna   |
-| 🔎 API aimsithe samhail                |            —            |      —      | 🆕 `/v1/models/query` |
+|                                 |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------------- | :--------------------: | :---------: | :-------------------: |
+| Soláthraithe 🌐                 |          352           |   **358**   |          376          |
+| 🧠 Múnla comhrá uathúil IDs     |          1320          |  **1374**   |         1475          |
+| 🖼️ Droichead Módúlachta         |  🆕 + fuaime + físeán  |      ✓      |           ✓           |
+| 📡 radar catalóg saor in aisce, | 🆕 rogha an diúltaithe |      ✓      |           ✓           |
+| ⚖️ Sceidealú cuóta-eolas        |     🆕 Cuóta-Share     |      ✓      |           ✓           |
+| 📊 teiliméadracht cuóta         |           🆕           |      ✓      |           ✓           |
+| 🧰 mód gan cheann               |           —            |      —      | 🆕 `serve --headless` |
+| infra iarnróid 🛤️ LTS           |           —            |      —      | cainéil scaoileadh 🆕 |
+| 🔎 Fionnachtain múnla API       |           —            |      —      | 🆕 `/v1/models/query` |
 
 **→ [Treochlár](ROADMAP.md) — ag marcaíocht ar an iarnród go `v3.9.0 LTS`**
 
@@ -621,59 +621,58 @@ faoin gcatalóg reatha ag **[radar.omniroute.online/planos](https://radar.omniro
 
 <div align="center">
 
-## 🤖 CLIanna & Gníomhairí Códúcháin Comhoiriúnacha
+## 🤖 Comhoiriúnach CLIs & Gníomhairí Códaithe
 
-> Cumraíocht amháin — `http://localhost:20128/v1` — agus ritheann **gach** IDE nó CLI IS ar shamhlacha saor in aisce agus ar chostas íseal.
+> Cumraíocht amháin - `http://localhost:20128/v1` - agus** gach** Ritheann AI IDE nó CLI ar mhúnlaí saor in aisce agus ar chostas íseal.
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude </b></sub><br/><sub> </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b> Kilo Cód </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b> Cód Zú </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b> Leanúint ar aghaidh </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b> Aider </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> Factory Droid </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b> Smelt </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Pi </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Tógáil </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b> Hermes Gníomhaire </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b> Goose </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b> Ateangaire Oscailte </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ oibríonn sé freisin le</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>aon uirlis atá comhoiriúnach le OpenAI</b>
+Oibríonn <b>＋ freisin le </b> · Deic Gníomhaire · Kiro · Cód Ordú · Antigravity · Windsurf · AMP · <b> aon uirlis OpenAI-comhoiriúnach </b>
 </div>
 
-<sub>📖 Socrú de réir uirlise do na 37 uirlis ar fad (27 CLI Code + 10 CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Breiseán OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Per-uirlis a shocrú le haghaidh na 38 uirlis go léir (27 CLI Code's + 11 CLI Gníomhairí) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**Seol aon CLI a dtacaítear leis trí OmniRoute le hordú amháin** — ní scríobhtar aon chomhaid chumraíochta,
-instealltar dintiúir de réir próisis, agus faigheann Qwen/Gemini eolaire baile aonuaire leithlisithe:
+**Seol aon CLI tacaithe trí OmniRoute in aon ordú amháin** — níl aon chomhaid cumraíochta scríofa, dintiúir arna instealladh in aghaidh an phróisis, faigh Qwen/Gemini teach scoite caith amach:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -684,13 +683,11 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# Nó roghnaigh soláthraí+múnla go hidirghníomhach agus scríobh cumraíocht na huirlise féin:
-omniroute configure codex          # freisin: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider+model interactively and write the tool's own config:
+omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-Urramaíonn gach ordú an comhthéacs cianda gníomhach (`omniroute connect <host>`), tugann `--dry-run`
-réamhamharc ar na hathróga timpeallachta/argóintí beachta gan iad a rith, agus coinníonn `--api-key-env NAME` rúin amach
-as stair do bhlaoisce. → [Comhtháthuithe CLI](docs/guides/CLI-INTEGRATIONS.md)
+Onóraíonn gach ordú an comhthéacs gníomhach cianda (`omniroute connect <host>`), déanann `--dry-run` réamhamhairc ar an env/args cruinn gan é a fhorghníomhú, agus coinníonn `--api-key-env NAME` rúin amach as do stair bhlaosc. [CLI](docs/guides/CLI-INTEGRATIONS.md) → zqf
 
 <br/>
 
@@ -765,92 +762,80 @@ as stair do bhlaoisce. → [Comhtháthuithe CLI](docs/guides/CLI-INTEGRATIONS.md
 
 <div align="center">
 
-## 🖥️ An Áit a Ritheann OmniRoute — Áit ar bith
+## 🖥️ Cá Ritheann OmniRoute - Áit ar bith
 
 </div>
 
-> An aip chéanna, d’inneall féin, do rialacha féin. Ó shuiteáil dhomhanda npm go dtí **do ghuthán** trí Termux.
+> An aip chéanna, do mheaisín, do rialacha. Ó shuiteáil npm domhanda go** do ghuthán** trí Termux.
 
 <table>
-  <tr><th align="left">Ardán</th><th align="left">Suiteáil</th><th align="left">Buaicphointí</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (domhanda)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Ordú amháin, aon OS</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Il-ailtireacht <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>Deasc (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Fuinneog dhúchasach + tráidire córais — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>Barra roghchláir (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Déanann sé maoirseacht ar an bhfreastalaí &amp; nuashonraíonn sé go huathoibríoch é — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code>arm64</code> dúchasach</td><td align="left">Raspberry Pi, freastalaithe ARM, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Ritheann sé <b>ar do ghuthán</b>, 24/7, gan root</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Cuir leis an Scáileán Baile"</td><td align="left">Lánscáileán, as líne, insuiteáilte ón mbrabhsálaí</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>Breiseán OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Comhtháthú dúchasach OpenCode</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>suiteáil an eisínteacht <b>OmniCopilot</b></td><td align="left">Gach samhail OmniRoute i roghnóir dúchasach Copilot Chat — cobhsaí &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>Ón bhfoinse</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Déan forbairt air, rannchuidigh leis</td></tr>
+  Ardán <tr><th align="left"></th><th align="left"> Suiteáil </th><th align="left"> Buaicphointí </th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (global)</b></td><td align="left" nowrap><code> npm install -g omniroute </code></td><td align="left"> Ordú amháin, aon OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (domhanda)</b></td><td align="left" nowrap><code> bun cuir -g omniroute </code></td><td align="left"> Tarball clárlainne céanna, suiteálann sé níos tapúla </td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Il-áirse <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> Deasc (Electron)</b></td><td align="left" nowrap><code> npm run electron: tóg </code></td><td align="left"> Fuinneog + córais zqm — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b> barra Roghchláir (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Maoirsíonn &amp; an freastalaí a nuashonrú go huathoibríoch — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code> arm64 </code></td><td align="left"> Raspberry Pi, freastalaithe ARM, Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android ( Termux )</b></td><td align="left" nowrap><code> pkg shuiteáil nodejs && npx -y omniroute </code></td><td align="left"> Ritheann <b> do ghuthán </b>, 24/7, gan fhréamh </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Cuir leis an Scáileán Baile"</td><td align="left"> Lánscáileán, as líne, is féidir é a shuiteáil ón mbrabhsálaí </td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode breiseán </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Comhtháthú OpenCode Dúchasach </td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Cód Copilot Comhrá </b></td><td align="left" nowrap> shuiteáil <b>OmniCopilot</b> síneadh </td><td align="left">OmniRoute samhail zqo sa roghnóir Comhrá Copilot dúchais — cobhsaí &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> Ó fhoinse </b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left"> Hack ar sé, rannchuidigh </td></tr>
 </table>
 
-<sub>📖 [Treoir Docker](docs/guides/DOCKER_GUIDE.md) · [Deasc](electron/README.md) · [Tráidire an bharra roghchláir](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+[Docker](docs/guides/DOCKER_GUIDE.md)<sub>📖 zqc · [Deisce](electron/README.md) · [Tráidire barra roghchláir](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Nua: OmniRoute laistigh de Copilot Chat dúchasach VS Code
+### 🧩 Nua: OmniRoute taobh istigh VS Cód dúchais Copilot Comhrá
 
 </div>
 
-> Gan aon bharra taoibh nua, gan aon chomhéadan comhrá nua — taispeántar gach samhail a fhreastalaíonn OmniRoute díreach sa
-> **roghnóir samhlacha Copilot Chat a úsáideann tú cheana féin**. Ó VS Code 1.122 i leith, oibríonn samhlacha soláthraí
-> gan síniú isteach ar GitHub ná síntiús Copilot — mód gníomhaire, glaoch uirlisí agus fís, agus iad
-> saor in aisce.
+> Uimh sidebar nua, aon comhrá nua UI - gach samhail a fhreastalaíonn ar OmniRoute léiríonn suas díreach sa**Copilot Roghnóir múnla comhrá a úsáideann tú cheana féin** . Ós rud é go Cód VS 1.122, oibríonn samhlacha soláthraithe gan síniú isteach GitHub nó síntiús Copilot - modh gníomhaire, glaoch uirlisí agus fís, saor in aisce.
 
-Suiteáil an eisínteacht **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, dírigh
-ar do fhreastalaí OmniRoute í (`localhost:20128` de réir réamhshocraithe), ansin oscail Copilot Chat → roghnóir samhlacha
-→ **Bainistigh Samhlacha…** → **OmniRoute**.
+Suiteáil an** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** síneadh, cuir in iúl é ag do fhreastalaí OmniRoute (réamhshocraithe go `localhost:20128`), ansin oscail Copilot Chat → model picker →** Bainistigh Múnlaí…** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">Siopa</th><th align="left">Nasc</th><th align="left">Oibríonn sé le</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Suiteáil →</a></td><td align="left">VS Code — cobhsaí &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Suiteáil →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left"> Store </th><th align="left"> Nasc </th><th align="left"> Oibríonn sé le </th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Cód Áit an Mhargaidh </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Suiteáil →</a ></td >< td ailíniú ="clé">VS Cód — cobhsaí &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🔓 <b> Oscailte VSX Chlárlann </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Suiteáil →</ a ></ td >< td ailíniú ="clé">Cursor, Windsurf, VSCodium, Theia, cód-freastalaí, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-Ón taobh istigh den eagarthóir: oscail an t-amharc **Eisínteachtaí**, cuardaigh **"OmniRoute"**, cliceáil **Suiteáil**
-— oibríonn sé ar an mbealach céanna sa dá shiopa. Tá an fhoinse, na fadhbanna agus an lámhleabhar foilsitheoireachta le fáil ag
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Ón taobh istigh den eagarthóir: oscail an** Eisínteachtaí** amharc, cuardach** "OmniRoute"** , cliceáil** Suiteáil** — oibríonn ar an mbealach céanna ar an dá stór. Foinse, eisiúintí agus an leabhar reatha foilsitheoireachta beo ag [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [Treoir VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — socrú, a dtaispeánann an roghnóir, deais i gcluaisín, fabhtcheartú</sub>
+<sub>📖 [VS Code Copilot Treoir comhrá](docs/guides/VSCODE-COPILOT.md) — socrú, cad a thaispeánann an roghnóir, painéal i gcluaisín, fabhtcheartú </sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Nua: OmniRouteTray — do gheata, ina chónaí sa bharra roghchláir
+### 🎩 Nua: OmniRouteTray — do gheata, ina gcónaí sa bharra roghchláir
 
 </div>
 
-> Is sona `omniroute serve` nuair a bhíonn sé ar siúl i gcónaí. Déanann **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> aip barra roghchláir socraigh-agus-déan-dearmad di sin do macOS: tosaíonn sé an freastalaí, coimeádann sé beo é
-> tar éis atosuithe, nuashonraíonn sé ina áit é, agus cuireann sé do bhuiséad beo comharthaí faoi aon chliceáil amháin — **gan aon
-> fhuinneog teirminéil fágtha ar oscailt, gan aon `npm install -g omniroute` le coinneáil faoi chúram.**
+> Tá `omniroute serve` níos sona nuair a bhíonn sé ar siúl i gcónaí.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** iompaíonn sé sin ina aip barra roghchláir socraithe agus dearmad le haghaidh macOS: cuireann sé tús leis an bhfreastalaí, coinníonn sé beo é thar atosaithe, déanann sé é a nuashonrú, agus cuireann sé do bhuiséad comhartha beo cliceáil ar shiúl -** níl aon fhuinneog teirminéil fágtha ar oscailt, gan aon `npm install -g omniroute` le cúram leanaí.**
 
-Tógtha le [Tauri v2](https://v2.tauri.app/) (croí Rust chomh beag le hearráid slánúcháin), tagann sé
-lena thimpeallacht reatha shínithe Node 24 féin agus bainistíonn sé suiteáil OmniRoute ar leis an aip í, mar sin ní théann sé riamh in adharca le do
-`node`/`bun` domhanda. **Roinneann sé an chumraíocht agus an bunachar sonraí atá agat cheana in `~/.omniroute/`** — mar sin is é
-an OmniRoute céanna é a ritheann tú cheana féin, ach hata air. 🎩
+Tógtha le [Tauri v2](https://v2.tauri.app/) (croílár Rust ar mhéid earráid shlánaithe), seolann sé a chuid ama rite Node 24 sínithe féin agus bainistíonn sé suiteáil OmniRoute faoi úinéireacht app, mar sin ní throideann sé do `node`/`bun` domhanda riamh. é** scaireanna do chumraíocht `~/.omniroute/` agus bunachar sonraí atá ann cheana féin** - mar sin is é an OmniRoute céanna a ritheann tú cheana féin, díreach le hata air. 🎩
 
 <table>
-  <tr><th align="left">A ndéanann sé</th><th align="left">Conas</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>Déanann sé maoirseacht ar an bhfreastalaí</b></td><td align="left">Seolann sé <code>omniroute serve</code>, glacann sé le hásc atá ag rith cheana seachas é a dhúbailt</td></tr>
-  <tr><td align="left" nowrap>📊 <b>Úsáid bheo le sracfhéachaint</b></td><td align="left">Barraí cuóta soláthraí, teorainneacha seisiúin/seachtainiúla Claude le comhaireamh síos go dtí an t-athshocrú, miondealú costais 30 lá</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>Nuashonraíonn sé ina áit go huathoibríoch</b></td><td align="left">Suiteáil chéimnithe, babhtáil adamhach, aischur ar theip — ar an eisiúint is nuaí i gcónaí</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>Tosaigh ar logáil isteach</b></td><td align="left">Seoladh roghnach ar logáil isteach; tráidire amháin, gan deilbhín sa duga</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>Dochtúir &amp; logaí</b></td><td align="left">Diagnóisic aon chliceáil agus rochtain ar logaí an fhreastalaí</td></tr>
+  <tr><th align="left"> Cad a dhéanann sé </th><th align="left"> Conas </th></tr>
+  <tr><td align="left" nowrap>🟢 <b> Maoirsíonn sé an freastalaí </b></td><td align="left"> Spawns <code> omniroute server </code>, glacann sé cás atá ar siúl cheana féin seachas é a dhúbailt </td></tr>
+  <tr><td align="left" nowrap>📊 <b> Sracfhéachaint ar úsáid bheo </b></td><td align="left"> Barraí cuóta an tsoláthraí, teorainneacha Claude session/weekly le comhaireamh anuas athshocraithe, miondealú costais 30 lá </td></tr>
+  <tr><td align="left" nowrap>🔄 <b> Auto-nuashonruithe i bhfeidhm </b></td><td align="left"> Suiteáil céimnithe, babhtáil adamhach, rolladh siar ar theip — i gcónaí ar an scaoileadh is nua </td></tr>
+  <tr><td align="left" nowrap>🚀 <b> Tosaigh ar logáil isteach </b></td><td align="left"> Seoladh roghnach ag logáil isteach; tráidire amháin, gan aon deilbhín duga </td></tr>
+  logs <tr><td align="left" nowrap>🩺 <b> Dochtúir &amp; </b></td><td align="left"> Diagnóisic aon-cliceáil agus rochtain loga freastalaí </td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>An fearr leat íoslódáil? Faigh an <code>.dmg</code> is déanaí ó
-<a href="https://github.com/zoispag/omniroute-tray/releases">Eisiúintí</a>. Tá an cód foinseach, na saincheisteanna agus na doiciméid tógála ar fáil ag
-<a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Tionscadal pobail le <a href="https://github.com/zoispag">@zoispag</a> — ní eisiúint oifigiúil de chuid OmniRoute é.</sub>
+<sub> Is fearr leat a íoslódáil? Faigh an <code>.dmg </code> is déanaí ó
+<a href="https://github.com/zoispag/omniroute-tray/releases"> Scaoileann </a>. Foinse, saincheisteanna agus tógáil
+docs beo ag <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Tionscadal pobail le <a href="https://github.com/zoispag">@zoispag </a> — ní eisiúint oifigiúil OmniRoute.</sub>
 
 <br/>
 

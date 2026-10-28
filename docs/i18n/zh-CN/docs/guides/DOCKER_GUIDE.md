@@ -631,7 +631,7 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep 让 kube 在SIGTERM之前删除服务端点，所以**新的**交通停止撞击垂死的进程。飞行中的`/v1/responses` SSE通过重量级准入租约耗尽至`SHUTDOWN_TIMEOUT_MS` （默认 30 秒）（#11015）。仍然到达进程的新请求会得到`503` + `Retry-After: 5`。在更换就绪之前重新创建空端点间隙仍然是硬中断 - 这是SQLite拓扑，而不是探针配置错误。
+`preStop` sleep 让 kube 在SIGTERM之前删除服务端点，所以**新的**交通停止撞击垂死的进程。飞行中的`/v1/responses` SSE通过重量级准入租约耗尽至`SHUTDOWN_TIMEOUT_MS` （默认 30 秒）（#11015）。仍然到达进程的新请求将获得`503` + `Retry-After: 5`。在更换就绪之前重新创建空端点间隙仍然是硬中断 - 这是SQLite拓扑，而不是探针配置错误。
 
 外部Postgres / 多写入者HA是**不是**记录的库存路径。如果您需要HA，请保留单个副本或运行项目已单独测试和记录的拓扑。 Postgres/MySQL作品位于[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 。在那之前，唯一受支持的繁殖方式**大的**`/v1/responses`容量是 N 个独立进程（下一节），而不是一个卷上的`replicas > 1` 。
 
