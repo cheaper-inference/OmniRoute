@@ -1,4 +1,7 @@
-import { canStartBackgroundRefresh } from "@/shared/utils/backgroundRefresh";
+import {
+  BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS,
+  canStartBackgroundRefresh,
+} from "@/shared/utils/backgroundRefresh";
 
 export const KIMI_CODING_BASE_URL = "https://api.kimi.com/coding/v1";
 export const KIMI_CODING_MODELS_URL = `${KIMI_CODING_BASE_URL}/models`;
@@ -79,6 +82,9 @@ type FetchLike = typeof fetch;
 let cachedVersion: string | null = null;
 let cachedAt = 0;
 let inFlight: Promise<string> | null = null;
+// Earliest time the getter may start another background lookup: one TTL after any answer
+// (the cache below only keeps versions newer than the pin), the retry window after a failure.
+let nextBackgroundRefreshAt = 0;
 let fetchImpl: FetchLike = fetch;
 
 function parseDottedTriple(value: unknown): string | null {
@@ -127,7 +133,8 @@ export function getKimiCodeCliVersion(): string {
     canStartBackgroundRefresh() &&
     !process.env.NODE_TEST_CONTEXT &&
     !readFreshCache() &&
-    !inFlight
+    !inFlight &&
+    Date.now() >= nextBackgroundRefreshAt
   ) {
     void refreshKimiCodeCliVersion();
   }
@@ -176,6 +183,9 @@ export function refreshKimiCodeCliVersion(): Promise<string> {
       cachedVersion = resolved;
       cachedAt = Date.now();
     }
+    nextBackgroundRefreshAt =
+      Date.now() +
+      (resolved ? KIMI_CODE_VERSION_CACHE_TTL_MS : BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS);
     return pickAtLeastPin(resolved ?? readFreshCache());
   })();
 
@@ -188,6 +198,7 @@ export function refreshKimiCodeCliVersion(): Promise<string> {
 
 /** Test seam: drop the registry cache so the next refresh hits the network. */
 export function resetKimiCodeCliVersionCache(): void {
+  nextBackgroundRefreshAt = 0;
   cachedVersion = null;
   cachedAt = 0;
   inFlight = null;

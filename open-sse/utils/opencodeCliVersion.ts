@@ -17,6 +17,8 @@
  * cache in background and later requests send the live version.
  */
 
+import { BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS } from "@/shared/utils/backgroundRefresh";
+
 const NPM_OPENCODE_LATEST_URL = "https://registry.npmjs.org/opencode-ai/latest";
 
 /** Cold/offline fallback. Bump when the pin visibly lags the registry. */
@@ -36,6 +38,9 @@ const FETCH_TIMEOUT_MS = 5_000;
 let cachedVersion: string | null = null;
 let cachedAt = 0;
 let inFlight: Promise<string> | null = null;
+// A failed lookup caches nothing and this refresh runs on every request, so a failure is
+// retried only after the shared retry window.
+let retryAfterFailureAt = 0;
 
 export function isOpencodeCliVersion(value: unknown): value is string {
   return typeof value === "string" && /^\d+\.\d+\.\d+$/.test(value.trim());
@@ -57,7 +62,11 @@ export function refreshOpencodeCliVersion(): Promise<string> {
     return Promise.resolve(cachedVersion);
   }
   if (inFlight) return inFlight;
+  if (Date.now() < retryAfterFailureAt) {
+    return Promise.resolve(cachedVersion ?? OPENCODE_CLI_VERSION_FALLBACK);
+  }
   inFlight = (async () => {
+    let answered = false;
     try {
       const response = await globalThis.fetch(NPM_OPENCODE_LATEST_URL, {
         headers: { Accept: "application/json" },
@@ -68,10 +77,12 @@ export function refreshOpencodeCliVersion(): Promise<string> {
       if (isOpencodeCliVersion(version)) {
         cachedVersion = version;
         cachedAt = Date.now();
+        answered = true;
       }
     } catch {
       // Registry unreachable — stale cache / pin stay valid.
     }
+    retryAfterFailureAt = answered ? 0 : Date.now() + BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS;
     return cachedVersion ?? OPENCODE_CLI_VERSION_FALLBACK;
   })();
   const current = inFlight;
@@ -83,6 +94,7 @@ export function refreshOpencodeCliVersion(): Promise<string> {
 
 /** Test seam: clear the cache. */
 export function resetOpencodeCliVersionCache(): void {
+  retryAfterFailureAt = 0;
   cachedVersion = null;
   cachedAt = 0;
   inFlight = null;
