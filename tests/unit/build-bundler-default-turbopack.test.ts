@@ -38,8 +38,19 @@ test("legacy nonzero env values preserve their prior explicit Turbopack behavior
   );
 });
 
-test("explicit empty and false strings keep prior Turbopack semantics", () => {
-  for (const value of ["", "false"]) {
+test("empty Turbopack override acts as unset for RAM-constrained Compose builds", () => {
+  assert.equal(
+    buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "" }, 8 * GiB),
+    "--webpack"
+  );
+  assert.equal(
+    buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "" }, 32 * GiB),
+    "--turbopack"
+  );
+});
+
+test("explicit nonempty nonzero strings keep prior Turbopack semantics", () => {
+  for (const value of ["false", "yes"]) {
     assert.equal(
       buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: value }, 8 * GiB),
       "--turbopack"
