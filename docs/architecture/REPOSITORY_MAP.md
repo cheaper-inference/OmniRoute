@@ -387,6 +387,7 @@ open-sse/
 | `healthcheck.mjs`                   | One-shot health check (used by Docker HEALTHCHECK)                         |
 | `uninstall.mjs`                     | Clean uninstall script                                                     |
 | `dev/sync-ui-kit.sh`                | Copy the CI UI Kit `src/` at a pinned commit into `packages/ui-kit/src`    |
+| `dev/sync-ui-kit-version.mjs`       | Mirror the synced kit version into `packages/ui-kit` and the lockfile      |
 | `check/check-ui-kit-snapshot.mjs`   | Pre-commit gate: `packages/ui-kit/src` matches the pinned upstream commit  |
 | `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — icon names in use that `ICON_MAP` does not map    |
 | `dev/codemod-material-icons.mjs`    | Rewrite literal Material Symbols spans to `<Icon>` (migration tooling)     |

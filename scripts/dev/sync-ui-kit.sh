@@ -37,6 +37,7 @@ find "$DEST/src" \( -name '*.ts' -o -name '*.tsx' \) -exec sed -i -E 's#(from "\
 git -C "$CLONE" show "$COMMIT:public/brand/lucide-license.txt" > "$DEST/lucide-license.txt"
 VERSION=$(git -C "$CLONE" show "$COMMIT:package.json" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).version))')
 DATE=$(git -C "$CLONE" show -s --format=%cs "$COMMIT")
+node "$ROOT/scripts/dev/sync-ui-kit-version.mjs" "$ROOT" "$VERSION"
 
 # 3) UPSTREAM.md (preserva a linha de autorização de licença se existir)
 AUTH=$(grep -E '^- license-authorization:' "$DEST/UPSTREAM.md" 2>/dev/null || echo '- license-authorization: (preencher — ver spec §1)')
@@ -53,6 +54,7 @@ $AUTH
 Fonte consumida (sem build): \`src/\` é cópia byte a byte do commit acima, exceto pela única
 transformação do sync: imports relativos perdem o sufixo \`.js\` (\`./button.js\` → \`./button\`).
 Para atualizar: \`scripts/dev/sync-ui-kit.sh <commit>\` (precisa do clone em \`_references/\`).
+O workflow \`.github/workflows/ui-kit-sync.yml\` faz isso todo dia e abre a PR quando o kit avança.
 Patches locais são proibidos; quando inevitáveis, documentar em PATCHES.md (seção \`## <commit>\`) e enviar upstream.
 MD
 [ -f "$DEST/PATCHES.md" ] || printf '# Patches locais\n\nNenhum. (Formato: `## <commit do snapshot>` + diff + link da PR upstream.)\n' > "$DEST/PATCHES.md"

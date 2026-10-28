@@ -145,7 +145,16 @@ lastUpdated: 2026-10-27
 
 `scripts/dev/sync-ui-kit.sh <commit> [clone]` copies the upstream `src/` at that commit into
 `packages/ui-kit/src` and applies the single allowed transformation (it drops the `.js` suffix from
-relative imports). Then: review `git diff packages/ui-kit`, do a visual pass on providers, settings, combos,
+relative imports). It also updates `UPSTREAM.md` and moves the workspace version (`packages/ui-kit/package.json`
+and its `package-lock.json` entry) to the upstream version through `scripts/dev/sync-ui-kit-version.mjs`.
+
+`.github/workflows/ui-kit-sync.yml` runs that sync once a day. When the kit's `main` has moved past the
+pinned commit, it opens a `chore/ui-kit-sync-<version>` PR against the highest `release/vX.Y.Z` branch. It
+holds while that release is frozen and skips a version whose branch already exists. It needs the
+`secrets.UI_KIT_READ_TOKEN` repository secret (read access to `keak-ai/cheaper-inference-ui-kit`);
+`secrets.UI_KIT_SYNC_PR_TOKEN` is optional and lets the PR trigger CI.
+
+Whether the sync ran by hand or from the workflow, then: review `git diff packages/ui-kit`, do a visual pass on providers, settings, combos,
 usage and endpoint in both themes, run `npm run check:ui-kit-snapshot` and `npm run test:vitest:ui`, and
 open the PR with the upstream changelog.
 

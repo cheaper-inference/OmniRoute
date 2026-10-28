@@ -1,0 +1,169 @@
+name: UI kit sync
+
+# Daily: when the Keak CI UI Kit's main moves past the snapshot pinned in
+# packages/ui-kit/UPSTREAM.md, run scripts/dev/sync-ui-kit.sh and open a PR against the
+# highest release/vX.Y.Z branch. It holds while that branch is frozen (Hard Rule #21) and skips
+# a version that already has a chore/ui-kit-sync-<version> branch. The PR is not merged here:
+# it still needs review, CI and the visual check on the local VPS before merge.
+#
+# Secrets:
+#   UI_KIT_READ_TOKEN     fine-grained PAT, resource owner keak-ai, repository
+#                         cheaper-inference-ui-kit, Contents: read. Without it the job exits
+#                         quietly.
+#   UI_KIT_SYNC_PR_TOKEN  optional fine-grained PAT on cheaper-inference/OmniRoute (Contents and
+#                         Pull requests: write). A PR opened with the default GITHUB_TOKEN does
+#                         not trigger CI; with this token it does.
+
+on:
+  schedule:
+    - cron: "41 9 * * *" # once a day, after the Keak team's working hours (US)
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Kit commit to sync (full SHA; default: the kit's main)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ui-kit-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync packages/ui-kit
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push chore/ui-kit-sync-<version>
+      pull-requests: write # open the PR against the release branch
+      issues: read # release-freeze and base-red lookups
+    steps:
+      - name: Resolve the target release branch
+        id: base
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          BASE=$(gh api "repos/$REPO/branches" --paginate --jq '.[].name' \
+            | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          [ -n "$BASE" ] || { echo "no release/vX.Y.Z branch" >&2; exit 1; }
+          FREEZES=$(gh issue list -R "$REPO" --label release-freeze --state open --json title --jq '.[].title')
+          if printf '%s\n' "$FREEZES" | grep -qF "release-freeze: ${BASE#release/} "; then
+            FROZEN=true
+          else
+            FROZEN=false
+          fi
+          RED=$(gh issue list -R "$REPO" --state open \
+            --search "Release branch not green: $BASE in:title" --json number --jq '.[0].number // empty')
+          {
+            echo "branch=$BASE"
+            echo "frozen=$FROZEN"
+            echo "basered=$RED"
+          } >> "$GITHUB_OUTPUT"
+          echo "target $BASE (frozen=$FROZEN, base-red=${RED:-none})"
+
+      - name: Checkout the release branch
+        if: steps.base.outputs.frozen == 'false'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.base.outputs.branch }}
+          persist-credentials: false
+
+      - name: Fetch the kit and compare with the pinned snapshot
+        id: kit
+        if: steps.base.outputs.frozen == 'false'
+        env:
+          KIT_TOKEN: ${{ secrets.UI_KIT_READ_TOKEN }}
+          INPUT_COMMIT: ${{ inputs.commit }}
+        run: |
+          set -euo pipefail
+          if [ -z "$KIT_TOKEN" ]; then
+            echo "UI_KIT_READ_TOKEN is not set — nothing to do."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          CLONE=_references/cheaper-inference-ui-kit
+          AUTH=$(printf 'x-access-token:%s' "$KIT_TOKEN" | base64 -w0)
+          echo "::add-mask::$AUTH"
+          git -c "http.extraheader=AUTHORIZATION: basic $AUTH" clone --quiet \
+            https://github.com/keak-ai/cheaper-inference-ui-kit.git "$CLONE"
+          if [ -n "$INPUT_COMMIT" ]; then
+            printf '%s' "$INPUT_COMMIT" | grep -qE '^[0-9a-f]{40}$' \
+              || { echo "Refusing non-SHA input: $INPUT_COMMIT" >&2; exit 1; }
+            TARGET=$INPUT_COMMIT
+          else
+            TARGET=$(git -C "$CLONE" rev-parse HEAD)
+          fi
+          git -C "$CLONE" cat-file -e "${TARGET}^{commit}"
+          PINNED=$(grep -m1 -oE '^- commit: [0-9a-f]{40}' packages/ui-kit/UPSTREAM.md | cut -d' ' -f3)
+          VERSION=$(git -C "$CLONE" show "${TARGET}:package.json" | jq -r .version)
+          printf '%s' "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            || { echo "unexpected kit version: $VERSION" >&2; exit 1; }
+          BRANCH="chore/ui-kit-sync-${VERSION}"
+          SKIP=false
+          if [ "$TARGET" = "$PINNED" ]; then
+            echo "packages/ui-kit is already at $TARGET ($VERSION)."
+            SKIP=true
+          elif [ -n "$(git ls-remote --heads origin "$BRANCH")" ]; then
+            echo "$BRANCH already exists — a sync PR for $VERSION is open or was handled."
+            SKIP=true
+          fi
+          {
+            echo "skip=$SKIP"
+            echo "target=$TARGET"
+            echo "pinned=$PINNED"
+            echo "version=$VERSION"
+            echo "branch=$BRANCH"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Sync the snapshot
+        if: steps.base.outputs.frozen == 'false' && steps.kit.outputs.skip == 'false'
+        env:
+          TARGET: ${{ steps.kit.outputs.target }}
+          VERSION: ${{ steps.kit.outputs.version }}
+        run: |
+          set -euo pipefail
+          scripts/dev/sync-ui-kit.sh "$TARGET"
+          node scripts/check/check-ui-kit-snapshot.mjs
+          # shellcheck disable=SC2016 # the backticks are Markdown code spans, not substitutions
+          printf -- '- **chore(dashboard):** the vendored Keak CI UI Kit moves to %s (`packages/ui-kit`, upstream `%s`).\n' \
+            "$VERSION" "${TARGET:0:7}" > "changelog.d/maintenance/0000-ui-kit-${VERSION//./-}.md"
+          git status --short
+
+      - name: Commit, push and open the PR
+        if: steps.base.outputs.frozen == 'false' && steps.kit.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.UI_KIT_SYNC_PR_TOKEN || github.token }}
+          BASE: ${{ steps.base.outputs.branch }}
+          BASERED: ${{ steps.base.outputs.basered }}
+          BRANCH: ${{ steps.kit.outputs.branch }}
+          TARGET: ${{ steps.kit.outputs.target }}
+          PINNED: ${{ steps.kit.outputs.pinned }}
+          VERSION: ${{ steps.kit.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh auth setup-git
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git add packages/ui-kit package-lock.json "changelog.d/maintenance/0000-ui-kit-${VERSION//./-}.md"
+          git commit -m "chore(dashboard): sync the vendored CI UI Kit to ${VERSION}" \
+            -m "packages/ui-kit moves from upstream ${PINNED:0:7} to ${TARGET:0:7} (${VERSION}) through scripts/dev/sync-ui-kit.sh."
+          git push origin "$BRANCH"
+          # shellcheck disable=SC2016 # the backticks are Markdown code spans, not substitutions
+          {
+            if [ -n "$BASERED" ]; then printf '⚠️ base-red inherited: #%s\n\n' "$BASERED"; fi
+            printf '## Summary\n\nAutomatic sync of the vendored Keak CI UI Kit (`packages/ui-kit`) from upstream `%s` to `%s` (%s), opened by `.github/workflows/ui-kit-sync.yml`.\n\n' "${PINNED:0:7}" "${TARGET:0:7}" "$VERSION"
+            printf 'Upstream changes: https://github.com/keak-ai/cheaper-inference-ui-kit/compare/%s...%s\n\n' "$PINNED" "$TARGET"
+            printf '## Before merge\n\n'
+            printf -- '- [ ] CI is green, or every red check is inherited from the base.\n'
+            printf -- '- [ ] The kit dependencies in the compare above are already in `package.json`.\n'
+            printf -- '- [ ] Visual check of a build of this branch on the local VPS (`deploy-vps-local`).\n'
+            printf -- '- [ ] Fill in the changelog fragment with the visible changes.\n'
+          } > pr-body.md
+          gh pr create --base "$BASE" --head "$BRANCH" \
+            --title "chore(dashboard): sync the vendored CI UI Kit to ${VERSION}" --body-file pr-body.md
