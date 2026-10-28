@@ -12,6 +12,37 @@ Wait for checkout and dependency installation to finish before collecting eviden
 Borrowed dependencies can support diagnosis but cannot certify a clean install.
 Physical dependencies are required for standalone packaging; no external symlink.
 
+### Verify the actual installed instructions before admission
+
+From the candidate worktree, run its versioned checker against the shared
+installation actually used by agents. In this repository's linked-worktree
+layout, the absolute common Git directory is `<shared-root>/.git`; a worktree's
+own `.git` file is not the shared root. Resolve and verify that layout explicitly:
+
+```bash
+VALIDATION_GIT_COMMON=$(git rev-parse --path-format=absolute --git-common-dir) || exit 2
+case "$VALIDATION_GIT_COMMON" in
+  */.git) VALIDATION_SHARED_ROOT=${VALIDATION_GIT_COMMON%/.git} ;;
+  *) printf '%s\n' 'HOLD: resolve the actual shared skill installation' >&2; exit 2 ;;
+esac
+VALIDATION_SKILLS_ROOT="$VALIDATION_SHARED_ROOT/.agents/skills"
+[ -d "$VALIDATION_SKILLS_ROOT" ] || {
+  printf '%s\n' 'HOLD: shared skill installation is missing' >&2
+  exit 2
+}
+node scripts/quality/check-skill-contract.mjs "$VALIDATION_SKILLS_ROOT" || exit $?
+```
+
+Preserve the exit and JSON receipt, which includes the resolved installation
+path. Record the candidate SHA alongside that receipt. Require all canonical templates and reviewed caller overlays to
+MATCH. Never substitute `config/quality/skill-templates` for the installed root;
+that would inspect reference files rather than the instructions agents execute.
+Unknown layouts, a missing checker/installation, drift or an incomplete report
+retain HOLD. Do not install or overwrite instructions automatically: reconcile
+and review the exact differences, then rerun. Refresh this check after changing
+the candidate contract or installed instructions. Entrypoints that do not read
+this shared module are outside its coverage and must be inventoried separately.
+
 ## 0a. Admit local heavy work
 
 Before dependency installation, full suites, coverage or build, follow

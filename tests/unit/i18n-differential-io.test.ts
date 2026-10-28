@@ -134,6 +134,19 @@ test("both gates report the same pinned pair and still reject a genuine new-key 
   assert.deepEqual(keys.report.gaps, [{ key: "newLabel", locale: "pt" }]);
 });
 
+test("both gates report partial pinned context as INCOMPLETE even when local comparison passes", (t) => {
+  const f = fixture(t);
+  f.save("pt", { label: "tradução nova" });
+  for (const gate of ["check-ui-value-drift", "check-new-key-coverage"]) {
+    assert.equal(f.run(gate).status, 0, "the unpinned local control must pass");
+    for (const args of [[], ["--warn"]]) {
+      const result = f.run(gate, { I18N_CANDIDATE_SHA: f.base }, args);
+      assert.equal(result.status, 2, result.stdout + result.stderr);
+      assert.equal(result.report.incomplete, true);
+    }
+  }
+});
+
 test("unknown dispatch without an exact PR or explicit base fails rather than guessing release", (t) => {
   const f = fixture(t);
   const eventPath = path.join(f.cwd, "event.json");

@@ -7,6 +7,13 @@ import { resolveOpenapiBaseline } from "../check/openapiBaseline.mjs";
 const SHA = /^[0-9a-f]{40}$/;
 const BASE_BRANCH = /^(?:main|release\/v\d+\.\d+\.\d+)$/;
 const REPOSITORY = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
+const PINNED_CONTEXT_FIELDS = [
+  "I18N_BASE_SHA",
+  "I18N_CANDIDATE_SHA",
+  "I18N_BASE_TIP_SHA",
+  "I18N_COMPARISON_SOURCE",
+  "I18N_COMPARISON_SCOPE",
+];
 
 function git(cwd, ...args) {
   try {
@@ -98,8 +105,10 @@ export function resolveUiDiffBase({
   const eventName = env.GITHUB_EVENT_NAME;
 
   // The workflow resolves once, then passes this same pinned pair to both UI gates.
-  if (env.I18N_BASE_SHA) {
+  // A partial or explicitly empty context cannot fall back to local or event history.
+  if (PINNED_CONTEXT_FIELDS.some((field) => Object.hasOwn(env, field))) {
     assertSha(env.I18N_BASE_SHA);
+    assertSha(env.I18N_CANDIDATE_SHA);
     if (env.I18N_CANDIDATE_SHA !== candidateSha) {
       throw new Error("Pinned i18n candidate does not match checkout");
     }

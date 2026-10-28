@@ -171,6 +171,44 @@ test("local explicit base resolves a merge-base and never requires a network loo
   assert.equal(result.source, "local-merge-base");
 });
 
+test("any supplied pinned context requires a complete immutable pair without local or event fallback", (t) => {
+  const f = fixture(t);
+  const fields = [
+    "I18N_BASE_SHA",
+    "I18N_CANDIDATE_SHA",
+    "I18N_BASE_TIP_SHA",
+    "I18N_COMPARISON_SOURCE",
+    "I18N_COMPARISON_SCOPE",
+  ];
+  const partial = [
+    { I18N_CANDIDATE_SHA: f.middle },
+    { I18N_CANDIDATE_SHA: f.head },
+    { I18N_BASE_SHA: f.base },
+    { I18N_BASE_TIP_SHA: f.base },
+    { I18N_COMPARISON_SOURCE: "explicit-pinned-pair" },
+    { I18N_COMPARISON_SCOPE: "candidate" },
+    ...fields.map((field) => ({ [field]: "" })),
+  ];
+  for (const extra of partial) {
+    assert.throws(
+      () => resolveUiDiffBase({ cwd: f.cwd, env: { BASE_REF: f.base, ...extra } }),
+      /immutable|does not match checkout/
+    );
+    assert.throws(
+      () => f.resolve("push", { before: f.base, after: f.head }, extra),
+      /immutable|does not match checkout/
+    );
+  }
+  const complete = resolveUiDiffBase({
+    cwd: f.cwd,
+    env: { BASE_REF: f.middle, I18N_BASE_SHA: f.base, I18N_CANDIDATE_SHA: f.head },
+  });
+  assert.equal(complete.baseSha, f.base);
+  assert.equal(complete.baseTipSha, f.base);
+  assert.equal(complete.candidateSha, f.head);
+  assert.equal(complete.source, "explicit-pinned-pair");
+});
+
 test("only an absent path in an existing tree is a legitimate missing locale", (t) => {
   const f = fixture(t);
   assert.equal(

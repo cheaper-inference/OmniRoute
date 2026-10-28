@@ -1,0 +1,276 @@
+--- a/.agents/skills/_shared/i18n-translate-new-keys.md
++++ b/.agents/skills/_shared/i18n-translate-new-keys.md
+@@ -31,12 +31,35 @@
+ 
+ ### 1. Detect the touched keys
+ 
++Use the actual PR target, or the target already approved for a new branch, from
++`base-green.md`. Fetch and verify that target before this step; set `BASE_REF` to its
++reviewed ref or commit, then pin it locally. In CI, preserve the already resolved SHA pair
++instead of running this local preparation. A package version is not a comparison base.
++
+ ```bash
+-git fetch origin "$RELEASE_BRANCH" --quiet
+-git diff "origin/$RELEASE_BRANCH" -- src/i18n/messages/en.json bin/cli/locales/en.json
++: "${BASE_REF:?Set BASE_REF to the reviewed PR target ref or commit}"
++I18N_TARGET_COMMIT=$(git rev-parse --verify "${BASE_REF}^{commit}") || exit 2
++I18N_CHECKED_HEAD=$(git rev-parse --verify "HEAD^{commit}") || exit 2
++BASE_REF="$I18N_TARGET_COMMIT"
++export BASE_REF
++I18N_DIFF_BASE=$(git merge-base "$BASE_REF" "$I18N_CHECKED_HEAD") || exit 2
++[ "$I18N_DIFF_BASE" != "$I18N_CHECKED_HEAD" ] || exit 2
++git diff "$I18N_DIFF_BASE" -- src/i18n/messages/en.json bin/cli/locales/en.json
+ ```
+ 
+-No hunk → this module does not apply; carry on. Hunks in `bin/cli/locales/en.json` → the
++Both differential UI gates (`i18n:check-new-keys` and `i18n:check-value-drift`) require
++this explicit local base. Check that each reported candidate SHA equals the recorded head,
++and record the comparison and scope. CI resolves one
++`I18N_BASE_SHA` / `I18N_CANDIDATE_SHA` pair for both gates; preserve that pair when
++invoked inside CI. Missing history, an empty comparison, malformed catalogs or a moved
++candidate return **2 / INCOMPLETE**: repair the evidence and rerun, retaining HOLD.
++The verification commands below forward local `BASE_REF` when set and preserve
++the CI pair when it is absent; an empty forwarded value does not supply a base.
++The gates enforce complete comparison context. Exit 1 is a measured gap; exit 0
++only covers the complete reported comparison. A changed
++base/head invalidates the prior report. `--warn` is not an admission check.
++
++No hunk against the valid comparison → this module does not apply; carry on. Hunks in `bin/cli/locales/en.json` → the
+ same flow with `--catalog=cli`. Hunks that are NOT yours → the base drifted; rebase onto the
+ release tip first so the runner translates only your keys.
+ 
+@@ -85,12 +108,13 @@
+ 
+ **Inside an agent that can dispatch subagents (Claude Code / Workflow):** dispatch **ONE**
+ background subagent (`run_in_background` / `agent()` with the default model, high effort)
+-whose ONLY job is:
++whose ONLY job is (pass the pinned local `BASE_REF` and recorded head, or the complete
++CI comparison environment, in its task context):
+ 
+ 1. run `bash scripts/i18n/translate-new-keys.sh` (foreground inside the subagent is fine),
+ 2. poll `_artifacts/i18n-new-keys/batch.rc` until it exists (`tail
+    _artifacts/i18n-new-keys/batch.log` for progress; a locale's `<code>.exit` = its verdict),
+-3. run and **report verbatim** `npm run i18n:check-keys && npm run i18n:check-ratio && npm run i18n:check-new-keys`,
++3. run and **report verbatim** `npm run i18n:check-keys && npm run i18n:check-ratio && BASE_REF="${BASE_REF:-}" npm run i18n:check-new-keys && BASE_REF="${BASE_REF:-}" npm run i18n:check-value-drift`,
+ 4. list the locale files it changed (`git status --short src/i18n/messages bin/cli/locales`).
+ 
+ The main flow keeps running the rest of the battery (typecheck, lint, tests, complexity gates)
+@@ -102,8 +126,14 @@
+ 
+ ### 4. Verify, then commit the locales WITH the feature
+ 
++`uplift-prs/scripts/fill_missing_i18n.py` is a legacy-named, read-only inventory of
++new-key gaps. It consumes the gate's JSON, preserves exit 0/1/2 and never creates
++translations or markers. For exit 1, translate the reported keys through the reviewed
++flow above, then rerun the inventory with the same reviewed comparison. Exit 2 requires
++repairing the comparison/tool/report first and makes no catalog changes.
++
+ ```bash
+-npm run i18n:check-keys && npm run i18n:check-ratio && npm run i18n:check-new-keys
++npm run i18n:check-keys && npm run i18n:check-ratio && BASE_REF="${BASE_REF:-}" npm run i18n:check-new-keys && BASE_REF="${BASE_REF:-}" npm run i18n:check-value-drift
+ git add src/i18n/messages/*.json          # (bin/cli/locales/*.json for the CLI catalog)
+ ```
+ 
+--- a/.agents/skills/i18n-waves/references/scope-map.md
++++ b/.agents/skills/i18n-waves/references/scope-map.md
+@@ -16,6 +16,12 @@
+ | Chaves de CLI | `bin/cli` + catálogo `--catalog=cli` | `npm run i18n:check-keys:cli`, `npm run check:cli-i18n` | `sync-ui-keys.mjs --catalog=cli --translate-markers`; `translate-new-keys.sh --catalog=cli` | Mesmo backend e env das docs; allowlist `scripts/i18n/untranslatable-cli-keys.json`. |
+ | Catálogo do site | `omnirouteSite/lang/<code>.json` | — (não é gate de CI) | `node scripts/i18n/retranslate-site.mjs` | Fora da onda, salvo pedido. |
+ | Espelhos de skills do produto | `skills/**/SKILL.md`, `skills/**/references/endpoints.md` | `npm run check:agent-skills-sync` («Merge integrity») | `node --import tsx/esm scripts/skills/generate-agent-skills.mjs --apply` | Não é tradução: é **superfície protegida** gerada do `docs/openapi.yaml`. PR própria, diff revisado, aprovação do dono. |
++
++Para os gates diferenciais de UI (`i18n:check-new-keys` e `i18n:check-value-drift`),
++prepare e passe `BASE_REF` explícita pelo procedimento de `_shared/i18n-translate-new-keys.md`,
++seção 1, vinculada à base real da PR e ao candidato atual. Preserve o par de SHAs fornecido
++pelo CI quando existir. `2 / INCOMPLETE` exige corrigir a evidência; não é PASS nem uma
++regressão atribuível ao contribuinte. Mudança de base/head exige nova comparação.
+ 
+ Fonte inglesa defasada (contagens como «193 migrations», «358 providers» nos `Docs Gates`) é
+ `npm run check:docs-counts` / `npm run gen:provider-reference`, não i18n.
+--- a/.agents/skills/implement-features/SKILL.md
++++ b/.agents/skills/implement-features/SKILL.md
+@@ -368,7 +368,7 @@
+ 
+ If any item fails, **fix root cause** before committing. Do NOT bypass with `--no-verify` (hard rule #10).
+ 
+-> **🌐 i18n keys added? (`../_shared/i18n-translate-new-keys.md`)** — if the feature touched `src/i18n/messages/en.json` (or `bin/cli/locales/en.json`), translate the new keys BEFORE opening the PR: the new-key gate now rejects `__MISSING__` markers. Launch the detached runner / ONE background subagent while the rest of this battery runs, and open the PR only after its report (`i18n:check-keys` + `i18n:check-ratio` + `i18n:check-new-keys`) is green.
++> **🌐 i18n keys added? (`../_shared/i18n-translate-new-keys.md`)** — if the feature touched `src/i18n/messages/en.json` (or `bin/cli/locales/en.json`), translate the new keys BEFORE opening the PR: the new-key gate now rejects `__MISSING__` markers. Launch the detached runner / ONE background subagent while the rest of this battery runs, pass the reviewed `BASE_REF` from section 1 of that shared module to the worker, and open the PR only after its report (`i18n:check-keys` + `i18n:check-ratio` + `i18n:check-new-keys` + `i18n:check-value-drift`) passes on the current comparison. Missing or changed base/head and exit 2 (`INCOMPLETE`) remain HOLD until the comparison is repaired and both differential gates are rerun.
+ 
+ ### 3.3 Commit + open a PR (one feature = one branch = one PR — immediately)
+ 
+--- a/.agents/skills/uplift-prs/scripts/fill_missing_i18n.py
++++ b/.agents/skills/uplift-prs/scripts/fill_missing_i18n.py
+@@ -1,42 +1,86 @@
+ #!/usr/bin/env python3
+-"""Run scripts/i18n/check-new-key-coverage.mjs; for every reported `✗ <key> — missing in N: a, b`
+-fill the key in those locales with `__MISSING__:<english>` (vi must be translated by hand: it is
+-left alone and reported). Re-runs the gate at the end. Exit 0 when the gate passes."""
+-import json, re, subprocess, sys
++"""Legacy entrypoint: report new-key translation gaps without modifying catalogs.
++
++Set BASE_REF to the reviewed PR target ref/commit locally, or provide the CI's
++I18N_BASE_SHA/I18N_CANDIDATE_SHA pair. Prints the gate's JSON and preserves strict
++exit semantics: 0 complete/pass, 1 complete/gaps, 2 incomplete evidence. Translation
++belongs to the reviewed i18n workflow; this helper never fills placeholders.
++"""
++import json
++import os
++import re
++import subprocess
++import sys
++
++SHA = re.compile(r"[0-9a-f]{40}\Z")
++
++
++def valid_sha(value):
++    return isinstance(value, str) and bool(SHA.fullmatch(value)) and value != "0" * 40
++
++
++def incomplete(reason):
++    return 2, {"ok": False, "incomplete": True, "reason": reason}
++
++
+ def run_gate():
+-    r = subprocess.run(["node", "scripts/i18n/check-new-key-coverage.mjs"], capture_output=True, text=True)
+-    return r.returncode, r.stdout + r.stderr
+-def get_path(obj, key):
+-    # flat key first, then dotted traversal
+-    if key in obj: return obj[key], "flat"
+-    cur = obj
+-    for part in key.split("."):
+-        if not isinstance(cur, dict) or part not in cur: return None, None
+-        cur = cur[part]
+-    return cur, "nested"
+-def set_path(obj, key, value, mode):
+-    if mode == "flat": obj[key] = value; return
+-    parts = key.split("."); cur = obj
+-    for part in parts[:-1]: cur = cur.setdefault(part, {})
+-    cur[parts[-1]] = value
+-rc, out = run_gate()
+-if rc == 0: print(out.strip().splitlines()[-1]); sys.exit(0)
+-en = json.load(open("src/i18n/messages/en.json", encoding="utf-8"))
+-todo = {}
+-for m in re.finditer(r"✗ (\S+) — missing in \d+: ([a-zA-Z\-, ]+)", out):
+-    key, locs = m.group(1), [x.strip() for x in m.group(2).split(",") if x.strip()]
+-    for loc in locs: todo.setdefault(loc, []).append(key)
+-skipped_vi = []
+-for loc, keys in sorted(todo.items()):
+-    if loc == "vi": skipped_vi = keys; continue
+-    p = f"src/i18n/messages/{loc}.json"; data = json.load(open(p, encoding="utf-8"))
+-    for key in keys:
+-        val, mode = get_path(en, key)
+-        if val is None: print("no english value for", key); continue
+-        cur, _ = get_path(data, key)
+-        if cur is not None: continue
+-        set_path(data, key, f"__MISSING__:{val}" if isinstance(val, str) else val, mode)
+-    open(p, "w", encoding="utf-8").write(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+-    print(f"filled {loc}: {len(keys)} key(s)")
+-if skipped_vi: print("vi needs real translations for:", skipped_vi)
+-rc, out = run_gate(); print(out.strip().splitlines()[-1]); sys.exit(rc)
++    env = os.environ.copy()
++    base, candidate = env.get("I18N_BASE_SHA"), env.get("I18N_CANDIDATE_SHA")
++    if base or candidate:
++        if not valid_sha(base) or not valid_sha(candidate) or base == candidate:
++            return incomplete("Provide a complete, distinct I18N_BASE_SHA/I18N_CANDIDATE_SHA pair")
++    elif not env.get("BASE_REF", "").strip():
++        return incomplete("Set BASE_REF to the reviewed PR target ref/commit before running this helper")
++
++    try:
++        result = subprocess.run(
++            ["node", "scripts/i18n/check-new-key-coverage.mjs", "--json"],
++            env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=120,
++        )
++    except (OSError, subprocess.TimeoutExpired):
++        return incomplete("The new-key gate could not complete")
++    try:
++        report = json.loads(result.stdout)
++    except (ValueError, TypeError):
++        return incomplete("The new-key gate did not return one valid JSON report")
++    if not isinstance(report, dict):
++        return incomplete("The new-key gate returned an invalid report shape")
++    if result.returncode == 2 and report.get("ok") is False and report.get("incomplete") is True:
++        if isinstance(report.get("reason"), str) and report["reason"].strip():
++            return 2, report
++        return incomplete("The new-key gate returned incomplete evidence without a reason")
++
++    comparison, gaps = report.get("comparison"), report.get("gaps")
++    if not isinstance(comparison, dict) or not isinstance(gaps, list):
++        return incomplete("The new-key gate report lacks its comparison or gaps inventory")
++    if not all(valid_sha(comparison.get(key)) for key in ("baseSha", "baseTipSha", "candidateSha")):
++        return incomplete("The new-key gate report lacks an immutable comparison")
++    if comparison["baseSha"] == comparison["candidateSha"] or not all(
++        isinstance(comparison.get(key), str) and comparison[key].strip() for key in ("source", "scope")
++    ):
++        return incomplete("The new-key gate reported an empty or unspecified comparison")
++    if base and (comparison["baseSha"] != base or comparison["candidateSha"] != candidate):
++        return incomplete("The new-key gate report differs from the pinned CI comparison")
++    base_tip = env.get("I18N_BASE_TIP_SHA") if base else env.get("BASE_REF")
++    if valid_sha(base_tip) and comparison["baseTipSha"] != base_tip:
++        return incomplete("The new-key gate report differs from the requested target commit")
++    if any(not isinstance(gap, dict) or not all(
++        isinstance(gap.get(key), str) and gap[key].strip() for key in ("key", "locale")
++    ) for gap in gaps):
++        return incomplete("The new-key gate returned an invalid translation gap")
++    expected_exit = 1 if gaps else 0
++    if result.returncode != expected_exit or report.get("ok") is not (not gaps) or report.get("incomplete"):
++        return incomplete("The new-key gate exit and report contradict one another")
++    return expected_exit, report
++
++
++def main():
++    code, report = run_gate()
++    print(json.dumps(report, ensure_ascii=False, indent=2))
++    if code == 1:
++        print("Real translations are required. Follow the shared i18n workflow and rerun this inventory; no catalogs changed.", file=sys.stderr)
++    return code
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+--- a/.agents/skills/generate-release/phases/phase-0-preflight.md
++++ b/.agents/skills/generate-release/phases/phase-0-preflight.md
+@@ -82,6 +82,15 @@
+ 
+ From an **isolated worktree on the release branch** (Rule #19 — never the shared checkout):
+ 
++Before any `check:release-green --full-ci` invocation below, capture `BASE_TIP_SHA`
++from the reviewed actual target of the release PR and `CANDIDATE_SHA` from its
++checked-out candidate, as full commit IDs. Read `../../validate-release-green/SKILL.md`
++for the comparison contract. Pass that pair with `--i18n-scope candidate`; the
++observer computes the merge base and records the target tip separately. Verify
++those IDs and scope in the report. Missing context, a self comparison or a moved
++checkout is INCOMPLETE and retains HOLD. A `last-commit` tip observation is not a
++whole-release-PR check. Refresh the pair after any target/candidate change.
++
+ > **🔴 Cross-session safety (CLAUDE.md Hard Rule #22) — MANDATORY; put this verbatim in every subagent prompt (agents don't inherit CLAUDE.md).** Many sessions/agents work this repo in parallel during a release:
+ >
+ > - **NEVER `git stash` / `git stash pop` — anywhere, including inside this worktree and inside any subagent.** `git stash` hits the **shared object store**, not the worktree, so it silently clobbers/resurrects another session's uncommitted work (2026-07-02: a `#5923` change leaked into the unrelated `#2296` worktree via a global `stash pop`; reincided via a subagent). To diff working changes against a base ref without stashing: `git show <ref>:<path>` or `git diff <ref> -- <path>`.
+@@ -89,7 +98,7 @@
+ 
+ ```bash
+ # Run it in BACKGROUND and do not read the log until it contains `EXIT=`. See the rule below.
+-npm run check:release-green -- --with-build --full-ci   # Solution C — full release-equivalent validation + the ci.yml static gate set (see the --full-ci note below)
++npm run check:release-green -- --with-build --full-ci --i18n-base-sha "${BASE_TIP_SHA:?reviewed PR target commit required}" --i18n-candidate-sha "${CANDIDATE_SHA:?checked-out candidate commit required}" --i18n-scope candidate # Solution C — full release-equivalent validation + the ci.yml static gate set (see the --full-ci note below)
+ ```
+ 
+ > **🔴 NEVER read the tail while it is still running.** The verdict block is printed only at the
+@@ -102,7 +111,7 @@
+ > This is the same discipline the phase already mandates for the unit suite. Apply it here:
+ >
+ > ```bash
+-> setsid nohup npm run check:release-green -- --with-build --full-ci \
++> setsid nohup npm run check:release-green -- --with-build --full-ci --i18n-base-sha "${BASE_TIP_SHA:?reviewed PR target commit required}" --i18n-candidate-sha "${CANDIDATE_SHA:?checked-out candidate commit required}" --i18n-scope candidate \
+ >   > /tmp/relgreen.log 2>&1 < /dev/null &
+ > # then, and ONLY then:
+ > grep -q 'EXIT=' /tmp/relgreen.log && sed -n '/──── verdict ────/,$p' /tmp/relgreen.log
+@@ -225,9 +234,9 @@
+ > the pre-flight. **Run them all in ONE command now** (the script reads `ci.yml` itself, so the set
+ > never drifts as gates are added):
+ > ```bash
+-> npm run check:release-green -- --quick --full-ci   # drift ratchets + fast HARD + ALL ci.yml static gates
++> npm run check:release-green -- --quick --full-ci --i18n-base-sha "${BASE_TIP_SHA:?reviewed PR target commit required}" --i18n-candidate-sha "${CANDIDATE_SHA:?checked-out candidate commit required}" --i18n-scope candidate # drift ratchets + fast HARD + ALL ci.yml static gates
+ > # or the complete pass (adds the slow unit/vitest/integration suites + pack-artifact):
+-> npm run check:release-green -- --full-ci --with-build
++> npm run check:release-green -- --full-ci --with-build --i18n-base-sha "${BASE_TIP_SHA:?reviewed PR target commit required}" --i18n-candidate-sha "${CANDIDATE_SHA:?checked-out candidate commit required}" --i18n-scope candidate
+ > ```
+ > Fix or rebaseline every red BEFORE the first push. `--full-ci` covers the exact gates that bit
+ > v3.8.46 (`check:route-validation:t06`, `check:docs-symbols`, `check:bundle-size -- --ratchet`,

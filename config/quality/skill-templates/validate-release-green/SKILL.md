@@ -16,9 +16,30 @@ Inspect `scripts/quality/validate-release-green.mjs`, its npm entrypoint and the
 candidate's workflows before choosing flags. On candidates that provide them:
 
 - `npm run check:release-green -- --quick`: partial fast diagnosis.
-- `npm run check:release-green -- --full-ci --with-build --hermetic --json`:
-  the observer's broader static/test/package profile; this is still not a promise
-  of parity with every workflow lane.
+- `npm run check:release-green -- --full-ci --with-build --hermetic --json`
+  with the explicit comparison below: the observer's broader static/test/package
+  profile; this is still not a promise of parity with every workflow lane.
+
+For a PR or combined candidate, capture `BASE_TIP_SHA` from its reviewed actual
+target and `CANDIDATE_SHA` from the checked-out candidate, both full commit IDs.
+Pass them with every `--full-ci` invocation (including `--quick --full-ci`):
+
+```bash
+npm run check:release-green -- --full-ci --with-build --hermetic --json \
+  --i18n-base-sha "${BASE_TIP_SHA:?reviewed PR target commit required}" \
+  --i18n-candidate-sha "${CANDIDATE_SHA:?checked-out candidate commit required}" \
+  --i18n-scope candidate
+```
+
+The observer derives the merge base and records the target tip separately. Its
+report must bind the expected candidate, base tip and `candidate` scope. Local
+`BASE_REF` pinned to that target commit is also accepted; the explicit pair above
+binds the expected checkout. Preserve a valid CI-supplied comparison. Missing,
+self, stale or unreadable comparison evidence is **INCOMPLETE**, never PASS.
+
+A scheduled tip observer may deliberately compare its exact first parent using
+`--i18n-scope last-commit`; report that limited scope. It cannot certify a whole
+PR. Refresh the binding and rerun when the candidate or reviewed target changes.
 
 The versioned static gate manifest, if present, describes static scan membership,
 not all observer or admission jobs. Report unmodeled coverage explicitly.
