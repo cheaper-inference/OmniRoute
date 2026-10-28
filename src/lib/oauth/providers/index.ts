@@ -28,6 +28,7 @@ import { devinDesktop } from "./devin-desktop";
 import { grokCli } from "./grok-cli";
 import { xaiOauth } from "./xai-oauth";
 import { openference } from "./openference";
+import { renderhour } from "./renderhour";
 import { codebuddyCn } from "./codebuddy-cn";
 import { codebuddyIntl } from "./codebuddy-intl";
 import { workbuddy } from "./workbuddy";
@@ -63,6 +64,7 @@ export const PROVIDERS = {
   "grok-cli": grokCli,
   "xai-oauth": xaiOauth,
   openference,
+  renderhour,
   "codebuddy-cn": codebuddyCn,
   "codebuddy-intl": codebuddyIntl,
   // WorkBuddy is a separate Tencent product from CodeBuddy CN (own host, own

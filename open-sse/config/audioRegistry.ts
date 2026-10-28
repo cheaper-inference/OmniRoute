@@ -10,6 +10,7 @@
 import { getProviderAlias } from "@/shared/constants/providers";
 import { isLoopbackNodeHost } from "@/shared/network/loopbackNodeHost";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+import { RENDERHOUR_SPEECH_PROVIDER } from "./providers/registry/renderhour/mediaModels.ts";
 import {
   toRegistrySpeechModels as toSyntxSpeechModels,
   toRegistryTranscriptionModels as toSyntxTranscriptionModels,
@@ -669,6 +670,7 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     format: "syntx-audio",
     models: toSyntxSpeechModels(),
   },
+  renderhour: RENDERHOUR_SPEECH_PROVIDER,
 };
 
 /**

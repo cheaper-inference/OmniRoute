@@ -38,6 +38,13 @@ export { formatDeviceCodeRemaining } from "./OAuthModalPanels";
 
 const GOOGLE_OAUTH_PROVIDERS = new Set(["antigravity", "agy"]);
 
+/**
+ * Providers whose OAuth server accepts only loopback redirects (any port, RFC 8252 §7.3).
+ * On a remote install the browser lands on the operator's own loopback and the callback URL
+ * is pasted back, as for the Google providers.
+ */
+const LOOPBACK_REDIRECT_PROVIDERS = new Set(["renderhour"]);
+
 /** Providers that use a local callback server on a random port (PKCE browser flow). */
 const PKCE_CALLBACK_SERVER_PROVIDERS = new Set(["codex", "xai-oauth", "grok-cli"]);
 
@@ -585,6 +592,11 @@ export default function OAuthModal({
           // Even in remote deployments we use loopback — user copies the callback URL manually.
           const port = window.location.port || "20128";
           redirectUri = `http://127.0.0.1:${port}/callback`;
+        } else if (LOOPBACK_REDIRECT_PROVIDERS.has(provider)) {
+          // Same origin as the dashboard on localhost, so the /callback relay reaches it.
+          const host = isTrueLocalhost ? window.location.hostname : "localhost";
+          const port = window.location.port || "20128";
+          redirectUri = `http://${host}:${port}/callback`;
         } else if (!isLocalhost) {
           // Behind reverse proxy: use actual origin (e.g., https://omniroute.example.com/callback)
           // Supports PUBLIC_URL env var override, or falls back to window.location.origin.

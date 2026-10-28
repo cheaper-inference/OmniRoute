@@ -34,6 +34,7 @@ import {
   upstreamErrorResponse,
 } from "../utils/audioResponse.ts";
 import { handleSyntxSpeech } from "./syntxAudio.ts";
+import { handleRenderhourSpeech } from "./renderhourSpeech.ts";
 import {
   getKieCallbackUrl,
   getKieErrorMessage,
@@ -1027,6 +1028,10 @@ export async function handleAudioSpeech({
 
     if (providerConfig.format === "tortoise") {
       return handleTortoiseSpeech(providerConfig, body);
+    }
+
+    if (providerConfig.format === "renderhour-tts") {
+      return handleRenderhourSpeech({ providerConfig, body, modelId, credentials });
     }
 
     if (providerConfig.format === "syntx-audio") {

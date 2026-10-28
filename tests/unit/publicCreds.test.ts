@@ -60,6 +60,12 @@ test("resolvePublicCred('openference_id') returns the public PKCE client id shap
   assert.equal(v.length, 9);
 });
 
+test("resolvePublicCred('renderhour_id') returns the RenderHour public PKCE client id shape", () => {
+  const v = resolvePublicCred("renderhour_id");
+  assert.match(v, /^rhc_[a-z]+$/);
+  assert.equal(v.length, 13);
+});
+
 test("resolvePublicCred('muse_id') returns the public Meta Muse CLI numeric client id", () => {
   const v = resolvePublicCred("muse_id");
   assert.match(v, /^\d+$/);

@@ -289,6 +289,8 @@ export async function validateProviderApiKey({
     soniox: validateSonioxProvider,
     "fal-ai": ({ apiKey, providerSpecificData }: any) =>
       validateImageProviderApiKey({ provider: "fal-ai", apiKey, providerSpecificData }),
+    renderhour: ({ apiKey, providerSpecificData }: any) =>
+      validateImageProviderApiKey({ provider: "renderhour", apiKey, providerSpecificData }),
     "stability-ai": ({ apiKey, providerSpecificData }: any) =>
       validateImageProviderApiKey({ provider: "stability-ai", apiKey, providerSpecificData }),
     "black-forest-labs": ({ apiKey, providerSpecificData }: any) =>
