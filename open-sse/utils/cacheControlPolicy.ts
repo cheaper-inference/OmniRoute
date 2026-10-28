@@ -134,6 +134,11 @@ const OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS = new Set([
   "xiaomi-mimo",
 ]);
 
+/** Providers whose cache is populated from the longest matching prefix without
+ * an explicit `cache_control` breakpoint. This is deliberately narrower than
+ * CACHING_PROVIDERS, which also includes explicit-breakpoint providers. */
+const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set(["openai", "codex", "azure"]);
+
 /**
  * Per-connection override for cache behavior, resolved from the connection's
  * `provider_specific_data.cache` JSON sub-object (see `resolveConnectionCacheOverride`).
@@ -260,6 +265,23 @@ export function providerSupportsCaching(
   // All Claude-protocol providers support prompt caching
   if (targetFormat === "claude") return true;
   return false;
+}
+
+/** Whether a marker-free request can still participate in the provider cache.
+ * A custom connection must declare marker stripping to opt into this stronger
+ * semantic; `supportsPromptCaching` alone does not say how caching is requested. */
+export function providerUsesAutomaticPrefixCaching(
+  provider: string | null | undefined,
+  connectionCacheOverride?: ConnectionCacheOverride | null
+): boolean {
+  if (connectionCacheOverride?.supportsPromptCaching === false) return false;
+  const passthrough = connectionCacheOverride?.cacheControlPassthrough;
+  if (passthrough === "openai-format" || passthrough === "claude-format") return false;
+  if (connectionCacheOverride?.supportsPromptCaching === true && passthrough === "strip") {
+    return true;
+  }
+  if (!provider) return false;
+  return AUTOMATIC_PREFIX_CACHING_PROVIDERS.has(provider.toLowerCase());
 }
 
 /**
