@@ -326,6 +326,22 @@ test("@theme inline still exposes bg-surface-2 and rounded-card", () => {
   assert.match(theme, /--radius-control:\s*var\(--radius-control\);/);
 });
 
+test("bg-alt, muted and surface-secondary have @theme entries so their utilities paint (KEA-7886 P4)", () => {
+  // Before P4 these three had a :root value but no @theme entry: `bg-bg-alt` (41 uses),
+  // `bg-muted/50` and `bg-surface-secondary/30` generated no CSS at all.
+  const theme = block("@theme inline {");
+  const root = block(":root {\n  --desktop-safe-top");
+  for (const [name, kit] of [
+    ["--color-bg-alt", "var(--ci-color-surface-subtle)"],
+    ["--color-muted", "var(--ci-color-surface-muted)"],
+    ["--color-surface-secondary", "var(--ci-color-surface-subtle)"],
+  ] as const) {
+    assert.ok(theme.includes(`${name}: var(${name});`), `@theme inline exposes ${name}`);
+    // Kit token → flips with data-theme="dark", so light and dark both get a kit surface.
+    assert.ok(root.includes(`${name}: ${kit};`), `:root maps ${name} → ${kit}`);
+  }
+});
+
 test("cn() still dedupes via tailwind-merge and DataTable paints an opaque surface", () => {
   assert.match(read("src/shared/utils/cn.ts"), /twMerge\(clsx\(/);
   assert.ok(read("src/shared/components/DataTable.tsx").includes("var(--color-surface)"));

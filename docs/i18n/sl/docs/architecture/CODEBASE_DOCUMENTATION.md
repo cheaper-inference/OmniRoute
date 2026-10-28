@@ -499,7 +499,7 @@ moduli za posamezne ponudnike (sheme orodij, adapterji za pridobivanje/TTS, obde
 (pomožni modul za skupno identiteto) in `index.ts` (register).
 
 > Opomba: ponudnike, ki niso navedeni tukaj, obravnava `default.ts` z uporabo splošnega
-> izvajalnika, združljivega z OpenAI. Celoten katalog ponudnikov (375 ponudnikov) je v
+> izvajalnika, združljivega z OpenAI. Celoten katalog ponudnikov (376 ponudnikov) je v
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

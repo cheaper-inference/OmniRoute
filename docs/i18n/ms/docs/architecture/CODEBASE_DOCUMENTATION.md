@@ -499,7 +499,7 @@ pembantu bagi setiap penyedia (skema alat, penyesuai pengambilan/TTS, pengendali
 (pembantu identiti dikongsi) dan `index.ts` (daftar).
 
 > Nota: penyedia yang tidak disenaraikan di sini dikendalikan oleh `default.ts` menggunakan
-> pelaksana generik yang serasi dengan OpenAI. Katalog penyedia lengkap (375 penyedia) terdapat dalam
+> pelaksana generik yang serasi dengan OpenAI. Katalog penyedia lengkap (376 penyedia) terdapat dalam
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

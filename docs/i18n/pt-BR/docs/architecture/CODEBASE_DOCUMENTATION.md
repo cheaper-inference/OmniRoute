@@ -499,7 +499,7 @@ específicos de cada provedor (esquemas de ferramentas, adaptadores de busca/TTS
 (auxiliar de identidade compartilhado) e `index.ts` (registro).
 
 > Observação: os provedores não listados aqui são atendidos por `default.ts` usando o executor
-> genérico compatível com a OpenAI. O catálogo completo de provedores (375 provedores) fica em
+> genérico compatível com a OpenAI. O catálogo completo de provedores (376 provedores) fica em
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

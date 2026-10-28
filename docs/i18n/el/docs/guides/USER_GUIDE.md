@@ -611,55 +611,55 @@ post_install() {
 <details>
 <summary><b>Προβολή όλων των διαθέσιμων μοντέλων</b></summary>
 
-> Η παρακάτω λίστα έχει συνταχθεί από το `open-sse/config/providerRegistry.ts` για την έκδοση v3.8.0. Τα καταλόγοι cloud (Gemini, OpenRouter κ.λπ.) συγχρονίζονται δυναμικά — για τον πλήρη ζωντανό κατάλογο ανοίξτε **Πίνακας Ελέγχου → Πάροχοι → [πάροχος] → Διαθέσιμα Μοντέλα** ή καλέστε `GET /api/models/catalog`.
+> Η παρακάτω λίστα είναι επιμελημένη από το `open-sse/config/providerRegistry.ts` για την v3.8.0. Οι κατάλογοι cloud (Gemini, OpenRouter, κ.λπ.) συγχρονίζονται δυναμικά — για τον πλήρη ζωντανό κατάλογο ανοίξτε **Πίνακας Ελέγχου → Πάροχοι → [πάροχος] → Διαθέσιμα Μοντέλα** ή καλέστε το `GET /api/models/catalog`.
 >
-> Εάν η ενσωματωμένη λίστα ενός παρόχου έχει αποκλίνει, χρησιμοποιήστε **Εισαγωγή από /models** σε αυτή τη σελίδα (ή ενεργοποιήστε **Αυτόματο Συγχρονισμό**) για να αντλήσετε τον ζωντανό upstream κατάλογο. Αυτό επαληθεύτηκε στην έκδοση v3.8.50 για το LLM7.io (`gemini-3.1-flash-lite`) και το UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)· η ανώνυμη πρόσβαση στο Pollinations παρέμεινε περιορισμένη από upstream κατά τη διάρκεια της ίδιας δοκιμής.
+> Αν η ενσωματωμένη λίστα κάποιου παρόχου έχει αποκλίνει, χρησιμοποιήστε την **Εισαγωγή από /models** σε εκείνη τη σελίδα (ή ενεργοποιήστε τον **Αυτόματο Συγχρονισμό**) για να ανακτήσετε τον ζωντανό κατάλογο upstream. Αυτό επαληθεύτηκε στην v3.8.50 για τα LLM7.io (`gemini-3.1-flash-lite`) και UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)· η ανώνυμη πρόσβαση στο Pollinations παρέμεινε περιορισμένη από τον upstream κατά τον ίδιο κύκλο δοκιμών.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ επίπεδα προσπάθειας: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ επίπεδα effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ΔΩΡΕΑΝ OAuth: χρησιμοποιήστε τον ζωντανό κατάλογο που εμφανίζεται στο **Πίνακας Ελέγχου → Πάροχοι → Kiro → Διαθέσιμα Μοντέλα**. Η διαθεσιμότητα εξαρτάται από τον λογαριασμό και το πλάνο.
+**Kiro (`kr/`)** — ΔΩΡΕΑΝ OAuth: χρησιμοποιήστε τον ζωντανό κατάλογο που εμφανίζεται στην ενότητα **Πίνακας Ελέγχου → Πάροχοι → Kiro → Διαθέσιμα Μοντέλα**. Η διαθεσιμότητα εξαρτάται από τον λογαριασμό και το πλάνο.
 
 **Qoder (`if/`)** — ΔΩΡΕΑΝ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0,2–0,6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0,2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/μήνα κατ' αποκοπή ή ανά χρήση: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/μήνα σταθερά ή ανά χρήση: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Κλειδί API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Εξαιρετικά γρήγορο: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Εξαιρετικά ταχύ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Εγγενές Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — Φιλοξενείται στην ΕΕ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Ενισχυμένο με αναζήτηση: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Με ενίσχυση αναζήτησης: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Ανοιχτού κώδικα: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (δωρεάν), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Γρήγορη εκτέλεση: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Ταχεία εξαγωγή συμπερασμάτων: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Σε κλίμακα wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — Εστιασμένο σε RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Επιχειρησιακό: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Εταιρικό: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Συγχρονίζεται ζωντανά ανά κλειδί API από την Google — δεν υπάρχει στατική λίστα. Συνδέστε ένα κλειδί στο **Πίνακας Ελέγχου → Πάροχοι** και στη συνέχεια χρησιμοποιήστε **Διαθέσιμα Μοντέλα** για να εισαγάγετε τον τρέχοντα κατάλογο (π.χ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Συγχρονίζεται ζωντανά ανά κλειδί API από τη Google — δεν υπάρχει στατική λίστα. Συνδέστε ένα κλειδί στο **Πίνακας Ελέγχου → Πάροχοι** και έπειτα χρησιμοποιήστε τα **Διαθέσιμα Μοντέλα** για να εισαγάγετε τον τρέχοντα κατάλογο (π.χ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Άλλοι συμβατοί πάροχοι** (επιλεγμένοι): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (μέσω `aws-bedrock`), `azure-ai`, `openrouter` (κατάλογος passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ο καθένας διατηρεί τη δική του λίστα μοντέλων στο `providerRegistry.ts` και μπορεί να συγχρονιστεί αυτόματα όταν ο πάροχος εκθέτει ένα endpoint `/models`.
+**Άλλοι συμβατοί πάροχοι** (επιλεγμένοι): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (μέσω `aws-bedrock`), `azure-ai`, `openrouter` (κατάλογος passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Καθένας διατηρεί τη δική του λίστα μοντέλων στο `providerRegistry.ts` και μπορεί να συγχρονίζεται αυτόματα όταν ο πάροχος εκθέτει ένα endpoint `/models`.
 
-**Σημείωση για τα αναγνωριστικά μοντέλων:** Το OmniRoute χρησιμοποιεί τα native αναγνωριστικά του παρόχου (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ορισμένα αναγνωριστικά περιλαμβάνουν εκδόσεις με τελείες επειδή έτσι τα αναμένει το upstream API. Εάν ένα μοντέλο δεν εμφανίζεται παραπάνω, εκτελέστε `omniroute models --search <term>` ή χτυπήστε `GET /api/models/catalog` για να επιβεβαιώσετε τη διαθεσιμότητα.
+**Σημείωση για τα ID μοντέλων:** Το OmniRoute χρησιμοποιεί εγγενή ID παρόχων (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ορισμένα ID περιλαμβάνουν εκδόσεις με τελείες, επειδή έτσι τα αναμένει το upstream API. Αν κάποιο μοντέλο δεν παρατίθεται παραπάνω, εκτελέστε `omniroute models --search <term>` ή καλέστε το `GET /api/models/catalog` για να επιβεβαιώσετε τη διαθεσιμότητα.
 
 </details>
 

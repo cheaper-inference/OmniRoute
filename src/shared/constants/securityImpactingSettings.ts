@@ -12,8 +12,8 @@
  *   the password-verify only fires ONCE per PATCH.
  * - `oidcEnabled` / `oidcDisablePasswordLogin` / `oidcClientSecret`: who may log
  *   in to the dashboard.
- * - `oidcIssuer` / `oidcClientId` / `oidcAllowedSubjects` / `oidcRedirectPath` /
- *   `oidcScopes`: the OIDC identity config — which IdP's ID tokens are trusted, the
+ * - `oidcIssuer` / `oidcClientId` / `oidcAllowedSubjects` / `oidcAdmissionClaim` /
+ *   `oidcRedirectPath` / `oidcScopes`: the OIDC identity config — which IdP's ID tokens are trusted, the
  *   audience they must carry, where the authorization code is sent and which subjects
  *   may log in. Changing them without re-auth would let a stolen session or management
  *   credential point dashboard login at an attacker-controlled IdP, allowlist the
@@ -44,6 +44,7 @@ export const SECURITY_IMPACTING_SETTINGS_KEYS = [
   "oidcIssuer",
   "oidcClientId",
   "oidcAllowedSubjects",
+  "oidcAdmissionClaim",
   "oidcRedirectPath",
   "oidcScopes",
   "corsOrigins",

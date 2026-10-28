@@ -499,7 +499,7 @@ qalan modullar isə hər provayder üçün köməkçilərdir (alət sxemləri, f
 (paylaşılan identiklik köməkçisi) və `index.ts` (reyestr).
 
 > Qeyd: burada göstərilməyən provayderlərə ümumi OpenAI-uyğun icraçıdan istifadə edən
-> `default.ts` vasitəsilə xidmət göstərilir. Tam provayder kataloqu (375 provayder)
+> `default.ts` vasitəsilə xidmət göstərilir. Tam provayder kataloqu (376 provayder)
 > `src/shared/constants/providers.ts` daxilində yerləşir.
 
 ### 4.3 `open-sse/translator/`

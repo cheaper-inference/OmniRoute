@@ -39,7 +39,7 @@ Objektiver Funktionsvergleich mit beliebten Open-Source-KI-Routern.
 
 ## Wann Sie OmniRoute wählen sollten
 
-- Sie hosten selbst und wünschen **maximale Anbieterabdeckung** (375 Anbieter, 155 kostenlose Katalogeinträge ohne Authentifizierung)
+- Sie hosten selbst und wünschen **maximale Anbieterabdeckung** (376 Anbieter, 155 kostenlose Katalogeinträge ohne Authentifizierung)
 - Sie benötigen einen **integrierten MCP-Server** (LLM-Tools, Speicher und Skills, die als Tools bereitgestellt werden)
 - Sie benötigen das **A2A-Protokoll** für Agent-zu-Agent-Workflows
 - Sie wünschen **Fingerprint-Verschleierung** (JA3/JA4), um eine Erkennung durch vorgelagerte CAPTCHAs zu vermeiden

@@ -606,60 +606,60 @@ Fún àlàyé kíkún nípa àwọn àyípadà ayíká, wo [README](../README.md
 
 ---
 
-## 📊 Àwọn Àwòṣe Tó Wà
+## 📊 Àwọn Awoṣe Tó Wà Lọ́wọ́
 
 <details>
-<summary><b>Wo gbogbo àwọn àwòṣe tó wà</b></summary>
+<summary><b>Wo gbogbo àwọn awoṣe tó wà lọ́wọ́</b></summary>
 
-> A ṣe àkójọ tó wà nísàlẹ̀ láti inú `open-sse/config/providerRegistry.ts` fún v3.8.0. Àwọn katalọ́ọ̀gù awọsánmà (Gemini, OpenRouter, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) máa ń múṣiṣẹ́pọ̀ ní aládàáṣe — láti rí gbogbo katalọ́ọ̀gù tó wà lọ́wọ́lọ́wọ́, ṣí **Dashboard → Providers → [provider] → Available Models** tàbí pe `GET /api/models/catalog`.
+> Àkópọ̀ tó wà ní isàlẹ̀ ni a kó papọ̀ láti inu `open-sse/config/providerRegistry.ts` fún v3.8.0. Àwọn kàtálógù awọ̀nàmáàmá (Gemini, OpenRouter, àti bẹ́ẹ̀bẹ́ẹ̀ lọ) ni wọ́n ń ṣe àmúṣẹ́pọ̀ lọ́nà aláṣẹ́ṣe — fún kàtálógù tó ń ṣiṣẹ́ ní kikun, ṣí **Pátákó Ìṣàkóso → Àwọn Olùpèsè → [olùpèsè] → Àwọn Awoṣe Tó Wà Lọ́wọ́** tàbí pe `GET /api/models/catalog`.
 >
-> Tí àkójọ tí a kọ sínú olùpèsè kan bá ti yà kúrò nínú èyí tó wà lọ́wọ́lọ́wọ́, lo **Import from /models** lójú ewé yẹn (tàbí mú **Auto-Sync** ṣiṣẹ́) láti fa katalọ́ọ̀gù orísun òkè tó wà lọ́wọ́lọ́wọ́. A fìdí èyí múlẹ̀ nínú v3.8.50 fún LLM7.io (`gemini-3.1-flash-lite`) àti UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ìráyè àìlórúkọ Pollinations ṣì ní ààlà láti ọ̀dọ̀ orísun òkè nígbà ìdánwò kan náà.
+> Bí àkópọ̀ àtòbáwá ti olùpèsè kan bá ti yí padà, lo **Gba wọlé láti /models** lórí ojú-ìwé yẹn (tàbí mú **Àmúṣẹ́pọ̀ Aláṣẹ́ṣe** ṣiṣẹ́) láti fa kàtálógù orísun òkè tó ń ṣiṣẹ́. A fìdí èyí múlẹ̀ ní v3.8.50 fún LLM7.io (`gemini-3.1-flash-lite`) àti UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ìwọ̀le aláìlórúkọ ti Pollinations ṣì wà lábẹ́ ààlà orísun òkè nígbà àyẹ̀wó kannáà náà.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ àwọn ìpele ìsapá: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ àwọn ipele ìsapá: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth Ọ̀FẸ́: lo katalọ́ọ̀gù tó wà lọ́wọ́lọ́wọ́ tí a fi hàn lábẹ́ **Dashboard → Providers → Kiro → Available Models**. Wíwà rẹ̀ sinmi lórí àkọọ́lẹ̀ àti ètò ìsanwó.
+**Kiro (`kr/`)** — OAuth lọ́fẹ̀ẹ́: lo kàtálógù tó ń ṣiṣẹ́ tí wọ́n fi hàn lábẹ́ **Pátákó Ìṣàkóso → Àwọn Olùpèsè → Kiro → Àwọn Awoṣe Tó Wà Lọ́wọ́**. Èyí tó wà lọ́wọ́ dá lórí àkáǹtì àti ètò rẹ̀.
 
-**Qoder (`if/`)** — OAuth Ọ̀FẸ́: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth lọ́fẹ̀ẹ́: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/oṣù ní iye kan ṣoṣo tàbí gẹ́gẹ́ bí ìlò: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/fún oṣù lọ́nà tó dúró tàbí gẹ́gẹ́ bí ìlò ṣe lọ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — kọ́kọ́rọ́ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Kọ́kọ́rọ̀ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Yára gan-an: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ó yára gan-an: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok abinibi: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok àbíbí: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — A gbàlejò rẹ̀ ní EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Tí wọ́n gbé ní EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Pẹ̀lú ìṣàfikún ìṣàwárí: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Tí ìwádìí ṣe àtìlẹ́yìn fún: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Orísun-ṣíṣí: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ọ̀fẹ́), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Orísun ṣíṣí: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (lọ́fẹ̀ẹ́), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Ìṣirò ìdáhùn tó yára: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Ìtumọ̀ tó yára: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Ìwọ̀n wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Ní ìwọ̀n wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Fojú sí RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Tó dojukọ lórí RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Fún ilé-iṣẹ́: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Fún àwọn ilé-iṣẹ́: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: A máa ń mú un ṣiṣẹ́pọ̀ lọ́wọ́lọ́wọ́ fún kọ́kọ́rọ́ API kọ̀ọ̀kan láti Google — kò sí àkójọ àìyípadà. So kọ́kọ́rọ́ kan pọ̀ ní **Dashboard → Providers**, lẹ́yìn náà lo **Available Models** láti ṣàgbéwọlé katalọ́ọ̀gù tó wà lọ́wọ́lọ́wọ́ (fún àpẹẹrẹ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Wọ́n ń ṣe àmúṣẹ́pọ̀ rẹ̀ láàyè fún kọ́kọ́rọ̀ API kọ̀ọ̀kan láti ọ̀dọ̀ Google — kò sí àkópọ̀ tó dúró. So kọ́kọ́rọ̀ kan pọ̀ nínú **Pátákó Ìṣàkóso → Àwọn Olùpèsè** lẹ́yìn náà lo **Àwọn Awoṣe Tó Wà Lọ́wọ́** láti gbe kàtálógù lọ́wọ́lọ́wọ́ wọlé (fún àpẹẹrẹ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Àwọn olùpèsè míì tó bá a mu** (àwọn tí a yàn): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (nípasẹ̀ `aws-bedrock`), `azure-ai`, `openrouter` (katalọ́ọ̀gù àgbéranṣẹ́ tààrà), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ọ̀kọ̀ọ̀kan ń tọ́jú àkójọ àwòṣe tirẹ̀ nínú `providerRegistry.ts`, a sì lè mú un ṣiṣẹ́pọ̀ ní aládàáṣe nígbà tí olùpèsè bá pèsè ojú òpin `/models`.
+**Àwọn olùpèsè mìíràn tó bá a mu** (tí a yan): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (nípasẹ̀ `aws-bedrock`), `azure-ai`, `openrouter` (kàtálógù tó ń gbe kọjá), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ọ̀kọ̀ọ̀kan wọn ń ṣàkóso àkópọ̀ awoṣe tirẹ̀ nínú `providerRegistry.ts`, ó sì ṣeé ṣe láti ṣe àmúṣẹ́pọ̀ rẹ̀ láìfọwọ́wọ́ nígbà tí olùpèsè náà bá fi òpin-ìsopọ̀ `/models` hàn.
 
-**Àkíyèsí nípa àwọn ID àwòṣe:** OmniRoute ń lo àwọn ID abinibi olùpèsè (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Àwọn ID kan ní àwọn ẹ̀yà nọ́mbà onídọ̀tì nítorí pé bẹ́ẹ̀ ni API orísun òkè ṣe ń retí wọn. Tí àwòṣe kan kò bá sí nínú àkójọ òkè, ṣiṣẹ́ `omniroute models --search <term>` tàbí lo `GET /api/models/catalog` láti fìdí wíwà rẹ̀ múlẹ̀.
+**Àkíyèsí nípa àwọn ID awoṣe:** OmniRoute ń lo àwọn ID àbíbí ti olùpèsè kọ̀ọ̀kan (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Àwọn ID kan ní àwọn ẹ̀yà tó kó àmì-ojúpo nítorí bẹ́ẹ̀ ni API orísun òkè ṣe ń retí wọn. Bí awoṣe kan kò bá sí nínú àkópọ̀ òkè, ṣe `omniroute models --search <term>` tàbí pe `GET /api/models/catalog` láti fìdí bó ṣe wà lọ́wọ́ múlẹ̀.
 
 </details>
 

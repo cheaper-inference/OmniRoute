@@ -499,7 +499,7 @@ fiecărui furnizor (scheme pentru instrumente, adaptoare de preluare/TTS, gestio
 (utilitar comun pentru identitate) și `index.ts` (registru).
 
 > Notă: furnizorii care nu sunt enumerați aici sunt deserviți de `default.ts` folosind executorul generic
-> compatibil cu OpenAI. Catalogul complet al furnizorilor (375 de furnizori) se află în
+> compatibil cu OpenAI. Catalogul complet al furnizorilor (376 de furnizori) se află în
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

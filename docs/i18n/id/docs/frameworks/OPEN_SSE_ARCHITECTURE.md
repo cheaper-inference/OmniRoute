@@ -488,7 +488,7 @@ Ini menangani:
 
 | Berkas                        | Tujuan                                           |
 | ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Registri model chat di atas katalog 375 penyedia |
+| `providerRegistry.ts`         | Registri model chat di atas katalog 376 penyedia |
 | `providerModels.ts`           | Alias model, pemetaan format                     |
 | `constants.ts`                | Timeout, batas, kode status                      |
 | `defaultThinkingSignature.ts` | Tanda tangan thinking Claude default             |

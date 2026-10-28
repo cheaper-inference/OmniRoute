@@ -499,7 +499,7 @@ assistants propres aux fournisseurs (schémas d’outils, adaptateurs fetch/TTS,
 (assistant d’identité partagé) et `index.ts` (registre).
 
 > Remarque : les fournisseurs qui ne figurent pas dans cette liste sont pris en charge par `default.ts` au moyen de l’exécuteur générique
-> compatible avec OpenAI. Le catalogue complet des fournisseurs (375 fournisseurs) se trouve dans
+> compatible avec OpenAI. Le catalogue complet des fournisseurs (376 fournisseurs) se trouve dans
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

@@ -275,6 +275,12 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE call_logs ADD COLUMN session_tag TEXT DEFAULT NULL");
       console.log("[DB] Added call_logs.session_tag column");
     }
+    // added by 214_call_logs_client_session_id; back-filled here because the call-log
+    // INSERT names it on every write.
+    if (!columnNames.has("client_session_id")) {
+      db.exec("ALTER TABLE call_logs ADD COLUMN client_session_id TEXT DEFAULT NULL");
+      console.log("[DB] Added call_logs.client_session_id column");
+    }
     // added by 188_call_logs_reasoning_encrypted; back-filled here for
     // lineages that skipped the migration file — the call-log write path
     // references these columns on every insert.
@@ -329,6 +335,7 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
     );
     db.exec("CREATE INDEX IF NOT EXISTS idx_cl_correlation_id ON call_logs(correlation_id)");
     db.exec("CREATE INDEX IF NOT EXISTS idx_cl_session_tag ON call_logs(session_tag)");
+    db.exec("CREATE INDEX IF NOT EXISTS idx_cl_client_session_id ON call_logs(client_session_id)");
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.warn("[DB] Failed to verify call_logs schema:", message);

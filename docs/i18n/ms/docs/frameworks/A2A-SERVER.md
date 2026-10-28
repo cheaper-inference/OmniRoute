@@ -163,7 +163,7 @@ OmniRoute mendedahkan 6 kemahiran A2A yang disambungkan dalam `src/lib/a2a/taskE
 | Health Report      | `health-report`      | Mengagregatkan keadaan circuit breaker, cooldown dan lockout setiap penyedia                                                                             | health, resilience         | "Tunjukkan status kesihatan semua penyedia" |
 | List Capabilities  | `list-capabilities`  | Mengembalikan katalog Agent Skills 45 entri penuh (23 API + 21 CLI + 1 config) sebagai jadual markdown dengan URL SKILL.md mentah untuk suntikan konteks | catalog, discovery, skills | "Senaraikan semua keupayaan OmniRoute"      |
 
-> Kad Ejen harus dikekalkan sejajar dengan katalog 375 penyedia langsung; bilangan penyedia dan metadata percuma/tanpa-auth bersumber daripada pendaftar runtime.
+> Kad Ejen harus dikekalkan sejajar dengan katalog 376 penyedia langsung; bilangan penyedia dan metadata percuma/tanpa-auth bersumber daripada pendaftar runtime.
 
 ### Butiran Kemahiran `list-capabilities`
 

@@ -611,55 +611,55 @@ post_install() {
 <details>
 <summary><b>មើលម៉ូដែលដែលមានទាំងអស់</b></summary>
 
-> បញ្ជីខាងក្រោមត្រូវបានជ្រើសរើស និងរៀបចំពី `open-sse/config/providerRegistry.ts` សម្រាប់ v3.8.0។ កាតាឡុកលើក្លោដ (Gemini, OpenRouter ជាដើម) ត្រូវបានធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ — ដើម្បីមើលកាតាឡុកពេញលេញបច្ចុប្បន្ន សូមបើក **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → [provider] → ម៉ូដែលដែលមាន** ឬហៅ `GET /api/models/catalog`។
+> បញ្ជីខាងក្រោមត្រូវបានរៀបចំឡើងពី `open-sse/config/providerRegistry.ts` សម្រាប់ v3.8.0។ កាតាឡុកក្លោដ (Gemini, OpenRouter ជាដើម) ត្រូវបានធ្វើសមកាលកម្មដោយថាមវន្ត — សម្រាប់កាតាឡុកផ្ទាល់ពេញលេញ សូមបើក **Dashboard → Providers → [provider] → Available Models** ឬហៅ `GET /api/models/catalog`។
 >
-> ប្រសិនបើបញ្ជីដែលភ្ជាប់មកជាមួយរបស់អ្នកផ្តល់សេវាលែងត្រូវគ្នានឹងបញ្ជីបច្ចុប្បន្ន សូមប្រើ **នាំចូលពី /models** នៅលើទំព័រនោះ (ឬបើក **ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ**) ដើម្បីទាញយកកាតាឡុកបច្ចុប្បន្នពីប្រភពដើម។ ចំណុចនេះត្រូវបានផ្ទៀងផ្ទាត់ក្នុង v3.8.50 សម្រាប់ LLM7.io (`gemini-3.1-flash-lite`) និង UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ការចូលប្រើ Pollinations ដោយអនាមិកនៅតែត្រូវបានកម្រិតដោយប្រភពដើម ក្នុងអំឡុងពេលធ្វើតេស្តដូចគ្នា។
+> បើបញ្ជីដែលមានស្រាប់របស់អ្នកផ្តល់សេវាបានខ្វែងពីការពិត សូមប្រើ **Import from /models** នៅលើទំព័រនោះ (ឬបើក **Auto-Sync**) ដើម្បីទាញយកកាតាឡុកផ្ទាល់ពី upstream។ រឿងនេះត្រូវបានផ្ទៀងផ្ទាត់ក្នុង v3.8.50 សម្រាប់ LLM7.io (`gemini-3.1-flash-lite`) និង UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ចំណែកការចូលប្រើអនាមិករបស់ Pollinations នៅតែមានកម្រិតដោយ upstream ក្នុងអំឡុងការសាកល្បងដដែល។
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ កម្រិតការប្រឹងប្រែង: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ កម្រិត effort៖ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth ឥតគិតថ្លៃ: ប្រើកាតាឡុកបច្ចុប្បន្នដែលបង្ហាញនៅក្រោម **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → Kiro → ម៉ូដែលដែលមាន**។ ភាពអាចប្រើបានអាស្រ័យលើគណនី និងគម្រោង។
+**Kiro (`kr/`)** — OAuth ឥតគិតថ្លៃ៖ សូមប្រើកាតាឡុកផ្ទាល់ដែលបង្ហាញនៅក្រោម **Dashboard → Providers → Kiro → Available Models**។ ភាពអាចរកបានអាស្រ័យលើគណនី និងផែនការ។
 
-**Qoder (`if/`)** — OAuth ឥតគិតថ្លៃ: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth ឥតគិតថ្លៃ៖ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M៖ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M៖ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ខែ ថ្លៃថេរ ឬបង់តាមការប្រើប្រាស់: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ខែ តម្លៃថេរ ឬបង់តាមការប្រើប្រាស់៖ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — កូនសោ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — កូនសោ API៖ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — ល្បឿនលឿនខ្លាំង: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — លឿនបំផុត៖ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok ដើម: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok ដើម៖ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — បង្ហោះនៅសហភាពអឺរ៉ុប: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — ហោសនៅ EU៖ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — បន្ថែមសមត្ថភាពដោយការស្វែងរក: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — បំពាក់បន្ថែមដោយការស្វែងរក៖ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ប្រភពបើកចំហ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ឥតគិតថ្លៃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — កូដចំហ៖ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ឥតគិតថ្លៃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — ការអនុមានលឿន: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — inference លឿន៖ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — មាត្រដ្ឋានវេហ្វឺរ: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — មាត្រដ្ឋាន wafer៖ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — ផ្តោតលើ RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — ផ្តោតលើ RAG៖ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — សម្រាប់សហគ្រាស: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — សម្រាប់សហគ្រាស៖ `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: ធ្វើសមកាលកម្មបច្ចុប្បន្នតាមកូនសោ API ពី Google — មិនមានបញ្ជីថេរទេ។ ភ្ជាប់កូនសោមួយនៅក្នុង **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា** បន្ទាប់មកប្រើ **ម៉ូដែលដែលមាន** ដើម្បីនាំចូលកាតាឡុកបច្ចុប្បន្ន (ឧ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)។
+**Gemini (Google Cloud `gemini/`)**៖ ធ្វើសមកាលកម្មផ្ទាល់តាមកូនសោ API នីមួយៗពី Google — គ្មានបញ្ជីថេរទេ។ ភ្ជាប់កូនសោនៅក្នុង **Dashboard → Providers** រួចប្រើ **Available Models** ដើម្បីនាំចូលកាតាឡុកបច្ចុប្បន្ន (ឧ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)។
 
-**អ្នកផ្តល់សេវាដែលត្រូវគ្នាផ្សេងទៀត** (បានជ្រើសរើស): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (តាមរយៈ `aws-bedrock`), `azure-ai`, `openrouter` (កាតាឡុកឆ្លងកាត់ដោយផ្ទាល់), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`។ អ្នកផ្តល់សេវានីមួយៗរក្សាបញ្ជីម៉ូដែលផ្ទាល់ខ្លួននៅក្នុង `providerRegistry.ts` ហើយអាចធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ នៅពេលអ្នកផ្តល់សេវាបង្ហាញ endpoint `/models`។
+**អ្នកផ្តល់សេវាដែលឆ្គួតគ្នាផ្សេងទៀត** (ជម្រើស)៖ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (តាមរយៈ `aws-bedrock`), `azure-ai`, `openrouter` (កាតាឡុក passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`។ នីមួយៗរក្សាបញ្ជីម៉ូដែលផ្ទាល់ខ្លួននៅក្នុង `providerRegistry.ts` ហើយអាចធ្វើសមកាលកម្មស្វ័យប្រវត្តិបាន នៅពេលអ្នកផ្តល់សេវាបង្ហាញ endpoint `/models`។
 
-**កំណត់ចំណាំអំពីលេខសម្គាល់ម៉ូដែល:** OmniRoute ប្រើលេខសម្គាល់ដើមរបស់អ្នកផ្តល់សេវា (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)។ លេខសម្គាល់ខ្លះមានកំណែប្រើសញ្ញាចុច ពីព្រោះ API ប្រភពដើមតម្រូវឱ្យប្រើទម្រង់នោះ។ ប្រសិនបើម៉ូដែលមួយមិនមានក្នុងបញ្ជីខាងលើ សូមដំណើរការ `omniroute models --search <term>` ឬហៅ `GET /api/models/catalog` ដើម្បីបញ្ជាក់ភាពអាចប្រើបាន។
+**ចំណាំអំពី ID ម៉ូដែល៖** OmniRoute ប្រើ ID ជាក់លាក់របស់អ្នកផ្តល់សេវា (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)។ ID ខ្លះមានកំណែដែលមានចុច ព្រោះនោះជារបៀបដែល API upstream រំពឹងទុក។ បើម៉ូដែលមិនមានក្នុងបញ្ជីខាងលើទេ សូមដំណើរការ `omniroute models --search <term>` ឬហៅ `GET /api/models/catalog` ដើម្បីបញ្ជាក់ភាពអាចរកបាន។
 
 </details>
 

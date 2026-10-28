@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | الملف                          | الغرض                                               |
 | ------------------------------ | --------------------------------------------------- |
-| `providerRegistry.ts`          | سجل نماذج المحادثة فوق الكتالوج الذي يضم 375 مزودًا |
+| `providerRegistry.ts`          | سجل نماذج المحادثة فوق الكتالوج الذي يضم 376 مزودًا |
 | `providerModels.ts`            | الأسماء المستعارة للنماذج، ربط التنسيقات            |
 | `constants.ts`                 | المهلات، الحدود، رموز الحالة                        |
 | `defaultThinkingSignature.ts`  | توقيع التفكير الافتراضي لـ Claude                   |

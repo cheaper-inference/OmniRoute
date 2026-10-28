@@ -191,6 +191,7 @@ jobs:
       - run: npm run check:known-symbols
       - run: npm run check:route-guard-membership
       - run: npm run check:test-discovery
+      - run: npm run check:test-tla-order
       - run: npm run check:radar-sentinels
       - run: npm run check:tracked-artifacts
       - name: AI attribution in commit / PR metadata (Hard Rule #16)
@@ -994,9 +995,13 @@ jobs:
     # governed the build and the test jobs, which want OPPOSITE machines: the build needs the
     # .113's RAM, the tests need the hosted runner's link. Measured on 2026-07-29 —
     # actions/setup-node took 20m06s on .113 with 4 concurrent runners versus 16s hosted (npm
-    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31. So
-    # self-hosted is strictly worse here and there is nothing to configure.
-    runs-on: ubuntu-latest
+    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31.
+    # 2026-10-27 (owner): the hosted pool is now the bottleneck — the free org plan runs ~20
+    # hosted jobs at once and PR runs waited 5+ h in the queue. USE_VPS_TEST_RUNNER opts
+    # own-origin pull requests into the dedicated `omni-ci` slots (omniroute-113-3/-4/-8,
+    # 12G/16G and 4 CPUs each — a hosted runner's profile) while the setup-node cost is
+    # re-measured. Default off; forks, merge_group and push always stay hosted.
+    runs-on: ${{ (vars.USE_VPS_TEST_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-ci"]') || 'ubuntu-latest' }}
     timeout-minutes: 25
     # needs: changes (not build) — this job never downloads the next-build artifact;
     # gating it on Build only serialized ~20min of wall-clock for nothing. Jobs that
@@ -1106,9 +1111,13 @@ jobs:
     # governed the build and the test jobs, which want OPPOSITE machines: the build needs the
     # .113's RAM, the tests need the hosted runner's link. Measured on 2026-07-29 —
     # actions/setup-node took 20m06s on .113 with 4 concurrent runners versus 16s hosted (npm
-    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31. So
-    # self-hosted is strictly worse here and there is nothing to configure.
-    runs-on: ubuntu-latest
+    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31.
+    # 2026-10-27 (owner): the hosted pool is now the bottleneck — the free org plan runs ~20
+    # hosted jobs at once and PR runs waited 5+ h in the queue. USE_VPS_TEST_RUNNER opts
+    # own-origin pull requests into the dedicated `omni-ci` slots (omniroute-113-3/-4/-8,
+    # 12G/16G and 4 CPUs each — a hosted runner's profile) while the setup-node cost is
+    # re-measured. Default off; forks, merge_group and push always stay hosted.
+    runs-on: ${{ (vars.USE_VPS_TEST_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-ci"]') || 'ubuntu-latest' }}
     timeout-minutes: 15
     # needs: changes (not build) — no artifact consumed; see test-unit note.
     needs: changes

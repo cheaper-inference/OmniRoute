@@ -163,7 +163,7 @@ OmniRoute jesponi 6 ħiliet A2A konnessi f'`src/lib/a2a/taskExecution.ts::A2A_SK
 | Health Report      | `health-report`      | Jaggrèga l-istat ta' circuit breaker, cooldown, u lockout għal kull provider                                                                                            | health, resilience         | "Uri l-istatus tas-saħħa tal-providers kollha" |
 | List Capabilities  | `list-capabilities`  | Jirritorna l-katalgu sħiħ ta' 45-il dħul tal-Agent Skills (23 API + 21 CLI + 1 config) bħala tabella markdown bil-URLs grezzi tas-SKILL.md għall-injezzjoni tal-kuntest | catalog, discovery, skills | "Elenka l-kapaċitajiet kollha ta' OmniRoute"   |
 
-> L-Agent Card għandu jinżamm allinjat mal-katalgu ħaj ta' 375 provider; il-għadd tal-providers u l-metadata ta' b'xejn/bla avtentikazzjoni jittieħdu mir-reġistru tal-runtime.
+> L-Agent Card għandu jinżamm allinjat mal-katalgu ħaj ta' 376 provider; il-għadd tal-providers u l-metadata ta' b'xejn/bla avtentikazzjoni jittieħdu mir-reġistru tal-runtime.
 
 ### Dettall tal-Ħila `list-capabilities`
 

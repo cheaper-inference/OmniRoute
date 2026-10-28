@@ -498,7 +498,7 @@ open-sse/
 (የጋራ identity helper) እና `index.ts` (registry)።
 
 > ማስታወሻ፦ እዚህ ያልተዘረዘሩ አቅራቢዎች generic
-> OpenAI-compatible executorን በመጠቀም በ`default.ts` ይስተናገዳሉ። ሙሉው የአቅራቢዎች ካታሎግ (375 አቅራቢዎች) በ
+> OpenAI-compatible executorን በመጠቀም በ`default.ts` ይስተናገዳሉ። ሙሉው የአቅራቢዎች ካታሎግ (376 አቅራቢዎች) በ
 > `src/shared/constants/providers.ts` ውስጥ ይገኛል።
 
 ### 4.3 `open-sse/translator/`

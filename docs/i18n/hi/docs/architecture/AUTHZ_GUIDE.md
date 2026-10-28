@@ -17,81 +17,106 @@
 
 ### 1. API कुंजी (Bearer)
 
-OpenAI/Anthropic/Gemini-संगत क्लाइंट APIs के लिए और कुछ प्रबंधन रूट्स के लिए इसका उपयोग होता है, जब कुंजी के पास `manage` स्कोप हो।
+OpenAI/Anthropic/Gemini-संगत क्लाइंट API और कुछ प्रबंधन रूट के लिए उपयोग किया जाता है, जब कुंजी के पास `manage` स्कोप हो।
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-`src/sse/services/auth.ts` में `isValidApiKey()` / `extractApiKey()` द्वारा सत्यापित और `src/shared/utils/apiAuth.ts` के माध्यम से पुनः निर्यातित। सत्यापनकर्ता `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env vars को भी स्थायी पासथ्रू कुंजियों के रूप में स्वीकार करता है (issue #1350)।
+इसे `src/sse/services/auth.ts` में `isValidApiKey()` / `extractApiKey()` द्वारा सत्यापित किया जाता है और `src/shared/utils/apiAuth.ts` के माध्यम से फिर से एक्सपोर्ट किया जाता है। वैलिडेटर `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` एनवायरनमेंट वेरिएबल को स्थायी पासथ्रू कुंजियों के रूप में भी स्वीकार करता है (इश्यू #1350)।
 
 ### 2. डैशबोर्ड सेशन (auth_token कुकी)
 
-डैशबोर्ड पेजों और एडमिन संचालनों के लिए।
+डैशबोर्ड पेज और एडमिन संचालन के लिए।
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-कुकी तभी सेशन होती है जब JWT सत्यापित हो **और** उसमें `authenticated: true` हो
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)। कुकी का हर उपभोक्ता
-(डैशबोर्ड रूट गार्ड (`isDashboardSessionAuthenticated()`), authz पाइपलाइन रिफ्रेश, WebSocket हैंडशेक, लाइव
-सर्वर, `/api/settings/require-login`, `/api/auth/status`) इसी हेल्पर से होकर जाता है।
-`JWT_SECRET` से साइन किए गए अन्य JWT भी मौजूद हैं — Cursor CLI passthrough कुंजी धारकों के लिए
-`iss "omniroute" / aud "cursor-cli"` टोकन बनाता है — और वे कभी सेशन नहीं होते
+किसी कुकी को केवल तभी सेशन माना जाता है, जब JWT सत्यापित हो **और** उसमें `authenticated: true` मौजूद हो
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)। कुकी का उपयोग करने वाला प्रत्येक
+घटक (डैशबोर्ड रूट गार्ड (`isDashboardSessionAuthenticated()`), authz पाइपलाइन रिफ्रेश, WebSocket हैंडशेक, लाइव
+सर्वर, `/api/settings/require-login`, `/api/auth/status`) इसी हेल्पर से होकर गुजरता है।
+`JWT_SECRET` से साइन किए गए अन्य JWT भी मौजूद हैं — Cursor CLI पासथ्रू कुंजी धारकों के लिए
+`iss "omniroute" / aud "cursor-cli"` टोकन जारी करता है — और उन्हें कभी भी सेशन नहीं माना जाता
 (#13298)।
 
-`src/shared/utils/apiAuth.ts` में `isDashboardSessionAuthenticated()` द्वारा सत्यापित। जब JWT की 30-दिन की अवधि में 7 दिन से कम बचे हों, तो पाइपलाइन उसे स्वतः रिफ्रेश करती है।
+इसे `src/shared/utils/apiAuth.ts` में `isDashboardSessionAuthenticated()` द्वारा सत्यापित किया जाता है। जब JWT की 30-दिन की अवधि में 7 दिन से कम समय बचता है, तो पाइपलाइन उसे अपने-आप रिफ्रेश कर देती है।
 
-सेशन अपनी 30 दिन की अवधि पूरी होने से पहले भी समाप्त हो सकता है, क्योंकि हर टोकन-निर्माता `mintDashboardSessionToken` से होकर जाता है (जारी करने का समय `iat` और एक आईडी `jti`) और सत्यापनकर्ता दो सेटिंग्स जाँचता है: `sessionsValidAfter`, जिसे पासवर्ड बदलने पर सेट किया जाता है ताकि उससे पहले जारी हर सेशन सत्यापित होना बंद हो जाए (जिस ब्राउज़र ने पासवर्ड बदला उसे नई कुकी मिलती है), और `revokedDashboardSessions`, जिसमें `POST /api/auth/logout` साइन-आउट किए गए सेशन का `jti` जोड़ता है। पुराने रिलीज़ द्वारा बनाए गए सेशन में इनमें से कोई क्लेम नहीं होता और वे पहले पासवर्ड बदलने तक मान्य रहते हैं। यदि सेटिंग्स पढ़ी नहीं जा सकतीं, तो सेशन पर भरोसा नहीं किया जाता।
+कोई सेशन अपनी 30-दिन की अवधि पूरी होने से पहले भी समाप्त हो सकता है, क्योंकि हर टोकन जारीकर्ता `mintDashboardSessionToken` से होकर गुजरता है (जारी करने का समय `iat` और एक आईडी `jti`) और सत्यापनकर्ता दो सेटिंग्स की जाँच करता है: `sessionsValidAfter`, जिसे पासवर्ड बदलने पर सेट किया जाता है, ताकि उससे पहले जारी किए गए सभी सेशन सत्यापित होना बंद हो जाएँ (पासवर्ड बदलने वाले ब्राउज़र को एक नई कुकी मिलती है), और `revokedDashboardSessions`, जिसमें `POST /api/auth/logout` साइन-आउट किए गए सेशन का `jti` जोड़ता है। किसी पुराने रिलीज़ द्वारा जारी किए गए सेशन में इनमें से कोई भी क्लेम नहीं होता और वे पहली बार पासवर्ड बदले जाने तक मान्य रहते हैं। यदि सेटिंग्स को पढ़ा नहीं जा सकता, तो सेशन पर भरोसा नहीं किया जाता।
 
-कुछ प्रबंधन रूट्स **किसी भी** मोड को स्वीकार करते हैं: जब API कुंजी के पास `manage` (या `admin`) स्कोप हो, तो कुकी या `Bearer <key>`। v3.8 में जोड़े गए "API कॉल्स के ज़रिए कॉन्फ़िगर योग्य" वर्कफ़्लो को यही सक्षम करता है।
+कुछ प्रबंधन रूट **दोनों में से किसी भी** मोड को स्वीकार करते हैं: कुकी या `Bearer <key>`, जब API कुंजी के पास `manage` (या `admin`) स्कोप हो। यही v3.8 में जोड़े गए "API कॉल के माध्यम से कॉन्फ़िगर करने योग्य" वर्कफ़्लो को संभव बनाता है।
 
 #### वैकल्पिक OIDC लॉगिन गेट (#6973)
 
-डैशबोर्ड एडमिन लॉगिन डिफ़ॉल्ट पासवर्ड लॉगिन के साथ **ऑप्ट-इन** OIDC (OpenID Connect) फ़्लो भी सपोर्ट करता है — पासवर्ड लॉगिन कभी हटाया नहीं जाता, केवल पूरक बनाया जाता है:
+डैशबोर्ड एडमिन लॉगिन, डिफ़ॉल्ट पासवर्ड लॉगिन के साथ-साथ एक **ऑप्ट-इन** OIDC (OpenID Connect) फ़्लो का भी समर्थन करता है — पासवर्ड लॉगिन को कभी हटाया नहीं जाता, केवल
+उसमें अतिरिक्त विकल्प जोड़ा जाता है:
 
-- `settings.oidcEnabled === true` **और** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` सभी कॉन्फ़िगर होने पर ही सक्षम (सेटिंग्स → Auth)।
-  अन्यथा `GET /api/auth/oidc/login` `400` लौटाता है।
-- `GET /api/auth/oidc/login` इश्यूअर के `/.well-known/openid-configuration` से
-  `authorization_endpoint` खोजता है (विफल होने पर `<issuer>/authorize` का उपयोग करता है), आने वाले
-  अनुरोध से redirect URI बनाता है (`x-forwarded-proto` के प्रति जागरूक), और एक यादृच्छिक `state` के साथ
-  IdP पर रीडायरेक्ट करता है, जो `httpOnly` `oidc_state` कुकी में संग्रहीत होता है।
-- `GET /api/auth/oidc/callback` `state` सत्यापित करता है, authorization
-  code का आदान-प्रदान करता है, और इश्यूअर के JWKS (`jose` का `createRemoteJWKSet`, प्रति JWKS URI कैश्ड)
-  के ज़रिए ID टोकन के हस्ताक्षर की जाँच करता है, साथ में `issuer`/`audience` जाँच भी। `oidcAllowedSubjects`
-  अनुमति-सूची अनिवार्य है: यह टोकन के `sub` क्लेम या उसके `email` क्लेम से मेल खाती है — email क्लेम केवल
-  तभी मान्य माना जाता है जब `email_verified === true` हो, इसलिए IdP पर असत्यापित ईमेल कभी गेट पार नहीं
-  कर सकता — और कोई प्रविष्टि न होने पर कॉलबैक हर लॉगिन को अस्वीकार करता है (`not_configured`)।
-- सफल होने पर यह ठीक **वही** 30-दिन का `auth_token` JWT बनाता है जो पासवर्ड लॉगिन जारी करता है
-  (`src/app/api/auth/login/route.ts`), इसलिए डैशबोर्ड सेशन पाइपलाइन का बाकी हिस्सा (स्वतः रिफ्रेश, कुकी
-  फ़्लैग) अपरिवर्तित रहता है — OIDC केवल यह बदलता है कि कुकी कैसे बनती है, यह नहीं कि वह क्या अनुमति देती है।
-- हर `oidc*` सेटिंग (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`,
-  `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`)
-  `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`) में है:
-  `PATCH /api/settings` तब तक `400 PASSWORD_REQUIRED` देता है जब तक बॉडी में प्रबंधन पासवर्ड
-  `currentPassword` के रूप में न हो (गलत होने पर `401 PASSWORD_MISMATCH`)। `oidcDisablePasswordLogin`
-  पासवर्ड _लॉगिन_ (`POST /api/auth/login`) को रोकता है पर संग्रहीत पासवर्ड हैश रखता है, और री-ऑथेंटिकेशन
-  अब भी उसके विरुद्ध `currentPassword` जाँचता है।
-- `corsOrigins` और `bruteForceProtection` भी `SECURITY_IMPACTING_SETTINGS_KEYS` में हैं: इनमें से किसी को
-  ढीला करना लॉगिन सुरक्षा कमज़ोर करता है, इसलिए इन पर भी वही `currentPassword` री-ऑथेंटिकेशन लागू होता है
-  (Security टैब इसे माँगता है) और JSON इंपोर्ट इन्हें हटा देता है।
-- हर सुरक्षा-नीति कुंजी — `SECURITY_IMPACTING_SETTINGS_KEYS` की प्रविष्टियाँ, हर `oidc*` कुंजी और डैशबोर्ड
-  सेशन स्थिति — `PATCH /api/settings` पर **केवल-ऑपरेटर** है: `manage`-स्कोप वाली API कुंजी या `oma_`
-  एक्सेस टोकन को सही `currentPassword` भेजने पर भी `403` से अस्वीकार किया जाता है, और इस अस्वीकृति का
-  ऑडिट `reason: OPERATOR_REQUIRED` के साथ `settings.update_failed` के रूप में होता है
-  (`src/lib/api/operatorCredential.ts` में `requireOperatorCredential()`)। सामान्य सेटिंग्स (थीम, प्रदर्शन
-  प्राथमिकताएँ) `manage` कुंजी या `admin` एक्सेस टोकन के लिए लिखने योग्य रहती हैं। `/api/settings` स्वयं का
-  हर बदलाव (और `/api/settings/require-login` का भी) `admin` एक्सेस-टोकन स्कोप माँगता है
-  (`src/server/authz/accessScopes.ts` में `ADMIN_MUTATION_EXACT_PATHS`, सटीक-पथ मिलान); `GET` `read` ही
-  रहता है, और `/api/settings/*` के अन्य उप-रूट्स (proxies, combo defaults, model aliases, compression,
-  purges…) विधि से अनुमानित `write` स्कोप बनाए रखते हैं।
-- `POST /api/settings/import-json` उस री-ऑथेंटिकेशन को छोड़ देता है, इसलिए लिखने से पहले यह
-  `IMPORT_STRIPPED_SETTINGS_KEYS` (उसी फ़ाइल में) की हर कुंजी हटा देता है: पासवर्ड और `currentPassword`,
-  हर `SECURITY_IMPACTING_SETTINGS_KEYS` प्रविष्टि, और डैशबोर्ड सेशन स्थिति (`sessionsValidAfter`,
-  `revokedDashboardSessions`)। इसलिए पुराना बैकअप इंपोर्ट करने से वह सेशन पुनर्जीवित नहीं हो सकता जिसे
-  पासवर्ड बदलने या साइन-आउट ने पहले ही समाप्त कर दिया था।
+- तब तक अक्षम रहता है, जब तक `settings.oidcEnabled === true` **और** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` सभी कॉन्फ़िगर न हों (सेटिंग्स → प्रमाणीकरण)।
+  अन्यथा `GET /api/auth/oidc/login` द्वारा `400` लौटाया जाता है।
+- `GET /api/auth/oidc/login`, जारीकर्ता के
+  `/.well-known/openid-configuration` से `authorization_endpoint` खोजता है
+  (अनुपलब्ध होने पर `<issuer>/authorize` का उपयोग करता है), आने वाले अनुरोध से
+  रीडायरेक्ट URI बनाता है (`x-forwarded-proto` का ध्यान रखते हुए), और एक यादृच्छिक `state`
+  के साथ IdP पर रीडायरेक्ट करता है, जिसे `httpOnly` `oidc_state` कुकी में संग्रहीत किया
+  जाता है।
+- `GET /api/auth/oidc/callback`, `state` को सत्यापित करता है, प्राधिकरण
+  कोड का विनिमय करता है, और जारीकर्ता के JWKS के माध्यम से ID टोकन के हस्ताक्षर को
+  सत्यापित करता है (`jose` का `createRemoteJWKSet`, प्रत्येक JWKS URI के अनुसार कैश किया गया),
+  साथ ही `issuer`/`audience` जाँच भी करता है। डैशबोर्ड में प्रवेश के लिए एक गैर-रिक्त
+  `oidcAllowedSubjects` सूची, एक `oidcAdmissionClaim` नीति, या दोनों आवश्यक हैं।
+  सब्जेक्ट सूची `sub` या `email` से केवल तभी मेल खाती है, जब `email_verified === true` हो।
+  वैकल्पिक क्लेम नीति में डॉट से अलग किया गया ID-टोकन क्लेम पथ (उदाहरण के लिए,
+  `realm_access.roles`) और स्वीकृत मानों की एक सरणी होती है; हल किया गया क्लेम स्ट्रिंग्स
+  की एक सरणी होना चाहिए, जिसमें कम-से-कम एक स्वीकृत मान हो। यदि दोनों नीतियाँ कॉन्फ़िगर
+  की गई हैं, तो दोनों का सफल होना आवश्यक है। अनुपलब्ध/विकृत क्लेम बंद-स्थिति में विफल होते हैं,
+  और किसी भी नीति के अभाव में कॉलबैक लॉगिन अस्वीकार कर देता है (`not_configured`)।
+  मौजूदा केवल-सब्जेक्ट कॉन्फ़िगरेशन बिना बदलाव के काम करते रहते हैं।
+- Keycloak सामान्यतः realm भूमिकाओं को access tokens में मैप करता है, आवश्यक नहीं कि ID
+  tokens में भी करे। realm भूमिका `admin` को आवश्यक बनाने के लिए, इस क्लाइंट हेतु एक
+  protocol mapper कॉन्फ़िगर करें, जो अपने **ID token** में `realm_access.roles` शामिल करे,
+  फिर `oidcAdmissionClaim` को `{ "path": "realm_access.roles", "values": ["admin"] }` पर सेट करें।
+  केवल-भूमिका आधारित प्रवेश सक्षम करने से पहले इस क्लाइंट का वास्तविक ID-टोकन क्लेम जाँचें;
+  एप्लिकेशन access-token भूमिकाएँ नहीं पढ़ता है। IdP-पक्षीय टोकन अस्वीकृति इस
+  एप्लिकेशन-पक्षीय जाँच को पूरक कर सकती है, लेकिन उसका स्थान नहीं ले सकती।
+- सफलता मिलने पर यह **बिल्कुल वही** 30-दिवसीय `auth_token` JWT बनाता है, जो पासवर्ड
+  लॉगिन द्वारा जारी किया जाता है (`src/app/api/auth/login/route.ts`), इसलिए डैशबोर्ड
+  सेशन पाइपलाइन का शेष भाग (स्वतः रीफ़्रेश, कुकी फ़्लैग्स) अपरिवर्तित रहता है —
+  OIDC केवल यह बदलता है कि कुकी कैसे बनाई जाती है, यह नहीं कि वह क्या अनुमति देती है।
+  IdP की भूमिकाओं/समूहों में किए गए बदलाव मौजूदा OmniRoute सेशन अमान्य नहीं करते;
+  लॉगआउट, पासवर्ड रोटेशन या सेशन की समाप्ति अब भी उनकी अवधि नियंत्रित करते हैं।
+- प्रत्येक `oidc*` सेटिंग (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`) में शामिल है: `PATCH /api/settings`
+  तब तक `400 PASSWORD_REQUIRED` देता है, जब तक अनुरोध बॉडी में प्रबंधन
+  पासवर्ड `currentPassword` के रूप में न भेजा गया हो (गलत होने पर `401 PASSWORD_MISMATCH`)।
+  `oidcDisablePasswordLogin`, पासवर्ड से _लॉगिन_ (`POST /api/auth/login`) को अस्वीकार
+  करता है, लेकिन संग्रहीत पासवर्ड हैश को बनाए रखता है, और पुनः प्रमाणीकरण अब भी
+  `currentPassword` को उसी से जाँचता है।
+- `corsOrigins` और `bruteForceProtection` भी `SECURITY_IMPACTING_SETTINGS_KEYS`
+  में हैं: इनमें से किसी को भी शिथिल करने से लॉगिन सुरक्षा कमज़ोर होती है, इसलिए इनके
+  लिए भी समान `currentPassword` पुनः प्रमाणीकरण आवश्यक है (Security टैब इसकी माँग करता है)
+  और JSON आयात इन्हें हटा देता है।
+- प्रत्येक सुरक्षा-नीति कुंजी — `SECURITY_IMPACTING_SETTINGS_KEYS` की प्रविष्टियाँ,
+  प्रत्येक `oidc*` कुंजी और डैशबोर्ड सेशन स्थिति — `PATCH /api/settings` पर
+  **केवल-संचालक** के लिए है: `manage` स्कोप वाली API कुंजी या `oma_` access token को
+  सही `currentPassword` भेजने पर भी `403` के साथ अस्वीकार कर दिया जाता है, और यह
+  अस्वीकृति `settings.update_failed` के रूप में `reason: OPERATOR_REQUIRED` सहित ऑडिट
+  की जाती है (`src/lib/api/operatorCredential.ts` में `requireOperatorCredential()`)।
+  सामान्य सेटिंग्स (थीम, प्रदर्शन प्राथमिकताएँ) किसी `manage` कुंजी या `admin` access token
+  के लिए लिखने योग्य रहती हैं। स्वयं `/api/settings` में होने वाले प्रत्येक बदलाव (और
+  `/api/settings/require-login` में होने वाले बदलाव) के लिए भी `admin` access-token स्कोप
+  आवश्यक है (`src/server/authz/accessScopes.ts` में `ADMIN_MUTATION_EXACT_PATHS`, सटीक-पथ
+  मिलान); `GET` का स्कोप `read` ही रहता है, और अन्य `/api/settings/*` उप-रूट (प्रॉक्सी,
+  कॉम्बो डिफ़ॉल्ट, मॉडल उपनाम, संपीड़न, पर्ज…) विधि से अनुमानित `write` स्कोप बनाए रखते हैं।
+- `POST /api/settings/import-json` उस पुनः प्रमाणीकरण को छोड़ देता है, इसलिए लिखने से
+  पहले यह `IMPORT_STRIPPED_SETTINGS_KEYS` (उसी फ़ाइल में) की प्रत्येक कुंजी हटा देता है:
+  पासवर्ड और `currentPassword`, प्रत्येक `SECURITY_IMPACTING_SETTINGS_KEYS` प्रविष्टि,
+  और डैशबोर्ड सेशन स्थिति (`sessionsValidAfter`, `revokedDashboardSessions`)।
+  इसलिए किसी पुराने बैकअप को आयात करने से ऐसा सेशन पुनर्जीवित नहीं हो सकता, जिसे पासवर्ड
+  बदलाव या साइन-आउट द्वारा पहले ही समाप्त किया जा चुका हो।
 
 ## रूट वर्ग
 

@@ -25,20 +25,22 @@ Bereik:         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Wat Het Comprimeert
 
-De ingebouwde catalogus bevat momenteel 49 filters, verdeeld over deze categorieën:
+De ingebouwde catalogus bevat momenteel 56 filters verdeeld over deze categorieën:
 
 | Categorie | Voorbeelden                                                   |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go-tests, Cargo-tests       |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo-tests    |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, generieke shelllogboeken                |
-| `docker`  | `docker ps`, Docker-logboeken                                 |
+| `shell`   | `ls`, `find`, `grep`, generieke shell-logs                    |
+| `docker`  | `docker ps`, Docker-logs                                      |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON-uitvoer, stacktraces, generieke terugval voor uitvoer    |
+| `generic` | JSON-output, stacktraces, generieke output-fallback           |
 
-De detector in `open-sse/services/compression/engines/rtk/commandDetector.ts` classificeert uitvoer voordat een filter wordt geselecteerd. Filters kunnen ook overeenkomen op basis van een opdrachtpatroon of reguliere expressie voor uitvoer wanneer een opdrachtklasse niet voldoende is.
+De detector in `open-sse/services/compression/engines/rtk/commandDetector.ts` classificeert de output
+vóór de filterselectie. Filters kunnen ook matchen op commandopatroon of output-regex wanneer een
+commandoklasse niet voldoende is.
 
 ## Filterresolutie
 
@@ -342,19 +344,19 @@ node --import tsx/esm --test \
 
 ## Intensiteitsniveaus (v3.8.16+)
 
-RTK ondersteunt **3 intensiteitsniveaus** die een afweging maken tussen **agressiviteit van compressie** en **veiligheid**. Het niveau wordt ingesteld via `config.intensity` in de engineconfiguratie.
+RTK ondersteunt **3 intensiteitsniveaus** die een afweging maken tussen **agressiviteit van de compressie** en **veiligheid**. Het niveau wordt ingesteld via `config.intensity` in de engine-configuratie.
 
 ### De 3 niveaus
 
-| Niveau                 | Afkappingsdrempel    | Tokenbesparing | Risico    | Het meest geschikt voor           |
+| Niveau                 | Afkapdrempel         | Tokenbesparing | Risico    | Geschikt voor                     |
 | ---------------------- | -------------------- | -------------- | --------- | --------------------------------- |
 | `minimal`              | 24 regels per sectie | ~20-40%        | Zeer laag | Productie met kritieke context    |
-| `standard` (standaard) | 24 regels per sectie | ~50-70%        | Laag      | Dagelijkse programmeersessies     |
+| `standard` (standaard) | 24 regels per sectie | ~50-70%        | Laag      | Dagelijkse codeersessies          |
 | `aggressive`           | 16 regels per sectie | ~70-90%        | Gemiddeld | Lange sessies, maximale besparing |
 
 ### Waar de afkapping plaatsvindt
 
-De afkappingsdrempel is van invloed op `lineFilter.ts`:
+De afkapdrempel beïnvloedt `lineFilter.ts`:
 
 ```ts
 // Uit open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -362,39 +364,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Zowel het **begin** als het **einde** van elke sectie blijft behouden; inhoud in het midden wordt verwijderd wanneer de afkapping wordt geactiveerd.
+Zowel de **kop** als de **staart** van elke sectie blijft behouden; de middelste inhoud wordt weggelaten zodra de afkapping ingrijpt.
 
-### Wat behouden blijft en wat wordt verwijderd
+### Wat blijft vs. wat wordt weggesneden
 
-| Inhoud                                 | minimal          | standard         | aggressive       |
-| -------------------------------------- | ---------------- | ---------------- | ---------------- |
-| Fouten / stacktraces                   | ✅ behouden      | ✅ behouden      | ✅ behouden      |
-| Mislukte tests                         | ✅ behouden      | ✅ behouden      | ✅ behouden      |
-| Buildfouten                            | ✅ behouden      | ✅ behouden      | ✅ behouden      |
-| Geslaagde tests (uitgebreid)           | ✅ behouden      | 🟡 samengevouwen | 🟡 samengevouwen |
-| Routinematige uitvoer (informatielogs) | 🟡 samengevouwen | 🟡 samengevouwen | ❌ verwijderd    |
-| Voortgangsbalken                       | 🟡 samengevouwen | ❌ verwijderd    | ❌ verwijderd    |
-| Banner / ASCII-art                     | 🟡 samengevouwen | ❌ verwijderd    | ❌ verwijderd    |
+| Inhoud                      | minimal          | standard         | aggressive       |
+| --------------------------- | ---------------- | ---------------- | ---------------- |
+| Fouten / stacktraces        | ✅ behouden      | ✅ behouden      | ✅ behouden      |
+| Mislukte tests              | ✅ behouden      | ✅ behouden      | ✅ behouden      |
+| Bouwfouten                  | ✅ behouden      | ✅ behouden      | ✅ behouden      |
+| Geslaagde tests (verbose)   | ✅ behouden      | 🟡 samengevouwen | 🟡 samengevouwen |
+| Routine-uitvoer (info-logs) | 🟡 samengevouwen | 🟡 samengevouwen | ❌ weggelaten    |
+| Voortgangsbalken            | 🟡 samengevouwen | ❌ weggelaten    | ❌ weggelaten    |
+| Banner / ASCII-art          | 🟡 samengevouwen | ❌ weggelaten    | ❌ weggelaten    |
 
 ### De juiste intensiteit kiezen
 
 ```
-                  Is contextverlies catastrofaal?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     JA          NEE       NIET ZEKER
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Hoe kritiek     Probeer eerst `standard`
-      │      is doorvoer?    (werkt voor 80% van de
-      │           │          gevallen)
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │    LAAG       HOOG
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -404,7 +406,7 @@ Zowel het **begin** als het **einde** van elke sectie blijft behouden; inhoud in
 
 ### Intensiteit configureren
 
-**Per combinatie** (in de combinatieconfiguratie):
+**Per combo** (in de comboconfiguratie):
 
 ```json
 {
@@ -420,8 +422,8 @@ Zowel het **begin** als het **einde** van elke sectie blijft behouden; inhoud in
 **Programmatisch**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) is een
-`CompressionEngine` en heeft geen `updateConfig`-methode. Werk de configuratie van een engine
-in plaats daarvan bij via de registerhelper:
+`CompressionEngine` en heeft geen `updateConfig`-methode. Werk de configuratie
+van een engine in plaats daarvan bij via de registry-helper:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -431,14 +433,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Het effect verifiëren
 
-Gebruik de **verificatiepoort** (zie hieronder) om te bevestigen dat je filter veilig is bij de gekozen intensiteit:
+Gebruik de **Verify Gate** (zie hieronder) om te bevestigen dat je filter veilig is bij de gekozen intensiteit:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filters zijn mislukt bij agressieve intensiteit");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 
