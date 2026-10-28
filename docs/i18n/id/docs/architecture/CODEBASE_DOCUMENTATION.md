@@ -75,45 +75,45 @@ OmniRoute/
 
 ```
 src/
-├── app/                  Halaman App Router + rute API
-├── lib/                  Pustaka inti (DB, autentikasi, OAuth, skill, memori, …)
-├── domain/               Lapisan domain murni (kebijakan, fallback, biaya, penguncian, …)
-├── server/               Modul khusus server (otorisasi, CORS, autentikasi)
-├── shared/               Tipe, konstanta, validasi, kontrak, utilitas (aman lintas batas)
-├── mitm/                 Helper proksi man-in-the-middle untuk integrasi CLI
-├── models/               Metadata model lokal / alias
-├── sse/                  Handler SSE lama yang masih berada di bawah src/ (bukan open-sse/)
-├── store/                Penyimpanan state sisi klien
-├── middleware/           Utilitas middleware tingkat rute (bukan middleware global Next.js)
-├── scripts/              Skrip dalam repositori yang dapat diimpor oleh kode aplikasi
-├── types/                Tipe TS ambien dan bersama
-├── i18n/                 Bundel locale
-├── instrumentation.ts    Hook instrumentasi Next.js
+├── app/                  App Router pages + API routes
+├── lib/                  Core libraries (DB, auth, OAuth, skills, memory, …)
+├── domain/               Pure domain layer (policy, fallback, cost, lockout, …)
+├── server/               Server-only modules (authz, cors, auth)
+├── shared/               Types, constants, validation, contracts, utils (cross-boundary safe)
+├── mitm/                 Man-in-the-middle proxy helpers for CLI integration
+├── models/               Local model metadata / aliasing
+├── sse/                  Legacy SSE handlers that still live under src/ (not open-sse/)
+├── store/                Client-side state stores
+├── middleware/           Route-level middleware utilities (not Next.js global middleware)
+├── scripts/              In-tree scripts importable by app code
+├── types/                Ambient and shared TS types
+├── i18n/                 Locale bundles
+├── instrumentation.ts    Next.js instrumentation hook
 ├── instrumentation-node.ts
-└── proxy.ts              Helper bootstrap proksi tingkat atas
+└── proxy.ts              Top-level proxy bootstrap helper
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router mengekspos UI dasbor serta API HTTP publik/manajemen.
-**Tidak ada middleware global** — intersepsi dilakukan per rute.
+App Router mengekspos UI dasbor sekaligus HTTP API publik/manajemen.
+**Tidak ada middleware global** — intersepsi dilakukan per-route.
 
 Segmen tingkat atas di bawah `src/app/`:
 
-| Path                                                                          | Tujuan                                         |
-| ----------------------------------------------------------------------------- | ---------------------------------------------- |
-| `api/`                                                                        | Semua rute API HTTP (lihat perincian di bawah) |
-| `a2a/`                                                                        | Endpoint A2A JSON-RPC 2.0 (`POST /a2a`)        |
-| `.well-known/agent.json/`                                                     | Dokumen penemuan A2A Agent Card                |
-| `(dashboard)/`                                                                | UI dasbor (grup rute, tanpa prefiks URL)       |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Alur autentikasi                               |
-| `landing/`                                                                    | Halaman pemasaran/landing                      |
-| `docs/`                                                                       | Penampil dokumentasi API tersemat              |
-| `status/`, `maintenance/`, `offline/`                                         | Halaman operasional                            |
-| `privacy/`, `terms/`                                                          | Halaman legal                                  |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Halaman error statis                           |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Batas error/pemuatan framework                 |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Kerangka root                                  |
+| Path                                                                          | Tujuan                                        |
+| ----------------------------------------------------------------------------- | --------------------------------------------- |
+| `api/`                                                                        | Semua route HTTP API (lihat rincian di bawah) |
+| `a2a/`                                                                        | Endpoint A2A JSON-RPC 2.0 (`POST /a2a`)       |
+| `.well-known/agent.json/`                                                     | Dokumen discovery A2A Agent Card              |
+| `(dashboard)/`                                                                | UI dasbor (route group, tanpa prefiks URL)    |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Alur autentikasi                              |
+| `landing/`                                                                    | Halaman marketing/landing                     |
+| `docs/`                                                                       | Penampil dokumentasi API tertanam             |
+| `status/`, `maintenance/`, `offline/`                                         | Halaman operasional                           |
+| `privacy/`, `terms/`                                                          | Halaman legal                                 |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Halaman error statis                          |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Batas error/loading framework                 |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Shell root                                    |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — Halaman UI
 
@@ -121,8 +121,8 @@ Segmen tingkat atas di bawah `src/app/`:
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
 `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
 `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`, serta `page.tsx`, `HomePageClient.tsx`,
-`BootstrapBanner.tsx` pada root.
+`translator`, `usage`, `webhooks`, ditambah `page.tsx` root, `HomePageClient.tsx`,
+`BootstrapBanner.tsx`.
 
 #### 3.1.2 `src/app/api/` — Grup API tingkat atas
 
@@ -177,49 +177,48 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   Manajemen layanan tersemat (9router, cliproxy) — LOCAL_ONLY
+├── services/   Embedded service management (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         API publik yang kompatibel dengan OpenAI
-├── v1beta/     Kompatibilitas bergaya Gemini
+├── v1/         OpenAI-compatible public API
+├── v1beta/     Gemini-style compat
 ├── version-manager/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — Manajemen Layanan Tersemat
+#### 3.1.2a `src/app/api/services/` — Manajemen Embedded Services
 
-Rute untuk menginstal, memulai, menghentikan, dan memantau 9Router serta CLIProxyAPI.
-Semua path diklasifikasikan sebagai **LOCAL_ONLY** (khusus loopback, aturan wajib #17) karena
-dapat menjalankan `npm install` dan membuat proses turunan.
+Route untuk menginstal, memulai, menghentikan, dan memantau 9Router dan CLIProxyAPI.
+Semua path diklasifikasikan sebagai **LOCAL_ONLY** (hanya loopback, aturan keras #17) karena dapat memanggil `npm install` dan menjalankan proses child.
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             pembantu getOrInitSupervisor()
+│   ├── _lib.ts             helper getOrInitSupervisor()
 │   ├── install/route.ts    POST — npm install melalui execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install versi yang lebih baru
-│   ├── rotate-key/route.ts POST — buat kunci API baru + mulai ulang
-│   ├── status/route.ts     GET  — status langsung + DB + metadata versi
-│   └── auto-start/route.ts POST — alihkan flag auto_start
+│   ├── update/route.ts     POST — npm install versi lebih baru
+│   ├── rotate-key/route.ts POST — buat API key baru + restart
+│   ├── status/route.ts     GET  — status live + DB + metadata versi
+│   └── auto-start/route.ts POST — toggle flag auto_start
 ├── cliproxy/
-│   ├── _lib.ts             pembantu getOrInitSupervisor()
+│   ├── _lib.ts             helper getOrInitSupervisor()
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install versi yang lebih baru
-│   ├── status/route.ts     GET  — status langsung + DB + metadata versi
-│   └── auto-start/route.ts POST — alihkan flag auto_start
+│   ├── update/route.ts     POST — npm install versi lebih baru
+│   ├── status/route.ts     GET  — status live + DB + metadata versi
+│   └── auto-start/route.ts POST — toggle flag auto_start
 └── [name]/
-    └── logs/route.ts       GET  — tail log SSE (digunakan bersama oleh semua layanan)
+    └── logs/route.ts       GET  — ekor log SSE (dipakai bersama semua layanan)
 ```
 
 UI dasbor terkait:
 `src/app/(dashboard)/dashboard/providers/services/` — halaman dua tab (CLIProxyAPI + 9Router).
-Proksi terbalik untuk UI tertanam 9Router:
+Reverse proxy untuk UI tertanam 9Router:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
 Pembahasan mendalam: `docs/frameworks/EMBEDDED-SERVICES.md`
@@ -230,91 +229,92 @@ Pembahasan mendalam: `docs/frameworks/EMBEDDED-SERVICES.md`
 v1/
 ├── accounts/[id]/                       pencarian akun
 ├── agents/tasks/[id]/, agents/tasks/    endpoint tugas bergaya A2A
-├── api/                                 pembantu API internal yang diekspos di bawah v1/api
+├── api/                                 helper API internal yang diekspos di bawah v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
-├── batches/[id]/{cancel}, batches/      OpenAI Batches API
+├── batches/[id]/{cancel}, batches/      API Batches OpenAI
 ├── chat/completions/                    Chat Completions (endpoint utama)
-├── completions/                         penyelesaian teks lawas
-├── embeddings/                          embeddings
-├── files/[id]/, files/                  Files API
-├── _helpers/                            pembantu rute bersama (tanpa URL publik)
+├── completions/                         completions teks lama
+├── embeddings/                          Embeddings
+├── files/[id]/, files/                  API Files
+├── _helpers/                            helper rute bersama (tanpa URL publik)
 ├── images/{edits, generations}/         pembuatan + pengeditan gambar
-├── issues/                              endpoint pembantu triase
-├── management/{proxies}/                rute bercakupan manajemen di dalam v1
-├── messages/{count_tokens}/             kompatibilitas pesan bergaya Anthropic
+├── issues/                              endpoint helper triase
+├── management/{proxies}/                rute berlingkup management di dalam v1
+├── messages/{count_tokens}/             kompatibilitas messages gaya Anthropic
 ├── models/                              daftar model (`route.ts`, `catalog.ts`)
-├── moderations/                         moderasi
+├── moderations/                         Moderasi
 ├── music/                               pembuatan musik
-├── providers/[provider]/                operasi per penyedia
-├── quotas/{check}                       pemeriksaan kuota
-├── registered-keys/                     administrasi kunci terdaftar
-├── rerank/                              pemeringkatan ulang
-├── responses/[...path]/                 OpenAI Responses API (penangkap semua)
+├── providers/[provider]/                operasi per-provider
+├── quotas/{check}                       probe kuota
+├── registered-keys/                     admin kunci terdaftar
+├── rerank/                              Reranking
+├── responses/[...path]/                 API Responses OpenAI (catch-all)
 ├── search/                              pencarian web
 ├── videos/                              pembuatan video
 ├── ws/                                  jembatan WebSocket
-└── route.ts                             penangan indeks
+└── route.ts                             handler indeks
 ```
 
 Setiap file rute mengikuti pola yang sama:
 
 ```
-Rute → preflight CORS → validasi isi dengan Zod → autentikasi opsional
-     → penerapan kebijakan kunci API → delegasi penangan (open-sse)
+Rute → preflight CORS → validasi body Zod → autentikasi opsional
+     → penegakan kebijakan API key → delegasi handler (open-sse)
 ```
 
-`v1beta/` adalah permukaan kompatibilitas bergaya Gemini (pembungkus tipis yang menerjemahkan ke
-pipeline `open-sse/handlers/` yang sama).
+`v1beta/` adalah permukaan kompatibilitas bergaya Gemini (pembungkus tipis yang
+menerjemahkan ke pipeline `open-sse/handlers/` yang sama).
 
 ### 3.2 `src/lib/` — Pustaka inti
 
-Selalu impor data, sinkronisasi, OAuth, skill, memori, dan sebagainya melalui modul-modul ini. Tabel
-mengelompokkan direktori aktual dan file tingkat atas yang penting.
+Selalu impor data, sync, OAuth, skill, memory, dan sebagainya melalui modul-modul
+ini. Tabel berikut mengelompokkan direktori aktual dan file tingkat atas yang
+perlu diperhatikan.
 
-| Modul             | Tujuan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Module            | Tujuan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | Server protokol A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 keterampilan: analisis biaya, laporan kesehatan, penemuan penyedia, pengelolaan kuota, perutean cerdas, daftar kapabilitas)                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `a2a/`            | Server protokol A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 skill: analisis biaya, laporan kesehatan, penemuan penyedia, manajemen kuota, perutean cerdas, daftar-kapabilitas)                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `api/`            | Pembantu API internal: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `auth/`           | `managementPassword.ts` (pengaturan ulang kata sandi / hashing)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `api/`            | Helper API internal: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `auth/`           | `managementPassword.ts` (reset kata sandi / hashing)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `batches/`        | Layanan OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `catalog/`        | Sinkronisasi katalog OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `cloudAgent/`     | Registri agen cloud: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `combos/`         | Pembantu resolusi kombo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `cloudAgent/`     | Registri cloud agent: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `combos/`         | Helper resolusi combo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `compliance/`     | Audit + audit penyedia: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `config/`         | Perekat konfigurasi runtime                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `db/`             | Modul domain SQLite (lihat §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `display/`        | Pembantu UI/tampilan yang digunakan oleh respons API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `display/`        | Helper UI/tampilan yang digunakan oleh respons API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `embeddings/`     | Registri layanan embedding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `env/`            | Pemuatan + introspeksi env                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `evals/`          | Runtime evaluasi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `env/`            | Pemuatan env + introspeksi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `evals/`          | Runtime eval                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `jobs/`           | Pekerjaan latar belakang (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `memory/`         | Memori persisten: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `oauth/`          | Modul penyedia OAuth/impor (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, serta `services/`, `utils/`, dan `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                   |
+| `oauth/`          | Modul penyedia OAuth/impor (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, ditambah `services/`, `utils/`, dan `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                |
 | `plugins/`        | Pemuat plugin (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `providerModels/` | Siklus hidup model terkelola: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `providers/`      | Pembantu penyedia: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `resilience/`     | `settings.ts` — pengaturan untuk pemutus sirkuit, masa tunggu, dan penguncian                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `providers/`      | Helper penyedia: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `resilience/`     | `settings.ts` — pengaturan untuk circuit breaker, cooldown, lockout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `runtime/`        | Deteksi fitur runtime                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `services/`       | Kerangka kerja layanan tertanam: `ServiceSupervisor.ts` (supervisor proses anak generik dengan kunci operasi, buffer cincin, dan pemeriksa kesehatan), `bootstrap.ts` (pendaftaran tingkat proses dan mulai otomatis), `registry.ts` (peta alat → supervisor), `apiKey.ts` (penyimpanan kunci AES-256-GCM), `modelSync.ts` (sinkronisasi model berkala), `ringBuffer.ts` (buffer log melingkar 5 MB), `healthCheck.ts` (probe kesehatan HTTP), `types.ts`, `embedWsProxy.ts` (proksi WebSocket), `installers/{ninerouter,cliproxy}.ts`. Lihat `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                            |
-| `agentSkills/`    | Katalog + generator Agent Skills: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → menulis `skills/{id}/SKILL.md`), `openapiParser.ts` (mengekstrak endpoint REST dari spesifikasi OpenAPI), `cliRegistryParser.ts` (mengekstrak subperintah CLI dari bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Digunakan oleh rute REST (`/api/agent-skills/*`), alat MCP (`omniroute_agent_skills_*`), dan skill A2A `list-capabilities`. Lihat [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Kerangka kerja skill: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, serta `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `services/`       | Kerangka layanan tertanam: `ServiceSupervisor.ts` (supervisor proses anak generik dengan kunci operasi, ring buffer, pemeriksa kesehatan), `bootstrap.ts` (registrasi tingkat proses dan mulai otomatis), `registry.ts` (peta tool → supervisor), `apiKey.ts` (penyimpanan kunci AES-256-GCM), `modelSync.ts` (sinkronisasi model berkala), `ringBuffer.ts` (buffer log sirkular 5 MB), `healthCheck.ts` (probe kesehatan HTTP), `types.ts`, `embedWsProxy.ts` (proksi WebSocket), `installers/{ninerouter,cliproxy}.ts`. Lihat `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                          |
+| `agentSkills/`    | Katalog + generator Agent Skills: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → menulis `skills/{id}/SKILL.md`), `openapiParser.ts` (mengekstrak endpoint REST dari spesifikasi OpenAPI), `cliRegistryParser.ts` (mengekstrak subperintah CLI dari bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Digunakan oleh rute REST (`/api/agent-skills/*`), tool MCP (`omniroute_agent_skills_*`), dan skill A2A `list-capabilities`. Lihat [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Kerangka skill: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, serta `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `spend/`          | `batchWriter.ts` (buffer write-behind)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `sync/`           | `bundle.ts`, `tokens.ts` (Sinkronisasi Cloud)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `system/`         | Pembantu tingkat sistem                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `system/`         | Helper tingkat sistem                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `translator/`     | Perekat penerjemah tingkat atas (mendelegasikan ke `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `usage/`          | Akuntansi penggunaan: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `versionManager/` | Pembaruan otomatis + manifes versi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `versionManager/` | Auto-update + manifes versi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `ws/`             | Jembatan WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `zed-oauth/`      | Alur OAuth editor Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 File tingkat atas di `src/lib/`:
 
-- Barrel lama `localDb.ts` telah dihapus — konsumen mengimpor modul `src/lib/db/*` tertentu secara langsung.
+- Barrel lama `localDb.ts` telah dihapus — konsumen mengimpor modul `src/lib/db/*` secara langsung.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -329,13 +329,13 @@ File tingkat atas di `src/lib/`:
 #### 3.2.1 `src/lib/db/`
 
 Database SQLite singleton (`getDbInstance()` di `core.ts`, penjurnalan WAL).
-**Jangan pernah menulis SQL mentah di rute atau handler** — gunakan modul-modul ini.
+**Jangan pernah menulis SQL mentah di route atau handler** — gunakan modul-modul ini.
 
 ![Ikhtisar skema database (tabel inti terpilih)](../diagrams/exported/db-schema-overview.svg)
 
 > Sumber: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Modul domain (masing-masing memiliki satu atau beberapa tabel): `apiKeys.ts`, `backup.ts`,
+Modul domain (masing-masing mengelola satu atau lebih tabel): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -349,8 +349,8 @@ Modul domain (masing-masing memiliki satu atau beberapa tabel): `apiKeys.ts`, `b
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-`migrations/` berisi 168 file `.sql` berversi (idempoten, transaksional) dan
-dijalankan oleh `migrationRunner.ts` saat proses boot.
+`migrations/` menyimpan 168 file `.sql` berversi (idempoten, transaksional) dan
+dijalankan oleh `migrationRunner.ts` saat boot.
 
 Tabel yang dibuat di seluruh migrasi (total 123):
 
@@ -368,31 +368,41 @@ Tabel yang dibuat di seluruh migrasi (total 123):
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (ditambah tabel virtual FTS5 untuk pencarian memori).
+`webhooks` (serta tabel virtual FTS5 untuk pencarian memori).
 
 ### 3.3 `src/domain/` — Lapisan domain
 
-Logika bisnis murni, tanpa I/O. Diimpor oleh rute dan handler.
+Layanan domain dan kontrak evaluasi. Sebagian modul dipanggil oleh jalur
+permintaan aktif; lainnya tetap sebagai kontrak mandiri. Jangan berasumsi bahwa
+seluruh direktori ini bebas dari I/O atau bahwa perubahan pada setiap modul
+memengaruhi perutean produksi.
 
-| File                                       | Tujuan                                            |
-| ------------------------------------------ | ------------------------------------------------- |
-| `policyEngine.ts`                          | Resolver kebijakan tingkat atas                   |
-| `fallbackPolicy.ts`                        | Pohon keputusan fallback                          |
-| `costRules.ts`                             | Aturan penghitungan biaya                         |
-| `lockoutPolicy.ts`                         | Keputusan penguncian model                        |
-| `tagRouter.ts`                             | Perutean berbasis tag                             |
-| `comboResolver.ts`                         | Resolusi kombo dari permintaan → daftar target    |
-| `connectionModelRules.ts`                  | Filter model per koneksi                          |
-| `modelAvailability.ts`                     | Pemeriksaan ketersediaan model                    |
-| `degradation.ts`                           | Transisi mode terdegradasi                        |
-| `providerExpiration.ts`                    | Deteksi akun/kunci kedaluwarsa                    |
-| `quotaCache.ts`                            | Keputusan kuota yang di-cache                     |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Helper struktur respons                           |
-| `configAudit.ts`                           | Audit perubahan konfigurasi                       |
-| `assessment/`                              | Penilaian model (sesuai RFC, diterapkan sebagian) |
-| `types.ts`                                 | Tipe domain bersama                               |
+Permukaan kebijakan aktif adalah `src/shared/utils/apiKeyPolicy.ts` dan
+`src/sse/handlers/chat/resolvedModelPolicy.ts`. Penanganan combo aktif dan
+resolusi target menggunakan `open-sse/services/combo.ts`. Kontrak `policyEngine.ts`
+dan `comboResolver.ts` yang diuji, bersama dengan `src/lib/container.ts`, bukan
+merupakan wiring dari jalur permintaan chat yang diperiksa. Pisahkan keduanya dari
+permukaan aktif tersebut saat merencanakan perubahan perutean.
 
-### 3.4 `src/server/` — Khusus server
+| Berkas                                     | Tujuan                                              |
+| ------------------------------------------ | --------------------------------------------------- |
+| `policyEngine.ts`                          | Kontrak evaluasi kebijakan yang dicadangkan         |
+| `fallbackPolicy.ts`                        | Pohon keputusan fallback                            |
+| `costRules.ts`                             | Aturan perhitungan biaya                            |
+| `lockoutPolicy.ts`                         | Keputusan lockout model                             |
+| `tagRouter.ts`                             | Perutean berbasis tag                               |
+| `comboResolver.ts`                         | Kontrak pemilihan combo yang dicadangkan            |
+| `connectionModelRules.ts`                  | Filter model per koneksi                            |
+| `modelAvailability.ts`                     | Pemeriksaan ketersediaan model                      |
+| `degradation.ts`                           | Transisi mode terdegradasi                          |
+| `providerExpiration.ts`                    | Deteksi akun/kunci yang kedaluwarsa                 |
+| `quotaCache.ts`                            | Keputusan kuota tersimpan di cache                  |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Helper bentuk respons                               |
+| `configAudit.ts`                           | Audit perubahan konfigurasi                         |
+| `assessment/`                              | Asesmen model (per RFC, sebagian diimplementasikan) |
+| `types.ts`                                 | Tipe domain bersama                                 |
+
+### 3.4 `src/server/` — Hanya server
 
 Tidak dapat diimpor dari komponen klien.
 
@@ -400,30 +410,30 @@ Tidak dapat diimpor dari komponen klien.
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Mengklasifikasikan rute sebagai publik atau manajemen
-│   ├── assertAuth.ts      Helper asersi
-│   ├── context.ts         Konteks authz per permintaan
+│   ├── classify.ts        Mengklasifikasikan rute sebagai publik vs manajemen
+│   ├── assertAuth.ts      Helper assertion
+│   ├── context.ts         Konteks authz per-permintaan
 │   ├── headers.ts
 │   ├── pipeline.ts        Pipeline authz
-│   ├── policies/          Kebijakan konkret
+│   ├── policies/          Policy konkret
 │   └── types.ts
-└── cors/origins.ts        Daftar asal CORS yang diizinkan
+└── cors/origins.ts        Allowlist origin CORS
 ```
 
-### 3.5 `src/shared/` — Aman untuk dibagikan
+### 3.5 `src/shared/` — Aman untuk Dibagikan
 
-Dibagi menjadi subdirektori terfokus:
+Dibagi menjadi subdirektori yang terfokus:
 
-- `constants/` — `providers.ts` (katalog penyedia yang divalidasi dengan Zod), `models.ts`,
+- `constants/` — `providers.ts` (katalog provider tervalidasi Zod), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (daftar larangan), `mcpScopes.ts`,
+  `headers.ts`, `upstreamHeaders.ts` (denylist), `mcpScopes.ts`,
   `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
   `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
 - `validation/` — `schemas.ts` (~80 skema Zod), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — kontrak API publik yang didistribusikan ke npm.
+- `contracts/` — kontrak API publik yang dikirim ke npm.
 - `types/` — tipe TS bersama.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
@@ -432,16 +442,15 @@ Dibagi menjadi subdirektori terfokus:
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, serta hook/komponen dasbor di bawah `services/`, `network/`,
+  `a11yAudit.ts`, serta hook/komponen dashboard di bawah `services/`, `network/`,
   `middleware/`, `schemas/`, `hooks/`, `components/`.
-- `components/` — API komponen dasbor (barrel `index.tsx`: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …). Komponen primitifnya merupakan adaptor
-  di atas kit yang disertakan (`packages/ui-kit`, diimpor melalui subpath komponen seperti
-  `@omniroute/ui-kit/button`), sehingga layar tetap mempertahankan impornya sementara
-  markup-nya berasal dari kit tersebut. Shell-nya adalah `layouts/DashboardLayout.tsx` →
-  `layouts/DashboardShell.tsx` (`SidebarProvider`/`SidebarInset` dari kit) dengan
-  `Sidebar.tsx` dan `Header.tsx`; ikon diproses melalui `Icon.tsx` dan
-  `constants/iconMap.ts`. Lihat `docs/architecture/DESIGN_SYSTEM.md`.
+- `components/` — API komponen dashboard (`index.tsx` barrel: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Primitifnya adalah adaptor atas
+  kit yang di-vendor (`packages/ui-kit`, diimpor melalui subpath komponen seperti
+  `@omniroute/ui-kit/button`), sehingga layar tetap mempertahankan impor mereka
+  sementara markup-nya berasal dari kit. Shell-nya adalah `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (kit `SidebarProvider`/`SidebarInset`) dengan `Sidebar.tsx` dan `Header.tsx`; ikon melalui
+  `Icon.tsx` dan `constants/iconMap.ts`. Lihat `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
@@ -702,9 +711,9 @@ Diorganisasikan ke dalam 6 subfolder berdasarkan tujuan.
 
 ---
 
-## 9. Alur Permintaan (Ringkasan)
+## 9. Pipeline Permintaan (Ringkasan)
 
-![Alur permintaan (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
+![Pipeline permintaan (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
 
 > Sumber: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
@@ -714,32 +723,33 @@ Permintaan klien
      Pemeriksaan preflight CORS
      Validasi Zod (chatCompletionsSchema di shared/validation/schemas.ts)
      Autentikasi (extractApiKey + isValidApiKey ATAU requireManagementAuth)
-     Mesin kebijakan (src/server/authz/pipeline.ts)
-     Pembatas pengaman (penyamaran PII, injeksi prompt, bridge visi)
+     Otorisasi rute (src/server/authz/pipeline.ts)
+     Kebijakan kunci API (src/shared/utils/apiKeyPolicy.ts; diberlakukan pada jalur yang dipilih)
+     Guardrails (penyamaran PII, injeksi prompt, jembatan visi)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     Pemeriksaan cache (cache semantik + cache baca)
+     Pemeriksaan cache (semantik + cache baca)
      Batas laju (rateLimitManager, accountSemaphore)
-     Perutean kombo (jika model diresolusikan menjadi kombo)
-       comboResolver → perulangan per target → handleSingleModel()
+     Perutean combo (jika model diresolusikan ke combo)
+       resolveComboTargets (open-sse/services/combo.ts) → dispatch per target
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       pengambilan dari upstream → percobaan ulang/backoff melalui accountFallback
+       ambil dari upstream → retry/backoff melalui accountFallback
      translateResponse() (open-sse/translator/response/*)
-     Aliran SSE ATAU respons JSON
+     Stream SSE ATAU respons JSON
      Jika Responses API: TransformStream melalui open-sse/transformer/responsesTransformer.ts
   → Audit kepatuhan (src/lib/compliance/)
-  → Respons kepada klien
+  → Respons ke klien
 ```
 
-### Status runtime ketahanan (tiga mekanisme)
+### Status runtime resiliensi (tiga mekanisme)
 
 | Mekanisme                | Cakupan                    | Lokasi                                                                                                          |
 | ------------------------ | -------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Pemutus sirkuit penyedia | Seluruh penyedia           | `src/shared/utils/circuitBreaker.ts`, disimpan di `domain_circuit_breakers`                                     |
-| Masa jeda koneksi        | Satu akun/kunci            | `markAccountUnavailable()` di `src/sse/services/auth.ts`; digunakan oleh `accountFallback.checkFallbackError()` |
-| Penguncian model         | Penyedia + koneksi + model | `open-sse/services/accountFallback.ts`, disimpan di `domain_lockout_state`                                      |
+| Circuit breaker penyedia | Seluruh penyedia           | `src/shared/utils/circuitBreaker.ts`, disimpan di `domain_circuit_breakers`                                     |
+| Cooldown koneksi         | Satu akun/kunci            | `markAccountUnavailable()` di `src/sse/services/auth.ts`; digunakan oleh `accountFallback.checkFallbackError()` |
+| Lockout model            | Penyedia + koneksi + model | `open-sse/services/accountFallback.ts`, disimpan di `domain_lockout_state`                                      |
 
-Lihat [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) dan bagian khusus di
+Lihat [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) dan bagian khususnya di
 [CLAUDE.md](../../CLAUDE.md).
 
 ---

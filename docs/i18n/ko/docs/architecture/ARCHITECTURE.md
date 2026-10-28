@@ -8,25 +8,25 @@
 
 _최종 업데이트: 2026-06-28_
 
-## 개요
+## 요약
 
-OmniRoute는 Next.js 기반의 로컬 AI 라우팅 게이트웨이 및 대시보드입니다.
-단일 OpenAI 호환 엔드포인트(`/v1/*`)를 제공하며, 변환, 폴백, 토큰 갱신, 사용량 추적 기능을 통해 여러 업스트림 공급자로 트래픽을 라우팅합니다.
+OmniRoute는 Next.js를 기반으로 구축된 로컬 AI 라우팅 게이트웨이 및 대시보드입니다.
+단일 OpenAI 호환 엔드포인트(`/v1/*`)를 제공하며, 변환, 폴백, 토큰 갱신 및 사용량 추적을 통해 여러 업스트림 공급자에 트래픽을 라우팅합니다.
 
 핵심 기능:
 
 - CLI/도구를 위한 OpenAI 호환 API 인터페이스(공급자 376개, 실행기 모듈 156개)
 - 공급자 형식 간 요청/응답 변환
-- 모델 콤보 폴백(다중 모델 시퀀스)
-- 런타임에 `compositeTiers` 기준으로 순서가 지정되는 구조화된 콤보 단계(`provider + model + connection`)
+- 모델 조합 폴백(다중 모델 시퀀스)
+- 구조화된 조합 단계(`provider + model + connection`) 및 `compositeTiers`에 따른 런타임 순서 지정
 - 계정 수준 폴백(공급자별 다중 계정)
-- 기본 채팅 경로에서 할당량 사전 검사 및 할당량 인식 P2C 계정 선택
-- OAuth + API 키 기반 공급자 연결 관리(OAuth 공급자 모듈 27개)
+- 기본 채팅 경로에서 할당량 사전 확인 및 할당량 인식 P2C 계정 선택
+- OAuth 및 API 키 기반 공급자 연결 관리(OAuth 공급자 모듈 27개)
 - `/v1/embeddings`를 통한 임베딩 생성(공급자 18개)
 - `/v1/images/generations`를 통한 이미지 생성(공급자 10개 이상, 모델 20개 이상)
-- `/v1/audio/transcriptions`를 통한 오디오 트랜스크립션(공급자 18개)
+- `/v1/audio/transcriptions`를 통한 오디오 전사(공급자 18개)
 - `/v1/audio/speech`를 통한 텍스트 음성 변환(기본 제공 공급자 24개)
-- `/v1/videos/generations`를 통한 비디오 생성(ComfyUI + SD WebUI)
+- `/v1/videos/generations`를 통한 동영상 생성(ComfyUI + SD WebUI)
 - `/v1/music/generations`를 통한 음악 생성(ComfyUI)
 - `/v1/search`를 통한 웹 검색(공급자 20개)
 - `/v1/moderations`를 통한 콘텐츠 검토
@@ -35,52 +35,52 @@ OmniRoute는 Next.js 기반의 로컬 AI 라우팅 게이트웨이 및 대시보
 - 엄격한 OpenAI SDK 호환성을 위한 응답 정제
 - 공급자 간 호환성을 위한 역할 정규화(developer→system, system→user)
 - 구조화된 출력 변환(json_schema → Gemini responseSchema)
-- 공급자, 키, 별칭, 콤보, 설정, 가격 정보의 로컬 영속성(DB 모듈 122개)
+- 공급자, 키, 별칭, 조합, 설정 및 가격 정보의 로컬 영속성(DB 모듈 122개)
 - 사용량/비용 추적 및 요청 로깅
-- 여러 기기/상태 동기화를 위한 선택적 클라우드 동기화
-- API 액세스 제어를 위한 IP 허용 목록/차단 목록
-- 사고 예산 관리(패스스루/자동/사용자 지정/적응형)
-- 전역 시스템 프롬프트 주입
-- 세션 추적 및 핑거프린팅
-- 공급자별 프로필을 사용하는 계정별 향상된 속도 제한
+- 다중 기기/상태 동기화를 위한 선택적 클라우드 동기화
+- API 접근 제어를 위한 IP 허용 목록/차단 목록
+- 추론 예산 관리(패스스루/자동/사용자 지정/적응형)
+- 전역 시스템 프롬프트 삽입
+- 세션 추적 및 지문 생성
+- 공급자별 프로필을 사용하는 계정별 고급 속도 제한
 - 공급자 복원력을 위한 서킷 브레이커 패턴
-- 뮤텍스 잠금을 통한 선더링 허드 방지
+- 뮤텍스 잠금을 통한 동시 요청 폭주 방지
 - 서명 기반 요청 중복 제거 캐시
 - 도메인 계층: 비용 규칙, 폴백 정책, 잠금 정책
-- Context Relay: 계정 전환 시 연속성을 유지하기 위한 세션 인계 요약
-- 도메인 상태 영속성(폴백, 예산, 잠금, 서킷 브레이커를 위한 SQLite 연속 기입 캐시)
+- Context Relay: 계정 전환 시 연속성을 위한 세션 인계 요약
+- 도메인 상태 영속성(폴백, 예산, 잠금 및 서킷 브레이커를 위한 SQLite 연속 기입 캐시)
 - 중앙 집중식 요청 평가를 위한 정책 엔진(잠금 → 예산 → 폴백)
-- p50/p95/p99 지연 시간 집계를 포함한 요청 텔레메트리
-- `combo_execution_key` / `combo_step_id`를 통한 콤보 대상 텔레메트리 및 과거 콤보 대상 상태
+- p50/p95/p99 지연 시간 집계를 지원하는 요청 텔레메트리
+- `combo_execution_key` / `combo_step_id`를 통한 조합 대상 텔레메트리 및 과거 조합 대상 상태
 - 엔드투엔드 추적을 위한 상관관계 ID(X-Request-Id)
-- API 키별 옵트아웃이 가능한 규정 준수 감사 로깅
+- API 키별 옵트아웃을 지원하는 규정 준수 감사 로깅
 - LLM 품질 보증을 위한 평가 프레임워크
 - 실시간 공급자 서킷 브레이커 상태를 제공하는 상태 대시보드
-- 3가지 전송 방식(stdio/SSE/Streamable HTTP)을 지원하는 MCP 서버(도구 110개)
-- 스킬 및 작업 수명 주기를 지원하는 A2A 서버(JSON-RPC 2.0 + SSE)
-- 메모리 시스템(추출, 주입, 검색, 요약)
+- 3가지 전송 방식(stdio/SSE/Streamable HTTP)을 지원하는 MCP Server(도구 110개)
+- 스킬 및 작업 수명 주기를 지원하는 A2A Server(JSON-RPC 2.0 + SSE)
+- 메모리 시스템(추출, 삽입, 검색, 요약)
 - 스킬 시스템(레지스트리, 실행기, 샌드박스, 기본 제공 스킬)
 - 인증서 관리 및 DNS 처리를 지원하는 MITM 프록시
 - 프롬프트 인젝션 방어 미들웨어
-- Caveman, RTK, 스택형 파이프라인, 압축 콤보, 언어 팩, 분석을 지원하는 프롬프트 압축 파이프라인
-- ACP(Agent Communication Protocol) 레지스트리
+- Caveman, RTK, 스택형 파이프라인, 압축 조합, 언어 팩 및 분석을 지원하는 프롬프트 압축 파이프라인
+- ACP (Agent Communication Protocol) 레지스트리
 - 모듈식 OAuth 공급자(`src/lib/oauth/providers/` 아래의 개별 모듈 22개)
 - 제거/완전 제거 스크립트
 - OAuth 환경 복구 작업
 - OpenAI 호환 WS 클라이언트를 위한 WebSocket 브리지(`/v1/ws`)
 - 동기화 토큰 관리(발급/폐기, ETag 버전 관리형 구성 번들 다운로드)
-- 일급 공급자 프리셋으로 제공되는 GLM Thinking(`glmt`)
+- 일급 공급자 프리셋인 GLM Thinking(`glmt`)
 - 하이브리드 토큰 계산(공급자 측 `/messages/count_tokens` 및 추정 폴백)
 - 모델 별칭 자동 시딩(시작 시 30개 이상의 프록시 간 방언 정규화)
-- SSRF 방어, 비공개 URL 차단, 구성 가능한 재시도를 지원하는 안전한 아웃바운드 페치
+- SSRF 방어, 비공개 URL 차단 및 구성 가능한 재시도를 지원하는 안전한 아웃바운드 fetch
 - 구성 가능한 `requestRetry` 및 `maxRetryIntervalSec`를 사용하는 쿨다운 인식 채팅 재시도
-- 시작 시 Zod를 통한 런타임 환경 검증
-- 페이지네이션, 공급자 CRUD 이벤트, SSRF 차단 검증 로깅을 포함하는 규정 준수 감사 v2
+- 시작 시 Zod를 사용하는 런타임 환경 검증
+- 페이지네이션, 공급자 CRUD 이벤트 및 SSRF 차단 검증 로깅을 지원하는 규정 준수 감사 v2
 
-주요 런타임 모델:
+기본 런타임 모델:
 
 - `src/app/api/*` 아래의 Next.js 앱 라우트가 대시보드 API와 호환성 API를 모두 구현
-- `src/sse/*` + `open-sse/*`의 공유 SSE/라우팅 코어가 공급자 실행, 변환, 스트리밍, 폴백, 사용량을 처리
+- `src/sse/*` + `open-sse/*`의 공유 SSE/라우팅 코어가 공급자 실행, 변환, 스트리밍, 폴백 및 사용량을 처리
 
 ## 참조 다이어그램
 
@@ -266,73 +266,73 @@ flowchart LR
 - 구성 번들: `src/app/api/sync/bundle` (GET, 설정/제공자/조합/키의 ETag 버전 관리 스냅샷)
 - WebSocket: `src/app/api/v1/ws/route.ts` — OpenAI 호환 WS 클라이언트용 Upgrade 핸들러
 
-## 2) SSE + 번역 코어
+## 2) SSE + 변환 코어
 
 주요 흐름 모듈:
 
 - 진입점: `src/sse/handlers/chat.ts`
-- 핵심 오케스트레이션: `open-sse/handlers/chatCore.ts`
-- 제공자 실행 어댑터: `open-sse/executors/*`
-- 형식 감지/제공자 구성: `open-sse/services/provider.ts`
-- 모델 파싱/해석: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- 코어 오케스트레이션: `open-sse/handlers/chatCore.ts`
+- 프로바이더 실행 어댑터: `open-sse/executors/*`
+- 형식 감지/프로바이더 설정: `open-sse/services/provider.ts`
+- 모델 파싱/해결: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - 계정 폴백 로직: `open-sse/services/accountFallback.ts`
-- 번역 레지스트리: `open-sse/translator/index.ts`
+- 변환 레지스트리: `open-sse/translator/index.ts`
 - 스트림 변환: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
 - 사용량 추출/정규화: `open-sse/utils/usageTracking.ts`
 - Think 태그 파서: `open-sse/utils/thinkTagParser.ts`
 - 임베딩 핸들러: `open-sse/handlers/embeddings.ts`
-- 임베딩 제공자 레지스트리: `open-sse/config/embeddingRegistry.ts`
+- 임베딩 프로바이더 레지스트리: `open-sse/config/embeddingRegistry.ts`
 - 이미지 생성 핸들러: `open-sse/handlers/imageGeneration.ts`
-- 이미지 제공자 레지스트리: `open-sse/config/imageRegistry.ts`
+- 이미지 프로바이더 레지스트리: `open-sse/config/imageRegistry.ts`
 - 응답 정제: `open-sse/handlers/responseSanitizer.ts`
 - 역할 정규화: `open-sse/services/roleNormalizer.ts`
 
-서비스(비즈니스 로직):
+서비스 (비즈니스 로직):
 
-- 계정 선택/점수 산정: `open-sse/services/accountSelector.ts`
-- 컨텍스트 수명 주기 관리: `open-sse/services/contextManager.ts`
+- 계정 선택/스코어링: `open-sse/services/accountSelector.ts`
+- 컨텍스트 라이프사이클 관리: `open-sse/services/contextManager.ts`
 - IP 필터 적용: `open-sse/services/ipFilter.ts`
 - 세션 추적: `open-sse/services/sessionManager.ts`
 - 요청 중복 제거: `open-sse/services/signatureCache.ts`
 - 시스템 프롬프트 주입: `open-sse/services/systemPrompt.ts`
-- 추론 예산 관리: `open-sse/services/thinkingBudget.ts`
+- Thinking 예산 관리: `open-sse/services/thinkingBudget.ts`
 - 와일드카드 모델 라우팅: `open-sse/services/wildcardRouter.ts`
-- 요청 제한 관리: `open-sse/services/rateLimitManager.ts`
-- 회로 차단기: `src/shared/utils/circuitBreaker.ts`
+- 레이트 리밋 관리: `open-sse/services/rateLimitManager.ts`
+- 서킷 브레이커: `src/shared/utils/circuitBreaker.ts`
 - 컨텍스트 핸드오프: `open-sse/services/contextHandoff.ts` — 컨텍스트 릴레이 전략을 위한 핸드오프 요약 생성 및 주입
-- 압축: `open-sse/services/compression/*` — 제공자 변환 전 선제적 압축;
-  Caveman 규칙, RTK 필터, 스택형 파이프라인, 압축 조합, 통계 및 검증 포함
-- Codex 할당량 가져오기: `open-sse/services/codexQuotaFetcher.ts` — 컨텍스트 릴레이 핸드오프 결정을 위해 Codex 할당량을 가져옴
-- 쿨다운 인식 재시도: `src/sse/services/cooldownAwareRetry.ts` — 구성 가능한 `requestRetry` / `maxRetryIntervalSec`를 사용한 모델별 쿨다운 재시도
-- 안전한 아웃바운드 가져오기: `src/shared/network/safeOutboundFetch.ts` — SSRF 방어, 비공개 URL 차단, 재시도 및 타임아웃이 적용된 제공자/모델 가져오기
-- 아웃바운드 URL 가드: `src/shared/network/outboundUrlGuard.ts` — 제공자 URL에 대한 호스트 검사; `src/shared/network/outboundUrlGuardPolicy.ts`는 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` 및 해당 대시보드 토글에서 모드를 선택함(`docs/reference/ENVIRONMENT.md` 참조)
-- 제공자 요청 기본값: `open-sse/services/providerRequestDefaults.ts` — 제공자 수준의 `maxTokens`, `temperature`, `thinkingBudgetTokens` 기본값
-- GLM 제공자 상수: `open-sse/config/glmProvider.ts` — 공유 GLM 모델, 할당량 URL, GLMT 타임아웃/기본값
-- Antigravity 업스트림: `open-sse/config/antigravityUpstream.ts` — 기본 URL 및 검색 경로 상수
-- Codex 클라이언트 상수: `open-sse/config/codexClient.ts` — 버전이 지정된 사용자 에이전트 및 클라이언트 버전 값
-- 모델 별칭 시드: `src/lib/modelAliasSeed.ts` — 시작 시 30개 이상의 프록시 간 방언 별칭을 시딩
+- 압축: `open-sse/services/compression/*` — 프로바이더 변환 전 선제적 압축;
+  Caveman 규칙, RTK 필터, 스택 파이프라인, 압축 콤보, 통계 및 검증 포함
+- Codex 쿼터 페처: `open-sse/services/codexQuotaFetcher.ts` — 컨텍스트 릴레이 핸드오프 결정을 위한 Codex 쿼터 조회
+- 쿨다운 인식 재시도: `src/sse/services/cooldownAwareRetry.ts` — 설정 가능한 `requestRetry` / `maxRetryIntervalSec`를 사용한 모델별 쿨다운 재시도
+- 안전한 아웃바운드 fetch: `src/shared/network/safeOutboundFetch.ts` — SSRF 가드, 프라이빗 URL 차단, 재시도 및 타임아웃이 적용된 보호된 프로바이더/모델 fetch
+- 아웃바운드 URL 가드: `src/shared/network/outboundUrlGuard.ts` — 프로바이더 URL에 대한 호스트 검사; `src/shared/network/outboundUrlGuardPolicy.ts`가 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` 및 해당 대시보드 토글에서 모드를 선택 (`docs/reference/ENVIRONMENT.md` 참조)
+- 프로바이더 요청 기본값: `open-sse/services/providerRequestDefaults.ts` — 프로바이더 수준 `maxTokens`, `temperature`, `thinkingBudgetTokens` 기본값
+- GLM 프로바이더 상수: `open-sse/config/glmProvider.ts` — 공유 GLM 모델, 쿼터 URL, GLMT 타임아웃/기본값
+- Antigravity 업스트림: `open-sse/config/antigravityUpstream.ts` — 기본 URL 및 디스커버리 경로 상수
+- Codex 클라이언트 상수: `open-sse/config/codexClient.ts` — 버전이 지정된 user-agent 및 클라이언트 버전 값
+- 모델 별칭 시드: `src/lib/modelAliasSeed.ts` — 시작 시 30개 이상의 크로스 프록시 dialect 별칭을 시드
 
-도메인 계층 모듈:
+도메인 레이어 모듈:
 
 - 비용 규칙/예산: `src/domain/costRules.ts`
 - 폴백 정책: `src/domain/fallbackPolicy.ts`
-- 조합 해석기: `src/domain/comboResolver.ts`
-- 잠금 정책: `src/domain/lockoutPolicy.ts`
-- 정책 엔진: `src/domain/policyEngine.ts` — 중앙 집중식 잠금 → 예산 → 폴백 평가
-- 오류 코드 카탈로그: `src/shared/constants/errorCodes.ts`
+- 예약된 콤보 해결 컨트랙트: `src/domain/comboResolver.ts`; 실제 라우팅은 `open-sse/services/combo.ts`를 사용
+- 락아웃 정책: `src/domain/lockoutPolicy.ts`
+- 예약된 정책 평가 컨트랙트: `src/domain/policyEngine.ts`; 요청 경로는 `src/shared/utils/apiKeyPolicy.ts`를 통해 API 키 정책을, `src/sse/handlers/chat/resolvedModelPolicy.ts`를 통해 해결된 대상 인가를 적용
+- 에러 코드 카탈로그: `src/shared/constants/errorCodes.ts`
 - 요청 ID: `src/shared/utils/requestId.ts`
-- 가져오기 타임아웃: `src/shared/utils/fetchTimeout.ts`
+- Fetch 타임아웃: `src/shared/utils/fetchTimeout.ts`
 - 요청 텔레메트리: `src/shared/utils/requestTelemetry.ts`
-- 규정 준수/감사: `src/lib/compliance/index.ts`
-- 평가 실행기: `src/lib/evals/evalRunner.ts`
-- 도메인 상태 영속성: `src/lib/db/domainState.ts` — 폴백 체인, 예산, 비용 기록, 잠금 상태, 회로 차단기를 위한 SQLite CRUD
+- 컴플라이언스/감사: `src/lib/compliance/index.ts`
+- Eval 러너: `src/lib/evals/evalRunner.ts`
+- 도메인 상태 영속화: `src/lib/db/domainState.ts` — 폴백 체인, 예산, 비용 이력, 락아웃 상태, 서킷 브레이커를 위한 SQLite CRUD
 
-OAuth 제공자 모듈(`src/lib/oauth/providers/` 아래의 개별 파일 27개):
+OAuth 프로바이더 모듈 (`src/lib/oauth/providers/` 아래 27개의 개별 파일):
 
 - 레지스트리 인덱스: `src/lib/oauth/providers/index.ts`
-- 개별 제공자: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- 공유 헬퍼: `codebuddyDeviceAuth.ts`(CodeBuddy CN/국제 버전 기기 흐름), `museCodeDeviceResponse.ts`
-- 얇은 래퍼: `src/lib/oauth/providers.ts` — 개별 모듈에서 다시 내보냄
+- 개별 프로바이더: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- 공유 헬퍼: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl 디바이스 플로우), `museCodeDeviceResponse.ts`
+- 씬 래퍼: `src/lib/oauth/providers.ts` — 개별 모듈에서 재보내기
 
 ## 5) 임베디드 서비스 (v3.8.4)
 
@@ -347,153 +347,177 @@ OmniRoute는 **임베디드 서비스**라고 하는 로컬 실행 AI 도구 프
 
 상세 설명: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## 주요 하위 시스템 (v3.8.0)
+## 주요 서브시스템 (v3.8.0)
 
 ### A. Auto Combo 엔진
 
-Auto Combo는 정적 combo 정의에 의존하는 대신 요청 시점에 라우팅 대상을 동적으로 평가하고 선택합니다. `auto/*` model prefix 계열을 구동합니다.
+Auto Combo는 정적 콤보 정의에 의존하는 대신, 요청 시점에 라우팅 대상을 동적으로
+점수화하고 선택합니다. `auto/*` 모델 프리픽스 제품군을 구동합니다.
 
 - 엔진 진입점: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (`auto/` prefix 자동 감지)
-- Dashboard: `/dashboard/auto-combo`
-- Telemetry: `auto_combo_decisions` SQLite table
+- 라이브 콤보 진입점: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), `src/sse/handlers/chat.ts`에서 호출됨
+- 대시보드: `/dashboard/auto-combo`
+- 텔레메트리: `auto_combo_decisions` SQLite 테이블
 
 주요 기능:
 
-- **20가지 라우팅 전략**(우선순위, 가중치, 우선 채우기, 라운드 로빈, P2C, 무작위,
-  최소 사용, 비용 최적화, 재설정 인식, 재설정 기간, 여유 용량, 할당량 가중치,
-  엄격한 무작위, **auto**, lkgp, 컨텍스트 최적화, 캐시 최적화, 컨텍스트 릴레이, **fusion**,
+- **20가지 라우팅 전략** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
   pipeline) —
-  auto는 v3.8.0의 핵심 추가 기능이며, `fusion`(패널 팬아웃 + 판정 합성,
-  `open-sse/services/fusion.ts`)은 v3.8.36에서 새롭게 추가되었습니다.
-- **16개 요소 기반 평가**: 할당량, 상태, 역비용, 역지연 시간, 작업 적합도와
-  그 외 10개 요소입니다. 요소 및 기본 가중치의 기준 표는
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)에 있습니다. 여기에 다시
-  기술하면 오래된 정보가 남을 수 있는 곳이 하나 더 생기게 됩니다.
-- **가상 팩토리**는 일치하는 이름의 combo가 없을 때 임시 combo를 구체화하며,
-  정상 상태의 활성 provider connection에서 후보를 가져옵니다.
-- **Auto prefix**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — 각각 조정된 가중치 프로필을 기반으로 합니다.
-- **6가지 mode pack**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first`, `chaos-mode` — dashboard에서 호출할 수 있는 사전 설정된 가중치
-  구성입니다. (요청 시점 variant인 위의 `auto/*` prefix와 혼동하지 마십시오.)
+  auto는 v3.8.0의 대표적인 추가 사항이며, `fusion`(패널 팬아웃 + 심사 합성,
+  `open-sse/services/fusion.ts`)은 v3.8.36에서 새로 추가되었습니다.
+- **16개 팩터 점수화**: 쿼터, 상태, 비용 역수, 지연 시간 역수, 작업 적합성
+  및 그 외 10가지. 팩터와 기본 가중치에 대한 정규(canonical) 표는
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)에 있습니다 — 여기에 다시
+  나열하면 최신 상태를 잃기 쉬운 위치가 두 군데로 늘어날 뿐입니다.
+- **가상 팩토리(Virtual factory)**는 일치하는 명명된 콤보가 없을 때 임시 콤보를
+  실체화하며, 정상 상태의 활성 프로바이더 연결에서 후보를 가져옵니다.
+- **Auto 프리픽스**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
+  `auto/smart`, `auto/lkgp` — 각각 튜닝된 가중치 프로파일로 뒷받침됩니다.
+- **6가지 모드 팩**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
+  `reliability-first` 및 `chaos-mode` — 대시보드에서 호출할 수 있는 사전 설정
+  가중치 구성입니다. (요청 시점 변형인 위의 `auto/*` 프리픽스와 혼동하지
+  마세요.)
 
-전체 알고리즘 세부 사항(요소 공식, 가중치 조정)은
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)를 참조하십시오.
+전체 알고리즘 세부 사항(팩터 공식, 가중치 튜닝)은
+[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)를 참조하세요.
 
 ### B. Cloud Agents
 
-Cloud Agents는 타사 호스팅 code-agent 플랫폼(Codex Cloud, Devin,
-Jules)을 DB 기반의 통합된 task lifecycle로 래핑합니다. 모든 task 생성/검사
-endpoint에는 management authentication이 필요합니다.
+Cloud Agents는 타사 호스티드 코드 에이전트 플랫폼(Codex Cloud, Devin,
+Jules)을 통일된 DB 기반 작업 라이프사이클 뒤에 래핑합니다. 모든 작업 생성/조회
+엔드포인트는 관리 인증을 요구합니다.
 
 - 모듈 루트: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, 그리고 `agents/` 아래 agent별 하위 디렉터리)
-- Agent별 구현: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Public endpoint: `/api/v1/agents/tasks/*` (목록/생성/조회/취소)
-- Management endpoint: `/api/cloud/*` (프로비저닝, 상태, 일괄 처리)
-- Dashboard: `/dashboard/cloud-agents`
-- Storage: `cloud_agent_tasks` table
+  `types.ts`, `db.ts`, 및 `agents/` 아래의 에이전트별 하위 디렉터리)
+- 에이전트별 구현: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- 퍼블릭 엔드포인트: `/api/v1/agents/tasks/*` (목록/생성/조회/취소)
+- 관리 엔드포인트: `/api/cloud/*` (프로비저닝, 상태, 배치)
+- 대시보드: `/dashboard/cloud-agents`
+- 스토리지: `cloud_agent_tasks` 테이블
 
-Agent별 프로비저닝 및 OAuth 세부 사항은
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)를 참조하십시오.
+에이전트별 프로비저닝 및 OAuth 세부 사항은
+[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)를 참조하세요.
 
 ### C. Guardrails
 
-Guardrails 모듈은 PII, prompt injection 및 안전하지 않은 vision content를
-검사하는 hot-reload 가능 middleware layer입니다. 위반이 발생하면 구조화된 error
-code와 함께 HTTP **503**으로 요청을 즉시 중단하여, downstream caller가 재시도하거나
-분기할 수 있도록 합니다.
+guardrails 모듈은 PII, 프롬프트 인젝션, 안전하지 않은 비전 콘텐츠에 대해 요청과
+응답을 검사하는 핫 리로드 가능한 미들웨어 계층입니다. 위반 시 HTTP **503**과
+구조화된 오류 코드로 요청을 단락시켜, 다운스트림 호출자가 재시도하거나 분기할 수
+있게 합니다.
 
 - 모듈 루트: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
   `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Hot reload: registry가 config 변경 사항을 감시하고 chain을 제자리에서 재구성합니다.
-- 연결 지점: chat handler 진입점, image generation handler, response sanitizer
-- HTTP contract: 위반은 `error.code = "GUARDRAIL_VIOLATION"`이 포함된 `503`으로 표시됩니다.
+- 핫 리로드: 레지스트리가 구성 변경을 감시하고 체인을 그 자리에서 재구축
+- 연결 지점: 채팅 핸들러 진입부, 이미지 생성 핸들러, 응답 새니타이저
+- HTTP 규약: 위반은 `error.code = "GUARDRAIL_VIOLATION"`과 함께 `503`으로 표면화됨
 
-Ruleset 작성 및 threshold 조정은
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)를 참조하십시오.
+룰셋 작성 및 임계값 튜닝은
+[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)를 참조하세요.
 
-### D. Domain 계층
+### D. 도메인 계층
 
-`src/domain/` namespace는 정책 결정을 중앙화하여 route handler가 lockout/budget/fallback
-logic을 직접 조합하지 않아도 되도록 합니다.
+`src/domain/` 네임스페이스에는 도메인 서비스와 예약된 평가 계약이 들어 있습니다.
+모든 요청에 대한 단일 필수 정책 진입점은 아닙니다.
 
-- Policy engine: `src/domain/policyEngine.ts` — 실행 전 평가를 위한 단일 진입점
-  (lockout → budget → fallback 순서)
-- Cost rule: `src/domain/costRules.ts`
-- Fallback policy: `src/domain/fallbackPolicy.ts`
-- Lockout policy: `src/domain/lockoutPolicy.ts`
-- Tag 기반 라우팅: `src/domain/tagRouter.ts`
-- Combo resolver: `src/domain/comboResolver.ts` — combo name, auto/\*
-  prefix 및 wildcard model target을 구체적인 execution plan으로 변환합니다.
-- Connection/model rule joiner: `src/domain/connectionModelRules.ts`
-- Model availability snapshot: `src/domain/modelAvailability.ts`
-- Provider expiration 추적: `src/domain/providerExpiration.ts`
-- Quota cache: `src/domain/quotaCache.ts`
-- Degradation state: `src/domain/degradation.ts`
-- Configuration audit: `src/domain/configAudit.ts`
-- OmniRoute response metadata builder: `src/domain/omnirouteResponseMeta.ts`
-- Assessment subsystem: `src/domain/assessment/` — 주기적인 평가 job
+라이브 채팅 경로는 `src/shared/utils/apiKeyPolicy.ts`의 `enforceApiKeyPolicy()`를
+호출하며, 해석된 모델과 콤보 멤버에 대한 인가는
+`src/sse/handlers/chat/resolvedModelPolicy.ts`에 구현되어 있습니다.
+`src/app/api/v1/chat/completions/route.ts`의 셀프 호스팅 진입점도 디스패치 전에
+API 키 정책을 적용합니다. 콤보 해석은 `open-sse/services/combo.ts`를 통해 실행됩니다.
 
-### E. Authorization Pipeline
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` 및 `src/lib/container.ts`는
+해당 요청 경로의 배선(wiring)이 아니라 테스트되는 계약으로 남아 있습니다. 컨테이너는
+정책 엔진을 등록하지만, 검사된 프로덕션 요청 경로는 이를 해석하지 않습니다.
+이러한 계약만 변경해서는 라이브 채팅 정책이나 콤보 라우팅이 바뀌지 않으며,
+이를 연결하거나 제거하려면 별도의 설계 결정이 필요합니다.
 
-Authorization pipeline은 모든 수신 요청을 분류하고 dispatch 전에 적절한
-policy chain을 적용합니다.
+- 예약된 정책 엔진: `src/domain/policyEngine.ts` — 잠금 → 예산 → 폴백 평가
+- 비용 규칙: `src/domain/costRules.ts`
+- 폴백 정책: `src/domain/fallbackPolicy.ts`
+- 잠금 정책: `src/domain/lockoutPolicy.ts`
+- 태그 기반 라우팅: `src/domain/tagRouter.ts`
+- 예약된 콤보 리졸버: `src/domain/comboResolver.ts` — 독립형 선택 계약; 라이브 콤보 라우팅은 `open-sse/services/combo.ts`에 구현됨
+- 연결/모델 규칙 조이너: `src/domain/connectionModelRules.ts`
+- 모델 가용성 스냅샷: `src/domain/modelAvailability.ts`
+- 프로바이더 만료 추적: `src/domain/providerExpiration.ts`
+- 쿼터 캐시: `src/domain/quotaCache.ts`
+- 성능 저하 상태: `src/domain/degradation.ts`
+- 구성 감사: `src/domain/configAudit.ts`
+- OmniRoute 응답 메타데이터 빌더: `src/domain/omnirouteResponseMeta.ts`
+- 평가(assessment) 서브시스템: `src/domain/assessment/` — 주기적 평가 작업
 
-- Pipeline 진입점: `src/server/authz/pipeline.ts`
-- Request classifier: `src/server/authz/classify.ts` — public compatibility route와
-  management route를 구분합니다.
-- Public route 목록: `src/shared/constants/publicApiRoutes.ts`
-- Policy: `src/server/authz/policies/` — 조합 가능한 predicate
+### E. 인가 파이프라인
+
+인가 파이프라인은 들어오는 모든 요청을 분류하고 디스패치 전에 적절한 정책
+체인을 적용합니다.
+
+- 파이프라인 진입점: `src/server/authz/pipeline.ts`
+- 요청 분류기: `src/server/authz/classify.ts` — 공개
+  호환 라우트와 관리 라우트를 구분
+- 공개 라우트 인벤토리: `src/shared/constants/publicApiRoutes.ts`
+- 정책: `src/server/authz/policies/` — 조합 가능한 조건자
   (`requireApiKey`, `requireManagement`, `requireFreshAuth` 등)
-- Header utility: `src/server/authz/headers.ts`
-- Assertion helper: `src/server/authz/assertAuth.ts`
-- Request context: `src/server/authz/context.ts`
+- 헤더 유틸리티: `src/server/authz/headers.ts`
+- 단언 헬퍼: `src/server/authz/assertAuth.ts`
+- 요청 컨텍스트: `src/server/authz/context.ts`
 
-Public route와 management route 사이에는 엄격한 경계가 있습니다. agent/cooldown API 및
-provider 변경에는 management auth가 필요합니다(누락된 경우 HTTP 401).
+공개 라우트와 관리 라우트는 엄격한 경계입니다: agent/cooldown API와
+프로바이더 변경(mutation)은 관리 인증이 필요합니다(없으면 HTTP 401).
 
-전체 route 분류 규칙은
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)를 참조하십시오.
+전체 라우트 분류 규칙은
+[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)를 참조하세요.
 
-### F. Workflow FSM 및 Task-Aware Router
+### F. 워크플로우 FSM 및 작업 인식 라우터
 
-Combo 선택 위에 계층화된 유한 상태 머신 기반 router로, 감지된 workflow 단계(계획, 실행,
-검토) 및 background task affinity에 따라 traffic을 전달합니다.
+콤보 선택 위에 계층화된 유한 상태 머신(FSM) 기반 라우터로, 감지된 워크플로우
+단계(계획, 실행, 검토)와 백그라운드 작업 친화성에 따라 트래픽을
+분배합니다.
 
-- 워크플로 FSM: `open-sse/services/workflowFSM.ts`
+- 워크플로우 FSM: `open-sse/services/workflowFSM.ts`
 - 작업 인식 라우터: `open-sse/services/taskAwareRouter.ts`
 - 백그라운드 작업 감지기: `open-sse/services/backgroundTaskDetector.ts`
 - 의도 분류기: `open-sse/services/intentClassifier.ts`
 
-FSM 전이는 Auto Combo의 점수 계산에 반영되어, 백그라운드/자동화 작업에는 더 저렴한 모델을 우선하고 대화형 계획/검토 턴에는 더 강력한 모델을 우선하도록 편향을 줍니다.
+FSM 전환은 Auto Combo의 스코어링에 반영되어, 백그라운드/자동화 작업에는
+더 저렴한 모델을, 대화형 계획/검토 턴에는 더 강력한 모델을 선호하도록
+편향시킵니다.
 
-### G. 제공자별 복원력
+### G. 프로바이더별 복원력
 
-여러 제공자는 전역 회로 차단기 / 연결 쿨다운 / 모델 잠금 계층을 기반으로 동작하는 전용 복원력 및 스텔스 모듈을 제공합니다.
+여러 프로바이더는 전역 서킷 브레이커 / 연결 쿨다운 / 모델 락아웃 계층 위에
+올라타는 전용 복원력 및 스텔스 모듈을 제공합니다:
 
-- Antigravity 429 엔진: `open-sse/services/antigravity429Engine.ts`(신원을 순환하고, 응답 헤더를 정리하며, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`를 통해 크레딧/버전 추적을 구동)
+- Antigravity 429 엔진: `open-sse/services/antigravity429Engine.ts` (아이덴티티를
+  순환하고, 응답 헤더를 스크럽하며, `antigravityCredits.ts`,
+  `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
+  `antigravityIdentity.ts`, `antigravityVersion.ts`를 통해 크레딧/버전 추적을 구동)
 - ModelScope 할당량 정책: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH(호환성 채널 핸드셰이크): `open-sse/services/claudeCodeCCH.ts`, 그리고 `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
-- Claude Code 지문 형성: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
+  외에 `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
+  `claudeCodeToolRemapper.ts`
+- Claude Code 핑거프린트 셰이핑: `open-sse/services/claudeCodeFingerprint.ts`
 - Claude Code 난독화: `open-sse/services/claudeCodeObfuscation.ts`
 
-전체 스텔스 플레이북과 운영 지침은 `docs/security/STEALTH_GUIDE.md`를 참조하세요(git에만 있으며 `/docs`에는 컴파일되지 않음).
+전체 스텔스 플레이북과 운영 지침은
+`docs/security/STEALTH_GUIDE.md`를 참조하세요(git에 있으며 `/docs`에 컴파일되지 않음).
 
-### H. 웹훅, 추론 캐시, 읽기 캐시
+### H. 웹훅, 리즈닝 캐시, 읽기 캐시
 
-- **웹훅** — 제공자/계정/작업 이벤트의 아웃바운드 디스패치.
+- **웹훅** — 프로바이더/계정/작업 이벤트에 대한 아웃바운드 디스패치.
   - 디스패처: `src/lib/webhookDispatcher.ts`
-  - 저장소: `webhooks` SQLite 테이블(`src/lib/db/webhooks.ts`를 통해 사용)
-  - 대시보드: `/dashboard/webhooks`(구독, 시크릿, 재시도 기록)
-  - 이벤트 분류 체계와 재시도 의미 체계는 [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)를 참조하세요.
-- **추론 캐시** — 사고 토큰을 내보내는 제공자(Claude, GLMT 등)를 위한 재생 가능한 추론 블록으로, 연속된 턴에서 재추론을 생략할 수 있습니다.
+  - 스토리지: `webhooks` SQLite 테이블(`src/lib/db/webhooks.ts` 경유)
+  - 대시보드: `/dashboard/webhooks`(구독, 시크릿, 재시도 내역)
+  - 이벤트 분류 체계와 재시도 시맨틱은 [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)를 참조하세요.
+- **리즈닝 캐시** — 사고(thinking) 토큰을 생성하는 프로바이더(Claude, GLMT 등)를 위한
+  재생 가능한 리즈닝 블록으로, 연속된 턴에서 재사고를 건너뛸 수 있습니다.
   - DB 계층: `src/lib/db/reasoningCache.ts`
   - 서비스 계층: `open-sse/services/reasoningCache.ts`
-  - 재생 의미 체계는 [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)를 참조하세요.
-- **읽기 캐시** — 시그니처를 키로 사용하는 단기 응답 캐시로, 오작동하는 업스트림 SDK의 동일한 재시도를 하나로 통합하는 데 사용됩니다.
+  - 재생 시맨틱은 [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)를 참조하세요.
+- **읽기 캐시** — 시그니처로 키가 지정되고 손상된 업스트림 SDK의 동일한
+  재시도를 병합하는 데 사용되는 단기 응답 캐시.
   - DB 계층: `src/lib/db/readCache.ts`
   - 통계 엔드포인트: `GET /api/cache/stats`, 대시보드: `/dashboard/cache`
 

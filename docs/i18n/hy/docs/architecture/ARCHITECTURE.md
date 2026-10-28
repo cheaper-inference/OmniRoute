@@ -266,73 +266,73 @@ flowchart LR
 - Կազմաձևման փաթեթ՝ `src/app/api/sync/bundle` (GET՝ կարգավորումների/մատակարարների/համակցությունների/բանալիների ETag-ով տարբերակավորված ակնթարթային պատկեր)
 - WebSocket՝ `src/app/api/v1/ws/route.ts` — Upgrade մշակիչ OpenAI-ի հետ համատեղելի WS հաճախորդների համար
 
-## 2) SSE + թարգմանության միջուկ
+## 2) SSE + Թարգմանության հիմնական միջուկ
 
-Հիմնական հոսքի մոդուլներ․
+Հիմնական հոսքի մոդուլներ.
 
-- Մուտքային կետ՝ `src/sse/handlers/chat.ts`
-- Հիմնական համակարգում՝ `open-sse/handlers/chatCore.ts`
-- Մատակարարների կատարման ադապտերներ՝ `open-sse/executors/*`
-- Ձևաչափի հայտնաբերում/մատակարարի կազմաձևում՝ `open-sse/services/provider.ts`
-- Մոդելի վերլուծում/լուծում՝ `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Հաշվի պահուստային անցման տրամաբանություն՝ `open-sse/services/accountFallback.ts`
-- Թարգմանության գրանցամատյան՝ `open-sse/translator/index.ts`
-- Հոսքի փոխակերպումներ՝ `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Օգտագործման տվյալների դուրսբերում/նորմալացում՝ `open-sse/utils/usageTracking.ts`
-- Think թեգի վերլուծիչ՝ `open-sse/utils/thinkTagParser.ts`
-- Ներդրման մշակիչ՝ `open-sse/handlers/embeddings.ts`
-- Ներդրման մատակարարների գրանցամատյան՝ `open-sse/config/embeddingRegistry.ts`
-- Պատկերների գեներացման մշակիչ՝ `open-sse/handlers/imageGeneration.ts`
-- Պատկերների մատակարարների գրանցամատյան՝ `open-sse/config/imageRegistry.ts`
-- Պատասխանի մաքրում՝ `open-sse/handlers/responseSanitizer.ts`
-- Դերերի նորմալացում՝ `open-sse/services/roleNormalizer.ts`
+- Մուտքի կետ. `src/sse/handlers/chat.ts`
+- Հիմնական օրկեստրացիա. `open-sse/handlers/chatCore.ts`
+- Պրովայդերի կատարման ադապտերներ. `open-sse/executors/*`
+- Ձևաչափի որոշում/պրովայդերի կոնֆիգուրացիա. `open-sse/services/provider.ts`
+- Մոդելի վերլուծում/լուծում. `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Հաշվի fallback տրամաբանություն. `open-sse/services/accountFallback.ts`
+- Թարգմանիչի ռեեստր. `open-sse/translator/index.ts`
+- Հոսքի փոխակերպումներ. `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Օգտագործման արդյունահանում/նորմալիզացում. `open-sse/utils/usageTracking.ts`
+- Think թեգի վերլուծիչ. `open-sse/utils/thinkTagParser.ts`
+- Embedding մշակիչ. `open-sse/handlers/embeddings.ts`
+- Embedding պրովայդերի ռեեստր. `open-sse/config/embeddingRegistry.ts`
+- Պատկերի գեներացման մշակիչ. `open-sse/handlers/imageGeneration.ts`
+- Պատկերի պրովայդերի ռեեստր. `open-sse/config/imageRegistry.ts`
+- Պատասխանի մաքրում. `open-sse/handlers/responseSanitizer.ts`
+- Դերի նորմալիզացում. `open-sse/services/roleNormalizer.ts`
 
-Ծառայություններ (բիզնես տրամաբանություն)․
+Ծառայություններ (բիզնես տրամաբանություն).
 
-- Հաշվի ընտրություն/գնահատում՝ `open-sse/services/accountSelector.ts`
-- Համատեքստի կենսացիկլի կառավարում՝ `open-sse/services/contextManager.ts`
-- IP զտիչի կիրառում՝ `open-sse/services/ipFilter.ts`
-- Սեսիաների հետագծում՝ `open-sse/services/sessionManager.ts`
-- Հարցումների կրկնօրինակների վերացում՝ `open-sse/services/signatureCache.ts`
-- Համակարգային հուշման ներարկում՝ `open-sse/services/systemPrompt.ts`
-- Մտածողության բյուջեի կառավարում՝ `open-sse/services/thinkingBudget.ts`
-- Փոխարինող նշանով մոդելի երթուղավորում՝ `open-sse/services/wildcardRouter.ts`
-- Հաճախականության սահմանաչափի կառավարում՝ `open-sse/services/rateLimitManager.ts`
-- Շղթայի անջատիչ՝ `src/shared/utils/circuitBreaker.ts`
-- Համատեքստի փոխանցում՝ `open-sse/services/contextHandoff.ts` — փոխանցման ամփոփագրի գեներացում և ներարկում՝ համատեքստի վերահաղորդման ռազմավարության համար
-- Սեղմում՝ `open-sse/services/compression/*` — կանխարգելիչ սեղմում՝ մատակարարի թարգմանությունից առաջ․
-  ներառում է Caveman կանոններ, RTK զտիչներ, շերտավորված մշակման շղթաներ, սեղմման համակցություններ, վիճակագրություն և վավերացում
-- Codex քվոտայի ստացող՝ `open-sse/services/codexQuotaFetcher.ts` — ստանում է Codex քվոտան՝ համատեքստի վերահաղորդման փոխանցման որոշումների համար
-- Սպասման ժամանակահատվածը հաշվի առնող կրկնափորձ՝ `src/sse/services/cooldownAwareRetry.ts` — յուրաքանչյուր մոդելի համար սպասման ժամանակահատվածով կրկնափորձեր՝ կազմաձևելի `requestRetry` / `maxRetryIntervalSec` պարամետրերով
-- Անվտանգ ելքային հարցում՝ `src/shared/network/safeOutboundFetch.ts` — պաշտպանված մատակարարի/մոդելի հարցում՝ SSRF պաշտպանությամբ, մասնավոր URL-ների արգելափակմամբ, կրկնափորձով և ժամանակային սահմանափակմամբ
-- Ելքային URL-ի պաշտպանություն՝ `src/shared/network/outboundUrlGuard.ts` — մատակարարի URL-ների հոսթերի ստուգումներ․ `src/shared/network/outboundUrlGuardPolicy.ts`-ը ռեժիմն ընտրում է `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` և դրանց կառավարման վահանակի փոխարկիչներից (տե՛ս `docs/reference/ENVIRONMENT.md`)
-- Մատակարարի հարցման լռելյայն արժեքներ՝ `open-sse/services/providerRequestDefaults.ts` — մատակարարի մակարդակի `maxTokens`, `temperature`, `thinkingBudgetTokens` լռելյայն արժեքներ
-- GLM մատակարարի հաստատուններ՝ `open-sse/config/glmProvider.ts` — համօգտագործվող GLM մոդելներ, քվոտայի URL-ներ, GLMT ժամանակային սահմանափակումներ/լռելյայն արժեքներ
-- Antigravity վերին մակարդակի ծառայություն՝ `open-sse/config/antigravityUpstream.ts` — բազային URL-ի և հայտնաբերման ուղու հաստատուններ
-- Codex հաճախորդի հաստատուններ՝ `open-sse/config/codexClient.ts` — տարբերակավորված օգտատիրոջ գործակալի և հաճախորդի տարբերակի արժեքներ
-- Մոդելի այլանունների սկզբնական հավաքածու՝ `src/lib/modelAliasSeed.ts` — գործարկման պահին սկզբնավորում է տարբեր պրոքսի-բարբառների 30+ այլանուն
+- Հաշվի ընտրություն/միավորներ. `open-sse/services/accountSelector.ts`
+- Կոնտեքստի կյանքի ցիկլի կառավարում. `open-sse/services/contextManager.ts`
+- IP ֆիլտրի կիրարում. `open-sse/services/ipFilter.ts`
+- Սեսիայի հետևում. `open-sse/services/sessionManager.ts`
+- Հարցումների կրկնօրինակման վերացում. `open-sse/services/signatureCache.ts`
+- Սիստեմային հրահանգի ներարկում. `open-sse/services/systemPrompt.ts`
+- Thinking բյուջեի կառավարում. `open-sse/services/thinkingBudget.ts`
+- Wildcard մոդելի երթուղավորում. `open-sse/services/wildcardRouter.ts`
+- Դրույքի սահմանաչափի կառավարում. `open-sse/services/rateLimitManager.ts`
+- Circuit breaker. `src/shared/utils/circuitBreaker.ts`
+- Կոնտեքստի փոխանցում. `open-sse/services/contextHandoff.ts` — կոնտեքստի-ռելե ռազմավարության համար փոխանցման ամփոփագիր գեներացում և ներարկում
+- Սեղմում. `open-sse/services/compression/*` — պրովայդերի թարգմանությունից առաջ կանխարգելիչ սեղմում.
+  ներառում է Caveman կանոնները, RTK ֆիլտրերը, շերտավորված խողովակաշարերը, սեղմման համակցությունները, վիճակագրությունը և վավերացումը
+- Codex քվոտայի ստացող. `open-sse/services/codexQuotaFetcher.ts` — ստանում է Codex քվոտան կոնտեքստի-ռելե փոխանցման որոշումների համար
+- Սառեցմանը զգայուն կրկնփորձ. `src/sse/services/cooldownAwareRetry.ts` — մեկ մոդելի սառեցման կրկնփորձեր կազմաձևելի `requestRetry` / `maxRetryIntervalSec`-ով
+- Անվտանգ ելքային fetch. `src/shared/network/safeOutboundFetch.ts` — պաշտպանված պրովայդերի/մոդելի fetch SSRF պաշտպանությամբ, մասնավոր URL-ների արգելափակմամբ, կրկնփորձով և timeout-ով
+- Ելքային URL պաշտպան. `src/shared/network/outboundUrlGuard.ts` — պրովայդերի URL-ների հոսթի ստուգումներ. `src/shared/network/outboundUrlGuardPolicy.ts`-ը ընտրում է ռեժիմը `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`-ից, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`-ից և դրանց վահանակի անջատիչներից (տե՛ս `docs/reference/ENVIRONMENT.md`)
+- Պրովայդերի հարցման լռելյայն արժեքներ. `open-sse/services/providerRequestDefaults.ts` — պրովայդերի մակարդակի `maxTokens`, `temperature`, `thinkingBudgetTokens` լռելյայն արժեքներ
+- GLM պրովայդերի հաստատուններ. `open-sse/config/glmProvider.ts` — ընդհանուր GLM մոդելներ, քվոտայի URL-ներ, GLMT timeout/լռելյայն արժեքներ
+- Antigravity upstream. `open-sse/config/antigravityUpstream.ts` — բազային URL և հայտնաբերման ուղու հաստատուններ
+- Codex հաճախորդի հաստատուններ. `open-sse/config/codexClient.ts` — տարբերակավորված user-agent և client-version արժեքներ
+- Մոդելի մականունների սկզբնական տվյալներ. `src/lib/modelAliasSeed.ts` — մեկնարկի ժամանակ ավելացնում է 30+ խաչմերուկային պրոքսի դիալեկտի մականուններ
 
-Տիրույթի շերտի մոդուլներ․
+Դոմեյնի շերտի մոդուլներ.
 
-- Արժեքի կանոններ/բյուջեներ՝ `src/domain/costRules.ts`
-- Պահուստային անցման քաղաքականություն՝ `src/domain/fallbackPolicy.ts`
-- Համակցությունների լուծիչ՝ `src/domain/comboResolver.ts`
-- Արգելափակման քաղաքականություն՝ `src/domain/lockoutPolicy.ts`
-- Քաղաքականությունների շարժիչ՝ `src/domain/policyEngine.ts` — կենտրոնացված արգելափակում → բյուջե → պահուստային անցում գնահատում
-- Սխալի կոդերի կատալոգ՝ `src/shared/constants/errorCodes.ts`
-- Հարցման ID՝ `src/shared/utils/requestId.ts`
-- Հարցման ժամանակային սահմանափակում՝ `src/shared/utils/fetchTimeout.ts`
-- Հարցման հեռաչափություն՝ `src/shared/utils/requestTelemetry.ts`
-- Համապատասխանություն/աուդիտ՝ `src/lib/compliance/index.ts`
-- Գնահատումների գործարկիչ՝ `src/lib/evals/evalRunner.ts`
-- Տիրույթի վիճակի պահպանում՝ `src/lib/db/domainState.ts` — SQLite CRUD՝ պահուստային անցման շղթաների, բյուջեների, ծախսերի պատմության, արգելափակման վիճակի և շղթայի անջատիչների համար
+- Ծախսերի կանոններ/բյուջեներ. `src/domain/costRules.ts`
+- Fallback քաղաքականություն. `src/domain/fallbackPolicy.ts`
+- Արգելված համակցության լուծման պայմանագիր. `src/domain/comboResolver.ts`; իրական երթուղավորումը օգտագործում է `open-sse/services/combo.ts`
+- Արգելափակման քաղաքականություն. `src/domain/lockoutPolicy.ts`
+- Արգելված քաղաքականության գնահատման պայմանագիր. `src/domain/policyEngine.ts`; հարցման ուղին կիրարում է API-key քաղաքականություն `src/shared/utils/apiKeyPolicy.ts`-ի միջոցով և լուծված թիրախի թույլտվություն `src/sse/handlers/chat/resolvedModelPolicy.ts`-ի միջոցով
+- Սխալի կոդերի կատալոգ. `src/shared/constants/errorCodes.ts`
+- Հարցման ID. `src/shared/utils/requestId.ts`
+- Fetch timeout. `src/shared/utils/fetchTimeout.ts`
+- Հարցման հեռաչափություն. `src/shared/utils/requestTelemetry.ts`
+- Համապատասխանություն/աուդիտ. `src/lib/compliance/index.ts`
+- Eval runner. `src/lib/evals/evalRunner.ts`
+- Դոմեյնի վիճակի պահպանում. `src/lib/db/domainState.ts` — SQLite CRUD fallback շղթաների, բյուջեների, ծախսերի պատմության, արգելափակման վիճակի, circuit breaker-ների համար
 
-OAuth մատակարարների մոդուլներ (27 առանձին ֆայլ `src/lib/oauth/providers/`-ի ներքո)․
+OAuth պրովայդերի մոդուլներ (27 առանձին ֆայլեր `src/lib/oauth/providers/`-ում).
 
-- Գրանցամատյանի ինդեքս՝ `src/lib/oauth/providers/index.ts`
-- Առանձին մատակարարներ՝ `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Համօգտագործվող օժանդակիչներ՝ `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl սարքային հոսք), `museCodeDeviceResponse.ts`
-- Թեթև փաթեթավորիչ՝ `src/lib/oauth/providers.ts` — վերաարտահանում է առանձին մոդուլներից
+- Ռեեստրի ինդեքս. `src/lib/oauth/providers/index.ts`
+- Առանձին պրովայդերներ. `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Ընդհանուր օգնականներ. `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl սարքի հոսք), `museCodeDeviceResponse.ts`
+- Բարակ փաթաթան. `src/lib/oauth/providers.ts` — վերաարտահանում է առանձին մոդուլներից
 
 ## 5) Ներդրված ծառայություններ (v3.8.4)
 
@@ -360,162 +360,177 @@ OmniRoute-ը կարող է տեղադրել, վերահսկել և հարցու�
 
 ### A. Auto Combo շարժիչ
 
-Auto Combo-ն հարցման պահին դինամիկորեն գնահատում և ընտրում է երթուղավորման թիրախները՝
-ստատիկ combo սահմանման վրա հենվելու փոխարեն։ Այն ապահովում է `auto/*` մոդելային նախածանցների ընտանիքի աշխատանքը։
+Auto Combo-ն հարցման պահին դինամիկ կերպով գնահատում և ընտրում է երթուղավորման նպատակները՝
+այլ ոչ թե հենվելով ստատիկ combo սահմանման վրա։ Այն աշխատեցնում է `auto/*` մոդելի նախածանցների ընտանիքը։
 
-- Շարժիչի մուտքային կետ՝ `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
+- Շարժիչի մուտք՝ `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Լուծիչ՝ `src/domain/comboResolver.ts` (`auto/` նախածանցի ավտոմատ հայտնաբերում)
-- Կառավարման վահանակ՝ `/dashboard/auto-combo`
-- Հեռաչափություն՝ SQLite-ի `auto_combo_decisions` աղյուսակ
+- Կենդանի combo-ի մուտք՝ `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), որը կանչվում է `src/sse/handlers/chat.ts`-ի կողմից
+- Վահանակ՝ `/dashboard/auto-combo`
+- Հեռաչափություն՝ `auto_combo_decisions` SQLite աղյուսակ
 
-Հիմնական հնարավորություններ՝
+Հիմնական հնարավորությունները.
 
-- **Երթուղավորման 20 ռազմավարություն** (առաջնահերթություն, կշռված, նախ լրացում, շրջանաձև հերթափոխ, P2C, պատահական,
-  նվազագույն օգտագործված, ծախսով օպտիմալացված, վերակայումը հաշվի առնող, վերակայման պատուհան, պահուստային հզորություն, քվոտայով կշռված,
-  խիստ պատահական, **auto**, lkgp, համատեքստով օպտիմալացված, քեշով օպտիմալացված, համատեքստի փոխանցում, **fusion**,
-  կոնվեյեր) —
-  auto-ն v3.8.0-ի գլխավոր հավելումն է, իսկ `fusion`-ը (պանելային զուգահեռ բաշխում + դատավորի համադրում,
-  `open-sse/services/fusion.ts`) նոր է v3.8.36-ում։
-- **16 գործոնով գնահատում**՝ քվոտա, առողջություն, հակադարձ ծախս, հակադարձ ուշացում, առաջադրանքին համապատասխանություն և
-  ևս տասը գործոն։ Գործոնների և դրանց լռելյայն կշիռների կանոնական աղյուսակը գտնվում է
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)-ում. այն այստեղ կրկնելը
-  կհանգեցներ հնանալու ևս մեկ վայրի առաջացմանը։
-- **Վիրտուալ գործարանը** ստեղծում է կարճատև combo-ներ, երբ համապատասխան անվանված combo
-  գոյություն չունի՝ թեկնածուները վերցնելով առողջ և ակտիվ մատակարարի միացումներից։
-- **Auto նախածանցներ**՝ `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — յուրաքանչյուրն ապահովվում է ճշգրտված կշիռների պրոֆիլով։
-- **Ռեժիմների 6 փաթեթ**՝ `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` և `chaos-mode` — կշիռների նախապես սահմանված կազմաձևումներ, որոնք կարելի է կանչել
-  կառավարման վահանակից։ (Չշփոթել վերը նշված `auto/*` նախածանցների հետ, որոնք
-  հարցման պահին կիրառվող տարբերակներ են։)
+- **20 երթուղավորման ռազմավարություն** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
+  pipeline) —
+  auto-ն v3.8.0-ի գլխավոր ավելացումն է. `fusion`-ը (պանելի fan-out + դատավորի սինթեզ,
+  `open-sse/services/fusion.ts`) նորություն է v3.8.36-ում։
+- **16-գործոն գնահատում**. քվոտա, առողջություն, հակադարձ արժեք, հակադարձ ուշացում,
+  առաջադրանքի համապատասխանություն և ևս տասը։ Գործոնների և դրանց լռելյայն կշիռների
+  կանոնական աղյուսակը գտնվում է
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)-ում — այն այստեղ կրկնելը
+  կստեղծի հնանալու երկրորդ վայր։
+- **Վիրտուալ ֆաբրիկան** ստեղծում է էֆեմեր combo-ներ, երբ համապատասխան անվանված combo
+  գոյություն չունի, թեկնածուներին վերցնելով առողջ ակտիվ մատակարարների միացումներից։
+- **Auto նախածանցներ**. `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
+  `auto/smart`, `auto/lkgp` — յուրաքանչյուրը հենված է կարգավորված կշռային պրոֆիլի վրա։
+- **6 ռեժիմի փաթեթ**. `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
+  `reliability-first` և `chaos-mode` — նախապես սահմանված կշռային կոնֆիգուրացիաներ,
+  որոնք կարելի է կանչել վահանակից։ (Չշփոթել վերևի `auto/*` նախածանցների հետ, որոնք
+  հարցման պահի տարբերակներ են։)
 
-Ալգորիթմական ամբողջական մանրամասների համար (գործոնների բանաձևեր, կշիռների ճշգրտում) տե՛ս
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)։
+Ալգորիթմական ամբողջական մանրամասների (գործոնների բանաձևեր, կշիռների կարգավորում) համար տե՛ս
+[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md):
 
-### B. Ամպային գործակալներ
+### B. Cloud Agents
 
-Cloud Agents-ը երրորդ կողմերի հոսթինգով տրամադրվող կոդային գործակալների հարթակները (Codex Cloud, Devin,
-Jules) միավորում է տվյալների բազայի վրա հիմնված առաջադրանքների միասնական կենսացիկլի հետևում։ Առաջադրանքների ստեղծման/ստուգման
-բոլոր վերջնակետերը պահանջում են կառավարման նույնականացում։
+Cloud Agents-ը երրորդ կողմի հոսթինգված code-agent հարթակները (Codex Cloud, Devin,
+Jules) միավորում է միասնական, DB-ի վրա հենված առաջադրանքի կենսափուլի ետևում։
+Առաջադրանքի ստեղծման/ստուգման բոլոր վերջնակետները պահանջում են կառավարման նույնականացում։
 
 - Մոդուլի արմատ՝ `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, ինչպես նաև յուրաքանչյուր գործակալի ենթապանակները `agents/`-ի տակ)
-- Յուրաքանչյուր գործակալի իրականացումներ՝ `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Հանրային վերջնակետեր՝ `/api/v1/agents/tasks/*` (ցուցակագրում/ստեղծում/ստացում/չեղարկում)
-- Կառավարման վերջնակետեր՝ `/api/cloud/*` (տրամադրում, կարգավիճակ, խմբաքանակ)
-- Կառավարման վահանակ՝ `/dashboard/cloud-agents`
+  `types.ts`, `db.ts`, գումարած `agents/`-ի տակ գտնվող ըստ գործակալի ենթապանակները)
+- Ըստ գործակալի իրականացումներ՝ `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Հանրային վերջնակետներ՝ `/api/v1/agents/tasks/*` (ցանկ/ստեղծում/ստացում/չեղարկում)
+- Կառավարման վերջնակետներ՝ `/api/cloud/*` (տրամադրում, կարգավիճակ, խմբային գործողություններ)
+- Վահանակ՝ `/dashboard/cloud-agents`
 - Պահոց՝ `cloud_agent_tasks` աղյուսակ
 
-Յուրաքանչյուր գործակալի տրամադրման և OAuth-ի առանձնահատկությունների համար տե՛ս
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)։
+Ըստ գործակալի տրամադրման և OAuth-ի մանրամասների համար տե՛ս
+[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md):
 
-### C. Պաշտպանիչ սահմանափակումներ
+### C. Guardrails
 
-Պաշտպանիչ սահմանափակումների մոդուլը թեժ վերալիցքավորվող միջնաշերտ է, որը ստուգում է հարցումներն
-ու պատասխանները՝ անձնական նույնականացվող տվյալների (PII), prompt injection-ի և տեսողական ոչ անվտանգ բովանդակության առկայության համար։ Խախտումները
-վաղաժամ ընդհատում են հարցումը՝ վերադարձնելով HTTP **503** և կառուցվածքային սխալի կոդ, ինչը թույլ է տալիս
-հաջորդական կանչողներին կրկին փորձել կամ ընտրել այլ ճյուղ։
+Guardrails մոդուլը տաք վերաբեռնելի middleware շերտ է, որը ստուգում է հարցումներն ու
+պատասխանները PII-ի, prompt injection-ի և անապահով vision բովանդակության համար։
+Խախտումները հարցումը վաղաժամ ընդհատում են HTTP **503**-ով և կառուցվածքային սխալի կոդով՝
+թույլ տալով downstream կանչողներին կրկնել փորձը կամ ճյուղավորվել։
 
 - Մոդուլի արմատ՝ `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
   `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Թեժ վերալիցքավորում՝ ռեեստրը հետևում է կազմաձևման փոփոխություններին և տեղում վերակառուցում շղթան
-- Միացման կետեր՝ զրույցի մշակիչի մուտք, պատկերների ստեղծման մշակիչ, պատասխանի սանիտարացում
-- HTTP պայմանագիր՝ խախտումները ներկայացվում են որպես `503`՝ `error.code = "GUARDRAIL_VIOLATION"`
+- Տաք վերաբեռնում՝ ռեեստրը հետևում է կոնֆիգուրացիայի փոփոխություններին և տեղում վերակառուցում է շղթան
+- Միացման կետեր՝ chat մշակիչի մուտք, պատկերի գեներացիայի մշակիչ, պատասխանի մաքրիչ
+- HTTP պայմանագիր՝ խախտումները երևում են որպես `503`՝ `error.code = "GUARDRAIL_VIOLATION"`-ով
 
-Կանոնների հավաքածուների ստեղծման և շեմերի ճշգրտման համար տե՛ս
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)։
+Կանոնակարգերի կազմման և շեմերի կարգավորման համար տե՛ս
+[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md):
 
-### D. Դոմենային շերտ
+### D. Տիրույթի շերտ
 
-`src/domain/` անվանատարածքը կենտրոնացնում է քաղաքականության որոշումները, որպեսզի երթուղիների մշակիչները ստիպված չլինեն
-ինքնուրույն համադրել արգելափակման/բյուջեի/պահուստային անցման տրամաբանությունը։
+`src/domain/` անվանատարածքը պարունակում է տիրույթի ծառայություններ և վերապահված գնահատման
+պայմանագրեր։ Այն ամեն հարցման համար միասնական պարտադիր քաղաքականության մուտքի կետ չէ։
 
-- Քաղաքականության շարժիչ՝ `src/domain/policyEngine.ts` — նախակատարողական
-  գնահատման միասնական մուտքային կետ (արգելափակում → բյուջե → պահուստային անցման հերթականություն)
-- Ծախսերի կանոններ՝ `src/domain/costRules.ts`
-- Պահուստային անցման քաղաքականություն՝ `src/domain/fallbackPolicy.ts`
+Կենդանի chat ուղին կանչում է `enforceApiKeyPolicy()`-ը
+`src/shared/utils/apiKeyPolicy.ts`-ից. լուծված մոդելների և combo անդամների լիազորումը
+իրականացված է `src/sse/handlers/chat/resolvedModelPolicy.ts`-ում։ Self-hosted մուտքը
+`src/app/api/v1/chat/completions/route.ts`-ում նույնպես կիրառում է API բանալու քաղաքականություն
+մինչև ուղարկումը։ Combo-ի լուծումը կատարվում է `open-sse/services/combo.ts`-ի միջով։
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` և `src/lib/container.ts`-ը
+մնում են փորձարկված պայմանագրեր, ոչ թե այդ հարցման ուղու կապակցում։ Կոնտեյները գրանցում է
+քաղաքականության շարժիչը, բայց ստուգված production հարցման ուղին չի լուծում այն։ Միայն այդ
+պայմանագրերը փոխելը չի փոխում կենդանի chat քաղաքականությունը կամ combo երթուղավորումը.
+դրանք միացնելը կամ հեռացնելը պահանջում է առանձին նախագծային որոշում։
+
+- Վերապահված քաղաքականության շարժիչ՝ `src/domain/policyEngine.ts` — արգելափակում → բյուջե → fallback գնահատում
+- Արժեքի կանոններ՝ `src/domain/costRules.ts`
+- Fallback քաղաքականություն՝ `src/domain/fallbackPolicy.ts`
 - Արգելափակման քաղաքականություն՝ `src/domain/lockoutPolicy.ts`
-- Պիտակների վրա հիմնված երթուղավորում՝ `src/domain/tagRouter.ts`
-- Combo լուծիչ՝ `src/domain/comboResolver.ts` — combo անունները, auto/\*
-  նախածանցները և wildcard մոդելային թիրախները վերածում է կատարման հստակ պլանների
+- Պիտակի հիման վրա երթուղավորում՝ `src/domain/tagRouter.ts`
+- Վերապահված combo լուծիչ՝ `src/domain/comboResolver.ts` — ինքնուրույն ընտրության պայմանագիր. կենդանի combo երթուղավորումը իրականացված է `open-sse/services/combo.ts`-ում
 - Միացման/մոդելի կանոնների միավորիչ՝ `src/domain/connectionModelRules.ts`
-- Մոդելների հասանելիության ակնթարթային պատկերներ՝ `src/domain/modelAvailability.ts`
-- Մատակարարների ժամկետի ավարտի հետևում՝ `src/domain/providerExpiration.ts`
+- Մոդելի հասանելիության ակնթարթային պատկերներ՝ `src/domain/modelAvailability.ts`
+- Մատակարարի ժամկետանցման հետևում՝ `src/domain/providerExpiration.ts`
 - Քվոտայի քեշ՝ `src/domain/quotaCache.ts`
-- Դեգրադացման վիճակ՝ `src/domain/degradation.ts`
-- Կազմաձևման աուդիտ՝ `src/domain/configAudit.ts`
+- Վատթարացման վիճակ՝ `src/domain/degradation.ts`
+- Կոնֆիգուրացիայի աուդիտ՝ `src/domain/configAudit.ts`
 - OmniRoute պատասխանի մետատվյալների կառուցիչ՝ `src/domain/omnirouteResponseMeta.ts`
 - Գնահատման ենթահամակարգ՝ `src/domain/assessment/` — պարբերական գնահատման առաջադրանքներ
 
-### E. Լիազորման կոնվեյեր
+### E. Լիազորման խողովակաշար
 
-Լիազորման կոնվեյերը դասակարգում է յուրաքանչյուր մուտքային հարցում և կիրառում
-համապատասխան քաղաքականությունների շղթան՝ նախքան ուղարկումը։
+Լիազորման խողովակաշարը դասակարգում է յուրաքանչյուր մուտքային հարցում և կիրառում է
+համապատասխան քաղաքականության շղթան մինչև ուղարկումը։
 
-- Կոնվեյերի մուտքային կետ՝ `src/server/authz/pipeline.ts`
-- Հարցումների դասակարգիչ՝ `src/server/authz/classify.ts` — տարբերակում է հանրային
+- Pipeline-ի մուտքային կետ՝ `src/server/authz/pipeline.ts`
+- Հարցման դասակարգիչ՝ `src/server/authz/classify.ts` — տարբերակում է հանրային
   համատեղելիության երթուղիները կառավարման երթուղիներից
 - Հանրային երթուղիների ցանկ՝ `src/shared/constants/publicApiRoutes.ts`
-- Քաղաքականություններ՝ `src/server/authz/policies/` — համադրելի պրեդիկատներ
+- Կանոնակարգեր՝ `src/server/authz/policies/` — կոմպոզվող պրեդիկատներ
   (`requireApiKey`, `requireManagement`, `requireFreshAuth` և այլն)
 - Վերնագրերի օգտակար գործիքներ՝ `src/server/authz/headers.ts`
-- Պնդման օգնական՝ `src/server/authz/assertAuth.ts`
-- Հարցման համատեքստ՝ `src/server/authz/context.ts`
+- Հաստատման օգնական՝ `src/server/authz/assertAuth.ts`
+- Հարցման կոնտեքստ՝ `src/server/authz/context.ts`
 
-Հանրային և կառավարման երթուղիների միջև խիստ սահման կա. գործակալների/cooldown API-ները և
-մատակարարների փոփոխությունները պահանջում են կառավարման նույնականացում (բացակայության դեպքում՝ HTTP 401)։
+Հանրային և կառավարման երթուղիների միջև խիստ սահման կա. agent/cooldown API-ները և
+մատակարարի փոփոխությունները պահանջում են կառավարման նույնականացում (HTTP 401, եթե այն բացակայում է)։
 
 Երթուղիների դասակարգման ամբողջական կանոնների համար տե՛ս
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)։
+[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md):
 
-### F. Աշխատանքային հոսքի FSM և առաջադրանքը հաշվի առնող երթուղիչ
+### F. Աշխատանքային հոսքի FSM և առաջադրանք-զգայուն երթուղավորիչ
 
-Վերջավոր վիճակների մեքենայով կառավարվող երթուղիչ, որը շերտավորված է combo ընտրության վերևում՝
-երթևեկությունն ըստ հայտնաբերված աշխատանքային հոսքի փուլի (պլանավորում, կատարում,
-վերանայում) և ֆոնային առաջադրանքի համապատասխանության ուղղորդելու համար։
+Վերջավոր վիճակների ավտոմատի վրա հիմնված երթուղավորիչ, որը շերտավորված է կոմբո ընտրության
+վերևում՝ թրաֆիկը ուղղորդելու համար՝ ելնելով հայտնաբերված աշխատանքային հոսքի փուլից
+(պլանավորում, կատարում, վերանայում) և ֆոնային առաջադրանքների հարակցությունից։
 
 - Աշխատանքային հոսքի FSM՝ `open-sse/services/workflowFSM.ts`
-- Առաջադրանքը հաշվի առնող երթուղիչ՝ `open-sse/services/taskAwareRouter.ts`
+- Առաջադրանք-զգայուն երթուղավորիչ՝ `open-sse/services/taskAwareRouter.ts`
 - Ֆոնային առաջադրանքների հայտնաբերիչ՝ `open-sse/services/backgroundTaskDetector.ts`
 - Մտադրության դասակարգիչ՝ `open-sse/services/intentClassifier.ts`
 
-FSM-ի անցումները ներառվում են Auto Combo-ի գնահատման մեջ՝ ֆոնային/ավտոմատացման առաջադրանքների համար նախապատվությունը տալով ավելի էժան մոդելներին, իսկ ինտերակտիվ պլանավորման/վերանայման փուլերի համար՝ ավելի հզոր մոդելներին։
+FSM-ի անցումները սնուցում են Auto Combo-ի միավորագրումը՝ թեքելով դեպի ավելի էժան մոդելներ
+ֆոնային/ավտոմատացման առաջադրանքների համար և դեպի ավելի հզոր մոդելներ՝ ինտերակտիվ
+պլանավորման/վերանայման պտույտների համար։
 
-### G. Մատակարարին հատուկ կայունություն
+### G. Մատակարար-հատուկ կայունություն
 
-Մի քանի մատակարարներ տրամադրում են կայունության և քողարկման հատուկ մոդուլներ, որոնք հիմնվում են գլոբալ շղթայի ընդհատիչի / կապի վերականգնման սպասման / մոդելի արգելափակման շերտերի վրա՝
+Մի քանի մատակարարներ ներառում են հատուկ կայունության և թաքնվածության (stealth) մոդուլներ,
+որոնք հենվում են գլոբալ circuit breaker / միացման cooldown / մոդելի արգելափակման շերտերի վրա՝
 
-- Antigravity 429 շարժիչ՝ `open-sse/services/antigravity429Engine.ts` (փոխում է
-  ինքնությունը, մաքրում է պատասխանի վերնագրերը, կառավարում է կրեդիտների/տարբերակի հետագծումը՝
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts` մոդուլների միջոցով)
-- ModelScope քվոտայի քաղաքականություն՝ `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (համատեղելիության կապուղու ձեռքսեղմում)՝ `open-sse/services/claudeCodeCCH.ts`,
+- Antigravity 429 շարժիչ՝ `open-sse/services/antigravity429Engine.ts` (պտտեցնում է
+  ինքնությունը, մաքրում է պատասխանի վերնագրերը, կառավարում է կրեդիտների/տարբերակի հետևումը
+  `antigravityCredits.ts`-ի, `antigravityHeaderScrub.ts`-ի, `antigravityHeaders.ts`-ի,
+  `antigravityIdentity.ts`-ի, `antigravityVersion.ts`-ի միջոցով)
+- ModelScope-ի քվոտայի կանոնակարգ՝ `open-sse/services/modelscopePolicy.ts`
+- Claude Code CCH (Compatibility Channel Handshake)՝ `open-sse/services/claudeCodeCCH.ts`,
   ինչպես նաև `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
   `claudeCodeToolRemapper.ts`
 - Claude Code-ի մատնահետքի ձևավորում՝ `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code-ի քողարկում՝ `open-sse/services/claudeCodeObfuscation.ts`
+- Claude Code-ի շփոթեցում (obfuscation)՝ `open-sse/services/claudeCodeObfuscation.ts`
 
-Քողարկման ամբողջական ուղեցույցի և շահագործման հրահանգների համար տե՛ս
-`docs/security/STEALTH_GUIDE.md` (git-ում է, չի կոմպիլացվում `/docs`-ում)։
+Stealth-ի ամբողջական տակտիկաների և գործառնական ուղեցույցի համար տե՛ս
+`docs/security/STEALTH_GUIDE.md` (git; չի կոմպիլվում `/docs`-ի մեջ)։
 
-### H. Վեբհուքեր, հիմնավորման քեշ, ընթերցման քեշ
+### H. Վեբհուքեր, Reasoning քեշ, Read քեշ
 
-- **Վեբհուքեր** — մատակարարի/հաշվի/առաջադրանքի իրադարձությունների ելքային առաքում։
-  - Դիսպետչեր՝ `src/lib/webhookDispatcher.ts`
+- **Վեբհուքեր** — մատակարարի/հաշվի/առաջադրանքի իրադարձությունների ելքային ուղարկում։
+  - Բաշխիչ՝ `src/lib/webhookDispatcher.ts`
   - Պահոց՝ `webhooks` SQLite աղյուսակ (`src/lib/db/webhooks.ts`-ի միջոցով)
-  - Կառավարման վահանակ՝ `/dashboard/webhooks` (բաժանորդագրություններ, գաղտնիքներ, կրկնափորձերի պատմություն)
-  - Իրադարձությունների դասակարգման և կրկնափորձերի իմաստաբանության համար տե՛ս [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)։
-- **Հիմնավորման քեշ** — վերարտադրելի հիմնավորման բլոկներ այն մատակարարների համար, որոնք
-  արտածում են մտածողության թոքեններ (Claude, GLMT և այլն), որպեսզի հաջորդական փուլերում հնարավոր լինի խուսափել կրկնակի մտածելուց։
-  - ՏԲ շերտ՝ `src/lib/db/reasoningCache.ts`
+  - Վահանակ՝ `/dashboard/webhooks` (բաժանորդագրություններ, գաղտնիքներ, կրկնափորձերի պատմություն)
+  - Իրադարձությունների տաքսոնոմիայի և կրկնափորձերի սեմանտիկայի համար տե՛ս [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md):
+- **Reasoning քեշ** — վերանվագարկելի մտաբանման բլոկներ այն մատակարարների համար, որոնք
+  արտադրում են մտածման թոքեներ (Claude, GLMT և այլն), որպեսզի հաջորդական պտույտները
+  կարողանան շրջանցել կրկնակի մտածումը։
+  - Տվյալների բազայի շերտ՝ `src/lib/db/reasoningCache.ts`
   - Ծառայության շերտ՝ `open-sse/services/reasoningCache.ts`
-  - Վերարտադրման իմաստաբանության համար տե՛ս [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)։
-- **Ընթերցման քեշ** — կարճաժամկետ պատասխանի քեշ՝ ըստ ստորագրության, որն օգտագործվում է
-  խափանված վերին մակարդակի SDK-ներից եկող նույնական կրկնափորձերը միավորելու համար։
-  - ՏԲ շերտ՝ `src/lib/db/readCache.ts`
-  - Վիճակագրության վերջնակետ՝ `GET /api/cache/stats`, կառավարման վահանակը՝ `/dashboard/cache`
+  - Վերանվագարկման սեմանտիկայի համար տե՛ս [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md):
+- **Read քեշ** — կարճատև պատասխանների քեշ, որը բանալիացված է ստորագրությամբ և
+  օգտագործվում է վերևահոսքի խնդրահարույց SDK-ներից եկած նույնական կրկնափորձերը միավորելու համար։
+  - Տվյալների բազայի շերտ՝ `src/lib/db/readCache.ts`
+  - Վիճակագրության endpoint՝ `GET /api/cache/stats`, վահանակը՝ `/dashboard/cache`
 
 ## 3) Պահպանման շերտ
 

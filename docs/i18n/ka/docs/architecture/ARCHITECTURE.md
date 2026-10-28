@@ -266,73 +266,73 @@ flowchart LR
 - კონფიგურაციის პაკეტი: `src/app/api/sync/bundle` (GET, პარამეტრების/პროვაიდერების/კომბინაციების/გასაღებების ETag-ით ვერსირებული ანაბეჭდი)
 - WebSocket: `src/app/api/v1/ws/route.ts` — Upgrade დამმუშავებელი OpenAI-სთან თავსებადი WS კლიენტებისთვის
 
-## 2) SSE + თარგმანის ბირთვი
+## 2) SSE + თარგმნის ბირთვი
 
 მთავარი ნაკადის მოდულები:
 
 - შესასვლელი წერტილი: `src/sse/handlers/chat.ts`
-- ძირითადი ორკესტრირება: `open-sse/handlers/chatCore.ts`
+- ძირითადი ორკესტრაცია: `open-sse/handlers/chatCore.ts`
 - პროვაიდერის შესრულების ადაპტერები: `open-sse/executors/*`
-- ფორმატის ამოცნობა/პროვაიდერის კონფიგურაცია: `open-sse/services/provider.ts`
-- მოდელის დამუშავება/განსაზღვრა: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- ანგარიშზე სარეზერვო გადართვის ლოგიკა: `open-sse/services/accountFallback.ts`
-- თარგმანის რეესტრი: `open-sse/translator/index.ts`
-- ნაკადის გარდაქმნები: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- გამოყენების მონაცემების ამოღება/ნორმალიზაცია: `open-sse/utils/usageTracking.ts`
-- ფიქრის ტეგის პარსერი: `open-sse/utils/thinkTagParser.ts`
-- ემბედინგების დამმუშავებელი: `open-sse/handlers/embeddings.ts`
-- ემბედინგების პროვაიდერთა რეესტრი: `open-sse/config/embeddingRegistry.ts`
-- სურათების გენერირების დამმუშავებელი: `open-sse/handlers/imageGeneration.ts`
-- სურათების პროვაიდერთა რეესტრი: `open-sse/config/imageRegistry.ts`
-- პასუხის სანიტიზაცია: `open-sse/handlers/responseSanitizer.ts`
+- ფორმატის აღმოჩენა/პროვაიდერის კონფიგურაცია: `open-sse/services/provider.ts`
+- მოდელის პარსინგი/ამოხსნა: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- ანგარიშის fallback ლოგიკა: `open-sse/services/accountFallback.ts`
+- თარგმნის რეესტრი: `open-sse/translator/index.ts`
+- ნაკადის ტრანსფორმაციები: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- გამოყენების ამოღება/ნორმალიზაცია: `open-sse/utils/usageTracking.ts`
+- Think თეგის პარსერი: `open-sse/utils/thinkTagParser.ts`
+- ემბედინგის დამმუშავებელი: `open-sse/handlers/embeddings.ts`
+- ემბედინგის პროვაიდერების რეესტრი: `open-sse/config/embeddingRegistry.ts`
+- სურათის გენერაციის დამმუშავებელი: `open-sse/handlers/imageGeneration.ts`
+- სურათის პროვაიდერების რეესტრი: `open-sse/config/imageRegistry.ts`
+- პასუხების გასუფთავება: `open-sse/handlers/responseSanitizer.ts`
 - როლების ნორმალიზაცია: `open-sse/services/roleNormalizer.ts`
 
-სერვისები (ბიზნესლოგიკა):
+სერვისები (ბიზნეს ლოგიკა):
 
-- ანგარიშის შერჩევა/შეფასება: `open-sse/services/accountSelector.ts`
+- ანგარიშის არჩევა/შეფასება: `open-sse/services/accountSelector.ts`
 - კონტექსტის სასიცოცხლო ციკლის მართვა: `open-sse/services/contextManager.ts`
-- IP-ფილტრის წესების აღსრულება: `open-sse/services/ipFilter.ts`
-- სესიების თვალყურის დევნება: `open-sse/services/sessionManager.ts`
-- მოთხოვნების დუბლირების აღმოფხვრა: `open-sse/services/signatureCache.ts`
-- სისტემური მითითების ჩასმა: `open-sse/services/systemPrompt.ts`
-- მსჯელობის ბიუჯეტის მართვა: `open-sse/services/thinkingBudget.ts`
-- მოდელების wildcard-მარშრუტიზაცია: `open-sse/services/wildcardRouter.ts`
-- სიხშირის ლიმიტის მართვა: `open-sse/services/rateLimitManager.ts`
-- ამომრთველი: `src/shared/utils/circuitBreaker.ts`
-- კონტექსტის გადაცემა: `open-sse/services/contextHandoff.ts` — გადაცემის შეჯამების გენერირება და ჩასმა context-relay სტრატეგიისთვის
-- შეკუმშვა: `open-sse/services/compression/*` — პროვაიდერთან თარგმნამდე პროაქტიული შეკუმშვა;
-  მოიცავს Caveman-ის წესებს, RTK-ფილტრებს, მრავალდონიან კონვეიერებს, შეკუმშვის კომბინაციებს, სტატისტიკასა და ვალიდაციას
-- Codex-ის კვოტის მიმღები: `open-sse/services/codexQuotaFetcher.ts` — იღებს Codex-ის კვოტას context-relay გადაცემის შესახებ გადაწყვეტილებებისთვის
-- გაცივების პერიოდის გათვალისწინებით განმეორებითი მცდელობა: `src/sse/services/cooldownAwareRetry.ts` — თითოეული მოდელისთვის გაცივების პერიოდის მქონე განმეორებითი მცდელობები, კონფიგურირებადი `requestRetry` / `maxRetryIntervalSec` პარამეტრებით
-- უსაფრთხო გამავალი fetch: `src/shared/network/safeOutboundFetch.ts` — დაცული პროვაიდერის/მოდელის fetch SSRF-ისგან დაცვით, კერძო URL-ების დაბლოკვით, განმეორებითი მცდელობითა და დროის ამოწურვით
-- გამავალი URL-ების დამცავი: `src/shared/network/outboundUrlGuard.ts` — პროვაიდერის URL-ების ჰოსტების შემოწმება; `src/shared/network/outboundUrlGuardPolicy.ts` რეჟიმს ირჩევს `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` და მათი მართვის პანელის გადამრთველების მიხედვით (იხილეთ `docs/reference/ENVIRONMENT.md`)
-- პროვაიდერის მოთხოვნის ნაგულისხმევი პარამეტრები: `open-sse/services/providerRequestDefaults.ts` — პროვაიდერის დონის `maxTokens`, `temperature`, `thinkingBudgetTokens` ნაგულისხმევი მნიშვნელობები
-- GLM პროვაიდერის კონსტანტები: `open-sse/config/glmProvider.ts` — საზიარო GLM მოდელები, კვოტის URL-ები, GLMT დროის ამოწურვისა და ნაგულისხმევი მნიშვნელობები
-- Antigravity-ის ზედა დონის სერვისი: `open-sse/config/antigravityUpstream.ts` — საბაზისო URL-ისა და აღმოჩენის ბილიკის კონსტანტები
-- Codex კლიენტის კონსტანტები: `open-sse/config/codexClient.ts` — ვერსიონირებული user-agent-ისა და კლიენტის ვერსიის მნიშვნელობები
-- მოდელების ფსევდონიმების საწყისი მონაცემები: `src/lib/modelAliasSeed.ts` — გაშვებისას ამატებს 30-ზე მეტ სხვადასხვა პროქსი-დიალექტის ფსევდონიმს
+- IP ფილტრის აღსრულება: `open-sse/services/ipFilter.ts`
+- სესიების თვალთვალი: `open-sse/services/sessionManager.ts`
+- მოთხოვნების დედუპლიკაცია: `open-sse/services/signatureCache.ts`
+- სისტემური პრომპტის ინექცია: `open-sse/services/systemPrompt.ts`
+- აზროვნების ბიუჯეტის მართვა: `open-sse/services/thinkingBudget.ts`
+- Wildcard მოდელების მარშრუტიზაცია: `open-sse/services/wildcardRouter.ts`
+- Rate limit-ების მართვა: `open-sse/services/rateLimitManager.ts`
+- Circuit breaker: `src/shared/utils/circuitBreaker.ts`
+- კონტექსტის გადაცემა: `open-sse/services/contextHandoff.ts` — გადაცემის შეჯამების გენერაცია და ინექცია context-relay სტრატეგიისთვის
+- კომპრესია: `open-sse/services/compression/*` — პროაქტიული კომპრესია პროვაიდერისთვის თარგმნამდე;
+  მოიცავს Caveman წესებს, RTK ფილტრებს, სტეკურ პაიპლაინებს, კომპრესიის კომბინაციებს, სტატისტიკასა და ვალიდაციას
+- Codex კვოტის მიმღები: `open-sse/services/codexQuotaFetcher.ts` — იღებს Codex კვოტას context-relay გადაცემის გადაწყვეტილებებისთვის
+- Cooldown-ის გათვალისწინებული ხელახლა ცდა: `src/sse/services/cooldownAwareRetry.ts` — თითოეული მოდელისთვის cooldown-ით ხელახლა ცდები კონფიგურირებადი `requestRetry` / `maxRetryIntervalSec` პარამეტრებით
+- უსაფრთხო გამავალი fetch: `src/shared/network/safeOutboundFetch.ts` — დაცული პროვაიდერის/მოდელის fetch SSRF დაცვით, პირადი URL-ების დაბლოკვით, ხელახლა ცდითა და timeout-ით
+- გამავალი URL-ების დაცვა: `src/shared/network/outboundUrlGuard.ts` — ჰოსტების შემოწმება პროვაიდერის URL-ებზე; `src/shared/network/outboundUrlGuardPolicy.ts` ირჩევს რეჟიმს `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`-დან და მათი დაშბორდის გადამრთველებიდან (იხ. `docs/reference/ENVIRONMENT.md`)
+- პროვაიდერის მოთხოვნის ნაგულისხმები მნიშვნელობები: `open-sse/services/providerRequestDefaults.ts` — პროვაიდერის დონის `maxTokens`, `temperature`, `thinkingBudgetTokens` ნაგულისხმები მნიშვნელობები
+- GLM პროვაიდერის კონსტანტები: `open-sse/config/glmProvider.ts` — გაზიარებული GLM მოდელები, კვოტის URL-ები, GLMT timeout/ნაგულისხმები მნიშვნელობები
+- Antigravity აპსტრიმი: `open-sse/config/antigravityUpstream.ts` — საბაზო URL-ისა და აღმოჩენის გზის კონსტანტები
+- Codex კლიენტის კონსტანტები: `open-sse/config/codexClient.ts` — ვერსიანიჭებული user-agent-ისა და client-version-ის მნიშვნელობები
+- მოდელის ალიასების დათესვა: `src/lib/modelAliasSeed.ts` — გაშვებისას თესავს 30+ ჯვარედინი პროქსის დიალექტის ალიასებს
 
-დომენური შრის მოდულები:
+დომენის შრის მოდულები:
 
 - ღირებულების წესები/ბიუჯეტები: `src/domain/costRules.ts`
-- სარეზერვო გადართვის პოლიტიკა: `src/domain/fallbackPolicy.ts`
-- კომბინაციების განმსაზღვრელი: `src/domain/comboResolver.ts`
-- ბლოკირების პოლიტიკა: `src/domain/lockoutPolicy.ts`
-- პოლიტიკის ძრავა: `src/domain/policyEngine.ts` — ცენტრალიზებული ბლოკირების → ბიუჯეტის → სარეზერვო გადართვის შეფასება
+- Fallback პოლიტიკა: `src/domain/fallbackPolicy.ts`
+- დარეზერვებული კომბოს ამოხსნის კონტრაქტი: `src/domain/comboResolver.ts`; ცოცხალი მარშრუტიზაცია იყენებს `open-sse/services/combo.ts`-ს
+- დაბლოკვის პოლიტიკა: `src/domain/lockoutPolicy.ts`
+- დარეზერვებული პოლიტიკის შეფასების კონტრაქტი: `src/domain/policyEngine.ts`; მოთხოვნის გზა ახორციელებს API-გასაღების პოლიტიკას `src/shared/utils/apiKeyPolicy.ts`-ით და ამოხსნილი სამიზნის ავტორიზაციას `src/sse/handlers/chat/resolvedModelPolicy.ts`-ით
 - შეცდომის კოდების კატალოგი: `src/shared/constants/errorCodes.ts`
 - მოთხოვნის ID: `src/shared/utils/requestId.ts`
-- fetch-ის დროის ამოწურვა: `src/shared/utils/fetchTimeout.ts`
+- Fetch-ის timeout: `src/shared/utils/fetchTimeout.ts`
 - მოთხოვნის ტელემეტრია: `src/shared/utils/requestTelemetry.ts`
 - შესაბამისობა/აუდიტი: `src/lib/compliance/index.ts`
 - შეფასებების გამშვები: `src/lib/evals/evalRunner.ts`
-- დომენის მდგომარეობის მუდმივი შენახვა: `src/lib/db/domainState.ts` — SQLite CRUD სარეზერვო გადართვის ჯაჭვებისთვის, ბიუჯეტებისთვის, ღირებულების ისტორიისთვის, ბლოკირების მდგომარეობისა და ამომრთველებისთვის
+- დომენის მდგომარეობის შენახვა: `src/lib/db/domainState.ts` — SQLite CRUD fallback ჯაჭვებისთვის, ბიუჯეტებისთვის, ღირებულების ისტორიისთვის, დაბლოკვის მდგომარეობისთვის, circuit breaker-ებისთვის
 
-OAuth პროვაიდერის მოდულები (27 ცალკეული ფაილი `src/lib/oauth/providers/`-ში):
+OAuth პროვაიდერების მოდულები (27 ცალკეული ფაილი `src/lib/oauth/providers/`-ში):
 
 - რეესტრის ინდექსი: `src/lib/oauth/providers/index.ts`
 - ცალკეული პროვაიდერები: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- საზიარო დამხმარეები: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl მოწყობილობის ნაკადი), `museCodeDeviceResponse.ts`
-- თხელი გარსი: `src/lib/oauth/providers.ts` — ცალკეული მოდულებიდან ხელახლა ახორციელებს ექსპორტს
+- გაზიარებული დამხმარეები: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl მოწყობილობის ავტორიზაციის ნაკადი), `museCodeDeviceResponse.ts`
+- თხელი შესაფარებელი: `src/lib/oauth/providers.ts` — რეექსპორტი ცალკეული მოდულებიდან
 
 ## 5) ჩაშენებული სერვისები (v3.8.4)
 
@@ -359,166 +359,190 @@ OmniRoute-ს შეუძლია დააყენოს, ზედამხ
 
 ## ძირითადი ქვესისტემები (v3.8.0)
 
-### A. ავტომატური კომბინაციების ძრავა
+### A. Auto Combo-ს ძრავა
 
-Auto Combo მოთხოვნის დამუშავებისას დინამიკურად აფასებს და ირჩევს მარშრუტიზაციის სამიზნეებს, ნაცვლად იმისა, რომ სტატიკურ კომბინაციის განსაზღვრებას დაეყრდნოს. ის უზრუნველყოფს `auto/*` მოდელის პრეფიქსების ოჯახის მუშაობას.
+Auto Combo მოთხოვნის მომენტში დინამიურად აფასებს და ირჩევს რაუტინგის მიზნებს,
+ნაცვლად იმისა, რომ სტატიკური კომბოს განმარტებაზე იყოს დამოკიდებული. ის უზრუნველყოფს
+`auto/*` მოდელის პრეფიქსების ოჯახის მუშაობას.
 
 - ძრავის შესასვლელი: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- გადამწყვეტი: `src/domain/comboResolver.ts` (`auto/` პრეფიქსის ავტომატური აღმოჩენა)
-- მართვის პანელი: `/dashboard/auto-combo`
+- ცოცხალი კომბოს შესასვლელი: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), რომელსაც იძახებს `src/sse/handlers/chat.ts`
+- დეშბორდი: `/dashboard/auto-combo`
 - ტელემეტრია: `auto_combo_decisions` SQLite ცხრილი
 
 ძირითადი შესაძლებლობები:
 
-- **მარშრუტიზაციის 20 სტრატეგია** (პრიორიტეტული, შეწონილი, ჯერ შევსება, ციკლური განაწილება, P2C, შემთხვევითი,
-  ყველაზე ნაკლებად გამოყენებული, ხარჯზე ოპტიმიზებული, განულების გათვალისწინებით, განულების ფანჯარა, თავისუფალი რესურსი, კვოტით შეწონილი,
-  მკაცრად შემთხვევითი, **ავტომატური**, lkgp, კონტექსტზე ოპტიმიზებული, კეშზე ოპტიმიზებული, კონტექსტის გადაცემა, **fusion**,
-  კონვეიერი) —
-  ავტომატური სტრატეგია v3.8.0-ის მთავარი სიახლეა; `fusion` (პანელზე პარალელური განაწილება + მსაჯის მიერ სინთეზი,
+- **20 რაუტინგის სტრატეგია** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
+  pipeline) —
+  auto არის v3.8.0-ის მთავარი სიახლე; `fusion` (პანელებზე fan-out + მსაჯულის სინთეზი,
   `open-sse/services/fusion.ts`) ახალია v3.8.36-ში.
-- **16-ფაქტორიანი შეფასება**: კვოტა, მდგომარეობა, შებრუნებული ღირებულება, შებრუნებული დაყოვნება, ამოცანასთან შესაბამისობა და
-  კიდევ ათი ფაქტორი. ფაქტორებისა და მათი ნაგულისხმევი წონების კანონიკური ცხრილი განთავსებულია
+- **16-ფაქტორიანი სქორინგი**: ქვოტა, ჯანმრთელობა, შებრუნებული ღირებულება, შებრუნებული
+  ლატენცია, ამოცანის შესაბამისობა და კიდევ ათი სხვა. ფაქტორებისა და მათი ნაგულისხმევი
+  წონების კანონიკური ცხრილი მოთავსებულია
   [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)-ში — მისი აქ გამეორება
-  შექმნიდა კიდევ ერთ ადგილს, სადაც ინფორმაცია შეიძლება მოძველდეს.
-- **ვირტუალური ფაბრიკა** ქმნის დროებით კომბინაციებს, როდესაც შესაბამისი სახელდებული კომბინაცია
-  არ არსებობს, და კანდიდატებს იღებს აქტიური, გამართულად მომუშავე პროვაიდერების კავშირებიდან.
-- **ავტომატური პრეფიქსები**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — თითოეული მათგანი ეფუძნება მორგებულ წონით პროფილს.
-- **რეჟიმების 6 პაკეტი**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` და `chaos-mode` — წონების წინასწარ განსაზღვრული კონფიგურაციები, რომელთა გამოძახებაც შესაძლებელია
-  მართვის პანელიდან. (არ აგერიოთ ზემოთ ჩამოთვლილ `auto/*` პრეფიქსებში, რომლებიც
-  მოთხოვნის დამუშავების დროის ვარიანტებია.)
+  შექმნიდა მეორე ადგილს, სადაც ის დროთა განმავლობაში განუახლებელი დარჩებოდა.
+- **ვირტუალური ფაბრიკა** ქმნის დროებით კომბოებს მაშინ, როდესაც შესაბამისი
+  დასახელებული კომბო არ არსებობს; კანდიდატებს იღებს ჯანსაღი აქტიური პროვაიდერის
+  კავშირებიდან.
+- **Auto პრეფიქსები**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
+  `auto/smart`, `auto/lkgp` — თითოეულს უკან დახვეწილი წონების პროფილი დგას.
+- **6 რეჟიმის პაკეტი**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
+  `reliability-first` და `chaos-mode` — წინასწარ განსაზღვრული წონების კონფიგურაციები,
+  რომლებიც დეშბორდიდანაა გამოსაძახებელი. (ნუ აგერივებათ ზემოთ მოყვანილ `auto/*`
+  პრეფიქსებში — ისინი მოთხოვნის მომენტის ვარიანტებია.)
 
-ალგორითმის სრული დეტალებისთვის (ფაქტორების ფორმულები, წონების გამართვა) იხილეთ
+სრული ალგორითმული დეტალებისთვის (ფაქტორების ფორმულები, წონების დახვეწა) იხილეთ
 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. ღრუბლოვანი აგენტები
+### B. Cloud Agents
 
-Cloud Agents მესამე მხარის ჰოსტირებულ კოდის აგენტების პლატფორმებს (Codex Cloud, Devin,
-Jules) აერთიანებს მონაცემთა ბაზაზე დაფუძნებული ამოცანების სასიცოცხლო ციკლის ერთიანი ინტერფეისის მიღმა. ამოცანების შექმნისა და დათვალიერების
-ყველა საბოლოო წერტილი საჭიროებს მართვის ავთენტიფიკაციას.
+Cloud Agents მესამე მხარის ჰოსტირებული კოდ-აგენტის პლატფორმებს (Codex Cloud, Devin,
+Jules) აერთიანებს ერთიანი, მონაცემთა ბაზაზე დაფუძნებული ამოცანის სასიცოცხლო ციკლის უკან.
+ამოცანის შექმნის/დათვალიერების ყველა ენდპოინტი მოითხოვს სამართავ ავთენტიფიკაციას.
 
 - მოდულის ფესვი: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, აგრეთვე თითოეული აგენტის ქვეკატალოგები `agents/`-ის ქვეშ)
-- ცალკეული აგენტების იმპლემენტაციები: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- საჯარო საბოლოო წერტილები: `/api/v1/agents/tasks/*` (სიის მიღება/შექმნა/მიღება/გაუქმება)
-- მართვის საბოლოო წერტილები: `/api/cloud/*` (რესურსებით უზრუნველყოფა, სტატუსი, პაკეტური დამუშავება)
-- მართვის პანელი: `/dashboard/cloud-agents`
+  `types.ts`, `db.ts`, პლუს თითოეული აგენტის ქვედირექტორიები `agents/`-ის ქვეშ)
+- თითოეული აგენტის იმპლემენტაციები: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- საჯარო ენდპოინტები: `/api/v1/agents/tasks/*` (სია/შექმნა/მიღება/გაუქმება)
+- სამართავი ენდპოინტები: `/api/cloud/*` (პროვიზიონირება, სტატუსი, ჯგუფური ოპერაციები)
+- დეშბორდი: `/dashboard/cloud-agents`
 - საცავი: `cloud_agent_tasks` ცხრილი
 
-თითოეული აგენტის რესურსებით უზრუნველყოფისა და OAuth-ის სპეციფიკისთვის იხილეთ
+თითოეული აგენტის პროვიზიონირებისა და OAuth-ის სპეციფიკებისთვის იხილეთ
 [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. დამცავი მექანიზმები
+### C. Guardrails
 
-დამცავი მექანიზმების მოდული არის დინამიკურად გადატვირთვადი შუალედური პროგრამული ფენა, რომელიც მოთხოვნებსა და
-პასუხებს ამოწმებს პერსონალური საიდენტიფიკაციო ინფორმაციის, პრომპტის ინექციისა და სახიფათო ვიზუალური კონტენტის გამოსავლენად. დარღვევები
-დაუყოვნებლივ წყვეტს მოთხოვნას HTTP **503**-ითა და სტრუქტურირებული შეცდომის კოდით, რაც
-ქვემოთ განთავსებულ გამომძახებებს განმეორებითი ცდის ან სხვა განშტოებაზე გადასვლის საშუალებას აძლევს.
+Guardrails-ის მოდული არის ცხელად გადატვირთვადი მიდლვეარ-ფენა, რომელიც მოთხოვნებსა
+და პასუხებს ამოწმებს PII-ზე, პრომპტის ინექციასა და სახიფათო ვიზუალურ კონტენტზე.
+დარღვევები მოთხოვნას მყისიერად წყვეტს HTTP **503** სტატუსით და სტრუქტურირებული
+შეცდომის კოდით, რაც შუალედურ გამომძახებლებს საშუალებას აძლევს გაიმეორონ მცდელობა
+ან განშტოდნენ.
 
 - მოდულის ფესვი: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
   `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- დინამიკური გადატვირთვა: რეესტრი აკვირდება კონფიგურაციის ცვლილებებს და ჯაჭვს ადგილზე ხელახლა აგებს
-- მიერთების წერტილები: ჩატის დამმუშავებლის შესასვლელი, გამოსახულების გენერირების დამმუშავებელი, პასუხის გამწმენდი
-- HTTP კონტრაქტი: დარღვევები ბრუნდება, როგორც `503`, მნიშვნელობით `error.code = "GUARDRAIL_VIOLATION"`
+- ცხელი გადატვირთვა: რეესტრი თვალყურს ადევნებს კონფიგურაციის ცვლილებებს და ჯაჭვს
+  ადგილზე აღადგენს
+- ჩართვის წერტილები: ჩატის ჰენდლერის შესასვლელი, სურათების გენერაციის ჰენდლერი,
+  პასუხის სანიტიზატორი
+- HTTP კონტრაქტი: დარღვევები გამოისახება როგორც `503`, `error.code = "GUARDRAIL_VIOLATION"`-ით
 
-წესების ნაკრების შედგენისა და ზღურბლების გამართვისთვის იხილეთ
+წესების ნაკრების შედგენისა და ზღვარების დახვეწისთვის იხილეთ
 [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
-### D. დომენური ფენა
+### D. დომენის ფენა
 
-`src/domain/` სახელთა სივრცე პოლიტიკის გადაწყვეტილებებს ცენტრალიზებულად მართავს, რათა მარშრუტების დამმუშავებლებს
-ბლოკირების, ბიუჯეტისა და სარეზერვო ლოგიკის დამოუკიდებლად აწყობა არ მოუწიოთ.
+`src/domain/` სახელთა სივრცე შეიცავს დომენურ სერვისებსა და დარეზერვებული შეფასების
+კონტრაქტებს. ის არ არის ყველა მოთხოვნისთვის ერთი სავალდებულო პოლიტიკის შესასვლელი
+წერტილი.
 
-- პოლიტიკის ძრავა: `src/domain/policyEngine.ts` — წინასწარი შესრულების
-  შეფასების ერთიანი შესასვლელი წერტილი (ბლოკირება → ბიუჯეტი → სარეზერვო ვარიანტი)
-- ხარჯის წესები: `src/domain/costRules.ts`
-- სარეზერვო ვარიანტის პოლიტიკა: `src/domain/fallbackPolicy.ts`
-- ბლოკირების პოლიტიკა: `src/domain/lockoutPolicy.ts`
-- ტეგებზე დაფუძნებული მარშრუტიზაცია: `src/domain/tagRouter.ts`
-- კომბინაციის გადამწყვეტი: `src/domain/comboResolver.ts` — კომბინაციების სახელებს, auto/\*
-  პრეფიქსებსა და შაბლონურ მოდელის სამიზნეებს გარდაქმნის კონკრეტულ შესრულების გეგმებად
-- კავშირისა და მოდელის წესების გამაერთიანებელი: `src/domain/connectionModelRules.ts`
-- მოდელების ხელმისაწვდომობის მომენტალური სურათები: `src/domain/modelAvailability.ts`
+ცოცხალი ჩატის ბილიკი იძახებს `enforceApiKeyPolicy()`-ს
+`src/shared/utils/apiKeyPolicy.ts`-დან; გარჩეული მოდელებისა და კომბოს წევრების
+ავტორიზაცია იმპლემენტირებულია `src/sse/handlers/chat/resolvedModelPolicy.ts`-ში.
+თვითჰოსტირებული შესასვლელი `src/app/api/v1/chat/completions/route.ts`-ში ასევე
+აიძულებს API-გასაღების პოლიტიკას dispatch-მდე. კომბოს გარჩევა მიმდინარეობს
+`open-sse/services/combo.ts`-ის საშუალებით.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` და `src/lib/container.ts`
+რჩება დატესტილ კონტრაქტებად და არა ამ მოთხოვნის ბილიკის გაერთიანების (wiring)
+ნაწილად. კონტეინერი არეგისტრირებს პოლიტიკის ძრავას, მაგრამ შემოწმებული საპროდაქშენ
+მოთხოვნის ბილიკი მას არ გარჩევს. მხოლოდ ამ კონტრაქტების შეცვლა არ ცვლის ცოცხალი
+ჩატის პოლიტიკას ან კომბოს რაუტინგს; მათი მიერთება ან მოხსნა ცალკე საპროექტო
+გადაწყვეტილებას მოითხოვს.
+
+- დარეზერვებული პოლიტიკის ძრავა: `src/domain/policyEngine.ts` — lockout → budget → fallback შეფასება
+- ღირებულების წესები: `src/domain/costRules.ts`
+- Fallback-ის პოლიტიკა: `src/domain/fallbackPolicy.ts`
+- Lockout-ის პოლიტიკა: `src/domain/lockoutPolicy.ts`
+- თეგებზე დაფუძნებული რაუტინგი: `src/domain/tagRouter.ts`
+- დარეზერვებული კომბოს რეზოლვერი: `src/domain/comboResolver.ts` — დამოუკიდებელი არჩევის კონტრაქტი; ცოცხალი კომბოს რაუტინგი იმპლემენტირებულია `open-sse/services/combo.ts`-ში
+- კავშირის/მოდელის წესების შემაერთებელი: `src/domain/connectionModelRules.ts`
+- მოდელის ხელმისაწვდომობის სნაპშოტები: `src/domain/modelAvailability.ts`
 - პროვაიდერის ვადის გასვლის თვალყურის დევნება: `src/domain/providerExpiration.ts`
-- კვოტის კეში: `src/domain/quotaCache.ts`
+- ქვოტის ქეში: `src/domain/quotaCache.ts`
 - დეგრადაციის მდგომარეობა: `src/domain/degradation.ts`
 - კონფიგურაციის აუდიტი: `src/domain/configAudit.ts`
-- OmniRoute-ის პასუხის მეტამონაცემების შემქმნელი: `src/domain/omnirouteResponseMeta.ts`
+- OmniRoute-ის პასუხის მეტამონაცემების ამგებელი: `src/domain/omnirouteResponseMeta.ts`
 - შეფასების ქვესისტემა: `src/domain/assessment/` — პერიოდული შეფასების დავალებები
 
-### E. ავტორიზაციის კონვეიერი
+### E. ავტორიზაციის პაიპლაინი
 
-ავტორიზაციის კონვეიერი თითოეულ შემომავალ მოთხოვნას კლასიფიკაციას უკეთებს და
-გაგზავნამდე შესაბამის პოლიტიკათა ჯაჭვს იყენებს.
+ავტორიზაციის პაიპლაინი აკლასიფიცირებს ყველა შემომავალ მოთხოვნას და dispatch-მდე
+ამოქმედებს შესაბამისი პოლიტიკების ჯაჭვს.
 
-- კონვეიერის შესასვლელი: `src/server/authz/pipeline.ts`
+- Pipeline-ის შესვლის წერტილი: `src/server/authz/pipeline.ts`
 - მოთხოვნის კლასიფიკატორი: `src/server/authz/classify.ts` — განასხვავებს საჯარო
   თავსებადობის მარშრუტებს მართვის მარშრუტებისგან
 - საჯარო მარშრუტების ინვენტარი: `src/shared/constants/publicApiRoutes.ts`
-- პოლიტიკები: `src/server/authz/policies/` — კომპოზირებადი პრედიკატები
+- პოლიტიკები: `src/server/authz/policies/` — კომპოზიციური პრედიკატები
   (`requireApiKey`, `requireManagement`, `requireFreshAuth` და სხვ.)
-- სათაურების უტილიტები: `src/server/authz/headers.ts`
-- შემოწმების დამხმარე: `src/server/authz/assertAuth.ts`
+- ჰედერების უტილიტები: `src/server/authz/headers.ts`
+- Assertion დამხმარე: `src/server/authz/assertAuth.ts`
 - მოთხოვნის კონტექსტი: `src/server/authz/context.ts`
 
-საჯარო და მართვის მარშრუტები მკაცრად გამიჯნულია: აგენტის/დაყოვნების APIs და
-პროვაიდერის ცვლილებები საჭიროებს მართვის ავთენტიფიკაციას (მისი არარსებობისას HTTP 401).
+საჯარო და მართვის მარშრუტები მკაცრი საზღვარია: agent/cooldown API-ები და
+პროვაიდერის მუტაციები მოითხოვენ მართვის ავთენტიფიკაციას (HTTP 401, თუ აკლია).
 
 მარშრუტების კლასიფიკაციის სრული წესებისთვის იხილეთ
 [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. სამუშაო პროცესის FSM და ამოცანის გათვალისწინებით მომუშავე მარშრუტიზატორი
+### F. Workflow FSM და ამოცანაზე-ორიენტირებული როუტერი
 
-სასრულ მდგომარეობათა მანქანაზე დაფუძნებული მარშრუტიზატორი, რომელიც განთავსებულია კომბინაციის შერჩევის ზემოთ და
-ტრაფიკს აღმოჩენილი სამუშაო პროცესის ეტაპის (დაგეგმვა, შესრულება,
-მიმოხილვა) და ფონურ ამოცანასთან შესაბამისობის მიხედვით წარმართავს.
+სასრული მდგომარეობების ავტომატზე დაფუძნებული როუტერი, რომელიც განლაგებულია
+კომბოს არჩევის ზემოთ და მიმართავს ტრაფიკს აღმოჩენილი workflow-ის ეტაპის
+(დაგეგმვა, შესრულება, გადახედვა) და ფონური ამოცანის აფინობის მიხედვით.
 
-- სამუშაო პროცესის FSM: `open-sse/services/workflowFSM.ts`
-- ამოცანის გათვალისწინების მქონე როუტერი: `open-sse/services/taskAwareRouter.ts`
+- Workflow FSM: `open-sse/services/workflowFSM.ts`
+- ამოცანაზე-ორიენტირებული როუტერი: `open-sse/services/taskAwareRouter.ts`
 - ფონური ამოცანების დეტექტორი: `open-sse/services/backgroundTaskDetector.ts`
-- განზრახვის კლასიფიკატორი: `open-sse/services/intentClassifier.ts`
+- ინტენტის კლასიფიკატორი: `open-sse/services/intentClassifier.ts`
 
-FSM-ის გადასვლები გავლენას ახდენს Auto Combo-ს შეფასებაზე და უპირატესობას ანიჭებს უფრო იაფ მოდელებს
-ფონური/ავტომატიზაციის ამოცანებისთვის, ხოლო უფრო მძლავრ მოდელებს — ინტერაქტიული
-დაგეგმვის/მიმოხილვის ეტაპებისთვის.
+FSM-ის გადასვლები იკვებება Auto Combo-ის ქულების სისტემაში და იხრება უფრო
+იაფი მოდელებისკენ ფონური/ავტომატიზაციის ამოცანებისთვის და უფრო ძლიერი
+მოდელებისკენ ინტერაქტიული დაგეგმვის/გადახედვის მიმონაცვლევებისთვის.
 
-### G. პროვაიდერისთვის სპეციფიკური მდგრადობა
+### G. პროვაიდერის სპეციფიკური მდგრადობა
 
-რამდენიმე პროვაიდერს მოჰყვება სპეციალური მდგრადობისა და შენიღბვის მოდულები, რომლებიც ეყრდნობა
-გლობალური ამომრთველის / კავშირის დაყოვნების / მოდელის ბლოკირების შრეებს:
+რამდენიმე პროვაიდერი მოყვება განკუთვნილი მდგრადობისა და stealth მოდულებით,
+რომლებიც ეყრდნობიან გლობალურ circuit breaker / connection cooldown / model
+lockout ფენებს:
 
-- Antigravity 429-ის ძრავა: `open-sse/services/antigravity429Engine.ts` (ცვლის
-  იდენტობას, ასუფთავებს პასუხის სათაურებს, მართავს კრედიტების/ვერსიის აღრიცხვას
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`-ის მეშვეობით)
-- ModelScope-ის კვოტის პოლიტიკა: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (თავსებადობის არხის ხელის ჩამორთმევა): `open-sse/services/claudeCodeCCH.ts`,
-  დამატებით `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
+- Antigravity 429 ძრავა: `open-sse/services/antigravity429Engine.ts` (ატრიალებს
+  იდენტობას, წმენდს პასუხის ჰედერებს, მართავს კრედიტების/ვერსიის
+  თვალყურისდევნებას `antigravityCredits.ts`, `antigravityHeaderScrub.ts`,
+  `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`-ის
+  საშუალებით)
+- ModelScope კვოტის პოლიტიკა: `open-sse/services/modelscopePolicy.ts`
+- Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
+  პლუს `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
   `claudeCodeToolRemapper.ts`
-- Claude Code-ის ციფრული ანაბეჭდის ფორმირება: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code-ის ობფუსკაცია: `open-sse/services/claudeCodeObfuscation.ts`
+- Claude Code fingerprint-ის ფორმირება: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Code ობფუსკაცია: `open-sse/services/claudeCodeObfuscation.ts`
 
-შენიღბვის სრული სახელმძღვანელოსა და ოპერაციული მითითებებისთვის იხილეთ
+სრული stealth სახელმძღვანელოსა და ოპერაციული მითითებებისთვის იხილეთ
 `docs/security/STEALTH_GUIDE.md` (git; არ კომპილირდება `/docs`-ში).
 
-### H. ვებჰუკები, მსჯელობის კეში, წაკითხვის კეში
+### H. Webhook-ები, მსჯელობის ქეში, წაკითხვის ქეში
 
-- **ვებჰუკები** — პროვაიდერის/ანგარიშის/ამოცანის მოვლენების გამავალი დისპეტჩერიზაცია.
+- **Webhook-ები** — გამავლი გაგზავნა პროვაიდერის/ანგარიშის/ამოცანის მოვლენებისთვის.
   - დისპეტჩერი: `src/lib/webhookDispatcher.ts`
-  - საცავი: SQLite-ის `webhooks` ცხრილი (`src/lib/db/webhooks.ts`-ის მეშვეობით)
-  - მართვის პანელი: `/dashboard/webhooks` (გამოწერები, საიდუმლოებები, ხელახალი მცდელობების ისტორია)
-  - მოვლენების ტაქსონომიისა და ხელახალი მცდელობების სემანტიკისთვის იხილეთ [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **მსჯელობის კეში** — ხელახლა დაკვრადი მსჯელობის ბლოკები პროვაიდერებისთვის, რომლებიც
-  აზროვნების ტოკენებს გასცემენ (Claude, GLMT და სხვ.), რათა მომდევნო ეტაპებმა ხელახალი მსჯელობა გამოტოვონ.
-  - მონაცემთა ბაზის შრე: `src/lib/db/reasoningCache.ts`
-  - სერვისის შრე: `open-sse/services/reasoningCache.ts`
-  - ხელახლა დაკვრის სემანტიკისთვის იხილეთ [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **წაკითხვის კეში** — ხელმოწერით ინდექსირებული ხანმოკლე პასუხების კეში, რომელიც გამოიყენება
-  გაუმართავი ზედა დონის SDK-ებიდან იდენტური ხელახალი მცდელობების გასაერთიანებლად.
-  - მონაცემთა ბაზის შრე: `src/lib/db/readCache.ts`
-  - სტატისტიკის საბოლოო წერტილი: `GET /api/cache/stats`, მართვის პანელი: `/dashboard/cache`
+  - საცავი: `webhooks` SQLite ცხრილი (`src/lib/db/webhooks.ts`-ის საშუალებით)
+  - დეშბორდი: `/dashboard/webhooks` (გამოწერები, საიდუმლო გასაღებები, განმეორების ისტორია)
+  - მოვლენების ტაქსონომიისა და განმეორების სემანტიკისთვის იხილეთ [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **მსჯელობის ქეში** — ხელახლა დასაკრავი მსჯელობის ბლოკები იმ პროვაიდერებისთვის,
+  რომლებიც გამოსცემენ აზროვნების ტოკენებს (Claude, GLMT და სხვ.), რათა
+  თანმიმდევრულმა მიმონაცვლევებმა გამოტოვონ ხელახალი აზროვნება.
+  - DB ფენა: `src/lib/db/reasoningCache.ts`
+  - სერვისის ფენა: `open-sse/services/reasoningCache.ts`
+  - ხელახალი დაკვრის სემანტიკისთვის იხილეთ [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **წაკითხვის ქეში** — მოკლევადიანი პასუხის ქეში, სიგნატურით გასაღებული,
+  რომელიც გამოიყენება დაზიანებული upstream SDK-ებიდან მოსული იდენტური
+  განმეორებების შესაკრეჭად.
+  - DB ფენა: `src/lib/db/readCache.ts`
+  - სტატისტიკის ენდპოინტი: `GET /api/cache/stats`, დეშბორდი `/dashboard/cache`-ზე
 
 ## 3) მდგრადობის ფენა
 

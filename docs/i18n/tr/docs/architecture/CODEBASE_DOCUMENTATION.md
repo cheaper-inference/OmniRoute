@@ -76,52 +76,52 @@ OmniRoute/
 ```
 src/
 ├── app/                  App Router sayfaları + API rotaları
-├── lib/                  Temel kütüphaneler (veritabanı, kimlik doğrulama, OAuth, beceriler, bellek, …)
-├── domain/               Saf etki alanı katmanı (politika, geri dönüş, maliyet, kilitleme, …)
-├── server/               Yalnızca sunucu modülleri (yetkilendirme, cors, kimlik doğrulama)
-├── shared/               Türler, sabitler, doğrulama, sözleşmeler, yardımcı araçlar (sınırlar arası kullanıma uygun)
-├── mitm/                 CLI entegrasyonu için ortadaki adam proxy yardımcıları
+├── lib/                  Çekirdek kütüphaneler (DB, kimlik doğrulama, OAuth, yetenekler, bellek, …)
+├── domain/               Saf alan katmanı (politika, geri dönüş, maliyet, kilitleme, …)
+├── server/               Yalnızca sunucuya özel modüller (authz, cors, auth)
+├── shared/               Tipler, sabitler, doğrulama, sözleşmeler, yardımcılar (sınır ötesi güvenli)
+├── mitm/                 CLI entegrasyonu için man-in-the-middle proxy yardımcıları
 ├── models/               Yerel model meta verileri / takma adlandırma
-├── sse/                  Hâlâ src/ altında bulunan eski SSE işleyicileri (open-sse/ altında değil)
+├── sse/                  Hâlâ src/ altında yaşayan eski SSE işleyicileri (open-sse/ değil)
 ├── store/                İstemci tarafı durum depoları
-├── middleware/           Rota düzeyinde ara yazılım yardımcıları (Next.js global ara yazılımı değil)
-├── scripts/              Uygulama kodu tarafından içe aktarılabilen proje içi betikler
-├── types/                Ortam ve paylaşılan TS türleri
+├── middleware/           Rota düzeyinde middleware yardımcıları (Next.js genel middleware değil)
+├── scripts/              Uygulama kodundan içe aktarılabilen ağaç içi betikler
+├── types/                Ortam ve paylaşılan TS tipleri
 ├── i18n/                 Yerel ayar paketleri
-├── instrumentation.ts    Next.js enstrümantasyon kancası
+├── instrumentation.ts    Next.js instrumentation kancası
 ├── instrumentation-node.ts
 └── proxy.ts              Üst düzey proxy önyükleme yardımcısı
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router, hem kontrol paneli kullanıcı arayüzünü hem de genel/yönetim HTTP API'sini sunar.
-**Global ara yazılım yoktur** — müdahale her rota için ayrı ayrı gerçekleştirilir.
+App Router hem kontrol paneli arayüzünü hem de genel/yönetim HTTP API'sini sunar.
+**Genel middleware yoktur** — müdahale rota başına yapılır.
 
 `src/app/` altındaki üst düzey segmentler:
 
-| Yol                                                                           | Amaç                                                          |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `api/`                                                                        | Tüm HTTP API rotaları (aşağıdaki döküme bakın)                |
-| `a2a/`                                                                        | A2A JSON-RPC 2.0 uç noktası (`POST /a2a`)                     |
-| `.well-known/agent.json/`                                                     | A2A Agent Card keşif belgesi                                  |
-| `(dashboard)/`                                                                | Kontrol paneli kullanıcı arayüzü (rota grubu, URL ön eki yok) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Kimlik doğrulama akışları                                     |
-| `landing/`                                                                    | Pazarlama/açılış sayfası                                      |
-| `docs/`                                                                       | Gömülü API belgeleri görüntüleyicisi                          |
-| `status/`, `maintenance/`, `offline/`                                         | Operasyonel sayfalar                                          |
-| `privacy/`, `terms/`                                                          | Yasal sayfalar                                                |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statik hata sayfaları                                         |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Framework hata/yükleme sınırları                              |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Kök kabuk                                                     |
+| Yol                                                                           | Amaç                                               |
+| ----------------------------------------------------------------------------- | -------------------------------------------------- |
+| `api/`                                                                        | Tüm HTTP API rotaları (aşağıdaki ayrıntıya bakın)  |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 uç noktası (`POST /a2a`)          |
+| `.well-known/agent.json/`                                                     | A2A Agent Card keşif belgesi                       |
+| `(dashboard)/`                                                                | Kontrol paneli arayüzü (rota grubu, URL öneki yok) |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Kimlik doğrulama akışları                          |
+| `landing/`                                                                    | Pazarlama/açılış sayfası                           |
+| `docs/`                                                                       | Gömülü API dokümantasyon görüntüleyici             |
+| `status/`, `maintenance/`, `offline/`                                         | Operasyonel sayfalar                               |
+| `privacy/`, `terms/`                                                          | Yasal sayfalar                                     |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statik hata sayfaları                              |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Çerçeve hata/yükleme sınırları                     |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Kök kabuk                                          |
 
-#### 3.1.1 `src/app/(dashboard)/dashboard/` — Kullanıcı arayüzü sayfaları
+#### 3.1.1 `src/app/(dashboard)/dashboard/` — Arayüz sayfaları
 
 `agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
 `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
 `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`; ayrıca kök `page.tsx`, `HomePageClient.tsx`,
+`translator`, `usage`, `webhooks`, ayrıca kök `page.tsx`, `HomePageClient.tsx`,
 `BootstrapBanner.tsx`.
 
 #### 3.1.2 `src/app/api/` — Üst düzey API grupları
@@ -188,133 +188,131 @@ src/app/api/
 
 #### 3.1.2a `src/app/api/services/` — Gömülü Hizmetler yönetimi
 
-9Router ve CLIProxyAPI'yi yüklemek, başlatmak, durdurmak ve izlemek için rotalar.
-Tüm yollar, `npm install` komutunu çalıştırabildikleri ve alt süreçler oluşturabildikleri
-için **LOCAL_ONLY** (yalnızca geri döngü, katı kural #17) olarak sınıflandırılır.
+9Router ve CLIProxyAPI'yi yükleme, başlatma, durdurma ve izleme rotaları.
+Tüm yollar **LOCAL_ONLY** olarak sınıflandırılmıştır (yalnızca geri döngü, katı kural #17) çünkü
+`npm install` çağırabilir ve alt süreçler başlatabilirler.
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             getOrInitSupervisor() yardımcısı
-│   ├── install/route.ts    POST — execFile aracılığıyla npm install
+│   ├── _lib.ts             getOrInitSupervisor() helper
+│   ├── install/route.ts    POST — npm install via execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — daha yeni sürüm için npm install
-│   ├── rotate-key/route.ts POST — yeni API anahtarı oluştur + yeniden başlat
-│   ├── status/route.ts     GET  — canlı + DB durumu + sürüm meta verileri
-│   └── auto-start/route.ts POST — auto_start bayrağını aç/kapat
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── rotate-key/route.ts POST — generate new API key + restart
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 ├── cliproxy/
-│   ├── _lib.ts             getOrInitSupervisor() yardımcısı
+│   ├── _lib.ts             getOrInitSupervisor() helper
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — daha yeni sürüm için npm install
-│   ├── status/route.ts     GET  — canlı + DB durumu + sürüm meta verileri
-│   └── auto-start/route.ts POST — auto_start bayrağını aç/kapat
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 └── [name]/
-    └── logs/route.ts       GET  — SSE günlük kuyruğu (tüm hizmetler tarafından paylaşılır)
+    └── logs/route.ts       GET  — SSE log tail (shared by all services)
 ```
 
-İlgili pano kullanıcı arayüzü:
+İlgili kontrol paneli arayüzü:
 `src/app/(dashboard)/dashboard/providers/services/` — iki sekmeli sayfa (CLIProxyAPI + 9Router).
-9Router gömülü kullanıcı arayüzü için ters proxy:
+9Router gömülü arayüzü için ters proxy:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-Ayrıntılı inceleme: `docs/frameworks/EMBEDDED-SERVICES.md`
+Ayrıntılı bilgi: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 #### 3.1.3 `src/app/api/v1/` — OpenAI uyumlu genel API
 
 ```
 v1/
-├── accounts/[id]/                       hesap arama
-├── agents/tasks/[id]/, agents/tasks/    A2A tarzı görev uç noktaları
-├── api/                                 v1/api altında kullanıma sunulan dahili API yardımcıları
+├── accounts/[id]/                       account lookup
+├── agents/tasks/[id]/, agents/tasks/    A2A-flavored task endpoints
+├── api/                                 internal API helpers exposed under v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    Chat Completions (ana uç nokta)
-├── completions/                         Eski metin tamamlama
-├── embeddings/                          Gömme işlemleri
+├── chat/completions/                    Chat Completions (the main endpoint)
+├── completions/                         Legacy text completions
+├── embeddings/                          Embeddings
 ├── files/[id]/, files/                  Files API
-├── _helpers/                            Paylaşılan rota yardımcıları (genel URL yok)
-├── images/{edits, generations}/         Görsel oluşturma + düzenleme
-├── issues/                              Önceliklendirme yardımcı uç noktaları
-├── management/{proxies}/                v1 içindeki yönetim kapsamlı rotalar
-├── messages/{count_tokens}/             Anthropic tarzı mesaj uyumluluğu
-├── models/                              Model listeleme (`route.ts`, `catalog.ts`)
-├── moderations/                         Moderasyon
-├── music/                               Müzik oluşturma
-├── providers/[provider]/                Sağlayıcı başına işlemler
-├── quotas/{check}                       Kota yoklamaları
-├── registered-keys/                     Kayıtlı anahtar yönetimi
-├── rerank/                              Yeniden sıralama
-├── responses/[...path]/                 OpenAI Responses API (tümünü yakalayan)
-├── search/                              Web araması
-├── videos/                              Video oluşturma
-├── ws/                                  WebSocket köprüsü
-└── route.ts                             Dizin işleyicisi
+├── _helpers/                            Shared route helpers (no public URL)
+├── images/{edits, generations}/         Image gen + edit
+├── issues/                              Triage helper endpoints
+├── management/{proxies}/                Management-scoped routes inside v1
+├── messages/{count_tokens}/             Anthropic-style messages compat
+├── models/                              Model listing (`route.ts`, `catalog.ts`)
+├── moderations/                         Moderation
+├── music/                               Music gen
+├── providers/[provider]/                Per-provider operations
+├── quotas/{check}                       Quota probes
+├── registered-keys/                     Registered key admin
+├── rerank/                              Reranking
+├── responses/[...path]/                 OpenAI Responses API (catch-all)
+├── search/                              Web search
+├── videos/                              Video gen
+├── ws/                                  WebSocket bridge
+└── route.ts                             Index handler
 ```
 
 Her rota dosyası aynı kalıbı izler:
 
 ```
-Rota → CORS ön kontrolü → Zod gövde doğrulaması → isteğe bağlı kimlik doğrulama
-     → API anahtarı politikası uygulaması → işleyiciye devretme (open-sse)
+Route → CORS preflight → Zod body validation → optional auth
+      → API key policy enforcement → handler delegation (open-sse)
 ```
 
-`v1beta/`, Gemini tarzı uyumluluk yüzeyidir (aynı `open-sse/handlers/` işlem
-hattına çeviri yapan ince bir sarmalayıcı).
+`v1beta/`, Gemini tarzı uyumluluk yüzeyidir (aynı `open-sse/handlers/` işlem hattına çeviren ince bir sarmalayıcı).
 
-### 3.2 `src/lib/` — Çekirdek kitaplıklar
+### 3.2 `src/lib/` — Çekirdek kütüphaneler
 
-Verileri, senkronizasyonu, OAuth'u, becerileri, belleği vb. her zaman bu modüller
-aracılığıyla içe aktarın. Tablo, gerçek dizinleri ve dikkat çeken üst düzey dosyaları gruplandırır.
+Veri, senkronizasyon, OAuth, beceri, bellek vb. her zaman bu modüller aracılığıyla içe aktarın. Tablo, gerçek dizinleri ve dikkate değer üst düzey dosyaları gruplar.
 
-| Modül             | Amaç                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A protokol sunucusu: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 yetenek: maliyet analizi, sistem durumu raporu, sağlayıcı keşfi, kota yönetimi, akıllı yönlendirme, yetenekleri listeleme)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `api/`            | Dahili API yardımcıları: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `auth/`           | `managementPassword.ts` (parola sıfırlama / karma oluşturma)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `batches/`        | OpenAI Batches API hizmeti (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `catalog/`        | OpenRouter katalog senkronizasyonu (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `cloudAgent/`     | Bulut ajanı kayıt defteri: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `combos/`         | Kombinasyon çözümleme yardımcıları                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `compliance/`     | Denetim + sağlayıcı denetimi: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `config/`         | Çalışma zamanı yapılandırma bağlayıcısı                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `db/`             | SQLite etki alanı modülleri (bkz. §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `display/`        | API yanıtlarında kullanılan kullanıcı arayüzü/görüntüleme yardımcıları                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `embeddings/`     | Gömme hizmeti kayıt defteri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `env/`            | Ortam yükleme + inceleme                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `evals/`          | Değerlendirme çalışma zamanı                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `jobs/`           | Arka plan işleri (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `memory/`         | Kalıcı bellek: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `oauth/`          | OAuth/içe aktarma sağlayıcısı modülleri (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`; ayrıca `services/`, `utils/` ve `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                  |
-| `plugins/`        | Eklenti yükleyicisi (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `providerModels/` | Yönetilen model yaşam döngüsü: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `providers/`      | Sağlayıcı yardımcıları: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `resilience/`     | `settings.ts` — devre kesici, bekleme süresi ve kilitleme ayarları                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `runtime/`        | Çalışma zamanı özellik algılama                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `services/`       | Gömülü hizmetler çerçevesi: `ServiceSupervisor.ts` (işlem kilidi, halka arabellek ve sistem durumu denetleyicisi içeren genel alt süreç denetleyicisi), `bootstrap.ts` (süreç düzeyinde kayıt ve otomatik başlatma), `registry.ts` (araç → denetleyici eşlemesi), `apiKey.ts` (AES-256-GCM anahtar deposu), `modelSync.ts` (düzenli model eşitleme), `ringBuffer.ts` (5 MB döngüsel günlük arabelleği), `healthCheck.ts` (HTTP sistem durumu yoklaması), `types.ts`, `embedWsProxy.ts` (WebSocket proxy'si), `installers/{ninerouter,cliproxy}.ts`. Bkz. `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                            |
-| `agentSkills/`    | Agent Skills kataloğu + oluşturucu: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md` dosyasına yazar), `openapiParser.ts` (OpenAPI belirtiminden REST uç noktalarını çıkarır), `cliRegistryParser.ts` (bin/cli-registry içinden CLI alt komutlarını çıkarır), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). REST rotaları (`/api/agent-skills/*`), MCP araçları (`omniroute_agent_skills_*`) ve A2A becerisi `list-capabilities` tarafından kullanılır. Bkz. [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Beceri çerçevesi: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, ayrıca `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `spend/`          | `batchWriter.ts` (gecikmeli yazma arabelleği)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `sync/`           | `bundle.ts`, `tokens.ts` (Bulut Senkronizasyonu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `system/`         | Sistem düzeyinde yardımcılar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `translator/`     | Üst düzey çevirici bağlantı kodu (`open-sse/translator/` içine devreder)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `usage/`          | Kullanım muhasebesi: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `versionManager/` | Otomatik güncelleme + sürüm manifesti                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `ws/`             | WebSocket köprüsü                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `zed-oauth/`      | Zed editörü OAuth akışı                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Module            | Amaç                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `a2a/`            | A2A protokol sunucusu: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 yetenek: maliyet analizi, sağlık raporu, sağlayıcı keşfi, kota yönetimi, akıllı yönlendirme, yetenekleri listeleme)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `acp/`            | Ajan-Kontrol-Protokolü: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `api/`            | Dahili API yardımcıları: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `auth/`           | `managementPassword.ts` (parola sıfırlama / karma oluşturma)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `batches/`        | OpenAI Batches API hizmeti (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `catalog/`        | OpenRouter katalog eşitlemesi (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `cloudAgent/`     | Bulut ajan kayıt defteri: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `combos/`         | Kombinasyon çözümleme yardımcıları                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `compliance/`     | Denetim + sağlayıcı denetimi: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `config/`         | Çalışma zamanı yapılandırma bağlayıcısı                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `db/`             | SQLite alan modülleri (bkz. §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `display/`        | API yanıtlarında kullanılan UI/görüntüleme yardımcıları                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `embeddings/`     | Embedding hizmeti kayıt defteri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `env/`            | Ortam yükleme + iç gözlem                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `evals/`          | Eval çalışma zamanı                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `jobs/`           | Arka plan işleri (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `memory/`         | Kalıcı bellek: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `oauth/`          | OAuth/import sağlayıcı modülleri (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, ayrıca `services/`, `utils/` ve `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                 |
+| `plugins/`        | Eklenti yükleyici (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `providerModels/` | Yönetilen model yaşam döngüsü: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `providers/`      | Sağlayıcı yardımcıları: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `resilience/`     | `settings.ts` — devre kesici, bekleme süresi ve kilitlenme ayarları                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `runtime/`        | Çalışma zamanı özellik algılama                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `services/`       | Gömülü hizmetler çerçevesi: `ServiceSupervisor.ts` (işlem kilidi, halka tampon, sağlık denetleyicisi ile genel alt süreç gözetmeni), `bootstrap.ts` (süreç düzeyinde kayıt ve otomatik başlatma), `registry.ts` (araç → gözetmen eşlemesi), `apiKey.ts` (AES-256-GCM anahtar deposu), `modelSync.ts` (periyodik model senkronizasyonu), `ringBuffer.ts` (5 MB döngüsel günlük tamponu), `healthCheck.ts` (HTTP sağlık yoklaması), `types.ts`, `embedWsProxy.ts` (WebSocket proxy'si), `installers/{ninerouter,cliproxy}.ts`. Bkz. `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                                           |
+| `agentSkills/`    | Agent Skills kataloğu + oluşturucusu: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md` yazar), `openapiParser.ts` (OpenAPI spesifikasyonundan REST uç noktalarını çıkarır), `cliRegistryParser.ts` (bin/cli-registry'den CLI alt komutlarını çıkarır), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). REST rotaları (`/api/agent-skills/*`), MCP araçları (`omniroute_agent_skills_*`) ve A2A yeteneği `list-capabilities` tarafından tüketilir. Bkz. [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Yetenek çerçevesi: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, ayrıca `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `spend/`          | `batchWriter.ts` (write-behind arabelleği)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Bulut Senkronizasyonu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `system/`         | Sistem düzeyi yardımcılar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `translator/`     | Üst düzey çevirici bağlantı katmanı (`open-sse/translator/` dizinine delege eder)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `usage/`          | Kullanım muhasebesi: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `versionManager/` | Otomatik güncelleme + sürüm manifestosu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `ws/`             | WebSocket köprüsü                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `zed-oauth/`      | Zed editörü OAuth akışı                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 `src/lib/` içindeki üst düzey dosyalar:
 
-- Eski `localDb.ts` barrel dosyası kaldırıldı — tüketiciler belirli `src/lib/db/*` modüllerini doğrudan içe aktarır.
+- Eski `localDb.ts` toplu dışa aktarım dosyası kaldırıldı — tüketiciler doğrudan belirli `src/lib/db/*` modüllerini içe aktarıyor.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -328,14 +326,14 @@ aracılığıyla içe aktarın. Tablo, gerçek dizinleri ve dikkat çeken üst d
 
 #### 3.2.1 `src/lib/db/`
 
-Tekil SQLite veritabanı (`core.ts` içindeki `getDbInstance()`, WAL günlük kaydı).
-**Rotalarda veya işleyicilerde asla ham SQL yazmayın** — bu modülleri kullanın.
+Singleton SQLite veritabanı (`core.ts` içindeki `getDbInstance()`, WAL günlükleme).
+**Rotalarda veya işleyicilerde asla ham SQL yazmayın** — bu modüller üzerinden gidin.
 
-![Veritabanı şemasına genel bakış (seçili çekirdek tablolar)](../diagrams/exported/db-schema-overview.svg)
+![Veritabanı şemasına genel bakış (seçilmiş temel tablolar)](../diagrams/exported/db-schema-overview.svg)
 
 > Kaynak: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Etki alanı modülleri (her biri bir veya daha fazla tablonun sahibidir): `apiKeys.ts`, `backup.ts`,
+Etki alanı modülleri (her biri bir veya daha fazla tabloya sahiptir): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -349,10 +347,10 @@ Etki alanı modülleri (her biri bir veya daha fazla tablonun sahibidir): `apiKe
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-`migrations/`, sürümlendirilmiş 168 `.sql` dosyasını (idempotent, işlemsel) barındırır ve
-başlatma sırasında `migrationRunner.ts` tarafından yürütülür.
+`migrations/` dizini 168 adet sürümlenmiş `.sql` dosyası barındırır (idempotent, işlemsel) ve
+açılışta `migrationRunner.ts` tarafından yürütülür.
 
-Geçişler genelinde oluşturulan tablolar (toplam 123):
+Migrasyonlar boyunca oluşturulan tablolar (toplam 123):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -372,25 +370,34 @@ Geçişler genelinde oluşturulan tablolar (toplam 123):
 
 ### 3.3 `src/domain/` — Etki alanı katmanı
 
-G/Ç içermeyen saf iş mantığı. Rotalar ve işleyiciler tarafından içe aktarılır.
+Etki alanı servisleri ve değerlendirme sözleşmeleri. Bazı modüller canlı
+istek yolundan çağrılır; diğerleri bağımsız sözleşmeler olarak kalır. Bu dizinin tamamının
+G/Ç içermediğini veya her modülü değiştirmenin üretim yönlendirmesini etkileyeceğini varsaymayın.
 
-| Dosya                                      | Amaç                                                  |
-| ------------------------------------------ | ----------------------------------------------------- |
-| `policyEngine.ts`                          | Üst düzey politika çözümleyici                        |
-| `fallbackPolicy.ts`                        | Geri dönüş karar ağacı                                |
-| `costRules.ts`                             | Maliyet hesaplama kuralları                           |
-| `lockoutPolicy.ts`                         | Model kilitleme kararları                             |
-| `tagRouter.ts`                             | Etiket tabanlı yönlendirme                            |
-| `comboResolver.ts`                         | İstekten → hedef listesine kombinasyon çözümleme      |
-| `connectionModelRules.ts`                  | Bağlantı başına model filtreleri                      |
-| `modelAvailability.ts`                     | Model kullanılabilirliği denetimi                     |
-| `degradation.ts`                           | Kısıtlı mod geçişleri                                 |
-| `providerExpiration.ts`                    | Süresi dolmuş hesap/anahtar algılama                  |
-| `quotaCache.ts`                            | Önbelleğe alınmış kota kararları                      |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Yanıt şekli yardımcıları                              |
-| `configAudit.ts`                           | Yapılandırma değişikliği denetimi                     |
-| `assessment/`                              | Model değerlendirmesi (RFC'ye göre, kısmen uygulandı) |
-| `types.ts`                                 | Paylaşılan etki alanı türleri                         |
+Canlı ilke yüzeyleri `src/shared/utils/apiKeyPolicy.ts` ve
+`src/sse/handlers/chat/resolvedModelPolicy.ts` dosyalarıdır. Canlı kombinasyon işleme ve hedef
+çözümleme `open-sse/services/combo.ts` kullanır. Test edilmiş `policyEngine.ts` ve
+`comboResolver.ts` sözleşmeleri, `src/lib/container.ts` ile birlikte, incelenen sohbet isteği yolunun
+kablolaması değildir. Bir yönlendirme değişikliği planlarken bunları bu etkin
+yüzeylerden ayrı tutun.
+
+| Dosya                                      | Amaç                                                   |
+| ------------------------------------------ | ------------------------------------------------------ |
+| `policyEngine.ts`                          | Ayrılmış ilke değerlendirme sözleşmesi                 |
+| `fallbackPolicy.ts`                        | Yedekleme karar ağacı                                  |
+| `costRules.ts`                             | Maliyet hesaplama kuralları                            |
+| `lockoutPolicy.ts`                         | Model kilitleme kararları                              |
+| `tagRouter.ts`                             | Etiket tabanlı yönlendirme                             |
+| `comboResolver.ts`                         | Ayrılmış kombinasyon seçimi sözleşmesi                 |
+| `connectionModelRules.ts`                  | Bağlantı başına model filtreleri                       |
+| `modelAvailability.ts`                     | Model kullanılabilirlik denetimi                       |
+| `degradation.ts`                           | Bozulmuş mod geçişleri                                 |
+| `providerExpiration.ts`                    | Süresi dolmuş hesap/anahtar tespiti                    |
+| `quotaCache.ts`                            | Önbelleğe alınmış kota kararları                       |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Yanıt şekli yardımcıları                               |
+| `configAudit.ts`                           | Yapılandırma değişikliği denetimi                      |
+| `assessment/`                              | Model değerlendirmesi (RFC'ye göre, kısmen uygulanmış) |
+| `types.ts`                                 | Paylaşılan etki alanı türleri                          |
 
 ### 3.4 `src/server/` — Yalnızca sunucu
 
@@ -400,30 +407,30 @@ G/Ç içermeyen saf iş mantığı. Rotalar ve işleyiciler tarafından içe akt
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Rotaları herkese açık veya yönetim olarak sınıflandırır
-│   ├── assertAuth.ts      Doğrulama yardımcı işlevi
-│   ├── context.ts         İstek başına yetkilendirme bağlamı
+│   ├── classify.ts        Classifies routes as public vs management
+│   ├── assertAuth.ts      Assertion helper
+│   ├── context.ts         Per-request authz context
 │   ├── headers.ts
-│   ├── pipeline.ts        Yetkilendirme işlem hattı
-│   ├── policies/          Somut politikalar
+│   ├── pipeline.ts        Authz pipeline
+│   ├── policies/          Concrete policies
 │   └── types.ts
-└── cors/origins.ts        CORS kaynak izin listesi
+└── cors/origins.ts        CORS origin allowlist
 ```
 
 ### 3.5 `src/shared/` — Paylaşılması güvenli
 
-Odaklanmış alt dizinlere ayrılmıştır:
+Odaklı alt dizinlere ayrılır:
 
-- `constants/` — `providers.ts` (Zod ile doğrulanan sağlayıcı kataloğu), `models.ts`,
+- `constants/` — `providers.ts` (Zod ile doğrulanmış sağlayıcı kataloğu), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (engelleme listesi), `mcpScopes.ts`,
+  `headers.ts`, `upstreamHeaders.ts` (yasak listesi), `mcpScopes.ts`,
   `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
   `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
 - `validation/` — `schemas.ts` (~80 Zod şeması), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — npm'de yayımlanan genel API sözleşmeleri.
+- `contracts/` — npm'e gönderilen herkese açık API sözleşmeleri.
 - `types/` — paylaşılan TS türleri.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
@@ -432,16 +439,16 @@ Odaklanmış alt dizinlere ayrılmıştır:
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`; ayrıca `services/`, `network/`,
-  `middleware/`, `schemas/`, `hooks/`, `components/` altındaki pano hook'ları/bileşenleri.
-- `components/` — pano bileşeni API'si (`index.tsx` barrel dosyası: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …). Temel bileşenler, projeye dâhil edilen kit
-  (`packages/ui-kit`, `@omniroute/ui-kit/button` gibi bileşen alt yolları üzerinden içe aktarılır)
-  üzerinde çalışan adaptörlerdir; böylece ekranlar kendi içe aktarımlarını korurken işaretleme kit'e ait olur.
-  Kabuk, `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
-  (kit'in `SidebarProvider`/`SidebarInset` bileşenleri) şeklindedir ve `Sidebar.tsx` ile
-  `Header.tsx` dosyalarını içerir; simgeler `Icon.tsx` ve `constants/iconMap.ts` üzerinden
-  işlenir. Bkz. `docs/architecture/DESIGN_SYSTEM.md`.
+  `a11yAudit.ts`, ayrıca `services/`, `network/`,
+  `middleware/`, `schemas/`, `hooks/`, `components/` altında kontrol paneli hook'ları/bileşenleri.
+- `components/` — kontrol paneli bileşen API'si (`index.tsx` dışa aktarma dosyası: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Temel bileşenler, sağlanan kitin
+  (`packages/ui-kit`, `@omniroute/ui-kit/button` gibi bileşen alt yoluyla içe aktarılır)
+  üzerine adaptörlerdir; böylece ekranlar içe aktarımlarını korurken işaretleme kitin
+  kendisindedir. Kabuk, `Sidebar.tsx` ve `Header.tsx` ile birlikte
+  `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (kit `SidebarProvider`/`SidebarInset`) şeklindedir; simgeler
+  `Icon.tsx` ve `constants/iconMap.ts` üzerinden gider. Bkz. `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
@@ -713,19 +720,20 @@ Amaca göre 6 alt klasör halinde düzenlenmiştir.
 ```
 İstemci isteği
   → /v1/chat/completions (route.ts)
-     CORS ön kontrolü
+     CORS preflight kontrolü
      Zod doğrulaması (shared/validation/schemas.ts içindeki chatCompletionsSchema)
      Kimlik doğrulama (extractApiKey + isValidApiKey VEYA requireManagementAuth)
-     İlke motoru (src/server/authz/pipeline.ts)
-     Koruyucu önlemler (PII maskeleyici, istem enjeksiyonu, görüntü köprüsü)
+     Rota yetkilendirmesi (src/server/authz/pipeline.ts)
+     API anahtarı politikası (src/shared/utils/apiKeyPolicy.ts; seçilen yol üzerinde uygulanır)
+     Koruma katmanları (PII maskeleyici, istem enjeksiyonu, görüntü köprüsü)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     Önbellek kontrolü (anlamsal + okuma önbelleği)
+     Önbellek kontrolü (semantik + okuma önbelleği)
      Hız sınırı (rateLimitManager, accountSemaphore)
-     Birleşik yönlendirme (model bir kombinasyona çözümlenirse)
-       comboResolver → hedef başına döngü → handleSingleModel()
+     Combo yönlendirmesi (model bir combo'ya çözümlenirse)
+       resolveComboTargets (open-sse/services/combo.ts) → hedef başına gönderim
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       üst kaynağı getir → accountFallback aracılığıyla yeniden deneme/üstel bekleme
+       upstream'den getir → accountFallback ile yeniden deneme/geri çekilme
      translateResponse() (open-sse/translator/response/*)
      SSE akışı VEYA JSON yanıtı
      Responses API ise: open-sse/transformer/responsesTransformer.ts aracılığıyla TransformStream
@@ -735,14 +743,13 @@ Amaca göre 6 alt klasör halinde düzenlenmiştir.
 
 ### Dayanıklılık çalışma zamanı durumu (üç mekanizma)
 
-| Mekanizma                | Kapsam                       | Konum                                                                                                                        |
-| ------------------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Sağlayıcı devre kesicisi | Sağlayıcının tamamı          | `src/shared/utils/circuitBreaker.ts`, `domain_circuit_breakers` içinde kalıcı olarak saklanır                                |
-| Bağlantı bekleme süresi  | Bir hesap/anahtar            | `src/sse/services/auth.ts` içindeki `markAccountUnavailable()`; `accountFallback.checkFallbackError()` tarafından kullanılır |
-| Model kilitleme          | Sağlayıcı + bağlantı + model | `open-sse/services/accountFallback.ts`, `domain_lockout_state` içinde kalıcı olarak saklanır                                 |
+| Mekanizma              | Kapsam                       | Konum                                                                                                                        |
+| ---------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Sağlayıcı devre kesici | Tüm sağlayıcı                | `src/shared/utils/circuitBreaker.ts`, `domain_circuit_breakers` içinde kalıcı olarak saklanır                                |
+| Bağlantı soğuma süresi | Tek hesap/anahtar            | `src/sse/services/auth.ts` içindeki `markAccountUnavailable()`; `accountFallback.checkFallbackError()` tarafından kullanılır |
+| Model kilidi           | Sağlayıcı + bağlantı + model | `open-sse/services/accountFallback.ts`, `domain_lockout_state` içinde kalıcı olarak saklanır                                 |
 
-Bkz. [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) ve
-[CLAUDE.md](../../CLAUDE.md) içindeki özel bölüm.
+[RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) ve [CLAUDE.md](../../CLAUDE.md) içindeki ilgili bölüme bakın.
 
 ---
 

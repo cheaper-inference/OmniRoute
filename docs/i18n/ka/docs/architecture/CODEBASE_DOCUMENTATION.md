@@ -75,45 +75,45 @@ OmniRoute/
 
 ```
 src/
-├── app/                  App Router-ის გვერდები + API მარშრუტები
-├── lib/                  ძირითადი ბიბლიოთეკები (DB, ავთენტიკაცია, OAuth, უნარები, მეხსიერება, …)
-├── domain/               სუფთა დომენური შრე (პოლიტიკა, სარეზერვო გადართვა, ღირებულება, დაბლოკვა, …)
-├── server/               მხოლოდ სერვერის მოდულები (ავტორიზაცია, cors, ავთენტიკაცია)
-├── shared/               ტიპები, მუდმივები, ვალიდაცია, კონტრაქტები, დამხმარე ფუნქციები (უსაფრთხოა საზღვრებს შორის)
-├── mitm/                 შუამავალი პროქსის დამხმარე საშუალებები CLI-სთან ინტეგრაციისთვის
-├── models/               ლოკალური მოდელების მეტამონაცემები / ალიასები
-├── sse/                  ძველი SSE დამმუშავებლები, რომლებიც ჯერ კიდევ src/-შია (არა open-sse/-ში)
+├── app/                  App Router გვერდები + API მარშრუტები
+├── lib/                  ძირითადი ბიბლიოთეკები (DB, ავტორიზაცია, OAuth, უნარები, მეხსიერება, …)
+├── domain/               სუფთა დომენის ფენა (პოლიტიკა, fallback, ღირებულება, დაბლოკვა, …)
+├── server/               მხოლოდ სერვერული მოდულები (authz, cors, auth)
+├── shared/               ტიპები, კონსტანტები, ვალიდაცია, კონტრაქტები, უტილიტები (უსაფრთხოა საზღვრებს შორის)
+├── mitm/                 Man-in-the-middle პროქსის დამხმარეები CLI ინტეგრაციისთვის
+├── models/               ლოკალური მოდელების მეტამონაცემები / ფსევდონიმები
+├── sse/                  მოძველებული SSE დამმუშავებლები, რომლებიც ჯერ კიდევ src/ ქვეშ ცხოვრობენ (არა open-sse/)
 ├── store/                კლიენტის მხარის მდგომარეობის საცავები
-├── middleware/           მარშრუტის დონის middleware-ის დამხმარე საშუალებები (არა Next.js-ის გლობალური middleware)
-├── scripts/              პროექტის შიდა სკრიპტები, რომელთა იმპორტირებაც აპლიკაციის კოდს შეუძლია
-├── types/                გლობალური და გაზიარებული TS ტიპები
-├── i18n/                 ლოკალიზაციის პაკეტები
-├── instrumentation.ts    Next.js-ის ინსტრუმენტაციის ჰუკი
+├── middleware/           მარშრუტის დონის middleware უტილიტები (არა Next.js გლობალური middleware)
+├── scripts/              ხის შინაგანი სკრიპტები, რომელთა იმპორტიც აპლიკაციის კოდიდან შეიძლება
+├── types/                Ambient და გაზიარებული TS ტიპები
+├── i18n/                 ლოკალიზაციის ბანდლები
+├── instrumentation.ts    Next.js ინსტრუმენტაციის ჰუკი
 ├── instrumentation-node.ts
-└── proxy.ts              ზედა დონის პროქსის საწყისი ჩატვირთვის დამხმარე
+└── proxy.ts              უმაღლესი დონის პროქსის bootstrap დამხმარე
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router უზრუნველყოფს როგორც მართვის პანელის UI-ს, ისე საჯარო/მართვის HTTP API-ს.
-**გლობალური middleware არ არსებობს** — ჩაჭერა თითოეული მარშრუტის დონეზე სრულდება.
+App Router გამოაქვეყნებს როგორც დაშბორდის UI-ს, ისე საჯარო/სამართავ HTTP API-ს.
+**გლობალური middleware არ არსებობს** — გადაჭრა სრულდება თითოეული მარშრუტის დონეზე.
 
-ზედა დონის სეგმენტები `src/app/`-ში:
+უმაღლესი დონის სეგმენტები `src/app/`-ში:
 
-| გზა                                                                           | დანიშნულება                                                  |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `api/`                                                                        | ყველა HTTP API მარშრუტი (იხილეთ ქვემოთ დაყოფა)               |
-| `a2a/`                                                                        | A2A JSON-RPC 2.0 საბოლოო წერტილი (`POST /a2a`)               |
-| `.well-known/agent.json/`                                                     | A2A Agent Card-ის აღმოჩენის დოკუმენტი                        |
-| `(dashboard)/`                                                                | მართვის პანელის UI (მარშრუტების ჯგუფი, URL პრეფიქსის გარეშე) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | ავთენტიკაციის ნაკადები                                       |
-| `landing/`                                                                    | მარკეტინგული/საწყისი გვერდი                                  |
-| `docs/`                                                                       | ჩაშენებული API დოკუმენტაციის დამთვალიერებელი                 |
-| `status/`, `maintenance/`, `offline/`                                         | ოპერაციული გვერდები                                          |
-| `privacy/`, `terms/`                                                          | სამართლებრივი გვერდები                                       |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | სტატიკური შეცდომის გვერდები                                  |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | ფრეიმვორკის შეცდომის/ჩატვირთვის საზღვრები                    |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | ძირითადი გარსი                                               |
+| Path                                                                          | Purpose                                                |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `api/`                                                                        | ყველა HTTP API მარშრუტი (იხ. დაყოფა ქვემოთ)            |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 ენდპოინტი (`POST /a2a`)               |
+| `.well-known/agent.json/`                                                     | A2A Agent Card-ის აღმოჩენის დოკუმენტი                  |
+| `(dashboard)/`                                                                | დაშბორდის UI (მარშრუტების ჯგუფი, URL პრეფიქსის გარეშე) |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | ავტორიზაციის ნაკადები                                  |
+| `landing/`                                                                    | მარკეტინგული/სადესანტო გვერდი                          |
+| `docs/`                                                                       | ჩაშენებული API დოკუმენტაციის მნახველი                  |
+| `status/`, `maintenance/`, `offline/`                                         | ოპერაციული გვერდები                                    |
+| `privacy/`, `terms/`                                                          | სამართლებრივი გვერდები                                 |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | სტატიკური შეცდომის გვერდები                            |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | ფრეიმვორკის შეცდომის/ჩატვირთვის საზღვრები              |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | ძირითადი გარსი                                         |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — UI გვერდები
 
@@ -124,7 +124,7 @@ App Router უზრუნველყოფს როგორც მართ�
 `translator`, `usage`, `webhooks`, ასევე ძირითადი `page.tsx`, `HomePageClient.tsx`,
 `BootstrapBanner.tsx`.
 
-#### 3.1.2 `src/app/api/` — ზედა დონის API ჯგუფები
+#### 3.1.2 `src/app/api/` — უმაღლესი დონის API ჯგუფები
 
 ```
 src/app/api/
@@ -181,16 +181,16 @@ src/app/api/
 ├── upstream-proxy/
 ├── usage/
 ├── v1/         OpenAI-სთან თავსებადი საჯარო API
-├── v1beta/     Gemini-ის სტილის თავსებადობა
+├── v1beta/     Gemini-ს სტილის თავსებადობა
 ├── version-manager/
 └── webhooks/
 ```
 
 #### 3.1.2a `src/app/api/services/` — ჩაშენებული სერვისების მართვა
 
-მარშრუტები 9Router-ისა და CLIProxyAPI-ის ინსტალაციისთვის, გაშვებისთვის, შეჩერებისა და მონიტორინგისთვის.
-ყველა გზა კლასიფიცირებულია, როგორც **LOCAL_ONLY** (მხოლოდ loopback, მკაცრი წესი #17), რადგან მათ
-შეუძლიათ გამოიძახონ `npm install` და შექმნან შვილობილი პროცესები.
+მარშრუტები 9Router-ისა და CLIProxyAPI-ის ინსტალაციის, გაშვების, გაჩერებისა და მონიტორინგისთვის.
+ყველა გზა კლასიფიცირებულია როგორც **LOCAL_ONLY** (მხოლოდ loopback, მკაცრი წესი #17), რადგან
+მათ შეუძლიათ გამოიძახონ `npm install` და გაუშვან შვილი პროცესები.
 
 ```
 src/app/api/services/
@@ -201,9 +201,9 @@ src/app/api/services/
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
 │   ├── update/route.ts     POST — npm install უფრო ახალი ვერსიისთვის
-│   ├── rotate-key/route.ts POST — ახალი API გასაღების გენერაცია + გადატვირთვა
-│   ├── status/route.ts     GET  — მიმდინარე + DB სტატუსი + ვერსიის მეტამონაცემები
-│   └── auto-start/route.ts POST — auto_start ალმის გადართვა
+│   ├── rotate-key/route.ts POST — ახალი API-გასაღების გენერაცია + გადატვირთვა
+│   ├── status/route.ts     GET  — ცოცხალი + DB სტატუსი + ვერსიის მეტამონაცემები
+│   └── auto-start/route.ts POST — auto_start ფლაგის გადართვა
 ├── cliproxy/
 │   ├── _lib.ts             getOrInitSupervisor() დამხმარე
 │   ├── install/route.ts    POST — npm install
@@ -211,110 +211,110 @@ src/app/api/services/
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
 │   ├── update/route.ts     POST — npm install უფრო ახალი ვერსიისთვის
-│   ├── status/route.ts     GET  — მიმდინარე + DB სტატუსი + ვერსიის მეტამონაცემები
-│   └── auto-start/route.ts POST — auto_start ალმის გადართვა
+│   ├── status/route.ts     GET  — ცოცხალი + DB სტატუსი + ვერსიის მეტამონაცემები
+│   └── auto-start/route.ts POST — auto_start ფლაგის გადართვა
 └── [name]/
-    └── logs/route.ts       GET  — SSE ჟურნალის ბოლო ჩანაწერები (საერთოა ყველა სერვისისთვის)
+    └── logs/route.ts       GET  — SSE ლოგების ნაკადი (საერთო ყველა სერვისისთვის)
 ```
 
-შესაბამისი მართვის პანელის UI:
-`src/app/(dashboard)/dashboard/providers/services/` — ორჩანართიანი გვერდი (CLIProxyAPI + 9Router).
-უკუ-პროქსი 9Router-ის ჩაშენებული UI-სთვის:
+შესაბამისი დაშბორდის UI:
+`src/app/(dashboard)/dashboard/providers/services/` — ორი ტაბის გვერდი (CLIProxyAPI + 9Router).
+საპირისპირო პროქსი 9Router-ის ჩაშენებული UI-სთვის:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-დეტალური მიმოხილვა: `docs/frameworks/EMBEDDED-SERVICES.md`
+დეტალური გარჩევა: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-#### 3.1.3 `src/app/api/v1/` — OpenAI-სთან თავსებადი საჯარო API
+#### 3.1.3 `src/app/api/v1/` — OpenAI-თან თავსებადი საჯარო API
 
 ```
 v1/
-├── accounts/[id]/                       ანგარიშის მოძიება
-├── agents/tasks/[id]/, agents/tasks/    A2A-ს სტილის ამოცანების საბოლოო წერტილები
-├── api/                                 v1/api-ის ქვეშ ხელმისაწვდომი შიდა API დამხმარეები
+├── accounts/[id]/                       ანგარიშის ძიება
+├── agents/tasks/[id]/, agents/tasks/    A2A-სტილის ამოცანების ენდპოინტები
+├── api/                                 შინაგანი API-დამხმარეები, ხელმისაწვდომი v1/api-ის ქვეშ
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    ჩატის დასრულებები (მთავარი საბოლოო წერტილი)
-├── completions/                         მოძველებული ტექსტური დასრულებები
-├── embeddings/                          ჩაშენებები
-├── files/[id]/, files/                  ფაილების API
-├── _helpers/                            მარშრუტის საერთო დამხმარეები (საჯარო URL-ის გარეშე)
+├── chat/completions/                    Chat Completions (მთავარი ენდპოინტი)
+├── completions/                         მემკვიდრეობითი ტექსტური შევსებები
+├── embeddings/                          Embeddings
+├── files/[id]/, files/                  Files API
+├── _helpers/                            საერთო როუტ-დამხმარეები (საჯარო URL-ის გარეშე)
 ├── images/{edits, generations}/         სურათების გენერაცია + რედაქტირება
-├── issues/                              პრობლემების დახარისხების დამხმარე საბოლოო წერტილები
-├── management/{proxies}/                მართვის არეალით შეზღუდული მარშრუტები v1-ის შიგნით
-├── messages/{count_tokens}/             Anthropic-ის სტილის შეტყობინებებთან თავსებადობა
+├── issues/                              ტრიაჟის დამხმარე ენდპოინტები
+├── management/{proxies}/                Management-სფეროში მოქცეული როუტები v1-ის შიგნით
+├── messages/{count_tokens}/             Anthropic-სტილის messages-თავსებადობა
 ├── models/                              მოდელების ჩამონათვალი (`route.ts`, `catalog.ts`)
 ├── moderations/                         მოდერაცია
 ├── music/                               მუსიკის გენერაცია
-├── providers/[provider]/                ოპერაციები თითოეული პროვაიდერისთვის
-├── quotas/{check}                       კვოტის შემოწმებები
+├── providers/[provider]/                თითოეული პროვაიდერის ოპერაციები
+├── quotas/{check}                       კვოტების შემოწმებები
 ├── registered-keys/                     რეგისტრირებული გასაღებების ადმინისტრირება
 ├── rerank/                              ხელახალი რანჟირება
-├── responses/[...path]/                 OpenAI Responses API (ყველაფრის მომცველი)
+├── responses/[...path]/                 OpenAI Responses API (ყველა მარშრუტის დამჭერი)
 ├── search/                              ვებძიება
-├── videos/                              ვიდეოს გენერაცია
-├── ws/                                  WebSocket ხიდი
+├── videos/                              ვიდეოების გენერაცია
+├── ws/                                  WebSocket-ხიდი
 └── route.ts                             ინდექსის დამმუშავებელი
 ```
 
-მარშრუტის ყველა ფაილი ერთსა და იმავე შაბლონს მიჰყვება:
+ყველა როუტის ფაილი იმავე ნიმუშს მიჰყვება:
 
 ```
-მარშრუტი → CORS-ის წინასწარი მოთხოვნა → მოთხოვნის სხეულის Zod-ით ვალიდაცია → არასავალდებულო ავთენტიფიკაცია
-          → API გასაღების პოლიტიკის აღსრულება → დამმუშავებელზე დელეგირება (open-sse)
+როუტი → CORS preflight → Zod-ით სხეულის ვალიდაცია → არასავალდებულო ავთენტიფიკაცია
+      → API-გასაღების პოლიტიკის აღსრულება → დელეგირება ჰენდლერზე (open-sse)
 ```
 
-`v1beta/` არის Gemini-ს სტილთან თავსებადი ზედაპირი (მსუბუქი გარსი, რომელიც მოთხოვნებს
-იმავე `open-sse/handlers/` კონვეიერისთვის გარდაქმნის).
+`v1beta/` არის Gemini-სტილის თავსებადობის ზედაპირი (თხელი გარსი, რომელიც იმავე
+`open-sse/handlers/` პაიპლაინში გადაითარგმნება).
 
 ### 3.2 `src/lib/` — ძირითადი ბიბლიოთეკები
 
-მონაცემები, სინქრონიზაცია, OAuth, უნარები, მეხსიერება და სხვა ყოველთვის ამ მოდულების მეშვეობით დააიმპორტეთ.
-ცხრილში დაჯგუფებულია რეალური დირექტორიები და მნიშვნელოვანი ზედა დონის ფაილები.
+data, sync, OAuth, skill, memory და ა.შ. ყოველთვის დააიმპორტეთ ამ მოდულებიდან.
+ცხრილი აჯგუფებს რეალურ დირექტორიებსა და მნიშვნელოვან უმაღლესი დონის ფაილებს.
 
-| მოდული            | დანიშნულება                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A პროტოკოლის სერვერი: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 უნარი: ხარჯების ანალიზი, მდგომარეობის ანგარიში, პროვაიდერების აღმოჩენა, კვოტების მართვა, ჭკვიანი მარშრუტიზაცია, შესაძლებლობების სიის ჩვენება)                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `acp/`            | აგენტების მართვის პროტოკოლი: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `api/`            | შიდა API-ის დამხმარე საშუალებები: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `auth/`           | `managementPassword.ts` (პაროლის აღდგენა / ჰეშირება)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `batches/`        | OpenAI Batches API-ის სერვისი (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `catalog/`        | OpenRouter-ის კატალოგის სინქრონიზაცია (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `cloudAgent/`     | ღრუბლოვანი აგენტების რეესტრი: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `combos/`         | კომბინაციების ამოხსნის დამხმარე საშუალებები                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `compliance/`     | აუდიტი + პროვაიდერის აუდიტი: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `config/`         | შესრულების დროის კონფიგურაციის დამაკავშირებელი შრე                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `db/`             | SQLite-ის დომენური მოდულები (იხილეთ §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `display/`        | API-ის პასუხებში გამოყენებული UI/ჩვენების დამხმარე საშუალებები                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `embeddings/`     | embedding სერვისების რეესტრი                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `env/`            | გარემოს ცვლადების ჩატვირთვა + ინტროსპექცია                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `evals/`          | შეფასებების შესრულების გარემო                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `jobs/`           | ფონური ამოცანები (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `memory/`         | მუდმივი მეხსიერება: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `oauth/`          | OAuth/იმპორტის პროვაიდერის მოდულები (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, ასევე `services/`, `utils/` და `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                 |
-| `plugins/`        | პლაგინების ჩამტვირთავი (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `providerModels/` | მართული მოდელის სასიცოცხლო ციკლი: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `providers/`      | პროვაიდერის დამხმარე საშუალებები: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `resilience/`     | `settings.ts` — circuit breaker-ის, cooldown-ისა და lockout-ის პარამეტრები                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `runtime/`        | შესრულების გარემოს ფუნქციების გამოვლენა                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `services/`       | ჩაშენებული სერვისების ფრეიმვორკი: `ServiceSupervisor.ts` (შვილობილი პროცესების ზოგადი ზედამხედველი ოპერაციის ბლოკირებით, რგოლური ბუფერითა და მდგომარეობის შემმოწმებლით), `bootstrap.ts` (პროცესის დონის რეგისტრაცია და ავტომატური გაშვება), `registry.ts` (ხელსაწყო → ზედამხედველის რუკა), `apiKey.ts` (AES-256-GCM გასაღებების საცავი), `modelSync.ts` (მოდელების პერიოდული სინქრონიზაცია), `ringBuffer.ts` (5 MB მოცულობის წრიული ჟურნალის ბუფერი), `healthCheck.ts` (HTTP მდგომარეობის შემოწმება), `types.ts`, `embedWsProxy.ts` (WebSocket პროქსი), `installers/{ninerouter,cliproxy}.ts`. იხილეთ `docs/frameworks/EMBEDDED-SERVICES.md`                                                                         |
-| `agentSkills/`    | Agent Skills-ის კატალოგი და გენერატორი: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → წერს `skills/{id}/SKILL.md`-ში), `openapiParser.ts` (OpenAPI სპეციფიკაციიდან REST endpoint-ების ამოღება), `cliRegistryParser.ts` (bin/cli-registry-დან CLI ქვეკომანდების ამოღება), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). გამოიყენება REST მარშრუტების (`/api/agent-skills/*`), MCP ხელსაწყოებისა (`omniroute_agent_skills_*`) და A2A უნარის `list-capabilities` მიერ. იხილეთ [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | უნარების ფრეიმვორკი: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, აგრეთვე `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `spend/`          | `batchWriter.ts` (დაგვიანებული ჩაწერის ბუფერი)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `sync/`           | `bundle.ts`, `tokens.ts` (ღრუბლოვანი სინქრონიზაცია)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `system/`         | სისტემური დონის დამხმარე საშუალებები                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `translator/`     | უმაღლესი დონის მთარგმნელის დამაკავშირებელი შრე (დელეგირებას ახდენს `open-sse/translator/`-ში)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `usage/`          | გამოყენების აღრიცხვა: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `versionManager/` | ავტომატური განახლება + ვერსიის მანიფესტი                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `ws/`             | WebSocket-ის ხიდი                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `zed-oauth/`      | Zed რედაქტორის OAuth ნაკადი                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| მოდული            | დანიშნულება                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | A2A პროტოკოლის სერვერი: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 უნარი: ხარჯების ანალიზი, ჯანმრთელობის ანგარიში, პროვაიდერის აღმოჩენა, კვოტების მართვა, ჭკვიანი მარშრუტიზაცია, list-capabilities)                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `acp/`            | აგენტის მართვის პროტოკოლი (Agent-Control-Protocol): `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `api/`            | შინაგანი API დამხმარეები: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `auth/`           | `managementPassword.ts` (პაროლის აღდგენა / ჰეშირება)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `batches/`        | OpenAI Batches API სერვისი (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `catalog/`        | OpenRouter კატალოგის სინქრონიზაცია (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `cloudAgent/`     | ღრუბლოვანი აგენტების რეესტრი: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `combos/`         | კომბინაციების რეზოლუციის დამხმარე ფუნქციები                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `compliance/`     | აუდიტი + პროვაიდერის აუდიტი: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `config/`         | გაშვების დროის კონფიგურაციის დამაკავშირებელი ფენა                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `db/`             | SQLite დომენური მოდულები (იხ. §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `display/`        | UI/გამოსახვის დამხმარეები, რომლებსაც API პასუხები იყენებს                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `embeddings/`     | ემბედინგ სერვისების რეესტრი                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `env/`            | გარემოს ცვლადების ჩატვირთვა + ინტროსპექცია                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `evals/`          | Eval-ების გაშვების გარემო                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `jobs/`           | ფონური ამოცანები (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `memory/`         | მუდმივი მეხსიერება: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `oauth/`          | OAuth/იმპორტის პროვაიდერის მოდულები (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, ასევე `services/`, `utils/` და `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                              |
+| `plugins/`        | პლაგინების ჩამტვირთავი (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `providerModels/` | მართული მოდელების სასიცოცხლო ციკლი: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `providers/`      | პროვაიდერების დამხმარეები: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `resilience/`     | `settings.ts` — circuit breaker-ის, cooldown-ისა და lockout-ის პარამეტრები                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `runtime/`        | Runtime-ის შესაძლებლობების გამოვლენა                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `services/`       | ჩაშენებული სერვისების ფრეიმვორკი: `ServiceSupervisor.ts` (ზოგადი შვილობილი პროცესის სუპერვაიზორი ოპერაციის საკეტით, რგოლური ბუფერით და ჯანმრთელობის შემმოწმებლით), `bootstrap.ts` (პროცესის დონეზე რეგისტრაცია და ავტომატური გაშვება), `registry.ts` (ინსტრუმენტი → სუპერვაიზორის რუკა), `apiKey.ts` (AES-256-GCM გასაღებების საცავი), `modelSync.ts` (მოდელების პერიოდული სინქრონიზაცია), `ringBuffer.ts` (5 MB ცირკულარული ლოგ-ბუფერი), `healthCheck.ts` (HTTP ჯანმრთელობის პრობა), `types.ts`, `embedWsProxy.ts` (WebSocket-პროქსი), `installers/{ninerouter,cliproxy}.ts`. იხილეთ `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                      |
+| `agentSkills/`    | Agent Skills-ის კატალოგი + გენერატორი: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → წერს `skills/{id}/SKILL.md`-ში), `openapiParser.ts` (აღებს REST endpoint-ებს OpenAPI სპეციფიკაციიდან), `cliRegistryParser.ts` (აღებს CLI ქვებრძანებებს bin/cli-registry-დან), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). გამოიყენება REST მარშრუტების (`/api/agent-skills/*`), MCP ინსტრუმენტების (`omniroute_agent_skills_*`) და A2A skill-ის `list-capabilities` მიერ. იხილეთ [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Skill-ების ფრეიმვორკი: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, ასევე `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `spend/`          | `batchWriter.ts` (write-behind ბუფერი)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `sync/`           | `bundle.ts`, `tokens.ts` (ღრუბლოვანი სინქრონიზაცია)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `system/`         | სისტემური დონის დამხმარეები                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `translator/`     | ზედა დონის თარჯიმნის დამაკავშირებელი (დელეგირებას ახდენს `open-sse/translator/`-ში)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `usage/`          | გამოყენების აღრიცხვა: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `versionManager/` | ავტოგანახლება + ვერსიის მანიფესტი                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `ws/`             | WebSocket ხიდი                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `zed-oauth/`      | Zed რედაქტორის OAuth პროცესი                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
-უმაღლესი დონის ფაილები `src/lib/`-ში:
+ზედა დონის ფაილები `src/lib/`-ში:
 
-- ძველი `localDb.ts` barrel-ფაილი წაიშალა — მომხმარებლები პირდაპირ ახორციელებენ კონკრეტული `src/lib/db/*` მოდულების იმპორტს.
+- ძველი `localDb.ts` barrel-ფაილი წაიშალა — მომხმარებლები პირდაპირ იმპორტავენ კონკრეტულ `src/lib/db/*` მოდულებს.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -328,14 +328,14 @@ v1/
 
 #### 3.2.1 `src/lib/db/`
 
-Singleton SQLite მონაცემთა ბაზა (`getDbInstance()` ფაილში `core.ts`, WAL ჟურნალირება).
-**არასოდეს ჩაწეროთ ნედლი SQL მარშრუტებში ან დამმუშავებლებში** — გამოიყენეთ ეს მოდულები.
+SQLite მონაცემთა ბაზის სინგლტონი (`getDbInstance()` `core.ts`-ში, WAL ჟურნალირებით).
+**არასდროს წეროთ ნედლი SQL-ი როუტებში ან დამმუშავებლებში** — გამოიყენეთ ეს მოდულები.
 
-![მონაცემთა ბაზის სქემის მიმოხილვა (შერჩეული ძირითადი ცხრილები)](../diagrams/exported/db-schema-overview.svg)
+![მონაცემთა ბაზის სქემის მიმოხილვა (არჩეული ძირითადი ცხრილები)](../diagrams/exported/db-schema-overview.svg)
 
 > წყარო: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-დომენური მოდულები (თითოეული მართავს ერთ ან მეტ ცხრილს): `apiKeys.ts`, `backup.ts`,
+დომენის მოდულები (თითოეული ფლობს ერთ ან მეტ ცხრილს): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -349,10 +349,10 @@ Singleton SQLite მონაცემთა ბაზა (`getDbInstance()` ფ
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-`migrations/` შეიცავს 168 ვერსირებულ `.sql` ფაილს (იდემპოტენტურსა და ტრანზაქციულს), რომლებსაც
-ჩატვირთვისას `migrationRunner.ts` ასრულებს.
+`migrations/` შეიცავს 168 ვერსირებულ `.sql` ფაილს (იდემპოტენტური, ტრანზაქციული) და
+სრულდება `migrationRunner.ts`-ის მიერ გაშვებისას.
 
-მიგრაციების ფარგლებში შექმნილი ცხრილები (სულ 123):
+მიგრაციებით შექმნილი ცხრილები (სულ 123):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -368,62 +368,72 @@ Singleton SQLite მონაცემთა ბაზა (`getDbInstance()` ფ
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (ასევე FTS5 ვირტუალური ცხრილები მეხსიერებაში ძიებისთვის).
+`webhooks` (ასევე FTS5 ვირტუალური ცხრილები მეხსიერების ძიებისთვის).
 
-### 3.3 `src/domain/` — დომენური ფენა
+### 3.3 `src/domain/` — დომენის ფენა
 
-სუფთა ბიზნესლოგიკა, I/O-ის გარეშე. იმპორტირდება მარშრუტებისა და დამმუშავებლების მიერ.
+დომენის სერვისები და შეფასების კონტრაქტები. ზოგიერთი მოდული იძახება მოთხოვნის
+აქტიური გზიდან; სხვები რჩება დამოუკიდებელ კონტრაქტებად. ნუ ჩათვლით, რომ ეს მთელი
+დირექტორია თავისუფალია I/O-სგან ან რომ თითოეული მოდულის შეცვლა გავლენას მოახდენს
+საწარმოო მარშრუტიზაციაზე.
 
-| ფაილი                                      | დანიშნულება                                              |
-| ------------------------------------------ | -------------------------------------------------------- |
-| `policyEngine.ts`                          | ზედა დონის პოლიტიკის განმსაზღვრელი                       |
-| `fallbackPolicy.ts`                        | სარეზერვო ვარიანტის გადაწყვეტილებათა ხე                  |
-| `costRules.ts`                             | ღირებულების გამოთვლის წესები                             |
-| `lockoutPolicy.ts`                         | მოდელის დაბლოკვის გადაწყვეტილებები                       |
-| `tagRouter.ts`                             | ტეგებზე დაფუძნებული მარშრუტიზაცია                        |
-| `comboResolver.ts`                         | კომბინაციის განსაზღვრა მოთხოვნიდან → სამიზნეების სიამდე  |
-| `connectionModelRules.ts`                  | თითოეული კავშირის მოდელის ფილტრები                       |
-| `modelAvailability.ts`                     | მოდელის ხელმისაწვდომობის შემოწმება                       |
-| `degradation.ts`                           | დეგრადირებულ რეჟიმში გადასვლები                          |
-| `providerExpiration.ts`                    | ვადაგასული ანგარიშის/გასაღების გამოვლენა                 |
-| `quotaCache.ts`                            | ქეშირებული კვოტის გადაწყვეტილებები                       |
-| `responses.ts`, `omnirouteResponseMeta.ts` | პასუხის სტრუქტურის დამხმარე ფუნქციები                    |
-| `configAudit.ts`                           | კონფიგურაციის ცვლილებების აუდიტი                         |
-| `assessment/`                              | მოდელის შეფასება (RFC-ის მიხედვით, ნაწილობრივ დანერგილი) |
-| `types.ts`                                 | გაზიარებული დომენური ტიპები                              |
+აქტიური პოლიტიკის ზედაპირებია `src/shared/utils/apiKeyPolicy.ts` და
+`src/sse/handlers/chat/resolvedModelPolicy.ts`. კომბოების აქტიური დამუშავება და სამიზნის
+გარჩევა იყენებს `open-sse/services/combo.ts`-ს. შემოწმებული `policyEngine.ts` და
+`comboResolver.ts` კონტრაქტები, `src/lib/container.ts`-თან ერთად, არ წარმოადგენს
+შემოწმებული ჩატის მოთხოვნის გზის გაყვანილობას. მარშრუტიზაციის ცვლილების დაგეგმვისას
+მკაცრად განასხვავეთ ისინი ამ აქტიური ზედაპირებისგან.
+
+| ფაილი                                      | დანიშნულება                                                     |
+| ------------------------------------------ | --------------------------------------------------------------- |
+| `policyEngine.ts`                          | დარეზერვებული პოლიტიკის შეფასების კონტრაქტი                     |
+| `fallbackPolicy.ts`                        | სარეზერვო (fallback) გადაწყვეტილების ხე                         |
+| `costRules.ts`                             | ღირებულების გამოთვლის წესები                                    |
+| `lockoutPolicy.ts`                         | მოდელის დაბლოკვის გადაწყვეტილებები                              |
+| `tagRouter.ts`                             | თეგებზე დაფუძნებული მარშრუტიზაცია                               |
+| `comboResolver.ts`                         | დარეზერვებული კომბოს არჩევის კონტრაქტი                          |
+| `connectionModelRules.ts`                  | მოდელის ფილტრები თითო კავშირისთვის                              |
+| `modelAvailability.ts`                     | მოდელის ხელმისაწვდომობის შემოწმება                              |
+| `degradation.ts`                           | დეგრადირებული რეჟიმის გადასვლები                                |
+| `providerExpiration.ts`                    | ვადაგასული ანგარიშის/გასაღების აღმოჩენა                         |
+| `quotaCache.ts`                            | ქეშირებული კვოტის გადაწყვეტილებები                              |
+| `responses.ts`, `omnirouteResponseMeta.ts` | პასუხის ფორმის დამხმარე ფუნქციები                               |
+| `configAudit.ts`                           | კონფიგურაციის ცვლილებების აუდიტი                                |
+| `assessment/`                              | მოდელის შეფასება (RFC-ის მიხედვით, ნაწილობრივ იმპლემენტირებული) |
+| `types.ts`                                 | საერთო დომენის ტიპები                                           |
 
 ### 3.4 `src/server/` — მხოლოდ სერვერისთვის
 
-კლიენტის კომპონენტებიდან მისი იმპორტი შეუძლებელია.
+მისი იმპორტი კლიენტის კომპონენტებიდან შეუძლებელია.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        მარშრუტებს ყოფს საჯარო და მართვის მარშრუტებად
-│   ├── assertAuth.ts      ასერტაციის დამხმარე ფუნქცია
-│   ├── context.ts         თითოეული მოთხოვნის ავტორიზაციის კონტექსტი
+│   ├── classify.ts        აკლასიფიცირებს როუტებს საჯარო და სამართავ კატეგორიებად
+│   ├── assertAuth.ts      მტკიცების (assertion) დამხმარე
+│   ├── context.ts         თითოეული მოთხოვნის authz კონტექსტი
 │   ├── headers.ts
-│   ├── pipeline.ts        ავტორიზაციის კონვეიერი
+│   ├── pipeline.ts        Authz პაიპლაინი
 │   ├── policies/          კონკრეტული პოლიტიკები
 │   └── types.ts
-└── cors/origins.ts        CORS წყაროების ნებადართული სია
+└── cors/origins.ts        CORS origin-ების დაშვებული სია
 ```
 
-### 3.5 `src/shared/` — უსაფრთხო გაზიარებისთვის
+### 3.5 `src/shared/` — უსაფრთხოა გაზიარებისთვის
 
-დაყოფილია კონკრეტულ დანიშნულებაზე ორიენტირებულ ქვედირექტორიებად:
+დაყოფილია ფოკუსირებულ ქვედირექტორიებად:
 
 - `constants/` — `providers.ts` (Zod-ით ვალიდირებული პროვაიდერების კატალოგი), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (აკრძალვების სია), `mcpScopes.ts`,
+  `headers.ts`, `upstreamHeaders.ts` (აკრძალული სია), `mcpScopes.ts`,
   `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
   `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
 - `validation/` — `schemas.ts` (~80 Zod სქემა), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — npm-ზე გამოქვეყნებული საჯარო API კონტრაქტები.
+- `contracts/` — საჯარო API კონტრაქტები, რომლებიც ქვეყნდება npm-ში.
 - `types/` — გაზიარებული TS ტიპები.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
@@ -432,16 +442,16 @@ server/
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, ასევე დაფის ჰუკები/კომპონენტები `services/`, `network/`,
-  `middleware/`, `schemas/`, `hooks/`, `components/`-ში.
-- `components/` — დაფის კომპონენტების API (`index.tsx` ბარელი: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …). პრიმიტივები ვენდორული ნაკრების
-  ადაპტერებია (`packages/ui-kit`, იმპორტირებული კომპონენტის ქვეკავშირის მეშვეობით,
-  როგორიცაა `@omniroute/ui-kit/button`), ამიტომ ეკრანები ინარჩუნებენ საკუთარ
-  იმპორტებს, ხოლო მარკაფი ნაკრებს ეკუთვნის. გარსია
+  `a11yAudit.ts`, ასევე dashboard-ის ჰუკები/კომპონენტები `services/`, `network/`,
+  `middleware/`, `schemas/`, `hooks/`, `components/` ქვედირექტორიებში.
+- `components/` — dashboard-ის კომპონენტების API (`index.tsx` barrel: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). პრიმიტივები არის ადაპტერები
+  vendored ნაკრების თავზე (`packages/ui-kit`, რომელიც იმპორტირდება კომპონენტის
+  ქვებილიწუნით, როგორიცაა `@omniroute/ui-kit/button`), ამიტომ ეკრანები
+  ინარჩუნებენ საკუთარ იმპორტებს, ხოლო მარკაპი ნაკრებიდან მოდის. გარსია
   `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
-  (ნაკრების `SidebarProvider`/`SidebarInset`) `Sidebar.tsx`-სა და `Header.tsx`-თან
-  ერთად; ხატულები გადის `Icon.tsx`-ისა და `constants/iconMap.ts`-ის გავლით.
+  (kit `SidebarProvider`/`SidebarInset`) `Sidebar.tsx`-თან და `Header.tsx`-თან
+  ერთად; ხატულები გადიან `Icon.tsx`-ისა და `constants/iconMap.ts`-ის მეშვეობით.
   იხილეთ `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
@@ -703,44 +713,45 @@ bin/
 
 ---
 
-## 9. მოთხოვნის დამუშავების კონვეიერი (შეჯამება)
+## 9. მოთხოვნის პაიპლაინი (შეჯამება)
 
-![მოთხოვნის დამუშავების კონვეიერი (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
+![მოთხოვნის პაიპლაინი (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
 
 > წყარო: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
 ```
 კლიენტის მოთხოვნა
   → /v1/chat/completions (route.ts)
-     CORS-ის წინასწარი შემოწმება
-     Zod-ვალიდაცია (chatCompletionsSchema ფაილში shared/validation/schemas.ts)
+     CORS preflight შემოწმება
+     Zod ვალიდაცია (chatCompletionsSchema ფაილში shared/validation/schemas.ts)
      ავთენტიფიკაცია (extractApiKey + isValidApiKey ან requireManagementAuth)
-     პოლიტიკის ძრავა (src/server/authz/pipeline.ts)
-     დამცავი მექანიზმები (PII-ის შემნიღბავი, პრომპტ-ინექციისგან დაცვა, ხედვის ხიდი)
+     მარშრუტის ავტორიზაცია (src/server/authz/pipeline.ts)
+     API-გასაღების პოლიტიკა (src/shared/utils/apiKeyPolicy.ts; აღსრულდება არჩეულ გზაზე)
+     დამცავი მექანიზმები (PII მასკირება, პრომპტ-ინექცია, vision bridge)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
      ქეშის შემოწმება (სემანტიკური + წაკითხვის ქეში)
-     სიხშირის შეზღუდვა (rateLimitManager, accountSemaphore)
-     კომბინირებული მარშრუტიზაცია (თუ მოდელი კომბინაციად განისაზღვრება)
-       comboResolver → ციკლი თითოეული სამიზნისთვის → handleSingleModel()
+     მოთხოვნების სიხშირის შეზღუდვა (rateLimitManager, accountSemaphore)
+     კომბოს მარშრუტაცია (თუ მოდელი კომბოს შეესაბამება)
+       resolveComboTargets (open-sse/services/combo.ts) → გაგზავნა თითოეულ სამიზნეზე
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       მოთხოვნის გაგზავნა ზედა დონის სერვისში → ხელახალი ცდა/დაყოვნება accountFallback-ის მეშვეობით
+       fetch upstream-ზე → განმეორება/backoff accountFallback-ის საშუალებით
      translateResponse() (open-sse/translator/response/*)
-     SSE-ნაკადი ან JSON-პასუხი
-     თუ Responses API გამოიყენება: TransformStream open-sse/transformer/responsesTransformer.ts-ის მეშვეობით
+     SSE ნაკადი ან JSON პასუხი
+     თუ Responses API: TransformStream open-sse/transformer/responsesTransformer.ts-ის საშუალებით
   → შესაბამისობის აუდიტი (src/lib/compliance/)
   → პასუხი კლიენტს
 ```
 
-### მდგრადობის გაშვების მდგომარეობა (სამი მექანიზმი)
+### მდგრადობის საოპერაციო მდგომარეობა (სამი მექანიზმი)
 
-| მექანიზმი                     | მოქმედების არეალი             | მდებარეობა                                                                                                               |
-| ----------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| პროვაიდერის წრედის ამომრთველი | მთელი პროვაიდერი              | `src/shared/utils/circuitBreaker.ts`, ინახება `domain_circuit_breakers`-ში                                               |
-| კავშირის დაყოვნების პერიოდი   | ერთი ანგარიში/გასაღები        | `markAccountUnavailable()` ფაილში `src/sse/services/auth.ts`; გამოიყენება `accountFallback.checkFallbackError()`-ის მიერ |
-| მოდელის ბლოკირება             | პროვაიდერი + კავშირი + მოდელი | `open-sse/services/accountFallback.ts`, ინახება `domain_lockout_state`-ში                                                |
+| მექანიზმი                                | ფარგლები                      | სად                                                                                                                     |
+| ---------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| პროვაიდერის ამომრთველი (circuit breaker) | მთელი პროვაიდერი              | `src/shared/utils/circuitBreaker.ts`, შენახულია `domain_circuit_breakers`-ში                                            |
+| კავშირის დროებითი გამორთვა (cooldown)    | ერთი ანგარიში/გასაღები        | `markAccountUnavailable()` ფაილში `src/sse/services/auth.ts`; მოიხმარება `accountFallback.checkFallbackError()`-ის მიერ |
+| მოდელის დაბლოკვა                         | პროვაიდერი + კავშირი + მოდელი | `open-sse/services/accountFallback.ts`, შენახულია `domain_lockout_state`-ში                                             |
 
-იხილეთ [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) და შესაბამისი განყოფილება
+იხილეთ [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) და განკუთვნილი განყოფილება
 [CLAUDE.md](../../CLAUDE.md)-ში.
 
 ---

@@ -265,73 +265,72 @@ Fearainn bhainistíochta:
 - Beart cumraíochta: `src/app/api/sync/bundle` (GET, seat den leagan arna shainaithint le ETag de shocruithe/soláthraithe/teaglamaí/eochracha)
 - WebSocket: `src/app/api/v1/ws/route.ts` — láimhseálaí Upgrade do chliaint WS atá comhoiriúnach le OpenAI
 
-## 2) SSE + Croí an Aistriúcháin
+## 2) SSE + Croílár an Aistriúcháin
 
-Príomh-mhodúil an tsreafa:
+Modúil phríomhshreafa:
 
-- Pointe iontrála: `src/sse/handlers/chat.ts`
-- Croí-cheolfhoirniú: `open-sse/handlers/chatCore.ts`
-- Cuibheoirí forghníomhaithe soláthraithe: `open-sse/executors/*`
-- Brath formáide/cumraíocht soláthraí: `open-sse/services/provider.ts`
+- Iontráil: `src/sse/handlers/chat.ts`
+- Eagrú croíláir: `open-sse/handlers/chatCore.ts`
+- Oiriúnóirí forghníomhaithe soláthraí: `open-sse/executors/*`
+- Braiteadh formáide/cumraíocht soláthraí: `open-sse/services/provider.ts`
 - Parsáil/réiteach samhla: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - Loighic chúltaca cuntais: `open-sse/services/accountFallback.ts`
 - Clárlann aistriúcháin: `open-sse/translator/index.ts`
 - Claochluithe srutha: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Eastóscadh/normalú úsáide: `open-sse/utils/usageTracking.ts`
-- Parsálaí clibe smaointeoireachta: `open-sse/utils/thinkTagParser.ts`
+- Asbhaint/normalú úsáide: `open-sse/utils/usageTracking.ts`
+- Parsálaí clibeanna think: `open-sse/utils/thinkTagParser.ts`
 - Láimhseálaí leabaithe: `open-sse/handlers/embeddings.ts`
 - Clárlann soláthraithe leabaithe: `open-sse/config/embeddingRegistry.ts`
 - Láimhseálaí giniúna íomhánna: `open-sse/handlers/imageGeneration.ts`
 - Clárlann soláthraithe íomhánna: `open-sse/config/imageRegistry.ts`
-- Sláintiú freagartha: `open-sse/handlers/responseSanitizer.ts`
+- Sláintíochtú freagartha: `open-sse/handlers/responseSanitizer.ts`
 - Normalú ról: `open-sse/services/roleNormalizer.ts`
 
 Seirbhísí (loighic ghnó):
 
 - Roghnú/scóráil cuntas: `open-sse/services/accountSelector.ts`
-- Bainistiú shaolré an chomhthéacs: `open-sse/services/contextManager.ts`
+- Bainistiú saolré comhthéacs: `open-sse/services/contextManager.ts`
 - Forfheidhmiú scagaire IP: `open-sse/services/ipFilter.ts`
 - Rianú seisiún: `open-sse/services/sessionManager.ts`
-- Dí-dhúbailt iarratas: `open-sse/services/signatureCache.ts`
+- Dídhúbláil iarratas: `open-sse/services/signatureCache.ts`
 - Instealladh leid chórais: `open-sse/services/systemPrompt.ts`
 - Bainistiú buiséid smaointeoireachta: `open-sse/services/thinkingBudget.ts`
-- Ródú samhlacha saoróige: `open-sse/services/wildcardRouter.ts`
+- Ródú samhla le saoróga: `open-sse/services/wildcardRouter.ts`
 - Bainistiú teorann ráta: `open-sse/services/rateLimitManager.ts`
-- Scoradán ciorcaid: `src/shared/utils/circuitBreaker.ts`
-- Aistriú comhthéacs: `open-sse/services/contextHandoff.ts` — achoimre aistrithe a ghiniúint agus a instealladh don straitéis athsheachadta comhthéacs
-- Comhbhrú: `open-sse/services/compression/*` — comhbhrú réamhghníomhach roimh aistriúchán an tsoláthraí;
-  áirítear rialacha Caveman, scagairí RTK, píblínte cruachta, teaglamaí comhbhrúcháin, staitisticí agus bailíochtú
-- Aisghabhálaí cuóta Codex: `open-sse/services/codexQuotaFetcher.ts` — aisghabhann sé cuóta Codex le haghaidh cinntí aistrithe athsheachadta comhthéacs
-- Atriail atá feasach ar thréimhse shuaimhnithe: `src/sse/services/cooldownAwareRetry.ts` — atrialacha tréimhse suaimhnithe de réir samhla le `requestRetry` / `maxRetryIntervalSec` inchumraithe
-- Aisghabháil shlán amach: `src/shared/network/safeOutboundFetch.ts` — aisghabháil chosanta soláthraí/samhla le cosaint SSRF, blocáil URLanna príobháideacha, atriail agus teorainn ama
-- Cosaint URLanna amach: `src/shared/network/outboundUrlGuard.ts` — seiceálacha óstach ar URLanna soláthraithe; roghnaíonn `src/shared/network/outboundUrlGuardPolicy.ts` an mód ó `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, agus a lascáin deais (féach `docs/reference/ENVIRONMENT.md`)
-- Réamhshocruithe iarratais soláthraí: `open-sse/services/providerRequestDefaults.ts` — réamhshocruithe `maxTokens`, `temperature`, `thinkingBudgetTokens` ar leibhéal an tsoláthraí
-- Tairisigh soláthraí GLM: `open-sse/config/glmProvider.ts` — samhlacha comhroinnte GLM, URLanna cuóta, teorainn ama/réamhshocruithe GLMT
-- Réamhtheagmhas Antigravity: `open-sse/config/antigravityUpstream.ts` — URL bonn agus tairisigh chonair aimsithe
-- Tairisigh chliaint Codex: `open-sse/config/codexClient.ts` — luachanna gníomhaire úsáideora agus leagain cliaint a bhfuil leagan sonraithe acu
-- Síol ailias samhla: `src/lib/modelAliasSeed.ts` — síolraíonn sé 30+ ailias tras-seachfhreastalaí ag an am tosaithe
+- Bristeoir ciorcaid: `src/shared/utils/circuitBreaker.ts`
+- Aistriú comhthéacs: `open-sse/services/contextHandoff.ts` — giniúint agus instealladh achoimre aistrithe don straitéis context-relay
+- Comhbhrú: `open-sse/services/compression/*` — comhbhrú réamhghníomhach roimh aistriúchán an tsoláthraí; cuimsíonn sé rialacha Caveman, scagairí RTK, píblínte cruachta, teaglamaí comhbhrúite, staitisticí, agus bailíochtú
+- Faighteoir cuóta Codex: `open-sse/services/codexQuotaFetcher.ts` — fáigheann sé cuóta Codex le haghaidh cinntí aistrithe context-relay
+- Athtriail eolach ar fhuarú: `src/sse/services/cooldownAwareRetry.ts` — athtrialacha fuaraithe in aghaidh na samhla le `requestRetry` / `maxRetryIntervalSec` in-athchumraithe
+- Fáil sheachtrach shábháilte: `src/shared/network/safeOutboundFetch.ts` — fáil soláthraí/samhla faoi chosaint le garda SSRF, bac ar URLanna príobháideacha, atthriail, agus teorainn ama
+- Garda URL seachtrach: `src/shared/network/outboundUrlGuard.ts` — seiceálacha ósta ar URLanna soláthraithe; roghnaíonn `src/shared/network/outboundUrlGuardPolicy.ts` an mód ó `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, agus óna lascanna deais (féach `docs/reference/ENVIRONMENT.md`)
+- Réamhshocruithe iarratais sholáthraí: `open-sse/services/providerRequestDefaults.ts` — réamhshocruithe `maxTokens`, `temperature`, `thinkingBudgetTokens` ag leibhéal an tsoláthraí
+- Tairisigh sholáthraí GLM: `open-sse/config/glmProvider.ts` — samhlacha GLM comhroinnte, URLanna cuóta, teorainn ama/réamhshocruithe GLMT
+- Antigravity suas-sruth: `open-sse/config/antigravityUpstream.ts` — tairisigh bun-URL agus chosáin aimsithe
+- Tairisigh chliaint Codex: `open-sse/config/codexClient.ts` — luachanna leaganaithe user-agent agus client-version
+- Síol ailias samhla: `src/lib/modelAliasSeed.ts` — síolaíonn sé 30+ ailias chanúnach tras-seachfhreastalaí ag am tosaithe
 
-Modúil na sraithe fearainn:
+Modúil chiseal an fhearainn:
 
 - Rialacha costais/buiséid: `src/domain/costRules.ts`
 - Beartas cúltaca: `src/domain/fallbackPolicy.ts`
-- Réiteoir teaglamaí: `src/domain/comboResolver.ts`
-- Beartas frithdhúnadh: `src/domain/lockoutPolicy.ts`
-- Inneall beartais: `src/domain/policyEngine.ts` — meastóireacht láraithe ar fhrithdhúnadh → buiséad → cúltaca
+- Conradh réitigh teaglaim curtha in áirithe: `src/domain/comboResolver.ts`; úsáideann an ródú beo `open-sse/services/combo.ts`
+- Beartas glasála amach: `src/domain/lockoutPolicy.ts`
+- Conradh measúnaithe beartais curtha in áirithe: `src/domain/policyEngine.ts`; forfheidhmíonn conair an iarratais beartas eochair-API trí `src/shared/utils/apiKeyPolicy.ts` agus údarú sprice réitithe trí `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Catalóg cód earráide: `src/shared/constants/errorCodes.ts`
-- Aitheantas iarratais: `src/shared/utils/requestId.ts`
-- Teorainn ama aisghabhála: `src/shared/utils/fetchTimeout.ts`
-- Teiliméadracht iarratais: `src/shared/utils/requestTelemetry.ts`
+- ID iarratais: `src/shared/utils/requestId.ts`
+- Teorainn ama fála: `src/shared/utils/fetchTimeout.ts`
+- Teileaméadracht iarratais: `src/shared/utils/requestTelemetry.ts`
 - Comhlíonadh/iniúchadh: `src/lib/compliance/index.ts`
-- Reathaí meastóireachta: `src/lib/evals/evalRunner.ts`
-- Marthanacht staid fearainn: `src/lib/db/domainState.ts` — CRUD SQLite le haghaidh slabhraí cúltaca, buiséad, stair chostais, staid frithdhúnadh agus scoradáin chiorcaid
+- Ritheoir meastóireachta: `src/lib/evals/evalRunner.ts`
+- Marthanacht stáit fearainn: `src/lib/db/domainState.ts` — CRUD SQLite le haghaidh slabhraí cúltaca, buiséid, stair chostais, stát glasála amach, bristeoirí ciorcaid
 
-Modúil soláthraithe OAuth (27 comhad aonair faoi `src/lib/oauth/providers/`):
+Modúil sholáthraithe OAuth (27 gcomhad aonair faoi `src/lib/oauth/providers/`):
 
 - Innéacs clárlainne: `src/lib/oauth/providers/index.ts`
 - Soláthraithe aonair: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Cúntóirí comhroinnte: `codebuddyDeviceAuth.ts` (sreabhadh gléis CodeBuddy CN/idirnáisiúnta), `museCodeDeviceResponse.ts`
-- Fillteán tanaí: `src/lib/oauth/providers.ts` — athonnmhairíonn sé ó mhodúil aonair
+- Cuiditheoirí comhroinnte: `codebuddyDeviceAuth.ts` (sreabhadh gléis CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
+- Fillteoir tanaí: `src/lib/oauth/providers.ts` — ath-onnmhairíonn sé ó na modúil aonair
 
 ## 5) Seirbhísí Leabaithe (v3.8.4)
 
@@ -356,167 +355,182 @@ Sraitheanna ailtireachta:
 
 Mionléargas: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## Mór-Fhochórais (v3.8.0)
+## Príomhfhochórais (v3.8.0)
 
-### A. Inneall Uath-Theaglama
+### A. Inneall Auto Combo
 
-Déanann Uath-Theaglamáil spriocanna ródaithe a scóráil agus a roghnú go dinimiciúil tráth na hiarrata, seachas
-a bheith ag brath ar shainmhíniú statach teaglama. Cumhachtaíonn sé teaghlach réimíreacha samhla `auto/*`.
+Déanann Auto Combo scóráil dhinimiciúil ar spriocanna ródaithe agus roghnaíonn sé iad ag am an iarratais, seachas
+brath ar shainmhíniú combo statach. Is é a thiomáineann teaghlach réimíreanna samhla `auto/*`.
 
-- Pointe iontrála an innill: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
+- Iontráil an innill: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Réiteoir: `src/domain/comboResolver.ts` (uathbhraith réimír `auto/`)
+- Iontráil combo bheo: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), arna ghlaoch ag `src/sse/handlers/chat.ts`
 - Deais: `/dashboard/auto-combo`
-- Teiliméadracht: tábla SQLite `auto_combo_decisions`
+- Teileméadracht: tábla SQLite `auto_combo_decisions`
 
 Príomhchumais:
 
-- **20 straitéis ródaithe** (tosaíocht, ualaithe, líonadh ar dtús, spól-robin, P2C, randamach,
-  is lú úsáidte, optamaithe ó thaobh costais, feasach ar athshocrú, fuinneog athshocraithe, spás breise, ualaithe de réir cuóta,
-  dianrandamach, **auto**, lkgp, optamaithe de réir comhthéacs, optamaithe de réir taisce, athsheachadadh comhthéacs, **fusion**,
-  píblíne) —
-  is é auto an phríomhghné nua in v3.8.0; tá `fusion` (leathnú amach painéil + sintéis breithimh,
-  `open-sse/services/fusion.ts`) nua in v3.8.36.
-- **Scóráil 16 fhachtóir**: cuóta, sláinte, costas inbhéartach, aga folaigh inbhéartach, oiriúnacht don tasc agus
-  deich gcinn eile. Tá tábla caighdeánach na bhfachtóirí agus a n-ualuithe réamhshocraithe le fáil in
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — dá n-athluafaí anseo é,
-  bheadh an dara háit ann ina bhféadfadh sé dul as dáta.
-- **Monarcha fhíorúil** a chruthaíonn teaglamaí neamhbhuan nuair nach ann do theaglam ainmnithe meaitseála,
-  agus a fhaigheann iarrthóirí ó naisc shláintiúla ghníomhacha soláthraithe.
-- **Réimíreacha uathoibríocha**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — próifíl ualaithe mionchoigeartaithe mar bhonn le gach ceann acu.
-- **6 phaca móid**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` agus `chaos-mode` — cumraíochtaí réamhshocraithe ualaithe is féidir a ghlaoch ón
-  deais. (Ná measc iad seo leis na réimíreacha `auto/*` thuas, ar athróga iad
-  a chuirtear i bhfeidhm tráth na hiarrata.)
+- **20 straitéis ródaithe** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
+  pipeline) —
+  is í auto an príomhbhreis i v3.8.0; tá `fusion` (scaipeadh painéil + sintéis bhreithiúna,
+  `open-sse/services/fusion.ts`) nua i v3.8.36.
+- **Scóráil 16-fachtóir**: cuóta, sláinte, costas inbhéartach, moill inbhéartach, oiriúnacht don tasc
+  agus deich gceann eile. Tá an tábla canónta de na fachtóirí agus a meáchain réamhshocraithe le fáil in
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — dá n-athinsítí anseo é bheadh
+  dara áit aige chun dul as dáta.
+- Cruthaíonn an **mhonarcha fhíorúil** combos eifimearacha nuair nach bhfuil aon chombo ainmnithe meaitseála ann,
+  ag fáil iarrthóirí ó naisc ghníomhacha shlániúla soláthraithe.
+- **Réimíreanna Auto**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
+  `auto/smart`, `auto/lkgp` — tá próifíl meáchain thiúnaithe taobh thiar de gach ceann.
+- **6 phacáiste mód**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
+  `reliability-first` agus `chaos-mode` — cumraíochtaí meáchain réamhshocraithe ar féidir iad a ghlaoch ón
+  deais. (Ná measctar leis na réimíreanna `auto/*` thuas iad, arb é sin leaganacha am-iarratais.)
 
-Le haghaidh sonraí iomlána algartamacha (foirmlí fachtóirí, mionchoigeartú ualuithe), féach
+Le sonraí iomlána algartamacha (foirmlí fachtóirí, tiúnadh meáchain), féach
 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Gníomhairí Néalríomhaireachta
+### B. Cloud Agents
 
-Cuireann Gníomhairí Néalríomhaireachta ardáin óstáilte tríú páirtí do ghníomhairí cód (Codex Cloud, Devin,
-Jules) taobh thiar de shaolré aonfhoirmeach tascanna le tacaíocht bunachair sonraí. Teastaíonn fíordheimhniú bainistíochta
-ó gach críochphointe um chruthú agus iniúchadh tascanna.
+Cuireann Cloud Agents ardáin ghníomhairí códaithe óstáilte ó thríú páirtithe (Codex Cloud, Devin,
+Jules) faoi chlúdach taobh thiar de shaolré tascanna aonfhoirmeach faoi thacaíocht DB. Éilíonn gach críochphointe
+cruthaithe/cigireachta tascanna fíordheimhniú bainistíochta.
 
 - Fréamh an mhodúil: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, chomh maith le fochomhadlanna do gach gníomhaire faoi `agents/`)
-- Feidhmiúcháin do gach gníomhaire: `agents/codex/`, `agents/devin/`, `agents/jules/`
+  `types.ts`, `db.ts`, móide fho-eolairí in aghaidh an ghníomhaire faoi `agents/`)
+- Feidhmiúcháin in aghaidh an ghníomhaire: `agents/codex/`, `agents/devin/`, `agents/jules/`
 - Críochphointí poiblí: `/api/v1/agents/tasks/*` (liostú/cruthú/fáil/cealú)
 - Críochphointí bainistíochta: `/api/cloud/*` (soláthar, stádas, baisc)
 - Deais: `/dashboard/cloud-agents`
 - Stóráil: tábla `cloud_agent_tasks`
 
-Le haghaidh sonraí faoi sholáthar gach gníomhaire agus faoi OAuth, féach
+Le sonraí maidir le soláthar in aghaidh an ghníomhaire agus OAuth, féach
 [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Ráillí Cosanta
+### C. Guardrails
 
-Is sraith mheánearraí in-athlódáilte gan stad é modúl na ráillí cosanta, a dhéanann iniúchadh ar iarratais
-agus freagraí le haghaidh PII, instealladh leide, agus ábhar fís neamhshábháilte. Cuireann sáruithe
-deireadh láithreach leis an iarratas le HTTP **503** agus cód struchtúrtha earráide, rud a ligeann
-do ghlaoiteoirí iartheachtacha triail eile a bhaint as nó brainse eile a leanúint.
+Is ciseal middleware in-athluchtaithe go te é an modúl guardrails a scrúdaíonn iarratais
+agus freagraí le haghaidh PII, prompt injection, agus ábhar radhairc neamhshábháilte. Gearrchuartaíonn sáruithe
+an t-iarratas le HTTP **503** móide cód earráide struchtúrtha, rud a ligeann do ghlaoiteoirí síos an tsrutha
+atriail nó brainsiú a dhéanamh.
 
 - Fréamh an mhodúil: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
   `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Athlódáil gan stad: déanann an chlárlann faireachán ar athruithe cumraíochta agus atógann sí an slabhra ina áit
-- Pointí nasctha: iontráil láimhseálaí comhrá, láimhseálaí giniúna íomhánna, sláintitheoir freagraí
-- Conradh HTTP: tagann sáruithe chun solais mar `503` le `error.code = "GUARDRAIL_VIOLATION"`
+- Athlódáil the: faireann an clárlann ar athruithe cumraíochta agus atógann sé an slabhra ar an láthair
+- Pointí ionsreangaithe: iontráil an láimhseálaí comhrá, láimhseálaí giniúna íomhánna, slánaitheoir freagartha
+- Conradh HTTP: nochtann sáruithe mar `503` le `error.code = "GUARDRAIL_VIOLATION"`
 
-Le haghaidh rialacha a chumadh agus tairseacha a mhionchoigeartú, féach
+Le haghaidh cruthú rialachán agus tiúnadh tairseacha, féach
 [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
-### D. Sraith Fearainn
+### D. Ciseal Fearainn
 
-Láraíonn an t-ainmspás `src/domain/` cinntí beartais ionas nach gá do láimhseálaithe bealaigh
-loighic frithdhúnadh amach/buiséid/chúltaca a chur le chéile iad féin.
+Tá seirbhísí fearainn agus conarthaí measúnaithe forchoimeádta in ainmspás `src/domain/`.
+Ní hé pointe iontrála polasaí éigeantach amháin do gach iarratas é.
 
-- Inneall beartais: `src/domain/policyEngine.ts` — pointe iontrála aonair le haghaidh
-  meastóireachta réamhfhorghníomhaithe (frithdhúnadh amach → buiséad → ordú cúltaca)
+Glaoíonn an cosán comhrá beo ar `enforceApiKeyPolicy()` ó
+`src/shared/utils/apiKeyPolicy.ts`; tá údarú samhlacha réitithe agus ball combo
+curtha i bhfeidhm i `src/sse/handlers/chat/resolvedModelPolicy.ts`. Cuireann an
+iontráil fhéin-óstáilte in `src/app/api/v1/chat/completions/route.ts` polasaí eochair-API i bhfeidhm freisin roimh
+sheoladh. Téann réiteach combo trí `open-sse/services/combo.ts`.
+
+Is conarthaí tástáilte go fóil iad `src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` agus `src/lib/container.ts`,
+ní sreangú an chosáin iarratais sin. Cláraíonn an coimeádán an t-inneall polasaí, ach ní réitíonn an cosán iarratais
+táirgthe a scrúdaíodh é. Ní athraíonn athrú ar na conarthaí sin amháin polasaí comhrá beo ná ródú combo;
+teastaíonn cinneadh dearaidh ar leith chun iad a nascadh nó a bhaint.
+
+- Inneall polasaí forchoimeádta: `src/domain/policyEngine.ts` — measúnú glasála → buiséad → cúltaca
 - Rialacha costais: `src/domain/costRules.ts`
-- Beartas cúltaca: `src/domain/fallbackPolicy.ts`
-- Beartas frithdhúnadh amach: `src/domain/lockoutPolicy.ts`
+- Polasaí cúltaca: `src/domain/fallbackPolicy.ts`
+- Polasaí glasála: `src/domain/lockoutPolicy.ts`
 - Ródú bunaithe ar chlibeanna: `src/domain/tagRouter.ts`
-- Réiteoir teaglama: `src/domain/comboResolver.ts` — réitíonn sé ainmneacha teaglama, réimíreacha auto/\*
-  agus spriocanna samhla le saoróga ina bpleananna nithiúla forghníomhaithe
-- Nascaire rialacha naisc/samhla: `src/domain/connectionModelRules.ts`
-- Grianghraif de staid infhaighteachta samhlacha: `src/domain/modelAvailability.ts`
+- Réititheoir combo forchoimeádta: `src/domain/comboResolver.ts` — conradh roghnaithe neamhspleách; tá ródú combo beo curtha i bhfeidhm in `open-sse/services/combo.ts`
+- Ceanglóir rialacha naisc/samhla: `src/domain/connectionModelRules.ts`
+- Grianghraif infhaighteachta samhla: `src/domain/modelAvailability.ts`
 - Rianú éaga soláthraithe: `src/domain/providerExpiration.ts`
 - Taisce cuóta: `src/domain/quotaCache.ts`
-- Staid díghrádaithe: `src/domain/degradation.ts`
+- Stát dhíghrádaithe: `src/domain/degradation.ts`
 - Iniúchadh cumraíochta: `src/domain/configAudit.ts`
-- Tógálaí meiteashonraí freagra OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- Fochóras measúnaithe: `src/domain/assessment/` — jabanna meastóireachta tréimhsiúla
+- Tógálaí meiteashonraí freagartha OmniRoute: `src/domain/omnirouteResponseMeta.ts`
+- Fochóras measúnaithe: `src/domain/assessment/` — poist mheasúnaithe tréimhsiúla
 
 ### E. Píblíne Údaraithe
 
-Aicmíonn an phíblíne údaraithe gach iarratas isteach agus cuireann sí an slabhra
-beartais cuí i bhfeidhm roimh é a sheoladh.
+Rangaíonn an píblíne údaraithe gach iarratas a thagann isteach agus cuireann sé an
+slabhra polasaí cuí i bhfeidhm roimh sheoladh.
 
-- Pointe iontrála na píblíne: `src/server/authz/pipeline.ts`
-- Aicmitheoir iarratas: `src/server/authz/classify.ts` — déanann sé idirdhealú idir bealaí poiblí
-  comhoiriúnachta agus bealaí bainistíochta
+- Iontráil píblíne: `src/server/authz/pipeline.ts`
+- Aicmeoir iarratais: `src/server/authz/classify.ts` — idirdhealaíonn sé bealaí
+  comhoiriúnachta poiblí ó bhealaí bainistíochta
 - Fardal bealaí poiblí: `src/shared/constants/publicApiRoutes.ts`
-- Beartais: `src/server/authz/policies/` — preideacáidí is féidir a chomhshuíomh
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth`, etc.)
-- Fóntais ceanntáisc: `src/server/authz/headers.ts`
-- Cúntóir dearbhaithe: `src/server/authz/assertAuth.ts`
+- Beartais: `src/server/authz/policies/` — preideacáit inchumtha
+  (`requireApiKey`, `requireManagement`, `requireFreshAuth`, srl.)
+- Uirlisí ceanntásca: `src/server/authz/headers.ts`
+- Cuiditheoir dearbhaíochta: `src/server/authz/assertAuth.ts`
 - Comhthéacs iarratais: `src/server/authz/context.ts`
 
-Is teorainn dhocht iad bealaí poiblí i gcomparáid le bealaí bainistíochta: teastaíonn fíordheimhniú bainistíochta ó APIanna
-gníomhairí/tréimhsí fuaraithe agus ó shócháin soláthraithe (HTTP 401 mura bhfuil sé ann).
+Is teorainn chrua í an deighilt idir bealaí poiblí agus bealaí bainistíochta:
+éilíonn APIanna gníomhaire/fuaraithe agus mutations soláthraithe fíordheimhniú
+bainistíochta (HTTP 401 mura bhfuil sé ann).
 
-Le haghaidh rialacha iomlána aicmithe na mbealaí, féach
+Le haghaidh na rialacha iomlána aicmithe bealaí, féach
 [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. FSM Sreafa Oibre agus Ródaire Feasach ar Thascanna
+### F. FSM Sreabhadh Oibre agus Ródair Feasach ar Thascanna
 
-Ródaire faoi stiúir meaisín staide críochta, atá srathaithe os cionn roghnú teaglama chun
-trácht a dhíriú bunaithe ar chéim bhraite an tsreafa oibre (pleanáil, forghníomhú,
-athbhreithniú) agus cleamhnacht le tascanna cúlra.
+Ródair á thiomáint ag meaisín stáide críochnaithe atá sraitheaithe os cionn
+roghnú teaglaim chun trácht a stiúradh bunaithe ar chéim an tsreabhadh oibre
+a braitheadh (pleanáil, feidhmiú, athbhreithniú) agus ar chosúlacht le
+cúltascanna.
 
-- FSM an tsreafa oibre: `open-sse/services/workflowFSM.ts`
-- Ródaire atá feasach ar thascanna: `open-sse/services/taskAwareRouter.ts`
-- Brathadóir tascanna cúlra: `open-sse/services/backgroundTaskDetector.ts`
-- Aicmitheoir intinne: `open-sse/services/intentClassifier.ts`
+- FSM sreabhadh oibre: `open-sse/services/workflowFSM.ts`
+- Ródair feasach ar thascanna: `open-sse/services/taskAwareRouter.ts`
+- Brathadóir cúltascanna: `open-sse/services/backgroundTaskDetector.ts`
+- Aicmeoir intinne: `open-sse/services/intentClassifier.ts`
 
-Cuirtear aistrithe an FSM san áireamh i scóráil Auto Combo, rud a chlaonann i dtreo samhlacha níos saoire
-le haghaidh tascanna cúlra/uathoibrithe agus i dtreo samhlacha níos cumhachtaí le haghaidh sealanna idirghníomhacha
-pleanála/athbhreithnithe.
+Beathaíonn tiontuithe an FSM isteach i scóráil Auto Combo, ag claonadh i dtreo
+samhlacha níos saoire le haghaidh tascanna cúltaca/uathoibrithe agus i dtreo
+samhlacha níos láidre le haghaidh babhtaí pleanála/athbhreithnithe
+idirghníomhacha.
 
-### G. Athléimneacht a Bhaineann go Sonrach le Soláthraithe
+### G. Athléimneacht ar leith do Sholáthraithe
 
-Tagann modúil thiomnaithe athléimneachta agus ceilteachta le roinnt soláthraithe, a bhaineann leas as
-na sraitheanna domhanda scoradáin chiorcaid / fuaraithe naisc / frithdhúnadh samhlacha:
+Seolann roinnt soláthraithe modúil tiomnaithe athléimneachta agus stealth a
+dhéanann marcaíocht ar na sraitheanna domhanda bristeora chiorcaid / fuaraithe
+nasctha / glasála samhla:
 
-- Inneall Antigravity 429: `open-sse/services/antigravity429Engine.ts` (rothlaíonn sé
-  aitheantas, glanann sé ceanntásca freagartha, agus bainistíonn sé rianú creidmheasanna/leaganacha trí
+- Inneall 429 Antigravity: `open-sse/services/antigravity429Engine.ts`
+  (rothlaíonn sé aitheantas, sciúrann sé ceanntásca freagartha, tiomáineann sé
+  rianú creidmheasanna/leagain trí
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
 - Beartas cuóta ModelScope: `open-sse/services/modelscopePolicy.ts`
-- CCH Claude Code (Croitheadh Láimhe Cainéil Comhoiriúnachta): `open-sse/services/claudeCodeCCH.ts`,
+- Claude Code CCH (Lámhascaireacht Chainéil Chomhoiriúnachta): `open-sse/services/claudeCodeCCH.ts`,
   chomh maith le `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
   `claudeCodeToolRemapper.ts`
 - Múnlú méarloirg Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
 - Doiléiriú Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
 
-Chun an lámhleabhar iomlán ceilteachta agus an treoir oibríochtúil a fháil, féach
-`docs/security/STEALTH_GUIDE.md` (git; níl sé tiomsaithe isteach in `/docs`).
+Le haghaidh an treoirleabhair stealth iomláin agus na treorach oibriúcháin, féach
+`docs/security/STEALTH_GUIDE.md` (git; nach bhfuil tiomsaithe isteach i `/docs`).
 
-### H. Crúcaí Gréasáin, Taisce Réasúnaithe, Taisce Léite
+### H. Webhooks, Taisce Réasúnaíochta, Taisce Léithe
 
-- **Crúcaí Gréasáin** — seoladh amach d’imeachtaí soláthraí/cuntais/taisc.
+- **Webhooks** — seoladh amach d'imeachtaí soláthraí/cuntais/tasc.
   - Seoltóir: `src/lib/webhookDispatcher.ts`
   - Stóráil: tábla SQLite `webhooks` (trí `src/lib/db/webhooks.ts`)
   - Painéal: `/dashboard/webhooks` (síntiúis, rúin, stair atrialacha)
-  - Le haghaidh tacsanomaíocht imeachtaí agus shéimeantaic na n-atrialacha, féach [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Taisce Réasúnaithe** — bloic réasúnaithe in-athsheinnte do sholáthraithe a astaíonn
-  comharthaí smaointeoireachta (Claude, GLMT, etc.) ionas gur féidir le sealanna comhleanúnacha athsmaoineamh a sheachaint.
+  - Le haghaidh tacsanomaíocht imeachtaí agus séimeantacht atriail, féach [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Taisce Réasúnaíochta** — bloic réasúnaíochta in-athsheinnte do sholáthraithe
+  a astaíonn comharthaí machnaimh (Claude, GLMT, srl.) ionas gur féidir le
+  casanna as a chéile an t-athmhachnamh a sheachaint.
   - Sraith DB: `src/lib/db/reasoningCache.ts`
   - Sraith seirbhíse: `open-sse/services/reasoningCache.ts`
-  - Le haghaidh shéimeantaic na hathsheinnte, féach [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Taisce Léite** — taisce freagartha gearrshaolach atá eochraithe de réir sínithe agus a úsáidtear chun
-  atrialacha comhionanna ó SDKanna réamhtheachtacha briste a chomhdhlúthú.
+  - Le haghaidh séimeantacht athsheinnte, féach [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Taisce Léithe** — taisce freagartha gearrshaolach atá eochairthe de réir
+  sínithe agus a úsáidtear chun atrialacha comhionanna ó SDKanna suasshrutha
+  briste a chomhchoiriú.
   - Sraith DB: `src/lib/db/readCache.ts`
   - Críochphointe staitisticí: `GET /api/cache/stats`, painéal ag `/dashboard/cache`
 

@@ -268,71 +268,71 @@ Fannonin gudanarwa:
 
 ## 2) SSE + Jigon Fassara
 
-Manyan modulolin tafiyar aiki:
+Modules na babban gudana:
 
-- Mashiga: `src/sse/handlers/chat.ts`
-- Babban tsara gudanarwa: `open-sse/handlers/chatCore.ts`
-- Adaftocin aiwatar da masu samarwa: `open-sse/executors/*`
-- Gano tsari/daidaitawar mai samarwa: `open-sse/services/provider.ts`
-- Warwarewa/ƙayyade model: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Dabarar komawa ga madadin asusu: `open-sse/services/accountFallback.ts`
-- Rijistar fassara: `open-sse/translator/index.ts`
-- Sauye-sauyen rafin bayanai: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Ciro/daidaita bayanan amfani: `open-sse/utils/usageTracking.ts`
-- Mai warware alamar think: `open-sse/utils/thinkTagParser.ts`
+- Wurin shiga: `src/sse/handlers/chat.ts`
+- Jagorantar tsakiya: `open-sse/handlers/chatCore.ts`
+- Madaidaitan aiwatar da masu bayarwa: `open-sse/executors/*`
+- Gano tsari/saita mai bayarwa: `open-sse/services/provider.ts`
+- Rarraba/warware model: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Mantikin fallback na asusu: `open-sse/services/accountFallback.ts`
+- Rajistar fassara: `open-sse/translator/index.ts`
+- Canje-canjen stream: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Fitar da amfani/daidaitawa: `open-sse/utils/usageTracking.ts`
+- Mai rarraba tag na think: `open-sse/utils/thinkTagParser.ts`
 - Mai sarrafa embedding: `open-sse/handlers/embeddings.ts`
-- Rijistar masu samar da embedding: `open-sse/config/embeddingRegistry.ts`
+- Rajistar masu bayar da embedding: `open-sse/config/embeddingRegistry.ts`
 - Mai sarrafa samar da hoto: `open-sse/handlers/imageGeneration.ts`
-- Rijistar masu samar da hoto: `open-sse/config/imageRegistry.ts`
-- Tsabtace amsa: `open-sse/handlers/responseSanitizer.ts`
-- Daidaita rawa: `open-sse/services/roleNormalizer.ts`
+- Rajistar masu bayar da hoto: `open-sse/config/imageRegistry.ts`
+- Tsaftace amsa: `open-sse/handlers/responseSanitizer.ts`
+- Daidaita matsayi: `open-sse/services/roleNormalizer.ts`
 
-Sabis-sabis (dabarun kasuwanci):
+Ayyuka (mantikin kasuwanci):
 
-- Zaɓi/ƙididdige maki na asusu: `open-sse/services/accountSelector.ts`
-- Gudanar da zagayowar rayuwar mahallin bayani: `open-sse/services/contextManager.ts`
-- Tilasta tace IP: `open-sse/services/ipFilter.ts`
-- Bibiyar zaman aiki: `open-sse/services/sessionManager.ts`
-- Cire buƙatun da suka maimaitu: `open-sse/services/signatureCache.ts`
-- Saka umarnin tsarin: `open-sse/services/systemPrompt.ts`
-- Gudanar da kasafin tunani: `open-sse/services/thinkingBudget.ts`
+- Zaɓen asusu/lissafa maki: `open-sse/services/accountSelector.ts`
+- Gudanar da tsawon rayuwar context: `open-sse/services/contextManager.ts`
+- Tilasta tacewar IP: `open-sse/services/ipFilter.ts`
+- Bin diddigen zama: `open-sse/services/sessionManager.ts`
+- Cire kwatankwacin buƙatu: `open-sse/services/signatureCache.ts`
+- Shigar da system prompt: `open-sse/services/systemPrompt.ts`
+- Gudanar da kasafin thinking: `open-sse/services/thinkingBudget.ts`
 - Jagorantar model ta wildcard: `open-sse/services/wildcardRouter.ts`
-- Gudanar da iyakar yawan buƙatu: `open-sse/services/rateLimitManager.ts`
-- Mai katse da'ira: `src/shared/utils/circuitBreaker.ts`
-- Miƙa mahallin bayani: `open-sse/services/contextHandoff.ts` — samarwa da saka taƙaitaccen miƙawa don dabarar isar da mahallin bayani
-- Matsewa: `open-sse/services/compression/*` — matsewa tun kafin fassarar mai samarwa;
-  ya haɗa da ƙa'idojin Caveman, matatan RTK, jerin pipelines masu jere, haɗe-haɗen matsewa, ƙididdiga, da tabbatarwa
-- Mai ɗauko ƙayyadaddun amfani na Codex: `open-sse/services/codexQuotaFetcher.ts` — yana ɗauko ƙayyadaddun amfani na Codex don yanke shawarar miƙawar isar da mahallin bayani
-- Sake gwadawa mai lura da lokacin jira: `src/sse/services/cooldownAwareRetry.ts` — sake gwadawa bisa kowane model tare da lokacin jira da za a iya saita shi ta `requestRetry` / `maxRetryIntervalSec`
-- Amintaccen ɗaukowa zuwa waje: `src/shared/network/safeOutboundFetch.ts` — ɗauko bayanan mai samarwa/model cikin kariya tare da kariyar SSRF, toshe URL masu zaman kansu, sake gwadawa, da iyakar lokaci
-- Kariyar URL mai fita: `src/shared/network/outboundUrlGuard.ts` — binciken host a kan URL na masu samarwa; `src/shared/network/outboundUrlGuardPolicy.ts` yana zaɓar yanayin daga `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, da maɓallan dashboard nasu (duba `docs/reference/ENVIRONMENT.md`)
-- Tsoffin saitunan buƙatar mai samarwa: `open-sse/services/providerRequestDefaults.ts` — tsoffin saitunan matakin mai samarwa na `maxTokens`, `temperature`, `thinkingBudgetTokens`
-- Tsayayyun ƙimomin mai samar da GLM: `open-sse/config/glmProvider.ts` — model na GLM da aka raba, URL na ƙayyadaddun amfani, iyakar lokaci/tsoffin saitunan GLMT
-- Tushen Antigravity na sama: `open-sse/config/antigravityUpstream.ts` — URL na tushe da tsayayyun ƙimomin hanyar ganowa
-- Tsayayyun ƙimomin abokin cinikin Codex: `open-sse/config/codexClient.ts` — ƙimomin user-agent da client-version masu nau'i
-- Fara laƙabin model: `src/lib/modelAliasSeed.ts` — yana fara laƙabin yarukan cross-proxy sama da 30 a lokacin farawa
+- Gudanar da ƙayyadadden adadin buƙatu: `open-sse/services/rateLimitManager.ts`
+- Circuit breaker: `src/shared/utils/circuitBreaker.ts`
+- Mika context: `open-sse/services/contextHandoff.ts` — samar da taƙaitaccen bayanin mika wuya da shigar da shi don dabarar context-relay
+- Matsewa: `open-sse/services/compression/*` — matsewa mai shirin gaba kafin fassarar mai bayarwa;
+  ya haɗa da dokokin Caveman, matacen RTK, pipelines da aka shimfiɗa, hadaddun matsewa, ƙididdiga, da tantancewa
+- Mai samar da quota na Codex: `open-sse/services/codexQuotaFetcher.ts` — yana samar da quota na Codex don yanke shawarar mika context-relay
+- Sake gwadawa mai fahimtar cooldown: `src/sse/services/cooldownAwareRetry.ts` — sake gwadawa na cooldown ga kowane model tare da `requestRetry` / `maxRetryIntervalSec` da ake iya saitawa
+- Fetch na fita mai aminci: `src/shared/network/safeOutboundFetch.ts` — fetch na mai bayarwa/model da aka tsare tare da gadin SSRF, toshe URL na sirri, sake gwadawa, da ƙayyade lokaci
+- Gadin URL na fita: `src/shared/network/outboundUrlGuard.ts` — binciken host kan URL na masu bayarwa; `src/shared/network/outboundUrlGuardPolicy.ts` yana zaɓar yanayin daga `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, da sauyawarsu na dashboard (dubi `docs/reference/ENVIRONMENT.md`)
+- Tsoffaffin buƙatu na mai bayarwa: `open-sse/services/providerRequestDefaults.ts` — tsoffaffin `maxTokens`, `temperature`, `thinkingBudgetTokens` a matakin mai bayarwa
+- Tsayayyun ƙimomin mai bayar da GLM: `open-sse/config/glmProvider.ts` — models na GLM da ake amfani da su tare, URL na quota, timeout/tsoffaffin GLMT
+- Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — tsayayyun URL na tushe da hanyar gano
+- Tsayayyun ƙimomin client na Codex: `open-sse/config/codexClient.ts` — ƙimomin user-agent da client-version masu lambar siga
+- Shukar laƙabin model: `src/lib/modelAliasSeed.ts` — yana shuka laƙabin yaruka na cross-proxy sama da 30 lokacin ƙaddamarwa
 
-Modulolin layin domain:
+Modules na matakin domain:
 
-- Ƙa'idojin kuɗi/kasafin kuɗi: `src/domain/costRules.ts`
-- Manufar komawa ga madadi: `src/domain/fallbackPolicy.ts`
-- Mai warware combo: `src/domain/comboResolver.ts`
+- Dokokin kuɗi/kasafin kuɗi: `src/domain/costRules.ts`
+- Manufar fallback: `src/domain/fallbackPolicy.ts`
+- Kwangilar warware combo da aka kebe: `src/domain/comboResolver.ts`; jagorantar kai tsaye tana amfani da `open-sse/services/combo.ts`
 - Manufar kullewa: `src/domain/lockoutPolicy.ts`
-- Injin manufofi: `src/domain/policyEngine.ts` — kimantawa ta tsakiya daga kullewa → kasafin kuɗi → komawa ga madadi
+- Kwangilar kimanta manufofi da aka kebe: `src/domain/policyEngine.ts`; hanyar buƙata tana tilasta manufar maɓallin API ta `src/shared/utils/apiKeyPolicy.ts` da kuma izinin manufa da aka warware ta `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Kundin lambobin kuskure: `src/shared/constants/errorCodes.ts`
 - ID na buƙata: `src/shared/utils/requestId.ts`
-- Iyakar lokacin ɗaukowa: `src/shared/utils/fetchTimeout.ts`
-- Bayanan ma'aunin buƙata: `src/shared/utils/requestTelemetry.ts`
-- Bin ƙa'ida/bincike: `src/lib/compliance/index.ts`
+- Ƙayyade lokacin fetch: `src/shared/utils/fetchTimeout.ts`
+- Telemetry na buƙata: `src/shared/utils/requestTelemetry.ts`
+- Biyayya/audit: `src/lib/compliance/index.ts`
 - Mai gudanar da kimantawa: `src/lib/evals/evalRunner.ts`
-- Adana yanayin domain: `src/lib/db/domainState.ts` — ayyukan SQLite CRUD don jerin komawa ga madadi, kasafin kuɗi, tarihin kuɗi, yanayin kullewa, da masu katse da'ira
+- Ajiyayyen yanayin domain: `src/lib/db/domainState.ts` — SQLite CRUD don sarƙoƙin fallback, kasafin kuɗi, tarihin kuɗi, yanayin kullewa, da circuit breakers
 
-Modulolin masu samar da OAuth (fayiloli guda 27 a ƙarƙashin `src/lib/oauth/providers/`):
+Modules na masu bayar da OAuth (fayiloli 27 na daban a ƙarƙashin `src/lib/oauth/providers/`):
 
-- Fihirisar rijista: `src/lib/oauth/providers/index.ts`
-- Masu samarwa ɗai-ɗai: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Mataimaka na gama-gari: `codebuddyDeviceAuth.ts` (tafiyar tantance na'urar CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
-- Ƙaramin wrapper: `src/lib/oauth/providers.ts` — yana sake fitarwa daga modulolin ɗai-ɗai
+- Fihirisar rajista: `src/lib/oauth/providers/index.ts`
+- Masu bayarwa na daban: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Mataimaka na gama gari: `codebuddyDeviceAuth.ts` (tsarin na'ura na CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
+- Wrapper mai sauƙi: `src/lib/oauth/providers.ts` — yana sake fitarwa daga modules na daban
 
 ## 5) Sabis na Ciki (v3.8.4)
 
@@ -357,168 +357,156 @@ Matakan gine-gine:
 
 Cikakken bayani: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## Manyan Ƙananan Tsaruka (v3.8.0)
+## Manyan Tsarin Ƙarƙashin (v3.8.0)
 
 ### A. Injin Auto Combo
 
-Auto Combo yana ƙididdige maki tare da zaɓar wuraren da za a tura buƙata a lokacin da aka karɓi buƙatar, maimakon
-dogaro da tsayayyen ma’anar combo. Shi ne ke tafiyar da dangin prefix na samfurin `auto/*`.
+Auto Combo yana ƙididdiga maki kuma yana zaɓar manufofin jagorawa a lokacin buƙata, maimakon dogara da ma'anar combo mai tsayayye. Yana aiwatar da dangin prefix na samfurin `auto/*`.
 
-- Mashigar injin: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Mai warwarewa: `src/domain/comboResolver.ts` (gano prefix ɗin `auto/` ta atomatik)
-- Dashboard: `/dashboard/auto-combo`
+- Shigarwar injin: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Shigarwar combo kai tsaye: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), wanda `src/sse/handlers/chat.ts` ke kira
+- Allon sarrafawa: `/dashboard/auto-combo`
 - Telemetry: teburin SQLite na `auto_combo_decisions`
 
-Muhimman ƙwarewa:
+Manyan damar:
 
-- **Dabarun tura buƙata guda 20** (fifiko, mai nauyi, cika-na-farko, zagaye-bi-da-bi, P2C, bazuwar,
-  mafi ƙarancin amfani, inganta-farashi, mai la’akari-da-sake-saiti, tagar-sake-saiti, sararin-ajiya, mai nauyin-keɓaɓɓen-rabo,
-  tsantsar-bazuwar, **auto**, lkgp, inganta-mahallin-bayani, inganta-cache, isar-da-mahallin-bayani, **fusion**,
-  pipeline) —
-  auto shi ne babban ƙarin da aka yi a v3.8.0; `fusion` (watsa zuwa panel + haɗawar hukunci,
-  `open-sse/services/fusion.ts`) sabo ne a v3.8.36.
-- **Ƙididdigar abubuwa 16**: keɓaɓɓen rabo, lafiya, akasin farashi, akasin jinkiri, dacewa da aiki da
-  wasu goma. Tabbataccen teburin abubuwan da ma’aunansu na asali yana cikin
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — sake bayyana shi a nan zai
-  samar masa da wuri na biyu da zai iya zama tsohon bayani.
-- **Masana’antar kama-da-wane** tana samar da combos na wucin gadi idan babu combo mai suna da ya dace,
-  tana samo ’yan takara daga haɗin provider masu lafiya da aiki.
-- **Prefixes na atomatik**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — kowanne yana samun goyon bayan bayanin ma’auni da aka daidaita.
-- **Kunshin yanayi guda 6**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` da `chaos-mode` — tsarukan ma’auni da aka riga aka saita waɗanda za a iya kira daga
-  dashboard. (Kada a gauraya su da prefixes na `auto/*` da ke sama, waɗanda
-  nau’o’i ne na lokacin buƙata.)
+- **Dabarun jagorawa 20** (priority, weighted, fill-first, round-robin, P2C, random, least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**, pipeline) —
+  auto shi ne babban ƙari a v3.8.0; `fusion` (yaduwa zuwa panel + haɗewar alkali, `open-sse/services/fusion.ts`) sabo ne a v3.8.36.
+- **Ƙididdiga bisa abubuwa 16**: quota, lafiya, akasin kuɗi, akasin jinkiri, dacewar aiki da sauran goma. Jadawalin halitta na abubuwa da nauyansu na asali yana a
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — maimaita shi a nan zai ba shi wuri na biyu inda zai iya tsufa.
+- **Masana'antar kama-daga-sama (virtual factory)** tana samar da combo na wucin gadi lokacin da babu wani combo mai suna da ya dace, tana ɗaukar ƙwararru daga haɗin provider masu lafiya da ke aiki.
+- **Prefixes na Auto**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — kowannensu yana da tallafin bayanan nauyi da aka daidaita.
+- **Kunshin yanayi 6**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` da `chaos-mode` — saitunan nauyi da aka saita a gaba waɗanda za a iya kira daga allon sarrafawa. (Kada a ruɗe su da prefixes na `auto/*` da ke sama, waɗanda bambance-bambance ne na lokacin buƙata.)
 
-Don cikakkun bayanan algorithm (dabarun abubuwa, daidaita ma’auni), duba
+Don cikakkun bayanai na algorithm (ƙa'idodin ƙididdigar abubuwa, daidaita nauyi), duba
 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
 ### B. Cloud Agents
 
-Cloud Agents yana lulluɓe dandamalin code-agent na wasu kamfanoni da ake gudanarwa a waje (Codex Cloud, Devin,
-Jules) a bayan daidaitaccen tsarin rayuwar aiki mai goyon bayan DB. Duk endpoints na ƙirƙira/duba
-aiki suna buƙatar tantancewar gudanarwa.
+Cloud Agents yana rufe dandalin code-agent na ɓangare na uku da aka masauki baki (Codex Cloud, Devin, Jules) a bayan tsarin rayuwar aiki guda ɗaya wanda DB ke tallafawa. Duk ƙarshen ƙirƙirar/duban aiki suna buƙatar tabbatarwar gudanarwa.
 
-- Tushen module: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, tare da ƙananan kundin adireshin kowane agent a ƙarƙashin `agents/`)
+- Tushen module: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, tare da ƙananan kundayen kowane agent a ƙarƙashin `agents/`)
 - Aiwatarwar kowane agent: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Endpoints na jama’a: `/api/v1/agents/tasks/*` (jera/ƙirƙira/samu/soke)
-- Endpoints na gudanarwa: `/api/cloud/*` (tanadi, matsayi, rukuni)
-- Dashboard: `/dashboard/cloud-agents`
-- Ma’ajiya: teburin `cloud_agent_tasks`
+- Ƙarshen jama'a: `/api/v1/agents/tasks/*` (jera/ƙirƙiri/samun/soke)
+- Ƙarshen gudanarwa: `/api/cloud/*` (samarda, matsayi, taro)
+- Allon sarrafawa: `/dashboard/cloud-agents`
+- Ajiya: teburin `cloud_agent_tasks`
 
-Don bayanan tanadin kowane agent da takamaiman bayanan OAuth, duba
+Don samarda kowane agent da ƙayyadadden OAuth, duba
 [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
 ### C. Guardrails
 
-Module na guardrails wani layin middleware ne da za a iya sake lodawa kai tsaye wanda ke binciken buƙatu
-da martani don gano PII, shigar da prompt ta kutse, da abun cikin gani marar aminci. Saɓawa
-na katse buƙatar nan take da HTTP **503** tare da tsararren lambar kuskure, wanda ke ba
-masu kira na ƙasa damar sake gwadawa ko bin wata reshe.
+Module na guardrails wani yari ne na middleware wanda za a iya sake lodi shi a zafi, wanda ke bincikar buƙatu da amsoshi don PII, prompt injection, da abun cikin hangen nesa marar aminci. Ketarewa yana katse buƙatar nan da nan da HTTP **503** tare da lambar kuskure mai tsari, wanda ke ba masu kira na gaba damar sake gwadawa ko resa.
 
-- Tushen module: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Sake lodawa kai tsaye: registry yana sa ido kan sauye-sauyen config kuma yana sake gina jerin a wurin
-- Wuraren haɗawa: mashigar handler na chat, handler na samar da hoto, mai tsabtace martani
-- Yarjejeniyar HTTP: saɓawa yana bayyana a matsayin `503` tare da `error.code = "GUARDRAIL_VIOLATION"`
+- Tushen module: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Sake lodi a zafi: registry yana sa ido kan canje-canjen config kuma yana sake gina sarkar a inda take
+- Wuraren haɗawa: shigarwar mai sarrafa chat, mai sarrafa samar da hoto, mai tsaftar amsa
+- Yarjejeniyar HTTP: ketarewa tana bayyana a matsayin `503` tare da `error.code = "GUARDRAIL_VIOLATION"`
 
-Don rubuta ruleset da daidaita threshold, duba
+Don rubuta saitin dokoki da daidaita ƙimar ƙofa, duba
 [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
-### D. Layin Domain
+### D. Sashin Domain
 
-Namespace na `src/domain/` yana tattara shawarwarin manufofi a wuri guda domin route handlers kada su
-riƙa haɗa dabarun lockout/budget/fallback da kansu.
+Namespace na `src/domain/` yana ƙunshe da ayyukan domain da kwangilolin kimantawa da aka tanadar. Ba shigarwar manufofi ɗaya tilas ba ne ga kowace buƙata.
 
-- Injin manufofi: `src/domain/policyEngine.ts` — mashiga guda ɗaya don
-  kimantawa kafin aiwatarwa (tsarin lockout → budget → fallback)
-- Dokokin farashi: `src/domain/costRules.ts`
-- Manufar fallback: `src/domain/fallbackPolicy.ts`
-- Manufar lockout: `src/domain/lockoutPolicy.ts`
-- Tura buƙata bisa tag: `src/domain/tagRouter.ts`
-- Mai warware combo: `src/domain/comboResolver.ts` — yana warware sunayen combo, prefixes na auto/\*
-  da maƙasudan samfurin wildcard zuwa takamaiman tsare-tsaren aiwatarwa
-- Mai haɗa dokokin connection/model: `src/domain/connectionModelRules.ts`
-- Hotunan halin samuwar model: `src/domain/modelAvailability.ts`
-- Bibiyar ƙarewar provider: `src/domain/providerExpiration.ts`
-- Cache na keɓaɓɓen rabo: `src/domain/quotaCache.ts`
-- Halin taɓarɓarewa: `src/domain/degradation.ts`
-- Binciken config: `src/domain/configAudit.ts`
-- Mai gina metadata na martanin OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- Ƙaramin tsarin kimantawa: `src/domain/assessment/` — ayyukan kimantawa na lokaci-lokaci
+Hanyar chat kai tsaye tana kiran `enforceApiKeyPolicy()` daga
+`src/shared/utils/apiKeyPolicy.ts`; an aiwatar da izinin samfura da aka warware da membobin combo
+a `src/sse/handlers/chat/resolvedModelPolicy.ts`. Shigarwar self-hosted
+a `src/app/api/v1/chat/completions/route.ts` shi ma tana aiwatar da manufofin API-key kafin
+tura. Warwarewar combo tana gudana ta `open-sse/services/combo.ts`.
 
-### E. Pipeline na Ba da Izini
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` da `src/lib/container.ts`
+suna kasancewa kwangiloli da aka gwada, ba kuma haɗin waya na wannan hanyar buƙatar ba. Container yana rajista
+injin manufofi, amma hanyar buƙatar samarwa da aka duba ba ta warware shi ba.
+Canza waɗannan kwangiloli kawai ba ya canza manufofin chat kai tsaye ko jagorar combo;
+haɗa ko cire su yana buƙatar wata shawarwar zane daban.
 
-Pipeline na ba da izini yana rarraba kowace buƙata mai shigowa sannan ya yi amfani da
-jerin manufofin da suka dace kafin turawa.
+- Injin manufofi da aka tanadar: `src/domain/policyEngine.ts` — lockout → kasafin kuɗi → kimantar fallback
+- Dokokin kuɗi: `src/domain/costRules.ts`
+- Manufofin fallback: `src/domain/fallbackPolicy.ts`
+- Manufofin lockout: `src/domain/lockoutPolicy.ts`
+- Jagorawa bisa tag: `src/domain/tagRouter.ts`
+- Mai warware combo da aka tanadar: `src/domain/comboResolver.ts` — kwangilar zaɓi mai zaman kanta; an aiwatar da jagorar combo kai tsaye a `open-sse/services/combo.ts`
+- Mai haɗa dokar haɗi/samfur: `src/domain/connectionModelRules.ts`
+- Kamannin samuwar samfura: `src/domain/modelAvailability.ts`
+- Bin diddigin ƙarewar provider: `src/domain/providerExpiration.ts`
+- Cache na quota: `src/domain/quotaCache.ts`
+- Matsayin ɓacewa: `src/domain/degradation.ts`
+- Binciken saiti: `src/domain/configAudit.ts`
+- Mai gina metadata na amsar OmniRoute: `src/domain/omnirouteResponseMeta.ts`
+- Tsarin ƙarƙashin kimantawa: `src/domain/assessment/` — ayyukan kimantawa na lokaci-lokaci
 
-- Mashigar pipeline: `src/server/authz/pipeline.ts`
-- Mai rarraba buƙata: `src/server/authz/classify.ts` — yana bambance routes na jama’a
-  masu dacewa da routes na gudanarwa
-- Jerin routes na API na jama’a: `src/shared/constants/publicApiRoutes.ts`
-- Manufofi: `src/server/authz/policies/` — predicates da za a iya haɗawa
+### E. Layin Izini
+
+Layin izini yana rarraba kowace buƙata mai shigowa kuma yana aiwatar da sarkar manufofi da ta dace kafin tura.
+
+- Shigarwar Pipeline: `src/server/authz/pipeline.ts`
+- Mai rarraba buƙatu: `src/server/authz/classify.ts` — yana bambanta hanyoyin dacewa
+  na jama'a daga hanyoyin gudanarwa
+- Jerin hanyoyin jama'a: `src/shared/constants/publicApiRoutes.ts`
+- Manufofi: `src/server/authz/policies/` — abubuwan ƙidaya da za a iya haɗawa
   (`requireApiKey`, `requireManagement`, `requireFreshAuth`, da sauransu)
-- Kayan aikin header: `src/server/authz/headers.ts`
-- Mataimakin assertion: `src/server/authz/assertAuth.ts`
-- Mahallin buƙata: `src/server/authz/context.ts`
+- Kayan aikin Header: `src/server/authz/headers.ts`
+- Mataimakin tabbatarwa: `src/server/authz/assertAuth.ts`
+- Yanayin buƙata: `src/server/authz/context.ts`
 
-Routes na jama’a da na gudanarwa suna da ƙaƙƙarfan iyaka: APIs na agent/cooldown da
-canje-canjen provider suna buƙatar tantancewar gudanarwa (HTTP 401 idan babu).
+Hanyoyin jama'a da na gudanarwa iyaka ce mai ƙarfi: API na agent/cooldown da
+canje-canjen provider suna buƙatar tantancewar gudanarwa (HTTP 401 idan ba a bayar ba).
 
-Don cikakkun dokokin rarraba route, duba
+Don cikakkun ƙa'idodin rarraba hanyoyi, duba
 [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. Workflow FSM da Router Mai La’akari da Aiki
+### F. Workflow FSM da Mai Jujjuyawa Masu Sanin Aiki
 
-Router da finite-state-machine ke jagoranta wanda aka shimfiɗa a saman zaɓin combo domin tura
-zirga-zirga bisa matakin workflow da aka gano (tsarawa, aiwatarwa,
-bita) da kusancin aiki na bayan-fage.
+Mai jujjuyawa wanda finite-state-machine ke tuki wanda aka shimfiɗa a saman zaɓin combo don jagorantar
+zirga-zirga bisa matakin aikin da aka gano (tsare-tsare, aiwatarwa,
+bita) da kusancin aikin baya.
 
 - Workflow FSM: `open-sse/services/workflowFSM.ts`
-- Na'ura mai ba da hanya bisa la'akari da aiki: `open-sse/services/taskAwareRouter.ts`
-- Mai gano ayyukan bango: `open-sse/services/backgroundTaskDetector.ts`
-- Mai rarraba manufa: `open-sse/services/intentClassifier.ts`
+- Mai jujjuyawa mai sanin aiki: `open-sse/services/taskAwareRouter.ts`
+- Mai gano ayyukan baya: `open-sse/services/backgroundTaskDetector.ts`
+- Mai rarraba niyya: `open-sse/services/intentClassifier.ts`
 
-Sauye-sauyen FSM suna shiga cikin tsarin ƙididdigar Auto Combo, suna karkata zuwa samfura masu rahusa
-don ayyukan bango/na sarrafa-kai, kuma zuwa samfura masu ƙarfi don zagayen
-tsarawa/bita na mu'amala.
+Canje-canjen FSM suna shiga cikin ƙidayar Auto Combo, suna karkata zuwa ƙiraɗa masu araha
+don ayyukan baya/automation da kuma zuwa ƙiraɗa masu ƙarfi don zantattun
+tsare-tsare/bita na hulɗa.
 
-### G. Juriya Takamaimai Ga Mai Ba da Sabis
+### G. Juriyar Keɓaɓɓen Provider
 
-Wasu masu ba da sabis suna zuwa da keɓaɓɓun kayayyakin juriya da ɓoyewa waɗanda ke jingina da
-matakan global circuit breaker / connection cooldown / model lockout:
+Wasu providers suna zuwa da keɓaɓɓun module na juriya da ɓoye-waɓo da ke hawan
+layers na duniya na circuit breaker / connection cooldown / model lockout:
 
-- Injin Antigravity 429: `open-sse/services/antigravity429Engine.ts` (yana sauya
-  shaida, yana goge response headers, yana gudanar da bin diddigin credits/version ta hanyar
+- Injin Antigravity 429: `open-sse/services/antigravity429Engine.ts` (yana juya
+  ainihi, yana share headers na amsa, yana tura bin diddigin credits/version ta
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- Manufar quota ta ModelScope: `open-sse/services/modelscopePolicy.ts`
+- Manufar ƙidayar ModelScope: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
   tare da `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
   `claudeCodeToolRemapper.ts`
-- Tsara fingerprint na Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- Ɓoye Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- Siffar fingerprint na Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
+- ɓoye-waɓo na Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
 
-Don cikakken tsarin dabarun ɓoyewa da jagorar gudanarwa, duba
+Don cikakken littafin ɓoye-waɓo da jagorar aiki, duba
 `docs/security/STEALTH_GUIDE.md` (git; ba a haɗa shi cikin `/docs` ba).
 
-### H. Webhooks, Ma'ajiyar Reasoning, Ma'ajiyar Karatu
+### H. Webhooks, Reasoning Cache, Read Cache
 
-- **Webhooks** — aika bayanai zuwa waje don abubuwan da suka shafi mai ba da sabis/asusu/aiki.
+- **Webhooks** — aikawa zuwa waje don abubuwan da suka faru na provider/account/aiki.
   - Mai aikawa: `src/lib/webhookDispatcher.ts`
-  - Ma'ajiya: jadawalin SQLite na `webhooks` (ta hanyar `src/lib/db/webhooks.ts`)
-  - Dashboard: `/dashboard/webhooks` (rajista, sirrika, tarihin sake gwadawa)
-  - Don rukunin nau'ikan abubuwan da suka faru da ƙa'idojin sake gwadawa, duba [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Ma'ajiyar Reasoning** — ɓangarorin reasoning da za a iya sake kunnawa don masu ba da sabis da ke fitar da
-  thinking tokens (Claude, GLMT, da sauransu) domin zagayen da ke biyo baya su iya tsallake sake yin tunani.
-  - Matakin DB: `src/lib/db/reasoningCache.ts`
-  - Matakin sabis: `open-sse/services/reasoningCache.ts`
-  - Don ƙa'idojin sake kunnawa, duba [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Ma'ajiyar Karatu** — ma'ajiyar martani ta ɗan gajeren lokaci wadda aka yi mata maɓalli bisa signature kuma ake amfani da ita don
-  haɗa sake-gwadawa iri ɗaya daga gurɓatattun upstream SDKs.
-  - Matakin DB: `src/lib/db/readCache.ts`
+  - Ma'ajiya: teburin SQLite na `webhooks` (ta `src/lib/db/webhooks.ts`)
+  - Dashboard: `/dashboard/webhooks` (biyan kuɗi, asiri, tarihin sake gwadawa)
+  - Don rarraba abubuwan da suka faru da ma'anar sake gwadawa, duba [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Reasoning Cache** — tubalan hankali da za a iya sake kunnawa don providers da ke fitar da
+  thinking tokens (Claude, GLMT, da sauransu) don zantattu masu zuwa su tsallake sake tunani.
+  - Layer na DB: `src/lib/db/reasoningCache.ts`
+  - Layer na sabis: `open-sse/services/reasoningCache.ts`
+  - Don ma'anar sake kunnawa, duba [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Read Cache** — cache na amsa na ɗan gajeren lokaci wanda aka siffata ta hanyar sa hannu kuma ana amfani da shi don
+  haɗa sake gwadawa iri ɗaya daga upstream SDKs da suka lalace.
+  - Layer na DB: `src/lib/db/readCache.ts`
   - Endpoint na ƙididdiga: `GET /api/cache/stats`, dashboard a `/dashboard/cache`
 
 ## 3) Matakin Adana Bayanai

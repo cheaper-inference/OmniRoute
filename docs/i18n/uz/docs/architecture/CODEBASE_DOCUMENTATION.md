@@ -73,53 +73,53 @@ OmniRoute/
 
 ```
 src/
-├── app/                  App Router sahifalari + API marshrutlari
-├── lib/                  Asosiy kutubxonalar (DB, autentifikatsiya, OAuth, ko‘nikmalar, xotira, …)
-├── domain/               Sof domen qatlami (siyosat, zaxira, xarajat, bloklash, …)
-├── server/               Faqat server uchun modullar (avtorizatsiya, cors, autentifikatsiya)
-├── shared/               Turlar, konstantalar, validatsiya, shartnomalar, yordamchi vositalar (chegaralararo xavfsiz)
-├── mitm/                 CLI integratsiyasi uchun vositachi proksi yordamchilari
-├── models/               Lokal model metama’lumotlari / taxalluslash
-├── sse/                  Hali ham src/ ostida joylashgan eski SSE ishlov beruvchilari (open-sse/ emas)
-├── store/                Mijoz tomoni holat omborlari
-├── middleware/           Marshrut darajasidagi oraliq dastur yordamchilari (Next.js global oraliq dasturi emas)
-├── scripts/              Ilova kodi import qilishi mumkin bo‘lgan ichki skriptlar
-├── types/                Atrof-muhit va umumiy TS turlari
-├── i18n/                 Lokal to‘plamlar
-├── instrumentation.ts    Next.js instrumentatsiya hook’i
+├── app/                  App Router pages + API routes
+├── lib/                  Core libraries (DB, auth, OAuth, skills, memory, …)
+├── domain/               Pure domain layer (policy, fallback, cost, lockout, …)
+├── server/               Server-only modules (authz, cors, auth)
+├── shared/               Types, constants, validation, contracts, utils (cross-boundary safe)
+├── mitm/                 Man-in-the-middle proxy helpers for CLI integration
+├── models/               Local model metadata / aliasing
+├── sse/                  Legacy SSE handlers that still live under src/ (not open-sse/)
+├── store/                Client-side state stores
+├── middleware/           Route-level middleware utilities (not Next.js global middleware)
+├── scripts/              In-tree scripts importable by app code
+├── types/                Ambient and shared TS types
+├── i18n/                 Locale bundles
+├── instrumentation.ts    Next.js instrumentation hook
 ├── instrumentation-node.ts
-└── proxy.ts              Yuqori darajadagi proksini ishga tushirish yordamchisi
+└── proxy.ts              Top-level proxy bootstrap helper
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router boshqaruv paneli interfeysi va ommaviy/boshqaruv HTTP API’sini taqdim etadi.
-**Global oraliq dastur mavjud emas** — tutib olish har bir marshrut bo‘yicha alohida bajariladi.
+App Router ham dashboard interfeysini, ham ommaviy/boshqaruv HTTP API ni taqdim etadi.
+**Global middleware yoʻq** — interceptsiya har bir marshrut boʻyicha amalga oshiriladi.
 
 `src/app/` ostidagi yuqori darajali segmentlar:
 
-| Yo‘l                                                                          | Maqsad                                                         |
-| ----------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `api/`                                                                        | Barcha HTTP API marshrutlari (quyidagi tafsilotlarga qarang)   |
-| `a2a/`                                                                        | A2A JSON-RPC 2.0 so‘nggi nuqtasi (`POST /a2a`)                 |
-| `.well-known/agent.json/`                                                     | A2A Agent Card topish hujjati                                  |
-| `(dashboard)/`                                                                | Boshqaruv paneli interfeysi (marshrut guruhi, URL prefiksisiz) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Autentifikatsiya jarayonlari                                   |
-| `landing/`                                                                    | Marketing/boshlang‘ich sahifa                                  |
-| `docs/`                                                                       | Ichki API hujjatlari ko‘ruvchisi                               |
-| `status/`, `maintenance/`, `offline/`                                         | Operatsion sahifalar                                           |
-| `privacy/`, `terms/`                                                          | Huquqiy sahifalar                                              |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statik xato sahifalari                                         |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Freymvorkning xato/yuklanish chegaralari                       |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Ildiz qobig‘i                                                  |
+| Yoʻl                                                                          | Maqsadi                                                 |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `api/`                                                                        | Barcha HTTP API marshrutlari (quyida batafsil)          |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 endpointi (`POST /a2a`)                |
+| `.well-known/agent.json/`                                                     | A2A Agent Card topilish hujjati                         |
+| `(dashboard)/`                                                                | Dashboard interfeysi (marshrut guruhi, URL prefiksisiz) |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Autentifikatsiya oqimlari                               |
+| `landing/`                                                                    | Marketing/landing sahifasi                              |
+| `docs/`                                                                       | Ichiga joylashtirilgan API hujjatlari koʻruvchisi       |
+| `status/`, `maintenance/`, `offline/`                                         | Operatsion sahifalar                                    |
+| `privacy/`, `terms/`                                                          | Huquqiy sahifalar                                       |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statik xato sahifalari                                  |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Framework xato/yuklanish chegaralari                    |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Ildiz qobigʻi                                           |
 
-#### 3.1.1 `src/app/(dashboard)/dashboard/` — Interfeys sahifalari
+#### 3.1.1 `src/app/(dashboard)/dashboard/` — UI sahifalari
 
 `agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
 `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
 `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks`, shuningdek ildizdagi `page.tsx`, `HomePageClient.tsx`,
+`translator`, `usage`, `webhooks`, shuningdek ildiz `page.tsx`, `HomePageClient.tsx`,
 `BootstrapBanner.tsx`.
 
 #### 3.1.2 `src/app/api/` — Yuqori darajali API guruhlari
@@ -175,144 +175,142 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   Ichki xizmatlarni boshqarish (9router, cliproxy) — LOCAL_ONLY
+├── services/   Embedded service management (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         OpenAI bilan mos ommaviy API
-├── v1beta/     Gemini uslubidagi moslik
+├── v1/         OpenAI-compatible public API
+├── v1beta/     Gemini-style compat
 ├── version-manager/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — Ichki xizmatlarni boshqarish
+#### 3.1.2a `src/app/api/services/` — Ichiga joylashtirilgan xizmatlar boshqaruvi
 
-9Router va CLIProxyAPI’ni o‘rnatish, ishga tushirish, to‘xtatish va kuzatish uchun marshrutlar.
-Barcha yo‘llar **LOCAL_ONLY** (faqat loopback, qat’iy qoida #17) sifatida tasniflangan, chunki ular
-`npm install`ni chaqirishi va ikkilamchi jarayonlarni ishga tushirishi mumkin.
+9Router va CLIProxyAPI ni oʻrnatish, ishga tushirish, toʻxtatish va monitoring qilish uchun marshrutlar.
+Barcha yoʻllar **LOCAL_ONLY** deb tasniflangan (faqat loopback, qat'iy qoida #17), chunki ular
+`npm install` ni chaqirishi va child processlarni ishga tushirishi mumkin.
 
 ```
 src/app/api/services/
 ├── 9router/
 │   ├── _lib.ts             getOrInitSupervisor() yordamchisi
-│   ├── install/route.ts    POST — execFile orqali npm install
+│   ├── install/route.ts    POST — npm install execFile orqali
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — yangiroq versiyani npm install orqali oʻrnatish
-│   ├── rotate-key/route.ts POST — yangi API kalitini yaratish + qayta ishga tushirish
-│   ├── status/route.ts     GET  — jonli holat + DB holati + versiya metamaʼlumotlari
-│   └── auto-start/route.ts POST — auto_start bayrogʻini almashtirish
+│   ├── update/route.ts     POST — npm install orqali yangiroq versiyani oʻrnatish
+│   ├── rotate-key/route.ts POST — yangi API kalit yaratish + qayta ishga tushirish
+│   ├── status/route.ts     GET  — jonli + DB holati + versiya metamaʼlumotlari
+│   └── auto-start/route.ts POST — auto_start belgisini almashtirish
 ├── cliproxy/
 │   ├── _lib.ts             getOrInitSupervisor() yordamchisi
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — yangiroq versiyani npm install orqali oʻrnatish
-│   ├── status/route.ts     GET  — jonli holat + DB holati + versiya metamaʼlumotlari
-│   └── auto-start/route.ts POST — auto_start bayrogʻini almashtirish
+│   ├── update/route.ts     POST — npm install orqali yangiroq versiyani oʻrnatish
+│   ├── status/route.ts     GET  — jonli + DB holati + versiya metamaʼlumotlari
+│   └── auto-start/route.ts POST — auto_start belgisini almashtirish
 └── [name]/
-    └── logs/route.ts       GET  — SSE jurnalining oxirgi yozuvlari (barcha xizmatlar tomonidan umumiy ishlatiladi)
+    └── logs/route.ts       GET  — SSE jurnalini kuzatish (barcha xizmatlar uchun umumiy)
 ```
 
-Mos boshqaruv paneli interfeysi:
-`src/app/(dashboard)/dashboard/providers/services/` — ikki ichki oynali sahifa (CLIProxyAPI + 9Router).
+Tegishli boshqaruv paneli interfeysi:
+`src/app/(dashboard)/dashboard/providers/services/` — ikki tabli sahifa (CLIProxyAPI + 9Router).
 9Router ichki interfeysi uchun teskari proksi:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-Batafsil: `docs/frameworks/EMBEDDED-SERVICES.md`
+Batafsil maʼlumot: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-#### 3.1.3 `src/app/api/v1/` — OpenAI bilan mos keluvchi ommaviy API
+#### 3.1.3 `src/app/api/v1/` — OpenAI bilan mos ommaviy API
 
 ```
 v1/
-├── accounts/[id]/                       hisobni qidirish
-├── agents/tasks/[id]/, agents/tasks/    A2A uslubidagi vazifa oxirgi nuqtalari
-├── api/                                 v1/api ostida taqdim etilgan ichki API yordamchilari
+├── accounts/[id]/                       hisob qidirish
+├── agents/tasks/[id]/, agents/tasks/    A2A uslubidagi vazifa endpointlari
+├── api/                                 v1/api ostida ochilgan ichki API yordamchilari
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    Chat Completions (asosiy oxirgi nuqta)
-├── completions/                         Eski matn toʻldirishlari
-├── embeddings/                          Vektorli ifodalar
+├── chat/completions/                    Chat Completions (asosiy endpoint)
+├── completions/                         Eski matnli completions
+├── embeddings/                          Embeddings
 ├── files/[id]/, files/                  Files API
 ├── _helpers/                            Umumiy marshrut yordamchilari (ommaviy URL yoʻq)
-├── images/{edits, generations}/         Tasvir yaratish + tahrirlash
-├── issues/                              Muammolarni saralash yordamchi oxirgi nuqtalari
+├── images/{edits, generations}/         Rasm generatsiyasi + tahrirlash
+├── issues/                              Triage yordamchi endpointlari
 ├── management/{proxies}/                v1 ichidagi boshqaruv doirasidagi marshrutlar
-├── messages/{count_tokens}/             Anthropic uslubidagi xabarlar bilan moslik
+├── messages/{count_tokens}/             Anthropic uslubidagi xabarlar mosligi
 ├── models/                              Modellar roʻyxati (`route.ts`, `catalog.ts`)
 ├── moderations/                         Moderatsiya
-├── music/                               Musiqa yaratish
-├── providers/[provider]/                Har bir provayderga tegishli amallar
-├── quotas/{check}                       Kvotani tekshirish
-├── registered-keys/                     Roʻyxatdan oʻtgan kalitlarni boshqarish
-├── rerank/                              Qayta tartiblash
-├── responses/[...path]/                 OpenAI Responses API (barcha marshrutlarni qamrab oluvchi)
+├── music/                               Musiqa generatsiyasi
+├── providers/[provider]/                Provayder boʻyicha operatsiyalar
+├── quotas/{check}                       Kvota tekshiruvlari
+├── registered-keys/                     Roʻyxatdan oʻtgan kalitlar administratori
+├── rerank/                              Qayta reytinglash
+├── responses/[...path]/                 OpenAI Responses API (barcha yoʻllarni qamrab oluvchi)
 ├── search/                              Veb-qidiruv
-├── videos/                              Video yaratish
+├── videos/                              Video generatsiyasi
 ├── ws/                                  WebSocket koʻprigi
-└── route.ts                             Indeks ishlov beruvchisi
+└── route.ts                             Indeks ishlovchisi
 ```
 
-Har bir marshrut fayli bir xil andozaga amal qiladi:
+Har bir marshrut fayli bir xil namunaga amal qiladi:
 
 ```
-Marshrut → CORS dastlabki soʻrovi → Zod orqali soʻrov tanasini tekshirish → ixtiyoriy autentifikatsiya
-         → API kaliti siyosatini qoʻllash → ishlov beruvchiga topshirish (open-sse)
+Marshrut → CORS preflight → Zod body validatsiyasi → ixtiyoriy autentifikatsiya
+      → API kalit siyosatini qoʻllash → handler delegatsiyasi (open-sse)
 ```
 
-`v1beta/` — Gemini uslubidagi moslik qatlami (bir xil
-`open-sse/handlers/` konveyeriga oʻgiruvchi yupqa oʻrama).
+`v1beta/` — Gemini uslubidagi moslik qatlami (bir xil `open-sse/handlers/` quvuriga oʻgiruvchi yupqa qobiq).
 
 ### 3.2 `src/lib/` — Asosiy kutubxonalar
 
-Maʼlumotlar, sinxronlash, OAuth, koʻnikmalar, xotira va boshqalarni har doim ushbu modullar orqali import qiling. Quyidagi
-jadvalda amaldagi kataloglar va eʼtiborga molik yuqori darajadagi fayllar guruhlangan.
+Maʼlumotlar, sinxronizatsiya, OAuth, skill, xotira va boshqalarni har doim shu modullar orqali import qiling. Jadval haqiqiy kataloglar va muhim yuqori darajadagi fayllarni guruhlaydi.
 
-| Modul             | Maqsadi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A protokoli serveri: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 ta ko‘nikma: xarajatlar tahlili, holat hisoboti, provayderlarni aniqlash, kvotalarni boshqarish, aqlli marshrutlash, imkoniyatlar ro‘yxati)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `acp/`            | Agentlarni boshqarish protokoli: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `api/`            | Ichki API yordamchilari: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `auth/`           | `managementPassword.ts` (parolni tiklash / xeshlash)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `batches/`        | OpenAI Batches API xizmati (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `catalog/`        | OpenRouter katalogini sinxronlash (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `cloudAgent/`     | Bulut agentlari reyestri: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `combos/`         | Kombinatsiyalarni aniqlash yordamchilari                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `compliance/`     | Audit + provayder auditi: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `config/`         | Ishlash vaqti konfiguratsiyasini bogʻlash                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `db/`             | SQLite domen modullari (§3.2.1 ga qarang)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `display/`        | API javoblarida ishlatiladigan UI/koʻrsatish yordamchilari                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `embeddings/`     | Embedding xizmati reyestri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `env/`            | Muhitni yuklash + introspeksiya                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `evals/`          | Eval bajarilish muhiti                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `jobs/`           | Fon vazifalari (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `memory/`         | Doimiy xotira: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `oauth/`          | OAuth/import provayderi modullari (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, shuningdek, `services/`, `utils/` va `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `plugins/`        | Plagin yuklagichi (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `providerModels/` | Boshqariladigan model hayotiy sikli: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `providers/`      | Provayder yordamchilari: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `resilience/`     | `settings.ts` — zanjir uzgichi, kutish davri va bloklash sozlamalari                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `runtime/`        | Ish vaqti xususiyatlarini aniqlash                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `services/`       | Ichki xizmatlar freymvorki: `ServiceSupervisor.ts` (operatsiya qulfi, halqali bufer va holat tekshiruvchisiga ega universal quyi jarayon nazoratchisi), `bootstrap.ts` (jarayon darajasida roʻyxatdan oʻtkazish va avtomatik ishga tushirish), `registry.ts` (vosita → nazoratchi xaritasi), `apiKey.ts` (AES-256-GCM kalitlar ombori), `modelSync.ts` (modellarni davriy sinxronlash), `ringBuffer.ts` (5 MB hajmli halqali jurnal buferi), `healthCheck.ts` (HTTP holat tekshiruvi), `types.ts`, `embedWsProxy.ts` (WebSocket proksisi), `installers/{ninerouter,cliproxy}.ts`. `docs/frameworks/EMBEDDED-SERVICES.md` fayliga qarang                                                                                                                                      |
-| `agentSkills/`    | Agent ko‘nikmalari katalogi va generatori: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md` fayliga yozadi), `openapiParser.ts` (OpenAPI spetsifikatsiyasidan REST soʻnggi nuqtalarini ajratib oladi), `cliRegistryParser.ts` (bin/cli-registry ichidan CLI quyi buyruqlarini ajratib oladi), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). REST marshrutlari (`/api/agent-skills/*`), MCP vositalari (`omniroute_agent_skills_*`) va A2A ko‘nikmasi `list-capabilities` tomonidan ishlatiladi. [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) fayliga qarang. |
-| `skills/`         | Ko‘nikmalar freymvorki: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, shuningdek `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `spend/`          | `batchWriter.ts` (kechiktirib yozish buferi)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `system/`         | Tizim darajasidagi yordamchi vositalar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `translator/`     | Yuqori darajadagi tarjimon bogʻlovchi qatlami (`open-sse/translator/` ichiga delegatsiya qiladi)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `usage/`          | Foydalanishni hisobga olish: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `versionManager/` | Avtomatik yangilash + versiya manifesti                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `ws/`             | WebSocket koʻprigi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `zed-oauth/`      | Zed muharririning OAuth jarayoni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Modul             | Maqsadi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | A2A protokol serveri: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 ta koʻnikma: xarajat tahlili, sogʻliq hisoboti, provayderlarni aniqlash, kvota boshqaruvi, aqlli marshrutlash, imkoniyatlar roʻyxati)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `api/`            | Ichki API yordamchilari: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `auth/`           | `managementPassword.ts` (parolni tiklash / xeshlash)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `batches/`        | OpenAI Batches API xizmati (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `catalog/`        | OpenRouter katalogini sinxronlash (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `cloudAgent/`     | Cloud agent reyestri: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `combos/`         | Combo (kombinatsiya) yechimi boʻyicha yordamchilar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `compliance/`     | Audit + provayder auditi: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `config/`         | Ish vaqti konfiguratsiyasi uchun bogʻlovchi qatlam                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `db/`             | SQLite domen modullari (§3.2.1 ga qarang)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `display/`        | API javoblarida ishlatiladigan UI/koʻrsatish yordamchilari                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `embeddings/`     | Embedding xizmati reyestri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `env/`            | Env yuklash + introspeksiya                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `evals/`          | Eval bajarilish muhiti                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `jobs/`           | Fon vazifalari (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `memory/`         | Doimiy xotira: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `oauth/`          | OAuth/import provayder modullari (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, shuningdek `services/`, `utils/` va `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                                             |
+| `plugins/`        | Plagin yuklagichi (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `providerModels/` | Boshqariladigan model hayotiy sikli: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `providers/`      | Provayder yordamchilari: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `resilience/`     | `settings.ts` — circuit breaker, cooldown, lockout uchun sozlamalar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `runtime/`        | Runtime xususiyatlarini aniqlash                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `services/`       | Oʻrnatilgan xizmatlar freymvorki: `ServiceSupervisor.ts` (operatsiya qulfi, ring buffer, health tekshiruvchisi bilan umumiy child-process nazoratchisi), `bootstrap.ts` (process darajasida roʻyxatga olish va avtomatik ishga tushirish), `registry.ts` (asbob → nazoratchi xaritasi), `apiKey.ts` (AES-256-GCM kalit ombori), `modelSync.ts` (davriy model sinxronizatsiyasi), `ringBuffer.ts` (5 MB aylanma log buferi), `healthCheck.ts` (HTTP health tekshiruvi), `types.ts`, `embedWsProxy.ts` (WebSocket proksisi), `installers/{ninerouter,cliproxy}.ts`. Qarang: `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                                   |
+| `agentSkills/`    | Agent Skills katalogi + generatori: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md` faylini yozadi), `openapiParser.ts` (OpenAPI spetsifikatsiyasidan REST endpointlarini ajratib oladi), `cliRegistryParser.ts` (bin/cli-registry dan CLI subkomandalarini ajratib oladi), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). REST marshrutlari (`/api/agent-skills/*`), MCP asboblari (`omniroute_agent_skills_*`) va A2A `list-capabilities` skill'i tomonidan foydalaniladi. Qarang: [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Skill freymvorki: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, shuningdek `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `spend/`          | `batchWriter.ts` (yozishdan keyingi bufer)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Bulutli sinxronizatsiya)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `system/`         | Tizim darajasidagi yordamchilar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `translator/`     | Yuqori darajadagi tarjimon yelimi (`open-sse/translator/` ga delegatsiya qiladi)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `usage/`          | Foydalanish hisobi: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `versionManager/` | Avtomatik yangilash + versiya manifesti                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `ws/`             | WebSocket koʻprigi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `zed-oauth/`      | Zed muharriri OAuth oqimi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
-`src/lib/` ichidagi yuqori darajadagi fayllar:
+`src/lib/` dagi yuqori darajadagi fayllar:
 
-- Eski `localDb.ts` barrel fayli olib tashlandi — isteʼmolchilar muayyan `src/lib/db/*` modullarini bevosita import qiladi.
+- Eski `localDb.ts` barrel olib tashlandi — iste'molchilar to'g'ridan-to'g'ri aniq `src/lib/db/*` modullarini import qiladilar.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -326,10 +324,10 @@ jadvalda amaldagi kataloglar va eʼtiborga molik yuqori darajadagi fayllar guruh
 
 #### 3.2.1 `src/lib/db/`
 
-Singleton SQLite maʼlumotlar bazasi (`core.ts` ichidagi `getDbInstance()`, WAL jurnallash).
-**Marshrutlar yoki ishlov beruvchilarda hech qachon xom SQL yozmang** — ushbu modullar orqali ishlang.
+Singleton SQLite ma'lumotlar bazasi (`core.ts` ichidagi `getDbInstance()`, WAL jurnallash).
+**Marshrutlar yoki handlerlarda hech qachon xom SQL yozmang** — ushbu modullar orqali ishlang.
 
-![Maʼlumotlar bazasi sxemasining umumiy ko‘rinishi (tanlangan asosiy jadvallar)](../diagrams/exported/db-schema-overview.svg)
+![Ma'lumotlar bazasi sxemasining umumiy ko'rinishi (tanlangan asosiy jadvallar)](../diagrams/exported/db-schema-overview.svg)
 
 > Manba: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
@@ -347,10 +345,10 @@ Domen modullari (har biri bir yoki bir nechta jadvalga egalik qiladi): `apiKeys.
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-`migrations/` 168 ta versiyalangan `.sql` faylini (idempotent, tranzaksion) o‘z ichiga oladi va ular
-ishga tushish vaqtida `migrationRunner.ts` tomonidan bajariladi.
+`migrations/` 168 ta versiyalangan `.sql` fayllarini saqlaydi (idempotent, tranzaksion) va
+ishga tushishda `migrationRunner.ts` tomonidan bajariladi.
 
-Migratsiyalar davomida yaratiladigan jadvallar (jami 123 ta):
+Migratsiyalar orqali yaratilgan jadvallar (jami 123 ta):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -366,62 +364,71 @@ Migratsiyalar davomida yaratiladigan jadvallar (jami 123 ta):
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (shuningdek, xotira qidiruvi uchun FTS5 virtual jadvallari).
+`webhooks` (qo'shimcha xotirani qidirish uchun FTS5 virtual jadvallari).
 
 ### 3.3 `src/domain/` — Domen qatlami
 
-Kiritish-chiqarishsiz sof biznes mantiqi. Marshrutlar va ishlov beruvchilar tomonidan import qilinadi.
+Domen xizmatlari va baholash shartnomalari. Ba'zi modullar jonli
+so'rov yo'lidan chaqiriladi; boshqalari mustaqil shartnomalar bo'lib qoladi. Bu butun katalog
+I/O dan xoli deb yoki har bir modulni o'zgartirish ishlab chiqarish marshrutizatsiyasiga ta'sir qiladi deb o'ylamang.
 
-| Fayl                                       | Maqsadi                                                   |
-| ------------------------------------------ | --------------------------------------------------------- |
-| `policyEngine.ts`                          | Yuqori darajadagi siyosatni aniqlash                      |
-| `fallbackPolicy.ts`                        | Zaxira variantini tanlash qarorlar daraxti                |
-| `costRules.ts`                             | Xarajatlarni hisoblash qoidalari                          |
-| `lockoutPolicy.ts`                         | Modelni bloklash qarorlari                                |
-| `tagRouter.ts`                             | Teglarga asoslangan marshrutlash                          |
-| `comboResolver.ts`                         | So‘rovdan maqsadlar ro‘yxatiga → kombinatsiyani aniqlash  |
-| `connectionModelRules.ts`                  | Har bir ulanish uchun model filtrlari                     |
-| `modelAvailability.ts`                     | Model mavjudligini tekshirish                             |
-| `degradation.ts`                           | Pasaytirilgan rejimga o‘tishlar                           |
-| `providerExpiration.ts`                    | Muddati tugagan hisob/kalitni aniqlash                    |
-| `quotaCache.ts`                            | Keshlangan kvota qarorlari                                |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Javob shakli yordamchilari                                |
-| `configAudit.ts`                           | Konfiguratsiya o‘zgarishlari auditi                       |
-| `assessment/`                              | Modelni baholash (RFC bo‘yicha, qisman amalga oshirilgan) |
-| `types.ts`                                 | Umumiy domen turlari                                      |
+Jonli siyosat sirtlari — `src/shared/utils/apiKeyPolicy.ts` va
+`src/sse/handlers/chat/resolvedModelPolicy.ts`. Jonli combo bilan ishlash va nishonni
+aniqlash `open-sse/services/combo.ts` dan foydalanadi. Sinovdan o'tgan `policyEngine.ts` va
+`comboResolver.ts` shartnomalari hamda `src/lib/container.ts` tekshirilgan chat so'rovi yo'lining
+ulanishi emas. Marshrutizatsiya o'zgarishini rejalashtirishda ularni faol
+sirtlardan alohida saqlang.
+
+| Fayl                                       | Maqsad                                                |
+| ------------------------------------------ | ----------------------------------------------------- |
+| `policyEngine.ts`                          | Zaxiralangan siyosat-baholash shartnomasi             |
+| `fallbackPolicy.ts`                        | Zaxira qarorlar daraxti                               |
+| `costRules.ts`                             | Xarajatni hisoblash qoidalari                         |
+| `lockoutPolicy.ts`                         | Modelni bloklash qarorlari                            |
+| `tagRouter.ts`                             | Tegga asoslangan marshrutizatsiya                     |
+| `comboResolver.ts`                         | Zaxiralangan combo-tanlash shartnomasi                |
+| `connectionModelRules.ts`                  | Har bir ulanish uchun model filtrlari                 |
+| `modelAvailability.ts`                     | Model mavjudligini tekshirish                         |
+| `degradation.ts`                           | Degradatsiya rejimiga o'tishlar                       |
+| `providerExpiration.ts`                    | Muddati o'tgan account/key aniqlash                   |
+| `quotaCache.ts`                            | Keshlangan kvota qarorlari                            |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Javob shakli yordamchilari                            |
+| `configAudit.ts`                           | Konfiguratsiya o'zgarishlari auditi                   |
+| `assessment/`                              | Modelni baholash (RFC bo'yicha, qisman joriy etilgan) |
+| `types.ts`                                 | Umumiy domen turlari                                  |
 
 ### 3.4 `src/server/` — Faqat server uchun
 
-Mijoz komponentlaridan import qilib bo‘lmaydi.
+Client komponentlaridan import qilib bo'lmaydi.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        Marshrutlarni ommaviy va boshqaruv turlariga ajratadi
+│   ├── classify.ts        Marshrutlarni public va management sifatida tasniflaydi
 │   ├── assertAuth.ts      Tasdiqlash yordamchisi
-│   ├── context.ts         Har bir so‘rov uchun avtorizatsiya konteksti
+│   ├── context.ts         Har bir soʻrov uchun authz konteksti
 │   ├── headers.ts
-│   ├── pipeline.ts        Avtorizatsiya konveyeri
+│   ├── pipeline.ts        Authz pipeline
 │   ├── policies/          Aniq siyosatlar
 │   └── types.ts
-└── cors/origins.ts        Ruxsat etilgan CORS manbalari ro‘yxati
+└── cors/origins.ts        CORS origin ruxsat roʻyxati
 ```
 
 ### 3.5 `src/shared/` — Ulashish uchun xavfsiz
 
-Muayyan vazifalarga yo‘naltirilgan quyi kataloglarga ajratilgan:
+Maqsadli kichik kataloglarga boʻlingan:
 
-- `constants/` — `providers.ts` (Zod orqali tekshiriladigan provayderlar katalogi), `models.ts`,
+- `constants/` — `providers.ts` (Zod bilan tekshirilgan provayderlar katalogi), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (taqiqlanganlar roʻyxati), `mcpScopes.ts`,
+  `headers.ts`, `upstreamHeaders.ts` (denylist), `mcpScopes.ts`,
   `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
   `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
 - `validation/` — `schemas.ts` (~80 ta Zod sxemasi), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — npm orqali tarqatiladigan ommaviy API shartnomalari.
+- `contracts/` — npm ga chiqariladigan public API kontraktlari.
 - `types/` — umumiy TS turlari.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
@@ -430,16 +437,15 @@ Muayyan vazifalarga yo‘naltirilgan quyi kataloglarga ajratilgan:
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, shuningdek, `services/`, `network/`, `middleware/`, `schemas/`,
-  `hooks/`, `components/` ichidagi boshqaruv paneli huklari/komponentlari.
-- `components/` — boshqaruv paneli komponentlari APIʼsi (`index.tsx` barrel fayli: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …). Primitivlar vendorga biriktirilgan
-  toʻplam (`packages/ui-kit`, `@omniroute/ui-kit/button` kabi komponent quyi yoʻli orqali
-  import qilinadi) ustidagi adapterlardir, shu sababli ekranlar importlarini saqlab qoladi,
-  belgilash tuzilmasi esa toʻplamga tegishli boʻladi. Qobiq `layouts/DashboardLayout.tsx` →
-  `layouts/DashboardShell.tsx` (toʻplamdagi `SidebarProvider`/`SidebarInset`) boʻlib,
-  `Sidebar.tsx` va `Header.tsx` bilan ishlaydi; ikonalar `Icon.tsx` va
-  `constants/iconMap.ts` orqali uzatiladi. `docs/architecture/DESIGN_SYSTEM.md` ga qarang.
+  `a11yAudit.ts`, shuningdek `services/`, `network/`,
+  `middleware/`, `schemas/`, `hooks/`, `components/` ostidagi dashboard hooklari/komponentlari.
+- `components/` — dashboard komponent API (`index.tsx` barrel: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Primitivlar vendored kit ustidagi adapterlar
+  (`packages/ui-kit`, komponent subpathi orqali import qilinadi, masalan
+  `@omniroute/ui-kit/button`), shuning uchun ekranlar oʻz importlarini saqlab qoladi, markup esa
+  kitga tegishli. Qobiq — `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (kit `SidebarProvider`/`SidebarInset`) boʻlib, `Sidebar.tsx` va `Header.tsx` bilan; ikonkalar
+  `Icon.tsx` va `constants/iconMap.ts` orqali oʻtadi. `docs/architecture/DESIGN_SYSTEM.md` ga qarang.
 
 ---
 
@@ -702,45 +708,46 @@ Maqsadiga ko‘ra 6 ta quyi jildga ajratilgan.
 
 ---
 
-## 9. So‘rov konveyeri (qisqacha)
+## 9. Soʻrovlar quvuri (Xulosa)
 
-![So‘rov konveyeri (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
+![Soʻrovlar quvuri (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
 
 > Manba: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
 ```
-Mijoz so‘rovi
+Client request
   → /v1/chat/completions (route.ts)
-     CORS dastlabki so‘rovini tekshirish
-     Zod validatsiyasi (shared/validation/schemas.ts ichidagi chatCompletionsSchema)
-     Autentifikatsiya (extractApiKey + isValidApiKey YOKI requireManagementAuth)
-     Siyosat mexanizmi (src/server/authz/pipeline.ts)
-     Himoya cheklovlari (PII maskalovchisi, prompt inyeksiyasi, tasvir ko‘prigi)
+     CORS preflight check
+     Zod validation (chatCompletionsSchema in shared/validation/schemas.ts)
+     Auth (extractApiKey + isValidApiKey OR requireManagementAuth)
+     Route authorization (src/server/authz/pipeline.ts)
+     API-key policy (src/shared/utils/apiKeyPolicy.ts; enforced on the selected path)
+     Guardrails (PII masker, prompt injection, vision bridge)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     Keshni tekshirish (semantik + o‘qish keshi)
-     Tezlik cheklovi (rateLimitManager, accountSemaphore)
-     Kombinatsiyalangan marshrutlash (agar model kombinatsiyaga mos kelsa)
-       comboResolver → har bir maqsad bo‘yicha sikl → handleSingleModel()
+     Cache check (semantic + read cache)
+     Rate limit (rateLimitManager, accountSemaphore)
+     Combo routing (if model resolves to a combo)
+       resolveComboTargets (open-sse/services/combo.ts) → per-target dispatch
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       yuqori oqimga so‘rov yuborish → accountFallback orqali qayta urinish/kechiktirish
+       fetch upstream → retry/backoff via accountFallback
      translateResponse() (open-sse/translator/response/*)
-     SSE oqimi YOKI JSON javobi
-     Agar Responses API bo‘lsa: open-sse/transformer/responsesTransformer.ts orqali TransformStream
-  → Muvofiqlik auditi (src/lib/compliance/)
-  → Mijozga javob
+     SSE stream OR JSON response
+     If Responses API: TransformStream via open-sse/transformer/responsesTransformer.ts
+  → Compliance audit (src/lib/compliance/)
+  → Response to client
 ```
 
-### Barqarorlikning ish vaqtidagi holati (uchta mexanizm)
+### Barqarorlik ish vaqtidagi holat (uchta mexanizm)
 
-| Mexanizm                        | Qamrov                      | Joylashuvi                                                                                                                   |
-| ------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Provayderning avtomatik uzgichi | Butun provayder             | `src/shared/utils/circuitBreaker.ts`, `domain_circuit_breakers` ichida saqlanadi                                             |
-| Ulanishning kutish davri        | Bitta hisob/qalit           | `src/sse/services/auth.ts` ichidagi `markAccountUnavailable()`; `accountFallback.checkFallbackError()` tomonidan ishlatiladi |
-| Modelni bloklash                | Provayder + ulanish + model | `open-sse/services/accountFallback.ts`, `domain_lockout_state` ichida saqlanadi                                              |
+| Mexanizm                  | Qamrov                      | Qayerda                                                                                                                            |
+| ------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Provayder circuit breaker | Butun provayder             | `src/shared/utils/circuitBreaker.ts`, `domain_circuit_breakers` ichida saqlanadi                                                   |
+| Ulanish cooldown          | Bitta hisob/kalit           | `src/sse/services/auth.ts` ichidagi `markAccountUnavailable()`; `accountFallback.checkFallbackError()` tomonidan isteʼmol qilinadi |
+| Model lockout             | Provayder + ulanish + model | `open-sse/services/accountFallback.ts`, `domain_lockout_state` ichida saqlanadi                                                    |
 
 [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) va
-[CLAUDE.md](../../CLAUDE.md) ichidagi maxsus bo‘limga qarang.
+[CLAUDE.md](../../CLAUDE.md) ichidagi maxsus boʻlimga qarang.
 
 ---
 

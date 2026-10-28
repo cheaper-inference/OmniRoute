@@ -268,71 +268,71 @@ Oblasti správy:
 
 ## 2) SSE + jádro překladu
 
-Hlavní moduly toku:
+Moduly hlavního toku:
 
 - Vstupní bod: `src/sse/handlers/chat.ts`
-- Základní orchestrace: `open-sse/handlers/chatCore.ts`
-- Adaptéry pro spouštění poskytovatelů: `open-sse/executors/*`
-- Detekce formátu / konfigurace poskytovatele: `open-sse/services/provider.ts`
-- Parsování / překlad modelu: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Logika přechodu na záložní účet: `open-sse/services/accountFallback.ts`
+- Hlavní orchestrace: `open-sse/handlers/chatCore.ts`
+- Adaptéry provádění poskytovatelů: `open-sse/executors/*`
+- Detekce formátu/konfigurace poskytovatele: `open-sse/services/provider.ts`
+- Parsování/rozlišení modelu: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Logika fallbacku účtů: `open-sse/services/accountFallback.ts`
 - Registr překladů: `open-sse/translator/index.ts`
-- Transformace streamů: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Extrakce / normalizace využití: `open-sse/utils/usageTracking.ts`
-- Parser značek pro přemýšlení: `open-sse/utils/thinkTagParser.ts`
-- Obsluha embeddingů: `open-sse/handlers/embeddings.ts`
+- Transformace streamu: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Extrakce/normalizace využití: `open-sse/utils/usageTracking.ts`
+- Parser think značek: `open-sse/utils/thinkTagParser.ts`
+- Handler embeddingů: `open-sse/handlers/embeddings.ts`
 - Registr poskytovatelů embeddingů: `open-sse/config/embeddingRegistry.ts`
-- Obsluha generování obrázků: `open-sse/handlers/imageGeneration.ts`
+- Handler generování obrázků: `open-sse/handlers/imageGeneration.ts`
 - Registr poskytovatelů obrázků: `open-sse/config/imageRegistry.ts`
 - Sanitizace odpovědí: `open-sse/handlers/responseSanitizer.ts`
 - Normalizace rolí: `open-sse/services/roleNormalizer.ts`
 
-Služby (obchodní logika):
+Služby (byznysová logika):
 
-- Výběr / hodnocení účtů: `open-sse/services/accountSelector.ts`
+- Výběr/hodnocení účtů: `open-sse/services/accountSelector.ts`
 - Správa životního cyklu kontextu: `open-sse/services/contextManager.ts`
-- Vynucování filtrování IP adres: `open-sse/services/ipFilter.ts`
+- Vymáhání IP filtru: `open-sse/services/ipFilter.ts`
 - Sledování relací: `open-sse/services/sessionManager.ts`
 - Deduplikace požadavků: `open-sse/services/signatureCache.ts`
 - Vkládání systémového promptu: `open-sse/services/systemPrompt.ts`
-- Správa rozpočtu pro přemýšlení: `open-sse/services/thinkingBudget.ts`
-- Směrování modelů pomocí zástupných znaků: `open-sse/services/wildcardRouter.ts`
-- Správa omezení rychlosti: `open-sse/services/rateLimitManager.ts`
-- Jistič: `src/shared/utils/circuitBreaker.ts`
-- Předání kontextu: `open-sse/services/contextHandoff.ts` — generování a vkládání souhrnu předání pro strategii předávání kontextu
+- Správa rozpočtu thinking: `open-sse/services/thinkingBudget.ts`
+- Směrování wildcard modelů: `open-sse/services/wildcardRouter.ts`
+- Správa rate limitů: `open-sse/services/rateLimitManager.ts`
+- Circuit breaker: `src/shared/utils/circuitBreaker.ts`
+- Předání kontextu: `open-sse/services/contextHandoff.ts` — generování a vkládání souhrnu předání pro strategii context-relay
 - Komprese: `open-sse/services/compression/*` — proaktivní komprese před překladem poskytovatele;
-  zahrnuje pravidla Caveman, filtry RTK, zřetězené pipeline, kombinace komprese, statistiky a validaci
-- Načítání kvóty Codex: `open-sse/services/codexQuotaFetcher.ts` — načítá kvótu Codex pro rozhodování o předání kontextu
-- Opakování zohledňující dobu blokování: `src/sse/services/cooldownAwareRetry.ts` — opakované pokusy pro jednotlivé modely s konfigurovatelnými hodnotami `requestRetry` / `maxRetryIntervalSec`
-- Bezpečné odchozí načítání: `src/shared/network/safeOutboundFetch.ts` — chráněné načítání poskytovatele / modelu s ochranou proti SSRF, blokováním privátních URL, opakováním a časovým limitem
-- Ochrana odchozích URL: `src/shared/network/outboundUrlGuard.ts` — kontroly hostitelů v URL poskytovatelů; `src/shared/network/outboundUrlGuardPolicy.ts` vybírá režim z `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` a jejich přepínačů na řídicím panelu (viz `docs/reference/ENVIRONMENT.md`)
+  zahrnuje pravidla Caveman, filtry RTK, řetězené pipeline, kompresní kombinace, statistiky a validaci
+- Stahovač kvóty Codex: `open-sse/services/codexQuotaFetcher.ts` — získává kvótu Codex pro rozhodnutí o předání context-relay
+- Opakování s ohledem na cooldown: `src/sse/services/cooldownAwareRetry.ts` — opakování s cooldownem pro jednotlivé modely s konfigurovatelnými `requestRetry` / `maxRetryIntervalSec`
+- Bezpečný odchozí fetch: `src/shared/network/safeOutboundFetch.ts` — střežené načítání poskytovatelů/modelů s ochranou proti SSRF, blokováním privátních URL, opakováním a timeoutem
+- Ochrana odchozích URL: `src/shared/network/outboundUrlGuard.ts` — kontroly hostitele na URL poskytovatelů; `src/shared/network/outboundUrlGuardPolicy.ts` volí režim podle `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` a jejich přepínačů v dashboardu (viz `docs/reference/ENVIRONMENT.md`)
 - Výchozí hodnoty požadavků poskytovatele: `open-sse/services/providerRequestDefaults.ts` — výchozí hodnoty `maxTokens`, `temperature`, `thinkingBudgetTokens` na úrovni poskytovatele
-- Konstanty poskytovatele GLM: `open-sse/config/glmProvider.ts` — sdílené modely GLM, URL kvót, časový limit a výchozí hodnoty GLMT
-- Upstream Antigravity: `open-sse/config/antigravityUpstream.ts` — konstanty základní URL a cesty pro zjišťování
-- Konstanty klienta Codex: `open-sse/config/codexClient.ts` — verzované hodnoty user-agent a verze klienta
-- Počáteční aliasy modelů: `src/lib/modelAliasSeed.ts` — při spuštění inicializuje více než 30 aliasů napříč dialekty proxy
+- Konstanty poskytovatele GLM: `open-sse/config/glmProvider.ts` — sdílené modely GLM, URL kvót, timeout/výchozí hodnoty GLMT
+- Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — konstanty základní URL a cesty discovery
+- Konstanty klienta Codex: `open-sse/config/codexClient.ts` — verzované hodnoty user-agent a client-version
+- Seed aliasů modelů: `src/lib/modelAliasSeed.ts` — při spuštění vytváří 30+ aliasů napříč proxy dialekty
 
 Moduly doménové vrstvy:
 
-- Pravidla nákladů / rozpočty: `src/domain/costRules.ts`
-- Zásady přechodu na záložní variantu: `src/domain/fallbackPolicy.ts`
-- Překladač kombinací: `src/domain/comboResolver.ts`
-- Zásady uzamčení: `src/domain/lockoutPolicy.ts`
-- Modul zásad: `src/domain/policyEngine.ts` — centralizované vyhodnocení uzamčení → rozpočtu → záložní varianty
+- Pravidla nákladů/rozpočty: `src/domain/costRules.ts`
+- Politika fallbacku: `src/domain/fallbackPolicy.ts`
+- Rezervovaný kontrakt pro rozlišení kombinací: `src/domain/comboResolver.ts`; živé směrování používá `open-sse/services/combo.ts`
+- Politika uzamčení: `src/domain/lockoutPolicy.ts`
+- Rezervovaný kontrakt pro vyhodnocování politik: `src/domain/policyEngine.ts`; cesta požadavku vymáhá politiku API klíčů prostřednictvím `src/shared/utils/apiKeyPolicy.ts` a autorizaci rozlišeného cíle prostřednictvím `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Katalog chybových kódů: `src/shared/constants/errorCodes.ts`
 - ID požadavku: `src/shared/utils/requestId.ts`
-- Časový limit načítání: `src/shared/utils/fetchTimeout.ts`
+- Timeout fetch: `src/shared/utils/fetchTimeout.ts`
 - Telemetrie požadavků: `src/shared/utils/requestTelemetry.ts`
-- Dodržování předpisů / audit: `src/lib/compliance/index.ts`
-- Spouštěč vyhodnocení: `src/lib/evals/evalRunner.ts`
-- Perzistence stavu domény: `src/lib/db/domainState.ts` — operace CRUD v SQLite pro řetězce záložních variant, rozpočty, historii nákladů, stav uzamčení a jističe
+- Compliance/audit: `src/lib/compliance/index.ts`
+- Spouštěč evalů: `src/lib/evals/evalRunner.ts`
+- Perzistence doménového stavu: `src/lib/db/domainState.ts` — SQLite CRUD pro fallback řetězce, rozpočty, historii nákladů, stav uzamčení a circuit breakery
 
-Moduly poskytovatelů OAuth (27 samostatných souborů v `src/lib/oauth/providers/`):
+Moduly OAuth poskytovatelů (27 jednotlivých souborů v `src/lib/oauth/providers/`):
 
 - Index registru: `src/lib/oauth/providers/index.ts`
 - Jednotliví poskytovatelé: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Sdílené pomocné moduly: `codebuddyDeviceAuth.ts` (tok zařízení CodeBuddy CN / mezinárodní verze), `museCodeDeviceResponse.ts`
-- Tenká obálka: `src/lib/oauth/providers.ts` — znovu exportuje obsah jednotlivých modulů
+- Sdílení pomocníci: `codebuddyDeviceAuth.ts` (device flow pro CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
+- Tenký obal: `src/lib/oauth/providers.ts` — re-exportuje z jednotlivých modulů
 
 ## 5) Vestavěné služby (v3.8.4)
 
@@ -359,167 +359,178 @@ Podrobný rozbor: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ## Hlavní subsystémy (v3.8.0)
 
-### A. Modul Auto Combo
+### A. Auto Combo Engine
 
-Auto Combo dynamicky vyhodnocuje a vybírá cíle směrování v okamžiku požadavku, namísto
-spoléhání se na statickou definici komba. Zajišťuje fungování rodiny prefixů modelů `auto/*`.
+Auto Combo dynamicky skóruje a vybírá cíle směrování v době požadavku, místo aby se spoléhalo na statickou definici komba. Pohání rodinu prefixů modelů `auto/*`.
 
-- Vstupní bod modulu: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
+- Vstup enginu: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (automatická detekce prefixu `auto/`)
-- Řídicí panel: `/dashboard/auto-combo`
+- Vstup živých komb: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), voláno z `src/sse/handlers/chat.ts`
+- Nástěnka: `/dashboard/auto-combo`
 - Telemetrie: tabulka SQLite `auto_combo_decisions`
 
-Klíčové funkce:
+Klíčové schopnosti:
 
-- **20 strategií směrování** (prioritní, vážená, nejprve naplnit, round-robin, P2C, náhodná,
-  nejméně používaná, nákladově optimalizovaná, zohledňující reset, okno resetu, volná kapacita, vážená podle kvóty,
-  striktně náhodná, **auto**, lkgp, optimalizovaná podle kontextu, optimalizovaná pro mezipaměť, předávání kontextu, **fusion**,
+- **20 strategií směrování** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
   pipeline) —
-  auto je hlavní novinkou ve v3.8.0; `fusion` (rozeslání panelu + syntéza posuzovatelem,
-  `open-sse/services/fusion.ts`) je novinkou ve v3.8.36.
-- **Hodnocení podle 16 faktorů**: kvóta, stav, převrácená hodnota nákladů, převrácená hodnota latence, vhodnost pro úlohu a
-  deset dalších. Kanonická tabulka faktorů a jejich výchozích vah se nachází v
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — její opakování zde by
-  vytvořilo druhé místo, kde by mohla zastarat.
-- **Virtuální továrna** materializuje dočasná komba, pokud neexistuje žádné odpovídající pojmenované kombo,
-  přičemž kandidáty získává ze zdravých aktivních připojení poskytovatelů.
-- **Automatické prefixy**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — každý z nich je založen na vyladěném profilu vah.
+  auto je hlavní novinkou ve v3.8.0; `fusion` (fan-out do panelu + syntéza hodnotitelem,
+  `open-sse/services/fusion.ts`) je nový ve v3.8.36.
+- **Skórování 16 faktory**: kvóta, zdraví, inverzní náklady, inverzní latence, vhodnost pro úlohu
+  a deset dalších. Kanonická tabulka faktorů a jejich výchozích vah se nachází v
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — její zopakování zde by
+  vytvořilo druhé místo, které by mohlo zastarat.
+- **Virtuální továrna** materializuje efemérní komba, když neexistuje žádné odpovídající
+  pojmenované kombo, přičemž kandidáty čerpá ze zdravých aktivních připojení poskytovatelů.
+- **Prefixy auto**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
+  `auto/smart`, `auto/lkgp` — každý je podložen vyladěným profilem vah.
 - **6 balíčků režimů**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` a `chaos-mode` — přednastavené konfigurace vah, které lze vyvolat z
-  řídicího panelu. (Nezaměňujte je s výše uvedenými prefixy `auto/*`, které představují
-  varianty používané v okamžiku požadavku.)
+  `reliability-first` a `chaos-mode` — přednastavené konfigurace vah, které lze vyvolat
+  z nástěnky. (Nezaměňovat s prefixy `auto/*` výše — ty jsou variantami použitými
+  v době požadavku.)
 
-Úplné podrobnosti o algoritmu (vzorce faktorů, ladění vah) naleznete v
+Úplné algoritmické podrobnosti (vzorce faktorů, ladění vah) viz
 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Cloudoví agenti
+### B. Cloud Agents
 
-Cloudoví agenti zpřístupňují hostované platformy agentů pro kód třetích stran (Codex Cloud, Devin,
-Jules) prostřednictvím jednotného životního cyklu úloh podporovaného databází. Všechny koncové body pro vytváření a kontrolu
-úloh vyžadují autentizaci pro správu.
+Cloud Agents obaluje externí hostované platformy kódovacích agentů (Codex Cloud, Devin,
+Jules) do jednotného životního cyklu úloh podloženého databází. Všechny koncové body
+pro vytváření/kontrolu úloh vyžadují správní autentizaci.
 
 - Kořen modulu: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts` a podadresáře jednotlivých agentů v `agents/`)
+  `types.ts`, `db.ts`, plus podadresáře jednotlivých agentů pod `agents/`)
 - Implementace jednotlivých agentů: `agents/codex/`, `agents/devin/`, `agents/jules/`
 - Veřejné koncové body: `/api/v1/agents/tasks/*` (výpis/vytvoření/získání/zrušení)
-- Koncové body pro správu: `/api/cloud/*` (zřizování, stav, dávkové operace)
-- Řídicí panel: `/dashboard/cloud-agents`
+- Koncové body správy: `/api/cloud/*` (zřizování, stav, dávkové operace)
+- Nástěnka: `/dashboard/cloud-agents`
 - Úložiště: tabulka `cloud_agent_tasks`
 
-Podrobnosti o zřizování jednotlivých agentů a specifikách OAuth naleznete v
+Zřizování jednotlivých agentů a specifika OAuth viz
 [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Ochranná pravidla
+### C. Guardrails
 
-Modul ochranných pravidel je vrstva middlewaru podporující opětovné načítání za běhu, která kontroluje požadavky
-a odpovědi na přítomnost osobních údajů, injektování promptů a nebezpečného obrazového obsahu. Porušení pravidel
-okamžitě ukončí požadavek s HTTP **503** a strukturovaným kódem chyby, což
-následným volajícím umožňuje požadavek zopakovat nebo zvolit jinou větev.
+Modul guardrails je vrstva middleware s podporou horkého znovunačtení, která kontroluje
+požadavky a odpovědi na PII, prompt injection a nebezpečný obrazový obsah. Porušení
+okamžitě ukončí požadavek s HTTP **503** a strukturovaným kódem chyby, což následným
+volajícím umožňuje požadavek zopakovat nebo se rozvětvit.
 
 - Kořen modulu: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
   `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Opětovné načítání za běhu: registr sleduje změny konfigurace a na místě znovu sestavuje řetězec
-- Body zapojení: vstup obslužné rutiny chatu, obslužná rutina generování obrázků, sanitizátor odpovědí
-- Kontrakt HTTP: porušení se projeví jako `503` s `error.code = "GUARDRAIL_VIOLATION"`
+- Horké znovunačtení: registr sleduje změny konfigurace a přestavuje řetězec za běhu
+- Body zapojení: vstup obsluhy chatu, obsluha generování obrázků, sanitizer odpovědí
+- HTTP kontrakt: porušení se projeví jako `503` s `error.code = "GUARDRAIL_VIOLATION"`
 
-Informace o vytváření sad pravidel a ladění prahových hodnot naleznete v
+Tvorbu sad pravidel a ladění prahových hodnot viz
 [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Doménová vrstva
 
-Jmenný prostor `src/domain/` centralizuje rozhodování o zásadách, aby obslužné rutiny tras nemusely
-samy sestavovat logiku blokování, rozpočtu a záložních variant.
+Jmenný prostor `src/domain/` obsahuje doménové služby a rezervované vyhodnocovací kontrakty.
+Není jediným povinným vstupním bodem politiky, jímž by procházel každý požadavek.
 
-- Modul zásad: `src/domain/policyEngine.ts` — jediný vstupní bod pro
-  vyhodnocení před spuštěním (pořadí: blokování → rozpočet → záložní varianta)
-- Pravidla nákladů: `src/domain/costRules.ts`
-- Zásady záložních variant: `src/domain/fallbackPolicy.ts`
-- Zásady blokování: `src/domain/lockoutPolicy.ts`
-- Směrování založené na značkách: `src/domain/tagRouter.ts`
-- Resolver komb: `src/domain/comboResolver.ts` — převádí názvy komb, prefixy auto/\*
-  a cíle modelů se zástupnými znaky na konkrétní plány spuštění
-- Propojovač pravidel připojení/modelů: `src/domain/connectionModelRules.ts`
+Živá cesta chatu volá `enforceApiKeyPolicy()` z
+`src/shared/utils/apiKeyPolicy.ts`; autorizace vyřešených modelů a členů komba
+je implementována v `src/sse/handlers/chat/resolvedModelPolicy.ts`. Vstupní bod pro
+self-hosted nasazení v `src/app/api/v1/chat/completions/route.ts` rovněž vynucuje
+politiku API klíčů před předáním požadavku. Řešení komb probíhá přes
+`open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` a `src/lib/container.ts`
+zůstávají testovanými kontrakty, nikoli zapojením této cesty požadavku. Kontejner
+engine politiky registruje, ale zkoumaná produkční cesta požadavku jej neresolvuje.
+Samotná změna těchto kontraktů nemění živou politiku chatu ani směrování komb;
+jejich zapojení či odebrání vyžaduje samostatné návrhové rozhodnutí.
+
+- Rezervovaný engine politiky: `src/domain/policyEngine.ts` — vyhodnocení lockout → budget → fallback
+- Cenová pravidla: `src/domain/costRules.ts`
+- Politika fallbacku: `src/domain/fallbackPolicy.ts`
+- Politika uzamčení: `src/domain/lockoutPolicy.ts`
+- Směrování podle tagů: `src/domain/tagRouter.ts`
+- Rezervovaný resolver komb: `src/domain/comboResolver.ts` — samostatný kontrakt výběru; živé směrování komb je implementováno v `open-sse/services/combo.ts`
+- Spojovač pravidel připojení/modelů: `src/domain/connectionModelRules.ts`
 - Snímky dostupnosti modelů: `src/domain/modelAvailability.ts`
-- Sledování vypršení platnosti poskytovatelů: `src/domain/providerExpiration.ts`
+- Sledování expirace poskytovatelů: `src/domain/providerExpiration.ts`
 - Mezipaměť kvót: `src/domain/quotaCache.ts`
 - Stav degradace: `src/domain/degradation.ts`
 - Audit konfigurace: `src/domain/configAudit.ts`
-- Generátor metadat odpovědi OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- Subsystém vyhodnocování: `src/domain/assessment/` — úlohy pravidelného vyhodnocování
+- Tvůrce metadat odpovědí OmniRoute: `src/domain/omnirouteResponseMeta.ts`
+- Subsystém hodnocení: `src/domain/assessment/` — periodické vyhodnocovací úlohy
 
 ### E. Autorizační pipeline
 
 Autorizační pipeline klasifikuje každý příchozí požadavek a před jeho předáním
-aplikuje příslušný řetězec zásad.
+použije příslušný řetězec politik.
 
 - Vstupní bod pipeline: `src/server/authz/pipeline.ts`
 - Klasifikátor požadavků: `src/server/authz/classify.ts` — rozlišuje veřejné
-  trasy kompatibility od tras pro správu
-- Seznam veřejných tras: `src/shared/constants/publicApiRoutes.ts`
-- Zásady: `src/server/authz/policies/` — skládací predikáty
+  kompatibilní routy od rout pro správu
+- Inventář veřejných rout: `src/shared/constants/publicApiRoutes.ts`
+- Zásady: `src/server/authz/policies/` — komponovatelné predikáty
   (`requireApiKey`, `requireManagement`, `requireFreshAuth` atd.)
-- Nástroje pro hlavičky: `src/server/authz/headers.ts`
-- Pomocná funkce pro ověření: `src/server/authz/assertAuth.ts`
+- Pomocné nástroje pro hlavičky: `src/server/authz/headers.ts`
+- Pomocník pro aserce: `src/server/authz/assertAuth.ts`
 - Kontext požadavku: `src/server/authz/context.ts`
 
-Veřejné trasy a trasy pro správu jsou striktně odděleny: API agentů/cooldown a
-změny poskytovatelů vyžadují autentizaci pro správu (pokud chybí, HTTP 401).
+Veřejné routy a routy pro správu tvoří pevnou hranici: API agent/cooldown a
+mutace poskytovatelů vyžadují autentizaci pro správu (pokud chybí, HTTP 401).
 
-Úplná pravidla klasifikace tras naleznete v
+Úplná pravidla klasifikace rout najdete v
 [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. FSM pracovního postupu a router zohledňující úlohy
+### F. FSM workflow a router s rozpoznáváním úloh
 
-Router řízený konečným stavovým automatem, umístěný nad výběrem komba, který směruje
-provoz na základě rozpoznané fáze pracovního postupu (plánování, provádění,
-kontrola) a afinity k úlohám na pozadí.
+Router řízený konečným automatem, navrstvený nad výběr combo, který směruje
+provoz podle detekované fáze workflow (plánování, provádění, revize) a afinitu
+k úlohám na pozadí.
 
-- FSM pracovního postupu: `open-sse/services/workflowFSM.ts`
-- Směrovač zohledňující úlohy: `open-sse/services/taskAwareRouter.ts`
+- FSM workflow: `open-sse/services/workflowFSM.ts`
+- Router s rozpoznáváním úloh: `open-sse/services/taskAwareRouter.ts`
 - Detektor úloh na pozadí: `open-sse/services/backgroundTaskDetector.ts`
 - Klasifikátor záměru: `open-sse/services/intentClassifier.ts`
 
-Přechody FSM vstupují do hodnocení funkce Auto Combo, která upřednostňuje levnější modely
-pro úlohy na pozadí a automatizační úlohy a výkonnější modely pro interaktivní
-kroky plánování a kontroly.
+Přechody FSM vstupují do skórování Auto Combo a naklánějí jej k levnějším
+modelům pro úlohy na pozadí/automatizaci a k silnějším modelům pro interaktivní
+tahy plánování/revize.
 
-### G. Odolnost specifická pro poskytovatele
+### G. Odolnost specifická pro jednotlivé poskytovatele
 
-Několik poskytovatelů nabízí specializované moduly odolnosti a utajení, které využívají
-globální vrstvy jističe, prodlevy připojení a blokování modelů:
+Někteří poskytovatelé dodávají vyhrazené moduly odolnosti a utajení, které se
+opírají o globální vrstvy circuit breaker / connection cooldown / model lockout:
 
-- Engine Antigravity 429: `open-sse/services/antigravity429Engine.ts` (střídá
-  identity, odstraňuje hlavičky odpovědí, řídí sledování kreditů/verzí prostřednictvím
+- Engine Antigravity 429: `open-sse/services/antigravity429Engine.ts` (rotuje
+  identitu, čistí hlavičky odpovědí, řídí sledování kreditů/verzí prostřednictvím
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- Zásady kvót ModelScope: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (navázání kompatibilního kanálu): `open-sse/services/claudeCodeCCH.ts`,
-  dále `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
+- Zásada kvót ModelScope: `open-sse/services/modelscopePolicy.ts`
+- Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
+  plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
   `claudeCodeToolRemapper.ts`
-- Formování otisku Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
+- Formování fingerprintu Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
 - Obfuskace Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
 
-Úplný přehled postupů utajení a provozní pokyny naleznete v souboru
-`docs/security/STEALTH_GUIDE.md` (git; nekompiluje se do `/docs`).
+Úplný stealth playbook a provozní pokyny najdete v
+`docs/security/STEALTH_GUIDE.md` (git; není zkompilováno do `/docs`).
 
-### H. Webhooky, mezipaměť uvažování, mezipaměť čtení
+### H. Webhooky, Reasoning Cache, Read Cache
 
-- **Webhooky** — odchozí odesílání událostí poskytovatelů, účtů a úloh.
+- **Webhooky** — odchozí odesílání událostí poskytovatelů/účtů/úloh.
   - Dispečer: `src/lib/webhookDispatcher.ts`
-  - Úložiště: tabulka SQLite `webhooks` (prostřednictvím `src/lib/db/webhooks.ts`)
-  - Řídicí panel: `/dashboard/webhooks` (odběry, tajné klíče, historie opakovaných pokusů)
-  - Taxonomii událostí a sémantiku opakovaných pokusů naleznete v dokumentu [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Mezipaměť uvažování** — opakovaně přehratelné bloky uvažování pro poskytovatele, kteří generují
-  tokeny přemýšlení (Claude, GLMT atd.), aby po sobě jdoucí kroky mohly přeskočit opakované uvažování.
+  - Úložiště: tabulka `webhooks` v SQLite (prostřednictvím `src/lib/db/webhooks.ts`)
+  - Nástěnka: `/dashboard/webhooks` (odběry, tajemství, historie opakování)
+  - Taxonomii událostí a sémantiku opakování najdete v [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Reasoning Cache** — znovu přehratelné bloky uvažování pro poskytovatele, kteří
+  vydávají thinking tokeny (Claude, GLMT atd.), takže po sobě jdoucí tahy mohou
+  přeskočit opakované uvažování.
   - Databázová vrstva: `src/lib/db/reasoningCache.ts`
-  - Vrstva služby: `open-sse/services/reasoningCache.ts`
-  - Sémantiku přehrávání naleznete v dokumentu [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Mezipaměť čtení** — krátkodobá mezipaměť odpovědí rozlišená podle signatury, která slouží ke
-  sloučení identických opakovaných pokusů z nefunkčních nadřazených SDK.
+  - Servisní vrstva: `open-sse/services/reasoningCache.ts`
+  - Sémantiku přehrávání najdete v [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Read Cache** — krátkodobá mezipaměť odpovědí klíčovaná podle podpisu, sloužící
+  ke sloučení identických opakovaných pokusů z vadných upstream SDK.
   - Databázová vrstva: `src/lib/db/readCache.ts`
-  - Koncový bod statistik: `GET /api/cache/stats`, řídicí panel na adrese `/dashboard/cache`
+  - Koncový bod statistik: `GET /api/cache/stats`, nástěnka na `/dashboard/cache`
 
 ## 3) Vrstva perzistence
 

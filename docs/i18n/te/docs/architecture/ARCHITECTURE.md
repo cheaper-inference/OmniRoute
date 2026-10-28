@@ -269,71 +269,71 @@ flowchart LR
 
 ## 2) SSE + అనువాద కోర్
 
-ప్రధాన ప్రవాహ మాడ్యూల్లు:
+ప్రధాన ఫ్లో మాడ్యూల్స్:
 
-- ప్రవేశం: `src/sse/handlers/chat.ts`
-- కోర్ సమన్వయం: `open-sse/handlers/chatCore.ts`
-- ప్రొవైడర్ అమలు అడాప్టర్లు: `open-sse/executors/*`
-- ఫార్మాట్ గుర్తింపు/ప్రొవైడర్ కాన్ఫిగరేషన్: `open-sse/services/provider.ts`
+- ఎంట్రీ: `src/sse/handlers/chat.ts`
+- కోర్ ఆర్కెస్ట్రేషన్: `open-sse/handlers/chatCore.ts`
+- ప్రొవైడర్ ఎక్జిక్యూషన్ అడాప్టర్లు: `open-sse/executors/*`
+- ఫార్మాట్ డిటెక్షన్/ప్రొవైడర్ కాన్ఫిగ్: `open-sse/services/provider.ts`
 - మోడల్ పార్స్/రిజాల్వ్: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- ఖాతా ఫాల్బ్యాక్ లాజిక్: `open-sse/services/accountFallback.ts`
+- అకౌంట్ ఫాల్బ్యాక్ లాజిక్: `open-sse/services/accountFallback.ts`
 - అనువాద రిజిస్ట్రీ: `open-sse/translator/index.ts`
-- స్ట్రీమ్ రూపాంతరాలు: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- వినియోగ సంగ్రహణ/సాధారణీకరణ: `open-sse/utils/usageTracking.ts`
+- స్ట్రీమ్ ట్రాన్స్ఫార్మేషన్లు: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- వినియోగ సేకరణ/నార్మలైజేషన్: `open-sse/utils/usageTracking.ts`
 - థింక్ ట్యాగ్ పార్సర్: `open-sse/utils/thinkTagParser.ts`
 - ఎంబెడింగ్ హ్యాండ్లర్: `open-sse/handlers/embeddings.ts`
 - ఎంబెడింగ్ ప్రొవైడర్ రిజిస్ట్రీ: `open-sse/config/embeddingRegistry.ts`
 - ఇమేజ్ జనరేషన్ హ్యాండ్లర్: `open-sse/handlers/imageGeneration.ts`
 - ఇమేజ్ ప్రొవైడర్ రిజిస్ట్రీ: `open-sse/config/imageRegistry.ts`
-- ప్రతిస్పందన శుద్ధీకరణ: `open-sse/handlers/responseSanitizer.ts`
-- పాత్ర సాధారణీకరణ: `open-sse/services/roleNormalizer.ts`
+- రెస్పాన్స్ శానిటైజేషన్: `open-sse/handlers/responseSanitizer.ts`
+- రోల్ నార్మలైజేషన్: `open-sse/services/roleNormalizer.ts`
 
-సర్వీసులు (వ్యాపార లాజిక్):
+సర్వీసులు (బిజినెస్ లాజిక్):
 
-- ఖాతా ఎంపిక/స్కోరింగ్: `open-sse/services/accountSelector.ts`
-- కాంటెక్స్ట్ జీవితచక్ర నిర్వహణ: `open-sse/services/contextManager.ts`
+- అకౌంట్ ఎంపిక/స్కోరింగ్: `open-sse/services/accountSelector.ts`
+- కాన్టెక్స్ట్ లైఫ్సైకిల్ నిర్వహణ: `open-sse/services/contextManager.ts`
 - IP ఫిల్టర్ అమలు: `open-sse/services/ipFilter.ts`
 - సెషన్ ట్రాకింగ్: `open-sse/services/sessionManager.ts`
-- అభ్యర్థన డీడూప్లికేషన్: `open-sse/services/signatureCache.ts`
+- రిక్వెస్ట్ డీడూప్లికేషన్: `open-sse/services/signatureCache.ts`
 - సిస్టమ్ ప్రాంప్ట్ ఇంజెక్షన్: `open-sse/services/systemPrompt.ts`
 - థింకింగ్ బడ్జెట్ నిర్వహణ: `open-sse/services/thinkingBudget.ts`
 - వైల్డ్కార్డ్ మోడల్ రూటింగ్: `open-sse/services/wildcardRouter.ts`
 - రేట్ లిమిట్ నిర్వహణ: `open-sse/services/rateLimitManager.ts`
 - సర్క్యూట్ బ్రేకర్: `src/shared/utils/circuitBreaker.ts`
-- కాంటెక్స్ట్ హ్యాండాఫ్: `open-sse/services/contextHandoff.ts` — కాంటెక్స్ట్-రిలే వ్యూహం కోసం హ్యాండాఫ్ సారాంశ సృష్టి మరియు ఇంజెక్షన్
-- కంప్రెషన్: `open-sse/services/compression/*` — ప్రొవైడర్ అనువాదానికి ముందు క్రియాశీల కంప్రెషన్;
-  Caveman నియమాలు, RTK ఫిల్టర్లు, స్టాక్డ్ పైప్లైన్లు, కంప్రెషన్ కాంబోలు, గణాంకాలు మరియు ధ్రువీకరణను కలిగి ఉంటుంది
-- Codex కోటా ఫెచర్: `open-sse/services/codexQuotaFetcher.ts` — కాంటెక్స్ట్-రిలే హ్యాండాఫ్ నిర్ణయాల కోసం Codex కోటాను పొందుతుంది
-- కూల్డౌన్-అవేర్ రీట్రై: `src/sse/services/cooldownAwareRetry.ts` — కాన్ఫిగర్ చేయగల `requestRetry` / `maxRetryIntervalSec`తో ప్రతి మోడల్కు కూల్డౌన్ రీట్రైలు
-- సురక్షిత అవుట్బౌండ్ ఫెచ్: `src/shared/network/safeOutboundFetch.ts` — SSRF రక్షణ, ప్రైవేట్-URL నిరోధం, రీట్రై మరియు టైమ్అవుట్తో సంరక్షిత ప్రొవైడర్/మోడల్ ఫెచ్
-- అవుట్బౌండ్ URL రక్షణ: `src/shared/network/outboundUrlGuard.ts` — ప్రొవైడర్ URLలపై హోస్ట్ తనిఖీలు; `src/shared/network/outboundUrlGuardPolicy.ts`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` మరియు వాటి డ్యాష్బోర్డ్ టాగిళ్ల నుంచి మోడ్ను ఎంచుకుంటుంది (`docs/reference/ENVIRONMENT.md` చూడండి)
-- ప్రొవైడర్ అభ్యర్థన డిఫాల్ట్లు: `open-sse/services/providerRequestDefaults.ts` — ప్రొవైడర్-స్థాయి `maxTokens`, `temperature`, `thinkingBudgetTokens` డిఫాల్ట్లు
-- GLM ప్రొవైడర్ స్థిరాంకాలు: `open-sse/config/glmProvider.ts` — భాగస్వామ్య GLM మోడల్లు, కోటా URLలు, GLMT టైమ్అవుట్/డిఫాల్ట్లు
+- కాన్టెక్స్ట్ హ్యాండాఫ్: `open-sse/services/contextHandoff.ts` — కాన్టెక్స్ట్-రిలే వ్యూహం కోసం హ్యాండాఫ్ సారాంశ జనరేషన్ మరియు ఇంజెక్షన్
+- కంప్రెషన్: `open-sse/services/compression/*` — ప్రొవైడర్ అనువాదానికి ముందు ప్రోయాక్టివ్ కంప్రెషన్;
+  Caveman నియమాలు, RTK ఫిల్టర్లు, స్టాక్డ్ పైప్లైన్లు, కంప్రెషన్ కాంబోలు, గణాంకాలు మరియు వాలిడేషన్ను కలిగి ఉంటుంది
+- Codex కోటా ఫెచర్: `open-sse/services/codexQuotaFetcher.ts` — కాన్టెక్స్ట్-రిలే హ్యాండాఫ్ నిర్ణయాల కోసం Codex కోటాను ఫెచ్ చేస్తుంది
+- కూల్డౌన్-అవేర్ రీట్రై: `src/sse/services/cooldownAwareRetry.ts` — కాన్ఫిగరబుల్ `requestRetry` / `maxRetryIntervalSec` తో ప్రతి-మోడల్ కూల్డౌన్ రీట్రైలు
+- సురక్షిత అవుట్బౌండ్ ఫెచ్: `src/shared/network/safeOutboundFetch.ts` — SSRF గార్డ్, ప్రైవేట్-URL బ్లాకింగ్, రీట్రై మరియు టైమ్అవుట్తో రక్షిత ప్రొవైడర్/మోడల్ ఫెచ్
+- అవుట్బౌండ్ URL గార్డ్: `src/shared/network/outboundUrlGuard.ts` — ప్రొవైడర్ URLలపై హోస్ట్ తనిఖీలు; `src/shared/network/outboundUrlGuardPolicy.ts` `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` మరియు వాటి డాష్బోర్డ్ టోగుల్స్ నుండి మోడ్ను ఎంచుకుంటుంది (చూడండి `docs/reference/ENVIRONMENT.md`)
+- ప్రొవైడర్ రిక్వెస్ట్ డిఫాల్ట్లు: `open-sse/services/providerRequestDefaults.ts` — ప్రొవైడర్-స్థాయి `maxTokens`, `temperature`, `thinkingBudgetTokens` డిఫాల్ట్లు
+- GLM ప్రొవైడర్ స్థిరాంకాలు: `open-sse/config/glmProvider.ts` — భాగస్వామ్య GLM మోడళ్లు, కోటా URLలు, GLMT టైమ్అవుట్/డిఫాల్ట్లు
 - Antigravity అప్స్ట్రీమ్: `open-sse/config/antigravityUpstream.ts` — బేస్ URL మరియు డిస్కవరీ పాత్ స్థిరాంకాలు
-- Codex క్లయింట్ స్థిరాంకాలు: `open-sse/config/codexClient.ts` — వెర్షన్ చేయబడిన యూజర్-ఏజెంట్ మరియు క్లయింట్-వెర్షన్ విలువలు
-- మోడల్ అలియాస్ సీడ్: `src/lib/modelAliasSeed.ts` — ప్రారంభ సమయంలో 30+ క్రాస్-ప్రాక్సీ డయలెక్ట్ అలియాస్లను సీడ్ చేస్తుంది
+- Codex క్లయింట్ స్థిరాంకాలు: `open-sse/config/codexClient.ts` — వెర్షన్ చేసిన యూజర్-ఏజెంట్ మరియు క్లయింట్-వెర్షన్ విలువలు
+- మోడల్ అలియాస్ సీడ్: `src/lib/modelAliasSeed.ts` — స్టార్టప్ వద్ద 30+ క్రాస్-ప్రాక్సీ డైలెక్ట్ అలియాస్లను సీడ్ చేస్తుంది
 
-డొమైన్ లేయర్ మాడ్యూల్లు:
+డొమైన్ లేయర్ మాడ్యూల్స్:
 
 - ఖర్చు నియమాలు/బడ్జెట్లు: `src/domain/costRules.ts`
-- ఫాల్బ్యాక్ విధానం: `src/domain/fallbackPolicy.ts`
-- కాంబో రిజాల్వర్: `src/domain/comboResolver.ts`
-- లాకౌట్ విధానం: `src/domain/lockoutPolicy.ts`
-- విధాన ఇంజిన్: `src/domain/policyEngine.ts` — కేంద్రీకృత లాకౌట్ → బడ్జెట్ → ఫాల్బ్యాక్ మూల్యాంకనం
-- ఎర్రర్ కోడ్ల కేటలాగ్: `src/shared/constants/errorCodes.ts`
-- అభ్యర్థన ID: `src/shared/utils/requestId.ts`
+- ఫాల్బ్యాక్ పాలసీ: `src/domain/fallbackPolicy.ts`
+- రిజర్వ్ చేసిన కాంబో-రిజల్యూషన్ కాంట్రాక్ట్: `src/domain/comboResolver.ts`; లైవ్ రూటింగ్ `open-sse/services/combo.ts` ఉపయోగిస్తుంది
+- లాక్అవుట్ పాలసీ: `src/domain/lockoutPolicy.ts`
+- రిజర్వ్ చేసిన పాలసీ-మూల్యాంకన కాంట్రాక్ట్: `src/domain/policyEngine.ts`; రిక్వెస్ట్ పాత్ `src/shared/utils/apiKeyPolicy.ts` ద్వారా API-key పాలసీని మరియు `src/sse/handlers/chat/resolvedModelPolicy.ts` ద్వారా రిజాల్వ్డ్-టార్గెట్ అథరైజేషన్ను అమలు చేస్తుంది
+- ఎర్రర్ కోడ్స్ క్యాటలాగ్: `src/shared/constants/errorCodes.ts`
+- రిక్వెస్ట్ ID: `src/shared/utils/requestId.ts`
 - ఫెచ్ టైమ్అవుట్: `src/shared/utils/fetchTimeout.ts`
-- అభ్యర్థన టెలిమెట్రీ: `src/shared/utils/requestTelemetry.ts`
-- అనుసరణ/ఆడిట్: `src/lib/compliance/index.ts`
-- మూల్యాంకన రన్నర్: `src/lib/evals/evalRunner.ts`
-- డొమైన్ స్థితి నిల్వ: `src/lib/db/domainState.ts` — ఫాల్బ్యాక్ చైన్లు, బడ్జెట్లు, ఖర్చు చరిత్ర, లాకౌట్ స్థితి, సర్క్యూట్ బ్రేకర్ల కోసం SQLite CRUD
+- రిక్వెస్ట్ టెలిమెట్రీ: `src/shared/utils/requestTelemetry.ts`
+- కంప్లయన్స్/ఆడిట్: `src/lib/compliance/index.ts`
+- ఎవాల్ రన్నర్: `src/lib/evals/evalRunner.ts`
+- డొమైన్ స్టేట్ పెర్సిస్టెన్స్: `src/lib/db/domainState.ts` — ఫాల్బ్యాక్ చైన్లు, బడ్జెట్లు, ఖర్చు చరిత్ర, లాక్అవుట్ స్టేట్, సర్క్యూట్ బ్రేకర్ల కోసం SQLite CRUD
 
-OAuth ప్రొవైడర్ మాడ్యూల్లు (`src/lib/oauth/providers/` కింద 27 వ్యక్తిగత ఫైల్లు):
+OAuth ప్రొవైడర్ మాడ్యూల్స్ (`src/lib/oauth/providers/` కింద 27 వ్యక్తిగత ఫైళ్లు):
 
 - రిజిస్ట్రీ ఇండెక్స్: `src/lib/oauth/providers/index.ts`
 - వ్యక్తిగత ప్రొవైడర్లు: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- భాగస్వామ్య సహాయకాలు: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl పరికర ప్రవాహం), `museCodeDeviceResponse.ts`
-- తేలికపాటి ర్యాపర్: `src/lib/oauth/providers.ts` — వ్యక్తిగత మాడ్యూల్ల నుంచి తిరిగి ఎగుమతి చేస్తుంది
+- భాగస్వామ్య హెల్పర్లు: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl డివైస్ ఫ్లో), `museCodeDeviceResponse.ts`
+- థిన్ ర్యాపర్: `src/lib/oauth/providers.ts` — వ్యక్తిగత మాడ్యూల్స్ నుండి రీ-ఎక్స్పోర్ట్ చేస్తుంది
 
 ## 5) ఎంబెడెడ్ సేవలు (v3.8.4)
 
@@ -357,156 +357,181 @@ OmniRoute స్థానికంగా నడుస్తున్న AI స�
 
 లోతైన వివరణ: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## ప్రధాన ఉపవ్యవస్థలు (v3.8.0)
+## ప్రధాన సబ్సిస్టమ్లు (v3.8.0)
 
 ### A. ఆటో కాంబో ఇంజిన్
 
-Auto Combo స్థిరమైన కాంబో నిర్వచనంపై ఆధారపడకుండా, అభ్యర్థన సమయంలో రూటింగ్ లక్ష్యాలకు డైనమిక్గా స్కోర్ ఇచ్చి వాటిని ఎంచుకుంటుంది. ఇది `auto/*` మోడల్ ప్రిఫిక్స్ కుటుంబానికి శక్తినిస్తుంది.
+ఆటో కాంబో, స్టాటిక్ కాంబో నిర్వచనంపై ఆధారపడటానికి బదులుగా, అభ్యర్థన సమయంలో రూటింగ్ లక్ష్యాలను డైనమిక్గా స్కోర్ చేసి ఎంపిక చేస్తుంది. ఇది `auto/*` మోడల్ ప్రిఫిక్స్ కుటుంబానికి శక్తినిస్తుంది.
 
-- ఇంజిన్ ప్రవేశ స్థానం: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
+- ఇంజిన్ ఎంట్రీ: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- రిజాల్వర్: `src/domain/comboResolver.ts` (`auto/` ప్రిఫిక్స్ను స్వయంచాలకంగా గుర్తించడం)
+- లైవ్ కాంబో ఎంట్రీ: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), `src/sse/handlers/chat.ts` ద్వారా కాల్ చేయబడుతుంది
 - డ్యాష్బోర్డ్: `/dashboard/auto-combo`
-- టెలిమెట్రీ: `auto_combo_decisions` SQLite పట్టిక
+- టెలిమెట్రీ: `auto_combo_decisions` SQLite టేబుల్
 
 ప్రధాన సామర్థ్యాలు:
 
-- **20 రూటింగ్ వ్యూహాలు** (ప్రాధాన్యత, వెయిటెడ్, ముందుగా నింపడం, రౌండ్-రాబిన్, P2C, యాదృచ్ఛికం,
-  అతి తక్కువగా ఉపయోగించినది, ఖర్చు-ఆప్టిమైజ్డ్, రీసెట్-అవేర్, రీసెట్-విండో, హెడ్రూమ్, కోటా-వెయిటెడ్,
-  కఠిన-యాదృచ్ఛికం, **auto**, lkgp, కాంటెక్స్ట్-ఆప్టిమైజ్డ్, క్యాష్-ఆప్టిమైజ్డ్, కాంటెక్స్ట్-రిలే, **fusion**,
-  పైప్లైన్) —
-  v3.8.0లో auto ప్రధానంగా చేర్చబడింది; `fusion` (ప్యానెల్ ఫ్యాన్-అవుట్ + జడ్జ్ సింథసిస్,
+- **20 రూటింగ్ వ్యూహాలు** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
+  pipeline) —
+  auto అనేది v3.8.0లో ప్రధానంగా జోడించబడినది; `fusion` (ప్యానెల్ ఫ్యాన్-అవుట్ + జడ్జ్ సింథసిస్,
   `open-sse/services/fusion.ts`) v3.8.36లో కొత్తది.
-- **16-కారకాల స్కోరింగ్**: కోటా, హెల్త్, విలోమ ఖర్చు, విలోమ లేటెన్సీ, టాస్క్ ఫిట్ మరియు
-  మరో పది. కారకాలు, వాటి డిఫాల్ట్ వెయిట్ల ప్రామాణిక పట్టిక
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)లో ఉంది — దానిని ఇక్కడ మళ్లీ పేర్కొంటే,
-  పాతబడిపోయే అవకాశం ఉన్న రెండో స్థానం ఏర్పడుతుంది.
-- **వర్చువల్ ఫ్యాక్టరీ** సరిపోలే పేరుగల కాంబో ఏదీ లేనప్పుడు, ఆరోగ్యకరమైన యాక్టివ్ ప్రొవైడర్ కనెక్షన్ల నుండి
-  అభ్యర్థులను తీసుకొని తాత్కాలిక కాంబోలను సృష్టిస్తుంది.
+- **16-ఫ్యాక్టర్ స్కోరింగ్**: కోటా, హెల్త్, ఇన్వర్స్ కాస్ట్, ఇన్వర్స్ లేటెన్సీ, టాస్క్ ఫిట్
+  మరియు మరో పది. ఫ్యాక్టర్లు మరియు వాటి డిఫాల్ట్ వెయిట్ల అధికారిక పట్టిక
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)లో ఉంది — దాన్ని ఇక్కడ మళ్లీ
+  పేర్కొనడం వల్ల అది పాతబడిపోయే రెండో చోటు ఏర్పడుతుంది.
+- **వర్చువల్ ఫ్యాక్టరీ**: సరిపోయే పేరుగల కాంబో లేనప్పుడు, ఆరోగ్యకరమైన యాక్టివ్ ప్రొవైడర్
+  కనెక్షన్ల నుండి అభ్యర్థులను సేకరించి తాత్కాలిక కాంబోలను రూపొందిస్తుంది.
 - **ఆటో ప్రిఫిక్స్లు**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — ప్రతి ఒక్కదానికి ప్రత్యేకంగా ట్యూన్ చేసిన వెయిట్ ప్రొఫైల్ మద్దతుగా ఉంటుంది.
+  `auto/smart`, `auto/lkgp` — ప్రతి ఒక్కటి ట్యూన్ చేసిన వెయిట్ ప్రొఫైల్తో మద్దతు పొందుతుంది.
 - **6 మోడ్ ప్యాక్లు**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` మరియు `chaos-mode` — డ్యాష్బోర్డ్ నుండి ఉపయోగించగల ప్రీసెట్ వెయిట్ కాన్ఫిగరేషన్లు.
-  (వీటిని పైన ఉన్న `auto/*` ప్రిఫిక్స్లతో గందరగోళపరచవద్దు; అవి అభ్యర్థన-సమయ వేరియంట్లు.)
+  `reliability-first` మరియు `chaos-mode` — డ్యాష్బోర్డ్ నుండి కాల్ చేయగల ప్రీసెట్ వెయిట్
+  కాన్ఫిగరేషన్లు. (పైన ఉన్న `auto/*` ప్రిఫిక్స్లతో గందరగోళం పడవద్దు; అవి
+  అభ్యర్థన-సమయ వేరియంట్లు.)
 
-పూర్తి అల్గోరిథమిక్ వివరాల కోసం (కారకాల ఫార్ములాలు, వెయిట్ ట్యూనింగ్),
+పూర్తి అల్గారిథమిక్ వివరాల కోసం (ఫ్యాక్టర్ ఫార్ములాలు, వెయిట్ ట్యూనింగ్),
 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) చూడండి.
 
 ### B. క్లౌడ్ ఏజెంట్లు
 
-Cloud Agents అనేది మూడవ-పక్ష హోస్ట్ చేసిన కోడ్-ఏజెంట్ ప్లాట్ఫారమ్లను (Codex Cloud, Devin,
-Jules) ఏకరీతి DB-ఆధారిత టాస్క్ లైఫ్సైకిల్ వెనుక ర్యాప్ చేస్తుంది. అన్ని టాస్క్ సృష్టి/పరిశీలన
-ఎండ్పాయింట్లకు మేనేజ్మెంట్ ఆథెంటికేషన్ అవసరం.
+క్లౌడ్ ఏజెంట్స్, మూడవ-పక్ష హోస్ట్ చేసిన కోడ్-ఏజెంట్ ప్లాట్ఫారమ్లను (Codex Cloud, Devin,
+Jules) ఏకరీతి DB-ఆధారిట టాస్క్ జీవితచక్రం వెనుక చుట్టుతుంది. అన్ని టాస్క్ సృష్టి/పరిశీలన
+ఎండ్పాయింట్లకు నిర్వహణ ప్రామాణీకరణ అవసరం.
 
 - మాడ్యూల్ రూట్: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, అలాగే `agents/` కింద ఒక్కో ఏజెంట్కు సంబంధించిన సబ్డైరెక్టరీలు)
-- ఒక్కో ఏజెంట్కు సంబంధించిన అమలులు: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- పబ్లిక్ ఎండ్పాయింట్లు: `/api/v1/agents/tasks/*` (జాబితా/సృష్టించడం/పొందడం/రద్దు చేయడం)
-- మేనేజ్మెంట్ ఎండ్పాయింట్లు: `/api/cloud/*` (ప్రొవిజనింగ్, స్థితి, బ్యాచ్)
+  `types.ts`, `db.ts`, అలాగే `agents/` కింద ఏజెంట్-వారీ సబ్డైరెక్టరీలు)
+- ఏజెంట్-వారీ అమలులు: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- పబ్లిక్ ఎండ్పాయింట్లు: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- నిర్వహణ ఎండ్పాయింట్లు: `/api/cloud/*` (provisioning, status, batch)
 - డ్యాష్బోర్డ్: `/dashboard/cloud-agents`
-- నిల్వ: `cloud_agent_tasks` పట్టిక
+- నిల్వ: `cloud_agent_tasks` టేబుల్
 
-ఒక్కో ఏజెంట్కు సంబంధించిన ప్రొవిజనింగ్ మరియు OAuth ప్రత్యేకతల కోసం,
+ఏజెంట్-వారీ ప్రొవిజనింగ్ మరియు OAuth వివరాల కోసం,
 [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) చూడండి.
 
 ### C. గార్డ్రైల్స్
 
-గార్డ్రైల్స్ మాడ్యూల్ అనేది PII, ప్రాంప్ట్ ఇంజెక్షన్ మరియు అసురక్షిత విజన్ కంటెంట్ కోసం అభ్యర్థనలు,
-ప్రతిస్పందనలను పరిశీలించే హాట్-రీలోడ్ చేయగల మిడిల్వేర్ లేయర్. ఉల్లంఘనలు HTTP **503**తో పాటు
-నిర్మిత ఎరర్ కోడ్ను అందించి అభ్యర్థనను వెంటనే నిలిపివేస్తాయి; తద్వారా డౌన్స్ట్రీమ్ కాలర్లు
-మళ్లీ ప్రయత్నించవచ్చు లేదా వేరే బ్రాంచ్ను ఎంచుకోవచ్చు.
+గార్డ్రైల్స్ మాడ్యూల్ అనేది PII, ప్రాంప్ట్ ఇంజెక్షన్ మరియు అసురక్షిత విజన్ కంటెంట్ కోసం
+అభ్యర్థనలు మరియు ప్రతిస్పందనలను పరిశీలించే హాట్-రీలోడబుల్ మిడిల్వేర్ లేయర్. ఉల్లంఘనలు
+HTTP **503** ప్లస్ నిర్మాణాత్మక ఎర్రర్ కోడ్తో అభ్యర్థనను షార్ట్-సర్క్యూట్ చేస్తాయి, దాంతో
+డౌన్స్ట్రీమ్ కాలర్లు మళ్లీ ప్రయత్నించడం లేదా బ్రాంచ్ చేయడం సాధ్యమవుతుంది.
 
 - మాడ్యూల్ రూట్: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
   `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- హాట్ రీలోడ్: రిజిస్ట్రీ కాన్ఫిగరేషన్ మార్పులను గమనించి, అదే స్థానంలో చైన్ను పునర్నిర్మిస్తుంది
-- అనుసంధాన బిందువులు: చాట్ హ్యాండ్లర్ ప్రవేశ స్థానం, ఇమేజ్ జనరేషన్ హ్యాండ్లర్, రెస్పాన్స్ శానిటైజర్
-- HTTP ఒప్పందం: ఉల్లంఘనలు `error.code = "GUARDRAIL_VIOLATION"`తో `503`గా కనిపిస్తాయి
+- హాట్ రీలోడ్: రిజిస్ట్రీ కాన్ఫిగ్ మార్పులను గమనించి, చైన్ను అక్కడే తిరిగి నిర్మిస్తుంది
+- వైర్-ఇన్ పాయింట్లు: చాట్ హ్యాండ్లర్ ఎంట్రీ, ఇమేజ్ జనరేషన్ హ్యాండ్లర్, రెస్పాన్స్ శానిటైజర్
+- HTTP కాంట్రాక్ట్: ఉల్లంఘనలు `error.code = "GUARDRAIL_VIOLATION"`తో `503`గా బయటపడతాయి
 
 రూల్సెట్ రచన మరియు థ్రెషోల్డ్ ట్యూనింగ్ కోసం,
 [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) చూడండి.
 
 ### D. డొమైన్ లేయర్
 
-`src/domain/` నేమ్స్పేస్ పాలసీ నిర్ణయాలను కేంద్రీకరిస్తుంది, తద్వారా రూట్ హ్యాండ్లర్లు
-లాకౌట్/బడ్జెట్/ఫాల్బ్యాక్ లాజిక్ను స్వయంగా సమీకరించాల్సిన అవసరం ఉండదు.
+`src/domain/` నేమ్స్పేస్ డొమైన్ సర్వీస్లు మరియు రిజర్వ్ చేసిన ఎవాల్యుయేషన్
+కాంట్రాక్ట్లను కలిగి ఉంటుంది. ఇది ప్రతి అభ్యర్థనకు ఒక తప్పనిసరి పాలసీ ఎంట్రీ పాయింట్ కాదు.
 
-- పాలసీ ఇంజిన్: `src/domain/policyEngine.ts` — అమలుకు ముందస్తు మూల్యాంకనానికి ఏకైక ప్రవేశ స్థానం
-  (లాకౌట్ → బడ్జెట్ → ఫాల్బ్యాక్ క్రమం)
-- ఖర్చు నియమాలు: `src/domain/costRules.ts`
+లైవ్ చాట్ పాత్ `src/shared/utils/apiKeyPolicy.ts` నుండి `enforceApiKeyPolicy()`ని కాల్
+చేస్తుంది; రిజాల్వ్ చేసిన మోడళ్లు మరియు కాంబో సభ్యుల అథారైజేషన్
+`src/sse/handlers/chat/resolvedModelPolicy.ts`లో అమలు చేయబడింది.
+`src/app/api/v1/chat/completions/route.ts`లోని సెల్ఫ్-హోస్టెడ్ ఎంట్రీ కూడా డిస్ప్యాచ్ ముందు
+API-కీ పాలసీని అమలు చేస్తుంది. కాంబో రిజల్యూషన్ `open-sse/services/combo.ts` ద్వారా
+నడుస్తుంది.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` మరియు `src/lib/container.ts`
+పరీక్షించబడిన కాంట్రాక్ట్లుగా ఉంటాయి, ఆ అభ్యర్థన పాత్ యొక్క వైరింగ్ కావు. కంటైనర్ పాలసీ
+ఇంజిన్ను రిజిస్టర్ చేస్తుంది, కానీ పరిశీలించిన ప్రొడక్షన్ అభ్యర్థన పాత్ దాన్ని రిజాల్వ్
+చేయదు. ఆ కాంట్రాక్ట్లను మాత్రమే మార్చడం లైవ్ చాట్ పాలసీ లేదా కాంబో రూటింగ్ను మార్చదు;
+వాటిని కనెక్ట్ చేయడం లేదా తొలగించడానికి ప్రత్యేక డిజైన్ నిర్ణయం అవసరం.
+
+- రిజర్వ్ చేసిన పాలసీ ఇంజిన్: `src/domain/policyEngine.ts` — లాక్అవుట్ → బడ్జెట్ → ఫాల్బ్యాక్ ఎవాల్యుయేషన్
+- కాస్ట్ రూల్స్: `src/domain/costRules.ts`
 - ఫాల్బ్యాక్ పాలసీ: `src/domain/fallbackPolicy.ts`
-- లాకౌట్ పాలసీ: `src/domain/lockoutPolicy.ts`
+- లాక్అవుట్ పాలసీ: `src/domain/lockoutPolicy.ts`
 - ట్యాగ్-ఆధారిత రూటింగ్: `src/domain/tagRouter.ts`
-- కాంబో రిజాల్వర్: `src/domain/comboResolver.ts` — కాంబో పేర్లు, auto/\*
-  ప్రిఫిక్స్లు మరియు వైల్డ్కార్డ్ మోడల్ లక్ష్యాలను నిర్దిష్ట అమలు ప్రణాళికలుగా పరిష్కరిస్తుంది
-- కనెక్షన్/మోడల్ నియమాల జాయినర్: `src/domain/connectionModelRules.ts`
-- మోడల్ లభ్యత స్నాప్షాట్లు: `src/domain/modelAvailability.ts`
+- రిజర్వ్ చేసిన కాంబో రిజాల్వర్: `src/domain/comboResolver.ts` — స్టాండ్అలోన్ సెలెక్షన్ కాంట్రాక్ట్; లైవ్ కాంబో రూటింగ్ `open-sse/services/combo.ts`లో అమలు చేయబడింది
+- కనెక్షన్/మోడల్ రూల్ జాయినర్: `src/domain/connectionModelRules.ts`
+- మోడల్ అందుబాటు స్నాప్షాట్లు: `src/domain/modelAvailability.ts`
 - ప్రొవైడర్ గడువు ట్రాకింగ్: `src/domain/providerExpiration.ts`
-- కోటా క్యాష్: `src/domain/quotaCache.ts`
-- డీగ్రడేషన్ స్థితి: `src/domain/degradation.ts`
+- కోటా కాషే: `src/domain/quotaCache.ts`
+- డిగ్రడేషన్ స్టేట్: `src/domain/degradation.ts`
 - కాన్ఫిగరేషన్ ఆడిట్: `src/domain/configAudit.ts`
 - OmniRoute రెస్పాన్స్ మెటాడేటా బిల్డర్: `src/domain/omnirouteResponseMeta.ts`
-- అసెస్మెంట్ ఉపవ్యవస్థ: `src/domain/assessment/` — కాలానుగుణ మూల్యాంకన జాబ్లు
+- అసెస్మెంట్ సబ్సిస్టమ్: `src/domain/assessment/` — ఆవర్తన ఎవాల్యుయేషన్ జాబ్లు
 
-### E. ఆథరైజేషన్ పైప్లైన్
+### E. అథారైజేషన్ పైప్లైన్
 
-ఆథరైజేషన్ పైప్లైన్ ప్రతి ఇన్కమింగ్ అభ్యర్థనను వర్గీకరించి, డిస్పాచ్ చేయడానికి ముందు
+అథారైజేషన్ పైప్లైన్ ప్రతి ఇన్కమింగ్ అభ్యర్థనను వర్గీకరించి, డిస్ప్యాచ్ ముందు
 తగిన పాలసీ చైన్ను వర్తింపజేస్తుంది.
 
-- పైప్లైన్ ప్రవేశ స్థానం: `src/server/authz/pipeline.ts`
-- అభ్యర్థన వర్గీకరణ: `src/server/authz/classify.ts` — పబ్లిక్ కంపాటిబిలిటీ రూట్లను
-  మేనేజ్మెంట్ రూట్ల నుండి వేరు చేస్తుంది
-- పబ్లిక్ రూట్ జాబితా: `src/shared/constants/publicApiRoutes.ts`
-- పాలసీలు: `src/server/authz/policies/` — కలిపి ఉపయోగించగల ప్రెడికేట్లు
+- పైప్లైన్ ప్రవేశం: `src/server/authz/pipeline.ts`
+- అభ్యర్థన వర్గీకరణి: `src/server/authz/classify.ts` — పబ్లిక్
+  కంపాటిబిలిటీ రూట్లను మేనేజ్మెంట్ రూట్ల నుండి వేరు చేస్తుంది
+- పబ్లిక్ రూట్ ఇన్వెంటరీ: `src/shared/constants/publicApiRoutes.ts`
+- పాలసీలు: `src/server/authz/policies/` — కంపోజబుల్ ప్రిడికేట్లు
   (`requireApiKey`, `requireManagement`, `requireFreshAuth`, మొదలైనవి)
-- హెడర్ యుటిలిటీలు: `src/server/authz/headers.ts`
+- హెడర్ యూటిలిటీలు: `src/server/authz/headers.ts`
 - అసర్షన్ హెల్పర్: `src/server/authz/assertAuth.ts`
-- అభ్యర్థన కాంటెక్స్ట్: `src/server/authz/context.ts`
+- అభ్యర్థన సందర్భం: `src/server/authz/context.ts`
 
-పబ్లిక్ మరియు మేనేజ్మెంట్ రూట్ల మధ్య కఠినమైన సరిహద్దు ఉంది: ఏజెంట్/కూల్డౌన్ APIలు మరియు
-ప్రొవైడర్ మార్పులకు మేనేజ్మెంట్ ఆథెంటికేషన్ అవసరం (అది లేకపోతే HTTP 401).
+పబ్లిక్ vs మేనేజ్మెంట్ రూట్లు ఒక కఠినమైన సరిహద్దు: agent/cooldown APIలు మరియు
+ప్రొవైడర్ మ్యూటేషన్లకు మేనేజ్మెంట్ అథెంటికేషన్ అవసరం (లేకపోతే HTTP 401).
 
 పూర్తి రూట్ వర్గీకరణ నియమాల కోసం,
 [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) చూడండి.
 
-### F. వర్క్ఫ్లో FSM మరియు టాస్క్-అవేర్ రౌటర్
+### F. వర్క్ఫ్లో FSM మరియు టాస్క్-అవేర్ రూటర్
 
-గుర్తించిన వర్క్ఫ్లో దశ (ప్రణాళిక, అమలు,
-సమీక్ష) మరియు బ్యాక్గ్రౌండ్-టాస్క్ అనుబంధం ఆధారంగా ట్రాఫిక్ను మళ్లించేందుకు, కాంబో ఎంపికకు పైన అమర్చిన
-ఫైనైట్-స్టేట్-మెషిన్ ఆధారిత రౌటర్.
+గుర్తించిన వర్క్ఫ్లో దశ (ప్లానింగ్, ఎగ్జిక్యూషన్,
+రివ్యూ) మరియు బ్యాక్గ్రౌండ్-టాస్క్ అఫినిటీ ఆధారంగా ట్రాఫిక్ను మళ్లించడానికి
+కాంబో సెలెక్షన్ పైన పొరగా ఉన్న ఫైనైట్-స్టేట్-మెషిన్ ఆధారిత రూటర్.
 
 - వర్క్ఫ్లో FSM: `open-sse/services/workflowFSM.ts`
-- టాస్క్-అవేర్ రౌటర్: `open-sse/services/taskAwareRouter.ts`
+- టాస్క్-అవేర్ రూటర్: `open-sse/services/taskAwareRouter.ts`
 - బ్యాక్గ్రౌండ్ టాస్క్ డిటెక్టర్: `open-sse/services/backgroundTaskDetector.ts`
-- ఇంటెంట్ క్లాసిఫైయర్: `open-sse/services/intentClassifier.ts`
+- ఇంటెంట్ వర్గీకరణి: `open-sse/services/intentClassifier.ts`
 
-FSM ట్రాన్సిషన్లు Auto Combo స్కోరింగ్లోకి ఫీడ్ అవుతాయి, బ్యాక్గ్రౌండ్/ఆటోమేషన్ టాస్క్ల కోసం తక్కువ ఖర్చుతో కూడిన మోడళ్ల వైపు, ఇంటరాక్టివ్ ప్లానింగ్/రివ్యూ టర్న్ల కోసం మరింత శక్తివంతమైన మోడళ్ల వైపు మొగ్గు చూపేలా చేస్తాయి.
+FSM ట్రాన్జిషన్లు Auto Combo యొక్క స్కోరింగ్లోకి ప్రవేశించి,
+బ్యాక్గ్రౌండ్/ఆటోమేషన్ టాస్క్ల కోసం చౌకైన మోడల్ల వైపుకు మరియు ఇంటరాక్టివ్
+ప్లానింగ్/రివ్యూ టర్న్ల కోసం బలమైన మోడల్ల వైపుకు అనుకూలంగా మారుతాయి.
 
-### G. ప్రొవైడర్-నిర్దిష్ట స్థితిస్థాపకత
+### G. ప్రొవైడర్-నిర్దిష్ట రెసిలియన్స్
 
-అనేక ప్రొవైడర్లు గ్లోబల్ సర్క్యూట్ బ్రేకర్ / కనెక్షన్ కూల్డౌన్ / మోడల్ లాకౌట్ లేయర్లపై ఆధారపడి పనిచేసే ప్రత్యేక స్థితిస్థాపకత మరియు స్టెల్త్ మాడ్యూల్లను అందిస్తారు:
+అనేక ప్రొవైడర్లు గ్లోబల్ సర్క్యూట్ బ్రేకర్ / కనెక్షన్ కూల్డౌన్ / మోడల్ లాక్అవుట్
+పొరలపై ఆధారపడే ప్రత్యేక రెసిలియన్స్ మరియు స్టెల్త్ మాడ్యూల్లను అందిస్తారు:
 
-- Antigravity 429 ఇంజిన్: `open-sse/services/antigravity429Engine.ts` (ఐడెంటిటీని రొటేట్ చేస్తుంది, రెస్పాన్స్ హెడర్లను స్క్రబ్ చేస్తుంది, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` ద్వారా క్రెడిట్లు/వెర్షన్ ట్రాకింగ్ను నిర్వహిస్తుంది)
+- Antigravity 429 ఇంజిన్: `open-sse/services/antigravity429Engine.ts` (ఐడెంటిటీను
+  రొటేట్ చేస్తుంది, రెస్పాన్స్ హెడర్లను స్క్రబ్ చేస్తుంది, క్రెడిట్స్/వెర్షన్ ట్రాకింగ్ను
+  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
+  `antigravityIdentity.ts`, `antigravityVersion.ts` ద్వారా నడుపుతుంది)
 - ModelScope కోటా పాలసీ: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (కంపాటిబిలిటీ ఛానల్ హ్యాండ్షేక్): `open-sse/services/claudeCodeCCH.ts`, అలాగే `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Code CCH (కంపాటిబిలిటీ ఛానెల్ హ్యాండ్షేక్): `open-sse/services/claudeCodeCCH.ts`,
+  అలాగే `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
+  `claudeCodeToolRemapper.ts`
 - Claude Code ఫింగర్ప్రింట్ షేపింగ్: `open-sse/services/claudeCodeFingerprint.ts`
 - Claude Code అబ్ఫస్కేషన్: `open-sse/services/claudeCodeObfuscation.ts`
 
-పూర్తి స్టెల్త్ ప్లేబుక్ మరియు ఆపరేషనల్ మార్గదర్శకం కోసం, `docs/security/STEALTH_GUIDE.md` చూడండి (gitలో ఉంది; `/docs`లోకి కంపైల్ చేయబడదు).
+పూర్తి స్టెల్త్ ప్లేబుక్ మరియు ఆపరేషనల్ మార్గదర్శకత్వం కోసం,
+`docs/security/STEALTH_GUIDE.md` చూడండి (git; `/docs`లో కంపైల్ చేయబడలేదు).
 
-### H. వెబ్హుక్లు, రీజనింగ్ క్యాష్, రీడ్ క్యాష్
+### H. వెబ్హుక్లు, రీజనింగ్ కాషే, రీడ్ కాషే
 
 - **వెబ్హుక్లు** — ప్రొవైడర్/అకౌంట్/టాస్క్ ఈవెంట్ల కోసం అవుట్బౌండ్ డిస్పాచ్.
   - డిస్పాచర్: `src/lib/webhookDispatcher.ts`
   - స్టోరేజ్: `webhooks` SQLite టేబుల్ (`src/lib/db/webhooks.ts` ద్వారా)
   - డ్యాష్బోర్డ్: `/dashboard/webhooks` (సబ్స్క్రిప్షన్లు, సీక్రెట్లు, రీట్రై హిస్టరీ)
   - ఈవెంట్ టాక్సానమీ మరియు రీట్రై సెమాంటిక్స్ కోసం, [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) చూడండి.
-- **రీజనింగ్ క్యాష్** — థింకింగ్ టోకెన్లను విడుదల చేసే ప్రొవైడర్ల (Claude, GLMT మొదలైనవి) కోసం రీప్లే చేయగల రీజనింగ్ బ్లాక్లు; తద్వారా వరుస టర్న్లు మళ్లీ ఆలోచించడాన్ని దాటవేయగలవు.
-  - DB లేయర్: `src/lib/db/reasoningCache.ts`
-  - సర్వీస్ లేయర్: `open-sse/services/reasoningCache.ts`
+- **రీజనింగ్ కాషే** — థింకింగ్ టోకెన్లను విడుదల చేసే ప్రొవైడర్ల కోసం
+  రీప్లే చేయగల రీజనింగ్ బ్లాక్లు (Claude, GLMT మొదలైనవి), తద్వారా వరుస
+  టర్న్లు మళ్లీ ఆలోచించడాన్ని దాటవేయగలవు.
+  - DB పొర: `src/lib/db/reasoningCache.ts`
+  - సర్వీస్ పొర: `open-sse/services/reasoningCache.ts`
   - రీప్లే సెమాంటిక్స్ కోసం, [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) చూడండి.
-- **రీడ్ క్యాష్** — సిగ్నేచర్ ఆధారంగా కీ చేయబడిన, స్వల్పకాలిక రెస్పాన్స్ క్యాష్; లోపభూయిష్టమైన అప్స్ట్రీమ్ SDKల నుండి వచ్చే ఒకే విధమైన రీట్రైలను ఏకీకృతం చేయడానికి ఉపయోగించబడుతుంది.
-  - DB లేయర్: `src/lib/db/readCache.ts`
-  - స్టాట్స్ ఎండ్పాయింట్: `GET /api/cache/stats`, డ్యాష్బోర్డ్: `/dashboard/cache`
+- **రీడ్ కాషే** — సిగ్నేచర్ ద్వారా కీ చేయబడిన స్వల్పకాలిక రెస్పాన్స్ కాషే,
+  విరిగిన అప్స్ట్రీమ్ SDKల నుండి వచ్చే ఒకేలాంటి రీట్రైలను కలపడానికి
+  ఉపయోగించబడుతుంది.
+  - DB పొర: `src/lib/db/readCache.ts`
+  - స్టాట్స్ ఎండ్పాయింట్: `GET /api/cache/stats`, డ్యాష్బోర్డ్ `/dashboard/cache` వద్ద
 
 ## 3) స్థిర నిల్వ లేయర్
 

@@ -75,45 +75,45 @@ OmniRoute/
 
 ```
 src/
-├── app/                  App Router -sivut + API-reitit
-├── lib/                  Ydinkirjastot (tietokanta, todennus, OAuth, taidot, muisti, …)
-├── domain/               Puhdas toimialuekerros (käytännöt, varajärjestelyt, kustannukset, lukitus, …)
-├── server/               Vain palvelimella käytettävät moduulit (käyttöoikeudet, CORS, todennus)
-├── shared/               Tyypit, vakiot, validointi, sopimukset, apufunktiot (turvallisia rajapintojen välillä)
-├── mitm/                 Väliintulovälityspalvelimen apufunktiot CLI-integraatiota varten
-├── models/               Paikallisten mallien metatiedot / aliakset
-├── sse/                  Vanhat SSE-käsittelijät, jotka sijaitsevat edelleen src/-hakemistossa (eivät open-sse/-hakemistossa)
-├── store/                Asiakaspuolen tilasäilöt
-├── middleware/           Reittitason väliohjelmistojen apufunktiot (ei Next.js:n globaali väliohjelmisto)
-├── scripts/              Lähdekoodipuussa olevat skriptit, joita sovelluskoodi voi tuoda
-├── types/                Ympäröivät ja jaetut TS-tyypit
-├── i18n/                 Kielialuepaketit
-├── instrumentation.ts    Next.js:n instrumentointikoukku
+├── app/                  App Router pages + API routes
+├── lib/                  Core libraries (DB, auth, OAuth, skills, memory, …)
+├── domain/               Pure domain layer (policy, fallback, cost, lockout, …)
+├── server/               Server-only modules (authz, cors, auth)
+├── shared/               Types, constants, validation, contracts, utils (cross-boundary safe)
+├── mitm/                 Man-in-the-middle proxy helpers for CLI integration
+├── models/               Local model metadata / aliasing
+├── sse/                  Legacy SSE handlers that still live under src/ (not open-sse/)
+├── store/                Client-side state stores
+├── middleware/           Route-level middleware utilities (not Next.js global middleware)
+├── scripts/              In-tree scripts importable by app code
+├── types/                Ambient and shared TS types
+├── i18n/                 Locale bundles
+├── instrumentation.ts    Next.js instrumentation hook
 ├── instrumentation-node.ts
-└── proxy.ts              Ylimmän tason välityspalvelimen käynnistyksen apufunktio
+└── proxy.ts              Top-level proxy bootstrap helper
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router tarjoaa sekä hallintapaneelin käyttöliittymän että julkisen ja hallinnollisen HTTP-rajapinnan.
-**Globaalia väliohjelmistoa ei ole** — käsittely tapahtuu reittikohtaisesti.
+App Router tarjoaa sekä dashboard-käyttöliittymän että julkisen/hallinnan HTTP-API:n.
+**Globaalia middlewareä ei ole** — sieppaus tehdään reittikohtaisesti.
 
 Ylimmän tason segmentit hakemistossa `src/app/`:
 
-| Polku                                                                         | Tarkoitus                                                         |
-| ----------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `api/`                                                                        | Kaikki HTTP API -reitit (katso erittely alta)                     |
-| `a2a/`                                                                        | A2A JSON-RPC 2.0 -päätepiste (`POST /a2a`)                        |
-| `.well-known/agent.json/`                                                     | A2A Agent Card -etsintädokumentti                                 |
-| `(dashboard)/`                                                                | Hallintapaneelin käyttöliittymä (reittiryhmä, ei URL-etuliitettä) |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Todennuskulut                                                     |
-| `landing/`                                                                    | Markkinointi-/aloitussivu                                         |
-| `docs/`                                                                       | Upotettu API-dokumentaation katseluohjelma                        |
-| `status/`, `maintenance/`, `offline/`                                         | Operatiiviset sivut                                               |
-| `privacy/`, `terms/`                                                          | Oikeudelliset sivut                                               |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Staattiset virhesivut                                             |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Sovelluskehyksen virhe- ja latausrajat                            |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Juuritason kehys                                                  |
+| Polku                                                                         | Tarkoitus                                                  |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `api/`                                                                        | Kaikki HTTP-API-reitit (ks. erittely alla)                 |
+| `a2a/`                                                                        | A2A JSON-RPC 2.0 -päätepiste (`POST /a2a`)                 |
+| `.well-known/agent.json/`                                                     | A2A Agent Card -discovery-dokumentti                       |
+| `(dashboard)/`                                                                | Dashboard-käyttöliittymä (reittiryhmä, ei URL-etuliitettä) |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | Todennusvirrat                                             |
+| `landing/`                                                                    | Markkinointi-/landing-sivu                                 |
+| `docs/`                                                                       | Upotettu API-dokumenttien katselin                         |
+| `status/`, `maintenance/`, `offline/`                                         | Operatiiviset sivut                                        |
+| `privacy/`, `terms/`                                                          | Oikeudelliset sivut                                        |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Staattiset virhesivut                                      |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Kehyksen virhe- ja latausrajat                             |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Juurikuori                                                 |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — Käyttöliittymäsivut
 
@@ -121,7 +121,7 @@ Ylimmän tason segmentit hakemistossa `src/app/`:
 `changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
 `costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
 `playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks` sekä juuritason `page.tsx`, `HomePageClient.tsx`,
+`translator`, `usage`, `webhooks`, sekä juuren `page.tsx`, `HomePageClient.tsx`,
 `BootstrapBanner.tsx`.
 
 #### 3.1.2 `src/app/api/` — Ylimmän tason API-ryhmät
@@ -177,144 +177,144 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   Upotettujen palvelujen hallinta (9router, cliproxy) — LOCAL_ONLY
+├── services/   Embedded service management (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
-├── v1/         OpenAI-yhteensopiva julkinen API
-├── v1beta/     Gemini-tyylinen yhteensopivuus
+├── v1/         OpenAI-compatible public API
+├── v1beta/     Gemini-style compat
 ├── version-manager/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — Upotettujen palvelujen hallinta
+#### 3.1.2a `src/app/api/services/` — Upotettujen palveluiden hallinta
 
-Reitit 9Routerin ja CLIProxyAPI:n asentamiseen, käynnistämiseen, pysäyttämiseen ja valvontaan.
-Kaikki polut on luokiteltu **LOCAL_ONLY**-luokkaan (vain takaisinkytkentäosoite, ehdoton sääntö #17), koska ne
-voivat suorittaa `npm install` -komennon ja käynnistää aliprosesseja.
+Reitit 9Routerin ja CLIProxyAPIn asentamiseen, käynnistämiseen, pysäyttämiseen ja valvontaan.
+Kaikki polut on luokiteltu **LOCAL_ONLY**-luokkaan (vain loopback, kova sääntö #17), koska ne
+voivat kutsua `npm install` -komentoa ja käynnistää aliprosesseja.
 
 ```
 src/app/api/services/
 ├── 9router/
-│   ├── _lib.ts             getOrInitSupervisor()-apufunktio
-│   ├── install/route.ts    POST — npm install execFilen kautta
+│   ├── _lib.ts             getOrInitSupervisor() helper
+│   ├── install/route.ts    POST — npm install via execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install uudemmalle versiolle
-│   ├── rotate-key/route.ts POST — luo uusi API-avain + käynnistä uudelleen
-│   ├── status/route.ts     GET  — reaaliaikainen + tietokannan tila + versioiden metatiedot
-│   └── auto-start/route.ts POST — vaihda auto_start-lipun tilaa
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── rotate-key/route.ts POST — generate new API key + restart
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 ├── cliproxy/
-│   ├── _lib.ts             getOrInitSupervisor()-apufunktio
+│   ├── _lib.ts             getOrInitSupervisor() helper
 │   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — npm install uudemmalle versiolle
-│   ├── status/route.ts     GET  — reaaliaikainen + tietokannan tila + versioiden metatiedot
-│   └── auto-start/route.ts POST — vaihda auto_start-lipun tilaa
+│   ├── update/route.ts     POST — npm install newer version
+│   ├── status/route.ts     GET  — live + DB status + version metadata
+│   └── auto-start/route.ts POST — toggle auto_start flag
 └── [name]/
-    └── logs/route.ts       GET  — SSE-lokin loppuosa (kaikkien palvelujen yhteinen)
+    └── logs/route.ts       GET  — SSE log tail (shared by all services)
 ```
 
-Vastaava hallintapaneelin käyttöliittymä:
-`src/app/(dashboard)/dashboard/providers/services/` — kahden välilehden sivu (CLIProxyAPI + 9Router).
-Käänteinen välityspalvelin 9Routerin upotetulle käyttöliittymälle:
+Vastaava dashboard-käyttöliittymä:
+`src/app/(dashboard)/dashboard/providers/services/` — kaksivälilehtinen sivu (CLIProxyAPI + 9Router).
+9Routerin upotetun käyttöliittymän käänteisvälityspalvelin:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-Syvällisempi kuvaus: `docs/frameworks/EMBEDDED-SERVICES.md`
+Syväsukellus: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 #### 3.1.3 `src/app/api/v1/` — OpenAI-yhteensopiva julkinen API
 
 ```
 v1/
-├── accounts/[id]/                       tilin haku
-├── agents/tasks/[id]/, agents/tasks/    A2A-tyyliset tehtäväpäätepisteet
-├── api/                                 sisäiset API-apufunktiot, jotka on julkaistu polussa v1/api
+├── accounts/[id]/                       account lookup
+├── agents/tasks/[id]/, agents/tasks/    A2A-flavored task endpoints
+├── api/                                 internal API helpers exposed under v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    keskustelutäydennykset (pääasiallinen päätepiste)
-├── completions/                         vanhat tekstitäydennykset
-├── embeddings/                          upotukset
-├── files/[id]/, files/                  tiedosto-API
-├── _helpers/                            jaetut reittiapufunktiot (ei julkista URL-osoitetta)
-├── images/{edits, generations}/         kuvien generointi + muokkaus
-├── issues/                              luokittelun apupäätepisteet
-├── management/{proxies}/                hallinnan laajuiset reitit v1:n sisällä
-├── messages/{count_tokens}/             Anthropic-tyylinen viestiyhteensopivuus
-├── models/                              mallien luettelo (`route.ts`, `catalog.ts`)
-├── moderations/                         moderointi
-├── music/                               musiikin generointi
-├── providers/[provider]/                palveluntarjoajakohtaiset toiminnot
-├── quotas/{check}                       kiintiöiden tarkistukset
-├── registered-keys/                     rekisteröityjen avainten hallinta
-├── rerank/                              uudelleenjärjestäminen
-├── responses/[...path]/                 OpenAI Responses API (kaiken kattava)
-├── search/                              verkkohaku
-├── videos/                              videoiden generointi
-├── ws/                                  WebSocket-silta
-└── route.ts                             indeksikäsittelijä
+├── chat/completions/                    Chat Completions (the main endpoint)
+├── completions/                         Legacy text completions
+├── embeddings/                          Embeddings
+├── files/[id]/, files/                  Files API
+├── _helpers/                            Shared route helpers (no public URL)
+├── images/{edits, generations}/         Image gen + edit
+├── issues/                              Triage helper endpoints
+├── management/{proxies}/                Management-scoped routes inside v1
+├── messages/{count_tokens}/             Anthropic-style messages compat
+├── models/                              Model listing (`route.ts`, `catalog.ts`)
+├── moderations/                         Moderation
+├── music/                               Music gen
+├── providers/[provider]/                Per-provider operations
+├── quotas/{check}                       Quota probes
+├── registered-keys/                     Registered key admin
+├── rerank/                              Reranking
+├── responses/[...path]/                 OpenAI Responses API (catch-all)
+├── search/                              Web search
+├── videos/                              Video gen
+├── ws/                                  WebSocket bridge
+└── route.ts                             Index handler
 ```
 
 Jokainen reittitiedosto noudattaa samaa kaavaa:
 
 ```
-Reitti → CORS-esitarkistus → pyynnön rungon Zod-validointi → valinnainen todennus
-       → API-avainkäytännön valvonta → delegointi käsittelijälle (open-sse)
+Route → CORS preflight → Zod body validation → optional auth
+      → API key policy enforcement → handler delegation (open-sse)
 ```
 
-`v1beta/` on Gemini-tyylinen yhteensopivuusrajapinta (ohut kääre, joka muuntaa pyynnöt
-samaan `open-sse/handlers/`-käsittelyputkeen).
+`v1beta/` on Gemini-tyylinen yhteensopivuuspinta (ohut kääre, joka muuntaa samaan
+`open-sse/handlers/`-käsittelyketjuun).
 
 ### 3.2 `src/lib/` — Ydinkirjastot
 
-Tuo data, synkronointi, OAuth, taidot, muisti ja muut vastaavat aina näiden moduulien kautta.
-Taulukko ryhmittelee varsinaiset hakemistot ja huomionarvoiset ylätason tiedostot.
+Tuo data, synkronointi, OAuth, taidot, muisti jne. aina näiden moduulien kautta.
+Taulukko ryhmittelee varsinaiset hakemistot ja merkittävät ylimmän tason tiedostot.
 
-| Moduuli           | Tarkoitus                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A-protokollapalvelin: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 taitoa: kustannusanalyysi, kuntoraportti, palveluntarjoajien etsintä, kiintiöiden hallinta, älykäs reititys, ominaisuuksien luettelointi)                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `api/`            | Sisäiset API-apuohjelmat: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `auth/`           | `managementPassword.ts` (salasanan nollaus / hajautus)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `batches/`        | OpenAI Batches API -palvelu (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `catalog/`        | OpenRouter-luettelon synkronointi (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `cloudAgent/`     | Pilviagenttirekisteri: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `combos/`         | Yhdistelmien selvityksen apufunktiot                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `compliance/`     | Auditointi + palveluntarjoajan auditointi: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `config/`         | Suorituksenaikaisen määrityksen yhdistävä kerros                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `db/`             | SQLite-toimialuemoduulit (katso §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `display/`        | API-vastauksissa käytettävät käyttöliittymän ja näyttämisen apufunktiot                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `embeddings/`     | Upotuspalvelurekisteri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `env/`            | Ympäristömuuttujien lataus + tarkastelu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `evals/`          | Arviointien suoritusaikainen ympäristö                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `jobs/`           | Taustatehtävät (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `memory/`         | Pysyvä muisti: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `oauth/`          | OAuth-/tuontipalveluntarjoajien moduulit (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, sekä `services/`, `utils/` ja `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                              |
-| `plugins/`        | Liitännäisten lataaja (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `providerModels/` | Hallittu mallin elinkaari: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `providers/`      | Palveluntarjoajien apuohjelmat: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `resilience/`     | `settings.ts` — katkaisijan, jäähdytysajan ja lukituksen asetukset                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `runtime/`        | Suorituksenaikainen ominaisuuksien tunnistus                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `services/`       | Upotettujen palvelujen kehys: `ServiceSupervisor.ts` (yleiskäyttöinen aliprosessien valvoja, jossa on toimintolukko, rengaspuskuri ja kuntotarkistin), `bootstrap.ts` (prosessitason rekisteröinti ja automaattinen käynnistys), `registry.ts` (työkalun ja valvojan välinen määritys), `apiKey.ts` (AES-256-GCM-avainsäilö), `modelSync.ts` (mallien säännöllinen synkronointi), `ringBuffer.ts` (5 MB:n kiertävä lokipuskuri), `healthCheck.ts` (HTTP-kuntotarkistus), `types.ts`, `embedWsProxy.ts` (WebSocket-välityspalvelin), `installers/{ninerouter,cliproxy}.ts`. Katso `docs/frameworks/EMBEDDED-SERVICES.md`                                                                               |
-| `agentSkills/`    | Agent Skills -luettelo ja -generaattori: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → writes `skills/{id}/SKILL.md`), `openapiParser.ts` (poimii REST-päätepisteet OpenAPI-määrityksestä), `cliRegistryParser.ts` (poimii CLI-alikomennot kohteesta bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Tätä käyttävät REST-reitit (`/api/agent-skills/*`), MCP-työkalut (`omniroute_agent_skills_*`) ja A2A-taito `list-capabilities`. Katso [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Taitokehys: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts` sekä `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `spend/`          | `batchWriter.ts` (viivästetty kirjoituspuskuri)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `sync/`           | `bundle.ts`, `tokens.ts` (pilvisynkronointi)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `system/`         | Järjestelmätason apufunktiot                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `translator/`     | Ylätason kääntäjän yhdistävä kerros (delegoi hakemistoon `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `usage/`          | Käytön seuranta: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `versionManager/` | Automaattinen päivitys + versioluettelo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `ws/`             | WebSocket-silta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `zed-oauth/`      | Zed-editorin OAuth-kulku                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Module            | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | A2A-protokollapalvelin: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 taitoa: kustannusanalyysi, terveysraportti, palveluntarjoajien löytäminen, kiintiöiden hallinta, älykäs reititys, ominaisuuksien luettelointi)                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `api/`            | Sisäiset API-aputoiminnot: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `auth/`           | `managementPassword.ts` (salasanan nollaus / tiivistäminen)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `batches/`        | OpenAI Batches API -palvelu (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `catalog/`        | OpenRouter-katalogin synkronointi (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `cloudAgent/`     | Cloud agent -rekisteri: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `combos/`         | Combon ratkaisemisen apufunktiot                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `compliance/`     | Auditointi + toimittaja-auditointi: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `config/`         | Ajonaikaisen konfiguraation liimakoodi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `db/`             | SQLite-toimialuemoduulit (ks. §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `display/`        | API-vastausten käyttämät UI-/näyttöapufunktiot                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `embeddings/`     | Embedding-palvelun rekisteri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `env/`            | Ympäristömuuttujien lataus + introspektio                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `evals/`          | Eval-suoritusympäristö                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `jobs/`           | Taustatyöt (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `memory/`         | Pysyvä muisti: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `oauth/`          | OAuth-/tuontipalveluntarjoajamoduulit (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, sekä `services/`, `utils/` ja `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                          |
+| `plugins/`        | Liitännäislataaja (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `providerModels/` | Hallittujen mallien elinkaari: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `providers/`      | Tarjoajien apuohjelmat: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `resilience/`     | `settings.ts` — asetukset piirikatkaisijalle, jäähdytysajalle ja lukitukselle                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `runtime/`        | Ajonaikaisten ominaisuuksien tunnistus                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `services/`       | Upotettujen palvelujen kehys: `ServiceSupervisor.ts` (yleinen lapsiprosessien valvoja, jossa on toimintolukko, rengaspuskuri ja kunnonvalvoja), `bootstrap.ts` (prosessitason rekisteröinti ja automaattinen käynnistys), `registry.ts` (työkalu → valvoja -kartta), `apiKey.ts` (AES-256-GCM-avainsäilö), `modelSync.ts` (säännöllinen mallien synkronointi), `ringBuffer.ts` (5 MB:n kehämäinen lokipuskuri), `healthCheck.ts` (HTTP-kunnonvalvontakysely), `types.ts`, `embedWsProxy.ts` (WebSocket-välityspalvelin), `installers/{ninerouter,cliproxy}.ts`. Katso `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                   |
+| `agentSkills/`    | Agent Skills -luettelo ja generaattori: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → kirjoittaa `skills/{id}/SKILL.md`), `openapiParser.ts` (poimii REST-päätepisteet OpenAPI-määrittelystä), `cliRegistryParser.ts` (poimii CLI-alikomennot tiedostosta bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Käytetään REST-reiteillä (`/api/agent-skills/*`), MCP-työkaluissa (`omniroute_agent_skills_*`) ja A2A-taidossa `list-capabilities`. Katso [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Taitokehys: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, sekä `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `spend/`          | `batchWriter.ts` (kirjoituksen viivästyttävä puskuri)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `system/`         | Järjestelmätason apurit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `translator/`     | Ylätason kääntäjäliima (delegoi kansioon `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `usage/`          | Käytön laskenta: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `versionManager/` | Automaattinen päivitys + versiomanifesti                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `ws/`             | WebSocket-silta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `zed-oauth/`      | Zed-editorin OAuth-virta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
-Ylätason tiedostot hakemistossa `src/lib/`:
+Ylätason tiedostot kansiossa `src/lib/`:
 
-- Vanha `localDb.ts`-koontimoduuli poistettiin — käyttäjät tuovat tietyt `src/lib/db/*`-moduulit suoraan.
+- Vanha `localDb.ts`-barrel poistettiin — kuluttajat tuovat tietyt `src/lib/db/*`-moduulit suoraan.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -328,14 +328,14 @@ Ylätason tiedostot hakemistossa `src/lib/`:
 
 #### 3.2.1 `src/lib/db/`
 
-SQLite-tietokannan singleton-ilmentymä (`getDbInstance()` tiedostossa `core.ts`, WAL-kirjaus).
+Singleton SQLite -tietokanta (`getDbInstance()` tiedostossa `core.ts`, WAL-journalointi).
 **Älä koskaan kirjoita raakaa SQL:ää reitteihin tai käsittelijöihin** — käytä näitä moduuleja.
 
-![Tietokantaskeeman yleiskuva (valitut ydintaulut)](../diagrams/exported/db-schema-overview.svg)
+![Tietokantaskeeman yleiskatsaus (valitut ydintaulut)](../diagrams/exported/db-schema-overview.svg)
 
 > Lähde: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-Toimialuemoduulit (kukin vastaa yhdestä tai useammasta taulusta): `apiKeys.ts`, `backup.ts`,
+Domain-moduulit (kukin omistaa yhden tai useamman taulun): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -349,10 +349,9 @@ Toimialuemoduulit (kukin vastaa yhdestä tai useammasta taulusta): `apiKeys.ts`,
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-`migrations/` sisältää 168 versioitua `.sql`-tiedostoa (idempotentteja ja transaktionaalisia), jotka
-`migrationRunner.ts` suorittaa käynnistyksen yhteydessä.
+`migrations/` sisältää 168 versioitua `.sql`-tiedostoa (idempotentteja, transaktionaalisia), ja `migrationRunner.ts` suorittaa ne käynnistyksen yhteydessä.
 
-Migraatioissa luodut taulut (yhteensä 123):
+Migraatioiden aikana luodut taulut (yhteensä 123):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -370,60 +369,67 @@ Migraatioissa luodut taulut (yhteensä 123):
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
 `webhooks` (sekä FTS5-virtuaalitaulut muistihakua varten).
 
-### 3.3 `src/domain/` — Toimialuekerros
+### 3.3 `src/domain/` — Domain-kerros
 
-Puhdas liiketoimintalogiikka ilman I/O-toimintoja. Reitit ja käsittelijät tuovat sen käyttöönsä.
+Domain-palvelut ja arviointisopimukset. Jotkin moduulit kutsutaan live-pyyntöpolulta; toiset pysyvät itsenäisinä sopimuksina. Älä oleta, että tämä kokonainen hakemisto on vapaa I/O:sta tai että jokaisen moduulin muuttaminen vaikuttaa tuotannon reititykseen.
 
-| Tiedosto                                   | Tarkoitus                                                |
-| ------------------------------------------ | -------------------------------------------------------- |
-| `policyEngine.ts`                          | Ylimmän tason käytäntöratkaisija                         |
-| `fallbackPolicy.ts`                        | Varavalinnan päätöspuu                                   |
-| `costRules.ts`                             | Kustannusten laskentasäännöt                             |
-| `lockoutPolicy.ts`                         | Mallin lukituspäätökset                                  |
-| `tagRouter.ts`                             | Tunnistepohjainen reititys                               |
-| `comboResolver.ts`                         | Yhdistelmän ratkaiseminen pyynnöstä → kohdeluetteloon    |
-| `connectionModelRules.ts`                  | Yhteyskohtaiset mallisuodattimet                         |
-| `modelAvailability.ts`                     | Mallin saatavuuden tarkistus                             |
-| `degradation.ts`                           | Siirtymät alennetun toimintatilan välillä                |
-| `providerExpiration.ts`                    | Vanhentuneiden tilien/avainten tunnistus                 |
-| `quotaCache.ts`                            | Välimuistiin tallennetut kiintiöpäätökset                |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Vastauksen muodon apufunktiot                            |
-| `configAudit.ts`                           | Määritysmuutosten auditointi                             |
-| `assessment/`                              | Mallin arviointi (RFC:n mukaisesti, toteutettu osittain) |
-| `types.ts`                                 | Jaetut toimialuetyypit                                   |
+Live-käytännön pinnat ovat `src/shared/utils/apiKeyPolicy.ts` ja
+`src/sse/handlers/chat/resolvedModelPolicy.ts`. Live-combo-käsittely ja kohteen
+ratkaisu käyttävät moduulia `open-sse/services/combo.ts`. Testatut sopimukset
+`policyEngine.ts` ja `comboResolver.ts` yhdessä tiedoston `src/lib/container.ts`
+kanssa eivät ole tarkastellun chat-pyyntöpolun kytkentä. Pidä ne erillään noista
+aktiivisista pinnoista, kun suunnittelet reitityksen muutosta.
 
-### 3.4 `src/server/` — Vain palvelimelle
+| Tiedosto                                   | Tarkoitus                                            |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `policyEngine.ts`                          | Varattu policy-arvioinnin sopimus                    |
+| `fallbackPolicy.ts`                        | Fallback-päätöspuu                                   |
+| `costRules.ts`                             | Kustannuslaskennan säännöt                           |
+| `lockoutPolicy.ts`                         | Mallin lukituksen päätökset                          |
+| `tagRouter.ts`                             | Tunnisteisiin perustuva reititys                     |
+| `comboResolver.ts`                         | Varattu combon valintasopimus                        |
+| `connectionModelRules.ts`                  | Yhteyksittäiset mallisuodattimet                     |
+| `modelAvailability.ts`                     | Mallin saatavuuden tarkistus                         |
+| `degradation.ts`                           | Heikennetyn tilan siirtymät                          |
+| `providerExpiration.ts`                    | Vanhentuneen tilin/avaimen tunnistus                 |
+| `quotaCache.ts`                            | Välimuistitetut kiintiöpäätökset                     |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Vastauksen muodon apurit                             |
+| `configAudit.ts`                           | Konfiguraatiomuutosten auditointi                    |
+| `assessment/`                              | Mallin arviointi (RFC:n mukaan, osittain toteutettu) |
+| `types.ts`                                 | Yhteiset domain-tyypit                               |
 
-Ei voida tuoda asiakaskomponentteihin.
+### 3.4 `src/server/` — Vain palvelimella
+
+Ei voi tuoda asiakaskomponenteista.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
 │   ├── classify.ts        Luokittelee reitit julkisiksi tai hallintareiteiksi
-│   ├── assertAuth.ts      Vahvistuksen apufunktio
-│   ├── context.ts         Pyyntökohtainen valtuutuskonteksti
+│   ├── assertAuth.ts      Assertio-apuri
+│   ├── context.ts         Pyyntökohtainen authz-konteksti
 │   ├── headers.ts
-│   ├── pipeline.ts        Valtuutusputki
+│   ├── pipeline.ts        Authz-putki
 │   ├── policies/          Konkreettiset käytännöt
 │   └── types.ts
-└── cors/origins.ts        Sallittujen CORS-alkuperien luettelo
+└── cors/origins.ts        CORS-originien sallittujen lista
 ```
 
-### 3.5 `src/shared/` — Turvallisesti jaettava
+### 3.5 `src/shared/` — Jaettavaksi turvallinen
 
-Jaettu tarkoituksenmukaisiin alihakemistoihin:
+Jaettu kohdennettuihin alihakemistoihin:
 
-- `constants/` — `providers.ts` (Zod-validoitu palveluntarjoajaluettelo), `models.ts`,
+- `constants/` — `providers.ts` (Zod-validoitu tarjoajaluettelo), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
-  `headers.ts`, `upstreamHeaders.ts` (estolista), `mcpScopes.ts`,
+  `headers.ts`, `upstreamHeaders.ts` (kieltolista), `mcpScopes.ts`,
   `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
   `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
-- `validation/` — `schemas.ts` (noin 80 Zod-skeemaa), `compressionConfigSchemas.ts`,
+- `validation/` — `schemas.ts` (~80 Zod-skeemaa), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — npm:ään julkaistavat julkisen API:n sopimukset.
+- `contracts/` — julkiset API-sopimukset, jotka toimitetaan npm:ään.
 - `types/` — jaetut TS-tyypit.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
@@ -432,14 +438,14 @@ Jaettu tarkoituksenmukaisiin alihakemistoihin:
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts` sekä hallintapaneelin hookit ja komponentit hakemistojen `services/`, `network/`,
+  `a11yAudit.ts`, sekä hallintapaneelin hookit/komponentit hakemistojen `services/`, `network/`,
   `middleware/`, `schemas/`, `hooks/`, `components/` alla.
-- `components/` — hallintapaneelin komponentti-API (`index.tsx`-koontitiedosto: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …). Peruskomponentit ovat sovittimia
-  projektiin sisällytetyn komponenttikirjaston päällä (`packages/ui-kit`, joka tuodaan komponentin alipolun kautta, kuten
-  `@omniroute/ui-kit/button`), joten näkymät säilyttävät tuontinsa, vaikka merkintärakenne tulee
-  komponenttikirjastosta. Kehys on `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
-  (komponenttikirjaston `SidebarProvider`/`SidebarInset`) sekä `Sidebar.tsx` ja `Header.tsx`; kuvakkeet kulkevat
+- `components/` — hallintapaneelin komponentti-API (`index.tsx` toimii kokoavana tiedostona: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Primitiivit ovat adaptereita vendoroidun
+  työkalupaketin päällä (`packages/ui-kit`, joka tuodaan komponentin alipolulla, kuten
+  `@omniroute/ui-kit/button`), joten näkymät säilyttävät tuontinsa, kun taas markup on
+  työkalupaketin omaa. Kehys on `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (työkalupaketin `SidebarProvider`/`SidebarInset`), ja siihen kuuluvat `Sidebar.tsx` ja `Header.tsx`; kuvakkeet kulkevat
   tiedostojen `Icon.tsx` ja `constants/iconMap.ts` kautta. Katso `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
@@ -708,21 +714,22 @@ Järjestetty käyttötarkoituksen mukaan kuuteen alikansioon.
 > Lähde: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
 ```
-Asiakaspyyntö
+Asiakkaan pyyntö
   → /v1/chat/completions (route.ts)
-     CORS-esitarkistus
+     CORS-preflight-tarkistus
      Zod-validointi (chatCompletionsSchema tiedostossa shared/validation/schemas.ts)
-     Todennus (extractApiKey + isValidApiKey TAI requireManagementAuth)
-     Käytäntömoottori (src/server/authz/pipeline.ts)
-     Suojaukset (henkilötietojen peittäjä, kehotesyötteen manipuloinnin esto, kuvasyötteen silta)
+     Autentikointi (extractApiKey + isValidApiKey TAI requireManagementAuth)
+     Reitin valtuutus (src/server/authz/pipeline.ts)
+     API-avainkäytäntö (src/shared/utils/apiKeyPolicy.ts; pakotetaan valitulla polulla)
+     Suojakaiteet (PII-naamiointi, prompt-injektio, vision-silta)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     Välimuistin tarkistus (semanttinen välimuisti + lukuvälimuisti)
+     Välimuistin tarkistus (semanttinen + lukuvälimuisti)
      Nopeusrajoitus (rateLimitManager, accountSemaphore)
-     Yhdistelmäreititys (jos malli ratkaistaan yhdistelmäksi)
-       comboResolver → silmukka kohteittain → handleSingleModel()
+     Combo-reititys (jos malli ratkeaa comboksi)
+       resolveComboTargets (open-sse/services/combo.ts) → kohdekohtainen lähetys
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       pyyntö ylävirtaan → uudelleenyritys/eksponentiaalinen viive accountFallback-mekanismin kautta
+       haku ylävirrasta → uudelleenyritys/backoff accountFallbackin kautta
      translateResponse() (open-sse/translator/response/*)
      SSE-virta TAI JSON-vastaus
      Jos Responses API: TransformStream tiedoston open-sse/transformer/responsesTransformer.ts kautta
@@ -730,15 +737,15 @@ Asiakaspyyntö
   → Vastaus asiakkaalle
 ```
 
-### Vikasietoisuuden ajonaikainen tila (kolme mekanismia)
+### Resilienssin ajonaikainen tila (kolme mekanismia)
 
-| Mekanismi                    | Laajuus                           | Sijainti                                                                                                               |
-| ---------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Palveluntarjoajan katkaisija | Koko palveluntarjoaja             | `src/shared/utils/circuitBreaker.ts`, tallennetaan kohteeseen `domain_circuit_breakers`                                |
-| Yhteyden jäähdytysaika       | Yksi tili/avain                   | `markAccountUnavailable()` tiedostossa `src/sse/services/auth.ts`; `accountFallback.checkFallbackError()` käyttää sitä |
-| Mallin lukitus               | Palveluntarjoaja + yhteys + malli | `open-sse/services/accountFallback.ts`, tallennetaan kohteeseen `domain_lockout_state`                                 |
+| Mekanismi                    | Laajuus                           | Missä                                                                                                                           |
+| ---------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Palveluntarjoajan katkaisija | Koko palveluntarjoaja             | `src/shared/utils/circuitBreaker.ts`, säilytetään taulussa `domain_circuit_breakers`                                            |
+| Yhteyden jäähdytys           | Yksi tili/avain                   | `markAccountUnavailable()` tiedostossa `src/sse/services/auth.ts`; kulutetaan `accountFallback.checkFallbackError()`-funktiolla |
+| Mallin lukitus               | Palveluntarjoaja + yhteys + malli | `open-sse/services/accountFallback.ts`, säilytetään taulussa `domain_lockout_state`                                             |
 
-Katso [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) ja erillinen osio tiedostossa
+Katso [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) ja siihen omistettu osio tiedostossa
 [CLAUDE.md](../../CLAUDE.md).
 
 ---

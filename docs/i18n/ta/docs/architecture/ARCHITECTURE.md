@@ -265,73 +265,73 @@ flowchart LR
 - உள்ளமைவுத் தொகுப்பு: `src/app/api/sync/bundle` (GET, அமைப்புகள்/வழங்குநர்கள்/சேர்க்கைகள்/விசைகளின் ETag-பதிப்பிடப்பட்ட நிலைப்படம்)
 - WebSocket: `src/app/api/v1/ws/route.ts` — OpenAI-இணக்கமான WS கிளையன்ட்களுக்கான Upgrade கையாளி
 
-## 2) SSE + மொழிபெயர்ப்பு மையம்
+## 2) SSE + மொழிபெயர்ப்பு கோர்
 
-முதன்மை ஓட்டத் தொகுதிகள்:
+முக்கிய ஓட்ட மொடியூல்கள்:
 
-- நுழைவுப் புள்ளி: `src/sse/handlers/chat.ts`
+- நுழைவு: `src/sse/handlers/chat.ts`
 - மைய ஒருங்கிணைப்பு: `open-sse/handlers/chatCore.ts`
 - வழங்குநர் செயலாக்க அடாப்டர்கள்: `open-sse/executors/*`
-- வடிவமைப்பைக் கண்டறிதல்/வழங்குநர் உள்ளமைவு: `open-sse/services/provider.ts`
-- மாதிரியைப் பகுத்தறிதல்/தீர்மானித்தல்: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- கணக்கு மாற்றுவழித் தர்க்கம்: `open-sse/services/accountFallback.ts`
-- மொழிபெயர்ப்புப் பதிவகம்: `open-sse/translator/index.ts`
-- ஸ்ட்ரீம் உருமாற்றங்கள்: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- பயன்பாட்டைப் பிரித்தெடுத்தல்/இயல்பாக்குதல்: `open-sse/utils/usageTracking.ts`
-- சிந்தனைக் குறிச்சொல் பகுப்பி: `open-sse/utils/thinkTagParser.ts`
-- உட்பொதித்தல் கையாளி: `open-sse/handlers/embeddings.ts`
-- உட்பொதித்தல் வழங்குநர் பதிவகம்: `open-sse/config/embeddingRegistry.ts`
-- பட உருவாக்கக் கையாளி: `open-sse/handlers/imageGeneration.ts`
-- பட வழங்குநர் பதிவகம்: `open-sse/config/imageRegistry.ts`
+- வடிவம் கண்டறிதல்/வழங்குநர் உள்ளமைவு: `open-sse/services/provider.ts`
+- மாடல் பாகுபடுத்தல்/தீர்வு: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- கணக்கு மாற்றுப் (fallback) தர்க்கம்: `open-sse/services/accountFallback.ts`
+- மொழிபெயர்ப்பு பதிவேடு: `open-sse/translator/index.ts`
+- ஸ்ட்ரீம் மாற்றங்கள்: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- பயன்பாடு பிரித்தெடுத்தல்/இயல்பாக்கம்: `open-sse/utils/usageTracking.ts`
+- Think குறிச்சொல் பாகுபடுத்தி: `open-sse/utils/thinkTagParser.ts`
+- எம்பெடிங் கையாளுபவர்: `open-sse/handlers/embeddings.ts`
+- எம்பெடிங் வழங்குநர் பதிவேடு: `open-sse/config/embeddingRegistry.ts`
+- படம் உருவாக்கும் கையாளுபவர்: `open-sse/handlers/imageGeneration.ts`
+- பட வழங்குநர் பதிவேடு: `open-sse/config/imageRegistry.ts`
 - பதில் தூய்மைப்படுத்தல்: `open-sse/handlers/responseSanitizer.ts`
-- பங்கு இயல்பாக்குதல்: `open-sse/services/roleNormalizer.ts`
+- பங்கு இயல்பாக்கம்: `open-sse/services/roleNormalizer.ts`
 
-சேவைகள் (வணிகத் தர்க்கம்):
+சேவைகள் (வணிக தர்க்கம்):
 
-- கணக்குத் தேர்வு/மதிப்பீடு: `open-sse/services/accountSelector.ts`
-- சூழல் வாழ்வுச்சுழற்சி மேலாண்மை: `open-sse/services/contextManager.ts`
-- IP வடிகட்டி அமலாக்கம்: `open-sse/services/ipFilter.ts`
+- கணக்கு தேர்வு/மதிப்பெண் வழங்கல்: `open-sse/services/accountSelector.ts`
+- சூழல் வாழ்க்கைச்சுழற்சி நிர்வாகம்: `open-sse/services/contextManager.ts`
+- IP வடிப்பான் நடைமுறைப்படுத்தல்: `open-sse/services/ipFilter.ts`
 - அமர்வு கண்காணிப்பு: `open-sse/services/sessionManager.ts`
-- கோரிக்கை நகல்நீக்கம்: `open-sse/services/signatureCache.ts`
-- கணினித் தூண்டுதல் உட்செலுத்தல்: `open-sse/services/systemPrompt.ts`
-- சிந்தனை வரவுசெலவுத் திட்ட மேலாண்மை: `open-sse/services/thinkingBudget.ts`
-- வைல்ட்கார்டு மாதிரி வழிப்படுத்தல்: `open-sse/services/wildcardRouter.ts`
-- விகித வரம்பு மேலாண்மை: `open-sse/services/rateLimitManager.ts`
+- கோரிக்கை நகல் நீக்கம்: `open-sse/services/signatureCache.ts`
+- கணினி வரியூட்டல் (system prompt) செலுத்தல்: `open-sse/services/systemPrompt.ts`
+- சிந்தனை பட்ஜெட் நிர்வாகம்: `open-sse/services/thinkingBudget.ts`
+- வைல்ட்கார்டு மாடல் வழிசெலுத்தல்: `open-sse/services/wildcardRouter.ts`
+- வீத வரம்பு நிர்வாகம்: `open-sse/services/rateLimitManager.ts`
 - சர்க்யூட் பிரேக்கர்: `src/shared/utils/circuitBreaker.ts`
-- சூழல் ஒப்படைப்பு: `open-sse/services/contextHandoff.ts` — சூழல்-தொடர்ப்பு உத்திக்கான ஒப்படைப்புச் சுருக்கத்தை உருவாக்குதல் மற்றும் உட்செலுத்துதல்
-- சுருக்கம்: `open-sse/services/compression/*` — வழங்குநர் மொழிபெயர்ப்புக்கு முன் முன்னெச்சரிக்கைச் சுருக்கம்;
-  Caveman விதிகள், RTK வடிகட்டிகள், அடுக்கப்பட்ட பைப்லைன்கள், சுருக்கச் சேர்க்கைகள், புள்ளிவிவரங்கள் மற்றும் சரிபார்ப்பை உள்ளடக்கியது
-- Codex ஒதுக்கீட்டு பெறுகருவி: `open-sse/services/codexQuotaFetcher.ts` — சூழல்-தொடர்ப்பு ஒப்படைப்புத் தீர்மானங்களுக்காக Codex ஒதுக்கீட்டைப் பெறுகிறது
-- குளிர்வுக் காலத்தைக் கருத்தில்கொள்ளும் மறுமுயற்சி: `src/sse/services/cooldownAwareRetry.ts` — உள்ளமைக்கக்கூடிய `requestRetry` / `maxRetryIntervalSec` உடன் ஒவ்வொரு மாதிரிக்குமான குளிர்வுக் கால மறுமுயற்சிகள்
-- பாதுகாப்பான வெளிச்செல்லும் பெறுதல்: `src/shared/network/safeOutboundFetch.ts` — SSRF பாதுகாப்பு, தனிப்பட்ட URL தடுப்பு, மறுமுயற்சி மற்றும் காலக்கெடு ஆகியவற்றுடன் பாதுகாக்கப்பட்ட வழங்குநர்/மாதிரிப் பெறுதல்
-- வெளிச்செல்லும் URL பாதுகாப்பு: `src/shared/network/outboundUrlGuard.ts` — வழங்குநர் URL-களில் ஹோஸ்ட் சோதனைகள்; `src/shared/network/outboundUrlGuardPolicy.ts`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` மற்றும் அவற்றின் டாஷ்போர்டு மாற்றிகளிலிருந்து பயன்முறையைத் தேர்ந்தெடுக்கிறது (`docs/reference/ENVIRONMENT.md`-ஐப் பார்க்கவும்)
+- சூழல் கைமாற்றம்: `open-sse/services/contextHandoff.ts` — context-relay உத்திக்கான கைமாற்ற சுருக்க உருவாக்கம் மற்றும் செலுத்தல்
+- சுருக்கம்: `open-sse/services/compression/*` — வழங்குநர் மொழிபெயர்ப்புக்கு முன் முன்னோக்கு சுருக்கம்;
+  Caveman விதிகள், RTK வடிப்பான்கள், அடுக்கு பைப்லைன்கள், சுருக்க காம்போக்கள், புள்ளிவிவரங்கள் மற்றும் சரிபார்ப்பு ஆகியவை அடங்கும்
+- Codex ஒதுக்கீடு பெறுபவர்: `open-sse/services/codexQuotaFetcher.ts` — context-relay கைமாற்ற முடிவுகளுக்காக Codex ஒதுக்கீட்டைப் பெறுகிறது
+- கூல்டவுன்-உணர் மறுமுயற்சி: `src/sse/services/cooldownAwareRetry.ts` — கட்டமைக்கக்கூடிய `requestRetry` / `maxRetryIntervalSec` உடன் மாடல் தோறும் கூல்டவுன் மறுமுயற்சிகள்
+- பாதுகாப்பான வெளிச்செல்லும் fetch: `src/shared/network/safeOutboundFetch.ts` — SSRF பாதுகாப்பு, தனிப்பட்ட-URL தடுப்பு, மறுமுயற்சி மற்றும் காலக்கெடுவுடன் பாதுகாக்கப்பட்ட வழங்குநர்/மாடல் fetch
+- வெளிச்செல்லும் URL பாதுகாப்பு: `src/shared/network/outboundUrlGuard.ts` — வழங்குநர் URL-களில் ஹோஸ்ட் சரிபார்ப்புகள்; `src/shared/network/outboundUrlGuardPolicy.ts` `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` மற்றும் அவற்றின் டாஷ்போர்டு நிலைமாற்றிகளிலிருந்து பயன்முறையைத் தேர்ந்தெடுக்கிறது (பார்க்க `docs/reference/ENVIRONMENT.md`)
 - வழங்குநர் கோரிக்கை இயல்புநிலைகள்: `open-sse/services/providerRequestDefaults.ts` — வழங்குநர்-நிலை `maxTokens`, `temperature`, `thinkingBudgetTokens` இயல்புநிலைகள்
-- GLM வழங்குநர் மாறிலிகள்: `open-sse/config/glmProvider.ts` — பகிரப்பட்ட GLM மாதிரிகள், ஒதுக்கீட்டு URL-கள், GLMT காலக்கெடு/இயல்புநிலைகள்
-- Antigravity அப்ஸ்ட்ரீம்: `open-sse/config/antigravityUpstream.ts` — அடிப்படை URL மற்றும் கண்டறிதல் பாதை மாறிலிகள்
-- Codex கிளையன்ட் மாறிலிகள்: `open-sse/config/codexClient.ts` — பதிப்பிடப்பட்ட பயனர்-முகவர் மற்றும் கிளையன்ட்-பதிப்பு மதிப்புகள்
-- மாதிரி மாற்றுப்பெயர் தொடக்கத் தரவு: `src/lib/modelAliasSeed.ts` — தொடக்கத்தின்போது 30+ குறுக்கு-பதிலி பேச்சுவழக்கு மாற்றுப்பெயர்களைத் தொடக்குகிறது
+- GLM வழங்குநர் மாறிலிகள்: `open-sse/config/glmProvider.ts` — பகிரப்பட்ட GLM மாடல்கள், ஒதுக்கீடு URL-கள், GLMT காலக்கெடு/இயல்புநிலைகள்
+- Antigravity அப்ஸ்ட்ரீம்: `open-sse/config/antigravityUpstream.ts` — அடிப்படை URL மற்றும் கண்டுபிடிப்பு பாதை மாறிலிகள்
+- Codex கிளையன்ட் மாறிலிகள்: `open-sse/config/codexClient.ts` — பதிப்பிடப்பட்ட user-agent மற்றும் client-version மதிப்புகள்
+- மாடல் மாற்றுப் பெயர் விதை: `src/lib/modelAliasSeed.ts` — தொடக்கத்தில் 30+ குறுக்கு-ப்ராக்ஸி வட்டார வழக்கு மாற்றுப் பெயர்களை விதைக்கிறது
 
-டொமைன் அடுக்குத் தொகுதிகள்:
+டொமைன் அடுக்கு மொடியூல்கள்:
 
-- செலவு விதிகள்/வரவுசெலவுத் திட்டங்கள்: `src/domain/costRules.ts`
-- மாற்றுவழிக் கொள்கை: `src/domain/fallbackPolicy.ts`
-- சேர்க்கைத் தீர்மானிப்பான்: `src/domain/comboResolver.ts`
+- செலவு விதிகள்/பட்ஜெட்டுகள்: `src/domain/costRules.ts`
+- மாற்று (fallback) கொள்கை: `src/domain/fallbackPolicy.ts`
+- ஒதுக்கப்பட்ட காம்போ-தீர்வு ஒப்பந்தம்: `src/domain/comboResolver.ts`; நேரடி வழிசெலுத்தல் `open-sse/services/combo.ts` ஐப் பயன்படுத்துகிறது
 - பூட்டல் கொள்கை: `src/domain/lockoutPolicy.ts`
-- கொள்கை இயந்திரம்: `src/domain/policyEngine.ts` — மையப்படுத்தப்பட்ட பூட்டல் → வரவுசெலவுத் திட்டம் → மாற்றுவழி மதிப்பீடு
-- பிழைக் குறியீடுகள் பட்டியல்: `src/shared/constants/errorCodes.ts`
+- ஒதுக்கப்பட்ட கொள்கை-மதிப்பீட்டு ஒப்பந்தம்: `src/domain/policyEngine.ts`; கோரிக்கை பாதை API-விசை கொள்கையை `src/shared/utils/apiKeyPolicy.ts` வழியாகவும், தீர்க்கப்பட்ட-இலக்கு அங்கீகாரத்தை `src/sse/handlers/chat/resolvedModelPolicy.ts` வழியாகவும் நடைமுறைப்படுத்துகிறது
+- பிழை குறியீடுகள் பட்டியல்: `src/shared/constants/errorCodes.ts`
 - கோரிக்கை ID: `src/shared/utils/requestId.ts`
-- பெறுதல் காலக்கெடு: `src/shared/utils/fetchTimeout.ts`
-- கோரிக்கை தொலைஅளவீடு: `src/shared/utils/requestTelemetry.ts`
-- இணக்கப்பாடு/தணிக்கை: `src/lib/compliance/index.ts`
+- Fetch காலக்கெடு: `src/shared/utils/fetchTimeout.ts`
+- கோரிக்கை டெலிமெட்ரி: `src/shared/utils/requestTelemetry.ts`
+- இணக்கம்/தணிக்கை: `src/lib/compliance/index.ts`
 - மதிப்பீட்டு இயக்கி: `src/lib/evals/evalRunner.ts`
-- டொமைன் நிலை நிலைநிறுத்தம்: `src/lib/db/domainState.ts` — மாற்றுவழிச் சங்கிலிகள், வரவுசெலவுத் திட்டங்கள், செலவு வரலாறு, பூட்டல் நிலை மற்றும் சர்க்யூட் பிரேக்கர்களுக்கான SQLite CRUD
+- டொமைன் நிலை நிலைத்தன்மை: `src/lib/db/domainState.ts` — fallback சங்கிலிகள், பட்ஜெட்டுகள், செலவு வரலாறு, பூட்டல் நிலை, சர்க்யூட் பிரேக்கர்களுக்கான SQLite CRUD
 
-OAuth வழங்குநர் தொகுதிகள் (`src/lib/oauth/providers/`-இன் கீழ் 27 தனிப்பட்ட கோப்புகள்):
+OAuth வழங்குநர் மொடியூல்கள் (`src/lib/oauth/providers/` கீழ் 27 தனிப்பட்ட கோப்புகள்):
 
-- பதிவகச் சுட்டி: `src/lib/oauth/providers/index.ts`
+- பதிவேடு குறியீடு: `src/lib/oauth/providers/index.ts`
 - தனிப்பட்ட வழங்குநர்கள்: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- பகிரப்பட்ட உதவிச் செயலிகள்: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl சாதன ஓட்டம்), `museCodeDeviceResponse.ts`
-- மெல்லிய உறையாக்கி: `src/lib/oauth/providers.ts` — தனிப்பட்ட தொகுதிகளிலிருந்து மீள்-ஏற்றுமதி செய்கிறது
+- பகிரப்பட்ட உதவியாளர்கள்: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl சாதன ஓட்டம்), `museCodeDeviceResponse.ts`
+- மெல்லிய ரேப்பர்: `src/lib/oauth/providers.ts` — தனிப்பட்ட மொடியூல்களிலிருந்து மீள்-ஏற்றுமதி செய்கிறது
 
 ## 5) உட்பொதிக்கப்பட்ட சேவைகள் (v3.8.4)
 
@@ -356,163 +356,187 @@ OmniRoute நிறுவவும், மேற்பார்வையிட�
 
 விரிவான ஆய்வு: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## முக்கிய துணைஅமைப்புகள் (v3.8.0)
+## முக்கிய துணை அமைப்புகள் (v3.8.0)
 
-### A. தானியக்கக் கூட்டிணைப்பு இயந்திரம்
+### A. Auto Combo எஞ்சின்
 
-தானியக்கக் கூட்டிணைப்பு, நிலையான கூட்டிணைப்பு வரையறையைச் சார்ந்திருப்பதற்குப் பதிலாக,
-கோரிக்கை நேரத்தில் வழிப்படுத்தல் இலக்குகளுக்கு மாறும் வகையில் மதிப்பெண் அளித்து அவற்றைத்
-தேர்ந்தெடுக்கிறது. இது `auto/*` மாதிரி முன்னொட்டுக் குடும்பத்தை இயக்குகிறது.
+Auto Combo என்பது நிலையான காம்போ வரையறையைச் சார்ந்திருக்காமல், கோரிக்கை நேரத்தில் ரூட்டிங் இலக்குகளை மாறும் முறையில் மதிப்பெண் வழங்கித் தேர்ந்தெடுக்கிறது. இது `auto/*` மாடல் முன்னொட்டுக் குடும்பத்தை இயக்குகிறது.
 
-- இயந்திர நுழைவுப்புள்ளி: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
+- எஞ்சின் நுழைவு: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- தீர்வி: `src/domain/comboResolver.ts` (`auto/` முன்னொட்டைத் தானாகக் கண்டறிதல்)
-- கட்டுப்பாட்டுப் பலகை: `/dashboard/auto-combo`
-- தொலைஅளவியல்: `auto_combo_decisions` SQLite அட்டவணை
+- நேரடி காம்போ நுழைவு: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), `src/sse/handlers/chat.ts` ஆல் அழைக்கப்படுகிறது
+- டாஷ்போர்டு: `/dashboard/auto-combo`
+- டெலிமெட்ரி: `auto_combo_decisions` SQLite அட்டவணை
 
 முக்கிய திறன்கள்:
 
-- **20 வழிப்படுத்தல் உத்திகள்** (முன்னுரிமை, எடையிடப்பட்டது, முதலில்-நிரப்பு, சுழற்சி-முறை, P2C, சீரற்றது,
-  மிகக்-குறைவாகப்-பயன்படுத்தப்பட்டது, செலவு-உகப்பாக்கப்பட்டது, மீட்டமைப்பு-விழிப்புணர்வுடையது, மீட்டமைப்பு-சாளரம், இருப்புத்திறன், ஒதுக்கீடு-எடையிடப்பட்டது,
-  கண்டிப்பான-சீரற்றது, **தானியக்கம்**, lkgp, சூழல்-உகப்பாக்கப்பட்டது, தற்காலிகச் சேமிப்பு-உகப்பாக்கப்பட்டது, சூழல்-தொடரனுப்பல், **இணைவு**,
-  செயலாக்கத் தொடர்) —
-  v3.8.0 இன் முதன்மைச் சேர்க்கை தானியக்கம் ஆகும்; `fusion` (குழுப் பரவல் + நடுவர் தொகுப்பு,
-  `open-sse/services/fusion.ts`) v3.8.36 இல் புதிதாகச் சேர்க்கப்பட்டது.
-- **16-காரணி மதிப்பீடு**: ஒதுக்கீடு, ஆரோக்கியம், தலைகீழ் செலவு, தலைகீழ் தாமதம், பணிப் பொருத்தம் மற்றும்
-  மேலும் பத்து காரணிகள். காரணிகள் மற்றும் அவற்றின் இயல்புநிலை எடைகளுக்கான அதிகாரப்பூர்வ அட்டவணை
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) இல் உள்ளது — அதை இங்கே மீண்டும் குறிப்பிடுவது
-  காலாவதியாகக்கூடிய இரண்டாவது இடத்தை உருவாக்கிவிடும்.
-- பொருந்தும் பெயரிடப்பட்ட கூட்டிணைப்பு எதுவும் இல்லாதபோது, ஆரோக்கியமான செயலில் உள்ள வழங்குநர் இணைப்புகளிலிருந்து
-  தேர்வர்களைப் பெற்று, **மெய்நிகர் தொழிற்சாலை** தற்காலிகக் கூட்டிணைப்புகளை உருவாக்குகிறது.
-- **தானியக்க முன்னொட்டுகள்**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — ஒவ்வொன்றும் நேர்த்தியாகச் சரிசெய்யப்பட்ட எடைச் சுயவிவரத்தால் ஆதரிக்கப்படுகிறது.
-- **6 பயன்முறைத் தொகுப்புகள்**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` மற்றும் `chaos-mode` — கட்டுப்பாட்டுப் பலகையிலிருந்து அழைக்கக்கூடிய முன்னமைக்கப்பட்ட எடை உள்ளமைவுகள்.
-  (மேலே உள்ள `auto/*` முன்னொட்டுகளுடன் இவற்றைக் குழப்ப வேண்டாம்; அவை கோரிக்கை-நேர மாறுபாடுகள்.)
+- **20 ரூட்டிங் உத்திகள்** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
+  pipeline) —
+  auto என்பது v3.8.0 இன் தலைப்புச் சேர்க்கை; `fusion` (பேனல் ஃபேன்-அவுட் + ஜட்ஜ் சிந்தசிஸ்,
+  `open-sse/services/fusion.ts`) v3.8.36 இல் புதிது.
+- **16-காரணி மதிப்பீடு**: quota, health, inverse cost, inverse latency, task fit
+  மற்றும் மேலும் பத்து. காரணிகள் மற்றும் அவற்றின் இயல்புநிலை எடைகளின் அதிகாரப்பூர்வ அட்டவணை
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) இல் உள்ளது — அதை இங்கு மீண்டும்
+  கூறுவது அதற்குக் காலாவதியாவதற்கு இரண்டாவது இடத்தைத் தந்துவிடும்.
+- **விர்ச்சுவல் ஃபேக்டரி** பொருந்தும் பெயரிடப்பட்ட காம்போ எதுவும் இல்லாதபோது தற்காலிக
+  காம்போக்களை உருவாக்குகிறது, ஆரோக்கியமான செயலில் உள்ள புரொவைடர் இணைப்புகளிலிருந்து
+  வேட்பாளர்களைப் பெறுகிறது.
+- **ஆட்டோ முன்னொட்டுகள்**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
+  `auto/smart`, `auto/lkgp` — ஒவ்வொன்றும் சரிசெய்யப்பட்ட எடைச் சுயவிவரத்தால் ஆதரிக்கப்படுகிறது.
+- **6 மோட் பேக்குகள்**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
+  `reliability-first` மற்றும் `chaos-mode` — டாஷ்போர்டிலிருந்து அழைக்கக்கூடிய முன்னமைக்கப்பட்ட
+  எடைக் கட்டமைப்புகள். (மேலே உள்ள `auto/*` முன்னொட்டுகளுடன் குழப்பிக் கொள்ள வேண்டாம்,
+  அவை கோரிக்கை-நேர மாறுபாடுகள்.)
 
-முழுமையான வழிமுறை விவரங்களுக்கு (காரணி வாய்ப்பாடுகள், எடைச் சரிசெய்தல்),
+முழு அல்காரிதம் விவரங்களுக்கு (காரணி சூத்திரங்கள், எடை சரிசெய்தல்),
 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) ஐப் பார்க்கவும்.
 
-### B. மேக முகவர்கள்
+### B. கிளவுட் ஏஜென்ட்கள்
 
-மேக முகவர்கள், மூன்றாம் தரப்பு வழங்கும் ஹோஸ்ட் செய்யப்பட்ட குறியீட்டு-முகவர் தளங்களை (Codex Cloud, Devin,
-Jules), ஒரே மாதிரியான தரவுத்தள-ஆதரவுடைய பணிவாழ்க்கைச் சுழற்சிக்குப் பின்னால் பொதிகிறது. அனைத்து பணியுருவாக்கம்/ஆய்வு
-இறுதிப்புள்ளிகளுக்கும் மேலாண்மை அங்கீகரிப்பு தேவை.
+கிளவுட் ஏஜென்ட்கள் மூன்றாம் தரப்பு ஹோஸ்ட் செய்யப்பட்ட கோட்-ஏஜென்ட் தளங்களை (Codex Cloud, Devin,
+Jules) ஒரே மாதிரியான DB-ஆதரவு பணி வாழ்க்கைச் சுழற்சியின் பின்னால் மறைத்து வைக்கிறது.
+அனைத்து பணி உருவாக்கம்/ஆய்வு எண்ட்பாயின்ட்களுக்கும் மேலாண்மை அங்கீகாரம் தேவை.
 
-- தொகுதிக் மூலம்: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, மேலும் `agents/` இன் கீழுள்ள முகவர்-வாரியான துணைக்கோப்பகங்கள்)
-- முகவர்-வாரியான செயலாக்கங்கள்: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- பொது இறுதிப்புள்ளிகள்: `/api/v1/agents/tasks/*` (பட்டியலிடுதல்/உருவாக்குதல்/பெறுதல்/ரத்துசெய்தல்)
-- மேலாண்மை இறுதிப்புள்ளிகள்: `/api/cloud/*` (வழங்கல், நிலை, தொகுதி)
-- கட்டுப்பாட்டுப் பலகை: `/dashboard/cloud-agents`
-- சேமிப்பகம்: `cloud_agent_tasks` அட்டவணை
+- மாட்யூல் ரூட்: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
+  `types.ts`, `db.ts`, மற்றும் `agents/` கீழ் ஒவ்வொரு ஏஜென்டுக்குமான துணை அடைவுகள்)
+- ஒவ்வொரு ஏஜென்ட் செயலாக்கங்கள்: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- பொது எண்ட்பாயின்ட்கள்: `/api/v1/agents/tasks/*` (பட்டியலிடு/உருவாக்கு/பெறு/ரத்துசெய்)
+- மேலாண்மை எண்ட்பாயின்ட்கள்: `/api/cloud/*` (புரொவிஷனிங், நிலை, பேட்ச்)
+- டாஷ்போர்டு: `/dashboard/cloud-agents`
+- சேமிப்பு: `cloud_agent_tasks` அட்டவணை
 
-முகவர்-வாரியான வழங்கல் மற்றும் OAuth விவரங்களுக்கு,
+ஒவ்வொரு ஏஜென்டின் புரொவிஷனிங் மற்றும் OAuth விவரங்களுக்கு,
 [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) ஐப் பார்க்கவும்.
 
-### C. பாதுகாப்புத் தடுப்புகள்
+### C. கார்ட்ரெயில்ஸ்
 
-பாதுகாப்புத் தடுப்புகள் தொகுதி என்பது கோரிக்கைகள் மற்றும் பதில்களில் PII, தூண்டுரை உட்செலுத்தல் மற்றும்
-பாதுகாப்பற்ற காட்சி உள்ளடக்கம் உள்ளதா என்பதை ஆய்வுசெய்யும், இயங்குநிலையில் மீளேற்றக்கூடிய இடைநிலை மென்பொருள் அடுக்கு ஆகும். மீறல்கள்,
-கட்டமைக்கப்பட்ட பிழைக் குறியீட்டுடன் HTTP **503** ஐ வழங்கி கோரிக்கையை உடனடியாக நிறுத்துகின்றன; இதனால்
-கீழ்நிலை அழைப்பாளர்கள் மீண்டும் முயற்சிக்கவோ அல்லது வேறு கிளைக்குச் செல்லவோ முடியும்.
+கார்ட்ரெயில்ஸ் மாட்யூல் என்பது PII, ப்ராம்ட் இன்ஜெக்ஷன் மற்றும் பாதுகாப்பற்ற விஷன்
+உள்ளடக்கத்திற்காகக் கோரிக்கைகள் மற்றும் பதில்களை ஆய்வு செய்யும் ஹாட்-ரீலோடபிள் மிடில்வேர்
+அடுக்கு ஆகும். மீறல்கள் கோரிக்கையை HTTP **503** மற்றும் கட்டமைக்கப்பட்ட பிழைக் குறியீட்டுடன்
+ஷார்ட்-சர்க்யூட் செய்கின்றன, இதனால் பின்னடைவு அழைப்பாளர்கள் மீண்டும் முயற்சிக்கலாம் அல்லது
+கிளைக்கலாம்.
 
-- தொகுதிக் மூலம்: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
+- மாட்யூல் ரூட்: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
   `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- இயங்குநிலை மீளேற்றம்: பதிவகம் உள்ளமைவு மாற்றங்களைக் கண்காணித்து, சங்கிலியை அதே இடத்தில் மீண்டும் உருவாக்குகிறது
-- இணைப்புப் புள்ளிகள்: அரட்டை கையாளியின் நுழைவு, பட உருவாக்கக் கையாளி, பதில் தூய்மைப்படுத்தி
-- HTTP ஒப்பந்தம்: மீறல்கள் `error.code = "GUARDRAIL_VIOLATION"` உடன் `503` ஆக வெளிப்படும்
+- ஹாட் ரீலோடு: ரிஜிஸ்ட்ரி கான்ஃபிக் மாற்றங்களைக் கண்காணித்து, செயினை அதே இடத்தில் மீண்டும் உருவாக்குகிறது
+- வயர்-இன் புள்ளிகள்: சாட் ஹேண்ட்லர் நுழைவு, இமேஜ் ஜெனரேஷன் ஹேண்ட்லர், ரெஸ்பான்ஸ் சானிடைசர்
+- HTTP ஒப்பந்தம்: மீறல்கள் `503` ஆக `error.code = "GUARDRAIL_VIOLATION"` உடன் வெளிப்படுகின்றன
 
-விதித்தொகுப்பு உருவாக்கம் மற்றும் வரம்பு நேர்த்திசெய்தல் குறித்து,
+ரூல்செட் உருவாக்கம் மற்றும் த்ரெஷோல்டு சரிசெய்தலுக்கு,
 [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) ஐப் பார்க்கவும்.
 
-### D. கள அடுக்கு
+### D. டொமைன் லேயர்
 
-வழித்தடக் கையாளிகள் பூட்டல்/நிதிநிலை/மாற்றுவழித் தர்க்கத்தைத் தாமாக ஒருங்கிணைக்க வேண்டியிருக்காதவாறு,
-`src/domain/` பெயர்வெளி கொள்கைத் தீர்மானங்களை மையப்படுத்துகிறது.
+`src/domain/` நேம்ஸ்பேஸ் டொமைன் சேவைகள் மற்றும் ஒதுக்கப்பட்ட மதிப்பீட்டு ஒப்பந்தங்களைக்
+கொண்டுள்ளது. இது ஒவ்வொரு கோரிக்கைக்கும் ஒரே கட்டாய கொள்கை நுழைவுப் புள்ளி அல்ல.
 
-- கொள்கை இயந்திரம்: `src/domain/policyEngine.ts` — செயலாக்கத்திற்கு முந்தைய
-  மதிப்பீட்டிற்கான ஒற்றை நுழைவுப்புள்ளி (பூட்டல் → நிதிநிலை → மாற்றுவழி வரிசைப்படுத்தல்)
+நேரடி சாட் பாதை `src/shared/utils/apiKeyPolicy.ts` இலிருந்து `enforceApiKeyPolicy()` ஐ
+அழைக்கிறது; தீர்க்கப்பட்ட மாடல்கள் மற்றும் காம்போ உறுப்பினர்களின் அங்கீகாரம்
+`src/sse/handlers/chat/resolvedModelPolicy.ts` இல் செயல்படுத்தப்படுகிறது.
+`src/app/api/v1/chat/completions/route.ts` இல் உள்ள செல்ஃப்-ஹோஸ்டட் நுழைவும் அனுப்புவதற்கு முன்
+API-key கொள்கையைச் செயல்படுத்துகிறது. காம்போ தீர்வு `open-sse/services/combo.ts` வழியாக
+இயங்குகிறது.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` மற்றும் `src/lib/container.ts`
+ஆகியவை சோதிக்கப்பட்ட ஒப்பந்தங்களாக உள்ளன, அந்தக் கோரிக்கைப் பாதையின் வயரிங் அல்ல.
+கண்டெய்னர் பாலிசி எஞ்சினைப் பதிவு செய்கிறது, ஆனால் ஆய்வு செய்யப்பட்ட புரொடக்ஷன் கோரிக்கைப்
+பாதை அதைத் தீர்க்காது. அந்த ஒப்பந்தங்களை மட்டும் மாற்றுவது நேரடி சாட் கொள்கையையோ அல்லது
+காம்போ ரூட்டிங்கையோ மாற்றாது; அவற்றை இணைப்பது அல்லது நீக்குவது தனி வடிவமைப்பு முடிவை
+தேவைப்படுத்துகிறது.
+
+- ஒதுக்கப்பட்ட பாலிசி எஞ்சின்: `src/domain/policyEngine.ts` — லாக்அவுட் → பட்ஜெட் → ஃபால்பேக் மதிப்பீடு
 - செலவு விதிகள்: `src/domain/costRules.ts`
-- மாற்றுவழிக் கொள்கை: `src/domain/fallbackPolicy.ts`
-- பூட்டல் கொள்கை: `src/domain/lockoutPolicy.ts`
-- குறிச்சொல்-அடிப்படையிலான வழிப்படுத்தல்: `src/domain/tagRouter.ts`
-- கூட்டிணைப்புத் தீர்வி: `src/domain/comboResolver.ts` — கூட்டிணைப்புப் பெயர்கள், auto/\*
-  முன்னொட்டுகள் மற்றும் மாற்றுக்குறி மாதிரி இலக்குகளைத் திடமான செயலாக்கத் திட்டங்களாகத் தீர்க்கிறது
-- இணைப்பு/மாதிரி விதி இணைப்பி: `src/domain/connectionModelRules.ts`
-- மாதிரிக் கிடைப்புநிலை நொடிப்படங்கள்: `src/domain/modelAvailability.ts`
-- வழங்குநர் காலாவதிக் கண்காணிப்பு: `src/domain/providerExpiration.ts`
-- ஒதுக்கீட்டுத் தற்காலிகச் சேமிப்பு: `src/domain/quotaCache.ts`
+- ஃபால்பேக் கொள்கை: `src/domain/fallbackPolicy.ts`
+- லாக்அவுட் கொள்கை: `src/domain/lockoutPolicy.ts`
+- டேக்-அடிப்படையிலான ரூட்டிங்: `src/domain/tagRouter.ts`
+- ஒதுக்கப்பட்ட காம்போ ரிசால்வர்: `src/domain/comboResolver.ts` — தனித்த தேர்வு ஒப்பந்தம்; நேரடி காம்போ ரூட்டிங் `open-sse/services/combo.ts` இல் செயல்படுத்தப்படுகிறது
+- இணைப்பு/மாடல் விதி இணைப்பான்: `src/domain/connectionModelRules.ts`
+- மாடல் கிடைக்கும் தன்மை ஸ்னாப்ஷாட்டுகள்: `src/domain/modelAvailability.ts`
+- புரொவைடர் காலாவதி கண்காணிப்பு: `src/domain/providerExpiration.ts`
+- கோட்டா கேஷ்: `src/domain/quotaCache.ts`
 - தரக்குறைவு நிலை: `src/domain/degradation.ts`
-- உள்ளமைவுத் தணிக்கை: `src/domain/configAudit.ts`
-- OmniRoute பதில் மேனிலைத் தரவு உருவாக்கி: `src/domain/omnirouteResponseMeta.ts`
-- மதிப்பீட்டுத் துணைஅமைப்பு: `src/domain/assessment/` — காலமுறை மதிப்பீட்டுப் பணிகள்
+- கட்டமைப்புத் தணிக்கை: `src/domain/configAudit.ts`
+- OmniRoute ரெஸ்பான்ஸ் மெட்டாடேட்டா பில்டர்: `src/domain/omnirouteResponseMeta.ts`
+- அசெஸ்மென்ட் துணை அமைப்பு: `src/domain/assessment/` — ஆவர்த்தன மதிப்பீட்டுப் பணிகள்
 
-### E. அங்கீகாரச் செயலாக்கத் தொடர்
+### E. அங்கீகார பைப்லைன்
 
-அங்கீகாரச் செயலாக்கத் தொடர், உள்வரும் ஒவ்வொரு கோரிக்கையையும் வகைப்படுத்தி, அனுப்பிவைப்பதற்கு முன்
-பொருத்தமான கொள்கைச் சங்கிலியைப் பயன்படுத்துகிறது.
+அங்கீகார பைப்லைன் ஒவ்வொரு உள்வரும் கோரிக்கையையும் வகைப்படுத்தி, அனுப்புவதற்கு முன்
+பொருத்தமான கொள்கை செயினைப் பயன்படுத்துகிறது.
 
-- செயலாக்கத் தொடர் நுழைவு: `src/server/authz/pipeline.ts`
-- கோரிக்கை வகைப்படுத்தி: `src/server/authz/classify.ts` — பொது
-  இணக்கத்தன்மை வழித்தடங்களை மேலாண்மை வழித்தடங்களிலிருந்து வேறுபடுத்துகிறது
-- பொது வழித்தடப் பட்டியல்: `src/shared/constants/publicApiRoutes.ts`
-- கொள்கைகள்: `src/server/authz/policies/` — ஒன்றிணைக்கக்கூடிய நிபந்தனைகள்
+- பைப்லைன் நுழைவு: `src/server/authz/pipeline.ts`
+- கோரிக்கை வகைப்படுத்தி: `src/server/authz/classify.ts` — பொது இணக்க
+  வழிகளை நிர்வாக வழிகளிலிருந்து வேறுபடுத்துகிறது
+- பொது வழி பட்டியல்: `src/shared/constants/publicApiRoutes.ts`
+- கொள்கைகள்: `src/server/authz/policies/` — இணைக்கக்கூடிய நிபந்தனைகள்
   (`requireApiKey`, `requireManagement`, `requireFreshAuth`, போன்றவை)
 - தலைப்பு பயன்பாடுகள்: `src/server/authz/headers.ts`
-- உறுதிப்படுத்தல் உதவி: `src/server/authz/assertAuth.ts`
-- கோரிக்கைச் சூழல்: `src/server/authz/context.ts`
+- உறுதிப்படுத்தல் உதவியாளர்: `src/server/authz/assertAuth.ts`
+- கோரிக்கை சூழல்: `src/server/authz/context.ts`
 
-பொது மற்றும் மேலாண்மை வழித்தடங்களுக்கு இடையிலானது கண்டிப்பான எல்லையாகும்: முகவர்/காத்திருப்புக் கால API-கள் மற்றும்
-வழங்குநர் மாற்றங்களுக்கு மேலாண்மை அங்கீகரிப்பு தேவை (இல்லையெனில் HTTP 401).
+பொது மற்றும் நிர்வாக வழிகள் ஒரு கடுமையான எல்லை: agent/cooldown APIகள் மற்றும்
+வழங்குநர் மாற்றங்களுக்கு நிர்வாக அங்கீகாரம் தேவை (இல்லையென்றால் HTTP 401).
 
-முழுமையான வழித்தட வகைப்பாட்டு விதிகளுக்கு,
+முழு வழி வகைப்பாட்டு விதிகளுக்கு,
 [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ஐப் பார்க்கவும்.
 
-### F. பணிப்பாய்வு FSM மற்றும் பணி-விழிப்புணர்வுள்ள வழிப்படுத்தி
+### F. பணிப்பாய்வு FSM மற்றும் பணி-உணர்வு ரூட்டர்
 
-கண்டறியப்பட்ட பணிப்பாய்வு கட்டம் (திட்டமிடல், செயலாக்கம்,
-மதிப்பாய்வு) மற்றும் பின்னணிப் பணி நாட்டம் ஆகியவற்றின் அடிப்படையில் போக்குவரத்தை வழிநடத்த, கூட்டிணைப்புத் தேர்வுக்கு மேலே அடுக்கப்பட்ட
-வரையறுக்கப்பட்ட-நிலை-இயந்திரத்தால் இயக்கப்படும் வழிப்படுத்தி.
+கண்டறியப்பட்ட பணிப்பாய்வு நிலை (திட்டமிடல், செயலாக்கம்,
+மதிப்பாய்வு) மற்றும் பின்னணி-பணி இணைப்பின் அடிப்படையில் போக்குவரத்தை
+வழிநடத்த, காம்போ தேர்வுக்கு மேலே அடுக்கப்பட்ட ஒரு வரையறுக்கப்பட்ட-நிலை-இயந்திரம்
+இயக்கும் ரூட்டர்.
 
 - பணிப்பாய்வு FSM: `open-sse/services/workflowFSM.ts`
-- பணி-விழிப்புணர்வுள்ள வழிப்படுத்தி: `open-sse/services/taskAwareRouter.ts`
-- பின்னணிப் பணி கண்டறிவான்: `open-sse/services/backgroundTaskDetector.ts`
+- பணி-உணர்வு ரூட்டர்: `open-sse/services/taskAwareRouter.ts`
+- பின்னணி பணி கண்டறிதல்: `open-sse/services/backgroundTaskDetector.ts`
 - நோக்க வகைப்படுத்தி: `open-sse/services/intentClassifier.ts`
 
-FSM நிலைமாற்றங்கள் Auto Combo-வின் மதிப்பீட்டிற்கு உள்ளீடாக அமைகின்றன; பின்னணி/தானியக்கப் பணிகளுக்கு மலிவான மாதிரிகளையும், ஊடாடும் திட்டமிடல்/மதிப்பாய்வுச் சுற்றுகளுக்கு அதிகத் திறனுள்ள மாதிரிகளையும் தேர்ந்தெடுக்கும் வகையில் சார்புநிலையை ஏற்படுத்துகின்றன.
+FSM மாற்றங்கள் Auto Combo-வின் மதிப்பீட்டிற்கு உள்ளீடாகச் செல்கின்றன;
+பின்னணி/ஆட்டோமேஷன் பணிகளுக்கு மலிவான மாதிரிகளை நோக்கியும், ஊடாடும்
+திட்டமிடல்/மதிப்பாய்வு சுற்றுகளுக்கு வலுவான மாதிரிகளை நோக்கியும் சார்பு
+ஏற்படுத்துகின்றன.
 
-### G. வழங்குநர்-சார்ந்த மீள்திறன்
+### G. வழங்குநர்-குறிப்பிட்ட மீள்தன்மை
 
-பல வழங்குநர்கள், உலகளாவிய circuit breaker / இணைப்பு cooldown / மாதிரி lockout அடுக்குகளுடன் இணைந்து செயல்படும் பிரத்யேக மீள்திறன் மற்றும் மறைநிலைத் தொகுதிகளை வழங்குகின்றனர்:
+பல வழங்குநர்கள், உலகளாவிய சர்க்யூட் பிரேக்கர் / இணைப்பு கூல்டவுன் / மாதிரி
+லாக்அவுட் அடுக்குகளின் மீது சார்ந்து இயங்கும் அர்ப்பணிக்கப்பட்ட மீள்தன்மை
+மற்றும் ஸ்டெல்த் தொகுதிகளை வழங்குகின்றனர்:
 
-- Antigravity 429 இயந்திரம்: `open-sse/services/antigravity429Engine.ts` (அடையாளத்தைச் சுழற்சி முறையில் மாற்றுகிறது, பதில் தலைப்புகளைத் தூய்மைப்படுத்துகிறது, மேலும்
+- Antigravity 429 இயந்திரம்: `open-sse/services/antigravity429Engine.ts` (அடையாளத்தை
+  சுழற்றுகிறது, பதில் தலைப்புகளை துடைக்கிறது, கிரெடிட்ஸ்/பதிப்பு கண்காணிப்பை
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts` ஆகியவற்றின் மூலம் கிரெடிட்கள்/பதிப்பு கண்காணிப்பை இயக்குகிறது)
+  `antigravityIdentity.ts`, `antigravityVersion.ts` வழியாக இயக்குகிறது)
 - ModelScope ஒதுக்கீட்டுக் கொள்கை: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (இணக்கத்தன்மை சேனல் கைகுலுக்கல்): `open-sse/services/claudeCodeCCH.ts`,
-  மேலும் `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
+- Claude Code CCH (இணக்க சேனல் கைகுலுக்கம்): `open-sse/services/claudeCodeCCH.ts`,
+  மற்றும் `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
   `claudeCodeToolRemapper.ts`
-- Claude Code கைரேகை வடிவமைப்பு: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code மறைவாக்கம்: `open-sse/services/claudeCodeObfuscation.ts`
+- Claude Code ஃபிங்கர்பிரிண்ட் வடிவமைப்பு: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Code மறைப்பு: `open-sse/services/claudeCodeObfuscation.ts`
 
-முழுமையான மறைநிலைச் செயல்திட்டம் மற்றும் செயல்பாட்டு வழிகாட்டுதலுக்கு,
-`docs/security/STEALTH_GUIDE.md`-ஐப் பார்க்கவும் (git; `/docs`-க்குள் தொகுக்கப்படவில்லை).
+முழு ஸ்டெல்த் நடைமுறைக் கையேடு மற்றும் செயல்பாட்டு வழிகாட்டுதலுக்கு,
+`docs/security/STEALTH_GUIDE.md` ஐப் பார்க்கவும் (git; `/docs`-இல் தொகுக்கப்படவில்லை).
 
-### H. Webhooks, சிந்தனை Cache, வாசிப்பு Cache
+### H. Webhooks, பகுத்தறிவு கேச், வாசிப்பு கேச்
 
-- **Webhooks** — வழங்குநர்/கணக்கு/பணி நிகழ்வுகளுக்கான வெளிச்செல்லும் அனுப்புகை.
-  - அனுப்புநர்: `src/lib/webhookDispatcher.ts`
-  - சேமிப்பகம்: `webhooks` SQLite அட்டவணை (`src/lib/db/webhooks.ts` மூலம்)
-  - கட்டுப்பாட்டகம்: `/dashboard/webhooks` (சந்தாக்கள், இரகசியங்கள், மறுமுயற்சி வரலாறு)
-  - நிகழ்வு வகைப்பாடு மற்றும் மறுமுயற்சிச் சொற்பொருளியலுக்கு, [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)-ஐப் பார்க்கவும்.
-- **சிந்தனை Cache** — சிந்தனை token-களை வெளியிடும் வழங்குநர்களுக்கான (Claude, GLMT போன்றவை) மீண்டும் இயக்கக்கூடிய சிந்தனைத் தொகுதிகள்; இதனால் தொடர்ச்சியான சுற்றுகள் மீண்டும் சிந்திப்பதைத் தவிர்க்கலாம்.
+- **Webhooks** — வழங்குநர்/கணக்கு/பணி நிகழ்வுகளுக்கான வெளிச்செல்லும் அனுப்புதல்.
+  - டிஸ்பேச்சர்: `src/lib/webhookDispatcher.ts`
+  - சேமிப்பு: `webhooks` SQLite அட்டவணை (`src/lib/db/webhooks.ts` வழியாக)
+  - டாஷ்போர்டு: `/dashboard/webhooks` (சந்தாக்கள், ரகசியங்கள், மீள்முயற்சி வரலாறு)
+  - நிகழ்வு வகையியல் மற்றும் மீள்முயற்சி சொற்பொருளியலுக்கு, [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) ஐப் பார்க்கவும்.
+- **பகுத்தறிவு கேச்** — சிந்தனை டோக்கன்களை வெளியிடும் வழங்குநர்களுக்கான
+  (Claude, GLMT போன்றவை) மீண்டும் இயக்கக்கூடிய பகுத்தறிவு தொகுதிகள்; இதனால்
+  தொடர்ச்சியான சுற்றுகள் மீண்டும் சிந்திப்பதைத் தவிர்க்கலாம்.
   - DB அடுக்கு: `src/lib/db/reasoningCache.ts`
   - சேவை அடுக்கு: `open-sse/services/reasoningCache.ts`
-  - மீண்டும் இயக்கும் சொற்பொருளியலுக்கு, [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)-ஐப் பார்க்கவும்.
-- **வாசிப்பு Cache** — கையொப்பத்தின் அடிப்படையில் விசைப்படுத்தப்பட்ட, குறுகிய காலம் நீடிக்கும் பதில் cache; செயலிழந்த upstream SDK-களிலிருந்து வரும் ஒரே மாதிரியான மறுமுயற்சிகளை ஒன்றிணைக்கப் பயன்படுகிறது.
+  - மீளியக்க சொற்பொருளியலுக்கு, [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) ஐப் பார்க்கவும்.
+- **வாசிப்பு கேச்** — கையொப்பத்தை விசையாகக் கொண்ட குறுகிய-ஆயுள் பதில் கேச்;
+  உடைந்த அப்ஸ்ட்ரீம் SDKகளிலிருந்து வரும் ஒத்த மீள்முயற்சிகளை ஒன்றாக்கப்
+  பயன்படுகிறது.
   - DB அடுக்கு: `src/lib/db/readCache.ts`
-  - புள்ளிவிவர endpoint: `GET /api/cache/stats`, கட்டுப்பாட்டகம்: `/dashboard/cache`
+  - புள்ளிவிவர முனைப்பு: `GET /api/cache/stats`, டாஷ்போர்டு `/dashboard/cache`-இல்
 
 ## 3) நிலைத்தன்மை அடுக்கு
 
