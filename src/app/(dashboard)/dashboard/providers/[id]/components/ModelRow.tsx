@@ -242,7 +242,7 @@ export function ModelVisibilityToolbar({
           icon="bar_chart"
           onClick={onCompare}
           disabled={compareDisabled}
-          title={providerText(t, "compareModels", "Compare intelligence")}
+          title={providerText(t, "compareModelsTitle", "Compare intelligence")}
         >
           <span>{providerText(t, "compareModels", "Compare")}</span>
         </Button>
