@@ -57,3 +57,15 @@ test("3. the early-keepalive and bypass-stream constructors carry the header", (
     "bypassResponse's synthetic SSE response must set X-Accel-Buffering: no"
   );
 });
+
+test("4. the semantic-cache SSE hit carries the header; JSON hits stay clean", () => {
+  const semanticCache = fs.readFileSync(
+    path.join(ROOT, "open-sse/handlers/chatCore/semanticCache.ts"),
+    "utf-8"
+  );
+  assert.match(
+    semanticCache,
+    /if \(cachedSse\) \{\s*\n\s*headers\["X-Accel-Buffering"\] = "no";/,
+    "the X-Accel-Buffering header must be set only for cachedSse responses"
+  );
+});
