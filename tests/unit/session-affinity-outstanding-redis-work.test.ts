@@ -55,6 +55,11 @@ function readLocal(key: string) {
   return local.get(key, "codex", ttl, now + 10);
 }
 
+// Open the SQLite fallback (connection + migrations) before any timed batch: otherwise the
+// first batch's fallback writes pay that one-off cost inside the deadline window below.
+test.before(() => {
+  readLocal("synthetic-warmup");
+});
 test.beforeEach((t) => {
   t.mock.method(console, "warn", () => {});
 });
