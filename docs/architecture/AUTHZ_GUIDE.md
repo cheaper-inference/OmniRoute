@@ -66,18 +66,31 @@ supplemented:
 - `GET /api/auth/oidc/callback` validates `state`, exchanges the authorization
   code, and verifies the ID token's signature via the issuer's JWKS
   (`jose`'s `createRemoteJWKSet`, cached per JWKS URI) with `issuer`/`audience`
-  checks. The `oidcAllowedSubjects` allowlist is required: it matches the
-  token's `sub` claim or its `email` claim — the email claim is only honored
-  when `email_verified === true`, so an unverified email at the IdP can never
-  pass the gate — and with no entries the callback refuses every login
-  (`not_configured`).
+  checks. Dashboard admission requires a nonempty `oidcAllowedSubjects` list,
+  an `oidcAdmissionClaim` policy, or both. The subject list matches `sub` or
+  `email` only when `email_verified === true`. The optional claim policy takes
+  a dot-separated ID-token claim path (for example, `realm_access.roles`) and
+  an array of accepted values; the resolved claim must be an array of strings
+  containing at least one accepted value. If both policies are configured,
+  both must pass. Missing/malformed claims fail closed, and without either
+  policy the callback refuses login (`not_configured`). Existing subject-only
+  configurations continue unchanged.
+- Keycloak normally maps realm roles into access tokens, not necessarily ID
+  tokens. To require the realm role `admin`, configure a protocol mapper for
+  this client that includes `realm_access.roles` in its **ID token**, then set
+  `oidcAdmissionClaim` to `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Check the actual ID-token claim for this client before enabling role-only
+  admission; the application does not read access-token roles. IdP-side token
+  refusal can supplement but does not replace this application-side check.
 - On success it mints the **exact same** 30-day `auth_token` JWT the password
   login issues (`src/app/api/auth/login/route.ts`), so the rest of the
   dashboard session pipeline (auto-refresh, cookie flags) is unchanged —
-  OIDC only replaces how the cookie gets minted, not what it grants.
+  OIDC only replaces how the cookie gets minted, not what it grants. Changes
+  to IdP roles/groups do not invalidate existing OmniRoute sessions; logout,
+  password rotation, or session expiry still govern their lifetime.
 - Every `oidc*` setting (`oidcEnabled`, `oidcDisablePasswordLogin`,
   `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) is in `SECURITY_IMPACTING_SETTINGS_KEYS`
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) is in `SECURITY_IMPACTING_SETTINGS_KEYS`
   (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
   answers `400 PASSWORD_REQUIRED` unless the body carries the management
   password as `currentPassword` (`401 PASSWORD_MISMATCH` when it is wrong).

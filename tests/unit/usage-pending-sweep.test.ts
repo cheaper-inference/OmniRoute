@@ -7,10 +7,12 @@ const {
   getPendingRequests,
   sweepStalePendingRequests,
   getMaxPendingRequestAgeMs,
+  getMaxPendingDetails,
   getPendingRetainedBytes,
   finalizePendingRequestById,
   updatePendingRequestById,
   updatePendingRequest,
+  updatePendingRequestStreamChunks,
   clearPendingRequests,
 } = await import("../../src/lib/usage/usageHistory.ts");
 
@@ -133,7 +135,9 @@ test("UPDATE path measures payloads (regression: the ceiling must not no-op in p
   updatePendingRequest("m", "p", "c-b", { providerResponse: worstCaseObject });
   assert.equal(getPendingRetainedBytes(), afterBucket, "replacing a payload must not accumulate");
 
-  // Enough entries to exceed the ceiling, each fattened through the update path.
+  // After inserting enough fat entries, the byte ceiling should cap retained bytes.
+  // Insert entries until we're at or near the ceiling, then verify we can't exceed it
+  // by adding more payloads — the ceiling should reclaim or refuse.
   const CEILING = 256 * 1024 * 1024;
   const perEntry = afterById - afterInsertA;
   const extra = Math.ceil(CEILING / perEntry) + 50;
@@ -142,10 +146,12 @@ test("UPDATE path measures payloads (regression: the ceiling must not no-op in p
     assert.ok(nextId);
     updatePendingRequestById(nextId, { providerResponse: worstCaseObject });
   }
+  // After the burst, retained bytes should be close to but not exceed the ceiling.
   assert.ok(
-    getPendingRetainedBytes() > CEILING,
-    `the map should now exceed the ceiling (retained ${getPendingRetainedBytes()})`
+    getPendingRetainedBytes() <= CEILING * 1.01,
+    `the map should stay at or near the ceiling after a fat insert burst (retained ${getPendingRetainedBytes()})`
   );
+
   trackPendingRequest("m", "p", "c-trigger", true);
   assert.ok(
     getPendingRetainedBytes() <= CEILING,
@@ -156,11 +162,93 @@ test("UPDATE path measures payloads (regression: the ceiling must not no-op in p
   assert.equal(getPendingRetainedBytes(), 0, "clear resets retained bytes");
 });
 
-test("sweepStalePendingRequests marks over-age pending details and keeps counts", () => {
+test("UPDATE path enforces the byte ceiling when growing bare entries (regression)", () => {
+  clearPendingRequests();
+
+  const worstCaseString = "x".repeat(1200);
+  const worstCaseArray = Array.from({ length: 12 }, () => ({
+    role: "user",
+    content: worstCaseString,
+  }));
+  const worstCaseObject = Object.fromEntries(
+    Array.from({ length: 24 }, (_, i) => [`key${i}`, worstCaseArray])
+  );
+  const ceiling = 256 * 1024 * 1024;
+  const count = getMaxPendingDetails();
+  const ids: string[] = [];
+
+  // Keep insertion below the byte ceiling, then grow every entry through the
+  // update path. Without update-time enforcement, the count-capped map exceeds
+  // the byte ceiling because each protected preview is larger than 1/5000 of it.
+  for (let i = 0; i < count; i++) {
+    const id = trackPendingRequest("m", "p", `c-update-${i}`, true);
+    assert.ok(id, "id tracked");
+    ids.push(id);
+  }
+  assert.ok(getPendingRetainedBytes() < ceiling, "bare inserts stay below the byte ceiling");
+
+  for (const id of ids) {
+    updatePendingRequestById(id, { providerResponse: worstCaseObject });
+  }
+
+  assert.ok(
+    getPendingRetainedBytes() <= ceiling,
+    `update-time growth must stay under the ${ceiling} byte ceiling`
+  );
+  assert.ok(
+    getPendingById().size < count,
+    "update-time byte enforcement must evict entries after the count cap is reached"
+  );
+
+  clearPendingRequests();
+  assert.equal(getPendingRetainedBytes(), 0, "clear resets retained bytes");
+});
+
+test("stream-chunks update path is measured and re-enforces the ceiling (regression)", () => {
+  clearPendingRequests();
+
+  // A bare entry retains almost nothing; chunks arrive later via the
+  // streaming path. Before the fix, growing chunks were neither measured nor
+  // enforced, so the byte ceiling silently stopped binding for streams.
+  const id = trackPendingRequest("m", "p", "c-stream", true);
+  assert.ok(id, "id tracked");
+  const afterInsert = getPendingRetainedBytes();
+
+  const bigChunk = "y".repeat(1200);
+  updatePendingRequestStreamChunks("m", "p", "c-stream", {
+    provider: [bigChunk],
+  });
+  const afterChunks = getPendingRetainedBytes();
+  assert.ok(
+    afterChunks > afterInsert,
+    `stream-chunks update must be measured (insert ${afterInsert} -> ${afterChunks})`
+  );
+
+  // Replacing with the same-size payload must not accumulate.
+  updatePendingRequestStreamChunks("m", "p", "c-stream", {
+    provider: [bigChunk],
+  });
+  assert.equal(getPendingRetainedBytes(), afterChunks, "replacing a payload must not accumulate");
+
+  // Clearing chunks must drop the retained bytes back down.
+  updatePendingRequestStreamChunks("m", "p", "c-stream", null);
+  assert.ok(
+    getPendingRetainedBytes() < afterChunks,
+    "clearing stream chunks must reclaim their bytes"
+  );
+
+  clearPendingRequests();
+  assert.equal(getPendingRetainedBytes(), 0, "clear resets retained bytes");
+});
+
+test("sweepStalePendingRequests prunes then removes over-age pending details after a grace period", () => {
   clearPendingRequests();
 
   // One request that will age past the max age (still in flight), one fresh.
-  const staleId = trackPendingRequest("gpt-x", "openai", "conn-stale", true);
+  const staleId = trackPendingRequest("gpt-x", "openai", "conn-stale", true, {
+    providerResponse: { body: "x".repeat(20_000) },
+    correlationId: "corr-stale",
+  });
   const freshId = trackPendingRequest("gpt-x", "openai", "conn-fresh", true);
 
   assert.ok(staleId && freshId, "both started requests should produce ids");
@@ -170,6 +258,15 @@ test("sweepStalePendingRequests marks over-age pending details and keeps counts"
   // Age the stale entry well beyond the max age.
   const stale = getPendingById().get(staleId);
   assert.ok(stale, "stale detail should exist");
+  stale.tokens = {
+    in: 12,
+    out: 34,
+    cacheRead: null,
+    cacheCreation: null,
+    reasoning: null,
+    compressed: null,
+  };
+  const retainedBeforeSweep = getPendingRetainedBytes();
   stale.startedAt = Date.now() - 2 * HOUR_MS;
 
   const removed = sweepStalePendingRequests(Date.now(), HOUR_MS);
@@ -179,6 +276,12 @@ test("sweepStalePendingRequests marks over-age pending details and keeps counts"
   const marked = getPendingById().get(staleId);
   assert.equal(marked?.stale, true, "over-age entry should be marked");
   assert.ok(typeof marked?.sweptAt === "number", "marked entry should carry a sweep timestamp");
+  assert.equal(marked?.providerResponse, undefined, "stale payloads should be pruned");
+  assert.deepEqual(marked?.tokens, stale.tokens, "lightweight token metadata should be preserved");
+  assert.ok(
+    getPendingRetainedBytes() < retainedBeforeSweep,
+    "pruning stale payloads must reduce retained-byte accounting"
+  );
   assert.ok(getPendingById().has(freshId), "fresh entry must survive");
   assert.equal(getPendingById().get(freshId)?.stale, undefined);
 
@@ -186,6 +289,18 @@ test("sweepStalePendingRequests marks over-age pending details and keeps counts"
   assert.equal(getPendingRequests().byModel["gpt-x (openai)"], 2);
   assert.equal(getPendingRequests().byAccount["conn-stale"]["gpt-x (openai)"], 1);
   assert.equal(getPendingRequests().byAccount["conn-fresh"]["gpt-x (openai)"], 1);
+
+  const removedAfterGrace = sweepStalePendingRequests(Date.now() + 5 * MINUTE_MS, HOUR_MS);
+  assert.equal(removedAfterGrace, 1);
+  assert.equal(getPendingById().has(staleId), false, "stale detail should be physically removed");
+  assert.equal(getPendingRequests().byModel["gpt-x (openai)"], 1);
+  assert.equal(getPendingRequests().byAccount["conn-stale"], undefined);
+  assert.equal(getPendingById().has(freshId), true, "fresh detail must remain");
+  const replacementId = trackPendingRequest("gpt-x", "openai", "conn-retry", true, {
+    correlationId: "corr-stale",
+  });
+  assert.ok(replacementId);
+  assert.notEqual(replacementId, staleId, "removed stale correlation IDs must not be reused");
 
   clearPendingRequests();
 });
@@ -261,6 +376,57 @@ test("invalid pending sweep max age falls back to one hour", () => {
   } finally {
     if (previous === undefined) delete process.env.MAX_PENDING_REQUEST_AGE_MS;
     else process.env.MAX_PENDING_REQUEST_AGE_MS = previous;
+  }
+});
+
+test("pending detail cap is configurable through the environment", () => {
+  const previous = process.env.MAX_PENDING_DETAILS;
+  process.env.MAX_PENDING_DETAILS = "17";
+
+  try {
+    assert.equal(getMaxPendingDetails(), 17);
+    assert.equal(getMaxPendingDetails("0"), 5000);
+    assert.equal(getMaxPendingDetails("-1"), 5000);
+    assert.equal(getMaxPendingDetails("1.5"), 5000);
+    assert.equal(getMaxPendingDetails("not-a-number"), 5000);
+  } finally {
+    if (previous === undefined) delete process.env.MAX_PENDING_DETAILS;
+    else process.env.MAX_PENDING_DETAILS = previous;
+  }
+});
+
+test("pending correlation map is immediately bounded by the configured detail cap", () => {
+  clearPendingRequests();
+  const previous = process.env.MAX_PENDING_DETAILS;
+  process.env.MAX_PENDING_DETAILS = "2";
+
+  try {
+    const firstId = trackPendingRequest("m", "p", "c1", true, {
+      correlationId: "corr-1",
+    });
+    assert.ok(firstId);
+    assert.ok(trackPendingRequest("m", "p", "c2", true, { correlationId: "corr-2" }));
+    assert.ok(trackPendingRequest("m", "p", "c3", true, { correlationId: "corr-3" }));
+
+    const replacementId = trackPendingRequest("m", "p", "c4", true, {
+      correlationId: "corr-1",
+    });
+    assert.ok(replacementId);
+    assert.notEqual(
+      replacementId,
+      firstId,
+      "an evicted correlation mapping should not resurrect its old pending id"
+    );
+    assert.equal(
+      sweepStalePendingRequests(Date.now(), HOUR_MS),
+      2,
+      "the configured pending-detail cap should remove entries over the limit"
+    );
+    assert.equal(getPendingById().size, 2);
+  } finally {
+    if (previous === undefined) delete process.env.MAX_PENDING_DETAILS;
+    else process.env.MAX_PENDING_DETAILS = previous;
+    clearPendingRequests();
   }
 });
 

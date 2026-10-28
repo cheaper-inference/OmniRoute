@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Ujuzi Unaopatikana
+## Ujuzi Uliopo
 
-OmniRoute hutoa ujuzi 6 wa A2A uliounganishwa katika `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kila moduli ya ujuzi iko katika `src/lib/a2a/skills/`.
+OmniRoute inafichua ujuzi wa A2A 6 unaotumia waya katika `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kila moduli ya ujuzi inaishi `src/lib/a2a/skills/`.
 
-| Ujuzi              | ID                   | Maelezo                                                                                                                                                                         | Lebo                       | Mifano                                      |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------------ |
-| Smart Routing      | `smart-routing`      | Huelekeza prompt kupitia mtoa huduma/mchanganyiko bora kwa kutumia injini ya combo ya OmniRoute pamoja na upimaji alama                                                         | routing, providers         | "Elekeza prompt hii kupitia mfano bora"     |
-| Quota Management   | `quota-management`   | Huripoti hali ya kwota kwa kila mtoa huduma, husaidia witoaji kuamua lini kupunguza kasi/kubadilisha                                                                            | quota, providers           | "Angalia kwota ya anthropic"                |
-| Provider Discovery | `provider-discovery` | Huorodhesha watoa huduma waliosakinishwa pamoja na uwezo, bendera za kiwango cha bure, na hali ya OAuth                                                                         | providers, discovery       | "Watoa huduma gani wanapatikana?"           |
-| Cost Analysis      | `cost-analysis`      | Hukadiria gharama ya ombi/mazungumzo kwa kutumia katalogi pamoja na matumizi ya hivi karibuni                                                                                   | cost, usage                | "Kadiria gharama ya mazungumzo haya"        |
-| Health Report      | `health-report`      | Hukusanya hali za circuit breaker, cooldown, na lockout kwa kila mtoa huduma                                                                                                    | health, resilience         | "Onyesha hali ya afya ya watoa huduma wote" |
-| List Capabilities  | `list-capabilities`  | Hurudisha katalogi kamili ya Ujuzi wa Wakala yenye viingizo 45 (API 23 + CLI 21 + config 1) kama jedwali la markdown lenye URL ghafi za SKILL.md kwa ajili ya kuingiza muktadha | catalog, discovery, skills | "Orodhesha uwezo wote wa OmniRoute"         |
+| Ujuzi                   | ID                   | Maelezo                                                                                                                                                               | Lebo                      | Mifano                                           |
+| :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------ | :----------------------------------------------- |
+| Smart Routing           | `smart-routing`      | Hupitisha onyesho kupitia provider/combo mojawapo kwa kutumia injini ya mchanganyiko ya OmniRoute+ kufunga                                                            | uelekezaji, watoa huduma  | "Elekeza onyesho hili kupitia mtindo bora zaidi" |
+| Usimamizi wa Kiwango    | `quota-management`   | Ripoti hali ya upendeleo kwa kila mtoaji huduma, huwasaidia wapigaji kuamua wakati wa throttle/switch                                                                 | upendeleo, watoa huduma   | "Angalia mgawo wa anthropic"                     |
+| Ugunduzi wa Mtoa Huduma | `provider-discovery` | Inaorodhesha watoa huduma waliosakinishwa wenye uwezo, bendera za daraja la bure, hali ya OAuth                                                                       | watoa huduma, ugunduzi    | "Ni watoa huduma gani wanapatikana?"             |
+| Uchambuzi wa Gharama    | `cost-analysis`      | Makadirio ya gharama ya request/conversation kutokana na katalogi + matumizi ya hivi majuzi                                                                           | gharama, matumizi         | "Kadiria gharama ya mazungumzo haya"             |
+| Ripoti ya Afya          | `health-report`      | Hukusanya kikatiza mzunguko, hali tulivu, hali ya kufunga kwa kila mtoa huduma                                                                                        | afya, uvumilivu           | "Onyesha hali ya afya ya watoa huduma wote"      |
+| Orodha ya Uwezo         | `list-capabilities`  | Hurejesha katalogi kamili ya Ujuzi wa Wakala yenye viingilio 45 (23 API + 21 CLI + 1 usanidi) kama jedwali la alama iliyo na SKILL.md URLs ghafi ya kudunga muktadha. | katalogi, ugunduzi, ujuzi | "Orodhesha uwezo wote OmniRoute "                |
 
-> Agent Card inapaswa kudumishwa ikilingana na katalogi hai ya watoa huduma 375; idadi za watoa huduma na metadata ya bure/bila-uthibitishaji hutokana na rejista ya wakati wa utekelezaji.
+> Kadi ya Wakala inapaswa kuwekwa kulingana na orodha ya moja kwa moja ya watoa huduma 377; hesabu za watoa huduma na metadata free/no-auth hutolewa kutoka kwa sajili ya wakati wa utekelezaji.
 
-### Maelezo ya Ujuzi wa `list-capabilities`
+### `list-capabilities` Maelezo ya Ujuzi
 
-Ujuzi wa `list-capabilities` ni muhimu hasa kwa mawakala wa nje ambao wanahitaji kugundua kile OmniRoute kinachotoa kabla ya kutuma miito ya API. Hurudisha kizalisho cha jedwali la markdown lililopangiliwa:
+Ustadi wa `list-capabilities` ni muhimu sana kwa mawakala wa nje ambao wanahitaji kugundua kile OmniRoute inafichua kabla ya kutuma simu API. Inarudisha bandia ya jedwali la alama iliyopangwa:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ Ujuzi wa `list-capabilities` ni muhimu hasa kwa mawakala wa nje ambao wanahitaji
 ...
 ```
 
-Kila mstari unajumuisha safu ya `rawUrl` ili mawakala waweze kupata SKILL.md kamili mara moja. Sehemu ya `metadata.totalSkills` inakisi ukubwa wa katalogi (45 leo). Utekelezaji: `src/lib/a2a/skills/listCapabilities.ts`. Tazama pia [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Kila safu inajumuisha safu wima `rawUrl` ili mawakala waweze kuleta SKILL.md kamili mara moja. Sehemu `metadata.totalSkills` inaakisi ukubwa wa katalogi (45 leo). Utekelezaji: `src/lib/a2a/skills/listCapabilities.ts`. Tazama pia [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -268,7 +268,7 @@ limewasilishwa → linafanyiwa kazi → limekamilika
 
 ## Mifano ya Ujumuishaji
 
-### Python (requests)
+### Chatu (maombi)
 
 ```python
 import requests
@@ -287,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (chota)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

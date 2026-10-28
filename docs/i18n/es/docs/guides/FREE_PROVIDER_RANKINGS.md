@@ -11,24 +11,19 @@
 
 ---
 
-## Qué es
+## ¿Qué es?
 
-OmniRoute registra 375 proveedores, incluidas 155 entradas del catálogo marcadas como **free/no-auth** (sin autenticación, OAuth de nivel gratuito o clave de API de nivel gratuito — consulta la [Guía de niveles gratuitos](../getting-started/FREE-TIERS-GUIDE.md) y el [directorio completo de niveles gratuitos](../reference/FREE_TIERS.md)). El problema: los proveedores gratuitos varían enormemente en la calidad de sus modelos. Un proveedor sin autenticación que ofrece un modelo de vanguardia es mucho más útil que uno que ofrece un modelo antiguo y pequeño.
+OmniRoute registra 377 proveedores, incluidas 155 entradas de catálogo marcadas**free/no-auth** (sin autenticación, OAuth de nivel gratuito o clave API de nivel gratuito; consulte la [Guía de niveles gratuitos](../getting-started/FREE-TIERS-GUIDE.md) y el [directorio completo de niveles gratuitos](../reference/FREE_TIERS.md) ). El problema: los proveedores gratuitos varían enormemente en la calidad de los modelos. Un proveedor sin autenticación que preste servicio a un modelo de frontera es mucho más útil que uno que preste servicio a un modelo heredado pequeño.
 
-**Clasificación de proveedores gratuitos** responde a la pregunta «**¿qué proveedor gratuito me ofrece el mejor modelo?**» combinando el catálogo de cada proveedor gratuito con **puntuaciones de calidad colaborativas** procedentes de la **clasificación Arena AI** (ELO basado en preferencias humanas, la misma idea detrás de la arena de chatbots LMArena). Los proveedores se clasifican según la potencia de su **mejor modelo gratuito**.
+**Clasificaciones de proveedores gratuitas** respuestas "** ¿Qué proveedor gratuito me ofrece el mejor modelo?** " uniéndote al catálogo gratuito de cada proveedor con** puntuaciones de calidad de fuentes colectivas** desde** Clasificación de arena AI** (human-preference ELO, la misma idea detrás del chatbot arena LMArena). Luego, los proveedores se clasifican según la solidez de sus** mejor modelo gratis** .
 
 La clasificación se calcula a partir de tres fuentes reales:
 
-1. Las listas de proveedores gratuitos — `NOAUTH_PROVIDERS`, además de las entradas de
-   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` marcadas con `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. El catálogo de modelos de cada proveedor del registro de proveedores
-   (`open-sse/config/providerRegistry.ts`).
-3. Las puntuaciones de idoneidad por tarea derivadas del ELO almacenadas en la tabla
-   `model_intelligence` de la base de datos por el motor de sincronización de ELO de
-   Arena (`src/lib/arenaEloSync.ts`).
+1. Las listas de proveedores gratuitos: `NOAUTH_PROVIDERS`, además de entradas `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` marcadas como `hasFree` (`src/shared/constants/providers.ts`).
+2. Catálogo de modelos de cada proveedor del registro de proveedores (`open-sse/config/providerRegistry.ts`).
+3. Puntuaciones de ajuste de tareas derivadas de ELO almacenadas en la tabla `model_intelligence` DB por el motor de sincronización Arena ELO (`src/lib/arenaEloSync.ts`).
 
-La lógica de combinación reside en `src/lib/freeProviderRankings.ts`.
+La lógica de unión vive en `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -114,30 +109,29 @@ Estructura de la respuesta:
 
 ## Cómo funcionan las puntuaciones
 
-### Fuente: clasificación de Arena AI
+### Fuente: tabla de clasificación de Arena AI
 
-El motor de sincronización de ELO de Arena (`src/lib/arenaEloSync.ts`) obtiene dos clasificaciones —`text`
-y `code`— de la API de clasificación de Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Cada entrada de la clasificación
-incluye un nombre de modelo, proveedor, `score` ELO, intervalo de confianza y número de votos.
+El motor de sincronización de ELO de Arena (`src/lib/arenaEloSync.ts`) obtiene dos tablas de clasificación — `text` y `code` — desde la API de la tabla de clasificación de Arena AI
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Cuando esa API no devuelve ninguna tabla utilizable, el motor recurre como alternativa al dataset oficial `lmarena-ai/leaderboard-dataset` en el servidor de datasets de Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` informa de `activeSource`, `lastError` y
+`lastFailedAt`. Cada entrada de la tabla de clasificación incluye un nombre de modelo, un proveedor, una puntuación ELO (`score`), un intervalo de confianza y un número de votos.
 
-Las categorías de la clasificación se asignan a las categorías de tareas de OmniRoute:
+Las categorías de la tabla de clasificación se corresponden con las categorías de tareas de OmniRoute:
 
-| Clasificación de Arena | Categorías de tareas de OmniRoute                 |
-| ---------------------- | ------------------------------------------------- |
-| `text`                 | `default`, `review`, `documentation`, `debugging` |
-| `code`                 | `coding`                                          |
+| Tabla de clasificación de Arena | Categorías de tareas de OmniRoute                 |
+| ------------------------------- | ------------------------------------------------- |
+| `text`                          | `default`, `review`, `documentation`, `debugging` |
+| `code`                          | `coding`                                          |
 
-### Normalización (puntuación de adecuación a la tarea)
+### Normalización (puntuación de idoneidad para la tarea)
 
-Las puntuaciones ELO sin procesar se normalizan por clasificación como un **valor de adecuación a la tarea en `[0.4, 0.98]`**:
+Las puntuaciones ELO brutas se normalizan por tabla de clasificación en un **valor de idoneidad para la tarea en `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-La puntuación nunca alcanza `0` ni `1`, lo que deja margen para las modificaciones del usuario. Este es el
-campo `score` que aparece en la respuesta de la API y la etiqueta que se muestra en el panel.
+La puntuación nunca alcanza `0` ni `1`, lo que deja margen para ajustes del usuario. Este es el campo `score` que ves en la respuesta de la API y la etiqueta que se muestra en el panel.
 
 ### Confianza
 
@@ -149,65 +143,59 @@ Cada entrada recibe un nivel de confianza basado en el número de votos de Arena
 | `medium`  | ≥ 1,000 |
 | `low`     | < 1,000 |
 
-### Almacenamiento y vigencia
+### Almacenamiento y frescura
 
-Las entradas normalizadas se escriben en la tabla `model_intelligence` de la base de datos con
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Las entradas **caducan después de
-7 días**, por lo que un proveedor que deja de sincronizarse acaba desapareciendo en lugar de proporcionar
-datos obsoletos.
+Las entradas normalizadas se escriben en la tabla de la base de datos `model_intelligence` con
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Las entradas **caducan a los
+7 días**, de modo que un proveedor que deja de sincronizarse acaba desapareciendo en lugar de servir datos obsoletos.
 
-La sincronización se ejecuta **de forma predeterminada**:
+La sincronización se ejecuta **activada por defecto**:
 
-- Se ejecuta una vez al iniciar el servidor y, posteriormente, mediante un temporizador periódico
+- Se ejecuta una vez al arrancar el servidor y después con un temporizador periódico
   (`src/lib/arenaEloSync.ts`, conectado desde `src/instrumentation-node.ts`).
-- Es **no bloqueante y nunca provoca un error fatal**: si falla la obtención de datos del servicio ascendente, OmniRoute sigue
-  ejecutándose y las clasificaciones simplemente muestran los últimos datos válidos (o un estado vacío).
+- Es **no bloqueante y nunca fatal**: si la obtención desde la fuente falla, OmniRoute sigue
+  funcionando y las clasificaciones simplemente muestran los últimos datos válidos (o un estado vacío).
 
 Dos variables de entorno la controlan (documentadas en
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Variable                  | Valor predeterminado | Propósito                                                           |
-| ------------------------- | -------------------- | ------------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`               | Establézcala en `false` para desactivar la sincronización saliente. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h)        | Intervalo de sincronización, en segundos.                           |
+| Variable                  | Valor por defecto | Propósito                                                          |
+| ------------------------- | ----------------- | ------------------------------------------------------------------ |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`            | Establécela en `false` para desactivar la sincronización saliente. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h)     | Intervalo de sincronización, en segundos.                          |
 
 ### Sincronización manual / estado / borrado
 
-Para los operadores, un endpoint de administración autenticado permite el control manual
+Para los operadores, un endpoint de administración autenticado expone control manual
 (`src/app/api/intelligence/sync/route.ts` — requiere autenticación de administración):
 
 ```
 GET    /api/intelligence/sync          # estado actual de la sincronización (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # inicia una sincronización manual; cuerpo: { "dryRun": true } para obtener una vista previa sin escribir
+POST   /api/intelligence/sync          # lanza una sincronización manual; cuerpo: { "dryRun": true } para previsualizar sin escribir
 DELETE /api/intelligence/sync          # borra todas las entradas de inteligencia arena_elo sincronizadas
 ```
 
-Si la página de clasificaciones está vacía, un `POST /api/intelligence/sync` manual (o simplemente
-reiniciar el servidor) vuelve a rellenarla.
+Si la página de clasificaciones está vacía, un `POST /api/intelligence/sync` manual (o simplemente reiniciar el servidor) la vuelve a rellenar.
 
-### Correspondencia de los modelos con la clasificación
+### Correspondencia de modelos con la tabla de clasificación
 
-Los ID de los modelos del registro y los nombres de los modelos de Arena no siempre coinciden exactamente. La clasificación utiliza
-una correspondencia flexible (`findMatchingIntelligence` en `src/lib/freeProviderRankings.ts`):
+Los IDs de modelo del registro y los nombres de modelo de Arena no siempre coinciden exactamente. La clasificación utiliza una correspondencia flexible (`findMatchingIntelligence` en `src/lib/freeProviderRankings.ts`):
 
 1. Coincidencia exacta con el ID de modelo normalizado.
-2. Coincidencia tras eliminar un sufijo de versión final (p. ej., `kimi-k2.6` → `kimi-k2`).
-3. Coincidencia por prefijo (el nombre de un modelo de la clasificación es un prefijo del ID del registro).
+2. Coincidencia tras eliminar un sufijo de versión al final (p. ej., `kimi-k2.6` → `kimi-k2`).
+3. Coincidencia por prefijo (un nombre de modelo de la tabla de clasificación es prefijo del ID del registro).
 
-En la sincronización, se eliminan los prefijos de proveedores conocidos (`anthropic/`, `openai/`, `google/`, …)
-y un pequeño mapa de alias amplía los nombres canónicos a las variantes que OmniRoute utiliza
-internamente, de modo que los modelos puedan encontrarse con cualquier nombre.
+En el lado de la sincronización, los prefijos de proveedor conocidos (`anthropic/`, `openai/`, `google/`, …) se eliminan y un pequeño mapa de alias expande los nombres canónicos a las variantes que OmniRoute usa internamente, de modo que los modelos sigan pudiendo encontrarse con cualquier nombre.
 
-### Cómo se clasifica un proveedor
+### Cómo se clasifica a un proveedor
 
-Para cada proveedor gratuito, el motor puntúa todos los modelos de su catálogo y, después:
+Para cada proveedor gratuito, el motor puntúa cada modelo de su catálogo y después:
 
-- **Mejor modelo** = el modelo del proveedor con la puntuación más alta.
-- **Puntuación media** = la puntuación media de todos los modelos puntuados de ese proveedor.
-- **Modelos** = cuántos modelos del proveedor tenían una puntuación de Arena.
+- **Top Model** = el modelo con mayor puntuación del proveedor.
+- **Avg Score** = la puntuación media de todos los modelos puntuados de ese proveedor.
+- **Models** = cuántos modelos del proveedor tenían una puntuación de Arena.
 
-Los proveedores se ordenan primero por la **puntuación del mejor modelo** y, después, por la puntuación media. Esto recompensa a un
-proveedor que ofrece al menos un modelo gratuito potente.
+Los proveedores se ordenan primero por la **puntuación de su mejor modelo** y después por la puntuación media. Esto premia a un proveedor que ofrece al menos un modelo gratuito potente.
 
 ---
 

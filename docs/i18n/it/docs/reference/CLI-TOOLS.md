@@ -4,17 +4,17 @@
 
 ---
 
-Ultimo aggiornamento: 2026-08-23
+Ultimo aggiornamento: 23-08-2026
 
-OmniRoute si integra con tre categorie di strumenti CLI distribuite su tre pagine dedicate della dashboard:
+OmniRoute si integra con tre categorie di strumenti CLI distribuiti su tre pagine dashboard dedicate:
 
-| Pagina         | Route                   | Concetto                                                                                  | Numero        |
-| -------------- | ----------------------- | ----------------------------------------------------------------------------------------- | ------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Strumenti di programmazione indirizzati a OmniRoute (Client → CLI → OmniRoute → Provider) | 26            |
-| **CLI Agents** | `/dashboard/cli-agents` | Agenti autonomi indirizzati a OmniRoute (stesso flusso, ambito più ampio)                 | 10            |
-| **ACP Agents** | `/dashboard/acp-agents` | CLI che OmniRoute avvia come backend tramite stdio/ACP (flusso inverso)                   | vedi registro |
+| Pagina         | Itinerario              | Concetto                                                                          | Contare       |
+| -------------- | ----------------------- | --------------------------------------------------------------------------------- | ------------- |
+| **CLI Codice** | `/dashboard/cli-code`   | Strumenti di codifica puntati su OmniRoute (Client → CLI → OmniRoute → Provider)  | 26            |
+| **CLI Agenti** | `/dashboard/cli-agents` | Agenti autonomi indirizzati a OmniRoute (stesso flusso, ambito più ampio)         | 11            |
+| **ACP Agenti** | `/dashboard/acp-agents` | CLIs che OmniRoute viene generato come backend tramite stdio/ACP (flusso inverso) | vedi registro |
 
-Le route legacy vengono reindirizzate tramite 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Le rotte legacy reindirizzano tramite 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,11 +43,9 @@ ACP Agents (flusso inverso di avvio):
 
 ---
 
-## Configurazione automatica con `setup-*`
+## Autoconfigurazione con `setup-*`
 
-Non è necessario scrivere manualmente la configurazione di ogni strumento. OmniRoute fornisce un comando `setup-*`
-per ogni CLI supportata, che legge il catalogo dei modelli **attivo** da un'istanza
-OmniRoute in esecuzione (locale o remota) e scrive sul computer la configurazione specifica dello strumento:
+Non è necessario scrivere manualmente la configurazione di ogni strumento. OmniRoute fornisce un comando `setup-*` per CLI supportato che legge il file** vivere** catalogo dei modelli da uno OmniRoute in esecuzione (locale o remoto) e scrive la configurazione dello strumento sul tuo computer:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,54 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Ognuno accetta `--remote <url> --api-key <key>` (per configurare uno strumento locale affinché utilizzi
-un'istanza OmniRoute remota), `--dry-run` (per visualizzare un'anteprima senza scrivere) e `--port`. Gli strumenti
-senza rilevamento automatico dei modelli (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) accettano
-`--model <id>` (e `--yes` per le esecuzioni non interattive). `setup-5dive` è l'unica
-procedura che non scrive in `$HOME`: configura un parco di agenti 5dive
-scrivendo un profilo di autenticazione di proprietà di root sull'host del parco, quindi viene rieseguito tramite `sudo`
-e non dispone di una propria modalità remota. Per avviare una CLI con le
-variabili d'ambiente corrette già inserite e senza scrivere alcuna configurazione, utilizza il launcher generico
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — i target e gli alias provengono da `bin/cli/cli-manifest.mjs`); i launcher precedenti
-specifici per strumento `omniroute launch` (Claude Code) e `omniroute launch-codex`
-(Codex) rimangono disponibili. Gemini CLI può essere soltanto avviata: è un target di `omniroute run`
-ma non dispone di alcuna procedura `setup-*`/`configure`.
+Ciascuno accetta `--remote <url> --api-key <key>` (configura uno strumento locale rispetto a uno OmniRoute remoto), `--dry-run` (anteprima senza scrittura) e `--port`. Gli strumenti senza rilevamento automatico del modello (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) accettano `--model <id>` (e `--yes` per le corse non interattive). `setup-5dive` è l'unica ricetta che non scrive sotto `$HOME`: configura una flotta di agenti 5dive scrivendo un profilo di autenticazione di proprietà di root sull'host della flotta, quindi riesegue tramite `sudo` e non ha una propria modalità remota. Per avviare uno CLI con l'env corretto inserito e nessuna configurazione scritta, utilizzare il launcher `omniroute run <target>` generico (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — target e alias provengono da `bin/cli/cli-manifest.mjs`); i lanciatori legacy per strumento `omniroute launch` (Claude Code) e `omniroute launch-codex` (Codex) rimangono disponibili. Gemini CLI è di solo lancio: è un target `omniroute run` ma non ha una ricetta `setup-*`/`configure`.
 
-> **Riferimento completo:** la tabella principale — cosa scrive ogni comando, tutti i flag,
-> modalità locale e remota e quali strumenti richiedono il suffisso `/v1` — è disponibile in
-> **[Integrazioni CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Riferimento completo:** la tabella principale - cosa scrive ogni comando, ogni flag, locale vs remoto e quali strumenti vogliono un suffisso `/v1` - vive in** [CLI Integrazioni](../guides/CLI-INTEGRATIONS.md)** .
 
-### Esecuzione di questi comandi all'interno di un container
+### Eseguendoli all'interno di un contenitore
 
-Un comando `setup-*` eseguito all'interno del container OmniRoute scrive nella
-home del container stesso, che non viene letta da alcuna CLI dell'host e scompare insieme al
-container. OmniRoute rileva questa situazione e termina con il codice `2`, mostrando le istruzioni anziché
-scrivere. Esistono due soluzioni supportate: installare la CLI sull'host e usare
-`omniroute connect` per connettersi al container, oppure montare tramite bind le directory di configurazione e impostare
-`CLI_CONFIG_HOME` (il profilo compose `host`). Ogni comando `setup-*`, insieme a
-`omniroute configure` e `omniroute config set`, accetta
-`--allow-container-write` quando si intende effettivamente configurare le CLI del container;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` produce lo stesso risultato per
-il server. Consulta la
-[Guida Docker → Configurazione degli strumenti CLI dell'host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Un comando `setup-*` eseguito all'interno del contenitore OmniRoute scrive nella home del contenitore, che nessun host CLI legge e che scompare con il contenitore. OmniRoute lo rileva ed esce `2` con le istruzioni anziché con la scrittura. Due modi supportati: installare CLI sull'host e `omniroute connect` nel contenitore oppure eseguire il bind-mount delle directory di configurazione e impostare `CLI_CONFIG_HOME` (il profilo `host` di composizione). Ogni comando `setup-*`, più `omniroute configure` e `omniroute config set`, accetta `--allow-container-write` quando si configura CLIs proprio del contenitore è ciò che intendevi effettivamente; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` fa lo stesso per il server. Consulta [la Guida Docker → Configurazione degli strumenti CLI dell'host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-L'**endpoint di applicazione** della dashboard (`POST /api/cli-tools/apply`) applica lo
-stesso controllo: in un container, un'operazione di scrittura la cui destinazione non è montata tramite bind dall'
-host restituisce **`422`** con `containerEphemeralTarget: true`, il testo sicuro dell'errore
-e — per gli strumenti dotati di una procedura per l'host (claude, codex, opencode, cline,
-kilo, continue) — un `hostSetupCommand` (ad es. `omniroute setup-opencode`) da eseguire
-sull'host; non viene scritto nulla. `dryRun: true` continua a funzionare in modalità container
-e restituisce un'anteprima con i dati sensibili oscurati e il percorso di destinazione, senza modificare il disco. Il contenuto
-dell'anteprima non costituisce una configurazione contenente credenziali da copiare o importare. Esegui l'applicazione
-sull'host usando gli input originali relativi a strumento/URL di base/chiave API/modello, oppure utilizza il comando
-di configurazione lato host indicato. Consulta [Sicurezza della configurazione CLI](../security/CLI-CONFIGURATION.md)
-per l'intestazione dell'anteprima e il contratto della richiesta. Questo comportamento è
-intenzionale ed è protetto da test di regressione in
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — non "correggere" mai un errore 422
-rimuovendo il controllo.
+Quello del cruscotto** applicare l'endpoint** (`POST /api/cli-tools/apply`) impone la stessa guardia: in un contenitore, una scrittura la cui destinazione non è vincolata dall'host risponde**`422`** con `containerEphemeralTarget: true`, il testo dell'errore sicuro e — per gli strumenti con una ricetta host (claude, codex, opencode, cline, kilo, continue) — uno `hostSetupCommand` (ad esempio `omniroute setup-opencode`) da eseguire invece sull'host; non c'è scritto nulla. `dryRun: true` continua a funzionare in modalità contenitore e restituisce un percorso di destinazione + in anteprima oscurato senza toccare il disco. Il contenuto di anteprima non è una configurazione con credenziali da copiare o importare. Applicare con gli input tool/base URL/API key/model originali sull'host oppure utilizzare il comando di configurazione lato host indicato. Consulta [la sicurezza della configurazione CLI](../security/CLI-CONFIGURATION.md) per l'intestazione di anteprima e il contratto di richiesta. Questo comportamento è intenzionale e protetto da regressione da `tests/unit/api/cli-tools/apply-container-guard.test.ts` : non "aggiustare" mai un 422 rimuovendo la protezione.
 
 ---
 
@@ -182,22 +144,23 @@ Tutti gli strumenti visualizzati in `/dashboard/cli-code`. Quelli con `baseUrlSu
 Gli strumenti con `baseUrlSupport: "partial"` mostrano il badge "⚠ URL di base parziale" nella scheda della dashboard.
 ---
 
-## 2. Catalogo degli agenti CLI (10 strumenti)
+## 2. Catalogo agenti CLI (11 strumenti)
 
-Agenti autonomi visualizzati in `/dashboard/cli-agents`:
+Agenti autonomi che compaiono in `/dashboard/cli-agents`:
 
-| id           | nome             | fornitore                | supporto baseUrl | avviabile tramite ACP |
-| ------------ | ---------------- | ------------------------ | ---------------- | --------------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | full             | false                 |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full             | true                  |
-| goose        | Goose            | Block / Linux Foundation | full             | true                  |
-| interpreter  | Open Interpreter | OSS                      | full             | true                  |
-| warp         | Warp AI          | Warp Inc.                | partial          | true                  |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full             | false                 |
-| omp          | Oh My Pi         | OSS                      | full             | true                  |
-| letta        | Letta CLI        | Letta                    | full             | false                 |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full             | false                 |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full             | false                 |
+| id                | nome            | venditore               | baseUrlSupport | acpSpawnable |
+| ----------------- | --------------- | ----------------------- | -------------- | ------------ |
+| hermes-agente     | Agente Hermes   | Nous Research           | pieno          | falso        |
+| openclaw          | OpenClaw        | OSS (P. Steinberger)    | pieno          | VERO         |
+| oca               | Oca             | Fondazione Block/ Linux | pieno          | VERO         |
+| interprete        | Apri Interprete | OSS                     | pieno          | VERO         |
+| ordito            | Warp AI         | Warp Inc.               | parziale       | VERO         |
+| mazzo-agente      | Mazzo Agente    | asheshgoplani (OSS)     | pieno          | falso        |
+| omp               | Oh mio Pi       | OSS                     | pieno          | VERO         |
+| letta             | Letta CLI       | Letta                   | pieno          | falso        |
+| agente principale | Primo Agente    | Intelletto Primo (OSS)  | pieno          | falso        |
+| 5immersione       | 5immersione     | OSS (5dive-ai)          | pieno          | falso        |
+| whycodes          | WhyCodes        | Perché Corporazione     | pieno          | falso        |
 
 ---
 

@@ -172,81 +172,82 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 # सर्व चाचण्या (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# एकच चाचणी फाइल (Node.js चे मूळ टेस्ट रनर — बहुतेक चाचण्या हे वापरतात)
+# एकच चाचणी फाइल (Node.js नेटिव्ह टेस्ट रनर — बहुतेक चाचण्या हेच वापरतात)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# केवळ तुमच्या बदलामुळे प्रभावित झालेल्या युनिट चाचण्या (CI गेटप्रमाणेच TIA निवडकर्ता, #8084)
-npm run test:scoped            # शेवटच्या कमिटमधील (किंवा वर्किंग ट्रीमधील) बदल
-npm run test:scoped:staged     # केवळ स्टेज केलेले बदल — प्री-कमिट रनसोबत उत्तम जुळते
-npm run test:scoped:full       # आधी इम्पोर्ट-ग्राफ मॅप पुन्हा तयार करा (फाइल्स जोडल्यानंतर/हलवल्यानंतर)
-# Exit 1 + "run the full suite" याचा अर्थ हब फाइल (tsconfig, package.json, …) किंवा एखादा
-# मॅप न केलेला स्रोत बदलला आहे — निवडकर्ता सुरक्षितपणे अयशस्वी होतो, तो कधीही गुपचूप वगळत नाही.
+# फक्त तुमच्या बदलामुळे प्रभावित झालेल्या unit चाचण्या (CI गेटसारखाच TIA सिलेक्टर, #8084)
+npm run test:scoped            # शेवटच्या commit मधील (किंवा working tree मधील) बदल
+npm run test:scoped:staged     # फक्त staged बदल — pre-commit रनसोबत चांगले जुळते
+npm run test:scoped:full       # प्रथम import-graph मॅप पुन्हा तयार करा (फाइल्स जोडल्यानंतर/हलवल्यानंतर)
+# Exit 1 + "संपूर्ण suite चालवा" याचा अर्थ hub फाइल (tsconfig, package.json, …) किंवा
+# मॅप न केलेला source बदलला आहे — सिलेक्टर सुरक्षितपणे अपयशी ठरतो; तो कधीही गुपचूप वगळत नाही.
 
-# Vitest (MCP सर्व्हर, autoCombo, कॅशे)
+# Vitest (MCP सर्व्हर, autoCombo, cache)
 npm run test:vitest
 
 # E2E चाचण्या (Playwright आवश्यक)
 npm run test:e2e
 
-# प्रोटोकॉल क्लायंट्सच्या E2E चाचण्या (MCP ट्रान्सपोर्ट्स, A2A)
+# Protocol clients E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# इकोसिस्टम सुसंगतता चाचण्या
+# Ecosystem सुसंगतता चाचण्या
 npm run test:ecosystem
 
-# कव्हरेज गेट: स्टेटमेंट्स/ओळी/फंक्शन्स/ब्रँचेससाठी 60%
+# Coverage गेट: statements/lines/functions/branches साठी 60%
 npm run test:coverage
 npm run coverage:report
 
-# लिंट + स्वरूप तपासणी
+# Lint + format तपासणी
 npm run lint
 npm run check
 
-# गेट केलेली वास्तविक-अपस्ट्रीम कॉम्बो स्मोक चाचणी (VPS प्रवेश + वास्तविक प्रदाता क्रेडिट्स आवश्यक)
-# वास्तविक प्रदात्यांना विनंत्या पाठवते — थोडा खर्च होतो. CI मध्ये कधीही चालत नाही. गेटशिवाय व्यवस्थितपणे वगळली जाते.
-# आवश्यक: ssh root@192.168.0.15 प्रवेश (VPS वरून केवळ-वाचनीय DB स्नॅपशॉट सोर्स करते).
+# गेट केलेली real-upstream combo smoke चाचणी (VPS प्रवेश + वास्तविक provider credits आवश्यक)
+# वास्तविक providers वापरते — थोडा खर्च होतो. CI मध्ये कधीही चालत नाही. गेट नसल्यास व्यवस्थित वगळली जाते.
+# आवश्यक: ssh root@192.168.0.15 प्रवेश (VPS वरून read-only DB snapshot वापरते).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS लाइव्ह स्मोक — साध्या Node ESM स्क्रिप्ट्स, लाइव्ह .15 सर्व्हरला थेट विनंत्या पाठवतात.
-# आवश्यक: ssh root@192.168.0.15 प्रवेश (SSH sqlite द्वारे कॉम्बो तयार केले/काढून टाकले जातात).
-# वास्तविक प्रदात्यांना विनंत्या पाठवते (कमी खर्च). केवळ __live_test__* कॉम्बो तयार करते/हटवते. CI मध्ये कधीही चालत नाही.
-# .15 वर REQUIRE_API_KEY=false असल्यामुळे API की आवश्यक नाही, पण सेट केले असल्यास COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY वापरते.
+# Phase-3 VPS live smoke — साध्या Node ESM scripts, थेट live .15 सर्व्हर वापरतात.
+# आवश्यक: ssh root@192.168.0.15 प्रवेश (SSH sqlite द्वारे combos तयार केले/हटवले जातात).
+# वास्तविक providers वापरते (कमी खर्च). फक्त __live_test__* combos तयार करते/हटवते. CI मध्ये कधीही चालत नाही.
+# .15 वर REQUIRE_API_KEY=false असल्यामुळे API key आवश्यक नाही, परंतु सेट केले असल्यास COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY वापरते.
 npm run test:combo:live:vps              # 7 HTTP परिस्थिती (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # वास्तविक क्रॉस-प्रोव्हायडर फेलओव्हर परिस्थिती जोडते (एकूण 8)
+npm run test:combo:live:vps:failover     # वास्तविक cross-provider failover परिस्थिती जोडते (एकूण 8)
 ```
 
-कव्हरेजविषयी नोंदी:
+Coverage विषयी नोंदी:
 
-- `npm run test:coverage` मुख्य युनिट चाचणी संचाचे स्रोत कव्हरेज मोजते, `tests/**` वगळते आणि `open-sse/**` समाविष्ट करते
-- पुल रिक्वेस्ट्सनी स्टेटमेंट्स/ओळी/फंक्शन्स/ब्रँचेससाठी कव्हरेज गेट **60%+** राखले पाहिजे
-- एखाद्या PR ने `src/`, `open-sse/`, `electron/`, किंवा `bin/` मधील प्रॉडक्शन कोड बदलल्यास, त्याच PR मध्ये स्वयंचलित चाचण्या जोडल्या किंवा अद्ययावत केल्या पाहिजेत
-- `npm run coverage:report` नवीनतम कव्हरेज रनमधील प्रत्येक फाइलचा तपशीलवार अहवाल दर्शवते
-- `npm run test:coverage:legacy` ऐतिहासिक तुलनेसाठी जुने मेट्रिक जतन करते
-- टप्प्याटप्प्याने कव्हरेज सुधारण्याचा आराखडा पाहण्यासाठी `docs/ops/COVERAGE_PLAN.md` पहा
+- `npm run test:coverage` मुख्य unit test suite साठी source coverage मोजते, `tests/**` वगळते आणि `open-sse/**` समाविष्ट करते
+- Pull requests मध्ये statements/lines/functions/branches साठी coverage गेट **60%+** राखणे आवश्यक आहे
+- एखाद्या PR मध्ये `src/`, `open-sse/`, `electron/` किंवा `bin/` मधील production code बदलल्यास, त्याच PR मध्ये automated tests जोडणे किंवा अद्ययावत करणे आवश्यक आहे
+- `npm run coverage:report` नवीनतम coverage run मधील तपशीलवार, प्रत्येक फाइलनुसार report दाखवते
+- `npm run test:coverage:legacy` ऐतिहासिक तुलनेसाठी जुने metric जतन करते
+- टप्प्याटप्प्याने coverage सुधारण्याचा roadmap पाहण्यासाठी `docs/ops/COVERAGE_PLAN.md` पहा
 
-### पुल रिक्वेस्टच्या आवश्यकता
+### Pull Request आवश्यकता
 
-PR उघडण्यापूर्वी, तुम्ही बदललेल्या भागासाठी केंद्रित लूप चालवण्यासाठी
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) वापरा. संपूर्ण युनिट संच (4 CI शार्ड्स), Vitest, **60%+** कव्हरेज गेट आणि
-प्रॉडक्शन बिल्ड ही CI ची जबाबदारी आहे — ती स्थानिकरीत्या चालवल्याने PR
-तपासण्यांमधून आधीच मिळणार नाही अशी कोणतीही अतिरिक्त माहिती मिळत नाही आणि लहान मशीनवर त्यामुळे होस्ट पूर्ण क्षमतेने वापरला जाऊ शकतो (#8084):
+PR उघडण्यापूर्वी, तुम्ही केलेल्या बदलांसाठी focused loop चालवण्यासाठी
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) वापरा. संपूर्ण unit suite (4 CI shards), Vitest, **60%+** coverage गेट आणि
+production build ही CI ची जबाबदारी आहे — ती स्थानिक पातळीवर चालवल्याने PR
+तपासण्यांतून आधीच मिळणार नाही अशी कोणतीही अतिरिक्त माहिती मिळत नाही आणि लहान मशीनवर त्यामुळे host पूर्ण क्षमतेने वापरला जाऊ शकतो (#8084):
 
-- तुमचा बदल कव्हर करणाऱ्या चाचणी फाइल्स चालवा: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- तुमचा बदल समाविष्ट करणाऱ्या test files चालवा: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` चालवा
-- प्रॉडक्शन कोड बदलल्यावर त्याच PR मध्ये स्वयंचलित चाचण्या समाविष्ट करा किंवा अद्ययावत करा
-- प्रॉडक्शन कोड बदलल्यावर बदललेल्या किंवा जोडलेल्या चाचणी फाइल्स PR वर्णनात नमूद करा
-- CI मध्ये प्रकल्पाची सिक्रेट्स कॉन्फिगर केलेली असतील, तेव्हा PR वरील SonarQube निकाल तपासा
+- production code बदलल्यावर त्याच PR मध्ये automated tests समाविष्ट करा किंवा अद्ययावत करा
+- `node:test` फाइल्समध्ये, प्रत्येक top-level `await` (उदाहरणार्थ `await import(...)`) पहिल्या `test()` / `describe()` च्या आधी ठेवा: `--test-force-exit` अंतर्गत, त्यानंतर नोंदवलेल्या चाचण्या कधीही न चालता गुपचूप राहू शकतात (#18045; `npm run check:test-tla-order` द्वारे लागू केलेले)
+- production code बदलल्यावर PR वर्णनात बदललेल्या किंवा जोडलेल्या test files समाविष्ट करा
+- CI मध्ये project secrets configure केलेले असताना PR वरील SonarQube result तपासा
 
-सध्याची चाचणी स्थिती: **122 युनिट चाचणी फाइल्स**, ज्यांत खालील बाबी समाविष्ट आहेत:
+सध्याची चाचणी स्थिती: **122 unit test files**, ज्यांत पुढील बाबी समाविष्ट आहेत:
 
-- प्रदाता ट्रान्सलेटर आणि स्वरूप रूपांतरण
-- रेट लिमिटिंग, सर्किट ब्रेकर आणि लवचिकता
-- सिमॅंटिक कॅशे, आयडेम्पोटन्सी आणि प्रगती ट्रॅकिंग
-- डेटाबेस ऑपरेशन्स आणि स्कीमा (21 DB मॉड्यूल्स)
-- OAuth प्रवाह आणि प्रमाणीकरण
-- API एंडपॉइंट प्रमाणीकरण (Zod v4)
-- MCP सर्व्हर टूल्स आणि स्कोपची अंमलबजावणी
-- Memory आणि Skills प्रणाली
+- Provider translators आणि format conversion
+- Rate limiting, circuit breaker आणि resilience
+- Semantic cache, idempotency आणि progress tracking
+- Database operations आणि schema (21 DB modules)
+- OAuth flows आणि authentication
+- API endpoint validation (Zod v4)
+- MCP server tools आणि scope enforcement
+- Memory आणि Skills systems
 
 ---
 

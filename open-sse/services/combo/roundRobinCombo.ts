@@ -78,6 +78,7 @@ import {
   getStickyRoundRobinStartIndex,
   recordStickyRoundRobinSuccess,
   resolveComboStickyRoundRobinLimit,
+  rotateWithinVisionTiers,
 } from "./rrState.ts";
 import { expandTargetsForAllStrategies } from "./connectionAwareExpansion.ts";
 import {
@@ -129,8 +130,10 @@ import {
 import { resolveShadowTargets, scheduleShadowRouting } from "./shadowRouting.ts";
 import {
   computeCompatRejectedTargets,
+  deriveRequestCompatibilityRequirements,
   describeCapabilityFilterExhaustion,
   filterTargetsByRequestCompatibility,
+  partitionConfirmedVisionTargets,
   resolveComboTargets,
 } from "./comboStructure.ts";
 import { releaseStickyPinOnFailure, clearStaleLKGP } from "../combo.ts";
@@ -446,6 +449,24 @@ export async function handleRoundRobinCombo({
     if (stickyIdx >= 0) rrStartIndex = stickyIdx;
   }
 
+  // #17289: unknown-vision targets are a last resort for image requests. Rotating
+  // the whole filtered list would hand them a share of the traffic, so rotate
+  // WITHIN the confirmed tier and only fall through to the unknown tier after it.
+  // The partition is stable (a no-op unless prompt-cache affinity reordered the
+  // list), and the start index follows the target it pointed at.
+  const rrVisionTiers = partitionConfirmedVisionTargets(
+    filteredTargets,
+    deriveRequestCompatibilityRequirements(body)
+  );
+  const rrConfirmedCount = rrVisionTiers.confirmedCount;
+  if (rrConfirmedCount > 0) {
+    const pivot = filteredTargets[rrStartIndex % modelCount];
+    filteredTargets = rrVisionTiers.targets;
+    rrStartIndex = Math.max(0, filteredTargets.indexOf(pivot));
+  }
+  const rrTargetIndexAt = (offset: number): number =>
+    rotateWithinVisionTiers(offset, rrStartIndex, modelCount, rrConfirmedCount);
+
   const clientRequestedStream = body?.stream === true;
   const startTime = Date.now();
   let lastError: string | null = null;
@@ -559,7 +580,7 @@ export async function handleRoundRobinCombo({
       if (clientGone()) return errorResponse(499, "Client disconnected");
       // G4: stop launching new work once the safety timer fired.
       if (rrExpired) break;
-      const modelIndex = (rrStartIndex + offset) % modelCount;
+      const modelIndex = rrTargetIndexAt(offset);
       const target = filteredTargets[modelIndex];
       const modelStr = target.modelStr;
       const provider = target.provider;
