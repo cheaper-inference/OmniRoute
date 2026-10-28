@@ -14,6 +14,23 @@ import { createHash } from "node:crypto";
 // capped at 64 chars by OpenAI-family providers.
 const MAX_TOOL_NAME_LEN = 64;
 
+// #17890 — the Responses API default namespace. Its tools are the ones clients
+// address by bare name (Codex's `exec`, `wait`), so they keep the bare leaf.
+const DEFAULT_NAMESPACE = "functions";
+
+/** Names of top-level (non-namespace) function/custom tools, for collision checks. */
+export function collectFlatToolNames(tools: unknown[]): Set<string> {
+  const names = new Set<string>();
+  for (const value of tools) {
+    if (!value || typeof value !== "object") continue;
+    const tool = value as { type?: unknown; name?: unknown; function?: { name?: unknown } };
+    if (tool.type === "namespace") continue;
+    const name = typeof tool.function?.name === "string" ? tool.function.name : tool.name;
+    if (typeof name === "string" && name.trim()) names.add(name.trim());
+  }
+  return names;
+}
+
 /**
  * Fold a Responses "namespace" tool's container name and a child leaf name
  * into a single, collision-safe Chat Completions wire name.
@@ -25,14 +42,22 @@ const MAX_TOOL_NAME_LEN = 64;
  *   verbatim (never double-prefixed).
  * - A container name already ending in `__` -> collapses onto the leaf
  *   without adding a second `__` separator.
+ * - The default `functions` namespace -> the bare leaf (#17890), unless a flat
+ *   top-level tool already uses that name (`flatNames`), in which case it falls
+ *   back to the qualified `functions__<leaf>` to avoid duplicate Chat names.
  * - Otherwise -> `${nsName}__${leaf}`.
  * - Names over the 64-char Chat limit are hash-truncated deterministically
  *   (same scheme as open-sse/utils/kiroSanitizer.ts) so the same input always
  *   produces the same truncated wire name.
  */
-export function flattenNamespaceToolName(nsName: string, leaf: string): string {
+export function flattenNamespaceToolName(
+  nsName: string,
+  leaf: string,
+  flatNames?: ReadonlySet<string>
+): string {
   if (!nsName) return leaf;
   if (leaf.includes("__")) return leaf;
+  if (nsName === DEFAULT_NAMESPACE && !flatNames?.has(leaf)) return leaf;
   const prefix = nsName.endsWith("__") ? nsName : `${nsName}__`;
   const qualified = `${prefix}${leaf}`;
   if (qualified.length <= MAX_TOOL_NAME_LEN) return qualified;
@@ -50,9 +75,10 @@ export function flattenNamespaceToolName(nsName: string, leaf: string): string {
 export function resolveNamespacedToolChoiceName(
   namespace: unknown,
   name: string,
-  declaredNames: ReadonlySet<string>
+  declaredNames: ReadonlySet<string>,
+  flatNames?: ReadonlySet<string>
 ): string {
   if (typeof namespace !== "string" || !namespace || !name) return name;
-  const qualified = flattenNamespaceToolName(namespace, name);
+  const qualified = flattenNamespaceToolName(namespace, name, flatNames);
   return declaredNames.has(qualified) ? qualified : name;
 }

@@ -781,47 +781,40 @@ tüm çağrı sahiplerinin erişiminin reddedildiği null sahipli kayıtlar (get
 
 ---
 
-## Arama API'si
+## API
 
-Web/arama sağlayıcısı soyutlaması (Tavily, Brave, Exa, Serper vb.).
+Web/search sağlayıcı soyutlaması (Tavily, Brave, Exa, Serper, vb.).
 
-| Yöntem | Yol                    | Açıklama                                                                                                     |
+| Yöntem | Yol                    | Tanım                                                                                                        |
 | ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/search`           | Yapılandırılmış arama sağlayıcılarını ve yeteneklerini listeler                                              |
-| POST   | `/v1/search`           | Bir arama sorgusu çalıştırır — gövde `v1SearchSchema` ile doğrulanır, önbelleğe alma/birleştirmeyi destekler |
-| GET    | `/v1/search/analytics` | Sağlayıcı bazında isabet/gecikme/önbellek istatistikleri                                                     |
+| GET    | `/v1/search`           | Yapılandırılmış arama sağlayıcılarının + yeteneklerini listeleyin                                            |
+| POST   | `/v1/search`           | `v1SearchSchema` tarafından doğrulanmış bir — gövdesi arama sorgusu çalıştırın, caching/coalescing destekler |
+| GET    | `/v1/search/analytics` | Sağlayıcı başına hit/latency/cache istatistikleri                                                            |
 
-**Kimlik doğrulama:** Bearer API anahtarı (`extractApiKey` + `isValidApiKey`). Arama politikası `enforceApiKeyPolicy` aracılığıyla uygulanır.
+**Yetki:** Taşıyıcı API anahtarı (`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` aracılığıyla uygulanan arama politikası.
 
 ### Exa ve Tavily `provider_options`
 
-Exa ve Tavily, sağlayıcıya özgü alanları ad alanlı bir nesneden okur:
-`provider_options.exa` (veya `provider_options["exa-search"]`) ve `provider_options.tavily`
-(veya `provider_options["tavily-search"]`). Yalnızca aşağıdaki anahtarlar iletilir. Her biri
-`open-sse/handlers/search/providerOptionsPassthrough.ts` içindeki kendi Zod şemasına göre
-kontrol edilir ve yanlış türe sahip bir anahtar kaldırılır. Kimlik doğrulama, temel URL,
-`stream` ve `outputSchema` dahil olmak üzere diğer tüm anahtarlar yok sayılır. Diğer sağlayıcılar
-tarafından kullanılan düz anahtarlar (`cx`, `depth`, ...) eskisi gibi çalışır.
+Exa ve Tavily, sağlayıcıya özel alanları ad alanlı bir paketten okur: `provider_options.exa` (veya `provider_options["exa-search"]`) ve `provider_options.tavily` (veya `provider_options["tavily-search"]`). Yalnızca aşağıdaki anahtarlar iletilir. Her biri `open-sse/handlers/search/providerOptionsPassthrough.ts` içindeki kendi Zod şemasına göre kontrol edilir ve yanlış türde bir anahtar bırakılır. Auth, base URL, `stream` ve `outputSchema` dahil diğer anahtarlar göz ardı edilir. Diğer sağlayıcılar tarafından kullanılan düz tuşlar (`cx`, `depth`, ...) daha önce olduğu gibi çalışır.
 
-| Sağlayıcı | Üst düzey alanlar                                                                                                                                                                                                                                                                                                                                                         | İç içe                                                                                                                                                                     |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (düz ilkel değerler), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                           | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` varsayılan `{ text: true, highlights: true }` üzerine birleştirilir |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                          |
+| sağlayıcı | Üst düzey alanlar                                                                                                                                                                                                                                                                                                                                                         | Yuvalanmış                                                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (düz temeller), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                 | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` varsayılan `{ text: true, highlights: true }` üzerinden birleştirildi |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                   |
 
-Genel alanlar her zaman önceliklidir: `query`, `max_results`, `filters` (alan adları), `country` ve
-`search_type` değerinden türetilen konu. Exa'da `search_type: "news"`, `category: "news"` değerini korur.
-Tavily ayrıca `search_type: "finance"` (`topic: "finance"`) değerini de kabul eder.
+Genel alanlar her zaman kazanır: `query`, `max_results`, `filters` (domainler), `country` ve `search_type` türetilen konu. Exa'da `search_type: "news"`, `category: "news"` değerini korur. Tavily ayrıca `search_type: "finance"` (`topic: "finance"`) de kabul eder.
 
-Genel `time_range` artık her iki sağlayıcıya da ulaşır: Exa `startPublishedDate` (ISO
-zaman damgası), Tavily ise `start_date` (`YYYY-MM-DD`) alır. `provider_options` içindeki açıkça belirtilmiş
-bir tarih, eşlenen tarihin üzerine yazılır.
+Firecrawl arama maliyeti, döndürülen 10 sonuçtan oluşan başlatılan blok başına, blok başına 0,002 USD (2 kredi) ve çağrı başına en az bir blok ( [Firecrawl faturalandırması](https://docs.firecrawl.dev/billing) ) olarak kaydedilir: 11 sonucun maliyeti 0,004 USD'dir.
 
-Exa sonuçları `id`, `highlight_scores`, `summary`, `subpages`, `entities` ve `extras` alanlarını
-`provider_raw` içinde tutar. Tavily sonuçları `images` ve `favicon` alanlarını tutar.
+Jenerik `time_range` artık her iki sağlayıcıya da ulaşıyor: Exa `startPublishedDate` (ISO zaman damgası) alıyor ve Tavily `start_date` (`YYYY-MM-DD`) alıyor. `provider_options` açık bir tarih, eşlenen tarihi geçersiz kılar.
 
-Maliyet hesaplaması hâlâ düz `costPerQuery` kayıt defterini kullanır. Tavily,
-`search_depth: "advanced"` için çağrı başına daha fazla kredi ücretlendirir ve bu fark
-`usage.search_cost_usd` değerine yansıtılmaz.
+Exa sonuçları `id`, `highlight_scores`, `summary`, `subpages`, `entities` ve `extras` `provider_raw` tutar. Tavily sonuçları `images` ve `favicon` korur.
+
+`depth` `provider_options` veya bağlantı ayarlarından gelmesine bakılmaksızın, bağlantı arama maliyeti `depth` `fast` ve `standard` için 0,005 ABD doları ve `deep` ( [Bağlantı fiyatlandırması](https://docs.linkup.so/pages/documentation/development/pricing) ) için 0,05 ABD doları olarak kaydedilir.
+
+Exa `type: "lite"` (Exa 3.0) daha küçük bir alan kümesini kabul eder ve başka bir alan ayarlandığında isteğin tamamını reddeder. Lite için `additionalQueries`, `systemPrompt` ve `text` ile `highlights` dışındaki tüm `contents` tuşları çağrıdan önce bırakılır. Kullanımdan kaldırılan `subpages`, `subpageTarget`, `highlights.numSentences` ve `highlights.highlightsPerUrl` artık iletilmiyor.
+
+Maliyet muhasebesi, Exa hariç, Exa'nın kendi fiyatlandırmasını izleyen düz kayıt `costPerQuery`: 10 sonucu kapsayan `auto` (ve eski `fast`) için çağrı başına 0,007 ABD doları veya `lite` (ve eski `instant`) için 0,004 ABD doları; Sonraki her sonuç için 0,001 ABD doları; ve `contents.summary` ayarlandığında döndürülen sonuç başına 0,001 ABD doları. Tavily `search_depth` `basic`, `fast` ve `ultra-fast` için 1 kredi (0,008 ABD doları) ve `advanced` ( [Tavily API kredileri](https://docs.tavily.com/documentation/api-credits) ) için 2 kredi (0,016 ABD doları) olarak kaydedilmiştir. Tavily'nin gelişmiş seviyeye yükselttiği `auto_parameters: true` ile yapılan bir çağrı hâlâ 1 kredi olarak kaydediliyor.
 
 ---
 

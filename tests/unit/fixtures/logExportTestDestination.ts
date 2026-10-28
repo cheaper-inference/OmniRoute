@@ -21,6 +21,11 @@ export const testDestination: LogExportDestinationType = {
     serviceAccountJson: z.string().optional(),
   }),
   createClient(config) {
+    // Ignore SIGTERM as soon as the child knows it is the hang fixture. Installing it only
+    // when the first batch arrives raced the run timeout on a loaded runner: the timeout fired
+    // first, the default SIGTERM handler killed the child, and the escalation test saw
+    // SIGTERM instead of SIGKILL.
+    if (config.mode === "hang" && process.send) process.on("SIGTERM", () => {});
     let batches = 0;
     const output = String(config.output);
     return {
