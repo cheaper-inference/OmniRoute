@@ -219,6 +219,43 @@ describe("expiry-first combo ordering", () => {
     assert.equal(ids[0], bId);
   });
 
+  it("case 7b: tieBandPercent 100 rotates only positive scores, zero scores stay last", async () => {
+    // At a 100% band every score in [0, best] is within the band, so only the
+    // score > 0 guard keeps the exhausted and no-telemetry accounts out of the
+    // rotation. B (0.8/h) and C (0.4/h) are 50% apart and must trade the lead;
+    // A (only an unknown window) and D (nothing cached) score 0, survive the
+    // expander's filters, and must never lead: they stay behind B and C in
+    // priority order on every call.
+    const aId = await createConnection("codex", "c7b-a");
+    const dId = await createConnection("codex", "c7b-d");
+    const bId = await createConnection("codex", "c7b-b");
+    const cId = await createConnection("codex", "c7b-c");
+    setQuotaCache(aId, "codex", { weekly: { fractionReported: false, remainingPercentage: 0 } });
+    seedWeekly(bId, "codex", 80, 1 * HOUR);
+    seedWeekly(cId, "codex", 40, 1 * HOUR);
+
+    const targets = [
+      mkTarget(aId, "codex", "gpt-5", 1),
+      mkTarget(dId, "codex", "gpt-5", 2),
+      mkTarget(bId, "codex", "gpt-5", 3),
+      mkTarget(cId, "codex", "gpt-5", 4),
+    ];
+    const leads = new Set<string | null>();
+    for (let call = 0; call < 4; call++) {
+      const ordered = await orderTargetsByExpiryFirst(
+        targets,
+        "ef-c7b",
+        { expiryFirstTieBandPercent: 100 },
+        makeLog()
+      );
+      const ids = ordered.map((t) => t.connectionId);
+      assert.deepEqual(new Set(ids.slice(0, 2)), new Set([bId, cId]), `call ${call}: ${ids}`);
+      assert.deepEqual(ids.slice(2), [aId, dId], `call ${call}: ${ids}`);
+      leads.add(ids[0]);
+    }
+    assert.deepEqual(leads, new Set([bId, cId]));
+  });
+
   it("case 8: a reset in the past clamps to minHours, no crash, still positive", async () => {
     const aId = await createConnection("codex", "c8-a");
     // Weekly 80% left whose reset passed an hour before NOW.
