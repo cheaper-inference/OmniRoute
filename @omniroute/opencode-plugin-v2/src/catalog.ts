@@ -1125,6 +1125,7 @@ export function buildProviderPayload(
     activation: "enabled",
     package: NPM_OPENAI_COMPAT,
     settings: { baseURL: ensureV1Suffix(opts.baseURL), apiKey: opts.apiKey },
+    headers: opts.headers,
     integrationID: X,
   } as unknown as StableProviderInfo;
   const models: StableModelInfo[] = [];
