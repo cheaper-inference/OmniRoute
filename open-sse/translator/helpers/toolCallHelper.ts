@@ -301,9 +301,61 @@ export function hasToolResults(
   return false;
 }
 
+// Ids answered by one message: OpenAI role:"tool" carries tool_call_id; a Claude
+// role:"user" message carries tool_result content blocks.
+function respondedToolIds(msg: ToolMessage): string[] {
+  if (msg.role === "tool" && msg.tool_call_id) return [String(msg.tool_call_id)];
+  if (msg.role !== "user" || !Array.isArray(msg.content)) return [];
+  const ids: string[] = [];
+  for (const block of msg.content as ToolContentBlock[]) {
+    if (block?.type === "tool_result" && block.tool_use_id) ids.push(String(block.tool_use_id));
+  }
+  return ids;
+}
+
+// The run of tool-response messages that immediately follows messages[start - 1].
+function collectToolResponseRun(
+  messages: ToolMessage[],
+  start: number
+): { responses: ToolMessage[]; respondedIds: Set<string> } {
+  const responses: ToolMessage[] = [];
+  const respondedIds = new Set<string>();
+  for (let j = start; j < messages.length; j++) {
+    const ids = respondedToolIds(messages[j]);
+    if (ids.length === 0) break;
+    responses.push(messages[j]);
+    for (const id of ids) respondedIds.add(id);
+  }
+  return { responses, respondedIds };
+}
+
+function emptyToolResultBlocks(ids: string[]): ToolContentBlock[] {
+  return ids.map((id) => ({ type: "tool_result", tool_use_id: id, content: "" }));
+}
+
+// Claude shape: Anthropic requires every tool_result in the user message right after the
+// tool_use turn, so the missing blocks join the first existing results message (after its
+// tool_result blocks, before any other block) instead of a second consecutive user message.
+// The caller's message object is copied, never mutated.
+function withClaudeMissingResults(responses: ToolMessage[], missingIds: string[]): ToolMessage[] {
+  const target = responses.findIndex((m) => m.role === "user" && Array.isArray(m.content));
+  if (target === -1) {
+    return [...responses, { role: "user", content: emptyToolResultBlocks(missingIds) }];
+  }
+  const content = [...(responses[target].content as ToolContentBlock[])];
+  let insertAt = 0;
+  content.forEach((block, idx) => {
+    if (block?.type === "tool_result") insertAt = idx + 1;
+  });
+  content.splice(insertAt, 0, ...emptyToolResultBlocks(missingIds));
+  const merged = [...responses];
+  merged[target] = { ...responses[target], content };
+  return merged;
+}
+
 // Fix missing tool responses - insert empty tool_result if assistant has tool_use but next messages lack responses for all tool_calls.
 // Inserts in the same shape as the opening assistant message: OpenAI tool_calls → role:"tool";
-// Claude tool_use blocks → role:"user" with tool_result content blocks.
+// Claude tool_use blocks → tool_result content blocks merged into the following user message.
 export function fixMissingToolResponses<T extends ToolCallBody>(body: T): T {
   if (!body.messages || !Array.isArray(body.messages)) return body;
 
@@ -317,53 +369,22 @@ export function fixMissingToolResponses<T extends ToolCallBody>(body: T): T {
     const toolCallIds = getToolCallIds(msg);
     if (toolCallIds.length === 0) continue;
 
-    // Collect all tool response IDs that immediately follow this assistant message
-    const respondedIds = new Set<string>();
-    let j = i + 1;
-    while (j < body.messages.length) {
-      const nextMsg = body.messages[j];
-      let isToolResponse = false;
-      if (nextMsg.role === "tool" && nextMsg.tool_call_id) {
-        respondedIds.add(String(nextMsg.tool_call_id));
-        isToolResponse = true;
-      } else if (nextMsg.role === "user" && Array.isArray(nextMsg.content)) {
-        for (const block of nextMsg.content as ToolContentBlock[]) {
-          if (block?.type === "tool_result" && block.tool_use_id) {
-            respondedIds.add(String(block.tool_use_id));
-            isToolResponse = true;
-          }
-        }
-      }
-      if (!isToolResponse) break;
-      newMessages.push(nextMsg);
-      j++;
-    }
+    // Collect all tool responses that immediately follow this assistant message
+    const { responses, respondedIds } = collectToolResponseRun(body.messages, i + 1);
+    i += responses.length;
 
     // Insert empty tool responses for any tool calls that were not answered
     const missingIds = toolCallIds.filter((id) => !respondedIds.has(id));
-    if (missingIds.length > 0) {
-      const hasOpenAIToolCalls = Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
-      if (hasOpenAIToolCalls) {
-        for (const id of missingIds) {
-          newMessages.push({
-            role: "tool",
-            tool_call_id: id,
-            content: "",
-          });
-        }
-      } else {
-        newMessages.push({
-          role: "user",
-          content: missingIds.map((id) => ({
-            type: "tool_result",
-            tool_use_id: id,
-            content: "",
-          })),
-        });
-      }
+    const hasOpenAIToolCalls = Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
+    if (missingIds.length === 0) {
+      newMessages.push(...responses);
+    } else if (hasOpenAIToolCalls) {
+      newMessages.push(...responses);
+      for (const id of missingIds)
+        newMessages.push({ role: "tool", tool_call_id: id, content: "" });
+    } else {
+      newMessages.push(...withClaudeMissingResults(responses, missingIds));
     }
-
-    i = j - 1;
   }
 
   body.messages = newMessages;
