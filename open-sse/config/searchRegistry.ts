@@ -55,6 +55,11 @@ export interface SearchProviderConfig {
   /** Results included in the per-call price; each one above it adds `extraResultCost`. */
   includedResults?: number;
   extraResultCost?: number;
+  /**
+   * Per returned result, added when the request body sets `contents.<key>` to a
+   * truthy value (e.g. Exa bills `contents.summary` per summarized result).
+   */
+  contentsCostPerResult?: Record<string, number>;
 }
 
 export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
@@ -118,6 +123,10 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     // The legacy `instant` type is billed like lite; `fast` like auto (live costDollars).
     costByMode: { lite: 0.004, instant: 0.004 },
     costModeField: "type",
+    // Both include 10 results; each extra one and each summary is $0.001 (live costDollars).
+    includedResults: 10,
+    extraResultCost: 0.001,
+    contentsCostPerResult: { summary: 0.001 },
     freeMonthlyQuota: 1000,
     searchTypes: ["web", "news"],
     defaultMaxResults: 5,
@@ -134,6 +143,10 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "bearer",
     costPerQuery: 0.008,
+    // 1 credit ($0.008) for basic / fast / ultra-fast, 2 credits for advanced:
+    // https://docs.tavily.com/documentation/api-credits
+    costByMode: { advanced: 0.016 },
+    costModeField: "search_depth",
     freeMonthlyQuota: 1000,
     searchTypes: ["web", "news", "finance"],
     defaultMaxResults: 5,
