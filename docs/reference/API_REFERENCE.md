@@ -1597,6 +1597,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **Supported formats:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** file-mode transcription over the Gemini Live
+WebSocket (requires a Gemini API key). The upload is converted to 16 kHz mono PCM with `ffmpeg`
+(must be on `PATH`, unless the file is already a 16 kHz mono PCM WAV), streamed to the session and
+the finalized text is returned as `{ "text": "..." }`. Optional `language` and `prompt` form fields
+are forwarded. Limits: uploads above 25 MiB or decoded audio longer than 10 minutes answer
+`413`; a conversion that runs longer than 60 s is killed and answers `504`. The API key is sent
+in the `x-goog-api-key` header only, never in the WebSocket URL.
+
 ---
 
 ## Ollama Compatibility
