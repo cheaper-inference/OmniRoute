@@ -1,6 +1,7 @@
 import { isIP } from "node:net";
 import dns from "node:dns";
 import { Agent, fetch as undiciFetch } from "undici";
+import { closeDispatcher } from "../../../open-sse/utils/proxyDispatcherCache.ts";
 
 /**
  * Shared DNS-resolve-then-pin primitives (#12569). Originally written only for
@@ -92,7 +93,7 @@ export function createPinnedFetch(address: string, family: number): typeof fetch
       // cannot finish before the caller starts reading it, so awaiting here stalled every
       // download larger than about 64 KB. The connection is still closed as soon as the body
       // has been read.
-      void dispatcher.close().catch(() => undefined);
+      closeDispatcher(dispatcher);
     }
   }) as typeof fetch;
 }

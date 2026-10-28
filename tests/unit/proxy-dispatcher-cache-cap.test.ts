@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  closeDispatcher,
   setDispatcherCacheEntry,
   getDispatcherCache,
   clearDispatcherCache,
@@ -27,5 +28,11 @@ describe("proxy dispatcher cache cap (#9158)", () => {
     assert.equal(getDispatcherCache().has("u512"), true, "newest entry must be retained");
 
     clearDispatcherCache();
+  });
+
+  it("tolerates a runtime whose dispatcher has no close (Bun's undici shim)", () => {
+    const bunLikeDispatcher = { dispatch: () => true } as never;
+    assert.doesNotThrow(() => closeDispatcher(bunLikeDispatcher));
+    assert.doesNotThrow(() => closeDispatcher(undefined));
   });
 });

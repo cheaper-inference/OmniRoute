@@ -119,10 +119,15 @@ export function setLocalRetryCachedDispatcher(dispatcher: Dispatcher): void {
   (globalThis as GlobalWithDispatcherCache)[LOCAL_RETRY_DISPATCHER_KEY] = dispatcher;
 }
 
-function closeDispatcher(dispatcher: Dispatcher | undefined): void {
+/**
+ * Close a dispatcher without assuming the runtime implements it: Bun's undici
+ * shim exposes an `Agent` whose `close` is undefined, so a bare `close()` call
+ * throws `close is not a function` there (compiled builds).
+ */
+export function closeDispatcher(dispatcher: Dispatcher | undefined): void {
   if (!dispatcher) return;
   try {
-    const result = dispatcher.close();
+    const result = dispatcher.close?.();
     if (result && typeof (result as Promise<void>).catch === "function") {
       void (result as Promise<void>).catch(() => {});
     }

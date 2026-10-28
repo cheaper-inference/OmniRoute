@@ -7,6 +7,7 @@ import { createSocksDispatcherWithFamily } from "./socksConnectorWithFamily.ts";
 import {
   createRoundRobinDispatcher,
   getDefaultCachedDispatcher,
+  closeDispatcher,
   getDispatcherCache,
   getLocalDefaultCachedDispatcher,
   getLocalRetryCachedDispatcher,
@@ -608,7 +609,7 @@ export function createProxyDispatcher(proxyUrl: string): Dispatcher {
   // building. If so, drop our duplicate (avoid leaking sockets) and reuse theirs.
   const winner = dispatcherCache.get(normalizedUrl);
   if (winner) {
-    void dispatcher.close().catch(() => {});
+    closeDispatcher(dispatcher);
     return winner;
   }
   setDispatcherCacheEntry(normalizedUrl, dispatcher);
@@ -641,7 +642,7 @@ export function getProxyRetryDispatcher(proxyUrl: string): Dispatcher {
 
   const winner = dispatcherCache.get(retryKey);
   if (winner) {
-    void dispatcher.close().catch(() => {});
+    closeDispatcher(dispatcher);
     return winner;
   }
   setDispatcherCacheEntry(retryKey, dispatcher);
