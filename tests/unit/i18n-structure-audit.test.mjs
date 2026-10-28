@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
-  copyFileSync,
+  cpSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 import os from "node:os";
@@ -127,22 +128,16 @@ test("agrees with the official extractors for generated and standalone document 
   const dir = mkdtempSync(path.join(os.tmpdir(), "omniroute-i18n-extractors-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   // Import the actual module in a fixture checkout with no .env or backend configuration.
-  // Only its local source dependencies are copied; no installation or translation runs.
+  // Copy code only, including future local transitive imports, rather than a
+  // hand-maintained dependency list. No configuration, installation or translation runs.
   const moduleDir = path.join(dir, "scripts/i18n");
-  for (const rel of [
-    "run-translation.mjs",
-    "glossary-normalize.mjs",
-    "lib/language-bar.mjs",
-    "lib/translate-backend.mjs",
-    "lib/translation-state.mjs",
-    "lib/numeric-section-delta.mjs",
-  ]) {
-    const target = path.join(moduleDir, rel);
-    mkdirSync(path.dirname(target), { recursive: true });
-    copyFileSync(path.join(path.dirname(SCRIPT), rel), target);
-  }
+  cpSync(path.dirname(SCRIPT), moduleDir, {
+    recursive: true,
+    filter: (source) => statSync(source).isDirectory() || source.endsWith(".mjs"),
+  });
   assert.equal(existsSync(path.join(dir, ".env")), false);
-  t.mock.method(globalThis, "fetch", () => {
+  assert.equal(existsSync(path.join(dir, "config/i18n.json")), false);
+  const backend = t.mock.method(globalThis, "fetch", () => {
     throw new Error("The extractor compatibility test must not call a backend");
   });
   const { extractMirrorBody, stripTopHeading, validateTranslatedChunk } = await import(
@@ -163,6 +158,7 @@ test("agrees with the official extractors for generated and standalone document 
     );
     assert.equal(actual, expected);
   }
+  assert.equal(backend.mock.callCount(), 0, "extractor compatibility must remain offline");
 });
 
 test("the canonical CLI defaults to the audited checkout's artifact directory", (t) => {

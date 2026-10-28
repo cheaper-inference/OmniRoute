@@ -15,8 +15,14 @@ test("unrelated candidate builds cannot replace each other's pending concurrency
   assert.equal(workflow.jobs.build.concurrency["cancel-in-progress"], false);
 });
 
-test("same workflow/ref runs serialize without cancelling the running candidate", () => {
-  assert.equal(workflow.concurrency.group, "${{ github.workflow }}-${{ github.ref }}");
+test("candidate runs serialize while metadata edits cannot replace their pending slot", () => {
+  // ci-admission-events.test.mjs executes this expression for metadata edits,
+  // base retargets and candidate events. Keep this build-queue contract aligned:
+  // only edited events without a base change get an independent run_id group.
+  assert.equal(
+    workflow.concurrency.group,
+    "${{ github.workflow }}-${{ github.ref }}-${{ github.event.action == 'edited' && github.event.changes.base == null && github.run_id || 'candidate' }}"
+  );
   assert.equal(workflow.concurrency["cancel-in-progress"], false);
 });
 
