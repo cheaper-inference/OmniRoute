@@ -16,6 +16,11 @@ import { MAX_CURSOR_IMAGES, resolveCursorImages } from "../utils/cursorImages.ts
 
 const ZCODE_URL = "zcode://app-server/stdio";
 const ACCOUNT_PROVIDER_ID = "account:zai-individual-coding-plan";
+// The builtin Coding Plan profile is the ZCode config entry that carries the
+// Individual Coding Plan API key (provider["builtin:zai-coding-plan"] in
+// ~/.zcode/v2/config.json). The app-server falls back to it when the account
+// profile is not enabled, and the gateway transport reads its key.
+const BUILTIN_PROVIDER_ID = "builtin:zai-coding-plan";
 const DEFAULT_TURN_TIMEOUT_MS = 600_000;
 const ZCODE_MODEL_ALLOWLIST = new Set(ZCODE_MODELS.map((model) => model.id));
 const DEFAULT_ZCODE_MODEL = ZCODE_MODELS[0]?.id || "glm-5.2";
@@ -54,9 +59,10 @@ function findNativeModelEntry(
   providerId?: string
 ): NativeModelEntry | null {
   const providers = asRecord(view).providers;
-  // Default only to the explicitly identified Individual Plan account. The
-  // builtin profile has no proven plan identity, so it requires an exact pin.
-  const allowed = providerId ? [providerId] : [ACCOUNT_PROVIDER_ID];
+  // An explicit pin selects exactly that profile. Otherwise prefer the Individual
+  // Plan account and fall back to the builtin Coding Plan profile; other profiles
+  // (Start Plan, custom providers) are never picked implicitly.
+  const allowed = providerId ? [providerId] : [ACCOUNT_PROVIDER_ID, BUILTIN_PROVIDER_ID];
   for (const id of allowed) {
     const provider = (Array.isArray(providers) ? providers : [])
       .map(asRecord)
@@ -420,6 +426,12 @@ function boundMaxOutputTokens(request: JsonRecord, nativeMaxTokens: number | und
   request.maxOutputTokens = Math.min(callerMax ?? nativeMaxTokens, nativeMaxTokens);
 }
 
+/** The configured ZCode transport, or null when ZCODE_TRANSPORT names neither. */
+function resolveZcodeTransport(): "gateway" | "app-server" | null {
+  const transport = (process.env.ZCODE_TRANSPORT || "app-server").trim().toLowerCase();
+  return transport === "gateway" || transport === "app-server" ? transport : null;
+}
+
 export class ZcodeExecutor extends BaseExecutor {
   constructor(private readonly options: ZcodeExecutorOptions = {}) {
     super("zcode", { id: "zcode", baseUrl: ZCODE_URL, format: "openai" });
@@ -434,39 +446,51 @@ export class ZcodeExecutor extends BaseExecutor {
     const resolution = resolveZcodeModel(input.model);
     if (!resolution.ok)
       return errorResponse(400, "error" in resolution ? resolution.error : "Invalid ZCode model");
-    const transport = (process.env.ZCODE_TRANSPORT || "app-server").trim().toLowerCase();
-    if (!["gateway", "app-server"].includes(transport))
-      return errorResponse(400, "Invalid ZCODE_TRANSPORT");
+    const transport = resolveZcodeTransport();
+    if (!transport) return errorResponse(400, "Invalid ZCODE_TRANSPORT");
     let request: JsonRecord;
     try {
       request = await prepareZcodeRequest(input.body, resolution.model, input.signal);
     } catch (error) {
       return errorResponse(400, sanitizeErrorMessage(errorText(error)));
     }
-    if (transport === "gateway") {
-      const providerId =
-        this.options.providerId || process.env.ZCODE_PROVIDER_ID || ACCOUNT_PROVIDER_ID;
-      if (providerId !== ACCOUNT_PROVIDER_ID && providerId !== "builtin:zai-coding-plan") {
-        return errorResponse(
-          503,
-          "Direct ZCode streaming currently requires the Individual Coding Plan; Start Plan needs its official host runtime-auth callback."
-        );
-      }
-      let apiKey: string;
-      try {
-        apiKey = await readZcodeIndividualCodingPlanApiKey(providerId);
-      } catch (error) {
-        input.log?.warn?.(
-          "ZCODE_GATEWAY",
-          error instanceof Error ? error.name : "Profile credential unavailable"
-        );
-        return errorResponse(
-          401,
-          "The selected Individual Coding Plan credential is unavailable or its local config is not safely readable."
-        );
-      }
-      return executeZcodeGateway({ ...input, model: resolution.model }, request, { apiKey });
+    if (transport === "gateway") return this.executeGateway(input, resolution.model, request);
+    return this.executeAppServer(input, resolution.model, request);
+  }
+  // Opt-in direct HTTP transport: only the Individual Coding Plan credential.
+  private async executeGateway(
+    input: ExecuteInput,
+    model: string,
+    request: JsonRecord
+  ): Promise<ExecutorExecuteResult> {
+    const providerId =
+      this.options.providerId || process.env.ZCODE_PROVIDER_ID || ACCOUNT_PROVIDER_ID;
+    if (providerId !== ACCOUNT_PROVIDER_ID && providerId !== BUILTIN_PROVIDER_ID) {
+      return errorResponse(
+        503,
+        "Direct ZCode streaming currently requires the Individual Coding Plan; Start Plan needs its official host runtime-auth callback."
+      );
     }
+    let apiKey: string;
+    try {
+      apiKey = await readZcodeIndividualCodingPlanApiKey(providerId);
+    } catch (error) {
+      input.log?.warn?.(
+        "ZCODE_GATEWAY",
+        error instanceof Error ? error.name : "Profile credential unavailable"
+      );
+      return errorResponse(
+        401,
+        "The selected Individual Coding Plan credential is unavailable or its local config is not safely readable."
+      );
+    }
+    return executeZcodeGateway({ ...input, model }, request, { apiKey });
+  }
+  private async executeAppServer(
+    input: ExecuteInput,
+    model: string,
+    request: JsonRecord
+  ): Promise<ExecutorExecuteResult> {
     const client = this.createClient();
     try {
       const cwd = resolve(this.workingDirectory());
@@ -478,10 +502,10 @@ export class ZcodeExecutor extends BaseExecutor {
       if (initialized.available !== true) throw new Error("ZCode model runtime is unavailable");
       const { selection, nativeMaxTokens } = await this.waitForSelection(
         client,
-        resolution.model,
+        model,
         input.signal
       );
-      input.log?.info?.("ZCODE", `native model request model=${resolution.model}`);
+      input.log?.info?.("ZCODE", `native model request model=${model}`);
       boundMaxOutputTokens(request, nativeMaxTokens);
       const result = asRecord(
         await withAbort(
@@ -498,11 +522,11 @@ export class ZcodeExecutor extends BaseExecutor {
         )
       );
       return {
-        response: modelResponse(resolution.model, result, Boolean(input.stream)),
+        response: modelResponse(model, result, Boolean(input.stream)),
         url: ZCODE_URL,
         headers: {},
         transformedBody: {
-          model: resolution.model,
+          model,
           buffered: true,
           tools: (request.tools as unknown[]).length,
         },
