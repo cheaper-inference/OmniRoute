@@ -9,9 +9,9 @@ import { openMemorySqliteAdapter } from "../_helpers/memorySqliteAdapter.ts";
 const migrationsDir = fs.mkdtempSync(path.join(os.tmpdir(), "cache-write-migration-"));
 fs.copyFileSync(
   fileURLToPath(
-    new URL("../../../src/lib/db/migrations/213_call_logs_cache_write_tiers.sql", import.meta.url)
+    new URL("../../../src/lib/db/migrations/217_call_logs_cache_write_tiers.sql", import.meta.url)
   ),
-  path.join(migrationsDir, "213_call_logs_cache_write_tiers.sql")
+  path.join(migrationsDir, "217_call_logs_cache_write_tiers.sql")
 );
 const old = process.env.OMNIROUTE_MIGRATIONS_DIR;
 process.env.OMNIROUTE_MIGRATIONS_DIR = migrationsDir;
@@ -45,7 +45,7 @@ for (const partial of [false, true]) {
       db.prepare(
         "UPDATE call_logs SET tokens_cache_creation_5m=30, tokens_cache_creation_1h=70, cache_creation_tier_status='reported' WHERE id='legacy'"
       ).run();
-      db.prepare("DELETE FROM _omniroute_migrations WHERE version='213'").run();
+      db.prepare("DELETE FROM _omniroute_migrations WHERE version='217'").run();
       runMigrations(db);
       assert.equal(
         (db.prepare("SELECT tokens_cache_creation_1h AS n FROM call_logs").get() as { n: number })
