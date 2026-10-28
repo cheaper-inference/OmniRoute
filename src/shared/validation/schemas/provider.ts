@@ -19,6 +19,7 @@ import {
   customHeadersSchema,
 } from "./misc.ts";
 import { isValidProviderIconUrl } from "@/shared/validation/iconUrl";
+import { customJsonConfigSchema } from "@omniroute/open-sse/utils/customJson.ts";
 import {
   MODEL_CONCURRENCY_MAX_CAP,
   MODEL_CONCURRENCY_MAX_KEY_LENGTH,
@@ -390,6 +391,7 @@ export const createProviderNodeSchema = z
         "audio-transcriptions",
         "audio-speech",
         "images-generations",
+        "custom-json",
       ])
       .optional(),
     baseUrl: z.string().trim().min(1).optional(),
@@ -407,6 +409,8 @@ export const createProviderNodeSchema = z
     // isValidProviderIconUrl (2000 chars for http(s), 256 KiB for data:image).
     iconUrl: providerNodeIconUrlSchema,
     customHeaders: customHeadersSchema,
+    // Custom JSON API node config (apiType "custom-json"): request template + response path.
+    customJson: customJsonConfigSchema.optional(),
     dailyQuotaResetTimezone: dailyQuotaResetTimezoneSchema,
     dailyQuotaResetHour: dailyQuotaResetHourSchema,
     providerIdSuffix: providerIdSuffixSchema,
@@ -435,6 +439,13 @@ export const createProviderNodeSchema = z
         code: z.ZodIssueCode.custom,
         message: reservedProviderPrefixMessage(normalizedPrefix),
         path: ["prefix"],
+      });
+    }
+    if (value.preset && value.apiType === "custom-json") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Presets cannot create custom JSON API nodes",
+        path: ["apiType"],
       });
     }
     if (value.preset === "vibeproxy-openai") {
@@ -475,6 +486,13 @@ export const createProviderNodeSchema = z
         path: ["prefix"],
       });
     }
+    if (nodeType !== "openai-compatible" && value.apiType === "custom-json") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Custom JSON API nodes must use the openai-compatible type",
+        path: ["apiType"],
+      });
+    }
     if (nodeType === "openai-compatible" && !value.apiType) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -496,6 +514,7 @@ export const updateProviderNodeSchema = z
         "audio-transcriptions",
         "audio-speech",
         "images-generations",
+        "custom-json",
       ])
       .optional(),
     baseUrl: z.string().trim().min(1, "Base URL is required"),
@@ -505,6 +524,7 @@ export const updateProviderNodeSchema = z
     // clears a previously stored custom icon.
     iconUrl: providerNodeIconUrlSchema,
     customHeaders: customHeadersSchema,
+    customJson: customJsonConfigSchema.optional(),
     dailyQuotaResetTimezone: dailyQuotaResetTimezoneSchema,
     dailyQuotaResetHour: dailyQuotaResetHourSchema,
   })
@@ -535,11 +555,14 @@ export const providerNodeValidateSchema = z.object({
       "audio-transcriptions",
       "audio-speech",
       "images-generations",
+      "custom-json",
     ])
     .optional(),
   chatPath: z.string().trim().startsWith("/").max(500).optional().or(z.literal("")),
   modelsPath: z.string().trim().startsWith("/").max(500).optional().or(z.literal("")),
   modelId: z.string().trim().max(200).optional().or(z.literal("")),
+  customJson: customJsonConfigSchema.optional(),
+  customHeaders: customHeadersSchema,
 });
 
 // rate-limit override numeric fields must reject operator intent loss.

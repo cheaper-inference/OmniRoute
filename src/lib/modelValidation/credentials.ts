@@ -29,6 +29,7 @@ async function freshProviderData(provider: string, value: unknown) {
     ...(node.chatPath && !data.chatPath ? { chatPath: node.chatPath } : {}),
     ...(node.modelsPath && !data.modelsPath ? { modelsPath: node.modelsPath } : {}),
     ...(node.customHeaders && !data.customHeaders ? { customHeaders: node.customHeaders } : {}),
+    ...(node.customJsonConfig && !data.customJson ? { customJson: node.customJsonConfig } : {}),
   };
 }
 

@@ -12,6 +12,7 @@ import { isClaudeCodeCompatibleProvider } from "@/shared/constants/providers";
 import { updateProviderNodeSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { validateProviderNodeBaseUrl } from "../urlGuard";
+import { resolveCustomJsonNodeConfig } from "../customJsonNode";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -56,8 +57,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (isValidationFailure(validation)) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-    const { name, prefix, apiType, baseUrl, chatPath, modelsPath, customHeaders, iconUrl, dailyQuotaResetTimezone, dailyQuotaResetHour } =
-      validation.data;
+    const {
+      name,
+      prefix,
+      apiType,
+      baseUrl,
+      chatPath,
+      modelsPath,
+      customHeaders,
+      customJson,
+      iconUrl,
+      dailyQuotaResetTimezone,
+      dailyQuotaResetHour,
+    } = validation.data;
     const node: any = await getProviderNodeById(id);
 
     if (!node) {
@@ -72,6 +84,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       "audio-transcriptions",
       "audio-speech",
       "images-generations",
+      "custom-json",
     ];
     if (node.type === "openai-compatible" && (!apiType || !validApiTypes.includes(apiType))) {
       return NextResponse.json({ error: "Invalid OpenAI compatible API type" }, { status: 400 });
@@ -87,6 +100,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
     const baseUrlError = validateProviderNodeBaseUrl(sanitizedBaseUrl);
     if (baseUrlError) return baseUrlError;
+    const customJsonNode = resolveCustomJsonNodeConfig(
+      node.type === "openai-compatible" ? apiType : null,
+      customJson,
+      sanitizedBaseUrl,
+      node.customJsonConfig
+    );
+    if (customJsonNode.error) return customJsonNode.error;
 
     const updates: Record<string, unknown> = {
       name: name.trim(),
@@ -105,14 +125,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     if (node.type === "openai-compatible") {
       updates.apiType = apiType;
+      updates.customJsonConfig = customJsonNode.config;
     }
 
     const updated = await updateProviderNode(id, updates);
 
     try {
-      const { registerMoonshotFetchersForNodes } = await import(
-        "@omniroute/open-sse/services/moonshotQuotaFetcher.ts"
-      );
+      const { registerMoonshotFetchersForNodes } =
+        await import("@omniroute/open-sse/services/moonshotQuotaFetcher.ts");
       registerMoonshotFetchersForNodes([
         {
           id: typeof updated?.id === "string" ? updated.id : id,
@@ -146,6 +166,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         }
         if (node.type === "openai-compatible") {
           providerSpecificData.apiType = apiType;
+          // Every existing connection follows the node's custom JSON config (or drops it).
+          if (customJsonNode.config) providerSpecificData.customJson = customJsonNode.config;
+          else delete providerSpecificData.customJson;
         }
 
         return [

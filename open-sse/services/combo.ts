@@ -9,6 +9,7 @@ import { errorResponse, errorResponseWithComboDiagnostics } from "../utils/error
 import { isProviderSafetyStopsEnabled } from "../utils/providerSafety.ts";
 import { createChaosHeaderBarrier } from "./combo/chaosHeaderBarrier.ts";
 import { runComboWithSafetyLatch } from "./combo/safetyStopLatch.ts";
+import { runComboWithNoReplayLatch } from "./combo/noReplayLatch.ts";
 
 import { recordComboFailure } from "./combo/failureTracker.ts";
 import { buildRecoveryHint } from "./combo/pinRecovery.ts";
@@ -768,13 +769,16 @@ export async function handleComboChat(options: HandleComboChatOptions): Promise<
       : createInvocationId());
   // PROVIDER_SAFETY_STOPS_TERMINAL (#17049, default off): latch explicit provider safety
   // stops as terminal for this invocation. Off, the combo runs exactly as before.
+  // Custom JSON API nodes: a marked business response is final, never replayed elsewhere.
+  const inner = (opts: HandleComboChatOptions) =>
+    runComboWithNoReplayLatch(opts, handleComboChatInner);
   const response = isProviderSafetyStopsEnabled()
     ? await runComboWithSafetyLatch(
         { ...options, invocationId: traceInvocationId },
         traceInvocationId,
-        handleComboChatInner
+        inner
       )
-    : await handleComboChatInner({ ...options, invocationId: traceInvocationId });
+    : await inner({ ...options, invocationId: traceInvocationId });
   response.headers.set("X-OmniRoute-Combo-Trace", traceInvocationId);
   const trace = getComboTrace(traceInvocationId);
   // A failed set can still retry; only the final response determines terminal status.
