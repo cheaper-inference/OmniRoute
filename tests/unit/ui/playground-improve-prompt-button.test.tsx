@@ -47,6 +47,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+// KEA-7886: the confirmation is the kit Dialog (ConfirmModal adapter), portaled to
+// document.body — dialog queries go to the document, not to the render container.
 describe("ImprovePromptButton", () => {
   it("renders the Improve prompt button", () => {
     const el = renderButton();
@@ -76,7 +78,7 @@ describe("ImprovePromptButton", () => {
       btn.click();
     });
 
-    const modal = el.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='dialog']");
     expect(modal).not.toBeNull();
     expect(modal?.textContent).toContain("Improve prompt");
   });
@@ -89,7 +91,7 @@ describe("ImprovePromptButton", () => {
       btn.click();
     });
 
-    const modal = el.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='dialog']");
     expect(modal?.textContent).toContain("quota");
   });
 
@@ -101,7 +103,7 @@ describe("ImprovePromptButton", () => {
       btn.click();
     });
 
-    const modal = el.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='dialog']");
     expect(modal?.textContent).toContain("openai/gpt-4o");
   });
 
@@ -114,13 +116,15 @@ describe("ImprovePromptButton", () => {
       btn.click();
     });
 
-    const cancelBtn = el.querySelector("[role='dialog'] button:first-child") as HTMLButtonElement;
+    const cancelBtn = document.querySelector(
+      "[role='dialog'] button:first-child"
+    ) as HTMLButtonElement;
     await act(async () => {
       cancelBtn.click();
     });
 
     // Modal should close
-    expect(el.querySelector("[role='dialog']")).toBeNull();
+    expect(document.querySelector("[role='dialog']")).toBeNull();
     expect(vi.mocked(fetch)).not.toHaveBeenCalled();
   });
 
@@ -152,7 +156,7 @@ describe("ImprovePromptButton", () => {
     });
 
     // Click confirm (Improve button)
-    const modal = el.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='dialog']");
     const allBtns = modal?.querySelectorAll("button") ?? [];
     const improveBtn = Array.from(allBtns).find(
       (b) => b.textContent?.includes("Improve") && !b.textContent?.includes("Improve prompt")

@@ -460,16 +460,16 @@ A kérések 5%-a (konfigurálható) véletlenszerű szolgáltatókhoz kerül fel
 
 ## API
 
-**Nincs külön `POST /api/combos/auto` végpont** — az Auto-Combo kétféleképpen használható:
+**Nincs dedikált `POST /api/combos/auto` végpont** — az Auto-Combo kétféleképpen használható:
 
-1. **Nulla konfiguráció (ajánlott):** Küldjön bármilyen csevegéskiegészítési kérelmet `model: "auto"` vagy `model: "auto/<variant>"` értékkel. A virtuális gyár kérésenként állítja össze a kombót — nincs szükség tartós tárolásra vagy API-hívásokra.
+1. **Konfiguráció nélkül (ajánlott):** Küldjön bármilyen csevegésikiegészítés-kérést `model: "auto"` vagy `model: "auto/<variant>"` értékkel. A virtuális gyár kérésenként építi fel a kombót — nincs szükség tartós tárolásra vagy API-hívásokra.
 
-2. **Tartósan tárolt kombó `strategy: "auto"` beállítással:** Hozzon létre egy normál kombót a `POST /api/combos` használatával, és állítsa be a `strategy: "auto"` értéket, valamint a `config.auto.weights` / `config.auto.candidatePool` beállításokat. Ugyanaz a pontozómotor használatos; a kombó a `combos` táblában tárolódik, és azonosító alapján újra felhasználható.
+2. **Tartósan tárolt kombó `strategy: "auto"` beállítással:** Hozzon létre egy normál kombót a `POST /api/combos` használatával, és állítsa be a `strategy: "auto"` értéket, valamint a `config.auto.weights` / `config.auto.candidatePool` beállításokat. Ugyanaz a pontozómotor kerül használatra; a kombó a `combos` tárolóban lesz mentve, és azonosító alapján újra felhasználható.
 
-A felderítéshez a `GET /api/combos/auto` felsorolja az összes változatot a feloldott jelöltkészletével, valamint a `context_length` / `max_output_tokens` értékekkel — ezek a jelöltkészlet ablakainak MAXIMUMAI. A klienseknek (például az opencode beépülő modulnak) ezeket az értékeket kell közzétenniük `0` helyett: a nulla méretű kontextus teljesen letiltja az opencode automatikus tömörítését, így a munkamenetek addig növekednek, amíg az átjáró előzménytisztítása meg nem semmisíti a kontextust. A MAXIMUM biztonságosan közzétehető, mivel az auto-combo kontextus-előszűrője a túlméretes kéréseket nagy ablakkal rendelkező jelöltekhez irányítja.
+A felderítéshez a `GET /api/combos/auto` felsorolja az összes változatot a feloldott jelöltkészletével, valamint a `context_length` / `max_output_tokens` értékekkel — ezek a jelöltkészlet ablakai közül vett MAX értékek. A klienseknek (például az opencode beépülő modulnak) ezeket az értékeket kell meghirdetniük `0` helyett: a nulla méretű kontextus teljesen letiltja az opencode automatikus tömörítését, így a munkamenetek addig növekednek, amíg az átjáró előzménytisztítása el nem pusztítja a kontextust. A MAX érték meghirdetése biztonságos, mert az auto-combo kontextus-előszűrője a túlméretes kéréseket nagy ablakkal rendelkező jelöltekhez irányítja.
 
 ```bash
-# Nulla konfigurációs használat (kombó létrehozása nélkül)
+# Konfiguráció nélküli használat (kombó létrehozása nélkül)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
@@ -483,33 +483,33 @@ curl -X POST http://localhost:20128/api/combos \
 
 ### Automatikus útválasztási stratégiák
 
-A tartósan tárolt, `strategy: "auto"` beállítású kombók a `config.routerStrategy` (vagy a régebbi
-`config.auto.routerStrategy`) értékét az alábbiak egyikére állíthatják:
+A tartósan tárolt, `strategy: "auto"` beállítású kombóknál a `config.routerStrategy` (vagy az örökölt
+`config.auto.routerStrategy`) az alábbi értékek egyikére állítható:
 
 - `rules` — alapértelmezett súlyozott pontozás
-- `score` — a legmagasabb konfigurált súlyozott pontszámot választja ki. Pontos egyezés esetén megőrzi a konfigurált
-  jelöltsorrendet; a meglévő `explorationRate` a teljes rangsorolt készletből mintavételez.
+- `score` — a legmagasabb konfigurált súlyozott pontszámot választja. Pontosan azonos pontszám esetén megőrzi a konfigurált
+  jelöltsorrendet; a meglévő `explorationRate` a teljes rangsorolt készletből végez mintavételt.
 - `cost` / `eco` — a legolcsóbb kifogástalan állapotú szolgáltató
 - `latency` / `fast` — a legalacsonyabb p95 késleltetés megbízhatósági büntetéssel
-- `sla-aware` / `sla` — előnyben részesíti azokat a jelölteket, amelyek teljesítik a p95 késleltetési, hibaarány- és opcionális
-  költség-SLO-kat
-- `lkgp` — először az utolsó ismert jó szolgáltató
-- `nadir` — megkérdezi a [Nadir](https://getnadir.com) döntési API-ját, hogy a készlet melyik modelljére van szüksége a
-  promptnak; külön engedélyezendő, hiba esetén a `rules` stratégiára tér vissza
+- `sla-aware` / `sla` — előnyben részesíti azokat a jelölteket, amelyek megfelelnek a p95 késleltetési, hibaarány- és opcionális
+  költség-SLO-knak
+- `lkgp` — először a legutóbb ismerten jól működő szolgáltató
+- `nadir` — megkérdezi a [Nadir](https://getnadir.com) döntési API-ját, hogy a készlet melyik modelljére van szüksége az
+  utasításnak; külön engedélyezendő, hiba esetén a `rules` stratégiára tér át
 
 ### Az útválasztási stratégiák részletesen
 
-Az auto-combo motor 7 cserélhető **RouterStrategy** implementációt kínál, amelyeket
-a `config.routerStrategy` (vagy a régebbi `config.auto.routerStrategy`) segítségével válthat ki.
-Minden stratégia egy szolgáltatót választ a jelöltkészletből egy `RoutingContext`
-(feladattípus, eszköz-/képi információk, tokenbecslés, opcionális SLA-szabályzat, opcionális
-utolsó ismert jó szolgáltató) alapján.
+Az auto-combo motor 7 cserélhető **RouterStrategy**-megvalósítást kínál, amelyek között
+a `config.routerStrategy` (vagy az örökölt `config.auto.routerStrategy`) használatával válthat.
+Minden stratégia egy szolgáltatót választ a jelöltkészletből egy `RoutingContext` alapján
+(feladattípus, eszköz-/képi tippek, tokenbecslés, opcionális SLA-szabályzat, opcionális
+legutóbb ismerten jól működő szolgáltató).
 
 #### 1. `rules` (alapértelmezett) — 16 tényezős súlyozott pontozás
 
-A meglévő pontozómotort burkolja. Kiszűri az `OPEN` állapotú áramkör-megszakítóval rendelkező
-jelölteket, majd az aktuális feladattípussal és a `getTaskFitness()` használatával futtatja a `scorePool()`
-függvényt, és a legmagasabb pontszámú szolgáltatót választja ki.
+A meglévő pontozómotort foglalja egységbe. Kiszűri az `OPEN` állapotú megszakítóval rendelkező
+jelölteket, majd az aktuális feladattípussal és a `getTaskFitness()` használatával futtatja a `scorePool()` függvényt,
+és a legmagasabb pontszámú szolgáltatót választja.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -529,7 +529,7 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Mikor használja**: Alapértelmezésként. Akkor használja, ha kiegyensúlyozott kompromisszumot szeretne az összes jel között.
+**Mikor használja**: Alapértelmezés szerint. Akkor használja, ha az összes jel közötti kiegyensúlyozott kompromisszumra van szüksége.
 
 **Álnév**: `rules` (nincs álnév)
 
@@ -561,7 +561,7 @@ class CostStrategyImpl implements RouterStrategy {
 
 #### 3. `latency` / `fast` — a legalacsonyabb p95 késleltetés megbízhatósági büntetéssel
 
-A `p95LatencyMs + (errorRate * 1000)` szerint rendez. A hibaarány miatti büntetés biztosítja,
+A `p95LatencyMs + (errorRate * 1000)` alapján rendez. A hibaarányra vonatkozó büntetés biztosítja,
 hogy a megbízhatatlan szolgáltatók akkor is alacsonyabb helyre kerüljenek a rangsorban, ha a névleges késleltetésük alacsony.
 
 ```ts
@@ -586,27 +586,27 @@ interaktív kódolási asszisztensekhez.
 
 ---
 
-#### 4. `sla-aware` / `sla` — késleltetési-/hiba-/költség-SLO-megfelelőség
+#### 4. `sla-aware` / `sla` — késleltetési/hiba-/költség-SLO-knak való megfelelés
 
 Minden jelöltet aszerint pontoz, hogy mennyire felel meg a konfigurált SLO-szabályzatnak:
 
-| Tényező               | Súly | Képlet                                              |
-| --------------------- | ---- | --------------------------------------------------- |
-| Késleltetési pontszám | 35%  | `threshold / max(value, ε)`                         |
-| Hibapontszám          | 35%  | `threshold / max(value, ε)`                         |
-| Állapotpontszám       | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)   |
-| Költségpontszám       | 10%  | `threshold / max(value, ε)` vagy inverz normalizált |
-| Stabilitási pontszám  | 5%   | a késleltetés szórásának inverz normalizált értéke  |
+| Tényező               | Súly | Képlet                                                  |
+| --------------------- | ---- | ------------------------------------------------------- |
+| Késleltetési pontszám | 35%  | `threshold / max(value, ε)`                             |
+| Hibapontszám          | 35%  | `threshold / max(value, ε)`                             |
+| Állapotpontszám       | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)       |
+| Költségpontszám       | 10%  | `threshold / max(value, ε)` vagy fordított normalizálás |
+| Stabilitási pontszám  | 5%   | a késleltetés szórásának fordított normalizálása        |
 
-Amikor a `hardConstraints: true`, a jelöltek rendezése elsősorban a **korlátozássértési pontszám**
-(alapján történik, vagyis aszerint, hogy mennyivel lépik túl valamelyik SLO-t), majd az összesített pontszám alapján. Ellenkező esetben
+Ha a `hardConstraints: true`, a jelöltek rendezése elsődlegesen a **sértési pontszám**
+(azaz hogy mennyivel lépik túl valamelyik SLO-t), majd az összesített pontszám alapján történik. Ellenkező esetben
 csak az összesített pontszám számít.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
   readonly name = "sla-aware";
   readonly description =
-    "A késleltetési, hibaarány- és költség-SLO-k teljesítésére legnagyobb valószínűséggel képes szolgáltatót választja ki";
+    "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
     // ... minden jelöltet pontoz a szabályzat alapján: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
@@ -614,7 +614,7 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**SLA-mezők** (a kombináció konfigurációjában állíthatók be):
+**SLA-mezők** (a kombinált konfigurációban állíthatók be):
 
 ```json
 {
@@ -629,23 +629,22 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Mikor használja**: Szigorú késleltetési, hibaarány- vagy költségkerettel rendelkező éles számítási feladatokhoz.
+**Mikor érdemes használni**: Szigorú késleltetési, hibaarány- vagy költségkerettel rendelkező éles munkaterhelésekhez.
 
-**Aliasok**: `sla-aware`, `sla`
+**Álnevek**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — az utolsó ismerten jól működő szolgáltató az első
+#### 5. `lkgp` — az utolsó ismert jó szolgáltató először
 
-Először az **utolsó ismerten jól működő szolgáltatót** próbálja ki (ha be van állítva), majd visszatér a
-`rules` stratégiához. Hasznos a munkamenet-rögzítéshez — így ugyanaz a szolgáltató kezeli
+Először az **utolsó ismert jó szolgáltatót** próbálja ki (ha be van állítva), majd visszatér a
+`rules` stratégiára. Hasznos a munkamenet-rögzítéshez — ugyanaz a szolgáltató kezeli
 a beszélgetés további kéréseit.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
   readonly name = "lkgp";
-  readonly description =
-    "Először az utolsó ismerten jól működő szolgáltatót próbálja, majd visszatér a rules stratégiához";
+  readonly description = "Tries last known good provider first, then falls back to rules";
 
   select(pool, context) {
     if (context.lkgpEnabled === false) {
@@ -661,26 +660,26 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Visszatérés a rules stratégiához
+    // Visszatérés a rules stratégiára
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Mikor használja**: Többfordulós beszélgetésekhez, amelyeknél azt szeretné, hogy ugyanaz a szolgáltató kezelje
-a további kéréseket (például a gyorsítótárazás, a kontextus folytonossága vagy az árképzés következetessége érdekében).
+**Mikor érdemes használni**: Többfordulós beszélgetéseknél, ahol azt szeretné, hogy ugyanaz a szolgáltató kezelje
+a további kéréseket (például gyorsítótárazás, kontextusfolytonosság vagy egységes árazás érdekében).
 
-**Alias**: `lkgp` (nincs alias)
+**Álnév**: `lkgp` (nincs álnév)
 
 ---
 
 #### 6. `nadir` — prompttudatos modellválasztás a Nadir segítségével
 
-A fenti stratégiák mindegyike a saját telemetriai adatai alapján rangsorolja a jelölteket; egyikük sem olvassa el
+A fenti stratégiák mindegyike a saját telemetriai adatai alapján rangsorolja a jelölteket; egyik sem olvassa
 a kérést. A `nadir` elküldi az utolsó felhasználói fordulót és a készlet modellazonosítóit a
 [Nadir](https://getnadir.com) döntési API-jának (`POST /v1/bucket`), majd a Nadir által
-ebből a kínálatból kiválasztott modellhez irányít (`simple` → a legolcsóbb megfelelő modell, `complex` → a
-legfejlettebb modell). Az adott modellt kiszolgáló kapcsolatot továbbra is a `rules` választja ki, így a kvóta,
+a kínálatból kiválasztott modellhez irányít (`simple` → a legolcsóbb megfelelő modell, `complex` → a
+csúcskategóriás modell). Az adott modellt kiszolgáló kapcsolatot továbbra is a `rules` választja ki, így a kvóta,
 az állapot és a költség továbbra is meghatározza, hogy melyik fiókot használja.
 
 ```json
@@ -697,31 +696,34 @@ az állapot és a költség továbbra is meghatározza, hogy melyik fiókot hasz
 }
 ```
 
-Az `OMNIROUTE_NADIR_API_KEY` és az `OMNIROUTE_NADIR_BASE_URL` környezeti tartalékértékként szolgál a két
+Az `OMNIROUTE_NADIR_API_KEY` és az `OMNIROUTE_NADIR_BASE_URL` környezeti tartalékérték a két
 karakterlánchoz. A `baseUrl` csak saját üzemeltetésű Nadir esetén szükséges (a rendszer elfogadja a záró `/v1` részt).
-A kulcs nélküli hívások a Nadir névtelen csomagjába kerülnek, amely IP-címenkénti sebességkorlátozást alkalmaz.
+A kulcs nélküli hívások a Nadir anonim csomagjába kerülnek, amely IP-címenkénti sebességkorlátozást alkalmaz. Kulccsal
+([hozzon létre egyet](https://app.getnadir.com/dashboard/api-keys)) minden döntés
+naplózásra kerül a Nadir irányítópultján. Teljes beállítási és ellenőrzési útmutató:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-A rendszert a következők hagyják el: az utolsó felhasználói üzenet szövege (az első 16 ezer karakter), a jelölt
-modellek azonosítói, valamint egy `source: "omniroute"` csatornacímke. A rendszerprompt, az előzmények, az eszközök és a
+A rendszert a következő adatok hagyják el: az utolsó felhasználói üzenet szövege (az első 16 ezer karakter), a jelölt
+modellek azonosítói és egy `source: "omniroute"` csatornacímke. A rendszerprompt, az előzmények, az eszközök és a
 fejlécek nem kerülnek továbbításra.
 
-Hiba esetén a működés nyílt hibakezelést alkalmaz: időtúllépés (alapértelmezés szerint 2000 ms), nem 2xx válasz, elérhetetlen
-gazdagép, hibás formátumú válasz vagy a készleten kívüli kiválasztás esetén a `rules`
-döntésére tér vissza, és az ok elé a `NadirStrategy: fallback (…)` előtag kerül. Sikertelen hívás után a
-stratégia 30 másodpercig kihagyja a hálózati hívást, így egy kimaradás 30 másodpercenként egy időtúllépést okoz, nem pedig
-kérésenként egyet. Az útválasztási események csak akkor jelentenek `strategy: "nadir"` értéket, ha ténylegesen a Nadir hozta meg
-a döntést.
+Hiba esetén a működés nyitott módon folytatódik: időtúllépés (alapértelmezés szerint 2000 ms), nem 2xx válasz, elérhetetlen
+gazdagép, hibás formátumú válasz vagy a készleten kívüli választás esetén a rendszer a `rules`
+döntését használja, és az indoklás a `NadirStrategy: fallback (…)` előtagot kapja. Egy sikertelen hívás után a
+stratégia 30 másodpercig kihagyja a hálózati hozzáférést, így egy kiesés 30 másodpercenként egy időtúllépéssel jár,
+nem pedig kérésenként eggyel. Az útválasztási események csak akkor jelentenek `strategy: "nadir"` értéket, ha valóban
+a Nadir hozta meg a döntést.
 
-**Mikor használja**: vegyes nehézségű forgalomhoz olyan készleten, amely több modellszintet fog át (egy kis, egy közepes
-és egy élvonalbeli modell), és csökkenteni szeretné az élvonalbeli modell állandó használatából eredő költségeket.
+**Mikor érdemes használni**: Vegyes nehézségű forgalomhoz olyan készleten, amely több modellszintet fog át (egy kisebb, egy középkategóriás
+és egy csúcskategóriás modellt), ha csökkenteni szeretné a csúcskategóriás modell állandó használatából eredő költséget.
 
-**Alias**: `nadir` (nincs alias)
+**Álnév**: `nadir` (nincs álnév)
 
 ---
 
 ### Egyéni útválasztási stratégiák
 
-A nyilvános API-n keresztül regisztrálhatja saját `RouterStrategy`-megvalósítását:
+A nyilvános API-n keresztül saját `RouterStrategy`-megvalósítást regisztrálhat:
 
 ```ts
 import {
@@ -731,10 +733,10 @@ import {
 
 class MyCustomStrategy implements RouterStrategy {
   readonly name = "my-custom";
-  readonly description = "Saját egyéni útválasztási stratégiám";
+  readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Az útválasztási logika helye
+    // Ide kerül az egyéni útválasztási logika
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -749,7 +751,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Ezután használja így:
+Ezután használja a következőképpen:
 
 ```json
 {
@@ -762,16 +764,16 @@ Ezután használja így:
 
 ---
 
-### Útválasztási stratégia kiválasztási útmutatója
+### Útmutató az útválasztási stratégia kiválasztásához
 
-| Használati eset            | Stratégia   | Indok                                            |
-| -------------------------- | ----------- | ------------------------------------------------ |
-| Kiegyensúlyozott terhelés  | `rules`     | Alapértelmezés — minden tényezőt figyelembe vesz |
-| Költség minimalizálása     | `cost`      | Mindig a legolcsóbbat választja                  |
-| Késleltetés minimalizálása | `latency`   | A leggyorsabb megbízható szolgáltatót választja  |
-| Szigorú SLO-k              | `sla-aware` | P95-/hiba-/költségküszöbök alapján szűr          |
-| Többfordulós csevegés      | `lkgp`      | Munkamenet-rögzítés                              |
-| Vegyes nehézség            | `nadir`     | Promptonként választja ki a modellszintet        |
+| Használati eset            | Stratégia   | Indoklás                                          |
+| -------------------------- | ----------- | ------------------------------------------------- |
+| Kiegyensúlyozott terhelés  | `rules`     | Alapértelmezett — minden tényezőt figyelembe vesz |
+| Költség minimalizálása     | `cost`      | Mindig a legolcsóbbat választja                   |
+| Késleltetés minimalizálása | `latency`   | A leggyorsabb megbízható szolgáltatót választja   |
+| Szigorú SLO-k              | `sla-aware` | A p95-/hiba-/költségküszöbök alapján szűr         |
+| Többfordulós csevegés      | `lkgp`      | Munkamenethez kötöttség                           |
+| Vegyes nehézség            | `nadir`     | Kérésenként választja ki a modell szintjét        |
 
 SLA-tudatos mezők:
 

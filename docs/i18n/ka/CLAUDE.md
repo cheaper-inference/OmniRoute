@@ -11,17 +11,18 @@
 PII-სთან დაკავშირებული მიგნებები). სრულად წაიკითხეთ; პროექტის წესები აქ ხელახლა არ დაამატოთ. ქვემოთ მოცემული ყველაფერი ვრცელდება მხოლოდ
 Claude Code-ზე — `AGENTS.md`-ში უკვე განსაზღვრული წესების საოპერაციო დაზუსტებები.
 
-## Worktree-ის იზოლაცია — Claude Code-ის სპეციფიკა
+## Worktree იზოლაცია — Claude Code-ის სპეციფიკა
 
-Worktree-ის სრული სავალდებულო პროტოკოლი (საბაზისო branch-ის დადასტურება, `.claude/worktrees/`-ის კანონიკური
-path, `cp -al` node_modules, გაუქმების წესები) მოცემულია `AGENTS.md` → Git Workflow → "Worktree
-isolation"-ში. Claude Code-ისთვის სპეციფიკური პუნქტები:
+სრული სავალდებულო worktree პროტოკოლი (საბაზო ბრენჩის დადასტურება, `.claude/worktrees/` კანონიკური
+გზა, `cp -al` node_modules, დაშლის წესები) მოცემულია
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)-ში (შეჯამებულია `AGENTS.md`-ში →
+Git Workflow → "Worktree isolation"). Claude Code-ის სპეციფიკური პუნქტები:
 
-- დაადასტურეთ საბაზისო branch ოპერატორთან `AskUserQuestion`-ის მეშვეობით (მკაცრი წესი #19), თუ მას
-  ეს უკვე არ უთქვამს.
-- უპირატესობა მიანიჭეთ ჩაშენებულ `EnterWorktree` ხელსაწყოს — ის worktree-ებს უკვე
-  `.claude/worktrees/`-ში (კანონიკურ path-ზე) ქმნის. შექმენით worktree დოკუმენტირებული `git
-worktree add` ბრძანებით, შემდეგ კი გამოიძახეთ `EnterWorktree` მისი `path`-ით.
+- დაადასტურეთ საბაზო ბრენჩი ოპერატორთან `AskUserQuestion`-ით (მკაცრი წესი #19), თუ მან უკვე
+  არ გითხრათ.
+- უპირატესობა მიანიჭეთ ჩაშენებულ `EnterWorktree` ინსტრუმენტს — ის უკვე ქმნის worktree-ებს
+  `.claude/worktrees/`-ქვეშ (კანონიკური გზა). შექმენით worktree დოკუმენტირებული `git
+worktree add` ბრძანებით, შემდეგ გამოიძახეთ `EnterWorktree` მისი `path`-ით.
 
 ## სესიებს შორის უსაფრთხოება — Claude Code-ის სპეციფიკა
 

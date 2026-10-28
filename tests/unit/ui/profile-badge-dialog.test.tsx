@@ -39,8 +39,10 @@ const badge = {
   createdAt: "2026-08-26T00:00:00.000Z",
 };
 
-const badgeHeading = (container: HTMLElement) =>
-  Array.from(container.querySelectorAll("h2")).find((h) => h.textContent === "First Request");
+// The detail is the kit Dialog (Modal adapter), portalled to document.body: the heading and
+// the dialog are looked up in the document, not in the render container.
+const badgeHeading = (_container?: HTMLElement) =>
+  Array.from(document.querySelectorAll("h2")).find((h) => h.textContent === "First Request");
 
 async function openBadge() {
   vi.stubGlobal(
@@ -81,18 +83,18 @@ describe("Profile badge detail modal", () => {
     // The detail panel is open (its heading is rendered)...
     expect(badgeHeading(container)).toBeTruthy();
     // ...and it must be exposed to assistive technology as a dialog.
-    const dialog = container.querySelector('[role="dialog"]');
+    const dialog = document.querySelector('[role="dialog"]');
     expect(dialog).not.toBeNull();
     expect(dialog?.getAttribute("aria-modal")).toBe("true");
     const labelId = dialog?.getAttribute("aria-labelledby");
     expect(labelId).toBeTruthy();
-    expect(container.querySelector(`#${labelId}`)).toBe(badgeHeading(container));
+    expect(document.querySelector(`#${CSS.escape(labelId!)}`)).toBe(badgeHeading(container));
   });
 
   it("closes on Escape", async () => {
     const container = await openBadge();
     expect(badgeHeading(container)).toBeTruthy();
-    expect(container.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
 
     act(() => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));

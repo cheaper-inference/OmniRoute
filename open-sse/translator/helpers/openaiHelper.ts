@@ -55,6 +55,8 @@ const CLAUDE_TOOL_CHOICE_REQUIRED = "an" + "y";
 export interface FilterToOpenAIFormatOptions {
   /** Keep `cache_control` on content blocks (providers that honor OpenAI-format breakpoints). */
   preserveCacheControl?: boolean;
+  /** Keep OpenAI's explicit prompt-caching `prompt_cache_breakpoint` on content parts (GPT-5.6+). */
+  preservePromptCacheBreakpoint?: boolean;
   /** Keep Moonshot's non-standard `video_url` content block. */
   preserveVideoUrl?: boolean;
   /** Keep `reasoning_content` on tool-call assistant turns (reasoning-replay providers). */
@@ -77,6 +79,10 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
   // Keep that extension opt-in so generic OpenAI-compatible providers still
   // receive only the standard allowlist below.
   const preserveVideoUrl = opts?.preserveVideoUrl === true;
+  // OpenAI explicit prompt caching marks prefix ends with `prompt_cache_breakpoint`
+  // on content parts. With `prompt_cache_options: { mode: "explicit" }` and no
+  // breakpoint the upstream caches nothing, so keep it for providers that accept it.
+  const preservePromptCacheBreakpoint = opts?.preservePromptCacheBreakpoint === true;
   // #4849 strips reasoning_content from tool-call assistant turns to stop O(n^2)
   // context growth — but reasoning-replay providers (DeepSeek V4, Kimi K2, etc.)
   // REQUIRE the client's reasoning_content to be passed back, so keep it for them
@@ -92,8 +98,37 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
     // target accepts `developer` (provider allowlist / per-model compat toggle).
     if (msg.role === "developer" && !preserveDeveloperRole) msg = { ...msg, role: "system" };
 
-    // Keep tool messages as-is (OpenAI format)
-    if (msg.role === "tool") return msg;
+    // Keep tool messages as-is (OpenAI format) — except for `cache_control`
+    // markers sitting on their content blocks. A `role:"tool"` message becomes a
+    // Claude `tool_result` block whose `content[]` is the message's content, so a
+    // marker left on a content block lands at `tool_result.content[i].cache_control`,
+    // which Anthropic hard-rejects: "cache_control may not be specified within
+    // `tool_result.content`. Instead, place it directly on `tool_result`". The
+    // prepareClaudeRequest hoist cannot save this path: it only runs for
+    // targetFormat === "claude", while an openai-compatible upstream that itself
+    // re-translates to Anthropic (gateway-in-front-of-Anthropic) never reaches it.
+    // Hoist the marker onto the tool MESSAGE instead, so the downstream
+    // openai→claude conversion emits it on the `tool_result` block itself.
+    if (msg.role === "tool") {
+      if (!Array.isArray(msg.content)) return msg;
+      let hoisted: unknown;
+      let found = false;
+      const content = msg.content.map((block) => {
+        if (!block || typeof block !== "object" || block.cache_control === undefined) return block;
+        found = true;
+        const { cache_control, ...rest } = block;
+        if (hoisted === undefined) hoisted = cache_control;
+        return rest;
+      });
+      if (!found) return msg;
+      const next = { ...msg, content };
+      // Only carry the marker up for providers that honor explicit OpenAI-format
+      // breakpoints; otherwise drop it, matching how non-tool blocks are stripped.
+      if (preserveCacheControl && next.cache_control === undefined) {
+        next.cache_control = hoisted;
+      }
+      return next;
+    }
 
     // An empty `tool_calls: []` carries no tool calls: drop the key (several providers
     // 400 on an empty array) and let the turn go through the normal content
@@ -154,6 +189,9 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
           const cleanBlock: Record<string, unknown> = { type: block.type };
           if (preserveCacheControl && cache_control !== undefined) {
             cleanBlock.cache_control = cache_control;
+          }
+          if (preservePromptCacheBreakpoint && block.prompt_cache_breakpoint !== undefined) {
+            cleanBlock.prompt_cache_breakpoint = block.prompt_cache_breakpoint;
           }
           for (const field of allowedFields) {
             if (block[field] !== undefined) cleanBlock[field] = block[field];

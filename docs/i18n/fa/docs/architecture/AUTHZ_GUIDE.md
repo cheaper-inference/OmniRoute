@@ -15,17 +15,17 @@ OmniRoute دارای یک خط لوله احراز هویت آگاه به مسی
 
 ## دو حالت احراز هویت
 
-### ۱. کلید API (Bearer)
+### 1. کلید API (Bearer)
 
-برای API های سازگار با OpenAI/Anthropic/Gemini و چند مسیر مدیریتی استفاده می‌شود، وقتی که کلید دارای محدوده‌ی `manage` باشد.
+برای APIهای کلاینت سازگار با OpenAI/Anthropic/Gemini و چند مسیر مدیریتی، هنگامی که کلید دارای محدودهٔ دسترسی `manage` باشد، استفاده میشود.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-اعتبارسنجی توسط `isValidApiKey()` / `extractApiKey()` در `src/sse/services/auth.ts` انجام می‌شود و از طریق `src/shared/utils/apiAuth.ts` دوباره صادر می‌شود. اعتبارسنج متغیرهای محیطی `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` را هم به‌عنوان کلیدهای عبوری پایدار می‌پذیرد (issue #1350).
+اعتبارسنجی توسط `isValidApiKey()` / `extractApiKey()` در `src/sse/services/auth.ts` انجام میشود و از طریق `src/shared/utils/apiAuth.ts` نیز دوباره صادر میشود. اعتبارسنج همچنین متغیرهای محیطی `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` را بهعنوان کلیدهای عبوری دائمی میپذیرد (issue #1350).
 
-### ۲. نشست داشبورد (کوکی auth_token)
+### 2. نشست داشبورد (کوکی auth_token)
 
 برای صفحات داشبورد و عملیات مدیریتی.
 
@@ -33,26 +33,97 @@ Authorization: Bearer <api-key>
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-کوکی وقتی نشست محسوب می‌شود که JWT تأیید شود **و** `authenticated: true` داشته باشد (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). هر مصرف‌کننده‌ی کوکی (گارد مسیر داشبورد (`isDashboardSessionAuthenticated()`)، تازه‌سازی خط پردازش مجوز، handshake وب‌سوکت، سرور زنده، `/api/settings/require-login`، `/api/auth/status`) از همین تابع کمکی عبور می‌کند. JWTهای دیگری که با `JWT_SECRET` امضا شده‌اند هم وجود دارند — عبور Cursor CLI برای دارندگان کلید توکن‌هایی با `iss "omniroute" / aud "cursor-cli"` صادر می‌کند — و هرگز نشست نیستند (#13298).
+یک کوکی تنها زمانی نشست محسوب میشود که JWT با موفقیت تأیید شود **و** شامل `authenticated: true` باشد
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). تمام
+مصرفکنندگان این کوکی (محافظ مسیر داشبورد (`isDashboardSessionAuthenticated()`)، نوسازی خط لولهٔ مجوزدهی، دستدهی WebSocket، سرور
+زنده، `/api/settings/require-login`، `/api/auth/status`) از این تابع کمکی عبور میکنند.
+JWTهای دیگری نیز وجود دارند که با `JWT_SECRET` امضا شدهاند — سازوکار عبوری Cursor CLI برای
+دارندگان کلید، توکنهای `iss "omniroute" / aud "cursor-cli"` صادر میکند — و هرگز نشست
+محسوب نمیشوند (#13298).
 
-تأیید با `isDashboardSessionAuthenticated()` در `src/shared/utils/apiAuth.ts` انجام می‌شود. خط پردازش وقتی JWT کمتر از ۷ روز از عمر ۳۰ روزه‌اش باقی مانده باشد، آن را به‌طور خودکار تازه می‌کند.
+تأیید توسط `isDashboardSessionAuthenticated()` در `src/shared/utils/apiAuth.ts` انجام میشود. خط لوله، زمانی که کمتر از ۷ روز از طول عمر ۳۰روزهٔ JWT باقی مانده باشد، آن را بهطور خودکار نوسازی میکند.
 
-یک نشست ممکن است پیش از پایان ۳۰ روز هم خاتمه یابد، زیرا هر صادرکننده از `mintDashboardSessionToken` عبور می‌کند (زمان صدور `iat` و شناسه‌ی `jti`) و تأییدکننده دو تنظیم را بررسی می‌کند: `sessionsValidAfter` که با تغییر رمز عبور تنظیم می‌شود تا هر نشستی که پیش از آن صادر شده تأیید نشود (مرورگری که رمز را عوض کرده کوکی تازه می‌گیرد)، و `revokedDashboardSessions` که `POST /api/auth/logout` مقدار `jti` نشست خارج‌شده را به آن اضافه می‌کند. نشست‌هایی که توسط نسخه‌ی قدیمی‌تر ساخته شده‌اند هیچ‌کدام از این ادعاها را ندارند و تا اولین تغییر رمز عبور معتبر می‌مانند. اگر تنظیمات خوانده نشوند، نشست معتبر شمرده نمی‌شود.
+یک نشست همچنین ممکن است پیش از پایان ۳۰ روز خاتمه یابد، زیرا همهٔ صادرکنندگان از `mintDashboardSessionToken` عبور میکنند (با زمان صدور `iat` و شناسهٔ `jti`) و تأییدکننده دو تنظیم را بررسی میکند: `sessionsValidAfter` که هنگام تغییر گذرواژه تنظیم میشود تا تمام نشستهای صادرشده پیش از آن دیگر تأیید نشوند (مرورگری که گذرواژه را تغییر داده است، یک کوکی تازه دریافت میکند)، و `revokedDashboardSessions` که `POST /api/auth/logout` مقدار `jti` نشست خارجشده را به آن اضافه میکند. نشستهایی که توسط نسخهای قدیمیتر صادر شدهاند، هیچیک از این ادعاها را ندارند و تا نخستین تغییر گذرواژه معتبر باقی میمانند. اگر تنظیمات قابل خواندن نباشند، نشست مورد اعتماد قرار نمیگیرد.
 
-برخی مسیرهای مدیریتی **هر یک از دو** حالت را می‌پذیرند: کوکی یا `Bearer <key>` وقتی که کلید API دارای محدوده‌ی `manage` (یا `admin`) باشد. همین امکان جریان کار «قابل پیکربندی از طریق فراخوانی API» را که در v3.8 اضافه شد فعال می‌کند.
+برخی مسیرهای مدیریتی **هر یک** از این دو حالت را میپذیرند: کوکی یا `Bearer <key>`، مشروط بر اینکه کلید API دارای محدودهٔ دسترسی `manage` (یا `admin`) باشد. این همان چیزی است که گردشکار «قابل پیکربندی از طریق فراخوانیهای API» افزودهشده در v3.8 را ممکن میکند.
 
-#### دروازه‌ی اختیاری ورود OIDC (#6973)
+#### دروازهٔ ورود اختیاری OIDC‏ (#6973)
 
-ورود مدیر داشبورد، علاوه بر ورود پیش‌فرض با رمز عبور، یک جریان **اختیاری** OIDC (OpenID Connect) هم دارد — ورود با رمز عبور هرگز حذف نمی‌شود، فقط تکمیل می‌شود:
+ورود مدیر داشبورد همچنین از یک جریان **اختیاری** OIDC‏ (OpenID Connect)
+در کنار ورود پیشفرض با گذرواژه پشتیبانی میکند — ورود با گذرواژه هرگز حذف نمیشود و فقط
+تکمیل میشود:
 
-- غیرفعال است، مگر آن‌که `settings.oidcEnabled === true` **و** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` همگی پیکربندی شده باشند (تنظیمات → احراز هویت). `GET /api/auth/oidc/login` در غیر این صورت `400` برمی‌گرداند.
-- `GET /api/auth/oidc/login` مقدار `authorization_endpoint` را از `/.well-known/openid-configuration` صادرکننده کشف می‌کند (در صورت نبود، به `<issuer>/authorize` بازمی‌گردد)، URI بازگشت را از درخواست ورودی می‌سازد (با توجه به `x-forwarded-proto`) و کاربر را با یک `state` تصادفی که در کوکی `httpOnly` با نام `oidc_state` ذخیره می‌شود به IdP هدایت می‌کند.
-- `GET /api/auth/oidc/callback` مقدار `state` را اعتبارسنجی می‌کند، کد مجوز را مبادله می‌کند و امضای ID token را از طریق JWKS صادرکننده تأیید می‌کند (`createRemoteJWKSet` از `jose`، که برای هر URI مربوط به JWKS کش می‌شود) همراه با بررسی‌های `issuer`/`audience`. فهرست مجاز `oidcAllowedSubjects` الزامی است: با ادعای `sub` توکن یا ادعای `email` آن تطابق دارد — ادعای ایمیل تنها زمانی پذیرفته می‌شود که `email_verified === true` باشد، بنابراین ایمیل تأییدنشده در IdP هرگز نمی‌تواند از دروازه عبور کند — و اگر هیچ ورودی وجود نداشته باشد، callback هر ورود را رد می‌کند (`not_configured`).
-- در صورت موفقیت، **دقیقاً همان** JWT ‏`auth_token` با اعتبار ۳۰ روزه را صادر می‌کند که ورود با رمز عبور صادر می‌کند (`src/app/api/auth/login/route.ts`)، بنابراین بقیه‌ی خط پردازش نشست داشبورد (تازه‌سازی خودکار، پرچم‌های کوکی) بدون تغییر می‌ماند — OIDC فقط نحوه‌ی صدور کوکی را جایگزین می‌کند، نه آنچه کوکی اعطا می‌کند.
-- هر تنظیم `oidc*` (`oidcEnabled`، `oidcDisablePasswordLogin`، `oidcIssuer`، `oidcClientId`، `oidcClientSecret`، `oidcAllowedSubjects`، `oidcRedirectPath`، `oidcScopes`) در `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`) قرار دارد: `PATCH /api/settings` پاسخ `400 PASSWORD_REQUIRED` می‌دهد، مگر آن‌که بدنه رمز عبور مدیریت را به‌صورت `currentPassword` داشته باشد (`401 PASSWORD_MISMATCH` وقتی که نادرست باشد). `oidcDisablePasswordLogin` _ورود_ با رمز عبور (`POST /api/auth/login`) را رد می‌کند، اما هش ذخیره‌شده‌ی رمز عبور را نگه می‌دارد و احراز هویت مجدد همچنان `currentPassword` را با آن بررسی می‌کند.
-- `corsOrigins` و `bruteForceProtection` هم در `SECURITY_IMPACTING_SETTINGS_KEYS` هستند: سست کردن هر کدام از آن‌ها دفاع‌های ورود را ضعیف می‌کند، بنابراین همان احراز هویت مجدد با `currentPassword` را می‌طلبند (زبانه‌ی امنیت آن را درخواست می‌کند) و واردکردن JSON آن‌ها را حذف می‌کند.
-- هر کلید سیاست امنیتی — ورودی‌های `SECURITY_IMPACTING_SETTINGS_KEYS`، هر کلید `oidc*` و وضعیت نشست داشبورد — در `PATCH /api/settings` **فقط برای اپراتور** است: کلید API با محدوده‌ی `manage` یا توکن دسترسی `oma_` حتی وقتی `currentPassword` درست را بفرستد با `403` رد می‌شود، و این رد شدن به‌عنوان `settings.update_failed` با `reason: OPERATOR_REQUIRED` ثبت می‌شود (`requireOperatorCredential()` در `src/lib/api/operatorCredential.ts`). تنظیمات عادی (تم، ترجیحات نمایش) برای کلید `manage` یا توکن دسترسی `admin` همچنان قابل نوشتن هستند. هر تغییری در خود `/api/settings` (و در `/api/settings/require-login`) هم به محدوده‌ی توکن دسترسی `admin` نیاز دارد (`ADMIN_MUTATION_EXACT_PATHS` در `src/server/authz/accessScopes.ts`، تطابق دقیق مسیر)؛ `GET` همچنان `read` است و سایر زیرمسیرهای `/api/settings/*` (پروکسی‌ها، پیش‌فرض‌های ترکیب، نام‌های مستعار مدل، فشرده‌سازی، پاکسازی‌ها…) محدوده‌ی `write` استنتاج‌شده از متد را حفظ می‌کنند.
-- `POST /api/settings/import-json` احراز هویت مجدد را دور می‌زند، بنابراین پیش از نوشتن، هر کلیدی در `IMPORT_STRIPPED_SETTINGS_KEYS` (همان فایل) را حذف می‌کند: رمز عبور و `currentPassword`، هر ورودی `SECURITY_IMPACTING_SETTINGS_KEYS` و وضعیت نشست داشبورد (`sessionsValidAfter`، `revokedDashboardSessions`). بنابراین وارد کردن یک نسخه‌ی پشتیبان قدیمی نمی‌تواند نشستی را که تغییر رمز عبور یا خروج از حساب پایان داده، دوباره زنده کند.
+- غیرفعال است، مگر اینکه `settings.oidcEnabled === true` باشد **و** همهٔ مقادیر `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` پیکربندی شده باشند (تنظیمات ← احراز هویت).
+  در غیر این صورت، `GET /api/auth/oidc/login` پاسخ `400` برمیگرداند.
+- `GET /api/auth/oidc/login`، مقدار `authorization_endpoint` را از
+  `/.well-known/openid-configuration` صادرکننده کشف میکند (و در صورت عدم موفقیت، از
+  `<issuer>/authorize` استفاده میکند)، URI تغییرمسیر را از درخواست ورودی
+  (با درنظرگرفتن `x-forwarded-proto`) میسازد و کاربر را با یک `state` تصادفی که
+  در کوکی `httpOnly` با نام `oidc_state` ذخیره شده است، به IdP هدایت میکند.
+- `GET /api/auth/oidc/callback`، مقدار `state` را اعتبارسنجی میکند، کد مجوز را
+  مبادله میکند و امضای توکن ID را از طریق JWKS صادرکننده
+  (`createRemoteJWKSet` متعلق به `jose`، با کش جداگانه برای هر URI مربوط به JWKS)
+  و با بررسیهای `issuer`/`audience` تأیید میکند. پذیرش در داشبورد به یک فهرست
+  غیرخالی `oidcAllowedSubjects`، یک خطمشی `oidcAdmissionClaim` یا هر دو نیاز دارد.
+  فهرست subject تنها زمانی با `sub` یا `email` مطابقت داده میشود که
+  `email_verified === true` باشد. خطمشی اختیاری claim، یک مسیر claim در توکن ID
+  با اجزای جداشده توسط نقطه (برای مثال، `realm_access.roles`) و آرایهای از مقادیر
+  پذیرفتهشده دریافت میکند؛ claim نهایی باید آرایهای از رشتهها باشد که حداقل
+  یکی از مقادیر پذیرفتهشده را در خود داشته باشد. اگر هر دو خطمشی پیکربندی شده
+  باشند، هر دو باید با موفقیت عبور کنند. claimهای مفقود یا بدساخت با رویکرد امن
+  رد میشوند و در نبود هر دو خطمشی، callback از ورود جلوگیری میکند
+  (`not_configured`). پیکربندیهای موجود که فقط بر subject متکی هستند، بدون تغییر
+  به کار خود ادامه میدهند.
+- Keycloak معمولاً نقشهای realm را در access tokenها نگاشت میکند، نه لزوماً در
+  توکنهای ID. برای الزامیکردن نقش realm با نام `admin`، یک protocol mapper برای
+  این client پیکربندی کنید که `realm_access.roles` را در **توکن ID** آن قرار دهد؛
+  سپس `oidcAdmissionClaim` را روی
+  `{ "path": "realm_access.roles", "values": ["admin"] }` تنظیم کنید.
+  پیش از فعالکردن پذیرش صرفاً مبتنی بر نقش، claim واقعی توکن ID را برای این client
+  بررسی کنید؛ برنامه نقشهای access token را نمیخواند. رد توکن در سمت IdP
+  میتواند مکمل این بررسی سمت برنامه باشد، اما جایگزین آن نیست.
+- در صورت موفقیت، **دقیقاً همان** JWT سیروزهٔ `auth_token` را ایجاد میکند که
+  ورود با رمز عبور صادر میکند (`src/app/api/auth/login/route.ts`)؛ بنابراین
+  بقیهٔ خط لولهٔ نشست داشبورد (نوسازی خودکار و پرچمهای کوکی) بدون تغییر باقی
+  میماند — OIDC فقط نحوهٔ ایجاد کوکی را جایگزین میکند، نه مجوزهایی را که کوکی
+  اعطا میکند. تغییرات نقشها یا گروههای IdP، نشستهای موجود OmniRoute را
+  نامعتبر نمیکند؛ خروج، تغییر رمز عبور یا انقضای نشست همچنان طول عمر آنها را
+  تعیین میکند.
+- تمام تنظیمات `oidc*` (`oidcEnabled`، `oidcDisablePasswordLogin`،
+  `oidcIssuer`، `oidcClientId`، `oidcClientSecret`، `oidcAllowedSubjects`،
+  `oidcAdmissionClaim`، `oidcRedirectPath`، `oidcScopes`) در `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`) قرار دارند:
+  `PATCH /api/settings` با `400 PASSWORD_REQUIRED` پاسخ میدهد، مگر اینکه body
+  شامل رمز عبور مدیریتی در `currentPassword` باشد (اگر نادرست باشد،
+  `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin`، _ورود_ با رمز عبور
+  (`POST /api/auth/login`) را رد میکند، اما هش رمز عبور ذخیرهشده را نگه میدارد
+  و احراز هویت مجدد همچنان `currentPassword` را در برابر آن بررسی میکند.
+- `corsOrigins` و `bruteForceProtection` نیز در `SECURITY_IMPACTING_SETTINGS_KEYS`
+  قرار دارند: آسانگیرانهترکردن هرکدام، دفاعهای ورود را تضعیف میکند؛ بنابراین
+  آنها نیز به همان احراز هویت مجدد با `currentPassword` نیاز دارند (زبانهٔ امنیت
+  آن را درخواست میکند) و واردکردن JSON آنها را حذف میکند.
+- تمام کلیدهای خطمشی امنیتی — ورودیهای `SECURITY_IMPACTING_SETTINGS_KEYS`،
+  تمام کلیدهای `oidc*` و وضعیت نشست داشبورد — در `PATCH /api/settings` **فقط
+  مخصوص اپراتور** هستند: کلید API با scope برابر `manage` یا access token با
+  پیشوند `oma_`، حتی در صورت ارسال `currentPassword` صحیح، با `403` رد میشود و
+  این ردشدن با رویداد `settings.update_failed` و `reason: OPERATOR_REQUIRED`
+  ثبت ممیزی میشود (`requireOperatorCredential()` در
+  `src/lib/api/operatorCredential.ts`). تنظیمات عادی (پوسته و ترجیحات نمایش)
+  همچنان با یک کلید `manage` یا access token با سطح `admin` قابل تغییر هستند.
+  هر تغییری در خود `/api/settings` (و نیز `/api/settings/require-login`) به scope
+  مربوط به access token با نام `admin` نیز نیاز دارد
+  (`ADMIN_MUTATION_EXACT_PATHS` در `src/server/authz/accessScopes.ts`، با تطبیق
+  دقیق مسیر)؛ `GET` همچنان `read` باقی میماند و سایر زیرمسیرهای
+  `/api/settings/*` (پراکسیها، پیشفرضهای combo، نامهای مستعار مدل، فشردهسازی،
+  پاکسازیها و موارد دیگر) scope استنباطشده از متد یعنی `write` را حفظ میکنند.
+- `POST /api/settings/import-json` از این احراز هویت مجدد صرفنظر میکند؛ بنابراین
+  پیش از نوشتن، تمام کلیدهای موجود در `IMPORT_STRIPPED_SETTINGS_KEYS` (در همان
+  فایل) را حذف میکند: رمز عبور و `currentPassword`، تمام ورودیهای
+  `SECURITY_IMPACTING_SETTINGS_KEYS` و وضعیت نشست داشبورد
+  (`sessionsValidAfter`، `revokedDashboardSessions`). در نتیجه، واردکردن یک
+  نسخهٔ پشتیبان قدیمی نمیتواند نشستی را که قبلاً با تغییر رمز عبور یا خروج
+  خاتمه یافته است، دوباره فعال کند.
 
 ## کلاس‌های مسیر
 

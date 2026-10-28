@@ -9,16 +9,16 @@ interface CoverageBarProps {
 
 function barColor(have: number, total: number): string {
   const pct = total > 0 ? have / total : 0;
-  if (pct >= 1) return "bg-emerald-500";
-  if (pct >= 0.75) return "bg-amber-400";
-  return "bg-red-500";
+  if (pct >= 1) return "bg-success";
+  if (pct >= 0.75) return "bg-warning";
+  return "bg-error";
 }
 
 function trackColor(have: number, total: number): string {
   const pct = total > 0 ? have / total : 0;
-  if (pct >= 1) return "bg-emerald-500/20";
-  if (pct >= 0.75) return "bg-amber-400/20";
-  return "bg-red-500/20";
+  if (pct >= 1) return "bg-success/20";
+  if (pct >= 0.75) return "bg-warning/20";
+  return "bg-error/20";
 }
 
 export function CoverageBar({ coverage }: CoverageBarProps): JSX.Element {

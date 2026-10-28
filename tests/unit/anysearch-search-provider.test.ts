@@ -116,7 +116,7 @@ test("handleSearch maps AnySearch results into the unified search response", asy
           results: [
             {
               title: "OmniRoute",
-              url: "https://github.com/diegosouzapw/OmniRoute",
+              url: "https://github.com/cheaper-inference/OmniRoute",
               snippet: "AI gateway for multi-provider LLM",
               date: "2026-08-23T00:00:00.000Z",
             },
@@ -144,7 +144,7 @@ test("handleSearch maps AnySearch results into the unified search response", asy
     assert.equal(headers.Authorization, "Bearer as_sk_test");
     assert.equal(result.data?.provider, "anysearch-search");
     assert.equal(result.data?.results[0].title, "OmniRoute");
-    assert.equal(result.data?.results[0].url, "https://github.com/diegosouzapw/OmniRoute");
+    assert.equal(result.data?.results[0].url, "https://github.com/cheaper-inference/OmniRoute");
     assert.equal(result.data?.results[0].snippet, "AI gateway for multi-provider LLM");
   } finally {
     globalThis.fetch = originalFetch;

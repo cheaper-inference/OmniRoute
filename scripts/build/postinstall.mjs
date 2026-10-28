@@ -18,11 +18,11 @@
  *   - sql.js (WASM SQLite fallback runtime)
  *   - node-machine-id (local CLI machine-token server runtime)
  *
- * Fixes: https://github.com/diegosouzapw/OmniRoute/issues/129
- * Fixes: https://github.com/diegosouzapw/OmniRoute/issues/321
- * Fixes: https://github.com/diegosouzapw/OmniRoute/issues/426
- * Fixes: https://github.com/diegosouzapw/OmniRoute/issues/1634
- * Fixes: https://github.com/diegosouzapw/OmniRoute/issues/7802
+ * Fixes: https://github.com/cheaper-inference/OmniRoute/issues/129
+ * Fixes: https://github.com/cheaper-inference/OmniRoute/issues/321
+ * Fixes: https://github.com/cheaper-inference/OmniRoute/issues/426
+ * Fixes: https://github.com/cheaper-inference/OmniRoute/issues/1634
+ * Fixes: https://github.com/cheaper-inference/OmniRoute/issues/7802
  */
 
 import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";

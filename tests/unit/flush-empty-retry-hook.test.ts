@@ -373,3 +373,105 @@ test("a managed lease replays the leased connection instead of rotating", async 
   assert.deepEqual(dispatches, [leased.apiKey, leased.apiKey]);
   assert.match(bodyText, /served-after-retry/, "client must receive the retry content");
 });
+
+// ---------------------------------------------------------------------------
+// #17461: direct (non-translated) openai→openai turns.
+//
+// The hook used to be armed for translate-path streams only, so a direct
+// openai→openai turn — the shape most degenerate turns arrive in — never
+// reached the retry loop, and a turn whose whole output was draft/system-echo
+// markup was classified as a normal turn.
+// ---------------------------------------------------------------------------
+
+async function seedGroq(name: string, apiKey: string) {
+  const row = (await providersDb.createProviderConnection({
+    provider: "groq",
+    authType: "apikey",
+    name,
+    apiKey,
+    isActive: true,
+    testStatus: "active",
+  })) as { id: string };
+  return { id: row.id, apiKey };
+}
+
+// A direct openai→openai turn whose entire content is draft/system-echo
+// markup: nothing usable reaches the client, which strips the tags and is
+// left with an empty turn.
+function draftOnlyOpenAiStreamResponse(): Response {
+  return new Response(
+    `data: ${JSON.stringify({
+      choices: [
+        {
+          index: 0,
+          delta: {
+            role: "assistant",
+            content: "<summary>draft skeleton</summary>\n<analysis>draft skeleton</analysis>",
+          },
+        },
+      ],
+    })}\n\n` +
+      `data: ${JSON.stringify({
+        choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+      })}\n\n` +
+      `data: [DONE]\n\n`,
+    { status: 200, headers: { "Content-Type": "text/event-stream" } }
+  );
+}
+
+function contentOpenAiStreamResponse(text: string): Response {
+  return new Response(
+    `data: ${JSON.stringify({
+      choices: [{ index: 0, delta: { role: "assistant", content: text } }],
+    })}\n\n` +
+      `data: ${JSON.stringify({
+        choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+      })}\n\n` +
+      `data: [DONE]\n\n`,
+    { status: 200, headers: { "Content-Type": "text/event-stream" } }
+  );
+}
+
+function openAiStreamRequest() {
+  const nonce = `flush-empty-retry-openai-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return new Request("http://localhost/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
+    body: JSON.stringify({
+      model: "groq/openai/gpt-oss-20b",
+      messages: [{ role: "user", content: `Reply with OK only. ${nonce}` }],
+      max_tokens: 64,
+      stream: true,
+      temperature: 0,
+    }),
+  });
+}
+
+test("direct openai→openai: a draft-only turn retries on a sibling and serves content (#17461)", async () => {
+  await seedGroq("groq-draft-a", "sk-flush-draft-a");
+  await seedGroq("groq-content-b", "sk-flush-content-b");
+  const dispatches: string[] = [];
+  stubFetch(dispatches, (_auth, callIndex) =>
+    callIndex === 0
+      ? draftOnlyOpenAiStreamResponse()
+      : contentOpenAiStreamResponse("served-after-retry")
+  );
+  const response = await handleChat(openAiStreamRequest());
+  const bodyText = await drainText(response);
+  assert.equal(dispatches.length, 2, `expected initial + 1 retry, got ${dispatches.length}`);
+  assert.match(bodyText, /served-after-retry/, "client must receive the retry content");
+});
+
+test("direct openai→openai: a real answer is served without a retry (#17461)", async () => {
+  await seedGroq("groq-real-a", "sk-flush-real-a");
+  await seedGroq("groq-real-b", "sk-flush-real-b");
+  const dispatches: string[] = [];
+  stubFetch(dispatches, () => contentOpenAiStreamResponse("answered-once"));
+  const response = await handleChat(openAiStreamRequest());
+  const bodyText = await drainText(response);
+  assert.equal(dispatches.length, 1, `a real answer must not be retried, got ${dispatches.length}`);
+  assert.match(bodyText, /answered-once/, "client must receive the answer");
+});

@@ -1,5 +1,3 @@
-import { getHttpStatusStyle } from "@/shared/constants/colors";
-
 export type TimelineRowKind = "llm" | "mcp";
 
 export interface TimelineLog {
@@ -81,13 +79,34 @@ export function formatTimeAxis(ms: number): string {
   return `${h}:${m}:${s}`;
 }
 
+/**
+ * Timeline bar fills, as kit theme tokens (KEA-7886): status tones for 2xx/4xx/5xx, the
+ * categorical chart palette for "active" and MCP rows. CSS values, so both themes resolve.
+ */
+export const TIMELINE_BAR_COLORS = {
+  success: "var(--color-success)",
+  warning: "var(--color-warning)",
+  error: "var(--color-error)",
+  active: "var(--color-chart-3)",
+  other: "var(--color-text-muted)",
+} as const;
+
 export function getStatusColor(status: number, active: boolean | undefined): string {
-  if (active) return "#6366F1";
-  return getHttpStatusStyle(status).bg;
+  if (active) return TIMELINE_BAR_COLORS.active;
+  if (status >= 200 && status < 300) return TIMELINE_BAR_COLORS.success;
+  if (status >= 400 && status < 500) return TIMELINE_BAR_COLORS.warning;
+  if (status >= 500) return TIMELINE_BAR_COLORS.error;
+  // status 0 = pending (same tone as an active bar, as before).
+  if (status === 0) return TIMELINE_BAR_COLORS.active;
+  return TIMELINE_BAR_COLORS.other;
 }
 
-/** Teal, distinct from the 2xx green used for LLM bars. */
-export const MCP_BAR_COLOR = "#0F766E";
+/**
+ * Categorical chart blue for MCP rows. Not chart-4: the kit's chart-4 is the success green in
+ * both themes, which made MCP bars identical to 2xx LLM bars. chart-2 is unused by the other
+ * timeline categories.
+ */
+export const MCP_BAR_COLOR = "var(--color-chart-2)";
 
 export function getTimelineBarColor(log: TimelineLog): string {
   if (log.kind === "mcp" && (log.status || 0) < 400) return MCP_BAR_COLOR;

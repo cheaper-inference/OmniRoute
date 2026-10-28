@@ -165,30 +165,30 @@ Lẹ́yìn ìdáhùn (àṣeyọrí tàbí ìkùnà), a máa ń ṣàkọsílẹ
 
 ---
 
-## Ìtúpalẹ̀ Jinlẹ̀ Àwọn Fáìlì Pàtàkì
+## Ìwádìí Jinlẹ̀ Àwọn Fáìlì Pàtàkì
 
-### chatCore.ts (5977 ìlà)
+### chatCore.ts (àwọn ila 5977)
 
-**Olùṣàkóso ìbéèrè àkọ́kọ́**. Láìka bí ó ti tóbi tó, ó ní ìṣètò tó ṣe kedere:
+**Olùṣàkóso ìbéèrè pàtàkì jù lọ** ni. Bí ó tilẹ̀ jẹ́ pé ó tóbi, ó ní ìṣètò tó kedere:
 
 ```ts
-// Àpẹẹrẹ ìṣètò chatCore.ts
+// Ìṣètò àfihàn ti chatCore.ts
 export async function handleChat(request: NextRequest) {
-  // 1. Ìfàṣẹsí + CORS
+  // 1. Ìjẹ́rìí + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Ìfẹ̀sẹ̀múlẹ̀ ara ìbéèrè
+  // 2. Ìfàṣẹyìnsílẹ̀ body
   const body = await parseRequestBody(request);
 
-  // 3. Ìṣàwárí fọ́ọ̀mù + ìtumọ̀
+  // 3. Ìwárí format + íyípadà
   const sourceFormat = detectFormat(request);
   const targetFormat = getTargetFormat(providerId);
   if (needsTranslation(sourceFormat, targetFormat)) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. Ìdarí combo
+  // 4. Ìtọ́sọ́nà combo
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Tẹ̀síwájú sí ibi-àfojúsùn tó tẹ̀lé
+      // Tẹ̀síwájú sí àfojúsùn tókàn
     }
   }
 
-  // 5. Àṣàyàn ìgbà pàjáwìrì
+  // 5. Ìpadàsẹ́yìn pajawiri
   return await emergencyFallback(body);
 }
 ```
 
-Bí ó tilẹ̀ jẹ́ pé ó jẹ́ iṣẹ́ ńlá kan ṣoṣo, a ṣètò rẹ̀ sí **àwọn abala tí a fi àlàyé sí** tí ó bá ìlànà onípele márùn-ún náà mu.
+Bí ó tilẹ̀ jẹ́ function ńlá kan ṣoṣo, a pín ín sí **àwọn abala tí a ṣe àkíyèsí lórí** tí ó bá pipeline oní ipele 5 mu.
 
-### combo.ts (4456 ìlà kóòdù)
+### combo.ts (4456 LOC)
 
-**Ẹ́ńjìnnì ìdarí** tí ó ń yanjú combo kan sí àwọn ibi-àfojúsùn tí a tò létòlétò.
+**Ẹ̀rọ ìtọ́sọ́nà** tí ń yí combo kan padà sí àwọn àfojúsùn tó ṣe le lẹ́sẹ̀sẹ̀.
 
 ```ts
 // services/combo.ts
@@ -226,117 +226,120 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Ó ṣètìlẹ́yìn fún **ọgbọ̀n ìlànà ìdarí mọ́kàndínlógún** (wo `src/shared/constants/routingStrategies.ts`):
+Ó ṣe àtìlẹ́yìn fún **àwọn ìlànà ìtọ́sọ́nà 20** (wo `src/shared/constants/routingStrategies.ts`):
 
-| Ìlànà               | Ìhùwàsí                                                                  |
-| ------------------- | ------------------------------------------------------------------------ |
-| `priority`          | Àtòjọ tí a tò nípa fífi ibi-àfojúsùn àkọ́kọ́ síwájú                        |
-| `weighted`          | Ìṣeeṣe tí ó dá lórí ìwọ̀n ibi-àfojúsùn kọ̀ọ̀kan                             |
-| `round-robin`       | Yípo gba àwọn ibi-àfojúsùn kọjá létòlétò                                 |
-| `context-relay`     | Fà àyíká ọ̀rọ̀ lé àwọn ibi-àfojúsùn lọ́wọ́                                   |
-| `fill-first`        | Kún ìpín kí o tó lọ sí èyí tó tẹ̀lé                                       |
-| `p2c`               | Agbára àwọn àṣàyàn méjì                                                  |
-| `random`            | Àṣàyàn aláìlábòsí tó dọ́gba                                               |
-| `least-used`        | Yan èyí tí a lò díẹ̀ jù lọ láìpẹ́ yìí                                      |
-| `cost-optimized`    | Ibi-àfojúsùn tó ní ìlera tó sì din owó jù lọ lákọ̀ọ́kọ́                     |
-| `reset-aware`       | Mọ àwọn àsìkò àtúntò olùpèsè                                             |
-| `reset-window`      | Ìdarí tó dá lórí àsìkò àtúntò                                            |
-| `headroom`          | Ààyè ìpín tó ṣẹ́kù jù lọ lákọ̀ọ́kọ́                                          |
-| `strict-random`     | Aláìlábòsí ní tòótọ́ (láìsí ìwọ̀n dídára)                                  |
-| `auto`              | Lo ìṣírò onífákítọ̀ mẹ́rìndínlógún (`autoCombo/`)                          |
-| `lkgp`              | Olùpèsè tó dára tí a mọ̀ gbẹ̀yìn lákọ̀ọ́kọ́                                   |
-| `context-optimized` | Èyí tó dára jù fún àwọn ìbéèrè tó ní àyíká ọ̀rọ̀ gígùn                     |
-| `fusion`            | Fi ránṣẹ́ sí ẹgbẹ́ kan lẹ́ẹ̀kan náà, lẹ́yìn náà kí adájọ́ ṣàkópọ̀ (`fusion.ts`) |
+| Ìlànà               | Bí ó ṣe ń ṣe                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| `priority`          | Àtòjọ lẹ́sẹ̀sẹ̀ tó ń bẹ̀rẹ̀ láti àfojúsùn àkọ́kọ́                                               |
+| `weighted`          | Lílò ìṣeéṣe gẹ́gẹ́ bí ìwúwo àfojúsùn kọ̀ọ̀kan                                                |
+| `round-robin`       | Yí káàkiri àwọn àfojúsùn lẹ́sẹ̀sẹ̀                                                          |
+| `context-relay`     | Gbe context kọjá láàrin àwọn àfojúsùn                                                    |
+| `fill-first`        | Kún quota ṣáájú kí ó tó lọ sí ẹni tókàn                                                  |
+| `p2c`               | Agbára àṣàyàn méjì                                                                       |
+| `random`            | Àṣàyàn rọ́rọ́n déédéé                                                                      |
+| `least-used`        | Yan ẹni tí a lo kéré jù láìpẹ́ yìí                                                        |
+| `cost-optimized`    | Àfojúsùn aláàáfíà tó dinwọ jù ni àkọ́kọ́                                                   |
+| `reset-aware`       | Ó mọ̀ nípa àwọn window àtúnṣètò (reset) ti olùpèsè                                        |
+| `reset-window`      | Ìtọ́sọ́nà tó dá lórí window àtúnṣètò                                                       |
+| `headroom`          | Aya quota tó kù jù ni àkọ́kọ́                                                              |
+| `quota-weighted`    | Fò àwọn àkáàntì tí ó ti parẹ́, lẹ́yìn náà ó ń yan gẹ́gẹ́ bí quota tó kù ÷ ẹrù iṣẹ́ tó wà lọ́wọ́ |
+| `strict-random`     | Déédéé ní tòótọ́ (kò sí íwúwo didára)                                                     |
+| `auto`              | Lo ìdíwọ́n ohun-16 (`autoCombo/`)                                                         |
+| `lkgp`              | Olùpèsè rere tó kẹ́yìn tí a mọ̀ ni àkọ́kọ́                                                   |
+| `context-optimized` | Ó dára jù fún àwọn ìbéèrè context gígùn                                                  |
+| `cache-optimized`   | Fi prefix prompt tó lè tún jẹ́ lílò kọ̀ọ̀kan sórí àkáàntì kannáá (awíta prompt-cache)       |
+| `fusion`            | Ń tú ká sí panel kan ní ẹ̀gbẹ́ẹ̀gbẹ́, lẹ́yìn náà ó sì ń dá pọ̀ nípasẹ̀ adájọ́ kan (`fusion.ts`)  |
+| `pipeline`          | Ń sopọ̀ àwọn ìgbésẹ̀ pọ̀ — èsì àfojúsùn kọ̀ọ̀kan ni ó ń fún ẹni tó tẹ̀ lé e                    |
 
-### base.ts (1170 ìlà kóòdù)
+### base.ts (1170 LOC)
 
-**Olùmúṣẹ aláfoyemọ́** tí gbogbo kíláàsì olùmúṣẹ ń jogún (tààràtàbí nípasẹ̀ `DefaultExecutor` àti àwọn kíláàsì abẹ́lẹ̀ míì). Ó ní:
+**Olùmúṣe abstract** tí gbogbo kiláàsì olùmúṣe ń gba lẹ́yìn (tàbí ní tààràà, tàbí nípasẹ̀ `DefaultExecutor` àti àwọn kiláàsì-ìtẹ̀sí mìíràn). Ó ní:
 
-- `buildUrl()` — ìkọ́ URL àìyípadà (àwọn kíláàsì abẹ́lẹ̀ lè ṣàtúnkọ ọ́ fún àṣà)
-- `buildHeaders()` — àwọn àkọlé àìyípadà (ìfàṣẹsí, irú àkóónú)
-- `transformRequest()` — ń kọjá lọ láìyípadà ní àìyípadà
-- `execute()` — ìyípo HTTP àkọ́kọ́ pẹ̀lú àtúnṣe/ìdádúró-sẹ́yìn/olùdádúró
+- `buildUrl()` — ìṣẹ̀dá URL àtìbòmọ́láwìí (àwọn kiláàsì-ìtẹ̀sí ń bó jù lọ fún ti pàtàkìsí)
+- `buildHeaders()` — àwọn header àtìbòmọ́láwìí (ìjẹ́rìí, content-type)
+- `transformRequest()` — ó ń kọjá lọ bí ó ṣe rí ní àtìbòmọ́láwìí
+- `execute()` — lúùpù (loop) HTTP pàtàkì pẹ̀lú retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // Ń bójú tó gbogbo àwọn olùpèsè tó bá OpenAI/Anthropic mu
-  // Àwọn olùpèsè ń forúkọsílẹ̀ àwọn àtòpọ̀ (URL, ìfàṣẹsí, àwọn àkọlé), ṣùgbọ́n wọ́n ń pín ọgbọ́n ìmúṣẹ kan náà
+  // Ó ń ṣàkóso gbogbo àwọn olùpèsè tó bá OpenAI/Anthropic mu
+  // Àwọn olùpèsè ń forúkọsílẹ̀ àwọn ìṣètò (URL, ìjẹ́rìí, àwọn header) ṣùgbọ́n wọ́n ń pín lógíìkì olùmúṣe kannáá
 }
 ```
 
-A máa ń ṣètò ìhùwàsí pàtó fún olùpèsè (àwọn àkọlé ìfàṣẹsí, URL ìpìlẹ̀, àwọn àkọlé ẹ̀yà) nípasẹ̀ ìforúkọsílẹ̀ olùpèsè, kì í ṣe àwọn kíláàsì olùmúṣẹ ọ̀tọ̀ọ̀tọ̀.
+A ń ṣètò ìhùwàsí tó jẹ́ ti olùpèsè kọ̀ọ̀kan (àwọn header ìjẹ́rìí, URL ìpìlẹ̀, àwọn header ẹ̀yà) nípasẹ̀ Ìforúkọsílẹ̀ Olùpèsè (provider registry), kì í ṣe àwọn kiláàsì olùmúṣe tó yàtọ̀.
 
 ````
 
 ---
 
-## Àwọn Iṣẹ́ (módù 117)
+## Àwọn iṣẹ́ (117 module)
 
-Àwọn iṣẹ́ jẹ́ **àwọn módù tó dojú kọ ohun kan ṣoṣo, tí wọ́n sì ní ète kan pàtó** tí àwọn handler ń ṣàkójọpọ̀. Àwọn ẹ̀ka pàtàkì ni:
+Àwọn iṣẹ́ jẹ́ **àwọn module tó fọkànsìn lé ète kan ṣoṣo** tí àwọn handler ń darapọ̀. Àwọn ẹ̀yà ńlá ni:
 
-### Ìdarí Ọ̀nà & Combo
+### Routing àti Combo
 
-- `combo.ts` — ibi ìwọlé fún àwọn ìbéèrè tí a darí nípasẹ̀ combo
-- `services/autoCombo/` — ìṣírò àmì onífáktọ̀ 16, àwọn ọgbọ́n ìdarí ọ̀nà aládàáṣiṣẹ́ 8
-- `wildcardRouter.ts` — ń bá àwọn ọ̀nà wildcard mu (`gpt-*`)
-- `modelFamilyFallback.ts` — fallback inú ẹbí T5
+- `combo.ts` — ibi ìbẹ̀rẹ̀ fún àwọn ìbéèrè tí wọ́n ṣe combo-route
+- `services/autoCombo/` — ìṣirò àmì pẹ̀lú factor mẹ́rìndínlógún, àwọn ògùdà auto routing mẹ́jọ
+- `wildcardRouter.ts` — ń bá àwọn wildcard route (`gpt-*`) mu
+- `modelFamilyFallback.ts` — T5 fallback nínú ẹbí
 
-### Ìdíwọ̀n Oṣùwọ̀n & Quota
+### Rate Limiting àti Quota
 
 - `rateLimitManager.ts` — token bucket fún key+provider kọ̀ọ̀kan
-- `usage.ts` — fífi ìlò sílẹ̀
-- `quotaCache.ts` — àwọn àwòrán quota inú-memory
+- `usage.ts` — ìkọ̀silẹ̀ ìlò
+- `quotaCache.ts` — àwọn snapshot quota nínú memory
 
-### Àkọọ́lẹ̀ & Token
+### Account àti Token
 
-- `tokenRefresh.ts` — ìsọ̀tun OAuth nígbà 401
-- `accountFallback.ts` — yípadà sí àkọọ́lẹ̀ mìíràn
-- `sessionManager.ts` — ipò session aláyípo-ọ̀pọ̀
+- `tokenRefresh.ts` — OAuth refresh lórí 401
+- `accountFallback.ts` — yí padà sí account mìíràn
+- `sessionManager.ts` — ipò session ọ̀pọ̀-turn
 
-### Òye
+### Ọgbọ́n
 
-- `intentClassifier.ts` — pín ète ìbéèrè sí ẹ̀ka
-- `taskAwareRouter.ts` — darí ọ̀nà nípasẹ̀ irú iṣẹ́
-- `thinkingBudget.ts` — pín àwọn token ìrònú
-- `contextManager.ts` — fi àyíká ìdarí ọ̀nà sínú
+- `intentClassifier.ts` — ṣe ìsọ̀rí ète ìbéèrè
+- `taskAwareRouter.ts` — ṣe route gẹ́gẹ́ bí irú iṣẹ́ ṣe rí
+- `thinkingBudget.ts` — pín àwọn thinking token
+- `contextManager.ts` — fi routing context sí inú
 
 ### Ìfaradà
 
-- `resilience.ts` — ìṣètò retry, backoff, àti breaker
-- `emergencyFallback.ts` — fallback ìgbẹ̀yìn-gbẹ́yìn
-- `modelDeprecation.ts` — darí ọ̀nà lọ́nà aládàáṣiṣẹ́ sí àwọn model arọ́pò
+- `resilience.ts` — ìtúngbìyànjú, backoff, ìdarí breaker
+- `emergencyFallback.ts` — fallback ikẹ́yìn
+- `modelDeprecation.ts` — auto-route sí àwọn model tó ń rọ́pò̀ wọn
 
 ### Ipò
 
-- `signatureCache.ts` — yọ àwọn àdàkọ kúrò nípasẹ̀ signature ìbéèrè
-- `volumeDetector.ts` — dídín ẹrù kù
+- `signatureCache.ts` — dedup nípasẹ̀ signature ìbéèrè
+- `volumeDetector.ts` — ìdín àfikún kù
 - `contextHandoff.ts` — serialization session
 
-### Ìfúnpọ̀
+### Compression
 
-- `compression/` (àkọsílẹ̀ abẹ́) — gbogbo pipeline ìfúnpọ̀
-- Fáìlì 39 tó bo àwọn engine, àkójọpọ̀ òfin, àti adapter
+- `compression/` (subdirectory) — pipeline compression kikun
+- Àwọn fáìlì mẹ́rìndínlọ́gbọ̀n tó bo engines, rule packs, àti adapters
 
-### Àwọn Ọgbọ́n
+### Àwọn ọgbọ́n
 
-- (a ṣàlàyé rẹ̀ nínú [SKILLS.md](./SKILLS.md))
+- (wọ́n ti bo ọ́ nínú [SKILLS.md](./SKILLS.md))
 
 ### Ìrántí
 
-- (a ṣàlàyé rẹ̀ nínú [MEMORY.md](./MEMORY.md))
+- (wọ́n ti bo ọ́ nínú [MEMORY.md](./MEMORY.md))
 
 ---
 
-## Àwọn Executor (módù 150)
+## Àwọn Executor (150 module)
 
-Ní púpọ̀ jù lọ, fáìlì kan wà fún provider kọ̀ọ̀kan. Gbogbo àwọn class executor ń fa `BaseExecutor` gùn, wọ́n sì ń override ohun tó yàtọ̀; àwọn módù yòókù jẹ́ olùrànlọ́wọ́ provider-kọ̀ọ̀kan (àwọn schema irinṣẹ́, àwọn adapter fetch/TTS, àti àwọn olùṣàkóso ìwà àrà).
+Ní ìpọ̀pọ̀ jù lọ, fáìlì kan ni fún provider kọ̀ọ̀kan. Gbogbo àwọn kíláàsì executor ń gba `BaseExecutor` lẹ́yìn, wọ́n sì ń rọ́ ohun tó yàtọ̀ sípò; àwọn module yòókù jẹ́ àwọn olùrànlọ́wọ́ fún provider kọ̀ọ̀kan (àwọn schema irinṣẹ́, àwọn adapter fetch/TTS, àwọn olùṣàkóso quirk).
 
-### Àwọn Àpẹẹrẹ Tó Wọ́pọ̀
+### Àwọn àpẹẹrẹ tó wọ́pọ̀
 
-A ń yan àwọn provider nípasẹ̀ `getExecutor(providerId)`, èyí tó ń dá executor tí a ti ṣètò padà. Àwọn provider tó bá OpenAI/Anthropic mu ń lo `DefaultExecutor` (`executors/default.ts`). A ṣètò ìwà tó jẹ́ ti provider pàtó (URL ìpìlẹ̀, àwọn header ìfàṣẹsí, ẹ̀yà API) nínú `open-sse/config/providers/`, nígbà tí a ń bójú tó àwọn ìyípadà sí body ìbéèrè nínú `open-sse/translator/`.
+Wọ́n ń yanju àwọn provider nípasẹ̀ `getExecutor(providerId)`, èyí tó ń dá executor tí wọ́n ti ṣètò padà. Àwọn provider tó bá OpenAI/Anthropic ṣe é ń lo `DefaultExecutor` (`executors/default.ts`). Wọ́n ń ṣètò ìwà tó yàtọ̀ fún provider (base URL, auth headers, API version) nínú `open-sse/config/providers/`, nígbà tí wọ́n sì ń ṣàkóso àwọn ìyípadà ara ìbéèrè nínú `open-sse/translator/`.
 
-A ṣètò **URL Àkànṣe** nípasẹ̀ ìṣètò provider:
+Wọ́n ń ṣètò **URL àdáni** nípasẹ̀ ìṣètò provider:
 
 ```ts
 // Ìṣètò provider nínú open-sse/config/providers/
@@ -346,15 +349,15 @@ export default {
 }
 ````
 
-A ń bójú tó **ìfàṣẹsí àkànṣe** nípasẹ̀ ìṣètò ìfàṣẹsí registry provider (kọ́kọ́rọ́ API, OAuth, àwọn profile header).
+Wọ́n ń ṣàkóso **auth àdáni** nípasẹ̀ ìṣètò auth ti registry provider (API key, OAuth, àwọn profaili header).
 
-A ń forúkọsílẹ̀ àwọn ìyípadà **body ìbéèrè àkànṣe** (fún àpẹẹrẹ, bí Anthropic ṣe ń ya `system` sọ́tọ̀ kúrò nínú `messages`) fún provider kọ̀ọ̀kan nínú `open-sse/translator/`.
+Àwọn ìyípadà **ara ìbéèrè àdáni** (fún àpẹẹrẹ, Anthropic tí ń ya `system` kúrò lára `messages`) ni wọ́n forúkọsilẹ̀ fún provider kọ̀ọ̀kan nínú `open-sse/translator/`.
 
 ````
 
-### Factory Executor
+### Ilé-iṣẹ́ Executor
 
-`executors/index.ts` ń export `getExecutor(providerId)`:
+`executors/index.ts` ń ṣe export `getExecutor(providerId)`:
 
 ```ts
 import { getExecutor } from "@omniroute/open-sse/executors";
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-Ìyanjú ń kọjá nípasẹ̀ `ExecutorRegistry` (`executors/registry.ts`): a kéde gbogbo executor àkànṣe nínú tábìlì tí a fi sínú `executors/index.ts`, a sì forúkọsílẹ̀ wọn nípasẹ̀ `registerExecutor(alias, instance)` nígbà tí módù bá ń load; `getExecutor()` ń ṣàyẹ̀wò registry, ó sì ń lo `DefaultExecutor` tí a fi memoize gẹ́gẹ́ bí fallback fún provider èyíkéyìí tí kò ní àkọsílẹ̀ àkànṣe. Golden test `tests/unit/executor-map-golden.test.ts` ló ń ṣe àpèjúwe gbogbo mapping alias → executor.
+Ìyanju ń lọ nípasẹ̀ `ExecutorRegistry` (`executors/registry.ts`): wọ́n kéde gbogbo executor àmójútó nínú tábìlì abínúdá ti `executors/index.ts`, wọ́n sì forúkọsilẹ̀ rẹ̀ nípasẹ̀ `registerExecutor(alias, instance)` nígbà tí module bá ń load; `getExecutor()` ń kàn sí registry ó sì ń padà sí `DefaultExecutor` tí wọ́n ti memoize fún provider kankan tí kò ní entry àmójútó. Golden test `tests/unit/executor-map-golden.test.ts` ni ó ṣàpèjúwe gbogbo ìsopọ̀ alias → executor.
 
 ---
 
@@ -479,19 +482,19 @@ createResponsesApiTransformStream(): TransformStream
 
 ---
 
-## Ìṣètò
+## Iṣeto ni
 
-`open-sse/config/` ni ipele ìṣètò wà:
+`open-sse/config/` di Layer iṣeto ni:
 
-| Fáìlì                           | Ìdí                                                |
-| ------------------------------- | -------------------------------------------------- |
-| `providerRegistry.ts`           | Ìforúkọsílẹ̀ àwòṣe ìbánisọ̀rọ̀ lórí àkójọ olùpèsè 374 |
-| `providerModels.ts`             | Àwọn orúkọ àfidípò àwòṣe, ìbámu fọ́ọ̀mù              |
-| `constants.ts`                  | Àkókò ìdádúró, àwọn òpin, àwọn kóòdù ipò           |
-| `defaultThinkingSignature.ts`   | Ìfọwọ́sí ìrònú Claude àiyipada                      |
-| `modelStrip.ts` (nínú services) | Yíyọ àwọn ààyè kúrò fún olùpèsè kọ̀ọ̀kan             |
+| Faili                           | Idi                                                  |
+| ------------------------------- | ---------------------------------------------------- |
+| `providerRegistry.ts`           | Iforukọsilẹ-awoṣe iwiregbe lori katalogi olupese 377 |
+| `providerModels.ts`             | Awọn inagijẹ awoṣe, aworan atọka                     |
+| `constants.ts`                  | Awọn akoko ipari, awọn opin, awọn koodu ipo          |
+| `defaultThinkingSignature.ts`   | Ibuwọlu ero aiyipada Claude                          |
+| `modelStrip.ts` (ninu awọn iṣẹ) | Fun-olupese aaye idinku                              |
 
-### Àwòṣe Ìforúkọsílẹ̀ Olùpèsè
+### Eto Iforukọsilẹ Olupese
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Ìfọwọ́sí Zod nígbà tí module bá ń kó wọlé ń rí i dájú pé gbogbo àwọn ìṣètò olùpèsè jẹ́ tó tọ́.
+Zod afọwọsi ni fifuye module idaniloju gbogbo awọn atunto olupese wulo.
 
 ---
 

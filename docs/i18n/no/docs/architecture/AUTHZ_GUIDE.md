@@ -17,42 +17,107 @@ OmniRoute har en rutebevisst autorisasjons-pipeline som kontrollerer hver API-fo
 
 ### 1. API-nøkkel (Bearer)
 
-Brukes for de OpenAI/Anthropic/Gemini-kompatible klient-API-ene og noen få administrasjonsruter når nøkkelen har scopet `manage`.
+Brukes for de OpenAI/Anthropic/Gemini-kompatible klient-API-ene og enkelte administrasjonsruter når nøkkelen har omfanget `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Valideres av `isValidApiKey()` / `extractApiKey()` i `src/sse/services/auth.ts` og re-eksporteres via `src/shared/utils/apiAuth.ts`. Validatoren godtar også miljøvariablene `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` som vedvarende passthrough-nøkler (issue #1350).
+Valideres av `isValidApiKey()` / `extractApiKey()` i `src/sse/services/auth.ts` og eksporteres på nytt gjennom `src/shared/utils/apiAuth.ts`. Validatoren godtar også miljøvariablene `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` som permanente passthrough-nøkler (sak #1350).
 
-### 2. Dashboard-økt (auth_token-cookie)
+### 2. Kontrollpaneløkt (auth_token-informasjonskapsel)
 
-For dashboardsider og administrative operasjoner.
+For kontrollpanelsider og administratoroperasjoner.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-En cookie er bare en økt når JWT-en verifiseres **og** inneholder `authenticated: true` (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Alle som bruker cookien (dashboardets rutevakt (`isDashboardSessionAuthenticated()`), autorisasjonspipelinens fornyelse, WebSocket-håndtrykket, live-serveren, `/api/settings/require-login`, `/api/auth/status`) går gjennom denne hjelperen. Andre JWT-er signert med `JWT_SECRET` finnes — Cursor CLI-passthrough utsteder `iss "omniroute" / aud "cursor-cli"`-tokens til nøkkelinnehavere — og er aldri økter (#13298).
+En informasjonskapsel er bare en økt når JWT-en er verifisert **og** inneholder `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Alle
+som bruker informasjonskapselen (rutebeskyttelsen for kontrollpanelet (`isDashboardSessionAuthenticated()`), oppdatering i autorisasjonspipelinen, WebSocket-håndtrykk, direkte-
+serveren, `/api/settings/require-login`, `/api/auth/status`) går gjennom denne hjelpefunksjonen.
+Det finnes andre JWT-er signert med `JWT_SECRET` — passthrough-funksjonen for Cursor CLI utsteder
+tokener med `iss "omniroute" / aud "cursor-cli"` til nøkkelinnehavere — og disse er aldri økter
+(#13298).
 
-Verifiseres av `isDashboardSessionAuthenticated()` i `src/shared/utils/apiAuth.ts`. Pipelinen fornyer JWT-en automatisk når den har mindre enn 7 dager igjen av sin levetid på 30 dager.
+Verifiseres av `isDashboardSessionAuthenticated()` i `src/shared/utils/apiAuth.ts`. Pipelinen oppdaterer JWT-en automatisk når det gjenstår mindre enn 7 dager av levetiden på 30 dager.
 
-En økt kan avsluttes før de 30 dagene er gått, fordi hver utsteder går gjennom `mintDashboardSessionToken` (med utstedelsestid `iat` og id `jti`), og verifisereren sjekker to innstillinger: `sessionsValidAfter`, som settes av et passordbytte slik at hver økt utstedt før det slutter å verifiseres (nettleseren som byttet passordet får en ny cookie), og `revokedDashboardSessions`, som `POST /api/auth/logout` legger til den utloggede øktens `jti` i. Økter utstedt av en eldre utgivelse har ingen av disse claimene og forblir gyldige til første passordbytte. Hvis innstillingene ikke kan leses, stoles det ikke på økten.
+En økt kan også avsluttes før de 30 dagene har gått, fordi alle som utsteder økter, går gjennom `mintDashboardSessionToken` (et utstedelsestidspunkt `iat` og en ID `jti`), og verifikatoren kontrollerer to innstillinger: `sessionsValidAfter`, som angis ved passordendring slik at alle økter som ble utstedt før tidspunktet, ikke lenger verifiseres (nettleseren som endret passordet, får en ny informasjonskapsel), og `revokedDashboardSessions`, som `POST /api/auth/logout` legger `jti`-verdien til den avloggede økten i. Økter utstedt av en eldre versjon inneholder ingen av disse kravene og forblir gyldige frem til den første passordendringen. Hvis innstillingene ikke kan leses, blir ikke økten ansett som pålitelig.
 
-Noen administrasjonsruter godtar **enten** modus: cookie ELLER `Bearer <key>` når API-nøkkelen har scopet `manage` (eller `admin`). Dette er det som gjør arbeidsflyten «konfigurerbar via API-kall» mulig, lagt til i v3.8.
+Enkelte administrasjonsruter godtar **begge** moduser: informasjonskapsel ELLER `Bearer <key>` når API-nøkkelen har omfanget `manage` (eller `admin`). Dette muliggjør arbeidsflyten «konfigurerbar via API-kall», som ble lagt til i v3.8.
 
-#### Valgfri OIDC-innloggingsport (#6973)
+#### Valgfri OIDC-påloggingskontroll (#6973)
 
-Dashboardets administratorinnlogging støtter også en **valgfri** OIDC-flyt (OpenID Connect) ved siden av standard passordinnlogging. Passordinnlogging fjernes aldri, den utfylles bare:
+Administratorpåloggingen for kontrollpanelet støtter også en **valgfri** OIDC-flyt (OpenID Connect)
+ved siden av standard pålogging med passord — passordpålogging fjernes aldri, men
+suppleres:
 
-- Deaktivert med mindre `settings.oidcEnabled === true` **og** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` er alle konfigurert (Innstillinger → Autentisering). `GET /api/auth/oidc/login` returnerer `400` ellers.
-- `GET /api/auth/oidc/login` finner `authorization_endpoint` fra issuerens `/.well-known/openid-configuration` (faller tilbake til `<issuer>/authorize`), bygger redirect-URI-en fra den innkommende forespørselen (`x-forwarded-proto`-bevisst) og sender til IdP-en med en tilfeldig `state` lagret i en `httpOnly`-cookie `oidc_state`.
-- `GET /api/auth/oidc/callback` validerer `state`, bytter ut authorization code og verifiserer ID-tokenets signatur via issuerens JWKS (`jose`s `createRemoteJWKSet`, cachet per JWKS-URI) med sjekk av `issuer`/`audience`. Tillatelseslisten `oidcAllowedSubjects` er påkrevd: den matcher tokenets `sub`-claim eller `email`-claim. E-post-claimet godtas bare når `email_verified === true`, slik at en uverifisert e-post hos IdP-en aldri kan passere porten. Uten oppføringer avviser callbacken hver innlogging (`not_configured`).
-- Ved suksess utsteder den **nøyaktig samme** 30-dagers `auth_token`-JWT som passordinnloggingen utsteder (`src/app/api/auth/login/route.ts`), slik at resten av dashboardets øktpipeline (automatisk fornyelse, cookie-flagg) er uendret. OIDC erstatter bare hvordan cookien utstedes, ikke hva den gir tilgang til.
-- Alle `oidc*`-innstillinger (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) finnes i `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` svarer `400 PASSWORD_REQUIRED` med mindre body inneholder administrasjonspassordet som `currentPassword` (`401 PASSWORD_MISMATCH` når det er feil). `oidcDisablePasswordLogin` forbyr passordinnlogging (`POST /api/auth/login`), men beholder den lagrede passordhashen, og re-autentisering sjekker fortsatt `currentPassword` mot den.
-- `corsOrigins` og `bruteForceProtection` er også i `SECURITY_IMPACTING_SETTINGS_KEYS`: å løsne en av dem svekker innloggingsforsvaret, så de krever samme re-autentisering med `currentPassword` (fanen Sikkerhet ber om den), og JSON-importen fjerner dem.
-- Hver sikkerhetspolicynøkkel, altså `SECURITY_IMPACTING_SETTINGS_KEYS`-oppføringene, alle `oidc*`-nøkler og dashboardets øktstatus, er **kun for operatøren** på `PATCH /api/settings`: en API-nøkkel med scopet `manage` eller et `oma_`-tilgangstoken avvises med `403` selv når den sender riktig `currentPassword`, og avvisningen logges som `settings.update_failed` med `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` i `src/lib/api/operatorCredential.ts`). Vanlige innstillinger (tema, visningsvalg) kan fortsatt skrives av en `manage`-nøkkel eller et `admin`-tilgangstoken. Enhver endring av selve `/api/settings` (og av `/api/settings/require-login`) krever også scopet `admin` for tilgangstoken (`ADMIN_MUTATION_EXACT_PATHS` i `src/server/authz/accessScopes.ts`, eksakt stimatch). `GET` forblir `read`, og de øvrige underrutene under `/api/settings/*` (proxyer, combo-standarder, modellalias, komprimering, rensinger …) beholder den metodeavledede `write`-scopet.
-- `POST /api/settings/import-json` hopper over den re-autentiseringen, så den fjerner alle nøkler i `IMPORT_STRIPPED_SETTINGS_KEYS` (samme fil) før den skriver: passordet og `currentPassword`, hver `SECURITY_IMPACTING_SETTINGS_KEYS`-oppføring og dashboardets øktstatus (`sessionsValidAfter`, `revokedDashboardSessions`). Import av en eldre sikkerhetskopi kan derfor ikke gjenopplive en økt som et passordbytte eller en utlogging allerede har avsluttet.
+- Deaktivert med mindre `settings.oidcEnabled === true` **og** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` alle er konfigurert (Innstillinger → Autentisering).
+  `GET /api/auth/oidc/login` returnerer ellers `400`.
+- `GET /api/auth/oidc/login` finner `authorization_endpoint` fra utstederens
+  `/.well-known/openid-configuration` (faller tilbake til
+  `<issuer>/authorize`), bygger URI-en for omdirigering fra den innkommende forespørselen
+  (tar hensyn til `x-forwarded-proto`) og omdirigerer til IdP-en med en tilfeldig `state`
+  lagret i en `httpOnly`-informasjonskapsel kalt `oidc_state`.
+- `GET /api/auth/oidc/callback` validerer `state`, utveksler autorisasjonskoden
+  og verifiserer ID-tokenets signatur via utstederens JWKS
+  (`jose` sin `createRemoteJWKSet`, bufret per JWKS-URI) med kontroller av `issuer`/`audience`.
+  Tilgang til kontrollpanelet krever en ikke-tom `oidcAllowedSubjects`-liste,
+  en `oidcAdmissionClaim`-policy eller begge deler. Listen over subjekter samsvarer med `sub` eller
+  `email` bare når `email_verified === true`. Den valgfrie claim-policyen bruker
+  en punktseparert bane til en claim i ID-tokenet (for eksempel `realm_access.roles`) og
+  en matrise med godkjente verdier. Den oppløste claimen må være en matrise med strenger
+  som inneholder minst én godkjent verdi. Hvis begge policyene er konfigurert,
+  må begge godkjennes. Manglende eller ugyldig utformede claims avvises, og uten noen av
+  policyene nekter callback-endepunktet innlogging (`not_configured`). Eksisterende konfigurasjoner
+  som bare bruker subjekter, fortsetter uendret.
+- Keycloak tilordner vanligvis realm-roller til tilgangstokener, ikke nødvendigvis
+  ID-tokener. For å kreve realm-rollen `admin` må du konfigurere en protokolltilordning for
+  denne klienten som inkluderer `realm_access.roles` i dens **ID-token**, og deretter angi
+  `oidcAdmissionClaim` som `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Kontroller den faktiske claimen i ID-tokenet for denne klienten før du aktiverer tilgang
+  basert kun på roller. Applikasjonen leser ikke roller fra tilgangstokener. Avvisning av tokener
+  på IdP-siden kan være et supplement, men erstatter ikke denne kontrollen på applikasjonssiden.
+- Ved suksess opprettes **nøyaktig samme** 30-dagers `auth_token`-JWT som
+  passordinnloggingen utsteder (`src/app/api/auth/login/route.ts`), slik at resten av
+  kontrollpanelets øktpipeline (automatisk oppdatering, flagg for informasjonskapsler) er uendret —
+  OIDC erstatter bare hvordan informasjonskapselen opprettes, ikke hvilke rettigheter den gir. Endringer
+  i IdP-roller/-grupper ugyldiggjør ikke eksisterende OmniRoute-økter. Utlogging,
+  passordrotasjon eller utløp av økten styrer fortsatt levetiden deres.
+- Hver `oidc*`-innstilling (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) finnes i `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  svarer med `400 PASSWORD_REQUIRED` med mindre kroppen inneholder administrasjonspassordet
+  som `currentPassword` (`401 PASSWORD_MISMATCH` når det er feil).
+  `oidcDisablePasswordLogin` nekter _innlogging_ med passord (`POST /api/auth/login`),
+  men beholder den lagrede passordhashen, og ny autentisering kontrollerer fortsatt
+  `currentPassword` mot den.
+- `corsOrigins` og `bruteForceProtection` finnes også i `SECURITY_IMPACTING_SETTINGS_KEYS`:
+  Å lempe på noen av dem svekker innloggingsforsvaret, så de krever den samme
+  nye autentiseringen med `currentPassword` (Sikkerhet-fanen ber om det), og JSON-importen
+  utelater dem.
+- Hver sikkerhetspolicynøkkel — oppføringene i `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  hver `oidc*`-nøkkel og kontrollpanelets økttilstand — er **kun for operatører** ved
+  `PATCH /api/settings`: En API-nøkkel med `manage`-omfang eller et `oma_`-tilgangstoken
+  avvises med `403` selv når det sender riktig `currentPassword`, og
+  avvisningen loggføres som `settings.update_failed` med `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` i `src/lib/api/operatorCredential.ts`).
+  Vanlige innstillinger (tema, visningspreferanser) kan fortsatt endres med en `manage`-nøkkel
+  eller et `admin`-tilgangstoken. Hver endring av selve `/api/settings` (og av
+  `/api/settings/require-login`) krever også `admin`-omfanget for tilgangstokener
+  (`ADMIN_MUTATION_EXACT_PATHS` i `src/server/authz/accessScopes.ts`, eksakt samsvar
+  med banen). `GET` forblir `read`, og de andre `/api/settings/*`-underrutene (proxyer,
+  kombinasjonsstandarder, modellaliaser, komprimering, slettinger …) beholder det metodeutledede
+  `write`-omfanget.
+- `POST /api/settings/import-json` hopper over denne nye autentiseringen og fjerner derfor hver nøkkel i
+  `IMPORT_STRIPPED_SETTINGS_KEYS` (samme fil) før skriving: passordet og
+  `currentPassword`, hver oppføring i `SECURITY_IMPACTING_SETTINGS_KEYS` og
+  kontrollpanelets økttilstand (`sessionsValidAfter`, `revokedDashboardSessions`).
+  Import av en eldre sikkerhetskopi kan derfor ikke gjenopplive en økt som en passordendring
+  eller utlogging allerede har avsluttet.
 
 ## Rutetyper
 

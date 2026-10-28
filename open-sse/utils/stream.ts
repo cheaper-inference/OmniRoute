@@ -65,6 +65,7 @@ import { createReasoningStreamObserver } from "./responsesReasoningObservation.t
 import { recordToolLatency } from "../services/toolLatencyTracker.ts";
 import { extractToolSchemaMap } from "../translator/response/openai-responses/toolSchemas.ts";
 import { collectDeclaredToolNames } from "../translator/response/openai-responses/declaredToolName.ts";
+import { findDeclaredToolName } from "../services/declaredToolCasing.ts";
 import { appendToolCallNameDelta } from "./toolCallName.ts";
 import {
   generateSessionId,
@@ -168,6 +169,7 @@ type StreamCompletePayload = {
   itlMs?: number | null;
   /** True when the stream was interrupted (timeout/abort/error) before a clean finish. */
   interrupted?: boolean;
+  cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   /**
    * Encrypted-reasoning observation (Responses opaque `reasoning` items):
    * flag when seen, wall-clock added→done delta when paired. Efforts are
@@ -215,6 +217,8 @@ type StreamOptions = {
   provider?: string | null;
   reqLogger?: StreamLogger | null;
   toolNameMap?: unknown;
+  /** The CLIENT request's `tools[]`, the authority on tool-name casing for Anthropic-format clients. */
+  clientTools?: unknown;
   model?: string | null;
   connectionId?: string | null;
   apiKeyInfo?: unknown;
@@ -238,6 +242,7 @@ type TranslateState = ReturnType<typeof initState> & {
   toolNameMap?: unknown;
   signatureNamespace?: string | null;
   usage?: unknown;
+  cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   finishReason?: unknown;
   copilotCompatibleReasoning?: boolean;
   /** Suppress the `</think>` close marker for clients that render it verbatim (#5245). */
@@ -252,6 +257,8 @@ type TranslateState = ReturnType<typeof initState> & {
   toolSchemas?: Map<string, Record<string, unknown>> | null;
   /** Every tool name the request declared (with or without a schema). */
   declaredToolNames?: Set<string> | null;
+  /** The CLIENT request's `tools[]` — the authority on tool-name casing for Anthropic-format clients. */
+  clientTools?: unknown;
   customToolNames?: ReadonlySet<string>;
   requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
   upstreamError?: {
@@ -565,6 +572,14 @@ function shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
   const type = getClaudeEventType(payload);
   if (!type || lifecycle.hasError || lifecycle.hasContentBlock) return false;
   if (!hasClaudeAssistantLifecycle(lifecycle)) return false;
+  const delta = (payload as JsonRecord).delta;
+  // A bare `event: message_delta` line: its data line carries the stop_reason and decides.
+  if (type === "message_delta" && !delta) return false;
+  // A refusal has no content by design; forward it so the client sees why.
+  const stopReason =
+    (delta && typeof delta === "object" ? (delta as JsonRecord).stop_reason : null) ??
+    lifecycle.stopReason;
+  if (stopReason === "refusal") return false;
   return type === "message_delta" || type === "message_stop";
 }
 
@@ -713,34 +728,6 @@ export function restoreClaudePassthroughToolUseName(
   return true;
 }
 
-/**
- * Exact- then case-insensitive lookup of `name` inside the request's tools[]
- * (Anthropic `name` or OpenAI `function.name`). Returns the DECLARED spelling,
- * or null when no declared tool matches (server tools, undeclared names).
- */
-function findDeclaredToolName(requestTools: unknown, name: string): string | null {
-  if (!Array.isArray(requestTools)) return null;
-  const lower = name.toLowerCase();
-  let caseInsensitive: string | null = null;
-  for (const tool of requestTools) {
-    if (!tool || typeof tool !== "object" || Array.isArray(tool)) continue;
-    const item = tool as JsonRecord;
-    const directName = typeof item.name === "string" ? item.name.trim() : "";
-    const fn =
-      item.function && typeof item.function === "object" && !Array.isArray(item.function)
-        ? (item.function as JsonRecord)
-        : null;
-    const functionName = typeof fn?.name === "string" ? fn.name.trim() : "";
-    const declared = functionName || directName;
-    if (!declared) continue;
-    if (declared === name) return declared;
-    if (caseInsensitive === null && declared.toLowerCase() === lower) {
-      caseInsensitive = declared;
-    }
-  }
-  return caseInsensitive;
-}
-
 // Note: TextDecoder/TextEncoder are created per-stream inside createSSEStream()
 // to avoid shared state issues with concurrent streams (TextDecoder with {stream:true}
 // maintains internal buffering state between decode() calls).
@@ -784,6 +771,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     provider = null,
     reqLogger = null,
     toolNameMap = null,
+    clientTools = null,
     model = null,
     connectionId = null,
     apiKeyInfo = null,
@@ -870,6 +858,30 @@ export function createSSEStream(options: StreamOptions = {}) {
     const fields = mergeCacheCreationFields(usage, value);
     if (Object.keys(fields).length > 0) Object.assign((usage ??= {}), fields);
   };
+  let lastPropagatedCacheEvidence: TranslateState["cacheEvidence"];
+
+  function mergeUsageSnapshot(current: UsageLike | null, incoming: UsageLike): UsageLike {
+    if (!current) return { ...incoming };
+    return {
+      ...current,
+      ...incoming,
+      // A provider may split usage across snapshots. Undefined fields do not
+      // erase earlier evidence; explicit zero is meaningful (a cache miss).
+      ...(incoming.cache_evidence === "invalid"
+        ? { cached_tokens: undefined, cache_evidence: "invalid" }
+        : incoming.cached_tokens !== undefined
+          ? { cached_tokens: incoming.cached_tokens }
+          : {}),
+      ...(incoming.cache_read_input_tokens !== undefined
+        ? { cache_read_input_tokens: incoming.cache_read_input_tokens }
+        : {}),
+      ...(incoming.cache_creation_input_tokens !== undefined
+        ? { cache_creation_input_tokens: incoming.cache_creation_input_tokens }
+        : {}),
+      ...(incoming.cache_evidence !== undefined ? { cache_evidence: incoming.cache_evidence } : {}),
+    };
+  }
+
   /** Passthrough (OpenAI CC shape): saw tool_calls in stream before finish_reason */
   let passthroughHasToolCalls = false;
   /** Passthrough: whether a chunk with non-null finish_reason was seen (#7800) */
@@ -895,6 +907,7 @@ export function createSSEStream(options: StreamOptions = {}) {
           accumulatedReasoning: "",
           toolSchemas: extractToolSchemaMap(body),
           declaredToolNames: collectDeclaredToolNames(body),
+          clientTools,
           customToolNames,
           requestToolIdentityMap,
         }
@@ -1660,7 +1673,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // Responses SSE: only extract usage, forward payload as-is
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = { ...extracted, ...mergeCacheCreationFields(usage, extracted) };
+                    usage = {
+                      ...mergeUsageSnapshot(usage, extracted),
+                      ...mergeCacheCreationFields(usage, extracted),
+                    };
                   }
                   // Keep generic Responses deltas for fallback usage estimates,
                   // but only visible text deltas may become assistant content in
@@ -1936,9 +1952,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                     if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
                     if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
                     if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
-                    if (eu.cache_read_input_tokens)
+                    if (eu.cache_read_input_tokens !== undefined)
                       u.cache_read_input_tokens = eu.cache_read_input_tokens;
-                    if (eu.cache_creation_input_tokens)
+                    if (eu.cache_creation_input_tokens !== undefined)
                       u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
                   }
                   if (
@@ -1954,7 +1970,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   const restoredToolName = restoreClaudePassthroughToolUseName(
                     parsed,
                     toolNameMap,
-                    body
+                    clientTools ?? (body as JsonRecord | null)?.tools
                   );
                   // Track content length and accumulate from Claude format
                   if (parsed.delta?.text) {
@@ -2163,6 +2179,14 @@ export function createSSEStream(options: StreamOptions = {}) {
                       const deltaArgs =
                         typeof tc?.function?.arguments === "string" ? tc.function.arguments : "";
                       if (!existing) {
+                        // A fragment that opens a new slot must carry an id — strict
+                        // OpenAI-compatible clients (@ai-sdk/openai-compatible) throw
+                        // "Expected 'id' to be a string." otherwise. Fill a stable one
+                        // and force re-serialization so the client sees it (9router #4992).
+                        if (tc && (tc.id == null || tc.id === "")) {
+                          tc.id = `call_${crypto.randomUUID().replace(/-/g, "").slice(0, 24)}`;
+                          toolCallIdCoerced = true;
+                        }
                         passthroughToolCalls.set(key, {
                           id: tc?.id != null ? String(tc.id) : null,
                           index: Number.isInteger(tc?.index) ? tc.index : passthroughToolCalls.size,
@@ -2226,7 +2250,10 @@ export function createSSEStream(options: StreamOptions = {}) {
 
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = { ...extracted, ...mergeCacheCreationFields(usage, extracted) };
+                    usage = {
+                      ...mergeUsageSnapshot(usage, extracted),
+                      ...mergeCacheCreationFields(usage, extracted),
+                    };
                   }
 
                   const isFinishChunk = parsed.choices?.[0]?.finish_reason;
@@ -2534,25 +2561,34 @@ export function createSSEStream(options: StreamOptions = {}) {
             if (!state.usage) {
               state.usage = extracted;
             } else {
-              const su = state.usage as Record<string, number>;
-              const eu = extracted as Record<string, number>;
+              const su = state.usage as UsageLike;
+              const eu = extracted as UsageLike;
               Object.assign(su, mergeCacheCreationFields(su, extracted));
               if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
               if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
               if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
               if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
               if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
-              if (eu.cache_read_input_tokens > 0)
+              if (eu.cache_read_input_tokens !== undefined)
                 su.cache_read_input_tokens = eu.cache_read_input_tokens;
-              if (eu.cache_creation_input_tokens > 0)
+              if (eu.cache_creation_input_tokens !== undefined)
                 su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-              if (eu.cached_tokens > 0) su.cached_tokens = eu.cached_tokens;
+              if (eu.cache_evidence === "invalid") {
+                delete su.cached_tokens;
+              } else if (eu.cached_tokens !== undefined) {
+                su.cached_tokens = eu.cached_tokens;
+              }
+              if (eu.cache_evidence !== undefined) su.cache_evidence = eu.cache_evidence;
               if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
             }
           }
 
           // Translate: targetFormat -> openai -> sourceFormat
           const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
+          if (state?.cacheEvidence !== lastPropagatedCacheEvidence) {
+            usage = { ...usage, cache_evidence: state?.cacheEvidence };
+            lastPropagatedCacheEvidence = state?.cacheEvidence;
+          }
 
           // Log OpenAI intermediate chunks (if available)
           for (const item of getOpenAIIntermediateChunks(translated)) {
@@ -2943,6 +2979,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 onComplete({
                   status: 200,
                   usage,
+                  cacheEvidence: usage?.cache_evidence as StreamCompletePayload["cacheEvidence"],
                   responseBody,
                   reasoningMeta: reasoningObserver.take(),
                   ...timing.completionTiming(),
@@ -3066,24 +3103,33 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (!state.usage) {
                   state.usage = extracted;
                 } else {
-                  const su = state.usage as Record<string, number>;
-                  const eu = extracted as Record<string, number>;
+                  const su = state.usage as UsageLike;
+                  const eu = extracted as UsageLike;
                   Object.assign(su, mergeCacheCreationFields(su, extracted));
                   if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
                   if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                   if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
                   if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
                   if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
-                  if (eu.cache_read_input_tokens > 0)
+                  if (eu.cache_read_input_tokens !== undefined)
                     su.cache_read_input_tokens = eu.cache_read_input_tokens;
-                  if (eu.cache_creation_input_tokens > 0)
+                  if (eu.cache_creation_input_tokens !== undefined)
                     su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-                  if (eu.cached_tokens > 0) su.cached_tokens = eu.cached_tokens;
+                  if (eu.cache_evidence === "invalid") {
+                    delete su.cached_tokens;
+                  } else if (eu.cached_tokens !== undefined) {
+                    su.cached_tokens = eu.cached_tokens;
+                  }
+                  if (eu.cache_evidence !== undefined) su.cache_evidence = eu.cache_evidence;
                   if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
                 }
               }
 
               const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
+              if (state?.cacheEvidence !== lastPropagatedCacheEvidence) {
+                usage = { ...usage, cache_evidence: state?.cacheEvidence };
+                lastPropagatedCacheEvidence = state?.cacheEvidence;
+              }
 
               // Log OpenAI intermediate chunks
               for (const item of getOpenAIIntermediateChunks(translated)) {
@@ -3303,6 +3349,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               onComplete({
                 status: 200,
                 usage: state?.usage,
+                cacheEvidence: state?.cacheEvidence,
                 responseBody,
                 ...timing.completionTiming(),
                 reasoningMeta: reasoningObserver.take(),
@@ -3382,6 +3429,7 @@ export function createSSETransformStreamWithLogger(
   requestedThinking: boolean | undefined = undefined,
   customToolNames: ReadonlySet<string> = new Set(),
   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
+  clientTools: unknown = null,
   streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES
 ) {
   return createSSEStream({
@@ -3403,6 +3451,7 @@ export function createSSETransformStreamWithLogger(
     customToolNames,
     requestToolIdentityMap,
     streamBufferBytes,
+    clientTools,
   });
 }
 
@@ -3417,7 +3466,8 @@ export function createPassthroughStreamWithLogger(
   apiKeyInfo: unknown = null,
   onFailure: ((payload: StreamFailurePayload) => boolean | void | Promise<void>) | null = null,
   clientResponseFormat: string | null = null,
-  requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null
+  requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
+  clientTools: unknown = null
 ) {
   return createSSEStream({
     mode: STREAM_MODE.PASSTHROUGH,
@@ -3432,6 +3482,7 @@ export function createPassthroughStreamWithLogger(
     onFailure,
     clientResponseFormat,
     requestToolIdentityMap,
+    clientTools,
   });
 }
 

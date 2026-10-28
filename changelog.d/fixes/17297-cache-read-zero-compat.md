@@ -1,0 +1,1 @@
+- fix(usage): preserve positive prompt cache-read counts when earlier compatibility fields report zero (#17297 — thanks @huangyoudashi).
