@@ -152,6 +152,7 @@ test("translateBody falls back to Google for a chunk the model keeps truncating"
   let modelCalls = 0;
   const backend = {
     engine: "llm",
+    model: "primary",
     googleFallback: true,
     callChat: async () => {
       modelCalls++;
@@ -187,6 +188,7 @@ test("translateBody uses Google directly with the google engine and on model err
     { code: "de", english: "German" },
     {
       engine: "llm",
+      model: "primary",
       googleFallback: true,
       callChat: async () => {
         throw new Error("upstream 429: quota exhausted");

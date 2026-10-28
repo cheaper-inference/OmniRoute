@@ -42,9 +42,9 @@
  * fences / table rows / code spans are rebuilt from the source):
  *   OMNIROUTE_TRANSLATION_ENGINE      llm (default) | google — `google` needs no LLM env at all
  *   OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK  default on; `0` disables. With the llm engine, a
- *                                     chunk the model could not produce (output guard failed
- *                                     on every attempt, or quota/backend errors) is translated
- *                                     by Google instead of failing the locale.
+ *                                     chunk no model could produce (every model and the
+ *                                     re-split rejected, or a model error) is translated by
+ *                                     Google instead of failing the locale.
  *   OMNIROUTE_TRANSLATION_GOOGLE_API_KEY   optional; official Cloud Translation v2 instead of
  *                                     the keyless web endpoint
  *   OMNIROUTE_TRANSLATION_GOOGLE_CONCURRENCY  parallel Google requests (default 6)
@@ -925,6 +925,64 @@ async function resolveSectionPlan({ task, state, opts, sections }) {
   return planSectionReuse({ previousHashes, sections, mirrorSections });
 }
 
+// A chunk the validator keeps rejecting used to be retried CHUNK_ATTEMPTS times on the same
+// model and then fail the whole doc: the model chain only engaged on HTTP errors. On
+// 2026-10-27 the fallback model cut large tables right after the header row under load
+// ("table rows 1/9") and one USER_GUIDE run spent 6.6 h on retries. A rejected chunk now
+// falls through the chain (each level keeps the rest of the chain for HTTP fallback), and
+// when every model rejects a large chunk it is re-split on the same safe seams as
+// chunkMarkdown (headings, paragraphs, table rows) and translated piece by piece.
+const SPLIT_DEPTH = 2;
+const SPLIT_MIN_CHARS = 1500;
+
+export async function translateChunk(
+  chunk,
+  system,
+  backend,
+  { call = callChat, label = "chunk", depth = 0 } = {}
+) {
+  const messages = [
+    { role: "system", content: system },
+    { role: "user", content: chunk },
+  ];
+  const chain = [backend.model, ...(backend.fallbackModels ?? [])].filter(Boolean);
+  let checked;
+  for (let level = 0; level < chain.length; level++) {
+    const levelBackend = {
+      ...backend,
+      model: chain[level],
+      fallbackModels: chain.slice(level + 1),
+    };
+    for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
+      checked = validateTranslatedChunk(chunk, await call(messages, levelBackend));
+      if (checked.problems.length === 0) return checked.text;
+      logWarn(
+        `  ${label} rejected (${chain[level]}, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
+      );
+    }
+  }
+  if (depth < SPLIT_DEPTH && chunk.length > SPLIT_MIN_CHARS) {
+    const pieces = chunkMarkdown(chunk, Math.ceil(chunk.length / 2));
+    if (pieces.length > 1) {
+      logWarn(
+        `  ${label} split into ${pieces.length} smaller pieces after every model rejected it`
+      );
+      const parts = [];
+      for (let p = 0; p < pieces.length; p++) {
+        parts.push(
+          await translateChunk(pieces[p], system, backend, {
+            call,
+            label: `${label}.${p + 1}`,
+            depth: depth + 1,
+          })
+        );
+      }
+      return joinTranslatedChunks(parts);
+    }
+  }
+  throw new Error(`${label} failed validation: ${checked.problems.join("; ")}`);
+}
+
 export function translationEngine(env = process.env) {
   return (env.OMNIROUTE_TRANSLATION_ENGINE || "llm").trim().toLowerCase() === "google"
     ? "google"
@@ -968,22 +1026,6 @@ async function translateChunkWithGoogle(chunk, localeEntry, backend, label) {
   throw new Error(`${label} failed validation (google): ${problems.join("; ")}`);
 }
 
-// One chunk through the model chain; null when every attempt failed the output guard.
-async function translateChunkWithModel(chunk, messages, backend, label) {
-  let checked;
-  for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
-    checked = validateTranslatedChunk(
-      chunk,
-      await (backend.callChat ?? callChat)(messages, backend)
-    );
-    if (checked.problems.length === 0) return { text: checked.text };
-    logWarn(
-      `  ${label} rejected (attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
-    );
-  }
-  return { problems: checked.problems };
-}
-
 export async function translateBody(body, localeEntry, backend) {
   const englishName = localeEntry.english ?? localeEntry.name;
   const native = localeEntry.native ?? localeEntry.name;
@@ -994,33 +1036,29 @@ export async function translateBody(body, localeEntry, backend) {
   const fallback = backend.googleFallback ?? googleFallbackEnabled();
   for (let i = 0; i < chunks.length; i++) {
     const label = `chunk ${i + 1}/${chunks.length}`;
+    let text;
     if (engine === "google") {
-      translated.push(await translateChunkWithGoogle(chunks[i], localeEntry, backend, label));
-      continue;
-    }
-    const messages = [
-      { role: "system", content: system },
-      { role: "user", content: chunks[i] },
-    ];
-    let result;
-    try {
-      result = await translateChunkWithModel(chunks[i], messages, backend, label);
-    } catch (err) {
-      if (!fallback) throw err;
-      result = { problems: [`model error: ${String(err?.message ?? err).slice(0, 120)}`] };
-    }
-    if (result.problems) {
-      if (!fallback) {
-        throw new Error(`${label} failed validation: ${result.problems.join("; ")}`);
+      text = await translateChunkWithGoogle(chunks[i], localeEntry, backend, label);
+    } else {
+      try {
+        text = await translateChunk(chunks[i], system, backend, {
+          call: backend.callChat ?? callChat,
+          label,
+        });
+      } catch (err) {
+        if (!fallback) throw err;
+        // Every model and the re-split rejected the chunk (or the chain errored out): Google
+        // rebuilds the structure from the source, so a truncated table cannot come back.
+        logWarn(
+          `  [i18n-google] ${label} via Google (${String(err?.message ?? err).slice(0, 160)})`
+        );
+        text = await translateChunkWithGoogle(chunks[i], localeEntry, backend, label);
       }
-      logWarn(`  [i18n-google] ${label} via Google (${result.problems.join("; ")})`);
-      translated.push(await translateChunkWithGoogle(chunks[i], localeEntry, backend, label));
-      continue;
     }
-    translated.push(result.text);
+    translated.push(text);
     if (chunks.length > 1) {
       logInfo(
-        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${checked.text.length} chars)`
+        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${text.length} chars)`
       );
     }
   }
