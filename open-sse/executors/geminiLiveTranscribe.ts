@@ -35,15 +35,27 @@ export class GeminiLiveError extends Error {
   }
 }
 
+function isRiffWave(buffer: Buffer): boolean {
+  return buffer.toString("ascii", 0, 4) === "RIFF" && buffer.toString("ascii", 8, 12) === "WAVE";
+}
+
+/** "fmt " chunk check: PCM (format 1), mono, 16 kHz, 16-bit samples. */
+function isPcm16kMonoFmtChunk(buffer: Buffer, dataOffset: number, chunkSize: number): boolean {
+  if (chunkSize < 16) return false;
+  return (
+    buffer.readUInt16LE(dataOffset) === 1 && // audio format: 1 = PCM
+    buffer.readUInt16LE(dataOffset + 2) === 1 && // channels: 1 = mono
+    buffer.readUInt32LE(dataOffset + 4) === 16000 && // sample rate
+    buffer.readUInt16LE(dataOffset + 14) === 16 // bits per sample
+  );
+}
+
 /**
  * Detect if a buffer is already a 16kHz 16-bit mono PCM WAV file.
  * If so, extracts the raw PCM sample bytes without running FFmpeg.
  */
 export function extractPcmFrom16kWav(buffer: Buffer): Buffer | null {
-  if (buffer.length < 44) return null;
-  if (buffer.toString("ascii", 0, 4) !== "RIFF" || buffer.toString("ascii", 8, 12) !== "WAVE") {
-    return null;
-  }
+  if (buffer.length < 44 || !isRiffWave(buffer)) return null;
 
   let offset = 12;
   let isPcm16k = false;
@@ -54,22 +66,11 @@ export function extractPcmFrom16kWav(buffer: Buffer): Buffer | null {
     const chunkDataOffset = offset + 8;
 
     if (chunkId === "fmt ") {
-      if (chunkSize < 16) return null;
-      const audioFormat = buffer.readUInt16LE(chunkDataOffset); // 1 = PCM
-      const numChannels = buffer.readUInt16LE(chunkDataOffset + 2); // 1 = mono
-      const sampleRate = buffer.readUInt32LE(chunkDataOffset + 4); // 16000
-      const bitsPerSample = buffer.readUInt16LE(chunkDataOffset + 14); // 16
-
-      if (audioFormat === 1 && numChannels === 1 && sampleRate === 16000 && bitsPerSample === 16) {
-        isPcm16k = true;
-      } else {
-        return null;
-      }
-    } else if (chunkId === "data") {
-      if (isPcm16k) {
-        const dataEnd = Math.min(chunkDataOffset + chunkSize, buffer.length);
-        return buffer.subarray(chunkDataOffset, dataEnd);
-      }
+      if (!isPcm16kMonoFmtChunk(buffer, chunkDataOffset, chunkSize)) return null;
+      isPcm16k = true;
+    } else if (chunkId === "data" && isPcm16k) {
+      const dataEnd = Math.min(chunkDataOffset + chunkSize, buffer.length);
+      return buffer.subarray(chunkDataOffset, dataEnd);
     }
 
     // Chunks in WAV are 2-byte aligned
@@ -288,6 +289,278 @@ export function resolveLiveWsUrlAndHeaders(
   return { url: wsUrl.toString(), headers };
 }
 
+const GEMINI_LIVE_DEFAULT_MODEL = "gemini-3.5-transcribe-live";
+/** Overall safety timeout for one Live session (processing up to a 4-min file). */
+const GEMINI_LIVE_MAX_WAIT_MS = 120_000;
+/** 100 ms of audio at 16 kHz 16-bit mono. */
+const PCM_CHUNK_BYTES = 3200;
+const WS_BACKPRESSURE_BYTES = 65536;
+/** Grace period after audioStreamEnd when no turnComplete arrives (music-only or silence). */
+const STREAM_END_GRACE_MS = 5000;
+
+interface LiveServerContent {
+  inputTranscription?: { text?: unknown };
+  input_transcription?: { text?: unknown };
+  turnComplete?: unknown;
+  turn_complete?: unknown;
+  generationComplete?: unknown;
+  generation_complete?: unknown;
+}
+
+interface LiveServerMessage {
+  error?: { code?: unknown; message?: string };
+  setupComplete?: unknown;
+  setup_complete?: unknown;
+  serverContent?: LiveServerContent;
+  server_content?: LiveServerContent;
+}
+
+function trimmedText(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function buildLiveSetupMessage(options: GeminiLiveTranscribeOptions): Record<string, unknown> {
+  const rawModel = options.model || GEMINI_LIVE_DEFAULT_MODEL;
+  const modelName = rawModel.startsWith("models/") ? rawModel : `models/${rawModel}`;
+  const language = trimmedText(options.language);
+  const prompt = trimmedText(options.prompt);
+
+  return {
+    setup: {
+      model: modelName,
+      generationConfig: {
+        responseModalities: ["TEXT"],
+      },
+      inputAudioTranscription: {
+        languageCodes: language ? [language] : [],
+      },
+      ...(prompt ? { systemInstruction: { parts: [{ text: prompt }] } } : {}),
+    },
+  };
+}
+
+function isLiveTurnComplete(serverContent: LiveServerContent): boolean {
+  return (
+    Boolean(serverContent.turnComplete) ||
+    Boolean(serverContent.turn_complete) ||
+    Boolean(serverContent.generationComplete) ||
+    Boolean(serverContent.generation_complete)
+  );
+}
+
+/** Maps a ws transport error message to the HTTP status reported to the client. */
+function liveSocketErrorStatus(message: string): number {
+  const statusMatch = /Unexpected server response: (\d{3})/.exec(message);
+  if (statusMatch) return parseInt(statusMatch[1], 10);
+  if (/quota|429|resource_exhausted/i.test(message)) return 429;
+  if (/401|unauthorized|unauthenticated/i.test(message)) return 401;
+  if (/403|forbidden/i.test(message)) return 403;
+  return 500;
+}
+
+function liveUnexpectedCloseError(code: number, reason: Buffer | undefined): GeminiLiveError {
+  const reasonStr = reason ? reason.toString() : "";
+  return new GeminiLiveError(
+    `Gemini Live connection closed unexpectedly (code: ${code}${reasonStr ? `, reason: ${reasonStr}` : ""})`,
+    code === 1008 || code === 4429 ? 429 : 502
+  );
+}
+
+/**
+ * One file-mode Live session: setup → stream PCM chunks → audioStreamEnd → collect the
+ * finalized inputTranscription. The first outcome wins; every exit path clears the timers
+ * and closes the socket.
+ */
+class GeminiLiveSession {
+  private ws: WebSocket | null = null;
+  private settled = false;
+  private audioStreamEnded = false;
+  private finishTimer: NodeJS.Timeout | null = null;
+  private maxWaitTimer: NodeJS.Timeout | null = null;
+  private readonly transcripts: string[] = [];
+  private readonly pcmBuffer: Buffer;
+  private readonly options: GeminiLiveTranscribeOptions;
+  private readonly onResolve: (text: string) => void;
+  private readonly onReject: (err: Error) => void;
+
+  constructor(
+    pcmBuffer: Buffer,
+    options: GeminiLiveTranscribeOptions,
+    onResolve: (text: string) => void,
+    onReject: (err: Error) => void
+  ) {
+    this.pcmBuffer = pcmBuffer;
+    this.options = options;
+    this.onResolve = onResolve;
+    this.onReject = onReject;
+  }
+
+  start(url: string, headers: Record<string, string>): void {
+    this.maxWaitTimer = setTimeout(() => {
+      this.fail(new GeminiLiveError("Gemini Live transcription timed out", 504));
+    }, GEMINI_LIVE_MAX_WAIT_MS);
+
+    let ws: WebSocket;
+    try {
+      ws = new WebSocket(url, { headers });
+    } catch (err) {
+      this.fail(
+        new GeminiLiveError(
+          `Failed to initialize WebSocket: ${err instanceof Error ? err.message : String(err)}`,
+          500
+        )
+      );
+      return;
+    }
+    this.ws = ws;
+
+    ws.on("open", () => ws.send(JSON.stringify(buildLiveSetupMessage(this.options))));
+    ws.on("message", (raw) => this.handleMessage(raw));
+    ws.on("error", (err: Error) => {
+      this.fail(
+        new GeminiLiveError(
+          `Gemini Live WebSocket error: ${err.message}`,
+          liveSocketErrorStatus(err.message)
+        )
+      );
+    });
+    ws.on("close", (code, reason) => this.handleClose(code, reason));
+  }
+
+  private cleanup(): void {
+    if (this.finishTimer) {
+      clearTimeout(this.finishTimer);
+      this.finishTimer = null;
+    }
+    if (this.maxWaitTimer) {
+      clearTimeout(this.maxWaitTimer);
+      this.maxWaitTimer = null;
+    }
+    const ws = this.ws;
+    if (!ws) return;
+    try {
+      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+        ws.close(1000);
+      }
+    } catch {
+      /* ignore close errors */
+    }
+  }
+
+  private succeed(text: string): void {
+    if (this.settled) return;
+    this.settled = true;
+    this.cleanup();
+    this.onResolve(text);
+  }
+
+  private fail(err: Error): void {
+    if (this.settled) return;
+    this.settled = true;
+    this.cleanup();
+    this.onReject(err);
+  }
+
+  private scheduleFinish(delayMs = 300): void {
+    if (this.finishTimer) clearTimeout(this.finishTimer);
+    this.finishTimer = setTimeout(() => {
+      const text = this.transcripts
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+      this.succeed(text);
+    }, delayMs);
+  }
+
+  private openSocketOrThrow(): WebSocket {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      throw new GeminiLiveError("WebSocket disconnected while streaming audio", 500);
+    }
+    return this.ws;
+  }
+
+  private async streamAudio(): Promise<void> {
+    try {
+      const pcm = this.pcmBuffer;
+      for (let offset = 0; offset < pcm.length; offset += PCM_CHUNK_BYTES) {
+        const ws = this.openSocketOrThrow();
+        const chunk = pcm.subarray(offset, Math.min(offset + PCM_CHUNK_BYTES, pcm.length));
+        ws.send(
+          JSON.stringify({
+            realtimeInput: {
+              audio: {
+                data: chunk.toString("base64"),
+                mimeType: "audio/pcm;rate=16000",
+              },
+            },
+          })
+        );
+        if (ws.bufferedAmount > WS_BACKPRESSURE_BYTES) {
+          await sleep(15);
+        }
+      }
+      this.endAudioStream();
+    } catch (err) {
+      this.fail(err instanceof Error ? err : new Error(String(err)));
+    }
+  }
+
+  private endAudioStream(): void {
+    const ws = this.ws;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    this.audioStreamEnded = true;
+    ws.send(JSON.stringify({ realtimeInput: { audioStreamEnd: true } }));
+    this.scheduleFinish(STREAM_END_GRACE_MS);
+  }
+
+  private handleMessage(raw: WebSocket.RawData): void {
+    try {
+      this.dispatchServerMessage(JSON.parse(raw.toString()) as LiveServerMessage);
+    } catch {
+      /* ignore JSON parse errors for non-json frames */
+    }
+  }
+
+  private dispatchServerMessage(data: LiveServerMessage): void {
+    // Error payload from the server
+    if (data.error) {
+      const code = typeof data.error.code === "number" ? data.error.code : 500;
+      this.fail(new GeminiLiveError(data.error.message || "Gemini Live upstream error", code));
+      return;
+    }
+
+    // Setup complete → start streaming audio
+    if (data.setupComplete || data.setup_complete) {
+      this.streamAudio().catch((err: Error) => this.fail(err));
+      return;
+    }
+
+    const serverContent = data.serverContent || data.server_content;
+    if (serverContent) this.collectServerContent(serverContent);
+  }
+
+  private collectServerContent(serverContent: LiveServerContent): void {
+    const inputTranscription =
+      serverContent.inputTranscription || serverContent.input_transcription;
+    if (inputTranscription?.text && typeof inputTranscription.text === "string") {
+      this.transcripts.push(inputTranscription.text);
+    }
+    if (isLiveTurnComplete(serverContent) && this.audioStreamEnded) {
+      this.scheduleFinish(250);
+    }
+  }
+
+  private handleClose(code: number, reason: Buffer | undefined): void {
+    if (this.settled) return;
+    if (this.audioStreamEnded) {
+      this.scheduleFinish(0);
+    } else {
+      this.fail(liveUnexpectedCloseError(code, reason));
+    }
+  }
+}
+
 /**
  * Transcribe an audio file using Gemini Live WebSocket (bidiGenerateContent).
  *
@@ -304,216 +577,7 @@ export async function geminiLiveTranscribe(
   const { url, headers } = resolveLiveWsUrlAndHeaders(credentials, options.baseUrl);
 
   return new Promise<string>((resolve, reject) => {
-    let ws: WebSocket | null = null;
-    let isSettled = false;
-    let audioStreamEnded = false;
-    let finishTimer: NodeJS.Timeout | null = null;
-    let maxWaitTimer: NodeJS.Timeout | null = null;
-    const transcripts: string[] = [];
-
-    const cleanup = () => {
-      if (finishTimer) {
-        clearTimeout(finishTimer);
-        finishTimer = null;
-      }
-      if (maxWaitTimer) {
-        clearTimeout(maxWaitTimer);
-        maxWaitTimer = null;
-      }
-      if (ws) {
-        try {
-          if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-            ws.close(1000);
-          }
-        } catch {
-          /* ignore close errors */
-        }
-      }
-    };
-
-    const settleResolve = (text: string) => {
-      if (isSettled) return;
-      isSettled = true;
-      cleanup();
-      resolve(text);
-    };
-
-    const settleReject = (err: Error) => {
-      if (isSettled) return;
-      isSettled = true;
-      cleanup();
-      reject(err);
-    };
-
-    // Overall safety timeout (120 seconds for processing up to 4-min file)
-    maxWaitTimer = setTimeout(() => {
-      settleReject(new GeminiLiveError("Gemini Live transcription timed out", 504));
-    }, 120_000);
-
-    try {
-      ws = new WebSocket(url, { headers });
-    } catch (err) {
-      settleReject(
-        new GeminiLiveError(
-          `Failed to initialize WebSocket: ${err instanceof Error ? err.message : String(err)}`,
-          500
-        )
-      );
-      return;
-    }
-
-    const scheduleFinish = (delayMs = 300) => {
-      if (finishTimer) clearTimeout(finishTimer);
-      finishTimer = setTimeout(() => {
-        const text = transcripts
-          .map((t) => t.trim())
-          .filter(Boolean)
-          .join(" ")
-          .trim();
-        settleResolve(text);
-      }, delayMs);
-    };
-
-    const streamAudio = async () => {
-      try {
-        const CHUNK_SIZE = 3200; // 100ms at 16kHz 16-bit mono
-        for (let offset = 0; offset < pcmBuffer.length; offset += CHUNK_SIZE) {
-          if (!ws || ws.readyState !== WebSocket.OPEN) {
-            throw new GeminiLiveError("WebSocket disconnected while streaming audio", 500);
-          }
-          const chunk = pcmBuffer.subarray(offset, Math.min(offset + CHUNK_SIZE, pcmBuffer.length));
-          ws.send(
-            JSON.stringify({
-              realtimeInput: {
-                audio: {
-                  data: chunk.toString("base64"),
-                  mimeType: "audio/pcm;rate=16000",
-                },
-              },
-            })
-          );
-          if (ws.bufferedAmount > 65536) {
-            await sleep(15);
-          }
-        }
-
-        // End of audio stream
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          audioStreamEnded = true;
-          ws.send(
-            JSON.stringify({
-              realtimeInput: {
-                audioStreamEnd: true,
-              },
-            })
-          );
-          // Wait up to 5 seconds after stream end if no turnComplete arrives (e.g. music-only or silence)
-          scheduleFinish(5000);
-        }
-      } catch (err) {
-        settleReject(err instanceof Error ? err : new Error(String(err)));
-      }
-    };
-
-    ws.on("open", () => {
-      const rawModel = options.model || "gemini-3.5-transcribe-live";
-      const modelName = rawModel.startsWith("models/") ? rawModel : `models/${rawModel}`;
-
-      const setupMessage: Record<string, unknown> = {
-        setup: {
-          model: modelName,
-          generationConfig: {
-            responseModalities: ["TEXT"],
-          },
-          inputAudioTranscription: {
-            languageCodes:
-              typeof options.language === "string" && options.language.trim()
-                ? [options.language.trim()]
-                : [],
-          },
-          ...(typeof options.prompt === "string" && options.prompt.trim()
-            ? {
-                systemInstruction: {
-                  parts: [{ text: options.prompt.trim() }],
-                },
-              }
-            : {}),
-        },
-      };
-
-      ws!.send(JSON.stringify(setupMessage));
-    });
-
-    ws.on("message", (raw) => {
-      try {
-        const data = JSON.parse(raw.toString());
-
-        // Check for error payload from server
-        if (data.error) {
-          const code = typeof data.error.code === "number" ? data.error.code : 500;
-          const msg = data.error.message || "Gemini Live upstream error";
-          settleReject(new GeminiLiveError(msg, code));
-          return;
-        }
-
-        // Setup complete → start streaming audio
-        if (data.setupComplete || data.setup_complete) {
-          streamAudio().catch(settleReject);
-          return;
-        }
-
-        // Collect server content
-        const serverContent = data.serverContent || data.server_content;
-        if (serverContent) {
-          const inputTranscription =
-            serverContent.inputTranscription || serverContent.input_transcription;
-          if (inputTranscription?.text && typeof inputTranscription.text === "string") {
-            transcripts.push(inputTranscription.text);
-          }
-
-          const isTurnComplete =
-            Boolean(serverContent.turnComplete) ||
-            Boolean(serverContent.turn_complete) ||
-            Boolean(serverContent.generationComplete) ||
-            Boolean(serverContent.generation_complete);
-
-          if (isTurnComplete && audioStreamEnded) {
-            scheduleFinish(250);
-          }
-        }
-      } catch {
-        /* ignore JSON parse errors for non-json frames */
-      }
-    });
-
-    ws.on("error", (err: Error) => {
-      let status = 500;
-      const statusMatch = /Unexpected server response: (\d{3})/.exec(err.message);
-      if (statusMatch) {
-        status = parseInt(statusMatch[1], 10);
-      } else if (/quota|429|resource_exhausted/i.test(err.message)) {
-        status = 429;
-      } else if (/401|unauthorized|unauthenticated/i.test(err.message)) {
-        status = 401;
-      } else if (/403|forbidden/i.test(err.message)) {
-        status = 403;
-      }
-      settleReject(new GeminiLiveError(`Gemini Live WebSocket error: ${err.message}`, status));
-    });
-
-    ws.on("close", (code, reason) => {
-      if (isSettled) return;
-      if (audioStreamEnded) {
-        scheduleFinish(0);
-      } else {
-        const reasonStr = reason ? reason.toString() : "";
-        settleReject(
-          new GeminiLiveError(
-            `Gemini Live connection closed unexpectedly (code: ${code}${reasonStr ? `, reason: ${reasonStr}` : ""})`,
-            code === 1008 || code === 4429 ? 429 : 502
-          )
-        );
-      }
-    });
+    const session = new GeminiLiveSession(pcmBuffer, options, resolve, reject);
+    session.start(url, headers);
   });
 }
