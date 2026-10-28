@@ -107,7 +107,7 @@ OmniRoute/
 
 > **Flyttet ud af roden i v3.8.26 (oprydning):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` og den genererede `quality-metrics.json` (ignoreres af git). Se [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` og den genererede `quality-metrics.json` (ignoreres af git). Se [`## config/`](#config--statiske-konfigurationer--tilstand-for-kvalitetskontrol).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Undermappe            | Formål                                                                                                                                                                                                |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokaliserede dokoversættelser (41 sprog)                                                                                                                                                              |
+| `docs/i18n/`          | Lokaliserede dokoversættelser (66 sprog)                                                                                                                                                              |
 | `docs/screenshots/`   | Billedressourcer til vejledninger                                                                                                                                                                     |
 | `_tasks/superpowers/` | Planer/specifikationer fra superpowers (`writing-plans`/`brainstorming`) + research — isoleret, separat versioneret repo, gitignoreret af hovedtræet. Se CLAUDE.md → "Planning & Research Artifacts". |
 

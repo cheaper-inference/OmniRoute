@@ -107,7 +107,7 @@ OmniRoute/
 
 > **A v3.8.26 verzióban kikerült a gyökérkönyvtárból (rendezés):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, valamint a generált `quality-metrics.json` (a git figyelmen kívül hagyja). Lásd: [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, valamint a generált `quality-metrics.json` (a git figyelmen kívül hagyja). Lásd: [`## config/`](#config--statikus-konfigurációk--minőségkapu-állapot).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Alkönyvtár            | Cél                                                                                                                                                                                                   |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Honosított dokumentációs fordítások (41 nyelven)                                                                                                                                                      |
+| `docs/i18n/`          | Honosított dokumentációs fordítások (66 nyelven)                                                                                                                                                      |
 | `docs/screenshots/`   | Képi elemek az útmutatókhoz                                                                                                                                                                           |
 | `_tasks/superpowers/` | Tervek/specifikációk a superpowers-ből (`writing-plans`/`brainstorming`) + kutatás — izolált, külön verziózott repo, amelyet a fő fa gitignore-ol. Lásd: CLAUDE.md → "Planning & Research Artifacts". |
 

@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26 ਵਿੱਚ ਰੂਟ ਤੋਂ ਬਾਹਰ ਭੇਜਿਆ ਗਿਆ (ਅਵਿਵਸਥਾ ਘਟਾਉਣ ਲਈ):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ਅਤੇ ਤਿਆਰ ਕੀਤੀ `quality-metrics.json` (gitignored)। [`## config/`](#config--static-configs--quality-gate-state) ਵੇਖੋ।
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ਅਤੇ ਤਿਆਰ ਕੀਤੀ `quality-metrics.json` (gitignored)। [`## config/`](#config--ਸਥਿਰ-ਕੌਂਫਿਗਰੇਸ਼ਨ--ਕੁਆਲਿਟੀ-ਗੇਟ-ਸਥਿਤੀ) ਵੇਖੋ।
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | ਸਬਡਾਇਰੈਕਟਰੀ           | ਉਦੇਸ਼                                                                                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | ਸਥਾਨੀਕ੍ਰਿਤ ਦਸਤਾਵੇਜ਼ ਅਨੁਵਾਦ (41 ਲੋਕੇਲ)                                                                                                                                                                  |
+| `docs/i18n/`          | ਸਥਾਨੀਕ੍ਰਿਤ ਦਸਤਾਵੇਜ਼ ਅਨੁਵਾਦ (66 ਲੋਕੇਲ)                                                                                                                                                                  |
 | `docs/screenshots/`   | ਗਾਈਡਾਂ ਲਈ ਚਿੱਤਰ ਐਸੈੱਟਸ                                                                                                                                                                                 |
 | `_tasks/superpowers/` | superpowers ਤੋਂ ਪਲਾਨ/ਸਪੈੱਕ (`writing-plans`/`brainstorming`) + ਰਿਸਰਚ — ਅਲੱਗ-ਥਲੱਗ, ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਵਰਜ਼ਨ ਕੀਤਾ ਰੈਪੋ, ਮੁੱਖ ਟ੍ਰੀ ਦੁਆਰਾ gitignore ਕੀਤਾ ਗਿਆ। ਦੇਖੋ CLAUDE.md → "Planning & Research Artifacts"। |
 

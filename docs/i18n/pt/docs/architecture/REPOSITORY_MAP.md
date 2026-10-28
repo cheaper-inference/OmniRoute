@@ -107,7 +107,7 @@ OmniRoute/
 
 > **Movido para fora da raiz na v3.8.26 (organização):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` e o ficheiro `quality-metrics.json` gerado (ignorado pelo Git). Consulte [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` e o ficheiro `quality-metrics.json` gerado (ignorado pelo Git). Consulte [`## config/`](#config--configurações-estáticas--estado-dos-controlos-de-qualidade).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Subdiretório          | Finalidade                                                                                                                                                                                                                   |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Traduções localizadas da documentação (41 idiomas)                                                                                                                                                                           |
+| `docs/i18n/`          | Traduções localizadas da documentação (66 idiomas)                                                                                                                                                                           |
 | `docs/screenshots/`   | Recursos de imagem para os guias                                                                                                                                                                                             |
 | `_tasks/superpowers/` | Planos/especificações do superpowers (`writing-plans`/`brainstorming`) + pesquisa — repositório isolado, com versionamento separado, ignorado pelo git na árvore principal. Ver CLAUDE.md → "Planning & Research Artifacts". |
 

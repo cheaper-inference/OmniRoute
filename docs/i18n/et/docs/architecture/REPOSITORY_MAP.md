@@ -107,7 +107,7 @@ OmniRoute/
 
 > **Teisaldatud versioonis v3.8.26 juurkataloogist välja (korrastamine):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ja genereeritud `quality-metrics.json` (gitignore'iga eiratud). Vaadake jaotist [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ja genereeritud `quality-metrics.json` (gitignore'iga eiratud). Vaadake jaotist [`## config/`](#config--staatilised-konfiguratsioonid--kvaliteedivärava-olek).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Alamkataloog          | Eesmärk                                                                                                                                                                                                     |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokaliseeritud dokumentatsiooni tõlked (41 lokaati)                                                                                                                                                         |
+| `docs/i18n/`          | Lokaliseeritud dokumentatsiooni tõlked (66 lokaati)                                                                                                                                                         |
 | `docs/screenshots/`   | Juhendite pildiressursid                                                                                                                                                                                    |
 | `_tasks/superpowers/` | Superpowers'i plaanid/spetsifikatsioonid (`writing-plans`/`brainstorming`) + uurimistöö — isoleeritud, eraldi versioonitav repo, mida põhipuu gitignore'ib. Vt CLAUDE.md → "Planning & Research Artifacts". |
 

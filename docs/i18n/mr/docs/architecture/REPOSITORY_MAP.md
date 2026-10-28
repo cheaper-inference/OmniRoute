@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26 मध्ये root मधून बाहेर हलवले (अव्यवस्था कमी करण्यासाठी):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, आणि व्युत्पन्न केलेली `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state) पहा.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, आणि व्युत्पन्न केलेली `quality-metrics.json` (gitignored). [`## config/`](#config--स्थिर-कॉन्फिगरेशन्स--गुणवत्ता-गेट-स्थिती) पहा.
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | उपनिर्देशिका          | उद्देश                                                                                                                                                                                                                |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | स्थानिकीकृत दस्तऐवज भाषांतरे (41 लोकेल्स)                                                                                                                                                                             |
+| `docs/i18n/`          | स्थानिकीकृत दस्तऐवज भाषांतरे (66 लोकेल्स)                                                                                                                                                                             |
 | `docs/screenshots/`   | मार्गदर्शकांसाठी इमेज ॲसेट्स                                                                                                                                                                                          |
 | `_tasks/superpowers/` | superpowers मधील योजना/स्पेसिफिकेशन्स (`writing-plans`/`brainstorming`) + संशोधन — वेगळे ठेवलेले, स्वतंत्रपणे व्हर्जन केलेले रेपो, मुख्य ट्रीद्वारे gitignore केलेले. CLAUDE.md पहा → "नियोजन व संशोधन आर्टिफॅक्ट्स". |
 

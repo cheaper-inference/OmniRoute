@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26ରେ ରୁଟ୍ରୁ ବାହାରକୁ ସ୍ଥାନାନ୍ତରିତ (ଅବ୍ୟବସ୍ଥା ହ୍ରାସ):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ଏବଂ ଉତ୍ପାଦିତ `quality-metrics.json` (gitignored)। [`## config/`](#config--static-configs--quality-gate-state) ଦେଖନ୍ତୁ।
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ଏବଂ ଉତ୍ପାଦିତ `quality-metrics.json` (gitignored)। [`## config/`](#config--ସ୍ଥିର-କନଫିଗ୍ଗୁଡ଼ିକ--ଗୁଣବତ୍ତା-ଗେଟ୍-ସ୍ଥିତି) ଦେଖନ୍ତୁ।
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | ସବଡାଇରେକ୍ଟରି          | ଉଦ୍ଦେଶ୍ୟ                                                                                                                                                                                   |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | ସ୍ଥାନୀୀକୃତ ଡକ୍ ଅନୁବାଦ (41 ଲୋକେଲ୍)                                                                                                                                                          |
+| `docs/i18n/`          | ସ୍ଥାନୀୀକୃତ ଡକ୍ ଅନୁବାଦ (66 ଲୋକେଲ୍)                                                                                                                                                          |
 | `docs/screenshots/`   | ଗାଇଡ୍ ପାଇଁ ଇମେଜ୍ ଆସେଟ୍                                                                                                                                                                     |
 | `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) ରୁ ଯୋଜନା/ସ୍ପେକ୍ + ଗବେଷଣା — ପୃଥକ, ଅଲଗା ଭର୍ସନ ହେଉଥିବା repo, ମୁଖ୍ୟ ଟ୍ରୀ ଦ୍ୱାରା gitignored। CLAUDE.md → "Planning & Research Artifacts" ଦେଖନ୍ତୁ। |
 

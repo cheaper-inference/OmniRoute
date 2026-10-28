@@ -107,7 +107,7 @@ OmniRoute/
 
 > **הועברו מתיקיית השורש ב-v3.8.26 (לצמצום העומס):**
 >
-> - **← `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, וכן `quality-metrics.json` שנוצר אוטומטית (נכלל ב-gitignore). ראו [`## config/`](#config--static-configs--quality-gate-state).
+> - **← `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, וכן `quality-metrics.json` שנוצר אוטומטית (נכלל ב-gitignore). ראו [`## config/`](#config--תצורות-סטטיות--מצב-שער-האיכות).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | תת-תיקייה             | מטרה                                                                                                                                                                                            |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | תרגומי מסמכים מקומיים (41 שפות)                                                                                                                                                                 |
+| `docs/i18n/`          | תרגומי מסמכים מקומיים (66 שפות)                                                                                                                                                                 |
 | `docs/screenshots/`   | נכסי תמונות עבור המדריכים                                                                                                                                                                       |
 | `_tasks/superpowers/` | תוכניות/מפרטים מ-superpowers (`writing-plans`/`brainstorming`) וכן מחקר — ריפו מבודד עם ניהול גרסאות נפרד, מוחרג ב-gitignore על ידי העץ הראשי. ראו CLAUDE.md ← "Planning & Research Artifacts". |
 

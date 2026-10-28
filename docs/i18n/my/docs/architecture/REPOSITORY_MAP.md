@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26 တွင် root မှ ရွှေ့ထုတ်ထားသည် (ရှုပ်ထွေးမှုလျှော့ချရန်):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` နှင့် ထုတ်လုပ်ထားသော `quality-metrics.json` (gitignored)။ [`## config/`](#config--static-configs--quality-gate-state) ကို ကြည့်ပါ။
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` နှင့် ထုတ်လုပ်ထားသော `quality-metrics.json` (gitignored)။ [`## config/`](#config--တည်ငြိမ်-config-များ--အရည်အသွေးစစ်ဆေးရေးအဆင့်-အခြေအနေ) ကို ကြည့်ပါ။
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | ဆပ်ဒရက်တရီ            | ရည်ရွယ်ချက်                                                                                                                                                                                                                        |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ဒေသန္တရဘာသာပြန် စာရွက်စာတမ်းများ (locales 41 ခု)                                                                                                                                                                                   |
+| `docs/i18n/`          | ဒေသန္တရဘာသာပြန် စာရွက်စာတမ်းများ (locales 66 ခု)                                                                                                                                                                                   |
 | `docs/screenshots/`   | လမ်းညွှန်များအတွက် ရုပ်ပုံ assets များ                                                                                                                                                                                             |
 | `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) မှ plans/specs များ + သုတေသန — သီးခြားခွဲထားပြီး version သီးသန့်သတ်မှတ်ထားသော repo ဖြစ်ကာ main tree မှ gitignore လုပ်ထားသည်။ CLAUDE.md → "Planning & Research Artifacts" ကိုကြည့်ပါ။ |
 

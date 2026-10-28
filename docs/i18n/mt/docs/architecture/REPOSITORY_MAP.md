@@ -107,7 +107,7 @@ OmniRoute/
 
 > **Imċaqlaq barra mill-għerq f’v3.8.26 (biex jitnaqqas l-imbarazz):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, u l-`quality-metrics.json` iġġenerat (injorat minn git). Ara [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, u l-`quality-metrics.json` iġġenerat (injorat minn git). Ara [`## config/`](#config--konfigurazzjonijiet-statiċi--stat-tal-limitu-tal-kwalità).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Subdir                | Skop                                                                                                                                                                                                             |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Traduzzjonijiet lokaliżżati tad-dokumentazzjoni (41 locale)                                                                                                                                                      |
+| `docs/i18n/`          | Traduzzjonijiet lokaliżżati tad-dokumentazzjoni (66 locale)                                                                                                                                                      |
 | `docs/screenshots/`   | Riżorsi ta' immaġini għall-gwidi                                                                                                                                                                                 |
 | `_tasks/superpowers/` | Pjanijiet/speċifikazzjonijiet minn superpowers (`writing-plans`/`brainstorming`) + riċerka — repo iżolata, b'verzjonar separat, gitignored mit-tree prinċipali. Ara CLAUDE.md → "Planning & Research Artifacts". |
 

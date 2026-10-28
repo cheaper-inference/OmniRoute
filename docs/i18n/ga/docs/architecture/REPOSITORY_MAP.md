@@ -107,7 +107,7 @@ OmniRoute/
 
 > **Bogtha amach as an bhfréamh in v3.8.26 (chun tranglam a laghdú):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, agus an `quality-metrics.json` ginte (gitignored). Féach [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, agus an `quality-metrics.json` ginte (gitignored). Féach [`## config/`](#config--cumraíochtaí-statacha--staid-an-gheata-cáilíochta).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Fochomhadlann         | Cuspóir                                                                                                                                                                                                             |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Aistriúcháin logánaithe ar dhoiciméid (41 logánacht)                                                                                                                                                                |
+| `docs/i18n/`          | Aistriúcháin logánaithe ar dhoiciméid (66 logánacht)                                                                                                                                                                |
 | `docs/screenshots/`   | Sócmhainní íomhá do na treoracha                                                                                                                                                                                    |
 | `_tasks/superpowers/` | Pleananna/sonraíochtaí ó superpowers (`writing-plans`/`brainstorming`) + taighde — repo scoite amach, le leaganú ar leith, faoi gitignore ag an bpríomhchrann. Féach CLAUDE.md → "Déantáin Phleanála agus Taighde". |
 

@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26 میں روٹ سے باہر منتقل کیا گیا (بے ترتیبی کم کرنے کے لیے):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`، `complexity-baseline.json`، `duplication-baseline.json`، `file-size-baseline.json`، `test-discovery-baseline.json`، `dependency-allowlist.json`، `.license-allowlist.json`، اور تیار کردہ `quality-metrics.json` (gitignored)۔ دیکھیں [`## config/`](#config--static-configs--quality-gate-state)۔
+> - **→ `config/quality/`:** `quality-baseline.json`، `complexity-baseline.json`، `duplication-baseline.json`، `file-size-baseline.json`، `test-discovery-baseline.json`، `dependency-allowlist.json`، `.license-allowlist.json`، اور تیار کردہ `quality-metrics.json` (gitignored)۔ دیکھیں [`## config/`](#config--جامد-کنفیگریشنز--کوالٹی-گیٹ-کی-حالت)۔
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | ذیلی ڈائریکٹری        | مقصد                                                                                                                                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | مقامی زبانوں میں دستاویزی ترجمے (41 زبانیں)                                                                                                                                                       |
+| `docs/i18n/`          | مقامی زبانوں میں دستاویزی ترجمے (66 زبانیں)                                                                                                                                                       |
 | `docs/screenshots/`   | رہنمائیوں کے لیے تصویری اثاثے                                                                                                                                                                     |
 | `_tasks/superpowers/` | سپر پاورز (`writing-plans`/`brainstorming`) سے منصوبے/تفصیلات + تحقیق — الگ تھلگ، الگ سے ورژن شدہ ریپو، جو مرکزی ٹری کی طرف سے gitignored ہے۔ دیکھیں CLAUDE.md ← "Planning & Research Artifacts"۔ |
 

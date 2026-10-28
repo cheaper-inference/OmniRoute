@@ -107,7 +107,7 @@ OmniRoute/
 
 > **E bugara ya pụọ na mgbọrọgwụ na v3.8.26 (iji belata mkpọtụ):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, na `quality-metrics.json` a na-emepụta (git anaghị eso ya). Hụ [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, na `quality-metrics.json` a na-emepụta (git anaghị eso ya). Hụ [`## config/`](#config--nhazi-static--ọnọdụ-ọnụ-ụzọ-ogo).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Ndekọ dị n'ime        | Ebumnuche                                                                                                                                                                                                               |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Ntụgharị akwụkwọ n'asụsụ obodo (asụsụ 41)                                                                                                                                                                               |
+| `docs/i18n/`          | Ntụgharị akwụkwọ n'asụsụ obodo (asụsụ 66)                                                                                                                                                                               |
 | `docs/screenshots/`   | Ihe onyonyo maka nduzi                                                                                                                                                                                                  |
 | `_tasks/superpowers/` | Atụmatụ/nkọwapụta sitere na superpowers (`writing-plans`/`brainstorming`) + nyocha — nke ewepụrụ n'otu, repo nke enweere ụdị nke ya, nke osisi isi na-ahapụ na git. Lee CLAUDE.md → "Ihe E Nwetara n'Atụmatụ & Nyocha". |
 

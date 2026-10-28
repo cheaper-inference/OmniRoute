@@ -107,7 +107,7 @@ OmniRoute/
 
 > **በ v3.8.26 ከስር ማውጫው ወጥቷል (ለማደራጀት):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`፣ `complexity-baseline.json`፣ `duplication-baseline.json`፣ `file-size-baseline.json`፣ `test-discovery-baseline.json`፣ `dependency-allowlist.json`፣ `.license-allowlist.json`፣ እና የሚመነጨው `quality-metrics.json` (በ gitignore የተካተተ)። [`## config/`](#config--static-configs--quality-gate-state)ን ይመልከቱ።
+> - **→ `config/quality/`:** `quality-baseline.json`፣ `complexity-baseline.json`፣ `duplication-baseline.json`፣ `file-size-baseline.json`፣ `test-discovery-baseline.json`፣ `dependency-allowlist.json`፣ `.license-allowlist.json`፣ እና የሚመነጨው `quality-metrics.json` (በ gitignore የተካተተ)። [`## config/`](#config--የማይለዋወጡ-ውቅሮች--የጥራት-በር-ሁኔታ)ን ይመልከቱ።
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | ንዑስ ማውጫ               | ዓላማ                                                                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | የተካቱ ሰነድ ትርጉሞች (41 ቋንቋዎች)                                                                                                                                                            |
+| `docs/i18n/`          | የተካቱ ሰነድ ትርጉሞች (66 ቋንቋዎች)                                                                                                                                                            |
 | `docs/screenshots/`   | ለመመሪያዎች የምስል ንብረቶች                                                                                                                                                                   |
 | `_tasks/superpowers/` | ከ superpowers የተገኙ እቅዶች/ስፔኮች (`writing-plans`/`brainstorming`) + ምርምር — የተነጠለ፣ በተናጠል የቅጂ አያያዝ ያለው repo፣ በዋናው ዛፍ gitignored የሚደረግ። CLAUDE.md → "Planning & Research Artifacts" ይመልከቱ። |
 

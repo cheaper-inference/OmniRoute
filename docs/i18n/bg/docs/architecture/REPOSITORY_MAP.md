@@ -107,7 +107,7 @@ OmniRoute/
 
 > **Преместени извън кореновата директория във v3.8.26 (за по-добра подредба):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` и генерираният `quality-metrics.json` (игнориран от git). Вижте [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` и генерираният `quality-metrics.json` (игнориран от git). Вижте [`## config/`](#config--статични-конфигурации--състояние-на-контролните-прагове-за-качество).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Поддиректория         | Предназначение                                                                                                                                                                                                          |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Локализирани преводи на документацията (41 локала)                                                                                                                                                                      |
+| `docs/i18n/`          | Локализирани преводи на документацията (66 локала)                                                                                                                                                                      |
 | `docs/screenshots/`   | Графични ресурси за ръководствата                                                                                                                                                                                       |
 | `_tasks/superpowers/` | Планове/спецификации от superpowers (`writing-plans`/`brainstorming`) + изследвания — изолирано хранилище с отделно версиониране, игнорирано от git в основното дърво. Вж. CLAUDE.md → „Planning & Research Artifacts“. |
 

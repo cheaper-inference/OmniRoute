@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26 मा मूल डाइरेक्टरीबाट बाहिर सारिएको (व्यवस्थित गर्न):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, र उत्पन्न गरिएको `quality-metrics.json` (gitignored)। [`## config/`](#config--static-configs--quality-gate-state) हेर्नुहोस्।
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, र उत्पन्न गरिएको `quality-metrics.json` (gitignored)। [`## config/`](#config--स्थिर-कन्फिगरेसनहरू--गुणस्तर-गेट-स्थिति) हेर्नुहोस्।
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | उपडाइरेक्टरी          | उद्देश्य                                                                                                                                                                                            |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | स्थानीयकृत डक अनुवादहरू (४१ लोकेलहरू)                                                                                                                                                               |
+| `docs/i18n/`          | स्थानीयकृत डक अनुवादहरू (६६ लोकेलहरू)                                                                                                                                                               |
 | `docs/screenshots/`   | गाइडहरूका लागि छवि एसेटहरू                                                                                                                                                                          |
 | `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) बाट योजना/विशिष्टताहरू + अनुसन्धान — अलग, छुट्टै-संस्करणित रेपो, मुख्य ट्रीद्वारा gitignored। CLAUDE.md → "Planning & Research Artifacts" हेर्नुहोस्। |
 

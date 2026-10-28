@@ -107,7 +107,7 @@ OmniRoute/
 
 > **نُقلت من الجذر في v3.8.26 (لتقليل الفوضى):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`، و`complexity-baseline.json`، و`duplication-baseline.json`، و`file-size-baseline.json`، و`test-discovery-baseline.json`، و`dependency-allowlist.json`، و`.license-allowlist.json`، وملف `quality-metrics.json` المُنشأ (يتجاهله git). راجع [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`، و`complexity-baseline.json`، و`duplication-baseline.json`، و`file-size-baseline.json`، و`test-discovery-baseline.json`، و`dependency-allowlist.json`، و`.license-allowlist.json`، وملف `quality-metrics.json` المُنشأ (يتجاهله git). راجع [`## config/`](#config--الإعدادات-الثابتة--حالة-بوابة-الجودة).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | الدليل الفرعي         | الغرض                                                                                                                                                                                            |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | ترجمات المستندات المُعرَّبة (41 لغة)                                                                                                                                                             |
+| `docs/i18n/`          | ترجمات المستندات المُعرَّبة (66 لغة)                                                                                                                                                             |
 | `docs/screenshots/`   | أصول الصور الخاصة بالأدلة                                                                                                                                                                        |
 | `_tasks/superpowers/` | خطط/مواصفات من superpowers ‏(`writing-plans`/`brainstorming`) + أبحاث — مستودع معزول ذو إصدارات منفصلة، متجاهَل في git من الشجرة الرئيسية. راجع CLAUDE.md ← قسم "Planning & Research Artifacts". |
 

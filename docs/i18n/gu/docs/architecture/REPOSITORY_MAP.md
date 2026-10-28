@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26માં રૂટની બહાર ખસેડવામાં આવ્યું (અવ્યવસ્થા ઘટાડવા માટે):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, અને જનરેટ કરેલી `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state) જુઓ.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, અને જનરેટ કરેલી `quality-metrics.json` (gitignored). [`## config/`](#config--સ્ટેટિક-કન્ફિગ્સ--ક્વોલિટી-ગેટ-સ્થિતિ) જુઓ.
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | સબડિર                 | હेतુ                                                                                                                                                                                             |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | સ્થાનિકીકૃત દસ્તાવેજ અનુવાદો (41 લોકેલ્સ)                                                                                                                                                        |
+| `docs/i18n/`          | સ્થાનિકીકૃત દસ્તાવેજ અનુવાદો (66 લોકેલ્સ)                                                                                                                                                        |
 | `docs/screenshots/`   | માર્ગદર્શિકાઓ માટે છબી એસેટ્સ                                                                                                                                                                    |
 | `_tasks/superpowers/` | સુપરપાવર્સ (`writing-plans`/`brainstorming`) માંથી પ્લાન્સ/સ્પેક્સ + સંશોધન — અલગ રાખેલું, અલગથી-વર્ઝન્ડ રેપો, મુખ્ય ટ્રી દ્વારા gitignored. જુઓ CLAUDE.md → "પ્લાનિંગ અને સંશોધન આર્ટિફેક્ટ્સ". |
 

@@ -107,7 +107,7 @@ OmniRoute/
 
 > **An fitar da su daga tushen a v3.8.26 (don rage cunkoso):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, da kuma `quality-metrics.json` da aka samar (gitignored). Duba [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, da kuma `quality-metrics.json` da aka samar (gitignored). Duba [`## config/`](#config--saitunan-tsaye--matsayin-shingen-inganci).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Ƙaramin kundu         | Manufa                                                                                                                                                                                                                                                |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Fassarorin takardu na yankuna daban-daban (yankuna 41)                                                                                                                                                                                                |
+| `docs/i18n/`          | Fassarorin takardu na yankuna daban-daban (yankuna 66)                                                                                                                                                                                                |
 | `docs/screenshots/`   | Kayayyakin hotuna don jagorori                                                                                                                                                                                                                        |
 | `_tasks/superpowers/` | Tsare-tsare da ƙayyadaddun bayanai daga superpowers (`writing-plans`/`brainstorming`) da bincike — an ware su, repo mai zaman kansa da ke da sigarsa daban, wanda babban bishiyar ta saka a gitignore. Duba CLAUDE.md → "Kayayyakin Tsari & Bincike". |
 

@@ -107,7 +107,7 @@ OmniRoute/
 
 > **Siirretty pois juuresta versiossa v3.8.26 (selkeytys):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ja luotu `quality-metrics.json` (gitin ohittama). Katso [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ja luotu `quality-metrics.json` (gitin ohittama). Katso [`## config/`](#config--staattiset-määritykset-ja-laatuportin-tila).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Alahakemisto          | Tarkoitus                                                                                                                                                                                                               |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Dokumenttien lokalisoidut käännökset (41 kieliversiota)                                                                                                                                                                 |
+| `docs/i18n/`          | Dokumenttien lokalisoidut käännökset (66 kieliversiota)                                                                                                                                                                 |
 | `docs/screenshots/`   | Opaiden kuvatiedostot                                                                                                                                                                                                   |
 | `_tasks/superpowers/` | Suunnitelmat/määrittelyt superpowers-työkaluista (`writing-plans`/`brainstorming`) + tutkimus — eristetty, erikseen versioitu repo, jonka pääpuun gitignore ohittaa. Katso CLAUDE.md → "Planning & Research Artifacts". |
 

@@ -107,7 +107,7 @@ OmniRoute/
 
 > **Flyttet ut av roten i v3.8.26 (opprydding):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` og den genererte `quality-metrics.json` (ignorert av git). Se [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` og den genererte `quality-metrics.json` (ignorert av git). Se [`## config/`](#config--statiske-konfigurasjoner--status-for-kvalitetsport).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Underkatalog          | Formål                                                                                                                                                                                               |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokaliserte oversettelser av dokumentasjonen (41 språk)                                                                                                                                              |
+| `docs/i18n/`          | Lokaliserte oversettelser av dokumentasjonen (66 språk)                                                                                                                                              |
 | `docs/screenshots/`   | Bilderessurser for veiledningene                                                                                                                                                                     |
 | `_tasks/superpowers/` | Planer/spesifikasjoner fra superpowers (`writing-plans`/`brainstorming`) + forskning — isolert, separat versjonert repo, git-ignorert av hovedtreet. Se CLAUDE.md → «Planning & Research Artifacts». |
 

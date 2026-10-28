@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26에서 루트 외부로 이동됨(정리):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` 및 생성된 `quality-metrics.json`(git에서 무시됨). [`## config/`](#config--static-configs--quality-gate-state)을 참조하세요.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` 및 생성된 `quality-metrics.json`(git에서 무시됨). [`## config/`](#config--정적-구성--품질-게이트-상태)을 참조하세요.
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | 하위 디렉토리         | 목적                                                                                                                                                                                                   |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | 현지화된 문서 번역 (41개 로케일)                                                                                                                                                                       |
+| `docs/i18n/`          | 현지화된 문서 번역 (66개 로케일)                                                                                                                                                                       |
 | `docs/screenshots/`   | 가이드용 이미지 자산                                                                                                                                                                                   |
 | `_tasks/superpowers/` | superpowers에서 생성된 계획/스펙(`writing-plans`/`brainstorming`) 및 리서치 자료 — 격리된 별도 버전 관리 저장소이며, 메인 트리에서 gitignore 처리됨. CLAUDE.md → "Planning & Research Artifacts" 참조. |
 

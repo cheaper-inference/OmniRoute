@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26 versiyasida ildiz katalogdan koʻchirildi (tartibga keltirish):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` va yaratiladigan `quality-metrics.json` (git tomonidan eʼtiborsiz qoldiriladi). [`## config/`](#config--static-configs--quality-gate-state) boʻlimiga qarang.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` va yaratiladigan `quality-metrics.json` (git tomonidan eʼtiborsiz qoldiriladi). [`## config/`](#config--statik-konfiguratsiyalar--sifat-nazorati-holati) boʻlimiga qarang.
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Ichki katalog         | Maqsad                                                                                                                                                                                                                                               |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Mahalliylashtirilgan hujjat tarjimalari (41 lokal)                                                                                                                                                                                                   |
+| `docs/i18n/`          | Mahalliylashtirilgan hujjat tarjimalari (66 lokal)                                                                                                                                                                                                   |
 | `docs/screenshots/`   | Qo'llanmalar uchun rasm fayllari                                                                                                                                                                                                                     |
 | `_tasks/superpowers/` | Superpowers'dan olingan rejalar/spetsifikatsiyalar (`writing-plans`/`brainstorming`) + tadqiqot — izolyatsiya qilingan, alohida versiyalangan repo, asosiy daraxt tomonidan gitignore qilingan. Qarang: CLAUDE.md → "Planning & Research Artifacts". |
 

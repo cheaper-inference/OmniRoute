@@ -107,7 +107,7 @@ OmniRoute/
 
 > **v3.8.26-ში ძირეული დირექტორიიდან გადატანილია (მოწესრიგების მიზნით):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` და გენერირებული `quality-metrics.json` (gitignored). იხილეთ [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` და გენერირებული `quality-metrics.json` (gitignored). იხილეთ [`## config/`](#config--სტატიკური-კონფიგურაციები--ხარისხის-ბარიერის-მდგომარეობა).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | ქვედირექტორია         | მიზანი                                                                                                                                                                                                                          |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | დოკუმენტაციის ლოკალიზებული თარგმნები (41 ლოკალი)                                                                                                                                                                                |
+| `docs/i18n/`          | დოკუმენტაციის ლოკალიზებული თარგმნები (66 ლოკალი)                                                                                                                                                                                |
 | `docs/screenshots/`   | გზამკვლევებისთვის განკუთვნილი გამოსახულებების რესურსები                                                                                                                                                                         |
 | `_tasks/superpowers/` | გეგმები/სპეციფიკაციები superpowers-დან (`writing-plans`/`brainstorming`) + კვლევა — იზოლირებული, ცალკე ვერსირებული რეპოზიტორია, რომელსაც მთავარი ხე gitignore-ით უგნებელჰყოფს. იხ. CLAUDE.md → "Planning & Research Artifacts". |
 

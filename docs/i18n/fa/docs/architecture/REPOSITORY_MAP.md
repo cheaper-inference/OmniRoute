@@ -107,7 +107,7 @@ OmniRoute/
 
 > **در v3.8.26 از ریشه منتقل شد (برای کاهش شلوغی):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`، `complexity-baseline.json`، `duplication-baseline.json`، `file-size-baseline.json`، `test-discovery-baseline.json`، `dependency-allowlist.json`، `.license-allowlist.json` و فایل تولیدشدهٔ `quality-metrics.json` (نادیدهگرفتهشده توسط git). به [`## config/`](#config--static-configs--quality-gate-state) مراجعه کنید.
+> - **→ `config/quality/`:** `quality-baseline.json`، `complexity-baseline.json`، `duplication-baseline.json`، `file-size-baseline.json`، `test-discovery-baseline.json`، `dependency-allowlist.json`، `.license-allowlist.json` و فایل تولیدشدهٔ `quality-metrics.json` (نادیدهگرفتهشده توسط git). به [`## config/`](#config--پیکربندیهای-ایستا--وضعیت-دروازهٔ-کیفیت) مراجعه کنید.
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | زیرشاخه               | هدف                                                                                                                                                                                                        |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ترجمههای محلیسازیشده اسناد (۴۱ زبان محلی)                                                                                                                                                                  |
+| `docs/i18n/`          | ترجمههای محلیسازیشده اسناد (۶۶ زبان محلی)                                                                                                                                                                  |
 | `docs/screenshots/`   | داراییهای تصویری برای راهنماها                                                                                                                                                                             |
 | `_tasks/superpowers/` | طرحها/مشخصات حاصل از superpowers (`writing-plans`/`brainstorming`) + پژوهش — مخزنی مجزا با نسخهبندی مستقل که توسط درخت اصلی gitignore شده است. به CLAUDE.md → «Planning & Research Artifacts» مراجعه کنید. |
 

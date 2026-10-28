@@ -107,7 +107,7 @@ OmniRoute/
 
 > **Dialihkan keluar daripada direktori akar dalam v3.8.26 (mengurangkan keserabutan):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, dan `quality-metrics.json` yang dijana (diabaikan oleh git). Lihat [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, dan `quality-metrics.json` yang dijana (diabaikan oleh git). Lihat [`## config/`](#config--konfigurasi-statik--keadaan-gerbang-kualiti).
 
 ---
 
@@ -462,7 +462,7 @@ open-sse/
 
 | Subdir                | Tujuan                                                                                                                                                                                                                |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Terjemahan dokumentasi terlokalisasi (41 lokaliti)                                                                                                                                                                    |
+| `docs/i18n/`          | Terjemahan dokumentasi terlokalisasi (66 lokaliti)                                                                                                                                                                    |
 | `docs/screenshots/`   | Aset imej untuk panduan                                                                                                                                                                                               |
 | `_tasks/superpowers/` | Pelan/spesifikasi daripada superpowers (`writing-plans`/`brainstorming`) + penyelidikan — repo terasing, berversi berasingan, diabaikan git oleh pokok utama. Lihat CLAUDE.md → "Artefak Perancangan & Penyelidikan". |
 
