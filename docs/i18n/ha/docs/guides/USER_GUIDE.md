@@ -611,9 +611,9 @@ Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
 <details>
 <summary><b>Duba duk samfuran da ake da su</b></summary>
 
-> An tsara jerin da ke ƙasa daga `open-sse/config/providerRegistry.ts` don v3.8.0. Ana daidaita kundin girgije (Gemini, OpenRouter, da sauransu) kai tsaye — don cikakken kundin kai-tsaye, buɗe **Dashboard → Providers → [provider] → Available Models** ko kira `GET /api/models/catalog`.
+> Jerin da ke ƙasa an tsara shi daga `open-sse/config/providerRegistry.ts` don v3.8.0. Ana daidaita katalogi na girgije (Gemini, OpenRouter, da sauransu) kai tsaye — don cikakken katalog na kai tsaye buɗe **Dashboard → Providers → [provider] → Available Models** ko kira `GET /api/models/catalog`.
 >
-> Idan ginannen jerin wani mai samarwa ya sauya daga na yanzu, yi amfani da **Import from /models** a wannan shafin (ko kunna **Auto-Sync**) don jawo kundin kai-tsaye daga tushen sama. An tabbatar da wannan a v3.8.50 don LLM7.io (`gemini-3.1-flash-lite`) da UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); damar Pollinations ta ba-suna ta ci gaba da kasancewa ƙarƙashin iyakokin tushen sama yayin wannan zagayen gwajin.
+> Idan jerin da aka sanya na wani mai samarwa ya kaucewa, yi amfani da **Import from /models** a wannan shafin (ko kunna **Auto-Sync**) don ja katalog na upstream na kai tsaye. An tabbatar da wannan a v3.8.50 ga LLM7.io (`gemini-3.1-flash-lite`) da UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); samun damar baƙo na Pollinations ya kasance yana da ƙuntatawa daga upstream a lokacin wannan zagayen gwaji.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -621,7 +621,7 @@ Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth KYAUTA: yi amfani da kundin kai-tsaye da aka nuna ƙarƙashin **Dashboard → Providers → Kiro → Available Models**. Samuwar ya dogara da asusun da tsarin biyan kuɗi.
+**Kiro (`kr/`)** — OAuth KYAUTA: yi amfani da katalog na kai tsaye da aka nuna a ƙarƙashin **Dashboard → Providers → Kiro → Available Models**. Samuwa ya dogara da asusun da shirin.
 
 **Qoder (`if/`)** — OAuth KYAUTA: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -629,37 +629,37 @@ Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/wata a dunƙule ko bisa amfani: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/wata cikakke ko bisa kowane amfani: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Maɓallin API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Mai tsananin sauri: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Mai sauri sosai: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok na asali: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Ana masaukinsa a EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Ana masaukar shi a EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — An ƙarfafa shi da bincike: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Buɗaɗɗen tushe: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (kyauta), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Budɗaɗɗen tushe: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (kyauta), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Hasashe mai sauri: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Inference mai sauri: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — A sikelin wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Girman wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Mai da hankali kan RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Mai mayar da hankali kan RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Na kamfanoni: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Don manyan kamfanoni: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Ana daidaita shi kai-tsaye bisa kowane maɓallin API daga Google — babu tsayayyen jeri. Haɗa maɓalli a **Dashboard → Providers**, sannan yi amfani da **Available Models** don shigo da kundin na yanzu (misali `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Ana daidaita shi kai tsaye ga kowane maɓallin API daga Google — babu jeri na tsayayye. Haɗa maɓalli a **Dashboard → Providers** sannan yi amfani da **Available Models** don shigo da katalog na yanzu (misali `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Sauran masu samarwa masu jituwa** (zaɓaɓɓu): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ta hanyar `aws-bedrock`), `azure-ai`, `openrouter` (kundin da ake wucewa kai tsaye), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kowanne yana kula da nasa jerin samfura a cikin `providerRegistry.ts`, kuma ana iya daidaita shi kai-tsaye idan mai samarwar ya bayar da maƙurar `/models`.
+**Sauran masu samarwa masu jituwa** (zaɓaɓɓu): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ta `aws-bedrock`), `azure-ai`, `openrouter` (katalog na passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kowanne yana kula da nasa jerin samfura a cikin `providerRegistry.ts` kuma ana iya daidaita shi ta atomatik idan mai samarwa ya bayyana ƙarshen `/models`.
 
-**Bayani kan ID ɗin samfura:** OmniRoute yana amfani da ID na asali na mai samarwa (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Wasu ID sun haɗa da nau'ukan da ke da ɗigo saboda haka API na tushen sama yake buƙatar su. Idan ba a jera wani samfuri a sama ba, gudanar da `omniroute models --search <term>` ko aika buƙata zuwa `GET /api/models/catalog` don tabbatar da samuwarsa.
+**Lura kan ID na samfura:** OmniRoute yana amfani da ID na asali na kowane mai samarwa (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Wasu ID suna haɗa da sigogi masu taki domin haka ne API na upstream yake tsammanin su. Idan ba a jera wani samfuri a sama ba, gudanar da `omniroute models --search <term>` ko kira `GET /api/models/catalog` don tabbatar da samuwa.
 
 </details>
 

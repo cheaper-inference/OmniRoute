@@ -71,7 +71,7 @@
 
 |                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Nodrošinātāji                 |           352            |   **358**   |          375          |
+| 🌐 Nodrošinātāji                 |           352            |   **358**   |          376          |
 | 🧠 Unikālie tērzēšanas modeļu ID |           1320           |  **1374**   |         1475          |
 | 🖼️ Modalitāšu tilts              | 🆕 redze + audio + video |      ✓      |           ✓           |
 | 📡 Radar bezmaksas katalogs      |      🆕 pēc izvēles      |      ✓      |           ✓           |

@@ -612,13 +612,13 @@ post_install() {
 <details>
 <summary><b>تمام دستیاب ماڈلز دیکھیں</b></summary>
 
-> ذیل کی فہرست v3.8.0 کے لیے `open-sse/config/providerRegistry.ts` سے منتخب کی گئی ہے۔ کلاؤڈ کیٹلاگز (Gemini، OpenRouter وغیرہ) متحرک طور پر ہم وقت کیے جاتے ہیں — مکمل لائیو کیٹلاگ کے لیے **Dashboard → Providers → [provider] → Available Models** کھولیں یا `GET /api/models/catalog` کو کال کریں۔
+> نیچے دی گئی فہرست v3.8.0 کے لیے `open-sse/config/providerRegistry.ts` سے مرتب کی گئی ہے۔ کلاؤڈ کیٹلاگز (Gemini، OpenRouter وغیرہ) متحرک طور پر سنک ہوتے ہیں — مکمل لائیو کیٹلاگ کے لیے **Dashboard → Providers → [provider] → Available Models** کھولیں یا `GET /api/models/catalog` کال کریں۔
 >
-> اگر کسی فراہم کنندہ کی پہلے سے شامل فہرست موجودہ فہرست سے مختلف ہو گئی ہو، تو لائیو اپ اسٹریم کیٹلاگ حاصل کرنے کے لیے اس صفحے پر **Import from /models** استعمال کریں (یا **Auto-Sync** فعال کریں)۔ LLM7.io (`gemini-3.1-flash-lite`) اور UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) کے لیے v3.8.50 میں اس کی تصدیق کی گئی؛ اسی آزمائشی مرحلے کے دوران Pollinations کی گمنام رسائی اپ اسٹریم کی جانب سے محدود رہی۔
+> اگر کسی پرووائیڈر کی بلٹ اِن فہرست پرانی ہو گئی ہو تو لائیو اپ اسٹریم کیٹلاگ حاصل کرنے کے لیے اسی صفحے پر **Import from /models** استعمال کریں (یا **Auto-Sync** فعال کریں)۔ یہ تصدیق v3.8.50 میں LLM7.io (`gemini-3.1-flash-lite`) اور UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) کے لیے کی گئی؛ اسی ٹیسٹ مرحلے کے دوران Pollinations کی گمنام رسائی اپ اسٹریم کی جانب سے محدود رہی۔
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ محنت کی سطحیں: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort درجے: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
@@ -630,37 +630,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ماہ مقررہ یا فی استعمال: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo مقررہ یا فی استعمال: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API کلید: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — انتہائی تیز: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — انتہائی تیز رفتار: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — مقامی Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok نیٹو: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — یورپی یونین میں ہوسٹ کردہ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU میں ہوسٹڈ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — تلاش سے تقویت یافتہ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — تلاش سے مزید بہتر: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — اوپن سورس: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (مفت)، `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — اوپن سورس: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (مفت), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — تیز انفرنس: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — ویفر پیمانے پر: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — ویفر اسکیل: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG پر مرکوز: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — انٹرپرائز: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — انٹرپرائز: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google سے ہر API کلید کے مطابق لائیو ہم وقت کیا جاتا ہے — کوئی جامد فہرست نہیں۔ **Dashboard → Providers** میں کلید منسلک کریں، پھر موجودہ کیٹلاگ درآمد کرنے کے لیے **Available Models** استعمال کریں (مثلاً `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)۔
+**Gemini (Google Cloud `gemini/`)**: ہر API key کے لیے Google سے لائیو سنک کیا جاتا ہے — کوئی جامد فہرست نہیں۔ **Dashboard → Providers** میں key جوڑیں پھر موجودہ کیٹلاگ درآمد کرنے کے لیے **Available Models** استعمال کریں (مثلاً `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)۔
 
-**دیگر ہم آہنگ فراہم کنندگان** (منتخب): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` کے ذریعے)، `azure-ai`, `openrouter` (پاس تھرو کیٹلاگ)، `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`۔ ہر ایک `providerRegistry.ts` میں اپنی ماڈل فہرست برقرار رکھتا ہے اور جب فراہم کنندہ `/models` اینڈ پوائنٹ پیش کرے تو اسے خودکار طور پر ہم وقت کیا جا سکتا ہے۔
+**دیگر ہم آہنگ پرووائیڈرز** (منتخب): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (بذریعہ `aws-bedrock`), `azure-ai`, `openrouter` (پاس تھرو کیٹلاگ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`۔ ہر ایک `providerRegistry.ts` میں اپنی ماڈل فہرست رکھتا ہے اور جب پرووائیڈر `/models` اینڈ پوائنٹ فراہم کرتا ہے تو اسے خودکار طور پر سنک کیا جا سکتا ہے۔
 
-**ماڈل IDs کے بارے میں نوٹ:** OmniRoute فراہم کنندہ کے مقامی IDs استعمال کرتا ہے (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)۔ بعض IDs میں نقطوں والے ورژن شامل ہوتے ہیں کیونکہ اپ اسٹریم API انہیں اسی طرح قبول کرتا ہے۔ اگر کوئی ماڈل اوپر درج نہ ہو، تو دستیابی کی تصدیق کے لیے `omniroute models --search <term>` چلائیں یا `GET /api/models/catalog` استعمال کریں۔
+**ماڈل IDs کے بارے میں نوٹ:** OmniRoute پرووائیڈر کے مقامی IDs استعمال کرتا ہے (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)۔ کچھ IDs میں نقطہ دار ورژن شامل ہیں کیونکہ اپ اسٹریم API انہی کو اسی طرح متوقع کرتا ہے۔ اگر کوئی ماڈل اوپر فہرست میں نہ ہو تو دستیابی کی تصدیق کے لیے `omniroute models --search <term>` چلائیں یا `GET /api/models/catalog` استعمال کریں۔
 
 </details>
 

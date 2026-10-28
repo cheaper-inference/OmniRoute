@@ -609,14 +609,14 @@ post_install() {
 
 ---
 
-## 📊 கிடைக்கக்கூடிய மாதிரிகள்
+## 📊 கிடைக்கும் மாதிரிகள்
 
 <details>
-<summary><b>கிடைக்கக்கூடிய அனைத்து மாதிரிகளையும் காண்க</b></summary>
+<summary><b>கிடைக்கும் அனைத்து மாதிரிகளையும் காண்க</b></summary>
 
-> கீழேயுள்ள பட்டியல் v3.8.0-க்கான `open-sse/config/providerRegistry.ts`-இலிருந்து தொகுக்கப்பட்டுள்ளது. கிளவுட் பட்டியல்கள் (Gemini, OpenRouter போன்றவை) மாறும் வகையில் ஒத்திசைக்கப்படுகின்றன — முழுமையான நேரடிப் பட்டியலைக் காண **Dashboard → Providers → [provider] → Available Models** என்பதைத் திறக்கவும் அல்லது `GET /api/models/catalog`-ஐ அழைக்கவும்.
+> கீழுள்ள பட்டியல் v3.8.0-க்காக `open-sse/config/providerRegistry.ts`-இலிருந்து தொகுக்கப்பட்டது. கிளவுட் பட்டியல்கள் (Gemini, OpenRouter போன்றவை) டைனமிக்காக ஒத்திசைக்கப்படுகின்றன — முழு நேரடி பட்டியலுக்கு **Dashboard → Providers → [provider] → Available Models** ஐத் திறக்கவும் அல்லது `GET /api/models/catalog` ஐ அழைக்கவும்.
 >
-> வழங்குநரின் உள்ளமைக்கப்பட்ட பட்டியல் காலப்போக்கில் மாறியிருந்தால், நேரடி மூலப் பட்டியலைப் பெற அந்தப் பக்கத்தில் உள்ள **Import from /models** என்பதைப் பயன்படுத்தவும் (அல்லது **Auto-Sync**-ஐ இயக்கவும்). இது LLM7.io (`gemini-3.1-flash-lite`) மற்றும் UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ஆகியவற்றுக்கு v3.8.50-இல் சரிபார்க்கப்பட்டது; அதே சோதனைச் சுற்றின்போது Pollinations-இன் அடையாளமற்ற அணுகல், மூலச் சேவையின் வரம்புகளுக்கு உட்பட்டதாகவே இருந்தது.
+> ஒரு வழங்குநரின் உள்ளமைக்கப்பட்ட பட்டியல் மாறிவிட்டால், நேரடி அப்ஸ்ட்ரீம் பட்டியலைப் பெற அந்தப் பக்கத்தில் உள்ள **Import from /models** ஐப் பயன்படுத்தவும் (அல்லது **Auto-Sync** ஐ இயக்கவும்). இது v3.8.50-இல் LLM7.io (`gemini-3.1-flash-lite`) மற்றும் UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ஆகியவற்றுக்கு சரிபார்க்கப்பட்டது; அதே சோதனைச் சுற்றில் Pollinations அநாமதேய அணுகல் அப்ஸ்ட்ரீம் வரம்புக்கு உட்பட்டதாகவே இருந்தது.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -624,7 +624,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — இலவச OAuth: **Dashboard → Providers → Kiro → Available Models** என்பதன் கீழ் காட்டப்படும் நேரடிப் பட்டியலைப் பயன்படுத்தவும். கிடைக்கும் தன்மை கணக்கு மற்றும் திட்டத்தைச் சார்ந்தது.
+**Kiro (`kr/`)** — இலவச OAuth: **Dashboard → Providers → Kiro → Available Models** இல் காண்பிக்கப்படும் நேரடி பட்டியலைப் பயன்படுத்தவும். கிடைக்கும் தன்மை கணக்கு மற்றும் திட்டத்தைப் பொறுத்து மாறுபடும்.
 
 **Qoder (`if/`)** — இலவச OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,37 +632,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — மாதத்திற்கு நிலையான $9 அல்லது பயன்பாட்டுக்கு ஏற்ப: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/மாதம் நிலையான கட்டணம் அல்லது பயன்பாட்டிற்கேற்ப: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API விசை: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — அதிவேகமானது: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — மிக வேகமானது: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — இயல்புநிலை Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok நேட்டிவ்: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — EU-இல் ஹோஸ்ட் செய்யப்பட்டது: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — தேடலால் மேம்படுத்தப்பட்டது: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — தேடல்-மேம்படுத்தப்பட்டது: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — திறந்த மூலம்: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (இலவசம்), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — திறந்த மூல: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (இலவசம்), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — வேகமான அனுமானம்: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — வேகமான இன்ஃபரன்ஸ்: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — வேஃபர் அளவிலானது: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — வேஃபர்-அளவு: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-ஐ மையமாகக் கொண்டது: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-மையம்: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — நிறுவனப் பயன்பாடு: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — எண்டர்பிரைஸ்: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google-இலிருந்து ஒவ்வொரு API விசைக்கும் நேரடியாக ஒத்திசைக்கப்படுகிறது — நிலையான பட்டியல் இல்லை. **Dashboard → Providers** என்பதில் ஒரு விசையை இணைத்து, தற்போதைய பட்டியலை இறக்குமதி செய்ய **Available Models** என்பதைப் பயன்படுத்தவும் (எ.கா. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google-இலிருந்து API விசை வாரியாக நேரடியாக ஒத்திசைக்கப்படுகிறது — நிலையான பட்டியல் இல்லை. **Dashboard → Providers** இல் ஒரு விசையை இணைத்துவிட்டு, தற்போதைய பட்டியலை இறக்குமதி செய்ய **Available Models** ஐப் பயன்படுத்தவும் (எ.கா. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**பிற இணக்கமான வழங்குநர்கள்** (தேர்ந்தெடுக்கப்பட்டவை): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` வழியாக), `azure-ai`, `openrouter` (இடைமாற்றமில்லா பட்டியல்), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ஒவ்வொன்றும் `providerRegistry.ts`-இல் தனது சொந்த மாதிரிப் பட்டியலைப் பராமரிக்கிறது; மேலும் வழங்குநர் `/models` முனைப்புள்ளியை வெளிப்படுத்தும்போது அவற்றைத் தானாக ஒத்திசைக்க முடியும்.
+**மற்ற இணக்கமான வழங்குநர்கள்** (தேர்ந்தெடுக்கப்பட்டவை): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` வழியாக), `azure-ai`, `openrouter` (பாஸ்த்ரூ பட்டியல்), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ஒவ்வொன்றும் `providerRegistry.ts`-இல் தனது சொந்த மாதிரி பட்டியலைப் பராமரிக்கிறது; வழங்குநர் `/models` எண்ட்பாயிண்ட்டை வெளிப்படுத்தும்போது தானாகவே ஒத்திசைக்கப்படலாம்.
 
-**மாதிரி ID-கள் குறித்த குறிப்பு:** OmniRoute வழங்குநருக்குரிய அசல் ID-களைப் பயன்படுத்துகிறது (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). மூல API அவற்றை அவ்வாறே எதிர்பார்ப்பதால், சில ID-களில் புள்ளிகளுடன் கூடிய பதிப்புகள் உள்ளன. ஒரு மாதிரி மேலே பட்டியலிடப்படவில்லை என்றால், அது கிடைக்கிறதா என்பதை உறுதிப்படுத்த `omniroute models --search <term>`-ஐ இயக்கவும் அல்லது `GET /api/models/catalog`-ஐ அணுகவும்.
+**மாதிரி ID-கள் குறித்த குறிப்பு:** OmniRoute வழங்குநர்-நேட்டிவ் ID-களைப் பயன்படுத்துகிறது (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). சில ID-கள் புள்ளியிட்ட பதிப்புகளைக் கொண்டுள்ளன, ஏனெனில் அப்ஸ்ட்ரீம் API அவற்றை அவ்வாறே எதிர்பார்க்கிறது. ஏதேனும் மாதிரி மேலே பட்டியலிடப்படவில்லை என்றால், கிடைக்கும் தன்மையை உறுதிப்படுத்த `omniroute models --search <term>` ஐ இயக்கவும் அல்லது `GET /api/models/catalog` ஐ அணுகவும்.
 
 </details>
 

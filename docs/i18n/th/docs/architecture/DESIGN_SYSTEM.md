@@ -4,158 +4,160 @@
 
 ---
 
-> **สถานะ:** แดชบอร์ดสร้างขึ้นบน **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ซึ่งนำเข้ามาไว้
-> เป็น workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot จาก upstream ถูกตรึงไว้ใน
-> `packages/ui-kit/UPSTREAM.md` และตรวจสอบด้วย `npm run check:ui-kit-snapshot`) โดยธีมสว่างเป็นธีมมาตรฐาน
-> และค่ากำหนดเริ่มต้นคือ `system` สีเน้นคือสีเขียวมะนาว Keak (`--ci-color-accent`) ส่วน Inter
-> (ระยะห่างตัวอักษร 0, `--ci-letter-spacing-ui`) เป็นตระกูลฟอนต์สำหรับ UI ขณะที่ Instrument Serif ใช้เฉพาะกับข้อความแสดงผลขนาดใหญ่ที่มีความโปร่งโล่ง
-> (`.ci-dashboard-display`) และ IBM Plex Mono ใช้สำหรับโค้ด — ฟอนต์ทั้งหมดโฮสต์ด้วยตนเองผ่านการ import
-> `@fontsource/*` ที่ด้านบนของ `src/app/globals.css` ไอคอนทุกอันเป็น glyph ของ Lucide
+> **สถานะ:** แดชบอร์ดสร้างขึ้นบน **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ซึ่งถูกนำมา vendor
+> ไว้เป็น workspace `packages/ui-kit` (`@omniroute/ui-kit`; สแนปชอตจาก upstream ถูกปักหมุดไว้ใน
+> `packages/ui-kit/UPSTREAM.md` และมีการตรวจสอบโดย `npm run check:ui-kit-snapshot`) ธีม Light คือธีม
+> มาตรฐาน ค่า preference เริ่มต้นคือ `system` สี accent คือ Keak lime (`--ci-color-accent`) ฟอนต์ Inter
+> (letter-spacing 0, `--ci-letter-spacing-ui`) คือฟอนต์หลักของ UI ส่วน Instrument Serif ใช้เฉพาะข้อความ
+> display ขนาดใหญ่ที่เบาบาง (`.ci-dashboard-display`) และ IBM Plex Mono สำหรับโค้ด — ทั้งหมด self-host
+> ผ่าน `@fontsource/*` imports ที่ด้านบนของ `src/app/globals.css` ทุกไอคอนเป็น glyph ของ Lucide
 
-## 1. ตำแหน่งขององค์ประกอบต่าง ๆ
+## 1. ตำแหน่งที่อยู่ของสิ่งต่างๆ
 
-- **คิท** `packages/ui-kit/src` เป็นสำเนาระดับไบต์ที่ตรงกับ `src/` ต้นทางทุกประการ ณ คอมมิตที่ตรึงไว้ใน
-  `packages/ui-kit/UPSTREAM.md` (ซึ่งบันทึกการอนุญาตด้านไลเซนส์ไว้ด้วย); `PATCHES.md` แสดงรายการแพตช์ภายใน
-  (ไม่มี) โดยนำมาใช้โดยตรงในรูปแบบซอร์สโค้ดโดยไม่มีขั้นตอนบิลด์: `next.config.mjs` ทำการทรานสไพล์ และ
+- **Kit.** `packages/ui-kit/src` คือสำเนาที่คัดลอกมาเหมือนกันทุกไบต์ของ `src/` จาก upstream ณ commit ที่ปักหมุดไว้ใน
+  `packages/ui-kit/UPSTREAM.md` (ซึ่งบันทึกการอนุญาตลิขสิทธิ์ไว้ด้วย); `PATCHES.md` แสดงรายการ patch
+  ที่ทำไว้ภายใน (ไม่มี) ชุดนี้ถูกนำไปใช้ในรูปแบบ source โดยตรง โดยไม่ต้อง build: `next.config.mjs` ทำการ transpile ให้ และ
   `tsconfig.json` แมป `@omniroute/ui-kit` → `packages/ui-kit/src` และ `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` และ `vitest.mcp.config.ts` ใช้ alias เดียวกัน) ให้นำเข้าคอมโพเนนต์
-  ของคิทผ่าน subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) และห้ามนำเข้าผ่าน
-  barrel `@omniroute/ui-kit`: barrel จะดึงทุกคอมโพเนนต์ (รวมถึงตัวเลือกวันที่) เข้ามาในทุกโมดูลที่นำเข้า
-  สไตล์ชีตของคิทถูกนำเข้าผ่าน `src/app/globals.css`
+  `packages/ui-kit/src/*` (`vitest.config.ts` และ `vitest.mcp.config.ts` ใช้ alias เดียวกัน) ให้ import
+  คอมโพเนนต์ของ kit ผ่าน subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) เท่านั้น ห้าม import
+  ผ่าน barrel ของ `@omniroute/ui-kit` เด็ดขาด: เพราะ barrel จะดึงทุกคอมโพเนนต์ (รวมถึง date picker)
+  เข้ามาในทุกไฟล์ที่ import สไตล์ชีตของ kit ถูกนำเข้าผ่าน `src/app/globals.css`
   (`@import "../../packages/ui-kit/src/ci-ui.css"`)
-- **โทเค็น** `packages/ui-kit/src/ci-tokens.css` ประกาศโทเค็น `--ci-*`; `src/app/globals.css`
-  เชื่อมโทเค็นเหล่านี้เข้ากับชื่อดั้งเดิมของ OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`) เพื่อให้การอ่านค่า `var(--color-*)` ที่มีอยู่และยูทิลิตี
-  Tailwind ยังคงทำงานได้ โค้ดใหม่ต้องใช้ยูทิลิตี Tailwind (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) หรือคลาสของคิท และห้ามใช้ค่า hex
-  (`tests/unit/design-kit-bridge.test.ts` บังคับใช้การเชื่อมนี้) `text-primary` จะถูกแก้ค่าเป็น
-  `--color-primary-ink` ผ่าน `--text-color-primary` (lime-800 ในธีมสว่าง และสีเน้น lime ในธีมมืด) เพื่อให้
-  ข้อความหลักยังคงอ่านได้ชัดเจน ขณะที่ `bg-primary`/`border-primary` ยังคงใช้พื้นผิวสี lime ชุดข้อมูลของแผนภูมิใช้
+- **Tokens.** `packages/ui-kit/src/ci-tokens.css` ประกาศ token `--ci-*` ไว้; `src/app/globals.css`
+  ทำหน้าที่เป็นสะพานเชื่อม token เหล่านั้นเข้ากับชื่อแบบเดิมของ OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`) เพื่อให้การอ่านค่า `var(--color-*)` ที่มีอยู่เดิมและ Tailwind
+  utilities ยังคงทำงานได้ต่อไป โค้ดใหม่ให้ใช้ Tailwind utilities (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) หรือคลาสของ kit เท่านั้น — ห้ามใช้ค่าสีแบบ hex
+  โดยเด็ดขาด (`tests/unit/design-kit-bridge.test.ts` บังคับใช้การเชื่อมนี้) `text-primary` จะ resolve ไปยัง
+  `--color-primary-ink` ผ่าน `--text-color-primary` (lime-800 ในโหมด light และสี lime accent ในโหมด dark) ทำให้
+  ข้อความ primary ยังอ่านง่าย ขณะที่ `bg-primary`/`border-primary` ยังคงพื้นผิวสี lime ไว้ ชุดข้อมูล (series) ของกราฟใช้
   `--color-chart-1` … `--color-chart-5`
-- **ธีม** `<html className="ci-theme">` (`src/app/layout.tsx`) เปิดใช้ธีมของคิทกับเอกสาร
-  ค่ากำหนดสามารถเป็น `light`, `dark` หรือ `system` (`THEME_CONFIG.defaultTheme = "system"` ใน
-  `src/shared/constants/appConfig.ts`; `system` ทำตาม `prefers-color-scheme`) `applyTheme()` ใน
-  `src/store/themeStore.ts` (ซึ่งมีตรรกะเดียวกันในสคริปต์บูตสแตรปแบบ inline ใน `src/app/layout.tsx` ที่ทำงาน
-  ก่อน hydration) จะตั้งค่า `data-theme="dark"|"light"` และสลับคลาส `.dark` บน `<html>` ไปพร้อมกัน
-  ชุดโทเค็นธีมมืดของคิทอ้างอิง `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  การ override ธีมมืดของ OmniRoute เอง (บล็อก `.dark` ใน `globals.css`) และยูทิลิตี `dark:` แบบดั้งเดิมของ
-  Tailwind อ้างอิงคลาส `.dark` ไม่มีพรีเซ็ตสีเน้น: สีเน้นมาจากคิทเสมอ และพรีเซ็ตที่บันทึกค้างไว้จากบิลด์เก่า
-  จะถูกลบเมื่อสโตร์โหลด
-- **คอมโพเนนต์ (อะแดปเตอร์)** `src/shared/components/index.tsx` รักษา API คอมโพเนนต์ของ OmniRoute
-  (ชื่อ, default export และ props เดิม) และ primitive ที่อยู่เบื้องหลังเป็นอะแดปเตอร์ครอบคิท: ฟอร์ม
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlay และ feedback
+- **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) เป็นการเปิดให้เอกสารใช้ธีมของ kit
+  ค่าการตั้งค่าคือ `light`, `dark` หรือ `system` (`THEME_CONFIG.defaultTheme = "system"` ใน
+  `src/shared/constants/appConfig.ts`; `system` จะทำตามค่า `prefers-color-scheme`) `applyTheme()` ใน
+  `src/store/themeStore.ts` (ซึ่งมีสคริปต์ bootstrap แบบ inline ใน `src/app/layout.tsx` ที่ทำงาน
+  ก่อน hydration ทำหน้าที่เดียวกันนี้) จะตั้งค่า `data-theme="dark"|"light"` และสลับคลาส `.dark` บน `<html>` ไปพร้อมกัน
+  ชุด token สำหรับธีม dark ของ kit ถูกผูกไว้กับ `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  ส่วนการ override ธีม dark ของ OmniRoute เอง (บล็อก `.dark` ใน `globals.css`) และ Tailwind utilities แบบ `dark:`
+  เดิม ถูกผูกไว้กับคลาส `.dark` ไม่มีพรีเซ็ตสี accent: สี accent มาจาก
+  kit เสมอ และพรีเซ็ตที่เคยบันทึกไว้จาก build เก่าจะถูกลบทิ้งเมื่อ store โหลดขึ้นมา
+- **Components (adapters).** `src/shared/components/index.tsx` คง API ของคอมโพเนนต์ OmniRoute ไว้เหมือนเดิม (ชื่อเดิม
+  default export และ props เดิม) และ primitive ที่อยู่เบื้องหลังคือ adapter ที่ครอบ kit อีกชั้น: กลุ่มฟอร์ม
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), กลุ่ม overlay และ feedback
   (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  โครงสร้าง (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) และตาราง
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`) อะแดปเตอร์จะนำเข้าคอมโพเนนต์
-  ของคิทผ่าน subpath และแมป props ดั้งเดิมเข้ากับคอมโพเนนต์นั้น ตัวอย่างเช่น `Button variant="primary"` คือปุ่ม
-  `default` ของคิท (`--ci-button-primary-*`: พื้นผิวกลับสีในธีมสว่าง และสีเน้นพร้อมสีตัวอักษร
-  `--ci-color-accent-foreground` ในธีมมืด), `danger` คือ `destructive` และ `warning` คือ `outline` ร่วมกับ
-  ส่วนขยาย `.ci-button--warning` กฎ `.ci-button--warning` และ `.ci-badge[data-tone]` ที่ส่วนท้ายของ
-  `globals.css` (`@layer components`) เป็นส่วนขยายของ OmniRoute ที่เพิ่มบนคลาสของคิท
-  `tests/unit/ui/adapters/*.test.tsx` ตรึงลักษณะการทำงานของอะแดปเตอร์แต่ละตัวไว้
-- **เชลล์** `src/app/(dashboard)/layout.tsx` เรนเดอร์ `DashboardLayout` ซึ่งเรนเดอร์
-  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` /
-  `SidebarInset` ของคิท (`packages/ui-kit/src/sidebar.tsx`) โดยมีตรรกะการนำทางของ OmniRoute อยู่ใน
-  `src/shared/components/Sidebar.tsx` ลิงก์ "ข้ามไปยังเนื้อหา" ที่ชี้ไปยัง `#main-content` เป็นองค์ประกอบแรก
-  ที่สามารถรับโฟกัสได้ `src/shared/components/Header.tsx` มี `SidebarTrigger` ของคิท (ตัวสลับ sidebar
-  เพียงตัวเดียวของเชลล์), `ProductSwitcher` ของ Keak และตัวเปิด command palette; โดยจะแสดงชื่อ route
-  เฉพาะเมื่อไม่มี `PageHeader` ของคิท (`.ci-page-header`) ถูกเมานต์ภายใน `#main-content` เพื่อให้หน้าที่มี
-  `PageHeader` ของตัวเองมี `h1` เพียงรายการเดียว `src/shared/components/CommandPalette.tsx` เป็น
-  `Dialog` ของคิท
-- **ไอคอน** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) จะแปลงชื่อ (คำศัพท์
-  Material Symbols ที่หน้าจอต่าง ๆ ใช้) ผ่าน `ICON_MAP` (`src/shared/constants/iconMap.ts`) ให้เป็น glyph
-  ของ Lucide ฟอนต์และแพ็กเกจ Material Symbols ถูกนำออกแล้ว: ชื่อที่ไม่มีอยู่ในแมปจะเรนเดอร์ glyph ตัวยึด
-  แบบเป็นกลาง (`data-icon-missing="true"`) และบันทึกคำเตือนลงคอนโซลเมื่ออยู่นอกสภาพแวดล้อม production
-  `npm run gen:icon-map` จะแสดงชื่อที่กำลังใช้งานแต่ไม่มีอยู่ในแมป
-  (`tests/unit/icon-map-coverage.test.ts` จะล้มเหลวเมื่อมีชื่อใดไม่มีไอคอน Lucide;
-  `tests/unit/icon-map-object-values.test.ts` ครอบคลุมชื่อที่จัดเก็บอยู่ในอ็อบเจ็กต์สำหรับค้นหา);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` จะแปลง span แบบ literal
-  `<span className="material-symbols-outlined">` ให้เป็น `<Icon>`
-- **แบรนด์** `src/shared/components/OmniRouteLogo.tsx` ครอบคิทไว้: default export `OmniRouteLogo`
-  เรนเดอร์ `ProductIcon product="omniroute" variant="glyph"` (SVG แบบ inline ที่รองรับ `basePath`) และ
-  `OmniRouteLockup` เรนเดอร์ `ProductLockup product="omniroute"` (ชื่อสำหรับการช่วยการเข้าถึงคือ
-  "Keak OmniRoute") หรือสำหรับผู้ให้บริการแบบ white-label จะเรนเดอร์ `name`/`logoSrc` ของผู้ให้บริการนั้นเอง
-  ปลายทางของ product switcher อยู่ใน `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`,
-  `KEAK_ACTIVE_PRODUCT`) หน้าจอแบบสแตนด์อโลน ได้แก่ `src/app/login/page.tsx`,
-  `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`,
-  `src/app/not-found.tsx` และ `src/shared/components/ErrorPageScaffold.tsx`
-  จะแสดง lockup; `tests/unit/brand-pages-static.test.ts` ทำหน้าที่ป้องกันข้อกำหนดนี้ไว้
+  กลุ่มโครงสร้าง (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) และกลุ่มตาราง
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`) adapter จะ import คอมโพเนนต์ของ kit
+  ผ่าน subpath แล้วแมป props แบบเดิมเข้ากับคอมโพเนนต์นั้น — ตัวอย่างเช่น `Button variant="primary"` คือ
+  ปุ่ม `default` ของ kit (`--ci-button-primary-*`: พื้นผิวแบบ inverse ในโหมด light และสี accent พร้อมสีหมึก
+  `--ci-color-accent-foreground` ในโหมด dark), `danger` คือ `destructive` และ `warning` คือ `outline` บวกกับ
+  ส่วนขยาย `.ci-button--warning` กฎ `.ci-button--warning` และ `.ci-badge[data-tone]` ที่อยู่
+  ท้ายไฟล์ `globals.css` (`@layer components`) คือส่วนขยายของ OmniRoute ที่ต่อยอดจากคลาสของ kit
+  `tests/unit/ui/adapters/*.test.tsx` ตรึงพฤติกรรมของ adapter แต่ละตัวไว้
+- **Shell.** `src/app/(dashboard)/layout.tsx` render `DashboardLayout` ซึ่ง render
+  `src/shared/components/layouts/DashboardShell.tsx`: ประกอบด้วย `SidebarProvider` / `Sidebar` /
+  `SidebarInset` ของ kit (`packages/ui-kit/src/sidebar.tsx`) โดยมีตรรกะการนำทางของ OmniRoute อยู่ใน
+  `src/shared/components/Sidebar.tsx` ลิงก์ "skip to content" ที่ชี้ไปยัง `#main-content` คือองค์ประกอบแรก
+  ที่โฟกัสได้ `src/shared/components/Header.tsx` มี `SidebarTrigger` ของ kit (ตัวสลับ sidebar
+  เพียงตัวเดียวของ shell), `ProductSwitcher` ของ Keak และปุ่มเปิด command palette; ส่วนนี้จะแสดงชื่อ route
+  เฉพาะเมื่อไม่มี `PageHeader` ของ kit (`.ci-page-header`) ถูก mount อยู่ภายใน `#main-content` เท่านั้น เพื่อให้หน้าที่มี
+  `PageHeader` ของตัวเองมี `h1` เพียงอันเดียว `src/shared/components/CommandPalette.tsx` คือ `Dialog` ของ kit
+- **Icons.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) จะแปลงชื่อ (ตาม
+  คำศัพท์ของ Material Symbols ที่หน้าจอต่างๆ ใช้) ผ่าน `ICON_MAP` (`src/shared/constants/iconMap.ts`) ให้เป็น
+  glyph ของ Lucide ฟอนต์และแพ็กเกจของ Material Symbols ถูกนำออกไปแล้วทั้งหมด: ชื่อที่ไม่มีในแมปจะถูก render เป็น
+  glyph ตัวแทนที่เป็นกลาง (`data-icon-missing="true"`) พร้อมบันทึกคำเตือนลงคอนโซลเมื่อไม่ได้รันใน production
+  `npm run gen:icon-map` จะพิมพ์ชื่อที่กำลังถูกใช้งานแต่ไม่มีอยู่ในแมปออกมา
+  (`tests/unit/icon-map-coverage.test.ts` จะล้มเหลวหากมีชื่อใดที่ไม่มีไอคอน Lucide คู่กัน;
+  `tests/unit/icon-map-object-values.test.ts` ครอบคลุมชื่อที่ถูกเก็บไว้ใน lookup object);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` จะเขียน
+  `<span className="material-symbols-outlined">` แบบ literal ใหม่ให้กลายเป็น `<Icon>`
+- **Brand.** `src/shared/components/OmniRouteLogo.tsx` ครอบ kit ไว้อีกชั้น: default export `OmniRouteLogo`
+  จะ render `ProductIcon product="omniroute" variant="glyph"` (SVG แบบ inline ที่ปลอดภัยกับการใช้ `basePath`) และ
+  `OmniRouteLockup` จะ render `ProductLockup product="omniroute"` (ชื่อสำหรับการเข้าถึงคือ "Keak OmniRoute") หรือสำหรับ
+  ผู้ให้บริการแบบ white-label ก็จะใช้ `name`/`logoSrc` ของตนเอง รายการปลายทางของ product switcher อยู่ใน
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) หน้าจอแบบ
+  standalone — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` และ `src/shared/components/ErrorPageScaffold.tsx`
+  — จะแสดง lockup; และ `tests/unit/brand-pages-static.test.ts` คอยคุ้มกันส่วนนี้ไว้
 
 ## 2. กฎ
 
-1. ใช้โทเคนเท่านั้น ห้ามใช้ค่าลิเทอรัล ข้อยกเว้นที่ตั้งใจเก็บไว้: เทอร์มินัลคอนโซลที่เป็นโหมดมืดเสมอ และ
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ซึ่งเป็นสำเนา hex ที่ resolve แล้วของพาเลตต์สถานะ
-   ของ kit สำหรับผู้เรียกที่จำเป็นต้องใช้ค่า hex ลิเทอรัล พาเลตต์เชิงหมวดหมู่ไม่ได้เป็นข้อยกเว้นอีกต่อไป:
-   พวกมันใช้ chart token ทั้งห้าตัวของ kit (`--color-chart-1..5`) ผ่าน
-   `src/shared/utils/categoricalPalette.ts` และสำหรับกลยุทธ์การกำหนดเส้นทาง ใช้
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; เอจของ ReactFlow และแคนวาส
-   orchestration จะอ่านตัวแปร `--orch-status-*` ที่รองรับธีม (`src/shared/components/flow/edgeStyles.ts`)
+1. ใช้โทเคนเท่านั้น ห้ามใช้ค่าลิเทอรัล ข้อยกเว้นที่ตั้งใจเก็บไว้: เทอร์มินัลคอนโซลที่เป็นโทนมืดเสมอ และ
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ซึ่งเป็นมิร์เรอร์ hex ที่ resolve แล้วของพาเลตต์
+   สถานะของ kit สำหรับผู้เรียกที่ต้องการค่า hex แบบลิเทอรัล พาเลตต์เชิงหมวดหมู่ (categorical palettes)
+   ไม่ใช่ข้อยกเว้นอีกต่อไป: พวกมันทำงานอยู่บน chart token ทั้งห้าตัวของ kit (`--color-chart-1..5`) ผ่าน
+   `src/shared/utils/categoricalPalette.ts` และสำหรับกลยุทธ์การกำหนดเส้นทาง ผ่าน
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; เอจของ ReactFlow และแคนวาสของ
+   orchestration อ่านตัวแปร `--orch-status-*` ที่รองรับธีม (`src/shared/components/flow/edgeStyles.ts`)
 2. ห้ามแพตช์ `packages/ui-kit/src` ด้วยมือเด็ดขาด: ให้ซิงก์ด้วย `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) จะล้มเหลวหากมีไบต์ใด
-   แตกต่างจากคอมมิต upstream ที่ปักหมุดไว้ (จะข้ามไปพร้อมคำเตือนเมื่อไม่มีการโคลน upstream ซึ่งก็คือ
-   `UI_KIT_CLONE` หรือ `_references/cheaper-inference-ui-kit`) เมื่อ kit ขาดสิ่งใด ให้หาวิธีจัดการ
-   ใน adapter หรือในหน้าจอ แล้วร้องขอสิ่งนั้นจาก upstream
-3. ข้อความเริ่มต้นของ kit เป็นภาษาอังกฤษ (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   ให้ส่งสตริงที่แปลแล้วจาก `useTranslations(...)` ทุกครั้งที่คอมโพเนนต์ของ kit เรนเดอร์ข้อความ
-4. ยูทิลิตีของ Tailwind มีความสำคัญเหนือคลาสของคอมโพเนนต์ kit (kit ประกาศ
-   `@layer theme, base, components, utilities` และกฎของมันอยู่ใน `components`) — ใช้ยูทิลิตี
-   สำหรับระยะห่างและเลย์เอาต์ ไม่ใช่เพื่อเปลี่ยนสีของคอมโพเนนต์ kit
-5. หัวข้อ: ใช้ `.ci-heading` (Inter ไม่มี tracking) สำหรับชื่อหน้าและชื่อส่วน; ใช้ `.ci-dashboard-display`
-   (Instrument Serif) เฉพาะกับข้อความแสดงผลขนาดใหญ่ที่ปรากฏเบาบาง เช่น รหัสสถานะบนหน้าแสดงข้อผิดพลาด
-6. `tests/unit/dashboard-kit-sweep.test.ts` คอยเฝ้าระวังการนำ kit มาใช้: ห้ามมี span แบบ Material ligature
-   ภายใต้ `src/app` หรือ `src/shared/components`; ในทรี dashboard (`src/app/(dashboard)` และ
-   `src/shared/components`) ห้ามมี `<select>`, `<textarea>` หรือ `<table>` แบบดิบ และห้ามสร้าง
-   `role="dialog"` เองนอกเหนือจากข้อยกเว้นที่ระบุไว้ (สาขา native ของ adapter `Select`,
-   `RequestLoggerDetail`); `<button>` หรือ `<input>` ดิบทุกตัวในบริเวณนั้นต้องมีคอมเมนต์ที่มีข้อความ
-   `kit-exception:` (พร้อมเหตุผล) ซึ่งต้องจบอยู่ภายในไม่เกิน 3 บรรทัดเหนือตัวมัน; โทนสีของพาเลตต์และ
-   variant `dark:` ใช้ได้เฉพาะในไฟล์ที่เทสต์ระบุไว้เท่านั้น
-7. ตรวจสอบทั้งสองธีมและ viewport ขนาด 390 px ก่อนสร้าง PR (ถ่ายภาพหน้าจอ); `tests/e2e/a11y.spec.ts`
-   จะรัน axe
+   เกต pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) จะล้มเหลวเมื่อมีไบต์ใด ๆ
+   แตกต่างจากคอมมิต upstream ที่ปักหมุดไว้ (จะข้ามพร้อมคำเตือนเมื่อไม่มี upstream clone ซึ่งคือ
+   `UI_KIT_CLONE` หรือ `_references/cheaper-inference-ui-kit`) เมื่อ kit ขาดอะไรบางอย่าง ให้หาทาง
+   แก้ปัญหาเฉพาะหน้าใน adapter หรือในหน้าจอ และร้องขอสิ่งนั้นจาก upstream
+3. ค่าเริ่มต้นของข้อความใน kit เป็นภาษาอังกฤษ (`label = "Loading"`, `loadingLabel = "Loading table"`…)
+   — ส่งสตริงที่แปลแล้วจาก `useTranslations(...)` ทุกครั้งที่คอมโพเนนต์ของ kit เรนเดอร์ข้อความ
+4. utility ของ Tailwind มีความสำคัญเหนือคลาสของคอมโพเนนต์ kit (kit ประกาศ
+   `@layer theme, base, components, utilities` และกฎของมันอยู่ใน `components`) — ใช้ utility สำหรับ
+   ระยะห่างและเลย์เอาต์ ไม่ใช่เพื่อเปลี่ยนสีของคอมโพเนนต์ kit
+5. หัวเรื่อง: `.ci-heading` (Inter ไม่มี tracking) สำหรับชื่อหน้าและชื่อส่วน; `.ci-dashboard-display`
+   (Instrument Serif) เฉพาะสำหรับข้อความแสดงผลขนาดใหญ่ที่มีจำนวนน้อย เช่น รหัสสถานะของหน้า error
+6. `tests/unit/dashboard-kit-sweep.test.ts` คุ้มกันการนำ kit มาใช้: ไม่อนุญาต Material ligature span ใต้
+   `src/app` หรือ `src/shared/components`; ในต้นไม้ของ dashboard (`src/app/(dashboard)` และ
+   `src/shared/components`) ไม่อนุญาต `<select>`, `<textarea>` หรือ `<table>` แบบดิบ และไม่อนุญาต
+   `role="dialog"` ที่เขียนเองนอกเหนือจากข้อยกเว้นที่ระบุไว้ (native branch ของ `Select` adapter,
+   `RequestLoggerDetail`); ทุก `<button>` หรือ `<input>` แบบดิบในที่นั้นต้องมีคอมเมนต์ที่มี
+   `kit-exception:` (พร้อมเหตุผล) ซึ่งจบลงไม่เกิน 3 บรรทัดเหนือมัน; เฉดสีของพาเลตต์และ `dark:` variant
+   อนุญาตเฉพาะในไฟล์ที่การทดสอบระบุไว้
+7. ตรวจสอบทั้งสองธีมและ viewport ขนาด 390 px ก่อน PR (ด้วยภาพหน้าจอ); `tests/e2e/a11y.spec.ts` รัน
+   axe
 
 ## 3. การเพิ่มหน้าจอ
 
-1. เปิดหน้าด้วย `PageHeader` ของ kit (`@omniroute/ui-kit/page-header`, ใช้ `compact` ภายใน
-   แดชบอร์ด) — พร้อมชื่อ คำอธิบาย และ `actions` จากนั้นส่วนหัวของ shell จะไม่แสดงชื่อของตัวเอง
-2. สร้างส่วนควบคุมจาก `@/shared/components` (อะแดปเตอร์) และใช้คอมโพเนนต์ของ kit ผ่าน subpath ในกรณีที่ไม่มี
-   อะแดปเตอร์ (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+1. เปิดหน้าด้วย `PageHeader` ของ kit (`@omniroute/ui-kit/page-header`, `compact` ภายใน dashboard)
+   — ชื่อเรื่อง คำอธิบาย และ `actions` จากนั้นเฮดเดอร์ของ shell จะไม่แสดงชื่อเรื่องของตัวเอง
+2. สร้างคอนโทรลจาก `@/shared/components` (ตัว adapter) และใช้คอมโพเนนต์ของ kit ผ่าน subpath ในกรณีที่
+   ไม่มี adapter (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
    `Slider`…)
-3. ไอคอน: `<Icon name="…" />` หากเพิ่มชื่อใหม่ ให้ใส่ชื่อนั้นใน `ICON_MAP` พร้อมคอมโพเนนต์ Lucide
-   ที่ตรงกันในเชิงความหมาย; `npm run gen:icon-map` จะแสดงรายชื่อที่ยังขาดอยู่
-4. สี: ใช้ยูทิลิตีเชิงความหมาย (`text-success`, `bg-warning-bg`, `border-border`…) และ
-   `var(--color-chart-N)` สำหรับชุดข้อมูลในแผนภูมิ; ห้ามใช้ค่า hex และห้ามใช้ตัวแปร `dark:` ที่เพียงทำซ้ำสีเดิม
-5. ข้อความ: ทุกสตริง รวมถึงป้ายกำกับที่ส่งให้คอมโพเนนต์ของ kit ต้องมาจาก `useTranslations` คีย์ใหม่
-   ต้องเพิ่มลงใน `src/i18n/messages/en.json`, `pt-BR.json` และ `vi.json` (การทดสอบความเท่าเทียมของภาษาเวียดนาม
-   กำหนดให้มีทุกคีย์ภาษาอังกฤษ); locale อื่นจะถูกเติมโดยการซิงค์ i18n
-6. รันตัวตรวจสอบก่อนเปิด PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+3. ไอคอน: `<Icon name="…" />` ชื่อใหม่จะถูกเพิ่มเข้าไปใน `ICON_MAP` พร้อมกับคอมโพเนนต์ Lucide ที่ตรงกัน
+   ทางความหมาย; `npm run gen:icon-map` จะแสดงรายชื่อที่ยังขาดอยู่
+4. สี: ใช้ utility เชิงความหมาย (`text-success`, `bg-warning-bg`, `border-border`…) และ
+   `var(--color-chart-N)` สำหรับชุดข้อมูลของกราฟ; ไม่ใช้ค่า hex และไม่ใช้ `dark:` variant ที่เพียงแค่
+   ทำซ้ำสีเดิม
+5. ข้อความ: ทุกสตริง รวมถึง label ที่คุณส่งให้คอมโพเนนต์ของ kit ต้องมาจาก `useTranslations` คีย์ใหม่
+   ให้ใส่ใน `src/i18n/messages/en.json`, `pt-BR.json` และ `vi.json` (การทดสอบ parity ของภาษา
+   เวียดนามจะปักหมุดทุกคีย์ภาษาอังกฤษ); ภาษาอื่น ๆ จะถูกเติมโดยการซิงก์ i18n
+6. รันตัวคุ้มกันก่อน PR: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (เป็นการตรวจสอบเพียงรายการเดียวที่ตรวจพบ import ซ้ำใน `iconMap.ts`),
-   `npm run check:ui-icu` และการทดสอบของหน้าจอนั้นเอง
+   `npm run check:dashboard-typecheck` (การตรวจสอบเพียงตัวเดียวที่จับ import ที่ซ้ำกันใน `iconMap.ts`
+   ได้), `npm run check:ui-icu` และการทดสอบของหน้าจอนั้นเอง
 
-## 4. การเพิ่มหรือเปลี่ยนอะแดปเตอร์
+## 4. การเพิ่มหรือเปลี่ยนแปลง adapter
 
-1. รักษา API สาธารณะของ `src/shared/components/index.tsx` ไว้ ได้แก่ ชื่อ export, default export และ
-   props ที่รองรับต้องเหมือนเดิม แมป props แบบเดิมไปยัง kit ภายในอะแดปเตอร์ (ดู `Button.tsx`: `VARIANT_TO_KIT`,
-   `SIZE_TO_KIT`)
-2. นำเข้า kit ผ่าน subpath (`@omniroute/ui-kit/<component>`)
-3. วิธีแก้ปัญหาชั่วคราวสำหรับส่วนที่ kit ยังขาดต้องอยู่ในอะแดปเตอร์ (หรือใน `globals.css` `@layer components` เมื่อการแก้ไขเป็น
-   เรื่องสไตล์) ห้ามอยู่ใน `packages/ui-kit/src`
-4. เพิ่มหรืออัปเดต `tests/unit/ui/adapters/<name>.test.tsx` สำหรับอะแดปเตอร์ที่มีผู้เรียกใช้จำนวนมาก ให้เปรียบเทียบ
-   markup ที่เรนเดอร์ก่อนและหลังการเปลี่ยนแปลง เพราะการเปลี่ยน padding หรือ wrapper จะส่งผลไปยังทุกหน้าจอ
+1. รักษา public API ของ `src/shared/components/index.tsx` ไว้: ชื่อ export เหมือนเดิม, default exports และ props ที่รับ โดยแมป legacy props ไปยัง kit ภายใน adapter (ดู `Button.tsx`: `VARIANT_TO_KIT`, `SIZE_TO_KIT`)
+2. import kit ด้วย subpath (`@omniroute/ui-kit/<component>`)
+3. workaround สำหรับช่องว่างของ kit ให้อยู่ใน adapter (หรือใน `globals.css` `@layer components` เมื่อการแก้ไขเป็น style) ห้ามอยู่ใน `packages/ui-kit/src`
+4. เพิ่มหรืออัปเดต `tests/unit/ui/adapters/<name>.test.tsx` สำหรับ adapter ที่มี caller จำนวนมาก ให้เปรียบเทียบ markup ที่ render ก่อนและหลังการเปลี่ยนแปลง — การเปลี่ยน padding หรือ wrapper จะแพร่ไปทุกหน้าจอ
 
 ## 5. การอัปเดต kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` จะคัดลอก `src/` ต้นทาง ณ commit นั้นไปยัง
-`packages/ui-kit/src` และใช้การแปลงเพียงอย่างเดียวที่อนุญาต (นำส่วนต่อท้าย `.js` ออกจาก
-relative import) จากนั้นให้ตรวจสอบ `git diff packages/ui-kit`, ตรวจสอบด้วยสายตาในหน้า providers, settings, combos,
-usage และ endpoint สำหรับทั้งสองธีม, เรียกใช้ `npm run check:ui-kit-snapshot` และ `npm run test:vitest:ui` และ
-เปิด PR พร้อม changelog จากต้นทาง
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` คัดลอก `src/` จาก upstream ที่ commit นั้นไปยัง `packages/ui-kit/src` และใช้การแปลงเพียงอย่างเดียวที่อนุญาต (ตัด suffix `.js` ออกจาก relative imports) จากนั้น: ตรวจสอบ `git diff packages/ui-kit`, ตรวจด้วยสายตาบนหน้า providers, settings, combos, usage และ endpoint ในทั้งสองธีม, รัน `npm run check:ui-kit-snapshot` และ `npm run test:vitest:ui`, แล้วเปิด PR พร้อมกับ changelog ของ upstream
 
-## 6. ดัชนีอ้างอิง
+## 6. ไดอะแกรมใน README
 
-- `src/app/globals.css` — ตัวเชื่อม token, การ override ของ `.dark`, ส่วนขยาย OmniRoute ใน `@layer components`
-- `packages/ui-kit/UPSTREAM.md` — commit ต้นทางที่ตรึงไว้และการอนุญาตด้านสิทธิ์ใช้งาน; `packages/ui-kit/PATCHES.md`
+ไดอะแกรมสิบสองภาพที่ `README.md` หลักฝังอยู่ (`docs/diagrams/*.svg`) คือการนำ kit ไปใช้กับภาพนิ่ง และถูก generate ขึ้น ไม่ได้วาดด้วยมือ: ไฟล์ generator 13 ไฟล์ที่ `scripts/docs/gen-readme-*.mjs` (ไดอะแกรมสิบสองภาพบวกกับ driver `gen-readme-diagrams.mjs`) และ staleness test 12 ไฟล์ที่ `tests/unit/docs/readme-*-svg.test.ts` ภาพละหนึ่งไฟล์ แต่ละไฟล์เปรียบเทียบระดับ byte ระหว่างไฟล์ที่ commit กับ output ของ generator ของมัน (job `test-unit`)
+
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` คัดลอก palette จาก `packages/ui-kit/src/ci-tokens.css` (ปักหมุดกับไฟล์นั้นโดย `tests/unit/docs/readme-diagram-theme.test.ts`) และกำหนดบทบาทข้อความบนฟอนต์ของ kit — Instrument Serif สำหรับ display, Inter สำหรับข้อความ UI, IBM Plex Mono สำหรับตัวเลขและโค้ด ซึ่งเป็นแพ็กเกจ `@fontsource` ชุดเดียวกับที่ `src/app/globals.css` โหลดสำหรับ dashboard ค่าของธีม light อยู่บน `:root` และค่าของธีม dark อยู่หลัง `prefers-color-scheme: dark` ภายในไฟล์ เพื่อให้แต่ละภาพแสดงตาม scheme ของผู้ดูบน GitHub
+- **Fonts.** `scripts/docs/readme-fonts.mjs` ทำ subset ไฟล์ woff2 เหล่านั้นให้เหลือเฉพาะ glyph ที่แต่ละไดอะแกรมวาด และฝังเป็น `@font-face` `data:` URIs — วิธีเดียวที่ตัวพิมพ์ของ kit จะไปถึงภาพใน README ได้ เนื่องจาก GitHub Markdown ไม่มี CSS และ camo proxy บล็อกทุกการ fetch จากภายนอก subset เหล่านั้นเป็น latin เท่านั้น; glyph สัญลักษณ์ที่ fallback ไปยัง system stack จะได้รับอนุญาตทีละตัวใน `SYMBOL_FALLBACKS` และ glyph อื่นใดที่ไม่ครอบคลุมจะ throw
+- **Regenerate.** `npm run docs:readme-diagrams` เขียนทั้งสิบสองภาพใหม่ตามลำดับใน README และพิมพ์หนึ่งบรรทัดต่อไฟล์พร้อมขนาดของมัน generator แต่ละตัวก็รันได้ด้วยตัวเอง (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ต้องใช้ `node --import tsx/esm` เพราะตัวเลขของมันมาจาก live catalog loader ใน `open-sse/config/freeModelCatalog.ts`; ผลกระทบต่อ CI จากการเปลี่ยนแปลง catalog อยู่ใน `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`) ให้ commit generator และ SVG พร้อมกัน
+- **การพิสูจน์.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` render ไฟล์ในแบบเดียวกับที่ GitHub ให้บริการ (แท็ก `<img>`, `Content-Security-Policy` ของ camo, `image/svg+xml`) จับภาพ frame ทั้ง light และ dark และรายงาน external font requests ที่หน้าเว็บทำ (ต้องเป็น 0)
+- **ขีดจำกัดขนาด.** ต่ำกว่า 200 KB ต่อไฟล์ (staleness test แต่ละตัว assert ข้อนี้); 500 KB คือขีดจำกัดสูงสุดสำหรับภาพ README ใดๆ (กฎของ SVG studio validator)
+- **ข้อความคงเดิม ตัวเลขมาจาก gate.** การ rebrand เปลี่ยนฟอนต์และ palette ไม่ใช่คำ: generator แต่ละตัวเก็บข้อความของไดอะแกรมไว้ในค่าคงที่ `*_COPY` (หรือสร้างจาก live catalog) ซึ่งเป็นทั้งข้อความที่ถูกวาดและ input ของ font-subset ตัวเลข canonical อยู่ในโหนด `<text>` อ่านโดย `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); staleness test ของไดอะแกรมที่ gate อ่านก็รัน validator ของมันบนไฟล์ที่ generate ด้วย ดังนั้นตัวเลขที่เบี่ยงเบนจากโค้ดจะทำให้ test ล้มเหลว — ให้แก้ที่แหล่งข้อมูลซึ่ง gate อ่าน ห้ามแก้ตัวเลขใน generator
+
+## 7. ดัชนีอ้างอิง
+
+- `src/app/globals.css` — บริดจ์โทเคน, การเขียนทับ `.dark`, ส่วนขยาย `@layer components` ของ OmniRoute
+- `packages/ui-kit/UPSTREAM.md` — คอมมิตต้นน้ำที่ปักหมุดไว้และการอนุญาตสัญญาอนุญาต; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` และอะแดปเตอร์ที่อยู่ข้างกัน; `src/shared/components/layouts/DashboardShell.tsx`,
+- `src/shared/components/index.tsx` และอะแดปเตอร์ที่อยู่ถัดจากไฟล์นี้; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`

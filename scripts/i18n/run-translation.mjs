@@ -913,6 +913,64 @@ async function resolveSectionPlan({ task, state, opts, sections }) {
   return planSectionReuse({ previousHashes, sections, mirrorSections });
 }
 
+// A chunk the validator keeps rejecting used to be retried CHUNK_ATTEMPTS times on the same
+// model and then fail the whole doc: the model chain only engaged on HTTP errors. On
+// 2026-10-27 the fallback model cut large tables right after the header row under load
+// ("table rows 1/9") and one USER_GUIDE run spent 6.6 h on retries. A rejected chunk now
+// falls through the chain (each level keeps the rest of the chain for HTTP fallback), and
+// when every model rejects a large chunk it is re-split on the same safe seams as
+// chunkMarkdown (headings, paragraphs, table rows) and translated piece by piece.
+const SPLIT_DEPTH = 2;
+const SPLIT_MIN_CHARS = 1500;
+
+export async function translateChunk(
+  chunk,
+  system,
+  backend,
+  { call = callChat, label = "chunk", depth = 0 } = {}
+) {
+  const messages = [
+    { role: "system", content: system },
+    { role: "user", content: chunk },
+  ];
+  const chain = [backend.model, ...(backend.fallbackModels ?? [])].filter(Boolean);
+  let checked;
+  for (let level = 0; level < chain.length; level++) {
+    const levelBackend = {
+      ...backend,
+      model: chain[level],
+      fallbackModels: chain.slice(level + 1),
+    };
+    for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
+      checked = validateTranslatedChunk(chunk, await call(messages, levelBackend));
+      if (checked.problems.length === 0) return checked.text;
+      logWarn(
+        `  ${label} rejected (${chain[level]}, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
+      );
+    }
+  }
+  if (depth < SPLIT_DEPTH && chunk.length > SPLIT_MIN_CHARS) {
+    const pieces = chunkMarkdown(chunk, Math.ceil(chunk.length / 2));
+    if (pieces.length > 1) {
+      logWarn(
+        `  ${label} split into ${pieces.length} smaller pieces after every model rejected it`
+      );
+      const parts = [];
+      for (let p = 0; p < pieces.length; p++) {
+        parts.push(
+          await translateChunk(pieces[p], system, backend, {
+            call,
+            label: `${label}.${p + 1}`,
+            depth: depth + 1,
+          })
+        );
+      }
+      return joinTranslatedChunks(parts);
+    }
+  }
+  throw new Error(`${label} failed validation: ${checked.problems.join("; ")}`);
+}
+
 async function translateBody(body, localeEntry, backend) {
   const englishName = localeEntry.english ?? localeEntry.name;
   const native = localeEntry.native ?? localeEntry.name;
@@ -920,27 +978,13 @@ async function translateBody(body, localeEntry, backend) {
   const chunks = chunkMarkdown(body);
   const translated = [];
   for (let i = 0; i < chunks.length; i++) {
-    const messages = [
-      { role: "system", content: system },
-      { role: "user", content: chunks[i] },
-    ];
-    let checked;
-    for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
-      checked = validateTranslatedChunk(chunks[i], await callChat(messages, backend));
-      if (checked.problems.length === 0) break;
-      logWarn(
-        `  chunk ${i + 1}/${chunks.length} rejected (attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
-      );
-    }
-    if (checked.problems.length > 0) {
-      throw new Error(
-        `chunk ${i + 1}/${chunks.length} failed validation: ${checked.problems.join("; ")}`
-      );
-    }
-    translated.push(checked.text);
+    const text = await translateChunk(chunks[i], system, backend, {
+      label: `chunk ${i + 1}/${chunks.length}`,
+    });
+    translated.push(text);
     if (chunks.length > 1) {
       logInfo(
-        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${checked.text.length} chars)`
+        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${text.length} chars)`
       );
     }
   }

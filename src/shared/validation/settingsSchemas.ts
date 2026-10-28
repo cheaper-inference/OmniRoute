@@ -446,6 +446,8 @@ export const updateSettingsSchema = z.object({
   stripModelPrefix: z.boolean().optional(),
   // Cache control preservation mode
   alwaysPreserveClientCache: z.enum(["auto", "always", "never"]).optional(),
+  // Gemini through Antigravity only; default off and no explicit cache resources.
+  geminiPromptCacheMode: z.enum(["off", "implicit"]).optional(),
   antigravitySignatureCacheMode: z.enum(signatureCacheModeValues).optional(),
   // Adaptive Volume Routing
   adaptiveVolumeRouting: z.boolean().optional(),

@@ -17,13 +17,7 @@ import {
   recordProviderSuccess,
   selectLockoutCooldownMs,
 } from "../accountFallback.ts";
-import {
-  errorResponse,
-  isContentPolicyRefusalComboStopEnabled,
-  logRetryHintUnreadable,
-  parseRetryAfterHeader,
-  readProseRetryAfter,
-} from "../../utils/error.ts";
+import { errorResponse, isContentPolicyRefusalComboStopEnabled } from "../../utils/error.ts";
 import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { recordComboRequest, getComboMetrics } from "../comboMetrics.ts";
@@ -84,7 +78,7 @@ import {
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
 import {
-  isQuotaExhaustionResponse,
+  isQuotaExhaustionFailure,
   recordQuotaExhaustionClassification,
 } from "./quotaExhaustion.ts";
 import { markAccountExhaustedFromCredits } from "../../../src/domain/quotaCache.ts";
@@ -101,7 +95,7 @@ import {
 } from "./executeTargetClassify.ts";
 import type { CompressionMode } from "../compression/types.ts";
 import type { ExecuteTargetResult, ExecuteTargetAttemptOptions } from "./attemptLoopTypes.ts";
-import type { ComboErrorBody, ComboRetryAfter } from "./types.ts";
+import { readAttemptFailure, resolveAttemptRetryAfter } from "./attemptFailure.ts";
 import type { ResponseValidationConfig } from "./responseValidation.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
@@ -723,51 +717,9 @@ export async function executeTargetAttempt(
       return { ok: true, response: result };
     }
 
-    // Extract error info from response
-    let errorText = result.statusText || "";
-    let errorBody: ComboErrorBody = null;
-    let retryAfter: ComboRetryAfter | null = null;
-    let bodyText = "";
-    try {
-      const cloned = result.clone();
-      try {
-        const text = await cloned.text();
-        bodyText = text;
-        if (text) {
-          errorText = text.substring(0, 500);
-          errorBody = JSON.parse(text);
-          const parsedError = errorBody?.error;
-          errorText =
-            (typeof parsedError === "object" && parsedError?.message) ||
-            (typeof parsedError === "string" ? parsedError : null) ||
-            errorBody?.message ||
-            errorText;
-          // Nested retry hints (live incident 1784457764961-73): reset_at (ISO,
-          // buildErrorBody) is unambiguous and preferred; retry_after is ISO from
-          // buildModelCooldownBody but integer SECONDS from buildErrorBody — coerce
-          // a number to an instant before it can out-race an ISO sibling in the
-          // earliest-retryAfter comparison below. reset_seconds is the last resort.
-          const nestedError = typeof parsedError === "object" ? parsedError : null;
-          const nestedRetryAfterRaw = nestedError?.retry_after ?? null;
-          const nestedResetSeconds = nestedError?.reset_seconds ?? null;
-          retryAfter =
-            errorBody?.retryAfter ||
-            nestedError?.reset_at ||
-            (typeof nestedRetryAfterRaw === "number" && nestedRetryAfterRaw > 0
-              ? new Date(Date.now() + nestedRetryAfterRaw * 1000).toISOString()
-              : nestedRetryAfterRaw) ||
-            (typeof nestedResetSeconds === "number" && nestedResetSeconds > 0
-              ? new Date(Date.now() + nestedResetSeconds * 1000).toISOString()
-              : null);
-        }
-      } catch {
-        logRetryHintUnreadable(deps.log, "COMBO", modelStr, result.status, "unparseable body");
-      }
-    } catch {
-      logRetryHintUnreadable(deps.log, "COMBO", modelStr, result.status, "clone failed");
-    }
-    retryAfter ||= readProseRetryAfter(bodyText); // #13672 opt-in prose retry hints
-    retryAfter ||= parseRetryAfterHeader(result.headers); // header-only shapes (quota-reset-timing)
+    const failure = await readAttemptFailure(result, { log: deps.log, modelStr });
+    const { errorText, errorBody, structuredError } = failure;
+    const retryAfter = resolveAttemptRetryAfter(failure);
 
     // Track earliest retryAfter
     if (
@@ -775,15 +727,6 @@ export async function executeTargetAttempt(
       (!state.earliestRetryAfter || new Date(retryAfter) < new Date(state.earliestRetryAfter))
     ) {
       state.earliestRetryAfter = retryAfter;
-    }
-
-    // Normalize error text
-    if (typeof errorText !== "string") {
-      try {
-        errorText = JSON.stringify(errorText);
-      } catch {
-        errorText = String(errorText);
-      }
     }
 
     if (isProviderCircuitOpenResult(result, errorText)) {
@@ -867,25 +810,6 @@ export async function executeTargetAttempt(
     // treated as local to that target and the combo continues to the next target.
     // Error classification is retained only for retry/cooldown pacing; it must
     // not decide whether fallback happens, including for generic 400 responses.
-    const rawError = errorBody?.error;
-    const structuredError =
-      rawError && typeof rawError === "object"
-        ? {
-            // Upstream JSON may carry a numeric `code`/`type` (e.g. {"code":40001}).
-            // Coerce to string if present instead of discarding, so downstream string
-            // ops (.toLowerCase, .startsWith) can run safely without type crashes.
-            code:
-              (rawError as Record<string, unknown>).code !== undefined &&
-              (rawError as Record<string, unknown>).code !== null
-                ? String((rawError as Record<string, unknown>).code)
-                : undefined,
-            type:
-              (rawError as Record<string, unknown>).type !== undefined &&
-              (rawError as Record<string, unknown>).type !== null
-                ? String((rawError as Record<string, unknown>).type)
-                : undefined,
-          }
-        : undefined;
     const scopedFailure = isScopedFailure(result, errorText, structuredError);
 
     // #8375: input-bound request-scoped failures (context_length_exceeded) are
@@ -1097,7 +1021,7 @@ export async function executeTargetAttempt(
       });
     }
 
-    const quotaExhausted = await isQuotaExhaustionResponse(result, provider, rawModel, profile);
+    const quotaExhausted = isQuotaExhaustionFailure(failure, provider, rawModel, profile);
     recordQuotaExhaustionClassification(result, quotaExhausted);
     // Balance exhaustion is upstream truth about credits, and it outranks the
     // stored snapshot — which can be hours stale and still claim headroom. Mark

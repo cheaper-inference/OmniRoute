@@ -71,7 +71,7 @@
 
 |                                          |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
 | ---------------------------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 Pružatelji                            |          352          |   **358**   |          375          |
+| 🌐 Pružatelji                            |          352          |   **358**   |          376          |
 | 🧠 Jedinstveni ID-ovi modela za razgovor |         1320          |  **1374**   |         1475          |
 | 🖼️ Most modaliteta                       | 🆕 vid + zvuk + video |      ✓      |           ✓           |
 | 📡 Besplatni Radar katalog               |     🆕 po izboru      |      ✓      |           ✓           |
