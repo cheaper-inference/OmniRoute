@@ -1389,10 +1389,15 @@ function stripRecoveredBlocks(text: string, toolNames: string[]): string {
     if (!/^\s*[[{]/.test(rest)) continue;
     const body = extractBalancedJson(rest);
     if (!body) continue;
-    // A closer immediately after the body is removed with it, whatever it names.
+    // Every closer immediately after the body is removed with it, whatever it
+    // names. A model told to close the block with the last argument's tag often
+    // emits the correct closer *and* that one (`</write></path>`), and the
+    // leftover tag is the same leaked markup this pass exists to remove.
     const bodyEnd = text.indexOf(body, bodyStart) + body.length;
-    const closer = text.slice(bodyEnd).match(/^\s*<\s*\/\s*[A-Za-z_][\w.-]*\s*>/);
-    const end = bodyEnd + (closer ? closer[0].length : 0);
+    const closerRe = /\s*<\s*\/\s*[A-Za-z_][\w.-]*\s*>/y;
+    closerRe.lastIndex = bodyEnd;
+    let end = bodyEnd;
+    while (closerRe.exec(text) !== null) end = closerRe.lastIndex;
     out += text.slice(cursor, match.index);
     cursor = end;
     opener.lastIndex = end;

@@ -333,6 +333,63 @@ test("executor streaming: tool call emits clean tool_calls chunk without raw mar
   }
 });
 
+test("executor streaming: parallel tool calls keep their own index", async () => {
+  // A streaming client reassembles the calls by `index`; without one, N parallel
+  // calls collapse into a single call whose name and arguments are the
+  // concatenation of all of them.
+  const modelResponse =
+    '<read>{"path":"/repo/a.py"}</read>\n<write>{"path":"/repo/b.py","content":"x"}</path>';
+  const executor = makeExecutor((chatId) => buildSuccessFrames(chatId, modelResponse));
+  const result = await executor.execute(
+    executeArgs(
+      {
+        model: "test-model",
+        messages: [{ role: "user", content: "do both" }],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "read",
+              description: "Read",
+              parameters: {
+                type: "object",
+                properties: { path: { type: "string" } },
+                required: ["path"],
+              },
+            },
+          },
+          {
+            type: "function",
+            function: {
+              name: "write",
+              description: "Write",
+              parameters: {
+                type: "object",
+                properties: { path: { type: "string" }, content: { type: "string" } },
+                required: ["path", "content"],
+              },
+            },
+          },
+        ],
+      },
+      true
+    )
+  );
+
+  const chunks = parseSseChunks(await result.response.text());
+  const deltas = chunks.flatMap((chunk) => chunk.choices?.[0]?.delta?.tool_calls ?? []);
+  assert.equal(deltas.length, 2);
+  assert.deepEqual(
+    deltas.map((delta) => delta.index),
+    [0, 1]
+  );
+  assert.deepEqual(
+    deltas.map((delta) => delta.function.name),
+    ["read", "write"]
+  );
+  assert.notEqual(deltas[0].id, deltas[1].id);
+});
+
 test("executor streaming: text response without tools works normally", async () => {
   const executor = makeExecutor((chatId) =>
     buildSuccessFrames(chatId, "Hello world!", "thinking...")

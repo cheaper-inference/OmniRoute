@@ -789,19 +789,26 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
             enqueue({ delta: { content }, finish_reason: null });
           }
 
-          // Emit tool_calls if present
-          if (toolCalls.length > 0) {
+          // Emit tool_calls if present — one delta per call, each carrying its
+          // `index`. A streaming client keys the calls it reassembles on that
+          // index (it is how the OpenAI SDK accumulates them), so a batch
+          // without one collapses N parallel calls into a single call whose name
+          // and arguments are the concatenation of all of them.
+          toolCalls.forEach((tc, index) => {
             enqueue({
               delta: {
-                tool_calls: toolCalls.map((tc) => ({
-                  id: tc.id,
-                  type: "function",
-                  function: { name: tc.name, arguments: tc.arguments },
-                })),
+                tool_calls: [
+                  {
+                    index,
+                    id: tc.id,
+                    type: "function",
+                    function: { name: tc.name, arguments: tc.arguments },
+                  },
+                ],
               },
               finish_reason: null,
             });
-          }
+          });
 
           // Handle errors
           if (bufferError) {

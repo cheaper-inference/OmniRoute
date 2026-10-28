@@ -489,6 +489,29 @@ test("D4: a closer inside a JSON string does not truncate the strip", () => {
   assert.deepEqual(JSON.parse(call.arguments), { path: "a.py", content: "x</write>y" });
 });
 
+test("D4: a doubled closer after a recovered block is stripped too", () => {
+  // A model told to close the block with the last argument's tag often emits the
+  // correct closer *and* that one; the leftover tag is the same leaked markup.
+  assert.equal(
+    stripCfToolMarkup('<write>{"path":"/repo/a.py","content":"x"}</write></path>', TOOL_NAMES),
+    ""
+  );
+  assert.equal(
+    stripCfToolMarkup(
+      '<write>{"path":"/repo/a.py","content":"x"}</write></path>\n\n' +
+        '<write>{"path":"/repo/b.py","content":"y"}</write></path>',
+      TOOL_NAMES
+    ),
+    ""
+  );
+  // …and the doubled closer must not turn one block into two calls.
+  assert.equal(
+    parseCfToolCalls('<write>{"path":"/repo/a.py","content":"x"}</write></path>', OPENCODE_TOOLS)
+      .length,
+    1
+  );
+});
+
 test("D4: an unclosed body is stripped with its opener", () => {
   assert.equal(stripCfToolMarkup('<tool>{"path":"/repo/a.py"}', TOOL_NAMES), "");
   assert.equal(stripCfToolMarkup('<write>{"path":"/repo/a.py","content":"x"}', TOOL_NAMES), "");
