@@ -98,6 +98,7 @@ export interface ResolvedOptions extends FreeOptions {
   baseURL: string;
   apiKey: string;
   managementReadToken?: string;
+  headers?: Record<string, string>;
   timeoutMs: number;
   timeouts?: EndpointTimeouts;
   logger?: Logger;

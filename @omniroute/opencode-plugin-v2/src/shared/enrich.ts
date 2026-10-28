@@ -317,7 +317,8 @@ export type OmniRouteEnrichmentFetcher = (
   baseURL: string,
   apiKey: string,
   timeoutMs?: number,
-  onSourceError?: OmniRouteEnrichmentSourceError
+  onSourceError?: OmniRouteEnrichmentSourceError,
+  extraHeaders?: Record<string, string>
 ) => Promise<OmniRouteEnrichmentMap>;
 
 function trimTrailingSlashes(value: string): string {
@@ -355,7 +356,8 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
   baseURL,
   apiKey,
   timeoutMs = 10_000,
-  onSourceError
+  onSourceError,
+  extraHeaders
 ) => {
   const report = (endpoint: string, reason: unknown): void => {
     onSourceError?.(endpoint, reason instanceof Error ? reason.message : String(reason));
@@ -364,8 +366,9 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
   if (!baseURL || !apiKey) return out;
   const root = trimTrailingSlashes(baseURL.replace(/\/v1\/?$/, ""));
   const headers = {
-    Authorization: `Bearer ${apiKey}`,
     Accept: "application/json",
+    ...(extraHeaders ?? {}),
+    Authorization: `Bearer ${apiKey}`,
   };
 
   // 1. Catalog with nice display names.

@@ -43,7 +43,8 @@ export interface OmniRouteRawCombo {
 export type OmniRouteCombosFetcher = (
   baseURL: string,
   apiKey: string,
-  timeoutMs?: number
+  timeoutMs?: number,
+  headers?: Record<string, string>
 ) => Promise<OmniRouteRawCombo[]>;
 
 function trimTrailingSlashes(value: string): string {
@@ -73,7 +74,8 @@ function trimTrailingSlashes(value: string): string {
 export const defaultOmniRouteCombosFetcher: OmniRouteCombosFetcher = async (
   baseURL,
   apiKey,
-  timeoutMs = 10_000
+  timeoutMs = 10_000,
+  headers
 ) => {
   if (!apiKey) throw new Error("[omniroute-v2] apiKey required to fetch /api/combos");
   if (!baseURL) throw new Error("[omniroute-v2] baseURL required to fetch /api/combos");
@@ -91,8 +93,9 @@ export const defaultOmniRouteCombosFetcher: OmniRouteCombosFetcher = async (
     const res = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         Accept: "application/json",
+        ...(headers ?? {}),
+        Authorization: `Bearer ${apiKey}`,
       },
       signal: controller.signal,
     });

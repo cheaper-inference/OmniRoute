@@ -228,6 +228,13 @@ const optionsSchema = z
       .refine(isHttpUrl, "baseURL must be an http(s) URL, for example http://localhost:20128")
       .optional(),
     managementReadToken: z.string().min(1).optional(),
+    /**
+     * Extra HTTP headers sent with every gateway fetch (models, combos,
+     * pricing, free-tier). Useful for gateways behind Cloudflare Access
+     * or other header-based auth proxies. Merged into the Authorization
+     * header; never overrides the bearer token.
+     */
+    headers: z.record(z.string(), z.string()).optional(),
     features: featuresSchema.optional(),
   })
   .strict();
@@ -383,7 +390,7 @@ export function resolveOmniRoutePluginOptions(opts?: OmniRoutePluginOptions): Re
    * lookup fails with "No credentials for opencode-<x>".
    */
   omnirouteProviderId: string;
-} & Pick<OmniRoutePluginOptions, "baseURL" | "managementReadToken" | "features"> {
+} & Pick<OmniRoutePluginOptions, "baseURL" | "managementReadToken" | "features" | "headers"> {
   const rawProviderId = opts?.providerId ?? OMNIROUTE_PROVIDER_KEY;
   const omnirouteProviderId = trimLeadingOpencodePrefix(rawProviderId);
   // OC 1.17.8+ native-adapter gate rejects providerID not in
@@ -410,6 +417,7 @@ export function resolveOmniRoutePluginOptions(opts?: OmniRoutePluginOptions): Re
     autoSyncIntervalMs,
     baseURL: opts?.baseURL,
     managementReadToken: opts?.managementReadToken,
+    headers: opts?.headers,
     features: opts?.features,
   };
 }
@@ -725,7 +733,7 @@ export function invalidateOmniRouteFetchCache(
 export async function resolveOmniRouteRuntimeAuth(
   resolved: ResolvedOmniRoutePluginOptions,
   readAuthJson?: OmniRouteReadAuthJson
-): Promise<{ apiKey: string; baseURL: string; managementReadToken: string } | null> {
+): Promise<{ apiKey: string; baseURL: string; managementReadToken: string; headers?: Record<string, string> } | null> {
   const reader = readAuthJson ?? defaultReadAuthJson;
   let authJson: AuthJsonShape | undefined | null;
   try {
@@ -767,7 +775,7 @@ export async function resolveOmniRouteRuntimeAuth(
   const baseURL = resolved.baseURL ?? (authBaseURL || "");
   if (!baseURL) return null;
   const managementReadToken = resolved.managementReadToken ?? apiKey;
-  return { apiKey, baseURL, managementReadToken };
+  return { apiKey, baseURL, managementReadToken, headers: resolved.headers };
 }
 
 /**
@@ -842,7 +850,7 @@ export async function forceSyncOmniRouteModels(args: {
   // slow (#14926). On failure both caches stay exactly as they were.
   let rawModels: OmniRouteRawModelEntry[];
   try {
-    rawModels = await fetcher(auth.baseURL, auth.apiKey, 10_000);
+    rawModels = await fetcher(auth.baseURL, auth.apiKey, 10_000, auth.headers);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.warn(
@@ -868,7 +876,7 @@ export async function forceSyncOmniRouteModels(args: {
     let rawCombos: OmniRouteRawCombo[] = [];
     if (wantCombos) {
       try {
-        rawCombos = await combosFetcher(auth.baseURL, auth.managementReadToken, 10_000);
+        rawCombos = await combosFetcher(auth.baseURL, auth.managementReadToken, 10_000, auth.headers);
       } catch (err) {
         logger.warn("force sync: combos fetch failed", err);
       }
@@ -876,7 +884,7 @@ export async function forceSyncOmniRouteModels(args: {
     let rawEnrichment: OmniRouteEnrichmentMap = new Map();
     if (wantEnrichment) {
       try {
-        rawEnrichment = await enrichmentFetcher(auth.baseURL, auth.managementReadToken, 10_000);
+        rawEnrichment = await enrichmentFetcher(auth.baseURL, auth.managementReadToken, 10_000, auth.headers);
       } catch {
         rawEnrichment = new Map();
       }
@@ -887,7 +895,8 @@ export async function forceSyncOmniRouteModels(args: {
         rawCompressionCombos = await compressionMetaFetcher(
           auth.baseURL,
           auth.managementReadToken,
-          10_000
+          10_000,
+          auth.headers
         );
       } catch {
         rawCompressionCombos = [];
@@ -896,7 +905,7 @@ export async function forceSyncOmniRouteModels(args: {
     let rawConnections: OmniRouteProviderConnection[] = [];
     if (wantUsableOnly) {
       try {
-        rawConnections = await providersFetcher(auth.baseURL, auth.managementReadToken, 10_000);
+        rawConnections = await providersFetcher(auth.baseURL, auth.managementReadToken, 10_000, auth.headers);
       } catch {
         rawConnections = [];
       }
@@ -1251,7 +1260,8 @@ export interface OmniRouteRawModelEntry {
 export type OmniRouteModelsFetcher = (
   baseURL: string,
   apiKey: string,
-  timeoutMs?: number
+  timeoutMs?: number,
+  headers?: Record<string, string>
 ) => Promise<OmniRouteRawModelEntry[]>;
 
 /**
@@ -1264,7 +1274,8 @@ export type OmniRouteModelsFetcher = (
 export const defaultOmniRouteModelsFetcher: OmniRouteModelsFetcher = async (
   baseURL,
   apiKey,
-  timeoutMs = 30_000
+  timeoutMs = 30_000,
+  headers
 ) => {
   if (!apiKey) throw new Error("@omniroute/opencode-plugin: apiKey required to fetch /v1/models");
   if (!baseURL) throw new Error("@omniroute/opencode-plugin: baseURL required to fetch /v1/models");
@@ -1280,8 +1291,9 @@ export const defaultOmniRouteModelsFetcher: OmniRouteModelsFetcher = async (
     const res = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         Accept: "application/json",
+        ...(headers ?? {}),
+        Authorization: `Bearer ${apiKey}`,
       },
       signal: controller.signal,
     });
@@ -1518,7 +1530,8 @@ export interface OmniRouteRawCombo {
 export type OmniRouteCombosFetcher = (
   baseURL: string,
   apiKey: string,
-  timeoutMs?: number
+  timeoutMs?: number,
+  headers?: Record<string, string>
 ) => Promise<OmniRouteRawCombo[]>;
 
 /**
@@ -1542,7 +1555,8 @@ export type OmniRouteCombosFetcher = (
 export const defaultOmniRouteCombosFetcher: OmniRouteCombosFetcher = async (
   baseURL,
   apiKey,
-  timeoutMs = 10_000
+  timeoutMs = 10_000,
+  headers
 ) => {
   if (!apiKey) throw new Error("@omniroute/opencode-plugin: apiKey required to fetch /api/combos");
   if (!baseURL)
@@ -1561,8 +1575,9 @@ export const defaultOmniRouteCombosFetcher: OmniRouteCombosFetcher = async (
     const res = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         Accept: "application/json",
+        ...(headers ?? {}),
+        Authorization: `Bearer ${apiKey}`,
       },
       signal: controller.signal,
     });
@@ -1788,7 +1803,8 @@ export type OmniRouteEnrichmentMap = Map<string, OmniRouteEnrichmentEntry>;
 export type OmniRouteEnrichmentFetcher = (
   baseURL: string,
   apiKey: string,
-  timeoutMs?: number
+  timeoutMs?: number,
+  headers?: Record<string, string>
 ) => Promise<OmniRouteEnrichmentMap>;
 
 /**
@@ -1815,14 +1831,16 @@ export type OmniRouteEnrichmentFetcher = (
 export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = async (
   baseURL,
   apiKey,
-  timeoutMs = 10_000
+  timeoutMs = 10_000,
+  extraHeaders
 ) => {
   const out: OmniRouteEnrichmentMap = new Map();
   if (!baseURL || !apiKey) return out;
   const root = baseURL.replace(/\/v1\/?$/, "").replace(/\/$/, "");
   const headers = {
-    Authorization: `Bearer ${apiKey}`,
     Accept: "application/json",
+    ...(extraHeaders ?? {}),
+    Authorization: `Bearer ${apiKey}`,
   };
 
   // ── 1. Catalog with nice display names ────────────────────────────────
@@ -2453,7 +2471,8 @@ export interface OmniRouteCompressionCombo {
 export type OmniRouteCompressionMetaFetcher = (
   baseURL: string,
   apiKey: string,
-  timeoutMs?: number
+  timeoutMs?: number,
+  headers?: Record<string, string>
 ) => Promise<OmniRouteCompressionCombo[]>;
 
 /**
@@ -2464,7 +2483,8 @@ export type OmniRouteCompressionMetaFetcher = (
 export const defaultOmniRouteCompressionMetaFetcher: OmniRouteCompressionMetaFetcher = async (
   baseURL,
   apiKey,
-  timeoutMs = 10_000
+  timeoutMs = 10_000,
+  headers
 ) => {
   const empty: OmniRouteCompressionCombo[] = [];
   if (!baseURL || !apiKey) return empty;
@@ -2476,8 +2496,9 @@ export const defaultOmniRouteCompressionMetaFetcher: OmniRouteCompressionMetaFet
     const res = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         Accept: "application/json",
+        ...(headers ?? {}),
+        Authorization: `Bearer ${apiKey}`,
       },
       signal: ac.signal,
     });
@@ -2607,7 +2628,8 @@ export interface OmniRouteProviderConnection {
 export type OmniRouteProvidersFetcher = (
   baseURL: string,
   apiKey: string,
-  timeoutMs?: number
+  timeoutMs?: number,
+  headers?: Record<string, string>
 ) => Promise<OmniRouteProviderConnection[]>;
 
 /**
@@ -2619,7 +2641,8 @@ export type OmniRouteProvidersFetcher = (
 export const defaultOmniRouteProvidersFetcher: OmniRouteProvidersFetcher = async (
   baseURL,
   apiKey,
-  timeoutMs = 10_000
+  timeoutMs = 10_000,
+  headers
 ) => {
   const empty: OmniRouteProviderConnection[] = [];
   if (!baseURL || !apiKey) return empty;
@@ -2631,8 +2654,9 @@ export const defaultOmniRouteProvidersFetcher: OmniRouteProvidersFetcher = async
     const res = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         Accept: "application/json",
+        ...(headers ?? {}),
+        Authorization: `Bearer ${apiKey}`,
       },
       signal: ac.signal,
     });
@@ -3172,7 +3196,7 @@ export function createOmniRouteProviderHook(
         // Models fetch is required (no catalog otherwise → silent provider
         // disappearance). We do NOT wrap this in a try; let the error
         // propagate to OC's UI.
-        rawModels = await fetcher(baseURL, apiKey, 10_000);
+        rawModels = await fetcher(baseURL, apiKey, 10_000, resolved.headers);
 
         // T-05: combos fetch is best-effort, gated by features.combos.
         // Soft-fail on any error: emit a warn-level diagnostic and fall back
@@ -3183,7 +3207,7 @@ export function createOmniRouteProviderHook(
         rawCombos = [];
         if (wantCombos) {
           try {
-            rawCombos = await combosFetcher(baseURL, managementReadToken, 10_000);
+            rawCombos = await combosFetcher(baseURL, managementReadToken, 10_000, resolved.headers);
           } catch (err) {
             logger.warn("combos fetch failed, falling back to models-only catalog", err);
           }
@@ -3194,7 +3218,7 @@ export function createOmniRouteProviderHook(
         rawEnrichment = new Map();
         if (wantEnrichment) {
           try {
-            rawEnrichment = await enrichmentFetcher(baseURL, managementReadToken, 10_000);
+            rawEnrichment = await enrichmentFetcher(baseURL, managementReadToken, 10_000, resolved.headers);
           } catch (err) {
             logger.warn("enrichment fetch failed, falling back to raw ids", err);
           }
@@ -3208,7 +3232,8 @@ export function createOmniRouteProviderHook(
             rawCompressionCombos = await compressionMetaFetcher(
               baseURL,
               managementReadToken,
-              10_000
+              10_000,
+              resolved.headers
             );
           } catch (err) {
             logger.warn("compression-metadata fetch failed", err);
@@ -3223,7 +3248,7 @@ export function createOmniRouteProviderHook(
         rawConnections = [];
         if (wantUsableOnly) {
           try {
-            rawConnections = await providersFetcher(baseURL, managementReadToken, 10_000);
+            rawConnections = await providersFetcher(baseURL, managementReadToken, 10_000, resolved.headers);
           } catch (err) {
             logger.warn(
               "/api/providers fetch failed; usableOnly filter disabled for this refresh",
@@ -5280,7 +5305,7 @@ export function createOmniRouteConfigHook(
         // exact warn message so per-endpoint fallbacks are preserved.
         const doModels = async (): Promise<void> => {
           try {
-            localRawModels = await fetcher(baseURL, apiKey, 30_000);
+            localRawModels = await fetcher(baseURL, apiKey, 30_000, resolved.headers);
           } catch (err) {
             logAt(
               "error",
@@ -5294,7 +5319,7 @@ export function createOmniRouteConfigHook(
         const doCombos = async (): Promise<void> => {
           if (!wantCombos) return;
           try {
-            localRawCombos = await combosFetcher(baseURL, managementReadToken, 10_000);
+            localRawCombos = await combosFetcher(baseURL, managementReadToken, 10_000, resolved.headers);
           } catch (err) {
             logAt(
               "error",
@@ -5306,7 +5331,7 @@ export function createOmniRouteConfigHook(
         const doEnrichment = async (): Promise<void> => {
           if (!wantEnrichment) return;
           try {
-            localRawEnrichment = await enrichmentFetcher(baseURL, managementReadToken, 10_000);
+            localRawEnrichment = await enrichmentFetcher(baseURL, managementReadToken, 10_000, resolved.headers);
           } catch (err) {
             logAt(
               "error",
@@ -5321,7 +5346,8 @@ export function createOmniRouteConfigHook(
             localRawCompressionCombos = await compressionMetaFetcher(
               baseURL,
               managementReadToken,
-              10_000
+              10_000,
+              resolved.headers
             );
           } catch (err) {
             logAt(
@@ -5334,7 +5360,7 @@ export function createOmniRouteConfigHook(
         const doConnections = async (): Promise<void> => {
           if (!wantUsableOnly) return;
           try {
-            localRawConnections = await providersFetcher(baseURL, managementReadToken, 10_000);
+            localRawConnections = await providersFetcher(baseURL, managementReadToken, 10_000, resolved.headers);
           } catch (err) {
             logAt(
               "error",
