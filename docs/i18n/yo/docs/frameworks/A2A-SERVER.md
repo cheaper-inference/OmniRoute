@@ -163,7 +163,7 @@ OmniRoute ń ṣàfihàn àwọn ìmọ̀-ìṣẹ́ A2A mẹ́fà tí a sopọ�
 | Health Report      | `health-report`      | Ń ṣàkópọ̀ ipò circuit breaker, cooldown, àti lockout fún olùpèsè kọ̀ọ̀kan                                                                                     | health, resilience         | "Fi ipò èròjà gbogbo àwọn olùpèsè hàn"     |
 | List Capabilities  | `list-capabilities`  | Ń dá kàtálógì Agent Skills kíkún pẹ̀lú ẹ̀yà 45 (23 API + 21 CLI + 1 config) padà gẹ́gẹ́ bí tábìlì markdown pẹ̀lú àwọn URL SKILL.md gangan fún context injection | catalog, discovery, skills | "Ṣàkójọ gbogbo àwọn agbára OmniRoute"      |
 
-> Ó yẹ kí wọ́n máa mú kí Agent Card bá kàtálógì olùpèsè 375 tó ń ṣiṣẹ́ lọ́wọ́ mu; àwọn iye olùpèsè àti metadata free/no-auth ń wá láti inú runtime registry.
+> Ó yẹ kí wọ́n máa mú kí Agent Card bá kàtálógì olùpèsè 376 tó ń ṣiṣẹ́ lọ́wọ́ mu; àwọn iye olùpèsè àti metadata free/no-auth ń wá láti inú runtime registry.
 
 ### Ẹ̀kúnrẹ́rẹ́ Ìmọ̀-Ìṣẹ́ `list-capabilities`
 

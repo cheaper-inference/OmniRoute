@@ -59,9 +59,12 @@ Complete OIDC login for the dashboard admin gate
 
 Validates the `state` cookie, exchanges the authorization `code` for tokens,
 verifies the ID token against the issuer's JWKS (audience = client id), and
-checks the token's `sub`/`email` against `oidcAllowedSubjects`, which must hold at
-least one entry (an empty list ends in `not_configured`). On success it mints the same 30-day `auth_token` dashboard-session
-JWT used by password login and redirects to `/dashboard`.
+requires at least one dashboard admission policy: `oidcAllowedSubjects`
+(matching `sub` or verified `email`) or `oidcAdmissionClaim` (matching a
+configured array claim in the verified ID token). When both are present,
+both must match. Without either policy the callback returns `not_configured`.
+On success it mints the same 30-day `auth_token` dashboard-session JWT
+used by password login and redirects to `/dashboard`.
 
 
 ```bash
@@ -96,7 +99,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute
 
-Local/remote AI gateway exposing OpenAI-compatible REST. One key, 375 providers,
+Local/remote AI gateway exposing OpenAI-compatible REST. One key, 376 providers,
 auto-fallback, RTK token saver, MCP server, A2A agents.
 
 ## Setup

@@ -20,6 +20,7 @@ import {
   wantsProgress as defaultWantsProgress,
 } from "../../utils/progressTracker.ts";
 import { createPiiSseTransform as defaultPiiSse } from "@/lib/streamingPiiTransform";
+import { isPiiTransformEnabled } from "@/lib/streamingPiiTransform";
 import {
   createCredentialSseTransform as defaultCredentialSse,
   isCredentialTransformEnabled,
@@ -77,6 +78,10 @@ export function assembleStreamingPipeline(
     responseHeaders: Record<string, string>;
     credentialRedactionEnabled?: boolean;
     credentialDisabledGuardrails?: string[];
+    /** Names the caller asked to skip. Absent means no opt-out: when the
+     * request carries `pii-masker`, both PII insertions are skipped so the
+     * bytes pass through untouched, matching the non-streaming guardrail. */
+    piiDisabledGuardrails?: string[];
     /** See pipeWithDisconnect's own doc comment — the post-handoff "stream is
      * open but never produced real output" watchdog. Threaded from the same
      * adaptive streamReadinessPolicy.timeoutMs already computed for this
@@ -100,10 +105,12 @@ export function assembleStreamingPipeline(
     args.streamController,
     { contentStallTimeoutMs: args.contentStallTimeoutMs }
   );
-  if (typeof args.createPiiTransform === "function") {
-    piiStream = piiStream.pipeThrough((args.createPiiTransform as () => TransformStream)());
-  } else if (deps.isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")) {
-    piiStream = piiStream.pipeThrough(deps.createPiiSseTransform());
+  if (isPiiTransformEnabled({ piiDisabledGuardrails: args.piiDisabledGuardrails ?? [] })) {
+    if (typeof args.createPiiTransform === "function") {
+      piiStream = piiStream.pipeThrough((args.createPiiTransform as () => TransformStream)());
+    } else if (deps.isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")) {
+      piiStream = piiStream.pipeThrough(deps.createPiiSseTransform());
+    }
   }
 
   // Credential redaction is opt-in, gated per request by the same flag and

@@ -488,7 +488,7 @@ Hiki hushughulikia:
 
 | Faili                             | Kusudi                                                        |
 | --------------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`             | Rejesta ya modeli za soga juu ya katalogi ya watoa huduma 375 |
+| `providerRegistry.ts`             | Rejesta ya modeli za soga juu ya katalogi ya watoa huduma 376 |
 | `providerModels.ts`               | Majina mbadala ya modeli, uwekaji ramani wa miundo            |
 | `constants.ts`                    | Muda wa kuisha, mipaka, misimbo ya hali                       |
 | `defaultThinkingSignature.ts`     | Saini chaguomsingi ya kufikiria ya Claude                     |

@@ -223,8 +223,8 @@ test("flow surfaces still express state with --orch-status-* tokens, not fixed h
   for (const tone of ["text-success", "text-warning", "text-error"]) {
     assert.ok(badge.includes(`"${tone}"`), `badge reads the ${tone} status token`);
   }
-  // EngineNode keeps the categorical LAYER_COLORS palette (hex by design); its state colors
-  // are the tokens above, so the forbidden literal there is the old warning hex.
+  // EngineNode's categorical layer pills ride the chart tokens (P8, asserted below); its state
+  // colors are the tokens above, so the forbidden literal there is the old warning hex.
   for (const [name, src] of Object.entries({ combo, edges, badge })) {
     assert.ok(!src.includes('"#22c55e"'), `${name} hardcodes no success hex`);
   }
@@ -303,12 +303,19 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
   assert.ok(!cockpit.includes('"#22c55e"'), "cockpit hardcodes no success hex");
   assert.ok(io.includes('"var(--orch-status-success)"'), "IoNode savings = success token");
 
-  // Deliberately NOT migrated — categorical/brand palettes, not state.
-  assert.ok(strategy.includes("STRATEGY_COLORS"), "strategy hues stay a categorical palette");
-  assert.ok(engine.includes("LAYER_COLORS"), "layer pills stay a categorical palette");
+  // Categorical palettes (not state) ride the kit chart tokens, never hex (KEA-7886, P8).
   assert.ok(
-    io.includes('isInput ? "#6366f1" : "#22c55e"'),
-    "IoNode keeps its indigo/green input-output identity pair"
+    strategy.includes("strategyColorVar(") && !/#[0-9a-fA-F]{6}/.test(strategy),
+    "strategy hues come from the shared chart-token strategy palette"
+  );
+  assert.ok(
+    engine.includes("categoricalSlotFor(LAYER_ORDER, layer)") &&
+      !/LAYER_COLORS|"#[0-9a-fA-F]{6}/.test(engine),
+    "layer pills stay a categorical palette, on the chart tokens"
+  );
+  assert.ok(
+    io.includes('isInput ? "var(--color-chart-2)" : "var(--color-chart-4)"'),
+    "IoNode keeps an input/output identity pair, on the chart tokens"
   );
 });
 
@@ -317,6 +324,22 @@ test("@theme inline still exposes bg-surface-2 and rounded-card", () => {
   assert.match(theme, /--color-surface-2:\s*var\(--surface-2\);/);
   assert.match(theme, /--radius-card:\s*var\(--radius\);/);
   assert.match(theme, /--radius-control:\s*var\(--radius-control\);/);
+});
+
+test("bg-alt, muted and surface-secondary have @theme entries so their utilities paint (KEA-7886 P4)", () => {
+  // Before P4 these three had a :root value but no @theme entry: `bg-bg-alt` (41 uses),
+  // `bg-muted/50` and `bg-surface-secondary/30` generated no CSS at all.
+  const theme = block("@theme inline {");
+  const root = block(":root {\n  --desktop-safe-top");
+  for (const [name, kit] of [
+    ["--color-bg-alt", "var(--ci-color-surface-subtle)"],
+    ["--color-muted", "var(--ci-color-surface-muted)"],
+    ["--color-surface-secondary", "var(--ci-color-surface-subtle)"],
+  ] as const) {
+    assert.ok(theme.includes(`${name}: var(${name});`), `@theme inline exposes ${name}`);
+    // Kit token → flips with data-theme="dark", so light and dark both get a kit surface.
+    assert.ok(root.includes(`${name}: ${kit};`), `:root maps ${name} → ${kit}`);
+  }
 });
 
 test("cn() still dedupes via tailwind-merge and DataTable paints an opaque surface", () => {

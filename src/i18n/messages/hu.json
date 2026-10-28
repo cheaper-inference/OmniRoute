@@ -25,8 +25,10 @@
     "confirm": "Biztos vagy benne?",
     "refresh": "Frissítés",
     "close": "Bezárás",
+    "dialogTitleFallback": "Párbeszédablak",
     "previousPage": "Előző oldal",
     "nextPage": "Következő oldal",
+    "pagination": "Lapozás",
     "capsLockOn": "A Caps Lock be van kapcsolva",
     "dismissNotification": "Értesítés elvetése",
     "toggleColumns": "Oszlopok ki-/bekapcsolása",
@@ -182,6 +184,7 @@
     "combos": "Kombinációk",
     "noModelsFound": "Nem találhatók modellek",
     "clear": "Törlés",
+    "clearFilters": "Szűrők törlése",
     "done": "Kész",
     "selectAll": "Összes kijelölése",
     "unselectAll": "Kijelölés megszüntetése",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Használva {count, plural, one {# tétel} other {# tétel}}",
     "batchFilePreview": "Előnézet",
     "batchFilePreviewTruncated": "Az első {shown} sor megjelenítése ({total} összes sor)",
-    "batchFileDownloadFull": "Teljes fájl letöltése"
+    "batchFileDownloadFull": "Teljes fájl letöltése",
+    "tokensPageTitle": "Tokenek",
+    "tokensPageDescription": "Tokenek küldése API-kulcsok között, meghívókódok megosztása és közösségi szerverek csatlakoztatása.",
+    "tokensServerUrlLabel": "Szerver URL-címe"
   },
   "disabled": "Letiltva",
   "featureFlagOmnirouteEmergencyFallbackDescription": "A keretet kimerítő kérések átirányítása a vészhelyzeti ingyenes tartalék szolgáltatóhoz/modellhez.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "A proxyszerver leállt vagy újraindul.",
     "expandSidebar": "Az oldalsáv kibontása",
     "collapseSidebar": "Oldalsáv összecsukása",
-    "themes": "Témák",
-    "presetColors": "Népszerű színek",
     "createTheme": "Hozzon létre témát",
     "chooseColor": "Válasszon egy színt",
-    "themeCoral": "Korall",
-    "themeBlue": "Kék",
-    "themeRed": "Piros",
-    "themeGreen": "zöld",
-    "themeViolet": "Violet",
-    "themeOrange": "narancssárga",
-    "themeCyan": "Cián",
     "cliToolsShort": "Eszközök",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Témarendszer",
     "whitelabelingDesc": "A saját márkázás leírása",
     "switchThemes": "Témaváltás",
-    "themeAccentDesc": "A téma kiemelőszínének leírása",
     "uploadFavicon": "Favicon feltöltése",
     "themeDark": "Sötét téma",
     "customLogoDesc": "Az egyéni logó leírása",
     "sidebarVisibilityToggle": "Az oldalsáv láthatóságának kapcsolója",
-    "themeAccent": "A téma kiemelőszíne",
     "resetFavicon": "Favicon visszaállítása",
     "whitelabeling": "Saját márkázás",
     "darkMode": "Sötét mód",
@@ -1122,10 +1117,8 @@
     "customLogo": "Egyéni logó",
     "appearance": "Megjelenés",
     "themeSelectionAria": "Témaválasztás ARIA-címkéje",
-    "themeCreate": "Téma létrehozása",
     "customFaviconDesc": "Egyéni favicon leírása",
     "logoPreview": "Logó előnézete",
-    "themeCustom": "Egyéni téma",
     "hideHealthLogsDesc": "Állapotnaplók elrejtésének leírása",
     "faviconPreview": "Favicon előnézete",
     "changelog": "Változásnapló",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 vagy @csatornaneve",
       "chatIdHint": "A csevegés/csatorna egyedi numerikus azonosítója vagy nyilvános felhasználóneve.",
       "tutorial": "Hogyan konfigurálja a Telegram webhookot:"
-    }
+    },
+    "copy": "Másolás",
+    "copied": "Másolva!",
+    "expandDetails": "Részletek megjelenítése",
+    "collapseDetails": "Részletek elrejtése"
   },
   "compliance": {
     "auditTitle": "Auditálás",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "Hívások (24 óra)",
     "mcpMetricSuccessRate": "Sikerességi arány",
     "mcpMetricAvgDuration": "Átlagos időtartam",
-    "mcpMetricTopTool": "Legjobb eszköz"
-  },
-  "themesPage": {
-    "title": "Témák",
-    "description": "Válasszon egy előre beállított témát, vagy hozzon létre saját témát egyetlen színnel",
-    "presetColors": "Népszerű színek",
-    "customTheme": "Egyedi téma",
-    "customThemeDesc": "Kattintson a Téma létrehozása elemre, és válasszon egy színt",
-    "createTheme": "Hozzon létre témát",
-    "activePreset": "Aktív téma"
+    "mcpMetricTopTool": "Legjobb eszköz",
+    "dismissError": "Hiba bezárása"
   },
   "header": {
     "logout": "Kijelentkezés",
     "quickNavigation": "Gyorsnavigáció",
     "quickNavigationTitle": "Gyorsnavigáció (⌘K / Ctrl+K)",
     "openQuickNavigation": "Gyorsnavigáció megnyitása",
+    "openMenu": "Menü megnyitása",
+    "products": "Keak-termékek",
     "switchToLightMode": "Váltás világos módra",
     "switchToDarkMode": "Váltás sötét módra",
     "language": "Nyelv",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Antropikus kompatibilis",
     "media": "Média",
     "mediaDescription": "Készítsen képeket, videókat és zenét",
-    "themes": "Témák",
-    "themesDescription": "Válasszon színtémát az egész irányítópult panelhez",
     "costsDescription": "Kiadások nyomon követése, trendek elemzése és az AI-költségkeret kezelése minden szolgáltatónál",
     "cacheDescription": "A szolgáltatói promptgyorsítótár hatékonyságának és a helyi szemantikus válaszok újrafelhasználásának figyelése.",
     "limitsDescription": "Sebességkorlátok és kvóták beállítása API-kulcsonként és szolgáltatónként",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "Csak a kiválasztott kapcsolatok",
     "selectAtLeastOneConnection": "Válasszon ki legalább egy kapcsolatot, vagy válassza az Összes kapcsolat lehetőséget.",
     "allConnectionsDesc": "Ez a kulcs bármely aktív kapcsolatot használhatja.",
-    "restrictedToConnections": "{count, plural, one {# kapcsolatra} other {# kapcsolatra}} korlátozva."
+    "restrictedToConnections": "{count, plural, one {# kapcsolatra} other {# kapcsolatra}} korlátozva.",
+    "preferredConnections": "Előnyben részesített kapcsolatok",
+    "preferredConnectionsDesc": "Kulcsonkénti prioritási sorrend. Ha egy előnyben részesített kapcsolat nem érhető el, az útválasztás a következő jogosultra vált.",
+    "preferredConnectionsNone": "Nincs beállított preferencia — az alapértelmezett útválasztási stratégia érvényes.",
+    "preferredConnectionsClear": "Törlés",
+    "removeSelection": "{name} eltávolítása"
   },
   "auditLog": {
     "title": "Ellenőrzési napló",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Állítsa be a Kép→Szöveg hidat a Modalitás Híd beállításaiban",
     "sttBridgeCta": "Állítsa be a Beszéd→Szöveg hidat a Modalitás Híd beállításaiban",
     "existingConnection": "Meglévő kapcsolat",
-    "openrouterSttDescription": "Az OpenRouter beszédről szövegre modellek a beállított OpenRouter kapcsolatodat használják. Nincs szükség külön hitelesítő adatokra."
+    "openrouterSttDescription": "Az OpenRouter beszédről szövegre modellek a beállított OpenRouter kapcsolatodat használják. Nincs szükség külön hitelesítő adatokra.",
+    "modalityTabsAria": "Médiatípus",
+    "serviceKindsAria": "Szolgáltatástípus"
   },
   "search": {
     "searchQuery": "Keresési lekérdezés",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "Ismeretlen",
     "cliproxyapiUpdate": "Frissítés",
     "cliproxyapiUpdateAvailable": "Frissítés elérhető: v{current} → v{latest}",
-    "cliproxyapiVersion": "Verzió"
+    "cliproxyapiVersion": "Verzió",
+    "removeMapping": "Leképezés eltávolítása"
   },
   "modelCatalog": {
     "title": "Modellek és kombinációk",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "Kombináció → {name}"
   },
   "combos": {
+    "title": "Kombók",
+    "description": "Modellkombinációk létrehozása súlyozott útválasztással és tartalék támogatással",
+    "autoCatalogTitle": "Auto-routing katalógus",
     "autoTosLoadError": "Nem sikerült betölteni a felhasználási feltételekre vonatkozó szabályzatot. Módosítás előtt próbálja újra.",
     "autoTosSaveError": "Nem sikerült menteni a felhasználási feltételekre vonatkozó szabályzatot. Továbbra is az előző beállítás látható. Próbálja újra.",
     "autoTosIncludeLabel": "A ToS: avoid jelölésű szolgáltatók bevonása az auto használatába",
     "autoTosDescription": "Alapértelmezés szerint kikapcsolva. Minden auto kombinációra vonatkozik, nem csak egy fiókra. Egy szolgáltató csatlakoztatása nem kapcsolja be ezt a lehetőséget.",
-    "title": "Kombók",
-    "description": "Modellkombinációk létrehozása súlyozott útválasztással és tartalék támogatással",
-    "autoCatalogTitle": "Auto-routing katalógus",
     "autoCatalogTemplateCount": "{count} sablonok",
     "autoCatalogDescription": "A csatlakoztatott szolgáltatóktól dinamikusan megoldott beépített auto/* kombók. Használja ezen azonosítók bármelyikét modellmezőként – nincs szükség beállításra.",
     "autoCatalogExpand": "Az automatikus útválasztási katalógus kibontása",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "Még nincsenek kombók konfigurálva.",
     "playgroundCreateFirst": "Először hozzon létre egyet",
     "weighted": "Súlyozott",
+    "weightPercent": "Súly (%)",
     "leastUsed": "Legkevésbé használt",
     "costOpt": "Költségoptimalizált",
     "strategyGuideTitle": "Hogyan kell használni ezt a stratégiát",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# fiók} other {# fiók}}",
     "builderGlobalAdded": "Hozzáadva",
     "builderGlobalAdd": "Hozzáadás",
+    "clearSearch": "Keresés törlése",
     "manualModel": "Kézi modell",
     "manualModelInvalid": "Adja meg a modellt szolgáltató/modell formátumban.",
     "manualModelUnknownProvider": "Ismeretlen szolgáltató előtag.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "Kombinációhivatkozás hozzáadása",
     "builderPinnedAccount": "Rögzített fiók",
     "builderLegacyEntry": "Örökölt bejegyzés",
+    "builderStaleModel": "Nincs az élő katalógusban",
     "reviewName": "Név",
     "reviewStrategy": "Stratégia",
     "reviewSteps": "Lépések",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "Minimális tartalomhossz (karakter)",
     "responseValidationJsonPaths": "JSON-útvonal ellenőrzések",
     "responseValidationAddCheck": "+ Ellenőrzés hozzáadása",
+    "responseValidationRemoveCheck": "Ellenőrzés eltávolítása",
+    "responseValidationPath": "JSON-útvonal",
+    "responseValidationCondition": "Feltétel",
+    "responseValidationValue": "Várt érték",
     "agentFeaturesSystemMessageOverride": "Rendszerüzenet felülírása",
     "agentFeaturesSystemMessagePlaceholder": "Szakértő asszisztens vagy...",
     "agentFeaturesSystemMessageHint": "Rendszerüzenetek felülbírálása ügynökök számára",
@@ -5288,7 +5292,8 @@
         "skipped": "már konfigurálva van",
         "failed": "sikertelen"
       }
-    }
+    },
+    "stepProgress": "Beállítási folyamat"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Ez a szolgáltató alapértelmezés szerint ki van zárva az auto használatából",
@@ -6056,10 +6061,10 @@
     "apiFormatLabel": "API-formátum címkéje",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Kínai API-régió",
-    "apiRegionHint": "API-régió súgószövege",
-    "apiRegionInternational": "Nemzetközi API-régió",
-    "apiRegionLabel": "API-régió címkéje",
+    "apiRegionChina": "Kontinentális Kína",
+    "apiRegionHint": "Válassza ki az API-hozzáféréshez és a kvótakövetéshez használt végponti régiót.",
+    "apiRegionInternational": "Nemzetközi",
+    "apiRegionLabel": "API-régió",
     "apikey": "API-kulcs",
     "audio": "Hang",
     "audioProvidersHeading": "Hangszolgáltatók címsora",
@@ -6080,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Amikor ez a fiók eléri az 5 órás használati korlátját, és az Anthropic felajánlja az alacsonyabb prioritású sávot, az OmniRoute elfogadja azt, és az időablak alaphelyzetbe állásáig továbbra is anthropic-usage-limit: slow beállítással küldi a kéréseket a kapcsolat ideiglenes leállítása helyett. A heti korlát továbbra is érvényes, és előfordulhat, hogy a válaszoknak várniuk kell a szabad kapacitásra.",
     "claudeAutoLimitResetLabel": "A munkamenet-korlát automatikus alaphelyzetbe állítása (hetente egyszer)",
     "claudeAutoLimitResetDescription": "Amikor ez a fiók eléri az 5 órás használati korlátját, és elérhető a munkamenet-korlát alaphelyzetbe állítása, az OmniRoute automatikusan igénybe veszi azt, és teljes sebességgel újrapróbálkozik. Ez felhasználja a fiók hetente egyszer igénybe vehető alaphelyzetbe állítását, és továbbra is beleszámít a heti korlátba.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Az átmeneti várakozási idő kihagyása, hogy ez a kapcsolat helyreállítható hibák után is használható maradjon (a végleges állapotok, például a letiltás vagy lejárat továbbra is érvényesek).",
     "disableCoolingLabel": "Lehűlési idő (cooldown) letiltása ehhez a kapcsolathoz",
     "bulkPasteAdded": "{count, plural, one {1 kulcs hozzáadva} other {# kulcs hozzáadva}}",
@@ -6533,6 +6545,7 @@
       "monsterapi": "Szerezzen API-kulcsot itt: monsterapi.ai",
       "moonshot": "Csatlakoztassa a Moonshot AI-t egy API-kulccsal.",
       "morph": "Ingyenes csomag: 250K kredit/hó, $0",
+      "apmix": "Kapcsold össze az Apmixet egy apmix.ai/dashboard-ról származó API-kulccsal — egy előfizetés, sok modell.",
       "nanogpt": "Csatlakoztassa a NanoGPT-t egy API-kulccsal.",
       "nebius": "~$1 próbakredit regisztrációkor API-teszteléshez",
       "nlpcloud": "Az NLP Cloud saját fejlesztésű chatbot API-t használ az OpenAI chat/completions helyett. Az OmniRoute átalakítja az OpenAI üzeneteket input/context/history formátumra, és elérhetővé teszi a támogatott chatbot modellek helyi katalógusát.",
@@ -6621,7 +6634,7 @@
       "claude": "A Claude Code összekapcsolása a meglévő OAuth-folyamattal.",
       "cline": "A Cline összekapcsolása a meglévő OAuth-folyamattal.",
       "cursor": "A Cursor IDE összekapcsolása a meglévő OAuth-folyamattal.",
-      "cursor-api": "Csatlakoztasd a Cursor szolgáltatást a cursor.com/dashboard/api oldalon létrehozott felhasználói API-kulccsal (crsr_...); nincs szükség IDE-munkamenetre.",
+      "cursor-api": "Csatlakoztassa a Cursort egy felhasználói API-kulccsal (crsr_... vagy grok_...) a cursor.com/dashboard/api oldalról; nincs szükség IDE-munkamenetre.",
       "github": "A GitHub Copilot összekapcsolása a meglévő OAuth-folyamattal.",
       "gitlab-duo": "OAuth alkalmazás ai_features + read_user hatókörökkel. Konfigurálja a GITLAB_DUO_OAUTH_CLIENT_ID és opcionálisan a GITLAB_DUO_OAUTH_CLIENT_SECRET változókat ezen az OmniRoute példányon.",
       "kilocode": "A Kilo Code összekapcsolása a meglévő OAuth-folyamattal.",
@@ -6629,8 +6642,7 @@
       "kiro": "Ingyenes csomag: havi 50 kredit (~25K–100K token). ⚠️ A Kiro felhasználási feltételei tiltják a külső proxykkal és futtatókeretekkel való használatot.",
       "codex": "Csatlakoztasd az OpenAI Codex szolgáltatást a meglévő OAuth-folyamattal.",
       "qwen": "Csatlakoztasd a Qwen Code szolgáltatást a meglévő OAuth-folyamattal.",
-      "github-models": "Hozzon létre egy GitHub PAT-ot 'models: read' hatókörrel a github.com/settings/tokens oldalon",
-      "apmix": "Kapcsold össze az Apmixet egy apmix.ai/dashboard-ról származó API-kulccsal — egy előfizetés, sok modell."
+      "github-models": "Hozzon létre egy GitHub PAT-ot 'models: read' hatókörrel a github.com/settings/tokens oldalon"
     },
     "passthroughModelsDescription": "Az {provider} elfogadja a szolgáltató natív modellazonosítóit. Importáljon a /models-ból, vagy adjon hozzá egyéni azonosítókat az útválasztáshoz.",
     "bedrockModelsDescription": "Az Amazon Bedrock modellek hatóköre az AWS régió szerint történik. Importáljon a /models mappából, vagy adja hozzá a kiválasztott régióban engedélyezett Bedrock modellazonosítókat.",
@@ -6802,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Beállítások elemre",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "Válassza ki, mely elemek jelenjenek meg az oldalsávon. Az Alapvető beállítás mellett a speciális eszközök továbbra is kereshetők.",
     "hideHealthLogs": "Állapotellenőrzési naplók elrejtése",
     "hideHealthLogsDesc": "Ha BE van kapcsolva, tiltsa le a [HealthCheck] üzeneteket a kiszolgálókonzolon",
-    "themeAccent": "Téma színe",
-    "themeAccentDesc": "Válassz előre beállított színt, vagy készíts saját témát egy színből",
-    "themeCreate": "Téma létrehozása",
-    "themeCustom": "Egyéni téma",
-    "themeBlue": "Kék",
-    "themeRed": "Piros",
-    "themeGreen": "Zöld",
-    "themeViolet": "Ibolya",
-    "themeOrange": "Narancs",
-    "themeCyan": "Cián",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Az alkalmazás nevének és logójának testreszabása",
     "appName": "Alkalmazás neve",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "Most",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Alapbináris elérési út",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Opcionális: ellenőrzi a generált fájlt a binárissal az elfogadott fájl cseréje előtt. Hagyja üresen, ha mellette szeretné továbbra is írni. A könyvtár hiányzóan jön létre."
+      "coreBinaryPathHelp": "Opcionális: ellenőrzi a generált fájlt a binárissal az elfogadott fájl cseréje előtt. Hagyja üresen, ha mellette szeretné továbbra is írni. A könyvtár hiányzóan jön létre.",
+      "urlFeedlessHint": "Hagyja üresen a csak választós feliratkozáshoz: állítson be egy vezérlő-URL-t lentebb, nem töltődik le, nem frissül és nem kötődik hozzá semmilyen hírforrás."
     },
     "bulkHealthcheck": "Tömeges állapotellenőrzés",
     "bulkHealthcheckDesc": "Az összes beállított proxy tesztelése egy cél-URL-en annak megállapításához, hogy melyek működnek.",
@@ -7707,6 +7703,7 @@
     "configured": "konfigurálva",
     "none": "Nincs",
     "modelOverrideValuePlaceholder": "Numerikus érték",
+    "modelOverrideKey": "Felülbírálási kulcs",
     "modelOverrideReasoningEffortsPlaceholder": "Angol vesszővel elválasztva, pl. low, medium, high",
     "addKeyValue": "Kulcs-érték hozzáadása",
     "noModelOverrides": "Nincsenek felülírások konfigurálva ehhez a modellhez.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "Egyes modelleknél felülbírálhatja az alapértelmezett árazást. Az egyéni felülbírálások elsőbbséget élveznek az automatikusan észlelt árképzéssel szemben.",
     "editPricing": "Árak szerkesztése",
     "viewFullDetails": "Teljes részletek megtekintése",
-    "themeCoral": "Korall",
     "adaptiveVolumeRouting": "Adaptív forgalomalapú útválasztás",
     "adaptiveVolumeRoutingDesc": "A kapcsolatok számának dinamikus skálázása a hasznos adat mennyisége és az átviteli terhelés alapján.",
     "lkgpToggleTitle": "Legutóbbi ismert működő szolgáltató (LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "Csökkentse a tokenhasználatot a promptok tömörítésével, mielőtt elküldi őket a szolgáltatóknak",
     "autoCombosTitle": "Automatikus kombinációk",
     "autoCombosDesc": "Engedélyezi, hogy ez a kulcs a beépített auto/* kombinációkat használja, amelyek automatikusan választanak modellt minden konfigurált szolgáltatótól",
+    "ccDiscoveryAliasesTitle": "Claude Code-felderítési aliaszok",
+    "ccDiscoveryAliasesDesc": "A claude/... kompatibilitási tükrözések hirdetése azokhoz a modellekhez és kombinációkhoz, amelyekhez ez a kulcs már hozzáfér",
     "compressionGuidanceFullGuideLink": "Teljes tömörítési útmutató",
     "compressionGuidanceShow": "Részletek",
     "compressionGuidanceHide": "Részletek elrejtése",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "Sikeres",
     "tomlTestFailed": "Sikertelen",
     "tomlImportError": "Nem sikerült feldolgozni az RTK TOML fájlt.",
-    "tomlFileReadError": "Nem sikerült beolvasni a kijelölt TOML fájlt."
+    "tomlFileReadError": "Nem sikerült beolvasni a kijelölt TOML fájlt.",
+    "viewMode": "Nézetmód"
   },
   "compressionEngineConfig": {
     "loading": "Betöltés…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "Nyelvi csomagok: {packs}",
     "dragToReorder": "Húzza a lépés átrendezéséhez",
     "engine": "Motor",
-    "intensity": "Intenzitás"
+    "intensity": "Intenzitás",
+    "compressionOverride": "Tömörítés felülbírálása"
   },
   "compressionStudio": {
     "noRun": "Nem áll rendelkezésre tömörítési futtatás.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "győztes: {winner}",
     "encoder": "kódoló",
     "bytes": "bájt",
-    "tokensCl100k": "tokenek (cl100k)"
+    "tokensCl100k": "tokenek (cl100k)",
+    "studioViews": "Studio-nézetek"
   },
   "omniglyph": {
     "preview": "Előnézet",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "Az ennél rövidebb üzenetek nincsenek tömörítve. Alacsonyabb = nagyobb tömörítés.",
     "tooltipMinSavings": "Csak akkor tömörítse, ha legalább ennyi tokent megtakarít.",
     "ultraSettings": "Ultra beállítások",
-    "ultraSettingsDesc": "SLM-alapú szemantikai tömörítés"
+    "ultraSettingsDesc": "SLM-alapú szemantikai tömörítés",
+    "defaultLanguage": "Alapértelmezett nyelv",
+    "viewMode": "Nézetmód"
   },
   "translator": {
     "title": "Fordító",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "Nem sikerült átalakítani az adatfolyamot"
   },
   "usage": {
+    "healthExtraUsageBypass": "A keret kimerült; a többlethasználat engedélyezett, így a szolgáltatás folytatódik.",
+    "healthPaidCreditsBypass": "A keret kimerült; az elérhető fizetett kreditek lehetővé teszik a szolgáltatás folytatását.",
+    "healthFilteringBypass": "A keret kimerült; a helyi keretszűrés ki van kapcsolva, így a szolgáltatás folytatódik.",
     "title": "Használat",
     "grokExtraUsageCredits": "További Használati Kreditek",
     "grokAutoTopUp": "Automatikus Feltöltés",
@@ -9998,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Szolgáltatói korlátok",
     "noProviders": "Nincs szolgáltató csatlakozva",
+    "quotaAuthRequired": "Hitelesítés szükséges – jelentkezzen be az irányítópultra",
+    "quotaAuthRequiredHint": "A szolgáltatói kapcsolatok nem tölthetők be, mert az irányítópult munkamenete hiányzik vagy lejárt. Jelentkezzen be, majd frissítse az oldalt a kvótakorlátok megtekintéséhez.",
     "connectProvidersForQuota": "Csatlakozzon OAuth szolgáltatókhoz az API-kvótakorlátok és -használat nyomon követéséhez.",
     "accountsCount": "{count, plural, one {# fiók} other {# fiók}}",
     "filteredFromCount": "(szűrve innen: {count})",
@@ -10047,9 +10055,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Ismeretlen",
     "statTotal": "Összesen",
-    "statCritical": "Kritikus",
-    "statAlert": "Riasztás",
-    "statHealthy": "Egészséges",
     "filterPurchaseTypeLabel": "Típus",
     "filterTierLabel": "Szint",
     "purchaseAll": "Összes",
@@ -10288,10 +10293,64 @@
     "lastRefreshed": "Legutóbb frissítve",
     "providerQuota": "Szolgáltatói kvóta",
     "providerQuotaHomeHint": "Élő állapot a csatlakoztatott fiókokban",
+    "claudeResetCreditDefaultTitle": "Claude-korlát visszaállítása",
+    "confirmRedeemClaudeResetCredit": "A beváltás azonnal visszaállítja a jogosult Claude használati korlátokat, és véglegesen felhasználja ezt a kreditet.",
+    "claudeResetCreditsModalTitle": "Claude-visszaállítási kreditek",
+    "claudeResetCreditsModalExplainer": "Elérhető Claude-visszaállítási kreditek és heti munkamenet-visszaállítások ehhez a fiókhoz.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "A legutóbbi megfigyelések alapján, nem élő teszt. Válasszon fiókot a részletekhez.",
+    "healthRecovery": "Várható helyreállás",
+    "healthAvailable": "Elérhető",
+    "healthRestricted": "Részben korlátozott",
+    "healthUnavailable": "Nem elérhető",
+    "healthPeakHourProtection": "Csúcsidős védelem",
+    "healthCooldown": "Várakozási idő",
+    "healthQuotaExhausted": "A kvóta kimerült",
+    "healthOverview": "Áttekintés",
+    "layoutFull": "Teljes",
+    "layoutCompact": "Kompakt",
+    "healthQuotaError": "A kvóta beolvasása sikertelen",
+    "healthNoRuntime": "A működési állapot nem érhető el",
+    "healthPreviousSnapshot": "Az utolsó frissítés sikertelen; az előző eredmény látható",
+    "healthPreviousFailure": "Az utolsó kérés sikertelen; a várakozás lejárt",
+    "healthAwaitingSync": "A visszaállítás ideje elmúlt; szinkronizálásra vár",
+    "healthVerdictUnavailable": "Az elérhetőség ellenőrzése nem érhető el; csak a kvótaszintek láthatók",
+    "healthSummaryFailed": "Az állapotösszegzés beolvasása sikertelen; modellzárolások hiányozhatnak",
+    "healthRuntimeObserved": "Állapot frissítve: {time}",
+    "healthQuotaObserved": "Kvóta megfigyelve: {time}",
+    "healthOldestQuota": "Legrégebbi kvótapillanatkép: {time}",
+    "healthRecoveryUnknown": "A helyreállítás ideje ismeretlen",
+    "healthDetailsHint": "Kattintson a részletekért és műveletekért",
+    "healthFiveHour": "5 óra",
+    "healthOverall": "Összesített",
+    "healthAction": "Beavatkozás szükséges",
+    "healthTitle": "Fiókok elérhetősége",
+    "healthDrag": "Húzással módosítható a szolgáltatók sorrendje",
+    "healthDragPosition": "{provider}, {count, plural, one {{position, number}. hely, összesen #} other {{position, number}. hely, összesen #}}",
+    "healthResetOrder": "Alapértelmezett sorrend visszaállítása",
+    "healthPool": "{name} készlet",
+    "healthOtherPool": "Ugyanaz a fiók · {pool}: {status} ({remaining} maradt)",
+    "healthIncluded": "{count, plural, one {Ebből # részben korlátozott fiók} other {Ebből # részben korlátozott fiók}}",
+    "healthBannerUnavailable": "{count, plural, one {# fiók átmenetileg nem érhető el} other {# fiók átmenetileg nem érhető el}}",
+    "healthBannerAvailable": "{count, plural, one {# fiók elérhető} other {Mind a(z) # fiók elérhető}}",
+    "healthLegendHide": "Jelmagyarázat elrejtése",
+    "healthLegendShow": "Jelmagyarázat megjelenítése",
+    "healthLegendOk": "Tömör = megmaradt keret; áttetsző = felhasznált.",
+    "healthLegendCooldown": "A(z) {window} kerete elfogyott. Tömör = eltelt várakozás; áttetsző = hátralévő várakozás.",
+    "healthLegendAction": "A jogosultság lejárt vagy a fiókot letiltották; várakozás nem segít.",
+    "healthLegendPartial": "Még használható. Sárga felső rész = korlátozott modell vagy készlet.",
+    "healthWaited": "Eltelt várakozás: {percent}",
+    "healthWait": "Még {duration} (helyreállás: {time})",
+    "healthFastest": "Legkorábbi helyreállás: {duration} múlva",
+    "healthRatio": "{available, plural, one {# / {active, number} elérhető} other {# / {active, number} elérhető}}",
+    "healthCd5": "5 óra · Várakozási idő",
+    "healthCdw": "Heti · Várakozási idő",
+    "healthRecentSuccessBypass": "Az útválasztás engedélyezi ezt a fiókot, mert nemrég sikeres volt egy kérés.",
+    "healthPurchasedBalanceBypass": "A megvásárolt egyenleg a foglalt keret kimerülése után is használható.",
+    "healthCutoffAtRequest": "A valós idejű kvótaküszöbök ellenőrzése a kérés útválasztásakor történik."
   },
   "modals": {
     "waitingAuth": "Várakozás az engedélyezésre",
@@ -11078,7 +11137,8 @@
       "message": "Üzenet",
       "error": "Hiba",
       "completion": "Befejezés"
-    }
+    },
+    "statusFilter": "Állapot"
   },
   "templateNames": {
     "simple-chat": "Egyszerű csevegés",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "{minutes} perce",
     "hoursAgo": "{hours} órája",
     "daysAgo": "{days} napja",
-    "entries": "Bejegyzések"
+    "entries": "Bejegyzések",
+    "viewSwitcherAria": "Gyorsítótárnézet"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globális",
@@ -11447,6 +11508,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "További műveletek",
     "test": "Tesztelés",
     "edit": "Szerkesztés",
     "delete": "Törlés",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "Nem található érvényes bejegyzés. Ellenőrizze a formátumot, és próbálja újra.",
     "bulkImportSuccess": "Az importálás befejeződött: {created} létrehozva, {updated} frissítve, {failed} sikertelen",
     "bulkImportErrorLine": "{line}. sor: {reason}",
-    "bulkImportMaxExceeded": "Legfeljebb 100 proxy importálásonként",
+    "bulkImportMaxExceeded": "Legfeljebb {max} proxy importálásonként",
     "bulkImportPreview": "Előnézet",
     "clearAssignment": "(tiszta feladat)",
     "bulkProxyAssignment": "Tömeges proxy-hozzárendelés",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "IP-alapú sebességkorlát (429)",
     "poolSetAsideKindSlow": "lassú válaszok",
     "poolSetAsideKindGeoBlocked": "régió blokkolva (403/451)",
+    "poolSetAsideKindOperatorReported": "üzemszünet, amelyet az üzemeltető jelentett",
     "poolSetAsideUntil": "Vissza a rotációba {endsAt}",
     "poolSetAsideRepeat": "Félretéve {count, plural, one {# alkalommal} other {# alkalommal}}",
     "poolUnknownAddress": "Ismeretlen cím",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "Kód exportálása",
     "exportShort": "Exportálás",
     "noStateToExport": "Nincs exportálható játszótér-állapot.",
-    "closeExportModal": "Exportálási ablak bezárása",
     "close": "Bezárás",
     "exportRealKeyWarning": "Biztonsági figyelmeztetés: az exportálás blokkolva — valós API-kulcsot észleltünk a kimenetben. Kérjük, állítsa vissza az API-kulcsot, és próbálja újra.",
     "placeholderHintPrefix": "Cseréld le",
@@ -11809,7 +11871,8 @@
       "nextButton": "Tovább",
       "runButton": "Futtatás",
       "promptPlaceholder": "Írja be az üzenetet… (Enter a küldéshez, Shift+Enter az új sorhoz)"
-    }
+    },
+    "playgroundTabs": "Playground-módok"
   },
   "miniPlayground": {
     "endpoint": "Végpont",
@@ -11880,7 +11943,8 @@
     "assistant": "Asszisztens",
     "errorLabel": "Hiba",
     "requestFailed": "A kérés sikertelen",
-    "stop": "Leállítás"
+    "stop": "Leállítás",
+    "messageInputAria": "Üzenet"
   },
   "requestLogger": {
     "recording": "Rögzítés",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "{count} fiókrotáció",
       "resilienceRetried": "Üres kör újrapróbálva",
       "resilienceContinued": "Folytatva a stream közepén",
-      "resilienceRecovered": "Rugalmassági művelettel helyreállítva"
-    }
+      "resilienceRecovered": "Rugalmassági művelettel helyreállítva",
+      "conversationContext": "Beszélgetési kontextus",
+      "goToBottom": "Ugrás az aljára",
+      "liveRefreshOn": "Élő frissítés: bekapcsolva",
+      "liveRefreshOff": "Élő frissítés: kikapcsolva",
+      "liveRefresh": "Élő frissítés",
+      "continuesFromParent": "a szülő folytatása",
+      "continuesFrom": "{id} folytatása",
+      "viewConversation": "beszélgetés megtekintése",
+      "openConversation": "A(z) {id} beszélgetés megnyitása"
+    },
+    "tableLabel": "Kérésnaplók"
   },
   "proxyLogger": {
     "filterAll": "Összes",
@@ -12113,7 +12187,9 @@
     "colServedBy": "Szolgáltatva általa",
     "filterTraffic": "Forgalom",
     "filterTests": "Tesztelés",
-    "filterSource": "Forrás"
+    "filterSource": "Forrás",
+    "tableLabel": "Proxynaplók",
+    "sortLogs": "Naplók rendezése"
   },
   "endpointOptions": {
     "speech": "Beszéd",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "KIMERÜLT",
     "statusAlerting": "RIASZTÁS",
     "statusError": "HIBA",
-    "moreSuffix": "+{count} további"
+    "moreSuffix": "+{count} további",
+    "feedFilterLabel": "Események szűrése"
   },
   "quotaShare": {
     "weightPercent": "Súly %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "Csoportosítatlan",
     "ungroupedHint": "Ezek a poolok nincsenek ismert csoporthoz rendelve. Szerkessz egy poolt, hogy áthelyezd egy valódi csoportba.",
     "removeFailed": "Nem sikerült eltávolítani ezt a készletet.",
-    "dismiss": "Bezárás"
+    "dismiss": "Bezárás",
+    "allocationsHeading": "Kiosztások",
+    "wizardRemoveDimension": "Dimenzió eltávolítása",
+    "wizardRemoveKey": "Kulcs eltávolítása"
   },
   "plugins": {
     "title": "Bővítmények",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "A beállítások frissítése sikertelen",
       "serviceRevealApiKey": "{actor} felfedte a(z) {target} API-kulcsát",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Hiba bezárása"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "Ugrás most",
       "message": "A MITM Proxy mostantól az AgentBridge alatt található.",
       "title": "Ez az oldal áthelyezésre került"
-    }
+    },
+    "dnsOn": "DNS bekapcsolva",
+    "dnsOff": "DNS kikapcsolva",
+    "showServerSettings": "Szerverbeállítások megjelenítése",
+    "hideServerSettings": "Szerverbeállítások elrejtése",
+    "upstreamCaTesting": "Tesztelés…",
+    "removeMapping": "Leképezés eltávolítása",
+    "mappingSourcePlaceholder": "pl. gemini-3.6-flash-medium, vagy * az összes leképezetlen modellhez",
+    "mappingWildcardHint": "A * forrás használatával minden explicit leképezés nélküli modell az OmniRoute-on keresztül a kiválasztott célhoz lesz irányítva. A pontos forrásegyezések mindig elsőbbséget élveznek a * karakterrel szemben.",
+    "wizardDetectingModels": "Modellek észlelése az elfogott forgalomból...",
+    "wizardDetectedModels": "Az elfogott forgalomban {count, plural, one {# modell} other {# modell}} található. Válaszd ki a hozzáadni kívánt modelleket:",
+    "wizardSelectedModels": "{count, plural, one {# modell} other {# modell}} kijelölve. A következő képernyőn leképezheted őket OmniRoute-modellekre.",
+    "wizardAddModels": "{count, plural, one {# modell} other {# modell}} hozzáadása",
+    "wizardNoModelsDetected": "Még nem észlelhetők modellek. Indíts egy kérést a(z) {agent} használatával, majd futtasd újra ezt a varázslót a modellek forgalomból történő automatikus észleléséhez.",
+    "wizardNoModelsHint": "Vagy zárd be ezt a varázslót, és add hozzá manuálisan a leképezéseket az ügynökkártyán."
   },
   "providerStats": {
     "unknownError": "Ismeretlen hiba",
@@ -12686,7 +12781,11 @@
     "avgTtft": "Átlagos TTFT",
     "avgTotal": "Átlagos összesített",
     "requestTelemetry": "Kérés-telemetria",
-    "requestTelemetryDescription": "7 fázisú folyamat lebontása (utolsó 5 perc)"
+    "requestTelemetryDescription": "7 fázisú folyamat lebontása (utolsó 5 perc)",
+    "title": "Szolgáltatói statisztikák",
+    "description": "Szolgáltatónkénti és modellenkénti forgalom, késleltetés és sikerességi arány",
+    "combo": "Kombinált",
+    "toggleModels": "A(z) {provider} modelljeinek megjelenítése"
   },
   "relay": {
     "title": "Szerver nélküli közvetítő proxyk",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "Nincs kéréstörzs.",
     "noResponseBody": "Nincs választörzs.",
     "formatted": "Formázott",
-    "raw": "Nyers"
+    "raw": "Nyers",
+    "requestCount": "{count, plural, one {# kérés} other {# kérés}}",
+    "expandList": "Lista kibontása",
+    "collapseList": "Lista összecsukása",
+    "snippetLanguage": "Kódrészlet nyelve",
+    "headersTable": "Fejlécek",
+    "showSecrets": "Titkos értékek megjelenítése",
+    "maskSecrets": "Titkos értékek maszkolása",
+    "llmNotAvailable": "Ehhez a kéréshez nem érhetők el LLM-metaadatok.",
+    "llmStreamYes": "igen (SSE)",
+    "llmStreamNo": "nem",
+    "llmTotalTokens": "Összesen: {count} token"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "Az elmúlt 24 órában a szolgáltató által ténylegesen megválaszolt hívások aránya. A gondolatjel azt jelenti, hogy túl kevés forgalmat kezelt az arány megállapításához.",
     "reliabilitySample": "Az elmúlt {hours} órában {requests} hívásból {successes} sikeres volt",
     "reliabilityTooFew": "Az elmúlt {hours} órában csak {requests} hívás történt – túl kevés az arány megállapításához",
-    "reliabilityNoTraffic": "Az elmúlt 24 órában nem rögzítettek hívást"
+    "reliabilityNoTraffic": "Az elmúlt 24 órában nem rögzítettek hívást",
+    "categoryFilter": "Feladatkategória"
   },
   "discovery": {
     "title": "Szolgáltató-felderítés",
@@ -13331,7 +13442,11 @@
     "method": "Módszer",
     "auth": "Hitelesítés",
     "feasibility": "Megvalósíthatóság",
-    "models": "Modellek"
+    "models": "Modellek",
+    "provider": "Szolgáltató",
+    "status": "Állapot",
+    "endpoint": "Végpont",
+    "actions": "Műveletek"
   },
   "noAuthProvider": {
     "title": "Nincs szükség hitelesítésre",
@@ -13380,7 +13495,8 @@
     "ownProxy": "Saját proxy",
     "freeTierPause": "{model} modell szüneteltetve (429), visszatér: {time}",
     "freeTierPauseProvider": "Szüneteltetve (429), visszatér: {time}",
-    "freeTierPauseNote": "Folyamatban lévő szüneteltetés ezen a példányon"
+    "freeTierPauseNote": "Folyamatban lévő szüneteltetés ezen a példányon",
+    "proxyType": "Proxytípus"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "Egy rejtett eredmény vár...",
         "criteria": "Teljesítse a rejtett eredményt a jelvény felfedéséhez."
       }
-    }
+    },
+    "leaderboardTitle": "Ranglista",
+    "leaderboardDescription": "Rangsorok és eredmények az API-kulcsaid között",
+    "badgeLocked": "Zárolva"
   },
   "featureFlags": {
     "title": "Feature flag-ek",
@@ -13794,6 +13913,7 @@
     "latency": "Késleltetés",
     "quota": "Kvóta",
     "rangeWindow": "{range} időablak",
+    "timeRange": "Időtartomány",
     "runtimeHealthBlend": "futásidejű/állapot keverék",
     "averageResponseTime": "átlagos válaszidő",
     "worstQuota": "Legrosszabb kvóta",
@@ -13995,7 +14115,11 @@
     "learnMore": "További információ",
     "changelogLoadFailed": "Nem sikerült betölteni a változásnaplót. Kérjük, próbálja meg később.",
     "retry": "Újra",
-    "viewFullHistory": "Teljes előzmények megtekintése a GitHubon"
+    "viewFullHistory": "Teljes előzmények megtekintése a GitHubon",
+    "title": "Hírek és változásnapló",
+    "description": "Az OmniRoute csapatának közleményei és a legújabb kiadási megjegyzések",
+    "viewLabel": "Megtekintés",
+    "loadingNews": "Közlemények betöltése..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "Szolgáltató Áramkör Megszakító Állapot",
       "lastUpdate": "Utolsó frissítés: {timestamp}",
       "uptimeMinutes": "{minutes}p",
-      "uptimeHoursMinutes": "{hours}ó {minutes}p"
+      "uptimeHoursMinutes": "{hours}ó {minutes}p",
+      "breakerClosed": "Lezárva",
+      "breakerNotClosed": "Nyitott vagy félig nyitott"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "Karbantartási Részletek",
         "secondaryAction": "Rendszerállapot"
       }
+    },
+    "miniapp": {
+      "askAnything": "Kérdezz bármit…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} látható / összesen {total}",
+    "modeLabel": "Nézetmód",
+    "jumpToNow": "Ugrás az aktuális időpontra, a MOST vonal visszaáll a(z) {position}%-os pozícióra",
+    "laneReuse": "Sáv újrafelhasználása",
+    "laneReuseLabel": "Sáv újrafelhasználási időablaka (perc)",
+    "laneReuseHint": "Az azonos beszélgetésazonosítóval rendelkező kérések ugyanabban az idősorsávban maradnak, amennyiben a közöttük lévő időköz nem haladja meg ezt a percszámot.",
+    "laneReuseUnit": "perc",
+    "autoRefresh": "Automatikus frissítés",
+    "autoRefreshLabel": "Automatikus frissítés időköze (másodperc)",
+    "autoRefreshHint": "Milyen gyakran kérje le újra az idősor a kérések listáját a szerverről.",
+    "autoRefreshUnit": "mp",
+    "zoomOut": "Kicsinyítés",
+    "zoomIn": "Nagyítás"
   },
   "metadata": {
     "compressionTitle": "Tömörítés",

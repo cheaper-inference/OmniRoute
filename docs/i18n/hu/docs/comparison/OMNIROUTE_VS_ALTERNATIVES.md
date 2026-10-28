@@ -39,7 +39,7 @@ Objektív funkcióösszehasonlítás népszerű nyílt forráskódú AI-routerek
 
 ## Mikor érdemes az OmniRoute-ot választani
 
-- Saját magad üzemelteted (self-host), és **maximális szolgáltatói lefedettségre** van szükséged (375 szolgáltató, 155 ingyenes/hitelesítés nélküli katalógusbejegyzés)
+- Saját magad üzemelteted (self-host), és **maximális szolgáltatói lefedettségre** van szükséged (376 szolgáltató, 155 ingyenes/hitelesítés nélküli katalógusbejegyzés)
 - **Beépített MCP-szerverre** van szükséged (LLM-eszközök, memória és skill-ek eszközökként érhetők el)
 - **A2A-protokollra** van szükséged ügynökök közötti (agent-to-agent) munkafolyamatokhoz
 - **Ujjlenyomat-alapú rejtőzést** (fingerprint stealth, JA3/JA4) szeretnél, hogy elkerüld az upstream CAPTCHA-k általi felismerést

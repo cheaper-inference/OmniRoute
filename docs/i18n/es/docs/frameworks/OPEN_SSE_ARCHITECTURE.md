@@ -488,7 +488,7 @@ Esto gestiona:
 
 | Archivo                       | Propósito                                                        |
 | ----------------------------- | ---------------------------------------------------------------- |
-| `providerRegistry.ts`         | Registro de modelos de chat sobre el catálogo de 375 proveedores |
+| `providerRegistry.ts`         | Registro de modelos de chat sobre el catálogo de 376 proveedores |
 | `providerModels.ts`           | Alias de modelos, mapeo de formatos                              |
 | `constants.ts`                | Tiempos de espera, límites, códigos de estado                    |
 | `defaultThinkingSignature.ts` | Firma de pensamiento predeterminada de Claude                    |

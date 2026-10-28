@@ -25,8 +25,10 @@
     "confirm": "Żgur?",
     "refresh": "Aġġorna",
     "close": "Agħlaq",
+    "dialogTitleFallback": "Djalogu",
     "previousPage": "Il-paġna ta' qabel",
     "nextPage": "Il-paġna li jmiss",
+    "pagination": "Paġinazzjoni",
     "capsLockOn": "Caps Lock huwa mixgħul",
     "dismissNotification": "Agħlaq in-notifika",
     "toggleColumns": "Ibdel il-viżibbiltà tal-kolonni",
@@ -182,6 +184,7 @@
     "combos": "Kombinazzjonijiet",
     "noModelsFound": "Ma nstab l-ebda mudell",
     "clear": "Ħassar",
+    "clearFilters": "Neħħi l-filtri",
     "done": "Lest",
     "selectAll": "Agħżel kollox",
     "unselectAll": "Neħħi l-għażla minn kollox",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Użat minn {count, plural, one {# lott} other {# lottijiet}}",
     "batchFilePreview": "Previżjoni",
     "batchFilePreviewTruncated": "Qed jintwerew l-ewwel {shown} linji ({total} linji b'kollox)",
-    "batchFileDownloadFull": "Niżżel il-Fajl Sħiħ"
+    "batchFileDownloadFull": "Niżżel il-Fajl Sħiħ",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Ibgħat tokens bejn iċ-ċwievet tal-API, aqsam kodiċijiet tal-istedina u qabbad servers tal-komunità.",
+    "tokensServerUrlLabel": "URL tas-server"
   },
   "disabled": "Diżattivat",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Idderieġi t-talbiet li eżawrew il-baġit lejn il-fornitur/mudell ta' riżerva bla ħlas għall-emerġenzi.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Is-server proxy twaqqaf jew qed jerġa’ jibda.",
     "expandSidebar": "Espandi l-istrixxa tal-ġenb",
     "collapseSidebar": "Ikkollassa l-istrixxa tal-ġenb",
-    "themes": "Temi",
-    "presetColors": "Kuluri popolari",
     "createTheme": "Oħloq tema",
     "chooseColor": "Agħżel kulur wieħed",
-    "themeCoral": "Qroll",
-    "themeBlue": "Blu",
-    "themeRed": "Aħmar",
-    "themeGreen": "Aħdar",
-    "themeViolet": "Vjola",
-    "themeOrange": "Oranġjo",
-    "themeCyan": "Ċjan",
     "cliToolsShort": "Għodod",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Sistema tat-temi",
     "whitelabelingDesc": "Deskrizzjoni tal-personalizzazzjoni tal-marka",
     "switchThemes": "Aqleb it-temi",
-    "themeAccentDesc": "Deskrizzjoni tal-kulur ta’ enfasi tat-tema",
     "uploadFavicon": "Tella’ favicon",
     "themeDark": "Tema skura",
     "customLogoDesc": "Deskrizzjoni tal-logo personalizzat",
     "sidebarVisibilityToggle": "Swiċċ tal-viżibbiltà tal-istrixxa tal-ġenb",
-    "themeAccent": "Kulur ta’ enfasi tat-tema",
     "resetFavicon": "Irrisettja l-favicon",
     "whitelabeling": "Personalizzazzjoni tal-marka",
     "darkMode": "Modalità skura",
@@ -1122,10 +1117,8 @@
     "customLogo": "Logo personalizzat",
     "appearance": "Dehra",
     "themeSelectionAria": "ARIA għall-Għażla tat-Tema",
-    "themeCreate": "Oħloq Tema",
     "customFaviconDesc": "Deskrizzjoni tal-Favicon Personalizzata",
     "logoPreview": "Previżjoni tal-Logo",
-    "themeCustom": "Tema Personalizzata",
     "hideHealthLogsDesc": "Deskrizzjoni tal-ħabi tar-reġistri tal-istat tas-sistema",
     "faviconPreview": "Previżjoni tal-Favicon",
     "changelog": "Reġistru tal-Bidliet",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 jew @channelname",
       "chatIdHint": "L-identifikatur numeriku uniku jew l-isem tal-utent pubbliku taċ-chat/tal-kanal.",
       "tutorial": "Kif tikkonfigura webhook ta’ Telegram:"
-    }
+    },
+    "copy": "Ikkopja",
+    "copied": "Ikkupjat!",
+    "expandDetails": "Uri d-dettalji",
+    "collapseDetails": "Aħbi d-dettalji"
   },
   "compliance": {
     "auditTitle": "Awditjar",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "Sejħiet (24 siegħa)",
     "mcpMetricSuccessRate": "Rata ta' suċċess",
     "mcpMetricAvgDuration": "Durata medja",
-    "mcpMetricTopTool": "L-aktar għodda użata"
-  },
-  "themesPage": {
-    "title": "Temi",
-    "description": "Agħżel tema ssettjata minn qabel jew oħloq waħda tiegħek stess b'kulur wieħed",
-    "presetColors": "Kuluri popolari",
-    "customTheme": "Tema personalizzata",
-    "customThemeDesc": "Ikklikkja fuq “Oħloq tema” u agħżel kulur wieħed",
-    "createTheme": "Oħloq tema",
-    "activePreset": "Tema attiva"
+    "mcpMetricTopTool": "L-aktar għodda użata",
+    "dismissError": "Agħlaq l-iżball"
   },
   "header": {
     "logout": "Oħroġ",
     "quickNavigation": "Navigazzjoni rapida",
     "quickNavigationTitle": "Navigazzjoni rapida (⌘K / Ctrl+K)",
     "openQuickNavigation": "Iftaħ in-navigazzjoni rapida",
+    "openMenu": "Iftaħ il-menu",
+    "products": "Prodotti ta’ Keak",
     "switchToLightMode": "Aqleb għall-modalità ċara",
     "switchToDarkMode": "Aqleb għall-modalità skura",
     "language": "Lingwa",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Kompatibbli ma’ Anthropic",
     "media": "Midja",
     "mediaDescription": "Iġġenera immaġnijiet, vidjows u mużika",
-    "themes": "Temi",
-    "themesDescription": "Agħżel tema tal-kuluri għall-pannell kollu tad-dashboard",
     "costsDescription": "Intraċċa l-infiq, analizza x-xejriet u mmaniġġja l-baġit tal-AI tiegħek mal-fornituri kollha",
     "cacheDescription": "Immonitorja l-effiċjenza tal-cache tal-prompts tal-fornituri u l-użu mill-ġdid lokali ta’ tweġibiet semantiċi.",
     "limitsDescription": "Ikkonfigura l-limiti tar-rata u l-kwoti għal kull ċavetta tal-API u fornitur",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "Il-konnessjonijiet magħżula biss",
     "selectAtLeastOneConnection": "Agħżel mill-inqas konnessjoni waħda jew agħżel Il-konnessjonijiet kollha.",
     "allConnectionsDesc": "Din iċ-ċavetta tista’ tuża kwalunkwe konnessjoni attiva.",
-    "restrictedToConnections": "Ristretta għal {count, plural, one {# konnessjoni} other {# konnessjonijiet}}."
+    "restrictedToConnections": "Ristretta għal {count, plural, one {# konnessjoni} other {# konnessjonijiet}}.",
+    "preferredConnections": "Konnessjonijiet preferuti",
+    "preferredConnectionsDesc": "Ordni ta' prijorità għal kull ċavetta. Jekk konnessjoni preferuta mhix disponibbli, ir-rotta tgħaddi għall-konnessjoni eliġibbli li jmiss.",
+    "preferredConnectionsNone": "Ebda preferenza ma ġiet issettjata — tintuża l-istrateġija tar-rotta awtomatika.",
+    "preferredConnectionsClear": "Ħassar",
+    "removeSelection": "Neħħi {name}"
   },
   "auditLog": {
     "title": "Reġistru tal-Awditjar",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Ikkonfigura l-pont Immaġni→Test fis-settings ta’ Modality Bridge",
     "sttBridgeCta": "Ikkonfigura l-pont Diskors→Test fis-settings ta’ Modality Bridge",
     "existingConnection": "Konnessjoni eżistenti",
-    "openrouterSttDescription": "Il-mudelli ta’ OpenRouter għat-trasformazzjoni tad-diskors f’test jużaw il-konnessjoni OpenRouter ikkonfigurata tiegħek. Mhi meħtieġa l-ebda kredenzjali separata."
+    "openrouterSttDescription": "Il-mudelli ta’ OpenRouter għat-trasformazzjoni tad-diskors f’test jużaw il-konnessjoni OpenRouter ikkonfigurata tiegħek. Mhi meħtieġa l-ebda kredenzjali separata.",
+    "modalityTabsAria": "Tip tal-midja",
+    "serviceKindsAria": "Tip ta’ servizz"
   },
   "search": {
     "searchQuery": "Mistoqsija tat-Tiftix",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "Mhux magħruf",
     "cliproxyapiUpdate": "Aġġorna",
     "cliproxyapiUpdateAvailable": "Aġġornament disponibbli: v{current} → v{latest}",
-    "cliproxyapiVersion": "Verżjoni"
+    "cliproxyapiVersion": "Verżjoni",
+    "removeMapping": "Neħħi l-immappjar"
   },
   "modelCatalog": {
     "title": "Mudelli u Combos",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "Combo → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Inkludi fornituri mmarkati ToS: avoid f’auto",
-    "autoTosDescription": "Mitfi awtomatikament. Japplika għall-combos auto kollha, mhux għal kont wieħed biss. Il-konnessjoni ta’ fornitur ma tattivax din l-għażla.",
-    "autoTosSaveError": "Il-politika ToS ma setgħetx tiġi ssejvjata. Għadu jidher l-issettjar ta’ qabel. Erġa’ pprova.",
-    "autoTosLoadError": "Il-politika ToS ma setgħetx titgħabba. Erġa’ pprova qabel tibdilha.",
     "title": "Kombinazzjonijiet",
     "description": "Oħloq kombinazzjonijiet ta’ mudelli b’instradar ponderat u appoġġ għal alternattivi ta’ riżerva",
     "autoCatalogTitle": "Katalgu tal-instradar awtomatiku",
+    "autoTosLoadError": "Il-politika ToS ma setgħetx titgħabba. Erġa’ pprova qabel tibdilha.",
+    "autoTosSaveError": "Il-politika ToS ma setgħetx tiġi ssejvjata. Għadu jidher l-issettjar ta’ qabel. Erġa’ pprova.",
+    "autoTosIncludeLabel": "Inkludi fornituri mmarkati ToS: avoid f’auto",
+    "autoTosDescription": "Mitfi awtomatikament. Japplika għall-combos auto kollha, mhux għal kont wieħed biss. Il-konnessjoni ta’ fornitur ma tattivax din l-għażla.",
     "autoCatalogTemplateCount": "{count} mudelli",
     "autoCatalogDescription": "Kombinazzjonijiet auto/* integrati li jiġu riżolti b’mod dinamiku mill-fornituri konnessi. Uża kwalunkwe wieħed minn dawn l-IDs bħala l-qasam tal-mudell — ebda konfigurazzjoni meħtieġa.",
     "autoCatalogExpand": "Espandi l-katalgu tal-instradar awtomatiku",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "Għadu ma ġie kkonfigurat ebda combo.",
     "playgroundCreateFirst": "L-ewwel oħloq waħda",
     "weighted": "Ibbilanċjata skont il-Piż",
+    "weightPercent": "Piż (%)",
     "leastUsed": "L-Inqas Użata",
     "costOpt": "Ottimizzata għall-Ispejjeż",
     "strategyGuideTitle": "Kif tuża din l-istrateġija",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# kont} other {# kontijiet}}",
     "builderGlobalAdded": "Miżjud",
     "builderGlobalAdd": "Żid",
+    "clearSearch": "Ħassar it-tfittxija",
     "manualModel": "Mudell manwali",
     "manualModelInvalid": "Daħħal mudell bħala provider/model.",
     "manualModelUnknownProvider": "Prefiss tal-fornitur mhux magħruf.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "Żid referenza għall-kombinazzjoni",
     "builderPinnedAccount": "Kont Ippinnjat",
     "builderLegacyEntry": "Entrata minn verżjoni preċedenti",
+    "builderStaleModel": "Mhux fil-katalgu live",
     "reviewName": "Isem",
     "reviewStrategy": "Strateġija",
     "reviewSteps": "Passi",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "Tul minimu tal-kontenut (karattri)",
     "responseValidationJsonPaths": "Verifiki tal-JSON-path",
     "responseValidationAddCheck": "+ Żid verifika",
+    "responseValidationRemoveCheck": "Neħħi l-verifika",
+    "responseValidationPath": "Mogħdija JSON",
+    "responseValidationCondition": "Kundizzjoni",
+    "responseValidationValue": "Valur mistenni",
     "agentFeaturesSystemMessageOverride": "Issostitwixxi l-messaġġ tas-sistema",
     "agentFeaturesSystemMessagePlaceholder": "Inti assistent espert...",
     "agentFeaturesSystemMessageHint": "Sostituzzjoni tal-messaġġ tas-sistema għall-aġenti",
@@ -5288,7 +5292,8 @@
         "skipped": "diġà kkonfigurat",
         "failed": "falla"
       }
-    }
+    },
+    "stepProgress": "Progress tal-konfigurazzjoni"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Dan il-fornitur huwa eskluż minn auto awtomatikament",
@@ -6056,10 +6061,10 @@
     "apiFormatLabel": "Tikketta tal-format tal-API",
     "apiKeyOptionalHint": "Ħalli vojt jekk il-konfigurazzjoni lokali jew il-fornitur tiegħek ma jeħtiġux awtentikazzjoni.",
     "apiKeyOptionalLabel": "Ċavetta tal-API (mhux obbligatorja)",
-    "apiRegionChina": "Reġjun tal-API: iċ-Ċina",
-    "apiRegionHint": "Ħjiel dwar ir-reġjun tal-API",
-    "apiRegionInternational": "Reġjun tal-API: Internazzjonali",
-    "apiRegionLabel": "Tikketta tar-reġjun tal-API",
+    "apiRegionChina": "Iċ-Ċina Kontinentali",
+    "apiRegionHint": "Agħżel ir-reġjun tal-endpoint użat għall-aċċess tal-API u t-traċċar tal-kwota.",
+    "apiRegionInternational": "Internazzjonali",
+    "apiRegionLabel": "Reġjun tal-API",
     "apikey": "Ċavetta tal-API",
     "audio": "Awdjo",
     "audioProvidersHeading": "Intestatura tal-fornituri tal-awdjo",
@@ -6080,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Meta dan il-kont jilħaq il-limitu ta' użu tiegħu ta' 5 sigħat u Anthropic toffri l-kanal bi prijorità aktar baxxa, OmniRoute taċċettah u tkompli tibgħat it-talbiet b'anthropic-usage-limit: slow sakemm tiġi rrisettjata t-tieqa, minflok ma tħalli l-konnessjoni tistenna. Il-limitu ta' kull ġimgħa xorta japplika u t-tweġibiet jistgħu jistennew sakemm ikun hemm kapaċità disponibbli.",
     "claudeAutoLimitResetLabel": "Irrisettja awtomatikament il-limitu tas-sessjoni (darba fil-ġimgħa)",
     "claudeAutoLimitResetDescription": "Meta dan il-kont jilħaq il-limitu ta' użu tiegħu ta' 5 sigħat u jkun disponibbli reset tal-limitu tas-sessjoni, OmniRoute tużah awtomatikament u terġa' tipprova bil-veloċità sħiħa. Dan juża r-reset tal-kont ta' darba fil-ġimgħa u xorta jgħodd mal-limitu ta' kull ġimgħa.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Aqbeż il-perjodu ta’ stennija temporanju sabiex din il-konnessjoni tibqa’ eliġibbli anke wara żbalji li jistgħu jiġu rkuprati (l-istati terminali bħal ipprojbiti jew skaduti xorta jibqgħu japplikaw).",
     "disableCoolingLabel": "Iddiżattiva l-perjodu ta’ stennija għal din il-konnessjoni",
     "bulkPasteAdded": "{count, plural, one {Żdiedet ċavetta waħda} other {Żdiedu # ċwievet}}",
@@ -6533,6 +6545,7 @@
       "monsterapi": "Ikseb ċavetta API fuq monsterapi.ai",
       "moonshot": "Qabbad Kimi b'ċavetta API.",
       "morph": "Livell b'xejn: 250K krediti fix-xahar, $0",
+      "apmix": "Qabbad Apmix bi ċavetta API minn apmix.ai/dashboard — abbonament wieħed, bosta mudelli.",
       "nanogpt": "Qabbad NanoGPT b'ċavetta API.",
       "nebius": "Madwar $1 fi krediti ta' prova mar-reġistrazzjoni għall-ittestjar tal-API",
       "nlpcloud": "NLP Cloud juża API proprjetarja ta' chatbot minflok chat/completions ta' OpenAI. OmniRoute jadatta l-messaġġi ta' OpenAI għal input/context/history u jipprovdi katalgu lokali ta' mudelli ta' chatbot appoġġjati.",
@@ -6621,7 +6634,7 @@
       "claude": "Qabbad Claude Code bil-fluss OAuth eżistenti.",
       "cline": "Qabbad Cline bil-fluss OAuth eżistenti.",
       "cursor": "Qabbad Cursor IDE bil-fluss OAuth eżistenti.",
-      "cursor-api": "Qabbad Cursor b'ċavetta API tal-utent (crsr_...) minn cursor.com/dashboard/api; ma hija meħtieġa ebda sessjoni tal-IDE.",
+      "cursor-api": "Qabbad Cursor ma' API key tal-utent (crsr_... jew grok_...) minn cursor.com/dashboard/api; ma hemmx bżonn ta' sessjoni IDE.",
       "github": "Qabbad GitHub Copilot bil-fluss OAuth eżistenti.",
       "gitlab-duo": "Applikazzjoni OAuth bl-ambiti ai_features + read_user. Ikkonfigura GITLAB_DUO_OAUTH_CLIENT_ID u, jekk mixtieq, GITLAB_DUO_OAUTH_CLIENT_SECRET fuq din l-istanza ta' OmniRoute.",
       "kilocode": "Qabbad Kilo Code bil-fluss OAuth eżistenti.",
@@ -6629,8 +6642,7 @@
       "kiro": "Livell bla ħlas: 50 kreditu/xahar (~25K–100K token). ⚠️ It-Termini tas-Servizz ta’ Kiro jipprojbixxu l-użu ta’ proxy/harness ta’ parti terza.",
       "codex": "Qabbad OpenAI Codex mal-fluss OAuth eżistenti.",
       "qwen": "Qabbad Qwen Code mal-fluss OAuth eżistenti.",
-      "github-models": "Oħloq GitHub PAT bl-ambitu 'models: read' fuq github.com/settings/tokens",
-      "apmix": "Qabbad Apmix bi ċavetta API minn apmix.ai/dashboard — abbonament wieħed, bosta mudelli."
+      "github-models": "Oħloq GitHub PAT bl-ambitu 'models: read' fuq github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} jaċċetta IDs tal-mudelli nattivi għall-fornitur. Importa minn /models jew żid IDs personalizzati għar-routing.",
     "bedrockModelsDescription": "Il-mudelli ta’ Amazon Bedrock huma limitati skont ir-reġjun AWS. Importa minn /models jew żid IDs tal-mudelli Bedrock attivati fir-reġjun magħżul.",
@@ -6802,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Issettjar",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "Agħżel liema elementi jintwerew fl-istrixxa tal-ġenb. L-essenzjali jżommu l-għodod avvanzati disponibbli fit-tfittxija.",
     "hideHealthLogs": "Aħbi r-Reġistri tal-Kontrolli tas-Saħħa",
     "hideHealthLogsDesc": "Meta MIXGĦUL, aħbi l-messaġġi [HealthCheck] fil-console tas-server",
-    "themeAccent": "Kulur tat-tema",
-    "themeAccentDesc": "Agħżel kulur issettjat minn qabel jew oħloq it-tema tiegħek b'kulur wieħed",
-    "themeCreate": "Oħloq tema",
-    "themeCustom": "Tema personalizzata",
-    "themeBlue": "Blu",
-    "themeRed": "Aħmar",
-    "themeGreen": "Aħdar",
-    "themeViolet": "Vjola",
-    "themeOrange": "Oranġjo",
-    "themeCyan": "Ċjan",
     "whitelabeling": "Identità tal-Marka",
     "whitelabelingDesc": "Ippersonalizza l-isem u l-logo tal-applikazzjoni",
     "appName": "Isem tal-Applikazzjoni",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "Issa",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Triq tal-binarju ċentrali",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Opzjonali: tivverifika l-fajl mġenerat bil-binarju ċentrali qabel ma tissostitixxi l-fajl adottat. Ħalli l-boxx biex tikteb minn taħtu. Id-direttorju jinħoloq jekk ma jkunx hemm."
+      "coreBinaryPathHelp": "Opzjonali: tivverifika l-fajl mġenerat bil-binarju ċentrali qabel ma tissostitixxi l-fajl adottat. Ħalli l-boxx biex tikteb minn taħtu. Id-direttorju jinħoloq jekk ma jkunx hemm.",
+      "urlFeedlessHint": "Ħalli lvojt għal abbonament biss b'seleettur: issettja URL ta' kontroll hawn taħt, l-ebda feed ma jiġi mkabb, aġġornat jew marbut."
     },
     "bulkHealthcheck": "Kontroll tas-Saħħa tal-Massa",
     "bulkHealthcheckDesc": "Ittestja l-proxies konfigurati kollha ma' URL fil-mira biex issib liema minnhom jaħdmu.",
@@ -7707,6 +7703,7 @@
     "configured": "ikkonfigurat",
     "none": "Xejn",
     "modelOverrideValuePlaceholder": "Valur numeriku",
+    "modelOverrideKey": "Ċavetta tal-override",
     "modelOverrideReasoningEffortsPlaceholder": "Bl-Ingliż, separati b'virgoli, eż. low, medium, high",
     "addKeyValue": "Żid ċavetta u valur",
     "noModelOverrides": "Ma ġiet ikkonfigurata ebda sostituzzjoni għal dan il-mudell.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "Tista’ tissostitwixxi l-ipprezzar predefinit għal mudelli speċifiċi. Is-sostituzzjonijiet personalizzati jieħdu prijorità fuq l-ipprezzar identifikat awtomatikament.",
     "editPricing": "Immodifika l-Ipprezzar",
     "viewFullDetails": "Ara d-Dettalji Kollha",
-    "themeCoral": "Qroll",
     "adaptiveVolumeRouting": "Rotot Adattivi skont il-Volum",
     "adaptiveVolumeRoutingDesc": "Aġġusta l-konnessjonijiet b’mod dinamiku skont il-volum tal-payload u l-pressjoni fuq il-fluss tad-data.",
     "lkgpToggleTitle": "L-Aħħar Fornitur Magħruf li Ħadem (LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "Naqqas l-użu tat-tokens billi tikkompressa l-prompts qabel ma tibgħathom lill-fornituri",
     "autoCombosTitle": "Kombinazzjonijiet Awtomatiċi",
     "autoCombosDesc": "Ippermetti lil din iċ-ċavetta tuża l-kombinazzjonijiet auto/* inkorporati, li jagħżlu mudell awtomatikament minn kull fornitur ikkonfigurat",
+    "ccDiscoveryAliasesTitle": "Alias ta' skoperta għal Claude Code",
+    "ccDiscoveryAliasesDesc": "Irreklama mirrors ta' kompatibilità claude/... għal mudelli u combos li din iċ-ċavetta tista' diġà taċċessa",
     "compressionGuidanceFullGuideLink": "Gwida sħiħa għall-kompressjoni",
     "compressionGuidanceShow": "Dettalji",
     "compressionGuidanceHide": "Aħbi d-dettalji",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "Għadda",
     "tomlTestFailed": "Falla",
     "tomlImportError": "Ma setax jiġi pproċessat il-fajl RTK TOML.",
-    "tomlFileReadError": "Ma setax jinqara l-fajl TOML magħżul."
+    "tomlFileReadError": "Ma setax jinqara l-fajl TOML magħżul.",
+    "viewMode": "Modalità tal-wiri"
   },
   "compressionEngineConfig": {
     "loading": "Qed jitgħabba…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "Pakketti tal-lingwa: {packs}",
     "dragToReorder": "Iddreggja biex tibdel l-ordni tal-pass",
     "engine": "Magna",
-    "intensity": "Intensità"
+    "intensity": "Intensità",
+    "compressionOverride": "Override tal-kompressjoni"
   },
   "compressionStudio": {
     "noRun": "Ebda eżekuzzjoni tal-kompressjoni mhi disponibbli.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "rebbieħ: {winner}",
     "encoder": "kodifikatur",
     "bytes": "bajts",
-    "tokensCl100k": "tokens (cl100k)"
+    "tokensCl100k": "tokens (cl100k)",
+    "studioViews": "Dehriet ta’ Studio"
   },
   "omniglyph": {
     "preview": "Previżjoni",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "Messaġġi iqsar minn dan ma jiġux ikkompressati. Inqas = aktar kompressjoni.",
     "tooltipMinSavings": "Ikkompressa biss jekk tiffranka mill-inqas dan l-għadd ta’ tokens.",
     "ultraSettings": "Konfigurazzjoni Ultra",
-    "ultraSettingsDesc": "Kompressjoni semantika mħaddma minn SLM"
+    "ultraSettingsDesc": "Kompressjoni semantika mħaddma minn SLM",
+    "defaultLanguage": "Lingwa predefinita",
+    "viewMode": "Modalità tal-wiri"
   },
   "translator": {
     "title": "Traduttur",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "It-trasformazzjoni tal-fluss falliet"
   },
   "usage": {
+    "healthExtraUsageBypass": "Il-kwota ntużat kollha; l-użu żejjed huwa permess, għalhekk is-servizz ikompli.",
+    "healthPaidCreditsBypass": "Il-kwota ntużat kollha; il-krediti mħallsa disponibbli jippermettu li s-servizz ikompli.",
+    "healthFilteringBypass": "Il-kwota ntużat kollha; il-filtrazzjoni lokali tal-kwoti hija diżattivata, għalhekk is-servizz ikompli.",
     "title": "Użu",
     "grokExtraUsageCredits": "Krediti Addizzjonali għall-Użu",
     "grokAutoTopUp": "Rikarga Awtomatika",
@@ -9998,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limiti tal-Fornituri",
     "noProviders": "L-ebda fornitur mhu konness",
+    "quotaAuthRequired": "Awtentikazzjoni meħtieġa - idħol fid-dashboard",
+    "quotaAuthRequiredHint": "Il-konnessjonijiet tal-fornituri ma setgħux jitgħabbew minħabba li s-sessjoni tad-dashboard hija nieqsa jew skadiet. Idħol u aġġorna biex tara l-limiti tal-kwota tiegħek.",
     "connectProvidersForQuota": "Ikkonnettja mal-fornituri permezz ta’ OAuth biex issegwi l-limiti tal-kwota u l-użu tal-API tiegħek.",
     "accountsCount": "{count, plural, one {# kont} other {# kontijiet}}",
     "filteredFromCount": "(iffiltrati minn {count})",
@@ -10047,9 +10055,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Mhux magħruf",
     "statTotal": "Total",
-    "statCritical": "Kritiku",
-    "statAlert": "Twissija",
-    "statHealthy": "Tajjeb",
     "filterPurchaseTypeLabel": "Tip",
     "filterTierLabel": "Livell",
     "purchaseAll": "Kollha",
@@ -10288,10 +10293,64 @@
     "lastRefreshed": "Aġġornat l-aħħar darba",
     "providerQuota": "Kwota tal-Fornitur",
     "providerQuotaHomeHint": "Status f’ħin reali fil-kontijiet konnessi",
+    "claudeResetCreditDefaultTitle": "Irrisettjar tal-limitu ta' Claude",
+    "confirmRedeemClaudeResetCredit": "It-tifdija tirrisettja immedjatament il-limiti eliġibbli tal-użu ta' Claude u tikkonsma dan il-kreditu b'mod permanenti.",
+    "claudeResetCreditsModalTitle": "Krediti għall-irrisettjar ta' Claude",
+    "claudeResetCreditsModalExplainer": "Krediti disponibbli għall-irrisettjar ta' Claude u rrisettjar ta' sessjonijiet ta' kull ġimgħa għal dan il-kont.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Ibbażat fuq osservazzjonijiet reċenti, mhux test dirett. Agħżel kont għad-dettalji.",
+    "healthRecovery": "Irkupru mistenni",
+    "healthAvailable": "Disponibbli",
+    "healthRestricted": "Parzjalment ristrett",
+    "healthUnavailable": "Mhux Disponibbli",
+    "healthPeakHourProtection": "Protezzjoni fil-ħinijiet tal-quċċata",
+    "healthCooldown": "Perjodu ta’ stennija",
+    "healthQuotaExhausted": "Il-kwota ntużat kollha",
+    "healthOverview": "Ħarsa ġenerali",
+    "layoutFull": "Sħiħ",
+    "layoutCompact": "Kompatt",
+    "healthQuotaError": "Il-qari tal-kwota falla",
+    "healthNoRuntime": "L-istat operattiv mhux disponibbli",
+    "healthPreviousSnapshot": "L-aħħar aġġornament falla; qed jintwera r-riżultat preċedenti",
+    "healthPreviousFailure": "L-aħħar talba falliet; il-ħin ta’ stennija spiċċa",
+    "healthAwaitingSync": "Għadda l-ħin tar-risettjar; qed jistenna s-sinkronizzazzjoni",
+    "healthVerdictUnavailable": "Ir-riżultat tal-verifika tad-disponibbiltà mhux disponibbli; jintwerew biss il-livelli tal-kwota",
+    "healthSummaryFailed": "Il-qari tas-sommarju tal-istat falla; jista’ jkun hemm nuqqas ta’ tagħrif dwar serraturi tal-mudelli",
+    "healthRuntimeObserved": "L-istat ġie aġġornat {time}",
+    "healthQuotaObserved": "Il-kwota ġiet osservata {time}",
+    "healthOldestQuota": "L-eqdem stampa tal-kwota: {time}",
+    "healthRecoveryUnknown": "Il-ħin tal-irkupru mhux magħruf",
+    "healthDetailsHint": "Ikklikkja għad-dettalji u l-azzjonijiet",
+    "healthFiveHour": "5 sigħat",
+    "healthOverall": "Kumplessiva",
+    "healthAction": "Tinħtieġ azzjoni",
+    "healthTitle": "Disponibbiltà tal-kontijiet",
+    "healthDrag": "Iġbed biex tibdel l-ordni tal-fornituri",
+    "healthDragPosition": "{provider}, {count, plural, one {pożizzjoni {position, number} minn #} two {pożizzjoni {position, number} minn #} few {pożizzjoni {position, number} minn #} many {pożizzjoni {position, number} minn #} other {pożizzjoni {position, number} minn #}}",
+    "healthResetOrder": "Irrestawra l-ordni predefinita",
+    "healthPool": "Grupp {name}",
+    "healthOtherPool": "L-istess kont · {pool}: {status} ({remaining} fadal)",
+    "healthIncluded": "{count, plural, one {Jinkludi # kont parzjalment ristrett} two {Jinkludi żewġ kontijiet parzjalment ristretti (#)} few {Jinkludi # kontijiet parzjalment ristretti} many {Jinkludi #-il kont parzjalment ristrett} other {Jinkludi # kont parzjalment ristrett}}",
+    "healthBannerUnavailable": "{count, plural, one {# kont temporanjament mhux disponibbli} two {Żewġ kontijiet temporanjament mhux disponibbli (#)} few {# kontijiet temporanjament mhux disponibbli} many {#-il kont temporanjament mhux disponibbli} other {# kont temporanjament mhux disponibbli}}",
+    "healthBannerAvailable": "{count, plural, one {# kont disponibbli} two {Iż-żewġ kontijiet huma disponibbli (#)} few {Il-# kontijiet kollha huma disponibbli} many {Il-kontijiet kollha huma disponibbli: #} other {Il-kontijiet kollha huma disponibbli: #}}",
+    "healthLegendHide": "Aħbi l-leġġenda",
+    "healthLegendShow": "Uri l-leġġenda",
+    "healthLegendOk": "Mimli = kwota li fadal; trasluċidu = użat.",
+    "healthLegendCooldown": "Il-kwota ta’ {window} spiċċat. Mimli = stennija li għaddiet; trasluċidu = stennija li fadal.",
+    "healthLegendAction": "L-awtorizzazzjoni skadiet jew il-kont ġie mblukkat; l-istennija ma ssolvix dan.",
+    "healthLegendPartial": "Għadu jista’ jintuża. Quċċata safra = mudell jew grupp ristrett.",
+    "healthWaited": "Stennija li għaddiet: {percent}",
+    "healthWait": "{duration} oħra (irkupru f’{time})",
+    "healthFastest": "L-eqreb irkupru fi żmien {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} disponibbli} two {# / {active, number} disponibbli} few {# / {active, number} disponibbli} many {# / {active, number} disponibbli} other {# / {active, number} disponibbli}}",
+    "healthCd5": "5 sigħat · Perjodu ta’ stennija",
+    "healthCdw": "Kull ġimgħa · Perjodu ta’ stennija",
+    "healthRecentSuccessBypass": "Ir-routing jippermetti dan il-kont għax talba rnexxiet dan l-aħħar.",
+    "healthPurchasedBalanceBypass": "Il-bilanċ mixtri jippermetti li tkompli wara li tintuża l-kwota inkluża kollha.",
+    "healthCutoffAtRequest": "Il-limiti tal-kwota f’ħin reali jiġu ċċekkjati meta talba tiġi rotta."
   },
   "modals": {
     "waitingAuth": "Stennija għall-Awtorizzazzjoni",
@@ -11078,7 +11137,8 @@
       "message": "Messaġġ",
       "error": "Żball",
       "completion": "Tlestija"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Chat Sempliċi",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "{minutes}m ilu",
     "hoursAgo": "{hours}h ilu",
     "daysAgo": "{days}d ilu",
-    "entries": "Entrati"
+    "entries": "Entrati",
+    "viewSwitcherAria": "Dehra tal-cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globali",
@@ -11447,6 +11508,7 @@
     "tableHealth": "Kundizzjoni (24 siegħa)",
     "tableUsage": "Użu",
     "tableActions": "Azzjonijiet",
+    "moreActions": "Aktar azzjonijiet",
     "test": "Ittestja",
     "edit": "Editja",
     "delete": "Ħassar",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "Ma nstabet l-ebda entrata valida. Iċċekkja l-format u erġa’ pprova.",
     "bulkImportSuccess": "L-importazzjoni tlestiet: {created} inħolqu, {updated} ġew aġġornati, {failed} fallew",
     "bulkImportErrorLine": "Linja {line}: {reason}",
-    "bulkImportMaxExceeded": "Massimu ta’ 100 proxy għal kull importazzjoni",
+    "bulkImportMaxExceeded": "Massimu ta’ {max} proxy għal kull importazzjoni",
     "bulkImportPreview": "Previżjoni",
     "clearAssignment": "(neħħi l-assenjazzjoni)",
     "bulkProxyAssignment": "Assenjazzjoni tal-Proxy bil-Massa",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "limitu tar-rata tal-IP (429)",
     "poolSetAsideKindSlow": "risposti bil-mod",
     "poolSetAsideKindGeoBlocked": "blokkat fir-reġjun (403/451)",
+    "poolSetAsideKindOperatorReported": "ħsara rrapportata mill-operatur",
     "poolSetAsideUntil": "Lura fir-rotazzjoni {endsAt}",
     "poolSetAsideRepeat": "Imwarrab {count, plural, one {# darba} other {# darbiet}}",
     "poolUnknownAddress": "Indirizz mhux magħruf",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "Esporta l-Kodiċi",
     "exportShort": "Esporta",
     "noStateToExport": "Ma hemm l-ebda stat tal-playground disponibbli għall-esportazzjoni.",
-    "closeExportModal": "Agħlaq it-tieqa modali tal-esportazzjoni",
     "close": "Agħlaq",
     "exportRealKeyWarning": "Twissija ta’ sigurtà: l-esportazzjoni ġiet imblukkata — instabet ċavetta API reali fl-output. Jekk jogħġbok irrisettja ċ-ċavetta API tiegħek u erġa’ pprova.",
     "placeholderHintPrefix": "Ibdel",
@@ -11809,7 +11871,8 @@
       "nextButton": "Li jmiss",
       "runButton": "Ħaddem",
       "promptPlaceholder": "Daħħal il-messaġġ tiegħek… (Enter biex tibgħat, Shift+Enter għal linja ġdida)"
-    }
+    },
+    "playgroundTabs": "Modi tal-Playground"
   },
   "miniPlayground": {
     "endpoint": "Punt tat-tmiem",
@@ -11880,7 +11943,8 @@
     "assistant": "Assistent",
     "errorLabel": "Żball",
     "requestFailed": "It-talba falliet",
-    "stop": "Waqqaf"
+    "stop": "Waqqaf",
+    "messageInputAria": "Messaġġ"
   },
   "requestLogger": {
     "recording": "Qed jirreġistra",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "{count} rotazzjonijiet tal-kont",
       "resilienceRetried": "Dawra vojta ġiet ippruvata mill-ġdid",
       "resilienceContinued": "Kompla f'nofs il-fluss",
-      "resilienceRecovered": "Irkuprat minn azzjoni ta' reżiljenza"
-    }
+      "resilienceRecovered": "Irkuprat minn azzjoni ta' reżiljenza",
+      "conversationContext": "Kuntest tal-Konverżazzjoni",
+      "goToBottom": "Mur fil-qiegħ",
+      "liveRefreshOn": "Aġġornament dirett: mixgħul",
+      "liveRefreshOff": "Aġġornament dirett: mitfi",
+      "liveRefresh": "Aġġornament dirett",
+      "continuesFromParent": "ikompli mill-ġenitur",
+      "continuesFrom": "Ikompli minn {id}",
+      "viewConversation": "ara l-konverżazzjoni",
+      "openConversation": "Iftaħ il-konverżazzjoni {id}"
+    },
+    "tableLabel": "Reġistri tat-talbiet"
   },
   "proxyLogger": {
     "filterAll": "Kollha",
@@ -12113,7 +12187,9 @@
     "colServedBy": "Servut minn",
     "filterTraffic": "Traffiku",
     "filterTests": "Testijiet",
-    "filterSource": "Sors"
+    "filterSource": "Sors",
+    "tableLabel": "Reġistri tal-proxy",
+    "sortLogs": "Issortja r-reġistri"
   },
   "endpointOptions": {
     "speech": "Diskors",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "EŻAWRITA",
     "statusAlerting": "TWISSIJA",
     "statusError": "ŻBALL",
-    "moreSuffix": "+{count} oħra"
+    "moreSuffix": "+{count} oħra",
+    "feedFilterLabel": "Iffiltra l-avvenimenti"
   },
   "quotaShare": {
     "weightPercent": "Piż %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "Mingħajr grupp",
     "ungroupedHint": "Dawn il-ġabriet mhumiex assenjati lil grupp magħruf. Editja ġabra biex tmexxiha għal grupp eżistenti.",
     "removeFailed": "Ma setgħetx titneħħa din il-ġabra.",
-    "dismiss": "Agħlaq"
+    "dismiss": "Agħlaq",
+    "allocationsHeading": "Allokazzjonijiet",
+    "wizardRemoveDimension": "Neħħi d-dimensjoni",
+    "wizardRemoveKey": "Neħħi ċ-ċavetta"
   },
   "plugins": {
     "title": "Plugins",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "L-aġġornament tal-issettjar falla",
       "serviceRevealApiKey": "{actor} żvela ċ-ċavetta API għal {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Agħlaq l-iżball"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "Mur issa",
       "message": "Il-MITM Proxy issa jinsab taħt AgentBridge.",
       "title": "Din il-paġna ġiet imċaqalqa"
-    }
+    },
+    "dnsOn": "DNS mixgħul",
+    "dnsOff": "DNS mitfi",
+    "showServerSettings": "Uri s-settings tas-server",
+    "hideServerSettings": "Aħbi s-settings tas-server",
+    "upstreamCaTesting": "Qed jiġi ttestjat…",
+    "removeMapping": "Neħħi l-immappjar",
+    "mappingSourcePlaceholder": "eż., gemini-3.6-flash-medium, jew * għal dawk kollha mhux immappjati",
+    "mappingWildcardHint": "Uża * bħala s-sors biex tidderieġi kull mudell mingħajr immappjar espliċitu permezz ta’ OmniRoute lejn id-destinazzjoni magħżula. Taqbiliet eżatti mas-sors dejjem jieħdu preċedenza fuq *.",
+    "wizardDetectingModels": "Qed jiġu identifikati mudelli mit-traffiku interċettat...",
+    "wizardDetectedModels": "Instabu {count, plural, one {# mudell} other {# mudelli}} fit-traffiku interċettat. Agħżel dawk li trid iżżid:",
+    "wizardSelectedModels": "Intgħażlu {count, plural, one {# mudell} other {# mudelli}}. Fl-iskrin li jmiss se timmappjahom ma’ mudelli ta’ OmniRoute.",
+    "wizardAddModels": "Żid {count, plural, one {# mudell} other {# mudelli}}",
+    "wizardNoModelsDetected": "Għadu ma ġie identifikat l-ebda mudell. Uża {agent} biex tagħmel talba, imbagħad erġa’ ħaddem dan l-assistent biex tidentifika awtomatikament il-mudelli mit-traffiku.",
+    "wizardNoModelsHint": "Jew agħlaq dan l-assistent u żid l-immappjar manwalment fil-kard tal-aġent."
   },
   "providerStats": {
     "unknownError": "Żball mhux magħruf",
@@ -12686,7 +12781,11 @@
     "avgTtft": "TTFT Medju",
     "avgTotal": "Medja Totali",
     "requestTelemetry": "Telemetrija tat-Talbiet",
-    "requestTelemetryDescription": "Tqassim tal-pipeline f’7 fażijiet (l-aħħar 5 minuti)"
+    "requestTelemetryDescription": "Tqassim tal-pipeline f’7 fażijiet (l-aħħar 5 minuti)",
+    "title": "Statistika tal-fornituri",
+    "description": "Traffiku, latenza u rati ta’ suċċess għal kull fornitur u għal kull mudell",
+    "combo": "Kombinazzjoni",
+    "toggleModels": "Uri l-mudelli għal {provider}"
   },
   "relay": {
     "title": "Proxies tar-Relay mingħajr server",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "Ebda korp tat-talba.",
     "noResponseBody": "Ebda korp tat-tweġiba.",
     "formatted": "Ifformattjat",
-    "raw": "Mhux ipproċessat"
+    "raw": "Mhux ipproċessat",
+    "requestCount": "{count, plural, one {# talba} other {# talbiet}}",
+    "expandList": "Espandi l-lista",
+    "collapseList": "Ikkollassa l-lista",
+    "snippetLanguage": "Lingwa tas-silta tal-kodiċi",
+    "headersTable": "Intestaturi",
+    "showSecrets": "Uri s-sigrieti",
+    "maskSecrets": "Għatti s-sigrieti",
+    "llmNotAvailable": "Il-metadata tal-LLM mhix disponibbli għal din it-talba.",
+    "llmStreamYes": "iva (SSE)",
+    "llmStreamNo": "le",
+    "llmTotalTokens": "B'kollox: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "Il-proporzjon ta’ sejħiet li dan il-fornitur fil-fatt wieġeb matul l-aħħar 24 siegħa. Sing ifisser li pproċessa ftit wisq traffiku biex tiġi indikata rata.",
     "reliabilitySample": "Irnexxew {successes} minn {requests} sejħiet matul l-aħħar {hours} siegħa",
     "reliabilityTooFew": "Kien hemm biss {requests} sejħiet matul l-aħħar {hours} siegħa — ftit wisq biex tiġi indikata rata",
-    "reliabilityNoTraffic": "Ma ġiet irreġistrata l-ebda sejħa matul l-aħħar 24 siegħa"
+    "reliabilityNoTraffic": "Ma ġiet irreġistrata l-ebda sejħa matul l-aħħar 24 siegħa",
+    "categoryFilter": "Kategorija tal-kompitu"
   },
   "discovery": {
     "title": "Skoperta tal-Fornituri",
@@ -13331,7 +13442,11 @@
     "method": "Metodu",
     "auth": "Awtentikazzjoni",
     "feasibility": "Fattibbiltà",
-    "models": "Mudelli"
+    "models": "Mudelli",
+    "provider": "Fornitur",
+    "status": "Status",
+    "endpoint": "Punt aħħari",
+    "actions": "Azzjonijiet"
   },
   "noAuthProvider": {
     "title": "L-ebda awtentikazzjoni meħtieġa",
@@ -13380,7 +13495,8 @@
     "ownProxy": "Proxy proprju",
     "freeTierPause": "Il-mudell {model} ippawżat (429), lura fi {time}",
     "freeTierPauseProvider": "Ippawżat (429), lura fi {time}",
-    "freeTierPauseNote": "Pawża fil-proċess fuq dan il-caż"
+    "freeTierPauseNote": "Pawża fil-proċess fuq dan il-caż",
+    "proxyType": "Tip ta' proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "Kisba moħbija qed tistenniek...",
         "criteria": "Imla l-kisba moħbija biex tikxef din il-badge."
       }
-    }
+    },
+    "leaderboardTitle": "Klassifika",
+    "leaderboardDescription": "Klassifiki u kisbiet għaċ-ċwievet API tiegħek",
+    "badgeLocked": "Imsakkar"
   },
   "featureFlags": {
     "title": "Flags tal-Karatteristiċi",
@@ -13794,6 +13913,7 @@
     "latency": "Latenza",
     "quota": "Kwota",
     "rangeWindow": "perjodu ta' {range}",
+    "timeRange": "Medda ta' żmien",
     "runtimeHealthBlend": "taħlita tat-tħaddim u s-saħħa",
     "averageResponseTime": "ħin medju tar-rispons",
     "worstQuota": "L-agħar kwota",
@@ -13995,7 +14115,11 @@
     "learnMore": "Sir af aktar",
     "changelogLoadFailed": "Ir-reġistru tal-bidliet ma setax jitgħabba. Jekk jogħġbok, erġa’ pprova aktar tard.",
     "retry": "Erġa’ pprova",
-    "viewFullHistory": "Ara l-istorja sħiħa fuq GitHub"
+    "viewFullHistory": "Ara l-istorja sħiħa fuq GitHub",
+    "title": "Aħbarijiet u reġistru tal-bidliet",
+    "description": "Avviżi mit-tim ta' OmniRoute u l-aħħar noti tar-rilaxx",
+    "viewLabel": "Ara",
+    "loadingNews": "Qed jitgħabbew l-avviżi..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "Stat tas-Circuit Breaker tal-Fornitur",
       "lastUpdate": "L-aħħar aġġornament: {timestamp}",
       "uptimeMinutes": "{minutes}min",
-      "uptimeHoursMinutes": "{hours}s {minutes}min"
+      "uptimeHoursMinutes": "{hours}s {minutes}min",
+      "breakerClosed": "Magħluq",
+      "breakerNotClosed": "Miftuħ jew nofsu miftuħ"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "Dettalji tal-Manutenzjoni",
         "secondaryAction": "Status tas-Sistema"
       }
+    },
+    "miniapp": {
+      "askAnything": "Staqsi kwalunkwe ħaġa…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} viżibbli / {total} b'kollox",
+    "modeLabel": "Modalità tal-wiri",
+    "jumpToNow": "Aqbeż għall-ħin attwali; il-linja ISSA terġa' tiġi ssettjata fil-pożizzjoni {position}%",
+    "laneReuse": "Użu mill-ġdid tal-korsija",
+    "laneReuseLabel": "Perjodu għall-użu mill-ġdid tal-korsija (minuti)",
+    "laneReuseHint": "Talbiet li jaqsmu l-istess ID tal-konverżazzjoni jibqgħu fl-istess ringiela tal-kronoloġija sakemm l-intervall bejniethom ikun inqas minn dan l-għadd ta' minuti.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Aġġornament awtomatiku",
+    "autoRefreshLabel": "Intervall tal-aġġornament awtomatiku (sekondi)",
+    "autoRefreshHint": "Kemm-il darba l-kronoloġija terġa' ġġib il-lista tat-talbiet mis-server.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Naqqas iż-żum",
+    "zoomIn": "Żid iż-żum"
   },
   "metadata": {
     "compressionTitle": "Kompressjoni",

@@ -163,7 +163,7 @@ OmniRoute چھ (6) A2A مہارتیں فراہم کرتا ہے جو `src/lib/a2a
 | ہیلتھ رپورٹ (Health Report)           | `health-report`      | فی provider circuit breaker، cooldown اور lockout حالت کو یکجا کرتا ہے                                                                                               | health, resilience         | "تمام providers کی health status دکھائیں"    |
 | صلاحیتوں کی فہرست (List Capabilities) | `list-capabilities`  | مکمل 45 آئٹمز پر مشتمل Agent Skills catalog (23 API + 21 CLI + 1 config) کو markdown table کی صورت میں، context injection کے لیے raw SKILL.md URLs سمیت واپس کرتا ہے | catalog, discovery, skills | "OmniRoute کی تمام صلاحیتیں فہرست کریں"      |
 
-> Agent Card کو لائیو 375-provider catalog کے ہم آہنگ رکھا جانا چاہیے؛ providers کی تعداد اور free/no-auth metadata رن ٹائم registry سے حاصل کیا جاتا ہے۔
+> Agent Card کو لائیو 376-provider catalog کے ہم آہنگ رکھا جانا چاہیے؛ providers کی تعداد اور free/no-auth metadata رن ٹائم registry سے حاصل کیا جاتا ہے۔
 
 ### `list-capabilities` مہارت کی تفصیل
 

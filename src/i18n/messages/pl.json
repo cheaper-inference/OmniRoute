@@ -25,8 +25,10 @@
     "confirm": "Czy na pewno?",
     "refresh": "Odśwież",
     "close": "Zamknij",
+    "dialogTitleFallback": "Okno dialogowe",
     "previousPage": "Poprzednia strona",
     "nextPage": "Następna strona",
+    "pagination": "Paginacja",
     "capsLockOn": "Caps Lock jest włączony",
     "dismissNotification": "Odrzuć powiadomienie",
     "toggleColumns": "Przełącz kolumny",
@@ -182,6 +184,7 @@
     "combos": "combos",
     "noModelsFound": "Nie znaleziono models",
     "clear": "Wyczyść",
+    "clearFilters": "Wyczyść filtry",
     "done": "Gotowe",
     "selectAll": "Zaznacz wszystko",
     "unselectAll": "Odznacz wszystko",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Używane przez {count, plural, one {# partię} other {# partii}}",
     "batchFilePreview": "Podgląd",
     "batchFilePreviewTruncated": "Wyświetlanie pierwszych {shown} linii ({total} łącznie linii)",
-    "batchFileDownloadFull": "Pobierz Pełny Plik"
+    "batchFileDownloadFull": "Pobierz Pełny Plik",
+    "tokensPageTitle": "Tokeny",
+    "tokensPageDescription": "Przesyłaj tokeny między kluczami API, udostępniaj kody zaproszeń i łącz serwery społecznościowe.",
+    "tokensServerUrlLabel": "Adres URL serwera"
   },
   "disabled": "Wyłączone",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Kierowanie żądań z wyczerpanym budżetem do awaryjnego, bezpłatnego fallback provider/model.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Serwer proxy został zatrzymany lub uruchamia się ponownie.",
     "expandSidebar": "Rozwiń panel boczny",
     "collapseSidebar": "Zwiń panel boczny",
-    "themes": "Motywy",
-    "presetColors": "Popularne kolory",
     "createTheme": "Utwórz motyw",
     "chooseColor": "Wybierz kolor",
-    "themeCoral": "Koralowy",
-    "themeBlue": "Niebieski",
-    "themeRed": "Czerwony",
-    "themeGreen": "Zielony",
-    "themeViolet": "Fioletowy",
-    "themeOrange": "Pomarańczowy",
-    "themeCyan": "Cyjan",
     "cliToolsShort": "Narzędzia",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "System motywów",
     "whitelabelingDesc": "Opis whitelabeling",
     "switchThemes": "Przełącz motywy",
-    "themeAccentDesc": "Opis akcentu motywu",
     "uploadFavicon": "Prześlij favicon",
     "themeDark": "Motyw ciemny",
     "customLogoDesc": "Opis własnego logo",
     "sidebarVisibilityToggle": "Przełącznik widoczności panelu bocznego",
-    "themeAccent": "Akcent motywu",
     "resetFavicon": "Resetuj favicon",
     "whitelabeling": "Personalizacja marki",
     "darkMode": "Tryb ciemny",
@@ -1122,10 +1117,8 @@
     "customLogo": "Własne logo",
     "appearance": "Wygląd",
     "themeSelectionAria": "Wybór motywu Aria",
-    "themeCreate": "Tworzenie motywu",
     "customFaviconDesc": "Opis własnego favicon",
     "logoPreview": "Podgląd logo",
-    "themeCustom": "Motyw niestandardowy",
     "hideHealthLogsDesc": "Opis ukrywania logów stanu",
     "faviconPreview": "Podgląd favicon",
     "changelog": "Dziennik zmian",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 lub @channelname",
       "chatIdHint": "Unikalny identyfikator numeryczny lub publiczna nazwa użytkownika czatu/kanału.",
       "tutorial": "Jak skonfigurować webhook Telegram:"
-    }
+    },
+    "copy": "Kopiuj",
+    "copied": "Skopiowano!",
+    "expandDetails": "Pokaż szczegóły",
+    "collapseDetails": "Ukryj szczegóły"
   },
   "compliance": {
     "auditTitle": "Audyt",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "Połączenia (24h)",
     "mcpMetricSuccessRate": "Wskaźnik sukcesu",
     "mcpMetricAvgDuration": "Średni czas trwania",
-    "mcpMetricTopTool": "Najlepsze narzędzie"
-  },
-  "themesPage": {
-    "title": "Motywy",
-    "description": "Wybierz gotowy motyw lub utwórz własny za pomocą jednego koloru",
-    "presetColors": "Popularne kolory",
-    "customTheme": "Własny motyw",
-    "customThemeDesc": "Kliknij utwórz motyw i wybierz jeden kolor",
-    "createTheme": "Utwórz motyw",
-    "activePreset": "Aktywny motyw"
+    "mcpMetricTopTool": "Najlepsze narzędzie",
+    "dismissError": "Odrzuć błąd"
   },
   "header": {
     "logout": "Wyloguj",
     "quickNavigation": "Szybka nawigacja",
     "quickNavigationTitle": "Szybka nawigacja (⌘K / Ctrl+K)",
     "openQuickNavigation": "Otwórz szybką nawigację",
+    "openMenu": "Otwórz menu",
+    "products": "Produkty Keak",
     "switchToLightMode": "Przełącz na tryb jasny",
     "switchToDarkMode": "Przełącz na tryb ciemny",
     "language": "Język",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Kompatybilne z Anthropic",
     "media": "Media",
     "mediaDescription": "Generowanie obrazów, wideo i muzyki",
-    "themes": "Motywy",
-    "themesDescription": "Wybór motywu kolorystycznego dla całego panelu dashboard",
     "costsDescription": "Śledzenie wydatków, analiza trendów i zarządzanie budżetem AI u wszystkich providers",
     "cacheDescription": "Monitorowanie wydajności prompt cache u provider i lokalnego ponownego użycia odpowiedzi semantycznych.",
     "limitsDescription": "Konfiguracja rate limit i quota dla każdego klucza API i provider",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "Tylko wybrane połączenia",
     "selectAtLeastOneConnection": "Wybierz co najmniej jedno połączenie lub opcję Wszystkie połączenia.",
     "allConnectionsDesc": "Ten klucz może korzystać z dowolnego aktywnego połączenia.",
-    "restrictedToConnections": "Ograniczono do {count, plural, one {# połączenia} few {# połączeń} many {# połączeń} other {# połączenia}}."
+    "restrictedToConnections": "Ograniczono do {count, plural, one {# połączenia} few {# połączeń} many {# połączeń} other {# połączenia}}.",
+    "preferredConnections": "Preferowane połączenia",
+    "preferredConnectionsDesc": "Kolejność priorytetów dla każdego klucza. Jeśli preferowane połączenie jest niedostępne, routing przechodzi do następnego kwalifikującego się.",
+    "preferredConnectionsNone": "Nie ustawiono preferencji — używana jest domyślna strategia routingu.",
+    "preferredConnectionsClear": "Wyczyść",
+    "removeSelection": "Usuń {name}"
   },
   "auditLog": {
     "title": "Rejestr audytu",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Skonfiguruj most Obraz→Tekst w ustawieniach Mostu Modalności",
     "sttBridgeCta": "Skonfiguruj most Speech→Text w ustawieniach Modality Bridge",
     "existingConnection": "Istniejące połączenie",
-    "openrouterSttDescription": "Modele rozpoznawania mowy OpenRouter korzystają z Twojego skonfigurowanego połączenia OpenRouter. Nie są wymagane osobne poświadczenia."
+    "openrouterSttDescription": "Modele rozpoznawania mowy OpenRouter korzystają z Twojego skonfigurowanego połączenia OpenRouter. Nie są wymagane osobne poświadczenia.",
+    "modalityTabsAria": "Typ multimediów",
+    "serviceKindsAria": "Typ usługi"
   },
   "search": {
     "searchQuery": "Zapytanie wyszukiwania",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "Nieznany",
     "cliproxyapiUpdate": "Aktualizuj",
     "cliproxyapiUpdateAvailable": "Dostępna aktualizacja: v{current} → v{latest}",
-    "cliproxyapiVersion": "Wersja"
+    "cliproxyapiVersion": "Wersja",
+    "removeMapping": "Usuń mapowanie"
   },
   "modelCatalog": {
     "title": "Modele i zestawy",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "Kombinacja → {name}"
   },
   "combos": {
+    "title": "Kombinacje",
+    "description": "Tworzenie model combos z routingiem ważonym i obsługą fallback",
+    "autoCatalogTitle": "Katalog auto-routingu",
     "autoTosLoadError": "Nie udało się wczytać zasad ToS. Spróbuj ponownie przed ich zmianą.",
     "autoTosSaveError": "Nie udało się zapisać zasad ToS. Nadal wyświetlane jest poprzednie ustawienie. Spróbuj ponownie.",
     "autoTosIncludeLabel": "Uwzględnij dostawców oznaczonych ToS: avoid w auto",
     "autoTosDescription": "Domyślnie wyłączone. Dotyczy wszystkich kombinacji auto, a nie tylko jednego konta. Połączenie dostawcy nie włącza tej opcji.",
-    "title": "Kombinacje",
-    "description": "Tworzenie model combos z routingiem ważonym i obsługą fallback",
-    "autoCatalogTitle": "Katalog auto-routingu",
     "autoCatalogTemplateCount": "{count} szablonów",
     "autoCatalogDescription": "Wbudowane combos auto/* rozwiązywane dynamicznie z połączonych providers. Użyj dowolnego z tych IDs jako pola model — konfiguracja nie jest wymagana.",
     "autoCatalogExpand": "Rozwiń katalog auto-routingu",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "Nie skonfigurowano jeszcze żadnych kombinacji.",
     "playgroundCreateFirst": "Najpierw utwórz jedną",
     "weighted": "Ważony",
+    "weightPercent": "Waga (%)",
     "leastUsed": "Najmniej używany",
     "costOpt": "Optymalizacja kosztów",
     "strategyGuideTitle": "Jak korzystać z tej strategii",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# konto} other {# kont}}",
     "builderGlobalAdded": "Dodano",
     "builderGlobalAdd": "Dodaj",
+    "clearSearch": "Wyczyść wyszukiwanie",
     "manualModel": "Ręczny model",
     "manualModelInvalid": "Wprowadź model w formacie provider/model.",
     "manualModelUnknownProvider": "Nieznany prefiks provider.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "Dodaj referencję combo",
     "builderPinnedAccount": "Przypięte konto",
     "builderLegacyEntry": "Wpis legacy",
+    "builderStaleModel": "Brak w katalogu na żywo",
     "reviewName": "Nazwa",
     "reviewStrategy": "Strategia",
     "reviewSteps": "Kroki",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "Minimalna długość zawartości (znaki)",
     "responseValidationJsonPaths": "Testy JSON-path",
     "responseValidationAddCheck": "+ Dodaj test",
+    "responseValidationRemoveCheck": "Usuń sprawdzenie",
+    "responseValidationPath": "Ścieżka JSON",
+    "responseValidationCondition": "Warunek",
+    "responseValidationValue": "Oczekiwana wartość",
     "agentFeaturesSystemMessageOverride": "Zastąp komunikat systemowy",
     "agentFeaturesSystemMessagePlaceholder": "Jesteś eksperckim asystentem...",
     "agentFeaturesSystemMessageHint": "Zastąpienie komunikatu systemowego dla agentów",
@@ -5288,7 +5292,8 @@
         "skipped": "już skonfigurowane",
         "failed": "niepowodzenie"
       }
-    }
+    },
+    "stepProgress": "Postęp konfiguracji"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Ten dostawca jest domyślnie wykluczony z auto",
@@ -6056,9 +6061,9 @@
     "apiFormatLabel": "Etykieta formatu API",
     "apiKeyOptionalHint": "Wskazówka: klucz API opcjonalny",
     "apiKeyOptionalLabel": "Klucz API opcjonalny",
-    "apiRegionChina": "Region API Chiny",
-    "apiRegionHint": "Wskazówka dotycząca regionu API",
-    "apiRegionInternational": "Międzynarodowy region API",
+    "apiRegionChina": "Chiny kontynentalne",
+    "apiRegionHint": "Wybierz region punktu końcowego używany do dostępu do API i śledzenia limitów.",
+    "apiRegionInternational": "Międzynarodowy",
     "apiRegionLabel": "Region API",
     "apikey": "Klucz API",
     "audio": "Dźwięk",
@@ -6080,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Gdy to konto osiągnie 5-godzinny limit użycia, a Anthropic zaoferuje tryb o niższym priorytecie, OmniRoute zaakceptuje go i będzie nadal wysyłać żądania z anthropic-usage-limit: slow aż do zresetowania okna, zamiast wstrzymywać połączenie. Tygodniowy limit nadal obowiązuje, a odpowiedzi mogą oczekiwać na wolne zasoby.",
     "claudeAutoLimitResetLabel": "Automatycznie resetuj limit sesji (raz w tygodniu)",
     "claudeAutoLimitResetDescription": "Gdy to konto osiągnie 5-godzinny limit użycia, a reset limitu sesji będzie dostępny, OmniRoute automatycznie go aktywuje i ponowi próbę z pełną szybkością. Wykorzystuje przysługujący kontu reset raz w tygodniu i nadal wlicza się do tygodniowego limitu.",
+    "codexPaidCreditsShort": "Dodatkowe kredyty",
+    "codexPaidCreditsToggleTitle": "Zezwalaj na płatne kredyty Codex po wyczerpaniu limitu subskrypcji (mogą obowiązywać dodatkowe opłaty)",
+    "codexPaidCreditsEnabled": "Płatne kredyty Codex włączone (mogą obowiązywać dodatkowe opłaty)",
+    "codexPaidCreditsDisabled": "Płatne kredyty Codex wyłączone",
+    "failedUpdateCodexPaidCredits": "Nie udało się zaktualizować zasad płatnych kredytów Codex",
+    "allowCodexPaidCreditsLabel": "Zezwalaj na płatne kredyty Codex",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Pomiń tymczasowy cooldown, aby to połączenie pozostało kwalifikowalne nawet po błędach podlegających naprawie (stany terminalne, takie jak banned/expired, nadal obowiązują).",
     "disableCoolingLabel": "Wyłącz cooldown dla tego połączenia",
     "bulkPasteAdded": "{count, plural, one {Dodano 1 klucz} other {Dodano # kluczy}}",
@@ -6533,6 +6545,7 @@
       "monsterapi": "Pobierz klucz API na monsterapi.ai",
       "moonshot": "Połącz Moonshot AI za pomocą klucza API.",
       "morph": "Darmowy plan: 250K kredytów/miesiąc, $0",
+      "apmix": "Połącz Apmix kluczem API z apmix.ai/dashboard — jedna subskrypcja, wiele modeli.",
       "nanogpt": "Połącz NanoGPT za pomocą klucza API.",
       "nebius": "~$1 w kredytach próbnych przy rejestracji do testowania API",
       "nlpcloud": "NLP Cloud używa autorskiego API chatbota zamiast OpenAI chat/completions. OmniRoute dostosowuje komunikaty OpenAI do input/context/history i udostępnia lokalny katalog obsługiwanych modeli chatbotów.",
@@ -6621,7 +6634,7 @@
       "claude": "Połącz Claude Code za pomocą istniejącego przepływu OAuth.",
       "cline": "Połącz Cline za pomocą istniejącego przepływu OAuth.",
       "cursor": "Połącz Cursor IDE za pomocą istniejącego przepływu OAuth.",
-      "cursor-api": "Połącz Cursor za pomocą klucza API użytkownika (crsr_...) z cursor.com/dashboard/api; sesja IDE nie jest wymagana.",
+      "cursor-api": "Połącz Cursor za pomocą klucza API użytkownika (crsr_... lub grok_...) ze strony cursor.com/dashboard/api; sesja IDE nie jest wymagana.",
       "github": "Połącz GitHub Copilot za pomocą istniejącego przepływu OAuth.",
       "gitlab-duo": "Aplikacja OAuth z zakresami ai_features + read_user. Skonfiguruj GITLAB_DUO_OAUTH_CLIENT_ID i opcjonalnie GITLAB_DUO_OAUTH_CLIENT_SECRET w tej instancji OmniRoute.",
       "kilocode": "Połącz Kilo Code za pomocą istniejącego przepływu OAuth.",
@@ -6629,8 +6642,7 @@
       "kiro": "Darmowy plan: 50 kredytów/miesiąc (~25K–100K tokenów). ⚠️ ToS Kiro zabrania korzystania z zewnętrznych proxy/harness.",
       "codex": "Połącz OpenAI Codex za pomocą istniejącego przepływu OAuth.",
       "qwen": "Połącz Qwen Code za pomocą istniejącego przepływu OAuth.",
-      "github-models": "Utwórz token GitHub PAT z zakresem 'models: read' na github.com/settings/tokens",
-      "apmix": "Połącz Apmix kluczem API z apmix.ai/dashboard — jedna subskrypcja, wiele modeli."
+      "github-models": "Utwórz token GitHub PAT z zakresem 'models: read' na github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} akceptuje natywne ID models dla provider. Zaimportuj z /models lub dodaj własne ID do routing.",
     "bedrockModelsDescription": "Models Amazon Bedrock są ograniczone do regionu AWS. Zaimportuj z /models lub dodaj Bedrock ID models włączone w wybranym regionie.",
@@ -6802,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Limity współbieżności dla poszczególnych modeli",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Opcjonalne: jeden wpis model=cap w wierszu, dopasowywany do dokładnego identyfikatora modelu upstream. Nadmiarowe żądania są kolejkowane lokalnie; puste oznacza brak limitu dla modelu.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Nieprawidłowy wpis współbieżności dla modelu „{entry}” — użyj model=cap, gdzie cap jest liczbą całkowitą od 1 do {max}.",
-    "codexPaidCreditsShort": "Dodatkowe kredyty",
-    "codexPaidCreditsToggleTitle": "Zezwalaj na płatne kredyty Codex po wyczerpaniu limitu subskrypcji (mogą obowiązywać dodatkowe opłaty)",
-    "codexPaidCreditsEnabled": "Płatne kredyty Codex włączone (mogą obowiązywać dodatkowe opłaty)",
-    "codexPaidCreditsDisabled": "Płatne kredyty Codex wyłączone",
-    "failedUpdateCodexPaidCredits": "Nie udało się zaktualizować zasad płatnych kredytów Codex",
-    "allowCodexPaidCreditsLabel": "Zezwalaj na płatne kredyty Codex",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Nieprawidłowy wpis współbieżności dla modelu „{entry}” — użyj model=cap, gdzie cap jest liczbą całkowitą od 1 do {max}."
   },
   "settings": {
     "title": "Ustawienia",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "Wybierz elementy wyświetlane na pasku bocznym. W trybie Podstawowe zaawansowane narzędzia nadal można wyszukiwać.",
     "hideHealthLogs": "Ukryj logi Health Check",
     "hideHealthLogsDesc": "Gdy włączone, ukrywaj komunikaty [HealthCheck] w konsoli serwera.",
-    "themeAccent": "Kolor motywu",
-    "themeAccentDesc": "Wybierz gotowy kolor lub utwórz własny motyw oparty na jednym kolorze.",
-    "themeCreate": "Utwórz motyw",
-    "themeCustom": "Niestandardowy motyw",
-    "themeBlue": "Niebieski",
-    "themeRed": "Czerwony",
-    "themeGreen": "Zielony",
-    "themeViolet": "Fioletowy",
-    "themeOrange": "Pomarańczowy",
-    "themeCyan": "Cyjan",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Dostosowywanie nazwy i logo aplikacji.",
     "appName": "Nazwa aplikacji",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "Teraz",
       "coreConfigPath": "Plik konfiguracji rdzenia",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Bezwzględna ścieżka do pliku .json (rozszerzenie małymi literami). Puste = bez generowania. Każda synchronizacja zapisuje '<path>'.generated obok przyjętego pliku, nigdy do niego.",
+      "coreConfigPathDesc": "Bezwzględna ścieżka do pliku .json/.yaml/.yml (rozszerzenie małymi literami). Puste = bez generowania. Każda synchronizacja zapisuje '<path>'.generated obok przyjętego pliku, nigdy do niego.",
       "lastSwitchKind": "Powód przełączenia",
       "switchKind": {
         "ip_quota_429": "limit",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "Zastosowane przez: {mode}",
       "coreBinaryPath": "Ścieżka pliku binarnego rdzenia",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Opcjonalne: weryfikuje wygenerowany plik plikiem binarnym rdzenia przed zastąpieniem przyjętego pliku. Pozostaw puste, aby nadal zapisywać obok niego. Katalog zostanie utworzony, jeśli nie istnieje."
+      "coreBinaryPathHelp": "Opcjonalne: weryfikuje wygenerowany plik plikiem binarnym rdzenia przed zastąpieniem przyjętego pliku. Pozostaw puste, aby nadal zapisywać obok niego. Katalog zostanie utworzony, jeśli nie istnieje.",
+      "urlFeedlessHint": "Pozostaw puste, aby subskrypcja obejmowała tylko selektor: ustaw poniżej adres URL sterujący, żaden feed nie jest pobierany, odświeżany ani powiązany."
     },
     "bulkHealthcheck": "Zbiorczy Healthcheck",
     "bulkHealthcheckDesc": "Testowanie wszystkich skonfigurowanych proxy pod kątem docelowego URL w celu znalezienia działających.",
@@ -7707,6 +7703,7 @@
     "configured": "skonfigurowano",
     "none": "Brak",
     "modelOverrideValuePlaceholder": "Wartość liczbowa",
+    "modelOverrideKey": "Klucz nadpisania",
     "modelOverrideReasoningEffortsPlaceholder": "Wartości w języku angielskim oddzielone przecinkami, np. low, medium, high",
     "addKeyValue": "Dodaj wartość klucza",
     "noModelOverrides": "Brak skonfigurowanych nadpisań dla tego model.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "Można nadpisać domyślną wycenę dla określonych models. Niestandardowe nadpisania mają priorytet nad automatycznie wykrytą wyceną.",
     "editPricing": "Edytuj wycenę",
     "viewFullDetails": "Pokaż pełne szczegóły",
-    "themeCoral": "Koralowy",
     "adaptiveVolumeRouting": "Adaptacyjny routing wolumenowy",
     "adaptiveVolumeRoutingDesc": "Skaluj połączenia dynamicznie w oparciu o wolumen ładunku (payload) i ciśnienie przepustowości.",
     "lkgpToggleTitle": "Ostatni znany działający dostawca (LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "Zmniejsz zużycie tokens poprzez kompresję promptów przed wysłaniem do providers",
     "autoCombosTitle": "Automatyczne kombinacje",
     "autoCombosDesc": "Zezwól temu kluczowi na korzystanie z wbudowanych kombinacji auto/*, które automatycznie wybierają model spośród wszystkich skonfigurowanych dostawców",
+    "ccDiscoveryAliasesTitle": "Aliasy wykrywania Claude Code",
+    "ccDiscoveryAliasesDesc": "Ogłaszaj lustra zgodności claude/... dla modeli i kombinacji, do których ten klucz ma już dostęp",
     "compressionGuidanceFullGuideLink": "Pełny przewodnik kompresji",
     "compressionGuidanceShow": "Szczegóły",
     "compressionGuidanceHide": "Ukryj szczegóły",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "Powodzenie",
     "tomlTestFailed": "Błąd",
     "tomlImportError": "Nie można przetworzyć pliku RTK TOML.",
-    "tomlFileReadError": "Nie można odczytać wybranego pliku TOML."
+    "tomlFileReadError": "Nie można odczytać wybranego pliku TOML.",
+    "viewMode": "Tryb widoku"
   },
   "compressionEngineConfig": {
     "loading": "Wczytywanie…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "Pakiety językowe: {packs}",
     "dragToReorder": "Przeciągnij, aby zmienić kolejność kroku",
     "engine": "Silnik",
-    "intensity": "Intensywność"
+    "intensity": "Intensywność",
+    "compressionOverride": "Nadpisanie kompresji"
   },
   "compressionStudio": {
     "noRun": "Brak dostępnego przebiegu kompresji.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "zwycięzca: {winner}",
     "encoder": "koder",
     "bytes": "bajty",
-    "tokensCl100k": "tokeny (cl100k)"
+    "tokensCl100k": "tokeny (cl100k)",
+    "studioViews": "Widoki Studio"
   },
   "omniglyph": {
     "preview": "Podgląd",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "Wiadomości krótsze niż ta wartość nie są kompresowane. Niższa = większa kompresja.",
     "tooltipMinSavings": "Kompresuj tylko wtedy, gdy pozwala to zaoszczędzić co najmniej tyle tokens.",
     "ultraSettings": "Ustawienia Ultra",
-    "ultraSettingsDesc": "Kompresja semantyczna oparta na SLM"
+    "ultraSettingsDesc": "Kompresja semantyczna oparta na SLM",
+    "defaultLanguage": "Domyślny język",
+    "viewMode": "Tryb widoku"
   },
   "translator": {
     "title": "Tłumacz",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "Nie udało się przekształcić strumienia"
   },
   "usage": {
+    "healthExtraUsageBypass": "Limit wyczerpany; dodatkowe użycie jest dozwolone, więc usługa działa dalej.",
+    "healthPaidCreditsBypass": "Limit wyczerpany; dostępne płatne kredyty pozwalają kontynuować usługę.",
+    "healthFilteringBypass": "Limit wyczerpany; lokalne filtrowanie limitów jest wyłączone, więc usługa działa dalej.",
     "title": "Użycie",
     "grokExtraUsageCredits": "Dodatkowe Kredyty Użytkowania",
     "grokAutoTopUp": "Automatyczne Doładowanie",
@@ -9998,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limity dostawców",
     "noProviders": "Brak połączonych providers",
+    "quotaAuthRequired": "Wymagane uwierzytelnienie — zaloguj się do panelu",
+    "quotaAuthRequiredHint": "Nie udało się wczytać połączeń z dostawcami, ponieważ sesja panelu wygasła lub nie istnieje. Zaloguj się i odśwież stronę, aby zobaczyć swoje limity.",
     "connectProvidersForQuota": "Połącz się z providers za pomocą OAuth, aby śledzić limity quota i zużycie API.",
     "accountsCount": "{count, plural, one {# konto} other {# kont}}",
     "filteredFromCount": "(odfiltrowano z {count})",
@@ -10047,9 +10055,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Nieznany",
     "statTotal": "Suma",
-    "statCritical": "Krytyczny",
-    "statAlert": "Alert",
-    "statHealthy": "Zdrowy",
     "filterPurchaseTypeLabel": "Typ",
     "filterTierLabel": "Plan",
     "purchaseAll": "Wszystkie",
@@ -10288,10 +10293,64 @@
     "lastRefreshed": "Ostatnio odświeżono",
     "providerQuota": "Limit dostawcy",
     "providerQuotaHomeHint": "Status na żywo na połączonych kontach",
+    "claudeResetCreditDefaultTitle": "Reset limitu Claude",
+    "confirmRedeemClaudeResetCredit": "Wykorzystanie natychmiast resetuje kwalifikujące się limity użycia Claude i trwale zużywa ten kredyt.",
+    "claudeResetCreditsModalTitle": "Kredyty resetu Claude",
+    "claudeResetCreditsModalExplainer": "Dostępne kredyty resetu Claude i cotygodniowe resety sesji dla tego konta.",
     "codexPaidCreditsLabel": "Płatne kredyty Codex",
     "codexPaidCreditsAvailable": "Dostępne (saldo nie jest raportowane)",
     "codexPaidCreditsUnavailable": "Niedostępne lub osiągnięto limit wydatków",
-    "codexPaidCreditsUnlimited": "Bez limitu"
+    "codexPaidCreditsUnlimited": "Bez limitu",
+    "healthAccountHint": "Na podstawie ostatnich obserwacji, nie testu na żywo. Wybierz konto, aby zobaczyć szczegóły.",
+    "healthRecovery": "Przewidywane przywrócenie",
+    "healthAvailable": "Dostępne",
+    "healthRestricted": "Częściowo ograniczone",
+    "healthUnavailable": "Niedostępny",
+    "healthPeakHourProtection": "Ochrona w godzinach szczytu",
+    "healthCooldown": "Okres oczekiwania",
+    "healthQuotaExhausted": "Limit wyczerpany",
+    "healthOverview": "Przegląd",
+    "layoutFull": "Pełny",
+    "layoutCompact": "Kompaktowy",
+    "healthQuotaError": "Błąd odczytu limitu",
+    "healthNoRuntime": "Stan działania niedostępny",
+    "healthPreviousSnapshot": "Ostatnie odświeżenie nie powiodło się; wyświetlono poprzedni wynik",
+    "healthPreviousFailure": "Ostatnie żądanie nie powiodło się; czas oczekiwania minął",
+    "healthAwaitingSync": "Czas resetu minął; oczekiwanie na synchronizację",
+    "healthVerdictUnavailable": "Sprawdzenie dostępności jest niedostępne; wyświetlane są tylko poziomy limitów",
+    "healthSummaryFailed": "Błąd odczytu podsumowania stanu; może brakować blokad modeli",
+    "healthRuntimeObserved": "Stan zaktualizowano {time}",
+    "healthQuotaObserved": "Limit zaobserwowano {time}",
+    "healthOldestQuota": "Najstarszy zapis limitu: {time}",
+    "healthRecoveryUnknown": "Czas przywrócenia nieznany",
+    "healthDetailsHint": "Kliknij, aby zobaczyć szczegóły i działania",
+    "healthFiveHour": "5 godzin",
+    "healthOverall": "Ogólny",
+    "healthAction": "Wymaga działania",
+    "healthTitle": "Dostępność kont",
+    "healthDrag": "Przeciągnij, aby zmienić kolejność dostawców",
+    "healthDragPosition": "{provider}, {count, plural, one {pozycja {position, number} z #} few {pozycja {position, number} z #} many {pozycja {position, number} z #} other {pozycja {position, number} z #}}",
+    "healthResetOrder": "Przywróć domyślną kolejność",
+    "healthPool": "Pula {name}",
+    "healthOtherPool": "To samo konto · {pool}: {status} (pozostało {remaining})",
+    "healthIncluded": "{count, plural, one {W tym # częściowo ograniczone konto} few {W tym # częściowo ograniczone konta} many {W tym # częściowo ograniczonych kont} other {W tym # częściowo ograniczonego konta}}",
+    "healthBannerUnavailable": "{count, plural, one {# konto tymczasowo niedostępne} few {# konta tymczasowo niedostępne} many {# kont tymczasowo niedostępnych} other {# konta tymczasowo niedostępnego}}",
+    "healthBannerAvailable": "{count, plural, one {# konto dostępne} few {Wszystkie # konta dostępne} many {Wszystkie konta dostępne: #} other {# konta dostępnego}}",
+    "healthLegendHide": "Ukryj legendę",
+    "healthLegendShow": "Pokaż legendę",
+    "healthLegendOk": "Pełne = pozostały limit; półprzezroczyste = wykorzystany.",
+    "healthLegendCooldown": "Limit {window} wyczerpany. Pełne = czas odczekany; półprzezroczyste = pozostałe oczekiwanie.",
+    "healthLegendAction": "Autoryzacja wygasła lub konto zablokowano; czekanie nie pomoże.",
+    "healthLegendPartial": "Nadal dostępne. Żółty czubek = ograniczenie modelu lub puli.",
+    "healthWaited": "Odczekano {percent}",
+    "healthWait": "Jeszcze {duration} (dostępne o {time})",
+    "healthFastest": "Najbliższe odblokowanie za {duration}",
+    "healthRatio": "{available, plural, one {Dostępne # / {active, number}} few {Dostępne # / {active, number}} many {Dostępnych # / {active, number}} other {Dostępne # / {active, number}}}",
+    "healthCd5": "5 godzin · Okres oczekiwania",
+    "healthCdw": "Tygodniowy · Okres oczekiwania",
+    "healthRecentSuccessBypass": "Routing dopuszcza to konto, ponieważ niedawno żądanie zakończyło się powodzeniem.",
+    "healthPurchasedBalanceBypass": "Zakupione saldo pozwala korzystać dalej po wyczerpaniu wliczonego limitu.",
+    "healthCutoffAtRequest": "Progi limitów w czasie rzeczywistym są sprawdzane podczas routingu żądania."
   },
   "modals": {
     "waitingAuth": "Oczekiwanie na autoryzację",
@@ -11078,7 +11137,8 @@
       "message": "Wiadomość",
       "error": "Błąd",
       "completion": "Uzupełnienie"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Prosty czat",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "{minutes}m temu",
     "hoursAgo": "{hours}h temu",
     "daysAgo": "{days}d temu",
-    "entries": "Wpisy"
+    "entries": "Wpisy",
+    "viewSwitcherAria": "Widok pamięci podręcznej"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globalny",
@@ -11447,6 +11508,7 @@
     "tableHealth": "Kondycja (24h)",
     "tableUsage": "Użycie",
     "tableActions": "Akcje",
+    "moreActions": "Więcej działań",
     "test": "Test",
     "edit": "Edytuj",
     "delete": "Usuń",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "Nie znaleziono prawidłowych wpisów. Sprawdź format i spróbuj ponownie.",
     "bulkImportSuccess": "Import zakończony: utworzono {created}, zaktualizowano {updated}, nie powiodło się {failed}",
     "bulkImportErrorLine": "Linia {line}: {reason}",
-    "bulkImportMaxExceeded": "Maksymalnie 100 proxy na import",
+    "bulkImportMaxExceeded": "Maksymalnie {max} proxy na import",
     "bulkImportPreview": "Podgląd",
     "clearAssignment": "(wyczyść przypisanie)",
     "bulkProxyAssignment": "Masowe przypisywanie proxy",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "limit szybkości dla IP (429)",
     "poolSetAsideKindSlow": "powolne odpowiedzi",
     "poolSetAsideKindGeoBlocked": "zablokowany region (403/451)",
+    "poolSetAsideKindOperatorReported": "awaria zgłoszona przez operatora",
     "poolSetAsideUntil": "Z powrotem w rotacji {endsAt}",
     "poolSetAsideRepeat": "Odłożony {count, plural, one {# raz} other {# razy}}",
     "poolUnknownAddress": "Nieznany adres",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "Eksportuj kod",
     "exportShort": "Eksportuj",
     "noStateToExport": "Brak stanu playground dostępnego do eksportu.",
-    "closeExportModal": "Zamknij okno eksportu",
     "close": "Zamknij",
     "exportRealKeyWarning": "Ostrzeżenie o bezpieczeństwie: eksport zablokowany — w danych wyjściowych wykryto prawdziwy klucz API. Zresetuj swój klucz API i spróbuj ponownie.",
     "placeholderHintPrefix": "Zastąp",
@@ -11809,7 +11871,8 @@
       "nextButton": "Dalej",
       "runButton": "Uruchom",
       "promptPlaceholder": "Wpisz wiadomość… (Enter, aby wysłać, Shift+Enter dla nowego wiersza)"
-    }
+    },
+    "playgroundTabs": "Tryby Playground"
   },
   "miniPlayground": {
     "endpoint": "Punkt końcowy",
@@ -11880,7 +11943,8 @@
     "assistant": "Asystent",
     "errorLabel": "Błąd",
     "requestFailed": "Żądanie nie powiodło się",
-    "stop": "Zatrzymaj"
+    "stop": "Zatrzymaj",
+    "messageInputAria": "Wiadomość"
   },
   "requestLogger": {
     "recording": "Rejestrowanie",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "{count} rotacji kont",
       "resilienceRetried": "Ponawiono pustą turę",
       "resilienceContinued": "Wznowiono w trakcie strumienia",
-      "resilienceRecovered": "Odzyskano dzięki akcji odporności"
-    }
+      "resilienceRecovered": "Odzyskano dzięki akcji odporności",
+      "conversationContext": "Kontekst rozmowy",
+      "goToBottom": "Przejdź na dół",
+      "liveRefreshOn": "Odświeżanie na żywo: włączone",
+      "liveRefreshOff": "Odświeżanie na żywo: wyłączone",
+      "liveRefresh": "Odświeżanie na żywo",
+      "continuesFromParent": "kontynuuje z elementu nadrzędnego",
+      "continuesFrom": "Kontynuuje od {id}",
+      "viewConversation": "wyświetl rozmowę",
+      "openConversation": "Otwórz rozmowę {id}"
+    },
+    "tableLabel": "Dzienniki żądań"
   },
   "proxyLogger": {
     "filterAll": "Wszystkie",
@@ -12113,7 +12187,9 @@
     "colServedBy": "Obsługiwane przez",
     "filterTraffic": "Ruch",
     "filterTests": "Testy",
-    "filterSource": "Źródło"
+    "filterSource": "Źródło",
+    "tableLabel": "Dzienniki proxy",
+    "sortLogs": "Sortuj dzienniki"
   },
   "endpointOptions": {
     "speech": "Mowa",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "WYCZERPANE",
     "statusAlerting": "ALARM",
     "statusError": "BŁĄD",
-    "moreSuffix": "+{count} więcej"
+    "moreSuffix": "+{count} więcej",
+    "feedFilterLabel": "Filtruj zdarzenia"
   },
   "quotaShare": {
     "weightPercent": "Waga %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "Niezgrupowane",
     "ungroupedHint": "Te pule nie są przypisane do żadnej znanej grupy. Edytuj pulę, aby przenieść ją do rzeczywistej grupy.",
     "removeFailed": "Nie udało się usunąć tej puli.",
-    "dismiss": "Zamknij"
+    "dismiss": "Zamknij",
+    "allocationsHeading": "Alokacje",
+    "wizardRemoveDimension": "Usuń wymiar",
+    "wizardRemoveKey": "Usuń klucz"
   },
   "plugins": {
     "title": "Wtyczki",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "Aktualizacja ustawień nie powiodła się",
       "serviceRevealApiKey": "{actor} ujawnił klucz API dla {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Odrzuć błąd"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "Przejdź teraz",
       "message": "MITM Proxy znajduje się teraz w sekcji AgentBridge.",
       "title": "Ta strona została przeniesiona"
-    }
+    },
+    "dnsOn": "DNS włączony",
+    "dnsOff": "DNS wyłączony",
+    "showServerSettings": "Pokaż ustawienia serwera",
+    "hideServerSettings": "Ukryj ustawienia serwera",
+    "upstreamCaTesting": "Testowanie…",
+    "removeMapping": "Usuń mapowanie",
+    "mappingSourcePlaceholder": "np. gemini-3.6-flash-medium lub * dla wszystkich niezmapowanych modeli",
+    "mappingWildcardHint": "Użyj * jako źródła, aby kierować przez OmniRoute każdy model bez jawnego mapowania do wybranego modelu docelowego. Dokładne dopasowania źródła zawsze mają pierwszeństwo przed *.",
+    "wizardDetectingModels": "Wykrywanie modeli na podstawie przechwyconego ruchu...",
+    "wizardDetectedModels": "W przechwyconym ruchu znaleziono {count, plural, one {# model} few {# modele} many {# modeli} other {# modelu}}. Wybierz modele, które chcesz dodać:",
+    "wizardSelectedModels": "Wybrano {count, plural, one {# model} few {# modele} many {# modeli} other {# modelu}}. Na następnym ekranie przypiszesz wybrane pozycje do modeli OmniRoute.",
+    "wizardAddModels": "Dodaj {count, plural, one {# model} few {# modele} many {# modeli} other {# modelu}}",
+    "wizardNoModelsDetected": "Nie wykryto jeszcze żadnych modeli. Użyj {agent}, aby wysłać żądanie, a następnie ponownie uruchom ten kreator, by automatycznie wykryć modele na podstawie ruchu.",
+    "wizardNoModelsHint": "Możesz też zamknąć ten kreator i ręcznie dodać mapowania na karcie agenta."
   },
   "providerStats": {
     "unknownError": "Nieznany błąd",
@@ -12686,7 +12781,11 @@
     "avgTtft": "Śr. TTFT",
     "avgTotal": "Śr. łącznie",
     "requestTelemetry": "Telemetria żądań",
-    "requestTelemetryDescription": "Podział 7-fazowego potoku (ostatnie 5 minut)"
+    "requestTelemetryDescription": "Podział 7-fazowego potoku (ostatnie 5 minut)",
+    "title": "Statystyki dostawców",
+    "description": "Ruch, opóźnienia i wskaźniki powodzenia według dostawców i modeli",
+    "combo": "Kombinacja",
+    "toggleModels": "Pokaż modele dla {provider}"
   },
   "relay": {
     "title": "Bezserwerowe proxy przekaźnikowe",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "Brak treści żądania.",
     "noResponseBody": "Brak treści odpowiedzi.",
     "formatted": "Sformatowany",
-    "raw": "Surowy"
+    "raw": "Surowy",
+    "requestCount": "{count, plural, one {# żądanie} few {# żądania} many {# żądań} other {# żądania}}",
+    "expandList": "Rozwiń listę",
+    "collapseList": "Zwiń listę",
+    "snippetLanguage": "Język fragmentu kodu",
+    "headersTable": "Nagłówki",
+    "showSecrets": "Pokaż dane poufne",
+    "maskSecrets": "Maskuj dane poufne",
+    "llmNotAvailable": "Metadane LLM nie są dostępne dla tego żądania.",
+    "llmStreamYes": "tak (SSE)",
+    "llmStreamNo": "nie",
+    "llmTotalTokens": "Łącznie: {count} tokenów"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "Odsetek wywołań faktycznie obsłużonych przez tego dostawcę w ciągu ostatnich 24 godzin. Myślnik oznacza, że obsłużył zbyt mały ruch, aby określić współczynnik.",
     "reliabilitySample": "{successes} z {requests} wywołań zakończyło się powodzeniem w ciągu ostatnich {hours} godz.",
     "reliabilityTooFew": "Tylko {requests} wywołań w ciągu ostatnich {hours} godz. — zbyt mało, aby określić współczynnik",
-    "reliabilityNoTraffic": "Brak zarejestrowanych wywołań w ciągu ostatnich 24 godz."
+    "reliabilityNoTraffic": "Brak zarejestrowanych wywołań w ciągu ostatnich 24 godz.",
+    "categoryFilter": "Kategoria zadania"
   },
   "discovery": {
     "title": "Wykrywanie dostawców",
@@ -13331,7 +13442,11 @@
     "method": "Metoda",
     "auth": "Uwierzytelnianie",
     "feasibility": "Wykonalność",
-    "models": "Modele"
+    "models": "Modele",
+    "provider": "Dostawca",
+    "status": "Status",
+    "endpoint": "Punkt końcowy",
+    "actions": "Działania"
   },
   "noAuthProvider": {
     "title": "Uwierzytelnianie nie jest wymagane",
@@ -13380,7 +13495,8 @@
     "ownProxy": "Własne proxy",
     "freeTierPause": "Model {model} wstrzymany (429), powrót o {time}",
     "freeTierPauseProvider": "Wstrzymano (429), powrót o {time}",
-    "freeTierPauseNote": "Pauza w procesie w tej instancji"
+    "freeTierPauseNote": "Pauza w procesie w tej instancji",
+    "proxyType": "Typ serwera proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "Ukryte osiągnięcie czeka...",
         "criteria": "Ukończ ukryte osiągnięcie, aby ujawnić tę odznakę."
       }
-    }
+    },
+    "leaderboardTitle": "Ranking",
+    "leaderboardDescription": "Rankingi i osiągnięcia dla Twoich kluczy API",
+    "badgeLocked": "Zablokowane"
   },
   "featureFlags": {
     "title": "Flagi funkcji",
@@ -13794,6 +13913,7 @@
     "latency": "Opóźnienie",
     "quota": "Limit przydziału",
     "rangeWindow": "Okno {range}",
+    "timeRange": "Zakres czasu",
     "runtimeHealthBlend": "połączenie środowiska uruchomieniowego/kondycji",
     "averageResponseTime": "średni czas odpowiedzi",
     "worstQuota": "Najgorszy limit przydziału",
@@ -13995,7 +14115,11 @@
     "learnMore": "Dowiedz się więcej",
     "changelogLoadFailed": "Nie udało się wczytać dziennika zmian. Spróbuj ponownie później.",
     "retry": "Ponów próbę",
-    "viewFullHistory": "Wyświetl pełną historię w serwisie GitHub"
+    "viewFullHistory": "Wyświetl pełną historię w serwisie GitHub",
+    "title": "Aktualności i dziennik zmian",
+    "description": "Ogłoszenia zespołu OmniRoute i najnowsze informacje o wydaniach",
+    "viewLabel": "Wyświetl",
+    "loadingNews": "Ładowanie ogłoszeń..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "Stan Wyłącznika Obwodu Dostawcy",
       "lastUpdate": "Ostatnia aktualizacja: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} godz. {minutes} min"
+      "uptimeHoursMinutes": "{hours} godz. {minutes} min",
+      "breakerClosed": "Zamknięte",
+      "breakerNotClosed": "Otwarte lub półotwarte"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "Szczegóły konserwacji",
         "secondaryAction": "Stan systemu"
       }
+    },
+    "miniapp": {
+      "askAnything": "Zapytaj o cokolwiek…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "Narzędzie MCP",
     "scope": "Zakres",
-    "apiKey": "Klucz API"
+    "apiKey": "Klucz API",
+    "visibleCount": "Widoczne: {visible} / łącznie: {total}",
+    "modeLabel": "Tryb widoku",
+    "jumpToNow": "Przejdź do bieżącego czasu; linia TERAZ zostanie ustawiona na pozycji {position}%",
+    "laneReuse": "Ponowne użycie wiersza",
+    "laneReuseLabel": "Okno ponownego użycia wiersza (minuty)",
+    "laneReuseHint": "Żądania o tym samym identyfikatorze konwersacji pozostają w tym samym wierszu osi czasu, o ile odstęp między nimi jest krótszy niż podana liczba minut.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automatyczne odświeżanie",
+    "autoRefreshLabel": "Interwał automatycznego odświeżania (sekundy)",
+    "autoRefreshHint": "Częstotliwość ponownego pobierania przez oś czasu listy żądań z serwera.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Pomniejsz",
+    "zoomIn": "Powiększ"
   },
   "metadata": {
     "compressionTitle": "Kompresja",

@@ -20,7 +20,7 @@ Wakati wakala wa IDE (k.m., GitHub Copilot, Cursor, Claude Code) anapofanya wito
 
 Hii inamaanisha unaweza:
 
-- **Kuelekeza upya wakala yeyote kwa mtoa huduma yeyote**: Copilot akizungumza na OpenAI? Muelekeze kwa Anthropic Claude, Gemini, au mojawapo ya watoa huduma 375 wa OmniRoute.
+- **Kuelekeza upya wakala yeyote kwa mtoa huduma yeyote**: Copilot akizungumza na OpenAI? Muelekeze kwa Anthropic Claude, Gemini, au mojawapo ya watoa huduma 376 wa OmniRoute.
 - **Kutumia ramani za modeli**: `gemini-3-flash` → `claude-sonnet-4.7` kwa uwazi katika kiwango cha kishughulikiaji.
 - **Kuchunguza trafiki yote ya wakala**: kila ombi lililokatizwa huchapishwa kwenye [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **Kutumia ustahimilivu wa OmniRoute**: uelekezaji wa combo, circuit breakers, fallbacks, na ufuatiliaji wa gharama hufanya kazi kwa trafiki ya wakala wa IDE pia.

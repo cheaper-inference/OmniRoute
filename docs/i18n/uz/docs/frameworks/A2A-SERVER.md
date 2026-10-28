@@ -162,7 +162,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ichida ulangan 6 ta
 | Health Report      | `health-report`      | Har bir provayder bo'yicha circuit breaker, cooldown va lockout holatini jamlaydi                                                                                 | health, resilience         | "Barcha provayderlarning holatini ko'rsating"          |
 | List Capabilities  | `list-capabilities`  | To'liq 45 yozuvli Agent Skills katalogini (23 API + 21 CLI + 1 config) kontekst kiritish uchun xom SKILL.md URL'lari bilan markdown jadval ko'rinishida qaytaradi | catalog, discovery, skills | "Barcha OmniRoute imkoniyatlarini ro'yxatlang"         |
 
-> Agent Card jonli 375 provayderli katalog bilan mos holda saqlanishi kerak; provayderlar soni va bepul/avtorizatsiyasiz metadata ish vaqti reestrida (runtime registry) olinadi.
+> Agent Card jonli 376 provayderli katalog bilan mos holda saqlanishi kerak; provayderlar soni va bepul/avtorizatsiyasiz metadata ish vaqti reestrida (runtime registry) olinadi.
 
 ### `list-capabilities` Skill'i tafsilotlari
 

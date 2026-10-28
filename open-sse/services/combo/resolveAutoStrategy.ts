@@ -47,6 +47,7 @@ import type {
   ComboLogger,
   ResolvedComboTarget,
 } from "./types.ts";
+import { normalizeAutoConnectionScope } from "./autoConnectionScope.ts";
 
 /**
  * Dependency-injected `buildAutoCandidates` — it lives in `combo.ts` (the host of
@@ -58,7 +59,8 @@ type BuildAutoCandidates = (
   comboName: string,
   sessionId?: string | null,
   resetWindowConfig?: ResetWindowConfig,
-  resilienceSettings?: ResilienceSettings | null
+  resilienceSettings?: ResilienceSettings | null,
+  apiKeyAllowedConnections?: string[] | null
 ) => Promise<AutoProviderCandidate[]>;
 
 export interface ResolveAutoStrategyDeps {
@@ -84,6 +86,7 @@ export interface ResolveAutoStrategyDeps {
   resilienceSettings: ResilienceSettings;
   log: ComboLogger;
   buildAutoCandidates: BuildAutoCandidates;
+  apiKeyAllowedConnections?: string[] | null;
 }
 
 export type ResolveAutoStrategyResult =
@@ -101,6 +104,7 @@ export interface EvaluateAutoCandidatesOptions {
   resilienceSettings?: ResilienceSettings | null;
   manifestHint?: RoutingHint | null;
   buildAutoCandidates: BuildAutoCandidates;
+  apiKeyAllowedConnections?: string[] | null;
 }
 
 export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOptions) {
@@ -109,7 +113,8 @@ export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOpti
     options.comboName,
     options.sessionId,
     options.resetWindowConfig,
-    options.resilienceSettings
+    options.resilienceSettings,
+    options.apiKeyAllowedConnections
   );
   const cacheAffinityScores = calculatePromptCacheAffinityScores(
     builtCandidates,
@@ -271,7 +276,17 @@ export async function resolveAutoStrategyOrder(
       );
     }
 
-    eligibleTargets = await expandAutoComboCandidatePool(eligibleTargets, combo);
+    eligibleTargets = await expandAutoComboCandidatePool(
+      eligibleTargets,
+      combo,
+      deps.apiKeyAllowedConnections ?? null
+    );
+  } else if (normalizeAutoConnectionScope(deps.apiKeyAllowedConnections)) {
+    eligibleTargets = await expandAutoComboCandidatePool(
+      eligibleTargets,
+      combo,
+      deps.apiKeyAllowedConnections ?? null
+    );
   }
 
   const prompt = extractPromptForIntent(body);
@@ -373,6 +388,7 @@ export async function resolveAutoStrategyOrder(
       resilienceSettings: autoCandidateResilienceSettings,
       manifestHint: autoManifestHint,
       buildAutoCandidates,
+      apiKeyAllowedConnections: deps.apiKeyAllowedConnections ?? null,
     });
   for (let index = 0; index < sourceCandidates.length; index += 1) {
     sourceCandidates[index].cacheAffinity = candidates[index]?.cacheAffinity;
@@ -418,6 +434,7 @@ export async function resolveAutoStrategyOrder(
             sla: slaPolicy,
             weights,
             explorationRate,
+            manifestHint: autoManifestHint,
             messages: body.messages,
             nadir: nadirConfig,
           },
@@ -451,6 +468,7 @@ export async function resolveAutoStrategyOrder(
             budgetFallback,
             estimatedInputTokens,
             explorationRate,
+            manifestHint: autoManifestHint,
           },
           routableCandidates,
           taskType

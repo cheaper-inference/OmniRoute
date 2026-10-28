@@ -612,11 +612,11 @@ Täieliku keskkonnamuutujate loendi leiate [README](../README.md) failist.
 ## 📊 Saadaolevad mudelid
 
 <details>
-<summary><b>Vaata kõiki saadaolevaid mudeleid</b></summary>
+<summary><b>Kuva kõik saadaolevad mudelid</b></summary>
 
-> Allolev loend on koostatud faili `open-sse/config/providerRegistry.ts` põhjal versiooni v3.8.0 jaoks. Pilvekataloogid (Gemini, OpenRouter jt) sünkroniseeritakse dünaamiliselt — täieliku ja ajakohase kataloogi vaatamiseks avage **Dashboard → Providers → [provider] → Available Models** või kutsuge välja `GET /api/models/catalog`.
+> Allolev loend on koostatud failist `open-sse/config/providerRegistry.ts` versiooni v3.8.0 jaoks. Pilvekataloogid (Gemini, OpenRouter jne) sünkroonitakse dünaamiliselt — täieliku reaalajas kataloogi nägemiseks avage **Dashboard → Providers → [provider] → Available Models** või tehke päring `GET /api/models/catalog`.
 >
-> Kui teenusepakkuja sisseehitatud loend on aegunud, kasutage sellel lehel valikut **Import from /models** (või lülitage sisse **Auto-Sync**), et tõmmata värske kataloog otse allika juurest. See kontrolliti üle versioonis v3.8.50 LLM7.io jaoks (`gemini-3.1-flash-lite`) ja UncloseAI jaoks (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinationsi anonüümne juurdepääs oli samal testikorral endiselt allika poolt piiratud.
+> Kui mõne pakkuja sisseehitatud loend on aegunud, kasutage sellel lehel valikut **Import from /models** (või lubage **Auto-Sync**), et tõmmata reaalajas ülemvoo kataloog. See kinnitati versioonis v3.8.50 LLM7.io (`gemini-3.1-flash-lite`) ja UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) puhul; Pollinationsi anonüümne juurdepääs jäi sama testitsükli jooksul ülemvoo poolt piiratuks.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -624,45 +624,45 @@ Täieliku keskkonnamuutujate loendi leiate [README](../README.md) failist.
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — TASUTA OAuth: kasutage otsest kataloogi, mis on kuvatud all **Dashboard → Providers → Kiro → Available Models**. Saadavus sõltub kontost ja tellimusplaanist.
+**Kiro (`kr/`)** — TASUTA OAuth: kasutage reaalajas kataloogi, mida kuvatakse jaotises **Dashboard → Providers → Kiro → Available Models**. Saadavus sõltub kontost ja paketist.
 
 **Qoder (`if/`)** — TASUTA OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 $/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 $/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 $/kuus fikseeritud tasu või kasutuspõhine: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/kuus fikseeritud hinnaga või kasutuspõhiselt: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-võti: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Ülikiire: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok pärismudelid: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Groki-natiivne: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Majutatud ELis: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EL-is majutatud: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Otsingutoega täiendatud: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Otsinguga täiendatud: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Avatud lähtekoodiga: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (tasuta), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Kiire järeldus: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Kiire järeldamine: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Vahvelmastaabis (wafer-scale): `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-keskne: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Ettevõtte tasemel: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Ettevõtlusklass: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sünkroniseeritakse otse ja iga API-võtme kohta eraldi Google'ilt — staatiline loend puudub. Ühendage võti **Dashboard → Providers** all ja kasutage siis valikut **Available Models**, et importida hetkel kehtiv kataloog (nt `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Sünkroonitakse reaalajas iga API-võtme kohta Google'ist — staatilist loendit pole. Ühendage võti jaotises **Dashboard → Providers** ja seejärel kasutage praeguse kataloogi importimiseks valikut **Available Models** (nt `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Muud ühilduvad teenusepakkujad** (valik): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (kaudu `aws-bedrock`), `azure-ai`, `openrouter` (edastuskataloog / passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Igaüks neist haldab oma mudelite loendit failis `providerRegistry.ts` ja see saab olla automaatselt sünkroonitud, kui teenusepakkuja pakub `/models` lõpp-punkti.
+**Muud ühilduvad pakkujad** (valik): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (läbi `aws-bedrock`), `azure-ai`, `openrouter` (edastusreežimi kataloog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Igaüks haldab oma mudeliloendit failis `providerRegistry.ts` ja seda saab automaatselt sünkroonida, kui pakkuja pakub `/models` lõpp-punkti.
 
-**Märkus mudeli ID-de kohta:** OmniRoute kasutab teenusepakkuja pärismudelite ID-sid (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Mõned ID-d sisaldavad punktidega versiooninumbreid, kuna just sellisel kujul ootab neid allika API. Kui mõnda mudelit ülal loetletud ei ole, käivitage käsk `omniroute models --search <term>` või pöörduge `GET /api/models/catalog` poole, et saadavust kontrollida.
+**Märkus mudeli-ID-de kohta:** OmniRoute kasutab pakkuja-põhiseid ID-sid (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Mõned ID-d sisaldavad punktidega versiooninumbreid, sest ülemvoo API ootab neid just nii. Kui mudelit pole ülal loetletud, käivitage `omniroute models --search <term>` või tehke päring `GET /api/models/catalog`, et saadavust kinnitada.
 
 </details>
 

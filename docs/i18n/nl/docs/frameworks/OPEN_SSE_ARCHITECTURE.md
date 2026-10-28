@@ -488,7 +488,7 @@ Deze verwerkt:
 
 | Bestand                       | Doel                                             |
 | ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Chatmodel-register over de 375-providercatalogus |
+| `providerRegistry.ts`         | Chatmodel-register over de 376-providercatalogus |
 | `providerModels.ts`           | Modelaliassen, formaatmapping                    |
 | `constants.ts`                | Time-outs, limieten, statuscodes                 |
 | `defaultThinkingSignature.ts` | Standaard Claude thinking-signatuur              |

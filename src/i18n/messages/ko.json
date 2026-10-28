@@ -25,8 +25,10 @@
     "confirm": "확실합니까?",
     "refresh": "새로고침",
     "close": "닫기",
+    "dialogTitleFallback": "대화 상자",
     "previousPage": "이전 페이지",
     "nextPage": "다음 페이지",
+    "pagination": "페이지네이션",
     "capsLockOn": "Caps Lock이 켜져 있습니다",
     "dismissNotification": "알림 닫기",
     "toggleColumns": "열 토글",
@@ -182,6 +184,7 @@
     "combos": "콤보",
     "noModelsFound": "모델을 찾을 수 없습니다",
     "clear": "지우기",
+    "clearFilters": "필터 지우기",
     "done": "완료",
     "selectAll": "모두 선택",
     "unselectAll": "선택 해제",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# 배치} other {# 배치들}}",
     "batchFilePreview": "미리보기",
     "batchFilePreviewTruncated": "첫 번째 {shown} 줄 표시 ({total} 총 줄)",
-    "batchFileDownloadFull": "전체 파일 다운로드"
+    "batchFileDownloadFull": "전체 파일 다운로드",
+    "tokensPageTitle": "토큰",
+    "tokensPageDescription": "API 키 간에 토큰을 전송하고, 초대 코드를 공유하고, 커뮤니티 서버를 연결하세요.",
+    "tokensServerUrlLabel": "서버 URL"
   },
   "disabled": "비활성화됨",
   "featureFlagOmnirouteEmergencyFallbackDescription": "예산이 소진된 요청을 긴급 무료 폴백 제공자/모델로 라우팅합니다.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "프록시 서버가 중지되었거나 다시 시작되는 중입니다.",
     "expandSidebar": "사이드바 확장",
     "collapseSidebar": "사이드바 접기",
-    "themes": "테마",
-    "presetColors": "인기 색상",
     "createTheme": "테마 만들기",
     "chooseColor": "색상 하나 선택",
-    "themeCoral": "코랄",
-    "themeBlue": "파란색",
-    "themeRed": "빨간색",
-    "themeGreen": "초록색",
-    "themeViolet": "보라색",
-    "themeOrange": "주황색",
-    "themeCyan": "시안",
     "cliToolsShort": "도구",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "테마 시스템",
     "whitelabelingDesc": "화이트 라벨링 설명",
     "switchThemes": "테마 전환",
-    "themeAccentDesc": "테마 강조색 설명",
     "uploadFavicon": "파비콘 업로드",
     "themeDark": "어두운 테마",
     "customLogoDesc": "사용자 지정 로고 설명",
     "sidebarVisibilityToggle": "사이드바 표시 여부 전환",
-    "themeAccent": "테마 강조색",
     "resetFavicon": "파비콘 재설정",
     "whitelabeling": "화이트 라벨링",
     "darkMode": "다크 모드",
@@ -1122,10 +1117,8 @@
     "customLogo": "사용자 지정 로고",
     "appearance": "모양",
     "themeSelectionAria": "테마 선택 ARIA",
-    "themeCreate": "테마 만들기",
     "customFaviconDesc": "사용자 지정 파비콘 설명",
     "logoPreview": "로고 미리보기",
-    "themeCustom": "사용자 지정 테마",
     "hideHealthLogsDesc": "상태 로그 숨기기 설명",
     "faviconPreview": "파비콘 미리보기",
     "changelog": "변경 내역",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 또는 @channelname",
       "chatIdHint": "채팅/채널의 고유한 숫자 식별자 또는 공개 사용자 이름입니다.",
       "tutorial": "Telegram 웹훅 구성 방법:"
-    }
+    },
+    "copy": "복사",
+    "copied": "복사됨!",
+    "expandDetails": "세부 정보 표시",
+    "collapseDetails": "세부 정보 숨기기"
   },
   "compliance": {
     "auditTitle": "감사",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "통화 (24시간)",
     "mcpMetricSuccessRate": "성공률",
     "mcpMetricAvgDuration": "평균 지속 시간",
-    "mcpMetricTopTool": "최고의 도구"
-  },
-  "themesPage": {
-    "title": "테마",
-    "description": "사전 설정된 테마를 선택하거나 단일 색상으로 나만의 테마를 만드세요",
-    "presetColors": "인기 색상",
-    "customTheme": "사용자 지정 테마",
-    "customThemeDesc": "테마 만들기를 클릭하고 색상을 하나 선택하세요",
-    "createTheme": "테마 만들기",
-    "activePreset": "활성 테마"
+    "mcpMetricTopTool": "최고의 도구",
+    "dismissError": "오류 닫기"
   },
   "header": {
     "logout": "로그아웃",
     "quickNavigation": "빠른 탐색",
     "quickNavigationTitle": "빠른 탐색 (⌘K / Ctrl+K)",
     "openQuickNavigation": "빠른 탐색 열기",
+    "openMenu": "메뉴 열기",
+    "products": "Keak 제품",
     "switchToLightMode": "라이트 모드로 전환",
     "switchToDarkMode": "다크 모드로 전환",
     "language": "언어",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Anthropic 호환",
     "media": "미디어",
     "mediaDescription": "이미지, 동영상 및 음악 생성",
-    "themes": "테마",
-    "themesDescription": "전체 대시보드 패널의 색상 테마를 선택하세요",
     "costsDescription": "모든 제공업체의 지출을 추적하고 추세를 분석하며 AI 예산을 관리하세요",
     "cacheDescription": "제공업체 프롬프트 캐시 효율성과 로컬 시맨틱 응답 재사용을 모니터링합니다.",
     "limitsDescription": "API 키 및 제공업체별 속도 제한과 할당량을 구성합니다",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "선택한 연결만",
     "selectAtLeastOneConnection": "연결을 하나 이상 선택하거나 모든 연결을 선택하세요.",
     "allConnectionsDesc": "이 키는 모든 활성 연결을 사용할 수 있습니다.",
-    "restrictedToConnections": "{count, plural, one {#개 연결로 제한됩니다} other {#개 연결로 제한됩니다}}."
+    "restrictedToConnections": "{count, plural, one {#개 연결로 제한됩니다} other {#개 연결로 제한됩니다}}.",
+    "preferredConnections": "선호 연결",
+    "preferredConnectionsDesc": "키별 우선순위입니다. 선호 연결을 사용할 수 없으면 다음으로 적합한 연결로 라우팅이 넘어갑니다.",
+    "preferredConnectionsNone": "설정된 선호 항목이 없습니다 — 기본 라우팅 전략이 사용됩니다.",
+    "preferredConnectionsClear": "지우기",
+    "removeSelection": "{name} 제거"
   },
   "auditLog": {
     "title": "감사 로그",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Modality Bridge 설정에서 Image→Text 브리지를 구성하십시오.",
     "sttBridgeCta": "Modality Bridge 설정에서 Speech→Text 브리지를 구성합니다.",
     "existingConnection": "기존 연결",
-    "openrouterSttDescription": "OpenRouter 음성 인식 모델은 구성된 OpenRouter 연결을 사용합니다. 별도의 자격 증명이 필요하지 않습니다."
+    "openrouterSttDescription": "OpenRouter 음성 인식 모델은 구성된 OpenRouter 연결을 사용합니다. 별도의 자격 증명이 필요하지 않습니다.",
+    "modalityTabsAria": "미디어 유형",
+    "serviceKindsAria": "서비스 유형"
   },
   "search": {
     "searchQuery": "검색어",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "알 수 없음",
     "cliproxyapiUpdate": "업데이트",
     "cliproxyapiUpdateAvailable": "업데이트 가능: v{current} → v{latest}",
-    "cliproxyapiVersion": "버전"
+    "cliproxyapiVersion": "버전",
+    "removeMapping": "매핑 제거"
   },
   "modelCatalog": {
     "title": "모델 및 콤보",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "조합 → {name}"
   },
   "combos": {
+    "title": "콤보",
+    "description": "가중치 기반 라우팅 및 폴백 지원을 통해 모델 콤보 생성",
+    "autoCatalogTitle": "자동 라우팅 카탈로그",
     "autoTosLoadError": "서비스 약관 정책을 불러오지 못했습니다. 변경하기 전에 다시 시도하세요.",
     "autoTosSaveError": "서비스 약관 정책을 저장하지 못했습니다. 이전 설정이 계속 표시됩니다. 다시 시도하세요.",
     "autoTosIncludeLabel": "ToS: avoid로 표시된 제공자를 auto에 포함",
     "autoTosDescription": "기본적으로 꺼져 있습니다. 한 계정뿐 아니라 모든 auto 콤보에 적용됩니다. 제공자를 연결해도 이 옵션은 활성화되지 않습니다.",
-    "title": "콤보",
-    "description": "가중치 기반 라우팅 및 폴백 지원을 통해 모델 콤보 생성",
-    "autoCatalogTitle": "자동 라우팅 카탈로그",
     "autoCatalogTemplateCount": "{count} 템플릿",
     "autoCatalogDescription": "내장된 auto/* 콤보는 연결된 공급자로부터 동적으로 확인됩니다. 이러한 ID 중 하나를 모델 필드로 사용하세요 — 설정이 필요하지 않습니다.",
     "autoCatalogExpand": "자동 라우팅 카탈로그 확장",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "아직 구성된 콤보가 없습니다.",
     "playgroundCreateFirst": "먼저 하나를 생성하세요",
     "weighted": "가중",
+    "weightPercent": "가중치(%)",
     "leastUsed": "가장 적게 사용됨",
     "costOpt": "비용 최적화",
     "strategyGuideTitle": "이 전략을 사용하는 방법",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# 계정} other {# 계정}}",
     "builderGlobalAdded": "추가됨",
     "builderGlobalAdd": "추가",
+    "clearSearch": "검색어 지우기",
     "manualModel": "수동 모델",
     "manualModelInvalid": "모델을 provider/model 형식으로 입력하세요.",
     "manualModelUnknownProvider": "알 수 없는 제공업체 접두사입니다.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "콤보 참조 추가",
     "builderPinnedAccount": "고정된 계정",
     "builderLegacyEntry": "레거시 항목",
+    "builderStaleModel": "라이브 카탈로그에 없음",
     "reviewName": "이름",
     "reviewStrategy": "전략",
     "reviewSteps": "단계",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "최소 콘텐츠 길이 (자수)",
     "responseValidationJsonPaths": "JSON-path 검사",
     "responseValidationAddCheck": "+ 검사 추가",
+    "responseValidationRemoveCheck": "검사 제거",
+    "responseValidationPath": "JSON 경로",
+    "responseValidationCondition": "조건",
+    "responseValidationValue": "예상 값",
     "agentFeaturesSystemMessageOverride": "시스템 메시지 재정의",
     "agentFeaturesSystemMessagePlaceholder": "당신은 전문 조수입니다 ...",
     "agentFeaturesSystemMessageHint": "에이전트에 대한 시스템 메시지 재정의",
@@ -5288,7 +5292,8 @@
         "skipped": "이미 구성됨",
         "failed": "실패했습니다"
       }
-    }
+    },
+    "stepProgress": "설정 진행률"
   },
   "providers": {
     "tosAvoidNoticeTitle": "이 제공자는 기본적으로 auto에서 제외됩니다",
@@ -6056,9 +6061,9 @@
     "apiFormatLabel": "API 형식 레이블",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "API 지역: 중국",
-    "apiRegionHint": "API 리전 안내",
-    "apiRegionInternational": "API 지역: 국제",
+    "apiRegionChina": "중국 본토",
+    "apiRegionHint": "API 액세스 및 할당량 추적에 사용할 엔드포인트 리전을 선택하세요.",
+    "apiRegionInternational": "해외",
     "apiRegionLabel": "API 리전",
     "apikey": "API 키",
     "audio": "오디오",
@@ -6080,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "이 계정이 5시간 사용 한도에 도달하고 Anthropic에서 낮은 우선순위 처리 경로를 제공하면, OmniRoute는 이를 수락하고 연결을 일시 중지하는 대신 사용량 기간이 초기화될 때까지 anthropic-usage-limit: slow을 사용하여 요청을 계속 전송합니다. 주간 한도는 계속 적용되며, 여유 처리 용량이 생길 때까지 응답이 대기할 수 있습니다.",
     "claudeAutoLimitResetLabel": "세션 한도 자동 초기화(주 1회)",
     "claudeAutoLimitResetDescription": "이 계정이 5시간 사용 한도에 도달하고 세션 한도 초기화를 사용할 수 있으면, OmniRoute가 이를 자동으로 적용하고 최대 속도로 다시 시도합니다. 계정의 주 1회 초기화 기회를 사용하며, 사용량은 계속 주간 한도에 포함됩니다.",
+    "codexPaidCreditsShort": "추가 크레딧",
+    "codexPaidCreditsToggleTitle": "구독 할당량을 모두 사용한 후 유료 Codex 크레딧 허용(추가 요금이 부과될 수 있음)",
+    "codexPaidCreditsEnabled": "Codex 유료 크레딧 사용 설정됨(추가 요금이 부과될 수 있음)",
+    "codexPaidCreditsDisabled": "Codex 유료 크레딧 사용 안 함",
+    "failedUpdateCodexPaidCredits": "Codex 유료 크레딧 정책을 업데이트하지 못했습니다",
+    "allowCodexPaidCreditsLabel": "유료 Codex 크레딧 허용",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "일시적인 쿨다운을 건너뛰어 복구 가능한 오류가 발생한 후에도 이 연결이 사용 가능한 상태로 유지되도록 합니다(차단됨/만료됨과 같은 최종 상태는 여전히 적용됨).",
     "disableCoolingLabel": "이 연결에 대한 쿨다운 비활성화",
     "bulkPasteAdded": "{count, plural, one {키 1개 추가됨} other {키 #개 추가됨}}",
@@ -6533,6 +6545,7 @@
       "monsterapi": "monsterapi.ai에서 API 키 받기",
       "moonshot": "API 키로 Moonshot AI를 연결합니다.",
       "morph": "무료 티어: 월 250K 크레딧, $0",
+      "apmix": "apmix.ai/dashboard에서 API 키로 Apmix를 연결하세요 — 하나의 구독으로 다양한 모델.",
       "nanogpt": "API 키로 NanoGPT를 연결합니다.",
       "nebius": "API 테스트를 위한 가입 시 약 $1 체험 크레딧 제공",
       "nlpcloud": "NLP Cloud는 OpenAI chat/completions 대신 자체 챗봇 API를 사용합니다. OmniRoute는 OpenAI 메시지를 input/context/history에 맞게 변환하고 지원되는 챗봇 모델의 로컬 카탈로그를 제공합니다.",
@@ -6621,7 +6634,7 @@
       "claude": "기존 OAuth 흐름으로 Claude Code를 연결합니다.",
       "cline": "기존 OAuth 흐름으로 Cline을 연결합니다.",
       "cursor": "기존 OAuth 흐름으로 Cursor IDE를 연결합니다.",
-      "cursor-api": "cursor.com/dashboard/api에서 발급한 사용자 API 키(crsr_...)로 Cursor를 연결하세요. IDE 세션은 필요하지 않습니다.",
+      "cursor-api": "cursor.com/dashboard/api에서 발급한 사용자 API 키(crsr_... 또는 grok_...)로 Cursor를 연결하세요. IDE 세션은 필요 없습니다.",
       "github": "기존 OAuth 흐름으로 GitHub Copilot을 연결합니다.",
       "gitlab-duo": "ai_features + read_user 스코프가 있는 OAuth 애플리케이션입니다. 이 OmniRoute 인스턴스에서 GITLAB_DUO_OAUTH_CLIENT_ID 및 선택적으로 GITLAB_DUO_OAUTH_CLIENT_SECRET을 구성하세요.",
       "kilocode": "기존 OAuth 흐름으로 Kilo Code를 연결합니다.",
@@ -6629,8 +6642,7 @@
       "kiro": "무료 티어: 월 50 크레딧(~25K–100K 토큰). ⚠️ Kiro ToS는 서드파티 프록시/하네스 사용을 금지합니다.",
       "codex": "기존 OAuth 흐름으로 OpenAI Codex를 연결합니다.",
       "qwen": "기존 OAuth 흐름으로 Qwen Code를 연결합니다.",
-      "github-models": "github.com/settings/tokens 에서 'models: read' 범위(scope)를 가진 GitHub PAT를 생성하세요.",
-      "apmix": "apmix.ai/dashboard에서 API 키로 Apmix를 연결하세요 — 하나의 구독으로 다양한 모델."
+      "github-models": "github.com/settings/tokens 에서 'models: read' 범위(scope)를 가진 GitHub PAT를 생성하세요."
     },
     "passthroughModelsDescription": "{provider}은 공급자 기본 모델 ID를 허용합니다. /models에서 가져오거나 라우팅을 위한 사용자 정의 ID를 추가하세요.",
     "bedrockModelsDescription": "Amazon Bedrock 모델은 AWS 지역별로 범위가 지정됩니다. /models에서 가져오거나 선택한 지역에서 활성화된 Bedrock 모델 ID를 추가하세요.",
@@ -6802,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "모델별 동시 실행 상한",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "선택 사항: 한 줄에 model=cap 하나를 입력합니다. 업스트림 모델 ID와 정확히 일치해야 합니다. 초과 요청은 로컬에서 대기하며, 비워 두면 모델별 상한이 없습니다.",
-    "rateLimitOverridesModelConcurrencyInvalid": "모델별 동시 실행 항목 \"{entry}\"이(가) 올바르지 않습니다 — model=cap 형식을 사용하고 cap은 1에서 {max} 사이의 정수여야 합니다.",
-    "codexPaidCreditsShort": "추가 크레딧",
-    "codexPaidCreditsToggleTitle": "구독 할당량을 모두 사용한 후 유료 Codex 크레딧 허용(추가 요금이 부과될 수 있음)",
-    "codexPaidCreditsEnabled": "Codex 유료 크레딧 사용 설정됨(추가 요금이 부과될 수 있음)",
-    "codexPaidCreditsDisabled": "Codex 유료 크레딧 사용 안 함",
-    "failedUpdateCodexPaidCredits": "Codex 유료 크레딧 정책을 업데이트하지 못했습니다",
-    "allowCodexPaidCreditsLabel": "유료 Codex 크레딧 허용",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "모델별 동시 실행 항목 \"{entry}\"이(가) 올바르지 않습니다 — model=cap 형식을 사용하고 cap은 1에서 {max} 사이의 정수여야 합니다."
   },
   "settings": {
     "title": "설정",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "사이드바에 표시할 항목을 선택하세요. 필수 모드에서도 고급 도구를 검색할 수 있습니다.",
     "hideHealthLogs": "상태 확인 로그 숨기기",
     "hideHealthLogsDesc": "ON일 때, 서버 콘솔에서 [HealthCheck] 메시지를 억제합니다.",
-    "themeAccent": "테마 색상",
-    "themeAccentDesc": "미리 설정된 색상을 선택하거나 단일 색상으로 나만의 테마를 만드세요",
-    "themeCreate": "테마 만들기",
-    "themeCustom": "사용자 지정 테마",
-    "themeBlue": "파랑",
-    "themeRed": "빨강",
-    "themeGreen": "초록",
-    "themeViolet": "보라",
-    "themeOrange": "주황",
-    "themeCyan": "시안",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "애플리케이션 이름 및 로고 사용자 지정",
     "appName": "애플리케이션 이름",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "지금",
       "coreConfigPath": "코어 구성 파일",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "소문자 확장자의 .json 절대 경로입니다. 비워 두면 생성하지 않습니다. 동기화할 때마다 적용된 파일 옆에 '<path>'.generated를 쓰며, 적용된 파일에는 쓰지 않습니다.",
+      "coreConfigPathDesc": "소문자 확장자의 .json/.yaml/.yml 절대 경로입니다. 비워 두면 생성하지 않습니다. 동기화할 때마다 적용된 파일 옆에 '<path>'.generated를 쓰며, 적용된 파일에는 쓰지 않습니다.",
       "lastSwitchKind": "전환 사유",
       "switchKind": {
         "ip_quota_429": "할당량",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "적용 주체: {mode}",
       "coreBinaryPath": "코어 바이너리 경로",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "선택 사항: 채택된 파일을 대체하기 전에 코어 바이너리로 생성된 파일을 확인합니다. 옆에 계속 쓰려면 비워 두세요. 디렉터리가 없으면 생성됩니다."
+      "coreBinaryPathHelp": "선택 사항: 채택된 파일을 대체하기 전에 코어 바이너리로 생성된 파일을 확인합니다. 옆에 계속 쓰려면 비워 두세요. 디렉터리가 없으면 생성됩니다.",
+      "urlFeedlessHint": "선택자 전용 구독의 경우 비워두세요: 아래에 제어 URL을 설정하면 피드는 가져오지 않으며, 새로 고치거나 바인딩하지 않습니다."
     },
     "bulkHealthcheck": "일괄 상태 확인",
     "bulkHealthcheckDesc": "구성된 모든 프록시를 대상 URL에 대해 테스트하여 작동하는 프록시를 찾습니다.",
@@ -7707,6 +7703,7 @@
     "configured": "구성됨",
     "none": "없음",
     "modelOverrideValuePlaceholder": "숫자 값",
+    "modelOverrideKey": "키 재정의",
     "modelOverrideReasoningEffortsPlaceholder": "영문 쉼표로 구분(예: low, medium, high)",
     "addKeyValue": "키-값 추가",
     "noModelOverrides": "이 모델에 구성된 재정의가 없습니다.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "특정 모델의 기본 가격을 재정의할 수 있습니다. 맞춤 재정의는 자동 감지된 가격보다 우선 적용됩니다.",
     "editPricing": "가격 편집",
     "viewFullDetails": "전체 세부정보 보기",
-    "themeCoral": "코랄",
     "adaptiveVolumeRouting": "적응형 볼륨 라우팅",
     "adaptiveVolumeRoutingDesc": "페이로드 볼륨과 처리량 부하에 따라 연결 수를 동적으로 조정합니다.",
     "lkgpToggleTitle": "마지막 정상 공급자(LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "제공업체에 보내기 전에 프롬프트를 압축하여 토큰 사용량을 줄입니다",
     "autoCombosTitle": "자동 콤보",
     "autoCombosDesc": "이 키가 구성된 모든 제공업체에서 모델을 자동으로 선택하는 기본 제공 auto/* 콤보를 사용하도록 허용합니다",
+    "ccDiscoveryAliasesTitle": "Claude Code 검색 별칭",
+    "ccDiscoveryAliasesDesc": "이 키로 이미 액세스할 수 있는 모델과 조합에 대해 claude/... 호환성 미러를 알립니다",
     "compressionGuidanceFullGuideLink": "전체 압축 가이드",
     "compressionGuidanceShow": "상세 정보",
     "compressionGuidanceHide": "상세 정보 숨기기",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "통과",
     "tomlTestFailed": "실패",
     "tomlImportError": "RTK TOML 파일을 처리할 수 없습니다.",
-    "tomlFileReadError": "선택한 TOML 파일을 읽을 수 없습니다."
+    "tomlFileReadError": "선택한 TOML 파일을 읽을 수 없습니다.",
+    "viewMode": "보기 모드"
   },
   "compressionEngineConfig": {
     "loading": "로드 중…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "언어 팩: {packs}",
     "dragToReorder": "드래그하여 단계 순서 변경",
     "engine": "엔진",
-    "intensity": "강도"
+    "intensity": "강도",
+    "compressionOverride": "압축 재정의"
   },
   "compressionStudio": {
     "noRun": "사용 가능한 압축 실행이 없습니다.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "우승자: {winner}",
     "encoder": "인코더",
     "bytes": "바이트",
-    "tokensCl100k": "토큰 (cl100k)"
+    "tokensCl100k": "토큰 (cl100k)",
+    "studioViews": "Studio 보기"
   },
   "omniglyph": {
     "preview": "미리보기",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "이보다 짧은 메시지는 압축되지 않습니다. 낮음 = 더 많은 압축.",
     "tooltipMinSavings": "최소한 이만큼의 토큰을 절약할 수 있는 경우에만 압축합니다.",
     "ultraSettings": "울트라 설정",
-    "ultraSettingsDesc": "SLM 기반 의미 압축"
+    "ultraSettingsDesc": "SLM 기반 의미 압축",
+    "defaultLanguage": "기본 언어",
+    "viewMode": "보기 모드"
   },
   "translator": {
     "title": "번역기",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "스트림 변환 실패"
   },
   "usage": {
+    "healthExtraUsageBypass": "할당량을 소진했지만 추가 사용이 허용되어 서비스를 계속합니다.",
+    "healthPaidCreditsBypass": "할당량을 소진했지만 사용 가능한 유료 크레딧으로 서비스를 계속합니다.",
+    "healthFilteringBypass": "할당량을 소진했지만 로컬 할당량 필터링이 꺼져 있어 서비스를 계속합니다.",
     "title": "사용량",
     "grokExtraUsageCredits": "추가 사용 크레딧",
     "grokAutoTopUp": "자동 충전",
@@ -9998,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "공급자 한도",
     "noProviders": "연결된 제공업체 없음",
+    "quotaAuthRequired": "인증 필요 - 대시보드에 로그인하세요",
+    "quotaAuthRequiredHint": "대시보드 세션이 없거나 만료되어 제공업체 연결을 불러올 수 없습니다. 할당량 한도를 확인하려면 로그인한 후 새로고침하세요.",
     "connectProvidersForQuota": "OAuth를 통해 공급자에 연결하여 API 할당량 한도 및 사용량을 추적하세요.",
     "accountsCount": "{count, plural, one {#개 계정} other {#개 계정}}",
     "filteredFromCount": "({count}에서 필터링됨)",
@@ -10047,9 +10055,6 @@
     "tierLite": "라이트",
     "tierUnknown": "알 수 없음",
     "statTotal": "합계",
-    "statCritical": "심각",
-    "statAlert": "경고",
-    "statHealthy": "정상",
     "filterPurchaseTypeLabel": "유형",
     "filterTierLabel": "티어",
     "purchaseAll": "전체",
@@ -10288,10 +10293,64 @@
     "lastRefreshed": "마지막 새로고침",
     "providerQuota": "제공자 할당량",
     "providerQuotaHomeHint": "연결된 계정의 실시간 상태",
+    "claudeResetCreditDefaultTitle": "Claude 한도 초기화",
+    "confirmRedeemClaudeResetCredit": "사용 시 대상 Claude 사용 한도가 즉시 초기화되며 이 크레딧은 영구적으로 소진됩니다.",
+    "claudeResetCreditsModalTitle": "Claude 초기화 크레딧",
+    "claudeResetCreditsModalExplainer": "이 계정에서 사용 가능한 Claude 초기화 크레딧 및 주간 세션 초기화입니다.",
     "codexPaidCreditsLabel": "Codex 유료 크레딧",
     "codexPaidCreditsAvailable": "사용 가능(잔액 미보고)",
     "codexPaidCreditsUnavailable": "사용 불가 또는 지출 한도 도달",
-    "codexPaidCreditsUnlimited": "무제한"
+    "codexPaidCreditsUnlimited": "무제한",
+    "healthAccountHint": "최근 관측에 기반한 상태이며 실시간 연결 테스트가 아닙니다. 계정을 선택하면 세부 정보를 볼 수 있습니다.",
+    "healthRecovery": "예상 복구 시간",
+    "healthAvailable": "사용 가능",
+    "healthRestricted": "일부 제한됨",
+    "healthUnavailable": "이용 불가",
+    "healthPeakHourProtection": "혼잡 시간대 보호",
+    "healthCooldown": "대기 시간",
+    "healthQuotaExhausted": "할당량 소진",
+    "healthOverview": "개요",
+    "layoutFull": "전체",
+    "layoutCompact": "간결",
+    "healthQuotaError": "할당량 읽기 실패",
+    "healthNoRuntime": "실행 상태를 확인할 수 없음",
+    "healthPreviousSnapshot": "최근 새로고침 실패, 이전 결과 표시",
+    "healthPreviousFailure": "마지막 요청 실패, 대기 시간 종료",
+    "healthAwaitingSync": "초기화 시각 경과, 다음 동기화 대기 중",
+    "healthVerdictUnavailable": "가용성 확인 결과를 가져올 수 없어 할당량 수준만 표시합니다",
+    "healthSummaryFailed": "실행 상태 요약 읽기 실패, 모델 잠금 정보가 누락될 수 있음",
+    "healthRuntimeObserved": "실행 상태 갱신 {time}",
+    "healthQuotaObserved": "할당량 관측 {time}",
+    "healthOldestQuota": "가장 오래된 할당량 기록 {time}",
+    "healthRecoveryUnknown": "복구 시간 알 수 없음",
+    "healthDetailsHint": "클릭하여 세부 정보 및 작업 보기",
+    "healthFiveHour": "5시간",
+    "healthOverall": "전체",
+    "healthAction": "조치 필요",
+    "healthTitle": "계정 사용 가능 여부",
+    "healthDrag": "드래그하여 제공업체 순서 변경",
+    "healthDragPosition": "{provider}, {count, plural, other {전체 #개 중 {position, number}번째 위치}}",
+    "healthResetOrder": "기본 순서 복원",
+    "healthPool": "{name} 풀",
+    "healthOtherPool": "같은 계정의 {pool}: {status} (잔여 {remaining})",
+    "healthIncluded": "부분 제한 포함: {count, number}",
+    "healthBannerUnavailable": "일시적으로 사용 불가: {count, number}",
+    "healthBannerAvailable": "계정 {count, number}개 모두 사용 가능",
+    "healthLegendHide": "범례 숨기기",
+    "healthLegendShow": "범례 표시",
+    "healthLegendOk": "불투명 = 잔여 할당량, 반투명 = 사용량",
+    "healthLegendCooldown": "{window} 할당량 소진. 불투명 = 경과한 대기 시간, 반투명 = 남은 대기 시간",
+    "healthLegendAction": "인증이 만료되었거나 계정이 차단되어 기다려도 복구되지 않음",
+    "healthLegendPartial": "사용 가능. 상단 노란 부분 = 모델 또는 풀 제한",
+    "healthWaited": "대기 완료 {percent}",
+    "healthWait": "{duration} 더 대기 ({time} 복구)",
+    "healthFastest": "가장 빠른 복구: {duration} 후",
+    "healthRatio": "{available, number} / {active, number} 사용 가능",
+    "healthCd5": "5시간 · 대기 시간",
+    "healthCdw": "매주 · 대기 시간",
+    "healthRecentSuccessBypass": "최근 요청이 성공하여 라우터가 이 계정의 사용을 허용합니다.",
+    "healthPurchasedBalanceBypass": "포함된 할당량을 소진해도 구매한 잔액으로 계속 사용할 수 있습니다.",
+    "healthCutoffAtRequest": "실시간 할당량 임계값은 요청을 라우팅할 때 확인합니다."
   },
   "modals": {
     "waitingAuth": "승인을 기다리는 중",
@@ -11078,7 +11137,8 @@
       "message": "메시지",
       "error": "오류",
       "completion": "완료"
-    }
+    },
+    "statusFilter": "상태"
   },
   "templateNames": {
     "simple-chat": "간단한 채팅",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "{minutes}분 전",
     "hoursAgo": "{hours}시간 전",
     "daysAgo": "{days}일 전",
-    "entries": "항목"
+    "entries": "항목",
+    "viewSwitcherAria": "캐시 보기"
   },
   "proxyConfigModal": {
     "levelGlobal": "글로벌",
@@ -11447,6 +11508,7 @@
     "tableHealth": "상태 (24h)",
     "tableUsage": "사용량",
     "tableActions": "작업",
+    "moreActions": "추가 작업",
     "test": "테스트",
     "edit": "편집",
     "delete": "삭제",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "유효한 항목을 찾을 수 없습니다. 형식을 확인하고 다시 시도하세요.",
     "bulkImportSuccess": "가져오기 완료: {created} 생성됨, {updated} 업데이트됨, {failed} 실패",
     "bulkImportErrorLine": "{line} 라인: {reason}",
-    "bulkImportMaxExceeded": "가져오기당 최대 100개의 프록시",
+    "bulkImportMaxExceeded": "가져오기당 최대 {max}개의 프록시",
     "bulkImportPreview": "미리보기",
     "clearAssignment": "(할당 지우기)",
     "bulkProxyAssignment": "대량 프록시 할당",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "IP 속도 제한 (429)",
     "poolSetAsideKindSlow": "느린 응답",
     "poolSetAsideKindGeoBlocked": "지역 차단 (403/451)",
+    "poolSetAsideKindOperatorReported": "통신 사업자가 보고한 장애",
     "poolSetAsideUntil": "{endsAt}에 로테이션 복귀",
     "poolSetAsideRepeat": "제외됨 {count, plural, one {#번} other {#번}}",
     "poolUnknownAddress": "알 수 없는 주소",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "코드 내보내기",
     "exportShort": "내보내기",
     "noStateToExport": "내보낼 플레이그라운드 상태가 없습니다.",
-    "closeExportModal": "내보내기 모달 닫기",
     "close": "닫기",
     "exportRealKeyWarning": "보안 경고: 내보내기 차단됨 — 출력에서 실제 API 키가 감지되었습니다. API 키를 재설정하고 다시 시도하세요.",
     "placeholderHintPrefix": "바꾸기",
@@ -11809,7 +11871,8 @@
       "nextButton": "다음",
       "runButton": "실행",
       "promptPlaceholder": "메시지를 입력하세요… (전송하려면 Enter, 줄바꿈은 Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground 모드"
   },
   "miniPlayground": {
     "endpoint": "엔드포인트",
@@ -11880,7 +11943,8 @@
     "assistant": "어시스턴트",
     "errorLabel": "오류",
     "requestFailed": "요청 실패",
-    "stop": "중지"
+    "stop": "중지",
+    "messageInputAria": "메시지"
   },
   "requestLogger": {
     "recording": "기록 중",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "계정 전환 {count}회",
       "resilienceRetried": "빈 턴 재시도",
       "resilienceContinued": "스트림 중간에 재개",
-      "resilienceRecovered": "복원력 조치로 복구"
-    }
+      "resilienceRecovered": "복원력 조치로 복구",
+      "conversationContext": "대화 컨텍스트",
+      "goToBottom": "맨 아래로 이동",
+      "liveRefreshOn": "실시간 새로 고침: 켜짐",
+      "liveRefreshOff": "실시간 새로 고침: 꺼짐",
+      "liveRefresh": "실시간 새로 고침",
+      "continuesFromParent": "상위 항목에서 계속됨",
+      "continuesFrom": "{id}에서 계속됨",
+      "viewConversation": "대화 보기",
+      "openConversation": "대화 {id} 열기"
+    },
+    "tableLabel": "요청 로그"
   },
   "proxyLogger": {
     "filterAll": "전체",
@@ -12113,7 +12187,9 @@
     "colServedBy": "제공자",
     "filterTraffic": "트래픽",
     "filterTests": "테스트",
-    "filterSource": "소스"
+    "filterSource": "소스",
+    "tableLabel": "프록시 로그",
+    "sortLogs": "로그 정렬"
   },
   "endpointOptions": {
     "speech": "음성",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "소진됨",
     "statusAlerting": "경고 중",
     "statusError": "오류",
-    "moreSuffix": "외 {count}개"
+    "moreSuffix": "외 {count}개",
+    "feedFilterLabel": "이벤트 필터링"
   },
   "quotaShare": {
     "weightPercent": "가중치 %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "그룹 없음",
     "ungroupedHint": "이 풀들은 알려진 그룹에 할당되지 않았습니다. 풀을 편집하여 실제 그룹으로 이동하세요.",
     "removeFailed": "이 풀을 제거할 수 없습니다.",
-    "dismiss": "닫기"
+    "dismiss": "닫기",
+    "allocationsHeading": "할당",
+    "wizardRemoveDimension": "차원 제거",
+    "wizardRemoveKey": "키 제거"
   },
   "plugins": {
     "title": "플러그인",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "설정 업데이트 실패",
       "serviceRevealApiKey": "{actor}이(가) {target}의 API 키를 표시했습니다",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "오류 닫기"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "지금 이동",
       "message": "이제 MITM Proxy는 AgentBridge에 위치합니다.",
       "title": "이 페이지는 이동되었습니다"
-    }
+    },
+    "dnsOn": "DNS 켜짐",
+    "dnsOff": "DNS 꺼짐",
+    "showServerSettings": "서버 설정 표시",
+    "hideServerSettings": "서버 설정 숨기기",
+    "upstreamCaTesting": "테스트 중…",
+    "removeMapping": "매핑 제거",
+    "mappingSourcePlaceholder": "예: gemini-3.6-flash-medium 또는 매핑되지 않은 모든 모델을 나타내는 *",
+    "mappingWildcardHint": "명시적 매핑이 없는 모든 모델을 OmniRoute를 통해 선택한 대상으로 라우팅하려면 소스로 *를 사용하세요. 소스가 정확히 일치하는 매핑은 항상 *보다 우선합니다.",
+    "wizardDetectingModels": "가로챈 트래픽에서 모델을 감지하는 중...",
+    "wizardDetectedModels": "가로챈 트래픽에서 {count, plural, one {#개 모델} other {#개 모델}}을 찾았습니다. 추가할 모델을 선택하세요:",
+    "wizardSelectedModels": "{count, plural, one {#개 모델} other {#개 모델}}을 선택했습니다. 다음 화면에서 OmniRoute 모델에 매핑합니다.",
+    "wizardAddModels": "{count, plural, one {#개 모델} other {#개 모델}} 추가",
+    "wizardNoModelsDetected": "아직 감지된 모델이 없습니다. {agent}을 사용하여 요청한 후 이 마법사를 다시 실행하면 트래픽에서 모델을 자동으로 감지할 수 있습니다.",
+    "wizardNoModelsHint": "또는 이 마법사를 닫고 에이전트 카드에서 매핑을 수동으로 추가하세요."
   },
   "providerStats": {
     "unknownError": "알 수 없는 오류",
@@ -12686,7 +12781,11 @@
     "avgTtft": "평균 TTFT",
     "avgTotal": "평균 총계",
     "requestTelemetry": "요청 텔레메트리",
-    "requestTelemetryDescription": "7단계 파이프라인 분석 (최근 5분)"
+    "requestTelemetryDescription": "7단계 파이프라인 분석 (최근 5분)",
+    "title": "제공업체 통계",
+    "description": "제공업체별 및 모델별 트래픽, 지연 시간, 성공률",
+    "combo": "조합",
+    "toggleModels": "{provider}의 모델 표시"
   },
   "relay": {
     "title": "서버리스 릴레이 프록시",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "요청 본문이 없습니다.",
     "noResponseBody": "응답 본문이 없습니다.",
     "formatted": "포맷됨",
-    "raw": "원시 데이터"
+    "raw": "원시 데이터",
+    "requestCount": "{count, plural, one {#개 요청} other {#개 요청}}",
+    "expandList": "목록 펼치기",
+    "collapseList": "목록 접기",
+    "snippetLanguage": "코드 조각 언어",
+    "headersTable": "헤더",
+    "showSecrets": "비밀 정보 표시",
+    "maskSecrets": "비밀 정보 마스킹",
+    "llmNotAvailable": "이 요청에 사용할 수 있는 LLM 메타데이터가 없습니다.",
+    "llmStreamYes": "예(SSE)",
+    "llmStreamNo": "아니요",
+    "llmTotalTokens": "총 {count}개 토큰"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "지난 24시간 동안 이 제공업체가 실제로 응답한 호출의 비율입니다. 대시가 표시되면 처리한 트래픽이 너무 적어 성공률을 산정할 수 없다는 의미입니다.",
     "reliabilitySample": "지난 {hours}시간 동안 {requests}건의 호출 중 {successes}건 성공",
     "reliabilityTooFew": "지난 {hours}시간 동안 호출이 {requests}건뿐이어서 성공률을 산정하기에 너무 적습니다",
-    "reliabilityNoTraffic": "지난 24시간 동안 기록된 호출이 없습니다"
+    "reliabilityNoTraffic": "지난 24시간 동안 기록된 호출이 없습니다",
+    "categoryFilter": "작업 카테고리"
   },
   "discovery": {
     "title": "제공업체 탐색",
@@ -13331,7 +13442,11 @@
     "method": "방법",
     "auth": "인증",
     "feasibility": "실현 가능성",
-    "models": "모델"
+    "models": "모델",
+    "provider": "제공업체",
+    "status": "상태",
+    "endpoint": "엔드포인트",
+    "actions": "작업"
   },
   "noAuthProvider": {
     "title": "인증 필요 없음",
@@ -13380,7 +13495,8 @@
     "ownProxy": "자체 프록시",
     "freeTierPause": "모델 {model} 일시 중지됨 (429), {time}에 복귀",
     "freeTierPauseProvider": "일시 중지됨 (429), {time}에 복귀",
-    "freeTierPauseNote": "이 인스턴스에서 인프로세스 일시 중지"
+    "freeTierPauseNote": "이 인스턴스에서 인프로세스 일시 중지",
+    "proxyType": "프록시 유형"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "숨겨진 업적이 기다리고 있습니다...",
         "criteria": "이 배지를 공개하려면 숨겨진 업적을 완료하세요."
       }
-    }
+    },
+    "leaderboardTitle": "리더보드",
+    "leaderboardDescription": "API 키 전반의 순위와 업적",
+    "badgeLocked": "잠김"
   },
   "featureFlags": {
     "title": "기능 플래그",
@@ -13794,6 +13913,7 @@
     "latency": "지연 시간",
     "quota": "할당량",
     "rangeWindow": "{range} 기간",
+    "timeRange": "기간",
     "runtimeHealthBlend": "런타임/상태 혼합",
     "averageResponseTime": "평균 응답 시간",
     "worstQuota": "가장 부족한 할당량",
@@ -13995,7 +14115,11 @@
     "learnMore": "자세히 알아보기",
     "changelogLoadFailed": "변경 로그를 불러올 수 없습니다. 나중에 다시 시도해 주세요.",
     "retry": "재시도",
-    "viewFullHistory": "GitHub에서 전체 기록 보기"
+    "viewFullHistory": "GitHub에서 전체 기록 보기",
+    "title": "뉴스 및 변경 로그",
+    "description": "OmniRoute 팀의 공지 및 최신 릴리스 노트",
+    "viewLabel": "보기",
+    "loadingNews": "공지 불러오는 중..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "제공자 회로 차단기 상태",
       "lastUpdate": "마지막 업데이트: {timestamp}",
       "uptimeMinutes": "{minutes}분",
-      "uptimeHoursMinutes": "{hours}시간 {minutes}분"
+      "uptimeHoursMinutes": "{hours}시간 {minutes}분",
+      "breakerClosed": "닫힘",
+      "breakerNotClosed": "열림 또는 반열림"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "유지보수 세부정보",
         "secondaryAction": "시스템 상태"
       }
+    },
+    "miniapp": {
+      "askAnything": "무엇이든 물어보세요…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP 도구",
     "scope": "범위",
-    "apiKey": "API 키"
+    "apiKey": "API 키",
+    "visibleCount": "표시 {visible}개 / 전체 {total}개",
+    "modeLabel": "보기 모드",
+    "jumpToNow": "현재 시간으로 이동하면 NOW 선의 위치가 {position}%로 재설정됩니다",
+    "laneReuse": "행 재사용",
+    "laneReuseLabel": "행 재사용 시간 범위(분)",
+    "laneReuseHint": "동일한 대화 ID를 공유하는 요청은 요청 간 간격이 설정된 시간(분) 미만인 경우 같은 타임라인 행에 유지됩니다.",
+    "laneReuseUnit": "분",
+    "autoRefresh": "자동 새로 고침",
+    "autoRefreshLabel": "자동 새로 고침 간격(초)",
+    "autoRefreshHint": "타임라인이 서버에서 요청 목록을 다시 가져오는 빈도입니다.",
+    "autoRefreshUnit": "초",
+    "zoomOut": "축소",
+    "zoomIn": "확대"
   },
   "metadata": {
     "compressionTitle": "압축",

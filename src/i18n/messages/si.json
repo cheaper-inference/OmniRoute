@@ -25,8 +25,10 @@
     "confirm": "ඔබට විශ්වාසද?",
     "refresh": "යළි පූරණය කරන්න",
     "close": "වසන්න",
+    "dialogTitleFallback": "සංවාද කොටුව",
     "previousPage": "පෙර පිටුව",
     "nextPage": "ඊළඟ පිටුව",
+    "pagination": "පිටුකරණය",
     "capsLockOn": "Caps Lock සක්රියයි",
     "dismissNotification": "දැනුම්දීම ඉවතලන්න",
     "toggleColumns": "තීරු පෙන්වීම මාරු කරන්න",
@@ -182,6 +184,7 @@
     "combos": "සංයෝජන",
     "noModelsFound": "මාදිලි හමු නොවීය",
     "clear": "හිස් කරන්න",
+    "clearFilters": "පෙරහන් ඉවත් කරන්න",
     "done": "අවසන්",
     "selectAll": "සියල්ල තෝරන්න",
     "unselectAll": "සියල්ල තේරීම ඉවත් කරන්න",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# කාණ්ඩයක්} other {# කාණ්ඩ}} විසින් භාවිත කෙරේ",
     "batchFilePreview": "පෙරදසුන",
     "batchFilePreviewTruncated": "පළමු පේළි {shown} පෙන්වමින් පවතී (මුළු පේළි {total})",
-    "batchFileDownloadFull": "සම්පූර්ණ ගොනුව බාගන්න"
+    "batchFileDownloadFull": "සම්පූර්ණ ගොනුව බාගන්න",
+    "tokensPageTitle": "ටෝකන",
+    "tokensPageDescription": "API යතුරු අතර ටෝකන යවන්න, ආරාධනා කේත බෙදාගන්න සහ ප්රජා සේවාදායක සම්බන්ධ කරන්න.",
+    "tokensServerUrlLabel": "සේවාදායක URL"
   },
   "disabled": "අක්රියයි",
   "featureFlagOmnirouteEmergencyFallbackDescription": "අයවැය අවසන් වූ ඉල්ලීම් හදිසි නොමිලේ විකල්ප සපයන්නා/මාදිලිය වෙත යොමු කරන්න.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "ප්රොක්සි සේවාදායකය නවතා ඇත හෝ නැවත ආරම්භ වෙමින් පවතී.",
     "expandSidebar": "පැති තීරුව පුළුල් කරන්න",
     "collapseSidebar": "පැති තීරුව හකුළන්න",
-    "themes": "තේමා",
-    "presetColors": "ජනප්රිය වර්ණ",
     "createTheme": "තේමාවක් සාදන්න",
     "chooseColor": "එක් වර්ණයක් තෝරන්න",
-    "themeCoral": "කොරල්",
-    "themeBlue": "නිල්",
-    "themeRed": "රතු",
-    "themeGreen": "කොළ",
-    "themeViolet": "දම්",
-    "themeOrange": "තැඹිලි",
-    "themeCyan": "සයන්",
     "cliToolsShort": "මෙවලම්",
     "cache": "හැඹිලිය",
     "cacheShort": "හැඹිලිය",
@@ -1103,12 +1100,10 @@
     "themeSystem": "තේමා පද්ධතිය",
     "whitelabelingDesc": "සුදු ලේබල්කරණ විස්තරය",
     "switchThemes": "තේමා මාරු කරන්න",
-    "themeAccentDesc": "තේමා උද්දීපන වර්ණ විස්තරය",
     "uploadFavicon": "Favicon උඩුගත කරන්න",
     "themeDark": "අඳුරු තේමාව",
     "customLogoDesc": "අභිරුචි ලාංඡන විස්තරය",
     "sidebarVisibilityToggle": "පැති තීරුවේ දෘශ්යතාව මාරු කිරීම",
-    "themeAccent": "තේමා උද්දීපන වර්ණය",
     "resetFavicon": "Favicon යළි සකසන්න",
     "whitelabeling": "සුදු ලේබල්කරණය",
     "darkMode": "අඳුරු ප්රකාරය",
@@ -1122,10 +1117,8 @@
     "customLogo": "අභිරුචි ලාංඡනය",
     "appearance": "පෙනුම",
     "themeSelectionAria": "තේමා තේරීමේ Aria",
-    "themeCreate": "තේමාව සාදන්න",
     "customFaviconDesc": "අභිරුචි Favicon විස්තරය",
     "logoPreview": "ලාංඡන පෙරදසුන",
-    "themeCustom": "අභිරුචි තේමාව",
     "hideHealthLogsDesc": "සෞඛ්ය ලොග සැඟවීමේ විස්තරය",
     "faviconPreview": "Favicon පෙරදසුන",
     "changelog": "වෙනස්කම් සටහන",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 හෝ @channelname",
       "chatIdHint": "chat එකේ/නාලිකාවේ අනන්ය සංඛ්යාත්මක හඳුනාගැනීම හෝ පොදු පරිශීලක නාමය.",
       "tutorial": "Telegram webhook එක වින්යාස කරන ආකාරය:"
-    }
+    },
+    "copy": "පිටපත් කරන්න",
+    "copied": "පිටපත් කරන ලදී!",
+    "expandDetails": "විස්තර පෙන්වන්න",
+    "collapseDetails": "විස්තර සඟවන්න"
   },
   "compliance": {
     "auditTitle": "විගණනය",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "ඇමතුම් (පැය 24)",
     "mcpMetricSuccessRate": "සාර්ථකත්ව අනුපාතය",
     "mcpMetricAvgDuration": "සාමාන්ය කාලසීමාව",
-    "mcpMetricTopTool": "ප්රමුඛතම මෙවලම"
-  },
-  "themesPage": {
-    "title": "තේමා",
-    "description": "පෙරසැකසූ තේමාවක් තෝරන්න හෝ තනි වර්ණයකින් ඔබේම තේමාවක් සාදන්න",
-    "presetColors": "ජනප්රිය වර්ණ",
-    "customTheme": "අභිරුචි තේමාව",
-    "customThemeDesc": "‘තේමාව සාදන්න’ මත ක්ලික් කර එක් වර්ණයක් තෝරන්න",
-    "createTheme": "තේමාව සාදන්න",
-    "activePreset": "සක්රිය තේමාව"
+    "mcpMetricTopTool": "ප්රමුඛතම මෙවලම",
+    "dismissError": "දෝෂය ඉවතලන්න"
   },
   "header": {
     "logout": "ඉවත් වන්න",
     "quickNavigation": "ඉක්මන් සංචාලනය",
     "quickNavigationTitle": "ඉක්මන් සංචාලනය (⌘K / Ctrl+K)",
     "openQuickNavigation": "ඉක්මන් සංචාලනය විවෘත කරන්න",
+    "openMenu": "මෙනුව විවෘත කරන්න",
+    "products": "Keak නිෂ්පාදන",
     "switchToLightMode": "ආලෝක ප්රකාරයට මාරු වන්න",
     "switchToDarkMode": "අඳුරු ප්රකාරයට මාරු වන්න",
     "language": "භාෂාව",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Anthropic සමඟ අනුකූලයි",
     "media": "මාධ්ය",
     "mediaDescription": "රූප, වීඩියෝ සහ සංගීතය ජනනය කරන්න",
-    "themes": "තේමා",
-    "themesDescription": "සම්පූර්ණ උපකරණ පුවරු පැනලය සඳහා වර්ණ තේමාවක් තෝරන්න",
     "costsDescription": "සියලුම සපයන්නන් හරහා වියදම් නිරීක්ෂණය කරන්න, ප්රවණතා විශ්ලේෂණය කරන්න, සහ ඔබේ AI අයවැය කළමනාකරණය කරන්න",
     "cacheDescription": "සපයන්නන්ගේ ප්රොම්ප්ට් හැඹිලි කාර්යක්ෂමතාව සහ දේශීය අර්ථමය ප්රතිචාර නැවත භාවිතය නිරීක්ෂණය කරන්න.",
     "limitsDescription": "එක් එක් API යතුර සහ සපයන්නා සඳහා අනුපාත සීමා සහ කෝටා වින්යාස කරන්න",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "තෝරාගත් සම්බන්ධතා පමණි",
     "selectAtLeastOneConnection": "අවම වශයෙන් එක් සම්බන්ධතාවක් තෝරන්න, නැතහොත් සියලුම සම්බන්ධතා තෝරන්න.",
     "allConnectionsDesc": "මෙම යතුරට ඕනෑම සක්රිය සම්බන්ධතාවක් භාවිත කළ හැක.",
-    "restrictedToConnections": "{count, plural, one {සම්බන්ධතාව #කට} other {සම්බන්ධතා #කට}} සීමා කර ඇත."
+    "restrictedToConnections": "{count, plural, one {සම්බන්ධතාව #කට} other {සම්බන්ධතා #කට}} සීමා කර ඇත.",
+    "preferredConnections": "කැමති සම්බන්ධතා",
+    "preferredConnectionsDesc": "එක් එක් යතුර සඳහා ප්‍රමුඛතා අනුපිළිවෙල. කැමති සම්බන්ධතාවක් නොමැති නම්, මාර්ගගත කිරීම ඊළඟ සුදුසු සම්බන්ධතාවට මාරු වේ.",
+    "preferredConnectionsNone": "කැමැත්තක් සකසා නැත — පෙරනිමි මාර්ගගත කිරීමේ උපාය මාර්ගය භාවිත වේ.",
+    "preferredConnectionsClear": "හිස් කරන්න",
+    "removeSelection": "{name} ඉවත් කරන්න"
   },
   "auditLog": {
     "title": "විගණන ලොගය",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Modality Bridge සැකසුම් තුළ රූප→පෙළ පාලම වින්යාස කරන්න",
     "sttBridgeCta": "Modality Bridge සැකසුම් තුළ කථන→පෙළ පාලම වින්යාස කරන්න",
     "existingConnection": "පවතින සම්බන්ධතාව",
-    "openrouterSttDescription": "OpenRouter කථන-සිට-පෙළ ආකෘති ඔබ වින්යාස කළ OpenRouter සම්බන්ධතාව භාවිත කරයි. වෙනම අක්තපත්රයක් අවශ්ය නොවේ."
+    "openrouterSttDescription": "OpenRouter කථන-සිට-පෙළ ආකෘති ඔබ වින්යාස කළ OpenRouter සම්බන්ධතාව භාවිත කරයි. වෙනම අක්තපත්රයක් අවශ්ය නොවේ.",
+    "modalityTabsAria": "මාධ්ය වර්ගය",
+    "serviceKindsAria": "සේවා වර්ගය"
   },
   "search": {
     "searchQuery": "සෙවුම් විමසුම",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "නොදන්නා",
     "cliproxyapiUpdate": "යාවත්කාලීන කරන්න",
     "cliproxyapiUpdateAvailable": "යාවත්කාලීනයක් ඇත: v{current} → v{latest}",
-    "cliproxyapiVersion": "අනුවාදය"
+    "cliproxyapiVersion": "අනුවාදය",
+    "removeMapping": "සිතියම්ගත කිරීම ඉවත් කරන්න"
   },
   "modelCatalog": {
     "title": "මාදිලි සහ සංයෝජන",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "සංයෝජනය → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid ලෙස සලකුණු කළ සපයන්නන් auto වෙත ඇතුළත් කරන්න",
-    "autoTosDescription": "පෙරනිමියෙන් අක්‍රියයි. එක් ගිණුමකට පමණක් නොව සියලු auto සංයෝජනවලට අදාළ වේ. සපයන්නෙකු සම්බන්ධ කිරීමෙන් මෙම විකල්පය සක්‍රිය නොවේ.",
-    "autoTosSaveError": "ToS ප්‍රතිපත්තිය සුරැකිය නොහැකි විය. පෙර සැකසුම තවමත් පෙන්වයි. නැවත උත්සාහ කරන්න.",
-    "autoTosLoadError": "ToS ප්‍රතිපත්තිය පූරණය කළ නොහැකි විය. වෙනස් කිරීමට පෙර නැවත උත්සාහ කරන්න.",
     "title": "සංයෝජන",
     "description": "බරිත මාර්ගගත කිරීම සහ විකල්ප සහාය සහිත ආකෘති සංයෝජන සාදන්න",
     "autoCatalogTitle": "ස්වයංක්රීය මාර්ගගත කිරීමේ නාමාවලිය",
+    "autoTosLoadError": "ToS ප්‍රතිපත්තිය පූරණය කළ නොහැකි විය. වෙනස් කිරීමට පෙර නැවත උත්සාහ කරන්න.",
+    "autoTosSaveError": "ToS ප්‍රතිපත්තිය සුරැකිය නොහැකි විය. පෙර සැකසුම තවමත් පෙන්වයි. නැවත උත්සාහ කරන්න.",
+    "autoTosIncludeLabel": "ToS: avoid ලෙස සලකුණු කළ සපයන්නන් auto වෙත ඇතුළත් කරන්න",
+    "autoTosDescription": "පෙරනිමියෙන් අක්‍රියයි. එක් ගිණුමකට පමණක් නොව සියලු auto සංයෝජනවලට අදාළ වේ. සපයන්නෙකු සම්බන්ධ කිරීමෙන් මෙම විකල්පය සක්‍රිය නොවේ.",
     "autoCatalogTemplateCount": "සැකිලි {count}ක්",
     "autoCatalogDescription": "සම්බන්ධිත සැපයුම්කරුවන් මත පදනම්ව ගතිකව විසඳනු ලබන, පද්ධතිය තුළම අන්තර්ගත auto/* සංයෝජන. මෙම ඕනෑම ID එකක් model ක්ෂේත්රය ලෙස භාවිත කරන්න — සැකසීමක් අවශ්ය නොවේ.",
     "autoCatalogExpand": "ස්වයංක්රීය මාර්ගගත කිරීමේ නාමාවලිය දිගහරින්න",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "තවමත් කිසිදු කොම්බෝවක් වින්යාස කර නැත.",
     "playgroundCreateFirst": "පළමුව එකක් සාදන්න",
     "weighted": "බරිත",
+    "weightPercent": "බර (%)",
     "leastUsed": "අවම වශයෙන් භාවිත වූ",
     "costOpt": "පිරිවැය-ප්රශස්ත",
     "strategyGuideTitle": "මෙම උපායමාර්ගය භාවිත කරන ආකාරය",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# ගිණුම} other {# ගිණුම්}}",
     "builderGlobalAdded": "එක් කරන ලදී",
     "builderGlobalAdd": "එක් කරන්න",
+    "clearSearch": "සෙවීම හිස් කරන්න",
     "manualModel": "අතින් ඇතුළත් කරන මොඩලය",
     "manualModelInvalid": "මොඩලයක් provider/model ලෙස ඇතුළත් කරන්න.",
     "manualModelUnknownProvider": "හඳුනා නොගත් සපයන්නාගේ උපසර්ගයකි.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "කොම්බෝ යොමුව එක් කරන්න",
     "builderPinnedAccount": "ස්ථිර කළ ගිණුම",
     "builderLegacyEntry": "පැරණි ඇතුළත් කිරීම",
+    "builderStaleModel": "සජීවී නාමාවලියේ නැත",
     "reviewName": "නම",
     "reviewStrategy": "උපායමාර්ගය",
     "reviewSteps": "පියවර",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "අවම අන්තර්ගත දිග (අක්ෂර)",
     "responseValidationJsonPaths": "JSON-path පරීක්ෂණ",
     "responseValidationAddCheck": "+ පරීක්ෂණයක් එක් කරන්න",
+    "responseValidationRemoveCheck": "පරීක්ෂාව ඉවත් කරන්න",
+    "responseValidationPath": "JSON මාර්ගය",
+    "responseValidationCondition": "කොන්දේසිය",
+    "responseValidationValue": "අපේක්ෂිත අගය",
     "agentFeaturesSystemMessageOverride": "පද්ධති පණිවිඩය අභිබවා යන්න",
     "agentFeaturesSystemMessagePlaceholder": "ඔබ විශේෂඥ සහායකයෙකි...",
     "agentFeaturesSystemMessageHint": "නියෝජිතයන් සඳහා පද්ධති පණිවිඩ අභිබවා යාම",
@@ -5288,7 +5292,8 @@
         "skipped": "දැනටමත් වින්යාස කර ඇත",
         "failed": "අසාර්ථක විය"
       }
-    }
+    },
+    "stepProgress": "පිහිටුවීමේ ප්රගතිය"
   },
   "providers": {
     "tosAvoidNoticeTitle": "මෙම සපයන්නා පෙරනිමියෙන් auto වෙතින් ඉවත් කර ඇත",
@@ -6056,10 +6061,10 @@
     "apiFormatLabel": "API ආකෘති ලේබලය",
     "apiKeyOptionalHint": "ඔබේ දේශීය සැකසුමට හෝ සැපයුම්කරුට සත්යාපනය අවශ්ය නොවේ නම් හිස්ව තබන්න.",
     "apiKeyOptionalLabel": "API යතුර (විකල්පීය)",
-    "apiRegionChina": "API කලාපය: චීනය",
-    "apiRegionHint": "API කලාප ඉඟිය",
-    "apiRegionInternational": "API කලාපය: ජාත්යන්තර",
-    "apiRegionLabel": "API කලාප ලේබලය",
+    "apiRegionChina": "චීන මහාද්වීපය",
+    "apiRegionHint": "API ප්රවේශය සහ කෝටා නිරීක්ෂණය සඳහා යොදාගන්නා endpoint කලාපය තෝරන්න.",
+    "apiRegionInternational": "ජාත්යන්තර",
+    "apiRegionLabel": "API කලාපය",
     "apikey": "API යතුර",
     "audio": "ශ්රව්ය",
     "audioProvidersHeading": "ශ්රව්ය සැපයුම්කරුවන්ගේ ශීර්ෂය",
@@ -6540,6 +6545,7 @@
       "monsterapi": "API යතුර monsterapi.ai වෙතින් ලබා ගන්න",
       "moonshot": "API යතුරක් භාවිතයෙන් Kimi සම්බන්ධ කරන්න.",
       "morph": "නොමිලේ මට්ටම: මසකට ණය 250K, $0",
+      "apmix": "apmix.ai/dashboard වෙතින් API යතුරක් සමඟ Apmix සම්බන්ධ කරන්න — එක් දායකත්වයක්, බොහෝ ආකෘති.",
       "nanogpt": "API යතුරක් භාවිතයෙන් NanoGPT සම්බන්ධ කරන්න.",
       "nebius": "API පරීක්ෂා කිරීම සඳහා ලියාපදිංචි වීමේදී ~$1 අත්හදා බැලීමේ ණය",
       "nlpcloud": "NLP Cloud විසින් OpenAI chat/completions වෙනුවට හිමිකාර චැට්බොට් API එකක් භාවිත කරයි. OmniRoute විසින් OpenAI පණිවිඩ input/context/history බවට අනුවර්තනය කර, සහාය දක්වන චැට්බොට් මාදිලිවල දේශීය නාමාවලියක් නිරාවරණය කරයි.",
@@ -6636,8 +6642,7 @@
       "kiro": "නොමිලේ ස්තරය: මසකට credits 50ක් (~25K–100K tokens). ⚠️ Kiro ToS මඟින් තෙවන පාර්ශ්ව proxy/harness භාවිතය තහනම් කරයි.",
       "codex": "පවතින OAuth ප්රවාහය සමඟ OpenAI Codex සම්බන්ධ කරන්න.",
       "qwen": "පවතින OAuth ප්රවාහය සමඟ Qwen Code සම්බන්ධ කරන්න.",
-      "github-models": "github.com/settings/tokens හි 'models: read' scope එක සහිත GitHub PAT එකක් සාදන්න",
-      "apmix": "apmix.ai/dashboard වෙතින් API යතුරක් සමඟ Apmix සම්බන්ධ කරන්න — එක් දායකත්වයක්, බොහෝ ආකෘති."
+      "github-models": "github.com/settings/tokens හි 'models: read' scope එක සහිත GitHub PAT එකක් සාදන්න"
     },
     "passthroughModelsDescription": "{provider} සපයන්නා provider-native model IDs පිළිගනී. /models වෙතින් ආයාත කරන්න හෝ මාර්ගගත කිරීම සඳහා අභිරුචි IDs එක් කරන්න.",
     "bedrockModelsDescription": "Amazon Bedrock models AWS කලාපය අනුව සීමා වේ. /models වෙතින් ආයාත කරන්න හෝ තෝරාගත් කලාපයේ සක්රීය කර ඇති Bedrock model IDs එක් කරන්න.",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "පෙන්විය යුතු පැති තීරු අයිතම තෝරන්න. අත්යවශ්ය මාදිලියේදී උසස් මෙවලම් සෙවිය හැකිව පවතී.",
     "hideHealthLogs": "සෞඛ්ය පරීක්ෂණ ලොග් සඟවන්න",
     "hideHealthLogsDesc": "ON කර ඇති විට, සේවාදායක කොන්සෝලයේ [HealthCheck] පණිවිඩ යටපත් කරන්න",
-    "themeAccent": "තේමා වර්ණය",
-    "themeAccentDesc": "පෙර සැකසූ වර්ණයක් තෝරන්න හෝ එක් වර්ණයකින් ඔබේම තේමාව සාදන්න",
-    "themeCreate": "තේමාවක් සාදන්න",
-    "themeCustom": "අභිරුචි තේමාව",
-    "themeBlue": "නිල්",
-    "themeRed": "රතු",
-    "themeGreen": "කොළ",
-    "themeViolet": "දම්",
-    "themeOrange": "තැඹිලි",
-    "themeCyan": "සයන්",
     "whitelabeling": "සන්නාමකරණය",
     "whitelabelingDesc": "යෙදුමේ නම සහ ලාංඡනය අභිරුචිකරණය කරන්න",
     "appName": "යෙදුමේ නම",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "දැන්",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "ප්‍රධාන බයිනරි මාර්ගය",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "විකල්ප: ඇතුළත් කළ ගොනුව ආදේශ කිරීමට පෙර ප්‍රධාන බයිනරිය මගින් සකස් කළ ගොනුව විමර්ශනය කරයි. යාබදව ලිවීම තබා ගැනීමට හිස් අතින් තබන්න. නොපවතින නම් නිහිත නිර්මාණය වේ."
+      "coreBinaryPathHelp": "විකල්ප: ඇතුළත් කළ ගොනුව ආදේශ කිරීමට පෙර ප්‍රධාන බයිනරිය මගින් සකස් කළ ගොනුව විමර්ශනය කරයි. යාබදව ලිවීම තබා ගැනීමට හිස් අතින් තබන්න. නොපවතින නම් නිහිත නිර්මාණය වේ.",
+      "urlFeedlessHint": "තෝරාගැනීම් පමණක් සහිත දායකත්වයක් සඳහා හිස්ව තබන්න: පහත පාලක URL එකක් සකසන්න, අතුරුපිටුවක් ලබා නොගැනේ, නැවුම් නොකරනු ලබන්නේ හෝ බැඳ නොදමනු ලබන්නේය."
     },
     "bulkHealthcheck": "සමූහ සෞඛ්ය පරීක්ෂාව",
     "bulkHealthcheckDesc": "ක්රියා කරන ඒවා හඳුනා ගැනීමට වින්යාස කර ඇති සියලුම ප්රොක්සි ඉලක්ක URL එකක් සමඟ පරීක්ෂා කරන්න.",
@@ -7707,6 +7703,7 @@
     "configured": "වින්යාස කර ඇත",
     "none": "කිසිවක් නැත",
     "modelOverrideValuePlaceholder": "සංඛ්යාත්මක අගය",
+    "modelOverrideKey": "අතික්රමණ යතුර",
     "modelOverrideReasoningEffortsPlaceholder": "ඉංග්රීසි කොමාවෙන් වෙන් කළ, උදා. low, medium, high",
     "addKeyValue": "යතුර සහ අගය එක් කරන්න",
     "noModelOverrides": "මෙම ආකෘතිය සඳහා අභිබවා සැකසීම් කිසිවක් වින්යාස කර නැත.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "විශේෂිත මොඩල සඳහා පෙරනිමි මිලකරණය අතික්රමණය කළ හැක. අභිරුචි අතික්රමණවලට ස්වයංක්රීයව හඳුනාගත් මිලකරණයට වඩා ප්රමුඛත්වය ලැබේ.",
     "editPricing": "මිලකරණය සංස්කරණය කරන්න",
     "viewFullDetails": "සම්පූර්ණ විස්තර බලන්න",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "පරිමාවට අනුව අනුවර්තී මාර්ගගත කිරීම",
     "adaptiveVolumeRoutingDesc": "පේලෝඩ් පරිමාව සහ ප්රතිදාන ධාරිතාව මත ඇති පීඩනය අනුව සම්බන්ධතා ගතිකව පරිමාණය කරන්න.",
     "lkgpToggleTitle": "අවසන් වරට නිවැරදිව ක්රියා කළ සැපයුම්කරු (LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "සපයන්නන් වෙත යැවීමට පෙර ප්රේරක සම්පීඩනය කිරීමෙන් ටෝකන් භාවිතය අඩු කරන්න",
     "autoCombosTitle": "ස්වයංක්රීය සංයෝජන",
     "autoCombosDesc": "වින්යාස කර ඇති සෑම සැපයුම්කරුවෙකුගෙන්ම ආකෘතියක් ස්වයංක්රීයව තෝරන, ගොඩනඟා ඇති auto/* සංයෝජන භාවිත කිරීමට මෙම යතුරට ඉඩ දෙන්න",
+    "ccDiscoveryAliasesTitle": "Claude Code සොයාගැනීමේ අන්වර්ථ නම්",
+    "ccDiscoveryAliasesDesc": "මෙම යතුරට දැනටමත් ප්රවේශ විය හැකි ආකෘති සහ සංයෝජන සඳහා claude/... අනුකූලතා කැඩපත් ප්රචාරණය කරන්න",
     "compressionGuidanceFullGuideLink": "සම්පීඩනය පිළිබඳ සම්පූර්ණ මාර්ගෝපදේශය",
     "compressionGuidanceShow": "විස්තර",
     "compressionGuidanceHide": "විස්තර සඟවන්න",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "සමත්",
     "tomlTestFailed": "අසමත්",
     "tomlImportError": "RTK TOML ගොනුව සැකසීමට නොහැකි විය.",
-    "tomlFileReadError": "තෝරාගත් TOML ගොනුව කියවීමට නොහැකි විය."
+    "tomlFileReadError": "තෝරාගත් TOML ගොනුව කියවීමට නොහැකි විය.",
+    "viewMode": "දසුන් ප්රකාරය"
   },
   "compressionEngineConfig": {
     "loading": "පූරණය වෙමින්…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "භාෂා ඇසුරුම්: {packs}",
     "dragToReorder": "පියවරේ අනුපිළිවෙළ වෙනස් කිරීමට ඇදගෙන යන්න",
     "engine": "එන්ජිම",
-    "intensity": "තීව්රතාව"
+    "intensity": "තීව්රතාව",
+    "compressionOverride": "සම්පීඩන අතික්රමණය"
   },
   "compressionStudio": {
     "noRun": "ලබාගත හැකි සම්පීඩන ධාවනයක් නොමැත.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "ජයග්රාහකයා: {winner}",
     "encoder": "කේතකය",
     "bytes": "බයිට්",
-    "tokensCl100k": "ටෝකන (cl100k)"
+    "tokensCl100k": "ටෝකන (cl100k)",
+    "studioViews": "Studio දසුන්"
   },
   "omniglyph": {
     "preview": "පෙරදසුන",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "මෙයට වඩා කෙටි පණිවිඩ සම්පීඩනය නොකෙරේ. අඩු = වැඩි සම්පීඩනයක්.",
     "tooltipMinSavings": "අවම වශයෙන් මෙම ටෝකන ගණනවත් ඉතිරි කරන්නේ නම් පමණක් සම්පීඩනය කරන්න.",
     "ultraSettings": "Ultra සැකසුම්",
-    "ultraSettingsDesc": "SLM මඟින් බලගැන්වෙන අර්ථමය සම්පීඩනය"
+    "ultraSettingsDesc": "SLM මඟින් බලගැන්වෙන අර්ථමය සම්පීඩනය",
+    "defaultLanguage": "පෙරනිමි භාෂාව",
+    "viewMode": "දසුන් ප්රකාරය"
   },
   "translator": {
     "title": "පරිවර්තකය",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "ප්රවාහය පරිණාමනය කිරීමට අසමත් විය"
   },
   "usage": {
+    "healthExtraUsageBypass": "කෝටාව අවසන් වී ඇත; අමතර භාවිතයට අවසර ඇති බැවින් සේවාව දිගටම ක්‍රියාත්මක වේ.",
+    "healthPaidCreditsBypass": "කෝටාව අවසන් වී ඇත; පවතින ගෙවූ බැර මඟින් සේවාව දිගටම පවත්වාගත හැක.",
+    "healthFilteringBypass": "කෝටාව අවසන් වී ඇත; දේශීය කෝටා පෙරීම අක්‍රිය බැවින් සේවාව දිගටම ක්‍රියාත්මක වේ.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
@@ -10002,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "සැපයුම්කරු සීමා",
     "noProviders": "සම්බන්ධිත සැපයුම්කරුවන් නොමැත",
+    "quotaAuthRequired": "සත්යාපනය අවශ්යයි - උපකරණ පුවරුවට පිවිසෙන්න",
+    "quotaAuthRequiredHint": "උපකරණ පුවරු සැසිය නොමැති හෝ කල් ඉකුත් වී ඇති බැවින් සැපයුම්කරු සම්බන්ධතා පූරණය කළ නොහැකි විය. ඔබේ කෝටා සීමාවන් බැලීමට පිවිස පිටුව නැවුම් කරන්න.",
     "connectProvidersForQuota": "ඔබේ API කෝටා සීමා සහ භාවිතය හඹා යාමට OAuth සමඟ සැපයුම්කරුවන් වෙත සම්බන්ධ වන්න.",
     "accountsCount": "{count, plural, one {# ගිණුම} other {# ගිණුම්}}",
     "filteredFromCount": "({count}කින් පෙරා ඇත)",
@@ -10051,9 +10059,6 @@
     "tierLite": "ලයිට්",
     "tierUnknown": "නොදන්නා",
     "statTotal": "එකතුව",
-    "statCritical": "අතිශය තීරණාත්මක",
-    "statAlert": "අනතුරු ඇඟවීම",
-    "statHealthy": "සෞඛ්ය සම්පන්න",
     "filterPurchaseTypeLabel": "වර්ගය",
     "filterTierLabel": "ස්තරය",
     "purchaseAll": "සියල්ල",
@@ -10291,7 +10296,61 @@
     "updatedShort": "යාවත්කාලීන කළේ",
     "lastRefreshed": "අවසන් වරට නැවුම් කළේ",
     "providerQuota": "සපයන්නාගේ කෝටාව",
-    "providerQuotaHomeHint": "සම්බන්ධිත ගිණුම්වල සජීවී තත්ත්වය"
+    "providerQuotaHomeHint": "සම්බන්ධිත ගිණුම්වල සජීවී තත්ත්වය",
+    "claudeResetCreditDefaultTitle": "Claude සීමා යළි පිහිටුවීම",
+    "confirmRedeemClaudeResetCredit": "මුදවා ගැනීමෙන් සුදුසුකම් ලත් Claude භාවිත සීමාවන් වහාම යළි පිහිටුවන අතර මෙම ක්‍රෙඩිට් එක ස්ථිරවම වැය වේ.",
+    "claudeResetCreditsModalTitle": "Claude යළි පිහිටුවීමේ ක්‍රෙඩිට්",
+    "claudeResetCreditsModalExplainer": "මෙම ගිණුම සඳහා ලබා ගත හැකි Claude යළි පිහිටුවීමේ ක්‍රෙඩිට් සහ සතිපතා සැසි යළි පිහිටුවීම්.",
+    "healthAccountHint": "මෑත නිරීක්ෂණ මත පදනම් වේ, සජීවී පරීක්ෂණයක් නොවේ. විස්තර සඳහා ගිණුමක් තෝරන්න.",
+    "healthRecovery": "අපේක්ෂිත යථා තත්ත්වයට පත්වීමේ වේලාව",
+    "healthAvailable": "ලබා ගත හැකිය",
+    "healthRestricted": "අර්ධ වශයෙන් සීමා කර ඇත",
+    "healthUnavailable": "ලබාගත නොහැකියි",
+    "healthPeakHourProtection": "අධික භාවිත වේලාවේ ආරක්ෂාව",
+    "healthCooldown": "රැඳී සිටීමේ කාලය",
+    "healthQuotaExhausted": "කෝටාව අවසන් වී ඇත",
+    "healthOverview": "දළ විශ්ලේෂණය",
+    "layoutFull": "සම්පූර්ණ",
+    "layoutCompact": "සංක්ෂිප්ත",
+    "healthQuotaError": "කෝටාව කියවීම අසාර්ථකයි",
+    "healthNoRuntime": "ක්‍රියාකාරී තත්ත්වය ලබාගත නොහැක",
+    "healthPreviousSnapshot": "අවසන් යාවත්කාලීනය අසාර්ථකයි; පෙර ප්‍රතිඵලය පෙන්වයි",
+    "healthPreviousFailure": "අවසන් ඉල්ලීම අසාර්ථකයි; රැඳී සිටීම අවසන්",
+    "healthAwaitingSync": "යළි සැකසීමේ වේලාව පසු වී ඇත; සමමුහුර්ත කිරීම බලාපොරොත්තුවෙන්",
+    "healthVerdictUnavailable": "ලබාගත හැකි බව පරීක්ෂා කළ ප්‍රතිඵලය නොමැත; කෝටා මට්ටම් පමණක් පෙන්වයි",
+    "healthSummaryFailed": "ක්‍රියාකාරී සාරාංශය කියවීම අසාර්ථකයි; ආකෘති අගුළු තොරතුරු නොතිබිය හැක",
+    "healthRuntimeObserved": "ක්‍රියාකාරී තත්ත්වය යාවත්කාලීන කළේ {time}",
+    "healthQuotaObserved": "කෝටාව නිරීක්ෂණය කළේ {time}",
+    "healthOldestQuota": "පැරණිතම කෝටා සටහන: {time}",
+    "healthRecoveryUnknown": "යථා තත්ත්වයට පත්වන වේලාව නොදනී",
+    "healthDetailsHint": "විස්තර සහ ක්‍රියා සඳහා ක්ලික් කරන්න",
+    "healthFiveHour": "පැය 5",
+    "healthOverall": "සමස්ත",
+    "healthAction": "ක්‍රියාමාර්ගයක් අවශ්‍යයි",
+    "healthTitle": "ගිණුම් ලබාගත හැකි බව",
+    "healthDrag": "සපයන්නන්ගේ අනුපිළිවෙළ වෙනස් කිරීමට අදින්න",
+    "healthDragPosition": "{provider}, {count, plural, one {# අතරින් {position, number} වන ස්ථානය} other {# අතරින් {position, number} වන ස්ථානය}}",
+    "healthResetOrder": "පෙරනිමි අනුපිළිවෙළ යළි පිහිටුවන්න",
+    "healthPool": "{name} සමූහය",
+    "healthOtherPool": "එකම ගිණුමේ {pool}: {status} ({remaining} ඉතිරියි)",
+    "healthIncluded": "{count, plural, one {අර්ධ වශයෙන් සීමා කළ ගිණුම් #ක් ඇතුළත් වේ} other {අර්ධ වශයෙන් සීමා කළ ගිණුම් #ක් ඇතුළත් වේ}}",
+    "healthBannerUnavailable": "{count, plural, one {ගිණුම් #ක් තාවකාලිකව ලබාගත නොහැක} other {ගිණුම් #ක් තාවකාලිකව ලබාගත නොහැක}}",
+    "healthBannerAvailable": "{count, plural, one {ගිණුම් #ක් ලබාගත හැක} other {ගිණුම් #ම ලබාගත හැක}}",
+    "healthLegendHide": "සංකේත විස්තරය සඟවන්න",
+    "healthLegendShow": "සංකේත විස්තරය පෙන්වන්න",
+    "healthLegendOk": "තද පැහැය = ඉතිරි කෝටාව; අර්ධ පාරදෘශ්‍ය = භාවිත කළ ප්‍රමාණය.",
+    "healthLegendCooldown": "{window} කෝටාව අවසන්. තද පැහැය = ගත වූ රැඳී සිටීම; අර්ධ පාරදෘශ්‍ය = ඉතිරි රැඳී සිටීම.",
+    "healthLegendAction": "අවසරය කල් ඉකුත් හෝ ගිණුම තහනම්; බලා සිටීමෙන් සුව නොවේ.",
+    "healthLegendPartial": "තවමත් භාවිත කළ හැක. කහ මුදුන = ආකෘතියක් හෝ සමූහයක් සීමා වී ඇත.",
+    "healthWaited": "ගත වූ රැඳී සිටීම {percent}",
+    "healthWait": "තවත් {duration} ({time} ට නැවත ලැබේ)",
+    "healthFastest": "ඉක්මන්ම ප්‍රතිසාධනය {duration} කින්",
+    "healthRatio": "{available, plural, one {# / {active, number} ලබාගත හැක} other {# / {active, number} ලබාගත හැක}}",
+    "healthCd5": "පැය 5 · රැඳී සිටීමේ කාලය",
+    "healthCdw": "සතිපතා · රැඳී සිටීමේ කාලය",
+    "healthRecentSuccessBypass": "මෑතකදී ඉල්ලීමක් සාර්ථක වූ බැවින් රවුටින් මෙම ගිණුමට අවසර දෙයි.",
+    "healthPurchasedBalanceBypass": "ඇතුළත් කෝටාව අවසන් වූ පසු මිලදී ගත් ශේෂයෙන් භාවිතය දිගටම කරගෙන යා හැක.",
+    "healthCutoffAtRequest": "ඉල්ලීමක් රවුට් කරන විට සජීවී කෝටා සීමා පරීක්ෂා කෙරේ."
   },
   "modals": {
     "waitingAuth": "අවසරය සඳහා රැඳී සිටී",
@@ -11078,7 +11137,8 @@
       "message": "පණිවිඩය",
       "error": "දෝෂය",
       "completion": "සම්පූර්ණ කිරීම"
-    }
+    },
+    "statusFilter": "තත්ත්වය"
   },
   "templateNames": {
     "simple-chat": "සරල කතාබහ",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "මිනිත්තු {minutes}කට පෙර",
     "hoursAgo": "පැය {hours}කට පෙර",
     "daysAgo": "දින {days}කට පෙර",
-    "entries": "ඇතුළත් කිරීම්"
+    "entries": "ඇතුළත් කිරීම්",
+    "viewSwitcherAria": "හැඹිලි දසුන"
   },
   "proxyConfigModal": {
     "levelGlobal": "ගෝලීය",
@@ -11447,6 +11508,7 @@
     "tableHealth": "සෞඛ්යය (පැය 24)",
     "tableUsage": "භාවිතය",
     "tableActions": "ක්රියා",
+    "moreActions": "තවත් ක්රියා",
     "test": "පරීක්ෂා කරන්න",
     "edit": "සංස්කරණය කරන්න",
     "delete": "මකන්න",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "වලංගු ඇතුළත් කිරීම් හමු නොවීය. ආකෘතිය පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
     "bulkImportSuccess": "ආයාතය සම්පූර්ණයි: {created}ක් සාදන ලදී, {updated}ක් යාවත්කාලීන කරන ලදී, {failed}ක් අසමත් විය",
     "bulkImportErrorLine": "පේළිය {line}: {reason}",
-    "bulkImportMaxExceeded": "එක් ආයාතයකට උපරිම ප්රොක්සි 100ක්",
+    "bulkImportMaxExceeded": "එක් ආයාතයකට උපරිම ප්රොක්සි {max}ක්",
     "bulkImportPreview": "පෙරදසුන",
     "clearAssignment": "(පැවරීම ඉවත් කරන්න)",
     "bulkProxyAssignment": "ප්රොක්සි තොග පැවරීම",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "IP අනුපාත සීමාව (429)",
     "poolSetAsideKindSlow": "මන්දගාමී ප්‍රතිචාර",
     "poolSetAsideKindGeoBlocked": "කලාප-අවහිර (403/451)",
+    "poolSetAsideKindOperatorReported": "මෙහෙයුම්කරු විසින් වාර්තා කළ බිඳවැටීම",
     "poolSetAsideUntil": "භ්‍රමණයට ආපසු {endsAt}",
     "poolSetAsideRepeat": "වෙන්කර ඇත {count, plural, one {# වතාවක්} other {# වතාවක්}}",
     "poolUnknownAddress": "නොදන්නා ලිපිනය",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "කේතය නිර්යාත කරන්න",
     "exportShort": "නිර්යාත කරන්න",
     "noStateToExport": "නිර්යාත කිරීමට playground තත්ත්වයක් නොමැත.",
-    "closeExportModal": "නිර්යාත මොඩල් කවුළුව වසන්න",
     "close": "වසන්න",
     "exportRealKeyWarning": "ආරක්ෂක අනතුරු ඇඟවීම: නිර්යාත කිරීම අවහිර කර ඇත — ප්රතිදානයේ සැබෑ API යතුරක් අනාවරණය විය. කරුණාකර ඔබගේ API යතුර යළි සකසා නැවත උත්සාහ කරන්න.",
     "placeholderHintPrefix": "ප්රතිස්ථාපනය කරන්න",
@@ -11809,7 +11871,8 @@
       "nextButton": "ඊළඟ",
       "runButton": "ධාවනය කරන්න",
       "promptPlaceholder": "ඔබේ පණිවිඩය ඇතුළත් කරන්න… (යැවීමට Enter, නව පේළියක් සඳහා Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground ප්රකාර"
   },
   "miniPlayground": {
     "endpoint": "අන්ත ලක්ෂ්යය",
@@ -11880,7 +11943,8 @@
     "assistant": "සහායකයා",
     "errorLabel": "දෝෂය",
     "requestFailed": "ඉල්ලීම අසාර්ථක විය",
-    "stop": "නවත්වන්න"
+    "stop": "නවත්වන්න",
+    "messageInputAria": "පණිවිඩය"
   },
   "requestLogger": {
     "recording": "පටිගත වෙමින් පවතී",
@@ -12028,8 +12092,8 @@
       "compressed": "සම්පීඩිතයි: {from} → {to} ({percent}% ඉතිරි විය)",
       "output": "ප්රතිදානය",
       "totalOut": "මුළු ප්රතිදානය: {value}",
-      "reasoningObserved": "{value} · අක්ෂර {chars}ක් නිරීක්ෂණය විය",
       "reasoning": "තාර්කිකකරණය: {value}",
+      "reasoningObserved": "{value} · අක්ෂර {chars}ක් නිරීක්ෂණය විය",
       "requestedModel": "ඉල්ලා ඇති මාදිලිය",
       "requestProtocol": "ඉල්ලීම් ප්රොටෝකෝලය",
       "cacheSource": "කෑෂ් මූලාශ්රය",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "ගිණුම් භ්‍රමණ {count}",
       "resilienceRetried": "හිස් වාරය නැවත උත්සාහ කළා",
       "resilienceContinued": "ප්‍රවාහය මැදින් නැවත ආරම්භ කළා",
-      "resilienceRecovered": "ප්‍රත්‍යස්ථතා ක්‍රියාවකින් ප්‍රතිසාධනය කළා"
-    }
+      "resilienceRecovered": "ප්‍රත්‍යස්ථතා ක්‍රියාවකින් ප්‍රතිසාධනය කළා",
+      "conversationContext": "සංවාද සන්දර්භය",
+      "goToBottom": "පහළට යන්න",
+      "liveRefreshOn": "සජීවී නැවුම් කිරීම: සක්රියයි",
+      "liveRefreshOff": "සජීවී නැවුම් කිරීම: අක්රියයි",
+      "liveRefresh": "සජීවී නැවුම් කිරීම",
+      "continuesFromParent": "මව් අයිතමයෙන් දිගටම පවතී",
+      "continuesFrom": "{id} වෙතින් දිගටම පවතී",
+      "viewConversation": "සංවාදය බලන්න",
+      "openConversation": "{id} සංවාදය විවෘත කරන්න"
+    },
+    "tableLabel": "ඉල්ලීම් ලොග්"
   },
   "proxyLogger": {
     "filterAll": "සියල්ල",
@@ -12113,7 +12187,9 @@
     "colServedBy": "සැපයුම්කරු",
     "filterTraffic": "ගමනාගමනය",
     "filterTests": "පරීක්ෂණ",
-    "filterSource": "මූලාශ්‍රය"
+    "filterSource": "මූලාශ්‍රය",
+    "tableLabel": "ප්රොක්සි ලොග්",
+    "sortLogs": "ලොග් අනුපිළිවෙළට සකසන්න"
   },
   "endpointOptions": {
     "speech": "කථනය",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "අවසන් වී ඇත",
     "statusAlerting": "අනතුරු ඇඟවීමේ තත්ත්වයේ",
     "statusError": "දෝෂයකි",
-    "moreSuffix": "+ තවත් {count}ක්"
+    "moreSuffix": "+ තවත් {count}ක්",
+    "feedFilterLabel": "සිදුවීම් පෙරහන් කරන්න"
   },
   "quotaShare": {
     "weightPercent": "බර %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "කණ්ඩායම්ගත නොකළ",
     "ungroupedHint": "මෙම සංචිත හඳුනාගත් කණ්ඩායමකට පවරා නැත. සංචිතයක් සැබෑ කණ්ඩායමකට ගෙන යාමට එය සංස්කරණය කරන්න.",
     "removeFailed": "මෙම සංචිතය ඉවත් කිරීමට නොහැකි විය.",
-    "dismiss": "ඉවතලන්න"
+    "dismiss": "ඉවතලන්න",
+    "allocationsHeading": "වෙන් කිරීම්",
+    "wizardRemoveDimension": "මානය ඉවත් කරන්න",
+    "wizardRemoveKey": "යතුර ඉවත් කරන්න"
   },
   "plugins": {
     "title": "ප්ලගින",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "සැකසුම් යාවත්කාලීන කිරීම අසාර්ථක විය",
       "serviceRevealApiKey": "{actor} විසින් {target} සඳහා API යතුර හෙළි කළේය",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "දෝෂය ඉවතලන්න"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "දැන් යන්න",
       "message": "MITM Proxy දැන් AgentBridge යටතේ ඇත.",
       "title": "මෙම පිටුව වෙනත් ස්ථානයකට ගෙන ගොස් ඇත"
-    }
+    },
+    "dnsOn": "DNS සක්රියයි",
+    "dnsOff": "DNS අක්රියයි",
+    "showServerSettings": "සේවාදායක සැකසුම් පෙන්වන්න",
+    "hideServerSettings": "සේවාදායක සැකසුම් සඟවන්න",
+    "upstreamCaTesting": "පරීක්ෂා කරමින්…",
+    "removeMapping": "අනුරූපණය ඉවත් කරන්න",
+    "mappingSourcePlaceholder": "උදා., gemini-3.6-flash-medium, හෝ අනුරූපණය නොකළ සියල්ල සඳහා *",
+    "mappingWildcardHint": "පැහැදිලි අනුරූපණයක් නොමැති සෑම මාදිලියක්ම OmniRoute හරහා තෝරාගත් ඉලක්කයට යොමු කිරීමට මූලාශ්රය ලෙස * භාවිත කරන්න. නිශ්චිත මූලාශ්ර ගැළපීම් සෑම විටම * අභිබවා යයි.",
+    "wizardDetectingModels": "අතරමඟ ග්රහණය කළ ගමනාගමනයෙන් මාදිලි හඳුනා ගනිමින්...",
+    "wizardDetectedModels": "අතරමඟ ග්රහණය කළ ගමනාගමනයේ {count, plural, one {# මාදිලියක්} other {# මාදිලි}} හමු විය. ඔබට එක් කිරීමට අවශ්ය ඒවා තෝරන්න:",
+    "wizardSelectedModels": "{count, plural, one {# මාදිලියක්} other {# මාදිලි}} තෝරා ඇත. ඊළඟ තිරයේදී ඔබ ඒවා OmniRoute මාදිලිවලට අනුරූපණය කරනු ඇත.",
+    "wizardAddModels": "{count, plural, one {# මාදිලියක්} other {# මාදිලි}} එක් කරන්න",
+    "wizardNoModelsDetected": "තවම මාදිලි කිසිවක් හඳුනාගෙන නැත. ඉල්ලීමක් කිරීමට {agent} භාවිත කර, පසුව ගමනාගමනයෙන් මාදිලි ස්වයංක්රීයව හඳුනා ගැනීමට මෙම විශාරදය නැවත ධාවනය කරන්න.",
+    "wizardNoModelsHint": "නැතහොත් මෙම විශාරදය වසා නියෝජිත කාඩ්පතෙහි අනුරූපණ අතින් එක් කරන්න."
   },
   "providerStats": {
     "unknownError": "නොදන්නා දෝෂයකි",
@@ -12686,7 +12781,11 @@
     "avgTtft": "සාමාන්ය TTFT",
     "avgTotal": "සාමාන්ය සමස්තය",
     "requestTelemetry": "ඉල්ලීම් ටෙලිමෙට්රිය",
-    "requestTelemetryDescription": "අදියර 7ක නල මාර්ග විශ්ලේෂණය (පසුගිය මිනිත්තු 5)"
+    "requestTelemetryDescription": "අදියර 7ක නල මාර්ග විශ්ලේෂණය (පසුගිය මිනිත්තු 5)",
+    "title": "සැපයුම්කරුගේ සංඛ්යාලේඛන",
+    "description": "එක් එක් සැපයුම්කරු සහ මාදිලිය අනුව ගමනාගමනය, ප්රමාදය සහ සාර්ථකත්ව අනුපාත",
+    "combo": "සංයෝජනය",
+    "toggleModels": "{provider} සඳහා මාදිලි පෙන්වන්න"
   },
   "relay": {
     "title": "සර්වර් රහිත රිලේ ප්රොක්සි",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "ඉල්ලීමේ අන්තර්ගතයක් නැත.",
     "noResponseBody": "ප්රතිචාර අන්තර්ගතයක් නැත.",
     "formatted": "ආකෘතිගත කළ",
-    "raw": "අමු"
+    "raw": "අමු",
+    "requestCount": "{count, plural, one {# ඉල්ලීමක්} other {# ඉල්ලීම්}}",
+    "expandList": "ලැයිස්තුව විහිදුවන්න",
+    "collapseList": "ලැයිස්තුව හකුළන්න",
+    "snippetLanguage": "කේත කොටසේ භාෂාව",
+    "headersTable": "ශීර්ෂක",
+    "showSecrets": "රහස් පෙන්වන්න",
+    "maskSecrets": "රහස් ආවරණය කරන්න",
+    "llmNotAvailable": "මෙම ඉල්ලීම සඳහා LLM පාරදත්ත නොමැත.",
+    "llmStreamYes": "ඔව් (SSE)",
+    "llmStreamNo": "නැත",
+    "llmTotalTokens": "එකතුව: ටෝකන {count}"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "පසුගිය පැය 24 තුළ මෙම සැපයුම්කරු සැබවින්ම පිළිතුරු දුන් ඇමතුම් ප්රතිශතය. ඉරක් පෙන්වන්නේ අනුපාතයක් දැක්වීමට තරම් ප්රමාණවත් ඇමතුම් සංඛ්යාවක් හසුරුවා නොමැති බවයි.",
     "reliabilitySample": "පසුගිය පැය {hours} තුළ ඇමතුම් {requests}න් {successes}ක් සාර්ථක විය",
     "reliabilityTooFew": "පසුගිය පැය {hours} තුළ ඇමතුම් {requests}ක් පමණයි — අනුපාතයක් දැක්වීමට ප්රමාණවත් නොවේ",
-    "reliabilityNoTraffic": "පසුගිය පැය 24 තුළ කිසිදු ඇමතුමක් වාර්තා වී නැත"
+    "reliabilityNoTraffic": "පසුගිය පැය 24 තුළ කිසිදු ඇමතුමක් වාර්තා වී නැත",
+    "categoryFilter": "කාර්ය කාණ්ඩය"
   },
   "discovery": {
     "title": "සැපයුම්කරු සොයාගැනීම",
@@ -13331,7 +13442,11 @@
     "method": "ක්රමය",
     "auth": "සත්යාපනය",
     "feasibility": "ක්රියාත්මක කිරීමේ හැකියාව",
-    "models": "මාදිලි"
+    "models": "මාදිලි",
+    "provider": "සපයන්නා",
+    "status": "තත්ත්වය",
+    "endpoint": "අන්ත ලක්ෂ්යය",
+    "actions": "ක්රියා"
   },
   "noAuthProvider": {
     "title": "සත්යාපනය අවශ්ය නොවේ",
@@ -13380,7 +13495,8 @@
     "ownProxy": "ස්වකීය ප්‍රොක්සිය",
     "freeTierPause": "දේශය {model} නතර කළා (429), {time} දී නැවත එයි",
     "freeTierPauseProvider": "නතර කළා (429), {time} දී නැවත එයි",
-    "freeTierPauseNote": "මෙම ස්ථාපනයේ ඇතුළත ක්‍රියාත්මක නැවතීම"
+    "freeTierPauseNote": "මෙම ස්ථාපනයේ ඇතුළත ක්‍රියාත්මක නැවතීම",
+    "proxyType": "ප්රොක්සි වර්ගය"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "සැඟවුණු ජයග්රහණයක් බලා සිටී...",
         "criteria": "මෙම ලාංඡනය හෙළි කිරීමට සැඟවුණු ජයග්රහණය සම්පූර්ණ කරන්න."
       }
-    }
+    },
+    "leaderboardTitle": "ප්රමුඛතා පුවරුව",
+    "leaderboardDescription": "ඔබේ API යතුරු හරහා ශ්රේණිගත කිරීම් සහ ජයග්රහණ",
+    "badgeLocked": "අගුළු දමා ඇත"
   },
   "featureFlags": {
     "title": "විශේෂාංග සලකුණු",
@@ -13794,6 +13913,7 @@
     "latency": "ප්රමාදය",
     "quota": "කෝටාව",
     "rangeWindow": "{range} කාල පරාසය",
+    "timeRange": "කාල පරාසය",
     "runtimeHealthBlend": "ධාවන කාල/සෞඛ්ය මිශ්රණය",
     "averageResponseTime": "සාමාන්ය ප්රතිචාර කාලය",
     "worstQuota": "අවම කෝටාව",
@@ -13995,7 +14115,11 @@
     "learnMore": "තව දැනගන්න",
     "changelogLoadFailed": "වෙනස්කම් සටහන පූරණය කළ නොහැකි විය. කරුණාකර පසුව නැවත උත්සාහ කරන්න.",
     "retry": "නැවත උත්සාහ කරන්න",
-    "viewFullHistory": "සම්පූර්ණ ඉතිහාසය GitHub හි බලන්න"
+    "viewFullHistory": "සම්පූර්ණ ඉතිහාසය GitHub හි බලන්න",
+    "title": "පුවත් සහ වෙනස්කම් සටහන",
+    "description": "OmniRoute කණ්ඩායමේ නිවේදන සහ නවතම නිකුතු සටහන්",
+    "viewLabel": "බලන්න",
+    "loadingNews": "නිවේදන පූරණය වෙමින්..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "සපයන්නාගේ පරිපථ බිඳිනයේ තත්ත්වය",
       "lastUpdate": "අවසන් යාවත්කාලීනය: {timestamp}",
       "uptimeMinutes": "මිනිත්තු {minutes}",
-      "uptimeHoursMinutes": "පැය {hours} මිනිත්තු {minutes}"
+      "uptimeHoursMinutes": "පැය {hours} මිනිත්තු {minutes}",
+      "breakerClosed": "වසා ඇත",
+      "breakerNotClosed": "විවෘත හෝ අර්ධ-විවෘත"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "නඩත්තු විස්තර",
         "secondaryAction": "පද්ධති තත්ත්වය"
       }
+    },
+    "miniapp": {
+      "askAnything": "ඕනෑම දෙයක් අසන්න…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "දෘශ්යමාන {visible} / මුළු {total}",
+    "modeLabel": "දර්ශන ප්රකාරය",
+    "jumpToNow": "වත්මන් වේලාවට යන්න, NOW රේඛාව {position}% ස්ථානයට යළි සැකසේ",
+    "laneReuse": "පේළි නැවත භාවිතය",
+    "laneReuseLabel": "පේළි නැවත භාවිත කාල කවුළුව (මිනිත්තු)",
+    "laneReuseHint": "එකම සංවාද හැඳුනුම්කාරකය බෙදාගන්නා ඉල්ලීම් අතර පරතරය මෙම මිනිත්තු ගණනට අඩු වන තාක් ඒවා එකම කාලරේඛා පේළියේ පවතී.",
+    "laneReuseUnit": "මිනි.",
+    "autoRefresh": "ස්වයංක්රීය නැවුම් කිරීම",
+    "autoRefreshLabel": "ස්වයංක්රීය නැවුම් කිරීමේ කාල පරතරය (තත්පර)",
+    "autoRefreshHint": "කාලරේඛාව සේවාදායකයෙන් ඉල්ලීම් ලැයිස්තුව නැවත ලබාගන්නා වාර ගණන.",
+    "autoRefreshUnit": "ත.",
+    "zoomOut": "කුඩා කරන්න",
+    "zoomIn": "විශාල කරන්න"
   },
   "metadata": {
     "compressionTitle": "සම්පීඩනය",

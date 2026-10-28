@@ -614,55 +614,55 @@ post_install() {
 <details>
 <summary><b>مشاهده همه مدلهای موجود</b></summary>
 
-> فهرست زیر از `open-sse/config/providerRegistry.ts` برای v3.8.0 گردآوری شده است. کاتالوگهای ابری (Gemini، OpenRouter و غیره) بهصورت پویا همگامسازی میشوند — برای مشاهده کامل کاتالوگ زنده، به **داشبورد → ارائهدهندگان → [ارائهدهنده] → مدلهای موجود** بروید یا `GET /api/models/catalog` را فراخوانی کنید.
+> فهرست زیر از `open-sse/config/providerRegistry.ts` برای v3.8.0 گردآوری شده است. کاتالوگهای ابری (Gemini، OpenRouter و غیره) بهصورت پویا همگامسازی میشوند — برای مشاهده کاتالوگ کامل و بهروز، مسیر **Dashboard → Providers → [provider] → Available Models** را باز کنید یا `GET /api/models/catalog` را فراخوانی کنید.
 >
-> اگر فهرست داخلی یک ارائهدهنده قدیمی شده است، در همان صفحه از **وارد کردن از ‎/models** استفاده کنید (یا **همگامسازی خودکار** را فعال کنید) تا کاتالوگ زنده بالادستی دریافت شود. این قابلیت در v3.8.50 برای LLM7.io (`gemini-3.1-flash-lite`) و UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) تأیید شده است؛ دسترسی ناشناس Pollinations در همان مرحله آزمایش همچنان از سمت سرویس بالادستی محدود بود.
+> اگر فهرست داخلی یک ارائهدهنده قدیمی شده باشد، از **Import from /models** در همان صفحه استفاده کنید (یا **Auto-Sync** را فعال کنید) تا کاتالوگ بهروز upstream را دریافت کنید. این مورد در v3.8.50 برای LLM7.io (`gemini-3.1-flash-lite`) و UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) تأیید شد؛ دسترسی ناشناس Pollinations در همان مرحله آزمایش همچنان از سمت upstream محدود باقی ماند.
 
-**Claude Code (`cc/`)** — OAuth پلن Pro/Max: `cc/claude-opus-4-8`، `cc/claude-opus-4-7`، `cc/claude-opus-4-6`، `cc/claude-opus-4-5-20251101`، `cc/claude-sonnet-4-6`، `cc/claude-sonnet-4-5-20250929`، `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth از نوع Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth پلن Plus/Pro: `cx/gpt-5.5` (+ سطوح تلاش: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth از نوع Plus/Pro: `cx/gpt-5.5` (+ سطوح effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`، `gh/gpt-5.4`، `gh/gpt-5.4-mini`، `gh/gpt-5-mini`، `gh/gpt-5.3-codex`، `gh/claude-opus-4.7`، `gh/claude-opus-4.6`، `gh/claude-opus-4-5-20251101`، `gh/claude-sonnet-4.6`، `gh/claude-sonnet-4.5`، `gh/claude-haiku-4.5`، `gh/gemini-3.1-pro-preview`، `gh/gemini-3-flash-preview`، `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth رایگان: از کاتالوگ زنده نمایشدادهشده در **داشبورد → ارائهدهندگان → Kiro → مدلهای موجود** استفاده کنید. دسترسپذیری به حساب و پلن بستگی دارد.
+**Kiro (`kr/`)** — OAuth رایگان: از کاتالوگ بهروزی که در مسیر **Dashboard → Providers → Kiro → Available Models** نمایش داده میشود استفاده کنید. دسترسیپذیری بسته به حساب کاربری و طرح متفاوت است.
 
-**Qoder (`if/`)** — OAuth رایگان: `if/qwen3.8-max-preview`، `if/qwen3.7-max`، `if/qwen3.7-plus`، `if/kimi-k3`، `if/kimi-k2.7-code`، `if/glm-5.2`، `if/deepseek-v4-pro`، `if/deepseek-v4-flash`، `if/minimax-m3`
+**Qoder (`if/`)** — OAuth رایگان: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — ۰٫۲ تا ۰٫۶ دلار بهازای هر ۱ میلیون: `glm/glm-5.1`، `glm/glm-5`، `glm/glm-5-turbo`، `glm/glm-4.7`، `glm/glm-4.7-flash`، `glm/glm-4.6`، `glm/glm-4.6v`، `glm/glm-4.5`، `glm/glm-4.5v`، `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — ۰٫۲ دلار بهازای هر ۱ میلیون: `minimax/MiniMax-M2.7`، `minimax/MiniMax-M2.7-highspeed`، `minimax/MiniMax-M2.5`، `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ماهانه ۹ دلار ثابت یا پرداخت بر اساس مصرف: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — تعرفه ثابت $9 در ماه یا پرداخت بهازای مصرف: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — کلید API: `ds/deepseek-v4-pro`، `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — کلید API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — فوقسریع: `groq/llama-3.3-70b-versatile`، `groq/meta-llama/llama-4-maverick-17b-128e-instruct`، `groq/qwen/qwen3-32b`، `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — فوقسریع: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok بومی: `xai/grok-4.3`، `xai/grok-4.20-multi-agent-0309`، `xai/grok-4.20-0309-reasoning`، `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok بومی: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — میزبانیشده در اتحادیه اروپا: `mistral/mistral-large-latest`، `mistral/mistral-medium-3-5`، `mistral/mistral-small-latest`، `mistral/devstral-latest`، `mistral/codestral-latest`
+**Mistral (`mistral/`)** — میزبانیشده در اتحادیه اروپا: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — تقویتشده با جستوجو: `pplx/sonar-deep-research`، `pplx/sonar-reasoning-pro`، `pplx/sonar-pro`، `pplx/sonar`
+**Perplexity (`pplx/`)** — تقویتشده با جستجو: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — متنباز: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (رایگان)، `together/meta-llama/Llama-Vision-Free`، `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`، `together/deepseek-ai/DeepSeek-R1`، `together/Qwen/Qwen3-235B-A22B`، `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — متنباز: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (رایگان), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — استنتاج سریع: `fireworks/accounts/fireworks/models/kimi-k2p6`، `fireworks/accounts/fireworks/models/minimax-m2p7`، `fireworks/accounts/fireworks/models/qwen3p6-plus`، `fireworks/accounts/fireworks/models/glm-5p1`، `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — استنتاج سریع: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — در مقیاس ویفر: `cerebras/zai-glm-4.7`، `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — مقیاس ویفر: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — متمرکز بر RAG: `cohere/command-a-reasoning-08-2025`، `cohere/command-a-vision-07-2025`، `cohere/command-a-03-2025`، `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — متمرکز بر RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — سازمانی: `nvidia/z-ai/glm-5.1`، `nvidia/minimaxai/minimax-m2.7`، `nvidia/google/gemma-4-31b-it`، `nvidia/mistralai/mistral-small-4-119b-2603`، `nvidia/mistralai/mistral-large-3-675b-instruct-2512`، `nvidia/qwen/qwen3.5-397b-a17b`، `nvidia/deepseek-ai/deepseek-v4-pro`، `nvidia/openai/gpt-oss-120b`، `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — سازمانی: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`، `qianfan/ernie-5.0-thinking-latest`، `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`، `ollama-cloud/deepseek-v4-flash`، `ollama-cloud/kimi-k2.6`، `ollama-cloud/glm-5.1`، `ollama-cloud/minimax-m2.7`، `ollama-cloud/gemma4:31b`، `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: بهصورت زنده و بر اساس کلید API با Google همگامسازی میشود — فهرست ثابتی وجود ندارد. در **داشبورد → ارائهدهندگان** یک کلید متصل کنید، سپس برای وارد کردن کاتالوگ فعلی از **مدلهای موجود** استفاده کنید (برای نمونه، `gemini/gemini-3-pro` و `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: بهصورت زنده و بهازای هر کلید API از Google همگامسازی میشود — فهرست ثابتی وجود ندارد. یک کلید را در **Dashboard → Providers** متصل کنید و سپس از **Available Models** برای واردکردن کاتالوگ فعلی استفاده کنید (مثلاً `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**سایر ارائهدهندگان سازگار** (منتخب): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (از طریق `aws-bedrock`)، `azure-ai`، `openrouter` (کاتالوگ عبوری)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. هرکدام فهرست مدلهای خود را در `providerRegistry.ts` نگهداری میکنند و هنگامی که ارائهدهنده یک نقطه پایانی `/models` ارائه دهد، امکان همگامسازی خودکار وجود دارد.
+**سایر ارائهدهندگان سازگار** (منتخب): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (از طریق `aws-bedrock`), `azure-ai`, `openrouter` (کاتالوگ عبوری), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. هرکدام فهرست مدلهای خود را در `providerRegistry.ts` نگهداری میکنند و در صورتی که ارائهدهنده یک endpoint به نام `/models` ارائه دهد، میتوانند بهصورت خودکار همگامسازی شوند.
 
-**نکته درباره شناسههای مدل:** OmniRoute از شناسههای بومی ارائهدهنده (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`) استفاده میکند. برخی شناسهها شامل نسخههای نقطهدار هستند، زیرا API بالادستی آنها را به همین شکل انتظار دارد. اگر مدلی در بالا فهرست نشده است، برای تأیید دسترسپذیری `omniroute models --search <term>` را اجرا کنید یا `GET /api/models/catalog` را فراخوانی کنید.
+**نکته درباره شناسههای مدل:** OmniRoute از شناسههای بومیِ هر ارائهدهنده استفاده میکند (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). برخی شناسهها شامل نسخههای نقطهدار هستند، زیرا API بالادستی آنها را به همین شکل انتظار دارد. اگر مدلی در فهرست بالا ذکر نشده است، دستور `omniroute models --search <term>` را اجرا کنید یا `GET /api/models/catalog` را فراخوانی کنید تا از در دسترس بودن آن مطمئن شوید.
 
 </details>
 

@@ -25,8 +25,10 @@
     "confirm": "Είστε σίγουροι;",
     "refresh": "Ανανέωση",
     "close": "Κλείσιμο",
+    "dialogTitleFallback": "Παράθυρο διαλόγου",
     "previousPage": "Προηγούμενη σελίδα",
     "nextPage": "Επόμενη σελίδα",
+    "pagination": "Σελιδοποίηση",
     "capsLockOn": "Το Caps Lock είναι ενεργό",
     "dismissNotification": "Κλείσιμο ειδοποίησης",
     "toggleColumns": "Εναλλαγή στηλών",
@@ -182,6 +184,7 @@
     "combos": "Συνδυασμοί",
     "noModelsFound": "Δεν βρέθηκαν μοντέλα",
     "clear": "Εκκαθάριση",
+    "clearFilters": "Εκκαθάριση φίλτρων",
     "done": "Τέλος",
     "selectAll": "Επιλογή όλων",
     "unselectAll": "Αποεπιλογή όλων",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Χρησιμοποιείται από {count, plural, one {# παρτίδα} other {# παρτίδες}}",
     "batchFilePreview": "Προεπισκόπηση",
     "batchFilePreviewTruncated": "Εμφάνιση των πρώτων {shown} γραμμών (σύνολο γραμμών: {total})",
-    "batchFileDownloadFull": "Λήψη Πλήρους Αρχείου"
+    "batchFileDownloadFull": "Λήψη Πλήρους Αρχείου",
+    "tokensPageTitle": "Token",
+    "tokensPageDescription": "Στείλτε token μεταξύ κλειδιών API, κοινοποιήστε κωδικούς πρόσκλησης και συνδέστε διακομιστές κοινότητας.",
+    "tokensServerUrlLabel": "URL διακομιστή"
   },
   "disabled": "Απενεργοποιημένο",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Δρομολόγηση αιτημάτων των οποίων ο προϋπολογισμός έχει εξαντληθεί στον δωρεάν εφεδρικό πάροχο/μοντέλο έκτακτης ανάγκης.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Ο διακομιστής μεσολάβησης έχει σταματήσει ή επανεκκινείται.",
     "expandSidebar": "Ανάπτυξη πλαϊνής γραμμής",
     "collapseSidebar": "Σύμπτυξη πλαϊνής γραμμής",
-    "themes": "Θέματα",
-    "presetColors": "Δημοφιλή χρώματα",
     "createTheme": "Δημιουργία θέματος",
     "chooseColor": "Επιλέξτε ένα χρώμα",
-    "themeCoral": "Κοραλί",
-    "themeBlue": "Μπλε",
-    "themeRed": "Κόκκινο",
-    "themeGreen": "Πράσινο",
-    "themeViolet": "Βιολετί",
-    "themeOrange": "Πορτοκαλί",
-    "themeCyan": "Κυανό",
     "cliToolsShort": "Εργαλεία",
     "cache": "Κρυφή μνήμη",
     "cacheShort": "Κρυφή μνήμη",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Σύστημα θεμάτων",
     "whitelabelingDesc": "Περιγραφή προσαρμογής επωνυμίας",
     "switchThemes": "Εναλλαγή θεμάτων",
-    "themeAccentDesc": "Περιγραφή χρώματος έμφασης θέματος",
     "uploadFavicon": "Μεταφόρτωση Favicon",
     "themeDark": "Σκούρο θέμα",
     "customLogoDesc": "Περιγραφή προσαρμοσμένου λογότυπου",
     "sidebarVisibilityToggle": "Διακόπτης ορατότητας πλαϊνής γραμμής",
-    "themeAccent": "Χρώμα έμφασης θέματος",
     "resetFavicon": "Επαναφορά Favicon",
     "whitelabeling": "Προσαρμογή επωνυμίας",
     "darkMode": "Σκοτεινή λειτουργία",
@@ -1122,10 +1117,8 @@
     "customLogo": "Προσαρμοσμένο λογότυπο",
     "appearance": "Εμφάνιση",
     "themeSelectionAria": "ARIA επιλογής θέματος",
-    "themeCreate": "Δημιουργία θέματος",
     "customFaviconDesc": "Περιγραφή προσαρμοσμένου favicon",
     "logoPreview": "Προεπισκόπηση Λογοτύπου",
-    "themeCustom": "Προσαρμοσμένο θέμα",
     "hideHealthLogsDesc": "Περιγραφή απόκρυψης αρχείων καταγραφής ελέγχων εύρυθμης λειτουργίας",
     "faviconPreview": "Προεπισκόπηση favicon",
     "changelog": "Αρχείο Αλλαγών",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 ή @channelname",
       "chatIdHint": "Το μοναδικό αριθμητικό αναγνωριστικό ή το δημόσιο όνομα χρήστη της συνομιλίας/του καναλιού.",
       "tutorial": "Πώς να ρυθμίσετε το webhook Telegram:"
-    }
+    },
+    "copy": "Αντιγραφή",
+    "copied": "Αντιγράφηκε!",
+    "expandDetails": "Εμφάνιση λεπτομερειών",
+    "collapseDetails": "Απόκρυψη λεπτομερειών"
   },
   "compliance": {
     "auditTitle": "Έλεγχος",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "Κλήσεις (24ω)",
     "mcpMetricSuccessRate": "Ποσοστό επιτυχίας",
     "mcpMetricAvgDuration": "Μέση διάρκεια",
-    "mcpMetricTopTool": "Κορυφαίο εργαλείο"
-  },
-  "themesPage": {
-    "title": "Θέματα",
-    "description": "Επιλέξτε ένα προεπιλεγμένο θέμα ή δημιουργήστε το δικό σας με ένα μόνο χρώμα",
-    "presetColors": "Δημοφιλή χρώματα",
-    "customTheme": "Προσαρμοσμένο θέμα",
-    "customThemeDesc": "Κάντε κλικ στην επιλογή «Δημιουργία θέματος» και επιλέξτε ένα χρώμα",
-    "createTheme": "Δημιουργία θέματος",
-    "activePreset": "Ενεργό θέμα"
+    "mcpMetricTopTool": "Κορυφαίο εργαλείο",
+    "dismissError": "Κλείσιμο σφάλματος"
   },
   "header": {
     "logout": "Αποσύνδεση",
     "quickNavigation": "Γρήγορη πλοήγηση",
     "quickNavigationTitle": "Γρήγορη πλοήγηση (⌘K / Ctrl+K)",
     "openQuickNavigation": "Άνοιγμα γρήγορης πλοήγησης",
+    "openMenu": "Άνοιγμα μενού",
+    "products": "Προϊόντα Keak",
     "switchToLightMode": "Μετάβαση σε φωτεινή λειτουργία",
     "switchToDarkMode": "Μετάβαση σε σκοτεινή λειτουργία",
     "language": "Γλώσσα",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Συμβατό με Anthropic",
     "media": "Πολυμέσα",
     "mediaDescription": "Δημιουργία εικόνων, βίντεο και μουσικής",
-    "themes": "Θέματα",
-    "themesDescription": "Επιλέξτε ένα χρωματικό θέμα για ολόκληρο τον πίνακα ελέγχου",
     "costsDescription": "Παρακολούθηση δαπανών, ανάλυση τάσεων και διαχείριση του προϋπολογισμού AI σε όλους τους παρόχους",
     "cacheDescription": "Παρακολούθηση της αποδοτικότητας της προσωρινής μνήμης προτροπών των παρόχων και της τοπικής επαναχρησιμοποίησης σημασιολογικών αποκρίσεων.",
     "limitsDescription": "Διαμόρφωση ορίων ρυθμού και ποσοστώσεων ανά κλειδί API και πάροχο",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "Μόνο επιλεγμένες συνδέσεις",
     "selectAtLeastOneConnection": "Επιλέξτε τουλάχιστον μία σύνδεση ή επιλέξτε Όλες οι συνδέσεις.",
     "allConnectionsDesc": "Αυτό το κλειδί μπορεί να χρησιμοποιήσει οποιαδήποτε ενεργή σύνδεση.",
-    "restrictedToConnections": "Περιορισμένο σε {count, plural, one {# σύνδεση} other {# συνδέσεις}}."
+    "restrictedToConnections": "Περιορισμένο σε {count, plural, one {# σύνδεση} other {# συνδέσεις}}.",
+    "preferredConnections": "Προτιμώμενες συνδέσεις",
+    "preferredConnectionsDesc": "Σειρά προτεραιότητας ανά κλειδί. Αν μια προτιμώμενη σύνδεση δεν είναι διαθέσιμη, η δρομολόγηση μεταβαίνει στην επόμενη επιλέξιμη.",
+    "preferredConnectionsNone": "Δεν έχει οριστεί προτίμηση — χρησιμοποιείται η προεπιλεγμένη στρατηγική δρομολόγησης.",
+    "preferredConnectionsClear": "Εκκαθάριση",
+    "removeSelection": "Κατάργηση του {name}"
   },
   "auditLog": {
     "title": "Αρχείο καταγραφής ελέγχου",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Ρυθμίστε τη γέφυρα Εικόνα→Κείμενο στις ρυθμίσεις του Modality Bridge",
     "sttBridgeCta": "Ρυθμίστε τη γέφυρα Ομιλία→Κείμενο στις ρυθμίσεις του Modality Bridge",
     "existingConnection": "Υπάρχουσα σύνδεση",
-    "openrouterSttDescription": "Τα μοντέλα ομιλίας-σε-κείμενο του OpenRouter χρησιμοποιούν τη σύνδεση OpenRouter που έχετε ρυθμίσει. Δεν απαιτείται ξεχωριστό διαπιστευτήριο."
+    "openrouterSttDescription": "Τα μοντέλα ομιλίας-σε-κείμενο του OpenRouter χρησιμοποιούν τη σύνδεση OpenRouter που έχετε ρυθμίσει. Δεν απαιτείται ξεχωριστό διαπιστευτήριο.",
+    "modalityTabsAria": "Τύπος πολυμέσων",
+    "serviceKindsAria": "Τύπος υπηρεσίας"
   },
   "search": {
     "searchQuery": "Ερώτημα Αναζήτησης",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "Άγνωστο",
     "cliproxyapiUpdate": "Ενημέρωση",
     "cliproxyapiUpdateAvailable": "Διαθέσιμη ενημέρωση: v{current} → v{latest}",
-    "cliproxyapiVersion": "Έκδοση"
+    "cliproxyapiVersion": "Έκδοση",
+    "removeMapping": "Κατάργηση αντιστοίχισης"
   },
   "modelCatalog": {
     "title": "Μοντέλα & Συνδυασμοί",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "Συνδυασμός → {name}"
   },
   "combos": {
+    "title": "Συνδυασμοί",
+    "description": "Δημιουργήστε συνδυασμούς μοντέλων με σταθμισμένη δρομολόγηση και υποστήριξη εφεδρικών επιλογών",
+    "autoCatalogTitle": "Κατάλογος αυτόματης δρομολόγησης",
     "autoTosLoadError": "Δεν ήταν δυνατή η φόρτωση της πολιτικής όρων χρήσης. Δοκιμάστε ξανά πριν την αλλάξετε.",
     "autoTosSaveError": "Δεν ήταν δυνατή η αποθήκευση της πολιτικής όρων χρήσης. Εμφανίζεται ακόμη η προηγούμενη ρύθμιση. Δοκιμάστε ξανά.",
     "autoTosIncludeLabel": "Συμπερίληψη παρόχων με ένδειξη ToS: avoid στο auto",
     "autoTosDescription": "Απενεργοποιημένο από προεπιλογή. Ισχύει για όλους τους συνδυασμούς auto, όχι μόνο για έναν λογαριασμό. Η σύνδεση παρόχου δεν ενεργοποιεί αυτή την επιλογή.",
-    "title": "Συνδυασμοί",
-    "description": "Δημιουργήστε συνδυασμούς μοντέλων με σταθμισμένη δρομολόγηση και υποστήριξη εφεδρικών επιλογών",
-    "autoCatalogTitle": "Κατάλογος αυτόματης δρομολόγησης",
     "autoCatalogTemplateCount": "{count} πρότυπα",
     "autoCatalogDescription": "Ενσωματωμένοι συνδυασμοί auto/* που επιλύονται δυναμικά από συνδεδεμένους παρόχους. Χρησιμοποιήστε οποιοδήποτε από αυτά τα αναγνωριστικά ως τιμή του πεδίου μοντέλου — δεν απαιτείται ρύθμιση.",
     "autoCatalogExpand": "Ανάπτυξη καταλόγου αυτόματης δρομολόγησης",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "Δεν έχουν ρυθμιστεί combos ακόμα.",
     "playgroundCreateFirst": "Δημιουργήστε πρώτα ένα",
     "weighted": "Σταθμισμένη",
+    "weightPercent": "Βαρύτητα (%)",
     "leastUsed": "Λιγότερο Χρησιμοποιούμενη",
     "costOpt": "Βελτιστοποίηση Κόστους",
     "strategyGuideTitle": "Πώς να χρησιμοποιήσετε αυτή τη στρατηγική",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# λογαριασμός} other {# λογαριασμοί}}",
     "builderGlobalAdded": "Προστέθηκε",
     "builderGlobalAdd": "Προσθήκη",
+    "clearSearch": "Εκκαθάριση αναζήτησης",
     "manualModel": "Μη αυτόματο μοντέλο",
     "manualModelInvalid": "Εισαγάγετε ένα μοντέλο στη μορφή provider/model.",
     "manualModelUnknownProvider": "Άγνωστο πρόθεμα παρόχου.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "Προσθήκη αναφοράς συνδυασμού",
     "builderPinnedAccount": "Καρφιτσωμένος λογαριασμός",
     "builderLegacyEntry": "Καταχώρηση παλαιού τύπου",
+    "builderStaleModel": "Δεν υπάρχει στον ζωντανό κατάλογο",
     "reviewName": "Όνομα",
     "reviewStrategy": "Στρατηγική",
     "reviewSteps": "Βήματα",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "Ελάχιστο μήκος περιεχομένου (χαρακτήρες)",
     "responseValidationJsonPaths": "Έλεγχοι JSON-path",
     "responseValidationAddCheck": "+ Προσθήκη ελέγχου",
+    "responseValidationRemoveCheck": "Κατάργηση ελέγχου",
+    "responseValidationPath": "Διαδρομή JSON",
+    "responseValidationCondition": "Συνθήκη",
+    "responseValidationValue": "Αναμενόμενη τιμή",
     "agentFeaturesSystemMessageOverride": "Παράκαμψη μηνύματος συστήματος",
     "agentFeaturesSystemMessagePlaceholder": "Είστε ένας έμπειρος βοηθός...",
     "agentFeaturesSystemMessageHint": "Παράκαμψη μηνύματος συστήματος για πράκτορες",
@@ -5288,7 +5292,8 @@
         "skipped": "έχει ήδη ρυθμιστεί",
         "failed": "απέτυχε"
       }
-    }
+    },
+    "stepProgress": "Πρόοδος ρύθμισης"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Αυτός ο πάροχος εξαιρείται από το auto από προεπιλογή",
@@ -6056,10 +6061,10 @@
     "apiFormatLabel": "Ετικέτα μορφής API",
     "apiKeyOptionalHint": "Αφήστε κενό εάν η τοπική σας εγκατάσταση ή ο πάροχος δεν απαιτεί έλεγχο ταυτότητας.",
     "apiKeyOptionalLabel": "Κλειδί API (προαιρετικό)",
-    "apiRegionChina": "Περιοχή API: Κίνα",
-    "apiRegionHint": "Υπόδειξη περιοχής API",
-    "apiRegionInternational": "Περιοχή API: Διεθνής",
-    "apiRegionLabel": "Ετικέτα περιοχής API",
+    "apiRegionChina": "Ηπειρωτική Κίνα",
+    "apiRegionHint": "Επιλέξτε την περιοχή του τελικού σημείου που χρησιμοποιείται για την πρόσβαση στο API και την παρακολούθηση των ορίων χρήσης.",
+    "apiRegionInternational": "Διεθνής",
+    "apiRegionLabel": "Περιοχή API",
     "apikey": "Κλειδί API",
     "audio": "Ήχος",
     "audioProvidersHeading": "Επικεφαλίδα παρόχων ήχου",
@@ -6080,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Όταν αυτός ο λογαριασμός φτάνει στο όριο χρήσης των 5 ωρών και η Anthropic προσφέρει τη λωρίδα χαμηλότερης προτεραιότητας, το OmniRoute την αποδέχεται και συνεχίζει να στέλνει αιτήματα με anthropic-usage-limit: slow μέχρι να επαναφερθεί το παράθυρο, αντί να θέσει τη σύνδεση σε παύση. Το εβδομαδιαίο όριο εξακολουθεί να ισχύει και οι απαντήσεις ενδέχεται να περιμένουν μέχρι να υπάρξει διαθέσιμη χωρητικότητα.",
     "claudeAutoLimitResetLabel": "Αυτόματη επαναφορά του ορίου συνεδρίας (μία φορά την εβδομάδα)",
     "claudeAutoLimitResetDescription": "Όταν αυτός ο λογαριασμός φτάνει στο όριο χρήσης των 5 ωρών και είναι διαθέσιμη επαναφορά του ορίου συνεδρίας, το OmniRoute την αξιοποιεί αυτόματα και επαναλαμβάνει τις προσπάθειες με πλήρη ταχύτητα. Χρησιμοποιεί την επαναφορά του λογαριασμού που είναι διαθέσιμη μία φορά την εβδομάδα και εξακολουθεί να μετράει στο εβδομαδιαίο όριο.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Παραλείπει την προσωρινή περίοδο αναμονής, ώστε αυτή η σύνδεση να παραμένει διαθέσιμη προς επιλογή ακόμα και μετά από σφάλματα από τα οποία μπορεί να ανακάμψει (οι τελικές καταστάσεις, όπως η απαγόρευση ή η λήξη, εξακολουθούν να ισχύουν).",
     "disableCoolingLabel": "Απενεργοποίηση περιόδου αναμονής για αυτή τη σύνδεση",
     "bulkPasteAdded": "{count, plural, one {Προστέθηκε 1 κλειδί} other {Προστέθηκαν # κλειδιά}}",
@@ -6533,6 +6545,7 @@
       "monsterapi": "Αποκτήστε κλειδί API στο monsterapi.ai",
       "moonshot": "Συνδέστε το Kimi με ένα κλειδί API.",
       "morph": "Δωρεάν επίπεδο: 250K πιστώσεις/μήνα, $0",
+      "apmix": "Συνδέστε το Apmix με κλειδί API από το apmix.ai/dashboard — μία συνδρομή, πολλά μοντέλα.",
       "nanogpt": "Συνδέστε το NanoGPT με ένα κλειδί API.",
       "nebius": "~$1 δοκιμαστική πίστωση κατά την εγγραφή για δοκιμές API",
       "nlpcloud": "Το NLP Cloud χρησιμοποιεί ιδιόκτητο API chatbot αντί για OpenAI chat/completions. Το OmniRoute προσαρμόζει τα μηνύματα OpenAI σε input/context/history και εκθέτει έναν τοπικό κατάλογο υποστηριζόμενων μοντέλων chatbot.",
@@ -6629,8 +6642,7 @@
       "kiro": "Δωρεάν επίπεδο: 50 πιστώσεις/μήνα (~25K–100K tokens). ⚠️ Οι Όροι Χρήσης του Kiro απαγορεύουν τη χρήση proxy/harness τρίτων.",
       "codex": "Συνδέστε το OpenAI Codex με την υπάρχουσα ροή OAuth.",
       "qwen": "Συνδέστε το Qwen Code με την υπάρχουσα ροή OAuth.",
-      "github-models": "Δημιουργήστε ένα GitHub PAT με εμβέλεια 'models: read' στο github.com/settings/tokens",
-      "apmix": "Συνδέστε το Apmix με κλειδί API από το apmix.ai/dashboard — μία συνδρομή, πολλά μοντέλα."
+      "github-models": "Δημιουργήστε ένα GitHub PAT με εμβέλεια 'models: read' στο github.com/settings/tokens"
     },
     "passthroughModelsDescription": "Το {provider} δέχεται εγγενή αναγνωριστικά μοντέλων του παρόχου. Εισαγάγετε τα από το /models ή προσθέστε προσαρμοσμένα αναγνωριστικά για δρομολόγηση.",
     "bedrockModelsDescription": "Τα μοντέλα Amazon Bedrock ορίζονται ανά περιοχή AWS. Εισαγάγετε από το /models ή προσθέστε αναγνωριστικά μοντέλων Bedrock που είναι ενεργοποιημένα στην επιλεγμένη περιοχή.",
@@ -6802,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Ρυθμίσεις",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "Επιλέξτε ποια στοιχεία της πλαϊνής μπάρας θα εμφανίζονται. Η επιλογή «Βασικά» διατηρεί τα προηγμένα εργαλεία διαθέσιμα στην αναζήτηση.",
     "hideHealthLogs": "Απόκρυψη αρχείων καταγραφής ελέγχου εύρυθμης λειτουργίας",
     "hideHealthLogsDesc": "Όταν είναι ΕΝΕΡΓΟ, αποκρύπτει τα μηνύματα [HealthCheck] από την κονσόλα του διακομιστή",
-    "themeAccent": "Χρώμα θέματος",
-    "themeAccentDesc": "Επιλέξτε ένα προκαθορισμένο χρώμα ή δημιουργήστε το δικό σας θέμα με ένα χρώμα",
-    "themeCreate": "Δημιουργία θέματος",
-    "themeCustom": "Προσαρμοσμένο θέμα",
-    "themeBlue": "Μπλε",
-    "themeRed": "Κόκκινο",
-    "themeGreen": "Πράσινο",
-    "themeViolet": "Βιολετί",
-    "themeOrange": "Πορτοκαλί",
-    "themeCyan": "Κυανό",
     "whitelabeling": "Εταιρική ταυτότητα",
     "whitelabelingDesc": "Προσαρμόστε το όνομα και το λογότυπο της εφαρμογής",
     "appName": "Όνομα εφαρμογής",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "Τώρα",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Διαδρομή βασικής εκτελέσιμου",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Προαιρετικό: επαληθεύει το παραχθέν αρχείο με τη βασική εκτελέσιμο πριν από την αντικατάσταση του υιοθετημένου αρχείου. Αφήστε το κενό για να συνεχίσει η εγγραφή δίπλα του. Ο κατάλογος δημιουργείται αν δεν υπάρχει."
+      "coreBinaryPathHelp": "Προαιρετικό: επαληθεύει το παραχθέν αρχείο με τη βασική εκτελέσιμο πριν από την αντικατάσταση του υιοθετημένου αρχείου. Αφήστε το κενό για να συνεχίσει η εγγραφή δίπλα του. Ο κατάλογος δημιουργείται αν δεν υπάρχει.",
+      "urlFeedlessHint": "Αφήστε το κενό για συνδρομή μόνο με επιλογέα: ορίστε ένα URL ελέγχου παρακάτω, δεν ανακτάται, ανανεώνεται ή δεσμεύεται ροή."
     },
     "bulkHealthcheck": "Μαζικός έλεγχος εύρυθμης λειτουργίας",
     "bulkHealthcheckDesc": "Δοκιμάστε όλους τους διαμορφωμένους διακομιστές μεσολάβησης με μια διεύθυνση URL-στόχο, για να βρείτε ποιοι λειτουργούν.",
@@ -7707,6 +7703,7 @@
     "configured": "διαμορφωμένο",
     "none": "Κανένα",
     "modelOverrideValuePlaceholder": "Αριθμητική τιμή",
+    "modelOverrideKey": "Κλειδί παράκαμψης",
     "modelOverrideReasoningEffortsPlaceholder": "Τιμές στα αγγλικά, διαχωρισμένες με κόμματα, π.χ. low, medium, high",
     "addKeyValue": "Προσθήκη ζεύγους κλειδιού-τιμής",
     "noModelOverrides": "Δεν έχουν διαμορφωθεί παρακάμψεις για αυτό το μοντέλο.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "Μπορείτε να αντικαταστήσετε την προεπιλεγμένη τιμολόγηση για συγκεκριμένα μοντέλα. Οι προσαρμοσμένες τιμές υπερισχύουν της τιμολόγησης που ανιχνεύεται αυτόματα.",
     "editPricing": "Επεξεργασία τιμολόγησης",
     "viewFullDetails": "Προβολή πλήρων λεπτομερειών",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "Δυναμική Δρομολόγηση Όγκου",
     "adaptiveVolumeRoutingDesc": "Κλιμακώστε δυναμικά τις συνδέσεις βάσει του όγκου του φορτίου και της πίεσης στη διεκπεραιωτική ικανότητα.",
     "lkgpToggleTitle": "Τελευταίος Γνωστός Αξιόπιστος Πάροχος (LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "Μείωση χρήσης token με συμπίεση προτροπών πριν την αποστολή στους παρόχους",
     "autoCombosTitle": "Αυτόματοι συνδυασμοί",
     "autoCombosDesc": "Επιτρέψτε σε αυτό το κλειδί να χρησιμοποιεί τους ενσωματωμένους συνδυασμούς auto/*, οι οποίοι επιλέγουν αυτόματα ένα μοντέλο από κάθε διαμορφωμένο πάροχο",
+    "ccDiscoveryAliasesTitle": "Ψευδώνυμα ανακάλυψης Claude Code",
+    "ccDiscoveryAliasesDesc": "Κοινοποίηση καθρεπτών συμβατότητας claude/... για μοντέλα και συνδυασμούς στους οποίους αυτό το κλειδί έχει ήδη πρόσβαση",
     "compressionGuidanceFullGuideLink": "Πλήρης οδηγός συμπίεσης",
     "compressionGuidanceShow": "Λεπτομέρειες",
     "compressionGuidanceHide": "Απόκρυψη λεπτομερειών",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "Επιτυχία",
     "tomlTestFailed": "Αποτυχία",
     "tomlImportError": "Δεν ήταν δυνατή η επεξεργασία του αρχείου RTK TOML.",
-    "tomlFileReadError": "Δεν ήταν δυνατή η ανάγνωση του επιλεγμένου αρχείου TOML."
+    "tomlFileReadError": "Δεν ήταν δυνατή η ανάγνωση του επιλεγμένου αρχείου TOML.",
+    "viewMode": "Λειτουργία προβολής"
   },
   "compressionEngineConfig": {
     "loading": "Φόρτωση…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "Πακέτα γλώσσας: {packs}",
     "dragToReorder": "Σύρετε για να αναδιατάξετε το βήμα",
     "engine": "Μηχανισμός",
-    "intensity": "Ένταση"
+    "intensity": "Ένταση",
+    "compressionOverride": "Παράκαμψη συμπίεσης"
   },
   "compressionStudio": {
     "noRun": "Δεν υπάρχει διαθέσιμη εκτέλεση συμπίεσης.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "νικητής: {winner}",
     "encoder": "κωδικοποιητής",
     "bytes": "byte",
-    "tokensCl100k": "token (cl100k)"
+    "tokensCl100k": "token (cl100k)",
+    "studioViews": "Προβολές Studio"
   },
   "omniglyph": {
     "preview": "Προεπισκόπηση",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "Τα μηνύματα που είναι μικρότερα από αυτό το μήκος δεν συμπιέζονται. Χαμηλότερο = περισσότερη συμπίεση.",
     "tooltipMinSavings": "Συμπίεση μόνο αν εξοικονομείται τουλάχιστον αυτός ο αριθμός tokens.",
     "ultraSettings": "Ultra ρυθμίσεις",
-    "ultraSettingsDesc": "Σημασιολογική συμπίεση με τεχνολογία SLM"
+    "ultraSettingsDesc": "Σημασιολογική συμπίεση με τεχνολογία SLM",
+    "defaultLanguage": "Προεπιλεγμένη γλώσσα",
+    "viewMode": "Λειτουργία προβολής"
   },
   "translator": {
     "title": "Μεταφραστής",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "Αποτυχία μετασχηματισμού της ροής"
   },
   "usage": {
+    "healthExtraUsageBypass": "Το όριο εξαντλήθηκε· επιτρέπεται επιπλέον χρήση, οπότε η υπηρεσία συνεχίζεται.",
+    "healthPaidCreditsBypass": "Το όριο εξαντλήθηκε· οι διαθέσιμες πληρωμένες πιστώσεις επιτρέπουν τη συνέχιση της υπηρεσίας.",
+    "healthFilteringBypass": "Το όριο εξαντλήθηκε· το τοπικό φιλτράρισμα ορίων είναι απενεργοποιημένο, οπότε η υπηρεσία συνεχίζεται.",
     "title": "Χρήση",
     "grokExtraUsageCredits": "Πρόσθετες πιστώσεις χρήσης",
     "grokAutoTopUp": "Αυτόματη αναπλήρωση",
@@ -9998,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Όρια παρόχων",
     "noProviders": "Δεν υπάρχουν συνδεδεμένοι πάροχοι",
+    "quotaAuthRequired": "Απαιτείται έλεγχος ταυτότητας - συνδεθείτε στον πίνακα ελέγχου",
+    "quotaAuthRequiredHint": "Δεν ήταν δυνατή η φόρτωση των συνδέσεων παρόχων, επειδή η περίοδος σύνδεσης στον πίνακα ελέγχου λείπει ή έχει λήξει. Συνδεθείτε και ανανεώστε τη σελίδα για να δείτε τα όρια χρήσης σας.",
     "connectProvidersForQuota": "Συνδεθείτε σε παρόχους μέσω OAuth για να παρακολουθείτε τα όρια και τη χρήση του API σας.",
     "accountsCount": "{count, plural, one {# λογαριασμός} other {# λογαριασμοί}}",
     "filteredFromCount": "({count} πριν από το φιλτράρισμα)",
@@ -10047,9 +10055,6 @@
     "tierLite": "Ελαφρύ",
     "tierUnknown": "Άγνωστο",
     "statTotal": "Σύνολο",
-    "statCritical": "Κρίσιμο",
-    "statAlert": "Προειδοποίηση",
-    "statHealthy": "Υγιές",
     "filterPurchaseTypeLabel": "Τύπος",
     "filterTierLabel": "Βαθμίδα",
     "purchaseAll": "Όλα",
@@ -10288,10 +10293,64 @@
     "lastRefreshed": "Τελευταία ανανέωση",
     "providerQuota": "Όριο παρόχου",
     "providerQuotaHomeHint": "Ζωντανή κατάσταση σε όλους τους συνδεδεμένους λογαριασμούς",
+    "claudeResetCreditDefaultTitle": "Επαναφορά ορίων Claude",
+    "confirmRedeemClaudeResetCredit": "Η εξαργύρωση επαναφέρει άμεσα τα επιλέξιμα όρια χρήσης Claude και καταναλώνει οριστικά αυτήν την πίστωση.",
+    "claudeResetCreditsModalTitle": "Πιστώσεις επαναφοράς Claude",
+    "claudeResetCreditsModalExplainer": "Διαθέσιμες πιστώσεις επαναφοράς Claude και εβδομαδιαίες επαναφορές συνεδριών για αυτόν τον λογαριασμό.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Με βάση τις τελευταίες παρατηρήσεις, όχι ζωντανό έλεγχο. Επιλέξτε λογαριασμό για λεπτομέρειες.",
+    "healthRecovery": "Αναμενόμενη αποκατάσταση",
+    "healthAvailable": "Διαθέσιμο",
+    "healthRestricted": "Μερικώς περιορισμένο",
+    "healthUnavailable": "Μη διαθέσιμο",
+    "healthPeakHourProtection": "Προστασία ωρών αιχμής",
+    "healthCooldown": "Περίοδος αναμονής",
+    "healthQuotaExhausted": "Η ποσόστωση εξαντλήθηκε",
+    "healthOverview": "Επισκόπηση",
+    "layoutFull": "Πλήρης",
+    "layoutCompact": "Συμπαγής",
+    "healthQuotaError": "Αποτυχία ανάγνωσης ορίου",
+    "healthNoRuntime": "Η κατάσταση λειτουργίας δεν είναι διαθέσιμη",
+    "healthPreviousSnapshot": "Η τελευταία ανανέωση απέτυχε· εμφανίζεται το προηγούμενο αποτέλεσμα",
+    "healthPreviousFailure": "Το τελευταίο αίτημα απέτυχε· η αναμονή έληξε",
+    "healthAwaitingSync": "Πέρασε η ώρα επαναφοράς· αναμονή συγχρονισμού",
+    "healthVerdictUnavailable": "Ο έλεγχος διαθεσιμότητας δεν είναι διαθέσιμος· εμφανίζονται μόνο τα επίπεδα ποσόστωσης",
+    "healthSummaryFailed": "Αποτυχία ανάγνωσης σύνοψης· ενδέχεται να λείπουν κλειδώματα μοντέλων",
+    "healthRuntimeObserved": "Η κατάσταση ενημερώθηκε {time}",
+    "healthQuotaObserved": "Το όριο παρατηρήθηκε {time}",
+    "healthOldestQuota": "Παλαιότερο στιγμιότυπο ορίου: {time}",
+    "healthRecoveryUnknown": "Άγνωστος χρόνος αποκατάστασης",
+    "healthDetailsHint": "Πατήστε για λεπτομέρειες και ενέργειες",
+    "healthFiveHour": "5 ώρες",
+    "healthOverall": "Συνολικό",
+    "healthAction": "Απαιτείται ενέργεια",
+    "healthTitle": "Διαθεσιμότητα λογαριασμών",
+    "healthDrag": "Σύρετε για αναδιάταξη παρόχων",
+    "healthDragPosition": "{provider}, {count, plural, one {θέση {position, number} από #} other {θέση {position, number} από #}}",
+    "healthResetOrder": "Επαναφορά προεπιλεγμένης σειράς",
+    "healthPool": "Ομάδα {name}",
+    "healthOtherPool": "Ίδιος λογαριασμός · {pool}: {status} ({remaining} απομένει)",
+    "healthIncluded": "{count, plural, one {Περιλαμβάνει # μερικώς περιορισμένο λογαριασμό} other {Περιλαμβάνει # μερικώς περιορισμένους λογαριασμούς}}",
+    "healthBannerUnavailable": "{count, plural, one {# λογαριασμός προσωρινά μη διαθέσιμος} other {# λογαριασμοί προσωρινά μη διαθέσιμοι}}",
+    "healthBannerAvailable": "{count, plural, one {# λογαριασμός διαθέσιμος} other {Και οι # λογαριασμοί διαθέσιμοι}}",
+    "healthLegendHide": "Απόκρυψη υπομνήματος",
+    "healthLegendShow": "Εμφάνιση υπομνήματος",
+    "healthLegendOk": "Συμπαγές = υπόλοιπο ορίου· ημιδιαφανές = χρησιμοποιημένο.",
+    "healthLegendCooldown": "Το όριο {window} εξαντλήθηκε. Συμπαγές = αναμονή που πέρασε· ημιδιαφανές = αναμονή που απομένει.",
+    "healthLegendAction": "Η εξουσιοδότηση έληξε ή ο λογαριασμός αποκλείστηκε· η αναμονή δεν αρκεί.",
+    "healthLegendPartial": "Ακόμα χρησιμοποιήσιμο. Κίτρινη κορυφή = περιορισμένο μοντέλο ή ομάδα.",
+    "healthWaited": "Αναμονή που πέρασε: {percent}",
+    "healthWait": "Άλλα {duration} (ανάκτηση στις {time})",
+    "healthFastest": "Πρώτη ανάκτηση σε {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} διαθέσιμος} other {# / {active, number} διαθέσιμοι}}",
+    "healthCd5": "5 ώρες · Περίοδος αναμονής",
+    "healthCdw": "Εβδομαδιαία · Περίοδος αναμονής",
+    "healthRecentSuccessBypass": "Η δρομολόγηση επιτρέπει αυτόν τον λογαριασμό επειδή ένα αίτημα πέτυχε πρόσφατα.",
+    "healthPurchasedBalanceBypass": "Το αγορασμένο υπόλοιπο επιτρέπει τη συνέχιση μετά την εξάντληση του ενσωματωμένου ορίου.",
+    "healthCutoffAtRequest": "Τα όρια ποσόστωσης σε πραγματικό χρόνο ελέγχονται κατά τη δρομολόγηση αιτήματος."
   },
   "modals": {
     "waitingAuth": "Αναμονή εξουσιοδότησης",
@@ -11078,7 +11137,8 @@
       "message": "Μήνυμα",
       "error": "Σφάλμα",
       "completion": "Ολοκλήρωση"
-    }
+    },
+    "statusFilter": "Κατάσταση"
   },
   "templateNames": {
     "simple-chat": "Απλή συνομιλία",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "πριν από {minutes} λ.",
     "hoursAgo": "πριν από {hours} ώ.",
     "daysAgo": "πριν από {days} ημ.",
-    "entries": "Εγγραφές"
+    "entries": "Εγγραφές",
+    "viewSwitcherAria": "Προβολή κρυφής μνήμης"
   },
   "proxyConfigModal": {
     "levelGlobal": "Καθολικό",
@@ -11447,6 +11508,7 @@
     "tableHealth": "Υγεία (24ω)",
     "tableUsage": "Χρήση",
     "tableActions": "Ενέργειες",
+    "moreActions": "Περισσότερες ενέργειες",
     "test": "Δοκιμή",
     "edit": "Επεξεργασία",
     "delete": "Διαγραφή",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "Δεν βρέθηκαν έγκυρες εγγραφές. Ελέγξτε τη μορφή και δοκιμάστε ξανά.",
     "bulkImportSuccess": "Η εισαγωγή ολοκληρώθηκε: δημιουργήθηκαν {created}, ενημερώθηκαν {updated}, απέτυχαν {failed}",
     "bulkImportErrorLine": "Γραμμή {line}: {reason}",
-    "bulkImportMaxExceeded": "Μέγιστο όριο 100 διακομιστές μεσολάβησης ανά εισαγωγή",
+    "bulkImportMaxExceeded": "Μέγιστο {max} proxy ανά εισαγωγή",
     "bulkImportPreview": "Προεπισκόπηση",
     "clearAssignment": "(εκκαθάριση ανάθεσης)",
     "bulkProxyAssignment": "Μαζική ανάθεση διακομιστών μεσολάβησης",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "όριο ρυθμού ανά IP (429)",
     "poolSetAsideKindSlow": "αργές απαντήσεις",
     "poolSetAsideKindGeoBlocked": "αποκλεισμός περιοχής (403/451)",
+    "poolSetAsideKindOperatorReported": "διακοπή που αναφέρθηκε από τον λειτουργό",
     "poolSetAsideUntil": "Πίσω σε rotation {endsAt}",
     "poolSetAsideRepeat": "Στην άκρη {count, plural, one {# φορά} other {# φορές}}",
     "poolUnknownAddress": "Άγνωστη διεύθυνση",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "Εξαγωγή κώδικα",
     "exportShort": "Εξαγωγή",
     "noStateToExport": "Δεν υπάρχει διαθέσιμη κατάσταση χώρου δοκιμών για εξαγωγή.",
-    "closeExportModal": "Κλείσιμο παραθύρου εξαγωγής",
     "close": "Κλείσιμο",
     "exportRealKeyWarning": "Προειδοποίηση ασφαλείας: η εξαγωγή αποκλείστηκε — εντοπίστηκε πραγματικό κλειδί API στην έξοδο. Επαναφέρετε το κλειδί API σας και δοκιμάστε ξανά.",
     "placeholderHintPrefix": "Αντικαταστήστε",
@@ -11809,7 +11871,8 @@
       "nextButton": "Επόμενο",
       "runButton": "Εκτέλεση",
       "promptPlaceholder": "Εισάγετε το μήνυμά σας… (Enter για αποστολή, Shift+Enter για νέα γραμμή)"
-    }
+    },
+    "playgroundTabs": "Λειτουργίες Playground"
   },
   "miniPlayground": {
     "endpoint": "Τελικό σημείο",
@@ -11880,7 +11943,8 @@
     "assistant": "Βοηθός",
     "errorLabel": "Σφάλμα",
     "requestFailed": "Το αίτημα απέτυχε",
-    "stop": "Διακοπή"
+    "stop": "Διακοπή",
+    "messageInputAria": "Μήνυμα"
   },
   "requestLogger": {
     "recording": "Εγγραφή",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "{count} εναλλαγές λογαριασμών",
       "resilienceRetried": "Επανάληψη κενού γύρου",
       "resilienceContinued": "Συνέχιση στη μέση της ροής",
-      "resilienceRecovered": "Ανακτήθηκε με ενέργεια ανθεκτικότητας"
-    }
+      "resilienceRecovered": "Ανακτήθηκε με ενέργεια ανθεκτικότητας",
+      "conversationContext": "Πλαίσιο συνομιλίας",
+      "goToBottom": "Μετάβαση στο τέλος",
+      "liveRefreshOn": "Ζωντανή ανανέωση: ενεργή",
+      "liveRefreshOff": "Ζωντανή ανανέωση: ανενεργή",
+      "liveRefresh": "Ζωντανή ανανέωση",
+      "continuesFromParent": "συνεχίζει από το γονικό στοιχείο",
+      "continuesFrom": "Συνεχίζει από {id}",
+      "viewConversation": "προβολή συνομιλίας",
+      "openConversation": "Άνοιγμα συνομιλίας {id}"
+    },
+    "tableLabel": "Αρχεία καταγραφής αιτημάτων"
   },
   "proxyLogger": {
     "filterAll": "Όλα",
@@ -12113,7 +12187,9 @@
     "colServedBy": "Παρέχεται από",
     "filterTraffic": "Κίνηση",
     "filterTests": "Δοκιμές",
-    "filterSource": "Πηγή"
+    "filterSource": "Πηγή",
+    "tableLabel": "Αρχεία καταγραφής διακομιστή μεσολάβησης",
+    "sortLogs": "Ταξινόμηση αρχείων καταγραφής"
   },
   "endpointOptions": {
     "speech": "Ομιλία",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "ΕΞΑΝΤΛΗΜΕΝΗ",
     "statusAlerting": "ΣΕ ΣΥΝΑΓΕΡΜΟ",
     "statusError": "ΣΦΑΛΜΑ",
-    "moreSuffix": "+{count} ακόμη"
+    "moreSuffix": "+{count} ακόμη",
+    "feedFilterLabel": "Φιλτράρισμα συμβάντων"
   },
   "quotaShare": {
     "weightPercent": "Βάρος %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "Χωρίς ομάδα",
     "ungroupedHint": "Αυτά τα σύνολα δεν έχουν αντιστοιχιστεί σε γνωστή ομάδα. Επεξεργαστείτε ένα σύνολο για να το μετακινήσετε σε μια πραγματική ομάδα.",
     "removeFailed": "Δεν ήταν δυνατή η αφαίρεση αυτού του συνόλου.",
-    "dismiss": "Κλείσιμο"
+    "dismiss": "Κλείσιμο",
+    "allocationsHeading": "Κατανομές",
+    "wizardRemoveDimension": "Κατάργηση διάστασης",
+    "wizardRemoveKey": "Κατάργηση κλειδιού"
   },
   "plugins": {
     "title": "Πρόσθετα",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "Η ενημέρωση ρυθμίσεων απέτυχε",
       "serviceRevealApiKey": "{actor} αποκάλυψε το κλειδί API για {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Απόρριψη σφάλματος"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "Μετάβαση τώρα",
       "message": "Ο MITM Proxy βρίσκεται πλέον στην ενότητα AgentBridge.",
       "title": "Αυτή η σελίδα μεταφέρθηκε"
-    }
+    },
+    "dnsOn": "DNS ενεργό",
+    "dnsOff": "DNS ανενεργό",
+    "showServerSettings": "Εμφάνιση ρυθμίσεων διακομιστή",
+    "hideServerSettings": "Απόκρυψη ρυθμίσεων διακομιστή",
+    "upstreamCaTesting": "Δοκιμή…",
+    "removeMapping": "Κατάργηση αντιστοίχισης",
+    "mappingSourcePlaceholder": "π.χ., gemini-3.6-flash-medium ή * για όλα τα μη αντιστοιχισμένα μοντέλα",
+    "mappingWildcardHint": "Χρησιμοποιήστε το * ως πηγή για να δρομολογήσετε κάθε μοντέλο χωρίς ρητή αντιστοίχιση μέσω του OmniRoute στον επιλεγμένο προορισμό. Οι ακριβείς αντιστοιχίσεις πηγής υπερισχύουν πάντα του *.",
+    "wizardDetectingModels": "Εντοπισμός μοντέλων από την υποκλαπείσα κίνηση...",
+    "wizardDetectedModels": "Βρέθηκαν {count, plural, one {# μοντέλο} other {# μοντέλα}} στην υποκλαπείσα κίνηση. Επιλέξτε όσα θέλετε να προσθέσετε:",
+    "wizardSelectedModels": "Επιλέχθηκαν {count, plural, one {# μοντέλο} other {# μοντέλα}}. Θα τα αντιστοιχίσετε σε μοντέλα του OmniRoute στην επόμενη οθόνη.",
+    "wizardAddModels": "Προσθήκη {count, plural, one {# μοντέλου} other {# μοντέλων}}",
+    "wizardNoModelsDetected": "Δεν έχουν εντοπιστεί ακόμη μοντέλα. Χρησιμοποιήστε το {agent} για να υποβάλετε ένα αίτημα και, στη συνέχεια, εκτελέστε ξανά αυτόν τον οδηγό για αυτόματο εντοπισμό μοντέλων από την κίνηση.",
+    "wizardNoModelsHint": "Εναλλακτικά, κλείστε αυτόν τον οδηγό και προσθέστε αντιστοιχίσεις χειροκίνητα στην κάρτα του agent."
   },
   "providerStats": {
     "unknownError": "Άγνωστο σφάλμα",
@@ -12686,7 +12781,11 @@
     "avgTtft": "Μέσος TTFT",
     "avgTotal": "Μέσος συνολικός χρόνος",
     "requestTelemetry": "Τηλεμετρία αιτημάτων",
-    "requestTelemetryDescription": "Ανάλυση του pipeline 7 φάσεων (τελευταία 5 λεπτά)"
+    "requestTelemetryDescription": "Ανάλυση του pipeline 7 φάσεων (τελευταία 5 λεπτά)",
+    "title": "Στατιστικά παρόχων",
+    "description": "Κίνηση, καθυστέρηση και ποσοστά επιτυχίας ανά πάροχο και ανά μοντέλο",
+    "combo": "Συνδυασμός",
+    "toggleModels": "Εμφάνιση μοντέλων για {provider}"
   },
   "relay": {
     "title": "Serverless proxy αναμετάδοσης",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "Δεν υπάρχει σώμα αιτήματος.",
     "noResponseBody": "Δεν υπάρχει σώμα απόκρισης.",
     "formatted": "Μορφοποιημένο",
-    "raw": "Ακατέργαστο"
+    "raw": "Ακατέργαστο",
+    "requestCount": "{count, plural, one {# αίτημα} other {# αιτήματα}}",
+    "expandList": "Ανάπτυξη λίστας",
+    "collapseList": "Σύμπτυξη λίστας",
+    "snippetLanguage": "Γλώσσα αποσπάσματος",
+    "headersTable": "Κεφαλίδες",
+    "showSecrets": "Εμφάνιση μυστικών",
+    "maskSecrets": "Απόκρυψη μυστικών",
+    "llmNotAvailable": "Τα μεταδεδομένα LLM δεν είναι διαθέσιμα για αυτό το αίτημα.",
+    "llmStreamYes": "ναι (SSE)",
+    "llmStreamNo": "όχι",
+    "llmTotalTokens": "Σύνολο: {count} διακριτικά"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "Ποσοστό κλήσεων στις οποίες ανταποκρίθηκε πραγματικά αυτός ο πάροχος κατά τις τελευταίες 24 ώρες. Μια παύλα σημαίνει ότι εξυπηρέτησε πολύ λίγη κίνηση για να υπολογιστεί ποσοστό.",
     "reliabilitySample": "{successes} από {requests} κλήσεις ολοκληρώθηκαν επιτυχώς τις τελευταίες {hours}ω",
     "reliabilityTooFew": "Μόνο {requests} κλήσεις τις τελευταίες {hours}ω — πολύ λίγες για να υπολογιστεί ποσοστό",
-    "reliabilityNoTraffic": "Δεν καταγράφηκαν κλήσεις τις τελευταίες 24 ώρες"
+    "reliabilityNoTraffic": "Δεν καταγράφηκαν κλήσεις τις τελευταίες 24 ώρες",
+    "categoryFilter": "Κατηγορία εργασίας"
   },
   "discovery": {
     "title": "Ανακάλυψη παρόχων",
@@ -13331,7 +13442,11 @@
     "method": "Μέθοδος",
     "auth": "Αυθεντικοποίηση",
     "feasibility": "Εφικτότητα",
-    "models": "Μοντέλα"
+    "models": "Μοντέλα",
+    "provider": "Πάροχος",
+    "status": "Κατάσταση",
+    "endpoint": "Τελικό σημείο",
+    "actions": "Ενέργειες"
   },
   "noAuthProvider": {
     "title": "Δεν απαιτείται αυθεντικοποίηση",
@@ -13380,7 +13495,8 @@
     "ownProxy": "Δικός σας διακομιστής μεσολάβησης",
     "freeTierPause": "Το μοντέλο {model} σταμάτησε (429), θα επιστρέψει στις {time}",
     "freeTierPauseProvider": "Σταμάτησε (429), θα επιστρέψει στις {time}",
-    "freeTierPauseNote": "Παύση εντός διεργασίας σε αυτό το στοιχείο"
+    "freeTierPauseNote": "Παύση εντός διεργασίας σε αυτό το στοιχείο",
+    "proxyType": "Τύπος διακομιστή μεσολάβησης"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "Ένα κρυφό επίτευγμα σας περιμένει...",
         "criteria": "Ολοκληρώστε το κρυφό επίτευγμα για να αποκαλύψετε αυτό το σήμα."
       }
-    }
+    },
+    "leaderboardTitle": "Πίνακας κατάταξης",
+    "leaderboardDescription": "Κατατάξεις και επιτεύγματα για τα κλειδιά API σας",
+    "badgeLocked": "Κλειδωμένο"
   },
   "featureFlags": {
     "title": "Σημαίες λειτουργιών",
@@ -13794,6 +13913,7 @@
     "latency": "Καθυστέρηση",
     "quota": "Ποσόστωση",
     "rangeWindow": "Παράθυρο {range}",
+    "timeRange": "Χρονικό εύρος",
     "runtimeHealthBlend": "συνδυασμός χρόνου εκτέλεσης/υγείας",
     "averageResponseTime": "μέσος χρόνος απόκρισης",
     "worstQuota": "Ποσόστωση με τη χειρότερη κατάσταση",
@@ -13995,7 +14115,11 @@
     "learnMore": "Μάθετε περισσότερα",
     "changelogLoadFailed": "Δεν ήταν δυνατή η φόρτωση του αρχείου αλλαγών. Δοκιμάστε ξανά αργότερα.",
     "retry": "Επανάληψη",
-    "viewFullHistory": "Δείτε το πλήρες ιστορικό στο GitHub"
+    "viewFullHistory": "Δείτε το πλήρες ιστορικό στο GitHub",
+    "title": "Νέα και αρχείο αλλαγών",
+    "description": "Ανακοινώσεις από την ομάδα του OmniRoute και οι πιο πρόσφατες σημειώσεις έκδοσης",
+    "viewLabel": "Προβολή",
+    "loadingNews": "Φόρτωση ανακοινώσεων..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "Κατάσταση circuit breaker παρόχου",
       "lastUpdate": "Τελευταία ενημέρωση: {timestamp}",
       "uptimeMinutes": "{minutes}λ",
-      "uptimeHoursMinutes": "{hours}ω {minutes}λ"
+      "uptimeHoursMinutes": "{hours}ω {minutes}λ",
+      "breakerClosed": "Κλειστό",
+      "breakerNotClosed": "Ανοιχτό ή ημιανοιχτό"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "Λεπτομέρειες συντήρησης",
         "secondaryAction": "Κατάσταση Συστήματος"
       }
+    },
+    "miniapp": {
+      "askAnything": "Ρωτήστε οτιδήποτε…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} ορατά / {total} συνολικά",
+    "modeLabel": "Λειτουργία προβολής",
+    "jumpToNow": "Μετάβαση στην τρέχουσα ώρα, η γραμμή NOW επαναφέρεται στη θέση {position}%",
+    "laneReuse": "Επαναχρησιμοποίηση λωρίδας",
+    "laneReuseLabel": "Παράθυρο επαναχρησιμοποίησης λωρίδας (λεπτά)",
+    "laneReuseHint": "Τα αιτήματα που μοιράζονται το ίδιο αναγνωριστικό συνομιλίας παραμένουν στην ίδια σειρά της λωρίδας χρόνου, εφόσον το μεταξύ τους διάστημα είναι μικρότερο από αυτόν τον αριθμό λεπτών.",
+    "laneReuseUnit": "λεπ.",
+    "autoRefresh": "Αυτόματη ανανέωση",
+    "autoRefreshLabel": "Διάστημα αυτόματης ανανέωσης (δευτερόλεπτα)",
+    "autoRefreshHint": "Πόσο συχνά η λωρίδα χρόνου ανακτά εκ νέου τη λίστα αιτημάτων από τον διακομιστή.",
+    "autoRefreshUnit": "δευτ.",
+    "zoomOut": "Σμίκρυνση",
+    "zoomIn": "Μεγέθυνση"
   },
   "metadata": {
     "compressionTitle": "Συμπίεση",

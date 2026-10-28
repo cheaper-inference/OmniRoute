@@ -25,8 +25,10 @@
     "confirm": "നിങ്ങൾക്ക് ഉറപ്പാണോ?",
     "refresh": "പുതുക്കുക",
     "close": "അടയ്ക്കുക",
+    "dialogTitleFallback": "ഡയലോഗ്",
     "previousPage": "മുൻ പേജ്",
     "nextPage": "അടുത്ത പേജ്",
+    "pagination": "പേജിനേഷൻ",
     "capsLockOn": "Caps Lock ഓണാണ്",
     "dismissNotification": "അറിയിപ്പ് ഒഴിവാക്കുക",
     "toggleColumns": "കോളങ്ങൾ കാണിക്കുക/മറയ്ക്കുക",
@@ -182,6 +184,7 @@
     "combos": "കോംബോകൾ",
     "noModelsFound": "മോഡലുകളൊന്നും കണ്ടെത്തിയില്ല",
     "clear": "മായ്ക്കുക",
+    "clearFilters": "ഫിൽട്ടറുകൾ മായ്ക്കുക",
     "done": "പൂർത്തിയായി",
     "selectAll": "എല്ലാം തിരഞ്ഞെടുക്കുക",
     "unselectAll": "എല്ലാം തിരഞ്ഞെടുത്തത് ഒഴിവാക്കുക",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# ബാച്ച്} other {# ബാച്ചുകൾ}} ഉപയോഗിക്കുന്നു",
     "batchFilePreview": "പ്രിവ്യൂ",
     "batchFilePreviewTruncated": "ആദ്യത്തെ {shown} വരികൾ കാണിക്കുന്നു (ആകെ {total} വരികൾ)",
-    "batchFileDownloadFull": "പൂർണ്ണ ഫയൽ ഡൗൺലോഡ് ചെയ്യുക"
+    "batchFileDownloadFull": "പൂർണ്ണ ഫയൽ ഡൗൺലോഡ് ചെയ്യുക",
+    "tokensPageTitle": "ടോക്കണുകൾ",
+    "tokensPageDescription": "API കീകൾക്കിടയിൽ ടോക്കണുകൾ അയയ്ക്കുക, ക്ഷണക്കോഡുകൾ പങ്കിടുക, കമ്മ്യൂണിറ്റി സെർവറുകൾ ബന്ധിപ്പിക്കുക.",
+    "tokensServerUrlLabel": "സെർവർ URL"
   },
   "disabled": "പ്രവർത്തനരഹിതമാക്കി",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ബജറ്റ് തീർന്ന അഭ്യർത്ഥനകൾ അടിയന്തര സൗജന്യ ഫാൾബാക്ക് പ്രൊവൈഡർ/മോഡലിലേക്ക് റൂട്ട് ചെയ്യുക.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "പ്രോക്സി സെർവർ നിർത്തിയിരിക്കുന്നു അല്ലെങ്കിൽ പുനരാരംഭിക്കുകയാണ്.",
     "expandSidebar": "സൈഡ്ബാർ വികസിപ്പിക്കുക",
     "collapseSidebar": "സൈഡ്ബാർ ചുരുക്കുക",
-    "themes": "തീമുകൾ",
-    "presetColors": "ജനപ്രിയ നിറങ്ങൾ",
     "createTheme": "തീം സൃഷ്ടിക്കുക",
     "chooseColor": "ഒരു നിറം തിരഞ്ഞെടുക്കുക",
-    "themeCoral": "കോറൽ",
-    "themeBlue": "നീല",
-    "themeRed": "ചുവപ്പ്",
-    "themeGreen": "പച്ച",
-    "themeViolet": "വയലറ്റ്",
-    "themeOrange": "ഓറഞ്ച്",
-    "themeCyan": "സയാൻ",
     "cliToolsShort": "ഉപകരണങ്ങൾ",
     "cache": "കാഷെ",
     "cacheShort": "കാഷെ",
@@ -1103,12 +1100,10 @@
     "themeSystem": "തീം സംവിധാനം",
     "whitelabelingDesc": "വൈറ്റ്ലേബലിംഗ് വിവരണം",
     "switchThemes": "തീമുകൾ മാറ്റുക",
-    "themeAccentDesc": "തീം ആക്സന്റ് വിവരണം",
     "uploadFavicon": "ഫാവിക്കോൺ അപ്ലോഡ് ചെയ്യുക",
     "themeDark": "ഇരുണ്ട തീം",
     "customLogoDesc": "ഇഷ്ടാനുസൃത ലോഗോ വിവരണം",
     "sidebarVisibilityToggle": "സൈഡ്ബാർ ദൃശ്യത ടോഗിൾ",
-    "themeAccent": "തീം ആക്സന്റ്",
     "resetFavicon": "ഫാവിക്കോൺ പുനഃസജ്ജമാക്കുക",
     "whitelabeling": "വൈറ്റ്ലേബലിംഗ്",
     "darkMode": "ഡാർക്ക് മോഡ്",
@@ -1122,10 +1117,8 @@
     "customLogo": "ഇഷ്ടാനുസൃത ലോഗോ",
     "appearance": "രൂപഭാവം",
     "themeSelectionAria": "തീം തിരഞ്ഞെടുക്കൽ Aria",
-    "themeCreate": "തീം സൃഷ്ടിക്കുക",
     "customFaviconDesc": "ഇഷ്ടാനുസൃത ഫാവിക്കോൺ വിവരണം",
     "logoPreview": "ലോഗോ പ്രിവ്യൂ",
-    "themeCustom": "ഇഷ്ടാനുസൃത തീം",
     "hideHealthLogsDesc": "ആരോഗ്യനില ലോഗുകൾ മറയ്ക്കുന്നതിനുള്ള വിവരണം",
     "faviconPreview": "ഫാവിക്കോൺ പ്രിവ്യൂ",
     "changelog": "മാറ്റങ്ങളുടെ രേഖ",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 അല്ലെങ്കിൽ @channelname",
       "chatIdHint": "ചാറ്റിന്റെ/ചാനലിന്റെ തനതായ സംഖ്യാ ഐഡന്റിഫയർ അല്ലെങ്കിൽ പൊതു ഉപയോക്തൃനാമം.",
       "tutorial": "Telegram വെബ്ഹുക്ക് കോൺഫിഗർ ചെയ്യുന്ന വിധം:"
-    }
+    },
+    "copy": "പകർത്തുക",
+    "copied": "പകർത്തി!",
+    "expandDetails": "വിശദാംശങ്ങൾ കാണിക്കുക",
+    "collapseDetails": "വിശദാംശങ്ങൾ മറയ്ക്കുക"
   },
   "compliance": {
     "auditTitle": "ഓഡിറ്റ്",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "കോളുകൾ (24 മണിക്കൂർ)",
     "mcpMetricSuccessRate": "വിജയ നിരക്ക്",
     "mcpMetricAvgDuration": "ശരാശരി ദൈർഘ്യം",
-    "mcpMetricTopTool": "മുൻനിര ടൂൾ"
-  },
-  "themesPage": {
-    "title": "തീമുകൾ",
-    "description": "ഒരു മുൻനിശ്ചിത തീം തിരഞ്ഞെടുക്കുക അല്ലെങ്കിൽ ഒരൊറ്റ നിറം ഉപയോഗിച്ച് നിങ്ങളുടേതായ തീം സൃഷ്ടിക്കുക",
-    "presetColors": "ജനപ്രിയ നിറങ്ങൾ",
-    "customTheme": "ഇഷ്ടാനുസൃത തീം",
-    "customThemeDesc": "തീം സൃഷ്ടിക്കുക എന്നതിൽ ക്ലിക്ക് ചെയ്ത് ഒരു നിറം തിരഞ്ഞെടുക്കുക",
-    "createTheme": "തീം സൃഷ്ടിക്കുക",
-    "activePreset": "സജീവ തീം"
+    "mcpMetricTopTool": "മുൻനിര ടൂൾ",
+    "dismissError": "പിശക് ഒഴിവാക്കുക"
   },
   "header": {
     "logout": "ലോഗ് ഔട്ട്",
     "quickNavigation": "ദ്രുത നാവിഗേഷൻ",
     "quickNavigationTitle": "ദ്രുത നാവിഗേഷൻ (⌘K / Ctrl+K)",
     "openQuickNavigation": "ദ്രുത നാവിഗേഷൻ തുറക്കുക",
+    "openMenu": "മെനു തുറക്കുക",
+    "products": "Keak ഉൽപ്പന്നങ്ങൾ",
     "switchToLightMode": "ലൈറ്റ് മോഡിലേക്ക് മാറുക",
     "switchToDarkMode": "ഡാർക്ക് മോഡിലേക്ക് മാറുക",
     "language": "ഭാഷ",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Anthropic-ന് അനുയോജ്യം",
     "media": "മീഡിയ",
     "mediaDescription": "ചിത്രങ്ങളും വീഡിയോകളും സംഗീതവും സൃഷ്ടിക്കുക",
-    "themes": "തീമുകൾ",
-    "themesDescription": "മുഴുവൻ ഡാഷ്ബോർഡ് പാനലിനുമായി ഒരു വർണ്ണ തീം തിരഞ്ഞെടുക്കുക",
     "costsDescription": "എല്ലാ പ്രൊവൈഡർമാരിലുമുള്ള ചെലവുകൾ നിരീക്ഷിക്കുകയും പ്രവണതകൾ വിശകലനം ചെയ്യുകയും നിങ്ങളുടെ AI ബജറ്റ് നിയന്ത്രിക്കുകയും ചെയ്യുക",
     "cacheDescription": "പ്രൊവൈഡർ പ്രോംപ്റ്റ് കാഷിന്റെ കാര്യക്ഷമതയും ലോക്കൽ സെമാന്റിക് പ്രതികരണങ്ങളുടെ പുനരുപയോഗവും നിരീക്ഷിക്കുക.",
     "limitsDescription": "ഓരോ API കീക്കും പ്രൊവൈഡർക്കും നിരക്ക് പരിധികളും ക്വാട്ടകളും ക്രമീകരിക്കുക",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "തിരഞ്ഞെടുത്ത കണക്ഷനുകൾ മാത്രം",
     "selectAtLeastOneConnection": "കുറഞ്ഞത് ഒരു കണക്ഷനെങ്കിലും തിരഞ്ഞെടുക്കുക, അല്ലെങ്കിൽ എല്ലാ കണക്ഷനുകളും തിരഞ്ഞെടുക്കുക.",
     "allConnectionsDesc": "ഈ കീയ്ക്ക് സജീവമായ ഏത് കണക്ഷനും ഉപയോഗിക്കാം.",
-    "restrictedToConnections": "{count, plural, one {# കണക്ഷനിലേക്ക്} other {# കണക്ഷനുകളിലേക്ക്}} പരിമിതപ്പെടുത്തിയിരിക്കുന്നു."
+    "restrictedToConnections": "{count, plural, one {# കണക്ഷനിലേക്ക്} other {# കണക്ഷനുകളിലേക്ക്}} പരിമിതപ്പെടുത്തിയിരിക്കുന്നു.",
+    "preferredConnections": "മുൻഗണനയുള്ള കണക്ഷനുകൾ",
+    "preferredConnectionsDesc": "ഓരോ കീയ്ക്കുമുള്ള മുൻഗണനാ ക്രമം. മുൻഗണനയുള്ള കണക്ഷൻ ലഭ്യമല്ലെങ്കിൽ, റൂട്ടിംഗ് അടുത്ത യോഗ്യമായ കണക്ഷനിലേക്ക് മാറും.",
+    "preferredConnectionsNone": "മുൻഗണനയൊന്നും സജ്ജമാക്കിയിട്ടില്ല — ഡിഫോൾട്ട് റൂട്ടിംഗ് തന്ത്രം ഉപയോഗിക്കുന്നു.",
+    "preferredConnectionsClear": "മായ്ക്കുക",
+    "removeSelection": "{name} നീക്കംചെയ്യുക"
   },
   "auditLog": {
     "title": "ഓഡിറ്റ് ലോഗ്",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Modality Bridge ക്രമീകരണങ്ങളിൽ Image→Text ബ്രിഡ്ജ് കോൺഫിഗർ ചെയ്യുക",
     "sttBridgeCta": "Modality Bridge ക്രമീകരണങ്ങളിൽ Speech→Text ബ്രിഡ്ജ് കോൺഫിഗർ ചെയ്യുക",
     "existingConnection": "നിലവിലുള്ള കണക്ഷൻ",
-    "openrouterSttDescription": "OpenRouter സ്പീച്ച്-ടു-ടെക്സ്റ്റ് മോഡലുകൾ നിങ്ങൾ കോൺഫിഗർ ചെയ്ത OpenRouter കണക്ഷൻ ഉപയോഗിക്കുന്നു. പ്രത്യേക ക്രെഡൻഷ്യൽ ആവശ്യമില്ല."
+    "openrouterSttDescription": "OpenRouter സ്പീച്ച്-ടു-ടെക്സ്റ്റ് മോഡലുകൾ നിങ്ങൾ കോൺഫിഗർ ചെയ്ത OpenRouter കണക്ഷൻ ഉപയോഗിക്കുന്നു. പ്രത്യേക ക്രെഡൻഷ്യൽ ആവശ്യമില്ല.",
+    "modalityTabsAria": "മീഡിയ തരം",
+    "serviceKindsAria": "സേവന തരം"
   },
   "search": {
     "searchQuery": "തിരയൽ ക്വറി",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "അജ്ഞാതം",
     "cliproxyapiUpdate": "അപ്ഡേറ്റ് ചെയ്യുക",
     "cliproxyapiUpdateAvailable": "അപ്ഡേറ്റ് ലഭ്യമാണ്: v{current} → v{latest}",
-    "cliproxyapiVersion": "പതിപ്പ്"
+    "cliproxyapiVersion": "പതിപ്പ്",
+    "removeMapping": "മാപ്പിംഗ് നീക്കംചെയ്യുക"
   },
   "modelCatalog": {
     "title": "മോഡലുകളും കോംബോകളും",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "കോമ്പോ → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid എന്ന് അടയാളപ്പെടുത്തിയ ദാതാക്കളെ auto-യിൽ ഉൾപ്പെടുത്തുക",
-    "autoTosDescription": "സ്വതവേ ഓഫാണ്. ഒരൊറ്റ അക്കൗണ്ടിന് മാത്രമല്ല, എല്ലാ auto കോംബോകൾക്കും ബാധകമാണ്. ദാതാവിനെ ബന്ധിപ്പിക്കുന്നത് ഈ ഓപ്ഷൻ പ്രവർത്തനക്ഷമമാക്കില്ല.",
-    "autoTosSaveError": "ToS നയം സംരക്ഷിക്കാനായില്ല. മുമ്പത്തെ ക്രമീകരണം തന്നെയാണ് കാണിക്കുന്നത്. വീണ്ടും ശ്രമിക്കുക.",
-    "autoTosLoadError": "ToS നയം ലോഡ് ചെയ്യാനായില്ല. മാറ്റുന്നതിന് മുമ്പ് വീണ്ടും ശ്രമിക്കുക.",
     "title": "കോംബോകൾ",
     "description": "വെയ്റ്റഡ് റൂട്ടിംഗും ഫാൾബാക്ക് പിന്തുണയും ഉപയോഗിച്ച് മോഡൽ കോംബോകൾ സൃഷ്ടിക്കുക",
     "autoCatalogTitle": "ഓട്ടോ-റൂട്ടിംഗ് കാറ്റലോഗ്",
+    "autoTosLoadError": "ToS നയം ലോഡ് ചെയ്യാനായില്ല. മാറ്റുന്നതിന് മുമ്പ് വീണ്ടും ശ്രമിക്കുക.",
+    "autoTosSaveError": "ToS നയം സംരക്ഷിക്കാനായില്ല. മുമ്പത്തെ ക്രമീകരണം തന്നെയാണ് കാണിക്കുന്നത്. വീണ്ടും ശ്രമിക്കുക.",
+    "autoTosIncludeLabel": "ToS: avoid എന്ന് അടയാളപ്പെടുത്തിയ ദാതാക്കളെ auto-യിൽ ഉൾപ്പെടുത്തുക",
+    "autoTosDescription": "സ്വതവേ ഓഫാണ്. ഒരൊറ്റ അക്കൗണ്ടിന് മാത്രമല്ല, എല്ലാ auto കോംബോകൾക്കും ബാധകമാണ്. ദാതാവിനെ ബന്ധിപ്പിക്കുന്നത് ഈ ഓപ്ഷൻ പ്രവർത്തനക്ഷമമാക്കില്ല.",
     "autoCatalogTemplateCount": "{count} ടെംപ്ലേറ്റുകൾ",
     "autoCatalogDescription": "കണക്റ്റ് ചെയ്ത പ്രൊവൈഡർമാരിൽ നിന്ന് ഡൈനാമിക്കായി നിർണ്ണയിക്കപ്പെടുന്ന ബിൽറ്റ്-ഇൻ auto/* കോംബോകൾ. ഈ ID-കളിൽ ഏതും മോഡൽ ഫീൽഡായി ഉപയോഗിക്കാം — സജ്ജീകരണം ആവശ്യമില്ല.",
     "autoCatalogExpand": "ഓട്ടോ-റൂട്ടിംഗ് കാറ്റലോഗ് വിടർത്തുക",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "ഇതുവരെ കോംബോകളൊന്നും കോൺഫിഗർ ചെയ്തിട്ടില്ല.",
     "playgroundCreateFirst": "ആദ്യം ഒരെണ്ണം സൃഷ്ടിക്കുക",
     "weighted": "ഭാരിതം",
+    "weightPercent": "വെയ്റ്റ് (%)",
     "leastUsed": "ഏറ്റവും കുറച്ച് ഉപയോഗിച്ചത്",
     "costOpt": "ചെലവ്-ഒപ്റ്റിമൈസ്ഡ്",
     "strategyGuideTitle": "ഈ തന്ത്രം എങ്ങനെ ഉപയോഗിക്കാം",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# അക്കൗണ്ട്} other {# അക്കൗണ്ടുകൾ}}",
     "builderGlobalAdded": "ചേർത്തു",
     "builderGlobalAdd": "ചേർക്കുക",
+    "clearSearch": "തിരയൽ മായ്ക്കുക",
     "manualModel": "മാനുവൽ മോഡൽ",
     "manualModelInvalid": "ഒരു മോഡൽ provider/model എന്ന രൂപത്തിൽ നൽകുക.",
     "manualModelUnknownProvider": "അജ്ഞാതമായ പ്രൊവൈഡർ പ്രിഫിക്സ്.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "കോംബോ റഫറൻസ് ചേർക്കുക",
     "builderPinnedAccount": "പിൻ ചെയ്ത അക്കൗണ്ട്",
     "builderLegacyEntry": "ലെഗസി എൻട്രി",
+    "builderStaleModel": "ലൈവ് കാറ്റലോഗിൽ ഇല്ല",
     "reviewName": "പേര്",
     "reviewStrategy": "തന്ത്രം",
     "reviewSteps": "ഘട്ടങ്ങൾ",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "ഉള്ളടക്കത്തിന്റെ കുറഞ്ഞ ദൈർഘ്യം (പ്രതീകങ്ങൾ)",
     "responseValidationJsonPaths": "JSON-path പരിശോധനകൾ",
     "responseValidationAddCheck": "+ പരിശോധന ചേർക്കുക",
+    "responseValidationRemoveCheck": "പരിശോധന നീക്കംചെയ്യുക",
+    "responseValidationPath": "JSON പാത",
+    "responseValidationCondition": "വ്യവസ്ഥ",
+    "responseValidationValue": "പ്രതീക്ഷിക്കുന്ന മൂല്യം",
     "agentFeaturesSystemMessageOverride": "സിസ്റ്റം സന്ദേശം ഓവർറൈഡ് ചെയ്യുക",
     "agentFeaturesSystemMessagePlaceholder": "നിങ്ങൾ ഒരു വിദഗ്ധ സഹായിയാണ്...",
     "agentFeaturesSystemMessageHint": "ഏജന്റുകൾക്കായുള്ള സിസ്റ്റം സന്ദേശ ഓവർറൈഡ്",
@@ -5288,7 +5292,8 @@
         "skipped": "ഇതിനകം കോൺഫിഗർ ചെയ്തിട്ടുണ്ട്",
         "failed": "പരാജയപ്പെട്ടു"
       }
-    }
+    },
+    "stepProgress": "സജ്ജീകരണ പുരോഗതി"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ഈ ദാതാവിനെ സ്വതവേ auto-യിൽ നിന്ന് ഒഴിവാക്കിയിരിക്കുന്നു",
@@ -6056,10 +6061,10 @@
     "apiFormatLabel": "API ഫോർമാറ്റ് ലേബൽ",
     "apiKeyOptionalHint": "നിങ്ങളുടെ ലോക്കൽ സജ്ജീകരണത്തിനോ പ്രൊവൈഡർക്കോ പ്രാമാണീകരണം ആവശ്യമില്ലെങ്കിൽ ശൂന്യമായി വിടുക.",
     "apiKeyOptionalLabel": "API കീ (ഐച്ഛികം)",
-    "apiRegionChina": "API മേഖല: ചൈന",
-    "apiRegionHint": "API മേഖലാ സൂചന",
-    "apiRegionInternational": "API മേഖല: അന്താരാഷ്ട്രം",
-    "apiRegionLabel": "API മേഖലാ ലേബൽ",
+    "apiRegionChina": "മെയ്ൻലാൻഡ് ചൈന",
+    "apiRegionHint": "API ആക്സസിനും ക്വാട്ട ട്രാക്കിംഗിനും ഉപയോഗിക്കുന്ന എൻഡ്പോയിന്റ് മേഖല തിരഞ്ഞെടുക്കുക.",
+    "apiRegionInternational": "അന്തർദ്ദേശീയം",
+    "apiRegionLabel": "API മേഖല",
     "apikey": "API കീ",
     "audio": "ഓഡിയോ",
     "audioProvidersHeading": "ഓഡിയോ പ്രൊവൈഡർമാരുടെ തലക്കെട്ട്",
@@ -6540,6 +6545,7 @@
       "monsterapi": "monsterapi.ai-ൽ API കീ നേടുക",
       "moonshot": "ഒരു API കീ ഉപയോഗിച്ച് Kimi കണക്റ്റ് ചെയ്യുക.",
       "morph": "സൗജന്യ ടയർ: പ്രതിമാസം 250K ക്രെഡിറ്റുകൾ, $0",
+      "apmix": "apmix.ai/dashboard-ൽ നിന്നുള്ള API കീ ഉപയോഗിച്ച് Apmix ബന്ധിപ്പിക്കുക — ഒരു സബ്സ്ക്രിപ്ഷൻ, ധാരാളം മോഡലുകൾ.",
       "nanogpt": "ഒരു API കീ ഉപയോഗിച്ച് NanoGPT കണക്റ്റ് ചെയ്യുക.",
       "nebius": "API പരിശോധനയ്ക്കായി സൈൻ അപ്പ് ചെയ്യുമ്പോൾ ~$1 ട്രയൽ ക്രെഡിറ്റുകൾ",
       "nlpcloud": "OpenAI chat/completions-ന് പകരം NLP Cloud ഒരു പ്രൊപ്രൈറ്ററി ചാറ്റ്ബോട്ട് API ഉപയോഗിക്കുന്നു. OmniRoute, OpenAI സന്ദേശങ്ങളെ input/context/history-ലേക്ക് പൊരുത്തപ്പെടുത്തുകയും പിന്തുണയ്ക്കുന്ന ചാറ്റ്ബോട്ട് മോഡലുകളുടെ ഒരു ലോക്കൽ കാറ്റലോഗ് ലഭ്യമാക്കുകയും ചെയ്യുന്നു.",
@@ -6636,8 +6642,7 @@
       "kiro": "സൗജന്യ ടിയർ: പ്രതിമാസം 50 ക്രെഡിറ്റുകൾ (~25K–100K tokens). ⚠️ Kiro ToS മൂന്നാം കക്ഷി proxy/harness ഉപയോഗം നിരോധിക്കുന്നു.",
       "codex": "നിലവിലുള്ള OAuth പ്രവാഹം ഉപയോഗിച്ച് OpenAI Codex കണക്റ്റ് ചെയ്യുക.",
       "qwen": "നിലവിലുള്ള OAuth പ്രവാഹം ഉപയോഗിച്ച് Qwen Code കണക്റ്റ് ചെയ്യുക.",
-      "github-models": "github.com/settings/tokens-ൽ 'models: read' സ്കോപ്പുള്ള ഒരു GitHub PAT സൃഷ്ടിക്കുക",
-      "apmix": "apmix.ai/dashboard-ൽ നിന്നുള്ള API കീ ഉപയോഗിച്ച് Apmix ബന്ധിപ്പിക്കുക — ഒരു സബ്സ്ക്രിപ്ഷൻ, ധാരാളം മോഡലുകൾ."
+      "github-models": "github.com/settings/tokens-ൽ 'models: read' സ്കോപ്പുള്ള ഒരു GitHub PAT സൃഷ്ടിക്കുക"
     },
     "passthroughModelsDescription": "{provider} പ്രൊവൈഡർ-നേറ്റീവ് മോഡൽ ID-കൾ സ്വീകരിക്കുന്നു. /models-ൽ നിന്ന് ഇമ്പോർട്ട് ചെയ്യുക അല്ലെങ്കിൽ റൂട്ടിംഗിനായി ഇഷ്ടാനുസൃത ID-കൾ ചേർക്കുക.",
     "bedrockModelsDescription": "Amazon Bedrock മോഡലുകൾ AWS മേഖല അനുസരിച്ചാണ് പരിധിനിർണ്ണയിച്ചിരിക്കുന്നത്. /models-ൽ നിന്ന് ഇമ്പോർട്ട് ചെയ്യുക അല്ലെങ്കിൽ തിരഞ്ഞെടുത്ത മേഖലയിൽ പ്രവർത്തനക്ഷമമാക്കിയ Bedrock മോഡൽ ID-കൾ ചേർക്കുക.",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "ഏതൊക്കെ സൈഡ്ബാർ ഇനങ്ങൾ കാണിക്കണമെന്ന് തിരഞ്ഞെടുക്കുക. അടിസ്ഥാനങ്ങൾ തിരഞ്ഞെടുത്താലും വിപുലമായ ടൂളുകൾ തിരയാനാകും.",
     "hideHealthLogs": "ഹെൽത്ത് ചെക്ക് ലോഗുകൾ മറയ്ക്കുക",
     "hideHealthLogsDesc": "ON ആക്കുമ്പോൾ, സെർവർ കൺസോളിലെ [HealthCheck] സന്ദേശങ്ങൾ കാണിക്കാതിരിക്കും",
-    "themeAccent": "തീം നിറം",
-    "themeAccentDesc": "മുൻകൂട്ടി നിശ്ചയിച്ച ഒരു നിറം തിരഞ്ഞെടുക്കുക അല്ലെങ്കിൽ ഒരു നിറം ഉപയോഗിച്ച് നിങ്ങളുടെ സ്വന്തം തീം സൃഷ്ടിക്കുക",
-    "themeCreate": "തീം സൃഷ്ടിക്കുക",
-    "themeCustom": "ഇഷ്ടാനുസൃത തീം",
-    "themeBlue": "നീല",
-    "themeRed": "ചുവപ്പ്",
-    "themeGreen": "പച്ച",
-    "themeViolet": "വയലറ്റ്",
-    "themeOrange": "ഓറഞ്ച്",
-    "themeCyan": "സയാൻ",
     "whitelabeling": "ബ്രാൻഡിംഗ്",
     "whitelabelingDesc": "ആപ്ലിക്കേഷന്റെ പേരും ലോഗോയും ഇഷ്ടാനുസൃതമാക്കുക",
     "appName": "ആപ്ലിക്കേഷന്റെ പേര്",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "ഇപ്പോൾ",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "കോർ ബൈനറി പാത",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "ഓപ്ഷണൽ: സ്വീകരിച്ച ഫയൽ പകരമാക്കുന്നതിന് മുമ്പ് ഉത്പാദിപ്പിച്ച ഫയൽ കോർ ബൈനറി ഉപയോഗിച്ച് പരിശോധിക്കുന്നു. അതിന് അടുത്ത് എഴുതുന്നത് തുടരാൻ ശൂന്യമായി വിടുക. ഡയറക്ടറി ഇല്ലെങ്കിൽ സൃഷ്ടിക്കുന്നു."
+      "coreBinaryPathHelp": "ഓപ്ഷണൽ: സ്വീകരിച്ച ഫയൽ പകരമാക്കുന്നതിന് മുമ്പ് ഉത്പാദിപ്പിച്ച ഫയൽ കോർ ബൈനറി ഉപയോഗിച്ച് പരിശോധിക്കുന്നു. അതിന് അടുത്ത് എഴുതുന്നത് തുടരാൻ ശൂന്യമായി വിടുക. ഡയറക്ടറി ഇല്ലെങ്കിൽ സൃഷ്ടിക്കുന്നു.",
+      "urlFeedlessHint": "സെലക്ടർ മാത്രമുള്ള സബ്സ്ക്രിപ്ഷനായി ശൂന്യമായി വിടുക: താഴെ ഒരു URL നിയന്ത്രണം സജ്ജമാക്കുക, ഫീഡ് ലഭ്യമാക്കുകയോ പുതുക്കുകയോ ബൈൻഡ് ചെയ്യുകയോ ചെയ്യില്ല."
     },
     "bulkHealthcheck": "ബൾക്ക് ഹെൽത്ത് ചെക്ക്",
     "bulkHealthcheckDesc": "പ്രവർത്തിക്കുന്നവ കണ്ടെത്താൻ കോൺഫിഗർ ചെയ്ത എല്ലാ പ്രോക്സികളും ഒരു ലക്ഷ്യ URL-നെതിരെ പരിശോധിക്കുക.",
@@ -7707,6 +7703,7 @@
     "configured": "കോൺഫിഗർ ചെയ്തത്",
     "none": "ഒന്നുമില്ല",
     "modelOverrideValuePlaceholder": "സംഖ്യാ മൂല്യം",
+    "modelOverrideKey": "ഓവർറൈഡ് കീ",
     "modelOverrideReasoningEffortsPlaceholder": "ഇംഗ്ലീഷിൽ കോമ ഉപയോഗിച്ച് വേർതിരിച്ചത്, ഉദാ. low, medium, high",
     "addKeyValue": "കീ-വാല്യു ചേർക്കുക",
     "noModelOverrides": "ഈ മോഡലിനായി ഓവർറൈഡുകളൊന്നും കോൺഫിഗർ ചെയ്തിട്ടില്ല.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "നിർദ്ദിഷ്ട മോഡലുകളുടെ ഡിഫോൾട്ട് നിരക്ക് നിങ്ങൾക്ക് മറികടക്കാം. സ്വയമേവ കണ്ടെത്തിയ നിരക്കുകളേക്കാൾ ഇഷ്ടാനുസൃത ഓവർറൈഡുകൾക്ക് മുൻഗണന ലഭിക്കും.",
     "editPricing": "നിരക്ക് തിരുത്തുക",
     "viewFullDetails": "പൂർണ്ണ വിശദാംശങ്ങൾ കാണുക",
-    "themeCoral": "കോറൽ",
     "adaptiveVolumeRouting": "അഡാപ്റ്റീവ് വോള്യം റൂട്ടിംഗ്",
     "adaptiveVolumeRoutingDesc": "പേലോഡ് വോളിയത്തിന്റെയും ത്രൂപുട്ട് സമ്മർദത്തിന്റെയും അടിസ്ഥാനത്തിൽ കണക്ഷനുകൾ ചലനാത്മകമായി സ്കെയിൽ ചെയ്യുക.",
     "lkgpToggleTitle": "അവസാനം വിജയകരമായിരുന്ന പ്രൊവൈഡർ (LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "ദാതാക്കൾക്ക് അയയ്ക്കുന്നതിന് മുമ്പ് പ്രോംപ്റ്റുകൾ കംപ്രസ് ചെയ്ത് ടോക്കൺ ഉപയോഗം കുറയ്ക്കുക",
     "autoCombosTitle": "ഓട്ടോ കോംബോകൾ",
     "autoCombosDesc": "കോൺഫിഗർ ചെയ്ത ഓരോ പ്രൊവൈഡറിൽ നിന്നും ഒരു മോഡൽ സ്വയമേവ തിരഞ്ഞെടുക്കുന്ന ബിൽറ്റ്-ഇൻ auto/* കോംബോകൾ ഉപയോഗിക്കാൻ ഈ കീയെ അനുവദിക്കുക",
+    "ccDiscoveryAliasesTitle": "Claude Code കണ്ടെത്തൽ അപരനാമങ്ങൾ",
+    "ccDiscoveryAliasesDesc": "ഈ കീയ്ക്ക് ഇതിനകം ആക്സസ് ചെയ്യാൻ കഴിയുന്ന മോഡലുകൾക്കും കോംബോകൾക്കും വേണ്ടി claude/... അനുയോജ്യതാ മിററുകൾ പ്രഖ്യാപിക്കുക",
     "compressionGuidanceFullGuideLink": "സമ്പൂർണ്ണ കംപ്രഷൻ ഗൈഡ്",
     "compressionGuidanceShow": "വിശദാംശങ്ങൾ",
     "compressionGuidanceHide": "വിശദാംശങ്ങൾ മറയ്ക്കുക",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "വിജയിച്ചു",
     "tomlTestFailed": "പരാജയപ്പെട്ടു",
     "tomlImportError": "RTK TOML ഫയൽ പ്രോസസ്സ് ചെയ്യാനായില്ല.",
-    "tomlFileReadError": "തിരഞ്ഞെടുത്ത TOML ഫയൽ വായിക്കാനായില്ല."
+    "tomlFileReadError": "തിരഞ്ഞെടുത്ത TOML ഫയൽ വായിക്കാനായില്ല.",
+    "viewMode": "കാഴ്ചാ മോഡ്"
   },
   "compressionEngineConfig": {
     "loading": "ലോഡ് ചെയ്യുന്നു…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "ഭാഷാ പാക്കുകൾ: {packs}",
     "dragToReorder": "ഘട്ടത്തിന്റെ ക്രമം മാറ്റാൻ വലിച്ചിടുക",
     "engine": "എഞ്ചിൻ",
-    "intensity": "തീവ്രത"
+    "intensity": "തീവ്രത",
+    "compressionOverride": "കംപ്രഷൻ ഓവർറൈഡ്"
   },
   "compressionStudio": {
     "noRun": "കംപ്രഷൻ റൺ ലഭ്യമല്ല.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "വിജയി: {winner}",
     "encoder": "എൻകോഡർ",
     "bytes": "ബൈറ്റുകൾ",
-    "tokensCl100k": "ടോക്കണുകൾ (cl100k)"
+    "tokensCl100k": "ടോക്കണുകൾ (cl100k)",
+    "studioViews": "സ്റ്റുഡിയോ കാഴ്ചകൾ"
   },
   "omniglyph": {
     "preview": "പ്രിവ്യൂ",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "ഇതിലും ചെറുതായ സന്ദേശങ്ങൾ കംപ്രസ് ചെയ്യില്ല. കുറഞ്ഞ മൂല്യം = കൂടുതൽ കംപ്രഷൻ.",
     "tooltipMinSavings": "കുറഞ്ഞത് ഇത്രയും ടോക്കണുകൾ ലാഭിക്കുമെങ്കിൽ മാത്രം കംപ്രസ് ചെയ്യുക.",
     "ultraSettings": "അൾട്രാ ക്രമീകരണങ്ങൾ",
-    "ultraSettingsDesc": "SLM അധിഷ്ഠിത സെമാന്റിക് കംപ്രഷൻ"
+    "ultraSettingsDesc": "SLM അധിഷ്ഠിത സെമാന്റിക് കംപ്രഷൻ",
+    "defaultLanguage": "സ്വതവേയുള്ള ഭാഷ",
+    "viewMode": "കാഴ്ചാ മോഡ്"
   },
   "translator": {
     "title": "പരിഭാഷകൻ",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "സ്ട്രീം പരിവർത്തനം ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു"
   },
   "usage": {
+    "healthExtraUsageBypass": "ക്വാട്ട തീർന്നു; അധിക ഉപയോഗം അനുവദിച്ചതിനാൽ സേവനം തുടരുന്നു.",
+    "healthPaidCreditsBypass": "ക്വാട്ട തീർന്നു; ലഭ്യമായ പണമടച്ച ക്രെഡിറ്റുകൾ ഉപയോഗിച്ച് സേവനം തുടരാം.",
+    "healthFilteringBypass": "ക്വാട്ട തീർന്നു; പ്രാദേശിക ക്വാട്ട ഫിൽട്ടറിംഗ് ഓഫാക്കിയതിനാൽ സേവനം തുടരുന്നു.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
@@ -10002,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "പ്രൊവൈഡർ പരിധികൾ",
     "noProviders": "പ്രൊവൈഡറുകളൊന്നും കണക്റ്റ് ചെയ്തിട്ടില്ല",
+    "quotaAuthRequired": "പ്രാമാണീകരണം ആവശ്യമാണ് - ഡാഷ്ബോർഡിലേക്ക് സൈൻ ഇൻ ചെയ്യുക",
+    "quotaAuthRequiredHint": "ഡാഷ്ബോർഡ് സെഷൻ ലഭ്യമല്ലാത്തതിനാലോ കാലഹരണപ്പെട്ടതിനാലോ പ്രൊവൈഡർ കണക്ഷനുകൾ ലോഡ് ചെയ്യാനായില്ല. നിങ്ങളുടെ ക്വാട്ട പരിധികൾ കാണാൻ സൈൻ ഇൻ ചെയ്ത് പുതുക്കുക.",
     "connectProvidersForQuota": "നിങ്ങളുടെ API ക്വോട്ട പരിധികളും ഉപയോഗവും ട്രാക്ക് ചെയ്യാൻ OAuth ഉപയോഗിച്ച് പ്രൊവൈഡറുകളുമായി കണക്റ്റ് ചെയ്യുക.",
     "accountsCount": "{count, plural, one {# അക്കൗണ്ട്} other {# അക്കൗണ്ടുകൾ}}",
     "filteredFromCount": "({count}-ൽ നിന്ന് ഫിൽട്ടർ ചെയ്തത്)",
@@ -10051,9 +10059,6 @@
     "tierLite": "ലൈറ്റ്",
     "tierUnknown": "അജ്ഞാതം",
     "statTotal": "ആകെ",
-    "statCritical": "ഗുരുതരം",
-    "statAlert": "മുന്നറിയിപ്പ്",
-    "statHealthy": "ആരോഗ്യകരം",
     "filterPurchaseTypeLabel": "തരം",
     "filterTierLabel": "ടയർ",
     "purchaseAll": "എല്ലാം",
@@ -10291,7 +10296,61 @@
     "updatedShort": "പുതുക്കിയത്",
     "lastRefreshed": "അവസാനം പുതുക്കിയത്",
     "providerQuota": "ദാതാവിന്റെ ക്വോട്ട",
-    "providerQuotaHomeHint": "ബന്ധിപ്പിച്ച അക്കൗണ്ടുകളിലുടനീളമുള്ള തത്സമയ നില"
+    "providerQuotaHomeHint": "ബന്ധിപ്പിച്ച അക്കൗണ്ടുകളിലുടനീളമുള്ള തത്സമയ നില",
+    "claudeResetCreditDefaultTitle": "Claude ലിമിറ്റ് റീസെറ്റ്",
+    "confirmRedeemClaudeResetCredit": "റിഡീം ചെയ്യുന്നത് യോഗ്യമായ Claude ഉപയോഗ പരിധികൾ ഉടനടി റീസെറ്റ് ചെയ്യുകയും ഈ ക്രെഡിറ്റ് ശാശ്വതമായി ഉപയോഗിച്ചു തീർക്കുകയും ചെയ്യുന്നു.",
+    "claudeResetCreditsModalTitle": "Claude റീസെറ്റ് ക്രെഡിറ്റുകൾ",
+    "claudeResetCreditsModalExplainer": "ഈ അക്കൗണ്ടിനായി ലഭ്യമായ Claude റീസെറ്റ് ക്രെഡിറ്റുകളും പ്രതിവാര സെഷൻ റീസെറ്റുകളും.",
+    "healthAccountHint": "സമീപകാല നിരീക്ഷണങ്ങളെ അടിസ്ഥാനമാക്കിയത്, തത്സമയ പരിശോധനയല്ല. വിശദാംശങ്ങൾക്ക് അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക.",
+    "healthRecovery": "പ്രതീക്ഷിക്കുന്ന പുനഃസ്ഥാപന സമയം",
+    "healthAvailable": "ലഭ്യമാണ്",
+    "healthRestricted": "ഭാഗികമായി നിയന്ത്രിതം",
+    "healthUnavailable": "ലഭ്യമല്ല",
+    "healthPeakHourProtection": "തിരക്കേറിയ സമയത്തെ സംരക്ഷണം",
+    "healthCooldown": "കാത്തിരിപ്പ് സമയം",
+    "healthQuotaExhausted": "ക്വോട്ട തീർന്നു",
+    "healthOverview": "അവലോകനം",
+    "layoutFull": "പൂർണ്ണം",
+    "layoutCompact": "സംക്ഷിപ്തം",
+    "healthQuotaError": "ക്വോട്ട വായിക്കാനായില്ല",
+    "healthNoRuntime": "പ്രവർത്തന നില ലഭ്യമല്ല",
+    "healthPreviousSnapshot": "അവസാന പുതുക്കൽ പരാജയപ്പെട്ടു; മുൻ ഫലം കാണിക്കുന്നു",
+    "healthPreviousFailure": "അവസാന അഭ്യർത്ഥന പരാജയപ്പെട്ടു; കാത്തിരിപ്പ് അവസാനിച്ചു",
+    "healthAwaitingSync": "പുനഃസജ്ജീകരണ സമയം കഴിഞ്ഞു; സമന്വയത്തിനായി കാത്തിരിക്കുന്നു",
+    "healthVerdictUnavailable": "ലഭ്യതാ പരിശോധനയുടെ ഫലം ലഭ്യമല്ല; ക്വാട്ട നിലകൾ മാത്രം കാണിക്കുന്നു",
+    "healthSummaryFailed": "പ്രവർത്തന സംഗ്രഹം വായിക്കാനായില്ല; മോഡൽ ലോക്ക് വിവരം നഷ്ടമായിരിക്കാം",
+    "healthRuntimeObserved": "പ്രവർത്തന നില പുതുക്കി {time}",
+    "healthQuotaObserved": "ക്വോട്ട നിരീക്ഷിച്ചു {time}",
+    "healthOldestQuota": "ഏറ്റവും പഴയ ക്വോട്ട ചിത്രം: {time}",
+    "healthRecoveryUnknown": "വീണ്ടെടുക്കൽ സമയം അജ്ഞാതം",
+    "healthDetailsHint": "വിശദാംശങ്ങൾക്കും പ്രവർത്തനങ്ങൾക്കും ക്ലിക്ക് ചെയ്യുക",
+    "healthFiveHour": "5 മണിക്കൂർ",
+    "healthOverall": "മൊത്തം",
+    "healthAction": "നടപടി ആവശ്യമാണ്",
+    "healthTitle": "അക്കൗണ്ടുകളുടെ ലഭ്യത",
+    "healthDrag": "ദാതാക്കളുടെ ക്രമം മാറ്റാൻ വലിക്കുക",
+    "healthDragPosition": "{provider}, {count, plural, one {# ൽ {position, number} ആം സ്ഥാനം} other {# ൽ {position, number} ആം സ്ഥാനം}}",
+    "healthResetOrder": "സ്ഥിരസ്ഥിതി ക്രമം പുനഃസ്ഥാപിക്കുക",
+    "healthPool": "{name} പൂൾ",
+    "healthOtherPool": "അതേ അക്കൗണ്ടിലെ {pool}: {status} ({remaining} ബാക്കി)",
+    "healthIncluded": "{count, plural, one {ഭാഗികമായി നിയന്ത്രിച്ച # അക്കൗണ്ട് ഉൾപ്പെടുന്നു} other {ഭാഗികമായി നിയന്ത്രിച്ച # അക്കൗണ്ടുകൾ ഉൾപ്പെടുന്നു}}",
+    "healthBannerUnavailable": "{count, plural, one {# അക്കൗണ്ട് താൽക്കാലികമായി ലഭ്യമല്ല} other {# അക്കൗണ്ടുകൾ താൽക്കാലികമായി ലഭ്യമല്ല}}",
+    "healthBannerAvailable": "{count, plural, one {# അക്കൗണ്ട് ലഭ്യമാണ്} other {എല്ലാ # അക്കൗണ്ടുകളും ലഭ്യമാണ്}}",
+    "healthLegendHide": "ചിഹ്നങ്ങളുടെ വിശദീകരണം മറയ്ക്കുക",
+    "healthLegendShow": "ചിഹ്നങ്ങളുടെ വിശദീകരണം കാണിക്കുക",
+    "healthLegendOk": "കട്ടിനിറം = ശേഷിക്കുന്ന ക്വോട്ട; അർദ്ധസുതാര്യം = ഉപയോഗിച്ചത്.",
+    "healthLegendCooldown": "{window} ക്വോട്ട തീർന്നു. കട്ടിനിറം = കഴിഞ്ഞ കാത്തിരിപ്പ്; അർദ്ധസുതാര്യം = ശേഷിക്കുന്ന കാത്തിരിപ്പ്.",
+    "healthLegendAction": "അനുമതി കാലഹരണപ്പെട്ടു അല്ലെങ്കിൽ അക്കൗണ്ട് തടഞ്ഞു; കാത്തിരുന്നാൽ പരിഹരിക്കില്ല.",
+    "healthLegendPartial": "ഇപ്പോഴും ഉപയോഗിക്കാം. മഞ്ഞ മുകൾഭാഗം = മോഡൽ അല്ലെങ്കിൽ പൂൾ നിയന്ത്രിതം.",
+    "healthWaited": "കാത്തിരുന്നത് {percent}",
+    "healthWait": "ഇനി {duration} ({time}ന് പുനഃസ്ഥാപനം)",
+    "healthFastest": "ഏറ്റവും വേഗത്തിലുള്ള പുനഃസ്ഥാപനം {duration} കഴിഞ്ഞ്",
+    "healthRatio": "{available, plural, one {# / {active, number} ലഭ്യം} other {# / {active, number} ലഭ്യം}}",
+    "healthCd5": "5 മണിക്കൂർ · കാത്തിരിപ്പ് സമയം",
+    "healthCdw": "പ്രതിവാരം · കാത്തിരിപ്പ് സമയം",
+    "healthRecentSuccessBypass": "അടുത്തിടെ ഒരു അഭ്യർത്ഥന വിജയിച്ചതിനാൽ റൂട്ടിംഗ് ഈ അക്കൗണ്ട് അനുവദിക്കുന്നു.",
+    "healthPurchasedBalanceBypass": "ഉൾപ്പെടുത്തിയ ക്വോട്ട തീർന്ന ശേഷവും വാങ്ങിയ ബാലൻസ് ഉപയോഗിക്കാം.",
+    "healthCutoffAtRequest": "അഭ്യർത്ഥന റൂട്ട് ചെയ്യുമ്പോൾ തത്സമയ ക്വോട്ട പരിധികൾ പരിശോധിക്കും."
   },
   "modals": {
     "waitingAuth": "അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു",
@@ -11078,7 +11137,8 @@
       "message": "സന്ദേശം",
       "error": "പിശക്",
       "completion": "പൂർത്തീകരണം"
-    }
+    },
+    "statusFilter": "നില"
   },
   "templateNames": {
     "simple-chat": "ലളിതമായ ചാറ്റ്",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "{minutes} മിനിറ്റ് മുമ്പ്",
     "hoursAgo": "{hours} മണിക്കൂർ മുമ്പ്",
     "daysAgo": "{days} ദിവസം മുമ്പ്",
-    "entries": "എൻട്രികൾ"
+    "entries": "എൻട്രികൾ",
+    "viewSwitcherAria": "കാഷ് കാഴ്ച"
   },
   "proxyConfigModal": {
     "levelGlobal": "ആഗോളം",
@@ -11447,6 +11508,7 @@
     "tableHealth": "പ്രവർത്തനക്ഷമത (24 മണിക്കൂർ)",
     "tableUsage": "ഉപയോഗം",
     "tableActions": "പ്രവർത്തനങ്ങൾ",
+    "moreActions": "കൂടുതൽ പ്രവർത്തനങ്ങൾ",
     "test": "പരിശോധിക്കുക",
     "edit": "തിരുത്തുക",
     "delete": "ഇല്ലാതാക്കുക",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "സാധുവായ എൻട്രികളൊന്നും കണ്ടെത്തിയില്ല. ഫോർമാറ്റ് പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കുക.",
     "bulkImportSuccess": "ഇംപോർട്ട് പൂർത്തിയായി: {created} സൃഷ്ടിച്ചു, {updated} അപ്ഡേറ്റ് ചെയ്തു, {failed} പരാജയപ്പെട്ടു",
     "bulkImportErrorLine": "വരി {line}: {reason}",
-    "bulkImportMaxExceeded": "ഓരോ ഇംപോർട്ടിലും പരമാവധി 100 പ്രോക്സികൾ",
+    "bulkImportMaxExceeded": "ഓരോ ഇംപോർട്ടിലും പരമാവധി {max} പ്രോക്സികൾ",
     "bulkImportPreview": "പ്രിവ്യൂ",
     "clearAssignment": "(അസൈൻമെന്റ് മായ്ക്കുക)",
     "bulkProxyAssignment": "ബൾക്ക് പ്രോക്സി അസൈൻമെന്റ്",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "IP നിരക്ക് പരിധി (429)",
     "poolSetAsideKindSlow": "മന്ദഗതിയുള്ള പ്രതികരണങ്ങൾ",
     "poolSetAsideKindGeoBlocked": "പ്രദേശം നിരോധിച്ചത് (403/451)",
+    "poolSetAsideKindOperatorReported": "ഓപ്പറേറ്റർ റിപ്പോർട്ട് ചെയ്ത തടസ്സം",
     "poolSetAsideUntil": "റൊട്ടേഷനിലേക്ക് തിരികെ {endsAt}",
     "poolSetAsideRepeat": "മാറ്റിവച്ചു {count, plural, one {# തവണ} other {# തവണ}}",
     "poolUnknownAddress": "അജ്ഞാത വിലാസം",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "കോഡ് എക്സ്പോർട്ട് ചെയ്യുക",
     "exportShort": "എക്സ്പോർട്ട് ചെയ്യുക",
     "noStateToExport": "എക്സ്പോർട്ട് ചെയ്യാൻ പ്ലേഗ്രൗണ്ടിന്റെ അവസ്ഥയൊന്നും ലഭ്യമല്ല.",
-    "closeExportModal": "എക്സ്പോർട്ട് മോഡൽ വിൻഡോ അടയ്ക്കുക",
     "close": "അടയ്ക്കുക",
     "exportRealKeyWarning": "സുരക്ഷാ മുന്നറിയിപ്പ്: കയറ്റുമതി തടഞ്ഞു — ഔട്ട്പുട്ടിൽ ഒരു യഥാർത്ഥ API കീ കണ്ടെത്തി. ദയവായി നിങ്ങളുടെ API കീ പുനഃസജ്ജമാക്കി വീണ്ടും ശ്രമിക്കുക.",
     "placeholderHintPrefix": "മാറ്റിസ്ഥാപിക്കുക",
@@ -11809,7 +11871,8 @@
       "nextButton": "അടുത്തത്",
       "runButton": "പ്രവർത്തിപ്പിക്കുക",
       "promptPlaceholder": "നിങ്ങളുടെ സന്ദേശം നൽകുക… (അയയ്ക്കാൻ Enter, പുതിയ വരിക്ക് Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground മോഡുകൾ"
   },
   "miniPlayground": {
     "endpoint": "എൻഡ്പോയിന്റ്",
@@ -11880,7 +11943,8 @@
     "assistant": "അസിസ്റ്റന്റ്",
     "errorLabel": "പിശക്",
     "requestFailed": "അഭ്യർത്ഥന പരാജയപ്പെട്ടു",
-    "stop": "നിർത്തുക"
+    "stop": "നിർത്തുക",
+    "messageInputAria": "സന്ദേശം"
   },
   "requestLogger": {
     "recording": "റെക്കോർഡ് ചെയ്യുന്നു",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "{count} അക്കൗണ്ട് റൊട്ടേഷനുകൾ",
       "resilienceRetried": "ശൂന്യമായ ടേൺ വീണ്ടും ശ്രമിച്ചു",
       "resilienceContinued": "സ്ട്രീമിന്റെ മധ്യത്തിൽ നിന്ന് തുടർന്നു",
-      "resilienceRecovered": "റെസിലിയൻസ് നടപടിയിലൂടെ വീണ്ടെടുത്തു"
-    }
+      "resilienceRecovered": "റെസിലിയൻസ് നടപടിയിലൂടെ വീണ്ടെടുത്തു",
+      "conversationContext": "സംഭാഷണ സന്ദർഭം",
+      "goToBottom": "ഏറ്റവും താഴേക്ക് പോകുക",
+      "liveRefreshOn": "തത്സമയ പുതുക്കൽ: ഓൺ",
+      "liveRefreshOff": "തത്സമയ പുതുക്കൽ: ഓഫ്",
+      "liveRefresh": "തത്സമയ പുതുക്കൽ",
+      "continuesFromParent": "പാരന്റിൽ നിന്ന് തുടരുന്നു",
+      "continuesFrom": "{id}-ൽ നിന്ന് തുടരുന്നു",
+      "viewConversation": "സംഭാഷണം കാണുക",
+      "openConversation": "{id} സംഭാഷണം തുറക്കുക"
+    },
+    "tableLabel": "അഭ്യർത്ഥന ലോഗുകൾ"
   },
   "proxyLogger": {
     "filterAll": "എല്ലാം",
@@ -12113,7 +12187,9 @@
     "colServedBy": "സർവുഡ് ബൈ",
     "filterTraffic": "ട്രാഫിക്",
     "filterTests": "ടെസ്റ്റുകൾ",
-    "filterSource": "ഉറവിടം"
+    "filterSource": "ഉറവിടം",
+    "tableLabel": "പ്രോക്സി ലോഗുകൾ",
+    "sortLogs": "ലോഗുകൾ ക്രമീകരിക്കുക"
   },
   "endpointOptions": {
     "speech": "സംസാരം",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "തീർന്നു",
     "statusAlerting": "മുന്നറിയിപ്പ് നൽകുന്നു",
     "statusError": "പിശക്",
-    "moreSuffix": "+{count} എണ്ണം കൂടി"
+    "moreSuffix": "+{count} എണ്ണം കൂടി",
+    "feedFilterLabel": "ഇവന്റുകൾ ഫിൽട്ടർ ചെയ്യുക"
   },
   "quotaShare": {
     "weightPercent": "വെയ്റ്റ് %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "ഗ്രൂപ്പിലില്ലാത്തവ",
     "ungroupedHint": "ഈ പൂളുകൾ അറിയപ്പെടുന്ന ഒരു ഗ്രൂപ്പിലേക്കും നിയോഗിച്ചിട്ടില്ല. ഒരു യഥാർത്ഥ ഗ്രൂപ്പിലേക്ക് മാറ്റാൻ പൂൾ എഡിറ്റ് ചെയ്യുക.",
     "removeFailed": "ഈ പൂൾ നീക്കം ചെയ്യാനായില്ല.",
-    "dismiss": "അടയ്ക്കുക"
+    "dismiss": "അടയ്ക്കുക",
+    "allocationsHeading": "വിഹിതങ്ങൾ",
+    "wizardRemoveDimension": "ഡൈമെൻഷൻ നീക്കംചെയ്യുക",
+    "wizardRemoveKey": "കീ നീക്കംചെയ്യുക"
   },
   "plugins": {
     "title": "പ്ലഗിനുകൾ",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "ക്രമീകരണങ്ങൾ അപ്ഡേറ്റ് ചെയ്യാനായില്ല",
       "serviceRevealApiKey": "{actor} {target}-നുള്ള API കീ വെളിപ്പെടുത്തി",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "പിശക് നിരസിക്കുക"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "ഇപ്പോൾ പോകുക",
       "message": "MITM Proxy ഇപ്പോൾ AgentBridge-ന് കീഴിലാണ്.",
       "title": "ഈ പേജ് മറ്റൊരിടത്തേക്ക് മാറ്റിയിരിക്കുന്നു"
-    }
+    },
+    "dnsOn": "DNS ഓൺ",
+    "dnsOff": "DNS ഓഫ്",
+    "showServerSettings": "സെർവർ ക്രമീകരണങ്ങൾ കാണിക്കുക",
+    "hideServerSettings": "സെർവർ ക്രമീകരണങ്ങൾ മറയ്ക്കുക",
+    "upstreamCaTesting": "പരിശോധിക്കുന്നു…",
+    "removeMapping": "മാപ്പിംഗ് നീക്കംചെയ്യുക",
+    "mappingSourcePlaceholder": "ഉദാ., gemini-3.6-flash-medium, അല്ലെങ്കിൽ മാപ്പ് ചെയ്യാത്തവയ്ക്കെല്ലാം *",
+    "mappingWildcardHint": "വ്യക്തമായ മാപ്പിംഗ് ഇല്ലാത്ത എല്ലാ മോഡലുകളെയും OmniRoute വഴി തിരഞ്ഞെടുത്ത ലക്ഷ്യത്തിലേക്ക് റൂട്ട് ചെയ്യാൻ സോഴ്സായി * ഉപയോഗിക്കുക. കൃത്യമായ സോഴ്സ് പൊരുത്തങ്ങൾക്ക് എപ്പോഴും *-നേക്കാൾ മുൻഗണന ലഭിക്കും.",
+    "wizardDetectingModels": "ഇന്റർസെപ്റ്റ് ചെയ്ത ട്രാഫിക്കിൽ നിന്ന് മോഡലുകൾ കണ്ടെത്തുന്നു...",
+    "wizardDetectedModels": "ഇന്റർസെപ്റ്റ് ചെയ്ത ട്രാഫിക്കിൽ {count, plural, one {# മോഡൽ} other {# മോഡലുകൾ}} കണ്ടെത്തി. ചേർക്കേണ്ടവ തിരഞ്ഞെടുക്കുക:",
+    "wizardSelectedModels": "{count, plural, one {# മോഡൽ} other {# മോഡലുകൾ}} തിരഞ്ഞെടുത്തു. അടുത്ത സ്ക്രീനിൽ അവയെ OmniRoute മോഡലുകളിലേക്ക് മാപ്പ് ചെയ്യാം.",
+    "wizardAddModels": "{count, plural, one {# മോഡൽ} other {# മോഡലുകൾ}} ചേർക്കുക",
+    "wizardNoModelsDetected": "ഇതുവരെ മോഡലുകളൊന്നും കണ്ടെത്തിയിട്ടില്ല. ഒരു അഭ്യർത്ഥന നടത്താൻ {agent} ഉപയോഗിക്കുക, തുടർന്ന് ട്രാഫിക്കിൽ നിന്ന് മോഡലുകൾ സ്വയമേവ കണ്ടെത്താൻ ഈ വിസാർഡ് വീണ്ടും പ്രവർത്തിപ്പിക്കുക.",
+    "wizardNoModelsHint": "അല്ലെങ്കിൽ ഈ വിസാർഡ് അടച്ച് ഏജന്റ് കാർഡിൽ മാപ്പിംഗുകൾ നേരിട്ട് ചേർക്കുക."
   },
   "providerStats": {
     "unknownError": "അജ്ഞാത പിശക്",
@@ -12686,7 +12781,11 @@
     "avgTtft": "ശരാശരി TTFT",
     "avgTotal": "ശരാശരി ആകെ സമയം",
     "requestTelemetry": "അഭ്യർത്ഥന ടെലിമെട്രി",
-    "requestTelemetryDescription": "7-ഘട്ട പൈപ്പ്ലൈൻ വിഭജനം (കഴിഞ്ഞ 5 മിനിറ്റ്)"
+    "requestTelemetryDescription": "7-ഘട്ട പൈപ്പ്ലൈൻ വിഭജനം (കഴിഞ്ഞ 5 മിനിറ്റ്)",
+    "title": "പ്രൊവൈഡർ സ്ഥിതിവിവരക്കണക്കുകൾ",
+    "description": "ഓരോ പ്രൊവൈഡറിലെയും ഓരോ മോഡലിലെയും ട്രാഫിക്, ലേറ്റൻസി, വിജയനിരക്കുകൾ",
+    "combo": "സംയോജനം",
+    "toggleModels": "{provider}-നുള്ള മോഡലുകൾ കാണിക്കുക"
   },
   "relay": {
     "title": "സർവർലെസ് റിലേ പ്രോക്സികൾ",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "അഭ്യർത്ഥന ബോഡി ഇല്ല.",
     "noResponseBody": "പ്രതികരണ ബോഡി ഇല്ല.",
     "formatted": "ഫോർമാറ്റ് ചെയ്തത്",
-    "raw": "അസംസ്കൃതം"
+    "raw": "അസംസ്കൃതം",
+    "requestCount": "{count, plural, one {# അഭ്യർത്ഥന} other {# അഭ്യർത്ഥനകൾ}}",
+    "expandList": "പട്ടിക വികസിപ്പിക്കുക",
+    "collapseList": "പട്ടിക ചുരുക്കുക",
+    "snippetLanguage": "സ്നിപ്പറ്റ് ഭാഷ",
+    "headersTable": "ഹെഡറുകൾ",
+    "showSecrets": "രഹസ്യങ്ങൾ കാണിക്കുക",
+    "maskSecrets": "രഹസ്യങ്ങൾ മറയ്ക്കുക",
+    "llmNotAvailable": "ഈ അഭ്യർത്ഥനയ്ക്കുള്ള LLM മെറ്റാഡാറ്റ ലഭ്യമല്ല.",
+    "llmStreamYes": "അതെ (SSE)",
+    "llmStreamNo": "ഇല്ല",
+    "llmTotalTokens": "ആകെ: {count} ടോക്കണുകൾ"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "കഴിഞ്ഞ 24 മണിക്കൂറിൽ ഈ ദാതാവ് യഥാർത്ഥത്തിൽ മറുപടി നൽകിയ കോളുകളുടെ അനുപാതം. ഒരു ഡാഷ് കാണിക്കുന്നത് നിരക്ക് നിർണ്ണയിക്കാൻ ആവശ്യമായത്ര ട്രാഫിക് കൈകാര്യം ചെയ്തിട്ടില്ലെന്നാണ്.",
     "reliabilitySample": "കഴിഞ്ഞ {hours} മണിക്കൂറിൽ {requests} കോളുകളിൽ {successes} എണ്ണം വിജയിച്ചു",
     "reliabilityTooFew": "കഴിഞ്ഞ {hours} മണിക്കൂറിൽ {requests} കോളുകൾ മാത്രം — നിരക്ക് നിർണ്ണയിക്കാൻ പര്യാപ്തമല്ല",
-    "reliabilityNoTraffic": "കഴിഞ്ഞ 24 മണിക്കൂറിൽ കോളുകളൊന്നും രേഖപ്പെടുത്തിയിട്ടില്ല"
+    "reliabilityNoTraffic": "കഴിഞ്ഞ 24 മണിക്കൂറിൽ കോളുകളൊന്നും രേഖപ്പെടുത്തിയിട്ടില്ല",
+    "categoryFilter": "ടാസ്ക് വിഭാഗം"
   },
   "discovery": {
     "title": "ദാതാക്കളെ കണ്ടെത്തൽ",
@@ -13331,7 +13442,11 @@
     "method": "രീതി",
     "auth": "പ്രാമാണീകരണം",
     "feasibility": "പ്രായോഗികത",
-    "models": "മോഡലുകൾ"
+    "models": "മോഡലുകൾ",
+    "provider": "സേവനദാതാവ്",
+    "status": "നില",
+    "endpoint": "എൻഡ്പോയിന്റ്",
+    "actions": "പ്രവർത്തനങ്ങൾ"
   },
   "noAuthProvider": {
     "title": "പ്രാമാണീകരണം ആവശ്യമില്ല",
@@ -13380,7 +13495,8 @@
     "ownProxy": "സ്വന്തം പ്രോക്സി",
     "freeTierPause": "മോഡൽ {model} തൽക്കാലം നിർത്തി (429), {time}-യിൽ തിരിച്ചെത്തും",
     "freeTierPauseProvider": "തടഞ്ഞു (429), {time}-ൽ തിരിച்சെത്തും",
-    "freeTierPauseNote": "ഈ ഇൻസ്റ്റൻസിൽ പ്രോസസ്സ് ഇൻ-പ്രോസസ്സ് പോസ്"
+    "freeTierPauseNote": "ഈ ഇൻസ്റ്റൻസിൽ പ്രോസസ്സ് ഇൻ-പ്രോസസ്സ് പോസ്",
+    "proxyType": "പ്രോക്സി തരം"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "ഒരു രഹസ്യ നേട്ടം കാത്തിരിക്കുന്നു...",
         "criteria": "ഈ ബാഡ്ജ് വെളിപ്പെടുത്താൻ രഹസ്യ നേട്ടം പൂർത്തിയാക്കുക."
       }
-    }
+    },
+    "leaderboardTitle": "ലീഡർബോർഡ്",
+    "leaderboardDescription": "നിങ്ങളുടെ API കീകളിലുടനീളമുള്ള റാങ്കിംഗുകളും നേട്ടങ്ങളും",
+    "badgeLocked": "ലോക്ക് ചെയ്തത്"
   },
   "featureFlags": {
     "title": "ഫീച്ചർ ഫ്ലാഗുകൾ",
@@ -13794,6 +13913,7 @@
     "latency": "ലേറ്റൻസി",
     "quota": "ക്വോട്ട",
     "rangeWindow": "{range} സമയപരിധി",
+    "timeRange": "സമയപരിധി",
     "runtimeHealthBlend": "റൺടൈം/ആരോഗ്യ സംയോജനം",
     "averageResponseTime": "ശരാശരി പ്രതികരണ സമയം",
     "worstQuota": "ഏറ്റവും മോശം ക്വോട്ട",
@@ -13995,7 +14115,11 @@
     "learnMore": "കൂടുതലറിയുക",
     "changelogLoadFailed": "മാറ്റങ്ങളുടെ രേഖ ലോഡ് ചെയ്യാനായില്ല. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.",
     "retry": "വീണ്ടും ശ്രമിക്കുക",
-    "viewFullHistory": "പൂർണ്ണ ചരിത്രം GitHub-ൽ കാണുക"
+    "viewFullHistory": "പൂർണ്ണ ചരിത്രം GitHub-ൽ കാണുക",
+    "title": "വാർത്തകളും മാറ്റങ്ങളുടെ രേഖയും",
+    "description": "OmniRoute ടീമിൽ നിന്നുള്ള അറിയിപ്പുകളും ഏറ്റവും പുതിയ റിലീസ് കുറിപ്പുകളും",
+    "viewLabel": "കാണുക",
+    "loadingNews": "അറിയിപ്പുകൾ ലോഡ് ചെയ്യുന്നു..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കർ നില",
       "lastUpdate": "അവസാന അപ്ഡേറ്റ്: {timestamp}",
       "uptimeMinutes": "{minutes}മി",
-      "uptimeHoursMinutes": "{hours}മ {minutes}മി"
+      "uptimeHoursMinutes": "{hours}മ {minutes}മി",
+      "breakerClosed": "അടഞ്ഞത്",
+      "breakerNotClosed": "തുറന്നത് അല്ലെങ്കിൽ പകുതി തുറന്നത്"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "അറ്റകുറ്റപ്പണി വിശദാംശങ്ങൾ",
         "secondaryAction": "സിസ്റ്റം നില"
       }
+    },
+    "miniapp": {
+      "askAnything": "എന്തും ചോദിക്കൂ…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} ദൃശ്യം / ആകെ {total}",
+    "modeLabel": "ദൃശ്യ മോഡ്",
+    "jumpToNow": "നിലവിലെ സമയത്തിലേക്ക് പോകുക, NOW രേഖ {position}% സ്ഥാനത്തേക്ക് പുനഃക്രമീകരിക്കും",
+    "laneReuse": "ലെയിൻ പുനരുപയോഗം",
+    "laneReuseLabel": "ലെയിൻ പുനരുപയോഗ സമയപരിധി (മിനിറ്റ്)",
+    "laneReuseHint": "ഒരേ സംഭാഷണ ഐഡി പങ്കിടുന്ന അഭ്യർത്ഥനകൾക്കിടയിലെ ഇടവേള ഇത്രയും മിനിറ്റിൽ താഴെയായിരിക്കുന്നിടത്തോളം അവ ഒരേ ടൈംലൈൻ വരിയിൽ തുടരും.",
+    "laneReuseUnit": "മിനിറ്റ്",
+    "autoRefresh": "സ്വയമേവ പുതുക്കൽ",
+    "autoRefreshLabel": "സ്വയമേവ പുതുക്കുന്നതിനുള്ള ഇടവേള (സെക്കൻഡ്)",
+    "autoRefreshHint": "സെർവറിൽ നിന്ന് അഭ്യർത്ഥനകളുടെ പട്ടിക ടൈംലൈൻ എത്ര ഇടവേളയിൽ വീണ്ടും ലഭ്യമാക്കണം.",
+    "autoRefreshUnit": "സെ.",
+    "zoomOut": "സൂം ഔട്ട്",
+    "zoomIn": "സൂം ഇൻ"
   },
   "metadata": {
     "compressionTitle": "കംപ്രഷൻ",

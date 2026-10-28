@@ -34,7 +34,7 @@ const updateDestinationSchema = z.object({
 });
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {
@@ -53,7 +53,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {
@@ -136,7 +136,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {

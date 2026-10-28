@@ -20,7 +20,7 @@ Nuair a dhéanann gníomhaire IDE (m.sh., GitHub Copilot, Cursor, Claude Code) g
 
 Ciallaíonn sé seo gur féidir leat:
 
-- **Aon ghníomhaire a athródú chuig aon soláthraí**: Copilot ag caint le OpenAI? Atreoraigh é chuig Anthropic Claude, Gemini, nó aon cheann de 375 soláthraí OmniRoute.
+- **Aon ghníomhaire a athródú chuig aon soláthraí**: Copilot ag caint le OpenAI? Atreoraigh é chuig Anthropic Claude, Gemini, nó aon cheann de 376 soláthraí OmniRoute.
 - **Mapálacha samhlacha a chur i bhfeidhm**: `gemini-3-flash` → `claude-sonnet-4.7` go trédhearcach ag leibhéal an láimhseálaí.
 - **Gach trácht gníomhaire a bhreathnú**: foilsítear gach iarratas idircheaptha chuig an [Cigire Tráchta](./TRAFFIC_INSPECTOR.md).
 - **Athléimneacht OmniRoute a chur i bhfeidhm**: oibríonn ródú teaglama, briseoirí ciorcaid, cúláiseanna, agus rianú costais do thrácht gníomhaire IDE chomh maith.

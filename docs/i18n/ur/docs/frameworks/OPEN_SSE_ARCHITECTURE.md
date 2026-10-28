@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | فائل                          | مقصد                                           |
 | ----------------------------- | ---------------------------------------------- |
-| `providerRegistry.ts`         | 375 فراہم کنندہ کیٹلاگ کے اوپر چیٹ ماڈل رجسٹری |
+| `providerRegistry.ts`         | 376 فراہم کنندہ کیٹلاگ کے اوپر چیٹ ماڈل رجسٹری |
 | `providerModels.ts`           | ماڈل عرفی نام، فارمیٹ میپنگ                    |
 | `constants.ts`                | ٹائم آؤٹس، حدود، اسٹیٹس کوڈز                   |
 | `defaultThinkingSignature.ts` | ڈیفالٹ Claude تھنکنگ سگنیچر                    |

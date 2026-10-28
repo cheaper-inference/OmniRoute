@@ -39,7 +39,7 @@ Objektiivne funktsioonide võrdlus populaarsete avatud lähtekoodiga AI-ruuterit
 
 ## Millal valida OmniRoute
 
-- Majutad ise ja soovid **maksimaalset pakkujate katvust** (375 pakkujat, 155 tasuta/autentimiseta kataloogikirjet)
+- Majutad ise ja soovid **maksimaalset pakkujate katvust** (376 pakkujat, 155 tasuta/autentimiseta kataloogikirjet)
 - Vajad **sisseehitatud MCP-serverit** (LLM-i tööriistad, mälu ja oskused, mis on esitatud tööriistadena)
 - Vajad **A2A-protokolli** agentidevahelisteks töövoogudeks
 - Soovid **sõrmejälje varjamist** (JA3/JA4), et vältida ülesvoolu CAPTCHA-de poolset tuvastamist

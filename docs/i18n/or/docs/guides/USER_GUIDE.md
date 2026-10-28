@@ -609,22 +609,22 @@ post_install() {
 
 ---
 
-## 📊 ଉପଲବ୍ଧ ମଡେଲ୍‌ଗୁଡ଼ିକ
+## 📊 ଉପଲବ୍ଧ ମଡେଲ୍ଗୁଡ଼ିକ
 
 <details>
 <summary><b>ସମସ୍ତ ଉପଲବ୍ଧ ମଡେଲ୍ ଦେଖନ୍ତୁ</b></summary>
 
-> ନିମ୍ନରେ ଥିବା ତାଲିକାଟି v3.8.0 ପାଇଁ `open-sse/config/providerRegistry.ts` ରୁ ସଂକଳିତ। କ୍ଲାଉଡ୍ କ୍ୟାଟାଲଗ୍‌ଗୁଡ଼ିକ (Gemini, OpenRouter ଇତ୍ୟାଦି) ଗତିଶୀଳ ଭାବରେ ସିଙ୍କ୍ ହୁଏ — ସମ୍ପୂର୍ଣ୍ଣ ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ପାଇଁ **Dashboard → Providers → [provider] → Available Models** ଖୋଲନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କଲ୍ କରନ୍ତୁ।
+> ନିମ୍ନ ତାଲିକାଟି v3.8.0 ପାଇଁ `open-sse/config/providerRegistry.ts` ରୁ ସଂଗୃହୀତ । କ୍ଲାଉଡ୍ କାଟାଲଗ୍ଗୁଡ଼ିକ (Gemini, OpenRouter ଇତ୍ୟାଦି) ଡାଇନାମିକ୍ ଭାବରେ ସିଙ୍କ୍ ହୁଅନ୍ତି — ସମ୍ପୂର୍ଣ୍ଣ ଲାଇଭ୍ କାଟାଲଗ୍ ପାଇଁ **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର → [provider] → ଉପଲବ୍ଧ ମଡେଲ୍ଗୁଡ଼ିକ** ଖୋଲନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କଲ୍ କରନ୍ତୁ ।
 >
-> ଯଦି କୌଣସି ପ୍ରଦାନକାରୀଙ୍କ ବିଲ୍ଟ-ଇନ୍ ତାଲିକା ଅସଙ୍ଗତ ହୋଇଯାଇଛି, ତେବେ ଲାଇଭ୍ ଅପ୍‌ଷ୍ଟ୍ରିମ୍ କ୍ୟାଟାଲଗ୍ ଆଣିବା ପାଇଁ ସେହି ପୃଷ୍ଠାରେ **Import from /models** ବ୍ୟବହାର କରନ୍ତୁ (କିମ୍ବା **Auto-Sync** ସକ୍ଷମ କରନ୍ତୁ)। LLM7.io (`gemini-3.1-flash-lite`) ଏବଂ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ପାଇଁ ଏହା v3.8.50 ରେ ଯାଞ୍ଚ କରାଯାଇଥିଲା; ସେହି ପରୀକ୍ଷଣ ସମୟରେ Pollinations ର ଅଜ୍ଞାତ ପ୍ରବେଶ ଅପ୍‌ଷ୍ଟ୍ରିମ୍‌ରେ ସୀମିତ ରହିଥିଲା।
+> ଯଦି କୌଣସି ପ୍ରୋଭାଇଡରର ବିଲ୍ଟ-ଇନ୍ ତାଲିକା ପରିବର୍ତ୍ତିତ ହୋଇଯାଇଛି, ତେବେ ଲାଇଭ୍ ଅପ୍ଷ୍ଟ୍ରିମ୍ କାଟାଲଗ୍ ଆଣିବା ପାଇଁ ସେହି ପୃଷ୍ଠାରେ **/models ରୁ ଆମଦାନୀ କରନ୍ତୁ** ବ୍ୟବହାର କରନ୍ତୁ (କିମ୍ବା **ଅଟୋ-ସିଙ୍କ** ସକ୍ଷମ କରନ୍ତୁ) । ଏହା v3.8.50 ରେ LLM7.io (`gemini-3.1-flash-lite`) ଏବଂ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ପାଇଁ ଯାଞ୍ଚ କରାଯାଇଥିଲା; ସମାନ ଟେଷ୍ଟ ପାସ୍ ସମୟରେ Pollinations ଅଜ୍ଞାତ ପ୍ରବେଶ (anonymous access) ଅପ୍ଷ୍ଟ୍ରିମ୍-ସୀମିତ ରହିଥିଲା ।
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ପ୍ରୟାସ ସ୍ତରଗୁଡ଼ିକ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ଏଫର୍ଟ ଟିଅର୍ଗୁଡ଼ିକ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ମାଗଣା OAuth: **Dashboard → Providers → Kiro → Available Models** ଅଧୀନରେ ଦେଖାଯାଇଥିବା ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ବ୍ୟବହାର କରନ୍ତୁ। ଉପଲବ୍ଧତା ଆକାଉଣ୍ଟ୍ ଏବଂ ପ୍ଲାନ୍ ଉପରେ ନିର୍ଭର କରେ।
+**Kiro (`kr/`)** — ମାଗଣା OAuth: **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର → Kiro → ଉପଲବ୍ଧ ମଡେଲ୍ଗୁଡ଼ିକ** ଅଧୀନରେ ଦେଖାଯାଉଥିବା ଲାଇଭ୍ କାଟାଲଗ୍ ବ୍ୟବହାର କରନ୍ତୁ । ଉପଲବ୍ଧତା ଆକାଉଣ୍ଟ ଏବଂ ପ୍ଲାନ୍ ଉପରେ ନିର୍ଭର କରେ ।
 
 **Qoder (`if/`)** — ମାଗଣା OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,37 +632,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ମାସକୁ ନିର୍ଦ୍ଧାରିତ $9 କିମ୍ବା ବ୍ୟବହାର ଅନୁସାରେ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ମାସ ଫ୍ଲାଟ୍ କିମ୍ବା ପ୍ରତି-ବ୍ୟବହାର: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API କୀ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — ଅତ୍ୟନ୍ତ ଦ୍ରୁତ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — ମୂଳ Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok ନେଟିଭ୍: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — EU-ହୋଷ୍ଟେଡ୍: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — ସନ୍ଧାନ-ସମୃଦ୍ଧ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — ସର୍ଚ୍ଚ-ଅଗ୍ମେଣ୍ଟେଡ୍: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ଓପନ୍-ସୋର୍ସ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ମାଗଣା), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ଓପନ୍-ସୋର୍ସ୍: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ମାଗଣା), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — ଦ୍ରୁତ ଇନ୍‌ଫରେନ୍ସ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — ଦ୍ରୁତ ଇନଫରେନ୍ସ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — ୱେଫର୍-ସ୍କେଲ୍: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-କେନ୍ଦ୍ରିତ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-ଫୋକସ୍ଡ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ଏଣ୍ଟର୍‌ପ୍ରାଇଜ୍: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ଏଣ୍ଟରପ୍ରାଇଜ୍: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google ରୁ ପ୍ରତ୍ୟେକ API କୀ ଅନୁସାରେ ଲାଇଭ୍ ସିଙ୍କ୍ ହୁଏ — କୌଣସି ସ୍ଥିର ତାଲିକା ନାହିଁ। **Dashboard → Providers** ରେ ଏକ କୀ ସଂଯୋଗ କରନ୍ତୁ, ତା’ପରେ ବର୍ତ୍ତମାନର କ୍ୟାଟାଲଗ୍ ଆମଦାନୀ କରିବା ପାଇଁ **Available Models** ବ୍ୟବହାର କରନ୍ତୁ (ଉଦାହରଣ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
+**Gemini (Google Cloud `gemini/`)**: Google ରୁ ପ୍ରତି API key ଅନୁଯାୟୀ ଲାଇଭ୍ ସିଙ୍କ୍ ହୁଏ — କୌଣସି ସ୍ଥିର ତାଲିକା ନାହିଁ । **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର** ରେ ଏକ key ସଂଯୋଗ କରନ୍ତୁ ଏବଂ ତାପରେ ବର୍ତ୍ତମାନର କାଟାଲଗ୍ ଆମଦାନୀ କରିବାକୁ **ଉପଲବ୍ଧ ମଡେଲ୍ଗୁଡ଼ିକ** ବ୍ୟବହାର କରନ୍ତୁ (ଉଦାହରଣ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`) ।
 
-**ଅନ୍ୟାନ୍ୟ ସୁସଙ୍ଗତ ପ୍ରଦାନକାରୀ** (ନିର୍ବାଚିତ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ମାଧ୍ୟମରେ), `azure-ai`, `openrouter` (ପାସ୍‌ଥ୍ରୁ କ୍ୟାଟାଲଗ୍), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। ପ୍ରତ୍ୟେକ ନିଜସ୍ୱ ମଡେଲ୍ ତାଲିକା `providerRegistry.ts` ରେ ପରିଚାଳନା କରେ ଏବଂ ପ୍ରଦାନକାରୀ ଏକ `/models` ଏଣ୍ଡପଏଣ୍ଟ୍ ଉପଲବ୍ଧ କରାଇଲେ ତାହା ସ୍ୱୟଂଚାଳିତ ଭାବରେ ସିଙ୍କ୍ ହୋଇପାରେ।
+**ଅନ୍ୟାନ୍ୟ ସୁସଙ୍ଗତ ପ୍ରୋଭାଇଡର** (ମନୋନୀତ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ମାଧ୍ୟମରେ), `azure-ai`, `openrouter` (ପାସ୍ଥ୍ରୁ କାଟାଲଗ୍), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat` । ପ୍ରତ୍ୟେକ `providerRegistry.ts` ରେ ନିଜର ମଡେଲ୍ ତାଲିକା ରକ୍ଷଣାବେକ୍ଷଣ କରେ ଏବଂ ପ୍ରୋଭାଇଡର `/models` ଏଣ୍ଡପଏଣ୍ଟ ପ୍ରଦାନ କଲେ ଅଟୋ-ସିଙ୍କ୍ ହୋଇପାରେ ।
 
-**ମଡେଲ୍ ID ସମ୍ପର୍କିତ ଟିପ୍ପଣୀ:** OmniRoute ପ୍ରଦାନକାରୀଙ୍କ ମୂଳ ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ବ୍ୟବହାର କରେ। କିଛି ID ରେ ବିନ୍ଦୁଯୁକ୍ତ ସଂସ୍କରଣ ରହିଛି, କାରଣ ଅପ୍‌ଷ୍ଟ୍ରିମ୍ API ସେଗୁଡ଼ିକୁ ସେହି ରୂପରେ ଆଶା କରେ। ଯଦି କୌଣସି ମଡେଲ୍ ଉପରେ ତାଲିକାଭୁକ୍ତ ନାହିଁ, ଉପଲବ୍ଧତା ନିଶ୍ଚିତ କରିବା ପାଇଁ `omniroute models --search <term>` ଚଲାନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କୁ ଅନୁରୋଧ ପଠାନ୍ତୁ।
+**ମଡେଲ୍ ID ସମ୍ପର୍କରେ ଟିପ୍ପଣୀ:** OmniRoute ପ୍ରୋଭାଇଡର-ନେଟିଭ୍ ID ବ୍ୟବହାର କରେ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) । କିଛି ID ରେ ଡଟେଡ୍ ଭର୍ସନ୍ ଥାଏ କାରଣ ଅପ୍ଷ୍ଟ୍ରିମ୍ API ସେହିପରି ଆଶା କରେ । ଯଦି କୌଣସି ମଡେଲ୍ ଉପରେ ତାଲିକାଭୁକ୍ତ ନାହିଁ, ତେବେ `omniroute models --search <term>` ଚଲାନ୍ତୁ କିମ୍ବା ଉପଲବ୍ଧତା ନିଶ୍ଚିତ କରିବାକୁ `GET /api/models/catalog` କଲ୍ କରନ୍ତୁ ।
 
 </details>
 

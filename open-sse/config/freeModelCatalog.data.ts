@@ -22,7 +22,7 @@ import type { FreeModelBudget } from "./freeModelCatalog.ts";
  * rewrites file timestamps on every deploy, which would report a months-old
  * catalog as "updated today". Bump this whenever the entries below change.
  */
-export const FREE_CATALOG_CURATED_AT = "2026-10-19";
+export const FREE_CATALOG_CURATED_AT = "2026-10-25";
 
 export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "agentrouter", modelId: "claude-opus-4-8", displayName: "Claude Opus 4.8", monthlyTokens: 0, creditTokens: 200000000, freeType: "one-time-initial", poolKey: "agentrouter", tos: "caution" },
@@ -314,7 +314,7 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "nscale", modelId: "meta-llama/Llama-4-Scout-17B-16E-Instruct", displayName: "meta-llama/Llama-4-Scout-17B-16E-Instruct", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "nscale", tos: "caution" },
   { provider: "nscale", modelId: "meta-llama/Llama-3.3-70B-Instruct", displayName: "meta-llama/Llama-3.3-70B-Instruct", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "nscale", tos: "caution" },
   { provider: "nvidia", modelId: "google/gemma-4-31b-it", displayName: "Gemma 4 31B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
-  { provider: "nvidia", modelId: "nvidia/nemotron-3-super-120b-a12b", displayName: "Nemotron 3 Super 120B A12B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
+  { provider: "nvidia", modelId: "nvidia/nemotron-3.5-super-vl-120b-a12b", displayName: "Nemotron 3.5 Super VL 120B A12B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
   { provider: "nvidia", modelId: "openai/gpt-oss-120b", displayName: "GPT OSS 120B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
   // evidence: public-page https://ollama.com/pricing (2026-09-02) — Free plan: "Starter usage credits
   // included · Includes access to starter models · Add credits to unlock all models"; docs.ollama.com/cloud:
@@ -327,6 +327,23 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "ollama-cloud", modelId: "gemma4:31b", displayName: "Gemma 4 31B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ollama-cloud", tos: "ambiguous" },
   { provider: "ollama-cloud", modelId: "nemotron-3-super", displayName: "NVIDIA Nemotron 3 Super", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ollama-cloud", tos: "ambiguous" },
   { provider: "ollama-cloud", modelId: "qwen3.5:397b", displayName: "Qwen 3.5 397B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ollama-cloud", tos: "ambiguous" },
+  // evidence: api-public https://onomeo.com/api/info (2026-10-25) — `freeModels` lists the models served free of
+  // charge. Metering is 30 calls per 5 h per account inside a site-wide pool shared by all accounts (`rate`:
+  // perAccountWindowMax 30, windowMinutes 300) — a call count, not a token quantity ⇒ recurring-uncapped with 0
+  // tokens. Models in `modelsPaused` are not cataloged. `modelTraining` marks the upstreams that train on prompts.
+  { provider: "onomeo", modelId: "auto", displayName: "Auto", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
+  { provider: "onomeo", modelId: "deepseek-v4-flash", displayName: "DeepSeek V4 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution" },
+  { provider: "onomeo", modelId: "glm-5.2", displayName: "GLM 5.2", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution" },
+  { provider: "onomeo", modelId: "gemini-3.1-flash-lite", displayName: "Gemini 3.1 Flash Lite", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
+  { provider: "onomeo", modelId: "gpt-oss-20b", displayName: "GPT-OSS 20B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
+  { provider: "onomeo", modelId: "muse-glimmer-30b", displayName: "Muse Glimmer 30B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
+  { provider: "onomeo", modelId: "glm-5.3-flash", displayName: "GLM 5.3 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
+  { provider: "onomeo", modelId: "codestral-latest", displayName: "Codestral Latest", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution" },
+  { provider: "onomeo", modelId: "ministral-14b-latest", displayName: "Ministral 14B Latest", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution" },
+  { provider: "onomeo", modelId: "hy4-preview", displayName: "HY4 Preview", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution" },
+  { provider: "onomeo", modelId: "glm-4.5-flash", displayName: "GLM 4.5 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
+  { provider: "onomeo", modelId: "glm-4.6v-flash", displayName: "GLM 4.6v Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
+  { provider: "onomeo", modelId: "glm-4.7-flash", displayName: "GLM 4.7 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
   // OpenCode Zen free set refreshed 2026-10-20 against https://opencode.ai/zen/v1/models
   // (served IDs) ∩ https://opencode.ai/docs/zen/ ($0 input+output pricing). The free list
   // rotates ("free for a limited time"); only IDs present in BOTH sources are listed here.

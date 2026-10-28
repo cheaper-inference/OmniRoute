@@ -163,7 +163,7 @@ OmniRoute yana bayyana ƙwarewa 6 na A2A da aka haɗa a `src/lib/a2a/taskExecuti
 | Health Report      | `health-report`      | Yana haɗa yanayin circuit breaker, cooldown, da lockout na kowane provider                                                                                                      | health, resilience         | "Nuna matsayin lafiyar duk providers"     |
 | List Capabilities  | `list-capabilities`  | Yana mayar da cikakken catalog na Agent Skills mai ɗauke da abubuwa 45 (23 API + 21 CLI + 1 config) a matsayin teburin markdown tare da raw SKILL.md URLs don shigar da context | catalog, discovery, skills | "Lissafa duk ƙwararrun OmniRoute"         |
 
-> Ya kamata a ci gaba da daidaita Agent Card da catalog na providers 375 na rayuwa; adadin providers da metadata na free/no-auth ana samun su daga registry na runtime.
+> Ya kamata a ci gaba da daidaita Agent Card da catalog na providers 376 na rayuwa; adadin providers da metadata na free/no-auth ana samun su daga registry na runtime.
 
 ### Cikakken Bayanin Ƙwarewar `list-capabilities`
 

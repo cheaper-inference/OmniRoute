@@ -605,14 +605,14 @@ Par pilnu vides mainīgo atsauci skatiet [README](../README.md).
 
 ---
 
-## 📄 Pieejamie modeļi
+## 📊 Pieejamie modeļi
 
 <details>
-<summary><b>Skatīt visus pieejamos modeļus</summary>
+<summary><b>Skatīt visus pieejamos modeļus</b></summary>
 
-> Zemāk esošais saraksts ir apkopots no `open-sse/config/providerRegistry.ts` versijai 3.8.0. Mākoņu katalogi (Gemini, OpenRouter utt.) tiek dinamiski sinhronizēti — lai skatītu pilnu dzīvo katalogu, atveriet **Vadības panelis → Sniedzēji → [sniedzējs] → Pieejamie modeļi** vai izsauciet `GET /api/models/catalog`.
+> Tālāk sniegtais saraksts ir apkopots no `open-sse/config/providerRegistry.ts` versijai v3.8.0. Mākoņpakalpojumu katalogi (Gemini, OpenRouter u.c.) tiek sinhronizēti dinamiski — pilno reāllaika katalogu atveriet sadaļā **Vadības panelis → Pakalpojumu sniedzēji → [pakalpojumu sniedzējs] → Pieejamie modeļi** vai izsauciet `GET /api/models/catalog`.
 >
-> Ja sniedzēja iebūvētais saraksts ir novecojis, izmantojiet šajā lapā esošo **Importēt no /models** (vai iespējojiet **Automātisko sinhronizāciju**), lai iegūtu dzīvo augšpus esošo katalogu. Tas tika verificēts versijā 3.8.50 ar LLM7.io (`gemini-3.1-flash-lite`) un UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinations anonīmā piekļuve bija ierobežota ar augšpus esošo iestatījumu tajā pašā testa gājienā.
+> Ja pakalpojumu sniedzēja iebūvētais saraksts ir novecojis, izmantojiet tajā lapā opciju **Importēt no /models** (vai iespējojiet **Automātisko sinhronizāciju**), lai iegūtu aktuālo augšplūsmas katalogu. Tas tika pārbaudīts versijā v3.8.50 pakalpojumiem LLM7.io (`gemini-3.1-flash-lite`) un UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinations anonīmā piekļuve tajā pašā testēšanas ciklā joprojām bija ierobežota no augšplūsmas puses.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -620,7 +620,7 @@ Par pilnu vides mainīgo atsauci skatiet [README](../README.md).
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — BEZMAKSAS OAuth: izmantojiet dzīvo katalogu, kas parādīts zem **Vadības panelis → Sniedzēji → Kiro → Pieejamie modeļi**. Pieejamība ir atkarīga no konta un plāna.
+**Kiro (`kr/`)** — BEZMAKSAS OAuth: izmantojiet reāllaika katalogu, kas redzams sadaļā **Vadības panelis → Pakalpojumu sniedzēji → Kiro → Pieejamie modeļi**. Pieejamība ir atkarīga no konta un plāna.
 
 **Qoder (`if/`)** — BEZMAKSAS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -628,37 +628,37 @@ Par pilnu vides mainīgo atsauci skatiet [README](../README.md).
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mēn. fiksēta maksa vai par lietošanu: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mēn. fiksēti vai pēc lietojuma: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API atslēga: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultra-ātrs: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Īpaši ātrs: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok natīvie modeļi: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — ES mitināts: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Mitināts ES: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Meklēšanas papildināts: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Ar meklēšanas papildinājumu: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Atvērtā pirmkoda: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bezmaksas), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Atvērtā koda: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bezmaksas), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Ātra inference: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Ātra secināšana: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Šķīvja mēroga: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Plāksnes mēroga: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG vērsts: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Uz RAG orientēts: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Uzņēmumiem: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Korporatīvais: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sinhronizēts dzīvi no Google atkarībā no API atslēgas — nav statiska saraksta. Pievienojiet atslēgu **Vadības panelis → Sniedzēji**, pēc tam izmantojiet **Pieejamie modeļi**, lai importētu pašreizējo katalogu (piem., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Reāllaikā sinhronizēts no Google katrai API atslēgai atsevišķi — statiska saraksta nav. Pievienojiet atslēgu sadaļā **Vadības panelis → Pakalpojumu sniedzēji** un pēc tam izmantojiet **Pieejamie modeļi**, lai importētu pašreizējo katalogu (piem., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Citi saderīgi sniedzēji** (izvēlēti): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (caur `aws-bedrock`), `azure-ai`, `openrouter` (caurlaides katalogs), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Katrs uztur savu modeļu sarakstu `providerRegistry.ts` un var tikt automātiski sinhronizēts, kad sniedzējs nodrošina `/models` galapunktu.
+**Citi saderīgie pakalpojumu sniedzēji** (izvēlētie): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (caur `aws-bedrock`), `azure-ai`, `openrouter` (caurlaides katalogs), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Katrs no tiem uztur savu modeļu sarakstu failā `providerRegistry.ts`, un to var automātiski sinhronizēt, ja pakalpojumu sniedzējs nodrošina `/models` galapunktu.
 
-**Piezīme par modeļu ID:** OmniRoute izmanto sniedzēja dzimtos ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Daži ID satur punktota versija, jo tā to sagaida augšpus esošā API. Ja modelis nav uzskaitīts iepriekš, palaidiet `omniroute models --search <term>` vai izsauciet `GET /api/models/catalog`, lai apstiprinātu pieejamību.
+**Piezīme par modeļu ID:** OmniRoute izmanto pakalpojumu sniedzēja natīvos ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Daži ID ietver versijas ar punktiem, jo tieši tā tos sagaida augšplūsmas API. Ja modelis nav minēts iepriekšējā sarakstā, palaidiet `omniroute models --search <term>` vai izsauciet `GET /api/models/catalog`, lai pārliecinātos par pieejamību.
 
 </details>
 

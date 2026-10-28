@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ფაილი                         | დანიშნულება                                     |
 | ----------------------------- | ----------------------------------------------- |
-| `providerRegistry.ts`         | ჩატ-მოდელების რეესტრი 375-პროვაიდერის კატალოგზე |
+| `providerRegistry.ts`         | ჩატ-მოდელების რეესტრი 376-პროვაიდერის კატალოგზე |
 | `providerModels.ts`           | მოდელების ფსევდონიმები, ფორმატების მეპინგი      |
 | `constants.ts`                | ტაიმაუტები, ლიმიტები, სტატუს-კოდები             |
 | `defaultThinkingSignature.ts` | Claude-ის ნაგულისხმევი thinking-ხელმოწერა       |

@@ -163,7 +163,7 @@ Nochtann OmniRoute 6 scil A2A atá nasctha in `src/lib/a2a/taskExecution.ts::A2A
 | Tuairisc Sláinte          | `health-report`      | Comhshlonnaítear stádas circuit breaker, cooldown agus lockout in aghaidh an tsoláthraí                                                                           | health, resilience         | "Taispeáin stádas sláinte na soláthraithe go léir" |
 | Liostú Cumas              | `list-capabilities`  | Tugtar an catalóg iomlán Agent Skills le 45 iontráil (23 API + 21 CLI + 1 config) mar thábla markdown le URLanna amha SKILL.md le haghaidh instealladh comhthéacs | catalog, discovery, skills | "Liostaigh cumais OmniRoute go léir"               |
 
-> Ba cheart an Agent Card a choinneáil ailínithe leis an gcatalóg beo de 375 soláthraí; faightear líonmhaireachtaí soláthraithe agus meiteashonraí saor/gan údarú ón gclárlann rith-ama.
+> Ba cheart an Agent Card a choinneáil ailínithe leis an gcatalóg beo de 376 soláthraí; faightear líonmhaireachtaí soláthraithe agus meiteashonraí saor/gan údarú ón gclárlann rith-ama.
 
 ### Sonraí na Scile `list-capabilities`
 

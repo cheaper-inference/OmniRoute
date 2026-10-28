@@ -163,7 +163,7 @@ OmniRoute hutoa ujuzi 6 wa A2A uliounganishwa katika `src/lib/a2a/taskExecution.
 | Health Report      | `health-report`      | Hukusanya hali za circuit breaker, cooldown, na lockout kwa kila mtoa huduma                                                                                                    | health, resilience         | "Onyesha hali ya afya ya watoa huduma wote" |
 | List Capabilities  | `list-capabilities`  | Hurudisha katalogi kamili ya Ujuzi wa Wakala yenye viingizo 45 (API 23 + CLI 21 + config 1) kama jedwali la markdown lenye URL ghafi za SKILL.md kwa ajili ya kuingiza muktadha | catalog, discovery, skills | "Orodhesha uwezo wote wa OmniRoute"         |
 
-> Agent Card inapaswa kudumishwa ikilingana na katalogi hai ya watoa huduma 375; idadi za watoa huduma na metadata ya bure/bila-uthibitishaji hutokana na rejista ya wakati wa utekelezaji.
+> Agent Card inapaswa kudumishwa ikilingana na katalogi hai ya watoa huduma 376; idadi za watoa huduma na metadata ya bure/bila-uthibitishaji hutokana na rejista ya wakati wa utekelezaji.
 
 ### Maelezo ya Ujuzi wa `list-capabilities`
 

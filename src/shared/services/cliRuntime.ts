@@ -369,7 +369,11 @@ export const normalizeCliToolId = (toolId: string): string => {
   return CLI_TOOL_ALIASES[normalized] || normalized;
 };
 
-const isWindows = () => process.platform === "win32";
+// This module is bundled on Linux for Windows installations. Turbopack can
+// constant-fold process.platform at build time and strip the Windows discovery
+// and where.exe branches, leaving CLI binaries undetectable on Windows (#17157).
+// os.platform() is evaluated at runtime, preserving both platform paths.
+const isWindows = () => os.platform() === "win32";
 
 /**
  * (#510) Normalize MSYS2/Git-Bash style paths to Windows-native paths.

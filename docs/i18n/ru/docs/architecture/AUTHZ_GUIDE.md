@@ -15,15 +15,15 @@ OmniRoute имеет конвейер авторизации, учитывающ
 
 ## Два режима аутентификации
 
-### 1. Ключ API (Bearer)
+### 1. API-ключ (Bearer)
 
-Используется для клиентских API, совместимых с OpenAI/Anthropic/Gemini, и для некоторых маршрутов управления, когда ключ имеет область доступа `manage`.
+Используется для клиентских API, совместимых с OpenAI/Anthropic/Gemini, а также для некоторых маршрутов управления, если ключ имеет область действия `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Проверяется функциями `isValidApiKey()` / `extractApiKey()` в `src/sse/services/auth.ts` и реэкспортируется через `src/shared/utils/apiAuth.ts`. Валидатор также принимает переменные окружения `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` как постоянные сквозные ключи (issue #1350).
+Проверяется функциями `isValidApiKey()` / `extractApiKey()` в `src/sse/services/auth.ts` и повторно экспортируется через `src/shared/utils/apiAuth.ts`. Валидатор также принимает переменные окружения `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` в качестве постоянных ключей сквозной передачи (задача #1350).
 
 ### 2. Сеанс панели управления (cookie auth_token)
 
@@ -33,64 +33,96 @@ Authorization: Bearer <api-key>
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Cookie является сеансом только тогда, когда JWT проверяется **и** содержит `authenticated: true`
+Cookie считается сеансом только в том случае, если JWT проходит проверку **и** содержит `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Каждый
-потребитель cookie (защита маршрутов панели (`isDashboardSessionAuthenticated()`), обновление в конвейере authz, рукопожатие WebSocket, live
-server, `/api/settings/require-login`, `/api/auth/status`) проходит через этот помощник.
-Существуют и другие JWT, подписанные `JWT_SECRET`: проброс Cursor CLI выпускает токены
-`iss "omniroute" / aud "cursor-cli"` для владельцев ключей, и они никогда не являются сеансами
+потребитель этого cookie (защита маршрутов панели управления (`isDashboardSessionAuthenticated()`), обновление конвейера авторизации, рукопожатие WebSocket, сервер
+реального времени, `/api/settings/require-login`, `/api/auth/status`) использует этот вспомогательный метод.
+Существуют и другие JWT, подписанные с помощью `JWT_SECRET`: механизм сквозной передачи Cursor CLI выпускает
+для владельцев ключей токены `iss "omniroute" / aud "cursor-cli"`, которые никогда не считаются сеансами
 (#13298).
 
-Проверяется функцией `isDashboardSessionAuthenticated()` в `src/shared/utils/apiAuth.ts`. Конвейер автоматически обновляет JWT, когда до конца его 30-дневного срока действия остается менее 7 дней.
+Проверка выполняется функцией `isDashboardSessionAuthenticated()` в `src/shared/utils/apiAuth.ts`. Конвейер автоматически обновляет JWT, если до окончания его 30-дневного срока действия остаётся менее 7 дней.
 
-Сеанс может завершиться и раньше 30 дней, потому что каждый выпускающий код проходит через `mintDashboardSessionToken` (время выдачи `iat` и идентификатор `jti`), а верификатор проверяет два параметра: `sessionsValidAfter`, который задается при смене пароля, поэтому все сеансы, выданные до нее, перестают проходить проверку (браузер, сменивший пароль, получает новый cookie), и `revokedDashboardSessions`, в который `POST /api/auth/logout` добавляет `jti` завершенного сеанса. Сеансы, выпущенные более старым релизом, не содержат ни одного из этих полей и остаются действительными до первой смены пароля. Если настройки невозможно прочитать, сеанс не считается доверенным.
+Сеанс также может завершиться до истечения 30 дней, поскольку каждый механизм выпуска использует `mintDashboardSessionToken` (время выпуска `iat` и идентификатор `jti`), а проверяющий код учитывает две настройки: `sessionsValidAfter`, которая задаётся при изменении пароля, из-за чего все сеансы, выпущенные ранее, перестают проходить проверку (браузер, в котором был изменён пароль, получает новый cookie), и `revokedDashboardSessions`, куда `POST /api/auth/logout` добавляет `jti` завершённого сеанса. Сеансы, созданные более старой версией, не содержат ни одного из этих утверждений и остаются действительными до первой смены пароля. Если настройки прочитать не удаётся, сеанс не считается доверенным.
 
-Некоторые маршруты управления принимают **любой** из двух режимов: cookie ИЛИ `Bearer <key>`, если ключ API имеет область доступа `manage` (или `admin`). Именно это позволяет сценарий «настройка через вызовы API», добавленный в v3.8.
+Некоторые маршруты управления принимают **любой** из режимов: cookie ИЛИ `Bearer <key>`, если API-ключ имеет область действия `manage` (или `admin`). Именно это обеспечивает рабочий процесс «настройки посредством вызовов API», добавленный в v3.8.
 
-#### Необязательный шлюз входа OIDC (#6973)
+#### Необязательное ограничение входа через OIDC (#6973)
 
-Вход администратора в панель также поддерживает **необязательный** поток OIDC (OpenID Connect)
-наряду со стандартным входом по паролю. Вход по паролю никогда не удаляется, а только дополняется:
+Вход администратора в панель управления также поддерживает **опциональный** поток OIDC (OpenID Connect)
+наряду со стандартным входом по паролю — вход по паролю никогда не удаляется, а только
+дополняется:
 
-- Отключено, если не задано `settings.oidcEnabled === true` **и** не заполнены все параметры `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` (Настройки → Auth). `GET /api/auth/oidc/login` возвращает `400` в остальных случаях.
-- `GET /api/auth/oidc/login` получает `authorization_endpoint` из `/.well-known/openid-configuration` издателя
-  (если его нет, используется `<issuer>/authorize`), формирует redirect URI по входящему запросу
-  (с учетом `x-forwarded-proto`) и перенаправляет на IdP со случайным `state`, сохраненным в cookie `oidc_state`
-  с флагом `httpOnly`.
-- `GET /api/auth/oidc/callback` проверяет `state`, обменивает код авторизации и проверяет подпись ID-токена
-  через JWKS издателя (`jose`'s `createRemoteJWKSet`, кешируется для каждого JWKS URI) с проверками `issuer`
-  и `audience`. Список `oidcAllowedSubjects` обязателен: он сопоставляется с claim `sub` токена или с claim
-  `email`. Claim email учитывается только при `email_verified === true`, поэтому непроверенный email у IdP
-  никогда не пройдет шлюз. При пустом списке callback отклоняет любой вход (`not_configured`).
-- При успехе выпускается **тот же самый** 30-дневный JWT `auth_token`, что и при входе по паролю
-  (`src/app/api/auth/login/route.ts`), поэтому остальной конвейер сеанса панели (автообновление, флаги cookie)
-  не меняется. OIDC заменяет только способ выпуска cookie, но не то, что он дает.
-- Каждый параметр `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`,
-  `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) входит в
-  `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
-  отвечает `400 PASSWORD_REQUIRED`, если в теле нет пароля управления в поле `currentPassword`
-  (при неверном пароле ответ `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin` запрещает вход по паролю
-  (`POST /api/auth/login`), но сохраняет хеш пароля, а повторная аутентификация по-прежнему проверяет
-  `currentPassword` против него.
-- `corsOrigins` и `bruteForceProtection` тоже входят в `SECURITY_IMPACTING_SETTINGS_KEYS`: ослабление любого
-  из них снижает защиту входа, поэтому для них требуется та же повторная аутентификация через `currentPassword`
-  (вкладка Security ее запрашивает), а при импорте JSON эти ключи отбрасываются.
-- Каждый ключ политики безопасности (записи `SECURITY_IMPACTING_SETTINGS_KEYS`, все ключи `oidc*` и состояние
-  сеанса панели) доступен **только оператору** в `PATCH /api/settings`. Ключ API с областью `manage` или
-  токен доступа `oma_` получают `403`, даже если отправили верный `currentPassword`. Отказ фиксируется
-  в аудите как `settings.update_failed` с `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` в
-  `src/lib/api/operatorCredential.ts`). Обычные настройки (тема, параметры отображения) остаются доступными
-  для записи ключу `manage` или токену доступа `admin`. Любое изменение самого `/api/settings` (и
-  `/api/settings/require-login`) также требует области доступа токена `admin` (`ADMIN_MUTATION_EXACT_PATHS`
-  в `src/server/authz/accessScopes.ts`, точное совпадение пути). `GET` остается с областью `read`, а остальные
-  подмаршруты `/api/settings/*` (прокси, параметры комбо, псевдонимы моделей, сжатие, очистка…) сохраняют
-  область `write`, выводимую из метода.
-- `POST /api/settings/import-json` пропускает эту повторную аутентификацию, поэтому перед записью он отбрасывает
-  все ключи из `IMPORT_STRIPPED_SETTINGS_KEYS` (тот же файл): пароль и `currentPassword`, каждую запись
-  `SECURITY_IMPACTING_SETTINGS_KEYS` и состояние сеанса панели (`sessionsValidAfter`,
-  `revokedDashboardSessions`). Поэтому импорт старой резервной копии не может вернуть к жизни сеанс,
-  который уже завершили смена пароля или выход из системы.
+- Отключено, если только `settings.oidcEnabled === true` **и** все параметры
+  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` не настроены (Настройки → Аутентификация).
+  В противном случае `GET /api/auth/oidc/login` возвращает `400`.
+- `GET /api/auth/oidc/login` определяет `authorization_endpoint` из
+  `/.well-known/openid-configuration` издателя (с резервным переходом на
+  `<issuer>/authorize`), формирует URI перенаправления на основе входящего запроса
+  (с учётом `x-forwarded-proto`) и перенаправляет к IdP со случайным значением `state`,
+  сохранённым в cookie `oidc_state` с флагом `httpOnly`.
+- `GET /api/auth/oidc/callback` проверяет `state`, обменивает код авторизации
+  и проверяет подпись ID-токена через JWKS издателя
+  (`createRemoteJWKSet` из `jose`, с кешированием для каждого URI JWKS), проверяя
+  `issuer`/`audience`. Для допуска к панели управления необходим непустой список
+  `oidcAllowedSubjects`, политика `oidcAdmissionClaim` или оба условия. Список
+  субъектов сопоставляется с `sub` или `email`, причём `email` используется только
+  при `email_verified === true`. Необязательная политика утверждений принимает
+  разделённый точками путь к утверждению ID-токена (например, `realm_access.roles`)
+  и массив допустимых значений; найденное утверждение должно быть массивом строк,
+  содержащим хотя бы одно допустимое значение. Если настроены обе политики,
+  должны выполняться обе. Отсутствующие или некорректные утверждения приводят к
+  отказу, а при отсутствии обеих политик обработчик обратного вызова отклоняет
+  вход (`not_configured`). Существующие конфигурации, использующие только список
+  субъектов, продолжают работать без изменений.
+- Обычно Keycloak добавляет роли области в токены доступа, но не обязательно в
+  ID-токены. Чтобы требовать роль области `admin`, настройте для этого клиента
+  протокольный маппер, включающий `realm_access.roles` в его **ID-токен**, а затем
+  задайте для `oidcAdmissionClaim` значение `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Прежде чем включать допуск только по роли, проверьте фактическое утверждение
+  ID-токена этого клиента; приложение не считывает роли из токена доступа. Отказ
+  в выдаче токена на стороне IdP может дополнять эту проверку на стороне
+  приложения, но не заменяет её.
+- При успешном входе создаётся **в точности такой же** 30-дневный JWT `auth_token`,
+  какой выдаёт вход по паролю (`src/app/api/auth/login/route.ts`), поэтому остальная
+  часть конвейера сеанса панели управления (автоматическое обновление, флаги cookie)
+  остаётся неизменной — OIDC заменяет только способ создания cookie, но не
+  предоставляемые им права. Изменения ролей или групп в IdP не аннулируют
+  существующие сеансы OmniRoute; срок их действия по-прежнему определяется
+  выходом из системы, сменой пароля или истечением срока сеанса.
+- Каждый параметр `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) входит в `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  возвращает `400 PASSWORD_REQUIRED`, если тело запроса не содержит пароль
+  управления в поле `currentPassword` (`401 PASSWORD_MISMATCH`, если пароль неверен).
+  `oidcDisablePasswordLogin` запрещает _вход_ по паролю (`POST /api/auth/login`),
+  но сохраняет хеш пароля, а повторная аутентификация по-прежнему сверяет
+  `currentPassword` с ним.
+- `corsOrigins` и `bruteForceProtection` также входят в `SECURITY_IMPACTING_SETTINGS_KEYS`:
+  ослабление любого из этих параметров снижает защищённость входа, поэтому для них
+  требуется такая же повторная аутентификация через `currentPassword` (вкладка
+  «Безопасность» запрашивает его), а при импорте JSON они отбрасываются.
+- Каждый ключ политики безопасности — записи `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  все ключи `oidc*` и состояние сеанса панели управления — доступен **только оператору**
+  в `PATCH /api/settings`: API-ключ с областью `manage` или токен доступа `oma_`
+  отклоняется с кодом `403`, даже если передаёт правильный `currentPassword`, а
+  отказ записывается в журнал аудита как `settings.update_failed` с
+  `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` в `src/lib/api/operatorCredential.ts`).
+  Обычные настройки (тема, параметры отображения) остаются доступными для записи
+  с помощью ключа `manage` или токена доступа `admin`. Для любого изменения самих
+  `/api/settings` (а также `/api/settings/require-login`) также требуется область
+  токена доступа `admin` (`ADMIN_MUTATION_EXACT_PATHS` в `src/server/authz/accessScopes.ts`,
+  точное совпадение пути); для `GET` по-прежнему достаточно `read`, а остальные
+  вложенные маршруты `/api/settings/*` (прокси, значения комбинаций по умолчанию,
+  псевдонимы моделей, сжатие, очистка…) сохраняют область `write`, определяемую
+  по методу запроса.
+- `POST /api/settings/import-json` пропускает эту повторную аутентификацию, поэтому
+  перед записью отбрасывает каждый ключ из `IMPORT_STRIPPED_SETTINGS_KEYS` (тот же
+  файл): пароль и `currentPassword`, все записи `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  а также состояние сеанса панели управления (`sessionsValidAfter`,
+  `revokedDashboardSessions`). Поэтому импорт старой резервной копии не может
+  восстановить сеанс, уже завершённый сменой пароля или выходом из системы.
 
 ## Классы маршрутов
 
