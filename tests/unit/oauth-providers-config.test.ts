@@ -49,6 +49,7 @@ const {
   OPENFERENCE_CONFIG,
   ZED_HOSTED_CONFIG,
   MUSE_CODE_CONFIG,
+  MINIMAX_CODE_CONFIG,
 } = oauthModule;
 const { getAntigravityLoadCodeAssistMetadata } = antigravityHeadersModule;
 const {
@@ -87,6 +88,7 @@ const EXPECTED_PROVIDER_KEYS = [
   "zed",
   "zed-hosted",
   "muse-code",
+  "minimax-code",
 ];
 
 const browserUrl = "http://localhost:20128/callback";
@@ -124,6 +126,7 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   zed: ZED_CONFIG,
   "zed-hosted": ZED_HOSTED_CONFIG,
   "muse-code": MUSE_CODE_CONFIG,
+  "minimax-code": MINIMAX_CODE_CONFIG,
 };
 
 const KIRO_REQUIRED_FIELDS = [
@@ -174,6 +177,7 @@ const REQUIRED_FIELDS_BY_PROVIDER = {
   // prettier-ignore
   "zed-hosted": ["webBaseUrl", "cloudBaseUrl", "llmBaseUrl", "userInfoUrl", "llmTokenUrl", "modelsUrl"],
   "muse-code": ["deviceCodeUrl", "tokenUrl", "clientId", "mintUrl"],
+  "minimax-code": ["deviceCodeUrl", "tokenUrl", "clientId", "scope", "audience"],
 };
 
 function getByPath(object, path) {
