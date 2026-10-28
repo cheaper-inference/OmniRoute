@@ -25,8 +25,10 @@
     "confirm": "אתה בטוח?",
     "refresh": "רענן",
     "close": "סגור",
+    "dialogTitleFallback": "תיבת דו־שיח",
     "previousPage": "הדף הקודם",
     "nextPage": "הדף הבא",
+    "pagination": "עימוד",
     "capsLockOn": "Caps Lock מופעל",
     "dismissNotification": "התעלם מההתראה",
     "toggleColumns": "הצג/הסתר עמודות",
@@ -182,6 +184,7 @@
     "combos": "שילובים",
     "noModelsFound": "לא נמצאו מודלים",
     "clear": "ניקוי",
+    "clearFilters": "ניקוי מסננים",
     "done": "סיום",
     "selectAll": "בחר הכול",
     "unselectAll": "בטל בחירה",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "שימוש ב{count, plural, one {# קבוצת} other {# קבוצות}}",
     "batchFilePreview": "תצוגה מקדימה",
     "batchFilePreviewTruncated": "מציג {shown} שורות ראשונות ({total} שורות סך הכל)",
-    "batchFileDownloadFull": "הורד קובץ מלא"
+    "batchFileDownloadFull": "הורד קובץ מלא",
+    "tokensPageTitle": "אסימונים",
+    "tokensPageDescription": "שליחת אסימונים בין מפתחות API, שיתוף קודי הזמנה וחיבור שרתי קהילה.",
+    "tokensServerUrlLabel": "כתובת URL של השרת"
   },
   "disabled": "מושבת",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ניתוב בקשות שחרגו מהתקציב לספק/מודל גיבוי חינמי לשעת חירום.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "שרת ה-proxy נעצר או מופעל מחדש.",
     "expandSidebar": "הרחב את סרגל הצד",
     "collapseSidebar": "כווץ את סרגל הצד",
-    "themes": "ערכות נושא",
-    "presetColors": "צבעים פופולריים",
     "createTheme": "יצירת ערכת נושא",
     "chooseColor": "בחרו צבע אחד",
-    "themeCoral": "אלמוג",
-    "themeBlue": "כחול",
-    "themeRed": "אדום",
-    "themeGreen": "ירוק",
-    "themeViolet": "סגול",
-    "themeOrange": "כתום",
-    "themeCyan": "ציאן",
     "cliToolsShort": "כלים",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "מערכת ערכות הנושא",
     "whitelabelingDesc": "תיאור המיתוג המותאם אישית",
     "switchThemes": "החלפת ערכות נושא",
-    "themeAccentDesc": "תיאור צבע ההדגשה של ערכת הנושא",
     "uploadFavicon": "העלאת Favicon",
     "themeDark": "ערכת נושא כהה",
     "customLogoDesc": "תיאור לוגו מותאם אישית",
     "sidebarVisibilityToggle": "מתג נראות סרגל הצד",
-    "themeAccent": "צבע הדגשה של ערכת הנושא",
     "resetFavicon": "איפוס סמל האתר",
     "whitelabeling": "מיתוג מותאם אישית",
     "darkMode": "מצב כהה",
@@ -1122,10 +1117,8 @@
     "customLogo": "לוגו מותאם אישית",
     "appearance": "מראה",
     "themeSelectionAria": "תווית ARIA לבחירת ערכת נושא",
-    "themeCreate": "יצירת ערכת נושא",
     "customFaviconDesc": "תיאור סמל אתר מותאם אישית",
     "logoPreview": "תצוגה מקדימה של הלוגו",
-    "themeCustom": "ערכת נושא מותאמת אישית",
     "hideHealthLogsDesc": "תיאור הסתרת יומני תקינות",
     "faviconPreview": "תצוגה מקדימה של סמל האתר",
     "changelog": "יומן שינויים",
@@ -1352,7 +1345,9 @@
       "open": "פתח",
       "close": "סגור"
     },
-    "noResults": "אין תוצאות"
+    "noResults": "אין תוצאות",
+    "costsTeams": "צוותים",
+    "costsTeamsSubtitle": "מרכזי עלות של צוותים"
   },
   "webhooks": {
     "title": "וובהוקים",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 או @channelname",
       "chatIdHint": "המזהה המספרי הייחודי או שם המשתמש הציבורי של הצ'אט/ערוץ.",
       "tutorial": "כיצד להגדיר Webhook של Telegram:"
-    }
+    },
+    "copy": "העתקה",
+    "copied": "הועתק!",
+    "expandDetails": "הצגת פרטים",
+    "collapseDetails": "הסתרת פרטים"
   },
   "compliance": {
     "auditTitle": "ביקורת",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "שיחות (24ש')",
     "mcpMetricSuccessRate": "שיעור הצלחה",
     "mcpMetricAvgDuration": "משך ממוצע",
-    "mcpMetricTopTool": "כלי מוביל"
-  },
-  "themesPage": {
-    "title": "ערכות נושא",
-    "description": "בחרו ערכת נושא מוכנה מראש או צרו ערכה משלכם באמצעות צבע אחד",
-    "presetColors": "צבעים פופולריים",
-    "customTheme": "ערכת נושא מותאמת אישית",
-    "customThemeDesc": "לחצו על יצירת ערכת נושא ובחרו צבע אחד",
-    "createTheme": "יצירת ערכת נושא",
-    "activePreset": "ערכת נושא פעילה"
+    "mcpMetricTopTool": "כלי מוביל",
+    "dismissError": "סגירת השגיאה"
   },
   "header": {
     "logout": "התנתק",
     "quickNavigation": "ניווט מהיר",
     "quickNavigationTitle": "ניווט מהיר (⌘K / Ctrl+K)",
     "openQuickNavigation": "פתח ניווט מהיר",
+    "openMenu": "פתיחת התפריט",
+    "products": "מוצרי Keak",
     "switchToLightMode": "עבור למצב בהיר",
     "switchToDarkMode": "עבור למצב כהה",
     "language": "שפה",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "תואם אנתרופי",
     "media": "מדיה",
     "mediaDescription": "יצירת תמונות, סרטונים ומוזיקה",
-    "themes": "ערכות נושא",
-    "themesDescription": "בחרו ערכת צבעים לכל לוח הבקרה",
     "costsDescription": "מעקב אחר הוצאות, ניתוח מגמות וניהול תקציב ה-AI שלכם בכל הספקים",
     "cacheDescription": "ניטור יעילות מטמון ההנחיות של הספקים ושימוש חוזר מקומי בתגובות סמנטיות.",
     "limitsDescription": "הגדרת מגבלות קצב ומכסות לכל מפתח API וספק",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "כללים מתקדמים למטען הנתונים, מגבלות בקשות והגדרות API של פרוקסי",
     "mitmProxyDescription": "הגדרת פרוקסי MITM לבדיקת תעבורה ולניפוי שגיאות",
     "oneProxyDescription": "הגדרת 1Proxy לשרשור פרוקסי מתקדם",
-    "omniSkillsDescription": "התקן ונהל מיומנויות ארגז חול להרצה אוטומטית של הנחיות וכלים"
+    "omniSkillsDescription": "התקן ונהל מיומנויות ארגז חול להרצה אוטומטית של הנחיות וכלים",
+    "teamsDescription": "הערכות עלות צוות ותקציבים רכים משותפים"
   },
   "cloudSyncStatus": {
     "synced": "מסונכרן",
@@ -2495,7 +2487,12 @@
     "onlySelectedConnections": "רק חיבורים שנבחרו",
     "selectAtLeastOneConnection": "יש לבחור חיבור אחד לפחות או לבחור באפשרות כל החיבורים.",
     "allConnectionsDesc": "מפתח זה יכול להשתמש בכל חיבור פעיל.",
-    "restrictedToConnections": "מוגבל ל-{count, plural, one {חיבור אחד} other {# חיבורים}}."
+    "restrictedToConnections": "מוגבל ל-{count, plural, one {חיבור אחד} other {# חיבורים}}.",
+    "preferredConnections": "חיבורים מועדפים",
+    "preferredConnectionsDesc": "סדר עדיפויות לכל מפתח. אם חיבור מועדף אינו זמין, הניתוב עובר לחיבור הכשיר הבא.",
+    "preferredConnectionsNone": "לא הוגדרה העדפה — נעשה שימוש באסטרטגיית הניתוב המוגדרת כברירת מחדל.",
+    "preferredConnectionsClear": "נקה",
+    "removeSelection": "הסרת {name}"
   },
   "auditLog": {
     "title": "יומן ביקורת",
@@ -2607,7 +2604,9 @@
     "imageToTextBridgeCta": "הגדר את גשר התמונה→טקסט בהגדרות גשר המודאליות",
     "sttBridgeCta": "הגדר את גשר דיבור→טקסט בהגדרות גשר מודליות",
     "existingConnection": "חיבור קיים",
-    "openrouterSttDescription": "מודלים של OpenRouter להמרת דיבור לטקסט משתמשים בחיבור OpenRouter שהגדרת. אין צורך באישור נפרד."
+    "openrouterSttDescription": "מודלים של OpenRouter להמרת דיבור לטקסט משתמשים בחיבור OpenRouter שהגדרת. אין צורך באישור נפרד.",
+    "modalityTabsAria": "סוג מדיה",
+    "serviceKindsAria": "סוג שירות"
   },
   "search": {
     "searchQuery": "שאילתת חיפוש",
@@ -2982,6 +2981,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "השתמש כאשר אתה צריך עוזר AI קל משקל יליד מסוף למשימות מהירות.",
       "hermes-agent": "השתמש כאשר יש צורך ב-Hermes Agent (מבית Nousresearch) עם מודלי ברירת מחדל, האצלה, ראייה ועזר המנותבים דרך OmniRoute.",
+      "whycodes": "השתמש כאשר אתה רוצה את WhyCodes כסוכן CLI אוטונומי רב-תכליתי (TUI, סוכנים בעלי שם, זיכרון, swarm) המכוון ל-OmniRoute.",
       "custom": "השתמש עבור הטמעת כלים מותאמים אישית או תצורות כלליות תואמות OpenAI."
     },
     "toolDescriptions": {
@@ -3022,6 +3022,7 @@
       "warp": "מסוף Warp AI עם תמיכה בספק מותאם אישית",
       "agent-deck": "מתזמר מרובה סוכנים Agent Deck",
       "5dive": "5dive — צי מתארח עצמאית של סוכני קוד; פרופיל אימות אחד מכוון את כולם ל-OmniRoute",
+      "whycodes": "סוכן CLI אוטונומי WhyCodes עם כתובת URL בסיסית תואמת OpenAI",
       "zed": "עורך הקוד Zed — סוכן מובנה דרך ספק תואם OpenAI"
     },
     "guides": {
@@ -3278,7 +3279,8 @@
     "cliproxyapiUnknown": "לא ידוע",
     "cliproxyapiUpdate": "עדכון",
     "cliproxyapiUpdateAvailable": "עדכון זמין: v{current} → v{latest}",
-    "cliproxyapiVersion": "גרסה"
+    "cliproxyapiVersion": "גרסה",
+    "removeMapping": "הסרת מיפוי"
   },
   "modelCatalog": {
     "title": "מודלים ושילובים",
@@ -3342,6 +3344,18 @@
     "maxMembersPlaceholder": "למשל 10",
     "testSelected": "בדיקת הנבחרים ({count})",
     "testAllFiltered": "בדיקת כל המסוננים ({count})",
+    "visibility": "נראות",
+    "allVisibility": "גלויים ומוסתרים",
+    "visibleOnly": "גלויים",
+    "hiddenOnly": "מוסתרים",
+    "visibleColumn": "גלוי",
+    "hideModel": "הסתרת {name} מ-/v1/models",
+    "showModel": "הצגת {name} ב-/v1/models",
+    "hiddenBadge": "מוסתר",
+    "hideFiltered": "הסתרת המסוננים ({count})",
+    "showFiltered": "הצגת המסוננים ({count})",
+    "visibilityCounts": "{visible} גלויים · {hidden} מוסתרים · {total} סה\"כ",
+    "visibilityUpdateFailed": "עדכון נראות המודל נכשל",
     "cancel": "ביטול",
     "clearResults": "ניקוי תוצאות",
     "testing": "בבדיקה...",
@@ -3400,13 +3414,13 @@
     "comboRefMember": "שילוב → {name}"
   },
   "combos": {
+    "title": "שילובים",
+    "description": "צור שילובי דגמים עם ניתוב משוקלל ותמיכה ב-fallback",
+    "autoCatalogTitle": "קטלוג ניתוב אוטומטי",
     "autoTosLoadError": "לא ניתן לטעון את מדיניות תנאי השירות. יש לנסות שוב לפני שמשנים אותה.",
     "autoTosSaveError": "לא ניתן לשמור את מדיניות תנאי השירות. ההגדרה הקודמת עדיין מוצגת. יש לנסות שוב.",
     "autoTosIncludeLabel": "כלול ב-auto ספקים המסומנים ToS: avoid",
     "autoTosDescription": "כבוי כברירת מחדל. חל על כל שילובי auto, ולא רק על חשבון אחד. חיבור ספק אינו מפעיל אפשרות זו.",
-    "title": "שילובים",
-    "description": "צור שילובי דגמים עם ניתוב משוקלל ותמיכה ב-fallback",
-    "autoCatalogTitle": "קטלוג ניתוב אוטומטי",
     "autoCatalogTemplateCount": "{count} תבניות",
     "autoCatalogDescription": "שילובי אוטומטי/* מובנים שנפתרו באופן דינמי מספקים מחוברים. השתמש בכל אחד מהמזהים האלה בתור שדה הדגם - אין צורך בהגדרה.",
     "autoCatalogExpand": "הרחב את קטלוג הניתוב האוטומטי",
@@ -3518,6 +3532,9 @@
     "moveUp": "לזוז למעלה",
     "moveDown": "לזוז למטה",
     "removeModel": "הסר",
+    "testStep": "בדוק את המודל הזה",
+    "testStepRunning": "בודק…",
+    "testStepNotTestable": "ניתן לבדוק רק שלבים עם מודל יחיד",
     "saving": "שומר...",
     "liveNoProviders": "טרם נצפו ספקים.",
     "liveFleetDataHint": "נתוני הצי מגיעים דרך אירועי קומבו חיים.",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "עדיין לא הוגדרו שילובים.",
     "playgroundCreateFirst": "צור אחד תחילה",
     "weighted": "משוקלל",
+    "weightPercent": "משקל (%)",
     "leastUsed": "הכי פחות בשימוש",
     "costOpt": "מיטוב עלויות",
     "strategyGuideTitle": "כיצד להשתמש באסטרטגיה זו",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# חשבון} other {# חשבונות}}",
     "builderGlobalAdded": "נוסף",
     "builderGlobalAdd": "הוסף",
+    "clearSearch": "ניקוי החיפוש",
     "manualModel": "מודל ידני",
     "manualModelInvalid": "הזן מודל בפורמט provider/model.",
     "manualModelUnknownProvider": "תחילית ספק לא מוכרת.",
@@ -3936,6 +3955,7 @@
     "builderComboRefStep": "הוספת הפניה לשילוב",
     "builderPinnedAccount": "חשבון מוצמד",
     "builderLegacyEntry": "רשומה מדור קודם",
+    "builderStaleModel": "לא נמצא בקטלוג החי",
     "reviewName": "שם",
     "reviewStrategy": "אסטרטגיה",
     "reviewSteps": "שלבים",
@@ -3973,6 +3993,10 @@
     "responseValidationMinLength": "אורך תוכן מינימלי (תווים)",
     "responseValidationJsonPaths": "בדיקות JSON-path",
     "responseValidationAddCheck": "+ הוסף בדיקה",
+    "responseValidationRemoveCheck": "הסרת בדיקה",
+    "responseValidationPath": "נתיב JSON",
+    "responseValidationCondition": "תנאי",
+    "responseValidationValue": "ערך צפוי",
     "agentFeaturesSystemMessageOverride": "ביטול הודעת מערכת",
     "agentFeaturesSystemMessagePlaceholder": "אתה עוזר מומחה...",
     "agentFeaturesSystemMessageHint": "עקיפה של הודעת מערכת עבור סוכנים",
@@ -5288,7 +5312,8 @@
         "skipped": "כבר מוגדר",
         "failed": "נכשל"
       }
-    }
+    },
+    "stepProgress": "התקדמות ההגדרה"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ספק זה מוחרג מ-auto כברירת מחדל",
@@ -5579,6 +5604,7 @@
     "allModelsAlreadyImported": "כל הדגמים כבר מיובאים",
     "noNewModelsToImport": "אין דגמים חדשים לייבוא — כל הדגמים כבר קיימים ברישום או ברשימת הדגמים המותאמים",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "גילוי מודלים נכשל {time}",
     "skippingExistingModels": "מדלג על {count} דגמים קיימים",
     "autoSync": "סנכרון אוטומטי",
     "autoSyncShort": "סנכרון",
@@ -6056,10 +6082,10 @@
     "apiFormatLabel": "תווית פורמט API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "אזור API: סין",
-    "apiRegionHint": "רמז לאזור API",
-    "apiRegionInternational": "אזור API: בינלאומי",
-    "apiRegionLabel": "תווית אזור API",
+    "apiRegionChina": "סין היבשתית",
+    "apiRegionHint": "בחר את אזור נקודת הקצה המשמש לגישה ל-API ולמעקב אחר המכסה.",
+    "apiRegionInternational": "בינלאומי",
+    "apiRegionLabel": "אזור API",
     "apikey": "מפתח API",
     "audio": "שמע",
     "audioProvidersHeading": "כותרת ספקי שמע",
@@ -6080,6 +6106,13 @@
     "claudeLowPriorityModeDescription": "כאשר החשבון הזה מגיע למגבלת השימוש שלו ל-5 שעות ו-Anthropic מציעה את המסלול בעדיפות הנמוכה יותר, OmniRoute מקבל אותו וממשיך לשלוח בקשות עם anthropic-usage-limit: slow עד לאיפוס חלון הזמן, במקום לצנן את החיבור. המגבלה השבועית עדיין חלה, וייתכן שהתגובות ימתינו לקיבולת פנויה.",
     "claudeAutoLimitResetLabel": "איפוס אוטומטי של מגבלת ההפעלה (פעם בשבוע)",
     "claudeAutoLimitResetDescription": "כאשר החשבון הזה מגיע למגבלת השימוש שלו ל-5 שעות ואיפוס מגבלת ההפעלה זמין, OmniRoute מממש אותו אוטומטית ומנסה שוב במהירות מלאה. הפעולה מנצלת את האיפוס השבועי החד-פעמי של החשבון ועדיין נספרת במסגרת המגבלה השבועית.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "דלג על תקופת הצינון הזמנית כדי שחיבור זה יישאר זמין גם לאחר שגיאות הניתנות לשחזור (מצבים סופיים כמו חסום/פג תוקף עדיין חלים).",
     "disableCoolingLabel": "השבת תקופת צינון עבור חיבור זה",
     "bulkPasteAdded": "{count, plural, one {נוסף מפתח אחד} other {נוספו # מפתחות}}",
@@ -6533,6 +6566,7 @@
       "monsterapi": "קבל מפתח API ב-monsterapi.ai",
       "moonshot": "חבר את Moonshot AI באמצעות מפתח API.",
       "morph": "מסלול חינמי: 250K קרדיטים/חודש, $0",
+      "apmix": "חבר את Apmix עם מפתח API מ־apmix.ai/dashboard — מינוי אחד, הרבה מודלים.",
       "nanogpt": "חבר את NanoGPT באמצעות מפתח API.",
       "nebius": "קרדיט ניסיון של כ-$1 בהרשמה לבדיקת ה-API",
       "nlpcloud": "NLP Cloud משתמשת ב-API צ'אטבוט קנייני במקום ב-chat/completions של OpenAI. OmniRoute מתאימה הודעות OpenAI ל-input/context/history וחושפת קטלוג מקומי של מודלי צ'אטבוט נתמכים.",
@@ -6621,7 +6655,7 @@
       "claude": "חבר את Claude Code באמצעות תהליך ה-OAuth הקיים.",
       "cline": "חבר את Cline באמצעות תהליך ה-OAuth הקיים.",
       "cursor": "חבר את Cursor IDE באמצעות תהליך ה-OAuth הקיים.",
-      "cursor-api": "יש לחבר את Cursor באמצעות מפתח API של משתמש (crsr_...) מ-cursor.com/dashboard/api; אין צורך בהפעלת סשן IDE.",
+      "cursor-api": "חברו את Cursor באמצעות מפתח API של משתמש (crsr_... או grok_...) מ-cursor.com/dashboard/api; אין צורך בסשן IDE.",
       "github": "חבר את GitHub Copilot באמצעות תהליך ה-OAuth הקיים.",
       "gitlab-duo": "יישום OAuth עם הרשאות (scopes) של ai_features + read_user. הגדר את GITLAB_DUO_OAUTH_CLIENT_ID ואופציונלית את GITLAB_DUO_OAUTH_CLIENT_SECRET במופע OmniRoute זה.",
       "kilocode": "חבר את Kilo Code באמצעות תהליך ה-OAuth הקיים.",
@@ -6629,8 +6663,7 @@
       "kiro": "מסלול חינמי: 50 קרדיטים לחודש (~25K–100K טוקנים). ⚠️ תנאי השימוש של Kiro אוסרים על שימוש בפרוקסי/harness של צד שלישי.",
       "codex": "חבר את OpenAI Codex באמצעות תהליך ה-OAuth הקיים.",
       "qwen": "חבר את Qwen Code באמצעות תהליך ה-OAuth הקיים.",
-      "github-models": "צור GitHub PAT עם הרשאת 'models: read' ב-github.com/settings/tokens",
-      "apmix": "חבר את Apmix עם מפתח API מ־apmix.ai/dashboard — מינוי אחד, הרבה מודלים."
+      "github-models": "צור GitHub PAT עם הרשאת 'models: read' ב-github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} מקבל מזהי מודל מקוריים של ספק. ייבא מ /models או הוסף מזהים מותאמים אישית לניתוב.",
     "bedrockModelsDescription": "הדגמים של Amazon Bedrock נמצאים לפי אזור AWS. ייבא מ-/models או הוסף מזהי דגמי Bedrock המופעלים באזור הנבחר.",
@@ -6802,14 +6835,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "הגדרות",
@@ -7105,16 +7131,6 @@
     "settingsSidebarDesc": "בחרו אילו פריטים יוצגו בסרגל הצד. האפשרות 'כלים חיוניים' משאירה את הכלים המתקדמים ניתנים לחיפוש.",
     "hideHealthLogs": "הסתר יומני בדיקת בריאות",
     "hideHealthLogsDesc": "כאשר מופעל, דחק הודעות [HealthCheck] במסוף השרת",
-    "themeAccent": "צבע ערכת נושא",
-    "themeAccentDesc": "בחר צבע מוכן מראש או צור ערכת נושא משלך עם צבע אחד",
-    "themeCreate": "צור ערכת נושא",
-    "themeCustom": "ערכת נושא מותאמת אישית",
-    "themeBlue": "כחול",
-    "themeRed": "אדום",
-    "themeGreen": "ירוק",
-    "themeViolet": "סגול",
-    "themeOrange": "כתום",
-    "themeCyan": "ציאן",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "התאמה אישית של שם היישום והלוגו",
     "appName": "שם היישום",
@@ -7255,7 +7271,7 @@
       "nextSwitchNow": "עכשיו",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7282,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "נתיב קובץ הבינארי של הליבה",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "אופציונלי: מאמת את הקובץ שנוצר מול קובץ הבינארי של הליבה לפני החלפת הקובץ שאומץ. השאר ריק כדי להמשיך לכתוב לידו. התיקייה נוצרת אם אינה קיימת."
+      "coreBinaryPathHelp": "אופציונלי: מאמת את הקובץ שנוצר מול קובץ הבינארי של הליבה לפני החלפת הקובץ שאומץ. השאר ריק כדי להמשיך לכתוב לידו. התיקייה נוצרת אם אינה קיימת.",
+      "urlFeedlessHint": "השאירו ריק למנוי של בורר בלבד: הגדירו כתובת URL של בקרה למטה, לא יאובק, ירענן או ייקשר שום פיד."
     },
     "bulkHealthcheck": "בדיקת תקינות מרוכזת",
     "bulkHealthcheckDesc": "בדיקת כל שרתי ה-proxy שהוגדרו מול כתובת URL יעד כדי לגלות אילו מהם פועלים.",
@@ -7707,6 +7724,7 @@
     "configured": "מוגדר",
     "none": "ללא",
     "modelOverrideValuePlaceholder": "ערך מספרי",
+    "modelOverrideKey": "מפתח דריסה",
     "modelOverrideReasoningEffortsPlaceholder": "ערכים באנגלית המופרדים בפסיקים, למשל low, medium, high",
     "addKeyValue": "הוסף מפתח-ערך",
     "noModelOverrides": "לא הוגדרו דריסות עבור מודל זה.",
@@ -7755,7 +7773,6 @@
     "customPricingNote": "אתה יכול לעקוף את תמחור ברירת המחדל עבור דגמים ספציפיים. עקיפות מותאמות אישית מקבלות עדיפות על פני תמחור שזוהה אוטומטית.",
     "editPricing": "ערוך תמחור",
     "viewFullDetails": "צפה בפרטים המלאים",
-    "themeCoral": "אלמוג",
     "adaptiveVolumeRouting": "ניתוב מסתגל לפי נפח",
     "adaptiveVolumeRoutingDesc": "התאמה דינמית של מספר החיבורים בהתאם לנפח המטען ולעומס התפוקה.",
     "lkgpToggleTitle": "הספק האחרון שידוע כתקין (LKGP)",
@@ -7850,6 +7867,8 @@
     "compressionDesc": "צמצום השימוש בטוקנים באמצעות דחיסת הנחיות לפני שליחתן לספקים",
     "autoCombosTitle": "שילובים אוטומטיים",
     "autoCombosDesc": "אפשר למפתח הזה להשתמש בשילובי auto/* המובנים, שבוחרים מודל באופן אוטומטי מכל ספק מוגדר",
+    "ccDiscoveryAliasesTitle": "כינויי הגילוי של Claude Code",
+    "ccDiscoveryAliasesDesc": "פרסם שיקופי תאימות מסוג claude/... עבור מודלים ושילובים שלמפתח זה כבר יש גישה אליהם",
     "compressionGuidanceFullGuideLink": "מדריך דחיסה מלא",
     "compressionGuidanceShow": "פרטים",
     "compressionGuidanceHide": "הסתר פרטים",
@@ -9035,7 +9054,8 @@
     "tomlTestPassed": "עבר",
     "tomlTestFailed": "נכשל",
     "tomlImportError": "לא ניתן היה לעבד את קובץ ה-RTK TOML.",
-    "tomlFileReadError": "לא ניתן היה לקרוא את קובץ ה-TOML שנבחר."
+    "tomlFileReadError": "לא ניתן היה לקרוא את קובץ ה-TOML שנבחר.",
+    "viewMode": "מצב תצוגה"
   },
   "compressionEngineConfig": {
     "loading": "טוען…",
@@ -9257,7 +9277,8 @@
     "languagePacksList": "חבילות שפה: {packs}",
     "dragToReorder": "גרור כדי לשנות את סדר השלבים",
     "engine": "מנוע",
-    "intensity": "עוצמה"
+    "intensity": "עוצמה",
+    "compressionOverride": "דריסת דחיסה"
   },
   "compressionStudio": {
     "noRun": "אין הרצת דחיסה זמינה.",
@@ -9317,7 +9338,8 @@
     "encoderWinner": "מנצח: {winner}",
     "encoder": "מקודד",
     "bytes": "בייטים",
-    "tokensCl100k": "טוקנים (cl100k)"
+    "tokensCl100k": "טוקנים (cl100k)",
+    "studioViews": "תצוגות Studio"
   },
   "omniglyph": {
     "preview": "תצוגה מקדימה",
@@ -9523,7 +9545,9 @@
     "tooltipMinLength": "הודעות קצרות מזה אינן דחוסות. נמוך יותר = יותר דחיסה.",
     "tooltipMinSavings": "דחוס רק אם זה חוסך לפחות כל כך הרבה אסימונים.",
     "ultraSettings": "הגדרות אולטרה",
-    "ultraSettingsDesc": "דחיסה סמנטית המופעלת על ידי SLM"
+    "ultraSettingsDesc": "דחיסה סמנטית המופעלת על ידי SLM",
+    "defaultLanguage": "שפת ברירת המחדל",
+    "viewMode": "מצב תצוגה"
   },
   "translator": {
     "title": "מתרגם",
@@ -9835,6 +9859,9 @@
     "streamTransformFailed": "המרת הזרם נכשלה"
   },
   "usage": {
+    "healthExtraUsageBypass": "המכסה נוצלה; שימוש נוסף מותר, ולכן השירות נמשך.",
+    "healthPaidCreditsBypass": "המכסה נוצלה; יתרת קרדיטים בתשלום מאפשרת את המשך השירות.",
+    "healthFilteringBypass": "המכסה נוצלה; סינון המכסות המקומי כבוי, ולכן השירות נמשך.",
     "title": "שימוש",
     "grokExtraUsageCredits": "קרדיטים נוספים לשימוש",
     "grokAutoTopUp": "טעינה אוטומטית",
@@ -9998,6 +10025,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "מגבלות ספקים",
     "noProviders": "אין ספקים מחוברים",
+    "quotaAuthRequired": "נדרש אימות - יש להתחבר ללוח הבקרה",
+    "quotaAuthRequiredHint": "לא ניתן היה לטעון את חיבורי הספקים מכיוון שההפעלה של לוח הבקרה חסרה או שפג תוקפה. יש להתחבר ולרענן כדי לראות את מגבלות המכסה שלכם.",
     "connectProvidersForQuota": "התחבר לספקים עם OAuth כדי לעקוב אחר מגבלות מכסת ה-API והשימוש שלך.",
     "accountsCount": "{count, plural, one {# חשבון} other {# חשבונות}}",
     "filteredFromCount": "(מסונן מ-{count})",
@@ -10047,9 +10076,6 @@
     "tierLite": "קל",
     "tierUnknown": "לא ידוע",
     "statTotal": "סך הכל",
-    "statCritical": "קריטי",
-    "statAlert": "התראה",
-    "statHealthy": "תקין",
     "filterPurchaseTypeLabel": "סוג",
     "filterTierLabel": "רמה",
     "purchaseAll": "הכל",
@@ -10288,10 +10314,64 @@
     "lastRefreshed": "רענון אחרון",
     "providerQuota": "מכסת ספק",
     "providerQuotaHomeHint": "סטטוס בזמן אמת בכל החשבונות המחוברים",
+    "claudeResetCreditDefaultTitle": "איפוס מגבלת Claude",
+    "confirmRedeemClaudeResetCredit": "מימוש מאפס מיידית את מגבלות השימוש הזכאיות של Claude ומנצל קרדיט זה לצמיתות.",
+    "claudeResetCreditsModalTitle": "קרדיטים לאיפוס Claude",
+    "claudeResetCreditsModalExplainer": "קרדיטים זמינים לאיפוס Claude ואיפוסי סשן שבועיים עבור חשבון זה.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "מבוסס על תצפיות אחרונות, לא בדיקה חיה. בחרו חשבון לפרטים.",
+    "healthRecovery": "מועד התאוששות צפוי",
+    "healthAvailable": "זמין",
+    "healthRestricted": "מוגבל חלקית",
+    "healthUnavailable": "לא זמין",
+    "healthPeakHourProtection": "הגנה בשעות עומס",
+    "healthCooldown": "זמן המתנה",
+    "healthQuotaExhausted": "המכסה נוצלה",
+    "healthOverview": "סקירה כללית",
+    "layoutFull": "מלא",
+    "layoutCompact": "קומפקטי",
+    "healthQuotaError": "קריאת המכסה נכשלה",
+    "healthNoRuntime": "מצב הפעולה אינו זמין",
+    "healthPreviousSnapshot": "הרענון האחרון נכשל; התוצאה הקודמת מוצגת",
+    "healthPreviousFailure": "הבקשה האחרונה נכשלה; זמן ההמתנה הסתיים",
+    "healthAwaitingSync": "מועד האיפוס חלף; ממתין לסנכרון",
+    "healthVerdictUnavailable": "תוצאת בדיקת הזמינות אינה זמינה; מוצגות רק רמות המכסה",
+    "healthSummaryFailed": "קריאת סיכום הפעולה נכשלה; ייתכן שחסר מידע על נעילות מודלים",
+    "healthRuntimeObserved": "מצב הפעולה עודכן {time}",
+    "healthQuotaObserved": "המכסה נצפתה {time}",
+    "healthOldestQuota": "תמונת המכסה הישנה ביותר: {time}",
+    "healthRecoveryUnknown": "מועד ההתאוששות אינו ידוע",
+    "healthDetailsHint": "לחצו להצגת פרטים ופעולות",
+    "healthFiveHour": "5 שעות",
+    "healthOverall": "כולל",
+    "healthAction": "נדרשת פעולה",
+    "healthTitle": "זמינות חשבונות",
+    "healthDrag": "גרירה לשינוי סדר הספקים",
+    "healthDragPosition": "{provider}, {count, plural, one {מיקום {position, number} מתוך #} two {מיקום {position, number} מתוך #} other {מיקום {position, number} מתוך #}}",
+    "healthResetOrder": "שחזור סדר ברירת המחדל",
+    "healthPool": "מאגר {name}",
+    "healthOtherPool": "אותו חשבון · {pool}: {status} (נותרו {remaining})",
+    "healthIncluded": "{count, plural, one {כולל חשבון # מוגבל חלקית} two {כולל # חשבונות מוגבלים חלקית} other {כולל # חשבונות מוגבלים חלקית}}",
+    "healthBannerUnavailable": "{count, plural, one {חשבון # אינו זמין זמנית} two {# חשבונות אינם זמינים זמנית} other {# חשבונות אינם זמינים זמנית}}",
+    "healthBannerAvailable": "{count, plural, one {חשבון # זמין} two {שני החשבונות זמינים (#)} other {כל # החשבונות זמינים}}",
+    "healthLegendHide": "הסתרת המקרא",
+    "healthLegendShow": "הצגת המקרא",
+    "healthLegendOk": "מלא = מכסה שנותרה; שקוף למחצה = נוצל.",
+    "healthLegendCooldown": "מכסת {window} מוצתה. מלא = המתנה שחלפה; שקוף למחצה = המתנה שנותרה.",
+    "healthLegendAction": "ההרשאה פגה או שהחשבון נחסם; המתנה לא תפתור זאת.",
+    "healthLegendPartial": "עדיין שמיש. קצה צהוב = מודל או מאגר מוגבל.",
+    "healthWaited": "המתנה שחלפה: {percent}",
+    "healthWait": "עוד {duration} (חזרה ב־{time})",
+    "healthFastest": "החזרה הקרובה בעוד {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} זמין} two {# / {active, number} זמינים} other {# / {active, number} זמינים}}",
+    "healthCd5": "5 שעות · זמן המתנה",
+    "healthCdw": "שבועי · זמן המתנה",
+    "healthRecentSuccessBypass": "הניתוב מאפשר שימוש בחשבון זה משום שבקשה הצליחה לאחרונה.",
+    "healthPurchasedBalanceBypass": "יתרה שנרכשה מאפשרת להמשיך לאחר ניצול המכסה הכלולה.",
+    "healthCutoffAtRequest": "ספי המכסה בזמן אמת נבדקים בעת ניתוב בקשה."
   },
   "modals": {
     "waitingAuth": "ממתין לאישור",
@@ -11078,7 +11158,8 @@
       "message": "הודעה",
       "error": "שגיאה",
       "completion": "השלמה"
-    }
+    },
+    "statusFilter": "סטטוס"
   },
   "templateNames": {
     "simple-chat": "צ'אט פשוט",
@@ -11259,7 +11340,8 @@
     "minutesAgo": "לפני {minutes} דק'",
     "hoursAgo": "לפני {hours} שע'",
     "daysAgo": "לפני {days} ימים",
-    "entries": "רשומות"
+    "entries": "רשומות",
+    "viewSwitcherAria": "תצוגת מטמון"
   },
   "proxyConfigModal": {
     "levelGlobal": "גלובלי",
@@ -11447,6 +11529,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "פעולות נוספות",
     "test": "בדיקה",
     "edit": "עריכה",
     "delete": "מחיקה",
@@ -11526,7 +11609,7 @@
     "bulkImportNoValidEntries": "לא נמצאו ערכים חוקיים. בדוק את הפורמט ונסה שוב.",
     "bulkImportSuccess": "הייבוא הושלם: {created} נוצר, {updated} עודכן, {failed} נכשל",
     "bulkImportErrorLine": "שורה {line}: {reason}",
-    "bulkImportMaxExceeded": "מקסימום 100 פרוקסי לכל ייבוא",
+    "bulkImportMaxExceeded": "מקסימום {max} פרוקסי לכל ייבוא",
     "bulkImportPreview": "תצוגה מקדימה",
     "clearAssignment": "(הקצאה ברורה)",
     "bulkProxyAssignment": "הקצאת פרוקסי בכמות גדולה",
@@ -11587,6 +11670,7 @@
     "poolSetAsideKindIpQuota429": "הגבלת קצב לפי IP ‏(429)",
     "poolSetAsideKindSlow": "תגובות איטיות",
     "poolSetAsideKindGeoBlocked": "אזור חסום (403/451)",
+    "poolSetAsideKindOperatorReported": "תקלה שדווחה על ידי מפעיל",
     "poolSetAsideUntil": "חוזר לרוטציה {endsAt}",
     "poolSetAsideRepeat": "הושם בצד {count, plural, one {# פעם} other {# פעמים}}",
     "poolUnknownAddress": "כתובת לא ידועה",
@@ -11696,7 +11780,6 @@
     "exportCodeTitle": "ייצוא קוד",
     "exportShort": "ייצוא",
     "noStateToExport": "אין מצב זמין של סביבת הניסוי לייצוא.",
-    "closeExportModal": "סגור מודאל ייצוא",
     "close": "סגור",
     "exportRealKeyWarning": "אזהרת אבטחה: הייצוא נחסם — זוהה מפתח API אמיתי בפלט. אנא אפס את מפתח ה-API שלך ונסה שוב.",
     "placeholderHintPrefix": "החלף",
@@ -11809,7 +11892,8 @@
       "nextButton": "הבא",
       "runButton": "הפעל",
       "promptPlaceholder": "הזן את ההודעה שלך… (Enter לשליחה, Shift+Enter לשורה חדשה)"
-    }
+    },
+    "playgroundTabs": "מצבי Playground"
   },
   "miniPlayground": {
     "endpoint": "נקודת קצה",
@@ -11880,7 +11964,8 @@
     "assistant": "עוזר",
     "errorLabel": "שגיאה",
     "requestFailed": "הבקשה נכשלה",
-    "stop": "עצור"
+    "stop": "עצור",
+    "messageInputAria": "הודעה"
   },
   "requestLogger": {
     "recording": "מקליט",
@@ -12067,8 +12152,18 @@
       "resilienceRotations": "{count} החלפות חשבון",
       "resilienceRetried": "תור ריק נוסה שוב",
       "resilienceContinued": "חודש באמצע הזרם",
-      "resilienceRecovered": "שוחזר באמצעות פעולת חוסן"
-    }
+      "resilienceRecovered": "שוחזר באמצעות פעולת חוסן",
+      "conversationContext": "הקשר השיחה",
+      "goToBottom": "מעבר לתחתית",
+      "liveRefreshOn": "רענון בזמן אמת: פעיל",
+      "liveRefreshOff": "רענון בזמן אמת: כבוי",
+      "liveRefresh": "רענון בזמן אמת",
+      "continuesFromParent": "ממשיך מהאב",
+      "continuesFrom": "ממשיך מ־{id}",
+      "viewConversation": "הצגת השיחה",
+      "openConversation": "פתיחת השיחה {id}"
+    },
+    "tableLabel": "יומני בקשות"
   },
   "proxyLogger": {
     "filterAll": "הכול",
@@ -12113,7 +12208,9 @@
     "colServedBy": "מוגש על ידי",
     "filterTraffic": "תנועה",
     "filterTests": "בדיקות",
-    "filterSource": "מקור"
+    "filterSource": "מקור",
+    "tableLabel": "יומני פרוקסי",
+    "sortLogs": "מיון יומנים"
   },
   "endpointOptions": {
     "speech": "דיבור",
@@ -12198,7 +12295,8 @@
     "statusExhausted": "אזלה המכסה",
     "statusAlerting": "התראה פעילה",
     "statusError": "שגיאה",
-    "moreSuffix": "+{count} נוספים"
+    "moreSuffix": "+{count} נוספים",
+    "feedFilterLabel": "סינון אירועים"
   },
   "quotaShare": {
     "weightPercent": "משקל %",
@@ -12365,7 +12463,10 @@
     "ungroupedTitle": "ללא קבוצה",
     "ungroupedHint": "בריכות אלו אינן משויכות לקבוצה מוכרת. ערוך בריכה כדי להעביר אותה לקבוצה אמיתית.",
     "removeFailed": "לא ניתן להסיר את המאגר הזה.",
-    "dismiss": "סגירה"
+    "dismiss": "סגירה",
+    "allocationsHeading": "הקצאות",
+    "wizardRemoveDimension": "הסרת ממד",
+    "wizardRemoveKey": "הסרת מפתח"
   },
   "plugins": {
     "title": "תוספים",
@@ -12523,7 +12624,8 @@
       "settingsUpdateFailed": "עדכון ההגדרות נכשל",
       "serviceRevealApiKey": "{actor} חשף/ה מפתח API עבור {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "סגירת השגיאה"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12758,21 @@
       "goNow": "עבור עכשיו",
       "message": "ה-MITM Proxy נמצא כעת תחת AgentBridge.",
       "title": "דף זה הועבר"
-    }
+    },
+    "dnsOn": "DNS מופעל",
+    "dnsOff": "DNS מושבת",
+    "showServerSettings": "הצגת הגדרות השרת",
+    "hideServerSettings": "הסתרת הגדרות השרת",
+    "upstreamCaTesting": "מתבצעת בדיקה…",
+    "removeMapping": "הסרת מיפוי",
+    "mappingSourcePlaceholder": "לדוגמה, gemini-3.6-flash-medium, או * עבור כל המודלים שאינם ממופים",
+    "mappingWildcardHint": "יש להשתמש ב־* כמקור כדי לנתב דרך OmniRoute כל מודל שאין לו מיפוי מפורש אל היעד שנבחר. התאמות מקור מדויקות תמיד מקבלות עדיפות על *.",
+    "wizardDetectingModels": "מתבצע זיהוי של מודלים מהתעבורה שיורטה...",
+    "wizardDetectedModels": "{count, plural, one {נמצא מודל אחד} other {נמצאו # מודלים}} בתעבורה שיורטה. יש לבחור את המודלים שברצונך להוסיף:",
+    "wizardSelectedModels": "{count, plural, one {נבחר מודל אחד} other {נבחרו # מודלים}}. במסך הבא יהיה אפשר למפות אותם למודלים של OmniRoute.",
+    "wizardAddModels": "{count, plural, one {הוספת מודל אחד} other {הוספת # מודלים}}",
+    "wizardNoModelsDetected": "עדיין לא זוהו מודלים. יש להשתמש ב־{agent} כדי לבצע בקשה, ולאחר מכן להפעיל שוב את האשף הזה כדי לזהות אוטומטית מודלים מהתעבורה.",
+    "wizardNoModelsHint": "לחלופין, אפשר לסגור את האשף הזה ולהוסיף מיפויים באופן ידני בכרטיס הסוכן."
   },
   "providerStats": {
     "unknownError": "שגיאה לא ידועה",
@@ -12686,7 +12802,11 @@
     "avgTtft": "TTFT ממוצע",
     "avgTotal": "סה\"כ ממוצע",
     "requestTelemetry": "טלמטריית בקשות",
-    "requestTelemetryDescription": "פילוח צינור עיבוד בן 7 שלבים (5 הדקות האחרונות)"
+    "requestTelemetryDescription": "פילוח צינור עיבוד בן 7 שלבים (5 הדקות האחרונות)",
+    "title": "סטטיסטיקות ספקים",
+    "description": "תעבורה, זמני השהיה ושיעורי הצלחה לפי ספק ולפי מודל",
+    "combo": "משולב",
+    "toggleModels": "הצגת מודלים עבור {provider}"
   },
   "relay": {
     "title": "פרוקסי Relay ללא שרת",
@@ -12847,7 +12967,18 @@
     "noRequestBody": "אין גוף בקשה.",
     "noResponseBody": "אין גוף תגובה.",
     "formatted": "מעוצב",
-    "raw": "גולמי"
+    "raw": "גולמי",
+    "requestCount": "{count, plural, one {בקשה אחת} other {# בקשות}}",
+    "expandList": "הרחבת הרשימה",
+    "collapseList": "כיווץ הרשימה",
+    "snippetLanguage": "שפת קטע הקוד",
+    "headersTable": "כותרות",
+    "showSecrets": "הצגת סודות",
+    "maskSecrets": "הסתרת סודות",
+    "llmNotAvailable": "מטא־נתוני LLM אינם זמינים עבור בקשה זו.",
+    "llmStreamYes": "כן (SSE)",
+    "llmStreamNo": "לא",
+    "llmTotalTokens": "סה״כ: {count} טוקנים"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13437,8 @@
     "colReliabilityHelp": "שיעור הקריאות שספק זה אכן השיב להן במהלך 24 השעות האחרונות. מקף מציין שהוא טיפל במעט מדי תעבורה מכדי לקבוע שיעור.",
     "reliabilitySample": "{successes} מתוך {requests} קריאות הצליחו במהלך {hours} השעות האחרונות",
     "reliabilityTooFew": "רק {requests} קריאות במהלך {hours} השעות האחרונות — מעט מדי מכדי לקבוע שיעור",
-    "reliabilityNoTraffic": "לא תועדו קריאות במהלך 24 השעות האחרונות"
+    "reliabilityNoTraffic": "לא תועדו קריאות במהלך 24 השעות האחרונות",
+    "categoryFilter": "קטגוריית משימה"
   },
   "discovery": {
     "title": "גילוי ספקים",
@@ -13331,7 +13463,11 @@
     "method": "שיטה",
     "auth": "אימות",
     "feasibility": "היתכנות",
-    "models": "מודלים"
+    "models": "מודלים",
+    "provider": "ספק",
+    "status": "סטטוס",
+    "endpoint": "נקודת קצה",
+    "actions": "פעולות"
   },
   "noAuthProvider": {
     "title": "לא נדרש אימות",
@@ -13380,7 +13516,8 @@
     "ownProxy": "פרוקסי משלך",
     "freeTierPause": "הדגם {model} הושהה (429), יחזור ב-{time}",
     "freeTierPauseProvider": "הושהה (429), יחזור ב-{time}",
-    "freeTierPauseNote": "השהיה בתוך התהליך במופע זה"
+    "freeTierPauseNote": "השהיה בתוך התהליך במופע זה",
+    "proxyType": "סוג Proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13690,10 @@
         "description": "הישג נסתר ממתין...",
         "criteria": "השלם את ההישג הנסתר כדי לחשוף תג זה."
       }
-    }
+    },
+    "leaderboardTitle": "טבלת מובילים",
+    "leaderboardDescription": "דירוגים והישגים בכל מפתחות ה-API שלך",
+    "badgeLocked": "נעול"
   },
   "featureFlags": {
     "title": "דגלי תכונות",
@@ -13794,6 +13934,7 @@
     "latency": "השהיה",
     "quota": "מכסה",
     "rangeWindow": "חלון {range}",
+    "timeRange": "טווח זמן",
     "runtimeHealthBlend": "שילוב זמן ריצה/תקינות",
     "averageResponseTime": "זמן תגובה ממוצע",
     "worstQuota": "המכסה הגרועה ביותר",
@@ -13995,7 +14136,11 @@
     "learnMore": "מידע נוסף",
     "changelogLoadFailed": "לא ניתן לטעון את יומן השינויים. אנא נסה שוב מאוחר יותר.",
     "retry": "נסה שוב",
-    "viewFullHistory": "הצג היסטוריה מלאה ב-GitHub"
+    "viewFullHistory": "הצג היסטוריה מלאה ב-GitHub",
+    "title": "חדשות ויומן שינויים",
+    "description": "הכרזות מצוות OmniRoute והערות המהדורה העדכניות ביותר",
+    "viewLabel": "הצגה",
+    "loadingNews": "ההכרזות נטענות..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14691,9 @@
       "circuitBreakerState": "מצב מפסק מעגל ספק",
       "lastUpdate": "עדכון אחרון: {timestamp}",
       "uptimeMinutes": "{minutes}ד",
-      "uptimeHoursMinutes": "{hours}ש {minutes}ד"
+      "uptimeHoursMinutes": "{hours}ש {minutes}ד",
+      "breakerClosed": "סגור",
+      "breakerNotClosed": "פתוח או פתוח למחצה"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14768,9 @@
         "primaryAction": "פרטי תחזוקה",
         "secondaryAction": "סטטוס מערכת"
       }
+    },
+    "miniapp": {
+      "askAnything": "אפשר לשאול הכול…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14961,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} מוצגים / {total} בסך הכול",
+    "modeLabel": "מצב תצוגה",
+    "jumpToNow": "מעבר לזמן הנוכחי, קו NOW מתאפס למיקום {position}%",
+    "laneReuse": "שימוש חוזר בשורה",
+    "laneReuseLabel": "חלון שימוש חוזר בשורה (דקות)",
+    "laneReuseHint": "בקשות עם אותו מזהה שיחה נשארות באותה שורה בציר הזמן, כל עוד הפער ביניהן קטן ממספר הדקות הזה.",
+    "laneReuseUnit": "דק׳",
+    "autoRefresh": "רענון אוטומטי",
+    "autoRefreshLabel": "מרווח רענון אוטומטי (שניות)",
+    "autoRefreshHint": "התדירות שבה ציר הזמן מאחזר מחדש את רשימת הבקשות מהשרת.",
+    "autoRefreshUnit": "שנ׳",
+    "zoomOut": "הקטנת תצוגה",
+    "zoomIn": "הגדלת תצוגה"
   },
   "metadata": {
     "compressionTitle": "דחיסה",
@@ -15015,6 +15178,83 @@
     "dismissAriaLabel": "סגירה"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "השבתת היצירה של וריאציות של רמת החשיבה (למשל -low, -medium, -high) בקטלוג /v1/models.",
+  "teamCosts": {
+    "title": "עלויות צוות",
+    "subtitle": "נהלו תקציבים רכים משותפים והערכות עלות מהקטלוג.",
+    "refresh": "רענון",
+    "create": "יצירת צוות",
+    "edit": "עריכת צוות",
+    "archive": "העברה לארכיון",
+    "selectTeam": "צוותים",
+    "searchTeams": "חיפוש צוותים",
+    "statusFilter": "סטטוס הצוות",
+    "active": "פעיל",
+    "archived": "בארכיון · לקריאה בלבד",
+    "allTeams": "כל הצוותים",
+    "noTeams": "אין צוותים תואמים.",
+    "selectHint": "צרו או בחרו צוות כדי לראות עלויות.",
+    "loading": "טוען עלויות צוות…",
+    "budgetTitle": "התקציב הרך הנוכחי",
+    "budgetSubtitle": "שימוש מוצלח שנרשם · חלון מתגלגל · בלתי תלוי בתאריכי הדוח",
+    "archivedBudget": "בארכיון: אכיפת התקציב אינה פעילה. דוחות היסטוריים נשארים זמינים.",
+    "unlimited": "ללא הגבלה — לא הוגדר תקציב רך משותף.",
+    "budgetUnavailable": "סטטוס התקציב אינו זמין. רעננו כדי לנסות שוב.",
+    "used": "שימוש מוצלח",
+    "maximum": "תקרת התקציב",
+    "remaining": "יתרה ידועה",
+    "resets": "מתאפס ב",
+    "unpricedBudget": "לחלק מהשימוש המוצלח מחיר לא ידוע. הסכום הידוע חלקי; אכיפת התקציב רואה בחלון זה חריגה.",
+    "overBudget": "התקציב הושג או נחרג · חריגה של {amount}",
+    "reportTitle": "דוח שימוש",
+    "reportSubtitle": "כל הניסיונות · הערכת קטלוג ב-USD, לא חשבונית · ימי UTC שלמים",
+    "reportPeriod": "תקופת הדוח",
+    "day1": "יום אחד",
+    "day7": "7 ימים",
+    "day30": "30 יום",
+    "allTime": "כל הזמן",
+    "reportSpend": "הוצאה משוערת בדוח",
+    "requests": "בקשות",
+    "assignedKeys": "מפתחות מוקצים",
+    "unpricedReport": "הדוח כולל מחירים לא ידועים. ההוצאה המשוערת חלקית.",
+    "breakdown": "עלות לפי מפתח API",
+    "noUsage": "אין שימוש בתקופת דוח זו.",
+    "keyName": "שם מפתח API",
+    "tokens": "אסימוני קלט + פלט",
+    "unnamedKey": "מפתח ללא שם או שנמחק",
+    "unpriced": "מחיר לא ידוע",
+    "members": "חברות",
+    "memberSubtitle": "שינוי חברות משאיר את ההוצאה ההיסטורית אצל הצוות המקורי.",
+    "searchKeys": "חיפוש מפתחות או בעלים נוכחיים",
+    "chooseKey": "בחרו מפתח API",
+    "unassigned": "לא מוקצה",
+    "ownership": "צוות החיוב הנוכחי: {team}",
+    "assign": "הקצאה",
+    "remove": "הסרה",
+    "noMembers": "אין חברים נוכחיים. שימוש היסטורי עדיין עשוי להיספר בתקציב.",
+    "assignedAt": "הוקצה ב-{date} (UTC)",
+    "name": "שם הצוות",
+    "description": "תיאור",
+    "enableBudget": "הפעלת תקציב רך משותף",
+    "amount": "סכום התקציב (USD)",
+    "duration": "חלון תקציב מתגלגל",
+    "cancel": "ביטול",
+    "save": "שמירה",
+    "confirm": "אישור",
+    "transferTitle": "אישור העברת מפתח",
+    "transferMessage": "להעביר מפתח זה מ-“{source}” אל “{destination}”? ההוצאה ההיסטורית נשארת אצל הצוות המקורי.",
+    "removeTitle": "הסרת הקצאת מפתח",
+    "removeMessage": "להסיר מפתח זה מ-“{team}”? ההוצאה ההיסטורית נשארת בצוות זה.",
+    "archiveTitle": "העברת הצוות לארכיון",
+    "archiveMessage": "להעביר את “{team}” לארכיון? כל הקישורים הנוכחיים נסגרים ואכיפת התקציב נפסקת. דוחות היסטוריים נשארים זמינים.",
+    "invalidName": "הזינו שם (1–200 תווים) ותיאור של עד 2,000 תווים.",
+    "invalidAmount": "הזינו סכום תקציב סופי הגדול מאפס.",
+    "unauthorized": "היכנסו ללוח הניהול כדי להמשיך.",
+    "forbidden": "אין לכם הרשאה לנהל צוותים. הקלט שלכם נשמר.",
+    "notFound": "הצוות או ההקצאה כבר אינם קיימים.",
+    "conflict": "ההקצאה או הצוות השתנו. רעננו ואשרו את הבעלות הנוכחית לפני ניסיון נוסף.",
+    "failed": "הבקשה נכשלה. הקלט שלכם נשמר; נסו שוב.",
+    "partialBudget": "חלק מהדליים היומיים שנשמרו חופפים לגבול החלון ואי אפשר לחלקם במדויק. ההוצאה המוצגת חלקית; המכסה הנותרת אינה זמינה. מדיניות התקציב הרך הקיימת לא השתנתה."
+  },
   "connectionTest": {
     "title": "הודעת בדיקה",
     "description": "שליחת בקשה אמיתית אחת דרך חשבון זה. פעולה זו משתמשת בכמות קטנה מהמכסה ועשויה להתחיל חלון שימוש, בהתאם לספק.",
@@ -15074,5 +15314,8 @@
     "importButton": "ייבוא",
     "importFailed": "הייבוא נכשל.",
     "importSuccess": "יובאו {connections} חשבונות ו-{nodes} צמתי ספק; דולגו {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "התחלה מהמיקום הנוכחי (דילוג על יומנים קיימים)"
   }
 }

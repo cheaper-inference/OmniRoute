@@ -1,5 +1,5 @@
 import test from "node:test";
-import { makeMcpStreamFetch } from "./helpers/mcpStreamMock.ts";
+import { makeMcpStreamFetch, type McpFetchCall } from "./helpers/mcpStreamMock.ts";
 import assert from "node:assert/strict";
 
 const SKILLS_DATA = [
@@ -130,7 +130,9 @@ test("runSkillsEnable usa JSON-RPC tools/call", async () => {
 
   globalThis.fetch = origFetch;
   assert.ok(calls.some((x) => String(x.url).includes("/api/mcp/stream")));
-  const callBody = JSON.parse(calls.find((x) => String(x.init?.body || "").includes("tools/call"))?.init?.body || "{}");
+  const callBody = JSON.parse(
+    calls.find((x) => String(x.init?.body || "").includes("tools/call"))?.init?.body || "{}"
+  );
   assert.equal(callBody.method, "tools/call");
   assert.equal(callBody.params.name, "omniroute_skills_enable");
   assert.equal(callBody.params.arguments.skillId, "sk_pdf");
@@ -154,7 +156,9 @@ test("runSkillsExecute usa JSON-RPC tools/call", async () => {
   );
 
   globalThis.fetch = origFetch;
-  const callBody = JSON.parse(calls.find((x) => String(x.init?.body || "").includes("tools/call"))?.init?.body || "{}");
+  const callBody = JSON.parse(
+    calls.find((x) => String(x.init?.body || "").includes("tools/call"))?.init?.body || "{}"
+  );
   assert.equal(callBody.method, "tools/call");
   assert.equal(callBody.params.name, "omniroute_skills_execute");
   assert.equal(callBody.params.arguments.skillId, "sk_pdf");
@@ -224,4 +228,25 @@ test("runMarketplaceInstall --yes envia POST sem confirmação", async () => {
   assert.equal(capturedBody.version, "latest");
   assert.equal(capturedBody.enable, true);
   assert.ok(out.includes("sk_pdf_installed"));
+});
+
+test("runSkillsEnable works against a sessionless MCP stream", async () => {
+  const calls: McpFetchCall[] = [];
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = makeMcpStreamFetch({
+    toolResult: { ok: true },
+    sessionMode: "stateless",
+    calls,
+  });
+
+  try {
+    const { runSkillsEnable } = await import("../../bin/cli/commands/skills.mjs");
+    const out = await captureStdout(() => runSkillsEnable("sk_pdf", {}, makeCmd()));
+    const toolCall = calls.find((c) => c.body?.method === "tools/call");
+    assert.equal(toolCall?.body?.params?.name, "omniroute_skills_enable");
+    assert.deepEqual(toolCall?.body?.params?.arguments, { skillId: "sk_pdf", enabled: true });
+    assert.match(out, /Enabled: sk_pdf/);
+  } finally {
+    globalThis.fetch = origFetch;
+  }
 });

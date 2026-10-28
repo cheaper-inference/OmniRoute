@@ -5,6 +5,7 @@
 // (GHSA-mghq-58h3-qcqj, GHSA-v7g9-7f55-5g46). Do NOT loosen that gate; this module only makes the
 // client surface the failure instead of silently rendering a blank section.
 import Link from "next/link";
+import { buttonVariants } from "@omniroute/ui-kit/button";
 
 export interface DatabaseSettingsFetchResult {
   data: unknown;
@@ -36,19 +37,14 @@ export async function fetchDatabaseSettingsData(): Promise<DatabaseSettingsFetch
 
 export function AuthRequiredBanner({ t }: { t: (key: string) => string }) {
   return (
-    <div
-      role="alert"
-      className="mb-4 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-5 py-4"
-    >
-      <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+    <div role="alert" className="mb-4 rounded-xl border border-warning/30 bg-warning-bg px-5 py-4">
+      <h2 className="text-sm font-semibold text-text-main">
         {t("databaseSettingsAuthRequiredTitle")}
       </h2>
-      <p className="mt-1 text-sm text-amber-900/80 dark:text-amber-200/80">
-        {t("databaseSettingsAuthRequiredBody")}
-      </p>
+      <p className="mt-1 text-sm text-text-muted">{t("databaseSettingsAuthRequiredBody")}</p>
       <Link
         href="/login"
-        className="mt-3 inline-flex items-center rounded-lg bg-amber-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400"
+        className={buttonVariants({ variant: "default", size: "sm", className: "mt-3" })}
       >
         {t("databaseSettingsAuthRequiredCta")}
       </Link>

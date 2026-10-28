@@ -1,0 +1,1 @@
+- **refactor(auth):** Extract model authorization decisions and matching into the domain layer while preserving API-key, publication, group, and cache behavior ([#17959](https://github.com/cheaper-inference/OmniRoute/pull/17959)) — thanks @MumuTW

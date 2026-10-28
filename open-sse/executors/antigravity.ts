@@ -1,4 +1,5 @@
 import crypto, { randomUUID } from "crypto";
+import { isAntigravityPreResponseTimeout } from "../services/antigravityTimeout.ts";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -603,8 +604,7 @@ export class AntigravityExecutor extends BaseExecutor {
       (status === HTTP_STATUS.RATE_LIMITED ||
         status === HTTP_STATUS.NOT_FOUND ||
         status === HTTP_STATUS.BAD_GATEWAY ||
-        status === HTTP_STATUS.SERVICE_UNAVAILABLE ||
-        status === HTTP_STATUS.GATEWAY_TIMEOUT) &&
+        status === HTTP_STATUS.SERVICE_UNAVAILABLE) &&
       urlIndex + 1 < this.getFallbackCount()
     );
   }
@@ -1253,6 +1253,7 @@ export class AntigravityExecutor extends BaseExecutor {
       try {
         result = await this.executeOnce(input, candidate, physicalSendCounter);
       } catch (error) {
+        if (isAntigravityPreResponseTimeout(error)) throw error;
         const outcome = handleAntigravityFallbackChainError(
           input,
           error,
@@ -1394,6 +1395,9 @@ export class AntigravityExecutor extends BaseExecutor {
         if (signal?.aborted || isAbortError(error)) {
           throw signal?.reason ?? error;
         }
+        // This deadline has already consumed its full header budget. Never
+        // spend it again on another host within the SAME provider account.
+        if (isAntigravityPreResponseTimeout(error)) throw error;
         lastError = error;
         // A fetch failure on a URL that still has a fallback is a retry, not a
         // failed request: the loop continues and the client gets the next

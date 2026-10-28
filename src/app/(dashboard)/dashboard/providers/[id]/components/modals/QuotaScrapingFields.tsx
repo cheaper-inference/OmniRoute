@@ -34,7 +34,7 @@ export default function QuotaScrapingFields({
 }: QuotaScrapingFieldsProps) {
   if (provider === "ollama-cloud") {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-surface/20 p-4">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
         <Input
           label={providerText(t, "ollamaCloudUsageCookieLabel", "Ollama Cloud usage cookie")}
           name="ollamaCloudUsageCookie"
@@ -59,7 +59,7 @@ export default function QuotaScrapingFields({
 
   if (getProviderConnectionFamilyIds("alibaba").includes(provider)) {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-surface/20 p-4">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
         <Input
           label={providerText(
             t,
@@ -108,7 +108,7 @@ export default function QuotaScrapingFields({
 
   if (QWEN_TOKEN_PLAN_PROVIDERS.has(provider ?? "")) {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-surface/20 p-4">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
         <Input
           label={providerText(t, "qwenCloudCookieLabel", "Qwen / Model Studio console cookie")}
           name="qwenCloudCookie"
@@ -153,7 +153,7 @@ export default function QuotaScrapingFields({
 
   if (VOLCENGINE_PLAN_PROVIDERS.has(provider ?? "")) {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-surface/20 p-4">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
         <Input
           label={providerText(t, "volcConsoleCookieLabel", "Volcano Engine console cookie")}
           name="volcConsoleCookie"
@@ -181,7 +181,7 @@ export default function QuotaScrapingFields({
 
   if (XIAOMI_MIMO_PROVIDERS.has(provider ?? "")) {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-surface/20 p-4">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
         <Input
           label={providerText(t, "xiaomiMimoConsoleCookieLabel", "Xiaomi MiMo console cookie")}
           name="xiaomiMimoConsoleCookie"

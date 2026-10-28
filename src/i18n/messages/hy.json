@@ -25,8 +25,10 @@
     "confirm": "Վստա՞հ եք",
     "refresh": "Թարմացնել",
     "close": "Փակել",
+    "dialogTitleFallback": "Երկխոսության պատուհան",
     "previousPage": "Նախորդ էջ",
     "nextPage": "Հաջորդ էջ",
+    "pagination": "Էջավորում",
     "capsLockOn": "Caps Lock-ը միացված է",
     "dismissNotification": "Փակել ծանուցումը",
     "toggleColumns": "Փոխարկել սյունակների ցուցադրումը",
@@ -182,6 +184,7 @@
     "combos": "Կոմբինացիաներ",
     "noModelsFound": "Մոդելներ չեն գտնվել",
     "clear": "Մաքրել",
+    "clearFilters": "Մաքրել զտիչները",
     "done": "Պատրաստ է",
     "selectAll": "Ընտրել բոլորը",
     "unselectAll": "Ապաընտրել բոլորը",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Օգտագործվում է {count, plural, one {# փաթեթի} other {# փաթեթների}} կողմից",
     "batchFilePreview": "Նախադիտում",
     "batchFilePreviewTruncated": "Ցուցադրվում են առաջին {shown} տողերը (ընդամենը՝ {total} տող)",
-    "batchFileDownloadFull": "Ներբեռնել ամբողջական ֆայլը"
+    "batchFileDownloadFull": "Ներբեռնել ամբողջական ֆայլը",
+    "tokensPageTitle": "Թոքեններ",
+    "tokensPageDescription": "Ուղարկեք թոքեններ API բանալիների միջև, տարածեք հրավերի կոդերը և միացրեք համայնքային սերվերները։",
+    "tokensServerUrlLabel": "Սերվերի URL"
   },
   "disabled": "Անջատված է",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Բյուջեն սպառած հարցումներն ուղղորդել արտակարգ անվճար պահուստային մատակարարին/մոդելին։",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Պրոքսի սերվերը կանգնեցվել է կամ վերագործարկվում է։",
     "expandSidebar": "Ընդարձակել կողագոտին",
     "collapseSidebar": "Ծալել կողագոտին",
-    "themes": "Թեմաներ",
-    "presetColors": "Տարածված գույներ",
     "createTheme": "Ստեղծել թեմա",
     "chooseColor": "Ընտրեք մեկ գույն",
-    "themeCoral": "Մարջանագույն",
-    "themeBlue": "Կապույտ",
-    "themeRed": "Կարմիր",
-    "themeGreen": "Կանաչ",
-    "themeViolet": "Մանուշակագույն",
-    "themeOrange": "Նարնջագույն",
-    "themeCyan": "Ցիանագույն",
     "cliToolsShort": "Գործիքներ",
     "cache": "Քեշ",
     "cacheShort": "Քեշ",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Թեմաների համակարգ",
     "whitelabelingDesc": "Սեփական բրենդավորման նկարագրություն",
     "switchThemes": "Փոխել թեմաները",
-    "themeAccentDesc": "Թեմայի շեշտադրող գույնի նկարագրություն",
     "uploadFavicon": "Վերբեռնել ֆավիկոն",
     "themeDark": "Մուգ թեմա",
     "customLogoDesc": "Հատուկ լոգոտիպի նկարագրություն",
     "sidebarVisibilityToggle": "Կողագոտու տեսանելիության փոխարկիչ",
-    "themeAccent": "Թեմայի շեշտադրող գույն",
     "resetFavicon": "Վերակայել ֆավիկոնը",
     "whitelabeling": "Սեփական բրենդավորում",
     "darkMode": "Մուգ ռեժիմ",
@@ -1122,10 +1117,8 @@
     "customLogo": "Հատուկ լոգոտիպ",
     "appearance": "Արտաքին տեսք",
     "themeSelectionAria": "Թեմայի ընտրության ARIA պիտակ",
-    "themeCreate": "Ստեղծել թեմա",
     "customFaviconDesc": "Հատուկ ֆավիկոնի նկարագրություն",
     "logoPreview": "Լոգոյի նախադիտում",
-    "themeCustom": "Հատուկ թեմա",
     "hideHealthLogsDesc": "Առողջության ստուգման մատյանները թաքցնելու նկարագրություն",
     "faviconPreview": "Ֆավիկոնի նախադիտում",
     "changelog": "Փոփոխությունների պատմություն",
@@ -1352,7 +1345,9 @@
       "open": "բացել",
       "close": "փակել"
     },
-    "noResults": "Արդյունքներ չկան"
+    "noResults": "Արդյունքներ չկան",
+    "costsTeams": "Թիմեր",
+    "costsTeamsSubtitle": "Թիմերի ծախսային կենտրոններ"
   },
   "webhooks": {
     "title": "Վեբհուկներ",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 կամ @channelname",
       "chatIdHint": "Զրույցի/ալիքի եզակի թվային նույնացուցիչը կամ հանրային օգտանունը։",
       "tutorial": "Ինչպես կարգավորել Telegram վեբհուկը․"
-    }
+    },
+    "copy": "Պատճենել",
+    "copied": "Պատճենված է։",
+    "expandDetails": "Ցուցադրել մանրամասները",
+    "collapseDetails": "Թաքցնել մանրամասները"
   },
   "compliance": {
     "auditTitle": "Աուդիտ",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Կանչեր (24 ժ)",
     "mcpMetricSuccessRate": "Հաջողության ցուցանիշ",
     "mcpMetricAvgDuration": "Միջին տևողություն",
-    "mcpMetricTopTool": "Ամենաշատ օգտագործվող գործիք"
-  },
-  "themesPage": {
-    "title": "Թեմաներ",
-    "description": "Ընտրեք պատրաստի թեմա կամ ստեղծեք ձերը՝ մեկ գույնով",
-    "presetColors": "Հանրաճանաչ գույներ",
-    "customTheme": "Անհատական թեմա",
-    "customThemeDesc": "Սեղմեք «Ստեղծել թեմա» և ընտրեք մեկ գույն",
-    "createTheme": "Ստեղծել թեմա",
-    "activePreset": "Ակտիվ թեմա"
+    "mcpMetricTopTool": "Ամենաշատ օգտագործվող գործիք",
+    "dismissError": "Փակել սխալի հաղորդագրությունը"
   },
   "header": {
     "logout": "Դուրս գալ",
     "quickNavigation": "Արագ նավարկում",
     "quickNavigationTitle": "Արագ նավարկում (⌘K / Ctrl+K)",
     "openQuickNavigation": "Բացել արագ նավարկումը",
+    "openMenu": "Բացել ընտրացանկը",
+    "products": "Keak-ի արտադրանքներ",
     "switchToLightMode": "Անցնել բաց ռեժիմի",
     "switchToDarkMode": "Անցնել մուգ ռեժիմի",
     "language": "Լեզու",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Anthropic-ի հետ համատեղելի",
     "media": "Մեդիա",
     "mediaDescription": "Ստեղծեք պատկերներ, տեսանյութեր և երաժշտություն",
-    "themes": "Թեմաներ",
-    "themesDescription": "Ընտրեք գունային թեմա կառավարման ամբողջ վահանակի համար",
     "costsDescription": "Հետևեք ծախսերին, վերլուծեք միտումները և կառավարեք ձեր AI բյուջեն բոլոր մատակարարների մասով",
     "cacheDescription": "Վերահսկեք մատակարարների հուշումների քեշի արդյունավետությունը և տեղային իմաստային պատասխանների վերօգտագործումը։",
     "limitsDescription": "Կարգավորեք հարցումների հաճախականության սահմանաչափերն ու քվոտաները՝ ըստ API բանալու և մատակարարի",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Օգտակար բեռի ընդլայնված կանոններ, հարցումների սահմանաչափեր և պրոքսի API-ի կարգավորումներ",
     "mitmProxyDescription": "Կարգավորեք MITM պրոքսիի պարամետրերը՝ տրաֆիկի ստուգման և վրիպազերծման համար",
     "oneProxyDescription": "Կարգավորեք 1Proxy-ի պարամետրերը՝ պրոքսիների ընդլայնված շղթայակցման համար",
-    "omniSkillsDescription": "Տեղադրեք և կառավարեք sandbox հմտությունները՝ հուշումների և գործիքների ավտոմատ կատարման համար"
+    "omniSkillsDescription": "Տեղադրեք և կառավարեք sandbox հմտությունները՝ հուշումների և գործիքների ավտոմատ կատարման համար",
+    "teamsDescription": "Թիմի ծախսերի գնահատականներ և ընդհանուր փափուկ բյուջեներ"
   },
   "cloudSyncStatus": {
     "synced": "Համաժամեցված է",
@@ -2495,7 +2487,12 @@
     "onlySelectedConnections": "Միայն ընտրված կապերը",
     "selectAtLeastOneConnection": "Ընտրեք առնվազն մեկ կապ կամ ընտրեք «Բոլոր կապերը»։",
     "allConnectionsDesc": "Այս բանալին կարող է օգտագործել ցանկացած ակտիվ կապ։",
-    "restrictedToConnections": "Սահմանափակված է {count, plural, one {# կապով} other {# կապով}}։"
+    "restrictedToConnections": "Սահմանափակված է {count, plural, one {# կապով} other {# կապով}}։",
+    "preferredConnections": "Նախընտրելի կապեր",
+    "preferredConnectionsDesc": "Առաջնահերթության կարգ յուրաքանչյուր բանալու համար։ Եթե նախընտրելի կապը հասանելի չէ, երթուղումն անցնում է հաջորդ համապատասխան կապին։",
+    "preferredConnectionsNone": "Նախընտրություն սահմանված չէ — օգտագործվում է երթուղման լռելյայն ռազմավարությունը։",
+    "preferredConnectionsClear": "Մաքրել",
+    "removeSelection": "Հեռացնել {name}-ը"
   },
   "auditLog": {
     "title": "Աուդիտի մատյան",
@@ -2607,7 +2604,9 @@
     "imageToTextBridgeCta": "Կարգավորեք Image→Text կամուրջը Modality Bridge-ի կարգավորումներում",
     "sttBridgeCta": "Կարգավորեք Speech→Text կամուրջը Modality Bridge-ի կարգավորումներում",
     "existingConnection": "Առկա կապ",
-    "openrouterSttDescription": "OpenRouter-ի խոսքը տեքստի փոխակերպող մոդելներն օգտագործում են ձեր կարգավորված OpenRouter կապը։ Առանձին հավատարմագրեր չեն պահանջվում։"
+    "openrouterSttDescription": "OpenRouter-ի խոսքը տեքստի փոխակերպող մոդելներն օգտագործում են ձեր կարգավորված OpenRouter կապը։ Առանձին հավատարմագրեր չեն պահանջվում։",
+    "modalityTabsAria": "Մեդիայի տեսակ",
+    "serviceKindsAria": "Ծառայության տեսակ"
   },
   "search": {
     "searchQuery": "Որոնման հարցում",
@@ -2982,6 +2981,7 @@
       "amp": "Օգտագործեք, երբ ցանկանում եք Amp-ի կրճատ գրառումներով աշխատանքային հոսքեր, բայց միևնույն ժամանակ անհրաժեշտ է ապահովել OmniRoute-ի այլանունների և երթուղավորման կանոնների կիրառումը։",
       "hermes": "Օգտագործեք, երբ արագ առաջադրանքների համար անհրաժեշտ է թեթև, տերմինալում աշխատող AI օգնական։",
       "hermes-agent": "Օգտագործեք, երբ անհրաժեշտ է Hermes Agent-ը (Nousresearch-ի կողմից)՝ OmniRoute-ի միջոցով ուղղորդվող լռելյայն, պատվիրակման, տեսողական և օժանդակ մոդելներով։",
+      "whycodes": "Օգտագործեք, երբ ցանկանում եք WhyCodes-ը որպես բազմանպատակ ինքնավար CLI գործակալ (TUI, անվանված գործակալներ, հիշողություն, swarm)՝ ուղղված OmniRoute-ին։",
       "custom": "Օգտագործեք գործիքների հատուկ իրականացումների կամ ընդհանուր OpenAI-ի հետ համատեղելի կազմաձևումների համար։"
     },
     "toolDescriptions": {
@@ -3022,6 +3022,7 @@
       "warp": "Warp AI տերմինալ՝ հատուկ մատակարարի աջակցությամբ",
       "agent-deck": "Agent Deck բազմագործակալային համակարգող",
       "5dive": "5dive — ինքնուրույն հոսթավորվող կոդավորման գործակալների խումբ․ նույնականացման մեկ պրոֆիլը բոլորին ուղղորդում է դեպի OmniRoute",
+      "whycodes": "WhyCodes ինքնավար CLI գործակալ՝ OpenAI-համատեղելի հիմնական URL-ով",
       "zed": "Zed կոդի խմբագիր — ներկառուցված գործակալ OpenAI-համատեղելի մատակարարի միջոցով"
     },
     "guides": {
@@ -3278,7 +3279,8 @@
     "cliproxyapiUnknown": "Անհայտ",
     "cliproxyapiUpdate": "Թարմացնել",
     "cliproxyapiUpdateAvailable": "Հասանելի է թարմացում՝ v{current} → v{latest}",
-    "cliproxyapiVersion": "Տարբերակ"
+    "cliproxyapiVersion": "Տարբերակ",
+    "removeMapping": "Հեռացնել համապատասխանեցումը"
   },
   "modelCatalog": {
     "title": "Մոդելներ և կոմբոներ",
@@ -3342,6 +3344,18 @@
     "maxMembersPlaceholder": "օր.՝ 10",
     "testSelected": "Թեստավորել ընտրվածները ({count})",
     "testAllFiltered": "Թեստավորել բոլոր ֆիլտրվածները ({count})",
+    "visibility": "Տեսանելիություն",
+    "allVisibility": "Տեսանելի և թաքնված",
+    "visibleOnly": "Տեսանելի",
+    "hiddenOnly": "Թաքնված",
+    "visibleColumn": "Տեսանելի",
+    "hideModel": "Թաքցնել {name}-ը /v1/models-ից",
+    "showModel": "Ցուցադրել {name}-ը /v1/models-ում",
+    "hiddenBadge": "Թաքնված",
+    "hideFiltered": "Թաքցնել զտվածները ({count})",
+    "showFiltered": "Ցուցադրել զտվածները ({count})",
+    "visibilityCounts": "{visible} տեսանելի · {hidden} թաքնված · {total} ընդամենը",
+    "visibilityUpdateFailed": "Չհաջողվեց թարմացնել մոդելի տեսանելիությունը",
     "cancel": "Չեղարկել",
     "clearResults": "Մաքրել արդյունքները",
     "testing": "Թեստավորում...",
@@ -3400,13 +3414,13 @@
     "comboRefMember": "Համակցություն → {name}"
   },
   "combos": {
+    "title": "Կոմբինացիաներ",
+    "description": "Ստեղծեք մոդելների կոմբինացիաներ՝ կշռված երթուղավորմամբ և պահուստային անցման աջակցությամբ",
+    "autoCatalogTitle": "Ավտոմատ երթուղավորման կատալոգ",
     "autoTosLoadError": "Չհաջողվեց բեռնել ծառայության պայմանների քաղաքականությունը։ Փոխելուց առաջ կրկին փորձեք։",
     "autoTosSaveError": "Չհաջողվեց պահպանել ծառայության պայմանների քաղաքականությունը։ Դեռ ցուցադրվում է նախորդ կարգավորումը։ Կրկին փորձեք։",
     "autoTosIncludeLabel": "auto-ում ներառել ToS: avoid նշումով մատակարարներին",
     "autoTosDescription": "Լռելյայն անջատված է։ Կիրառվում է բոլոր auto համակցությունների, ոչ միայն մեկ հաշվի համար։ Մատակարարին միացնելը չի միացնում այս ընտրանքը։",
-    "title": "Կոմբինացիաներ",
-    "description": "Ստեղծեք մոդելների կոմբինացիաներ՝ կշռված երթուղավորմամբ և պահուստային անցման աջակցությամբ",
-    "autoCatalogTitle": "Ավտոմատ երթուղավորման կատալոգ",
     "autoCatalogTemplateCount": "{count} ձևանմուշ",
     "autoCatalogDescription": "Ներկառուցված auto/* կոմբինացիաները դինամիկորեն որոշվում են միացված պրովայդերների հիման վրա։ Այս նույնացուցիչներից ցանկացածն օգտագործեք որպես model դաշտի արժեք․ կարգավորում չի պահանջվում։",
     "autoCatalogExpand": "Ընդարձակել ավտոմատ երթուղավորման կատալոգը",
@@ -3518,6 +3532,9 @@
     "moveUp": "Տեղափոխել վերև",
     "moveDown": "Տեղափոխել ներքև",
     "removeModel": "Հեռացնել",
+    "testStep": "Փորձարկել այս մոդելը",
+    "testStepRunning": "Փորձարկվում է…",
+    "testStepNotTestable": "Կարելի է փորձարկել միայն մեկ մոդելով քայլերը",
     "saving": "Պահվում է...",
     "liveNoProviders": "Դեռևս որևէ մատակարար չի նկատվել։",
     "liveFleetDataHint": "Համակազմի տվյալները ստացվում են համակցությունների ուղիղ իրադարձությունների միջոցով։",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "Դեռևս կարգավորված կոմբոներ չկան։",
     "playgroundCreateFirst": "Նախ ստեղծեք մեկը",
     "weighted": "Կշռված",
+    "weightPercent": "Կշիռ (%)",
     "leastUsed": "Ամենաքիչ օգտագործված",
     "costOpt": "Ծախսերի օպտիմալացում",
     "strategyGuideTitle": "Ինչպես օգտագործել այս ռազմավարությունը",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# հաշիվ} other {# հաշիվ}}",
     "builderGlobalAdded": "Ավելացված է",
     "builderGlobalAdd": "Ավելացնել",
+    "clearSearch": "Մաքրել որոնումը",
     "manualModel": "Ձեռքով նշվող մոդել",
     "manualModelInvalid": "Մուտքագրեք մոդելը provider/model ձևաչափով։",
     "manualModelUnknownProvider": "Մատակարարի անհայտ նախածանց։",
@@ -3936,6 +3955,7 @@
     "builderComboRefStep": "Ավելացնել կոմբոյի հղում",
     "builderPinnedAccount": "Ամրացված հաշիվ",
     "builderLegacyEntry": "Հին ձևաչափի գրառում",
+    "builderStaleModel": "Կենդանի կատալոգում չկա",
     "reviewName": "Անուն",
     "reviewStrategy": "Ռազմավարություն",
     "reviewSteps": "Քայլեր",
@@ -3973,6 +3993,10 @@
     "responseValidationMinLength": "Բովանդակության նվազագույն երկարություն (նիշերով)",
     "responseValidationJsonPaths": "JSON ուղիների ստուգումներ",
     "responseValidationAddCheck": "+ Ավելացնել ստուգում",
+    "responseValidationRemoveCheck": "Հեռացնել ստուգումը",
+    "responseValidationPath": "JSON ուղի",
+    "responseValidationCondition": "Պայման",
+    "responseValidationValue": "Ակնկալվող արժեք",
     "agentFeaturesSystemMessageOverride": "Վերասահմանել համակարգային հաղորդագրությունը",
     "agentFeaturesSystemMessagePlaceholder": "Դուք փորձառու օգնական եք...",
     "agentFeaturesSystemMessageHint": "Համակարգային հաղորդագրության վերասահմանում գործակալների համար",
@@ -5288,7 +5312,8 @@
         "skipped": "արդեն կարգավորված է",
         "failed": "ձախողվել է"
       }
-    }
+    },
+    "stepProgress": "Կարգավորման առաջընթաց"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Այս մատակարարը լռելյայն բացառված է auto-ից",
@@ -5579,6 +5604,7 @@
     "allModelsAlreadyImported": "Բոլոր մոդելներն արդեն ներմուծված են",
     "noNewModelsToImport": "Ներմուծման համար նոր մոդելներ չկան. բոլոր մոդելներն արդեն գրանցամատյանում կամ հատուկ մոդելների ցանկում են",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Մոդելի հայտնաբերումը ձախողվեց {time}",
     "skippingExistingModels": "Բաց է թողնվում առկա {count} մոդել",
     "autoSync": "Ավտոմատ համաժամացում",
     "autoSyncShort": "Համաժամացնել",
@@ -6056,10 +6082,10 @@
     "apiFormatLabel": "API ձևաչափի պիտակ",
     "apiKeyOptionalHint": "Թողեք դատարկ, եթե ձեր տեղային կարգավորումը կամ մատակարարը նույնականացում չի պահանջում։",
     "apiKeyOptionalLabel": "API բանալի (ըստ ցանկության)",
-    "apiRegionChina": "API տարածաշրջան՝ Չինաստան",
-    "apiRegionHint": "API տարածաշրջանի հուշում",
-    "apiRegionInternational": "API տարածաշրջան՝ միջազգային",
-    "apiRegionLabel": "API տարածաշրջանի պիտակ",
+    "apiRegionChina": "Մայրցամաքային Չինաստան",
+    "apiRegionHint": "Ընտրեք վերջակետի տարածաշրջանը, որն օգտագործվում է API հասանելիության և քվոտայի հետևման համար։",
+    "apiRegionInternational": "Միջազգային",
+    "apiRegionLabel": "API տարածաշրջան",
     "apikey": "API բանալի",
     "audio": "Ձայնանյութ",
     "audioProvidersHeading": "Ձայնանյութի մատակարարների վերնագիր",
@@ -6540,6 +6566,7 @@
       "monsterapi": "Ստացեք API բանալի monsterapi.ai հասցեում",
       "moonshot": "Միացրեք Kimi-ն API բանալիով։",
       "morph": "Անվճար մակարդակ՝ ամսական 250K կրեդիտ, $0",
+      "apmix": "Միացրեք Apmix-ը apmix.ai/dashboard-ից API բանալիով — մեկ բաժանորդագրություն, շատ մոդելներ:",
       "nanogpt": "Միացրեք NanoGPT-ն API բանալիով։",
       "nebius": "Գրանցվելիս՝ մոտ $1-ի փորձնական կրեդիտներ API-ի փորձարկման համար",
       "nlpcloud": "NLP Cloud-ն OpenAI-ի chat/completions-ի փոխարեն օգտագործում է սեփական չաթբոտի API։ OmniRoute-ը OpenAI-ի հաղորդագրությունները հարմարեցնում է input/context/history ձևաչափին և տրամադրում է աջակցվող չաթբոտի մոդելների տեղային կատալոգ։",
@@ -6636,8 +6663,7 @@
       "kiro": "Անվճար մակարդակ՝ ամսական 50 կրեդիտ (~25K–100K թոքեն)։ ⚠️ Kiro-ի ToS-ն արգելում է երրորդ կողմի պրոքսիի/գործիքակազմի օգտագործումը։",
       "codex": "Միացրեք OpenAI Codex-ը առկա OAuth հոսքով։",
       "qwen": "Միացրեք Qwen Code-ը առկա OAuth հոսքով։",
-      "github-models": "Ստեղծեք GitHub PAT՝ 'models: read' տիրույթով, github.com/settings/tokens հասցեում",
-      "apmix": "Միացրեք Apmix-ը apmix.ai/dashboard-ից API բանալիով — մեկ բաժանորդագրություն, շատ մոդելներ:"
+      "github-models": "Ստեղծեք GitHub PAT՝ 'models: read' տիրույթով, github.com/settings/tokens հասցեում"
     },
     "passthroughModelsDescription": "{provider}-ն ընդունում է մատակարարին բնորոշ մոդելների ID-ներ։ Ներմուծեք /models-ից կամ երթուղավորման համար ավելացրեք հատուկ ID-ներ։",
     "bedrockModelsDescription": "Amazon Bedrock մոդելները սահմանափակված են ըստ AWS տարածաշրջանի։ Ներմուծեք /models-ից կամ ավելացրեք ընտրված տարածաշրջանում միացված Bedrock մոդելների ID-ները։",
@@ -7105,16 +7131,6 @@
     "settingsSidebarDesc": "Ընտրեք, թե կողագոտու որ տարրերը ցուցադրել։ «Հիմնականը» տարբերակի դեպքում ընդլայնված գործիքները մնում են որոնելի։",
     "hideHealthLogs": "Թաքցնել վիճակի ստուգման մատյանները",
     "hideHealthLogsDesc": "Երբ ՄԻԱՑՎԱԾ է, սերվերի վահանակում չցուցադրել [HealthCheck] հաղորդագրությունները",
-    "themeAccent": "Թեմայի գույն",
-    "themeAccentDesc": "Ընտրեք նախապես սահմանված գույն կամ ստեղծեք ձեր սեփական թեման մեկ գույնով",
-    "themeCreate": "Ստեղծել թեմա",
-    "themeCustom": "Անհատական թեմա",
-    "themeBlue": "Կապույտ",
-    "themeRed": "Կարմիր",
-    "themeGreen": "Կանաչ",
-    "themeViolet": "Մանուշակագույն",
-    "themeOrange": "Նարնջագույն",
-    "themeCyan": "Ցիանագույն",
     "whitelabeling": "Բրենդավորում",
     "whitelabelingDesc": "Հարմարեցրեք հավելվածի անունը և պատկերանշանը",
     "appName": "Հավելվածի անուն",
@@ -7255,7 +7271,7 @@
       "nextSwitchNow": "Հիմա",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7282,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Հիմնական բինարի ուղին",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Ընտրովի. ստուգում է գեներացված ֆայլը հիմնական բինարով նախքան ընդունված ֆայլի փոխարինումը. Դատարկ թողեք, որպեսզի շարունակի գրել նրա կողքին. Բացակայող հատուկ թղթապանակը ստեղծվում է։"
+      "coreBinaryPathHelp": "Ընտրովի. ստուգում է գեներացված ֆայլը հիմնական բինարով նախքան ընդունված ֆայլի փոխարինումը. Դատարկ թողեք, որպեսզի շարունակի գրել նրա կողքին. Բացակայող հատուկ թղթապանակը ստեղծվում է։",
+      "urlFeedlessHint": "Ընտրիչի համար բաժանորդագրություն ստանալու համար թողնել դատարկ՝ ներքևում սահմանել վերահսկման URL, որևէ հոսք չի ստացվում, թարմացվում կամ կապվում։"
     },
     "bulkHealthcheck": "Զանգվածային հասանելիության ստուգում",
     "bulkHealthcheckDesc": "Ստուգել բոլոր կարգավորված պրոքսիները թիրախային URL-ի նկատմամբ՝ պարզելու, թե որոնք են աշխատում։",
@@ -7707,6 +7724,7 @@
     "configured": "կարգավորված",
     "none": "Չկա",
     "modelOverrideValuePlaceholder": "Թվային արժեք",
+    "modelOverrideKey": "Վերագրման բանալի",
     "modelOverrideReasoningEffortsPlaceholder": "Անգլերեն՝ ստորակետերով բաժանված, օրինակ՝ low, medium, high",
     "addKeyValue": "Ավելացնել բանալի-արժեք",
     "noModelOverrides": "Այս մոդելի համար վերասահմանումներ կարգավորված չեն։",
@@ -7755,7 +7773,6 @@
     "customPricingNote": "Դուք կարող եք վերասահմանել որոշակի մոդելների լռելյայն գնագոյացումը։ Հատուկ վերասահմանումները գերակա են ինքնաբերաբար հայտնաբերված գնագոյացման նկատմամբ։",
     "editPricing": "Խմբագրել գնագոյացումը",
     "viewFullDetails": "Դիտել ամբողջական մանրամասները",
-    "themeCoral": "Մարջանագույն",
     "adaptiveVolumeRouting": "Ծավալին հարմարվող երթուղավորում",
     "adaptiveVolumeRoutingDesc": "Դինամիկորեն մասշտաբավորեք միացումները՝ հիմնվելով օգտակար բեռի ծավալի և թողունակության ծանրաբեռնվածության վրա։",
     "lkgpToggleTitle": "Վերջին հայտնի աշխատող մատակարար (LKGP)",
@@ -7850,6 +7867,8 @@
     "compressionDesc": "Կրճատեք թոքենների օգտագործումը՝ հուշումները մատակարարներին ուղարկելուց առաջ սեղմելով",
     "autoCombosTitle": "Ավտոմատ կոմբինացիաներ",
     "autoCombosDesc": "Թույլատրել այս բանալիին օգտագործել ներկառուցված auto/* կոմբինացիաները, որոնք ավտոմատ կերպով մոդել են ընտրում յուրաքանչյուր կազմաձևված մատակարարից",
+    "ccDiscoveryAliasesTitle": "Claude Code հայտնաբերման այլանուններ",
+    "ccDiscoveryAliasesDesc": "Հայտարարել claude/... համատեղելիության հայելիներ այն մոդելների և կոմբոների համար, որոնց այս բանալին արդեն կարող է մուտք գործել",
     "compressionGuidanceFullGuideLink": "Սեղմման ամբողջական ուղեցույց",
     "compressionGuidanceShow": "Մանրամասներ",
     "compressionGuidanceHide": "Թաքցնել մանրամասները",
@@ -9035,7 +9054,8 @@
     "tomlTestPassed": "Անցած",
     "tomlTestFailed": "Չանցած",
     "tomlImportError": "Չհաջողվեց մշակել RTK TOML ֆայլը։",
-    "tomlFileReadError": "Չհաջողվեց կարդալ ընտրված TOML ֆայլը։"
+    "tomlFileReadError": "Չհաջողվեց կարդալ ընտրված TOML ֆայլը։",
+    "viewMode": "Դիտման ռեժիմ"
   },
   "compressionEngineConfig": {
     "loading": "Բեռնվում է…",
@@ -9257,7 +9277,8 @@
     "languagePacksList": "Լեզվային փաթեթներ՝ {packs}",
     "dragToReorder": "Քաշեք՝ քայլի հերթականությունը փոխելու համար",
     "engine": "Շարժիչ",
-    "intensity": "Ինտենսիվություն"
+    "intensity": "Ինտենսիվություն",
+    "compressionOverride": "Սեղմման վերագրում"
   },
   "compressionStudio": {
     "noRun": "Սեղմման ոչ մի գործարկում հասանելի չէ։",
@@ -9317,7 +9338,8 @@
     "encoderWinner": "հաղթող՝ {winner}",
     "encoder": "կոդավորիչ",
     "bytes": "բայթեր",
-    "tokensCl100k": "թոքեններ (cl100k)"
+    "tokensCl100k": "թոքեններ (cl100k)",
+    "studioViews": "Studio-ի դիտումներ"
   },
   "omniglyph": {
     "preview": "Նախադիտում",
@@ -9523,7 +9545,9 @@
     "tooltipMinLength": "Սրանից կարճ հաղորդագրությունները չեն սեղմվում։ Ավելի ցածր = ավելի շատ սեղմում։",
     "tooltipMinSavings": "Սեղմել միայն այն դեպքում, եթե խնայվում է առնվազն այսքան տոկեն։",
     "ultraSettings": "Ultra կարգավորումներ",
-    "ultraSettingsDesc": "SLM-ով աշխատող իմաստային սեղմում"
+    "ultraSettingsDesc": "SLM-ով աշխատող իմաստային սեղմում",
+    "defaultLanguage": "Լռելյայն լեզու",
+    "viewMode": "Դիտման ռեժիմ"
   },
   "translator": {
     "title": "Թարգմանիչ",
@@ -9835,6 +9859,9 @@
     "streamTransformFailed": "Չհաջողվեց փոխակերպել հոսքը"
   },
   "usage": {
+    "healthExtraUsageBypass": "Քվոտան սպառվել է․ լրացուցիչ օգտագործումը թույլատրված է, ուստի ծառայությունը շարունակվում է։",
+    "healthPaidCreditsBypass": "Քվոտան սպառվել է․ հասանելի վճարովի կրեդիտները թույլ են տալիս շարունակել ծառայությունը։",
+    "healthFilteringBypass": "Քվոտան սպառվել է․ տեղային քվոտայի զտումն անջատված է, ուստի ծառայությունը շարունակվում է։",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
@@ -10002,6 +10029,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Մատակարարների սահմանաչափեր",
     "noProviders": "Ոչ մի մատակարար միացված չէ",
+    "quotaAuthRequired": "Նույնականացում է պահանջվում․ մուտք գործեք կառավարման վահանակ",
+    "quotaAuthRequiredHint": "Մատակարարների կապերը չհաջողվեց բեռնել, քանի որ կառավարման վահանակի աշխատաշրջանը բացակայում է կամ ժամկետանց է։ Մուտք գործեք և թարմացրեք էջը՝ ձեր քվոտայի սահմանաչափերը տեսնելու համար։",
     "connectProvidersForQuota": "Միացեք մատակարարներին OAuth-ի միջոցով՝ ձեր API քվոտայի սահմանաչափերին և օգտագործմանը հետևելու համար։",
     "accountsCount": "{count, plural, one {# հաշիվ} other {# հաշիվ}}",
     "filteredFromCount": "(զտված է {count}-ից)",
@@ -10051,9 +10080,6 @@
     "tierLite": "Թեթև",
     "tierUnknown": "Անհայտ",
     "statTotal": "Ընդհանուր",
-    "statCritical": "Կրիտիկական",
-    "statAlert": "Զգուշացում",
-    "statHealthy": "Նորմալ",
     "filterPurchaseTypeLabel": "Տեսակ",
     "filterTierLabel": "Մակարդակ",
     "purchaseAll": "Բոլորը",
@@ -10291,7 +10317,61 @@
     "updatedShort": "Թարմացվել է",
     "lastRefreshed": "Վերջին թարմացումը",
     "providerQuota": "Մատակարարի քվոտա",
-    "providerQuotaHomeHint": "Միացված հաշիվների ընթացիկ կարգավիճակը"
+    "providerQuotaHomeHint": "Միացված հաշիվների ընթացիկ կարգավիճակը",
+    "claudeResetCreditDefaultTitle": "Claude սահմանաչափի զրոյացում",
+    "confirmRedeemClaudeResetCredit": "Ակտիվացումն անմիջապես զրոյացնում է Claude-ի օգտագործման համապատասխան սահմանաչափերը և անվերադարձ սպառում է այս կրեդիտը:",
+    "claudeResetCreditsModalTitle": "Claude զրոյացման կրեդիտներ",
+    "claudeResetCreditsModalExplainer": "Այս հաշվի համար հասանելի Claude զրոյացման կրեդիտներ և շաբաթական սեանսների զրոյացումներ:",
+    "healthAccountHint": "Հիմնված է վերջին դիտարկումների վրա, ոչ թե ուղիղ ստուգման։ Մանրամասների համար ընտրեք հաշիվ։",
+    "healthRecovery": "Վերականգնման ակնկալվող ժամանակը",
+    "healthAvailable": "Հասանելի է",
+    "healthRestricted": "Մասամբ սահմանափակ",
+    "healthUnavailable": "Անհասանելի",
+    "healthPeakHourProtection": "Պիկ ժամերի պաշտպանություն",
+    "healthCooldown": "Սպասման ժամանակ",
+    "healthQuotaExhausted": "Քվոտան սպառված է",
+    "healthOverview": "Ընդհանուր տեսք",
+    "layoutFull": "Ամբողջական",
+    "layoutCompact": "Կոմպակտ",
+    "healthQuotaError": "Քվոտայի ընթերցումը ձախողվեց",
+    "healthNoRuntime": "Աշխատանքի վիճակը հասանելի չէ",
+    "healthPreviousSnapshot": "Վերջին թարմացումը ձախողվեց․ ցուցադրվում է նախորդ արդյունքը",
+    "healthPreviousFailure": "Վերջին հարցումը ձախողվեց․ սպասումն ավարտվել է",
+    "healthAwaitingSync": "Վերակայման ժամը անցել է․ սպասում է համաժամացմանը",
+    "healthVerdictUnavailable": "Հասանելիության ստուգման արդյունքը հասանելի չէ․ ցուցադրվում են միայն քվոտայի մակարդակները",
+    "healthSummaryFailed": "Վիճակի ամփոփման ընթերցումը ձախողվեց․ մոդելների արգելափակման տվյալները կարող են բացակայել",
+    "healthRuntimeObserved": "Վիճակը թարմացվել է {time}",
+    "healthQuotaObserved": "Քվոտան դիտարկվել է {time}",
+    "healthOldestQuota": "Քվոտայի ամենահին պատկերը՝ {time}",
+    "healthRecoveryUnknown": "Վերականգնման ժամը անհայտ է",
+    "healthDetailsHint": "Սեղմեք՝ մանրամասներն ու գործողությունները տեսնելու համար",
+    "healthFiveHour": "5 ժամ",
+    "healthOverall": "Ընդհանուր",
+    "healthAction": "Պահանջվում է գործողություն",
+    "healthTitle": "Հաշիվների հասանելիություն",
+    "healthDrag": "Քաշեք մատակարարների հերթը փոխելու համար",
+    "healthDragPosition": "{provider}, {count, plural, one {դիրք {position, number}՝ #-ից} other {դիրք {position, number}՝ #-ից}}",
+    "healthResetOrder": "Վերականգնել լռելյայն հերթը",
+    "healthPool": "{name} խումբ",
+    "healthOtherPool": "Նույն հաշիվը · {pool}՝ {status} (մնացել է {remaining})",
+    "healthIncluded": "{count, plural, one {Ներառում է # մասամբ սահմանափակված հաշիվ} other {Ներառում է # մասամբ սահմանափակված հաշիվ}}",
+    "healthBannerUnavailable": "{count, plural, one {# հաշիվ ժամանակավորապես անհասանելի է} other {# հաշիվ ժամանակավորապես անհասանելի է}}",
+    "healthBannerAvailable": "{count, plural, one {# հաշիվ հասանելի է} other {Բոլոր # հաշիվները հասանելի են}}",
+    "healthLegendHide": "Թաքցնել պայմանական նշանները",
+    "healthLegendShow": "Ցույց տալ պայմանական նշանները",
+    "healthLegendOk": "Հոծը = մնացած քվոտա, կիսաթափանցիկը = օգտագործված։",
+    "healthLegendCooldown": "{window} քվոտան սպառված է։ Հոծը = անցած սպասում, կիսաթափանցիկը = մնացած սպասում։",
+    "healthLegendAction": "Թույլտվությունն ավարտվել է կամ հաշիվն արգելափակված է. սպասելը չի օգնի։",
+    "healthLegendPartial": "Դեռ օգտագործելի է։ Դեղին վերևը = մոդելի կամ խմբի սահմանափակում։",
+    "healthWaited": "Սպասվել է {percent}",
+    "healthWait": "Եվս {duration} (վերականգնում՝ {time})",
+    "healthFastest": "Ամենավաղ վերականգնումը՝ {duration} հետո",
+    "healthRatio": "{available, plural, one {Հասանելի է # / {active, number}} other {Հասանելի է # / {active, number}}}",
+    "healthCd5": "5 ժամ · Սպասման ժամանակ",
+    "healthCdw": "Շաբաթական · Սպասման ժամանակ",
+    "healthRecentSuccessBypass": "Երթուղավորումը թույլատրում է այս հաշիվը, քանի որ վերջերս հարցումը հաջողվել է։",
+    "healthPurchasedBalanceBypass": "Գնված մնացորդը թույլ է տալիս շարունակել ներառված քվոտան սպառելուց հետո։",
+    "healthCutoffAtRequest": "Իրական ժամանակի քվոտայի շեմերը ստուգվում են հարցման երթուղավորման ժամանակ։"
   },
   "modals": {
     "waitingAuth": "Սպասում է լիազորմանը",
@@ -11078,7 +11158,8 @@
       "message": "Հաղորդագրություն",
       "error": "Սխալ",
       "completion": "Ավարտ"
-    }
+    },
+    "statusFilter": "Կարգավիճակ"
   },
   "templateNames": {
     "simple-chat": "Պարզ զրույց",
@@ -11259,7 +11340,8 @@
     "minutesAgo": "{minutes} րոպե առաջ",
     "hoursAgo": "{hours} ժամ առաջ",
     "daysAgo": "{days} օր առաջ",
-    "entries": "Գրառումներ"
+    "entries": "Գրառումներ",
+    "viewSwitcherAria": "Քեշի դիտում"
   },
   "proxyConfigModal": {
     "levelGlobal": "Գլոբալ",
@@ -11447,6 +11529,7 @@
     "tableHealth": "Աշխատունակություն (24 ժ.)",
     "tableUsage": "Օգտագործում",
     "tableActions": "Գործողություններ",
+    "moreActions": "Լրացուցիչ գործողություններ",
     "test": "Ստուգել",
     "edit": "Խմբագրել",
     "delete": "Ջնջել",
@@ -11526,7 +11609,7 @@
     "bulkImportNoValidEntries": "Վավեր գրառումներ չեն գտնվել։ Ստուգեք ձևաչափը և կրկին փորձեք։",
     "bulkImportSuccess": "Ներմուծումն ավարտված է․ ստեղծվել է՝ {created}, թարմացվել է՝ {updated}, ձախողվել է՝ {failed}",
     "bulkImportErrorLine": "Տող {line}․ {reason}",
-    "bulkImportMaxExceeded": "Մեկ ներմուծման համար առավելագույնը՝ 100 պրոքսի",
+    "bulkImportMaxExceeded": "Մեկ ներմուծման համար առավելագույնը՝ {max} պրոքսի",
     "bulkImportPreview": "Նախադիտում",
     "clearAssignment": "(մաքրել վերագրումը)",
     "bulkProxyAssignment": "Պրոքսիների զանգվածային վերագրում",
@@ -11587,6 +11670,7 @@
     "poolSetAsideKindIpQuota429": "IP արագության սահմանափակում (429)",
     "poolSetAsideKindSlow": "դանդաղ պատասխաններ",
     "poolSetAsideKindGeoBlocked": "Տարածաշրջանարգելված (403/451)",
+    "poolSetAsideKindOperatorReported": "օպերատորի կողմից հաղորդված խափանում",
     "poolSetAsideUntil": "Վերադարձ ռոտացիայի {endsAt}",
     "poolSetAsideRepeat": "Մի կողմ դրված {count, plural, one {# անգամ} other {# անգամ}}",
     "poolUnknownAddress": "Անհայտ հասցե",
@@ -11696,7 +11780,6 @@
     "exportCodeTitle": "Արտահանել կոդը",
     "exportShort": "Արտահանել",
     "noStateToExport": "Արտահանման համար playground-ի վիճակ հասանելի չէ։",
-    "closeExportModal": "Փակել արտահանման պատուհանը",
     "close": "Փակել",
     "exportRealKeyWarning": "Անվտանգության նախազգուշացում․ արտահանումն արգելափակվել է, քանի որ ելքում իրական API բանալի է հայտնաբերվել։ Խնդրում ենք վերակայել ձեր API բանալին և կրկին փորձել։",
     "placeholderHintPrefix": "Փոխարինեք",
@@ -11809,7 +11892,8 @@
       "nextButton": "Հաջորդ",
       "runButton": "Գործարկել",
       "promptPlaceholder": "Մուտքագրեք ձեր հաղորդագրությունը… (Enter՝ ուղարկելու համար, Shift+Enter՝ նոր տողի համար)"
-    }
+    },
+    "playgroundTabs": "Playground-ի ռեժիմներ"
   },
   "miniPlayground": {
     "endpoint": "Վերջնակետ",
@@ -11880,7 +11964,8 @@
     "assistant": "Օգնական",
     "errorLabel": "Սխալ",
     "requestFailed": "Հարցումը ձախողվեց",
-    "stop": "Կանգնեցնել"
+    "stop": "Կանգնեցնել",
+    "messageInputAria": "Հաղորդագրություն"
   },
   "requestLogger": {
     "recording": "Գրանցվում է",
@@ -12067,8 +12152,18 @@
       "resilienceRotations": "{count} հաշվի ռոտացիա",
       "resilienceRetried": "Դատարկ հերթը կրկնվել է",
       "resilienceContinued": "Վերսկսվել է հոսքի կեսից",
-      "resilienceRecovered": "Վերականգնվել է կայունության գործողությամբ"
-    }
+      "resilienceRecovered": "Վերականգնվել է կայունության գործողությամբ",
+      "conversationContext": "Զրույցի համատեքստ",
+      "goToBottom": "Անցնել ներքև",
+      "liveRefreshOn": "Ինքնաթարմացում՝ միացված",
+      "liveRefreshOff": "Ինքնաթարմացում՝ անջատված",
+      "liveRefresh": "Ինքնաթարմացում",
+      "continuesFromParent": "շարունակվում է ծնողից",
+      "continuesFrom": "Շարունակվում է {id}-ից",
+      "viewConversation": "դիտել զրույցը",
+      "openConversation": "Բացել {id} զրույցը"
+    },
+    "tableLabel": "Հարցումների մատյաններ"
   },
   "proxyLogger": {
     "filterAll": "Բոլորը",
@@ -12113,7 +12208,9 @@
     "colServedBy": "Մատակարարող",
     "filterTraffic": "Հոսք",
     "filterTests": "Թեստեր",
-    "filterSource": "Աղբյուր"
+    "filterSource": "Աղբյուր",
+    "tableLabel": "Պրոքսիի մատյաններ",
+    "sortLogs": "Տեսակավորել մատյանները"
   },
   "endpointOptions": {
     "speech": "Խոսք",
@@ -12198,7 +12295,8 @@
     "statusExhausted": "ՍՊԱՌՎԱԾ",
     "statusAlerting": "ԶԳՈՒՇԱՑՈՒՄ",
     "statusError": "ՍԽԱԼ",
-    "moreSuffix": "+ ևս {count}"
+    "moreSuffix": "+ ևս {count}",
+    "feedFilterLabel": "Զտել իրադարձությունները"
   },
   "quotaShare": {
     "weightPercent": "Կշիռ (%)",
@@ -12365,7 +12463,10 @@
     "ungroupedTitle": "Առանց խմբի",
     "ungroupedHint": "Այս պուլերը վերագրված չեն որևէ հայտնի խմբի։ Խմբագրեք պուլը՝ այն իրական խումբ տեղափոխելու համար։",
     "removeFailed": "Չհաջողվեց հեռացնել այս պուլը։",
-    "dismiss": "Փակել"
+    "dismiss": "Փակել",
+    "allocationsHeading": "Բաշխումներ",
+    "wizardRemoveDimension": "Հեռացնել չափումը",
+    "wizardRemoveKey": "Հեռացնել բանալին"
   },
   "plugins": {
     "title": "Փլագիններ",
@@ -12523,7 +12624,8 @@
       "settingsUpdateFailed": "Չհաջողվեց թարմացնել կարգավորումները",
       "serviceRevealApiKey": "{actor}-ը ցուցադրել է {target}-ի API բանալին",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Փակել սխալը"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12758,21 @@
       "goNow": "Անցնել հիմա",
       "message": "MITM Proxy-ն այժմ գտնվում է AgentBridge-ի բաժնում։",
       "title": "Այս էջը տեղափոխվել է"
-    }
+    },
+    "dnsOn": "DNS-ը միացված է",
+    "dnsOff": "DNS-ն անջատված է",
+    "showServerSettings": "Ցույց տալ սերվերի կարգավորումները",
+    "hideServerSettings": "Թաքցնել սերվերի կարգավորումները",
+    "upstreamCaTesting": "Փորձարկվում է…",
+    "removeMapping": "Հեռացնել համապատասխանեցումը",
+    "mappingSourcePlaceholder": "օրինակ՝ gemini-3.6-flash-medium, կամ *՝ բոլոր չհամապատասխանեցվածների համար",
+    "mappingWildcardHint": "Օգտագործեք *-ը որպես աղբյուր՝ առանց հստակ համապատասխանեցման յուրաքանչյուր մոդել OmniRoute-ի միջոցով ընտրված թիրախին ուղղորդելու համար։ Աղբյուրի ճշգրիտ համընկնումները միշտ գերակայում են *-ին։",
+    "wizardDetectingModels": "Ընդհատված տրաֆիկից մոդելների հայտնաբերում...",
+    "wizardDetectedModels": "Ընդհատված տրաֆիկում գտնվել է {count, plural, one {# մոդել} other {# մոդել}}։ Ընտրեք նրանք, որոնք ցանկանում եք ավելացնել․",
+    "wizardSelectedModels": "Ընտրված է {count, plural, one {# մոդել} other {# մոդել}}։ Հաջորդ էկրանին դրանք կհամապատասխանեցնեք OmniRoute-ի մոդելներին։",
+    "wizardAddModels": "Ավելացնել {count, plural, one {# մոդել} other {# մոդել}}",
+    "wizardNoModelsDetected": "Դեռևս մոդելներ չեն հայտնաբերվել։ Օգտագործեք {agent}-ը՝ հարցում կատարելու համար, ապա կրկին գործարկեք այս օգնականը՝ տրաֆիկից մոդելներն ինքնաբերաբար հայտնաբերելու համար։",
+    "wizardNoModelsHint": "Կամ փակեք այս օգնականը և համապատասխանեցումները ձեռքով ավելացրեք գործակալի քարտում։"
   },
   "providerStats": {
     "unknownError": "Անհայտ սխալ",
@@ -12686,7 +12802,11 @@
     "avgTtft": "Միջին TTFT",
     "avgTotal": "Միջին ընդհանուր ժամանակ",
     "requestTelemetry": "Հարցումների հեռաչափություն",
-    "requestTelemetryDescription": "7 փուլից բաղկացած մշակման շղթայի մանրամասներ (վերջին 5 րոպեի ընթացքում)"
+    "requestTelemetryDescription": "7 փուլից բաղկացած մշակման շղթայի մանրամասներ (վերջին 5 րոպեի ընթացքում)",
+    "title": "Մատակարարների վիճակագրություն",
+    "description": "Ըստ մատակարարի և մոդելի տրաֆիկը, հապաղումը և հաջողության ցուցանիշները",
+    "combo": "Համակցված",
+    "toggleModels": "Ցույց տալ {provider}-ի մոդելները"
   },
   "relay": {
     "title": "Առանց սերվերի ռելե-պրոքսիներ",
@@ -12847,7 +12967,18 @@
     "noRequestBody": "Հարցման մարմին չկա։",
     "noResponseBody": "Պատասխանի մարմին չկա։",
     "formatted": "Ձևաչափված",
-    "raw": "Չմշակված"
+    "raw": "Չմշակված",
+    "requestCount": "{count, plural, one {# հարցում} other {# հարցում}}",
+    "expandList": "Ընդարձակել ցանկը",
+    "collapseList": "Կոծկել ցանկը",
+    "snippetLanguage": "Կոդի հատվածի լեզու",
+    "headersTable": "Վերնագրեր",
+    "showSecrets": "Ցույց տալ գաղտնի տվյալները",
+    "maskSecrets": "Քողարկել գաղտնի տվյալները",
+    "llmNotAvailable": "LLM-ի մետատվյալներն այս հարցման համար հասանելի չեն։",
+    "llmStreamYes": "այո (SSE)",
+    "llmStreamNo": "ոչ",
+    "llmTotalTokens": "Ընդամենը՝ {count} թոքեն"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13437,8 @@
     "colReliabilityHelp": "Վերջին 24 ժամում այս պրովայդերի կողմից փաստացի պատասխանված կանչերի մասնաբաժինը։ Գծիկը նշանակում է, որ սպասարկված տրաֆիկը բավարար չէ ցուցանիշ ներկայացնելու համար։",
     "reliabilitySample": "Վերջին {hours} ժ-ում {requests} կանչից {successes}-ը հաջողությամբ է ավարտվել",
     "reliabilityTooFew": "Վերջին {hours} ժ-ում ընդամենը {requests} կանչ է եղել՝ ցուցանիշ ներկայացնելու համար չափազանց քիչ",
-    "reliabilityNoTraffic": "Վերջին 24 ժ-ում կանչեր չեն գրանցվել"
+    "reliabilityNoTraffic": "Վերջին 24 ժ-ում կանչեր չեն գրանցվել",
+    "categoryFilter": "Առաջադրանքի կատեգորիա"
   },
   "discovery": {
     "title": "Պրովայդերների հայտնաբերում",
@@ -13331,7 +13463,11 @@
     "method": "Մեթոդ",
     "auth": "Նույնականացում",
     "feasibility": "Իրագործելիություն",
-    "models": "Մոդելներ"
+    "models": "Մոդելներ",
+    "provider": "Մատակարար",
+    "status": "Կարգավիճակ",
+    "endpoint": "Վերջնակետ",
+    "actions": "Գործողություններ"
   },
   "noAuthProvider": {
     "title": "Նույնականացում չի պահանջվում",
@@ -13380,7 +13516,8 @@
     "ownProxy": "Սեփական պրոքսի",
     "freeTierPause": "Մոդել {model} կանգնեցված է (429), կվերադառնա {time}",
     "freeTierPauseProvider": "Կանգնեցված է (429), կվերադառնա {time}",
-    "freeTierPauseNote": "Գործընթացի ներսում կանգնեցում այս օրինակի համար"
+    "freeTierPauseNote": "Գործընթացի ներսում կանգնեցում այս օրինակի համար",
+    "proxyType": "Պրոքսիի տեսակ"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13690,10 @@
         "description": "Ձեզ թաքնված նվաճում է սպասում...",
         "criteria": "Կատարեք թաքնված նվաճումը՝ այս կրծքանշանը բացահայտելու համար։"
       }
-    }
+    },
+    "leaderboardTitle": "Առաջատարների աղյուսակ",
+    "leaderboardDescription": "Ձեր API բանալիների վարկանիշներն ու ձեռքբերումները",
+    "badgeLocked": "Կողպված է"
   },
   "featureFlags": {
     "title": "Գործառույթների դրոշակներ",
@@ -13794,6 +13934,7 @@
     "latency": "Ուշացում",
     "quota": "Քվոտա",
     "rangeWindow": "{range} ժամանակահատված",
+    "timeRange": "Ժամանակային միջակայք",
     "runtimeHealthBlend": "կատարման ժամանակի/աշխատանքային վիճակի համակցում",
     "averageResponseTime": "պատասխանի միջին ժամանակ",
     "worstQuota": "Ամենավատ քվոտա",
@@ -13995,7 +14136,11 @@
     "learnMore": "Իմանալ ավելին",
     "changelogLoadFailed": "Չհաջողվեց բեռնել փոփոխությունների մատյանը։ Խնդրում ենք ավելի ուշ կրկին փորձել։",
     "retry": "Կրկին փորձել",
-    "viewFullHistory": "Դիտել ամբողջ պատմությունը GitHub-ում"
+    "viewFullHistory": "Դիտել ամբողջ պատմությունը GitHub-ում",
+    "title": "Նորություններ և փոփոխությունների մատյան",
+    "description": "OmniRoute թիմի հայտարարությունները և վերջին թողարկման նշումները",
+    "viewLabel": "Դիտել",
+    "loadingNews": "Հայտարարությունները բեռնվում են..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14691,9 @@
       "circuitBreakerState": "Մատակարարի շղթայի անջատիչի վիճակը",
       "lastUpdate": "Վերջին թարմացումը՝ {timestamp}",
       "uptimeMinutes": "{minutes} ր",
-      "uptimeHoursMinutes": "{hours} ժ {minutes} ր"
+      "uptimeHoursMinutes": "{hours} ժ {minutes} ր",
+      "breakerClosed": "Փակ է",
+      "breakerNotClosed": "Բաց կամ կիսաբաց է"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14768,9 @@
         "primaryAction": "Սպասարկման մանրամասներ",
         "secondaryAction": "Համակարգի կարգավիճակ"
       }
+    },
+    "miniapp": {
+      "askAnything": "Հարցրեք ցանկացած բան…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14961,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "Տեսանելի՝ {visible} / ընդհանուր՝ {total}",
+    "modeLabel": "Դիտման ռեժիմ",
+    "jumpToNow": "Անցնել ընթացիկ ժամանակին․ ՀԻՄԱ գիծը կվերադառնա {position}% դիրքին",
+    "laneReuse": "Գոտու վերօգտագործում",
+    "laneReuseLabel": "Գոտու վերօգտագործման ժամանակահատվածը (րոպեներով)",
+    "laneReuseHint": "Միևնույն զրույցի նույնացուցիչն օգտագործող հարցումները մնում են ժամանակագծի նույն տողում, քանի դեռ դրանց միջև ընդմիջումը չի գերազանցում այսքան րոպեն։",
+    "laneReuseUnit": "ր",
+    "autoRefresh": "Ինքնաթարմացում",
+    "autoRefreshLabel": "Ինքնաթարմացման միջակայքը (վայրկյաններով)",
+    "autoRefreshHint": "Որքան հաճախ է ժամանակագիծը սերվերից կրկին ստանում հարցումների ցանկը։",
+    "autoRefreshUnit": "վ",
+    "zoomOut": "Փոքրացնել",
+    "zoomIn": "Մեծացնել"
   },
   "metadata": {
     "compressionTitle": "Սեղմում",
@@ -15015,6 +15178,83 @@
     "dismissAriaLabel": "Փակել"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Անջատել մտածողության մակարդակի տարբերակների (օր.՝ -low, -medium, -high) ստեղծումը /v1/models կատալոգում։",
+  "teamCosts": {
+    "title": "Թիմի ծախսեր",
+    "subtitle": "Կառավարեք ընդհանուր փափուկ բյուջեները և կատալոգի ծախսերի գնահատականները։",
+    "refresh": "Թարմացնել",
+    "create": "Ստեղծել թիմ",
+    "edit": "Խմբագրել թիմը",
+    "archive": "Արխիվացնել",
+    "selectTeam": "Թիմեր",
+    "searchTeams": "Որոնել թիմեր",
+    "statusFilter": "Թիմի կարգավիճակ",
+    "active": "Ակտիվ",
+    "archived": "Արխիվացված · միայն կարդալու համար",
+    "allTeams": "Բոլոր թիմերը",
+    "noTeams": "Համապատասխան թիմեր չկան։",
+    "selectHint": "Ծախսերը տեսնելու համար ստեղծեք կամ ընտրեք թիմ։",
+    "loading": "Թիմի ծախսերը բեռնվում են…",
+    "budgetTitle": "Ընթացիկ փափուկ բյուջե",
+    "budgetSubtitle": "Հաջող գրանցված օգտագործում · սահող պատուհան · անկախ հաշվետվության ամսաթվերից",
+    "archivedBudget": "Արխիվացված է. բյուջեի կիրառումն անակտիվ է։ Պատմական հաշվետվությունները մնում են հասանելի։",
+    "unlimited": "Անսահմանափակ — ընդհանուր փափուկ բյուջե կարգավորված չէ։",
+    "budgetUnavailable": "Բյուջեի կարգավիճակը հասանելի չէ։ Թարմացրեք՝ նորից փորձելու համար։",
+    "used": "Հաջող օգտագործում",
+    "maximum": "Բյուջեի առավելագույնը",
+    "remaining": "Հայտնի մնացորդ",
+    "resets": "Վերակայվում է",
+    "unpricedBudget": "Հաջող օգտագործման մի մասի գինն անհայտ է։ Հայտնի գումարը թերի է. բյուջեի կիրառումն այս պատուհանը համարում է գերազանցված։",
+    "overBudget": "Բյուջեն հասել է կամ գերազանցվել է · {amount} ավել",
+    "reportTitle": "Օգտագործման հաշվետվություն",
+    "reportSubtitle": "Բոլոր փորձերը · կատալոգի գնահատական USD-ով, ոչ թե հաշիվ · ամբողջ UTC ամսաթվեր",
+    "reportPeriod": "Հաշվետվության ժամանակահատված",
+    "day1": "1 օր",
+    "day7": "7 օր",
+    "day30": "30 օր",
+    "allTime": "Ամբողջ ժամանակ",
+    "reportSpend": "Հաշվետվության գնահատված ծախս",
+    "requests": "Հարցումներ",
+    "assignedKeys": "Նշանակված բանալիներ",
+    "unpricedReport": "Այս հաշվետվությունը պարունակում է անհայտ գներ։ Գնահատված ծախսը թերի է։",
+    "breakdown": "Ծախս ըստ API բանալու",
+    "noUsage": "Այս հաշվետվության ժամանակահատվածում օգտագործում չկա։",
+    "keyName": "API բանալու անունը",
+    "tokens": "Մուտքային + ելքային թոքեններ",
+    "unnamedKey": "Անանուն կամ ջնջված բանալի",
+    "unpriced": "Անհայտ գին",
+    "members": "Անդամակցություն",
+    "memberSubtitle": "Անդամակցության փոփոխությունը պատմական ծախսը թողնում է սկզբնական թիմում։",
+    "searchKeys": "Որոնել բանալիներ կամ ընթացիկ սեփականատերեր",
+    "chooseKey": "Ընտրեք API բանալի",
+    "unassigned": "Չնշանակված",
+    "ownership": "Ընթացիկ վճարման թիմ՝ {team}",
+    "assign": "Նշանակել",
+    "remove": "Հեռացնել",
+    "noMembers": "Ընթացիկ անդամներ չկան։ Պատմական օգտագործումը կարող է դեռ հաշվվել բյուջեում։",
+    "assignedAt": "Նշանակվել է {date}-ին (UTC)",
+    "name": "Թիմի անունը",
+    "description": "Նկարագրություն",
+    "enableBudget": "Միացնել ընդհանուր փափուկ բյուջեն",
+    "amount": "Բյուջեի գումար (USD)",
+    "duration": "Սահող բյուջեի պատուհան",
+    "cancel": "Չեղարկել",
+    "save": "Պահպանել",
+    "confirm": "Հաստատել",
+    "transferTitle": "Հաստատեք բանալու փոխանցումը",
+    "transferMessage": "Տեղափոխե՞լ այս բանալին «{source}»-ից «{destination}»։ Պատմական ծախսը մնում է սկզբնական թիմում։",
+    "removeTitle": "Հեռացնել բանալու նշանակումը",
+    "removeMessage": "Հեռացնե՞լ այս բանալին «{team}»-ից։ Պատմական ծախսը մնում է այս թիմում։",
+    "archiveTitle": "Արխիվացնել թիմը",
+    "archiveMessage": "Արխիվացնե՞լ «{team}»-ը։ Բոլոր ընթացիկ կապերը փակվում են, և բյուջեի կիրառումը դադարում է։ Պատմական հաշվետվությունները մնում են հասանելի։",
+    "invalidName": "Մուտքագրեք անուն (1–200 նիշ) և ոչ ավելի, քան 2000 նիշանոց նկարագրություն։",
+    "invalidAmount": "Մուտքագրեք զրոյից մեծ վերջավոր բյուջեի գումար։",
+    "unauthorized": "Շարունակելու համար մուտք գործեք կառավարման վահանակ։",
+    "forbidden": "Թիմերը կառավարելու թույլտվություն չունեք։ Ձեր մուտքագրածը պահպանված է։",
+    "notFound": "Այս թիմը կամ նշանակումն այլևս գոյություն չունի։",
+    "conflict": "Նշանակումը կամ թիմը փոխվել է։ Թարմացրեք և նորից փորձելուց առաջ հաստատեք ընթացիկ սեփականությունը։",
+    "failed": "Հարցումը ձախողվեց։ Ձեր մուտքագրածը պահպանված է. խնդրում ենք նորից փորձել։",
+    "partialBudget": "Պահպանված որոշ օրական զամբյուղներ համընկնում են պատուհանի սահմանի հետ և չեն կարող ճշգրիտ բաշխվել։ Ցուցադրված ծախսը թերի է. մնացած սահմանաչափը հասանելի չէ։ Գործող փափուկ բյուջեի քաղաքականությունը չի փոխվում։"
+  },
   "connectionTest": {
     "title": "Փորձնական հաղորդագրություն",
     "description": "Ուղարկել մեկ իրական հարցում այս հաշվի միջոցով։ Սա օգտագործում է քվոտայի փոքր մասը և, կախված մատակարարից, կարող է սկսել օգտագործման ժամանակահատվածը։",
@@ -15074,5 +15314,8 @@
     "importButton": "Ներմուծել",
     "importFailed": "Ներմուծումը ձախողվեց։",
     "importSuccess": "Ներմուծվեց {connections} հաշիվ և {nodes} մատակարարի հանգույց. բաց թողնվեց՝ {skipped}։"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Սկսել ընթացիկ դիրքից (բաց թողնել առկա մատյանները)"
   }
 }

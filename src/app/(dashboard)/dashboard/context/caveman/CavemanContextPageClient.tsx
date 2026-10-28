@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
 import { SegmentedControl } from "@/shared/components";
+import Card from "@/shared/components/Card";
+import Checkbox from "@/shared/components/Checkbox";
+import Select from "@/shared/components/Select";
+import Icon from "@/shared/components/Icon";
 import CompressionSettingsTab from "@/app/(dashboard)/dashboard/settings/components/CompressionSettingsTab";
 import { outputStyleLanguages } from "../../../../../../open-sse/services/compression/outputStyles/catalog.ts";
 import {
@@ -169,16 +175,18 @@ export default function CavemanContextPageClient() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[30px] text-primary">compress</span>
-            <div>
-              <h1 className="text-2xl font-bold text-text-main">{t("title")}</h1>
-              <p className="text-sm text-text-muted">{t("description")}</p>
-            </div>
-          </div>
+      <PageHeader
+        compact
+        title={
+          <span className="flex items-center gap-3">
+            <Icon name="compress" size={30} className="text-primary" />
+            {t("title")}
+          </span>
+        }
+        description={t("description")}
+        actions={
           <SegmentedControl
+            aria-label={t("viewMode")}
             value={viewMode}
             onChange={(v) => setViewMode(v as "simple" | "advanced")}
             options={[
@@ -186,85 +194,72 @@ export default function CavemanContextPageClient() {
               { value: "advanced", label: t("advancedMode") || "Advanced" },
             ]}
           />
-        </div>
-      </header>
+        }
+      />
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-4">
         {statCards.map(([label, value]) => (
-          <div key={label} className="rounded-lg border border-border bg-surface p-4">
+          <Card key={label} padding="sm">
             <p className="text-xs uppercase text-text-muted">{label}</p>
             <p className="mt-1 text-xl font-semibold text-text-main">{value}</p>
-          </div>
+          </Card>
         ))}
       </section>
 
-      <section className="rounded-lg border border-border bg-surface p-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold text-text-main">{t("languagePacks")}</h2>
-          <p className="text-xs text-text-muted">{t("languagePacksDesc")}</p>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-4 text-sm text-text-main">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={languageConfig.enabled}
-              disabled={saving}
-              onChange={(event) => updateLanguageConfig({ enabled: event.target.checked })}
-            />
-            {t("enabled")}
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={languageConfig.autoDetect}
-              disabled={saving}
-              onChange={(event) => updateLanguageConfig({ autoDetect: event.target.checked })}
-            />
-            {t("autoDetect")}
-          </label>
-          <select
+      <Card padding="sm">
+        <SectionHeader title={t("languagePacks")} description={t("languagePacksDesc")} />
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-text-main">
+          <Checkbox
+            label={t("enabled")}
+            checked={languageConfig.enabled}
+            disabled={saving}
+            onChange={(event) => updateLanguageConfig({ enabled: event.target.checked })}
+          />
+          <Checkbox
+            label={t("autoDetect")}
+            checked={languageConfig.autoDetect}
+            disabled={saving}
+            onChange={(event) => updateLanguageConfig({ autoDetect: event.target.checked })}
+          />
+          <Select
+            aria-label={t("defaultLanguage")}
             value={languageConfig.defaultLanguage}
             disabled={saving || languageConfig.autoDetect}
             onChange={(event) => updateLanguageConfig({ defaultLanguage: event.target.value })}
-            className="rounded-lg border border-border bg-bg px-3 py-2 text-sm"
           >
             {languageOptions.map((lang) => (
               <option key={lang} value={lang}>
                 {lang}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {languagePacks.map((pack) => (
-            <label
+            <Checkbox
               key={pack.language}
-              className="flex items-center justify-between rounded-lg border border-border bg-bg p-3 text-sm text-text-main"
-            >
-              <span>
-                {pack.language} - {t("rulesCount", { count: pack.ruleCount })}
-              </span>
-              <input
-                type="checkbox"
-                checked={languageConfig.enabledPacks.includes(pack.language)}
-                disabled={saving || pack.language === "en"}
-                onChange={(event) => togglePack(pack.language, event.target.checked)}
-              />
-            </label>
+              className="justify-between rounded-lg border border-border bg-bg p-3 text-sm text-text-main"
+              label={`${pack.language} - ${t("rulesCount", { count: pack.ruleCount })}`}
+              checked={languageConfig.enabledPacks.includes(pack.language)}
+              disabled={saving || pack.language === "en"}
+              onChange={(event) => togglePack(pack.language, event.target.checked)}
+            />
           ))}
         </div>
-      </section>
+      </Card>
 
       {!masterEnabled && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300 flex items-start gap-2">
-          <span className="material-symbols-outlined text-[18px]">info</span>
-          <p>{t("masterDisabledWarning")}</p>
-        </div>
+        <Alert
+          variant="warning"
+          icon={<Icon name="info" size={18} />}
+          className="[&>.ci-alert__dismiss]:hidden"
+          description={t("masterDisabledWarning")}
+        />
       )}
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-lg border border-border bg-surface p-4">
-          <h2 className="text-sm font-semibold text-text-main">{t("analyticsTitle")}</h2>
+        <Card padding="sm">
+          <SectionHeader title={t("analyticsTitle")} />
           <div className="mt-3 space-y-2 text-sm text-text-main">
             {modeBreakdown.length === 0 ? (
               <p className="text-text-muted">{t("noAnalytics")}</p>
@@ -279,31 +274,32 @@ export default function CavemanContextPageClient() {
               ))
             )}
           </div>
-        </div>
+        </Card>
 
-        <div className="rounded-lg border border-border bg-surface p-4">
-          <h2 className="text-sm font-semibold text-text-main">{t("outputModeTitle")}</h2>
-          <p className="mt-1 text-xs text-text-muted">{t("outputModeDesc")}</p>
+        <Card padding="sm">
+          <SectionHeader title={t("outputModeTitle")} description={t("outputModeDesc")} />
           {/* On/off + intensity for caveman output mode live in the panel
               (/dashboard/context/settings). This page keeps the detailed knobs only. */}
           <div className="mt-3 flex flex-wrap gap-4 text-sm text-text-main">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={outputMode.autoClarity}
-                disabled={saving}
-                onChange={(event) => updateOutputMode({ autoClarity: event.target.checked })}
-              />
-              {t("autoClarity")}
-            </label>
+            <Checkbox
+              label={t("autoClarity")}
+              checked={outputMode.autoClarity}
+              disabled={saving}
+              onChange={(event) => updateOutputMode({ autoClarity: event.target.checked })}
+            />
           </div>
-          <pre className="mt-3 overflow-auto rounded-lg border border-border bg-bg p-3 text-xs text-text-main">
+          <pre
+            // Scrollable region: keyboard users must be able to focus it (axe scrollable-region-focusable).
+            tabIndex={0}
+            aria-label={t("outputModeTitle")}
+            className="mt-3 overflow-auto rounded-lg border border-border bg-bg p-3 text-xs text-text-main"
+          >
             {previewPrompt}
           </pre>
           <p className="mt-3 text-xs text-text-muted">
             {t("bypassConditions")}: {t("bypassConditionsList")}
           </p>
-        </div>
+        </Card>
       </section>
 
       {viewMode === "advanced" && <CompressionSettingsTab />}

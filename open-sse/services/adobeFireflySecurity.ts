@@ -52,3 +52,21 @@ export function isAdobeFireflyApiUrl(rawUrl: string): boolean {
 export function isAdobeLoginCookieDomain(domain: string): boolean {
   return hostnameMatches(domain.replace(/^\./, ""), "adobelogin.com");
 }
+
+/**
+ * Epoch-ms embedded in a Forter token. Prefer the established `_ms__` marker
+ * so an unrelated earlier numeric field cannot override it, and preserve its
+ * existing 13-digit range. Some captures omit those delimiters; only for that
+ * fallback accept a standalone 13-digit run in 2020-09-13 .. 2033-05-18.
+ * This parses a timestamp heuristic, not cookie authenticity or freshness.
+ */
+const ADOBE_FORTER_LEGACY_TIMESTAMP_PATTERN = /_(\d{13})__/;
+const ADOBE_FORTER_TIMESTAMP_PATTERN = /(?:^|[^0-9])(1[6-9]\d{11})(?![0-9])/;
+
+export function matchAdobeForterTimestamp(value: string): number {
+  const token = String(value || "");
+  const match =
+    token.match(ADOBE_FORTER_LEGACY_TIMESTAMP_PATTERN) ??
+    token.match(ADOBE_FORTER_TIMESTAMP_PATTERN);
+  return match ? Number(match[1]) : 0;
+}

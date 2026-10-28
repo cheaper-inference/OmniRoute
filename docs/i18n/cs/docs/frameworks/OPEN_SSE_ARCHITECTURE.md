@@ -486,13 +486,13 @@ Zpracovává:
 
 `open-sse/config/` obsahuje konfigurační vrstvu:
 
-| Soubor                        | Účel                                                       |
-| ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Registr chatovacích modelů nad katalogem 375 poskytovatelů |
-| `providerModels.ts`           | Aliasy modelů, mapování formátů                            |
-| `constants.ts`                | Časové limity, omezení, stavové kódy                       |
-| `defaultThinkingSignature.ts` | Výchozí podpis myšlení Claude                              |
-| `modelStrip.ts` (v services)  | Odstraňování polí podle poskytovatele                      |
+| Soubor                        | Účel                                                |
+| ----------------------------- | --------------------------------------------------- |
+| `providerRegistry.ts`         | Registr modelu chatu přes katalog poskytovatelů 377 |
+| `providerModels.ts`           | Aliasy modelu, mapování formátu                     |
+| `constants.ts`                | Časové limity, limity, stavové kódy                 |
+| `defaultThinkingSignature.ts` | Výchozí podpis myšlení Claude                       |
+| `modelStrip.ts` (ve službách) | Odizolování polí podle poskytovatele                |
 
 ### Schéma registru poskytovatelů
 
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Validace pomocí Zod při načtení modulu zajišťuje, že všechny konfigurace poskytovatelů jsou platné.
+Ověření Zod při načtení modulu zajišťuje, že všechny konfigurace poskytovatele jsou platné.
 
 ---
 

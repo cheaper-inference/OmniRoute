@@ -135,6 +135,29 @@ test("UPDATE path measures payloads (regression: the ceiling must not no-op in p
   updatePendingRequest("m", "p", "c-b", { providerResponse: worstCaseObject });
   assert.equal(getPendingRetainedBytes(), afterBucket, "replacing a payload must not accumulate");
 
+  // After inserting enough fat entries, the byte ceiling should cap retained bytes.
+  // Insert entries until we're at or near the ceiling, then verify we can't exceed it
+  // by adding more payloads — the ceiling should reclaim or refuse.
+  const CEILING = 256 * 1024 * 1024;
+  const perEntry = afterById - afterInsertA;
+  const extra = Math.ceil(CEILING / perEntry) + 50;
+  for (let i = 0; i < extra; i++) {
+    const nextId = trackPendingRequest("m", "p", `c${i}`, true);
+    assert.ok(nextId);
+    updatePendingRequestById(nextId, { providerResponse: worstCaseObject });
+  }
+  // After the burst, retained bytes should be close to but not exceed the ceiling.
+  assert.ok(
+    getPendingRetainedBytes() <= CEILING * 1.01,
+    `the map should stay at or near the ceiling after a fat insert burst (retained ${getPendingRetainedBytes()})`
+  );
+
+  trackPendingRequest("m", "p", "c-trigger", true);
+  assert.ok(
+    getPendingRetainedBytes() <= CEILING,
+    `ceiling must reclaim on insert (retained ${getPendingRetainedBytes()})`
+  );
+
   clearPendingRequests();
   assert.equal(getPendingRetainedBytes(), 0, "clear resets retained bytes");
 });

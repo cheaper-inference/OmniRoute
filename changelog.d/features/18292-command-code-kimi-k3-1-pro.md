@@ -1,0 +1,1 @@
+- **feat(providers):** Command Code lists Kimi K3.1 Pro (`moonshotai/Kimi-K3.1-Pro`) in its static catalog with reasoning-effort variants, 1M context and a 384K output ceiling, so fresh or unsynced installs can route to it ([#18292](https://github.com/cheaper-inference/OmniRoute/pull/18292)) — thanks @berthojoris

@@ -44,17 +44,18 @@ Größte **dokumentierte** Beiträger: `mistral` 1,00B, `nara` 210M, `llm7` 150M
 
 ---
 
-## Aktualisierung vom 2026-06-17 — Änderungen seit 2026-06-05
+## 2026-06-17-Aktualisierung — was sich seit 2026-06-05 geändert hat
 
-Ein Webrecherche-Durchlauf mit 50 Agenten (offizielle Dokumentation + Nachrichten der letzten 7 Tage, durch Gegenprüfung verifiziert) hat den gesamten Katalog aktualisiert. Highlights:
+Ein Web-Recherchedurchlauf mit 50 Agenten (offizielle Doku + Nachrichten der letzten 7 Tage, adversarisch verifiziert) hat den gesamten Katalog aktualisiert. Highlights:
 
-- **Entfernt / keine kostenlose Stufe (2026):** `chutes` (kostenlose Stufe endete 2026-03), `phind` (Unternehmen stellte den Betrieb 2026-01 ein), `kluster` (eingestellt am 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (kostenloser MiMo-Zugang am 2026-05-24 widerrufen, Nemotron-Aktion endete 2026-06 — am 2026-06-18 erneut verifiziert), `aimlapi` (kostenlose Stufe pausiert — am 2026-06-18 erneut verifiziert), `yi` (Yi-Light eingestellt, nutzungsabhängige Abrechnung — am 2026-06-18 erneut verifiziert), `featherless-ai` (derzeit keine kostenlose Stufe), `chipotle` (Chipotles „Pepper AI“ — das durch Reverse Engineering erschlossene Amelia-Chat-Widget unter `amelia.chipotle.com`, mit dem der Anbieter kommunizierte, liefert inzwischen auf jeder Route einschließlich der Root-Route 404 zurück; Backend außer Betrieb genommen/verschoben, bestätigt am 2026-09-15 — vollständig aus dem Katalog entfernt, #13131/#4037). `iflytek` / `sparkdesk` bleiben aufgeführt, enthalten jedoch einen Hinweis zu den Nutzungsbedingungen (Spark Lite ist kostenlos; die Nutzungsbedingungen schränken die Proxy-/Relay-Nutzung ein).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` wurden am 2026-06-01 eingestellt, und `2.5 Pro` verließ die kostenlose Stufe (2026-04); die kostenlose Stufe umfasst jetzt **nur noch die Flash-Familie** (2.5/3/3.1/3.5 Flash + Gemma). Der Katalog **fasst** die Flash-Familie jetzt zusammen (zuvor durch die separate Zählung jeder Variante überhöht: 462M → 60M).
-- **Korrigierte Zahlen:** `cloudflare-ai` 122M → **30M** (tatsächlich 10k Neuronen/Tag), `doubao` als einmaliges Registrierungsguthaben neu eingestuft (nicht wiederkehrend), `llm7` 4M → **150M** (dokumentierte 5M Token/Tag), `together`: „-Free“-Endpunkte eingestellt → auch das Registrierungsguthaben von $25 entfernt (Mindestkauf von $5 erforderlich, keine kostenlose Testphase), `longcat`: Vorschau beendet + Flash-Modelle eingestellt → nur noch **LongCat-2.0**, als einmaliges Registrierungsguthaben von **10M** Token neu eingestuft (KYC-pflichtig, nicht wiederkehrend).
-- **Neu entdeckte kostenlose Anbieter:** ⭐ **Kilo Code** (`kilo-gateway` — rotierende „Auto Free“-Auswahl: NVIDIA-Nemotron-3-Familie, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 rotierende kostenlose Coding-Modelle), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash dauerhaft kostenlos + 20M Registrierungsbonus) und `arcee-ai` Trinity Large Preview.
-- **Neue transparente Stufen** (siehe Methodik): eine Kategorie für _dauerhaft kostenlos, aber ohne festgelegtes Limit_ (echter wiederkehrender Zugang ohne zählbares Token-Limit) und ein _durch Einzahlung freigeschalteter Bonus_ (OpenRouter $10 → +24M/Monat), die beide **separat** ausgewiesen werden, damit sie die hervorgehobene Gesamtsumme niemals aufblähen.
+- **Entfernt / kein kostenloses Kontingent (2026):** `chutes` (kostenloses Kontingent endete 2026-03), `phind` (Unternehmen 2026-01 eingestellt), `kluster` (abgekündigt 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo-Kostenloszugang widerrufen 2026-05-24, Nemotron-Aktion endete 2026-06 — erneut verifiziert 2026-06-18), `aimlapi` (kostenloses Kontingent pausiert — erneut verifiziert 2026-06-18), `yi` (Yi-Light eingestellt, Pay-as-you-go — erneut verifiziert 2026-06-18), `featherless-ai` (derzeit kein kostenloses Kontingent), `chipotle` (Chipotles „Pepper AI" — das per Reverse Engineering angebundene Amelia-Chat-Widget `amelia.chipotle.com`, mit dem der Provider kommunizierte, liefert jetzt auf jeder Route 404, einschließlich Root; Backend außer Betrieb bzw. umgezogen, bestätigt 2026-09-15 — vollständig aus dem Katalog entfernt, #13131/#4037). `iflytek` / `sparkdesk` bleiben gelistet, erhalten aber einen ToS-Warnhinweis (Spark Lite ist kostenlos; die ToS beschränken die Proxy-/Relay-Nutzung ein).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` wurden am 2026-06-01 abgeschaltet und `2.5 Pro` ist aus dem kostenlosen Kontingent gefallen (2026-04); das kostenlose Kontingent umfasst jetzt **nur noch die Flash-Familie** (2.5/3/3.1/3.5 Flash + Gemma). Der Katalog **bündelt** die Flash-Familie nun (der Wert war zuvor aufgebläht, weil jede Variante einzeln gezählt wurde: 462M → 60M).
+- **Korrigierte Zahlen:** `cloudflare-ai` 122M → **30M** (real 10k Neurons/Tag), `doubao` als einmaliges Anmeldeguthaben neu klassifiziert (nicht wiederkehrend), `llm7` 4M → **150M** (dokumentierte 5M Tokens/Tag), `together` „-Free"-Endpunkte eingestellt → $25-Anmeldeguthaben ebenfalls entfernt (erfordert Mindesteinkauf von $5, kein kostenloser Test), `longcat` Preview beendet + Flash-Modelle eingestellt → nur noch **LongCat-2.0**, neu klassifiziert als einmaliges **10M**-Token-Anmeldeguthaben (KYC-pflichtig, nicht wiederkehrend).
+- **Poolside: Direktinferenz endet (verifiziert 2026-10-20):** Die [offizielle Plattform](https://platform.poolside.ai/) kündigt die Abschaltung zum **2026-10-31** an und verweist Nutzer darauf, die Modelle von Hugging Face zum Self-Hosting herunterzuladen. Der direkte `poolside`-Provider trägt diesen Warnhinweis. Der handgepflegte Free-Katalog enthält keine direkten Poolside-Einträge; seine nach Poolside benannten Einträge gehören zu `kilo-gateway`. Diese Ankündigung belegt nicht die Verfügbarkeit der von Kilo, Cline, NVIDIA oder anderen Gateways ausgelieferten Modelle, daher werden diese Einträge auf dieser Grundlage nicht entfernt.
+- **Neu entdeckte kostenlose Provider:** ⭐ **Kilo Code** (`kilo-gateway` — rotierendes „Auto Free"-Set: NVIDIA Nemotron 3 Familie, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 rotierende kostenlose Coding-Modelle, aktualisiert 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash dauerhaft kostenlos + 20M Anmeldebonus) und `arcee-ai` Trinity Large Preview.
+- **Neue ehrliche Kategorien** (siehe Methodik): eine Kategorie _dauerhaft kostenlos, aber unbegrenzt_ (realer wiederkehrender Zugang, kein zählbares Token-Limit) und ein _Einzahlungs-Freischalt-Boost_ (OpenRouter $10 → +24M/Monat) — beide werden **separat** ausgewiesen, damit sie die Headline-Zahl niemals aufblähen.
 
-> Die detaillierte Tabelle pro Anbieter weiter unten ist der **Schnappschuss vom 2026-06-05**; die oben genannten Änderungen haben Vorrang. Die aktuelle, maßgebliche Quelle ist der modellbezogene Katalog `open-sse/config/freeModelCatalog.ts`.
+> Die detaillierte Pro-Provider-Tabelle weiter unten ist der **Snapshot vom 2026-06-05**; die obigen Deltas ersetzen ihn. Die aktuelle, kanonische Quelle ist der Pro-Modell-Katalog `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -113,7 +114,7 @@ tatsächlich geschieht — diese Trennung wird absichtlich beibehalten.
 ## Methodik & Einschränkungen
 
 - Die Zahlen sind **Obergrenzenschätzungen**, die auf den von den jeweiligen Anbietern dokumentierten Free-Tier-Limits mit Stand vom **2026-06-17** basieren und durch Webrecherche ermittelt wurden. Free-Tier-Angebote ändern sich ständig — überprüfen Sie die Angaben erneut, bevor Sie sich auf einen Wert verlassen.
-- **Wofür ein Eintrag tatsächlich bürgt.** Kein Eintrag enthält eine individuelle Vertrauensbewertung, und die API stellt auch keine bereit — behandeln Sie jeden oben genannten Wert als Schätzung derselben, nicht näher benannten Qualität. Zwei Fakten unterscheiden sich davon, weil sie manuell kuratiert und nicht abgeleitet werden: 44 Einträge enthalten einen unabhängig dokumentierten harten Stopp (39 davon sind die xKiro-Zeilen, die alle dasselbe tägliche Kontingent nutzen), und 12 Einträge enthalten einen Hinweis zur Verwendung von Prompts für Trainingszwecke. `hardStopGuaranteed` wird nur gesetzt, wenn aus den Bedingungen des Anbieters selbst hervorgeht, dass eine Anfrage bei Überschreitung des kostenlosen Kontingents abgelehnt wird, anstatt stillschweigend kostenpflichtig zu werden; die Quelle steht in einem Kommentar neben dem Eintrag. Der Wert wird niemals standardmäßig auf `true` gesetzt, und ein von niemandem überprüfter Eintrag bleibt ungesetzt. Ein fehlendes Hard-Stop-Flag bedeutet daher „nicht nachgewiesen“ und nicht „stellt bekanntermaßen Kosten in Rechnung“. Der **STRICT-Modus** (der optionale Routing-Schutz `freeAccessPolicy=strict`) vertraut nur Einträgen, die dieses Flag enthalten; jedes andere Free-Tier-Angebot wird als `no-hard-stop` ausgeschlossen (siehe `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Wenn der Schutz einen Pool filtert, meldet das für den Betreiber sichtbare Protokoll sowohl die Anzahl der Ausschlüsse als auch deren Anteil mit `no-hard-stop`.
+- **Wofür ein Eintrag tatsächlich bürgt.** Kein Eintrag enthält eine individuelle Vertrauensbewertung, und die API stellt auch keine bereit — behandeln Sie jeden oben genannten Wert als Schätzung derselben, nicht näher benannten Qualität. Zwei Fakten unterscheiden sich davon, weil sie manuell kuratiert und nicht abgeleitet werden: 44 Einträge enthalten einen unabhängig dokumentierten harten Stopp (39 davon sind die xKiro-Zeilen, die alle dasselbe tägliche Kontingent nutzen), und 20 Einträge enthalten einen Hinweis zur Verwendung von Prompts für Trainingszwecke. `hardStopGuaranteed` wird nur gesetzt, wenn aus den Bedingungen des Anbieters selbst hervorgeht, dass eine Anfrage bei Überschreitung des kostenlosen Kontingents abgelehnt wird, anstatt stillschweigend kostenpflichtig zu werden; die Quelle steht in einem Kommentar neben dem Eintrag. Der Wert wird niemals standardmäßig auf `true` gesetzt, und ein von niemandem überprüfter Eintrag bleibt ungesetzt. Ein fehlendes Hard-Stop-Flag bedeutet daher „nicht nachgewiesen“ und nicht „stellt bekanntermaßen Kosten in Rechnung“. Der **STRICT-Modus** (der optionale Routing-Schutz `freeAccessPolicy=strict`) vertraut nur Einträgen, die dieses Flag enthalten; jedes andere Free-Tier-Angebot wird als `no-hard-stop` ausgeschlossen (siehe `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Wenn der Schutz einen Pool filtert, meldet das für den Betreiber sichtbare Protokoll sowohl die Anzahl der Ausschlüsse als auch deren Anteil mit `no-hard-stop`.
 - `estMonthlyFreeTokens` = nur monatlich wiederkehrende Token. **Einmaliges Startguthaben wird nicht erneuert** und zählt als 0. Eingestellte Tarife zählen ebenfalls als 0.
 - Tägliches Token-Limit → `monthly = daily × 30`. Wenn nur RPD dokumentiert ist → `RPD × ~800 output tokens × 30`. Wenn nur RPM/TPM dokumentiert ist (kein tägliches Limit) → **unbegrenzt** (siehe unten).
 - **Dauerhaft kostenlos, aber ohne veröffentlichtes Token-Limit** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): Hierbei handelt es sich um echten, wiederkehrenden kostenlosen Zugriff mit Begrenzungen hinsichtlich Rate bzw. Parallelität. Wir klassifizieren diese Angebote als `recurring-uncapped` und **summieren sie niemals** — eine Multiplikation von `RPM × 24/7 × 30d` würde eine unrealistische Obergrenze erzeugen (genau die Aufblähung, die wir ablehnen). Sie werden aufgeführt, damit ihre Existenz bekannt ist.
@@ -241,75 +242,75 @@ Die meisten Angaben zu „kostenlosen Tokens pro Monat“ in diesem Bereich sind
 
 ---
 
-## Kostenloses Kontingent je Anbieter (Bytez/Nous geprüft am 2026-10-15; Zeilen erneut auditiert am 2026-09-02; übrige am 2026-06-17)
+## Kostenloses Kontingent pro Anbieter (Bytez/Nous geprüft am 2026-10-15; Zeilen erneut auditiert am 2026-09-02; andere am 2026-06-17)
 
-> Neu generiert aus dem Modellkatalog (`open-sse/config/freeModelCatalog.ts`) und nach Pools dedupliziert. Sortiert nach regelmäßig verfügbaren Tokens/Monat. `uncapped*` = dauerhaft kostenlos, aber ohne veröffentlichtes Token-Limit (raten-/parallelitätsbegrenzt) — tatsächlich verfügbar, jedoch **nicht** in die Gesamtangabe eingerechnet. `—` = nur Guthaben / ohne Schlüssel / nicht in Tokens quantifizierbar.
+> Neu generiert aus dem Modellkatalog (`open-sse/config/freeModelCatalog.ts`) und nach Pools dedupliziert. Sortiert nach regelmäßig verfügbaren Tokens/Monat. `uncapped*` = dauerhaft kostenlos, aber ohne veröffentlichtes Token-Limit (raten-/parallelitätsbegrenzt) — tatsächlich verfügbar, **wird jedoch nicht** in die Gesamtsumme der Überschrift eingerechnet. `—` = nur Guthaben / ohne Schlüssel / nicht in Tokens quantifizierbar.
 
-| Anbieter         | Kostenloser Typ        | Regelmäßige Token/Monat | Erstmonatsguthaben | Nutzungsbedingungen | Modelle |
-| ---------------- | ---------------------- | ----------------------- | ------------------ | ------------------- | ------- |
-| `mistral`        | wiederkehrend          | ~1.00B                  | —                  | Vorsicht            | 5       |
-| `nara`           | wiederkehrend          | ~210M                   | —                  | Vorsicht            | 8       |
-| `llm7`           | wiederkehrend          | ~150M                   | —                  | Vorsicht            | 4       |
-| `xkiro`          | wiederkehrend          | ~150M                   | —                  | Vorsicht            | 39      |
-| `longcat`        | einmalig               | —                       | 10M                | Vorsicht            | 1       |
-| `cerebras`       | einmalig               | —                       | $5 Guthaben        | Vorsicht            | 2       |
-| `cloudflare-ai`  | wiederkehrend          | ~30M                    | —                  | Vorsicht            | 9       |
-| `groq`           | wiederkehrend          | ~30M                    | —                  | Vorsicht            | 5       |
-| `api-airforce`   | wiederkehrend          | ~24M                    | —                  | Vorsicht            | 7       |
-| `bluesminds`     | wiederkehrend          | ~7M                     | —                  | uneindeutig         | 22      |
-| `sambanova`      | wiederkehrend          | ~6M                     | —                  | Vorsicht            | 5       |
-| `arcee-ai`       | wiederkehrend          | ~5M                     | —                  | Vorsicht            | 1       |
-| `bazaarlink`     | wiederkehrend          | ~4M                     | —                  | Vorsicht            | 32      |
-| `openrouter`     | wiederkehrend          | ~1M                     | —                  | Vorsicht            | 1       |
-| `cohere`         | wiederkehrend          | ~800K                   | —                  | Vorsicht            | 6       |
-| `huggingchat`    | wiederkehrend          | ~500K                   | —                  | Vorsicht            | 4       |
-| `morph`          | wiederkehrend          | ~400K                   | —                  | okay                | 2       |
-| `huggingface`    | wiederkehrend          | ~200K                   | —                  | Vorsicht            | 6       |
-| `kiro`           | wiederkehrend          | ~25K                    | —                  | vermeiden           | 12      |
-| `glm-cn`         | unbegrenzt             | unbegrenzt\*            | ~20M               | okay                | 4       |
-| `baidu`          | unbegrenzt             | unbegrenzt\*            | —                  | Vorsicht            | 1       |
-| `gemini`         | unbegrenzt             | unbegrenzt\*            | —                  | Vorsicht            | 4       |
-| `kilo-gateway`   | unbegrenzt             | unbegrenzt\*            | —                  | Vorsicht            | 7       |
-| `ollama-cloud`   | unbegrenzt             | unbegrenzt\*            | —                  | uneindeutig         | 8       |
-| `opencode-zen`   | unbegrenzt             | unbegrenzt\*            | —                  | Vorsicht            | 6       |
-| `tencent`        | unbegrenzt             | unbegrenzt\*            | —                  | Vorsicht            | 1       |
-| `vertex`         | Registrierungsguthaben | —                       | ~300M              | Vorsicht            | 10      |
-| `agentrouter`    | Registrierungsguthaben | —                       | ~200M              | Vorsicht            | 4       |
-| `predibase`      | Registrierungsguthaben | —                       | ~25M               | Vorsicht            | 1       |
-| `doubao`         | Registrierungsguthaben | —                       | ~15M               | uneindeutig         | 1       |
-| `ai21`           | Registrierungsguthaben | —                       | ~10M               | vermeiden           | 2       |
-| `deepseek`       | Registrierungsguthaben | —                       | ~5M                | okay                | 2       |
-| `hyperbolic`     | Registrierungsguthaben | —                       | ~5M                | okay                | 8       |
-| `nscale`         | Registrierungsguthaben | —                       | ~5M                | Vorsicht            | 6       |
-| `bytez`          | Guthaben (wiederk.)    | —                       | unbekannt          | uneindeutig         | 1       |
-| `deepinfra`      | Registrierungsguthaben | —                       | ~1M                | Vorsicht            | 22      |
-| `fireworks`      | Registrierungsguthaben | —                       | ~1M                | vermeiden           | 10      |
-| `nebius`         | Registrierungsguthaben | —                       | ~1M                | Vorsicht            | 1       |
-| `qoder`          | Registrierungsguthaben | —                       | ~1M                | Vorsicht            | 14      |
-| `scaleway`       | Registrierungsguthaben | —                       | ~1M                | okay                | 6       |
-| `novita`         | Registrierungsguthaben | —                       | ~500K              | Vorsicht            | 1       |
-| `agy`            | ohne Schlüssel         | —                       | —                  | vermeiden           | 16      |
-| `baichuan`       | ohne Schlüssel         | —                       | —                  | uneindeutig         | 1       |
-| `blackbox`       | ohne Schlüssel         | —                       | —                  | vermeiden           | 6       |
-| `coze`           | ohne Schlüssel         | —                       | —                  | vermeiden           | 1       |
-| `duckduckgo-web` | ohne Schlüssel         | —                       | —                  | vermeiden           | 6       |
-| `freemodel-dev`  | ohne Schlüssel         | —                       | —                  | unbekannt           | 4       |
-| `friendliai`     | ohne Schlüssel         | —                       | —                  | vermeiden           | 2       |
-| `iflytek`        | ohne Schlüssel         | —                       | —                  | vermeiden           | 1       |
-| `inference-net`  | ohne Schlüssel         | —                       | —                  | Vorsicht            | 3       |
-| `liquid`         | ohne Schlüssel         | —                       | —                  | unbekannt           | 1       |
-| `monsterapi`     | ohne Schlüssel         | —                       | —                  | uneindeutig         | 1       |
-| `muse-spark-web` | ohne Schlüssel         | —                       | —                  | vermeiden           | 3       |
-| `nlpcloud`       | ohne Schlüssel         | —                       | —                  | vermeiden           | 1       |
-| `nvidia`         | ohne Schlüssel         | —                       | —                  | Vorsicht            | 13      |
-| `pollinations`   | ohne Schlüssel         | —                       | —                  | Vorsicht            | 31      |
-| `publicai`       | ohne Schlüssel         | —                       | —                  | Vorsicht            | 3       |
-| `reka`           | ohne Schlüssel         | —                       | —                  | Vorsicht            | 2       |
-| `sensenova`      | ohne Schlüssel         | —                       | —                  | Vorsicht            | 1       |
-| `sparkdesk`      | schlüssellos           | —                       | —                  | Vorsicht            | 1       |
-| `stepfun`        | schlüssellos           | —                       | —                  | ok                  | 1       |
-| `t3-web`         | schlüssellos           | —                       | —                  | vermeiden           | 23      |
-| `uncloseai`      | schlüssellos           | —                       | —                  | Vorsicht            | 3       |
+| Anbieter         | Art des Gratisangebots | Regelmäßige Token/Monat | Guthaben im ersten Monat | Nutzungsbedingungen | Modelle |
+| ---------------- | ---------------------- | ----------------------- | ------------------------ | ------------------- | ------- |
+| `mistral`        | wiederkehrend          | ~1.00B                  | —                        | Vorsicht            | 5       |
+| `nara`           | wiederkehrend          | ~210M                   | —                        | Vorsicht            | 8       |
+| `llm7`           | wiederkehrend          | ~150M                   | —                        | Vorsicht            | 4       |
+| `xkiro`          | wiederkehrend          | ~150M                   | —                        | Vorsicht            | 39      |
+| `longcat`        | einmalig               | —                       | 10M                      | Vorsicht            | 1       |
+| `cerebras`       | einmalig               | —                       | $5 Guthaben              | Vorsicht            | 2       |
+| `cloudflare-ai`  | wiederkehrend          | ~30M                    | —                        | Vorsicht            | 9       |
+| `groq`           | wiederkehrend          | ~30M                    | —                        | Vorsicht            | 5       |
+| `api-airforce`   | wiederkehrend          | ~24M                    | —                        | Vorsicht            | 7       |
+| `bluesminds`     | wiederkehrend          | ~7M                     | —                        | unklar              | 22      |
+| `sambanova`      | wiederkehrend          | ~6M                     | —                        | Vorsicht            | 5       |
+| `arcee-ai`       | wiederkehrend          | ~5M                     | —                        | Vorsicht            | 1       |
+| `bazaarlink`     | wiederkehrend          | ~4M                     | —                        | Vorsicht            | 32      |
+| `openrouter`     | wiederkehrend          | ~1M                     | —                        | Vorsicht            | 1       |
+| `cohere`         | wiederkehrend          | ~800K                   | —                        | Vorsicht            | 6       |
+| `huggingchat`    | wiederkehrend          | ~500K                   | —                        | Vorsicht            | 4       |
+| `morph`          | wiederkehrend          | ~400K                   | —                        | ok                  | 2       |
+| `huggingface`    | wiederkehrend          | ~200K                   | —                        | Vorsicht            | 6       |
+| `kiro`           | wiederkehrend          | ~25K                    | —                        | vermeiden           | 12      |
+| `glm-cn`         | unbegrenzt             | unbegrenzt\*            | ~20M                     | ok                  | 4       |
+| `baidu`          | unbegrenzt             | unbegrenzt\*            | —                        | Vorsicht            | 1       |
+| `gemini`         | unbegrenzt             | unbegrenzt\*            | —                        | Vorsicht            | 4       |
+| `kilo-gateway`   | unbegrenzt             | unbegrenzt\*            | —                        | Vorsicht            | 7       |
+| `ollama-cloud`   | unbegrenzt             | unbegrenzt\*            | —                        | unklar              | 8       |
+| `opencode-zen`   | unbegrenzt             | unbegrenzt\*            | —                        | Vorsicht            | 10      |
+| `tencent`        | unbegrenzt             | unbegrenzt\*            | —                        | Vorsicht            | 1       |
+| `vertex`         | Anmeldeguthaben        | —                       | ~300M                    | Vorsicht            | 10      |
+| `agentrouter`    | Anmeldeguthaben        | —                       | ~200M                    | Vorsicht            | 4       |
+| `predibase`      | Anmeldeguthaben        | —                       | ~25M                     | Vorsicht            | 1       |
+| `doubao`         | Anmeldeguthaben        | —                       | ~15M                     | unklar              | 1       |
+| `ai21`           | Anmeldeguthaben        | —                       | ~10M                     | vermeiden           | 2       |
+| `deepseek`       | Anmeldeguthaben        | —                       | ~5M                      | ok                  | 2       |
+| `hyperbolic`     | Anmeldeguthaben        | —                       | ~5M                      | ok                  | 8       |
+| `nscale`         | Anmeldeguthaben        | —                       | ~5M                      | Vorsicht            | 6       |
+| `bytez`          | Guthaben (wiederk.)    | —                       | unbekannt                | unklar              | 1       |
+| `deepinfra`      | Anmeldeguthaben        | —                       | ~1M                      | Vorsicht            | 22      |
+| `fireworks`      | Anmeldeguthaben        | —                       | ~1M                      | vermeiden           | 10      |
+| `nebius`         | Anmeldeguthaben        | —                       | ~1M                      | Vorsicht            | 1       |
+| `qoder`          | Anmeldeguthaben        | —                       | ~1M                      | Vorsicht            | 14      |
+| `scaleway`       | Anmeldeguthaben        | —                       | ~1M                      | ok                  | 6       |
+| `novita`         | Anmeldeguthaben        | —                       | ~500K                    | Vorsicht            | 1       |
+| `agy`            | ohne Schlüssel         | —                       | —                        | vermeiden           | 16      |
+| `baichuan`       | ohne Schlüssel         | —                       | —                        | unklar              | 1       |
+| `blackbox`       | ohne Schlüssel         | —                       | —                        | vermeiden           | 6       |
+| `coze`           | ohne Schlüssel         | —                       | —                        | vermeiden           | 1       |
+| `duckduckgo-web` | ohne Schlüssel         | —                       | —                        | vermeiden           | 6       |
+| `freemodel-dev`  | ohne Schlüssel         | —                       | —                        | unbekannt           | 4       |
+| `friendliai`     | ohne Schlüssel         | —                       | —                        | vermeiden           | 2       |
+| `iflytek`        | ohne Schlüssel         | —                       | —                        | vermeiden           | 1       |
+| `inference-net`  | ohne Schlüssel         | —                       | —                        | Vorsicht            | 3       |
+| `liquid`         | ohne Schlüssel         | —                       | —                        | unbekannt           | 1       |
+| `monsterapi`     | ohne Schlüssel         | —                       | —                        | unklar              | 1       |
+| `muse-spark-web` | ohne Schlüssel         | —                       | —                        | vermeiden           | 3       |
+| `nlpcloud`       | ohne Schlüssel         | —                       | —                        | vermeiden           | 1       |
+| `nvidia`         | ohne Schlüssel         | —                       | —                        | Vorsicht            | 13      |
+| `pollinations`   | ohne Schlüssel         | —                       | —                        | Vorsicht            | 31      |
+| `publicai`       | ohne Schlüssel         | —                       | —                        | Vorsicht            | 3       |
+| `reka`           | ohne Schlüssel         | —                       | —                        | Vorsicht            | 2       |
+| `sensenova`      | ohne Schlüssel         | —                       | —                        | Vorsicht            | 1       |
+| `sparkdesk`      | schlüssellos           | —                       | —                        | Vorsicht            | 1       |
+| `stepfun`        | schlüssellos           | —                       | —                        | ok                  | 1       |
+| `t3-web`         | schlüssellos           | —                       | —                        | vermeiden           | 23      |
+| `uncloseai`      | schlüssellos           | —                       | —                        | Vorsicht            | 3       |
 
 ---
 

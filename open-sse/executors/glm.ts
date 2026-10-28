@@ -129,16 +129,24 @@ function isGlmThinkingModel(model: string): boolean {
  */
 const GLM_THINKING_DEFAULT_MAX_TOKENS = 131072;
 
-function applyGlmRequestDefaults(body: unknown, defaults?: JsonRecord | null): unknown {
+function applyGlmRequestDefaults(
+  body: unknown,
+  defaults?: JsonRecord | null,
+  clientThinkingType?: unknown
+): unknown {
   const record = asRecord(body);
   if (!record || !defaults) return body;
 
   const next = { ...(applyProviderRequestDefaults(record, defaults) as JsonRecord) };
   const thinkingType = typeof defaults.thinkingType === "string" ? defaults.thinkingType : null;
 
-  if (thinkingType && next.thinking === undefined) {
-    next.thinking = { type: thinkingType };
-  } else if (thinkingType && asRecord(next.thinking)?.type === "enabled") {
+  // Apply the connection default only when the client did not set a thinking
+  // type of its own; other thinking fields are merged and preserved.
+  if (
+    thinkingType &&
+    clientThinkingType === undefined &&
+    (next.thinking === undefined || asRecord(next.thinking))
+  ) {
     next.thinking = { ...asRecord(next.thinking), type: thinkingType };
   }
 
@@ -310,8 +318,13 @@ export class GlmExecutor extends DefaultExecutor {
     stream: boolean,
     credentials: ProviderCredentials
   ) {
+    const clientThinkingType = asRecord(asRecord(body)?.thinking)?.type;
     const cleanedBody = super.transformRequest(model, body, stream, credentials);
-    return applyGlmRequestDefaults(cleanedBody, this.config.requestDefaults as JsonRecord | null);
+    return applyGlmRequestDefaults(
+      cleanedBody,
+      this.config.requestDefaults as JsonRecord | null,
+      clientThinkingType
+    );
   }
 
   transformForTransport(

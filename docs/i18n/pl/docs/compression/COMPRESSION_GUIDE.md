@@ -32,91 +32,82 @@ OmniRoute implementuje modułowy potok kompresji promptów, który działa **pro
 
 ## Tryby kompresji
 
-### Wyłączony
+### Wyłączona
 
-Kompresja nie jest stosowana. Wszystkie wiadomości są przekazywane bez zmian.
+Brak kompresji. Wszystkie wiadomości przechodzą bez zmian.
 
-### Tryb lekki (~15% oszczędności, opóźnienie <1ms)
+### Tryb Lite (~15% oszczędności, opóźnienie <1 ms)
 
-Najbezpieczniejszy tryb — bez zmian semantycznych, wyłącznie porządkowanie formatowania:
+Najbezpieczniejszy tryb — zerowa zmiana semantyczna, tylko uporządkowanie formatowania:
 
-| Technika                 | Opis                                                           |
-| ------------------------ | -------------------------------------------------------------- |
-| `collapseWhitespace`     | Łączenie kolejnych pustych wierszy i usuwanie końcowych spacji |
-| `dedupSystemPrompt`      | Usuwanie zduplikowanych wiadomości systemowych                 |
-| `compressToolResults`    | Kompresowanie rozwlekłych wyników narzędzi/funkcji             |
-| `removeRedundantContent` | Usuwanie powtarzających się instrukcji                         |
-| `replaceImageUrls`       | Skracanie identyfikatorów URI danych obrazów base64            |
+| Technika                 | Opis                                                    |
+| ------------------------ | ------------------------------------------------------- |
+| `collapseWhitespace`     | Scala kolejne puste wiersze i spacje na końcach wierszy |
+| `dedupSystemPrompt`      | Usuwa zduplikowane komunikaty systemowe                 |
+| `compressToolResults`    | Kompresuje rozwlekłe wyniki narzędzi/funkcji            |
+| `removeRedundantContent` | Usuwa powtarzające się instrukcje                       |
+| `replaceImageUrls`       | Skraca identyfikatory URI danych obrazów base64         |
 
-**Najlepszy do:** Stałego użycia i przepływów pracy o krytycznym znaczeniu dla bezpieczeństwa.
+**Najlepszy do:** pracy w trybie ciągłym, procesów krytycznych dla bezpieczeństwa.
 
-### Tryb standardowy (~30% oszczędności)
+### Tryb Standard (~30% oszczędności)
 
-Inspirowany rozwiązaniem [Caveman](https://github.com/JuliusBrussee/caveman) — usuwa słowa-wypełniacze i rozwlekłe sformułowania, zachowując znaczenie:
+Zainspirowany projektem [Caveman](https://github.com/JuliusBrussee/caveman) — usuwa słowa-wypełniacze i rozwlekłe sformułowania, zachowując znaczenie:
 
-- Usuwa słowa-wypełniacze („proszę”, „myślę, że”, „zasadniczo”, „właściwie”)
-- Skraca rozwlekłe wyrażenia („w celu” → „aby”, „w wyniku” → „ponieważ”)
-- Usuwa uprzejme asekuracyjne sformułowania („Czy zechcesz...”, „Jeśli mógłbyś...”)
+- Usuwa słowa-wypełniacze („please”, „I think”, „basically”, „actually”)
+- Skraca rozwlekłe zwroty („in order to” → „to”, „as a result of” → „because”)
+- Usuwa grzecznościowe wstawki („Would you mind...”, „If you could possibly...”)
 - Ponad 30 reguł regex dostosowanych do promptów programistycznych
 
-**Najlepszy do:** Codziennych zadań programistycznych i zespołów dbających o koszty.
+**Najlepszy do:** codziennych procesów programistycznych, zespołów dbających o koszty.
 
-### Tryb agresywny (~50% oszczędności)
+### Tryb Aggressive (~50% oszczędności)
 
 Inteligentne zarządzanie historią podczas długich sesji:
 
-- **Starzenie wiadomości** — starsze wiadomości są stopniowo coraz bardziej kompresowane
-- **Kompresja wyników narzędzi** — długie wyniki narzędzi są skracane lub pomijane (pierwsze/ostatnie wiersze,
-  filtrowanie wierszy z dopasowaniami, kompaktowanie kluczy JSON)
+- **Starzenie wiadomości** — starsze wiadomości są stopniowo coraz silniej kompresowane
+- **Kompresja wyników narzędzi** — długie wyniki narzędzi są obcinane lub skracane (pierwsze/ostatnie wiersze, filtrowanie wierszy z dopasowaniami, kompaktowanie kluczy JSON)
 - **Mechanizmy ochrony integralności strukturalnej** — zapewniają spójność par `tool_use` + `tool_result`
-- **Uwzględnianie okna kontekstu** — respektuje limity tokenów poszczególnych modeli
+- **Świadomość okna kontekstu** — przestrzega limitów tokenów dla poszczególnych modeli
 
-**Najlepszy do:** Rozbudowanych sesji debugowania i dużych baz kodu.
+**Najlepszy do:** długich sesji debugowania, dużych baz kodu.
 
 ### Tryb Ultra (~75% oszczędności)
 
-Maksymalna kompresja w scenariuszach, w których liczba tokenów ma krytyczne znaczenie:
+Maksymalna kompresja do scenariuszy krytycznych pod względem tokenów:
 
-- **Przycinanie heurystyczne** — przycinanie tokenów w prozie na podstawie punktacji
-- **Zachowanie struktury** — wydzielone bloki kodu, kod wbudowany, adresy URL i identyfikatory są
-  zastępowane znacznikami i ponownie wstawiane bez żadnych zmian; nigdy nie są przycinane
-- **Opcjonalna warstwa SLM** — po skonfigurowaniu mały model lokalny może doprecyzować przycinanie
-- Niezależny od trybu agresywnego: nie uruchamia starzenia wiadomości, kompresji wyników narzędzi
-  ani awaryjnego modułu podsumowującego (tylko awaria warstwy SLM może skierować przebieg awaryjny
-  przez tryb agresywny)
+- **Przycinanie heurystyczne** — przycinanie tokenów prozy na podstawie punktacji
+- **Zachowanie struktury** — blok kodu, kod inline, adresy URL i identyfikatory są zamieniane na znaczniki (tombstone) i ponownie zszywane w oryginalnej postaci — nigdy nie są przycinane
+- **Opcjonalna warstwa SLM** — po skonfigurowaniu mały lokalny model może udoskonalić przycinanie
+- Niezależny od trybu Aggressive: nie uruchamia starzenia wiadomości, kompresji wyników narzędzi ani awaryjnego streszczacza (tylko awaria warstwy SLM może skierować przebieg awaryjny przez tryb aggressive)
 
-**Najlepszy do:** Sytuacji, w których wielokrotnie osiągasz limity kontekstu.
+**Najlepszy do:** sytuacji, gdy wielokrotnie osiągasz limity kontekstu.
 
-### Tryb RTK (60–90% po stronie dostawcy nadrzędnego)
+### Tryb RTK (zakres 60–90% upstream)
 
-Tryb RTK jest zoptymalizowany pod kątem obszernych wyników narzędzi pojawiających się w sesjach agentów programistycznych:
+Tryb RTK jest zoptymalizowany pod kątem rozwlekłych wyników narzędzi pojawiających się w sesjach agentów programistycznych:
 
-- Wykrywa klasy poleceń/wyników, takie jak `git status`, `git diff`, `git log`, narzędzia uruchamiające testy,
-  kompilacje TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audyty/instalacje npm, logi Docker, wyniki narzędzi infrastrukturalnych
-  oraz ogólne wyniki powłoki
+- Wykrywa klasy poleceń/wyjść, takie jak `git status`, `git diff`, `git log`, programy uruchamiające testy, kompilacje TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalacje, logi Dockera, wyjście infrastruktury oraz ogólne wyjście powłoki
 - Stosuje pakiety filtrów JSON z `open-sse/services/compression/engines/rtk/filters/`
-- Importuje filtry schematu RTK TOML v1 z projektowych lub globalnych plików `filters.toml`, z walidacją
-  testów wbudowanych i kontrolą zaufania dla plików projektowych
-- Zawiera 55 wbudowanych filtrów z osadzonymi przykładami weryfikacyjnymi
-- Usuwa sekwencje sterujące ANSI, paski postępu, powtarzające się wiersze i nieistotny szum
-- Zachowuje awarie, błędy, ostrzeżenia, zmienione pliki, podsumowania i końcową część długich wyników
-- Obsługuje projektowe filtry z kontrolą zaufania, filtry globalne oraz opcjonalne odzyskiwanie zredagowanych surowych wyników
+- Importuje filtry RTK TOML schema v1 z projektowych lub globalnych plików `filters.toml`, z walidacją przez testy inline i kontrolą zaufania dla plików projektowych
+- Dostarcza 56 wbudowanych filtrów z przykładami weryfikacji inline
+- Usuwa sekwencje sterujące ANSI, paski postępu, powtarzające się wiersze i szum niewymagający reakcji
+- Zachowuje niepowodzenia, błędy, ostrzeżenia, zmienione pliki, podsumowania i końcówkę długiego wyjścia
+- Obsługuje filtry projektowe z kontrolą zaufania, filtry globalne oraz opcjonalne odzyskiwanie surowego wyjścia po anonimizacji
 
-**Najlepszy do:** Sesji agentów obejmujących powłokę, kompilowanie, testowanie, git, grep i transkrypcje wyników plikowych.
+**Najlepszy do:** sesji agentowych z transkryptami powłoki, kompilacji, testów, git, grep i wyjścia plików.
 
-### Tryb warstwowy (78–95% kwalifikującego się zakresu)
+### Tryb Stacked (zakres kwalifikowany: 78–95%)
 
-Tryb warstwowy uruchamia wiele silników kompresji w deterministycznej kolejności. Domyślny potok to:
+Tryb Stacked uruchamia wiele silników kompresji w deterministycznej kolejności. Domyślny pipeline to:
 
 ```txt
 RTK -> Caveman
 ```
 
-Ta kolejność najpierw kompaktuje wyniki terminala/narzędzi, a następnie stosuje semantyczne skracanie Caveman do
-pozostałej części promptu w języku naturalnym. Potoki warstwowe można konfigurować globalnie lub za pomocą
-kombinacji kompresji przypisanych do kombinacji routingu.
+Taka kolejność najpierw zapewnia zwartość wyjścia terminala/narzędzi, a następnie stosuje semantyczną kondensację Caveman do pozostałego promptu w języku naturalnym. Pipeline'y Stacked można konfigurować globalnie lub poprzez kombinacje kompresji przypisane do kombinacji routingu.
 
-**Najlepszy do:** Mieszanego kontekstu zawierającego duże logi narzędzi oraz instrukcje użytkownika lub podsumowania asystenta.
+**Najlepszy do:** mieszanych kontekstów z dużymi logami narzędzi oraz instrukcjami użytkownika lub podsumowaniami asystenta.
 
 ---
 

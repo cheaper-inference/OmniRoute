@@ -11,7 +11,12 @@
 // button, badge, "cache impact" label) is translated.
 
 import { useTranslations } from "next-intl";
-import type { CacheImpact, EngineGuidance } from "../../../../../../open-sse/services/compression/engineCatalog.ts";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import type {
+  CacheImpact,
+  EngineGuidance,
+} from "../../../../../../open-sse/services/compression/engineCatalog.ts";
 
 const CACHE_IMPACT_LABEL: Record<CacheImpact, string> = {
   none: "None",
@@ -38,27 +43,30 @@ export default function EngineGuidanceDetail({
     <div className="mt-1 flex flex-col gap-1">
       <div className="flex items-center gap-2">
         {!guidance.lossy && (
-          <span
+          <Badge
+            size="sm"
+            variant="success"
             data-testid={`engine-safe-default-${id}`}
-            className="rounded border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-emerald-500"
+            className="text-[10px] uppercase tracking-wider"
           >
             {t("compressionGuidanceSafeDefault")}
-          </span>
+          </Badge>
         )}
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           data-testid={`engine-guidance-toggle-${id}`}
           onClick={onToggle}
           aria-expanded={expanded}
-          className="text-[10px] uppercase tracking-wider text-primary hover:underline"
+          className="h-6 min-h-6 px-1.5 text-[10px] uppercase tracking-wider text-primary"
         >
           {expanded ? t("compressionGuidanceHide") : t("compressionGuidanceShow")}
-        </button>
+        </Button>
       </div>
       {expanded && (
         <div
           data-testid={`engine-guidance-detail-${id}`}
-          className="rounded border border-border/50 bg-bg-subtle p-2 text-xs text-text-muted"
+          className="rounded border border-border bg-bg-subtle p-2 text-xs text-text-muted"
         >
           <p>{guidance.tradeoffs}</p>
           <p className="mt-1">

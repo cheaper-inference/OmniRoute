@@ -45,11 +45,13 @@ export interface SearchProviderConfig {
    */
   allowClientBaseUrlOverride?: boolean;
   /**
-   * Per-call price by request mode (the `mode` field of the built request body),
-   * for providers whose price depends on it. Unlisted modes use `costPerQuery`.
+   * Per-call price by request mode (the `costModeField` field of the built request
+   * body), for providers whose price depends on it. Unlisted modes use `costPerQuery`.
    * See computeSearchCostUsd() in open-sse/handlers/search/reportedCost.ts.
    */
   costByMode?: Record<string, number>;
+  /** Request-body field that holds the mode priced by `costByMode` (default `"mode"`). */
+  costModeField?: string;
   /** Results included in the per-call price; each one above it adds `extraResultCost`. */
   includedResults?: number;
   extraResultCost?: number;
@@ -112,6 +114,10 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "x-api-key",
     costPerQuery: 0.007,
+    // Exa 3.0: `type: "lite"` is $4/1k requests vs $7/1k for the default `auto`.
+    // The legacy `instant` type is billed like lite; `fast` like auto (live costDollars).
+    costByMode: { lite: 0.004, instant: 0.004 },
+    costModeField: "type",
     freeMonthlyQuota: 1000,
     searchTypes: ["web", "news"],
     defaultMaxResults: 5,
@@ -145,7 +151,9 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     method: "POST",
     authType: "apikey",
     authHeader: "bearer",
-    costPerQuery: 0.005,
+    // buildNimbleRequest() always sends search_depth "lite": $1.10 per 1K
+    // (standard is $5.00). https://docs.nimbleway.com/nimble-sdk/admin/pricing
+    costPerQuery: 0.0011,
     freeMonthlyQuota: 0,
     searchTypes: ["web", "news"],
     defaultMaxResults: 5,
@@ -153,6 +161,22 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     // Kept below GLOBAL_TIMEOUT_MS (handlers/search.ts) so a stalled Nimble call
     // still leaves budget for the failover provider instead of burning the whole
     // request window.
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+  },
+
+  "kimi-search": {
+    id: "kimi-search",
+    name: "Kimi Search",
+    baseUrl: "https://api.moonshot.ai/v1/tools/search",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "bearer",
+    costPerQuery: 0.005, // $0.005 per successful non-empty call — platform.kimi.ai/docs/pricing/tools
+    freeMonthlyQuota: 0,
+    searchTypes: ["web"],
+    defaultMaxResults: 5,
+    maxMaxResults: 20,
     timeoutMs: 10_000,
     cacheTTLMs: 5 * 60 * 1000,
   },
@@ -488,6 +512,8 @@ export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
   x: "x-search",
   xquik: "xquik-search",
   xquik_search: "xquik-search",
+  kimi: "kimi-search",
+  moonshot: "kimi-search",
   anysearch: "anysearch-search",
   anysearch_search: "anysearch-search",
   parallel: "parallel-search",
