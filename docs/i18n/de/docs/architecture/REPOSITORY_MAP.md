@@ -111,150 +111,150 @@ OmniRoute/
 
 ---
 
-## `src/` — Next.js-Anwendung
+## `src/` – Next.js Anwendung
 
 ```
 src/
-├── app/                 # App Router (Seiten + API-Routen + Statusseiten + Landingpage)
-├── lib/                 # Kernbibliotheken / Domänenmodule (80 Unterverzeichnisse + ~70 Dateien auf oberster Ebene)
-├── domain/              # Reine Domänenlogik (Richtlinien-Engine, Fallback, Kosten, Sperrung, comboResolver, Bewertung)
-├── server/              # Ausschließlich serverseitige Module (Autorisierungspipeline, CORS, Authentifizierungs-Middleware) — können nicht vom Client importiert werden
-├── shared/              # Sichere gemeinsame Nutzung durch Server und Client (Konstanten, Typen, Validierung, Verträge, Hilfsfunktionen)
-├── i18n/                # next-intl-Konfiguration + Nachrichten-JSON pro Gebietsschema (67 Gebietsschemas)
-├── middleware/          # Next.js-Middleware (Anreicherung von Anfragen, Erkennung des Gebietsschemas)
-├── mitm/                # MITM-Proxy-Kern: Zertifikatserzeugung/-installation, Handler, Ziele, Inspektor, Masken, Passthrough
-│   ├── handlers/        # 9 IDE-Agent-Handlerklassen, die MitmHandlerBase erweitern (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Schicht zur Datenverkehrserfassung: Puffer (In-Memory-Ringpuffer), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Verbindungscode für Modelladapter (Legacy-Shim)
-├── scripts/             # Wartungsskripte innerhalb des Quellbaums (z. B. backfillAggregation)
-├── sse/                 # Legacy-SSE-Handler/-Dienste (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Legacy-In-Memory-Speicher (wird schrittweise durch src/lib/db ersetzt)
-├── types/               # Gemeinsam genutzte TS-Typdateien
-├── instrumentation.ts   # Next.js-Telemetrie-Hook (Browser + Edge)
-├── instrumentation-node.ts  # Ausschließlich Node-spezifische Instrumentierung
-└── proxy.ts             # Einstiegspunkt-Shim für HTTP-Proxy
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node-only instrumentation
+└── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` — App Router (Next.js 16)
+### `src/app/` – App-Router (Next.js 16)
 
-| Pfad                                                                         | Zweck                                                                                                                                                                                                                                                                                                                                   |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | Öffentliche OpenAI-kompatible API (~25 Unterrouten: Chat, Vervollständigungen, Einbettungen, Dateien, Stapelverarbeitung, Audio, Bilder, Videos, Musik, Reranking, Moderation, Suche, WS, Agenten, Konten, Anbieter usw.)                                                                                                               |
-| `app/api/v1beta/`                                                            | API-Endpunkte im Gemini-Stil                                                                                                                                                                                                                                                                                                            |
-| `app/api/playground/`                                                        | Playground-Studio-Routen: `improve-prompt/` (POST — LLM-Prompt-Umschreiber), `presets/` (GET-Liste / POST-Erstellung), `presets/[id]/` (GET / PUT / DELETE) — siehe `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                              |
-| `app/api/` (nicht v1)                                                        | Verwaltungs-/Admin-Routen (~60 Verzeichnisse: Anbieter, Kombinationen, Einstellungen, MCP, A2A, Evaluierungen, Speicher, Fähigkeiten, Webhooks, Compliance, Resilienz, Monitoring, Tunnel, CLI-Tools usw.)                                                                                                                              |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge-REST-API — 12 Routen (Serversteuerung, Agentenstatus/DNS/Zuordnungen, Umgehung, Zertifikat, Upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Siehe `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                            |
-| `app/api/tools/traffic-inspector/`                                           | Traffic-Inspector-REST- und WS-API — 16+ Routen (Anfragen, Sitzungen, Hosts, Erfassungsmodi, Export, WS). LOCAL_ONLY + SPAWN_CAPABLE. Siehe `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                                  |
-| `app/a2a/`                                                                   | A2A-JSON-RPC-2.0-Einstiegspunkt (`POST /a2a`)                                                                                                                                                                                                                                                                                           |
-| `app/.well-known/agent.json/`                                                | A2A-Agentenkarte (Erkennung)                                                                                                                                                                                                                                                                                                            |
-| `app/(dashboard)/dashboard/`                                                 | Dashboard-UI-Seiten (50+ Bereiche, ~118 page.tsx-Dateien: Anbieter, Kombinationen, Einstellungen, Speicher, Fähigkeiten, Webhooks, Evaluierungen, Audit, Stapelverarbeitung, Cache, Kosten, Zustand, System, Aktivität usw.)                                                                                                            |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio-UI (3 Registerkarten: Suche/Scraping/Vergleich + SearchConceptCard + ProviderCatalog) — siehe `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                              |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (Plan 21): `page.tsx` (Grundgerüst mit 3 Registerkarten), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge-Dashboard-Seite — Serverkarte, 9 Agentenkarten, Einrichtungsassistent, Modellzuordnung, Umgehungsliste. i18n PT-BR + EN. Siehe `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                            |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic-Inspector-Dashboard-Seite — DevTools-Teilansicht, 7 Detailregisterkarten, 4 Schalter für Erfassungsmodi, Sitzungsaufzeichnung, Kontextfarbgebung. i18n PT-BR + EN. Siehe `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                |
-| `app/(dashboard)/dashboard/activity/`                                        | Aktivitätsfeed-Seite (Gruppe B): `page.tsx` (Server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — siehe `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                             |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Seite für die gemeinsame Quotennutzung (Gruppe B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                          |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfigurationsseite für Anbietertarife (Gruppe B): `page.tsx` + `ProviderPlanConfigClient.tsx` — Überschreibung der Quotendimensionen pro Verbindung                                                                                                                                                                                    |
-| `app/docs/`                                                                  | Eingebettete Dokumentationsansicht (rendert `docs/*.md`)                                                                                                                                                                                                                                                                                |
-| `app/landing/`                                                               | Marketing-Landingpage                                                                                                                                                                                                                                                                                                                   |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Authentifizierungsbezogene Seiten                                                                                                                                                                                                                                                                                                       |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP-Fehlerseiten                                                                                                                                                                                                                                                                                                                       |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Statische Seiten/Statusseiten                                                                                                                                                                                                                                                                                                           |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Root-Layout, Startseite, PWA-Manifest, globales CSS                                                                                                                                                                                                                                                                                     |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Fehlergrenzen                                                                                                                                                                                                                                                                                                                           |
+| Weg                                                                          | Zweck                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `app/api/v1/`                                                                | Öffentliches OpenAI-kompatibles API (~ 25 Unterrouten: Chat, Vervollständigungen, Einbettungen, Dateien, Stapel, Audio, Bilder, Videos, Musik, Neubewertung, Moderationen, Suche, WS, Agenten, Konten, Anbieter usw.)                                                                                              |
+| `app/api/v1beta/`                                                            | API -Endpunkte im Gemini-Stil                                                                                                                                                                                                                                                                                      |
+| `app/api/playground/`                                                        | Playground Studio-Routen: `improve-prompt/` (POST – LLM Prompt Rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) – siehe `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                 |
+| `app/api/` (nicht v1)                                                        | Management/admin -Routen (~ 60-Verzeichnisse: Anbieter, Kombinationen, Einstellungen, MCP, A2A, Auswertungen, Speicher, Fähigkeiten, Webhooks, Compliance, Belastbarkeit, Überwachung, Tunnel, CLI-Tools usw.)                                                                                                     |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API – 12 Routen (Serversteuerung, Agent state/DNS/mappings, Bypass, Zertifikat, Upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Siehe `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                              |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API – 16 + Routen (Anfragen, Sitzungen, Hosts, Erfassungsmodi, Export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Siehe `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                               |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0-Einstiegspunkt (`POST /a2a`)                                                                                                                                                                                                                                                                      |
+| `app/.well-known/agent.json/`                                                | A2A Agent Card (Entdeckung)                                                                                                                                                                                                                                                                                        |
+| `app/(dashboard)/dashboard/`                                                 | Dashboard- UI Seiten (50 + Abschnitte, ~ 118 page.tsx Dateien: Anbieter, Kombinationen, Einstellungen, Speicher, Fähigkeiten, Webhooks, Auswertungen, Audit, Batch, Cache, Kosten, Zustand, System, Aktivität usw.)                                                                                                |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 Registerkarten: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) – siehe `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                            |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (Plan 21): `page.tsx` (3-Tab-Shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge Dashboard-Seite – Serverkarte, 9 Agentenkarten, Einrichtungsassistent, Modellzuordnung, Umgehungsliste. i18n PT-BR + EN. Siehe `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                       |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector-Dashboard-Seite – DevTools Split, 7 Detail-Registerkarten, 4 Aufnahmemodus-Umschaltungen, Sitzungsaufzeichnung, Kontexteinfärbung. i18n PT-BR + EN. Siehe `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                |
+| `app/(dashboard)/dashboard/activity/`                                        | Aktivitäts-Feed-Seite (Gruppe B): `page.tsx` (Server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` – siehe `docs/architecture/MONITORING_SECTIONS.md`                                                                                                       |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Seite zur Quotenteilung (Gruppe B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                    |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfigurationsseite des Anbieterplans (Gruppe B): `page.tsx` + `ProviderPlanConfigClient.tsx` – Kontingentdimensionen pro Verbindung überschreiben                                                                                                                                                                 |
+| `app/docs/`                                                                  | Eingebetteter Dokumentations-Viewer (rendert `docs/*.md`)                                                                                                                                                                                                                                                          |
+| `app/landing/`                                                               | Marketing-Landingpage                                                                                                                                                                                                                                                                                              |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Authentifizierungsbezogene Seiten                                                                                                                                                                                                                                                                                  |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP -Fehlerseiten                                                                                                                                                                                                                                                                                                 |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status Seiten                                                                                                                                                                                                                                                                                               |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Root-Layout, Home, PWA -Manifest, globales CSS                                                                                                                                                                                                                                                                     |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Fehlergrenzen                                                                                                                                                                                                                                                                                                      |
 
-### `src/lib/` — Kernbibliotheken (~50 Module)
+### `src/lib/` – Kernbibliotheken (~ 50 Module)
 
-| Modul                                    | Zweck                                                                                                                                                                                                                                                                                                                                         |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A-Protokoll-Task-Manager, Skills (5), Streaming                                                                                                                                                                                                                                                                                             |
-| `acp/`                                   | CLI-Agentenregistrierung (lokale CLI-Erkennung — siehe `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                            |
-| `api/`                                   | Gemeinsam genutzte API-Hilfsfunktionen (`requireManagementAuth`, Validierung)                                                                                                                                                                                                                                                                 |
-| `auth/`                                  | Sitzungen, Passwort-Hashing, Tokenvalidierung                                                                                                                                                                                                                                                                                                 |
-| `batches/`                               | Handler für die OpenAI Batches API                                                                                                                                                                                                                                                                                                            |
-| `catalog/`                               | Zod-Validierung des Anbieterkatalogs + Ermittlung von Fähigkeiten                                                                                                                                                                                                                                                                             |
-| `cloudAgent/`                            | Cloud-Agenten (Codex Cloud, Devin, Jules) — siehe `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                                            |
-| `combos/`                                | Combo-Auflösung + Hilfsfunktionen zur Neusortierung                                                                                                                                                                                                                                                                                           |
-| `audit/`                                 | Hilfsfunktionen für den Aktivitätsfeed: `highLevelActions.ts` (Positivliste + `isHighLevelAction()`), `activityIcons.ts` (Zuordnung von Aktion → Symbol/Verb), `timeline.ts` (groupByDay/relativeTime) — siehe `docs/architecture/MONITORING_SECTIONS.md`                                                                                     |
-| `compliance/`                            | Auditprotokoll + Anbieter-Audit — siehe `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                                         |
-| `compression/`                           | Bindeglied zur Komprimierungs-Engine (Engines befinden sich in `open-sse/services/compression/`)                                                                                                                                                                                                                                              |
-| `config/`                                | Hilfsfunktionen für die Laufzeitkonfiguration                                                                                                                                                                                                                                                                                                 |
-| `db/`                                    | Über 120 domänenspezifische DB-Module + 168 Migrationen (für SQLite immer diese Module verwenden)                                                                                                                                                                                                                                             |
-| `quota/`                                 | Engine zur gemeinsamen Quotennutzung: `dimensions.ts` (Typen/Zod), `types.ts` (QuotaStore-Schnittstelle), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — siehe `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Radar-Client für den Katalog kostenloser Modelle: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — siehe `docs/frameworks/RADAR.md`                                                                                                                                               |
-| `display/`                               | Hilfsfunktionen zur UI-Formatierung (Kosten, Latenz usw.)                                                                                                                                                                                                                                                                                     |
-| `embeddings/`                            | Hilfsfunktionen für den Embeddings-Dienst                                                                                                                                                                                                                                                                                                     |
-| `env/`                                   | Parsen und Validieren von Umgebungsvariablen                                                                                                                                                                                                                                                                                                  |
-| `evals/`                                 | Evaluierungsframework (Suites, Runner, Laufzeit) — siehe `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                           |
-| `guardrails/`                            | PII-Maskierung, Prompt-Injection, Vision-Bridge — siehe `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                         |
-| `jobs/`                                  | Hintergrundjobs (Cron-ähnlich)                                                                                                                                                                                                                                                                                                                |
-| `memory/`                                | Konversationsgedächtnis (SQLite FTS5 + sqlite-vec-Hybrid-RRF + Qdrant-Stufe 2) — siehe `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                            |
-| `memory/embedding/`                      | Embedding-Schicht für mehrere Quellen: `index.ts` (Resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (Plan 21)                                                                                                                                                                                        |
-| `memory/vectorStore.ts`                  | Wrapper für sqlite-vec v0.1.9 — KNN-Brute-Force + Hybrid-RRF (FTS5 + Vektor, k=60). Verzögerte Initialisierung; funktioniert bei nicht verfügbarem sqlite-vec mit reduziertem Funktionsumfang weiter. (Plan 21)                                                                                                                               |
-| `memory/reindex.ts`                      | `runReindexBatch()` — verarbeitet Erinnerungen mit `needs_reindex=1` im Hintergrund; wird von `POST /api/memory/reindex` und dem Lazy-Backfill-Pfad aufgerufen. (Plan 21)                                                                                                                                                                     |
-| `monitoring/`                            | Zustandsprüfungen, Ausgabe von Metriken                                                                                                                                                                                                                                                                                                       |
-| `oauth/`                                 | OAuth-/Importabläufe für 22 Anbietermodule (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                                        |
-| `plugins/`                               | Plugin-Registry                                                                                                                                                                                                                                                                                                                               |
-| `promptCache/`                           | Prompt-Cache-Haltepunkte im Anthropic-Stil                                                                                                                                                                                                                                                                                                    |
-| `skills/`                                | Skills-Framework (integriert + Marktplatz + SkillsSH) — siehe `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                                     |
-| `playground/`                            | Gemeinsam genutzte Hilfsfunktionen für Playground Studio: `codeExport.ts` (curl-/Python-/TS-Generator), `promptImprover.ts` (Meta-Prompt-Builder), `streamMetrics.ts` (reine TTFT-/TPS-Berechnung), `types.ts` (Preistabelle) — siehe `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                  |
-| `webhookDispatcher.ts`                   | HMAC-Webhook-Zustellung — siehe `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                                 |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnel-Manager — siehe `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                                            |
-| `cloudSync.ts`, `initCloudSync.ts`       | Optionale Cloud-Synchronisierung des Zustands                                                                                                                                                                                                                                                                                                 |
-| `localDb.ts`                             | Reexport-Sammelmodul für Datenbankmodule (keine Logik — nur Reexports)                                                                                                                                                                                                                                                                        |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Anfrage-Caching und Idempotenz                                                                                                                                                                                                                                                                                                                |
-| (~30 weitere Dateien auf oberster Ebene) | Spezialisierte Hilfsfunktionen (logEnv, modelsDevSync, piiSanitizer usw.)                                                                                                                                                                                                                                                                     |
+| Modul                                    | Zweck                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A -Protokoll-Task-Manager, Fähigkeiten (5), Streaming                                                                                                                                                                                                                                                                            |
+| `acp/`                                   | CLI Agent Registry (lokale CLI -Erkennung – siehe `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                      |
+| `api/`                                   | Gemeinsam genutzte API Helfer (`requireManagementAuth`, Validierung)                                                                                                                                                                                                                                                               |
+| `auth/`                                  | Sitzung, Passwort-Hashing, Token-Validierung                                                                                                                                                                                                                                                                                       |
+| `batches/`                               | OpenAI Batches, API Handler                                                                                                                                                                                                                                                                                                        |
+| `catalog/`                               | Anbieterkatalog Zod -Validierung + -Fähigkeitsauflösung                                                                                                                                                                                                                                                                            |
+| `cloudAgent/`                            | Cloud-Agenten (Codex Cloud, Devin, Jules) – siehe `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                                 |
+| `combos/`                                | Combo-Resolution- + -Reorder-Helfer                                                                                                                                                                                                                                                                                                |
+| `audit/`                                 | Aktivitäts-Feed-Helfer: `highLevelActions.ts` (Zulassungsliste + `isHighLevelAction()`), `activityIcons.ts` (Aktion → icon/verb Karte), `timeline.ts` (groupByDay/relativeTime) – siehe `docs/architecture/MONITORING_SECTIONS.md`                                                                                                 |
+| `compliance/`                            | Audit-Protokoll + Provider-Audit – siehe `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                             |
+| `compression/`                           | Kleber für Kompressionsmotoren (Motoren leben in `open-sse/services/compression/`)                                                                                                                                                                                                                                                 |
+| `config/`                                | Laufzeitkonfigurationshelfer                                                                                                                                                                                                                                                                                                       |
+| `db/`                                    | 120 + Domäne, DB Module + 168 Migrationen (für SQLite immer hier durchgehen)                                                                                                                                                                                                                                                       |
+| `quota/`                                 | Kontingent-Sharing-Engine: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore Schnittstelle), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` – siehe `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Radar-Free-Model-Katalog-Client: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) – siehe `docs/frameworks/RADAR.md`                                                                                                                                                     |
+| `display/`                               | UI -Formatierungshilfen (Kosten, Latenz usw.)                                                                                                                                                                                                                                                                                      |
+| `embeddings/`                            | Helfer des Einbettungsdienstes                                                                                                                                                                                                                                                                                                     |
+| `env/`                                   | Env-Variablenparsing, + -Validierung                                                                                                                                                                                                                                                                                               |
+| `evals/`                                 | Eval-Framework (Suites, Runner, Runtime) – siehe `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                        |
+| `guardrails/`                            | PII Masker, sofortige Injektion, Sichtbrücke – siehe `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                 |
+| `jobs/`                                  | Hintergrundjobs (Cron-ähnlich)                                                                                                                                                                                                                                                                                                     |
+| `memory/`                                | Konversationsgedächtnis (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant Tier 2) – siehe `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                  |
+| `memory/embedding/`                      | Einbettungsschicht mit mehreren Quellen: `index.ts` (Resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (Plan 21)                                                                                                                                                                           |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 Wrapper – KNN Brute-Force + Hybrid RRF (FTS5 + -Vektor, K = 60). Lazy-init wird ordnungsgemäß abgebaut, wenn sqlite-vec nicht verfügbar ist. (Plan 21)                                                                                                                                                           |
+| `memory/reindex.ts`                      | `runReindexBatch()` – verarbeitet Erinnerungen mit `needs_reindex=1` im Hintergrund; aufgerufen von `POST /api/memory/reindex` und Lazy-Backfill-Pfad. (Plan 21)                                                                                                                                                                   |
+| `monitoring/`                            | Gesundheitschecks, Metrikausgabe                                                                                                                                                                                                                                                                                                   |
+| `oauth/`                                 | OAuth/import -Flows für 22 Anbietermodule (Agy, Antigravity, Claude, Cline, Codebuddy-CN, Codex, Cursor, Devin-Desktop, Ghe-Copilot, Github, Gitlab-Duo, Grok-Cli-Oauth, Grok-Cli, Kilocode, Kimi-Coding, Kiro, Openference, Qoder, Trae, Xai-Oauth, Zed-Hosted, Zed)                                                              |
+| `plugins/`                               | Plugin-Registrierung                                                                                                                                                                                                                                                                                                               |
+| `promptCache/`                           | Prompt-Cache-Haltepunkte im Anthropic-Stil                                                                                                                                                                                                                                                                                         |
+| `skills/`                                | Kompetenzrahmen (integrierter + -Marktplatz + SkillsSH) – siehe `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                        |
+| `playground/`                            | Gemeinsame Helfer von Playground Studio: `codeExport.ts` (curl/Python/TS Generator), `promptImprover.ts` (Meta-Prompt-Builder), `streamMetrics.ts` (reines TTFT/TPS), `types.ts` (Preistabelle) – siehe `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                     |
+| `webhookDispatcher.ts`                   | HMAC Webhook-Bereitstellung – siehe `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                  |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnelmanager – siehe `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                                  |
+| `cloudSync.ts`, `initCloudSync.ts`       | Optionale Cloud-Synchronisierung des Status                                                                                                                                                                                                                                                                                        |
+| `localDb.ts`                             | Fass für DB-Module erneut exportieren (keine Logik – nur erneute Exporte)                                                                                                                                                                                                                                                          |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | Caching- + Idempotenz anfordern                                                                                                                                                                                                                                                                                                    |
+| (~ 30 weitere Top-Level-Dateien)         | Spezialisierte Helfer (logEnv, modelsDevSync, piiSanitizer usw.)                                                                                                                                                                                                                                                                   |
 
-### `src/lib/db/` — Datenbank (147 Module + 208 Migrationen)
+### `src/lib/db/` – Datenbank (147 Module + 208 Migrationen)
 
-| Unterverzeichnis          | Zweck                                                                                                                                                                                |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `db/core.ts`              | `getDbInstance()`-Singleton mit WAL-Journaling                                                                                                                                       |
-| `db/migrations/`          | Versionierte SQL-Dateien (idempotent, transaktional). `073_memory_vec.sql` fügt `memory_vec_meta` und die Spalte `needs_reindex` hinzu (Plan 21).                                    |
-| `db/playgroundPresets.ts` | CRUD-Modul für Voreinstellungen von Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
-| `db/memoryVec.ts`         | CRUD für `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) sowie `markMemoryNeedsReindex`, `getMemoryReindexQueue` usw. (Plan 21)                       |
-| `db/<domain>.ts`          | Ein Modul pro Domäne: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache usw.             |
+| Unterverzeichnis          | Zweck                                                                                                                                                                                                             |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | `getDbInstance()` Singleton mit WAL -Journaling                                                                                                                                                                   |
+| `db/migrations/`          | Versionierte SQL Dateien (idempotent, transaktional). `073_memory_vec.sql` fügt `memory_vec_meta` + `needs_reindex` hinzu (Plan 21).                                                                              |
+| `db/playgroundPresets.ts` | CRUD Modul für Playground Studio-Voreinstellungen (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                                  |
+| `db/memoryVec.ts`         | CRUD für `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` usw. (Plan 21)                                                        |
+| `db/<domain>.ts`          | Ein Modul pro Domäne: Anbieter, Kombinationen, API-Schlüssel, Benutzer, Sitzungen, Nutzung, Prüfprotokoll, Webhooks, Fähigkeiten, Speichereinträge, Cloud-Agent-Aufgaben, Auswertungen* \* , reasoning_cache usw. |
 
 ### `src/domain/`
 
-| Modul                  | Zweck                                              |
-| ---------------------- | -------------------------------------------------- |
-| `policy.ts`            | Richtlinien-Engine                                 |
-| `fallbackPolicy.ts`    | Fallback-Entscheidungsbaum                         |
-| `costRules.ts`         | Regeln für die Kostenberechnung                    |
-| `lockoutPolicy.ts`     | Sperrrichtlinie für Modelle/Verbindungen           |
-| `tagRouter.ts`         | Tag-basiertes Routing                              |
-| `comboResolver.ts`     | Combo-Auflösung (von der Combo-Engine verwendet)   |
-| `modelAvailability.ts` | Verfügbarkeitsprüfung pro Modell                   |
-| `assessment/`          | Modellbewertung (Phase 1 von RFC-AUTO-ASSESSMENT ) |
+| Modul                  | Zweck                                                 |
+| ---------------------- | ----------------------------------------------------- |
+| `policy.ts`            | Richtlinien-Engine                                    |
+| `fallbackPolicy.ts`    | Fallback-Entscheidungsbaum                            |
+| `costRules.ts`         | Kostenberechnungsregeln                               |
+| `lockoutPolicy.ts`     | Model/connection -Sperrrichtlinie                     |
+| `tagRouter.ts`         | Tag-basiertes Routing                                 |
+| `comboResolver.ts`     | Combo-Auflösung (wird von der Combo-Engine verwendet) |
+| `modelAvailability.ts` | Verfügbarkeitsprüfung pro Modell                      |
+| `assessment/`          | Modellbewertung (Phase 1 von RFC-AUTO-ASSESSMENT)     |
 
 ### `src/server/`
 
 | Modul    | Zweck                                                                                                  |
 | -------- | ------------------------------------------------------------------------------------------------------ |
-| `authz/` | Autorisierungspipeline: `classify` → `policies` → `enforce` — siehe `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | CORS-Konfiguration                                                                                     |
+| `authz/` | Autorisierungspipeline: `classify` → `policies` → `enforce` – siehe `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | CORS -Konfiguration                                                                                    |
 | `auth/`  | Sitzungs-Middleware                                                                                    |
 
 ### `src/shared/`
 
 | Modul                            | Zweck                                                                                                 |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `components/`                    | Dashboard-Komponenten-API: Adapter für `packages/ui-kit` — siehe `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: von den Ansichten verwendete Symbolnamen → Lucide-Komponenten (`<Icon>`)                  |
-| `constants/providers.ts`         | **375 Anbieter** mit Zod-Validierung (maßgebliche Quelle)                                             |
-| `constants/cliTools.ts`          | Register externer CLI-Tools                                                                           |
+| `components/`                    | Dashboard-Komponente API: Adapter über `packages/ui-kit` – siehe `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: Von den Bildschirmen verwendete Symbolnamen → Lucide-Komponenten (`<Icon>`)               |
+| `constants/providers.ts`         | **377 Anbieter** mit Zod -Validierung (Quelle der Wahrheit)                                           |
+| `constants/cliTools.ts`          | Externe CLI Tool-Registrierung                                                                        |
 | `constants/routingStrategies.ts` | **20 Routing-Strategien** mit Prioritäten                                                             |
-| `constants/publicApiRoutes.ts`   | Routen, die Bearer-Authentifizierung (anstelle von Verwaltungs-Authentifizierung) erfordern           |
-| `constants/upstreamHeaders.ts`   | Sperrliste für Header bei Upstream-Anfragen                                                           |
-| `validation/schemas.ts`          | ~80 Zod-Schemas (zentrale maßgebliche Quelle für API-Verträge)                                        |
-| `validation/helpers.ts`          | Hilfsfunktionen für die Zod-Validierung (`validateBody` usw.)                                         |
-| `types/`                         | Gemeinsam genutzte TS-Typen                                                                           |
-| `contracts/`                     | Öffentliche API-Verträge (über `files:` in `package.json` eingebunden)                                |
-| `utils/circuitBreaker.ts`        | Circuit Breaker für Anbieter (siehe `docs/architecture/RESILIENCE_GUIDE.md`)                          |
-| `utils/apiAuth.ts`               | API-Schlüsselvalidierung, Bereichsprüfung                                                             |
-| `utils/fetchTimeout.ts`          | Timeout-/Abbruch-Wrapper für Upstream-Abrufe                                                          |
-| `utils/releaseNotes.ts`          | Parser für geschlossene v2-/Legacy-Ankündigungen, Lokalisierung und Verwerfen nach ID                 |
+| `constants/publicApiRoutes.ts`   | Routen, die eine Bearer-Authentifizierung (vs. Management-Authentifizierung) erfordern                |
+| `constants/upstreamHeaders.ts`   | Header-Denylist für Upstream-Anfragen                                                                 |
+| `validation/schemas.ts`          | ~ 80 Zod -Schemata (Single Source of Truth für API Verträge)                                          |
+| `validation/helpers.ts`          | Zod -Validierungshelfer (`validateBody` usw.)                                                         |
+| `types/`                         | Gemeinsame TS -Typen                                                                                  |
+| `contracts/`                     | Öffentliche API Verträge (von `files:` in `package.json` verbraucht)                                  |
+| `utils/circuitBreaker.ts`        | Leistungsschalter des Anbieters (siehe `docs/architecture/RESILIENCE_GUIDE.md`)                       |
+| `utils/apiAuth.ts`               | API -Schlüsselvalidierung, Bereichsprüfung                                                            |
+| `utils/fetchTimeout.ts`          | Timeout/abort Wrapper für Upstream-Abruf                                                              |
+| `utils/releaseNotes.ts`          | Geschlossener v2/legacy Ankündigungsparser, Lokalisierung und ID -Entlassung                          |
 
 ---
 
@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Öffentliche Dokumentation (7 Hauptdateien + 17 Unterverzeichnisse)
+## `docs/` – Öffentliche Dokumentation (7 Stammdateien + 17 Unterverzeichnisse)
 
-### Übergeordnete Leitfäden
+### Reiseführer auf höchstem Niveau
 
-| Dokument                    | Zweck                                                                                                    |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Architektur auf hoher Ebene, Subsystemübersicht, Dashboard-Oberfläche                                    |
-| `CODEBASE_DOCUMENTATION.md` | Technische Referenz: Verzeichnisse, Module, Konventionen                                                 |
-| `FEATURES.md`               | Funktionsmatrix mit den Highlights von v3.8                                                              |
-| `USER_GUIDE.md`             | Benutzerhandbuch (Einrichtung, Modelle, Kombinationen, CLIs, Audio usw.)                                 |
-| `API_REFERENCE.md`          | Referenz der API-Endpunkte mit Authentifizierungsmodell                                                  |
-| `openapi.yaml`              | OpenAPI-3.0-Spezifikation (121 Pfade)                                                                    |
-| `SETUP_GUIDE.md`            | Installationsmethoden (npm, npx, Docker, Electron, Termux, Quellcode)                                    |
-| `ENVIRONMENT.md`            | Alle Umgebungsvariablen (~800 dokumentiert, ~3.050 Zeilen in `.env.example`)                             |
-| `TROUBLESHOOTING.md`        | Häufige Fehler + bekannte Probleme in v3.8.0                                                             |
-| `RELEASE_CHECKLIST.md`      | Vollständiger Release-Ablauf (Skills, husky, Conventional Commits, Bereitstellung)                       |
-| `COVERAGE_PLAN.md`          | Abdeckungsziele und aktueller Stand                                                                      |
-| `FREE_TIERS.md`             | Kuratierte Anbieter mit kostenlosen Tarifen (48+ kostenlos + 11 OAuth)                                   |
-| `CLI-TOOLS.md`              | Externe CLI-Integrationen + interne OmniRoute-CLI                                                        |
-| `I18N.md`                   | i18n-Architektur, Hinzufügen einer Sprache, 67 Gebietsschemata                                           |
-| `UNINSTALL.md`              | Schritte zur vollständigen Deinstallation                                                                |
-| `PROVIDER_REFERENCE.md`     | **Automatisch generierter** Katalog mit 375 Anbietern (neu generieren: `npm run gen:provider-reference`) |
+| Dok                         | Zweck                                                                                         |
+| --------------------------- | --------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | High-Level-Architektur, Subsystemkarte, Dashboard-Oberfläche                                  |
+| `CODEBASE_DOCUMENTATION.md` | Technische Referenz: Verzeichnisse, Module, Konventionen                                      |
+| `FEATURES.md`               | Funktionsmatrix mit v3.8-Highlights                                                           |
+| `USER_GUIDE.md`             | Endbenutzerhandbuch (Setup, Modelle, Combos, CLIs, Audio usw.)                                |
+| `API_REFERENCE.md`          | API -Endpunktreferenz mit Authentifizierungsmodell                                            |
+| `openapi.yaml`              | OpenAPI 3.0-Spezifikation (121 Pfade)                                                         |
+| `SETUP_GUIDE.md`            | Installationsmethoden (npm, npx, Docker, Electron, Termux, source)                            |
+| `ENVIRONMENT.md`            | Alle Umgebungsvariablen (~ 800 dokumentiert, ~ 3.050 Zeilen `.env.example`)                   |
+| `TROUBLESHOOTING.md`        | Häufige Fehler + v3.8.0 bekannte Probleme                                                     |
+| `RELEASE_CHECKLIST.md`      | Vollständiger Release-Ablauf (Fähigkeiten, Husky, konventionelle Commits, Bereitstellung)     |
+| `COVERAGE_PLAN.md`          | Abdeckungsziele und aktueller Stand                                                           |
+| `FREE_TIERS.md`             | Kuratierte Free-Tier-Anbieter (48 + kostenlose + 11 OAuth)                                    |
+| `CLI-TOOLS.md`              | Externe CLI -Integrationen + Interne OmniRoute CLI                                            |
+| `I18N.md`                   | i18n-Architektur, Hinzufügen einer Sprache, 67 Gebietsschemas                                 |
+| `UNINSTALL.md`              | Saubere Deinstallationsschritte                                                               |
+| `PROVIDER_REFERENCE.md`     | **Automatisch generiert** Katalog von 377 Anbietern (regen: `npm run gen:provider-reference`) |
 
-### Detaildokumentation zu Subsystemen
+### Tiefgehende Einblicke in das Subsystem
 
-| Dokument                                   | Zweck                                                                                     |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                            | MCP-Server: 110 Tools, 3 Transportarten, 33 Bereiche, REST-Endpunkte                      |
-| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 Skills, REST-Hilfsfunktionen, Agentenkarte                          |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | Einheitlicher Leitfaden: A2A vs. ACP vs. Cloud-Agenten                                    |
-| `CLOUD_AGENT.md`                           | Orchestrierung von Codex Cloud / Devin / Jules                                            |
-| `SKILLS.md`                                | Skills-Framework (integriert + Marketplace + SkillsSH + Sandbox)                          |
-| `RADAR.md`                                 | Radar-Katalog-Overlay für kostenlose Modelle (`RADAR_ENABLED`, standardmäßig deaktiviert) |
-| `MEMORY.md`                                | Speichersystem (SQLite FTS5 + Qdrant)                                                     |
-| `EVALS.md`                                 | Evaluierungs-Framework (Suites, Ausführungen, Bewertungsraster)                           |
-| `GUARDRAILS.md`                            | PII-Maskierung, Prompt-Injection, Vision-Bridge                                           |
-| `COMPLIANCE.md`                            | Audit-Protokoll, Aufbewahrung, noLog-Opt-out                                              |
-| `WEBHOOKS.md`                              | HMAC-signierte Webhook-Zustellung                                                         |
-| `REASONING_REPLAY.md`                      | Hybrider Speicher-/SQLite-Cache für `reasoning_content`                                   |
-| `AUTHZ_GUIDE.md`                           | Autorisierungspipeline (`classify` → `policies` → `enforce`)                              |
-| `RESILIENCE_GUIDE.md`                      | Circuit Breaker + Cooldown + Modellsperre                                                 |
-| `docs/security/STEALTH_GUIDE.md` (nur git) | TLS-Fingerprinting (JA3/JA4), Claude Code CCH, MITM-Zertifikat                            |
-| `AUTO-COMBO.md`                            | Auto-Combo-Engine (Bewertung anhand von 16 Faktoren, 6 Moduspakete, virtuelle Factory)    |
+| Dok                                        | Zweck                                                                                |
+| ------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `MCP-SERVER.md`                            | MCP Server: 110 Tools, 3 Transporte, 33 Bereiche, REST Endpunkte                     |
+| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 Fähigkeiten, REST Helfer, Agentenkarte                         |
+| `AGENT_PROTOCOLS_GUIDE.md`                 | Einheitlicher Leitfaden: A2A vs. ACP vs. Cloud Agents                                |
+| `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules -Orchestrierung                                          |
+| `SKILLS.md`                                | Skills-Framework (integrierter + Marktplatz +, SkillsSH + Sandbox)                   |
+| `RADAR.md`                                 | Radar-Katalog-Overlay für freie Modelle (`RADAR_ENABLED`, standardmäßig deaktiviert) |
+| `MEMORY.md`                                | Speichersystem (SQLite FTS5 + Qdrant)                                                |
+| `EVALS.md`                                 | Bewertungsrahmen (Suiten, Läufe, Rubriken)                                           |
+| `GUARDRAILS.md`                            | PII -Masker, sofortige Injektion, Sichtbrücke                                        |
+| `COMPLIANCE.md`                            | Audit-Protokoll, Aufbewahrung, NoLog-Opt-out                                         |
+| `WEBHOOKS.md`                              | HMAC-signierte Webhook-Zustellung                                                    |
+| `REASONING_REPLAY.md`                      | Hybrider memory/SQLite -Cache für `reasoning_content`                                |
+| `AUTHZ_GUIDE.md`                           | Autorisierungspipeline (`classify` → `policies` → `enforce`)                         |
+| `RESILIENCE_GUIDE.md`                      | Leistungsschalter + Abklingzeit + -Modellsperre                                      |
+| `docs/security/STEALTH_GUIDE.md` (nur Git) | TLS -Fingerabdruck (JA3/JA4), Claude -Code CCH, MITM Zertifikat                      |
+| `AUTO-COMBO.md`                            | Auto Combo Engine (16-Faktor-Bewertung, 6 Moduspakete, virtuelle Fabrik)             |
 
-### Komprimierung
+### Kompression
 
-| Dokument                        | Zweck                                      |
-| ------------------------------- | ------------------------------------------ |
-| `COMPRESSION_GUIDE.md`          | Übersicht der Komprimierungsmodi + Roadmap |
-| `COMPRESSION_ENGINES.md`        | Caveman- und RTK-Engines, Registry-Vertrag |
-| `COMPRESSION_RULES_FORMAT.md`   | JSON-Schema für Caveman-Regelpakete        |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Bestand der Regelpakete je Sprache         |
-| `RTK_COMPRESSION.md`            | Deklarative RTK-Pipeline (49 Filter)       |
+| Dok                             | Zweck                                            |
+| ------------------------------- | ------------------------------------------------ |
+| `COMPRESSION_GUIDE.md`          | Übersicht über die Komprimierungsmodi + -Roadmap |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK Motoren, Registrierungsvertrag     |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman-Regelpaket JSON -Schema                  |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Regelpaketinventar pro Sprache                   |
+| `RTK_COMPRESSION.md`            | Deklarative RTK -Pipeline (56 Filter)            |
 
-### Bereitstellung
+### Einsatz
 
-| Dokument                     | Zweck                                                               |
+| Dok                          | Zweck                                                               |
 | ---------------------------- | ------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker-Build, Profile (base/cli/host/cliproxyapi), Redis-Sidecar    |
-| `VM_DEPLOYMENT_GUIDE.md`     | Generische VM-/VPS-Bereitstellung (Ubuntu/Debian + nginx + systemd) |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-Bereitstellung (derzeit nur auf Chinesisch)                  |
-| `TERMUX_GUIDE.md`            | Headless-Betrieb unter Android über Termux                          |
-| `PWA_GUIDE.md`               | Installation einer Progressive Web App + Service Worker             |
+| `DOCKER_GUIDE.md`            | Docker -Build, Profile (base/cli/host/cliproxyapi), Redis Sidecar   |
+| `VM_DEPLOYMENT_GUIDE.md`     | Generische VM/VPS -Bereitstellung (Ubuntu/Debian + nginx + systemd) |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-Bereitstellung (derzeit nur auf Chinesisch verfügbar)        |
+| `TERMUX_GUIDE.md`            | Android Headless über Termux                                        |
+| `PWA_GUIDE.md`               | Progressive Web App installiert + Servicemitarbeiter                |
 | `ELECTRON_GUIDE.md`          | Desktop-App erstellen + signieren + verteilen                       |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                              |
-| `PROXY_GUIDE.md`             | 4-stufiger ausgehender Proxy + 1proxy-Marktplatz                    |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Trichter                            |
+| `PROXY_GUIDE.md`             | 4-stufiger Outbound-Proxy + 1Proxy-Marktplatz                       |
 
 ### Unterverzeichnisse
 
-| Unterverzeichnis      | Zweck                                                                                                                                                                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokalisierte Dokumentationsübersetzungen (41 Gebietsschemata)                                                                                                                                                                               |
-| `docs/screenshots/`   | Bildressourcen für Anleitungen                                                                                                                                                                                                              |
-| `_tasks/superpowers/` | Pläne/Spezifikationen aus superpowers (`writing-plans`/`brainstorming`) + Recherche – isoliertes, separat versioniertes Repository, das vom Hauptverzeichnis über Git ignoriert wird. Siehe CLAUDE.md → „Planungs- und Rechercheartefakte“. |
+| Unterverzeichnis      | Zweck                                                                                                                                                                                                |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokalisierte Dokumentübersetzungen (41 Gebietsschemas)                                                                                                                                               |
+| `docs/screenshots/`   | Bildressourcen für Reiseführer                                                                                                                                                                       |
+| `_tasks/superpowers/` | Plans/specs von Superkräften (`writing-plans`/`brainstorming`) + Forschung – isoliertes, separat versioniertes Repo, vom Hauptbaum ignoriert. Siehe CLAUDE.md → „Planungs- und Forschungsartefakte“. |
 
 ---
 

@@ -1,10 +1,10 @@
-import { getSettings } from "@/lib/db/settings";
+import { getCachedSettings } from "@/lib/db/readCache";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import * as log from "../utils/logger";
 
 export async function isNoAuthProviderBlockedBySettings(providerId: string): Promise<boolean> {
   try {
-    const settings = await getSettings();
+    const settings = await getCachedSettings();
     return isProviderBlockedByIdOrAlias(providerId, settings.blockedProviders);
   } catch (error) {
     log.warn(
@@ -31,7 +31,7 @@ export async function isNoAuthProviderBlockedBySettings(providerId: string): Pro
  */
 export async function isAnonymousFallbackDisabledBySettings(providerId: string): Promise<boolean> {
   try {
-    const settings = await getSettings();
+    const settings = await getCachedSettings();
     return isProviderBlockedByIdOrAlias(providerId, settings.noAuthFallbackDisabledProviders);
   } catch (error) {
     log.warn(

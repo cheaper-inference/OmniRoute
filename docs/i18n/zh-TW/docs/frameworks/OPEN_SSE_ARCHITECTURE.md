@@ -482,19 +482,19 @@ createResponsesApiTransformStream(): TransformStream
 
 ---
 
-## 設定
+## 配置
 
-`open-sse/config/` 存放設定層：
+`open-sse/config/`持有配置層：
 
-| 檔案                             | 用途                                  |
-| -------------------------------- | ------------------------------------- |
-| `providerRegistry.ts`            | 涵蓋 375 家提供者目錄的聊天模型註冊表 |
-| `providerModels.ts`              | 模型別名、格式對應                    |
-| `constants.ts`                   | 逾時、限制、狀態碼                    |
-| `defaultThinkingSignature.ts`    | 預設 Claude 思考簽名                  |
-| `modelStrip.ts`（位於 services） | 依提供者的欄位移除                    |
+| 文件                          | 目的                               |
+| ----------------------------- | ---------------------------------- |
+| `providerRegistry.ts`         | 377 個提供者目錄上的聊天模型註冊表 |
+| `providerModels.ts`           | 模型別名、格式映射                 |
+| `constants.ts`                | 逾時、限制、狀態代碼               |
+| `defaultThinkingSignature.ts` | 預設Claude思維簽名                 |
+| `modelStrip.ts` （服務中）    | 每個提供者的欄位剝離               |
 
-### 提供者註冊表結構
+### 提供者註冊架構
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-模組載入時的 Zod 驗證可確保所有提供者設定皆有效。
+模組載入時的Zod驗證可確保所有提供者配置均有效。
 
 ---
 

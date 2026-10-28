@@ -4,123 +4,147 @@
 
 ---
 
-> **Estado:** el panel se basa en el **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), integrado
-> como el espacio de trabajo `packages/ui-kit` (`@omniroute/ui-kit`; la instantánea del proyecto original está fijada en
-> `packages/ui-kit/UPSTREAM.md` y protegida mediante `npm run check:ui-kit-snapshot`). El tema claro es el
-> canónico; la preferencia predeterminada es `system`. El color de énfasis es el verde lima de Keak (`--ci-color-accent`). Inter
-> (espaciado entre letras 0, `--ci-letter-spacing-ui`) es la familia tipográfica de la interfaz, Instrument Serif solo se usa para textos
-> de presentación grandes y poco densos (`.ci-dashboard-display`), e IBM Plex Mono para código; todas se alojan localmente mediante las
-> importaciones de `@fontsource/*` al principio de `src/app/globals.css`. Todos los iconos son glifos de Lucide.
+> **Estado:** El tablero está construido sobre el** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), suministrado como el espacio de trabajo `packages/ui-kit` (`@omniroute/ui-kit`; la instantánea ascendente está fijada en `packages/ui-kit/UPSTREAM.md` y protegida por `npm run check:ui-kit-snapshot`). La luz es el tema canónico; la preferencia predeterminada es `system`. El acento es lima Keak (`--ci-color-accent`). Switzer es la única familia para UI, texto de visualización y código (`--ci-font-ui`; `--ci-font-display` y `--ci-font-mono` lo resuelven), autohospedado por el propio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Cada ícono es un glifo Lucide.
 
-## 1. Dónde se encuentra cada elemento
+## 1. Dónde se encuentran las cosas
 
-- **Kit.** `packages/ui-kit/src` es una copia idéntica byte por byte del directorio `src/` original en el commit fijado en
-  `packages/ui-kit/UPSTREAM.md` (que también registra la autorización de la licencia); `PATCHES.md` enumera los parches
-  locales (ninguno). Se consume como código fuente, sin compilación: `next.config.mjs` lo transpila, y
-  `tsconfig.json` asigna `@omniroute/ui-kit` → `packages/ui-kit/src` y `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` y `vitest.mcp.config.ts` contienen el mismo alias). Importe un
-  componente del kit mediante su subruta (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nunca
-  mediante el barrel `@omniroute/ui-kit`: el barrel incorpora todos los componentes (incluido el selector de fechas)
-  en cada módulo que lo importa. La hoja de estilos del kit se incorpora mediante `src/app/globals.css`
+- **Kit.** `packages/ui-kit/src` es una copia byte a byte del `src/` upstream en el commit fijado en
+  `packages/ui-kit/UPSTREAM.md` (que también registra la autorización de licencia); `PATCHES.md` enumera
+  los parches locales (ninguno). Se consume como fuente, sin compilación: `next.config.mjs` lo transpila, y
+  `tsconfig.json` mapea `@omniroute/ui-kit` → `packages/ui-kit/src` y `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` y `vitest.mcp.config.ts` llevan el mismo alias). Importa un
+  componente del kit por su subruta (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nunca a
+  través del barrel `@omniroute/ui-kit`: el barrel arrastra todos los componentes (incluido el selector de
+  fecha) a cada importador. La hoja de estilos del kit entra a través de `src/app/globals.css`
   (`@import "../../packages/ui-kit/src/ci-ui.css"`).
 - **Tokens.** `packages/ui-kit/src/ci-tokens.css` declara los tokens `--ci-*`; `src/app/globals.css`
-  los conecta con los nombres heredados de OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), para que las referencias existentes a `var(--color-*)` y las
-  utilidades de Tailwind sigan funcionando. El código nuevo usa las utilidades de Tailwind (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) o las clases del kit, nunca un valor hexadecimal
-  (`tests/unit/design-kit-bridge.test.ts` garantiza esta conexión). `text-primary` se resuelve como
-  `--color-primary-ink` mediante `--text-color-primary` (lime-800 en el tema claro y el acento lima en el oscuro), de modo que
-  el texto principal siga siendo legible mientras `bg-primary`/`border-primary` mantienen la superficie lima. Las series de los gráficos usan
-  `--color-chart-1` … `--color-chart-5`.
-- **Temas.** `<html className="ci-theme">` (`src/app/layout.tsx`) incorpora el documento al tema del kit.
-  La preferencia es `light`, `dark` o `system` (`THEME_CONFIG.defaultTheme = "system"` en
-  `src/shared/constants/appConfig.ts`; `system` sigue `prefers-color-scheme`). `applyTheme()` en
-  `src/store/themeStore.ts` (replicado por el script de inicialización en línea de `src/app/layout.tsx`, que se ejecuta
-  antes de la hidratación) establece `data-theme="dark"|"light"` y activa o desactiva al mismo tiempo la clase `.dark` en `<html>`.
-  El conjunto de tokens oscuros del kit usa como clave `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  las sobrescrituras oscuras propias de OmniRoute (el bloque `.dark` de `globals.css`) y las utilidades heredadas `dark:`
-  de Tailwind usan como clave la clase `.dark`. No hay ajustes preestablecidos para el color de acento: el acento siempre procede del
-  kit, y cualquier ajuste preestablecido persistido de una compilación anterior se elimina cuando se carga el almacén.
-- **Componentes (adaptadores).** `src/shared/components/index.tsx` conserva la API de componentes de OmniRoute (los mismos
-  nombres, exportaciones predeterminadas y propiedades), y los elementos primitivos subyacentes son adaptadores del kit: formularios
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), superposiciones y retroalimentación
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  estructura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) y tablas
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Un adaptador importa el componente del kit
-  mediante su subruta y asigna las propiedades heredadas a este; por ejemplo, `Button variant="primary"` es el botón
-  `default` del kit (`--ci-button-primary-*`: la superficie inversa en el tema claro y el acento con su color de texto
-  `--ci-color-accent-foreground` en el oscuro), `danger` es `destructive`, y `warning` es `outline` más
-  la extensión `.ci-button--warning`. Las reglas `.ci-button--warning` y `.ci-badge[data-tone]` situadas al
-  final de `globals.css` (`@layer components`) son extensiones de OmniRoute sobre las clases del kit.
-  `tests/unit/ui/adapters/*.test.tsx` fija el comportamiento de cada adaptador.
-- **Estructura.** `src/app/(dashboard)/layout.tsx` renderiza `DashboardLayout`, que renderiza
-  `src/shared/components/layouts/DashboardShell.tsx`: los componentes `SidebarProvider` / `Sidebar` /
-  `SidebarInset` del kit (`packages/ui-kit/src/sidebar.tsx`), con la lógica de navegación de OmniRoute en
-  `src/shared/components/Sidebar.tsx`. Un enlace «saltar al contenido» dirigido a `#main-content` es el primer elemento
-  que puede recibir el foco. `src/shared/components/Header.tsx` contiene el `SidebarTrigger` del kit (el único control
-  de la barra lateral en la estructura), el `ProductSwitcher` de Keak y el control para abrir la paleta de comandos; muestra el título de la ruta únicamente
-  cuando no hay ningún `PageHeader` del kit (`.ci-page-header`) montado dentro de `#main-content`, de modo que una página con su propio
-  `PageHeader` tenga un único `h1`. `src/shared/components/CommandPalette.tsx` es un `Dialog` del kit.
-- **Iconos.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) resuelve el nombre (del
-  vocabulario de Material Symbols que usan las pantallas) mediante `ICON_MAP` (`src/shared/constants/iconMap.ts`) a un
-  glifo de Lucide. La fuente y el paquete de Material Symbols se han eliminado: un nombre ausente del mapa renderiza un
-  glifo marcador de posición neutro (`data-icon-missing="true"`) y registra una advertencia en la consola fuera de producción.
-  `npm run gen:icon-map` muestra los nombres utilizados que faltan en el mapa
+  hace de puente hacia los nombres heredados de OmniRoute (`--color-*`, `--radius-*`,
+  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), de modo que las lecturas
+  existentes de `var(--color-*)` y las utilidades de Tailwind sigan funcionando. El código nuevo usa las
+  utilidades de Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`,
+  `bg-success-bg`, `bg-chart-1`…) o clases del kit — nunca un valor hexadecimal
+  (`tests/unit/design-kit-bridge.test.ts` hace cumplir el puente). `text-primary` resuelve a
+  `--color-primary-ink` a través de `--text-color-primary` (lime-800 en claro, el acento lima en oscuro),
+  por lo que el texto primario sigue siendo legible mientras `bg-primary`/`border-primary` mantienen la
+  superficie lima. Las series de gráficos usan `--color-chart-1` … `--color-chart-5`.
+- **Temas.** `<html className="ci-theme">` (`src/app/layout.tsx`) hace que el documento adopte el tema del
+  kit. La preferencia es `light`, `dark` o `system` (`THEME_CONFIG.defaultTheme = "system"` en
+  `src/shared/constants/appConfig.ts`; `system` sigue a `prefers-color-scheme`). `applyTheme()` en
+  `src/store/themeStore.ts` (reflejado por el script de arranque en línea en `src/app/layout.tsx`, que se
+  ejecuta antes de la hidratación) establece `data-theme="dark"|"light"` y alterna la clase `.dark` en
+  `<html>` a la vez. El conjunto de tokens oscuros del kit se activa con `data-theme="dark"`
+  (`packages/ui-kit/src/ci-tokens.css`); las sobreescrituras oscuras propias de OmniRoute (el bloque
+  `.dark` en `globals.css`) y las utilidades heredadas de Tailwind `dark:` se activan con la clase
+  `.dark`. No existen preajustes de color de acento: el acento siempre proviene del kit, y un preajuste
+  persistido de una compilación anterior se descarta cuando se carga el store.
+- **Componentes (adaptadores).** `src/shared/components/index.tsx` mantiene la API de componentes de
+  OmniRoute (mismos nombres, exportaciones por defecto y props), y las primitivas detrás de ella son
+  adaptadores sobre el kit: formularios (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`,
+  `Badge`, `Card`), superposiciones y retroalimentación (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`,
+  `NotificationToast`, `EmptyState`, `Loading`), estructura (`Collapsible`, `CollapsibleSection`,
+  `SegmentedControl`, `Breadcrumbs`, `Avatar`) y tablas (`DataTable`, `FilterBar`, `ColumnToggle`,
+  `FilterPills`, `PresetSlider`). Un adaptador importa el componente del kit por subruta y mapea las props
+  heredadas sobre él — por ejemplo, `Button variant="primary"` es el botón `default` del kit
+  (`--ci-button-primary-*`: la superficie inversa en claro, el acento con su tinta
+  `--ci-color-accent-foreground` en oscuro), `danger` es `destructive`, y `warning` es `outline` más la
+  extensión `.ci-button--warning`. Las reglas `.ci-button--warning` y `.ci-badge[data-tone]` al final de
+  `globals.css` (`@layer components`) son extensiones de OmniRoute sobre las clases del kit.
+  `tests/unit/ui/adapters/*.test.tsx` fija cada adaptador.
+- **Shell.** `src/app/(dashboard)/layout.tsx` renderiza `DashboardLayout`, que renderiza
+  `src/shared/components/layouts/DashboardShell.tsx`: el `SidebarProvider` / `Sidebar` / `SidebarInset`
+  del kit (`packages/ui-kit/src/sidebar.tsx`), con la lógica de navegación de OmniRoute en
+  `src/shared/components/Sidebar.tsx`. Un enlace "saltar al contenido" hacia `#main-content` es el primer
+  elemento enfocable. `src/shared/components/Header.tsx` contiene el `SidebarTrigger` del kit (el único
+  conmutador de la barra lateral del shell), el `ProductSwitcher` de Keak y el abridor de la paleta de
+  comandos; muestra el título de la ruta solo mientras no haya ningún `PageHeader` del kit
+  (`.ci-page-header`) montado dentro de `#main-content`, de modo que una página con su propio
+  `PageHeader` tiene un único `h1`. `src/shared/components/CommandPalette.tsx` es un `Dialog` del kit.
+- **Iconos.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) resuelve el nombre (el
+  vocabulario de Material Symbols que usan las pantallas) a través de `ICON_MAP`
+  (`src/shared/constants/iconMap.ts`) a un glifo de Lucide. La fuente y el paquete de Material Symbols han
+  desaparecido: un nombre que falte en el mapa renderiza un glifo neutral de marcador de posición
+  (`data-icon-missing="true"`) y registra una advertencia en la consola fuera de producción.
+  `npm run gen:icon-map` imprime los nombres en uso que faltan en el mapa
   (`tests/unit/icon-map-coverage.test.ts` falla ante cualquier nombre sin un icono de Lucide;
-  `tests/unit/icon-map-object-values.test.ts` cubre los nombres almacenados en objetos de consulta);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` reescribe los elementos `span` literales
-  `<span className="material-symbols-outlined">` como `<Icon>`.
-- **Marca.** `src/shared/components/OmniRouteLogo.tsx` envuelve el kit: la exportación predeterminada `OmniRouteLogo`
-  renderiza `ProductIcon product="omniroute" variant="glyph"` (SVG en línea, compatible con `basePath`) y
-  `OmniRouteLockup` renderiza `ProductLockup product="omniroute"` (nombre accesible «Keak OmniRoute») o, para
-  operadores de marca blanca, sus propios `name`/`logoSrc`. Los destinos del selector de productos se encuentran en
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Las pantallas independientes
-  — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` y `src/shared/components/ErrorPageScaffold.tsx`
-  — muestran el logotipo combinado; `tests/unit/brand-pages-static.test.ts` garantiza este comportamiento.
+  `tests/unit/icon-map-object-values.test.ts` cubre los nombres almacenados en objetos de búsqueda);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` reescribe los spans literales
+  `<span className="material-symbols-outlined">` a `<Icon>`.
+- **Marca.** `src/shared/components/OmniRouteLogo.tsx` envuelve el kit: la exportación por defecto
+  `OmniRouteLogo` renderiza `ProductIcon product="omniroute" variant="glyph"` (SVG en línea, seguro con
+  `basePath`) y `OmniRouteLockup` renderiza `ProductLockup product="omniroute"` (nombre accesible "Keak
+  OmniRoute") o, para operadores de marca blanca, su propio `name`/`logoSrc`. Los destinos del conmutador
+  de productos residen en `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`,
+  `KEAK_ACTIVE_PRODUCT`). Las pantallas independientes — `src/app/login/page.tsx`,
+  `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`,
+  `src/app/not-found.tsx` y `src/shared/components/ErrorPageScaffold.tsx` — muestran el lockup;
+  `tests/unit/brand-pages-static.test.ts` lo protege.
 
 ## 2. Reglas
 
-1. Tokens, nunca literales. Excepciones mantenidas deliberadamente: la terminal de consola siempre oscura, los trazos SVG de ReactFlow mediante `STATUS_HEX` (`src/shared/constants/statusColors.ts`) y las paletas categóricas `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) y `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Nunca modifiques `packages/ui-kit/src` manualmente: sincronízalo con `scripts/dev/sync-ui-kit.sh <commit>`; la comprobación previa al commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) falla ante cualquier byte que difiera del commit fijado del repositorio de origen (se omite con una advertencia cuando el clon del repositorio de origen, `UI_KIT_CLONE` o `_references/cheaper-inference-ui-kit`, no está presente). Cuando al kit le falte algo, busca una solución alternativa en el adaptador o en la pantalla y solicítalo al repositorio de origen.
-3. Los textos predeterminados del kit están en inglés (`label = "Loading"`, `loadingLabel = "Loading table"`…) — pasa cadenas traducidas desde `useTranslations(...)` siempre que un componente del kit muestre texto.
-4. Las utilidades de Tailwind prevalecen sobre las clases de los componentes del kit (el kit declara `@layer theme, base, components, utilities` y sus reglas están en `components`) — usa utilidades para el espaciado y la disposición, no para cambiar los colores de los componentes del kit.
-5. Encabezados: `.ci-heading` (Inter, sin espaciado entre caracteres) para los títulos de páginas y secciones; `.ci-dashboard-display` (Instrument Serif) solo para texto de presentación grande y aislado, como el código de estado de la página de error.
-6. `tests/unit/dashboard-kit-sweep.test.ts` protege la adopción del kit: ningún span de ligadura de Material bajo `src/app` o `src/shared/components`; en el árbol del panel (`src/app/(dashboard)` y `src/shared/components`) no debe haber ningún `<select>`, `<textarea>` o `<table>` sin abstraer, ni ningún `role="dialog"` implementado manualmente fuera de las excepciones enumeradas (la rama nativa del adaptador `Select`, `RequestLoggerDetail`); cada `<button>` o `<input>` sin abstraer debe tener allí un comentario que contenga `kit-exception:` (con el motivo) y que termine como máximo 3 líneas antes; los matices de la paleta y las variantes `dark:` solo pueden aparecer en los archivos enumerados por la prueba.
-7. Verifica ambos temas y la vista de 390 px antes de un PR (capturas de pantalla); `tests/e2e/a11y.spec.ts` ejecuta axe.
+1. Fichas, nunca literales. Excepciones mantenidas a propósito: la terminal de consola siempre oscura y `STATUS_HEX` (`src/shared/constants/statusColors.ts`), el espejo hexadecimal resuelto de la paleta de estado del kit para personas que llaman que necesitan un hexadecimal literal. Las paletas categóricas ya no son una excepción: se basan en los cinco tokens de gráficos del kit (`--color-chart-1..5`) hasta `src/shared/utils/categoricalPalette.ts` y, para estrategias de enrutamiento, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; Los bordes ReactFlow y el lienzo de orquestación leen las variables `--orch-status-*` sensibles al tema (`src/shared/components/flow/edgeStyles.ts`).
+2. Nunca parchee `packages/ui-kit/src` a mano: sincronice con `scripts/dev/sync-ui-kit.sh <commit>`; la puerta de confirmación previa `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) falla en cualquier byte que difiera de la confirmación ascendente fijada (se salta con una advertencia cuando el clon ascendente, `UI_KIT_CLONE` o `_references/cheaper-inference-ui-kit`, está ausente). Cuando al kit le falta algo, solucione el problema en el adaptador o en la pantalla y solicítelo.
+3. Los valores predeterminados del texto del kit son inglés (`label = "Loading"`, `loadingLabel = "Loading table"`…): pase cadenas traducidas desde `useTranslations(...)` siempre que un componente del kit represente texto.
+4. Las utilidades Tailwind ganan a las clases de componentes del kit (el kit declara `@layer theme, base, components, utilities` y sus reglas viven en `components`): use utilidades para el espaciado y el diseño, no para volver a colorear los componentes del kit.
+5. Encabezados: `.ci-heading` para títulos de páginas y secciones; `.ci-dashboard-display` solo para texto de visualización grande y escaso, como el código de estado de la página de error. Ambos usan Suiza.
+6. `tests/unit/dashboard-kit-sweep.test.ts` protege la adopción del kit: no hay tramo de ligadura de material bajo `src/app` o `src/shared/components`; en el árbol del tablero (`src/app/(dashboard)` y `src/shared/components`) no hay `<select>`, `<textarea>` o `<table>` sin formato ni `role="dialog"` enrollado a mano fuera de las excepciones enumeradas (la rama nativa del adaptador `Select`, `RequestLoggerDetail`); cada `<button>` o `<input>` sin formato necesita un comentario que contenga `kit-exception:` (con el motivo) que termine como máximo 3 líneas encima; tonos de paleta y variantes `dark:` solo en los archivos que enumera la prueba.
+7. Verifique ambos temas y la ventana gráfica de 390 px antes de un PR (capturas de pantalla); `tests/e2e/a11y.spec.ts` ejecuta hacha.
 
-## 3. Añadir una pantalla
+## 3. Agregar una pantalla
 
-1. Abre la página con el `PageHeader` del kit (`@omniroute/ui-kit/page-header`, `compact` dentro del panel) — título, descripción y `actions`. El encabezado del shell omite entonces su propio título.
-2. Crea los controles a partir de `@/shared/components` (los adaptadores) y usa los componentes del kit mediante subrutas cuando no exista un adaptador (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
-3. Iconos: `<Icon name="…" />`. Un nombre nuevo se añade a `ICON_MAP` con el componente de Lucide semánticamente correspondiente; `npm run gen:icon-map` enumera los nombres que aún faltan.
-4. Colores: utilidades semánticas (`text-success`, `bg-warning-bg`, `border-border`…) y `var(--color-chart-N)` para las series de los gráficos; sin valores hexadecimales ni variantes `dark:` que solo repitan un color.
-5. Texto: cada cadena, incluidas las etiquetas que pasas a los componentes del kit, proviene de `useTranslations`. Las claves nuevas se añaden a `src/i18n/messages/en.json`, `pt-BR.json` y `vi.json` (la prueba de paridad de vietnamita fija cada clave en inglés); las demás configuraciones regionales se rellenan mediante la sincronización de i18n.
-6. Ejecuta las comprobaciones antes del PR: `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck` (la única comprobación que detecta una importación duplicada en `iconMap.ts`), `npm run check:ui-icu` y las pruebas propias de la pantalla.
+1. Abre la página con el `PageHeader` del kit (`@omniroute/ui-kit/page-header`, `compact` dentro del
+   dashboard) — título, descripción y `actions`. El encabezado del shell entonces omite su propio
+   título.
+2. Construye los controles a partir de `@/shared/components` (los adaptadores) y usa los componentes
+   del kit por subruta donde no exista adaptador (`Table`/`TableScrollArea`/`DataTableShell`,
+   `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. Iconos: `<Icon name="…" />`. Un nombre nuevo va en `ICON_MAP` con el componente de Lucide que
+   coincida semánticamente; `npm run gen:icon-map` lista los nombres que aún faltan.
+4. Colores: utilidades semánticas (`text-success`, `bg-warning-bg`, `border-border`…) y
+   `var(--color-chart-N)` para las series de los gráficos; sin valores hex y sin variantes `dark:`
+   que solo repitan un color.
+5. Texto: cada cadena, incluidas las etiquetas que pasas a los componentes del kit, proviene de
+   `useTranslations`. Las claves nuevas van en `src/i18n/messages/en.json`, `pt-BR.json` y `vi.json`
+   (la prueba de paridad de vietnamita fija cada clave inglesa); los demás locales se completan con
+   la sincronización de i18n.
+6. Ejecuta las verificaciones antes del PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (la única verificación que detecta una importación duplicada
+   en `iconMap.ts`), `npm run check:ui-icu`, y las pruebas propias de la pantalla.
 
-## 4. Añadir o modificar un adaptador
+## 4. Añadir o cambiar un adaptador
 
-1. Mantén la API pública de `src/shared/components/index.tsx`: los mismos nombres de exportación, exportaciones predeterminadas y
-   props aceptadas. Convierte las props heredadas a las del kit dentro del adaptador (consulta `Button.tsx`: `VARIANT_TO_KIT`,
+1. Mantén la API pública de `src/shared/components/index.tsx`: mismos nombres de exportación, exportaciones por defecto y
+   props aceptadas. Mapea las props heredadas al kit dentro del adaptador (ver `Button.tsx`: `VARIANT_TO_KIT`,
    `SIZE_TO_KIT`).
-2. Importa el kit mediante una subruta (`@omniroute/ui-kit/<component>`).
-3. Las soluciones provisionales para las carencias del kit deben residir en el adaptador (o en `globals.css` `@layer components` cuando la corrección sea de
+2. Importa el kit por subruta (`@omniroute/ui-kit/<component>`).
+3. Los workarounds para las carencias del kit viven en el adaptador (o en `globals.css` `@layer components` cuando el arreglo es un
    estilo), nunca en `packages/ui-kit/src`.
-4. Añade o actualiza `tests/unit/ui/adapters/<name>.test.tsx`. Para un adaptador con muchos consumidores, compara el
-   marcado renderizado antes y después del cambio: los cambios de relleno o de contenedores se propagan a todas las pantallas.
+4. Añade o actualiza `tests/unit/ui/adapters/<name>.test.tsx`. Para un adaptador con muchos llamadores, compara el
+   marcado renderizado antes y después del cambio: los cambios de padding o de wrapper se propagan a todas las pantallas.
 
 ## 5. Actualizar el kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` copia el `src/` de origen en ese commit a
-`packages/ui-kit/src` y aplica la única transformación permitida (elimina el sufijo `.js` de las
-importaciones relativas). A continuación: revisa `git diff packages/ui-kit`, realiza una comprobación visual de proveedores, ajustes, combos,
-uso y endpoint en ambos temas, ejecuta `npm run check:ui-kit-snapshot` y `npm run test:vitest:ui`, y
-abre el PR con el registro de cambios del proyecto de origen.
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` copia el `src/` de upstream en ese commit dentro de
+`packages/ui-kit/src` y aplica la única transformación permitida (quita el sufijo `.js` de las
+importaciones relativas). Después: revisa `git diff packages/ui-kit`, haz una pasada visual por providers, settings, combos,
+usage y endpoint en ambos temas, ejecuta `npm run check:ui-kit-snapshot` y `npm run test:vitest:ui`, y
+abre la PR con el changelog de upstream.
 
-## 6. Índice de referencia
+## 6. diagramas README
+
+Los doce diagramas que incorpora la raíz `README.md` (`docs/diagrams/*.svg`) son el kit aplicado a una imagen estática, y se generan, no se dibujan a mano: 13 archivos generadores en `scripts/docs/gen-readme-*.mjs` (doce diagramas más el controlador `gen-readme-diagrams.mjs` ) y 12 pruebas de obsolescencia en `tests/unit/docs/readme-*-svg.test.ts`, una por diagrama, cada byte compara el archivo confirmado con la salida de su generador (trabajo `test-unit`).
+
+- **Fichas.** `scripts/docs/readme-diagram-theme.mjs` copia la paleta de `packages/ui-kit/src/ci-tokens.css` (fijada en ese archivo por `tests/unit/docs/readme-diagram-theme.test.ts`) y define las funciones de texto en las caras anteriores del kit (Instrument Serif para visualización, Inter para texto UI, IBM Plex Mono para figuras y código) de los paquetes `@fontsource` (el tablero en sí usa el Switzer del kit desde el kit 0.0.66). Los valores claros se ubican en `:root`, los valores oscuros detrás de `prefers-color-scheme: dark`, dentro del archivo, por lo que cada imagen sigue el esquema del espectador en GitHub.
+- **Fuentes.** `scripts/docs/readme-fonts.mjs` subconjuntos de esos archivos woff2 a los glifos que dibuja cada diagrama y los incrusta como `@font-face` `data:` URIs : la única forma en que la tipografía del kit llega a una imagen README, ya que GitHub Markdown no incluye CSS y el proxy de camuflaje bloquea cada recuperación externa. Los subconjuntos son sólo en latín; los glifos de símbolos que vuelven a la pila del sistema se permiten uno por uno en `SYMBOL_FALLBACKS`, y cualquier otro glifo descubierto.
+- **Regenerado.** `npm run docs:readme-diagrams` reescribe los doce en orden README e imprime una línea por archivo con su tamaño. Un único generador también se ejecuta por sí solo (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` necesita `node --import tsx/esm` porque sus cifras provienen del cargador de catálogo en vivo en `open-sse/config/freeModelCatalog.ts`; la consecuencia CI de un cambio de catálogo está en `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Confirme el generador y el SVG juntos.
+- **Prueba.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` representa un archivo de la forma en que GitHub lo sirve (una etiqueta `<img>`, `Content-Security-Policy` de camuflaje, `image/svg+xml`), captura un marco claro y uno oscuro e informa la fuente externa que solicita la página (debe ser 0).
+- **Presupuesto.** Menos de 200 KB por archivo (cada prueba de obsolescencia lo afirma); 500 KB es el límite máximo para cualquier imagen README (la regla del validador de SVG studio).
+- **Copia sin cambios, cuenta desde la puerta.** El cambio de marca cambió el tipo y la paleta, no las palabras: cada generador lleva la copia de su diagrama en una constante `*_COPY` (o la construye a partir del catálogo en vivo) que es tanto el texto dibujado como la entrada del subconjunto de fuentes. Las figuras canónicas permanecen en los nodos `<text>`, leídas por `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); las pruebas de obsolescencia de los diagramas que lee la puerta también ejecutan sus validadores en el archivo generado, por lo que una cifra que se desvía del código no pasa la prueba: corrige la fuente que lee la puerta, nunca el número en el generador.
+
+## 7. Índice de referencias
 
 - `src/app/globals.css` — puente de tokens, sobrescrituras de `.dark`, extensiones de OmniRoute en `@layer components`
-- `packages/ui-kit/UPSTREAM.md` — commit de origen fijado y autorización de licencia; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/UPSTREAM.md` — commit upstream fijado y autorización de licencia; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
 - `src/shared/components/index.tsx` y los adaptadores junto a él; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`

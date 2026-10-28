@@ -1,4 +1,8 @@
-import { OPENAI_COMPATIBLE_PREFIX, USAGE_SUPPORTED_PROVIDERS } from "@/shared/constants/providers";
+import {
+  isAnthropicCompatibleProvider,
+  isOpenAICompatibleProvider,
+  USAGE_SUPPORTED_PROVIDERS,
+} from "@/shared/constants/providers";
 import { isMoonshotOpenPlatformConnection } from "@omniroute/open-sse/services/usage/moonshotOpenPlatform.ts";
 
 export interface ProviderQuotaVisibilityConnection {
@@ -20,7 +24,7 @@ export function supportsProviderQuota(
   // members of a static list. Such a connection supports quota exactly when it
   // declares where its quota lives (#13616) — the capability is a property of
   // the connection, not of the provider id.
-  if (hasOpenAiCompatibleQuotaEndpoint(providerId, connection?.providerSpecificData)) return true;
+  if (hasCompatibleQuotaEndpoint(providerId, connection?.providerSpecificData)) return true;
   return isMoonshotOpenPlatformConnection({
     provider: providerId,
     providerSpecificData: connection?.providerSpecificData,
@@ -28,17 +32,17 @@ export function supportsProviderQuota(
 }
 
 /**
- * True for an `openai-compatible-*` connection carrying a usable
- * `providerSpecificData.quotaEndpoint`: a non-empty `url` and at least one
+ * True for an `openai-compatible-*` or `anthropic-compatible-*` connection carrying a
+ * usable `providerSpecificData.quotaEndpoint`: a non-empty `url` and at least one
  * entry in `quotas`. Both halves are required — an endpoint with no mapping
  * can be fetched but never produces a quota, so treating it as supported would
  * put a permanently empty card in Provider Limits.
  */
-export function hasOpenAiCompatibleQuotaEndpoint(
+export function hasCompatibleQuotaEndpoint(
   providerId: string,
   providerSpecificData: unknown
 ): boolean {
-  if (typeof providerId !== "string" || !providerId.startsWith(OPENAI_COMPATIBLE_PREFIX)) {
+  if (!isOpenAICompatibleProvider(providerId) && !isAnthropicCompatibleProvider(providerId)) {
     return false;
   }
   const psd = providerSpecificData as { quotaEndpoint?: unknown } | null | undefined;

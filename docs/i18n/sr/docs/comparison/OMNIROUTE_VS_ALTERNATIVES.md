@@ -37,13 +37,13 @@ Objektivno poređenje funkcija u odnosu na popularne open-source AI rutere.
 | **Podrška za tunele (Cloudflared, Tailscale, Ngrok)** |                      ✅                       |           ❌            |         n/a          |      n/a      |
 | **Licenca**                                           |                      MIT                      |           MIT           |    proprijetarna     | proprijetarna |
 
-## Kada izabrati OmniRoute
+## Када изабрати OmniRoute
 
-- Sami hostujete i želite **maksimalnu pokrivenost provajdera** (375 provajdera, 155 besplatnih stavki kataloga bez autentifikacije)
-- Potreban vam je **ugrađeni MCP server** (LLM alati, memorija, veštine izložene kao alati)
-- Potreban vam je **A2A protokol** za tokove rada između agenata
-- Želite **prikrivanje otiska** (JA3/JA4) da biste izbegli otkrivanje od strane upstream CAPTCHA provera
-- Potrebne su vam **enterprise funkcije** (guardrails, evals, audit trail) bez SaaS računa
+- Ви сте сами домаћини и желите** максимална покривеност провајдера** (377 провајдера, 155 уноса у каталогу free/no-auth )
+- Треба вам а** уграђени MCP сервер** (LLM алати, меморија, вештине изложене као алати)
+- Вама треба**A2A протокол** за токове рада од агента до агента
+- Ви желите** стелт отиска прста** (JA3/JA4) да би се избегло откривање узводно CAPTCHAs
+- Вама треба** карактеристике предузећа** (заштитне ограде, евалуације, ревизорски траг) без SaaS рачуна
 
 ## Када одабрати LiteLLM
 

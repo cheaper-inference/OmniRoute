@@ -34,6 +34,9 @@ export interface ProviderLimitsCacheEntry {
   paidCredits?: CodexPaidCredits;
   billing?: ProviderBillingStatus;
   quotaGroups?: Array<Record<string, unknown>>;
+  limitReached?: boolean;
+  sparkLimitReached?: boolean;
+  rateLimitReachedType?: string;
 }
 
 const PROVIDER_LIMITS_CACHE_NAMESPACE = "providerLimitsCache";
@@ -56,6 +59,28 @@ function sanitizeCacheEntryForStorage(entry: ProviderLimitsCacheEntry): Provider
   return billing ? { ...rest, billing } : rest;
 }
 
+function normalizeOptionalCacheFields(record: JsonRecord): Partial<ProviderLimitsCacheEntry> {
+  const bankedResetCredits = Number(record.bankedResetCredits);
+  const paidCredits = parseCodexPaidCredits(record.paidCredits);
+  const billing = sanitizeProviderBillingStatus(record.billing);
+  const modelQuotas = toRecord(record.modelQuotas);
+  return {
+    ...(modelQuotas ? { modelQuotas } : {}),
+    ...(typeof record.limitReached === "boolean" ? { limitReached: record.limitReached } : {}),
+    ...(typeof record.sparkLimitReached === "boolean"
+      ? { sparkLimitReached: record.sparkLimitReached }
+      : {}),
+    ...(typeof record.rateLimitReachedType === "string"
+      ? { rateLimitReachedType: record.rateLimitReachedType }
+      : {}),
+    ...(Number.isFinite(bankedResetCredits) ? { bankedResetCredits } : {}),
+    ...(paidCredits ? { paidCredits } : {}),
+    ...(billing ? { billing } : {}),
+    ...(Array.isArray(record.quotaGroups)
+      ? { quotaGroups: record.quotaGroups as Array<Record<string, unknown>> }
+      : {}),
+  };
+}
 function normalizeCacheEntry(value: unknown): ProviderLimitsCacheEntry | null {
   const record = toRecord(value);
   if (!record) return null;
@@ -64,24 +89,13 @@ function normalizeCacheEntry(value: unknown): ProviderLimitsCacheEntry | null {
     typeof record.fetchedAt === "string" && record.fetchedAt.trim() ? record.fetchedAt : null;
   if (!fetchedAt) return null;
 
-  const bankedResetCredits = Number(record.bankedResetCredits);
-  const paidCredits = parseCodexPaidCredits(record.paidCredits);
-  const billing = sanitizeProviderBillingStatus(record.billing);
-  const modelQuotas = toRecord(record.modelQuotas);
-
   return {
     quotas: toRecord(record.quotas),
-    ...(modelQuotas ? { modelQuotas } : {}),
+    ...normalizeOptionalCacheFields(record),
     plan: record.plan ?? null,
     message: typeof record.message === "string" ? record.message : null,
     fetchedAt,
     source: typeof record.source === "string" ? record.source : null,
-    ...(Number.isFinite(bankedResetCredits) ? { bankedResetCredits } : {}),
-    ...(paidCredits ? { paidCredits } : {}),
-    ...(billing ? { billing } : {}),
-    ...(Array.isArray(record.quotaGroups)
-      ? { quotaGroups: record.quotaGroups as Array<Record<string, unknown>> }
-      : {}),
   };
 }
 
