@@ -180,11 +180,12 @@ export function resolveNextBuildBundlerFlag(
   baseEnv = process.env,
   memoryBytes = getEffectiveBuildMemoryBytes()
 ) {
-  // Preserve the existing operator and CI contract: any explicitly provided
-  // value other than "0" still selects Turbopack, including "1" and legacy
-  // nonzero values. Do not override deliberate build choices.
-  if (baseEnv.OMNIROUTE_USE_TURBOPACK !== undefined) {
-    return baseEnv.OMNIROUTE_USE_TURBOPACK === "0" ? "--webpack" : "--turbopack";
+  // A blank value is common when Compose forwards an unset shell variable.
+  // Treat it like an absent opt-in instead of accidentally forcing Turbopack
+  // on a RAM-constrained host. Keep "0" and all NONEMPTY overrides authoritative.
+  const override = baseEnv.OMNIROUTE_USE_TURBOPACK;
+  if (override !== undefined && override !== "") {
+    return override === "0" ? "--webpack" : "--turbopack";
   }
   // Default to the build path confirmed to work at 16 GiB (#18184). A bad RAM
   // reading also prefers webpack; on sufficiently large hosts keep Turbopack.
