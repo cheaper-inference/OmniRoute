@@ -481,6 +481,17 @@ export const opencode_goProvider: RegistryEntry = {
       maxOutputTokens: 128000,
       targetFormat: "claude",
     },
+    // Served only over the Google Generative AI wire on the Go inference host (see
+    // GO_GEMINI_INFERENCE_BASE_URL); the /zen/go/v1 chat host has no route for it. Limits
+    // from models.dev. The earlier `gemini-4-argon-contributor` id now answers 410
+    // ModelDeprecated (live-checked 2026-10-26), so only the live id is declared.
+    {
+      id: "gemini-4-argon",
+      name: "Gemini 4 Argon",
+      contextLength: 1048576,
+      maxOutputTokens: 65536,
+      targetFormat: "gemini",
+    },
     {
       id: "grok-4.7",
       name: "Grok 4.7",

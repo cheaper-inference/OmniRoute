@@ -226,6 +226,13 @@ const GO_SURFACE_BASE_URL = "https://opencode.ai/zen/go/v1";
 export const FREE_TIER_INFERENCE_BASE_URL = "https://opencode.ai/inference/v1";
 
 /**
+ * Where OpenCode Go serves its Gemini-wire models (e.g. `gemini-4-argon-contributor`):
+ * `<base>/models/<model>:streamGenerateContent?alt=sse` keyed by `x-goog-api-key`. The
+ * `/zen/go/v1` chat host answers those models with 400 ModelProtocolUnsupported.
+ */
+export const GO_GEMINI_INFERENCE_BASE_URL = "https://opencode.ai/inference/go/v1";
+
+/**
  * The credential the gated free-tier lane serves.
  *
  * Measured live on 2026-10-21 against `https://opencode.ai/inference/v1` (Chat

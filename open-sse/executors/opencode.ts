@@ -60,6 +60,7 @@ import {
 } from "./opencodeGeoBlock.ts";
 import {
   FREE_TIER_INFERENCE_BASE_URL,
+  GO_GEMINI_INFERENCE_BASE_URL,
   attemptFor,
   isGatedFreeTierRequest,
   isPremiumOpencodeModel,
@@ -1342,17 +1343,18 @@ export class OpencodeExecutor extends BaseExecutor {
     void urlIndex;
     void credentials;
 
-    const base =
-      Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
-        ? FREE_TIER_INFERENCE_BASE_URL
-        : this.config.baseUrl;
+    const gated = Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model);
+    const base = gated ? FREE_TIER_INFERENCE_BASE_URL : this.config.baseUrl;
     switch (this._requestFormat) {
       case "claude":
         return `${base}/messages`;
       case "openai-responses":
         return `${base}/responses`;
-      case "gemini":
-        return `${base}/models/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
+      case "gemini": {
+        // Go serves its Gemini-wire models from a separate inference host (see the constant).
+        const geminiBase = this.usesGoGeminiWire() && !gated ? GO_GEMINI_INFERENCE_BASE_URL : base;
+        return `${geminiBase}/models/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
+      }
       default:
         return `${base}/chat/completions`;
     }
@@ -1370,6 +1372,11 @@ export class OpencodeExecutor extends BaseExecutor {
    */
   private usesZenApiKeyAuth(): boolean {
     return this._requestFormat === "openai-responses" && this.config?.baseUrl === ZEN_BASE_URL;
+  }
+
+  /** OpenCode Go's Gemini wire: its own inference host, keyed by `x-goog-api-key`. */
+  private usesGoGeminiWire(): boolean {
+    return this._requestFormat === "gemini" && this._surface() === "go";
   }
 
   buildHeaders(
@@ -1397,6 +1404,8 @@ export class OpencodeExecutor extends BaseExecutor {
     if (key) {
       if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
         headers["x-api-key"] = key;
+      } else if (this.usesGoGeminiWire() && !gatedScope) {
+        headers["x-goog-api-key"] = key;
       } else {
         headers["Authorization"] = `Bearer ${key}`;
       }
