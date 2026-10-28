@@ -169,6 +169,7 @@ declare global {
           byAccount: Record<string, Record<string, number>>;
           details: Record<string, Record<string, PendingRequestDetail[]>>;
         };
+        totalPendingDetailBytes?: number;
         pendingById: Map<string, PendingRequestDetail>;
         pendingIdByCorrelation: Map<string, { id: string; touchedAt: number }>;
       }
@@ -189,6 +190,7 @@ const pendingState = (globalThis.__omnirouteUsageHistoryPendingState ??= {
     byAccount: Object.create(null) as Record<string, Record<string, number>>,
     details: Object.create(null) as Record<string, Record<string, PendingRequestDetail[]>>,
   },
+  totalPendingDetailBytes: 0,
   pendingById: new Map<string, PendingRequestDetail>(),
   pendingIdByCorrelation: new Map<string, { id: string; touchedAt: number }>(),
 });
@@ -220,19 +222,6 @@ const DEFAULT_MAX_PENDING_REQUEST_AGE_MS = 60 * 60 * 1000;
 const MAX_PENDING_DETAILS = 5000;
 const PENDING_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
 const MAX_PENDING_DETAIL_BYTES = 256 * 1024 * 1024;
-
-/**
- * Retained-byte total for `pendingById`. The 5000-entry cap bounds COUNT but
- * not MEMORY: each entry retains up to four payloads (clientRequest +
- * providerRequest + providerResponse + clientResponse, see
- * pendingRequestScope.ts::PENDING_PAYLOAD_KEYS). Payloads are preview-truncated
- * first, so a worst-case entry measures ~50 KB and the 5000 cap lands near
- * 250 MB — close enough to the process ceiling that a byte ceiling is the
- * safer invariant, and it bounds the map within a single burst instead of
- * waiting for the 5-minute age sweep. Mirrors the accounting
- * completedRequestDetails.ts already does for the same payloads.
- */
-let totalPendingDetailBytes = 0;
 
 /** Monotonic suffix making pending ids unique even inside one millisecond. */
 let pendingIdSequence = 0;
@@ -273,22 +262,42 @@ function pendingDetailBytes(detail: PendingRequestDetail): number {
 }
 
 /**
+ * Retained-byte total for `pendingById`. The 5000-entry cap bounds COUNT but
+ * not MEMORY: each entry retains up to four payloads (clientRequest +
+ * providerRequest + providerResponse + clientResponse, see
+ * pendingRequestScope.ts::PENDING_PAYLOAD_KEYS). Payloads are preview-truncated
+ * first, so a worst-case entry measures ~50 KB and the 5000 cap lands near
+ * 250 MB — close enough to the process ceiling that a byte ceiling is the
+ * safer invariant, and it bounds the map within a single burst instead of
+ * waiting for the 5-minute age sweep. Mirrors the accounting
+ * completedRequestDetails.ts already does for the same payloads.
+ */
+// Older module instances preserved the map without a shared byte total. Recount
+// that legacy state once, after the payload-size helpers are initialized.
+if (!Number.isFinite(pendingState.totalPendingDetailBytes)) {
+  pendingState.totalPendingDetailBytes = 0;
+  for (const detail of pendingById.values()) {
+    pendingState.totalPendingDetailBytes += pendingDetailBytes(detail);
+  }
+}
+
+/**
  * Hard byte ceiling on the pending map. Runs after every insert so a burst of
  * large-context requests cannot push the process past the 85% heap guard before
  * the 5-minute age sweep runs. Eviction order matches the count-cap path
  * (stale-marked first, then oldest) so the dashboard's pending counters self-heal.
  */
 function enforcePendingByteCeiling(): void {
-  if (totalPendingDetailBytes <= MAX_PENDING_DETAIL_BYTES) return;
+  if (pendingState.totalPendingDetailBytes <= MAX_PENDING_DETAIL_BYTES) return;
   const victims = [...pendingById.values()].sort((a, b) => {
     if (Boolean(a.stale) !== Boolean(b.stale)) return a.stale ? -1 : 1;
     return a.startedAt - b.startedAt;
   });
   for (const detail of victims) {
-    if (totalPendingDetailBytes <= MAX_PENDING_DETAIL_BYTES) break;
+    if (pendingState.totalPendingDetailBytes <= MAX_PENDING_DETAIL_BYTES) break;
     const modelKey = detail.provider ? `${detail.model} (${detail.provider})` : detail.model;
     pendingById.delete(detail.id);
-    totalPendingDetailBytes -= pendingDetailBytes(detail);
+    pendingState.totalPendingDetailBytes -= pendingDetailBytes(detail);
     if (detail.connectionId && isSafeKey(modelKey)) {
       const bucket = pendingRequests.details[detail.connectionId]?.[modelKey];
       if (bucket) {
@@ -303,7 +312,7 @@ function enforcePendingByteCeiling(): void {
 
 /** Retained bytes currently held by the pending map (diagnostics + tests). */
 export function getPendingRetainedBytes(): number {
-  return totalPendingDetailBytes;
+  return pendingState.totalPendingDetailBytes;
 }
 let _pendingSweepTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -344,7 +353,7 @@ export function sweepStalePendingRequests(
   const remove = (detail: PendingRequestDetail): void => {
     const modelKey = detail.provider ? `${detail.model} (${detail.provider})` : detail.model;
     pendingById.delete(detail.id);
-    totalPendingDetailBytes -= pendingDetailBytes(detail);
+    pendingState.totalPendingDetailBytes -= pendingDetailBytes(detail);
     if (detail.connectionId && isSafeKey(modelKey)) {
       const bucket = pendingRequests.details[detail.connectionId]?.[modelKey];
       if (bucket) {
@@ -494,7 +503,7 @@ export function trackPendingRequest(
       };
       pendingRequests.details[connectionId][modelKey].push(newDetail);
       pendingById.set(newDetail.id, newDetail);
-      totalPendingDetailBytes += pendingDetailBytes(newDetail);
+      pendingState.totalPendingDetailBytes += pendingDetailBytes(newDetail);
       enforcePendingByteCeiling();
       if (normalizedMetadata.correlationId) {
         pendingIdByCorrelation.set(normalizedMetadata.correlationId, {
@@ -512,13 +521,13 @@ export function trackPendingRequest(
         );
         if (removed) {
           pendingById.delete(removed.id);
-          totalPendingDetailBytes -= pendingDetailBytes(removed);
+          pendingState.totalPendingDetailBytes -= pendingDetailBytes(removed);
         }
       } else if (pendingRequests.details[connectionId]?.[modelKey]?.length) {
         const removed = pendingRequests.details[connectionId][modelKey].shift();
         if (removed) {
           pendingById.delete(removed.id);
-          totalPendingDetailBytes -= pendingDetailBytes(removed);
+          pendingState.totalPendingDetailBytes -= pendingDetailBytes(removed);
         }
       }
       if (!pendingRequests.details[connectionId]?.[modelKey]?.length) {
@@ -548,7 +557,7 @@ export function updatePendingRequest(
   // undercounts and the byte ceiling silently stops enforcing in production.
   const before = pendingDetailBytes(details[lastIdx]);
   Object.assign(details[lastIdx], normalizePendingMetadata(metadata));
-  totalPendingDetailBytes += pendingDetailBytes(details[lastIdx]) - before;
+  pendingState.totalPendingDetailBytes += pendingDetailBytes(details[lastIdx]) - before;
 }
 
 export function updatePendingRequestById(id: string | null, metadata: PendingRequestMetadata) {
@@ -556,7 +565,7 @@ export function updatePendingRequestById(id: string | null, metadata: PendingReq
   if (!detail) return false;
   const before = pendingDetailBytes(detail);
   Object.assign(detail, normalizePendingMetadata(metadata));
-  totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+  pendingState.totalPendingDetailBytes += pendingDetailBytes(detail) - before;
   return true;
 }
 
@@ -639,7 +648,7 @@ function finalizePendingDetailAt(
 
   details.splice(index, 1);
   pendingById.delete(updated.id);
-  totalPendingDetailBytes -= pendingDetailBytes(updated);
+  pendingState.totalPendingDetailBytes -= pendingDetailBytes(updated);
   cleanupPendingDetails(connectionId, modelKey);
   decrementPendingCounters(modelKey, connectionId);
   return updated.id;
@@ -736,7 +745,7 @@ export function clearPendingRequests() {
   >;
   pendingById.clear();
   pendingIdByCorrelation.clear();
-  totalPendingDetailBytes = 0;
+  pendingState.totalPendingDetailBytes = 0;
   clearCompletedDetails();
 }
 
