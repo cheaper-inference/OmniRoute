@@ -7,7 +7,7 @@
  * The store namespaces a provider removal must purge are `syncedAvailableModels` (the
  * synced catalog, keys `<providerId>:<connectionId>`) and `discoveryState` (the same key
  * shape; the namespace only exists from the sibling change onwards, so removals recorded
- * before version 213 are exempt from the `discoveryState` namespace only).
+ * before version 217 are exempt from the `discoveryState` namespace only).
  *
  * A purge must keep every store row whose connection still exists. It decides liveness
  * from the connection id — the part of the key after the colon — and never from the
@@ -23,7 +23,7 @@
  *     );
  *
  * A purge anchored on a provider id is not a valid purge for a removal recorded from
- * version 213 onwards: it drops the catalog of a connection that was moved to another
+ * version 217 onwards: it drops the catalog of a connection that was moved to another
  * provider and is still alive.
  *
  * A purge that narrows the rows it deletes is never a valid purge: a sweep narrowed to
@@ -68,12 +68,12 @@
  * A purge anchored on a bare prefix wildcard is never a valid purge: it would also drop
  * the catalog of a sibling provider that still has connections.
  *
- * Removals recorded before this rule applies (versions below 213) are exempt from the
+ * Removals recorded before this rule applies (versions below 217) are exempt from the
  * connection-keyed shape requirement only: a purge anchored on the provider id is accepted
  * for them. Every other requirement still applies to them — the purge must exist, it must
  * be about that provider, a purge anchored on a bare prefix wildcard is still refused, and
  * so is a sweep narrowed to a subset of the store rows.
- * The cleanup migration (version 213) purges the store for them.
+ * The cleanup migration (version 217) purges the store for them.
  *
  * The rule covers every migration that deletes rows from `provider_connections` — one
  * provider, several providers, or every connection. A migration that deletes connections
@@ -92,8 +92,8 @@ import {
 } from "../_helpers/betterSqlite3Availability.ts";
 
 const MIGRATIONS_DIR = path.resolve(import.meta.dirname, "../../../src/lib/db/migrations");
-const CLEANUP_MIGRATION_FILE = "213_purge_orphaned_provider_catalogs.sql";
-const RULE_APPLIES_FROM_VERSION = 213;
+const CLEANUP_MIGRATION_FILE = "217_purge_orphaned_provider_catalogs.sql";
+const RULE_APPLIES_FROM_VERSION = 217;
 const RULE_NAMESPACES = ["syncedAvailableModels", "discoveryState"];
 
 type RemovalKind = "mass" | "provider-ids" | "unreadable" | "by-connection-id";

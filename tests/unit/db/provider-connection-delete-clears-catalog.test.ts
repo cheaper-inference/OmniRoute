@@ -15,7 +15,7 @@ import path from "node:path";
 import { makeManagementSessionRequest } from "../../helpers/managementSession.ts";
 
 const MIGRATIONS_DIR = path.resolve(import.meta.dirname, "../../../src/lib/db/migrations");
-const CLEANUP_MIGRATION_FILE = "213_purge_orphaned_provider_catalogs.sql";
+const CLEANUP_MIGRATION_FILE = "217_purge_orphaned_provider_catalogs.sql";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-connection-delete-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
