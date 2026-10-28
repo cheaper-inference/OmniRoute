@@ -1,0 +1,1 @@
+- **fix(auto-combo):** account-semaphore capacity errors (`SEMAPHORE_TIMEOUT`/`SEMAPHORE_QUEUE_FULL`, type `account_semaphore_capacity`) are now classified as local queue capacity — no cooldown, no rotation blame, no connection disable ([#18442](https://github.com/cheaper-inference/OmniRoute/pull/18442)) — thanks @jjxyxsjr
