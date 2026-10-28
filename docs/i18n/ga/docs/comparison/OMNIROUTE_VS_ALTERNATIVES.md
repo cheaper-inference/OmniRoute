@@ -37,13 +37,13 @@ Comparáid oibiachtúil gnéithe le ródairí AI foinse oscailte coitianta.
 | **Tacaíocht tolláin (Cloudflared, Tailscale, Ngrok)**             |                      ✅                       |           ❌           |         n/a          |    n/a    |
 | **Ceadúnas**                                                      |                      MIT                      |          MIT           |       dílsithe       | dílsithe  |
 
-## Cathain ar chóir OmniRoute a roghnú
+## Nuair a roghnú OmniRoute
 
-- Déanann tú féinóstáil agus teastaíonn uait **uaschumhdach soláthraithe** (375 soláthraí, 155 iontráil catalaige saor in aisce/gan údarú)
-- Teastaíonn uait **freastalaí MCP ionsuite** (uirlisí LLM, cuimhne, scileanna nochta mar uirlisí)
-- Teastaíonn uait **prótacal A2A** do shreafaí oibre gníomhaire-go-gníomhaire
-- Teastaíonn uait **folach méarloirge** (JA3/JA4) chun braiteadh ó CAPTCHAs thuas an tsruth a sheachaint
-- Teastaíonn uait **gnéithe fiontraíochta** (cosaintí, meastóireachtaí, cosán iniúchta) gan bille SaaS
+- Tá tú féin-óstach agus ba mhaith leat** clúdach soláthraí uasta** (377 soláthraí, 155 iontráil free/no-auth )
+- Ní mór duit a** freastalaí MCP ionsuite** ( uirlisí LLM, cuimhne, scileanna nochta mar uirlisí)
+- Ní mór duit** prótacal A2A** le haghaidh sreafaí oibre gníomhaire-go-ghníomhaire
+- Ba mhaith leat** stealth méarloirg** (JA3/JA4) chun braite trí CAPTCHAs in aghaidh an tsrutha a sheachaint
+- Ní mór duit** gnéithe fiontair** (ráillí cosanta, evals, rian iniúchta) gan bille SaaS
 
 ## Cathain LiteLLM a roghnú
 

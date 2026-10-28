@@ -292,6 +292,7 @@ import type {
   CompressionPipelineStep,
   CompressionResult,
 } from "../services/compression/types.ts";
+import type { CachingDetectionContext } from "../services/compression/cachingAware.ts";
 import { runLiveZoneCompression } from "./chatCore/liveZoneCompression.ts";
 import { prepareWebSearchFallbackBody } from "../services/webSearchFallback.ts";
 import { prepareWebFetchFallbackBody } from "../services/webFetchInterception.ts";
@@ -822,6 +823,13 @@ async function handleChatCoreInner({
   const noLogEnabled = apiKeyInfo?.noLog === true;
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
+  const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
+  const isScopedGeminiCacheTarget =
+    (provider === "antigravity" || provider === "agy") &&
+    effectiveModel
+      .toLowerCase()
+      .split("/")
+      .some((segment) => segment.startsWith("gemini-"));
   // Opt-in tool-source diagnostics (#1825): summarize the request's tool definitions
   // (count + MCP/hosted/client source breakdown + first names) as a single debug line.
   if (settings.logToolSources === true) {
@@ -895,8 +903,16 @@ async function handleChatCoreInner({
   let reasoningReplayHistory: unknown[] | null = null;
   // persistAttemptLogs extracted to chatCore/attemptLogging.ts (#3501); bind the per-request context
   // once so the 16 call sites keep passing only the per-attempt args (byte-identical).
-  const persistAttemptLogs = (args: PersistAttemptLogsArgs) =>
-    persistAttemptLogsFor(args, {
+  const persistAttemptLogs = (args: PersistAttemptLogsArgs) => {
+    if (isScopedGeminiCacheTarget && args.geminiPromptCache === undefined) {
+      args.geminiPromptCache = buildCacheUsageLogMeta(
+        args.tokens && typeof args.tokens === "object"
+          ? (args.tokens as Record<string, unknown>)
+          : null,
+        { mode: geminiPromptCacheMode, compressionTokens: tokensCompressed || undefined }
+      )?.geminiPromptCache;
+    }
+    return persistAttemptLogsFor(args, {
       traceId,
       provider,
       connectionId,
@@ -933,6 +949,7 @@ async function handleChatCoreInner({
       // transcript was redacted. false for every non-video request.
       videoContentRemoved: videoBridgeObserved,
     });
+  };
 
   // Primary path: merge client model id + alias target so config on either key applies; resolved
   // id wins on same header name. T5 family fallback uses only (nextModel, resolveModelAlias(next))
@@ -1393,7 +1410,13 @@ async function handleChatCoreInner({
         compressionComboKey,
         estimatedTokens,
         body as Record<string, unknown>,
-        { provider, targetFormat, model: effectiveModel, connectionCacheOverride },
+        {
+          provider,
+          targetFormat,
+          model: effectiveModel,
+          geminiPromptCacheMode: isScopedGeminiCacheTarget ? geminiPromptCacheMode : null,
+          connectionCacheOverride,
+        },
         namedCombos,
         compressionHeader
       );
@@ -1499,7 +1522,13 @@ async function handleChatCoreInner({
         compressionComboKey,
         estimatedTokens,
         compressionInputBody,
-        { provider, targetFormat, model: effectiveModel, connectionCacheOverride },
+        {
+          provider,
+          targetFormat,
+          model: effectiveModel,
+          geminiPromptCacheMode: isScopedGeminiCacheTarget ? geminiPromptCacheMode : null,
+          connectionCacheOverride,
+        },
         namedCombos,
         compressionHeader,
         {
@@ -1538,7 +1567,13 @@ async function handleChatCoreInner({
         // #3890: in a caching context, never compress the system prompt (cacheable prefix)
         // even if the operator disabled preserveSystemPrompt — honors the cache-aware flag
         // that selectCompressionStrategy can only partially apply via the mode string.
-        const cacheCtx = { provider, targetFormat, model: effectiveModel, connectionCacheOverride };
+        const cacheCtx: CachingDetectionContext = {
+          provider,
+          targetFormat,
+          model: effectiveModel,
+          geminiPromptCacheMode: isScopedGeminiCacheTarget ? geminiPromptCacheMode : null,
+          connectionCacheOverride,
+        };
         const compressionConfig = resolveCacheAwareConfig(config, compressionInputBody, cacheCtx);
         const compressionPrincipalId = apiKeyInfo?.id ? String(apiKeyInfo.id) : undefined;
         const compressionOptions = {
@@ -2048,6 +2083,7 @@ async function handleChatCoreInner({
     comboStrategy,
     targetProvider: provider,
     targetFormat,
+    targetModel: effectiveModel,
     settings: { alwaysPreserveClientCache: cacheControlMode },
     connectionCacheOverride,
   });
@@ -3139,6 +3175,9 @@ async function handleChatCoreInner({
   if (!stream) {
     const nonStreamingOutcome = await runNonStreamingResponse({
       reportSignatureFailure,
+      geminiPromptCacheMode,
+      isScopedGeminiCacheTarget,
+      tokensCompressed,
       apiKeyInfo,
       allowedConnections,
       appendRequestLog,
@@ -3277,6 +3316,9 @@ async function handleChatCoreInner({
   }
 
   const streamingTailOutcome = await runStreamingTail({
+    geminiPromptCacheMode,
+    isScopedGeminiCacheTarget,
+    tokensCompressed,
     registerStreamFinalizers: (
       pipelineError: streamFailure.PipelineStreamErrorHandler,
       clientDisconnect: (event: { reason: string; duration: number }) => boolean

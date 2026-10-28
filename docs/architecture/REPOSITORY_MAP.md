@@ -244,7 +244,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard component API: adapters over `packages/ui-kit` — see `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: icon names used by the screens → Lucide components (`<Icon>`)                           |
-| `constants/providers.ts`         | **375 providers** with Zod validation (source of truth)                                             |
+| `constants/providers.ts`         | **377 providers** with Zod validation (source of truth)                                             |
 | `constants/cliTools.ts`          | External CLI tool registry                                                                          |
 | `constants/routingStrategies.ts` | **20 routing strategies** with priorities                                                           |
 | `constants/publicApiRoutes.ts`   | Routes that require Bearer (vs management) auth                                                     |
@@ -414,7 +414,7 @@ open-sse/
 | `CLI-TOOLS.md`              | External CLI integrations + Internal OmniRoute CLI                                    |
 | `I18N.md`                   | i18n architecture, adding a language, 67 locales                                      |
 | `UNINSTALL.md`              | Clean uninstall steps                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 375 providers (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 377 providers (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem deep-dives
 
@@ -445,7 +445,7 @@ open-sse/
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK engines, registry contract |
 | `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON schema            |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Per-language rule pack inventory         |
-| `RTK_COMPRESSION.md`            | RTK declarative pipeline (49 filters)    |
+| `RTK_COMPRESSION.md`            | RTK declarative pipeline (56 filters)    |
 
 ### Deployment
 

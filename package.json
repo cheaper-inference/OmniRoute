@@ -1,7 +1,7 @@
 {
   "name": "omniroute",
   "version": "3.8.53",
-  "description": "Unified AI router with 375 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
+  "description": "Unified AI router with 377 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
   "type": "module",
   "bin": {
     "omniroute": "bin/omniroute.mjs",
@@ -123,6 +123,7 @@
     "build:cli": "node --import tsx scripts/build/prepublish.ts",
     "omniroute:verify": "node scripts/check/omniroute-verify.mjs",
     "build:release": "rm -rf .build dist && OMNIROUTE_BUILD_SHA=$(git rev-parse --short HEAD) npm run build && npm run build:cli && node scripts/build/write-build-sha.mjs",
+    "bun:release": "bun scripts/release/bun-pack.mjs",
     "build:native:tproxy": "cd src/mitm/tproxy/native && npx --yes node-gyp rebuild",
     "start": "node scripts/dev/run-next.mjs start",
     "start:fast": "cross-env OMNIROUTE_SKIP_STANDALONE=1 node scripts/dev/run-next.mjs start",
@@ -280,7 +281,7 @@
     "test:boundary:live": "cross-env RUN_BOUNDARY_LIVE=1 DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 \"tests/boundary/*.live.test.ts\"",
     "test:heap": "node --expose-gc --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/integration/heap-growth.test.ts",
     "test:chaos": "cross-env RUN_CHAOS_INT=1 node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 tests/integration/resilience-chaos.test.ts",
-    "test:e2e": "node scripts/dev/run-playwright-tests.mjs test tests/e2e/*.spec.ts",
+    "test:e2e": "node scripts/dev/run-playwright-tests.mjs",
     "test:protocols:e2e": "node scripts/dev/run-protocol-clients-tests.mjs",
     "test:vitest": "vitest run --config vitest.mcp.config.ts",
     "test:vitest:ui": "vitest run --config vitest.config.ts",
@@ -320,7 +321,9 @@
     "i18n:check-keys:cli": "node scripts/i18n/check-key-completeness.mjs --catalog=cli",
     "check:free-catalog-evidence": "node scripts/check/check-free-catalog-evidence.mjs",
     "check:ui-kit-snapshot": "node scripts/check/check-ui-kit-snapshot.mjs",
-    "gen:icon-map": "node scripts/dev/gen-icon-map.mjs"
+    "gen:icon-map": "node scripts/dev/gen-icon-map.mjs",
+    "docs:readme-hero": "node scripts/docs/gen-readme-hero.mjs",
+    "docs:readme-diagrams": "node --import tsx/esm scripts/docs/gen-readme-diagrams.mjs"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "1.4.0",
@@ -439,7 +442,7 @@
     "@axe-core/playwright": "^4.13.0",
     "@cyclonedx/cyclonedx-npm": "6.0.1",
     "@eslint/compat": "^2.1.1",
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "1.62.1",
     "@size-limit/file": "^14.1.0",
     "@stryker-mutator/core": "^10.0.0",
     "@stryker-mutator/tap-runner": "^10.0.0",
@@ -489,6 +492,7 @@
     "prettier": "^3.9.6",
     "promptfoo": "0.123.0",
     "size-limit": "^14.1.0",
+    "subset-font": "^2.9.0",
     "tailwindcss": "^4.3.0",
     "type-coverage": "^2.30.1",
     "typescript": "^6.0.3",
@@ -545,7 +549,7 @@
     "postcss": "^8.5.18",
     "ip-address": "^10.7.4",
     "axios": "^1.20.0",
-    "qs": "^6.16.0",
+    "qs": "^6.16.1",
     "uuid": "^14.0.2",
     "form-data": "^4.0.6",
     "vite": "^8.3.3",
@@ -553,7 +557,7 @@
     "@babel/core": "^7.29.6",
     "hono": "^4.13.13",
     "@hono/node-server": "^2.0.5",
-    "fast-uri": "^3.1.7",
+    "fast-uri": "^3.1.9",
     "body-parser": "^2.4.0",
     "@yarnpkg/parsers": {
       "js-yaml": "^4.3.2"
