@@ -37,6 +37,17 @@
  *                                     cmd/deepseek/deepseek-v4.1-flash
  *   OMNIROUTE_TRANSLATION_TIMEOUT_MS  optional, default 60000
  *   OMNIROUTE_TRANSLATION_CONCURRENCY optional, default 4
+ *
+ * Google engine (scripts/i18n/lib/google-translate.mjs — structure-safe: only text is sent,
+ * fences / table rows / code spans are rebuilt from the source):
+ *   OMNIROUTE_TRANSLATION_ENGINE      llm (default) | google — `google` needs no LLM env at all
+ *   OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK  default on; `0` disables. With the llm engine, a
+ *                                     chunk the model could not produce (output guard failed
+ *                                     on every attempt, or quota/backend errors) is translated
+ *                                     by Google instead of failing the locale.
+ *   OMNIROUTE_TRANSLATION_GOOGLE_API_KEY   optional; official Cloud Translation v2 instead of
+ *                                     the keyless web endpoint
+ *   OMNIROUTE_TRANSLATION_GOOGLE_CONCURRENCY  parallel Google requests (default 6)
  */
 
 import { promises as fs, existsSync, readFileSync } from "node:fs";
@@ -48,6 +59,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
 import { isFallbackWorthy, resolveModelChain } from "./lib/translate-backend.mjs";
+import { translateMarkdownWithGoogle } from "./lib/google-translate.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
 
 // ----- .env loader --------------------------------------------------------
@@ -913,31 +925,99 @@ async function resolveSectionPlan({ task, state, opts, sections }) {
   return planSectionReuse({ previousHashes, sections, mirrorSections });
 }
 
-async function translateBody(body, localeEntry, backend) {
+export function translationEngine(env = process.env) {
+  return (env.OMNIROUTE_TRANSLATION_ENGINE || "llm").trim().toLowerCase() === "google"
+    ? "google"
+    : "llm";
+}
+
+export function googleFallbackEnabled(env = process.env) {
+  return (env.OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK ?? "1").trim() !== "0";
+}
+
+let protectedTermsCache = null;
+function protectedTerms() {
+  if (protectedTermsCache) return protectedTermsCache;
+  try {
+    const file = path.join(SCRIPT_DIR, "glossary", "protected-terms.json");
+    protectedTermsCache = JSON.parse(readFileSync(file, "utf8")).terms ?? [];
+  } catch {
+    protectedTermsCache = [];
+  }
+  return protectedTermsCache;
+}
+
+// One chunk through Google, checked by the same output guard as a model answer. The web
+// endpoint's answers vary between calls (2026-10-28: hy failed once, passed on rerun), so a
+// rejected answer is retried like a model answer.
+async function translateChunkWithGoogle(chunk, localeEntry, backend, label) {
+  let problems = [];
+  for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
+    const text = await (backend.googleTranslate ?? translateMarkdownWithGoogle)(
+      chunk,
+      localeEntry.code,
+      { protectedTerms: protectedTerms() }
+    );
+    const checked = validateTranslatedChunk(chunk, text);
+    if (checked.problems.length === 0) return checked.text;
+    problems = checked.problems;
+    logWarn(
+      `  ${label} rejected (google, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${problems.join("; ")}`
+    );
+  }
+  throw new Error(`${label} failed validation (google): ${problems.join("; ")}`);
+}
+
+// One chunk through the model chain; null when every attempt failed the output guard.
+async function translateChunkWithModel(chunk, messages, backend, label) {
+  let checked;
+  for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
+    checked = validateTranslatedChunk(
+      chunk,
+      await (backend.callChat ?? callChat)(messages, backend)
+    );
+    if (checked.problems.length === 0) return { text: checked.text };
+    logWarn(
+      `  ${label} rejected (attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
+    );
+  }
+  return { problems: checked.problems };
+}
+
+export async function translateBody(body, localeEntry, backend) {
   const englishName = localeEntry.english ?? localeEntry.name;
   const native = localeEntry.native ?? localeEntry.name;
   const system = SYSTEM_PROMPT(englishName, native);
   const chunks = chunkMarkdown(body);
   const translated = [];
+  const engine = backend.engine ?? "llm";
+  const fallback = backend.googleFallback ?? googleFallbackEnabled();
   for (let i = 0; i < chunks.length; i++) {
+    const label = `chunk ${i + 1}/${chunks.length}`;
+    if (engine === "google") {
+      translated.push(await translateChunkWithGoogle(chunks[i], localeEntry, backend, label));
+      continue;
+    }
     const messages = [
       { role: "system", content: system },
       { role: "user", content: chunks[i] },
     ];
-    let checked;
-    for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
-      checked = validateTranslatedChunk(chunks[i], await callChat(messages, backend));
-      if (checked.problems.length === 0) break;
-      logWarn(
-        `  chunk ${i + 1}/${chunks.length} rejected (attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
-      );
+    let result;
+    try {
+      result = await translateChunkWithModel(chunks[i], messages, backend, label);
+    } catch (err) {
+      if (!fallback) throw err;
+      result = { problems: [`model error: ${String(err?.message ?? err).slice(0, 120)}`] };
     }
-    if (checked.problems.length > 0) {
-      throw new Error(
-        `chunk ${i + 1}/${chunks.length} failed validation: ${checked.problems.join("; ")}`
-      );
+    if (result.problems) {
+      if (!fallback) {
+        throw new Error(`${label} failed validation: ${result.problems.join("; ")}`);
+      }
+      logWarn(`  [i18n-google] ${label} via Google (${result.problems.join("; ")})`);
+      translated.push(await translateChunkWithGoogle(chunks[i], localeEntry, backend, label));
+      continue;
     }
-    translated.push(checked.text);
+    translated.push(result.text);
     if (chunks.length > 1) {
       logInfo(
         `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${checked.text.length} chars)`
@@ -1091,7 +1171,13 @@ async function main() {
 
   // Read backend env up front so dry-run can still print masked summary.
   let backend = null;
-  if (!opts.dryRun) {
+  if (!opts.dryRun && translationEngine() === "google") {
+    backend = {
+      engine: "google",
+      concurrency: opts.concurrency || Number(process.env.OMNIROUTE_TRANSLATION_CONCURRENCY || 8),
+    };
+    logInfo(`backend: Google Translate (concurrency=${backend.concurrency})`);
+  } else if (!opts.dryRun) {
     backend = backendConfig();
     if (opts.concurrency) backend.concurrency = opts.concurrency;
     else backend.concurrency = Number(process.env.OMNIROUTE_TRANSLATION_CONCURRENCY || 4);
