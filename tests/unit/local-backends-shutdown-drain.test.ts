@@ -167,6 +167,19 @@ function writeFailingChrome(dir: string): string {
 
 async function runChatGptWebTurn(stream: boolean) {
   const chromeExecutablePath = writeFailingChrome(isolatedRoot);
+  // Only an operator-configured browser is launched (#18358): a stored
+  // chromeExecutablePath is honoured only when it matches CHATGPT_WEB_CODEX_CHROME_PATH.
+  const oldChromePath = process.env.CHATGPT_WEB_CODEX_CHROME_PATH;
+  process.env.CHATGPT_WEB_CODEX_CHROME_PATH = chromeExecutablePath;
+  try {
+    return await runChatGptWebTurnWith(chromeExecutablePath, stream);
+  } finally {
+    if (oldChromePath === undefined) delete process.env.CHATGPT_WEB_CODEX_CHROME_PATH;
+    else process.env.CHATGPT_WEB_CODEX_CHROME_PATH = oldChromePath;
+  }
+}
+
+async function runChatGptWebTurnWith(chromeExecutablePath: string, stream: boolean) {
   const executor = new ChatGptWebCodexExecutor();
   return executor.execute({
     model: "luna",
