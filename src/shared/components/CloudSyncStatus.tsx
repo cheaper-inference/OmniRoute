@@ -36,6 +36,7 @@ export default function CloudSyncStatus({ collapsed = false }) {
   const router = useRouter();
 
   const poll = useCallback(async () => {
+    if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
     try {
       const res = await fetch("/api/sync/cloud");
       if (!mountedRef.current) return;

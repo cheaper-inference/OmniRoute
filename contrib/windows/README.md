@@ -1,20 +1,27 @@
 # Windows helpers — run OmniRoute from a source checkout
 
-Two double-clickable `.bat` files for Windows users who cloned the repo instead of
+Double-clickable `.bat` files for Windows users who cloned the repo instead of
 installing the npm package. Both resolve the repo root from their own location, so they
 work from any checkout path.
 
-| File                  | What it does                                                                       |
-| --------------------- | ---------------------------------------------------------------------------------- |
-| `start-omniroute.bat` | `npm run dev` — dev server + dashboard on `http://localhost:20128`                 |
-| `launch-claude.bat`   | `node bin\omniroute.mjs launch` — opens Claude Code pointed at the local OmniRoute |
+| File                           | What it does                                                                       |
+| ------------------------------ | ---------------------------------------------------------------------------------- |
+| `start-omniroute-prod.bat`     | **Production mode** — fastest page transitions, lowest memory, stable              |
+| `start-omniroute-light.bat`    | Light dev mode — dashboard on, background sync jobs disabled                       |
+| `start-omniroute-headless.bat` | Headless mode — ultra-light API proxy only (/v1/*), dashboard disabled, lowest RAM |
+| `start-omniroute.bat`          | Standard dev server + dashboard on `http://localhost:20128`                        |
+| `launch-claude.bat`            | `node bin\omniroute.mjs launch` — opens Claude Code pointed at the local OmniRoute |
 
 Usage:
 
 1. `npm install` once (see the note below if you are on npm ≥ 11).
-2. Double-click `start-omniroute.bat` and wait for `dev server listening on http://0.0.0.0:20128`.
-3. Open the dashboard, connect a provider, copy an API key from **Endpoints**.
-4. Double-click `launch-claude.bat`. Extra arguments are forwarded, e.g.
+2. Double-click your chosen startup script:
+   - `start-omniroute-prod.bat` (**Recommended**: builds once, then runs fast with instant page loads).
+   - `start-omniroute-light.bat` (dev mode with background services off).
+   - `start-omniroute-headless.bat` (proxy only, no UI).
+3. Wait for `server listening on http://0.0.0.0:20128`.
+4. Open the dashboard (if in UI mode) at `http://localhost:20128`, connect a provider, copy an API key from **Endpoints**.
+5. Double-click `launch-claude.bat`. Extra arguments are forwarded, e.g.
    `launch-claude.bat --profile glm52` after `node bin\omniroute.mjs setup-claude`.
 
 ## npm ≥ 11 skips `better-sqlite3` on Windows

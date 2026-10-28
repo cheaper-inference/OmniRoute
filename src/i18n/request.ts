@@ -153,6 +153,16 @@ const loadLocaleMessages = createLocaleMessagesLoader(
   async (locale) => (await import(`./messages/${locale}.json`)).default
 );
 
+const normalizedCache = new WeakMap<Record<string, unknown>, Record<string, unknown>>();
+
+function getNormalizedLocaleMessages(messages: Record<string, unknown>): Record<string, unknown> {
+  const cached = normalizedCache.get(messages);
+  if (cached) return cached;
+  const normalized = normalizeComplianceEventTypes(messages);
+  normalizedCache.set(messages, normalized);
+  return normalized;
+}
+
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
   let locale: string = cookieStore.get(LOCALE_COOKIE)?.value || "";
@@ -164,17 +174,22 @@ export default getRequestConfig(async () => {
 
   locale = resolveRequestedLocale(locale, LOCALES, LOCALE_ALIASES, DEFAULT_LOCALE);
 
-  const localeMessages = normalizeComplianceEventTypes(await loadLocaleMessages(locale));
+  const rawLocaleMessages = await loadLocaleMessages(locale);
+  const localeMessages = getNormalizedLocaleMessages(rawLocaleMessages);
+
+  // When the active locale is the fallback (EN), return immediately without cloning or merging
+  if (locale === FALLBACK_LOCALE) {
+    return {
+      locale,
+      messages: localeMessages,
+    };
+  }
 
   // G1: fall back to EN for any missing key. EN is loaded only once per request
   // and only when the active locale is not EN itself (no-op).
-  let messages = localeMessages as Record<string, unknown>;
-  if (locale !== FALLBACK_LOCALE) {
-    const fallbackMessages = normalizeComplianceEventTypes(
-      await loadLocaleMessages(FALLBACK_LOCALE)
-    );
-    messages = deepMergeFallback({ ...localeMessages }, fallbackMessages);
-  }
+  const rawFallbackMessages = await loadLocaleMessages(FALLBACK_LOCALE);
+  const fallbackMessages = getNormalizedLocaleMessages(rawFallbackMessages);
+  let messages = deepMergeFallback({ ...localeMessages }, fallbackMessages);
 
   // 4. Merge EN as namespace-level fallback for locales that are missing new namespaces.
   //    Only applied when the active locale is not EN (avoids a redundant import).
@@ -183,14 +198,14 @@ export default getRequestConfig(async () => {
   //    This ensures new namespaces (e.g. cliCode, cliAgents, acpAgents, cliCommon added
   //    in plan 14 F9) are displayed in English for the 39 non-EN/non-pt-BR locales until
   //    translations are shipped.
-  let mergedMessages: Record<string, unknown> = messages as Record<string, unknown>;
-  if (locale !== DEFAULT_LOCALE) {
-    const enMessages = normalizeComplianceEventTypes(await loadLocaleMessages(DEFAULT_LOCALE));
-    mergedMessages = { ...enMessages, ...mergedMessages };
+  if (locale !== DEFAULT_LOCALE && DEFAULT_LOCALE !== FALLBACK_LOCALE) {
+    const rawEnMessages = await loadLocaleMessages(DEFAULT_LOCALE);
+    const enMessages = getNormalizedLocaleMessages(rawEnMessages);
+    messages = { ...enMessages, ...messages };
   }
 
   return {
     locale,
-    messages: mergedMessages,
+    messages,
   };
 });

@@ -66,16 +66,22 @@ function queueHotReloadCheck(source: string) {
 export function startRuntimeConfigHotReload(options: { pollIntervalMs?: number } = {}) {
   if (pollTimer || sqliteWatcher) return;
 
+  const bgDisabled = process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
+  const isBgDisabled =
+    bgDisabled && new Set(["1", "true", "yes", "on"]).has(bgDisabled.trim().toLowerCase());
+
   const pollIntervalMs = Math.max(
     options.pollIntervalMs || getPollIntervalMs(),
     MIN_POLL_INTERVAL_MS
   );
 
-  pollTimer = setInterval(() => {
-    queueHotReloadCheck("hot-reload:poll");
-  }, pollIntervalMs);
-  if (typeof pollTimer === "object" && "unref" in pollTimer) {
-    (pollTimer as { unref?: () => void }).unref?.();
+  if (!isBgDisabled) {
+    pollTimer = setInterval(() => {
+      queueHotReloadCheck("hot-reload:poll");
+    }, pollIntervalMs);
+    if (typeof pollTimer === "object" && "unref" in pollTimer) {
+      (pollTimer as { unref?: () => void }).unref?.();
+    }
   }
 
   if (SQLITE_FILE) {

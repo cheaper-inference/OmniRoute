@@ -83,6 +83,8 @@ function isBuildProcess(): boolean {
 
 function isCredentialHealthCheckDisabled(): boolean {
   if (isBuildProcess() || isAutomatedTestProcess()) return true;
+  const bgDisabled = process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
+  if (bgDisabled && TRUE_ENV_VALUES.has(bgDisabled.trim().toLowerCase())) return true;
   const val = process.env.OMNIROUTE_DISABLE_CREDENTIAL_HEALTH_CHECK;
   return val ? TRUE_ENV_VALUES.has(val.trim().toLowerCase()) : false;
 }
