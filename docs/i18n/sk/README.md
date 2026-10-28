@@ -71,7 +71,7 @@
 
 |                                  |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Poskytovatelia                |           352           |   **358**   |          375          |
+| 🌐 Poskytovatelia                |           352           |   **358**   |          376          |
 | 🧠 Jedinečné ID modelov chatu    |          1320           |  **1374**   |         1475          |
 | 🖼️ Most modalít                  | 🆕 obraz + zvuk + video |      ✓      |           ✓           |
 | 📡 Bezplatný katalóg Radaru      |  🆕 voliteľné zapnutie  |      ✓      |           ✓           |

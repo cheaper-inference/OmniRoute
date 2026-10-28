@@ -10,22 +10,22 @@
 
 _Posljednje ažurirano: 2026-06-28_
 
-## Izvršni sažetak
+## Sažetak za rukovodstvo
 
-OmniRoute je lokalni pristupnik za usmjeravanje umjetne inteligencije i nadzorna ploča izgrađena na Next.js-u.
-Pruža jedinstvenu krajnju točku kompatibilnu s OpenAI-jem (`/v1/*`) i usmjerava promet prema više nadređenih pružatelja uz prevođenje, pričuvno prebacivanje, osvježavanje tokena i praćenje upotrebe.
+OmniRoute je lokalni pristupnik za usmjeravanje AI-ja i nadzorna ploča izgrađena na Next.js-u.
+Pruža jedinstvenu krajnju točku kompatibilnu s OpenAI-jem (`/v1/*`) i usmjerava promet preko više uzvodnih pružatelja uz prevođenje, pričuvne opcije, osvježavanje tokena i praćenje upotrebe.
 
 Ključne mogućnosti:
 
 - API sučelje kompatibilno s OpenAI-jem za CLI/alate (376 pružatelja, 156 izvršnih modula)
 - Prevođenje zahtjeva/odgovora između formata pružatelja
-- Pričuvno prebacivanje kombinacija modela (slijed više modela)
-- Strukturirani koraci kombinacije (`provider + model + connection`) s redoslijedom tijekom izvođenja prema `compositeTiers`
-- Pričuvno prebacivanje na razini računa (više računa po pružatelju)
-- Prethodna provjera kvote i P2C odabir računa koji uzima u obzir kvotu u glavnom toku razgovora
+- Pričuvni odabir kombinacije modela (slijed više modela)
+- Strukturirani koraci kombinacije (`provider + model + connection`) s određivanjem redoslijeda tijekom izvođenja prema `compositeTiers`
+- Pričuvni odabir na razini računa (više računa po pružatelju)
+- Prethodna provjera kvote i P2C odabir računa svjestan kvote u glavnom tijeku razgovora
 - Upravljanje vezama s pružateljima putem OAutha i API ključeva (27 modula OAuth pružatelja)
 - Generiranje ugradnji putem `/v1/embeddings` (18 pružatelja)
-- Generiranje slika putem `/v1/images/generations` (10+ pružatelja, 20+ modela)
+- Generiranje slika putem `/v1/images/generations` (više od 10 pružatelja, više od 20 modela)
 - Transkripcija zvuka putem `/v1/audio/transcriptions` (18 pružatelja)
 - Pretvaranje teksta u govor putem `/v1/audio/speech` (24 ugrađena pružatelja)
 - Generiranje videozapisa putem `/v1/videos/generations` (ComfyUI + SD WebUI)
@@ -34,55 +34,55 @@ Ključne mogućnosti:
 - Moderiranje putem `/v1/moderations`
 - Ponovno rangiranje putem `/v1/rerank`
 - Raščlanjivanje oznaka za razmišljanje (`<think>...</think>`) za modele zaključivanja
-- Sanitizacija odgovora radi stroge kompatibilnosti s OpenAI SDK-om
+- Pročišćavanje odgovora radi stroge kompatibilnosti s OpenAI SDK-om
 - Normalizacija uloga (developer→system, system→user) radi kompatibilnosti među pružateljima
 - Pretvorba strukturiranog izlaza (json_schema → Gemini responseSchema)
-- Lokalna pohrana pružatelja, ključeva, pseudonima, kombinacija, postavki i cijena (122 DB modula)
+- Lokalna pohrana pružatelja, ključeva, pseudonima, kombinacija, postavki i cijena (122 modula baze podataka)
 - Praćenje upotrebe/troškova i bilježenje zahtjeva
-- Neobavezna sinkronizacija s oblakom radi sinkronizacije stanja između više uređaja
+- Neobavezna sinkronizacija u oblaku za sinkronizaciju na više uređaja/sinkronizaciju stanja
 - Popis dopuštenih/blokiranih IP adresa za kontrolu pristupa API-ju
-- Upravljanje proračunom za razmišljanje (izravno prosljeđivanje/automatski/prilagođeni/prilagodljivi)
+- Upravljanje proračunom za razmišljanje (izravno prosljeđivanje/automatski/prilagođeni/prilagodljivi način)
 - Globalno umetanje sistemskog upita
 - Praćenje sesija i izrada otisaka
-- Poboljšano ograničavanje brzine po računu s profilima specifičnima za pružatelje
+- Poboljšano ograničavanje učestalosti zahtjeva po računu uz profile specifične za pružatelja
 - Obrazac prekidača strujnog kruga za otpornost pružatelja
-- Zaštita od naglog istodobnog opterećenja zaključavanjem pomoću muteksa
-- Predmemorija za deduplikaciju zahtjeva na temelju potpisa
-- Domenski sloj: pravila troškova, pravila pričuvnog prebacivanja, pravila zaključavanja
-- Context Relay: sažeci primopredaje sesije za kontinuitet pri rotaciji računa
-- Trajna pohrana stanja domene (SQLite predmemorija s izravnim zapisivanjem za pričuvna prebacivanja, proračune, zaključavanja i prekidače strujnog kruga)
-- Mehanizam pravila za centraliziranu evaluaciju zahtjeva (zaključavanje → proračun → pričuvno prebacivanje)
+- Zaštita od naglog vala istodobnih zahtjeva s pomoću zaključavanja muteksom
+- Predmemorija za uklanjanje duplikata zahtjeva na temelju potpisa
+- Sloj domene: pravila troškova, pravila pričuvnog odabira, pravila zaključavanja
+- Context Relay: sažeci primopredaje sesija radi kontinuiteta pri rotaciji računa
+- Trajna pohrana stanja domene (SQLite predmemorija s izravnim zapisivanjem za pričuvne odabire, proračune, zaključavanja i prekidače strujnog kruga)
+- Mehanizam pravila za centraliziranu procjenu zahtjeva (zaključavanje → proračun → pričuvni odabir)
 - Telemetrija zahtjeva s agregacijom latencije p50/p95/p99
 - Telemetrija ciljeva kombinacije i povijesno stanje ciljeva kombinacije putem `combo_execution_key` / `combo_step_id`
 - ID korelacije (X-Request-Id) za praćenje od početka do kraja
-- Evidentiranje revizije usklađenosti uz mogućnost isključivanja po API ključu
-- Eval okvir za osiguravanje kvalitete LLM-a
+- Evidentiranje usklađenosti uz mogućnost isključivanja po API ključu
+- Okvir za evaluaciju radi osiguranja kvalitete LLM-a
 - Nadzorna ploča stanja sa statusom prekidača strujnog kruga pružatelja u stvarnom vremenu
 - MCP poslužitelj (110 alata) s 3 prijenosa (stdio/SSE/Streamable HTTP)
 - A2A poslužitelj (JSON-RPC 2.0 + SSE) s vještinama i životnim ciklusom zadataka
 - Sustav memorije (izdvajanje, umetanje, dohvaćanje, sažimanje)
 - Sustav vještina (registar, izvršitelj, izolirano okruženje, ugrađene vještine)
-- MITM proxy s upravljanjem certifikatima i obradom DNS-a
-- Posrednički softver za zaštitu od umetanja upita
-- Cjevovod za kompresiju upita s komponentama Caveman, RTK, složenim cjevovodima, kombinacijama kompresije, jezičnim paketima i analitikom
+- MITM proxy s upravljanjem certifikatima i rukovanjem DNS-om
+- Posrednički sloj za zaštitu od umetanja upita
+- Proces sažimanja upita s Cavemanom, RTK-om, složenim procesima, kombinacijama sažimanja, jezičnim paketima i analitikom
 - Registar ACP-a (Agent Communication Protocol)
 - Modularni OAuth pružatelji (22 pojedinačna modula u `src/lib/oauth/providers/`)
-- Skripte uninstall/full-uninstall
+- Skripte za deinstalaciju/potpunu deinstalaciju
 - Radnja popravka OAuth okruženja
 - WebSocket most za WS klijente kompatibilne s OpenAI-jem (`/v1/ws`)
 - Upravljanje tokenima za sinkronizaciju (izdavanje/opoziv, preuzimanje konfiguracijskog paketa s verzijama temeljenima na ETag-u)
 - GLM Thinking (`glmt`) kao punopravna unaprijed postavljena konfiguracija pružatelja
-- Hibridno brojanje tokena (`/messages/count_tokens` na strani pružatelja uz procjenu kao pričuvnu opciju)
-- Automatsko početno popunjavanje pseudonima modela (30+ normalizacija dijalekata između proxyja pri pokretanju)
-- Sigurno izlazno dohvaćanje sa zaštitom od SSRF-a, blokiranjem privatnih URL-ova i podesivim ponovnim pokušajima
-- Ponovni pokušaji razgovora koji uzimaju u obzir razdoblje hlađenja, uz podesive `requestRetry` i `maxRetryIntervalSec`
+- Hibridno brojanje tokena (pružateljeva krajnja točka `/messages/count_tokens` uz procjenu kao pričuvnu opciju)
+- Automatsko početno popunjavanje pseudonima modela (više od 30 normalizacija dijalekata između proxyja pri pokretanju)
+- Sigurno odlazno dohvaćanje sa zaštitom od SSRF-a, blokiranjem privatnih URL-ova i podesivim ponovnim pokušajima
+- Ponovni pokušaji razgovora koji uvažavaju razdoblje mirovanja, s podesivim vrijednostima `requestRetry` i `maxRetryIntervalSec`
 - Provjera valjanosti okruženja izvođenja pomoću Zoda pri pokretanju
-- Revizija usklađenosti v2 sa straničenjem, CRUD događajima pružatelja i evidentiranjem provjere valjanosti blokirane zbog SSRF-a
+- Evidencija usklađenosti v2 sa straničenjem, događajima CRUD operacija nad pružateljima i evidentiranjem provjera koje je blokirao SSRF
 
 Primarni model izvođenja:
 
-- Rute aplikacije Next.js u `src/app/api/*` implementiraju API-je nadzorne ploče i API-je za kompatibilnost
-- Zajednička jezgra za SSE/usmjeravanje u `src/sse/*` + `open-sse/*` upravlja izvršavanjem pružatelja, prevođenjem, strujanjem, pričuvnim prebacivanjem i upotrebom
+- Rute Next.js aplikacije u `src/app/api/*` implementiraju API-je nadzorne ploče i API-je za kompatibilnost
+- Zajednička jezgra za SSE/usmjeravanje u `src/sse/*` + `open-sse/*` upravlja izvršavanjem kod pružatelja, prevođenjem, strujanjem, pričuvnim odabirom i upotrebom
 
 ## Referentni dijagrami
 

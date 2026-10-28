@@ -71,7 +71,7 @@
 
 |                                         |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Mga Provider                         |            352            |   **358**   |          375          |
+| 🌐 Mga Provider                         |            352            |   **358**   |          376          |
 | 🧠 Natatanging chat model ID            |           1320            |  **1374**   |         1475          |
 | 🖼️ Modality Bridge                      | 🆕 vision + audio + video |      ✓      |           ✓           |
 | 📡 Libreng catalog ng Radar             |         🆕 opt-in         |      ✓      |           ✓           |

@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Provayder cheklovlari",
     "noProviders": "Hech qanday provayder ulanmagan",
+    "quotaAuthRequired": "Autentifikatsiya talab qilinadi — boshqaruv paneliga kiring",
+    "quotaAuthRequiredHint": "Boshqaruv paneli seansi mavjud emas yoki muddati tugaganligi sababli provayder ulanishlarini yuklab bo‘lmadi. Kvota cheklovlarini ko‘rish uchun tizimga kiring va sahifani yangilang.",
     "connectProvidersForQuota": "API kvota cheklovlari va foydalanish holatini kuzatish uchun provayderlarga OAuth orqali ulaning.",
     "accountsCount": "{count, plural, one {# ta hisob} other {# ta hisob}}",
     "filteredFromCount": "({count} tadan filtrlangan)",

@@ -71,7 +71,7 @@
 
 |                                |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------ | :--------------------: | :---------: | :-------------------: |
-| 🌐 Leverantörer                |          352           |   **358**   |          375          |
+| 🌐 Leverantörer                |          352           |   **358**   |          376          |
 | 🧠 Unika chattmodell-ID:n      |          1320          |  **1374**   |         1475          |
 | 🖼️ Modalitetsbrygga            | 🆕 bild + ljud + video |      ✓      |           ✓           |
 | 📡 Radar – gratis katalog      |       🆕 opt-in        |      ✓      |           ✓           |

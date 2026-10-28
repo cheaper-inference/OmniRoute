@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Iyakokin Masu Samarwa",
     "noProviders": "Babu Masu Samarwa da Aka Haɗa",
+    "quotaAuthRequired": "Ana buƙatar tantancewa - shiga cikin dashboard",
+    "quotaAuthRequiredHint": "Ba a iya loda haɗin masu samar da sabis ba saboda zaman dashboard ɗin ya ɓace ko ya ƙare. Shiga sannan ka sabunta don ganin iyakokin ƙayyadadden amfaninka.",
     "connectProvidersForQuota": "Haɗa da masu samarwa ta amfani da OAuth don bibiyar iyakokin adadin amfani da API da kuma amfaninka.",
     "accountsCount": "{count, plural, one {# asusu} other {# asusu}}",
     "filteredFromCount": "(an tace daga {count})",

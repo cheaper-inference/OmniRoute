@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Giới hạn của nhà cung cấp",
     "noProviders": "Không có nhà cung cấp nào được kết nối",
+    "quotaAuthRequired": "Yêu cầu xác thực - đăng nhập vào trang tổng quan",
+    "quotaAuthRequiredHint": "Không thể tải các kết nối nhà cung cấp vì phiên trang tổng quan bị thiếu hoặc đã hết hạn. Hãy đăng nhập và làm mới để xem giới hạn hạn ngạch của bạn.",
     "connectProvidersForQuota": "Kết nối với các nhà cung cấp bằng OAuth để theo dõi giới hạn hạn ngạch và mức sử dụng API của bạn.",
     "accountsCount": "{count, plural, one {# tài khoản} other {# tài khoản}}",
     "filteredFromCount": "(được lọc từ {count})",

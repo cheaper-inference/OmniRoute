@@ -117,144 +117,144 @@ OmniRoute/
 src/
 ├── app/                 # App Router (stranice + API rute + stranice statusa + odredišna stranica)
 ├── lib/                 # Temeljne biblioteke / domenski moduli (80 poddirektorija + ~70 datoteka najviše razine)
-├── domain/              # Čista domenska logika (mehanizam pravila, pričuvno ponašanje, trošak, zaključavanje, comboResolver, procjena)
-├── server/              # Moduli samo za poslužitelj (autorizacijski proces, CORS, autentifikacijski međusloj) — ne mogu se uvoziti na klijentu
-├── shared/              # Dijeljeno između poslužitelja i klijenta kada je sigurno (konstante, tipovi, validacija, ugovori, pomoćne funkcije)
-├── i18n/                # next-intl konfiguracija + JSON poruke za svaki lokalitet (67 lokaliteta)
-├── middleware/          # Next.js međusloj (obogaćivanje zahtjeva, otkrivanje lokaliteta)
-├── mitm/                # Jezgra MITM proxyja: generiranje/instalacija certifikata, rukovatelji, odredišta, inspektor, maske, izravni prolaz
-│   ├── handlers/        # 9 klasa rukovatelja za IDE agente koje proširuju MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Sloj za bilježenje prometa: međuspremnik (kružni međuspremnik u memoriji), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Poveznica za prilagodnike modela (naslijeđeni kompatibilni sloj)
+├── domain/              # Čista domenska logika (mehanizam pravila, pričuvno rješenje, trošak, zaključavanje, comboResolver, procjena)
+├── server/              # Moduli samo za poslužitelj (autorizacijski proces, cors, autentifikacijski međuopsklop) — ne mogu se uvoziti iz klijenta
+├── shared/              # Dijeljeno između poslužitelja i klijenta gdje je sigurno (konstante, tipovi, validacija, ugovori, pomoćne funkcije)
+├── i18n/                # next-intl konfiguracija + JSON poruke po lokalizaciji (67 lokalizacija)
+├── middleware/          # Next.js međuopsklop (obogaćivanje zahtjeva, otkrivanje lokalizacije)
+├── mitm/                # Jezgra MITM proxyja: generiranje/instalacija certifikata, rukovatelji, ciljevi, inspektor, maske, prosljeđivanje
+│   ├── handlers/        # 9 klasa rukovatelja IDE agenata koje proširuju MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Sloj za bilježenje prometa: međuspremnik (prsten u memoriji), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Poveznica prilagodnika modela (naslijeđeni kompatibilnosni sloj)
 ├── scripts/             # Ugrađene skripte za održavanje (npr. backfillAggregation)
-├── sse/                 # Naslijeđeni SSE rukovatelji/servisi (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Naslijeđeno spremište u memoriji (postupno se zamjenjuje s src/lib/db)
+├── sse/                 # Naslijeđeni SSE rukovatelji/usluge (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Naslijeđeno spremište u memoriji (postupno ga zamjenjuje src/lib/db)
 ├── types/               # Dijeljene datoteke TS tipova
 ├── instrumentation.ts   # Next.js priključak za telemetriju (preglednik + rubno okruženje)
 ├── instrumentation-node.ts  # Instrumentacija samo za Node
-└── proxy.ts             # Ulazni kompatibilni sloj za HTTP proxy
+└── proxy.ts             # Ulazni kompatibilnosni sloj za HTTP proxy
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Putanja                                                                      | Namjena                                                                                                                                                                                                                                                                                                                    |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | Javni API kompatibilan s OpenAI-jem (~25 podruta: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers itd.)                                                                                                                          |
-| `app/api/v1beta/`                                                            | Krajnje točke API-ja u stilu Geminija                                                                                                                                                                                                                                                                                      |
-| `app/api/playground/`                                                        | Rute Studija Playground: `improve-prompt/` (POST — LLM alat za preoblikovanje upita), `presets/` (GET popis / POST stvaranje), `presets/[id]/` (GET / PUT / DELETE) — pogledajte `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                    |
-| `app/api/` (nije v1)                                                         | Rute za upravljanje/administraciju (~60 direktorija: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools itd.)                                                                                                                                  |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ruta (upravljanje poslužiteljem, stanje agenta/DNS/mapiranja, zaobilaženje, certifikat, nadređeni CA). LOCAL_ONLY + SPAWN_CAPABLE. Pogledajte `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                               |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ ruta (zahtjevi, sesije, domaćini, načini snimanja, izvoz, ws). LOCAL_ONLY + SPAWN_CAPABLE. Pogledajte `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                     |
-| `app/a2a/`                                                                   | Ulazna točka A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                                |
-| `app/.well-known/agent.json/`                                                | Kartica A2A agenta (otkrivanje)                                                                                                                                                                                                                                                                                            |
-| `app/(dashboard)/dashboard/`                                                 | Stranice korisničkog sučelja nadzorne ploče (50+ odjeljaka, ~118 datoteka page.tsx: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity itd.)                                                                                                               |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Korisničko sučelje Studija alata za pretraživanje (3 kartice: Pretraživanje/Struganje/Usporedba + SearchConceptCard + ProviderCatalog) — pogledajte `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                               |
-| `app/(dashboard)/dashboard/memory/`                                          | Studio memorije (plan 21): `page.tsx` (okvir s 3 kartice), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Stranica nadzorne ploče AgentBridge — kartica poslužitelja, 9 kartica agenata, čarobnjak za postavljanje, mapiranje modela, popis zaobilaženja. i18n PT-BR + EN. Pogledajte `docs/frameworks/AGENTBRIDGE.md`.                                                                                                              |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Stranica nadzorne ploče Traffic Inspector — podijeljeni prikaz DevTools, 7 kartica s pojedinostima, 4 prekidača načina snimanja, snimač sesije, označavanje konteksta bojama. i18n PT-BR + EN. Pogledajte `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                          |
-| `app/(dashboard)/dashboard/activity/`                                        | Stranica sa sažetkom aktivnosti (Grupa B): `page.tsx` (poslužiteljska) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — pogledajte `docs/architecture/MONITORING_SECTIONS.md`                                                                                         |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Stranica za dijeljenje kvota (Grupa B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                        |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Stranica za konfiguraciju plana pružatelja usluga (Grupa B): `page.tsx` + `ProviderPlanConfigClient.tsx` — nadjačavanje dimenzija kvote po vezi                                                                                                                                                                            |
-| `app/docs/`                                                                  | Ugrađeni preglednik dokumentacije (prikazuje `docs/*.md`)                                                                                                                                                                                                                                                                  |
-| `app/landing/`                                                               | Marketinška odredišna stranica                                                                                                                                                                                                                                                                                             |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Stranice povezane s autentifikacijom                                                                                                                                                                                                                                                                                       |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | Stranice HTTP pogrešaka                                                                                                                                                                                                                                                                                                    |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Statičke stranice i stranice statusa                                                                                                                                                                                                                                                                                       |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Korijenski raspored, početna stranica, PWA manifest, globalni CSS                                                                                                                                                                                                                                                          |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Granice pogrešaka                                                                                                                                                                                                                                                                                                          |
+| Putanja                                                                      | Svrha                                                                                                                                                                                                                                                                                                                     |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | Javni API kompatibilan s OpenAI-jem (~25 podruta: razgovor, dovršavanja, ugrađivanja, datoteke, skupne obrade, zvuk, slike, videozapisi, glazba, ponovno rangiranje, moderiranje, pretraživanje, ws, agenti, računi, pružatelji itd.)                                                                                     |
+| `app/api/v1beta/`                                                            | Krajnje točke API-ja u stilu Geminija                                                                                                                                                                                                                                                                                     |
+| `app/api/playground/`                                                        | Rute Playground Studija: `improve-prompt/` (POST — LLM preoblikovatelj upita), `presets/` (GET popis / POST stvaranje), `presets/[id]/` (GET / PUT / DELETE) — pogledajte `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                          |
+| `app/api/` (izvan v1)                                                        | Rute za upravljanje/administraciju (~60 direktorija: pružatelji, kombinacije, postavke, mcp, a2a, evaluacije, memorija, vještine, webhookovi, usklađenost, otpornost, nadzor, tuneli, CLI alati itd.)                                                                                                                     |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ruta (upravljanje poslužiteljem, stanje agenta/DNS/mapiranja, zaobilaženje, certifikat, nadređeni CA). LOCAL_ONLY + SPAWN_CAPABLE. Pogledajte `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                              |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ ruta (zahtjevi, sesije, glavni sustavi, načini snimanja, izvoz, ws). LOCAL_ONLY + SPAWN_CAPABLE. Pogledajte `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                              |
+| `app/a2a/`                                                                   | Ulazna točka A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                               |
+| `app/.well-known/agent.json/`                                                | Kartica A2A agenta (otkrivanje)                                                                                                                                                                                                                                                                                           |
+| `app/(dashboard)/dashboard/`                                                 | Stranice korisničkog sučelja nadzorne ploče (50+ odjeljaka, ~118 datoteka page.tsx: pružatelji, kombinacije, postavke, memorija, vještine, webhookovi, evaluacije, revizija, skupna obrada, predmemorija, troškovi, stanje, sustav, aktivnosti itd.)                                                                      |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Korisničko sučelje Search Tools Studija (3 kartice: Pretraživanje/Dohvaćanje/Usporedba + SearchConceptCard + ProviderCatalog) — pogledajte `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                       |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21): `page.tsx` (ljuska s 3 kartice), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Stranica nadzorne ploče AgentBridge — kartica poslužitelja, 9 kartica agenata, čarobnjak za postavljanje, mapiranje modela, popis zaobilaženja. i18n PT-BR + EN. Pogledajte `docs/frameworks/AGENTBRIDGE.md`.                                                                                                             |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Stranica nadzorne ploče Traffic Inspector — podijeljeni prikaz DevTools, 7 kartica s pojedinostima, 4 prekidača načina snimanja, snimač sesije, kontekstualno označavanje bojama. i18n PT-BR + EN. Pogledajte `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                     |
+| `app/(dashboard)/dashboard/activity/`                                        | Stranica sa sažetkom aktivnosti (Grupa B): `page.tsx` (poslužiteljska) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — pogledajte `docs/architecture/MONITORING_SECTIONS.md`                                                                                        |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Stranica za dijeljenje kvota (Grupa B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                       |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Stranica za konfiguraciju tarifa pružatelja usluga (Grupa B): `page.tsx` + `ProviderPlanConfigClient.tsx` — nadjačavanje dimenzija kvote po vezi                                                                                                                                                                          |
+| `app/docs/`                                                                  | Ugrađeni preglednik dokumentacije (prikazuje `docs/*.md`)                                                                                                                                                                                                                                                                 |
+| `app/landing/`                                                               | Marketinška odredišna stranica                                                                                                                                                                                                                                                                                            |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Stranice povezane s autentifikacijom                                                                                                                                                                                                                                                                                      |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | Stranice HTTP pogrešaka                                                                                                                                                                                                                                                                                                   |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Statičke/statusne stranice                                                                                                                                                                                                                                                                                                |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Korijenski raspored, početna stranica, PWA manifest, globalni CSS                                                                                                                                                                                                                                                         |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Granice pogrešaka                                                                                                                                                                                                                                                                                                         |
 
 ### `src/lib/` — Osnovne biblioteke (~50 modula)
 
-| Modul                                    | Svrha                                                                                                                                                                                                                                                                                                                                  |
+| Modul                                    | Namjena                                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | Upravitelj zadataka A2A protokola, vještine (5), strujanje                                                                                                                                                                                                                                                                             |
 | `acp/`                                   | Registar CLI agenata (lokalno otkrivanje CLI-ja — pogledajte `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                               |
 | `api/`                                   | Zajedničke pomoćne funkcije API-ja (`requireManagementAuth`, provjera valjanosti)                                                                                                                                                                                                                                                      |
 | `auth/`                                  | Sesija, sažimanje lozinki, provjera valjanosti tokena                                                                                                                                                                                                                                                                                  |
-| `batches/`                               | Rukovatelji za OpenAI Batches API                                                                                                                                                                                                                                                                                                      |
-| `catalog/`                               | Zod provjera valjanosti kataloga pružatelja + razrješavanje mogućnosti                                                                                                                                                                                                                                                                 |
+| `batches/`                               | Obrađivači OpenAI Batches API-ja                                                                                                                                                                                                                                                                                                       |
+| `catalog/`                               | Zod provjera valjanosti kataloga pružatelja + određivanje mogućnosti                                                                                                                                                                                                                                                                   |
 | `cloudAgent/`                            | Agenti u oblaku (Codex Cloud, Devin, Jules) — pogledajte `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                              |
-| `combos/`                                | Razrješavanje kombinacija + pomoćne funkcije za promjenu redoslijeda                                                                                                                                                                                                                                                                   |
-| `audit/`                                 | Pomoćne funkcije sažetka aktivnosti: `highLevelActions.ts` (popis dopuštenih vrijednosti + `isHighLevelAction()`), `activityIcons.ts` (mapiranje radnje → ikona/glagol), `timeline.ts` (groupByDay/relativeTime) — pogledajte `docs/architecture/MONITORING_SECTIONS.md`                                                               |
-| `compliance/`                            | Zapisnik nadzora + nadzor pružatelja — pogledajte `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                        |
-| `compression/`                           | Integracijski sloj mehanizma za kompresiju (mehanizmi se nalaze u `open-sse/services/compression/`)                                                                                                                                                                                                                                    |
-| `config/`                                | Pomoćne funkcije za konfiguraciju tijekom izvođenja                                                                                                                                                                                                                                                                                    |
-| `db/`                                    | Više od 120 domenskih DB modula + 168 migracija (za SQLite uvijek pristupajte preko njih)                                                                                                                                                                                                                                              |
+| `combos/`                                | Određivanje kombinacija + pomoćne funkcije za promjenu redoslijeda                                                                                                                                                                                                                                                                     |
+| `audit/`                                 | Pomoćne funkcije sažetka aktivnosti: `highLevelActions.ts` (popis dopuštenih + `isHighLevelAction()`), `activityIcons.ts` (mapiranje radnje → ikona/glagol), `timeline.ts` (groupByDay/relativeTime) — pogledajte `docs/architecture/MONITORING_SECTIONS.md`                                                                           |
+| `compliance/`                            | Dnevnik revizije + revizija pružatelja — pogledajte `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                      |
+| `compression/`                           | Povezivanje mehanizma za kompresiju (mehanizmi se nalaze u `open-sse/services/compression/`)                                                                                                                                                                                                                                           |
+| `config/`                                | Pomoćne funkcije konfiguracije tijekom izvođenja                                                                                                                                                                                                                                                                                       |
+| `db/`                                    | Više od 120 domenskih DB modula + 168 migracija (za SQLite uvijek pristupajte putem njih)                                                                                                                                                                                                                                              |
 | `quota/`                                 | Mehanizam za dijeljenje kvota: `dimensions.ts` (tipovi/Zod), `types.ts` (sučelje QuotaStore), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — pogledajte `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                 | Klijent kataloga besplatnih modela Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — pogledajte `docs/frameworks/RADAR.md`                                                                                                                                           |
 | `display/`                               | Pomoćne funkcije za formatiranje korisničkog sučelja (trošak, latencija itd.)                                                                                                                                                                                                                                                          |
-| `embeddings/`                            | Pomoćne funkcije za uslugu ugradnji                                                                                                                                                                                                                                                                                                    |
+| `embeddings/`                            | Pomoćne funkcije usluge ugradnji                                                                                                                                                                                                                                                                                                       |
 | `env/`                                   | Raščlanjivanje i provjera valjanosti varijabli okruženja                                                                                                                                                                                                                                                                               |
-| `evals/`                                 | Okvir za evaluaciju (skupovi, pokretač, izvršno okruženje) — pogledajte `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                     |
-| `guardrails/`                            | Maskiranje osobnih podataka (PII), zaštita od ubacivanja uputa, most za vizualne modele — pogledajte `docs/security/GUARDRAILS.md`                                                                                                                                                                                                     |
-| `jobs/`                                  | Pozadinski poslovi (nalik na cron)                                                                                                                                                                                                                                                                                                     |
+| `evals/`                                 | Okvir za evaluaciju (paketi testova, pokretač, izvršno okruženje) — pogledajte `docs/frameworks/EVALS.md`                                                                                                                                                                                                                              |
+| `guardrails/`                            | Maskiranje osobnih podataka (PII), zaštita od ubacivanja upita, most za obradu slike — pogledajte `docs/security/GUARDRAILS.md`                                                                                                                                                                                                        |
+| `jobs/`                                  | Pozadinski poslovi (poput crona)                                                                                                                                                                                                                                                                                                       |
 | `memory/`                                | Konverzacijska memorija (hibridni RRF sa SQLite FTS5 + sqlite-vec te Qdrant druge razine) — pogledajte `docs/frameworks/MEMORY.md`                                                                                                                                                                                                     |
-| `memory/embedding/`                      | Sloj ugradnji iz više izvora: `index.ts` (razrješivač), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                                       |
-| `memory/vectorStore.ts`                  | Omotač za sqlite-vec v0.1.9 — KNN pretraživanje grubom silom + hibridni RRF (FTS5 + vektor, k=60). Lijena inicijalizacija; postupno smanjuje funkcionalnost kada sqlite-vec nije dostupan. (plan 21)                                                                                                                                   |
-| `memory/reindex.ts`                      | `runReindexBatch()` — obrađuje memorije s `needs_reindex=1` u pozadini; pozivaju ga `POST /api/memory/reindex` i putanja lijene naknadne popune. (plan 21)                                                                                                                                                                             |
-| `monitoring/`                            | Provjere ispravnosti, emitiranje metrika                                                                                                                                                                                                                                                                                               |
+| `memory/embedding/`                      | Višeizvorni sloj ugradnji: `index.ts` (razrješivač), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                                          |
+| `memory/vectorStore.ts`                  | Omotač za sqlite-vec v0.1.9 — KNN grubom silom + hibridni RRF (FTS5 + vektor, k=60). Lijena inicijalizacija; postupno smanjuje funkcionalnost kada sqlite-vec nije dostupan. (plan 21)                                                                                                                                                 |
+| `memory/reindex.ts`                      | `runReindexBatch()` — obrađuje memorije s `needs_reindex=1` u pozadini; pozivaju ga `POST /api/memory/reindex` i put lijenog naknadnog popunjavanja. (plan 21)                                                                                                                                                                         |
+| `monitoring/`                            | Provjere stanja, emitiranje metrika                                                                                                                                                                                                                                                                                                    |
 | `oauth/`                                 | OAuth/tijekovi uvoza za 22 modula pružatelja usluga (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                        |
 | `plugins/`                               | Registar dodataka                                                                                                                                                                                                                                                                                                                      |
 | `promptCache/`                           | Prijelomne točke predmemorije upita u stilu Anthropic                                                                                                                                                                                                                                                                                  |
 | `skills/`                                | Okvir za vještine (ugrađene + tržište + SkillsSH) — pogledajte `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                             |
 | `playground/`                            | Zajednički pomoćni alati za Playground Studio: `codeExport.ts` (generator za curl/Python/TS), `promptImprover.ts` (alat za izradu metauputa), `streamMetrics.ts` (čisti TTFT/TPS), `types.ts` (tablica cijena) — pogledajte `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                     |
 | `webhookDispatcher.ts`                   | Isporuka webhookova s HMAC-om — pogledajte `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                               |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Upravitelji tunelima — pogledajte `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                          |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Upravitelji tunela — pogledajte `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                            |
 | `cloudSync.ts`, `initCloudSync.ts`       | Neobavezna sinkronizacija stanja s oblakom                                                                                                                                                                                                                                                                                             |
-| `localDb.ts`                             | Zbirni modul za ponovni izvoz modula baze podataka (bez logike — samo ponovni izvozi)                                                                                                                                                                                                                                                  |
+| `localDb.ts`                             | Modul za ponovni izvoz modula baze podataka (bez logike — samo ponovni izvozi)                                                                                                                                                                                                                                                         |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Predmemoriranje zahtjeva + idempotentnost                                                                                                                                                                                                                                                                                              |
-| (još ~30 datoteka najviše razine)        | Specijalizirani pomoćni alati (logEnv, modelsDevSync, piiSanitizer itd.)                                                                                                                                                                                                                                                               |
+| (~30 dodatnih datoteka najviše razine)   | Specijalizirani pomoćni alati (logEnv, modelsDevSync, piiSanitizer itd.)                                                                                                                                                                                                                                                               |
 
 ### `src/lib/db/` — Baza podataka (147 modula + 208 migracija)
 
-| Poddirektorij             | Svrha                                                                                                                                                                                               |
+| Poddirektorij             | Namjena                                                                                                                                                                                             |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | Jedinstvena instanca `getDbInstance()` s WAL bilježenjem                                                                                                                                            |
-| `db/migrations/`          | Verzionirane SQL datoteke (idempotentne, transakcijske). `073_memory_vec.sql` dodaje `memory_vec_meta` + stupac `needs_reindex` (plan 21).                                                          |
+| `db/core.ts`              | Jedinstvena instanca `getDbInstance()` s WAL vođenjem dnevnika                                                                                                                                      |
+| `db/migrations/`          | SQL datoteke s verzijama (idempotentne, transakcijske). `073_memory_vec.sql` dodaje stupac `memory_vec_meta` + `needs_reindex` (plan 21).                                                           |
 | `db/playgroundPresets.ts` | CRUD modul za unaprijed postavljene konfiguracije Playground Studija (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
 | `db/memoryVec.ts`         | CRUD za `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` itd. (plan 21)                                           |
 | `db/<domain>.ts`          | Jedan modul po domeni: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache itd.                           |
 
 ### `src/domain/`
 
-| Modul                  | Svrha                                                        |
+| Modul                  | Namjena                                                      |
 | ---------------------- | ------------------------------------------------------------ |
 | `policy.ts`            | Mehanizam pravila                                            |
-| `fallbackPolicy.ts`    | Stablo odlučivanja za rezervni odabir                        |
+| `fallbackPolicy.ts`    | Stablo odluka za pričuvne opcije                             |
 | `costRules.ts`         | Pravila izračuna troškova                                    |
 | `lockoutPolicy.ts`     | Pravila blokiranja modela/veze                               |
 | `tagRouter.ts`         | Usmjeravanje na temelju oznaka                               |
 | `comboResolver.ts`     | Razrješavanje kombinacija (koristi ga mehanizam kombinacija) |
-| `modelAvailability.ts` | Provjera dostupnosti po modelu                               |
-| `assessment/`          | Procjena modela (1. faza dokumenta RFC-AUTO-ASSESSMENT )     |
+| `modelAvailability.ts` | Provjera dostupnosti za svaki model                          |
+| `assessment/`          | Procjena modela (1. faza dokumenta RFC-AUTO-ASSESSMENT)      |
 
 ### `src/server/`
 
-| Modul    | Svrha                                                                                                      |
-| -------- | ---------------------------------------------------------------------------------------------------------- |
-| `authz/` | Autorizacijski slijed: `classify` → `policies` → `enforce` — pogledajte `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | Konfiguracija CORS-a                                                                                       |
-| `auth/`  | Međuprogram sesije                                                                                         |
+| Modul    | Namjena                                                                                                 |
+| -------- | ------------------------------------------------------------------------------------------------------- |
+| `authz/` | Tijek autorizacije: `classify` → `policies` → `enforce` — pogledajte `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | Konfiguracija CORS-a                                                                                    |
+| `auth/`  | Posrednički softver za sesije                                                                           |
 
 ### `src/shared/`
 
-| Modul                            | Svrha                                                                                                           |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `components/`                    | API komponenti nadzorne ploče: adapteri nad `packages/ui-kit` — pogledajte `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: nazivi ikona koje koriste zasloni → komponente Lucide (`<Icon>`)                                    |
-| `constants/providers.ts`         | **376 pružatelja usluga** sa Zod validacijom (izvor istine)                                                     |
-| `constants/cliTools.ts`          | Registar vanjskih CLI alata                                                                                     |
-| `constants/routingStrategies.ts` | **20 strategija usmjeravanja** s prioritetima                                                                   |
-| `constants/publicApiRoutes.ts`   | Rute koje zahtijevaju Bearer autentifikaciju (nasuprot upravljačkoj autentifikaciji)                            |
-| `constants/upstreamHeaders.ts`   | Popis zabranjenih zaglavlja za zahtjeve prema nadređenim servisima                                              |
-| `validation/schemas.ts`          | ~80 Zod shema (jedinstveni izvor istine za API ugovore)                                                         |
-| `validation/helpers.ts`          | Pomoćne funkcije za Zod validaciju (`validateBody` itd.)                                                        |
-| `types/`                         | Zajednički TS tipovi                                                                                            |
-| `contracts/`                     | Javni API ugovori (koristi ih `files:` u `package.json`)                                                        |
-| `utils/circuitBreaker.ts`        | Prekidač strujnog kruga pružatelja usluga (pogledajte `docs/architecture/RESILIENCE_GUIDE.md`)                  |
-| `utils/apiAuth.ts`               | Validacija API ključa, provjera opsega                                                                          |
-| `utils/fetchTimeout.ts`          | Omotači za vremensko ograničenje/prekid uzvodnog dohvaćanja                                                     |
-| `utils/releaseNotes.ts`          | Analizator zatvorenih v2/naslijeđenih objava, lokalizacija i odbacivanje prema ID-u                             |
+| Modul                            | Svrha                                                                                                          |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `components/`                    | API komponenti nadzorne ploče: adapteri za `packages/ui-kit` — pogledajte `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: nazivi ikona koje upotrebljavaju zasloni → Lucide komponente (`<Icon>`)                            |
+| `constants/providers.ts`         | **376 pružatelja usluga** sa Zod validacijom (izvor istine)                                                    |
+| `constants/cliTools.ts`          | Registar vanjskih CLI alata                                                                                    |
+| `constants/routingStrategies.ts` | **20 strategija usmjeravanja** s prioritetima                                                                  |
+| `constants/publicApiRoutes.ts`   | Rute koje zahtijevaju Bearer autentifikaciju (za razliku od upravljačke)                                       |
+| `constants/upstreamHeaders.ts`   | Popis zabranjenih zaglavlja za upstream zahtjeve                                                               |
+| `validation/schemas.ts`          | ~80 Zod shema (jedinstveni izvor istine za API ugovore)                                                        |
+| `validation/helpers.ts`          | Pomoćne funkcije za Zod validaciju (`validateBody` itd.)                                                       |
+| `types/`                         | Zajednički TS tipovi                                                                                           |
+| `contracts/`                     | Javni API ugovori (koje upotrebljava `files:` u datoteci `package.json`)                                       |
+| `utils/circuitBreaker.ts`        | Zaštitni prekidač pružatelja usluga (pogledajte `docs/architecture/RESILIENCE_GUIDE.md`)                       |
+| `utils/apiAuth.ts`               | Validacija API ključa, provjera opsega                                                                         |
+| `utils/fetchTimeout.ts`          | Omotači za vremensko ograničenje/prekid upstream dohvaćanja                                                    |
+| `utils/releaseNotes.ts`          | Parser zatvorenih v2/naslijeđenih objava, lokalizacija i odbacivanje prema ID-u                                |
 
 ---
 
@@ -395,76 +395,76 @@ open-sse/
 
 ### Vodiči najviše razine
 
-| Dokument                    | Svrha                                                                                                       |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Arhitektura visoke razine, mapa podsustava, površina nadzorne ploče                                         |
-| `CODEBASE_DOCUMENTATION.md` | Inženjerska referenca: direktoriji, moduli, konvencije                                                      |
-| `FEATURES.md`               | Matrica značajki s istaknutim novitetima v3.8                                                               |
-| `USER_GUIDE.md`             | Priručnik za krajnjeg korisnika (postavljanje, modeli, kombinacije, CLI-ovi, zvuk itd.)                     |
-| `API_REFERENCE.md`          | Referenca API krajnjih točaka s modelom autentikacije                                                       |
-| `openapi.yaml`              | OpenAPI 3.0 specifikacija (121 putanja)                                                                     |
-| `SETUP_GUIDE.md`            | Metode instalacije (npm, npx, Docker, Electron, Termux, izvorni kod)                                        |
-| `ENVIRONMENT.md`            | Sve varijable okruženja (~800 dokumentiranih, ~3.050 redaka u `.env.example`)                               |
-| `TROUBLESHOOTING.md`        | Uobičajene pogreške + poznati problemi u v3.8.0                                                             |
-| `RELEASE_CHECKLIST.md`      | Potpuni tijek objave (skills, husky, conventional commits, deploy)                                          |
-| `COVERAGE_PLAN.md`          | Ciljevi pokrivenosti i trenutačno stanje                                                                    |
-| `FREE_TIERS.md`             | Odabrani pružatelji besplatnih razina (48+ besplatnih + 11 OAuth)                                           |
-| `CLI-TOOLS.md`              | Integracije vanjskih CLI alata + interni OmniRoute CLI                                                      |
-| `I18N.md`                   | i18n arhitektura, dodavanje jezika, 67 lokaliteta                                                           |
-| `UNINSTALL.md`              | Koraci za čistu deinstalaciju                                                                               |
-| `PROVIDER_REFERENCE.md`     | **Automatski generirani** katalog od 376 pružatelja (ponovno generiranje: `npm run gen:provider-reference`) |
+| Dokument                    | Svrha                                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | Arhitektura na visokoj razini, mapa podsustava, površina nadzorne ploče                                            |
+| `CODEBASE_DOCUMENTATION.md` | Inženjerska referenca: direktoriji, moduli, konvencije                                                             |
+| `FEATURES.md`               | Matrica značajki s istaknutim novostima verzije v3.8                                                               |
+| `USER_GUIDE.md`             | Priručnik za krajnjeg korisnika (postavljanje, modeli, kombinacije, CLI-ovi, zvuk itd.)                            |
+| `API_REFERENCE.md`          | Referenca API krajnjih točaka s modelom autentifikacije                                                            |
+| `openapi.yaml`              | OpenAPI 3.0 specifikacija (121 putanja)                                                                            |
+| `SETUP_GUIDE.md`            | Metode instalacije (npm, npx, Docker, Electron, Termux, izvorni kod)                                               |
+| `ENVIRONMENT.md`            | Sve varijable okoline (~800 dokumentiranih, ~3.050 redaka u `.env.example`)                                        |
+| `TROUBLESHOOTING.md`        | Česte pogreške + poznati problemi u v3.8.0                                                                         |
+| `RELEASE_CHECKLIST.md`      | Potpuni tijek izdavanja (skills, husky, conventional commits, deploy)                                              |
+| `COVERAGE_PLAN.md`          | Ciljevi pokrivenosti i trenutno stanje                                                                             |
+| `FREE_TIERS.md`             | Odabrani besplatni pružatelji usluga (48+ besplatnih + 11 OAuth)                                                   |
+| `CLI-TOOLS.md`              | Integracije vanjskih CLI alata + interni OmniRoute CLI                                                             |
+| `I18N.md`                   | i18n arhitektura, dodavanje jezika, 67 lokalnih shema                                                              |
+| `UNINSTALL.md`              | Koraci za čistu deinstalaciju                                                                                      |
+| `PROVIDER_REFERENCE.md`     | **Automatski generirani** katalog od 376 pružatelja usluga (ponovno generiranje: `npm run gen:provider-reference`) |
 
 ### Detaljni opisi podsustava
 
-| Dokument                                    | Svrha                                                                                    |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP poslužitelj: 110 alata, 3 transporta, 33 opsega, REST krajnje točke                  |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 vještina, REST pomoćne funkcije, kartica agenta                    |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | Objedinjeni vodič: A2A vs ACP vs Cloud Agents                                            |
-| `CLOUD_AGENT.md`                            | Orkestracija Codex Cloud / Devin / Jules                                                 |
-| `SKILLS.md`                                 | Okvir vještina (ugrađene + tržište + SkillsSH + sandbox)                                 |
-| `RADAR.md`                                  | Sloj kataloga besplatnih modela za Radar (`RADAR_ENABLED`, zadano isključeno)            |
-| `MEMORY.md`                                 | Sustav memorije (SQLite FTS5 + Qdrant)                                                   |
-| `EVALS.md`                                  | Okvir evaluacije (paketi, izvođenja, rubrike)                                            |
-| `GUARDRAILS.md`                             | Maskiranje PII-ja, injekcija upita, vizijski most                                        |
-| `COMPLIANCE.md`                             | Revizijski zapisnik, zadržavanje, noLog isključivanje                                    |
-| `WEBHOOKS.md`                               | Isporuka webhookova s HMAC potpisom                                                      |
-| `REASONING_REPLAY.md`                       | Hibridna memorijska/SQLite predmemorija za `reasoning_content`                           |
-| `AUTHZ_GUIDE.md`                            | Cjevovod autorizacije (`classify` → `policies` → `enforce`)                              |
-| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + blokada modela                                              |
-| `docs/security/STEALTH_GUIDE.md` (samo git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM certifikat                           |
-| `AUTO-COMBO.md`                             | Auto Combo mehanizam (bodovanje po 16 faktora, 6 paketa načina rada, virtualna tvornica) |
+| Dokument                                    | Svrha                                                                                  |
+| ------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | MCP poslužitelj: 110 alata, 3 transporta, 33 opsega, REST krajnje točke                |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 vještina, REST pomoćnici, kartica agenta                         |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | Objedinjeni vodič: A2A naspram ACP naspram Cloud Agents                                |
+| `CLOUD_AGENT.md`                            | Orkestracija Codex Cloud / Devin / Jules                                               |
+| `SKILLS.md`                                 | Okvir vještina (ugrađene + tržište + SkillsSH + sandbox)                               |
+| `RADAR.md`                                  | Radar sloj kataloga besplatnih modela (`RADAR_ENABLED`, zadano isključeno)             |
+| `MEMORY.md`                                 | Sustav memorije (SQLite FTS5 + Qdrant)                                                 |
+| `EVALS.md`                                  | Okvir za evaluaciju (paketi testova, pokretanja, rubrike)                              |
+| `GUARDRAILS.md`                             | Maskiranje PII podataka, prompt injection, most za viziju                              |
+| `COMPLIANCE.md`                             | Revizijski zapisnik, zadržavanje, noLog isključivanje                                  |
+| `WEBHOOKS.md`                               | Dostava webhookova potpisana HMAC-om                                                   |
+| `REASONING_REPLAY.md`                       | Hibridna memorijska/SQLite predmemorija za `reasoning_content`                         |
+| `AUTHZ_GUIDE.md`                            | Cjevovod autorizacije (`classify` → `policies` → `enforce`)                            |
+| `RESILIENCE_GUIDE.md`                       | Prekidač strujnog kruga + razdoblje hlađenja + blokada modela                          |
+| `docs/security/STEALTH_GUIDE.md` (samo git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM certifikat                         |
+| `AUTO-COMBO.md`                             | Auto Combo pogon (ocjenjivanje s 16 faktora, 6 paketa načina rada, virtualna tvornica) |
 
 ### Kompresija
 
 | Dokument                        | Svrha                                    |
 | ------------------------------- | ---------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Pregled načina kompresije + plan razvoja |
-| `COMPRESSION_ENGINES.md`        | Caveman i RTK mehanizmi, ugovor registra |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK pogoni, ugovor registra    |
 | `COMPRESSION_RULES_FORMAT.md`   | JSON shema Caveman paketa pravila        |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Popis paketa pravila po jeziku           |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Inventar paketa pravila po jeziku        |
 | `RTK_COMPRESSION.md`            | RTK deklarativni cjevovod (56 filtara)   |
 
-### Implementacija
+### Postavljanje
 
-| Dokument                     | Svrha                                                                   |
-| ---------------------------- | ----------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Izrada Docker slika, profili (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Generičko postavljanje na VM/VPS (Ubuntu/Debian + nginx + systemd)      |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Postavljanje na Fly.io (trenutno dostupno samo na kineskom)             |
-| `TERMUX_GUIDE.md`            | Android headless putem Termuxa                                          |
-| `PWA_GUIDE.md`               | Instalacija Progressive Web App aplikacije + service worker             |
-| `ELECTRON_GUIDE.md`          | Izrada, potpisivanje i distribucija desktop aplikacije                  |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                  |
-| `PROXY_GUIDE.md`             | Izlazni proxy s 4 razine + 1proxy tržište                               |
+| Dokument                     | Svrha                                                                |
+| ---------------------------- | -------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker izgradnja, profili (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Generička implementacija na VM/VPS (Ubuntu/Debian + nginx + systemd) |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io implementacija (trenutačno samo na kineskom)                  |
+| `TERMUX_GUIDE.md`            | Android headless putem Termuxa                                       |
+| `PWA_GUIDE.md`               | Instalacija Progressive Web App + service worker                     |
+| `ELECTRON_GUIDE.md`          | Izrada desktop aplikacije + potpisivanje + distribucija              |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                               |
+| `PROXY_GUIDE.md`             | 4-razinski odlazni proxy + 1proxy tržište                            |
 
 ### Poddirektoriji
 
-| Poddirektorij         | Svrha                                                                                                                                                                                                             |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokalizirani prijevodi dokumentacije (41 locale)                                                                                                                                                                  |
-| `docs/screenshots/`   | Slikovni resursi za vodiče                                                                                                                                                                                        |
-| `_tasks/superpowers/` | Planovi/specifikacije iz superpowers (`writing-plans`/`brainstorming`) + istraživanje — izoliran, zasebno verzioniran repozitorij, gitignored u glavnom stablu. Vidi CLAUDE.md → "Planning & Research Artifacts". |
+| Podmapa               | Svrha                                                                                                                                                                                                                |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokalizirani prijevodi dokumentacije (41 lokaliteta)                                                                                                                                                                 |
+| `docs/screenshots/`   | Slikovni resursi za vodiče                                                                                                                                                                                           |
+| `_tasks/superpowers/` | Planovi/specifikacije iz superpowers (`writing-plans`/`brainstorming`) + istraživanje — izoliran, zasebno verzioniran repozitorij, gitignoriran od glavnog stabla. Vidi CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

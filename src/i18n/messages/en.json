@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Provider Limits",
     "noProviders": "No Providers Connected",
+    "quotaAuthRequired": "Authentication required - sign in to the dashboard",
+    "quotaAuthRequiredHint": "Provider connections could not be loaded because the dashboard session is missing or expired. Sign in and refresh to see your quota limits.",
     "connectProvidersForQuota": "Connect to providers with OAuth to track your API quota limits and usage.",
     "accountsCount": "{count, plural, one {# account} other {# accounts}}",
     "filteredFromCount": "(filtered from {count})",

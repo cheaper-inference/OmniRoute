@@ -71,7 +71,7 @@
 
 |                               |            v3.8.50             | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------- | :----------------------------: | :---------: | :-------------------: |
-| 🌐 Penyedia                   |              352               |   **358**   |          375          |
+| 🌐 Penyedia                   |              352               |   **358**   |          376          |
 | 🧠 ID model sembang unik      |              1320              |  **1374**   |         1475          |
 | 🖼️ Jambatan Modaliti          | 🆕 penglihatan + audio + video |      ✓      |           ✓           |
 | 📡 Katalog percuma Radar      |     🆕 penyertaan sukarela     |      ✓      |           ✓           |

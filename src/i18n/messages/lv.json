@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Nodrošinātāju limiti",
     "noProviders": "Nav savienotu pakalpojumu sniedzēju",
+    "quotaAuthRequired": "Nepieciešama autentifikācija — pierakstieties informācijas panelī",
+    "quotaAuthRequiredHint": "Pakalpojumu sniedzēju savienojumus nevarēja ielādēt, jo informācijas paneļa sesija nav pieejama vai ir beigusies. Pierakstieties un atsvaidziniet lapu, lai skatītu savus kvotu ierobežojumus.",
     "connectProvidersForQuota": "Izveidojiet savienojumu ar pakalpojumu sniedzējiem, izmantojot OAuth, lai sekotu API kvotu limitiem un lietojumam.",
     "accountsCount": "{count, plural, one {# konts} other {# konti}}",
     "filteredFromCount": "(atlasīts no {count})",
