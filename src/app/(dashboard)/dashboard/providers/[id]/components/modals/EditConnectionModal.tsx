@@ -139,6 +139,7 @@ export default function EditConnectionModal({
     rateLimitMaxConcurrent: "",
     modelConcurrency: "",
     apiKey: "",
+    m365RefreshToken: "",
     healthCheckInterval: "" as number | "",
     baseUrl: "",
     targetFormat: "",
@@ -412,6 +413,7 @@ export default function EditConnectionModal({
           stringField(connection.providerSpecificData?.connectorName) ||
           CHATGPT_WEB_CODEX_CONNECTOR_NAME,
         m365Tier: normalizeM365TierValue(connection.providerSpecificData?.tier) as M365TierValue,
+        m365RefreshToken: "",
         peakHourProtection: {
           ...EMPTY_PEAK_HOUR_PROTECTION,
           ...((connection.providerSpecificData?.peakHourProtection as PeakHourProtectionConfig) ||
@@ -1210,6 +1212,16 @@ export default function EditConnectionModal({
                   />
                 )}
                 <ProviderTierField provider={provider} />
+                {provider === "copilot-m365-web" && (
+                  <Input
+                    type="password"
+                    autoComplete="new-password"
+                    label={t("m365RefreshTokenLabel")}
+                    value={formData.m365RefreshToken}
+                    onChange={(e) => setFormData({ ...formData, m365RefreshToken: e.target.value })}
+                    hint={t("m365RefreshTokenEditHint")}
+                  />
+                )}
                 {isM365TierCapable && (
                   <Select
                     label={t("m365TierLabel")}
