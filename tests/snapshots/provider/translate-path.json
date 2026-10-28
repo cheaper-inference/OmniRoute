@@ -1049,6 +1049,29 @@
       "stream": "https://app.chatplayground.ai/api/chat"
     }
   },
+  "cheapaimodel": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.cheapaimodel.ai/v1/chat/completions",
+      "stream": "https://api.cheapaimodel.ai/v1/chat/completions"
+    }
+  },
   "cheaperinference": {
     "format": "openai",
     "headers": {

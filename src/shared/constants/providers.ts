@@ -170,6 +170,7 @@ export const AGGREGATOR_PROVIDER_IDS = new Set([
   "tokenmarket",
   "demonroute",
   "daoxe",
+  "cheapaimodel",
 ]);
 
 export const ENTERPRISE_CLOUD_PROVIDER_IDS = new Set([

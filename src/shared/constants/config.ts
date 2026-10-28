@@ -21,6 +21,7 @@ export const PROVIDER_ENDPOINTS = {
   literouter: "https://api.literouter.com/v1/chat/completions",
   greenpt: "https://api.greenpt.ai/v1/chat/completions",
   ainetcafe: "https://microquickjs.com/v1/chat/completions",
+  cheapaimodel: "https://api.cheapaimodel.ai/v1/chat/completions",
   onomeo: "https://onomeo.com/v1/chat/completions",
   eurouter: "https://api.eurouter.ai/v1/chat/completions",
   unifically: "https://api.unifically.com/v1/chat/completions",
