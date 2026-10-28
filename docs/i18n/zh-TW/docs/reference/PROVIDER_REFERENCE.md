@@ -397,28 +397,29 @@
 | `vllm`                | `vllm`       | vLLM                | 本機、自行託管 | [連結](https://github.com/vllm-project/vllm)                    | API 金鑰為選用。請設定本機 vLLM 與 OpenAI 相容的基礎 URL（預設：http://localhost:8000/v1）。                                                                                                                                           |
 | `xinference`          | `xinference` | XInference          | 本機、自行託管 | [連結](https://inference.readthedocs.io)                        | API 金鑰為選用。請設定本機 XInference 與 OpenAI 相容的基礎 URL（預設：http://localhost:9997/v1）。                                                                                                                                     |
 
-## 搜尋提供者（18）
+## 搜尋提供者 (19)
 
-| ID                  | 別名            | 名稱                       | 標籤 | 網站                                                            | 備註                                                                                      |
-| ------------------- | --------------- | -------------------------- | ---- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `anysearch-search`  | `anysearch`     | AnySearch                  | 搜尋 | [連結](https://anysearch.com)                                   | 可選用來自 anysearch.com 的 API 金鑰（as_sk_...）— 每日免費 1000 次；無金鑰方案的限制較低 |
-| `brave-search`      | `brave-search`  | Brave Search               | 搜尋 | [連結](https://brave.com/search/api)                            | 來自 Brave Search API 儀表板的訂閱權杖                                                    |
-| `context7`          | `context7`      | Context7（函式庫文件）     | 搜尋 | [連結](https://context7.com)                                    | API 金鑰為選用（ctx7sk-...）— 匿名方案無須金鑰即可使用；金鑰可提高速率限制                |
-| `exa-search`        | `exa-search`    | Exa Search                 | 搜尋 | [連結](https://exa.ai)                                          | 來自 dashboard.exa.ai 的 API 金鑰                                                         |
-| `firecrawl`         | `fc`            | Firecrawl                  | 搜尋 | [連結](https://firecrawl.dev)                                   | 來自 firecrawl.dev/app/api-keys 的 API 金鑰（或設定自行託管的 Firecrawl 基礎 URL）        |
-| `google-pse-search` | `google-pse`    | Google Programmable Search | 搜尋 | [連結](https://developers.google.com/custom-search/v1/overview) | 需要 Google API 金鑰及您的 Programmable Search Engine ID（cx）                            |
-| `linkup-search`     | `linkup`        | Linkup Search              | 搜尋 | [連結](https://docs.linkup.so)                                  | 來自 Linkup 儀表板的 Bearer API 金鑰                                                      |
-| `nimble-search`     | `nimble`        | Nimble Search              | 搜尋 | [連結](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | 來自 Nimble 儀表板的 Bearer API 金鑰                                                      |
-| `ollama-search`     | `ollama-search` | Ollama Search              | 搜尋 | [連結](https://ollama.com/settings/keys)                        | 與 Ollama Cloud 相同的 API 金鑰（來自 ollama.com/settings/keys）                          |
-| `parallel-search`   | `parallel`      | Parallel Search            | 搜尋 | [連結](https://parallel.ai)                                     | 來自 platform.parallel.ai 的 API 金鑰（以 x-api-key 傳送）                                |
-| `perplexity-search` | `pplx-search`   | Perplexity Search          | 搜尋 | [連結](https://docs.perplexity.ai/guides/search-quickstart)     | 與 Perplexity 相同的 API 金鑰（pplx-...）                                                 |
-| `searchapi-search`  | `searchapi`     | SearchAPI                  | 搜尋 | [連結](https://www.searchapi.io/docs/google)                    | 來自 SearchAPI 的 API 金鑰（查詢參數或 Bearer 驗證）                                      |
-| `searxng-search`    | `searxng`       | SearXNG Search             | 搜尋 | [連結](https://docs.searxng.org)                                | API 金鑰為選用。設定您的 SearXNG 基礎 URL。某些執行個體可能需要 Bearer 權杖才能存取。     |
-| `serper-search`     | `serper-search` | Serper Search              | 搜尋 | [連結](https://serper.dev)                                      | 來自 serper.dev 儀表板的 API 金鑰                                                         |
-| `tavily-search`     | `tavily-search` | Tavily Search              | 搜尋 | [連結](https://tavily.com)                                      | 來自 app.tavily.com 的 API 金鑰（格式：tvly-...）                                         |
-| `x-search`          | `x_search`      | X Search（Grok）           | 搜尋 | [連結](https://docs.x.ai/developers/tools/x-search)             | SuperGrok OAuth（xai-oauth）或 xAI API 金鑰。這是 Grok X Search，而非 X Developer MCP。   |
-| `xquik-search`      | `xquik`         | Xquik X Search             | 搜尋 | [連結](https://docs.xquik.com)                                  | Xquik API 金鑰（xq_...）。搜尋會依傳回的貼文數量計費；目錄估算採用 5 筆結果。             |
-| `youcom-search`     | `youcom-search` | You.com Search             | 搜尋 | [連結](https://you.com/business/api/)                           | 來自 You.com 平台儀表板的 X-API-Key                                                       |
+| ID                  | 別名            | 姓名               | 標籤 | 網站                                                            | 筆記                                                                                  |
+| ------------------- | --------------- | ------------------ | ---- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `anysearch-search`  | `anysearch`     | AnySearch          | 搜尋 | [關聯](https://anysearch.com)                                   | 來自anysearch.com 的可選API密鑰 (as_sk_...) - 免費1000/day；無鑰匙等級的限制較低      |
+| `brave-search`      | `brave-search`  | 勇敢的搜索         | 搜尋 | [關聯](https://brave.com/search/api)                            | 來自 Brave Search API儀表板的訂閱令牌                                                 |
+| `context7`          | `context7`      | Context7（庫文件） | 搜尋 | [關聯](https://context7.com)                                    | API key 可選 (ctx7sk-...) — 匿名層無需密鑰即可運作；一鍵提高速率限制                  |
+| `exa-search`        | `exa-search`    | 埃克薩搜尋         | 搜尋 | [關聯](https://exa.ai)                                          | 來自dashboard.exa.ai 的API鑰                                                          |
+| `firecrawl`         | `fc`            | 火行               | 搜尋 | [關聯](https://firecrawl.dev)                                   | 來自firecrawl.dev/app/api-keys的API鑰（或設定您的自架 Firecrawl 基礎URL）             |
+| `google-pse-search` | `google-pse`    | Google可程式搜尋   | 搜尋 | [關聯](https://developers.google.com/custom-search/v1/overview) | 需要Google API鑰和可程式搜尋引擎ID (cx)                                               |
+| `kimi-search`       | `kimi-search`   | Kimi               | 搜尋 | [關聯](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API鑰 (MOONSHOT_API_KEY) 來自 platform.kimi.ai                            |
+| `linkup-search`     | `linkup`        | 連結搜尋           | 搜尋 | [關聯](https://docs.linkup.so)                                  | Linkup 儀表板中的 Bearer API金鑰                                                      |
+| `nimble-search`     | `nimble`        | 敏捷搜尋           | 搜尋 | [關聯](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble 儀表板中的 Bearer API金鑰                                                      |
+| `ollama-search`     | `ollama-search` | Ollama             | 搜尋 | [關聯](https://ollama.com/settings/keys)                        | 與Ollama Cloud 相同的API鑰（來自ollama.com/settings/keys）                            |
+| `parallel-search`   | `parallel`      | 平行搜尋           | 搜尋 | [關聯](https://parallel.ai)                                     | 來自 platform.parallel.ai 的API密鑰（作為 x-api-key 發送）                            |
+| `perplexity-search` | `pplx-search`   | 困惑度搜尋         | 搜尋 | [關聯](https://docs.perplexity.ai/guides/search-quickstart)     | 與 Perplexity 相同的API鑰 (pplx-...)                                                  |
+| `searchapi-search`  | `searchapi`     | SearchAPI          | 搜尋 | [關聯](https://www.searchapi.io/docs/google)                    | 來自SearchAPI的API鑰（查詢參數或承載身份驗證）                                        |
+| `searxng-search`    | `searxng`       | SearXNG            | 搜尋 | [關聯](https://docs.searxng.org)                                | API密鑰是可選的。設定您的SearXNG基礎URL。某些實例可能需要不記名令牌才能存取。         |
+| `serper-search`     | `serper-search` | 毒蛇搜索           | 搜尋 | [關聯](https://serper.dev)                                      | serper.dev 儀表板中的API鑰                                                            |
+| `tavily-search`     | `tavily-search` | 塔維利搜尋         | 搜尋 | [關聯](https://tavily.com)                                      | 來自 app.tavily.com 的API密鑰（格式：tvly-...）                                       |
+| `x-search`          | `x_search`      | X 搜尋 (Grok)      | 搜尋 | [關聯](https://docs.x.ai/developers/tools/x-search)             | SuperGrok OAuth (xai-oauth) 或 xAI API鑰。這是Grok X Search，而不是 X Developer MCP。 |
+| `xquik-search`      | `xquik`         | Xquik X 搜索       | 搜尋 | [關聯](https://docs.xquik.com)                                  | Xquik API密鑰 (xq_...)。搜尋按回傳的貼文進行計量；目錄估計使用 5 個結果。             |
+| `youcom-search`     | `youcom-search` | 友網搜尋           | 搜尋 | [關聯](https://you.com/business/api/)                           | You.com 平台儀表板中的 X-API-Key                                                      |
 
 ## 僅音訊提供者 (12)
 

@@ -397,28 +397,29 @@
 | `vllm`                | `vllm`       | vLLM                | 本地、自托管 | [链接](https://github.com/vllm-project/vllm)                    | API 密钥可选。配置本地 vLLM 的 OpenAI 兼容基础 URL（默认值：http://localhost:8000/v1）。                                                                                                                                         |
 | `xinference`          | `xinference` | XInference          | 本地、自托管 | [链接](https://inference.readthedocs.io)                        | API 密钥可选。配置本地 XInference 的 OpenAI 兼容基础 URL（默认值：http://localhost:9997/v1）。                                                                                                                                   |
 
-## 搜索提供者 (18)
+## 搜索提供者 (19)
 
-| ID                  | 别名            | 名称                       | 标签 | 网站                                                            | 备注                                                                                         |
-| ------------------- | --------------- | -------------------------- | ---- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `anysearch-search`  | `anysearch`     | AnySearch                  | 搜索 | [链接](https://anysearch.com)                                   | 可选择使用来自 anysearch.com 的 API 密钥 (as_sk_...)——每天免费 1000 次；无密钥层级的限制更低 |
-| `brave-search`      | `brave-search`  | Brave Search               | 搜索 | [链接](https://brave.com/search/api)                            | 来自 Brave Search API 控制面板的订阅令牌                                                     |
-| `context7`          | `context7`      | Context7（库文档）         | 搜索 | [链接](https://context7.com)                                    | API 密钥可选 (ctx7sk-...)——匿名层级无需密钥即可使用；使用密钥可提高速率限制                  |
-| `exa-search`        | `exa-search`    | Exa Search                 | 搜索 | [链接](https://exa.ai)                                          | 来自 dashboard.exa.ai 的 API 密钥                                                            |
-| `firecrawl`         | `fc`            | Firecrawl                  | 搜索 | [链接](https://firecrawl.dev)                                   | 来自 firecrawl.dev/app/api-keys 的 API 密钥（或设置自托管 Firecrawl 的基础 URL）             |
-| `google-pse-search` | `google-pse`    | Google Programmable Search | 搜索 | [链接](https://developers.google.com/custom-search/v1/overview) | 需要 Google API 密钥和您的 Programmable Search Engine ID (cx)                                |
-| `linkup-search`     | `linkup`        | Linkup Search              | 搜索 | [链接](https://docs.linkup.so)                                  | 来自 Linkup 控制面板的 Bearer API 密钥                                                       |
-| `nimble-search`     | `nimble`        | Nimble Search              | 搜索 | [链接](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | 来自 Nimble 控制面板的 Bearer API 密钥                                                       |
-| `ollama-search`     | `ollama-search` | Ollama Search              | 搜索 | [链接](https://ollama.com/settings/keys)                        | 与 Ollama Cloud 使用相同的 API 密钥（来自 ollama.com/settings/keys）                         |
-| `parallel-search`   | `parallel`      | Parallel Search            | 搜索 | [链接](https://parallel.ai)                                     | 来自 platform.parallel.ai 的 API 密钥（以 x-api-key 发送）                                   |
-| `perplexity-search` | `pplx-search`   | Perplexity Search          | 搜索 | [链接](https://docs.perplexity.ai/guides/search-quickstart)     | 与 Perplexity 使用相同的 API 密钥 (pplx-...)                                                 |
-| `searchapi-search`  | `searchapi`     | SearchAPI                  | 搜索 | [链接](https://www.searchapi.io/docs/google)                    | 来自 SearchAPI 的 API 密钥（查询参数或 Bearer 身份验证）                                     |
-| `searxng-search`    | `searxng`       | SearXNG Search             | 搜索 | [链接](https://docs.searxng.org)                                | API 密钥可选。请设置您的 SearXNG 基础 URL。某些实例可能需要 Bearer 令牌才能访问。            |
-| `serper-search`     | `serper-search` | Serper Search              | 搜索 | [链接](https://serper.dev)                                      | 来自 serper.dev 控制面板的 API 密钥                                                          |
-| `tavily-search`     | `tavily-search` | Tavily Search              | 搜索 | [链接](https://tavily.com)                                      | 来自 app.tavily.com 的 API 密钥（格式：tvly-...）                                            |
-| `x-search`          | `x_search`      | X Search (Grok)            | 搜索 | [链接](https://docs.x.ai/developers/tools/x-search)             | SuperGrok OAuth (xai-oauth) 或 xAI API 密钥。这是 Grok X Search，而不是 X Developer MCP。    |
-| `xquik-search`      | `xquik`         | Xquik X Search             | 搜索 | [链接](https://docs.xquik.com)                                  | Xquik API 密钥 (xq_...)。搜索按返回的帖子数计费；目录估算使用 5 条结果。                     |
-| `youcom-search`     | `youcom-search` | You.com Search             | 搜索 | [链接](https://you.com/business/api/)                           | 来自 You.com 平台控制面板的 X-API-Key                                                        |
+| ID                  | 别名            | 姓名               | 标签 | 网站                                                            | 笔记                                                                                    |
+| ------------------- | --------------- | ------------------ | ---- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `anysearch-search`  | `anysearch`     | AnySearch          | 搜索 | [关联](https://anysearch.com)                                   | 来自anysearch.com 的可选API密钥 (as_sk_...) - 免费1000/day；无钥匙级别的限制较低        |
+| `brave-search`      | `brave-search`  | 勇敢的搜索         | 搜索 | [关联](https://brave.com/search/api)                            | 来自 Brave Search API仪表板的订阅令牌                                                   |
+| `context7`          | `context7`      | Context7（库文档） | 搜索 | [关联](https://context7.com)                                    | API key 可选 (ctx7sk-...) — 匿名层无需密钥即可工作；一键提高速率限制                    |
+| `exa-search`        | `exa-search`    | 埃克萨搜索         | 搜索 | [关联](https://exa.ai)                                          | 来自dashboard.exa.ai 的API密钥                                                          |
+| `firecrawl`         | `fc`            | 火行               | 搜索 | [关联](https://firecrawl.dev)                                   | 来自firecrawl.dev/app/api-keys的API密钥（或设置您的自托管 Firecrawl 基础URL）           |
+| `google-pse-search` | `google-pse`    | Google可编程搜索   | 搜索 | [关联](https://developers.google.com/custom-search/v1/overview) | 需要Google API密钥和可编程搜索引擎ID (cx)                                               |
+| `kimi-search`       | `kimi-search`   | Kimi               | 搜索 | [关联](https://platform.kimi.ai/docs/api/tools-search)          | Moonshot AI API密钥 (MOONSHOT_API_KEY) 来自 platform.kimi.ai                            |
+| `linkup-search`     | `linkup`        | 链接搜索           | 搜索 | [关联](https://docs.linkup.so)                                  | Linkup 仪表板中的 Bearer API密钥                                                        |
+| `nimble-search`     | `nimble`        | 敏捷搜索           | 搜索 | [关联](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble 仪表板中的 Bearer API密钥                                                        |
+| `ollama-search`     | `ollama-search` | Ollama             | 搜索 | [关联](https://ollama.com/settings/keys)                        | 与Ollama Cloud 相同的API密钥（来自ollama.com/settings/keys）                            |
+| `parallel-search`   | `parallel`      | 并行搜索           | 搜索 | [关联](https://parallel.ai)                                     | 来自 platform.parallel.ai 的API密钥（作为 x-api-key 发送）                              |
+| `perplexity-search` | `pplx-search`   | 困惑度搜索         | 搜索 | [关联](https://docs.perplexity.ai/guides/search-quickstart)     | 与 Perplexity 相同的API密钥 (pplx-...)                                                  |
+| `searchapi-search`  | `searchapi`     | SearchAPI          | 搜索 | [关联](https://www.searchapi.io/docs/google)                    | 来自SearchAPI的API密钥（查询参数或承载身份验证）                                        |
+| `searxng-search`    | `searxng`       | SearXNG            | 搜索 | [关联](https://docs.searxng.org)                                | API密钥是可选的。设置您的SearXNG基础URL。某些实例可能需要不记名令牌才能访问。           |
+| `serper-search`     | `serper-search` | 毒蛇搜索           | 搜索 | [关联](https://serper.dev)                                      | serper.dev 仪表板中的API密钥                                                            |
+| `tavily-search`     | `tavily-search` | 塔维利搜索         | 搜索 | [关联](https://tavily.com)                                      | 来自 app.tavily.com 的API密钥（格式：tvly-...）                                         |
+| `x-search`          | `x_search`      | X 搜索 (Grok)      | 搜索 | [关联](https://docs.x.ai/developers/tools/x-search)             | SuperGrok OAuth (xai-oauth) 或 xAI API密钥。这是Grok X Search，而不是 X Developer MCP。 |
+| `xquik-search`      | `xquik`         | Xquik X 搜索       | 搜索 | [关联](https://docs.xquik.com)                                  | Xquik API密钥 (xq_...)。搜索按返回的帖子进行计量；目录估计使用 5 个结果。               |
+| `youcom-search`     | `youcom-search` | 友网搜索           | 搜索 | [关联](https://you.com/business/api/)                           | You.com 平台仪表板中的 X-API-Key                                                        |
 
 ## 纯音频提供者（12 个）
 
