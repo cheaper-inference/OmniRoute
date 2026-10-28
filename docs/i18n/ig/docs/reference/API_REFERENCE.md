@@ -856,7 +856,7 @@ onye na-enye Web/search abstraction (Tavily, Brave, Exa, Serper, wdg).
 | Usoro | Ụzọ                    | Nkọwa                                                                               |
 | ----- | ---------------------- | ----------------------------------------------------------------------------------- |
 | GET   | `/v1/search`           | Ndepụta ahaziri ndị na-eweta ọchụchọ + ike                                          |
-| POST  | `/v1/search`           | Gbaa ajụjụ ọchụchọ - ahụ nke `v1SearchSchema` kwadoro, na-akwado caching/coalescing |
+| POST  | `/v1/search`           | Gbaa ajụjụ ọchụchọ — ahụ nke `v1SearchSchema` kwadoro, na-akwado caching/coalescing |
 | GET   | `/v1/search/analytics` | Onye na-eweta hit/latency/cache stats                                               |
 
 **Nyocha:** Igodo API onye na-ebu (`extractApiKey` + `isValidApiKey`). Amụma ọchụchọ kwadoro site na `enforceApiKeyPolicy`.
@@ -878,7 +878,7 @@ Nsonaazụ ule dowe `id`, `highlight_scores`, `summary`, `subpages`, `entities` 
 
 Exa `type: "lite"` (Exa 3.0) na-anabata obere ogige ma jụ arịrịọ niile mgbe edobere ubi ọ bụla ọzọ. Maka lite, `additionalQueries`, `systemPrompt` na igodo `contents` ọ bụla ma e wezụga `text` na `highlights` a na-atụba tupu oku a. Agakwaghị ebugharị `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl`.
 
-Ịkọ ọnụ ahịa ọnụ ahịa bụ ihe ndekọ dị larịị `costPerQuery`, ma e wezụga Exa `type: "lite"`, nke edere na ọnụahịa efu ($ 0.004 kwa oku vs $ 0.007 maka `auto`). Ụdị `instant` nke nketa ka a na-akwụ ụgwọ ka lite; `fast` na-akwụ ụgwọ dị ka `auto`. Tavily na-akwụ `search_depth: "advanced"` na kredit karịa otu oku, na ọdịiche ahụ adịghị egosipụta na `usage.search_cost_usd`.
+Ịkọ ọnụ ahịa ọnụ ahịa bụ ewepụghị ndekọ `costPerQuery`, ma e wezụga Exa, nke na-esote ọnụahịa nke Exa: $ 0.007 kwa oku maka `auto` (na ihe nketa `fast`) ma ọ bụ $ 0.004 maka `lite` (na ihe nketa `instant`), na-ekpuchi 10 nsonaazụ; $0.001 maka nsonaazụ ọ bụla ọzọ; yana $0.001 kwa rịzọlt weghachi mgbe edobere `contents.summary`. A na-edekọ Tavily na 1 kredit ($0.008) maka `search_depth` `basic`, `fast` na `ultra-fast`, yana kredit 2 ($0.016) maka `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). A ka na-edekọ oku nwere `auto_parameters: true` nke Tavily kwalitere na kredit 1.
 
 ---
 

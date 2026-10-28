@@ -832,7 +832,7 @@ sự trừu tượng của nhà cung cấp Web/search (Tavily, Brave, Exa, Serpe
 | Phương pháp | Con đường              | Sự miêu tả                                                                                      |
 | ----------- | ---------------------- | ----------------------------------------------------------------------------------------------- |
 | GET         | `/v1/search`           | Liệt kê các khả năng + của nhà cung cấp dịch vụ tìm kiếm được định cấu hình                     |
-| POST        | `/v1/search`           | Chạy truy vấn tìm kiếm — nội dung được xác thực bởi `v1SearchSchema`, hỗ trợ caching/coalescing |
+| POST        | `/v1/search`           | Chạy truy vấn tìm kiếm nội dung — được xác thực bởi `v1SearchSchema`, hỗ trợ caching/coalescing |
 | GET         | `/v1/search/analytics` | Số liệu thống kê hit/latency/cache của mỗi nhà cung cấp                                         |
 
 **Xác thực:** Khóa API mang (`extractApiKey` + `isValidApiKey`). Chính sách tìm kiếm được thực thi thông qua `enforceApiKeyPolicy`.
@@ -854,7 +854,7 @@ Kết quả Exa giữ `id`, `highlight_scores`, `summary`, `subpages`, `entities
 
 Exa `type: "lite"` (Exa 3.0) chấp nhận một nhóm trường nhỏ hơn và từ chối toàn bộ yêu cầu khi bất kỳ trường nào khác được đặt. Đối với lite, `additionalQueries`, `systemPrompt` và mọi khóa `contents` ngoại trừ `text` và `highlights` đều bị loại bỏ trước cuộc gọi. `subpages`, `subpageTarget`, `highlights.numSentences` và `highlights.highlightsPerUrl` không được dùng nữa không còn được chuyển tiếp nữa.
 
-Kế toán chi phí là đăng ký cố định `costPerQuery`, ngoại trừ Exa `type: "lite"`, được ghi ở mức giá thấp ($0,004 mỗi cuộc gọi so với $0,007 cho `auto`). Loại `instant` cũ được tính phí như lite; `fast` được lập hoá đơn như `auto`. Lập hóa đơn `search_depth: "advanced"` một cách khéo léo với nhiều tín dụng hơn cho mỗi cuộc gọi và sự khác biệt đó không được phản ánh trong `usage.search_cost_usd`.
+Kế toán chi phí là sổ đăng ký cố định `costPerQuery`, ngoại trừ Exa, tuân theo giá riêng của Exa: 0,007 USD mỗi lệnh gọi cho `auto` (và `fast` cũ) hoặc 0,004 USD cho `lite` (và `instant` cũ), bao gồm 10 kết quả; 0,001 USD cho mỗi kết quả tiếp theo; và 0,001 USD cho mỗi kết quả trả về khi `contents.summary` được đặt. Tavily được ghi ở mức 1 tín dụng ($0,008) cho `search_depth` `basic`, `fast` và `ultra-fast` và 2 tín dụng ($0,016) cho `advanced` ( [tín dụng Tavily API](https://docs.tavily.com/documentation/api-credits) ). Cuộc gọi với `auto_parameters: true` mà Tavily nâng cấp lên nâng cao vẫn được ghi ở mức 1 tín dụng.
 
 ---
 

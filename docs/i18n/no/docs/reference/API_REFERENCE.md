@@ -880,7 +880,7 @@ Exa-resultater holder `id`, `highlight_scores`, `summary`, `subpages`, `entities
 
 Exa `type: "lite"` (Exa 3.0) godtar et mindre sett med felt og avviser hele forespørselen når et hvilket som helst annet felt er satt. For lite blir `additionalQueries`, `systemPrompt` og hver `contents` -tast unntatt `text` og `highlights` droppet før samtalen. De utdaterte `subpages`, `subpageTarget`, `highlights.numSentences` og `highlights.highlightsPerUrl` videresendes ikke lenger.
 
-Kostnadsregnskap er det flate registeret `costPerQuery`, bortsett fra Exa `type: "lite"`, som registreres til lite pris ($0,004 per samtale vs $0,007 for `auto`). Den eldre `instant` typen faktureres som lite; `fast` faktureres som `auto`. Tavily fakturerer `search_depth: "advanced"` med flere kreditter per samtale, og den forskjellen gjenspeiles ikke i `usage.search_cost_usd`.
+Kostnadsregnskap er det flate registeret `costPerQuery`, bortsett fra Exa, som følger Exas egen prissetting: $0,007 per samtale for `auto` (og den eldre `fast`) eller $0,004 for `lite` (og den eldre `instant`), som dekker 10 resultater; $0,001 for hvert ytterligere resultat; og $0,001 per returnert resultat når `contents.summary` er satt. Tavily er registrert med 1 kreditt ($0,008) for `search_depth` `basic`, `fast` og `ultra-fast`, og 2 kreditter ($0,016) for `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). En samtale med `auto_parameters: true` som Tavily oppgraderer til avansert blir fortsatt registrert med 1 kreditt.
 
 ---
 

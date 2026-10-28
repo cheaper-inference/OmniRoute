@@ -847,11 +847,11 @@ OpenAI سے مطابقت رکھنے والی بیچ پروسیسنگ۔
 
 Web/search فراہم کنندہ خلاصہ (Tavily, Brave, Exa, Serper, etc.)
 
-| طریقہ | راستہ                  | تفصیل                                                                                                  |
-| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| GET   | `/v1/search`           | ترتیب شدہ تلاش فراہم کنندگان کی + صلاحیتوں کی فہرست بنائیں                                             |
-| POST  | `/v1/search`           | تلاش کا استفسار چلائیں — `v1SearchSchema` کے ذریعے تصدیق شدہ جسم، caching/coalescing کو سپورٹ کرتا ہے۔ |
-| GET   | `/v1/search/analytics` | فی فراہم کنندہ hit/latency/cache اعدادوشمار                                                            |
+| طریقہ | راستہ                  | تفصیل                                                                                                    |
+| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | ترتیب شدہ تلاش فراہم کنندگان کی + صلاحیتوں کی فہرست بنائیں                                               |
+| POST  | `/v1/search`           | ایک سرچ استفسار چلائیں — باڈی جس کی توثیق `v1SearchSchema` نے کی ہے، caching/coalescing کو سپورٹ کرتا ہے |
+| GET   | `/v1/search/analytics` | فی فراہم کنندہ hit/latency/cache اعدادوشمار                                                              |
 
 **تصدیق:** بیئرر API کلید (`extractApiKey` + `isValidApiKey`)۔ تلاش کی پالیسی `enforceApiKeyPolicy` کے ذریعے نافذ کی گئی۔
 
@@ -872,7 +872,7 @@ Exa نتائج `id`, `highlight_scores`, `summary`, `subpages`, `entities` او�
 
 Exa `type: "lite"` (Exa 3.0) فیلڈز کے ایک چھوٹے سیٹ کو قبول کرتا ہے اور جب کوئی دوسرا فیلڈ سیٹ کیا جاتا ہے تو پوری درخواست کو مسترد کر دیتا ہے۔ لائٹ کے لیے، `additionalQueries`، `systemPrompt` اور `text` اور `highlights` کے علاوہ ہر `contents` کلید کال سے پہلے چھوڑ دی جاتی ہے۔ فرسودہ `subpages`، `subpageTarget`، `highlights.numSentences` اور `highlights.highlightsPerUrl` مزید آگے نہیں بھیجے جاتے ہیں۔
 
-لاگت کا حساب کتاب فلیٹ رجسٹری `costPerQuery` ہے، سوائے Exa `type: "lite"`، جو کہ لائٹ قیمت پر ریکارڈ کیا جاتا ہے ($0.004 فی کال بمقابلہ $0.007 برائے `auto`)۔ لیگیسی `instant` قسم لائٹ کی طرح بل کی جاتی ہے۔ `fast` `auto` کی طرح بل کیا جاتا ہے۔ Tavily `search_depth: "advanced"` فی کال زیادہ کریڈٹ پر بل دیتا ہے، اور یہ فرق `usage.search_cost_usd` میں ظاہر نہیں ہوتا ہے۔
+لاگت کا حساب کتاب فلیٹ رجسٹری `costPerQuery` ہے، Exa کے علاوہ، جو Exa کی اپنی قیمتوں کی پیروی کرتا ہے: $0.007 فی کال `auto` (اور لیگیسی `fast`) کے لیے یا $0.004 `lite` (اور لیگیسی `instant`) کے لیے، جس میں 10 نتائج شامل ہیں۔ ہر مزید نتیجے کے لیے $0.001؛ اور $0.001 فی لوٹا ہوا نتیجہ جب `contents.summary` سیٹ ہو۔ Tavily کو `search_depth` `basic`، `fast` اور `ultra-fast` کے لیے 1 کریڈٹ ($0.008) اور `advanced` ( [Tavily API کریڈٹس](https://docs.tavily.com/documentation/api-credits) ) کے لیے 2 کریڈٹ ($0.016) پر ریکارڈ کیا گیا ہے۔ `auto_parameters: true` کے ساتھ ایک کال جسے Tavily ایڈوانس میں اپ گریڈ کرتا ہے اب بھی 1 کریڈٹ پر ریکارڈ کیا جاتا ہے۔
 
 ---
 

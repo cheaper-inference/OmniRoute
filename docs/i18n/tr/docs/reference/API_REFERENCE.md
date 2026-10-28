@@ -785,11 +785,11 @@ tüm çağrı sahiplerinin erişiminin reddedildiği null sahipli kayıtlar (get
 
 Web/search sağlayıcı soyutlaması (Tavily, Brave, Exa, Serper, vb.).
 
-| Yöntem | Yol                    | Tanım                                                                                                       |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Yapılandırılmış arama sağlayıcılarının + yeteneklerini listeleyin                                           |
-| POST   | `/v1/search`           | Bir arama sorgusu çalıştırın — gövde `v1SearchSchema` tarafından doğrulandı, caching/coalescing destekliyor |
-| GET    | `/v1/search/analytics` | Sağlayıcı başına hit/latency/cache istatistikleri                                                           |
+| Yöntem | Yol                    | Tanım                                                                                                        |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | Yapılandırılmış arama sağlayıcılarının + yeteneklerini listeleyin                                            |
+| POST   | `/v1/search`           | `v1SearchSchema` tarafından doğrulanmış bir — gövdesi arama sorgusu çalıştırın, caching/coalescing destekler |
+| GET    | `/v1/search/analytics` | Sağlayıcı başına hit/latency/cache istatistikleri                                                            |
 
 **Yetki:** Taşıyıcı API anahtarı (`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` aracılığıyla uygulanan arama politikası.
 
@@ -810,7 +810,7 @@ Exa sonuçları `id`, `highlight_scores`, `summary`, `subpages`, `entities` ve `
 
 Exa `type: "lite"` (Exa 3.0) daha küçük bir alan kümesini kabul eder ve başka bir alan ayarlandığında isteğin tamamını reddeder. Lite için `additionalQueries`, `systemPrompt` ve `text` ile `highlights` dışındaki tüm `contents` tuşları çağrıdan önce bırakılır. Kullanımdan kaldırılan `subpages`, `subpageTarget`, `highlights.numSentences` ve `highlights.highlightsPerUrl` artık iletilmiyor.
 
-Maliyet muhasebesi, basit fiyatla kaydedilen Exa `type: "lite"` hariç düz kayıt `costPerQuery`(çağrı başına 0,004 ABD doları, `auto` için 0,007 ABD doları). Eski `instant` türü lite gibi faturalandırılır; `fast` `auto` gibi faturalandırılır. Tavily, `search_depth: "advanced"` arama başına daha fazla krediyle faturalandırıyor ve bu fark `usage.search_cost_usd` yansıtılmıyor.
+Maliyet muhasebesi, Exa hariç, Exa'nın kendi fiyatlandırmasını izleyen düz kayıt `costPerQuery`: 10 sonucu kapsayan `auto` (ve eski `fast`) için çağrı başına 0,007 ABD doları veya `lite` (ve eski `instant`) için 0,004 ABD doları; Sonraki her sonuç için 0,001 ABD doları; ve `contents.summary` ayarlandığında döndürülen sonuç başına 0,001 ABD doları. Tavily `search_depth` `basic`, `fast` ve `ultra-fast` için 1 kredi (0,008 ABD doları) ve `advanced` ( [Tavily API kredileri](https://docs.tavily.com/documentation/api-credits) ) için 2 kredi (0,016 ABD doları) olarak kaydedilmiştir. Tavily'nin gelişmiş seviyeye yükselttiği `auto_parameters: true` ile yapılan bir çağrı hâlâ 1 kredi olarak kaydediliyor.
 
 ---
 

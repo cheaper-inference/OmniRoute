@@ -854,11 +854,11 @@ mai kira da ba na zaman ba (samu, sharewa, sokewa, da binciken `input_file_id` y
 
 abstraction mai bada Web/search (Tavily, Brave, Exa, Serper, da sauransu).
 
-| Hanya | Hanya                  | Bayani                                                                                              |
-| ----- | ---------------------- | --------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Lissafin da aka saita masu samar da bincike + iyawar                                                |
-| POST  | `/v1/search`           | Gudanar da tambayar nema - jiki ingantacce ta `v1SearchSchema`, yana goyan bayan caching/coalescing |
-| GET   | `/v1/search/analytics` | Mai bayarwa hit/latency/cache ƙididdiga                                                             |
+| Hanya | Hanya                  | Bayani                                                                                                    |
+| ----- | ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Lissafin da aka saita masu samar da bincike + iyawar                                                      |
+| POST  | `/v1/search`           | Gudun binciken binciken — jiki wanda aka inganta ta `v1SearchSchema`, yana goyan bayan caching/coalescing |
+| GET   | `/v1/search/analytics` | Mai bayarwa hit/latency/cache ƙididdiga                                                                   |
 
 **Gaskiya:** Mai ɗaukar maɓallin API (`extractApiKey` + `isValidApiKey`). An aiwatar da manufofin bincike ta hanyar `enforceApiKeyPolicy`.
 
@@ -879,7 +879,7 @@ Sakamako yana kiyaye `id`, `highlight_scores`, `summary`, `subpages`, `entities`
 
 Exa `type: "lite"` (Exa 3.0) yana karɓar ƙaramin saitin filayen kuma ya ƙi duk buƙatar lokacin da aka saita kowane filin. Don lite, `additionalQueries`, `systemPrompt` da kowane maɓallin `contents` banda `text` da `highlights` ana sauke kafin kiran. Ba a ƙara turawa da aka soke `subpages`, `subpageTarget`, `highlights.numSentences` da `highlights.highlightsPerUrl`.
 
-Kididdigar ƙididdigewa ita ce ɗakin yin rajistar `costPerQuery`, ban da Exa `type: "lite"`, wanda aka yi rikodin shi a farashi mai sauƙi ($0.004 kowane kira vs $0.007 don `auto`). Ana lissafin nau'in `instant` na gado kamar Lite; ana lissafin `fast` kamar `auto`. Tavily lissafin `search_depth: "advanced"` akan ƙarin ƙididdigewa kowane kira, kuma wannan bambancin ba ya bayyana a cikin `usage.search_cost_usd`.
+Kididdigar ƙididdigewa ita ce ɗakin rajistar `costPerQuery`, ban da Exa, wanda ya biyo bayan farashin kansa na Exa: $0.007 a kowane kira don `auto` (da `fast` na gado ) ko $0.004 don `lite` (da `instant` na gado), yana rufe sakamako 10; $0.001 ga kowane ƙarin sakamako; da $0.001 a kowane sakamakon da aka dawo lokacin da aka saita `contents.summary`. Ana yin rikodin Tavily a 1 kiredit ($0.008) don `search_depth` `basic`, `fast` da `ultra-fast`, da ƙididdiga 2 ($0.016) don `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Kira tare da `auto_parameters: true` wanda Tavily ya inganta zuwa ci gaba har yanzu ana yin rikodin shi a 1 kiredit.
 
 ---
 

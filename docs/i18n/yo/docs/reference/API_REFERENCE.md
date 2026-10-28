@@ -830,11 +830,11 @@ olùpè tí kì í ṣe ti sáà (gbígbà, píparẹ́, fífagilé, àti àyẹ
 
 abstraction olupese Web/search (Tavily, Brave, Exa, Serper, bbl).
 
-| Ọna  | Ona                    | Apejuwe                                                                                        |
-| ---- | ---------------------- | ---------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | Akojọ atunto awọn olupese wiwa + awọn agbara                                                   |
-| POST | `/v1/search`           | Ṣiṣe ibeere wiwa kan — ara ti a fọwọsi nipasẹ `v1SearchSchema`, ṣe atilẹyin caching/coalescing |
-| GET  | `/v1/search/analytics` | Awọn iṣiro hit/latency/cache fun olupese                                                       |
+| Ọna  | Ona                    | Apejuwe                                                                                    |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------------ |
+| GET  | `/v1/search`           | Akojọ atunto awọn olupese wiwa + awọn agbara                                               |
+| POST | `/v1/search`           | Ṣiṣe ibeere wiwa — ara ti a fọwọsi nipasẹ `v1SearchSchema`, ṣe atilẹyin caching/coalescing |
+| GET  | `/v1/search/analytics` | Awọn iṣiro hit/latency/cache fun olupese                                                   |
 
 **Ifọwọsi:** Bọtini API ti nrù (`extractApiKey` + `isValidApiKey`). Ilana wiwa ti fi agbara mu nipasẹ `enforceApiKeyPolicy`.
 
@@ -855,7 +855,7 @@ Awọn abajade idanwo tọju `id`, `highlight_scores`, `summary`, `subpages`, `e
 
 Exa `type: "lite"` (Exa 3.0) gba eto ti o kere ju ti awọn aaye ati kọ gbogbo ibeere nigbati eyikeyi aaye miiran ti ṣeto. Fun Lite, `additionalQueries`, `systemPrompt` ati gbogbo bọtini `contents` ayafi `text` ati `highlights` ti wa silẹ ṣaaju ipe naa. `subpages`, `subpageTarget`, `highlights.numSentences` ati `highlights.highlightsPerUrl` ti a ti sọ silẹ ko ni siwaju mọ.
 
-Iṣiro idiyele jẹ iforukọsilẹ alapin `costPerQuery`, ayafi Exa `type: "lite"`, eyiti o gbasilẹ ni idiyele kekere ($0.004 fun ipe kan vs $0.007 fun `auto`). Iru `instant` julọ ti wa ni billed bi Lite; `fast` jẹ owo bi `auto`. Tavily ṣe owo `search_depth: "advanced"` ni awọn kirẹditi diẹ sii fun ipe kan, ati pe iyatọ yẹn ko han ninu `usage.search_cost_usd`.
+Iṣiro iye owo jẹ iforukọsilẹ alapin `costPerQuery`, ayafi fun Exa, eyiti o tẹle idiyele ti ara Exa: $ 0.007 fun ipe fun `auto` (ati julọ `fast`) tabi $ 0.004 fun `lite` (ati aṣẹ `instant`), ti o bo awọn abajade 10; $ 0.001 fun abajade siwaju kọọkan; ati $0.001 fun esi pada nigbati `contents.summary` ti ṣeto. Tavily ti wa ni igbasilẹ ni 1 kirẹditi ($0.008) fun `search_depth` `basic`, `fast` ati `ultra-fast`, ati 2 kirediti ($0.016) fun `advanced` ( [Tavily API kirediti](https://docs.tavily.com/documentation/api-credits) ). Ipe pẹlu `auto_parameters: true` ti awọn iṣagbega Tavily si ilọsiwaju jẹ ṣi gbasilẹ ni kirẹditi 1.
 
 ---
 

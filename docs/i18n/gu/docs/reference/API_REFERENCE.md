@@ -834,11 +834,11 @@ OpenAI-સુસંગત બૅચ પ્રક્રિયા.
 
 Web/search પ્રદાતા એબ્સ્ટ્રેક્શન (Tavily, Brave, Exa, Serper, વગેરે).
 
-| પદ્ધતિ | પાથ                    | વર્ણન                                                                                         |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | રૂપરેખાંકિત શોધ પ્રદાતાઓની + ક્ષમતાઓની સૂચિ બનાવો                                             |
-| POST   | `/v1/search`           | શોધ ક્વેરી ચલાવો — બોડી `v1SearchSchema` દ્વારા માન્ય છે, caching/coalescing ને સપોર્ટ કરે છે |
-| GET    | `/v1/search/analytics` | પ્રતિ-પ્રદાતા hit/latency/cache આંકડા                                                         |
+| પદ્ધતિ | પાથ                    | વર્ણન                                                                                      |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | રૂપરેખાંકિત શોધ પ્રદાતાઓની + ક્ષમતાઓની સૂચિ બનાવો                                          |
+| POST   | `/v1/search`           | `v1SearchSchema` દ્વારા માન્ય — બોડી શોધ ક્વેરી ચલાવો, caching/coalescing ને સપોર્ટ કરે છે |
+| GET    | `/v1/search/analytics` | પ્રતિ-પ્રદાતા hit/latency/cache આંકડા                                                      |
 
 **ઓથ:** બેરર API કી (`extractApiKey` + `isValidApiKey`). શોધ નીતિ `enforceApiKeyPolicy` દ્વારા લાગુ કરવામાં આવી છે.
 
@@ -859,7 +859,7 @@ Exa પરિણામો `id`, `highlight_scores`, `summary`, `subpages`, `enti
 
 Exa `type: "lite"` (Exa 3.0) ફીલ્ડના નાના સેટને સ્વીકારે છે અને જ્યારે અન્ય કોઈ ફીલ્ડ સેટ કરવામાં આવે ત્યારે સમગ્ર વિનંતીને નકારી કાઢે છે. લાઇટ માટે, `additionalQueries`, `systemPrompt` અને `text` અને `highlights` સિવાયની દરેક `contents` કી કૉલ પહેલાં છોડી દેવામાં આવે છે. નાપસંદ કરેલ `subpages`, `subpageTarget`, `highlights.numSentences` અને `highlights.highlightsPerUrl` હવે ફોરવર્ડ કરવામાં આવશે નહીં.
 
-કોસ્ટ એકાઉન્ટિંગ એ Exa `type: "lite"` સિવાય ફ્લેટ રજિસ્ટ્રી `costPerQuery` છે, જે લાઇટ પ્રાઈસ પર રેકોર્ડ કરવામાં આવે છે ($0.004 પ્રતિ કોલ વિરુદ્ધ $0.007 `auto` માટે). લેગસી `instant` પ્રકારનું બિલ લાઇટ જેવું છે; `fast` `auto` જેમ બિલ કરવામાં આવે છે. Tavily કૉલ દીઠ વધુ ક્રેડિટ પર `search_depth: "advanced"` બિલ કરે છે, અને તે તફાવત `usage.search_cost_usd` માં પ્રતિબિંબિત થતો નથી.
+કોસ્ટ એકાઉન્ટિંગ એ ફ્લેટ રજિસ્ટ્રી `costPerQuery` છે, Exa સિવાય, જે Exa ની પોતાની કિંમતોને અનુસરે છે: `auto` (અને લેગસી `fast`) માટે $0.007 અથવા `lite` (અને લેગસી `instant`) માટે $0.004, 10 પરિણામોને આવરી લે છે; દરેક વધુ પરિણામ માટે $0.001; અને જ્યારે `contents.summary` સેટ કરેલ હોય ત્યારે પરત કરેલા પરિણામ દીઠ $0.001. Tavily `search_depth` `basic`, `fast` અને `ultra-fast` માટે 1 ક્રેડિટ ($0.008) અને `advanced` ( [Tavily API ક્રેડિટ્સ](https://docs.tavily.com/documentation/api-credits) ) માટે 2 ક્રેડિટ ($0.016) પર નોંધાયેલ છે. `auto_parameters: true` સાથેનો કોલ કે જે Tavily એડવાન્સ્ડમાં અપગ્રેડ કરે છે તે હજુ પણ 1 ક્રેડિટ પર રેકોર્ડ કરવામાં આવે છે.
 
 ---
 

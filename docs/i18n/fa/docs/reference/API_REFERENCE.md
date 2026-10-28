@@ -829,11 +829,11 @@ POST /v1/providers/{provider}/images/generations
 
 انتزاع ارائه دهنده Web/search (Tavily، Brave، Exa، Serper و غیره).
 
-| روش  | مسیر                   | توضیحات                                                                                                   |
-| ---- | ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | قابلیت های + ارائه دهندگان جستجوی پیکربندی شده را فهرست کنید                                              |
-| POST | `/v1/search`           | یک عبارت جستجو را اجرا کنید - بدنه تایید شده توسط `v1SearchSchema`، از caching/coalescing پشتیبانی می کند |
-| GET  | `/v1/search/analytics` | آمار hit/latency/cache هر ارائه دهنده                                                                     |
+| روش  | مسیر                   | توضیحات                                                                                                      |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| GET  | `/v1/search`           | قابلیت های + ارائه دهندگان جستجوی پیکربندی شده را فهرست کنید                                                 |
+| POST | `/v1/search`           | یک عبارت جستجوی — را اجرا کنید که توسط `v1SearchSchema` تأیید شده است، از caching/coalescing پشتیبانی می کند |
+| GET  | `/v1/search/analytics` | آمار hit/latency/cache هر ارائه دهنده                                                                        |
 
 **احراز هویت:** کلید حامل API (`extractApiKey` + `isValidApiKey`). سیاست جستجو از طریق `enforceApiKeyPolicy` اجرا شد.
 
@@ -854,7 +854,7 @@ Exa و Tavily فیلدهای خاص ارائه دهنده را از یک کیس�
 
 Exa `type: "lite"` (Exa 3.0) مجموعه کوچکتری از فیلدها را می پذیرد و در صورت تنظیم هر فیلد دیگری، کل درخواست را رد می کند. برای lite، `additionalQueries`، `systemPrompt` و هر کلید `contents` به جز `text` و `highlights` قبل از تماس حذف میشوند. `subpages`، `subpageTarget`، `highlights.numSentences` و `highlights.highlightsPerUrl` منسوخ شده دیگر ارسال نمیشوند.
 
-حسابداری هزینه یک رجیستری ثابت `costPerQuery` است، به جز Exa `type: "lite"`، که با قیمت لایت (0.004 دلار در هر تماس در مقابل 0.007 دلار برای `auto`) ثبت می شود. نوع `instant` قدیمی مانند lite صورتحساب میشود. `fast` مانند `auto` صورتحساب می شود. Tavily `search_depth: "advanced"` را با اعتبار بیشتری در هر تماس صورتحساب میکند، و این تفاوت در `usage.search_cost_usd` منعکس نمیشود.
+حسابداری بهای تمام شده `costPerQuery` ثبت ثابت است، به جز Exa، که از قیمت گذاری خود Exa پیروی می کند: 0.007 دلار در هر تماس برای `auto` (و `fast` میراث) یا 0.004 دلار برای `lite` (و `instant` میراث)، که 10 نتیجه را پوشش می دهد. 0.001 دلار برای هر نتیجه بعدی؛ و 0.001 دلار به ازای هر نتیجه برگشتی زمانی که `contents.summary` تنظیم شود. Tavily با 1 اعتبار (0.008 دلار) برای `search_depth` `basic`، `fast` و `ultra-fast`، و 2 اعتبار (0.016 دلار) برای `advanced` ( [اعتبارات Tavily API](https://docs.tavily.com/documentation/api-credits) ) ثبت شده است. تماس با `auto_parameters: true` که Tavily آن را به پیشرفته ارتقا میدهد همچنان با 1 اعتبار ثبت میشود.
 
 ---
 

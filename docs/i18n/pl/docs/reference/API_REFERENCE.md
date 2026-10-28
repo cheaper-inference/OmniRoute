@@ -853,11 +853,11 @@ wywołującemu spoza sesji (pobieranie, usuwanie, anulowanie oraz sprawdzanie `i
 
 abstrakcja dostawcy Web/search (Tavily, Brave, Exa, Serper itp.).
 
-| Metoda | Ścieżka                | Opis                                                                                                   |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/search`           | Wyświetl listę możliwości + skonfigurowanych dostawców wyszukiwania                                    |
-| POST   | `/v1/search`           | Uruchom zapytanie wyszukiwania — treść sprawdzona przez `v1SearchSchema`, obsługuje caching/coalescing |
-| GET    | `/v1/search/analytics` | Statystyki hit/latency/cache dla poszczególnych dostawców                                              |
+| Metoda | Ścieżka                | Opis                                                                                                  |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Wyświetl listę możliwości + skonfigurowanych dostawców wyszukiwania                                   |
+| POST   | `/v1/search`           | Uruchom zapytanie wyszukiwania — body sprawdzone przez `v1SearchSchema`, obsługuje caching/coalescing |
+| GET    | `/v1/search/analytics` | Statystyki hit/latency/cache dla poszczególnych dostawców                                             |
 
 **Autoryzacja:** Klucz API na okaziciela (`extractApiKey` + `isValidApiKey`). Polityka wyszukiwania wymuszona przez `enforceApiKeyPolicy`.
 
@@ -878,7 +878,7 @@ Wyniki Exa zachowują `id`, `highlight_scores`, `summary`, `subpages`, `entities
 
 Exa `type: "lite"` (Exa 3.0) akceptuje mniejszy zestaw pól i odrzuca całe żądanie, gdy ustawione jest inne pole. W przypadku Lite, `additionalQueries`, `systemPrompt` i każdy klawisz `contents` z wyjątkiem `text` i `highlights` są odrzucane przed wywołaniem. Przestarzałe `subpages`, `subpageTarget`, `highlights.numSentences` i `highlights.highlightsPerUrl` nie są już przekazywane.
 
-Rachunek kosztów to rejestr płaski `costPerQuery`, z wyjątkiem Exa `type: "lite"`, który jest rejestrowany według ceny lite (0,004 USD za połączenie w porównaniu z 0,007 USD za `auto`). Starszy typ `instant` jest rozliczany jak Lite; `fast` jest rozliczane jak `auto`. Tavily nalicza `search_depth: "advanced"` więcej kredytów za połączenie, a różnica ta nie jest odzwierciedlona w `usage.search_cost_usd`.
+Rachunek kosztów to płaski rejestr `costPerQuery`, z wyjątkiem Exa, który stosuje własne ceny Exa: 0,007 USD za połączenie dla `auto` (i starszego `fast`) lub 0,004 USD dla `lite` (i starszego `instant`), obejmujące 10 wyników; 0,001 $ za każdy kolejny wynik; i 0,001 USD za zwrócony wynik, gdy ustawiono `contents.summary`. Tavily ma 1 kredyt (0,008 USD) dla `search_depth` `basic`, `fast` i `ultra-fast` oraz 2 kredyty (0,016 USD) dla `advanced` ( [kredyty Tavily API](https://docs.tavily.com/documentation/api-credits) ). Połączenie z `auto_parameters: true`, które Tavily aktualizuje do wersji zaawansowanej, jest nadal rejestrowane z 1 kredytem.
 
 ---
 

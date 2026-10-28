@@ -832,7 +832,7 @@ abstraction du fournisseur Web/search (Tavily, Brave, Exa, Serper, etc.).
 | Méthode | Chemin                 | Description                                                                                               |
 | ------- | ---------------------- | --------------------------------------------------------------------------------------------------------- |
 | GET     | `/v1/search`           | Répertorier les capacités + des fournisseurs de recherche configurés                                      |
-| POST    | `/v1/search`           | Exécutez une requête de recherche – corps validé par `v1SearchSchema`, prend en charge caching/coalescing |
+| POST    | `/v1/search`           | Exécutez une requête de recherche corps — validé par `v1SearchSchema`, prend en charge caching/coalescing |
 | GET     | `/v1/search/analytics` | Statistiques hit/latency/cache par fournisseur                                                            |
 
 **Authentification :** Clé API au porteur (`extractApiKey` + `isValidApiKey`). Politique de recherche appliquée via `enforceApiKeyPolicy`.
@@ -854,7 +854,7 @@ Les résultats Exa conservent `id`, `highlight_scores`, `summary`, `subpages`, `
 
 Exa `type: "lite"` (Exa 3.0) accepte un ensemble plus petit de champs et rejette l'intégralité de la demande lorsqu'un autre champ est défini. Pour Lite, `additionalQueries`, `systemPrompt` et toutes les touches `contents` sauf `text` et `highlights` sont supprimées avant l'appel. Les `subpages`, `subpageTarget`, `highlights.numSentences` et `highlights.highlightsPerUrl` obsolètes ne sont plus transmis.
 
-La comptabilité analytique est le registre plat `costPerQuery`, à l'exception d'Exa `type: "lite"`, qui est enregistré au prix léger (0,004 $ par appel contre 0,007 $ pour `auto`). Le type `instant` hérité est facturé comme Lite ; `fast` est facturé comme `auto`. Tavily facture `search_depth: "advanced"` avec plus de crédits par appel, et cette différence n'est pas reflétée dans `usage.search_cost_usd`.
+La comptabilité analytique est le registre plat `costPerQuery`, à l'exception d'Exa, qui suit la propre tarification d'Exa : 0,007 $ par appel pour `auto` (et l'ancien `fast`) ou 0,004 $ pour `lite` (et l'ancien `instant`), couvrant 10 résultats ; 0,001 $ pour chaque résultat supplémentaire ; et 0,001 $ par résultat renvoyé lorsque `contents.summary` est défini. Tavily est enregistré à 1 crédit (0,008 $) pour `search_depth` `basic`, `fast` et `ultra-fast`, et 2 crédits (0,016 $) pour `advanced` ( [crédits Tavily API](https://docs.tavily.com/documentation/api-credits) ). Un appel avec `auto_parameters: true` que Tavily met à niveau vers avancé est toujours enregistré à 1 crédit.
 
 ---
 

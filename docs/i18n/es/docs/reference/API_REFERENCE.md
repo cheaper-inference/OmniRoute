@@ -829,11 +829,11 @@ los solicitantes sin sesión (al recuperar, eliminar, cancelar y durante la comp
 
 abstracción del proveedor Web/search (Tavily, Brave, Exa, Serper, etc.).
 
-| Método | Camino                 | Descripción                                                                                               |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Listar las capacidades + de los proveedores de búsqueda configurados                                      |
-| POST   | `/v1/search`           | Ejecute una consulta de búsqueda: cuerpo validado por `v1SearchSchema`, compatible con caching/coalescing |
-| GET    | `/v1/search/analytics` | Estadísticas hit/latency/cache por proveedor                                                              |
+| Método | Camino                 | Descripción                                                                                        |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Listar las capacidades + de los proveedores de búsqueda configurados                               |
+| POST   | `/v1/search`           | Ejecute una consulta de búsqueda cuerpo — validado por `v1SearchSchema`, admite caching/coalescing |
+| GET    | `/v1/search/analytics` | Estadísticas hit/latency/cache por proveedor                                                       |
 
 **Autenticación:** Clave API al portador (`extractApiKey` + `isValidApiKey`). Política de búsqueda aplicada a través de `enforceApiKeyPolicy`.
 
@@ -854,7 +854,7 @@ Los resultados de Exa mantienen `id`, `highlight_scores`, `summary`, `subpages`,
 
 Exa `type: "lite"` (Exa 3.0) acepta un conjunto más pequeño de campos y rechaza la solicitud completa cuando se establece cualquier otro campo. Para lite, `additionalQueries`, `systemPrompt` y todas las teclas `contents` excepto `text` y `highlights` se eliminan antes de la llamada. Los obsoletos `subpages`, `subpageTarget`, `highlights.numSentences` y `highlights.highlightsPerUrl` ya no se reenvían.
 
-La contabilidad de costos es el registro plano `costPerQuery`, excepto Exa `type: "lite"`, que se registra al precio lite ($0,004 por llamada vs $0,007 por `auto`). El tipo `instant` heredado se factura como lite; `fast` se factura como `auto`. Tavily factura `search_depth: "advanced"` con más créditos por llamada, y esa diferencia no se refleja en `usage.search_cost_usd`.
+La contabilidad de costos es el registro plano `costPerQuery`, excepto para Exa, que sigue el propio precio de Exa: $0,007 por llamada para `auto` (y el legado `fast`) o $0,004 para `lite` (y el legado `instant`), que cubre 10 resultados; $0,001 por cada resultado adicional; y $0,001 por resultado devuelto cuando se establece `contents.summary`. Tavily se registra a 1 crédito ($0,008) para `search_depth` `basic`, `fast` y `ultra-fast`, y 2 créditos ($0,016) para `advanced` ( [créditos Tavily API](https://docs.tavily.com/documentation/api-credits) ). Una llamada con `auto_parameters: true` que Tavily actualiza a avanzado todavía se registra con 1 crédito.
 
 ---
 

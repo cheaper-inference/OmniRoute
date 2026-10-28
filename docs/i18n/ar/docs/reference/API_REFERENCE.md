@@ -853,11 +853,11 @@ POST /v1/providers/{provider}/images/generations
 
 تجريد مزود Web/search (Tavily، Brave، Exa، Serper، وما إلى ذلك).
 
-| طريقة | طريق                   | وصف                                                                                             |
-| ----- | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | قائمة موفري البحث تكوين قدرات +                                                                 |
-| POST  | `/v1/search`           | قم بتشغيل استعلام بحث - تم التحقق من صحة النص بواسطة `v1SearchSchema`، ويدعم caching/coalescing |
-| GET   | `/v1/search/analytics` | إحصائيات hit/latency/cache لكل مزود                                                             |
+| طريقة | طريق                   | وصف                                                                                              |
+| ----- | ---------------------- | ------------------------------------------------------------------------------------------------ |
+| GET   | `/v1/search`           | قائمة موفري البحث تكوين قدرات +                                                                  |
+| POST  | `/v1/search`           | قم بتشغيل استعلام بحث — body تم التحقق من صحته بواسطة `v1SearchSchema`، ويدعم caching/coalescing |
+| GET   | `/v1/search/analytics` | إحصائيات hit/latency/cache لكل مزود                                                              |
 
 **المصادقة:** حامل مفتاح API (`extractApiKey` + `isValidApiKey`). تم فرض سياسة البحث عبر `enforceApiKeyPolicy`.
 
@@ -878,7 +878,7 @@ POST /v1/providers/{provider}/images/generations
 
 يقبل Exa `type: "lite"` (Exa 3.0) مجموعة أصغر من الحقول ويرفض الطلب بالكامل عند تعيين أي حقل آخر. بالنسبة إلى lite، يتم إسقاط `additionalQueries` و `systemPrompt` وكل مفتاح `contents` باستثناء `text` و `highlights` قبل المكالمة. لم يعد يتم إعادة توجيه `subpages` و `subpageTarget` و `highlights.numSentences` و `highlights.highlightsPerUrl` المهملة.
 
-محاسبة التكاليف هي السجل الثابت `costPerQuery`، باستثناء Exa `type: "lite"`، الذي يتم تسجيله بالسعر البسيط (0.004 دولار لكل مكالمة مقابل 0.007 دولار لـ `auto`). يتم إصدار فاتورة للنوع `instant` القديم مثل الإصدار Lite؛ تتم محاسبة `fast` مثل `auto`. تقوم Tavily بدفع `search_depth: "advanced"` بعدد أكبر من الاعتمادات لكل مكالمة، ولا ينعكس هذا الفرق في `usage.search_cost_usd`.
+محاسبة التكاليف هي السجل الثابت `costPerQuery`، باستثناء Exa، الذي يتبع تسعير Exa الخاص: 0.007 USD لكل استدعاء لـ `auto` (و `fast` القديم) أو 0.004 USD لـ `lite` (و `instant` القديم)، ويغطي 10 نتائج؛ 0.001 دولار لكل نتيجة إضافية؛ و0.001 دولار لكل نتيجة يتم إرجاعها عند تعيين `contents.summary`. تم تسجيل Tavily برصيد واحد (0.008 دولار) لـ `search_depth` `basic` و `fast` و `ultra-fast` و 2 رصيد (0.016 دولار) لـ `advanced` ( [أرصدة Tavily API](https://docs.tavily.com/documentation/api-credits) ). المكالمة مع `auto_parameters: true` التي يقوم Tavily بترقيتها إلى المستوى المتقدم لا تزال مسجلة برصيد واحد.
 
 ---
 

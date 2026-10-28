@@ -853,11 +853,11 @@ seansivälistele kutsujatele (hankimine, kustutamine, tühistamine ja loomisel t
 
 Web/search pakkuja abstraktsioon (Tavily, Brave, Exa, Serper jne).
 
-| meetod | Tee                    | Kirjeldus                                                                           |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Loetlege konfigureeritud otsingupakkujate + võimalused                              |
-| POST   | `/v1/search`           | Käivitage otsingupäring – keha kinnitas `v1SearchSchema`, toetab caching/coalescing |
-| GET    | `/v1/search/analytics` | Pakkujapõhine hit/latency/cache statistika                                          |
+| meetod | Tee                    | Kirjeldus                                                                                  |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | Loetlege konfigureeritud otsingupakkujate + võimalused                                     |
+| POST   | `/v1/search`           | Käivitage otsingupäring — body, mille kinnitas `v1SearchSchema`, toetab caching/coalescing |
+| GET    | `/v1/search/analytics` | Pakkujapõhine hit/latency/cache statistika                                                 |
 
 **Auth:** Kandja API võti (`extractApiKey` + `isValidApiKey`). Otsingupoliitika jõustatakse `enforceApiKeyPolicy` kaudu.
 
@@ -878,7 +878,7 @@ Eksa tulemused jätavad `id`, `highlight_scores`, `summary`, `subpages`, `entiti
 
 Exa `type: "lite"` (Exa 3.0) aktsepteerib väiksemat väljade kogumit ja lükkab kogu taotluse tagasi, kui on määratud mõni muu väli. Lite'i puhul jäetakse enne kõnet välja `additionalQueries`, `systemPrompt` ja kõik `contents` -klahvid, välja arvatud `text` ja `highlights`. Aegunud `subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei edastata enam.
 
-Kulude arvestus on ühtne register `costPerQuery`, välja arvatud Exa `type: "lite"`, mis registreeritakse lihthinnaga (0,004 dollarit kõne kohta vs. 0,007 dollarit `auto` puhul). Pärand `instant` tüüpi arveldatakse nagu lite; `fast` arveldatakse nagu `auto`. Tavily esitab `search_depth: "advanced"` le rohkem krediiti kõne kohta ja see erinevus ei kajastu `usage.search_cost_usd`.
+Kulude arvestus on ühtne register `costPerQuery`, välja arvatud Exa, mis järgib Exa enda hinnakujundust: 0,007 dollarit `auto` (ja pärand `fast`) kõne kohta või 0,004 dollarit `lite` (ja pärand `instant`) puhul, mis hõlmab 10 tulemust; 0,001 dollarit iga järgmise tulemuse eest; ja 0,001 $ iga tagastatud tulemuse kohta, kui `contents.summary` on määratud. Tavily on registreeritud 1 krediit ($ 0,008) `search_depth` `basic`, `fast` ja `ultra-fast` jaoks ning 2 krediiti ($ 0,016) `advanced` ( [Tavily API krediiti](https://docs.tavily.com/documentation/api-credits) ). Kõne `auto_parameters: true`, mille Tavily täiendab edasijõudnutele, salvestatakse endiselt 1 krediidiga.
 
 ---
 

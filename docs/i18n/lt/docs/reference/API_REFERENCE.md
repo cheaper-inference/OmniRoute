@@ -854,11 +854,11 @@ ne sesijos užklausos teikėjui (gaunant, ištrinant, atšaukiant ir kuriant atl
 
 Web/search teikėjo abstrakcija (Tavily, Brave, Exa, Serper ir kt.).
 
-| Metodas | Kelias                 | Aprašymas                                                                                     |
-| ------- | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | Sukonfigūruotų paieškos paslaugų teikėjų + galimybių sąrašas                                  |
-| POST    | `/v1/search`           | Vykdykite paieškos užklausą – `v1SearchSchema` patvirtintas kūnas, palaiko caching/coalescing |
-| GET     | `/v1/search/analytics` | Teikėjo hit/latency/cache statistika                                                          |
+| Metodas | Kelias                 | Aprašymas                                                                                    |
+| ------- | ---------------------- | -------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | Sukonfigūruotų paieškos paslaugų teikėjų + galimybių sąrašas                                 |
+| POST    | `/v1/search`           | Vykdykite paieškos užklausą — body, patvirtintą `v1SearchSchema`, palaiko caching/coalescing |
+| GET     | `/v1/search/analytics` | Teikėjo hit/latency/cache statistika                                                         |
 
 **Auth:** Nešiklio API raktas (`extractApiKey` + `isValidApiKey`). Paieškos politika vykdoma naudojant `enforceApiKeyPolicy`.
 
@@ -879,7 +879,7 @@ Exa rezultatai išsaugo `id`, `highlight_scores`, `summary`, `subpages`, `entiti
 
 Exa `type: "lite"` (Exa 3.0) priima mažesnį laukų rinkinį ir atmeta visą užklausą, kai nustatomas bet kuris kitas laukas. Lite, `additionalQueries`, `systemPrompt` ir kiekvienas `contents` klavišas, išskyrus `text` ir `highlights` atmetamas prieš skambinant. Nebenaudojami `subpages`, `subpageTarget`, `highlights.numSentences` ir `highlights.highlightsPerUrl` nebepersiunčiami.
 
-Sąnaudų apskaita yra fiksuoto registro `costPerQuery`, išskyrus Exa `type: "lite"`, kuri įrašoma pagal paprastą kainą (0,004 USD už skambutį, palyginti su 0,007 USD už `auto`). Pasenęs `instant` tipas apmokestinamas kaip lite; `fast` apmokestinamas kaip `auto`. Tavily apmokestina `search_depth: "advanced"` daugiau kreditų už skambutį ir šis skirtumas neatsispindi `usage.search_cost_usd`.
+Išlaidų apskaita yra vienodo registro `costPerQuery`, išskyrus Exa, kuri vadovaujasi pačios Exa kainodara: 0,007 USD už `auto` (ir senojo `fast`) skambutį arba 0,004 USD už `lite` (ir senąjį `instant`), apimanti 10 rezultatų; 0,001 USD už kiekvieną tolesnį rezultatą; ir 0,001 USD už grąžintą rezultatą, kai nustatytas `contents.summary`. Tavily įrašytas 1 kreditu (0,008 USD) už `search_depth` `basic`, `fast` ir `ultra-fast` ir 2 kreditus (0,016 USD) už `advanced` ( [Tavily API kreditai](https://docs.tavily.com/documentation/api-credits) ). Skambutis su `auto_parameters: true`, kurį Tavily atnaujina į išplėstinį, vis tiek įrašomas į 1 kreditą.
 
 ---
 

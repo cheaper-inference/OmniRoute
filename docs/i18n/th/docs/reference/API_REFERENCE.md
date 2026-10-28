@@ -853,11 +853,11 @@ POST /v1/providers/{provider}/images/generations
 
 นามธรรมของผู้ให้บริการ Web/search (Tavily, Brave, Exa, Serper ฯลฯ )
 
-| วิธี | เส้นทาง                | คำอธิบาย                                                                          |
-| ---- | ---------------------- | --------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | แสดงรายการความสามารถ + ของผู้ให้บริการการค้นหาที่กำหนดค่าไว้                      |
-| POST | `/v1/search`           | เรียกใช้คำค้นหา - เนื้อหาที่ตรวจสอบโดย `v1SearchSchema` รองรับ caching/coalescing |
-| GET  | `/v1/search/analytics` | สถิติ hit/latency/cache ต่อผู้ให้บริการ                                           |
+| วิธี | เส้นทาง                | คำอธิบาย                                                                        |
+| ---- | ---------------------- | ------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | แสดงรายการความสามารถ + ของผู้ให้บริการการค้นหาที่กำหนดค่าไว้                    |
+| POST | `/v1/search`           | เรียกใช้คำค้นหา — body ที่ตรวจสอบโดย `v1SearchSchema` รองรับ caching/coalescing |
+| GET  | `/v1/search/analytics` | สถิติ hit/latency/cache ต่อผู้ให้บริการ                                         |
 
 **รับรองความถูกต้อง:** ผู้ถือคีย์ API (`extractApiKey` + `isValidApiKey`) นโยบายการค้นหาบังคับใช้ผ่าน `enforceApiKeyPolicy`
 
@@ -878,7 +878,7 @@ Exa และ Tavily อ่านฟิลด์เฉพาะผู้ให�
 
 Exa `type: "lite"` (Exa 3.0) ยอมรับชุดฟิลด์ที่เล็กกว่าและปฏิเสธคำขอทั้งหมดเมื่อมีการตั้งค่าฟิลด์อื่น สำหรับ lite, `additionalQueries`, `systemPrompt` และทุกคีย์ `contents` ยกเว้น `text` และ `highlights` จะถูกละทิ้งก่อนการโทร `subpages`, `subpageTarget`, `highlights.numSentences` และ `highlights.highlightsPerUrl` ที่เลิกใช้แล้วจะไม่ถูกส่งต่ออีกต่อไป
 
-การบัญชีต้นทุนเป็นแบบแฟลตรีจีสทรี `costPerQuery` ยกเว้น Exa `type: "lite"` ซึ่งบันทึกในราคา Lite ($0.004 ต่อการโทร เทียบกับ $0.007 สำหรับ `auto`) ประเภท `instant` เดิมจะถูกเรียกเก็บเงินแบบไลต์ `fast` ถูกเรียกเก็บเงินเหมือน `auto` Tavily จะเรียกเก็บเงิน `search_depth: "advanced"` ด้วยเครดิตที่มากขึ้นต่อการโทร และความแตกต่างนั้นจะไม่สะท้อนให้เห็นใน `usage.search_cost_usd`
+การบัญชีต้นทุนเป็นแบบแฟลตรีจีสทรี `costPerQuery` ยกเว้น Exa ซึ่งเป็นไปตามราคาของ Exa เอง: 0.007 ดอลลาร์ต่อการเรียก `auto` (และ `fast` แบบเดิม) หรือ 0.004 ดอลลาร์สำหรับ `lite` (และ `instant` แบบเดิม) ครอบคลุม 10 ผลลัพธ์ $0.001 สำหรับผลลัพธ์เพิ่มเติมแต่ละรายการ และ 0.001 ดอลลาร์ต่อผลลัพธ์ที่ส่งคืนเมื่อตั้งค่า `contents.summary` Tavily ได้รับการบันทึกที่ 1 เครดิต ($0.008) สำหรับ `search_depth` `basic`, `fast` และ `ultra-fast` และ 2 เครดิต ($0.016) สำหรับ `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ) การโทรด้วย `auto_parameters: true` ที่ Tavily อัปเกรดเป็นขั้นสูงจะยังคงบันทึกไว้ที่ 1 เครดิต
 
 ---
 

@@ -800,11 +800,11 @@ OpenAI 호환 배치 처리입니다.
 
 Web/search 공급자 추상화(Tavily, Brave, Exa, Serper 등).
 
-| 방법 | 길                     | 설명                                                                                    |
-| ---- | ---------------------- | --------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | 구성된 검색 공급자 + 기능 나열                                                          |
-| POST | `/v1/search`           | 검색 쿼리 실행 - 본문은 `v1SearchSchema` 로 검증되었으며 caching/coalescing 지원합니다. |
-| GET  | `/v1/search/analytics` | 공급자별 hit/latency/cache 통계                                                         |
+| 방법 | 길                     | 설명                                                                                  |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | 구성된 검색 공급자 + 기능 나열                                                        |
+| POST | `/v1/search`           | `v1SearchSchema` 로 검증된 — 본문 검색 쿼리를 실행하고 caching/coalescing 지원합니다. |
+| GET  | `/v1/search/analytics` | 공급자별 hit/latency/cache 통계                                                       |
 
 **인증:** 베어러 API 키(`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` 통해 시행되는 검색 정책.
 
@@ -825,7 +825,7 @@ Exa 결과는 `id`, `highlight_scores`, `summary`, `subpages`, `entities` 및 `e
 
 Exa `type: "lite"` (Exa 3.0)는 더 작은 필드 집합을 허용하고 다른 필드가 설정되면 전체 요청을 거부합니다. 라이트의 경우 `additionalQueries`, `systemPrompt` 및 `text` 및 `highlights` 제외한 모든 `contents` 키는 호출 전에 삭제됩니다. 더 이상 사용되지 않는 `subpages`, `subpageTarget`, `highlights.numSentences` 및 `highlights.highlightsPerUrl` 는 더 이상 전달되지 않습니다.
 
-비용 회계는 라이트 가격(호출당 $0.004 vs `auto` 의 경우 $0.007)으로 기록되는 Exa `type: "lite"` 제외하고 플랫 레지스트리 `costPerQuery` 입니다. 레거시 `instant` 유형은 라이트처럼 청구됩니다. `fast` `auto` 처럼 청구됩니다. Tavily는 호출당 더 많은 크레딧을 `search_depth: "advanced"` 에 청구하며 해당 차액은 `usage.search_cost_usd` 에 반영되지 않습니다.
+비용 계산은 평면 레지스트리 `costPerQuery` 입니다. 단, Exa의 자체 가격을 따르는 Exa는 다음과 같습니다. `auto` (및 레거시 `fast`)의 경우 호출당 $0.007, `lite` (및 레거시 `instant`)의 경우 $0.004, 10개 결과 포함. 추가 결과당 $0.001; `contents.summary` 설정된 경우 반환된 결과당 $0.001입니다. Tavily는 `search_depth` `basic`, `fast` 및 `ultra-fast` 에 대해 1 크레딧($0.008), `advanced` ( [Tavily API 크레딧](https://docs.tavily.com/documentation/api-credits) )에 대해 2 크레딧($0.016)으로 기록됩니다. Tavily가 고급으로 업그레이드한 `auto_parameters: true` 사용한 통화는 여전히 1크레딧으로 기록됩니다.
 
 ---
 

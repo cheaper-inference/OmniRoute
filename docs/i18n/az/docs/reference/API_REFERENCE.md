@@ -777,11 +777,11 @@ sessiyası olmayan hər bir çağırışçı üçün əlçatmazdır (əldə etm�
 
 Web/search provayderi abstraksiya (Tavily, Brave, Exa, Serper və s.).
 
-| Metod | Yol                    | Təsvir                                                                                                            |
-| ----- | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Konfiqurasiya edilmiş axtarış provayderlərinin + imkanlarını sadalayın                                            |
-| POST  | `/v1/search`           | Axtarış sorğusunu yerinə yetirin — `v1SearchSchema` tərəfindən təsdiqlənmiş bədən, caching/coalescing dəstəkləyir |
-| GET   | `/v1/search/analytics` | Hər provayder üzrə hit/latency/cache statistikası                                                                 |
+| Metod | Yol                    | Təsvir                                                                                                       |
+| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| GET   | `/v1/search`           | Konfiqurasiya edilmiş axtarış provayderlərinin + imkanlarını sadalayın                                       |
+| POST  | `/v1/search`           | `v1SearchSchema` tərəfindən təsdiqlənmiş — bədən axtarış sorğusunu işə salın, caching/coalescing dəstəkləyir |
+| GET   | `/v1/search/analytics` | Hər provayder üzrə hit/latency/cache statistikası                                                            |
 
 **Auth:** Daşıyıcı API açarı (`extractApiKey` + `isValidApiKey`). Axtarış siyasəti `enforceApiKeyPolicy` vasitəsilə həyata keçirilir.
 
@@ -802,7 +802,7 @@ Exa nəticələri `id`, `highlight_scores`, `summary`, `subpages`, `entities` v�
 
 Exa `type: "lite"` (Exa 3.0) daha kiçik sahələr dəstini qəbul edir və hər hansı digər sahə təyin edildikdə bütün sorğunu rədd edir. Lite üçün `additionalQueries`, `systemPrompt` və `text` və `highlights` istisna olmaqla hər `contents` düyməsi zəngdən əvvəl atılır. Köhnəlmiş `subpages`, `subpageTarget`, `highlights.numSentences` və `highlights.highlightsPerUrl` artıq yönləndirilmir.
 
-Xərclərin uçotu sadə qiymətlə qeydə alınan Exa `type: "lite"` istisna olmaqla, `costPerQuery` düz reyestridir ( `auto` üçün 0,007 ABŞ dolları). Köhnə `instant` növü lite kimi hesablanır; `fast` `auto` kimi hesablanır. Tavily `search_depth: "advanced"` ni hər zəng üçün daha çox kreditlə hesablayır və bu fərq `usage.search_cost_usd`-da əks olunmur.
+Xərclərin uçotu Exa-nın öz qiymətinə uyğun gələn Exa istisna olmaqla, düz reyestr `costPerQuery`: `auto` (və köhnə `fast`) üçün hər zəng üçün $0,007 və ya `lite` (və köhnə `instant`) üçün $0,004, 10 nəticəni əhatə edir; Hər sonrakı nəticə üçün $0,001; və `contents.summary` təyin edildikdə hər qaytarılmış nəticə üçün $0,001. Tavily `search_depth` `basic`, `fast` və `ultra-fast` üçün 1 kreditlə ($0,008), `advanced` ( [Tavily API kreditləri](https://docs.tavily.com/documentation/api-credits) ) üçün isə 2 kreditlə ($0,016) qeydə alınır. Tavilinin qabaqcıl səviyyəyə yüksəltdiyi `auto_parameters: true` ilə zəng hələ də 1 kreditlə qeydə alınır.
 
 ---
 

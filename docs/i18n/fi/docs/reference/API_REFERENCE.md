@@ -853,11 +853,11 @@ istunnon ulkopuolisilta kutsujilta (haku, poisto, peruutus sekä luonnin yhteyde
 
 Web/search palveluntarjoajan abstraktio (Tavily, Brave, Exa, Serper jne.).
 
-| Menetelmä | Polku                  | Kuvaus                                                                           |
-| --------- | ---------------------- | -------------------------------------------------------------------------------- |
-| GET       | `/v1/search`           | Listaa määritetyt hakupalveluntarjoajat + -ominaisuudet                          |
-| POST      | `/v1/search`           | Suorita hakukysely – `v1SearchSchema` vahvistaa rungon, tukee caching/coalescing |
-| GET       | `/v1/search/analytics` | Palveluntarjoajakohtaiset hit/latency/cache tilastot                             |
+| Menetelmä | Polku                  | Kuvaus                                                                                |
+| --------- | ---------------------- | ------------------------------------------------------------------------------------- |
+| GET       | `/v1/search`           | Listaa määritetyt hakupalveluntarjoajat + -ominaisuudet                               |
+| POST      | `/v1/search`           | Suorita hakukysely — body, jonka `v1SearchSchema` vahvistaa, tukee caching/coalescing |
+| GET       | `/v1/search/analytics` | Palveluntarjoajakohtaiset hit/latency/cache tilastot                                  |
 
 **Todennus:** Kuljetin API avain (`extractApiKey` + `isValidApiKey`). Hakukäytäntö pakotettu `enforceApiKeyPolicy` kautta.
 
@@ -878,7 +878,7 @@ Exa-tulokset säilyttävät `id`, `highlight_scores`, `summary`, `subpages`, `en
 
 Exa `type: "lite"` (Exa 3.0) hyväksyy pienemmän joukon kenttiä ja hylkää koko pyynnön, kun jokin muu kenttä on asetettu. Lite:ssä `additionalQueries`, `systemPrompt` ja kaikki `contents` -näppäimet paitsi `text` ja `highlights` pudotetaan ennen kutsua. Käytöstä poistettuja `subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei enää lähetetä edelleen.
 
-Kustannuslaskenta on tasainen rekisteri `costPerQuery`, paitsi Exa `type: "lite"`, joka kirjataan lite-hintaan (0,004 dollaria puhelua kohti vs. 0,007 dollaria `auto` ssä). Vanha `instant` tyyppi laskutetaan kuten lite; `fast` laskutetaan kuten `auto`. Tavily laskuttaa `search_depth: "advanced"` enemmän krediittejä puhelua kohden, eikä tämä ero näy `usage.search_cost_usd`.
+Kustannuslaskenta on tasainen rekisteri `costPerQuery`, paitsi Exa, joka noudattaa Exan omaa hinnoittelua: 0,007 $ per puhelu `auto` (ja vanhalle `fast`) tai 0,004 $ `lite` :lle (ja vanhalle `instant`), joka kattaa 10 tulosta; 0,001 dollaria jokaisesta lisätuloksesta; ja 0,001 $ per palautettu tulos, kun `contents.summary` on asetettu. Tavily on kirjattu 1 krediittiin (0,008 dollaria) `search_depth` `basic`, `fast` ja `ultra-fast` ja 2 krediittiä (0,016 dollaria) `advanced` ( [Tavily API krediittejä](https://docs.tavily.com/documentation/api-credits) ). Puhelu `auto_parameters: true` llä, jonka Tavily päivittää edistyneemmäksi, tallennetaan edelleen 1 pisteellä.
 
 ---
 

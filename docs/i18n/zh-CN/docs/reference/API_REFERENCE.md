@@ -810,11 +810,11 @@ POST /v1/providers/{provider}/images/generations
 
 Web/search提供者抽象（Tavily、Brave、Exa、Serper 等）。
 
-| 方法 | 小路                   | 描述                                                                |
-| ---- | ---------------------- | ------------------------------------------------------------------- |
-| GET  | `/v1/search`           | 列出配置的搜索提供者+功能                                           |
-| POST | `/v1/search`           | 运行搜索查询 - 由`v1SearchSchema`验证的正文，支持caching/coalescing |
-| GET  | `/v1/search/analytics` | 每个提供者的hit/latency/cache统计数据                               |
+| 方法 | 小路                   | 描述                                                              |
+| ---- | ---------------------- | ----------------------------------------------------------------- |
+| GET  | `/v1/search`           | 列出配置的搜索提供者+功能                                         |
+| POST | `/v1/search`           | 运行由`v1SearchSchema`验证的搜索查询—主体，支持caching/coalescing |
+| GET  | `/v1/search/analytics` | 每个提供者的hit/latency/cache统计数据                             |
 
 **授权：**承载API密钥 (`extractApiKey` + `isValidApiKey`)。通过`enforceApiKeyPolicy`强制执行搜索策略。
 
@@ -835,7 +835,7 @@ Exa 结果将`id`、 `highlight_scores`、 `summary`、 `subpages`、 `entities`
 
 Exa `type: "lite"` (Exa 3.0) 接受较小的字段集，并在设置任何其他字段时拒绝整个请求。对于 lite， `additionalQueries`、 `systemPrompt`和除`text`和`highlights`之外的每个`contents`键在调用之前都会被删除。已弃用的`subpages`、 `subpageTarget`、 `highlights.numSentences`和`highlights.highlightsPerUrl`不再转发。
 
-成本核算是平面注册表`costPerQuery`，但 Exa `type: "lite"`除外，它以精简价格记录（每次调用 0.004 美元，而`auto`为 0.007 美元）。旧版`instant`类型的计费方式与 lite 类似； `fast`的计费方式与`auto`类似。 Tavilly 对`search_depth: "advanced"`每次调用收取更多积分，并且该差异未反映在`usage.search_cost_usd`中。
+Cost accounting is the flat registry `costPerQuery`, except for Exa, which follows Exa's own pricing: $0.007 per call for `auto` (and the legacy `fast`) or $0.004 for `lite` (and the legacy `instant`), covering 10 results; $0.001 for each further result; and $0.001 per returned result when `contents.summary` is set. Tavily is recorded at 1 credit ($0.008) for `search_depth` `basic`, `fast` and `ultra-fast`, and 2 credits ($0.016) for `advanced` ([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). A call with `auto_parameters: true` that Tavily upgrades to advanced is still recorded at 1 credit.
 
 ---
 

@@ -788,11 +788,11 @@ bekor qilish va yaratishdagi `input_file_id` tekshiruvi). `GET /v1/batches` anon
 
 Web/search provayderi abstraktsiyasi (Tavily, Brave, Exa, Serper va boshqalar).
 
-| Usul | Yo'l                   | Tavsif                                                                                                              |
-| ---- | ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | Konfiguratsiya qilingan qidiruv provayderlarining + imkoniyatlarini ro'yxatlang                                     |
-| POST | `/v1/search`           | Qidiruv so'rovini ishga tushiring - `v1SearchSchema` tomonidan tasdiqlangan, caching/coalescing qo'llab-quvvatlaydi |
-| GET  | `/v1/search/analytics` | Har bir provayder bo'yicha hit/latency/cache statistikasi                                                           |
+| Usul | Yo'l                   | Tavsif                                                                                                                      |
+| ---- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | Konfiguratsiya qilingan qidiruv provayderlarining + imkoniyatlarini ro'yxatlang                                             |
+| POST | `/v1/search`           | `v1SearchSchema` tomonidan tasdiqlangan — tanasi qidiruv so'rovini ishga tushiring , caching/coalescing qo'llab-quvvatlaydi |
+| GET  | `/v1/search/analytics` | Har bir provayder bo'yicha hit/latency/cache statistikasi                                                                   |
 
 **Muallif:** Tashuvchi API kaliti (`extractApiKey` + `isValidApiKey`). Qidiruv siyosati `enforceApiKeyPolicy` orqali amalga oshiriladi.
 
@@ -813,7 +813,7 @@ Exa natijalari `id`, `highlight_scores`, `summary`, `subpages`, `entities` `extr
 
 Exa `type: "lite"` (Exa 3.0) kichikroq maydonlar to'plamini qabul qiladi va boshqa maydon o'rnatilganda butun so'rovni rad etadi. Lite uchun `additionalQueries`, `systemPrompt` va `text` va `highlights` dan tashqari barcha `contents` tugmalari qo'ng'iroqdan oldin tushiriladi. Eskirgan `subpages`, `subpageTarget`, `highlights.numSentences` va `highlights.highlightsPerUrl` endi boshqa uzatilmaydi.
 
-Xarajatlarni hisobga olish `costPerQuery` tekis registrdir, Exa `type: "lite"` dan tashqari, u oddiy narxda qayd etiladi (har bir qo'ng'iroq uchun $0,004 va `auto` uchun $0,007). Eski `instant` turi lite kabi to'lanadi; `fast` `auto` kabi hisob-kitob qilinadi. Tavily har bir qo'ng'iroq uchun ko'proq kreditlar bo'yicha `search_depth: "advanced"` to'laydi va bu farq `usage.search_cost_usd` aks etmaydi.
+Xarajatlarni hisobga olish `costPerQuery` tekis registrdir, Exa-dan tashqari, Exa-ning o'z narxiga amal qiladi: `auto` (va eski `fast`) uchun har bir qo'ng'iroq uchun $0,007 yoki `lite` (va eski `instant`) uchun $0,004, 10 ta natijani qamrab oladi; Har bir keyingi natija uchun $0,001; va `contents.summary` o'rnatilganda qaytarilgan natija uchun $0,001. Tavily `search_depth` `basic`, `fast` va `ultra-fast` uchun 1 kredit ($0,008) va `advanced` ( [Tavily API kreditlari](https://docs.tavily.com/documentation/api-credits) ) uchun 2 kredit ($0,016) da qayd etilgan. Tavily ilg'or darajaga ko'taradigan `auto_parameters: true` bilan qo'ng'iroq hali ham 1 kreditda qayd etiladi.
 
 ---
 

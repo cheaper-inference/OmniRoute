@@ -853,11 +853,11 @@ aanroeper zonder sessie (ophalen, verwijderen, annuleren en de controle van `inp
 
 Web/search provider abstractie (Tavily, Brave, Exa, Serper, etc.).
 
-| Methode | Pad                    | Beschrijving                                                                                       |
-| ------- | ---------------------- | -------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | Lijst met geconfigureerde + -mogelijkheden van zoekmachines                                        |
-| POST    | `/v1/search`           | Voer een zoekopdracht uit - body gevalideerd door `v1SearchSchema`, ondersteunt caching/coalescing |
-| GET     | `/v1/search/analytics` | hit/latency/cache -statistieken per provider                                                       |
+| Methode | Pad                    | Beschrijving                                                                                   |
+| ------- | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | Lijst met geconfigureerde + -mogelijkheden van zoekmachines                                    |
+| POST    | `/v1/search`           | Voer een zoekopdracht — body gevalideerd door `v1SearchSchema`, ondersteunt caching/coalescing |
+| GET     | `/v1/search/analytics` | hit/latency/cache -statistieken per provider                                                   |
 
 **Autorisatie:** Drager API sleutel (`extractApiKey` + `isValidApiKey`). Zoekbeleid wordt afgedwongen via `enforceApiKeyPolicy`.
 
@@ -878,7 +878,7 @@ Exa-resultaten behouden `id`, `highlight_scores`, `summary`, `subpages`, `entiti
 
 Exa `type: "lite"` (Exa 3.0) accepteert een kleinere set velden en wijst het hele verzoek af wanneer een ander veld wordt ingesteld. Voor lite worden `additionalQueries`, `systemPrompt` en elke `contents` -sleutel behalve `text` en `highlights` verwijderd vóór de aanroep. De verouderde `subpages`, `subpageTarget`, `highlights.numSentences` en `highlights.highlightsPerUrl` worden niet langer doorgestuurd.
 
-Kostenberekening is het platte register `costPerQuery`, behalve Exa `type: "lite"`, dat wordt geregistreerd tegen de lite-prijs ($0,004 per gesprek versus $0,007 voor `auto`). Het oude `instant` type wordt gefactureerd als lite; `fast` wordt gefactureerd als `auto`. Tavily factureert `search_depth: "advanced"` tegen meer credits per gesprek, en dat verschil wordt niet weerspiegeld in `usage.search_cost_usd`.
+Kostenberekening is het platte register `costPerQuery`, met uitzondering van Exa, dat Exa's eigen prijzen volgt: $0,007 per oproep voor `auto` (en de oude `fast`) of $0,004 voor `lite` (en de oude `instant`), wat 10 resultaten omvat; $ 0,001 voor elk verder resultaat; en $ 0,001 per geretourneerd resultaat wanneer `contents.summary` is ingesteld. Tavily wordt geregistreerd op 1 credit ($0,008) voor `search_depth` `basic`, `fast` en `ultra-fast`, en 2 credits ($0,016) voor `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Een gesprek met `auto_parameters: true` dat Tavily upgradet naar geavanceerd wordt nog steeds geregistreerd tegen 1 credit.
 
 ---
 

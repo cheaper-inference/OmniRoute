@@ -846,11 +846,11 @@ Aufrufer ohne Sitzung verweigert (Abrufen, Löschen, Abbrechen sowie die Prüfun
 
 Web/search -Anbieterabstraktion (Tavily, Brave, Exa, Serper usw.).
 
-| Verfahren | Weg                    | Beschreibung                                                                                                             |
-| --------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| GET       | `/v1/search`           | Listen Sie + -Funktionen der konfigurierten Suchanbieter auf                                                             |
-| POST      | `/v1/search`           | Führen Sie eine Suchabfrage aus – der Textkörper wurde von `v1SearchSchema` validiert und unterstützt caching/coalescing |
-| GET       | `/v1/search/analytics` | hit/latency/cache -Statistiken pro Anbieter                                                                              |
+| Verfahren | Weg                    | Beschreibung                                                                                                     |
+| --------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| GET       | `/v1/search`           | Listen Sie + -Funktionen der konfigurierten Suchanbieter auf                                                     |
+| POST      | `/v1/search`           | Führen Sie einen von `v1SearchSchema` validierten — Körper einer Suchabfrage aus, caching/coalescing unterstützt |
+| GET       | `/v1/search/analytics` | hit/latency/cache -Statistiken pro Anbieter                                                                      |
 
 **Authentifizierung:** Inhaber API Schlüssel (`extractApiKey` + `isValidApiKey`). Suchrichtlinie wird über `enforceApiKeyPolicy`.
 
@@ -871,7 +871,7 @@ Exa-Ergebnisse behalten `id`, `highlight_scores`, `summary`, `subpages`, `entiti
 
 Exa `type: "lite"` (Exa 3.0) akzeptiert einen kleineren Satz von Feldern und lehnt die gesamte Anfrage ab, wenn ein anderes Feld festgelegt ist. Bei Lite werden `additionalQueries`, `systemPrompt` und alle `contents` -Tasten außer `text` und `highlights` vor dem Aufruf gelöscht. Die veralteten `subpages`, `subpageTarget`, `highlights.numSentences` und `highlights.highlightsPerUrl` werden nicht mehr weitergeleitet.
 
-Bei der Kostenrechnung handelt es sich um die Pauschalregistrierung `costPerQuery`, mit Ausnahme von Exa `type: "lite"`, die zum Lite-Preis erfasst wird (0,004 USD pro Anruf gegenüber 0,007 USD für `auto`). Der alte `instant` Typ wird wie Lite abgerechnet; `fast` wird wie `auto` abgerechnet. Tavily stellt `search_depth: "advanced"` mehr Credits pro Anruf in Rechnung, und dieser Unterschied spiegelt sich nicht in `usage.search_cost_usd` wider.
+Bei der Kostenrechnung handelt es sich um die Pauschalregistrierung `costPerQuery`, mit Ausnahme von Exa, die den eigenen Preisen von Exa folgt: 0,007 $ pro Aufruf für `auto` (und das alte `fast`) oder 0,004 $ für `lite` (und das alte `instant`), was 10 Ergebnisse abdeckt; 0,001 $ für jedes weitere Ergebnis; und 0,001 $ pro zurückgegebenem Ergebnis, wenn `contents.summary` festgelegt ist. Tavily wird mit 1 Credit (0,008 $) für `search_depth` `basic`, `fast` und `ultra-fast` und 2 Credits (0,016 $) für `advanced` ( [Tavily API Credits](https://docs.tavily.com/documentation/api-credits) ) erfasst. Ein Anruf mit `auto_parameters: true`, den Tavily auf „Erweitert“ hochstuft, wird immer noch mit 1 Credit aufgezeichnet.
 
 ---
 

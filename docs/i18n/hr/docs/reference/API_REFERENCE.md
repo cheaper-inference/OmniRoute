@@ -878,7 +878,7 @@ Exa rezultati zadržavaju `id`, `highlight_scores`, `summary`, `subpages`, `enti
 
 Exa `type: "lite"` (Exa 3.0) prihvaća manji skup polja i odbija cijeli zahtjev kada je postavljeno bilo koje drugo polje. Za lite, `additionalQueries`, `systemPrompt` i svaki `contents` ključ osim `text` i `highlights` ispuštaju se prije poziva. Zastarjeli `subpages`, `subpageTarget`, `highlights.numSentences` i `highlights.highlightsPerUrl` više se ne prosljeđuju.
 
-Troškovno računovodstvo je jedinstveni registar `costPerQuery`, osim Exa `type: "lite"`, koji se bilježi po laganoj cijeni (0,004 USD po pozivu u odnosu na 0,007 USD za `auto`). Naslijeđeni tip `instant` naplaćuje se kao lite; `fast` se naplaćuje kao `auto`. Tavily naplaćuje `search_depth: "advanced"` na više kredita po pozivu, a ta se razlika ne odražava u `usage.search_cost_usd`.
+Troškovno računovodstvo je jedinstveni registar `costPerQuery`, osim za Exa, koji slijedi Exa-ine vlastite cijene: 0,007 USD po pozivu za `auto` (i naslijeđeni `fast`) ili 0,004 USD za `lite` (i naslijeđeni `instant`), pokrivajući 10 rezultata; 0,001 $ za svaki daljnji rezultat; i 0,001 USD po vraćenom rezultatu kada je postavljen `contents.summary`. Tavily je zabilježen kao 1 kredit (0,008 USD) za `search_depth` `basic`, `fast` i `ultra-fast` i 2 kredita (0,016 USD) za `advanced` ( [Tavily API krediti](https://docs.tavily.com/documentation/api-credits) ). Poziv sa `auto_parameters: true` koji Tavily nadograđuje na napredni i dalje se bilježi s 1 kreditom.
 
 ---
 

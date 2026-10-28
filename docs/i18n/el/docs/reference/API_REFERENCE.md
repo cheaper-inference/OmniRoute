@@ -878,7 +878,7 @@ POST /v1/providers/{provider}/images/generations
 
 Το Exa `type: "lite"` (Exa 3.0) δέχεται ένα μικρότερο σύνολο πεδίων και απορρίπτει ολόκληρο το αίτημα όταν έχει οριστεί οποιοδήποτε άλλο πεδίο. Για το lite, `additionalQueries`, `systemPrompt` και κάθε πλήκτρο `contents` εκτός από `text` και `highlights` απορρίπτονται πριν από την κλήση. Τα καταργημένα `subpages`, `subpageTarget`, `highlights.numSentences` και `highlights.highlightsPerUrl` δεν προωθούνται πλέον.
 
-Η λογιστική κόστους είναι το επίπεδο μητρώο `costPerQuery`, εκτός από το Exa `type: "lite"`, το οποίο καταγράφεται στην τιμή lite (0,004 $ ανά κλήση έναντι 0,007 $ για `auto`). Ο τύπος `instant` παλαιού τύπου τιμολογείται σαν lite. `fast` τιμολογείται όπως `auto`. Η Tavily χρεώνει `search_depth: "advanced"` με περισσότερες πιστώσεις ανά κλήση και αυτή η διαφορά δεν αντικατοπτρίζεται στο `usage.search_cost_usd`.
+Η λογιστική κόστους είναι το κατ 'αποκοπή μητρώο `costPerQuery`, εκτός από το Exa, το οποίο ακολουθεί την τιμολόγηση του ίδιου του Exa: 0,007 $ ανά κλήση για `auto` (και το κληρονομούμενο `fast`) ή 0,004 $ για `lite` (και το κληροδοτημένο `instant`), καλύπτοντας 10 αποτελέσματα. 0,001 $ για κάθε περαιτέρω αποτέλεσμα. και 0,001 $ ανά επιστρεφόμενο αποτέλεσμα όταν έχει οριστεί `contents.summary`. Το Tavily καταγράφεται σε 1 πίστωση (0,008 $) για `search_depth` `basic`, `fast` και `ultra-fast`, και 2 μονάδες (0,016 $) για `advanced` ( [πιστώσεις Tavily API](https://docs.tavily.com/documentation/api-credits) ). Μια κλήση με `auto_parameters: true` που ο Tavily αναβαθμίζει σε προχωρημένους εξακολουθεί να καταγράφεται με 1 πίστωση.
 
 ---
 

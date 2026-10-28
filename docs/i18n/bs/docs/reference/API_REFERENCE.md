@@ -853,11 +853,11 @@ pozivaocu bez sesije (dohvatanje, brisanje, otkazivanje i provjera `input_file_i
 
 apstrakcija Web/search provajdera (Tavily, Brave, Exa, Serper, itd.).
 
-| Metoda | Put                    | Opis                                                                                               |
-| ------ | ---------------------- | -------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Navedite mogućnosti konfiguriranih provajdera pretraživanja +                                      |
-| POST   | `/v1/search`           | Pokrenite upit za pretragu — tijelo koje je potvrdio `v1SearchSchema`, podržava caching/coalescing |
-| GET    | `/v1/search/analytics` | hit/latency/cache statistika po provajderu                                                         |
+| Metoda | Put                    | Opis                                                                                           |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Navedite mogućnosti konfiguriranih provajdera pretraživanja +                                  |
+| POST   | `/v1/search`           | Pokrenite upit za pretragu — tijelo potvrđeno od `v1SearchSchema`, podržava caching/coalescing |
+| GET    | `/v1/search/analytics` | hit/latency/cache statistika po provajderu                                                     |
 
 **Auth:** Nosilac API ključa (`extractApiKey` + `isValidApiKey`). Politika pretraživanja nametnuta preko `enforceApiKeyPolicy`.
 
@@ -878,7 +878,7 @@ Exa rezultati zadržavaju `id`, `highlight_scores`, `summary`, `subpages`, `enti
 
 Exa `type: "lite"` (Exa 3.0) prihvata manji skup polja i odbija cijeli zahtjev kada se postavi bilo koje drugo polje. Za lite, `additionalQueries`, `systemPrompt` i svaki `contents` ključ osim `text` i `highlights` se ispuštaju prije poziva. Zastarjeli `subpages`, `subpageTarget`, `highlights.numSentences` i `highlights.highlightsPerUrl` se više ne prosljeđuju.
 
-Računovodstvo troškova je ravni registar `costPerQuery`, osim Exa `type: "lite"`, koji se bilježi po jednostavnoj cijeni (0,004 USD po pozivu naspram 0,007 USD za `auto`). Naslijeđeni `instant` tip se naplaćuje kao lite; `fast` se naplaćuje kao `auto`. Tavily naplaćuje `search_depth: "advanced"` više kredita po pozivu, a ta razlika se ne odražava na `usage.search_cost_usd`.
+Računovodstvo troškova je ravni registar `costPerQuery`, osim za Exa, koji slijedi Exa-e vlastite cijene: 0,007 USD po pozivu za `auto` (i naslijeđeni `fast`) ili 0,004 USD za `lite` (i naslijeđeni `instant`), pokrivajući 10 rezultata; 0,001 $ za svaki dalji rezultat; i 0,001 $ po vraćenom rezultatu kada je postavljen `contents.summary`. Tavily je zabilježen na 1 kredit (0,008 USD) za `search_depth` `basic`, `fast` i `ultra-fast`, i 2 kredita (0,016 USD) za `advanced` ( [Tavily API krediti](https://docs.tavily.com/documentation/api-credits) ). Poziv sa `auto_parameters: true` koji Tavily nadogradi na napredni i dalje se snima na 1 kredit.
 
 ---
 

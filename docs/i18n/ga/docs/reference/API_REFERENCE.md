@@ -838,7 +838,7 @@ astarraingt soláthraí Web/search (Tavily, Brave, Exa, Serper, etc.).
 | Modh | Conair                 | Cur síos                                                                                            |
 | ---- | ---------------------- | --------------------------------------------------------------------------------------------------- |
 | GET  | `/v1/search`           | Liostaigh cumais + soláthraithe cuardaigh cumraithe                                                 |
-| POST | `/v1/search`           | Rith ceist chuardaigh — comhlacht arna bhailíochtú ag `v1SearchSchema`, tacaíonn caching/coalescing |
+| POST | `/v1/search`           | Rith ceist chuardaigh comhlacht — arna bhailíochtú ag `v1SearchSchema`, tacaíonn caching/coalescing |
 | GET  | `/v1/search/analytics` | Staitisticí hit/latency/cache in aghaidh an tsoláthraí                                              |
 
 **Údar:** Eochair API iompróra (`extractApiKey` + `isValidApiKey`). Beartas cuardaigh curtha i bhfeidhm trí `enforceApiKeyPolicy`.
@@ -860,7 +860,7 @@ Coinníonn torthaí exa `id`, `highlight_scores`, `summary`, `subpages`, `entiti
 
 Glacann Exa `type: "lite"` (Exa 3.0) le sraith réimsí níos lú agus diúltaíonn sé don iarratas iomlán nuair a shocraítear aon réimse eile. I gcás lite, scaoiltear `additionalQueries`, `systemPrompt` agus gach eochair `contents` seachas `text` agus `highlights` roimh an nglao. Ní chuirtear na `subpages`, `subpageTarget`, `highlights.numSentences` agus `highlights.highlightsPerUrl` ar aghaidh a thuilleadh.
 
-Is éard atá i gcuntasaíocht chostais ná an clárlann árasán `costPerQuery`, ach amháin Exa `type: "lite"`, a thaifeadtar ar an bpraghas lite ($0.004 in aghaidh an ghlao vs $0.007 le haghaidh `auto`). Déantar an cineál oidhreachta `instant` a bhilleáil mar lite; Cuirtear bille `fast` mar `auto`. Billí tavily `search_depth: "advanced"` ag níos mó creidmheasanna in aghaidh an ghlao, agus ní léirítear an difríocht sin i `usage.search_cost_usd`.
+Is éard atá i gcuntasaíocht chostais ná an clárlann árasán `costPerQuery`, ach amháin Exa, a leanann praghsáil Exa féin: $0.007 in aghaidh an ghlao ar `auto` (agus an `fast` oidhreachta) nó $0.004 le haghaidh `lite` (agus an oidhreacht `instant`), ag clúdach 10 dtorthaí; $0.001 do gach toradh eile; agus $0.001 in aghaidh an toraidh a tugadh ar ais nuair a shocraítear `contents.summary`. Taifeadtar Tavily ag 1 chreidmheas ($0.008) le haghaidh `search_depth` `basic`, `fast` agus `ultra-fast`, agus 2 chreidmheas ($0.016) le haghaidh `advanced` ( [creidmheasanna Tavily API](https://docs.tavily.com/documentation/api-credits) ). Tá glao le `auto_parameters: true` a uasghrádaíonn Tavily go hardleibhéal fós taifeadta ag 1 chreidmheas.
 
 ---
 

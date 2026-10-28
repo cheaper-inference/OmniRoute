@@ -853,7 +853,7 @@ uondoaji wa mtoaji wa Web/search (Tavily, Jasiri, Exa, Serper, nk).
 | Mbinu | Njia                   | Maelezo                                                                                             |
 | ----- | ---------------------- | --------------------------------------------------------------------------------------------------- |
 | GET   | `/v1/search`           | Orodhesha uwezo wa watoa huduma wa utafutaji +                                                      |
-| POST  | `/v1/search`           | Tekeleza hoja ya utafutaji - mwili uliothibitishwa na `v1SearchSchema`, unatumia caching/coalescing |
+| POST  | `/v1/search`           | Endesha hoja ya utafutaji — body iliyothibitishwa na `v1SearchSchema`, inasaidia caching/coalescing |
 | GET   | `/v1/search/analytics` | Takwimu hit/latency/cache kwa kila mtoa huduma                                                      |
 
 **Uthibitishaji:** Mbeba API ufunguo (`extractApiKey` + `isValidApiKey`). Sera ya utafutaji inatekelezwa kupitia `enforceApiKeyPolicy`.
@@ -875,7 +875,7 @@ Matokeo ya Exa huweka `id`, `highlight_scores`, `summary`, `subpages`, `entities
 
 Exa `type: "lite"` (Exa 3.0) inakubali seti ndogo ya sehemu na kukataa ombi zima wakati uga mwingine wowote umewekwa. Kwa lite, `additionalQueries`, `systemPrompt` na kila kitufe cha `contents` isipokuwa `text` na `highlights` hudondoshwa kabla ya simu. `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl` zilizoacha kutumika hazisambazwi tena.
 
-Uhasibu wa gharama ni sajili bapa `costPerQuery`, isipokuwa Exa `type: "lite"`, ambayo imerekodiwa kwa bei ndogo ($0.004 kwa kila simu dhidi ya $0.007 kwa `auto`). Aina ya `instant` ya urithi inatozwa kama lite; `fast` inatozwa kama `auto`. Tavily bills `search_depth: "advanced"` kwa mikopo zaidi kwa kila simu, na tofauti hiyo haionekani katika `usage.search_cost_usd`.
+Uhasibu wa gharama ni sajili bapa `costPerQuery`, isipokuwa Exa, ambayo inafuata bei ya Exa mwenyewe: $0.007 kwa simu kwa `auto` (na legacy `fast`) au $0.004 kwa `lite` (na urithi `instant`), inayojumuisha matokeo 10; $0.001 kwa kila matokeo zaidi; na $0.001 kwa kila tokeo lililorejeshwa wakati `contents.summary` imewekwa. Tavily imerekodiwa kwa salio 1 ($0.008) kwa `search_depth` `basic`, `fast` na `ultra-fast`, na salio 2 ($0.016) kwa `advanced` ( [mikopo ya Tavily API](https://docs.tavily.com/documentation/api-credits) ). Simu iliyo na `auto_parameters: true` ambayo Tavily inaboresha hadi ya hali ya juu bado inarekodiwa kwa mkopo 1.
 
 ---
 

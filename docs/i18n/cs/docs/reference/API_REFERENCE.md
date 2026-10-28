@@ -837,7 +837,7 @@ abstrakce poskytovatele Web/search (Tavily, Brave, Exa, Serper atd.).
 | Metoda | Cesta                  | Popis                                                                                   |
 | ------ | ---------------------- | --------------------------------------------------------------------------------------- |
 | GET    | `/v1/search`           | Vypsat možnosti + nakonfigurovaných poskytovatelů vyhledávání                           |
-| POST   | `/v1/search`           | Spusťte vyhledávací dotaz – tělo ověřeno `v1SearchSchema`, podporuje caching/coalescing |
+| POST   | `/v1/search`           | Spusťte vyhledávací dotaz — body ověřené `v1SearchSchema`, podporuje caching/coalescing |
 | GET    | `/v1/search/analytics` | Statistiky hit/latency/cache jednotlivých poskytovatelů                                 |
 
 **Auth:** Nosič API klíč (`extractApiKey` + `isValidApiKey`). Zásady vyhledávání vynucené prostřednictvím `enforceApiKeyPolicy`.
@@ -859,7 +859,7 @@ Výsledky Exa uchovávají `id`, `highlight_scores`, `summary`, `subpages`, `ent
 
 Exa `type: "lite"` (Exa 3.0) přijímá menší sadu polí a odmítne celý požadavek, když je nastaveno jakékoli jiné pole. Pro lite jsou před voláním zrušeny `additionalQueries`, `systemPrompt` a všechny klávesy `contents` kromě `text` a `highlights`. Zastaralé `subpages`, `subpageTarget`, `highlights.numSentences` a `highlights.highlightsPerUrl` se již nepřesílají.
 
-Účtování nákladů je plochý registr `costPerQuery`, kromě Exa `type: "lite"`, který se zaznamenává za lite cenu (0,004 USD za hovor oproti 0,007 USD za `auto`). Starší typ `instant` je účtován jako lite; `fast` se účtuje jako `auto`. Tavily účtuje `search_depth: "advanced"` více kreditů za hovor a tento rozdíl se v `usage.search_cost_usd` neodráží.
+Účtování nákladů je plochý registr `costPerQuery`, s výjimkou Exa, který se řídí vlastními cenami Exa: 0,007 $ za hovor pro `auto` (a starší `fast`) nebo 0,004 $ za `lite` (a starší `instant`), pokrývající 10 výsledků; 0,001 $ za každý další výsledek; a $ 0,001 za vrácený výsledek, když je nastaveno `contents.summary`. Tavily je zaznamenán ve výši 1 kreditu (0,008 $) za `search_depth` `basic`, `fast` a `ultra-fast` a 2 kredity (0,016 $) za `advanced` ( [kredity Tavily API](https://docs.tavily.com/documentation/api-credits) ). Hovor se `auto_parameters: true`, který Tavily upgraduje na pokročilé, je stále zaznamenán s 1 kreditem.
 
 ---
 

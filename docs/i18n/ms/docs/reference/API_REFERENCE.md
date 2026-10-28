@@ -853,11 +853,11 @@ pemanggil bukan sesi (dapatkan, padam, batal dan semakan `input_file_id` semasa 
 
 abstraksi penyedia Web/search (Tavily, Brave, Exa, Serper, dll.).
 
-| Kaedah | Laluan                 | Penerangan                                                                                      |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Senaraikan keupayaan + pembekal carian yang dikonfigurasikan                                    |
-| POST   | `/v1/search`           | Jalankan pertanyaan carian — badan disahkan oleh `v1SearchSchema`, menyokong caching/coalescing |
-| GET    | `/v1/search/analytics` | Statistik hit/latency/cache setiap pembekal                                                     |
+| Kaedah | Laluan                 | Penerangan                                                                                          |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Senaraikan keupayaan + pembekal carian yang dikonfigurasikan                                        |
+| POST   | `/v1/search`           | Jalankan pertanyaan carian — body yang disahkan oleh `v1SearchSchema`, menyokong caching/coalescing |
+| GET    | `/v1/search/analytics` | Statistik hit/latency/cache setiap pembekal                                                         |
 
 **Pengesahan:** Kunci API pembawa (`extractApiKey` + `isValidApiKey`). Dasar carian dikuatkuasakan melalui `enforceApiKeyPolicy`.
 
@@ -878,7 +878,7 @@ Keputusan Exa mengekalkan `id`, `highlight_scores`, `summary`, `subpages`, `enti
 
 Exa `type: "lite"` (Exa 3.0) menerima set medan yang lebih kecil dan menolak keseluruhan permintaan apabila mana-mana medan lain ditetapkan. Untuk lite, `additionalQueries`, `systemPrompt` dan setiap kekunci `contents` kecuali `text` dan `highlights` digugurkan sebelum panggilan. `subpages`, `subpageTarget`, `highlights.numSentences` dan `highlights.highlightsPerUrl` yang ditamatkan tidak dimajukan lagi.
 
-Perakaunan kos ialah `costPerQuery` pendaftaran rata , kecuali Exa `type: "lite"`, yang direkodkan pada harga ringkas ($0.004 setiap panggilan berbanding $0.007 untuk `auto`). Jenis `instant` warisan dibilkan seperti lite; `fast` dibilkan seperti `auto`. Tavily mengebil `search_depth: "advanced"` pada lebih banyak kredit setiap panggilan, dan perbezaan itu tidak ditunjukkan dalam `usage.search_cost_usd`.
+Perakaunan kos ialah `costPerQuery` pendaftaran rata , kecuali untuk Exa, yang mengikut harga Exa sendiri: $0.007 setiap panggilan untuk `auto` (dan `fast` legasi ) atau $0.004 untuk `lite` (dan `instant` warisan ), meliputi 10 keputusan; $0.001 untuk setiap keputusan selanjutnya; dan $0.001 setiap hasil yang dikembalikan apabila `contents.summary` ditetapkan. Tavily direkodkan pada 1 kredit ($0.008) untuk `search_depth` `basic`, `fast` dan `ultra-fast`, dan 2 kredit ($0.016) untuk `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Panggilan dengan `auto_parameters: true` yang Tavily naik taraf kepada lanjutan masih direkodkan pada 1 kredit.
 
 ---
 

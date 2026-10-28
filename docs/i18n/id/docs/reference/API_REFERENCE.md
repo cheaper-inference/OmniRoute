@@ -853,11 +853,11 @@ pemanggil non-sesi (pengambilan, penghapusan, pembatalan, serta pemeriksaan `inp
 
 abstraksi penyedia Web/search (Tavily, Brave, Exa, Serper, dll.).
 
-| Metode | Jalur                  | Keterangan                                                                                      |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Daftar kemampuan + penyedia pencarian yang dikonfigurasi                                        |
-| POST   | `/v1/search`           | Jalankan kueri penelusuran — isi divalidasi oleh `v1SearchSchema`, mendukung caching/coalescing |
-| GET    | `/v1/search/analytics` | Statistik hit/latency/cache per penyedia                                                        |
+| Metode | Jalur                  | Keterangan                                                                                               |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Daftar kemampuan + penyedia pencarian yang dikonfigurasi                                                 |
+| POST   | `/v1/search`           | Jalankan permintaan pencarian — body yang divalidasi oleh `v1SearchSchema`, mendukung caching/coalescing |
+| GET    | `/v1/search/analytics` | Statistik hit/latency/cache per penyedia                                                                 |
 
 **Otentikasi:** Kunci pembawa API (`extractApiKey` + `isValidApiKey`). Kebijakan pencarian diberlakukan melalui `enforceApiKeyPolicy`.
 
@@ -878,7 +878,7 @@ Hasil ujian menyimpan `id`, `highlight_scores`, `summary`, `subpages`, `entities
 
 Exa `type: "lite"` (Exa 3.0) menerima kumpulan bidang yang lebih kecil dan menolak seluruh permintaan ketika bidang lainnya disetel. Untuk ringan, `additionalQueries`, `systemPrompt` dan setiap kunci `contents` kecuali `text` dan `highlights` dihilangkan sebelum panggilan. `subpages`, `subpageTarget`, `highlights.numSentences` dan `highlights.highlightsPerUrl` yang tidak digunakan lagi tidak lagi diteruskan.
 
-Akuntansi biaya adalah registri datar `costPerQuery`, kecuali Exa `type: "lite"`, yang dicatat dengan harga ringan ($0,004 per panggilan vs $0,007 untuk `auto`). Tipe `instant` lawas ditagih seperti lite; `fast` ditagih seperti `auto`. Tavily menagih `search_depth: "advanced"` dengan lebih banyak kredit per panggilan, dan perbedaan itu tidak tercermin dalam `usage.search_cost_usd`.
+Akuntansi biaya adalah registri datar `costPerQuery`, kecuali Exa, yang mengikuti harga Exa sendiri: $0,007 per panggilan untuk `auto` (dan warisan `fast`) atau $0,004 untuk `lite` (dan warisan `instant`), mencakup 10 hasil; $0,001 untuk setiap hasil selanjutnya; dan $0,001 per hasil yang dikembalikan ketika `contents.summary` disetel. Tavily dicatat pada 1 kredit ($0,008) untuk `search_depth` `basic`, `fast` dan `ultra-fast`, dan 2 kredit ($0,016) untuk `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Panggilan dengan `auto_parameters: true` yang ditingkatkan Tavily ke tingkat lanjut masih dicatat sebesar 1 kredit.
 
 ---
 

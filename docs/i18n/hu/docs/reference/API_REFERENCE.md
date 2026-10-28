@@ -838,11 +838,11 @@ A `GET /v1/batches` a névtelen hívót `401` válasszal utasítja el még akkor
 
 Web/search szolgáltató absztrakció (Tavily, Brave, Exa, Serper stb.).
 
-| Módszer | Útvonal                | Leírás                                                                                                     |
-| ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | Sorolja fel a konfigurált keresési szolgáltatók + képességeit                                              |
-| POST    | `/v1/search`           | Futtasson le egy keresési lekérdezést – a törzset `v1SearchSchema` ellenőrzi, támogatja caching/coalescing |
-| GET     | `/v1/search/analytics` | Szolgáltatónkénti hit/latency/cache statisztika                                                            |
+| Módszer | Útvonal                | Leírás                                                        |
+| ------- | ---------------------- | ------------------------------------------------------------- |
+| GET     | `/v1/search`           | Sorolja fel a konfigurált keresési szolgáltatók + képességeit |
+| POST    | `/v1/search`           | `v1SearchSchema` le caching/coalescing keresési —             |
+| GET     | `/v1/search/analytics` | Szolgáltatónkénti hit/latency/cache statisztika               |
 
 **Auth:** Tartó API kulcs (`extractApiKey` + `isValidApiKey`). A keresési szabályzat `enforceApiKeyPolicy` keresztül érvényesítve.
 
@@ -863,7 +863,7 @@ Az exa eredmények `id`, `highlight_scores`, `summary`, `subpages`, `entities` �
 
 Az Exa `type: "lite"` (Exa 3.0) kisebb mezőket fogad el, és elutasítja a teljes kérést, ha bármely más mező be van állítva. Lite esetén `additionalQueries`, `systemPrompt` és `text` és `highlights` kivételével minden `contents` billentyű eldobásra kerül a hívás előtt. Az elavult `subpages`, `subpageTarget`, `highlights.numSentences` és `highlights.highlightsPerUrl` továbbítása már nem történik meg.
 
-A költségelszámolás a `costPerQuery` lapos regisztrációs adatbázis, kivéve az Exa `type: "lite"`, amely egyszerű áron kerül rögzítésre (hívásonként 0,004 USD, `auto` esetében 0,007 USD). A régi `instant` típus számlázása a lite szerint történik; `fast` számlázása `auto` hasonlóan történik. Tavily hívásonként több kredittel számlázza `search_depth: "advanced"`, és ez a különbség nem jelenik meg `usage.search_cost_usd` ban.
+A költségelszámolás a `costPerQuery` lapos nyilvántartás, kivéve az Exa esetében, amely az Exa saját árait követi: 0,007 USD hívásonként `auto` (és az örökölt `fast`) esetében vagy 0,004 USD `lite` (és az örökölt `instant`) esetében, amely 10 eredményt takar; 0,001 USD minden további eredményért; és 0,001 USD visszaadott eredményenként, ha `contents.summary` be van állítva. A Tavily 1 kreditet (0,008 USD) `search_depth` `basic`, `fast` és `ultra-fast` esetében, és 2 kreditet ($ 0,016) `advanced` esetében ( [Tavily API kredit](https://docs.tavily.com/documentation/api-credits) ). A `auto_parameters: true` folytatott hívást, amelyet Tavily haladó szintre frissít, továbbra is 1 kredittel rögzítenek.
 
 ---
 

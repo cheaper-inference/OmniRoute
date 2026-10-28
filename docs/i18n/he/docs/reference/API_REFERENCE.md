@@ -853,11 +853,11 @@ POST /v1/providers/{provider}/images/generations
 
 הפשטה של ספק Web/search (Tavily, Brave, Exa, Serper וכו').
 
-| שִׁיטָה | נָתִיב                 | תֵאוּר                                                                            |
-| ------- | ---------------------- | --------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | רשימת ספקי החיפוש המוגדרים יכולות +                                               |
-| POST    | `/v1/search`           | הפעל שאילתת חיפוש - גוף מאומת על ידי `v1SearchSchema`, תומך ב- caching/coalescing |
-| GET     | `/v1/search/analytics` | סטטיסטיקות hit/latency/cache לכל ספק                                              |
+| שִׁיטָה | נָתִיב                 | תֵאוּר                                                                             |
+| ------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | רשימת ספקי החיפוש המוגדרים יכולות +                                                |
+| POST    | `/v1/search`           | הפעל שאילתת חיפוש — body מאומת על ידי `v1SearchSchema`, תומך ב- caching/coalescing |
+| GET     | `/v1/search/analytics` | סטטיסטיקות hit/latency/cache לכל ספק                                               |
 
 **אישור:** מפתח API נושא (`extractApiKey` + `isValidApiKey`). מדיניות חיפוש נאכפת באמצעות `enforceApiKeyPolicy`.
 
@@ -878,7 +878,7 @@ Exa ו-Tavily קוראים שדות ספציפיים לספק מתוך תיק ע
 
 Exa `type: "lite"` (Exa 3.0) מקבל קבוצה קטנה יותר של שדות ודוחה את כל הבקשה כאשר כל שדה אחר מוגדר. עבור lite, `additionalQueries`, `systemPrompt` וכל מקש `contents` מלבד `text` ו- `highlights` נשמטים לפני השיחה. `subpages`, `subpageTarget`, `highlights.numSentences` ו- `highlights.highlightsPerUrl` לא מועברים עוד.
 
-חשבונאות עלויות היא הרישום השטוח `costPerQuery`, מלבד Exa `type: "lite"`, שנרשם במחיר הלייט ($0.004 לשיחה לעומת $0.007 עבור `auto`). סוג `instant` מדור קודם מחויב כמו lite; `fast` מחויב כמו `auto`. Tavily מחייבת `search_depth: "advanced"` יותר זיכויים לכל שיחה, וההבדל הזה לא בא לידי ביטוי ב- `usage.search_cost_usd`.
+חשבונאות עלויות היא הרישום השטוח `costPerQuery`, למעט Exa, העוקב אחר התמחור של Exa עצמו: $0.007 לקריאה עבור `auto` (וה- `fast` מדור קודם) או $0.004 עבור `lite` (וה- `instant` מדור קודם), המכסה 10 תוצאות; $0.001 עבור כל תוצאה נוספת; ו-$0.001 לתוצאה שהוחזרה כאשר `contents.summary` מוגדר. Tavily נרשם ב-1 זיכוי ($0.008) עבור `search_depth` `basic`, `fast` ו- `ultra-fast`, ו-2 קרדיטים ($0.016) עבור `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). שיחה עם `auto_parameters: true` שתווילי משדרגת למתקדמים עדיין מוקלטת ב-1 זיכוי.
 
 ---
 

@@ -851,7 +851,7 @@ Web/search ਪ੍ਰਦਾਤਾ ਐਬਸਟਰੈਕਸ਼ਨ (ਟੈਵੀਲ
 | ਵਿਧੀ | ਮਾਰਗ                   | ਵਰਣਨ                                                                                              |
 | ---- | ---------------------- | ------------------------------------------------------------------------------------------------- |
 | GET  | `/v1/search`           | ਕੌਂਫਿਗਰ ਕੀਤੇ ਖੋਜ ਪ੍ਰਦਾਤਾ + ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ                                                 |
-| POST | `/v1/search`           | ਇੱਕ ਖੋਜ ਪੁੱਛਗਿੱਛ ਚਲਾਓ — `v1SearchSchema` ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ ਸਰੀਰ, caching/coalescing ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ |
+| POST | `/v1/search`           | `v1SearchSchema` ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ ਇੱਕ ਖੋਜ ਪੁੱਛਗਿੱਛ — ਬਾਡੀ ਚਲਾਓ, caching/coalescing ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ |
 | GET  | `/v1/search/analytics` | ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ hit/latency/cache ਅੰਕੜੇ                                                             |
 
 **ਪ੍ਰਮਾਣ:** ਬੇਅਰਰ API ਕੁੰਜੀ (`extractApiKey` + `isValidApiKey`)। ਖੋਜ ਨੀਤੀ `enforceApiKeyPolicy` ਦੁਆਰਾ ਲਾਗੂ ਕੀਤੀ ਗਈ ਹੈ।
@@ -873,7 +873,7 @@ Exa ਨਤੀਜੇ `id`, `highlight_scores`, `summary`, `subpages`, `entities` 
 
 Exa `type: "lite"` (Exa 3.0) ਖੇਤਰਾਂ ਦੇ ਇੱਕ ਛੋਟੇ ਸਮੂਹ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ ਅਤੇ ਜਦੋਂ ਕੋਈ ਹੋਰ ਖੇਤਰ ਸੈੱਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਤਾਂ ਪੂਰੀ ਬੇਨਤੀ ਨੂੰ ਰੱਦ ਕਰਦਾ ਹੈ। ਲਾਈਟ ਲਈ, `additionalQueries`, `systemPrompt` ਅਤੇ `text` ਅਤੇ `highlights` ਨੂੰ ਛੱਡ ਕੇ ਹਰ `contents` ਕੁੰਜੀ ਕਾਲ ਤੋਂ ਪਹਿਲਾਂ ਛੱਡ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਬਰਤਰਫ਼ ਕੀਤੇ `subpages`, `subpageTarget`, `highlights.numSentences` ਅਤੇ `highlights.highlightsPerUrl` ਨੂੰ ਹੁਣ ਅੱਗੇ ਨਹੀਂ ਭੇਜਿਆ ਜਾਵੇਗਾ।
 
-ਲਾਗਤ ਅਕਾਉਂਟਿੰਗ ਫਲੈਟ ਰਜਿਸਟਰੀ `costPerQuery` ਹੈ, Exa `type: "lite"` ਨੂੰ ਛੱਡ ਕੇ, ਜੋ ਕਿ ਲਾਈਟ ਕੀਮਤ 'ਤੇ ਰਿਕਾਰਡ ਕੀਤੀ ਜਾਂਦੀ ਹੈ ($0.004 ਪ੍ਰਤੀ ਕਾਲ ਬਨਾਮ `auto` ਲਈ $0.007)। ਵਿਰਾਸਤੀ `instant` ਕਿਸਮ ਨੂੰ ਲਾਈਟ ਵਾਂਗ ਬਿਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ; `fast` `auto` ਵਾਂਗ ਬਿਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। Tavily ਪ੍ਰਤੀ ਕਾਲ ਵਧੇਰੇ ਕ੍ਰੈਡਿਟ 'ਤੇ `search_depth: "advanced"` ਬਿੱਲ ਦਿੰਦਾ ਹੈ, ਅਤੇ ਇਹ ਅੰਤਰ `usage.search_cost_usd` ਵਿੱਚ ਨਹੀਂ ਪ੍ਰਤੀਬਿੰਬਤ ਹੁੰਦਾ ਹੈ।
+ਲਾਗਤ ਲੇਖਾਕਾਰੀ ਫਲੈਟ ਰਜਿਸਟਰੀ `costPerQuery` ਹੈ, Exa ਨੂੰ ਛੱਡ ਕੇ, ਜੋ Exa ਦੀ ਆਪਣੀ ਕੀਮਤ ਦਾ ਪਾਲਣ ਕਰਦੀ ਹੈ: `auto` (ਅਤੇ ਵਿਰਾਸਤੀ `fast`) ਲਈ $0.007 ਪ੍ਰਤੀ ਕਾਲ ਜਾਂ `lite` (ਅਤੇ ਵਿਰਾਸਤੀ `instant`) ਲਈ $0.004, 10 ਨਤੀਜਿਆਂ ਨੂੰ ਕਵਰ ਕਰਦੇ ਹਨ; ਹਰੇਕ ਅਗਲੇ ਨਤੀਜੇ ਲਈ $0.001; ਅਤੇ $0.001 ਪ੍ਰਤੀ ਰਿਟਰਨ ਨਤੀਜਾ ਜਦੋਂ `contents.summary` ਸੈੱਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। Tavily ਨੂੰ `search_depth` `basic`, `fast` ਅਤੇ `ultra-fast` ਲਈ 1 ਕ੍ਰੈਡਿਟ ($0.008) ਅਤੇ `advanced` ( [Tavily API ਕ੍ਰੈਡਿਟ](https://docs.tavily.com/documentation/api-credits) ) ਲਈ 2 ਕ੍ਰੈਡਿਟ ($0.016) 'ਤੇ ਰਿਕਾਰਡ ਕੀਤਾ ਗਿਆ ਹੈ। `auto_parameters: true` ਨਾਲ ਇੱਕ ਕਾਲ ਜੋ Tavily ਐਡਵਾਂਸਡ ਵਿੱਚ ਅੱਪਗਰੇਡ ਕਰਦੀ ਹੈ ਅਜੇ ਵੀ 1 ਕ੍ਰੈਡਿਟ 'ਤੇ ਰਿਕਾਰਡ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
 
 ---
 

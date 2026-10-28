@@ -853,11 +853,11 @@ Tinatanggihan ng `GET /v1/batches` ang anonymous na caller gamit ang `401` kahit
 
 Web/search provider abstraction (Tavily, Brave, Exa, Serper, atbp.).
 
-| Pamamaraan | Daan                   | Paglalarawan                                                                                              |
-| ---------- | ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| GET        | `/v1/search`           | Ilista ang mga naka-configure na search provider + na kakayahan                                           |
-| POST       | `/v1/search`           | Magpatakbo ng query sa paghahanap — body validated by `v1SearchSchema`, sumusuporta sa caching/coalescing |
-| GET        | `/v1/search/analytics` | Bawat provider hit/latency/cache stats                                                                    |
+| Pamamaraan | Daan                   | Paglalarawan                                                                                                   |
+| ---------- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| GET        | `/v1/search`           | Ilista ang mga naka-configure na search provider + na kakayahan                                                |
+| POST       | `/v1/search`           | Magpatakbo ng query sa paghahanap — body na napatunayan ng `v1SearchSchema`, sumusuporta sa caching/coalescing |
+| GET        | `/v1/search/analytics` | Bawat provider hit/latency/cache stats                                                                         |
 
 **Awth:** Tagadala ng API key (`extractApiKey` + `isValidApiKey`). Ipinatupad ang patakaran sa paghahanap sa pamamagitan ng `enforceApiKeyPolicy`.
 
@@ -878,7 +878,7 @@ Ang mga resulta ng Exa ay nagpapanatili `id`, `highlight_scores`, `summary`, `su
 
 Ang Exa `type: "lite"` (Exa 3.0) ay tumatanggap ng mas maliit na hanay ng mga field at tinatanggihan ang buong kahilingan kapag nakatakda ang anumang ibang field. Para sa lite, `additionalQueries`, `systemPrompt` at bawat `contents` key maliban `text` at `highlights` ay ibinababa bago ang tawag. Ang hindi na ginagamit na `subpages`, `subpageTarget`, `highlights.numSentences` at `highlights.highlightsPerUrl` ay hindi na naipapasa.
 
-Ang cost accounting ay ang flat registry `costPerQuery`, maliban sa Exa `type: "lite"`, na naitala sa lite na presyo ($0.004 bawat tawag kumpara sa $0.007 para sa `auto`). Ang legacy na uri `instant` ay sinisingil tulad ng lite; `fast` ay sinisingil tulad ng `auto`. Si Tavily ay naniningil ng `search_depth: "advanced"` sa mas maraming credit sa bawat tawag, at ang pagkakaibang iyon ay hindi makikita sa `usage.search_cost_usd`.
+Ang cost accounting ay ang flat registry `costPerQuery`, maliban sa Exa, na sumusunod sa sariling pagpepresyo ng Exa: $0.007 bawat tawag para sa `auto` (at ang legacy `fast`) o $0.004 para sa `lite` (at ang legacy `instant`), na sumasaklaw sa 10 resulta; $0.001 para sa bawat karagdagang resulta; at $0.001 bawat ibinalik na resulta kapag itinakda ang `contents.summary`. Ang Tavily ay naitala sa 1 credit ($0.008) para sa `search_depth` `basic`, `fast` at `ultra-fast`, at 2 credits ($0.016) para sa `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Ang isang tawag na may `auto_parameters: true` na ina-upgrade ni Tavily sa advanced ay naitala pa rin sa 1 credit.
 
 ---
 

@@ -853,11 +853,11 @@ izsaucējam bez sesijas (iegūšana, dzēšana, atcelšana un `input_file_id` p�
 
 Web/search sniedzēja abstrakcija (Tavily, Brave, Exa, Serper utt.).
 
-| Metode | Ceļš                   | Apraksts                                                                                                |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Uzskaitiet konfigurēto meklēšanas pakalpojumu sniedzēju + iespējas                                      |
-| POST   | `/v1/search`           | Palaidiet meklēšanas vaicājumu — `v1SearchSchema` apstiprināts pamatteksts, atbalsta caching/coalescing |
-| GET    | `/v1/search/analytics` | hit/latency/cache statistika katram pakalpojumu sniedzējam                                              |
+| Metode | Ceļš                   | Apraksts                                                                                              |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Uzskaitiet konfigurēto meklēšanas pakalpojumu sniedzēju + iespējas                                    |
+| POST   | `/v1/search`           | Palaidiet meklēšanas vaicājumu — body, ko apstiprinājis `v1SearchSchema`, atbalsta caching/coalescing |
+| GET    | `/v1/search/analytics` | hit/latency/cache statistika katram pakalpojumu sniedzējam                                            |
 
 **Auth:** Nesēja API atslēga (`extractApiKey` + `isValidApiKey`). Meklēšanas politika tiek īstenota, izmantojot `enforceApiKeyPolicy`.
 
@@ -878,7 +878,7 @@ Eksāmenu rezultāti saglabā `id`, `highlight_scores`, `summary`, `subpages`, `
 
 Exa `type: "lite"` (Exa 3.0) pieņem mazāku lauku kopu un noraida visu pieprasījumu, ja ir iestatīts kāds cits lauks. Lite versijai `additionalQueries`, `systemPrompt` un visi `contents` taustiņi, izņemot `text` un `highlights` tiek atmesti pirms izsaukuma. Novecojušie `subpages`, `subpageTarget`, `highlights.numSentences` un `highlights.highlightsPerUrl` vairs netiek pārsūtīti.
 
-Izmaksu uzskaite ir vienotā reģistra `costPerQuery`, izņemot Exa `type: "lite"`, kas tiek reģistrēta par vienkāršo cenu (0,004 USD par zvanu pret 0,007 USD par `auto`). Mantotajam `instant` veidam tiek piemērota maksa kā lite; `fast` tiek iekasēta kā `auto`. Tavily iekasē `search_depth: "advanced"` vairāk kredītu par zvanu, un šī atšķirība nav atspoguļota `usage.search_cost_usd`.
+Izmaksu uzskaite ir vienotā reģistra `costPerQuery`, izņemot Exa, kas atbilst Exa pašas cenām: USD 0,007 par zvanu `auto` (un mantotā `fast`) vai USD 0,004 par `lite` (un mantoto `instant`), aptverot 10 rezultātus; 0,001 USD par katru nākamo rezultātu; un USD 0,001 par katru atgriezto rezultātu, ja ir iestatīts `contents.summary`. Tavily ir reģistrēts ar 1 kredītu ($ 0,008) par `search_depth` `basic`, `fast` un `ultra-fast` un par 2 kredītiem ($ 0,016) par `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Zvans ar `auto_parameters: true`, ko Tavily jaunina uz uzlaboto, joprojām tiek ierakstīts 1 kredīta apmērā.
 
 ---
 

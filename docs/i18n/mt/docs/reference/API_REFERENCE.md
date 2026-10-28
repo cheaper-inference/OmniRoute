@@ -832,11 +832,11 @@ min jagħmel sejħa mingħajr sessjoni (irkupru, tħassir, kanċellazzjoni, u l-
 
 Web/search fornitur estrazzjoni (Tavily, Brave, Exa, Serper, eċċ.).
 
-| Metodu | Mogħdija               | Deskrizzjoni                                                                                        |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Elenka l-fornituri tat-tiftix konfigurati + kapaċitajiet                                            |
-| POST   | `/v1/search`           | Mexxi mistoqsija ta' tfittxija — korp ivvalidat minn `v1SearchSchema`, jappoġġja caching/coalescing |
-| GET    | `/v1/search/analytics` | Per-provider hit/latency/cache stats                                                                |
+| Metodu | Mogħdija               | Deskrizzjoni                                                                                      |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Elenka l-fornituri tat-tiftix konfigurati + kapaċitajiet                                          |
+| POST   | `/v1/search`           | Mexxi mistoqsija ta' tfittxija — body validat minn `v1SearchSchema`, jappoġġja caching/coalescing |
+| GET    | `/v1/search/analytics` | Per-provider hit/latency/cache stats                                                              |
 
 **Awth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Politika ta' tfittxija infurzata permezz `enforceApiKeyPolicy`.
 
@@ -857,7 +857,7 @@ Ir-riżultati Exa jżommu `id`, `highlight_scores`, `summary`, `subpages`, `enti
 
 Exa `type: "lite"` (Exa 3.0) jaċċetta sett iżgħar ta' oqsma u jirrifjuta t-talba kollha meta jkun issettjat kwalunkwe qasam ieħor. Għal lite, `additionalQueries`, `systemPrompt` u kull ċavetta `contents` ħlief `text` u `highlights` jintefgħu qabel is-sejħa. `subpages`, `subpageTarget`, `highlights.numSentences` u `highlights.highlightsPerUrl` deprecati m'għadhomx jintbagħtu.
 
-Il-kontabilità tal-ispejjeż hija r-reġistru ċatt `costPerQuery`, ħlief Exa `type: "lite"`, li huwa rreġistrat bil-prezz lite ($0.004 għal kull sejħa vs $0.007 għal `auto`). It-tip `instant` tal-legat huwa fatturat bħal lite; `fast` huwa fatturat bħal `auto`. Tavily iħallas `search_depth: "advanced"` b'aktar krediti għal kull sejħa, u dik id-differenza mhix riflessa `usage.search_cost_usd`.
+Il-kontabilità tal-ispejjeż hija r-reġistru ċatt `costPerQuery`, ħlief għal Exa, li jsegwi l-ipprezzar ta 'Exa stess: $0.007 għal kull sejħa għal `auto` (u l-legacy `fast`) jew $0.004 għal `lite` (u l-legacy `instant`), li jkopri 10 riżultati; $0.001 għal kull riżultat ieħor; u $0.001 għal kull riżultat ritornat meta `contents.summary` huwa stabbilit. Tavily huwa rreġistrat f'kreditu 1 ($0.008) għal `search_depth` `basic`, `fast` u `ultra-fast`, u 2 krediti ($0.016) għal `advanced` ( [krediti Tavily API](https://docs.tavily.com/documentation/api-credits) ). Sejħa `auto_parameters: true` li Tavily jaġġorna għal avvanzat għadha rreġistrata bi kreditu 1.
 
 ---
 

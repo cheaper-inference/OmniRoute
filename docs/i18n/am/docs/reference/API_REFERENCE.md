@@ -835,7 +835,7 @@ Web/search አቅራቢ ማጠቃለያ (Tavily, Brave, Exa, Serper, ወዘተ.)
 | ዘዴ   | መንገድ                   | መግለጫ                                                                    |
 | ---- | ---------------------- | ----------------------------------------------------------------------- |
 | GET  | `/v1/search`           | የተዋቀሩ የፍለጋ አቅራቢዎች + ችሎታዎችን ይዘርዝሩ                                        |
-| POST | `/v1/search`           | የፍለጋ ጥያቄን አሂድ — አካል በ `v1SearchSchema` የተረጋገጠ፣ caching/coalescing ይደግፋል |
+| POST | `/v1/search`           | የፍለጋ ጥያቄን ያሂዱ — አካል በ `v1SearchSchema` የተረጋገጠ፣ caching/coalescing ይደግፋል |
 | GET  | `/v1/search/analytics` | በአንድ አቅራቢ hit/latency/cache ስታቲስቲክስ                                     |
 
 **ማረጋገጫ፡** ተሸካሚ API ቁልፍ (`extractApiKey` + `isValidApiKey`)። የፍለጋ መመሪያ በ `enforceApiKeyPolicy` ተፈጻሚ ነው።
@@ -857,7 +857,7 @@ Exa እና Tavily አቅራቢ-ተኮር መስኮችን በስም ከተሰየ�
 
 Exa `type: "lite"` (Exa 3.0) አነስተኛ የመስኮች ስብስብ ይቀበላል እና ሌላ ማንኛውም መስክ ሲዘጋጅ ሙሉውን ጥያቄ ውድቅ ያደርጋል። ለሊት፣ `additionalQueries`፣ `systemPrompt` እና `text` እና `highlights` በስተቀር ሁሉም `contents` ቁልፍ ከጥሪው በፊት ይጣላሉ። የተቋረጠው `subpages`፣ `subpageTarget`፣ `highlights.numSentences` እና `highlights.highlightsPerUrl` ከአሁን በኋላ አይተላለፉም።
 
-ወጪ ሒሳብ ጠፍጣፋ መዝገቡ `costPerQuery` ነው፣ ከ Exa `type: "lite"` በስተቀር፣ በቀላል ዋጋ ከተመዘገበው ($0.004 በአንድ ጥሪ ከ $0.007 ለ `auto`)። የቅርስ `instant` አይነት ልክ እንደ ሊት ነው የሚከፈለው; `fast` እንደ `auto` ይከፈላል። በጥሪ ብዙ ክሬዲቶች ላይ Tavily `search_depth: "advanced"` ሂሳብ ያስከፍላል፣ እና ይህ ልዩነት በ `usage.search_cost_usd` ውስጥ አይንጸባረቅም።
+ወጪ ሒሳብ ጠፍጣፋ መዝገብ `costPerQuery` ነው, Exa በስተቀር, Exa የራሱን ዋጋ ተከትሎ: $0.007 በአንድ ጥሪ `auto` (እና ቅርስ `fast`) ወይም $0.004 `lite` (እና ቅርስ `instant`), 10 ውጤቶች የሚሸፍን; ለእያንዳንዱ ተጨማሪ ውጤት $ 0.001; እና `contents.summary` ሲዘጋጅ በአንድ የተመለሰ ውጤት $0.001። ታቪሊ በ1 ክሬዲት ($0.008) ለ `search_depth` `basic`፣ `fast` እና `ultra-fast`፣ እና 2 ክሬዲት ($0.016) ለ `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ) ተመዝግቧል። Tavily ወደ የላቀ የሚያሻሽለው `auto_parameters: true` ያለው ጥሪ አሁንም በ1 ክሬዲት ተመዝግቧል።
 
 ---
 
