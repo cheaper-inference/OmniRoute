@@ -333,6 +333,7 @@
     "@fontsource/ibm-plex-mono": "5.3.0",
     "@fontsource/instrument-serif": "5.3.0",
     "@fontsource/inter": "5.3.0",
+    "@fontsource/vazirmatn": "5.3.0",
     "@lobehub/icons": "^5.16.0",
     "@modelcontextprotocol/sdk": "^1.31.0",
     "@monaco-editor/react": "^4.7.0",

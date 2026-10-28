@@ -1,0 +1,1 @@
+- **feat(dashboard):** Persian, Arabic and Urdu now render in the self-hosted Vazirmatn font (`@fontsource/vazirmatn`, OFL-1.1). The font is named only under `html[dir="rtl"]`, so LTR locales never download it ([#18355](https://github.com/cheaper-inference/OmniRoute/pull/18355)) — thanks @m4tinbeigi-official

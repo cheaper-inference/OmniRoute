@@ -16,6 +16,13 @@
 @import "@fontsource/ibm-plex-mono/500.css";
 @import "@fontsource/ibm-plex-mono/600.css";
 @import "@fontsource/ibm-plex-mono/700.css";
+/* Vazirmatn — Arabic-script typeface for the RTL locales (fa, ar, ur). Declared globally but only
+   NAMED by the `html[dir="rtl"]` rule below, and its arabic face carries a unicode-range, so the
+   browser never fetches it on an LTR page (tests/unit/rtl-font-stack.test.ts). */
+@import "@fontsource/vazirmatn/400.css";
+@import "@fontsource/vazirmatn/500.css";
+@import "@fontsource/vazirmatn/600.css";
+@import "@fontsource/vazirmatn/700.css";
 /* CI UI Kit — vendored snapshot (packages/ui-kit, see UPSTREAM.md). Declares the same
    `@layer theme, base, components, utilities` order as Tailwind v4, so Tailwind utilities on
    legacy screens keep winning over kit components, and the kit's `@layer base` (.ci-theme)
@@ -483,6 +490,19 @@ select option {
 /* ═══════════════════════════════════════════════════════════════
    RTL (Right-to-Left) Compatibility — fixes #7680
    ═══════════════════════════════════════════════════════════════ */
+/* Arabic-script typography: Inter has no Arabic glyphs, so fa/ar/ur used to fall back to whatever
+   the OS had. Inter stays first (its unicode-range keeps Latin model ids / code in Inter); Arabic
+   script falls through to Vazirmatn. Redefined on `.ci-theme` too because the kit sets
+   `--ci-font-ui` there. Zero tracking: letter-spacing breaks Arabic-script joining. Keep every
+   Vazirmatn reference under `html[dir="rtl"]` — never `:lang()`, which also matches the language
+   switcher's native names on LTR pages. */
+html[dir="rtl"],
+html[dir="rtl"] .ci-theme {
+  --ci-font-ui:
+    "Inter", "Vazirmatn", -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
+  --font-sans: var(--ci-font-ui);
+  letter-spacing: 0;
+}
 html[dir="rtl"] .text-left {
   text-align: start;
 }
