@@ -6,6 +6,8 @@
 // belonged to closed PRs or superseded heads, against the org's 20-job concurrency cap.
 // No npm dependencies: runs on a bare hosted runner with only the workflow token.
 
+import { pathToFileURL } from "node:url";
+
 const ACTIVE = new Set(["queued", "in_progress", "waiting", "pending", "requested"]);
 const PR_EVENTS = new Set(["pull_request", "pull_request_target"]);
 
@@ -89,7 +91,7 @@ async function main() {
   );
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   main().catch((err) => {
     console.error(`cancel-closed-pr-runs: ${err?.message ?? err}`);
     process.exit(1);

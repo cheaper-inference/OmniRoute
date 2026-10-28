@@ -19,77 +19,76 @@ _最后更新：2026-06-28_
 
 ## 执行摘要
 
-OmniRoute 是一个基于 Next.js 构建的本地 AI 路由网关和仪表板。
-它提供单一的 OpenAI 兼容端点（`/v1/*`），并通过格式转换、故障回退、令牌刷新和用量跟踪，将流量路由到多个上游提供者。
+OmniRoute是基于Next.js构建的本地AI路由网关和仪表板。它提供单个 OpenAI 兼容端点 (`/v1/*`)，并通过转换、回退、令牌刷新和使用跟踪在多个上游提供者之间路由流量。
 
 核心能力：
 
-- 为 CLI/工具提供 OpenAI 兼容的 API 接口（376 个提供者、156 个执行器模块）
-- 跨提供者格式的请求/响应转换
-- 模型组合故障回退（多模型序列）
-- 结构化组合步骤（`provider + model + connection`），运行时按 `compositeTiers` 排序
-- 账户级故障回退（每个提供者支持多个账户）
-- 主聊天路径中的配额预检和配额感知型 P2C 账户选择
-- OAuth + API 密钥提供者连接管理（27 个 OAuth 提供者模块）
-- 通过 `/v1/embeddings` 生成嵌入向量（18 个提供者）
-- 通过 `/v1/images/generations` 生成图像（10+ 个提供者、20+ 个模型）
-- 通过 `/v1/audio/transcriptions` 进行音频转录（18 个提供者）
-- 通过 `/v1/audio/speech` 实现文本转语音（24 个内置提供者）
-- 通过 `/v1/videos/generations` 生成视频（ComfyUI + SD WebUI）
-- 通过 `/v1/music/generations` 生成音乐（ComfyUI）
-- 通过 `/v1/search` 进行 Web 搜索（20 个提供者）
-- 通过 `/v1/moderations` 进行内容审核
-- 通过 `/v1/rerank` 进行重排序
-- 为推理模型解析思考标签（`<think>...</think>`）
-- 响应净化，确保严格兼容 OpenAI SDK
-- 角色规范化（developer→system、system→user），以实现跨提供者兼容
+- 用于CLI/tools的 OpenAI 兼容API表面（377 个提供者，156 个执行器模块）
+- 跨提供者格式的Request/response翻译
+- 模型组合后备（多模型序列）
+- 结构化组合步骤 (`provider + model + connection`)，运行时按`compositeTiers`排序
+- 账户级回退（每个提供者多个账户）
+- 主聊天路径中的配额预检和配额感知P2C帐户选择
+- OAuth + API 密钥提供者连接管理（27 个OAuth提供者模块）
+- 通过`/v1/embeddings`嵌入生成（18 个提供者）
+- 通过`/v1/images/generations`生成图像（10 个+提供者，20 个+模型）
+- 通过`/v1/audio/transcriptions`进行音频转录（18 个提供者）
+- 通过`/v1/audio/speech`进行文本转语音（24 个内置提供者）
+- 通过`/v1/videos/generations`生成视频 (ComfyUI + SD WebUI)
+- 通过`/v1/music/generations` (ComfyUI) 生成音乐
+- 通过`/v1/search`进行网络搜索（20 个提供者）
+- 通过`/v1/moderations`进行审核
+- 通过`/v1/rerank`重新排名
+- 考虑标签解析（`<think>...</think>`）用于推理模型
+- 响应清理以实现严格的OpenAI SDK兼容性
+- 角色规范化（开发者→系统、系统→用户）以实现跨提供者兼容性
 - 结构化输出转换（json_schema → Gemini responseSchema）
-- 提供者、密钥、别名、组合、设置和定价的本地持久化（122 个数据库模块）
-- 用量/成本跟踪和请求日志记录
-- 可选的云同步，用于多设备/状态同步
-- 用于 API 访问控制的 IP 允许列表/阻止列表
-- 思考预算管理（透传/自动/自定义/自适应）
-- 全局系统提示词注入
+- 提供者、密钥、别名、组合、设置、定价的本地持久性（122 个DB模块）
+- Usage/cost跟踪和请求记录
+- 用于multi-device/state同步的可选云同步
+- IP allowlist/blocklist用于API访问控制
+- 预算管理思维（passthrough/auto/custom/adaptive）
+- 全局系统提示注入
 - 会话跟踪和指纹识别
-- 基于账户的增强型速率限制，并支持提供者特定的配置方案
-- 用于增强提供者韧性的断路器模式
-- 使用互斥锁防止惊群效应
-- 基于签名的请求去重缓存
-- 领域层：成本规则、故障回退策略、锁定策略
-- 上下文中继：会话交接摘要，用于在账户轮换时保持连续性
-- 领域状态持久化（用于故障回退、预算、锁定和断路器的 SQLite 直写式缓存）
-- 用于集中式请求评估的策略引擎（锁定 → 预算 → 故障回退）
-- 请求遥测，支持 p50/p95/p99 延迟聚合
-- 组合目标遥测，以及通过 `combo_execution_key` / `combo_step_id` 记录的组合目标历史健康状态
-- 用于端到端追踪的关联 ID（X-Request-Id）
-- 合规审计日志记录，支持按 API 密钥选择退出
-- 用于 LLM 质量保证的评估框架
-- 健康状态仪表板，实时显示提供者断路器状态
-- MCP 服务器（110 个工具），支持 3 种传输方式（stdio/SSE/可流式 HTTP）
-- A2A 服务器（JSON-RPC 2.0 + SSE），支持技能和任务生命周期
-- 记忆系统（提取、注入、检索、摘要）
-- 技能系统（注册表、执行器、沙箱、内置技能）
-- MITM 代理，支持证书管理和 DNS 处理
-- 提示词注入防护中间件
-- 提示词压缩流水线，支持 Caveman、RTK、堆叠式流水线、压缩组合、语言包和分析
-- ACP（智能体通信协议）注册表
-- 模块化 OAuth 提供者（`src/lib/oauth/providers/` 下有 22 个独立模块）
-- 卸载/完全卸载脚本
-- OAuth 环境修复操作
-- 面向 OpenAI 兼容 WS 客户端的 WebSocket 桥接（`/v1/ws`）
-- 同步令牌管理（签发/撤销、下载采用 ETag 版本控制的配置包）
-- GLM Thinking（`glmt`）一等提供者预设
-- 混合式令牌计数（提供者侧 `/messages/count_tokens`，并提供估算回退）
-- 模型别名自动播种（启动时执行 30+ 种跨代理方言规范化）
-- 安全出站获取，支持 SSRF 防护、私有 URL 阻止和可配置重试
-- 可感知冷却期的聊天重试，支持配置 `requestRetry` 和 `maxRetryIntervalSec`
-- 启动时使用 Zod 进行运行时环境验证
-- 合规审计 v2，支持分页、提供者 CRUD 事件和 SSRF 阻止验证日志记录
+- 通过特定于提供者的配置文件增强每个帐户的速率限制
+- 提供者弹性的断路器模式
+- 通过互斥锁实现防雷群保护
+- 基于签名的请求重复数据删除缓存
+- 领域层：成本规则、回退策略、锁定策略
+- 上下文中继：帐户轮换连续性的会话切换摘要
+- 域状态持久性（用于回退、预算、锁定、断路器的SQLite直写式缓存）
+- 用于集中请求评估的策略引擎（锁定→预算→后备）
+- 使用p50/p95/p99延迟聚合请求遥测
+- 通过`combo_execution_key` / `combo_step_id`组合目标遥测和历史组合目标健康状况
+- 用于端到端跟踪的关联ID (X-Request-Id)
+- 根据API密钥选择退出的合规性审核日志记录
+- LLM质量保证评估框架
+- 具有实时提供者断路器状态的健康仪表板
+- MCP服务器（110 个工具），具有 3 种传输方式 (stdio/SSE/Streamable HTTP)
+- A2A服务器（JSON-RPC 2.0 + SSE）具有技能和任务生命周期
+- 记忆系统（提取、注入、检索、总结）
+- 技能系统（注册中心、执行器、沙箱、内置技能）
+- 具有证书管理和DNS处理功能的MITM代理
+- 提示注入防护中间件
+- 使用 Caveman、 RTK、堆叠管道、压缩组合、语言包和分析来提示压缩管道
+- ACP （代理通信协议）注册表
+- 模块化OAuth提供程序（ `src/lib/oauth/providers/`下有 22 个单独的模块）
+- Uninstall/full-uninstall脚本
+- OAuth环境修复行动
+- 用于兼容 OpenAI 的WS客户端的WebSocket桥接器 (`/v1/ws`)
+- 同步令牌管理（issue/revoke、ETag 版本配置包下载）
+- GLM思维（`glmt`）一流提供者预设
+- 混合令牌计数（具有估计回退的提供者端`/messages/count_tokens` ）
+- 模型别名自动播种（启动时 30 个+跨代理方言标准化）
+- 通过SSRF防护、私有URL阻止和可配置重试进行安全出站提取
+- 使用可配置的`requestRetry`和`maxRetryIntervalSec`进行冷却感知聊天重试
+- 启动时使用Zod验证运行时环境
+- 具有分页、提供者CRUD事件和 SSRF 阻止的验证日志记录的合规性审核 v2
 
 主要运行时模型：
 
-- `src/app/api/*` 下的 Next.js 应用路由同时实现仪表板 API 和兼容性 API
-- `src/sse/*` + `open-sse/*` 中的共享 SSE/路由核心负责提供者执行、格式转换、流式传输、故障回退和用量处理
+- `src/app/api/*`下的Next.js应用程序路由同时实现仪表板APIs和兼容性APIs
+- `src/sse/*` + `open-sse/*`中的共享SSE/routing核心处理提供程序执行、转换、流式传输、回退和使用
 
 ## 参考架构图
 

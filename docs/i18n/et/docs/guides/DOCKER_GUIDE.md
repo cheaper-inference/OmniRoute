@@ -648,27 +648,29 @@ sudo systemctl enable --now omniroute-update.path
 Teenus eemaldab taotluse enne tõmbamist, et nurjunud käivitus ei jääks korduma. Ilma
 `DOCKER_UPDATE_TRIGGER_FILE`-ita säilitab juhtpaneel käsitsi käskude töövoo.
 
-## Käideldavus: vaikimisi SQLite toetab üht replikaati
+## Kättesaadavus: vaikimisi SQLite on ühekoopia
 
-Dockeris/Kubernetesis kasutatav standardne OmniRoute on **üks Node’i protsess + üks SQLite’i kirjutaja**. Kõrge käideldavus ei ole selle topoloogia korral **toetatud**.
+Stock Docker / Kubernetes OmniRoute on** üks sõlm töötleb + üks SQLite kirjutaja** . Kõrge kättesaadavus on** ei toetata** sellel topoloogial.
 
-| Piirang                                                  | Tagajärg                                                                                                                                                                                                                                                                                                                                            |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Üks kirjutaja                                            | **Ärge** käivitage sama SQLite’i faili suhtes mitut replikaati. See rikub andmebaasi.                                                                                                                                                                                                                                                               |
-| Taasloomine / taaskäivitamine / HEALTHCHECK-i lõpetamine | Töös olevad SSE-ühendused, juhtpaneeli seansid ja mälusisene olek katkevad **täielikult**. Kõigi ühendatud klientide ühendus katkeb. Tühja lõpp-punkti akna ajal saavad uued taotlused pöördpuhverserverilt vastuse **`502 Bad Gateway: Unknown error`**, mitte OmniRoute’i JSON-i — kliendid ei saa seda teenusepakkuja tõrkest eristada (#11015). |
-| Sama sündmusetsükkel mis `/healthz`-il                   | Hõivatud kataloogi- või tihendustsükkel võib kontrolle viivitada; lühike ajalõpp taaskäivitab seejärel **ainsa** replikaadi.                                                                                                                                                                                                                        |
+| Piirang                                       | Tagajärg                                                                                                                                                                                                                                                                                              |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Üksik kirjanik                                | Tee** mitte** käivitada mitu koopiat sama SQLite faili vastu. See rikub DB.                                                                                                                                                                                                                           |
+| Loo uuesti / taaskäivitage / HEALTHCHECK kill | **Täielik katkestus** SSE, armatuurlaua seansside ja mälu oleku kohta. Iga ühendatud klient langeb. Uued päringud tühja lõpp-punkti akna ajal saavad pöördpuhverserveri**`502 Bad Gateway: Unknown error`** , mitte OmniRoute JSON — kliendid ei suuda seda teenusepakkuja tõrkest eristada (#11015). |
+| Sama sündmusetsükkel nagu `/healthz`          | Hõivatud kataloog või tihendusmärk võib viivitada sondidega; lühike ajalõpp ja seejärel taaskäivitab** ainult** koopia.                                                                                                                                                                               |
 
-**Kontrollide maatriks** (vt ka [Kubernetesi kontrollide soovitusi](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Sondi maatriks** (vt ka [Kubernetese sondi soovitusi](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Kontroll                  | Sihtmärk                                                        | Ärge kasutage                                                      |
-| ------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Elujõulisus               | TCP pordil `PORT` (vaikimisi `20128`) või leebe HTTP `/healthz` | `/api/monitoring/health`                                           |
-| Valmisolek                | HTTP `GET /healthz`                                             | Lühikesi ajalõppe, mis käsitlevad hõivatud sündmusetsüklit surnuna |
-| Süvakontroll / inimestele | `/api/monitoring/health`                                        | Automatiseeritud kubeleti elujõulisuskontrolli                     |
+| Sond             | Sihtmärk                                                 | Ärge kasutage                                                        |
+| ---------------- | -------------------------------------------------------- | -------------------------------------------------------------------- |
+| Elavdus          | TCP `PORT` (vaikimisi `20128`) või pehme HTTP `/healthz` | `/api/monitoring/health`                                             |
+| Valmisolek       | HTTP `GET /healthz`                                      | Tihedad ajalõpud, mis käsitlevad sündmusetsüklit hõivatud kui surnud |
+| Sügav / inimesed | `/api/monitoring/health`                                 | Automatiseeritud kubeleti elavus                                     |
 
-**Uuendused:** arvestage, et kõik seansid katkevad. Võimaluse korral suunake kliendid eelnevalt kõrvale; vaikimisi SQLite’i puhul pole jooksvat uuendamist. Compose’i `restart: unless-stopped` koos Dockeri `HEALTHCHECK`-iga asendab ka ainsa protsessi, kui konteineri olek on Unhealthy — mõju ulatus on sama.
+**Uuendused:** eeldada, et iga seanss langeb. Kui saate, tühjendage kliendid; SQLite vaikevärskendust ei toimu. Koosta `restart: unless-stopped` pluss Docker `HEALTHCHECK` asendab ka ainsa protsessi, kui konteiner on ebatervislik – sama plahvatuse raadius.
 
-Kubernetesi näide **ühe replikaadi** jaoks (Recreate on nõutav; ärge suurendage ühe SQLite’i faili puhul väärtust `replicas`):
+Valmis manifestid ja Helmi diagramm on reaalajas `deploy/kubernetes/` ja `deploy/helm/omniroute/` puhul – vaadake [Kubernetese juurutusjuhendit](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetesi katkend a** üksik koopia** (Nõutav on uuesti loomine; ärge tõstke `replicas` ühe SQLite faili vastu):
 
 ```yaml
 spec:
@@ -695,9 +697,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop`-ooteaeg võimaldab kube'il eemaldada Service'i lõpp-punktid enne SIGTERM-i, et **uus** liiklus ei jõuaks enam sulguva protsessini. Pooleliolevat `/v1/responses` SSE-d tühjendatakse kuni `SHUTDOWN_TIMEOUT_MS`-is määratud aja jooksul (vaikimisi 30 s), kasutades heavyweight admission lease'e (#11015). Uued päringud, mis siiski protsessini jõuavad, saavad vastuseks `503` + `Retry-After: 5`. Recreate'i tühi lõpp-punktide vahemik kuni asendusprotsessi Ready-olekuni põhjustab jätkuvalt täieliku katkestuse — see tuleneb SQLite'i topoloogiast, mitte proovi valest konfiguratsioonist.
+`preStop` sleep laseb kube'il loobuda teenuse lõpp-punktidest enne SIGTERM d nii** uus** liiklus lakkab tabamast surevat protsessi. Lennu ajal `/v1/responses` SSE tühjendatakse kuni `SHUTDOWN_TIMEOUT_MS` (vaikimisi 30 s) raskekaalu sissepääsulepingute (#11015) kaudu. Uued taotlused, mis ikka protsessi jõuavad, saavad `503` + `Retry-After: 5`. Tühja lõpp-punkti tühiku taasloomine, kuni asendus on valmis, jääb tõsiseks katkestuseks – see on SQLite topoloogia, mitte sondi vale konfiguratsioon.
 
-Väline Postgres / mitme kirjutajaga HA **ei ole** dokumenteeritud standardlahendus. Kui vajate HA-d, kasutage üht replikat või topoloogiat, mida projekt on eraldi testinud ja dokumenteerinud. Postgres/MySQL-i arendus toimub teemas [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kuni see pole välja antud, on ainus toetatud viis **suurte** `/v1/responses`-päringute läbilaskevõime suurendamiseks kasutada N sõltumatut protsessi (järgmine jaotis), mitte määrata ühel andmeköitel `replicas > 1`.
+Väline Postgres / mitmekirjutaja HA on** mitte** dokumenteeritud aktsiatee. Kui vajate HA, säilitage üks koopia või käivitage topoloogia, mida projekt on eraldi testinud ja dokumenteerinud. Postgres/MySQL teos asub asukohas [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kuni selle tarnimiseni on ainus toetatud viis paljundamiseks** suur** `/v1/responses` võimsus on N sõltumatut protsessi (järgmine jaotis), mitte `replicas > 1` ühel köitel.
 
 ## Horisontaalne skaleerimine: N sõltumatut protsessi
 

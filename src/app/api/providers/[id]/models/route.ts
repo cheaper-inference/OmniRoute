@@ -36,6 +36,7 @@ import {
 import { getStaticQoderModels } from "@omniroute/open-sse/services/qoderCli.ts";
 import { getCodexDiscoveryMode } from "@/shared/services/codexDiscoveryPolicy";
 import { deriveConfigFromRegistryModelsUrl } from "./discoveryConfig";
+import { recordDiscoveryOutcome } from "./discovery/discoveryOutcome";
 import {
   buildTokenPlanCatalogRequest,
   isTokenPlanCatalogProvider,
@@ -233,7 +234,7 @@ export async function GET(
     // over discovered metadata for the same id.
     let customModelsForProvider: Array<Record<string, unknown> & { id: string; name?: string }> =
       [];
-    if (!excludeCustom && !usesCuratedModelsOnly) {
+    if (!excludeCustom) {
       try {
         const custom = await getCustomModels(provider);
         if (Array.isArray(custom)) {
@@ -273,7 +274,12 @@ export async function GET(
       // The single place where a discovery response gets its public shape: the
       // internal reason is dropped and the response is flagged as degraded only
       // when the payload really is a degraded discovery.
-      return NextResponse.json(applyDiscoveryDegradation(payload), statusConfig);
+      const publicPayload = applyDiscoveryDegradation(payload);
+      // Keep the outcome of this discovery: the response carrying it is gone on
+      // the next read. The outcome is read from the public payload, so it
+      // carries the same reason the caller sees.
+      recordDiscoveryOutcome(publicPayload);
+      return NextResponse.json(publicPayload, statusConfig);
     };
 
     const connectionId = typeof connection.id === "string" ? connection.id : id;

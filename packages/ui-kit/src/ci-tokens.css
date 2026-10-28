@@ -1,3 +1,5 @@
+@import "./ci-fonts.css";
+
 /* ========================================================================== */
 /* Cheaper Inference design tokens                                             */
 /*                                                                            */
@@ -113,12 +115,10 @@
   --ci-color-announcement-warning: #d7a255;
 
   /* --- typography ---------------------------------------------------------- */
-  /* The host app owns font loading. Instrument Serif should remain Regular. */
-  --ci-font-ui:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-  --ci-font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
-  --ci-font-mono:
-    "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  /* All text, including technical content, uses the same self-hosted family. */
+  --ci-font-ui: "Switzer", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-display: var(--ci-font-ui);
+  --ci-font-mono: var(--ci-font-ui);
 
   --ci-font-size-xs: 0.75rem;
   --ci-font-size-sm: 0.875rem;
@@ -138,38 +138,60 @@
   --ci-font-weight-regular: 400;
   --ci-font-weight-medium: 500;
   --ci-font-weight-semibold: 600;
-  --ci-font-weight-bold: 700;
+  --ci-font-weight-bold: 600;
 
-  --ci-line-height-tight: 1;
-  --ci-line-height-heading: 1.08;
-  --ci-line-height-ui: 1.25;
-  --ci-line-height-body: 1.5;
-  --ci-line-height-relaxed: 1.65;
-  /* Inter always uses 0% tracking. Negative tracking is display-serif only. */
-  --ci-letter-spacing-display: -0.025em;
-  --ci-letter-spacing-ui: 0em;
-  --ci-letter-spacing-caps: 0em;
+  --ci-line-height-tight: 0.9;
+  --ci-line-height-heading: 1.1;
+  --ci-line-height-ui: 1.2;
+  --ci-line-height-body: 1.3;
+  --ci-line-height-relaxed: 1.5;
+  --ci-letter-spacing-display: -0.05em;
+  --ci-letter-spacing-ui: 0.01em;
+  --ci-letter-spacing-caps: 0.01em;
+
+  /* Public role tokens do not set sizes. Heading bands follow the computed
+     font size, including existing clamp() and responsive size utilities. */
+  --ci-type-heading-leading: 1.1;
+  --ci-type-heading-tracking: -0.02em;
+  --ci-type-body-leading: 1.3;
+  --ci-type-body-tracking: 0em;
+  --ci-type-reading-leading: 1.5;
+  --ci-type-reading-tracking: 0em;
+  --ci-type-control-leading: 1.2;
+  --ci-type-control-tracking: 0.01em;
+  --ci-type-data-leading: 1.25;
+  --ci-type-data-tracking: 0em;
+  --ci-type-caption-leading: 1.3;
+  --ci-type-caption-tracking: 0.01em;
+  --ci-type-metric-leading: 1.1;
+  --ci-type-metric-tracking: -0.02em;
 
   /* --- semantic typography ------------------------------------------------ */
   --ci-type-body-family: var(--ci-font-ui);
   --ci-type-body-size: var(--ci-font-size-md);
   --ci-type-body-weight: var(--ci-font-weight-regular);
-  --ci-type-body-leading: var(--ci-line-height-body);
   --ci-type-ui-family: var(--ci-font-ui);
   --ci-type-ui-size: var(--ci-font-size-sm);
   --ci-type-ui-weight: var(--ci-font-weight-medium);
   --ci-type-ui-leading: var(--ci-line-height-ui);
   --ci-type-display-family: var(--ci-font-display);
-  --ci-type-display-weight: var(--ci-font-weight-regular);
-  --ci-type-display-leading: var(--ci-line-height-tight);
+  --ci-type-display-weight: var(--ci-font-weight-medium);
+  --ci-type-display-leading: var(--ci-type-heading-leading);
   --ci-type-dashboard-display-family: var(--ci-font-display);
   --ci-type-dashboard-display-size: var(--ci-font-size-5xl);
-  --ci-type-dashboard-display-weight: var(--ci-font-weight-regular);
-  --ci-type-dashboard-display-leading: var(--ci-line-height-heading);
+  --ci-type-dashboard-display-weight: var(--ci-font-weight-medium);
+  --ci-type-dashboard-display-leading: var(--ci-type-heading-leading);
   /* Approved compact summary geometry for dashboard stat cards. */
   --ci-type-stat-eyebrow-size: 0.625rem;
   --ci-type-stat-eyebrow-value-size: 2.125rem;
   --ci-stat-eyebrow-icon-stroke-width: 1.75;
+  /* App-owned headers/canvases can share the documented appearance contract. */
+  --ci-page-title-size: clamp(3rem, 6vw, 5.5rem);
+  --ci-page-title-compact-size: clamp(2.25rem, 4vw, 3.5rem);
+  --ci-page-title-weight: var(--ci-font-weight-medium);
+  --ci-page-title-leading: var(--ci-type-heading-leading);
+  --ci-dashboard-canvas-image: none;
+  --ci-dashboard-canvas-overlay: none;
 
   /* --- spacing: 4px base with useful half steps --------------------------- */
   --ci-space-0: 0;
@@ -387,5 +409,24 @@
     --ci-duration-fast: 0ms;
     --ci-duration-base: 0ms;
     --ci-duration-slow: 0ms;
+  }
+}
+
+/* Inclusive boundaries: min(1, 1 + sign(size - boundary)) is 0 below
+   the boundary and 1 at/above it. em resolves on each consuming element.
+   Browsers without sign() retain the readable section-heading fallback. */
+@supports (line-height: calc(1em * sign(1em))) {
+  :root,
+  .ci-theme {
+    --ci-type-heading-leading: calc(1.2em
+      - 0.05em * min(1, calc(1 + sign(1em - 16px)))
+      - 0.05em * min(1, calc(1 + sign(1em - 20px)))
+      - 0.05em * min(1, calc(1 + sign(1em - 32px)))
+      - 0.15em * min(1, calc(1 + sign(1em - 48px))));
+    --ci-type-heading-tracking: calc(0.01em
+      - 0.02em * min(1, calc(1 + sign(1em - 16px)))
+      - 0.01em * min(1, calc(1 + sign(1em - 20px)))
+      - 0.02em * min(1, calc(1 + sign(1em - 32px)))
+      - 0.01em * min(1, calc(1 + sign(1em - 48px))));
   }
 }

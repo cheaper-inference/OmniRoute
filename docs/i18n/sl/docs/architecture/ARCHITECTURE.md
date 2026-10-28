@@ -8,79 +8,78 @@
 
 _Nazadnje posodobljeno: 2026-06-28_
 
-## Povzetek za vodstvo
+## Povzetek
 
-OmniRoute je lokalni prehod za usmerjanje umetne inteligence in nadzorna plošča, zgrajena na ogrodju Next.js.
-Zagotavlja enotno končno točko, združljivo z OpenAI (`/v1/*`), ter usmerja promet med več ponudniki višje ravni s prevajanjem, nadomestnimi možnostmi, osveževanjem žetonov in sledenjem uporabi.
+OmniRoute je lokalni usmerjevalni prehod AI in nadzorna plošča, zgrajena na Next.js. Zagotavlja eno končno točko, združljivo z OpenAI (`/v1/*`), in usmerja promet prek več ponudnikov navzgor s prevajanjem, nadomestnim delovanjem, osveževanjem žetonov in sledenjem uporabi.
 
-Ključne zmogljivosti:
+Osnovne zmogljivosti:
 
-- Površina API-ja, združljiva z OpenAI, za CLI/orodja (376 ponudnikov, 156 izvajalnih modulov)
-- Prevajanje zahtev in odgovorov med oblikami ponudnikov
-- Nadomestne možnosti kombinacij modelov (zaporedje več modelov)
-- Strukturirani koraki kombinacij (`provider + model + connection`) z izvajanjem po vrstnem redu, ki ga določa `compositeTiers`
-- Nadomestne možnosti na ravni računa (več računov na ponudnika)
-- Predhodno preverjanje kvote in izbira računa P2C z upoštevanjem kvote v glavni poti klepeta
-- Upravljanje povezav ponudnikov prek OAuth in ključev API (27 modulov ponudnikov OAuth)
-- Ustvarjanje vdelav prek `/v1/embeddings` (18 ponudnikov)
-- Ustvarjanje slik prek `/v1/images/generations` (več kot 10 ponudnikov, več kot 20 modelov)
-- Prepisovanje zvoka prek `/v1/audio/transcriptions` (18 ponudnikov)
+- Površina API združljiva z OpenAI, za CLI/tools (377 ponudnikov, 156 izvajalskih modulov)
+- prevod Request/response med formati ponudnika
+- Nadomestni kombinirani model (zaporedje več modelov)
+- Strukturirani kombinirani koraki (`provider + model + connection`) z vrstnim redom med izvajanjem `compositeTiers`
+- Nadomestni način na ravni računa (več računov na ponudnika)
+- Kvota pred tiskom in izbira računa P2C glede na kvote v glavni poti klepeta
+- OAuth + API-key upravljanje povezav ponudnika (27 modulov ponudnika OAuth )
+- Generiranje vdelave preko `/v1/embeddings` (18 ponudnikov)
+- Generiranje slike prek `/v1/images/generations` (10 ponudnikov +, 20 modelov + )
+- Prepis zvoka preko `/v1/audio/transcriptions` (18 ponudnikov)
 - Pretvorba besedila v govor prek `/v1/audio/speech` (24 vgrajenih ponudnikov)
-- Ustvarjanje videoposnetkov prek `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Ustvarjanje glasbe prek `/v1/music/generations` (ComfyUI)
-- Spletno iskanje prek `/v1/search` (20 ponudnikov)
-- Moderiranje prek `/v1/moderations`
-- Ponovno razvrščanje prek `/v1/rerank`
-- Razčlenjevanje oznak za razmišljanje (`<think>...</think>`) za modele sklepanja
-- Čiščenje odgovorov za strogo združljivost z OpenAI SDK
-- Normalizacija vlog (developer→system, system→user) za združljivost med ponudniki
-- Pretvorba strukturiranega izhoda (json_schema → Gemini responseSchema)
-- Lokalno trajno shranjevanje ponudnikov, ključev, vzdevkov, kombinacij, nastavitev in cen (122 modulov zbirke podatkov)
-- Sledenje uporabi/stroškom in beleženje zahtev
-- Izbirna sinhronizacija v oblaku za sinhronizacijo med več napravami in sinhronizacijo stanja
-- Seznam dovoljenih/blokiranih naslovov IP za nadzor dostopa do API-ja
-- Upravljanje proračuna za razmišljanje (neposredni prenos/samodejno/po meri/prilagodljivo)
-- Vstavljanje globalnega sistemskega poziva
-- Sledenje sejam in ustvarjanje prstnih odtisov
-- Izboljšano omejevanje hitrosti za posamezne račune s profili, specifičnimi za ponudnika
-- Vzorec odklopnika za odpornost ponudnikov
-- Zaščita pred množičnim sočasnim navalom z zaklepanjem mutex
-- Predpomnilnik za odstranjevanje podvojenih zahtev na podlagi podpisov
-- Domenska plast: pravila stroškov, pravilnik nadomestnih možnosti, pravilnik zaklepanja
-- Context Relay: povzetki predaje sej za ohranjanje neprekinjenosti pri menjavi računov
-- Trajno shranjevanje domenskega stanja (prepisovalni predpomnilnik SQLite za nadomestne možnosti, proračune, zaklepanja in odklopnike)
-- Mehanizem pravilnikov za centralizirano vrednotenje zahtev (zaklepanje → proračun → nadomestna možnost)
-- Telemetrija zahtev z združevanjem zakasnitev p50/p95/p99
-- Telemetrija ciljev kombinacij in zgodovinsko stanje ciljev kombinacij prek `combo_execution_key` / `combo_step_id`
-- ID korelacije (X-Request-Id) za sledenje od začetka do konca
-- Beleženje revizij skladnosti z možnostjo izključitve za posamezni ključ API
-- Ogrodje za vrednotenje zagotavljanja kakovosti LLM
-- Nadzorna plošča stanja s prikazom stanja odklopnikov ponudnikov v realnem času
-- Strežnik MCP (110 orodij) s 3 prenosi (stdio/SSE/Streamable HTTP)
-- Strežnik A2A (JSON-RPC 2.0 + SSE) z veščinami in življenjskim ciklom opravil
-- Pomnilniški sistem (izluščanje, vstavljanje, pridobivanje, povzemanje)
-- Sistem veščin (register, izvajalnik, peskovnik, vgrajene veščine)
-- Posredniški strežnik MITM z upravljanjem potrdil in obravnavo DNS
-- Vmesna programska oprema za zaščito pred vbrizgavanjem pozivov
-- Cevovod za stiskanje pozivov s sistemi Caveman, RTK, naloženimi cevovodi, kombinacijami stiskanja, jezikovnimi paketi in analitiko
-- Register ACP (Agent Communication Protocol)
-- Modularni ponudniki OAuth (22 posameznih modulov v `src/lib/oauth/providers/`)
-- Skripti za odstranitev/popolno odstranitev
-- Dejanje za popravilo okolja OAuth
-- Most WebSocket za odjemalce WS, združljive z OpenAI (`/v1/ws`)
-- Upravljanje sinhronizacijskih žetonov (izdaja/preklic, prenos konfiguracijskega paketa z različicami ETag)
-- GLM Thinking (`glmt`) kot prvovrstna prednastavitev ponudnika
-- Hibridno štetje žetonov (na strani ponudnika prek `/messages/count_tokens` z nadomestnim ocenjevanjem)
-- Samodejno začetno ustvarjanje vzdevkov modelov (več kot 30 normalizacij narečij med posredniškimi strežniki ob zagonu)
-- Varno odhodno pridobivanje z zaščito pred SSRF, blokiranjem zasebnih URL-jev in nastavljivim ponavljanjem
-- Ponovni poskusi klepeta z upoštevanjem obdobja ohlajanja in nastavljivima možnostma `requestRetry` ter `maxRetryIntervalSec`
+- Generiranje videa prek `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Generiranje glasbe prek `/v1/music/generations` (ComfyUI)
+- Spletno iskanje preko `/v1/search` (20 ponudnikov)
+- Moderacije prek `/v1/moderations`
+- Prerazvrščanje prek `/v1/rerank`
+- Razčlenjevanje oznake razmišljanja (`<think>...</think>`) za modele razmišljanja
+- Odzivna sanacija za strogo združljivost OpenAI SDK
+- Normalizacija vloge (sistem razvijalec →, uporabnik sistema →) za združljivost med ponudniki
+- Strukturirana izhodna pretvorba (json_schema → Gemini responseSchema)
+- Lokalna obstojnost za ponudnike, ključe, vzdevke, kombinacije, nastavitve, cene (122 modulov DB )
+- Usage/cost sledenje in beleženje zahtev
+- Izbirna sinhronizacija v oblaku za sinhronizacijo multi-device/state
+- IP allowlist/blocklist za nadzor dostopa API
+- Razmišljanje o upravljanju proračuna (passthrough/auto/custom/adaptive)
+- Globalna sistemska takojšnja injekcija
+- Sledenje seji in prstni odtis
+- Izboljšano omejevanje stopnje na račun s profili, specifičnimi za ponudnika
+- Vzorec odklopnika za odpornost ponudnika
+- Zaščita črede proti grmenju z zaklepanjem mutexa
+- Predpomnilnik za deduplikacijo zahtev na podlagi podpisa
+- Domenska plast: stroškovna pravila, rezervna politika, politika zaklepanja
+- Context Relay: povzetki predaje seje za kontinuiteto rotacije računa
+- Vztrajnost stanja domene (zapisni predpomnilnik SQLite za nadomestne vrednosti, proračune, zaklepe, odklopnike)
+- Mehanizem pravilnika za centralizirano vrednotenje zahtev (lockout → budget → backback)
+- Zahtevajte telemetrijo z združevanjem zakasnitev p50/p95/p99
+- Telemetrija kombiniranega cilja in zgodovinsko zdravje kombiniranega cilja prek `combo_execution_key` / `combo_step_id`
+- Korelacija ID (X-Request-Id) za sledenje od konca do konca
+- Beleženje revizije skladnosti z zavrnitvijo na ključ API
+- Ogrodje Eval za zagotavljanje kakovosti LLM
+- Zdravstvena nadzorna plošča s stanjem odklopnika ponudnika v realnem času
+- MCP strežnik (110 orodij) s 3 transporti (stdio/SSE/Streamable HTTP)
+- strežnik A2A (JSON-RPC 2.0 + SSE) z življenjskim ciklom spretnosti in opravil
+- Pomnilniški sistem (ekstrakcija, vbrizgavanje, iskanje, povzemanje)
+- Sistem veščin (register, izvajalec, peskovnik, vgrajene veščine)
+- MITM proxy z upravljanjem potrdil in obdelavo DNS
+- Vmesna programska oprema Prompt Injection Guard
+- Prompt stiskalni cevovod z Caveman, RTK, zloženimi cevovodi, kompresijskimi kombinacijami, jezikovnimi paketi in analitiko
+- register ACP (Agent Communication Protocol).
+- Modularni ponudniki OAuth (22 posameznih modulov pod `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall skripte
+- akcija popravljanja okolja OAuth
+- most WebSocket za odjemalce WS, združljive z OpenAI (`/v1/ws`)
+- Upravljanje žetonov sinhronizacije (issue/revoke, prenos konfiguracijskega svežnja z različico ETag)
+- GLM Thinking (`glmt`) prednastavitev prvovrstnega ponudnika
+- Hibridno štetje žetonov ( `/messages/count_tokens` na strani ponudnika z rezervno oceno)
+- Samodejno sejanje vzdevka modela (30 + navzkrižnih normalizacij narečja proxy ob zagonu)
+- Varno izhodno pridobivanje z zaščito SSRF, zasebnim blokiranjem URL in nastavljivim ponovnim poskusom
+- Ponovni poskusi klepeta z zaznavanjem ohlajanja z nastavljivima `requestRetry` in `maxRetryIntervalSec`
 - Preverjanje izvajalnega okolja z Zod ob zagonu
-- Revizija skladnosti v2 s številčenjem strani, dogodki CRUD ponudnikov in beleženjem preverjanj, blokiranih zaradi SSRF
+- Revizija skladnosti v2 s paginacijo, dogodki CRUD ponudnika in beleženjem preverjanja, ki ga blokira SSRF
 
-Primarni izvajalni model:
+Primarni model izvajalnega okolja:
 
-- Poti aplikacije Next.js v `src/app/api/*` izvajajo tako API-je nadzorne plošče kot združljivostne API-je
-- Skupno jedro SSE/usmerjanja v `src/sse/*` + `open-sse/*` obravnava izvajanje ponudnikov, prevajanje, pretočno prenašanje, nadomestne možnosti in uporabo
+- Poti aplikacij Next.js pod `src/app/api/*` izvajajo APIs nadzorne plošče in združljivost APIs
+- Jedro SSE/routing v skupni rabi v `src/sse/*` + `open-sse/*` obravnava ponudnikovo izvajanje, prevajanje, pretakanje, nadomestno delovanje in uporabo
 
 ## Referenčni diagrami
 
