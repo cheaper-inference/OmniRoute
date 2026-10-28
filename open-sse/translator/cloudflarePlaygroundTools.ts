@@ -78,6 +78,26 @@ export const CF_MAX_MESSAGE_CHARS = 5800;
  */
 export const CF_MAX_CONVERSATION_MESSAGES = 10;
 
+/**
+ * How many messages from the end of the conversation the tool reminder is
+ * re-stated at — a SillyTavern-style "author's note" for emulated tool calling.
+ *
+ * The contract travels as the *first* message, so by the time a long session is
+ * mid-loop the format rule sits ~10 turns away from the generation point. The
+ * reminder puts a short restatement back inside the recency window.
+ *
+ * `0` appends it last (most influential, but it can read as the newest user
+ * turn); `1`–`3` sandwiches it a little upstream, which is why the default is 1.
+ */
+export const CF_TOOL_REMINDER_DEPTH = 1;
+
+/**
+ * Only spend a conversation slot on the reminder once the tail is long enough
+ * that the contract at the top is no longer close to the generation point. On a
+ * short conversation the reminder would only repeat what the model just read.
+ */
+export const CF_TOOL_REMINDER_MIN_MESSAGES = 6;
+
 /** Roles the playground counts toward the 10-message conversation cap. */
 function countsTowardCfConversationCap(role: string | undefined): boolean {
   return role === "user" || role === "tool";
@@ -355,6 +375,34 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
   }
 
   return lines.join("\n");
+}
+
+/**
+ * Render the short reminder that re-states the tool contract near the end of the
+ * conversation (see `CF_TOOL_REMINDER_DEPTH`).
+ *
+ * Deliberately much shorter than the contract: it repeats only what a model
+ * drifts on — the tag shape, the nonce, the escaping rule for long bodies — and
+ * leaves the per-tool signatures to the contract at the top. Its length stays
+ * bounded no matter how many tools the caller declares.
+ */
+export function buildCfToolReminder(tools: ChatCompletionTool[]): string {
+  if (!tools || tools.length === 0) return "";
+
+  const nonce = getToolNonce(tools);
+  const names = tools.map((tool) => tool.function.name);
+  const example = names[0];
+  const shown = names.slice(0, 6);
+  const more = names.length > shown.length ? ` (+${names.length - shown.length} more)` : "";
+
+  return [
+    "# Tool call reminder",
+    "To call a tool, reply with that tool's own tag, one JSON object, and nothing else:",
+    `<${example}>{"arg": value, "_nonce": "${nonce}"}</${example}>`,
+    `Only these tags are read: ${shown.map((name) => `<${name}>`).join(" ")}${more}.`,
+    'Inside the JSON, escape every quote as \\" and every newline as \\n — long file bodies must stay parseable.',
+    "- If you do not need a tool, answer normally with no tag.",
+  ].join("\n");
 }
 
 /**
@@ -1240,21 +1288,42 @@ function inferToolName(
 }
 
 /**
+ * Index at which the reminder goes, counted `depth` messages from the end, moved
+ * forward if it would land inside a run of tool results — the assistant
+ * tool-call that produced them and its results must stay adjacent.
+ */
+function cfReminderIndex(retained: ChatCompletionMessageParam[], depth: number): number {
+  let index = Math.max(0, retained.length - Math.max(0, depth));
+  while (index < retained.length && retained[index]?.role === "tool") index++;
+  return index;
+}
+
+/**
  * Build the conversation prompt with the tool contract inserted as its own
  * user message(s) before the first user turn (the playground drops system
  * messages, and rejects any single message longer than 6000 chars).
  *
  * Also enforces the playground's 10-user-message conversation cap: the contract,
- * the compacted history block and the verbatim turns together never exceed it.
- * Old turns are compacted into a single user message instead of being dropped.
- * Works with an empty `tools` list too — the caller can always route messages
- * through here and get a payload the playground will accept.
+ * the reminder, the compacted history block and the verbatim turns together
+ * never exceed it. Old turns are compacted into a single user message instead of
+ * being dropped. Works with an empty `tools` list too — the caller can always
+ * route messages through here and get a payload the playground will accept.
  */
 export function buildCfToolConversationPrompt(
   messages: ChatCompletionMessageParam[],
   tools: ChatCompletionTool[]
 ): ChatCompletionMessageParam[] {
   const toolPrompt = tools && tools.length > 0 ? serializeCfToolPrompt(tools) : "";
+  const reminder = toolPrompt ? buildCfToolReminder(tools) : "";
+
+  // The reminder is only worth a conversation slot once the tail is long enough
+  // that the contract at the top has left the recency window. Decided from the
+  // caller's messages, not from the trimmed tail, so the slot count stays
+  // deterministic in one pass.
+  const wantsReminder =
+    reminder !== "" &&
+    (messages ?? []).filter((message) => countsTowardCfConversationCap(message.role)).length >=
+      CF_TOOL_REMINDER_MIN_MESSAGES;
 
   // The contract shares the 10-user-message budget with the conversation, so
   // budget for it first — but never let it consume the caller's own turn: at
@@ -1262,11 +1331,11 @@ export function buildCfToolConversationPrompt(
   // contract needing more than 9 messages is truncated to fit).
   const contractMessages: ChatCompletionMessageParam[] = toolPrompt
     ? chunkPrompt(toolPrompt, CF_MAX_MESSAGE_CHARS)
-        .slice(0, CF_MAX_CONVERSATION_MESSAGES - 1)
+        .slice(0, CF_MAX_CONVERSATION_MESSAGES - 1 - (wantsReminder ? 1 : 0))
         .map((chunk) => ({ role: "user" as const, content: chunk }))
     : [];
 
-  const budget = CF_MAX_CONVERSATION_MESSAGES - contractMessages.length;
+  const budget = CF_MAX_CONVERSATION_MESSAGES - contractMessages.length - (wantsReminder ? 1 : 0);
 
   // Everything that no longer fits verbatim is compacted into one user message
   // rather than dropped, so the model keeps the thread (and the original task).
@@ -1291,7 +1360,22 @@ export function buildCfToolConversationPrompt(
   // result when trimming dropped the tool call that produced it.
   const insertAt = retained.findIndex((message) => countsTowardCfConversationCap(message.role));
 
-  return [...retained.slice(0, insertAt), ...contractMessages, ...retained.slice(insertAt)];
+  const withContract = [
+    ...retained.slice(0, insertAt),
+    ...contractMessages,
+    ...retained.slice(insertAt),
+  ];
+  if (!wantsReminder) return withContract;
+
+  // Author's-note position: near the end, so the rule is fresh at generation
+  // time, but not last, so it is not mistaken for the newest user turn.
+  const reminderAt = cfReminderIndex(withContract, CF_TOOL_REMINDER_DEPTH);
+
+  return [
+    ...withContract.slice(0, reminderAt),
+    { role: "user" as const, content: reminder },
+    ...withContract.slice(reminderAt),
+  ];
 }
 
 /**

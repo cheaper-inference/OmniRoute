@@ -15,6 +15,7 @@ import {
   parseCfToolCalls,
   hasMalformedCfToolIntent,
   buildCfToolConversationPrompt,
+  buildCfToolReminder,
   trimCfConversation,
   compactCfConversation,
   stripCfToolMarkup,
@@ -900,6 +901,127 @@ test("buildCfToolConversationPrompt does nothing if no user message exists", () 
   ];
   const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
   assert.deepEqual(result, messages);
+});
+
+// ── tool reminder (in-context contract restatement) ───────────────────────────
+
+test("buildCfToolReminder returns empty string for empty tools", () => {
+  assert.equal(buildCfToolReminder([]), "");
+});
+
+test("buildCfToolReminder restates the contract with this request's nonce", () => {
+  const reminder = buildCfToolReminder(TEST_TOOLS_OPENAI);
+  const nonce = cfToolNonce(TEST_TOOLS_OPENAI);
+
+  assert.ok(reminder.includes("# Tool call reminder"));
+  // The tag shape, spelled with the first declared tool as the example.
+  assert.ok(reminder.includes(`<bash>{"arg": value, "_nonce": "${nonce}"}</bash>`));
+  // The binding is the one the caller validated against, not a fresh one.
+  assert.ok(reminder.includes(`"_nonce": "${nonce}"`));
+  // Escaping guidance for large bodies — the failure the reminder exists for.
+  assert.ok(reminder.includes('escape every quote as \\" and every newline as \\n'));
+  // Declared tags are listed so an invented tag is not the obvious choice.
+  assert.ok(reminder.includes("<bash> <read_file>"));
+  // The no-tool escape hatch must survive, or the model calls a tool regardless.
+  assert.ok(reminder.includes("If you do not need a tool"));
+});
+
+test("buildCfToolReminder stays bounded however many tools are declared", () => {
+  const many = Array.from({ length: 400 }, (_, i) => ({
+    type: "function" as const,
+    function: { name: `tool_${i}`, parameters: { type: "object" } },
+  }));
+  const reminder = buildCfToolReminder(many);
+  assert.ok(reminder.length < 1000, `reminder was ${reminder.length} chars`);
+  assert.ok(reminder.includes("(+394 more)"));
+});
+
+test("buildCfToolConversationPrompt restates the contract near the end on a long conversation", () => {
+  // 12 user turns + replies + latest question: well past the reminder threshold.
+  const messages = Array.from({ length: 12 }, (_, i) => [
+    { role: "user" as const, content: `turn ${i}` },
+    { role: "assistant" as const, content: `reply ${i}` },
+  ]).flat();
+  messages.push({ role: "user" as const, content: "latest question" });
+
+  const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
+  const reminderIndexes = result
+    .map((message, i) =>
+      ((message.content as string) ?? "").includes("# Tool call reminder") ? i : -1
+    )
+    .filter((i) => i >= 0);
+
+  assert.equal(reminderIndexes.length, 1);
+  // Author's-note position: inside the recency window but not the last message,
+  // so the caller's own turn is still what the model answers.
+  assert.equal(reminderIndexes[0], result.length - 2);
+  assert.equal(result[result.length - 1].content, "latest question");
+  // The full contract still travels at the top.
+  assert.ok((result[0].content as string).includes("# Tools"));
+  assert.ok(!(result[0].content as string).includes("# Tool call reminder"));
+});
+
+test("buildCfToolConversationPrompt omits the reminder on a short conversation", () => {
+  const messages = [
+    { role: "user" as const, content: "run it" },
+    { role: "assistant" as const, content: "ok" },
+    { role: "user" as const, content: "now this" },
+  ];
+  const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
+  assert.ok(!result.some((m) => ((m.content as string) ?? "").includes("# Tool call reminder")));
+  // Contract + the untouched conversation, with no slot spent on a reminder.
+  assert.equal(result.length, messages.length + 1);
+  assert.ok((result[0].content as string).includes("# Tools"));
+});
+
+test("buildCfToolConversationPrompt still honours the 10-message cap with a reminder", () => {
+  const messages = Array.from({ length: 20 }, (_, i) => ({
+    role: "user" as const,
+    content: `turn ${i}`,
+  }));
+  const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
+  assert.equal(userishCount(result), CF_MAX_CONVERSATION_MESSAGES);
+  assert.equal(result[result.length - 1].content, "turn 19");
+  assert.ok(result.some((m) => ((m.content as string) ?? "").includes("# Tool call reminder")));
+});
+
+test("buildCfToolConversationPrompt never lands the reminder between a tool call and its results", () => {
+  // Long enough to want a reminder, and the tail is a run of tool results.
+  const messages = [
+    ...Array.from({ length: 6 }, (_, i) => ({ role: "user" as const, content: `turn ${i}` })),
+    { role: "user" as const, content: "run the checks" },
+    { role: "assistant" as const, content: '<bash>{"command": "ls"}</bash>' },
+    { role: "tool" as const, content: "result one" },
+    { role: "tool" as const, content: "result two" },
+  ];
+  const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
+  const reminderIndex = result.findIndex((message) =>
+    ((message.content as string) ?? "").includes("# Tool call reminder")
+  );
+
+  assert.ok(reminderIndex > 0);
+  // Depth 1 pointed at a tool result, so the reminder moved past the whole run.
+  assert.equal(reminderIndex, result.length - 1);
+  assert.equal(result[result.length - 2].content, "result two");
+});
+
+test("buildCfToolConversationPrompt keeps every reminder message under the char cap", () => {
+  const reminder = buildCfToolReminder(TEST_TOOLS_OPENAI);
+  const result = buildCfToolConversationPrompt(
+    Array.from({ length: 12 }, (_, i) => ({ role: "user" as const, content: `turn ${i}` })),
+    TEST_TOOLS_OPENAI
+  );
+  for (const message of result) {
+    const content =
+      typeof message.content === "string" ? message.content : JSON.stringify(message.content);
+    if (content.includes("# Tool call reminder")) {
+      assert.ok(
+        content.length <= CF_MAX_MESSAGE_CHARS,
+        `${content.length} > ${CF_MAX_MESSAGE_CHARS}`
+      );
+    }
+  }
+  assert.ok(reminder.length <= CF_MAX_MESSAGE_CHARS);
 });
 
 // ── stripCfToolMarkup ─────────────────────────────────────────────────────────
