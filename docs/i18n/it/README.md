@@ -71,7 +71,7 @@
 
 |                                      |            v3.8.50            | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------ | :---------------------------: | :---------: | :-------------------: |
-| 🌐 Provider                          |              352              |   **358**   |          375          |
+| 🌐 Provider                          |              352              |   **358**   |          376          |
 | 🧠 ID univoci dei modelli di chat    |             1320              |  **1374**   |         1475          |
 | 🖼️ Ponte tra modalità                |  🆕 visione + audio + video   |      ✓      |           ✓           |
 | 📡 Catalogo gratuito Radar           | 🆕 partecipazione facoltativa |      ✓      |           ✓           |

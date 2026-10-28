@@ -115,146 +115,148 @@ OmniRoute/
 
 ```
 src/
-├── app/                 # App Router (ಪುಟಗಳು + API ರೂಟ್ಗಳು + ಸ್ಥಿತಿ ಪುಟಗಳು + ಲ್ಯಾಂಡಿಂಗ್)
-├── lib/                 # ಮೂಲ ಲೈಬ್ರರಿಗಳು / ಡೊಮೇನ್ ಮಾಡ್ಯೂಲ್ಗಳು (80 ಉಪಡೈರೆಕ್ಟರಿಗಳು + ~70 ಮೇಲ್ಮಟ್ಟದ ಫೈಲ್ಗಳು)
-├── domain/              # ಶುದ್ಧ ಡೊಮೇನ್ ಲಾಜಿಕ್ (policy engine, fallback, cost, lockout, comboResolver, assessment)
-├── server/              # ಸರ್ವರ್-ಮಾತ್ರ ಮಾಡ್ಯೂಲ್ಗಳು (authz ಪೈಪ್ಲೈನ್, cors, auth ಮಿಡಲ್ವೇರ್) — ಕ್ಲಯಂಟ್ನಿಂದ ಇಂಪೋರ್ಟ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ
-├── shared/              # ಸುರಕ್ಷಿತವಾಗಿರುವ ಕಡೆ ಸರ್ವರ್ ಮತ್ತು ಕ್ಲಯಂಟ್ ನಡುವೆ ಹಂಚಿಕೊಂಡವು (constants, types, validation, contracts, utils)
-├── i18n/                # next-intl ಕಾನ್ಫಿಗ್ + ಪ್ರತಿ-ಲೊಕೇಲ್ ಮೆಸೇಜ್ JSON (67 ಲೊಕೇಲ್ಗಳು)
-├── middleware/          # Next.js ಮಿಡಲ್ವೇರ್ (ರಿಕ್ವೆಸ್ಟ್ ಎನ್ರಿಚ್ಮೆಂಟ್, ಲೊಕೇಲ್ ಪತ್ತೆ)
-├── mitm/                # MITM ಪ್ರಾಕ್ಸಿ ಕೋರ್: ಸರ್ಟ್ ಜನರೇಷನ್/ಇನ್ಸ್ಟಾಲ್, handlers, targets, inspector, masks, passthrough
-│   ├── handlers/        # MitmHandlerBase ಅನ್ನು ವಿಸ್ತರಿಸುವ 9 IDE-agent ಹ್ಯಾಂಡ್ಲರ್ ಕ್ಲಾಸ್ಗಳು (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # ಟ್ರಾಫಿಕ್ ಕ್ಯಾಪ್ಚರ್ ಲೇಯರ್: buffer (ಇನ್-ಮೆಮೊರಿ ರಿಂಗ್), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # ಮಾಡೆಲ್ ಅಡಾಪ್ಟರ್ ಗ್ಲೂ (ಲಿಗಸಿ ಶಿಮ್)
-├── scripts/             # ಇನ್-ಟ್ರೀ ನಿರ್ವಹಣಾ ಸ್ಕ್ರಿಪ್ಟ್ಗಳು (ಉದಾ., backfillAggregation)
-├── sse/                 # ಲಿಗಸಿ SSE ಹ್ಯಾಂಡ್ಲರ್ಗಳು/ಸರ್ವೀಸ್ಗಳು (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # ಲಿಗಸಿ ಇನ್-ಮೆಮೊರಿ ಸ್ಟೋರ್ (src/lib/db ಗಾಗಿ ಹಂತಹಂತವಾಗಿ ತೆಗೆದುಹಾಕಲಾಗುತ್ತಿದೆ)
-├── types/               # ಹಂಚಿದ TS ಟೈಪ್ ಫೈಲ್ಗಳು
+├── app/                 # App Router (ಪುಟಗಳು + API ಮಾರ್ಗಗಳು + ಸ್ಥಿತಿ ಪುಟಗಳು + ಲ್ಯಾಂಡಿಂಗ್ ಪುಟ)
+├── lib/                 # ಪ್ರಮುಖ ಲೈಬ್ರರಿಗಳು / ಡೊಮೇನ್ ಮಾಡ್ಯೂಲ್ಗಳು (80 ಉಪಡೈರೆಕ್ಟರಿಗಳು + ~70 ಉನ್ನತ-ಹಂತದ ಫೈಲ್ಗಳು)
+├── domain/              # ಶುದ್ಧ ಡೊಮೇನ್ ತರ್ಕ (ನೀತಿ ಎಂಜಿನ್, ಪರ್ಯಾಯ ವ್ಯವಸ್ಥೆ, ವೆಚ್ಚ, ಲಾಕ್ಔಟ್, comboResolver, ಮೌಲ್ಯಮಾಪನ)
+├── server/              # ಸರ್ವರ್ಗೆ ಮಾತ್ರ ಸೀಮಿತವಾದ ಮಾಡ್ಯೂಲ್ಗಳು (ದೃಢೀಕರಣ ಪೈಪ್ಲೈನ್, cors, ದೃಢೀಕರಣ ಮಿಡಲ್ವೇರ್) — ಕ್ಲೈಂಟ್ನಿಂದ ಆಮದು ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ
+├── shared/              # ಸುರಕ್ಷಿತವಾಗಿರುವಲ್ಲಿ ಸರ್ವರ್ ಮತ್ತು ಕ್ಲೈಂಟ್ ನಡುವೆ ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತದೆ (ಸ್ಥಿರಾಂಕಗಳು, ಪ್ರಕಾರಗಳು, ಮೌಲ್ಯೀಕರಣ, ಒಪ್ಪಂದಗಳು, ಉಪಯುಕ್ತತೆಗಳು)
+├── i18n/                # next-intl ಸಂರಚನೆ + ಪ್ರತಿ ಲೊಕೇಲ್ನ ಸಂದೇಶ JSON (67 ಲೊಕೇಲ್ಗಳು)
+├── middleware/          # Next.js ಮಿಡಲ್ವೇರ್ (ವಿನಂತಿ ಪುಷ್ಟೀಕರಣ, ಲೊಕೇಲ್ ಪತ್ತೆ)
+├── mitm/                # MITM ಪ್ರಾಕ್ಸಿಯ ಪ್ರಮುಖ ಭಾಗ: ಪ್ರಮಾಣಪತ್ರ ರಚನೆ/ಸ್ಥಾಪನೆ, ಹ್ಯಾಂಡ್ಲರ್ಗಳು, ಗುರಿಗಳು, ಇನ್ಸ್ಪೆಕ್ಟರ್, ಮಾಸ್ಕ್ಗಳು, ಪಾಸ್ಥ್ರೂ
+│   ├── handlers/        # MitmHandlerBase ಅನ್ನು ವಿಸ್ತರಿಸುವ 9 IDE-ಏಜೆಂಟ್ ಹ್ಯಾಂಡ್ಲರ್ ಕ್ಲಾಸ್ಗಳು (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # ಟ್ರಾಫಿಕ್ ಸೆರೆಹಿಡಿಯುವ ಪದರ: ಬಫರ್ (ಮೆಮೊರಿಯೊಳಗಿನ ರಿಂಗ್), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # ಮಾದರಿ ಅಡಾಪ್ಟರ್ ಸಂಯೋಜಕ ಪದರ (ಹಳೆಯ ಹೊಂದಾಣಿಕೆ ಶಿಮ್)
+├── scripts/             # ಕೋಡ್ಬೇಸ್ನೊಳಗಿನ ನಿರ್ವಹಣಾ ಸ್ಕ್ರಿಪ್ಟ್ಗಳು (ಉದಾ., backfillAggregation)
+├── sse/                 # ಹಳೆಯ SSE ಹ್ಯಾಂಡ್ಲರ್ಗಳು/ಸೇವೆಗಳು (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # ಹಳೆಯ ಇನ್-ಮೆಮೊರಿ ಸ್ಟೋರ್ (src/lib/db ಪರವಾಗಿ ಹಂತ ಹಂತವಾಗಿ ತೆಗೆದುಹಾಕಲಾಗುತ್ತಿದೆ)
+├── types/               # ಹಂಚಿಕೊಂಡ TS ಪ್ರಕಾರದ ಫೈಲ್ಗಳು
 ├── instrumentation.ts   # Next.js ಟೆಲಿಮೆಟ್ರಿ ಹುಕ್ (ಬ್ರೌಸರ್ + ಎಡ್ಜ್)
-├── instrumentation-node.ts  # Node-ಮಾತ್ರ ಇನ್ಸ್ಟ್ರುಮೆಂಟೇಶನ್
-└── proxy.ts             # HTTP-ಪ್ರಾಕ್ಸಿ ಎಂಟ್ರಿ ಶಿಮ್
+├── instrumentation-node.ts  # Nodeಗೆ ಮಾತ್ರ ಸೀಮಿತವಾದ ಇನ್ಸ್ಟ್ರುಮೆಂಟೇಶನ್
+└── proxy.ts             # HTTP-ಪ್ರಾಕ್ಸಿ ಪ್ರವೇಶ ಶಿಮ್
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| ಮಾರ್ಗ                                                                        | ಉದ್ದೇಶ                                                                                                                                                                                                                                                                                                                |
+| Path                                                                         | ಉದ್ದೇಶ                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | ಸಾರ್ವಜನಿಕ OpenAI-ಹೊಂದಾಣಿಕೆ API (~25 ಉಪ-ಮಾರ್ಗಗಳು: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers, ಇತ್ಯಾದಿ)                                                                                                                  |
+| `app/api/v1/`                                                                | ಸಾರ್ವಜನಿಕ OpenAI-ಹೊಂದಾಣಿಕೆಯ API (~25 ಉಪ-ರೂಟ್ಗಳು: ಚಾಟ್, ಪೂರ್ಣಗೊಳಿಸುವಿಕೆಗಳು, ಎಂಬೆಡಿಂಗ್ಗಳು, ಫೈಲ್ಗಳು, ಬ್ಯಾಚ್ಗಳು, ಆಡಿಯೊ, ಚಿತ್ರಗಳು, ವೀಡಿಯೊಗಳು, ಸಂಗೀತ, ಮರುಶ್ರೇಯಾಂಕ, ಮಾಡರೇಶನ್ಗಳು, ಹುಡುಕಾಟ, ws, ಏಜೆಂಟ್ಗಳು, ಖಾತೆಗಳು, ಪೂರೈಕೆದಾರರು, ಇತ್ಯಾದಿ)                                                                                      |
 | `app/api/v1beta/`                                                            | Gemini-ಶೈಲಿಯ API ಎಂಡ್ಪಾಯಿಂಟ್ಗಳು                                                                                                                                                                                                                                                                                       |
-| `app/api/playground/`                                                        | Playground Studio ಮಾರ್ಗಗಳು: `improve-prompt/` (POST — LLM ಪ್ರಾಂಪ್ಟ್ ಮರುಬರವನಿಗೆ ಸಾಧನ), `presets/` (GET ಪಟ್ಟಿ / POST ರಚನೆ), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` ನೋಡಿ                                                                                                          |
-| `app/api/` (v1 ಅಲ್ಲದ)                                                        | ನಿರ್ವಹಣೆ/ನಿರ್ವಾಹಕ ಮಾರ್ಗಗಳು (~60 ಡೈರೆಕ್ಟರಿಗಳು: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, ಇತ್ಯಾದಿ)                                                                                                                                |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ಮಾರ್ಗಗಳು (ಸರ್ವರ್ ನಿಯಂತ್ರಣ, ಏಜೆಂಟ್ ಸ್ಥಿತಿ/DNS/ಮ್ಯಾಪಿಂಗ್ಗಳು, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` ನೋಡಿ.                                                                                                                                |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ ಮಾರ್ಗಗಳು (requests, sessions, hosts, capture-modes, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` ನೋಡಿ.                                                                                                                                    |
+| `app/api/playground/`                                                        | Playground Studio ರೂಟ್ಗಳು: `improve-prompt/` (POST — LLM ಪ್ರಾಂಪ್ಟ್ ಮರುಬರಹಗಾರ), `presets/` (GET ಪಟ್ಟಿ / POST ರಚನೆ), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` ನೋಡಿ                                                                                                                 |
+| `app/api/` (v1 ಅಲ್ಲದ)                                                        | ನಿರ್ವಹಣೆ/ನಿರ್ವಾಹಕ ರೂಟ್ಗಳು (~60 ಡೈರೆಕ್ಟರಿಗಳು: ಪೂರೈಕೆದಾರರು, ಕಾಂಬೊಗಳು, ಸೆಟ್ಟಿಂಗ್ಗಳು, mcp, a2a, ಮೌಲ್ಯಮಾಪನಗಳು, ಮೆಮೊರಿ, ಕೌಶಲ್ಯಗಳು, ವೆಬ್ಹುಕ್ಗಳು, ಅನುಸರಣೆ, ಸ್ಥಿತಿಸ್ಥಾಪಕತೆ, ಮೇಲ್ವಿಚಾರಣೆ, ಟನಲ್ಗಳು, cli-ಪರಿಕರಗಳು, ಇತ್ಯಾದಿ)                                                                                                       |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ರೂಟ್ಗಳು (ಸರ್ವರ್ ನಿಯಂತ್ರಣ, ಏಜೆಂಟ್ ಸ್ಥಿತಿ/DNS/ಮ್ಯಾಪಿಂಗ್ಗಳು, ಬೈಪಾಸ್, ಪ್ರಮಾಣಪತ್ರ, ಅಪ್ಸ್ಟ್ರೀಮ್-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` ನೋಡಿ.                                                                                                                        |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ ರೂಟ್ಗಳು (ವಿನಂತಿಗಳು, ಸೆಷನ್ಗಳು, ಹೋಸ್ಟ್ಗಳು, ಕ್ಯಾಪ್ಚರ್-ಮೋಡ್ಗಳು, ರಫ್ತು, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` ನೋಡಿ.                                                                                                                             |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ಪ್ರವೇಶ ಬಿಂದು (`POST /a2a`)                                                                                                                                                                                                                                                                           |
-| `app/.well-known/agent.json/`                                                | A2A ಏಜೆಂಟ್ ಕಾರ್ಡ್ (ಡಿಸ್ಕವರಿ)                                                                                                                                                                                                                                                                                          |
-| `app/(dashboard)/dashboard/`                                                 | ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಪುಟಗಳು (50+ ವಿಭಾಗಗಳು, ~118 page.tsx ಫೈಲ್ಗಳು: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity, ಇತ್ಯಾದಿ)                                                                                                                             |
+| `app/.well-known/agent.json/`                                                | A2A ಏಜೆಂಟ್ ಕಾರ್ಡ್ (ಅನ್ವೇಷಣೆ)                                                                                                                                                                                                                                                                                          |
+| `app/(dashboard)/dashboard/`                                                 | ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಪುಟಗಳು (50+ ವಿಭಾಗಗಳು, ~118 page.tsx ಫೈಲ್ಗಳು: ಪೂರೈಕೆದಾರರು, ಕಾಂಬೊಗಳು, ಸೆಟ್ಟಿಂಗ್ಗಳು, ಮೆಮೊರಿ, ಕೌಶಲ್ಯಗಳು, ವೆಬ್ಹುಕ್ಗಳು, ಮೌಲ್ಯಮಾಪನಗಳು, ಆಡಿಟ್, ಬ್ಯಾಚ್, ಕ್ಯಾಶ್, ವೆಚ್ಚಗಳು, ಆರೋಗ್ಯ, ಸಿಸ್ಟಮ್, ಚಟುವಟಿಕೆ, ಇತ್ಯಾದಿ)                                                                                                  |
 | `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 ಟ್ಯಾಬ್ಗಳು: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` ನೋಡಿ                                                                                                                                                                     |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (ಯೋಜನೆ 21): `page.tsx` (3-ಟ್ಯಾಬ್ ಶೆಲ್), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪುಟ — ಸರ್ವರ್ ಕಾರ್ಡ್, 9 ಏಜೆಂಟ್ ಕಾರ್ಡ್ಗಳು, ಸೆಟಪ್ ವಿಜಾರ್ಡ್, ಮಾದರಿ ಮ್ಯಾಪಿಂಗ್, bypass ಪಟ್ಟಿ. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` ನೋಡಿ.                                                                                                                                              |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪುಟ — DevTools ವಿಭಜನೆ, 7 ವಿವರ ಟ್ಯಾಬ್ಗಳು, 4 ಕ್ಯಾಪ್ಚರ್ ಮೋಡ್ ಟಾಗಲ್ಗಳು, ಸೆಷನ್ ರಿಕಾರ್ಡರ್, ಸಂದರ್ಭ ಬಣ್ಣೀಕರಣ. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` ನೋಡಿ.                                                                                                                    |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪುಟ — ಸರ್ವರ್ ಕಾರ್ಡ್, 9 ಏಜೆಂಟ್ ಕಾರ್ಡ್ಗಳು, ಸೆಟಪ್ ವಿಝಾರ್ಡ್, ಮಾದರಿ ಮ್ಯಾಪಿಂಗ್, ಬೈಪಾಸ್ ಪಟ್ಟಿ. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` ನೋಡಿ.                                                                                                                                              |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪುಟ — DevTools ವಿಭಜಿತ ನೋಟ, 7 ವಿವರ ಟ್ಯಾಬ್ಗಳು, 4 ಕ್ಯಾಪ್ಚರ್ ಮೋಡ್ ಟಾಗಲ್ಗಳು, ಸೆಷನ್ ರೆಕಾರ್ಡರ್, ಸಂದರ್ಭ ಬಣ್ಣೀಕರಣ. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` ನೋಡಿ.                                                                                                                |
 | `app/(dashboard)/dashboard/activity/`                                        | ಚಟುವಟಿಕೆ ಫೀಡ್ ಪುಟ (ಗುಂಪು B): `page.tsx` (ಸರ್ವರ್) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` ನೋಡಿ                                                                                                                |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | ಕೋಟಾ ಹಂಚಿಕೆ ಪುಟ (ಗುಂಪು B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | ಪೂರೈಕೆದಾರ ಯೋಜನೆ ಕಾನ್ಫಿಗ್ ಪುಟ (ಗುಂಪು B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ಪ್ರತಿ ಸಂಪರ್ಕಕ್ಕೆ ಕೋಟಾ ಆಯಾಮಗಳ ಅತಿಕ్రಮಣ                                                                                                                                                                                           |
-| `app/docs/`                                                                  | ಎಂಬೆಡ್ ಮಾಡಲಾದ ದಸ್ತಾವೇಜ್ ವೀಕ್ಷಕ (`docs/*.md` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ)                                                                                                                                                                                                                                                   |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | ಪೂರೈಕೆದಾರರ ಯೋಜನೆ ಸಂರಚನಾ ಪುಟ (ಗುಂಪು B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ಪ್ರತಿ ಸಂಪರ್ಕಕ್ಕೆ ಕೋಟಾ ಆಯಾಮಗಳ ಅತಿಕ್ರಮಣ                                                                                                                                                                                            |
+| `app/docs/`                                                                  | ಎಂಬೆಡ್ ಮಾಡಲಾದ ದಸ್ತಾವೇಜು ವೀಕ್ಷಕ (`docs/*.md` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ)                                                                                                                                                                                                                                                   |
 | `app/landing/`                                                               | ಮಾರ್ಕೆಟಿಂಗ್ ಲ್ಯಾಂಡಿಂಗ್ ಪುಟ                                                                                                                                                                                                                                                                                            |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | ಪ್ರಮಾಣೀಕರಣ-ಸಂಬಂಧಿತ ಪುಟಗಳು                                                                                                                                                                                                                                                                                             |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | ದೃಢೀಕರಣಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಪುಟಗಳು                                                                                                                                                                                                                                                                                          |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP ದೋಷ ಪುಟಗಳು                                                                                                                                                                                                                                                                                                       |
 | `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | ಸ್ಥಿರ/ಸ್ಥಿತಿ ಪುಟಗಳು                                                                                                                                                                                                                                                                                                   |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | ಮೂಲ ಲೇಔಟ್, ಮುಖಪುಟ, PWA ಮ್ಯಾನಿಫెಸ್ಟ್, ಜಾಗತಿಕ CSS                                                                                                                                                                                                                                                                       |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | ರೂಟ್ ಲೇಔಟ್, ಮುಖಪುಟ, PWA ಮ್ಯಾನಿಫೆಸ್ಟ್, ಜಾಗತಿಕ CSS                                                                                                                                                                                                                                                                      |
 | `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | ದೋಷ ಗಡಿಗಳು                                                                                                                                                                                                                                                                                                            |
 
-### `src/lib/` — ಪ್ರಮುಖ ಲೈಬ್ರರಿಗಳು (~50 ಮಾಡ್ಯೂಲ್ಗಳು)
+### `src/lib/` — ಮೂಲ ಲೈಬ್ರರಿಗಳು (~50 ಮಾಡ್ಯೂಲ್ಗಳು)
 
-| ಮಾಡ್ಯೂಲ್                                 | ಉದ್ದೇಶ                                                                                                                                                                                                                                                                                                                    |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A ಪ್ರೊಟೊಕಾಲ್ ಟಾಸ್ಕ್ ಮ್ಯಾನೇಜರ್, ಸ್ಕಿಲ್ಗಳು (5), ಸ್ಟ್ರೀಮಿಂಗ್                                                                                                                                                                                                                                                               |
-| `acp/`                                   | CLI ಏಜೆಂಟ್ ರಿಜಿಸ್ಟ್ರಿ (ಸ್ಥಳೀಯ CLI ಡಿಸ್ಕವರಿ — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` ನೋಡಿ)                                                                                                                                                                                                                             |
-| `api/`                                   | ಹಂಚಿಕೊಂಡ API ಹೆಲ್ಪರ್ಗಳು (`requireManagementAuth`, ಮಾನ್ಯತೆ)                                                                                                                                                                                                                                                                |
-| `auth/`                                  | ಸೆಷನ್, ಪಾಸ್ವರ್ಡ್ ಹ್ಯಾಶಿಂಗ್, ಟೋಕನ್ ಮಾನ್ಯತೆ                                                                                                                                                                                                                                                                                 |
-| `batches/`                               | OpenAI Batches API ಹ್ಯಾಂಡ್ಲರ್ಗಳು                                                                                                                                                                                                                                                                                          |
-| `catalog/`                               | ಪ್ರೊವೈಡರ್ ಕ್ಯಾಟಲಾಗ್ Zod ಮಾನ್ಯತೆ + ಸಾಮರ್ಥ್ಯ ರೆಸೊಲ್ಯೂಶನ್                                                                                                                                                                                                                                                                    |
-| `cloudAgent/`                            | ಕ್ಲೌಡ್ ಏಜೆಂಟ್ಗಳು (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` ನೋಡಿ                                                                                                                                                                                                                                      |
-| `combos/`                                | ಕಾಂಬೊ ರೆಸೊಲ್ಯೂಶನ್ + ಮರುಕ್ರಮಗೊಳಿಸುವ ಹೆಲ್ಪರ್ಗಳು                                                                                                                                                                                                                                                                             |
-| `audit/`                                 | ಆಕ್ಟಿವಿಟಿ ಫೀಡ್ ಹೆಲ್ಪರ್ಗಳು: `highLevelActions.ts` (ಅಲೋಲಿಸ್ಟ್ + `isHighLevelAction()`), `activityIcons.ts` (ಆಕ್ಷನ್ → ಐಕಾನ್/ಕ್ರಿಯಾಪದ ಮ್ಯಾಪ್), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` ನೋಡಿ                                                                                      |
-| `compliance/`                            | ಆಡಿಟ್ ಲಾಗ್ + ಪ್ರೊವೈಡರ್ ಆಡಿಟ್ — `docs/security/COMPLIANCE.md` ನೋಡಿ                                                                                                                                                                                                                                                         |
-| `compression/`                           | ಕಂಪ್ರೆಶನ್ ಎಂಜಿನ್ ಗ್ಲೂ (ಎಂಜಿನ್ಗಳು `open-sse/services/compression/` ನಲ್ಲಿವೆ)                                                                                                                                                                                                                                                |
-| `config/`                                | ರನ್ಟೈಮ್ ಕಾನ್ಫಿಗ್ ಹೆಲ್ಪರ್ಗಳು                                                                                                                                                                                                                                                                                               |
-| `db/`                                    | 120+ ಡೊಮೇನ್ DB ಮಾಡ್ಯೂಲ್ಗಳು + 168 ಮೈಗ್ರೇಶನ್ಗಳು (SQLite ಗಾಗಿ ಯಾವಾಗಲೂ ಇಲ್ಲಿಯೇ ಬರಬೇಕು)                                                                                                                                                                                                                                        |
-| `quota/`                                 | ಕೋಟಾ ಶೇರಿಂಗ್ ಎಂಜಿನ್: `dimensions.ts` (ಟೈಪ್ಗಳು/Zod), `types.ts` (QuotaStore ಇಂಟರ್ಫೇಸ್), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` ನೋಡಿ |
-| `radar/`                                 | Radar ಉಚಿತ-ಮಾದರಿ ಕ್ಯಾಟಲಾಗ್ ಕ್ಲೈಂಟ್: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` ನೋಡಿ                                                                                                                                          |
-| `display/`                               | UI ಫಾರ್ಮ್ಯಾಟಿಂಗ್ ಹೆಲ್ಪರ್ಗಳು (ವೆಚ್ಚ, ಲೇಟೆನ್ಸಿ, ಇತ್ಯಾದಿ)                                                                                                                                                                                                                                                                    |
-| `embeddings/`                            | ಎಂಬೆಡ್ಡಿಂಗ್ಸ್ ಸೇವಾ ಹೆಲ್ಪರ್ಗಳು                                                                                                                                                                                                                                                                                             |
-| `env/`                                   | ಎನ್ವಿ ವೇರಿಯಬಲ್ ಪಾರ್ಸಿಂಗ್ + ಮಾನ್ಯೀಕರಣ                                                                                                                                                                                                                                                                                      |
-| `evals/`                                 | ಇವಾಲ್ ಫ್ರೇಮ್ವರ್ಕ್ (ಸೂಟ್ಗಳು, ರನ್ನರ್, ರನ್ಟೈಮ್) — `docs/frameworks/EVALS.md` ನೋಡಿ                                                                                                                                                                                                                                            |
-| `guardrails/`                            | PII ಮಾಸ್ಕರ್, ಪ್ರಾಂಪ್ಟ್ ಇಂಜೆಕ್ಷನ್, ವಿಷನ್ ಬ್ರಿಡ್ಜ್ — `docs/security/GUARDRAILS.md` ನೋಡಿ                                                                                                                                                                                                                                     |
-| `jobs/`                                  | ಹಿನ್ನೆಲೆ ಜಾಬ್ಗಳು (cron-ರೀತಿಯ)                                                                                                                                                                                                                                                                                             |
-| `memory/`                                | ಸಂಭಾಷಣಾತ್ಮಕ ಮೆಮೊರಿ (SQLite FTS5 + sqlite-vec ಹೈಬ್ರಿಡ್ RRF + Qdrant ಟೈರ್ 2) — `docs/frameworks/MEMORY.md` ನೋಡಿ                                                                                                                                                                                                             |
-| `memory/embedding/`                      | ಬಹು-ಮೂಲ ಎಂಬೆಡ್ಡಿಂಗ್ ಪದರ: `index.ts` (ರಿಸಾಲ್ವರ್), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ಯೋಜನೆ 21)                                                                                                                                                                                |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ರ್ಯಾಪರ್ — KNN ಬ್ರೂಟ್-ಫೋರ್ಸ್ + ಹೈಬ್ರಿಡ್ RRF (FTS5 + ವೆಕ್ಟರ್, k=60). ಲೇಜಿ-ಇನಿಟ್, sqlite-vec ಲಭ್ಯವಿಲ್ಲದಿದ್ದಾಗ ಗ್ರೇಸ್ಫುಲ್ಲಾಗಿ ಡಿಗ್ರೇಡ್ ಆಗುತ್ತದೆ. (ಯೋಜನೆ 21)                                                                                                                                                 |
-| `memory/reindex.ts`                      | `runReindexBatch()` — `needs_reindex=1` ಹೊಂದಿರುವ ಮೆಮೊರಿಗಳನ್ನು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಪ್ರೊಸೆಸ್ ಮಾಡುತ್ತದೆ; `POST /api/memory/reindex` ಮತ್ತು ಲೇಜಿ-ಬ್ಯಾಕ್ಫಿಲ್ ಪಾತ್ನಿಂದ ಕರೆಯಲಾಗುತ್ತದೆ. (ಯೋಜನೆ 21)                                                                                                                                       |
-| `monitoring/`                            | ಹೆಲ್ತ್ ಚೆಕ್ಗಳು, ಮೆಟ್ರಿಕ್ಸ್ ಹೊರಸೂಸುವಿಕೆ                                                                                                                                                                                                                                                                                    |
-| `oauth/`                                 | 22 ಪ್ರೊವೈಡರ್ ಮಾಡ್ಯೂಲ್ಗಳಿಗಾಗಿ OAuth/ಇಂಪೋರ್ಟ್ ಫ್ಲೋಗಳು (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                           |
-| `plugins/`                               | ಪ್ಲಗಿನ್ ರಿಜಿಸ್ಟ್ರಿ                                                                                                                                                                                                                                                                                                        |
-| `promptCache/`                           | Anthropic-ಶೈಲಿಯ ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಶೆ ಬ್ರೇಕ್ಪಾಯಿಂಟ್ಗಳು                                                                                                                                                                                                                                                                         |
-| `skills/`                                | ಸ್ಕಿಲ್ಸ್ ಫ್ರೇಮ್ವರ್ಕ್ (ಬಿಲ್ಟ್-ಇನ್ + ಮಾರ್ಕೆಟ್ಪ್ಲೇಸ್ + SkillsSH) — `docs/frameworks/SKILLS.md` ನೋಡಿ                                                                                                                                                                                                                          |
-| `playground/`                            | Playground Studio ಹಂಚಿಕೆಯ ಸಹಾಯಕಗಳು: `codeExport.ts` (curl/Python/TS ಜನರೇಟರ್), `promptImprover.ts` (ಮೆಟಾ-ಪ್ರಾಂಪ್ಟ್ ಬಿಲ್ಡರ್), `streamMetrics.ts` (ಶುದ್ಧ TTFT/TPS), `types.ts` (ಬೆಲೆ ಪಟ್ಟಿ) — `docs/frameworks/PLAYGROUND_STUDIO.md` ನೋಡಿ                                                                                    |
-| `webhookDispatcher.ts`                   | HMAC webhook ವಿತರಣೆ — `docs/frameworks/WEBHOOKS.md` ನೋಡಿ                                                                                                                                                                                                                                                                  |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ಟನ್ನೆಲ್ ಮ್ಯಾನೇಜರ್ಗಳು — `docs/ops/TUNNELS_GUIDE.md` ನೋಡಿ                                                                                                                                                                                                                                                                   |
-| `cloudSync.ts`, `initCloudSync.ts`       | ಸ್ಥಿತಿಯ ಐಚ್ಛಿಕ ಕ್ಲೌಡ್ ಸಿಂಕ್                                                                                                                                                                                                                                                                                               |
-| `localDb.ts`                             | db ಮಾಡ್ಯೂಲ್ಗಳಿಗೆ ಮರು-ರಫ್ತು ಬ್ಯಾರಲ್ (ಯಾವುದೇ ಲಾಜಿಕ್ ಇಲ್ಲ — ಮರು-ರಫ್ತುಗಳು ಮಾತ್ರ)                                                                                                                                                                                                                                              |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | ವಿನಂತಿ ಕ್ಯಾಚಿಂಗ್ + ಐಡೆಂಪೊಟೆನ್ಸಿ                                                                                                                                                                                                                                                                                           |
-| (~30 ಹೆಚ್ಚಿನ ಉನ್ನತ-ಮಟ್ಟದ ಫೈಲ್ಗಳು)        | ವಿಶೇಷ ಸಹಾಯಕಗಳು (logEnv, modelsDevSync, piiSanitizer, ಇತ್ಯಾದಿ)                                                                                                                                                                                                                                                             |
+| ಮಾಡ್ಯೂಲ್                                 | ಉದ್ದೇಶ                                                                                                                                                                                                                                                                                                                     |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A ಪ್ರೋಟೋಕಾಲ್ ಕಾರ್ಯ ನಿರ್ವಾಹಕ, ಕೌಶಲ್ಯಗಳು (5), ಸ್ಟ್ರೀಮಿಂಗ್                                                                                                                                                                                                                                                                  |
+| `acp/`                                   | CLI ಏಜೆಂಟ್ ರಿಜಿಸ್ಟ್ರಿ (ಸ್ಥಳೀಯ CLI ಅನ್ವೇಷಣೆ — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` ನೋಡಿ)                                                                                                                                                                                                                              |
+| `api/`                                   | ಹಂಚಿಕೆಯ API ಸಹಾಯಕಗಳು (`requireManagementAuth`, ಮೌಲ್ಯೀಕರಣ)                                                                                                                                                                                                                                                                  |
+| `auth/`                                  | ಸೆಷನ್, ಪಾಸ್ವರ್ಡ್ ಹ್ಯಾಶಿಂಗ್, ಟೋಕನ್ ಮೌಲ್ಯೀಕರಣ                                                                                                                                                                                                                                                                                |
+| `batches/`                               | OpenAI Batches API ಹ್ಯಾಂಡ್ಲರ್ಗಳು                                                                                                                                                                                                                                                                                           |
+| `catalog/`                               | ಪೂರೈಕೆದಾರ ಕ್ಯಾಟಲಾಗ್ನ Zod ಮೌಲ್ಯೀಕರಣ + ಸಾಮರ್ಥ್ಯ ನಿರ್ಧಾರ                                                                                                                                                                                                                                                                      |
+| `cloudAgent/`                            | ಕ್ಲೌಡ್ ಏಜೆಂಟ್ಗಳು (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` ನೋಡಿ                                                                                                                                                                                                                                       |
+| `combos/`                                | ಕಾಂಬೊ ನಿರ್ಧಾರ + ಮರುಕ್ರಮಗೊಳಿಸುವ ಸಹಾಯಕಗಳು                                                                                                                                                                                                                                                                                    |
+| `audit/`                                 | ಚಟುವಟಿಕೆ ಫೀಡ್ ಸಹಾಯಕಗಳು: `highLevelActions.ts` (ಅನುಮತಿಪಟ್ಟಿ + `isHighLevelAction()`), `activityIcons.ts` (ಕ್ರಿಯೆ → ಐಕಾನ್/ಕ್ರಿಯಾಪದ ನಕ್ಷೆ), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` ನೋಡಿ                                                                                         |
+| `compliance/`                            | ಆಡಿಟ್ ಲಾಗ್ + ಪೂರೈಕೆದಾರ ಆಡಿಟ್ — `docs/security/COMPLIANCE.md` ನೋಡಿ                                                                                                                                                                                                                                                          |
+| `compression/`                           | ಕಂಪ್ರೆಷನ್ ಎಂಜಿನ್ ಸಂಯೋಜಕ (ಎಂಜಿನ್ಗಳು `open-sse/services/compression/` ನಲ್ಲಿ ಇವೆ)                                                                                                                                                                                                                                             |
+| `config/`                                | ರನ್ಟೈಮ್ ಕಾನ್ಫಿಗರೇಶನ್ ಸಹಾಯಕಗಳು                                                                                                                                                                                                                                                                                              |
+| `db/`                                    | 120+ ಡೊಮೇನ್ DB ಮಾಡ್ಯೂಲ್ಗಳು + 168 ಮೈಗ್ರೇಷನ್ಗಳು (SQLite ಗಾಗಿ ಯಾವಾಗಲೂ ಇದರ ಮೂಲಕವೇ ಹೋಗಿ)                                                                                                                                                                                                                                        |
+| `quota/`                                 | ಕೋಟಾ ಹಂಚಿಕೆ ಎಂಜಿನ್: `dimensions.ts` (ಪ್ರಕಾರಗಳು/Zod), `types.ts` (QuotaStore ಇಂಟರ್ಫೇಸ್), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` ನೋಡಿ |
+| `radar/`                                 | Radar ಉಚಿತ-ಮಾದರಿ ಕ್ಯಾಟಲಾಗ್ ಕ್ಲೈಂಟ್: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` ನೋಡಿ                                                                                                                                           |
+| `display/`                               | UI ಫಾರ್ಮ್ಯಾಟಿಂಗ್ ಸಹಾಯಕಗಳು (ವೆಚ್ಚ, ವಿಳಂಬ ಇತ್ಯಾದಿ)                                                                                                                                                                                                                                                                           |
+| `embeddings/`                            | ಎಂಬೆಡಿಂಗ್ಗಳ ಸೇವಾ ಸಹಾಯಕಗಳು                                                                                                                                                                                                                                                                                                  |
+| `env/`                                   | ಪರಿಸರ ಚರ ಪಾರ್ಸಿಂಗ್ + ಮೌಲ್ಯೀಕರಣ                                                                                                                                                                                                                                                                                             |
+| `evals/`                                 | ಮೌಲ್ಯಮಾಪನ ಫ್ರೇಮ್ವರ್ಕ್ (ಸೂಟ್ಗಳು, ರನ್ನರ್, ರನ್ಟೈಮ್) — `docs/frameworks/EVALS.md` ನೋಡಿ                                                                                                                                                                                                                                         |
+| `guardrails/`                            | PII ಮಾಸ್ಕರ್, ಪ್ರಾಂಪ್ಟ್ ಇಂಜೆಕ್ಷನ್, ವಿಷನ್ ಬ್ರಿಡ್ಜ್ — `docs/security/GUARDRAILS.md` ನೋಡಿ                                                                                                                                                                                                                                      |
+| `jobs/`                                  | ಹಿನ್ನೆಲೆ ಜಾಬ್ಗಳು (cron-ನಂತಹವು)                                                                                                                                                                                                                                                                                             |
+| `memory/`                                | ಸಂಭಾಷಣಾತ್ಮಕ ಮೆಮೊರಿ (SQLite FTS5 + sqlite-vec ಹೈಬ್ರಿಡ್ RRF + Qdrant ಶ್ರೇಣಿ 2) — `docs/frameworks/MEMORY.md` ನೋಡಿ                                                                                                                                                                                                            |
+| `memory/embedding/`                      | ಬಹು-ಮೂಲ ಎಂಬೆಡಿಂಗ್ ಪದರ: `index.ts` (ರೆಸಾಲ್ವರ್), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ಯೋಜನೆ 21)                                                                                                                                                                                   |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ರ್ಯಾಪರ್ — KNN ಬ್ರೂಟ್-ಫೋರ್ಸ್ + ಹೈಬ್ರಿಡ್ RRF (FTS5 + ವೆಕ್ಟರ್, k=60). ಲೇಜಿ-ಇನಿಷಿಯಲೈಸೇಶನ್; sqlite-vec ಲಭ್ಯವಿಲ್ಲದಿದ್ದಾಗ ಸುಗಮವಾಗಿ ಸಾಮರ್ಥ್ಯ ತಗ್ಗಿಸುತ್ತದೆ. (ಯೋಜನೆ 21)                                                                                                                                            |
+| `memory/reindex.ts`                      | `runReindexBatch()` — ಹಿನ್ನೆಲೆಯಲ್ಲಿ `needs_reindex=1` ಹೊಂದಿರುವ ಮೆಮೊರಿಗಳನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುತ್ತದೆ; `POST /api/memory/reindex` ಮತ್ತು ಲೇಜಿ-ಬ್ಯಾಕ್ಫಿಲ್ ಪಥದಿಂದ ಕರೆ ಮಾಡಲಾಗುತ್ತದೆ. (ಯೋಜನೆ 21)                                                                                                                                     |
+| `monitoring/`                            | ಆರೋಗ್ಯ ಪರಿಶೀಲನೆಗಳು, ಮೆಟ್ರಿಕ್ಗಳ ಹೊರಸೂಸುವಿಕೆ                                                                                                                                                                                                                                                                                 |
+| `oauth/`                                 | 22 ಪೂರೈಕೆದಾರ ಮಾಡ್ಯೂಲ್ಗಳಿಗೆ OAuth/ಆಮದು ಹರಿವುಗಳು (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                 |
+| `plugins/`                               | ಪ್ಲಗಿನ್ ರಿಜಿಸ್ಟ್ರಿ                                                                                                                                                                                                                                                                                                         |
+| `promptCache/`                           | Anthropic-ಶೈಲಿಯ ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಶ್ ಬ್ರೇಕ್ಪಾಯಿಂಟ್ಗಳು                                                                                                                                                                                                                                                                          |
+| `skills/`                                | ಕೌಶಲ್ಯಗಳ ಫ್ರೇಮ್ವರ್ಕ್ (ಅಂತರ್ನಿರ್ಮಿತ + ಮಾರ್ಕೆಟ್ಪ್ಲೇಸ್ + SkillsSH) — `docs/frameworks/SKILLS.md` ನೋಡಿ                                                                                                                                                                                                                         |
+| `playground/`                            | Playground Studio ಹಂಚಿಕೆಯ ಸಹಾಯಕಗಳು: `codeExport.ts` (curl/Python/TS ಜನರೇಟರ್), `promptImprover.ts` (ಮೆಟಾ-ಪ್ರಾಂಪ್ಟ್ ಬಿಲ್ಡರ್), `streamMetrics.ts` (ಶುದ್ಧ TTFT/TPS), `types.ts` (ಬೆಲೆ ನಿಗದಿ ಕೋಷ್ಟಕ) — `docs/frameworks/PLAYGROUND_STUDIO.md` ನೋಡಿ                                                                              |
+| `webhookDispatcher.ts`                   | HMAC ವೆಬ್ಹುಕ್ ವಿತರಣೆ — `docs/frameworks/WEBHOOKS.md` ನೋಡಿ                                                                                                                                                                                                                                                                  |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ಟನಲ್ ನಿರ್ವಾಹಕಗಳು — `docs/ops/TUNNELS_GUIDE.md` ನೋಡಿ                                                                                                                                                                                                                                                                        |
+| `cloudSync.ts`, `initCloudSync.ts`       | ಸ್ಥಿತಿಯ ಐಚ್ಛಿಕ ಕ್ಲೌಡ್ ಸಿಂಕ್                                                                                                                                                                                                                                                                                                |
+| `localDb.ts`                             | db ಮಾಡ್ಯೂಲ್ಗಳಿಗೆ ಮರು-ರಫ್ತು ಬ್ಯಾರೆಲ್ (ಯಾವುದೇ ತರ್ಕವಿಲ್ಲ — ಮರು-ರಫ್ತುಗಳು ಮಾತ್ರ)                                                                                                                                                                                                                                                |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | ವಿನಂತಿ ಕ್ಯಾಶಿಂಗ್ + ಐಡೆಂಪೊಟೆನ್ಸಿ                                                                                                                                                                                                                                                                                            |
+| (ಇನ್ನೂ ~30 ಉನ್ನತ-ಮಟ್ಟದ ಫೈಲ್ಗಳು)          | ವಿಶೇಷ ಸಹಾಯಕಗಳು (logEnv, modelsDevSync, piiSanitizer, ಇತ್ಯಾದಿ)                                                                                                                                                                                                                                                              |
 
-### `src/lib/db/` — ಡೇಟಾಬೇಸ್ (147 ಮಾಡ್ಯೂಲ್ಗಳು + 208 ಮೈಗ್ರೇಷನ್ಗಳು)
+### `src/lib/db/` — ಡೇಟಾಬೇಸ್ (147 ಮಾಡ್ಯೂಲ್ಗಳು + 208 ಮೈಗ್ರೇಶನ್ಗಳು)
 
-| ಉಪಡೈರೆ                    | ಉದ್ದೇಶ                                                                                                                                                                              |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL ಜರ್ನಲಿಂಗ್ನೊಂದಿಗೆ `getDbInstance()` ಸಿಂಗಲ್ಟನ್                                                                                                                                    |
-| `db/migrations/`          | ಆವೃತ್ತಿಬದ್ಧ SQL ಫೈಲ್ಗಳು (ಐಡೆಂಪೊಟೆಂಟ್, ಟ್ರಾನ್ಸಾಕ್ಷನಲ್). `073_memory_vec.sql` `memory_vec_meta` + `needs_reindex` ಕಾಲಮ್ ಅನ್ನು ಸೇರಿಸುತ್ತದೆ (ಯೋಜನೆ 21).                                 |
-| `db/playgroundPresets.ts` | Playground Studio ಪ್ರೀಸೆಟ್ಗಳಿಗೆ CRUD ಮಾಡ್ಯೂಲ್ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)        |
-| `db/memoryVec.ts`         | `memory_vec_meta` ಗಾಗಿ CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` ಇತ್ಯಾದಿ (ಯೋಜನೆ 21)                     |
-| `db/<domain>.ts`          | ಪ್ರತಿ ಡೊಮೇನ್ಗೆ ಒಂದು ಮಾಡ್ಯೂಲ್: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache ಇತ್ಯಾದಿ |
+| ಉಪಡೈರೆಕ್ಟರಿ               | ಉದ್ದೇಶ                                                                                                                                                                                             |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | WAL ಜರ್ನಲಿಂಗ್ನೊಂದಿಗೆ `getDbInstance()` ಸಿಂಗಲ್ಟನ್                                                                                                                                                   |
+| `db/migrations/`          | ಆವೃತ್ತಿ ನಿರ್ಧರಿತ SQL ಫೈಲ್ಗಳು (ಐಡೆಂಪೊಟೆಂಟ್, ಟ್ರಾನ್ಸಾಕ್ಷನಲ್). `073_memory_vec.sql`, `memory_vec_meta` + `needs_reindex` ಕಾಲಮ್ ಅನ್ನು ಸೇರಿಸುತ್ತದೆ (ಯೋಜನೆ 21).                                          |
+| `db/playgroundPresets.ts` | Playground Studio ಪ್ರಿಸೆಟ್ಗಳಿಗಾಗಿ CRUD ಮಾಡ್ಯೂಲ್ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                     |
+| `db/memoryVec.ts`         | `memory_vec_meta`ಗಾಗಿ CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, ಇತ್ಯಾದಿ (ಯೋಜನೆ 21)                                    |
+| `db/<domain>.ts`          | ಪ್ರತಿ ಡೊಮೇನ್ಗೆ ಒಂದು ಮಾಡ್ಯೂಲ್: ಪೂರೈಕೆದಾರರು, ಕಾಂಬೊಗಳು, apiKeys, ಬಳಕೆದಾರರು, ಸೆಷನ್ಗಳು, ಬಳಕೆ, audit*log, ವೆಬ್ಹುಕ್ಗಳು, ಕೌಶಲ್ಯಗಳು, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, ಇತ್ಯಾದಿ. |
 
 ### `src/domain/`
 
-| ಮಾಡ್ಯೂಲ್               | ಉದ್ದೇಶ                                        |
-| ---------------------- | --------------------------------------------- |
-| `policy.ts`            | ಪಾಲಿಸಿ ಎಂಜಿನ್                                 |
-| `fallbackPolicy.ts`    | ಫಾಲ್ಬ್ಯಾಕ್ ನಿರ್ಧಾರ ಮರ                         |
-| `costRules.ts`         | ವೆಚ್ಚ ಲೆಕ್ಕಾಚಾರದ ನಿಯಮಗಳು                      |
-| `lockoutPolicy.ts`     | ಮಾದರಿ/ಸಂಪರ್ಕ ಲಾಕ್ಔಟ್ ಪಾಲಿಸಿ                   |
-| `tagRouter.ts`         | ಟ್ಯಾಗ್-ಆಧಾರಿತ ರೌಟಿಂಗ್                         |
-| `comboResolver.ts`     | ಕಾಂಬೊ ರೆಸಲ್ಯೂಶನ್ (ಕಾಂಬೊ ಎಂಜಿನ್ ಬಳಸುತ್ತದೆ)     |
-| `modelAvailability.ts` | ಪ್ರತಿ-ಮಾದರಿ ಲಭ್ಯತೆ ಪರಿಶೀಲನೆ                   |
-| `assessment/`          | ಮಾದರಿ ಮೌಲ್ಯಮಾಪನ (RFC-AUTO-ASSESSMENT ನ ಹಂತ 1) |
+| ಮಾಡ್ಯೂಲ್               | ಉದ್ದೇಶ                                         |
+| ---------------------- | ---------------------------------------------- |
+| `policy.ts`            | ನೀತಿ ಎಂಜಿನ್                                    |
+| `fallbackPolicy.ts`    | ಫಾಲ್ಬ್ಯಾಕ್ ನಿರ್ಧಾರ ವೃಕ್ಷ                       |
+| `costRules.ts`         | ವೆಚ್ಚ ಲೆಕ್ಕಾಚಾರದ ನಿಯಮಗಳು                       |
+| `lockoutPolicy.ts`     | ಮಾಡೆಲ್/ಸಂಪರ್ಕ ಲಾಕ್ಔಟ್ ನೀತಿ                     |
+| `tagRouter.ts`         | ಟ್ಯಾಗ್-ಆಧಾರಿತ ರೂಟಿಂಗ್                          |
+| `comboResolver.ts`     | ಕಾಂಬೊ ಪರಿಹಾರ (ಕಾಂಬೊ ಎಂಜಿನ್ ಬಳಸುತ್ತದೆ)          |
+| `modelAvailability.ts` | ಪ್ರತಿ-ಮಾಡೆಲ್ ಲಭ್ಯತೆ ಪರಿಶೀಲನೆ                   |
+| `assessment/`          | ಮಾಡೆಲ್ ಮೌಲ್ಯಮಾಪನ (RFC-AUTO-ASSESSMENT ನ ಹಂತ 1) |
 
 ### `src/server/`
 
-| ಮಾಡ್ಯೂಲ್ | ಉದ್ದೇಶ                                                                                             |
-| -------- | -------------------------------------------------------------------------------------------------- |
-| `authz/` | ಅಧಿಕಾರೀಕರಣ ಪೈಪ್ಲೈನ್: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` ನೋಡಿ |
-| `cors/`  | CORS ಸಂರಚನೆ                                                                                        |
-| `auth/`  | ಸೆಷನ್ ಮಿಡಲ್ವೇರ್                                                                                    |
+| ಮಾಡ್ಯೂಲ್ | ಉದ್ದೇಶ                                                                                          |
+| -------- | ----------------------------------------------------------------------------------------------- |
+| `authz/` | ದೃಢೀಕರಣ ಪೈಪ್ಲೈನ್: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` ನೋಡಿ |
+| `cors/`  | CORS ಸಂರಚನೆ                                                                                     |
+| `auth/`  | ಸೆಷನ್ ಮಿಡಲ್ವೇರ್                                                                                 |
 
 ### `src/shared/`
 
 | ಮಾಡ್ಯೂಲ್                         | ಉದ್ದೇಶ                                                                                                       |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `components/`                    | ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಕಾಂಪೋನೆಂಟ್ API: `packages/ui-kit` ಮೇಲಿನ ಅಡಾಪ್ಟರ್ಗಳು — `docs/architecture/DESIGN_SYSTEM.md` ನೋಡಿ |
-| `constants/iconMap.ts`           | `ICON_MAP`: ಸ್ಕ್ರೀನ್ಗಳು ಬಳಸುವ ಐಕಾನ್ ಹೆಸರುಗಳು → Lucide ಕಾಂಪೋನೆಂಟ್ಗಳು (`<Icon>`)                               |
-| `constants/providers.ts`         | **376 ಪ್ರೊವೈಡರ್ಗಳು** Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ (ಸತ್ಯದ ಮೂಲ)                                                        |
-| `constants/cliTools.ts`          | ಬಾಹ್ಯ CLI ಟೂಲ್ ರಿಜಿಸ್ಟ್ರಿ                                                                                    |
-| `constants/routingStrategies.ts` | **20 ರೂಟಿಂಗ್ ಸ್ಟ್ರಾಟಜಿಗಳು** ಆದ್ಯತೆಗಳೊಂದಿಗೆ                                                                   |
-| `constants/publicApiRoutes.ts`   | Bearer (vs ಮ್ಯಾನೇಜ್ಮೆಂಟ್) ದೃಢೀಕರಣ ಅಗತ್ಯವಿರುವ ರೂಟ್ಗಳು                                                         |
-| `constants/upstreamHeaders.ts`   | ಅಪ್ಸ್ಟ್ರೀಮ್ ವಿನಂತಿಗಳಿಗೆ ಹೆಡರ್ ನಿರಾಕರಣ ಪಟ್ಟಿ                                                                  |
-| `validation/schemas.ts`          | ~80 Zod ಸ್ಕೀಮಾಗಳು (API ಕಾಂಟ್ರಾಕ್ಟ್ಗಳಿಗೆ ಏಕೈಕ ಸತ್ಯದ ಮೂಲ)                                                      |
-| `validation/helpers.ts`          | Zod ಮೌಲ್ಯೀಕರಣ ಸಹಾಯಕಗಳು (`validateBody` ಇತ್ಯಾದಿ)                                                              |
-| `types/`                         | ಹಂಚಿಕೊಂಡ TS ಟೈಪ್ಗಳು                                                                                          |
-| `contracts/`                     | ಸಾರ್ವಜನಿಕ API ಕಾಂಟ್ರಾಕ್ಟ್ಗಳು (`package.json` ನಲ್ಲಿ `files:` ಮೂಲಕ ಬಳಸಲಾಗುತ್ತವೆ)                               |
-| `utils/circuitBreaker.ts`        | ಪ್ರೊವೈಡರ್ ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ (`docs/architecture/RESILIENCE_GUIDE.md` ನೋಡಿ)                                   |
+| `components/`                    | ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಕಾಂಪೊನೆಂಟ್ API: `packages/ui-kit` ಮೇಲಿನ ಅಡಾಪ್ಟರ್ಗಳು — `docs/architecture/DESIGN_SYSTEM.md` ನೋಡಿ |
+| `constants/iconMap.ts`           | `ICON_MAP`: ಸ್ಕ್ರೀನ್ಗಳು ಬಳಸುವ ಐಕಾನ್ ಹೆಸರುಗಳು → Lucide ಕಾಂಪೊನೆಂಟ್ಗಳು (`<Icon>`)                               |
+| `constants/providers.ts`         | Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ **376 ಪೂರೈಕೆದಾರರು** (ಅಧಿಕೃತ ಮೂಲ)                                                        |
+| `constants/cliTools.ts`          | ಬಾಹ್ಯ CLI ಉಪಕರಣ ರಿಜಿಸ್ಟ್ರಿ                                                                                   |
+| `constants/routingStrategies.ts` | ಆದ್ಯತೆಗಳೊಂದಿಗೆ **20 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು**                                                                       |
+| `constants/publicApiRoutes.ts`   | Bearer (ನಿರ್ವಹಣೆಯ ಬದಲಾಗಿ) ದೃಢೀಕರಣ ಅಗತ್ಯವಿರುವ ರೂಟ್ಗಳು                                                         |
+| `constants/upstreamHeaders.ts`   | ಅಪ್ಸ್ಟ್ರೀಮ್ ವಿನಂತಿಗಳಿಗಾಗಿ ಹೆಡರ್ ನಿರಾಕರಣೆ ಪಟ್ಟಿ                                                               |
+| `validation/schemas.ts`          | ~80 Zod ಸ್ಕೀಮಾಗಳು (API ಒಪ್ಪಂದಗಳಿಗೆ ಏಕೈಕ ಅಧಿಕೃತ ಮೂಲ)                                                          |
+| `validation/helpers.ts`          | Zod ಮೌಲ್ಯೀಕರಣ ಸಹಾಯಕಗಳು (`validateBody`, ಇತ್ಯಾದಿ)                                                             |
+| `types/`                         | ಹಂಚಿಕೊಂಡ TS ಪ್ರಕಾರಗಳು                                                                                        |
+| `contracts/`                     | ಸಾರ್ವಜನಿಕ API ಒಪ್ಪಂದಗಳು (`package.json`ನಲ್ಲಿನ `files:` ಬಳಸುತ್ತವೆ)                                            |
+| `utils/circuitBreaker.ts`        | ಪೂರೈಕೆದಾರ ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ (`docs/architecture/RESILIENCE_GUIDE.md` ನೋಡಿ)                                   |
 | `utils/apiAuth.ts`               | API ಕೀ ಮೌಲ್ಯೀಕರಣ, ಸ್ಕೋಪ್ ಪರಿಶೀಲನೆ                                                                            |
-| `utils/fetchTimeout.ts`          | ಅಪ್ಸ್ಟ್ರೀಮ್ fetch ಗಾಗಿ ಟೈಮ್ಔಟ್/ಅಬಾರ್ಟ್ ರ್ಯಾಪರ್ಗಳು                                                            |
-| `utils/releaseNotes.ts`          | ಮುಚ್ಚಿದ v2/legacy ಅನೌನ್ಸ್ಮೆಂಟ್ ಪಾರ್ಸರ್, ಲೋಕಲೈಸೇಶನ್ ಮತ್ತು ID ಡಿಸ್ಮಿಸಲ್                                        |
+| `utils/fetchTimeout.ts`          | ಅಪ್ಸ್ಟ್ರೀಮ್ fetchಗಾಗಿ ಕಾಲಮಿತಿ/ರದ್ದತಿ ರ್ಯಾಪರ್ಗಳು                                                              |
+| `utils/releaseNotes.ts`          | ಮುಚ್ಚಿದ v2/ಲೆಗಸಿ ಪ್ರಕಟಣೆ ಪಾರ್ಸರ್, ಸ್ಥಳೀಕರಣ ಮತ್ತು ID ವಜಾಗೊಳಿಸುವಿಕೆ                                            |
+
+---
 
 ## `open-sse/` — ಸ್ಟ್ರೀಮಿಂಗ್ ಎಂಜಿನ್ ವರ್ಕ್ಸ್ಪೇಸ್
 
@@ -393,76 +395,76 @@ open-sse/
 
 ### ಉನ್ನತ-ಮಟ್ಟದ ಮಾರ್ಗದರ್ಶಿಗಳು
 
-| ದಸ್ತಾವೇಜು                   | ಉದ್ದೇಶ                                                                               |
+| ಡಾಕ್                        | ಉದ್ದೇಶ                                                                               |
 | --------------------------- | ------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | ಉನ್ನತ-ಮಟ್ಟದ ವಿನ್ಯಾಸ, ಉಪವ್ಯವಸ್ಥೆಗಳ ನಕ್ಷೆ, ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಮೇಲ್ಮೈ                         |
-| `CODEBASE_DOCUMENTATION.md` | ಎಂಜಿನಿಯರಿಂಗ್ ಉಲ್ಲೇಖ: ಡೈರೆಕ್ಟರಿಗಳು, ಮಾಡ್ಯೂಲ್ಗಳು, ಸಂಪ್ರದಾಯಗಳು                          |
-| `FEATURES.md`               | v3.8 ಮುಖ್ಯಾಂಶಗಳೊಂದಿಗೆ ವೈಶಿಷ್ಟ್ಯ ಮ್ಯಾಟ್ರಿಕ್ಸ್                                         |
-| `USER_GUIDE.md`             | ಅಂತಿಮ ಬಳಕೆದಾರರ ಕೈಪಿಡಿ (ಸೆಟಪ್, ಮಾದರಿಗಳು, ಕಾಂಬೊಗಳು, CLI ಗಳು, ಆಡಿಯೋ ಇತ್ಯಾದಿ)            |
-| `API_REFERENCE.md`          | ಪ್ರಾಮಾಣೀಕರಣ ಮಾದರಿಯೊಂದಿಗೆ API ಎಂಡ್ಪಾಯಿಂಟ್ ಉಲ್ಲೇಖ                                      |
-| `openapi.yaml`              | OpenAPI 3.0 ವಿಶೇಷಣ (121 ಪಾತ್ಗಳು)                                                     |
+| `ARCHITECTURE.md`           | ಉನ್ನತ-ಮಟ್ಟದ ಆರ್ಕಿಟೆಕ್ಚರ್, ಉಪವ್ಯವಸ್ಥೆ ನಕ್ಷೆ, ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಮೇಲ್ಮೈ                      |
+| `CODEBASE_DOCUMENTATION.md` | ಇಂಜಿನಿಯರಿಂಗ್ ಉಲ್ಲೇಖ: ಡೈರೆಕ್ಟರಿಗಳು, ಮಾಡ್ಯೂಲ್ಗಳು, ಸಂಪ್ರದಾಯಗಳು                          |
+| `FEATURES.md`               | v3.8 ಹೈಲೈಟ್ಗಳೊಂದಿಗೆ ಫೀಚರ್ ಮ್ಯಾಟ್ರಿಕ್ಸ್                                               |
+| `USER_GUIDE.md`             | ಅಂತಿಮ ಬಳಕೆದಾರರ ಕೈಪಿಡಿ (ಸೆಟಪ್, ಮಾಡೆಲ್ಗಳು, ಕಾಂಬೊಗಳು, CLI ಗಳು, ಆಡಿಯೊ, ಇತ್ಯಾದಿ)          |
+| `API_REFERENCE.md`          | ಆಥ್ ಮಾಡೆಲ್ನೊಂದಿಗೆ API ಎಂಡ್ಪಾಯಿಂಟ್ ಉಲ್ಲೇಖ                                             |
+| `openapi.yaml`              | OpenAPI 3.0 ಸ್ಪೆಕ್ (121 ಪಾತ್ಗಳು)                                                     |
 | `SETUP_GUIDE.md`            | ಇನ್ಸ್ಟಾಲ್ ವಿಧಾನಗಳು (npm, npx, Docker, Electron, Termux, ಸೋರ್ಸ್)                      |
-| `ENVIRONMENT.md`            | ಎಲ್ಲಾ ಎನ್ವಿ ವೇರಿಯೇಬಲ್ಗಳು (~800 ದಸ್ತಾವೇಜೀಕರಿಸಲಾಗಿದೆ, ~3,050 ಸಾಲುಗಳ `.env.example`)    |
-| `TROUBLESHOOTING.md`        | ಸಾಮಾನ್ಯ ದೋಷಗಳು + v3.8.0 ಗೊತ್ತಿರುವ ಸಮಸ್ಯೆಗಳು                                          |
-| `RELEASE_CHECKLIST.md`      | ಸಂಪೂರ್ಣ ಬಿಡುಗಡೆ ಹರಿವು (ಸ್ಕಿಲ್ಗಳು, husky, conventional commits, ಡಿಪ್ಲಾಯ್)             |
+| `ENVIRONMENT.md`            | ಎಲ್ಲಾ env ವೇರಿಯೇಬಲ್ಗಳು (~800 ದಸ್ತಾವೇಜೀಕರಿಸಲಾಗಿದೆ, ~3,050 ಸಾಲುಗಳ `.env.example`)      |
+| `TROUBLESHOOTING.md`        | ಸಾಮಾನ್ಯ ದೋಷಗಳು + v3.8.0 ತಿಳಿದಿರುವ ಸಮಸ್ಯೆಗಳು                                          |
+| `RELEASE_CHECKLIST.md`      | ಪೂರ್ಣ ರಿಲೀಸ್ ಫ್ಲೋ (ಸ್ಕಿಲ್ಗಳು, husky, conventional commits, ಡಿಪ್ಲಾಯ್)                 |
 | `COVERAGE_PLAN.md`          | ಕವರೇಜ್ ಗುರಿಗಳು ಮತ್ತು ಪ್ರಸ್ತುತ ಸ್ಥಿತಿ                                                 |
-| `FREE_TIERS.md`             | ಆಯ್ದ ಉಚಿತ-ಶ್ರೇಣಿ ಪ್ರೊವೈಡರ್ಗಳು (48+ ಉಚಿತ + 11 OAuth)                                  |
-| `CLI-TOOLS.md`              | ಹೊರಗಿನ CLI ಇಂಟಿಗ್ರೇಷನ್ಗಳು + ಆಂತರಿಕ OmniRoute CLI                                     |
-| `I18N.md`                   | i18n ವಿನ್ಯಾಸ, ಭಾಷೆಯನ್ನು ಸೇರಿಸುವುದು, 67 ಲೊಕೇಲ್ಗಳು                                     |
-| `UNINSTALL.md`              | ಸ್ವಚ್ಛ ಅನ್ಇನ್ಸ್ಟಾಲ್ ಹಂತಗಳು                                                           |
-| `PROVIDER_REFERENCE.md`     | 376 ಪ್ರೊವೈಡರ್ಗಳ **ಸ್ವಯಂ-ರಚಿತ** ಕ್ಯಾಟಲಾಗ್ (ಮರುರಚನೆ: `npm run gen:provider-reference`) |
+| `FREE_TIERS.md`             | ಕ್ಯೂರೇಟೆಡ್ ಫ್ರೀ-ಟೈರ್ ಪ್ರೊವೈಡರ್ಗಳು (48+ ಫ್ರೀ + 11 OAuth)                              |
+| `CLI-TOOLS.md`              | ಎಕ್ಸ್ಟರ್ನಲ್ CLI ಇಂಟಿಗ್ರೇಷನ್ಗಳು + ಇಂಟರ್ನಲ್ OmniRoute CLI                              |
+| `I18N.md`                   | i18n ಆರ್ಕಿಟೆಕ್ಚರ್, ಭಾಷೆಯನ್ನು ಸೇರಿಸುವುದು, 67 ಲೊಕೇಲ್ಗಳು                                |
+| `UNINSTALL.md`              | ಕ್ಲೀನ್ ಅನ್ಇನ್ಸ್ಟಾಲ್ ಹಂತಗಳು                                                           |
+| `PROVIDER_REFERENCE.md`     | 376 ಪ್ರೊವೈಡರ್ಗಳ **ಆಟೋ-ಜನರೇಟೆಡ್** ಕ್ಯಾಟಲಾಗ್ (regen: `npm run gen:provider-reference`) |
 
-### ಉಪವ್ಯವಸ್ಥೆ ಆಳವಾದ ವಿಶ್ಲೇಷಣೆಗಳು
+### ಉಪವ್ಯವಸ್ಥೆ ಡೀಪ್-ಡೈವ್ಗಳು
 
-| ದಸ್ತಾವೇಜು                                   | ಉದ್ದೇಶ                                                                          |
-| ------------------------------------------- | ------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP ಸರ್ವರ್: 110 ಟೂಲ್ಗಳು, 3 ಟ್ರಾನ್ಸ್ಪೋರ್ಟ್ಗಳು, 33 ಸ್ಕೋಪ್ಗಳು, REST ಎಂಡ್ಪಾಯಿಂಟ್ಗಳು |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 ಸ್ಕಿಲ್ಗಳು, REST ಹೆಲ್ಪರ್ಗಳು, ಏಜೆಂಟ್ ಕಾರ್ಡ್                 |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | ಏಕೀಕೃತ ಮಾರ್ಗದರ್ಶಿ: A2A vs ACP vs Cloud Agents                                   |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules ಆರ್ಕೆಸ್ಟ್ರೇಷನ್                                      |
-| `SKILLS.md`                                 | ಸ್ಕಿಲ್ಸ್ ಫ್ರೇಮ್ವರ್ಕ್ (ಬಿಲ್ಟ್-ಇನ್ + ಮಾರ್ಕೆಟ್ಪ್ಲೇಸ್ + SkillsSH + ಸ್ಯಾಂಡ್ಬಾಕ್ಸ್)   |
-| `RADAR.md`                                  | Radar ಉಚಿತ-ಮಾದರಿ ಕ್ಯಾಟಲಾಗ್ ಓವರ್ಲೇ (`RADAR_ENABLED`, ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್)           |
-| `MEMORY.md`                                 | ಮೆಮೊರಿ ಸಿಸ್ಟಮ್ (SQLite FTS5 + Qdrant)                                           |
-| `EVALS.md`                                  | ಇವಾಲ್ ಫ್ರೇಮ್ವರ್ಕ್ (ಸೂಟ್ಗಳು, ರನ್ಗಳು, ರೂಬ್ರಿಕ್ಗಳು)                                |
-| `GUARDRAILS.md`                             | PII ಮಾಸ್ಕರ್, ಪ್ರಾಂಪ್ಟ್ ಇಂಜೆಕ್ಷನ್, ವಿಷನ್ ಬ್ರಿಡ್ಜ್                                |
-| `COMPLIANCE.md`                             | ಆಡಿಟ್ ಲಾಗ್, ರಿಟೆನ್ಷನ್, noLog ಆಪ್ಟ್-ಔಟ್                                          |
-| `WEBHOOKS.md`                               | HMAC-ಸಹಿ ವೆಬ್ಹುಕ್ ಡೆಲಿವರಿ                                                       |
-| `REASONING_REPLAY.md`                       | `reasoning_content` ಗಾಗಿ ಹೈಬ್ರಿಡ್ ಮೆಮೊರಿ/SQLite ಕ್ಯಾಶೆ                          |
-| `AUTHZ_GUIDE.md`                            | ಅಧಿಕೀಕರಣ ಪೈಪ್ಲೈನ್ (`classify` → `policies` → `enforce`)                         |
-| `RESILIENCE_GUIDE.md`                       | ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ + ಕೂಲ್ಡೌನ್ + ಮಾದರಿ ಲಾಕ್ಔಟ್                                    |
-| `docs/security/STEALTH_GUIDE.md` (git only) | TLS ಫಿಂಗರ್ಪ್ರಿಂಟಿಂಗ್ (JA3/JA4), Claude Code CCH, MITM ಪ್ರಮಾಣಪತ್ರ                |
-| `AUTO-COMBO.md`                             | Auto Combo ಎಂಜಿನ್ (16-ಅಂಶ ಸ್ಕೋರಿಂಗ್, 6 ಮೋಡ್ ಪ್ಯಾಕ್ಗಳು, ವರ್ಚುವಲ್ ಫ್ಯಾಕ್ಟರಿ)      |
+| ಡಾಕ್                                         | ಉದ್ದೇಶ                                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | MCP ಸರ್ವರ್: 110 ಟೂಲ್ಗಳು, 3 ಟ್ರಾನ್ಸ್ಪೋರ್ಟ್ಗಳು, 33 ಸ್ಕೋಪ್ಗಳು, REST ಎಂಡ್ಪಾಯಿಂಟ್ಗಳು |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 ಸ್ಕಿಲ್ಗಳು, REST ಹೆಲ್ಪರ್ಗಳು, ಏಜೆಂಟ್ ಕಾರ್ಡ್                 |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | ಏಕೀಕೃತ ಮಾರ್ಗದರ್ಶಿ: A2A vs ACP vs Cloud Agents                                   |
+| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules ಆರ್ಕೆಸ್ಟ್ರೇಷನ್                                      |
+| `SKILLS.md`                                  | ಸ್ಕಿಲ್ಸ್ ಫ್ರೇಮ್ವರ್ಕ್ (ಬಿಲ್ಟ್-ಇನ್ + ಮಾರ್ಕೆಟ್ಪ್ಲೇಸ್ + SkillsSH + ಸ್ಯಾಂಡ್ಬಾಕ್ಸ್)   |
+| `RADAR.md`                                   | Radar ಫ್ರೀ-ಮಾಡೆಲ್ ಕ್ಯಾಟಲಾಗ್ ಓವರ್ಲೇ (`RADAR_ENABLED`, ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್)          |
+| `MEMORY.md`                                  | ಮೆಮೊರಿ ಸಿಸ್ಟಮ್ (SQLite FTS5 + Qdrant)                                           |
+| `EVALS.md`                                   | ಇವಾಲ್ ಫ್ರೇಮ್ವರ್ಕ್ (ಸೂಟ್ಗಳು, ರನ್ಗಳು, ರೂಬ್ರಿಕ್ಗಳು)                                |
+| `GUARDRAILS.md`                              | PII ಮಾಸ್ಕರ್, ಪ್ರಾಂಪ್ಟ್ ಇಂಜೆಕ್ಷನ್, ವಿಷನ್ ಬ್ರಿಡ್ಜ್                                |
+| `COMPLIANCE.md`                              | ಆಡಿಟ್ ಲಾಗ್, ರಿಟೆನ್ಷನ್, noLog ಆಪ್ಟ್-ಔಟ್                                          |
+| `WEBHOOKS.md`                                | HMAC-ಸಹಿ ಮಾಡಿದ ವೆಬ್ಹುಕ್ ಡೆಲಿವರಿ                                                 |
+| `REASONING_REPLAY.md`                        | `reasoning_content` ಗಾಗಿ ಹೈಬ್ರಿಡ್ ಮೆಮೊರಿ/SQLite ಕ್ಯಾಶೆ                          |
+| `AUTHZ_GUIDE.md`                             | ಆಥೊರೈಸೇಷನ್ ಪೈಪ್ಲೈನ್ (`classify` → `policies` → `enforce`)                       |
+| `RESILIENCE_GUIDE.md`                        | ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ + ಕೂಲ್ಡೌನ್ + ಮಾಡೆಲ್ ಲಾಕ್ಔಟ್                                   |
+| `docs/security/STEALTH_GUIDE.md` (git ಮಾತ್ರ) | TLS ಫಿಂಗರ್ಪ್ರಿಂಟಿಂಗ್ (JA3/JA4), Claude Code CCH, MITM ಸರ್ಟ್                     |
+| `AUTO-COMBO.md`                              | ಆಟೋ ಕಾಂಬೊ ಎಂಜಿನ್ (16-ಫ್ಯಾಕ್ಟರ್ ಸ್ಕೋರಿಂಗ್, 6 ಮೋಡ್ ಪ್ಯಾಕ್ಗಳು, ವರ್ಚುವಲ್ ಫ್ಯಾಕ್ಟರಿ) |
 
-### ಸಂಕ್ಷಿಪ್ತೀಕರಣ
+### ಕಂಪ್ರೆಷನ್
 
-| ದಸ್ತಾವೇಜು                       | ಉದ್ದೇಶ                                          |
+| ಡಾಕ್                            | ಉದ್ದೇಶ                                          |
 | ------------------------------- | ----------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | ಸಂಕ್ಷಿಪ್ತೀಕರಣ ಮೋಡ್ಗಳ ಅವಲೋಕನ + ರೋಡ್ಮ್ಯಾಪ್        |
+| `COMPRESSION_GUIDE.md`          | ಕಂಪ್ರೆಷನ್ ಮೋಡ್ಗಳ ಅವಲೋಕನ + ರೋಡ್ಮ್ಯಾಪ್            |
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK ಎಂಜಿನ್ಗಳು, ರಿಜಿಸ್ಟ್ರಿ ಕಾಂಟ್ರಾಕ್ಟ್ |
 | `COMPRESSION_RULES_FORMAT.md`   | Caveman ರೂಲ್ ಪ್ಯಾಕ್ JSON ಸ್ಕೀಮಾ                 |
-| `COMPRESSION_LANGUAGE_PACKS.md` | ಪ್ರತಿ-ಭಾಷೆ ರೂಲ್ ಪ್ಯಾಕ್ ದಾಸ್ತಾನು                 |
+| `COMPRESSION_LANGUAGE_PACKS.md` | ಪ್ರತಿ-ಭಾಷೆ ರೂಲ್ ಪ್ಯಾಕ್ ಇನ್ವೆಂಟರಿ                |
 | `RTK_COMPRESSION.md`            | RTK ಡಿಕ್ಲರೇಟಿವ್ ಪೈಪ್ಲೈನ್ (56 ಫಿಲ್ಟರ್ಗಳು)        |
 
-### ನಿಯೋಜನೆ
+### ಡಿಪ್ಲಾಯ್ಮೆಂಟ್
 
-| ಡಾಕ್                         | ಉದ್ದೇಶ                                                                 |
+| ದಸ್ತಾವೇಜು                    | ಉದ್ದೇಶ                                                                 |
 | ---------------------------- | ---------------------------------------------------------------------- |
 | `DOCKER_GUIDE.md`            | Docker ಬಿಲ್ಡ್, ಪ್ರೊಫೈಲ್ಗಳು (base/cli/host/cliproxyapi), Redis ಸೈಡ್ಕಾರ್ |
-| `VM_DEPLOYMENT_GUIDE.md`     | ಜೆನೆರಿಕ್ VM/VPS ಡಿಪ್ಲಾಯ್ಮೆಂಟ್ (Ubuntu/Debian + nginx + systemd)        |
+| `VM_DEPLOYMENT_GUIDE.md`     | ಸಾಮಾನ್ಯ VM/VPS ಡಿಪ್ಲಾಯ್ಮೆಂಟ್ (Ubuntu/Debian + nginx + systemd)         |
 | `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ಡಿಪ್ಲಾಯ್ಮೆಂಟ್ (ಪ್ರಸ್ತುತ ಚೈನೀಸ್-ಮಾತ್ರ)                           |
 | `TERMUX_GUIDE.md`            | Termux ಮೂಲಕ Android ಹೆಡ್ಲೆಸ್                                           |
-| `PWA_GUIDE.md`               | ಪ್ರೊಗ್ರೆಸಿವ್ ವೆಬ್ ಆ್ಯಪ್ ಇನ್ಸ್ಟಾಲ್ + ಸರ್ವೀಸ್ ವರ್ಕರ್                     |
+| `PWA_GUIDE.md`               | Progressive Web App ಇನ್ಸ್ಟಾಲ್ + ಸರ್ವೀಸ್ ವರ್ಕರ್                         |
 | `ELECTRON_GUIDE.md`          | ಡೆಸ್ಕ್ಟಾಪ್ ಆ್ಯಪ್ ಬಿಲ್ಡ್ + ಸೈನ್ + ವಿತರಣೆ                                |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
-| `PROXY_GUIDE.md`             | 4-ಹಂತದ ಔಟ್ಬೌಂಡ್ ಪ್ರಾಕ್ಸಿ + 1proxy ಮಾರ್ಕೆಟ್ಪ್ಲೇಸ್                       |
+| `PROXY_GUIDE.md`             | 4-ಹಂತದ ಔಟ್ಬೌಂಡ್ ಪ್ರಾಕ್ಸಿ + 1proxy ಮಾರುಕಟ್ಟೆ                            |
 
-### ಸಬ್ಡೈರೆಕ್ಟರಿಗಳು
+### ಉಪಡೈರೆಕ್ಟರಿಗಳು
 
-| ಸಬ್ಡೈರ್               | ಉದ್ದೇಶ                                                                                                                                                                                                                        |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ಸ್ಥಳೀಕರಿಸಿದ ಡಾಕ್ ಅನುವಾದಗಳು (41 ಲೊಕೇಲ್ಗಳು)                                                                                                                                                                                     |
-| `docs/screenshots/`   | ಗೈಡ್ಗಳಿಗಾಗಿ ಇಮೇಜ್ ಆಸೆಟ್ಗಳು                                                                                                                                                                                                    |
-| `_tasks/superpowers/` | superpowers ನಿಂದ ಪ್ಲಾನ್ಗಳು/ಸ್ಪೆಕ್ಗಳು (`writing-plans`/`brainstorming`) + ಸಂಶೋಧನೆ — ಪ್ರತ್ಯೇಕವಾದ, ಪ್ರತ್ಯೇಕವಾಗಿ ವರ್ಷನ್ ಮಾಡಲಾದ ರಿಪೊ, ಮುಖ್ಯ ಟ್ರೀಯಿಂದ gitignore ಮಾಡಲಾಗಿದೆ. CLAUDE.md → "ಯೋಜನೆ ಮತ್ತು ಸಂಶೋಧನಾ ಆರ್ಟಿಫ್ಯಾಕ್ಟ್ಗಳು" ನೋಡಿ. |
+| ಉಪಡೈರೆಕ್ಟರಿ           | ಉದ್ದೇಶ                                                                                                                                                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | ಸ್ಥಳೀಕರಿಸಿದ ದಸ್ತಾವೇಜು ಅನುವಾದಗಳು (41 ಲೊಕೇಲ್ಗಳು)                                                                                                                                                                            |
+| `docs/screenshots/`   | ಮಾರ್ಗದರ್ಶಿಗಳಿಗಾಗಿ ಚಿತ್ರ ಆಸ್ತಿಗಳು                                                                                                                                                                                          |
+| `_tasks/superpowers/` | ಸೂಪರ್ಪವರ್ಸ್ನಿಂದ ಯೋಜನೆಗಳು/ಸ್ಪೆಕ್ಗಳು (`writing-plans`/`brainstorming`) + ಸಂಶೋಧನೆ — ಪ್ರತ್ಯೇಕಿಸಲಾದ, ಪ್ರತ್ಯೇಕವಾಗಿ ಆವೃತ್ತಿಗೊಳಿಸಲಾದ ರೆಪೊ, ಮುಖ್ಯ ಟ್ರೀಯಿಂದ gitignore ಮಾಡಲಾಗಿದೆ. CLAUDE.md → "ಯೋಜನೆ ಮತ್ತು ಸಂಶೋಧನೆ ಕಲಾಕೃತಿಗಳು" ನೋಡಿ. |
 
 ---
 

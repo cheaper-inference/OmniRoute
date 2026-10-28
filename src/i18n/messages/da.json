@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Udbydergrænser",
     "noProviders": "Ingen udbydere tilsluttet",
+    "quotaAuthRequired": "Godkendelse påkrævet – log ind på kontrolpanelet",
+    "quotaAuthRequiredHint": "Udbyderforbindelser kunne ikke indlæses, fordi kontrolpanelsessionen mangler eller er udløbet. Log ind, og opdater siden for at se dine kvotegrænser.",
     "connectProvidersForQuota": "Opret forbindelse til udbydere med OAuth for at spore dine API-kvotegrænser og brug.",
     "accountsCount": "{count, plural, one {# konto} other {# konti}}",
     "filteredFromCount": "(filtreret fra {count})",

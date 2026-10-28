@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "מגבלות ספקים",
     "noProviders": "אין ספקים מחוברים",
+    "quotaAuthRequired": "נדרש אימות - יש להתחבר ללוח הבקרה",
+    "quotaAuthRequiredHint": "לא ניתן היה לטעון את חיבורי הספקים מכיוון שההפעלה של לוח הבקרה חסרה או שפג תוקפה. יש להתחבר ולרענן כדי לראות את מגבלות המכסה שלכם.",
     "connectProvidersForQuota": "התחבר לספקים עם OAuth כדי לעקוב אחר מגבלות מכסת ה-API והשימוש שלך.",
     "accountsCount": "{count, plural, one {# חשבון} other {# חשבונות}}",
     "filteredFromCount": "(מסונן מ-{count})",

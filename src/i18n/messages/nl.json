@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limieten van aanbieders",
     "noProviders": "Geen providers aangesloten",
+    "quotaAuthRequired": "Authenticatie vereist - meld u aan bij het dashboard",
+    "quotaAuthRequiredHint": "Providerverbindingen konden niet worden geladen omdat de dashboardsessie ontbreekt of is verlopen. Meld u aan en vernieuw de pagina om uw quotumlimieten te bekijken.",
     "connectProvidersForQuota": "Maak verbinding met providers met OAuth om uw API-quotumlimieten en -gebruik bij te houden.",
     "accountsCount": "{count, plural, one {# account} other {# accounts}}",
     "filteredFromCount": "(gefilterd van {count})",

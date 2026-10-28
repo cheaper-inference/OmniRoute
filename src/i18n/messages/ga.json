@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Teorainneacha Soláthraí",
     "noProviders": "Níl aon Soláthraí Ceangailte",
+    "quotaAuthRequired": "Fíordheimhniú riachtanach - sínigh isteach sa deais",
+    "quotaAuthRequiredHint": "Níorbh fhéidir naisc soláthraithe a lódáil toisc go bhfuil seisiún na deaise ar iarraidh nó imithe in éag. Sínigh isteach agus athnuaigh chun do theorainneacha cuóta a fheiceáil.",
     "connectProvidersForQuota": "Ceangail le soláthraithe trí OAuth chun teorainneacha do chuóta API agus d'úsáid a rianú.",
     "accountsCount": "{count, plural, one {# cuntas} other {# cuntais}}",
     "filteredFromCount": "(scagtha ó {count})",

@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "සැපයුම්කරු සීමා",
     "noProviders": "සම්බන්ධිත සැපයුම්කරුවන් නොමැත",
+    "quotaAuthRequired": "සත්යාපනය අවශ්යයි - උපකරණ පුවරුවට පිවිසෙන්න",
+    "quotaAuthRequiredHint": "උපකරණ පුවරු සැසිය නොමැති හෝ කල් ඉකුත් වී ඇති බැවින් සැපයුම්කරු සම්බන්ධතා පූරණය කළ නොහැකි විය. ඔබේ කෝටා සීමාවන් බැලීමට පිවිස පිටුව නැවුම් කරන්න.",
     "connectProvidersForQuota": "ඔබේ API කෝටා සීමා සහ භාවිතය හඹා යාමට OAuth සමඟ සැපයුම්කරුවන් වෙත සම්බන්ධ වන්න.",
     "accountsCount": "{count, plural, one {# ගිණුම} other {# ගිණුම්}}",
     "filteredFromCount": "({count}කින් පෙරා ඇත)",

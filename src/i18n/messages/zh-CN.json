@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "提供者限制",
     "noProviders": "没有连接提供者",
+    "quotaAuthRequired": "需要身份验证 - 请登录控制面板",
+    "quotaAuthRequiredHint": "由于控制面板会话缺失或已过期，无法加载提供商连接。请登录并刷新，以查看您的配额限制。",
     "connectProvidersForQuota": "通过 OAuth 连接提供者，以跟踪 API 配额限制和使用情况。",
     "accountsCount": "{count, plural, one {# 个账户} other {# 个账户}}",
     "filteredFromCount": "（从 {count} 过滤）",

@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Provayder limitləri",
     "noProviders": "Heç bir provayder qoşulmayıb",
+    "quotaAuthRequired": "Autentifikasiya tələb olunur — idarəetmə panelinə daxil olun",
+    "quotaAuthRequiredHint": "İdarəetmə paneli sessiyası mövcud olmadığı və ya müddəti bitdiyi üçün provayder bağlantılarını yükləmək mümkün olmadı. Kvota limitlərinizi görmək üçün daxil olun və səhifəni yeniləyin.",
     "connectProvidersForQuota": "API kvota limitlərinizi və istifadənizi izləmək üçün OAuth vasitəsilə provayderlərə qoşulun.",
     "accountsCount": "{count, plural, one {# hesab} other {# hesab}}",
     "filteredFromCount": "({count} nəticədən filtrlənib)",

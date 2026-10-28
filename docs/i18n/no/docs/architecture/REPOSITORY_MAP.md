@@ -116,45 +116,45 @@ OmniRoute/
 ```
 src/
 ├── app/                 # App Router (sider + API-ruter + statussider + landingsside)
-├── lib/                 # Kjernebiblioteker/domene-moduler (80 undermapper + ~70 filer på toppnivå)
-├── domain/              # Ren domenelogikk (policy-motor, reserveløsning, kostnad, sperring, comboResolver, vurdering)
+├── lib/                 # Kjernebiblioteker / domenemoduler (80 undermapper + ~70 filer på toppnivå)
+├── domain/              # Ren domenelogikk (policy-motor, reservehåndtering, kostnad, sperring, comboResolver, vurdering)
 ├── server/              # Moduler kun for server (autorisasjonsflyt, CORS, autentiseringsmellomvare) — kan ikke importeres fra klienten
-├── shared/              # Deles mellom server og klient der det er trygt (konstanter, typer, validering, kontrakter, verktøy)
+├── shared/              # Delt mellom server og klient der det er trygt (konstanter, typer, validering, kontrakter, verktøy)
 ├── i18n/                # next-intl-konfigurasjon + meldings-JSON per språkinnstilling (67 språkinnstillinger)
-├── middleware/          # Next.js-mellomvare (berikelse av forespørsler, gjenkjenning av språkinnstilling)
-├── mitm/                # Kjerne for MITM-proxy: generering/installasjon av sertifikater, håndterere, mål, inspektør, masker, direkte videresending
-│   ├── handlers/        # 9 håndtererklasser for IDE-agenter som utvider MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+├── middleware/          # Next.js-mellomvare (berikelse av forespørsler, språkdeteksjon)
+├── mitm/                # Kjerne for MITM-proxy: generering/installasjon av sertifikater, håndterere, mål, inspektør, masker, direktevideresending
+│   ├── handlers/        # 9 håndteringsklasser for IDE-agenter som utvider MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
 │   └── inspector/       # Lag for trafikkregistrering: buffer (ringbuffer i minnet), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
 ├── models/              # Koblingskode for modelladaptere (eldre kompatibilitetslag)
 ├── scripts/             # Vedlikeholdsskript i kildetreet (f.eks. backfillAggregation)
 ├── sse/                 # Eldre SSE-håndterere/-tjenester (chat.ts, chatHelpers.ts, services/auth.ts)
 ├── store/               # Eldre minnelager (fases ut til fordel for src/lib/db)
 ├── types/               # Delte TS-typefiler
-├── instrumentation.ts   # Next.js-hook for telemetri (nettleser + edge)
+├── instrumentation.ts   # Next.js-krok for telemetri (nettleser + edge)
 ├── instrumentation-node.ts  # Instrumentering kun for Node
-└── proxy.ts             # Inngangskompatibilitetslag for HTTP-proxy
+└── proxy.ts             # Inngangslag for HTTP-proxy
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Bane                                                                         | Formål                                                                                                                                                                                                                                                                                                                   |
+| Sti                                                                          | Formål                                                                                                                                                                                                                                                                                                                   |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app/api/v1/`                                                                | Offentlig OpenAI-kompatibelt API (~25 underruter: chat, fullføringer, innebygginger, filer, batcher, lyd, bilder, videoer, musikk, omrangering, moderering, søk, ws, agenter, kontoer, leverandører osv.)                                                                                                                |
+| `app/api/v1/`                                                                | Offentlig OpenAI-kompatibelt API (~25 underruter: chat, fullføringer, embeddings, filer, batcher, lyd, bilder, videoer, musikk, omrangering, moderering, søk, ws, agenter, kontoer, leverandører osv.)                                                                                                                   |
 | `app/api/v1beta/`                                                            | API-endepunkter i Gemini-stil                                                                                                                                                                                                                                                                                            |
 | `app/api/playground/`                                                        | Ruter for Playground Studio: `improve-prompt/` (POST — LLM-basert omskriving av ledetekster), `presets/` (GET liste / POST opprett), `presets/[id]/` (GET / PUT / DELETE) — se `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                    |
-| `app/api/` (ikke-v1)                                                         | Administrasjonsruter (~60 kataloger: leverandører, kombinasjoner, innstillinger, mcp, a2a, evalueringer, minne, ferdigheter, webhooks, samsvar, robusthet, overvåking, tunneler, CLI-verktøy osv.)                                                                                                                       |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST-API — 12 ruter (serverkontroll, agentstatus/DNS/tilordninger, omgåelse, sertifikat, oppstrøms-CA). LOCAL_ONLY + SPAWN_CAPABLE. Se `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                  |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST- og WS-API — 16+ ruter (forespørsler, økter, verter, opptaksmoduser, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. Se `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                      |
+| `app/api/` (ikke-v1)                                                         | Administrasjonsruter (~60 kataloger: leverandører, kombinasjoner, innstillinger, mcp, a2a, evalueringer, minne, ferdigheter, webhooks, samsvar, robusthet, overvåking, tunneler, cli-verktøy osv.)                                                                                                                       |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST-API — 12 ruter (serverstyring, agentstatus/DNS/tilordninger, forbikobling, sertifikat, oppstrøms-CA). LOCAL_ONLY + SPAWN_CAPABLE. Se `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                               |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST- + WS-API — 16+ ruter (forespørsler, økter, verter, registreringsmoduser, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. Se `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                 |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0-inngangspunkt (`POST /a2a`)                                                                                                                                                                                                                                                                             |
 | `app/.well-known/agent.json/`                                                | A2A-agentkort (oppdagelse)                                                                                                                                                                                                                                                                                               |
-| `app/(dashboard)/dashboard/`                                                 | Sider i kontrollpanelgrensesnittet (50+ seksjoner, ~118 page.tsx-filer: leverandører, kombinasjoner, innstillinger, minne, ferdigheter, webhooks, evalueringer, revisjon, batch, hurtigbuffer, kostnader, tilstand, system, aktivitet osv.)                                                                              |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Brukergrensesnitt for Search Tools Studio (3 faner: Søk/Innhenting/Sammenligning + SearchConceptCard + ProviderCatalog) — se `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                    |
+| `app/(dashboard)/dashboard/`                                                 | Dashbordets brukergrensesnittsider (50+ seksjoner, ~118 page.tsx-filer: leverandører, kombinasjoner, innstillinger, minne, ferdigheter, webhooks, evalueringer, revisjon, batch, hurtigbuffer, kostnader, tilstand, system, aktivitet osv.)                                                                              |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Brukergrensesnitt for Search Tools Studio (3 faner: Søk/Skrap/Sammenlign + SearchConceptCard + ProviderCatalog) — se `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                            |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21): `page.tsx` (skall med 3 faner), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge-kontrollpanelside — serverkort, 9 agentkort, oppsettsveiviser, modelltilordning, omgåelsesliste. i18n PT-BR + EN. Se `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                       |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector-kontrollpanelside — delt DevTools-visning, 7 detaljfaner, 4 brytere for opptaksmodus, øktopptaker, kontekstfargelegging. i18n PT-BR + EN. Se `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                   |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge-dashbordside — serverkort, 9 agentkort, konfigurasjonsveiviser, modelltilordning, forbikoblingsliste. i18n PT-BR + EN. Se `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                  |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector-dashbordside — DevTools-delt visning, 7 detaljfaner, 4 brytere for registreringsmodus, øktopptaker, kontekstfargelegging. i18n PT-BR + EN. Se `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                  |
 | `app/(dashboard)/dashboard/activity/`                                        | Aktivitetsstrømside (gruppe B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — se `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                  |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Side for kvotedeling (gruppe B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                             |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfigurasjonsside for leverandørplaner (gruppe B): `page.tsx` + `ProviderPlanConfigClient.tsx` — overstyring av kvotedimensjoner per tilkobling                                                                                                                                                                         |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfigurasjonsside for leverandørplan (gruppe B): `page.tsx` + `ProviderPlanConfigClient.tsx` — overstyring av kvotedimensjoner per tilkobling                                                                                                                                                                           |
 | `app/docs/`                                                                  | Innebygd dokumentasjonsvisning (gjengir `docs/*.md`)                                                                                                                                                                                                                                                                     |
 | `app/landing/`                                                               | Markedsføringsside                                                                                                                                                                                                                                                                                                       |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Autentiseringsrelaterte sider                                                                                                                                                                                                                                                                                            |
@@ -168,42 +168,42 @@ src/
 | Modul                                    | Formål                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | Oppgavebehandling for A2A-protokollen, ferdigheter (5), strømming                                                                                                                                                                                                                                                         |
-| `acp/`                                   | CLI-agentregister (lokal CLI-oppdagelse — se `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                  |
+| `acp/`                                   | CLI-agentregister (lokal CLI-oppdagelse – se `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                  |
 | `api/`                                   | Delte API-hjelpere (`requireManagementAuth`, validering)                                                                                                                                                                                                                                                                  |
-| `auth/`                                  | Økt, hashing av passord, validering av token                                                                                                                                                                                                                                                                              |
+| `auth/`                                  | Økter, passordhashing, tokenvalidering                                                                                                                                                                                                                                                                                    |
 | `batches/`                               | Behandlere for OpenAI Batches API                                                                                                                                                                                                                                                                                         |
-| `catalog/`                               | Zod-validering av leverandørkatalog + avklaring av funksjonalitet                                                                                                                                                                                                                                                         |
-| `cloudAgent/`                            | Skyagenter (Codex Cloud, Devin, Jules) — se `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                              |
-| `combos/`                                | Avklaring av kombinasjoner + hjelpere for endring av rekkefølge                                                                                                                                                                                                                                                           |
-| `audit/`                                 | Hjelpere for aktivitetsstrøm: `highLevelActions.ts` (tillatelsesliste + `isHighLevelAction()`), `activityIcons.ts` (handling → ikon-/verbkart), `timeline.ts` (groupByDay/relativeTime) — se `docs/architecture/MONITORING_SECTIONS.md`                                                                                   |
-| `compliance/`                            | Revisjonslogg + leverandørrevisjon — se `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                     |
+| `catalog/`                               | Zod-validering av leverandørkatalog og kapabilitetsoppløsning                                                                                                                                                                                                                                                             |
+| `cloudAgent/`                            | Skyagenter (Codex Cloud, Devin, Jules) – se `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                              |
+| `combos/`                                | Kombinasjonsoppløsning og hjelpere for endring av rekkefølge                                                                                                                                                                                                                                                              |
+| `audit/`                                 | Hjelpere for aktivitetsstrøm: `highLevelActions.ts` (tillatelsesliste + `isHighLevelAction()`), `activityIcons.ts` (tilordning fra handling → ikon/verb), `timeline.ts` (groupByDay/relativeTime) – se `docs/architecture/MONITORING_SECTIONS.md`                                                                         |
+| `compliance/`                            | Revisjonslogg og leverandørrevisjon – se `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                    |
 | `compression/`                           | Integrasjonslag for komprimeringsmotoren (motorene ligger i `open-sse/services/compression/`)                                                                                                                                                                                                                             |
 | `config/`                                | Hjelpere for kjøretidskonfigurasjon                                                                                                                                                                                                                                                                                       |
-| `db/`                                    | Over 120 domenespesifikke DB-moduler + 168 migreringer (bruk alltid disse for SQLite)                                                                                                                                                                                                                                     |
-| `quota/`                                 | Motor for kvotedeling: `dimensions.ts` (typer/Zod), `types.ts` (QuotaStore-grensesnitt), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — se `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Klient for Radars katalog over gratis modeller: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — se `docs/frameworks/RADAR.md`                                                                                                                                |
-| `display/`                               | Hjelpefunksjoner for UI-formatering (kostnad, ventetid osv.)                                                                                                                                                                                                                                                              |
+| `db/`                                    | Over 120 domenespesifikke DB-moduler og 168 migreringer (gå alltid gjennom disse for SQLite)                                                                                                                                                                                                                              |
+| `quota/`                                 | Motor for kvotedeling: `dimensions.ts` (typer/Zod), `types.ts` (QuotaStore-grensesnitt), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` – se `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Katalogklient for Radars gratis-modeller: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — se `docs/frameworks/RADAR.md`                                                                                                                                      |
+| `display/`                               | Hjelpefunksjoner for UI-formatering (kostnad, latens osv.)                                                                                                                                                                                                                                                                |
 | `embeddings/`                            | Hjelpefunksjoner for embedding-tjenesten                                                                                                                                                                                                                                                                                  |
 | `env/`                                   | Tolking og validering av miljøvariabler                                                                                                                                                                                                                                                                                   |
-| `evals/`                                 | Rammeverk for evalueringer (samlinger, kjører, kjøretidsmiljø) — se `docs/frameworks/EVALS.md`                                                                                                                                                                                                                            |
-| `guardrails/`                            | Maskering av personopplysninger, promptinjeksjon, bildebro — se `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                             |
+| `evals/`                                 | Evalueringsrammeverk (suiter, kjører, kjøretidsmiljø) — se `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                     |
+| `guardrails/`                            | Maskering av personopplysninger, promptinjeksjon, vision-bro — se `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                           |
 | `jobs/`                                  | Bakgrunnsjobber (cron-lignende)                                                                                                                                                                                                                                                                                           |
-| `memory/`                                | Samtaleminne (hybrid RRF med SQLite FTS5 + sqlite-vec samt Qdrant-nivå 2) — se `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                |
-| `memory/embedding/`                      | Embedding-lag med flere kilder: `index.ts` (løser), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                              |
-| `memory/vectorStore.ts`                  | Wrapper for sqlite-vec v0.1.9 — KNN-råstyrkesøk + hybrid RRF (FTS5 + vektor, k=60). Utsatt initialisering, degraderes kontrollert når sqlite-vec ikke er tilgjengelig. (plan 21)                                                                                                                                          |
-| `memory/reindex.ts`                      | `runReindexBatch()` — behandler minner med `needs_reindex=1` i bakgrunnen; kalles av `POST /api/memory/reindex` og banen for utsatt tilbakefylling. (plan 21)                                                                                                                                                             |
-| `monitoring/`                            | Helsesjekker, utsending av måledata                                                                                                                                                                                                                                                                                       |
+| `memory/`                                | Samtaleminne (SQLite FTS5 + sqlite-vec-hybrid RRF + Qdrant-nivå 2) — se `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                       |
+| `memory/embedding/`                      | Embedding-lag med flere kilder: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                           |
+| `memory/vectorStore.ts`                  | Wrapper for sqlite-vec v0.1.9 — KNN-brute-force + hybrid RRF (FTS5 + vektor, k=60). Initialiseres ved behov og degraderes kontrollert når sqlite-vec ikke er tilgjengelig. (plan 21)                                                                                                                                      |
+| `memory/reindex.ts`                      | `runReindexBatch()` — behandler minner med `needs_reindex=1` i bakgrunnen; kalles av `POST /api/memory/reindex` og banen for tilbakefylling ved behov. (plan 21)                                                                                                                                                          |
+| `monitoring/`                            | Helsesjekker, publisering av måledata                                                                                                                                                                                                                                                                                     |
 | `oauth/`                                 | OAuth-/importflyter for 22 leverandørmoduler (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                  |
-| `plugins/`                               | Register over programtillegg                                                                                                                                                                                                                                                                                              |
+| `plugins/`                               | Plugin-register                                                                                                                                                                                                                                                                                                           |
 | `promptCache/`                           | Anthropic-lignende bruddpunkter for prompt-hurtigbuffer                                                                                                                                                                                                                                                                   |
 | `skills/`                                | Rammeverk for ferdigheter (innebygde + markedsplass + SkillsSH) — se `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                          |
-| `playground/`                            | Delte hjelpeverktøy for Playground Studio: `codeExport.ts` (curl-/Python-/TS-generator), `promptImprover.ts` (metapromptbygger), `streamMetrics.ts` (ren TTFT/TPS), `types.ts` (pristabell) — se `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                   |
+| `playground/`                            | Delte hjelpefunksjoner for Playground Studio: `codeExport.ts` (curl/Python/TS-generator), `promptImprover.ts` (meta-promptbygger), `streamMetrics.ts` (ren TTFT/TPS), `types.ts` (pristabell) — se `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                 |
 | `webhookDispatcher.ts`                   | HMAC-webhooklevering — se `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                   |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunneladministratorer — se `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                    |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnelbehandlere — se `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                         |
 | `cloudSync.ts`, `initCloudSync.ts`       | Valgfri skysynkronisering av tilstand                                                                                                                                                                                                                                                                                     |
-| `localDb.ts`                             | Samlemodul for videreeksport av databasemoduler (ingen logikk — kun videreeksport)                                                                                                                                                                                                                                        |
+| `localDb.ts`                             | Reeksportmodul for databasemoduler (ingen logikk — kun reeksport)                                                                                                                                                                                                                                                         |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Forespørselsbufring + idempotens                                                                                                                                                                                                                                                                                          |
-| (~30 flere filer på toppnivå)            | Spesialiserte hjelpeverktøy (logEnv, modelsDevSync, piiSanitizer osv.)                                                                                                                                                                                                                                                    |
+| (~30 flere filer på toppnivå)            | Spesialiserte hjelpefunksjoner (logEnv, modelsDevSync, piiSanitizer osv.)                                                                                                                                                                                                                                                 |
 
 ### `src/lib/db/` — Database (147 moduler + 208 migreringer)
 
@@ -211,30 +211,30 @@ src/
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `db/core.ts`              | `getDbInstance()`-singleton med WAL-journalføring                                                                                                                                       |
 | `db/migrations/`          | Versjonerte SQL-filer (idempotente, transaksjonelle). `073_memory_vec.sql` legger til `memory_vec_meta` + kolonnen `needs_reindex` (plan 21).                                           |
-| `db/playgroundPresets.ts` | CRUD-modul for forhåndsinnstillinger i Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
+| `db/playgroundPresets.ts` | CRUD-modul for Playground Studio-forhåndsinnstillinger (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)   |
 | `db/memoryVec.ts`         | CRUD for `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` osv. (plan 21)                              |
-| `db/<domain>.ts`          | Én modul per domene: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache osv.                 |
+| `db/<domain>.ts`          | Én modul per domene: leverandører, kombinasjoner, API-nøkler, brukere, økter, bruk, audit*log, webhooks, ferdigheter, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache osv. |
 
 ### `src/domain/`
 
-| Modul                  | Formål                                                 |
-| ---------------------- | ------------------------------------------------------ |
-| `policy.ts`            | Regelmotor                                             |
-| `fallbackPolicy.ts`    | Beslutningstre for reservevalg                         |
-| `costRules.ts`         | Regler for kostnadsberegning                           |
-| `lockoutPolicy.ts`     | Utestengingspolicy for modell/tilkobling               |
-| `tagRouter.ts`         | Taggbasert ruting                                      |
-| `comboResolver.ts`     | Kombinasjonsoppløsning (brukes av kombinasjonsmotoren) |
-| `modelAvailability.ts` | Tilgjengelighetskontroll per modell                    |
-| `assessment/`          | Modellvurdering (fase 1 av RFC-AUTO-ASSESSMENT )       |
+| Modul                  | Formål                                           |
+| ---------------------- | ------------------------------------------------ |
+| `policy.ts`            | Regelverkssystem                                 |
+| `fallbackPolicy.ts`    | Beslutningstre for reserveløsninger              |
+| `costRules.ts`         | Regler for kostnadsberegning                     |
+| `lockoutPolicy.ts`     | Utestengingsregler for modell/tilkobling         |
+| `tagRouter.ts`         | Taggbasert ruting                                |
+| `comboResolver.ts`     | Kombinasjonsoppløsning (brukes av kombomotoren)  |
+| `modelAvailability.ts` | Tilgjengelighetskontroll per modell              |
+| `assessment/`          | Modellvurdering (fase 1 av RFC-AUTO-ASSESSMENT ) |
 
 ### `src/server/`
 
-| Modul    | Formål                                                                                          |
-| -------- | ----------------------------------------------------------------------------------------------- |
-| `authz/` | Autorisasjonskjede: `classify` → `policies` → `enforce` — se `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | CORS-konfigurasjon                                                                              |
-| `auth/`  | Mellomvare for økter                                                                            |
+| Modul    | Formål                                                                                            |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| `authz/` | Autorisasjonsprosess: `classify` → `policies` → `enforce` — se `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | CORS-konfigurasjon                                                                                |
+| `auth/`  | Mellomvare for økter                                                                              |
 
 ### `src/shared/`
 
@@ -242,19 +242,19 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API for kontrollpanelkomponenter: adaptere over `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavn som brukes av skjermbildene → Lucide-komponenter (`<Icon>`)                            |
-| `constants/providers.ts`         | **376 leverandører** med Zod-validering (autoritativ kilde)                                                 |
+| `constants/providers.ts`         | **376 leverandører** med Zod-validering (sannhetskilde)                                                     |
 | `constants/cliTools.ts`          | Register over eksterne CLI-verktøy                                                                          |
 | `constants/routingStrategies.ts` | **20 rutingsstrategier** med prioriteter                                                                    |
 | `constants/publicApiRoutes.ts`   | Ruter som krever Bearer-autentisering (i motsetning til administrasjonsautentisering)                       |
-| `constants/upstreamHeaders.ts`   | Blokkeringsliste for headere i oppstrømsforespørsler                                                        |
-| `validation/schemas.ts`          | ~80 Zod-skjemaer (én autoritativ kilde for API-kontrakter)                                                  |
+| `constants/upstreamHeaders.ts`   | Avvisningsliste for headere i oppstrømsforespørsler                                                         |
+| `validation/schemas.ts`          | ~80 Zod-skjemaer (én enkelt sannhetskilde for API-kontrakter)                                               |
 | `validation/helpers.ts`          | Hjelpefunksjoner for Zod-validering (`validateBody` osv.)                                                   |
 | `types/`                         | Delte TS-typer                                                                                              |
 | `contracts/`                     | Offentlige API-kontrakter (brukt av `files:` i `package.json`)                                              |
-| `utils/circuitBreaker.ts`        | Sikringsmekanisme for leverandører (se `docs/architecture/RESILIENCE_GUIDE.md`)                             |
-| `utils/apiAuth.ts`               | Validering av API-nøkler og kontroll av tilgangsomfang                                                      |
-| `utils/fetchTimeout.ts`          | Innkapslinger for tidsavbrudd/avbrytelse ved oppstrøms fetch                                                |
-| `utils/releaseNotes.ts`          | Parser for lukkede v2-/legacy-kunngjøringer, lokalisering og ID-basert avvisning                            |
+| `utils/circuitBreaker.ts`        | Kretsbryter for leverandører (se `docs/architecture/RESILIENCE_GUIDE.md`)                                   |
+| `utils/apiAuth.ts`               | Validering av API-nøkler, kontroll av omfang                                                                |
+| `utils/fetchTimeout.ts`          | Innkapslinger for tidsavbrudd/avbrytelse ved oppstrøms-fetch                                                |
+| `utils/releaseNotes.ts`          | Parser for avsluttede v2-/eldre kunngjøringer, lokalisering og avvisning etter ID                           |
 
 ---
 
@@ -395,45 +395,45 @@ open-sse/
 
 ### Veiledninger på toppnivå
 
-| Dok                         | Formål                                                                                    |
-| --------------------------- | ----------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Overordnet arkitektur, delsystemkart, dashbordflate                                       |
-| `CODEBASE_DOCUMENTATION.md` | Teknisk referanse: kataloger, moduler, konvensjoner                                       |
-| `FEATURES.md`               | Funksjonsmatrise med høydepunkter fra v3.8                                                |
-| `USER_GUIDE.md`             | Brukerhåndbok (oppsett, modeller, kombinasjoner, CLI-er, lyd osv.)                        |
-| `API_REFERENCE.md`          | API-endepunktreferanse med autentiseringsmodell                                           |
-| `openapi.yaml`              | OpenAPI 3.0-spesifikasjon (121 stier)                                                     |
-| `SETUP_GUIDE.md`            | Installasjonsmetoder (npm, npx, Docker, Electron, Termux, kildekode)                      |
-| `ENVIRONMENT.md`            | Alle miljøvariabler (~800 dokumentert, ~3 050 linjer i `.env.example`)                    |
-| `TROUBLESHOOTING.md`        | Vanlige feil + kjente problemer i v3.8.0                                                  |
-| `RELEASE_CHECKLIST.md`      | Full utgivelsesflyt (skills, husky, conventional commits, utrulling)                      |
-| `COVERAGE_PLAN.md`          | Dekningsmål og nåværende status                                                           |
-| `FREE_TIERS.md`             | Kuraterte gratistilbydere (48+ gratis + 11 OAuth)                                         |
-| `CLI-TOOLS.md`              | Eksterne CLI-integrasjoner + internt OmniRoute-CLI                                        |
-| `I18N.md`                   | i18n-arkitektur, legge til et språk, 67 språkversjoner                                    |
-| `UNINSTALL.md`              | Trinn for ren avinstallasjon                                                              |
-| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog over 376 tilbydere (regenerer: `npm run gen:provider-reference`) |
+| Dok                         | Formål                                                                                       |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Overordnet arkitektur, delsystemkart, dashbordflate                                          |
+| `CODEBASE_DOCUMENTATION.md` | Teknisk referanse: kataloger, moduler, konvensjoner                                          |
+| `FEATURES.md`               | Funksjonsmatrise med høydepunkter fra v3.8                                                   |
+| `USER_GUIDE.md`             | Sluttbrukerhåndbok (oppsett, modeller, comboer, CLI-er, lyd osv.)                            |
+| `API_REFERENCE.md`          | Referanse for API-endepunkter med autentiseringsmodell                                       |
+| `openapi.yaml`              | OpenAPI 3.0-spesifikasjon (121 stier)                                                        |
+| `SETUP_GUIDE.md`            | Installasjonsmetoder (npm, npx, Docker, Electron, Termux, kildekode)                         |
+| `ENVIRONMENT.md`            | Alle miljøvariabler (~800 dokumenterte, ~3 050 linjer `.env.example`)                        |
+| `TROUBLESHOOTING.md`        | Vanlige feil + kjente problemer i v3.8.0                                                     |
+| `RELEASE_CHECKLIST.md`      | Full utgivelsesflyt (skills, husky, conventional commits, utrulling)                         |
+| `COVERAGE_PLAN.md`          | Dekningsmål og nåværende status                                                              |
+| `FREE_TIERS.md`             | Utvalgte leverandører med gratisnivå (48+ gratis + 11 OAuth)                                 |
+| `CLI-TOOLS.md`              | Eksterne CLI-integrasjoner + internt OmniRoute-CLI                                           |
+| `I18N.md`                   | i18n-arkitektur, legge til et språk, 67 lokaliseringer                                       |
+| `UNINSTALL.md`              | Trinn for ren avinstallasjon                                                                 |
+| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog over 376 leverandører (regenerer: `npm run gen:provider-reference`) |
 
-### Dybdegående gjennomgang av delsystemer
+### Dypdykk i delsystemer
 
-| Dok                                        | Formål                                                                     |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                            | MCP-server: 110 verktøy, 3 transporter, 33 scopes, REST-endepunkter        |
-| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 skills, REST-hjelpere, agentkort                     |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | Samlet veiledning: A2A vs ACP vs Cloud Agents                              |
-| `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules-orkestrering                                   |
-| `SKILLS.md`                                | Skills-rammeverk (innebygd + markedsplass + SkillsSH + sandkasse)          |
-| `RADAR.md`                                 | Radar-overlegg for gratismodellkatalog (`RADAR_ENABLED`, av som standard)  |
-| `MEMORY.md`                                | Minnesystem (SQLite FTS5 + Qdrant)                                         |
-| `EVALS.md`                                 | Eval-rammeverk (suiter, kjøringer, vurderingsmatriser)                     |
-| `GUARDRAILS.md`                            | PII-maskering, prompt-injeksjon, vision-bro                                |
-| `COMPLIANCE.md`                            | Revisjonslogg, oppbevaring, noLog-opt-out                                  |
-| `WEBHOOKS.md`                              | HMAC-signert webhook-levering                                              |
-| `REASONING_REPLAY.md`                      | Hybrid minne-/SQLite-cache for `reasoning_content`                         |
-| `AUTHZ_GUIDE.md`                           | Autorisasjonspipeline (`classify` → `policies` → `enforce`)                |
-| `RESILIENCE_GUIDE.md`                      | Circuit breaker + nedkjøling + modellutestengelse                          |
-| `docs/security/STEALTH_GUIDE.md` (kun git) | TLS-fingeravtrykk (JA3/JA4), Claude Code CCH, MITM-sertifikat              |
-| `AUTO-COMBO.md`                            | Auto Combo-motor (16-faktor poengsetting, 6 moduspakker, virtuell fabrikk) |
+| Dok                                        | Formål                                                                       |
+| ------------------------------------------ | ---------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                            | MCP-server: 110 verktøy, 3 transporter, 33 scopes, REST-endepunkter          |
+| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 skills, REST-hjelpere, agentkort                       |
+| `AGENT_PROTOCOLS_GUIDE.md`                 | Samlet veiledning: A2A vs ACP vs Cloud Agents                                |
+| `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules-orkestrering                                     |
+| `SKILLS.md`                                | Skills-rammeverk (innebygd + markedsplass + SkillsSH + sandbox)              |
+| `RADAR.md`                                 | Radar-overlegg for gratismodellkatalog (`RADAR_ENABLED`, av som standard)    |
+| `MEMORY.md`                                | Minnesystem (SQLite FTS5 + Qdrant)                                           |
+| `EVALS.md`                                 | Evalueringsrammeverk (suiter, kjøringer, rubrikker)                          |
+| `GUARDRAILS.md`                            | PII-maskering, prompt-injeksjon, vision-bro                                  |
+| `COMPLIANCE.md`                            | Revisjonslogg, oppbevaring, noLog-fravalg                                    |
+| `WEBHOOKS.md`                              | HMAC-signert webhook-levering                                                |
+| `REASONING_REPLAY.md`                      | Hybrid minne-/SQLite-cache for `reasoning_content`                           |
+| `AUTHZ_GUIDE.md`                           | Autorisasjonspipeline (`classify` → `policies` → `enforce`)                  |
+| `RESILIENCE_GUIDE.md`                      | Circuit breaker + cooldown + modellutestenging                               |
+| `docs/security/STEALTH_GUIDE.md` (kun git) | TLS-fingeravtrykk (JA3/JA4), Claude Code CCH, MITM-sertifikat                |
+| `AUTO-COMBO.md`                            | Auto Combo-motor (16-faktor poengberegning, 6 moduspakker, virtuell fabrikk) |
 
 ### Komprimering
 
@@ -441,30 +441,30 @@ open-sse/
 | ------------------------------- | -------------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Oversikt over komprimeringsmoduser + veikart |
 | `COMPRESSION_ENGINES.md`        | Caveman- og RTK-motorer, registerkontrakt    |
-| `COMPRESSION_RULES_FORMAT.md`   | JSON-skjema for Caveman-regelpakke           |
+| `COMPRESSION_RULES_FORMAT.md`   | JSON-skjema for Caveman-regelpakker          |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Inventar over regelpakker per språk          |
 | `RTK_COMPRESSION.md`            | RTK deklarativ pipeline (56 filtre)          |
 
 ### Utrulling
 
-| Dokument                     | Formål                                                           |
-| ---------------------------- | ---------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker-bygg, profiler (base/cli/host/cliproxyapi), Redis-sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Generisk VM/VPS-distribusjon (Ubuntu/Debian + nginx + systemd)   |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-distribusjon (foreløpig kun på kinesisk)                  |
-| `TERMUX_GUIDE.md`            | Headless Android via Termux                                      |
-| `PWA_GUIDE.md`               | Installasjon av Progressive Web App + service worker             |
-| `ELECTRON_GUIDE.md`          | Bygg + signering + distribusjon av skrivebordsapp                |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                           |
-| `PROXY_GUIDE.md`             | 4-nivås utgående proxy + 1proxy-markedsplass                     |
+| Dokument                     | Formål                                                                 |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker-bygg, profiler (base/cli/host/cliproxyapi), Redis-sidecontainer |
+| `VM_DEPLOYMENT_GUIDE.md`     | Generisk VM/VPS-utrulling (Ubuntu/Debian + nginx + systemd)            |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-utrulling (foreløpig kun på kinesisk)                           |
+| `TERMUX_GUIDE.md`            | Headless Android via Termux                                            |
+| `PWA_GUIDE.md`               | Installasjon av Progressive Web App + service worker                   |
+| `ELECTRON_GUIDE.md`          | Bygging, signering og distribusjon av skrivebordsappen                 |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
+| `PROXY_GUIDE.md`             | 4-nivås utgående proxy + 1proxy-markedsplass                           |
 
 ### Underkataloger
 
-| Underkatalog          | Formål                                                                                                                                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Lokaliserte oversettelser av dokumentasjonen (41 språk)                                                                                                                                                      |
-| `docs/screenshots/`   | Bilderessurser for veiledninger                                                                                                                                                                              |
-| `_tasks/superpowers/` | Planer/spesifikasjoner fra superpowers (`writing-plans`/`brainstorming`) + forskning — isolert, separat versjonert repo, git-ignorert av hovedtreet. Se CLAUDE.md → «Planleggings- og forskningsartefakter». |
+| Underkatalog          | Formål                                                                                                                                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokaliserte oversettelser av dokumentasjonen (41 språk)                                                                                                                                              |
+| `docs/screenshots/`   | Bilderessurser for veiledningene                                                                                                                                                                     |
+| `_tasks/superpowers/` | Planer/spesifikasjoner fra superpowers (`writing-plans`/`brainstorming`) + forskning — isolert, separat versjonert repo, git-ignorert av hovedtreet. Se CLAUDE.md → «Planning & Research Artifacts». |
 
 ---
 

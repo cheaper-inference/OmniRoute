@@ -71,7 +71,7 @@
 
 |                           |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Providers              |            352            |   **358**   |          375          |
+| 🌐 Providers              |            352            |   **358**   |          376          |
 | 🧠 Unieke chat-model-ID's |           1320            |  **1374**   |         1475          |
 | 🖼️ Modaliteitsbrug        | 🆕 vision + audio + video |      ✓      |           ✓           |
 | 📡 Radar gratis catalogus |         🆕 opt-in         |      ✓      |           ✓           |

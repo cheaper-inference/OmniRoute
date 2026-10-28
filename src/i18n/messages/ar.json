@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "حدود المزود",
     "noProviders": "لا يوجد مقدمي خدمات متصلين",
+    "quotaAuthRequired": "المصادقة مطلوبة - سجّل الدخول إلى لوحة التحكم",
+    "quotaAuthRequiredHint": "تعذّر تحميل اتصالات المزوّد لأن جلسة لوحة التحكم مفقودة أو منتهية الصلاحية. سجّل الدخول وحدّث الصفحة للاطلاع على حدود حصتك.",
     "connectProvidersForQuota": "اتصل بموفري خدمة OAuth لتتبع حدود حصص واجهة برمجة التطبيقات (API) واستخدامها.",
     "accountsCount": "الحسابات: {count, plural, one {حساب واحد} other {# حسابات}}",
     "filteredFromCount": "(تمت التصفية من {count})",

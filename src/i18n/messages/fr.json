@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limites du fournisseur",
     "noProviders": "Aucun fournisseur connecté",
+    "quotaAuthRequired": "Authentification requise - connectez-vous au tableau de bord",
+    "quotaAuthRequiredHint": "Les connexions aux fournisseurs n’ont pas pu être chargées, car la session du tableau de bord est absente ou a expiré. Connectez-vous et actualisez la page pour consulter vos limites de quota.",
     "connectProvidersForQuota": "Connectez-vous aux fournisseurs avec OAuth pour suivre les limites de quota et l'utilisation de vos API.",
     "accountsCount": "{count, plural, one {# compte} other {# comptes}}",
     "filteredFromCount": "(filtré à partir de {count})",

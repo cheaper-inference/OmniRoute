@@ -116,145 +116,145 @@ OmniRoute/
 ```
 src/
 ├── app/                 # App Router (பக்கங்கள் + API வழித்தடங்கள் + நிலைப் பக்கங்கள் + முகப்புப் பக்கம்)
-├── lib/                 # முதன்மை நூலகங்கள் / டொமைன் தொகுதிகள் (80 துணைக் கோப்பகங்கள் + ~70 மேல்-நிலைக் கோப்புகள்)
-├── domain/              # தூய டொமைன் தர்க்கம் (கொள்கை இயந்திரம், மாற்று ஏற்பாடு, செலவு, பூட்டுதல், comboResolver, மதிப்பீடு)
-├── server/              # சேவையகத்திற்கு மட்டும் உரிய தொகுதிகள் (அங்கீகாரப் பைப்லைன், cors, அங்கீகார மிடில்வேர்) — கிளையண்டிலிருந்து இறக்குமதி செய்ய முடியாது
-├── shared/              # பாதுகாப்பான இடங்களில் சேவையகத்திற்கும் கிளையண்டிற்கும் இடையே பகிரப்படுபவை (மாறிலிகள், வகைகள், சரிபார்ப்பு, ஒப்பந்தங்கள், பயன்பாட்டுக் கருவிகள்)
-├── i18n/                # next-intl உள்ளமைவு + ஒவ்வொரு மொழி-பிராந்தியத்திற்குமான செய்தி JSON (67 மொழி-பிராந்தியங்கள்)
-├── middleware/          # Next.js மிடில்வேர் (கோரிக்கை செறிவூட்டல், மொழி-பிராந்தியக் கண்டறிதல்)
-├── mitm/                # MITM ப்ராக்ஸியின் மையப்பகுதி: சான்றிதழ் உருவாக்கம்/நிறுவல், கையாளுநர்கள், இலக்குகள், ஆய்வி, முகமூடிகள், நேரடி கடத்தல்
-│   ├── handlers/        # MitmHandlerBase-ஐ நீட்டிக்கும் 9 IDE-முகவர் கையாளுநர் வகுப்புகள் (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # போக்குவரத்துப் பதிவுப் படலம்: இடையகம் (நினைவகத்திலுள்ள வளையம்), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # மாதிரி அடாப்டர் இணைப்புக் குறியீடு (மரபுவழிப் பொருந்துதன்மை அடுக்கு)
-├── scripts/             # மூலக் கட்டமைப்பிலுள்ள பராமரிப்பு ஸ்கிரிப்ட்கள் (எ.கா., backfillAggregation)
-├── sse/                 # மரபுவழி SSE கையாளுநர்கள்/சேவைகள் (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # மரபுவழி நினைவகத் தரவகம் (src/lib/db-க்கு ஆதரவாகப் படிப்படியாக நீக்கப்படுகிறது)
+├── lib/                 # மைய நூலகங்கள் / டொமைன் தொகுதிகள் (80 துணைக் கோப்பகங்கள் + ~70 மேல்நிலைக் கோப்புகள்)
+├── domain/              # தூய டொமைன் தர்க்கம் (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # சேவையகத்திற்கு மட்டுமான தொகுதிகள் (authz pipeline, cors, auth middleware) — கிளையண்டிலிருந்து இறக்குமதி செய்ய முடியாது
+├── shared/              # பாதுகாப்பான இடங்களில் சேவையகத்திற்கும் கிளையண்டிற்கும் இடையே பகிரப்படுபவை (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl உள்ளமைவு + மொழிவாரியான செய்தி JSON (67 மொழிகள்)
+├── middleware/          # Next.js middleware (கோரிக்கை செறிவூட்டல், மொழியமைவு கண்டறிதல்)
+├── mitm/                # MITM proxy மையம்: சான்றிதழ் உருவாக்கம்/நிறுவல், handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # MitmHandlerBase-ஐ நீட்டிக்கும் 9 IDE-agent handler வகுப்புகள் (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # போக்குவரத்துப் பதிவு அடுக்கு: buffer (நினைவகத்திலுள்ள வளையம்), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter இணைப்புக் குறியீடு (மரபு shim)
+├── scripts/             # மூலக் கட்டமைப்பிற்குள் உள்ள பராமரிப்பு scripts (எ.கா., backfillAggregation)
+├── sse/                 # மரபு SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # மரபு நினைவகத்திலுள்ள store (src/lib/db-க்கு ஆதரவாகப் படிப்படியாக நீக்கப்படுகிறது)
 ├── types/               # பகிரப்பட்ட TS வகைக் கோப்புகள்
-├── instrumentation.ts   # Next.js தொலைஅளவியல் ஹூக் (உலாவி + எட்ஜ்)
-├── instrumentation-node.ts  # Node-க்கு மட்டும் உரிய கருவியாக்கம்
-└── proxy.ts             # HTTP-ப்ராக்ஸி நுழைவு பொருந்துதன்மை அடுக்கு
+├── instrumentation.ts   # Next.js telemetry hook (உலாவி + edge)
+├── instrumentation-node.ts  # Node-க்கு மட்டுமான instrumentation
+└── proxy.ts             # HTTP-proxy நுழைவு shim
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| பாதை                                                                         | நோக்கம்                                                                                                                                                                                                                                                                                                                      |
+| Path                                                                         | Purpose                                                                                                                                                                                                                                                                                                                      |
 | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | பொது OpenAI-இணக்கமான API (~25 துணை வழித்தடங்கள்: அரட்டை, நிறைவுகள், உட்பொதிவுகள், கோப்புகள், தொகுதிகள், ஆடியோ, படங்கள், வீடியோக்கள், இசை, மறுதரவரிசைப்படுத்தல், கட்டுப்பாடுகள், தேடல், ws, ஏஜென்ட்கள், கணக்குகள், வழங்குநர்கள் போன்றவை)                                                                                      |
+| `app/api/v1/`                                                                | பொது OpenAI-இணக்கமான API (~25 துணை வழித்தடங்கள்: அரட்டை, நிறைவுகள், உட்பொதிவுகள், கோப்புகள், தொகுதிகள், ஒலி, படங்கள், காணொளிகள், இசை, மறுதரவரிசைப்படுத்தல், மதிப்பீடுகள், தேடல், ws, முகவர்கள், கணக்குகள், வழங்குநர்கள் போன்றவை)                                                                                             |
 | `app/api/v1beta/`                                                            | Gemini-பாணி API முனைப்புள்ளிகள்                                                                                                                                                                                                                                                                                              |
-| `app/api/playground/`                                                        | Playground Studio வழித்தடங்கள்: `improve-prompt/` (POST — LLM தூண்டி மறுஎழுதுபவர்), `presets/` (GET பட்டியல் / POST உருவாக்கம்), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md`-ஐப் பார்க்கவும்                                                                                               |
-| `app/api/` (v1 அல்லாதவை)                                                     | மேலாண்மை/நிர்வாக வழித்தடங்கள் (~60 கோப்பகங்கள்: வழங்குநர்கள், சேர்க்கைகள், அமைப்புகள், mcp, a2a, மதிப்பீடுகள், நினைவகம், திறன்கள், webhook-கள், இணக்கப்பாடு, மீள்திறன், கண்காணிப்பு, சுரங்கங்கள், cli கருவிகள் போன்றவை)                                                                                                      |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 வழித்தடங்கள் (சேவையகக் கட்டுப்பாடு, ஏஜென்ட் நிலை/DNS/வரைபொருத்தங்கள், கடந்து செல்லல், சான்றிதழ், மேல்நிலை-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7`-ஐப் பார்க்கவும்.                                                                                                    |
+| `app/api/playground/`                                                        | Playground Studio வழித்தடங்கள்: `improve-prompt/` (POST — LLM தூண்டுதல் மறுஎழுதுபொறி), `presets/` (GET பட்டியல் / POST உருவாக்கம்), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md`-ஐப் பார்க்கவும்                                                                                            |
+| `app/api/` (v1 அல்லாதது)                                                     | மேலாண்மை/நிர்வாக வழித்தடங்கள் (~60 கோப்பகங்கள்: வழங்குநர்கள், சேர்க்கைகள், அமைப்புகள், mcp, a2a, மதிப்பீடுகள், நினைவகம், திறன்கள், webhooks, இணக்கப்பாடு, மீட்சித்திறன், கண்காணிப்பு, சுரங்கங்கள், cli கருவிகள் போன்றவை)                                                                                                     |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 வழித்தடங்கள் (சேவையகக் கட்டுப்பாடு, முகவர் நிலை/DNS/வரைபடுத்தல்கள், புறக்கணிப்பு, சான்றிதழ், upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7`-ஐப் பார்க்கவும்.                                                                                                        |
 | `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ வழித்தடங்கள் (கோரிக்கைகள், அமர்வுகள், புரவலன்கள், பிடிப்பு முறைகள், ஏற்றுமதி, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8`-ஐப் பார்க்கவும்.                                                                                                              |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 நுழைவுப் புள்ளி (`POST /a2a`)                                                                                                                                                                                                                                                                               |
-| `app/.well-known/agent.json/`                                                | A2A ஏஜென்ட் அட்டை (கண்டறிதல்)                                                                                                                                                                                                                                                                                                |
-| `app/(dashboard)/dashboard/`                                                 | முகப்புப் பலகை UI பக்கங்கள் (50+ பிரிவுகள், ~118 page.tsx கோப்புகள்: வழங்குநர்கள், சேர்க்கைகள், அமைப்புகள், நினைவகம், திறன்கள், webhook-கள், மதிப்பீடுகள், தணிக்கை, தொகுதி, தற்காலிகச் சேமிப்பு, செலவுகள், ஆரோக்கியம், அமைப்பு, செயல்பாடு போன்றவை)                                                                           |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 தாவல்கள்: தேடல்/ஸ்க்ரேப்/ஒப்பீடு + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md`-ஐப் பார்க்கவும்                                                                                                                                                                 |
+| `app/.well-known/agent.json/`                                                | A2A முகவர் அட்டை (கண்டறிதல்)                                                                                                                                                                                                                                                                                                 |
+| `app/(dashboard)/dashboard/`                                                 | கட்டுப்பாட்டுப் பலகை UI பக்கங்கள் (50+ பிரிவுகள், ~118 page.tsx கோப்புகள்: வழங்குநர்கள், சேர்க்கைகள், அமைப்புகள், நினைவகம், திறன்கள், webhooks, மதிப்பீடுகள், தணிக்கை, தொகுதி, தற்காலிகச் சேமிப்பு, செலவுகள், நலநிலை, அமைப்பு, செயல்பாடு போன்றவை)                                                                            |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 தாவல்கள்: தேடல்/வலைத்தரவு பிரித்தெடுத்தல்/ஒப்பிடுதல் + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md`-ஐப் பார்க்கவும்                                                                                                                                             |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (திட்டம் 21): `page.tsx` (3-தாவல் கட்டமைப்பு), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge முகப்புப் பலகைப் பக்கம் — சேவையக அட்டை, 9 ஏஜென்ட் அட்டைகள், அமைவு வழிகாட்டி, மாதிரி வரைபொருத்தம், கடந்து செல்லல் பட்டியல். i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md`-ஐப் பார்க்கவும்.                                                                                                                    |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector முகப்புப் பலகைப் பக்கம் — DevTools பிரிப்புக் காட்சி, 7 விவரத் தாவல்கள், 4 பிடிப்பு முறை நிலைமாற்றிகள், அமர்வுப் பதிவி, சூழல் வண்ணமாக்கல். i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md`-ஐப் பார்க்கவும்.                                                                                        |
-| `app/(dashboard)/dashboard/activity/`                                        | செயல்பாட்டு ஊட்டப் பக்கம் (குழு B): `page.tsx` (சேவையகம்) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`-ஐப் பார்க்கவும்                                                                                                   |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge கட்டுப்பாட்டுப் பலகைப் பக்கம் — சேவையக அட்டை, 9 முகவர் அட்டைகள், அமைவு வழிகாட்டி, மாதிரி வரைபடுத்தல், புறக்கணிப்புப் பட்டியல். i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md`-ஐப் பார்க்கவும்.                                                                                                                |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector கட்டுப்பாட்டுப் பலகைப் பக்கம் — DevTools பிரிப்புத் தோற்றம், 7 விவரத் தாவல்கள், 4 பிடிப்பு முறை நிலைமாற்றிகள், அமர்வுப் பதிவி, சூழல் வண்ணமயமாக்கல். i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md`-ஐப் பார்க்கவும்.                                                                               |
+| `app/(dashboard)/dashboard/activity/`                                        | செயல்பாட்டு ஊட்டப் பக்கம் (குழு B): `page.tsx` (சர்வர்) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`-ஐப் பார்க்கவும்                                                                                                     |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | ஒதுக்கீட்டுப் பகிர்வு பக்கம் (குழு B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                           |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | வழங்குநர் திட்ட உள்ளமைவுப் பக்கம் (குழு B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ஒவ்வொரு இணைப்பிற்குமான ஒதுக்கீட்டுப் பரிமாண மேலெழுதுதல்                                                                                                                                                                            |
-| `app/docs/`                                                                  | உட்பொதிக்கப்பட்ட ஆவணப் பார்வையகம் (`docs/*.md`-ஐ காட்சிப்படுத்துகிறது)                                                                                                                                                                                                                                                       |
-| `app/landing/`                                                               | சந்தைப்படுத்தல் அறிமுகப் பக்கம்                                                                                                                                                                                                                                                                                              |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | வழங்குநர் திட்ட உள்ளமைவுப் பக்கம் (குழு B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ஒவ்வொரு இணைப்பிற்குமான ஒதுக்கீட்டுப் பரிமாண மேலெழுதுகை                                                                                                                                                                             |
+| `app/docs/`                                                                  | உட்பொதிக்கப்பட்ட ஆவணப் பார்வையாளர் (`docs/*.md`-ஐ வழங்குகிறது)                                                                                                                                                                                                                                                               |
+| `app/landing/`                                                               | சந்தைப்படுத்தல் முகப்புப் பக்கம்                                                                                                                                                                                                                                                                                             |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | அங்கீகாரம் தொடர்பான பக்கங்கள்                                                                                                                                                                                                                                                                                                |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP பிழைப் பக்கங்கள்                                                                                                                                                                                                                                                                                                        |
 | `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | நிலையான/நிலைப் பக்கங்கள்                                                                                                                                                                                                                                                                                                     |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | மூலத் தளவமைப்பு, முகப்புப் பக்கம், PWA அறிக்கை, உலகளாவிய CSS                                                                                                                                                                                                                                                                 |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | மூலத் தளவமைப்பு, முகப்புப் பக்கம், PWA மேனிஃபெஸ்ட், உலகளாவிய CSS                                                                                                                                                                                                                                                             |
 | `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | பிழை எல்லைகள்                                                                                                                                                                                                                                                                                                                |
 
 ### `src/lib/` — மைய நூலகங்கள் (~50 தொகுதிகள்)
 
-| Module                                   | Purpose                                                                                                                                                                                                                                                                                                                                    |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `a2a/`                                   | A2A நெறிமுறைப் பணி மேலாளர், திறன்கள் (5), ஸ்ட்ரீமிங்                                                                                                                                                                                                                                                                                       |
-| `acp/`                                   | CLI முகவர் பதிவகம் (உள்ளக CLI கண்டறிதல் — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` பார்க்கவும்)                                                                                                                                                                                                                                          |
-| `api/`                                   | பகிரப்பட்ட API உதவிகள் (`requireManagementAuth`, சரிபார்ப்பு)                                                                                                                                                                                                                                                                              |
-| `auth/`                                  | அமர்வு, கடவுச்சொல் ஹாஷிங், டோக்கன் சரிபார்ப்பு                                                                                                                                                                                                                                                                                             |
-| `batches/`                               | OpenAI Batches API கையாளிகள்                                                                                                                                                                                                                                                                                                               |
-| `catalog/`                               | வழங்குநர் பட்டியலுக்கான Zod சரிபார்ப்பு + திறன் தீர்மானம்                                                                                                                                                                                                                                                                                  |
-| `cloudAgent/`                            | Cloud Agents (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` பார்க்கவும்                                                                                                                                                                                                                                                    |
-| `combos/`                                | Combo தீர்மானம் + மறுவரிசைப்படுத்தும் உதவிகள்                                                                                                                                                                                                                                                                                              |
-| `audit/`                                 | செயல்பாட்டு ஊட்ட உதவிகள்: `highLevelActions.ts` (அனுமதிப்பட்டியல் + `isHighLevelAction()`), `activityIcons.ts` (செயல் → படவுரு/வினைச்சொல் வரைபடம்), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` பார்க்கவும்                                                                                       |
-| `compliance/`                            | தணிக்கைப் பதிவு + வழங்குநர் தணிக்கை — `docs/security/COMPLIANCE.md` பார்க்கவும்                                                                                                                                                                                                                                                            |
-| `compression/`                           | சுருக்க இயந்திர ஒருங்கிணைப்புக் குறியீடு (இயந்திரங்கள் `open-sse/services/compression/`-இல் உள்ளன)                                                                                                                                                                                                                                         |
-| `config/`                                | இயக்கநேர உள்ளமைவு உதவிகள்                                                                                                                                                                                                                                                                                                                  |
-| `db/`                                    | 120+ களஞ்சார் DB தொகுதிகள் + 168 இடம்பெயர்வுகள் (SQLite செயல்பாடுகளுக்கு எப்போதும் இதன் வழியே செல்லவும்)                                                                                                                                                                                                                                   |
-| `quota/`                                 | ஒதுக்கீட்டுப் பகிர்வு இயந்திரம்: `dimensions.ts` (வகைகள்/Zod), `types.ts` (QuotaStore இடைமுகம்), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` பார்க்கவும் |
-| `radar/`                                 | Radar இலவச-மாதிரி பட்டியல் கிளையன்ட்: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md`-ஐப் பார்க்கவும்                                                                                                                                              |
-| `display/`                               | UI வடிவமைப்பு உதவிகள் (செலவு, தாமதம் போன்றவை)                                                                                                                                                                                                                                                                                              |
-| `embeddings/`                            | Embeddings சேவை உதவிகள்                                                                                                                                                                                                                                                                                                                    |
-| `env/`                                   | சூழல் மாறி பகுப்பாய்வு + சரிபார்ப்பு                                                                                                                                                                                                                                                                                                       |
-| `evals/`                                 | Eval கட்டமைப்பு (தொகுப்புகள், இயக்கி, இயக்கநேரம்) — `docs/frameworks/EVALS.md`-ஐப் பார்க்கவும்                                                                                                                                                                                                                                             |
-| `guardrails/`                            | PII மறைப்பான், prompt injection, vision bridge — `docs/security/GUARDRAILS.md`-ஐப் பார்க்கவும்                                                                                                                                                                                                                                             |
-| `jobs/`                                  | பின்னணிப் பணிகள் (cron போன்றவை)                                                                                                                                                                                                                                                                                                            |
-| `memory/`                                | உரையாடல் நினைவகம் (SQLite FTS5 + sqlite-vec கலப்பின RRF + Qdrant அடுக்கு 2) — `docs/frameworks/MEMORY.md`-ஐப் பார்க்கவும்                                                                                                                                                                                                                  |
-| `memory/embedding/`                      | பல-மூல embedding அடுக்கு: `index.ts` (தீர்வி), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (திட்டம் 21)                                                                                                                                                                                                 |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 உறை — KNN முழுமையான-தேடல் + கலப்பின RRF (FTS5 + vector, k=60). தாமதமான துவக்கம்; sqlite-vec கிடைக்காதபோது சீராகத் தரம் குறைகிறது. (திட்டம் 21)                                                                                                                                                                           |
-| `memory/reindex.ts`                      | `runReindexBatch()` — பின்னணியில் `needs_reindex=1` கொண்ட நினைவுகளைச் செயலாக்குகிறது; `POST /api/memory/reindex` மற்றும் தாமதமான-backfill பாதையால் அழைக்கப்படுகிறது. (திட்டம் 21)                                                                                                                                                          |
-| `monitoring/`                            | ஆரோக்கியச் சோதனைகள், அளவீடுகள் வெளியீடு                                                                                                                                                                                                                                                                                                    |
-| `oauth/`                                 | 22 வழங்குநர் தொகுதிகளுக்கான OAuth/இறக்குமதி செயலோட்டங்கள் (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                      |
-| `plugins/`                               | செருகுநிரல் பதிவகம்                                                                                                                                                                                                                                                                                                                        |
-| `promptCache/`                           | Anthropic-பாணி prompt cache இடைநிறுத்தப் புள்ளிகள்                                                                                                                                                                                                                                                                                         |
-| `skills/`                                | திறன்கள் கட்டமைப்பு (உள்ளமைந்தவை + சந்தை + SkillsSH) — `docs/frameworks/SKILLS.md`-ஐப் பார்க்கவும்                                                                                                                                                                                                                                         |
-| `playground/`                            | Playground Studio பகிரப்பட்ட உதவிக் கூறுகள்: `codeExport.ts` (curl/Python/TS உருவாக்கி), `promptImprover.ts` (மெட்டா-ப்ராம்ப்ட் உருவாக்கி), `streamMetrics.ts` (தூய TTFT/TPS), `types.ts` (விலை நிர்ணய அட்டவணை) — `docs/frameworks/PLAYGROUND_STUDIO.md` ஐப் பார்க்கவும்                                                                   |
-| `webhookDispatcher.ts`                   | HMAC webhook வழங்கல் — `docs/frameworks/WEBHOOKS.md` ஐப் பார்க்கவும்                                                                                                                                                                                                                                                                       |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | டன்னல் மேலாளர்கள் — `docs/ops/TUNNELS_GUIDE.md` ஐப் பார்க்கவும்                                                                                                                                                                                                                                                                            |
-| `cloudSync.ts`, `initCloudSync.ts`       | நிலையின் விருப்பத்திற்குரிய கிளவுட் ஒத்திசைவு                                                                                                                                                                                                                                                                                              |
-| `localDb.ts`                             | db தொகுதிகளுக்கான மறு-ஏற்றுமதி பேரல் (தர்க்கம் இல்லை — மறு-ஏற்றுமதிகள் மட்டுமே)                                                                                                                                                                                                                                                            |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | கோரிக்கை தற்காலிகச் சேமிப்பு + ஒருநிகழ்தன்மை                                                                                                                                                                                                                                                                                               |
-| (~30 கூடுதல் உயர்மட்டக் கோப்புகள்)       | சிறப்புப் பயன்பாட்டு உதவிகள் (logEnv, modelsDevSync, piiSanitizer போன்றவை)                                                                                                                                                                                                                                                                 |
+| தொகுதி                                   | நோக்கம்                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A நெறிமுறைப் பணி மேலாளர், திறன்கள் (5), ஸ்ட்ரீமிங்                                                                                                                                                                                                                                                                                           |
+| `acp/`                                   | CLI முகவர் பதிவகம் (உள்ளக CLI கண்டறிதல் — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`-ஐப் பார்க்கவும்)                                                                                                                                                                                                                                          |
+| `api/`                                   | பகிரப்பட்ட API உதவிகள் (`requireManagementAuth`, சரிபார்ப்பு)                                                                                                                                                                                                                                                                                  |
+| `auth/`                                  | அமர்வு, கடவுச்சொல் ஹாஷிங், டோக்கன் சரிபார்ப்பு                                                                                                                                                                                                                                                                                                 |
+| `batches/`                               | OpenAI Batches API கையாளிகள்                                                                                                                                                                                                                                                                                                                   |
+| `catalog/`                               | வழங்குநர் பட்டியலுக்கான Zod சரிபார்ப்பு + திறன் தீர்மானம்                                                                                                                                                                                                                                                                                      |
+| `cloudAgent/`                            | கிளவுட் முகவர்கள் (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md`-ஐப் பார்க்கவும்                                                                                                                                                                                                                                               |
+| `combos/`                                | சேர்க்கை தீர்மானம் + மறுவரிசைப்படுத்தல் உதவிகள்                                                                                                                                                                                                                                                                                                |
+| `audit/`                                 | செயல்பாட்டு ஊட்ட உதவிகள்: `highLevelActions.ts` (அனுமதிப்பட்டியல் + `isHighLevelAction()`), `activityIcons.ts` (செயல் → ஐகான்/வினைச்சொல் வரைபடம்), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md`-ஐப் பார்க்கவும்                                                                                        |
+| `compliance/`                            | தணிக்கைப் பதிவு + வழங்குநர் தணிக்கை — `docs/security/COMPLIANCE.md`-ஐப் பார்க்கவும்                                                                                                                                                                                                                                                            |
+| `compression/`                           | சுருக்க இயந்திர இணைப்புப் பகுதி (இயந்திரங்கள் `open-sse/services/compression/`-இல் உள்ளன)                                                                                                                                                                                                                                                      |
+| `config/`                                | இயக்கநேர உள்ளமைவு உதவிகள்                                                                                                                                                                                                                                                                                                                      |
+| `db/`                                    | 120+ களஞ்சார்ந்த DB தொகுதிகள் + 168 இடம்பெயர்வுகள் (SQLite-க்கு எப்போதும் இதன் வழியாகவே செல்லவும்)                                                                                                                                                                                                                                             |
+| `quota/`                                 | ஒதுக்கீட்டுப் பகிர்வு இயந்திரம்: `dimensions.ts` (வகைகள்/Zod), `types.ts` (QuotaStore இடைமுகம்), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md`-ஐப் பார்க்கவும் |
+| `radar/`                                 | Radar இலவச-மாதிரி பட்டியல் கிளையண்ட்: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` ஐப் பார்க்கவும்                                                                                                                                                  |
+| `display/`                               | UI வடிவமைப்பு உதவிகள் (செலவு, தாமதம் போன்றவை)                                                                                                                                                                                                                                                                                                  |
+| `embeddings/`                            | Embeddings சேவை உதவிகள்                                                                                                                                                                                                                                                                                                                        |
+| `env/`                                   | சூழல் மாறிகளைப் பகுத்தறிதல் + சரிபார்த்தல்                                                                                                                                                                                                                                                                                                     |
+| `evals/`                                 | மதிப்பீட்டுக் கட்டமைப்பு (தொகுப்புகள், இயக்கி, இயக்கநேரம்) — `docs/frameworks/EVALS.md` ஐப் பார்க்கவும்                                                                                                                                                                                                                                        |
+| `guardrails/`                            | PII மறைப்பான், prompt injection, vision bridge — `docs/security/GUARDRAILS.md` ஐப் பார்க்கவும்                                                                                                                                                                                                                                                 |
+| `jobs/`                                  | பின்னணிப் பணிகள் (cron போன்றவை)                                                                                                                                                                                                                                                                                                                |
+| `memory/`                                | உரையாடல் நினைவகம் (SQLite FTS5 + sqlite-vec கலப்பின RRF + Qdrant அடுக்கு 2) — `docs/frameworks/MEMORY.md` ஐப் பார்க்கவும்                                                                                                                                                                                                                      |
+| `memory/embedding/`                      | பல-மூல embedding அடுக்கு: `index.ts` (தீர்வி), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (திட்டம் 21)                                                                                                                                                                                                     |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN முழுமையான தேடல் + கலப்பின RRF (FTS5 + vector, k=60). தேவையின்போது தொடங்கப்படும்; sqlite-vec கிடைக்காதபோது சீராகத் தரம் குறையும். (திட்டம் 21)                                                                                                                                                                  |
+| `memory/reindex.ts`                      | `runReindexBatch()` — பின்னணியில் `needs_reindex=1` கொண்ட நினைவகங்களைச் செயலாக்குகிறது; `POST /api/memory/reindex` மற்றும் தேவையின்போதான backfill பாதையால் அழைக்கப்படுகிறது. (திட்டம் 21)                                                                                                                                                      |
+| `monitoring/`                            | ஆரோக்கியச் சோதனைகள், அளவீடுகளை வெளியிடுதல்                                                                                                                                                                                                                                                                                                     |
+| `oauth/`                                 | 22 வழங்குநர் தொகுதிகளுக்கான OAuth/import செயல்முறைகள் (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                              |
+| `plugins/`                               | Plugin பதிவகம்                                                                                                                                                                                                                                                                                                                                 |
+| `promptCache/`                           | Anthropic பாணியிலான prompt cache இடைநிறுத்தப் புள்ளிகள்                                                                                                                                                                                                                                                                                        |
+| `skills/`                                | Skills கட்டமைப்பு (உள்ளமைந்தவை + சந்தை + SkillsSH) — `docs/frameworks/SKILLS.md` ஐப் பார்க்கவும்                                                                                                                                                                                                                                               |
+| `playground/`                            | Playground Studio பகிரப்பட்ட உதவிகள்: `codeExport.ts` (curl/Python/TS உருவாக்கி), `promptImprover.ts` (மெட்டா-ப்ராம்ப்ட் உருவாக்கி), `streamMetrics.ts` (தூய TTFT/TPS), `types.ts` (விலை அட்டவணை) — `docs/frameworks/PLAYGROUND_STUDIO.md`-ஐப் பார்க்கவும்                                                                                     |
+| `webhookDispatcher.ts`                   | HMAC webhook வழங்கல் — `docs/frameworks/WEBHOOKS.md`-ஐப் பார்க்கவும்                                                                                                                                                                                                                                                                           |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | டனல் மேலாளர்கள் — `docs/ops/TUNNELS_GUIDE.md`-ஐப் பார்க்கவும்                                                                                                                                                                                                                                                                                  |
+| `cloudSync.ts`, `initCloudSync.ts`       | நிலையின் விருப்பத்திற்குரிய கிளவுட் ஒத்திசைவு                                                                                                                                                                                                                                                                                                  |
+| `localDb.ts`                             | db தொகுதிகளுக்கான மறுஏற்றுமதி பேரல் (தர்க்கம் இல்லை — மறுஏற்றுமதிகள் மட்டும்)                                                                                                                                                                                                                                                                  |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | கோரிக்கை தேக்ககம் + ஒருமுறைச் செயல்பாட்டுத்தன்மை                                                                                                                                                                                                                                                                                               |
+| (~30 கூடுதல் உயர்நிலை கோப்புகள்)         | சிறப்புப் பயன்பாட்டு உதவிகள் (logEnv, modelsDevSync, piiSanitizer போன்றவை)                                                                                                                                                                                                                                                                     |
 
 ### `src/lib/db/` — தரவுத்தளம் (147 தொகுதிகள் + 208 இடமாற்றங்கள்)
 
-| துணை அடைவு                | நோக்கம்                                                                                                                                                                                 |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL பதிவேட்டுடன் கூடிய `getDbInstance()` சிங்கிள்டன்                                                                                                                                    |
-| `db/migrations/`          | பதிப்பிடப்பட்ட SQL கோப்புகள் (ஒருநிகழ்தன்மை கொண்டவை, பரிவர்த்தனை சார்ந்தவை). `073_memory_vec.sql` ஆனது `memory_vec_meta` + `needs_reindex` நெடுவரிசையைச் சேர்க்கிறது (திட்டம் 21).      |
-| `db/playgroundPresets.ts` | Playground Studio முன்னமைவுகளுக்கான CRUD தொகுதி (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)          |
-| `db/memoryVec.ts`         | `memory_vec_meta`-க்கான CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` போன்றவை (திட்டம் 21)                      |
-| `db/<domain>.ts`          | ஒவ்வொரு டொமைனுக்கும் ஒரு தொகுதி: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache போன்றவை. |
+| துணைக் கோப்பகம்           | நோக்கம்                                                                                                                                                                                       |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | WAL பதிவேட்டுடன் கூடிய `getDbInstance()` தனிநிகழ்வு                                                                                                                                           |
+| `db/migrations/`          | பதிப்பிடப்பட்ட SQL கோப்புகள் (ஒருமுறைச் செயல்பாட்டுத்தன்மை கொண்டவை, பரிவர்த்தனை சார்ந்தவை). `073_memory_vec.sql`, `memory_vec_meta` + `needs_reindex` நெடுவரிசையைச் சேர்க்கிறது (திட்டம் 21). |
+| `db/playgroundPresets.ts` | Playground Studio முன்னமைவுகளுக்கான CRUD தொகுதி (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                |
+| `db/memoryVec.ts`         | `memory_vec_meta`-க்கான CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` போன்றவை (திட்டம் 21)                            |
+| `db/<domain>.ts`          | ஒவ்வொரு டொமைனுக்கும் ஒரு தொகுதி: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache போன்றவை.       |
 
 ### `src/domain/`
 
-| தொகுதி                 | நோக்கம்                                                      |
-| ---------------------- | ------------------------------------------------------------ |
-| `policy.ts`            | கொள்கை இயந்திரம்                                             |
-| `fallbackPolicy.ts`    | மாற்று முடிவு மரம்                                           |
-| `costRules.ts`         | செலவுக் கணக்கீட்டு விதிகள்                                   |
-| `lockoutPolicy.ts`     | மாடல்/இணைப்பு முடக்கல் கொள்கை                                |
-| `tagRouter.ts`         | குறிச்சொல் அடிப்படையிலான வழிப்படுத்தல்                       |
-| `comboResolver.ts`     | காம்போ தீர்மானம் (காம்போ இயந்திரத்தால் பயன்படுத்தப்படுகிறது) |
-| `modelAvailability.ts` | ஒவ்வொரு மாடலுக்குமான கிடைப்புநிலைச் சரிபார்ப்பு              |
-| `assessment/`          | மாடல் மதிப்பீடு (RFC-AUTO-ASSESSMENT இன் கட்டம் 1)           |
+| தொகுதி                 | நோக்கம்                                                        |
+| ---------------------- | -------------------------------------------------------------- |
+| `policy.ts`            | கொள்கை எஞ்சின்                                                 |
+| `fallbackPolicy.ts`    | மாற்று முடிவு மரம்                                             |
+| `costRules.ts`         | செலவுக் கணக்கீட்டு விதிகள்                                     |
+| `lockoutPolicy.ts`     | மாதிரி/இணைப்பு முடக்கக் கொள்கை                                 |
+| `tagRouter.ts`         | குறிச்சொல் அடிப்படையிலான வழிப்படுத்தல்                         |
+| `comboResolver.ts`     | சேர்க்கைத் தீர்மானம் (சேர்க்கை எஞ்சினால் பயன்படுத்தப்படுகிறது) |
+| `modelAvailability.ts` | ஒவ்வொரு மாதிரிக்குமான கிடைப்புநிலைச் சரிபார்ப்பு               |
+| `assessment/`          | மாதிரி மதிப்பீடு (RFC-AUTO-ASSESSMENT-இன் கட்டம் 1)            |
 
 ### `src/server/`
 
-| தொகுதி   | நோக்கம்                                                                                                               |
-| -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `authz/` | அங்கீகாரச் செயலாக்கத் தொடர்: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` ஐப் பார்க்கவும் |
-| `cors/`  | CORS உள்ளமைவு                                                                                                         |
-| `auth/`  | அமர்வு இடைநிலை மென்பொருள்                                                                                             |
+| தொகுதி   | நோக்கம்                                                                                                        |
+| -------- | -------------------------------------------------------------------------------------------------------------- |
+| `authz/` | அங்கீகாரச் செயல்முறை: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md`-ஐப் பார்க்கவும் |
+| `cors/`  | CORS உள்ளமைவு                                                                                                  |
+| `auth/`  | அமர்வு மிடில்வேர்                                                                                              |
 
 ### `src/shared/`
 
-| தொகுதி                           | நோக்கம்                                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `components/`                    | டாஷ்போர்டு கூறு API: `packages/ui-kit`-இன் மேல் அடாப்டர்கள் — `docs/architecture/DESIGN_SYSTEM.md`-ஐப் பார்க்கவும் |
-| `constants/iconMap.ts`           | `ICON_MAP`: திரைகள் பயன்படுத்தும் ஐகான் பெயர்கள் → Lucide கூறுகள் (`<Icon>`)                                       |
-| `constants/providers.ts`         | Zod சரிபார்ப்புடன் **376 வழங்குநர்கள்** (அதிகாரப்பூர்வ ஒற்றை ஆதாரம்)                                               |
-| `constants/cliTools.ts`          | வெளிப்புற CLI கருவிப் பதிவகம்                                                                                      |
-| `constants/routingStrategies.ts` | முன்னுரிமைகளுடன் **20 வழித்தட உத்திகள்**                                                                           |
-| `constants/publicApiRoutes.ts`   | Bearer அங்கீகாரம் தேவைப்படும் வழித்தடங்கள் (மேலாண்மை அங்கீகாரத்திற்கு மாறாக)                                       |
-| `constants/upstreamHeaders.ts`   | அப்ஸ்ட்ரீம் கோரிக்கைகளுக்கான தலைப்பு மறுப்புப் பட்டியல்                                                            |
-| `validation/schemas.ts`          | ~80 Zod ஸ்கீமாக்கள் (API ஒப்பந்தங்களுக்கான அதிகாரப்பூர்வ ஒற்றை ஆதாரம்)                                             |
-| `validation/helpers.ts`          | Zod சரிபார்ப்பு உதவிகள் (`validateBody` போன்றவை)                                                                   |
-| `types/`                         | பகிரப்பட்ட TS வகைகள்                                                                                               |
-| `contracts/`                     | பொது API ஒப்பந்தங்கள் (`package.json`-இல் உள்ள `files:` பயன்படுத்துபவை)                                            |
-| `utils/circuitBreaker.ts`        | வழங்குநர் சர்க்யூட் பிரேக்கர் (`docs/architecture/RESILIENCE_GUIDE.md`-ஐப் பார்க்கவும்)                            |
-| `utils/apiAuth.ts`               | API விசை சரிபார்ப்பு, ஸ்கோப் சரிபார்ப்பு                                                                           |
-| `utils/fetchTimeout.ts`          | அப்ஸ்ட்ரீம் fetch-க்கான காலக்கெடு/நிறுத்தல் ரேப்பர்கள்                                                             |
-| `utils/releaseNotes.ts`          | மூடப்பட்ட v2/மரபு அறிவிப்பு பார்சர், உள்ளூர்மயமாக்கல் மற்றும் ID நிராகரிப்பு                                       |
+| தொகுதி                           | நோக்கம்                                                                                                         |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `components/`                    | டாஷ்போர்டு கூறு API: `packages/ui-kit`-க்கான அடாப்டர்கள் — `docs/architecture/DESIGN_SYSTEM.md`-ஐப் பார்க்கவும் |
+| `constants/iconMap.ts`           | `ICON_MAP`: திரைகள் பயன்படுத்தும் ஐகான் பெயர்கள் → Lucide கூறுகள் (`<Icon>`)                                    |
+| `constants/providers.ts`         | Zod சரிபார்ப்புடன் **376 வழங்குநர்கள்** (அதிகாரப்பூர்வ ஒற்றை மூலம்)                                             |
+| `constants/cliTools.ts`          | வெளிப்புற CLI கருவிப் பதிவகம்                                                                                   |
+| `constants/routingStrategies.ts` | முன்னுரிமைகளுடன் **20 வழிப்படுத்தல் உத்திகள்**                                                                  |
+| `constants/publicApiRoutes.ts`   | நிர்வாக அங்கீகாரத்திற்குப் பதிலாக Bearer அங்கீகாரம் தேவைப்படும் வழிகள்                                          |
+| `constants/upstreamHeaders.ts`   | அப்ஸ்ட்ரீம் கோரிக்கைகளுக்கான தலைப்பு மறுப்புப் பட்டியல்                                                         |
+| `validation/schemas.ts`          | ~80 Zod திட்டவடிவங்கள் (API ஒப்பந்தங்களுக்கான அதிகாரப்பூர்வ ஒற்றை மூலம்)                                        |
+| `validation/helpers.ts`          | Zod சரிபார்ப்பு உதவியாளர்கள் (`validateBody`, முதலியன)                                                          |
+| `types/`                         | பகிரப்பட்ட TS வகைகள்                                                                                            |
+| `contracts/`                     | பொது API ஒப்பந்தங்கள் (`package.json`-இல் உள்ள `files:` பயன்படுத்துபவை)                                         |
+| `utils/circuitBreaker.ts`        | வழங்குநர் சர்க்யூட் பிரேக்கர் (`docs/architecture/RESILIENCE_GUIDE.md`-ஐப் பார்க்கவும்)                         |
+| `utils/apiAuth.ts`               | API விசைச் சரிபார்ப்பு, ஸ்கோப் சரிபார்ப்பு                                                                      |
+| `utils/fetchTimeout.ts`          | அப்ஸ்ட்ரீம் fetch-க்கான காலாவதி/நிறுத்தல் ரேப்பர்கள்                                                            |
+| `utils/releaseNotes.ts`          | மூடப்பட்ட v2/மரபு அறிவிப்பு பாகுபடுத்தி, உள்ளூர்மயமாக்கல் மற்றும் ID நிராகரிப்பு                                |
 
 ---
 
@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — பொது ஆவணங்கள் (7 வேர் கோப்புகள் + 17 துணைக் கோப்பகங்கள்)
+## `docs/` — பொது ஆவணங்கள் (7 ரூட் கோப்புகள் + 17 துணை அடைவுகள்)
 
-### உயர்மட்ட வழிகாட்டிகள்
+### உயர்-நிலை வழிகாட்டிகள்
 
 | ஆவணம்                       | நோக்கம்                                                                                                |
 | --------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | உயர்மட்ட கட்டமைப்பு, துணைமுறைமை வரைபடம், டாஷ்போர்டு மேற்பரப்பு                                         |
-| `CODEBASE_DOCUMENTATION.md` | பொறியியல் குறிப்பு: கோப்பகங்கள், தொகுதிகள், மரபுகள்                                                    |
+| `ARCHITECTURE.md`           | உயர்-நிலை கட்டமைப்பு, துணை அமைப்பு வரைபடம், டாஷ்போர்டு இடைமுகம்                                        |
+| `CODEBASE_DOCUMENTATION.md` | பொறியியல் குறிப்பு: அடைவுகள், தொகுதிகள், நடைமுறைகள்                                                    |
 | `FEATURES.md`               | v3.8 சிறப்பம்சங்களுடன் அம்ச அணி                                                                        |
-| `USER_GUIDE.md`             | இறுதி பயனர் கையேடு (அமைப்பு, மாதிரிகள், காம்போக்கள், CLIகள், ஆடியோ போன்றவை)                            |
+| `USER_GUIDE.md`             | இறுதி பயனர் கையேடு (அமைப்பு, மாதிரிகள், காம்போக்கள், CLIs, ஆடியோ போன்றவை)                              |
 | `API_REFERENCE.md`          | அங்கீகார மாதிரியுடன் API இறுதிப்புள்ளி குறிப்பு                                                        |
 | `openapi.yaml`              | OpenAPI 3.0 விவரக்குறிப்பு (121 பாதைகள்)                                                               |
 | `SETUP_GUIDE.md`            | நிறுவல் முறைகள் (npm, npx, Docker, Electron, Termux, மூலம்)                                            |
-| `ENVIRONMENT.md`            | அனைத்து env மாறிகள் (~800 ஆவணப்படுத்தப்பட்டவை, ~3,050 வரிகள் `.env.example`)                           |
+| `ENVIRONMENT.md`            | அனைத்து env மாறிகளும் (~800 ஆவணப்படுத்தப்பட்டவை, ~3,050 வரிகள் `.env.example`)                         |
 | `TROUBLESHOOTING.md`        | பொதுவான பிழைகள் + v3.8.0 அறியப்பட்ட சிக்கல்கள்                                                         |
-| `RELEASE_CHECKLIST.md`      | முழு வெளியீட்டு ஓட்டம் (திறன்கள், husky, conventional commits, பயோளிப்பு)                              |
-| `COVERAGE_PLAN.md`          | உள்ளடக்க இலக்குகள் மற்றும் தற்போதைய நிலை                                                               |
+| `RELEASE_CHECKLIST.md`      | முழு வெளியீட்டு ஓட்டம் (skills, husky, conventional commits, deploy)                                   |
+| `COVERAGE_PLAN.md`          | கவரேஜ் இலக்குகள் மற்றும் தற்போதைய நிலை                                                                 |
 | `FREE_TIERS.md`             | தேர்ந்தெடுக்கப்பட்ட இலவச-அடுக்கு வழங்குநர்கள் (48+ இலவசம் + 11 OAuth)                                  |
-| `CLI-TOOLS.md`              | வெளிப்புற CLI ஒருங்கிணைப்புகள் + உள் OmniRoute CLI                                                     |
-| `I18N.md`                   | i18n கட்டமைப்பு, மொழி சேர்த்தல், 67 உள்ளூர்மயமாக்கல்கள்                                                |
-| `UNINSTALL.md`              | தூய்மையான நிறுவல் நீக்க படிகள்                                                                         |
+| `CLI-TOOLS.md`              | வெளிப்புற CLI ஒருங்கிணைப்புகள் + உள்ளக OmniRoute CLI                                                   |
+| `I18N.md`                   | i18n கட்டமைப்பு, மொழி சேர்த்தல், 67 லோக்கேல்கள்                                                        |
+| `UNINSTALL.md`              | சுத்தமான நிறுவல் நீக்க படிகள்                                                                          |
 | `PROVIDER_REFERENCE.md`     | 376 வழங்குநர்களின் **தானாக உருவாக்கப்பட்ட** பட்டியல் (மீளுருவாக்கம்: `npm run gen:provider-reference`) |
 
-### துணைமுறைமை ஆழ்ந்த ஆய்வுகள்
+### துணை அமைப்பு ஆழ்ந்த ஆய்வுகள்
 
-| ஆவணம்                                          | நோக்கம்                                                                             |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                                | MCP சேவையகம்: 110 கருவிகள், 3 போக்குவரத்துகள், 33 நோக்கங்கள், REST இறுதிப்புள்ளிகள் |
-| `A2A-SERVER.md`                                | A2A v0.3: JSON-RPC, 6 திறன்கள், REST உதவியாளர்கள், முகவர் அட்டை                     |
-| `AGENT_PROTOCOLS_GUIDE.md`                     | ஒருங்கிணைந்த வழிகாட்டி: A2A vs ACP vs Cloud Agents                                  |
-| `CLOUD_AGENT.md`                               | Codex Cloud / Devin / Jules ஒருங்கிணைப்பு                                           |
-| `SKILLS.md`                                    | திறன்கள் கட்டமைப்பு (உள்ளமைந்த + சந்தை + SkillsSH + மணல்பெட்டி)                     |
-| `RADAR.md`                                     | Radar இலவச-மாதிரி பட்டியல் மேலடுக்கு (`RADAR_ENABLED`, இயல்பாக முடக்கப்பட்டது)      |
-| `MEMORY.md`                                    | நினைவக முறைமை (SQLite FTS5 + Qdrant)                                                |
-| `EVALS.md`                                     | மதிப்பீட்டு கட்டமைப்பு (தொகுப்புகள், இயக்கங்கள், மதிப்பீட்டு விதிகள்)               |
-| `GUARDRAILS.md`                                | PII மறைப்பான், prompt injection, பார்வை பாலம்                                       |
-| `COMPLIANCE.md`                                | தணிக்கை பதிவு, தக்கவைப்பு, noLog விலகு                                              |
-| `WEBHOOKS.md`                                  | HMAC-கையொப்பமிடப்பட்ட webhook வழங்கல்                                               |
-| `REASONING_REPLAY.md`                          | `reasoning_content`-க்கான கலப்பு நினைவகம்/SQLite தேக்ககம்                           |
-| `AUTHZ_GUIDE.md`                               | அங்கீகார குழாய் (`classify` → `policies` → `enforce`)                               |
-| `RESILIENCE_GUIDE.md`                          | சர்க்யூட் பிரேக்கர் + குளிர்வு காலம் + மாதிரி பூட்டுதல்                             |
-| `docs/security/STEALTH_GUIDE.md` (git மட்டும்) | TLS கைரேகை (JA3/JA4), Claude Code CCH, MITM சான்றிதழ்                               |
-| `AUTO-COMBO.md`                                | Auto Combo இயந்திரம் (16-காரணி மதிப்பீடு, 6 முறை தொகுப்புகள், மெய்நிகர் தொழிற்சாலை) |
+| ஆவணம்                                          | நோக்கம்                                                                            |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                                | MCP சர்வர்: 110 கருவிகள், 3 டிரான்ஸ்போர்ட்கள், 33 ஸ்கோபுகள், REST இறுதிப்புள்ளிகள் |
+| `A2A-SERVER.md`                                | A2A v0.3: JSON-RPC, 6 திறன்கள், REST உதவியாளர்கள், ஏஜென்ட் கார்டு                  |
+| `AGENT_PROTOCOLS_GUIDE.md`                     | ஒருங்கிணைந்த வழிகாட்டி: A2A vs ACP vs Cloud Agents                                 |
+| `CLOUD_AGENT.md`                               | Codex Cloud / Devin / Jules ஒருங்கிணைப்பு (orchestration)                          |
+| `SKILLS.md`                                    | திறன்கள் கட்டமைப்பு (உள்ளமைக்கப்பட்ட + மார்க்கெட்ப்ளேஸ் + SkillsSH + சாண்ட்பாக்ஸ்) |
+| `RADAR.md`                                     | Radar இலவச-மாதிரி பட்டியல் மேலடுக்கு (`RADAR_ENABLED`, இயல்பாக அணைக்கப்பட்டது)     |
+| `MEMORY.md`                                    | நினைவக அமைப்பு (SQLite FTS5 + Qdrant)                                              |
+| `EVALS.md`                                     | மதிப்பீட்டு கட்டமைப்பு (தொகுப்புகள், இயக்கங்கள், ரூபிரிக்குகள்)                    |
+| `GUARDRAILS.md`                                | PII மாஸ்கர், ப்ராம்ட் இன்ஜெக்ஷன், விஷன் பிரிட்ஜ்                                   |
+| `COMPLIANCE.md`                                | தணிக்கை பதிவு, தக்கவைப்பு, noLog விலகல்                                            |
+| `WEBHOOKS.md`                                  | HMAC-கையொப்பமிடப்பட்ட வெப்ஹூக் டெலிவரி                                             |
+| `REASONING_REPLAY.md`                          | `reasoning_content`-க்கான கலப்பு நினைவக/SQLite கேஷ்                                |
+| `AUTHZ_GUIDE.md`                               | அங்கீகரிப்பு பைப்லைன் (`classify` → `policies` → `enforce`)                        |
+| `RESILIENCE_GUIDE.md`                          | சர்க்யூட் பிரேக்கர் + கூல்டவுன் + மாதிரி லாக்அவுட்                                 |
+| `docs/security/STEALTH_GUIDE.md` (git மட்டும்) | TLS ஃபிங்கர்பிரிண்டிங் (JA3/JA4), Claude Code CCH, MITM சான்றிதழ்                  |
+| `AUTO-COMBO.md`                                | Auto Combo இயந்திரம் (16-காரணி மதிப்பெண், 6 மோட் பேக்குகள், வெர்ச்சுவல் ஃபேக்டரி)  |
 
 ### சுருக்கம்
 
-| ஆவணம்                           | நோக்கம்                                         |
-| ------------------------------- | ----------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | சுருக்க முறைகளின் கண்ணோட்டம் + வழித்தடம்        |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK இயந்திரங்கள், பதிவேட்டு ஒப்பந்தம் |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman விதி தொகுப்பு JSON schema               |
-| `COMPRESSION_LANGUAGE_PACKS.md` | மொழிவாரி விதி தொகுப்பு சரக்கிருப்பு             |
-| `RTK_COMPRESSION.md`            | RTK அறிவிப்பு குழாய் (56 வடிகட்டிகள்)           |
+| ஆவணம்                           | நோக்கம்                                          |
+| ------------------------------- | ------------------------------------------------ |
+| `COMPRESSION_GUIDE.md`          | சுருக்க முறைகளின் கண்ணோட்டம் + ரோட்மேப்          |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK இயந்திரங்கள், ரெஜிஸ்ட்ரி ஒப்பந்தம் |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman ரூல் பேக் JSON ஸ்கீமா                    |
+| `COMPRESSION_LANGUAGE_PACKS.md` | மொழி வாரியான ரூல் பேக் சரக்குப்பட்டியல்          |
+| `RTK_COMPRESSION.md`            | RTK அறிவிப்பு பைப்லைன் (56 வடிகட்டிகள்)          |
 
-### பயோளிப்பு
+### பரவலாக்கம்
 
 | ஆவணம்                        | நோக்கம்                                                                     |
 | ---------------------------- | --------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker உருவாக்கம், சுயவிவரங்கள் (base/cli/host/cliproxyapi), Redis சைட்கார் |
-| `VM_DEPLOYMENT_GUIDE.md`     | பொதுவான VM/VPS அமைப்பு (Ubuntu/Debian + nginx + systemd)                    |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io அமைப்பு (தற்போது சீன மொழியில் மட்டும்)                               |
-| `TERMUX_GUIDE.md`            | Termux வழியாக Android ஹெட்லெஸ்                                              |
+| `DOCKER_GUIDE.md`            | Docker கட்டமைப்பு, சுயவிவரங்கள் (base/cli/host/cliproxyapi), Redis சைட்கார் |
+| `VM_DEPLOYMENT_GUIDE.md`     | பொதுவான VM/VPS பயன்படுத்தல் (Ubuntu/Debian + nginx + systemd)               |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io பயன்படுத்தல் (தற்போது சீன மொழியில் மட்டும்)                          |
+| `TERMUX_GUIDE.md`            | Termux மூலம் Android ஹெட்லெஸ்                                               |
 | `PWA_GUIDE.md`               | Progressive Web App நிறுவல் + service worker                                |
-| `ELECTRON_GUIDE.md`          | டெஸ்க்டாப் ஆப் உருவாக்கம் + கையொப்பமிடல் + விநியோகம்                        |
+| `ELECTRON_GUIDE.md`          | டெஸ்க்டாப் செயலி கட்டமைப்பு + கையொப்பமிடல் + விநியோகம்                      |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                      |
 | `PROXY_GUIDE.md`             | 4-நிலை வெளிச்செல்லும் ப்ராக்ஸி + 1proxy சந்தை                               |
 
 ### துணை அடைவுகள்
 
-| துணை அடைவு            | நோக்கம்                                                                                                                                                                                                                                                                  |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | உள்ளூர்மயமாக்கப்பட்ட ஆவண மொழிபெயர்ப்புகள் (41 locales)                                                                                                                                                                                                                   |
-| `docs/screenshots/`   | வழிகாட்டிகளுக்கான படக் கோப்புகள்                                                                                                                                                                                                                                         |
-| `_tasks/superpowers/` | superpowers-இலிருந்து திட்டங்கள்/விவரக்குறிப்புகள் (`writing-plans`/`brainstorming`) + ஆராய்ச்சி — தனிமைப்படுத்தப்பட்ட, தனித்தனியாகப் பதிப்பிடப்பட்ட repo, பிரதான மரத்தில் gitignore செய்யப்பட்டது. CLAUDE.md → "திட்டமிடல் & ஆராய்ச்சி கலைப்பொருட்கள்" ஐப் பார்க்கவும். |
+| துணை அடைவு            | நோக்கம்                                                                                                                                                                                                                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | உள்ளூர்மயமாக்கப்பட்ட ஆவண மொழிபெயர்ப்புகள் (41 மொழி அமைப்புகள்)                                                                                                                                                                                                                     |
+| `docs/screenshots/`   | வழிகாட்டிகளுக்கான பட வளங்கள்                                                                                                                                                                                                                                                       |
+| `_tasks/superpowers/` | superpowers-இலிருந்து திட்டங்கள்/விவரக்குறிப்புகள் (`writing-plans`/`brainstorming`) + ஆராய்ச்சி — தனிமைப்படுத்தப்பட்ட, தனித்தனியாகப் பதிப்பிடப்படும் repo, முதன்மை டிரீ மூலம் gitignore செய்யப்பட்டது. CLAUDE.md → "திட்டமிடல் & ஆராய்ச்சி ஆர்டிஃபாக்ட்கள்" என்பதைப் பார்க்கவும். |
 
 ---
 

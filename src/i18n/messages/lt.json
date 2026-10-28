@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Teikėjų apribojimai",
     "noProviders": "Neprijungtas nė vienas teikėjas",
+    "quotaAuthRequired": "Reikalingas autentifikavimas – prisijunkite prie valdymo skydelio",
+    "quotaAuthRequiredHint": "Nepavyko įkelti teikėjų jungčių, nes valdymo skydelio sesijos nėra arba jos galiojimas baigėsi. Prisijunkite ir atnaujinkite puslapį, kad matytumėte savo kvotų limitus.",
     "connectProvidersForQuota": "Prisijunkite prie teikėjų naudodami OAuth, kad galėtumėte stebėti API kvotų apribojimus ir naudojimą.",
     "accountsCount": "{count, plural, one {# paskyra} few {# paskyros} other {# paskyrų}}",
     "filteredFromCount": "(atrinkta iš {count})",

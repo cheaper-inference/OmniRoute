@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Teenusepakkuja piirangud",
     "noProviders": "Ühtegi teenusepakkujat pole ühendatud",
+    "quotaAuthRequired": "Autentimine on nõutav – logige juhtpaneelile sisse",
+    "quotaAuthRequiredHint": "Teenusepakkujate ühendusi ei saanud laadida, kuna juhtpaneeli seanss puudub või on aegunud. Kvoodipiirangute nägemiseks logige sisse ja värskendage lehte.",
     "connectProvidersForQuota": "Looge OAuth-protokolli kaudu ühendus teenusepakkujatega, et jälgida oma API kvoodipiiranguid ja kasutust.",
     "accountsCount": "{count, plural, one {# konto} other {# kontot}}",
     "filteredFromCount": "(filtreeritud koguarvust {count})",

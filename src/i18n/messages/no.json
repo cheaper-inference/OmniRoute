@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Leverandørgrenser",
     "noProviders": "Ingen leverandører tilkoblet",
+    "quotaAuthRequired": "Autentisering kreves – logg på kontrollpanelet",
+    "quotaAuthRequiredHint": "Leverandørtilkoblinger kunne ikke lastes inn fordi kontrollpaneløkten mangler eller er utløpt. Logg på og oppdater for å se kvotegrensene dine.",
     "connectProvidersForQuota": "Koble til leverandører med OAuth for å spore API-kvotegrenser og bruk.",
     "accountsCount": "{count, plural, one {# konto} other {# kontoer}}",
     "filteredFromCount": "(filtrert fra {count})",

@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "प्रदाता सीमाएँ",
     "noProviders": "कोई प्रदाता कनेक्ट नहीं है",
+    "quotaAuthRequired": "प्रमाणीकरण आवश्यक है - डैशबोर्ड में साइन इन करें",
+    "quotaAuthRequiredHint": "डैशबोर्ड सत्र अनुपलब्ध होने या समाप्त हो जाने के कारण प्रदाता कनेक्शन लोड नहीं किए जा सके। अपनी कोटा सीमाएँ देखने के लिए साइन इन करें और रीफ़्रेश करें।",
     "connectProvidersForQuota": "अपनी एपीआई कोटा सीमा और उपयोग को ट्रैक करने के लिए OAuth वाले प्रदाताओं से जुड़ें।",
     "accountsCount": "{count, plural, one {# खाता} other {# खाते}}",
     "filteredFromCount": "({count} से फ़िल्टर किया गया)",

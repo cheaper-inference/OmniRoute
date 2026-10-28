@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Sağlayıcı Limitleri",
     "noProviders": "Bağlı sağlayıcı yok",
+    "quotaAuthRequired": "Kimlik doğrulama gerekli - kontrol panelinde oturum açın",
+    "quotaAuthRequiredHint": "Kontrol paneli oturumu olmadığı veya süresi dolduğu için sağlayıcı bağlantıları yüklenemedi. Kota sınırlarınızı görmek için oturum açıp sayfayı yenileyin.",
     "connectProvidersForQuota": "API kota sınırlarınızı ve kullanımınızı takip etmek için OAuth ile sağlayıcılara bağlanın.",
     "accountsCount": "{count, plural, one {# hesap} other {# hesap}}",
     "filteredFromCount": "(toplam {count} içinden filtrelendi)",

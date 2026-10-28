@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "प्रदायकका सीमाहरू",
     "noProviders": "कुनै प्रदायक जडान गरिएको छैन",
+    "quotaAuthRequired": "प्रमाणीकरण आवश्यक छ - ड्यासबोर्डमा साइन इन गर्नुहोस्",
+    "quotaAuthRequiredHint": "ड्यासबोर्ड सत्र उपलब्ध नभएको वा म्याद सकिएको कारण प्रदायक जडानहरू लोड गर्न सकिएन। आफ्ना कोटा सीमाहरू हेर्न साइन इन गरी रिफ्रेस गर्नुहोस्।",
     "connectProvidersForQuota": "आफ्नो API कोटा सीमा र प्रयोग ट्र्याक गर्न OAuth मार्फत प्रदायकहरूसँग जडान गर्नुहोस्।",
     "accountsCount": "{count, plural, one {# खाता} other {# खाताहरू}}",
     "filteredFromCount": "({count} मध्ये फिल्टर गरिएको)",

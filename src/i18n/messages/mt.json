@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limiti tal-Fornituri",
     "noProviders": "L-ebda fornitur mhu konness",
+    "quotaAuthRequired": "Awtentikazzjoni meħtieġa - idħol fid-dashboard",
+    "quotaAuthRequiredHint": "Il-konnessjonijiet tal-fornituri ma setgħux jitgħabbew minħabba li s-sessjoni tad-dashboard hija nieqsa jew skadiet. Idħol u aġġorna biex tara l-limiti tal-kwota tiegħek.",
     "connectProvidersForQuota": "Ikkonnettja mal-fornituri permezz ta’ OAuth biex issegwi l-limiti tal-kwota u l-użu tal-API tiegħek.",
     "accountsCount": "{count, plural, one {# kont} other {# kontijiet}}",
     "filteredFromCount": "(iffiltrati minn {count})",

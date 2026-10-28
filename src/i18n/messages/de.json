@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Anbieterbeschränkungen",
     "noProviders": "Keine Anbieter verbunden",
+    "quotaAuthRequired": "Authentifizierung erforderlich – melde dich beim Dashboard an",
+    "quotaAuthRequiredHint": "Die Anbieterverbindungen konnten nicht geladen werden, da die Dashboard-Sitzung fehlt oder abgelaufen ist. Melde dich an und aktualisiere die Seite, um deine Kontingentlimits anzuzeigen.",
     "connectProvidersForQuota": "Stellen Sie über OAuth eine Verbindung zu Anbietern her, um Ihre API-Kontingentgrenzen und -Nutzung zu verfolgen.",
     "accountsCount": "{count, plural, one {# Konto} other {# Konten}}",
     "filteredFromCount": "(gefiltert aus {count})",
