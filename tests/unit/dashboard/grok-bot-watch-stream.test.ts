@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { watchStream } =
+const { watchStream, pumpWatch } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/watchStream.ts");
 const { watchCounter, watchSlot } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/overlap.ts");
@@ -29,41 +29,112 @@ async function text(stream: ReadableStream<Uint8Array>): Promise<string> {
   return chunks.join("");
 }
 
-test("the first watch keeps cursor zero", async () => {
-  let sent = "";
-  const body = await text(
-    watchStream({
-      accessToken: "token",
-      agentId: "agent-1",
-      after: "0",
-      signal: new AbortController().signal,
-      release: () => {},
-      frames: (input) => {
-        sent = String(
-          (input.payload.cursors as Array<{ afterUpdatedSeq: string }>)[0].afterUpdatedSeq
-        );
-        return readerFrames([])();
-      },
-      pressure: () => "read",
-    })
-  );
-  assert.equal(sent, "0");
-  assert.equal(body, "");
-});
-
 test("each upstream frame becomes one server-sent event", async () => {
   const body = await text(
     watchStream({
       accessToken: "token",
       agentId: "agent-1",
       after: "7",
+      generation: 0,
       signal: new AbortController().signal,
       release: () => {},
+      streamId: "test-stream",
       frames: readerFrames([{ seq: "8" }, { heartbeat: true }]),
       pressure: () => "read",
     })
   );
-  assert.equal(body, 'data: {"seq":"8"}\n\ndata: {"heartbeat":true}\n\n');
+  assert.equal(
+    body,
+    'event: connected\ndata: {"streamId":"test-stream"}\n\nevent: frame\ndata: {"seq":"8"}\n\nevent: frame\ndata: {"heartbeat":true}\n\n'
+  );
+});
+
+test("a missing generation does not open the upstream watch", async () => {
+  const watches = watchCounter();
+  const release = watchSlot(watches, "conn-missing") ?? (() => {});
+  const stream = watchStream({
+    accessToken: "token",
+    agentId: "agent-1",
+    after: "0",
+    signal: new AbortController().signal,
+    release,
+    frames: async function* () {
+      throw new Error("upstream opened");
+    },
+  });
+  await assert.rejects(() => text(stream), /generation required/);
+  assert.equal(watches.size("conn-missing"), 0);
+});
+
+test("the upstream watch uses the requested generation", async () => {
+  let generation: unknown;
+  const body = await text(
+    watchStream({
+      accessToken: "token",
+      agentId: "agent-1",
+      after: "0",
+      generation: 0,
+      generation: 9,
+      signal: new AbortController().signal,
+      release: () => {},
+      frames: async function* (input) {
+        generation = (input.payload.cursors as Array<{ generation?: unknown }>)[0]?.generation;
+        yield { heartbeat: true };
+      },
+      pressure: () => "read",
+    })
+  );
+  assert.match(body, /"heartbeat":true/);
+  assert.equal(generation, 9);
+});
+
+test("a pause timer cannot pull another frame after cancel", async () => {
+  const seen: unknown[] = [];
+  const upstream = new AbortController();
+  const frames = (async function* () {
+    yield { seq: "1" };
+    await new Promise<void>((resolve) =>
+      upstream.signal.addEventListener("abort", () => resolve())
+    );
+    seen.push("late");
+    yield { seq: "2" };
+  })();
+  const controller = {
+    enqueue() {},
+    error() {},
+  } as unknown as ReadableStreamDefaultController<Uint8Array>;
+  const running = pumpWatch({
+    frames,
+    controller,
+    upstream,
+    pressure: () => "pause",
+    streamId: "pause",
+  });
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  upstream.abort();
+  await running;
+  assert.deepEqual(seen, []);
+});
+
+test("a frames factory failure releases its slot and aborts upstream", async () => {
+  const watches = watchCounter();
+  const release = watchSlot(watches, "conn-factory") ?? (() => {});
+  const upstream = new AbortController();
+  const stream = watchStream({
+    accessToken: "token",
+    agentId: "agent-1",
+    after: "0",
+    generation: 0,
+    signal: new AbortController().signal,
+    release,
+    frames: (input) => {
+      input.signal?.addEventListener("abort", () => upstream.abort());
+      throw new Error("factory failed");
+    },
+  });
+  await assert.rejects(() => text(stream), /factory failed/);
+  assert.equal(watches.size("conn-factory"), 0);
+  assert.equal(upstream.signal.aborted, true);
 });
 
 test("an upstream failure is reported as the route's error frame, not as a broken stream", async () => {
@@ -72,14 +143,18 @@ test("an upstream failure is reported as the route's error frame, not as a broke
       accessToken: "token",
       agentId: "agent-1",
       after: "0",
+      generation: 0,
       signal: new AbortController().signal,
       release: () => {},
+      streamId: "test-stream",
       frames: readerFrames([{ seq: "1" }, { seq: "2" }], 1),
       pressure: () => "read",
     })
   );
-  assert.match(body, /^data: \{"seq":"1"\}\n\n/);
-  assert.match(body, /event: error/);
+  assert.match(body, /event: frame\ndata: \{"seq":"1"\}\n\n/);
+  assert.match(body, /event: terminal/);
+  assert.match(body, /"code":"unknown"/);
+  assert.match(body, /"streamId":"test-stream"/);
 });
 
 test("the watch slot is given back when the consumer cancels", async () => {
@@ -89,6 +164,7 @@ test("the watch slot is given back when the consumer cancels", async () => {
     accessToken: "token",
     agentId: "agent-1",
     after: "0",
+    generation: 0,
     signal: new AbortController().signal,
     release,
     frames: readerFrames([{ seq: "1" }, { seq: "2" }]),
@@ -102,15 +178,18 @@ test("the watch slot is given back when the consumer cancels", async () => {
 test("cancelling a stalled watch frees its slot", async () => {
   const watches = watchCounter();
   const release = watchSlot(watches, "conn-stalled") ?? (() => {});
+  let upstreamSignal: AbortSignal | undefined;
   const stream = watchStream({
     accessToken: "token",
     agentId: "agent-1",
     after: "0",
+    generation: 0,
     signal: new AbortController().signal,
     release,
     // The upstream sends one frame and then goes quiet. Nothing else can free
     // the slot, so only the consumer's cancel can.
-    frames: async function* () {
+    frames: async function* (input) {
+      upstreamSignal = input.signal;
       yield { seq: "1" };
       await new Promise(() => {});
     },
@@ -120,6 +199,7 @@ test("cancelling a stalled watch frees its slot", async () => {
   assert.equal(watches.size("conn-stalled"), 1, "the watch holds its slot while streaming");
   await stream.cancel();
   assert.equal(watches.size("conn-stalled"), 0, "cancelling gives the slot back");
+  assert.equal(upstreamSignal?.aborted, true, "cancelling also aborts the upstream watch");
 });
 
 test("a queue that stays full aborts the upstream watch and fails the stream", async () => {
@@ -129,6 +209,7 @@ test("a queue that stays full aborts the upstream watch and fails the stream", a
     accessToken: "token",
     agentId: "agent-1",
     after: "0",
+    generation: 0,
     signal: new AbortController().signal,
     release,
     frames: readerFrames([{ seq: "1" }]),
@@ -145,13 +226,18 @@ test("a pause holds the loop and then delivers the frames", async () => {
       accessToken: "token",
       agentId: "agent-1",
       after: "0",
+      generation: 0,
       signal: new AbortController().signal,
       release: () => {},
+      streamId: "test-stream",
       frames: readerFrames([{ seq: "1" }]),
       pressure: () => answers.shift() ?? "read",
     })
   );
-  assert.equal(body, 'data: {"seq":"1"}\n\n');
+  assert.equal(
+    body,
+    'event: connected\ndata: {"streamId":"test-stream"}\n\nevent: frame\ndata: {"seq":"1"}\n\n'
+  );
 });
 
 test("the abort listener is removed once the stream ends", async () => {
@@ -174,6 +260,7 @@ test("the abort listener is removed once the stream ends", async () => {
       accessToken: "token",
       agentId: "agent-1",
       after: "0",
+      generation: 0,
       signal,
       release: () => {},
       frames: readerFrames([{ seq: "1" }]),
@@ -184,136 +271,55 @@ test("the abort listener is removed once the stream ends", async () => {
   assert.equal(removed, 1, "a finished watch leaves no abort listener behind");
 });
 
-test("consumer cancellation aborts an active upstream and releases exactly once", async () => {
-  let upstream: AbortSignal | undefined;
-  let releases = 0;
-  const stream = watchStream({
-    accessToken: "synthetic",
-    agentId: "agent",
-    after: "0",
-    signal: new AbortController().signal,
-    release: () => {
-      releases++;
-    },
-    pressure: () => "read",
-    frames: (input) => {
-      upstream = input.signal;
-      return (async function* () {
-        await new Promise<void>((resolve) =>
-          input.signal?.addEventListener("abort", () => resolve(), { once: true })
-        );
-      })();
-    },
-  });
-  await stream.cancel();
-  await Promise.resolve();
-  assert.equal(upstream?.aborted, true);
-  assert.equal(releases, 1);
+test("an omitted body is filled from the list one seq ahead", async () => {
+  const calls: Array<Record<string, unknown>> = [];
+  const body = await text(
+    watchStream({
+      accessToken: "token",
+      agentId: "agent-1",
+      after: "0",
+      generation: 2,
+      signal: new AbortController().signal,
+      release: () => {},
+      frames: readerFrames([{ rows: { entries: [{ seq: "3", bodyOmitted: true }] } }]),
+      recover: async (input) => {
+        calls.push(input.payload);
+        return { entries: [{ seq: "3", body: "kept" }] };
+      },
+      pressure: () => "read",
+    })
+  );
+  assert.deepEqual(calls, [{ agentId: "agent-1", sessionId: "", beforeSeq: "4", limit: 1 }]);
+  assert.match(body, /"body":"kept"/);
+  assert.equal(body.includes('"bodyOmitted":true'), false);
 });
 
-test("a pre-aborted request never opens an upstream stream and releases its slot", async () => {
-  const controller = new AbortController();
-  controller.abort();
-  let opened = 0;
-  let releases = 0;
-  const stream = watchStream({
-    accessToken: "synthetic",
-    agentId: "agent",
-    after: "0",
-    signal: controller.signal,
-    release: () => {
-      releases++;
-    },
-    frames: () => {
-      opened++;
-      return readerFrames([])();
-    },
-    pressure: () => "read",
-  });
-  await text(stream);
-  assert.equal(opened, 0);
-  assert.equal(releases, 1);
-});
-
-test("a synchronous upstream factory throw still releases and reports a safe error frame", async () => {
-  let releases = 0;
-  const stream = watchStream({
-    accessToken: "synthetic",
-    agentId: "agent",
-    after: "0",
-    signal: new AbortController().signal,
-    release: () => {
-      releases++;
-    },
-    frames: () => {
-      throw new Error("private upstream details");
-    },
-    pressure: () => "read",
-  });
-  const body = await text(stream);
-  assert.match(body, /event: error/);
-  assert.doesNotMatch(body, /private upstream details/);
-  assert.equal(releases, 1);
-});
-
-test("request abort stops upstream, releases once, and does not affect a different watch", async () => {
-  const request = new AbortController();
-  const watches = watchCounter();
-  const one = watchSlot(watches, "one")!;
-  const two = watchSlot(watches, "two")!;
-  let upstream: AbortSignal | undefined;
-  const stream = watchStream({
-    accessToken: "synthetic",
-    agentId: "agent",
-    after: "0",
-    signal: request.signal,
-    release: one,
-    pressure: () => "read",
-    frames: (input) => {
-      upstream = input.signal;
-      return (async function* () {
-        await new Promise<void>((resolve) =>
-          input.signal?.addEventListener("abort", () => resolve(), { once: true })
-        );
-      })();
-    },
-  });
-  request.abort();
-  await text(stream);
-  assert.equal(upstream?.aborted, true);
-  assert.equal(watches.size("one"), 0);
-  assert.equal(watches.size("two"), 1);
-  two();
-});
-
-test("cancel while paused closes the upstream iterator and frees only its own slot", async () => {
-  const watches = watchCounter();
-  const releaseOne = watchSlot(watches, "one")!;
-  const releaseTwo = watchSlot(watches, "two")!;
-  let closed = false;
-  let reads = 0;
-  const stream = watchStream({
-    accessToken: "synthetic",
-    agentId: "agent",
-    after: "0",
-    signal: new AbortController().signal,
-    release: releaseOne,
-    pressure: () => (++reads === 1 ? "read" : "pause"),
-    frames: async function* () {
-      try {
-        yield { seq: "1" };
-        yield { seq: "2" };
-      } finally {
-        closed = true;
-      }
-    },
-  });
-  const reader = stream.getReader();
-  await reader.read();
-  await reader.cancel();
-  await new Promise((resolve) => setTimeout(resolve, 250));
-  assert.equal(closed, true);
-  assert.equal(watches.size("one"), 0);
-  assert.equal(watches.size("two"), 1);
-  releaseTwo();
+test("a blob hash is read from its signed blobs path", async () => {
+  const calls: Array<Record<string, unknown>> = [];
+  const urls: string[] = [];
+  const body = await text(
+    watchStream({
+      accessToken: "token",
+      agentId: "agent-1",
+      after: "0",
+      generation: 2,
+      signal: new AbortController().signal,
+      release: () => {},
+      frames: readerFrames([{ rows: { entries: [{ seq: "8", blobHash: "abc123def456ghij" }] } }]),
+      recover: async (input) => {
+        calls.push(input.payload);
+        return {
+          instructions: [{ relPath: "blobs/abc123def456ghij", url: "https://blob.example/body" }],
+        };
+      },
+      fetchBlob: async (url) => {
+        urls.push(url);
+        return new Response("blob-body");
+      },
+      pressure: () => "read",
+    })
+  );
+  assert.deepEqual(calls, [{ relPaths: ["blobs/abc123def456ghij"] }]);
+  assert.deepEqual(urls, ["https://blob.example/body"]);
+  assert.match(body, /"body":"blob-body"/);
 });

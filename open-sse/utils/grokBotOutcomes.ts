@@ -1,0 +1,80 @@
+export type GrokBotActionOutcome = "accepted" | "refused" | "unknown";
+
+export function grokBotErrorStatus(error: unknown): number | undefined {
+  if (!error || typeof error !== "object") return undefined;
+  const status = (error as { status?: unknown }).status;
+  return typeof status === "number" ? status : undefined;
+}
+
+type Answer = Record<string, unknown>;
+
+function record(answer: unknown): Answer | null {
+  return answer !== null && typeof answer === "object" ? (answer as Answer) : null;
+}
+
+function hasRefusal(answer: Answer): boolean {
+  return answer.refusal !== null && typeof answer.refusal === "object";
+}
+
+const ACCEPTED_DELIVERIES = new Set<unknown>([
+  1,
+  2,
+  3,
+  "GROK_BOT_USER_MESSAGE_DELIVERY_ACCEPTED_BOX",
+  "GROK_BOT_USER_MESSAGE_DELIVERY_ACCEPTED_TEMPORAL",
+  "GROK_BOT_USER_MESSAGE_DELIVERY_DUPLICATE",
+]);
+
+export function grokBotSendOutcome(answer: unknown): GrokBotActionOutcome {
+  const body = record(answer);
+  if (!body) return "unknown";
+  if (
+    hasRefusal(body) ||
+    body.delivery === 4 ||
+    body.delivery === "GROK_BOT_USER_MESSAGE_DELIVERY_REFUSED"
+  ) {
+    return "refused";
+  }
+  if (ACCEPTED_DELIVERIES.has(body.delivery)) return "accepted";
+  if (body.delivery !== undefined) return "unknown";
+  return body.dispatched === true ? "accepted" : "unknown";
+}
+
+export function grokBotCardOutcome(
+  answer: unknown,
+  options: { allowEmpty?: boolean } = {}
+): GrokBotActionOutcome {
+  const allowEmpty = options.allowEmpty ?? true;
+  if (answer === null) return allowEmpty ? "accepted" : "unknown";
+  const body = record(answer);
+  if (!body) return "unknown";
+  if (
+    body.accepted === false ||
+    body.dispatched === false ||
+    hasRefusal(body) ||
+    "error" in body ||
+    "code" in body ||
+    "status" in body ||
+    "message" in body
+  ) {
+    return "refused";
+  }
+  if (Object.keys(body).length === 0) return allowEmpty ? "accepted" : "unknown";
+  if (body.accepted === true || body.dispatched === true) return "accepted";
+  return "unknown";
+}
+
+export function grokBotSendSettled(answer: unknown): boolean {
+  const status = (answer as { status?: unknown } | null)?.status;
+  return status === 2 || status === "ACCEPTED";
+}
+
+export function grokBotRefusal(answer: unknown): { failureCode: string; message: string } | null {
+  const body = record(answer);
+  const refusal = body && record(body.refusal);
+  if (!refusal) return null;
+  return {
+    failureCode: typeof refusal.failureCode === "string" ? refusal.failureCode : "",
+    message: typeof refusal.message === "string" ? refusal.message : "",
+  };
+}

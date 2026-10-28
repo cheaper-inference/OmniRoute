@@ -695,11 +695,27 @@ export function SkillsPanel({
 export function ComputersPanel({ computers }: { computers: GrokBotComputer[] }) {
   return (
     <ul className="space-y-1">
-      {computers.map((computer) => (
-        <li className="break-words text-sm" key={computer.machineId}>
-          {computer.machineId}
-        </li>
-      ))}
+      {computers.map((computer) => {
+        const details = [
+          computer.machineId,
+          computer.localRoot,
+          computer.terminalsFolder,
+          computer.variant,
+          computer.kind,
+          computer.serverAuthoritative ? "serverAuthoritative=true" : "",
+          computer.lastSeen,
+          computer.supervised ? "supervised=true" : "",
+          computer.capabilities.join(", "),
+        ]
+          .filter((value) => value !== "")
+          .join(" | ");
+        return (
+          <li className="break-words text-sm" key={computer.machineId}>
+            <div>{computer.label || computer.machineId}</div>
+            {details ? <div className="text-xs text-text-muted">{details}</div> : null}
+          </li>
+        );
+      })}
     </ul>
   );
 }
