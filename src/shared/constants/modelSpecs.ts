@@ -1145,6 +1145,24 @@ export function isAdaptiveThinkingOnly(modelId: string | null | undefined): bool
   return getModelSpec(modelId)?.adaptiveThinkingOnly === true;
 }
 
+/**
+ * True when the model cryptographically validates replayed `thinking` /
+ * `redacted_thinking` blocks against the original response. The Claude 5.x
+ * generation (Opus 5.x / Sonnet 5.x / Haiku 5.x / Fable 5.x — dated snapshots
+ * included) rejects fabricated replay placeholders with
+ * 400 "thinking or redacted_thinking blocks in the latest assistant message
+ * cannot be modified". For these models only byte-exact originals may be
+ * replayed; anything else must be dropped, never synthesized.
+ */
+export function validatesReplayedThinkingBlocks(modelId: string | null | undefined): boolean {
+  if (typeof modelId !== "string" || modelId.length === 0) return false;
+  let normalized = modelId.trim().toLowerCase();
+  const slash = normalized.lastIndexOf("/");
+  if (slash >= 0) normalized = normalized.slice(slash + 1);
+  normalized = normalized.replace(/-\d{8}$/, "");
+  return /^claude-(?:opus|sonnet|haiku|fable)-5(?:$|[.-])/.test(normalized);
+}
+
 export function getMaxEffortWhenThinkingDisabled(
   modelId: string | null | undefined
 ): "high" | null {

@@ -4,6 +4,7 @@ import { lookupReasoning, recordReplay } from "../../services/reasoningCache.ts"
 import { getModelTargetFormat } from "../../config/providerModels.ts";
 import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 import { sanitizeToolId } from "./schemaCoercion.ts";
+import { validatesReplayedThinkingBlocks } from "../../../src/shared/constants/modelSpecs.ts";
 
 export { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 
@@ -639,6 +640,31 @@ export function prepareClaudeRequest(
           markMessageCacheControl(msg)
         ) {
           lastAssistantProcessed = true;
+        }
+
+        // Claude 5.x-generation models cryptographically validate replayed
+        // thinking/redacted_thinking blocks, so ANY fabricated placeholder
+        // (DEFAULT_THINKING_CLAUDE_SIGNATURE as signature or data) is a hard
+        // 400 "thinking or redacted_thinking blocks in the latest assistant
+        // message cannot be modified". For these models: keep genuine blocks
+        // verbatim on every turn (no older-turn rewrite), never inject a
+        // precursor, and drop unverifiable blocks on the latest assistant
+        // turn — a missing block is recoverable, a fabricated one is not.
+        if (provider === "claude" && validatesReplayedThinkingBlocks(String(body.model ?? ""))) {
+          if (i === latestAssistantIndex) {
+            msg.content = content.filter((block) => {
+              if (block.type === "redacted_thinking") {
+                return typeof block.data === "string" && (block.data as string).length > 0;
+              }
+              if (block.type === "thinking") {
+                return (
+                  typeof block.signature === "string" && (block.signature as string).length > 0
+                );
+              }
+              return true;
+            });
+          }
+          continue;
         }
 
         // Handle thinking blocks for Anthropic-shape endpoints.

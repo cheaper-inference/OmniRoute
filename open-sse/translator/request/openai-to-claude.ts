@@ -11,6 +11,7 @@ import {
 } from "../helpers/claudeHelper.ts";
 import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
 import { restoreClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
+import { validatesReplayedThinkingBlocks } from "../../../src/shared/constants/modelSpecs.ts";
 import {
   getDefaultThinkingBudget,
   isAdaptiveThinkingOnly,
@@ -808,7 +809,14 @@ function getContentBlocksFromMessage(
       msg.reasoning_content &&
       thinkingEnabledForRequest &&
       hasToolUseBlock &&
-      !hasThinkingBlock
+      !hasThinkingBlock &&
+      // Claude 5.x models validate replayed thinking/redacted blocks against the
+      // original response — a fabricated placeholder 400s "cannot be modified".
+      // Drop the reasoning silently instead (same contract as #5945).
+      !(
+        thinkingBinding.provider === "claude" &&
+        validatesReplayedThinkingBlocks(String(thinkingBinding.model ?? "") || String(model))
+      )
     ) {
       blocks.unshift({
         type: "redacted_thinking",
