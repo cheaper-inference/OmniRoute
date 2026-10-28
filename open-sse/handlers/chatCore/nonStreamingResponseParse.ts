@@ -14,6 +14,7 @@
 import { normalizePayloadForLog } from "@/lib/logPayloads";
 import { extractSSEErrorMessage } from "../sseParser.ts";
 import { readNonStreamingResponseBody } from "./nonStreamingResponseBody.ts";
+import { parseJsonDocumentBehindEventStream } from "./nonStreamingJsonDocument.ts";
 import {
   normalizeNonStreamingEventPayload,
   parseNonStreamingSSEPayload,
@@ -94,6 +95,19 @@ export async function parseNonStreamingResponseBody(opts: {
     const parsedFromSSE = parseNonStreamingSSEPayload(streamPayload, targetFormat, model);
 
     if (!parsedFromSSE) {
+      // A forced-streaming upstream may answer with one complete JSON response document under
+      // an event-stream content type: use it as the non-stream response instead of a 502.
+      const jsonDocument = parseJsonDocumentBehindEventStream(rawBody, targetFormat);
+      if (jsonDocument) {
+        log?.debug?.("STREAM", `Upstream ${streamKind} body is a complete JSON response document`);
+        return {
+          kind: "ok",
+          responseBody: jsonDocument.body,
+          responsePayloadFormat: jsonDocument.format,
+          looksLikeSSE: true,
+          normalizedProviderPayload,
+        };
+      }
       // Some executors (e.g. the Devin/Windsurf CLI) always emit text/event-stream, signalling
       // failure with an error-only chunk (`data: {"error":{"message":"Devin CLI not found..."}}`)
       // that carries no `choices`. Surface that real, sanitized message instead of the generic 502
