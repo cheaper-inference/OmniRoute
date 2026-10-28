@@ -168,13 +168,26 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
     `- **Parameter Match:** Argument names must precisely match the tool's declared schema.`,
     `- **Multiple Calls:** Emit one tag block per call; several blocks may follow sequentially if necessary.`,
     "",
-    "## Examples",
+    "## Examples & Common Mistakes",
+    "",
+    "### ✅ Correct Example",
     "User: Check the contents of package.json and run the build script.",
     `Assistant: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
     `<shell>{"command": "npm run build", "_nonce": "${nonce}"}</shell>`,
     "",
-    "User: Replace the title in index.html with 'Hello World'.",
-    `Assistant: <edit>{"path": "index.html", "old_str": "<title>Old Title</title>", "new_str": "<title>Hello World</title>", "_nonce": "${nonce}"}</edit>`,
+    "### ❌ Incorrect Formats and How to Fix Them",
+    "",
+    "1. **Markdown Code Fences:**",
+    `   ❌ WRONG: \`\`\`json\n<read>{"path": "package.json", "_nonce": "${nonce}"}</read>\n\`\`\``,
+    `   ✅ CORRECT: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
+    "",
+    "2. **Generic Tool Tags:**",
+    `   ❌ WRONG: <tool>{"name": "read", "path": "package.json", "_nonce": "${nonce}"}</tool>`,
+    `   ✅ CORRECT: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
+    "",
+    "3. **Missing Security Nonce:**",
+    '   ❌ WRONG: <read>{"path": "package.json"}</read>',
+    `   ✅ CORRECT: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
     "",
     "Tools:",
   ];
@@ -188,7 +201,6 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
 
   return lines.join("\n");
 }
-
 /**
  * Render the short reminder that re-states the tool contract near the end of the
  * conversation (see `CF_TOOL_REMINDER_DEPTH`).

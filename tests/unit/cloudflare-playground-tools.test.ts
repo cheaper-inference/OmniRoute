@@ -86,7 +86,10 @@ test("serializeCfToolPrompt generates a compact contract block", () => {
   assert.ok(prompt.includes("path: string"));
   // Compact one-line signatures instead of pretty-printed JSON
   assert.ok(!prompt.includes('"type": "object"'));
-  assert.ok(prompt.length < 1600, `contract should stay small, got ${prompt.length}`);
+  // The worked + negative examples dominate the fixed preamble (~1.8k for two
+  // tools, ~2.6k for OpenCode's twelve), so the bound tracks the preamble, not
+  // the tool count.
+  assert.ok(prompt.length < 2000, `contract should stay small, got ${prompt.length}`);
 });
 
 test("serializeCfToolPrompt says the tool name belongs in the tag, not the JSON", () => {
