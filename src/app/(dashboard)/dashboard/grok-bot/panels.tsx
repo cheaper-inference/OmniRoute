@@ -692,7 +692,19 @@ export function SkillsPanel({
   );
 }
 
-export function ComputersPanel({ computers }: { computers: GrokBotComputer[] }) {
+export function ComputersPanel({
+  computers,
+  path,
+  result,
+  onPath,
+  onRead,
+}: {
+  computers: GrokBotComputer[];
+  path: string;
+  result: string;
+  onPath: (path: string) => void;
+  onRead: (computer: GrokBotComputer) => void;
+}) {
   return (
     <ul className="space-y-1">
       {computers.map((computer) => {
@@ -713,6 +725,23 @@ export function ComputersPanel({ computers }: { computers: GrokBotComputer[] }) 
           <li className="break-words text-sm" key={computer.machineId}>
             <div>{computer.label || computer.machineId}</div>
             {details ? <div className="text-xs text-text-muted">{details}</div> : null}
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                onRead(computer);
+              }}
+            >
+              <Input
+                className="min-w-0 flex-1 rounded-control border px-2 py-1 text-xs"
+                aria-label="computer file path"
+                onChange={(event) => onPath(event.target.value)}
+                value={path}
+              />
+              <Button variant="ghost" size="sm" className="rounded-control border px-2 py-1 text-xs">
+                Read file
+              </Button>
+            </form>
+            {result ? <div className="text-xs text-text-muted">{result}</div> : null}
           </li>
         );
       })}

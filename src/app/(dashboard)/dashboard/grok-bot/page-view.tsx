@@ -17,6 +17,12 @@ export function DetailsPanel({ state }: { state: PageState }) {
     computerRegion,
     accounts,
     computers,
+    computerPath,
+    setComputerPath,
+    computerFileState,
+    setComputerFileState,
+    selectedAccount,
+    selectedBot,
     skills,
     routines,
     fanout,
@@ -55,7 +61,34 @@ export function DetailsPanel({ state }: { state: PageState }) {
       </Card>
       <Card icon="computer" padding="sm" title={computerRegion.title}>
         {computers.length > 0 ? (
-          <ComputersPanel computers={computers} />
+          <ComputersPanel
+            computers={computers}
+            onPath={setComputerPath}
+            onRead={(computer) => {
+              void fetch(
+                `/api/providers/${encodeURIComponent(selectedAccount)}/grok-bot/computer-file`,
+                {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({
+                    agentId: selectedBot,
+                    machineId: computer.machineId,
+                    path: computerPath,
+                  }),
+                }
+              )
+                .then(async (response) => {
+                  if (!response.ok) throw new Error(String(response.status));
+                  const bytes = new Uint8Array(await response.arrayBuffer());
+                  setComputerFileState(`${bytes.byteLength} bytes`);
+                })
+                .catch((error: unknown) => {
+                  setComputerFileState(error instanceof Error ? error.message : "unavailable");
+                });
+            }}
+            path={computerPath}
+            result={computerFileState}
+          />
         ) : (
           <p className="text-sm text-text-muted">{computerRegion.empty}</p>
         )}

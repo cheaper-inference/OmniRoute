@@ -50,6 +50,21 @@ test("computer presence keeps the fields the client publishes", () => {
   ]);
 });
 
+test("computer rendering accepts a path and shows the read result", () => {
+  const [computer] = grokBotComputers(response);
+  const html = renderToStaticMarkup(
+    createElement(ComputersPanel, {
+      computers: [computer],
+      path: "/home/houminxi/terminals/probe.txt",
+      result: "16 bytes",
+      onPath: () => undefined,
+      onRead: () => undefined,
+    })
+  );
+  assert.match(html, /value="\/home\/houminxi\/terminals\/probe\.txt"/);
+  assert.match(html, /16 bytes/);
+});
+
 test("computer rendering uses the readable label and metadata", () => {
   const [computer] = grokBotComputers(response);
   const html = renderToStaticMarkup(createElement(ComputersPanel, { computers: [computer] }));

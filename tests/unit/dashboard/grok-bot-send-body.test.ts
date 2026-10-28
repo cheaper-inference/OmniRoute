@@ -11,6 +11,7 @@ test("a send carries an empty machine id and one message id", () => {
   });
   assert.equal(body.machineId, "");
   assert.equal(body.messageId, "m-1");
+  assert.equal(body.sendSource, "CHAT");
   assert.equal(body.text, "hello");
 });
 

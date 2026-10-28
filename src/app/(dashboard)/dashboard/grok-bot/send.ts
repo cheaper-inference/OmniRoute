@@ -12,5 +12,6 @@ export function grokBotSendBody(input: {
     messageId: input.messageId,
     text: input.text,
     sentAtMs: input.sentAtMs,
+    sendSource: "CHAT",
   };
 }

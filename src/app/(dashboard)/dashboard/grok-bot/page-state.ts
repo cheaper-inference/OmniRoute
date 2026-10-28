@@ -25,6 +25,8 @@ function useAccountSelection() {
   const [connectionUpdatedAt, setConnectionUpdatedAt] = useState("");
   const [roster, setRoster] = useState<GrokBotRosterEntry[]>([]);
   const [computers, setComputers] = useState<GrokBotComputer[]>([]);
+  const [computerPath, setComputerPath] = useState("");
+  const [computerFileState, setComputerFileState] = useState("");
   const [selectedBot, setSelectedBot] = useState("");
   const [skills, setSkills] = useState<GrokBotSkill[]>([]);
   const [routines, setRoutines] = useState<GrokBotRoutine[]>([]);
@@ -41,6 +43,10 @@ function useAccountSelection() {
     setRoster,
     computers,
     setComputers,
+    computerPath,
+    setComputerPath,
+    computerFileState,
+    setComputerFileState,
     selectedBot,
     setSelectedBot,
     skills,
