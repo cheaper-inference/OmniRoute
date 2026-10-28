@@ -39,11 +39,11 @@ Paragun oġġettiv tal-karatteristiċi ma' routers tal-AI open-source popolari.
 
 ## Meta tagħżel OmniRoute
 
-- Jekk tagħmel self-hosting u trid **kopertura massima tal-providers** (375 provider, 155 entrata tal-katalgu b'xejn/bla awtentikazzjoni)
-- Għandek bżonn **MCP server inkorporat** (għodod LLM, memorja, ħiliet esposti bħala għodod)
-- Għandek bżonn il-**protokoll A2A** għal workflows bejn aġent u l-ieħor
-- Trid **stealth tal-fingerprint** (JA3/JA4) biex tevita d-detezzjoni minn CAPTCHAs upstream
-- Għandek bżonn **karatteristiċi enterprise** (guardrails, evals, audit trail) mingħajr kont SaaS
+- Inti tospita lilek innifsek u trid** kopertura massima tal-fornitur** (377 fornitur, 155 entrati fil-katalgu free/no-auth )
+- Għandek bżonn a** server MCP mibni** (għodod LLM, memorja, ħiliet esposti bħala għodda)
+- Għandek bżonn**A2A protokoll** għal flussi tax-xogħol minn aġent għal aġent
+- Trid** stealth tal-marki tas-swaba'** (JA3/JA4) biex tevita skoperta minn upstream CAPTCHAs
+- Għandek bżonn** karatteristiċi tal-intrapriża** (guardrails, evals, audit trail) bla SaaS bill
 
 ## Meta għandek tagħżel LiteLLM
 

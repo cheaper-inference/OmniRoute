@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Kemahiran Tersedia
+## Kemahiran yang Ada
 
-OmniRoute mendedahkan 6 kemahiran A2A yang disambungkan dalam `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul kemahiran terletak dalam `src/lib/a2a/skills/`.
+OmniRoute mendedahkan 6 kemahiran A2A berwayar dalam `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul kemahiran hidup dalam `src/lib/a2a/skills/`.
 
-| Kemahiran          | ID                   | Penerangan                                                                                                                                               | Teg                        | Contoh                                      |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------ |
-| Smart Routing      | `smart-routing`      | Menghala prompt melalui penyedia/kombo optimum menggunakan enjin kombo + pemarkahan OmniRoute                                                            | routing, providers         | "Halakan prompt ini melalui model terbaik"  |
-| Quota Management   | `quota-management`   | Melaporkan keadaan kuota setiap penyedia, membantu pemanggil memutuskan bila untuk menyekat/bertukar                                                     | quota, providers           | "Semak kuota untuk anthropic"               |
-| Provider Discovery | `provider-discovery` | Menyenaraikan penyedia terpasang berserta keupayaan, penanda peringkat percuma, status OAuth                                                             | providers, discovery       | "Penyedia apa yang tersedia?"               |
-| Cost Analysis      | `cost-analysis`      | Menganggarkan kos sesuatu permintaan/perbualan berdasarkan katalog + penggunaan terkini                                                                  | cost, usage                | "Anggarkan kos untuk perbualan ini"         |
-| Health Report      | `health-report`      | Mengagregatkan keadaan circuit breaker, cooldown dan lockout setiap penyedia                                                                             | health, resilience         | "Tunjukkan status kesihatan semua penyedia" |
-| List Capabilities  | `list-capabilities`  | Mengembalikan katalog Agent Skills 45 entri penuh (23 API + 21 CLI + 1 config) sebagai jadual markdown dengan URL SKILL.md mentah untuk suntikan konteks | catalog, discovery, skills | "Senaraikan semua keupayaan OmniRoute"      |
+| Kemahiran            | ID                   | Penerangan                                                                                                                                                                   | Tag                          | Contoh                                      |
+| :------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :------------------------------------------ |
+| Penghalaan Pintar    | `smart-routing`      | Halakan gesaan melalui provider/combo optimum menggunakan pemarkahan + enjin kombo OmniRoute                                                                                 | penghalaan, pembekal         | "Halakan gesaan ini melalui model terbaik"  |
+| Pengurusan Kuota     | `quota-management`   | Laporan menyatakan kuota setiap pembekal, membantu pemanggil memutuskan bila untuk throttle/switch                                                                           | kuota, pembekal              | "Semak kuota untuk antropik"                |
+| Penemuan Pembekal    | `provider-discovery` | Menyenaraikan pembekal yang dipasang dengan keupayaan, bendera peringkat percuma, status OAuth                                                                               | pembekal, penemuan           | "Pembekal apa yang tersedia?"               |
+| Analisis Kos         | `cost-analysis`      | Anggaran kos request/conversation berdasarkan katalog + penggunaan terkini                                                                                                   | kos, penggunaan              | "Anggaran kos untuk perbualan ini"          |
+| Laporan Kesihatan    | `health-report`      | Agregat pemutus litar, cooldown, keadaan kunci keluar bagi setiap pembekal                                                                                                   | kesihatan, daya tahan        | "Tunjukkan status kesihatan semua pembekal" |
+| Senaraikan Keupayaan | `list-capabilities`  | Mengembalikan katalog Kemahiran Ejen 45 penyertaan penuh (23 API + 21 CLI + 1 konfigurasi) sebagai jadual penurunan harga dengan SKILL.md URLs mentah untuk suntikan konteks | katalog, penemuan, kemahiran | "Senaraikan semua keupayaan OmniRoute "     |
 
-> Kad Ejen harus dikekalkan sejajar dengan katalog 375 penyedia langsung; bilangan penyedia dan metadata percuma/tanpa-auth bersumber daripada pendaftar runtime.
+> Kad Ejen hendaklah sentiasa sejajar dengan katalog 377-pembekal langsung; kiraan pembekal dan metadata free/no-auth diperoleh daripada pendaftaran masa jalan.
 
-### Butiran Kemahiran `list-capabilities`
+### `list-capabilities` Butiran Kemahiran
 
-Kemahiran `list-capabilities` amat berguna untuk ejen luaran yang perlu menemui apa yang didedahkan oleh OmniRoute sebelum menghantar panggilan API. Ia mengembalikan artifak jadual markdown berstruktur:
+Kemahiran `list-capabilities` amat berguna untuk ejen luar yang perlu mengetahui perkara yang OmniRoute dedahkan sebelum menghantar panggilan API. Ia mengembalikan artifak jadual penurunan nilai berstruktur:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ Kemahiran `list-capabilities` amat berguna untuk ejen luaran yang perlu menemui 
 ...
 ```
 
-Setiap baris mengandungi lajur `rawUrl` supaya ejen boleh terus mengambil SKILL.md penuh. Medan `metadata.totalSkills` mencerminkan saiz katalog (45 buat masa ini). Pelaksanaan: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Setiap baris termasuk lajur `rawUrl` supaya ejen boleh segera mengambil SKILL.md penuh . Medan `metadata.totalSkills` mencerminkan saiz katalog (45 hari ini). Pelaksanaan: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -268,7 +268,7 @@ diserahkan → sedang diproses → selesai
 
 ## Contoh Integrasi
 
-### Python (requests)
+### Python (permintaan)
 
 ```python
 import requests
@@ -287,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (ambil)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

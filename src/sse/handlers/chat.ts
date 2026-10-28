@@ -34,6 +34,10 @@ import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/service
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { getImageModelEntry, isImageOnlyModel } from "@omniroute/open-sse/config/imageRegistry.ts";
 import { acceptHeaderForcesStream } from "@omniroute/open-sse/utils/aiSdkCompat.ts";
+import {
+  isAntigravityRefusalReplay,
+  usesAntigravity429Budget,
+} from "@omniroute/open-sse/services/antigravity429Guard.ts";
 import { applyNoThinkingAlias } from "@omniroute/open-sse/utils/noThinkingAlias.ts";
 import { resolveCcDiscoveryAliasStrip } from "@/lib/ccDiscoveryAliasResolve";
 import {
@@ -1805,6 +1809,10 @@ async function handleSingleModelChat(
   // loops so it can never reset and loop.
   let streamEarlyEofRetries = 0;
   let streamReadinessTimeoutRetries = 0;
+  // The Antigravity executor already spends a bounded 429 budget per request
+  // (antigravity429Guard.ts); restarting the whole request on top of it multiplied one
+  // refusal into dozens of upstream calls. Set once this request got such a 429.
+  let antigravity429AlreadyRetried = false;
   // STREAM_EARLY_EOF_SIBLING_FAILOVER_ENABLED: at most ONE sibling hop per request. Keeps the
   // original early-EOF 502 so an exhausted sibling pool surfaces it verbatim (combo detection).
   let earlyEofOriginal: Response | null = null;
@@ -1927,7 +1935,12 @@ async function handleSingleModelChat(
             lastErrorCode: credentials.lastErrorCode,
           });
 
-          if (retryDecision.shouldRetry) {
+          if (retryDecision.shouldRetry && antigravity429AlreadyRetried) {
+            log.info(
+              "COOLDOWN_RETRY",
+              `${provider}/${model} not restarted: the Antigravity executor already retried this request's 429`
+            );
+          } else if (retryDecision.shouldRetry) {
             const waitSec = Math.max(Math.ceil(retryDecision.waitMs / 1000), 0);
             log.info(
               "COOLDOWN_RETRY",
@@ -2594,6 +2607,16 @@ async function handleSingleModelChat(
         }
       }
 
+      if (result.status === 429 && usesAntigravity429Budget(provider)) {
+        antigravity429AlreadyRetried = true;
+      }
+      // A local answer to a re-send of a request Antigravity already refused is a verdict
+      // on that request, not on the account: no cooldown, no exhaustion mark, no breaker.
+      const isRefusalReplay = isAntigravityRefusalReplay(
+        Number(result.status || 0),
+        String(result.error || "")
+      );
+
       // 6. Daily quota error check - must be executed before markAccountUnavailable
       // Check if it's a daily quota exhausted error (e.g., ModelScope/Kimi "today's quota for model")
       // Daily quota lockout overrides subsequent rate_limited lockout, ensuring lockout until tomorrow 0:00
@@ -2643,7 +2666,7 @@ async function handleSingleModelChat(
         dailyQuotaExhausted = true;
       }
 
-      if (!dailyQuotaExhausted) {
+      if (!dailyQuotaExhausted && !isRefusalReplay) {
         await maybeMarkChatAccountExhaustedFrom429({
           connectionId: credentials.connectionId,
           provider,
@@ -2703,7 +2726,8 @@ async function handleSingleModelChat(
         ((credentials.providerSpecificData?.extraApiKeys as string[] | undefined) ?? []).length >
           0 || connectionHasExtraKeys(credentials.connectionId);
       const is401 = result.status === 401;
-      const skipConnectionDisable = shouldSkipConnDisable(result, is401, hasExtraKeys, provider);
+      const skipConnectionDisable =
+        isRefusalReplay || shouldSkipConnDisable(result, is401, hasExtraKeys, provider);
 
       const { shouldFallback, cooldownMs } = skipConnectionDisable
         ? { shouldFallback: false, cooldownMs: 0 }
@@ -2764,6 +2788,7 @@ async function handleSingleModelChat(
 
       // Isolate probe-origin failures from real-traffic breaker accounting (#9817).
       if (
+        !isRefusalReplay &&
         !wasProviderProbe &&
         !(await shouldIsolateProbeFailures()) &&
         classifyProviderBreakerResult(result, isCombo, forceLiveComboTest) === "failure"
