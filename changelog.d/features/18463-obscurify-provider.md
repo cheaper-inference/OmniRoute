@@ -1,0 +1,1 @@
+- **feat(providers):** Added Obscurify.ai as an OpenAI-compatible API-key provider (`https://obscurify.ai/v1`, privacy-focused, no-email accounts), with live model discovery via `passthroughModels` ([#18463](https://github.com/cheaper-inference/OmniRoute/pull/18463)) — thanks @tonydavis629
