@@ -395,7 +395,7 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,targe
 # npm 12 requires an explicit allowlist for required global lifecycle scripts.
 RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-npm-cache,target=/root/.npm \
   npm install -g --no-audit --no-fund --allow-scripts=@anthropic-ai/claude-code,openclaw \
-    @openai/codex@0.159.2 \
+    @openai/codex@0.165.0 \
     @anthropic-ai/claude-code@2.1.260 \
     droid@0.212.0 \
     openclaw@2026.9.1 \

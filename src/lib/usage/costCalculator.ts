@@ -177,8 +177,8 @@ export function getCodexFastCostMultiplier(
   const compactModelKey = modelKey.replace(/-/g, "");
   // Codex GPT-6 Fast is 2.5x Standard (https://developers.openai.com/codex/pricing).
   if (
-    /^gpt-6(?:\.1)?-(?:astra|sol|luna)$/.test(modelKey) ||
-    /^gpt6(?:\.1)?(?:astra|sol|luna)$/.test(compactModelKey)
+    /^gpt-6(?:\.1)?-(?:astra|sol|terra|luna)$/.test(modelKey) ||
+    /^gpt6(?:\.1)?(?:astra|sol|terra|luna)$/.test(compactModelKey)
   ) {
     return 2.5;
   }
