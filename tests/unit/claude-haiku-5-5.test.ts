@@ -12,6 +12,7 @@ import { getDefaultPricing } from "../../src/shared/constants/pricing.ts";
 import { getModelSpec } from "../../src/shared/constants/modelSpecs.ts";
 import { normalizeClaudeHaikuConstraints } from "../../open-sse/services/claudeHaikuConstraints.ts";
 import { getStaticModelsForProvider } from "../../src/lib/providers/staticModels.ts";
+import { modelHasNativeContext1m } from "../../open-sse/config/claudeCodeCompatibleIdentity.ts";
 
 const MODEL_ID = "claude-haiku-5-5";
 
@@ -32,9 +33,18 @@ test("Claude Haiku 5.5 is adaptive-only and preserves adaptive thinking", () => 
   assert.deepEqual(out.output_config, { effort: "high" });
 });
 
-test("Claude Haiku 5.5 does not support max effort", () => {
-  assert.equal(supportsClaudeMaxEffort(MODEL_ID), false);
-  assert.equal(supportsClaudeMaxEffort(`claude/${MODEL_ID}`), false);
+// Source: https://platform.claude.com/docs/en/build-with-claude/effort ("Claude Haiku 5.5
+// supports all five effort levels"; the `max` row lists Haiku 5.5), matching #18064.
+test("Claude Haiku 5.5 supports max effort", () => {
+  assert.equal(supportsClaudeMaxEffort(MODEL_ID), true);
+  assert.equal(supportsClaudeMaxEffort(`claude/${MODEL_ID}`), true);
+});
+
+// Source: https://platform.claude.com/docs/en/build-with-claude/context-windows ("For every
+// model with a 1M-token context window, 1M is the default: you don't need a beta header").
+test("Claude Haiku 5.5 has a native 1M context window (no context-1m beta)", () => {
+  assert.equal(modelHasNativeContext1m(MODEL_ID), true);
+  assert.equal(modelHasNativeContext1m(`claude/${MODEL_ID}`), true);
 });
 
 // Source: https://platform.claude.com/docs/en/about-claude/pricing (Claude Haiku 5.5 rows):
@@ -81,8 +91,14 @@ test("Claude Haiku 5.5 is registered on first-party and cloud providers", () => 
     assert.ok(ids.has(targetId), `${providerId} must expose ${targetId}`);
   }
 
-  const claude = getModelsByProviderId("claude").find((entry) => entry.id === MODEL_ID);
-  assert.deepEqual(claude?.supportedThinkingEfforts, ["low", "medium", "high", "xhigh"]);
+  for (const providerId of ["claude", "anthropic"]) {
+    const entry = getModelsByProviderId(providerId).find((model) => model.id === MODEL_ID);
+    assert.deepEqual(entry?.supportedThinkingEfforts, ["low", "medium", "high", "xhigh", "max"]);
+  }
+  const bedrock = getModelsByProviderId("bedrock").find(
+    (entry) => entry.id === "anthropic.claude-haiku-5-5"
+  );
+  assert.deepEqual(bedrock?.supportedThinkingEfforts, ["low", "medium", "high", "xhigh", "max"]);
   assert.equal(
     getNextFamilyFallback(`claude/${MODEL_ID}`, new Set()),
     "claude/claude-haiku-4-5-20251001"

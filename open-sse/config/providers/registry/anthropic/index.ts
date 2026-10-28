@@ -112,7 +112,7 @@ export const anthropicProvider: RegistryEntry = {
       contextLength: 1000000,
       maxOutputTokens: 128000,
       supportsReasoning: true,
-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
   ],

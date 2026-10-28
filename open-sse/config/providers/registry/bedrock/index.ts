@@ -79,7 +79,7 @@ export const bedrockProvider: RegistryEntry = {
       supportsVision: true,
       contextLength: 1000000,
       supportsReasoning: true,
-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
       supportsXHighEffort: true,
     },
     { id: "openai.gpt-oss-120b-1:0", name: "GPT-OSS 120B (Bedrock)" },

@@ -160,7 +160,7 @@ export const claudeProvider: RegistryEntry = {
       contextLength: 1000000,
       maxOutputTokens: 128000,
       supportsXHighEffort: true,
-      supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
   ],
