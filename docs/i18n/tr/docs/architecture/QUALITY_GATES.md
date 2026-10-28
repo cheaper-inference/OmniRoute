@@ -39,10 +39,9 @@ barındırılan kapasite doğrulanmalıdır.
 Her JSON makbuzu, checkout yapılmış SHA'yı, iş akışı çalıştırmasını ve denemeyi tanımlar.
 CLI, checkout/olay SHA uyuşmazlığını reddeder. İş akışı testleri, politika üyeliğini
 karar işinin `needs` listesine bağlar; böylece yeni veya kaldırılmış bir hat sessizce
-kaybolamaz. Makbuzlar; yayımlama, dağıtım veya mevcut bir tavsiye niteliğindeki tarayıcının
-iç işleyişini değil, kendi iş akışlarını kapsar. Dal kurallarında her iki kontrol adını
-etkinleştirmek ayrı bir yönetimsel değişikliktir; bu işlerin eklenmesi tek başına bir
-dalı korumaz.
+kaybolamaz. Makbuzlar; yayımlama, dağıtım veya mevcut bir tavsiye niteliğindeki tarayıcının iç işleyişini değil, kendi iş akışlarını kapsar. Geçerli kontrolleri dal kurallarında zorunlu kılmak ayrı bir idari değişikliktir; işlerini tanımlamak tek başına bir dalı korumaz.
+
+`API Route Typecheck`, her iki toplu hükmün ve yerel tam gözlemcinin statik profilinin dışında kalan bağımsız bir iş akışı kontrolüdür. Tam aday için sonucunu ayrı olarak inceleyin. `.github/workflows/api-route-typecheck.yml`; `main` veya `release/**` dallarını hedefleyen PR'larda, bu iki dal ailesinden birine yapılan push'larda ve manuel tetiklemede çalışır. Herhangi bir yol filtresi yoktur. PR hedef dalı değişiklikleri yeni bir kontrol talep eder; gövde/başlık düzenlemeleri yalnızca gözlem amaçlı `Admission not requested / API Route Typecheck` adını kullanır ve kabul kontrolünün yerini alamaz. İş akışı bir merge-group tetikleyicisi tanımlamaz. Bu kontrolü zorunlu kılan herhangi bir merge-queue kullanıma alımı, önce söz konusu olay için kontrolün yürütülmesini sağlamalıdır.
 
 ### Kabul indirgeyicisinde saklanan kanıtlar
 
@@ -84,6 +83,12 @@ fonksiyon/blok kapsamı için güvenli değildir. Eksik, hatalı biçimlendirilm
 uyumsuz parçalar kabulün başarısız olmasına neden olur. Başarısız test parçaları, ham
 tanılama kapsamını ayrı olarak saklar; bu kapsam nihai birleştirmeye giremez.
 
+### Birim yürütme ilerleme kayıtları
+
+Paylaşılan `test:unit:ci:shard` komutu, `primary`, `dashboard` ve `serial` aşamalarını `scripts/ci/unit-progress-reporter.mjs` aracılığıyla kaydeder. Normal test raporu kullanılabilir olmaya devam eder. Yalnızca meta veri içeren ayrı bir kayıt, her dosyanın başlangıcını ve tamamlanmasını kaydeder; 30 saniyelik düzenli durum bildirimi ise hâlâ etkin olan dosyaları ve geçen sürelerini listeler. Yalnızca izin verilen yürütme meta verileri kaydedilir; test açıklamaları, çıktılar, hata içerikleri ve ortamın tamamı serileştirilmez.
+
+CI ve Quality, JSONL dosyalarını `unit-progress-ci-<run>-<attempt>-<shard>` ve `unit-progress-quality-<run>-<attempt>-<shard>` olarak saklar. Bir iş zaman aşımı, sonraki yüklemeyi engelleyebilir; önceden gönderilmiş düzenli durum bildirimleri tanılama kanıtı olarak kalır. Eksik düzenli durum bildirimleri, engellenmiş veya sonlandırılmış bir çalıştırıcı sürecine de işaret edebilir. Bu kayıtlar mevcut test seçimini, eşzamanlılığı, son tarihleri ve çıkış durumunu korur; aday kabulüyle ilgili kararlar değildir.
+
 ### Statik tarama envanteri
 
 Sürümlendirilmiş npm alias envanteri ve statik tarama üyeliği
@@ -117,6 +122,28 @@ envanteri bir referanstır; bir geçidin gerçekten çalıştığının kanıtı
 
 Betikler `scripts/check/` (politika geçitleri) ve `scripts/quality/` (ratchet motoru)
 altında bulunur. CI için doğruluğun kaynağı `.github/workflows/ci.yml` dosyasıdır.
+
+### Yayımlanan temel dokümantasyonun durumu
+
+`.github/workflows/i18n-base-health.yml`, `main` ve `release/v*` dallarına yapılan seçili
+gönderimlerden sonra ve manuel tetikleme sırasında dokümantasyonun durumunu izler. Filtreleri;
+dokümantasyonu, kök dizindeki Markdown dosyalarını, `llm.txt` dosyasını, çeviri durumunu/yapılandırmasını
+ve ilgili i18n araçlarını kapsar. Tek `Published base documentation health` işi, barındırılan Ubuntu'yu
+kullanır ve beş dakikalık bir zaman sınırına sahiptir. Salt okunur doğrulama gerçekleştirir ve
+bağımlılık kurulumu, çeviri veya durum benimsemesi olmadan bir tanılama makbuzu yazar.
+
+`scripts/i18n/check-base-health.mjs`; kaynak karması, eksik hedef, hedef karması,
+güncelliğini yitirmiş çeviri ve bölüm önbelleği tutarsızlıklarının bulunmamasını gerektirir.
+Ayrıca mevcut çekirdek belge/yerel ayar kapsamını ve bunun kaydedilmiş kaynağını doğrular.
+Geçersiz bağlam, eksik kapsam veya kesintiye uğramış bir denetleyici `INCOMPLETE`; doğrulanmış
+sapma ise `FAIL` sonucunu üretir. Her ikisi de başarısızlığı belirten bir çıkış durumu döndürür.
+Makbuz; kullanıma alınan SHA'ya, iş akışına, çalıştırmaya ve denemeye bağlıdır ve
+`i18n-base-health-<sha>-<run>-<attempt>` olarak saklanır.
+
+Bu, yayımlanan temelin bağımsız bir gözlemidir. Bir PR veya birleştirme grubu olayı,
+zorunlu bir PR denetimi, npm takma adı ya da statik tarama profili üyesi eklemez.
+Mevcut diferansiyel PR politikası ve temel denetleyicinin tavsiye niteliğindeki sınıflandırmaları
+ayrı kalır. Başarılı bir yükleme, başarısız bir durum sonucunu PASS'e dönüştüremez.
 
 ### Release PR hızlı yolu (`quality.yml`)
 
@@ -249,12 +276,12 @@ Daima ücretsiz sağlayıcılar, katalog girdileri, yinelenen havuzlar ve puanla
 
 ### İş: `i18n-ui-coverage`
 
-| Betik                                | Doğruladığı                                                                                                                                                                                         | Engelleyici             |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| `check-ui-keys-coverage` (satır içi) | UI i18n anahtarı kapsamı ≥ %65                                                                                                                                                                      | Evet                    |
-| `check-ui-value-drift` (satır içi)   | Yeniden yazılmış bir İngilizce **değer**, geride güncelliğini yitirmiş çeviri bırakmaz                                                                                                              | Evet                    |
-| `check-new-key-coverage` (satır içi) | **Yeni** bir İngilizce anahtar her yerel ayarda çevrilmiştir — `__MISSING__:` işareti reddedilir                                                                                                    | Evet                    |
-| `check-translation-ratio`            | Yerel ayar başına gerçek çeviri oranı (izin listesinin dışındaki İngilizceyle aynı / yer tutucu / eksik yapraklar), `config/quality/i18n-translation-baseline.json` + tolerans değerini aşmamalıdır | **Tavsiye niteliğinde** |
+| Betik                                | Doğruladığı                                                                                                                                                                                         | Engelleyici     |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `check-ui-keys-coverage` (satır içi) | UI i18n anahtarı kapsamı ≥ %65                                                                                                                                                                      | Evet            |
+| `check-ui-value-drift` (satır içi)   | Yeniden yazılmış bir İngilizce **değer**, geride güncelliğini yitirmiş çeviri bırakmaz                                                                                                              | Evet            |
+| `check-new-key-coverage` (satır içi) | **Yeni** bir İngilizce anahtar her yerel ayarda çevrilmiştir — `__MISSING__:` işareti reddedilir                                                                                                    | Evet            |
+| `check-translation-ratio`            | Yerel ayar başına gerçek çeviri oranı (izin listesinin dışındaki İngilizceyle aynı / yer tutucu / eksik yapraklar), `config/quality/i18n-translation-baseline.json` + tolerans değerini aşmamalıdır | **Engelleyici** |
 
 `fetch-depth: 0` gerektirir — değer sapması geçidi, `en.json` dosyasını birleştirme tabanıyla karşılaştırır.
 
@@ -302,8 +329,9 @@ npm run i18n:check-value-drift:warn     # yalnızca raporla
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Temel katalog okunamadığında (temel ref'i içermeyen sığ klon), `check-openapi-breaking`
-davranışını yansıtarak `SKIP reason=base-unresolved` ile 0 çıkış kodu döndürür.
+Değer sapması ve yeni anahtar denetimleri, `scripts/i18n/resolve-ui-diff-base.mjs` tarafından sağlanan tek bir değişmez karşılaştırmayı paylaşır. İş akışı, aynı taban, taban ucu ve aday SHA'larını her iki denetime de iletir. PR/taban yeniden hedefleme, push ve merge-group çalıştırmaları kendi olay bağlamlarını kullanır. Bir aday dalı manuel olarak tetiklemek, onun açık PR'ının tam olarak belirtilmesini veya açıkça `i18n_base_sha` girdisinin sağlanmasını gerektirir. Bu girdi olmadan `main` ya da `release/vX.Y.Z` için manuel veya zamanlanmış gözlem, son commit'i ilk üst commit'iyle karşılaştırır; bu, devralınan tüm çeviri borcunun denetimi değildir. Yerel çağrı, örneğin yukarıdaki `BASE_REF` komutu gibi açıkça belirtilmiş bir karşılaştırma tabanı gerektirir.
+
+Eksik veya belirsiz karşılaştırma bağlamı, okunamayan ya da geçersiz bir zorunlu katalog ve değişmiş bir aday, uyarı modunda da dahil olmak üzere **2** çıkış koduyla `INCOMPLETE` sonucunu üretir. Katalog okumaları `scripts/i18n/read-ui-catalog.mjs` kullanır; okuma hataları boş nesnelerle değiştirilmez. Ne kullanılamayan bir taban ne de eksik girdi PASS sonucunu oluşturur.
 
 ### İş: `i18n`
 
@@ -325,7 +353,7 @@ Yalnızca pull request'lerde çalışır.
 
 ### İş: `test-vitest`
 
-`build` sonrasında çalışır. Başarısızlık durumunda birleştirmeyi engeller.
+`changes` sınıflandırma işini gerektirir. Geçerli matris parçaları başarısız olduğunda birleştirmeyi engeller.
 
 | Paket            | Doğruladıkları                                                      | Engelleyici                                                                                                               |
 | ---------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
@@ -400,8 +428,9 @@ başına sayımların farkı alınır):
 
 - **engelleyici** — PR, değiştirdiği dosyalara döngüsel/bilişsel karmaşıklık ihlalleri veya ölü dışa aktarımlar ekledi
   (günlükte `complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=`);
-- **öneri niteliğinde** — genel toplamın dondurulmuş temel değerle karşılaştırılması. Devralınan sapma hiçbir
-  zaman masum bir PR'ı başarısız kılmaz; sapma, sürüm uzlaştırmasında yeniden dondurulur ve ek kapasite işi tarafından izlenir.
+- **uyarı niteliğinde** — genel toplamın dondurulmuş temel değerle karşılaştırılması. Devralınan sapma,
+  masum bir PR'yi asla kırmızı olarak işaretlemez; sapma, sürüm uzlaştırması sırasında düzeltilmek üzere izlenir ve
+  kapasite payı görevi tarafından takip edilir.
 
 `check:file-size`, temel referansı kendi kurallarına göre kullanır (`scripts/check/check-file-size.mjs`, #8522):
 ağaçtaki her kaynak ve test dosyasını kontrol eder, her birinin PR tabanındaki satır sayısını
@@ -610,7 +639,11 @@ bir izin listesiyle yeşil olan bir geçit, sahte bir kalite algısı yaratır.
 
 1. `scripts/check/check-<name>.mjs` (veya `.ts`) dosyasını oluşturun. Politika geçitleri 0/1 çıkış koduyla sonlanır.
    Mandallı ölçüm tarzındaki geçitler, `collect-metrics.mjs` aracılığıyla `quality-metrics.json` dosyasına bir metrik yazar.
-2. `package.json` dosyasına `"check:<name>": "node scripts/check/check-<name>.mjs"` ekleyin.
+2. `package.json` dosyasına `"check:<name>": "node scripts/check/check-<name>.mjs"` ekleyin ve
+   takma adı ve tam komutunu `config/quality/gate-manifest.json` içinde eşitleyin.
+   Mevcut bir doğrulama takma adını değiştirirken veya kaldırırken de aynı eşitlemeyi uygulayın.
+   `npm run check:gate-manifest` komutunu çalıştırın; pre-commit hook'u ve CI değişiklik sınıflandırması
+   bu sözleşmenin uygulanmasını sağlar.
 3. Bunu `.github/workflows/ci.yml` içinde uygun işin altına bağlayın
    (politika → `lint` veya `docs-sync-strict`; mandallı ölçüm → `quality-gate`).
 4. Bir izin listesi varsa eski girdilerin otomatik olarak algılanması için

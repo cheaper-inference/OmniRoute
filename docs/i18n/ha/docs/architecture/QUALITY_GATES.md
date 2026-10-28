@@ -36,9 +36,18 @@ runners; dole ne a tabbatar da isasshen ƙarfin hosted kafin fara amfani da shi.
 Kowace takardar shaidar JSON tana bayyana SHA da aka checkout, gudanarwar workflow da attempt.
 CLI yana ƙin rashin daidaituwar SHA na checkout/event. Gwaje-gwajen workflow suna ɗaure zama memba na policy
 da jerin `needs` na aikin verdict domin sabon lane ko wanda aka cire kada ya ɓace ba tare da an lura ba.
-Takardun shaidar suna rufe workflow nasu ne kawai, ba publication, deployment, ko bayanan ciki
-na advisory scanner da ke akwai ba. Kunna sunayen check guda biyu a dokokin branch
-wani sauyin gudanarwa ne na daban; ƙara waɗannan ayyukan ba ya kare branch da kansa.
+Rasitan sun shafi tsarin aikinsu ne kawai, ba wallafawa, turawa zuwa aiki, ko abubuwan ciki
+na na'urar bincike mai ba da shawara da ake da ita ba. Sanya binciken da suka dace su zama wajibi a ƙa'idojin reshe
+wani canjin gudanarwa ne na daban; bayyana ayyukansu kaɗai ba ya kare reshe.
+
+`API Route Typecheck` binciken tsarin aiki ne mai zaman kansa, wanda yake wajen duka hukuncin haɗaka
+da bayanin martabar tsaye na cikakken mai sa ido na gida. Bincika sakamakonsa daban don ainihin
+ɗan takarar. `.github/workflows/api-route-typecheck.yml` yana gudana kan PRs masu nufin `main` ko
+`release/**`, turawa zuwa kowane ɗaya daga cikin rukunin rassan, da kuma ƙaddamarwa da hannu. Ba shi da matatar hanya.
+Sake sauya reshen tushe na PR yana neman sabon bincike; gyare-gyaren jiki/take suna amfani da sunan sa ido kawai
+`Admission not requested / API Route Typecheck` kuma ba za su iya maye gurbin binciken karɓa ba.
+Tsarin aikin bai ayyana abin tayar da merge-group ba. Duk wani ƙaddamar da jerin gwanon haɗewa da ke buƙatar
+wannan binciken dole ne da farko ya tabbatar da gudanarsa don wannan aukuwar.
 
 ### Hujjojin da aka riƙe a acceptance reducer
 
@@ -77,6 +86,21 @@ da ake da su. Inputs suna riƙe tsarin sunayen fayil na duniya na c8; yin pre-me
 ga gaurayen function/block coverage. Shards da suka ɓace, suka lalace ko ba su dace ba suna sa admission ya gaza.
 Test shards da suka gaza suna riƙe raw diagnostic coverage dabam; ba zai iya shiga final merge ba.
 
+### Bayanan shaidar ci gaban gudanar da gwajin unit
+
+Umarnin gama-gari na `test:unit:ci:shard` yana rikodin matakan `primary`, `dashboard` da `serial`
+ta hanyar `scripts/ci/unit-progress-reporter.mjs`. Rahoton gwaji na yau da kullum yana nan
+har yanzu. Wani bayanin shaida na metadata kaɗai yana rikodin farawa da kammalawar kowane fayil,
+kuma siginar heartbeat ta kowane daƙiƙa 30 tana jera fayilolin da har yanzu suke aiki da kuma tsawon lokacin da suka ɗauka. Yana rikodin
+metadata na gudanarwa da ke cikin jerin waɗanda aka amince da su kawai; ba a mayar da bayanin gwaje-gwaje, sakamakon da aka fitar, cikakkun bayanan kurakurai da dukan
+environment zuwa tsari na serialized.
+
+CI da Quality suna adana fayilolin JSONL a matsayin `unit-progress-ci-<run>-<attempt>-<shard>` da
+`unit-progress-quality-<run>-<attempt>-<shard>`. Ƙarewar lokacin job na iya hana upload na gaba;
+sigogin heartbeat da aka riga aka fitar suna nan a matsayin hujjar gano matsala. Rashin sigogin heartbeat na iya kuma nuna
+cewa an toshe ko an dakatar da tsarin runner. Waɗannan bayanan shaida suna kiyaye zaɓin gwaji,
+concurrency, wa'adin ƙarshe da exit status da suke akwai; ba hukuncin amincewa da candidate ba ne.
+
 ### Kundin static scan
 
 Kundin npm-alias mai sigogi da mambobin static-scan suna cikin
@@ -107,6 +131,27 @@ manuni ne, ba hujjar cewa an gudanar da wani gate da gaske ba.
 
 Scripts suna ƙarƙashin `scripts/check/` (policy gates) da `scripts/quality/` (ratchet engine).
 Asalin gaskiyar CI shi ne `.github/workflows/ci.yml`.
+
+### Lafiyar takardun tushen da aka wallafa
+
+`.github/workflows/i18n-base-health.yml` yana lura da lafiyar takardu bayan wasu zaɓaɓɓun
+turawa zuwa `main` da `release/v*`, da kuma yayin ƙaddamarwa da hannu. Matatansa sun ƙunshi takardu,
+Markdown na tushe, `llm.txt`, yanayin/saitin fassara da kayan aikin i18n masu dacewa.
+Aikin guda ɗaya na `Published base documentation health` yana amfani da Ubuntu da aka masauki kuma yana da
+wa'adin mintuna biyar. Yana gudanar da ingantawa ta karatu-kawai kuma yana rubuta rasidin bincike ba tare da
+sanya dependency, yin fassara ko karɓar wani yanayi ba.
+
+`scripts/i18n/check-base-health.mjs` yana buƙatar kada a sami rashin daidaito na source-hash, missing-target, target-hash,
+stale-translation da section-cache. Haka kuma yana inganta iyakar core
+document/locale ta yanzu da asalin da aka rubuta mata. Mahalli mara inganci, ɗaukar bayani da bai cika ba
+ko katsewar mai dubawa yana haifar da `INCOMPLETE`; tabbataccen karkacewa yana haifar da `FAIL`. Dukansu
+suna dawo da matsayin fita na gazawa. Ana ɗaure rasidin da SHA na checkout, workflow, run da
+attempt, kuma ana adana shi a matsayin `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Wannan lura ne mai zaman kansa kan tushen da aka wallafa. Ba ya ƙara event na PR ko
+merge-group, required PR check, npm alias ko memba na static-scan profile.
+Manufar differential PR da ake da ita da advisory classifications na ainihin checker
+suna ci gaba da kasancewa daban. Nasarar upload ba za ta iya sauya sakamakon lafiya da ya gaza zuwa PASS ba.
 
 ### Hanya mai sauri ta Release PR (`quality.yml`)
 
@@ -241,12 +286,12 @@ Binciken bayanan masu ba da sabis kyauta har abada, shigarwar katalogi, wuraren 
 
 ### Aiki: `i18n-ui-coverage`
 
-| Skrip                             | Abin da yake tantancewa                                                                                                                                                                       | Mai toshewa    |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `check-ui-keys-coverage` (a ciki) | Rufin maɓallan UI i18n ya kai ≥ 65%                                                                                                                                                           | Ee             |
-| `check-ui-value-drift` (a ciki)   | Sake rubuta **ƙimar** Turanci ba ya barin tsohuwar fassara a baya                                                                                                                             | Ee             |
-| `check-new-key-coverage` (a ciki) | An fassara **sabon** maɓallin Turanci a kowane locale — ana ƙin alamar `__MISSING__:`                                                                                                         | Ee             |
-| `check-translation-ratio`         | Rabon fassara ta ainihi ga kowane locale (daidai-da-Turanci / gurbin wucin gadi / waɗanda suka ɓace a wajen jerin izini) kada ya wuce `config/quality/i18n-translation-baseline.json` + slack | **Na shawara** |
+| Skrip                             | Abin da yake tantancewa                                                                                                                                                                       | Mai toshewa     |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `check-ui-keys-coverage` (a ciki) | Rufin maɓallan UI i18n ya kai ≥ 65%                                                                                                                                                           | Ee              |
+| `check-ui-value-drift` (a ciki)   | Sake rubuta **ƙimar** Turanci ba ya barin tsohuwar fassara a baya                                                                                                                             | Ee              |
+| `check-new-key-coverage` (a ciki) | An fassara **sabon** maɓallin Turanci a kowane locale — ana ƙin alamar `__MISSING__:`                                                                                                         | Ee              |
+| `check-translation-ratio`         | Rabon fassara ta ainihi ga kowane locale (daidai-da-Turanci / gurbin wucin gadi / waɗanda suka ɓace a wajen jerin izini) kada ya wuce `config/quality/i18n-translation-baseline.json` + slack | **Mai toshewa** |
 
 Yana buƙatar `fetch-depth: 0` — shingen karkacewar ƙima yana kwatanta bambancin `en.json` da merge base.
 
@@ -289,8 +334,19 @@ npm run i18n:check-value-drift:warn     # report only
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Yana fita da 0 tare da `SKIP reason=base-unresolved` idan ba za a iya karanta base catalog ba (shallow
-clone ba tare da base ref ba), daidai da halayen `check-openapi-breaking`.
+Matakan tantance karkacewar ƙima da sabbin maɓallai suna amfani da kwatance guda ɗaya marar sauyawa daga
+`scripts/i18n/resolve-ui-diff-base.mjs`. Tsarin aiki yana miƙa SHAs iri ɗaya na tushe, ƙarshen tushe da
+ɗan takara zuwa duka gwaje-gwajen. Gudanarwar PR/sake nufar da tushe, push da merge-group suna amfani da mahallin
+abubuwan da suka faru nasu. Aika reshen ɗan takara yana buƙatar ainihin PR ɗinsa da yake buɗe ko shigarwar
+`i18n_base_sha` a sarari. Aika ko lura da aka tsara na `main` ko `release/vX.Y.Z`
+ba tare da wannan shigarwar ba yana kwatanta commit na ƙarshe da mahaifinsa na farko; ba bincike ba ne na
+duk bashin fassara da aka gada. Kiran gida yana buƙatar tushen kwatance da aka bayyana a sarari,
+misali umarnin `BASE_REF` da ke sama.
+
+Mahallin kwatance da ya ɓace ko yake da ruɗani, kundin da ake buƙata wanda ba za a iya karantawa ba ko ba ingantacce ba, da
+ɗan takara da ya sauya suna haifar da `INCOMPLETE` tare da lambar fita **2**, har ma a yanayin gargaɗi.
+Ana karanta kundin ta amfani da `scripts/i18n/read-ui-catalog.mjs`; ba a maye gurbin gazawar karantawa
+da abubuwa marasa komai. Rashin samuwar tushe ko shigarwa marar cikawa ba sa tabbatar da PASS.
 
 ### Job: `i18n`
 
@@ -312,7 +368,7 @@ Yana aiki ne kawai a kan pull requests.
 
 ### Job: `test-vitest`
 
-Yana aiki bayan `build`. Yana toshe merge idan ya gaza.
+Yana buƙatar aikin rarrabawa na `changes`. Sassan matrix da suka dace suna hana haɗewa idan sun gaza.
 
 | Rukunin Gwaji    | Abin da yake tabbatarwa                                              | Toshewa                                                                                                                                |
 | ---------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -384,8 +440,9 @@ ya taɓa** (`scripts/check/newCodeMode.mjs`: ana samar da merge-base a cikin
 
 - **mai toshewa** — PR ya ƙara matsalolin cyclomatic/cognitive ko dead exports a fayilolin da ya canza
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` a cikin log);
-- **na shawara** — jimillar duniya baki ɗaya idan aka kwatanta da ma'aunin tushe da aka daskarar. Drift da aka gada ba zai taɓa
-  sanya PR marar laifi ya zama ja ba; ana sake daskarar da drift yayin daidaitawar fitarwa, kuma aikin headroom yana sa masa ido.
+- **shawara** — jimillar gaba ɗaya idan aka kwatanta da ma’aunin tushe da aka daskarar. Karkacewar da aka gada ba ta taɓa sa
+  PR marar laifi ya zama ja ba; ana bibiyar karkacewar don gyarawa yayin daidaitawar fitarwa, kuma aikin
+  headroom yana sa ido a kanta.
 
 `check:file-size` yana amfani da base ref bisa nasa ƙa'idojin (`scripts/check/check-file-size.mjs`, #8522):
 yana duba kowane fayil na source da test a cikin bishiyar, yana karanta adadin layukan kowannensu a PR base
@@ -591,7 +648,11 @@ nasara tare da allowlist mai ci gaba da girma tana ba da tunanin inganci na ƙar
 
 1. Ƙirƙiri `scripts/check/check-<name>.mjs` (ko `.ts`). Ƙofofin manufofi suna fita da 0/1.
    Ƙofofi irin na ratchet suna fitar da ma'auni zuwa `quality-metrics.json` ta hanyar `collect-metrics.mjs`.
-2. Ƙara `"check:<name>": "node scripts/check/check-<name>.mjs"` zuwa `package.json`.
+2. Ƙara `"check:<name>": "node scripts/check/check-<name>.mjs"` zuwa `package.json`, sannan
+   a daidaita alias ɗin da ainihin umarninsa a cikin `config/quality/gate-manifest.json`.
+   A yi irin wannan daidaitawar yayin canzawa ko cire alias na tabbatarwa da yake akwai.
+   Gudanar da `npm run check:gate-manifest`; hook na pre-commit da rarrabe sauye-sauye na CI
+   suna tilasta bin wannan ƙa'ida.
 3. Haɗa ta a cikin `.github/workflows/ci.yml` ƙarƙashin aikin da ya dace
    (manufa → `lint` ko `docs-sync-strict`; ratchet → `quality-gate`).
 4. Idan tana da allowlist, yi amfani da `reportStaleEntries()` daga

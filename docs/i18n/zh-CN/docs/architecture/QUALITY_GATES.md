@@ -32,9 +32,9 @@ PASS。有效的仅文档或仅目录分类可使代码通道不适用；草稿 
 每份 JSON 收据都会标识检出的 SHA、工作流运行及尝试次数。
 CLI 会拒绝检出 SHA 与事件 SHA 不匹配的情况。工作流测试会将策略成员关系绑定到
 判定作业的 `needs` 列表，因此新增或移除的通道不会悄然消失。
-这些收据覆盖其所属工作流，而不覆盖发布、部署或现有建议性扫描器的内部执行。
-在分支规则中启用这两个检查名称是一项单独的管理变更；添加这些作业本身并不会
-保护分支。
+这些回执涵盖的是其自身的工作流，而不是发布、部署或现有建议性扫描器的内部实现。将适用的检查设置为分支规则中的必需检查，是一项单独的管理变更；仅定义这些作业本身并不能保护分支。
+
+`API Route Typecheck` 是一项独立的工作流检查，不属于任何聚合裁决，也不属于本地完整观察器的静态配置。请针对确切的候选版本单独检查其结果。`.github/workflows/api-route-typecheck.yml` 会在以 `main` 或 `release/**` 为目标分支的 PR、推送到上述任一分支系列以及手动调度时运行。它没有路径过滤器。重新指定 PR 的基础分支会请求一项新检查；编辑正文/标题时使用仅观察名称 `Admission not requested / API Route Typecheck`，且无法替代准入检查。该工作流未声明合并组触发器。任何要求此检查的合并队列推广，都必须先确保该检查会针对该事件执行。
 
 ### 验收归并器中保留的证据
 
@@ -72,6 +72,12 @@ Istanbul 报告。最终的 Coverage 作业会根据候选版本 SHA、运行时
 缺失、格式错误或不兼容的分片会导致准入失败。测试失败的分片会单独保留原始的
 诊断覆盖率；这些数据不能进入最终合并。
 
+### 单元测试执行进度回执
+
+共享的 `test:unit:ci:shard` 命令通过 `scripts/ci/unit-progress-reporter.mjs` 记录 `primary`、`dashboard` 和 `serial` 阶段。常规测试报告仍然可用。另有一份仅包含元数据的回执，用于记录每个文件的开始和完成情况；每 30 秒发送一次的心跳会列出仍处于活动状态的文件及其已运行时间。它仅记录允许列表中的执行元数据；测试描述、输出、错误正文和完整环境均不会被序列化。
+
+CI 和 Quality 将 JSONL 文件分别保留为 `unit-progress-ci-<run>-<attempt>-<shard>` 和 `unit-progress-quality-<run>-<attempt>-<shard>`。作业超时可能会阻止后续上传；已经发出的心跳仍可作为诊断依据。心跳缺失也可能表示运行器进程已阻塞或终止。这些回执会保留现有的测试选择、并发设置、截止时间和退出状态；它们并非候选项准入判定。
+
 ### 静态扫描清单
 
 版本化的 npm 别名清单和静态扫描成员关系位于
@@ -100,6 +106,14 @@ CI/Quality 声明验证 npm 命令；它会拒绝漂移，而不是将 shell 令
 
 脚本位于 `scripts/check/`（策略门禁）和 `scripts/quality/`（棘轮引擎）下。
 CI 的事实来源是 `.github/workflows/ci.yml`。
+
+### 已发布基础文档的健康状态
+
+`.github/workflows/i18n-base-health.yml` 会在选定内容推送到 `main` 和 `release/v*` 后以及手动触发时检查文档健康状态。其过滤器涵盖文档、根目录 Markdown 文件、`llm.txt`、翻译状态/配置以及相关的 i18n 工具。唯一的 `Published base documentation health` 作业使用托管的 Ubuntu 运行器，超时时间为五分钟。它执行只读验证并写入诊断回执，不会安装依赖项、进行翻译或采纳状态。
+
+`scripts/i18n/check-base-health.mjs` 要求不存在源哈希、目标缺失、目标哈希、过时翻译和章节缓存不一致的问题。它还会验证当前核心文档/语言区域范围及其记录的来源信息。上下文无效、覆盖不完整或检查器中断会产生 `INCOMPLETE`；确认存在漂移则会产生 `FAIL`。这两种情况都会返回表示失败的退出状态。回执与检出 SHA、工作流、运行编号和尝试次数绑定，并以 `i18n-base-health-<sha>-<run>-<attempt>` 的名称保留。
+
+这是对已发布基础版本的独立观察。它不会添加 PR 或合并组事件、必需的 PR 检查、npm 别名或静态扫描配置文件成员。现有的差异化 PR 策略与底层检查器的建议性分类仍彼此独立。即使上传成功，也无法将失败的健康检查结果转为 PASS。
 
 ### Release PR 快速路径（`quality.yml`）
 
@@ -233,12 +247,12 @@ SVG 规范数值检查读取 `SVG_DIAGRAM_FILES`（`scripts/check/check-docs-cou
 
 ### 作业：`i18n-ui-coverage`
 
-| 脚本                             | 验证内容                                                                                                                                      | 是否阻断   |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `check-ui-keys-coverage`（内联） | UI i18n 键覆盖率 ≥ 65%                                                                                                                        | 是         |
-| `check-ui-value-drift`（内联）   | 重写后的英文**值**不会留下过时的翻译                                                                                                          | 是         |
-| `check-new-key-coverage`（内联） | **新增的**英文键已在每个语言区域中完成翻译——拒绝 `__MISSING__:` 标记                                                                          | 是         |
-| `check-translation-ratio`        | 每个语言区域的真实翻译比例（允许列表之外与英文相同、为占位符或缺失的叶节点）不得超过 `config/quality/i18n-translation-baseline.json` + 宽限值 | **建议性** |
+| 脚本                             | 验证内容                                                                                                                                      | 是否阻断 |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `check-ui-keys-coverage`（内联） | UI i18n 键覆盖率 ≥ 65%                                                                                                                        | 是       |
+| `check-ui-value-drift`（内联）   | 重写后的英文**值**不会留下过时的翻译                                                                                                          | 是       |
+| `check-new-key-coverage`（内联） | **新增的**英文键已在每个语言区域中完成翻译——拒绝 `__MISSING__:` 标记                                                                          | 是       |
+| `check-translation-ratio`        | 每个语言区域的真实翻译比例（允许列表之外与英文相同、为占位符或缺失的叶节点）不得超过 `config/quality/i18n-translation-baseline.json` + 宽限值 | **阻断** |
 
 需要 `fetch-depth: 0`——值漂移门禁会将 `en.json` 与合并基准进行差异比较。
 
@@ -269,7 +283,19 @@ npm run i18n:check-value-drift:warn     # 仅报告
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-当无法读取基准目录时（浅克隆中没有基准引用），以状态码 0 退出并输出 `SKIP reason=base-unresolved`，与 `check-openapi-breaking` 的行为一致。
+值漂移门禁和新键门禁共享来自
+`scripts/i18n/resolve-ui-diff-base.mjs` 的同一个不可变比较基准。工作流会将相同的基准、基准分支顶端和
+候选 SHA 传递给这两项检查。PR/基准分支重定向、推送和合并组运行均使用各自的事件
+上下文。调度候选分支时，需要存在与其完全匹配的开放 PR，或显式提供
+`i18n_base_sha` 输入。在未提供该输入的情况下，调度或定时观测 `main` 或 `release/vX.Y.Z`
+时，会将最后一次提交与其第一个父提交进行比较；这并不是对
+所有继承的翻译债务进行审计。本地调用需要显式指定比较基准，
+例如上面的 `BASE_REF` 命令。
+
+比较上下文缺失或存在歧义、必需的目录文件无法读取或无效，以及
+候选项发生变化时，都会产生 `INCOMPLETE`，退出代码为 **2**，包括警告模式下。
+目录文件通过 `scripts/i18n/read-ui-catalog.mjs` 读取；读取失败时不会用
+空对象替代。基准不可用或输入不完整均不能判定为 PASS。
 
 ### 作业：`i18n`
 
@@ -291,7 +317,7 @@ BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 
 ### 作业：`test-vitest`
 
-在 `build` 之后运行。失败时阻止合并。
+需要 `changes` 分类作业。适用的矩阵分片失败时会阻止合并。
 
 | 测试套件         | 验证内容                                                  | 阻断性                                                                        |
 | ---------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -346,7 +372,8 @@ BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 在 `pull_request` 事件中，`quality.yml` 会将 `--base-ref <PR base SHA>` 传递给 `check:file-size`、`check:complexity-ratchets` 和 `check:dead-code`。对于 `check:complexity-ratchets` 和 `check:dead-code`，门禁会比较 HEAD 与合并基点，且**仅限于 PR 修改的文件**（`scripts/check/newCodeMode.mjs`：在一次性 `git worktree` 中具现化合并基点，分别在该工作树和 HEAD 上运行 ESLint/knip，然后对每文件计数求差）：
 
 - **阻断性** — PR 在其修改的文件中新增了圈复杂度/认知复杂度违规或死导出（日志中的 `complexityNewCode=`、`cognitiveComplexityNewCode=`、`deadExportsNewCode=`）；
-- **建议性** — 全局总数与冻结基线的比较。继承的漂移绝不会导致无辜的 PR 失败；该漂移会在发布对账时重新冻结，并由余量作业监控。
+- **提示性** — 全局总量与冻结基线的对比。继承的偏差绝不会导致无辜的 PR
+  标红；该偏差会被持续跟踪，以便在发布对账时修复，并由余量任务监控。
 
 `check:file-size` 按其自身规则使用基础引用（`scripts/check/check-file-size.mjs`，#8522）：它会检查代码树中的每个源文件和测试文件，使用 `git show` 读取各文件在 PR 基础版本中的行数，并且只有当文件增长后超过其基线上限（基线内文件使用 `frozen` / `testFrozen`，基线外文件使用 `cap` / `testCap`）与基础版本大小二者中的较大值时，才会判定该文件失败。因此，基础版本中已经发生漂移的文件绝不会导致无辜的 PR 失败。
 
@@ -534,7 +561,11 @@ JSON，十秒钟即可完成，也是解除红色 PR 阻塞的最快方式。**�
 
 1. 创建 `scripts/check/check-<name>.mjs`（或 `.ts`）。策略门禁以 0/1 退出。
    棘轮式门禁通过 `collect-metrics.mjs` 将指标写入 `quality-metrics.json`。
-2. 将 `"check:<name>": "node scripts/check/check-<name>.mjs"` 添加到 `package.json`。
+2. 将 `"check:<name>": "node scripts/check/check-<name>.mjs"` 添加到 `package.json`，并
+   在 `config/quality/gate-manifest.json` 中同步该别名及其确切命令。
+   更改或移除现有验证别名时，也应执行相同的同步操作。
+   运行 `npm run check:gate-manifest`；pre-commit 钩子和 CI 变更分类
+   会强制执行此约定。
 3. 在 `.github/workflows/ci.yml` 的相应作业下接入它
    （策略 → `lint` 或 `docs-sync-strict`；棘轮 → `quality-gate`）。
 4. 如果它有允许列表，请使用

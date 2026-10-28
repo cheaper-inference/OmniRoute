@@ -36,9 +36,18 @@ tí a gbalejo fúnra wa ní ipò míì; a gbọ́dọ̀ ṣàyẹ̀wò pé agbá
 Receipt JSON kọ̀ọ̀kan ń tọ́ka SHA tí a checkout, run ìṣàn iṣẹ́ àti attempt.
 CLI máa kọ àìbámu SHA checkout/event. Àwọn ìdánwò ìṣàn iṣẹ́ so ọmọ ẹgbẹ́ ìlànà
 mọ́ àkójọ `needs` ti iṣẹ́ ìdájọ́, kí ọ̀nà tuntun tàbí ọ̀nà tí a yọ má bàa pòórá ní ìkọ̀kọ̀.
-Àwọn receipt náà bo ìṣàn iṣẹ́ tiwọn nìkan, kì í ṣe ìtẹ̀jáde, ìmúlọ, tàbí àwọn iṣẹ́ inú
-scanner ìmọ̀ràn tó ti wà. Ṣíṣiṣẹ́ àwọn orúkọ check méjèèjì nínú àwọn òfin ẹ̀ka jẹ́
-ìyípadà ìṣàkóso ọ̀tọ̀; fífi àwọn iṣẹ́ wọ̀nyí kún un kò dáàbò bo ẹ̀ka kan fúnra rẹ̀.
+Àwọn ìwé ẹ̀rí náà bo ìṣàn iṣẹ́ tiwọn fúnra wọn, kì í ṣe ìtẹ̀jáde, ìgbékalẹ̀ síbi lílò, tàbí àwọn iṣẹ́ inú
+ẹ̀rọ àyẹ̀wò tó ń fúnni ní ìmọ̀ràn tó ti wà tẹ́lẹ̀. Ṣíṣe àwọn àyẹ̀wò tó bá kan ọ̀ràn náà ní ohun tí a nílò nínú àwọn òfin ẹ̀ka
+jẹ́ àyípadà ìṣàkóso ọ̀tọ̀; ṣíṣe àlàyé àwọn iṣẹ́ wọn nìkan kò dáàbò bo ẹ̀ka kan.
+
+`API Route Typecheck` jẹ́ àyẹ̀wò ìṣàn iṣẹ́ olómìnira, tí kò sí nínú àwọn ìdájọ́ àpapọ̀ méjèèjì
+àti prófáìlì àìyípadà ti olùṣàkíyèsí kíkún agbègbè. Ṣàyẹ̀wò àbájáde rẹ̀ lọ́tọ̀ fún olùdíje gangan náà.
+`.github/workflows/api-route-typecheck.yml` máa ń ṣiṣẹ́ lórí àwọn PR sínú `main` tàbí
+`release/**`, àwọn ìfìránṣẹ́ sí èyíkéyìí nínú ìdílé ẹ̀ka náà, àti ìpilẹ̀ṣẹ̀ afọwọ́ṣe. Kò ní àsẹ̀ àlẹ́ ọ̀nà.
+Àtúndojú ìpìlẹ̀ PR máa ń béèrè àyẹ̀wò tuntun; àwọn àtúnṣe sí àkóónú/àkọlé máa ń lo orúkọ àkíyèsí-nìkan
+`Admission not requested / API Route Typecheck`, wọn kò sì lè rọ́pò àyẹ̀wò ìgbàwọlé náà. Ìṣàn iṣẹ́ náà
+kò kéde ohun ìpilẹ̀ṣẹ̀ ẹgbẹ́ ìdàpọ̀. Ìmúṣiṣẹ́ ètò ìlà ìdàpọ̀ èyíkéyìí tó nílò àyẹ̀wò yìí gbọ́dọ̀ kọ́kọ́
+fi ìṣiṣẹ́ rẹ̀ múlẹ̀ fún ìṣẹ̀lẹ̀ náà.
 
 ### Ẹ̀rí tí a pa mọ́ nínú acceptance reducer
 
@@ -78,6 +87,21 @@ fún shard kọ̀ọ̀kan kò ní ààbò fún coverage function/block àdàpọ
 bàjẹ́ tàbí tí kò bára mu máa ń fa ìkùnà gbigba wọlé. Àwọn shard ìdánwò tó kùnà máa ń pa
 coverage àyẹ̀wò raw mọ́ lọ́tọ̀; kò lè wọ merge ìkẹyìn.
 
+### Àwọn àkọsílẹ̀ ìtẹ̀síwájú ìṣiṣẹ́ unit
+
+Àṣẹ `test:unit:ci:shard` tí a pín ń ṣàkọsílẹ̀ àwọn ìpele `primary`, `dashboard` àti `serial`
+nípasẹ̀ `scripts/ci/unit-progress-reporter.mjs`. Ìjábọ̀ ìdánwò déédéé ṣì wà
+fún lílò. Àkọsílẹ̀ ọ̀tọ̀ kan tí ó ní metadata nìkan ń ṣàkọsílẹ̀ ìbẹ̀rẹ̀ àti ìparí fáìlì kọ̀ọ̀kan,
+heartbeat ọlọ́gbọ̀n-àáyá sì ń ṣe àkójọ àwọn fáìlì tí ó ṣì ń ṣiṣẹ́ àti iye àkókò tí wọ́n ti lò. Ó ń ṣàkọsílẹ̀
+metadata ìṣiṣẹ́ tí a fọwọ́ sí nìkan; a kì í serialize àwọn àpèjúwe ìdánwò, àbájáde, àkóónú àṣìṣe àti gbogbo
+environment náà.
+
+CI àti Quality ń tọ́jú àwọn fáìlì JSONL gẹ́gẹ́ bí `unit-progress-ci-<run>-<attempt>-<shard>` àti
+`unit-progress-quality-<run>-<attempt>-<shard>`. Timeout job kan lè dí upload tí ó yẹ kí ó wáyé lẹ́yìn;
+àwọn heartbeat tí a ti fi jáde ṣì jẹ́ ẹ̀rí fún ìwádìí ìṣòro. Àìsí heartbeat tún lè túmọ̀ sí
+pé process runner kan ti di tàbí pé a ti dá a dúró. Àwọn àkọsílẹ̀ wọ̀nyí ń pa yíyan ìdánwò,
+concurrency, àwọn deadline àti exit status tó wà tẹ́lẹ̀ mọ́; wọn kì í ṣe àwọn ìdájọ́ candidate-admission.
+
 ### Àkójọ static scan
 
 Àkójọ npm-alias tó ní ẹ̀yà àti ọmọ ẹgbẹ́ static-scan wà nínú
@@ -108,6 +132,14 @@ jẹ́ ìtọ́kasí, kì í ṣe ẹ̀rí pé gate kan ṣiṣẹ́ ní tòót�
 
 Àwọn script wà lábẹ́ `scripts/check/` (àwọn gate ìlànà) àti `scripts/quality/` (ẹ̀rọ ratchet).
 Orísun òtítọ́ CI ni `.github/workflows/ci.yml`.
+
+### Ìlera àkọsílẹ̀ ìpìlẹ̀ tí a tẹ̀jáde
+
+`.github/workflows/i18n-base-health.yml` ń ṣàkíyèsí ìlera àkọsílẹ̀ lẹ́yìn àwọn ìfìránṣẹ́ tí a yàn sí `main` àti `release/v*`, àti nígbà ìpilẹ̀ṣẹ̀ afọwọ́ṣe. Àwọn asẹ rẹ̀ bo àkọsílẹ̀, Markdown gbòǹgbò, `llm.txt`, ipò/ìṣètò ìtumọ̀ àti àwọn irinṣẹ́ i18n tó yẹ. Iṣẹ́ kan ṣoṣo náà, `Published base documentation health`, ń lo Ubuntu tí a gbàlejò, pẹ̀lú àkókò ìparí ìṣẹ́jú márùn-ún. Ó ń ṣe ìfọwọ́sí kíkà-nìkan, ó sì ń kọ ìwé-ẹ̀rí àyẹ̀wò láìsí fífi àwọn ohun-ìgbẹ́kẹ̀lé sori ẹrọ, ṣíṣe ìtumọ̀ tàbí gbígba ipò.
+
+`scripts/i18n/check-base-health.mjs` ń béèrè pé kò gbọdọ̀ sí àìbáramu kankan nínú háṣì orísun, àfojúsùn tí ó sọnù, háṣì àfojúsùn, ìtumọ̀ tí ó ti di àtijọ́ àti cache abala. Ó tún ń fọwọ́sí ààlà ìwé pàtàkì/èdè-agbègbè lọ́wọ́lọ́wọ́ àti orísun rẹ̀ tí a ti ṣàkọsílẹ̀. Àyíká tí kò fẹsẹ̀ múlẹ̀, àìpé ìbórí tàbí olùṣàyẹ̀wò tí a dá dúró ń mú `INCOMPLETE` jáde; ìyapa tí a ti fìdí rẹ̀ múlẹ̀ ń mú `FAIL` jáde. Àwọn méjèèjì ń dá ipò ìjáde tó ń fi ìkùnà hàn padà. A so ìwé-ẹ̀rí náà mọ́ SHA checkout, workflow, run àti attempt, a sì ń tọ́jú rẹ̀ gẹ́gẹ́ bí `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Èyí jẹ́ àkíyèsí olómìnira lórí ìpìlẹ̀ tí a tẹ̀jáde. Kò ṣàfikún ìṣẹ̀lẹ̀ PR tàbí merge-group, àyẹ̀wò PR tí a béèrè dandan, alias npm tàbí ọmọ ẹgbẹ́ profaili static-scan. Ìlànà PR ìyàtọ̀ tó wà tẹ́lẹ̀ àti àwọn ìsọ̀rí ìmọ̀ràn ti olùṣàyẹ̀wò abẹ́lẹ̀ ṣì wà lọ́tọ̀. Ìkó-sókè tó ṣàṣeyọrí kò lè yí àbájáde ìlera tó kùnà padà sí PASS.
 
 ### Ọ̀nà kíákíá PR ìtújáde (`quality.yml`)
 
@@ -241,12 +273,12 @@ SVG méjìlá fún README lábẹ́ `docs/diagrams/` ni a ń ṣe pẹ̀lú `scr
 
 ### Iṣẹ́: `i18n-ui-coverage`
 
-| Skripti                         | Ohun tí ó ń fọwọ́sí                                                                                                                                                            | Ìdènà      |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `check-ui-keys-coverage` (nínú) | Ìborí kọ́kọ́rọ́ UI i18n jẹ́ ≥ 65%                                                                                                                                                 | Bẹ́ẹ̀ni      |
-| `check-ui-value-drift` (nínú)   | **Iye** Gẹ̀ẹ́sì tí a tún kọ kò fi ìtumọ̀ tí ó ti di àtijọ́ sílẹ̀                                                                                                                   | Bẹ́ẹ̀ni      |
-| `check-new-key-coverage` (nínú) | Kọ́kọ́rọ́ Gẹ̀ẹ́sì **tuntun** kan ni a túmọ̀ ní gbogbo locale — a kọ àmì `__MISSING__:`                                                                                              | Bẹ́ẹ̀ni      |
-| `check-translation-ratio`       | Ìpín ìtumọ̀ gidi fún locale kọ̀ọ̀kan (èyí tó jọ Gẹ̀ẹ́sì / placeholder / àwọn tó ṣàìsí lẹ́yìn allowlist) kò gbọdọ̀ kọjá `config/quality/i18n-translation-baseline.json` + ààyè àfikún | **Ìmọ̀ràn** |
+| Skripti                         | Ohun tí ó ń fọwọ́sí                                                                                                                                                            | Ìdènà     |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `check-ui-keys-coverage` (nínú) | Ìborí kọ́kọ́rọ́ UI i18n jẹ́ ≥ 65%                                                                                                                                                 | Bẹ́ẹ̀ni     |
+| `check-ui-value-drift` (nínú)   | **Iye** Gẹ̀ẹ́sì tí a tún kọ kò fi ìtumọ̀ tí ó ti di àtijọ́ sílẹ̀                                                                                                                   | Bẹ́ẹ̀ni     |
+| `check-new-key-coverage` (nínú) | Kọ́kọ́rọ́ Gẹ̀ẹ́sì **tuntun** kan ni a túmọ̀ ní gbogbo locale — a kọ àmì `__MISSING__:`                                                                                              | Bẹ́ẹ̀ni     |
+| `check-translation-ratio`       | Ìpín ìtumọ̀ gidi fún locale kọ̀ọ̀kan (èyí tó jọ Gẹ̀ẹ́sì / placeholder / àwọn tó ṣàìsí lẹ́yìn allowlist) kò gbọdọ̀ kọjá `config/quality/i18n-translation-baseline.json` + ààyè àfikún | **Ìdènà** |
 
 Ó nílò `fetch-depth: 0` — ẹnu-ọ̀nà value-drift ń fi `en.json` wé merge base.
 
@@ -289,8 +321,19 @@ npm run i18n:check-value-drift:warn     # ìjábọ̀ nìkan
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Ó jáde pẹ̀lú 0 àti `SKIP reason=base-unresolved` nígbà tí kò bá ṣeé ka catalog ìpìlẹ̀ (shallow
-clone láìsí base ref), ní ìbámu pẹ̀lú `check-openapi-breaking`.
+Àwọn ẹnubodè value-drift àti new-key ń lo ìfiwéra aláìṣeéyípadà kan náà láti inú
+`scripts/i18n/resolve-ui-diff-base.mjs`. Workflow náà ń fi base, base-tip àti
+candidate SHAs kan náà ránṣẹ́ sí àwọn àyẹ̀wò méjèèjì. Àwọn ìṣiṣẹ́ PR/base-retarget, push àti merge-group ń lo event
+context wọn. Fífi candidate branch kan ránṣẹ́ nílò PR tí ó ṣí sílẹ̀ gan-an fún un tàbí input
+`i18n_base_sha` tí a sọ ní pàtó. Dispatch tàbí scheduled observation ti `main` tàbí `release/vX.Y.Z`
+láìsí input yẹn máa ń fi commit tó kẹ́yìn wé first parent rẹ̀; kì í ṣe audit fún
+gbogbo gbèsè ìtumọ̀ tí a jogún. Local invocation nílò comparison base tí a sọ ní pàtó,
+fún àpẹẹrẹ àṣẹ `BASE_REF` tó wà lókè.
+
+Comparison context tí kò sí tàbí tí kò ṣe kedere, required catalog tí kò ṣeé kà tàbí tí kò bófin mu, àti
+candidate tí ó yí padà máa ń ṣe àbájáde `INCOMPLETE` pẹ̀lú exit code **2**, títí kan ní warn mode.
+Àwọn catalog read ń lo `scripts/i18n/read-ui-catalog.mjs`; a kì í fi empty objects
+rọ́pò read failures. Bẹ́ẹ̀ ni unavailable base tàbí incomplete input kò lè fi ìdí PASS múlẹ̀.
 
 ### Job: `i18n`
 
@@ -312,7 +355,7 @@ Matrix ìfọwọ́sí i18n kíkún (job kan fún locale kọ̀ọ̀kan). Gbogbo
 
 ### Job: `test-vitest`
 
-Ó ń ṣiṣẹ́ lẹ́yìn `build`. Ó ń dí merge tí ó bá kùnà.
+Ó nílò iṣẹ́ ìpínsísọ̀rí `changes`. Àwọn abala matrix tó bá wúlò máa ń dí ìdapọ̀ lọ́wọ́ bí ìkùnà bá ṣẹlẹ̀.
 
 | Àkójọpọ̀ Ìdánwò   | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                    | Dídènà                                                                                                                      |
 | ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -385,8 +428,9 @@ nìkan** (`scripts/check/newCodeMode.mjs`: a dá merge-base náà sílẹ̀ nín
 
 - **tí ń dí ìlọsíwájú** — PR náà fi àwọn ìrúfin cyclomatic/cognitive tàbí àwọn export tí kò lò kún àwọn fáìlì tí ó yí padà
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` nínú àkọsílẹ̀);
-- **ìmọ̀ràn** — àpapọ̀ gbogbo rẹ̀ ní ìfiwéra pẹ̀lú ìpìlẹ̀ tí a ti dì mú. Ìyapa tí a jogún kì í sọ
-  PR aláìlẹ́bi di pupa; a tún di ìyapa náà mú nígbà ìlaja ìtúsílẹ̀, iṣẹ́ headroom sì ń ṣọ́ ọ.
+- **ìkìlọ̀** — àpapọ̀ káríayé ní ìfiwéra pẹ̀lú ìpìlẹ̀ tí a ti dí mú. Ìyapa tí a jogún kì í fi
+  àmì pupa sí PR tí kò mọwọ́-mẹsẹ̀; a máa ń tọpa ìyapa náà fún àtúnṣe nígbà ìbámu ìtújáde, iṣẹ́
+  headroom sì máa ń ṣọ́ ọ.
 
 `check:file-size` ń lo base ref gẹ́gẹ́ bí òfin tirẹ̀ (`scripts/check/check-file-size.mjs`, #8522):
 ó ń ṣàyẹ̀wò gbogbo fáìlì source àti test inú tree, ó ń ka iye ìlà fáìlì kọ̀ọ̀kan ní base PR
@@ -588,7 +632,11 @@ Nígbà tí o bá ń ṣàfikún àkọsílẹ̀ sí àtòjọ ìyọ̀ǹda:
 
 1. Ṣẹ̀dá `scripts/check/check-<name>.mjs` (tàbí `.ts`). Àwọn ẹnu-ọ̀nà àyẹ̀wò ìlànà máa jáde pẹ̀lú 0/1.
    Àwọn ẹnu-ọ̀nà àyẹ̀wò irú ratchet máa ń fi òṣùwọ̀n kan ránṣẹ́ sí `quality-metrics.json` nípasẹ̀ `collect-metrics.mjs`.
-2. Ṣàfikún `"check:<name>": "node scripts/check/check-<name>.mjs"` sí `package.json`.
+2. Ṣàfikún `"check:<name>": "node scripts/check/check-<name>.mjs"` sí `package.json`, kí o sì
+   mú alias náà àti àṣẹ rẹ̀ gan-an bá ara wọn mu nínú `config/quality/gate-manifest.json`.
+   Lo ìmúṣiṣẹ́pọ̀ kan náà nígbà tí o bá ń yí alias ìfàṣẹsí tó ti wà padà tàbí tí o bá ń yọ ọ́ kúrò.
+   Ṣiṣe `npm run check:gate-manifest`; hook pre-commit àti ìsọ̀rí ìyípadà CI
+   ń mú kí àdéhùn yìí di dandan.
 3. So ó pọ̀ sínú `.github/workflows/ci.yml` lábẹ́ iṣẹ́ tó yẹ
    (ìlànà → `lint` tàbí `docs-sync-strict`; ratchet → `quality-gate`).
 4. Tí ó bá ní àtòjọ ìyọ̀ǹda, lo `reportStaleEntries()` láti

@@ -39,10 +39,9 @@ vykdykles; prieš diegimą būtina patikrinti, ar prieglobos pajėgumų pakanka.
 Kiekviename JSON kvite nurodomi išregistruotas SHA, darbo eigos vykdymas ir bandymas.
 CLI atmeta išregistruotos versijos ir įvykio SHA neatitiktį. Darbo eigos testai susieja
 politikos narystę su verdikto užduoties `needs` sąrašu, todėl nauja arba pašalinta
-vykdymo šaka negali nepastebimai išnykti. Kvitai apima jų pačių darbo eigą, bet ne
-publikavimą, diegimą ar esamo rekomendacinio skaitytuvo vidinį veikimą. Abiejų patikrų
-pavadinimų aktyvinimas šakų taisyklėse yra atskiras administracinis pakeitimas; vien
-šių užduočių pridėjimas šakos neapsaugo.
+vykdymo šaka negali nepastebimai išnykti. Kvitai apima tik savo darbo eigą, o ne publikavimą, diegimą ar esamo rekomendacinio skaitytuvo vidinę veiklą. Atitinkamų patikrų nustatymas kaip privalomų šakų taisyklėse yra atskiras administracinis pakeitimas; vien jų užduočių apibrėžimas šakos neapsaugo.
+
+`API Route Typecheck` yra nepriklausoma darbo eigos patikra, nepatenkanti nei į bendrus verdiktus, nei į vietinio visapusiško stebėtojo statinį profilį. Jos rezultatą tikrinkite atskirai konkrečiam kandidatui. `.github/workflows/api-route-typecheck.yml` vykdoma PR užklausoms į `main` arba `release/**`, pakeitimų siuntimams į bet kurios iš šių šakų grupę ir rankiniam paleidimui. Joje nėra kelių filtro. Pakeitus PR bazinę šaką, prašoma atlikti naują patikrą; turinio ar pavadinimo pakeitimams naudojamas tik stebėjimui skirtas pavadinimas `Admission not requested / API Route Typecheck`, todėl jie negali pakeisti priėmimo patikros. Darbo eigoje neapibrėžtas sujungimo grupės aktyviklis. Prieš diegiant sujungimo eilę, kuriai būtina ši patikra, pirmiausia reikia užtikrinti, kad ji būtų vykdoma tam įvykiui.
 
 ### Išsaugoti įrodymai priėmimo reduktoriuje
 
@@ -86,6 +85,21 @@ suformuotos arba nesuderinamos dalys lemia nepriėmimą. Nesėkmingų testų dal
 išsaugo neapdorotus diagnostinius aprėpties duomenis; jie negali būti įtraukti į
 galutinį sujungimą.
 
+### Modulių vykdymo eigos patvirtinimai
+
+Bendroji `test:unit:ci:shard` komanda registruoja `primary`, `dashboard` ir `serial`
+etapus naudodama `scripts/ci/unit-progress-reporter.mjs`. Įprasta testų ataskaita išlieka
+pasiekiama. Atskirame, tik metaduomenims skirtame patvirtinime registruojama kiekvieno failo vykdymo pradžia ir pabaiga,
+o kas 30 sekundžių siunčiamame aktyvumo signale išvardijami vis dar aktyvūs failai ir jų vykdymo trukmė. Registruojami
+tik į leidžiamųjų sąrašą įtraukti vykdymo metaduomenys; testų aprašai, išvestis, klaidų turinys ir visa
+aplinka nėra serializuojami.
+
+CI ir kokybės procesai išsaugo JSONL failus kaip `unit-progress-ci-<run>-<attempt>-<shard>` ir
+`unit-progress-quality-<run>-<attempt>-<shard>`. Pasibaigus užduočiai skirtam laikui, vėlesnis įkėlimas gali neįvykti;
+jau išsiųsti aktyvumo signalai išlieka diagnostiniais įrodymais. Aktyvumo signalų nebuvimas taip pat gali reikšti,
+kad vykdyklės procesas buvo užblokuotas arba nutrauktas. Šie patvirtinimai išsaugo esamą testų parinkimą,
+lygiagretumą, terminus ir baigties būseną; jie nėra sprendimai dėl kandidato priėmimo.
+
 ### Statinės analizės inventorius
 
 Versijuojamas npm alternatyviųjų pavadinimų inventorius ir statinės analizės narystė
@@ -120,6 +134,27 @@ tikrųjų buvo vykdyta.
 Scenarijai yra kataloguose `scripts/check/` (politikos patikros) ir
 `scripts/quality/` (progreso fiksavimo mechanizmas). Patikimasis CI informacijos
 šaltinis yra `.github/workflows/ci.yml`.
+
+### Paskelbtos bazės dokumentacijos būklė
+
+`.github/workflows/i18n-base-health.yml` stebi dokumentacijos būklę po pasirinktų
+siuntimų į `main` ir `release/v*`, taip pat paleidus rankiniu būdu. Jo filtrai apima dokumentaciją,
+šakninio katalogo Markdown failus, `llm.txt`, vertimų būseną bei konfigūraciją ir susijusius i18n įrankius.
+Vienintelė `Published base documentation health` užduotis naudoja prieglobos paslaugos teikiamą Ubuntu aplinką ir jai
+taikomas penkių minučių terminas. Ji atlieka tik skaitomąją patikrą ir įrašo diagnostinį kvitą
+nediegdama priklausomybių, neatlikdama vertimo ir neperimdama būsenos.
+
+`scripts/i18n/check-base-health.mjs` reikalauja, kad nebūtų šaltinio maišos, trūkstamų tikslinių failų, tikslinės maišos,
+pasenusių vertimų ir skirsnių podėlio neatitikimų. Jis taip pat patikrina dabartinę pagrindinių
+dokumentų bei lokalių aprėptį ir užregistruotą jų kilmę. Netinkamas kontekstas, nevisiška aprėptis
+arba nutraukta tikrinimo priemonė pateikia `INCOMPLETE`; patvirtintas nuokrypis pateikia `FAIL`. Abiem
+atvejais grąžinama nesėkmę žyminti baigimo būsena. Kvitas susiejamas su paimtos versijos SHA, darbo eiga, vykdymu ir
+bandymu bei išsaugomas kaip `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Tai yra nepriklausomas paskelbtos bazės stebėjimas. Jis neprideda PR ar
+sujungimo grupės įvykio, privalomos PR patikros, npm alternatyvaus pavadinimo ar statinio nuskaitymo profilio nario.
+Esama diferencinė PR politika ir pagrindinės tikrinimo priemonės rekomendacinės klasifikacijos
+lieka atskiros. Sėkmingas įkėlimas negali nepavykusio būklės rezultato paversti į PASS.
 
 ### Spartusis leidimo PR kelias (`quality.yml`)
 
@@ -259,7 +294,7 @@ Teiginių apie visada nemokamus teikėjus, katalogo įrašus, pasikartojančius 
 | `check-ui-keys-coverage` (vidinis) | UI i18n raktų aprėptis yra ≥ 65 %                                                                                                                                                                                                      | Taip             |
 | `check-ui-value-drift` (vidinis)   | Perrašius anglišką **reikšmę**, nelieka pasenusio vertimo                                                                                                                                                                              | Taip             |
 | `check-new-key-coverage` (vidinis) | **Naujas** angliškas raktas išverstas kiekvienoje lokalėje — žymeklis `__MISSING__:` atmetamas                                                                                                                                         | Taip             |
-| `check-translation-ratio`          | Tikrų vertimų santykis kiekvienoje lokalėje (angliškam tekstui identiškos / vietaženklio / trūkstamos reikšmės, neįtrauktos į leidžiamųjų sąrašą) negali viršyti `config/quality/i18n-translation-baseline.json` + leistinos paklaidos | **Patariamasis** |
+| `check-translation-ratio`          | Tikrų vertimų santykis kiekvienoje lokalėje (angliškam tekstui identiškos / vietaženklio / trūkstamos reikšmės, neįtrauktos į leidžiamųjų sąrašą) negali viršyti `config/quality/i18n-translation-baseline.json` + leistinos paklaidos | **Blokuojantis** |
 
 Reikalingas `fetch-depth: 0` — reikšmių neatitikimų užkarda lygina `en.json` su sujungimo baze.
 
@@ -302,8 +337,19 @@ npm run i18n:check-value-drift:warn     # tik pateikti ataskaitą
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Baigiama su 0 ir `SKIP reason=base-unresolved`, kai bazinio katalogo nepavyksta perskaityti (negilioji
-klono kopija be bazinės nuorodos), taip pat kaip `check-openapi-breaking`.
+Reikšmių nuokrypio ir naujų raktų patikros naudoja tą patį nekintamą palyginimą iš
+`scripts/i18n/resolve-ui-diff-base.mjs`. Darbo eiga abiem patikroms perduoda tas pačias bazės, bazės viršūnės ir
+kandidato SHA reikšmes. PR / bazės pakeitimo, „push“ ir sujungimo grupės vykdymai naudoja savo įvykio
+kontekstą. Norint iškviesti kandidatinės šakos patikrą, būtina nurodyti tikslų jos atvirą PR arba aiškią
+`i18n_base_sha` įvestį. Iškvietus arba pagal tvarkaraštį stebint `main` ar `release/vX.Y.Z`
+be šios įvesties, paskutinis įsipareigojimas palyginamas su jo pirmuoju pirminiu įsipareigojimu; tai nėra
+visos paveldėtos vertimų techninės skolos auditas. Vietiniam iškvietimui būtina aiškiai nurodyti palyginimo bazę,
+pavyzdžiui, pirmiau pateiktoje `BASE_REF` komandoje.
+
+Kai trūksta palyginimo konteksto arba jis dviprasmis, kai būtinas katalogas yra nenuskaitomas ar netinkamas arba
+kai kandidatas pasikeičia, pateikiamas rezultatas `INCOMPLETE` su išėjimo kodu **2**, taip pat ir įspėjimo režimu.
+Katalogai skaitomi naudojant `scripts/i18n/read-ui-catalog.mjs`; skaitymo klaidos nepakeičiamos
+tuščiais objektais. Nei nepasiekiama bazė, nei neišsami įvestis nepatvirtina rezultato PASS.
 
 ### Užduotis: `i18n`
 
@@ -325,7 +371,7 @@ Vykdoma tik gavus įtraukimo užklausas.
 
 ### Užduotis: `test-vitest`
 
-Vykdoma po `build`. Nesėkmės atveju blokuoja sujungimą.
+Reikalinga `changes` klasifikavimo užduotis. Taikomos matricos dalys nesėkmės atveju blokuoja sujungimą.
 
 | Rinkinys         | Tikrina                                                        | Blokuojantis                                                                                                          |
 | ---------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -399,8 +445,9 @@ ESLint / knip paleidžiami ten ir HEAD versijoje, tada palyginami kiekvieno fail
 
 - **blokuojama** — PR pridėjo ciklomatinio / kognityvinio sudėtingumo pažeidimų arba nenaudojamų eksportų pakeistuose failuose
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` žurnale);
-- **rekomendacinis vertinimas** — bendras skaičius, palygintas su fiksuota bazine riba. Paveldėtas nuokrypis niekada
-  nepadaro niekuo dėto PR nepraėjusio; nuokrypis iš naujo užfiksuojamas derinant leidimą ir stebimas rezervo užduoties.
+- **patariamoji** — bendroji visuotinė suma, palyginti su užfiksuota bazine reikšme. Paveldėtas nuokrypis niekada
+  nepažymi nekalto PR raudonai; nuokrypis registruojamas, kad būtų ištaisytas derinant leidimą, ir stebimas
+  rezervinės talpos užduoties.
 
 `check:file-size` bazinę nuorodą naudoja pagal savo taisykles (`scripts/check/check-file-size.mjs`, #8522):
 jis patikrina kiekvieną pirminio kodo ir testų failą medyje, naudodamas `git show` perskaito kiekvieno jų
@@ -614,7 +661,10 @@ leidžiamųjų sąrašu sukuria klaidingą kokybės įspūdį.
 
 1. Sukurkite `scripts/check/check-<name>.mjs` (arba `.ts`). Politiką tikrinančios patikros baigiamos kodu 0/1.
    Slenkstinės patikros perduoda metriką į `quality-metrics.json` per `collect-metrics.mjs`.
-2. Į `package.json` pridėkite `"check:<name>": "node scripts/check/check-<name>.mjs"`.
+2. Įtraukite `"check:<name>": "node scripts/check/check-<name>.mjs"` į `package.json` ir
+   sinchronizuokite pseudonimą bei tikslią jo komandą faile `config/quality/gate-manifest.json`.
+   Taip pat sinchronizuokite keisdami arba pašalindami esamą tikrinimo pseudonimą.
+   Paleiskite `npm run check:gate-manifest`; šios sutarties laikymąsi užtikrina „pre-commit“ kabliukas ir CI pakeitimų klasifikavimas.
 3. Prijunkite ją `.github/workflows/ci.yml` faile prie tinkamos užduoties
    (politika → `lint` arba `docs-sync-strict`; slenkstinė patikra → `quality-gate`).
 4. Jei ji turi leidžiamųjų sąrašą, pritaikykite `reportStaleEntries()` iš

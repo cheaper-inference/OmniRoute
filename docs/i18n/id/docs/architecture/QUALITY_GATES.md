@@ -36,9 +36,18 @@ yang di-hosting sendiri; kapasitas hosting yang memadai harus diverifikasi sebel
 Setiap tanda terima JSON mengidentifikasi SHA yang di-checkout, eksekusi workflow, dan percobaan.
 CLI menolak ketidakcocokan SHA checkout/peristiwa. Pengujian workflow mengikat keanggotaan kebijakan
 ke daftar `needs` milik job keputusan agar lane baru atau yang dihapus tidak dapat menghilang secara diam-diam.
-Tanda terima mencakup workflow-nya sendiri, bukan publikasi, deployment, atau bagian internal
-dari pemindai advisori yang sudah ada. Mengaktifkan kedua nama pemeriksaan dalam aturan branch merupakan
-perubahan administratif terpisah; penambahan job ini tidak dengan sendirinya melindungi branch.
+Bukti tersebut mencakup alur kerjanya sendiri, bukan publikasi, deployment, atau bagian internal
+dari pemindai advisory yang sudah ada. Menjadikan pemeriksaan yang berlaku sebagai persyaratan dalam aturan branch
+merupakan perubahan administratif terpisah; mendefinisikan job-nya tidak dengan sendirinya melindungi branch.
+
+`API Route Typecheck` merupakan pemeriksaan alur kerja independen, di luar kedua verdict agregat
+dan profil statis observer penuh lokal. Periksa hasilnya secara terpisah untuk kandidat yang tepat.
+`.github/workflows/api-route-typecheck.yml` berjalan pada PR yang menargetkan `main` atau
+`release/**`, push ke salah satu kelompok branch tersebut, dan dispatch manual. Alur kerja ini tidak memiliki filter path.
+Penargetan ulang base PR meminta pemeriksaan baru; pengeditan body/title menggunakan nama khusus observasi
+`Admission not requested / API Route Typecheck` dan tidak dapat menggantikan pemeriksaan admission.
+Alur kerja tersebut tidak mendeklarasikan trigger merge-group. Setiap peluncuran merge queue yang mewajibkan
+pemeriksaan ini harus terlebih dahulu memastikan eksekusinya untuk event tersebut.
 
 ### Bukti yang dipertahankan dalam reducer penerimaan
 
@@ -77,6 +86,21 @@ cakupan yang sudah ada. Input mempertahankan urutan nama file global c8; pra-pen
 untuk cakupan fungsi/blok campuran. Shard yang hilang, rusak, atau tidak kompatibel menggagalkan penerimaan.
 Shard pengujian yang gagal mempertahankan cakupan diagnostik mentah secara terpisah; cakupan tersebut tidak dapat masuk ke penggabungan akhir.
 
+### Tanda terima progres eksekusi unit
+
+Perintah bersama `test:unit:ci:shard` mencatat fase `primary`, `dashboard`, dan `serial`
+melalui `scripts/ci/unit-progress-reporter.mjs`. Laporan pengujian normal tetap
+tersedia. Tanda terima terpisah yang hanya berisi metadata mencatat waktu mulai dan selesainya setiap file,
+dan heartbeat setiap 30 detik mencantumkan file yang masih aktif beserta waktu berjalannya. Tanda terima ini
+hanya mencatat metadata eksekusi yang ada dalam daftar izin; deskripsi pengujian, output, isi kesalahan, dan keseluruhan
+environment tidak diserialisasi.
+
+CI dan Quality menyimpan file JSONL sebagai `unit-progress-ci-<run>-<attempt>-<shard>` dan
+`unit-progress-quality-<run>-<attempt>-<shard>`. Timeout job dapat mencegah upload berikutnya;
+heartbeat yang telah dikirim tetap menjadi bukti diagnostik. Tidak adanya heartbeat juga dapat menunjukkan
+proses runner yang terblokir atau dihentikan. Tanda terima ini mempertahankan pemilihan pengujian,
+konkurensi, tenggat waktu, dan status keluar yang ada; tanda terima ini bukan keputusan penerimaan kandidat.
+
 ### Inventaris pemindaian statis
 
 Inventaris npm-alias berversi dan keanggotaan pemindaian statis berada di
@@ -107,6 +131,29 @@ merupakan referensi, bukan bukti bahwa gate benar-benar dijalankan.
 
 Skrip berada di bawah `scripts/check/` (gate kebijakan) dan `scripts/quality/` (mesin ratchet).
 Sumber kebenaran CI adalah `.github/workflows/ci.yml`.
+
+### Kesehatan dokumentasi basis yang dipublikasikan
+
+`.github/workflows/i18n-base-health.yml` memantau kesehatan dokumentasi setelah push tertentu
+ke `main` dan `release/v*`, serta saat dipicu secara manual. Filternya mencakup dokumentasi,
+Markdown tingkat root, `llm.txt`, status/konfigurasi terjemahan, dan alat i18n yang relevan.
+Job tunggal `Published base documentation health` menggunakan Ubuntu yang di-host dan batas
+waktu lima menit. Job ini melakukan validasi hanya-baca dan menulis tanda terima diagnostik
+tanpa instalasi dependensi, penerjemahan, atau adopsi status.
+
+`scripts/i18n/check-base-health.mjs` mensyaratkan tidak adanya inkonsistensi source-hash,
+missing-target, target-hash, stale-translation, dan section-cache. Skrip ini juga memvalidasi
+cakupan dokumen/lokal inti saat ini beserta asal-usulnya yang tercatat. Konteks yang tidak
+valid, cakupan yang tidak lengkap, atau pemeriksa yang terinterupsi menghasilkan `INCOMPLETE`;
+drift yang terkonfirmasi menghasilkan `FAIL`. Keduanya mengembalikan status keluar yang
+menunjukkan kegagalan. Tanda terima tersebut terikat pada SHA checkout, alur kerja, run, dan
+attempt, serta disimpan sebagai `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Ini merupakan pengamatan independen terhadap basis yang dipublikasikan. Mekanisme ini tidak
+menambahkan peristiwa PR atau merge-group, pemeriksaan PR wajib, alias npm, maupun anggota
+profil static-scan. Kebijakan PR diferensial yang sudah ada dan klasifikasi advisori dari
+pemeriksa yang mendasarinya tetap terpisah. Pengunggahan yang berhasil tidak dapat mengubah
+hasil kesehatan yang gagal menjadi PASS.
 
 ### Jalur cepat PR rilis (`quality.yml`)
 
@@ -241,12 +288,12 @@ Pemeriksaan klaim tentang penyedia gratis selamanya, entri katalog, pool berulan
 
 ### Job: `i18n-ui-coverage`
 
-| Skrip                             | Memvalidasi                                                                                                                                                                                         | Memblokir   |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `check-ui-keys-coverage` (inline) | Cakupan kunci i18n UI adalah ≥ 65%                                                                                                                                                                  | Ya          |
-| `check-ui-value-drift` (inline)   | **Nilai** bahasa Inggris yang ditulis ulang tidak meninggalkan terjemahan usang                                                                                                                     | Ya          |
-| `check-new-key-coverage` (inline) | Kunci bahasa Inggris **baru** diterjemahkan di setiap locale — penanda `__MISSING__:` akan ditolak                                                                                                  | Ya          |
-| `check-translation-ratio`         | Rasio terjemahan nyata per locale (sama dengan bahasa Inggris / placeholder / tidak ada di luar daftar yang diizinkan) tidak boleh melebihi `config/quality/i18n-translation-baseline.json` + slack | **Imbauan** |
+| Skrip                             | Memvalidasi                                                                                                                                                                                         | Memblokir     |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `check-ui-keys-coverage` (inline) | Cakupan kunci i18n UI adalah ≥ 65%                                                                                                                                                                  | Ya            |
+| `check-ui-value-drift` (inline)   | **Nilai** bahasa Inggris yang ditulis ulang tidak meninggalkan terjemahan usang                                                                                                                     | Ya            |
+| `check-new-key-coverage` (inline) | Kunci bahasa Inggris **baru** diterjemahkan di setiap locale — penanda `__MISSING__:` akan ditolak                                                                                                  | Ya            |
+| `check-translation-ratio`         | Rasio terjemahan nyata per locale (sama dengan bahasa Inggris / placeholder / tidak ada di luar daftar yang diizinkan) tidak boleh melebihi `config/quality/i18n-translation-baseline.json` + slack | **Memblokir** |
 
 Memerlukan `fetch-depth: 0` — gerbang pergeseran nilai membandingkan diff `en.json` terhadap basis penggabungan.
 
@@ -289,8 +336,19 @@ npm run i18n:check-value-drift:warn     # hanya laporan
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Keluar dengan kode 0 dan `SKIP reason=base-unresolved` ketika katalog dasar tidak dapat dibaca (clone dangkal
-tanpa ref dasar), mengikuti perilaku `check-openapi-breaking`.
+Gate pergeseran nilai dan kunci baru menggunakan satu perbandingan yang tidak dapat diubah dari
+`scripts/i18n/resolve-ui-diff-base.mjs`. Alur kerja meneruskan SHA basis, ujung basis, dan
+kandidat yang sama ke kedua pemeriksaan. Proses PR/penargetan ulang basis, push, dan grup penggabungan menggunakan konteks event
+masing-masing. Menjalankan kandidat dari suatu branch memerlukan PR terbuka yang tepat untuk branch tersebut atau input
+`i18n_base_sha` secara eksplisit. Pengamatan melalui dispatch atau jadwal terhadap `main` atau `release/vX.Y.Z`
+tanpa input tersebut membandingkan commit terakhir dengan parent pertamanya; ini bukan audit terhadap
+seluruh utang terjemahan yang diwariskan. Pemanggilan lokal memerlukan basis perbandingan eksplisit,
+misalnya perintah `BASE_REF` di atas.
+
+Konteks perbandingan yang hilang atau ambigu, katalog wajib yang tidak dapat dibaca atau tidak valid, serta
+kandidat yang berubah menghasilkan `INCOMPLETE` dengan kode keluar **2**, termasuk dalam mode peringatan.
+Pembacaan katalog menggunakan `scripts/i18n/read-ui-catalog.mjs`; kegagalan pembacaan tidak digantikan
+dengan objek kosong. Baik basis yang tidak tersedia maupun input yang tidak lengkap tidak menetapkan PASS.
 
 ### Job: `i18n`
 
@@ -312,7 +370,7 @@ Hanya dijalankan pada pull request.
 
 ### Job: `test-vitest`
 
-Dijalankan setelah `build`. Memblokir penggabungan jika gagal.
+Memerlukan job klasifikasi `changes`. Shard matriks yang berlaku akan memblokir penggabungan jika gagal.
 
 | Rangkaian        | Memvalidasi                                             | Pemblokiran                                                                                                                      |
 | ---------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -385,8 +443,9 @@ diubah oleh PR** (`scripts/check/newCodeMode.mjs`: merge-base diwujudkan dalam
 
 - **memblokir** — PR menambahkan pelanggaran siklomatik/kognitif atau ekspor yang tidak digunakan dalam file yang diubahnya
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` dalam log);
-- **saran** — total global dibandingkan dengan baseline yang dibekukan. Penyimpangan yang diwariskan tidak pernah membuat
-  PR yang tidak bersalah menjadi merah; penyimpangan dibekukan ulang saat rekonsiliasi rilis dan dipantau oleh pekerjaan headroom.
+- **advisori** — total global dibandingkan dengan baseline yang dibekukan. Drift yang diwariskan tidak pernah membuat
+  PR yang tidak bersalah menjadi merah; drift tersebut dilacak untuk diperbaiki saat rekonsiliasi rilis dan dipantau oleh
+  job headroom.
 
 `check:file-size` menggunakan referensi dasar dengan ketentuannya sendiri (`scripts/check/check-file-size.mjs`, #8522):
 skrip ini memeriksa setiap file sumber dan pengujian dalam pohon, membaca jumlah baris masing-masing pada basis PR
@@ -588,7 +647,11 @@ memberikan kesan kualitas yang semu.
 
 1. Buat `scripts/check/check-<name>.mjs` (atau `.ts`). Gate kebijakan keluar dengan kode 0/1.
    Gate bergaya ratchet mengeluarkan metrik ke `quality-metrics.json` melalui `collect-metrics.mjs`.
-2. Tambahkan `"check:<name>": "node scripts/check/check-<name>.mjs"` ke `package.json`.
+2. Tambahkan `"check:<name>": "node scripts/check/check-<name>.mjs"` ke `package.json`, dan
+   sinkronkan alias tersebut beserta perintah persisnya di `config/quality/gate-manifest.json`.
+   Terapkan sinkronisasi yang sama saat mengubah atau menghapus alias validasi yang sudah ada.
+   Jalankan `npm run check:gate-manifest`; hook pre-commit dan klasifikasi perubahan CI
+   memberlakukan kontrak ini.
 3. Hubungkan gate tersebut di `.github/workflows/ci.yml` pada job yang sesuai
    (kebijakan → `lint` atau `docs-sync-strict`; ratchet → `quality-gate`).
 4. Jika gate memiliki allowlist, terapkan `reportStaleEntries()` dari

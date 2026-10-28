@@ -37,8 +37,17 @@ Vsako potrdilo JSON določa prevzeti SHA, izvedbo poteka dela in poskus.
 CLI zavrne neujemanje med SHA prevzete kode in SHA dogodka. Preizkusi poteka dela vežejo članstvo v politiki
 na seznam `needs` opravila z odločitvijo, tako da nova ali odstranjena veja ne more neopazno izginiti.
 Potrdila pokrivajo lasten potek dela, ne pa objave, uvedbe ali notranjega delovanja
-obstoječega svetovalnega pregledovalnika. Aktiviranje obeh imen preverjanj v pravilih veje je
-ločena skrbniška sprememba; dodajanje teh opravil samo po sebi ne zaščiti veje.
+obstoječega svetovalnega pregledovalnika. Določitev ustreznih preverjanj kot obveznih v pravilih vej
+je ločena administrativna sprememba; opredelitev njihovih opravil sama po sebi ne zaščiti veje.
+
+`API Route Typecheck` je neodvisno preverjanje poteka dela, zunaj obeh skupnih končnih presoj
+in statičnega profila lokalnega popolnega opazovalca. Njegov rezultat za točno določenega
+kandidata preverite ločeno. `.github/workflows/api-route-typecheck.yml` se izvaja pri zahtevah PR v `main` ali
+`release/**`, potiskih v katero koli od teh družin vej in ročnem proženju. Nima filtra poti.
+Preusmeritve ciljne veje zahteve PR zahtevajo novo preverjanje; urejanja telesa/naslova uporabljajo zgolj opazovalno ime
+`Admission not requested / API Route Typecheck` in ne morejo nadomestiti preverjanja za sprejem.
+Potek dela ne določa sprožilca za skupino združevanja. Vsaka uvedba čakalne vrste za združevanje, ki zahteva
+to preverjanje, mora najprej zagotoviti njegovo izvajanje za ta dogodek.
 
 ### Ohranjena dokazila v reduktorju sprejema
 
@@ -77,6 +86,22 @@ pragove pokritosti. Vhodi ohranijo globalni vrstni red imen datotek c8; predhodn
 za mešano pokritost funkcij/blokov. Manjkajoči, nepravilno oblikovani ali nezdružljivi razdelki povzročijo neuspeh sprejema.
 Neuspeli preizkusni razdelki ločeno ohranijo neobdelano diagnostično pokritost; ta ne more biti vključena v končno združevanje.
 
+### Potrdila o napredku izvajanja enotnih testov
+
+Skupni ukaz `test:unit:ci:shard` beleži faze `primary`, `dashboard` in `serial`
+prek skripta `scripts/ci/unit-progress-reporter.mjs`. Običajno poročilo o testih ostane
+na voljo. Ločeno potrdilo, ki vsebuje samo metapodatke, beleži začetek in dokončanje vsake
+datoteke, 30-sekundni signal aktivnosti pa navaja datoteke, ki so še vedno aktivne, in čas
+njihovega izvajanja. Beleži samo metapodatke o izvajanju z dovoljenega seznama; opisi testov,
+izhodni podatki, vsebina napak in celotno okolje se ne serializirajo.
+
+CI in Quality shranita datoteke JSONL kot `unit-progress-ci-<run>-<attempt>-<shard>` in
+`unit-progress-quality-<run>-<attempt>-<shard>`. Časovna omejitev opravila lahko prepreči
+poznejše nalaganje; že oddani signali aktivnosti ostanejo diagnostični dokaz. Manjkajoči
+signali aktivnosti lahko pomenijo tudi, da je proces izvajalnika blokiran ali končan.
+Ta potrdila ohranjajo obstoječi izbor testov, sočasnost, roke in izhodno stanje; ne pomenijo
+odločitve o sprejemu kandidata.
+
 ### Inventar statičnega pregledovanja
 
 Različiceni inventar vzdevkov npm in članstvo v statičnem pregledovanju sta določena v
@@ -107,6 +132,14 @@ je referenca in ne dokaz, da je bila kontrola dejansko izvedena.
 
 Skripti so v `scripts/check/` (kontrole pravilnikov) in `scripts/quality/` (mehanizem zapore).
 Vir resnice za CI je `.github/workflows/ci.yml`.
+
+### Stanje objavljene osnovne dokumentacije
+
+`.github/workflows/i18n-base-health.yml` spremlja stanje dokumentacije po izbranih potiskih v `main` in `release/v*` ter ob ročnem zagonu. Njegovi filtri zajemajo dokumentacijo, korenske datoteke Markdown, `llm.txt`, stanje in konfiguracijo prevodov ter ustrezna orodja i18n. Edino opravilo `Published base documentation health` uporablja gostovani Ubuntu in petminutni rok. Izvaja preverjanje samo za branje in zapiše diagnostično potrdilo brez nameščanja odvisnosti, prevajanja ali prevzema stanja.
+
+`scripts/i18n/check-base-health.mjs` zahteva, da ni nobenih nedoslednosti glede zgoščene vrednosti vira, manjkajočega cilja, zgoščene vrednosti cilja, zastarelega prevoda in predpomnilnika razdelkov. Prav tako preveri trenutni obseg temeljnih dokumentov in jezikovnih nastavitev ter zabeleženo poreklo. Neveljaven kontekst, nepopolna pokritost ali prekinjeno preverjanje povzroči rezultat `INCOMPLETE`; potrjeno odstopanje povzroči rezultat `FAIL`. Oba vrneta izhodno stanje napake. Potrdilo je vezano na SHA prevzete različice, delovni tok, izvajanje in poskus ter se hrani kot `i18n-base-health-<sha>-<run>-<attempt>`.
+
+To je neodvisno opazovanje objavljene osnove. Ne dodaja dogodka zahteve za vlečenje ali skupine združevanja, obveznega preverjanja zahteve za vlečenje, vzdevka npm ali člana profila statičnega pregledovanja. Obstoječa diferencialna politika za zahteve za vlečenje in svetovalne razvrstitve temeljnega preverjevalnika ostajajo ločene. Uspešen prenos ne more spremeniti neuspešnega rezultata preverjanja stanja v PASS.
 
 ### Hitra pot za izdajni PR (`quality.yml`)
 
@@ -242,12 +275,12 @@ Preverjanja trditev o trajno brezplačnih ponudnikih, vnosih v katalogu, ponavlj
 
 ### Opravilo: `i18n-ui-coverage`
 
-| Skript                              | Preverja                                                                                                                                                                                                        | Blokira        |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `check-ui-keys-coverage` (vgrajeno) | Pokritost ključev i18n uporabniškega vmesnika je ≥ 65 %                                                                                                                                                         | Da             |
-| `check-ui-value-drift` (vgrajeno)   | Spremenjena angleška **vrednost** za seboj ne pusti zastarelega prevoda                                                                                                                                         | Da             |
-| `check-new-key-coverage` (vgrajeno) | **Nov** angleški ključ je preveden v vsaki jezikovni različici — oznaka `__MISSING__:` je zavrnjena                                                                                                             | Da             |
-| `check-translation-ratio`           | Delež dejanskih prevodov na jezikovno različico (enako angleščini / nadomestna vrednost / manjkajoči listi zunaj seznama dovoljenih) ne sme preseči `config/quality/i18n-translation-baseline.json` + tolerance | **Svetovalno** |
+| Skript                              | Preverja                                                                                                                                                                                                        | Blokira         |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `check-ui-keys-coverage` (vgrajeno) | Pokritost ključev i18n uporabniškega vmesnika je ≥ 65 %                                                                                                                                                         | Da              |
+| `check-ui-value-drift` (vgrajeno)   | Spremenjena angleška **vrednost** za seboj ne pusti zastarelega prevoda                                                                                                                                         | Da              |
+| `check-new-key-coverage` (vgrajeno) | **Nov** angleški ključ je preveden v vsaki jezikovni različici — oznaka `__MISSING__:` je zavrnjena                                                                                                             | Da              |
+| `check-translation-ratio`           | Delež dejanskih prevodov na jezikovno različico (enako angleščini / nadomestna vrednost / manjkajoči listi zunaj seznama dovoljenih) ne sme preseči `config/quality/i18n-translation-baseline.json` + tolerance | **Blokirajoče** |
 
 Zahteva `fetch-depth: 0` — varovalo za odmik vrednosti primerja `en.json` z osnovo združitve.
 
@@ -291,8 +324,19 @@ npm run i18n:check-value-drift:warn     # samo poročilo
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Konča se s kodo 0 in `SKIP reason=base-unresolved`, kadar osnovnega kataloga ni mogoče prebrati (plitvo
-kloniranje brez osnovne reference), enako kot `check-openapi-breaking`.
+Kontroli odmika vrednosti in novih ključev uporabljata isto nespremenljivo primerjavo iz
+`scripts/i18n/resolve-ui-diff-base.mjs`. Delovni tok obema preverjanjema posreduje iste SHA-je osnove, konice osnove in
+kandidata. Izvajanja za PR/spremembo ciljne veje (osnove), potisk in skupino združevanja uporabljajo kontekst svojega
+dogodka. Ročni zagon za vejo kandidata zahteva njen točno določen odprti PR ali izrecni vhod
+`i18n_base_sha`. Ročni ali načrtovani pregled veje `main` ali `release/vX.Y.Z`
+brez tega vhoda primerja zadnjo potrditev z njenim prvim nadrejenim elementom; ne gre za revizijo
+celotnega podedovanega dolga prevodov. Lokalni zagon zahteva izrecno osnovo primerjave,
+na primer zgornji ukaz `BASE_REF`.
+
+Manjkajoči ali dvoumni kontekst primerjave, neberljiv ali neveljaven zahtevani katalog in
+spremenjeni kandidat povzročijo stanje `INCOMPLETE` z izhodno kodo **2**, tudi v opozorilnem načinu.
+Katalogi se berejo z uporabo `scripts/i18n/read-ui-catalog.mjs`; napake pri branju se ne nadomestijo
+s praznimi objekti. Niti nerazpoložljiva osnova niti nepopolni vhodni podatki ne pomenijo stanja PASS.
 
 ### Opravilo: `i18n`
 
@@ -314,7 +358,7 @@ Izvaja se samo pri zahtevah za spojitev.
 
 ### Opravilo: `test-vitest`
 
-Izvede se po `build`. Ob neuspehu blokira združitev.
+Potrebuje opravilo za razvrščanje `changes`. Ustrezni deli matrike ob neuspehu blokirajo združitev.
 
 | Sklop            | Preverja                                                                | Blokirajoče                                                                                                            |
 | ---------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -386,8 +430,9 @@ PR spremenil** (`scripts/check/newCodeMode.mjs`: združitvena osnova se material
 
 - **blokirajoče** — PR je v spremenjenih datotekah dodal kršitve ciklomatske/kognitivne kompleksnosti ali mrtve izvoze
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` v dnevniku);
-- **priporočilno** — globalna skupna vrednost glede na zamrznjeno izhodišče. Podedovani odklon nikoli ne povzroči
-  neuspeha nedolžnega PR-ja; odklon se ob uskladitvi izdaje ponovno zamrzne, spremlja pa ga opravilo za rezervo.
+- **svetovalno** — globalna skupna vrednost v primerjavi z zamrznjeno izhodiščno vrednostjo. Podedovani odklon nikoli ne označi
+  nedolžnega PR-ja z rdečo; odklon se spremlja za odpravo ob usklajevanju izdaje, nadzoruje pa ga
+  opravilo za preverjanje rezerve.
 
 `check:file-size` uporablja osnovni sklic po lastnih pravilih (`scripts/check/check-file-size.mjs`, #8522):
 preveri vsako izvorno in testno datoteko v drevesu, z `git show` prebere število vrstic vsake datoteke
@@ -591,7 +636,11 @@ seznamu dovoljenih izjem ustvarja lažen občutek kakovosti.
 
 1. Ustvarite `scripts/check/check-<name>.mjs` (ali `.ts`). Preverjanja pravilnikov se končajo s kodo 0/1.
    Preverjanja vrste omejevalnik prek `collect-metrics.mjs` zapišejo metriko v `quality-metrics.json`.
-2. Dodajte `"check:<name>": "node scripts/check/check-<name>.mjs"` v `package.json`.
+2. Dodajte `"check:<name>": "node scripts/check/check-<name>.mjs"` v `package.json` in
+   sinhronizirajte vzdevek ter njegov natančen ukaz v `config/quality/gate-manifest.json`.
+   Enako sinhronizacijo izvedite pri spreminjanju ali odstranjevanju obstoječega vzdevka za preverjanje.
+   Zaženite `npm run check:gate-manifest`; predpotrditveni kavelj in klasifikacija sprememb v CI
+   zagotavljata upoštevanje te pogodbe.
 3. Povežite ga v `.github/workflows/ci.yml` pod ustreznim opravilom
    (pravilnik → `lint` ali `docs-sync-strict`; omejevalnik → `quality-gate`).
 4. Če uporablja seznam dovoljenih izjem, uporabite `reportStaleEntries()` iz

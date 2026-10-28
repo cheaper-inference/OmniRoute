@@ -37,8 +37,17 @@ Each JSON receipt identifies the checked-out SHA, workflow run and attempt.
 The CLI rejects a checkout/event SHA mismatch. Workflow tests bind policy membership
 to the verdict job's `needs` list so a new or removed lane cannot silently disappear.
 The receipts cover their own workflow, not publication, deployment, or the internals
-of an existing advisory scanner. Activating both check names in branch rules is a
-separate administrative change; adding these jobs does not itself protect a branch.
+of an existing advisory scanner. Making the applicable checks required in branch rules
+is a separate administrative change; defining their jobs does not itself protect a branch.
+
+`API Route Typecheck` is an independent workflow check, outside both aggregate verdicts
+and the local full observer's static profile. Inspect its result separately for the exact
+candidate. `.github/workflows/api-route-typecheck.yml` runs on PRs into `main` or
+`release/**`, pushes to either branch family, and manual dispatch. It has no path filter.
+PR base retargets request a new check; body/title edits use the observation-only name
+`Admission not requested / API Route Typecheck` and cannot replace the admission check.
+The workflow does not declare a merge-group trigger. Any merge-queue rollout that requires
+this check must first establish its execution for that event.
 
 ### Retained evidence in the acceptance reducer
 
@@ -77,6 +86,21 @@ coverage thresholds. Inputs retain c8's global filename order; per-shard pre-mer
 for mixed function/block coverage. Missing, malformed or incompatible shards fail admission.
 Failed test shards retain raw diagnostic coverage separately; it cannot enter the final merge.
 
+### Unit execution progress receipts
+
+The shared `test:unit:ci:shard` command records the `primary`, `dashboard` and `serial`
+phases through `scripts/ci/unit-progress-reporter.mjs`. The normal test report remains
+available. A separate metadata-only receipt records each file's start and completion,
+and a 30-second heartbeat lists the files still active and their elapsed time. It records
+only allowlisted execution metadata; test descriptions, output, error bodies and the full
+environment are not serialized.
+
+CI and Quality retain the JSONL files as `unit-progress-ci-<run>-<attempt>-<shard>` and
+`unit-progress-quality-<run>-<attempt>-<shard>`. A job timeout can prevent the later upload;
+heartbeats already emitted remain diagnostic evidence. Missing heartbeats can also reflect
+a blocked or terminated runner process. These receipts preserve the existing test selection,
+concurrency, deadlines and exit status; they are not candidate-admission verdicts.
+
 ### Static scan inventory
 
 The versioned npm-alias inventory and static-scan membership live in
@@ -107,6 +131,27 @@ is a reference, not proof that a gate actually ran.
 
 Scripts live under `scripts/check/` (policy gates) and `scripts/quality/` (ratchet engine).
 The CI source of truth is `.github/workflows/ci.yml`.
+
+### Published-base documentation health
+
+`.github/workflows/i18n-base-health.yml` observes documentation health after selected
+pushes to `main` and `release/v*`, and on manual dispatch. Its filters cover documentation,
+root Markdown, `llm.txt`, translation state/configuration and the relevant i18n tooling.
+The single `Published base documentation health` job uses hosted Ubuntu and a five-minute
+deadline. It performs read-only validation and writes a diagnostic receipt without a
+dependency installation, translation or state adoption.
+
+`scripts/i18n/check-base-health.mjs` requires zero source-hash, missing-target, target-hash,
+stale-translation and section-cache inconsistencies. It also validates the current core
+document/locale scope and its recorded provenance. Invalid context, incomplete coverage
+or an interrupted checker produces `INCOMPLETE`; confirmed drift produces `FAIL`. Both
+return a failing exit status. The receipt is bound to checkout SHA, workflow, run and
+attempt, and is retained as `i18n-base-health-<sha>-<run>-<attempt>`.
+
+This is an independent observation of the published base. It does not add a PR or
+merge-group event, a required PR check, an npm alias or a static-scan profile member.
+The existing differential PR policy and the underlying checker's advisory classifications
+remain separate. A successful upload cannot turn a failed health result into PASS.
 
 ### Release PR fast-path (`quality.yml`)
 
@@ -255,7 +300,7 @@ provider display name reds CI until that file is regenerated.
 | `check-ui-keys-coverage` (inline) | UI i18n key coverage is ≥ 65%                                                                                                                                                         | Yes          |
 | `check-ui-value-drift` (inline)   | A rewritten English **value** leaves no stale translation behind                                                                                                                      | Yes          |
 | `check-new-key-coverage` (inline) | A **new** English key is translated in every locale — a `__MISSING__:` marker is rejected                                                                                             | Yes          |
-| `check-translation-ratio`         | Real-translation ratio per locale (identical-to-English / placeholder / missing leaves outside the allowlist) must not exceed `config/quality/i18n-translation-baseline.json` + slack | **Advisory** |
+| `check-translation-ratio`         | Real-translation ratio per locale (identical-to-English / placeholder / missing leaves outside the allowlist) must not exceed `config/quality/i18n-translation-baseline.json` + slack | **Blocking** |
 
 Needs `fetch-depth: 0` — the value-drift gate diffs `en.json` against the merge base.
 
@@ -298,8 +343,19 @@ npm run i18n:check-value-drift:warn     # report only
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Exits 0 with `SKIP reason=base-unresolved` when the base catalog cannot be read (shallow
-clone without the base ref), mirroring `check-openapi-breaking`.
+The value-drift and new-key gates share one immutable comparison from
+`scripts/i18n/resolve-ui-diff-base.mjs`. The workflow passes the same base, base-tip and
+candidate SHAs to both checks. PR/base-retarget, push and merge-group runs use their event
+context. Dispatching a candidate branch requires its exact open PR or the explicit
+`i18n_base_sha` input. Dispatch or scheduled observation of `main` or `release/vX.Y.Z`
+without that input compares the last commit with its first parent; it is not an audit of
+all inherited translation debt. Local invocation requires an explicit comparison base,
+for example the `BASE_REF` command above.
+
+Missing or ambiguous comparison context, an unreadable or invalid required catalog, and
+a changed candidate produce `INCOMPLETE` with exit code **2**, including in warn mode.
+Catalog reads use `scripts/i18n/read-ui-catalog.mjs`; read failures are not substituted
+with empty objects. Neither an unavailable base nor incomplete input establishes PASS.
 
 ### Job: `i18n`
 
@@ -321,7 +377,7 @@ Runs on pull requests only.
 
 ### Job: `test-vitest`
 
-Runs after `build`. Blocks merge on failure.
+Needs the `changes` classification job. Applicable matrix shards block merge on failure.
 
 | Suite            | Validates                                                | Blocking                                                                                                      |
 | ---------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
@@ -395,7 +451,8 @@ touched** (`scripts/check/newCodeMode.mjs`: the merge-base is materialized in a 
 - **blocking** — the PR added cyclomatic/cognitive violations or dead exports in files it changed
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` in the log);
 - **advisory** — the global total vs. the frozen baseline. Inherited drift never reds an
-  innocent PR; the drift is re-frozen at release reconciliation and watched by the headroom job.
+  innocent PR; the drift is tracked for repair at release reconciliation and watched by the
+  headroom job.
 
 `check:file-size` uses the base ref on its own terms (`scripts/check/check-file-size.mjs`, #8522):
 it checks every source and test file in the tree, reads each one's line count at the PR base
@@ -598,7 +655,11 @@ allowlist is a false sense of quality.
 
 1. Create `scripts/check/check-<name>.mjs` (or `.ts`). Policy gates exit 0/1.
    Ratchet-style gates emit a metric to `quality-metrics.json` via `collect-metrics.mjs`.
-2. Add `"check:<name>": "node scripts/check/check-<name>.mjs"` to `package.json`.
+2. Add `"check:<name>": "node scripts/check/check-<name>.mjs"` to `package.json`, and
+   synchronize the alias and its exact command in `config/quality/gate-manifest.json`.
+   Apply the same synchronization when changing or removing an existing validation alias.
+   Run `npm run check:gate-manifest`; the pre-commit hook and CI change classification
+   enforce this contract.
 3. Wire it in `.github/workflows/ci.yml` under the appropriate job
    (policy → `lint` or `docs-sync-strict`; ratchet → `quality-gate`).
 4. If it has an allowlist, apply `reportStaleEntries()` from

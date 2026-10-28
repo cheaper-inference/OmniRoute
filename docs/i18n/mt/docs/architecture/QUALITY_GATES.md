@@ -36,9 +36,9 @@ qabel ir-rollout trid tiġi vverifikata kapaċità ospitata suffiċjenti.
 Kull riċevuta JSON tidentifika x-SHA li ġie checkout, il-workflow run u l-attempt.
 Is-CLI jirrifjuta nuqqas ta’ qbil bejn ix-SHA taċ-checkout u dak tal-avveniment. It-testijiet tal-workflow jorbtu s-sħubija fil-politika
 mal-lista `needs` tal-job tal-verdett sabiex lane ġdida jew imneħħija ma tkunx tista’ tisparixxi mingħajr ma jiġi nnutat.
-Ir-riċevuti jkopru l-workflow tagħhom stess, mhux il-pubblikazzjoni, id-deployment, jew il-funzjonament intern
-ta’ scanner konsultattiv eżistenti. L-attivazzjoni taż-żewġ ismijiet tal-checks fir-regoli tal-fergħa hija
-bidla amministrattiva separata; iż-żieda ta’ dawn il-jobs minnha nnifisha ma tipproteġix fergħa.
+L-irċevuti jkopru l-fluss tax-xogħol tagħhom stess, mhux il-pubblikazzjoni, id-distribuzzjoni, jew il-mekkaniżmi interni ta’ skaner konsultattiv eżistenti. Li l-kontrolli applikabbli jsiru obbligatorji fir-regoli tal-fergħat hija bidla amministrattiva separata; id-definizzjoni tal-kompiti tagħhom minnha nnifisha ma tipproteġix fergħa.
+
+`API Route Typecheck` huwa kontroll indipendenti tal-fluss tax-xogħol, barra miż-żewġ verdetti aggregati u mill-profil statiku tal-osservatur sħiħ lokali. Spezzjona r-riżultat tiegħu separatament għall-kandidat eżatt. `.github/workflows/api-route-typecheck.yml` jitħaddem fuq PRs lejn `main` jew `release/**`, fuq pushes lejn kwalunkwe waħda miż-żewġ familji ta’ fergħat, u permezz ta’ tħaddim manwali. Ma għandu l-ebda filtru tal-mogħdijiet. It-tibdil tal-fergħa bażi tal-PR jitlob kontroll ġdid; il-modifiki fil-korp/titlu jużaw l-isem ta’ osservazzjoni biss `Admission not requested / API Route Typecheck` u ma jistgħux jissostitwixxu l-kontroll tal-ammissjoni. Il-fluss tax-xogħol ma jiddikjarax skattatur għal grupp ta’ merges. Kwalunkwe introduzzjoni ta’ kju ta’ merges li teħtieġ dan il-kontroll trid l-ewwel tistabbilixxi t-tħaddim tiegħu għal dak l-avveniment.
 
 ### Evidenza miżmuma fir-reducer tal-aċċettazzjoni
 
@@ -78,6 +78,24 @@ għal kull shard mhuwiex sikur għal coverage imħallat ta’ functions/blocks. 
 jew inkompatibbli jwasslu biex l-aċċettazzjoni tfalli. Test shards li jfallu jżommu coverage dijanjostiku mhux ipproċessat
 separatament; dan ma jistax jidħol fil-merge finali.
 
+### Riċevuti tal-progress tal-eżekuzzjoni tat-testijiet unitarji
+
+Il-kmand kondiviż `test:unit:ci:shard` jirreġistra l-fażijiet `primary`, `dashboard` u `serial`
+permezz ta’ `scripts/ci/unit-progress-reporter.mjs`. Ir-rapport normali tat-testijiet jibqa’
+disponibbli. Riċevuta separata li tinkludi biss metadata tirreġistra l-bidu u t-tlestija ta’
+kull fajl, u sinjal ta’ attività kull 30 sekonda jelenka l-fajls li għadhom attivi u l-ħin
+li jkun għadda għalihom. Din tirreġistra biss metadata tal-eżekuzzjoni mil-lista permessa;
+id-deskrizzjonijiet tat-testijiet, l-output, il-kontenut tal-iżbalji u l-ambjent sħiħ ma jiġux
+serializzati.
+
+CI u Quality iżommu l-fajls JSONL bħala `unit-progress-ci-<run>-<attempt>-<shard>` u
+`unit-progress-quality-<run>-<attempt>-<shard>`. Skadenza tal-ħin tal-biċċa xogħol tista’
+tipprevjeni t-tlugħ sussegwenti; is-sinjali ta’ attività li jkunu diġà ntbagħtu jibqgħu
+evidenza dijanjostika. In-nuqqas ta’ sinjali ta’ attività jista’ jindika wkoll proċess
+runner imblukkat jew mitmum. Dawn l-irċevuti jippreservaw l-għażla eżistenti tat-testijiet,
+il-konkorrenza, l-iskadenzi u l-istatus tal-ħruġ; mhumiex verdetti dwar l-ammissjoni
+tal-kandidati.
+
 ### Inventarju tal-iscan statiku
 
 L-inventarju bl-aliases tal-npm li għandu verżjoni u s-sħubija fl-iscan statiku jinsabu f’
@@ -108,6 +126,27 @@ huwa referenza, mhux prova li gate fil-fatt tħaddem.
 
 L-iscripts jinsabu taħt `scripts/check/` (policy gates) u `scripts/quality/` (ratchet engine).
 Is-sors tal-verità tas-CI huwa `.github/workflows/ci.yml`.
+
+### Saħħa tad-dokumentazzjoni tal-bażi ppubblikata
+
+`.github/workflows/i18n-base-health.yml` josserva s-saħħa tad-dokumentazzjoni wara ċerti
+pushes lejn `main` u `release/v*`, kif ukoll meta jitħaddem manwalment. Il-filtri tiegħu jkopru d-dokumentazzjoni,
+il-fajls Markdown fl-għerq, `llm.txt`, l-istat/il-konfigurazzjoni tat-traduzzjoni u l-għodod i18n rilevanti.
+Il-job uniku `Published base documentation health` juża Ubuntu ospitat u limitu ta’ ħames minuti.
+Dan iwettaq validazzjoni għall-qari biss u jikteb irċevuta dijanjostika mingħajr
+installazzjoni tad-dipendenzi, traduzzjoni jew adozzjoni tal-istat.
+
+`scripts/i18n/check-base-health.mjs` jirrikjedi li ma jkun hemm l-ebda inkonsistenza fil-hash tas-sors, fil-mira nieqsa, fil-hash tal-mira,
+fit-traduzzjoni skaduta jew fil-cache tas-sezzjonijiet. Jivvalida wkoll l-ambitu attwali tad-dokumenti/lokalitajiet ewlenin
+u l-provenjenza rreġistrata tiegħu. Kuntest invalidu, kopertura mhux kompluta
+jew verifikatur interrott jipproduċi `INCOMPLETE`; devjazzjoni kkonfermata tipproduċi `FAIL`. It-tnejn
+jirritornaw status ta’ ħruġ li jindika falliment. L-irċevuta hija marbuta max-SHA taċ-checkout, mal-workflow, mal-ġirja u
+mat-tentattiv, u tinżamm bħala `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Din hija osservazzjoni indipendenti tal-bażi ppubblikata. Ma żżidx avveniment ta’ PR jew
+ta’ merge-group, verifika obbligatorja tal-PR, alias ta’ npm jew membru ta’ profil ta’ skennjar statiku.
+Il-politika differenzjali eżistenti tal-PR u l-klassifikazzjonijiet konsultattivi tal-verifikatur sottostanti
+jibqgħu separati. Upload b’suċċess ma jistax ibiddel riżultat tas-saħħa li falla f’PASS.
 
 ### Fast-path tal-PR tar-release (`quality.yml`)
 
@@ -242,12 +281,12 @@ Il-kontrolli tal-istqarrijiet dwar fornituri dejjem bla ħlas, entrati tal-katal
 
 ### Job: `i18n-ui-coverage`
 
-| Skritt                              | Jivvalida                                                                                                                                                                                                          | Imblukkar        |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
-| `check-ui-keys-coverage` (integrat) | Il-kopertura taċ-ċwievet i18n tal-UI hija ≥ 65%                                                                                                                                                                    | Iva              |
-| `check-ui-value-drift` (integrat)   | **Valur** bl-Ingliż miktub mill-ġdid ma jħalli warajh l-ebda traduzzjoni skaduta                                                                                                                                   | Iva              |
-| `check-new-key-coverage` (integrat) | Ċavetta **ġdida** bl-Ingliż tkun tradotta f’kull lokalizzazzjoni — markatur `__MISSING__:` jiġi rrifjutat                                                                                                          | Iva              |
-| `check-translation-ratio`           | Il-proporzjon ta’ traduzzjonijiet reali għal kull lokalizzazzjoni (identiċi għall-Ingliż / placeholder / nieqsa barra mil-lista permessa) ma jridx jaqbeż `config/quality/i18n-translation-baseline.json` + marġni | **Konsultattiv** |
+| Skritt                              | Jivvalida                                                                                                                                                                                                          | Imblukkar     |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| `check-ui-keys-coverage` (integrat) | Il-kopertura taċ-ċwievet i18n tal-UI hija ≥ 65%                                                                                                                                                                    | Iva           |
+| `check-ui-value-drift` (integrat)   | **Valur** bl-Ingliż miktub mill-ġdid ma jħalli warajh l-ebda traduzzjoni skaduta                                                                                                                                   | Iva           |
+| `check-new-key-coverage` (integrat) | Ċavetta **ġdida** bl-Ingliż tkun tradotta f’kull lokalizzazzjoni — markatur `__MISSING__:` jiġi rrifjutat                                                                                                          | Iva           |
+| `check-translation-ratio`           | Il-proporzjon ta’ traduzzjonijiet reali għal kull lokalizzazzjoni (identiċi għall-Ingliż / placeholder / nieqsa barra mil-lista permessa) ma jridx jaqbeż `config/quality/i18n-translation-baseline.json` + marġni | **Imblukkar** |
 
 Jeħtieġ `fetch-depth: 0` — il-kontroll tad-differenza fil-valuri jqabbel `en.json` mal-bażi tal-merge.
 
@@ -290,8 +329,19 @@ npm run i18n:check-value-drift:warn     # rapport biss
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Joħroġ b’0 u `SKIP reason=base-unresolved` meta l-katalgu bażi ma jkunx jista’ jinqara (clone baxx
-mingħajr ir-ref bażi), b’mod konsistenti ma’ `check-openapi-breaking`.
+Il-gates tad-drift tal-valuri u taċ-ċwievet ġodda jużaw l-istess paragun immutabbli minn
+`scripts/i18n/resolve-ui-diff-base.mjs`. Il-workflow jgħaddi l-istess SHAs tal-bażi, tat-tip tal-bażi u
+tal-kandidat liż-żewġ kontrolli. L-eżekuzzjonijiet ta’ PR/tibdil fil-mira tal-bażi, push u merge-group jużaw il-kuntest
+tal-avveniment tagħhom. Id-dispaċċ ta’ branch kandidat jirrikjedi l-PR miftuħ eżatt tiegħu jew l-input espliċitu
+`i18n_base_sha`. Id-dispaċċ jew l-osservazzjoni skedata ta’ `main` jew `release/vX.Y.Z`
+mingħajr dak l-input iqabblu l-aħħar commit mal-ewwel parent tiegħu; din mhix verifika tad-dejn kollu
+tat-traduzzjoni li ntiret. L-invokazzjoni lokali tirrikjedi bażi ta’ paragun espliċita,
+pereżempju l-kmand `BASE_REF` t’hawn fuq.
+
+Kuntest ta’ paragun nieqes jew ambigwu, katalogu meħtieġ li ma jistax jinqara jew li mhuwiex validu, u
+kandidat mibdul jipproduċu `INCOMPLETE` bil-kodiċi tal-ħruġ **2**, inkluż fil-modalità ta’ twissija.
+Il-qari tal-katalogi juża `scripts/i18n/read-ui-catalog.mjs`; il-fallimenti fil-qari ma jiġux sostitwiti
+b’oġġetti vojta. La bażi mhux disponibbli u lanqas input mhux komplut ma jistabbilixxu PASS.
 
 ### Job: `i18n`
 
@@ -313,7 +363,7 @@ Jitħaddem biss fuq pull requests.
 
 ### Job: `test-vitest`
 
-Jitħaddem wara `build`. Jimblokka l-merge jekk ifalli.
+Jeħtieġ il-job ta’ klassifikazzjoni `changes`. Ix-shards applikabbli tal-matriċi jimblukkaw il-merge jekk ifallu.
 
 | Sett             | Jivvalida                                                     | Jimblokka                                                                                                              |
 | ---------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -385,8 +435,9 @@ temporanju, ESLint/knip jitħaddmu hemmhekk u fuq HEAD, u l-għadd għal kull fa
 
 - **imblukkar** — il-PR żied ksur ċiklomatiċi/konjittivi jew exports mhux użati fil-fajls li biddel
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` fil-log);
-- **konsultattiv** — it-total globali mqabbel mal-linja bażi ffriżata. Devjazzjoni li tintiret qatt ma tagħmel
-  PR innoċenti aħmar; id-devjazzjoni terġa’ tiġi ffriżata waqt ir-rikonċiljazzjoni tar-rilaxx u tiġi mmonitorjata mill-job tal-ispazju ta’ manuvra.
+- **konsultattiv** — it-total globali mqabbel mal-linja bażi ffriżata. Devjazzjoni li tintiret qatt ma
+  tfalli PR innoċenti; id-devjazzjoni tiġi segwita biex tissewwa waqt ir-rikonċiljazzjoni tar-rilaxx u tiġi mmonitorjata mix-
+  xogħol tal-marġni disponibbli.
 
 `check:file-size` juża r-referenza bażi skont ir-regoli tiegħu stess (`scripts/check/check-file-size.mjs`, #8522):
 jiċċekkja kull fajl tas-sors u tat-testijiet fis-siġra, jaqra l-għadd ta’ linji ta’ kull wieħed fil-bażi tal-PR
@@ -591,7 +642,11 @@ b'lista ta' permessi li dejjem tikber jagħti sens falz ta' kwalità.
 
 1. Oħloq `scripts/check/check-<name>.mjs` (jew `.ts`). Il-gates tal-politika joħorġu b'0/1.
    Gates tat-tip ratchet joħorġu metrika lejn `quality-metrics.json` permezz ta' `collect-metrics.mjs`.
-2. Żid `"check:<name>": "node scripts/check/check-<name>.mjs"` ma' `package.json`.
+2. Żid `"check:<name>": "node scripts/check/check-<name>.mjs"` ma' `package.json`, u
+   ssinkronizza l-alias u l-kmand eżatt tiegħu f'`config/quality/gate-manifest.json`.
+   Applika l-istess sinkronizzazzjoni meta tibdel jew tneħħi alias ta' validazzjoni eżistenti.
+   Ħaddem `npm run check:gate-manifest`; il-hook ta' qabel il-commit u l-klassifikazzjoni tal-bidliet fis-CI
+   jinfurzaw dan il-kuntratt.
 3. Qabbdu f'`.github/workflows/ci.yml` taħt il-job xieraq
    (politika → `lint` jew `docs-sync-strict`; ratchet → `quality-gate`).
 4. Jekk ikollu lista ta' permessi, applika `reportStaleEntries()` minn

@@ -38,10 +38,18 @@ murach sin; ní mór dóthain acmhainne óstáilte a fhíorú roimh an rolladh a
 Sainaithnítear i ngach admháil JSON an SHA atá seiceáilte amach, rith an tsreafa oibre agus
 an iarracht. Diúltaíonn an CLI do neamhréir SHA idir an tseiceáil amach agus an teagmhas.
 Ceanglaíonn tástálacha sreafa oibre ballraíocht beartais le liosta `needs` jab an fhíoraisc
-ionas nach féidir le lána nua nó bainte imeacht gan rabhadh. Clúdaíonn na hadmhálacha a
-sreabhadh oibre féin, ní foilsiú, imscaradh ná oibriú inmheánach scanóra chomhairligh atá
-ann cheana. Is athrú riaracháin ar leith é an dá ainm seiceála a ghníomhachtú i rialacha
-brainse; ní chosnaíonn cur leis na jabanna seo brainse ann féin.
+ionas nach féidir le lána nua nó bainte imeacht gan rabhadh. Clúdaíonn na hadmhálacha a sreabhadh oibre féin, ní foilsiú, imscaradh, ná oibriú inmheánach
+scanóra comhairleach atá ann cheana. Is athrú riaracháin ar leith é na seiceálacha infheidhme a dhéanamh éigeantach i rialacha brainse;
+ní chosnaítear brainse trína gcuid jabanna a shainiú amháin.
+
+Is seiceáil neamhspleách sreafa oibre é `API Route Typecheck`, lasmuigh den dá fhíorasc chomhiomlána
+agus de phróifíl statach an bhreathnóra iomláin áitiúil. Scrúdaigh a thoradh ar leithligh don iarrthóir beacht.
+Ritheann `.github/workflows/api-route-typecheck.yml` ar PRanna isteach i `main` nó
+`release/**`, ar bhrúnna chuig ceachtar teaghlach brainse, agus trí thosú de láimh. Níl aon scagaire conairí aige.
+Iarrann athspriocdhíriú bhonn PR seiceáil nua; úsáideann athruithe ar an gcorp/teideal an t-ainm breathnóireachta amháin
+`Admission not requested / API Route Typecheck` agus ní féidir leo teacht in áit na seiceála iontrála.
+Ní dhearbhaíonn an sreabhadh oibre truicear grúpa cumaiscthe. Ní mór d’aon chur i bhfeidhm scuaine cumaiscthe a éilíonn
+an tseiceáil seo a feidhmiú don teagmhas sin a bhunú ar dtús.
 
 ### Fianaise choinnithe sa laghdaitheoir glactha
 
@@ -86,6 +94,21 @@ sardaí ar iarraidh, míchumtha nó neamh-chomhoiriúnach, teipeann ar an nglaca
 Coinníonn sardaí tástála ar theip orthu cumhdach diagnóiseach amh ar leithligh; ní
 féidir é a chur san áireamh sa chumasc deiridh.
 
+### Admhálacha ar dhul chun cinn fhorghníomhú na n-aonad
+
+Taifeadann an t-ordú comhroinnte `test:unit:ci:shard` na céimeanna `primary`, `dashboard` agus `serial`
+trí `scripts/ci/unit-progress-reporter.mjs`. Bíonn an gnáth-thuairisc tástála ar fáil i gcónaí.
+Taifeadann admháil ar leith, nach bhfuil inti ach meiteashonraí, tús agus críochnú gach comhaid,
+agus liostaíonn comhartha beatha gach 30 soicind na comhaid atá fós gníomhach agus an t-am atá caite acu. Ní thaifeadann sí
+ach meiteashonraí forghníomhaithe atá ar an liosta ceadaithe; ní dhéantar cur síos ar thástálacha, aschur, coirp earráide ná an
+timpeallacht iomlán a shrathú.
+
+Coinníonn CI agus Cáilíocht na comhaid JSONL mar `unit-progress-ci-<run>-<attempt>-<shard>` agus
+`unit-progress-quality-<run>-<attempt>-<shard>`. D’fhéadfadh teorainn ama poist cosc a chur ar an uaslódáil níos déanaí;
+fanann comharthaí beatha a astaíodh cheana mar fhianaise dhiagnóiseach. D’fhéadfadh sé freisin go léireodh
+comharthaí beatha atá ar iarraidh próiseas riteora atá blocáilte nó foirceanta. Caomhnaíonn na hadmhálacha seo an roghnú tástálacha,
+an chomhreomhaireacht, na sprioc-amanna agus an stádas scortha atá ann cheana; ní breithiúnais iad maidir le hiarrthóirí a ligean isteach.
+
 ### Fardal scanadh statach
 
 Tá an fardal leaganaithe d'ailiasanna npm agus ballraíocht an scanadh stataigh le fáil in
@@ -120,6 +143,14 @@ próis thíos, ní cruthúnas gur ritheadh geata i ndáiríre.
 
 Tá scripteanna faoi `scripts/check/` (geataí beartais) agus `scripts/quality/`
 (inneall raicéid). Is é `.github/workflows/ci.yml` foinse fhírinne CI.
+
+### Sláinte dhoiciméadú an bhoinn fhoilsithe
+
+Déanann `.github/workflows/i18n-base-health.yml` monatóireacht ar shláinte an doiciméadúcháin tar éis brúiteanna roghnaithe chuig `main` agus `release/v*`, agus ar sheoladh de láimh. Clúdaíonn a chuid scagairí an doiciméadúchán, Markdown sa fhréamh, `llm.txt`, staid/cumraíocht an aistriúcháin agus na huirlisí i18n ábhartha. Úsáideann an jab aonair `Published base documentation health` Ubuntu óstáilte agus sprioc-am cúig nóiméad. Déanann sé bailíochtú inléite amháin agus scríobhann sé admháil dhiagnóiseach gan spleáchais a shuiteáil, gan aistriúchán a dhéanamh ná staid a ghlacadh.
+
+Éilíonn `scripts/i18n/check-base-health.mjs` nach mbeidh aon neamhréireachtaí ann maidir le hais foinse, spriocanna ar iarraidh, hais sprice, aistriúcháin atá as dáta ná taisce rannán. Bailíochtaíonn sé freisin scóip reatha na gcroídhoiciméad/logchaighdeán agus a mbunáitíocht thaifeadta. Má bhíonn an comhthéacs neamhbhailí, an clúdach neamhiomlán nó an seiceálaí idirbhriste, gintear `INCOMPLETE`; má dheimhnítear imeacht, gintear `FAIL`. Filleann an dá cheann stádas scortha a léiríonn teip. Ceanglaítear an admháil le SHA an tseiceáil amach, leis an sreabhadh oibre, leis an rith agus leis an iarracht, agus coinnítear í mar `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Is breathnóireacht neamhspleách í seo ar an mbonn foilsithe. Ní chuireann sí teagmhas PR ná grúpa cumaisc, seiceáil riachtanach PR, ailias npm ná ball próifíle scanadh statach leis. Fanann an beartas difreálach PR atá ann cheana agus aicmithe comhairleacha an tseiceálaí bhunúsaigh ar leithligh. Ní féidir le huaslódáil rathúil toradh sláinte ar theip air a athrú go PASS.
 
 ### Mearchonair PR eisiúna (`quality.yml`)
 
@@ -253,12 +284,12 @@ Faigheann `free-tier-budget.svg` a chuid figiúirí ó lódálaí na catalóige 
 
 ### Jab: `i18n-ui-coverage`
 
-| Script                            | Bailíochtú                                                                                                                                                                                                                                       | Blocála          |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
-| `check-ui-keys-coverage` (inlíne) | Tá clúdach eochracha i18n an chomhéadain úsáideora ≥ 65%                                                                                                                                                                                         | Tá               |
-| `check-ui-value-drift` (inlíne)   | Ní fhágann **luach** Béarla athscríofa aon aistriúchán as dáta ina dhiaidh                                                                                                                                                                       | Tá               |
-| `check-new-key-coverage` (inlíne) | Aistrítear eochair **nua** Bhéarla i ngach logchaighdeán — diúltaítear do mharcóir `__MISSING__:`                                                                                                                                                | Tá               |
-| `check-translation-ratio`         | Ní mór nach sáróidh cóimheas na bhfíoraistriúchán de réir logchaighdeáin (iontrálacha atá comhionann leis an mBéarla / ionadchoinneálaí / ar iarraidh lasmuigh den liosta ceadaithe) `config/quality/i18n-translation-baseline.json` + lamháltas | **Comhairleach** |
+| Script                            | Bailíochtú                                                                                                                                                                                                                                       | Blocála         |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| `check-ui-keys-coverage` (inlíne) | Tá clúdach eochracha i18n an chomhéadain úsáideora ≥ 65%                                                                                                                                                                                         | Tá              |
+| `check-ui-value-drift` (inlíne)   | Ní fhágann **luach** Béarla athscríofa aon aistriúchán as dáta ina dhiaidh                                                                                                                                                                       | Tá              |
+| `check-new-key-coverage` (inlíne) | Aistrítear eochair **nua** Bhéarla i ngach logchaighdeán — diúltaítear do mharcóir `__MISSING__:`                                                                                                                                                | Tá              |
+| `check-translation-ratio`         | Ní mór nach sáróidh cóimheas na bhfíoraistriúchán de réir logchaighdeáin (iontrálacha atá comhionann leis an mBéarla / ionadchoinneálaí / ar iarraidh lasmuigh den liosta ceadaithe) `config/quality/i18n-translation-baseline.json` + lamháltas | **Coisctheach** |
 
 Teastaíonn `fetch-depth: 0` — déanann an geata um athrú luacha diff ar `en.json` i gcoinne an bhoinn chumaisc.
 
@@ -301,8 +332,19 @@ npm run i18n:check-value-drift:warn     # tuairisc amháin
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Scoireann sé le 0 agus `SKIP reason=base-unresolved` nuair nach féidir an bunchatalóg a léamh (clón éadomhain
-gan an tagairt bhoinn), ar aon dul le `check-openapi-breaking`.
+Comhroinneann na geataí um athrú luacha agus um eochracha nua aon chomparáid dhoshóinseáilte amháin ó
+`scripts/i18n/resolve-ui-diff-base.mjs`. Cuireann an sreabhadh oibre na SHAanna bonn, barr an bhoinn agus
+iarrthóra céanna ar aghaidh chuig an dá sheiceáil. Úsáideann riteanna PR/athspriocdhírithe boinn, brúite agus
+grúpa cumaisc comhthéacs a dteagmhais. Chun brainse iarrthóra a sheoladh, teastaíonn a PR oscailte beacht nó
+an t-ionchur sainráite `i18n_base_sha`. Nuair a sheoltar breathnóireacht nó nuair a dhéantar breathnóireacht sceidealaithe ar `main` nó `release/vX.Y.Z`
+gan an t-ionchur sin, cuirtear an gealltanas deireanach i gcomparáid lena chéad tuismitheoir; ní iniúchadh é seo ar
+an bhfiach aistriúcháin oidhreachtúil ar fad. Teastaíonn bonn comparáide sainráite le haghaidh agairt áitiúil,
+mar shampla an t-ordú `BASE_REF` thuas.
+
+Má bhíonn comhthéacs na comparáide in easnamh nó débhríoch, má bhíonn catalóg riachtanach neamh-inléite nó neamhbhailí, nó
+má bhíonn iarrthóir athraithe, tugtar `INCOMPLETE` le cód scoir **2**, lena n-áirítear sa mhód rabhaidh.
+Úsáideann léamha catalóige `scripts/i18n/read-ui-catalog.mjs`; ní chuirtear oibiachtaí folmha in ionad
+teipeanna léite. Ní dhearbhaíonn bonn nach bhfuil ar fáil ná ionchur neamhiomlán PASS.
 
 ### Jab: `i18n`
 
@@ -324,7 +366,7 @@ Ní ritheann sé ach ar iarratais tarraingthe.
 
 ### Jab: `test-vitest`
 
-Ritheann sé tar éis `build`. Cuireann teip cosc ar chumasc.
+Teastaíonn an jab aicmithe `changes` uaidh. Cuireann blúirí infheidhme na maitríse bac ar chumasc má theipeann orthu.
 
 | Sraith           | Bailíochtú                                                      | Blocáil                                                                                                                                |
 | ---------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -397,8 +439,9 @@ athraigh an PR iad** (`scripts/check/newCodeMode.mjs`: cuirtear an merge-base i 
 
 - **blocála** — chuir an PR sáruithe cioglamatacha/cognaíocha nó easpórtálacha marbha le comhaid a d’athraigh sé
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` sa loga);
-- **comhairleach** — an t-iomlán domhanda i gcomparáid leis an mbonnlíne sheasta. Ní chuireann imeacht oidhreachtúil
-  PR neamhchiontach ar dearg choíche; athshocraítear an t-imeacht mar luach seasta le linn réitigh eisiúna agus déanann an jab spáis bhreise monatóireacht air.
+- **comhairleach** — an t-iomlán domhanda i gcomparáid leis an mbonnlíne reoite. Ní chuireann
+  diallas oidhreachtúil PR neamhchiontach ar dearg riamh; déantar an diallas a rianú lena dheisiú le linn réiteach an eisiúna agus déanann an
+  jab spáis chinn monatóireacht air.
 
 Úsáideann `check:file-size` an tagairt bhunaidh de réir a rialacha féin (`scripts/check/check-file-size.mjs`, #8522):
 seiceálann sé gach comhad foinse agus tástála sa chrann, léann sé líon línte gach comhaid ag bonn an PR
@@ -603,7 +646,11 @@ agus liosta ceadaithe atá ag dul i méid tuiscint bhréagach ar cháilíocht.
 
 1. Cruthaigh `scripts/check/check-<name>.mjs` (nó `.ts`). Fágann geataí beartais le cód 0/1.
    Aschuireann geataí ar nós raicín méadracht chuig `quality-metrics.json` trí `collect-metrics.mjs`.
-2. Cuir `"check:<name>": "node scripts/check/check-<name>.mjs"` le `package.json`.
+2. Cuir `"check:<name>": "node scripts/check/check-<name>.mjs"` le `package.json`, agus
+   sioncronaigh an t-ailias agus a ordú beacht in `config/quality/gate-manifest.json`.
+   Déan an sioncrónú céanna agus ailias bailíochtaithe atá ann cheana á athrú nó á bhaint.
+   Rith `npm run check:gate-manifest`; cuireann an crúca réamh-thiomanta agus aicmiú athruithe CI
+   an conradh seo i bhfeidhm.
 3. Ceangail é in `.github/workflows/ci.yml` faoin jab cuí
    (beartas → `lint` nó `docs-sync-strict`; raicín → `quality-gate`).
 4. Má tá liosta ceadaithe aige, cuir `reportStaleEntries()` ó

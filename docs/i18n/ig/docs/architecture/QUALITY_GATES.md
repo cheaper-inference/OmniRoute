@@ -38,9 +38,9 @@ tupu rollout.
 Receipt JSON ọ bụla na-akọwa SHA e mere checkout, workflow run na attempt.
 CLI na-ajụ ma checkout/event SHA adabaghị. Nnwale workflow na-ejikọta ndị so na policy
 na ndepụta `needs` nke ọrụ verdict ka lane ọhụrụ ma ọ bụ nke ewepụrụ ghara ịla n'iyi
-na nzuzo. Receipt ndị ahụ na-ekpuchi workflow nke ha, ọ bụghị mbipụta, deployment, ma ọ bụ
-ihe dị n'ime advisory scanner dị adị. Ime ka aha check abụọ ahụ rụọ ọrụ n'ime branch rules
-bụ mgbanwe nchịkwa dị iche; ịgbakwunye ọrụ ndị a n'onwe ya anaghị echebe alaka.
+na nzuzo. Akwụkwọ nnata ndị ahụ na-ekpuchi usoro ọrụ nke ha, ọ bụghị mbipụta, mbugharị, ma ọ bụ usoro ime nke nyocha advisory dị adị. Ime ka nyocha ndị metụtara ya bụrụ ihe a chọrọ n’iwu branch bụ mgbanwe nchịkwa dị iche; ịkọwa jobs ha anaghị echebe branch n’onwe ya.
+
+`API Route Typecheck` bụ nyocha workflow kwụụrụ onwe ya, nke dị n’èzí ma mkpebi nchịkọta abụọ ahụ ma profaịlụ static nke local full observer. Nyochaa nsonaazụ ya iche maka candidate ahụ kpọmkwem. `.github/workflows/api-route-typecheck.yml` na-agba ọsọ na PR ndị na-abanye na `main` ma ọ bụ `release/**`, na push gaa n’ezinụlọ branch nke ọ bụla n’ime ha, yana manual dispatch. O nweghị path filter. Mgbanwe ebe PR base na-atụ aka na-arịọ nyocha ọhụrụ; ndezi body/title na-eji aha observation-only `Admission not requested / API Route Typecheck` ma enweghị ike dochie admission check. Workflow ahụ ekwupụtaghị merge-group trigger. Mgbasawanye merge-queue ọ bụla chọrọ nyocha a ga-ebu ụzọ hụ na e guzobere mmezu ya maka event ahụ.
 
 ### Ihe akaebe echekwara n'ime acceptance reducer
 
@@ -81,6 +81,21 @@ pre-merging nke shard n'otu n'otu adịghị nchebe maka function/block coverage
 Shard na-efu efu, nke ọdịdị ya ezighị ezi ma ọ bụ nke na-adabaghị na-eme ka nnabata daa.
 Test shard dara ada na-edobe raw diagnostic coverage iche; ọ pụghị ịbanye na merge ikpeazụ.
 
+### Ndekọ nnata nke ọganihu mmezu unit
+
+Iwu `test:unit:ci:shard` a na-ekekọrịta na-edekọ usoro `primary`, `dashboard` na `serial`
+site na `scripts/ci/unit-progress-reporter.mjs`. Akụkọ ule nkịtị ka dị
+n'ọrụ. Ndekọ nnata dị iche nke nwere naanị metadata na-edekọ mmalite na mmecha faịlụ ọ bụla,
+ebe mgbama obi nke sekọnd 30 na-edepụta faịlụ ndị ka na-arụ ọrụ na oge ha jirila. Ọ na-edekọ
+naanị metadata mmezu dị na ndepụta nkwenye; anaghị echekwa nkọwa ule, mmepụta, ọdịnaya njehie na
+gburugburụ gburugburu dị ka data ahaziri ahazi.
+
+CI na Quality na-edobe faịlụ JSONL dịka `unit-progress-ci-<run>-<attempt>-<shard>` na
+`unit-progress-quality-<run>-<attempt>-<shard>`. Oge ngwụcha job nwere ike igbochi mbulite ga-eme emechaa;
+mgbama obi ndị e zipụlarị ka bụ ihe akaebe maka nchọpụta nsogbu. Enweghị mgbama obi nwekwara ike igosi
+usoro runner egbochiri ma ọ bụ kwụsịrị. Ndekọ nnata ndị a na-echekwa nhọrọ ule,
+concurrency, oge ngwụcha na exit status ndị dị ugbu a; ha abụghị mkpebi nnabata candidate.
+
 ### Ndepụta static scan
 
 Ndepụta npm-alias nwere ụdị e depụtara na ndị so na static-scan dị na
@@ -111,6 +126,27 @@ n'okpuru bụ ntụaka, ọ bụghị ihe akaebe na gate mere n'ezie.
 
 Script dị n'okpuru `scripts/check/` (policy gate) na `scripts/quality/` (ratchet engine).
 Isi iyi eziokwu nke CI bụ `.github/workflows/ci.yml`.
+
+### Ọnọdụ ahụike dọkụmentị ntọala e bipụtara
+
+`.github/workflows/i18n-base-health.yml` na-enyocha ọnọdụ ahụike dọkụmentị mgbe e zipụrụ mgbanwe ndị ahọpụtara
+na `main` na `release/v*`, nakwa mgbe e ji aka kpalite ya. Ihe nzacha ya na-ekpuchi dọkụmentị,
+Markdown dị na mgbọrọgwụ, `llm.txt`, ọnọdụ/nhazi ntụgharị na ngwa i18n ndị metụtara ya.
+Ọrụ naanị ya, `Published base documentation health`, na-eji Ubuntu a kwadoro n'eluigwe ojii ma nwee
+oke oge nkeji ise. Ọ na-eme nkwado naanị ọgụgụ ma na-edepụta nnata nchọpụta na-enweghị
+ịwụnye ndabere, ịtụgharị asụsụ ma ọ bụ ịnabata ọnọdụ.
+
+`scripts/i18n/check-base-health.mjs` chọrọ ka ọnụọgụ nke ihe ndị na-ekwekọghị ekwekọ gbasara source-hash, missing-target, target-hash,
+stale-translation na section-cache bụrụ efu. Ọ na-enyochakwa oke dọkụmentị/locale isi dị ugbu a
+na ebe e dekọrọ na o si pụta. Ọnọdụ na-ezighi ezi, mkpuchi na-ezughị ezu
+ma ọ bụ onye nyocha a kwụsịrị n'etiti ọrụ na-emepụta `INCOMPLETE`; ngbanwe e gosipụtara na-emepụta `FAIL`. Ha abụọ
+na-eweghachi ọnọdụ ọpụpụ na-egosi ọdịda. A na-ejikọta nnata ahụ na SHA nke checkout, workflow, run na
+attempt, ma na-echekwa ya dịka `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Nke a bụ nlele nọọrọ onwe ya nke ntọala e bipụtara. Ọ naghị agbakwunye event PR ma ọ bụ
+merge-group, nyocha PR a chọrọ, alias npm ma ọ bụ onye otu profaịlụ static-scan.
+Iwu PR dị iche iche dị ugbu a na nhazi ndụmọdụ nke onye nyocha dị n'okpuru
+ka dị iche iche. Nbugo gara nke ọma enweghị ike ịgbanwe nsonaazụ ahụike dara ada ka ọ bụrụ PASS.
 
 ### Ụzọ-ngwa-ngwa Release PR (`quality.yml`)
 
@@ -245,12 +281,12 @@ Nlele nkwupụta gbasara ndị na-enye ọrụ n'efu ruo mgbe ebighị ebi, ndek
 
 ### Ọrụ: `i18n-ui-coverage`
 
-| Skript                                 | Ihe ọ na-enyocha                                                                                                                                                                                          | Na-egbochi  |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `check-ui-keys-coverage` (n'ime ahịrị) | Mkpuchi igodo i18n nke UI bụ ≥ 65%                                                                                                                                                                        | Ee          |
-| `check-ui-value-drift` (n'ime ahịrị)   | **Uru** Bekee e degharịrị anaghị ahapụ ntụgharị asụsụ ochie ọ bụla                                                                                                                                        | Ee          |
-| `check-new-key-coverage` (n'ime ahịrị) | A tụgharịala igodo Bekee **ọhụrụ** n'ime locale ọ bụla — a na-ajụ akara `__MISSING__:`                                                                                                                    | Ee          |
-| `check-translation-ratio`              | Oke ntụgharị asụsụ n'ezie n'otu locale (ndepụta ndị yiri Bekee / placeholder / ndị na-efu efu nke na-anọghị na allowlist) agaghị agafe `config/quality/i18n-translation-baseline.json` + ohere mgbakwunye | **Ndụmọdụ** |
+| Skript                                 | Ihe ọ na-enyocha                                                                                                                                                                                          | Na-egbochi     |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `check-ui-keys-coverage` (n'ime ahịrị) | Mkpuchi igodo i18n nke UI bụ ≥ 65%                                                                                                                                                                        | Ee             |
+| `check-ui-value-drift` (n'ime ahịrị)   | **Uru** Bekee e degharịrị anaghị ahapụ ntụgharị asụsụ ochie ọ bụla                                                                                                                                        | Ee             |
+| `check-new-key-coverage` (n'ime ahịrị) | A tụgharịala igodo Bekee **ọhụrụ** n'ime locale ọ bụla — a na-ajụ akara `__MISSING__:`                                                                                                                    | Ee             |
+| `check-translation-ratio`              | Oke ntụgharị asụsụ n'ezie n'otu locale (ndepụta ndị yiri Bekee / placeholder / ndị na-efu efu nke na-anọghị na allowlist) agaghị agafe `config/quality/i18n-translation-baseline.json` + ohere mgbakwunye | **Na-egbochi** |
 
 Ọ chọrọ `fetch-depth: 0` — mgbochi value-drift na-atụnyere ọdịiche `en.json` megide merge base.
 
@@ -293,8 +329,20 @@ npm run i18n:check-value-drift:warn     # naanị nye akụkọ
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Ọ na-eji 0 apụ na `SKIP reason=base-unresolved` mgbe enweghị ike ịgụ katalọgụ base (shallow
-clone na-enweghị base ref), dịka `check-openapi-breaking`.
+Ọnụ ụzọ nyocha ngbanwe-uru na igodo-ọhụrụ na-eji otu ntụnyere anaghị agbanwe agbanwe sitere na
+`scripts/i18n/resolve-ui-diff-base.mjs`. Usoro ọrụ ahụ na-enyefe otu SHA ntọala, ọnụ-ntọala na
+onye a na-atụle nye nyocha abụọ ahụ. Mmegharị PR/ntọala, push na merge-group na-eji ọnọdụ
+mmemme ha. Izipụ alaka onye a na-atụle chọrọ kpọmkwem PR ya mepere emepe ma ọ bụ ntinye
+`i18n_base_sha` e nyere n'ụzọ doro anya. Izipụ ma ọ bụ nlele ahaziri nke `main` ma ọ bụ `release/vX.Y.Z`
+na-enweghị ntinye ahụ na-atụnyere commit ikpeazụ na nne na nna mbụ ya; ọ bụghị nyocha
+ụgwọ ntụgharị asụsụ niile e ketara. Ịkpọ ya na kọmputa mpaghara chọrọ ntọala ntụnyere e nyere
+n'ụzọ doro anya, dịka ọmụmaatụ iwu `BASE_REF` dị n'elu.
+
+Ọnọdụ ntụnyere na-efu ma ọ bụ na-edoghị anya, katalọgụ achọrọ nke a na-apụghị ịgụ ma ọ bụ nke
+na-abụghị eziokwu, na onye a na-atụle nke gbanwere na-ebute `INCOMPLETE` yana koodu ọpụpụ **2**,
+gụnyere mgbe ọ nọ n'ọnọdụ ịdọ aka ná ntị. A na-eji `scripts/i18n/read-ui-catalog.mjs` agụ
+katalọgụ; anaghị eji objekịtị efu dochie ọdịda ọgụgụ. Ma ntọala na-adịghị adị ma ọ bụ ntinye
+ezughị ezu anaghị egosi PASS.
 
 ### Job: `i18n`
 
@@ -316,7 +364,7 @@ Matriks nyocha i18n zuru ezu (otu job maka locale ọ bụla). Job ahụ dum b�
 
 ### Job: `test-vitest`
 
-Ọ na-agba mgbe `build` gachara. Ọ na-egbochi merge ma ọ bụrụ na ọ daa.
+Ọ chọrọ ọrụ nhazi ọkwa `changes`. Iberibe matriks ndị metụtara ya na-egbochi njikọta ma ọ bụrụ na ha ada.
 
 | Nchịkọta ule     | Ihe ọ na-enyocha                                                   | Ihe na-egbochi                                                                                                       |
 | ---------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
@@ -391,9 +439,9 @@ kwa faịlụ):
 
 - **na-egbochi** — PR tinyere mmebi cyclomatic/cognitive ma ọ bụ dead exports na faịlụ ndị ọ gbanwere
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` n'ime log);
-- **ndụmọdụ** — ngụkọta zuru ụwa ọnụ ma e jiri ya tụnyere baseline e kpụkọrọ. Drift e ketara anaghị
-  eme ka PR na-enweghị mmejọ daa; a na-akpụkọ drift ahụ ọzọ n'oge mmezi release, ọrụ headroom
-  na-enyochakwa ya.
+- **ndụmọdụ** — mkpokọta zuru ụwa ọnụ ma e jiri ya tụnyere ntọala a kpọchiri akpọchi. Mgbanwe e ketara anaghị eme ka
+  PR na-enweghị ihe o mere nwee akara uhie; a na-edekọ mgbanwe ahụ maka mmezi n'oge nhazi ntọhapụ ma ọrụ
+  ohere fọdụrụ na-enyocha ya.
 
 `check:file-size` na-eji base ref dịka iwu nke ya si dị (`scripts/check/check-file-size.mjs`, #8522):
 ọ na-enyocha faịlụ source na test ọ bụla dị n'osisi ahụ, na-eji `git show` gụọ ọnụ ọgụgụ ahịrị nke
@@ -601,7 +649,11 @@ allowlist na-aga n’ihu na-eto na-enye echiche ụgha banyere ịdịmma.
 
 1. Mepụta `scripts/check/check-<name>.mjs` (ma ọ bụ `.ts`). Ọnụ ụzọ nyocha iwu na-apụ na 0/1.
    Ọnụ ụzọ nyocha ụdị ratchet na-ewepụta metrik gaa na `quality-metrics.json` site na `collect-metrics.mjs`.
-2. Gbakwunye `"check:<name>": "node scripts/check/check-<name>.mjs"` na `package.json`.
+2. Tinye `"check:<name>": "node scripts/check/check-<name>.mjs"` na `package.json`, ma
+   mekọrịta aha nnọchi ahụ na iwu ya kpọmkwem n'ime `config/quality/gate-manifest.json`.
+   Mee otu mmekọrịta ahụ mgbe ị na-agbanwe ma ọ bụ na-ewepụ aha nnọchi nkwado dị adị.
+   Gbaa `npm run check:gate-manifest`; nko pre-commit na nhazi mgbanwe CI
+   na-amanye nkwekọrịta a.
 3. Jikọọ ya na `.github/workflows/ci.yml` n’okpuru ọrụ kwesịrị ekwesị
    (iwu → `lint` ma ọ bụ `docs-sync-strict`; ratchet → `quality-gate`).
 4. Ọ bụrụ na o nwere ndepụta ikike, tinye `reportStaleEntries()` sitere na

@@ -36,9 +36,20 @@ runnery; před zavedením musí být ověřena dostatečná hostovaná kapacita.
 Každé potvrzení JSON identifikuje checkoutnutý SHA, běh workflow a pokus.
 CLI odmítne neshodu mezi SHA checkoutu a události. Testy workflow vážou členství v zásadách
 na seznam `needs` úlohy s verdiktem, takže nová nebo odebraná větev nemůže nepozorovaně zmizet.
-Potvrzení pokrývají vlastní workflow, nikoli publikování, nasazení ani vnitřní fungování
-existujícího doporučeného skeneru. Aktivace obou názvů kontrol v pravidlech větví je
-samostatná administrativní změna; přidání těchto úloh samo o sobě větev nechrání.
+Potvrzení pokrývají vlastní pracovní postup, nikoli publikování, nasazení ani interní
+fungování existujícího poradního skeneru. Nastavení příslušných kontrol
+jako povinných v pravidlech větví je samostatná administrativní změna; samotná definice
+jejich úloh větev nechrání.
+
+`API Route Typecheck` je nezávislá kontrola pracovního postupu, která stojí mimo obě
+souhrnná rozhodnutí i statický profil místního úplného pozorovatele. Její výsledek pro
+konkrétního kandidáta zkontrolujte samostatně. `.github/workflows/api-route-typecheck.yml`
+se spouští pro PR směřující do `main` nebo `release/**`, při odeslání změn do kterékoli
+z těchto skupin větví a při ručním spuštění. Nemá žádný filtr cest. Změna cílové větve
+PR vyžádá novou kontrolu; úpravy těla nebo názvu používají název určený pouze pro
+pozorování `Admission not requested / API Route Typecheck` a nemohou nahradit kontrolu
+přijetí. Pracovní postup nedeklaruje trigger pro skupinu sloučení. Každé zavedení fronty
+sloučení, které tuto kontrolu vyžaduje, musí nejprve zajistit její spuštění pro danou událost.
 
 ### Uchované důkazy v reduktoru přijetí
 
@@ -77,6 +88,22 @@ prahové hodnoty pokrytí. Vstupy zachovávají globální pořadí názvů soub
 pro smíšené pokrytí funkcí/bloků. Chybějící, poškozené nebo nekompatibilní shardy způsobí selhání přijetí.
 Shardy s neúspěšnými testy uchovávají nezpracované diagnostické pokrytí samostatně; nemůže být zahrnuto do závěrečného sloučení.
 
+### Záznamy o průběhu spouštění jednotkových testů
+
+Sdílený příkaz `test:unit:ci:shard` zaznamenává fáze `primary`, `dashboard` a `serial`
+prostřednictvím `scripts/ci/unit-progress-reporter.mjs`. Běžný protokol testů zůstává
+k dispozici. Samostatný záznam obsahující pouze metadata zaznamenává zahájení a dokončení
+každého souboru a 30sekundový prezenční signál uvádí soubory, které jsou stále aktivní,
+a dobu jejich běhu. Zaznamenává pouze metadata spuštění uvedená na seznamu povolených položek;
+popisy testů, výstup, těla chyb ani celé prostředí se neserializují.
+
+CI a Quality uchovávají soubory JSONL jako `unit-progress-ci-<run>-<attempt>-<shard>` a
+`unit-progress-quality-<run>-<attempt>-<shard>`. Vypršení časového limitu úlohy může zabránit
+pozdějšímu nahrání; již odeslané prezenční signály zůstávají diagnostickým důkazem. Chybějící
+prezenční signály mohou také znamenat zablokovaný nebo ukončený proces runneru. Tyto záznamy
+zachovávají stávající výběr testů, souběžnost, časové limity a návratový stav; nepředstavují
+rozhodnutí o přijetí kandidáta.
+
 ### Inventář statických kontrol
 
 Verzovaný inventář aliasů npm a členství ve statických kontrolách jsou uloženy v
@@ -107,6 +134,28 @@ je referenční a není důkazem, že brána byla skutečně spuštěna.
 
 Skripty se nacházejí v `scripts/check/` (brány zásad) a `scripts/quality/` (ratchet engine).
 Zdrojem pravdy pro CI je `.github/workflows/ci.yml`.
+
+### Stav dokumentace publikovaného základu
+
+`.github/workflows/i18n-base-health.yml` sleduje stav dokumentace po vybraných
+pushích do `main` a `release/v*` a při ručním spuštění. Jeho filtry zahrnují dokumentaci,
+kořenové soubory Markdown, `llm.txt`, stav a konfiguraci překladů a příslušné nástroje i18n.
+Jediná úloha `Published base documentation health` používá hostované Ubuntu a časový
+limit pěti minut. Provádí ověření pouze pro čtení a zapisuje diagnostické potvrzení bez
+instalace závislostí, překladu nebo převzetí stavu.
+
+`scripts/i18n/check-base-health.mjs` vyžaduje nulový počet nekonzistencí zdrojových hashů,
+chybějících cílů, cílových hashů, zastaralých překladů a mezipaměti sekcí. Ověřuje také
+aktuální rozsah základních dokumentů a národních prostředí a zaznamenaný původ tohoto
+rozsahu. Neplatný kontext, neúplné pokrytí nebo přerušená kontrola vytvoří `INCOMPLETE`;
+potvrzená odchylka vytvoří `FAIL`. Oba výsledky vrátí stav ukončení označující selhání.
+Potvrzení je svázáno s SHA revize checkoutu, pracovním postupem, během a pokusem a je
+uchováváno jako `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Jde o nezávislé sledování publikovaného základu. Nepřidává událost PR ani skupiny
+sloučení, povinnou kontrolu PR, alias npm ani člena profilu statické kontroly.
+Stávající rozdílové zásady pro PR a základní poradní klasifikace kontrolního nástroje
+zůstávají oddělené. Úspěšné nahrání nemůže změnit neúspěšný výsledek kontroly stavu na `PASS`.
 
 ### Zrychlený postup pro PR vydání (`quality.yml`)
 
@@ -241,12 +290,12 @@ Kontroly tvrzení o trvale bezplatných poskytovatelích, položkách katalogu, 
 
 ### Úloha: `i18n-ui-coverage`
 
-| Skript                            | Ověřuje                                                                                                                                                                                                     | Blokující        |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| `check-ui-keys-coverage` (inline) | Pokrytí klíčů i18n uživatelského rozhraní je ≥ 65 %                                                                                                                                                         | Ano              |
-| `check-ui-value-drift` (inline)   | Přepsaná anglická **hodnota** nezanechá žádný zastaralý překlad                                                                                                                                             | Ano              |
-| `check-new-key-coverage` (inline) | **Nový** anglický klíč je přeložen ve všech lokalizacích — značka `__MISSING__:` je odmítnuta                                                                                                               | Ano              |
-| `check-translation-ratio`         | Podíl skutečných překladů v jednotlivých lokalizacích (položky shodné s angličtinou / zástupné / chybějící mimo seznam výjimek) nesmí překročit `config/quality/i18n-translation-baseline.json` + toleranci | **Informativní** |
+| Skript                            | Ověřuje                                                                                                                                                                                                     | Blokující     |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `check-ui-keys-coverage` (inline) | Pokrytí klíčů i18n uživatelského rozhraní je ≥ 65 %                                                                                                                                                         | Ano           |
+| `check-ui-value-drift` (inline)   | Přepsaná anglická **hodnota** nezanechá žádný zastaralý překlad                                                                                                                                             | Ano           |
+| `check-new-key-coverage` (inline) | **Nový** anglický klíč je přeložen ve všech lokalizacích — značka `__MISSING__:` je odmítnuta                                                                                                               | Ano           |
+| `check-translation-ratio`         | Podíl skutečných překladů v jednotlivých lokalizacích (položky shodné s angličtinou / zástupné / chybějící mimo seznam výjimek) nesmí překročit `config/quality/i18n-translation-baseline.json` + toleranci | **Blokující** |
 
 Vyžaduje `fetch-depth: 0` — kontrola změn hodnot porovnává `en.json` se společným předkem.
 
@@ -289,8 +338,19 @@ npm run i18n:check-value-drift:warn     # pouze hlášení
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Skončí s kódem 0 a zprávou `SKIP reason=base-unresolved`, pokud nelze načíst základní katalog (mělký
-klon bez základní reference), obdobně jako `check-openapi-breaking`.
+Brány pro posun hodnot a nové klíče sdílejí jedno neměnné porovnání ze
+`scripts/i18n/resolve-ui-diff-base.mjs`. Workflow předává oběma kontrolám stejné SHA základu, špičky základu a
+kandidáta. Spuštění pro PR / změnu cílové větve základu, push a skupinu sloučení používají kontext příslušné
+události. Ruční spuštění pro kandidátní větev vyžaduje její přesně odpovídající otevřený PR nebo explicitní
+vstup `i18n_base_sha`. Ruční nebo naplánované pozorování větve `main` či `release/vX.Y.Z`
+bez tohoto vstupu porovnává poslední commit s jeho prvním rodičem; nejde o audit
+veškerého zděděného dluhu v překladech. Místní spuštění vyžaduje explicitní základ porovnání,
+například výše uvedený příkaz `BASE_REF`.
+
+Chybějící nebo nejednoznačný kontext porovnání, nečitelný či neplatný požadovaný katalog a
+změněný kandidát vedou ke stavu `INCOMPLETE` s návratovým kódem **2**, a to i ve varovném režimu.
+Katalogy se načítají pomocí `scripts/i18n/read-ui-catalog.mjs`; chyby při čtení nejsou nahrazovány
+prázdnými objekty. Nedostupný základ ani neúplný vstup neznamenají stav PASS.
 
 ### Úloha: `i18n`
 
@@ -312,7 +372,7 @@ Spouští se pouze u pull requestů.
 
 ### Úloha: `test-vitest`
 
-Spouští se po `build`. Při selhání blokuje sloučení.
+Vyžaduje úlohu klasifikace `changes`. Příslušné části matice při selhání zablokují sloučení.
 
 | Sada             | Ověřuje                                                  | Blokující                                                                                                                   |
 | ---------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -384,8 +444,9 @@ Při událostech `pull_request` předává `quality.yml` parametr `--base-ref <P
 
 - **blokující** — PR přidal porušení cyklomatické/kognitivní složitosti nebo nepoužívané exporty v souborech, které změnil
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` v protokolu);
-- **doporučující** — globální součet oproti zmrazenému výchozímu stavu. Zděděný posun nikdy nezpůsobí
-  selhání nevinného PR; posun se při sladění vydání znovu zmrazí a sleduje jej úloha pro kontrolu rezervy.
+- **poradní** — globální součet oproti zmrazené výchozí hodnotě. Zděděná odchylka nikdy neoznačí
+  nevinný PR červeně; odchylka se sleduje kvůli nápravě při sesouhlasení vydání a monitoruje ji
+  úloha pro kontrolu rezervy.
 
 `check:file-size` používá základní referenci podle vlastních pravidel (`scripts/check/check-file-size.mjs`, #8522):
 kontroluje každý zdrojový a testovací soubor ve stromu, pomocí `git show` načte počet jeho řádků v základu PR
@@ -590,7 +651,11 @@ seznamem povolených výjimek vytváří falešný pocit kvality.
 
 1. Vytvořte `scripts/check/check-<name>.mjs` (nebo `.ts`). Kontroly zásad končí s kódem 0/1.
    Západkové kontroly zapisují metriku do `quality-metrics.json` prostřednictvím `collect-metrics.mjs`.
-2. Přidejte `"check:<name>": "node scripts/check/check-<name>.mjs"` do `package.json`.
+2. Přidejte `"check:<name>": "node scripts/check/check-<name>.mjs"` do souboru `package.json` a
+   synchronizujte alias a jeho přesný příkaz v souboru `config/quality/gate-manifest.json`.
+   Stejnou synchronizaci proveďte při změně nebo odebrání existujícího validačního aliasu.
+   Spusťte `npm run check:gate-manifest`; hook před commitem a klasifikace změn v CI
+   vynucují dodržování této smlouvy.
 3. Zapojte ji v `.github/workflows/ci.yml` do příslušné úlohy
    (zásady → `lint` nebo `docs-sync-strict`; západka → `quality-gate`).
 4. Pokud používá seznam povolených výjimek, aplikujte `reportStaleEntries()` z

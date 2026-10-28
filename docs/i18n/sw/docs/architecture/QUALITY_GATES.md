@@ -36,9 +36,18 @@ zinazohostiwa binafsi; uwezo wa kutosha wa hosted lazima uthibitishwe kabla ya u
 Kila risiti ya JSON hutambua SHA iliyochukuliwa, utekelezaji wa mtiririko wa kazi na jaribio.
 CLI hukataa kutolingana kwa SHA ya checkout/event. Majaribio ya mtiririko wa kazi huunganisha uanachama wa sera
 na orodha ya `needs` ya kazi ya uamuzi ili mkondo mpya au ulioondolewa usiweze kutoweka kimyakimya.
-Risiti hushughulikia mtiririko wake wenyewe wa kazi, si uchapishaji, usambazaji, au utendaji wa ndani
-wa scanner ya ushauri iliyopo. Kuwasha majina yote mawili ya ukaguzi katika kanuni za tawi ni
-badiliko tofauti la kiutawala; kuongeza kazi hizi pekee hakulindi tawi.
+Stakabadhi zinahusu mtiririko wao wenyewe wa kazi, si uchapishaji, upelekaji, au utendaji wa ndani
+wa kichanganuzi kilichopo kinachotoa ushauri. Kufanya ukaguzi unaotumika kuwa wa lazima katika sheria za tawi
+ni mabadiliko tofauti ya kiutawala; kufafanua kazi zake pekee hakulindi tawi.
+
+`API Route Typecheck` ni ukaguzi huru wa mtiririko wa kazi, ulio nje ya maamuzi yote mawili ya jumla
+na wasifu tuli wa mwangalizi kamili wa ndani. Kagua matokeo yake kando kwa kandidati husika.
+`.github/workflows/api-route-typecheck.yml` huendeshwa kwenye PR zinazoelekezwa kwa `main` au
+`release/**`, misukumo kwenda kwa mojawapo ya familia hizo za matawi, na uanzishaji wa mwenyewe. Haina kichujio cha njia.
+Kubadilisha tawi lengwa la msingi la PR huomba ukaguzi mpya; uhariri wa maudhui/kichwa hutumia jina la uchunguzi pekee
+`Admission not requested / API Route Typecheck` na hauwezi kuchukua nafasi ya ukaguzi wa uidhinishaji.
+Mtiririko wa kazi hautangazi kichochezi cha kikundi cha uunganishaji. Uanzishaji wowote wa foleni ya uunganishaji unaohitaji
+ukaguzi huu lazima kwanza uthibitishe utekelezaji wake kwa tukio hilo.
 
 ### Ushahidi uliohifadhiwa katika kipunguzaji cha ukubalifu
 
@@ -78,6 +87,22 @@ kwa kila shard si salama kwa coverage mchanganyiko ya function/block. Shard zina
 au zisizooana husababisha uidhinishaji kushindwa. Shard za majaribio zilizoshindwa huhifadhi coverage ghafi
 ya uchunguzi kando; haiwezi kuingia katika muunganisho wa mwisho.
 
+### Risiti za maendeleo ya utekelezaji wa majaribio ya kitengo
+
+Amri ya pamoja ya `test:unit:ci:shard` hurekodi awamu za `primary`, `dashboard` na `serial`
+kupitia `scripts/ci/unit-progress-reporter.mjs`. Ripoti ya kawaida ya majaribio bado
+inapatikana. Risiti tofauti yenye metadata pekee hurekodi kuanza na kukamilika kwa kila faili,
+na mapigo ya moyo ya kila sekunde 30 huorodhesha faili ambazo bado zinaendelea pamoja na muda
+uliopita. Hurekodi metadata ya utekelezaji iliyo kwenye orodha ya ruhusa pekee; maelezo ya
+majaribio, matokeo, maudhui ya hitilafu na mazingira kamili hayahifadhiwi katika muundo wa mfululizo.
+
+CI na Quality huhifadhi faili za JSONL kama `unit-progress-ci-<run>-<attempt>-<shard>` na
+`unit-progress-quality-<run>-<attempt>-<shard>`. Kuisha kwa muda wa kazi kunaweza kuzuia
+upakiaji unaofuata; mapigo ya moyo ambayo tayari yametolewa hubaki kuwa ushahidi wa uchunguzi.
+Kutokuwepo kwa mapigo ya moyo kunaweza pia kuashiria mchakato wa runner uliozuiwa au kusitishwa.
+Risiti hizi huhifadhi uteuzi uliopo wa majaribio, utekelezaji sawia, makataa na hali ya kuondoka;
+si maamuzi ya kuidhinisha vipengee vinavyopendekezwa.
+
 ### Orodha ya scan tuli
 
 Orodha yenye matoleo ya alias za npm na uanachama wa static-scan zipo katika
@@ -108,6 +133,27 @@ ni rejeleo, si uthibitisho kwamba gate ilitekelezwa kweli.
 
 Script zipo chini ya `scripts/check/` (gate za sera) na `scripts/quality/` (injini ya ratchet).
 Chanzo cha ukweli cha CI ni `.github/workflows/ci.yml`.
+
+### Hali ya nyaraka za msingi zilizochapishwa
+
+`.github/workflows/i18n-base-health.yml` huchunguza hali ya nyaraka baada ya misukumo iliyochaguliwa
+kwenda `main` na `release/v*`, na wakati wa uanzishaji wa mikono. Vichujio vyake vinajumuisha nyaraka,
+Markdown ya mzizi, `llm.txt`, hali/usanidi wa tafsiri na zana husika za i18n.
+Kazi pekee ya `Published base documentation health` hutumia Ubuntu inayopangishwa na kikomo cha
+dakika tano. Hufanya uthibitishaji wa kusoma pekee na huandika risiti ya uchunguzi bila
+kusakinisha vitegemezi, kutafsiri au kuasili hali.
+
+`scripts/i18n/check-base-health.mjs` inahitaji kutokuwepo kwa hitilafu za hash ya chanzo, lengo linalokosekana, hash ya lengo,
+tafsiri iliyopitwa na wakati na akiba ya sehemu. Pia huthibitisha upeo wa sasa wa
+hati/lugha ya msingi na asili yake iliyorekodiwa. Muktadha batili, ushughulikiaji usiokamilika
+au kikagua kilichokatizwa huzalisha `INCOMPLETE`; mkengeuko uliothibitishwa huzalisha `FAIL`. Zote mbili
+hurejesha hali ya kutoka inayoashiria kutofaulu. Risiti hufungamanishwa na SHA ya checkout, mtiririko wa kazi, utekelezaji na
+jaribio, na huhifadhiwa kama `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Huu ni uchunguzi huru wa msingi uliochapishwa. Hauongezi tukio la PR au
+kikundi cha kuunganisha, ukaguzi wa PR unaohitajika, lakabu ya npm au mshiriki wa wasifu wa uchanganuzi tuli.
+Sera iliyopo ya PR ya kulinganisha tofauti na uainishaji wa ushauri wa kikagua cha msingi
+hubaki tofauti. Upakiaji uliofanikiwa hauwezi kubadilisha matokeo ya hali yaliyofeli kuwa PASS.
 
 ### Njia ya haraka ya PR ya toleo (`quality.yml`)
 
@@ -247,7 +293,7 @@ Ukaguzi wa madai kuhusu watoa huduma wa bure daima, maingizo ya katalogi, pool z
 | `check-ui-keys-coverage` (ndani ya faili) | Ufunikaji wa vitufe vya i18n vya UI ni ≥ 65%                                                                                                                                                                                     | Ndiyo       |
 | `check-ui-value-drift` (ndani ya faili)   | **Thamani** ya Kiingereza iliyoandikwa upya haiachi tafsiri yoyote iliyopitwa na wakati                                                                                                                                          | Ndiyo       |
 | `check-new-key-coverage` (ndani ya faili) | Kitufe **kipya** cha Kiingereza kimetafsiriwa katika kila lugha — alama ya `__MISSING__:` inakataliwa                                                                                                                            | Ndiyo       |
-| `check-translation-ratio`                 | Uwiano wa tafsiri halisi kwa kila lugha (zinazofanana na Kiingereza / vishikilia nafasi / majani yanayokosekana nje ya orodha iliyoruhusiwa) haupaswi kuzidi `config/quality/i18n-translation-baseline.json` + kiwango cha ziada | **Ushauri** |
+| `check-translation-ratio`                 | Uwiano wa tafsiri halisi kwa kila lugha (zinazofanana na Kiingereza / vishikilia nafasi / majani yanayokosekana nje ya orodha iliyoruhusiwa) haupaswi kuzidi `config/quality/i18n-translation-baseline.json` + kiwango cha ziada | **Inazuia** |
 
 Inahitaji `fetch-depth: 0` — kizuizi cha mabadiliko ya thamani hulinganisha `en.json` dhidi ya msingi wa uunganishaji.
 
@@ -290,8 +336,19 @@ npm run i18n:check-value-drift:warn     # toa ripoti pekee
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Hutoka kwa 0 ikiwa na `SKIP reason=base-unresolved` wakati katalogi ya msingi haiwezi kusomwa (nakala
-isiyo na historia kamili na isiyo na marejeleo ya msingi), sawa na `check-openapi-breaking`.
+Vichujio vya mabadiliko ya thamani na funguo mpya vinashiriki ulinganisho mmoja usiobadilika kutoka
+`scripts/i18n/resolve-ui-diff-base.mjs`. Mtiririko wa kazi hupitisha SHA zilezile za msingi, ncha ya msingi na
+mgombea kwa ukaguzi wote. Utekelezaji wa PR/ulengaji upya wa msingi, push na merge-group hutumia muktadha wa tukio lao.
+Kutuma tawi la mgombea kunahitaji PR yake halisi iliyo wazi au ingizo bayana la
+`i18n_base_sha`. Utumaji au uchunguzi ulioratibiwa wa `main` au `release/vX.Y.Z`
+bila ingizo hilo hulinganisha commit ya mwisho na mzazi wake wa kwanza; huu si ukaguzi wa
+deni lote la tafsiri lililorithiwa. Utekelezaji wa ndani unahitaji msingi bayana wa ulinganisho,
+kwa mfano amri ya `BASE_REF` iliyo hapo juu.
+
+Muktadha wa ulinganisho unaokosekana au wenye utata, katalogi inayohitajika isiyosomeka au batili, na
+mgombea aliyebadilishwa huzalisha `INCOMPLETE` kwa msimbo wa kutoka **2**, hata katika hali ya onyo.
+Usomaji wa katalogi hutumia `scripts/i18n/read-ui-catalog.mjs`; hitilafu za usomaji hazibadilishwi
+na vipengee tupu. Kutopatikana kwa msingi wala ingizo lisilokamilika hakuthibitishi PASS.
 
 ### Kazi: `i18n`
 
@@ -313,7 +370,7 @@ Huendeshwa kwenye maombi ya kuunganisha pekee.
 
 ### Kazi: `test-vitest`
 
-Huendeshwa baada ya `build`. Huzuia uunganishaji inaposhindwa.
+Inahitaji job ya uainishaji ya `changes`. Vigawanyo husika vya matriksi huzuia uunganishaji vikishindwa.
 
 | Kifurushi        | Huthibitisha                                                      | Kuzuia                                                                                                                             |
 | ---------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -386,8 +443,9 @@ imegusa pekee** (`scripts/check/newCodeMode.mjs`: merge-base huwekwa katika
 
 - **kizuizi** — PR iliongeza ukiukaji wa cyclomatic/cognitive au exports zilizokufa katika faili ilizobadilisha
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` kwenye kumbukumbu);
-- **ushauri** — jumla ya kimataifa dhidi ya msingi uliogandishwa. Mkengeuko uliorithiwa kamwe hausababishi
-  PR isiyohusika kuwa nyekundu; mkengeuko hugandishwa upya wakati wa upatanishaji wa toleo na kufuatiliwa na job ya headroom.
+- **ushauri** — jumla ya kimataifa dhidi ya msingi uliogandishwa. Mkengeuko uliorithiwa kamwe hauifanyi
+  PR isiyo na kosa kuwa nyekundu; mkengeuko huo hufuatiliwa ili urekebishwe wakati wa upatanishaji wa toleo na kufuatiliwa na
+  kazi ya headroom.
 
 `check:file-size` hutumia base ref kwa masharti yake yenyewe (`scripts/check/check-file-size.mjs`, #8522):
 hukagua kila faili ya chanzo na ya majaribio katika tree, husoma idadi ya mistari ya kila moja kwenye msingi wa PR
@@ -590,7 +648,11 @@ hutoa hisia potofu ya ubora.
 
 1. Unda `scripts/check/check-<name>.mjs` (au `.ts`). Malango ya sera hutoka kwa 0/1.
    Malango ya aina ya ratchet hutoa kipimo kwenda `quality-metrics.json` kupitia `collect-metrics.mjs`.
-2. Ongeza `"check:<name>": "node scripts/check/check-<name>.mjs"` kwenye `package.json`.
+2. Ongeza `"check:<name>": "node scripts/check/check-<name>.mjs"` kwenye `package.json`, na
+   sawazisha jina mbadala na amri yake halisi katika `config/quality/gate-manifest.json`.
+   Tekeleza usawazishaji huohuo unapobadilisha au kuondoa jina mbadala lililopo la uthibitishaji.
+   Endesha `npm run check:gate-manifest`; hook ya kabla ya commit na uainishaji wa mabadiliko wa CI
+   hutekeleza masharti haya.
 3. Liunganishe katika `.github/workflows/ci.yml` chini ya kazi inayofaa
    (sera → `lint` au `docs-sync-strict`; ratchet → `quality-gate`).
 4. Ikiwa lina orodha ya ruhusa, tumia `reportStaleEntries()` kutoka

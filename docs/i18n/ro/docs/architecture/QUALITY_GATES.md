@@ -40,10 +40,18 @@ Fiecare confirmare JSON identifică SHA-ul preluat, rularea fluxului de lucru ș
 CLI-ul respinge o neconcordanță între SHA-ul checkout-ului și cel al evenimentului. Testele
 fluxului de lucru leagă apartenența la politică de lista `needs` a jobului de verdict,
 astfel încât o pistă nouă sau eliminată să nu poată dispărea fără a fi observată.
-Confirmările acoperă propriul flux de lucru, nu publicarea, implementarea sau mecanismele
-interne ale unui scaner consultativ existent. Activarea ambelor nume de verificare în
-regulile ramurii este o modificare administrativă separată; adăugarea acestor joburi nu
-protejează în sine o ramură.
+Dovezile acoperă propriul flux de lucru, nu publicarea, implementarea sau mecanismele interne
+ale unui scaner consultativ existent. Stabilirea verificărilor aplicabile drept obligatorii în regulile pentru ramuri
+este o modificare administrativă separată; definirea joburilor lor nu protejează, în sine, o ramură.
+
+`API Route Typecheck` este o verificare independentă a fluxului de lucru, în afara ambelor verdicte agregate
+și a profilului static al observatorului local complet. Inspectați separat rezultatul acesteia pentru candidatul exact.
+`.github/workflows/api-route-typecheck.yml` rulează pentru PR-uri către `main` sau
+`release/**`, pentru push-uri către oricare dintre familiile de ramuri și pentru declanșarea manuală. Nu are niciun filtru de cale.
+Redirecționarea bazei unui PR solicită o verificare nouă; modificările corpului/titlului folosesc numele exclusiv pentru observare
+`Admission not requested / API Route Typecheck` și nu pot înlocui verificarea de admitere.
+Fluxul de lucru nu declară un declanșator pentru grupul de îmbinare. Orice implementare a unei cozi de îmbinare care necesită
+această verificare trebuie mai întâi să stabilească executarea ei pentru evenimentul respectiv.
 
 ### Dovezi păstrate în reductorul de acceptare
 
@@ -88,6 +96,21 @@ Shard-urile lipsă, incorect formatate sau incompatibile determină eșecul admi
 Shard-urile de testare eșuate păstrează separat acoperirea brută de diagnosticare; aceasta
 nu poate fi inclusă în combinarea finală.
 
+### Confirmări privind progresul execuției testelor unitare
+
+Comanda partajată `test:unit:ci:shard` înregistrează fazele `primary`, `dashboard` și `serial`
+prin `scripts/ci/unit-progress-reporter.mjs`. Raportul normal al testelor rămâne
+disponibil. O confirmare separată, care conține exclusiv metadate, înregistrează începutul și finalizarea fiecărui fișier,
+iar un semnal periodic la 30 de secunde enumeră fișierele încă active și timpul lor de execuție. Aceasta înregistrează
+numai metadatele de execuție incluse în lista de permisiuni; descrierile testelor, rezultatele, corpurile erorilor și mediul
+complet nu sunt serializate.
+
+CI și Quality păstrează fișierele JSONL ca `unit-progress-ci-<run>-<attempt>-<shard>` și
+`unit-progress-quality-<run>-<attempt>-<shard>`. Expirarea timpului alocat unei sarcini poate împiedica încărcarea ulterioară;
+semnalele periodice deja emise rămân dovezi pentru diagnosticare. Absența semnalelor periodice poate indica, de asemenea,
+un proces runner blocat sau oprit. Aceste confirmări păstrează selecția existentă a testelor,
+nivelul de concurență, termenele-limită și starea de ieșire; ele nu reprezintă verdicte privind admiterea candidaților.
+
 ### Inventarul scanării statice
 
 Inventarul versionat al aliasurilor npm și apartenența la scanarea statică se află în
@@ -122,6 +145,27 @@ rulat efectiv.
 
 Scripturile se află în `scripts/check/` (gate-uri de politică) și `scripts/quality/`
 (motorul de tip ratchet). Sursa de adevăr CI este `.github/workflows/ci.yml`.
+
+### Starea documentației de bază publicate
+
+`.github/workflows/i18n-base-health.yml` monitorizează starea documentației după anumite
+push-uri către `main` și `release/v*`, precum și la declanșarea manuală. Filtrele sale acoperă documentația,
+fișierele Markdown din rădăcină, `llm.txt`, starea/configurația traducerilor și instrumentele i18n relevante.
+Singurul job, `Published base documentation health`, utilizează Ubuntu găzduit și are un termen-limită
+de cinci minute. Acesta efectuează o validare numai în citire și scrie o confirmare de diagnosticare fără
+instalarea dependențelor, traducere sau adoptarea stării.
+
+`scripts/i18n/check-base-health.mjs` impune absența neconcordanțelor privind hash-ul sursă, țintele lipsă, hash-ul țintă,
+traducerile învechite și memoria cache a secțiunilor. De asemenea, validează domeniul curent al documentelor
+de bază/localizărilor și proveniența înregistrată a acestuia. Un context nevalid, o acoperire incompletă
+sau întreruperea verificatorului produce `INCOMPLETE`; o abatere confirmată produce `FAIL`. Ambele
+returnează o stare de ieșire de eșec. Confirmarea este asociată cu SHA-ul checkout-ului, fluxul de lucru, rularea și
+încercarea și este păstrată ca `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Aceasta este o observare independentă a bazei publicate. Nu adaugă un eveniment PR sau
+de grup de îmbinare, o verificare PR obligatorie, un alias npm sau un membru al profilului de scanare statică.
+Politica PR diferențială existentă și clasificările consultative ale verificatorului subiacent
+rămân separate. O încărcare reușită nu poate transforma un rezultat de stare eșuat în PASS.
 
 ### Calea rapidă pentru PR-urile de lansare (`quality.yml`)
 
@@ -254,12 +298,12 @@ Verificările afirmațiilor despre furnizorii gratuit pentru totdeauna, intrări
 
 ### Sarcină: `i18n-ui-coverage`
 
-| Script                            | Validează                                                                                                                                                                                                                     | Blocant         |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `check-ui-keys-coverage` (inline) | Acoperirea cheilor i18n din UI este ≥ 65%                                                                                                                                                                                     | Da              |
-| `check-ui-value-drift` (inline)   | Rescrierea unei **valori** în engleză nu lasă în urmă nicio traducere învechită                                                                                                                                               | Da              |
-| `check-new-key-coverage` (inline) | O cheie **nouă** în engleză este tradusă în fiecare limbă — un marcaj `__MISSING__:` este respins                                                                                                                             | Da              |
-| `check-translation-ratio`         | Raportul traducerilor reale pentru fiecare limbă (intrări identice cu engleza / substituenți / intrări lipsă din afara listei de permisiuni) nu trebuie să depășească `config/quality/i18n-translation-baseline.json` + marja | **Consultativ** |
+| Script                            | Validează                                                                                                                                                                                                                     | Blocant     |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `check-ui-keys-coverage` (inline) | Acoperirea cheilor i18n din UI este ≥ 65%                                                                                                                                                                                     | Da          |
+| `check-ui-value-drift` (inline)   | Rescrierea unei **valori** în engleză nu lasă în urmă nicio traducere învechită                                                                                                                                               | Da          |
+| `check-new-key-coverage` (inline) | O cheie **nouă** în engleză este tradusă în fiecare limbă — un marcaj `__MISSING__:` este respins                                                                                                                             | Da          |
+| `check-translation-ratio`         | Raportul traducerilor reale pentru fiecare limbă (intrări identice cu engleza / substituenți / intrări lipsă din afara listei de permisiuni) nu trebuie să depășească `config/quality/i18n-translation-baseline.json` + marja | **Blocant** |
 
 Necesită `fetch-depth: 0` — verificarea abaterilor valorilor compară diferențele din `en.json` față de baza de îmbinare.
 
@@ -302,8 +346,19 @@ npm run i18n:check-value-drift:warn     # doar raportare
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Se încheie cu codul 0 și `SKIP reason=base-unresolved` atunci când catalogul de bază nu poate fi citit (clonă
-superficială fără referința de bază), în același mod ca `check-openapi-breaking`.
+Porțile pentru variația valorilor și pentru cheile noi folosesc aceeași comparație imuabilă din
+`scripts/i18n/resolve-ui-diff-base.mjs`. Fluxul de lucru transmite aceleași SHA-uri pentru baza comparației, vârful bazei și
+candidat ambelor verificări. Rulările pentru PR/schimbarea bazei PR-ului, push și grupul de îmbinare folosesc contextul
+evenimentului lor. Declanșarea manuală pentru o ramură candidată necesită PR-ul deschis exact corespunzător acesteia sau valoarea de intrare explicită
+`i18n_base_sha`. Observarea declanșată manual sau programată a ramurii `main` ori `release/vX.Y.Z`
+fără acea valoare de intrare compară ultimul commit cu primul său părinte; aceasta nu reprezintă un audit al
+întregii datorii de traducere moștenite. Invocarea locală necesită o bază de comparație explicită,
+de exemplu comanda `BASE_REF` de mai sus.
+
+Un context de comparație lipsă sau ambiguu, un catalog obligatoriu ilizibil sau nevalid și
+un candidat modificat produc starea `INCOMPLETE` cu codul de ieșire **2**, inclusiv în modul de avertizare.
+Citirea cataloagelor utilizează `scripts/i18n/read-ui-catalog.mjs`; erorile de citire nu sunt înlocuite
+cu obiecte goale. Nici o bază indisponibilă, nici datele de intrare incomplete nu stabilesc starea PASS.
 
 ### Job: `i18n`
 
@@ -325,7 +380,7 @@ Rulează numai pentru solicitările de tragere.
 
 ### Job: `test-vitest`
 
-Rulează după `build`. Blochează îmbinarea în caz de eșec.
+Necesită jobul de clasificare `changes`. Partițiile aplicabile ale matricei blochează îmbinarea în caz de eșec.
 
 | Suită            | Validează                                                        | Blocant                                                                                                            |
 | ---------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -398,8 +453,9 @@ La evenimentele `pull_request`, `quality.yml` transmite `--base-ref <PR base SHA
 
 - **blocant** — PR-ul a adăugat încălcări ale complexității ciclomatice/cognitive sau exporturi neutilizate în fișierele pe care le-a modificat
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` în jurnal);
-- **consultativ** — totalul global comparat cu valoarea de referință înghețată. Deriva moștenită nu face niciodată ca un
-  PR nevinovat să eșueze; deriva este înghețată din nou la reconcilierea versiunii și monitorizată de jobul pentru marja disponibilă.
+- **consultativ** — totalul global comparativ cu valoarea de referință înghețată. Abaterea moștenită nu marchează niciodată cu roșu un
+  PR nevinovat; abaterea este urmărită pentru remediere la reconcilierea versiunii și monitorizată de
+  jobul de headroom.
 
 `check:file-size` utilizează referința de bază conform propriilor reguli (`scripts/check/check-file-size.mjs`, #8522):
 verifică fiecare fișier sursă și de test din arbore, citește numărul de linii al fiecăruia la baza PR-ului
@@ -602,7 +658,11 @@ de excepții în creștere creează o falsă impresie de calitate.
 
 1. Creați `scripts/check/check-<name>.mjs` (sau `.ts`). Controalele de politică se încheie cu codul 0/1.
    Controalele de tip prag progresiv emit o metrică în `quality-metrics.json` prin `collect-metrics.mjs`.
-2. Adăugați `"check:<name>": "node scripts/check/check-<name>.mjs"` în `package.json`.
+2. Adăugați `"check:<name>": "node scripts/check/check-<name>.mjs"` în `package.json` și
+   sincronizați aliasul și comanda sa exactă în `config/quality/gate-manifest.json`.
+   Aplicați aceeași sincronizare atunci când modificați sau eliminați un alias de validare existent.
+   Rulați `npm run check:gate-manifest`; hook-ul pre-commit și clasificarea modificărilor din CI
+   impun respectarea acestui contract.
 3. Integrați-l în `.github/workflows/ci.yml`, în cadrul jobului corespunzător
    (politică → `lint` sau `docs-sync-strict`; prag progresiv → `quality-gate`).
 4. Dacă are o listă de permisiuni, aplicați `reportStaleEntries()` din

@@ -36,8 +36,18 @@ runner; dapat tiyaking sapat ang hosted capacity bago ang rollout.
 Tinutukoy ng bawat JSON receipt ang na-checkout na SHA, workflow run, at attempt.
 Tinatanggihan ng CLI ang hindi pagtutugma ng checkout/event SHA. Itinatali ng mga workflow test ang membership ng patakaran
 sa listahan ng `needs` ng verdict job upang hindi tahimik na mawala ang isang bago o inalis na lane.
-Saklaw ng mga receipt ang sarili nilang workflow, hindi ang publication, deployment, o mga panloob na detalye
-ng isang umiiral na advisory scanner. Hiwalay na administratibong pagbabago ang pag-activate sa parehong pangalan ng check sa mga panuntunan ng branch; hindi awtomatikong napoprotektahan ang isang branch sa pagdaragdag lamang ng mga job na ito.
+Saklaw ng mga resibo ang sarili nilang workflow, hindi ang paglalathala, deployment, o ang mga internal
+ng isang umiiral na advisory scanner. Ang pagtatakda sa mga naaangkop na pagsusuri bilang required sa mga branch rule
+ay isang hiwalay na administratibong pagbabago; ang pagtukoy sa kanilang mga job ay hindi mismo nagpoprotekta sa isang branch.
+
+Ang `API Route Typecheck` ay isang independiyenteng pagsusuri ng workflow, sa labas ng parehong pinagsama-samang verdict
+at ng static profile ng lokal na full observer. Siyasatin nang hiwalay ang resulta nito para sa eksaktong
+candidate. Tumatakbo ang `.github/workflows/api-route-typecheck.yml` sa mga PR papunta sa `main` o
+`release/**`, sa mga push sa alinmang pamilya ng branch, at sa manual dispatch. Wala itong path filter.
+Humihiling ang mga retarget ng PR base ng bagong pagsusuri; ginagamit ng mga pag-edit sa body/title ang pangalan na para lamang sa obserbasyon na
+`Admission not requested / API Route Typecheck` at hindi maaaring pumalit sa admission check.
+Hindi nagdedeklara ang workflow ng merge-group trigger. Dapat munang tiyakin ng anumang rollout ng merge queue na nangangailangan
+ng pagsusuring ito ang pagpapatakbo nito para sa event na iyon.
 
 ### Napanatiling ebidensya sa acceptance reducer
 
@@ -76,6 +86,21 @@ na coverage threshold. Pinananatili ng mga input ang pandaigdigang pagkakasunod-
 ang paunang pag-merge sa bawat shard para sa pinaghalong function/block coverage. Ang mga nawawala, malformed, o hindi tugmang shard ay nagdudulot ng pagkabigo sa pagtanggap.
 Hiwalay na pinananatili ng mga nabigong test shard ang raw diagnostic coverage; hindi ito maaaring isama sa panghuling merge.
 
+### Mga tala ng progreso ng pagpapatupad ng unit
+
+Itinatala ng nakabahaging command na `test:unit:ci:shard` ang mga yugto ng `primary`, `dashboard`, at `serial`
+sa pamamagitan ng `scripts/ci/unit-progress-reporter.mjs`. Nananatiling available ang karaniwang ulat ng pagsubok.
+Itinatala ng hiwalay at metadata-only na tala ang pagsisimula at pagkumpleto ng bawat file,
+at inililista ng 30-segundong heartbeat ang mga file na aktibo pa rin at ang lumipas na oras ng mga ito. Tanging
+ang allowlisted na metadata ng pagpapatupad ang itinatala nito; hindi sine-serialize ang mga paglalarawan ng pagsubok,
+output, nilalaman ng error, at ang buong environment.
+
+Pinapanatili ng CI at Quality ang mga JSONL file bilang `unit-progress-ci-<run>-<attempt>-<shard>` at
+`unit-progress-quality-<run>-<attempt>-<shard>`. Maaaring pigilan ng timeout ng job ang kasunod na pag-upload;
+nananatiling ebidensiyang diagnostic ang mga heartbeat na naipadala na. Maaari ding mangahulugan ang mga nawawalang heartbeat
+na na-block o itinigil ang proseso ng runner. Pinapanatili ng mga talang ito ang kasalukuyang pagpili ng pagsubok,
+concurrency, mga deadline, at exit status; hindi ito mga pasya sa pagtanggap ng kandidato.
+
 ### Imbentaryo ng static scan
 
 Matatagpuan sa
@@ -106,6 +131,27 @@ hindi patunay na aktuwal na napatakbo ang isang gate.
 
 Matatagpuan ang mga script sa ilalim ng `scripts/check/` (mga policy gate) at `scripts/quality/` (ratchet engine).
 Ang source of truth ng CI ay `.github/workflows/ci.yml`.
+
+### Kalagayan ng dokumentasyon ng na-publish na base
+
+Sinusubaybayan ng `.github/workflows/i18n-base-health.yml` ang kalagayan ng dokumentasyon pagkatapos ng mga piling
+push sa `main` at `release/v*`, at sa manu-manong dispatch. Saklaw ng mga filter nito ang dokumentasyon,
+root Markdown, `llm.txt`, estado/configuration ng pagsasalin, at ang nauugnay na i18n tooling.
+Gumagamit ang nag-iisang `Published base documentation health` job ng hosted Ubuntu at limang minutong
+palugit. Nagsasagawa ito ng read-only na pagpapatunay at nagsusulat ng diagnostic receipt nang walang
+pag-install ng dependency, pagsasalin, o paggamit ng estado.
+
+Inaatasan ng `scripts/i18n/check-base-health.mjs` na walang source-hash, missing-target, target-hash,
+stale-translation, at section-cache na hindi pagkakatugma. Pinapatunayan din nito ang kasalukuyang saklaw ng pangunahing
+dokumento/locale at ang nakatalang provenance nito. Ang di-wastong konteksto, di-kumpletong coverage,
+o isang naantalang checker ay nagbubunga ng `INCOMPLETE`; ang nakumpirmang drift ay nagbubunga ng `FAIL`. Kapwa
+nagbabalik ang mga ito ng failing exit status. Ang receipt ay nakatali sa checkout SHA, workflow, run, at
+attempt, at pinananatili bilang `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Isa itong independiyenteng obserbasyon sa na-publish na base. Hindi ito nagdaragdag ng PR o
+merge-group event, kinakailangang PR check, npm alias, o miyembro ng static-scan profile.
+Nananatiling magkahiwalay ang umiiral na differential PR policy at ang advisory classifications
+ng pinagbabatayang checker. Hindi maaaring gawing PASS ng matagumpay na upload ang isang nabigong resulta ng pagsusuri sa kalagayan.
 
 ### Mabilis na landas ng Release PR (`quality.yml`)
 
@@ -240,12 +286,12 @@ Kinukuha ng `free-tier-budget.svg` ang mga numero nito mula sa loader ng kasaluk
 
 ### Job: `i18n-ui-coverage`
 
-| Script                            | Vine-validate                                                                                                                                                                                             | Humaharang   |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| `check-ui-keys-coverage` (inline) | Ang saklaw ng UI i18n key ay ≥ 65%                                                                                                                                                                        | Oo           |
-| `check-ui-value-drift` (inline)   | Walang naiiwang lumang salin kapag muling isinulat ang isang English na **value**                                                                                                                         | Oo           |
-| `check-new-key-coverage` (inline) | Ang isang **bagong** English key ay naisalin sa bawat locale — tinatanggihan ang marker na `__MISSING__:`                                                                                                 | Oo           |
-| `check-translation-ratio`         | Ang ratio ng tunay na salin bawat locale (kapareho ng English / placeholder / nawawalang leaves sa labas ng allowlist) ay hindi dapat lumampas sa `config/quality/i18n-translation-baseline.json` + slack | **Advisory** |
+| Script                            | Vine-validate                                                                                                                                                                                             | Humaharang     |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `check-ui-keys-coverage` (inline) | Ang saklaw ng UI i18n key ay ≥ 65%                                                                                                                                                                        | Oo             |
+| `check-ui-value-drift` (inline)   | Walang naiiwang lumang salin kapag muling isinulat ang isang English na **value**                                                                                                                         | Oo             |
+| `check-new-key-coverage` (inline) | Ang isang **bagong** English key ay naisalin sa bawat locale — tinatanggihan ang marker na `__MISSING__:`                                                                                                 | Oo             |
+| `check-translation-ratio`         | Ang ratio ng tunay na salin bawat locale (kapareho ng English / placeholder / nawawalang leaves sa labas ng allowlist) ay hindi dapat lumampas sa `config/quality/i18n-translation-baseline.json` + slack | **Humaharang** |
 
 Kailangan ang `fetch-depth: 0` — dini-diff ng value-drift gate ang `en.json` laban sa merge base.
 
@@ -288,8 +334,19 @@ npm run i18n:check-value-drift:warn     # ulat lamang
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Nag-e-exit nang 0 gamit ang `SKIP reason=base-unresolved` kapag hindi mabasa ang base catalog (shallow
-clone na walang base ref), gaya ng `check-openapi-breaking`.
+Ang mga gate para sa value-drift at new-key ay gumagamit ng iisang immutable na paghahambing mula sa
+`scripts/i18n/resolve-ui-diff-base.mjs`. Ipinapasa ng workflow ang parehong base, base-tip, at
+candidate SHA sa parehong pagsusuri. Ginagamit ng mga run para sa PR/base-retarget, push, at merge-group ang kani-kanilang event
+context. Ang pag-dispatch ng isang candidate branch ay nangangailangan ng eksaktong bukas na PR nito o ng tahasang
+`i18n_base_sha` input. Ang dispatch o nakaiskedyul na pagmamasid sa `main` o `release/vX.Y.Z`
+nang wala ang input na iyon ay naghahambing sa huling commit at sa first parent nito; hindi ito pag-audit ng
+lahat ng minanang translation debt. Ang lokal na invocation ay nangangailangan ng tahasang comparison base,
+halimbawa, ang `BASE_REF` command sa itaas.
+
+Ang nawawala o malabong comparison context, hindi mabasa o invalid na kinakailangang catalog, at
+nagbagong candidate ay nagreresulta sa `INCOMPLETE` na may exit code na **2**, kabilang ang warn mode.
+Ginagamit ng mga pagbasa sa catalog ang `scripts/i18n/read-ui-catalog.mjs`; ang mga read failure ay hindi
+pinapalitan ng mga empty object. Hindi nagtatakda ng PASS ang unavailable na base o incomplete na input.
 
 ### Job: `i18n`
 
@@ -311,7 +368,7 @@ Tumatakbo lamang sa mga pull request.
 
 ### Job: `test-vitest`
 
-Tumatakbo pagkatapos ng `build`. Hinaharang ang merge kapag nabigo.
+Kailangan ang job sa klasipikasyong `changes`. Hinaharangan ng mga naaangkop na matrix shard ang pag-merge kapag nabigo.
 
 | Suite            | Bineberipika                                            | Pagba-block                                                                                                                             |
 | ---------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -388,9 +445,9 @@ at kinukuha ang diff ng mga bilang kada file):
 
 - **blocking** — nagdagdag ang PR ng mga cyclomatic/cognitive violation o dead export sa mga file
   na binago nito (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` sa log);
-- **advisory** — ang kabuuang global kumpara sa naka-freeze na baseline. Hindi kailanman
-  nagpapapula sa isang walang-salang PR ang minanang drift; muling fini-freeze ang drift sa
-  release reconciliation at sinusubaybayan ng headroom job.
+- **advisory** — ang pandaigdigang kabuuan kumpara sa naka-freeze na baseline. Hindi kailanman
+  ginagawang pula ng minanang drift ang isang inosenteng PR; sinusubaybayan ang drift para ayusin
+  sa release reconciliation at binabantayan ng headroom job.
 
 Ginagamit ng `check:file-size` ang base ref ayon sa sarili nitong mga tuntunin
 (`scripts/check/check-file-size.mjs`, #8522): sinusuri nito ang bawat source at test file sa tree,
@@ -599,7 +656,11 @@ gate na may lumalaking allowlist ay nagbibigay ng maling pakiramdam ng kalidad.
 
 1. Gumawa ng `scripts/check/check-<name>.mjs` (o `.ts`). Ang mga policy gate ay nag-e-exit nang 0/1.
    Ang mga ratchet-style gate ay naglalabas ng metric sa `quality-metrics.json` sa pamamagitan ng `collect-metrics.mjs`.
-2. Idagdag ang `"check:<name>": "node scripts/check/check-<name>.mjs"` sa `package.json`.
+2. Idagdag ang `"check:<name>": "node scripts/check/check-<name>.mjs"` sa `package.json`, at
+   i-synchronize ang alias at ang eksaktong command nito sa `config/quality/gate-manifest.json`.
+   Ilapat ang parehong pag-synchronize kapag binabago o inaalis ang isang umiiral na validation alias.
+   Patakbuhin ang `npm run check:gate-manifest`; ipinapatupad ng pre-commit hook at klasipikasyon
+   ng pagbabago sa CI ang kontratang ito.
 3. Ikonekta ito sa `.github/workflows/ci.yml` sa ilalim ng naaangkop na job
    (policy → `lint` o `docs-sync-strict`; ratchet → `quality-gate`).
 4. Kung mayroon itong allowlist, ilapat ang `reportStaleEntries()` mula sa

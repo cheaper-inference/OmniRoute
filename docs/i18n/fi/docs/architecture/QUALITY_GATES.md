@@ -38,10 +38,9 @@ riittävyys on varmistettava ennen käyttöönottoa.
 Jokainen JSON-kuitti yksilöi uloskuitatun SHA:n, työnkulun suorituksen ja yrityksen.
 CLI hylkää uloskuittauksen ja tapahtuman SHA-arvojen ristiriidan. Työnkulkutestit sitovat
 käytännön jäsenyyden tulostyön `needs`-luetteloon, jotta uusi tai poistettu linja ei voi
-kadota huomaamatta. Kuitit kattavat oman työnkulkunsa, eivät julkaisemista, käyttöönottoa
-tai olemassa olevan neuvoa-antavan skannerin sisäistä toimintaa. Molempien tarkistusnimien
-aktivointi haarasäännöissä on erillinen hallinnollinen muutos; näiden töiden lisääminen
-ei itsessään suojaa haaraa.
+kadota huomaamatta. Kuitit kattavat oman työnkulkunsa, eivät julkaisemista, käyttöönottoa tai olemassa olevan neuvoa-antavan skannerin sisäistä toimintaa. Sovellettavien tarkistusten määrittäminen pakollisiksi haarasäännöissä on erillinen hallinnollinen muutos; töiden määrittäminen ei itsessään suojaa haaraa.
+
+`API Route Typecheck` on itsenäinen työnkulun tarkistus, joka ei kuulu kumpaankaan koostettuun lopputulokseen eikä paikallisen täyden tarkkailijan staattiseen profiiliin. Tarkista sen tulos erikseen täsmälliselle ehdokkaalle. `.github/workflows/api-route-typecheck.yml` suoritetaan PR-pyynnöille, joiden kohteena on `main` tai `release/**`, kumpaan tahansa haaraperheeseen tehtäville vienneille sekä manuaalisesta käynnistyksestä. Siinä ei ole polkusuodatinta. PR-pyynnön kohdehaaran vaihtaminen pyytää uuden tarkistuksen; leipätekstin tai otsikon muokkaukset käyttävät vain havainnointiin tarkoitettua nimeä `Admission not requested / API Route Typecheck`, eivätkä ne voi korvata hyväksymistarkistusta. Työnkulku ei määritä yhdistämisryhmän käynnistintä. Jos tämä tarkistus halutaan pakolliseksi yhdistämisjonon käyttöönotossa, sen suorittaminen kyseiselle tapahtumalle on ensin varmistettava.
 
 ### Säilytetty näyttö hyväksynnän koostajassa
 
@@ -84,6 +83,12 @@ yhdistetylle funktio-/lohkokattavuudelle. Puuttuvat, virheelliset tai yhteensopi
 aiheuttavat hyväksynnän epäonnistumisen. Epäonnistuneet testisirpaleet säilyttävät diagnostiset
 raakakattavuustiedot erikseen; niitä ei voi sisällyttää lopulliseen yhdistämiseen.
 
+### Yksikkötestien suorituksen edistymiskuitit
+
+Jaettu `test:unit:ci:shard`-komento kirjaa `primary`-, `dashboard`- ja `serial`-vaiheet `scripts/ci/unit-progress-reporter.mjs`-skriptin avulla. Normaali testiraportti on edelleen saatavilla. Erillinen, vain metatietoja sisältävä kuitti kirjaa kunkin tiedoston suorituksen alkamisen ja valmistumisen, ja 30 sekunnin välein lähetettävä tilapäivitys luettelee yhä aktiiviset tiedostot ja niiden kuluneen suoritusajan. Se kirjaa vain sallittujen tietojen luetteloon sisältyvät suorituksen metatiedot; testien kuvauksia, tulosteita, virheiden sisältöjä ja koko ympäristöä ei serialisoida.
+
+CI ja Quality säilyttävät JSONL-tiedostot nimillä `unit-progress-ci-<run>-<attempt>-<shard>` ja `unit-progress-quality-<run>-<attempt>-<shard>`. Työn aikakatkaisu voi estää myöhemmän latauksen; jo lähetetyt tilapäivitykset säilyvät diagnostisena aineistona. Puuttuvat tilapäivitykset voivat myös viitata estyneeseen tai keskeytettyyn suorittajaprosessiin. Nämä kuitit säilyttävät nykyisen testivalinnan, rinnakkaisuuden, määräajat ja poistumistilan; ne eivät ole päätöksiä ehdokkaan hyväksymisestä.
+
 ### Staattisten tarkistusten luettelo
 
 Versioitu npm-aliasluettelo ja staattisten tarkistusten jäsenyys sijaitsevat tiedostossa
@@ -115,6 +120,27 @@ Alla oleva sanallinen luettelo on viite, ei todiste siitä, että portti todella
 Komentosarjat sijaitsevat hakemistoissa `scripts/check/` (käytäntöportit) ja
 `scripts/quality/` (ratchet-moottori). CI:n ensisijainen totuuslähde on
 `.github/workflows/ci.yml`.
+
+### Julkaistun perustan dokumentaation tila
+
+`.github/workflows/i18n-base-health.yml` tarkkailee dokumentaation tilaa valittujen
+`main`- ja `release/v*`-haaroihin tehtyjen puskemisten jälkeen sekä manuaalisesti käynnistettäessä. Sen suodattimet kattavat dokumentaation,
+juuritason Markdown-tiedostot, `llm.txt`-tiedoston, käännösten tilan ja määritykset sekä asiaankuuluvat i18n-työkalut.
+Ainoa `Published base documentation health` -työ käyttää isännöityä Ubuntua ja viiden minuutin
+aikarajaa. Se suorittaa vain luku -muotoisen validoinnin ja kirjoittaa diagnostisen tositteen ilman
+riippuvuuksien asennusta, kääntämistä tai tilan käyttöönottoa.
+
+`scripts/i18n/check-base-health.mjs` edellyttää, ettei lähdehajautteissa ole ristiriitoja eikä
+puuttuvia kohteita, kohdehajautteiden ristiriitoja, vanhentuneita käännöksiä tai osiovälimuistin epäjohdonmukaisuuksia. Se validoi myös nykyisen ydindokumenttien ja kielialueiden
+laajuuden sekä sen tallennetun alkuperän. Virheellinen konteksti, puutteellinen kattavuus
+tai keskeytynyt tarkistus tuottaa tuloksen `INCOMPLETE`; vahvistettu poikkeama tuottaa tuloksen `FAIL`. Molemmat
+palauttavat epäonnistumista ilmaisevan poistumistilan. Tosite sidotaan uloskuitatun version SHA-tunnisteeseen, työnkulkuun, suoritukseen ja
+yritykseen, ja se säilytetään nimellä `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Tämä on julkaistun perustan riippumaton tarkkailu. Se ei lisää PR- tai
+merge-group-tapahtumaa, pakollista PR-tarkistusta, npm-aliasta eikä static-scan-profiilin jäsentä.
+Nykyinen PR-muutosten käytäntö ja taustalla olevan tarkistimen neuvoa-antavat luokitukset
+pysyvät erillisinä. Onnistunut lataus ei voi muuttaa epäonnistunutta tilatulosta tulokseksi PASS.
 
 ### Julkaisu-PR:n nopea polku (`quality.yml`)
 
@@ -250,12 +276,12 @@ Pysyvästi ilmaisten tarjoajien, luettelomerkintöjen, toistuvien poolien ja pis
 
 ### Työ: `i18n-ui-coverage`
 
-| Skripti                             | Tarkistaa                                                                                                                                                                                                                 | Estävä            |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| `check-ui-keys-coverage` (sisäinen) | Käyttöliittymän i18n-avainten kattavuus on ≥ 65 %                                                                                                                                                                         | Kyllä             |
-| `check-ui-value-drift` (sisäinen)   | Uudelleenkirjoitettu englanninkielinen **arvo** ei jätä jälkeensä vanhentuneita käännöksiä                                                                                                                                | Kyllä             |
-| `check-new-key-coverage` (sisäinen) | **Uusi** englanninkielinen avain on käännetty jokaisella kielialueella — `__MISSING__:`-merkintää ei hyväksytä                                                                                                            | Kyllä             |
-| `check-translation-ratio`           | Aitojen käännösten suhde kielialueittain (englannin kanssa identtiset / paikkamerkit / puuttuvat lehdet sallittujen luettelon ulkopuolella) ei saa ylittää arvoa `config/quality/i18n-translation-baseline.json` + jousto | **Neuvoa-antava** |
+| Skripti                             | Tarkistaa                                                                                                                                                                                                                 | Estävä     |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `check-ui-keys-coverage` (sisäinen) | Käyttöliittymän i18n-avainten kattavuus on ≥ 65 %                                                                                                                                                                         | Kyllä      |
+| `check-ui-value-drift` (sisäinen)   | Uudelleenkirjoitettu englanninkielinen **arvo** ei jätä jälkeensä vanhentuneita käännöksiä                                                                                                                                | Kyllä      |
+| `check-new-key-coverage` (sisäinen) | **Uusi** englanninkielinen avain on käännetty jokaisella kielialueella — `__MISSING__:`-merkintää ei hyväksytä                                                                                                            | Kyllä      |
+| `check-translation-ratio`           | Aitojen käännösten suhde kielialueittain (englannin kanssa identtiset / paikkamerkit / puuttuvat lehdet sallittujen luettelon ulkopuolella) ei saa ylittää arvoa `config/quality/i18n-translation-baseline.json` + jousto | **Estävä** |
 
 Edellyttää asetusta `fetch-depth: 0` — arvojen muuttumisen tarkistus vertaa tiedostoa `en.json` yhdistämiskantaan.
 
@@ -298,8 +324,19 @@ npm run i18n:check-value-drift:warn     # vain raportointi
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Päättyy tilakoodilla 0 ja ilmoituksella `SKIP reason=base-unresolved`, kun perusluetteloa ei voida lukea (matala
-klooni ilman kantaviitettä), kuten `check-openapi-breaking`.
+Arvopoikkeaman ja uusien avainten portit käyttävät samaa muuttumatonta vertailua
+tiedostosta `scripts/i18n/resolve-ui-diff-base.mjs`. Työnkulku välittää saman vertailupohjan, pohjan kärjen ja
+ehdokkaan SHA-tunnisteet molemmille tarkistuksille. PR:n tai vertailupohjan uudelleenkohdistuksen, push-tapahtuman ja merge group -ajon yhteydessä käytetään kyseisen tapahtuman
+kontekstia. Ehdokashaaran manuaalinen käynnistys edellyttää sen täsmällistä avointa PR:ää tai nimenomaista
+`i18n_base_sha`-syötettä. `main`- tai `release/vX.Y.Z`-haaran manuaalinen tai ajastettu tarkastelu
+ilman kyseistä syötettä vertaa viimeistä committia sen ensimmäiseen vanhempaan; se ei tarkasta
+kaikkea periytynyttä käännösvelkaa. Paikallinen suoritus edellyttää nimenomaista vertailupohjaa,
+esimerkiksi yllä olevaa `BASE_REF`-komentoa.
+
+Puuttuva tai moniselitteinen vertailukonteksti, lukukelvoton tai virheellinen pakollinen luettelo sekä
+suorituksen aikana muuttunut ehdokas tuottavat tuloksen `INCOMPLETE` ja poistumiskoodin **2**, myös varoitustilassa.
+Luettelot luetaan tiedostolla `scripts/i18n/read-ui-catalog.mjs`; lukuvirheitä ei korvata
+tyhjillä objekteilla. Vertailupohjan puuttuminen tai epätäydellinen syöte eivät kumpikaan tuota tulosta PASS.
 
 ### Työ: `i18n`
 
@@ -321,7 +358,7 @@ Suoritetaan vain pull requesteille.
 
 ### Työ: `test-vitest`
 
-Suoritetaan työn `build` jälkeen. Epäonnistuminen estää yhdistämisen.
+Edellyttää `changes`-luokittelutyötä. Sovellettavien matriisiosioiden epäonnistuminen estää yhdistämisen.
 
 | Kokonaisuus      | Validoi                                                                | Estävä                                                                                                                                                        |
 | ---------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -394,8 +431,9 @@ dokumentaation ja ympäristön sopimus, i18n-yhdenmukaisuus, yksikkötestit) eiv
 
 - **estävä** — PR lisäsi syklomaattisen tai kognitiivisen kompleksisuuden rikkomuksia tai kuolleita vientejä muuttamiinsa tiedostoihin
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` lokissa);
-- **neuvoa-antava** — globaali kokonaismäärä verrattuna jäädytettyyn vertailutasoon. Peritty poikkeama ei koskaan
-  muuta viatonta PR:ää hylätyksi; poikkeama jäädytetään uudelleen julkaisun täsmäytyksessä, ja liikkumavara-työ valvoo sitä.
+- **ohjeellinen** — globaali kokonaismäärä verrattuna jäädytettyyn perustasoon. Periytynyt poikkeama ei koskaan merkitse
+  syytöntä PR:ää punaiseksi; poikkeamaa seurataan korjattavaksi julkaisun täsmäytyksen yhteydessä, ja sitä valvoo
+  headroom-työ.
 
 `check:file-size` käyttää kantaviitettä omien sääntöjensä mukaisesti (`scripts/check/check-file-size.mjs`, #8522):
 se tarkistaa puun jokaisen lähdekoodi- ja testitiedoston, lukee kunkin rivimäärän PR:n kantaversiossa
@@ -603,7 +641,11 @@ sallittujen poikkeusten luettelo luovat valheellisen kuvan laadusta.
 
 1. Luo `scripts/check/check-<name>.mjs` (tai `.ts`). Käytäntötarkistukset palauttavat lopetuskoodin 0/1.
    Räikkätyyppiset tarkistukset kirjoittavat mittarin tiedostoon `quality-metrics.json` komentosarjan `collect-metrics.mjs` kautta.
-2. Lisää `"check:<name>": "node scripts/check/check-<name>.mjs"` tiedostoon `package.json`.
+2. Lisää `"check:<name>": "node scripts/check/check-<name>.mjs"` tiedostoon `package.json` ja
+   synkronoi alias sekä sen täsmällinen komento tiedostoon `config/quality/gate-manifest.json`.
+   Tee sama synkronointi, kun muutat tai poistat olemassa olevan validointialiaksen.
+   Suorita `npm run check:gate-manifest`; pre-commit-koukku ja CI:n muutosluokittelu
+   valvovat tätä sopimusta.
 3. Kytke se tiedostossa `.github/workflows/ci.yml` asianmukaiseen työhön
    (käytäntö → `lint` tai `docs-sync-strict`; räikkä → `quality-gate`).
 4. Jos sillä on sallittujen poikkeusten luettelo, käytä funktiota `reportStaleEntries()` tiedostosta

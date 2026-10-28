@@ -36,9 +36,18 @@ dihoskan sendiri; kapasiti dihoskan yang mencukupi mesti disahkan sebelum pelanc
 Setiap resit JSON mengenal pasti SHA yang telah di-checkout, pelaksanaan aliran kerja dan percubaan.
 CLI menolak ketidakpadanan SHA checkout/peristiwa. Ujian aliran kerja mengikat keahlian dasar
 kepada senarai `needs` tugas keputusan supaya laluan baharu atau yang dialih keluar tidak boleh hilang secara senyap.
-Resit meliputi aliran kerjanya sendiri, bukan penerbitan, penggunaan atau mekanisme dalaman
-pengimbas nasihat yang sedia ada. Mengaktifkan kedua-dua nama semakan dalam peraturan cabang ialah
-perubahan pentadbiran yang berasingan; penambahan tugas ini tidak melindungi cabang dengan sendirinya.
+Resit meliputi aliran kerja mereka sendiri, bukan penerbitan, pelaksanaan, atau dalaman
+pengimbas yang bersifat nasihat sedia ada. Menjadikan semakan yang berkenaan sebagai wajib dalam peraturan cabang
+ialah perubahan pentadbiran yang berasingan; mentakrifkan tugasnya tidak dengan sendirinya melindungi sesuatu cabang.
+
+`API Route Typecheck` ialah semakan aliran kerja bebas, di luar kedua-dua keputusan agregat
+dan profil statik pemerhati penuh tempatan. Periksa hasilnya secara berasingan untuk calon yang tepat.
+`.github/workflows/api-route-typecheck.yml` dijalankan pada PR ke `main` atau
+`release/**`, tolakan ke salah satu keluarga cabang, dan pencetusan manual. Ia tidak mempunyai penapis laluan.
+Penyasaran semula pangkalan PR meminta semakan baharu; suntingan isi kandungan/tajuk menggunakan nama pemerhatian sahaja
+`Admission not requested / API Route Typecheck` dan tidak boleh menggantikan semakan kemasukan.
+Aliran kerja tersebut tidak mengisytiharkan pencetus kumpulan gabungan. Sebarang pelaksanaan giliran gabungan yang memerlukan
+semakan ini mesti terlebih dahulu memastikan pelaksanaannya untuk peristiwa tersebut.
 
 ### Bukti tersimpan dalam pengurang penerimaan
 
@@ -77,6 +86,21 @@ ambang liputan sedia ada. Input mengekalkan susunan nama fail global c8; penggab
 untuk liputan fungsi/blok bercampur. Serpihan yang tiada, rosak atau tidak serasi menggagalkan penerimaan.
 Serpihan ujian yang gagal menyimpan liputan diagnostik mentah secara berasingan; liputan itu tidak boleh dimasukkan ke dalam penggabungan akhir.
 
+### Resit kemajuan pelaksanaan unit
+
+Perintah dikongsi `test:unit:ci:shard` merekodkan fasa `primary`, `dashboard` dan `serial`
+melalui `scripts/ci/unit-progress-reporter.mjs`. Laporan ujian biasa kekal
+tersedia. Resit berasingan yang mengandungi metadata sahaja merekodkan permulaan dan penyelesaian
+setiap fail, manakala denyutan jantung 30 saat menyenaraikan fail yang masih aktif serta masa berlalu.
+Ia hanya merekodkan metadata pelaksanaan yang disenaraibenarkan; perihalan ujian, output, kandungan ralat
+dan persekitaran penuh tidak disirikan.
+
+CI dan Quality mengekalkan fail JSONL sebagai `unit-progress-ci-<run>-<attempt>-<shard>` dan
+`unit-progress-quality-<run>-<attempt>-<shard>`. Tamat masa kerja boleh menghalang muat naik kemudian;
+denyutan jantung yang telah dipancarkan kekal sebagai bukti diagnostik. Ketiadaan denyutan jantung juga
+boleh menunjukkan proses pelaksana yang tersekat atau ditamatkan. Resit ini mengekalkan pemilihan ujian,
+keserentakan, tarikh akhir dan status keluar sedia ada; resit ini bukan keputusan penerimaan calon.
+
 ### Inventori imbasan statik
 
 Inventori npm-alias berversi dan keahlian imbasan statik terdapat dalam
@@ -107,6 +131,28 @@ ialah rujukan, bukan bukti bahawa pagar benar-benar dilaksanakan.
 
 Skrip terletak di bawah `scripts/check/` (pagar dasar) dan `scripts/quality/` (enjin ratchet).
 Sumber kebenaran CI ialah `.github/workflows/ci.yml`.
+
+### Kesihatan dokumentasi asas yang diterbitkan
+
+`.github/workflows/i18n-base-health.yml` memantau kesihatan dokumentasi selepas push terpilih
+ke `main` dan `release/v*`, serta apabila dicetuskan secara manual. Penapisnya merangkumi dokumentasi,
+Markdown akar, `llm.txt`, keadaan/konfigurasi terjemahan dan alat i18n yang berkaitan.
+Tugas tunggal `Published base documentation health` menggunakan Ubuntu yang dihoskan dan had masa
+lima minit. Tugas ini melakukan pengesahan baca sahaja dan menulis resit diagnostik tanpa
+pemasangan kebergantungan, terjemahan atau penggunaan keadaan.
+
+`scripts/i18n/check-base-health.mjs` mensyaratkan tiada ketakselarasan hash sumber, sasaran
+yang tiada, hash sasaran, terjemahan lapuk dan cache bahagian. Ia turut mengesahkan skop dokumen
+teras/lokal semasa serta asal usulnya yang direkodkan. Konteks yang tidak sah, liputan yang tidak
+lengkap atau pemeriksa yang terganggu menghasilkan `INCOMPLETE`; hanyutan yang disahkan menghasilkan
+`FAIL`. Kedua-duanya mengembalikan status keluar gagal. Resit tersebut terikat pada SHA checkout,
+aliran kerja, pelaksanaan dan percubaan, serta disimpan sebagai
+`i18n-base-health-<sha>-<run>-<attempt>`.
+
+Ini merupakan pemerhatian bebas terhadap asas yang diterbitkan. Ia tidak menambahkan peristiwa PR
+atau kumpulan gabungan, semakan PR wajib, alias npm atau ahli profil imbasan statik.
+Dasar PR pembezaan sedia ada dan klasifikasi nasihat pemeriksa asas kekal berasingan.
+Muat naik yang berjaya tidak boleh menukar hasil kesihatan yang gagal kepada PASS.
 
 ### Laluan pantas PR keluaran (`quality.yml`)
 
@@ -241,12 +287,12 @@ Semakan dakwaan tentang penyedia percuma selama-lamanya, entri katalog, kumpulan
 
 ### Tugas: `i18n-ui-coverage`
 
-| Skrip                              | Mengesahkan                                                                                                                                                                                                                   | Menyekat    |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `check-ui-keys-coverage` (sebaris) | Liputan kunci i18n UI ialah ≥ 65%                                                                                                                                                                                             | Ya          |
-| `check-ui-value-drift` (sebaris)   | **Nilai** bahasa Inggeris yang ditulis semula tidak meninggalkan terjemahan lapuk                                                                                                                                             | Ya          |
-| `check-new-key-coverage` (sebaris) | Kunci bahasa Inggeris **baharu** diterjemahkan dalam setiap penempatan — penanda `__MISSING__:` ditolak                                                                                                                       | Ya          |
-| `check-translation-ratio`          | Nisbah terjemahan sebenar bagi setiap penempatan (sama dengan bahasa Inggeris / pemegang tempat / entri hilang di luar senarai dibenarkan) tidak boleh melebihi `config/quality/i18n-translation-baseline.json` + kelonggaran | **Nasihat** |
+| Skrip                              | Mengesahkan                                                                                                                                                                                                                   | Menyekat     |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `check-ui-keys-coverage` (sebaris) | Liputan kunci i18n UI ialah ≥ 65%                                                                                                                                                                                             | Ya           |
+| `check-ui-value-drift` (sebaris)   | **Nilai** bahasa Inggeris yang ditulis semula tidak meninggalkan terjemahan lapuk                                                                                                                                             | Ya           |
+| `check-new-key-coverage` (sebaris) | Kunci bahasa Inggeris **baharu** diterjemahkan dalam setiap penempatan — penanda `__MISSING__:` ditolak                                                                                                                       | Ya           |
+| `check-translation-ratio`          | Nisbah terjemahan sebenar bagi setiap penempatan (sama dengan bahasa Inggeris / pemegang tempat / entri hilang di luar senarai dibenarkan) tidak boleh melebihi `config/quality/i18n-translation-baseline.json` + kelonggaran | **Menyekat** |
 
 Memerlukan `fetch-depth: 0` — get nilai-hanyut membandingkan perbezaan `en.json` dengan asas gabungan.
 
@@ -290,8 +336,19 @@ npm run i18n:check-value-drift:warn     # laporan sahaja
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Keluar dengan kod 0 berserta `SKIP reason=base-unresolved` apabila katalog asas tidak dapat dibaca (klon
-cetek tanpa rujukan asas), selaras dengan `check-openapi-breaking`.
+Get hanyutan nilai dan kunci baharu berkongsi satu perbandingan tidak boleh ubah daripada
+`scripts/i18n/resolve-ui-diff-base.mjs`. Aliran kerja menghantar SHA asas, hujung asas dan
+calon yang sama kepada kedua-dua semakan. Pelaksanaan PR/penyasaran semula asas, push dan kumpulan gabungan menggunakan konteks
+peristiwa masing-masing. Penghantaran cawangan calon memerlukan PR terbuka yang sepadan dengan tepat atau input
+`i18n_base_sha` yang dinyatakan secara eksplisit. Penghantaran atau pemerhatian berjadual terhadap `main` atau `release/vX.Y.Z`
+tanpa input tersebut membandingkan komit terakhir dengan induk pertamanya; ini bukan audit terhadap
+semua hutang terjemahan yang diwarisi. Pelaksanaan setempat memerlukan asas perbandingan yang dinyatakan secara eksplisit,
+contohnya perintah `BASE_REF` di atas.
+
+Konteks perbandingan yang tiada atau taksa, katalog wajib yang tidak boleh dibaca atau tidak sah, dan
+calon yang berubah menghasilkan `INCOMPLETE` dengan kod keluar **2**, termasuk dalam mod amaran.
+Pembacaan katalog menggunakan `scripts/i18n/read-ui-catalog.mjs`; kegagalan pembacaan tidak digantikan
+dengan objek kosong. Asas yang tidak tersedia mahupun input yang tidak lengkap tidak menghasilkan PASS.
 
 ### Tugas: `i18n`
 
@@ -313,7 +370,7 @@ Dijalankan pada permintaan tarik sahaja.
 
 ### Tugas: `test-vitest`
 
-Dijalankan selepas `build`. Menyekat penggabungan jika gagal.
+Memerlukan tugas pengelasan `changes`. Pecahan matriks yang berkenaan menyekat penggabungan jika gagal.
 
 | Suit             | Mengesahkan                                                 | Menyekat                                                                                                                       |
 | ---------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -386,8 +443,9 @@ sementara, ESLint/knip dijalankan di situ dan pada HEAD, kemudian kiraan setiap 
 
 - **menyekat** — PR menambahkan pelanggaran siklomatik/kognitif atau eksport mati dalam fail yang diubahnya
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` dalam log);
-- **nasihat** — jumlah global berbanding garis dasar yang dibekukan. Hanyutan yang diwarisi tidak akan
-  menyebabkan PR yang tidak bersalah menjadi merah; hanyutan dibekukan semula semasa penyelarasan keluaran dan dipantau oleh tugas ruang lebihan.
+- **nasihat** — jumlah global berbanding garis dasar yang dibekukan. Hanyutan yang diwarisi tidak sekali-kali menandakan
+  PR yang tidak bersalah sebagai merah; hanyutan itu dijejaki untuk pembaikan semasa penyelarasan keluaran dan dipantau oleh
+  tugas ruang lebihan.
 
 `check:file-size` menggunakan rujukan asas mengikut kaedahnya sendiri (`scripts/check/check-file-size.mjs`, #8522):
 ia memeriksa setiap fail sumber dan ujian dalam pepohon, membaca kiraan baris setiap fail pada asas PR
@@ -594,7 +652,11 @@ bertambah memberikan gambaran mutu yang palsu.
 
 1. Cipta `scripts/check/check-<name>.mjs` (atau `.ts`). Gerbang dasar keluar dengan kod 0/1.
    Gerbang berasaskan mekanisme sehala mengeluarkan metrik kepada `quality-metrics.json` melalui `collect-metrics.mjs`.
-2. Tambahkan `"check:<name>": "node scripts/check/check-<name>.mjs"` pada `package.json`.
+2. Tambahkan `"check:<name>": "node scripts/check/check-<name>.mjs"` pada `package.json`, dan
+   selaraskan alias tersebut serta perintah tepatnya dalam `config/quality/gate-manifest.json`.
+   Gunakan penyelarasan yang sama apabila mengubah atau mengalih keluar alias pengesahan sedia ada.
+   Jalankan `npm run check:gate-manifest`; cangkuk pra-komit dan pengelasan perubahan CI
+   menguatkuasakan kontrak ini.
 3. Sambungkannya dalam `.github/workflows/ci.yml` di bawah tugas yang sesuai
    (dasar → `lint` atau `docs-sync-strict`; mekanisme sehala → `quality-gate`).
 4. Jika gerbang itu mempunyai senarai benar, gunakan `reportStaleEntries()` daripada

@@ -36,9 +36,18 @@ auto-hospedados; é necessário verificar se há capacidade hospedada suficiente
 Cada recibo JSON identifica o SHA em checkout, a execução do workflow e a tentativa.
 A CLI rejeita uma incompatibilidade entre o SHA do checkout e o do evento. Os testes do workflow vinculam a participação
 na política à lista `needs` do job de veredito, para que uma trilha nova ou removida não possa desaparecer silenciosamente.
-Os recibos abrangem o próprio workflow, não a publicação, a implantação ou os detalhes internos
-de um scanner consultivo existente. Ativar ambos os nomes de verificações nas regras de branch é uma
-alteração administrativa separada; adicionar esses jobs não protege uma branch por si só.
+Os recibos abrangem seu próprio fluxo de trabalho, não a publicação, a implantação nem os componentes internos
+de um scanner consultivo existente. Tornar obrigatórias, nas regras de branch, as verificações aplicáveis
+é uma alteração administrativa separada; definir seus jobs não protege, por si só, um branch.
+
+`API Route Typecheck` é uma verificação independente do fluxo de trabalho, fora de ambos os veredictos agregados
+e do perfil estático do observador local completo. Inspecione seu resultado separadamente para o candidato exato.
+`.github/workflows/api-route-typecheck.yml` é executado em PRs direcionados a `main` ou
+`release/**`, em pushes para qualquer uma dessas famílias de branches e por acionamento manual. Ele não tem filtro de caminho.
+Redirecionamentos da base do PR solicitam uma nova verificação; edições do corpo/título usam o nome somente de observação
+`Admission not requested / API Route Typecheck` e não podem substituir a verificação de admissão.
+O fluxo de trabalho não declara um gatilho de grupo de merge. Qualquer implantação de fila de merge que exija
+essa verificação deve primeiro estabelecer sua execução para esse evento.
 
 ### Evidências retidas no redutor de aceitação
 
@@ -77,6 +86,22 @@ limites existentes de cobertura. As entradas preservam a ordem global de nomes d
 para cobertura mista de funções/blocos. Shards ausentes, malformados ou incompatíveis fazem a admissão
 falhar. Shards de testes que falharam retêm separadamente a cobertura bruta de diagnóstico; ela não pode entrar na mesclagem final.
 
+### Recibos de progresso da execução de testes unitários
+
+O comando compartilhado `test:unit:ci:shard` registra as fases `primary`, `dashboard` e `serial`
+por meio de `scripts/ci/unit-progress-reporter.mjs`. O relatório normal de testes continua
+disponível. Um recibo separado, contendo apenas metadados, registra o início e a conclusão
+de cada arquivo, e um sinal de atividade a cada 30 segundos lista os arquivos que ainda estão
+ativos e o tempo decorrido. Ele registra apenas metadados de execução incluídos na lista de
+permissões; descrições de testes, saída, conteúdo de erros e o ambiente completo não são serializados.
+
+CI e Quality retêm os arquivos JSONL como `unit-progress-ci-<run>-<attempt>-<shard>` e
+`unit-progress-quality-<run>-<attempt>-<shard>`. Um tempo limite do job pode impedir o upload
+posterior; os sinais de atividade já emitidos permanecem como evidência para diagnóstico.
+A ausência de sinais de atividade também pode indicar um processo do runner bloqueado ou
+encerrado. Esses recibos preservam a seleção de testes, a simultaneidade, os prazos e o status
+de saída existentes; eles não são veredictos de admissão de candidatos.
+
 ### Inventário de análise estática
 
 O inventário versionado de aliases npm e a participação na análise estática ficam em
@@ -107,6 +132,14 @@ evidências hospedadas de cobertura, matrizes de testes, pacotes ou implantaçã
 
 Os scripts ficam em `scripts/check/` (gates de política) e `scripts/quality/` (mecanismo de ratchet).
 A fonte da verdade da CI é `.github/workflows/ci.yml`.
+
+### Integridade da documentação base publicada
+
+O `.github/workflows/i18n-base-health.yml` monitora a integridade da documentação após pushes selecionados para `main` e `release/v*` e em acionamentos manuais. Seus filtros abrangem a documentação, arquivos Markdown na raiz, `llm.txt`, o estado e a configuração das traduções e as ferramentas de i18n relevantes. O único job `Published base documentation health` usa o Ubuntu hospedado e tem um prazo limite de cinco minutos. Ele executa uma validação somente leitura e grava um recibo de diagnóstico sem instalar dependências, traduzir ou adotar estados.
+
+O `scripts/i18n/check-base-health.mjs` exige que não haja inconsistências de hash de origem, destino ausente, hash de destino, tradução desatualizada nem cache de seção. Ele também valida o escopo atual de documentos/idiomas principais e sua proveniência registrada. Um contexto inválido, uma cobertura incompleta ou uma interrupção do verificador produz `INCOMPLETE`; um desvio confirmado produz `FAIL`. Ambos retornam um status de saída com falha. O recibo é vinculado ao SHA do checkout, ao workflow, à execução e à tentativa, e é retido como `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Esta é uma observação independente da base publicada. Ela não adiciona um evento de PR ou grupo de merge, uma verificação obrigatória de PR, um alias npm nem um membro de perfil de varredura estática. A política diferencial existente para PRs e as classificações consultivas do verificador subjacente permanecem separadas. Um upload bem-sucedido não pode transformar um resultado de integridade com falha em PASS.
 
 ### Caminho rápido para PR de release (`quality.yml`)
 
@@ -247,7 +280,7 @@ As verificações das afirmações sobre provedores gratuitos para sempre, entra
 | `check-ui-keys-coverage` (inline) | A cobertura de chaves de i18n da UI é ≥ 65%                                                                                                                                                             | Sim            |
 | `check-ui-value-drift` (inline)   | Um **valor** em inglês reescrito não deixa nenhuma tradução desatualizada para trás                                                                                                                     | Sim            |
 | `check-new-key-coverage` (inline) | Uma chave **nova** em inglês está traduzida em todas as localidades — um marcador `__MISSING__:` é rejeitado                                                                                            | Sim            |
-| `check-translation-ratio`         | A proporção de traduções reais por localidade (idênticas ao inglês / espaço reservado / ausentes fora da lista de permissões) não deve exceder `config/quality/i18n-translation-baseline.json` + margem | **Consultivo** |
+| `check-translation-ratio`         | A proporção de traduções reais por localidade (idênticas ao inglês / espaço reservado / ausentes fora da lista de permissões) não deve exceder `config/quality/i18n-translation-baseline.json` + margem | **Bloqueante** |
 
 Requer `fetch-depth: 0` — o gate de divergência de valores compara as diferenças de `en.json` em relação à base de mesclagem.
 
@@ -290,8 +323,19 @@ npm run i18n:check-value-drift:warn     # somente relatório
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Encerra com código 0 e `SKIP reason=base-unresolved` quando o catálogo base não pode ser lido (clone
-raso sem a referência base), espelhando `check-openapi-breaking`.
+As verificações de desvio de valores e de novas chaves compartilham uma única comparação imutável de
+`scripts/i18n/resolve-ui-diff-base.mjs`. O fluxo de trabalho fornece os mesmos SHAs da base, da ponta da base e
+do candidato para ambas as verificações. As execuções de PR/alteração da base de destino, push e grupo de mesclagem usam o contexto
+de seus eventos. O disparo de uma ramificação candidata exige seu PR aberto exato ou a entrada explícita
+`i18n_base_sha`. O disparo ou a observação agendada de `main` ou `release/vX.Y.Z`
+sem essa entrada compara o último commit com seu primeiro pai; isso não é uma auditoria de
+toda a dívida de tradução herdada. A invocação local exige uma base de comparação explícita,
+por exemplo, o comando `BASE_REF` acima.
+
+Um contexto de comparação ausente ou ambíguo, um catálogo obrigatório ilegível ou inválido e
+um candidato alterado produzem `INCOMPLETE` com o código de saída **2**, inclusive no modo de aviso.
+As leituras de catálogo usam `scripts/i18n/read-ui-catalog.mjs`; falhas de leitura não são substituídas
+por objetos vazios. Nem uma base indisponível nem uma entrada incompleta estabelecem PASS.
 
 ### Job: `i18n`
 
@@ -313,7 +357,7 @@ Executado somente em pull requests.
 
 ### Job: `test-vitest`
 
-Executado após `build`. Bloqueia a mesclagem em caso de falha.
+Requer o job de classificação `changes`. Os shards aplicáveis da matriz bloqueiam o merge em caso de falha.
 
 | Suíte            | Valida                                                             | Bloqueante                                                                                                                |
 | ---------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
@@ -386,8 +430,9 @@ Nos eventos `pull_request`, `quality.yml` passa `--base-ref <PR base SHA>` para 
 
 - **bloqueante** — o PR adicionou violações de complexidade ciclomática/cognitiva ou exports mortos nos arquivos que alterou
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` no log);
-- **consultivo** — o total global em comparação com a linha de base congelada. Um desvio herdado nunca reprova um
-  PR que não o causou; o desvio é congelado novamente na reconciliação da release e monitorado pelo job de margem.
+- **consultivo** — o total global em comparação com a linha de base congelada. O desvio herdado nunca faz
+  um PR inocente falhar; o desvio é rastreado para correção durante a reconciliação da versão e monitorado pelo
+  job de margem disponível.
 
 `check:file-size` usa a referência base conforme suas próprias regras (`scripts/check/check-file-size.mjs`, #8522):
 ele verifica todos os arquivos-fonte e de teste na árvore, lê a contagem de linhas de cada um na base do PR
@@ -592,7 +637,11 @@ verde com uma allowlist crescente transmite uma falsa sensação de qualidade.
 
 1. Crie `scripts/check/check-<name>.mjs` (ou `.ts`). Gates de política encerram com 0/1.
    Gates do tipo catraca emitem uma métrica para `quality-metrics.json` por meio de `collect-metrics.mjs`.
-2. Adicione `"check:<name>": "node scripts/check/check-<name>.mjs"` ao `package.json`.
+2. Adicione `"check:<name>": "node scripts/check/check-<name>.mjs"` ao `package.json` e
+   sincronize o alias e seu comando exato em `config/quality/gate-manifest.json`.
+   Aplique a mesma sincronização ao alterar ou remover um alias de validação existente.
+   Execute `npm run check:gate-manifest`; o hook de pre-commit e a classificação de alterações da CI
+   impõem esse contrato.
 3. Integre-o em `.github/workflows/ci.yml` no job apropriado
    (política → `lint` ou `docs-sync-strict`; catraca → `quality-gate`).
 4. Se ele tiver uma lista de permissões, aplique `reportStaleEntries()` de

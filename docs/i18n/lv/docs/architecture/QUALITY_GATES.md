@@ -40,10 +40,9 @@ pieejamība.
 Katrā JSON apliecinājumā ir norādīts izrakstītais SHA, darbplūsmas izpildes gadījums
 un mēģinājums. CLI noraida neatbilstību starp izrakstījuma un notikuma SHA.
 Darbplūsmas testi sasaista dalību politikā ar sprieduma uzdevuma `needs` sarakstu,
-lai jauns vai noņemts izpildes zars nevarētu nemanāmi pazust. Apliecinājumi attiecas
-uz pašu darbplūsmu, nevis publicēšanu, izvietošanu vai esoša konsultatīva skenera
-iekšējo darbību. Abu pārbaužu nosaukumu aktivizēšana zaru noteikumos ir atsevišķa
-administratīva izmaiņa; šo uzdevumu pievienošana pati par sevi neaizsargā zaru.
+lai jauns vai noņemts izpildes zars nevarētu nemanāmi pazust. Kvītis aptver savu darbplūsmu, nevis publicēšanu, izvietošanu vai esoša konsultatīva skenera iekšējo darbību. Piemērojamo pārbaužu noteikšana par obligātām zaru kārtulās ir atsevišķas administratīvas izmaiņas; to uzdevumu definēšana pati par sevi zaru neaizsargā.
+
+`API Route Typecheck` ir neatkarīga darbplūsmas pārbaude ārpus abiem apkopotajiem spriedumiem un lokālā pilnā novērotāja statiskā profila. Pārbaudiet tās rezultātu atsevišķi precīzajam kandidātam. `.github/workflows/api-route-typecheck.yml` tiek izpildīts PR pieprasījumiem uz `main` vai `release/**`, izmaiņu nosūtīšanai uz jebkuru no šīm zaru saimēm un manuālai palaišanai. Tam nav ceļu filtra. PR bāzes zara maiņa pieprasa jaunu pārbaudi; pamatteksta/virsraksta labojumi izmanto tikai novērošanai paredzēto nosaukumu `Admission not requested / API Route Typecheck` un nevar aizstāt uzņemšanas pārbaudi. Darbplūsma nedeklarē apvienošanas grupas trigeri. Jebkurai apvienošanas rindas ieviešanai, kurai šī pārbaude ir obligāta, vispirms jānodrošina tās izpilde šim notikumam.
 
 ### Saglabātie pierādījumi pieņemšanas reducētājā
 
@@ -88,6 +87,21 @@ nepareizi veidotas vai nesaderīgas daļas izraisa pielaides kļūmi. Nesekmīga
 daļas atsevišķi saglabā neapstrādātu diagnostikas pārklājumu; to nedrīkst iekļaut
 galīgajā sapludināšanā.
 
+### Vienību izpildes progresa ieraksti
+
+Koplietotā komanda `test:unit:ci:shard` reģistrē posmus `primary`, `dashboard` un `serial`,
+izmantojot `scripts/ci/unit-progress-reporter.mjs`. Parastais testu pārskats joprojām ir
+pieejams. Atsevišķs ieraksts, kurā ir tikai metadati, reģistrē katra faila izpildes sākumu un pabeigšanu,
+savukārt 30 sekunžu sirdspuksta ziņojumā ir uzskaitīti joprojām aktīvie faili un to izpildes ilgums. Tajā tiek reģistrēti
+tikai atļaušanas sarakstā iekļautie izpildes metadati; testu apraksti, izvade, kļūdu saturs un pilnā
+vide netiek serializēta.
+
+CI un Quality saglabā JSONL failus kā `unit-progress-ci-<run>-<attempt>-<shard>` un
+`unit-progress-quality-<run>-<attempt>-<shard>`. Darba noildze var nepieļaut vēlāko augšupielādi;
+jau nosūtītie sirdspuksta ziņojumi paliek kā diagnostikas pierādījumi. Trūkstoši sirdspuksta ziņojumi var liecināt arī par
+bloķētu vai pārtrauktu izpildītāja procesu. Šie ieraksti saglabā esošo testu atlasi,
+paralēlismu, termiņus un izejas statusu; tie nav spriedumi par kandidātu pielaidi.
+
 ### Statiskās skenēšanas uzskaite
 
 Versijotā npm aizstājvārdu uzskaite un dalība statiskajā skenēšanā atrodas
@@ -121,6 +135,27 @@ izpildīti.
 
 Skripti atrodas zem `scripts/check/` (politikas vārti) un `scripts/quality/`
 (slieksnīšu mehānisms). CI patiesības avots ir `.github/workflows/ci.yml`.
+
+### Publicētās bāzes dokumentācijas stāvoklis
+
+`.github/workflows/i18n-base-health.yml` uzrauga dokumentācijas stāvokli pēc atlasītām
+izmaiņu nosūtīšanām uz `main` un `release/v*`, kā arī pēc manuālas palaišanas. Tā filtri aptver dokumentāciju,
+saknes Markdown failus, `llm.txt`, tulkojumu stāvokli/konfigurāciju un saistītos i18n rīkus.
+Vienīgais `Published base documentation health` uzdevums izmanto mitinātu Ubuntu vidi un piecu minūšu
+termiņu. Tas veic tikai lasāmu validāciju un izveido diagnostikas apliecinājumu, neveicot
+atkarību instalēšanu, tulkošanu vai stāvokļa pārņemšanu.
+
+`scripts/i18n/check-base-health.mjs` pieprasa, lai nebūtu avota jaucējvērtību, trūkstošu mērķu, mērķa jaucējvērtību,
+novecojušu tulkojumu un sadaļu kešatmiņas neatbilstību. Tas arī validē pašreizējo pamata
+dokumentu/lokalizāciju tvērumu un reģistrēto izcelsmi. Nederīgs konteksts, nepilnīgs pārklājums
+vai pārtraukta pārbaudes rīka darbība rada `INCOMPLETE`; apstiprināta novirze rada `FAIL`. Abos
+gadījumos tiek atgriezts kļūmi norādošs izejas statuss. Apliecinājums ir piesaistīts izrakstīšanas SHA, darbplūsmai, izpildei un
+mēģinājumam, un tiek saglabāts kā `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Šis ir neatkarīgs publicētās bāzes novērojums. Tas nepievieno PR vai
+sapludināšanas grupas notikumu, obligātu PR pārbaudi, npm aizstājvārdu vai statiskās skenēšanas profila dalībnieku.
+Esošā diferenciālā PR politika un pamatā esošā pārbaudes rīka konsultatīvās klasifikācijas
+paliek nodalītas. Veiksmīga augšupielāde nevar pārvērst nesekmīgu stāvokļa rezultātu par PASS.
 
 ### Ātrais ceļš laidiena PR (`quality.yml`)
 
@@ -255,12 +290,12 @@ Apgalvojumu pārbaudes par pastāvīgi bezmaksas pakalpojumu sniedzējiem, katal
 
 ### Darbs: `i18n-ui-coverage`
 
-| Skripts                             | Pārbauda                                                                                                                                                                                                  | Bloķējošs        |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| `check-ui-keys-coverage` (iekļauts) | UI i18n atslēgu pārklājums ir ≥ 65%                                                                                                                                                                       | Jā               |
-| `check-ui-value-drift` (iekļauts)   | Pārrakstīta angļu valodas **vērtība** neatstāj novecojušus tulkojumus                                                                                                                                     | Jā               |
-| `check-new-key-coverage` (iekļauts) | **Jauna** angļu valodas atslēga ir iztulkota katrā lokalizācijā — marķieris `__MISSING__:` tiek noraidīts                                                                                                 | Jā               |
-| `check-translation-ratio`           | Reālo tulkojumu īpatsvars katrā lokalizācijā (angļu tekstam identiskas / vietturu / trūkstošas lapas ārpus atļauto saraksta) nedrīkst pārsniegt `config/quality/i18n-translation-baseline.json` + rezervi | **Konsultatīvs** |
+| Skripts                             | Pārbauda                                                                                                                                                                                                  | Bloķējošs     |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `check-ui-keys-coverage` (iekļauts) | UI i18n atslēgu pārklājums ir ≥ 65%                                                                                                                                                                       | Jā            |
+| `check-ui-value-drift` (iekļauts)   | Pārrakstīta angļu valodas **vērtība** neatstāj novecojušus tulkojumus                                                                                                                                     | Jā            |
+| `check-new-key-coverage` (iekļauts) | **Jauna** angļu valodas atslēga ir iztulkota katrā lokalizācijā — marķieris `__MISSING__:` tiek noraidīts                                                                                                 | Jā            |
+| `check-translation-ratio`           | Reālo tulkojumu īpatsvars katrā lokalizācijā (angļu tekstam identiskas / vietturu / trūkstošas lapas ārpus atļauto saraksta) nedrīkst pārsniegt `config/quality/i18n-translation-baseline.json` + rezervi | **Bloķējošs** |
 
 Nepieciešams `fetch-depth: 0` — vērtību novirzes vārteja salīdzina `en.json` ar apvienošanas bāzi.
 
@@ -303,8 +338,19 @@ npm run i18n:check-value-drift:warn     # tikai pārskats
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Beidzas ar kodu 0 un `SKIP reason=base-unresolved`, ja bāzes katalogu nevar nolasīt (sekls
-klons bez bāzes atsauces), līdzīgi kā `check-openapi-breaking`.
+Vērtību novirzes un jauno atslēgu pārbaudes izmanto vienu nemainīgu salīdzinājumu no
+`scripts/i18n/resolve-ui-diff-base.mjs`. Darbplūsma abām pārbaudēm nodod vienus un tos pašus bāzes, bāzes gala un
+kandidāta SHA. PR/bāzes atkārtotas mērķēšanas, izmaiņu nosūtīšanas un apvienošanas grupas izpildes izmanto attiecīgā notikuma
+kontekstu. Kandidāta zara manuālai palaišanai ir nepieciešams precīzi tam atbilstošais atvērtais PR vai tieši norādīta
+`i18n_base_sha` ievade. Manuāla vai ieplānota `main` vai `release/vX.Y.Z` novērošana
+bez šīs ievades salīdzina pēdējo komitu ar tā pirmo vecākkomitu; tā nav visa
+mantotā tulkojumu parāda revīzija. Lokālai izsaukšanai nepieciešama tieši norādīta salīdzināšanas bāze,
+piemēram, iepriekš minētā `BASE_REF` komanda.
+
+Trūkstošs vai neviennozīmīgs salīdzināšanas konteksts, nenolasāms vai nederīgs obligātais katalogs un
+mainīts kandidāts rada rezultātu `INCOMPLETE` ar izejas kodu **2**, arī brīdinājuma režīmā.
+Katalogi tiek lasīti, izmantojot `scripts/i18n/read-ui-catalog.mjs`; lasīšanas kļūmju gadījumā
+tie netiek aizstāti ar tukšiem objektiem. Ne nepieejama bāze, ne nepilnīga ievade nenodrošina rezultātu PASS.
 
 ### Uzdevums: `i18n`
 
@@ -326,7 +372,7 @@ Tiek izpildīts tikai izmaiņu pieprasījumiem.
 
 ### Uzdevums: `test-vitest`
 
-Tiek izpildīts pēc `build`. Kļūmes gadījumā bloķē apvienošanu.
+Nepieciešams `changes` klasifikācijas darbs. Attiecīgo matricas segmentu kļūme bloķē sapludināšanu.
 
 | Komplekts        | Pārbauda                                                          | Bloķējošs                                                                                                                      |
 | ---------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -399,8 +445,9 @@ ir mainījis** (`scripts/check/newCodeMode.mjs`: sapludināšanas bāze tiek mat
 
 - **bloķējošs** — PR mainītajos failos pievienoja ciklomātiskās/kognitīvās sarežģītības pārkāpumus vai neizmantotus eksportus
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` žurnālā);
-- **konsultatīvs** — globālā kopsumma salīdzinājumā ar fiksēto bāzes robežvērtību. Mantotā novirze nekad nepadara
-  nevainīgu PR nesekmīgu; novirze tiek atkārtoti fiksēta laidiena saskaņošanas laikā, un to uzrauga rezerves uzdevums.
+- **informatīvs** — globālā kopsumma salīdzinājumā ar fiksēto bāzes līmeni. Mantotā novirze nekad neiezīmē
+  nevainīgu PR sarkanā krāsā; novirze tiek uzskaitīta labošanai laidiena saskaņošanas laikā, un to uzrauga
+  rezerves apjoma uzdevums.
 
 `check:file-size` izmanto bāzes atsauci pēc saviem noteikumiem (`scripts/check/check-file-size.mjs`, #8522):
 tas pārbauda katru avota un testa failu kokā, nolasa katra faila rindu skaitu PR bāzē,
@@ -606,7 +653,11 @@ atļauto izņēmumu sarakstu rada maldīgu kvalitātes iespaidu.
 
 1. Izveidojiet `scripts/check/check-<name>.mjs` (vai `.ts`). Politikas pārbaudes beidz darbu ar kodu 0/1.
    Sprūdrata tipa pārbaudes izvada metriku failā `quality-metrics.json`, izmantojot `collect-metrics.mjs`.
-2. Pievienojiet `"check:<name>": "node scripts/check/check-<name>.mjs"` failam `package.json`.
+2. Pievienojiet `"check:<name>": "node scripts/check/check-<name>.mjs"` failam `package.json` un
+   sinhronizējiet aizstājvārdu un tā precīzo komandu failā `config/quality/gate-manifest.json`.
+   Veiciet tādu pašu sinhronizāciju, mainot vai noņemot esošu validācijas aizstājvārdu.
+   Palaidiet `npm run check:gate-manifest`; pirmskomita āķis un CI izmaiņu klasifikācija
+   nodrošina šīs vienošanās ievērošanu.
 3. Pievienojiet to `.github/workflows/ci.yml` atbilstošajā uzdevumā
    (politika → `lint` vai `docs-sync-strict`; sprūdrats → `quality-gate`).
 4. Ja pārbaudei ir atļauto vienumu saraksts, izmantojiet `reportStaleEntries()` no

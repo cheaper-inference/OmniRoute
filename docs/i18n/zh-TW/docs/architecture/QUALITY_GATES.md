@@ -35,8 +35,9 @@ CI 與 Quality Gates 工作流程各自產生一個穩定的判定結果：`Gate
 每份 JSON 收據都會識別已簽出的 SHA、工作流程執行及嘗試次數。
 CLI 會拒絕簽出 SHA 與事件 SHA 不相符的情況。工作流程測試會將政策成員資格
 綁定至判定作業的 `needs` 清單，因此新增或移除的執行通道無法悄然消失。
-收據涵蓋其自身的工作流程，而不涵蓋發佈、部署，或現有建議性掃描器的內部作業。
-在分支規則中啟用這兩個檢查名稱是另一項管理變更；新增這些作業本身並不會保護分支。
+收據涵蓋的是其本身的工作流程，而非發布、部署或現有建議性掃描器的內部機制。將適用的檢查設為分支規則中的必要條件，是另一項獨立的管理變更；僅定義其工作並不會保護分支。
+
+`API Route Typecheck` 是一項獨立的工作流程檢查，不包含在兩個彙總判定或本機完整觀察器的靜態設定檔中。請針對確切的候選項目個別檢查其結果。`.github/workflows/api-route-typecheck.yml` 會在以 `main` 或 `release/**` 為目標的 PR、推送至任一分支系列，以及手動分派時執行。它沒有路徑篩選器。重新設定 PR 基底分支會要求執行新的檢查；本文或標題的編輯會使用僅供觀察的名稱 `Admission not requested / API Route Typecheck`，且無法取代准入檢查。此工作流程未宣告合併群組觸發條件。任何要求此檢查的合併佇列推出作業，都必須先確保它會針對該事件執行。
 
 ### 驗收歸納器中保留的證據
 
@@ -75,6 +76,12 @@ MCP/autoCombo Vitest 測試套件。必要作業的結果涵蓋每個矩陣項�
 依分片預先合併並不安全。遺失、格式錯誤或不相容的分片都會導致准入失敗。
 失敗的測試分片會另外保留原始診斷覆蓋率；其不得進入最終合併。
 
+### 單元執行進度收據
+
+共用的 `test:unit:ci:shard` 命令會透過 `scripts/ci/unit-progress-reporter.mjs` 記錄 `primary`、`dashboard` 和 `serial` 階段。一般測試報告仍可使用。另一份僅包含中繼資料的收據會記錄每個檔案的開始與完成狀態，而每 30 秒一次的心跳會列出仍在執行中的檔案及其經過時間。它只記錄允許清單中的執行中繼資料；不會序列化測試描述、輸出、錯誤內容及完整環境。
+
+CI 和 Quality 會將 JSONL 檔案保留為 `unit-progress-ci-<run>-<attempt>-<shard>` 和 `unit-progress-quality-<run>-<attempt>-<shard>`。作業逾時可能會導致後續上傳無法進行；已發出的心跳仍可作為診斷依據。心跳缺失也可能表示執行器程序遭到阻塞或終止。這些收據會保留現有的測試選擇、並行設定、截止時間及結束狀態；它們並非候選項目准入的判定結果。
+
 ### 靜態掃描清單
 
 版本化的 npm 別名清單與靜態掃描成員資格位於
@@ -104,6 +111,14 @@ npm 進入點，因此會保留其執行階段（包括已設定使用 Bun 的�
 
 指令碼位於 `scripts/check/`（政策閘門）及 `scripts/quality/`（棘輪引擎）。
 CI 的單一真實來源為 `.github/workflows/ci.yml`。
+
+### 已發布基準文件的健康狀態
+
+`.github/workflows/i18n-base-health.yml` 會在選定的推送至 `main` 與 `release/v*` 後，以及手動分派時，觀察文件的健康狀態。其篩選條件涵蓋文件、根目錄 Markdown、`llm.txt`、翻譯狀態／設定，以及相關的 i18n 工具。唯一的 `Published base documentation health` 工作使用託管的 Ubuntu，並設有五分鐘的期限。它會執行唯讀驗證並寫入診斷收據，而不會安裝相依套件、進行翻譯或採用狀態。
+
+`scripts/i18n/check-base-health.mjs` 要求來源雜湊、目標缺失、目標雜湊、過時翻譯及章節快取的不一致情況均為零。它也會驗證目前的核心文件／語系範圍及其記錄的來源資訊。無效的情境、不完整的涵蓋範圍或檢查程式中斷，都會產生 `INCOMPLETE`；確認存在偏移則會產生 `FAIL`。兩者都會傳回表示失敗的結束狀態。收據會綁定至簽出 SHA、工作流程、執行與嘗試次數，並以 `i18n-base-health-<sha>-<run>-<attempt>` 的名稱保留。
+
+這是對已發布基準的獨立觀察。它不會新增 PR 或合併群組事件、必要的 PR 檢查、npm 別名或靜態掃描設定檔成員。現有的差異式 PR 政策與底層檢查程式的建議性分類仍維持分離。成功上傳無法將失敗的健康狀態結果轉變為 PASS。
 
 ### 發行 PR 快速路徑（`quality.yml`）
 
@@ -237,12 +252,12 @@ SVG 標準數值檢查會讀取 `SVG_DIAGRAM_FILES`（`scripts/check/check-docs-
 
 ### 工作：`i18n-ui-coverage`
 
-| 指令碼                           | 驗證內容                                                                                                                                  | 阻擋合併   |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `check-ui-keys-coverage`（內嵌） | UI i18n 鍵覆蓋率 ≥ 65%                                                                                                                    | 是         |
-| `check-ui-value-drift`（內嵌）   | 重寫後的英文**值**不會留下過時的翻譯                                                                                                      | 是         |
-| `check-new-key-coverage`（內嵌） | **新增的**英文鍵已在每個語系中翻譯完成 — 不接受 `__MISSING__:` 標記                                                                       | 是         |
-| `check-translation-ratio`        | 每個語系的實際翻譯比例（允許清單以外與英文相同／預留位置／缺漏的葉節點）不得超過 `config/quality/i18n-translation-baseline.json` + 餘裕值 | **建議性** |
+| 指令碼                           | 驗證內容                                                                                                                                  | 阻擋合併 |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `check-ui-keys-coverage`（內嵌） | UI i18n 鍵覆蓋率 ≥ 65%                                                                                                                    | 是       |
+| `check-ui-value-drift`（內嵌）   | 重寫後的英文**值**不會留下過時的翻譯                                                                                                      | 是       |
+| `check-new-key-coverage`（內嵌） | **新增的**英文鍵已在每個語系中翻譯完成 — 不接受 `__MISSING__:` 標記                                                                       | 是       |
+| `check-translation-ratio`        | 每個語系的實際翻譯比例（允許清單以外與英文相同／預留位置／缺漏的葉節點）不得超過 `config/quality/i18n-translation-baseline.json` + 餘裕值 | **阻擋** |
 
 需要 `fetch-depth: 0` — 值偏移閘門會比較 `en.json` 與合併基準之間的差異。
 
@@ -273,7 +288,19 @@ npm run i18n:check-value-drift:warn     # 僅產生報告
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-當無法讀取基礎目錄（缺少基礎參照的淺層複製）時，會以 `SKIP reason=base-unresolved` 和狀態碼 0 結束，行為與 `check-openapi-breaking` 一致。
+值漂移與新鍵閘門共用來自
+`scripts/i18n/resolve-ui-diff-base.mjs` 的同一個不可變比較結果。工作流程會將相同的基底、基底尖端與
+候選 SHA 傳遞給兩項檢查。PR／基底重新定向、推送與合併群組執行會使用其事件
+情境。分派候選分支時，必須有與其完全相符的開放中 PR，或明確提供
+`i18n_base_sha` 輸入。在未提供該輸入的情況下，分派或排程觀察 `main` 或 `release/vX.Y.Z`
+時，會將最後一筆提交與其第一個父提交進行比較；這並非對
+所有繼承而來的翻譯技術債進行稽核。本機叫用需要明確的比較基底，
+例如上方的 `BASE_REF` 命令。
+
+比較情境遺失或有歧義、必要目錄無法讀取或無效，以及
+候選項目發生變更時，都會產生 `INCOMPLETE` 並以結束代碼 **2** 結束，包括在警告模式下。
+目錄讀取使用 `scripts/i18n/read-ui-catalog.mjs`；讀取失敗時不會以
+空物件替代。基底無法取得或輸入不完整，皆不能判定為 PASS。
 
 ### 工作：`i18n`
 
@@ -295,7 +322,7 @@ BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 
 ### 工作：`test-vitest`
 
-在 `build` 之後執行。失敗時會阻擋合併。
+需要 `changes` 分類工作。適用的矩陣分片失敗時會阻擋合併。
 
 | 測試套件         | 驗證項目                                                  | 阻擋性                                                                            |
 | ---------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------- |
@@ -365,8 +392,9 @@ BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 
 - **阻擋性** — PR 在其修改的檔案中新增了循環／認知複雜度違規或無效匯出
   （記錄中的 `complexityNewCode=`、`cognitiveComplexityNewCode=`、`deadExportsNewCode=`）；
-- **建議性** — 全域總數與凍結基準的比較。繼承而來的偏移永遠不會讓無辜的 PR 變紅；
-  該偏移會在發行協調時重新凍結，並由預留空間工作監控。
+- **建議性** — 全域總量與凍結基準之間的比較。既有的偏差絕不會讓無辜的 PR
+  顯示為紅色；該偏差會持續追蹤，以便在發布協調時修復，並由
+  餘裕作業監控。
 
 `check:file-size` 依照自身規則使用基準參照（`scripts/check/check-file-size.mjs`，#8522）：
 它會檢查樹狀結構中的每個原始碼與測試檔案，使用 `git show` 讀取各檔案在 PR 基準上的行數，
@@ -557,7 +585,11 @@ JSON，十秒即可完成，也是解除紅燈 PR 阻塞最快的方法。
 
 1. 建立 `scripts/check/check-<name>.mjs`（或 `.ts`）。政策關卡以 0/1 結束。
    棘輪式關卡透過 `collect-metrics.mjs` 將指標輸出至 `quality-metrics.json`。
-2. 將 `"check:<name>": "node scripts/check/check-<name>.mjs"` 新增至 `package.json`。
+2. 將 `"check:<name>": "node scripts/check/check-<name>.mjs"` 新增至 `package.json`，並
+   在 `config/quality/gate-manifest.json` 中同步該別名及其完全相同的命令。
+   變更或移除現有的驗證別名時，也請套用相同的同步操作。
+   執行 `npm run check:gate-manifest`；pre-commit hook 與 CI 變更分類
+   會強制執行此契約。
 3. 在 `.github/workflows/ci.yml` 中將其接入適當的工作
    （政策 → `lint` 或 `docs-sync-strict`；棘輪 → `quality-gate`）。
 4. 如果它有允許清單，請套用來自

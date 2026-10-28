@@ -39,9 +39,9 @@ zweryfikować wystarczającą pojemność środowiska hostowanego.
 Każde potwierdzenie JSON identyfikuje pobrany SHA, uruchomienie przepływu pracy i próbę.
 CLI odrzuca niezgodność SHA między pobranym kodem a zdarzeniem. Testy przepływu pracy wiążą
 przynależność do polityki z listą `needs` zadania werdyktu, dzięki czemu nowa lub usunięta ścieżka
-nie może zniknąć niezauważenie. Potwierdzenia obejmują własny przepływ pracy, a nie publikację,
-wdrożenie ani wewnętrzne działanie istniejącego skanera doradczego. Aktywowanie obu nazw kontroli
-w regułach gałęzi jest osobną zmianą administracyjną; samo dodanie tych zadań nie chroni gałęzi.
+nie może zniknąć niezauważenie. Poświadczenia obejmują własny przepływ pracy, a nie publikację, wdrażanie ani wewnętrzne mechanizmy istniejącego skanera doradczego. Ustawienie odpowiednich kontroli jako wymaganych w regułach gałęzi jest osobną zmianą administracyjną; samo zdefiniowanie ich zadań nie chroni gałęzi.
+
+`API Route Typecheck` jest niezależną kontrolą przepływu pracy, nieuwzględnioną ani w obu zagregowanych werdyktach, ani w statycznym profilu lokalnego pełnego obserwatora. Sprawdź jej wynik osobno dla konkretnego kandydata. `.github/workflows/api-route-typecheck.yml` jest uruchamiany dla PR-ów kierowanych do `main` lub `release/**`, wypchnięć do dowolnej z tych rodzin gałęzi oraz wywołań ręcznych. Nie ma filtra ścieżek. Zmiana gałęzi docelowej PR-a powoduje żądanie nowej kontroli; edycje treści lub tytułu używają nazwy przeznaczonej wyłącznie do obserwacji `Admission not requested / API Route Typecheck` i nie mogą zastąpić kontroli dopuszczenia. Przepływ pracy nie deklaruje wyzwalacza dla grupy scaleń. Każde wdrożenie kolejki scaleń, które wymaga tej kontroli, musi najpierw zapewnić jej wykonywanie dla tego zdarzenia.
 
 ### Zachowane dowody w reduktorze akceptacji
 
@@ -84,6 +84,22 @@ funkcji/bloków. Brakujące, nieprawidłowo sformatowane lub niezgodne fragmenty
 niepowodzenie dopuszczenia. Fragmenty testów zakończone niepowodzeniem zachowują osobno surowe
 diagnostyczne dane pokrycia; nie mogą one wejść do końcowego scalania.
 
+### Potwierdzenia postępu wykonywania testów jednostkowych
+
+Współdzielone polecenie `test:unit:ci:shard` rejestruje fazy `primary`, `dashboard` i `serial`
+za pośrednictwem `scripts/ci/unit-progress-reporter.mjs`. Standardowy raport z testów pozostaje
+dostępny. Oddzielne potwierdzenie zawierające wyłącznie metadane rejestruje rozpoczęcie i zakończenie
+każdego pliku, a 30-sekundowy sygnał aktywności wskazuje pliki, które nadal są aktywne, oraz czas ich
+wykonywania. Rejestrowane są wyłącznie metadane wykonania znajdujące się na liście dozwolonych danych;
+opisy testów, dane wyjściowe, treści błędów ani pełne środowisko nie są serializowane.
+
+Procesy CI i Quality przechowują pliki JSONL jako `unit-progress-ci-<run>-<attempt>-<shard>` oraz
+`unit-progress-quality-<run>-<attempt>-<shard>`. Przekroczenie limitu czasu zadania może uniemożliwić
+późniejsze przesłanie plików; wyemitowane wcześniej sygnały aktywności pozostają materiałem
+diagnostycznym. Brak sygnałów aktywności może również wskazywać na zablokowany lub zakończony proces
+modułu wykonawczego. Te potwierdzenia zachowują dotychczasowy wybór testów, współbieżność, limity czasu
+i kod zakończenia; nie stanowią werdyktów dotyczących dopuszczenia kandydata.
+
 ### Inwentaryzacja skanowania statycznego
 
 Wersjonowany inwentarz aliasów npm i przynależność do skanowania statycznego znajdują się w
@@ -114,6 +130,27 @@ charakter informacyjny i nie stanowi dowodu, że bramka faktycznie została uruc
 
 Skrypty znajdują się w `scripts/check/` (bramki polityki) oraz `scripts/quality/` (silnik zapadkowy).
 Źródłem prawdy CI jest `.github/workflows/ci.yml`.
+
+### Stan opublikowanej dokumentacji bazowej
+
+`.github/workflows/i18n-base-health.yml` monitoruje stan dokumentacji po wybranych
+wypchnięciach do gałęzi `main` i `release/v*` oraz po ręcznym uruchomieniu. Jego filtry obejmują dokumentację,
+główne pliki Markdown, `llm.txt`, stan i konfigurację tłumaczeń oraz odpowiednie narzędzia i18n.
+Pojedyncze zadanie `Published base documentation health` korzysta z hostowanego środowiska Ubuntu i ma pięciominutowy
+limit czasu. Przeprowadza walidację tylko do odczytu i zapisuje potwierdzenie diagnostyczne bez
+instalowania zależności, tłumaczenia ani przyjmowania stanu.
+
+`scripts/i18n/check-base-health.mjs` wymaga braku niespójności dotyczących skrótów źródłowych, brakujących plików docelowych, skrótów plików docelowych,
+nieaktualnych tłumaczeń oraz pamięci podręcznej sekcji. Weryfikuje również bieżący zakres podstawowych
+dokumentów i ustawień regionalnych oraz zarejestrowane pochodzenie tego zakresu. Nieprawidłowy kontekst, niepełne pokrycie
+lub przerwane działanie narzędzia sprawdzającego powoduje ustawienie wyniku `INCOMPLETE`; potwierdzone rozbieżności powodują ustawienie wyniku `FAIL`. Oba
+zwracają kod zakończenia oznaczający niepowodzenie. Potwierdzenie jest powiązane z SHA wersji checkout, przepływem pracy, uruchomieniem i
+próbą oraz jest przechowywane jako `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Jest to niezależna obserwacja opublikowanej bazy. Nie dodaje zdarzenia PR ani
+grupy scalania, wymaganego sprawdzenia PR, aliasu npm ani elementu profilu skanowania statycznego.
+Istniejąca różnicowa polityka PR oraz bazowe klasyfikacje doradcze narzędzia sprawdzającego
+pozostają odrębne. Pomyślne przesłanie nie może zmienić nieudanego wyniku kontroli stanu na PASS.
 
 ### Szybka ścieżka PR wydania (`quality.yml`)
 
@@ -248,12 +285,12 @@ Kontrole twierdzeń o dostawcach bezpłatnych na zawsze, wpisach katalogu, odnaw
 
 ### Zadanie: `i18n-ui-coverage`
 
-| Skrypt                            | Sprawdza                                                                                                                                                                                                                                                        | Blokujący    |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| `check-ui-keys-coverage` (inline) | Pokrycie kluczy internacjonalizacji interfejsu użytkownika wynosi ≥ 65%                                                                                                                                                                                         | Tak          |
-| `check-ui-value-drift` (inline)   | Przepisana angielska **wartość** nie pozostawia nieaktualnych tłumaczeń                                                                                                                                                                                         | Tak          |
-| `check-new-key-coverage` (inline) | **Nowy** angielski klucz jest przetłumaczony we wszystkich ustawieniach regionalnych — znacznik `__MISSING__:` jest odrzucany                                                                                                                                   | Tak          |
-| `check-translation-ratio`         | Współczynnik rzeczywistych tłumaczeń dla ustawienia regionalnego (wartości identyczne z angielskimi / symbole zastępcze / brakujące liście spoza listy dozwolonych) nie może przekraczać wartości z `config/quality/i18n-translation-baseline.json` + marginesu | **Doradczy** |
+| Skrypt                            | Sprawdza                                                                                                                                                                                                                                                        | Blokujący     |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `check-ui-keys-coverage` (inline) | Pokrycie kluczy internacjonalizacji interfejsu użytkownika wynosi ≥ 65%                                                                                                                                                                                         | Tak           |
+| `check-ui-value-drift` (inline)   | Przepisana angielska **wartość** nie pozostawia nieaktualnych tłumaczeń                                                                                                                                                                                         | Tak           |
+| `check-new-key-coverage` (inline) | **Nowy** angielski klucz jest przetłumaczony we wszystkich ustawieniach regionalnych — znacznik `__MISSING__:` jest odrzucany                                                                                                                                   | Tak           |
+| `check-translation-ratio`         | Współczynnik rzeczywistych tłumaczeń dla ustawienia regionalnego (wartości identyczne z angielskimi / symbole zastępcze / brakujące liście spoza listy dozwolonych) nie może przekraczać wartości z `config/quality/i18n-translation-baseline.json` + marginesu | **Blokujące** |
 
 Wymaga `fetch-depth: 0` — mechanizm wykrywania rozbieżności wartości porównuje `en.json` z bazą scalania.
 
@@ -296,8 +333,22 @@ npm run i18n:check-value-drift:warn     # tylko raportowanie
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Kończy działanie kodem 0 i komunikatem `SKIP reason=base-unresolved`, gdy nie można odczytać katalogu bazowego (płytki
-klon bez referencji bazowej), analogicznie do `check-openapi-breaking`.
+Bramki dryfu wartości i nowych kluczy współdzielą jedno niezmienne porównanie z
+`scripts/i18n/resolve-ui-diff-base.mjs`. Przepływ pracy przekazuje do obu kontroli te same
+SHA bazy, końcówki bazy i kandydata. Uruchomienia dla PR/zmiany bazy docelowej, operacji
+push i grupy scalania używają kontekstu odpowiedniego zdarzenia. Uruchomienie dla gałęzi
+kandydującej wymaga dokładnie odpowiadającego jej otwartego PR albo jawnie podanej wartości
+wejściowej `i18n_base_sha`. Uruchomienie ręczne lub zaplanowana obserwacja gałęzi `main`
+albo `release/vX.Y.Z` bez tej wartości wejściowej porównuje ostatni commit z jego pierwszym
+rodzicem; nie jest to audyt całego odziedziczonego długu tłumaczeniowego. Wywołanie lokalne
+wymaga jawnie określonej bazy porównania, na przykład za pomocą powyższego polecenia
+`BASE_REF`.
+
+Brakujący lub niejednoznaczny kontekst porównania, niemożliwy do odczytania albo
+nieprawidłowy wymagany katalog oraz zmieniony kandydat skutkują wynikiem `INCOMPLETE`
+z kodem zakończenia **2**, również w trybie ostrzegania. Katalogi są odczytywane za pomocą
+`scripts/i18n/read-ui-catalog.mjs`; błędy odczytu nie są zastępowane pustymi obiektami.
+Ani niedostępna baza, ani niekompletne dane wejściowe nie oznaczają wyniku PASS.
 
 ### Zadanie: `i18n`
 
@@ -319,7 +370,7 @@ Uruchamiane wyłącznie dla pull requestów.
 
 ### Zadanie: `test-vitest`
 
-Uruchamiane po `build`. Niepowodzenie blokuje scalanie.
+Wymaga zadania klasyfikacyjnego `changes`. Odpowiednie fragmenty macierzy blokują scalanie w przypadku niepowodzenia.
 
 | Zestaw           | Weryfikuje                                                             | Blokujący                                                                                                                                       |
 | ---------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -392,8 +443,9 @@ Dla zdarzeń `pull_request` plik `quality.yml` przekazuje `--base-ref <PR base S
 
 - **blokujące** — PR dodał naruszenia złożoności cyklomatycznej/poznawczej lub martwe eksporty w zmienionych plikach
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` w dzienniku);
-- **doradcze** — globalna suma względem zamrożonego poziomu bazowego. Odziedziczone odchylenie nigdy nie powoduje
-  niepowodzenia niewinnego PR; odchylenie jest ponownie zamrażane podczas uzgadniania wydania i monitorowane przez zadanie sprawdzające zapas.
+- **informacyjne** — globalna suma względem zamrożonej wartości bazowej. Odziedziany dryf nigdy nie oznacza
+  niewinnego PR-a na czerwono; dryf jest śledzony w celu naprawy podczas uzgadniania wydania i monitorowany przez
+  zadanie kontroli zapasu.
 
 `check:file-size` korzysta z odwołania bazowego na własnych zasadach (`scripts/check/check-file-size.mjs`, #8522):
 sprawdza każdy plik źródłowy i testowy w drzewie, odczytuje liczbę jego wierszy w bazie PR
@@ -594,7 +646,11 @@ liście dozwolonych wyjątków daje fałszywe poczucie jakości.
 
 1. Utwórz `scripts/check/check-<name>.mjs` (lub `.ts`). Bramki zasad zwracają kod wyjścia 0/1.
    Bramki typu zapadkowego zapisują wskaźnik w `quality-metrics.json` za pośrednictwem `collect-metrics.mjs`.
-2. Dodaj `"check:<name>": "node scripts/check/check-<name>.mjs"` do `package.json`.
+2. Dodaj `"check:<name>": "node scripts/check/check-<name>.mjs"` do `package.json` oraz
+   zsynchronizuj alias i jego dokładne polecenie w `config/quality/gate-manifest.json`.
+   Zastosuj taką samą synchronizację podczas zmiany lub usuwania istniejącego aliasu walidacji.
+   Uruchom `npm run check:gate-manifest`; hook pre-commit i klasyfikacja zmian w CI
+   wymuszają przestrzeganie tej umowy.
 3. Podłącz ją w `.github/workflows/ci.yml` w odpowiednim zadaniu
    (zasady → `lint` lub `docs-sync-strict`; zapadka → `quality-gate`).
 4. Jeśli korzysta z listy dozwolonych elementów, zastosuj `reportStaleEntries()` z

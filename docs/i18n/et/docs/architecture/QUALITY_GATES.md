@@ -36,9 +36,9 @@ käitajad; enne juurutamist tuleb kontrollida piisava majutatud võimsuse olemas
 Iga JSON-kviitung tuvastab välja võetud SHA, töövoo käituse ja katse.
 CLI lükkab tagasi väljavõtte/sündmuse SHA mittevastavuse. Töövootestid seovad poliitika liikmesuse
 otsusetöö loendiga `needs`, nii et uus või eemaldatud rada ei saaks märkamatult kaduda.
-Kviitungid hõlmavad oma töövoogu, mitte avaldamist, juurutamist ega olemasoleva
-soovitusliku skanneri sisemist tööd. Mõlema kontrollnime aktiveerimine harureeglites on
-eraldi haldusmuudatus; nende tööde lisamine ei kaitse iseenesest haru.
+Kviitungid hõlmavad omaenda töövoogu, mitte avaldamist, juurutamist ega olemasoleva nõuandva skanneri sisemist toimimist. Kohaldatavate kontrollide kohustuslikuks muutmine harureeglites on eraldiseisev haldusmuudatus; nende tööde määratlemine ei kaitse iseenesest haru.
+
+`API Route Typecheck` on sõltumatu töövookontroll, mis jääb väljapoole mõlemat koondotsust ja kohaliku täieliku vaatleja staatilist profiili. Kontrollige selle tulemust täpse kandidaadi jaoks eraldi. `.github/workflows/api-route-typecheck.yml` käivitub `main`- või `release/**`-harusse suunatud PR-ide, kummagi haruperekonna tõukamiste ja käsitsi käivitamise korral. Sellel puudub teefilter. PR-i sihtharu muutmine taotleb uut kontrolli; keha või pealkirja muutmisel kasutatakse ainult vaatlemiseks mõeldud nime `Admission not requested / API Route Typecheck` ning see ei saa vastuvõtukontrolli asendada. Töövoog ei deklareeri liitmisrühma päästikut. Iga liitmisjärjekorra kasutuselevõtt, mis seda kontrolli nõuab, peab esmalt tagama selle käivitamise vastava sündmuse korral.
 
 ### Säilitatud tõendid vastuvõtu reduktoris
 
@@ -77,6 +77,21 @@ katvuslävendeid. Sisendid säilitavad c8 globaalse failinimede järjestuse; kil
 funktsioonide/plokkide segakatvuse korral. Puuduvad, vigased või ühildumatud killud põhjustavad vastuvõtmise nurjumise.
 Nurjunud testikillud säilitavad diagnostilise toorkatvuse eraldi; seda ei saa lõplikku liitmisse kaasata.
 
+### Üksustestide täitmise edenemise kviitungid
+
+Ühiskäsk `test:unit:ci:shard` salvestab etappide `primary`, `dashboard` ja `serial`
+edenemise skripti `scripts/ci/unit-progress-reporter.mjs` kaudu. Tavapärane testiaruanne jääb
+kättesaadavaks. Eraldi, ainult metaandmeid sisaldav kviitung salvestab iga faili käivitamise ja lõpetamise
+ning 30-sekundilise intervalliga südamelöök loetleb endiselt aktiivsed failid ja nende möödunud tööaja. See salvestab
+ainult lubatud täitmise metaandmed; testide kirjeldusi, väljundit, vigade sisu ega täielikku
+keskkonda ei serialiseerita.
+
+CI ja Quality säilitavad JSONL-failid nimedega `unit-progress-ci-<run>-<attempt>-<shard>` ja
+`unit-progress-quality-<run>-<attempt>-<shard>`. Töö ajalõpp võib takistada hilisemat üleslaadimist;
+juba väljastatud südamelöögid jäävad diagnostiliseks tõendusmaterjaliks. Puuduvad südamelöögid võivad viidata ka
+blokeeritud või lõpetatud käitusprotsessile. Need kviitungid säilitavad olemasoleva testivaliku,
+rööpsuse, tähtajad ja väljumisoleku; need ei ole kandidaatide vastuvõtmise otsused.
+
 ### Staatilise skannimise inventar
 
 Versioonitud npm-i aliaste inventar ja staatilise skannimise liikmesus asuvad failis
@@ -107,6 +122,27 @@ on viide, mitte tõend selle kohta, et kontrollvärav tegelikult käivitati.
 
 Skriptid asuvad kataloogides `scripts/check/` (poliitikaväravad) ja `scripts/quality/` (fikseerimismootor).
 CI tõeallikas on `.github/workflows/ci.yml`.
+
+### Avaldatud baasdokumentatsiooni seisund
+
+`.github/workflows/i18n-base-health.yml` jälgib dokumentatsiooni seisundit pärast valitud
+tõukeid harudesse `main` ja `release/v*` ning käsitsi käivitamisel. Selle filtrid hõlmavad dokumentatsiooni,
+juurkataloogi Markdown-faile, faili `llm.txt`, tõlke olekut ja konfiguratsiooni ning asjakohaseid i18n-tööriistu.
+Ainus töö `Published base documentation health` kasutab majutatud Ubuntut ja viieminutilist
+tähtaega. See teostab kirjutuskaitstud valideerimise ja kirjutab diagnostilise kviitungi ilma
+sõltuvusi installimata, tõlkimata ega olekut üle võtmata.
+
+`scripts/i18n/check-base-health.mjs` nõuab, et lähte-räsi vastuolusid, puuduvaid sihtfaile, siht-räsi
+vastuolusid, aegunud tõlkeid ega jaotiste vahemälu vastuolusid ei esineks. Samuti valideerib see praeguse põhidokumentide
+ja lokaatide ulatuse ning nende salvestatud päritolu. Sobimatu kontekst, puudulik katvus
+või katkestatud kontrollija annab tulemuseks `INCOMPLETE`; kinnitatud lahknevus annab tulemuseks `FAIL`. Mõlemad
+tagastavad nurjumist tähistava väljumisoleku. Kviitung seotakse väljavõtte SHA, töövoo, käituse ja
+katsega ning seda säilitatakse nimega `i18n-base-health-<sha>-<run>-<attempt>`.
+
+See on avaldatud baasi sõltumatu vaatlus. See ei lisa PR-i ega
+liitmisrühma sündmust, kohustuslikku PR-kontrolli, npm-i aliast ega staatilise skannimise profiili liiget.
+Olemasolev diferentsiaalne PR-poliitika ja selle aluseks oleva kontrollija soovituslikud klassifikatsioonid
+jäävad eraldiseisvaks. Edukas üleslaadimine ei saa muuta nurjunud seisunditulemust väärtuseks PASS.
 
 ### Väljalaske-PR-i kiirtee (`quality.yml`)
 
@@ -241,12 +277,12 @@ Püsivalt tasuta pakkujate, kataloogikirjete, korduvate kogumite ja hindamistegu
 
 ### Töö: `i18n-ui-coverage`
 
-| Skript                                  | Kontrollib                                                                                                                                                                                                                    | Blokeeriv       |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `check-ui-keys-coverage` (tekstisisene) | Kas kasutajaliidese i18n-võtmete katvus on ≥ 65%                                                                                                                                                                              | Jah             |
-| `check-ui-value-drift` (tekstisisene)   | Ingliskeelse **väärtuse** ümberkirjutamisel ei jää maha aegunud tõlget                                                                                                                                                        | Jah             |
-| `check-new-key-coverage` (tekstisisene) | **Uus** ingliskeelne võti on tõlgitud igas lokaadis — marker `__MISSING__:` lükatakse tagasi                                                                                                                                  | Jah             |
-| `check-translation-ratio`               | Tegelike tõlgete osakaal lokaadi kohta (inglise keelega identsed / kohatäited / puuduvad lehed väljaspool lubatud loendit) ei tohi ületada faili `config/quality/i18n-translation-baseline.json` väärtust koos lubatud varuga | **Soovituslik** |
+| Skript                                  | Kontrollib                                                                                                                                                                                                                    | Blokeeriv     |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `check-ui-keys-coverage` (tekstisisene) | Kas kasutajaliidese i18n-võtmete katvus on ≥ 65%                                                                                                                                                                              | Jah           |
+| `check-ui-value-drift` (tekstisisene)   | Ingliskeelse **väärtuse** ümberkirjutamisel ei jää maha aegunud tõlget                                                                                                                                                        | Jah           |
+| `check-new-key-coverage` (tekstisisene) | **Uus** ingliskeelne võti on tõlgitud igas lokaadis — marker `__MISSING__:` lükatakse tagasi                                                                                                                                  | Jah           |
+| `check-translation-ratio`               | Tegelike tõlgete osakaal lokaadi kohta (inglise keelega identsed / kohatäited / puuduvad lehed väljaspool lubatud loendit) ei tohi ületada faili `config/quality/i18n-translation-baseline.json` väärtust koos lubatud varuga | **Blokeeriv** |
 
 Vajab sätet `fetch-depth: 0` — väärtuste lahknevuse kontroll võrdleb faili `en.json` ühendamisbaasiga.
 
@@ -290,8 +326,19 @@ npm run i18n:check-value-drift:warn     # ainult aruanne
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Lõpetab koodiga 0 ja kuvab `SKIP reason=base-unresolved`, kui baaskataloogi ei saa lugeda (pinnapealne
-kloon ilma baasviiteta), järgides kontrolli `check-openapi-breaking` käitumist.
+Väärtusnihke ja uue võtme kontrollväravad kasutavad üht muutumatut võrdlust skriptist
+`scripts/i18n/resolve-ui-diff-base.mjs`. Töövoog edastab mõlemale kontrollile sama baasi, baasi tipu ja
+kandidaadi SHA-d. PR-i/baasi ümbersuunamise, push'i ja liitmisrühma käivitused kasutavad oma sündmuse
+konteksti. Kandidaatharu käsitsi käivitamine nõuab selle täpset avatud PR-i või sõnaselget
+`i18n_base_sha` sisendit. `main`-i või `release/vX.Y.Z`-i käsitsi või ajastatud jälgimine
+ilma selle sisendita võrdleb viimast commit'i selle esimese eellasega; see ei ole kogu
+päritud tõlkevõla audit. Kohalik käivitamine nõuab sõnaselget võrdlusbaasi,
+näiteks ülaltoodud käsku `BASE_REF`.
+
+Puuduv või mitmetähenduslik võrdluskontekst, loetamatu või vigane nõutav kataloog ja
+muutunud kandidaat annavad tulemuseks `INCOMPLETE` väljumiskoodiga **2**, sealhulgas hoiatusrežiimis.
+Kataloogide lugemiseks kasutatakse skripti `scripts/i18n/read-ui-catalog.mjs`; lugemistõrgete korral ei
+asendata neid tühjade objektidega. Ei kättesaamatu baas ega mittetäielik sisend anna tulemuseks PASS.
 
 ### Töö: `i18n`
 
@@ -313,7 +360,7 @@ Käivitatakse ainult tõmbetaotluste korral.
 
 ### Töö: `test-vitest`
 
-Käivitatakse pärast tööd `build`. Tõrke korral blokeerib ühendamise.
+Vajab klassifitseerimistööd `changes`. Kohaldatavate maatriksikildude nurjumine blokeerib ühendamise.
 
 | Testikomplekt    | Valideerib                                                             | Blokeeriv                                                                                                             |
 | ---------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -386,8 +433,9 @@ Sündmuste `pull_request` korral edastab `quality.yml` argumendi `--base-ref <PR
 
 - **blokeeriv** — PR lisas muudetud failidesse tsüklomaatilise/kognitiivse keerukuse rikkumisi või surnud eksporte
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` logis);
-- **soovituslik** — globaalne koguarv võrreldes külmutatud lähtetasemega. Päritud kõrvalekalle ei muuda
-  süütut PR-i kunagi ebaõnnestunuks; kõrvalekalle külmutatakse väljalaske kooskõlastamisel uuesti ja seda jälgib varu mõõtmise töö.
+- **nõuandev** — globaalne kogusumma võrrelduna fikseeritud lähtejoonega. Päritud hälve ei muuda
+  süütut PR-i kunagi punaseks; hälvet jälgitakse, et see väljalaske kooskõlastamisel parandada, ning seda
+  seirab varuruumi kontrolltöö.
 
 `check:file-size` kasutab baasviidet oma reeglite järgi (`scripts/check/check-file-size.mjs`, #8522):
 see kontrollib puus iga lähtekoodi- ja testifaili, loeb käsuga `git show` iga faili ridade arvu PR-i baasis
@@ -589,7 +637,11 @@ lubatud loendiga loob petliku kvaliteeditunde.
 
 1. Looge `scripts/check/check-<name>.mjs` (või `.ts`). Poliitika kontrollväravad lõpetavad koodiga 0/1.
    Põrkmehhanismi tüüpi kontrollväravad väljastavad mõõdiku faili `quality-metrics.json` skripti `collect-metrics.mjs` kaudu.
-2. Lisage `"check:<name>": "node scripts/check/check-<name>.mjs"` faili `package.json`.
+2. Lisage `"check:<name>": "node scripts/check/check-<name>.mjs"` faili `package.json` ning
+   sünkroonige alias ja selle täpne käsk failis `config/quality/gate-manifest.json`.
+   Rakendage sama sünkroonimist olemasoleva valideerimisaliase muutmisel või eemaldamisel.
+   Käivitage `npm run check:gate-manifest`; sissekandmiseelne konks ja CI muudatuste klassifitseerimine
+   jõustavad selle lepingu.
 3. Ühendage see failis `.github/workflows/ci.yml` sobiva töö alla
    (poliitika → `lint` või `docs-sync-strict`; põrkmehhanism → `quality-gate`).
 4. Kui sellel on lubatud loend, rakendage `reportStaleEntries()` failist

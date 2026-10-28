@@ -36,9 +36,18 @@ phải xác minh đủ dung lượng được lưu trữ trước khi triển kh
 Mỗi biên nhận JSON xác định SHA đã checkout, lượt chạy workflow và lần thử.
 CLI từ chối khi SHA của checkout/sự kiện không khớp. Các bài kiểm thử workflow liên kết thành viên chính sách
 với danh sách `needs` của job kết luận để một lane mới hoặc bị xóa không thể âm thầm biến mất.
-Các biên nhận chỉ bao phủ workflow của chính chúng, không bao gồm việc phát hành, triển khai hoặc phần nội bộ
-của một trình quét tư vấn hiện có. Việc kích hoạt cả hai tên kiểm tra trong quy tắc nhánh là
-một thay đổi quản trị riêng biệt; chỉ thêm các job này không tự bảo vệ nhánh.
+Các biên nhận chỉ bao quát quy trình làm việc của chính chúng, không bao gồm việc phát hành, triển khai hoặc các thành phần nội bộ
+của một trình quét mang tính khuyến nghị hiện có. Việc đặt các bước kiểm tra áp dụng thành bắt buộc trong các quy tắc nhánh
+là một thay đổi quản trị riêng biệt; chỉ định nghĩa các tác vụ của chúng không đồng nghĩa với việc bảo vệ một nhánh.
+
+`API Route Typecheck` là một bước kiểm tra quy trình làm việc độc lập, nằm ngoài cả hai kết luận tổng hợp
+và hồ sơ tĩnh của trình quan sát cục bộ đầy đủ. Hãy kiểm tra riêng kết quả của bước này cho đúng
+ứng viên. `.github/workflows/api-route-typecheck.yml` chạy trên các PR vào `main` hoặc
+`release/**`, các lần đẩy lên một trong hai nhóm nhánh và thao tác kích hoạt thủ công. Quy trình này không có bộ lọc đường dẫn.
+Việc thay đổi nhánh cơ sở đích của PR sẽ yêu cầu một bước kiểm tra mới; các chỉnh sửa nội dung/tiêu đề sử dụng tên chỉ dành cho việc quan sát
+`Admission not requested / API Route Typecheck` và không thể thay thế bước kiểm tra chấp thuận.
+Quy trình làm việc này không khai báo trình kích hoạt nhóm hợp nhất. Bất kỳ đợt triển khai hàng đợi hợp nhất nào yêu cầu
+bước kiểm tra này trước tiên đều phải thiết lập để bước kiểm tra được thực thi cho sự kiện đó.
 
 ### Bằng chứng được lưu giữ trong bộ rút gọn chấp nhận
 
@@ -78,6 +87,22 @@ theo từng shard không an toàn đối với độ bao phủ hỗn hợp funct
 không tương thích khiến việc tiếp nhận thất bại. Các shard kiểm thử thất bại lưu riêng độ bao phủ chẩn đoán thô;
 dữ liệu đó không thể tham gia lần hợp nhất cuối cùng.
 
+### Biên nhận tiến trình thực thi kiểm thử đơn vị
+
+Lệnh dùng chung `test:unit:ci:shard` ghi lại các giai đoạn `primary`, `dashboard` và `serial`
+thông qua `scripts/ci/unit-progress-reporter.mjs`. Báo cáo kiểm thử thông thường vẫn được
+cung cấp. Một biên nhận riêng chỉ chứa siêu dữ liệu sẽ ghi lại thời điểm bắt đầu và hoàn tất
+của từng tệp, đồng thời một tín hiệu nhịp tim mỗi 30 giây sẽ liệt kê các tệp vẫn đang hoạt động
+và thời gian đã trôi qua của chúng. Biên nhận chỉ ghi lại siêu dữ liệu thực thi có trong danh sách
+cho phép; mô tả kiểm thử, đầu ra, nội dung lỗi và toàn bộ môi trường không được tuần tự hóa.
+
+CI và Quality lưu giữ các tệp JSONL dưới dạng `unit-progress-ci-<run>-<attempt>-<shard>` và
+`unit-progress-quality-<run>-<attempt>-<shard>`. Việc hết thời gian chờ của một tác vụ có thể
+ngăn quá trình tải lên sau đó; các tín hiệu nhịp tim đã được phát vẫn là bằng chứng chẩn đoán.
+Việc thiếu tín hiệu nhịp tim cũng có thể phản ánh một tiến trình runner bị chặn hoặc chấm dứt.
+Các biên nhận này duy trì nguyên trạng cách lựa chọn kiểm thử, mức độ đồng thời, thời hạn và
+trạng thái thoát hiện có; chúng không phải là phán quyết tiếp nhận ứng viên.
+
 ### Danh mục quét tĩnh
 
 Danh mục npm-alias có phiên bản và thành viên quét tĩnh nằm trong
@@ -108,6 +133,27 @@ là tài liệu tham khảo, không phải bằng chứng cho thấy một gate 
 
 Các script nằm trong `scripts/check/` (gate chính sách) và `scripts/quality/` (công cụ ratchet).
 Nguồn sự thật của CI là `.github/workflows/ci.yml`.
+
+### Tình trạng tài liệu cơ sở đã xuất bản
+
+`.github/workflows/i18n-base-health.yml` theo dõi tình trạng tài liệu sau một số lần
+push được chọn lên `main` và `release/v*`, cũng như khi được kích hoạt thủ công. Các bộ lọc của quy trình bao quát tài liệu,
+Markdown ở thư mục gốc, `llm.txt`, trạng thái/cấu hình bản dịch và công cụ i18n liên quan.
+Job duy nhất `Published base documentation health` sử dụng Ubuntu được lưu trữ và có thời hạn
+năm phút. Job này thực hiện xác thực chỉ đọc và ghi biên nhận chẩn đoán mà không
+cài đặt phần phụ thuộc, dịch hay tiếp nhận trạng thái.
+
+`scripts/i18n/check-base-health.mjs` yêu cầu không có bất kỳ sự không nhất quán nào về hàm băm nguồn, đích bị thiếu, hàm băm đích,
+bản dịch lỗi thời và bộ nhớ đệm phần. Script này cũng xác thực phạm vi tài liệu cốt lõi/ngôn ngữ hiện tại
+cùng nguồn gốc đã ghi nhận của phạm vi đó. Ngữ cảnh không hợp lệ, phạm vi bao phủ không đầy đủ
+hoặc trình kiểm tra bị gián đoạn sẽ tạo ra `INCOMPLETE`; độ lệch đã xác nhận sẽ tạo ra `FAIL`. Cả hai
+đều trả về trạng thái thoát thất bại. Biên nhận được liên kết với SHA của bản checkout, quy trình công việc, lượt chạy và
+lần thử, đồng thời được lưu giữ dưới tên `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Đây là hoạt động quan sát độc lập đối với cơ sở đã xuất bản. Hoạt động này không thêm sự kiện PR hoặc
+nhóm hợp nhất, kiểm tra PR bắt buộc, bí danh npm hay thành viên hồ sơ quét tĩnh.
+Chính sách PR vi sai hiện có và các phân loại tư vấn của trình kiểm tra nền tảng
+vẫn tách biệt. Việc tải lên thành công không thể biến kết quả tình trạng thất bại thành PASS.
 
 ### Đường dẫn nhanh cho PR phát hành (`quality.yml`)
 
@@ -243,12 +289,12 @@ Các phép kiểm tra khẳng định về nhà cung cấp miễn phí vĩnh vi�
 
 ### Công việc: `i18n-ui-coverage`
 
-| Script                            | Xác thực                                                                                                                                                                                           | Chặn            |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `check-ui-keys-coverage` (inline) | Độ bao phủ khóa i18n của UI đạt ≥ 65%                                                                                                                                                              | Có              |
-| `check-ui-value-drift` (inline)   | Một **giá trị** tiếng Anh được viết lại không để lại bản dịch lỗi thời nào                                                                                                                         | Có              |
-| `check-new-key-coverage` (inline) | Một khóa tiếng Anh **mới** được dịch trong mọi locale — dấu `__MISSING__:` sẽ bị từ chối                                                                                                           | Có              |
-| `check-translation-ratio`         | Tỷ lệ bản dịch thực tế theo từng locale (giống tiếng Anh / phần giữ chỗ / thiếu các lá nằm ngoài danh sách cho phép) không được vượt quá `config/quality/i18n-translation-baseline.json` + biên độ | **Khuyến nghị** |
+| Script                            | Xác thực                                                                                                                                                                                           | Chặn        |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `check-ui-keys-coverage` (inline) | Độ bao phủ khóa i18n của UI đạt ≥ 65%                                                                                                                                                              | Có          |
+| `check-ui-value-drift` (inline)   | Một **giá trị** tiếng Anh được viết lại không để lại bản dịch lỗi thời nào                                                                                                                         | Có          |
+| `check-new-key-coverage` (inline) | Một khóa tiếng Anh **mới** được dịch trong mọi locale — dấu `__MISSING__:` sẽ bị từ chối                                                                                                           | Có          |
+| `check-translation-ratio`         | Tỷ lệ bản dịch thực tế theo từng locale (giống tiếng Anh / phần giữ chỗ / thiếu các lá nằm ngoài danh sách cho phép) không được vượt quá `config/quality/i18n-translation-baseline.json` + biên độ | **Có chặn** |
 
 Cần `fetch-depth: 0` — cổng kiểm tra độ lệch giá trị so sánh khác biệt của `en.json` với merge base.
 
@@ -291,8 +337,19 @@ npm run i18n:check-value-drift:warn     # chỉ báo cáo
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Thoát với mã 0 cùng `SKIP reason=base-unresolved` khi không thể đọc catalog cơ sở (bản clone nông
-không có base ref), tương tự `check-openapi-breaking`.
+Cổng độ lệch giá trị và cổng khóa mới dùng chung một phép so sánh bất biến từ
+`scripts/i18n/resolve-ui-diff-base.mjs`. Quy trình làm việc truyền cùng các SHA cơ sở, đầu mút cơ sở và
+ứng viên cho cả hai bước kiểm tra. Các lần chạy PR/đổi mục tiêu cơ sở, push và merge-group sử dụng ngữ cảnh
+sự kiện tương ứng. Việc điều phối một nhánh ứng viên yêu cầu PR đang mở chính xác của nhánh đó hoặc đầu vào
+`i18n_base_sha` tường minh. Việc điều phối hoặc quan sát theo lịch đối với `main` hay `release/vX.Y.Z`
+mà không có đầu vào đó sẽ so sánh commit cuối cùng với commit cha đầu tiên của nó; đây không phải là quá trình kiểm tra
+toàn bộ nợ bản dịch kế thừa. Việc gọi cục bộ yêu cầu một cơ sở so sánh tường minh,
+ví dụ như lệnh `BASE_REF` ở trên.
+
+Ngữ cảnh so sánh bị thiếu hoặc không rõ ràng, danh mục bắt buộc không thể đọc hoặc không hợp lệ, và
+ứng viên đã thay đổi sẽ tạo ra `INCOMPLETE` với mã thoát **2**, kể cả trong chế độ cảnh báo.
+Việc đọc danh mục sử dụng `scripts/i18n/read-ui-catalog.mjs`; lỗi đọc không được thay thế
+bằng các đối tượng rỗng. Cả cơ sở không khả dụng lẫn đầu vào không đầy đủ đều không xác lập PASS.
 
 ### Job: `i18n`
 
@@ -314,7 +371,7 @@ Chỉ chạy trên pull request.
 
 ### Job: `test-vitest`
 
-Chạy sau `build`. Chặn hợp nhất khi thất bại.
+Yêu cầu tác vụ phân loại `changes`. Các phân đoạn ma trận áp dụng sẽ chặn việc hợp nhất nếu thất bại.
 
 | Bộ kiểm thử      | Xác thực                                                             | Chặn                                                                                                           |
 | ---------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -392,9 +449,9 @@ sau đó các số đếm theo từng tệp được đối chiếu):
 - **chặn** — PR đã thêm các vi phạm về độ phức tạp cyclomatic/cognitive hoặc dead export trong
   những tệp mà nó thay đổi (`complexityNewCode=`, `cognitiveComplexityNewCode=`,
   `deadExportsNewCode=` trong nhật ký);
-- **khuyến nghị** — tổng toàn cục so với đường cơ sở đã đóng băng. Độ lệch kế thừa không bao giờ
-  khiến một PR vô can bị đỏ; độ lệch được đóng băng lại khi đối soát bản phát hành và được tác vụ
-  headroom theo dõi.
+- **khuyến cáo** — tổng toàn cục so với đường cơ sở đã đóng băng. Độ lệch kế thừa không bao giờ khiến một
+  PR vô can bị đánh dấu đỏ; độ lệch được theo dõi để khắc phục khi đối soát bản phát hành và được giám sát bởi
+  tác vụ headroom.
 
 `check:file-size` sử dụng base ref theo quy tắc riêng (`scripts/check/check-file-size.mjs`, #8522):
 nó kiểm tra mọi tệp mã nguồn và kiểm thử trong cây, đọc số dòng của từng tệp tại base của PR
@@ -597,7 +654,11 @@ danh sách cho phép ngày càng dài sẽ tạo ra cảm giác sai lệch về 
 
 1. Tạo `scripts/check/check-<name>.mjs` (hoặc `.ts`). Các cổng chính sách thoát với mã 0/1.
    Các cổng kiểu ratchet xuất một chỉ số vào `quality-metrics.json` thông qua `collect-metrics.mjs`.
-2. Thêm `"check:<name>": "node scripts/check/check-<name>.mjs"` vào `package.json`.
+2. Thêm `"check:<name>": "node scripts/check/check-<name>.mjs"` vào `package.json`, và
+   đồng bộ bí danh cùng lệnh chính xác của bí danh đó trong `config/quality/gate-manifest.json`.
+   Áp dụng quy trình đồng bộ tương tự khi thay đổi hoặc xóa một bí danh xác thực hiện có.
+   Chạy `npm run check:gate-manifest`; hook pre-commit và cơ chế phân loại thay đổi của CI
+   sẽ thực thi hợp đồng này.
 3. Kết nối cổng đó trong `.github/workflows/ci.yml` dưới job phù hợp
    (chính sách → `lint` hoặc `docs-sync-strict`; ratchet → `quality-gate`).
 4. Nếu cổng có danh sách cho phép, hãy áp dụng `reportStaleEntries()` từ

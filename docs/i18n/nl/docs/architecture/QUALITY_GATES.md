@@ -36,9 +36,18 @@ runners selecteren; vóór de uitrol moet worden gecontroleerd of er voldoende g
 Elk JSON-ontvangstbewijs identificeert de uitgecheckte SHA, workflowuitvoering en poging.
 De CLI wijst een verschil tussen de SHA van de checkout en die van het event af. Workflowtests koppelen beleidslidmaatschap
 aan de `needs`-lijst van de beoordelingsjob, zodat een nieuw of verwijderd traject niet ongemerkt kan verdwijnen.
-De ontvangstbewijzen dekken hun eigen workflow, niet publicatie, implementatie of de interne werking
-van een bestaande adviserende scanner. Het activeren van beide controlenamen in branchregels is een
-afzonderlijke administratieve wijziging; het toevoegen van deze jobs beschermt op zichzelf geen branch.
+De ontvangstbewijzen bestrijken hun eigen workflow, niet publicatie, implementatie of de interne werking
+van een bestaande adviserende scanner. Het verplicht stellen van de toepasselijke controles in branchregels
+is een afzonderlijke administratieve wijziging; het definiëren van hun jobs beschermt een branch niet op zichzelf.
+
+`API Route Typecheck` is een onafhankelijke workflowcontrole, buiten beide geaggregeerde eindoordelen
+en het statische profiel van de lokale volledige observer. Controleer het resultaat afzonderlijk voor de exacte
+kandidaat. `.github/workflows/api-route-typecheck.yml` wordt uitgevoerd voor PR's naar `main` of
+`release/**`, pushes naar een van beide branchfamilies en handmatige activering. Het bevat geen padfilter.
+Het opnieuw instellen van het PR-basisdoel vraagt om een nieuwe controle; wijzigingen aan de body/titel gebruiken de alleen voor observatie bestemde naam
+`Admission not requested / API Route Typecheck` en kunnen de toelatingscontrole niet vervangen.
+De workflow declareert geen trigger voor een mergegroep. Elke uitrol van een mergewachtrij waarvoor
+deze controle verplicht is, moet eerst de uitvoering ervan voor die gebeurtenis instellen.
 
 ### Bewaard bewijs in de acceptatiereducer
 
@@ -77,6 +86,22 @@ dekkingsdrempels uit. Invoer behoudt de globale bestandsnaamvolgorde van c8; voo
 voor gemengde functie-/blokdekking. Ontbrekende, onjuist gevormde of incompatibele shards doen de toelating mislukken.
 Mislukte testshards bewaren onbewerkte diagnostische dekking afzonderlijk; deze kan niet in de uiteindelijke samenvoeging worden opgenomen.
 
+### Voortgangsregistraties voor de uitvoering van unittests
+
+De gedeelde opdracht `test:unit:ci:shard` registreert de fasen `primary`, `dashboard` en `serial`
+via `scripts/ci/unit-progress-reporter.mjs`. Het normale testrapport blijft
+beschikbaar. Een afzonderlijke registratie met alleen metadata legt de start en voltooiing
+van elk bestand vast, en een heartbeat van 30 seconden vermeldt de bestanden die nog actief
+zijn en hun verstreken tijd. Alleen uitvoeringsmetadata op de allowlist wordt geregistreerd;
+testbeschrijvingen, uitvoer, foutdetails en de volledige omgeving worden niet geserialiseerd.
+
+CI en Quality bewaren de JSONL-bestanden als `unit-progress-ci-<run>-<attempt>-<shard>` en
+`unit-progress-quality-<run>-<attempt>-<shard>`. Een time-out van een job kan de latere upload
+verhinderen; reeds verzonden heartbeats blijven bruikbaar als diagnostisch bewijs. Ontbrekende
+heartbeats kunnen ook wijzen op een geblokkeerd of beëindigd runnerproces. Deze registraties
+behouden de bestaande testselectie, gelijktijdigheid, deadlines en afsluitstatus; het zijn
+geen beslissingen over de toelating van kandidaten.
+
 ### Inventaris van statische scans
 
 De versiegebonden inventaris van npm-aliassen en het lidmaatschap van statische scans bevinden zich in
@@ -107,6 +132,27 @@ is een referentie, geen bewijs dat een gate daadwerkelijk is uitgevoerd.
 
 Scripts bevinden zich onder `scripts/check/` (beleidsgates) en `scripts/quality/` (ratchet-engine).
 De gezaghebbende CI-bron is `.github/workflows/ci.yml`.
+
+### Status van de gepubliceerde basisdocumentatie
+
+`.github/workflows/i18n-base-health.yml` bewaakt de status van de documentatie na geselecteerde
+pushes naar `main` en `release/v*`, en bij handmatige uitvoering. De filters omvatten documentatie,
+Markdown-bestanden in de hoofdmap, `llm.txt`, de vertaalstatus en -configuratie en de relevante i18n-tools.
+De enige taak, `Published base documentation health`, gebruikt gehoste Ubuntu en heeft een
+tijdslimiet van vijf minuten. Deze voert alleen-lezenvalidatie uit en schrijft een diagnostisch ontvangstbewijs zonder
+afhankelijkheden te installeren, vertalingen uit te voeren of een status over te nemen.
+
+`scripts/i18n/check-base-health.mjs` vereist dat er geen inconsistenties zijn met bronhashes, ontbrekende doelen, doelhashes,
+verouderde vertalingen en de sectiecache. Het valideert ook het huidige bereik van
+kerndocumenten en landinstellingen, evenals de vastgelegde herkomst ervan. Een ongeldige context, onvolledige dekking
+of een onderbroken controle resulteert in `INCOMPLETE`; bevestigde afwijkingen resulteren in `FAIL`. Beide
+leveren een afsluitstatus voor mislukking op. Het ontvangstbewijs is gekoppeld aan de checkout-SHA, workflow, uitvoering en
+poging, en wordt bewaard als `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Dit is een onafhankelijke waarneming van de gepubliceerde basis. Er wordt geen PR- of
+merge-group-gebeurtenis, verplichte PR-controle, npm-alias of lid van een statisch scanprofiel toegevoegd.
+Het bestaande differentiële PR-beleid en de adviserende classificaties van de onderliggende controle
+blijven afzonderlijk. Een geslaagde upload kan een mislukt statusresultaat niet omzetten in PASS.
 
 ### Snel traject voor release-PR's (`quality.yml`)
 
@@ -246,7 +292,7 @@ De controles van beweringen over blijvend gratis aanbieders, catalogusitems, ter
 | `check-ui-keys-coverage` (inline) | Dekking van UI-i18n-sleutels is ≥ 65%                                                                                                                                                                                       | Ja             |
 | `check-ui-value-drift` (inline)   | Een herschreven Engelse **waarde** laat geen verouderde vertaling achter                                                                                                                                                    | Ja             |
 | `check-new-key-coverage` (inline) | Een **nieuwe** Engelse sleutel is in elke locale vertaald — een `__MISSING__:`-markering wordt afgewezen                                                                                                                    | Ja             |
-| `check-translation-ratio`         | Verhouding van echte vertalingen per locale (identiek aan Engels / tijdelijke aanduiding / ontbrekende bladeren buiten de toelatingslijst) mag `config/quality/i18n-translation-baseline.json` + speling niet overschrijden | **Adviserend** |
+| `check-translation-ratio`         | Verhouding van echte vertalingen per locale (identiek aan Engels / tijdelijke aanduiding / ontbrekende bladeren buiten de toelatingslijst) mag `config/quality/i18n-translation-baseline.json` + speling niet overschrijden | **Blokkerend** |
 
 Vereist `fetch-depth: 0` — de waardedriftcontrole vergelijkt `en.json` met de samenvoegbasis.
 
@@ -289,8 +335,19 @@ npm run i18n:check-value-drift:warn     # alleen rapporteren
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Eindigt met code 0 en `SKIP reason=base-unresolved` wanneer de basiscatalogus niet kan worden gelezen (ondiepe
-kloon zonder de basis-ref), overeenkomstig `check-openapi-breaking`.
+De controles op waardeafwijkingen en nieuwe sleutels gebruiken één onveranderlijke vergelijking uit
+`scripts/i18n/resolve-ui-diff-base.mjs`. De workflow geeft dezelfde basis-, basis-tip- en
+kandidaat-SHA's door aan beide controles. Uitvoeringen voor PR's/basiswijzigingen, pushes en merge-groepen gebruiken hun
+gebeurteniscontext. Voor het dispatchen van een kandidaatbranch is de exacte openstaande PR of de expliciete
+invoer `i18n_base_sha` vereist. Bij dispatch of geplande observatie van `main` of `release/vX.Y.Z`
+zonder die invoer wordt de laatste commit vergeleken met diens eerste parent; dit is geen audit van
+alle overgenomen vertalingsachterstand. Lokale aanroep vereist een expliciete vergelijkingsbasis,
+bijvoorbeeld de bovenstaande opdracht `BASE_REF`.
+
+Ontbrekende of dubbelzinnige vergelijkingscontext, een onleesbare of ongeldige vereiste catalogus en
+een gewijzigde kandidaat resulteren in `INCOMPLETE` met afsluitcode **2**, ook in waarschuwingsmodus.
+Catalogi worden gelezen met `scripts/i18n/read-ui-catalog.mjs`; leesfouten worden niet vervangen
+door lege objecten. Noch een niet-beschikbare basis, noch onvolledige invoer leidt tot PASS.
 
 ### Job: `i18n`
 
@@ -312,7 +369,7 @@ Wordt alleen uitgevoerd voor pull requests.
 
 ### Job: `test-vitest`
 
-Wordt uitgevoerd na `build`. Blokkeert samenvoegen bij een fout.
+Vereist de classificatietaak `changes`. Toepasselijke matrixshards blokkeren het samenvoegen bij een fout.
 
 | Suite            | Valideert                                                | Blokkerend                                                                                                                       |
 | ---------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -390,9 +447,9 @@ aantallen per bestand worden met elkaar vergeleken):
 - **blokkerend** — de PR heeft schendingen van cyclomatische/cognitieve complexiteit of dode
   exports toegevoegd in bestanden die door de PR zijn gewijzigd (`complexityNewCode=`,
   `cognitiveComplexityNewCode=`, `deadExportsNewCode=` in het logboek);
-- **adviserend** — het globale totaal ten opzichte van de bevroren basiswaarde. Overgenomen
-  afwijkingen laten een onschuldige PR nooit falen; de afwijking wordt bij de releaseafstemming
-  opnieuw bevroren en door de speelruimtetaak bewaakt.
+- **adviserend** — het globale totaal ten opzichte van de bevroren basislijn. Overgenomen drift laat
+  een onschuldige PR nooit rood kleuren; de drift wordt bijgehouden voor herstel tijdens de release-reconciliatie en bewaakt door de
+  headroom-job.
 
 `check:file-size` gebruikt de basisreferentie volgens zijn eigen regels
 (`scripts/check/check-file-size.mjs`, #8522): de controle verifieert elk bron- en testbestand in
@@ -600,7 +657,11 @@ allowlist geeft een vals gevoel van kwaliteit.
 
 1. Maak `scripts/check/check-<name>.mjs` (of `.ts`) aan. Beleids-gates eindigen met exitcode 0/1.
    Gates in ratchet-stijl schrijven via `collect-metrics.mjs` een metriek naar `quality-metrics.json`.
-2. Voeg `"check:<name>": "node scripts/check/check-<name>.mjs"` toe aan `package.json`.
+2. Voeg `"check:<name>": "node scripts/check/check-<name>.mjs"` toe aan `package.json` en
+   synchroniseer de alias en de exacte opdracht ervan in `config/quality/gate-manifest.json`.
+   Pas dezelfde synchronisatie toe wanneer u een bestaande validatie-alias wijzigt of verwijdert.
+   Voer `npm run check:gate-manifest` uit; de pre-commithaak en de wijzigingsclassificatie van CI
+   dwingen dit contract af.
 3. Neem deze op in `.github/workflows/ci.yml` onder de juiste job
    (beleid → `lint` of `docs-sync-strict`; ratchet → `quality-gate`).
 4. Als de gate een allowlist heeft, pas dan `reportStaleEntries()` uit

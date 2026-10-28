@@ -40,10 +40,9 @@ etishdan oldin yetarli hosted sigʻim mavjudligi tekshirilishi kerak.
 Har bir JSON kvitansiyasi checkout qilingan SHA, ish jarayoni ishga tushirilishi va urinishni
 aniqlaydi. CLI checkout/hodisa SHA nomuvofiqligini rad etadi. Ish jarayoni testlari siyosatdagi
 aʼzolikni yakuniy xulosa vazifasining `needs` roʻyxatiga bogʻlaydi, shuning uchun yangi yoki
-olib tashlangan yoʻnalish sezdirmasdan yoʻqolib qolmaydi. Kvitansiyalar nashr qilish, joylashtirish
-yoki mavjud tavsiyaviy skanerning ichki jarayonlarini emas, faqat oʻz ish jarayonini qamrab oladi.
-Branch qoidalarida har ikkala tekshiruv nomini faollashtirish alohida maʼmuriy oʻzgarishdir;
-bu vazifalarni qoʻshishning oʻzi branchni himoyalamaydi.
+olib tashlangan yoʻnalish sezdirmasdan yoʻqolib qolmaydi. Tasdiq qaydlari nashr qilish, joylashtirish yoki mavjud tavsiya beruvchi skanerning ichki tuzilishini emas, faqat o‘z ish jarayonini qamrab oladi. Tegishli tekshiruvlarni tarmoq qoidalarida majburiy qilish alohida ma’muriy o‘zgarishdir; ularning vazifalarini belgilashning o‘zi tarmoqni himoya qilmaydi.
+
+`API Route Typecheck` — har ikkala jamlangan xulosadan ham, mahalliy to‘liq kuzatuvchining statik profilidan ham tashqarida bo‘lgan mustaqil ish jarayoni tekshiruvi. Aniq nomzod uchun uning natijasini alohida tekshiring. `.github/workflows/api-route-typecheck.yml` `main` yoki `release/**` tarmoqlariga yo‘naltirilgan PR’larda, ushbu tarmoq oilalaridan biriga push qilinganda va qo‘lda ishga tushirilganda bajariladi. Unda yo‘l filtri yo‘q. PR asosiy tarmog‘ini qayta yo‘naltirish yangi tekshiruvni talab qiladi; tavsif/sarlavha tahrirlari faqat kuzatuv uchun mo‘ljallangan `Admission not requested / API Route Typecheck` nomidan foydalanadi va qabul tekshiruvining o‘rnini bosa olmaydi. Ish jarayonida birlashtirish guruhi uchun trigger e’lon qilinmagan. Ushbu tekshiruvni talab qiladigan har qanday birlashtirish navbatini joriy etishdan oldin uning mazkur hodisa uchun bajarilishi ta’minlanishi kerak.
 
 ### Qabul qilish reduktorida saqlanadigan dalillar
 
@@ -86,6 +85,21 @@ birlashtirish aralash funksiya/blok qamrovi uchun xavfli. Mavjud boʻlmagan, not
 yoki mos kelmaydigan shardlar qabul qilishni muvaffaqiyatsiz qiladi. Muvaffaqiyatsiz test
 shardlarining xom diagnostik qamrovi alohida saqlanadi; u yakuniy birlashtirishga kiritilmaydi.
 
+### Unit bajarilish jarayoni qaydlari
+
+Umumiy `test:unit:ci:shard` buyrugʻi `primary`, `dashboard` va `serial`
+bosqichlarini `scripts/ci/unit-progress-reporter.mjs` orqali qayd etadi. Odatiy test hisoboti
+mavjudligicha qoladi. Faqat metamaʼlumotlardan iborat alohida qayd har bir faylning ishga tushishi va yakunlanishini
+qayd etadi, 30 soniyalik yurak urishi signali esa hali ham faol fayllar va ularning oʻtgan vaqtini koʻrsatadi. Unda
+faqat ruxsat etilgan bajarilish metamaʼlumotlari qayd etiladi; test tavsiflari, chiqish maʼlumotlari, xatolik tafsilotlari va toʻliq
+muhit serializatsiya qilinmaydi.
+
+CI va Quality JSONL fayllarini `unit-progress-ci-<run>-<attempt>-<shard>` va
+`unit-progress-quality-<run>-<attempt>-<shard>` sifatida saqlaydi. Vazifa vaqtining tugashi keyingi yuklashga toʻsqinlik qilishi mumkin;
+allaqachon yuborilgan yurak urishi signallari diagnostik dalil boʻlib qoladi. Yurak urishi signallarining yoʻqligi
+bloklangan yoki toʻxtatilgan runner jarayonini ham anglatishi mumkin. Bu qaydlar mavjud test tanlovi,
+parallellik, muddatlar va chiqish holatini saqlab qoladi; ular nomzodni qabul qilish haqidagi hukmlar emas.
+
 ### Statik skanerlash roʻyxati
 
 Versiyalangan npm-alias roʻyxati va statik skanerlash tarkibi
@@ -119,6 +133,14 @@ maʼlumotnoma boʻlib, geyt amalda bajarilganining isboti emas.
 
 Skriptlar `scripts/check/` (siyosat geytlari) va `scripts/quality/` (ratchet mexanizmi) ostida
 joylashgan. CIning yagona ishonchli manbasi `.github/workflows/ci.yml` hisoblanadi.
+
+### E’lon qilingan baza hujjatlari holati
+
+`.github/workflows/i18n-base-health.yml` tanlangan `main` va `release/v*` tarmoqlariga yuborishlardan so‘ng hamda qo‘lda ishga tushirilganda hujjatlar holatini kuzatadi. Uning filtrlari hujjatlarni, ildiz katalogdagi Markdown fayllarini, `llm.txt` faylini, tarjima holati/konfiguratsiyasini va tegishli i18n vositalarini qamrab oladi. Yagona `Published base documentation health` vazifasi boshqariladigan Ubuntu muhitidan va besh daqiqalik vaqt chegarasidan foydalanadi. U faqat o‘qish rejimida tekshiradi va bog‘liqliklarni o‘rnatmasdan, tarjima qilmasdan yoki holatni qabul qilmasdan diagnostika qaydnomasini yozadi.
+
+`scripts/i18n/check-base-health.mjs` manba xeshi, yetishmayotgan maqsad fayli, maqsad xeshi, eskirgan tarjima va bo‘lim keshi bilan bog‘liq nomuvofiqliklar bo‘lmasligini talab qiladi. Shuningdek, u joriy asosiy hujjat/lokal qamrovini va uning qayd etilgan kelib chiqishini tekshiradi. Yaroqsiz kontekst, to‘liq bo‘lmagan qamrov yoki tekshiruvchining ish jarayoni uzilishi `INCOMPLETE` natijasini beradi; tasdiqlangan og‘ish esa `FAIL` natijasini beradi. Har ikkisi ham muvaffaqiyatsiz chiqish holatini qaytaradi. Qaydnoma checkout SHA qiymati, ish jarayoni, ishga tushirish va urinish bilan bog‘lanadi hamda `i18n-base-health-<sha>-<run>-<attempt>` nomi ostida saqlanadi.
+
+Bu e’lon qilingan bazaning mustaqil kuzatuvidir. U PR yoki birlashtirish guruhi hodisasini, majburiy PR tekshiruvini, npm taxallusini yoki statik tekshiruv profili a’zosini qo‘shmaydi. Mavjud differensial PR siyosati va asosiy tekshiruvchining tavsiyaviy tasniflari alohida qoladi. Muvaffaqiyatli yuklash muvaffaqiyatsiz holat natijasini PASS holatiga aylantira olmaydi.
 
 ### Release PR tezkor yoʻli (`quality.yml`)
 
@@ -258,7 +280,7 @@ Doim bepul provayderlar, katalog yozuvlari, takrorlanuvchi resurs havzalari va b
 | `check-ui-keys-coverage` (ichki) | UI i18n kalitlari qamrovi ≥ 65%                                                                                                                                                                                                                          | Ha             |
 | `check-ui-value-drift` (ichki)   | Qayta yozilgan inglizcha **qiymat** ortida eskirgan tarjima qolmasligini                                                                                                                                                                                 | Ha             |
 | `check-new-key-coverage` (ichki) | **Yangi** inglizcha kalit har bir lokalga tarjima qilinganini — `__MISSING__:` belgisi rad etiladi                                                                                                                                                       | Ha             |
-| `check-translation-ratio`        | Har bir lokal uchun haqiqiy tarjima ulushi (ruxsat etilganlar roʻyxatidan tashqaridagi inglizcha bilan bir xil / toʻldiruvchi / mavjud boʻlmagan elementlar) `config/quality/i18n-translation-baseline.json` + ruxsat etilgan ogʻishdan oshmasligi kerak | **Tavsiyaviy** |
+| `check-translation-ratio`        | Har bir lokal uchun haqiqiy tarjima ulushi (ruxsat etilganlar roʻyxatidan tashqaridagi inglizcha bilan bir xil / toʻldiruvchi / mavjud boʻlmagan elementlar) `config/quality/i18n-translation-baseline.json` + ruxsat etilgan ogʻishdan oshmasligi kerak | **Bloklovchi** |
 
 `fetch-depth: 0` talab qilinadi — qiymat siljishi darvozasi `en.json` faylini birlashtirish bazasi bilan solishtiradi.
 
@@ -301,8 +323,19 @@ npm run i18n:check-value-drift:warn     # faqat hisobot
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Bazaviy katalogni oʻqib boʻlmaganda (bazaviy refsiz sayoz
-klon) `SKIP reason=base-unresolved` bilan 0 kodida yakunlanadi; bu `check-openapi-breaking` xatti-harakatiga mos keladi.
+Qiymat siljishi va yangi kalit nazoratlari
+`scripts/i18n/resolve-ui-diff-base.mjs` dagi yagona o‘zgarmas taqqoslashdan foydalanadi. Ish jarayoni ikkala tekshiruvga ham bir xil asos, asos uchi va
+nomzod SHA qiymatlarini uzatadi. PR/asosni qayta nishonlash, push va merge-group ishga tushirishlari o‘z hodisa
+kontekstidan foydalanadi. Nomzod tarmoqni qo‘lda ishga tushirish uchun uning aynan mos ochiq PR’i yoki aniq
+`i18n_base_sha` kirishi talab qilinadi. Ushbu kirishsiz `main` yoki `release/vX.Y.Z` ni qo‘lda ishga tushirish yoxud reja asosida kuzatish
+oxirgi commitni uning birinchi ota-commit’i bilan taqqoslaydi; bu meros bo‘lib qolgan barcha
+tarjima qarzining auditi emas. Mahalliy ishga tushirish uchun aniq taqqoslash asosi talab qilinadi,
+masalan, yuqoridagi `BASE_REF` buyrug‘i.
+
+Taqqoslash kontekstining yo‘qligi yoki noaniqligi, talab qilinadigan katalogni o‘qib bo‘lmasligi yoki uning yaroqsizligi hamda
+nomzodning o‘zgarishi, ogohlantirish rejimida ham, **2** chiqish kodi bilan `INCOMPLETE` natijasini beradi.
+Kataloglarni o‘qish uchun `scripts/i18n/read-ui-catalog.mjs` ishlatiladi; o‘qishdagi xatolar
+bo‘sh obyektlar bilan almashtirilmaydi. Mavjud bo‘lmagan asos ham, to‘liq bo‘lmagan kirish ham PASS holatini belgilamaydi.
 
 ### Topshiriq: `i18n`
 
@@ -324,7 +357,7 @@ Faqat pull requestlarda ishga tushadi.
 
 ### Topshiriq: `test-vitest`
 
-`build`dan keyin ishga tushadi. Xatolik yuz bersa, birlashtirishni bloklaydi.
+`changes` tasniflash vazifasini talab qiladi. Tegishli matritsa shardlari muvaffaqiyatsizlik yuz bersa, birlashtirishni bloklaydi.
 
 | Toʻplam          | Tekshiradi                                                                | Bloklovchi                                                                                                                                     |
 | ---------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -402,9 +435,9 @@ HEAD da ishga tushiriladi hamda har bir fayl bo‘yicha sonlarning farqi hisobla
 - **bloklovchi** — PR o‘zi o‘zgartirgan fayllarda siklomatik/kognitiv murakkablik buzilishlarini
   yoki foydalanilmayotgan eksportlarni qo‘shgan (`complexityNewCode=`, `cognitiveComplexityNewCode=`,
   `deadExportsNewCode=` jurnalda);
-- **tavsiyaviy** — global jami qiymatning muzlatilgan bazaviy chegara bilan taqqoslanishi.
-  Meros qolgan og‘ish aloqasi bo‘lmagan PR ni hech qachon muvaffaqiyatsiz qilmaydi; og‘ish
-  relizni muvofiqlashtirish paytida qayta muzlatiladi va bo‘sh chegara vazifasi tomonidan kuzatiladi.
+- **tavsiyaviy** — global jami va muzlatilgan bazaviy holat o‘rtasidagi farq. Meros bo‘lib o‘tgan og‘ish
+  aybsiz PR’ni hech qachon qizil holatga keltirmaydi; og‘ish relizni muvofiqlashtirish vaqtida tuzatish uchun kuzatib boriladi va
+  zaxira sig‘imi vazifasi tomonidan nazorat qilinadi.
 
 `check:file-size` bazaviy havoladan o‘z qoidalari asosida foydalanadi
 (`scripts/check/check-file-size.mjs`, #8522): u daraxtdagi har bir manba va test faylini
@@ -613,7 +646,11 @@ roʻyxati kengayib borayotgan paytdagi yashil nazorat sifat haqida yolgʻon tasa
 
 1. `scripts/check/check-<name>.mjs` (yoki `.ts`) faylini yarating. Siyosat tekshiruvlari 0/1 kodi bilan yakunlanadi.
    Ratchet uslubidagi tekshiruvlar `collect-metrics.mjs` orqali `quality-metrics.json` fayliga koʻrsatkich yozadi.
-2. `package.json` fayliga `"check:<name>": "node scripts/check/check-<name>.mjs"` ni qoʻshing.
+2. `package.json` fayliga `"check:<name>": "node scripts/check/check-<name>.mjs"` ni qoʻshing va
+   taxallus hamda uning aniq buyrugʻini `config/quality/gate-manifest.json` faylida sinxronlashtiring.
+   Mavjud tekshiruv taxallusini oʻzgartirish yoki olib tashlashda ham xuddi shu sinxronlashtirishni bajaring.
+   `npm run check:gate-manifest` buyrugʻini ishga tushiring; pre-commit hook va CI oʻzgarishlar tasnifi
+   ushbu kelishuvga rioya etilishini taʼminlaydi.
 3. Uni `.github/workflows/ci.yml` faylida tegishli vazifaga ulang
    (siyosat → `lint` yoki `docs-sync-strict`; ratchet → `quality-gate`).
 4. Agar unda ruxsat etilganlar roʻyxati boʻlsa, eskirgan yozuvlar avtomatik aniqlanishi uchun

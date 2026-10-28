@@ -35,9 +35,9 @@ hosted tutumun mövcudluğu yoxlanılmalıdır.
 Hər JSON qəbzi checkout edilmiş SHA-nı, iş axını icrasını və cəhdi müəyyənləşdirir.
 CLI checkout/hadisə SHA uyğunsuzluğunu rədd edir. İş axını testləri siyasətdəki üzvlüyü
 hökm işinin `needs` siyahısı ilə əlaqələndirir ki, yeni və ya silinmiş xətt səssizcə yoxa çıxmasın.
-Qəbzlər öz iş axınlarını əhatə edir; dərcetməni, deployment-i və ya mövcud tövsiyə xarakterli
-skanerin daxili hissələrini deyil. Budaq qaydalarında hər iki yoxlama adının aktivləşdirilməsi
-ayrıca inzibati dəyişiklikdir; bu işlərin əlavə edilməsi öz-özlüyündə budağı qorumur.
+Təsdiqlər yalnız öz iş axınını əhatə edir; dərc edilməni, yerləşdirməni və ya mövcud tövsiyə xarakterli skanerin daxili mexanizmlərini əhatə etmir. Müvafiq yoxlamaların budaq qaydalarında məcburi edilməsi ayrıca inzibati dəyişiklikdir; onların tapşırıqlarının müəyyənləşdirilməsi öz-özlüyündə budağı qorumur.
+
+`API Route Typecheck` hər iki ümumiləşdirilmiş qərardan və lokal tam müşahidəçinin statik profilindən kənarda olan müstəqil iş axını yoxlamasıdır. Dəqiq namizəd üçün onun nəticəsini ayrıca yoxlayın. `.github/workflows/api-route-typecheck.yml` `main` və ya `release/**` budaqlarına yönəlmiş PR-lərdə, bu budaq ailələrindən hər hansı birinə göndərişlərdə və əl ilə işə salındıqda icra olunur. Onun yol filtri yoxdur. PR-in baza budağının yenidən hədəflənməsi yeni yoxlama tələb edir; mətn/başlıq redaktələri yalnız müşahidə üçün nəzərdə tutulmuş `Admission not requested / API Route Typecheck` adından istifadə edir və qəbul yoxlamasını əvəz edə bilməz. İş axını birləşdirmə qrupu trigger-i elan etmir. Bu yoxlamanı tələb edən hər hansı birləşdirmə növbəsi tətbiqi əvvəlcə həmin hadisə üçün onun icrasını təmin etməlidir.
 
 ### Qəbul reduktorunda saxlanılan sübutlar
 
@@ -77,6 +77,21 @@ qarışıq funksiya/blok coverage-i üçün təhlükəlidir. Mövcud olmayan, d�
 və ya uyğunsuz şardlar qəbulu uğursuz edir. Uğursuz test şardları ilkin diaqnostik coverage-i
 ayrıca saxlayır; o, son birləşdirməyə daxil edilə bilməz.
 
+### Unit icrasının gedişatı haqqında qəbzlər
+
+Ortaq `test:unit:ci:shard` əmri `primary`, `dashboard` və `serial`
+mərhələlərini `scripts/ci/unit-progress-reporter.mjs` vasitəsilə qeydə alır. Adi test hesabatı əlçatan olaraq
+qalır. Yalnız metadatadan ibarət ayrıca qəbz hər bir faylın başlanmasını və tamamlanmasını qeydə alır,
+30 saniyəlik ürək döyüntüsü isə hələ də aktiv olan faylları və onların keçən müddətini siyahıya alır. O,
+yalnız icazə siyahısına daxil edilmiş icra metadatasını qeydə alır; test təsvirləri, çıxış məlumatları, xəta mətnləri və tam
+mühit seriallaşdırılmır.
+
+CI və Quality JSONL fayllarını `unit-progress-ci-<run>-<attempt>-<shard>` və
+`unit-progress-quality-<run>-<attempt>-<shard>` kimi saxlayır. Tapşırığın vaxt limitini aşması sonrakı yükləmənin qarşısını ala bilər;
+artıq göndərilmiş ürək döyüntüləri diaqnostik sübut olaraq qalır. Ürək döyüntülərinin olmaması həmçinin
+icraçı prosesin bloklandığını və ya dayandırıldığını göstərə bilər. Bu qəbzlər mövcud test seçimini,
+paralelliyi, son müddətləri və çıxış statusunu qoruyur; onlar namizədin qəbuluna dair qərar deyil.
+
 ### Statik skan inventarı
 
 Versiyalaşdırılmış npm-alias inventarı və statik skan üzvlüyü
@@ -108,6 +123,14 @@ edildiyinin sübutu deyil.
 
 Skriptlər `scripts/check/` (siyasət geytləri) və `scripts/quality/` (ratchet mühərriki)
 altında yerləşir. CI üçün həqiqət mənbəyi `.github/workflows/ci.yml` faylıdır.
+
+### Dərc edilmiş baza sənədlərinin sağlamlığı
+
+`.github/workflows/i18n-base-health.yml` seçilmiş dəyişikliklər `main` və `release/v*` budaqlarına göndərildikdən sonra, həmçinin əl ilə işə salındıqda sənədlərin sağlamlığını müşahidə edir. Onun filtrləri sənədləri, kök Markdown fayllarını, `llm.txt` faylını, tərcümə vəziyyətini/konfiqurasiyasını və müvafiq i18n alətlərini əhatə edir. Yeganə `Published base documentation health` tapşırığı xidmət tərəfindən təmin edilən Ubuntu mühitindən istifadə edir və beş dəqiqəlik vaxt məhdudiyyətinə malikdir. O, yalnız oxuma rejimində doğrulama aparır və asılılıqları quraşdırmadan, tərcümə etmədən və ya vəziyyəti qəbul etmədən diaqnostik qəbz yazır.
+
+`scripts/i18n/check-base-health.mjs` mənbə heşi, çatışmayan hədəf, hədəf heşi, köhnəlmiş tərcümə və bölmə keşi uyğunsuzluqlarının olmamasını tələb edir. O, həmçinin cari əsas sənəd/lokal əhatə dairəsini və onun qeydə alınmış mənşəyini doğrulayır. Etibarsız kontekst, natamam əhatə və ya yoxlayıcının işinin yarımçıq kəsilməsi `INCOMPLETE` nəticəsini yaradır; təsdiqlənmiş yayınma isə `FAIL` nəticəsini yaradır. Hər ikisi uğursuz çıxış statusu qaytarır. Qəbz checkout SHA-sına, iş axınına, icraya və cəhdə bağlanır və `i18n-base-health-<sha>-<run>-<attempt>` adı ilə saxlanılır.
+
+Bu, dərc edilmiş bazanın müstəqil müşahidəsidir. O, PR və ya merge-group hadisəsi, məcburi PR yoxlaması, npm aliası və ya statik skan profilinin üzvünü əlavə etmir. Mövcud diferensial PR siyasəti və əsas yoxlayıcının tövsiyə xarakterli təsnifatları ayrı qalır. Uğurlu yükləmə uğursuz sağlamlıq nəticəsini PASS nəticəsinə çevirə bilməz.
 
 ### Release PR sürətli yolu (`quality.yml`)
 
@@ -241,12 +264,12 @@ Daim pulsuz provayderlər, kataloq qeydləri, təkrarlanan hovuzlar və qiymətl
 
 ### Tapşırıq: `i18n-ui-coverage`
 
-| Skript                                 | Yoxlayır                                                                                                                                                                                              | Bloklayıcı             |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `check-ui-keys-coverage` (sətirdaxili) | UI i18n açarlarının əhatə səviyyəsi ≥ 65%-dir                                                                                                                                                         | Bəli                   |
-| `check-ui-value-drift` (sətirdaxili)   | Yenidən yazılmış ingiliscə **dəyər** köhnəlmiş tərcümə saxlamır                                                                                                                                       | Bəli                   |
-| `check-new-key-coverage` (sətirdaxili) | **Yeni** ingiliscə açar hər lokal üçün tərcümə edilib — `__MISSING__:` markeri rədd edilir                                                                                                            | Bəli                   |
-| `check-translation-ratio`              | Hər lokal üzrə real tərcümə nisbəti (icazə siyahısından kənarda ingiliscə ilə eyni / yer tutucu / çatışmayan yarpaqlar) `config/quality/i18n-translation-baseline.json` + ehtiyat həddini aşmamalıdır | **Tövsiyə xarakterli** |
+| Skript                                 | Yoxlayır                                                                                                                                                                                              | Bloklayıcı     |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `check-ui-keys-coverage` (sətirdaxili) | UI i18n açarlarının əhatə səviyyəsi ≥ 65%-dir                                                                                                                                                         | Bəli           |
+| `check-ui-value-drift` (sətirdaxili)   | Yenidən yazılmış ingiliscə **dəyər** köhnəlmiş tərcümə saxlamır                                                                                                                                       | Bəli           |
+| `check-new-key-coverage` (sətirdaxili) | **Yeni** ingiliscə açar hər lokal üçün tərcümə edilib — `__MISSING__:` markeri rədd edilir                                                                                                            | Bəli           |
+| `check-translation-ratio`              | Hər lokal üzrə real tərcümə nisbəti (icazə siyahısından kənarda ingiliscə ilə eyni / yer tutucu / çatışmayan yarpaqlar) `config/quality/i18n-translation-baseline.json` + ehtiyat həddini aşmamalıdır | **Bloklayıcı** |
 
 `fetch-depth: 0` tələb edir — dəyər sapması qapısı `en.json` faylını birləşdirmə bazası ilə müqayisə edir.
 
@@ -290,8 +313,19 @@ npm run i18n:check-value-drift:warn     # yalnız hesabat
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Baza kataloqu oxuna bilmədikdə (baza ref-i olmayan dayaz klon) `check-openapi-breaking`
-davranışını təkrarlayaraq `SKIP reason=base-unresolved` ilə 0 çıxış kodu qaytarır.
+Dəyər dəyişməsi və yeni açar yoxlamaları dəyişməz müqayisəni
+`scripts/i18n/resolve-ui-diff-base.mjs` faylından ortaq şəkildə istifadə edir. İş axını hər iki yoxlamaya eyni baza, baza ucu və
+namizəd SHA-larını ötürür. PR/bazanın yenidən hədəflənməsi, push və merge-group icraları öz hadisə
+kontekstlərindən istifadə edir. Namizəd budağının əl ilə işə salınması üçün onun dəqiq açıq PR-ı və ya açıq şəkildə göstərilmiş
+`i18n_base_sha` girişi tələb olunur. Bu giriş olmadan `main` və ya `release/vX.Y.Z`
+üçün əl ilə işə salınma və ya planlaşdırılmış müşahidə son commit-i onun birinci valideyni ilə müqayisə edir; bu,
+miras qalmış bütün tərcümə borcunun auditi deyil. Lokal işə salınma üçün açıq şəkildə göstərilmiş müqayisə bazası,
+məsələn, yuxarıdakı `BASE_REF` əmri tələb olunur.
+
+Çatışmayan və ya qeyri-müəyyən müqayisə konteksti, oxuna bilməyən və ya etibarsız tələb olunan kataloq və
+dəyişdirilmiş namizəd, xəbərdarlıq rejimi də daxil olmaqla, **2** çıxış kodu ilə `INCOMPLETE` nəticəsini yaradır.
+Kataloqlar `scripts/i18n/read-ui-catalog.mjs` vasitəsilə oxunur; oxuma xətaları
+boş obyektlərlə əvəz edilmir. Nə əlçatan olmayan baza, nə də natamam giriş `PASS` nəticəsini təsdiqləyir.
 
 ### İş: `i18n`
 
@@ -313,7 +347,7 @@ Yalnız pull request-lərdə işləyir.
 
 ### İş: `test-vitest`
 
-`build` tamamlandıqdan sonra işləyir. Uğursuz olduqda birləşdirməni bloklayır.
+`changes` təsnifat işi tələb olunur. Tətbiq olunan matris fraqmentləri uğursuzluq halında birləşdirməni bloklayır.
 
 | Dəst             | Yoxlayır                                                 | Bloklayıcı                                                                                                                                          |
 | ---------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -387,9 +421,9 @@ reallaşdırılır, ESLint/knip orada və HEAD üzərində işə salınır, fayl
 
 - **bloklayıcı** — PR dəyişdirdiyi fayllara siklomatik/koqnitiv pozuntular və ya istifadəsiz ixraclar əlavə edib
   (jurnalda `complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=`);
-- **tövsiyə xarakterli** — qlobal cəmin dondurulmuş baza həddi ilə müqayisəsi. Miras alınmış yayınma
-  günahsız PR-ı heç vaxt qırmızı etmir; yayınma buraxılış uzlaşdırılması zamanı yenidən dondurulur və
-  ehtiyat işi tərəfindən izlənilir.
+- **məsləhət xarakterli** — qlobal cəmin dondurulmuş baza göstəricisi ilə müqayisəsi. Miras alınmış yayınma
+  günahsız PR-i heç vaxt uğursuz etmir; yayınma buraxılışın uzlaşdırılması zamanı düzəldilmək üçün izlənilir və
+  ehtiyat payı tapşırığı tərəfindən nəzarətdə saxlanılır.
 
 `check:file-size` baza istinadını öz qaydalarına uyğun istifadə edir (`scripts/check/check-file-size.mjs`, #8522):
 ağacdakı hər bir mənbə və test faylını yoxlayır, `git show` vasitəsilə hər birinin PR bazasındakı sətir
@@ -599,7 +633,11 @@ icazə siyahısı ilə yaşıl keçid saxta keyfiyyət hissi yaradır.
 
 1. `scripts/check/check-<name>.mjs` (və ya `.ts`) yaradın. Siyasət yoxlamaları 0/1 çıxış kodu ilə tamamlanır.
    Ratçet tipli yoxlamalar `collect-metrics.mjs` vasitəsilə `quality-metrics.json` faylına göstərici yazır.
-2. `package.json` faylına `"check:<name>": "node scripts/check/check-<name>.mjs"` əlavə edin.
+2. `package.json` faylına `"check:<name>": "node scripts/check/check-<name>.mjs"` əlavə edin və
+   aliası, eləcə də onun dəqiq əmrini `config/quality/gate-manifest.json` faylında sinxronlaşdırın.
+   Mövcud doğrulama aliasını dəyişdirərkən və ya silərkən də eyni sinxronlaşdırmanı tətbiq edin.
+   `npm run check:gate-manifest` əmrini işə salın; pre-commit hook-u və CI dəyişiklik təsnifatı
+   bu müqavilənin icrasını təmin edir.
 3. Onu `.github/workflows/ci.yml` daxilində uyğun tapşırığa
    (siyasət → `lint` və ya `docs-sync-strict`; ratçet → `quality-gate`) qoşun.
 4. İcazə siyahısı varsa, köhnəlmiş qeydlərin avtomatik aşkarlanması üçün
