@@ -4,13 +4,7 @@
 
 ---
 
-> **الحالة:** لوحة التحكم مبنية على **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)، وهي مدمجة ضمن المستودع
-> كمساحة عمل `packages/ui-kit` (`@omniroute/ui-kit`؛ واللقطة المرجعية للمصدر الأصلي مثبّتة في
-> `packages/ui-kit/UPSTREAM.md` ومحمية عبر `npm run check:ui-kit-snapshot`). السمة الفاتحة هي السمة
-> القياسية؛ والتفضيل الافتراضي هو `system`. لون التمييز هو Keak lime (`--ci-color-accent`). خط Inter
-> (letter-spacing 0، `--ci-letter-spacing-ui`) هو عائلة خطوط الواجهة، وخط Instrument Serif مخصص فقط لنصوص
-> العرض الكبيرة المتفرقة (`.ci-dashboard-display`)، وخط IBM Plex Mono للشيفرة — وجميعها مستضافة ذاتيًا من خلال
-> عمليات استيراد `@fontsource/*` في أعلى `src/app/globals.css`. كل أيقونة هي رمز رسومي من Lucide.
+> **حالة:** لوحة القيادة مبنية على** طقم كيك CI UI** (`@keak/cheaper-inference-ui-kit`) ، يتم بيعها كمساحة العمل `packages/ui-kit` (`@omniroute/ui-kit`؛ يتم تثبيت اللقطة الأولية في `packages/ui-kit/UPSTREAM.md` وحمايتها بواسطة `npm run check:ui-kit-snapshot`). الضوء هو الموضوع الأساسي. التفضيل الافتراضي هو `system`. اللهجة هي كيك الجير (`--ci-color-accent`). Switzer هي عائلة واحدة لـ UI ونص العرض والرمز (`--ci-font-ui`; `--ci-font-display` و `--ci-font-mono` مصممان عليه)، تتم استضافتها ذاتيًا بواسطة المجموعة نفسها (`packages/ui-kit/src/ci-fonts.css`، المستوردة بواسطة `ci-tokens.css`). كل أيقونة عبارة عن حرف رسومي من Lucide.
 
 ## 1. أين توجد الأشياء
 
@@ -83,13 +77,13 @@
 
 ## 2. القواعد
 
-1. الرموز (tokens) دائمًا، ولا قيم حرفية أبدًا. استثناءات أُبقيت عن قصد: طرفية وحدة التحكم الداكنة دائمًا و`STATUS_HEX` (`src/shared/constants/statusColors.ts`)، وهو المرآة المحوَّلة إلى hex للوحة ألوان الحالة في المجموعة، للمتصلين الذين يحتاجون إلى قيمة hex حرفية. لم تعد لوحات الألوان الفئوية استثناءً بعد الآن: فهي تعتمد على رموز المخططات الخمسة في المجموعة (`--color-chart-1..5`) عبر `src/shared/utils/categoricalPalette.ts`، وبالنسبة لاستراتيجيات التوجيه، عبر `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`؛ أما حواف ReactFlow ولوحة التنسيق (orchestration canvas) فتقرأ متغيرات `--orch-status-*` الواعية بالسمة (`src/shared/components/flow/edgeStyles.ts`).
-2. لا تعدّل `packages/ui-kit/src` يدويًا أبدًا: زامِن باستخدام `scripts/dev/sync-ui-kit.sh <commit>`؛ فبوابة ما قبل الالتزام `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) تفشل عند أي بايت يختلف عن الالتزام المثبَّت في المستودع الأصلي (وتتخطى الفحص مع تحذير عندما يكون استنساخ المستودع الأصلي، `UI_KIT_CLONE` أو `_references/cheaper-inference-ui-kit`، غائبًا). عندما تنقص المجموعة شيئًا ما، تحايَل عليه في المحوِّل أو في الشاشة واطلبه من المستودع الأصلي.
-3. الإعدادات الافتراضية لنصوص المجموعة هي الإنجليزية (`label = "Loading"`، `loadingLabel = "Loading table"`…) — مرِّر سلاسل مترجمة من `useTranslations(...)` كلما عرض مكوِّن من مكوِّنات المجموعة نصًا.
-4. أدوات Tailwind المساعدة تغلب فئات مكوِّنات المجموعة (تُعلن المجموعة `@layer theme, base, components, utilities` وقواعدها موجودة في طبقة `components`) — استخدم الأدوات المساعدة للتباعد والتخطيط، لا لإعادة تلوين مكوِّنات المجموعة.
-5. العناوين: `.ci-heading` (Inter، بدون تباعد أحرف) لعناوين الصفحات والأقسام؛ و`.ci-dashboard-display` (Instrument Serif) فقط للنصوص العرضية الكبيرة والمتفرقة مثل رمز الحالة في صفحة الخطأ.
-6. يحمي `tests/unit/dashboard-kit-sweep.test.ts` اعتماد المجموعة: لا عناصر span لمحارف Material المركّبة (ligature) تحت `src/app` أو `src/shared/components`؛ وفي شجرة لوحة التحكم (`src/app/(dashboard)` و`src/shared/components`) لا عناصر `<select>` أو `<textarea>` أو `<table>` خام، ولا `role="dialog"` مُنشأ يدويًا خارج الاستثناءات المدرجة (الفرع الأصلي لمحوِّل `Select`، و`RequestLoggerDetail`)؛ وكل `<button>` أو `<input>` خام هناك يحتاج إلى تعليق يحتوي على `kit-exception:` (مع السبب) ينتهي قبله بثلاثة أسطر على الأكثر؛ ودرجات ألوان اللوحة ومتغيرات `dark:` مسموح بها فقط في الملفات التي يسردها الاختبار.
-7. تحقق من كلتا السمتين ومن إطار العرض بعرض 390 بكسل قبل طلب الدمج (بلقطات شاشة)؛ ويُشغِّل `tests/e2e/a11y.spec.ts` أداة axe.
+1. الرموز، ليست حرفية أبدًا. الاستثناءات التي يتم الاحتفاظ بها عن قصد: محطة وحدة التحكم المظلمة دائمًا و `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ، المرآة السداسية التي تم حلها في لوحة حالة المجموعة للمتصلين الذين يحتاجون إلى رقم سداسي عشري حرفي. لم تعد اللوحات الفئوية استثناءً بعد الآن: فهي تعتمد على الرموز المميزة للمخططات الخمسة للمجموعة (`--color-chart-1..5`) عبر `src/shared/utils/categoricalPalette.ts` ، وبالنسبة لاستراتيجيات التوجيه، `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`؛ تقوم حواف ReactFlow ولوحة التنسيق بقراءة متغيرات `--orch-status-*` المدركة للموضوع (`src/shared/components/flow/edgeStyles.ts`).
+2. لا تقم مطلقًا بتصحيح `packages/ui-kit/src` يدويًا: قم بالمزامنة مع `scripts/dev/sync-ui-kit.sh <commit>`؛ تفشل بوابة الالتزام المسبق `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) على أي بايت يختلف عن التزام المنبع المثبت (يتم تخطيها مع تحذير عند غياب استنساخ المنبع، `UI_KIT_CLONE` أو `_references/cheaper-inference-ui-kit`). عندما تفتقر المجموعة إلى شيء ما، قم بحل المشكلة في المحول أو الشاشة واطلب ذلك من المنبع.
+3. الإعدادات الافتراضية لنص المجموعة هي الإنجليزية (`label = "Loading"`، `loadingLabel = "Loading table"`...) - قم بتمرير السلاسل المترجمة من `useTranslations(...)` عندما يعرض أحد مكونات المجموعة نصًا.
+4. تفوز الأدوات المساعدة Tailwind بفئات مكونات المجموعة (تعلن المجموعة عن `@layer theme, base, components, utilities` وقواعدها موجودة في `components`) - استخدم الأدوات المساعدة للتباعد والتخطيط، وليس لإعادة تلوين مكونات المجموعة.
+5. العناوين: `.ci-heading` لعناوين الصفحات والأقسام؛ `.ci-dashboard-display` فقط لنص العرض الكبير والمتفرق مثل رمز حالة صفحة الخطأ. كلاهما يستخدم سويتزر.
+6. `tests/unit/dashboard-kit-sweep.test.ts` تحمي اعتماد المجموعة: لا يوجد رباط مادي تحت `src/app` أو `src/shared/components`؛ في شجرة لوحة المعلومات (`src/app/(dashboard)` و `src/shared/components`) لا يوجد `<select>` أو `<textarea>` أو `<table>` خام ولا يوجد `role="dialog"` ملفوف يدويًا خارج الاستثناءات المدرجة (الفرع الأصلي لمحول `Select` ، `RequestLoggerDetail`)؛ كل `<button>` أو `<input>` خام يحتاج إلى تعليق يحتوي على `kit-exception:` (مع السبب) وينتهي فوقه بثلاثة أسطر على الأكثر؛ ألوان اللوحة ومتغيرات `dark:` فقط في الملفات التي يسردها الاختبار.
+7. التحقق من كلا الموضوعين وإطار العرض 390 بكسل قبل PR (لقطات الشاشة)؛ `tests/e2e/a11y.spec.ts` يدير الفأس.
 
 ## 3. إضافة شاشة
 
@@ -114,40 +108,16 @@
 `packages/ui-kit/src` ويطبق التحويل الوحيد المسموح به (إزالة اللاحقة `.js` من عمليات الاستيراد النسبية). ثم: راجع `git diff packages/ui-kit`، وقم بجولة بصرية على الموفرين (providers) والإعدادات والمجموعات (combos) والاستخدام ونقطة النهاية في كلا السمتين، وشغِّل `npm run check:ui-kit-snapshot` و`npm run test:vitest:ui`،
 وافتح طلب الدمج (PR) مع سجل التغييرات من المصدر الأصلي.
 
-## 6. مخططات README
+## 6. المخططات README
 
-المخططات الاثنا عشر التي يضمّنها `README.md` الجذري (`docs/diagrams/*.svg`) هي المجموعة مُطبَّقة على صورة ثابتة، وهي مُولَّدة وليست مرسومة يدويًا: 13 ملف مولِّد في `scripts/docs/gen-readme-*.mjs`
-(اثنا عشر مخططًا إضافةً إلى المُشغِّل `gen-readme-diagrams.mjs`) و12 اختبار تقادم في
-`tests/unit/docs/readme-*-svg.test.ts`، واحد لكل مخطط، كل منها يقارن بايتًا ببايت الملف المُرسَل مع
-مخرجات مولِّده (مهمة `test-unit`).
+الرسوم البيانية الاثني عشر التي يتضمنها جذر `README.md` (`docs/diagrams/*.svg`) هي المجموعة المطبقة على صورة ثابتة، ويتم إنشاؤها، وليس رسمها يدويًا: 13 ملف مولد في `scripts/docs/gen-readme-*.mjs` (اثني عشر مخططًا بالإضافة إلى برنامج تشغيل `gen-readme-diagrams.mjs` ) و12 اختبارًا للتلف في `tests/unit/docs/readme-*-svg.test.ts`، واحد لكل رسم تخطيطي، كل بايت يقارن الملف الملتزم بمخرجات المولد (وظيفة `test-unit`).
 
-- **الرموز (Tokens).** ينسخ `scripts/docs/readme-diagram-theme.mjs` لوحة الألوان من `packages/ui-kit/src/ci-tokens.css`
-  (مثبَّت مقابل ذلك الملف بواسطة `tests/unit/docs/readme-diagram-theme.test.ts`) ويعرِّف أدوار النص على
-  خطوط المجموعة — Instrument Serif للعناوين العرضية، وInter لنصوص الواجهة، وIBM Plex Mono للأرقام والشيفرة، وهي
-  نفس حزم `@fontsource` التي يحمِّلها `src/app/globals.css` للوحة التحكم. القيم الفاتحة توجد على `:root`، والقيم
-  الداكنة خلف `prefers-color-scheme: dark`، داخل الملف، بحيث تتبع كل صورة سمة العارض على
-  GitHub.
-- **الخطوط.** يقتطع `scripts/docs/readme-fonts.mjs` ملفات woff2 تلك إلى المحارف التي يرسمها كل مخطط
-  ويضمّنها كـ `@font-face` بصيغة `data:` URIs — وهي الطريقة الوحيدة التي تصل بها طباعة المجموعة إلى صورة README، بما أن
-  GitHub Markdown لا يحمل أي CSS ووكيل camo يحظر كل جلب خارجي. الاقتطاعات للأحرف اللاتينية فقط؛
-  محارف الرموز التي تعود إلى مجموعة خطوط النظام مسموح بها واحدًا واحدًا في `SYMBOL_FALLBACKS`، وأي
-  محرف آخر غير مغطًّى يُطلِق خطأً.
-- **إعادة التوليد.** يعيد `npm run docs:readme-diagrams` كتابة المخططات الاثني عشر كلها بترتيب README ويطبع سطرًا واحدًا لكل
-  ملف مع حجمه. يمكن أيضًا تشغيل مولِّد واحد بمفرده (`node scripts/docs/gen-readme-<name>.mjs`؛
-  يحتاج `free-tier-budget` إلى `node --import tsx/esm` لأن أرقامه تأتي من محمِّل الكتالوج الحي في
-  `open-sse/config/freeModelCatalog.ts`؛ ونتيجة تغيير الكتالوج على CI موضحة في
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). أرسل المولِّد وملف SVG معًا.
-- **الإثبات.** يُصيّر `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` الملف بالطريقة التي يقدّمه بها GitHub
-  (وسم `<img>`، وسياسة `Content-Security-Policy` الخاصة بـ camo، و`image/svg+xml`)، ويلتقط إطارًا فاتحًا وآخر داكنًا
-  ويُبلغ عن طلبات الخطوط الخارجية التي قامت بها الصفحة (يجب أن تكون 0).
-- **الميزانية.** أقل من 200 كيلوبايت لكل ملف (كل اختبار تقادم يؤكد ذلك)؛ و500 كيلوبايت هو الحد الأقصى الصارم لأي صورة في README
-  (قاعدة مُتحقِّق استوديو SVG).
-- **النص دون تغيير، والأرقام من البوابة.** غيّر تغيير العلامة التجارية الخطوط ولوحة الألوان، لا الكلمات: كل مولِّد
-  يحمل نص مخططه في ثابت `*_COPY` (أو يبنيه من الكتالوج الحي) وهو في الوقت نفسه
-  النص المرسوم ومدخل اقتطاع الخط. تبقى الأرقام المرجعية في عقد `<text>`، يقرؤها `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`)؛ وتشغِّل اختبارات التقادم للمخططات التي تقرؤها البوابة أيضًا
-  مُتحقِّقاتها على الملف المُولَّد، لذا فإن رقمًا ينحرف عن الشيفرة يُسقِط الاختبار — أصلِح
-  المصدر الذي تقرؤه البوابة، وليس الرقم في المولِّد أبدًا.
+- **الرموز.** يقوم `scripts/docs/readme-diagram-theme.mjs` بنسخ اللوحة من `packages/ui-kit/src/ci-tokens.css` (المثبتة على هذا الملف بواسطة `tests/unit/docs/readme-diagram-theme.test.ts`) ويحدد أدوار النص على الوجوه السابقة للمجموعة - Instrument Serif للعرض، وInter للنص UI ، و IBM Plex Mono للأشكال والرموز - من حزم `@fontsource` (تستخدم لوحة المعلومات نفسها Switzer الخاص بالمجموعة منذ الإصدار 0.0.66). توجد القيم الفاتحة على `:root`، والقيم الداكنة خلف `prefers-color-scheme: dark`، داخل الملف، بحيث تتبع كل صورة مخطط المشاهد على GitHub.
+- **الخطوط.** يقوم `scripts/docs/readme-fonts.mjs` بتجميع ملفات woff2 هذه إلى الحروف الرسومية التي يرسمها كل مخطط ويدمجها كـ `@font-face` `data:` URIs - الطريقة الوحيدة التي تصل بها مجموعة أدوات الطباعة إلى صورة README ، نظرًا لأن GitHub Markdown لا يحمل CSS ويقوم وكيل camo بحظر كل عملية جلب خارجية. المجموعات الفرعية لاتينية فقط؛ يُسمح باستخدام الحروف الرسومية للرموز التي ترجع إلى مكدس النظام واحدًا تلو الآخر في `SYMBOL_FALLBACKS`، وأي رميات رسومية أخرى غير مكشوفة.
+- **تجديد.** يعيد `npm run docs:readme-diagrams` كتابة جميع الملفات الاثني عشر بترتيب README ويطبع سطرًا واحدًا لكل ملف بحجمه. يعمل مولد واحد أيضًا من تلقاء نفسه (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` يحتاج `node --import tsx/esm` لأن أرقامه تأتي من محمل الكتالوج المباشر في `open-sse/config/freeModelCatalog.ts`؛ ونتيجة CI لتغيير الكتالوج تكون في `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). قم بإلزام المولد و SVG معًا.
+- **دليل.** يعرض `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ملفًا بالطريقة التي يخدمها بها GitHub (علامة `<img>` ، وcamo's `Content-Security-Policy`، `image/svg+xml`)، ويلتقط إطارًا فاتحًا وداكنًا ويبلغ عن طلبات الخط الخارجي التي تم إنشاؤها في الصفحة (يجب أن يكون 0).
+- **ميزانية.** أقل من 200 KB لكل ملف (كل اختبار للفساد يؤكد ذلك)؛ 500 KB هو الحد الأقصى لأي صورة README (قاعدة مدقق SVG studio).
+- **نسخ دون تغيير، التهم من البوابة.** لقد غيرت العلامة التجارية النوع واللوحة، وليس الكلمات: يحمل كل مولد نسخة الرسم التخطيطي الخاص به في ثابت `*_COPY` (أو يبنيها من الكتالوج المباشر) وهو النص المرسوم ومدخل مجموعة الخطوط الفرعية. تبقى الأشكال الأساسية في عقد `<text>` ، وتتم قراءتها بواسطة `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`)؛ تعمل اختبارات ثبات الرسوم البيانية التي تقرأها البوابة أيضًا على تشغيل أدوات التحقق الخاصة بها على الملف الذي تم إنشاؤه، لذا فإن الشكل الذي ينحرف عن الكود يفشل في الاختبار - قم بإصلاح المصدر الذي تقرأه البوابة، وليس الرقم الموجود في المولد أبدًا.
 
 ## 7. فهرس المراجع
 

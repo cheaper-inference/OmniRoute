@@ -11,31 +11,19 @@
 
 ---
 
-## Qué es
+## ¿Qué es?
 
-OmniRoute registra 376 proveedores, incluidas 155 entradas de catálogo marcadas como **gratuitas/sin autenticación**
-(sin autenticación, OAuth de nivel gratuito o clave de API de nivel gratuito — consulta la
-[Guía de niveles gratuitos](../getting-started/FREE-TIERS-GUIDE.md) y el
-[directorio completo de niveles gratuitos](../reference/FREE_TIERS.md)). El problema: los proveedores gratuitos varían
-enormemente en la calidad de sus modelos. Un proveedor sin autenticación que ofrece un modelo de vanguardia es mucho más útil
-que uno que ofrece un modelo heredado pequeño.
+OmniRoute registra 377 proveedores, incluidas 155 entradas de catálogo marcadas**free/no-auth** (sin autenticación, OAuth de nivel gratuito o clave API de nivel gratuito; consulte la [Guía de niveles gratuitos](../getting-started/FREE-TIERS-GUIDE.md) y el [directorio completo de niveles gratuitos](../reference/FREE_TIERS.md) ). El problema: los proveedores gratuitos varían enormemente en la calidad de los modelos. Un proveedor sin autenticación que preste servicio a un modelo de frontera es mucho más útil que uno que preste servicio a un modelo heredado pequeño.
 
-**La clasificación de proveedores gratuitos** responde a la pregunta "**¿qué proveedor gratuito me ofrece el mejor modelo?**"
-combinando el catálogo de cada proveedor gratuito con **puntuaciones de calidad de origen colectivo** procedentes de la
-**tabla de clasificación de Arena AI** (ELO basado en preferencias humanas, la misma idea detrás de la arena de chatbots
-LMArena). Los proveedores se clasifican luego según la potencia de su **mejor modelo gratuito**.
+**Clasificaciones de proveedores gratuitas** respuestas "** ¿Qué proveedor gratuito me ofrece el mejor modelo?** " uniéndote al catálogo gratuito de cada proveedor con** puntuaciones de calidad de fuentes colectivas** desde** Clasificación de arena AI** (human-preference ELO, la misma idea detrás del chatbot arena LMArena). Luego, los proveedores se clasifican según la solidez de sus** mejor modelo gratis** .
 
 La clasificación se calcula a partir de tres fuentes reales:
 
-1. Las listas de proveedores gratuitos — `NOAUTH_PROVIDERS`, además de las entradas de `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` marcadas con `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. El catálogo de modelos de cada proveedor procedente del registro de proveedores
-   (`open-sse/config/providerRegistry.ts`).
-3. Puntuaciones de idoneidad para tareas derivadas del ELO, almacenadas en la tabla de BD `model_intelligence` por el
-   motor de sincronización de Arena ELO (`src/lib/arenaEloSync.ts`).
+1. Las listas de proveedores gratuitos: `NOAUTH_PROVIDERS`, además de entradas `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` marcadas como `hasFree` (`src/shared/constants/providers.ts`).
+2. Catálogo de modelos de cada proveedor del registro de proveedores (`open-sse/config/providerRegistry.ts`).
+3. Puntuaciones de ajuste de tareas derivadas de ELO almacenadas en la tabla `model_intelligence` DB por el motor de sincronización Arena ELO (`src/lib/arenaEloSync.ts`).
 
-La lógica de combinación reside en `src/lib/freeProviderRankings.ts`.
+La lógica de unión vive en `src/lib/freeProviderRankings.ts`.
 
 ---
 

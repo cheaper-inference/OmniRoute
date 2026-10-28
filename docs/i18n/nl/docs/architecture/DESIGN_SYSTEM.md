@@ -4,13 +4,7 @@
 
 ---
 
-> **Status:** het dashboard is gebouwd op de **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), die als vendored kopie
-> is opgenomen in de workspace `packages/ui-kit` (`@omniroute/ui-kit`; de upstream-snapshot is vastgezet in
-> `packages/ui-kit/UPSTREAM.md` en wordt bewaakt door `npm run check:ui-kit-snapshot`). Light is het canonieke
-> thema; de standaardvoorkeur is `system`. Het accent is Keak-limoen (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) is de UI-familie, Instrument Serif alleen voor grote, spaarzaam
-> gebruikte displaytekst (`.ci-dashboard-display`), IBM Plex Mono voor code — allemaal zelf gehost via de
-> `@fontsource/*`-imports bovenaan `src/app/globals.css`. Elk icoon is een Lucide-glyph.
+> **Status:** het dashboard is gebouwd op de** Keak CI UI -kit** (`@keak/cheaper-inference-ui-kit`), verkocht als de werkruimte `packages/ui-kit` (`@omniroute/ui-kit`; de upstream-snapshot is vastgezet in `packages/ui-kit/UPSTREAM.md` en bewaakt door `npm run check:ui-kit-snapshot`). Licht is het canonieke thema; de standaardvoorkeur is `system`. Het accent is Keak-limoen (`--ci-color-accent`). Switzer is de enige familie voor UI, display- en codetekst (`--ci-font-ui`; `--ci-font-display` en `--ci-font-mono` lossen dit op), zelf gehost door de kit zelf (`packages/ui-kit/src/ci-fonts.css`, geïmporteerd door `ci-tokens.css`). Elk pictogram is een Lucide-glyph.
 
 ## 1. Waar alles staat
 
@@ -81,36 +75,13 @@
 
 ## 2. Regels
 
-1. Tokens, nooit literals. Uitzonderingen bewust behouden: de altijd donkere consoleterminal en
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), de resolved-hex-spiegel van het
-   statuspalet van de kit voor aanroepers die een letterlijke hex nodig hebben. De categorische
-   paletten zijn geen uitzondering meer: ze leunen op de vijf chart-tokens van de kit
-   (`--color-chart-1..5`) via `src/shared/utils/categoricalPalette.ts` en, voor
-   routingstrategieën, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-edges
-   en het orchestratiecanvas lezen de thema-bewuste `--orch-status-*`-variabelen
-   (`src/shared/components/flow/edgeStyles.ts`).
-2. Patch `packages/ui-kit/src` nooit handmatig: synchroniseer met `scripts/dev/sync-ui-kit.sh <commit>`; de
-   pre-commit-check `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) faalt op elke byte die
-   afwijkt van de vastgepinde upstream-commit (deze wordt met een waarschuwing overgeslagen wanneer de
-   upstream-clone, `UI_KIT_CLONE` of `_references/cheaper-inference-ui-kit`, ontbreekt). Wanneer de kit
-   iets mist, werk er dan in de adapter of het scherm omheen en vraag het aan upstream.
-3. De standaardteksten van de kit zijn Engels (`label = "Loading"`, `loadingLabel = "Loading table"`…) — geef vertaalde
-   strings door uit `useTranslations(...)` wanneer een kit-component tekst rendert.
-4. Tailwind-utilities winnen het van kit-componentklassen (de kit declareert
-   `@layer theme, base, components, utilities` en haar regels staan in `components`) — gebruik utilities voor
-   spacing en layout, niet om kit-componenten te herkleuren.
-5. Koppen: `.ci-heading` (Inter, geen tracking) voor pagina- en sectietitels; `.ci-dashboard-display`
-   (Instrument Serif) alleen voor grote, spaarzaam gebruikte displaytekst zoals de statuscode van de
-   foutpagina.
-6. `tests/unit/dashboard-kit-sweep.test.ts` bewaakt de kit-adoptie: geen Material-ligatuur-span onder
-   `src/app` of `src/shared/components`; in de dashboard-boom (`src/app/(dashboard)` en
-   `src/shared/components`) geen kale `<select>`, `<textarea>` of `<table>` en geen handgemaakte
-   `role="dialog"` buiten de opgesomde uitzonderingen (de native branch van de `Select`-adapter,
-   `RequestLoggerDetail`); elke kale `<button>` of `<input>` daar heeft een commentaar nodig dat
-   `kit-exception:` bevat (met de reden) en uiterlijk 3 regels erboven eindigt; palettinten en
-   `dark:`-varianten alleen in de bestanden die de test opsomt.
-7. Verifieer beide thema's en de 390 px-viewport vóór een PR (screenshots); `tests/e2e/a11y.spec.ts` draait
-   axe.
+1. Tokens, nooit letterlijke waarden. Uitzonderingen zijn met opzet gehouden: de altijd donkere consoleterminal en `STATUS_HEX` (`src/shared/constants/statusColors.ts`), de opgeloste hex-spiegel van het kitstatuspalet voor bellers die een letterlijke hex nodig hebben. De categorische paletten vormen geen uitzondering meer: ze rijden op de vijf kaarttokens van de kit (`--color-chart-1..5`) via `src/shared/utils/categoricalPalette.ts` en, voor routeringsstrategieën, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow randen en het orkestratiecanvas lezen de themabewuste `--orch-status-*` variabelen (`src/shared/components/flow/edgeStyles.ts`).
+2. Patch `packages/ui-kit/src` nooit met de hand: synchroniseer met `scripts/dev/sync-ui-kit.sh <commit>`; de pre-commit poort `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) faalt op elke byte die verschilt van de vastgezette upstream commit (hij slaat over met een waarschuwing wanneer de upstream kloon, `UI_KIT_CLONE` of `_references/cheaper-inference-ui-kit`, afwezig is). Als de kit iets mist, werk er dan omheen in de adapter of het scherm en vraag er upstream om.
+3. De standaardinstellingen voor de tekst van de kit zijn Engels (`label = "Loading"`, `loadingLabel = "Loading table"`…) — geef vertaalde tekenreeksen van `useTranslations(...)` door telkens wanneer een kitcomponent tekst weergeeft.
+4. Hulpprogramma's in de rug winnen de klassen van kitcomponenten (de kit declareert `@layer theme, base, components, utilities` en de regels ervan leven in `components`) - gebruik hulpprogramma's voor spatiëring en lay-out, niet om kitcomponenten opnieuw te kleuren.
+5. Koppen: `.ci-heading` voor pagina- en sectietitels; `.ci-dashboard-display` alleen voor grote, schaarse weergavetekst, zoals de statuscode van de foutpagina. Beide gebruiken Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` bewaakt de adoptie van de kit: geen materiaalligatuurspanwijdte onder `src/app` of `src/shared/components`; in de dashboardboom (`src/app/(dashboard)` en `src/shared/components`) geen onbewerkte `<select>`, `<textarea>` of `<table>` en geen handgerolde `role="dialog"` buiten de vermelde uitzonderingen (de eigen tak van de `Select` adapter, `RequestLoggerDetail`); elke onbewerkte `<button>` of `<input>` heeft een commentaar nodig dat `kit-exception:` bevat (met de reden) eindigend op maximaal 3 regels erboven; palettinten en `dark:` varianten alleen in de bestanden in de testlijst.
+7. Controleer beide thema's en de 390 px-viewport vóór een PR (screenshots); `tests/e2e/a11y.spec.ts` voert bijl uit.
 
 ## 3. Een scherm toevoegen
 
@@ -152,41 +123,16 @@ relatieve imports verwijderd). Daarna: bekijk `git diff packages/ui-kit`, doe ee
 settings, combos, usage en endpoint in beide thema's, voer `npm run check:ui-kit-snapshot` en `npm run test:vitest:ui` uit, en
 open de PR met de upstream-changelog.
 
-## 6. README-diagrammen
+## 6. README diagrammen
 
-De twaalf diagrammen die de root-`README.md` inbedt (`docs/diagrams/*.svg`) zijn de kit toegepast op een statische
-afbeelding, en ze worden gegenereerd, niet met de hand getekend: 13 generatorbestanden in `scripts/docs/gen-readme-*.mjs`
-(twaalf diagrammen plus de driver `gen-readme-diagrams.mjs`) en 12 staleness-tests in
-`tests/unit/docs/readme-*-svg.test.ts`, één per diagram, die elk het gecommitteerde bestand byte voor byte
-vergelijken met de output van hun generator (job `test-unit`).
+De twaalf diagrammen die de root `README.md` embeds (`docs/diagrams/*.svg`) zijn de kit die wordt toegepast op een statisch beeld, en ze worden gegenereerd, niet met de hand getekend: 13 generatorbestanden op `scripts/docs/gen-readme-*.mjs` (twaalf diagrammen plus het `gen-readme-diagrams.mjs` stuurprogramma) en 12 verouderingstests op `tests/unit/docs/readme-*-svg.test.ts`, één per diagram, waarbij elke byte het vastgelegde bestand vergelijkt met de uitvoer van de generator (job `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopieert het palet uit `packages/ui-kit/src/ci-tokens.css`
-  (vastgepind aan dat bestand door `tests/unit/docs/readme-diagram-theme.test.ts`) en definieert de tekstrollen op de
-  kit-lettertypen — Instrument Serif voor display, Inter voor UI-tekst, IBM Plex Mono voor cijfers en code, dezelfde
-  `@fontsource`-pakketten die `src/app/globals.css` voor het dashboard laadt. Lichte waarden staan op `:root`, donkere
-  waarden achter `prefers-color-scheme: dark`, binnen het bestand, zodat elke afbeelding op GitHub het schema van de
-  kijker volgt.
-- **Lettertypen.** `scripts/docs/readme-fonts.mjs` maakt subsets van die woff2-bestanden met alleen de glyphs die elk
-  diagram tekent en bedt ze in als `@font-face` `data:`-URI's — de enige manier waarop kit-typografie een
-  README-afbeelding bereikt, aangezien GitHub Markdown geen CSS meedraagt en de camo-proxy elke externe fetch
-  blokkeert. De subsets zijn alleen-latijn; de symboolglyphs die terugvallen op de systeemstack worden een voor een
-  toegestaan in `SYMBOL_FALLBACKS`, en elke andere niet-gedekte glyph gooit een fout.
-- **Opnieuw genereren.** `npm run docs:readme-diagrams` herschrijft alle twaalf in README-volgorde en drukt één regel per
-  bestand af met de grootte ervan. Een enkele generator draait ook op zichzelf (`node scripts/docs/gen-readme-<name>.mjs`;
-  `free-tier-budget` heeft `node --import tsx/esm` nodig omdat de cijfers uit de live cataloguslader in
-  `open-sse/config/freeModelCatalog.ts` komen; de CI-consequentie van een cataloguswijziging staat in
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit de generator en de SVG samen.
-- **Bewijs.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` rendert een bestand zoals GitHub het
-  serveert (een `<img>`-tag, camo's `Content-Security-Policy`, `image/svg+xml`), legt een licht en een donker frame
-  vast en rapporteert de externe lettertypeverzoeken die de pagina deed (moet 0 zijn).
-- **Budget.** Onder 200 KB per bestand (elke staleness-test beweert dat); 500 KB is de harde limiet voor elke
-  README-afbeelding (de regel van de SVG-studio-validator).
-- **Tekst ongewijzigd, cijfers uit de gate.** De rebrand veranderde lettertype en palet, niet de woorden: elke generator
-  draagt de tekst van zijn diagram in een `*_COPY`-constante (of bouwt die op uit de live catalogus) die zowel de
-  getekende tekst als de input voor de lettertype-subset is. Canonieke cijfers blijven in `<text>`-nodes, gelezen door
-  `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); de staleness-tests van de diagrammen die de gate
-  leest, draaien ook diens validators op het gegenereerde bestand, dus een cijfer dat afwijkt van de code laat de test
-  falen — repareer de bron die de gate leest, nooit het getal in de generator.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopieert het palet van `packages/ui-kit/src/ci-tokens.css` (vastgezet tegen dat bestand door `tests/unit/docs/readme-diagram-theme.test.ts`) en definieert de tekstrollen op de eerdere gezichten van de kit - Instrument Serif voor weergave, Inter voor UI tekst, IBM Plex Mono voor cijfers en code - van de `@fontsource` pakketten (het dashboard zelf gebruikt de Switzer van de kit sinds kit 0.0.66). Lichte waarden bevinden zich op `:root` en donkere waarden achter `prefers-color-scheme: dark` in het bestand, dus elke afbeelding volgt het schema van de kijker op GitHub.
+- **Lettertypen.** `scripts/docs/readme-fonts.mjs` subsets die woff2-bestanden naar de glyphs die elk diagram tekent en sluit ze in als `@font-face` `data:` URIs - de enige manier waarop kittypografie een README afbeelding bereikt, aangezien GitHub Markdown geen CSS bevat en de camo-proxy elke externe ophaalactie blokkeert. De subsets zijn alleen in het Latijn; de symboolglyphs die terugvallen naar de systeemstapel zijn één voor één toegestaan in `SYMBOL_FALLBACKS`, en alle andere ongedekte glyphs worden gegooid.
+- **Regenereer.** `npm run docs:readme-diagrams` herschrijft ze alle twaalf in README -volgorde en drukt één regel per bestand af met de grootte ervan. Een enkele generator werkt ook op zichzelf (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` heeft `node --import tsx/esm` nodig omdat de cijfers afkomstig zijn van de live cataloguslader in `open-sse/config/freeModelCatalog.ts`; de CI consequentie van een cataloguswijziging is in `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Verbind de generator en de SVG samen.
+- **Bewijs.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` rendert een bestand op de manier waarop GitHub het serveert (een `<img>` tag, camo's `Content-Security-Policy`, `image/svg+xml`), legt een licht en een donker kader vast en rapporteert dat het externe lettertype de pagina opvraagt (moet 0 zijn).
+- **Begroting.** Minder dan 200 KB per bestand (elke oudheidstest bevestigt dit); 500 KB is de harde limiet voor elk README -image (de regel van de SVG studio-validator).
+- **Kopieer ongewijzigd, telt vanaf de poort.** De rebranding veranderde van type en palet, niet van woorden: elke generator draagt de kopie van zijn diagram in een `*_COPY` constante (of bouwt deze op vanuit de live catalogus) die zowel de getekende tekst als de invoer van de lettertype-subset is. Canonieke figuren blijven in `<text>` knooppunten, gelezen door `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); de oudheidstests van de diagrammen die de poort leest, voeren ook hun validators uit op het gegenereerde bestand, dus een cijfer dat afwijkt van de code faalt voor de test - repareer de bron die de poort leest, nooit het getal in de generator.
 
 ## 7. Referentie-index
 

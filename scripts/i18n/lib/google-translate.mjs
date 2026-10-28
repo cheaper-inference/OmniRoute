@@ -92,6 +92,7 @@ function escapeRegExp(s) {
 }
 
 const INLINE_PATTERNS = [
+  /\u0001\d+\u0001/y, // ICU structure sentinels (translateStringsWithGoogle)
   /(`+)[\s\S]*?\1/y, // inline code (any backtick run)
   /!\[[^\]\n]*\]\([^)\n]*\)/y, // images: keep whole
   /\[[^\]\n]*\]\[[^\]\n]*\]/y, // reference links: keep whole
@@ -189,6 +190,11 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
       )
     : null;
 
+  const tokenSpan = (raw, spaceBefore, spaceAfter) => {
+    tokens.push({ raw, spaceBefore, spaceAfter });
+    return SPAN(tokenId(tokens.length - 1));
+  };
+
   function build(src) {
     let html = "";
     let plain = "";
@@ -199,12 +205,11 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
     };
     const pushToken = (raw, start, end) => {
       flushPlain();
-      tokens.push({
+      html += tokenSpan(
         raw,
-        spaceBefore: start > 0 && /\s/.test(src[start - 1]),
-        spaceAfter: end < src.length && /\s/.test(src[end]),
-      });
-      html += SPAN(tokenId(tokens.length - 1));
+        start > 0 && /\s/.test(src[start - 1]),
+        end < src.length && /\s/.test(src[end])
+      );
     };
     let pos = 0;
     outer: while (pos < src.length) {
@@ -654,4 +659,216 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
     throw new Error(`google translate: ${untranslated}/${total} segments could not be restored`);
   }
   return out.join("\n");
+}
+
+// ----- ICU MessageFormat strings ------------------------------------------------------
+
+/**
+ * Parses an ICU message into nodes: { text } | { raw } (simple argument, `#`, quoted literal
+ * — kept verbatim) | { complex: { head, options: [{ head, message }], close } } for plural /
+ * select / selectordinal. Malformed input degrades to text.
+ */
+export function parseIcuMessage(source) {
+  let i = 0;
+  function matchBrace(from) {
+    let depth = 0;
+    for (let k = from; k < source.length; k++) {
+      if (source[k] === "{") depth++;
+      else if (source[k] === "}" && --depth === 0) return k;
+    }
+    return -1;
+  }
+  function message(depth, inPlural) {
+    const nodes = [];
+    const text = (ch) => {
+      const last = nodes[nodes.length - 1];
+      if (last && last.text !== undefined) last.text += ch;
+      else nodes.push({ text: ch });
+    };
+    while (i < source.length) {
+      const c = source[i];
+      // ICU quoting, incl. the '<literal>' escape intl-messageformat needs for angle spans
+      if (c === "'" && /[{}#|'<]/.test(source[i + 1] ?? "")) {
+        const close = source[i + 1] === "'" ? i + 1 : source.indexOf("'", i + 1);
+        const end = close < 0 ? source.length : close + 1;
+        nodes.push({ raw: source.slice(i, end) });
+        i = end;
+        continue;
+      }
+      if (c === "#" && inPlural) {
+        nodes.push({ raw: "#" });
+        i++;
+        continue;
+      }
+      if (c === "}" && depth > 0) return nodes;
+      // rich-text tag pair (<code>…</code>, <link>…</link>): its text is its own segment, so
+      // the translator can move the pair but never split or swap the two tags
+      if (c === "<") {
+        const open = /^<([A-Za-z][\w-]*)>/.exec(source.slice(i));
+        if (open) {
+          const closeTag = `</${open[1]}>`;
+          const end = source.indexOf(closeTag, i + open[0].length);
+          if (end >= 0) {
+            const inner = source.slice(i + open[0].length, end);
+            nodes.push({
+              complex: {
+                head: open[0],
+                options: [{ head: "", message: parseIcuMessage(inner) }],
+                close: closeTag,
+                tag: true,
+              },
+            });
+            i = end + closeTag.length;
+            continue;
+          }
+        }
+      }
+      if (c === "{") {
+        const head = /^\{\s*([^\s,{}]+)\s*(?:,\s*(\w+)\s*)?(,|\})/.exec(source.slice(i));
+        const end = matchBrace(i);
+        if (head && end >= 0) {
+          const type = head[2];
+          if (!type || !/^(plural|select|selectordinal)$/.test(type)) {
+            nodes.push({ raw: source.slice(i, end + 1) });
+            i = end + 1;
+            continue;
+          }
+          const complex = { head: head[0], options: [], close: "" };
+          i += head[0].length;
+          for (;;) {
+            const opt = /^\s*(?:offset:\d+\s*)?(=?[\w-]+)\s*\{/.exec(source.slice(i));
+            if (!opt) break;
+            i += opt[0].length;
+            const child = message(depth + 1, type !== "select");
+            complex.options.push({ head: opt[0], message: child });
+            if (source[i] === "}") i++;
+          }
+          const close = /^\s*\}/.exec(source.slice(i));
+          complex.close = close ? close[0] : "}";
+          if (close) i += close[0].length;
+          nodes.push({ complex });
+          continue;
+        }
+      }
+      text(c);
+      i++;
+    }
+    return nodes;
+  }
+  return message(0, false);
+}
+
+/**
+ * Translates UI strings (ICU MessageFormat) into `localeCode`. A plural / select is never sent
+ * as structure: the outer sentence travels with the whole argument as ONE opaque token (the
+ * translator may move it, which is a valid reorder), and every branch text is its own segment,
+ * so the `{count, plural, one {…} other {…}}` scaffolding is rebuilt from the source. Leading
+ * and trailing whitespace is kept. Returns one entry per input: the translation, or null when
+ * an answer could not be restored safely (the caller keeps its marker).
+ */
+export async function translateStringsWithGoogle(texts, localeCode, options = {}) {
+  const segments = []; // { text } — every translatable message of every string
+  const plans = texts.map((raw) => {
+    const lead = raw.match(/^\s*/)[0];
+    const trail = raw.slice(lead.length).match(/\s*$/)[0];
+    const core = raw.slice(lead.length, raw.length - trail.length);
+    // A message → { id, sentinels: Map(sentinel → node) }
+    const plan = (nodes) => {
+      let flat = "";
+      const sentinels = new Map();
+      for (const node of nodes) {
+        if (node.text !== undefined) flat += node.text;
+        else {
+          const key = `\u0001${sentinels.size}\u0001`;
+          sentinels.set(
+            key,
+            node.complex
+              ? { complex: node.complex, options: node.complex.options.map((o) => plan(o.message)) }
+              : node
+          );
+          flat += key;
+        }
+      }
+      segments.push(flat);
+      return { id: segments.length - 1, sentinels };
+    };
+    return { lead, trail, root: plan(parseIcuMessage(core)) };
+  });
+
+  const markdown = await translateSegmentsWithGoogle(segments, localeCode, options);
+
+  const render = (msgPlan) => {
+    let out = markdown[msgPlan.id];
+    if (out == null) return null;
+    // An ASCII apostrophe right before an argument / brace / tag starts an ICU quoted span and
+    // would swallow the argument (ko turned “{source}” into '{source}'): use the typographic one.
+    out = out.replace(/'(?=[{}#|<\u0001])/g, "\u2019");
+    // "# -Charge": the translator glued a hyphen onto the word after a masked `#` / argument
+    out = out.replace(/(\u0001\d+\u0001) -(?=\p{L})/gu, "$1 ");
+    for (const [key, node] of msgPlan.sentinels) {
+      let value;
+      if (node.complex) {
+        const parts = [];
+        for (let k = 0; k < node.complex.options.length; k++) {
+          const child = render(node.options[k]);
+          if (child == null) return null;
+          parts.push(node.complex.options[k].head + child + (node.complex.tag ? "" : "}"));
+        }
+        value = node.complex.head + parts.join("") + node.complex.close;
+      } else value = node.raw;
+      if (!out.includes(key)) return null;
+      out = out.replace(key, () => value);
+    }
+    return out;
+  };
+  return plans.map((p) => {
+    const body = render(p.root);
+    return body == null ? null : p.lead + body + p.trail;
+  });
+}
+
+/**
+ * Translates plain text segments (no markdown blocks): each one is masked, batched and
+ * restored like a table cell. Returns the translations, null where restore failed; segments
+ * without prose come back unchanged.
+ */
+export async function translateSegmentsWithGoogle(segments, localeCode, options = {}) {
+  const {
+    fetchImpl = globalThis.fetch,
+    apiKey = process.env.OMNIROUTE_TRANSLATION_GOOGLE_API_KEY || "",
+    concurrency = Number(process.env.OMNIROUTE_TRANSLATION_GOOGLE_CONCURRENCY || 6),
+    timeoutMs = Number(process.env.OMNIROUTE_TRANSLATION_GOOGLE_TIMEOUT_MS || 30000),
+    backoffMs = 1000,
+    protectedTerms = [],
+  } = options;
+  const target = googleLangFor(localeCode);
+  const results = segments.map(() => null);
+  const pending = [];
+  segments.forEach((text, idx) => {
+    const lead = text.match(/^\s*/)[0];
+    const trail = text.slice(lead.length).match(/\s*$/)[0];
+    const core = text.slice(lead.length, text.length - trail.length);
+    const mask = maskInline(core, { protectedTerms });
+    if (!mask.hasProse) results[idx] = text;
+    else pending.push({ idx, lead, trail, mask });
+  });
+  const run = limiterFor(Math.max(1, concurrency));
+  const groups = planBatches(pending.map((p) => p.mask.html));
+  let cursor = 0;
+  await Promise.all(
+    groups.map((group) => {
+      const slice = pending.slice(cursor, cursor + group.length);
+      cursor += group.length;
+      return run(() =>
+        requestBatch(group, target, { fetchImpl, apiKey, timeoutMs, backoffMs })
+      ).then((answers) => {
+        answers.forEach((ans, i) => {
+          const p = slice[i];
+          const restored = p.mask.restore(ans);
+          results[p.idx] = restored == null ? null : p.lead + restored + p.trail;
+        });
+      });
+    })
+  );
+  return results;
 }

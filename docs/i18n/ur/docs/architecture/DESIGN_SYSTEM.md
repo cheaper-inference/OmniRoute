@@ -4,13 +4,7 @@
 
 ---
 
-> **حیثیت:** ڈیش بورڈ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) پر بنایا گیا ہے، جسے
-> ورک اسپیس `packages/ui-kit` (`@omniroute/ui-kit`) کے طور پر شامل (vendored) کیا گیا ہے؛ اپ اسٹریم سنیپ شاٹ
-> `packages/ui-kit/UPSTREAM.md` میں مقرر (pinned) ہے اور `npm run check:ui-kit-snapshot` کے ذریعے محفوظ ہے۔ Light
-> معیاری تھیم ہے؛ ڈیفالٹ ترجیح `system` ہے۔ نمایاں رنگ (accent) Keak lime (`--ci-color-accent`) ہے۔ Inter
-> (letter-spacing 0، `--ci-letter-spacing-ui`) UI کی فونٹ فیملی ہے، Instrument Serif صرف بڑے اور کھلے (sparse)
-> ڈسپلے ٹیکسٹ (`.ci-dashboard-display`) کے لیے، IBM Plex Mono کوڈ کے لیے — یہ سب `@fontsource/*`
-> امپورٹس کے ذریعے `src/app/globals.css` کے آغاز میں خود میزبانی (self-hosted) کیے گئے ہیں۔ ہر آئیکن ایک Lucide glyph ہے۔
+> **حیثیت:** ڈیش بورڈ پر بنایا گیا ہے۔** Keak CI UI کٹ** (`@keak/cheaper-inference-ui-kit`)، ورک اسپیس `packages/ui-kit` کے طور پر فروخت کیا جاتا ہے (`@omniroute/ui-kit`؛ اپ اسٹریم اسنیپ شاٹ کو `packages/ui-kit/UPSTREAM.md` میں پن کیا جاتا ہے اور `npm run check:ui-kit-snapshot` کے ذریعے محفوظ کیا جاتا ہے)۔ روشنی کیننیکل تھیم ہے۔ پہلے سے طے شدہ ترجیح `system` ہے۔ لہجہ Keak lime (`--ci-color-accent`) ہے۔ سوئٹزر UI، ڈسپلے اور کوڈ ٹیکسٹ کے لیے واحد خاندان ہے (`--ci-font-ui`؛ `--ci-font-display` اور `--ci-font-mono` اسے حل کرتا ہے)، خود کٹ کے ذریعے میزبانی کرتا ہے (`packages/ui-kit/src/ci-fonts.css`، درآمد شدہ بذریعہ `ci-tokens.css`)۔ ہر آئیکن ایک لوسائیڈ گلیف ہے۔
 
 ## 1. چیزیں کہاں موجود ہیں
 
@@ -22,33 +16,15 @@
 - **آئیکنز۔** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) نام (یعنی وہ Material Symbols vocabulary جو اسکرینیں استعمال کرتی ہیں) کو `ICON_MAP` (`src/shared/constants/iconMap.ts`) کے ذریعے کسی Lucide glyph میں بدلتا ہے۔ Material Symbols کا فونٹ اور پیکج ختم کر دیا گیا ہے: جو نام نقشے میں نہ ملے وہ ایک غیر جانب دار placeholder glyph رینڈر کرتا ہے (`data-icon-missing="true"`) اور production سے باہر console پر warning لاگ کرتا ہے۔ `npm run gen:icon-map` استعمال میں موجود ان ناموں کو پرنٹ کرتا ہے جو نقشے سے غائب ہیں (`tests/unit/icon-map-coverage.test.ts` ہر اس نام پر ناکام ہوتا ہے جس کا Lucide آئیکن موجود نہ ہو؛ `tests/unit/icon-map-object-values.test.ts` lookup objects میں محفوظ ناموں کا احاطہ کرتا ہے)؛ `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` حرفی `<span className="material-symbols-outlined">` spans کو `<Icon>` میں لکھ دیتا ہے۔
 - **برانڈ۔** `src/shared/components/OmniRouteLogo.tsx` کٹ کا ایک ریپر ہے: default export `OmniRouteLogo` میں `ProductIcon product="omniroute" variant="glyph"` رینڈر ہوتا ہے (inline SVG، `basePath` کے ساتھ محفوظ) اور `OmniRouteLockup` میں `ProductLockup product="omniroute"` رینڈر ہوتا ہے (قابلِ رسائی نام "Keak OmniRoute") یا، white-label operators کے لیے، ان کا اپنا `name`/`logoSrc`۔ Product-switcher کی منزلیں `src/shared/constants/keakProducts.ts` میں رہتی ہیں (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`)۔ الگ تھلگ اسکرینیں — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` اور `src/shared/components/ErrorPageScaffold.tsx` — یہی lockup دکھاتی ہیں؛ `tests/unit/brand-pages-static.test.ts` اس کی حفاظت کرتا ہے۔
 
-## 2. اصول
+## 2. قواعد
 
-1. ٹوکنز، کبھی بھی لٹیرلز نہیں۔ دانستہ طور پر رکھے گئے مستثنیات: ہمیشہ تاریک کنسول ٹرمینل اور
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`)، جو کٹ اسٹیٹس پیلٹ کا resolved-hex آئینہ ہے ان کالرز کے لیے جنہیں لٹیرل hex درکار ہوتا ہے۔ کیٹیگوریکل پیلٹس اب کوئی استثنا نہیں رہی ہیں:
-   یہ کٹ کے پانچ چارٹ ٹوکنز (`--color-chart-1..5`) پر سوار ہیں
-   `src/shared/utils/categoricalPalette.ts` کے ذریعے اور، روٹنگ حکمت عملیوں کے لیے،
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`؛ ReactFlow ایجز اور آرکسٹریشن
-   کینوس تھیم سے آگاہ `--orch-status-*` ویری ایبلز پڑھتے ہیں (`src/shared/components/flow/edgeStyles.ts`)۔
-2. کبھی بھی `packages/ui-kit/src` کو ہاتھ سے پیچ نہ کریں: `scripts/dev/sync-ui-kit.sh <commit>` کے ساتھ سنک کریں؛
-   pre-commit گیٹ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ہر اس بائٹ پر ناکام ہوتا ہے جو
-   پن شدہ اپ اسٹریم کمیٹ سے مختلف ہو (یہ وارننگ کے ساتھ اسکیپ کر دیتا ہے جب اپ اسٹریم کلون،
-   `UI_KIT_CLONE` یا `_references/cheaper-inference-ui-kit`، غیر موجود ہو)۔ جب کٹ میں کسی چیز کی کمی ہو
-   تو، اڈاپٹر یا اسکرین میں اس کے گرد کام کریں اور اپ اسٹریم سے اس کی درخواست کریں۔
-3. کٹ کے ٹیکسٹ ڈیفالٹس انگریزی ہیں (`label = "Loading"`، `loadingLabel = "Loading table"`…) — جب بھی کوئی کٹ کمپوننٹ ٹیکسٹ رینڈر کرے تو `useTranslations(...)` سے ترجمہ شدہ
-   سٹرنگز پاس کریں۔
-4. Tailwind یوٹیلٹیز کٹ کمپوننٹ کلاسز پر غالب آتی ہیں (کٹ
-   `@layer theme, base, components, utilities` کا اعلان کرتی ہے اور اس کے اصول `components` میں رہتے ہیں) — اسپیسنگ اور لے آؤٹ کے لیے یوٹیلٹیز استعمال کریں، کٹ کمپوننٹس کو دوبارہ رنگنے کے لیے نہیں۔
-5. ہیڈنگز: صفحہ اور سیکشن ٹائٹلز کے لیے `.ci-heading` (Inter، بغیر ٹریکنگ کے)؛ `.ci-dashboard-display`
-   (Instrument Serif) صرف بڑے، کہیں کہیں استعمال ہونے والے ڈسپلے ٹیکسٹ کے لیے جیسے ایرر پیج کا اسٹیٹس کوڈ۔
-6. `tests/unit/dashboard-kit-sweep.test.ts` کٹ کے اپناؤ کی نگرانی کرتا ہے: `src/app` یا
-   `src/shared/components` کے تحت کوئی Material لیگیچر اسپین نہیں؛ ڈیش بورڈ ٹری (`src/app/(dashboard)` اور
-   `src/shared/components`) میں کوئی خام `<select>`، `<textarea>` یا `<table>` نہیں اور درج فہرست مستثنیات (`Select` اڈاپٹر کی نیٹو برانچ،
-   `RequestLoggerDetail`) سے باہر کوئی خود ساختہ `role="dialog"` نہیں؛ وہاں ہر خام `<button>` یا `<input>` کے لیے ایک کمنٹ درکار ہے جس میں
-   `kit-exception:` (وجہ کے ساتھ) ہو اور جو اس سے زیادہ سے زیادہ 3 لائنز اوپر ختم ہوتا ہو؛ پیلٹ کی رنگتیں اور `dark:` ویریئنٹس
-   صرف ان فائلوں میں جنہیں ٹیسٹ فہرست کرتا ہے۔
-7. PR سے پہلے دونوں تھیمز اور 390 px ویو پورٹ کی تصدیق کریں (اسکرین شاٹس)؛ `tests/e2e/a11y.spec.ts`
-   axe چلاتا ہے۔
+1. ٹوکنز، کبھی بھی لفظی نہیں۔ مستثنیات کو مقصد کے مطابق رکھا جاتا ہے: ہمیشہ تاریک کنسول ٹرمینل اور `STATUS_HEX` (`src/shared/constants/statusColors.ts`)، کال کرنے والوں کے لیے کٹ اسٹیٹس پیلیٹ کا حل شدہ ہیکس آئینہ جن کو لفظی ہیکس کی ضرورت ہوتی ہے۔ واضح پیلیٹ اب کوئی استثنا نہیں ہے: وہ `src/shared/utils/categoricalPalette.ts` کے ذریعے کٹ کے پانچ چارٹ ٹوکن (`--color-chart-1..5`) پر سوار ہوتے ہیں اور روٹنگ کی حکمت عملیوں کے لیے، `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow کنارے اور آرکیسٹریشن کینوس تھیم سے آگاہ `--orch-status-*` متغیرات (`src/shared/components/flow/edgeStyles.ts`) کو پڑھتے ہیں۔
+2. `packages/ui-kit/src` کبھی ہاتھ سے نہ لگائیں: `scripts/dev/sync-ui-kit.sh <commit>` کے ساتھ مطابقت پذیری کریں؛ پری کمٹ گیٹ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) کسی بھی بائٹ پر ناکام ہوجاتا ہے جو اپ اسٹریم کمٹ سے مختلف ہوتا ہے (جب اپ اسٹریم کلون، `UI_KIT_CLONE` یا `_references/cheaper-inference-ui-kit` غیر حاضر ہوتا ہے تو یہ انتباہ کے ساتھ چھوڑ جاتا ہے)۔ جب کٹ میں کسی چیز کی کمی ہو تو، اڈاپٹر یا اسکرین میں اس کے ارد گرد کام کریں اور اس کے لیے اپ اسٹریم سے پوچھیں۔
+3. کٹ ٹیکسٹ ڈیفالٹ انگریزی ہیں (`label = "Loading"`, `loadingLabel = "Loading table"`…) — `useTranslations(...)` سے ترجمہ شدہ اسٹرنگ پاس کریں جب بھی کوئی کٹ کا جزو متن پیش کرتا ہے۔
+4. ٹیل ونڈ یوٹیلٹیز کٹ کے اجزاء کی کلاسوں پر جیت جاتی ہیں (کِٹ `@layer theme, base, components, utilities` کا اعلان کرتی ہے اور اس کے قواعد `components` میں رہتے ہیں) — یوٹیلیٹیز کو سپیسنگ اور لے آؤٹ کے لیے استعمال کریں، نہ کہ کٹ کے اجزاء کو دوبارہ رنگنے کے لیے۔
+5. عنوانات: صفحہ اور سیکشن کے عنوانات کے لیے `.ci-heading` ؛ `.ci-dashboard-display` صرف بڑے، ویرل ڈسپلے ٹیکسٹ جیسے ایرر پیج اسٹیٹس کوڈ کے لیے۔ دونوں سوئٹزر استعمال کرتے ہیں۔
+6. `tests/unit/dashboard-kit-sweep.test.ts` کٹ کو اپنانے کی حفاظت کرتا ہے: `src/app` یا `src/shared/components` کے تحت کوئی میٹریل لیگیچر اسپین نہیں ہے۔ ڈیش بورڈ ٹری میں (`src/app/(dashboard)` اور `src/shared/components`) کوئی خام `<select>`, `<textarea>` یا `<table>` نہیں اور فہرست میں مستثنیات سے باہر کوئی ہاتھ سے رولڈ `role="dialog"` نہیں ہے ( `Select` اڈاپٹر کی مقامی شاخ، `RequestLoggerDetail`)؛ ہر خام `<button>` یا `<input>` ایک تبصرہ کی ضرورت ہے جس میں `kit-exception:` (وجہ کے ساتھ) اس کے اوپر زیادہ سے زیادہ 3 لائنوں پر ختم ہو۔ palette hues اور `dark:` ویریئنٹس صرف فائلوں میں ٹیسٹ کی فہرستوں میں۔
+7. PR (اسکرین شاٹس) سے پہلے تھیمز اور 390 px ویو پورٹ دونوں کی تصدیق کریں۔ `tests/e2e/a11y.spec.ts` کلہاڑی چلاتا ہے۔
 
 ## 3. نئی اسکرین کا اضافہ
 
@@ -79,16 +55,16 @@
 
 `scripts/dev/sync-ui-kit.sh <commit> [clone]` اس commit پر موجود upstream `src/` کو `packages/ui-kit/src` میں کاپی کرتا ہے اور واحد مجاز تبدیلی لاگو کرتا ہے (یہ relative imports سے `.js` لاحقہ ہٹا دیتا ہے)۔ پھر: `git diff packages/ui-kit` کا جائزہ لیں، دونوں تھیمز میں providers، settings، combos، usage اور endpoint کا بصری معائنہ کریں، `npm run check:ui-kit-snapshot` اور `npm run test:vitest:ui` چلائیں، اور upstream changelog کے ساتھ PR کھولیں۔
 
-## 6. README کے خاکے
+## 6. README خاکے
 
-روٹ `README.md` میں شامل بارہ خاکے (`docs/diagrams/*.svg`) ایک static تصویر پر kit کا اطلاق ہیں، اور یہ generate کیے جاتے ہیں، ہاتھ سے نہیں بنائے جاتے: `scripts/docs/gen-readme-*.mjs` پر 13 generator فائلیں (بارہ خاکے اور ساتھ میں `gen-readme-diagrams.mjs` driver) اور `tests/unit/docs/readme-*-svg.test.ts` پر 12 staleness ٹیسٹ، ہر خاکے کے لیے ایک، ہر ایک committed فائل کا اس کے generator کے output سے byte بہ byte موازنہ کرتا ہے (جاب `test-unit`)۔
+روٹ `README.md` میں جو بارہ خاکے شامل ہوتے ہیں (`docs/diagrams/*.svg`) وہ کٹ ہیں جو ایک جامد تصویر پر لگائی جاتی ہیں، اور وہ تیار کی جاتی ہیں، ہاتھ سے نہیں کھینچی جاتی ہیں: `scripts/docs/gen-readme-*.mjs` پر 13 جنریٹر فائلیں (بارہ ڈائیگرامز کے علاوہ `gen-readme-diagrams.mjs` ڈرائیور) اور 12 staleness ٹیسٹ `tests/unit/docs/readme-*-svg.test.ts` فی فائل کے ساتھ ہر ایک فائل کے ساتھ، جنریٹر کا آؤٹ پٹ (نوکری `test-unit`)۔
 
-- **ٹوکنز۔** `scripts/docs/readme-diagram-theme.mjs` پیلیٹ کو `packages/ui-kit/src/ci-tokens.css` سے کاپی کرتی ہے (جو `tests/unit/docs/readme-diagram-theme.test.ts` کے ذریعے اسی فائل کے خلاف pin کی گئی ہے) اور kit کے faces پر text roles متعین کرتی ہے — display کے لیے Instrument Serif، UI متن کے لیے Inter، figures اور کوڈ کے لیے IBM Plex Mono، وہی `@fontsource` پیکجز جو `src/app/globals.css` ڈیش بورڈ کے لیے لوڈ کرتا ہے۔ light اقدار `:root` پر ہیں، dark اقدار `prefers-color-scheme: dark` کے پیچھے، فائل کے اندر ہی، تاکہ ہر تصویر GitHub پر دیکھنے والے کے scheme کی پیروی کرے۔
-- **فونٹس۔** `scripts/docs/readme-fonts.mjs` ان woff2 فائلوں کو ہر خاکے میں بننے والے glyphs تک subset کرتی ہے اور انہیں `@font-face` `data:` URIs کے طور پر embed کرتی ہے — kit کی typography کا README تصویر تک پہنچنے کا واحد راستہ، کیونکہ GitHub Markdown میں کوئی CSS نہیں ہوتی اور camo proxy ہر بیرونی fetch کو بلاک کرتی ہے۔ subsets صرف latin ہیں؛ وہ symbol glyphs جو system stack پر fallback کرتے ہیں، انہیں `SYMBOL_FALLBACKS` میں ایک ایک کر کے اجازت دی گئی ہے، اور کوئی بھی دوسرا uncovered glyph throw کرتا ہے۔
-- **دوبارہ generate کرنا۔** `npm run docs:readme-diagrams` تمام بارہ کو README کی ترتیب میں دوبارہ لکھتا ہے اور ہر فائل کے لیے اس کے سائز کے ساتھ ایک لائن پرنٹ کرتا ہے۔ ایک single generator خود بھی چلایا جا سکتا ہے (`node scripts/docs/gen-readme-<name>.mjs`؛ `free-tier-budget` کو `node --import tsx/esm` درکار ہے کیونکہ اس کے figures `open-sse/config/freeModelCatalog.ts` میں موجود live catalog loader سے آتے ہیں؛ catalog میں تبدیلی کا CI نتیجہ `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` میں بیان شدہ ہے)۔ generator اور SVG کو ایک ساتھ commit کریں۔
-- **ثبوت۔** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` فائل کو بالکل اسی طرح render کرتا ہے جس طرح GitHub اسے پیش کرتا ہے (ایک `<img>` ٹیگ، camo کی `Content-Security-Policy`، `image/svg+xml`)، ایک light اور ایک dark frame capture کرتا ہے اور صفحے سے کی گئی بیرونی فونٹ requests کی رپورٹ دیتا ہے (یہ 0 ہونی چاہئیں)۔
-- **بجٹ۔** فی فائل 200 KB سے کم (ہر staleness ٹیسٹ اسی کی تصدیق کرتا ہے)؛ کسی بھی README تصویر کے لیے 500 KB سخت حد ہے (SVG studio validator کا اصول)۔
-- **متن غیر تبدیل شدہ، گنتیاں gate سے۔** rebrand نے type اور palette بدلی، الفاظ نہیں: ہر generator اپنے خاکے کا متن ایک `*_COPY` constant میں رکھتا ہے (یا اسے live catalog سے بناتا ہے) جو بنا ہوا متن اور font-subset کا input دونوں ہے۔ مستند figures `<text>` nodes میں رہتے ہیں، جنہیں `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) پڑھتا ہے؛ جن خاکوں کو gate پڑھتا ہے ان کے staleness ٹیسٹ بھی generated فائل پر اس کے validators چلاتے ہیں، لہٰذا کوئی figure جو کوڈ سے ہٹ جائے ٹیسٹ fail کر دیتا ہے — اس source کو درست کریں جسے gate پڑھتا ہے، generator میں نمبر کو کبھی نہیں۔
+- **ٹوکنز۔** `scripts/docs/readme-diagram-theme.mjs` پیلیٹ کو `packages/ui-kit/src/ci-tokens.css` سے کاپی کرتا ہے ( `tests/unit/docs/readme-diagram-theme.test.ts` کے ذریعے اس فائل کے خلاف پن کیا گیا) اور کٹ کے پہلے چہروں پر ٹیکسٹ رولز کی وضاحت کرتا ہے — ڈسپلے کے لیے انسٹرومنٹ سیرف، UI ٹیکسٹ کے لیے انٹر، فگرز اور کوڈ کے لیے IBM Plex Mono — `@fontsource` پیکجز سے (ڈیش بورڈ خود kit'60 کے بعد سے kit's.60 کا استعمال کرتا ہے)۔ ہلکی قدریں `:root` پر، تاریک قدریں `prefers-color-scheme: dark` کے پیچھے، فائل کے اندر ہوتی ہیں، اس لیے ہر تصویر GitHub پر ناظرین کی اسکیم کی پیروی کرتی ہے۔
+- **فونٹس۔** `scripts/docs/readme-fonts.mjs` ان woff2 فائلوں کو glyphs میں سب سیٹ کرتا ہے جو ہر ایک خاکہ ڈرا کرتا ہے اور انہیں `@font-face` `data:` URIs کے طور پر ایمبیڈ کرتا ہے — کٹ ٹائپوگرافی کا README امیج تک پہنچنے کا واحد طریقہ ہے، کیونکہ GitHub مارک ڈاؤن میں کوئی CSS نہیں ہوتا ہے اور کیمو پراکسی ہر بیرونی بازیافت کو روکتی ہے۔ ذیلی سیٹیں صرف لاطینی ہیں۔ علامتی گلائف جو سسٹم اسٹیک پر واپس آتے ہیں انہیں `SYMBOL_FALLBACKS` میں ایک ایک کرکے اجازت دی جاتی ہے، اور کوئی دوسرا بے نقاب گلائف تھرو۔
+- **دوبارہ پیدا کرنا۔** `npm run docs:readme-diagrams` تمام بارہ کو README ترتیب میں دوبارہ لکھتا ہے اور اس کے سائز کے ساتھ فی فائل ایک لائن پرنٹ کرتا ہے۔ ایک واحد جنریٹر بھی اپنے طور پر چلتا ہے (`node scripts/docs/gen-readme-<name>.mjs`؛ `free-tier-budget` `node --import tsx/esm` کی ضرورت ہے کیونکہ اس کے اعداد و شمار `open-sse/config/freeModelCatalog.ts` میں لائیو کیٹلاگ لوڈر سے آتے ہیں؛ کیٹلاگ میں تبدیلی کا CI نتیجہ `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` میں ہوتا ہے)۔ جنریٹر اور SVG ایک ساتھ کمٹ کریں۔
+- **ثبوت** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` فائل کو اس طرح رینڈر کرتا ہے جس طرح GitHub اسے پیش کرتا ہے (ایک `<img>` ٹیگ، camo's `Content-Security-Policy`، `image/svg+xml`)، ایک روشنی اور ایک تاریک فریم کو پکڑتا ہے اور صفحہ کی طرف سے کی گئی بیرونی فونٹ کی درخواستوں کی رپورٹ کرتا ہے (0 ہونا چاہیے)۔
+- **بجٹ** فی فائل 200 KB کے تحت (ہر اسٹیلنس ٹیسٹ اس پر زور دیتا ہے)؛ 500 KB کسی بھی README امیج کے لیے ہارڈ کیپ ہے ( SVG سٹوڈیو کی تصدیق کرنے والے کا اصول)۔
+- **بغیر تبدیلی کے کاپی کریں، گیٹ سے شمار ہوتے ہیں۔** دوبارہ برانڈ تبدیل شدہ قسم اور پیلیٹ، الفاظ نہیں: ہر جنریٹر اپنے خاکے کی کاپی `*_COPY` مستقل میں رکھتا ہے (یا اسے لائیو کیٹلاگ سے بناتا ہے) جو کہ تیار کردہ متن اور فونٹ-سب سیٹ ان پٹ دونوں ہوتے ہیں۔ کینونیکل اعداد و شمار `<text>` نوڈس میں رہتے ہیں، `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) کے ذریعے پڑھے جاتے ہیں۔ گیٹ پڑھنے والے خاکوں کے اسٹیلنس ٹیسٹ بھی جنریٹڈ فائل پر اس کے توثیق کاروں کو چلاتے ہیں، لہذا کوڈ سے ہٹنے والا اعداد و شمار ٹیسٹ میں ناکام ہوجاتا ہے - گیٹ کے پڑھنے والے ذریعہ کو درست کریں، جنریٹر میں کبھی بھی نمبر نہیں۔
 
 ## 7. حوالہ جاتی اشاریہ
 

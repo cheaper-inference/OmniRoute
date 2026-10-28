@@ -58,7 +58,14 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
-import { isFallbackWorthy, resolveModelChain } from "./lib/translate-backend.mjs";
+import {
+  isFallbackWorthy,
+  isQuotaLike,
+  llmCircuit,
+  resolveModelChain,
+  translationEngine as sharedTranslationEngine,
+  googleFallbackEnabled as sharedGoogleFallbackEnabled,
+} from "./lib/translate-backend.mjs";
 import { translateMarkdownWithGoogle } from "./lib/google-translate.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
 
@@ -983,15 +990,8 @@ export async function translateChunk(
   throw new Error(`${label} failed validation: ${checked.problems.join("; ")}`);
 }
 
-export function translationEngine(env = process.env) {
-  return (env.OMNIROUTE_TRANSLATION_ENGINE || "llm").trim().toLowerCase() === "google"
-    ? "google"
-    : "llm";
-}
-
-export function googleFallbackEnabled(env = process.env) {
-  return (env.OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK ?? "1").trim() !== "0";
-}
+export const translationEngine = sharedTranslationEngine;
+export const googleFallbackEnabled = sharedGoogleFallbackEnabled;
 
 let protectedTermsCache = null;
 function protectedTerms() {
@@ -1037,7 +1037,7 @@ export async function translateBody(body, localeEntry, backend) {
   for (let i = 0; i < chunks.length; i++) {
     const label = `chunk ${i + 1}/${chunks.length}`;
     let text;
-    if (engine === "google") {
+    if (engine === "google" || (fallback && llmCircuit.open)) {
       text = await translateChunkWithGoogle(chunks[i], localeEntry, backend, label);
     } else {
       try {
@@ -1047,6 +1047,14 @@ export async function translateBody(body, localeEntry, backend) {
         });
       } catch (err) {
         if (!fallback) throw err;
+        if (isQuotaLike(err) && !llmCircuit.open) {
+          // quota / credits / auth: the backend will not recover mid-run, so stop asking it
+          llmCircuit.open = true;
+          llmCircuit.reason = String(err?.message ?? err).slice(0, 160);
+          logWarn(
+            `  LLM backend unavailable (${llmCircuit.reason}) — the rest of this run uses Google`
+          );
+        }
         // Every model and the re-split rejected the chunk (or the chain errored out): Google
         // rebuilds the structure from the source, so a truncated table cannot come back.
         logWarn(

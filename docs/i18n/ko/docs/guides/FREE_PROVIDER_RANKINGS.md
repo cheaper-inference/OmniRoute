@@ -11,34 +11,19 @@
 
 ---
 
-## 개요
+## 그것이 무엇인가
 
-OmniRoute는 376개의 프로바이더를 등록하며, 그중 155개의 카탈로그 항목이 **free/no-auth**(무료/무인증)로
-표시되어 있습니다
-(무인증,
-무료 티어 OAuth, 또는 무료 티어 API 키 —
-[무료 티어 가이드](../getting-started/FREE-TIERS-GUIDE.md)와 전체
-[무료 티어 디렉터리](../reference/FREE_TIERS.md) 참조). 문제는 무료 프로바이더마다
-모델 품질이 천차만별이라는 점입니다. 프론티어 모델을 제공하는 무인증 프로바이더는
-소형 레거시 모델을 제공하는 프로바이더보다 훨씬 유용합니다.
+OmniRoute 표시된 155개의 카탈로그 항목을 포함하여 377개의 공급자를 등록합니다.**free/no-auth** (인증 없음, 무료 계층 OAuth 또는 무료 계층 API 키 — [무료 계층 가이드](../getting-started/FREE-TIERS-GUIDE.md) 및 전체 [무료 계층 디렉터리](../reference/FREE_TIERS.md) 참조) 문제점: 무료 제공업체는 모델 품질이 매우 다양합니다. 프론티어 모델을 제공하는 인증 없는 제공업체는 소규모 레거시 모델을 제공하는 제공업체보다 훨씬 유용합니다.
 
-**무료 프로바이더 랭킹(Free Provider Rankings)**은 각 무료 프로바이더의 카탈로그를
-**Arena AI 리더보드**의 **크라우드소싱 품질 점수**(인간 선호도 ELO, LMArena
-챗봇 아레나와 동일한 개념)와 결합하여 "**어느 무료 프로바이더가 최고의 모델을
-제공하는가?**"라는 질문에 답합니다. 프로바이더는 각자의 **최고 무료 모델**의
-성능을 기준으로 순위가 매겨집니다.
+**무료 제공자 순위** 대답 "** 나에게 가장 좋은 모델을 제공하는 무료 제공업체는 어디인가요?** " 각 무료 제공업체의 카탈로그에 가입하여** 크라우드소싱 품질평가점수** 에서** 아레나 AI 리더보드** (인간 선호 ELO, LMArena 챗봇 경기장과 동일한 아이디어) 그런 다음 제공업체는 서비스의 강점에 따라 순위가 매겨집니다.** 최고의 무료 모델** .
 
-이 랭킹은 세 가지 실제 소스로부터 계산됩니다:
+순위는 세 가지 실제 소스를 통해 계산됩니다.
 
-1. 무료 프로바이더 목록 — `NOAUTH_PROVIDERS`와 `hasFree`로 플래그된
-   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` 항목
-   (`src/shared/constants/providers.ts`).
-2. 프로바이더 레지스트리의 각 프로바이더 모델 카탈로그
-   (`open-sse/config/providerRegistry.ts`).
-3. Arena ELO 동기화 엔진(`src/lib/arenaEloSync.ts`)이 `model_intelligence` DB 테이블에
-   저장하는 ELO 기반 작업 적합도(task-fit) 점수.
+1. 무료 제공자는 `NOAUTH_PROVIDERS` 와 `hasFree` (`src/shared/constants/providers.ts`) 플래그가 붙은 `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` 항목을 나열합니다.
+2. 공급자 레지스트리(`open-sse/config/providerRegistry.ts`)의 각 공급자 모델 카탈로그.
+3. Arena ELO 동기화 엔진(`src/lib/arenaEloSync.ts`)에 의해 `model_intelligence` DB 테이블에 저장된 ELO 파생 작업 적합 점수.
 
-조인 로직은 `src/lib/freeProviderRankings.ts`에 있습니다.
+조인 논리는 `src/lib/freeProviderRankings.ts` 에 있습니다.
 
 ---
 
