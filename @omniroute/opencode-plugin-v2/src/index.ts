@@ -17,12 +17,14 @@ import { buildProviderPayload, collectCatalog } from "./catalog.js";
 import { usesModelsComboSource } from "./combos-source.js";
 import {
   UNREACHABLE_COOLDOWN_MS,
+  MIN_REFRESH_INTERVAL_MS,
   memoryCacheKey,
   readDiskSnapshot,
   snapshotIdentityFingerprint,
   writeDiskSnapshot,
   type CatalogSnapshot,
 } from "./cache.js";
+import { startRefreshLoop } from "./refresh-loop.js";
 import { assertContext } from "./compat.js";
 import { type ApiKeyOrigin, resolveApiKey, warnIfMissing } from "./credentials.js";
 import { createSourceErrorReporter } from "./enrichment-report.js";
@@ -136,6 +138,11 @@ export default Plugin.define({
       unreachableUntil: 0,
     };
 
+    // Per-installation stopped flag for the background refresh loop. Declared
+    // up front so the closures below can reference it without a temporal
+    // dead zone, and so a tick that lands after teardown publishes nothing.
+    let stopped = false;
+
     // The credential the host holds wins over one written in config, so a
     // user who connected the integration from the UI never has to paste a
     // key into `opencode.json`. Reading it is async and the transforms must
@@ -164,9 +171,16 @@ export default Plugin.define({
       if (credentialChecked && apiKeyOrigin !== "missing") return;
       const next = await resolveApiKey(ctx, X, parsed.apiKey, log);
       const moved = next.key !== resolved.apiKey;
+      const previousCacheKey = cacheKey;
       resolved.apiKey = next.key;
       apiKeyOrigin = next.origin;
-      if (moved) ({ cacheKey, identityFingerprint } = credentialsOf());
+      if (moved) {
+        ({ cacheKey, identityFingerprint } = credentialsOf());
+        // Drop the stale entry so the memory cache does not grow across a
+        // credential change.
+        state.entries.delete(previousCacheKey);
+        state.inFlight.delete(previousCacheKey);
+      }
       if (!credentialChecked) warnIfMissing(next, X, log);
       else if (moved) log.info(`[omniroute-v2] API key picked up from the ${next.origin} source`);
       credentialChecked = true;
@@ -303,7 +317,7 @@ export default Plugin.define({
         enrichment: previous?.enrichment ?? new Map(),
         fetchedAt: Date.now(),
       };
-      if (models.length > 0) {
+      if (!stopped && models.length > 0) {
         state.entries.set(cacheKey, snapshot);
         await writeDiskSnapshot(X, snapshot, identityFingerprint, log);
       }
@@ -333,6 +347,7 @@ export default Plugin.define({
         SourceResult<OmniRouteEnrichmentMap>,
       ]
     ): Promise<void> {
+      if (stopped) return;
       if (state.entries.get(cacheKey) !== base) return;
       // Per source: a success replaces (even with an empty answer — that is
       // the gateway's answer), a failure keeps what we had.
@@ -361,7 +376,7 @@ export default Plugin.define({
       );
       const optionalChanged = state.optionalFingerprint !== optionalFingerprint;
       state.optionalFingerprint = optionalFingerprint;
-      if (optionalChanged) {
+      if (optionalChanged && !stopped) {
         try {
           await ctx.provider.reload();
         } catch (err) {
@@ -372,10 +387,11 @@ export default Plugin.define({
       }
     }
 
-    function loadSnapshot(): Promise<CatalogSnapshot> {
+    function loadSnapshot(force = false): Promise<CatalogSnapshot> {
       const now = Date.now();
       const hit = state.entries.get(cacheKey);
-      if (hit && hit.fetchedAt + resolved.modelCacheTtlMs > now) return Promise.resolve(hit);
+      if (!force && hit && hit.fetchedAt + resolved.modelCacheTtlMs > now)
+        return Promise.resolve(hit);
       // Cooldown after a total models failure: skip the network until it
       // lapses. Serves last-known-good when one exists; otherwise the refresh
       // below still runs (nothing to serve, no point pretending).
@@ -426,10 +442,13 @@ export default Plugin.define({
     // setup publishes first, then the host replays the callback (during
     // registration and on every reload) and reads the published snapshot.
     let latest: { info: unknown; models: unknown[] } | undefined;
-    const refreshAndPublish = async (): Promise<void> => {
+    const refreshAndPublish = async (options?: { force?: boolean }): Promise<void> => {
+      if (stopped) return;
       await ensureCredential();
+      if (stopped) return;
       await ensureWarmSnapshot();
-      const snapshot = await loadSnapshot();
+      const snapshot = await loadSnapshot(options?.force === true);
+      if (stopped) return;
       let effective = snapshot;
       if (snapshot.models.length === 0) {
         const stale = state.entries.get(cacheKey);
@@ -467,7 +486,7 @@ export default Plugin.define({
       const fingerprint = catalogContentFingerprint(effective.models, effective.combos);
       const changed = state.fingerprint !== undefined && state.fingerprint !== fingerprint;
       state.fingerprint = fingerprint;
-      if (changed) {
+      if (changed && !stopped) {
         await Promise.resolve();
         try {
           await ctx.provider.reload();
@@ -620,5 +639,53 @@ export default Plugin.define({
         );
       }
     }
+
+    // Background refresh loop: keep the served catalog aligned with the
+    // gateway. The first publish above already populated `latest`; the loop
+    // only re-runs refreshAndPublish on the configured TTL.
+    // Registry of live loops, keyed by providerId, scoped to globalThis so it
+    // survives module re-evaluation (the host loads the plugin up to ~20
+    // times per process). Defense in depth behind the Cleanup returned below.
+    const registryKey = Symbol.for("omniroute.opencode-plugin-v2.refresh-loops");
+    const g = globalThis as unknown as Record<
+      symbol,
+      Map<string, { stop: () => void; state: RefreshState }>
+    >;
+    if (!g[registryKey]) g[registryKey] = new Map();
+    const registry = g[registryKey];
+    // Stop any loop already registered for this providerId.
+    const existing = registry.get(X);
+    if (existing) {
+      try {
+        existing.stop();
+      } catch {
+        // ignore
+      }
+      registry.delete(X);
+    }
+
+    const stopLoop = startRefreshLoop({
+      intervalMs: Math.max(MIN_REFRESH_INTERVAL_MS, resolved.modelCacheTtlMs),
+      refresh: () => refreshAndPublish({ force: true }),
+      logger: log,
+    });
+
+    // Cleanup returned to the host: flag the installation as stopped (a tick
+    // already in flight then publishes nothing), clear the timer and drop the
+    // registry entry. The entry carries `state` only so tests can inspect the
+    // memory cache.
+    const stop = () => {
+      stopped = true;
+      try {
+        stopLoop();
+      } catch {
+        // ignore
+      }
+      registry.delete(X);
+    };
+
+    registry.set(X, { stop, state });
+
+    return stop;
   },
 });
