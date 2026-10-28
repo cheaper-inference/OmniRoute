@@ -34,7 +34,16 @@ function parseProcStat(statLine) {
   const processGroup = fieldsAfterComm[2];
   if (!/^[0-9]+$/.test(startTicks ?? "")) throw new Error("missing process start time");
   if (!/^[0-9]+$/.test(processGroup ?? "")) throw new Error("missing process group");
-  return { startTicks, processGroup: Number(processGroup) };
+  return {
+    startTicks,
+    processGroup: Number(processGroup),
+    state: fieldsAfterComm[0],
+    threadCount: fieldsAfterComm[17],
+  };
+}
+
+function isExitedZombie(record) {
+  return record.state === "Z" && record.threadCount === "1";
 }
 
 export function parseProcStartTicks(statLine) {
@@ -79,7 +88,12 @@ export function listProcessGroupMembers(processGroup) {
     const pid = Number(entry.name);
     try {
       const stat = parseProcStat(readFileSync(`/proc/${pid}/stat`, "utf8"));
-      if (stat.processGroup === processGroup) members.push({ pid, startTicks: stat.startTicks });
+      // A single-thread zombie has exited; only its parent/subreaper can reap it.
+      // A zombie thread-group leader may still have live threads, so its thread
+      // count must be exactly one before excluding it from executable members.
+      if (stat.processGroup === processGroup && !isExitedZombie(stat)) {
+        members.push({ pid, startTicks: stat.startTicks });
+      }
     } catch (error) {
       if (error.code !== "ENOENT") unknown = true;
     }
@@ -103,7 +117,7 @@ export async function killVerifiedGroupMembers(processGroup, leaderPid, timeoutM
       ) {
         return false;
       }
-      if (current.kind === "MISSING") continue;
+      if (current.kind === "MISSING" || isExitedZombie(current)) continue;
       try {
         process.kill(member.pid, "SIGKILL");
       } catch (error) {

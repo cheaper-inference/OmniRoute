@@ -27,6 +27,8 @@ import {
 const SCRIPT_PATH = fileURLToPath(
   new URL("../../scripts/dev/resource-budget.mjs", import.meta.url)
 );
+const PROCESS_HELPER_URL = new URL("../../scripts/dev/resource-budget-process.mjs", import.meta.url)
+  .href;
 const sandboxes = [];
 
 after(() => {
@@ -104,6 +106,20 @@ function isAlive(pid) {
     return true;
   } catch (error) {
     if (error.code === "ESRCH") return false;
+    throw error;
+  }
+}
+
+function hasExecutableThreads(pid) {
+  try {
+    const stat = readFileSync(`/proc/${pid}/stat`, "utf8");
+    const fields = stat
+      .slice(stat.lastIndexOf(")") + 2)
+      .trim()
+      .split(/\s+/);
+    return fields[0] !== "Z" || fields[17] !== "1";
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
     throw error;
   }
 }
@@ -272,6 +288,109 @@ test("admission arithmetic and proc parsing are deterministic seams", () => {
     parseProcStartTicks(`123 (name with ) parentheses) ${afterComm.join(" ")}`),
     "424242"
   );
+});
+
+function processGroupProbe(body) {
+  const result = spawnSync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "-e",
+      [
+        'import fs from "node:fs";',
+        'import { syncBuiltinESMExports } from "node:module";',
+        `const helperUrl = ${JSON.stringify(PROCESS_HELPER_URL)};`,
+        "const { listProcessGroupMembers, killVerifiedGroupMembers } = await import(helperUrl);",
+        "const records = new Map();",
+        "const signals = [];",
+        "let unreadable = false;",
+        "let becomeZombie = false;",
+        "const reads = new Map();",
+        "const group = 1234;",
+        'function stat(pid, state, pgid = group, threadCount = "1") {',
+        '  const fields = [state, "1", String(pgid), ...Array(16).fill("0"), String(pid * 10)];',
+        "  fields[17] = String(threadCount);",
+        '  return `${pid} (fixture process) ${fields.join(" ")}`;',
+        "}",
+        "fs.readdirSync = () => [...records.keys()].map((pid) => ({ name: String(pid), isDirectory: () => true }));",
+        "fs.readFileSync = (path) => {",
+        '  const pid = Number(String(path).split("/")[2]);',
+        "  reads.set(pid, (reads.get(pid) ?? 0) + 1);",
+        '  if (unreadable && pid === 9999) throw Object.assign(new Error("fixture inaccessible PID"), { code: "EACCES" });',
+        '  if (becomeZombie && reads.get(pid) > 1) return stat(pid, "Z");',
+        "  return records.get(pid);",
+        "};",
+        "process.kill = (...args) => signals.push(args);",
+        "syncBuiltinESMExports();",
+        body,
+      ].join("\n"),
+    ],
+    { encoding: "utf8", timeout: 5_000 }
+  );
+  return json(result);
+}
+
+test("group quiescence excludes known zombies but preserves executable and stopped members", () => {
+  const result = processGroupProbe(
+    [
+      'records.set(2000, stat(2000, "Z"));',
+      'records.set(2001, stat(2001, "S"));',
+      'records.set(2002, stat(2002, "T"));',
+      'records.set(2003, stat(2003, "R", 9998));',
+      "console.log(JSON.stringify(listProcessGroupMembers(group)));",
+    ].join("\n")
+  );
+  assert.equal(result.unknown, false);
+  assert.deepEqual(
+    result.members.map((member) => member.pid),
+    [2001, 2002]
+  );
+});
+
+test("known zombies never make an unreadable process table safe to release", () => {
+  const result = processGroupProbe(
+    [
+      'records.set(2000, stat(2000, "Z"));',
+      'records.set(9999, stat(9999, "S"));',
+      "unreadable = true;",
+      "const snapshot = listProcessGroupMembers(group);",
+      "const drained = await killVerifiedGroupMembers(group, group, 50);",
+      "console.log(JSON.stringify({ snapshot, drained, signals }));",
+    ].join("\n")
+  );
+  assert.equal(result.snapshot.unknown, true);
+  assert.deepEqual(result.snapshot.members, []);
+  assert.equal(result.drained, false);
+  assert.deepEqual(result.signals, []);
+});
+
+test("zombie leaders with additional or unknown threads still block quiescence", () => {
+  const result = processGroupProbe(
+    [
+      'records.set(2000, stat(2000, "Z"));',
+      'records.set(2001, stat(2001, "Z", group, "2"));',
+      'records.set(2002, stat(2002, "Z", group, "0"));',
+      'records.set(2003, stat(2003, "Z", group, "unknown"));',
+      "console.log(JSON.stringify(listProcessGroupMembers(group)));",
+    ].join("\n")
+  );
+  assert.deepEqual(
+    result.members.map((member) => member.pid),
+    [2001, 2002, 2003]
+  );
+});
+
+test("a member becoming a zombie between scan and signal needs no signal or foreign reap", () => {
+  const result = processGroupProbe(
+    [
+      'records.set(2000, stat(2000, "S"));',
+      "becomeZombie = true;",
+      "const drained = await killVerifiedGroupMembers(group, group, 50);",
+      "console.log(JSON.stringify({ drained, signals }));",
+    ].join("\n")
+  );
+  assert.equal(result.drained, true);
+  assert.deepEqual(result.signals, []);
 });
 
 test("two concurrent reservations cannot both consume the same capacity", async () => {
@@ -789,11 +908,16 @@ test("pressure monitoring terminates only its own process group", async () => {
 test("a direct parent may exit on TERM without orphaning its TERM-ignoring child", async () => {
   const dir = sandbox();
   const grandchildPidFile = join(dir, "term-ignoring-child.pid");
+  const termReceivedFile = join(dir, "term-ignoring-child.received");
+  const grandchildProgram = [
+    'const { writeFileSync } = require("node:fs");',
+    `process.on("SIGTERM", () => writeFileSync(${JSON.stringify(termReceivedFile)}, "received"));`,
+    `writeFileSync(${JSON.stringify(grandchildPidFile)}, String(process.pid));`,
+    "setInterval(() => {}, 1000);",
+  ].join("\n");
   const childProgram = [
     'const { spawn } = require("node:child_process");',
-    'const { writeFileSync } = require("node:fs");',
-    `const child = spawn(process.execPath, ["-e", "process.on('SIGTERM', () => {}); setInterval(() => {}, 1000)"], { stdio: "ignore" });`,
-    `writeFileSync(${JSON.stringify(grandchildPidFile)}, String(child.pid));`,
+    `spawn(process.execPath, ["-e", ${JSON.stringify(grandchildProgram)}], { stdio: "ignore" });`,
     "setInterval(() => {}, 1000);",
   ].join("\n");
 
@@ -810,7 +934,16 @@ test("a direct parent may exit on TERM without orphaning its TERM-ignoring child
   assert.equal(outcome.exitCode, 75);
 
   const grandchildPid = Number(readFileSync(grandchildPidFile, "utf8"));
-  assert.equal(isAlive(grandchildPid), false, "TERM-ignoring descendant escaped sentinel cleanup");
+  assert.equal(readFileSync(termReceivedFile, "utf8"), "received");
+  assert.equal(
+    hasExecutableThreads(grandchildPid),
+    false,
+    "TERM-ignoring descendant still executable at terminal cleanup"
+  );
+  await waitUntil(
+    () => !isAlive(grandchildPid),
+    "TERM-ignoring descendant escaped sentinel cleanup"
+  );
 });
 
 test("run propagates child status and releases its lease on every normal exit", () => {
@@ -1117,7 +1250,14 @@ test("SIGTERM to the CLI cleans descendants before releasing lease and compatibi
   const result = await running.completed;
   assert.equal(result.status, 143, `stdout:\n${result.stdout}\nstderr:\n${result.stderr}`);
   const grandchildPid = Number(readFileSync(grandchildPidFile, "utf8"));
-  assert.equal(isAlive(grandchildPid), false, "descendant survived wrapper SIGTERM");
+  // An outer subreaper may still own the exited descendant's zombie. It alone
+  // can reap that PID; this must not keep the guard's anchor or lease alive.
+  assert.equal(
+    hasExecutableThreads(grandchildPid),
+    false,
+    "descendant still executable when wrapper SIGTERM completed"
+  );
+  await waitUntil(() => !isAlive(grandchildPid), "descendant survived wrapper SIGTERM");
   assert.deepEqual(json(run(["status", "--common-dir", commonDir, "--json"])).leases, []);
   assert.equal(
     spawnSync("flock", ["-x", "-n", compatLock, "true"]).status,
@@ -1331,11 +1471,11 @@ test("a shutdown refusal is bounded and preserves the lease for explicit recover
     ],
     env
   );
-  await waitUntil(
-    () => json(run(["status", "--common-dir", commonDir, "--json"])).leases.length === 1,
-    "run lease never became visible"
-  );
-  const lease = json(run(["status", "--common-dir", commonDir, "--json"])).leases[0];
+  let lease;
+  await waitUntil(() => {
+    lease = json(run(["status", "--common-dir", commonDir, "--json"])).leases[0];
+    return lease?.processGroup !== undefined && lease.processGroup === lease.ownerPid;
+  }, "run lease was never transferred to the anchor");
   const timeout = Symbol("timeout");
   const result = await Promise.race([
     running.completed,
