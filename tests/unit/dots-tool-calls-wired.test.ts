@@ -89,6 +89,22 @@ test("Claude stream: a dots block split across chunks is held back, then parsed"
   assert.equal(textOf(events), "Checking. ");
 });
 
+for (const [label, chunks] of [
+  ["mid-name", ["Hi <dots_func", `tion_call>${INVOKE_BLOCK.slice("<dots_function_call>".length)}`]],
+  ["before '>'", ["Hi <dots_function_call", INVOKE_BLOCK.slice("<dots_function_call".length)]],
+] as Array<[string, string[]]>) {
+  test(`Claude stream: an opener split ${label} across chunks never leaks markup`, () => {
+    const events = runStream(TOOL_SHAPES[1][1], chunks);
+    assert.equal(toolUses(events).length, 1);
+    assert.equal(textOf(events), "Hi ");
+  });
+}
+
+test("Claude stream: a held-back partial opener is released when the stream ends", () => {
+  const events = runStream([], ["Compare a <dots_func"]);
+  assert.equal(textOf(events), "Compare a <dots_func");
+});
+
 test("Claude stream: dots markup for an undeclared tool is not turned into a tool_use", () => {
   const events = runStream(
     [{ name: "other_tool" }],
@@ -118,6 +134,7 @@ test("OpenAI sanitizer: dots markup in content becomes tool_calls", () => {
     ],
   }) as {
     choices: Array<{
+      finish_reason: string;
       message: {
         content: string;
         tool_calls: Array<{ function: { name: string; arguments: string } }>;
@@ -125,6 +142,8 @@ test("OpenAI sanitizer: dots markup in content becomes tool_calls", () => {
     }>;
   };
   const message = sanitized.choices[0].message;
+  assert.equal(sanitized.choices[0].finish_reason, "tool_calls");
+  assert.equal(Object.hasOwn(message, "finish_reason"), false);
   assert.equal(message.content, "Sure. ");
   assert.equal(message.tool_calls.length, 1);
   assert.equal(message.tool_calls[0].function.name, "get_weather");
@@ -153,4 +172,19 @@ test("OpenAI sanitizer: dots blocks are scrubbed from reasoning fields", () => {
     String(sanitized.choices[0].message.reasoning_content).includes("dots_function_call"),
     false
   );
+});
+
+test("OpenAI sanitizer: an unclosed dots block or partial opener in a whole body stays as content", () => {
+  for (const content of ["Use <dots_function_call> to call tools.", "Compare a <dots_func"]) {
+    const sanitized = sanitizeOpenAIResponse({
+      id: "chatcmpl-dots",
+      object: "chat.completion",
+      created: 1,
+      model: "gpt-test",
+      choices: [{ index: 0, message: { role: "assistant", content }, finish_reason: "stop" }],
+    }) as { choices: Array<{ finish_reason: string; message: Record<string, unknown> }> };
+    assert.equal(sanitized.choices[0].message.content, content);
+    assert.equal(sanitized.choices[0].message.tool_calls, undefined);
+    assert.equal(sanitized.choices[0].finish_reason, "stop");
+  }
 });

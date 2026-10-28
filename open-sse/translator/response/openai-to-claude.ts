@@ -17,7 +17,7 @@ import { restoreDeclaredToolName } from "../../services/declaredToolCasing.ts";
 import { sanitizeToolId } from "../helpers/schemaCoercion.ts";
 import { splitMarkdownBoundary } from "../helpers/markdownBoundary.ts";
 import { hasDsmlToolCalls, parseDsmlToolCalls } from "../../utils/dsmlToolCalls.ts";
-import { hasDotsToolCalls, parseDotsToolCalls } from "../../utils/dotsToolCalls.ts";
+import { needsDotsParsing, parseDotsToolCalls } from "../../utils/dotsToolCalls.ts";
 import {
   createDirectivePreambleStripper,
   createSystemPreambleStripper,
@@ -510,7 +510,7 @@ function extractDotsToolCalls(
   const pending = state._dotsHoldback;
   state._dotsHoldback = undefined;
   const input = pending ? pending + text : text;
-  if (!hasDotsToolCalls(input)) return { content: input, toolCalls: [] };
+  if (!needsDotsParsing(input)) return { content: input, toolCalls: [] };
   const result = parseDotsToolCalls(input, {
     tools: Array.isArray(state.clientTools) ? state.clientTools : [],
   });

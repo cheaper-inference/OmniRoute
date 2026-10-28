@@ -18,13 +18,17 @@
  * The parser converts complete blocks into OpenAI `tool_calls` records and scrubs
  * them from content. It accepts request tool schemas for type-aware coercion;
  * unknown tool names (when tools are declared) are left as content. Incomplete
- * blocks are buffered for streaming.
+ * blocks, and a trailing partial `<dots_function_call` opener, are buffered for
+ * streaming; with `final: true` (non-streaming bodies) they stay in the content.
  */
 
 import { findDeclaredToolName } from "../services/declaredToolCasing.ts";
 
 const DOTS_OPEN_RE = /<dots_function_call\b[^>]*>/i;
 const DOTS_CLOSE_RE = /<\/dots_function_call>/i;
+const DOTS_OPEN_TAG = "<dots_function_call";
+// A complete tag name whose `>` has not arrived yet (optionally with attributes).
+const DOTS_UNCLOSED_OPEN_RE = /<dots_function_call(?:\s[^<>]*)?$/i;
 
 // Opening/closing markers for invoke blocks inside dots_function_call
 const INVOKE_OPEN_RE = /<invoke\s+name="([^"]+)"[^>]*>/i;
@@ -176,6 +180,24 @@ export function hasDotsToolCalls(text: string): boolean {
   return /<dots_function_call\b/i.test(text);
 }
 
+/**
+ * Index where a trailing, still-incomplete `<dots_function_call` opener starts
+ * (a prefix of the tag name, or the full name before its `>`), or -1.
+ */
+function partialOpenerStart(text: string): number {
+  const unclosed = DOTS_UNCLOSED_OPEN_RE.exec(text);
+  if (unclosed) return unclosed.index;
+  const lastLt = text.lastIndexOf("<");
+  if (lastLt === -1) return -1;
+  return DOTS_OPEN_TAG.startsWith(text.slice(lastLt).toLowerCase()) ? lastLt : -1;
+}
+
+/** True when a streaming delta must go through the parser: a block, or a trailing partial opener. */
+export function needsDotsParsing(text: string): boolean {
+  if (!text || typeof text !== "string") return false;
+  return hasDotsToolCalls(text) || partialOpenerStart(text) !== -1;
+}
+
 export function stripDotsToolCallBlocks(text: string): string {
   if (!text || typeof text !== "string") return text;
   return text
@@ -281,6 +303,21 @@ function parseBlockInner(inner: string, index: ToolIndex): DotsToolCall | undefi
   return parseJsonBody(inner, index);
 }
 
+/**
+ * End of the parsed text: a held-back tail stays out of `content` while streaming,
+ * but a final (non-streaming) parse can never complete it, so it is plain content.
+ */
+function finishParse(
+  cleaned: string,
+  tail: string,
+  toolCalls: DotsToolCall[],
+  options: DotsParseOptions
+): ParseDotsResult {
+  const start = options.final ? -1 : partialOpenerStart(tail);
+  if (start === -1) return { content: cleaned + tail, toolCalls, holdback: "" };
+  return { content: cleaned + tail.slice(0, start), toolCalls, holdback: tail.slice(start) };
+}
+
 export function parseDotsToolCalls(text: string, options: DotsParseOptions = {}): ParseDotsResult {
   if (!text || typeof text !== "string") {
     return { content: text || "", toolCalls: [], holdback: "" };
@@ -294,15 +331,17 @@ export function parseDotsToolCalls(text: string, options: DotsParseOptions = {})
   while (remaining.length > 0) {
     const openMatch = remaining.match(DOTS_OPEN_RE);
     if (!openMatch || openMatch.index === undefined) {
-      return { content: cleaned + remaining, toolCalls, holdback: "" };
+      return finishParse(cleaned, remaining, toolCalls, options);
     }
     cleaned += remaining.slice(0, openMatch.index);
 
     const afterOpen = remaining.slice(openMatch.index + openMatch[0].length);
     const closeMatch = DOTS_CLOSE_RE.exec(afterOpen);
     if (!closeMatch) {
-      // Incomplete block - hold back
-      return { content: cleaned, toolCalls, holdback: openMatch[0] + afterOpen };
+      // Incomplete block - hold back while streaming; a final parse keeps it as content
+      const block = openMatch[0] + afterOpen;
+      if (options.final) return { content: cleaned + block, toolCalls, holdback: "" };
+      return { content: cleaned, toolCalls, holdback: block };
     }
 
     const inner = afterOpen.slice(0, closeMatch.index);

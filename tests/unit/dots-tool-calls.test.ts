@@ -137,3 +137,28 @@ test("parseDotsToolCalls: unknown tool is kept verbatim for Anthropic-shaped too
   assert.equal(result.toolCalls.length, 0);
   assert.equal(result.content, JSON_BLOCK);
 });
+
+test("parseDotsToolCalls: a trailing partial opener is held back, not returned as content", () => {
+  for (const partial of ["<", "<dots_func", "<dots_function_call", '<dots_function_call id="1"']) {
+    const result = parseDotsToolCalls(`Hi ${partial}`);
+    assert.equal(result.content, "Hi ", `content for ${partial}`);
+    assert.equal(result.holdback, partial, `holdback for ${partial}`);
+    assert.equal(result.toolCalls.length, 0);
+  }
+});
+
+test("parseDotsToolCalls: text that cannot start an opener is not held back", () => {
+  for (const text of ["a < b", "<div>", "Hi <dots_functions>", "x <dotsy"]) {
+    const result = parseDotsToolCalls(text);
+    assert.equal(result.content, text);
+    assert.equal(result.holdback, "");
+  }
+});
+
+test("parseDotsToolCalls: final parse keeps an unclosed block and a partial opener as content", () => {
+  for (const text of ["Use <dots_function_call> to call tools.", "Hi <dots_func"]) {
+    const result = parseDotsToolCalls(text, { final: true });
+    assert.equal(result.content, text);
+    assert.equal(result.holdback, "");
+  }
+});
