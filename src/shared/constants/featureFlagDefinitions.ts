@@ -1211,18 +1211,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
-    key: "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM",
-    label: "Anthropic-Compatible Mid-Conversation System Turns",
-    description:
-      "On plain anthropic-compatible-* relays (claude → claude passthrough), keep mid-conversation role:system turns inside messages[] instead of hoisting them into the top-level system parameter, so the cached prompt prefix stays stable across turns. Applies only when the client itself sent the mid-conversation-system-2026-04-07 anthropic-beta (forwarded upstream as-is). Off by default: every system turn is hoisted exactly as before, because relays that do not support the beta reject role:system messages with 400.",
-    descriptionI18nKey: "featureFlagAnthropicCompatibleMidConversationSystemDescription",
-    category: "runtime",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "caution",
-  },
-  {
     key: "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED",
     label: "DB Health Check: Defer Startup Scan",
     description:

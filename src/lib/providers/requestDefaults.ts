@@ -255,6 +255,14 @@ export function normalizeProviderSpecificData(
     delete normalized.disableCooling;
   }
 
+  // Mid-conversation system turns in place (open-sse/services/claudeMidConversationSystem.ts).
+  if (
+    "keepMidConversationSystem" in normalized &&
+    typeof normalized.keepMidConversationSystem !== "boolean"
+  ) {
+    delete normalized.keepMidConversationSystem;
+  }
+
   // Claude OAuth usage-wall opt-ins (open-sse/services/claudeLowPriority.ts) — only
   // persist real booleans; both default to off when absent.
   if ("lowPriorityMode" in normalized && typeof normalized.lowPriorityMode !== "boolean") {

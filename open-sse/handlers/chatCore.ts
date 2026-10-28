@@ -2107,13 +2107,8 @@ async function handleChatCoreInner({
         ...options,
         provider,
         sourceFormat,
-        // #16236: in-place mid-conversation system turns are opt-in AND need the client's beta.
-        clientAnthropicBeta: getHeaderValueCaseInsensitive(
-          clientRawRequest?.headers ?? null,
-          "anthropic-beta"
-        ),
-        isMidConversationSystemEnabled: () =>
-          isFeatureFlagEnabled("ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM"),
+        // #16236: in-place mid-conversation system turns are a per-connection opt-in.
+        providerSpecificData: credentials?.providerSpecificData,
       },
       log
     );
