@@ -297,13 +297,13 @@ Mga pangunahing gawi:
 
 ## 🔑 Mga Sync Token at Config Bundle _(v3.6.6+)_
 
-Posible na ngayon ang pag-access gamit ang maraming device at mga panlabas na operator sa pamamagitan ng **mga sync token na may saklaw**:
+Posible na ngayon ang pag-access mula sa maraming device at mga external operator sa pamamagitan ng **mga scoped sync token**:
 
-- **`POST /api/sync/tokens`** — Mag-isyu ng bagong sync token (may saklaw at opsyonal na expiration)
-- **`DELETE /api/sync/tokens/:id`** — Bawiin ang isang token
-- **`GET /api/sync/bundle`** — Mag-download ng may bersyong JSON snapshot na may ETag key ng lahat ng hindi sensitibong setting (nakatago ang mga password)
+- **`POST /api/sync/tokens`** — Mag-isyu ng bagong sync token (scoped, na may opsyonal na expiration)
+- **`DELETE /api/sync/tokens/:id`** — Magpawalang-bisa ng token
+- **`GET /api/sync/bundle`** — Mag-download ng naka-version at ETag-keyed na JSON snapshot ng config (ina-authenticate gamit lamang ang sync token). Inaalis ang mga setting ng authentication gaya ng password ng dashboard, ngunit kasama ang mga credential ng provider at API key, kaya ituring ang file bilang isang secret
 
-Binubuo ang config bundle ng `src/lib/sync/bundle.ts`. Inihahambing ng mga consumer ang `ETag` response header upang matukoy ang mga pagbabago nang hindi muling dina-download ang buong payload.
+Binubuo ng `src/lib/sync/bundle.ts` ang config bundle. Inihahambing ng mga consumer ang `ETag` response header upang matukoy ang mga pagbabago nang hindi muling dina-download ang buong payload. Mula sa CLI, sine-save ito ng `omniroute sync bundle <outPath> --token <syncToken>` (o `OMNIROUTE_SYNC_TOKEN`) sa isang file na ang may-ari lamang ang may access.
 
 ---
 

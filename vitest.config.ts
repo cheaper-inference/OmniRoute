@@ -5,6 +5,9 @@ import path from "path";
 export default defineConfig({
   test: {
     environment: "jsdom",
+    // jsdom + React suites routinely need 5–7 s on the shared hosted runner (Release-Green
+    // 2026-10-28: 8 UI tests "timed out in 5000ms" that pass in ~1 s locally).
+    testTimeout: 20000,
     globals: true,
     setupFiles: ["./tests/_setup/vitestUiPolyfills.ts"],
     pool: "threads",
@@ -46,11 +49,17 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      // Optional native embeddings are outside the UI unit-test runtime.
+      "@huggingface/transformers": path.resolve(
+        __dirname,
+        "./tests/_setup/transformersUnavailable.ts"
+      ),
       "@": path.resolve(__dirname, "./src"),
       // Mirrors tsconfig paths. Without it, a UI test importing from open-sse
       // resolves to undefined instead of failing loudly — which silently made
       // every provider look credentialed in the free-tier card tests.
       "@omniroute/open-sse": path.resolve(__dirname, "./open-sse"),
+      "@omniroute/ui-kit": path.resolve(__dirname, "./packages/ui-kit/src"),
     },
   },
 });

@@ -48,15 +48,11 @@ endpoint તરફ નિર્દેશિત થાય છે (તેમાં
 
 ---
 
-## Discovery aliases — `/model` picker માં non-Claude મોડેલો દર્શાવો
+## ડિસ્કવરી એલિયાસ — `/model` પિકરમાં બિન-Claude મોડલો દેખાવમાં લાવો
 
-Claude Code ની gateway model discovery માત્ર `claude` અથવા `anthropic` થી શરૂ થતાં ids
-ની યાદી દર્શાવે છે, તેથી `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` સાથે મૂળ
-`/model` picker સામાન્ય રીતે OmniRoute ના **માત્ર** Claude/Anthropic મોડેલો દર્શાવે છે —
-`kimi/kimi-k2.6` અથવા `glm/glm-5.2` ક્યારેય દેખાતું નથી, ભલે તેનું routing યોગ્ય રીતે થતું હોય.
+Claude Code ની ગેટવે મોડલ ડિસ્કવરી ફક્ત `claude` અથવા `anthropic` થી શરૂ થતા id જ લિસ્ટ કરે છે, તેથી `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` સાથે નેટિવ `/model` પિકર સામાન્ય રીતે OmniRoute ના Claude/Anthropic મોડલો **જ** બતાવે છે — `kimi/kimi-k2.6` અથવા `glm/glm-5.2` ક્યારેય દેખાતું નથી, ભલે તે યોગ્ય રીતે રાઉટ થાય છે.
 
-OmniRoute કોઈપણ enabled મોડેલ (અને combo) ને `claude/…` id હેઠળ પ્રતિબિંબિત કરી શકે છે, જેથી તે
-આ filter પસાર કરે અને picker માં દેખાય:
+OmniRoute કોઈપણ સક્રિય મોડલ (અને કોમ્બો) ને `claude/…` id હેઠળ મિરર કરી શકે છે જેથી તે તે ફિલ્ટર પાસ કરી શકે અને પિકરમાં દેખાય:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,38 +60,27 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-જ્યારે તમે Claude Code માંથી આમાંથી કોઈને પસંદ કરો છો, ત્યારે routing પહેલાં OmniRoute
-`claude/` wrapper દૂર કરીને મૂળ id પુનઃસ્થાપિત કરે છે — વાસ્તવિક `claude/<real-claude-model>` id
-(વાસ્તવિક Claude OAuth provider) ને હંમેશા અસ્પર્શિત રાખવામાં આવે છે.
+જ્યારે તમે Claude Code માં આમાંથી કોઈ એક પસંદ કરો છો, ત્યારે OmniRoute રાઉટિંગ પહેલાં `claude/` રેપર દૂર કરીને વાસ્તવિક id પર પાછું ફેરવે છે — અસલી `claude/<real-claude-model>` id (વાસ્તવિક Claude OAuth પ્રોવાઇડર) હંમેશા અછૂતો રહે છે.
 
-**આ default રૂપે બંધ હોય છે** અને ત્રણ-સ્તરીય gate દ્વારા નિયંત્રિત થાય છે (સૌથી ચોક્કસ
-સ્તર પ્રાધાન્ય પામે છે), તેથી સામાન્ય OmniRoute એવા clients માટે પોતાનું catalog બમણું કરતું નથી
-જે Claude Code નો ઉપયોગ કરતા નથી:
+ડિફોલ્ટ રૂપે ફક્ત બેઝ id મિરર થાય છે. ઓપ્ટ-ઇન `CATALOG_MIRROR_REFINEMENTS_ENABLED` ફીચર ફ્લેગ ચાલુ હોય ત્યારે, કેટલોગ જે reasoning-effort વેરિઅન્ટ પહેલેથી જ લિસ્ટ કરે છે (દા.ત. `codex/gpt-6-sol-high`) તે અન્ય કોઈપણ id ની જેમ મિરર થાય છે, જેથી Claude Code સ્પષ્ટ effort સ્તર પસંદ કરી શકે, અને built-in `auto/*` id જેને request path materialize કરી શકતું નથી તે મિરર થતા નથી. effort વેરિઅન્ટ લિસ્ટ થાય છે કે નહીં તે હજુ પણ `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` દ્વારા નિયંત્રિત થાય છે — મિરર ક્યારેય એવો વેરિઅન્ટ ઉમેરતું નથી જે બેઝ કેટલોગમાં ન હોય.
 
-| સ્તર     | ક્યાં                                                                        |
-| -------- | ---------------------------------------------------------------------------- |
-| મોડેલ    | Provider detail page → દરેક મોડેલ માટેનું "Expose in Claude Code" toggle     |
-| Provider | Provider detail page → provider-સ્તરનું toggle (તેના તમામ મોડેલો આવરી લે છે) |
-| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (default રૂપે બંધ)  |
+**આ ડિફોલ્ટ રૂપે બંધ છે** અને ત્રણ-સ્તરીય ગેટ દ્વારા નિયંત્રિત છે (સૌથી ચોક્કસ જીતે છે), જેથી સાદું OmniRoute એવા ક્લાયન્ટ્સ માટે પોતાનો કેટલોગ ક્યારેય બમણો ન કરે જે Claude Code વાપરતા નથી:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` environment variable global સ્તરને ફરજિયાત રીતે ચાલુ કરે છે
-અને dashboard override કરતાં પ્રાધાન્ય પામે છે (જ્યારે આવું થાય ત્યારે Feature Flags screen
-"active via environment variable" નોંધ દર્શાવે છે). દરેક provider અને
-દરેક મોડેલના toggles ત્યાંથી વધુ ચોક્કસ નિયંત્રણ આપે છે — દા.ત. global બંધ + Kimi provider ચાલુ હોય તો
-માત્ર Kimi ના મોડેલો જ દર્શાવવામાં આવે છે.
+| સ્તર      | ક્યાં                                                                     |
+| --------- | ------------------------------------------------------------------------- |
+| મોડલ      | પ્રોવાઇડર વિગત પેજ → દરેક-મોડલ "Claude Code માં બતાવો" ટૉગલ               |
+| પ્રોવાઇડર | પ્રોવાઇડર વિગત પેજ → પ્રોવાઇડર-સ્તરીય ટૉગલ (તેના તમામ મોડલોને આવરી લે છે) |
+| વૈશ્વિક   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (ડિફોલ્ટ બંધ)    |
 
-> ⚠️ **Non-Claude મોડેલો પર window mismatch.** Claude Code તે ઓળખતું ન હોય એવા કોઈપણ id માટે
-> 200K context window ધારે છે (તે `/v1/models` માંથી વાસ્તવિક window વાંચી શકતું નથી).
-> વધુ મોટી window ધરાવતા મોડેલ માટે (દા.ત. Kimi K2 ની 256K), મોડેલની વાસ્તવિક window કરતાં ઓછા
-> મૂલ્ય પર `CLAUDE_CODE_AUTO_COMPACT_WINDOW` સેટ કરો, જેથી auto-compaction સમય પહેલાં
-> શરૂ ન થાય. ઉપર બનાવવામાં આવેલી profiles પહેલેથી જ દરેક મોડેલ માટે આ કરે છે.
+`EXPOSE_CC_DISCOVERY_ALIASES` એન્વાયરનમેન્ટ વેરિએબલ વૈશ્વિક સ્તરને ફરજિયાત ચાલુ કરે છે અને ડેશબોર્ડ ઓવરરાઇડ કરતાં પ્રાથમિકતા લે છે (જ્યારે તેમ થાય ત્યારે Feature Flags સ્ક્રીન "એન્વાયરનમેન્ટ વેરિએબલ મારફતે સક્રિય" નોંધ બતાવે છે). દરેક-પ્રોવાઇડર અને દરેક-મોડલ ટૉગલ ત્યાંથી વધુ ચોકસાઈ કરે છે — દા.ત. વૈશ્વિક બંધ + Kimi પ્રોવાઇડર ચાલુ ફક્ત Kimi ના મોડલો જ બતાવે છે.
+
+> ⚠️ **બિન-Claude મોડલો પર વિન્ડો અસંગતતા.** Claude Code જે id ઓળખતું નથી તેના માટે 200K કોન્ટેક્સ્ટ વિન્ડો માની લે છે (તે `/v1/models` માંથી વાસ્તવિક વિન્ડો વાંચી શકતું નથી). મોટી વિન્ડો ધરાવતા મોડલ માટે (દા.ત. Kimi K2 ની 256K), `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ને મોડલની વાસ્તવિક વિન્ડો કરતાં નીચેના મૂલ્ય પર સેટ કરો જેથી auto-compaction વહેલું ટ્રિગર ન થાય. ઉપરની જનરેટ થયેલી પ્રોફાઇલ્સ આ દરેક મોડલ માટે પહેલેથી જ કરે છે.
 
 ---
 
-## ડૅશબોર્ડ પર ઑનબોર્ડિંગ બ્લૉક
+## ડેશબોર્ડ પર ઑનબોર્ડિંગ બ્લૉક
 
-Claude ટૂલ કાર્ડ (**Dashboard → CLI Code**) આ ઇન્સ્ટન્સ માટેનું ચોક્કસ `settings.json` ફ્રેગમેન્ટ
-ડિસ્કવરી-એલિયાસ માહિતી બટનની બાજુમાં, કૉપી બટન સાથે રેન્ડર કરે છે:
+Claude ટૂલ કાર્ડ (**Dashboard → CLI Code**) આ ઇન્સ્ટન્સ માટે ચોક્કસ `settings.json` ફ્રેગમેન્ટને ડિસ્કવરી-એલિયાસ માહિતી બટનની બાજુમાં, કૉપી બટન સાથે રેન્ડર કરે છે:
 
 ```jsonc
 {
@@ -107,30 +92,33 @@ Claude ટૂલ કાર્ડ (**Dashboard → CLI Code**) આ ઇન્સ�
 }
 ```
 
-બેઝ URL એ કાર્ડ દ્વારા રિઝૉલ્વ કરાયેલું URL છે (તમે ટાઇપ કરેલું કસ્ટમ ઓવરરાઇડ સહિત), જે પહેલેથી
-નોર્મલાઇઝ કરેલું હોય છે — `/v1` સફિક્સ નહીં, અંતે સ્લૅશ નહીં. **કી ક્યારેય રેન્ડર થતી નથી**: બ્લૉકમાં
-પ્લેસહોલ્ડર આપવામાં આવે છે, જેથી સ્ક્રીનશૉટ કે પેસ્ટ કરેલો સ્નિપેટ કી લીક ન કરી શકે. તેના સ્થાને તમારી કી પેસ્ટ કરો.
+બેઝ URL એ કાર્ડ દ્વારા રિઝૉલ્વ કરાયેલ URL છે (તમે લખેલું કસ્ટમ ઓવરરાઇડ પણ સામેલ છે), જે પહેલેથી જ નૉર્મલાઇઝ કરેલું છે — કોઈ `/v1` સફિક્સ નહીં અને અંતમાં કોઈ સ્લૅશ નહીં. **કી ક્યારેય રેન્ડર થતી નથી**: બ્લૉકમાં પ્લેસહોલ્ડર આપવામાં આવે છે, તેથી સ્ક્રીનશૉટ અથવા પેસ્ટ કરેલો સ્નિપેટ તેને લીક કરી શકતો નથી. તેના સ્થાને તમારી કી પેસ્ટ કરો.
 
-જે કોઈ મોડલની વાસ્તવિક કૉન્ટેક્સ્ટ વિન્ડો 200K ન હોય, તેના માટે એ જ `env` બ્લૉક હેઠળ
-`CLAUDE_CODE_AUTO_COMPACT_WINDOW` ઉમેરો — Claude Code જે દરેક idને ઓળખતું નથી તેના માટે 200K
-ધારે છે, તેથી અન્યથા ઑટો-કૉમ્પૅક્શન ખોટા બિંદુએ શરૂ થાય છે (અગાઉના વિભાગમાં આપેલી ચેતવણી જુઓ).
-સ્નિપેટ બિલ્ડર પણ આ મૂલ્ય સ્વીકારે છે, જેથી ટાર્ગેટ મોડલની વિન્ડો જાણતો કૉલર તેને સીધું જ
-આઉટપુટ કરી શકે.
+જે કોઈ મૉડલની વાસ્તવિક કૉન્ટેક્સ્ટ વિન્ડો 200K ન હોય તેના માટે એ જ `env` બ્લૉક હેઠળ `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ઉમેરો — Claude Code જે દરેક id ને ઓળખતું નથી તેના માટે 200K ધારે છે, તેથી અન્યથા ઑટો-કૉમ્પૅક્શન ખોટા બિંદુએ શરૂ થાય છે (અગાઉના વિભાગમાં આપેલી ચેતવણી જુઓ). સ્નિપેટ બિલ્ડર પણ આ મૂલ્ય સ્વીકારે છે, જેથી ટાર્ગેટ મૉડલની વિન્ડો જાણતો કૉલર તેને સીધું જ ઉત્સર્જિત કરી શકે.
 
-સ્રોત: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (`ClaudeGatewayOnboardingBlock` દ્વારા રેન્ડર કરાયેલું શુદ્ધ
-બિલ્ડર, યુનિટ-ટેસ્ટેડ).
+સ્રોત: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (શુદ્ધ બિલ્ડર, યુનિટ-ટેસ્ટેડ), જેને `ClaudeGatewayOnboardingBlock` દ્વારા રેન્ડર કરવામાં આવે છે.
+
+### એક અકાઉન્ટ પિન કરો (વૈકલ્પિક)
+
+દરેક Claude Code રિક્વેસ્ટને કોઈ એક ચોક્કસ પ્રોવાઇડર અકાઉન્ટ મારફતે મોકલવા માટે, એ જ `env` બ્લૉકમાં `ANTHROPIC_CUSTOM_HEADERS` દ્વારા `x-omniroute-connection` હેડર ઉમેરો:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+પ્રોવાઇડર પેજ પરની કનેક્શન રોમાં રહેલી `xxxxxxxx…` ચિપમાંથી id કૉપી કરો. પિન ફક્ત સિંગલ-મૉડલ ids (`provider/model`) પર લાગુ થાય છે, કૉમ્બોઝ પર નહીં. ચોક્કસ ફૉલબૅક વર્તણૂક માટે [પ્રતિ રિક્વેસ્ટ અકાઉન્ટ પિનિંગ](../reference/API_REFERENCE.md#account-pinning-per-request) જુઓ.
 
 ---
 
 ## પ્રોફાઇલ્સ (`CLAUDE_CONFIG_DIR`)
 
-Claude Codeમાં **નેટિવ પ્રોફાઇલ ફાઇલો નથી** (Codexની `~/.codex/<name>.config.toml`થી વિપરીત).
-રૂઢિપ્રયોગી પદ્ધતિ `CLAUDE_CONFIG_DIR` છે — દરેક પ્રોફાઇલ માટે અલગ કૉન્ફિગ ડિરેક્ટરી,
-અને દરેકની પોતાની `settings.json`, ક્રેડેન્શિયલ્સ, હિસ્ટ્રી અને કૅશ હોય છે.
+Claude Codeમાં **મૂળભૂત પ્રોફાઇલ ફાઇલો નથી** (Codexની `~/.codex/<name>.config.toml`થી વિપરીત).
+રૂઢિપ્રયોગી પદ્ધતિ `CLAUDE_CONFIG_DIR` છે — દરેક પ્રોફાઇલ માટે એક અલગ કૉન્ફિગ ડિરેક્ટરી,
+જેમાં દરેકની પોતાની `settings.json`, ઓળખપત્રો, ઇતિહાસ અને કૅશ હોય છે.
 
-`omniroute setup-claude` લાઇવ `/v1/models` કૅટલૉગ મેળવે છે અને
-`~/.claude/profiles/<name>/settings.json` પર દરેક મોડલ માટે એક પ્રોફાઇલ લખે છે, જેમાં
-**`setup-codex` જેવા જ નામો** (`glm52`, `kimi-k27`, `deepseek-pro`, …) ફરીથી વપરાય છે:
+`omniroute setup-claude` લાઇવ `/v1/models` કેટલોગ મેળવે છે અને દરેક મૉડલ માટે
+`~/.claude/profiles/<name>/settings.json` પર એક પ્રોફાઇલ લખે છે, જેમાં
+**`setup-codex` જેવા જ નામોનો ફરીથી ઉપયોગ થાય છે** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -147,20 +135,20 @@ Claude Codeમાં **નેટિવ પ્રોફાઇલ ફાઇલો 
 }
 ```
 
-> **ઑથ ટોકન ક્યારેય પ્રોફાઇલમાં લખવામાં આવતું નથી.** `omniroute launch --profile <name>` વડે
-> લૉન્ચ કરો (તે સક્રિય કૉન્ટેક્સ્ટમાંથી `ANTHROPIC_AUTH_TOKEN` ઇન્જેક્ટ કરે છે), અથવા જાતે
-> `ANTHROPIC_AUTH_TOKEN` એક્સપોર્ટ કરીને `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`
-> ચલાવો.
+> **ઑથ ટોકન ક્યારેય પ્રોફાઇલમાં લખાતું નથી.** `omniroute launch --profile <name>` વડે
+> શરૂ કરો (તે સક્રિય કૉન્ટેક્સ્ટમાંથી `ANTHROPIC_AUTH_TOKEN` દાખલ કરે છે), અથવા જાતે
+> `ANTHROPIC_AUTH_TOKEN` એક્સપોર્ટ કરો અને
+> `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude` ચલાવો.
 
-**મોડલ ડિસ્કવરી પછી ઑટો-સિંક (પસંદગીથી સક્રિય કરી શકાય છે).** જ્યારે પણ પ્રોવાઇડર મોડલ
-સિંક લાઇવ કૅટલૉગમાં ફેરફાર કરે ત્યારે OmniRoute એ જ
-`~/.claude/profiles/<name>/settings.json` ફાઇલોને આપમેળે ફરીથી જનરેટ કરી શકે છે — જેથી નવા/નામ બદલાયેલા મોડલને
-કમાન્ડ ફરીથી ચલાવ્યા વિના પ્રોફાઇલ મળે. તે **ડિફૉલ્ટ રૂપે બંધ** છે: તેને **CLI Code dashboard**માંથી ટૉગલ કરો ("CLI profile
-auto-sync" → Claude Code), અથવા `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` સેટ કરો (તે
-`CLI_ALLOW_CONFIG_WRITES`નું પણ પાલન કરે છે, જે ડિફૉલ્ટ રૂપે ચાલુ હોય છે). સક્ષમ હોય ત્યારે તે માત્ર પ્રોફાઇલ ફાઇલો જ લખે છે; તે ક્યારેય
+**મૉડલ શોધ પછી ઑટો-સિંક (ઑપ્ટ-ઇન).** જ્યારે પણ પ્રોવાઇડર મૉડલ
+સિંક લાઇવ કેટલોગમાં ફેરફાર કરે ત્યારે OmniRoute આ જ
+`~/.claude/profiles/<name>/settings.json` ફાઇલોને આપમેળે ફરી જનરેટ કરી શકે છે — જેથી નવા/નામ બદલાયેલા મૉડલને
+કમાન્ડ ફરી ચલાવ્યા વિના પ્રોફાઇલ મળી જાય. તે **ડિફૉલ્ટ રૂપે બંધ** હોય છે: તેને **CLI Code ડૅશબોર્ડ**માંથી ટૉગલ કરો ("CLI પ્રોફાઇલ
+ઑટો-સિંક" → Claude Code), અથવા `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` સેટ કરો (તે
+`CLI_ALLOW_CONFIG_WRITES`ને પણ માન આપે છે, જે ડિફૉલ્ટ રૂપે ચાલુ હોય છે). સક્ષમ હોય ત્યારે તે માત્ર પ્રોફાઇલ ફાઇલો જ લખે છે; તે ક્યારેય
 તમારા સક્રિય/ડિફૉલ્ટ Claude કૉન્ફિગ, ઑથ અથવા `~/.claude/settings.json`ને બદલતું નથી.
 
-### પ્રોફાઇલ્સ જનરેટ કરવી + વાપરવી
+### પ્રોફાઇલ જનરેટ કરવી + વાપરવી
 
 ```bash
 # સ્થાનિક OmniRoute
@@ -169,13 +157,17 @@ omniroute setup-claude
 # રિમોટ VPS (દરેક પ્રોફાઇલમાં VPS URL સમાવે છે)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
-# માત્ર કેટલાક પ્રોવાઇડર્સ
+# માત્ર કેટલાક પ્રોવાઇડર
 omniroute setup-claude --only glm,kimi
 
-# લખ્યા વિના પૂર્વાવલોકન
+# આ હોસ્ટ પર ન મળેલા સ્થાનિક-CLI પ્રોવાઇડર (zcode, auggie, devin-cli-agentic,
+# codex-app-server) માટે પણ પ્રોફાઇલ લખો (સ્થાનિક ટાર્ગેટ માટે ડિફૉલ્ટ રૂપે છોડવામાં આવે છે)
+omniroute setup-claude --include-local
+
+# લખ્યા વિના પૂર્વાવલોકન કરો
 omniroute setup-claude --dry-run
 
-# પ્રોફાઇલ લૉન્ચ કરો
+# પ્રોફાઇલ શરૂ કરો
 omniroute launch --profile kimi-k27
 ```
 

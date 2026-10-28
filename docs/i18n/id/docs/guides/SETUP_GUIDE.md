@@ -152,7 +152,7 @@ Kunci API: [salin dari halaman Endpoint]
 Model:     if/qwen3.8-max-preview (atau prefiks penyedia/model apa pun)
 ```
 
-Jika editor Anda tidak dapat mengirim `Authorization: Bearer ...`, gunakan URL dasar kompatibilitas dengan token sebagai gantinya:
+Jika editor Anda tidak dapat mengirim `Authorization: Bearer ...`, gunakan URL dasar kompatibilitas yang berisi token sebagai gantinya:
 
 ```txt
 URL Dasar: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -165,8 +165,7 @@ Berfungsi dengan Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, dan 
 
 #### Konfigurasi otomatis dengan `setup-*`
 
-Alih-alih menempelkan URL dasar dan kunci secara manual, biarkan OmniRoute menulis konfigurasi
-masing-masing alat dari katalog model aktif. Satu perintah per alat:
+Alih-alih menempelkan URL dasar dan kunci secara manual, biarkan OmniRoute menulis konfigurasi masing-masing alat dari katalog model aktif. Satu perintah untuk setiap alat:
 
 ```bash
 omniroute setup-codex        # profil ~/.codex/<name>.config.toml
@@ -175,23 +174,18 @@ omniroute setup-opencode     # ~/.config/opencode/opencode.json (kompatibel deng
 omniroute setup-cline        # pengaturan Cline CLI + ekstensi VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # mencetak langkah-langkah dalam aplikasi Cursor
+omniroute setup-cursor       # menampilkan langkah-langkah dalam aplikasi Cursor
 omniroute setup-roo          # impor Roo Code + penunjuk autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Masing-masing menerima `--remote <url> --api-key <key>` untuk mengonfigurasi alat lokal terhadap
-OmniRoute **jarak jauh**, serta `--dry-run` untuk melihat pratinjau. Untuk menjalankan CLI dengan
-env yang tepat disuntikkan tanpa menulis konfigurasi sama sekali, gunakan peluncur generik
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-peluncur lama per alat `omniroute launch` (Claude Code) dan
-`omniroute launch-codex` (Codex) tetap tersedia.
+Setiap perintah menerima `--remote <url> --api-key <key>` untuk mengonfigurasi alat lokal agar menggunakan OmniRoute **jarak jauh**, serta `--dry-run` untuk melakukan pratinjau. Untuk menjalankan CLI dengan env yang tepat disuntikkan tanpa menulis konfigurasi apa pun, gunakan peluncur generik `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); peluncur per alat versi lama `omniroute launch` (Claude Code) dan `omniroute launch-codex` (Codex) tetap tersedia.
 
-Untuk tabel lengkap (apa yang ditulis setiap perintah, semua flag, lokal vs jarak jauh, konvensi URL dasar
-`/v1`), lihat **[Integrasi CLI](./CLI-INTEGRATIONS.md)**.
+Untuk tabel lengkap (apa yang ditulis setiap perintah, semua flag, lokal vs. jarak jauh, konvensi URL dasar `/v1`), lihat **[Integrasi CLI](./CLI-INTEGRATIONS.md)**.
 
 Untuk konfigurasi terperinci per alat (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, dan lainnya), lihat **[Panduan Alat CLI](../reference/CLI-TOOLS.md)** khusus.
 
@@ -324,10 +318,10 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Templat Void Linux (xbps-src)
 
-Untuk pengguna Void Linux, Anda dapat membuat paket native menggunakan `xbps-src`. Simpan blok ini sebagai `srcpkgs/omniroute/template`:
+Untuk pengguna Void Linux, Anda dapat membangun paket native menggunakan `xbps-src`. Simpan blok ini sebagai `srcpkgs/omniroute/template`:
 
 ```bash
-# File templat untuk 'omniroute'
+# Berkas templat untuk 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1

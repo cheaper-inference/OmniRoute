@@ -513,7 +513,7 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA integrity_check;"
 
 ### 场景 1：WAL 文件丢失
 
-`-wal` 文件丢失，但 `-shm` 文件和主数据库完好无损：
+`-wal` 文件丢失，但 `-shm` 文件和主数据库完好：
 
 ```bash
 # 下次打开时自动恢复
@@ -533,21 +533,24 @@ mv recovered.db ~/.omniroute/storage.sqlite
 从备份恢复：
 
 ```bash
-omniroute sync pull --merge   # 或：omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` 仅从正在运行的服务器下载完整的 `.tar.gz` 归档
+（`GET /api/db-backups/exportAll`，需要操作员凭据）；它不会执行任何恢复操作。
 
 ### 场景 3：加密密钥丢失
 
-没有密钥时**无法恢复**。加密字段将无法读取。请使用新的凭据手动重新添加所有提供者。
+没有密钥时**无法恢复**。加密字段将无法读取。请使用新凭据手动重新添加所有提供者。
 
-> **缓解措施**：务必单独备份加密密钥，最好将其保存在密码管理器或 KMS 中。
+> **缓解措施**：请始终单独备份加密密钥，最好将其存储在密码管理器或 KMS 中。
 
-### 场景 4：磁盘空间已满
+### 场景 4：磁盘已满
 
 SQLite 将返回 `SQLITE_FULL` 错误。释放磁盘空间，然后执行：
 
 ```bash
-# 为 WAL 执行检查点操作以释放空间
+# 对 WAL 执行检查点操作以释放空间
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 
@@ -582,7 +585,7 @@ rm ~/.omniroute/storage.sqlite*
 omniroute
 ```
 
-如需**选择性**重置（保留提供者，清除使用记录）：
+如需进行**选择性**重置（保留提供者，清除使用记录）：
 
 ```bash
 DELETE FROM usage_history WHERE timestamp < datetime('now', '-30 day');

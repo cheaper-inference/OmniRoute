@@ -15,16 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import {
-  BENCHMARK_CORPUS,
-  DEFAULT_BENCHMARK_ENGINES,
-  benchmarkEngines,
-  runBenchmarkGate,
-} from "../../open-sse/services/compression/harness/benchmark.ts";
-import {
-  tokensPerTask,
-  type BudgetBaseline,
-} from "../../open-sse/services/compression/harness/budgetGate.ts";
+import type { BudgetBaseline } from "../../open-sse/services/compression/harness/budgetGate.ts";
 
 const BASELINE_PATH = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -33,6 +24,14 @@ const BASELINE_PATH = path.join(
 const TOLERANCE_PERCENT = 2;
 
 async function main(): Promise<void> {
+  if (!process.env.DATA_DIR?.trim()) delete process.env.DATA_DIR;
+  if (process.env.OMNIROUTE_ALLOW_DEFAULT_DATA_DIR !== "1") {
+    await import("../../tests/_setup/isolateDataDir.ts");
+  }
+  const { BENCHMARK_CORPUS, DEFAULT_BENCHMARK_ENGINES, benchmarkEngines, runBenchmarkGate } =
+    await import("../../open-sse/services/compression/harness/benchmark.ts");
+  const { tokensPerTask } =
+    await import("../../open-sse/services/compression/harness/budgetGate.ts");
   const update = process.argv.includes("--update");
   const reports = await benchmarkEngines(BENCHMARK_CORPUS, DEFAULT_BENCHMARK_ENGINES);
 

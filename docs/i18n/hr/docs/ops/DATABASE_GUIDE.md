@@ -528,23 +528,26 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Scenarij 2: Oštećena datoteka glavne baze podataka
+### Scenarij 2: Oštećena glavna datoteka baze podataka
 
 Vratite je iz sigurnosne kopije:
 
 ```bash
-omniroute sync pull --merge   # ili: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` samo preuzima potpunu `.tar.gz` arhivu s poslužitelja koji je pokrenut
+(`GET /api/db-backups/exportAll`, potrebne su vjerodajnice operatera); ne vraća nikakve podatke.
 
 ### Scenarij 3: Izgubljen ključ za šifriranje
 
 **Oporavak nije moguć** bez ključa. Šifrirana polja nije moguće pročitati. Ručno ponovno dodajte sve pružatelje usluga s novim vjerodajnicama.
 
-> **Ublažavanje rizika**: Ključ za šifriranje uvijek zasebno sigurnosno kopirajte, po mogućnosti u upravitelju lozinki ili KMS-u.
+> **Ublažavanje rizika**: Ključ za šifriranje uvijek sigurnosno kopirajte zasebno, idealno u upravitelju lozinki ili KMS-u.
 
 ### Scenarij 4: Disk je pun
 
-SQLite će vraćati pogreške `SQLITE_FULL`. Oslobodite prostor na disku, a zatim:
+SQLite će vratiti pogreške `SQLITE_FULL`. Oslobodite prostor na disku, a zatim izvršite:
 
 ```bash
 # Izvršite kontrolnu točku WAL-a kako biste oslobodili prostor

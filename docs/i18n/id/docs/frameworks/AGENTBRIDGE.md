@@ -12,38 +12,38 @@ AgentBridge adalah proxy MITM (Man-in-the-Middle) OmniRoute yang mencegat lalu l
 
 ---
 
-## §1 Gambaran Umum
+## §1 Ikhtisar
 
 ### Apa itu AgentBridge?
 
-Ketika agen IDE (misalnya, GitHub Copilot, Cursor, Claude Code) melakukan panggilan API, agen tersebut terhubung langsung ke penyedia AI upstream (OpenAI, Anthropic, dan sebagainya). AgentBridge mencegat koneksi tersebut secara transparan pada tingkat TLS — tanpa memerlukan perubahan konfigurasi agen apa pun — dan menulis ulang permintaan tersebut melalui OmniRoute.
+Ketika agen IDE (misalnya, GitHub Copilot, Cursor, Claude Code) membuat panggilan API, ia terhubung langsung ke penyedia AI hulu (OpenAI, Anthropic, dll.). AgentBridge mencegat koneksi tersebut secara transparan di tingkat TLS — tanpa memerlukan perubahan konfigurasi agen apa pun — dan menulis ulang permintaan melalui OmniRoute.
 
-Dengan demikian, Anda dapat:
+Ini berarti Anda dapat:
 
-- **Mengalihkan agen apa pun ke penyedia mana pun**: Copilot berkomunikasi dengan OpenAI? Alihkan ke Anthropic Claude, Gemini, atau salah satu dari 352 penyedia OmniRoute.
-- **Menerapkan pemetaan model**: `gemini-3-flash` → `claude-sonnet-4.7` secara transparan pada tingkat handler.
-- **Mengamati seluruh lalu lintas agen**: setiap permintaan yang dicegat dipublikasikan ke [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Menerapkan ketahanan OmniRoute**: perutean kombo, circuit breaker, fallback, dan pelacakan biaya juga berfungsi untuk lalu lintas agen IDE.
+- **Rutekan ulang agen mana pun ke penyedia mana pun** : Copilot berbicara dengan OpenAI? Alihkan ke Anthropic Claude, Gemini, atau salah satu dari 377 penyedia OmniRoute.
+- **Terapkan pemetaan model** : `gemini-3-flash` → `claude-sonnet-4.7` secara transparan di tingkat handler.
+- **Amati semua lalu lintas agen** : setiap permintaan yang disadap dipublikasikan ke [Inspektur Lalu Lintas](./TRAFFIC_INSPECTOR.md).
+- **Terapkan ketahanan OmniRoute** : perutean kombo, pemutus sirkuit, fallback, dan pelacakan biaya juga berfungsi untuk lalu lintas agen IDE.
 
-### Posisi dibandingkan pasar
+### Positioning vs. pasar
 
-| Fitur                  | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ---------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity            |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot         |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)             |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex           |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE             |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries         |    —    |    ✓     |        —        |             ✓             |
-| Claude Code            |    —    |    —     |        ✓        |             ✓             |
-| Open Code              |    —    |    —     |        ✓        |             ✓             |
-| Trae                   |    —    |    —     |        —        |       🔍 Diselidiki       |
-| UI Dasbor              |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector      |    ✗    |    ✗     |        ✓        |             ✓             |
-| Perutean OmniRoute     |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI pemetaan model      |    ✗    |    ✗     |        ✗        |             ✓             |
-| Daftar bypass          |    ✗    |    ✗     |        ✓        |             ✓             |
-| Sertifikat CA upstream |    ✗    |    ✗     |        ✓        |             ✓             |
+| Fitur                 | 9router | anti-api | llm-pencegat | **OmniRoute AgentBridge** |
+| --------------------- | :-----: | :------: | :----------: | :-----------------------: |
+| Antigravity           |    ✓    |    ✓     |      —       |             ✓             |
+| GitHub Copilot        |    ✓    |    ✓     |      —       |             ✓             |
+| Kiro (AWS)            |    ✓    |    ✓     |      —       |             ✓             |
+| OpenAI Codex          |    —    |    ✓     |      —       |             ✓             |
+| Cursor IDE            |    ✓    |    ✓     |      —       |             ✓             |
+| industri Zed          |    —    |    ✓     |      —       |             ✓             |
+| Kode Claude           |    —    |    —     |      ✓       |             ✓             |
+| Buka Kode             |    —    |    —     |      ✓       |             ✓             |
+| Trae                  |    —    |    —     |      —       |      🔍 Investigasi       |
+| Dasbor UI             |    ✓    |    ✗     |      ✗       |             ✓             |
+| Inspektur Lalu Lintas |    ✗    |    ✗     |      ✓       |             ✓             |
+| perutean OmniRoute    |    ✗    |    ✗     |      ✗       |             ✓             |
+| Pemetaan model UI     |    ✗    |    ✗     |      ✗       |             ✓             |
+| Lewati daftar         |    ✗    |    ✗     |      ✓       |             ✓             |
+| Sertifikat CA hulu    |    ✗    |    ✗     |      ✓       |             ✓             |
 
 ---
 
@@ -190,14 +190,14 @@ daftar larangan hop-by-hop/framing bersama (termasuk autentikasi proxy), menyunt
 
 Gunakan Kartu Server AgentBridge di `/dashboard/tools/agent-bridge`:
 
-| Tindakan              | Deskripsi                                                                      |
-| --------------------- | ------------------------------------------------------------------------------ |
-| Mulai Server          | Menjalankan `src/mitm/server.cjs` pada port 443                                |
-| Hentikan Server       | Menghentikan proses anak secara aman                                           |
-| Mulai Ulang Server    | Hentikan + mulai (menerapkan perubahan target)                                 |
-| Percayai Sertifikat   | Menginstal `DATA_DIR/mitm/ca.crt` ke penyimpanan kepercayaan OS                |
-| Unduh Sertifikat      | Mengunduh `ca.crt` untuk instalasi manual                                      |
-| Buat Ulang Sertifikat | Membuat pasangan kunci CA baru (semua sertifikat per agen menjadi tidak valid) |
+| Tindakan              | Deskripsi                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mulai Server          | Menjalankan `src/mitm/server.cjs` pada port 443. Dalam model root-CA, tindakan ini membuat `ca.crt` saat pertama kali dimulai dan memercayai sertifikat aktif jika kata sandi sudo tersedia                                                                                                                                                                                                        |
+| Hentikan Server       | Menghentikan proses turunan dengan aman                                                                                                                                                                                                                                                                                                                                                            |
+| Mulai Ulang Server    | Hentikan + mulai (menerapkan perubahan target dan sertifikat yang dibuat ulang)                                                                                                                                                                                                                                                                                                                    |
+| Percayai Sertifikat   | Memasang sertifikat aktif ke penyimpanan kepercayaan OS: `DATA_DIR/mitm/ca.crt` dalam model root-CA, `DATA_DIR/mitm/server.crt` pada instalasi legacy-leaf                                                                                                                                                                                                                                         |
+| Unduh Sertifikat      | Mengunduh sertifikat aktif untuk pemasangan manual (`omniroute-mitm-ca.crt` = `ca.crt`, atau `omniroute-mitm.crt` = `server.crt` pada instalasi legacy-leaf)                                                                                                                                                                                                                                       |
+| Buat Ulang Sertifikat | Tidak pernah mengubah model sertifikat. Instalasi legacy-leaf: membuat `server.crt`/`server.key` baru (mulai ulang server agar menggunakannya). Model root-CA: merotasi `ca.crt`/`ca.key`, ditolak saat server berjalan; kepercayaan terhadap CA lama yang tepercaya dicabut terlebih dahulu (memerlukan kata sandi sudo), atau rotasi dibatalkan. Setelahnya, klien harus memercayai CA baru lagi |
 
 ### 3.2 Memercayai sertifikat
 
@@ -222,30 +222,30 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Atau gunakan tombol "Percayai Sertifikat" di dasbor (menjalankan perintah yang sesuai untuk OS Anda, dengan prompt sudo jika diperlukan).
+Atau gunakan tombol "Percayai Sertifikat" di dasbor (menjalankan perintah yang sesuai untuk OS Anda, dengan permintaan kata sandi sudo jika diperlukan).
 
 #### IDE berbasis Electron mengabaikan penyimpanan kepercayaan OS (`NODE_EXTRA_CA_CERTS`)
 
-Beberapa IDE — terutama **Antigravity IDE**, serta aplikasi lain yang diturunkan dari Electron / VS Code — menyertakan
-runtime Node.js sendiri yang **tidak memeriksa penyimpanan kepercayaan OS** untuk `fetch`/HTTPS
-keluar. Memercayai CA pada tingkat OS/NSS sudah cukup untuk **backend** native IDE
+Beberapa IDE — terutama **Antigravity IDE**, serta aplikasi lain yang berasal dari Electron / VS Code — menyertakan
+runtime Node.js sendiri yang **tidak menggunakan penyimpanan kepercayaan OS** untuk
+`fetch`/HTTPS keluar. Memercayai CA pada tingkat OS/NSS sudah cukup untuk **backend** native IDE
 (misalnya server bahasa Go, yang menggunakan bundel CA OS), tetapi **frontend Electron** masih
-akan mengalami kegagalan TLS — hal ini terlihat seolah-olah aplikasi telah _keluar dari akun_ atau menampilkan
-_"kesalahan koneksi"_, meskipun log MITM menunjukkan panggilan bootstrap backend mengembalikan `200`. Dua langkah
-diperlukan, dan keduanya penting:
+akan mengalami kegagalan TLS — hal ini terlihat sebagai aplikasi yang _keluar dari akun_ atau menampilkan
+_"kesalahan koneksi"_, meskipun log MITM menunjukkan panggilan bootstrap backend mengembalikan `200`. Diperlukan
+dua langkah, dan keduanya penting:
 
 1. Arahkan runtime ke CA secara eksplisit:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
 2. **Jalankan IDE dari shell tersebut.** Menjalankannya dari ikon desktop / Dock / menu Start
-   **tidak** mewarisi ekspor shell, dan `~/.config/environment.d/*.conf` hanya berlaku setelah
-   login grafis baru. Tutup IDE sepenuhnya terlebih dahulu — penguncian instans tunggal Electron berarti peluncuran kedua
-   hanya akan memfokuskan proses yang sudah ada dan lingkungan baru akan diabaikan.
+   **tidak** mewarisi variabel yang diekspor oleh shell, dan `~/.config/environment.d/*.conf` hanya berlaku setelah
+   login grafis baru. Tutup IDE sepenuhnya terlebih dahulu — kunci singleton Electron menyebabkan peluncuran kedua
+   hanya memfokuskan proses yang sudah ada, sehingga lingkungan baru diabaikan.
 
 Langkah kepercayaan OS + NSS di atas tetap diperlukan (tumpukan jaringan Chromium yang digunakan oleh beberapa alur
-autentikasi membaca penyimpanan NSS per pengguna, dan memiliki pin statis sendiri untuk `*.googleapis.com` yang
-ditimpa oleh CA yang dipercaya secara lokal). `NODE_EXTRA_CA_CERTS` juga mencakup jalur `fetch` Node.
+autentikasi membaca penyimpanan NSS per pengguna, dan memiliki pin statisnya sendiri untuk `*.googleapis.com` yang dapat
+ditimpa oleh CA lokal tepercaya). `NODE_EXTRA_CA_CERTS` juga mencakup jalur `fetch` Node.
 
 ### 3.3 Perutean DNS
 
@@ -265,58 +265,68 @@ Gunakan Tabel Pemetaan Model di setiap kartu agen untuk menentukan pemetaan sumb
 | Model sumber (native agen) | Model target (OmniRoute) |
 | -------------------------- | ------------------------ |
 | `gpt-4o`                   | `claude-sonnet-4.7`      |
-| `*` (wildcard)             | `claude-haiku-4.7`       |
+| `*` (karakter pengganti)   | `claude-haiku-4.7`       |
 
-Wildcard `*` memetakan model apa pun yang tidak dikenali ke target yang ditentukan. Disimpan secara persisten dalam tabel `agent_bridge_mappings`.
+Karakter pengganti `*` memetakan setiap model yang tidak dikenali ke target yang ditentukan. Disimpan dalam tabel `agent_bridge_mappings`.
 
-> **Kiat — temukan ID model agen yang sebenarnya.** IDE mungkin mengirim nama model yang berbeda dari
-> label UI-nya dan yang berubah di antara versi utama. Sebagai contoh, **Antigravity 2** mengirim
+> **Kiat — temukan ID model sebenarnya dari agen.** IDE dapat mengirim nama model yang berbeda dari
+> label UI-nya dan dapat berubah di antara versi utama. Sebagai contoh, **Antigravity 2** mengirim
 > `gemini-3.1-pro-low`, `gemini-pro-agent`, dan `gemini-3.1-flash-lite` melalui jaringan — bukan
 > `gemini-2.5-pro` yang ditampilkan dalam dokumentasi lama. Kirim satu percakapan tanpa pemetaan yang cocok: MITM
-> akan mencatat persis `model:` yang masuk dan meneruskan permintaan. Petakan nilai literal tersebut, lalu
-> permintaan berikutnya akan diintersepsi dan dirutekan ke target Anda.
+> akan mencatat nilai persis `model:` yang masuk dan meneruskan permintaan tersebut. Petakan nilai literal itu, lalu
+> permintaan berikutnya akan dicegat dan dirutekan ke target Anda.
 
 ### 3.5 Pemberitahuan risiko
 
-AgentBridge mengintersepsi kredensial (token OAuth, kunci API) yang digunakan IDE untuk mengautentikasi ke penyedia upstream. Kredensial ini **disamarkan sebelum dicatat** (lihat §2.7), tetapi dapat dilihat oleh lapisan MITM OmniRoute. Aktivasi pertama setiap agen akan menampilkan modal pemberitahuan risiko yang dapat ditutup.
+AgentBridge mencegat kredensial (token OAuth, kunci API) yang digunakan IDE untuk mengautentikasi ke penyedia hulu. Kredensial ini **disamarkan sebelum dicatat** (lihat §2.7), tetapi dapat dilihat oleh lapisan MITM OmniRoute. Aktivasi pertama setiap agen akan menampilkan modal pemberitahuan risiko yang dapat ditutup.
 
 ### 3.6 Pemeliharaan & Diagnostik
 
-Dasbor menyediakan kartu **Pemeliharaan & Diagnostik** (`AgentBridgeMaintenanceCard`, di `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) yang menampilkan rute MITM operasional yang sebelumnya tidak memiliki UI. Subjudulnya: _"Uji mandiri pipeline penangkapan, batalkan status sistem yang tersisa, dan pindahkan penyiapan Anda antar mesin."_ Helper klien kartu berada di `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+Dasbor menyediakan kartu **Pemeliharaan & Diagnostik** (`AgentBridgeMaintenanceCard`, di `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) yang menampilkan rute MITM operasional yang sebelumnya tidak memiliki UI. Subjudulnya: _"Uji mandiri alur pengambilan, batalkan status sistem yang tersisa, dan pindahkan penyiapan Anda antar-mesin."_ Helper klien kartu ini berada di `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| Tombol                 | Rute                                   | Fungsinya                                                                                                                                                                                                |
-| ---------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Diagnosis**          | `GET /api/tools/agent-bridge/diagnose` | Menjalankan pengujian mandiri pipeline penangkapan dan menampilkan laporan per pemeriksaan (✓/✗ + petunjuk perbaikan).                                                                                   |
-| **Perbaiki**           | `POST /api/tools/agent-bridge/repair`  | Membatalkan status sistem MITM yatim (entri spoof DNS, CA root, proksi sistem) yang tertinggal akibat crash atau SIGKILL. Idempoten — melaporkan "Tidak ada yang perlu diperbaiki" ketika status bersih. |
-| **Hapus CA**           | `DELETE /api/tools/agent-bridge/cert`  | Membatalkan kepercayaan dan menghapus CA root MITM dari penyimpanan kepercayaan OS (eksplisit, idempoten). Hanya ditampilkan ketika CA sedang dipercaya; memerlukan konfirmasi langsung "Hapus CA?".     |
-| **Ekspor konfigurasi** | `GET /api/tools/agent-bridge/config`   | Mengunduh JSON konfigurasi portabel (lihat §3.7).                                                                                                                                                        |
-| **Impor konfigurasi**  | `POST /api/tools/agent-bridge/config`  | Mengunggah JSON konfigurasi yang sebelumnya diekspor (lihat §3.7).                                                                                                                                       |
+| Tombol                 | Rute                                   | Fungsinya                                                                                                                                                                                                    |
+| ---------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Diagnosis**          | `GET /api/tools/agent-bridge/diagnose` | Menjalankan uji mandiri alur pengambilan dan menampilkan laporan per pemeriksaan (✓/✗ + petunjuk perbaikan).                                                                                                 |
+| **Perbaiki**           | `POST /api/tools/agent-bridge/repair`  | Membatalkan status sistem MITM tanpa induk (entri spoof DNS, CA akar, proksi sistem) yang tertinggal akibat crash atau SIGKILL. Idempoten — melaporkan "Tidak ada yang perlu diperbaiki" saat status bersih. |
+| **Hapus CA**           | `DELETE /api/tools/agent-bridge/cert`  | Membatalkan kepercayaan dan menghapus CA akar MITM dari penyimpanan kepercayaan OS (eksplisit, idempoten). Hanya ditampilkan saat CA sedang dipercaya; memerlukan konfirmasi inline "Hapus CA?".             |
+| **Ekspor konfigurasi** | `GET /api/tools/agent-bridge/config`   | Mengunduh JSON konfigurasi portabel (lihat §3.7).                                                                                                                                                            |
+| **Impor konfigurasi**  | `POST /api/tools/agent-bridge/config`  | Mengunggah JSON konfigurasi yang sebelumnya diekspor (lihat §3.7).                                                                                                                                           |
 
-**Pemeriksaan diagnostik** (`summarizeDiagnostics()` dalam `src/mitm/inspector/diagnostics.ts`). Rute tersebut menjalankan probe berefek untuk masing-masing pemeriksaan dan memasukkan nilai boolean ke peringkas murni; satu hasil `healthy` beserta petunjuk untuk setiap kegagalan akan dikembalikan:
+Setiap kartu agen juga memiliki tombol **Pulihkan default** sendiri (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) — pembatalan satu klik per agen yang hanya menghapus
+spoof pada host agen tersebut, menghapus pemetaan model yang tersimpan, dan mereset status
+`dns_enabled`/`setup_completed`, sehingga IDE kembali berkomunikasi dengan hulu sebenarnya setelah
+dimulai ulang sepenuhnya. Tindakan ini **tidak** memengaruhi server MITM bersama atau CA akar
+(agen lain mungkin masih bergantung padanya) — keduanya tetap dapat diakses melalui Kartu Server dan
+tindakan **Hapus CA** di atas. Di Windows, tindakan ini juga sebisa mungkin menjalankan
+`ipconfig /flushdns`, karena Klien DNS Windows menyimpan entri file hosts dalam cache dan tidak akan
+menghapus spoof yang baru saja dihapus jika tidak dilakukan.
 
-| Nama pemeriksaan   | Hal yang diverifikasi                                  | Petunjuk saat gagal                                                                                                                                     |
-| ------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | Proses server MITM aktif                               | "Server MITM tidak berjalan. Jalankan dari tab AgentBridge."                                                                                            |
-| `server-reachable` | Server MITM menerima koneksi pada port-nya (probe TCP) | "Server MITM tidak menerima koneksi pada port-nya. Pastikan port tersebut tersedia dan Anda memiliki hak akses untuk mengikatnya."                      |
-| `cert-exists`      | Sertifikat MITM telah dibuat di disk                   | "Belum ada sertifikat MITM yang dibuat. Buat sertifikat dari tab AgentBridge."                                                                          |
-| `cert-trusted`     | CA root MITM berada di penyimpanan kepercayaan OS      | "CA root MITM tidak dipercaya oleh penyimpanan OS, sehingga intersepsi TLS akan gagal. Percayai sertifikat tersebut dari tab AgentBridge."              |
-| `dns-configured`   | Nama host target di-spoof dalam `/etc/hosts`           | "Nama host target tidak di-spoof dalam /etc/hosts, sehingga lalu lintas tidak pernah mencapai proksi. Aktifkan DNS untuk agen yang ingin Anda tangkap." |
+**Pemeriksaan diagnostik** (`summarizeDiagnostics()` di `src/mitm/inspector/diagnostics.ts`). Rute tersebut menjalankan pemeriksaan dengan efek samping untuk masing-masing item dan memasukkan nilai boolean ke peringkas murni; satu hasil `healthy` beserta petunjuk untuk setiap kegagalan akan dikembalikan:
 
-**Banner status yatim:** ketika halaman mendeteksi status yang tertinggal akibat crash (spoof DNS / CA / proksi sistem), kartu menampilkan banner kuning — _"Sesi sebelumnya meninggalkan status sistem (spoof DNS, CA, atau proksi sistem). Jalankan Perbaiki untuk membersihkannya."_ — dan menyoroti tombol **Perbaiki**. `Repair` adalah padanan lapisan aplikasi dari flag `--cleanup` milik ProxyBridge (mendelegasikan ke `repairMitm()` dalam `src/mitm/manager.ts`).
+| Nama pemeriksaan   | Hal yang diverifikasi                                        | Petunjuk saat gagal                                                                                                                                     |
+| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | Proses server MITM aktif                                     | "Server MITM tidak berjalan. Mulai server dari tab AgentBridge."                                                                                        |
+| `server-reachable` | Server MITM menerima koneksi pada port-nya (pemeriksaan TCP) | "Server MITM tidak menerima koneksi pada port-nya. Pastikan port tersebut tersedia dan Anda memiliki hak istimewa untuk mengikatnya."                   |
+| `cert-exists`      | Sertifikat MITM telah dibuat di disk                         | "Belum ada sertifikat MITM yang dibuat. Buat sertifikat dari tab AgentBridge."                                                                          |
+| `cert-trusted`     | CA akar MITM berada dalam penyimpanan kepercayaan OS         | "CA akar MITM tidak dipercaya oleh penyimpanan OS, sehingga intersepsi TLS akan gagal. Percayai sertifikat tersebut dari tab AgentBridge."              |
+| `dns-configured`   | Nama host target di-spoof dalam `/etc/hosts`                 | "Nama host target tidak di-spoof dalam /etc/hosts, sehingga lalu lintas tidak pernah mencapai proksi. Aktifkan DNS untuk agen yang ingin Anda tangkap." |
 
-> CA root MITM tetap terpasang selama proses berhenti/mulai untuk menghindari prompt sudo
+**Banner status tanpa induk:** saat halaman mendeteksi status yang tertinggal akibat crash (spoof DNS / CA / proksi sistem), kartu menampilkan banner kuning — _"Sesi sebelumnya meninggalkan status sistem (spoof DNS, CA, atau proksi sistem). Jalankan Perbaiki untuk membersihkannya."_ — dan menyorot tombol **Perbaiki**. `Repair` adalah analog pada lapisan aplikasi untuk flag `--cleanup` milik ProxyBridge (tindakan ini mendelegasikan ke `repairMitm()` di `src/mitm/manager.ts`).
+
+> CA root MITM tetap terinstal setelah stop/start untuk menghindari prompt sudo
 > berulang (perilaku yang sama seperti mitmproxy/Charles), sehingga penghapusannya merupakan tindakan
-> **Hapus CA** yang eksplisit, bukan sesuatu yang terjadi secara otomatis saat berhenti.
+> **Hapus CA** yang eksplisit, bukan sesuatu yang terjadi secara otomatis saat dihentikan.
 
 ### 3.7 Impor/ekspor konfigurasi portabel
 
-AgentBridge dapat melakukan serialisasi terhadap status yang **dapat disesuaikan oleh operator** menjadi blob JSON berversi sehingga suatu penyiapan dapat direplikasi di berbagai mesin. Serializer-nya adalah `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), yang divalidasi oleh `AgentBridgeConfigSchema`.
+AgentBridge dapat menserialisasi status yang **dapat disesuaikan oleh operator** menjadi blob JSON berversi sehingga suatu konfigurasi dapat direplikasi di berbagai mesin. Serializer-nya adalah `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), yang divalidasi oleh `AgentBridgeConfigSchema`.
 
-Ekspor menyertakan tepat tiga bagian (nilai default bawaan sengaja **TIDAK** diekspor, sehingga impor tidak pernah menduplikasi atau bertentangan dengannya):
+Ekspor mencakup tepat tiga bagian (nilai default bawaan sengaja **TIDAK** diekspor, sehingga impor tidak pernah menduplikasi atau berkonflik dengannya):
 
-| Kolom            | Sumber                                                       | Catatan                                                                        |
+| Bidang           | Sumber                                                       | Catatan                                                                        |
 | ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| `bypassPatterns` | pola bypass yang ditentukan pengguna (`agent_bridge_bypass`) | pola default bank/gov/okta dikecualikan                                        |
+| `bypassPatterns` | pola bypass yang ditentukan pengguna (`agent_bridge_bypass`) | pola default bank/gov/okta tidak disertakan                                    |
 | `customHosts`    | host khusus Traffic Inspector (`inspector_custom_hosts`)     | masing-masing: `{ host, kind: "llm"\|"app"\|"custom", label? }`                |
 | `agentMappings`  | pemetaan model per agen (`agent_bridge_mappings`)            | `{ [agentId]: [{ source, target }] }` untuk setiap agen yang memiliki pemetaan |
 
@@ -338,7 +348,7 @@ Ekspor menyertakan tepat tiga bagian (nilai default bawaan sengaja **TIDAK** die
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Yang **TIDAK** ada dalam konfigurasi: status server yang sedang berjalan, jalur sertifikat, status DNS per agen, jalur CA upstream, dan pengaturan TPROXY — semua itu merupakan status host/runtime, bukan preferensi portabel.
+Hal-hal yang **TIDAK** termasuk dalam konfigurasi: status server yang sedang berjalan, path sertifikat, status DNS per agen, path CA upstream, dan pengaturan TPROXY — semua itu merupakan status host/runtime, bukan preferensi portabel.
 
 ---
 
@@ -498,11 +508,11 @@ Jika AgentBridge melakukan intersepsi tetapi semua permintaan gagal:
 
 ## §7 Referensi API
 
-Semua rute bersifat `LOCAL_ONLY` (khusus loopback, diberlakukan sebelum autentikasi) dan `SPAWN_CAPABLE`. Lihat `src/server/authz/routeGuard.ts`.
+Semua rute bersifat `LOCAL_ONLY` (hanya loopback, diberlakukan sebelum autentikasi) dan `SPAWN_CAPABLE`. Lihat `src/server/authz/routeGuard.ts`.
 
 Path dasar: `/api/tools/agent-bridge/`
 
-| Metode              | Jalur                                          | Deskripsi                                                                                                                      |
+| Metode              | Path                                           | Deskripsi                                                                                                                      |
 | ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | GET                 | `/api/tools/agent-bridge/state`                | Status server global + deteksi/status per agen                                                                                 |
 | GET                 | `/api/tools/agent-bridge/agents`               | Daftar agen terdaftar (id, nama, host, kelayakan, status)                                                                      |
@@ -512,22 +522,23 @@ Path dasar: `/api/tools/agent-bridge/`
 | POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Aktifkan/nonaktifkan DNS untuk agen (`{enabled: boolean}`)                                                                     |
 | GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Pemetaan model untuk agen                                                                                                      |
 | PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Ganti pemetaan model                                                                                                           |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Pulihkan default: batalkan pemalsuan DNS agen ini, hapus pemetaannya, dan reset statusnya (lihat §3.6)                         |
 | POST                | `/api/tools/agent-bridge/server`               | Mulai/hentikan/mulai ulang server (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                      |
 | GET                 | `/api/tools/agent-bridge/cert`                 | Status sertifikat (`exists`, `trusted`, `path`)                                                                                |
 | POST                | `/api/tools/agent-bridge/cert`                 | Percayai (instal) CA root MITM                                                                                                 |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | Hapus kepercayaan (hapus) CA root MITM — idempoten (lihat §3.6)                                                                |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Buat ulang sertifikat MITM yang ditandatangani sendiri                                                                         |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | Alirkan sertifikat PEM untuk diunduh                                                                                           |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Cantumkan pola bypass (`default` + `user`)                                                                                     |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | Batalkan kepercayaan (hapus) CA root MITM — idempoten (lihat §3.6)                                                             |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Buat ulang sertifikat aktif tanpa mengubah model sertifikat (leaf lama, atau rotasi CA root — lihat §3.1)                      |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Alirkan sertifikat PEM aktif untuk diunduh (`ca.crt` pada model CA root, `server.crt` pada instalasi leaf lama)                |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Daftar pola bypass (`default` + `user`)                                                                                        |
 | POST                | `/api/tools/agent-bridge/bypass`               | Ganti seluruh pola bypass yang ditentukan pengguna                                                                             |
 | DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Hapus satu pola bypass yang ditentukan pengguna                                                                                |
 | GET                 | `/api/tools/agent-bridge/diagnose`             | Uji mandiri pipeline penangkapan (lihat §3.6)                                                                                  |
-| POST                | `/api/tools/agent-bridge/repair`               | Batalkan status sistem MITM yang tertinggal (lihat §3.6)                                                                       |
-| GET                 | `/api/tools/agent-bridge/config`               | Ekspor konfigurasi JSON portabel (lihat §3.7)                                                                                  |
-| POST                | `/api/tools/agent-bridge/config`               | Impor konfigurasi JSON portabel (lihat §3.7)                                                                                   |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Dapatkan jalur CA upstream yang dikonfigurasi                                                                                  |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Validasi + simpan jalur CA upstream                                                                                            |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Hanya validasi (uji coba) jalur CA upstream — tidak menyimpannya                                                               |
+| POST                | `/api/tools/agent-bridge/repair`               | Batalkan status sistem MITM yatim (lihat §3.6)                                                                                 |
+| GET                 | `/api/tools/agent-bridge/config`               | Ekspor JSON konfigurasi portabel (lihat §3.7)                                                                                  |
+| POST                | `/api/tools/agent-bridge/config`               | Impor JSON konfigurasi portabel (lihat §3.7)                                                                                   |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Dapatkan path CA upstream yang dikonfigurasi                                                                                   |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Validasi + simpan path CA upstream                                                                                             |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Hanya validasi (uji coba) path CA upstream — tidak menyimpan                                                                   |
 | GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Mode penangkapan dekripsi transparan TPROXY — lihat `docs/security/MITM-TPROXY-DECRYPT.md` (git; tidak dikompilasi ke `/docs`) |
 
 Skema OpenAPI lengkap: `docs/openapi.yaml` → tag `AgentBridge`.

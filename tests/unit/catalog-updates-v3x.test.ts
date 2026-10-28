@@ -33,7 +33,7 @@ test("NVIDIA catalog includes the current hosted models and GPT OSS 120B alias r
   assert.ok(ids.has("meta/muse-glimmer-30b"));
   assert.ok(ids.has("google/diffusiongemma-26b-a4b-it"));
   assert.ok(ids.has("openai/gpt-oss-120b"));
-  assert.ok(ids.has("nvidia/nemotron-3-super-120b-a12b"));
+  assert.ok(ids.has("nvidia/nemotron-3.5-super-vl-120b-a12b"));
 
   assert.deepEqual(resolveCanonicalProviderModel("nvidia", "gpt-oss-120b"), {
     provider: "nvidia",
@@ -90,7 +90,7 @@ test("Opus 5 catalog is limited to verified first-party, web, and Copilot provid
 
 test("Sonnet 5 catalog exposes claude-sonnet-5 across cc/kiro/anthropic/blackbox with Sonnet-tier pricing", () => {
   // Sonnet 5 must be wired everywhere the last flagship (Fable 5) was — but as a
-  // Sonnet-tier model: $3/$15 pricing (NOT the Opus/Fable $15/$75), 1M ctx / 128K out.
+  // Sonnet-tier model: kiro's own table is $3/$15 (not the official $2/$10), 1M ctx / 128K out.
   for (const providerId of ["cc", "kiro", "anthropic", "blackbox"]) {
     const ids = new Set(getModelsByProviderId(providerId).map((m) => m.id));
     assert.ok(ids.has("claude-sonnet-5"), `${providerId} must expose claude-sonnet-5`);

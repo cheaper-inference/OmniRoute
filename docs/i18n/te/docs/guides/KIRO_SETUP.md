@@ -117,29 +117,37 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ## API-కీ దిగుమతి ప్రవాహం
 
-API-కీ ప్రమాణీకరణ దీర్ఘకాలం చెల్లుబాటయ్యే Kiro / AWS CodeWhisperer బేరర్ క్రెడెన్షియల్ల కోసం ఉద్దేశించబడింది. ఇది
-OAuth రిఫ్రెష్ను ఉపయోగించదు, కాబట్టి షేర్ చేయబడిన OIDC సెషన్ చెల్లుబాటు రద్దు కావడాన్ని నివారిస్తుంది.
+API-కీ ప్రమాణీకరణ దీర్ఘకాలిక Kiro / AWS CodeWhisperer బేరర్ క్రెడెన్షియల్స్ కోసం ఉద్దేశించబడింది. ఇది
+OAuth రిఫ్రెష్ను ఉపయోగించదు, కాబట్టి భాగస్వామ్య OIDC సెషన్ చెల్లుబాటు రద్దును నివారిస్తుంది.
 
-### డాష్బోర్డ్
+### డ్యాష్బోర్డ్
 
-1. **డాష్బోర్డ్ -> ప్రొవైడర్లు -> Kiro** తెరవండి.
-2. **API కీ**ని ఎంచుకోండి.
-3. API కీని మరియు ఐచ్ఛిక AWS రీజియన్ను (డిఫాల్ట్గా `us-east-1`) అతికించండి.
-4. OmniRoute కీని ధృవీకరించి, కనెక్షన్ను సేవ్ చేస్తుంది.
+1. **Dashboard -> Providers -> Kiro** తెరవండి.
+2. **API Key** ఎంచుకోండి.
+3. API కీని పేస్ట్ చేసి AWS ప్రాంతాన్ని ఎంచుకోండి: **Auto-detect** (డిఫాల్ట్), **US East
+   (N. Virginia)** లేదా **Europe (Frankfurt)**.
+4. OmniRoute కీని ధ్రువీకరించి, కీ పనిచేసే ప్రాంతానికి పిన్ చేసిన కనెక్షన్ను సేవ్ చేస్తుంది.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` అనేది `auto` (డిఫాల్ట్), `us-east-1` లేదా `eu-central-1`ను అంగీకరిస్తుంది; ఇతర ఏ విలువైనా
+HTTP 400తో తిరస్కరించబడుతుంది.
 
 ### అంతర్గత ఒప్పందం
 
-API రూట్ `KiroService.validateApiKey()`ను కాల్ చేయడం ద్వారా కీని ధృవీకరిస్తుంది; ఇది
-రీజియన్కు సరిపోలే CodeWhisperer/Amazon Q ఎండ్పాయింట్పై `ListAvailableProfiles`ను
-ఉపయోగించి, ఒక `profileArn`ను పరిష్కరిస్తుంది.
+API రూట్ `KiroService.validateApiKey()`ను కాల్ చేయడం ద్వారా కీని ధ్రువీకరిస్తుంది, అది
+ప్రతి ప్రాంతానికి 10 సెకన్ల టైమ్అవుట్తో `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(Amazon Q సర్ఫేస్ API-కీ ఇన్ఫరెన్స్ ఉపయోగించేది)ను కాల్ చేస్తుంది. `auto` మోడ్లో
+ఇది మొదట `us-east-1`, ఆపై `eu-central-1`ను ప్రయత్నించి, కీని అంగీకరించిన మొదటి ప్రాంతాన్ని
+నిల్వ చేస్తుంది. ప్రతి అభ్యర్థి ప్రాంతంలోనూ తిరస్కరించబడిన కీ దిగుమతి HTTP 400తో విఫలమవుతుంది.
+ఐచ్ఛిక `profileArn`ను కనుగొనడానికి ఆపై `ListAvailableProfiles` సాధ్యమైనంతవరకు కాల్ చేయబడుతుంది
+(చాలా API కీలకు AWS దీనిని నిరాకరిస్తుంది).
 
 సేవ్ చేసిన కనెక్షన్ దీనిని ఉపయోగిస్తుంది:
 
@@ -155,9 +163,12 @@ API రూట్ `KiroService.validateApiKey()`ను కాల్ చేయడ�
 ```
 
 రన్టైమ్లో, `KiroExecutor.buildHeaders()` కీని
-`Authorization: Bearer <key>` రూపంలో పంపి, `tokentype: API_KEY`ను జోడిస్తుంది. కోటా/ప్రొఫైల్ కాల్లు
-కూడా ఇదే మార్కర్ను ఉపయోగిస్తాయి, తద్వారా AWS ఆ బేరర్ను OIDC లేదా సోషల్ యాక్సెస్ టోకెన్గా కాకుండా
-దీర్ఘకాలం చెల్లుబాటయ్యే API కీగా పరిగణిస్తుంది.
+`Authorization: Bearer <key>`గా పంపి, `tokentype: API_KEY`ను జోడిస్తుంది. కోటా/ప్రొఫైల్ కాల్స్
+కూడా ఇదే మార్కర్ను ఉపయోగిస్తాయి, తద్వారా AWS ఈ బేరర్ను OIDC లేదా సోషల్ యాక్సెస్ టోకెన్గా కాకుండా
+దీర్ఘకాలిక API కీగా పరిగణిస్తుంది. `KiroExecutor.execute()` API-కీ ఇన్ఫరెన్స్ను
+`https://q.<region>.amazonaws.com/generateAssistantResponse`కు మాత్రమే పంపుతుంది — ఇందులో `us-east-1`
+కూడా ఉంటుంది — ఎందుకంటే Kiro IDE గేట్వే `TokenType=API_KEY`ను తిరస్కరిస్తుంది మరియు
+`codewhisperer.us-east-1` API-కీ పేలోడ్లను చెల్లని అభ్యర్థన బాడీగా తిరస్కరిస్తుంది (HTTP 400).
 
 ---
 

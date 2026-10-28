@@ -166,6 +166,45 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
+  // PR #10409 circulated through these draft slots before the current release
+  // claimed them. The name guard is mandatory: canonical migrations using the
+  // same numbers must never be rehomed as Team state.
+  {
+    fromVersion: "153",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "154",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "155",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "161",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "163",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "164",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
   {
     fromVersion: "134",
     fromName: "ccr_blocks",
@@ -186,6 +225,18 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "radar_local_model_state",
     toVersion: "153",
     toName: "radar_local_model_state",
+  },
+  {
+    // npm omniroute@3.8.50 was built from main at dea6bb8 (per its provenance
+    // attestation), which shipped model_capabilities as 163. 70f5d4cbf then moved it
+    // to 169 so 163_radar_feed_cache_generated_at could keep its slot. Without this
+    // entry, a database first migrated by that npm build keeps its 163 ledger row,
+    // so the release's 163 is treated as applied and never runs: radar_feed_cache
+    // never gets generated_at, and every boot logs the renumbering CRITICAL.
+    fromVersion: "163",
+    fromName: "model_capabilities",
+    toVersion: "169",
+    toName: "model_capabilities",
   },
   {
     fromVersion: "056",
@@ -257,8 +308,8 @@ export const PHYSICAL_SCHEMA_SENTINELS = [
 ] as const;
 
 export const INITIAL_SCHEMA_SENTINELS = ["provider_connections", "combos", "call_logs"] as const;
-// "178" added by #13717: migration 178 currently hard-fails on sql.js/no-FTS5
+// "178" (#13717) and "203" (#15707) recreate memory_fts and hard-fail on sql.js/no-FTS5
 // drivers. If #13331 (adds "180") lands before this, reconcile to the union
-// ({"022","023","178","180"}) and update the assertion in
+// ({"022","023","178","180","203"}) and update the assertion in
 // tests/unit/db-migrationrunner-constants-split.test.ts accordingly.
-export const OPTIONAL_FTS5_MIGRATION_VERSIONS = new Set(["022", "023", "178"]);
+export const OPTIONAL_FTS5_MIGRATION_VERSIONS = new Set(["022", "023", "178", "203"]);

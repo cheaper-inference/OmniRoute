@@ -48,77 +48,86 @@ Claude Code ከ **Anthropic Messages API** ጋር ይገናኛል፣ እናም �
 
 ---
 
-## የግኝት ተለዋጭ ስሞች — Claude ያልሆኑ ሞዴሎችን በ`/model` መራጭ ውስጥ ያሳዩ
+## የማግኘት ምትክ-ስሞች (discovery aliases) — በ `/model` መራጭ ውስጥ Claude ያልሆኑ ሞዴሎችን ማሳየት
 
-የClaude Code ጌትዌይ ሞዴል ግኝት በ`claude`
-ወይም `anthropic` የሚጀምሩ መለያዎችን ብቻ ይዘረዝራል፤ ስለዚህ `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ሲሆን ቤተኛው
-የ`/model` መራጭ በተለምዶ **የOmniRoute Claude/Anthropic ሞዴሎችን ብቻ** ያሳያል —
-`kimi/kimi-k2.6` ወይም `glm/glm-5.2` በትክክል ቢዘዋወርም እንኳ ፈጽሞ አይታይም።
+የ Claude Code የጌትዌይ ሞዴል ማግኘት `claude` ወይም `anthropic` በሚጀምሩ መታወቂያዎችን ብቻ ይዘረዝራል፣ ስለዚህ `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ሲሆን አገናዊው `/model` መራጭ **ብቻ** የ OmniRoute Claude/Anthropic ሞዴሎችን ያሳያል — `kimi/kimi-k2.6` ወይም `glm/glm-5.2` በፍጹም አይታይም፣ ምንም እንኳን ራውቲንግ በደንብ ቢሰራም።
 
-OmniRoute ማንኛውንም የነቃ ሞዴል (እና ጥምረት) በ`claude/…` መለያ ስር ማንጸባረቅ ይችላል፤ በዚህም
-ያንን ማጣሪያ አልፎ በመራጩ ውስጥ ይታያል፦
+OmniRoute ማንኛውንም ነቃ ሞዴል (እና ኮምቦ) በ `claude/…` መታወቂያ ስር ማንጸባረቅ ይችላል፣ ይህም ያን ማጣሪያ እንዲያልፍ እና በመራጩ ውስጥ እንዲታይ ያደርገዋል:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<ጥምረት "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-ከእነዚህ አንዱን በClaude Code ውስጥ ሲመርጡ፣ OmniRoute ከማዞሩ በፊት የ`claude/` መጠቅለያውን
-አስወግዶ ወደ እውነተኛው መለያ ይመልሰዋል — እውነተኛ `claude/<real-claude-model>` መለያ
-(ትክክለኛው የClaude OAuth አቅራቢ) ሁልጊዜ ሳይነካ ይቀራል።
+እነዚህን አንዱን በ Claude Code ውስጥ ሲመርጡ፣ OmniRoute ከራውቲንግ በፊት የ `claude/` መሸፈኛውን ወደ እውነተኛው መታወቂያ ይነስፋል — እውነተኛ `claude/<real-claude-model>` መታወቂያ (እውነተኛው የ Claude OAuth አቅራቢ) ሁልጊዜ ያለንክብካቤ ይቀራል።
 
-**ይህ በነባሪነት ጠፍቷል** እና በሶስት-ደረጃ መቆጣጠሪያ (በጣም ዝርዝር የሆነው
-ቅድሚያ ያገኛል) ይቆጣጠራል፤ ስለዚህ መደበኛ OmniRoute፣ Claude Codeን ለማይጠቀሙ
-ደንበኞች ካታሎጉን ፈጽሞ አያባዛም፦
+በነባሪነት የመሠረት መታወቂያዎች ብቻ ነው የሚንጸባረቁት። በፈቃደኝነት (opt-in) የሚነቃው `CATALOG_MIRROR_REFINEMENTS_ENABLED` የባህሪ ሰንደቅ ሲነቃ፣ ካታሎጉ አስቀድሞ የሚዘረዝራቸው የአስተሳሰብ-ጥረት (reasoning-effort) ተለዋዋጮች (ለምሳሌ `codex/gpt-6-sol-high`) እንደ ሌላው ማንኛውም መታወቂያ ይንጸባረቃሉ፣ ስለዚህ Claude Code ግልጽ የጥረት ደረጃ መምረጥ ይችላል፣ እና የጥያቄ መንገዱ መፍጠር (materialize) የማይችላቸው እንቅስቃሴ-ውስጣዊ (built-in) `auto/*` መታወቂያዎች አይንጸባረቁም። የጥረት ተለዋዋጮች በፍጹም መዘረዝራቸው ገና በ `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` ነው የሚገዛው — መስታወቱ መሠረታዊው ካታሎግ የሌለውን ተለዋዋጭ በፍጹም አይጨምርም።
 
-| ደረጃ     | ቦታ                                                               |
-| ------- | ---------------------------------------------------------------- |
-| ሞዴል     | የአቅራቢ ዝርዝር ገጽ → ለእያንዳንዱ ሞዴል "በClaude Code ውስጥ አሳይ" መቀያየሪያ        |
-| አቅራቢ    | የአቅራቢ ዝርዝር ገጽ → የአቅራቢ-ደረጃ መቀያየሪያ (ሁሉንም ሞዴሎቹን ያካትታል)              |
-| ዓለም አቀፍ | ቅንብሮች → የባህሪ ጠቋሚዎች → `EXPOSE_CC_DISCOVERY_ALIASES` (በነባሪነት ጠፍቷል) |
+**ይህ በነባሪነት ጠፍቷል** እና በሦስት-ደረጃ መቆጣጠሪያ በር (በጣም የተወሰነው ያሸንፋል) ይቆጣጠራል፣ ስለዚህ ተራ OmniRoute Claude Code ለማይጠቀሙ ደንበኞች ካታሎጉን በፍጹም አያባዛም:
 
-የ`EXPOSE_CC_DISCOVERY_ALIASES` የአካባቢ ተለዋዋጭ ዓለም አቀፉ ደረጃ እንዲበራ ያስገድዳል
-እና በዳሽቦርዱ ላይ ከተደረገው ማሻሻያ ቅድሚያ ያገኛል (የባህሪ ጠቋሚዎች ገጽ
-ይህ ሲከሰት "በአካባቢ ተለዋዋጭ በኩል ንቁ" የሚል ማስታወሻ ያሳያል)። የእያንዳንዱ አቅራቢ እና
-የእያንዳንዱ ሞዴል መቀያየሪያዎች ከዚያ ይበልጥ ያጠራሉ — ለምሳሌ ዓለም አቀፉ ጠፍቶ + የKimi አቅራቢ በርቶ ከሆነ
-የKimi ሞዴሎችን ብቻ ያሳያል።
+| ደረጃ    | የት                                                               |
+| ------ | ---------------------------------------------------------------- |
+| ሞዴል    | የአቅራቢ ዝርዝር ገጽ → የእያንዳንዱ ሞዴል "Expose in Claude Code" ቶግል          |
+| አቅራቢ   | የአቅራቢ ዝርዝር ገጽ → የአቅራቢ-ደረጃ ቶግል (ሁሉንም ሞዴሎቹን ይሸፍናል)                 |
+| አለምአቀፍ | ቅንብሮች → የባህሪ ሰንደቆች → `EXPOSE_CC_DISCOVERY_ALIASES` (በነባሪነት ጠፍቷል) |
 
-> ⚠️ **Claude ባልሆኑ ሞዴሎች ላይ የመስኮት አለመዛመድ።** Claude Code ለማያውቀው ማንኛውም መለያ የ200K አውድ
-> መስኮት እንዳለው ይገምታል (እውነተኛውን መስኮት ከ`/v1/models` ማንበብ አይችልም)። ትልቅ መስኮት ላለው ሞዴል
-> (ለምሳሌ የKimi K2 256K)፣ ራስ-ሰር ማጠቃለያው ያለጊዜው እንዳይነሳ፣
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW`ን ከሞዴሉ እውነተኛ መስኮት በታች ወዳለ እሴት ያቀናብሩ። ከላይ የተፈጠሩት መገለጫዎች ይህን
-> ቀድሞውኑ ለእያንዳንዱ ሞዴል ያደርጋሉ።
+የ `EXPOSE_CC_DISCOVERY_ALIASES` የአካባቢ ተለዋዋጭ አለምአቀፍ ደረጃውን በግድ ያበራል እና ከዳሽቦርዱ ቅድሚያ-ማሻሻያ (override) ላይ ቅድሚያ ይወስዳል (ሲሆን የባህሪ ሰንደቆች ማያ ገጽ "active via environment variable" የሚል ማስታወሻ ያሳያል)። የአቅራቢ-እና የሞዴል-ደረጃ ቶግሎች ከዚያ ጀምሮ ያጣራሉ — ለምሳሌ አለምአቀፍ ጠፍቶ + የ Kimi አቅራቢ በርቶ የ Kimi ሞዴሎችን ብቻ ያሳያል።
+
+> ⚠️ **በ Claude ያልሆኑ ሞዴሎች ላይ የመስኮት ልዩነት.** Claude Code ለማያውቀው ማንኛውም መታወቂያ 200K የአውድ መስኮት (context window) ይገምታል (እውነተኛ መስኮት ከ `/v1/models` ማንበብ አይችልም)። ከዚህ የላቀ መስኮት ላለው ሞዴል (ለምሳሌ የ Kimi K2 256K)፣ `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ከሞዴሉ እውነተኛ መስኮት በታች ወደሆነ እሴት ያዋቅሩት፣ ስለዚህ ራስ-ሰር-ማጠብ (auto-compaction) ከጊዜው በፊት አይነሳም። ከላይ የተፈጠሩት መገለጫዎች (profiles) ይህንን አስቀድመው በእያንዳንዱ ሞዴል ያደርጋሉ።
 
 ---
 
-## በዳሽቦርዱ ላይ ያለው የመነሻ ማዋቀሪያ ብሎክ
+## በዳሽቦርዱ ላይ ያለው የመጀመሪያ ማዋቀሪያ ብሎክ
 
-የClaude መሣሪያ ካርድ (**Dashboard → CLI Code**) ለዚህ ኢንስታንስ ትክክለኛውን የ`settings.json` ክፍልፋይ፣ ከdiscovery-alias መረጃ አዝራሩ አጠገብ፣ ከቅጂ አዝራር ጋር ያሳያል፦
+የClaude መሣሪያ ካርድ (**Dashboard → CLI Code**) ለዚህ instance ትክክለኛውን የ`settings.json` ክፍል
+ከdiscovery-alias መረጃ አዝራሩ አጠገብ፣ ከቅጂ አዝራር ጋር ያሳያል፦
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<የእርስዎ OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<የእርስዎ OmniRoute API ቁልፍ>",
+    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-መሠረታዊ URL በካርዱ የተወሰነው ነው (እርስዎ ያስገቡትን ብጁ ለውጥ ጨምሮ)፣ እና አስቀድሞ ደረጃውን የጠበቀ ነው — የ`/v1` ቅጥያም ሆነ በመጨረሻ የሚመጣ ስላሽ የለውም። **ቁልፉ በፍጹም አይታይም**፦ ብሎኩ ከቦታ ያዥ ጋር ስለሚቀርብ፣ የማያ ገጽ ቅጂ ወይም የተለጠፈ ቅንጭብ ቁልፉን ሊያጋልጥ አይችልም። ቁልፍዎን በቦታው ላይ ይለጥፉ።
+የመሠረት URL በካርዱ የተወሰነው ነው (እርስዎ ያስገቡትን ብጁ override ጨምሮ)፣ እና አስቀድሞ
+normalized ተደርጓል — የ`/v1` ቅጥያም ሆነ የመጨረሻ slash የለውም። **ቁልፉ ፈጽሞ አይታይም**፦ ብሎኩ
+placeholder ይዞ ይመጣል፣ ስለዚህ screenshot ወይም የተለጠፈ snippet ቁልፍን ሊያጋልጥ አይችልም። ቁልፍዎን በእሱ ላይ ይለጥፉ።
 
-እውነተኛው የአውድ መስኮት 200K ላልሆነ ማንኛውም ሞዴል፣ `CLAUDE_CODE_AUTO_COMPACT_WINDOW`ን በዚያው `env` ብሎክ ስር ያክሉ — Claude Code ለማያውቀው ለእያንዳንዱ id 200K እንዳለው ይገምታል፤ ስለዚህ ካልተዋቀረ ራስ-ሰር ማመቅ በተሳሳተ ነጥብ ላይ ይጀምራል (በቀደመው ክፍል ያለውን ማስጠንቀቂያ ይመልከቱ)። የቅንጭብ ገንቢውም ይህን እሴት ይቀበላል፤ ስለዚህ የዒላማውን ሞዴል የአውድ መስኮት የሚያውቅ ጠሪ በቀጥታ ሊያወጣው ይችላል።
+ትክክለኛው context window 200K ላልሆነ ማንኛውም model፣ `CLAUDE_CODE_AUTO_COMPACT_WINDOW`ን በተመሳሳዩ
+የ`env` ብሎክ ስር ያክሉ — Claude Code ለማያውቀው እያንዳንዱ id 200K እንዳለው ይገምታል፣ ስለዚህ
+ካልታከለ auto-compaction በተሳሳተ ቦታ ይጀምራል (ባለፈው ክፍል ያለውን ማስጠንቀቂያ ይመልከቱ)።
+የsnippet builder ይህን እሴትም ይቀበላል፣ ስለዚህ የዒላማ model windowን የሚያውቅ caller
+በቀጥታ ሊያመነጨው ይችላል።
 
-ምንጭ፦ `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (ንጹሕ ገንቢ፣ በክፍል ሙከራ የተፈተነ) በ`ClaudeGatewayOnboardingBlock` የሚታይ።
+ምንጭ፦ `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (ንጹሕ
+builder፣ unit-tested) በ`ClaudeGatewayOnboardingBlock` የሚታይ።
+
+### አንድ መለያ ይሰኩ (አማራጭ)
+
+እያንዳንዱን የClaude Code request በአንድ የተወሰነ provider account በኩል ለመላክ፣ በተመሳሳዩ የ`env` ብሎክ
+ውስጥ `ANTHROPIC_CUSTOM_HEADERS`ን በመጠቀም የ`x-omniroute-connection` headerን ያክሉ፦
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+idውን በprovider ገጽ ላይ ካለው የconnection ረድፍ `xxxxxxxx…` chip ይቅዱ። pinኑ የሚሠራው
+ለsingle-model ids (`provider/model`) ብቻ ነው፣ ለcombos አይደለም። ትክክለኛውን fallback ባህሪ ለማየት
+[በእያንዳንዱ request የመለያ መሰካት](../reference/API_REFERENCE.md#account-pinning-per-request)ን ይመልከቱ።
 
 ---
 
 ## መገለጫዎች (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **ቤተኛ የመገለጫ ፋይሎች የሉትም** (ከCodex `~/.codex/<name>.config.toml` በተለየ)። የተለመደው ዘዴ `CLAUDE_CONFIG_DIR` ነው — ለእያንዳንዱ መገለጫ የተለየ የውቅር ማውጫ፣ እያንዳንዱም የራሱ `settings.json`፣ ማረጋገጫዎች፣ ታሪክ እና መሸጎጫ ያለው።
+Claude Code **አብሮገነብ የመገለጫ ፋይሎች የሉትም** (እንደ Codex `~/.codex/<name>.config.toml` አይደለም)።
+የተለመደው ዘዴ `CLAUDE_CONFIG_DIR` ነው — ለእያንዳንዱ መገለጫ የተለየ የውቅረት ማውጫ ሲሆን፣
+እያንዳንዱም የራሱ `settings.json`፣ የመግቢያ ማረጋገጫዎች፣ ታሪክ እና መሸጎጫ አለው።
 
-`omniroute setup-claude` በቀጥታ ያለውን የ`/v1/models` ካታሎግ ያመጣና ለእያንዳንዱ ሞዴል አንድ መገለጫ በ`~/.claude/profiles/<name>/settings.json` ላይ ይጽፋል፤ እንዲሁም **ከ`setup-codex` ጋር ተመሳሳይ ስሞችን** (`glm52`፣ `kimi-k27`፣ `deepseek-pro`፣ …) እንደገና ይጠቀማል፦
+`omniroute setup-claude` ቀጥታውን `/v1/models` ካታሎግ አምጥቶ፣ ከ**`setup-codex` ጋር ተመሳሳይ ስሞችን** (`glm52`፣ `kimi-k27`፣ `deepseek-pro`፣ …) በመጠቀም ለእያንዳንዱ ሞዴል አንድ መገለጫ በ`~/.claude/profiles/<name>/settings.json` ይጽፋል፦
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -135,14 +144,17 @@ Claude Code **ቤተኛ የመገለጫ ፋይሎች የሉትም** (ከCodex `~
 }
 ```
 
-> **የማረጋገጫ ቶከኑ በመገለጫው ውስጥ በፍጹም አይጻፍም።** በ
-> `omniroute launch --profile <name>` ያስጀምሩት (ከንቁው አውድ `ANTHROPIC_AUTH_TOKEN`ን
-> ያስገባል)፣ ወይም `ANTHROPIC_AUTH_TOKEN`ን እራስዎ ወደ ውጭ ይላኩና
-> `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`ን ያስኪዱ።
+> **የማረጋገጫ ቶከኑ በመገለጫው ውስጥ ፈጽሞ አይጻፍም።** በ
+> `omniroute launch --profile <name>` ያስጀምሩ (ከንቁ አውድ `ANTHROPIC_AUTH_TOKEN`ን ያስገባል)፣ ወይም `ANTHROPIC_AUTH_TOKEN`ን ራስዎ export አድርገው
+> `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`ን ያሂዱ።
 
-**ከሞዴል ግኝት በኋላ ራስ-ሰር ማመሳሰል (በምርጫ የሚነቃ)።** የአቅራቢ ሞዴል ማመሳሰል በቀጥታ ያለውን ካታሎግ በሚቀይርበት ጊዜ ሁሉ OmniRoute እነዚህን ተመሳሳይ የ`~/.claude/profiles/<name>/settings.json` ፋይሎች በራስ-ሰር እንደገና ሊፈጥር ይችላል — ስለዚህ ትዕዛዙን እንደገና ሳያስኬዱ አዲስ ወይም እንደገና የተሰየሙ ሞዴሎች መገለጫዎችን ያገኛሉ። በነባሪነት **ጠፍቷል**፦ ከ**CLI Code dashboard** ("የCLI መገለጫ ራስ-ሰር ማመሳሰል" → Claude Code) ያብሩት፣ ወይም `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true`ን ያቀናብሩ (`CLI_ALLOW_CONFIG_WRITES`ንም ያከብራል፣ ይህም በነባሪነት በርቷል)። ሲነቃ የመገለጫ ፋይሎችን ብቻ ይጽፋል፤ ንቁውን/ነባሪውን የClaude ውቅር፣ ማረጋገጫ ወይም `~/.claude/settings.json`ን ፈጽሞ አይቀይርም።
+**ከሞዴል ፍለጋ በኋላ ራስ-ሰር ማመሳሰል (በምርጫ የሚነቃ)።** የአቅራቢ ሞዴል
+ማመሳሰል ቀጥታውን ካታሎግ በሚቀይርበት ጊዜ ሁሉ፣ OmniRoute እነዚህን ተመሳሳይ
+`~/.claude/profiles/<name>/settings.json` ፋይሎች በራስ-ሰር እንደገና ማመንጨት ይችላል — ስለዚህ አዲስ/እንደገና የተሰየሙ ሞዴሎች ትዕዛዙን እንደገና ሳያሂዱ መገለጫዎችን ያገኛሉ።
+በ**ነባሪነት ጠፍቷል**፦ ከ**CLI Code ዳሽቦርድ** ("CLI profile
+auto-sync" → Claude Code) ያብሩት፣ ወይም `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` ያዘጋጁ (`CLI_ALLOW_CONFIG_WRITES`ንም ያከብራል፤ ይህም በነባሪነት እንዲሰራ ተደርጓል)። ሲነቃ የሚጽፈው የመገለጫ ፋይሎችን ብቻ ነው፤ ንቁ/ነባሪ የClaude ውቅርዎን፣ ማረጋገጫዎን ወይም `~/.claude/settings.json`ን ፈጽሞ አይቀይርም።
 
-### መገለጫዎችን መፍጠር + መጠቀም
+### መገለጫዎችን ማመንጨት + መጠቀም
 
 ```bash
 # አካባቢያዊ OmniRoute
@@ -154,10 +166,14 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 # የተወሰኑ አቅራቢዎች ብቻ
 omniroute setup-claude --only glm,kimi
 
-# ሳይጻፍ ቅድመ ዕይታ
+# በዚህ አስተናጋጅ ላይ ያልተገኙ የአካባቢያዊ-CLI አቅራቢዎችን (zcode, auggie, devin-cli-agentic,
+# codex-app-server) መገለጫዎችም ይጻፉ (ለአካባቢያዊ ዒላማ በነባሪነት ይዘለላሉ)
+omniroute setup-claude --include-local
+
+# ሳይጽፉ ቅድመ ዕይታ ያድርጉ
 omniroute setup-claude --dry-run
 
-# መገለጫ ማስጀመር
+# አንድ መገለጫ ያስጀምሩ
 omniroute launch --profile kimi-k27
 ```
 

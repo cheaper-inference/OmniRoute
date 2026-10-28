@@ -43,9 +43,29 @@ export type FreeModelFreeType =
   | "recurring-daily"
   | "recurring-monthly"
   | "recurring-credit"
+  | "recurring-uncapped"
   | "one-time-initial"
   | "keyless"
   | "discontinued";
+
+/**
+ * Free types the `freeOnly` preset admits. Single-use credits and
+ * retired models stay visible without the preset but never pass it;
+ * an unrecognised gateway value stays unpublished under the preset
+ * until it is classified here.
+ */
+const FREE_ONLY_FREE_TYPES: ReadonlySet<string> = new Set([
+  "recurring-daily",
+  "recurring-monthly",
+  "recurring-credit",
+  "recurring-uncapped",
+  "keyless",
+]);
+
+/** Whether a free-tier entry counts as free under the `freeOnly` preset. */
+export function isFreeOnlyFreeType(freeType: unknown): boolean {
+  return typeof freeType === "string" && FREE_ONLY_FREE_TYPES.has(freeType);
+}
 
 // ── Provider Label ────────────────────────────────────────────────────────
 
@@ -139,12 +159,17 @@ function fmtTokens(n: number): string {
 /**
  * Format a free model budget into a short human-readable suffix.
  *
- * recurring-daily   → "25M tokens/day"
- * recurring-monthly → "25M tokens/month"
- * recurring-credit  → "10M credits"
- * one-time-initial  → "1M credits (one-time)"
- * keyless           → "(keyless)"
- * discontinued      → "(discontinued)"
+ * recurring-daily     → "25M tokens/day"
+ * recurring-monthly   → "25M tokens/month"
+ * recurring-credit    → "10M credits"
+ * recurring-uncapped  → "(uncapped)"
+ * one-time-initial    → "1M credits (one-time)"
+ * keyless             → "(keyless)"
+ * discontinued        → "(discontinued)"
+ * unknown future type → "(<type>)", never empty
+ *
+ * The uncapped label reuses the dashboard wording ("uncapped" in
+ * `FreeBudgetCard.tsx:133`), parenthesised like the other cap-less labels.
  */
 export function formatFreeBudget(params: {
   freeType: FreeModelFreeType;
@@ -160,6 +185,8 @@ export function formatFreeBudget(params: {
       return `${fmtTokens(monthlyTokens)} tokens/month`;
     case "recurring-credit":
       return `${fmtTokens(creditTokens)} credits`;
+    case "recurring-uncapped":
+      return "(uncapped)";
     case "one-time-initial":
       return `${fmtTokens(creditTokens)} credits (one-time)`;
     case "keyless":
@@ -167,7 +194,7 @@ export function formatFreeBudget(params: {
     case "discontinued":
       return "(discontinued)";
     default:
-      return "";
+      return `(${String(freeType)})`;
   }
 }
 

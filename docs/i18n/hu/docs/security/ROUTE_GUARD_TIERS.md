@@ -12,183 +12,223 @@ Az OmniRoute összes felügyeleti API-útvonala három védelmi szint egyikébe 
 
 ### 1. szint — LOCAL_ONLY
 
-**Kikényszeríti:** `isLocalOnlyPath(path)` → visszacsatolási cím ellenőrzése  
-**Megkerülés:** Alapértelmezés szerint nincs. Szűk körű kivétel vonatkozik a `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` útvonalaira, ha a kérés érvényes, `manage` hatókörrel rendelkező API-kulcsot tartalmaz (lásd: [A manage hatókör kivétele](#manage-scope-carve-out)).
+**Kikényszeríti:** `isLocalOnlyPath(path)` → loopback-gazdagép-ellenőrzés
+**Megkerülés:** Alapértelmezetten nincs. Szűk kivétel a
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` alatti útvonalakra, ha a kérés
+érvényes, `manage` hatókörrel rendelkező API-kulcsot hordoz (lásd:
+[Manage-hatókör kivétel](#manage-scope-carve-out)).
 
-Ezek az útvonalak gyermekfolyamatokat indítanak, vagy futásidejű kódot hajtanak végre. Ha nem visszacsatolási címről érkező forgalom számára is elérhetők lennének, akkor egy érvényes JWT-t megszerző támadó (például egy Cloudflared-/Ngrok-alagúton keresztül) folyamatok indítását válthatná ki — ez egy ismert CVE-osztály ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+Ezek az útvonalak gyermekfolyamatokat indítanak, vagy futásidejű kódot hajtanak
+végre. Ha nem loopback felé is elérhetővé válnának, egy érvényes JWT-hez jutott
+támadó (például egy Cloudflared/Ngrok alagúton keresztül) folyamatindítást
+válthatna ki — ez egy ismert CVE-osztály
+([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**Mi a GHSA-fhh6-4qxv-rpqj (a támadás típusa):** egy felügyeleti/ügynökkiszolgáló olyan végpontot tesz elérhetővé, amely alfolyamatot indít (`npm install`, `node`, böngésző, proxy, `git`, `tar`, …). Ha ez a végpont a gazdagépen kívülről is elérhető — mert az üzemeltető az OmniRoute-ot nginx-/Cloudflare-/Tailscale-alagút mögé helyezte, és kiszivárgott egy JWT, vagy hibás volt a hitelesítés konfigurációja —, a támadó az „API meghívását” „parancs futtatásává a gazdagépen” alakíthatja (távoli kódfuttatás). Az OmniRoute ezt úgy akadályozza meg, hogy minden folyamatindításra képes útvonalon **feltétel nélkül, minden hitelesítési ellenőrzés előtt visszacsatolási cím-ellenőrzést kényszerít ki**: egy alagúton keresztül kiszivárgott tokennel sem lehet elérni a folyamatindítást.
+**Mi a GHSA-fhh6-4qxv-rpqj (a támadási osztály):** egy felügyeleti/ügynökkiszolgáló
+olyan végpontot tesz közzé, amely alfolyamatot indít (`npm install`, `node`,
+böngésző, proxy, `git`, `tar`, …). Ha ez a végpont a gépen kívülről is elérhető —
+mert az üzemeltető az OmniRoute-ot egy nginx/Cloudflare/Tailscale alagút mögé
+helyezte, és kiszivárgott egy JWT, vagy a hitelesítés rosszul volt konfigurálva —,
+akkor a támadó a „hívjon meg egy API-t" műveletet „futtasson egy parancsot a
+gépen" műveletté alakítja (távoli kódfuttatás). Az OmniRoute ezt úgy zárja le,
+hogy minden folyamatindításra képes útvonalon **feltétel nélkül, minden
+hitelesítési ellenőrzés előtt** kikényszerít egy **loopback-gazdagép-ellenőrzést**:
+egy alagúton keresztül kiszivárgott token így sem érheti el a folyamatindítást.
 
-**A teljes LOCAL_ONLY-készlet.** A mérvadó forrás a `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` a `src/server/authz/routeGuard.ts` fájlban; az alábbi táblázat az aktuális állapotot tükrözi. A `check-route-guard-membership` ellenőrzési kapu felsorolja a folyamatindításra képes előtagok alatt található összes `route.ts` fájlt, és meghiúsítja a CI-folyamatot, ha bármelyik nincs kizárólag helyiként besorolva.
+**A teljes LOCAL_ONLY készlet.** A mérvadó forrás a
+`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` a
+`src/server/authz/routeGuard.ts` fájlban; az alábbi táblázat az aktuális állapotot
+tükrözi. A `check-route-guard-membership` kapu felsorolja a folyamatindításra
+képes prefixumok alatti összes `route.ts` fájlt, és meghiúsítja a CI-t, ha
+bármelyik nincs local-only kategóriába sorolva.
 
-| Előtag / minta                                                                                           | Miért csak helyileg érhető el                                                                                          |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP-kiszolgáló — stdio-hidakat és SSE-kezelőket indít                                                                  |
-| `/api/cli-tools/runtime/`                                                                                | CLI-eszköz futtatókörnyezete — tetszőleges beépülőkódot hajt végre                                                     |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Eszközönkénti beállításírók, amelyek hozzáférhetnek a gazdagépen lévő eszközbinárisokhoz/-konfigurációkhoz             |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Ugyanaz a `getCliRuntimeStatus()` folyamatindítás, mint a fenti hat rokon végpontnál (GHSA-35fw-cv32-2373)             |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI-leltárellenőrzések — eszközönként elindítják a `command -v` / `--version` parancsot (GHSA-35fw-cv32-2373)          |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Az Antigravity MITM-proxy vezérlése (elindítja/beállítja a rendszerproxyt)                                             |
-| `/api/modality-bridge/video/`                                                                            | Szigorúan megbízható loopbackhez kötött Video Bridge futásidejű ellenőrzése és belső kinyerési híd                     |
-| `/api/services/`                                                                                         | Beágyazott szolgáltatások (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + folyamatindítás               |
-| `/dashboard/providers/services/`                                                                         | Fordított proxy a beágyazott szolgáltatások felhasználói felületeihez                                                  |
-| `/api/tunnels/cloudflared`                                                                               | Telepíti/elindítja a cloudflared binárist                                                                              |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Telepíti/vezérli a tailscaled szolgáltatást a gazdagépen                                                               |
-| `/api/copilot/`                                                                                          | Hitelesítés nélküli LLM-illesztőprogram — alapértelmezés szerint csak CLI-n keresztül                                  |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM-kiszolgálót indít és módosítja a DNS-beállításokat                                                  |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy figyelő és rendszerproxy                                                                |
-| `/api/settings/mitm`                                                                                     | Engedélyezi a MITM-elfogást (rendszerszintű proxyállapot)                                                              |
-| `/api/issue-agent/`                                                                                      | Hibajegyügynök — helyi eszközöket indít a repóhoz                                                                      |
-| `/api/plugins/`, `/api/plugins`                                                                          | Beépülők — betöltés/végrehajtás a `worker_threads` + `child_process` használatával                                     |
-| `/api/middleware/`                                                                                       | Felhasználói köztes réteg — az operátor kódját folyamaton belül tölti be/hajtja végre                                  |
-| `/api/system/version`                                                                                    | Automatikus frissítés (csak POST; a GET/HEAD/OPTIONS kivétel) — elindítja a `git checkout` + `npm install` parancsokat |
-| `/api/db-backups/exportAll`                                                                              | Elindítja a `tar` parancsot az exportarchívum létrehozásához                                                           |
-| `/api/local/`                                                                                            | Egykattintásos helyi indítók (jelenleg Redis) — elindítja a podman/docker alkalmazást                                  |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | A Headroom proxy életciklusának kezelése — python CLI-t indít / PID-nek küld jelzést                                   |
-| `/api/jobs`, `/api/jobs/`                                                                                | Feladatfuttató vezérlése — ütemezett gazdagépoldali munkát hajt végre                                                  |
-| `/api/oauth/cursor/auto-import`                                                                          | A hitelesítő adatok importálása előtt végrehajtja az `execFile("which", ["cursor"])` hívást                            |
-| `/api/oauth/kiro/auto-import`                                                                            | Beolvassa a Kiro CLI hitelesítőadat-fájljait a gazdagépről                                                             |
-| `/api/skills/collect/`                                                                                   | Képességgyűjtés — észleli/telepíti a helyi eszközöket                                                                  |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Képességkezelők regisztrálása és végrehajtása — elérik a sandboxkonténer indítását (GHSA-jx89)                         |
-| `/api/discovery/`                                                                                        | Helyi hálózati/szolgáltatói felderítési vizsgálatok                                                                    |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Látható felületű böngészőt és VNC-munkamenetet indít interaktív bejelentkezésekhez                                     |
-| `/api/acp/agents`                                                                                        | ACP — felderíti és elindítja a helyi CLI-ügynök binárisait                                                             |
-| `/api/resilience/connections`, `/dashboard/resilience/connections`                                       | Kapcsolatkarbantartási műveletek, amelyek érinthetik a helyi CLI állapotát                                             |
-| `/api/providers/cursor/agent-availability`                                                               | Irányítópulti telepítési figyelmeztetés ellenőrzése — elindítja a `cursor-agent status --format json` parancsot        |
-| `/api/providers/{id}/login` (reguláris kifejezés)                                                        | Látható felületű Playwright Chromiumot indít webes sütikkel történő bejelentkezéshez                                   |
-| `/api/providers/volcengine-plan/connect` (reguláris kifejezés)                                           | Kézi, látható felületű folyamat + munkamenet-alapú automatikus telefonos/SMS-bejelentkezés (elindítja a Playwrightot)  |
-| `/api/providers/{id}/refresh-cursor` (reguláris kifejezés)                                               | A Cursor-munkamenet kézi megújítása — aktiválja a `cursor-agent` eszközt                                               |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (reguláris kifejezés)                                     | Diagnosztizálja a Codex CLI helyi telepítését (elindítja a binárist)                                                   |
+| Előtag / minta                                                                                           | Miért csak helyi elérésű                                                                                     |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `/api/mcp/`                                                                                              | MCP-kiszolgáló — stdio-hidakat + SSE-kezelőket indít                                                         |
+| `/api/cli-tools/runtime/`                                                                                | CLI-eszköz futtatókörnyezet — tetszőleges pluginkódot hajt végre                                             |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Eszközönkénti beállításírók, amelyek a gazdagépen hozzányúlhatnak az eszközök binárisaihoz/konfigurációjához |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Ugyanaz a `getCliRuntimeStatus()`-spawn, mint a fenti hat társ esetében (GHSA-35fw-cv32-2373)                |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI-leltár-lekérdezések — eszközönként `command -v` / `--version` spawnt indítanak (GHSA-35fw-cv32-2373)     |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM-proxy vezérlés (rendszerproxyt indít/állít be)                                              |
+| `/api/modality-bridge/video/`                                                                            | Szigorú, megbízható loopback-es Video Bridge futtatókörnyezet-lekérdezés és belső kinyerési híd              |
+| `/api/services/`                                                                                         | Beágyazott szolgáltatások (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn               |
+| `/dashboard/providers/services/`                                                                         | Reverse proxy a beágyazott szolgáltatások felületeihez                                                       |
+| `/api/tunnels/cloudflared`                                                                               | Telepíti/indítja a cloudflared binárist                                                                      |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Telepíti/vezérli a tailscaled-et a gazdagépen                                                                |
+| `/api/copilot/`                                                                                          | Hitelesítés nélküli LLM-illesztő — alapértelmezés szerint csak CLI                                           |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM-kiszolgálót indít + DNS-módosításokat végez                                               |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy-figyelő + rendszerproxy                                                       |
+| `/api/settings/mitm`                                                                                     | MITM-lehallgatást engedélyez (rendszerszintű proxy-állapot)                                                  |
+| `/api/issue-agent/`                                                                                      | Issue-ügynök — helyi eszközöket indít a repó ellen                                                           |
+| `/api/plugins/`, `/api/plugins`                                                                          | Pluginek — betöltés/végrehajtás `worker_threads` + `child_process` segítségével                              |
+| `/api/middleware/`                                                                                       | Felhasználói middleware — operátori kódot tölt be/hajt végre a folyamaton belül                              |
+| `/api/system/version`                                                                                    | Automatikus frissítés (csak POST; GET/HEAD/OPTIONS mentesítve) — `git checkout` + `npm install` spawnt indít |
+| `/api/db-backups/exportAll`                                                                              | `tar`-t indít az exportarchívumhoz                                                                           |
+| `/api/local/`                                                                                            | Egykattintásos helyi indítók (jelenleg Redis) — podman/dockert indít                                         |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom-proxy életciklus — python CLI-t indít / jelzést küld a PID-nek                                      |
+| `/api/jobs`, `/api/jobs/`                                                                                | Feladatfuttató-vezérlés — ütemezett, gazdagépoldali munkát hajt végre                                        |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` a hitelesítő adatok importálása előtt                                        |
+| `/api/oauth/kiro/auto-import`                                                                            | A Kiro CLI hitelesítőadat-fájljait olvassa be a gazdagépről                                                  |
+| `/api/skills/collect/`                                                                                   | Skill-gyűjtés — helyi eszközöket észlel/telepít                                                              |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Skill-handler regisztráció + végrehajtás — eljut a sandbox-konténer indításáig (GHSA-jx89)                   |
+| `/api/discovery/`                                                                                        | Helyi hálózati/szolgáltató-felderítési próbák                                                                |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Headful böngészőt + VNC-munkamenetet indít interaktív bejelentkezésekhez                                     |
+| `/api/acp/agents`                                                                                        | ACP — helyi CLI-agent binárisokat fedez fel és indít el                                                      |
+| `/api/resilience/connections`                                                                            | Fiókonkénti reziliencia-JSON (cooldown, breaker, lockout). A dashboard HTML nem csak helyi elérésű.          |
+| `/api/providers/cursor/agent-availability`                                                               | Dashboard install-emlékeztető ellenőrzés — lefuttatja a `cursor-agent status --format json` parancsot        |
+| `/api/providers/{id}/login` (regex)                                                                      | Headful Playwright Chromiumot indít webes cookie-alapú bejelentkezéshez                                      |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Manuális headful folyamat + munkamenet-alapú telefonos/SMS automatikus bejelentkezés (Playwrightot indít)    |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Manuális Cursor munkamenet-megújítás — megugrasztja a `cursor-agent`-et                                      |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnosztizálja a helyi Codex CLI telepítést (elindítja a binárist)                                          |
 
-**Válasz szabálysértés esetén:** `403 LOCAL_ONLY`
+**Szabálytalanság esetén a válasz:** `403 LOCAL_ONLY`
 
-#### Kivétel a kezelési hatókör számára
+#### Manage-hatókör kivétel
 
-A LOCAL_ONLY útvonalak egy része nem loopback címről is elérhető LEHET, ha és
-csak akkor, ha a kérés tartalmaz egy `Authorization: Bearer <api-key>`
-fejlécet, amelynek metaadatai között szerepel a `manage` hatókör (vagy az
-`admin`). A kivételt útvonalanként, kifejezetten a
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` szabályozza, így minden új LOCAL_ONLY
-útvonal alapértelmezés szerint továbbra is szigorúan csak loopback címről
-érhető el. A hitelesítetlen kérések és a kezelési hatókörrel nem rendelkező
-kulcsokat használó kérések továbbra is `403 LOCAL_ONLY` válasszal lesznek
-elutasítva.
+A LOCAL_ONLY útvonalak egy részhalmaza nem-loopback címről is elérhető LEHET,
+ha és csak ha a kérés tartalmaz egy `Authorization: Bearer <api-key>` fejlécet,
+amelynek metaadatai a `manage` hatókört (vagy `admin`) tartalmazzák. A kivétel
+explicit módon, útvonalanként van szabályozva a
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` segítségével, így bármely új
+LOCAL_ONLY útvonal alapértelmezése továbbra is szigorú loopback marad. A
+hitelesítetlen kérések és a nem-manage kulccsal érkező kérések továbbra is
+`403 LOCAL_ONLY` hibával elutasításra kerülnek.
 
-Jelenleg az egyetlen megkerülhető előtag az `/api/mcp/`. Az
-`/api/cli-tools/runtime/` és az `/api/services/` szándékosan ki van zárva,
-mivel tetszőleges alfolyamatokat indíthatnak (`npm install`, `node`), ami
-pontosan az a CVE-osztály, amelyet a LOCAL_ONLY szint hivatott megakadályozni.
+Jelenleg az egyetlen megkerülhető prefix a `/api/mcp/`. A `/api/cli-tools/runtime/`
+és a `/api/services/` szándékosan ki van zárva, mert tetszőleges alfolyamatokat
+indíthatnak (`npm install`, `node`), ami pontosan az a CVE-osztály, amelynek
+megelőzésére a LOCAL_ONLY szint létezik.
 
-**#7895 — az `mcp:connect` szűk hatóköre:** az `/api/mcp/` kivétel EGY olyan
-Bearer-kulcsot is elfogad, amely a szűk `mcp:connect` hatókörrel rendelkezik
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), amit a
-`src/server/authz/policies/management.ts` fájlban található
-`hasMcpConnectOrManageScope()` ellenőriz. Ez KIZÁRÓLAG az `/api/mcp/` útvonalra
-korlátozódik — az `mcp:connect` semmilyen jogosultságot nem biztosít más
-kezelési útvonalakon (beleértve minden más LOCAL_ONLY megkerülési előtagot is,
-ha valaha hozzáadnának ilyet), és szándékosan nincs benne a
-`MANAGEMENT_API_KEY_SCOPES` listában. A `manage`/`admin` hatókörrel rendelkező
-kulcs továbbra is pontosan ugyanúgy átmegy a kivételen, mint korábban; az
-`mcp:connect` egy alacsonyabb jogosultságú alternatíva azon távoli, kizárólag
-MCP-t használó hívók számára, amelyeknek nincs szükségük széles körű kezelési
-hozzáférésre.
+**#7895 — `mcp:connect` szűk hatókör:** a `/api/mcp/` kivétel olyan Bearer
+kulcsot is elfogad, amely a szűk `mcp:connect` hatókörrel rendelkezik
+(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), amelyet a
+`hasMcpConnectOrManageScope()` ellenőriz a
+`src/server/authz/policies/management.ts` fájlban. Ez KIZÁRÓLAG a `/api/mcp/`
+útvonalra vonatkozik — a `mcp:connect` semmilyen más management útvonalon nem
+ad jogosultságot (beleértve az összes többi LOCAL_ONLY bypass prefixet is, ha
+valaha kerülne ilyen hozzáadásra), és szándékosan ki van zárva a
+`MANAGEMENT_API_KEY_SCOPES` listából. A `manage`/`admin` kulcs továbbra is
+pontosan ugyanúgy átmegy a kivételen; a `mcp:connect` egy alacsonyabb
+jogosultsági szintű alternatíva a távoli, csak MCP-t használó hívók számára,
+akiknek nincs szükségük széles körű management hozzáférésre.
 
-| Kérés                                               | Útvonal                    | Eredmény                      |
-| --------------------------------------------------- | -------------------------- | ----------------------------- |
-| Nem loopback, nincs Bearer                          | `/api/mcp/*`               | 403 LOCAL_ONLY                |
-| Nem loopback, `manage` hatókörű Bearer              | `/api/mcp/*`               | Engedélyezve                  |
-| Nem loopback, `mcp:connect` hatókörű Bearer         | `/api/mcp/*`               | Engedélyezve                  |
-| Nem loopback, `manage`/`mcp:connect` nélküli Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY                |
-| Nem loopback, `mcp:connect` hatókörű Bearer         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
-| Nem loopback, `manage` hatókörű Bearer              | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
-| Loopback, tetszőleges/nincs Bearer                  | bármely LOCAL_ONLY         | Engedélyezve (átmegy a kapun) |
+| Kérés                                              | Útvonal                    | Eredmény                       |
+| -------------------------------------------------- | -------------------------- | ------------------------------ |
+| Nem-loopback, Bearer nélkül                        | `/api/mcp/*`               | 403 LOCAL_ONLY                 |
+| Nem-loopback, Bearer `manage` hatókörrel           | `/api/mcp/*`               | Engedélyezve                   |
+| Nem-loopback, Bearer `mcp:connect` hatókörrel      | `/api/mcp/*`               | Engedélyezve                   |
+| Nem-loopback, Bearer `manage`/`mcp:connect` nélkül | `/api/mcp/*`               | 403 LOCAL_ONLY                 |
+| Nem-loopback, Bearer `mcp:connect` hatókörrel      | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                 |
+| Nem-loopback, Bearer `manage` hatókörrel           | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                 |
+| Loopback, bármilyen/nincs Bearer                   | bármely LOCAL_ONLY         | Engedélyezve (a kapu átengedi) |
 
-#### Üzemeltetői útmutatás és auditálás
+#### Üzemeltetői útmutató és auditálás
 
-Ha az OmniRoute-ot fordított proxy vagy alagút (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok) mögött futtatja, a loopback-ellenőrzés továbbra is
-védi a fenti, folyamatindításra képes útvonalakat — a nem loopback klienscímről
-érkező kéréseket a rendszer `403 LOCAL_ONLY` válasszal utasítja el **még a
-hitelesítés futtatása előtt**, így egy kiszivárgott JWT sem érhet el
-folyamatindítást. Az üzemeltetőnek továbbra is két feladata van:
+Ha az OmniRoute-ot reverse proxy vagy alagút mögött futtatja (nginx, Caddy,
+Cloudflare Tunnel, Tailscale, Ngrok), a loopback-ellenőrzés továbbra is védi a
+fenti, folyamatindításra képes útvonalakat — az a kérés, amelynek klienscíme
+nem loopback, `403 LOCAL_ONLY` hibával elutasításra kerül, **még a hitelesítés
+lefutása előtt**, így egy kiszivárgott JWT sem érhet el folyamatindítást. Két
+üzemeltetői felelősség továbbra is fennáll:
 
-- **Ne „javítsa ki” a 403-as hibát azzal, hogy loopback címként hamisítja meg a
-  kliens IP-címét.** Az `X-Forwarded-For: 127.0.0.1` beállítása, illetve egy
-  olyan proxy használata, amely a forráscímet loopback címre írja át, pontosan
-  azt az RCE-osztályt nyitja meg újra, amelyet ez a szint lezár. Az
-  irányítópultot/API-t tegye elérhetővé a proxyn keresztül — a
-  folyamatindításra képes útvonalakat soha.
-- **Tartsa minimális szinten a kezelési hatókör kivételét.** Csak az
-  `/api/mcp/` kerülhető meg, és kizárólag `manage` hatókörű API-kulccsal. A
-  `SPAWN_CAPABLE_PREFIXES` soha nem adható hozzá a megkerülési listához — a zod
-  séma elutasítja őket, az `isLocalOnlyBypassableByManageScope` pedig futási
-  időben tiltja őket (többrétegű védelem); ezt jelenti az irányítópulton a
-  „nem tehető megkerülhetővé” megjelölés. Az `/api/providers/` alatt található,
-  dinamikus szegmensű és statikus útvonalú, folyamatindításra képes útvonalakat
-  (például `/login`, `/refresh-cursor`) a reguláris kifejezéseken alapuló
-  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` kiegészítő fedi
-  le a `src/shared/constants/spawnCapablePrefixes.ts` fájlban, nem pedig az
-  egyszerű `SPAWN_CAPABLE_PREFIXES` tömb — az egyszerű tömbnek a teljes
-  `/api/providers/` előtagot le kellene fednie ahhoz, hogy ezeket észlelje, ami
-  túlzottan kiszélesítené azt az útvonalfát, amelyet a távoli irányítópultok
-  jogosan használnak a szolgáltatók CRUD-műveleteihez.
+- **Ne „oldd meg" a 403-as hibát a kliens-IP loopbackként való hamisításával.** Az
+  `X-Forwarded-For: 127.0.0.1` beállítása, vagy egy olyan proxy, amely a forráscímet
+  loopbackre írja át, pontosan azt az RCE-osztályt nyitja újra, amelyet ez a szint zár le.
+  A dashboardot/API-t a proxyn keresztül tedd elérhetővé — a spawn-képes útvonalakat soha.
+- **Tartsd minimálisra a manage-hatókörű megkerülést.** Csak a `/api/mcp/` kerülhető meg,
+  és csak `manage` hatókörű API-kulccsal. A `SPAWN_CAPABLE_PREFIXES` soha nem vehető fel a
+  megkerülési listára — a zod-séma elutasítja, az `isLocalOnlyBypassableByManageScope`
+  pedig futásidőben tiltja őket (többrétegű védelem); erre utal a dashboard „cannot be
+  made bypassable" megjelölése. Ugyanez a tiltólista néhány olyan LOCAL_ONLY útvonalat is
+  tartalmaz, amelyek nem indítanak folyamatot, mégis soha nem lehetnek távolról elérhetők
+  — `/api/oauth/kiro/auto-import` (a gazdagép helyi Kiro hitelesítőfájljait olvassa),
+  `/api/discovery/` és `/api/issue-agent/`. A futásidejű pillanatképbetöltő szintén
+  eldobja az ilyen bejegyzéseket a tárolt beállítássorból, és az örökölt JSON-import
+  (`/api/settings/import-json`) soha nem írja a megkerülési kulcsokat. Minden
+  `LOCAL_ONLY_API_PREFIXES`-bejegyzésnek vagy a tiltólistán kell szerepelnie, vagy
+  megkerülésre jogosultként kell felülvizsgálni
+  (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). A `/api/providers/` alatti
+  dinamikus szegmensű és statikus útvonalú spawn-képes útvonalakat (pl. `/login`,
+  `/refresh-cursor`) a regexalapú `SPAWN_CAPABLE_PATTERNS` /
+  `SPAWN_CAPABLE_PATTERN_ANCESTORS` kiegészítő fedi le a
+  `src/shared/constants/spawnCapablePrefixes.ts` fájlban, nem a lapos
+  `SPAWN_CAPABLE_PREFIXES` tömb — a lapos tömbnek az egész `/api/providers/` prefixet le
+  kellene fednie, hogy elkapja őket, ami túlzottan kiszélesítené azt az útvonalfát,
+  amelyet a távoli dashboardok jogos módon használnak provider-CRUD műveletekhez.
 
 **Hozzáférés auditálása** — annak ellenőrzéséhez, hogy a gazdagépen kívülről semmi sem éri el ezeket az útvonalakat:
 
-- Nyissa meg az **Authorization Inventory** oldalt a `/dashboard/settings/security` útvonalon: ez megjeleníti az
-  aktuális LOCAL_ONLY előtaglistát, a megkerülhető előtagokat, valamint a fordítási időben
-  meghatározott, folyamatindításra képes („nem tehető megkerülhetővé”) halmazt.
-- Keressen rá a fordított proxy / hozzáférési naplókban a fenti előtagokra egy
-  nem loopback ügyfélcímmel párosítva. Minden olyan találat, amely `403 LOCAL_ONLY`
-  helyett `200` választ adott, azt jelenti, hogy a proxy elfedi a valódi ügyfél-IP-címet — javítsa a proxyt.
-- Az OmniRoute naplóiban egy ilyen útvonalhoz tartozó `403 LOCAL_ONLY` azt jelenti, hogy a védelem
-  rendeltetésszerűen működik, nem pedig egy elnyomandó hibát.
+- Nyisd meg az **Authorization Inventory** felületet a `/dashboard/settings/security` oldalon: megjeleníti
+  az élő LOCAL_ONLY prefixlistát, azt, hogy mely prefixek kerülhetők meg, valamint a
+  fordítási időben rögzített spawn-képes („cannot be made bypassable") halmazt.
+- Keress rá a reverse-proxy- és hozzáférési naplóidban a fenti prefixek és nem loopback
+  klienscímek párosaira. Minden olyan találat, amely `403 LOCAL_ONLY` helyett `200`-at
+  adott vissza, azt jelenti, hogy a proxy elfedi a valódi kliens-IP-t — javítsd a proxyt.
+- Az OmniRoute naplóiban ezen útvonalak egyikére érkezett `403 LOCAL_ONLY` a védelem
+  szándék szerinti működését jelzi, nem egy elnyomandó hibát.
+
+#### Távolról elérhető útvonalak hívási helyi szondakapuval
+
+Egyes útvonalaknak távoli dashboardról is elérhetőnek kell maradniuk, de helyi hívók
+esetén gazdagépoldali szondát futtatnak (`which <binary>`, `<binary> --version`,
+`tailscale status --json`). `GET` kérésre ezek nem LOCAL_ONLY-k; ehelyett a handler a
+megbízható partnerítéletet a `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`)
+segítségével olvassa ki, és a szondát csak `loopback` / `lan` hívók esetén futtatja. A
+`remote` hívó ugyanazt a válaszszerkezetet kapja, amely folyamatindítás nélküli
+forrásokból (perzisztens állapot, beállítások, fs-ellenőrzések) épül fel, `probed: false`
+jelöléssel.
+
+| Útvonal                                                          | Távoli hívóknál kihagyott szonda                                       |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI-futásidejű szonda (`allowLocalRuntimeProbe`) és CLI-tartalék spawn |
+| `GET /api/headroom/status`                                       | `which headroom` és a Python `--version`-szondák                       |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`      |
+| `GET /api/tunnels/cloudflared` (GET-re mentes a LOCAL_ONLY alól) | `which cloudflared` PATH-keresés                                       |
+
+Minden új, a gazdagépet szondázó olvasási útvonal ugyanezt a mintát követi, vagy egyenesen
+LOCAL_ONLY besorolást kap.
 
 ### 2. szint — ALWAYS_PROTECTED
 
-**Kikényszeríti:** `isAlwaysProtectedPath(path)` → a `requireLogin=false` megkerülés kihagyása
-**Megkerülés:** Nincs, ha `requireLogin=false`; JWT mindig szükséges
+**Kikényszeríti:** `isAlwaysProtectedPath(path)` → kihagyja a `requireLogin=false` megkerülést
+**Megkerülés:** Nincs `requireLogin=false` esetén; JWT mindig kötelező
 
-Ezek az útvonalak destruktív vagy visszafordíthatatlan műveleteket végeznek. Ha egy „jelszó nélküli”
-telepítésben engedélyeznénk őket, akkor ugyanazon a LAN-on bárki törölhetné az adatbázist vagy leállíthatná
-a kiszolgálófolyamatot.
+Ezek az útvonalak pusztítóak vagy visszafordíthatatlanok. Ha egy „jelszó nélküli"
+telepítésben engedélyezve lennének, a helyi hálózaton (LAN) bárki kitörölhetné az
+adatbázist vagy lelőhetné a szerverfolyamatot.
 
-| Útvonal                                   | Indok                                                                                    |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `/api/shutdown`                           | Leállítja a kiszolgálófolyamatot                                                         |
-| `/api/settings/database`                  | Adatbázis exportálása, importálása és törlése                                            |
-| `/api/db-backups`                         | Hozzáférés a teljes adatbázis biztonsági mentési archívumához                            |
-| `/api/settings/export-json`               | Exportálja a teljes beállításblokkot (a titkokkal együtt)                                |
-| `/api/settings/import-json`               | Lecseréli a teljes beállításblokkot                                                      |
-| `/api/providers/health-autopilot/actions` | Végrehajtja az autopilot helyreállítási műveleteit                                       |
-| `/api/settings/obsidian`                  | Újrafelhasználható WebDAV-hitelesítő adatokat állít ki bármely tároló gyökérkönyvtárához |
+| Útvonal                                   | Indok                                                                          |
+| ----------------------------------------- | ------------------------------------------------------------------------------ |
+| `/api/shutdown`                           | Leállítja a szerverfolyamatot                                                  |
+| `/api/settings/database`                  | Adatbázis-exportálás, -importálás és -törlés                                   |
+| `/api/db-backups`                         | Teljes adatbázis-biztonságimentési archívum elérése                            |
+| `/api/settings/export-json`               | A teljes beállításblob exportálása (a titkokat is beleértve)                   |
+| `/api/settings/import-json`               | A teljes beállításblob felülírása                                              |
+| `/api/providers/health-autopilot/actions` | Autopilot helyreállítási műveletek végrehajtása                                |
+| `/api/settings/obsidian`                  | Újrafelhasználható WebDAV-hitelesítő adatokat állít ki bármely vault-gyökérhez |
+| `/api/relay/tokens`                       | Relay-tokenek kibocsátása, listázása, szerkesztése és visszavonása             |
+| `/api/cli-tools/apply`                    | Felülírja az operátor gazdagépének CLI-konfigurációját                         |
+| `/api/cli-tools/guide-settings`           | Útmutató-vezérelt CLI-konfigurációs fájlokat ír                                |
+| `/api/cli-tools/hermes-agent-settings`    | A Hermes-ügynök konfigurációját írja                                           |
+| `/api/cli-tools/backups`                  | CLI-konfigurációs biztonsági mentések visszaállítása és törlése                |
+| `/api/log-export`                         | Hívásnaplókat küld egy konfigurált célhelyre                                   |
+| `/api/restart`                            | Újraindítja a szerverfolyamatot                                                |
 
-**Válasz szabálysértés esetén:** `401 Authentication required`
+**Szabálysértés esetén a válasz:** `401 Authentication required`
 
-A `/api/settings/obsidian` a `/webdav` gyermekútvonalára is kiterjed: a `POST` a WebDAV-fájlszolgáltatást —
-amelyet az egyedi Node-réteg szolgál ki a Next.js előtt, ezen folyamatláncon kívül — a hívó által kiválasztott gyökérkönyvtárra
-irányítja, és visszaküldi a frissen kiállított Basic hitelesítő adatokat; a `DELETE` lecseréli ezeket, a szülőútvonal `POST`
-művelete pedig eltárolja az Obsidian REST API-tokenjét. A GHSA-62vw csak a `GET` jelszófelfedését fedte el; a hitelesítő
-adatok kiállítása továbbra is a hiba esetén nyitott szinten maradt (GHSA-7pq4-8pvv-rx7r). Az `enableObsidianVaultSync()`
-ezenfelül elutasítja az olyan tárolót, amely maga az adatkönyvtár, azon belül helyezkedik el, vagy tartalmazza azt.
+Az `/api/settings/obsidian` lefedi a `/webdav` gyermekútvonalát is: a `POST` a WebDAV-fájlszolgáltatást — amelyet a Next.js előtti egyéni Node-réteg szolgál ki, ezen a pipeline-on kívül — a hívó által választott gyökérkönyvtárra irányítja, és frissen generált Basic-hitelesítő adatokat küld vissza; a `DELETE` ezeket rotálja, a szülő-`POST` pedig az Obsidian REST API-tokent tárolja. A GHSA-62vw csupán elfedte a `GET` általi jelszófelfedést; a kiadás továbbra is a fail-open szinten maradt (GHSA-7pq4-8pvv-rx7r). Az `enableObsidianVaultSync()` emellett elutasít minden olyan vaultot, amely maga az adatkönyvtár, annak belsejében helyezkedik el, vagy azt tartalmazza.
 
-### A friss telepítés rendszerindítási konfigurációja csak loopbackről érhető el — a valódi partner, nem a `Host` alapján
+#### A hitelesítőadat-exportálások és -visszaállítások kizárólag operátori műveletek
 
-Ha nincs beállítva kezelési jelszó (és nincs `INITIAL_PASSWORD` sem), akkor a
-`src/shared/utils/apiAuth.ts` fájlban található `isAuthRequired()` az anonim rendszerindítási konfigurációt **csak loopback partnerek számára**
-hagyja nyitva. A loopback állapot meghatározása sorrendben a megbízható partnerjelek alapján történik: a tokennel megjelölt valódi TCP-partner
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, amit a szabályzat lát), a folyamatlánc saját
-`AUTHZ_HEADER_PEER_LOCALITY` döntése (amit az útvonalkezelők látnak, és amely csak addig megbízható, amíg az
-`OMNIROUTE_PEER_STAMP_TOKEN` be van állítva), vagy közvetlen hívók esetén a valódi socketpartner. A `Host` /
-`nextUrl.hostname` értékét a rendszer soha nem veszi figyelembe, és az első jelszó beállítása
-(`POST /api/settings/require-login`) ugyanezen korlátozás alá esik, ahelyett, hogy minden
-hálózati partner számára nyitva állna (GHSA-7pq4-8pvv-rx7r). A `managementPolicy` explicit módon továbbadja a saját `peerContext` döntését,
-így azt soha nem az ORIGINAL (eltávolítás előtti) kérés fejlécei határozzák meg.
+A fenti szint csupán azt dönti el, hogy szükség van-e _valamilyen_ hitelesítő adatra. A tárolt hitelesítő adatokat letöltő útvonalak a kezelőben egy második ellenőrzést is végrehajtanak: a `GET /api/settings/export-json` (visszafejtett szolgáltatói kapcsolatok és nyers API-kulcsok), a `GET /api/db-backups/export` (az SQLite-fájl) és a `GET /api/db-backups/exportAll` (a teljes archívum) a `requireOperatorCredential()` függvényt hívja (`src/lib/api/operatorCredential.ts`). Ez elfogad egy irányítópult-munkamenetet, a helyi CLI-alanyt vagy egy kikapcsolt bejelentkezésű példányt, és `403`-as választ ad bármilyen hatókörű API-kulcsra (beleértve a `manage` és `admin` hatóköröket is), valamint az `oma_` hozzáférési tokenekre. A destruktív megfelelőik ugyanezt a határt tartják: a `POST /api/db-backups/import` (feltöltött `.sqlite`, beleértve a `dryRun=true` esetet is), a `POST /api/db-backups` (tárolt biztonsági mentés visszaállítása azonosító alapján) és a `POST /api/settings/import-json` (örökölt JSON-visszaállítás) lecseréli az élő adatbázist vagy a teljes beállítás-/kapcsolat-/API-kulcskészletet, így egy gépi hitelesítő adat ezeket sem indíthatja el. A visszaállítási pontok megsemmisítése szintén ezen a határon belül marad: a `DELETE /api/db-backups` (takarítás — a legutóbbi N megtartása / a D napnál régebbiek eldobása) és a `PATCH /api/db-backups` (megőrzési beállítások), mert a tárolt megőrzési szabály pontosan az, amit a `cleanupDbBackups()` minden automatikus biztonsági mentés után alkalmaz (`src/lib/db/backup.ts`), így egy gépi hitelesítő adat, amely elmenthetné a `keepLatest: 1` értéket, a következő pillanatfelvételnél mindent kitisztítana. A biztonsági mentések listázása és létrehozása (`GET`/`PUT /api/db-backups`) a szokásos felügyeleti hitelesítést őrzi. A szinkronizálási tokenek kiadása (`POST /api/sync/tokens`) ugyanazt a segédfüggvényt használja, kiegészülve a megbízható loopback belső-szolgáltatási tokennel.
+
+### A friss telepítés bootstrapje csak loopback felé elérhető — valós peer alapján, nem `Host` alapján
+
+Ha nincs beállítva felügyeleti jelszó (és nincs `INITIAL_PASSWORD`), az `isAuthRequired()` a `src/shared/utils/apiAuth.ts` fájlban **kizárólag a loopback-peerek számára** tartja nyitva az anonim bootstrapet. A loopback eldöntése a megbízható peer-jelzésekből történik, ebben a sorrendben: a tokennel bélyegzett valós TCP-peer (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, amit a policy lát), a pipeline saját `AUTHZ_HEADER_PEER_LOCALITY` megállapítása (amit az útvonalkezelők látnak, és amely csak addig megbízható, amíg az `OMNIROUTE_PEER_STAMP_TOKEN` be van állítva), vagy közvetlen hívók esetén egy valós socket-peer. A `Host` / `nextUrl.hostname` soha nem kerül figyelembevételre, és az első jelszó beállítása (`POST /api/settings/require-login`) ugyanezen korlátozás alatt áll, nem pedig minden hálózati peer számára nyitva (GHSA-7pq4-8pvv-rx7r). A `managementPolicy` explicit módon adja tovább a saját `peerContext`-megállapítását, így az EREDETI (a leválasztás előtti) kérés fejlécei sosem dönthetik el azt.
 
 ### 3. szint — MANAGEMENT (alapértelmezett)
 
-Minden egyéb kezelési útvonal. Hitelesítés szükséges, kivéve, ha a
-`requireLogin=false` van beállítva. A CLI-tokenek hitelesíthetik ezeket az útvonalakat (loopback + érvényes HMAC).
+Az összes többi felügyeleti útvonal. Hitelesítés szükséges, hacsak a `requireLogin=false` nincs beállítva. A CLI-tokenek képesek hitelesíteni ezeket az útvonalakat (loopback + érvényes HMAC).
 
 ## Kiértékelési sorrend
 

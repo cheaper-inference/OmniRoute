@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 function sectionRange(text, ver, nextVer) {
   const lines = text.split("\n");
@@ -46,7 +47,7 @@ export function syncChangelogSection(root, ver, nextVer) {
   return n;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   const [ver, nextVer] = process.argv.slice(2);
   if (!ver || !nextVer) {
     console.error("usage: sync-changelog-i18n.mjs <ver> <nextVer>");

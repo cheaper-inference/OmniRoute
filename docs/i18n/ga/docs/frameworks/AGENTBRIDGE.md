@@ -16,34 +16,34 @@ Is é AgentBridge seachfhreastalaí MITM (Man-in-the-Middle) OmniRoute a idirche
 
 ### Cad é AgentBridge?
 
-Nuair a dhéanann gníomhaire IDE (m.sh., GitHub Copilot, Cursor, Claude Code) glao API, nascann sé go díreach leis an soláthraí AI réamhtheachtach (OpenAI, Anthropic, srl.). Idircheapann AgentBridge an nasc sin go trédhearcach ag an leibhéal TLS — gan aon athrú cumraíochta ar an ngníomhaire a éileamh — agus athscríobhann sé an t-iarratas trí OmniRoute.
+Nuair a dhéanann gníomhaire IDE (m.sh., GitHub Copilot, Cursor, Claude Code) glaoch API, nascann sé go díreach leis an soláthraí AI in aghaidh an tsrutha (OpenAI, Anthropic, etc.). idircheapann AgentBridge an nasc sin go trédhearcach ag an leibhéal TLS - gan aon athrú ar chumraíocht an ghníomhaire a éileamh - agus athscríobhann sé an t-iarratas trí OmniRoute.
 
 Ciallaíonn sé seo gur féidir leat:
 
-- **Aon ghníomhaire a athródú chuig aon soláthraí**: Copilot ag cumarsáid le OpenAI? Atreoraigh é chuig Anthropic Claude, Gemini, nó aon cheann de 352 soláthraí OmniRoute.
-- **Mapálacha samhlacha a chur i bhfeidhm**: `gemini-3-flash` → `claude-sonnet-4.7` go trédhearcach ag leibhéal an láimhseálaí.
-- **Trácht uile na ngníomhairí a bhreathnú**: foilsítear gach iarratas idircheaptha sa [Chigire Tráchta](./TRAFFIC_INSPECTOR.md).
-- **Athléimneacht OmniRoute a chur i bhfeidhm**: oibríonn ródú teaglama, scoradáin chiorcaid, cúltacaí, agus rianú costas do thrácht gníomhairí IDE freisin.
+- **Déan gníomhaire ar bith a atreorú chuig aon soláthraí** : Copilot ag caint le OpenAI? Déan é a atreorú chuig Anthropic Claude, Gemini, nó chuig aon cheann de na 377 soláthraí OmniRoute.
+- **Cuir mapálacha samhlacha i bhfeidhm** : `gemini-3-flash` → `claude-sonnet-4.7` trédhearcach ag leibhéal an láimhseála.
+- **Breathnaigh ar gach trácht gníomhaire** : foilsítear gach iarratas idircheapadh don [Chigire Tráchta](./TRAFFIC_INSPECTOR.md).
+- **Cuir athléimneacht OmniRoute i bhfeidhm** : ródú teaglama, scoradáin chiorcaid, fallbacks, agus obair rianaithe costais do thrácht gníomhaire IDE freisin.
 
-### Suíomh sa mhargadh
+### Suíomh vs an margadh
 
-| Gné                        | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| -------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot             |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                 |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex               |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                 |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries             |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                |    —    |    —     |        ✓        |             ✓             |
-| Open Code                  |    —    |    —     |        ✓        |             ✓             |
-| Trae                       |    —    |    —     |        —        |      🔍 Faoi fhiosrú      |
-| Comhéadan deaise           |    ✓    |    ✗     |        ✗        |             ✓             |
-| Cigire Tráchta             |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ródú OmniRoute             |    ✗    |    ✗     |        ✗        |             ✓             |
-| Comhéadan mapála samhlacha |    ✗    |    ✗     |        ✗        |             ✓             |
-| Liosta seachanta           |    ✗    |    ✗     |        ✓        |             ✓             |
-| Teastas CA réamhtheachtach |    ✗    |    ✗     |        ✓        |             ✓             |
+| Gné                           | 9 ródaire | frith-api | llm-idircheapóir | **OmniRoute AgentBridge** |
+| ----------------------------- | :-------: | :-------: | :--------------: | :-----------------------: |
+| Antigravity                   |     ✓     |     ✓     |        —         |             ✓             |
+| GitHub Copilot                |     ✓     |     ✓     |        —         |             ✓             |
+| Kiro (AWS)                    |     ✓     |     ✓     |        —         |             ✓             |
+| OpenAI Codex                  |     —     |     ✓     |        —         |             ✓             |
+| Cursor IDE                    |     ✓     |     ✓     |        —         |             ✓             |
+| Tionscail Zed                 |     —     |     ✓     |        —         |             ✓             |
+| Cód Claude                    |     —     |     —     |        ✓         |             ✓             |
+| Cód Oscailte                  |     —     |     —     |        ✓         |             ✓             |
+| Trae                          |     —     |     —     |        —         |        🔍 Imscrúdú        |
+| Deais UI                      |     ✓     |     ✗     |        ✗         |             ✓             |
+| Cigire Tráchta                |     ✗     |     ✗     |        ✓         |             ✓             |
+| ródú OmniRoute                |     ✗     |     ✗     |        ✗         |             ✓             |
+| Samhail léarscáiliú UI        |     ✗     |     ✗     |        ✗         |             ✓             |
+| Liosta seachbhóthar           |     ✗     |     ✗     |        ✓         |             ✓             |
+| In aghaidh srutha CA deimhniú |     ✗     |     ✗     |        ✓         |             ✓             |
 
 ---
 
@@ -185,22 +185,22 @@ an liosta comhroinnte séanta hop-ar-hop/frámála (lena n-áirítear fíordheim
 
 ## §3 Socrú
 
-### 3.1 Freastalaí MITM a thosú/a stopadh
+### 3.1 Tosaigh/stop an freastalaí MITM
 
 Úsáid Cárta Freastalaí AgentBridge ag `/dashboard/tools/agent-bridge`:
 
-| Gníomh                 | Cur síos                                                                                           |
-| ---------------------- | -------------------------------------------------------------------------------------------------- |
-| Tosaigh an Freastalaí  | Seolann sé `src/mitm/server.cjs` ar phort 443                                                      |
-| Stop an Freastalaí     | Múchann sé an próiseas mac go slachtmhar                                                           |
-| Atosaigh an Freastalaí | Stopadh + tosú (cuirtear athruithe sprice i bhfeidhm)                                              |
-| Cuir Muinín sa Teastas | Suiteálann sé `DATA_DIR/mitm/ca.crt` i stór muiníne an OS                                          |
-| Íoslódáil an Teastas   | Íoslódálann sé `ca.crt` lena shuiteáil de láimh                                                    |
-| Athghin an Teastas     | Cruthaíonn sé eochairphéire CA nua (neamhbhailítear gach teastas reatha in aghaidh an ghníomhaire) |
+| Gníomh                 | Cur síos                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tosaigh an Freastalaí  | Seolann sé `src/mitm/server.cjs` ar phort 443. Faoi shamhail an CA fréimhe, cruthaíonn sé `ca.crt` ar an gcéad tosú agus cuireann sé muinín sa teastas gníomhach nuair atá focal faire sudo ar fáil                                                                                                                                                                                                                                                  |
+| Stop an Freastalaí     | Múchann sé an próiseas mac go rianúil                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Atosaigh an Freastalaí | Stop + tosú (cuireann sé athruithe sprice agus teastas athghinte i bhfeidhm)                                                                                                                                                                                                                                                                                                                                                                         |
+| Cuir Muinín sa Teastas | Suiteálann sé an teastas gníomhach i stór muiníne an OS: `DATA_DIR/mitm/ca.crt` faoi shamhail an CA fréimhe, `DATA_DIR/mitm/server.crt` ar shuiteáil oidhreachta duille                                                                                                                                                                                                                                                                              |
+| Íoslódáil an Teastas   | Íoslódálann sé an teastas gníomhach lena shuiteáil de láimh (`omniroute-mitm-ca.crt` = `ca.crt`, nó `omniroute-mitm.crt` = `server.crt` ar shuiteáil oidhreachta duille)                                                                                                                                                                                                                                                                             |
+| Athghin an Teastas     | Ní athraíonn sé samhail an teastais choíche. Suiteáil oidhreachta duille: gineann sé `server.crt`/`server.key` nua (atosaigh an freastalaí chun é a dháileadh). Samhail an CA fréimhe: rothlaíonn sé `ca.crt`/`ca.key`, agus diúltaítear dó agus an freastalaí ar siúl; baintear muinín as sean-CA iontaofa ar dtús (teastaíonn an focal faire sudo), nó cuirtear an rothlú ar ceal. Ní mór do chliaint muinín a chur sa CA nua arís ina dhiaidh sin |
 
-### 3.2 Muinín a chur sa teastas
+### 3.2 Cuir muinín sa teastas
 
-Ní mór d'fheidhmchóras an teastas CA AgentBridge a bheith iontaofa sula nglacfaidh IDEanna leis an nasc MITM.
+Ní mór don OS muinín a bheith aige i dteastas CA AgentBridge sula nglacfaidh IDEanna leis an gceangal MITM.
 
 **Linux (NSS — Chrome/Firefox):**
 
@@ -221,38 +221,36 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-Nó úsáid an cnaipe "Cuir Muinín sa Teastas" sa deais (ritheann sé an t-ordú cuí do d'OS, le leid sudo más gá).
+Nó úsáid an cnaipe "Cuir Muinín sa Teastas" sa deais (ritheann sé an t-ordú cuí do do OS, le leid sudo más gá).
 
 #### Déanann IDEanna atá bunaithe ar Electron neamhaird de stór muiníne an OS (`NODE_EXTRA_CA_CERTS`)
 
 Cuimsíonn roinnt IDEanna — go háirithe **Antigravity IDE**, agus aipeanna eile atá díorthaithe ó Electron / VS Code —
-a dtimpeallacht rite Node.js féin nach **seiceálann stór muiníne an OS** le haghaidh
-`fetch`/HTTPS amach. Is leor muinín a chur sa CA ar leibhéal an OS/NSS do **chúl-inneall** dúchasach an IDE
-(m.sh. freastalaí teanga Go, a úsáideann beart CA an OS), ach teipfidh TLS fós sa
-**chomhéadan Electron** — feictear é seo mar an aip a bheith _logáilte amach_ nó mar
-_"earráid naisc"_ fiú agus a léiríonn loga MITM go bhfuil `200` á thabhairt ar ais ag glaonna
-tosaithe an chúl-innill. Tá dhá chéim riachtanach, agus tá an dá cheann tábhachtach:
+a dtimpeallacht rite Node.js féin nach **dtéann i gcomhairle le stór muiníne an OS** le haghaidh
+`fetch`/HTTPS amach. Is leor muinín sa CA ag leibhéal an OS/NSS do **chúl-inneall** dúchasach an IDE
+(m.sh. freastalaí teanga Go, a úsáideann beart CA an OS), ach teipfidh TLS fós sa **chomhéadan Electron** —
+léirítear é sin mar an aip a bheith _logáilte amach_ nó ag taispeáint _"earráid cheangail"_
+cé go léiríonn an loga MITM go bhfuil glaonna tosaithe an chúl-innill ag filleadh `200`. Tá dhá chéim
+riachtanach, agus tá an dá cheann tábhachtach:
 
-1. Dírigh an timpeallacht rite ar an CA go sainráite:
+1. Cuir an timpeallacht rite i dtreo an CA go sainráite:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
 2. **Seol an IDE ón mblaosc sin.** Má thosaítear é ón deilbhín deisce / Dock / roghchlár Start,
-   ní bhfaighidh sé na heaspórtálacha blaosca mar oidhreacht, agus ní chuirtear `~/.config/environment.d/*.conf`
-   i bhfeidhm ach amháin tar éis logáil isteach ghrafach úr. Scoir den IDE go hiomlán ar dtús — ciallaíonn
-   glas aonáis Electron nach ndéanann an dara seoladh ach an próiseas reatha a thabhairt chun tosaigh agus
-   déantar neamhaird den timpeallacht nua.
+   ní fhaigheann sé easpórtálacha na blaosca mar oidhreacht, agus ní bhíonn feidhm ag `~/.config/environment.d/*.conf` ach amháin tar éis
+   logáil isteach ghrafach úr. Scoir den IDE go hiomlán ar dtús — ciallaíonn glas aonáis Electron nach ndéanann an dara
+   seoladh ach an próiseas atá ann cheana a chur i bhfócas agus déantar neamhaird den timpeallacht nua.
 
-Tá an chéim muiníne OS + NSS thuas riachtanach fós (léann cruach líonra Chromium a úsáideann roinnt sreafaí
-fíordheimhnithe an stór NSS in aghaidh an úsáideora, agus tá pionnaí statacha dá chuid féin aige do
-`*.googleapis.com` a sháraíonn CA a bhfuil muinín áitiúil ann as). Clúdaíonn `NODE_EXTRA_CA_CERTS`
-cosán `fetch` Node sa bhreis air sin.
+Tá céim muiníne an OS + NSS thuas fós riachtanach (léann cruach líonra Chromium a úsáideann roinnt sreafaí
+fíordheimhnithe an stór NSS in aghaidh an úsáideora, agus tá pionnaí statacha dá chuid féin aige do `*.googleapis.com` a
+sháraíonn CA a bhfuil muinín áitiúil ann as). Clúdaíonn `NODE_EXTRA_CA_CERTS` cosán `fetch` Node sa bhreis air sin.
 
 ### 3.3 Ródú DNS
 
-I gcás gach gníomhaire is mian leat a idircheapadh, ní mór dá óstach API nó dá óstaigh API réiteach go `127.0.0.1`. Bainistíonn AgentBridge iontrálacha `/etc/hosts` go huathoibríoch nuair a scoránaíonn tú DNS do ghníomhaire sa Draoi Socraithe.
+I gcás gach gníomhaire is mian leat a idircheapadh, ní mór dá óstach(aí) API réiteach go `127.0.0.1`. Bainistíonn AgentBridge iontrálacha `/etc/hosts` go huathoibríoch nuair a scoránaíonn tú DNS do ghníomhaire sa Treoraí Socraithe.
 
-Samplaí d'iontrálacha `/etc/hosts` do GitHub Copilot:
+Sampla d’iontrálacha `/etc/hosts` do GitHub Copilot:
 
 ```
 127.0.0.1 api.githubcopilot.com
@@ -263,63 +261,72 @@ Samplaí d'iontrálacha `/etc/hosts` do GitHub Copilot:
 
 Úsáid an Tábla Mapála Samhlacha i ngach cárta gníomhaire chun mapálacha foinse → sprioc a shainiú:
 
-| Samhail foinse (dúchasach don ghníomhaire) | Samhail sprice (OmniRoute) |
-| ------------------------------------------ | -------------------------- |
-| `gpt-4o`                                   | `claude-sonnet-4.7`        |
-| `*` (saoróg)                               | `claude-haiku-4.7`         |
+| Samhail foinseach (dúchasach don ghníomhaire) | Samhail sprice (OmniRoute) |
+| --------------------------------------------- | -------------------------- |
+| `gpt-4o`                                      | `claude-sonnet-4.7`        |
+| `*` (saoróg)                                  | `claude-haiku-4.7`         |
 
 Mapálann an tsaoróg `*` aon samhail neamhaitheanta chuig an sprioc shonraithe. Coinnítear í sa tábla `agent_bridge_mappings`.
 
-> **Leid — aimsigh fíor-IDanna samhlacha an ghníomhaire.** Féadfaidh IDE ainmneacha samhlacha a sheoladh atá éagsúil
-> óna lipéid chomhéadain agus a athraíonn idir mórleaganacha. Mar shampla, seolann **Antigravity 2**
+> **Leid — aimsigh fíoraitheantais samhlacha an ghníomhaire.** Féadfaidh IDE ainmneacha samhlacha a sheoladh atá éagsúil ó
+> na lipéid ina chomhéadan úsáideora agus a athraíonn idir mórleaganacha. Mar shampla, seolann **Antigravity 2**
 > `gemini-3.1-pro-low`, `gemini-pro-agent`, agus `gemini-3.1-flash-lite` thar an nasc — ní hé
-> `gemini-2.5-pro` a thaispeántar i ndoiciméid níos sine. Seol comhrá amháin gan aon mhapáil mheaitseála i bhfeidhm:
-> logálann MITM an `model:` isteach cruinn agus ligeann sé don iarratas dul tríd. Mapáil an luach litriúil sin,
-> agus ansin déantar an chéad iarratas eile a idircheapadh agus a ródú chuig do sprioc.
+> `gemini-2.5-pro` a thaispeántar i ndoiciméid níos sine. Seol comhrá amháin gan aon mhapáil chomhoiriúnach i bhfeidhm: logálann an MITM
+> an `model:` beacht a thagann isteach agus ligeann sé don iarratas dul ar aghaidh. Mapáil an luach litriúil sin, agus ansin
+> idircheapfar an chéad iarratas eile agus seolfar é chuig do sprioc.
 
 ### 3.5 Fógra riosca
 
-Idircheapann AgentBridge na dintiúir (comharthaí OAuth, eochracha API) a úsáideann an IDE chun fíordheimhniú le soláthraithe réamhtheachtacha. Déantar iad seo a **mhascadh roimh logáil** (féach §2.7), ach tá siad infheicthe ag ciseal MITM OmniRoute. Taispeántar dialóg mhódúil fógra riosca is féidir a dhúnadh nuair a ghníomhachtaítear gach gníomhaire den chéad uair.
+Idircheapann AgentBridge dintiúir (comharthaí OAuth, eochracha API) a úsáideann an IDE chun fíordheimhniú a dhéanamh le soláthraithe réamhtheachtacha. Déantar iad seo a **mhascadh roimh logáil** (féach §2.7), ach tá siad infheicthe ag ciseal MITM OmniRoute. Nuair a ghníomhachtaítear gach gníomhaire den chéad uair, taispeántar módúil fógra riosca is féidir a dhúnadh.
 
 ### 3.6 Cothabháil & Diagnóisic
 
-Cuireann an deais cárta **Cothabháil & Diagnóisic** (`AgentBridgeMaintenanceCard`, in `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) ar fáil, a nochtann bealaí oibríochtúla MITM nach raibh aon chomhéadan úsáideora acu roimhe seo. A fhotheideal: _"Déan féintástáil ar an bpíblíne gabhála, cealaigh staid chórais atá fágtha, agus bog do shocrú idir meaisíní."_ Tá cúntóirí cliaint an chárta in `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+Nochtann an deais cárta **Cothabháil & Diagnóisic** (`AgentBridgeMaintenanceCard`, in `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) a chuireann bealaí oibríochtúla MITM ar fáil nach raibh aon chomhéadan úsáideora acu roimhe seo. A fhotheideal: _"Déan féintástáil ar an bpíblíne gabhála, cealaigh staid chórais atá fágtha, agus bog do chumraíocht idir meaisíní."_ Tá cúntóirí cliaint an chárta in `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| Cnaipe                    | Bealach                                | A dhéanann sé                                                                                                                                                                                                                                 |
-| ------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Diagnóisigh**           | `GET /api/tools/agent-bridge/diagnose` | Ritheann sé féintástáil na píblíne gabhála agus taispeánann sé tuairisc do gach seiceáil (✓/✗ + leid leasúcháin).                                                                                                                             |
-| **Deisigh**               | `POST /api/tools/agent-bridge/repair`  | Cealaíonn sé staid dhílleachtach MITM sa chóras (iontrálacha bréagaithe DNS, CA fréimhe, seachfhreastalaí córais) a fágadh tar éis tuairteála nó SIGKILL. Idéimpitéinseach — tuairiscíonn sé "Níl aon rud le deisiú" nuair atá an staid glan. |
-| **Bain CA**               | `DELETE /api/tools/agent-bridge/cert`  | Dí-iontaobhaíonn sé agus baineann sé CA fréimhe MITM as stór iontaoibhe an OS (sainráite, idéimpitéinseach). Ní thaispeántar é ach nuair atá muinín as an CA faoi láthair; teastaíonn deimhniú inlíne "Bain CA?" uaidh.                       |
-| **Easpórtáil cumraíocht** | `GET /api/tools/agent-bridge/config`   | Íoslódálann sé JSON na cumraíochta iniompartha (féach §3.7).                                                                                                                                                                                  |
-| **Iompórtáil cumraíocht** | `POST /api/tools/agent-bridge/config`  | Uaslódálann sé JSON cumraíochta a easpórtáladh roimhe seo (féach §3.7).                                                                                                                                                                       |
+| Cnaipe                    | Bealach                                | An méid a dhéanann sé                                                                                                                                                                                                                 |
+| ------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Diagnóisigh**           | `GET /api/tools/agent-bridge/diagnose` | Ritheann sé féintástáil na píblíne gabhála agus taispeánann sé tuairisc do gach seiceáil (✓/✗ + leid feabhsúcháin).                                                                                                                   |
+| **Deisigh**               | `POST /api/tools/agent-bridge/repair`  | Cealaíonn sé staid chórais MITM dhílleachta (iontrálacha bréagaithe DNS, fréamh-ÚD, seachfhreastalaí córais) a fágadh tar éis tuairte nó SIGKILL. Idéimpitéinseach — tuairiscíonn sé "Níl aon rud le deisiú" nuair atá an staid glan. |
+| **Bain an ÚD**            | `DELETE /api/tools/agent-bridge/cert`  | Aisghaireann sé muinín as fréamh-ÚD MITM agus baineann sé í as stór muiníne an OS (follasach, idéimpitéinseach). Ní thaispeántar é ach nuair atá muinín as an ÚD faoi láthair; teastaíonn deimhniú inlíne "Bain an ÚD?" uaidh.        |
+| **Easpórtáil cumraíocht** | `GET /api/tools/agent-bridge/config`   | Íoslódálann sé JSON na cumraíochta iniompartha (féach §3.7).                                                                                                                                                                          |
+| **Iompórtáil cumraíocht** | `POST /api/tools/agent-bridge/config`  | Uaslódálann sé JSON cumraíochta a easpórtáladh roimhe seo (féach §3.7).                                                                                                                                                               |
 
-**Seiceálacha diagnóiseacha** (`summarizeDiagnostics()` in `src/mitm/inspector/diagnostics.ts`). Ritheann an bealach an tóireadóir éifeachtach do gach ceann acu agus cuireann sé na luachanna Boole isteach san achoimreoir íon; seoltar ar ais breith aonair `healthy` mar aon le leid do gach teip:
+Tá a chnaipe **Athchóirigh an réamhshocrú** féin ag gach cárta gníomhaire freisin (`POST
+/api/tools/agent-bridge/agents/{id}/reset`) — cealú aonchliceáil do gach gníomhaire a bhaineann bréagú ó óstaigh an
+ghníomhaire sin amháin, a ghlanann a mhapálacha samhlacha sábháilte, agus a athshocraíonn a staid `dns_enabled`/`setup_completed`,
+ionas go labhróidh an IDE leis an bhfíorsholáthraí réamhtheachtach arís tar éis dó atosú go hiomlán. **Ní bhaineann** sé don
+fhreastalaí comhroinnte MITM ná don fhréamh-ÚD (d’fhéadfadh gníomhairí eile a bheith ag brath orthu fós) — fanann siad sin inrochtana
+trí Chárta an Fhreastalaí agus an gníomh **Bain an ÚD** thuas. Ar Windows, déanann sé iarracht freisin
+`ipconfig /flushdns` a rith, ós rud é go gcuireann Cliant DNS Windows iontrálacha an chomhaid hosts i dtaisce agus nach mbainfidh sé
+bréagú atá díreach bainte murach sin.
 
-| Ainm na seiceála   | A bhfíoraíonn sé                                                | Leid ar theip                                                                                                                                                                                 |
-| ------------------ | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | Tá próiseas an fhreastalaí MITM gníomhach                       | "Níl an freastalaí MITM ag rith. Tosaigh é ón gcluaisín AgentBridge."                                                                                                                         |
-| `server-reachable` | Glacann an freastalaí MITM le naisc ar a phort (tóireadóir TCP) | "Níl an freastalaí MITM ag glacadh le naisc ar a phort. Seiceáil go bhfuil an port saor agus go bhfuil pribhléidí agat chun ceangal leis."                                                    |
-| `cert-exists`      | Gineadh an teastas MITM ar an diosca                            | "Níor gineadh aon teastas MITM fós. Gin ceann ón gcluaisín AgentBridge."                                                                                                                      |
-| `cert-trusted`     | Tá CA fréimhe MITM i stór iontaoibhe an OS                      | "Níl muinín ag stór an OS as CA fréimhe MITM, mar sin teipfidh ar idircheapadh TLS. Cuir muinín sa teastas ón gcluaisín AgentBridge."                                                         |
-| `dns-configured`   | Tá óstainmneacha sprice bréagaithe in `/etc/hosts`              | "Níl óstainmneacha sprice bréagaithe in /etc/hosts, mar sin ní shroicheann an trácht an seachfhreastalaí choíche. Cumasaigh DNS don ghníomhaire nó do na gníomhairí is mian leat a ghabháil." |
+**Seiceálacha diagnóisice** (`summarizeDiagnostics()` in `src/mitm/inspector/diagnostics.ts`). Ritheann an bealach an tóireadóir éifeachtach do gach ceann acu agus cuireann sé na luachanna Boole isteach san achoimreoir íon; seoltar ar ais breithiúnas aonair `healthy` mar aon le leid do gach teip:
 
-**Meirge staide dílleachtaí:** nuair a bhraitheann an leathanach staid a fágadh tar éis tuairteála (bréagadh DNS / CA / seachfhreastalaí córais), taispeánann an cárta meirge ómra — _"D’fhág seisiún roimhe seo staid chórais ina dhiaidh (bréagadh DNS, CA, nó seachfhreastalaí córais). Rith Deisigh chun í a ghlanadh."_ — agus aibhsíonn sé an cnaipe **Deisigh**. Is é `Repair` analóg chiseal feidhmchláir bhratach `--cleanup` ProxyBridge (tarmligeann sé chuig `repairMitm()` in `src/mitm/manager.ts`).
+| Ainm na seiceála   | An méid a fhíoraíonn sé                                         | Leid i gcás teipe                                                                                                                                                                 |
+| ------------------ | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | Tá próiseas an fhreastalaí MITM gníomhach                       | "Níl an freastalaí MITM ag rith. Tosaigh é ó chluaisín AgentBridge."                                                                                                              |
+| `server-reachable` | Glacann an freastalaí MITM le naisc ar a phort (tóireadóir TCP) | "Níl an freastalaí MITM ag glacadh le naisc ar a phort. Seiceáil go bhfuil an port saor agus go bhfuil pribhléidí agat chun ceangal leis."                                        |
+| `cert-exists`      | Gineadh an teastas MITM ar an diosca                            | "Níor gineadh aon teastas MITM fós. Gin ceann ó chluaisín AgentBridge."                                                                                                           |
+| `cert-trusted`     | Tá fréamh-ÚD MITM i stór muiníne an OS                          | "Níl muinín ag stór an OS as fréamh-ÚD MITM, mar sin teipfidh ar idircheapadh TLS. Cuir muinín sa teastas ó chluaisín AgentBridge."                                               |
+| `dns-configured`   | Tá na hainmneacha óstacha sprice bréagaithe in `/etc/hosts`     | "Níl na hainmneacha óstacha sprice bréagaithe in /etc/hosts, mar sin ní shroicheann an trácht an seachfhreastalaí riamh. Cumasaigh DNS do na gníomhairí is mian leat a ghabháil." |
 
-> Coinnítear CA fréimhe MITM suiteáilte idir stopadh agus tosú chun leideanna sudo
-> athfhillteacha a sheachaint (an t-iompar céanna le mitmproxy/Charles), mar sin is gníomh sainráite
+**Meirge staide dílleachtaí:** nuair a bhraitheann an leathanach staid a fágadh tar éis tuairte (bréagú DNS / ÚD / seachfhreastalaí córais), taispeánann an cárta meirge ómra — _"D’fhág seisiún roimhe seo staid chórais ina dhiaidh (bréagú DNS, ÚD, nó seachfhreastalaí córais). Rith Deisigh chun í a ghlanadh."_ — agus aibhsíonn sé an cnaipe **Deisigh**. Is é `Repair` an macasamhail ag ciseal an fheidhmchláir de bhratach `--cleanup` ProxyBridge (tarmligeann sé chuig `repairMitm()` in `src/mitm/manager.ts`).
+
+> Coinnítear fréamh-CA MITM suiteáilte idir stopadh/tosú chun leideanna `sudo`
+> arís agus arís eile a sheachaint (an t-iompar céanna le mitmproxy/Charles), mar sin is gníomh sainráite
 > **Bain CA** é a bhaint seachas rud a tharlaíonn go huathoibríoch nuair a stoptar é.
 
 ### 3.7 Iompórtáil/easpórtáil cumraíochta iniompartha
 
-Is féidir le AgentBridge an staid **is féidir leis an oibreoir a choigeartú** a shraithiú ina bhlob JSON le leagan, ionas gur féidir socrú a mhacasamhlú thar mheaisíní éagsúla. Is é `src/lib/inspector/configPortability.ts` an sraitheoir (`exportConfig()` / `importConfig()`), arna bhailíochtú ag `AgentBridgeConfigSchema`.
+Is féidir le AgentBridge an staid atá **intiúnáilte ag an oibreoir** a shrathú ina bhlob JSON le leagan ionas gur féidir socrú a mhacasamhlú ar mheaisíní éagsúla. Is é `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`) an srathóir, arna bhailíochtú ag `AgentBridgeConfigSchema`.
 
-Cuimsíonn an t-easpórtáil trí phíosa go díreach (ní easpórtáiltear na réamhshocruithe ionsuite d’aon ghnó, ionas nach ndéanfaidh iompórtáil iad a dhúbailt ná teacht salach orthu choíche):
+Cuimsíonn an t-easpórtáil trí chuid go díreach (ní easpórtáiltear na réamhshocruithe ionsuite **AR CHOR AR BITH** d'aon ghnó, ionas nach ndéanfar iad a dhúbláil ná nach mbeidh siad i gcoimhlint leis an iompórtáil riamh):
 
-| Réimse           | Foinse                                                                    | Nótaí                                                                            |
-| ---------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `bypassPatterns` | patrúin seachghabhála arna sainiú ag an úsáideoir (`agent_bridge_bypass`) | fágtar na patrúin réamhshocraithe bainc/rialtais/okta as an áireamh              |
-| `customHosts`    | óstaigh shaincheaptha Traffic Inspector (`inspector_custom_hosts`)        | gach ceann: `{ host, kind: "llm"\|"app"\|"custom", label? }`                     |
-| `agentMappings`  | mapálacha samhlacha de réir gníomhaire (`agent_bridge_mappings`)          | `{ [agentId]: [{ source, target }] }` do gach gníomhaire a bhfuil mapálacha aige |
+| Réimse           | Foinse                                                                      | Nótaí                                                                            |
+| ---------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `bypassPatterns` | patrúin sheachbhóthair atá sainithe ag an úsáideoir (`agent_bridge_bypass`) | fágtar patrúin réamhshocraithe bainc/rialtais/okta as an áireamh                 |
+| `customHosts`    | óstaigh shaincheaptha an Chigire Tráchta (`inspector_custom_hosts`)         | gach ceann: `{ host, kind: "llm"\|"app"\|"custom", label? }`                     |
+| `agentMappings`  | mapálacha samhlacha de réir gníomhaire (`agent_bridge_mappings`)            | `{ [agentId]: [{ source, target }] }` do gach gníomhaire a bhfuil mapálacha aige |
 
 ```jsonc
 // GET /api/tools/agent-bridge/config
@@ -333,13 +340,13 @@ Cuimsíonn an t-easpórtáil trí phíosa go díreach (ní easpórtáiltear na r
 }
 ```
 
-**Iompar iompórtála** (`POST /api/tools/agent-bridge/config`): cuirtear patrúin seachghabhála agus mapálacha de réir gníomhaire in ionad a chéile **go hiomlán**; cuirtear óstaigh shaincheaptha leis **go hidéimpitéinseach** (`INSERT OR IGNORE`). Tuairiscíonn an freagra cé mhéad de gach ceann a cuireadh i bhfeidhm:
+**Iompar iompórtála** (`POST /api/tools/agent-bridge/config`): cuirtear na patrúin sheachbhóthair agus na mapálacha de réir gníomhaire **in ionad a chéile go hiomlán**; cuirtear óstaigh shaincheaptha leis **go hidéimpitéinseach** (`INSERT OR IGNORE`). Tuairiscítear sa fhreagra cé mhéad de gach ceann a cuireadh i bhfeidhm:
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Cad é nach bhfuil sa chumraíocht: staid reatha an fhreastalaí, conairí teastais, staid DNS gach gníomhaire, conair an CA réamhtheachtaigh, ná socruithe TPROXY — is staid óstaigh/ama rite iad sin, ní sainroghanna iniompartha.
+Na rudaí **NACH BHFUIL** sa chumraíocht: staid reatha an fhreastalaí, conairí teastais, staid DNS de réir gníomhaire, conair an CA réamhtheachtaigh, agus socruithe TPROXY — is staid óstaigh/am rite iad sin, ní sainroghanna iniompartha.
 
 ---
 
@@ -499,39 +506,40 @@ Má dhéanann AgentBridge idircheapadh ach má theipeann ar gach iarratas:
 
 ## §7 Tagairt API
 
-Tá gach róta `LOCAL_ONLY` (aislúb amháin, curtha i bhfeidhm roimh fhíordheimhniú) agus `SPAWN_CAPABLE`. Féach `src/server/authz/routeGuard.ts`.
+Tá gach bealach `LOCAL_ONLY` (aischúrsach amháin, curtha i bhfeidhm roimh fhíordheimhniú) agus `SPAWN_CAPABLE`. Féach `src/server/authz/routeGuard.ts`.
 
 Bunchonair: `/api/tools/agent-bridge/`
 
-| Modh                | Conair                                         | Cur síos                                                                                                                             |
-| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| GET                 | `/api/tools/agent-bridge/state`                | Staid fhoriomlán an fhreastalaí + brath/stádas de réir gníomhaire                                                                    |
-| GET                 | `/api/tools/agent-bridge/agents`               | Liostaigh gníomhairí cláraithe (id, ainm, óstaigh, inmharthanacht, staid)                                                            |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Staid gníomhaire amháin (cumraíocht sprice + brath + staid stóráilte)                                                                |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Nuashonraigh `setup_completed` don ghníomhaire                                                                                       |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Rith tóireadóir braite don ghníomhaire (`installed`, `version?`, `path?`)                                                            |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Cumasaigh/díchumasaigh DNS don ghníomhaire (`{enabled: boolean}`)                                                                    |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Mapálacha samhlacha don ghníomhaire                                                                                                  |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Ionadaigh mapálacha samhlacha                                                                                                        |
-| POST                | `/api/tools/agent-bridge/server`               | Tosaigh/stop/atosaigh an freastalaí (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                          |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Stádas an teastais (`exists`, `trusted`, `path`)                                                                                     |
-| POST                | `/api/tools/agent-bridge/cert`                 | Cuir muinín in (suiteáil) an CA fréimhe MITM                                                                                         |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | Bain muinín as (bain) an CA fréimhe MITM — idémpótach (féach §3.6)                                                                   |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Athghin an teastas MITM féinsínithe                                                                                                  |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | Sruthaigh an teastas PEM lena íoslódáil                                                                                              |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Liostaigh patrúin seachanta (`default` + `user`)                                                                                     |
-| POST                | `/api/tools/agent-bridge/bypass`               | Ionadaigh na patrúin seachanta atá sainithe ag an úsáideoir ina n-iomláine                                                           |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Bain patrún seachanta amháin atá sainithe ag an úsáideoir                                                                            |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Féintástáil na píblíne gabhála (féach §3.6)                                                                                          |
-| POST                | `/api/tools/agent-bridge/repair`               | Cealaigh staid chórais MITM dílleachtach (féach §3.6)                                                                                |
-| GET                 | `/api/tools/agent-bridge/config`               | Easpórtáil JSON cumraíochta iniompartha (féach §3.7)                                                                                 |
-| POST                | `/api/tools/agent-bridge/config`               | Iompórtáil JSON cumraíochta iniompartha (féach §3.7)                                                                                 |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Faigh conair chumraithe an CA réamhtheachtaigh                                                                                       |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Bailíochtaigh + buanaigh conair an CA réamhtheachtaigh                                                                               |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Bailíochtaigh amháin (triail thirim) conair CA réamhtheachtaigh — ní bhuanaítear í                                                   |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Mód gabhála trédhearcach-díchriptithe TPROXY — féach `docs/security/MITM-TPROXY-DECRYPT.md` (git; ní thiomsaítear isteach i `/docs`) |
+| Modh                | Conair                                         | Cur síos                                                                                                                                             |
+| ------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | Staid dhomhanda an fhreastalaí + brath/stádas de réir gníomhaire                                                                                     |
+| GET                 | `/api/tools/agent-bridge/agents`               | Liostaigh gníomhairí cláraithe (id, name, hosts, viability, state)                                                                                   |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Staid gníomhaire amháin (cumraíocht sprice + brath + staid stóráilte)                                                                                |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Nuashonraigh `setup_completed` don ghníomhaire                                                                                                       |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Rith tóireadóir braite don ghníomhaire (`installed`, `version?`, `path?`)                                                                            |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Cumasaigh/díchumasaigh DNS don ghníomhaire (`{enabled: boolean}`)                                                                                    |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Mapálacha samhlacha don ghníomhaire                                                                                                                  |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Ionadaigh mapálacha samhlacha                                                                                                                        |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Athchóirigh an réamhshocrú: cealaigh bréagriocht DNS an ghníomhaire seo, glan a mhapálacha, athshocraigh a staid (féach §3.6)                        |
+| POST                | `/api/tools/agent-bridge/server`               | Tosaigh/stop/atosaigh an freastalaí (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                          |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Stádas an teastais (`exists`, `trusted`, `path`)                                                                                                     |
+| POST                | `/api/tools/agent-bridge/cert`                 | Cuir muinín san údarás deimhniúcháin fréimhe MITM (suiteáil é)                                                                                       |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | Bain muinín den údarás deimhniúcháin fréimhe MITM (bain é) — idé-eimpiteant (féach §3.6)                                                             |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Athghin an teastas gníomhach gan samhail an teastais a athrú (seanduilleog, nó rothlú údaráis deimhniúcháin fréimhe — féach §3.1)                    |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Sruthaigh an teastas gníomhach PEM lena íoslódáil (`ca.crt` faoin tsamhail údaráis deimhniúcháin fréimhe, `server.crt` ar shuiteáil seanduilleogach) |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Liostaigh patrúin seachanta (`default` + `user`)                                                                                                     |
+| POST                | `/api/tools/agent-bridge/bypass`               | Ionadaigh na patrúin seachanta atá sainithe ag an úsáideoir ina n-iomláine                                                                           |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Bain patrún seachanta aonair atá sainithe ag an úsáideoir                                                                                            |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Féintástáil na píblíne gabhála (féach §3.6)                                                                                                          |
+| POST                | `/api/tools/agent-bridge/repair`               | Cealaigh staid chórais MITM atá dílleachta (féach §3.6)                                                                                              |
+| GET                 | `/api/tools/agent-bridge/config`               | Easpórtáil JSON cumraíochta iniompartha (féach §3.7)                                                                                                 |
+| POST                | `/api/tools/agent-bridge/config`               | Iompórtáil JSON cumraíochta iniompartha (féach §3.7)                                                                                                 |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Faigh conair chumraithe an údaráis deimhniúcháin réamhtheachtaigh                                                                                    |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Bailíochtaigh + buanaigh conair an údaráis deimhniúcháin réamhtheachtaigh                                                                            |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Bailíochtaigh conair údaráis deimhniúcháin réamhtheachtaigh amháin (triail thirim) — ní bhuanaítear í                                                |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Mód gabhála trédhearcach-díchriptithe TPROXY — féach `docs/security/MITM-TPROXY-DECRYPT.md` (git; níl sé tiomsaithe isteach in `/docs`)              |
 
-Scéimre iomlána OpenAPI: `docs/openapi.yaml` → clib `AgentBridge`.
+Scéimeanna iomlána OpenAPI: `docs/openapi.yaml` → clib `AgentBridge`.
 
 ---
 

@@ -78,5 +78,8 @@ export function useResizablePanels(): [ResizablePanelsState, ResizablePanelsActi
 
   const effectiveWidth = collapsed ? COLLAPSED_RAIL : listWidth;
 
-  return [{ listWidth: effectiveWidth, collapsed }, { startDrag, toggleCollapse }];
+  return [
+    { listWidth: effectiveWidth, collapsed },
+    { startDrag, toggleCollapse },
+  ];
 }

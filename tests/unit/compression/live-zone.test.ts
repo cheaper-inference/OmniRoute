@@ -28,10 +28,13 @@ function toolCompressor(calls: Array<Record<string, unknown>>) {
     calls.push(structuredClone(body));
     const field = Array.isArray(body.messages) ? "messages" : "input";
     const items = body[field] as Array<Record<string, unknown>>;
+    const lastAssistant = items.findLastIndex((item) => item.role === "assistant");
     return result({
       ...body,
-      [field]: items.map((item) =>
-        item.role === "tool" ? { ...item, content: `compressed:${String(item.content)}` } : item
+      [field]: items.map((item, index) =>
+        item.role === "tool" && (lastAssistant === -1 || index < lastAssistant)
+          ? { ...item, content: `compressed:${String(item.content)}` }
+          : item
       ),
     });
   };
@@ -46,7 +49,7 @@ const options = {
 beforeEach(() => resetLiveZoneCache());
 
 describe("cache-aligned live-zone compression", () => {
-  it("compresses normally once, then sends only appended items through the engine", async () => {
+  it("rewrites appended completed tools with their turn context and freezes the prefix", async () => {
     const calls: Array<Record<string, unknown>> = [];
     const compress = toolCompressor(calls);
     const first = {
@@ -63,13 +66,15 @@ describe("cache-aligned live-zone compression", () => {
       messages: [
         ...first.messages,
         { role: "assistant", content: "Need the failing test" },
-        { role: "tool", content: "50 more noisy lines" },
+        { role: "tool", tool_call_id: "completed-live", content: "50 more noisy lines" },
+        { role: "assistant", content: "Inspect the newest result" },
+        { role: "tool", content: "new observation" },
       ],
     };
     const secondResult = await applyLiveZoneCompression(second, options, compress);
 
     assert.equal(calls.length, 2);
-    assert.deepEqual(calls[1].messages, [second.messages[4]]);
+    assert.deepEqual(calls[1].messages, second.messages.slice(3));
     assert.equal(
       JSON.stringify((secondResult.body.messages as unknown[]).slice(0, 3)),
       frozenBytes,
@@ -83,10 +88,11 @@ describe("cache-aligned live-zone compression", () => {
       (secondResult.body.messages as Array<{ content: string }>)[4].content,
       "compressed:50 more noisy lines"
     );
+    assert.deepEqual((secondResult.body.messages as unknown[])[6], second.messages[6]);
     assert.deepEqual(secondResult.stats?.liveZone, {
       cacheHit: true,
       frozenItems: 3,
-      liveItems: 2,
+      liveItems: 4,
     });
   });
 
@@ -201,7 +207,7 @@ describe("cache-aligned live-zone compression", () => {
     assert.equal(getLiveZoneCacheStats().entries, 1);
   });
 
-  it("compresses only new Responses API tool outputs", async () => {
+  it("retains new Responses API call context while rewriting only tool outputs", async () => {
     const calls: Array<Record<string, unknown>> = [];
     const compress = toolCompressor(calls);
     const first = { input: [{ type: "message", role: "user", content: "hello" }] };
@@ -214,7 +220,7 @@ describe("cache-aligned live-zone compression", () => {
       compress
     );
 
-    assert.deepEqual(calls[1].input, [output]);
+    assert.deepEqual(calls[1].input, [functionCall, output]);
     assert.deepEqual((result.body.input as unknown[])[1], functionCall);
   });
 

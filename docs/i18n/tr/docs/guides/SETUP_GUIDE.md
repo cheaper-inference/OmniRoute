@@ -149,10 +149,10 @@ omniroute providers validate
 ```txt
 Temel URL: http://localhost:20128/v1
 API Anahtarı:  [Endpoint sayfasından kopyalayın]
-Model:    if/qwen3.8-max-preview (veya herhangi bir sağlayıcı/model ön eki)
+Model:    if/qwen3.8-max-preview (veya herhangi bir sağlayıcı/model öneki)
 ```
 
-Editörünüz `Authorization: Bearer ...` gönderemiyorsa bunun yerine belirteç içeren uyumluluk temel adresini kullanın:
+Editörünüz `Authorization: Bearer ...` gönderemiyorsa bunun yerine token içeren uyumluluk temel adresini kullanın:
 
 ```txt
 Temel URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -165,34 +165,29 @@ Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode ve OpenAI uyumlu SDK'l
 
 #### `setup-*` ile otomatik yapılandırma
 
-Temel URL'yi ve anahtarı elle yapıştırmak yerine OmniRoute'un canlı model kataloğundan her aracın
-kendi yapılandırmasını yazmasına izin verin. Her araç için bir komut:
+Temel URL'yi ve anahtarı elle yapıştırmak yerine OmniRoute'un canlı model kataloğundan yararlanarak her aracın kendi yapılandırmasını yazmasına izin verin. Her araç için tek komut:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml profilleri
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI uyumlu)
-omniroute setup-cline        # Cline CLI + VS Code uzantısı ayarları
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai uyumlu)
+omniroute setup-cline        # Cline CLI + VS Code eklentisi ayarları
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # Cursor'ın uygulama içi adımlarını yazdırır
 omniroute setup-roo          # Roo Code içe aktarma + autoImport işaretçisi
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Her biri, yerel bir aracı **uzak** bir OmniRoute'a göre yapılandırmak için `--remote <url> --api-key <key>` parametrelerini ve önizleme için `--dry-run` parametresini kabul eder. Doğru
-ortam değişkenleri eklenmiş ve hiçbir yapılandırma yazılmamış şekilde bir CLI başlatmak için genel başlatıcı
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) komutunu kullanın;
-eski araç başına başlatıcılar olan `omniroute launch` (Claude Code) ve
-`omniroute launch-codex` (Codex) kullanılabilir olmaya devam eder.
+Her biri, yerel bir aracı **uzak** bir OmniRoute'a göre yapılandırmak için `--remote <url> --api-key <key>` seçeneklerini ve önizleme için `--dry-run` seçeneğini kabul eder. Bir CLI'yi doğru ortam değişkenleri eklenmiş ve hiçbir yapılandırma yazılmamış şekilde başlatmak için genel başlatıcı `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) komutunu kullanın; araç başına eski başlatıcılar olan `omniroute launch` (Claude Code) ve `omniroute launch-codex` (Codex) kullanılmaya devam edilebilir.
 
-Tam tablo (her komutun ne yazdığı, tüm parametreler, yerel ve uzak kullanım, temel URL
-`/v1` kuralları) için **[CLI Entegrasyonları](./CLI-INTEGRATIONS.md)** bölümüne bakın.
+Tam tablo için (her komutun ne yazdığı, tüm seçenekler, yerel ve uzak kullanım, temel URL `/v1` kuralları) **[CLI Entegrasyonları](./CLI-INTEGRATIONS.md)** belgesine bakın.
 
-Araç bazında ayrıntılı yapılandırma (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ve daha fazlası) için özel **[CLI Araçları Kılavuzu](../reference/CLI-TOOLS.md)** bölümüne bakın.
+Araç bazında ayrıntılı yapılandırma (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ve daha fazlası) için özel **[CLI Araçları Kılavuzu](../reference/CLI-TOOLS.md)** belgesine bakın.
 
 ---
 

@@ -7,29 +7,36 @@
 OmniRoute သည် စတင်ချိန်တွင် အဆင့် ၅ ဆင့်ပါ fallback chain မှတစ်ဆင့် ၎င်း၏ SQLite driver ကို ရွေးချယ်သတ်မှတ်သည်-
 
 1. **တွဲဖက်ပါဝင်သော `better-sqlite3`** (`package.json` ရှိ `dependencies` မှတစ်ဆင့်)
-   — အမြန်ဆုံးဖြစ်ပြီး native binary ကို အသုံးပြုကာ build tools များရှိသည့်အခါ `npm install` ဖြင့် ထည့်သွင်းပေးသည်။
+   — အမြန်ဆုံးဖြစ်ပြီး native binary ကို အသုံးပြုကာ build tools များရှိသည့်အခါ `npm install` က ထည့်သွင်းပေးသည်။
 
-2. **Runtime တွင် ထည့်သွင်းထားသော `better-sqlite3`** (`~/.omniroute/runtime/` အတွင်း)
-   — ပထမဆုံး run လုပ်ချိန်တွင် လိုအပ်မှသာ ထည့်သွင်းသည် **သို့မဟုတ်** `scripts/build/postinstall.mjs → scripts/postinstall.mjs` ဖြင့် ထည့်သွင်းသည်။
-   ပျက်စီးနေသော သို့မဟုတ် platform မကိုက်ညီသော binary များကို မတင်မိစေရန်
-   မတင်မီ native `.node` magic bytes (ELF / Mach-O / PE) ကို စစ်ဆေးအတည်ပြုသည်။
+2. **Runtime တွင် ထည့်သွင်းထားသော `better-sqlite3`** (`~/.omniroute/runtime/` ထဲတွင်)
+   — ပထမဆုံး run ချိန်တွင် လိုအပ်မှသာ ထည့်သွင်းသည် **သို့မဟုတ်** `scripts/build/postinstall.mjs → scripts/postinstall.mjs` က ထည့်သွင်းပေးသည်။
+   ပျက်စီးနေသော သို့မဟုတ် platform မှားနေသော binary များကို မတင်မိစေရန်
+   native `.node` magic bytes (ELF / Mach-O / PE) ကို load မလုပ်မီ စစ်ဆေးအတည်ပြုသည်။
 
-3. **`node:sqlite`** (Node ≥22.5 stdlib) — native build မလိုအပ်ပါ။ better-sqlite3 လမ်းကြောင်းနှစ်ခုစလုံး မအောင်မြင်သည့်အခါ အသုံးပြုသည်။ လုပ်ဆောင်ချက်များ ကန့်သတ်ထားသည်။
+3. **`node:sqlite`** (Node ≥22.5 stdlib) — native build မလိုအပ်ပါ၊
+   better-sqlite3 လမ်းကြောင်းနှစ်ခုလုံး မအောင်မြင်သည့်အခါ အသုံးပြုသည်။ လုပ်ဆောင်နိုင်စွမ်း ကန့်သတ်ထားသည်။
 
 4. **`sql.js`** (WASM) — နောက်ဆုံး fallback ဖြစ်သည်။ နေရာတိုင်းတွင် အလုပ်လုပ်သော်လည်း ပိုနှေးပြီး
-   data များကို synchronously ရေးသားမည့်အစား သတ်မှတ်ထားသော အချိန်ကြားကာလအလိုက် ရေးသားသည်။
+   data ကို synchronous ရေးသားမည့်အစား သတ်မှတ်ထားသော အချိန်အပိုင်းအခြားအလိုက် ရေးသားသည်။
 
-## ဤမျှရှုပ်ထွေးရသည့် အကြောင်းရင်းမှာ အဘယ်နည်း?
+## အဘယ်ကြောင့် ဤမျှရှုပ်ထွေးရသနည်း?
 
-- **Windows EBUSY**: ယခင် version ၏ `better_sqlite3.node` ကို လက်ရှိ run နေသော process တစ်ခုက lock လုပ်ထားပါက `npm install -g omniroute@latest` မအောင်မြင်နိုင်ပါ။ `~/.omniroute/runtime/` အတွင်း runtime install ပြုလုပ်ခြင်းဖြင့် global npm cache ကို ရှောင်ကွင်းနိုင်သည်။
-- **Build tools မရှိခြင်း**: အချို့ environment များ (VS Build Tools မပါသော corporate Windows၊ အနည်းဆုံးအစိတ်အပိုင်းများသာပါသော Docker images) တွင် `better-sqlite3` ကို compile မလုပ်နိုင်ပါ။ Runtime installer သည် npm registry မှ ကြိုတင် build လုပ်ထားသော binary တစ်ခုကို ရယူပေးသည်။ ထိုလုပ်ငန်းစဉ်ပင် မအောင်မြင်လျှင်လည်း fallback drivers များက OmniRoute ကို ဆက်လက်စတင်နိုင်စေသည်။
-- **Air-gapped systems**: npm registry ကို ချိတ်ဆက်မရပါက `node:sqlite`
+- **Windows EBUSY**- ယခင် version ၏ `better_sqlite3.node` ကို လည်ပတ်နေသော process တစ်ခုက
+  lock လုပ်ထားပါက `npm install -g omniroute@latest` မအောင်မြင်နိုင်ပါ။ `~/.omniroute/runtime/`
+  ရှိ runtime install သည် global npm cache ကို ရှောင်ကွင်းပေးသည်။
+- **Build tools မရှိခြင်း**- အချို့ environment များတွင် (VS Build Tools မရှိသော
+  corporate Windows၊ အနည်းဆုံးလိုအပ်ချက်သာပါသည့် Docker image များ) `better-sqlite3`
+  ကို compile မလုပ်နိုင်ပါ။ Runtime installer သည် npm registry မှ ကြိုတင် build လုပ်ထားသော
+  binary ကို ရယူပေးပြီး ထိုလုပ်ဆောင်ချက် မအောင်မြင်လျှင်ပင် fallback driver များက OmniRoute
+  ကို ဆက်လက်စတင်နိုင်စေသည်။
+- **ကွန်ရက်မှ သီးခြားခွဲထားသော စနစ်များ**- npm registry ကို ဆက်သွယ်၍မရပါက `node:sqlite`
   သို့မဟုတ် `sql.js` က အခြေခံလုပ်ဆောင်နိုင်စွမ်းကို အာမခံပေးသည်။
 
 ## Magic-byte စစ်ဆေးအတည်ပြုခြင်း
 
-Runtime တွင် ထည့်သွင်းထားသော `.node` file တစ်ခုကို မတင်မီ OmniRoute သည် ပထမဆုံး 8
-bytes ကို ဖတ်ပြီး သိရှိထားသော platform magics များနှင့် တိုက်ဆိုင်စစ်ဆေးသည်-
+Runtime တွင် ထည့်သွင်းထားသော `.node` file ကို မတင်မီ OmniRoute သည် ပထမဆုံး 8
+bytes ကိုဖတ်ပြီး သိရှိထားသော platform magic များနှင့် တိုက်ဆိုင်စစ်ဆေးသည်-
 
 | Platform              | Bytes (hex)   | Label       |
 | --------------------- | ------------- | ----------- |
@@ -41,7 +48,7 @@ bytes ကို ဖတ်ပြီး သိရှိထားသော platform
 
 Magic မကိုက်ညီပါက → file ကို လျစ်လျူရှုပြီး fallback သည် နောက်အဆင့်သို့ ဆက်သွားသည်။
 
-## လက်ရှိအသုံးပြုနေသော driver ကို စစ်ဆေးခြင်း
+## အသုံးပြုနေသော driver ကို စစ်ဆေးခြင်း
 
 ```typescript
 import { getDriverInfo } from "@/lib/db/core";
@@ -54,35 +61,61 @@ const info = getDriverInfo();
 ## ကိုယ်တိုင်ထိန်းချုပ်ခြင်း
 
 ```bash
-# မြန်ဆန်သော CI install များအတွက် postinstall warm-up ကို ကျော်ပါ
+# လျင်မြန်သော CI ထည့်သွင်းမှုများအတွက် postinstall warm-up ကို ကျော်ရန်
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
 
-# Runtime better-sqlite3 ကို အတင်းအကျပ် ပြန်လည်ထည့်သွင်းပါ
+# Runtime better-sqlite3 ကို မဖြစ်မနေ ပြန်လည်ထည့်သွင်းရန်
 rm -rf ~/.omniroute/runtime
 omniroute  # နောက်တစ်ကြိမ် စတင်ချိန်တွင် ပြန်လည်ထည့်သွင်းမည်
 
-# မည်သည့် driver ကို လက်ရှိအသုံးပြုနေသည်ကို စစ်ဆေးပါ
-omniroute config db-info  # CLI command ရှိပါက
+# မည်သည့် driver အသုံးပြုနေသည်ကို စစ်ဆေးရန်
+omniroute config db-info  # (CLI command ရှိပါက)
 ```
+
+## Synchronous ရပ်တန့်မှုများကို စစ်ဆေးဖော်ထုတ်ခြင်း
+
+`better-sqlite3` ဖြင့် synchronous adapter အချိန်တိုင်းတာမှုကို ဖွင့်ရန် မစတင်မီ
+`OMNIROUTE_SQLITE_SLOW_MS=200` ဟု သတ်မှတ်ပါ။ မူလအခြေအနေတွင် ပိတ်ထားသည်။
+ပြီးဆုံးသွားသော operation တစ်ခုသည် အနည်းဆုံး သတ်မှတ်ထားသည့် millisecond ပမာဏမျှ ကြာပါက
+adapter တစ်ခုလျှင် ဆယ်စက္ကန့်အတွင်း အများဆုံးတစ်ကြိမ် `[SQLITE-SLOW]` သတိပေးချက်ကို
+ထုတ်ပေးသည်။ သတိပေးချက်တွင် driver၊ operation class (`prepare`, `get`, `all`, `run`,
+`exec`, `pragma`, transaction သို့မဟုတ် maintenance) နှင့် ကြာမြင့်ခဲ့သော
+milliseconds တို့သာ ပါဝင်သည်။ SQL၊ bindings၊ rows၊ paths သို့မဟုတ် exception စာသားများ
+မပါဝင်ပါ။
+
+၎င်းသည် ရောဂါရှာဖွေရေး အထောက်အကူတစ်ခုသာဖြစ်ပြီး timeout သို့မဟုတ် query optimization
+မဟုတ်ပါ။ ပြန်မလာတော့သည့် operation တစ်ခုကို report မလုပ်နိုင်ခြင်း၊ CPU အလုပ်နှင့် disk
+စောင့်ဆိုင်းမှုကို မခွဲခြားနိုင်ခြင်း၊ တိကျသော SQL ကို မဖော်ထုတ်နိုင်ခြင်း သို့မဟုတ် raw
+driver handle မှတစ်ဆင့် လုပ်ဆောင်သည့် operation များကို မစောင့်ကြည့်နိုင်ခြင်းတို့ ရှိသည်။
+Async backup ကြာချိန်ကို ရည်ရွယ်ချက်ရှိရှိ ဖယ်ထုတ်ထားပြီး အခြား SQLite driver များကို
+ဤရွေးချယ်ဖွင့်နိုင်သော စောင့်ကြည့်မှုဖြင့် တိုင်းတာမထားပါ။ Variable ကို ပိတ်ခြင်းဖြင့် timing
+wrapper များမပါသော မူလ adapter ကို ပြန်လည်အသုံးပြုမည်ဖြစ်သည်။ Database schema သို့မဟုတ်
+သိမ်းဆည်းထားသော configuration များ ပြောင်းလဲမည်မဟုတ်ပါ။
+
+`/healthz` lag သတိပေးချက်သည် သက်တမ်းတစ်လျှောက် ပျမ်းမျှတန်ဖိုးကို မဟုတ်ဘဲ ယခင် sample
+နောက်ပိုင်းရှိ event-loop အမြင့်ဆုံးတန်ဖိုးကို report လုပ်သည်။ ရပ်တန့်မှုတစ်ခုကို SQLite
+သို့မဟုတ် disk ပျက်ကွက်မှုကြောင့်ဟု သတ်မှတ်မယူမီ ၎င်း၏ timestamp များကို နှေးကွေးသော
+operation သတိပေးချက်များ၊ host/storage metric များနှင့် ဆက်စပ်စစ်ဆေးပါ။
 
 ## ကိုးကားချက်
 
 အကောင်အထည်ဖော်ထားသည့်နေရာများ-
 
-- `bin/cli/runtime/magicBytes.mjs` — binary magic-byte စစ်ဆေးအတည်ပြုရေး helpers
-- `bin/cli/runtime/sqliteRuntime.mjs` — အဆင့် ၅ ဆင့်ပါ runtime resolver + လိုအပ်မှသာ လုပ်ဆောင်သော installer
+- `bin/cli/runtime/magicBytes.mjs` — binary magic-byte စစ်ဆေးအတည်ပြုရေး helper များ
+- `bin/cli/runtime/sqliteRuntime.mjs` — အဆင့် ၅ ဆင့်ပါ runtime resolver + lazy installer
 - `bin/cli/runtime/index.mjs` — startup orchestrator (`warmUpRuntimes()`)
-- `scripts/postinstall.mjs` — npm post-install hook (မအောင်မြင်လျှင်လည်း အလုပ်ရပ်တန့်စေမည်မဟုတ်သော warm-up)
+- `scripts/postinstall.mjs` — npm post-install hook (မအောင်မြင်သော်လည်း အဓိကလုပ်ငန်းစဉ်ကို မရပ်စေသော warm-up)
 - `src/lib/db/core.ts` — `ensureDbInitialized()` / `getDriverInfo()` exports
 
 ## Single-writer topology (HA ကို မပံ့ပိုးပါ)
 
-အထက်ပါ driver fallback chain သည် **process တစ်ခုတည်း** အတွင်းတွင်သာ ဆက်လက် run သည်။ ပုံသေ SQLite
-OmniRoute သည် **single writer** ဖြစ်သည်-
+အထက်ပါ driver fallback chain သည် **process တစ်ခုတည်း** အတွင်းသာ လည်ပတ်နေဆဲဖြစ်သည်။
+SQLite ကို မူလသတ်မှတ်ချက်ဖြင့် အသုံးပြုသော OmniRoute သည် **single writer** ဖြစ်သည်-
 
-- OmniRoute replica နှစ်ခုကို တူညီသော `storage.sqlite` file နှင့် မချိတ်ဆက်ပါနှင့်။
-- Container restart၊ Recreate deploy၊ OOM kill သို့မဟုတ် HEALTHCHECK restart ဖြစ်တိုင်း
-  လုပ်ဆောင်နေဆဲ SSE session အားလုံး ပြတ်တောက်သွားမည်။ ပုံမှန်လမ်းကြောင်းတွင် session drain မရှိပါ။
-- နှေးကွေးသော `/healthz` ကို သေဆုံးနေသည်ဟု သတ်မှတ်သော orchestrator liveness သည် တစ်ခုတည်းသော
-  replica ကို ရပ်တန့်ပစ်မည်။ TCP liveness + HTTP `/healthz` readiness ကို ဦးစားပေးပါ။ [Docker လမ်းညွှန် — ရရှိနိုင်မှု](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
+- OmniRoute replica နှစ်ခုကို `storage.sqlite` file တစ်ခုတည်းနှင့် မချိတ်ဆက်ပါနှင့်။
+- Container restart၊ Recreate deploy၊ OOM kill သို့မဟုတ် HEALTHCHECK restart တစ်ခုသည်
+  လုပ်ဆောင်နေဆဲ SSE session အားလုံးကို ဖြုတ်ချမည်။ မူလလမ်းကြောင်းတွင် session drain မရှိပါ။
+- နှေးကွေးသော `/healthz` ကို dead အဖြစ် သတ်မှတ်သည့် orchestrator liveness သည် တစ်ခုတည်းသော
+  replica ကို ရပ်ပစ်မည်။ TCP liveness + HTTP `/healthz` readiness ကို ဦးစားပေးပါ။
+  [Docker လမ်းညွှန် — availability](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
   နှင့် [Kubernetes probe အကြံပြုချက်များ](./MONITORING_GUIDE.md#kubernetes-probe-recommendations) ကို ကြည့်ပါ။

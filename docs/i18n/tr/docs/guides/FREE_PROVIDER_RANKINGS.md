@@ -12,34 +12,19 @@
 
 ---
 
-## Nedir?
+## Nedir
 
-OmniRoute, **ücretsiz/kimlik doğrulamasız** olarak işaretlenmiş 155 katalog girdisi
-dahil olmak üzere 329 sağlayıcı kaydeder (kimlik doğrulamasız,
-ücretsiz katmanlı OAuth veya ücretsiz katmanlı API anahtarı — bkz.
-[Ücretsiz Katmanlar Kılavuzu](../getting-started/FREE-TIERS-GUIDE.md) ve eksiksiz
-[Ücretsiz Katmanlar dizini](../reference/FREE_TIERS.md)). Ancak ücretsiz sağlayıcıların
-model kalitesi büyük ölçüde değişiklik gösterir. Öncü bir model sunan kimlik
-doğrulamasız sağlayıcı, küçük ve eski bir model sunan sağlayıcıdan çok daha kullanışlıdır.
+OmniRoute işaretlenmiş 155 katalog girişi de dahil olmak üzere 377 sağlayıcıyı kaydettiriyor**free/no-auth** (kimlik doğrulamasız, ücretsiz katmanlı OAuth veya ücretsiz katmanlı API anahtarı — [Ücretsiz Katmanlar Kılavuzu'na](../getting-started/FREE-TIERS-GUIDE.md) ve [Ücretsiz Katmanlar dizininin](../reference/FREE_TIERS.md) tamamına bakın). İşin püf noktası: ücretsiz sağlayıcıların model kalitesi açısından büyük farklılıklar göstermesi. Sınır modeline hizmet veren, kimlik doğrulaması olmayan bir sağlayıcı, küçük eski bir modele hizmet veren sağlayıcıdan çok daha faydalıdır.
 
-**Ücretsiz Sağlayıcı Sıralamaları**, her ücretsiz sağlayıcının kataloğunu **Arena AI
-liderlik tablosundaki** **kitle kaynaklı kalite puanlarıyla** (insan tercihlerine dayalı
-ELO; LMArena sohbet botu arenasının arkasındakiyle aynı yaklaşım) birleştirerek
-"**hangi ücretsiz sağlayıcı bana en iyi modeli sunuyor?**" sorusunu yanıtlar.
-Sağlayıcılar daha sonra **en iyi ücretsiz modellerinin** gücüne göre sıralanır.
+**Ücretsiz Sağlayıcı Sıralaması** cevaplar "** hangi ücretsiz sağlayıcı bana en iyi modeli veriyor?** " her ücretsiz sağlayıcının kataloğuna katılarak** Kitle kaynaklı kalite puanları** itibaren** Arena AI liderlik tablosu** (insan tercihi ELO, LMArena chatbot arenasının ardındaki aynı fikir). Sağlayıcılar daha sonra güçlerine göre sıralanır.** en iyi ücretsiz model** .
 
 Sıralama üç gerçek kaynaktan hesaplanır:
 
-1. Ücretsiz sağlayıcı listeleri — `NOAUTH_PROVIDERS` ve `hasFree` olarak işaretlenmiş
-   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` girdileri
-   (`src/shared/constants/providers.ts`).
-2. Sağlayıcı kayıt defterinden her sağlayıcının model kataloğu
-   (`open-sse/config/providerRegistry.ts`).
-3. Arena ELO eşitleme motoru (`src/lib/arenaEloSync.ts`) tarafından
-   `model_intelligence` DB tablosunda saklanan, ELO'dan türetilmiş göreve uygunluk
-   puanları.
+1. Ücretsiz sağlayıcı listeleri — `NOAUTH_PROVIDERS` ve `hasFree` (`src/shared/constants/providers.ts`) işaretli `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` girişleri.
+2. Her sağlayıcının model kataloğu, sağlayıcı kayıt defterinden (`open-sse/config/providerRegistry.ts`).
+3. Arena ELO senkronizasyon motoru (`src/lib/arenaEloSync.ts`) tarafından `model_intelligence` DB tablosunda saklanan ELO'dan türetilmiş göreve uyum puanları.
 
-Birleştirme mantığı `src/lib/freeProviderRankings.ts` dosyasında bulunur.
+Birleştirme mantığı `src/lib/freeProviderRankings.ts` yaşar.
 
 ---
 
@@ -130,99 +115,108 @@ değeridir (aşağıya bakın). Puanlanmış modeli olmayan sağlayıcılar yan�
 
 ### Kaynak: Arena AI liderlik tablosu
 
-Arena ELO senkronizasyon motoru (`src/lib/arenaEloSync.ts`), Arena AI liderlik tablosu API'sinden
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) iki liderlik tablosu — `text`
-ve `code` — alır. Her liderlik tablosu girdisi bir model adı, sağlayıcı, ELO `score` değeri,
-güven aralığı ve oy sayısı içerir.
+Arena ELO senkronizasyon motoru (`src/lib/arenaEloSync.ts`), Arena AI liderlik tablosu
+API'sinden (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) iki liderlik
+tablosu — `text` ve `code` — çeker. Bu API kullanılabilir bir tablo döndürmediğinde,
+motor Hugging Face datasets-server üzerindeki resmi `lmarena-ai/leaderboard-dataset`
+veri setine geri döner (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` `activeSource`, `lastError` ve
+`lastFailedAt` değerlerini raporlar. Her liderlik tablosu girdisi bir model adı,
+satıcı, ELO `score` değeri, güven aralığı ve oy sayısı taşır.
 
-Liderlik tablosu kategorileri, OmniRoute görev kategorileriyle şu şekilde eşleştirilir:
+Liderlik tablosu kategorileri OmniRoute görev kategorilerine eşlenir:
 
 | Arena liderlik tablosu | OmniRoute görev kategorileri                      |
 | ---------------------- | ------------------------------------------------- |
 | `text`                 | `default`, `review`, `documentation`, `debugging` |
 | `code`                 | `coding`                                          |
 
-### Normalleştirme (göreve uygunluk puanı)
+### Normalizasyon (görev uygunluğu puanı)
 
-Ham ELO puanları, her liderlik tablosu için **`[0.4, 0.98]` aralığında bir göreve uygunluk değerine** normalleştirilir:
+Ham ELO puanları, liderlik tablosu başına **`[0.4, 0.98]` aralığında bir görev
+uygunluğu değerine** normalize edilir:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Puan hiçbir zaman `0` veya `1` değerine ulaşmaz; böylece kullanıcı geçersiz kılmaları için
-pay bırakılır. Bu, API yanıtında gördüğünüz `score` alanı ve kontrol panelinde gösterilen etikettir.
+Puan asla `0` veya `1` değerine ulaşmaz; böylece kullanıcı geçersiz kılmaları için pay
+bırakılır. Bu, API yanıtında gördüğünüz `score` alanı ve kontrol panelinde gösterilen
+etikettir.
 
 ### Güven
 
-Her girdiye Arena oy sayısına göre bir güven düzeyi atanır:
+Her girdi, Arena oy sayısına göre bir güven seviyesi alır:
 
-| Güven    | Oy      |
-| -------- | ------- |
-| `high`   | ≥ 5.000 |
-| `medium` | ≥ 1.000 |
-| `low`    | < 1.000 |
+| Güven    | Oy sayısı |
+| -------- | --------- |
+| `high`   | ≥ 5,000   |
+| `medium` | ≥ 1,000   |
+| `low`    | < 1,000   |
 
 ### Depolama ve güncellik
 
-Normalleştirilmiş girdiler, `source = "arena_elo"` olacak şekilde `model_intelligence`
-veritabanı tablosuna yazılır (`src/lib/db/modelIntelligence.ts`). Girdilerin süresi **7 gün
-sonra dolar**; böylece senkronizasyonu durduran bir sağlayıcı, güncelliğini yitirmiş veriler
-sunmak yerine zamanla listeden çıkar.
+Normalize edilmiş girdiler, `source = "arena_elo"` ile `model_intelligence` veritabanı
+tablosuna yazılır (`src/lib/db/modelIntelligence.ts`). Girdiler **7 gün sonra süresi
+dolar**; böylece senkronizasyonu durduran bir sağlayıcı, bayat veri sunmak yerine
+zamanla listeden düşer.
 
-Senkronizasyon **varsayılan olarak etkindir**:
+Senkronizasyon **varsayılan olarak açıktır**:
 
-- Sunucu başlatıldığında bir kez, ardından periyodik bir zamanlayıcıyla çalışır
-  (`src/lib/arenaEloSync.ts`, `src/instrumentation-node.ts` üzerinden bağlanır).
-- **Engelleyici değildir ve hiçbir zaman kritik hataya yol açmaz** — üst kaynaktan veri alma
-  işlemi başarısız olursa OmniRoute çalışmaya devam eder ve sıralamalar yalnızca son başarılı
-  verileri (veya boş durumu) gösterir.
+- Sunucu başlangıcında bir kez çalışır ve ardından periyodik bir zamanlayıcıyla
+  çalışmaya devam eder (`src/lib/arenaEloSync.ts`, `src/instrumentation-node.ts`
+  üzerinden bağlanır).
+- **Engellemez ve asla ölümcül değildir** — yukarı akış çekimi başarısız olursa,
+  OmniRoute çalışmaya devam eder ve sıralamalar basitçe son iyi veriyi (veya boş bir
+  durumu) gösterir.
 
-İki ortam değişkeni tarafından kontrol edilir
-([`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) içinde belgelenmiştir):
+Bunu iki ortam değişkeni kontrol eder
+([`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) dosyasında belgelenmiştir):
 
 | Değişken                  | Varsayılan    | Amaç                                                          |
 | ------------------------- | ------------- | ------------------------------------------------------------- |
 | `ARENA_ELO_SYNC_ENABLED`  | `true`        | Giden senkronizasyondan çıkmak için `false` olarak ayarlayın. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Saniye cinsinden senkronizasyon aralığı.                      |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24s) | Senkronizasyon aralığı, saniye cinsinden.                     |
 
 ### Manuel senkronizasyon / durum / temizleme
 
-Operatörler için kimliği doğrulanmış bir yönetim uç noktası, manuel denetim sağlar
+Operatörler için, kimliği doğrulanmış bir yönetim uç noktası manuel kontrol sunar
 (`src/app/api/intelligence/sync/route.ts` — yönetim kimlik doğrulaması gerektirir):
 
 ```
-GET    /api/intelligence/sync          # geçerli senkronizasyon durumu (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # manuel senkronizasyonu tetikler; yazmadan önizlemek için gövde: { "dryRun": true }
-DELETE /api/intelligence/sync          # senkronize edilmiş tüm arena_elo istihbarat girdilerini temizler
+GET    /api/intelligence/sync          # mevcut senkronizasyon durumu (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # manuel senkronizasyon tetikler; yazmadan önizlemek için gövde: { "dryRun": true }
+DELETE /api/intelligence/sync          # senkronize edilmiş tüm arena_elo intelligence girdilerini temizler
 ```
 
-Sıralamalar sayfası boşsa manuel bir `POST /api/intelligence/sync` isteği (veya yalnızca
-sunucunun yeniden başlatılması) sayfayı yeniden doldurur.
+Sıralamalar sayfası boşsa, manuel bir `POST /api/intelligence/sync` (veya basitçe
+sunucuyu yeniden başlatmak) onu yeniden doldurur.
 
 ### Modelleri liderlik tablosuyla eşleştirme
 
-Kayıt model kimlikleri ile Arena model adları her zaman tam olarak eşleşmez. Sıralama,
-esnek eşleştirme kullanır (`src/lib/freeProviderRankings.ts` içindeki `findMatchingIntelligence`):
+Kayıt defteri model kimlikleri ile Arena model adları her zaman tam olarak eşleşmez.
+Sıralama esnek eşleştirme kullanır (`src/lib/freeProviderRankings.ts` içindeki
+`findMatchingIntelligence`):
 
-1. Normalleştirilmiş model kimliğiyle tam eşleşme.
-2. Sondaki sürüm son eki kaldırıldıktan sonra eşleşme (ör. `kimi-k2.6` → `kimi-k2`).
-3. Ön ek eşleşmesi (bir liderlik tablosu model adı, kayıt kimliğinin ön ekidir).
+1. Normalize edilmiş model kimliğinde tam eşleşme.
+2. Sondaki sürüm ekini kaldırdıktan sonra eşleşme (örn. `kimi-k2.6` → `kimi-k2`).
+3. Ön ek eşleşmesi (liderlik tablosundaki bir model adı, kayıt defteri kimliğinin ön ekidir).
 
-Senkronizasyon tarafında bilinen sağlayıcı ön ekleri (`anthropic/`, `openai/`, `google/`, …)
-kaldırılır ve küçük bir diğer ad haritası, standart adları OmniRoute'un dahili olarak
-kullandığı varyantlara genişletir; böylece modeller herhangi bir adla bulunabilir durumda kalır.
+Senkronizasyon tarafında, bilinen satıcı ön ekleri (`anthropic/`, `openai/`,
+`google/`, …) kaldırılır ve küçük bir takma ad haritası, kanonik adları OmniRoute'un
+dahili olarak kullandığı varyantlara genişletir; böylece modeller herhangi bir ad
+altında bulunabilir kalır.
 
 ### Bir sağlayıcı nasıl sıralanır
 
-Motor, her ücretsiz sağlayıcı için kataloğundaki tüm modelleri puanlar ve ardından:
+Her ücretsiz sağlayıcı için motor, kataloğundaki her modeli puanlar, ardından:
 
 - **En İyi Model** = sağlayıcının en yüksek puanlı modeli.
-- **Ort. Puan** = sağlayıcının puanlanmış tüm modellerindeki ortalama puan.
-- **Modeller** = sağlayıcının Arena puanına sahip model sayısı.
+- **Ortalama Puan** = sağlayıcının puanlanmış tüm modellerindeki ortalama puan.
+- **Modeller** = sağlayıcının kaç modelinin Arena puanı olduğu.
 
-Sağlayıcılar önce **en iyi model puanına**, ardından ortalama puana göre sıralanır. Bu,
-en az bir güçlü ücretsiz model sunan sağlayıcıyı ödüllendirir.
+Sağlayıcılar önce **en iyi model puanına**, ardından ortalama puana göre sıralanır.
+Bu, en az bir güçlü ücretsiz model sunan sağlayıcıyı ödüllendirir.
 
 ---
 

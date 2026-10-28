@@ -96,30 +96,42 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## API キーのインポートフロー
+## APIキーのインポートフロー
 
-API キー認証は、長期間有効な Kiro / AWS CodeWhisperer の bearer 認証情報向けです。OAuth 更新を使用しないため、共有 OIDC セッションの無効化を回避できます。
+APIキー認証は、長期間有効な Kiro / AWS CodeWhisperer のベアラー認証情報向けです。
+OAuth リフレッシュを使用しないため、共有 OIDC セッションの無効化を回避できます。
 
-### Dashboard
+### ダッシュボード
 
 1. **Dashboard -> Providers -> Kiro** を開きます。
 2. **API Key** を選択します。
-3. API キーと、必要に応じて AWS リージョン（デフォルトは `us-east-1`）を貼り付けます。
-4. OmniRoute がキーを検証し、接続を保存します。
+3. APIキーを貼り付け、AWS リージョンとして **Auto-detect**（デフォルト）、**US East
+   (N. Virginia)**、または **Europe (Frankfurt)** を選択します。
+4. OmniRoute がキーを検証し、そのキーが機能するリージョンに固定して接続を保存します。
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` には `auto`（デフォルト）、`us-east-1`、または `eu-central-1` を指定できます。それ以外の値は
+HTTP 400 で拒否されます。
 
 ### 内部コントラクト
 
-API ルートは `KiroService.validateApiKey()` を呼び出してキーを検証します。このメソッドは、リージョンに対応する CodeWhisperer/Amazon Q エンドポイントに対して `ListAvailableProfiles` を使用し、`profileArn` を解決します。
+APIルートは `KiroService.validateApiKey()` を呼び出してキーを検証します。このメソッドは、
+リージョンごとに 10 秒のタイムアウトを設定して
+`GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+（Amazon Q サーフェスが APIキー推論に使用する API）を呼び出します。
+`auto` モードでは、最初に `us-east-1`、次に `eu-central-1` を試行し、キーを受け入れた最初のリージョンを
+保存します。すべての候補リージョンで拒否されたキーは、HTTP 400 でインポートに失敗します。
+その後、オプションの `profileArn` を検出するために `ListAvailableProfiles` がベストエフォートで呼び出されます
+（ほとんどの APIキーでは AWS によって拒否されます）。
 
-保存される接続では、以下を使用します。
+保存される接続では、以下が使用されます。
 
 ```json
 {
@@ -132,7 +144,13 @@ API ルートは `KiroService.validateApiKey()` を呼び出してキーを検�
 }
 ```
 
-実行時に、`KiroExecutor.buildHeaders()` はキーを `Authorization: Bearer <key>` として送信し、`tokentype: API_KEY` を追加します。クォータおよびプロファイルの呼び出しでも同じマーカーを使用するため、AWS は bearer を OIDC またはソーシャルアクセストークンではなく、長期間有効な API キーとして扱います。
+実行時に、`KiroExecutor.buildHeaders()` はキーを
+`Authorization: Bearer <key>` として送信し、`tokentype: API_KEY` を追加します。クォータ／プロファイルの呼び出しでも
+同じマーカーを使用するため、AWS はベアラーを OIDC またはソーシャルアクセストークンではなく、
+長期間有効な APIキーとして扱います。`KiroExecutor.execute()` は APIキー推論を
+`https://q.<region>.amazonaws.com/generateAssistantResponse`（`us-east-1` を含む）にのみ
+送信します。これは、Kiro IDE ゲートウェイが `TokenType=API_KEY` を拒否し、
+`codewhisperer.us-east-1` が APIキーのペイロードを無効なリクエスト本文として拒否するためです（HTTP 400）。
 
 ---
 

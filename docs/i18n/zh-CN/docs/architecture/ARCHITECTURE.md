@@ -17,79 +17,78 @@ lastUpdated: 2026-06-28
 
 _最后更新：2026-06-28_
 
-## 概述
+## 执行摘要
 
-OmniRoute 是基于 Next.js 构建的本地 AI 路由网关和控制台。
-它提供一个统一的 OpenAI 兼容端点（`/v1/*`），将流量路由至多个上游服务商，并支持格式转换、容灾、Token 刷新和用量追踪。
+OmniRoute是基于Next.js构建的本地AI路由网关和仪表板。它提供单个 OpenAI 兼容端点 (`/v1/*`)，并通过转换、回退、令牌刷新和使用跟踪在多个上游提供者之间路由流量。
 
 核心能力：
 
-- OpenAI 兼容的 API 接口，供 CLI/工具使用（351 个服务商、107 个执行器）
-- 跨服务商格式的请求/响应转换
-- 模型 Combo 容灾（多模型序列）
-- 结构化 Combo 步骤（`服务商 + 模型 + 连接`），通过 `compositeTiers` 在运行时排序
-- 帐户级容灾（每服务商多帐户）
-- 配额预检，以及主聊通路中基于配额感知的 P2C 帐户选择
-- OAuth + API Key 服务商连接管理（17 个 OAuth 服务商模块）
-- 通过 `/v1/embeddings` 生成向量嵌入（6 个服务商、9 个模型）
-- 通过 `/v1/images/generations` 生成图片（10+ 个服务商、20+ 个模型）
-- 通过 `/v1/audio/transcriptions` 进行音频转录（7 个服务商）
-- 通过 `/v1/audio/speech` 进行文本转语音（10 个服务商）
-- 通过 `/v1/videos/generations` 生成视频（ComfyUI + SD WebUI）
-- 通过 `/v1/music/generations` 生成音乐（ComfyUI）
-- 通过 `/v1/search` 进行网页搜索（5 个服务商）
-- 通过 `/v1/moderations` 进行内容审核
-- 通过 `/v1/rerank` 进行重排序
-- 推理模型的 `<think>...</think>` 标签解析
-- 响应净化，确保与 OpenAI SDK 严格兼容
-- 角色归一化（developer→system, system→user），跨服务商兼容
+- 用于CLI/tools的 OpenAI 兼容API表面（377 个提供者，156 个执行器模块）
+- 跨提供者格式的Request/response翻译
+- 模型组合后备（多模型序列）
+- 结构化组合步骤 (`provider + model + connection`)，运行时按`compositeTiers`排序
+- 账户级回退（每个提供者多个账户）
+- 主聊天路径中的配额预检和配额感知P2C帐户选择
+- OAuth + API 密钥提供者连接管理（27 个OAuth提供者模块）
+- 通过`/v1/embeddings`嵌入生成（18 个提供者）
+- 通过`/v1/images/generations`生成图像（10 个+提供者，20 个+模型）
+- 通过`/v1/audio/transcriptions`进行音频转录（18 个提供者）
+- 通过`/v1/audio/speech`进行文本转语音（24 个内置提供者）
+- 通过`/v1/videos/generations`生成视频 (ComfyUI + SD WebUI)
+- 通过`/v1/music/generations` (ComfyUI) 生成音乐
+- 通过`/v1/search`进行网络搜索（20 个提供者）
+- 通过`/v1/moderations`进行审核
+- 通过`/v1/rerank`重新排名
+- 考虑标签解析（`<think>...</think>`）用于推理模型
+- 响应清理以实现严格的OpenAI SDK兼容性
+- 角色规范化（开发者→系统、系统→用户）以实现跨提供者兼容性
 - 结构化输出转换（json_schema → Gemini responseSchema）
-- 服务商、API Key、别名、Combo、设置、定价的本地持久化（26 个 DB 模块）
-- 用量/成本追踪和请求日志
-- 可选的云端同步，支持多设备/状态同步
-- IP 白名单/黑名单，控制 API 访问
-- Thinking Budget 管理（passthrough/auto/custom/adaptive）
+- 提供者、密钥、别名、组合、设置、定价的本地持久性（122 个DB模块）
+- Usage/cost跟踪和请求记录
+- 用于multi-device/state同步的可选云同步
+- IP allowlist/blocklist用于API访问控制
+- 预算管理思维（passthrough/auto/custom/adaptive）
 - 全局系统提示注入
-- 会话追踪和指纹识别
-- 增强的每帐户速率限制，含服务商专属配置
-- 熔断器模式，保障服务商容灾
-- 互斥锁防惊群效应保护
-- 基于签名的请求去重缓存
-- 域层：成本规则、容灾策略、锁定策略
-- Context Relay：会话交接摘要，确保帐户轮换连续性
-- 域状态持久化（基于 SQLite 的写穿式缓存，存储容灾、预算、锁定、熔断器状态）
-- 策略引擎，集中评估请求（锁定 → 预算 → 容灾）
-- 请求遥测，含 p50/p95/p99 延迟聚合
-- Combo 目标遥测，以及通过 `combo_execution_key` / `combo_step_id` 记录 Combo 目标历史健康状态
-- 关联 ID（X-Request-Id），支持端到端追踪
-- 合规审计日志，支持按 API Key 选择退出
-- 评估框架，用于 LLM 质量保证
-- 健康看板，实时显示服务商熔断器状态
-- MCP 服务端（87 个工具），支持 3 种传输方式（stdio/SSE/Streamable HTTP）
-- A2A 服务端（JSON-RPC 2.0 + SSE），含技能和任务生命周期
-- 记忆系统（提取、注入、检索、摘要）
-- 技能系统（注册表、执行器、沙箱、内置技能）
-- MITM 代理，含证书管理和 DNS 处理
+- 会话跟踪和指纹识别
+- 通过特定于提供者的配置文件增强每个帐户的速率限制
+- 提供者弹性的断路器模式
+- 通过互斥锁实现防雷群保护
+- 基于签名的请求重复数据删除缓存
+- 领域层：成本规则、回退策略、锁定策略
+- 上下文中继：帐户轮换连续性的会话切换摘要
+- 域状态持久性（用于回退、预算、锁定、断路器的SQLite直写式缓存）
+- 用于集中请求评估的策略引擎（锁定→预算→后备）
+- 使用p50/p95/p99延迟聚合请求遥测
+- 通过`combo_execution_key` / `combo_step_id`组合目标遥测和历史组合目标健康状况
+- 用于端到端跟踪的关联ID (X-Request-Id)
+- 根据API密钥选择退出的合规性审核日志记录
+- LLM质量保证评估框架
+- 具有实时提供者断路器状态的健康仪表板
+- MCP服务器（110 个工具），具有 3 种传输方式 (stdio/SSE/Streamable HTTP)
+- A2A服务器（JSON-RPC 2.0 + SSE）具有技能和任务生命周期
+- 记忆系统（提取、注入、检索、总结）
+- 技能系统（注册中心、执行器、沙箱、内置技能）
+- 具有证书管理和DNS处理功能的MITM代理
 - 提示注入防护中间件
-- 提示压缩管线，含 Caveman、RTK、级联管线、压缩 Combo、语言包和分析
-- ACP（Agent Communication Protocol）注册表
-- 模块化 OAuth 服务商（`src/lib/oauth/providers/` 下 22 个独立模块）
-- 卸载/完全卸载脚本
-- OAuth 环境修复操作
-- OpenAI 兼容 WebSocket 客户端的 WebSocket 桥接（`/v1/ws`）
-- 同步 Token 管理（签发/撤销，基于 ETag 版本控制的配置包下载）
-- GLM Thinking（`glmt`）一等服务商预设
-- 混合 Token 计数（服务商侧 `/messages/count_tokens` + 估算容灾）
-- 模型别名自动播种（启动时 30+ 跨代理方言归一化）
-- 安全出站 fetch，含 SSRF 防护、私有 URL 拦截和可配置重试
-- 冷却感知的聊重试机制，支持可配置的 `requestRetry` 和 `maxRetryIntervalSec`
-- 启动时通过 Zod 进行运行时环境校验
-- 合规审计 v2，含分页、服务商 CRUD 事件和 SSRF 拦截校验日志
+- 使用 Caveman、 RTK、堆叠管道、压缩组合、语言包和分析来提示压缩管道
+- ACP （代理通信协议）注册表
+- 模块化OAuth提供程序（ `src/lib/oauth/providers/`下有 22 个单独的模块）
+- Uninstall/full-uninstall脚本
+- OAuth环境修复行动
+- 用于兼容 OpenAI 的WS客户端的WebSocket桥接器 (`/v1/ws`)
+- 同步令牌管理（issue/revoke、ETag 版本配置包下载）
+- GLM思维（`glmt`）一流提供者预设
+- 混合令牌计数（具有估计回退的提供者端`/messages/count_tokens` ）
+- 模型别名自动播种（启动时 30 个+跨代理方言标准化）
+- 通过SSRF防护、私有URL阻止和可配置重试进行安全出站提取
+- 使用可配置的`requestRetry`和`maxRetryIntervalSec`进行冷却感知聊天重试
+- 启动时使用Zod验证运行时环境
+- 具有分页、提供者CRUD事件和 SSRF 阻止的验证日志记录的合规性审核 v2
 
 主要运行时模型：
 
-- `src/app/api/*` 下的 Next.js 应用路由同时实现控制台 API 和兼容 API
-- `src/sse/*` + `open-sse/*` 中的共享 SSE/路由核心处理服务商执行、格式转换、流式传输、容灾和用量追踪
+- `src/app/api/*`下的Next.js应用程序路由同时实现仪表板APIs和兼容性APIs
+- `src/sse/*` + `open-sse/*`中的共享SSE/routing核心处理提供程序执行、转换、流式传输、回退和使用
 
 ## 参考架构图
 
@@ -123,72 +122,79 @@ v3.8.0 平台的权威版本控制 Mermaid 源文件位于
 - 本地进程之外的服务商 SLA/控制面
 - 外部 CLI 二进制程序本身（Claude Code、Codex CLI 等）
 
-## 控制台界面（当前）
+## 仪表盘界面（当前）
 
 `src/app/(dashboard)/dashboard/` 下的主要页面：
 
-- `/dashboard` — 快速开始 + 服务商概览
+- `/dashboard` — 快速入门 + 提供者概览
 - `/dashboard/endpoint` — 端点代理 + MCP + A2A + API 端点标签页
-- `/dashboard/providers` — 服务商连接和凭据
-- `/dashboard/combos` — Combo 策略、模板、基于步骤的构建器、模型路由规则、手动持久化排序
-- `/dashboard/auto-combo` — Auto Combo 引擎：评分权重、模式包、虚拟工厂预设、遥测
-- `/dashboard/costs` — 成本聚合和定价可视化
-- `/dashboard/analytics` — 用量分析、评估、Combo 目标健康状态
+- `/dashboard/providers` — 提供者连接和凭据
+- `/dashboard/combos` — 组合策略、模板、分步构建器、模型路由规则、手动持久化排序
+- `/dashboard/auto-combo` — Auto Combo Engine：评分权重、模式包、虚拟工厂预设、遥测
+- `/dashboard/costs` — 成本汇总和定价可见性
+- `/dashboard/analytics` — 使用情况分析、评估、组合目标运行状况
 - `/dashboard/limits` — 配额/速率控制
-- `/dashboard/cli-tools` — CLI 接入引导、运行时检测、配置生成
-- `/dashboard/agents` — 已检测的 ACP 代理 + 自定义代理注册
-- `/dashboard/cloud-agents` — 云端托管代理任务（Codex Cloud、Devin、Jules）和任务生命周期
-- `/dashboard/skills` — A2A 技能注册表、沙箱执行、内置技能目录
-- `/dashboard/memory` — 持久化会话记忆查看和检索
+- `/dashboard/cli-tools` — CLI 引导、运行时检测、配置生成
+- `/dashboard/agents` — 检测到的 ACP 智能体 + 自定义智能体注册
+- `/dashboard/cloud-agents` — 云托管智能体任务（Codex Cloud、Devin、Jules）及任务生命周期
+- `/dashboard/skills` — A2A 技能注册表、沙盒执行、内置技能目录
+- `/dashboard/memory` — 持久化对话记忆的检查和检索
 - `/dashboard/webhooks` — 出站 Webhook 订阅、密钥轮换、重试统计
-- `/dashboard/batch` — 批量任务提交和进度
-- `/dashboard/cache` — 读穿式缓存和推理缓存统计、淘汰控制
-- `/dashboard/playground` — 针对任意配置 Combo/模型的交互式对话演练
-- `/dashboard/changelog` — 应用内更新日志查看器（渲染 `CHANGELOG.md`）
-- `/dashboard/system` — 运行时诊断、版本信息、环境校验界面
-- `/dashboard/onboarding` — 新装首次运行设置向导
-- `/dashboard/media` — 图片/视频/音乐演练
-- `/dashboard/search-tools` — 搜索服务商测试和历史
-- `/dashboard/health` — 运行时间、熔断器、速率限制、配额监控会话
+- `/dashboard/batch` — 批处理作业提交和进度
+- `/dashboard/cache` — 直读缓存和推理缓存统计、驱逐控制
+- `/dashboard/playground` — 面向任意已配置组合/模型的交互式聊天演练场
+- `/dashboard/changelog` — 应用内变更日志查看器（渲染 `CHANGELOG.md`）
+- `/dashboard/system` — 运行时诊断、版本信息、环境验证界面
+- `/dashboard/onboarding` — 面向新安装实例的首次运行设置向导
+- `/dashboard/media` — 图像/视频/音乐演练场
+- `/dashboard/search-tools` — 搜索提供者测试和历史记录
+- `/dashboard/health` — 正常运行时间、断路器、速率限制、配额监控会话
 - `/dashboard/logs` — 请求/代理/审计/控制台日志
-- `/dashboard/settings` — 系统设置标签页（常规、路由、Combo 默认值等）
+- `/dashboard/settings` — 系统设置标签页（常规、路由、组合默认值等）
 - `/dashboard/context/caveman` — Caveman 压缩规则、语言包、预览和输出模式
 - `/dashboard/context/rtk` — RTK 命令输出过滤器、预览和运行时安全设置
-- `/dashboard/context/combos` — 分配给路由 Combo 的命名压缩管线
-- `/dashboard/translator` — 翻译器查看和请求格式转换预览
-- `/dashboard/audit` — 合规审计日志浏览器，含分页和结构化元数据
-- `/dashboard/usage` — 关联 `usage_history` 的每请求用量浏览器
+- `/dashboard/context/combos` — 分配给路由组合的命名压缩管线
+- `/dashboard/translator` — 翻译器检查和请求格式转换预览
+- `/dashboard/audit` — 支持分页和结构化元数据的合规审计日志浏览器
+- `/dashboard/usage` — 与 `usage_history` 关联的逐请求使用情况浏览器
 - `/dashboard/compression` — 压缩分析、统计和管线分配
-- `/dashboard/api-manager` — API Key 生命周期和模型权限
+- `/dashboard/api-manager` — API 密钥生命周期和模型权限
+
+UI 层：每个页面都渲染在同一个外壳中 — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx`（该工具包的
+`SidebarProvider`/`SidebarInset`，以及 OmniRoute 的 `Sidebar.tsx` 和 `Header.tsx`）。页面从
+`@/shared/components`（对 `packages/ui-kit` 中随附的 Keak CI UI Kit 的适配器）或工具包组件子路径（`@omniroute/ui-kit/table`、`…/page-header`）导入其
+构建块，并通过 `<Icon>`（`ICON_MAP` → Lucide）导入图标。主题（默认为 `system`，支持浅色/深色）和令牌通过
+`src/app/globals.css` 中的桥接层来自该工具包。详细信息：`docs/architecture/DESIGN_SYSTEM.md`。
 
 ## 高层系统上下文
 
 ```mermaid
 flowchart LR
-    subgraph Clients[Developer Clients]
+    subgraph Clients[开发者客户端]
         C1[Claude Code]
         C2[Codex CLI]
         C3[OpenClaw / Droid / Cline / Continue / Roo]
-        C4[Custom OpenAI-compatible clients]
-        BROWSER[Browser Dashboard]
+        C4[自定义 OpenAI 兼容客户端]
+        BROWSER[浏览器仪表板]
     end
 
-    subgraph Router[OmniRoute Local Process]
-        API[V1 Compatibility API\n/v1/*]
-        DASH[Dashboard + Management API\n/api/*]
-        CORE[SSE + Translation Core\nopen-sse + src/sse]
+    subgraph Router[OmniRoute 本地进程]
+        API[V1 兼容 API\n/v1/*]
+        DASH[仪表板 + 管理 API\n/api/*]
+        CORE[SSE + 转换核心\nopen-sse + src/sse]
         DB[(storage.sqlite)]
-        UDB[(usage tables + log artifacts)]
+        UDB[(用量表 + 日志制品)]
     end
 
-    subgraph Upstreams[Upstream Providers]
-        P1[OAuth Providers\nClaude/Codex/Gemini/Qwen/Qoder/GitHub/Kiro/Cursor/Antigravity]
-        P2[API Key Providers\nOpenAI/Anthropic/OpenRouter/GLM/Kimi/MiniMax\nDeepSeek/Groq/xAI/Mistral/Perplexity\nTogether/Fireworks/Cerebras/Cohere/NVIDIA]
-        P3[Compatible Nodes\nOpenAI-compatible / Anthropic-compatible]
+    subgraph Upstreams[上游提供者]
+        P1[OAuth 提供者\nClaude/Codex/Gemini/Qoder/GitHub/Kiro/Cursor/Antigravity]
+        P2[API 密钥提供者\nOpenAI/Anthropic/OpenRouter/GLM/Kimi/MiniMax\nDeepSeek/Groq/xAI/Mistral/Perplexity\nTogether/Fireworks/Cerebras/Cohere/NVIDIA]
+        P3[兼容节点\nOpenAI 兼容 / Anthropic 兼容]
     end
 
-    subgraph Cloud[Optional Cloud Sync]
-        CLOUD[Cloud Sync Endpoint\nNEXT_PUBLIC_CLOUD_URL]
+    subgraph Cloud[可选的云同步]
+        CLOUD[云同步端点\nNEXT_PUBLIC_CLOUD_URL]
     end
 
     C1 --> API
@@ -267,72 +273,73 @@ flowchart LR
 - 配置包：`src/app/api/sync/bundle` (GET, ETag 版本控制的设置/服务商/Combo/Key 快照)
 - WebSocket：`src/app/api/v1/ws/route.ts` — OpenAI 兼容 WS 客户端的 Upgrade 处理
 
-## 2) SSE + 格式转换核心
+## 2) SSE + 翻译核心
 
-主流模块：
+主要流程模块：
 
 - 入口：`src/sse/handlers/chat.ts`
 - 核心编排：`open-sse/handlers/chatCore.ts`
-- 服务商执行适配器：`open-sse/executors/*`
-- 格式检测/服务商配置：`open-sse/services/provider.ts`
-- 模型解析/解析：`src/sse/services/model.ts`, `open-sse/services/model.ts`
-- 帐户容灾逻辑：`open-sse/services/accountFallback.ts`
+- 提供者执行适配器：`open-sse/executors/*`
+- 格式检测/提供者配置：`open-sse/services/provider.ts`
+- 模型解析/解析映射：`src/sse/services/model.ts`、`open-sse/services/model.ts`
+- 账户回退逻辑：`open-sse/services/accountFallback.ts`
 - 翻译器注册表：`open-sse/translator/index.ts`
-- 流转换：`open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- 用量提取/归一化：`open-sse/utils/usageTracking.ts`
+- 流转换：`open-sse/utils/stream.ts`、`open-sse/utils/streamHandler.ts`
+- 用量提取/标准化：`open-sse/utils/usageTracking.ts`
 - Think 标签解析器：`open-sse/utils/thinkTagParser.ts`
-- 向量嵌入处理器：`open-sse/handlers/embeddings.ts`
-- 向量嵌入服务商注册表：`open-sse/config/embeddingRegistry.ts`
-- 图片生成处理器：`open-sse/handlers/imageGeneration.ts`
-- 图片服务商注册表：`open-sse/config/imageRegistry.ts`
-- 响应净化：`open-sse/handlers/responseSanitizer.ts`
-- 角色归一化：`open-sse/services/roleNormalizer.ts`
+- 嵌入处理程序：`open-sse/handlers/embeddings.ts`
+- 嵌入提供者注册表：`open-sse/config/embeddingRegistry.ts`
+- 图像生成处理程序：`open-sse/handlers/imageGeneration.ts`
+- 图像提供者注册表：`open-sse/config/imageRegistry.ts`
+- 响应清理：`open-sse/handlers/responseSanitizer.ts`
+- 角色标准化：`open-sse/services/roleNormalizer.ts`
 
 服务（业务逻辑）：
 
-- 帐户选择/评分：`open-sse/services/accountSelector.ts`
+- 账户选择/评分：`open-sse/services/accountSelector.ts`
 - 上下文生命周期管理：`open-sse/services/contextManager.ts`
-- IP 过滤执行：`open-sse/services/ipFilter.ts`
-- 会话追踪：`open-sse/services/sessionManager.ts`
+- IP 过滤器强制执行：`open-sse/services/ipFilter.ts`
+- 会话跟踪：`open-sse/services/sessionManager.ts`
 - 请求去重：`open-sse/services/signatureCache.ts`
-- 系统提示注入：`open-sse/services/systemPrompt.ts`
-- Thinking Budget 管理：`open-sse/services/thinkingBudget.ts`
+- 系统提示词注入：`open-sse/services/systemPrompt.ts`
+- 思考预算管理：`open-sse/services/thinkingBudget.ts`
 - 通配符模型路由：`open-sse/services/wildcardRouter.ts`
 - 速率限制管理：`open-sse/services/rateLimitManager.ts`
 - 熔断器：`src/shared/utils/circuitBreaker.ts`
-- 上下文交接：`open-sse/services/contextHandoff.ts` — 为 context-relay 策略生成和注入交接摘要
-- 压缩：`open-sse/services/compression/*` — 在服务商翻译之前执行的主动压缩；
-  含 Caveman 规则、RTK 过滤器、级联管线、压缩 Combo、统计和校验
-- Codex 配额获取器：`open-sse/services/codexQuotaFetcher.ts` — 获取 Codex 配额，用于 context-relay 交接决策
-- 冷却感知重试：`src/sse/services/cooldownAwareRetry.ts` — 每模型冷却重试，支持可配置的 `requestRetry` / `maxRetryIntervalSec`
-- 安全出站 fetch：`src/shared/network/safeOutboundFetch.ts` — 带 SSRF 防护、私有 URL 拦截、重试和超时的服务商/模型 fetch
-- 出站 URL 守卫：`src/shared/network/outboundUrlGuard.ts` — 校验服务商 URL 是否指向私有/localhost CIDR 范围
-- 服务商请求默认值：`open-sse/services/providerRequestDefaults.ts` — 服务商级 `maxTokens`、`temperature`、`thinkingBudgetTokens` 默认值
-- GLM 服务商常量：`open-sse/config/glmProvider.ts` — 共享 GLM 模型、配额 URL、GLMT 超时/默认值
+- 上下文移交：`open-sse/services/contextHandoff.ts` — 为上下文中继策略生成并注入移交摘要
+- 压缩：`open-sse/services/compression/*` — 在提供者转换之前主动压缩；
+  包括 Caveman 规则、RTK 过滤器、堆叠管道、压缩组合、统计和验证
+- Codex 配额获取器：`open-sse/services/codexQuotaFetcher.ts` — 获取 Codex 配额，用于上下文中继的移交决策
+- 冷却感知重试：`src/sse/services/cooldownAwareRetry.ts` — 按模型执行冷却重试，可通过 `requestRetry` / `maxRetryIntervalSec` 配置
+- 安全出站请求：`src/shared/network/safeOutboundFetch.ts` — 受保护的提供者/模型请求，具备 SSRF 防护、私有 URL 阻止、重试和超时功能
+- 出站 URL 防护：`src/shared/network/outboundUrlGuard.ts` — 检查提供者 URL 的主机；`src/shared/network/outboundUrlGuardPolicy.ts` 根据 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`、`OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` 及其仪表板开关选择模式（参见 `docs/reference/ENVIRONMENT.md`）
+- 提供者请求默认值：`open-sse/services/providerRequestDefaults.ts` — 提供者级别的 `maxTokens`、`temperature`、`thinkingBudgetTokens` 默认值
+- GLM 提供者常量：`open-sse/config/glmProvider.ts` — 共享的 GLM 模型、配额 URL、GLMT 超时和默认值
 - Antigravity 上游：`open-sse/config/antigravityUpstream.ts` — 基础 URL 和发现路径常量
-- Codex 客户端常量：`open-sse/config/codexClient.ts` — 带版本号的 user-agent 和 client-version 值
-- 模型别名播种：`src/lib/modelAliasSeed.ts` — 启动时播种 30+ 跨代理方言别名
+- Codex 客户端常量：`open-sse/config/codexClient.ts` — 带版本的用户代理和客户端版本值
+- 模型别名种子：`src/lib/modelAliasSeed.ts` — 启动时植入 30 多个跨代理方言别名
 
-域层模块：
+领域层模块：
 
 - 成本规则/预算：`src/domain/costRules.ts`
-- 容灾策略：`src/domain/fallbackPolicy.ts`
-- Combo 解析器：`src/domain/comboResolver.ts`
+- 回退策略：`src/domain/fallbackPolicy.ts`
+- 组合解析器：`src/domain/comboResolver.ts`
 - 锁定策略：`src/domain/lockoutPolicy.ts`
-- 策略引擎：`src/domain/policyEngine.ts` — 集中式 锁定 → 预算 → 容灾 评估
-- 错误码目录：`src/shared/constants/errorCodes.ts`
+- 策略引擎：`src/domain/policyEngine.ts` — 集中执行锁定 → 预算 → 回退评估
+- 错误代码目录：`src/shared/constants/errorCodes.ts`
 - 请求 ID：`src/shared/utils/requestId.ts`
-- Fetch 超时：`src/shared/utils/fetchTimeout.ts`
+- 请求超时：`src/shared/utils/fetchTimeout.ts`
 - 请求遥测：`src/shared/utils/requestTelemetry.ts`
 - 合规/审计：`src/lib/compliance/index.ts`
 - 评估运行器：`src/lib/evals/evalRunner.ts`
-- 域状态持久化：`src/lib/db/domainState.ts` — SQLite CRUD，管理容灾链、预算、成本历史、锁定状态、熔断器
+- 领域状态持久化：`src/lib/db/domainState.ts` — 针对回退链、预算、成本历史、锁定状态和熔断器的 SQLite CRUD
 
-OAuth 服务商模块（`src/lib/oauth/providers/` 下 22 个独立文件）：
+OAuth 提供者模块（`src/lib/oauth/providers/` 下的 27 个独立文件）：
 
 - 注册表索引：`src/lib/oauth/providers/index.ts`
-- 独立服务商：`agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- 薄封装层：`src/lib/oauth/providers.ts` — 从独立模块重新导出
+- 各个提供者：`agy.ts`、`antigravity.ts`、`claude.ts`、`cline.ts`、`codebuddy-cn.ts`、`codebuddy-intl.ts`、`codex.ts`、`cursor.ts`、`devin-desktop.ts`、`ghe-copilot.ts`、`github.ts`、`gitlab-duo.ts`、`grok-cli-oauth.ts`、`grok-cli.ts`、`kilocode.ts`、`kimi-coding.ts`、`kiro.ts`、`muse-code.ts`、`openference.ts`、`qoder.ts`、`trae.ts`、`workbuddy.ts`、`xai-oauth.ts`、`zed-hosted.ts`、`zed.ts`
+- 共享辅助程序：`codebuddyDeviceAuth.ts`（CodeBuddy CN/intl 设备流程）、`museCodeDeviceResponse.ts`
+- 轻量封装：`src/lib/oauth/providers.ts` — 从各个模块重新导出
 
 ## 5) 嵌入式服务（v3.8.4）
 
@@ -356,162 +363,124 @@ v3.8.4 中发布了两项：9Router 和 CLIProxyAPI。
 
 深入阅读：`docs/frameworks/EMBEDDED-SERVICES.md`
 
-## 主要子系统（v3.8.0）
+## 主要子系统 (v3.8.0)
 
-### A. Auto Combo 引擎
+### A. 汽车组合发动机
 
-Auto Combo 在请求时动态评分和选择路由目标，而非依赖静态的 Combo 定义。
-它驱动 `auto/*` 模型前缀系列。
+自动组合在请求时动态评分和选择路由目标，而不是依赖于静态组合定义。它为`auto/*`模型前缀系列提供支持。
 
-- 引擎入口：`open-sse/services/autoCombo/`（`autoComboEngine.ts`、
-  `scoringEngine.ts`、`virtualFactory.ts`、`modePacks.ts`）
-- 解析器：`src/domain/comboResolver.ts`（自动检测 `auto/` 前缀）
-- 控制台页面：`/dashboard/auto-combo`
-- 遥测：`auto_combo_decisions` SQLite 表
+- 引擎条目： `open-sse/services/autoCombo/` （`autoComboEngine.ts`， `scoringEngine.ts`， `virtualFactory.ts`， `modePacks.ts`）
+- 解析器： `src/domain/comboResolver.ts` （自动检测`auto/`前缀）
+- 仪表板： `/dashboard/auto-combo`
+- 遥测： `auto_combo_decisions` SQLite表
 
 关键能力：
 
-- **17 种路由策略**（priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random,
-  **auto**, lkgp, context-optimized, context-relay, **fusion**，外加一条容灾路径）—
-  auto 是 v3.8.0 的重点新增策略；`fusion`（panel 分散请求 + judge 合成，
-  `open-sse/services/fusion.ts`）是 v3.8.36 新增。
-- **9 个评分因子**：成本、p95 延迟、成功率、配额余量、锁定距离、
-  熔断器状态、近期失败次数、模型可用性、标签亲和度。
-- **虚拟工厂**在不存在匹配的命名 Combo 时，从健康的活跃服务商连接
-  中实时构建临时 Combo。
-- **Auto 前缀**：`auto/coding`、`auto/cheap`、`auto/fast`、`auto/offline`、
-  `auto/smart`、`auto/lkgp` — 各自由一个调优过的权重配置支持。
-- **4 个模式包**：coding、fast、cheap、smart — 作为预设权重
-  配置发布，可从控制台调用。
+- **20种路由策略**（优先级、加权、先填充、循环、 P2C、随机、最少使用、成本优化、重置感知、重置窗口、净空、配额加权、严格随机、**汽车**、lkgp、上下文优化、缓存优化、上下文中继、**融合**，管道） — auto是v3.8.0中的标题添加； `fusion` （面板扇出+判断综合， `open-sse/services/fusion.ts`）是 v3.8.36 中的新增功能。
+- **16因素评分**：配额、运行状况、逆成本、逆延迟、任务适合度等等。因素的规范表及其默认权重位于[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —中，在这里重述它会使其成为第二个过时的地方。
+- **虚拟工厂**当不存在匹配的命名组合时，会实现临时组合，从健康的活跃提供者连接中寻找候选人。
+- **自动前缀**： `auto/coding`、 `auto/cheap`、 `auto/fast`、 `auto/offline`、 `auto/smart`、 `auto/lkgp` —每个都由调整后的权重配置文件支持。
+- **6 个模式包**： `ship-fast`、 `cost-saver`、 `quality-first`、 `offline-friendly`、 `reliability-first`和`chaos-mode` —可从仪表板调用的预设权重配置。 （不要与上面的`auto/*`前缀混淆，它们是请求时的变体。）
 
-完整算法细节（因子公式、权重调优）参见
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)。
+有关完整的算法详细信息（因子公式、权重调整），请参阅[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) 。
 
 ### B. 云代理
 
-Cloud Agents 将第三方托管代码代理平台（Codex Cloud、Devin、
-Jules）封装在统一的基于 DB 的任务生命周期之后。所有任务创建/查看
-端点均需要管理认证。
+云代理将第三方托管代码代理平台（Codex Cloud、 Devin、 Jules）包装在统一的数据库支持的任务生命周期后面。所有任务creation/inspection端点都需要管理身份验证。
 
-- 模块根目录：`src/lib/cloudAgent/`（`baseAgent.ts`、`registry.ts`、`api.ts`、
-  `types.ts`、`db.ts`，以及 `agents/` 下每个代理的子目录）
-- 每代理实现：`agents/codex/`、`agents/devin/`、`agents/jules/`
-- 公开端点：`/api/v1/agents/tasks/*`（list/create/get/cancel）
-- 管理端点：`/api/cloud/*`（配置、状态、批量）
-- 控制台页面：`/dashboard/cloud-agents`
-- 存储：`cloud_agent_tasks` 表
+- 模块根： `src/lib/cloudAgent/` （`baseAgent.ts`、 `registry.ts`、 `api.ts`、 `types.ts`、 `db.ts`，以及`agents/`下的每个代理子目录）
+- 每个代理实现： `agents/codex/`、 `agents/devin/`、 `agents/jules/`
+- 公共端点： `/api/v1/agents/tasks/*` （list/create/get/cancel）
+- 管理端点： `/api/cloud/*` （配置、状态、批次）
+- 仪表板： `/dashboard/cloud-agents`
+- 存储： `cloud_agent_tasks`表
 
-每代理配置和 OAuth 细节参见
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)。
+有关每个代理配置和OAuth详细信息，请参阅[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) 。
 
-### C. 安全护栏
+### C、护栏
 
-安全护栏模块是一个热重载的中间件层，检查请求
-和响应中的 PII、提示注入和不安全视觉内容。违规
-通过 HTTP **503** 加上结构化错误码立即拦截请求，
-下游调用方可以据此重试或分支处理。
+Guardrails 模块是一个可热重载的中间件层，用于检查PII、提示注入和不安全视觉内容的请求和响应。违规使HTTP短路请求**503**加上结构化错误代码，允许下游调用者重试或分支。
 
-- 模块根目录：`src/lib/guardrails/`（`base.ts`、`registry.ts`、`piiMasker.ts`、
-  `promptInjection.ts`、`visionBridge.ts`、`visionBridgeHelpers.ts`）
-- 热重载：注册表监控配置变更并在原地重建处理链
-- 接入点：聊处理器入口、图片生成处理器、响应净化器
-- HTTP 协议：违规以 `503` + `error.code = "GUARDRAIL_VIOLATION"` 呈现
+- 模块根： `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- 热重载：注册表监视配置更改并就地重建链
+- 接入点：聊天处理程序入口、图像生成处理程序、响应清理程序
+- HTTP合约：违规行为表现为`503`和`error.code = "GUARDRAIL_VIOLATION"`
 
-规则集编写和阈值调优参见
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)。
+有关规则集创作和阈值调整，请参阅[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) 。
 
 ### D. 域层
 
-`src/domain/` 命名空间集中管理策略决策，路由处理器无需自行
-处理锁定/预算/容灾逻辑。
+`src/domain/`命名空间集中了策略决策，因此路由处理程序不必自己组装lockout/budget/fallback逻辑。
 
-- 策略引擎：`src/domain/policyEngine.ts` — 统一入口，
-  执行前评估（锁定 → 预算 → 容灾排序）
-- 成本规则：`src/domain/costRules.ts`
-- 容灾策略：`src/domain/fallbackPolicy.ts`
-- 锁定策略：`src/domain/lockoutPolicy.ts`
-- 标签路由：`src/domain/tagRouter.ts`
-- Combo 解析器：`src/domain/comboResolver.ts` — 将 Combo 名称、auto/* 前缀
-  和通配符模型目标解析为具体执行计划
-- 连接/模型规则连接器：`src/domain/connectionModelRules.ts`
-- 模型可用性快照：`src/domain/modelAvailability.ts`
-- 服务商过期追踪：`src/domain/providerExpiration.ts`
-- 配额缓存：`src/domain/quotaCache.ts`
-- 降级状态：`src/domain/degradation.ts`
-- 配置审计：`src/domain/configAudit.ts`
-- OmniRoute 响应元数据构建器：`src/domain/omnirouteResponseMeta.ts`
-- 评估子系统：`src/domain/assessment/` — 周期性评估任务
+- 策略引擎： `src/domain/policyEngine.ts` —执行前评估的单一入口点（锁定→预算→后备排序）
+- 费用规则： `src/domain/costRules.ts`
+- 后备策略： `src/domain/fallbackPolicy.ts`
+- 锁定政策： `src/domain/lockoutPolicy.ts`
+- 基于标签的路由： `src/domain/tagRouter.ts`
+- 组合解析器： `src/domain/comboResolver.ts` —将组合名称、auto/\* 前缀和通配符模型目标解析为具体的执行计划
+- Connection/model规则加入者： `src/domain/connectionModelRules.ts`
+- 模型可用性快照： `src/domain/modelAvailability.ts`
+- 提供者到期跟踪： `src/domain/providerExpiration.ts`
+- 配额缓存： `src/domain/quotaCache.ts`
+- 降解状态： `src/domain/degradation.ts`
+- 配置审核： `src/domain/configAudit.ts`
+- OmniRoute响应元数据生成器： `src/domain/omnirouteResponseMeta.ts`
+- 评估子系统： `src/domain/assessment/` —定期评估作业
 
-### E. 授权管线
+### E. 授权管道
 
-授权管线对每个进入的请求进行分类，并在分发前应用
-相应的策略链。
+授权管道对每个传入请求进行分类，并在分派之前应用适当的策略链。
 
-- 管线入口：`src/server/authz/pipeline.ts`
-- 请求分类器：`src/server/authz/classify.ts` — 区分公开兼容路由和管理路由
-- 公开路由清单：`src/shared/constants/publicApiRoutes.ts`
-- 策略：`src/server/authz/policies/` — 可组合的断言条件
-  （`requireApiKey`、`requireManagement`、`requireFreshAuth` 等）
-- Header 工具：`src/server/authz/headers.ts`
-- 断言辅助：`src/server/authz/assertAuth.ts`
-- 请求上下文：`src/server/authz/context.ts`
+- 管道入口： `src/server/authz/pipeline.ts`
+- 请求分类器： `src/server/authz/classify.ts` —区分公共兼容路由和管理路由
+- 公共路线库存： `src/shared/constants/publicApiRoutes.ts`
+- 策略： `src/server/authz/policies/` —可组合谓词（`requireApiKey`、 `requireManagement`、 `requireFreshAuth`等）
+- 标头实用程序： `src/server/authz/headers.ts`
+- 断言助手： `src/server/authz/assertAuth.ts`
+- 请求上下文： `src/server/authz/context.ts`
 
-公开路由和管理路由之间是硬边界：代理/冷却 API 和
-服务商变更操作要求管理认证（缺失时返回 HTTP 401）。
+公共路由与管理路由是一个硬边界： agent/cooldown APIs和提供者突变需要管理身份验证（如果缺少，则为HTTP 401）。
 
-完整路由分类规则参见
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)。
+完整的路由分类规则请参见[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) 。
 
-### F. 工作流 FSM 与任务感知路由器
+### F. 工作流FSM和任务感知路由器
 
-在 Combo 选择之上叠加的有限状态机驱动路由器，
-根据检测到的工作流阶段（规划、执行、
-审核）和后台任务亲和度引导流量走向。
+有限状态机驱动的路由器位于组合选择之上，可根据检测到的工作流程阶段（计划、执行、审查）和后台任务关联来引导流量。
 
-- 工作流 FSM：`open-sse/services/workflowFSM.ts`
-- 任务感知路由器：`open-sse/services/taskAwareRouter.ts`
-- 后台任务检测器：`open-sse/services/backgroundTaskDetector.ts`
-- 意图分类器：`open-sse/services/intentClassifier.ts`
+- 工作流程FSM: `open-sse/services/workflowFSM.ts`
+- 任务感知路由器： `open-sse/services/taskAwareRouter.ts`
+- 后台任务检测器： `open-sse/services/backgroundTaskDetector.ts`
+- 意图分类器： `open-sse/services/intentClassifier.ts`
 
-FSM 状态转换反馈到 Auto Combo 的评分中，使后台/自动化任务偏向
-更便宜的模型，交互式规划/审核轮次偏向更强的模型。
+FSM转换纳入 Auto Combo 的评分中，偏向于background/automation任务的更便宜的模型，以及用于交互式planning/review转弯的更强的模型。
 
-### G. 服务商专属容灾
+### G. 特定于提供者的弹性
 
-多个服务商内置了专用的容灾和隐身模块，这些模块
-基于全局熔断器 / 连接冷却 / 模型锁定层运行：
+一些提供者提供了专用的弹性和隐形模块，这些模块搭载在全局断路器/连接冷却/模型锁定层上：
 
-- Antigravity 429 引擎：`open-sse/services/antigravity429Engine.ts`（轮换
-  身份、清洗响应头，通过 `antigravityCredits.ts`、`antigravityHeaderScrub.ts`、
-  `antigravityHeaders.ts`、`antigravityIdentity.ts`、
-  `antigravityVersion.ts` 驱动积分/版本追踪）
-- ModelScope 配额策略：`open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH（兼容通道握手）：`open-sse/services/claudeCodeCCH.ts`，
-  外加 `claudeCodeCompatible.ts`、`claudeCodeConstraints.ts`、`claudeCodeExtraRemap.ts`、
-  `claudeCodeToolRemapper.ts`
-- Claude Code 指纹塑造：`open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code 混淆：`open-sse/services/claudeCodeObfuscation.ts`
+- Antigravity 429 引擎： `open-sse/services/antigravity429Engine.ts` （轮换身份、清理响应标头、通过`antigravityCredits.ts`、 `antigravityHeaderScrub.ts`、 `antigravityHeaders.ts`、 `antigravityIdentity.ts`、 `antigravityVersion.ts`驱动credits/version跟踪）
+- Antigravity 429 防护： `open-sse/services/antigravity429Guard.ts` （所有主机上的上游 429 的每个请求预算， `ANTIGRAVITY_MAX_429_ATTEMPTS`；本地应答拒绝正文的相同重新发送； `src/sse/handlers/chat.ts`不会通过冷却感知重试重新启动此类请求）
+- ModelScope配额政策： `open-sse/services/modelscopePolicy.ts`
+- Claude代码CCH （兼容通道握手）： `open-sse/services/claudeCodeCCH.ts`，加上`claudeCodeCompatible.ts`、 `claudeCodeConstraints.ts`、 `claudeCodeExtraRemap.ts`、 `claudeCodeToolRemapper.ts`
+- Claude代码指纹整形： `open-sse/services/claudeCodeFingerprint.ts`
+- Claude代码混淆： `open-sse/services/claudeCodeObfuscation.ts`
 
-完整隐身策略和操作指南参见
-[`docs/security/STEALTH_GUIDE.md`](../security/STEALTH_GUIDE.md)。
+有关完整的隐形剧本和操作指南，请参阅`docs/security/STEALTH_GUIDE.md` （git；未编译到`/docs`中）。
 
-### H. Webhook、推理缓存、读缓存
+### H. Webhooks、推理缓存、读取缓存
 
-- **Webhook** — 服务商/帐户/任务事件的出站分发。
-  - 分发器：`src/lib/webhookDispatcher.ts`
-  - 存储：`webhooks` SQLite 表（通过 `src/lib/db/webhooks.ts`）
-  - 控制台页面：`/dashboard/webhooks`（订阅、密钥、重试历史）
-  - 事件分类和重试语义参见 [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)。
-- **推理缓存** — 对生成思考 Token 的服务商（Claude、GLMT 等）
-  保存可回放的推理块，让连续轮次可以跳过重新思考。
-  - DB 层：`src/lib/db/reasoningCache.ts`
-  - 服务层：`open-sse/services/reasoningCache.ts`
-  - 回放语义参见 [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)。
-- **读缓存** — 按签名索引的短生命周期响应缓存，用于
-  消除上游 SDK 的错误重复请求。
-  - DB 层：`src/lib/db/readCache.ts`
-  - 统计端点：`GET /api/cache/stats`，控制台页面 `/dashboard/cache`
+- **网络钩子**—用于provider/account/task事件的出站调度。
+  - 调度员： `src/lib/webhookDispatcher.ts`
+  - 存储： `webhooks` SQLite表（通过`src/lib/db/webhooks.ts`）
+  - 仪表板： `/dashboard/webhooks` （订阅、机密、重试历史记录）
+  - 有关事件分类和重试语义，请参阅[`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) 。
+- **推理缓存**—可重播推理块，用于发出思考标记（Claude、 GLMT等）的提供者，因此连续回合可以跳过重新思考。
+  - DB层： `src/lib/db/reasoningCache.ts`
+  - 服务层： `open-sse/services/reasoningCache.ts`
+  - 有关重播语义，请参阅[`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) 。
+- **读取缓存**—短期响应缓存，由签名键控，用于崩溃来自损坏的上游SDKs相同重试。
+  - DB层： `src/lib/db/readCache.ts`
+  - 统计端点： `GET /api/cache/stats`，仪表板位于`/dashboard/cache`
 
 ## 3) 持久化层
 
@@ -535,16 +504,17 @@ FSM 状态转换反馈到 Auto Combo 的评分中，使后台/自动化任务偏
 - 表（在 `src/lib/db/core.ts` 中创建）：`domain_fallback_chains`、`domain_budgets`、`domain_cost_history`、`domain_lockout_state`、`domain_circuit_breakers`
 - 写穿式缓存模式：运行时以内存 Map 为权威数据源；变更同步写入 SQLite；冷启动时从数据库恢复状态
 
-## 4) 认证与安全界面
+## 4) 身份验证 + 安全接口
 
-- 控制台 Cookie 认证：`src/proxy.ts`、`src/app/api/auth/login/route.ts`
-- API Key 生成/验证：`src/shared/utils/apiKey.ts`
-- 服务商密钥持久化存储在 `providerConnections` 条目中
-- 出站代理支持：`open-sse/utils/proxyFetch.ts`（环境变量）和 `open-sse/utils/networkProxy.ts`（可按服务商或全局配置）
-- SSRF / 出站 URL 守卫：`src/shared/network/outboundUrlGuard.ts` — 拦截所有服务商调用的私有/loopback/本地链路范围目标
-- 运行时环境校验：`src/lib/env/runtimeEnv.ts` — 用于所有环境变量的 Zod Schema，在启动时以错误/警告形式呈现
-- 同步 Token：`src/lib/db/syncTokens.ts` — 为配置包下载端点签发的带权限域 Token；后端使用 `sync_tokens` SQLite 表（迁移文件 `024_create_sync_tokens.sql`）
-- WebSocket 握手认证：`src/lib/ws/handshake.ts` — 通过 API Key 或会话 Cookie 校验 WS 升级请求
+- 仪表板 Cookie 身份验证：`src/proxy.ts`、`src/app/api/auth/login/route.ts`
+- API 密钥生成/验证：`src/shared/utils/apiKey.ts`
+- 提供者密钥持久化存储在 `providerConnections` 条目中
+- 出站代理支持：通过 `open-sse/utils/proxyFetch.ts`（环境变量）以及 `open-sse/utils/networkProxy.ts`（可按提供者或全局配置）
+- SSRF / 出站 URL 防护：`src/shared/network/outboundUrlGuard.ts` — 对提供者调用和 Webhook 目标执行主机检查；模式来自 `src/shared/network/outboundUrlGuardPolicy.ts`（相关标志位参见 `docs/reference/ENVIRONMENT.md`）
+- 运行时环境变量验证：`src/lib/env/runtimeEnv.ts` — 针对所有环境变量的 Zod schema，验证结果以启动错误/警告的形式呈现
+- 同步令牌：`src/lib/db/syncTokens.ts` — 用于配置包下载端点的作用域令牌；由 `sync_tokens` SQLite 表提供支持（迁移文件 `024_create_sync_tokens.sql`）
+- WebSocket 握手身份验证：`src/lib/ws/handshake.ts` — 通过 API 密钥或会话 Cookie 验证 WS 升级请求
+- 实时仪表板 WebSocket 身份验证：`src/server/ws/liveServer.ts` — Sidecar（端口 `LIVE_WS_PORT`）接受仪表板会话 Cookie，或持有管理作用域（`manage`/`admin`）的 Bearer API 密钥；仅限推理的密钥将被拒绝。其内部 `POST /__omniroute_event` 发布端点仅在不存在代理跳转标头（`x-forwarded-*`、`x-real-ip`、`forwarded`、`via`）时接受来自环回地址的对等端请求
 
 ## 5) 云端同步
 
@@ -558,145 +528,145 @@ FSM 状态转换反馈到 Auto Combo 的评分中，使后台/自动化任务偏
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Client as CLI/SDK Client
+    participant Client as CLI/SDK 客户端
     participant Route as /api/v1/chat/completions
     participant Chat as src/sse/handlers/chat
     participant Core as open-sse/handlers/chatCore
-    participant Model as Model Resolver
-    participant Auth as Credential Selector
-    participant Exec as Provider Executor
-    participant Prov as Upstream Provider
-    participant Stream as Stream Translator
+    participant Model as 模型解析器
+    participant Auth as 凭据选择器
+    participant Exec as 提供者执行器
+    participant Prov as 上游提供者
+    participant Stream as 流转换器
     participant Usage as usageDb
 
     Client->>Route: POST /v1/chat/completions
     Route->>Chat: handleChat(request)
-    Chat->>Model: parse/resolve model or combo
+    Chat->>Model: 解析/解析确定模型或组合
 
-    alt Combo model
-        Chat->>Chat: iterate combo models (handleComboChat)
+    alt 组合模型
+        Chat->>Chat: 遍历组合模型 (handleComboChat)
     end
 
     Chat->>Auth: getProviderCredentials(provider)
-    Auth-->>Chat: active account + tokens/api key
+    Auth-->>Chat: 活跃账户 + 令牌/API 密钥
 
     Chat->>Core: handleChatCore(body, modelInfo, credentials)
-    Core->>Core: detect source format
-    Core->>Core: translate request to target format
+    Core->>Core: 检测源格式
+    Core->>Core: 将请求转换为目标格式
     Core->>Exec: execute(provider, transformedBody)
-    Exec->>Prov: upstream API call
-    Prov-->>Exec: SSE/JSON response
-    Exec-->>Core: response + metadata
+    Exec->>Prov: 调用上游 API
+    Prov-->>Exec: SSE/JSON 响应
+    Exec-->>Core: 响应 + 元数据
 
     alt 401/403
         Core->>Exec: refreshCredentials()
-        Exec-->>Core: updated tokens
-        Core->>Exec: retry request
+        Exec-->>Core: 更新后的令牌
+        Core->>Exec: 重试请求
     end
 
-    Core->>Stream: translate/normalize stream to client format
-    Stream-->>Client: SSE chunks / JSON response
+    Core->>Stream: 将流转换/规范化为客户端格式
+    Stream-->>Client: SSE 数据块 / JSON 响应
 
-    Stream->>Usage: extract usage + persist history/log
+    Stream->>Usage: 提取用量 + 持久化历史记录/日志
 ```
 
-## Combo + 帐户容灾流程
+## 组合 + 账户回退流程
 
 ```mermaid
 flowchart TD
-    A[Incoming model string] --> B{Is combo name?}
-    B -- Yes --> C[Load combo models sequence]
-    B -- No --> D[Single model path]
+    A[传入的模型字符串] --> B{是组合名称吗？}
+    B -- 是 --> C[加载组合模型序列]
+    B -- 否 --> D[单一模型路径]
 
-    C --> E[Try model N]
-    E --> F[Resolve provider/model]
+    C --> E[尝试模型 N]
+    E --> F[解析提供者/模型]
     D --> F
 
-    F --> G[Select account credentials]
-    G --> H{Credentials available?}
-    H -- No --> I[Return provider unavailable]
-    H -- Yes --> J[Execute request]
+    F --> G[选择账户凭据]
+    G --> H{凭据可用吗？}
+    H -- 否 --> I[返回提供者不可用]
+    H -- 是 --> J[执行请求]
 
-    J --> K{Success?}
-    K -- Yes --> L[Return response]
-    K -- No --> M{Fallback-eligible error?}
+    J --> K{成功吗？}
+    K -- 是 --> L[返回响应]
+    K -- 否 --> M{错误符合回退条件吗？}
 
-    M -- No --> N[Return error]
-    M -- Yes --> O[Mark account unavailable cooldown]
-    O --> P{Another account for provider?}
-    P -- Yes --> G
-    P -- No --> Q{In combo with next model?}
-    Q -- Yes --> E
-    Q -- No --> R[Return all unavailable]
+    M -- 否 --> N[返回错误]
+    M -- 是 --> O[将账户标记为在冷却期内不可用]
+    O --> P{该提供者还有其他账户吗？}
+    P -- 是 --> G
+    P -- 否 --> Q{当前位于组合中且还有下一个模型吗？}
+    Q -- 是 --> E
+    Q -- 否 --> R[返回全部不可用]
 ```
 
-容灾决策由 `open-sse/services/accountFallback.ts` 根据状态码和错误消息启发式算法驱动。Combo 路由增加了一层额外保护：服务商级 400 错误（如上游内容拦截和角色校验失败）会被视为模型局部故障，后续 Combo 目标仍可继续执行。
+回退决策由 `open-sse/services/accountFallback.ts` 根据状态码和错误消息启发式规则驱动。组合路由增加了一项额外保护：限定于提供者的 400 错误（例如上游内容拦截和角色验证失败）会被视为模型局部故障，因此后续组合目标仍可继续运行。
 
-## OAuth 接入和 Token 刷新生命周期
+## OAuth 接入与令牌刷新生命周期
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant UI as Dashboard UI
+    participant UI as 仪表板 UI
     participant OAuth as /api/oauth/[provider]/[action]
-    participant ProvAuth as Provider Auth Server
+    participant ProvAuth as 提供者授权服务器
     participant DB as localDb
     participant Test as /api/providers/[id]/test
-    participant Exec as Provider Executor
+    participant Exec as 提供者执行器
 
-    UI->>OAuth: GET authorize or device-code
-    OAuth->>ProvAuth: create auth/device flow
-    ProvAuth-->>OAuth: auth URL or device code payload
-    OAuth-->>UI: flow data
+    UI->>OAuth: GET authorize 或 device-code
+    OAuth->>ProvAuth: 创建授权/设备流程
+    ProvAuth-->>OAuth: 授权 URL 或设备代码载荷
+    OAuth-->>UI: 流程数据
 
-    UI->>OAuth: POST exchange or poll
-    OAuth->>ProvAuth: token exchange/poll
-    ProvAuth-->>OAuth: access/refresh tokens
-    OAuth->>DB: createProviderConnection(oauth data)
-    OAuth-->>UI: success + connection id
+    UI->>OAuth: POST exchange 或 poll
+    OAuth->>ProvAuth: 令牌交换/轮询
+    ProvAuth-->>OAuth: 访问/刷新令牌
+    OAuth->>DB: createProviderConnection(OAuth 数据)
+    OAuth-->>UI: 成功 + 连接 ID
 
     UI->>Test: POST /api/providers/[id]/test
-    Test->>Exec: validate credentials / optional refresh
-    Exec-->>Test: valid or refreshed token info
-    Test->>DB: update status/tokens/errors
-    Test-->>UI: validation result
+    Test->>Exec: 验证凭据/可选刷新
+    Exec-->>Test: 有效或已刷新的令牌信息
+    Test->>DB: 更新状态/令牌/错误
+    Test-->>UI: 验证结果
 ```
 
-实时流量中的 Token 刷新在 `open-sse/handlers/chatCore.ts` 内通过执行器的 `refreshCredentials()` 完成。
+实时流量期间的刷新在 `open-sse/handlers/chatCore.ts` 内通过执行器的 `refreshCredentials()` 执行。
 
-## 云端同步生命周期（启用 / 同步 / 禁用）
+## 云同步生命周期（启用 / 同步 / 禁用）
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant UI as Endpoint Page UI
+    participant UI as 端点页面 UI
     participant Sync as /api/sync/cloud
     participant DB as localDb
-    participant Cloud as External Cloud Sync
+    participant Cloud as 外部云同步
     participant Claude as ~/.claude/settings.json
 
     UI->>Sync: POST action=enable
-    Sync->>DB: set cloudEnabled=true
-    Sync->>DB: ensure API key exists
-    Sync->>Cloud: POST /sync/{machineId} (providers/aliases/combos/keys)
-    Cloud-->>Sync: sync result
+    Sync->>DB: 设置 cloudEnabled=true
+    Sync->>DB: 确保 API 密钥存在
+    Sync->>Cloud: POST /sync/{machineId}（提供者/别名/组合/密钥）
+    Cloud-->>Sync: 同步结果
     Sync->>Cloud: GET /{machineId}/v1/verify
-    Sync-->>UI: enabled + verification status
+    Sync-->>UI: 已启用 + 验证状态
 
     UI->>Sync: POST action=sync
     Sync->>Cloud: POST /sync/{machineId}
-    Cloud-->>Sync: remote data
-    Sync->>DB: update newer local tokens/status
-    Sync-->>UI: synced
+    Cloud-->>Sync: 远程数据
+    Sync->>DB: 更新本地较新的令牌/状态
+    Sync-->>UI: 已同步
 
     UI->>Sync: POST action=disable
-    Sync->>DB: set cloudEnabled=false
+    Sync->>DB: 设置 cloudEnabled=false
     Sync->>Cloud: DELETE /sync/{machineId}
-    Sync->>Claude: switch ANTHROPIC_BASE_URL back to local (if needed)
-    Sync-->>UI: disabled
+    Sync->>Claude: 将 ANTHROPIC_BASE_URL 切换回本地地址（如有需要）
+    Sync-->>UI: 已禁用
 ```
 
-当云端同步启用时，由 `CloudSyncScheduler` 触发周期同步。
+启用云同步后，`CloudSyncScheduler` 会触发定期同步。
 
 ## 数据模型与存储映射
 
@@ -810,21 +780,21 @@ erDiagram
 
 ```mermaid
 flowchart LR
-    subgraph LocalHost[Developer Host]
-        CLI[CLI Tools]
-        Browser[Dashboard Browser]
+    subgraph LocalHost[开发者主机]
+        CLI[CLI 工具]
+        Browser[仪表板浏览器]
     end
 
-    subgraph ContainerOrProcess[OmniRoute Runtime]
-        Next[Next.js Server\nPORT=20128]
-        Core[SSE Core + Executors]
+    subgraph ContainerOrProcess[OmniRoute 运行时]
+        Next[Next.js 服务器\nPORT=20128]
+        Core[SSE 核心 + 执行器]
         MainDB[(storage.sqlite)]
-        UsageDB[(usage tables + log artifacts)]
+        UsageDB[(用量表 + 日志工件)]
     end
 
-    subgraph External[External Services]
-        Providers[AI Providers]
-        SyncCloud[Cloud Sync Service]
+    subgraph External[外部服务]
+        Providers[AI 提供者]
+        SyncCloud[云同步服务]
     end
 
     CLI --> Next

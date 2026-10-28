@@ -114,3 +114,37 @@ test("non-text reasoning_details (e.g. reasoning.encrypted) survive untouched", 
   });
   assert.deepEqual(target.reasoning_details, [{ type: "reasoning.encrypted", data: "sig" }]);
 });
+
+test("detail cleanup preserves mixed fields and does not mutate source objects", () => {
+  const source = {
+    reasoning_content: "existing",
+    reasoning_details: [
+      { text: NON_ANTHROPIC_THINKING_PLACEHOLDER, content: "real", id: "mixed" },
+      { text: "", content: null, id: "non-string" },
+      { text: "", content: "", id: "empty" },
+      { type: "reasoning.encrypted", data: "signature" },
+      null,
+    ],
+  };
+  const original = structuredClone(source);
+  const target = copy(source);
+  assert.deepEqual(target, {
+    reasoning_content: "existing",
+    reasoning_details: [
+      { content: "real", id: "mixed" },
+      { content: null, id: "non-string" },
+      { type: "reasoning.encrypted", data: "signature" },
+      {},
+    ],
+  });
+  assert.deepEqual(source, original);
+  assert.notEqual(target.reasoning_details, source.reasoning_details);
+});
+
+test("pre-existing target details are cleaned even when the source has none", () => {
+  const target: Record<string, unknown> = {
+    reasoning_details: [{ text: NON_ANTHROPIC_THINKING_PLACEHOLDER }],
+  };
+  copyOpenAICompatibleReasoningFields({}, target);
+  assert.deepEqual(target, {});
+});

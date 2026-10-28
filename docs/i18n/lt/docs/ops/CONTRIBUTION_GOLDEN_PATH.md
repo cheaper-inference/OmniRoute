@@ -4,48 +4,48 @@
 
 ---
 
-Naudokitės šiuo vadovu, kad pasirinktumėte mažiausią patikimą kūrimo ciklą „pull request“ užklausai. Jis
+Naudokite šį vadovą, kad pasirinktumėte mažiausią patikimą kūrimo ciklą ištraukimo užklausai. Jis
 nepakeičia toliau pateiktų nuorodų į konkrečių sričių architektūros ir saugumo dokumentus; jis susieja kiekvieną dažną
 pakeitimo tipą su jo sutartimis, tikslinėmis patikromis ir CI aprėptimi.
 
 ## Kelias, kuriuo eina kiekvienas pakeitimas
 
-1. **Prieš redaguodami pasirinkite bazinę šaką.** Raskite aukščiausią aktyvią `release/v*` šaką ir sukurkite šaką nuo
-   jos viršūnės. Kaip tikslą pasirinkite tą šaką, o ne `main`. Jei galioja leidimo įšaldymas, nesirinkite įšaldytos
-   šakos kaip tikslo; naudokite kitą aktyvų ciklą, aprašytą dokumente
-   [Šakų ir leidimų modelis](BRANCHING_MODEL.md).
+1. **Prieš redaguodami pasirinkite bazinę šaką.** Raskite aukščiausios versijos aktyvią `release/v*` šaką ir sukurkite naują šaką nuo
+   jos viršūnės. Kaip tikslinę pasirinkite tą šaką, o ne `main`. Jei galioja leidimo įšaldymas, nesirinkite įšaldytos
+   šakos; naudokite kitą aktyvų ciklą, aprašytą
+   [Šakų ir leidimų modelyje](BRANCHING_MODEL.md).
 2. **Įvardykite sutartis.** Nustatykite kiekvieną katalogą, schemą, sugeneruotą artefaktą, viešąją API ar naudotojo
-   sąsają, kurią paveikia pakeitimas. Toliau pateiktoje lentelėje nurodytas minimalus pradinis rinkinys.
-3. **Parašykite arba atnaujinkite tikslinius testus.** Produkcinės aplinkos pakeitimams kataloguose `src/`, `open-sse/`, `electron/` arba
-   `bin/` tame pačiame PR būtinas automatinis testas. Paleiskite mažiausią testų failų rinkinį, įrodantį
-   veikimą, tada – nurodytas tikslines patikras.
-4. **Leiskite CI vykdyti plačią matricą.** PR vykdomos visos vienetinių testų dalys, Vitest, aprėpties kartelės patikra ir
-   produkcinės aplinkos komponavimas. Platų testų rinkinį vietoje vykdykite tik tada, kai tikslinės patikros klaida rodo
+   sąsają, kurią paveikia pakeitimas. Toliau esančioje lentelėje pateiktas minimalus pradinis rinkinys.
+3. **Parašykite arba atnaujinkite tikslinius testus.** Produkcinio kodo pakeitimams kataloguose `src/`, `open-sse/`, `electron/` arba
+   `bin/` būtinas automatinis testas toje pačioje PR. Paleiskite mažiausią testų failų rinkinį, įrodantį
+   reikiamą elgseną, tada – nurodytas tikslines patikras.
+4. **Leiskite CI paleisti plačią matricą.** Visi vienetinių testų segmentai, Vitest, aprėpties kartelės patikra ir
+   produkcinis komponavimas paleidžiami PR. Plačią testų rinkinio dalį vietoje paleiskite tik tada, kai tikslinės patikros klaida rodo
    platesnį poveikį arba kai pakeitimas apima kelias posistemes.
-5. **Prieš peržiūrą suderinkite pakeitimus.** Atsisiųskite aktyvią bazinę šaką, peržiūrėkite jos naujus įrašus ir savo pakeitimų skirtumą nuo
-   jos, tada perbazinkite arba sujunkite bazinę šaką pagal dalyvių darbo eigą. Sugeneruotų failų
-   ir katalogų konfliktus išspręskite jų šaltinyje, sugeneruokite juos iš naujo, dar kartą paleiskite tikslinį ciklą ir patvirtinkite, kad
-   PR vis dar nukreiptas į aktyvią leidimo šaką.
-6. **Užregistruokite įrodymus.** PR šablone nurodykite vykdytas komandas, visus pridėtus ar pakeistus testų failus,
-   migracijas arba funkcijų vėliavėles ir visas dar laukiamas tik CI vykdomas patikras.
+5. **Prieš peržiūrą suderinkite pakeitimus.** Gaukite aktyvią bazinę šaką, peržiūrėkite jos naujus pakeitimus ir savo skirtumus nuo
+   jos, tada perbazinkite arba sujunkite bazinę šaką pagal bendradarbių darbo eigą. Sugeneruotų failų
+   ir katalogų konfliktus spręskite jų šaltinyje, sugeneruokite juos iš naujo, pakartotinai paleiskite tikslinį ciklą ir patvirtinkite, kad
+   PR vis dar nukreipta į aktyvią leidimo šaką.
+6. **Užfiksuokite įrodymus.** PR šablone nurodykite paleistas komandas, kiekvieną pridėtą ar pakeistą testo failą,
+   migracijas ar funkcijų vėliavėles ir visus dar laukiančius tik CI atliekamus patikrinimus.
 
-## Etaloniniai keliai pagal pakeitimo tipą
+## Rekomenduojami keliai pagal pakeitimo tipą
 
-Toliau pateiktos komandos yra minimalios tikslinės patikros, o ne leidimas praleisti testą, tiesiogiai tikrinantį
-jūsų pakeistą veikimą.
+Toliau pateiktos komandos yra minimalios tikslinės patikros, o ne leidimas praleisti testą, kuris tiesiogiai tikrina jūsų
+pakeistą elgseną.
 
 ### Teikėjas
 
 **Sutartys**
 
-- Teikėjo apibrėžimas kataloge `src/shared/constants/providers/` ir jo kompozicija faile
+- Teikėjo aprašas kataloge `src/shared/constants/providers/` ir jo kompozicija faile
   `src/shared/constants/providers.ts`.
-- Modeliai ir galimybės faile `open-sse/config/providerRegistry.ts` arba išskirtuose jo registro failuose.
-- Vykdyklės / transformatoriaus pasirinkimas, OAuth arba API rakto konfigūracija, valdymo skydelio ištekliai ir sugeneruota
-  teikėjo nuoroda, kai taikoma.
-- Viešieji prisijungimo duomenys turi naudoti `resolvePublicCred()`; klaidų atsakymuose turi būti naudojamos bendrosios išvalytų
-  klaidų pagalbinės priemonės. Žr. `docs/security/PUBLIC_CREDS.md` (git; nekompiliuojama į `/docs`) ir
-  [Klaidų išvalymas](../security/ERROR_SANITIZATION.md).
+- Modeliai ir galimybės faile `open-sse/config/providerRegistry.ts` arba išskaidytuose jo registro failuose.
+- Vykdytojo / transformatoriaus parinkimas, OAuth arba API rakto konfigūracija, valdymo skydelio ištekliai ir, kai
+  taikoma, sugeneruotas teikėjo žinynas.
+- Viešieji prisijungimo duomenys turi naudoti `resolvePublicCred()`; klaidų atsakymai turi naudoti bendrinamas išvalytų
+  klaidų pagalbines priemones. Žr. `docs/security/PUBLIC_CREDS.md` (git; nekompiliuojamas į `/docs`) ir
+  [Klaidų duomenų išvalymą](../security/ERROR_SANITIZATION.md).
 
 **Tikslinis ciklas**
 
@@ -54,33 +54,33 @@ npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # kai pasikeičia katalogas; įtraukite sugeneruotą skirtumą į įrašą
+npm run gen:provider-reference   # kai pasikeičia katalogas; įtraukite sugeneruotą skirtumą į komitą
 npm run lint
 ```
 
-Taip pat išbandykite kiekvieną paveiktą užklausų šeimą: pokalbių, Responses, vaizdų, vektorinių reprezentacijų, garso arba vaizdo įrašų.
-Sugeneruotų katalogų ir etaloninius skirtumus peržiūrėkite kaip sutarčių pakeitimus; nepriimkite jų aklai.
+Taip pat išbandykite kiekvieną paveiktą užklausų šeimą: pokalbių, Responses, vaizdų, vektorinių reprezentacijų, garso ar vaizdo įrašų.
+Sugeneruotų katalogų ir etaloninius skirtumus vertinkite kaip sutarčių pakeitimus; nepriimkite jų aklai.
 
 ### Maršruto parinkimas
 
 **Sutartys**
 
 - Viešosios strategijų reikšmės ir UI metaduomenys faile `src/shared/constants/routingStrategies.ts`.
-- Persiuntimas ir eiliškumas faile `open-sse/services/combo.ts` ir kataloge `open-sse/services/combo/`.
+- Nukreipimas ir eiliškumas faile `open-sse/services/combo.ts` ir kataloge `open-sse/services/combo/`.
 - Combo schemos, išlaikymas, atsparumo būsena, modelių galimybės ir API / UI valdikliai.
-- [Auto-Combo variklis](../routing/AUTO-COMBO.md) ir atsparumo dokumentacija, kai pasikeičia veikimas.
+- [Auto-Combo variklis](../routing/AUTO-COMBO.md) ir atsparumo dokumentacija, kai keičiasi elgsena.
 
 **Tikslinis ciklas**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strategijos arba persiuntimo pakeitimai
-npm run check:known-symbols      # strategijos registravimo pakeitimai
+npm run test:combo:matrix        # strategijos arba nukreipimo pakeitimai
+npm run check:known-symbols      # strategijos registracijos pakeitimai
 npm run lint
 ```
 
-Vietoje naudokite deterministinius testus su imituojamomis aukštesnio lygio paslaugomis. Tiesioginėms Combo paviršinėms patikroms reikalingi prisijungimo duomenys ir jos
-vykdomos rankiniu būdu, todėl nepakeičia CI.
+Vietoje naudokite deterministinius testus su imituojamais aukštesnio lygio paslaugų atsakymais. Tiesioginiams Combo baziniams testams reikia prisijungimo duomenų, jie
+atliekami rankiniu būdu ir nėra CI pakaitalas.
 
 ### UI / UX
 
@@ -89,8 +89,8 @@ vykdomos rankiniu būdu, todėl nepakeičia CI.
 - Next.js maršruto / puslapio ir bendrinamų komponentų ribos kataloguose `src/app/` ir
   `src/shared/components/`.
 - API atsakymų struktūros, įkėlimo / tuščios būsenos / klaidų būsenos, klaviatūros ir ekrano skaitytuvų veikimas,
-  adaptyvusis išdėstymas, temos ir lokalizacijų plėtra.
-- Angliškos UI šaltinio eilutės faile `src/i18n/messages/en.json`; naujo naudotojams rodomo teksto neįrašykite tiesiogiai kode.
+  prisitaikantis išdėstymas, temos ir lokalių plėtra.
+- Angliški UI šaltinio tekstai faile `src/i18n/messages/en.json`; neįrašykite naujo naudotojams matomo teksto tiesiai kode.
 
 **Tikslinis ciklas**
 
@@ -101,19 +101,19 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Sąveikos ar vaizdinių pakeitimų atveju paleiskite programą ir patikrinkite tiek siauras, tiek plačias peržiūros sritis. CI vykdo
-produkcinės aplinkos komponavimą ir platesnius testų rinkinius; vaizdinį veikimą vis tiek reikia patikrinti tikslingu komponento, Playwright
-arba dokumentuotu rankiniu testu, tinkamu konkrečiam pakeitimui.
+Jei keičiama sąveika ar vaizdas, paleiskite programą ir patikrinkite siaurą bei platų rodinio plotį. CI paleidžia
+produkcinį komponavimą ir platesnius testų rinkinius; vaizdinei elgsenai vis tiek reikia tikslinio komponento ar Playwright testo
+arba dokumentuotos, pakeitimui tinkamos rankinės patikros.
 
 ### i18n
 
 **Sutartys**
 
-- `src/i18n/messages/en.json` yra UI šaltinis; `config/i18n.json` yra lokalizacijų šaltinis.
-- CLI katalogai laikomi atskirai kataloge `bin/cli/locales/`.
+- `src/i18n/messages/en.json` yra UI šaltinis; `config/i18n.json` yra lokalių šaltinis.
+- CLI katalogai saugomi atskirai kataloge `bin/cli/locales/`.
 - Tiksliai išsaugokite ICU vietaženklius ir žymas. Neverskite produktų / teikėjų / modelių pavadinimų,
-  protokolų ir antraščių pavadinimų, komandų, kodo / JSON identifikatorių, URL, aplinkos kintamųjų arba
-  saugomų terminų, tokių kaip `OmniRoute`, `OAuth`, `MCP` ir `A2A`. Dabartinis šaltinio sąrašas yra
+  protokolų ir antraščių pavadinimų, komandų, kodo / JSON identifikatorių, URL, aplinkos kintamųjų ar
+  saugomų terminų, pvz., `OmniRoute`, `OAuth`, `MCP` ir `A2A`. Dabartinis šaltinio sąrašas yra
   `scripts/i18n/glossary/protected-terms.json`.
 
 **Tikslinis ciklas**
@@ -123,45 +123,45 @@ npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
 npm run i18n:check-value-drift
 npm run i18n:check-glossary
-npm run check:cli-i18n          # kai pasikeičia CLI eilutės / katalogai
+npm run check:cli-i18n          # kai keičiami CLI tekstai / katalogai
 npm run lint
 ```
 
 Tai yra esamos sistemos gairės, o ne kvietimas plėsti jos įrankius ar raktų modelį.
-Kol projektuojama pakaitinė sistema, i18n pataisos turi būti tikslinės. Nevykdykite vertimo
-komandų, kurios kreipiasi į išorines paslaugas, nebent užduočiai aiškiai reikia sugeneruotų vertimų ir
+Kol kuriama pakaitinė sistema, i18n pataisos turi būti tikslinės. Nepaleiskite vertimo
+komandų, kurios kreipiasi į išorines paslaugas, nebent užduotis aiškiai reikalauja sugeneruotų vertimų ir
 jūs peržiūrėjote gautą skirtumą.
 
 ### CLI
 
 **Sutartys**
 
-- Viešosios komandos ir vėliavėlės kataloge `bin/cli/`, sugeneruotos API komandos, išėjimo kodai, stdout/stderr ir
+- Viešosios komandos ir parinktys kataloge `bin/cli/`, sugeneruotos API komandos, išėjimo kodai, stdout/stderr ir
   JSON išvesties struktūros, konfigūracijos / aplinkos veikimas bei į paketą įtraukti failai.
 - Naudotojui rodomos CLI eilutės turi naudoti CLI i18n sluoksnį, o `en` / `pt-BR` katalogai turi būti suderinti.
-- Išlaikykite Node kaip palaikomą vykdymo aplinką ir paskelbto dvejetainio failo kontraktą.
+- Išsaugokite Node kaip palaikomą vykdymo aplinką ir paskelbto dvejetainio failo sutartį.
 
 **Tikslinis ciklas**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
 npm run check:cli-i18n
-npm run build:cli             # sugeneruoto / sujungto CLI pakeitimai
-npm run check:pack-policy     # paketo viešosios sąsajos pakeitimai
+npm run build:cli             # sugeneruotos / sukomplektuotos CLI pakeitimai
+npm run check:pack-policy     # paketo viešojo paviršiaus pakeitimai
 npm run lint
 ```
 
-Kai veikimas priklauso nuo analizavimo, failų arba išėjimo būsenos, laikinajame duomenų kataloge naudokite tikslią komandą.
+Kai veikimas priklauso nuo analizavimo, failų ar išėjimo būsenos, vykdykite tikslią komandą laikinajame duomenų kataloge.
 CI atlieka platesnes paketo artefaktų ir ekosistemos patikras.
 
 ### Duomenų bazė
 
-**Kontraktai**
+**Sutartys**
 
 - Domeno moduliai yra kataloge `src/lib/db/`; konkrečius modulius importuokite tiesiogiai (senasis `localDb.ts` pakartotinio eksportavimo sluoksnis pašalintas).
 - Sunumeruotos, idempotentinės SQL migracijos kataloge `src/lib/db/migrations/`, operacijų saugumas, naujinimo
-  veikimas, indeksai ir visi iškvietėjai, kuriems schema daro poveikį.
-- Maršrutai ir apdorojimo funkcijos niekada nevykdo neapdorotų SQL užklausų tiesiogiai.
+  veikimas, indeksai ir kiekvienas schemos paveiktas kvietėjas.
+- Maršrutai ir apdorojimo funkcijos niekada tiesiogiai nevykdo neapdorotų SQL užklausų.
 
 **Tikslinis ciklas**
 
@@ -173,42 +173,113 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Pridėdami migraciją išbandykite ir naują duomenų bazę, ir naujinimą iš ankstesnės schemos. Duomenų bazės testai
-valymo metu turi uždaryti jungtis ir iškviesti `resetDbInstance()`. Vykdykite `npm run test:bun:db` tik tada, kai
-keičiasi geriausių pastangų principu palaikomas Bun adapterio kelias; Node išlieka autoritetingas.
+Pridėdami migraciją, išbandykite ir naują duomenų bazę, ir naujinimą iš ankstesnės schemos. Atliekant valymą, duomenų bazės testai
+turi uždaryti deskriptorius ir iškviesti `resetDbInstance()`. Vykdykite `npm run test:bun:db` tik tada, kai
+pasikeičia pagal galimybes palaikomas Bun adapterio kelias; Node išlieka autoritetinga vykdymo aplinka.
 
-### Kūrimas / diegimas
+### Kompiliavimas / diegimas
 
-**Kontraktai**
+**Sutartys**
 
-- Šakninio katalogo ir darbo sričių manifestai / užrakto failas, `scripts/build/`, Next.js autonominis surinkimas, `dist/`
-  paketo turinys, Electron platformos metaduomenys, CI darbo eigos ir diegimo kontroliniai failai.
-- Palaikomi Node versijų diapazonai ir leidžiamų Bun naudojimo atvejų sąrašas faile `CLAUDE.md` turi likti nepakitę.
-- Kūrimo artefaktai neturi būti sekami; taikomos priklausomybių, licencijų, darbo eigų ir paketų taisyklės.
+- Šakninio katalogo ir darbo sričių manifestai / užrakto failas, `scripts/build/`, autonominis Next.js surinkimas, `dist/`
+  paketo turinys, Electron platformos metaduomenys, CI darbo eigos ir diegimo kontrolinės reikšmės.
+- Palaikomi Node versijų intervalai ir `CLAUDE.md` leidžiamųjų sąraše nurodytas Bun naudojimas turi likti nepakeisti.
+- Kompiliavimo artefaktai lieka nesekami; taikomos priklausomybių, licencijų, darbo eigų ir paketų strategijos.
 
 **Tikslinis ciklas**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # priklausomybės arba užrakto failo pakeitimai
-npm run check:pack-policy      # paskelbto paketo viešosios sąsajos pakeitimai
+npm run check:lockfile         # priklausomybių arba užrakto failo pakeitimai
+npm run check:pack-policy      # paskelbto paketo viešojo paviršiaus pakeitimai
 npm run lint
 ```
 
-Vietoje naudokite `npm run build` tik tada, kai pakeitimas daro poveikį kompiliavimui, autonominiam surinkimui, ištekliams
-arba vykdymo aplinkos paketų sujungimui. `npm run build:release` naudokite tik leidimo / diegimo patikrai. CI kūrimas yra
-galutinis įvairių platformų signalas; konkrečiai platformai skirtiems Electron pakeitimams reikia atitinkamo tikslinio kūrimo
-arba bazinio veikimo patikros įrodymų.
+Vietoje naudokite `npm run build` tik tada, kai pakeitimas turi įtakos kompiliavimui, autonominiam surinkimui, ištekliams
+arba vykdymo aplinkos komplektavimui. Naudokite `npm run build:release` tik leidimo / diegimo patikrai. CI kompiliavimas yra
+galutinis kelių platformų patikros signalas; konkrečiai Electron platformai skirtiems pakeitimams reikalingas atitinkamas tikslinis kompiliavimas
+arba bazinio veikimo patikros įrodymas.
+
+## Kūrėjo scenarijai bendrai naudojamame kompiuteryje
+
+Du `scripts/dev/` pagalbiniai scenarijai apibrėžia vietinį darbo ciklą devbox aplinkoje, kurioje aktyvūs ir kiti seansai:
+
+```bash
+scripts/dev/typecheck-touched.sh --base release/vX.Y.Z   # failai iš merge-base(HEAD, base)..HEAD
+scripts/dev/typecheck-touched.sh src/a.ts tests/unit/b.test.ts   # būtent šie failai
+scripts/dev/new-worktree.sh fix/1234-slug release/vX.Y.Z  # izoliuotas worktree, saugus lygiagrečiam darbui
+```
+
+- `typecheck-touched.sh` tikrina tik pakeistų `.ts/.tsx` failų tipus naudodamas laikiną
+  `tsconfig.touched.tmp.json` (`extends ./tsconfig.json`, `types: ["node"]`, `noEmit`,
+  `incremental: false`) ir 6 GB atminties limitą, todėl jis pakeičia viso projekto `tsc -p tsconfig.json`,
+  kuriam apkrautame kompiuteryje pritrūksta atminties. Jis išveda pakeistų failų klaidas ir vieną
+  suvestinės eilutę, o tada grąžina `1`, jei pakeistuose failuose yra klaidų, `2`, jei klaidos yra tik
+  importuotuose failuose arba tsc nustojo veikti nepateikęs diagnostikos (perskaitykite jo nurodytą
+  žurnalą kataloge `_artifacts/typecheck-touched/`), ir `0`, jei klaidų nėra. Laikinas tsconfig
+  visada pašalinamas; niekada jo neįtraukite į commit.
+- `new-worktree.sh` nuosekliai vykdo lygiagrečius paleidimus naudodamas
+  `<git-common-dir>/omniroute-new-worktree.lock` (pagal numatytuosius nustatymus laukia iki 600 s ir
+  rodo pranešimą; scenarijaus antraštėje aprašyta, kaip pakeisti šį nustatymą) ir panaikina savo
+  sukurtą šaką, kai `git worktree add` nepavyksta prieš sukuriant worktree, todėl pakartotinai bandant
+  nereikia rankiniu būdu vykdyti `git branch -D`. Kietosiomis nuorodomis susietas `node_modules` ir
+  `.husky/_` kopija lieka nepakeisti.
+
+## Vietinis kandidato ciklas
+
+Pirminio kodo testai negali įrodyti, kad supakuotas artefaktas paleidžiamas: pakavimo sąrašų,
+pašalintų priklausomybių ir savųjų dvejetainių failų problemos išryškėja tik įdiegus ir paleidus
+tarball. `npm run dev:candidate` (`scripts/dev/candidate.mjs`) yra vietinė RFC #8084 aprašyto
+vienkartinio kūrimo / tikrinimo / publikavimo proceso dalis: jis sukuria vieną kandidatą, patikrina
+būtent tą artefaktą, publikuoja jį pervardydamas katalogus ir grąžina ankstesnę versiją, jei
+publikuoto lizdo būklės patikra nepavyksta.
+
+```bash
+npm run dev:candidate -- run --dry-run --json  # išvesti planą nieko nekeičiant
+npm run dev:candidate -- run                   # sukurti + patikrinti + publikuoti, automatiškai grąžinti ankstesnę versiją
+npm run dev:candidate -- build                 # npm pack + įdiegti į _artifacts/candidate/<id>/
+npm run dev:candidate -- validate --id <id>    # paleisti laisvame prievade, /api/health + /v1/models
+npm run dev:candidate -- promote --id <id>     # <id> → current, current → previous
+npm run dev:candidate -- rollback              # sukeisti current ir previous
+npm run dev:candidate -- run --from-tarball <file.tgz>  # pakartotinai naudoti kitur (CI) sukurtą tarball
+```
+
+- **Sukurkite vieną kartą.** `build` supakuoja esamą medį (jam reikia `dist/server.js`, todėl
+  pirmiausia paleiskite `npm run build:release`) arba nukopijuoja `--from-tarball`, o tada įdiegia
+  tarball į izoliuotą npm prefiksą, nes tarball neturi `node_modules`. Id yra trumpa `HEAD` sha
+  (`-dirty`, kai medyje yra vietinių pakeitimų) arba `tgz-<sha256>`, jei naudojamas tarball. Jau
+  sukurtas švarus id panaudojamas pakartotinai, užuot jį kūrus iš naujo; norėdami sukurti iš naujo,
+  nurodykite `--force`.
+- **Tikrinkite paketą, o ne pirminį kodą.** `validate` paleidžia įdiegtą CLI
+  (`serve --port <free port>`) su nauju `DATA_DIR=<candidate>/data`, fiktyviomis paslaptimis, o
+  operatoriaus `OMNIROUTE_API_KEY`, `STORAGE_ENCRYPTION_KEY` ir `INITIAL_PASSWORD` pašalina iš
+  aplinkos, kad būtų patikrinta naujo diegimo autentifikavimo rakto nereikalaujanti loopback
+  konfigūracija. Jis laukia, kol `GET /api/health` grąžins 200, reikalauja, kad `GET /v1/models`
+  grąžintų 200, sustabdo procesų grupę ir įrašo rezultatą į `validation.json` kartu su tarball maiša.
+- **Publikuokite tą patį artefaktą.** `promote` atsisako publikuoti kandidatą, jei nėra sėkmingo jo
+  dabartinės tarball maišos patikrinimo. Numatytasis aktyvus lizdas yra
+  `_artifacts/candidate/current`; `--target <dir>` parenka kitą katalogą toje pačioje failų sistemoje,
+  o jo ankstesnis lizdas yra `<dir>.previous`. Kiekvienas pervardijimas yra atominis, o įvykus
+  klaidai proceso viduryje jau atlikti pervardijimai atšaukiami.
+- **Grąžinkite ankstesnę versiją.** `run` dar kartą patikrina publikuotą lizdą ir, jei patikra
+  nepavyksta, sukeičia `current` ir `previous`. Kandidatas, kurio pirmasis patikrinimas nepavyksta,
+  niekada nepublikuojamas.
+
+Viskas įrašoma į git ignoruojamą `_artifacts/candidate/`; esama OmniRoute instaliacija ir jos
+duomenų katalogas niekada nekeičiami. Publikuotas CLI yra
+`_artifacts/candidate/current/prefix/bin/omniroute`; naudodami jį paleiskite su savo `DATA_DIR`.
+Išėjimo kodai: `0` – sėkmė, `1` – nepavykęs patikrinimas arba publikavimas, `2` – naudojimo klaida
+arba trūkstamas build.
 
 ## Vietinis ciklas ir CI
 
-| Vykdyti lokaliai kiekvienam pakeitimui                                                               | CI pateikia platų rezultatų vaizdą                                                    |
-| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Tiesioginiai veikimo testai ir pirmiau nurodytos kategorijų patikros                                 | Lygiagrečiai suskaidytas visas vienetinių testų rinkinys ir nuoseklieji testai        |
-| `npm run lint`                                                                                       | „Vitest“ testų rinkiniai ir aprėpties bei kokybės kartelės                            |
-| Tipų patikra arba kūrimas tik tada, kai to reikalauja paveikta sutartis                              | Produkcinis kūrimas, saugumo, dokumentacijos, priklausomybių ir PR politikos patikros |
-| Neautomatinė sąveika / tiesioginės patikros tik tada, kai automatizavimas negali patvirtinti veikimo | Darbų tarpusavio integracijos ir platformų patikros, sukonfigūruotos darbo eigoje     |
+| Vykdyti vietoje kiekvienam pakeitimui                                                           | CI pateikia bendrą signalą                                                                  |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Tiesioginiai veikimo testai ir pirmiau nurodytos kategorijų patikros                            | Į dalis suskaidytas visas vienetinių testų rinkinys ir nuoseklieji testai                   |
+| `npm run lint`                                                                                  | Vitest testų rinkiniai ir aprėpties bei kokybės kartelės                                    |
+| Tipų tikrinimas arba kompiliavimas tik tada, kai to reikalauja paveikta sutartis                | Produkcinis kompiliavimas, saugumo, dokumentacijos, priklausomybių ir PR politikos patikros |
+| Rankinė sąveika / tiesioginės patikros tik tada, kai automatizavimas negali patvirtinti veikimo | Darbų tarpusavio integracijos ir platformų patikros, sukonfigūruotos darbo eigoje           |
 
 Sėkmingas tikslinis ciklas yra pakeistos sutarties įrodymas, o ne garantija, kad nesusijusios CI patikros
 bus sėkmingos. Kita vertus, neverskite kiekvieno vietinio pakeitimo laukti visos saugyklos matricos.
@@ -218,12 +289,12 @@ bus sėkmingos. Kita vertus, neverskite kiekvieno vietinio pakeitimo laukti viso
 Prieš prašydami peržiūros:
 
 - Patvirtinkite, kad PR bazė vis dar yra aukščiausia aktyvi `release/v*` šaka.
-- Atsisiųskite tos bazės naujinimus ir peržiūrėkite commit'us, įtrauktus nuo jūsų šakos sukūrimo.
-- Peržiūrėkite `git diff <active-base>...HEAD`, ar nėra netyčinių arba sugeneruotų pakeitimų pertekliaus.
-- Katalogų ir sugeneruotų dokumentų konfliktus spręskite atnaujindami šaltinį ir iš naujo generuodami išvestį.
-- Po suderinimo iš naujo paleiskite kiekvieną tikslinį testą / patikrą, nurodytą PR aprašyme.
-- Niekada nesilpninkite teiginių ir nešalinkite privalomų testų vien tam, kad prisitaikytumėte prie pasikeitusios bazės.
+- Atsisiųskite tos bazės pakeitimus ir peržiūrėkite įtraukimus, pridėtus nuo jūsų šakos sukūrimo.
+- Peržiūrėkite `git diff <active-base>...HEAD`, ar nėra netyčinių arba sugeneruotų pakeitimų.
+- Išspręskite katalogo ir sugeneruotų dokumentų konfliktus atnaujindami šaltinį ir iš naujo sugeneruodami išvestį.
+- Po suderinimo iš naujo paleiskite kiekvieną tikslinį testą / patikrą, nurodytą PR apraše.
+- Niekada nesilpninkite tikrinimų ir nepašalinkite privalomų testų vien tam, kad prisitaikytumėte prie pasikeitusios bazės.
 
-Leidimo įšaldymo ir bazės keitimo taisykles rasite dokumente
-[Šakų ir leidimų modelis](BRANCHING_MODEL.md). Visą CI patikrų sąrašą rasite dokumente
-[Kokybės patikrų žinynas](../architecture/QUALITY_GATES.md).
+Leidimo įšaldymo ir bazinės šakos keitimo taisykles rasite
+[Šakų ir leidimų modelyje](BRANCHING_MODEL.md). Visą CI patikrų sąrašą rasite
+[Kokybės patikrų žinyne](../architecture/QUALITY_GATES.md).

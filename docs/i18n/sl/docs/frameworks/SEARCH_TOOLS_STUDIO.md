@@ -36,36 +36,36 @@ Studio s tremi zavihki, ki združuje spletno iskanje, pridobivanje spletne vsebi
 
 ## Zavihki
 
-### Zavihek Iskanje
+### Zavihek za iskanje
 
 Obstoječe komponente `SearchForm` + `ResultsPanel` + `RerankPanel` razširi v zavihek:
 
-- Poizvedba → rezultati (naslov, URL, izsek, ocena ustreznosti).
-- Metapodatki ponudnika v podoknu Konfiguracija (strošek, kvota, stanje).
-- Razdelek za prerazvrščanje: izbira modela za prerazvrščanje, preureditev rezultatov in prikaz `positionDelta`.
+- Poizvedba → rezultati (naslov, URL, izvleček, ocena ustreznosti).
+- Metapodatki ponudnika v podoknu za konfiguracijo (stroški, kvota, stanje).
+- Razdelek za ponovno razvrščanje: izberite model za ponovno razvrščanje, prerazporedite rezultate, prikažite `positionDelta`.
 - Prazno stanje s pozivom k dejanju, ko ni konfiguriran noben ponudnik iskanja.
 - Zgodovina iskanja prek `SearchHistory.tsx`.
 - Kliče `POST /v1/search` (obstoječa končna točka, brez sprememb).
 
-### Zavihek Pridobivanje
+### Zavihek za pridobivanje vsebine
 
-Nov zavihek za pridobivanje vsebine z URL-ja prek `POST /v1/web/fetch` (ustvarjeno v načrtu 05):
+Nov zavihek za pridobivanje vsebine iz URL-ja prek `POST /v1/web/fetch` (ustvarjeno v načrtu 05):
 
-- Vnos: URL + preklop za celotno stran + izbirnik oblike (markdown / besedilo / HTML).
-- Oddaja → pridobivanje → izris `ScrapeResult.tsx`.
-- `ScrapeResult` izriše predogled markdowna in preklop za neobdelano vsebino.
-- Omejitev: če je telo odgovora večje od **256 KB**, uporabniški vmesnik prikaže `(skrajšano, ogled neobdelane vsebine)` in neobdelano vsebino odpre v modalnem oknu Monaco (D21).
-- Podokno z metapodatki: ponudnik (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), zakasnitev, strošek, velikost odgovora, število povezav.
+- Vnos: URL + stikalo za celotno stran + izbirnik oblike (markdown / besedilo / HTML).
+- Pošlji → pridobi → upodobi `ScrapeResult.tsx`.
+- `ScrapeResult` upodobi predogled markdowna + stikalo za neobdelano vsebino.
+- Omejitev: če je telo odziva večje od **256 KB**, uporabniški vmesnik prikaže `(skrajšano, prikaži neobdelano)` in odpre neobdelano vsebino v modalnem oknu Monaco (D21).
+- Podokno z metapodatki: ponudnik (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), zakasnitev, stroški, velikost odziva, število povezav.
 - Uporablja kavelj `useScrapeFetch.ts`.
 
-### Zavihek Primerjava
+### Zavihek za primerjavo
 
-Izvede isto poizvedbo oziroma URL vzporedno pri največ **4 ponudnikih** (D22):
+Izvede isto poizvedbo/URL pri največ **4 ponudnikih vzporedno** (D22):
 
 - Vzporedni stolpci za posamezne ponudnike.
-- Metrike: zakasnitev, strošek, število rezultatov, velikost odgovora.
-- Izračun prekrivanja URL-jev za iskanje (število skupnih URL-jev glede na začetni rezultat).
-- Za vsakega ponudnika kliče `POST /v1/search` (iskanje) ali `POST /v1/web/fetch` (pridobivanje).
+- Meritve: zakasnitev, stroški, število rezultatov, velikost odziva.
+- Izračun prekrivanja URL-jev pri iskanju (število skupnih URL-jev glede na začetni rezultat).
+- Za vsakega ponudnika kliče `POST /v1/search` (iskanje) ali `POST /v1/web/fetch` (pridobivanje vsebine).
 
 ---
 
@@ -100,13 +100,13 @@ Izvede isto poizvedbo oziroma URL vzporedno pri največ **4 ponudnikih** (D22):
 
 ## Katalog ponudnikov
 
-`ProviderCatalog.tsx` prikaže celoten seznam ponudnikov iz `GET /api/search/providers`
-(razširjen v F4, da vključuje ponudnike pridobivanja vsebine):
+`ProviderCatalog.tsx` prikazuje celoten seznam ponudnikov iz `GET /api/search/providers`
+(v F4 razširjen tako, da vključuje ponudnike za pridobivanje vsebine):
 
-| `kind` | `"search"` (20 ponudnikov) ali `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 ponudnikov) ali `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Stanje je **izpeljano ob času zahteve** s preverjanjem, ali poverilnice obstajajo in ali
-so vsi ključi trenutno v obdobju ohlajanja.
+Stanje se **določi ob času zahteve** s preverjanjem, ali poverilnice obstajajo in ali so
+vsi ključi trenutno v obdobju začasne blokade.
 
 ---
 
@@ -118,18 +118,18 @@ Ograda za ključ API je vedno `$OMNIROUTE_API_KEY` (D11, v skupni rabi s Playgro
 
 ---
 
-## Spremembe zaledja
+## Spremembe zalednega sistema
 
-Za to funkcionalnost je bila potrebna samo ena sprememba zaledja:
+Za to funkcionalnost je bila potrebna samo ena sprememba zalednega sistema:
 
 ### Razširjeni `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` je bil razširjen tako, da:
+Datoteka `src/app/api/search/providers/route.ts` je bila razširjena tako, da:
 
-- V polje vključi vseh 6 ponudnikov pridobivanja vsebine (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`).
+- Vključuje vse ponudnike pridobivanja vsebine (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) v matriki.
 - Vsakemu elementu doda `kind: "search" | "fetch"`.
 - Doda `status: "configured" | "missing" | "rate_limited"`, izpeljan iz trenutnega stanja poverilnic.
-- Ohrani združljivost za nazaj — obstoječa polja (`id`, `name` itd.) ostanejo nespremenjena.
+- Ohranja združljivost za nazaj — obstoječa polja (`id`, `name` itd.) ostanejo nespremenjena.
 
 ---
 

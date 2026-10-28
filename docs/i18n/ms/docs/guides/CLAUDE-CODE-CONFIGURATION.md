@@ -48,15 +48,16 @@ terus berfungsi), menjalankan pemeriksaan kesihatan pelayan, dan melaksanakan `c
 
 ---
 
-## Alias penemuan — paparkan model bukan Claude dalam pemilih `/model`
+## Alias penemuan — memaparkan model bukan Claude dalam pemilih `/model`
 
-Penemuan model get laluan Claude Code hanya menyenaraikan id yang bermula dengan `claude`
-atau `anthropic`, jadi dengan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, pemilih
-`/model` asli biasanya menunjukkan **hanya** model Claude/Anthropic OmniRoute — model
-`kimi/kimi-k2.6` atau `glm/glm-5.2` tidak akan muncul, walaupun penghalaannya berfungsi dengan baik.
+Penemuan model gateway Claude Code hanya menyenaraikan id yang bermula dengan `claude`
+atau `anthropic`, jadi dengan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` pemilih
+`/model` asli biasanya memaparkan model Claude/Anthropic OmniRoute **sahaja** —
+`kimi/kimi-k2.6` atau `glm/glm-5.2` tidak akan muncul langsung, walaupun ia boleh
+dirutkan dengan baik.
 
-OmniRoute boleh mencerminkan mana-mana model (dan gabungan) yang didayakan di bawah id `claude/…` supaya ia
-melepasi penapis tersebut dan muncul dalam pemilih:
+OmniRoute boleh mencerminkan mana-mana model (dan kombo) yang didayakan di bawah id
+`claude/…` supaya ia melepasi penapis tersebut dan muncul dalam pemilih:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,39 +65,49 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Apabila anda memilih salah satu daripadanya dalam Claude Code, OmniRoute membuang pembalut `claude/`
-dan mengembalikannya kepada id sebenar sebelum penghalaan — id `claude/<real-claude-model>` yang tulen
-(penyedia OAuth Claude sebenar) sentiasa dibiarkan tanpa perubahan.
+Apabila anda memilih salah satu daripadanya dalam Claude Code, OmniRoute membuang
+pembalut `claude/` untuk mengembalikan id sebenar sebelum perutean — id
+`claude/<real-claude-model>` tulen (pembekal OAuth Claude sebenar) sentiasa
+dibiarkan tanpa diubah.
 
-**Ciri ini dimatikan secara lalai** dan dikawal oleh get tiga peringkat (yang paling khusus
-diutamakan), jadi OmniRoute biasa tidak akan menggandakan katalognya untuk klien yang tidak menggunakan
-Claude Code:
+Secara lalai hanya id asas dicerminkan. Dengan bendera ciri opt-in
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` diaktifkan, varian usaha penaakulan yang sudah
+disenaraikan oleh katalog (cth. `codex/gpt-6-sol-high`) dicerminkan seperti mana-mana
+id lain, jadi Claude Code boleh memilih tahap usaha yang eksplisit, dan id `auto/*`
+terbina dalam yang tidak dapat diwujudkan oleh laluan permintaan tidak dicerminkan.
+Sama ada varian usaha disenaraikan langsung masih dikawal oleh
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — cerminan tidak pernah menambah varian
+yang tiada dalam katalog asas.
 
-| Peringkat | Lokasi                                                                          |
+**Ini dimatikan secara lalai** dan dikawal oleh pintu tiga peringkat (yang paling
+khusus menang), supaya OmniRoute biasa tidak pernah menggandakan katalognya bagi
+klien yang tidak menggunakan Claude Code:
+
+| Peringkat | Di mana                                                                         |
 | --------- | ------------------------------------------------------------------------------- |
-| Model     | Halaman butiran penyedia → togol "Dedahkan dalam Claude Code" bagi setiap model |
-| Penyedia  | Halaman butiran penyedia → togol peringkat penyedia (merangkumi semua modelnya) |
-| Global    | Tetapan → Bendera Ciri → `EXPOSE_CC_DISCOVERY_ALIASES` (dimatikan secara lalai) |
+| Model     | Halaman butiran pembekal → togol "Dedahkan dalam Claude Code" setiap model      |
+| Pembekal  | Halaman butiran pembekal → togol peringkat pembekal (merangkumi semua modelnya) |
+| Global    | Tetapan → Bendera Ciri → `EXPOSE_CC_DISCOVERY_ALIASES` (lalai mati)             |
 
-Pemboleh ubah persekitaran `EXPOSE_CC_DISCOVERY_ALIASES` memaksa peringkat global dihidupkan
-dan mengatasi pilihan penggantian papan pemuka (skrin Bendera Ciri menunjukkan
-nota "aktif melalui pemboleh ubah persekitaran" apabila ini berlaku). Togol bagi setiap penyedia dan
-setiap model memperincikan kawalan tersebut — cth. global dimatikan + penyedia Kimi dihidupkan akan mendedahkan
-hanya model Kimi.
+Pembolehubah persekitaran `EXPOSE_CC_DISCOVERY_ALIASES` memaksa peringkat global
+aktif dan mendapat keutamaan mengatasi penggantian papan pemuka (skrin Bendera Ciri
+memaparkan nota "aktif melalui pembolehubah persekitaran" apabila ia berlaku).
+Togol setiap pembekal dan setiap model menapis dari situ — cth. global mati +
+pembekal Kimi aktif hanya mendedahkan model Kimi.
 
-> ⚠️ **Ketidakpadanan tetingkap pada model bukan Claude.** Claude Code menganggap tetingkap konteks
-> 200K bagi mana-mana id yang tidak dikenalinya (ia tidak dapat membaca tetingkap sebenar daripada
-> `/v1/models`). Untuk model dengan tetingkap yang lebih besar (cth. 256K bagi Kimi K2), tetapkan
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` kepada nilai yang lebih rendah daripada tetingkap sebenar model supaya
-> pemadatan automatik tidak berlaku terlalu awal. Profil yang dijana di atas sudah
-> melakukan ini bagi setiap model.
+> ⚠️ **Ketidaksepadanan tetingkap pada model bukan Claude.** Claude Code menganggap
+> tetingkap konteks 200K untuk mana-mana id yang tidak dikenalinya (ia tidak dapat
+> membaca tetingkap sebenar daripada `/v1/models`). Untuk model dengan tetingkap
+> lebih besar (cth. 256K Kimi K2), tetapkan `CLAUDE_CODE_AUTO_COMPACT_WINDOW` kepada
+> nilai di bawah tetingkap sebenar model supaya pemadatan automatik tidak berlaku
+> terlalu awal. Profil yang dijana di atas sudah melakukan ini untuk setiap model.
 
 ---
 
-## Blok penyediaan awal pada papan pemuka
+## Blok penerimaan awal pada papan pemuka
 
 Kad alat Claude (**Papan Pemuka → Kod CLI**) memaparkan serpihan `settings.json` yang tepat
-untuk tika ini, bersebelahan butang maklumat alias penemuan, dengan butang salin:
+untuk tika ini, bersebelahan butang maklumat alias penemuan, berserta butang salin:
 
 ```jsonc
 {
@@ -108,29 +119,43 @@ untuk tika ini, bersebelahan butang maklumat alias penemuan, dengan butang salin
 }
 ```
 
-URL asas ialah URL yang ditentukan oleh kad tersebut (termasuk penggantian tersuai yang anda taip), dan sudah
-dinormalkan — tanpa akhiran `/v1` dan tanpa garis miring di hujung. **Kunci tersebut tidak pernah dipaparkan**: blok ini disertakan dengan
-ruang letak, jadi tangkapan skrin atau cebisan yang ditampal tidak boleh membocorkannya. Tampalkan kunci anda untuk menggantikannya.
+URL asas ialah URL yang ditentukan oleh kad (termasuk penggantian tersuai yang anda taip), yang telah
+dinormalkan — tanpa akhiran `/v1` dan tanpa garis miring penutup. **Kunci tidak pernah dipaparkan**: blok tersebut disertakan dengan
+ruang letak, supaya tangkapan skrin atau serpihan yang ditampal tidak boleh membocorkannya. Tampalkan kunci anda untuk menggantikannya.
 
-Tambahkan `CLAUDE_CODE_AUTO_COMPACT_WINDOW` di bawah blok `env` yang sama bagi mana-mana model yang tetingkap
-konteks sebenarnya bukan 200K — Claude Code mengandaikan 200K untuk setiap id yang tidak dikenalinya, maka
-pemadatan automatik akan tercetus pada titik yang salah (lihat amaran dalam bahagian sebelumnya).
-Pembina cebisan turut menerima nilai tersebut, jadi pemanggil yang mengetahui saiz tetingkap model sasaran
+Tambahkan `CLAUDE_CODE_AUTO_COMPACT_WINDOW` di bawah blok `env` yang sama untuk mana-mana model yang tetingkap
+konteks sebenarnya bukan 200K — Claude Code menganggap 200K untuk setiap id yang tidak dikenalinya, maka
+pemadatan automatik sebaliknya akan dicetuskan pada masa yang salah (lihat amaran dalam bahagian sebelumnya).
+Pembina serpihan turut menerima nilai tersebut, jadi pemanggil yang mengetahui saiz tetingkap model sasaran
 boleh menghasilkannya secara langsung.
 
-Sumber: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (pembina tulen,
-diuji unit) yang dipaparkan oleh `ClaudeGatewayOnboardingBlock`.
+Sumber: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (pembina
+tulen, diuji dengan ujian unit) yang dipaparkan oleh `ClaudeGatewayOnboardingBlock`.
+
+### Sematkan satu akaun (pilihan)
+
+Untuk menghantar setiap permintaan Claude Code melalui satu akaun penyedia tertentu, tambahkan pengepala
+`x-omniroute-connection` melalui `ANTHROPIC_CUSTOM_HEADERS` dalam blok `env` yang sama:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Salin id daripada cip `xxxxxxxx…` pada baris sambungan di halaman penyedia. Penyematan tersebut hanya
+digunakan untuk id model tunggal (`provider/model`), bukan untuk gabungan. Lihat
+[Penyematan akaun bagi setiap permintaan](../reference/API_REFERENCE.md#account-pinning-per-request) untuk
+tingkah laku sandaran yang tepat.
 
 ---
 
 ## Profil (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **tidak mempunyai fail profil natif** (tidak seperti `~/.codex/<name>.config.toml` milik Codex).
-Mekanisme idiomatik ialah `CLAUDE_CONFIG_DIR` — direktori konfigurasi yang berasingan bagi setiap
+Claude Code **tidak mempunyai fail profil asli** (tidak seperti `~/.codex/<name>.config.toml` milik Codex).
+Mekanisme yang lazim digunakan ialah `CLAUDE_CONFIG_DIR` — direktori konfigurasi berasingan bagi setiap
 profil, masing-masing dengan `settings.json`, kelayakan, sejarah dan cache tersendiri.
 
-`omniroute setup-claude` mendapatkan katalog `/v1/models` langsung dan menulis satu
-profil bagi setiap model pada `~/.claude/profiles/<name>/settings.json`, menggunakan semula
+`omniroute setup-claude` mendapatkan katalog `/v1/models` semasa dan menulis satu
+profil bagi setiap model di `~/.claude/profiles/<name>/settings.json`, menggunakan semula
 **nama yang sama seperti `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
@@ -153,13 +178,13 @@ profil bagi setiap model pada `~/.claude/profiles/<name>/settings.json`, menggun
 > konteks aktif), atau eksport sendiri `ANTHROPIC_AUTH_TOKEN` dan jalankan
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Penyegerakan automatik selepas penemuan model (pilihan ikut serta).** OmniRoute boleh menjana semula fail
+**Penyegerakan automatik selepas penemuan model (ikut serta).** OmniRoute boleh menjana semula fail
 `~/.claude/profiles/<name>/settings.json` yang sama secara automatik apabila penyegerakan model penyedia
-mengubah katalog langsung — maka model baharu/yang dinamakan semula mendapat profil tanpa perlu menjalankan semula
-perintah tersebut. Ciri ini **dimatikan secara lalai**: togolkannya daripada **papan pemuka Kod CLI** ("Penyegerakan automatik
+mengubah katalog semasa — supaya model baharu atau yang dinamakan semula mendapat profil tanpa perlu menjalankan semula
+perintah tersebut. Ia **dimatikan secara lalai**: aktifkan daripada **papan pemuka CLI Code** ("Penyegerakan automatik
 profil CLI" → Claude Code), atau tetapkan `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (ia turut mematuhi
-`CLI_ALLOW_CONFIG_WRITES`, yang dihidupkan secara lalai). Apabila didayakan, ia hanya menulis fail profil; ia tidak pernah
-mengubah konfigurasi Claude aktif/lalai, pengesahan, atau `~/.claude/settings.json` anda.
+`CLI_ALLOW_CONFIG_WRITES`, yang diaktifkan secara lalai). Apabila diaktifkan, ia hanya menulis fail profil; ia tidak pernah
+mengubah konfigurasi Claude aktif/lalai, pengesahan atau `~/.claude/settings.json` anda.
 
 ### Menjana + menggunakan profil
 
@@ -170,8 +195,12 @@ omniroute setup-claude
 # VPS jauh (menerapkan URL VPS ke dalam setiap profil)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
-# Hanya penyedia tertentu
+# Hanya beberapa penyedia
 omniroute setup-claude --only glm,kimi
+
+# Turut menulis profil untuk penyedia CLI setempat (zcode, auggie, devin-cli-agentic,
+# codex-app-server) yang tidak dikesan pada hos ini (dilangkau secara lalai untuk sasaran setempat)
+omniroute setup-claude --include-local
 
 # Pratonton tanpa menulis
 omniroute setup-claude --dry-run

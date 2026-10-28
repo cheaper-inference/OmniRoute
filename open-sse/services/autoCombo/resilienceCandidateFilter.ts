@@ -8,8 +8,25 @@
  * `paidModelFilter.ts` and `candidateOverrides.ts` in this directory.
  */
 import { isAccountUnavailable, isModelLocked } from "../accountFallback.ts";
+import { isOpencodeFreeTierSkipped } from "../opencodeFreeTierSkip.ts";
+import { recordAutoExclusion } from "./autoEvaluationTrace";
 
 export const SYNTHETIC_NOAUTH_CONNECTION_ID = "noauth";
+
+/**
+ * #9057 gate for the synthetic keyless connection: allowed when there is no
+ * allowlist, or when the allowlist names the synthetic id explicitly. The auto
+ * combo pins keyless targets to "noauth", and pin-fail-closed
+ * (`implicitPinAllowlist`) turns that pin into the allowlist ["noauth"].
+ * Lives next to the id so the engine (`comboKeyScope.ts`) and the app
+ * (`src/sse/services/noAuthAllowlist.ts`) share one implementation.
+ */
+export function allowlistPermitsSyntheticNoAuth(
+  allowedConnections: string[] | null | undefined
+): boolean {
+  if (!Array.isArray(allowedConnections) || allowedConnections.length === 0) return true;
+  return allowedConnections.includes(SYNTHETIC_NOAUTH_CONNECTION_ID);
+}
 
 const TERMINAL_CONNECTION_STATUSES = new Set([
   "banned",
@@ -73,15 +90,28 @@ function isConnectionEligibleForModel(
 export function filterResilienceBlockedCandidates<T extends ResilienceFilterCandidate>(
   pool: T[],
   connectionsById: Map<string, ConnectionResilienceView>,
-  skip = false
+  skip = false,
+  traceInvocationId?: string
 ): T[] {
   if (skip || !Array.isArray(pool) || pool.length === 0) return pool;
 
   let changed = false;
   const filtered = pool.flatMap((candidate) => {
     if (candidate.connectionId === SYNTHETIC_NOAUTH_CONNECTION_ID) {
-      if (isModelLocked(candidate.provider, SYNTHETIC_NOAUTH_CONNECTION_ID, candidate.model)) {
+      // #14313: after a free-tier refusal on the keyless path, pause only this
+      // synthetic candidate for a short TTL (never model lockout / cooldown).
+      if (
+        isModelLocked(candidate.provider, SYNTHETIC_NOAUTH_CONNECTION_ID, candidate.model) ||
+        isOpencodeFreeTierSkipped(candidate.provider, Date.now(), candidate.model)
+      ) {
         changed = true;
+        recordAutoExclusion(
+          traceInvocationId,
+          candidate,
+          "resilience",
+          "auto_resilience_filter",
+          "model-lockout"
+        );
         return [];
       }
       return [candidate];
@@ -98,6 +128,13 @@ export function filterResilienceBlockedCandidates<T extends ResilienceFilterCand
       );
       if (allowedConnectionIds.length === 0) {
         changed = true;
+        recordAutoExclusion(
+          traceInvocationId,
+          candidate,
+          "resilience",
+          "auto_resilience_filter",
+          "all-connections-blocked"
+        );
         return [];
       }
       if (allowedConnectionIds.length === candidate.allowedConnectionIds.length) {
@@ -117,6 +154,13 @@ export function filterResilienceBlockedCandidates<T extends ResilienceFilterCand
         )
       ) {
         changed = true;
+        recordAutoExclusion(
+          traceInvocationId,
+          candidate,
+          "resilience",
+          "auto_resilience_filter",
+          "connection-blocked"
+        );
         return [];
       }
     }

@@ -13,6 +13,7 @@
 
 import { getModelContextLimit } from "../../src/lib/modelCapabilities";
 import { parseModel } from "./model.ts";
+import { resolveProviderModelAlias } from "./modelCanonicalization.ts";
 import {
   CONTEXT_OVERFLOW_REGEX,
   containsModelUnavailableMessage,
@@ -20,6 +21,8 @@ import {
 } from "./errorClassifier.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
 import { isModelSelectable } from "./modelLifecycle.ts";
+import { isModelLocked } from "./accountFallback.ts";
+import { createComboModelVisibility } from "./combo/comboVisibility.ts";
 
 // ── Model Family Definitions ─────────────────────────────────────────────────
 
@@ -78,12 +81,49 @@ const FAMILY_FALLBACK_TEMPLATES: Record<string, readonly string[]> = {
   "gemini-2.5-pro": ["gemini-2.5-pro-preview-06-05", "gemini-2.5-pro-exp-03-25"],
   "gemini-2.5-pro-preview-06-05": ["gemini-2.5-pro", "gemini-2.5-pro-exp-03-25"],
 
+  // GPT-6 Astra family: same Codex OAuth catalog, effort aliases as siblings.
+  // Quality-empty 200 on astra-high (live openai-gpt-sol) should hop max then ultra.
+  "gpt-6-astra-high": ["gpt-6-astra-max", "gpt-6-astra-ultra", "gpt-6-astra-xhigh", "gpt-6-astra"],
+  "gpt-6-astra-max": ["gpt-6-astra-ultra", "gpt-6-astra-xhigh", "gpt-6-astra-high", "gpt-6-astra"],
+  "gpt-6-astra-ultra": ["gpt-6-astra-max", "gpt-6-astra-xhigh", "gpt-6-astra-high", "gpt-6-astra"],
+  "gpt-6-astra-xhigh": ["gpt-6-astra-max", "gpt-6-astra-ultra", "gpt-6-astra-high", "gpt-6-astra"],
+  "gpt-6-astra": ["gpt-6-astra-max", "gpt-6-astra-ultra", "gpt-6-astra-high"],
+
+  // Gemini 3.8 Flash effort aliases. Live onmi-gemini3.6 pins
+  // agy/gemini-3.8-flash-high; empty-content 502 hops medium then low.
+  "gemini-3.8-flash-high": [
+    "gemini-3.8-flash-medium",
+    "gemini-3.8-flash-low",
+    "gemini-3.8-flash-tiered",
+    "gemini-3.8-flash",
+  ],
+  "gemini-3.8-flash-medium": [
+    "gemini-3.8-flash-low",
+    "gemini-3.8-flash-tiered",
+    "gemini-3.8-flash-high",
+    "gemini-3.8-flash",
+  ],
+  "gemini-3.8-flash-low": [
+    "gemini-3.8-flash-medium",
+    "gemini-3.8-flash-tiered",
+    "gemini-3.8-flash-high",
+    "gemini-3.8-flash",
+  ],
+  "gemini-3.8-flash-tiered": [
+    "gemini-3.8-flash-medium",
+    "gemini-3.8-flash-high",
+    "gemini-3.8-flash-low",
+    "gemini-3.8-flash",
+  ],
+  "gemini-3.8-flash": ["gemini-3.8-flash-medium", "gemini-3.8-flash-high", "gemini-3.8-flash-low"],
+
   // Claude Mythos family — prefer the previous Fable before falling to Opus
   // tiers and then the cheaper Sonnet, matching the flagship ordering.
   "claude-fable-5-1": ["claude-fable-5", "claude-opus-5", "claude-sonnet-5"],
   "claude-fable-5": ["claude-opus-4-8", "claude-opus-4-7", "claude-sonnet-5"],
 
   // Claude Opus family
+  "claude-opus-5-5": ["claude-opus-5", "claude-opus-4-8", "claude-sonnet-5"],
   "claude-opus-5": ["claude-opus-4-8", "claude-opus-4-7", "claude-sonnet-5"],
   "claude-opus-4-8": ["claude-opus-4-7", "claude-opus-4-6", "claude-sonnet-5"],
   "claude-opus-4-7": ["claude-opus-4-6", "claude-opus-4-5-20251101", "claude-sonnet-5"],
@@ -91,6 +131,7 @@ const FAMILY_FALLBACK_TEMPLATES: Record<string, readonly string[]> = {
   "claude-opus-4-6-thinking": ["claude-opus-4-6", "claude-opus-4-5-20251101"],
 
   // Claude Sonnet family — Sonnet 5 is the newest tier; degrade to 4.6 → 4.5 → 4.
+  "claude-sonnet-5-5": ["claude-sonnet-5", "claude-sonnet-4-6", "claude-sonnet-4-5-20250929"],
   "claude-sonnet-5": [
     "claude-sonnet-4-6",
     "claude-sonnet-4-5-20250929",
@@ -181,8 +222,12 @@ function resolveCandidateNotation(candidate: string, supportedIds: Set<string>):
 function resolveFamilyContext(currentModel: string, providerHint?: string | null) {
   const parsed = parseModel(currentModel);
   const bareModel = parsed.model || currentModel;
-  const explicitProvider = parsed.provider || parsed.providerAlias || null;
-  const registryEntry = getRegistryEntry(explicitProvider || providerHint || "");
+  // Alias first: parseModel("agy/gemini-3.8-flash-high") canonicalizes
+  // provider to antigravity. Family hop must use the catalog the combo
+  // actually named (agy) or the explicit hint. Only a provider written in the
+  // model id itself prefixes the output: a bare id + hint stays bare (T30).
+  const explicitProvider = parsed.providerAlias || parsed.provider || null;
+  const registryEntry = getRegistryEntry(providerHint || explicitProvider || "");
   if (!registryEntry) return null;
 
   const lookupKey = bareModel.replace(/\./g, "-");
@@ -207,7 +252,7 @@ function wasCandidateTried(
   for (const attempted of triedModels) {
     const parsed = parseModel(attempted);
     const attemptedModel = parsed.model || attempted;
-    const attemptedProvider = parsed.provider || parsed.providerAlias || provider;
+    const attemptedProvider = parsed.providerAlias || parsed.provider || provider;
     const registryEntry = getRegistryEntry(attemptedProvider);
     if (
       (registryEntry?.id || attemptedProvider) === provider &&
@@ -266,6 +311,66 @@ export function getNextFamilyFallback(
   return null; // family exhausted
 }
 
+function isFamilyFallbackCandidateEligible(
+  provider: string,
+  candidate: string,
+  connectionId: string,
+  isVisible: ReturnType<typeof createComboModelVisibility>
+): boolean {
+  const parsedCandidate = parseModel(candidate);
+  const candidateModel = parsedCandidate.model || candidate;
+  const wireModel = resolveProviderModelAlias(provider, candidateModel);
+  // A public prefix can select a different runtime identity than its catalog id
+  // (agy/ routes to antigravity). Bare wire ids retain the explicit provider hint.
+  const visibilityProvider = parsedCandidate.providerAlias
+    ? parsedCandidate.provider || provider
+    : provider;
+  return (
+    isVisible(candidate, visibilityProvider) &&
+    !isModelLocked(provider, connectionId, candidateModel) &&
+    !isModelLocked(provider, connectionId, wireModel)
+  );
+}
+
+export function isFamilyFallbackEligible(
+  candidate: string,
+  provider: string,
+  connectionId: string
+): boolean {
+  return isFamilyFallbackCandidateEligible(
+    provider,
+    candidate,
+    connectionId,
+    createComboModelVisibility()
+  );
+}
+
+/**
+ * Get the next same-connection family fallback that passes the routing
+ * visibility and resilience gates used by combo targets.
+ */
+export function getNextEligibleFamilyFallback(
+  currentModel: string,
+  triedModels: Set<string>,
+  providerHint: string | null | undefined,
+  connectionId: string
+): string | null {
+  const resolved = resolveProviderFamilyCandidates(currentModel, providerHint);
+  if (!resolved) return null;
+
+  const isVisible = createComboModelVisibility();
+  for (const candidate of resolved.candidates) {
+    if (wasCandidateTried(candidate, resolved.provider, triedModels)) continue;
+    const fallbackModel = `${resolved.outputPrefix}${candidate}`;
+    if (
+      isFamilyFallbackCandidateEligible(resolved.provider, fallbackModel, connectionId, isVisible)
+    ) {
+      return fallbackModel;
+    }
+  }
+  return null;
+}
+
 /**
  * Check if a model belongs to any registered family.
  */
@@ -281,6 +386,48 @@ export function getModelFamily(model: string, providerHint?: string | null): str
   const resolved = resolveProviderFamilyCandidates(model, providerHint);
   if (!resolved) return [model];
   return [model, ...resolved.candidates.map((candidate) => `${resolved.outputPrefix}${candidate}`)];
+}
+
+/** Get same-family siblings that remain eligible on the current connection. */
+export function getEligibleModelFamily(
+  model: string,
+  providerHint: string | null | undefined,
+  connectionId: string
+): string[] {
+  const resolved = resolveProviderFamilyCandidates(model, providerHint);
+  if (!resolved) return [model];
+
+  const isVisible = createComboModelVisibility();
+  const candidates = resolved.candidates
+    .map((candidate) => `${resolved.outputPrefix}${candidate}`)
+    .filter((candidate) =>
+      isFamilyFallbackCandidateEligible(resolved.provider, candidate, connectionId, isVisible)
+    );
+  return [model, ...candidates];
+}
+
+/** Prefer a larger eligible context, then retain normal family fallback order. */
+export function getContextFamilyFallback(
+  currentModel: string,
+  triedModels: Set<string>,
+  providerHint: string | null | undefined,
+  connectionId: string,
+  allowedCandidates?: readonly string[]
+): string | null {
+  const allowed = allowedCandidates === undefined ? null : new Set(allowedCandidates);
+  const excluded = new Set(triedModels);
+  if (allowed) {
+    for (const candidate of getModelFamily(currentModel, providerHint)) {
+      if (!allowed.has(candidate)) excluded.add(candidate);
+    }
+  }
+  const candidates = getEligibleModelFamily(currentModel, providerHint, connectionId).filter(
+    (candidate) => candidate !== currentModel && !excluded.has(candidate)
+  );
+  return (
+    findLargerContextModel(currentModel, candidates, providerHint) ??
+    getNextEligibleFamilyFallback(currentModel, excluded, providerHint, connectionId)
+  );
 }
 
 /**

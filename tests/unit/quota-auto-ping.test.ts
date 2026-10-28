@@ -33,6 +33,9 @@ test.after(() => {
   resetDbInstance();
 });
 
+// A ping only counts once the Responses stream carries `response.completed`.
+const COMPLETED_PING_SSE =
+  'event: response.completed\ndata: {"type":"response.completed","response":{"status":"completed"}}\n\n';
 const NOW_ISO = "2026-01-01T12:00:00.000Z";
 const NOW_MS = new Date(NOW_ISO).getTime();
 
@@ -57,12 +60,14 @@ function baseDeps(overrides = {}) {
     // #11904: real callers get this from createDefaultQuotaAutoPingDeps(); the fixture
     // mirrors it so tests exercise the gated path without a real timer.
     throttleQuotaFetch: async () => {},
+    resolveProxyForConnection: async () => ({ proxy: null, level: "direct", levelId: null }),
+    runWithProxyContext: async (_proxy, callback) => callback(),
     getExecutor: (provider) => {
       calls.getExecutor.push(provider);
       return {
         execute: async (input) => {
           calls.executorExecute.push(input);
-          return { response: { ok: true, text: async () => "" } };
+          return { response: { ok: true, text: async () => COMPLETED_PING_SSE } };
         },
       };
     },

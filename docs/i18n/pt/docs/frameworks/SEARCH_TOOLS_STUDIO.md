@@ -36,36 +36,36 @@ Studio com três separadores que unifica pesquisa web, extração de conteúdo w
 
 ## Separadores
 
-### Separador Pesquisa
+### Separador de Pesquisa
 
-Transforma os componentes existentes `SearchForm` + `ResultsPanel` + `RerankPanel` num separador:
+Transforma o `SearchForm` + `ResultsPanel` + `RerankPanel` existente num separador:
 
 - Consulta → resultados (título, URL, excerto, pontuação de relevância).
-- Metadados do fornecedor no painel Configuração (custo, quota, estado).
-- Secção de reordenação: selecionar um modelo de reordenação, reordenar os resultados e apresentar `positionDelta`.
-- Estado vazio com chamada para ação quando não existem fornecedores de pesquisa configurados.
+- Metadados do fornecedor no painel de Configuração (custo, quota, estado).
+- Secção de reordenação: selecionar um modelo de reordenação, reordenar os resultados, apresentar `positionDelta`.
+- Estado vazio com CTA quando não existem fornecedores de pesquisa configurados.
 - Histórico de pesquisas através de `SearchHistory.tsx`.
 - Chama `POST /v1/search` (endpoint existente, sem alterações).
 
-### Separador Extração
+### Separador de Extração
 
 Novo separador para extrair conteúdo de um URL através de `POST /v1/web/fetch` (criado no plano 05):
 
-- Entrada: URL + seletor de página completa + seletor de formato (markdown / texto / HTML).
+- Entrada: URL + opção de página completa + seletor de formato (markdown / texto / HTML).
 - Submeter → obter → apresentar `ScrapeResult.tsx`.
-- `ScrapeResult` apresenta uma pré-visualização do markdown + opção para alternar para conteúdo em bruto.
+- `ScrapeResult` apresenta a pré-visualização em markdown + opção para ver o conteúdo em bruto.
 - Limite: se o corpo da resposta for superior a **256 KB**, a IU apresenta `(truncado, ver conteúdo em bruto)` e abre o conteúdo em bruto numa janela modal do Monaco (D21).
-- Painel de metadados: fornecedor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latência, custo, tamanho da resposta, número de ligações.
+- Painel de metadados: fornecedor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latência, custo, tamanho da resposta, número de ligações.
 - Utiliza o hook `useScrapeFetch.ts`.
 
-### Separador Comparação
+### Separador de Comparação
 
 Executa a mesma consulta/URL em até **4 fornecedores em paralelo** (D22):
 
 - Colunas lado a lado por fornecedor.
 - Métricas: latência, custo, número de resultados, tamanho da resposta.
-- Cálculo da sobreposição de URLs para pesquisa (número de URLs partilhados em comparação com o resultado inicial).
-- Chama `POST /v1/search` (pesquisa) ou `POST /v1/web/fetch` (extração) por fornecedor.
+- Cálculo da sobreposição de URLs para a pesquisa (número de URLs partilhados em comparação com o resultado inicial).
+- Chama `POST /v1/search` (pesquisa) ou `POST /v1/web/fetch` (extração) para cada fornecedor.
 
 ---
 
@@ -100,10 +100,10 @@ Executa a mesma consulta/URL em até **4 fornecedores em paralelo** (D22):
 
 ## Catálogo de fornecedores
 
-`ProviderCatalog.tsx` disponibiliza a lista completa de fornecedores a partir de `GET /api/search/providers`
+`ProviderCatalog.tsx` expõe a lista completa de fornecedores de `GET /api/search/providers`
 (alargada em F4 para incluir fornecedores de obtenção):
 
-| `kind` | `"search"` (20 fornecedores) ou `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 fornecedores) ou `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 O estado é **determinado no momento do pedido**, verificando se existem credenciais e se
 todas as chaves estão atualmente em período de espera.
@@ -120,15 +120,15 @@ O marcador de posição da chave da API é sempre `$OMNIROUTE_API_KEY` (D11, par
 
 ## Alterações no backend
 
-Foi necessária apenas uma alteração ao backend para esta funcionalidade:
+Foi necessária apenas uma alteração no backend para esta funcionalidade:
 
 ### `GET /api/search/providers` alargado
 
-`src/app/api/search/providers/route.ts` foi alargado para:
+O ficheiro `src/app/api/search/providers/route.ts` foi alargado para:
 
-- Incluir os 6 fornecedores de obtenção (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) no array.
+- Incluir todos os fornecedores de obtenção (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) no array.
 - Adicionar `kind: "search" | "fetch"` a cada item.
-- Adicionar `status: "configured" | "missing" | "rate_limited"`, determinado a partir do estado atual das credenciais.
+- Adicionar `status: "configured" | "missing" | "rate_limited"`, derivado do estado atual das credenciais.
 - Manter a retrocompatibilidade — os campos existentes (`id`, `name`, etc.) permanecem inalterados.
 
 ---

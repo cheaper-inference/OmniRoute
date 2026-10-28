@@ -508,14 +508,14 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA integrity_check;"
 
 ---
 
-## 災害復旧
+## ディザスタリカバリ
 
 ### シナリオ 1: WAL ファイルの消失
 
-`-wal` ファイルが消失しているものの、`-shm` とメイン DB が無傷の場合:
+`-wal` ファイルが見つからないものの、`-shm` ファイルとメイン DB が無傷の場合:
 
 ```bash
-# 次回起動時に自動復旧
+# 次回起動時に自動的に復旧
 omniroute
 ```
 
@@ -532,18 +532,21 @@ mv recovered.db ~/.omniroute/storage.sqlite
 バックアップから復元します:
 
 ```bash
-omniroute sync pull --merge   # または: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### シナリオ 3: 暗号化キーの消失
+`omniroute sync pull [outPath]` は、稼働中のサーバーから完全な `.tar.gz` アーカイブをダウンロードするだけです
+（`GET /api/db-backups/exportAll`、オペレーター認証情報が必要）。復元処理は行いません。
 
-キーがない場合、**復旧は不可能です**。暗号化されたフィールドは読み取れません。新しい認証情報を使用して、すべてのプロバイダーを手動で再追加してください。
+### シナリオ 3: 暗号化キーの紛失
 
-> **対策**: 暗号化キーは必ず別途バックアップし、可能であればパスワードマネージャーまたは KMS に保存してください。
+キーがなければ**復旧は不可能です**。暗号化されたフィールドは読み取れません。新しい認証情報を使用して、すべてのプロバイダーを手動で再追加してください。
+
+> **対策**: 暗号化キーは必ず別途バックアップしてください。パスワードマネージャーまたは KMS に保管することを推奨します。
 
 ### シナリオ 4: ディスク容量不足
 
-SQLite は `SQLITE_FULL` エラーを返します。ディスク容量を確保してから、以下を実行します:
+SQLite は `SQLITE_FULL` エラーを返します。ディスク容量を解放してから、次を実行します:
 
 ```bash
 # WAL をチェックポイントして容量を解放
@@ -554,13 +557,13 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 
 ## 一般的な操作
 
-### テーブルの確認
+### テーブルを確認する
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "SELECT * FROM api_keys LIMIT 5;"
 ```
 
-### すべてのテーブルの行数を確認
+### すべてのテーブルの行数を数える
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite <<EOF
@@ -568,20 +571,20 @@ SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';
 EOF
 ```
 
-### すべてのデータをリセット（消去）
+### すべてのデータをリセット（消去）する
 
 ```bash
-# 最初に OmniRoute を停止
+# 最初に OmniRoute を停止する
 omniroute stop
 
-# DB ファイルを削除
+# DB ファイルを削除する
 rm ~/.omniroute/storage.sqlite*
 
-# 再起動（空の DB が再作成される）
+# 再起動する（空の DB が再作成される）
 omniroute
 ```
 
-**選択的な**リセット（プロバイダーを保持し、使用状況データを消去）の場合:
+**選択的な**リセット（プロバイダーを保持し、使用履歴を消去する）の場合：
 
 ```bash
 DELETE FROM usage_history WHERE timestamp < datetime('now', '-30 day');
@@ -589,7 +592,7 @@ DELETE FROM call_logs WHERE timestamp < datetime('now', '-30 day');
 DELETE FROM proxy_logs WHERE timestamp < datetime('now', '-30 day');
 ```
 
-### 単一テーブルのエクスポート
+### 単一のテーブルをエクスポートする
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite <<EOF

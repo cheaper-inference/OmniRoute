@@ -20,7 +20,10 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { createServer, type IncomingMessage, type ServerResponse } from "http";
 import { randomUUID } from "crypto";
-import { verifyDashboardSessionToken } from "@/shared/utils/dashboardSessionToken";
+import {
+  verifyDashboardSessionToken,
+  DASHBOARD_SESSION_COOKIE,
+} from "@/shared/utils/dashboardSessionToken";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -32,6 +35,9 @@ import type { DashboardEventName, DashboardEventMap, DashboardChannel } from "@/
 
 import { CHANNEL_EVENTS, getChannelForEvent } from "@/lib/events/types";
 import { isAutomatedTestProcess, isBuildProcess } from "@/shared/utils/testProcess";
+import { hasProxyHopHeader } from "@/server/authz/proxyHeaders";
+// Pure constant module (no DB / Next.js imports) — safe to load statically here.
+import { hasManageScope } from "@/shared/constants/managementScopes";
 import { warnIfNonLoopbackWithoutApiKey } from "@/lib/startup/nonLoopbackApiKeyGuard";
 
 import {
@@ -128,8 +134,82 @@ function loadAuthModule(): Promise<typeof import("../../sse/services/auth.ts")> 
   return authModulePromise;
 }
 
+// Same treatment for the API-key store: the scope lookup after validation needs
+// `getApiKeyMetadata`, and the auth graph above already pulls this module in, so
+// warming both together costs nothing extra while keeping the sidecar free of a
+// static dependency on the DB layer.
+let apiKeysModulePromise: Promise<typeof import("@/lib/db/apiKeys")> | null = null;
+function loadApiKeysModule(): Promise<typeof import("@/lib/db/apiKeys")> {
+  if (!apiKeysModulePromise) {
+    apiKeysModulePromise = import("@/lib/db/apiKeys");
+  }
+  return apiKeysModulePromise;
+}
+
+/**
+ * True when the upgrade's real TCP peer is this machine. Forwarding headers
+ * (x-forwarded-*, x-real-ip, forwarded, via) mark a reverse-proxy or tunnel hop: the socket
+ * peer is the proxy, not the local dashboard user, so fail closed — same
+ * discipline as isLoopbackRequest() on the HTTP routes, which never trusts a
+ * client-controllable header for locality.
+ */
+function isLocalWsPeer(request: import("http").IncomingMessage): boolean {
+  if (hasProxyHopHeader(request.headers)) return false;
+  let peer = request.socket?.remoteAddress ?? null;
+  if (!peer) return false;
+  peer = peer.replace(/^::ffff:/i, "");
+  return peer === "127.0.0.1" || peer === "::1" || peer === "localhost";
+}
+
+/**
+ * Return true when the dashboard is in open/anonymous mode — i.e. the operator
+ * has explicitly disabled login (requireLogin=false) or this is a fresh
+ * single-user install with no password configured running on the default
+ * loopback interface. Mirrors the semantics of isAuthRequired() from
+ * shared/utils/apiAuth.ts without importing Next.js-only modules.
+ */
+async function isLiveWsAuthRequired(request: import("http").IncomingMessage): Promise<boolean> {
+  try {
+    const { getSettings } = await import("@/lib/db/settings");
+    const settings = await getSettings();
+
+    // Operator explicitly disabled login.
+    if (settings.requireLogin === false) return false;
+
+    // Fresh install: no password, no OIDC, no INITIAL_PASSWORD, and the server
+    // is loopback-bound (default) → allow unauthenticated dashboard access just
+    // like the Next.js routes do in this mode.
+    const hasPassword = typeof settings.password === "string" && settings.password.length > 0;
+    const hasOidc =
+      settings.oidcEnabled === true &&
+      typeof settings.oidcIssuer === "string" &&
+      settings.oidcIssuer.trim().length > 0;
+    if (!hasPassword && !hasOidc && !process.env.INITIAL_PASSWORD) {
+      const host = process.env.LIVE_WS_HOST || DEFAULT_HOST;
+      const isLoopback = host === "127.0.0.1" || host === "::1" || host === "localhost";
+      if (isLoopback && settings.setupComplete !== true && isLocalWsPeer(request)) return false;
+    }
+
+    return true;
+  } catch {
+    // Fail-closed: if we cannot read settings, require auth.
+    return true;
+  }
+}
+
 async function authorizeConnection(request: import("http").IncomingMessage): Promise<WsAuthResult> {
   const sessionId = randomUUID().slice(0, 8);
+
+  // Skip all credential checks when the dashboard is running in open/anonymous
+  // mode (requireLogin=false or a fresh loopback-bound install without a
+  // password). Every other authenticated surface in the app grants anonymous
+  // access in this mode; the WebSocket must behave consistently. Without this
+  // bypass, a no-password deployment can never establish a Live Dashboard
+  // connection because no auth_token cookie is ever issued (there is no login
+  // flow to mint one). See issue #14256.
+  if (!(await isLiveWsAuthRequired(request))) {
+    return { authorized: true, sessionId };
+  }
 
   // Token MUST come from the Authorization header (or X-Live-WS-Token).
   // Query-string tokens leak into access logs, browser history, and Referer
@@ -156,6 +236,16 @@ async function authorizeConnection(request: import("http").IncomingMessage): Pro
 
     if (!apiKey || !(await isValidApiKey(apiKey))) {
       return { authorized: false, sessionId, error: "Invalid API key" };
+    }
+
+    // The live channels carry operator telemetry for every tenant of the instance
+    // (requests, combo routing, credential health, …), so a bearer key must hold a
+    // management scope — an inference-only key is not an operator credential. The
+    // env master key is materialised with `manage`, so it keeps working.
+    const { getApiKeyMetadata } = await loadApiKeysModule();
+    const metadata = await getApiKeyMetadata(apiKey);
+    if (!metadata || !hasManageScope(metadata.scopes ?? [])) {
+      return { authorized: false, sessionId, error: "API key lacks management scope" };
     }
 
     return { authorized: true, sessionId };
@@ -189,7 +279,7 @@ export function getCookieValueFromHeader(
 async function isDashboardCookieAuthenticated(
   request: import("http").IncomingMessage
 ): Promise<boolean> {
-  const token = getCookieValueFromHeader(request.headers, "auth_token");
+  const token = getCookieValueFromHeader(request.headers, DASHBOARD_SESSION_COOKIE);
   if (!token || !process.env.JWT_SECRET) return false;
   return (await verifyDashboardSessionToken(token)) !== null;
 }
@@ -313,6 +403,10 @@ function subscribeToEventBus(): () => void {
 }
 
 function isLoopbackRequest(req: IncomingMessage): boolean {
+  // A same-host reverse proxy also connects from loopback; its forwarding headers are
+  // what tells its remote callers apart from the local publisher — same discipline as
+  // isLocalWsPeer() on the upgrade path. The publisher posts without such headers.
+  if (hasProxyHopHeader(req.headers)) return false;
   const addr = req.socket.remoteAddress;
   return addr === "127.0.0.1" || addr === "::1" || addr === "::ffff:127.0.0.1";
 }
@@ -491,6 +585,7 @@ export async function startLiveDashboardServer(
   // WebSocket handshakes (see loadAuthModule). A failed warm is non-fatal: the
   // handler retries the import lazily.
   await loadAuthModule().catch(() => {});
+  await loadApiKeysModule().catch(() => {});
 
   wss.on("connection", async (ws, request) => {
     const pendingMessages: string[] = [];

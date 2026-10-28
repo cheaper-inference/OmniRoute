@@ -47,6 +47,7 @@ export function parseInlineError(value: unknown): unknown {
 export function normalizeDetailState(value: unknown): CallLogDetailState {
   if (
     value === "ready" ||
+    value === "pending" ||
     value === "missing" ||
     value === "corrupt" ||
     value === "legacy-inline"
@@ -125,6 +126,19 @@ export function protectPipelinePayloads(
 
     if (key === "providerResponse" || key === "clientResponse") {
       const response = asRecord(value);
+      // #3229: a diagnostic-only payload is an allowlist PROJECTION -- a closed vocabulary of
+      // enums and gated scalars produced by projectAntigravityValidationDiagnostic -- and never
+      // carries upstream prose. protectErrorPayloadForLog is the raw-upstream-body scrubber, and
+      // its BLOCKED_KEYS heuristic drops any key whose NAME contains "key"/"token"/"path". Run
+      // over an already-bounded projection it silently deletes real classification fields
+      // (observed: schemaKeyword), leaving a log that looks complete but is not. Bound it like
+      // any other payload; do not re-scrub it as if it were a provider body.
+      if ("diagnostic" in response && !("body" in response)) {
+        protectedPayloads[key as "providerResponse" | "clientResponse"] = protectPayloadForLog(
+          value
+        ) as RequestPipelinePayloads["providerResponse"];
+        continue;
+      }
       const status = Number(response.status ?? responseStatus);
       if (Number.isFinite(status) && status >= 400 && status <= 599) {
         const projectedResponse =
@@ -183,6 +197,16 @@ export function buildRequestSummary(
 // object yields "" (no caller passes plain objects — verified: 35 callers use
 // strings and Error only). Deliberate deviation from design §4 ("objet →
 // JSON.stringify"): a stringified object carries no classifier signal.
+// Statuses the journal names when the routing classifier abstains. The
+// classifier's verdict drives pauses and locks, so it stays silent on some
+// refusals; the journal drives none, so a bare status is enough to name the
+// family. Bounded to statuses no ambiguous code can join: a code that can
+// mean several things (400, 404 of a resource, 499) stays "unknown".
+const CALL_LOG_STATUS_FALLBACK: Record<number, ErrorTypeContract> = {
+  403: "forbidden",
+  410: "model_not_found",
+};
+
 export function classifyCallLogError(
   status: number,
   error: unknown,
@@ -190,7 +214,9 @@ export function classifyCallLogError(
 ): ErrorTypeContract | null {
   const errorText = typeof error === "string" ? error : error instanceof Error ? error.message : "";
   if (status === 0 ? errorText.length === 0 : status < 400) return null;
-  return classifyProviderError(status, errorText, provider) ?? "unknown";
+  const verdict = classifyProviderError(status, errorText, provider);
+  if (verdict !== null) return verdict;
+  return CALL_LOG_STATUS_FALLBACK[status] ?? "unknown";
 }
 
 // #13441: defense in depth at the `call_logs.error_type` write boundary. The

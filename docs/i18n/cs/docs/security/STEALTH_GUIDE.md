@@ -16,40 +16,70 @@ Stealth funkce existují proto, aby OmniRoute mohla fungovat jako vrstva kompati
 
 ---
 
-## Vrstva vytváření otisků TLS
+## Vrstva otisku TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Trvalé relace `wreq-js` se vytvářejí líně pro každý rozsah účtu a přeložený proxy server. Celoprocesní fond `TlsClient` obsahuje nejvýše 128 relací, které pro upstreamy chráněné službou Cloudflare napodobují **Chrome 124 v systému macOS**. `TlsClient.fetch()` bezpečně selže, když nativní běhové prostředí není dostupné; volající může mimo tento obal explicitně vybrat záložní řešení.
+Trvalé relace `wreq-js` se vytvářejí líně pro každý rozsah účtu a přeložený proxy server. Celoprocesní
+fond `TlsClient` obsahuje nejvýše 128 relací, které se vůči upstreamům za Cloudflare vydávají za
+**Chrome 124 v systému macOS**. `TlsClient.fetch()` při nedostupnosti nativního běhového prostředí
+bezpečně selže; volající může mimo tuto obálku explicitně vybrat záložní řešení.
 
 - Profil relace: `browser: "chrome_124", os: "macos"`
-- Překlad proxy (podle priority): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (také varianty s malými písmeny)
-- Časový limit: `TLS_CLIENT_TIMEOUT_MS` (dědí se z `FETCH_TIMEOUT_MS`, výchozí hodnota 600000)
+- Překlad proxy serveru (podle priority): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (také malými písmeny)
+- Časový limit: `TLS_CLIENT_TIMEOUT_MS` (dědí z `FETCH_TIMEOUT_MS`, výchozí hodnota 600000)
 - Response z `wreq-js` je kompatibilní s fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Kontrolní mechanismus prvního bajtu (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()` se vyhodnotí, jakmile dorazí upstreamové hlavičky, takže samotný `TLS_CLIENT_TIMEOUT_MS` nemůže omezit tělo, které nikdy neposkytne první bajt. `guardTlsFirstByte()` nechá soupeřit první `read()` těla s `TLS_FIRST_BYTE_WATCHDOG_MS` (výchozí hodnota `10000`, hodnota `0` jej deaktivuje); správně fungující tělo není ovlivněno, zatímco uvízlé tělo zruší čtečku wreq a umožní existující logice záložního TLS v `proxyFetch` přejít na přímý/proxy dispečer (požadavek, který nelze bezpečně zopakovat, například POST s tělem, přesto vyvolá výjimku namísto tichého opakování).
+- Hlídací mechanismus prvního bajtu (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656):
+  `TlsClient.fetch()` se dokončí ihned po přijetí hlaviček upstreamu, takže samotný
+  `TLS_CLIENT_TIMEOUT_MS` nedokáže omezit tělo, které nikdy neposkytne první bajt.
+  `guardTlsFirstByte()` nechá soupeřit první `read()` těla s `TLS_FIRST_BYTE_WATCHDOG_MS`
+  (výchozí hodnota `10000`, hodnota `0` jej vypne); funkční tělo zůstane nedotčeno, zatímco
+  zaseknuté tělo zruší čtečku wreq a umožní stávající záložní logice TLS v `proxyFetch` přejít
+  k přímému/proxy dispečeru (požadavek, který nelze bezpečně zopakovat, např. POST s tělem, se
+  přesto ukončí výjimkou namísto tichého opakování).
 
-### Transport poskytovatelů s webovými cookies — wreq-js 3.2.0
+### Přenos poskytovatelů webových cookies — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` je sdílený adaptér pro pět níže uvedených specializovaných transportů s webovými cookies. Každý tenký obal poskytovatele vybírá profil prohlížeče/OS. Adaptér používá jediný zavaděč běhového prostředí wreq a fond transportů v `open-sse/utils/tlsClient.ts`, klíčovaný podle profilu + OS + přeloženého proxy serveru, přičemž každý požadavek používá `cookieMode: "ephemeral"`. Účty a požadavky tedy sdílejí připojení na úrovni transportu, nikdy však relaci wreq ani úložiště cookies.
+`open-sse/services/tlsClientBase.ts` je sdílený adaptér pro pět níže uvedených specializovaných
+přenosů webových cookies. Každá tenká obálka poskytovatele vybírá profil prohlížeče/OS. Adaptér
+používá jediný zavaděč běhového prostředí wreq a fond přenosů v `open-sse/utils/tlsClient.ts`,
+klíčovaný podle profilu + OS + přeloženého proxy serveru, přičemž každý požadavek používá
+`cookieMode: "ephemeral"`. Účty a požadavky proto sdílejí připojení na úrovni přenosu, ale nikdy
+nesdílejí relaci wreq ani úložiště cookies.
 
-| Poskytovatel | Profil        | Emulovaný OS | Zásady pro EOF streamu                           |
-| ------------ | ------------- | ------------ | ------------------------------------------------ |
-| Claude       | `chrome_146`  | Linux        | zahrnout `[DONE]`                                |
-| Perplexity   | `firefox_148` | macOS        | zahrnout `event: end_of_stream`                  |
-| Grok         | `chrome_146`  | Linux        | vyloučit `[DONE]`                                |
-| Notion       | `chrome_146`  | Windows      | zahrnout `[DONE]`                                |
-| LMArena      | `chrome_146`  | Windows      | bez sentinelové hodnoty; zavřít při nativním EOF |
+| Poskytovatel | Profil        | Emulovaný OS | Zásady pro EOF streamu                 |
+| ------------ | ------------- | ------------ | -------------------------------------- |
+| Claude       | `chrome_146`  | Linux        | zahrnout `[DONE]`                      |
+| Perplexity   | `firefox_151` | macOS        | zahrnout `event: end_of_stream`        |
+| Grok         | `chrome_146`  | Linux        | vynechat `[DONE]`                      |
+| Notion       | `chrome_146`  | Windows      | zahrnout `[DONE]`                      |
+| LMArena      | `chrome_146`  | Windows      | bez sentinelu; zavřít při nativním EOF |
 
-- Streamování spotřebovává nativní `ReadableStream` odpovědi přímo; nevytváří se žádný dočasný soubor ani pomocný proces.
-- Před zpřístupněním streamu se kontroluje až 256 počátečních bajtů. Poskytovatelé SSE ukládají chyby mimo SSE do vyrovnávací paměti; Grok/LMArena mapují výzvy Cloudflare na `403` a mezilehlé stránky HTML na `502`.
-- Nativní časový limit požadavku zůstává ohraničen absolutní pevnou lhůtou v JS. Uvíznutí zneplatní a zavře pouze dotčený transport profilu/OS/proxy, než jej další požadavek znovu vytvoří.
-- Priorita překladu proxy je `proxyUrl` pro konkrétní volání → kontext účtu/ovládacího panelu omezený na požadavek → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (včetně variant s malými písmeny). Chyby překladu vedou k bezpečnému selhání, aby nedošlo k úniku přímého připojení. LMArena záměrně provádí překlad vůči `arena.ai`.
-- `byteResponse` vrací URL `data:` s uvedeným typem obsahu bez poškození UTF-8.
-- Chyby jsou `TlsClientUnavailableError` (balíček/doplněk není dostupný), `TlsClientHangError` (překročena lhůta) a `WreqTransportCapacityError` (sdílený chybový kód kapacity relací), když je všech 128 omezených slotů profilu/OS/proxy aktivních nebo se zavírá.
+- Streamování přímo spotřebovává `ReadableStream` nativní odpovědi; nevytváří se žádný dočasný
+  soubor ani pomocný proces.
+- Před zpřístupněním streamu se zkontroluje až 256 počátečních bajtů. Poskytovatelé SSE ukládají
+  chyby jiné než SSE do vyrovnávací paměti; Grok/LMArena mapují výzvy Cloudflare na `403` a
+  mezilehlé stránky HTML na `502`.
+- Časový limit nativního požadavku zůstává obalen absolutním pevným termínem v JS. Zaseknutí
+  zneplatní a zavře pouze dotčený přenos profilu/OS/proxy serveru, než jej další požadavek znovu
+  vytvoří.
+- Priorita překladu proxy serveru je `proxyUrl` jednotlivého volání → kontext účtu/řídicího panelu
+  s rozsahem požadavku → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (včetně variant s malými písmeny).
+  Chyby překladu bezpečně selžou, místo aby umožnily únik přímého připojení. LMArena záměrně
+  provádí překlad vůči `arena.ai`.
+- `byteResponse` vrací URL `data:` s typem obsahu bez poškození UTF-8.
+- Chyby jsou `TlsClientUnavailableError` (nedostupný balíček/doplněk), `TlsClientHangError`
+  (překročený termín) a `WreqTransportCapacityError` (kód chyby kapacity sdílených relací), pokud
+  je všech 128 omezených slotů profilu/OS/proxy serveru aktivních nebo se zavírá.
 
-Výše uvedená obecná relace `TlsClient` zůstává specializovaná na trvalý stav cookies spravovaný prohlížečem. Obě cesty opakovaně používají jeden zavaděč modulu wreq s mezipamětí a jeden hook životního cyklu procesu; jejich fondy zůstávají oddělené, protože jejich životnosti cookies se záměrně liší.
+Výše uvedená obecná relace `TlsClient` zůstává specializovaná na trvalý stav cookies založený na
+prohlížeči. Obě cesty opakovaně používají jeden zavaděč modulu wreq uložený v mezipaměti a jeden
+háček životního cyklu procesu; jejich fondy zůstávají oddělené, protože životnosti jejich cookies
+se záměrně liší.
 
-Profily jsou podporovány připnutým balíčkem, ale skutečné přijetí systémem WAF se může měnit nezávisle na lokálních testech kontraktu. Před deklarováním shody s upstreamovým prohlížečem ověřte změny otisku pomocí explicitně autorizovaného živého účtu.
+Profily jsou podporovány připnutým balíčkem, ale jejich skutečné přijetí systémem WAF se může měnit
+nezávisle na místních smluvních testech. Před deklarováním shody s upstreamovým prohlížečem ověřte
+změny otisku pomocí explicitně autorizovaného živého účtu.
 
 ---
 
@@ -98,7 +128,7 @@ Používá se na: bloky `system`, veškerý obsah `messages[].content` a `tools[
 
 Pro relé Anthropic třetích stran, která přijímají pouze provoz „skutečného Claude Code“:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - Výchozí hodnota `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
@@ -222,7 +252,7 @@ Všechny koncové body MITM vyžadují ověření správy (`requireCliToolsAuth`
 
 | Proměnná                 | Výchozí hodnota                                                 |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

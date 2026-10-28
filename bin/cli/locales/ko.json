@@ -123,7 +123,9 @@
       "maxCostOpt": "일일 최대 비용(USD)",
       "allowedModelsOpt": "허용된 모델의 쉼표로 구분된 목록",
       "nothingToSet": "제공된 정책 필드가 없습니다. --rate-limit, --max-cost 또는 --allowed-models를 사용하세요.",
-      "updated": "정책이 업데이트되었습니다."
+      "updated": "정책이 업데이트되었습니다.",
+      "modelAccessModeOpt": "모델 접근 모드 (all | restricted)",
+      "unrestrictedOpt": "모든 모델 허용 (--model-access-mode all)"
     },
     "expiration": {
       "title": "키 만료",
@@ -254,6 +256,7 @@
     "log": "서버 로그를 인라인으로 표시",
     "no_recovery": "충돌 시 자동 재시작 비활성화(디버깅 모드)",
     "max_restarts": "포기하기 전 30초 이내 최대 충돌 재시작 횟수(기본값: 2)",
+    "headless": "프록시 엔진만 실행: 대시보드 비활성화(404), 선택적 하위 시스템 건너뜀(OMNIROUTE_HEADLESS=1 설정)",
     "tray": "시스템 트레이에서 시작(데스크톱 전용, 선택 사항)",
     "no_tray": "시스템 트레이 아이콘 비활성화",
     "ready_timeout": "준비 상태 프로브 제한 시간(ms)(OMNIROUTE_READY_TIMEOUT_MS로도 설정 가능, 기본값: 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "OmniRoute 인스턴스 간 구성 동기화",
     "push": {
-      "description": "구성을 클라우드 또는 원격 인스턴스로 푸시",
-      "target": "대상 (cloud 또는 context:name)",
-      "bundle": "동기화할 번들 구성 요소",
-      "dryRun": "적용하지 않고 미리 보기"
+      "description": "구성을 클라우드 또는 원격 인스턴스로 푸시"
     },
     "pull": {
-      "description": "클라우드 또는 원격에서 구성 가져오기",
-      "source": "소스 (cloud 또는 context:name)",
-      "merge": "기존 구성과 병합",
-      "replace": "기존 구성 교체",
-      "dryRun": "적용하지 않고 미리 보기"
-    },
-    "diff": {
-      "source": "소스 컨텍스트",
-      "target": "대상 컨텍스트"
+      "description": "클라우드 또는 원격에서 구성 가져오기"
     },
     "bundle": {
       "description": "구성을 번들 파일로 내보내기",
-      "include": "포함할 구성 요소 (쉼표로 구분)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "번들 파일 가져오기",
       "dryRun": "적용하지 않고 유효성 검사"
-    },
-    "initialize": {
-      "fromCloud": "클라우드 백업에서 초기화"
     },
     "tokens": {
       "description": "동기화 토큰 관리",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "확인 건너뛰기"
       }
-    },
-    "resolve": {
-      "description": "동기화 충돌을 대화형으로 해결"
     }
   },
   "config": {

@@ -511,7 +511,7 @@ Si la commande renvoie autre chose que `ok`, **cessez immédiatement d’utilise
 
 ## Reprise après sinistre
 
-### Scénario 1 : fichier WAL perdu
+### Scénario 1 : Fichier WAL perdu
 
 Le fichier `-wal` est manquant, mais le fichier `-shm` et la base de données principale sont intacts :
 
@@ -520,7 +520,7 @@ Le fichier `-wal` est manquant, mais le fichier `-shm` et la base de données pr
 omniroute
 ```
 
-Si SQLite ne peut pas effectuer la récupération automatique :
+Si SQLite ne parvient pas à effectuer la récupération automatiquement :
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite ".recover" > recovered.sql
@@ -528,26 +528,29 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Scénario 2 : fichier principal de la base de données corrompu
+### Scénario 2 : Fichier principal de la base de données corrompu
 
-Restaurez à partir d'une sauvegarde :
+Restaurez à partir d’une sauvegarde :
 
 ```bash
-omniroute sync pull --merge   # ou : omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Scénario 3 : clé de chiffrement perdue
+`omniroute sync pull [outPath]` télécharge uniquement une archive `.tar.gz` complète depuis un serveur en cours d’exécution
+(`GET /api/db-backups/exportAll`, identifiants d’opérateur requis) ; cette commande ne restaure rien.
 
-**Aucune récupération n'est possible** sans la clé. Les champs chiffrés sont illisibles. Ajoutez à nouveau manuellement tous les fournisseurs avec de nouveaux identifiants.
+### Scénario 3 : Clé de chiffrement perdue
 
-> **Mesure préventive** : sauvegardez toujours la clé de chiffrement séparément, idéalement dans un gestionnaire de mots de passe ou un KMS.
+**Aucune récupération n’est possible** sans la clé. Les champs chiffrés sont illisibles. Ajoutez à nouveau tous les fournisseurs manuellement avec de nouveaux identifiants.
 
-### Scénario 4 : disque plein
+> **Mesure préventive** : Sauvegardez toujours la clé de chiffrement séparément, idéalement dans un gestionnaire de mots de passe ou un KMS.
 
-SQLite renverra des erreurs `SQLITE_FULL`. Libérez de l'espace disque, puis :
+### Scénario 4 : Disque plein
+
+SQLite renverra des erreurs `SQLITE_FULL`. Libérez de l’espace disque, puis exécutez :
 
 ```bash
-# Effectuer un point de contrôle du WAL pour libérer de l'espace
+# Créer un point de contrôle du WAL afin de libérer de l’espace
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

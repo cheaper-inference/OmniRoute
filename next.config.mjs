@@ -1,6 +1,6 @@
 import createNextIntlPlugin from "next-intl/plugin";
 import { createMDX } from "fumadocs-mdx/next";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { betterSqlite3AliasFor } from "./scripts/build/better-sqlite3-stub-flag.mjs";
 import { mitmManagerAliasFor } from "./scripts/build/mitm-stub-flag.mjs";
@@ -11,8 +11,13 @@ import {
   resolveDashboardEmbedMode,
 } from "./scripts/build/dashboardEmbed.mjs";
 import { shouldBuildStandalone } from "./scripts/build/backendOnlyPages.mjs";
+import {
+  filterKnownInfrastructureWarnings,
+  isNextIntlExtractorDynamicImportWarning,
+} from "./scripts/build/knownBuildWarnings.mjs";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+const LOCALE_MESSAGES_JSON = /[\\/]src[\\/]i18n[\\/]messages[\\/][^\\/]+\.json$/;
 const distDir = process.env.NEXT_DIST_DIR || ".build/next";
 const projectRoot = dirname(fileURLToPath(import.meta.url));
 const scriptSrc =
@@ -64,45 +69,6 @@ const securityHeaders = [
     value: "max-age=63072000; includeSubDomains; preload",
   },
 ];
-
-function isNextIntlExtractorDynamicImportWarning(warning) {
-  const message = typeof warning === "string" ? warning : warning?.message || "";
-  const resource = warning?.module?.resource || warning?.file || "";
-  const target = "next-intl/dist/esm/production/extractor/format/index.js";
-  return (
-    resource.includes(target) &&
-    (message.includes("import(t)") || message.includes("dependency is an expression"))
-  );
-}
-
-const IGNORED_INFRASTRUCTURE_BUILD_DEPENDENCY_MODULES = [
-  "/node_modules/fumadocs-mdx/dist/load-from-file-",
-  "/node_modules/next-intl/dist/esm/production/extractor/format/index.js",
-];
-
-function isKnownInfrastructureBuildDependencyWarning(args) {
-  const message = args
-    .filter((value) => typeof value === "string")
-    .join(" ")
-    .replaceAll("\\", "/");
-  return (
-    message.includes("webpack.FileSystemInfo") &&
-    message.includes("for build dependencies failed at 'import(") &&
-    message.includes("incorrect cache invalidation") &&
-    IGNORED_INFRASTRUCTURE_BUILD_DEPENDENCY_MODULES.some((modulePath) =>
-      message.includes(modulePath)
-    )
-  );
-}
-
-function filterKnownInfrastructureWarnings(baseConsole) {
-  const filteredConsole = Object.create(baseConsole);
-  filteredConsole.warn = (...args) => {
-    if (isKnownInfrastructureBuildDependencyWarning(args)) return;
-    Reflect.apply(baseConsole.warn, baseConsole, args);
-  };
-  return filteredConsole;
-}
 
 // OMNIROUTE_BUILD_PROFILE=minimal physically removes four optional privileged
 // modules (MITM cert install, Zed keychain import, Cloud Sync, 9router
@@ -264,14 +230,17 @@ const nextConfig = {
     // runaway that OOM'd even at a 28 GB --max-old-space-size (RSS pinned at the
     // ceiling in a GC death-spiral). Removing it keeps the build's heap bounded.
     // optimizePackageImports is designed for external libs, not workspaces.
+    // Exception: `@omniroute/ui-kit` (KEA-7886) — a flat barrel (62 exports over
+    // 73 files, no deep re-export graph); the spike and Task 2 production builds
+    // stayed at the base's 232 warnings with no heap growth. open-sse stays out.
     optimizePackageImports: [
       "lobehub/icons",
       "@lobehub/icons",
       "lucide-react",
+      "@omniroute/ui-kit",
       "date-fns",
       "lodash",
       "lodash-es",
-      "material-symbols",
       "next-intl",
     ],
   },
@@ -301,6 +270,7 @@ const nextConfig = {
     // Using "**/*" ensures the exclusion applies across all app and API routes, not just "/".
     "**/*": [
       "**/.git/**",
+      "**/.eslintcache",
       "**/_tasks/**",
       "**/_references/**",
       "**/_ideia/**",
@@ -333,11 +303,13 @@ const nextConfig = {
     // build warnings.  Externalizing silences them without changing behaviour.
     "sql.js",
     // tiktoken's node build reads tiktoken_bg.wasm via __dirname-relative
-    // fs.readFileSync at import time. When bundled, the wasm asset is not
-    // traced into the server chunk and page-data collection for any route
-    // importing the vendored ChatGPT Web tokenizer fails with
-    // "Missing tiktoken_bg.wasm". Externalizing keeps the require at runtime
-    // where node_modules/tiktoken/tiktoken_bg.wasm resolves normally.
+    // fs.readFileSync at import time. When bundled (webpack or Turbopack), the
+    // wasm asset is not traced into the server chunk / the ESM entry's module
+    // graph omits the runtime asset, and page-data collection for any route
+    // importing the vendored ChatGPT Web tokenizer (e.g. /api/providers) fails
+    // with "Missing tiktoken_bg.wasm". Externalizing keeps Node's CommonJS
+    // require at runtime, where node_modules/tiktoken/tiktoken_bg.wasm
+    // resolves normally.
     "tiktoken",
     // sqlite-vec ships a native vec0.so loaded at runtime via createRequire().
     // Turbopack otherwise tries to bundle the .so and fails with "Unknown module
@@ -354,10 +326,6 @@ const nextConfig = {
     "jsdom",
     "@ngrok/ngrok",
     "@huggingface/transformers",
-    // The ESM entry imports tiktoken_bg.wasm as a module. Turbopack can compile
-    // that graph but omits the runtime asset, making provider routes fail during
-    // module evaluation. Keep Node's CommonJS loader and colocated WASM intact.
-    "tiktoken",
     // copilot-m365-web.ts imports 'ws' as a client-side WebSocket. When bundled,
     // ws cannot resolve its 'bufferutil' native addon (frame masking) and throws
     // TypeError: b.mask is not a function on the first outgoing frame, causing
@@ -386,16 +354,48 @@ const nextConfig = {
     "util",
     "process",
   ],
-  transpilePackages: ["@omniroute/open-sse", "@lobehub/icons", "fumadocs-ui", "fumadocs-core"],
+  transpilePackages: [
+    "@omniroute/open-sse",
+    "@lobehub/icons",
+    "fumadocs-ui",
+    "fumadocs-core",
+    "@omniroute/ui-kit",
+  ],
   allowedDevOrigins: ["localhost", "127.0.0.1", "192.168.0.250"],
   typescript: {
     // TODO: Re-enable after fixing all sub-component useTranslations scope issues
     ignoreBuildErrors: true,
   },
   webpack(config, { dev, webpack }) {
+    // Production webpack builds skip the persistent filesystem cache unless
+    // OMNIROUTE_WEBPACK_BUILD_CACHE=1. With the cache on, webpack keeps every
+    // module's build and codegen result in memory and then serializes the whole
+    // graph to .build/next/cache/webpack; measured on this repo that adds about
+    // 2.5 GB to peak build RSS at a 6144 MB heap cap. A clean CI or Docker build
+    // starts with an empty cache and never reads it back; only repeat builds on the
+    // same tree or BuildKit host do.
+    if (!dev && process.env.OMNIROUTE_WEBPACK_BUILD_CACHE !== "1") {
+      config.cache = false;
+    }
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       isNextIntlExtractorDynamicImportWarning,
+    ];
+    // Locale catalogs (src/i18n/messages/*.json) are only ever read whole, through
+    // the dynamic import in src/i18n/request.ts. As `json` modules webpack keeps
+    // every catalog as an object tree, tracks an export for every nested key and
+    // generates code from it, about 1 GB of server compile heap for 67 catalogs.
+    // As `asset/source` each catalog stays a string (validated and minified by
+    // the loader) and request.ts parses it on first use. Turbopack does not read
+    // this hook and still imports the catalogs as JSON.
+    config.module = config.module || {};
+    config.module.rules = [
+      ...(config.module.rules || []),
+      {
+        test: LOCALE_MESSAGES_JSON,
+        type: "asset/source",
+        use: [{ loader: join(projectRoot, "scripts/build/localeMessagesLoader.cjs") }],
+      },
     ];
     const infrastructureLogging = config.infrastructureLogging || {};
     config.infrastructureLogging = {
@@ -470,13 +470,22 @@ const nextConfig = {
       // NormalModuleReplacementPlugin swaps the real module for a stub before
       // webpack resolves it, so the privileged source files are never compiled
       // into the standalone output.
+      // BUGFIX (Chat 327, D-1): resource.request resolves relative to the
+      // *importing file's* directory, not the project root -- a bare
+      // "./src/..." string only worked for imports from projectRoot itself.
+      // Use an absolute path (import.meta.url-derived projectRoot, already
+      // defined above) so this resolves correctly regardless of which file
+      // does the importing.
       const replacements = [
-        [/^@\/mitm\/cert\/install$/, "./src/mitm/cert/install.stub.ts"],
-        [/^@\/lib\/zed-oauth\/keychain-reader$/, "./src/lib/zed-oauth/keychain-reader.stub.ts"],
-        [/^@\/lib\/cloudSync$/, "./src/lib/cloudSync.stub.ts"],
+        [/^@\/mitm\/cert\/install$/, join(projectRoot, "src/mitm/cert/install.stub.ts")],
+        [
+          /^@\/lib\/zed-oauth\/keychain-reader$/,
+          join(projectRoot, "src/lib/zed-oauth/keychain-reader.stub.ts"),
+        ],
+        [/^@\/lib\/cloudSync$/, join(projectRoot, "src/lib/cloudSync.stub.ts")],
         [
           /^@\/lib\/services\/installers\/ninerouter$/,
-          "./src/lib/services/installers/ninerouter.stub.ts",
+          join(projectRoot, "src/lib/services/installers/ninerouter.stub.ts"),
         ],
       ];
       for (const [pattern, stubPath] of replacements) {

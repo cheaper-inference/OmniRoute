@@ -120,16 +120,16 @@
 
 ## 📖 راهاندازی ارائهدهنده
 
-برای افزودن گروهی اتصالهای کلید API از یک فایل CSV یا JSON، از مسیر **داشبورد → ارائهدهندگان → وارد کردن از فایل** استفاده کنید. ترتیب ستونها ثابت است (`provider,name,apiKey,baseUrl,priority`)؛ مقدار `provider` باید از قبل بهعنوان یک ارائهدهنده مدیریتشده یا یک گره سازگار وجود داشته باشد. به [وارد کردن ارائهدهندگان از یک فایل CSV یا JSON](../providers/CSV-IMPORT.md) مراجعه کنید.
+برای افزودن انبوه اتصالهای کلید API از یک فایل CSV یا JSON، از مسیر **داشبورد ← ارائهدهندگان ← درونریزی از فایل** استفاده کنید. ستونها موقعیتی هستند (`provider,name,apiKey,baseUrl,priority`)؛ مقدار `provider` باید از قبل بهعنوان یک ارائهدهنده مدیریتشده یا یک گره سازگار وجود داشته باشد. به [درونریزی ارائهدهندگان از فایل CSV یا JSON](../providers/CSV-IMPORT.md) مراجعه کنید.
 
 ### 🔐 ارائهدهندگان اشتراکی
 
 #### Claude Code (Pro/Max)
 
 ```bash
-داشبورد → ارائهدهندگان → اتصال Claude Code
-→ ورود با OAuth → نوسازی خودکار توکن
-→ پایش سهمیه ۵ ساعته و هفتگی
+داشبورد ← ارائهدهندگان ← اتصال Claude Code
+← ورود با OAuth ← نوسازی خودکار توکن
+← پیگیری سهمیه ۵ ساعته + هفتگی
 
 مدلها:
   cc/claude-opus-4-7
@@ -137,16 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**نکته حرفهای:** برای وظایف پیچیده از Opus و برای سرعت از Sonnet استفاده کنید. OmniRoute سهمیه را بهازای هر مدل پایش میکند!
+**نکته حرفهای:** برای وظایف پیچیده از Opus و برای سرعت از Sonnet استفاده کنید. OmniRoute سهمیه را بهازای هر مدل پیگیری میکند!
 
-مسیرهای سازگار با Claude و Claude Code، سطح تلاش تفکر `max` را برای مدلهای Opus و Sonnet حفظ میکنند. مدلهای Haiku سطح تلاش `max` را نمیپذیرند؛ بنابراین OmniRoute پیش از ارسال درخواست به سرویس بالادستی، آن را به بودجه تفکر بالا تنزل میدهد.
+روی میزبان OmniRoute مرورگر ندارید؟ دستور `claude setup-token` را در هر جایی که Claude Code وارد حساب شده است اجرا کنید و توکن یکساله را در زبانه **Setup Token** جایگذاری کنید. به [استفاده از Claude Code با setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md) مراجعه کنید.
+
+مسیرهای سازگار با Claude و Claude Code، میزان تلاش تفکر `max` را برای مدلهای Opus و Sonnet
+حفظ میکنند. مدلهای Haiku سطح تلاش `max` را نمیپذیرند؛ بنابراین OmniRoute پیش از ارسال درخواست
+به سرویس بالادستی، آن را به بودجه تفکر بالا کاهش میدهد.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-داشبورد → ارائهدهندگان → اتصال Codex
-→ ورود با OAuth (درگاه 1455)
-→ بازنشانی ۵ ساعته و هفتگی
+داشبورد ← ارائهدهندگان ← اتصال Codex
+← ورود با OAuth (درگاه 1455)
+← بازنشانی ۵ ساعته + هفتگی
 
 مدلها:
   cx/gpt-5.5
@@ -158,9 +162,9 @@
 #### GitHub Copilot
 
 ```bash
-داشبورد → ارائهدهندگان → اتصال GitHub
-→ OAuth از طریق GitHub
-→ بازنشانی ماهانه (روز اول ماه)
+داشبورد ← ارائهدهندگان ← اتصال GitHub
+← OAuth از طریق GitHub
+← بازنشانی ماهانه (روز اول ماه)
 
 مدلها:
   gh/gpt-5.5
@@ -176,40 +180,41 @@
 
 1. ثبتنام کنید: [Zhipu AI](https://open.bigmodel.cn)
 2. کلید API را از Coding Plan دریافت کنید
-3. داشبورد → افزودن کلید API: ارائهدهنده: `glm`، کلید API: `your-key`
+3. داشبورد ← افزودن کلید API: ارائهدهنده: `glm`، کلید API: `your-key`
 
-**استفاده:** `glm/glm-4.7` — **نکته حرفهای:** Coding Plan با یکهفتم هزینه، ۳ برابر سهمیه ارائه میدهد! بازنشانی روزانه ساعت ۱۰:۰۰ صبح انجام میشود.
+**استفاده:** `glm/glm-4.7` — **نکته حرفهای:** Coding Plan با یکهفتم هزینه، ۳ برابر سهمیه ارائه میدهد! بازنشانی روزانه در ساعت ۱۰:۰۰ صبح انجام میشود.
 
 #### MiniMax M2.1 (بازنشانی ۵ ساعته، $0.20/1M)
 
 1. ثبتنام کنید: [MiniMax](https://www.minimax.io)
-2. کلید API را دریافت کنید → داشبورد → افزودن کلید API
+2. کلید API را دریافت کنید ← داشبورد ← افزودن کلید API
 
-**استفاده:** `minimax/MiniMax-M2.1` — **نکته حرفهای:** ارزانترین گزینه برای زمینههای طولانی (۱ میلیون توکن)!
+**استفاده:** `minimax/MiniMax-M2.1` — **نکته حرفهای:** ارزانترین گزینه برای زمینه طولانی (۱ میلیون توکن)!
 
-#### Kimi K2 (هزینه ثابت $9/ماه)
+#### Kimi K2 (ماهانه ثابت $9)
 
-1. اشتراک تهیه کنید: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. کلید API را دریافت کنید → داشبورد → افزودن کلید API
+1. مشترک شوید: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. کلید API را دریافت کنید ← داشبورد ← افزودن کلید API
 
-**استفاده:** `kimi/kimi-k2.5` — **نکته حرفهای:** هزینه ثابت $9/ماه برای ۱۰ میلیون توکن، یعنی هزینه مؤثر $0.90/1M!
+**استفاده:** `kimi/kimi-k2.5` — **نکته حرفهای:** ماهانه $9 ثابت برای ۱۰ میلیون توکن، یعنی هزینه مؤثر $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. ثبتنام کنید: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. یک کلید API برای Qianfan ایجاد کنید → داشبورد → افزودن کلید API: ارائهدهنده: `qianfan`
+2. یک کلید API برای Qianfan ایجاد کنید ← داشبورد ← افزودن کلید API: ارائهدهنده: `qianfan`
 
-**استفاده:** `qianfan/ernie-5.1`، `qianfan/ernie-x1.1` یا شناسه مدل دیگری از Qianfan که با OpenAI سازگار باشد.
+**استفاده:** `qianfan/ernie-5.1`، `qianfan/ernie-x1.1`، یا شناسه یک مدل دیگر Qianfan که با OpenAI سازگار است.
 
 ### 🆓 ارائهدهندگان رایگان
 
-ارائهدهندگان رایگان و بدون احراز هویت، در صفحه ارائهدهنده خود کلیدی در کنار **بدون نیاز به احراز هویت** دارند.
-خاموش کردن آن، ارائهدهنده را غیرفعال میکند، آن را از نماهای پیکربندیشده/فشرده ارائهدهندگان حذف میکند و مدلهایش را از `/v1/models` برمیدارد.
+ارائهدهندگان رایگانِ بدون نیاز به احراز هویت، در صفحه ارائهدهنده خود کلیدی در کنار **نیازی به احراز هویت نیست** دارند.
+خاموش کردن آن، ارائهدهنده را غیرفعال میکند، آن را از نماهای پیکربندیشده/فشرده ارائهدهندگان حذف میکند و
+مدلهایش را از `/v1/models` حذف میکند.
 
 #### Qoder (۹ مدل رایگان)
 
 ```bash
-داشبورد → اتصال Qoder → ورود با OAuth → دسترسی مشمول محدودیتهای فعلی ارائهدهنده است
+داشبورد ← اتصال Qoder ← ورود با OAuth ← دسترسی تابع محدودیتهای فعلی ارائهدهنده است
 
 مدلها: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -217,7 +222,7 @@
 #### Kiro (Claude رایگان)
 
 ```bash
-داشبورد → اتصال Kiro → AWS Builder ID یا Google/GitHub → حدود ۵۰ اعتبار در ماه
+داشبورد ← اتصال Kiro ← AWS Builder ID یا Google/GitHub ← حدود ۵۰ اعتبار در ماه
 
 مدلها: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -609,88 +614,131 @@ post_install() {
 <details>
 <summary><b>مشاهده همه مدلهای موجود</b></summary>
 
-> فهرست زیر از `open-sse/config/providerRegistry.ts` برای v3.8.0 گردآوری شده است. کاتالوگهای ابری (Gemini، OpenRouter و غیره) بهصورت پویا همگامسازی میشوند — برای مشاهده کامل کاتالوگ زنده، به **داشبورد → ارائهدهندگان → [ارائهدهنده] → مدلهای موجود** بروید یا `GET /api/models/catalog` را فراخوانی کنید.
+> فهرست زیر از `open-sse/config/providerRegistry.ts` برای v3.8.0 گردآوری شده است. کاتالوگهای ابری (Gemini، OpenRouter و غیره) بهصورت پویا همگامسازی میشوند — برای مشاهده کاتالوگ کامل و بهروز، مسیر **Dashboard → Providers → [provider] → Available Models** را باز کنید یا `GET /api/models/catalog` را فراخوانی کنید.
 >
-> اگر فهرست داخلی یک ارائهدهنده قدیمی شده است، در همان صفحه از **وارد کردن از ‎/models** استفاده کنید (یا **همگامسازی خودکار** را فعال کنید) تا کاتالوگ زنده بالادستی دریافت شود. این قابلیت در v3.8.50 برای LLM7.io (`gemini-3.1-flash-lite`) و UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) تأیید شده است؛ دسترسی ناشناس Pollinations در همان مرحله آزمایش همچنان از سمت سرویس بالادستی محدود بود.
+> اگر فهرست داخلی یک ارائهدهنده قدیمی شده باشد، از **Import from /models** در همان صفحه استفاده کنید (یا **Auto-Sync** را فعال کنید) تا کاتالوگ بهروز upstream را دریافت کنید. این مورد در v3.8.50 برای LLM7.io (`gemini-3.1-flash-lite`) و UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) تأیید شد؛ دسترسی ناشناس Pollinations در همان مرحله آزمایش همچنان از سمت upstream محدود باقی ماند.
 
-**Claude Code (`cc/`)** — OAuth پلن Pro/Max: `cc/claude-opus-4-8`، `cc/claude-opus-4-7`، `cc/claude-opus-4-6`، `cc/claude-opus-4-5-20251101`، `cc/claude-sonnet-4-6`، `cc/claude-sonnet-4-5-20250929`، `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth از نوع Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth پلن Plus/Pro: `cx/gpt-5.5` (+ سطوح تلاش: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth از نوع Plus/Pro: `cx/gpt-5.5` (+ سطوح effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`، `gh/gpt-5.4`، `gh/gpt-5.4-mini`، `gh/gpt-5-mini`، `gh/gpt-5.3-codex`، `gh/claude-opus-4.7`، `gh/claude-opus-4.6`، `gh/claude-opus-4-5-20251101`، `gh/claude-sonnet-4.6`، `gh/claude-sonnet-4.5`، `gh/claude-haiku-4.5`، `gh/gemini-3.1-pro-preview`، `gh/gemini-3-flash-preview`، `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth رایگان: از کاتالوگ زنده نمایشدادهشده در **داشبورد → ارائهدهندگان → Kiro → مدلهای موجود** استفاده کنید. دسترسپذیری به حساب و پلن بستگی دارد.
+**Kiro (`kr/`)** — OAuth رایگان: از کاتالوگ بهروزی که در مسیر **Dashboard → Providers → Kiro → Available Models** نمایش داده میشود استفاده کنید. دسترسیپذیری بسته به حساب کاربری و طرح متفاوت است.
 
-**Qoder (`if/`)** — OAuth رایگان: `if/qwen3.8-max-preview`، `if/qwen3.7-max`، `if/qwen3.7-plus`، `if/kimi-k3`، `if/kimi-k2.7-code`، `if/glm-5.2`، `if/deepseek-v4-pro`، `if/deepseek-v4-flash`، `if/minimax-m3`
+**Qoder (`if/`)** — OAuth رایگان: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — ۰٫۲ تا ۰٫۶ دلار بهازای هر ۱ میلیون: `glm/glm-5.1`، `glm/glm-5`، `glm/glm-5-turbo`، `glm/glm-4.7`، `glm/glm-4.7-flash`، `glm/glm-4.6`، `glm/glm-4.6v`، `glm/glm-4.5`، `glm/glm-4.5v`، `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — ۰٫۲ دلار بهازای هر ۱ میلیون: `minimax/MiniMax-M2.7`، `minimax/MiniMax-M2.7-highspeed`، `minimax/MiniMax-M2.5`، `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ماهانه ۹ دلار ثابت یا پرداخت بر اساس مصرف: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — تعرفه ثابت $9 در ماه یا پرداخت بهازای مصرف: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — کلید API: `ds/deepseek-v4-pro`، `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — کلید API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — فوقسریع: `groq/llama-3.3-70b-versatile`، `groq/meta-llama/llama-4-maverick-17b-128e-instruct`، `groq/qwen/qwen3-32b`، `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — فوقسریع: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok بومی: `xai/grok-4.3`، `xai/grok-4.20-multi-agent-0309`، `xai/grok-4.20-0309-reasoning`، `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok بومی: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — میزبانیشده در اتحادیه اروپا: `mistral/mistral-large-latest`، `mistral/mistral-medium-3-5`، `mistral/mistral-small-latest`، `mistral/devstral-latest`، `mistral/codestral-latest`
+**Mistral (`mistral/`)** — میزبانیشده در اتحادیه اروپا: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — تقویتشده با جستوجو: `pplx/sonar-deep-research`، `pplx/sonar-reasoning-pro`، `pplx/sonar-pro`، `pplx/sonar`
+**Perplexity (`pplx/`)** — تقویتشده با جستجو: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — متنباز: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (رایگان)، `together/meta-llama/Llama-Vision-Free`، `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`، `together/deepseek-ai/DeepSeek-R1`، `together/Qwen/Qwen3-235B-A22B`، `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — متنباز: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (رایگان), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — استنتاج سریع: `fireworks/accounts/fireworks/models/kimi-k2p6`، `fireworks/accounts/fireworks/models/minimax-m2p7`، `fireworks/accounts/fireworks/models/qwen3p6-plus`، `fireworks/accounts/fireworks/models/glm-5p1`، `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — استنتاج سریع: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — در مقیاس ویفر: `cerebras/zai-glm-4.7`، `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — مقیاس ویفر: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — متمرکز بر RAG: `cohere/command-a-reasoning-08-2025`، `cohere/command-a-vision-07-2025`، `cohere/command-a-03-2025`، `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — متمرکز بر RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — سازمانی: `nvidia/z-ai/glm-5.1`، `nvidia/minimaxai/minimax-m2.7`، `nvidia/google/gemma-4-31b-it`، `nvidia/mistralai/mistral-small-4-119b-2603`، `nvidia/mistralai/mistral-large-3-675b-instruct-2512`، `nvidia/qwen/qwen3.5-397b-a17b`، `nvidia/deepseek-ai/deepseek-v4-pro`، `nvidia/openai/gpt-oss-120b`، `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — سازمانی: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`، `qianfan/ernie-5.0-thinking-latest`، `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`، `ollama-cloud/deepseek-v4-flash`، `ollama-cloud/kimi-k2.6`، `ollama-cloud/glm-5.1`، `ollama-cloud/minimax-m2.7`، `ollama-cloud/gemma4:31b`، `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: بهصورت زنده و بر اساس کلید API با Google همگامسازی میشود — فهرست ثابتی وجود ندارد. در **داشبورد → ارائهدهندگان** یک کلید متصل کنید، سپس برای وارد کردن کاتالوگ فعلی از **مدلهای موجود** استفاده کنید (برای نمونه، `gemini/gemini-3-pro` و `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: بهصورت زنده و بهازای هر کلید API از Google همگامسازی میشود — فهرست ثابتی وجود ندارد. یک کلید را در **Dashboard → Providers** متصل کنید و سپس از **Available Models** برای واردکردن کاتالوگ فعلی استفاده کنید (مثلاً `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**سایر ارائهدهندگان سازگار** (منتخب): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (از طریق `aws-bedrock`)، `azure-ai`، `openrouter` (کاتالوگ عبوری)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. هرکدام فهرست مدلهای خود را در `providerRegistry.ts` نگهداری میکنند و هنگامی که ارائهدهنده یک نقطه پایانی `/models` ارائه دهد، امکان همگامسازی خودکار وجود دارد.
+**سایر ارائهدهندگان سازگار** (منتخب): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (از طریق `aws-bedrock`), `azure-ai`, `openrouter` (کاتالوگ عبوری), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. هرکدام فهرست مدلهای خود را در `providerRegistry.ts` نگهداری میکنند و در صورتی که ارائهدهنده یک endpoint به نام `/models` ارائه دهد، میتوانند بهصورت خودکار همگامسازی شوند.
 
-**نکته درباره شناسههای مدل:** OmniRoute از شناسههای بومی ارائهدهنده (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`) استفاده میکند. برخی شناسهها شامل نسخههای نقطهدار هستند، زیرا API بالادستی آنها را به همین شکل انتظار دارد. اگر مدلی در بالا فهرست نشده است، برای تأیید دسترسپذیری `omniroute models --search <term>` را اجرا کنید یا `GET /api/models/catalog` را فراخوانی کنید.
+**نکته درباره شناسههای مدل:** OmniRoute از شناسههای بومیِ هر ارائهدهنده استفاده میکند (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). برخی شناسهها شامل نسخههای نقطهدار هستند، زیرا API بالادستی آنها را به همین شکل انتظار دارد. اگر مدلی در فهرست بالا ذکر نشده است، دستور `omniroute models --search <term>` را اجرا کنید یا `GET /api/models/catalog` را فراخوانی کنید تا از در دسترس بودن آن مطمئن شوید.
 
 </details>
 
 ---
 
-## 🧩 قابلیتهای پیشرفته
+## ویژگی های پیشرفته 🧩
 
-### مدلهای سفارشی
+### مدل های سفارشی
 
-بدون انتظار برای بهروزرسانی برنامه، هر شناسهٔ مدلی را به هر ارائهدهندهای اضافه کنید:
+بدون اینکه منتظر بروزرسانی برنامه باشید، هر مدل ID به هر ارائه دهنده اضافه کنید:
 
 ```bash
-# از طریق API
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# فهرست: curl http://localhost:20128/api/provider-models?provider=openai
-# حذف: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-یا از داشبورد استفاده کنید: **Providers → [Provider] → Custom Models**.
+یا از داشبورد استفاده کنید:** ارائه دهندگان → [ارائه دهنده] → مدل های سفارشی** .
 
-نکات:
+یادداشت ها:
 
-- ارائهدهندگان OpenRouter و سازگار با OpenAI/Anthropic فقط از طریق **Available Models** مدیریت میشوند. افزودن دستی، درونریزی و همگامسازی خودکار، همگی در یک فهرست واحد از مدلهای موجود قرار میگیرند؛ بنابراین برای این ارائهدهندگان بخش جداگانهای با عنوان Custom Models وجود ندارد.
-- بخش **Custom Models** برای ارائهدهندگانی در نظر گرفته شده است که امکان درونریزی مدیریتشدهٔ مدلهای موجود را ارائه نمیکنند.
+- ارائه دهندگان OpenRouter و OpenAI/Anthropic-compatible از مدیریت می شوند** مدل های موجود** فقط افزودن دستی، وارد کردن و همگامسازی خودکار همه در فهرست مدلهای موجود یکسان قرار میگیرند، بنابراین بخش مدلهای سفارشی جداگانه برای آن ارائهدهندگان وجود ندارد.
+- این** مدل های سفارشی** بخش برای ارائه دهندگانی در نظر گرفته شده است که واردات مدل های موجود مدیریت شده را در معرض نمایش نمی گذارند.
 
-### زنجیرهسازی همتایان OmniRoute
+### ارائه دهندگان سفارشی سازگار با OpenAI
 
-میتوان درگاه OmniRoute دیگری را بهعنوان یک ارائهدهندهٔ **سفارشیِ سازگار با OpenAI** اضافه کرد. از URL پایهٔ `/v1` همتا و یک کلید API اختصاصی با حداقل سطح دسترسی که توسط همان همتا صادر شده است، استفاده کنید.
+هر دروازه ای که از OpenAI API صحبت می کند (پراکسی خود میزبان، vLLM، جمع کننده شخص ثالث) می تواند به عنوان گره ارائه دهنده خود اضافه شود:
 
-برای زنجیرههای دوسویه یا چندمرحلهای، محافظ حلقهٔ اختیاری را در همهٔ درگاهها فعال کنید:
+1. **ارائه دهندگان → افزودن OpenAI سازگار** .
+2. **نام** : یک برچسب نمایشگر برای گره.
+3. **پیشوند** : نام مسیریابی مشتریان مدل ها را به عنوان `<prefix>/<model>` می نامند، بنابراین یک گره با پیشوند `mygw` `mygw/gpt-4o-mini` را ارائه می دهد. مورد نیاز؛ هیچ محدودیتی برای شخصیت وجود ندارد
+4. **نوع API** : خانواده نقطه پایانی که درگاه ارائه میکند (تکمیلهای چت، پاسخها، جاسازیها، صدا، تصاویر).
+5. **پایه URL** : ریشه API ، تا و شامل `/v1` (مثلا `https://gateway.example.com/v1`)، نه مسیر کامل `/chat/completions`. دروازه هایی با مسیرهای غیر استاندارد آنها را در زیر قرار می دهند** تنظیمات پیشرفته** (مسیر چت، مسیر مدل ها).
+6. این** کلید API (برای چک)** فیلد فقط اتصال را آزمایش می کند. پس از ایجاد گره، آن را باز کرده و استفاده کنید** افزودن اتصال** برای ذخیره کلیدی که درخواست ها از آن استفاده خواهند کرد.
+
+گره یک شناسه داخلی به شکل `openai-compatible-<apiType>-<uuid>` دریافت می کند. شما هرگز نیازی به تایپ آن ندارید، پیشوند نام عمومی است.
+
+#### پیشوندهای رزرو شده
+
+یک پیشوند نمی تواند شناسه یا نام مستعار یک ارائه دهنده داخلی (به عنوان مثال `openai`، `cf`) و یا شناسه یک ارائه دهنده بازنشسته باشد. حلکننده مدل، شناسهها و نامهای مستعار داخلی را قبل از گرههای سفارشی بررسی میکند، بنابراین گرهای که یکی از آن پیشوندها را استفاده میکند، هرگز ترافیک دریافت نمیکند: `<prefix>/model` به جای آن به ارائهدهنده داخلی میرود، یا اگر آن ارائهدهنده بازنشسته شود، بسته نمیشود. ایجاد یا ویرایش یک گره با چنین پیشوندی رد می شود:
+
+```text
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+```
+
+یک پیشوند متمایز (`mygw`، `acme-proxy`) انتخاب کنید. اگر درخواستها به یک گره سفارشی با خطای نامگذاری یک ارائهدهنده داخلی یا اعتبار آن با شکست مواجه شد، بررسی کنید که آیا پیشوند گره رزرو شده است: گرههایی که قبل از وجود این قانون ذخیره شدهاند هنوز ذخیره میشوند، اما پیشوند آنها به ارائهدهنده داخلی میرود. گره را ویرایش کنید و یک پیشوند جدید به آن بدهید.
+
+#### گزینه های دروازه هر اتصال
+
+این کلیدها در `providerSpecificData` یک اتصال قرار می گیرند (به عنوان مثال از طریق `PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (عدد صحیح، 1-1024) - برای اتصالات سازگار با قالب چت OpenAI که دروازه آنها نام ابزار طولانی را رد می کند. نام های طولانی تر به عنوان نام مستعار کوتاه ارسال می شوند و در پاسخ بازیابی می شوند.
+- `quotaEndpoint` - نقطه پایانی quota/credits دروازه، نوار سهمیه داشبورد و مسیریابی آگاه از سهمیه را بخوانید. بر روی هر دو اتصال OpenAI و Anthropic سازگار کار می کند. شکل کامل در `open-sse/services/usage/openaiCompatible.ts` مستند شده است.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### زنجیر زدن همتایان OmniRoute
+
+دروازه OmniRoute دیگری را می توان به عنوان یک اضافه کرد** سازگار با OpenAI سفارشی** ارائه دهنده از پایه `/v1` URL همتا و یک کلید اختصاصی API با حداقل امتیاز صادر شده توسط آن همتا استفاده کنید.
+
+برای زنجیره های متقابل یا چند جهشی، محافظ حلقه انتخابی را در هر دروازه فعال کنید:
 
 ```bash
 # gateway-a
@@ -706,13 +754,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-فقط درخواستهایی که به URL همتایی ارسال میشوند که صراحتاً در فهرست مجاز قرار دارد، سربرگ `X-OmniRoute-Peer-Trace` را دریافت میکنند. درگاه، شناسهٔ تکراری نمونه یا تمامشدن بودجهٔ تعداد گامها را با HTTP `508 Loop Detected` رد میکند؛ ارائهدهندگان بالادستی معمولی هیچ فرادادهای دربارهٔ همتا دریافت نمیکنند.
+فقط درخواستهایی که به یک همتا URL به طور صریح در فهرست مجاز ارسال میشوند، سرصفحه `X-OmniRoute-Peer-Trace` را دریافت میکنند. یک دروازه، یک مثال مکرر ID یا بودجه پایان یافته را با HTTP `508 Loop Detected` رد می کند. ارائه دهندگان عادی بالادستی هیچ ابرداده ای دریافت نمی کنند.
 
-زنجیرهسازی همتاها بهمعنای تکثیر پایگاهداده یا جایگزینی میزبان هنگام خرابی نیست. هر درگاه، وضعیت SQLite، حافظههای نهان، شمارندههای نرخ و نشستهای مستقل خود را نگه میدارد. برای دسترسپذیری فعال/غیرفعال یا فعال/فعال، از پراکسی معکوس دارای بررسی سلامت یا سازوکار جایگزینی سمت کلاینت استفاده کنید و هرگز یک پایگاهدادهٔ SQLite را همزمان در چند نمونهٔ در حال اجرای OmniRoute متصل نکنید.
+زنجیره همتا، تکرار پایگاه داده یا شکست میزبان نیست. هر دروازه ای حالت SQLite ، حافظه پنهان، شمارنده نرخ و جلسات مستقل را نگه می دارد. برای در دسترس بودن active/passive یا active/active از یک پروکسی معکوس یا کلاینت بررسیشده سالم استفاده کنید و هرگز یک پایگاه داده SQLite را در چندین نمونه در حال OmniRoute نصب نکنید.
 
-### مسیرهای اختصاصی ارائهدهنده
+### مسیرهای ارائه دهنده اختصاصی
 
-درخواستها را همراه با اعتبارسنجی مدل، مستقیماً به یک ارائهدهندهٔ مشخص هدایت کنید:
+درخواستهای مسیر مستقیماً به یک ارائهدهنده خاص با اعتبارسنجی مدل:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -720,140 +768,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-اگر پیشوند ارائهدهنده وجود نداشته باشد، بهطور خودکار اضافه میشود. مدلهای ناسازگار خطای `400` برمیگردانند.
+در صورت عدم وجود پیشوند ارائه دهنده به صورت خودکار اضافه می شود. مدل های نامتناسب `400` را برمی گرداند.
 
-### پیکربندی پراکسی شبکه
+### پیکربندی پروکسی شبکه
 
 ```bash
-# تنظیم پراکسی سراسری
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# پراکسی مختص هر ارائهدهنده
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# آزمایش پراکسی
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**اولویت:** مختص کلید → مختص ترکیب → مختص ارائهدهنده → سراسری → محیط.
+**تقدم:** → ویژه کلید ترکیبی خاص → ارائه دهنده خاص → محیط → جهانی.
 
-### API فهرست مدلها
+### کاتالوگ مدل API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-مدلها را بهصورت گروهبندیشده بر اساس ارائهدهنده و همراه با نوع (`chat`، `embedding`، `image`) برمیگرداند.
+مدلهای گروهبندیشده بر اساس ارائهدهنده را با انواع (`chat`، `embedding`، `image`) برمیگرداند.
 
-### همگامسازی ابری
+### همگام سازی ابری
 
-- همگامسازی ارائهدهندگان، ترکیبها و تنظیمات بین دستگاهها
-- همگامسازی خودکار در پسزمینه با مهلت زمانی و توقف سریع هنگام خطا
-- در محیط عملیاتی، `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` سمت سرور را ترجیح دهید
+- ارائهدهندگان، ترکیبها و تنظیمات را در دستگاهها همگامسازی کنید
+- همگامسازی خودکار پسزمینه با زمانبندی + با شکست سریع
+- در تولید `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` سمت سرور را ترجیح دهید
 
 ### تونل سریع Cloudflare
 
-- برای Docker و سایر استقرارهای خودمیزبان در **Dashboard → Endpoints** در دسترس است
-- یک URL موقت `https://*.trycloudflare.com` ایجاد میکند که درخواستها را به نقطهٔ پایانی فعلی و سازگار با OpenAI شما در `/v1` هدایت میکند
-- در اولین فعالسازی، `cloudflared` فقط در صورت نیاز نصب میشود؛ راهاندازیهای مجدد بعدی از همان فایل اجرایی مدیریتشده استفاده میکنند
-- تونلهای سریع پس از راهاندازی مجدد OmniRoute یا کانتینر، بهطور خودکار بازیابی نمیشوند؛ در صورت نیاز، آنها را دوباره از داشبورد فعال کنید
-- URLهای تونل موقتی هستند و هر بار که تونل را متوقف و دوباره راهاندازی میکنید، تغییر میکنند
-- تونلهای سریع مدیریتشده بهطور پیشفرض از انتقال HTTP/2 استفاده میکنند تا از هشدارهای پرشمار مربوط به بافر UDP در QUIC در کانتینرهای دارای محدودیت جلوگیری شود
-- اگر میخواهید انتخاب انتقال مدیریتشده را بازنویسی کنید، `CLOUDFLARED_PROTOCOL=quic` یا `auto` را تنظیم کنید
-- اگر ترجیح میدهید بهجای دانلود مدیریتشده از فایل اجرایی ازپیشنصبشدهٔ `cloudflared` استفاده کنید، `CLOUDFLARED_BIN` را تنظیم کنید
-- پنلهای Cloudflare Quick Tunnel، Tailscale Funnel و ngrok Tunnel را میتوان در **Settings → Appearance** نمایش داد یا پنهان کرد. پنهانکردن یک پنل، تونل در حال اجرا را متوقف نمیکند.
+- موجود در** داشبورد → endpoints** برای Docker و دیگر استقرارهای خود میزبان
+- یک `https://*.trycloudflare.com` URL موقت ایجاد می کند که به نقطه پایانی `/v1` سازگار با OpenAI فعلی شما ارسال می کند.
+- ابتدا فقط در صورت نیاز `cloudflared` را فعال می کند. بعداً از همان باینری مدیریت شده مجدداً استفاده می کند
+- تونل های سریع پس از راه اندازی مجدد OmniRoute یا کانتینر به طور خودکار بازیابی نمی شوند. در صورت نیاز آنها را از داشبورد دوباره فعال کنید
+- تونل URLs زودگذر هستند و هر بار که تونل را stop/start می کنید تغییر می کنند
+- تونل های سریع مدیریت شده به طور پیش فرض برای حمل و نقل HTTP/2 برای جلوگیری از هشدارهای بافر پر سر و صدا QUIC UDP در کانتینرهای محدود
+- اگر می خواهید انتخاب حمل و نقل مدیریت شده را لغو کنید `CLOUDFLARED_PROTOCOL=quic` یا `auto` را تنظیم کنید
+- اگر ترجیح می دهید به جای دانلود مدیریت شده از یک باینری `cloudflared` از پیش نصب شده استفاده کنید `CLOUDFLARED_BIN` تنظیم کنید
+- پنلهای تونل سریع Cloudflare ، قیف Tailscale و ngrok تونل را میتوان در آن نشان داد یا پنهان کرد.** تنظیمات → ظاهر** . مخفی کردن یک پانل باعث توقف یک تونل در حال اجرا نمی شود.
 
-### هوشمندی درگاه LLM (مرحلهٔ 9)
+### LLM Gateway Intelligence (فاز 9)
 
-- **حافظهٔ نهان معنایی** — پاسخهای غیرجریانی با temperature=0 را بهطور خودکار در حافظهٔ نهان ذخیره میکند (برای دورزدن آن از `X-OmniRoute-No-Cache: true` استفاده کنید)
-- **تکرارناپذیری درخواست** — درخواستها را در بازهٔ 5s با استفاده از سربرگ `Idempotency-Key` یا `X-Request-Id` حذف تکراری میکند
-- **ردیابی پیشرفت** — رویدادهای اختیاری SSE از نوع `event: progress` را از طریق سربرگ `X-OmniRoute-Progress: true` ارائه میدهد
+- **کش معنایی** - ذخیره خودکار پاسخهای بدون جریان، دمای = 0 (بای پس با `X-OmniRoute-No-Cache: true`)
+- **درخواست عدم توانایی** - درخواست ها را در 5 ثانیه از طریق هدر `Idempotency-Key` یا `X-Request-Id` کپی می کند
+- **ردیابی پیشرفت** - رویدادهای SSE `event: progress` را از طریق هدر `X-OmniRoute-Progress: true` انتخاب کنید
 
 ---
 
-### محیط آزمایشی مترجم
+### زمین بازی مترجم
 
-از طریق **Dashboard → Translator** به آن دسترسی پیدا کنید. نحوهٔ ترجمهٔ درخواستهای API بین ارائهدهندگان توسط OmniRoute را اشکالزدایی و مصورسازی کنید.
+دسترسی از طریق** مترجم داشبورد →** . اشکال زدایی کنید و تجسم کنید که OmniRoute چگونه درخواست های API را بین ارائه دهندگان ترجمه می کند.
 
-| حالت             | هدف                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------- |
-| **Playground**   | قالبهای مبدأ/مقصد را انتخاب کنید، یک درخواست جایگذاری کنید و خروجی ترجمهشده را فوراً ببینید |
-| **Chat Tester**  | پیامهای زندهٔ چت را از طریق پراکسی ارسال کنید و چرخهٔ کامل درخواست/پاسخ را بررسی کنید       |
-| **Test Bench**   | برای تأیید صحت ترجمه، آزمونهای دستهای را روی چندین ترکیب قالب اجرا کنید                     |
-| **Live Monitor** | هنگام عبور درخواستها از پراکسی، ترجمهها را بهصورت بلادرنگ مشاهده کنید                       |
+| حالت             | هدف                                                                                                 |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| **زمین بازی**    | فرمت های source/target را انتخاب کنید، یک درخواست را جایگذاری کنید و خروجی ترجمه شده را فورا ببینید |
+| **تستر چت**      | پیامهای چت زنده را از طریق پروکسی ارسال کنید و چرخه کامل request/response را بررسی کنید             |
+| **نیمکت تست**    | برای تأیید صحت ترجمه، آزمایشهای دستهای را در چندین ترکیب قالب اجرا کنید                             |
+| **مانیتور زنده** | هنگامی که درخواست ها از طریق پروکسی جریان می یابند، ترجمه های بلادرنگ را تماشا کنید                 |
 
 **موارد استفاده:**
 
-- اشکالزدایی علت شکست یک ترکیب مشخص کلاینت/ارائهدهنده
-- اطمینان از ترجمهٔ صحیح برچسبهای تفکر، فراخوانی ابزارها و اعلانهای سیستمی
-- مقایسهٔ تفاوت قالبها میان OpenAI، Claude، Gemini و قالبهای Responses API
+- اشکال زدایی کنید چرا یک ترکیب خاص client/provider شکست می خورد
+- بررسی کنید که برچسبهای تفکر، فراخوانیهای ابزار و درخواستهای سیستم به درستی ترجمه میشوند
+- مقایسه تفاوت فرمت بین فرمتهای OpenAI، Claude، Gemini و پاسخها API
 
 ---
 
-### راهبردهای مسیریابی
+### استراتژی های مسیریابی
 
-از مسیر **داشبورد → تنظیمات → مسیریابی** پیکربندی کنید. داشبورد شش راهبرد پرکاربرد را ارائه میدهد؛ ترکیبها و مسیریاب خودکار در داخل از مجموعه گستردهتری پشتیبانی میکنند.
+پیکربندی از طریق** تنظیمات داشبورد → مسیریابی →** . داشبورد شش استراتژی پر استفاده را نشان می دهد. ترکیبها و روتر خودکار به صورت داخلی از مجموعه گستردهتری پشتیبانی میکنند.
 
-**راهبردهای قابلمشاهده در داشبورد (مسیریابی در سطح حساب):**
+**استراتژی های قابل مشاهده داشبورد (مسیریابی در سطح حساب):**
 
-| راهبرد                      | توضیحات                                                                                                                 |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **پر کردن اولی**            | حسابها را بهترتیب اولویت استفاده میکند — حساب اصلی تا زمانی که در دسترس نباشد، همه درخواستها را مدیریت میکند            |
-| **گردشی**                   | با یک حد چسبندگی قابلتنظیم میان همه حسابها گردش میکند (پیشفرض: 3 فراخوانی برای هر حساب)                                 |
-| **P2C (توانِ دو انتخاب)**   | 2 حساب را بهصورت تصادفی انتخاب میکند و درخواست را به حساب سالمتر هدایت میکند — بار را با درنظرگرفتن سلامت متعادل میسازد |
-| **تصادفی**                  | برای هر درخواست، با استفاده از درهمریزی Fisher-Yates یک حساب را بهصورت تصادفی انتخاب میکند                              |
-| **کماستفادهترین**           | درخواست را به حسابی با قدیمیترین برچسب زمانی `lastUsedAt` هدایت میکند و ترافیک را بهطور یکنواخت توزیع میکند             |
-| **بهینهسازیشده برای هزینه** | درخواست را به حسابی با کمترین مقدار اولویت هدایت میکند و ارائهدهندگان کمهزینهتر را ترجیح میدهد                          |
+| استراتژی                 | توضیحات                                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| **ابتدا پر کنید**        | از حسابها به ترتیب اولویت استفاده میکند - حساب اصلی همه درخواستها را تا زمانی که در دسترس نباشد رسیدگی میکند |
+| **راند رابین**           | چرخه در تمام حسابها با محدودیت چسبنده قابل تنظیم (پیشفرض: 3 تماس در هر حساب)                                 |
+| **P2C (قدرت دو انتخاب)** | ۲ حساب تصادفی و مسیر به سمت سالمتر را انتخاب میکند - بار را با آگاهی از سلامت متعادل میکند                   |
+| **تصادفی**               | به طور تصادفی یک حساب برای هر درخواست با استفاده از Fisher-Yates shuffle انتخاب می کند                       |
+| **کمترین استفاده**       | مسیرهایی را به حسابی با قدیمیترین مُهر زمانی `lastUsedAt` میرساند و ترافیک را به طور مساوی توزیع میکند       |
+| **بهینه سازی هزینه**     | مسیرها به حساب با کمترین ارزش اولویت، بهینه سازی برای ارائه دهندگان کم هزینه                                 |
 
-**راهبردهای پیشرفته ترکیبی و خودکار** (برای هر ترکیب یا از طریق پیشوندهای `auto/*` قابلپیکربندی هستند — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) را ببینید):
+**استراتژی های پیشرفته ترکیبی و خودکار** (قابل تنظیم در هر ترکیب یا از طریق پیشوندهای `auto/*` - به [AUTO-COMBO.md](../routing/AUTO-COMBO.md) مراجعه کنید):
 
-- `priority` — ترتیب سختگیرانه، بدون گردش نوبتی
-- `weighted` — تقسیم متناسب ترافیک براساس وزنهای هر مدل
-- `fill-first` — استفاده کامل از مدل اول تا رسیدن به محدودیتها
+- `priority` - نظم سخت، هرگز دور روبین
+- `weighted` - ترافیک متناسب تقسیم بر وزن هر مدل
+- `fill-first` - اولین مدل را تخلیه کنید تا محدودیت ها برآورده شود
 - `round-robin` / `strict-random` / `random`
-- `p2c` (توانِ دو انتخاب)
+- `p2c` (قدرت دو انتخاب)
 - `least-used` و `cost-optimized`
-- `auto` — مبتنی بر امتیاز در میان همه گزینهها
-- `lkgp` (آخرین ارائهدهنده سالم شناختهشده) — به آخرین ارائهدهنده موفق متصل میماند و سپس به قواعد جایگزین رجوع میکند
-- `context-optimized` — مدلی با بزرگترین پنجره زمینه آزاد را انتخاب میکند
-- `context-relay` — مدلهای دارای زمینه طولانی را برای نوبتهای بعدی بهصورت زنجیرهای متصل میکند
+- `auto` - امتیاز محور در همه نامزدها
+- `lkgp` (آخرین ارائه دهنده خوب شناخته شده) - به آخرین ارائه دهنده موفق پین می کند، سپس به قوانین باز می گردد
+- `context-optimized` - مدلی را با بزرگترین پنجره زمینه آزاد انتخاب می کند
+- `context-relay` - مدلهای زمینه طولانی زنجیرهای برای نوبتهای بعدی
 
-#### سرآیند نشست چسبنده خارجی
+#### سربرگ جلسه چسبنده خارجی
 
-برای حفظ وابستگی نشست خارجی (برای مثال، عاملهای Claude Code/Codex در پشت پراکسیهای معکوس)، این سرآیند را ارسال کنید:
+برای تمایل به جلسه خارجی (به عنوان مثال، عوامل Claude Code/Codex در پشت پراکسی های معکوس)، ارسال کنید:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute همچنین `x_session_id` را میپذیرد و کلید مؤثر نشست را در `X-OmniRoute-Session-Id` برمیگرداند.
+OmniRoute همچنین `x_session_id` می پذیرد و کلید نشست موثر را در `X-OmniRoute-Session-Id` برمی گرداند.
 
-اگر از Nginx استفاده میکنید و سرآیندهایی با قالب زیرخط ارسال میکنید، این گزینه را فعال کنید:
+اگر از Nginx استفاده می کنید و هدرهای فرم زیرخط را ارسال می کنید، فعال کنید:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### نامهای مستعار مدل با نویسه عام
+#### نام مستعار مدل Wildcard
 
-برای نگاشت مجدد نام مدلها، الگوهای دارای نویسه عام ایجاد کنید:
-
-```
-الگو: claude-sonnet-*     →  مقصد: cc/claude-sonnet-4-6
-الگو: gpt-*               →  مقصد: gh/gpt-5.3-codex
-```
-
-نویسههای عام از `*` (هر تعداد نویسه) و `?` (یک نویسه) پشتیبانی میکنند.
-
-#### زنجیرههای جایگزین
-
-زنجیرههای جایگزین سراسری را تعریف کنید که بر همه درخواستها اعمال شوند:
+برای ترسیم مجدد نام مدل ها، الگوهای عام ایجاد کنید:
 
 ```
-زنجیره: production-fallback
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+```
+
+Wildcards از `*` (هر کاراکتر) و `?` (تک شخصیت) پشتیبانی می کنند.
+
+#### زنجیرهای بازگشتی
+
+زنجیره های بازگشتی جهانی را تعریف کنید که در همه درخواست ها اعمال می شود:
+
+```
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -861,154 +909,209 @@ underscores_in_headers on;
 
 ---
 
-### تابآوری و قطعکنندههای مدار
+### ترکیبات رایج ارائه دهنده و الگوهای مسیریابی
 
-از مسیر **داشبورد → تنظیمات → تابآوری** پیکربندی کنید.
+در اینجا الگوهای نمونه ای برای ترکیب چندین ارائه دهنده و مسیریابی بین آنها در OmniRoute آورده شده است:
 
-OmniRoute تابآوری در سطح ارائهدهنده را با پنج مؤلفه پیادهسازی میکند:
+#### 1. Coding Agent Combo: استدلال بالا پایان با Cost/Speed Fallback
 
-1. **صف درخواست و تنظیم آهنگ** — شکلدهی درخواست در سطح سیستم:
-   - **درخواست در دقیقه (RPM)** — حداکثر تعداد درخواست در دقیقه برای هر حساب
-   - **حداقل زمان بین درخواستها** — حداقل فاصله زمانی بین درخواستها برحسب میلیثانیه
-   - **حداکثر درخواستهای همزمان** — حداکثر تعداد درخواستهای همزمان برای هر حساب
+ایده آل برای عوامل برنامه نویسی (OpenCode، Claude Code، Cursor، Cline). مسیرها در ابتدا به مدلهای استدلال مرزی، بازگشت به مدلهای کدگذاری سریع در صورت خستگی سهمیه یا خطا.
 
-2. **دوره انتظار اتصال** — پیکربندی براساس نوع احراز هویت برای یک اتصال، پس از خطاهای قابلتلاشمجدد:
-   - **دوره انتظار پایه** — بازه پیشفرض انتظار برای خطاهای قابلتلاشمجدد بالادستی
-   - **استفاده از راهنمای تلاش مجدد بالادستی** — در صورت ارائه، به `Retry-After` معتبر یا راهنمای بازنشانی پایبند میماند
-   - **حداکثر مراحل عقبنشینی** — حداکثر سطح عقبنشینی نمایی برای خطاهای تکراری
+- **داشبورد** : Combos → New Combo → نام: `agent-coding` → استراتژی: `Priority`
+- **مدل ها** :
+  1. `claude/claude-sonnet-4-6` (عامل کدگذاری اولیه)
+  2. `openai/gpt-4o` (ثانویه بازگشتی با ظرفیت بالا)
+  3. `deepseek/deepseek-v4-flash` (بازگشت با کارایی بالا، مقرون به صرفه)
 
-3. **قطعکننده مدار ارائهدهنده** — خطاهای سرتاسری ارائهدهنده را ردیابی میکند، در آستانه هشدار پیکربندیشده وضعیت ارائهدهنده را تنزلیافته علامت میزند و با رسیدن به آستانه خطای پیکربندیشده، قطعکننده را باز میکند:
-   - **آستانه تنزل** — تعداد خطاهای متوالی ارائهدهنده پیش از ورود به `DEGRADED`
-   - **آستانه خطا** — تعداد خطاهای متوالی ارائهدهنده پیش از ورود به `OPEN`
-   - **مهلت بازنشانی** — بازه زمانی پیش از آزمایش مجدد ارائهدهنده
-   - **CLOSED** (سالم) — درخواستها بهطور عادی جریان مییابند
-   - **DEGRADED** — درحالیکه افزایش خطاها ردیابی میشود، درخواستها همچنان جریان مییابند
-   - **OPEN** — ارائهدهنده پس از خطاهای تکراری، موقتاً مسدود میشود
-   - **HALF_OPEN** — بررسی میشود که آیا ارائهدهنده بازیابی شده است
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
 
-   محدودیتهای نرخ `429` در سطح اتصال در **دوره انتظار اتصال** باقی میمانند و در قطعکننده ارائهدهنده محاسبه نمیشوند.
+#### 2. Free-Tier Auto Failover Combo
 
-   وضعیت زمان اجرای قطعکننده ارائهدهنده فقط در **داشبورد → سلامت** نمایش داده میشود.
+چندین ارائهدهنده لایه آزاد و بدون کلید را برای به حداکثر رساندن زمان بدون هزینه API زنجیرهای میکند.
 
-4. **انتظار برای پایان دوره انتظار** — اگر همه اتصالهای کاندید از قبل در دوره انتظار باشند، OmniRoute میتواند تا پایان نزدیکترین دوره انتظار صبر کند و همان درخواست کلاینت را بهطور خودکار دوباره امتحان کند.
+- **استراتژی** : `Least Used` یا `Round Robin` (بار را در بین سهمیه ها توزیع می کند)
+- **مدل ها** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
 
-5. **تشخیص خودکار محدودیت نرخ** — وقتی ارائهدهندگان بالادستی بازههای انتظار صریحی برمیگردانند، در صورت فعال بودن این تنظیم، آن راهنماها دوره انتظار محلی اتصال را لغو و جایگزین میکنند.
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
 
-**نکته حرفهای:** برای بررسی و بازنشانی قطعکنندههای فعال ارائهدهندگان پس از یک قطعی، از صفحه **سلامت** استفاده کنید. صفحه تابآوری فقط پیکربندی را تغییر میدهد.
+#### 3. خط لوله چندوجهی / چشم انداز و متن
+
+جفت کردن مدلهای دید تخصصی با تولید متن با سرعت بالا برای جریانهای کاری شامل درک تصویر و تولید کد.
+
+- **الگو** : یک ترکیب `Priority` که ابتدا مدلهای دارای قابلیت دید را فهرست میکند و در آخر یک مدل text/code با توان عملیاتی بالا را فهرست میکند.
+- **مدل ها** :
+  1. `gemini/gemini-2.5-pro` (درک قوی image/multimodal )
+  2. `openai/gpt-4o` (بینایی متعادل و استفاده از ابزار)
+  3. `deepseek/deepseek-v4-flash` (نسل Text/code )
 
 ---
 
-### برونبری / درونریزی پایگاه داده
+### ارتجاعی و مدار شکن
 
-نسخههای پشتیبان پایگاه داده را در **داشبورد → تنظیمات → سیستم و فضای ذخیرهسازی** مدیریت کنید.
+پیکربندی از طریق** تنظیمات داشبورد → → Resilience** .
 
-| عملیات                              | توضیحات                                                                                                                                                                         |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **خروجی گرفتن از پایگاه داده**      | پایگاه داده فعلی SQLite را بهصورت یک فایل `.sqlite` دانلود میکند                                                                                                                |
-| **خروجی گرفتن از همهچیز (.tar.gz)** | یک آرشیو پشتیبان کامل شامل پایگاه داده، تنظیمات، ترکیبها، اتصالهای ارائهدهندگان (بدون اطلاعات احراز هویت) و فراداده کلیدهای API را دانلود میکند                                 |
-| **وارد کردن پایگاه داده**           | یک فایل `.sqlite` را برای جایگزینی پایگاه داده فعلی بارگذاری میکند. مگر اینکه `DISABLE_SQLITE_AUTO_BACKUP=true` باشد، پیش از وارد کردن بهطور خودکار یک نسخه پشتیبان ایجاد میشود |
+OmniRoute انعطاف پذیری در سطح ارائه دهنده را با پنج جزء پیاده سازی می کند:
+
+1. **درخواست صف و سرعت** - شکل دهی درخواست در سطح سیستم:
+   - **درخواست در دقیقه (RPM)** - حداکثر درخواست در دقیقه برای هر حساب
+   - **حداقل زمان بین درخواست ها** - حداقل فاصله بین درخواست ها در میلی ثانیه
+   - **حداکثر درخواست همزمان** - حداکثر درخواست همزمان برای هر حساب
+
+2. **خنک شدن اتصال** - پیکربندی از نوع Per-auth برای یک اتصال واحد پس از خرابی های قابل امتحان مجدد:
+   - **خنک کننده پایه** - پنجره خنک کننده پیش فرض برای خرابی های بالادستی قابل امتحان مجدد
+   - **از نکات «آزمایش مجدد بالادست» استفاده کنید** - در صورت ارائه به نکات معتبر `Retry-After` یا تنظیم مجدد احترام می گذارد
+   - **حداکثر مراحل عقب نشینی** - حداکثر سطح عقب نشینی نمایی برای شکست های مکرر
+
+3. **مدار شکن ارائه دهنده** - خرابیهای ارائهدهنده سرتاسر را ردیابی میکند، ارائهدهندهای را که در آستانه هشدار پیکربندیشده تنزل یافته، علامتگذاری میکند، و با رسیدن به آستانه شکست پیکربندیشده، شکن را باز میکند:
+   - **آستانه تخریب** - خرابی های متوالی ارائه دهنده قبل از ورود به `DEGRADED`
+   - **آستانه شکست** - خرابی های متوالی ارائه دهنده قبل از ورود به `OPEN`
+   - **بازنشانی مهلت زمانی** - پنجره زمانی قبل از آزمایش مجدد ارائه دهنده
+   - **CLOSED** (سالم) - درخواست ها به طور معمول جریان دارند
+   - **DEGRADED** - در حالی که خرابیهای بالا ردیابی میشوند، درخواستها همچنان جریان دارند
+   - **OPEN** - ارائه دهنده به طور موقت پس از خرابی های مکرر مسدود می شود
+   - **HALF_OPEN** - آزمایش اینکه آیا ارائه دهنده بهبود یافته است
+
+   محدودیتهای نرخ `429` در محدوده اتصال باقی میمانند** خنک شدن اتصال** و در میان شکن ارائه دهنده حساب نمی شود.
+
+   وضعیت زمان اجرا قطع کننده ارائه دهنده روشن نشان داده شده است** داشبورد → Health** فقط
+
+4. **منتظر خنک شدن باشید** - اگر هر اتصال کاندید از قبل خنک می شود، OmniRoute می تواند منتظر اولین خنک شدن بماند و به طور خودکار همان درخواست مشتری را دوباره امتحان کند.
+
+5. **تشخیص خودکار محدودیت نرخ** - هنگامی که ارائه دهندگان بالادست پنجرههای انتظار صریح را برمیگردانند، این نکات زمانی که تنظیم فعال میشود، خنککردن اتصال محلی را لغو میکند.
+
+**نکته حرفه ای:** استفاده کنید** سلامتی** صفحه ای برای بازرسی و بازنشانی بریکرهای ارائه دهنده زنده پس از قطع شدن. صفحه Resilience فقط پیکربندی را تغییر می دهد.
+
+---
+
+### صادرات / واردات پایگاه داده
+
+مدیریت پشتیبانگیری از پایگاه داده در** تنظیمات داشبورد → → سیستم و ذخیره سازی** .
+
+| اقدام                     | توضیحات                                                                                                                                                                 |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **پایگاه داده صادرات**    | پایگاه داده SQLite فعلی را به عنوان یک فایل `.sqlite` دانلود می کند                                                                                                     |
+| **صادرات همه (tar.gz.)**  | یک بایگانی پشتیبان کامل شامل: پایگاه داده، تنظیمات، ترکیب، اتصالات ارائه دهنده (بدون اعتبار)، ابرداده کلید API را دانلود می کند.                                        |
+| **وارد کردن پایگاه داده** | یک فایل `.sqlite` را برای جایگزینی پایگاه داده فعلی آپلود کنید. یک نسخه پشتیبان از قبل از واردات به طور خودکار ایجاد می شود مگر اینکه `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: خروجی گرفتن از پایگاه داده
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: خروجی گرفتن از همهچیز (آرشیو کامل)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: وارد کردن پایگاه داده
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**اعتبارسنجی وارد کردن:** یکپارچگی فایل واردشده (بررسی pragma در SQLite)، وجود جدولهای الزامی (`provider_connections`، `provider_nodes`، `combos`، `api_keys`) و اندازه آن (حداکثر 100MB) اعتبارسنجی میشوند.
+**اعتبارسنجی واردات:** فایل وارد شده از نظر یکپارچگی (بررسی SQLite pragma)، جداول مورد نیاز (`provider_connections`، `provider_nodes`، `combos`، `api_keys`) و اندازه (حداکثر 100 مگابایت) تأیید شده است.
 
 **موارد استفاده:**
 
-- انتقال OmniRoute بین دستگاهها
-- ایجاد نسخههای پشتیبان خارجی برای بازیابی پس از بحران
-- اشتراکگذاری پیکربندیها بین اعضای تیم (خروجی گرفتن از همهچیز ← اشتراکگذاری آرشیو)
+- OmniRoute بین ماشین ها مهاجرت کنید
+- پشتیبانگیری خارجی برای بازیابی فاجعه ایجاد کنید
+- به اشتراک گذاری تنظیمات بین اعضای تیم (صادرات تمام آرشیو اشتراک → )
 
 ---
 
 ### داشبورد تنظیمات
 
-صفحه تنظیمات برای پیمایش آسان در **7 زبانه** سازماندهی شده است:
+صفحه تنظیمات به صورت سازماندهی شده است** 7 برگه** برای ناوبری آسان:
 
-| زبانه          | محتوا                                                                                                                                                                   |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **عمومی**      | ابزارهای ذخیرهسازی سیستم، رفتار پیشفرض، نمایش تونل Endpoint                                                                                                             |
-| **ظاهر**       | کنترلهای پوسته (روشن/تیره/سیستم)، نمایش نوار کناری، کلیدهای نمایش پنل برای کارتهای تونل Cloudflare/Tailscale/ngrok                                                      |
-| **هوش مصنوعی** | بودجه تفکر (عبور بدون تغییر / حذف خودکار / سفارشی / تطبیقی — به [THINKING_BUDGET.md](./THINKING_BUDGET.md) مراجعه کنید)، پرامپت سیستمی سراسری، آمار کش پرامپت           |
-| **امنیت**      | تنظیمات ورود/رمز عبور، کنترل دسترسی IP، احراز هویت API برای `/models`، مسدودسازی ارائهدهنده، محافظ در برابر تزریق پرامپت                                                |
-| **مسیریابی**   | راهبرد مسیریابی سراسری (پر کردن اولین / نوبتگردشی / P2C / تصادفی / کماستفادهترین / بهینهسازی هزینه)، نامهای مستعار مدل با نویسه عام، زنجیرههای جایگزین، پیشفرضهای ترکیب |
-| **تابآوری**    | صف درخواست، دوره انتظار اتصال، پیکربندی قطعکننده ارائهدهنده و رفتار انتظار برای پایان دوره انتظار                                                                       |
-| **پیشرفته**    | پیکربندی پراکسی سراسری (HTTP/SOCKS5)، بازنویسی پراکسی برای هر ارائهدهنده                                                                                                |
+| Tab          | مطالب                                                                                                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ژنرال**    | ابزارهای ذخیره سازی سیستم، رفتار پیش فرض، دید تونل نقطه پایانی                                                                                                        |
+| **ظاهر**     | کنترلهای تم (light/dark/system)، نمایان شدن نوار کناری، کلیدهای پانل برای کارتهای تونل Cloudflare/Tailscale/ngrok                                                     |
+| **AI**       | بودجه فکری (گذرا / نوار خودکار / سفارشی / تطبیقی - به [THINKING_BUDGET.md](./THINKING_BUDGET.md) مراجعه کنید)، درخواست سیستم جهانی، آمار حافظه پنهان سریع             |
+| **امنیت**    | تنظیمات Login/Password ، کنترل دسترسی IP ، API auth برای `/models`، مسدود کردن ارائه دهنده، محافظ تزریق سریع                                                          |
+| **مسیریابی** | استراتژی مسیریابی جهانی (Fill First / Round Robin / P2C / تصادفی / کمتر استفاده شده / بهینه سازی هزینه)، نام مستعار مدل علامت، زنجیره های بازگشتی، پیش فرض های ترکیبی |
+| **تاب آوری** | صف درخواست، خنک شدن اتصال، پیکربندی شکن ارائه دهنده و رفتار انتظار برای خنک شدن                                                                                       |
+| **پیشرفته**  | پیکربندی پروکسی جهانی (HTTP/SOCKS5)، لغو پروکسی هر ارائه دهنده                                                                                                        |
 
-بخش عمومی دیگر یادداشتهای فقطخواندنی مربوط به ثبت گزارش و کش را تکرار نمیکند. تنظیمات نگهداری و
-بهینهسازی پایگاه داده از طریق `/api/settings/database` ذخیره میشوند؛ پاکسازی دستی کش از
-`DELETE /api/cache` استفاده میکند. سقف تعداد ردیفهای گزارش درخواست و پراکسی توسط
-`CALL_LOGS_TABLE_MAX_ROWS` و `PROXY_LOGS_TABLE_MAX_ROWS` کنترل میشود.
+General دیگر گزارشهای فقط خواندنی و یادداشتهای کش را تکرار نمیکند. تنظیمات حفظ پایگاه داده و بهینه سازی از طریق `/api/settings/database` ادامه دارد. پاکسازی کش دستی از `DELETE /api/cache` استفاده می کند. سرپوشهای ردیف لاگ درخواست و پروکسی توسط `CALL_LOGS_TABLE_MAX_ROWS` و `PROXY_LOGS_TABLE_MAX_ROWS` کنترل میشوند.
 
 ---
 
-### مدیریت هزینهها و بودجه
+### مدیریت هزینه و بودجه
 
-از طریق **داشبورد ← هزینهها** در دسترس است.
+دسترسی از طریق** هزینه های داشبورد →** .
 
-| زبانه         | هدف                                                                                             |
-| ------------- | ----------------------------------------------------------------------------------------------- |
-| **بودجه**     | تعیین محدودیت هزینه برای هر کلید API با بودجههای روزانه/هفتگی/ماهانه و ردیابی بلادرنگ           |
-| **قیمتگذاری** | مشاهده و ویرایش ورودیهای قیمتگذاری مدل — هزینه بهازای هر 1K توکن ورودی/خروجی برای هر ارائهدهنده |
+| Tab            | هدف                                                                                                 |
+| -------------- | --------------------------------------------------------------------------------------------------- |
+| **بودجه**      | با بودجه daily/weekly/monthly و ردیابی بیدرنگ، محدودیتهای هزینه را برای هر کلید API تنظیم کنید      |
+| **قیمت گذاری** | ورودیهای قیمتگذاری مدل را مشاهده و ویرایش کنید - هزینه هر هزار توکن input/output برای هر ارائهدهنده |
 
 ```bash
-# API: تنظیم بودجه
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: دریافت وضعیت فعلی بودجه
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**ردیابی هزینه:** هر درخواست، میزان استفاده از توکن را ثبت میکند و هزینه را با استفاده از جدول قیمتگذاری محاسبه میکند. جزئیات تفکیکی را بر اساس ارائهدهنده، مدل و کلید API در **داشبورد ← میزان استفاده** مشاهده کنید.
+**پیگیری هزینه:** هر درخواست استفاده از نشانه را ثبت می کند و هزینه را با استفاده از جدول قیمت گذاری محاسبه می کند. مشاهده خرابی ها در** استفاده از داشبورد →** توسط ارائه دهنده، مدل، و کلید API.
 
 ---
 
 ### رونویسی صوتی
 
-OmniRoute از رونویسی صوتی از طریق نقطه پایانی سازگار با OpenAI پشتیبانی میکند:
+OmniRoute از رونویسی صوتی از طریق نقطه پایانی سازگار با OpenAI پشتیبانی می کند:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# نمونه با curl
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` مسیر بومی Deepgram است و به یک کلید API از Deepgram نیاز دارد.
-اگر فقط OpenRouter پیکربندی شده است، از `openrouter/deepgram/nova-3` استفاده کنید.
+`deepgram/nova-3` مسیر اصلی Deepgram است و به یک کلید API Deepgram نیاز دارد. اگر فقط OpenRouter پیکربندی شده است، `openrouter/deepgram/nova-3` استفاده کنید.
 
-ارائهدهندگان **تبدیل گفتار به متن (رونویسی)**:
+**گفتار به متن (رونویسی)** ارائه دهندگان:
 
-- `openai/` (سازگار با whisper)
+- `openai/` (سازگار با زمزمه)
 - `groq/` (Groq Whisper Turbo)
-- `deepgram/` (خانواده Nova)
+- `deepgram/` (خانواده نوا)
 - `assemblyai/`
-- `nvidia/` (Parakeet، Canary)
-- `huggingface/` (گونههای whisper)
+- `nvidia/` (پاراکیت، قناری)
+- `huggingface/` (انواع زمزمه)
 - `qwen/`
 
-ارائهدهندگان **تبدیل متن به گفتار (`POST /v1/audio/speech`)**:
+**تبدیل متن به گفتار (`POST /v1/audio/speech`)** ارائه دهندگان:
 
 - `openai/` (tts-1، tts-1-hd)
 - `hyperbolic/`
-- `deepgram/` (Aura)
-- `nvidia/` (Magpie TTS)
+- `deepgram/` (هاله)
+- `nvidia/` (زاغی TTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1017,59 +1120,48 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `kie/`
 - `aws-polly/`
 - `xiaomi-mimo/`
-- `coqui/`، `tortoise/`
+- `coqui/`, `tortoise/`
 - `qwen/`
 
-قالبهای صوتی پشتیبانیشده برای رونویسی: `mp3`، `wav`، `m4a`، `flac`، `ogg`، `webm`. قالبهای خروجی TTS به ارائهدهنده بستگی دارند (mp3، wav، opus، pcm، mulaw).
+فرمت های صوتی پشتیبانی شده برای رونویسی: `mp3`، `wav`، `m4a`، `flac`، `ogg`، `webm`. فرمت های خروجی TTS به ارائه دهنده بستگی دارد (mp3، wav، opus، pcm، mulaw).
 
 ---
 
-### راهبردهای متعادلسازی ترکیب
+### استراتژی های متعادل کننده ترکیبی
 
-متعادلسازی هر ترکیب را در **داشبورد ← ترکیبها ← ایجاد/ویرایش ← راهبرد** پیکربندی کنید.
+تعادل در هر ترکیب را پیکربندی کنید** داشبورد → Combos → Create/Edit → استراتژی** .
 
-| راهبرد                 | توضیحات                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------ |
-| **نوبتی**              | مدلها را بهصورت متوالی به گردش درمیآورد                                                          |
-| **اولویتدار**          | همیشه ابتدا مدل اول را امتحان میکند؛ فقط در صورت خطا به مدل بعدی میرود                           |
-| **تصادفی**             | برای هر درخواست، مدلی تصادفی از ترکیب انتخاب میکند                                               |
-| **وزندار**             | مسیریابی را متناسب با وزن اختصاصیافته به هر مدل انجام میدهد                                      |
-| **کماستفادهترین**      | درخواست را به مدلی با کمترین تعداد درخواستهای اخیر هدایت میکند (از معیارهای ترکیب استفاده میکند) |
-| **بهینه از نظر هزینه** | درخواست را به ارزانترین مدل موجود هدایت میکند (از جدول قیمتگذاری استفاده میکند)                  |
+| استراتژی             | توضیحات                                                                        |
+| -------------------- | ------------------------------------------------------------------------------ |
+| **دور رابین**        | به صورت متوالی در میان مدل ها می چرخد                                          |
+| **اولویت**           | همیشه مدل اول را امتحان می کند. فقط به خطا برمی گردد                           |
+| **تصادفی**           | برای هر درخواست یک مدل تصادفی از ترکیب ترکیبی انتخاب می کند                    |
+| **وزن دار**          | مسیرها به طور متناسب بر اساس وزن های اختصاص داده شده در هر مدل                 |
+| **کمترین استفاده**   | مسیرهایی به مدل با کمترین درخواست های اخیر (از معیارهای ترکیبی استفاده می کند) |
+| **بهینه سازی هزینه** | مسیرها به ارزان ترین مدل موجود (از جدول قیمت استفاده می کند)                   |
 
-پیشفرضهای سراسری ترکیب را میتوان در **داشبورد ← تنظیمات ← مسیریابی ← پیشفرضهای ترکیب** تنظیم کرد.
-مهلتهای زمانی مقصدهای ترکیب بهطور پیشفرض از مهلت زمانی درخواست فعلی به ارث برده میشوند. فقط زمانی از **مهلت زمانی مقصد
-(ثانیه)** در پیشفرضهای ترکیب یا یک ترکیب خاص استفاده کنید که لازم است محدودیت کوتاهتری برای هر مقصد،
-بازگشت به مقصد جایگزین را سریعتر فعال کند.
+پیش فرض های جهانی ترکیبی را می توان در آن تنظیم کرد** تنظیمات داشبورد → → مسیریابی → پیشفرض ترکیبی** . مهلت زمانی هدف ترکیبی به طور پیشفرض مهلت زمانی درخواست فعلی را به ارث میبرد. استفاده کنید** مهلت زمانی هدف (ثانیه)** در پیشفرضهای ترکیبی یا ترکیبی تکی تنها زمانی که یک محدودیت کوتاهتر برای هر هدف باید بازگشت سریعتری ایجاد کند.
 
-بهینهسازیهای بدون تأخیر ترکیب اختیاری هستند. **بهینهسازیهای بدون تأخیر** را غیرفعال نگه دارید تا
-این قابلیتهای کاهش تأخیر از رقابت همزمان مقصدهای جایگزین، رد کردن مقصدها بر اساس سابقه
-TTFT یا فشردهسازی درخواستهای جایگزین جلوگیری کنند؛ فعالسازی آن اجازه میدهد پوشش ریسک پیکربندیشده، رد کردن پیشبینانه بر اساس TTFT
-و فشردهسازی پیشدستانه درخواست جایگزین، صحت مسیریابی/درخواست را در ازای کاهش
-تأخیر انتهایی کمتر کنند.
+بهینهسازیهای ترکیبی با تأخیر صفر انتخابی هستند. ترک کنید** بهینه سازی با تاخیر صفر** برای جلوگیری از مسابقه دادن به اهداف بازگشتی، پرش از اهداف بر اساس تاریخچه TTFT یا فشرده سازی درخواست های بازگشتی، این ویژگی های تأخیر غیرفعال است. فعال کردن آن اجازه می دهد تا پوشش پیکربندی شده، پرش های پیش بینی کننده TTFT ، و فشرده سازی بازگشتی فعال برای معامله وفاداری routing/request با تأخیر دم کمتر.
 
-زمانی که ارائهدهندگان بالادستی به محدودیتهای سختگیرانه
-`max_tokens` / `maxOutputTokens` نیاز دارند، **بافر توکنهای استدلال** را غیرفعال کنید. در صورت فعال بودن، مسیریابی ترکیبی فقط برای مدلهای استدلالی
-که سقف خروجی مشخصی دارند، فضای اضافه در نظر میگیرد و وقتی مقدار امنِ بافرشده از آن سقف
-فراتر رود، محدودیت توکن کلاینت را بدون تغییر باقی میگذارد. اگر محدودیت کلاینت از قبل بالاتر از یک سقف مشخص باشد،
-OmniRoute پیش از ارسال درخواست بالادستی، آن را تا همان سقف کاهش میدهد.
+غیر فعال کردن** بافر توکن استدلال** هنگامی که ارائه دهندگان بالادستی به محدودیت های سختگیرانه `max_tokens` / `maxOutputTokens` نیاز دارند. هنگامی که فعال باشد، مسیریابی ترکیبی تنها فضای سر مدل استدلالی را برای مدلهایی با درپوش خروجی مشخص اضافه میکند و زمانی که مقدار بافر ایمن از آن سقف فراتر رود، محدودیت توکن کلاینت را بدون تغییر میگذارد. اگر محدودیت کلاینت از قبل بالاتر از یک سقف شناخته شده باشد، OmniRoute قبل از ارسال درخواست بالادستی، آن را به آن سقف میبندد.
 
 ---
 
 ### داشبورد سلامت
 
-از طریق **داشبورد ← سلامت** به آن دسترسی پیدا کنید. نمای کلی بلادرنگ سلامت سیستم با ۶ کارت:
+دسترسی از طریق** داشبورد → Health** . نمای کلی سلامت سیستم بلادرنگ با 6 کارت:
 
-| کارت                   | موارد نمایشدادهشده                                            |
-| ---------------------- | ------------------------------------------------------------- |
-| **وضعیت سیستم**        | زمان کارکرد، نسخه، میزان استفاده از حافظه، پوشه دادهها        |
-| **سلامت ارائهدهندگان** | وضعیت زمان اجرای قطعکننده مدار سراسری ارائهدهندگان            |
-| **محدودیتهای نرخ**     | دورههای انتظار فعال اتصال برای هر حساب بههمراه زمان باقیمانده |
-| **قفلهای فعال**        | قفلهای فعال مختص مدل و محرومیتهای موقت                        |
-| **کش امضا**            | آمار کش حذف موارد تکراری (کلیدهای فعال، نرخ اصابت)            |
-| **تلهمتری تأخیر**      | تجمیع تأخیر p50/p95/p99 برای هر ارائهدهنده                    |
+| کارت                  | آنچه را نشان می دهد                                |
+| --------------------- | -------------------------------------------------- |
+| **وضعیت سیستم**       | Uptime، نسخه، استفاده از حافظه، فهرست داده ها      |
+| **ارائه دهنده سلامت** | وضعیت زمان اجرا قطع کننده مدار ارائه دهنده جهانی   |
+| **محدودیت های نرخ**   | خنکسازی اتصال فعال در هر حساب با زمان باقیمانده    |
+| **قفل های فعال**      | قفلهای فعال با محدوده مدل و محرومیتهای موقت        |
+| **کش امضا**           | آمار حافظه پنهان حذف مجدد (کلیدهای فعال، نرخ ضربه) |
+| **تله متری تاخیر**    | تجمع تاخیر p50/p95/p99 در هر ارائه دهنده           |
 
-**نکته حرفهای:** صفحه سلامت هر ۱۰ ثانیه بهطور خودکار تازهسازی میشود. از کارت قطعکننده مدار برای شناسایی ارائهدهندگانی که با مشکل مواجهاند استفاده کنید.
+**نکته حرفه ای:** صفحه سلامت هر 10 ثانیه به طور خودکار بازخوانی می شود. از کارت قطع کننده مدار برای شناسایی ارائه دهندگانی که با مشکل مواجه هستند استفاده کنید.
 
 ---
 

@@ -17,12 +17,15 @@ import { maybeLogToolCallSpecViolation } from "./toolCallSpecViolationAudit.ts";
 import type { RequestCompletedPayload, RequestFailedPayload } from "@/lib/events/types";
 import { saveCallLog } from "@/lib/usageDb";
 import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
+import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import { FORMATS } from "../../translator/formats.ts";
 import { takeEarlyKeepaliveBytes } from "../../utils/earlyKeepaliveByteBuffer.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { isEstimatedUsage } from "../../utils/usageTracking.ts";
 import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
+import { readAddedWait } from "../../utils/proxyFetch.ts";
+import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
 
@@ -67,12 +70,12 @@ function mutableVideoLogMessage(
  *
  * `body` itself is NEVER mutated: by the time an attempt is logged, this same
  * `body` reference has already been sent upstream (the model path), so
- * mutating it here would be both unsafe and pointless. Only the containers on
- * the path to each redacted part are cloned (container array -> message ->
- * content array -> part); every sibling message/part keeps referencing the
- * original objects. Returns `body` unchanged (same reference, no allocation)
- * when there is nothing to redact, so the common non-video path is
- * byte-identical to before this function existed.
+ * mutating it here would be both unsafe and pointless. Shadow replacement
+ * clones only the containers on the path to each redacted part (container
+ * array -> message -> content array -> part). With failClosedOnMiss enabled,
+ * the final structural redactor also clones the result to protect raw video
+ * siblings. The common non-video path still returns `body` unchanged (same
+ * reference, no allocation) when there is nothing to redact.
  *
  * #12150 fix round 1 (adversarial review, CRITICAL): matches by CONTENT
  * (`entry.fullText === part.text`), never by `entry.messageIndex`/
@@ -208,7 +211,10 @@ export function applyVideoBridgeLogRedaction(
     if (failClosedOnMiss && !matchedEntry) return OMITTED_VIDEO_TRANSCRIPT_REQUEST;
   }
 
-  return redacted && cloneState.rootClone ? cloneState.rootClone : body;
+  const result = redacted && cloneState.rootClone ? cloneState.rootClone : body;
+  // A matched description shadow does not cover raw video siblings left by a
+  // failed description or maxVideos. Redact their fields on the retained copy.
+  return failClosedOnMiss ? redactVideoTranscriptFieldsForLog(result) : result;
 }
 
 /**
@@ -240,6 +246,7 @@ export function extractResponsesId(sourceFormat: unknown, clientResponse: unknow
 export type PersistAttemptLogsArgs = {
   status: number;
   tokens?: unknown;
+  usageEstimated?: boolean | null;
   responseBody?: unknown;
   error?: string | null;
   providerRequest?: unknown;
@@ -247,7 +254,23 @@ export type PersistAttemptLogsArgs = {
   clientResponse?: unknown;
   claudeCacheMeta?: Record<string, unknown>;
   claudeCacheUsageMeta?: Record<string, unknown>;
+  geminiPromptCache?: Record<string, unknown> | null;
   cacheSource?: "upstream" | "semantic";
+  /**
+   * #13130: time to the first forwarded stream chunk (ms), as measured by
+   * streamTiming for THIS attempt. Persisted to call_logs.ttft_ms so the
+   * dashboard TPS divides by generation time (duration - TTFT). Streaming
+   * completions pass it; non-streaming paths leave it undefined (column NULL).
+   */
+  ttft?: number | null;
+  /**
+   * Encrypted-reasoning observation from the stream loops (flag + wall-clock
+   * duration only). Efforts are read at the sink from the request bodies.
+   */
+  reasoningMeta?: {
+    encryptedSeen: boolean;
+    durationMs: number | null;
+  } | null;
 };
 
 export type PersistAttemptLogsContext = {
@@ -261,7 +284,7 @@ export type PersistAttemptLogsContext = {
   detailedLoggingEnabled: boolean;
   reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
   pendingRequestId: unknown;
-  clientRawRequest: { endpoint?: string } | null | undefined;
+  clientRawRequest: { endpoint?: string; headers?: unknown; body?: unknown } | null | undefined;
   requestedModel: unknown;
   credentials: { connectionId?: string } | null | undefined;
   startTime: number;
@@ -388,7 +411,9 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     clientResponse,
     claudeCacheMeta,
     claudeCacheUsageMeta,
+    geminiPromptCache,
     cacheSource,
+    ttft,
   } = args;
   const {
     traceId,
@@ -444,7 +469,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
       : redactedRequest;
   const retainedResponse = videoContentRemoved
     ? { _omniroute_omitted: "video-transcript" }
-    : responseBody;
+    : (responseBody ?? (status >= 400 ? providerResponse : undefined));
   const retainedError = videoContentRemoved && error ? "[omitted: video transcript]" : error;
 
   const providerWarnings = extractProviderWarnings(providerResponse, clientResponse, responseBody);
@@ -536,11 +561,16 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     }
   }
 
-  // #13481: each combo attempt needs its own row. Attempts share pendingRequestId, so
-  // keying the log on it made the successful member's insert hit the UNIQUE constraint
-  // and vanish from the dashboard; traceId is per attempt and pairs with request.started.
+  // Primary key is a fresh UUID from saveCallLog, not traceId. Attempts share
+  // pendingRequestId and must not share the row key. correlationId still
+  // pairs the row with request.started. pendingRequestId is NOT the row key: it only
+  // routes token usage to the live in-memory request row (#14324).
+  // Late read of the per-request added wait published on the ALS
+  // capture sink by the executor. Fail-soft: null outside a capture or when
+  // nothing was published — the row stores NULL (no wait), never throws.
+  const addedWait = readAddedWait();
   saveCallLog({
-    id: traceId,
+    pendingRequestId: ctx.pendingRequestId,
     method: "POST",
     path: clientRawRequest?.endpoint || "/v1/chat/completions",
     status,
@@ -549,11 +579,22 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     provider,
     connectionId: finalConnectionId || undefined,
     duration: Date.now() - startTime,
+    ttftMs: typeof ttft === "number" && Number.isFinite(ttft) && ttft >= 0 ? ttft : null,
     tokens: tokens || {},
+    // Estimated-token flag, computed here where tokens still carry the marker
+    // (it does not survive spreads or JSON round-trips to the sink).
+    usageEstimated: args.usageEstimated ?? (isEstimatedUsage(tokens) ? true : null),
+    // Encrypted-reasoning observation: stream-side flag plus duration, and
+    // the two request bodies so the sink can read effort values
+    // (requested from the client body, upstream from the post-strip body).
+    reasoningMeta: args.reasoningMeta ?? null,
+    clientRequestBody: body ?? null,
+    upstreamRequestBody: providerRequest ?? null,
     requestBody: cloneBoundedChatLogPayload(
       attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
         ...accountRotationMeta,
         claudePromptCache: claudeCacheMeta,
+        geminiPromptCache,
       })
     ),
     responseBody: cloneBoundedChatLogPayload(
@@ -567,6 +608,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
             }
           : null,
         claudePromptCacheUsage: claudeCacheUsageMeta,
+        geminiPromptCache,
         // Operators can tell estimated token counts (and the cost derived from them)
         // apart from provider-reported ones. Log-only: billing is unchanged.
         usageEstimated: isEstimatedUsage(tokens) ? true : null,
@@ -584,11 +626,14 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     apiKeyName: apiKeyInfo?.name || null,
     noLog: noLogEnabled,
     pipelinePayloads,
-    correlationId,
+    correlationId: correlationId || traceId,
     modelPinned: modelPinned || false,
     sessionTag: sessionTag || null,
+    clientSessionId: clientSessionIdFromRawRequest(clientRawRequest),
     responseId: extractResponsesId(sourceFormat, clientResponse),
     videoContentRemoved: videoContentRemoved || false,
+    addedWaitMs: addedWait?.ms ?? null,
+    addedWaitCause: addedWait?.cause ?? null,
   }).catch(() => {});
 
   // Emit the terminal request-lifecycle event to the live dashboard bus. `request.started`

@@ -20,6 +20,15 @@ import {
   wantsProgress as defaultWantsProgress,
 } from "../../utils/progressTracker.ts";
 import { createPiiSseTransform as defaultPiiSse } from "@/lib/streamingPiiTransform";
+import { isPiiTransformEnabled, resolvePiiGate } from "@/lib/streamingPiiTransform";
+
+// Single seam to the PII stream module: streamingTail resolves the per-request gate through this
+// file instead of importing src/ itself (boundary ratchet, quality-baseline.json).
+export { resolvePiiGate };
+import {
+  createCredentialSseTransform as defaultCredentialSse,
+  isCredentialTransformEnabled,
+} from "@/lib/streamingCredentialTransform";
 import { isFeatureFlagEnabled as defaultFeatureFlag } from "@/shared/utils/featureFlags";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { SSE_HEARTBEAT_INTERVAL_MS } from "../../config/constants.ts";
@@ -42,6 +51,7 @@ export interface StreamingPipelineDeps {
   pipeWithDisconnect: typeof defaultPipeWithDisconnect;
   isFeatureFlagEnabled: typeof defaultFeatureFlag;
   createPiiSseTransform: typeof defaultPiiSse;
+  createCredentialSseTransform: typeof defaultCredentialSse;
   createProgressTransform: typeof defaultProgress;
   createSseHeartbeatTransform: typeof defaultHeartbeat;
   shapeForClientFormat: typeof defaultShape;
@@ -53,6 +63,7 @@ const DEFAULT_DEPS: StreamingPipelineDeps = {
   pipeWithDisconnect: defaultPipeWithDisconnect,
   isFeatureFlagEnabled: defaultFeatureFlag,
   createPiiSseTransform: defaultPiiSse,
+  createCredentialSseTransform: defaultCredentialSse,
   createProgressTransform: defaultProgress,
   createSseHeartbeatTransform: defaultHeartbeat,
   shapeForClientFormat: defaultShape,
@@ -69,12 +80,21 @@ export function assembleStreamingPipeline(
     clientResponseFormat: Parameters<typeof defaultShape>[0];
     echoModel: string | null | undefined;
     responseHeaders: Record<string, string>;
+    credentialRedactionEnabled?: boolean;
+    credentialDisabledGuardrails?: string[];
+    /** Names the caller asked to skip. Absent means no opt-out: when the
+     * request carries `pii-masker`, both PII insertions are skipped so the
+     * bytes pass through untouched, matching the non-streaming guardrail. */
+    piiDisabledGuardrails?: string[];
     /** See pipeWithDisconnect's own doc comment — the post-handoff "stream is
      * open but never produced real output" watchdog. Threaded from the same
      * adaptive streamReadinessPolicy.timeoutMs already computed for this
      * request's pre-handoff readiness gate, so slow-first-content reasoning
      * models keep the same generous budget in both phases. */
     contentStallTimeoutMs?: number;
+    /** Total lifetime budget for this stream (see resolveStreamActiveTimeoutMs).
+     * Omitted falls back to STREAM_ACTIVE_TIMEOUT_MS; 0 leaves the watchdog off. */
+    activeTimeoutMs?: number;
   },
   deps: StreamingPipelineDeps = DEFAULT_DEPS
 ) {
@@ -90,12 +110,29 @@ export function assembleStreamingPipeline(
     args.providerResponse,
     args.transformStream,
     args.streamController,
-    { contentStallTimeoutMs: args.contentStallTimeoutMs }
+    {
+      contentStallTimeoutMs: args.contentStallTimeoutMs,
+      activeTimeoutMs: args.activeTimeoutMs,
+    }
   );
-  if (typeof args.createPiiTransform === "function") {
-    piiStream = piiStream.pipeThrough((args.createPiiTransform as () => TransformStream)());
-  } else if (deps.isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")) {
-    piiStream = piiStream.pipeThrough(deps.createPiiSseTransform());
+  if (isPiiTransformEnabled({ piiDisabledGuardrails: args.piiDisabledGuardrails ?? [] })) {
+    if (typeof args.createPiiTransform === "function") {
+      piiStream = piiStream.pipeThrough((args.createPiiTransform as () => TransformStream)());
+    } else if (deps.isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")) {
+      piiStream = piiStream.pipeThrough(deps.createPiiSseTransform());
+    }
+  }
+
+  // Credential redaction is opt-in, gated per request by the same flag and
+  // opt-out name as the non-streaming post-call guardrail. Off or opted out
+  // enqueues no transform, so bytes pass through untouched.
+  if (
+    isCredentialTransformEnabled({
+      credentialRedactionEnabled: args.credentialRedactionEnabled ?? false,
+      credentialDisabledGuardrails: args.credentialDisabledGuardrails ?? [],
+    })
+  ) {
+    piiStream = piiStream.pipeThrough(deps.createCredentialSseTransform());
   }
 
   if (progressEnabled) {

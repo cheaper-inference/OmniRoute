@@ -34,10 +34,17 @@ export const APP_STAGING_REMOVAL_PATHS: string[] = [
 export const APP_STAGING_ALLOWED_EXACT_PATHS: string[] = [
   ".env.example",
   "BUILD_SHA",
+  // Sentinel written by write-build-base-path.mjs into the standalone dist/. Consumed at
+  // container start time by ensure-docker-base-path.mjs to compare the baked-in
+  // OMNIROUTE_BASE_PATH against the runtime value. Without this entry prepublish Step
+  // 10.7 (findUnexpectedArtifactPaths) prunes it as an unexpected artifact → the Docker
+  // container crashes at startup with a missing sentinel.
+  "BUILD_OMNIROUTE_BASE_PATH",
   "docs/openapi.yaml",
   // #7065: imported by dist/server-ws.mjs; assembleStandalone copies it but without
   // this bare entry the prepublish prune deleted it → every `omniroute` boot of the
   // published 3.8.47 crashed with ERR_MODULE_NOT_FOUND (same class as tls-options/3.8.41).
+  "h2c-upgrade-guard.cjs",
   "head-response-guard.cjs",
   "http-method-guard.cjs",
   "open-sse/mcp-server/server.js",
@@ -47,6 +54,9 @@ export const APP_STAGING_ALLOWED_EXACT_PATHS: string[] = [
   "open-sse/services/compression/engines/llmlingua/onnxWorker.js",
   "open-sse/services/compression/compressionWorker.js",
   "src/lib/usage/callLogArtifactWorker.js",
+  "src/lib/logExport/exportChild.js",
+  // Scoped ESM package survives pruning beneath a CommonJS standalone root.
+  "src/lib/logExport/package.json",
   "src/lib/db/healthCheckWorker.js",
   "package.json",
   "peer-stamp.mjs",
@@ -105,7 +115,8 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "config/release/wreq-js-rust-notices.md",
   "bin/aliasResolver.mjs",
   // #14006: Antigravity MITM bridge (operator tool for the Antigravity IDE/CLI).
-  // Pure node:* imports, shipped via package.json "files": ["bin/"].
+  // Shipped via package.json "files": ["bin/"]; its only local import is the CJS shim
+  // ../src/mitm/_internal/bridgeCert.cjs (shipped via "src/mitm/").
   "bin/antigravity-bridge.mjs",
   "bin/chatgpt-web-codex-mcp.mjs",
   // #7808: ESM loader hook split out of bin/aliasResolver.mjs to silence CodeQL
@@ -136,6 +147,9 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   // bin/cli/commands/config.mjs (`config lang list`). Shipped via package.json "files";
   // without it the published CLI cannot resolve aliases and `config lang list` is empty.
   "config/i18n.json",
+  // Read by bin/cli/cli-manifest.mjs for run/configure/completion contracts.
+  // Allow the runtime manifest itself, not arbitrary files under config/.
+  "config/cli-tools-manifest.json",
   "open-sse/mcp-server/README.md",
   "open-sse/mcp-server/audit.ts",
   "open-sse/mcp-server/httpTransport.ts",
@@ -151,10 +165,13 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "scripts/build/backendOnlyPages.mjs",
   "scripts/build/build-tproxy-native.mjs",
   "scripts/build/build-next-isolated.mjs",
+  "scripts/i18n/generate-global-error-messages.mjs",
   "scripts/check/check-supported-node-runtime.ts",
   "scripts/build/native-binary-compat.mjs",
   "scripts/build/wreqJsNative.mjs",
   "scripts/build/postinstall.mjs",
+  // Imported by scripts/build/postinstall.mjs to pick the better-sqlite3 prebuild target.
+  "scripts/build/betterSqlitePrebuildTarget.mjs",
   "scripts/build/postinstallSupport.mjs",
   "scripts/build/colocateOptionals.mjs",
   // #8859: imported by scripts/build/postinstall.mjs to repair playwright-core's
@@ -168,6 +185,8 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "scripts/packs/optionalPackManifest.mjs",
   "scripts/build/sync-env.mjs",
   "scripts/dev/responses-ws-proxy.mjs",
+  // Imported by scripts/dev/responses-ws-proxy.mjs.
+  "scripts/dev/peer-stamp.mjs",
   "scripts/dev/sync-env.mjs",
   // #5361: imported at runtime by bin/cli/commands/serve.mjs + the standalone
   // server wrapper for opt-in native HTTPS/TLS serving (kept dependency-light).
@@ -199,6 +218,10 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_PATH_PREFIXES: string[] = [
 export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "dist/open-sse/services/compression/engines/rtk/filters/generic-output.json",
   "dist/src/lib/usage/callLogArtifactWorker.js",
+  "dist/src/lib/logExport/exportChild.js",
+  "dist/src/lib/logExport/package.json",
+  // Unbundled destination helper also ships through package.json's src/lib/ prefix.
+  "src/lib/logExport/destinations/otlpRequestHeaders.ts",
   "dist/src/lib/db/healthCheckWorker.js",
   "dist/open-sse/vendor/codex-chatgpt-web/adapters/chatgpt-web/mcp-server.js",
   "dist/open-sse/services/compression/rules/en/filler.json",
@@ -217,6 +240,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "dist/tls-options.mjs",
   // #7065: regression guard for the HEAD response guard (dist/server-ws.mjs import).
   "dist/head-response-guard.cjs",
+  // Cleartext h2c upgrade guard (dist/server-ws.mjs import) — same boot-crash class as above.
+  "dist/h2c-upgrade-guard.cjs",
   "dist/webdav-handler.mjs",
   "bin/cli/program.mjs",
   // Direct imports of bin/omniroute.mjs — bin/cli/ is only an allowlist PREFIX, so a
@@ -224,6 +249,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   // required entries make its absence loud (#7065 class; derived + enforced by
   // tests/unit/pack-artifact-entrypoint-closures.test.ts).
   "bin/cli/data-dir.mjs",
+  // GHSA-2pg2-xm9r-8544: private-by-default DATA_DIR / .env modes, called on every boot.
+  "bin/cli/privateDataDir.mjs",
   "bin/cli/utils/ensureAndroidCacheDir.mjs",
   "bin/cli/utils/parseEnvValue.mjs",
   "bin/cli/utils/storageKeyProvision.mjs",
@@ -247,6 +274,7 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   // PREFIX, so a vanished file would never fail the unexpected-paths check — list it
   // REQUIRED so the tarball can never silently lose it again (#7065 class).
   "config/i18n.json",
+  "config/cli-tools-manifest.json",
   "config/release/wreq-js-native-manifest.json",
   "config/release/wreq-js-rust-license-inventory.json",
   "config/release/wreq-js-rust-notices.md",

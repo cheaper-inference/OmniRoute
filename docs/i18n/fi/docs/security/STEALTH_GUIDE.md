@@ -20,57 +20,72 @@ Häiveominaisuudet ovat olemassa, jotta OmniRoute voi toimia yhteensopivuuskerro
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Pysyvät `wreq-js`-istunnot luodaan laiskasti tilikohtaisesti ja ratkaistun välityspalvelimen mukaan. Prosessinlaajuinen `TlsClient` ylläpitää enintään 128 istunnon poolia, jotka jäljittelevät **Chrome 124:ää macOS:ssä** Cloudflaren takana oleville ylävirran palveluille. `TlsClient.fetch()` keskeyttää turvallisesti, kun natiivi suoritusympäristö ei ole käytettävissä; kutsuja voi nimenomaisesti valita varavaihtoehdon tämän kääreen ulkopuolella.
+Pysyvät `wreq-js`-istunnot luodaan laiskasti tilikohtaisesti ja ratkaistua välityspalvelinta kohden.
+Prosessinlaajuinen `TlsClient` ylläpitää enintään 128:aa istuntoa, jotka jäljittelevät
+**Chrome 124:ää macOS:llä** Cloudflaren takana olevia taustapalveluita varten.
+`TlsClient.fetch()` estää pyynnön turvallisesti, kun natiivia suoritusympäristöä ei ole saatavilla;
+kutsuja voi nimenomaisesti valita varajärjestelyn tämän kääreen ulkopuolella.
 
 - Istuntoprofiili: `browser: "chrome_124", os: "macos"`
-- Välityspalvelimen ratkaisu (prioriteettijärjestys): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (myös pienillä kirjaimilla)
+- Välityspalvelimen ratkaisu (tärkeysjärjestyksessä): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (myös pienaakkosilla)
 - Aikakatkaisu: `TLS_CLIENT_TIMEOUT_MS` (periytyy muuttujasta `FETCH_TIMEOUT_MS`, oletus 600000)
-- `wreq-js`-vastaus on fetch-yhteensopiva (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Ensimmäisen tavun valvonta (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  palautuu heti, kun ylävirran otsakkeet saapuvat, joten `TLS_CLIENT_TIMEOUT_MS` ei yksin voi rajata
-  rungon käsittelyaikaa, jos runko ei koskaan tuota ensimmäistä tavua. `guardTlsFirstByte()` asettaa rungon ensimmäisen `read()`-kutsun
-  kilpailemaan aikarajan `TLS_FIRST_BYTE_WATCHDOG_MS` kanssa (oletus `10000`, arvo `0` poistaa sen käytöstä); toimivaan runkoon
-  tämä ei vaikuta, kun taas pysähtynyt runko peruuttaa wreq-lukijan ja antaa `proxyFetch`-toiminnon olemassa olevan
-  TLS-varalogiikan jatkaa suoraan/välityspalvelimen kautta toimivaan välittäjään (pyyntö, jota ei voi turvallisesti toistaa, esimerkiksi
-  rungollinen POST-pyyntö, aiheuttaa edelleen poikkeuksen sen sijaan, että se yritettäisiin hiljaisesti uudelleen).
+- `wreq-js`-Response on fetch-yhteensopiva (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Ensimmäisen tavun valvonta-ajastin (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656):
+  `TlsClient.fetch()` valmistuu heti, kun taustapalvelun otsakkeet saapuvat, joten pelkkä
+  `TLS_CLIENT_TIMEOUT_MS` ei voi rajoittaa vastausrunkoa, joka ei koskaan tuota ensimmäistä tavua.
+  `guardTlsFirstByte()` kilpailuttaa vastausrungon ensimmäisen `read()`-kutsun
+  `TLS_FIRST_BYTE_WATCHDOG_MS`-ajan kanssa (oletus `10000`, `0` poistaa sen käytöstä); tämä ei
+  vaikuta toimivaan vastausrunkoon, kun taas pysähtynyt vastausrunko peruuttaa wreq-lukijan ja antaa
+  `proxyFetch`-funktion olemassa olevan TLS-varajärjestelylogiikan siirtyä suoran yhteyden tai
+  välityspalvelimen välittäjään (pyyntö, jonka turvallista uudelleentoistoa ei voida taata, kuten
+  vastausrungon sisältävä POST-pyyntö, aiheuttaa silti virheen sen sijaan, että sitä yritettäisiin
+  huomaamatta uudelleen).
 
-### Web-evästeitä käyttävä palveluntarjoajasiirto — wreq-js 3.2.0
+### Verkkovästeitä käyttävien palveluntarjoajien siirtoyhteys — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` on alla olevien viiden erikoistuneen
-web-evästeitä käyttävän siirtotavan jaettu sovitin. Kukin kevyt palveluntarjoajakääre valitsee selain-/käyttöjärjestelmäprofiilin. Sovitin
-käyttää tiedostossa `open-sse/utils/tlsClient.ts` olevaa yhtä wreq-suoritusympäristön lataajaa ja siirtopoolia, jonka avaimena on
-profiili + käyttöjärjestelmä + ratkaistu välityspalvelin, ja jokainen pyyntö käyttää asetusta `cookieMode: "ephemeral"`. Tilit ja
-pyynnöt jakavat näin siirtotason yhteydet, mutta eivät koskaan wreq-istuntoa tai evästesäilöä.
+`open-sse/services/tlsClientBase.ts` on alla olevien viiden erikoistuneen verkkovästeitä käyttävän
+siirtoyhteyden jaettu sovitin. Kukin kevyt palveluntarjoajakohtainen kääre valitsee selain- ja
+käyttöjärjestelmäprofiilin. Sovitin käyttää yhtä wreq-suoritusympäristön lataajaa ja
+siirtoyhteyspoolia tiedostossa `open-sse/utils/tlsClient.ts`, ja avaimena käytetään profiilin,
+käyttöjärjestelmän ja ratkaistun välityspalvelimen yhdistelmää. Jokainen pyyntö käyttää samalla
+asetusta `cookieMode: "ephemeral"`. Tilit ja pyynnöt jakavat siten siirtoyhteystason yhteydet, mutta
+eivät koskaan wreq-istuntoa tai evästevarastoa.
 
-| Palveluntarjoaja | Profiili      | Emuloitu käyttöjärjestelmä | Virran EOF-käytäntö                          |
-| ---------------- | ------------- | -------------------------- | -------------------------------------------- |
-| Claude           | `chrome_146`  | Linux                      | sisällytä `[DONE]`                           |
-| Perplexity       | `firefox_148` | macOS                      | sisällytä `event: end_of_stream`             |
-| Grok             | `chrome_146`  | Linux                      | jätä `[DONE]` pois                           |
-| Notion           | `chrome_146`  | Windows                    | sisällytä `[DONE]`                           |
-| LMArena          | `chrome_146`  | Windows                    | ei vartioarvoa; sulje natiivissa EOF-tilassa |
+| Palveluntarjoaja | Profiili      | Emuloitu käyttöjärjestelmä | Suoratoiston EOF-käytäntö                |
+| ---------------- | ------------- | -------------------------- | ---------------------------------------- |
+| Claude           | `chrome_146`  | Linux                      | sisällytä `[DONE]`                       |
+| Perplexity       | `firefox_151` | macOS                      | sisällytä `event: end_of_stream`         |
+| Grok             | `chrome_146`  | Linux                      | jätä `[DONE]` pois                       |
+| Notion           | `chrome_146`  | Windows                    | sisällytä `[DONE]`                       |
+| LMArena          | `chrome_146`  | Windows                    | ei merkkiä; sulje natiivissa EOF-tilassa |
 
-- Suoratoisto kuluttaa natiivin vastauksen `ReadableStream`-virtaa suoraan; väliaikaistiedostoa tai
+- Suoratoisto kuluttaa natiivin vastauksen `ReadableStream`-virtaa suoraan; tilapäistiedostoa tai
   oheisprosessia ei luoda.
-- Enintään 256 ensimmäistä tavua tarkastetaan ennen virran tarjoamista. SSE-palveluntarjoajat puskuroivat muut kuin SSE-
-  virheet; Grok/LMArena muuntavat Cloudflare-haasteet tilakoodiksi `403` ja HTML-välisivut tilakoodiksi `502`.
-- Natiivin pyynnön aikakatkaisua rajoittaa lisäksi absoluuttinen JS:n kova määräaika. Jumiutuminen mitätöi
-  ja sulkee vain kyseisen profiilin/käyttöjärjestelmän/välityspalvelimen siirtoyhteyden, ennen kuin seuraava pyyntö luo sen uudelleen.
-- Välityspalvelimen ratkaisun kutsukohtainen prioriteettijärjestys on `proxyUrl` → pyyntökohtainen tili-/hallintapaneelikonteksti →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (mukaan lukien pienikirjaimiset versiot). Ratkaisuvirheet keskeyttävät
-  turvallisesti sen sijaan, että suora yhteys vuotaisi. LMArena tekee ratkaisun tarkoituksellisesti kohdetta `arena.ai` vasten.
-- `byteResponse` palauttaa sisältötyypitetyn `data:`-URL:n ilman UTF-8-vaurioita.
-- Virheet ovat `TlsClientUnavailableError` (paketti/lisäosa ei ole käytettävissä), `TlsClientHangError`
-  (määräaika ylittyi) ja `WreqTransportCapacityError` (jaetun istuntokapasiteettivirheen koodi),
-  kun kaikki 128 rajattua profiili-/käyttöjärjestelmä-/välityspalvelinpaikkaa ovat aktiivisia tai sulkeutumassa.
+- Enintään 256 ensimmäistä tavua tarkastetaan ennen virran tarjoamista. SSE-palveluntarjoajat
+  puskuroivat muut kuin SSE-virheet; Grok/LMArena muuntaa Cloudflare-haasteet tilaksi `403` ja
+  HTML-välisivut tilaksi `502`.
+- Natiivin pyynnön aikakatkaisu on edelleen kääritty absoluuttiseen JavaScriptin kovaan määräaikaan.
+  Jumiutuminen mitätöi ja sulkee vain kyseisen profiilin, käyttöjärjestelmän ja välityspalvelimen
+  siirtoyhteyden, ennen kuin seuraava pyyntö luo sen uudelleen.
+- Välityspalvelimen ratkaisemisen kutsukohtainen tärkeysjärjestys on `proxyUrl` → pyynnön laajuinen
+  tili-/hallintapaneelikonteksti → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (mukaan lukien
+  pienaakkosvariantit). Ratkaisuvirheet estävät pyynnön turvallisesti sen sijaan, että suora yhteys
+  vuotaisi läpi. LMArena tekee ratkaisun tarkoituksellisesti osoitetta `arena.ai` vasten.
+- `byteResponse` palauttaa sisältötyypitetyn `data:`-URL-osoitteen ilman UTF-8-tietojen
+  vioittumista.
+- Virhetyypit ovat `TlsClientUnavailableError` (paketti tai lisäosa ei ole saatavilla),
+  `TlsClientHangError` (määräaika ylitetty) ja `WreqTransportCapacityError` (jaettu
+  istuntokapasiteettivirheen koodi), kun kaikki 128 rajattua profiili-, käyttöjärjestelmä- ja
+  välityspalvelinpaikkaa ovat aktiivisia tai sulkeutumassa.
 
-Yllä kuvattu yleinen `TlsClient`-istunto on edelleen erikoistettu selaimen tukemaan pysyvään evästetilaan.
-Molemmat polut käyttävät uudelleen yhtä välimuistiin tallennettua wreq-moduulin lataajaa ja prosessin elinkaarikoukkua; niiden poolit pysyvät
-erillisinä, koska niiden evästeiden elinkaaret ovat tarkoituksellisesti erilaiset.
+Edellä kuvattu yleinen `TlsClient`-istunto on edelleen erikoistettu pysyvään selainpohjaiseen
+evästetilaan. Molemmat polut käyttävät uudelleen yhtä välimuistiin tallennettua wreq-moduulin
+lataajaa ja prosessin elinkaarikoukkua; niiden poolit pysyvät erillisinä, koska niiden evästeiden
+elinkaaret ovat tarkoituksellisesti erilaiset.
 
-Kiinnitetty paketti tukee profiileja, mutta todellisen WAF:n hyväksyntä voi muuttua paikallisista
-sopimustesteistä riippumatta. Validoi sormenjälkimuutokset erikseen valtuutettua aktiivista tiliä vasten,
-ennen kuin ilmoitat vastaavuudesta ylävirran selaimen kanssa.
+Lukittu paketti tukee profiileja, mutta todellisen WAF:n hyväksyntä voi muuttua paikallisista
+sopimustesteistä riippumatta. Validoi sormenjälkimuutokset erikseen hyväksytyllä aktiivisella
+tilillä, ennen kuin väität niiden vastaavan taustapalvelun selainta.
 
 ---
 
@@ -119,7 +134,7 @@ Kohteet: `system`-lohkot, kaikki `messages[].content`-sisällöt sekä `tools[].
 
 Kolmannen osapuolen Anthropic-välityspalveluille, jotka hyväksyvät vain ”aidon Claude Code” -liikenteen:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` oletuksena
@@ -243,7 +258,7 @@ Kaikki MITM-päätepisteet edellyttävät hallinnan todennusta (`requireCliTools
 
 | Muuttuja                 | Oletusarvo                                                      |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

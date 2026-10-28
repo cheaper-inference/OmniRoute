@@ -1,0 +1,1 @@
+- **feat(audio):** `/v1/audio/transcriptions` accepts a multipart `url` as an alternative to `file` — OmniRoute downloads it through the SSRF-hardened remote media fetcher (public HTTPS only, DNS pinning, 2 redirects, 25 MiB and 15 s caps) and sends only the audio bytes to the provider, never the caller's URL (#18040).

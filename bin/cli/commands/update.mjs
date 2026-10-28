@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { t } from "../i18n.mjs";
-import { npmBin, npmExecOptions } from "../npm-exec.mjs";
+import { npmBin, npmExecInvocation } from "../npm-exec.mjs";
 import { readPidFile, isPidRunning } from "../utils/pid.mjs";
 
 const execFileAsync = promisify(execFile);
@@ -30,15 +30,21 @@ export async function getCurrentVersion() {
 // `--prefer-online` forces npm to revalidate its HTTP cache against the registry.
 // Without it `npm view` can return a stale cached version (e.g. report 3.8.30 as
 // "latest" after 3.8.31 was published), so the updater told users on an old build
-// they were already on the latest version (#4376). `execFn` is injectable for tests.
-export async function getLatestVersion(execFn = execFileAsync) {
+// they were already on the latest version (#4376). `execFn` and `platform` are
+// injectable for tests.
+export async function getLatestVersion(execFn = execFileAsync, platform = process.platform) {
   try {
-    // argv is all literals, so enabling the shell on win32 cannot splice a
-    // runtime value into the command line (Hard Rule #13).
+    // Every token is a literal, so joining them into a command line on win32 cannot
+    // splice a runtime value into it (Hard Rule #13) — npmExecInvocation enforces
+    // that. It also hands execFile an EMPTY args array there, so the shell is
+    // enabled for npm.cmd without tripping DEP0190 (#15327).
     const { stdout } = await execFn(
-      npmBin(),
-      ["view", "omniroute", "version", "--prefer-online"],
-      npmExecOptions(process.platform, { timeoutMs: 15000 })
+      ...npmExecInvocation(
+        platform,
+        npmBin(platform),
+        ["view", "omniroute", "version", "--prefer-online"],
+        { timeoutMs: 15000 }
+      )
     );
     return stdout.trim();
   } catch {
@@ -89,9 +95,9 @@ export async function createBackup() {
 // symptom. `--apply` never restarted anything and its success message ("Run
 // `omniroute --version` to verify.") implied the update was already live.
 //
-// `restart.mjs`'s `runRestartCommand()` stops then re-spawns the server in the
-// foreground (via `serve.mjs::runServe`), which can block the calling terminal
-// and is a materially bigger behavior change than this fix warrants to invoke
+// `restart.mjs`'s `runRestartCommand()` stops then re-spawns the server detached
+// (via `serve.mjs::runServe` with `daemon: true`, #17168), which is still a
+// materially bigger behavior change than this fix warrants to invoke
 // unconditionally and unattended from `--apply`. Instead, detect whether a
 // CLI-managed server is currently running (the same PID file `stop.mjs`/
 // `restart.mjs` already trust) and print an explicit, prominent instruction —
@@ -108,9 +114,13 @@ export async function printPostApplyGuidance(latest, deps = { readPidFile, isPid
     printInfo("  Run `omniroute restart` now to apply this update.");
   } else {
     printInfo(`No running OmniRoute server was detected via the CLI's PID file.`);
-    printInfo(`  Start it with \`omniroute serve\` (or restart your existing process) to run ${latest}.`);
+    printInfo(
+      `  Start it with \`omniroute serve\` (or restart your existing process) to run ${latest}.`
+    );
   }
-  printInfo("`omniroute --version` will keep reporting the old version until the process restarts.");
+  printInfo(
+    "`omniroute --version` will keep reporting the old version until the process restarts."
+  );
 }
 
 export function registerUpdate(program) {
@@ -154,9 +164,9 @@ export async function runUpdateCommand(opts = {}) {
   if (showChangelog) {
     try {
       const { stdout } = await execFileAsync(
-        npmBin(),
-        ["view", "omniroute", "changelog"],
-        npmExecOptions(process.platform, { timeoutMs: 15000 })
+        ...npmExecInvocation(process.platform, npmBin(), ["view", "omniroute", "changelog"], {
+          timeoutMs: 15000,
+        })
       );
       if (stdout.trim()) {
         console.log(stdout.trim());

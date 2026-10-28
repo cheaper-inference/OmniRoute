@@ -253,9 +253,20 @@ describe("OpencodeExecutor free-tier refusal retry with observed tools", () => {
 
   // Single direct account (fast path): first dispatch 403 FreeTier, retry carries
   // the union and succeeds — one extra fetch, original tools intact first.
+  //
+  // Since #14156 the contract appends the RESOLVED placeholder names to client tools on
+  // the first dispatch too, and resolution prefers the operator's configured names over
+  // the un-scoped observed ones. The retry therefore only adds something when the
+  // observed names differ from the configured ones — so this scenario configures `bash`.
   it("retries once with observed names appended and returns the retry success", async () => {
-    const exec = new OpencodeExecutor("opencode");
-    recordAcceptedToolNames("opencode", "muse-spark-1.3-contributor-free", undefined, [
+    const prevConfigured = process.env.OPENCODE_FREE_TIER_PLACEHOLDER_TOOLS;
+    process.env.OPENCODE_FREE_TIER_PLACEHOLDER_TOOLS = "bash";
+    after(() => {
+      if (prevConfigured === undefined) delete process.env.OPENCODE_FREE_TIER_PLACEHOLDER_TOOLS;
+      else process.env.OPENCODE_FREE_TIER_PLACEHOLDER_TOOLS = prevConfigured;
+    });
+    const exec = new OpencodeExecutor("opencode-zen");
+    recordAcceptedToolNames("opencode-zen", "muse-spark-1.3-contributor-free", undefined, [
       "edit",
       "write",
     ]);
@@ -290,19 +301,57 @@ describe("OpencodeExecutor free-tier refusal retry with observed tools", () => {
 
     assert.strictEqual(result.response.status, 200);
     assert.strictEqual(seenTools.length, 2, "exactly one retry dispatch");
-    assert.deepEqual(seenTools[0], ["glob", "read"], "first dispatch keeps client tools");
+    assert.deepEqual(
+      seenTools[0],
+      ["glob", "read", "bash"],
+      "first dispatch keeps client tools first, then the configured placeholders (#14156)"
+    );
     assert.deepEqual(
       seenTools[1],
-      ["glob", "read", "edit", "write"],
+      ["glob", "read", "edit", "write", "bash"],
       "retry appends observed names after client tools"
     );
     await result.response.body?.cancel();
   });
 
+  // #14156 + #14464 interaction: without configured names the first dispatch already
+  // carries the observed names, so the merged retry body would be byte-for-byte the shape
+  // the upstream just refused. It must not be re-sent.
+  it("does not re-send the refused shape when the first dispatch already carried the observed names", async () => {
+    const exec = new OpencodeExecutor("opencode-zen");
+    recordAcceptedToolNames("opencode-zen", "muse-spark-1.3-contributor-free", undefined, [
+      "edit",
+      "write",
+    ]);
+    globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const parsed = JSON.parse(String((init as Record<string, unknown>)?.body ?? "{}")) as {
+        tools?: unknown[];
+      };
+      seenTools.push(Array.isArray(parsed.tools) ? parsed.tools.map(toolNameOf) : null);
+      return new Response(REFUSAL_BODY, {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof globalThis.fetch;
+
+    const result = await runWithBody(exec, {
+      model: "muse-spark-1.3-contributor-free",
+      messages: [{ role: "user", content: "hi" }],
+      stream: true,
+      tools: [
+        { type: "function", function: { name: "glob", parameters: { type: "object" } } },
+        { type: "function", function: { name: "read", parameters: { type: "object" } } },
+      ],
+    });
+
+    assert.strictEqual(result.response.status, 403);
+    assert.deepEqual(seenTools, [["glob", "read", "edit", "write"]], "one dispatch, no duplicate");
+  });
+
   // Retry refusal: the ORIGINAL 403 is propagated and the store is untouched.
   it("propagates the original refusal when the retry is refused, store untouched", async () => {
-    const exec = new OpencodeExecutor("opencode");
-    recordAcceptedToolNames("opencode", "muse-spark-1.3-contributor-free", undefined, ["edit"]);
+    const exec = new OpencodeExecutor("opencode-zen");
+    recordAcceptedToolNames("opencode-zen", "muse-spark-1.3-contributor-free", undefined, ["edit"]);
     globalThis.fetch = (async () => {
       return new Response(REFUSAL_BODY, {
         status: 403,
@@ -319,12 +368,14 @@ describe("OpencodeExecutor free-tier refusal retry with observed tools", () => {
 
     assert.strictEqual(result.response.status, 403);
     assert.strictEqual(await result.response.text(), REFUSAL_BODY);
-    assert.deepEqual(getObservedToolNames("opencode", "muse-spark-1.3-contributor-free"), ["edit"]);
+    assert.deepEqual(getObservedToolNames("opencode-zen", "muse-spark-1.3-contributor-free"), [
+      "edit",
+    ]);
   });
 
   // Nothing observed to add: no second fetch.
   it("skips the retry when the store holds nothing new", async () => {
-    const exec = new OpencodeExecutor("opencode");
+    const exec = new OpencodeExecutor("opencode-zen");
     let fetches = 0;
     globalThis.fetch = (async () => {
       fetches++;

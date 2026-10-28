@@ -118,17 +118,17 @@ Giriş vasitələri: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Provayderlərin quraşdırılması
+## 📖 Provayderin quraşdırılması
 
-CSV və ya JSON faylından API açarı bağlantılarını toplu şəkildə əlavə etmək üçün **İdarəetmə paneli → Provayderlər → Fayldan idxal et** seçimindən istifadə edin. Sütunlar mövqeyə əsaslanır (`provider,name,apiKey,baseUrl,priority`); `provider` artıq idarə olunan provayder və ya uyğun qovşaq kimi mövcud olmalıdır. Baxın: [Provayderləri CSV və ya JSON faylından idxal etmək](../providers/CSV-IMPORT.md).
+CSV və ya JSON faylından API açarı bağlantılarını toplu şəkildə əlavə etmək üçün **İdarəetmə paneli → Provayderlər → Fayldan idxal et** yolundan istifadə edin. Sütunların sırası sabitdir (`provider,name,apiKey,baseUrl,priority`); `provider` artıq idarə olunan provayder və ya uyğun bir qovşaq kimi mövcud olmalıdır. Baxın: [Provayderləri CSV və ya JSON faylından idxal etmək](../providers/CSV-IMPORT.md).
 
 ### 🔐 Abunəlik provayderləri
 
 #### Claude Code (Pro/Max)
 
 ```bash
-İdarəetmə paneli → Provayderlər → Claude Code-u qoş
-→ OAuth ilə daxil olun → Tokenin avtomatik yenilənməsi
+İdarəetmə paneli → Provayderlər → Claude Code-a qoşul
+→ OAuth ilə daxil olma → Tokenin avtomatik yenilənməsi
 → 5 saatlıq + həftəlik kvotanın izlənməsi
 
 Modellər:
@@ -137,15 +137,17 @@ Modellər:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Peşəkar məsləhət:** Mürəkkəb tapşırıqlar üçün Opus, sürət üçün Sonnet istifadə edin. OmniRoute hər model üzrə kvotanı izləyir!
+**Peşəkar məsləhət:** Mürəkkəb tapşırıqlar üçün Opus, sürət üçün Sonnet istifadə edin. OmniRoute kvotanı hər model üzrə izləyir!
 
-Claude və Claude Code ilə uyğun marşrutlar Opus və Sonnet modelləri üçün `max` düşünmə səyini qoruyur. Haiku modelləri `max` səy səviyyəsini qəbul etmir, buna görə də OmniRoute sorğunu yuxarı axına göndərməzdən əvvəl onu yüksək düşünmə büdcəsinə endirir.
+OmniRoute hostunda brauzer yoxdur? Claude Code-a daxil olduğunuz istənilən yerdə `claude setup-token` əmrini icra edin və birillik tokeni **Quraşdırma tokeni** tabına yapışdırın. Baxın: [Claude Code-dan quraşdırma tokeni ilə istifadə](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+
+Claude və Claude Code ilə uyğun marşrutlar Opus və Sonnet modelləri üçün `max` düşünmə səyini qoruyur. Haiku modelləri `max` səy səviyyəsini qəbul etmir, buna görə də OmniRoute həmin sorğunu yuxarı axına göndərməzdən əvvəl onu yüksək düşünmə büdcəsi səviyyəsinə endirir.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-İdarəetmə paneli → Provayderlər → Codex-i qoş
-→ OAuth ilə daxil olun (port 1455)
+İdarəetmə paneli → Provayderlər → Codex-ə qoşul
+→ OAuth ilə daxil olma (port 1455)
 → 5 saatlıq + həftəlik sıfırlanma
 
 Modellər:
@@ -158,7 +160,7 @@ Modellər:
 #### GitHub Copilot
 
 ```bash
-İdarəetmə paneli → Provayderlər → GitHub-ı qoş
+İdarəetmə paneli → Provayderlər → GitHub-a qoşul
 → GitHub vasitəsilə OAuth
 → Aylıq sıfırlanma (ayın 1-i)
 
@@ -175,24 +177,24 @@ Modellər:
 #### GLM-4.7 (Gündəlik sıfırlanma, $0.6/1M)
 
 1. Qeydiyyatdan keçin: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan-dan API açarını əldə edin
+2. Coding Plan-dan API açarı əldə edin
 3. İdarəetmə paneli → API açarı əlavə et: Provayder: `glm`, API açarı: `your-key`
 
-**İstifadə:** `glm/glm-4.7` — **Peşəkar məsləhət:** Coding Plan dəyərin 1/7-si müqabilində 3× kvota təklif edir! Hər gün saat 10:00-da sıfırlanır.
+**İstifadə:** `glm/glm-4.7` — **Peşəkar məsləhət:** Coding Plan xərcin 1/7-si müqabilində 3× kvota təklif edir! Hər gün saat 10:00-da sıfırlanır.
 
 #### MiniMax M2.1 (5 saatlıq sıfırlanma, $0.20/1M)
 
 1. Qeydiyyatdan keçin: [MiniMax](https://www.minimax.io)
-2. API açarını əldə edin → İdarəetmə paneli → API açarı əlavə et
+2. API açarı əldə edin → İdarəetmə paneli → API açarı əlavə et
 
 **İstifadə:** `minimax/MiniMax-M2.1` — **Peşəkar məsləhət:** Uzun kontekst (1M token) üçün ən ucuz seçimdir!
 
-#### Kimi K2 (sabit $9/ay)
+#### Kimi K2 (aylıq sabit $9)
 
 1. Abunə olun: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API açarını əldə edin → İdarəetmə paneli → API açarı əlavə et
+2. API açarı əldə edin → İdarəetmə paneli → API açarı əlavə et
 
-**İstifadə:** `kimi/kimi-k2.5` — **Peşəkar məsləhət:** 10M token üçün sabit $9/ay = effektiv xərc $0.90/1M!
+**İstifadə:** `kimi/kimi-k2.5` — **Peşəkar məsləhət:** 10M token üçün aylıq sabit $9 = effektiv xərc $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
@@ -203,13 +205,14 @@ Modellər:
 
 ### 🆓 PULSUZ provayderlər
 
-Autentifikasiya tələb etməyən pulsuz provayderlərin provayder səhifəsində **Autentifikasiya tələb olunmur** seçiminin yanında keçid var.
-Onu söndürmək həmin provayderi deaktiv edir, Provayderlərin konfiqurasiya edilmiş/yığcam görünüşlərindən çıxarır və modellərini `/v1/models` siyahısından silir.
+Autentifikasiya tələb etməyən pulsuz provayderlərin öz səhifəsində **Autentifikasiya tələb olunmur** seçiminin yanında keçid düyməsi var.
+Onu söndürmək həmin provayderi deaktiv edir, Provayderlərin konfiqurasiya edilmiş/yığcam görünüşlərindən çıxarır və
+modellərini `/v1/models` siyahısından silir.
 
 #### Qoder (9 PULSUZ model)
 
 ```bash
-İdarəetmə paneli → Qoder-i qoş → OAuth ilə daxil olun → Giriş cari provayder limitlərinə tabedir
+İdarəetmə paneli → Qoder-ə qoşul → OAuth ilə daxil olma → Giriş cari provayder limitlərinə tabedir
 
 Modellər: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -217,7 +220,7 @@ Modellər: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, 
 #### Kiro (Claude PULSUZ)
 
 ```bash
-İdarəetmə paneli → Kiro-nu qoş → AWS Builder ID və ya Google/GitHub → ayda təxminən 50 kredit
+İdarəetmə paneli → Kiro-ya qoşul → AWS Builder ID və ya Google/GitHub → ayda təxminən 50 kredit
 
 Modellər: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -609,9 +612,9 @@ Mühit dəyişənlərinin tam siyahısı üçün [README](../README.md) faylına
 <details>
 <summary><b>Bütün mövcud modellərə baxın</b></summary>
 
-> Aşağıdakı siyahı v3.8.0 üçün `open-sse/config/providerRegistry.ts` faylından seçilərək hazırlanıb. Bulud kataloqları (Gemini, OpenRouter və s.) dinamik şəkildə sinxronlaşdırılır — tam və aktual kataloq üçün **İdarəetmə paneli → Provayderlər → [provayder] → Mövcud modellər** bölməsini açın və ya `GET /api/models/catalog` sorğusunu çağırın.
+> Aşağıdakı siyahı v3.8.0 üçün `open-sse/config/providerRegistry.ts` faylından tərtib edilmişdir. Bulud kataloqları (Gemini, OpenRouter və s.) dinamik şəkildə sinxronlaşdırılır — tam canlı kataloq üçün **Panel → Provayderlər → [provayder] → Mövcud Modellər** bölməsini açın və ya `GET /api/models/catalog` çağırışını edin.
 >
-> Provayderin daxili siyahısı aktuallığını itiribsə, yuxarı axındakı aktual kataloqu əldə etmək üçün həmin səhifədə **/models-dən idxal et** seçimindən istifadə edin (və ya **Avtomatik sinxronlaşdırma** funksiyasını aktivləşdirin). Bu, LLM7.io (`gemini-3.1-flash-lite`) və UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) üçün v3.8.50 versiyasında təsdiqlənib; eyni sınaq mərhələsində Pollinations anonim girişi yuxarı axın tərəfindən məhdudlaşdırılmış olaraq qalıb.
+> Əgər provayderin daxili siyahısı köhnəlibsə, canlı upstream kataloqunu çəkmək üçün həmin səhifədə **/models-dən idxal et** seçimindən istifadə edin (və ya **Avto-Sinxronizasiya**-nı aktivləşdirin). Bu, v3.8.50-də LLM7.io (`gemini-3.1-flash-lite`) və UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) üçün yoxlanılıb; eyni test mərhələsində Pollinations-un anonim girişi upstream tərəfindən məhdud qaldı.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -619,7 +622,7 @@ Mühit dəyişənlərinin tam siyahısı üçün [README](../README.md) faylına
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — PULSUZ OAuth: **İdarəetmə paneli → Provayderlər → Kiro → Mövcud modellər** bölməsində göstərilən aktual kataloqdan istifadə edin. Əlçatanlıq hesabdan və plandan asılıdır.
+**Kiro (`kr/`)** — PULSUZ OAuth: **Panel → Provayderlər → Kiro → Mövcud Modellər** bölməsində göstərilən canlı kataloqdan istifadə edin. Mövcudluq hesabdan və plandan asılıdır.
 
 **Qoder (`if/`)** — PULSUZ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -627,71 +630,113 @@ Mühit dəyişənlərinin tam siyahısı üçün [README](../README.md) faylına
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — aylıq sabit $9 və ya istifadəyə görə ödəniş: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ay sabit qiymət və ya istifadəyə görə: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API açarı: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultra sürətli: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ultra-sürətli: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Yerli Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Doğma Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Aİ-də yerləşdirilir: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Aİ-də yerləşdirilmiş: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Axtarışla zənginləşdirilmiş: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Axtarışla gücləndirilmiş: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Açıq mənbəli: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (pulsuz), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Açıq mənbə: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (pulsuz), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Sürətli inferensiya: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Sürətli inferens: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Vafli miqyasında: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Wafer-miqyaslı: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG yönümlü: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-yönümlü: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Müəssisələr üçün: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Korporativ: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google-dan hər API açarı üzrə real vaxt rejimində sinxronlaşdırılır — statik siyahı yoxdur. **İdarəetmə paneli → Provayderlər** bölməsində açarı qoşun, sonra cari kataloqu idxal etmək üçün **Mövcud modellər** seçimindən istifadə edin (məsələn, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google-dan hər API açarı üzrə canlı sinxronlaşdırılır — statik siyahı yoxdur. **Panel → Provayderlər** bölməsində açar bağlayın, sonra cari kataloqu idxal etmək üçün **Mövcud Modellər** bölməsindən istifadə edin (məs. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Digər uyğun provayderlər** (seçilmiş): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` vasitəsilə), `azure-ai`, `openrouter` (ötürmə kataloqu), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hər biri `providerRegistry.ts` daxilində öz model siyahısını saxlayır və provayder `/models` son nöqtəsini təqdim etdikdə avtomatik sinxronlaşdırıla bilər.
+**Digər uyğun provayderlər** (seçilmiş): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` vasitəsilə), `azure-ai`, `openrouter` (birbaşa ötürmə kataloqu), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hər biri `providerRegistry.ts` faylında öz model siyahısını saxlayır və provayder `/models` endpoint-i təqdim etdikdə avtomatik sinxronlaşdırıla bilər.
 
-**Model ID-ləri haqqında qeyd:** OmniRoute provayderə məxsus ID-lərdən (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) istifadə edir. Bəzi ID-lərə nöqtəli versiyalar daxildir, çünki yuxarı axın API-si onları bu formada gözləyir. Model yuxarıda göstərilməyibsə, əlçatanlığını təsdiqləmək üçün `omniroute models --search <term>` əmrini icra edin və ya `GET /api/models/catalog` sorğusunu göndərin.
+**Model ID-ləri haqqında qeyd:** OmniRoute provayderə xas ID-lərdən istifadə edir (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Bəzi ID-lərə nöqtəli versiyalar daxildir, çünki upstream API onları məhz bu formada gözləyir. Əgər model yuxarıda sadalanmayıbsa, mövcudluğu təsdiqləmək üçün `omniroute models --search <term>` əmrini icra edin və ya `GET /api/models/catalog` ünvanına sorğu göndərin.
 
 </details>
 
 ---
 
-## 🧩 Təkmil Funksiyalar
+## 🧩 Qabaqcıl Xüsusiyyətlər
 
-### Fərdi Modellər
+### Xüsusi Modellər
 
-Tətbiq yeniləməsini gözləmədən istənilən provayderə istənilən model ID-sini əlavə edin:
+Proqram yeniləməsini gözləmədən istənilən ID modelini istənilən provayderə əlavə edin:
 
 ```bash
-# API vasitəsilə
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# Siyahı: curl http://localhost:20128/api/provider-models?provider=openai
-# Silmək: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Və ya İdarəetmə Panelindən istifadə edin: **Provayderlər → [Provayder] → Fərdi Modellər**.
+Və ya İdarə Panelindən istifadə edin:** Provayderlər → [Provayder] → Xüsusi Modellər** .
 
 Qeydlər:
 
-- OpenRouter və OpenAI/Anthropic ilə uyğun provayderlər yalnız **Mövcud Modellər** bölməsindən idarə olunur. Əllə əlavəetmə, idxal və avtomatik sinxronizasiya eyni mövcud modellər siyahısına daxil olur, buna görə də həmin provayderlər üçün ayrıca Fərdi Modellər bölməsi yoxdur.
-- **Fərdi Modellər** bölməsi idarə olunan mövcud model idxalını təqdim etməyən provayderlər üçün nəzərdə tutulub.
+- OpenRouter və OpenAI/Anthropic-compatible provayderləri tərəfindən idarə olunur** Mövcud Modellər** yalnız. Eyni mövcud model siyahısındakı bütün əraziləri əl ilə əlavə edin, idxal edin və avtomatik sinxronizasiya edin, buna görə də həmin provayderlər üçün ayrıca Fərdi Modellər bölməsi yoxdur.
+- The** Xüsusi Modellər** bölmə idarə olunan mövcud model idxalını ifşa etməyən provayderlər üçün nəzərdə tutulub.
 
-### OmniRoute Qovşaqlarının Zəncirlənməsi
+### Xüsusi OpenAI-a uyğun provayderlər
 
-Başqa bir OmniRoute şlüzü **Fərdi OpenAI-uyğun** provayder kimi əlavə edilə bilər. Qovşağın
-`/v1` əsas URL-indən və həmin qovşaq tərəfindən verilmiş ayrıca, minimal səlahiyyətli API açarından istifadə edin.
+OpenAI API danışan hər hansı bir şlüz (özünü idarə edən proksi, vLLM, üçüncü tərəf aqreqatoru) öz provayder nodu kimi əlavə edilə bilər:
 
-Qarşılıqlı və ya çoxkeçidli zəncirlər üçün hər şlüzdə könüllü dövr mühafizəsini aktivləşdirin:
+1. **Provayderlər → Əlavə et OpenAI Uyğundur** .
+2. **ad** : node üçün ekran etiketi.
+3. **Prefiks** : marşrutlaşdırma adı. Müştərilər modelləri `<prefix>/<model>` adlandırırlar, buna görə də `mygw` prefiksi olan qovşaq `mygw/gpt-4o-mini` xidmət edir. Tələb olunur; xarakter məhdudiyyəti yoxdur.
+4. **API növü** : şlüzün xidmət etdiyi son nöqtə ailəsi (Söhbət Tamamlamaları, Cavablar, Yerləşdirmələr, audio, şəkillər).
+5. **Baza URL** : tam `/chat/completions` yolu deyil, `/v1` (məsələn `https://gateway.example.com/v1`) daxil olmaqla API kökü. Qeyri-standart yolları olan şlüzlər onları altına qoyur** Qabaqcıl Parametrlər** (söhbət yolu, modellər yolu).
+6. The**API açarı (yoxlama üçün)** sahə yalnız əlaqəni yoxlayır. Düyün yaratdıqdan sonra onu açın və istifadə edin** Əlaqə əlavə edin** sorğuların istifadə edəcəyi açarı saxlamaq üçün.
+
+Düyün `openai-compatible-<apiType>-<uuid>` formasının daxili identifikatorunu alır; heç vaxt onu yazmağa ehtiyac yoxdur, prefiks ictimai addır.
+
+#### Qorunan prefikslər
+
+Prefiks daxili provayderin id və ya ləqəbi ola bilməz (məsələn `openai`, `cf`), nə də təqaüdə çıxmış provayderin id-si. Model həlledicisi xüsusi qovşaqlardan əvvəl daxili id və ləqəbləri yoxlayır, beləliklə, bu prefikslərdən birini istifadə edən qovşaq heç vaxt trafik almayacaq: `<prefix>/model` əvəzinə daxili provayderə gedəcək və ya provayder təqaüdə çıxsa, bağlana bilməyəcək. Belə bir prefikslə qovşağın yaradılması və ya redaktə edilməsi aşağıdakılarla rədd edilir:
+
+```text
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+```
+
+Fərqli bir prefiks seçin (`mygw`, `acme-proxy`). Fərdi noda sorğular daxili provayderi və ya onun etimadnaməsini adlandıran xəta ilə uğursuz olarsa, node prefiksinin qorunub saxlanmadığını yoxlayın: bu qayda mövcud olmamışdan əvvəl saxlanılan qovşaqlar hələ də saxlanılır, lakin onların daxili provayderə prefiks marşrutları. Düyünü redaktə edin və ona yeni prefiks verin.
+
+#### Hər bir əlaqə üçün şlüz seçimləri
+
+Bu düymələr əlaqənin `providerSpecificData` daxil olur (məsələn, `PUT /api/providers/{id}` vasitəsilə):
+
+- `toolNameMaxLength` (integer, 1–1024) — şluz uzun alət adlarını rədd edən OpenAI chat formatına uyğun bağlantılar üçün. Daha uzun adlar qısa ləqəb kimi göndərilir və cavabda bərpa olunur.
+- `quotaEndpoint` — şlüzün quota/credits son nöqtəsi, tablosuna kvota zolağı və kvotadan xəbərdar marşrutlaşdırma üçün oxuyun. Həm OpenAI, həm də Antropik uyğunluqlar üzərində işləyir; tam forma `open-sse/services/usage/openaiCompatible.ts` sənədləşdirilib.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### Zəncirləmə OmniRoute Peers
+
+Başqa bir OmniRoute gateway a kimi əlavə edilə bilər** Xüsusi OpenAI-a uyğundur** provayder. Həmyaşıdın `/v1` bazası URL və həmin həmyaşıd tərəfindən verilmiş xüsusi, ən az imtiyazlı API açarından istifadə edin.
+
+Qarşılıqlı və ya çox-hoplu zəncirlər üçün hər bir şlüzdə qoşulma mühafizəsini aktiv edin:
 
 ```bash
 # gateway-a
@@ -707,17 +752,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Yalnız açıq şəkildə icazə siyahısına əlavə edilmiş qovşaq URL-inə göndərilən sorğular
-`X-OmniRoute-Peer-Trace` başlığını alır. Şlüz təkrarlanan instansiya ID-sini və ya tükənmiş keçid
-limitini HTTP `508 Loop Detected` ilə rədd edir; adi yuxarı axın provayderləri heç bir qovşaq metadatası almır.
+Yalnız açıq şəkildə icazə verilən həmyaşıd URL -ya göndərilən sorğular `X-OmniRoute-Peer-Trace` başlığını alır. Şlüz təkrar ID nümunəsini və ya HTTP `508 Loop Detected` ilə tükənmiş hop büdcəsini rədd edir; adi upstream provayderlər həmyaşıd metadata qəbul etmirlər.
 
-Qovşaq zəncirlənməsi verilənlər bazasının replikasiyası və ya hostun nasazlıq zamanı əvəzlənməsi deyil. Hər şlüz müstəqil
-SQLite vəziyyətini, keşləri, tezlik sayğaclarını və sessiyaları saxlayır. Aktiv/passiv və ya aktiv/aktiv əlçatanlıq üçün sağlamlıq yoxlamalı əks proksi və ya klient
-ehtiyat keçidindən istifadə edin və bir SQLite verilənlər bazasını heç vaxt eyni vaxtda işləyən bir neçə OmniRoute instansiyasına qoşmayın.
+Peer zəncirləmə verilənlər bazası replikasiyası və ya hostun əvəzlənməsi deyil. Hər bir şlüz müstəqil SQLite vəziyyətini, keşləri, tarif sayğaclarını və sessiyaları saxlayır. active/passive və ya active/active mövcudluğu üçün sağlamlığı yoxlanılmış əks proksi və ya müştəri əvəzetməsindən istifadə edin və heç vaxt bir SQLite verilənlər bazasını çoxsaylı işləyən OmniRoute instansiyalarına quraşdırmayın.
 
 ### Xüsusi Provayder Marşrutları
 
-Model doğrulaması ilə sorğuları birbaşa konkret provayderə yönləndirin:
+Sorğuları modelin təsdiqi ilə birbaşa xüsusi provayderə yönləndirin:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -725,140 +766,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Provayder prefiksi yoxdursa, avtomatik əlavə olunur. Uyğun olmayan modellər `400` qaytarır.
+Provayder prefiksi yoxdursa, avtomatik əlavə edilir. Uyğun olmayan modellər `400` qaytarır.
 
 ### Şəbəkə Proksi Konfiqurasiyası
 
 ```bash
-# Qlobal proksini təyin edin
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Hər provayder üçün proksi
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Proksini sınaqdan keçirin
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Üstünlük sırası:** Açara xas → Kombinasiyaya xas → Provayderə xas → Qlobal → Mühit.
+**Üstünlük:** Açar-spesifik → Kombo-xüsusi → Provayderə məxsus → Qlobal → Mühit.
 
-### Model Kataloqu API-si
+### Model kataloqu API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Provayderə görə qruplaşdırılmış modelləri növləri (`chat`, `embedding`, `image`) ilə birlikdə qaytarır.
+Provayder tərəfindən növlərə görə qruplaşdırılmış modelləri qaytarır (`chat`, `embedding`, `image`).
 
 ### Bulud Sinxronizasiyası
 
-- Provayderləri, kombinasiyaları və parametrləri cihazlar arasında sinxronlaşdırın
-- Taymaut və erkən xəta ilə avtomatik fon sinxronizasiyası
-- İstehsal mühitində server tərəfli `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` istifadə etməyə üstünlük verin
+- Provayderləri, kombinləri və parametrləri cihazlar arasında sinxronlaşdırın
+- Zaman aşımı ilə avtomatik fon sinxronizasiyası + uğursuz
+- İstehsalda server tərəfi `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` üstünlük verin
 
-### Cloudflare Sürətli Tuneli
+### Cloudflare Sürətli Tunel
 
-- Docker və digər öz serverində yerləşdirilən qurulumlar üçün **İdarəetmə Paneli → Son Nöqtələr** bölməsində mövcuddur
-- Cari OpenAI-uyğun `/v1` son nöqtənizə yönləndirilən müvəqqəti `https://*.trycloudflare.com` URL-i yaradır
-- İlk aktivləşdirmə zamanı `cloudflared` yalnız ehtiyac olduqda quraşdırılır; sonrakı yenidən başladılmalarda eyni idarə olunan binar fayldan istifadə edilir
-- Sürətli Tunellər OmniRoute və ya konteyner yenidən başladıldıqdan sonra avtomatik bərpa edilmir; ehtiyac olduqda onları idarəetmə panelindən yenidən aktivləşdirin
-- Tunel URL-ləri müvəqqətidir və tuneli hər dayandırıb-başlatdığınız zaman dəyişir
-- İdarə olunan Sürətli Tunellər məhdud konteynerlərdə səs-küylü QUIC UDP bufer xəbərdarlıqlarının qarşısını almaq üçün standart olaraq HTTP/2 nəqliyyatından istifadə edir
-- İdarə olunan nəqliyyat seçimini dəyişdirmək istəyirsinizsə, `CLOUDFLARED_PROTOCOL=quic` və ya `auto` təyin edin
-- İdarə olunan endirmə əvəzinə əvvəlcədən quraşdırılmış `cloudflared` binar faylından istifadə etməyə üstünlük verirsinizsə, `CLOUDFLARED_BIN` təyin edin
-- Cloudflare Quick Tunnel, Tailscale Funnel və ngrok Tunnel panelləri **Parametrlər → Görünüş** bölməsində göstərilə və ya gizlədilə bilər. Paneli gizlətmək işləyən tuneli dayandırmır.
+- -də mövcuddur** Dashboard → Endpoints** Docker və digər öz-özünə yerləşdirilən yerləşdirmələr üçün
+- Cari OpenAI uyğun `/v1` son nöqtəsinə yönləndirən müvəqqəti `https://*.trycloudflare.com` URL yaradır
+- Əvvəlcə `cloudflared` quraşdırmalarını yalnız lazım olduqda aktivləşdirin; daha sonra yenidən başladıqda eyni idarə olunan ikili faylı yenidən istifadə edir
+- Sürətli Tunellər OmniRoute və ya konteyner yenidən işə salındıqdan sonra avtomatik bərpa edilmir; lazım olduqda onları tablosundan yenidən aktivləşdirin
+- Tunel URLs efemerdir və hər dəfə tuneli stop/start etdikdə dəyişir
+- Məhdud konteynerlərdə səs-küylü QUIC UDP bufer xəbərdarlıqlarının qarşısını almaq üçün idarə olunan Sürətli Tunellər defolt olaraq HTTP/2 nəqliyyatına uyğundur
+- İdarə olunan nəqliyyat seçimini ləğv etmək istəyirsinizsə, `CLOUDFLARED_PROTOCOL=quic` və ya `auto` seçin
+- İdarə olunan endirmə əvəzinə əvvəlcədən quraşdırılmış `cloudflared` binar faylından istifadə etməyi üstün tutursunuzsa, `CLOUDFLARED_BIN` seçin
+- Cloudflare Quick Tunnel, Tailscale Funnel və ngrok Tunnel panelləri burada göstərilə və ya gizlədilə bilər.** Parametrlər → Görünüş** . Paneli gizlətmək işləyən tuneli dayandırmır.
 
-### LLM Şlüz İntellekti (Mərhələ 9)
+### LLM Gateway Intelligence (Mərhələ 9)
 
-- **Semantik Keş** — Axınsız, temperature=0 cavablarını avtomatik keşləyir (`X-OmniRoute-No-Cache: true` ilə yan keçin)
-- **Sorğuların İdempotentliyi** — `Idempotency-Key` və ya `X-Request-Id` başlığı vasitəsilə 5 saniyə ərzində sorğuların təkrarlanmasının qarşısını alır
-- **İrəliləyişin İzlənməsi** — `X-OmniRoute-Progress: true` başlığı vasitəsilə könüllü SSE `event: progress` hadisələri
+- **Semantik keş** — Axın olmayan avtomatik keşlər, temperatur = 0 cavabları ( `X-OmniRoute-No-Cache: true` ilə keçin)
+- **Qüsursuzluğu tələb edin** — `Idempotency-Key` və ya `X-Request-Id` başlığı vasitəsilə 5 saniyə ərzində sorğuları təkrarlayır
+- **Tərəqqi İzləmə** — `X-OmniRoute-Progress: true` başlığı vasitəsilə SSE `event: progress` hadisələrini daxil edin
 
 ---
 
-### Tərcüməçi Sınaq Meydançası
+### Tərcüməçi oyun meydançası
 
-**İdarəetmə Paneli → Tərcüməçi** vasitəsilə daxil olun. OmniRoute-un provayderlər arasında API sorğularını necə çevirdiyini sazlayın və vizuallaşdırın.
+vasitəsilə daxil olmaq** Dashboard → Translator** . Sazlayın və OmniRoute provayderlər arasında API sorğularını necə tərcümə etdiyini görüntüləyin.
 
-| Rejim                | Məqsəd                                                                                            |
-| -------------------- | ------------------------------------------------------------------------------------------------- |
-| **Sınaq Meydançası** | Mənbə/hədəf formatlarını seçin, sorğunu yerləşdirin və çevrilmiş nəticəni dərhal görün            |
-| **Çat Sınaqçısı**    | Proksi vasitəsilə canlı çat mesajları göndərin və tam sorğu/cavab dövrünü yoxlayın                |
-| **Sınaq Stendi**     | Tərcümənin düzgünlüyünü yoxlamaq üçün bir neçə format kombinasiyası üzrə paket sınaqları başladın |
-| **Canlı Monitor**    | Sorğular proksidən keçərkən real vaxtda tərcümələri izləyin                                       |
+| Rejim               | Məqsəd                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| **Oyun meydançası** | source/target formatlarını seçin, sorğu daxil edin və tərcümə edilmiş çıxışa dərhal baxın  |
+| **Chat Tester**     | Proksi vasitəsilə canlı söhbət mesajları göndərin və tam request/response dövrünü yoxlayın |
+| **Test dəzgahı**    | Tərcümənin düzgünlüyünü yoxlamaq üçün bir çox format birləşməsi üzrə toplu testlər keçirin |
+| **Canlı Monitor**   | Sorğular proksi vasitəsilə axarkən real vaxt tərcümələrinə baxın                           |
 
 **İstifadə halları:**
 
-- Konkret klient/provayder kombinasiyasının niyə uğursuz olduğunu sazlayın
-- Düşünmə teqlərinin, alət çağırışlarının və sistem təlimatlarının düzgün çevrildiyini yoxlayın
-- OpenAI, Claude, Gemini və Responses API formatları arasındakı format fərqlərini müqayisə edin
+- Müəyyən bir client/provider birləşməsinin niyə uğursuz olduğunu yoxlayın
+- Düşüncə teqlərinin, alət çağırışlarının və sistem göstərişlərinin düzgün tərcümə olunduğunu yoxlayın
+- OpenAI, Claude, Gemini və Responses API formatları arasında format fərqlərini müqayisə edin
 
 ---
 
 ### Marşrutlaşdırma Strategiyaları
 
-**İdarəetmə paneli → Parametrlər → Marşrutlaşdırma** vasitəsilə konfiqurasiya edin. İdarəetmə panelində ən çox istifadə olunan altı strategiya göstərilir; kombinasiyalar və avtomatik marşrutlaşdırıcı daxildə daha geniş strategiya dəstini dəstəkləyir.
+vasitəsilə konfiqurasiya edin** İdarə paneli → Parametrləri → Marşrutlaşdırma** . İdarə paneli ən çox istifadə edilən altı strategiyanı nümayiş etdirir; kombinasiyalar və avtomatik marşrutlaşdırıcı daxili olaraq daha geniş dəsti dəstəkləyir.
 
-**İdarəetmə panelində görünən strategiyalar (hesab səviyyəsində marşrutlaşdırma):**
+**Paneldə görünən strategiyalar (hesab səviyyəli marşrutlaşdırma):**
 
-| Strategiya                        | Təsvir                                                                                                                    |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **İlkini Doldur**                 | Hesabları prioritet sırası ilə istifadə edir — əsas hesab əlçatan olmayana qədər bütün sorğuları emal edir                |
-| **Dairəvi Növbələmə**             | Konfiqurasiya edilə bilən sabit limitlə bütün hesablar arasında növbə ilə keçir (standart: hər hesaba 3 çağırış)          |
-| **P2C (İki Seçimin Gücü)**        | Təsadüfi 2 hesab seçir və sorğunu daha sağlam olana yönləndirir — sağlamlıq vəziyyətini nəzərə alaraq yükü balanslaşdırır |
-| **Təsadüfi**                      | Fisher-Yates qarışdırmasından istifadə edərək hər sorğu üçün təsadüfi hesab seçir                                         |
-| **Ən Az İstifadə Olunan**         | Sorğunu ən köhnə `lastUsedAt` vaxt nişanına malik hesaba yönləndirərək trafiki bərabər paylayır                           |
-| **Xərcə Görə Optimallaşdırılmış** | Sorğunu ən aşağı prioritet dəyərinə malik hesaba yönləndirərək ən aşağı xərcli provayderlər üçün optimallaşdırır          |
+| Strategiya                 | Təsvir                                                                                                           |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Əvvəlcə doldurun**       | Hesabları prioritet qaydada istifadə edir — əsas hesab əlçatan olmayana qədər bütün sorğuları idarə edir         |
+| **Dəyirmi Robin**          | Konfiqurasiya edilə bilən yapışqan limiti olan bütün hesablar arasında dövrə vurur (defolt: hər hesaba 3 zəng)   |
+| **P2C (İki Seçim Gücü)**   | 2 təsadüfi hesab və daha sağlam olana marşrut seçir — yükü sağlamlıq haqqında məlumatlandırma ilə balanslaşdırır |
+| **Təsadüfi**               | Fisher-Yates shuffle istifadə edərək hər sorğu üçün təsadüfi hesab seçir                                         |
+| **Az İstifadə Edilib**     | Trafiki bərabər paylayan ən köhnə `lastUsedAt` vaxt damğası olan hesaba marşrutlar                               |
+| **Xərc optimallaşdırılıb** | Ən aşağı qiymətli provayderlər üçün optimallaşdırılaraq, ən aşağı prioritet dəyəri olan hesaba marşrutlar        |
 
-**Qabaqcıl kombinasiya və avtomatik strategiyalar** (hər kombinasiya üçün ayrıca və ya `auto/*` prefiksləri vasitəsilə konfiqurasiya edilə bilər — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) sənədinə baxın):
+**Qabaqcıl kombo və avtomatik strategiyalar** (kombo və ya `auto/*` prefiksləri vasitəsilə konfiqurasiya edilə bilər - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) baxın):
 
-- `priority` — ciddi ardıcıllıq, heç vaxt dairəvi növbələmə etmir
-- `weighted` — hər model üzrə çəkilərə əsaslanan proporsional trafik bölgüsü
-- `fill-first` — limitlərə çatana qədər ilk modeli tam istifadə edir
+- `priority` - ciddi nizam-intizam, heç vaxt round-robins
+- `weighted` — hər model çəkilərinə görə mütənasib trafik bölünməsi
+- `fill-first` — limitlər çatana qədər ilk modeli boşaltın
 - `round-robin` / `strict-random` / `random`
-- `p2c` (İki Seçimin Gücü)
+- `p2c` (İki Seçim Gücü)
 - `least-used` və `cost-optimized`
-- `auto` — bütün namizədlər arasında bala əsaslanan seçim
-- `lkgp` (Son Məlum Yaxşı Provayder) — son uğurlu provayderə bağlanır, sonra qaydalara əsaslanan ehtiyat varianta keçir
-- `context-optimized` — ən böyük boş kontekst pəncərəsinə malik modeli seçir
-- `context-relay` — sonrakı müraciətlər üçün böyük kontekstli modelləri zəncirvari birləşdirir
+- `auto` - bütün namizədlər arasında hesaba əsaslanan
+- `lkgp` (Son Bilinən Yaxşı Provayder) — sonuncu uğurlu provayderə işarə edir, sonra qaydalara qayıdır
+- `context-optimized` — ən böyük pulsuz kontekst pəncərəsi olan modeli seçir
+- `context-relay` — təqib növbələri üçün uzun kontekstli modelləri zəncirləyir
 
-#### Xarici Sabit Sessiya Başlığı
+#### Xarici Yapışqan Sessiya Başlığı
 
-Xarici sessiya bağlılığı üçün (məsələn, əks proksilərin arxasındakı Claude Code/Codex agentləri) aşağıdakı başlığı göndərin:
+Xarici sessiya yaxınlığı üçün (məsələn, əks proksilərin arxasında Claude Code/Codex agentləri) göndərin:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute həmçinin `x_session_id` başlığını qəbul edir və faktiki sessiya açarını `X-OmniRoute-Session-Id` başlığında qaytarır.
+OmniRoute həmçinin `x_session_id` qəbul edir və `X-OmniRoute-Session-Id` də effektiv sessiya açarını qaytarır.
 
-Nginx istifadə edirsinizsə və alt xəttli başlıqlar göndərirsinizsə, bunu aktivləşdirin:
+Nginx istifadə edirsinizsə və alt xətt başlıqlarını göndərirsinizsə, aktivləşdirin:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Əvəzedici Simvollu Model Aliasları
+#### Wildcard Model ləqəbləri
 
-Model adlarını yenidən uyğunlaşdırmaq üçün əvəzedici simvol nümunələri yaradın:
-
-```
-Nümunə: claude-sonnet-*     →  Hədəf: cc/claude-sonnet-4-6
-Nümunə: gpt-*               →  Hədəf: gh/gpt-5.3-codex
-```
-
-Əvəzedici simvollar `*` (istənilən simvollar) və `?` (bir simvol) işarələrini dəstəkləyir.
-
-#### Ehtiyat Keçid Zəncirləri
-
-Bütün sorğulara tətbiq olunan qlobal ehtiyat keçid zəncirlərini müəyyənləşdirin:
+Model adlarını dəyişdirmək üçün joker nümunələr yaradın:
 
 ```
-Zəncir: production-fallback
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+```
+
+Joker simvollar `*` (istənilən simvol) və `?` (tək simvol) dəstəkləyir.
+
+#### Fallback Zəncirlər
+
+Bütün sorğularda tətbiq olunan qlobal ehtiyat zəncirlərini müəyyənləşdirin:
+
+```
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -866,149 +907,204 @@ Zəncir: production-fallback
 
 ---
 
-### Dayanıqlılıq və Dövrə Kəsiciləri
+### Ümumi Provayder Kombinasiyaları və Marşrut Nümunələri
 
-**İdarəetmə paneli → Parametrlər → Dayanıqlılıq** vasitəsilə konfiqurasiya edin.
+Çoxsaylı provayderləri birləşdirmək və OmniRoute da onlar arasında marşrutlaşdırma üçün nümunə nümunələri:
 
-OmniRoute provayder səviyyəsində dayanıqlılığı beş komponent vasitəsilə təmin edir:
+#### 1. Kodlaşdırma Agent Kombo: Cost/Speed Fallback ilə yüksək səviyyəli düşünmə
 
-1. **Sorğu Növbəsi və Tempin Tənzimlənməsi** — Sistem səviyyəsində sorğuların formalaşdırılması:
-   - **Dəqiqədə Sorğular (RPM)** — Hər hesab üçün dəqiqə ərzində maksimum sorğu sayı
-   - **Sorğular Arasında Minimum Vaxt** — Sorğular arasında millisaniyə ilə minimum fasilə
-   - **Maksimum Paralel Sorğular** — Hər hesab üçün maksimum eyni vaxtlı sorğu sayı
+Kodlaşdırma agentləri üçün idealdır (OpenCode, Claude Code, Cursor, Cline). Kvota tükənməsi və ya səhvlər üzrə sürətli kodlaşdırma modellərinə qayıdıb, əvvəlcə sərhəd əsaslandırma modellərinə istiqamətlər.
 
-2. **Bağlantının Soyuma Müddəti** — Təkrar cəhd edilə bilən xətalardan sonra tək bir bağlantı üçün autentifikasiya növünə görə konfiqurasiya:
-   - **Əsas Soyuma Müddəti** — Təkrar cəhd edilə bilən yuxarı axın xətaları üçün standart soyuma müddəti
-   - **Yuxarı Axının Təkrar Cəhd Göstərişlərindən İstifadə** — Təqdim edildikdə mötəbər `Retry-After` və ya sıfırlama göstərişlərinə əməl edir
-   - **Maksimum Geriçəkilmə Addımları** — Təkrarlanan xətalar üçün maksimum eksponensial geriçəkilmə səviyyəsi
+- **İdarə paneli** : Kombolar → Yeni Kombo → Adı: `agent-coding` → Strategiya: `Priority`
+- **Modellər** :
+  1. `claude/claude-sonnet-4-6` (İlkin kodlaşdırma agenti)
+  2. `openai/gpt-4o` (İkinci dərəcəli yüksək tutumlu ehtiyat)
+  3. `deepseek/deepseek-v4-flash` (Yüksək səmərəlilik, sərfəli geriləmə)
 
-3. **Provayder Dövrə Kəsicisi** — Provayderin ucdan-uca xətalarını izləyir, konfiqurasiya edilmiş xəbərdarlıq həddində provayderi zəifləmiş kimi işarələyir və konfiqurasiya edilmiş xəta həddinə çatdıqda kəsicini açır:
-   - **Zəifləmə Həddi** — `DEGRADED` vəziyyətinə keçməzdən əvvəl ardıcıl provayder xətalarının sayı
-   - **Xəta Həddi** — `OPEN` vəziyyətinə keçməzdən əvvəl ardıcıl provayder xətalarının sayı
-   - **Sıfırlama Taym-autu** — Provayder yenidən sınaqdan keçirilməzdən əvvəlki vaxt intervalı
-   - **CLOSED** (Sağlam) — Sorğular normal şəkildə ötürülür
-   - **DEGRADED** — Artan xətalar izlənilərkən sorğular ötürülməyə davam edir
-   - **OPEN** — Təkrarlanan xətalardan sonra provayder müvəqqəti olaraq bloklanır
-   - **HALF_OPEN** — Provayderin bərpa olunub-olunmadığı yoxlanılır
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
 
-   Bağlantı səviyyəli `429` sürət limitləri **Bağlantının Soyuma Müddəti** daxilində qalır və provayder kəsicisində nəzərə alınmır.
+#### 2. Pulsuz Səviyyəli Avtomatik Failover Kombo
 
-   Provayder kəsicisinin icra vaxtı vəziyyəti yalnız **İdarəetmə paneli → Sağlamlıq** bölməsində göstərilir.
+API xərcləri olmadan işləmə müddətini artırmaq üçün çox sayda pulsuz və açarsız provayderləri birləşdirir.
 
-4. **Soyuma Müddətini Gözləmə** — Bütün namizəd bağlantılar artıq soyuma mərhələsindədirsə, OmniRoute ən tez bitəcək soyuma müddətini gözləyə və eyni müştəri sorğusunu avtomatik olaraq yenidən sınaya bilər.
+- **Strategiya** : `Least Used` və ya `Round Robin` (kvotalar üzrə yükü paylayır)
+- **Modellər** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
 
-5. **Sürət Limitinin Avtomatik Aşkarlanması** — Yuxarı axın provayderləri açıq gözləmə intervalları qaytardıqda və bu parametr aktiv olduqda, həmin göstərişlər yerli bağlantı soyuma müddətini əvəz edir.
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
 
-**Peşəkar Məsləhət:** Nasazlıqdan sonra aktiv provayder kəsicilərini yoxlamaq və sıfırlamaq üçün **Sağlamlıq** səhifəsindən istifadə edin. Dayanıqlılıq səhifəsi yalnız konfiqurasiyanı dəyişir.
+#### 3. Multimodal / Görmə və Mətn Boru Kəməri
+
+Təsvirin anlaşılması və kodun yaradılmasını əhatə edən iş axınları üçün yüksək sürətli mətn generasiyası ilə xüsusi görmə modellərinin qoşalaşdırılması.
+
+- **Nümunə** : İlk olaraq görmə qabiliyyətinə malik modelləri, sonuncu isə yüksək məhsuldarlığa malik text/code modelini siyahıya alan `Priority` kombinatı.
+- **Modellər** :
+  1. `gemini/gemini-2.5-pro` (Güclü image/multimodal anlama)
+  2. `openai/gpt-4o` (Balanslı görmə və alət istifadəsi)
+  3. `deepseek/deepseek-v4-flash` (Text/code nəsil)
 
 ---
 
-### Verilənlər Bazasının İxracı / İdxalı
+### Dayanıqlılıq və Devre kesiciler
 
-Verilənlər bazasının ehtiyat nüsxələrini **İdarəetmə paneli → Parametrlər → Sistem və Saxlama** bölməsində idarə edin.
+vasitəsilə konfiqurasiya edin** İdarə paneli → Parametrləri → Dayanıqlıq** .
 
-| Əməliyyat                        | Təsvir                                                                                                                                                                             |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Verilənlər bazasını ixrac et** | Cari SQLite verilənlər bazasını `.sqlite` faylı kimi endirir                                                                                                                       |
-| **Hamısını ixrac et (.tar.gz)**  | Aşağıdakıları ehtiva edən tam ehtiyat nüsxəsi arxivini endirir: verilənlər bazası, parametrlər, kombolar, provayder bağlantıları (giriş məlumatları olmadan), API açarı metadatası |
-| **Verilənlər bazasını idxal et** | Cari verilənlər bazasını əvəz etmək üçün `.sqlite` faylı yükləyir. `DISABLE_SQLITE_AUTO_BACKUP=true` olmadıqda, idxaldan əvvəl avtomatik olaraq ehtiyat nüsxəsi yaradılır          |
+OmniRoute beş komponentlə provayder səviyyəsində davamlılığı həyata keçirir:
+
+1. **Sorğu Növbəsi və Pacing** — Sistem səviyyəsində sorğunun formalaşdırılması:
+   - **Dəqiqədə sorğular (RPM)** — Hər hesab üçün dəqiqədə maksimum sorğular
+   - **Sorğular Arasında Min Vaxt** — Sorğular arasında millisaniyələrdə minimum boşluq
+   - **Maksimum Paralel Sorğular** — Hesab başına maksimum eyni vaxtda sorğular
+
+2. **Bağlantının soyudulması** — Yenidən sınaqdan keçirilə bilən uğursuzluqlardan sonra tək qoşulma üçün hər autent tipli konfiqurasiya:
+   - **Baza soyutma** — Yenidən cəhd edilə bilən yuxarı axın uğursuzluqları üçün defolt soyutma pəncərəsi
+   - **Upstream Retry göstərişlərindən istifadə edin** — Nüfuzlu `Retry-After` ya hörmət edir və ya təqdim edildikdə göstərişləri sıfırlayır
+   - **Maksimum geri çəkilmə addımları** — Təkrarlanan uğursuzluqlar üçün maksimum eksponensial geriləmə səviyyəsi
+
+3. **Təchizatçı Circuit Breaker** — Təchizatçı xətalarını izləyir, konfiqurasiya edilmiş xəbərdarlıq həddində zəifləmiş provayderi qeyd edir və konfiqurasiya edilmiş uğursuzluq həddinə çatdıqda açarı açır:
+   - **Deqradasiya həddi** — `DEGRADED` daxil olmamışdan əvvəl ardıcıl provayder uğursuzluqları
+   - **Uğursuzluq həddi** — `OPEN` daxil olmamışdan əvvəl ardıcıl provayder uğursuzluqları
+   - **Vaxt aşımını sıfırlayın** — Provayderin yenidən sınaqdan keçirilməsinə qədər vaxt pəncərəsi
+   - **CLOSED** (Sağlam) — Sorğular normal şəkildə axır
+   - **DEGRADED** — Yüksək uğursuzluqlar izlənilərkən sorğular hələ də axır
+   - **OPEN** — Təkrar uğursuzluqlardan sonra provayder müvəqqəti olaraq bloklanır
+   - **HALF_OPEN** — Provayderin bərpa olub-olmadığını yoxlamaq
+
+   Qoşulma əhatəli `429` tarif limitləri qalır** Bağlantının soyudulması** və provayderi pozan tərəfə saymayın.
+
+   Provayder kəsicisinin işləmə vaxtı vəziyyəti göstərilir** Dashboard → Health** yalnız.
+
+4. **Soğutma müddətini gözləyin** — Əgər hər bir namizəd bağlantısı artıq soyuyursa, OmniRoute ən erkən soyumağı gözləyə və avtomatik olaraq eyni müştəri sorğusunu təkrar sınaya bilər.
+
+5. **Rate Limit Avtomatik Aşkarlanması** — Yuxarı provayderlər açıq gözləmə pəncərələrini qaytardıqda, parametr aktivləşdirildikdə, bu göstərişlər yerli əlaqənin soyumasını ləğv edir.
+
+**Pro İpucu:** istifadə edin** Sağlamlıq** fasilədən sonra canlı provayder açarlarını yoxlamaq və sıfırlamaq üçün səhifə. Resilience səhifəsi yalnız konfiqurasiyanı dəyişir.
+
+---
+
+### Verilənlər bazasının İxrac / İdxal
+
+Verilənlər bazası ehtiyat nüsxələrini idarə edin** İdarə paneli → Parametrləri → Sistem və Saxlama** .
+
+| Fəaliyyət                          | Təsvir                                                                                                                                                                   |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Verilənlər bazasını ixrac edin** | Cari SQLite verilənlər bazasını `.sqlite` faylı kimi yükləyir                                                                                                            |
+| **Hamısını Eksport et (.tar.gz)**  | Tam ehtiyat arxivi yükləyir: verilənlər bazası, parametrlər, kombinasiyalar, provayder əlaqələri (etimadnamə yoxdur), API açar metadata                                  |
+| **İdxal verilənlər bazası**        | Cari verilənlər bazasını əvəz etmək üçün `.sqlite` faylını yükləyin. İdxaldan əvvəl ehtiyat nüsxə `DISABLE_SQLITE_AUTO_BACKUP=true` olmadıqda avtomatik olaraq yaradılır |
 
 ```bash
-# API: Verilənlər bazasını ixrac et
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Hamısını ixrac et (tam arxiv)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Verilənlər bazasını idxal et
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**İdxalın yoxlanılması:** İdxal edilən fayl bütövlük (SQLite pragma yoxlaması), tələb olunan cədvəllər (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) və ölçü (maksimum 100MB) baxımından yoxlanılır.
+**İdxal Təsdiqləmə:** İdxal edilmiş fayl bütövlük (SQLite praqma yoxlanışı), tələb olunan cədvəllər (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) və ölçüsü (maks. 100MB) üçün təsdiqlənir.
 
 **İstifadə halları:**
 
-- OmniRoute-u maşınlar arasında köçürmək
-- Fəlakətdən sonra bərpa üçün xarici ehtiyat nüsxələri yaratmaq
-- Konfiqurasiyaları komanda üzvləri arasında paylaşmaq (hamısını ixrac et → arxivi paylaş)
+- Maşınlar arasında OmniRoute köçürün
+- Fəlakətin bərpası üçün xarici ehtiyat nüsxələri yaradın
+- Komanda üzvləri arasında konfiqurasiyaları paylaşın (bütün → paylaşım arxivini ixrac edin)
 
 ---
 
-### Parametrlər idarəetmə paneli
+### Parametrlər Paneli
 
-Rahat naviqasiya üçün parametrlər səhifəsi **7 tab** şəklində təşkil edilib:
+Parametrlər səhifəsi təşkil olunub** 7 nişan** asan naviqasiya üçün:
 
-| Tab                 | Məzmun                                                                                                                                                                                                                     |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ümumi**           | Sistem yaddaşı alətləri, standart davranış, endpoint tunelinin görünməsi                                                                                                                                                   |
-| **Görünüş**         | Mövzu idarəetmələri (işıqlı/qaranlıq/sistem), yan panelin görünməsi, Cloudflare/Tailscale/ngrok tunel kartları üçün panel keçidləri                                                                                        |
-| **AI**              | Düşünmə büdcəsi (dəyişikliksiz ötürmə / avtomatik silmə / fərdi / adaptiv — [THINKING_BUDGET.md](./THINKING_BUDGET.md) sənədinə baxın), qlobal sistem promptu, prompt keşinin statistikası                                 |
-| **Təhlükəsizlik**   | Giriş/Parol parametrləri, IP girişinə nəzarət, `/models` üçün API autentifikasiyası, provayderlərin bloklanması, prompt inyeksiyasından qorunma                                                                            |
-| **Marşrutlaşdırma** | Qlobal marşrutlaşdırma strategiyası (Əvvəlcə doldur / Dövri növbə / P2C / Təsadüfi / Ən az istifadə olunan / Xərc üzrə optimallaşdırılmış), model ləqəblərində universal simvollar, ehtiyat zəncirləri, kombo standartları |
-| **Dayanıqlılıq**    | Sorğu növbəsi, bağlantının gözləmə müddəti, provayder dövrəqıranının konfiqurasiyası və gözləmə müddətinin bitməsini gözləmə davranışı                                                                                     |
-| **Qabaqcıl**        | Qlobal proksi konfiqurasiyası (HTTP/SOCKS5), hər provayder üçün proksi əvəzləmələri                                                                                                                                        |
+| Tab                 | İçindəkilər                                                                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **General**         | Sistem saxlama vasitələri, defolt davranış, Son nöqtə tunelinin görünməsi                                                                                                                                    |
+| **Görünüş**         | Mövzu nəzarətləri (light/dark/system), yan panel görünməsi, Cloudflare/Tailscale/ngrok tunel kartları üçün panel keçidləri                                                                                   |
+| **AI**              | Düşüncə büdcəsi (keçid / avtomatik zolaq / xüsusi / adaptiv — bax [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), qlobal sistem xəbərdarlığı, operativ keş statistikası                                        |
+| **Təhlükəsizlik**   | Login/Password parametrləri, IP Giriş Nəzarəti, `/models` üçün API auth, Provayderin Bloklanması, operativ injection mühafizəsi                                                                              |
+| **Marşrutlaşdırma** | Qlobal marşrutlaşdırma strategiyası (Birinci Doldur / Dəyirmi Robin / P2C / Təsadüfi / Ən Az İstifadə Edilmiş / Xərcləri Optimize Edilmiş), joker model ləqəbləri, ehtiyat zəncirlər, kombinasiya defoltları |
+| **Dözümlülük**      | Sorğu növbəsi, əlaqənin soyudulması, provayder kəsici konfiqurasiyası və soyuma müddətini gözləmə davranışı                                                                                                  |
+| **Qabaqcıl**        | Qlobal proksi konfiqurasiyası (HTTP/SOCKS5), hər provayder üçün proksi ləğv edilir                                                                                                                           |
 
-Ümumi bölməsi artıq yalnız oxumaq üçün olan jurnal və keş qeydlərini təkrarlamır. Verilənlər bazasının saxlanma müddəti və
-optimallaşdırma parametrləri `/api/settings/database` vasitəsilə yadda saxlanılır; keşi əl ilə təmizləmək üçün
-`DELETE /api/cache` istifadə olunur. Sorğu və proksi jurnalı sətirlərinin limitləri
-`CALL_LOGS_TABLE_MAX_ROWS` və `PROXY_LOGS_TABLE_MAX_ROWS` vasitəsilə idarə olunur.
+General artıq yalnız oxumaq üçün qeydləri və keş qeydlərini dublikat etmir. Verilənlər bazasının saxlanması və optimallaşdırma parametrləri `/api/settings/database` vasitəsilə davam etdirilir; manuel keş təmizləmə `DELETE /api/cache` istifadə edir. Sorğu və proksi jurnalı sıra başlıqları `CALL_LOGS_TABLE_MAX_ROWS` və `PROXY_LOGS_TABLE_MAX_ROWS` tərəfindən idarə olunur.
 
 ---
 
-### Xərclərin və büdcənin idarə edilməsi
+### Xərclər və Büdcə İdarəetmə
 
-**İdarəetmə paneli → Xərclər** vasitəsilə daxil olun.
+vasitəsilə daxil olmaq** Dashboard → Xərcləri** .
 
-| Tab                | Məqsəd                                                                                                         |
-| ------------------ | -------------------------------------------------------------------------------------------------------------- |
-| **Büdcə**          | Gündəlik/həftəlik/aylıq büdcələrlə hər API açarı üçün xərc limitləri təyin etmək və onları real vaxtda izləmək |
-| **Qiymətləndirmə** | Model qiymət qeydlərinə baxmaq və onları redaktə etmək — hər provayder üzrə 1K giriş/çıxış tokeninin qiyməti   |
+| Tab                | Məqsəd                                                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| **Büdcə**          | daily/weekly/monthly büdcələri və real vaxt izləmə ilə API açarı üçün xərcləmə limitlərini təyin edin |
+| **Qiymətləndirmə** | Model qiymət qeydlərinə baxın və redaktə edin - provayderə görə 1K input/output tokeninin dəyəri      |
 
 ```bash
-# API: Büdcə təyin et
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Cari büdcə vəziyyətini əldə et
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Xərclərin izlənməsi:** Hər sorğu token istifadəsini jurnala yazır və qiymətləndirmə cədvəlindən istifadə edərək xərci hesablayır. Provayder, model və API açarı üzrə bölgülərə **İdarəetmə paneli → İstifadə** bölməsində baxın.
+**Xərclərin izlənməsi:** Hər sorğu token istifadəsini qeyd edir və qiymət cədvəlindən istifadə edərək dəyəri hesablayır. Bölmələrə baxın** Dashboard → İstifadəsi** provayder, model və API açarı ilə.
 
 ---
 
-### Audio transkripsiyası
+### Audio Transkripsiya
 
-OmniRoute OpenAI ilə uyğun endpoint vasitəsilə audio transkripsiyasını dəstəkləyir:
+OmniRoute OpenAI-a uyğun son nöqtə vasitəsilə audio transkripsiyanı dəstəkləyir:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# curl ilə nümunə
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` yerli Deepgram marşrutudur və Deepgram API açarı tələb edir.
-Yalnız OpenRouter konfiqurasiya edilibsə, `openrouter/deepgram/nova-3` istifadə edin.
+`deepgram/nova-3` yerli Deepgram marşrutudur və Deepgram API açarına ehtiyac duyur. Yalnız OpenRouter konfiqurasiya edilibsə, `openrouter/deepgram/nova-3` istifadə edin.
 
-**Nitqdən mətnə (transkripsiya)** provayderləri:
+**Nitqdən Mətnə (transkripsiya)** provayderlər:
 
-- `openai/` (whisper ilə uyğun)
+- `openai/` (pıçıltıya uyğun)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (Nova ailəsi)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper variantları)
+- `nvidia/` (Parakeet, Kanarya)
+- `huggingface/` (pıçıltı variantları)
 - `qwen/`
 
-**Mətndən nitqə (`POST /v1/audio/speech`)** provayderləri:
+**Mətndən nitqə (`POST /v1/audio/speech`)** provayderlər:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1025,53 +1121,45 @@ Yalnız OpenRouter konfiqurasiya edilibsə, `openrouter/deepgram/nova-3` istifad
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Transkripsiya üçün dəstəklənən audio formatları: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS çıxış formatları provayderdən asılıdır (mp3, wav, opus, pcm, mulaw).
+Transkripsiya üçün dəstəklənən audio formatlar: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS çıxış formatları provayderdən asılıdır (mp3, wav, opus, pcm, mulaw).
 
 ---
 
 ### Kombo balanslaşdırma strategiyaları
 
-Hər kombo üçün balanslaşdırmanı **İdarəetmə paneli → Kombolar → Yarat/Redaktə et → Strategiya** bölməsində konfiqurasiya edin.
+Hər kombo balansını konfiqurasiya edin** Dashboard → Combos → Create/Edit → Strategy** .
 
-| Strategiya                             | Təsvir                                                                                 |
-| -------------------------------------- | -------------------------------------------------------------------------------------- |
-| **Dövrü növbələmə**                    | Modellər arasında ardıcıl şəkildə keçid edir                                           |
-| **Prioritet**                          | Həmişə əvvəlcə birinci modeli sınayır; yalnız xəta baş verdikdə ehtiyat modelə keçir   |
-| **Təsadüfi**                           | Hər sorğu üçün kombinasiyadan təsadüfi bir model seçir                                 |
-| **Çəkili**                             | Hər modelə təyin edilmiş çəkilərə əsasən proporsional marşrutlaşdırma aparır           |
-| **Ən az istifadə edilən**              | Ən az son sorğuya malik modelə yönləndirir (kombinasiya metrikalarından istifadə edir) |
-| **Xərc baxımından optimallaşdırılmış** | Ən ucuz əlçatan modelə yönləndirir (qiymət cədvəlindən istifadə edir)                  |
+| Strategiya                  | Təsvir                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| **Dairəvi Robin**           | Modellər arasında ardıcıl olaraq fırlanır                                      |
+| **Prioritet**               | Həmişə ilk modeli sınayır; yalnız səhvə görə geri qayıdır                      |
+| **Təsadüfi**                | Hər sorğu üçün kombinasiyadan təsadüfi bir model seçir                         |
+| **Çəkili**                  | Marşrutlar proporsional olaraq hər model üçün təyin edilmiş çəkilərə əsaslanır |
+| **Az İstifadə Edilib**      | Ən az son sorğu ilə modelə marşrutlar (kombo metriklərdən istifadə edir)       |
+| **Xərc-Optimallaşdırılmış** | Ən ucuz mövcud modelə marşrutlar (qiymət cədvəlindən istifadə edir)            |
 
-Qlobal kombinasiya standartları **İdarəetmə paneli → Parametrlər → Marşrutlaşdırma → Kombinasiya standartları** bölməsində təyin edilə bilər.
-Kombinasiya hədəflərinin vaxt aşımı standart olaraq cari sorğunun vaxt aşımı dəyərini miras alır. Yalnız hədəf üzrə daha qısa limitin ehtiyat varianta daha sürətli keçidi işə salmalı olduğu hallarda kombinasiya standartlarında və ya fərdi kombinasiyada **Hədəf vaxt aşımı
-(saniyə)** parametrindən istifadə edin.
+Qlobal kombinasiya standartları quraşdırıla bilər** Dashboard → Parametrləri → Routing → Combo Defolt** . Qarışıq hədəf vaxt aşımları defolt olaraq cari sorğu fasiləsini miras alır. istifadə edin** Hədəf fasiləsi (saniyə)** kombo defoltlarında və ya fərdi komboda yalnız hədəf başına daha qısa limit daha sürətli geri dönməyə səbəb olduqda.
 
-Sıfır gecikməli kombinasiya optimallaşdırmaları seçim əsasında aktivləşdirilir. Bu gecikmə funksiyalarının ehtiyat hədəflərlə yarışmasının, TTFT
-tarixçəsinə əsasən hədəfləri ötürməsinin və ya ehtiyat sorğuları sıxışdırmasının qarşısını almaq üçün **Sıfır gecikməli optimallaşdırmalar** parametrini deaktiv saxlayın; onu aktivləşdirmək konfiqurasiya edilmiş paralel ehtiyat sorğularına, proqnozlaşdırıcı TTFT
-ötürmələrinə və proaktiv ehtiyat sıxışdırmasına marşrutlaşdırma/sorğu dəqiqliyini daha aşağı sonluq
-gecikməsi ilə dəyişməyə imkan verir.
+Sıfır gecikmə kombo optimallaşdırmaları daxil edilir. tərk et** Sıfır gecikmə optimallaşdırmaları** bu gecikmə funksiyalarının ehtiyat hədəflərlə yarışmasının, TTFT tarixçəsinə əsaslanan hədəflərin atlanmasının və ya geri qaytarma sorğularının sıxılmasının qarşısını almaq üçün deaktiv edilib; onu aktivləşdirmək konfiqurasiya edilmiş hedcinq, proqnozlaşdırılan TTFT atlamaları və aşağı quyruq gecikməsi üçün routing/request sədaqəti ilə ticarət etmək üçün proaktiv geri sıxılmaya imkan verir.
 
-Yuxarı axın provayderləri sərt
-`max_tokens` / `maxOutputTokens` limitləri tələb etdikdə **Düşünmə tokeni buferi** parametrini deaktiv edin. Aktiv olduqda, kombinasiya marşrutlaşdırması yalnız məlum çıxış limitinə malik modellər üçün düşünmə modellərinə
-əlavə ehtiyat sahəsi əlavə edir və təhlükəsiz buferlənmiş dəyər həmin limiti aşacağı halda müştərinin token limitini dəyişməz saxlayır. Müştəri limiti artıq məlum limitdən yuxarıdırsa,
-OmniRoute yuxarı axın sorğusunu göndərməzdən əvvəl onu həmin limitə endirir.
+Deaktiv edin** Əsaslandırma nişanı buferi** yuxarı axın provayderləri ciddi `max_tokens` / `maxOutputTokens` məhdudiyyətləri tələb etdikdə. Aktivləşdirildikdə, birləşmiş marşrutlaşdırma yalnız məlum çıxış qapağı olan modellər üçün əsaslandırma modelinin boşluğunu əlavə edir və təhlükəsiz bufer edilmiş dəyər həmin həddi keçdikdə müştəri nişanı limitini dəyişməz qoyur. Müştəri limiti artıq məlum həddən artıqdırsa, OmniRoute yuxarı sorğunu göndərməzdən əvvəl onu həmin həddə qədər sıxır.
 
 ---
 
-### Sistem vəziyyəti paneli
+### Sağlamlıq Paneli
 
-**İdarəetmə paneli → Sistem vəziyyəti** vasitəsilə daxil olun. 6 kartdan ibarət real vaxt rejimində sistem vəziyyətinə ümumi baxış:
+vasitəsilə daxil olmaq** Dashboard → Health** . 6 kartla real vaxt sistem sağlamlığına baxış:
 
-| Kart                      | Göstərdiyi məlumatlar                                                                    |
-| ------------------------- | ---------------------------------------------------------------------------------------- |
-| **Sistem statusu**        | İşləmə müddəti, versiya, yaddaş istifadəsi, məlumat qovluğu                              |
-| **Provayder vəziyyəti**   | Qlobal provayder dövrəqıranının icra vəziyyəti                                           |
-| **Sürət limitləri**       | Qalan vaxtla birlikdə hər hesab üzrə aktiv bağlantı gözləmə müddətləri                   |
-| **Aktiv bloklamalar**     | Aktiv model səviyyəli bloklamalar və müvəqqəti istisnalar                                |
-| **İmza keşi**             | Dublikatların aradan qaldırılması keşinin statistikası (aktiv açarlar, uyğunluq nisbəti) |
-| **Gecikmə telemetriyası** | Hər provayder üzrə p50/p95/p99 gecikmə aqreqasiyası                                      |
+| Kart                      | Nəyi göstərir                                                    |
+| ------------------------- | ---------------------------------------------------------------- |
+| **Sistem Vəziyyəti**      | İş vaxtı, versiya, yaddaş istifadəsi, məlumat kataloqu           |
+| **Provayder Sağlamlığı**  | Qlobal provayderin dövrə açarının işləmə vaxtı vəziyyəti         |
+| **Məzənnə Limitləri**     | Qalan vaxtla hesab üzrə aktiv əlaqənin soyudulması               |
+| **Aktiv Lokautlar**       | Aktiv model əhatəli lokavtlar və müvəqqəti istisnalar            |
+| **İmza Keşi**             | Təkmilləşdirmə keş statistikası (aktiv düymələr, vuruş dərəcəsi) |
+| **Gecikmə telemetriyası** | hər provayder üçün p50/p95/p99 gecikmə aqreqasiyası              |
 
-**Peşəkar məsləhət:** Sistem vəziyyəti səhifəsi hər 10 saniyədən bir avtomatik yenilənir. Hansı provayderlərdə problemlər yarandığını müəyyən etmək üçün dövrəqıran kartından istifadə edin.
+**Pro İpucu:** Sağlamlıq səhifəsi hər 10 saniyədən bir avtomatik yenilənir. Hansı provayderlərin problemlə üzləşdiyini müəyyən etmək üçün elektrik açarı kartından istifadə edin.
 
 ---
 

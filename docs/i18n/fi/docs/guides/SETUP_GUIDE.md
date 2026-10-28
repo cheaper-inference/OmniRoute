@@ -144,29 +144,29 @@ omniroute providers validate
 2. Avaa Dashboard → `Endpoints` ja luo API-avain.
 3. (Valinnainen) Avaa Dashboard → `Combos` ja määritä varaketjusi.
 
-### 2) Määritä ohjelmointityökalusi
+### 2) Määritä koodaustyökalusi
 
 ```txt
 Perus-URL: http://localhost:20128/v1
-API-avain: [kopioi Endpoint-sivulta]
+API-avain: [kopioi Endpoints-sivulta]
 Malli:     if/qwen3.8-max-preview (tai mikä tahansa palveluntarjoaja/malli-etuliite)
 ```
 
-Jos editorisi ei voi lähettää `Authorization: Bearer ...` -otsaketta, käytä sen sijaan tokenin sisältävää yhteensopivuuden perusosoitetta:
+Jos editorisi ei voi lähettää `Authorization: Bearer ...` -otsaketta, käytä sen sijaan tokenisoitua yhteensopivuusosoitetta:
 
 ```txt
-Perus-URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Mallien URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Keskustelun URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama-tunnisteiden URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Perus-URL:        http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Mallien URL:      http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+Keskustelun URL:  http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama Tags -URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Toimii Claude Coden, Codex CLI:n, Cursorin, Clinen, OpenClawin, OpenCoden ja OpenAI-yhteensopivien SDK:iden kanssa.
+Toimii Claude Coden, Codex CLI:n, Cursorin, Clinen, OpenClawn, OpenCoden ja OpenAI-yhteensopivien SDK:iden kanssa.
 
 #### Automaattinen määritys `setup-*`-komennoilla
 
 Sen sijaan, että liittäisit perus-URL-osoitteen ja avaimen käsin, anna OmniRouten kirjoittaa kunkin työkalun
-omat määritykset reaaliaikaisesta malliluettelosta. Yksi komento työkalua kohden:
+oma määritys reaaliaikaisesta malliluettelosta. Yksi komento työkalua kohden:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml-profiilit
@@ -178,22 +178,23 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # tulostaa Cursorin sovelluksen sisäiset vaiheet
 omniroute setup-roo          # Roo Code -tuonti ja autoImport-osoitin
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Jokainen hyväksyy valinnat `--remote <url> --api-key <key>`, joilla paikallinen työkalu määritetään käyttämään
-**etäpalvelimella** toimivaa OmniRoutea, sekä valinnan `--dry-run` esikatselua varten. Jos haluat käynnistää CLI:n oikeat
-ympäristömuuttujat asetettuina kirjoittamatta lainkaan määrityksiä, käytä yleistä käynnistintä
+Kukin hyväksyy valinnat `--remote <url> --api-key <key>`, joilla paikallinen työkalu määritetään käyttämään
+**etäpalvelimella** olevaa OmniRoutea, sekä valinnan `--dry-run` esikatselua varten. Jos haluat käynnistää CLI:n oikeat
+ympäristömuuttujat asetettuina kirjoittamatta mitään määrityksiä, käytä yleiskäynnistintä
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
 vanhat työkalukohtaiset käynnistimet `omniroute launch` (Claude Code) ja
 `omniroute launch-codex` (Codex) ovat edelleen käytettävissä.
 
-Täydellinen taulukko (mitä kukin komento kirjoittaa, kaikki valinnat, paikallinen ja etäkäyttö sekä perus-URL-osoitteen
+Täydellinen taulukko (mitä kukin komento kirjoittaa, kaikki valinnat, paikallinen vs. etäpalvelin sekä perus-URL-osoitteiden
 `/v1`-käytännöt) on kohdassa **[CLI-integraatiot](./CLI-INTEGRATIONS.md)**.
 
-Yksityiskohtaiset työkalukohtaiset määritykset (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ja muut) ovat erillisessä **[CLI-työkalujen oppaassa](../reference/CLI-TOOLS.md)**.
+Yksityiskohtaiset työkalukohtaiset määritysohjeet (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ja muut) ovat erillisessä **[CLI-työkalujen oppaassa](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -324,7 +325,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Void Linuxin (xbps-src) mallipohja
 
-Void Linuxin käyttäjät voivat kääntää natiivin paketin `xbps-src`-työkalulla. Tallenna tämä lohko tiedostoksi `srcpkgs/omniroute/template`:
+Void Linuxin käyttäjät voivat rakentaa natiivin paketin `xbps-src`-työkalulla. Tallenna tämä lohko tiedostoksi `srcpkgs/omniroute/template`:
 
 ```bash
 # Mallipohjatiedosto paketille 'omniroute'
@@ -333,12 +334,12 @@ version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="Yleiskäyttöinen tekoäly-yhdyskäytävä älykkäällä reitityksellä useille LLM-palveluntarjoajille"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Luo tarkistussumma uudelleen jokaiselle julkaisulle komennolla:
+# Luo tarkistussumma uudelleen jokaista julkaisua varten komennolla:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"
