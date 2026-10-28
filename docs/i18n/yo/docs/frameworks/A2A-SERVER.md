@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Àwọn Ìmọ̀-Ìṣẹ́ Tó Wà
+## Awọn ogbon ti o wa
 
-OmniRoute ń ṣàfihàn àwọn ìmọ̀-ìṣẹ́ A2A mẹ́fà tí a sopọ̀ nínú `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Modúlì ìmọ̀-ìṣẹ́ kọ̀ọ̀kan wà nínú `src/lib/a2a/skills/`.
+OmniRoute ṣafihan awọn ọgbọn A2A 6 ti a firanṣẹ ni `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kọọkan olorijori module ngbe ni `src/lib/a2a/skills/`.
 
-| Ìmọ̀-Ìṣẹ́            | ID                   | Àpèjúwe                                                                                                                                                    | Àwọn Àmì                   | Àwọn Àpẹẹrẹ                                |
-| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :----------------------------------------- |
-| Smart Routing      | `smart-routing`      | Ń darí ìbéèrè kan kọjá olùpèsè/combo tó yẹ jùlọ nílò ẹ̀rọ combo ti OmniRoute + ìdímejì (scoring)                                                            | routing, providers         | "Darí ìbéèrè yìí kọjá àpẹẹrẹ tó dára jùlọ" |
-| Quota Management   | `quota-management`   | Ń ṣe ìròyìn ipò quota fún olùpèsè kọ̀ọ̀kan, ó sì ń ràn àwọn olùpè lọ́wọ́ láti pinnu ìgbà tí wọ́n yóò dínkù/ṣàyípadà                                             | quota, providers           | "Ṣàyẹ̀wò quota fún anthropic"               |
-| Provider Discovery | `provider-discovery` | Ń ṣàkójọ àwọn olùpèsè tí a fi sọ́rọ̀ pẹ̀lú àwọn agbára wọn, àwọn àmì free-tier, àti ipò OAuth                                                                 | providers, discovery       | "Àwọn olùpèsè wo ni wọ́n wà?"               |
-| Cost Analysis      | `cost-analysis`      | Ń ṣe ìṣirò iye owó ìbéèrè/ìjíròrò kan ní gbígbá kàtálógì + lílò láìpẹ́ yìí sínú rò                                                                          | cost, usage                | "Ṣe ìṣirò iye owó ìjíròrò yìí"             |
-| Health Report      | `health-report`      | Ń ṣàkópọ̀ ipò circuit breaker, cooldown, àti lockout fún olùpèsè kọ̀ọ̀kan                                                                                     | health, resilience         | "Fi ipò èròjà gbogbo àwọn olùpèsè hàn"     |
-| List Capabilities  | `list-capabilities`  | Ń dá kàtálógì Agent Skills kíkún pẹ̀lú ẹ̀yà 45 (23 API + 21 CLI + 1 config) padà gẹ́gẹ́ bí tábìlì markdown pẹ̀lú àwọn URL SKILL.md gangan fún context injection | catalog, discovery, skills | "Ṣàkójọ gbogbo àwọn agbára OmniRoute"      |
+| Ogbon             | ID                   | Apejuwe                                                                                                                           | Awọn afi               | Awọn apẹẹrẹ                              |
+| :---------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------- | :--------------------- | :--------------------------------------- |
+| Smart afisona     | `smart-routing`      | Awọn ipa ọna kiakia nipasẹ provider/combo to dara julọ nipa lilo igbelewọn konbo engine OmniRoute+                                | afisona, awọn olupese  | "Pa ọna yii nipasẹ awoṣe ti o dara julọ" |
+| Quota Management  | `quota-management`   | Awọn ijabọ fun ipinlẹ ipin ipin-olupese, ṣe iranlọwọ fun awọn olupe lati pinnu igba lati throttle/switch                          | ipin, awọn olupese     | "Ṣayẹwo ipin fun anthropic"              |
+| Awari Olupese     | `provider-discovery` | Awọn atokọ ti awọn olupese ti fi sori ẹrọ pẹlu awọn agbara, awọn asia ipele-ọfẹ, ipo OAuth                                        | olupese, Awari         | "Awọn olupese wo ni o wa?"               |
+| Iye owo Analysis  | `cost-analysis`      | Iṣiro iye owo ti request/conversation ti a fun ni katalogi + lilo aipẹ                                                            | iye owo, lilo          | "Iro idiyele fun ibaraẹnisọrọ yii"       |
+| Iroyin Ilera      | `health-report`      | Aggregates Circuit fifọ, cooldown, lockout ipinle fun olupese                                                                     | ilera, resilience      | "Fi ipo ilera han gbogbo awọn olupese"   |
+| Awọn agbara Akojọ | `list-capabilities`  | Pada ni kikun 45-iwọle Agent Skills katalogi (23 API + 21 CLI + 1 atunto) bi tabili isamisi pẹlu SKILL.md URLs aise fun abẹrẹ ọrọ | katalogi, Awari, ogbon | "Akojọ gbogbo awọn agbara OmniRoute "    |
 
-> Ó yẹ kí wọ́n máa mú kí Agent Card bá kàtálógì olùpèsè 375 tó ń ṣiṣẹ́ lọ́wọ́ mu; àwọn iye olùpèsè àti metadata free/no-auth ń wá láti inú runtime registry.
+> Kaadi Aṣoju yẹ ki o wa ni ibamu pẹlu katalogi Olupese 377 laaye; Awọn iṣiro olupese ati awọn metadata free/no-auth jẹ orisun lati iforukọsilẹ akoko asiko.
 
-### Ẹ̀kúnrẹ́rẹ́ Ìmọ̀-Ìṣẹ́ `list-capabilities`
+### `list-capabilities` Skill Apejuwe
 
-Ìmọ̀-ìṣẹ́ `list-capabilities` wúlò pàtó fún àwọn agent òde tí wọ́n nílò láti ṣàwárí ohun tí OmniRoute ń ṣàfihàn kí wọ́n tó fi àwọn ìpè API ránṣẹ́. Ó ń dá ohun-èlò tábìlì markdown tó ní ìlànà padà:
+Imọgbọn `list-capabilities` wulo paapaa fun awọn aṣoju ita ti o nilo lati ṣawari kini OmniRoute ṣafihan ṣaaju fifiranṣẹ awọn ipe API. O da iṣẹ-ọnà tabili isamisi ti eleto pada:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ OmniRoute ń ṣàfihàn àwọn ìmọ̀-ìṣẹ́ A2A mẹ́fà tí a sopọ�
 ...
 ```
 
-Ọ̀nà kọ̀ọ̀kan ní ọ̀wọ́n `rawUrl` nínú kí àwọn agent lè gba SKILL.md kíkún lẹ́sẹ̀kẹsẹ̀. Pàápàá `metadata.totalSkills` ń ṣe àfihàn ìtóbi kàtálógì (45 lónìí). Ìmúṣe: `src/lib/a2a/skills/listCapabilities.ts`. Tún wo [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Lara kọọkan pẹlu iwe `rawUrl` ki awọn aṣoju le mu SKILL.md ni kikun lẹsẹkẹsẹ. Aaye `metadata.totalSkills` ṣe afihan iwọn katalogi (45 loni). imuse: `src/lib/a2a/skills/listCapabilities.ts`. Wo tun [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -266,9 +266,9 @@ submitted → working → completed
 
 ---
 
-## Àwọn Àpẹẹrẹ Ìṣọ̀kan
+## Awọn apẹẹrẹ Iṣọkan
 
-### Python (requests)
+### Python (awọn ibeere)
 
 ```python
 import requests
@@ -287,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (gba)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

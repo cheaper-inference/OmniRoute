@@ -1,4 +1,9 @@
+# RTK Compression (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+
 ---
+
 title: "Kompresja RTK"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -29,24 +34,24 @@ Stacked:       1 - (1 - 0.80) * (1 - 0.46) = 89.2% saved
 Range:         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Co kompresuje
+## Co jest kompresowane
 
-Wbudowany katalog obecnie dostarcza 49 filtrów w tych kategoriach:
+Wbudowany katalog zawiera obecnie 56 filtrów w następujących kategoriach:
 
 | Kategoria | Przykłady                                                     |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go tests, Cargo tests       |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, testy Cargo    |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, generyczne logi shella                  |
+| `shell`   | `ls`, `find`, `grep`, ogólne logi powłoki                     |
 | `docker`  | `docker ps`, logi Dockera                                     |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | wyjście JSON, stack trace'y, generyczny fallback wyjścia      |
+| `generic` | dane wyjściowe JSON, ślady stosu, ogólny fallback wyjścia     |
 
-Detektor w `open-sse/services/compression/engines/rtk/commandDetector.ts` klasyfikuje wyjście
-przed wyborem filtra. Filtry mogą też matchować po wzorcu polecenia lub regexie wyjścia, gdy klasa
-polecenia nie wystarcza.
+Detektor w `open-sse/services/compression/engines/rtk/commandDetector.ts` klasyfikuje dane
+wyjściowe przed wyborem filtra. Filtry mogą również dopasowywać się według wzorca polecenia lub
+wyrażenia regularnego danych wyjściowych, gdy sama klasa polecenia nie wystarcza.
 
 ## Rozwiązywanie filtrów
 
@@ -318,15 +323,15 @@ Sekrety są redagowane przed persystencją, w tym typowe bearer tokeny, klucze A
 klucze dostępu AWS oraz wartości w stylu przypisania `token=...`, `secret=...`, `password=...`. Analityka
 przechowuje tylko pointer id, rozmiar i metadane hasha.
 
-## Verify Gate
+## Brama weryfikacyjna
 
-Skupiony verify gate uruchamia wbudowane inline testy filtrów bez odpalania zewnętrznych poleceń:
+Ukierunkowana brama weryfikacyjna uruchamia wbudowane testy filtrów inline bez wywoływania zewnętrznych poleceń:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
 ```
 
-Szerszy gate RTK to:
+Szersza brama RTK to:
 
 ```bash
 node --import tsx/esm --test \
@@ -335,7 +340,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-Przed releasem uruchom szeroki gate kompresji:
+Przed wydaniem uruchom szeroką bramę kompresji:
 
 ```bash
 node --import tsx/esm --test \
@@ -358,60 +363,59 @@ node --import tsx/esm --test \
 
 ## Poziomy intensywności (v3.8.16+)
 
-RTK wspiera **3 poziomy intensywności**, które balansują między **agresywnością kompresji** a **bezpieczeństwem**. Poziom
-ustawia się przez `config.intensity` w konfiguracji silnika.
+RTK obsługuje **3 poziomy intensywności**, które stanowią kompromis między **agresywnością kompresji** a **bezpieczeństwem**. Poziom ustawia się za pomocą `config.intensity` w konfiguracji silnika.
 
 ### 3 poziomy
 
-| Poziom               | Próg obcinania     | Oszczędność tokenów | Ryzyko        | Najlepsze do                      |
-| -------------------- | ------------------ | ------------------- | ------------- | --------------------------------- |
-| `minimal`            | 24 linii na sekcję | ~20-40%             | Bardzo niskie | Produkcja z krytycznym kontekstem |
-| `standard` (default) | 24 linii na sekcję | ~50-70%             | Niskie        | Codzienne sesje kodowania         |
-| `aggressive`         | 16 linii na sekcję | ~70-90%             | Średnie       | Długie sesje, max oszczędności    |
+| Poziom                | Próg obcinania     | Oszczędność tokenów | Ryzyko        | Najlepszy do                          |
+| --------------------- | ------------------ | ------------------- | ------------- | ------------------------------------- |
+| `minimal`             | 24 linie na sekcję | ~20-40%             | Bardzo niskie | Produkcja z krytycznym kontekstem     |
+| `standard` (domyślny) | 24 linie na sekcję | ~50-70%             | Niskie        | Codzienne sesje kodowania             |
+| `aggressive`          | 16 linii na sekcję | ~70-90%             | Średnie       | Długie sesje, maksymalne oszczędności |
 
 ### Gdzie następuje obcinanie
 
 Próg obcinania wpływa na `lineFilter.ts`:
 
 ```ts
-// From open-sse/services/compression/engines/rtk/index.ts:329-330
+// Z pliku open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Zachowywane są zarówno **head**, jak i **tail** każdej sekcji; środkowa treść jest usuwana, gdy rusza obcinanie.
+Zarówno **początek**, jak i **koniec** każdej sekcji są zachowywane; zawartość środkowa jest odrzucana, gdy uruchamia się obcinanie.
 
-### Co zostaje, a co jest wycinane
+### Co zostaje, a co jest usuwane
 
-| Treść                      | minimal      | standard     | aggressive   |
-| -------------------------- | ------------ | ------------ | ------------ |
-| Błędy / stack trace'y      | ✅ zachowane | ✅ zachowane | ✅ zachowane |
-| Porażki testów             | ✅ zachowane | ✅ zachowane | ✅ zachowane |
-| Błędy builda               | ✅ zachowane | ✅ zachowane | ✅ zachowane |
-| Przejścia testów (verbose) | ✅ zachowane | 🟡 zwinięte  | 🟡 zwinięte  |
-| Rutynowe wyjście (info)    | 🟡 zwinięte  | 🟡 zwinięte  | ❌ usunięte  |
-| Paski postępu              | 🟡 zwinięte  | ❌ usunięte  | ❌ usunięte  |
-| Banner / ASCII art         | 🟡 zwinięte  | ❌ usunięte  | ❌ usunięte  |
+| Zawartość                            | minimal      | standard     | aggressive   |
+| ------------------------------------ | ------------ | ------------ | ------------ |
+| Błędy / ślady stosu                  | ✅ zachowane | ✅ zachowane | ✅ zachowane |
+| Niepowodzenia testów                 | ✅ zachowane | ✅ zachowane | ✅ zachowane |
+| Błędy budowania                      | ✅ zachowane | ✅ zachowane | ✅ zachowane |
+| Zaliczone testy (szczegółowe)        | ✅ zachowane | 🟡 zwinięte  | 🟡 zwinięte  |
+| Rutynowe wyjście (logi informacyjne) | 🟡 zwinięte  | 🟡 zwinięte  | ❌ odrzucone |
+| Paski postępu                        | 🟡 zwinięte  | ❌ odrzucone | ❌ odrzucone |
+| Baner / ASCII art                    | 🟡 zwinięte  | ❌ odrzucone | ❌ odrzucone |
 
-### Wybór właściwej intensywności
+### Wybór odpowiedniej intensywności
 
 ```
-                  Is losing context catastrophic?
+                  Czy utrata kontekstu to katastrofa?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    YES          NO          NOT SURE
+    TAK          NIE        NIE WIEM
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      How critical    Try `standard` first
-      │      is throughput?  (works for 80% of
-      │           │          cases)
+      │      Jak ważna       Najpierw spróbuj
+      │      przepustowość?  `standard` (działa
+      │           │          w 80% przypadków)
       │      ┌────┴────┐
       │      │         │
-      │     LOW       HIGH
+      │    NISKA     WYSOKA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -419,9 +423,9 @@ Zachowywane są zarówno **head**, jak i **tail** każdej sekcji; środkowa tre�
       └──────┴─────────┘
 ```
 
-### Konfiguracja intensywności
+### Konfigurowanie intensywności
 
-**Per-combo** (w konfiguracji combo):
+**Na poziomie combo** (w konfiguracji combo):
 
 ```json
 {
@@ -434,11 +438,11 @@ Zachowywane są zarówno **head**, jak i **tail** każdej sekcji; środkowa tre�
 }
 ```
 
-**Programatycznie**:
+**Programowo**:
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) jest
-`CompressionEngine` i nie ma metody `updateConfig`. Aktualizuj konfigurację silnika
-przez helper rejestru:
+`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) jest silnikiem typu
+`CompressionEngine` i nie posiada metody `updateConfig`. Zamiast tego zaktualizuj konfigurację
+silnika za pomocą funkcji pomocniczej rejestru:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -448,7 +452,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Weryfikacja efektu
 
-Użyj **Verify Gate** (zob. niżej), aby potwierdzić, że filtr jest bezpieczny przy wybranej intensywności:
+Użyj mechanizmu **Verify Gate** (patrz niżej), aby potwierdzić, że filtr jest bezpieczny przy wybranej intensywności:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

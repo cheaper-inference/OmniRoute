@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Các kỹ năng khả dụng
+## Kỹ năng có sẵn
 
-OmniRoute cung cấp 6 kỹ năng A2A được kết nối trong `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Mỗi module kỹ năng nằm trong `src/lib/a2a/skills/`.
+OmniRoute bộc lộ 6 kỹ năng A2A có trong `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Mỗi mô-đun kỹ năng tồn tại trong `src/lib/a2a/skills/`.
 
-| Kỹ năng            | ID                   | Mô tả                                                                                                                                        | Thẻ                        | Ví dụ                                        |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------- |
-| Smart Routing      | `smart-routing`      | Định tuyến một prompt qua provider/combo tối ưu bằng combo engine + cơ chế chấm điểm của OmniRoute                                           | routing, providers         | "Định tuyến prompt này qua mô hình tốt nhất" |
-| Quota Management   | `quota-management`   | Báo cáo trạng thái quota theo từng provider, giúp phía gọi quyết định khi nào cần điều tiết/chuyển đổi                                       | quota, providers           | "Kiểm tra quota của anthropic"               |
-| Provider Discovery | `provider-discovery` | Liệt kê các provider đã cài đặt cùng với capabilities, cờ free-tier, trạng thái OAuth                                                        | providers, discovery       | "Có những provider nào khả dụng?"            |
-| Cost Analysis      | `cost-analysis`      | Ước tính chi phí của một request/cuộc hội thoại dựa trên catalog + mức sử dụng gần đây                                                       | cost, usage                | "Ước tính chi phí cho cuộc hội thoại này"    |
-| Health Report      | `health-report`      | Tổng hợp trạng thái circuit breaker, cooldown, lockout theo từng provider                                                                    | health, resilience         | "Hiển thị tình trạng của tất cả provider"    |
-| List Capabilities  | `list-capabilities`  | Trả về toàn bộ catalog Agent Skills gồm 45 mục (23 API + 21 CLI + 1 config) dưới dạng bảng markdown kèm URL SKILL.md thô để chèn vào context | catalog, discovery, skills | "Liệt kê tất cả khả năng của OmniRoute"      |
+| Kỹ năng               | ID                   | Sự miêu tả                                                                                                                                   | Thẻ                         | Ví dụ                                                      |
+| :-------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------- | :--------------------------------------------------------- |
+| Định tuyến thông minh | `smart-routing`      | Định tuyến lời nhắc thông qua provider/combo tối ưu bằng cách sử dụng tính năng ghi điểm + của công cụ kết hợp OmniRoute                     | định tuyến, nhà cung cấp    | "Định tuyến lời nhắc này thông qua mô hình tốt nhất"       |
+| Quản lý hạn ngạch     | `quota-management`   | Báo cáo trạng thái hạn ngạch của mỗi nhà cung cấp, giúp người gọi quyết định thời điểm throttle/switch                                       | hạn ngạch, nhà cung cấp     | "Kiểm tra hạn ngạch cho nhân loại"                         |
+| Khám phá nhà cung cấp | `provider-discovery` | Liệt kê các nhà cung cấp đã cài đặt với các khả năng, cờ cấp miễn phí, trạng thái OAuth                                                      | nhà cung cấp, khám phá      | "Có những nhà cung cấp nào?"                               |
+| Phân tích chi phí     | `cost-analysis`      | Ước tính chi phí của một request/conversation dựa trên danh mục + sử dụng gần đây                                                            | chi phí, cách sử dụng       | "Ước tính chi phí cho cuộc trò chuyện này"                 |
+| Báo cáo sức khỏe      | `health-report`      | Tổng hợp bộ ngắt mạch, thời gian hồi chiêu, trạng thái khóa cho mỗi nhà cung cấp                                                             | sức khỏe, khả năng phục hồi | "Hiển thị tình trạng sức khỏe của tất cả các nhà cung cấp" |
+| Liệt kê khả năng      | `list-capabilities`  | Trả về danh mục Kỹ năng đặc vụ gồm 45 mục đầy đủ (23 API + 21 CLI + 1 config) dưới dạng bảng đánh dấu với SKILL.md URLs thô để chèn ngữ cảnh | danh mục, khám phá, kỹ năng | "Liệt kê tất cả các khả năng OmniRoute "                   |
 
-> Agent Card cần được giữ đồng bộ với catalog 375 provider đang hoạt động; số lượng provider cùng metadata free/no-auth được lấy từ registry tại runtime.
+> Thẻ Đại lý phải được giữ phù hợp với danh mục nhà cung cấp trực tiếp của 377; số lượng nhà cung cấp và siêu dữ liệu free/no-auth có nguồn gốc từ sổ đăng ký thời gian chạy.
 
 ### Chi tiết kỹ năng `list-capabilities`
 
-Kỹ năng `list-capabilities` đặc biệt hữu ích cho các agent bên ngoài cần khám phá những gì OmniRoute cung cấp trước khi gửi các lệnh gọi API. Nó trả về một artifact là bảng markdown có cấu trúc:
+Kỹ năng `list-capabilities` đặc biệt hữu ích cho các tác nhân bên ngoài cần khám phá những gì OmniRoute bộc lộ trước khi gửi cuộc gọi API. Nó trả về một tạo phẩm bảng đánh dấu có cấu trúc:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ Kỹ năng `list-capabilities` đặc biệt hữu ích cho các agent bên ngo�
 ...
 ```
 
-Mỗi hàng đều bao gồm cột `rawUrl` để các agent có thể fetch ngay SKILL.md đầy đủ. Trường `metadata.totalSkills` phản ánh kích thước catalog (45 ở thời điểm hiện tại). Triển khai: `src/lib/a2a/skills/listCapabilities.ts`. Xem thêm [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Mỗi hàng bao gồm cột `rawUrl` để các tổng đài viên có thể tìm nạp toàn bộ SKILL.md ngay lập tức. Trường `metadata.totalSkills` phản ánh kích thước danh mục (45 ngày nay). Thực hiện: `src/lib/a2a/skills/listCapabilities.ts`. Xem thêm [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -268,7 +268,7 @@ Các tác vụ hết hạn sau `ttlMinutes` (mặc định 5 phút) — được
 
 ## Ví dụ tích hợp
 
-### Python (requests)
+### Python (yêu cầu)
 
 ```python
 import requests
@@ -287,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (tìm nạp)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

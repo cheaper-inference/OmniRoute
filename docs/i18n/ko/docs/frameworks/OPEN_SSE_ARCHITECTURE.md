@@ -484,17 +484,17 @@ createResponsesApiTransformStream(): TransformStream
 
 ## 구성
 
-`open-sse/config/`에는 구성 레이어가 있습니다:
+`open-sse/config/` 구성 레이어를 보유합니다.
 
-| 파일                          | 용도                                                |
-| ----------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`         | 375개 프로바이더 카탈로그 기반 채팅 모델 레지스트리 |
-| `providerModels.ts`           | 모델 별칭, 형식 매핑                                |
-| `constants.ts`                | 타임아웃, 제한, 상태 코드                           |
-| `defaultThinkingSignature.ts` | 기본 Claude thinking 시그니처                       |
-| `modelStrip.ts` (services 내) | 프로바이더별 필드 제거                              |
+| 파일                          | 목적                                      |
+| ----------------------------- | ----------------------------------------- |
+| `providerRegistry.ts`         | 377 제공자 카탈로그를 통한 채팅 모델 등록 |
+| `providerModels.ts`           | 모델 별칭, 형식 매핑                      |
+| `constants.ts`                | 시간 초과, 한도, 상태 코드                |
+| `defaultThinkingSignature.ts` | 기본 Claude 사고 서명                     |
+| `modelStrip.ts` (서비스 중)   | 공급자별 필드 제거                        |
 
-### 프로바이더 레지스트리 스키마
+### 공급자 레지스트리 스키마
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-모듈 로드 시 Zod 검증을 통해 모든 프로바이더 구성이 유효한지 확인합니다.
+모듈 로드 시 Zod 유효성 검사를 통해 모든 공급자 구성이 유효한지 확인합니다.
 
 ---
 

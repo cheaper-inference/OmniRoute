@@ -4,152 +4,86 @@
 
 ---
 
-> **Κατάσταση:** ο πίνακας ελέγχου βασίζεται στο **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), το οποίο είναι ενσωματωμένο
-> ως χώρος εργασίας `packages/ui-kit` (`@omniroute/ui-kit`· το upstream στιγμιότυπο είναι καρφιτσωμένο στο
-> `packages/ui-kit/UPSTREAM.md` και προστατεύεται από το `npm run check:ui-kit-snapshot`). Το ανοιχτόχρωμο είναι το κανονικό
-> θέμα· η προεπιλεγμένη προτίμηση είναι `system`. Το χρώμα έμφασης είναι το Keak lime (`--ci-color-accent`). Η Inter
-> (διάστιχο γραμμάτων 0, `--ci-letter-spacing-ui`) είναι η οικογένεια γραμματοσειρών του UI, ενώ η Instrument Serif χρησιμοποιείται μόνο για μεγάλο, αραιό
-> κείμενο προβολής (`.ci-dashboard-display`) και η IBM Plex Mono για κώδικα — όλες φιλοξενούνται τοπικά μέσω των
-> εισαγωγών `@fontsource/*` στην αρχή του `src/app/globals.css`. Κάθε εικονίδιο είναι γλυφή Lucide.
+> **Κατάσταση:** το ταμπλό είναι χτισμένο πάνω στο** Κιτ Keak CI UI** (`@keak/cheaper-inference-ui-kit`), πωλείται ως ο χώρος εργασίας `packages/ui-kit` (`@omniroute/ui-kit`; το στιγμιότυπο ανάντη είναι καρφιτσωμένο σε `packages/ui-kit/UPSTREAM.md` και προστατεύεται από `npm run check:ui-kit-snapshot`). Το φως είναι το κανονικό θέμα. η προεπιλεγμένη προτίμηση είναι `system`. Η προφορά είναι Keak lime (`--ci-color-accent`). Το Switzer είναι η ενιαία οικογένεια για UI, οθόνη και κείμενο κώδικα (`--ci-font-ui`; `--ci-font-display` και `--ci-font-mono` επιλύουν σε αυτό), που φιλοξενείται από το ίδιο το κιτ (`packages/ui-kit/src/ci-fonts.css`, εισαγωγή από `ci-tokens.css`). Κάθε εικονίδιο είναι ένα γλυφό Lucide.
 
-## 1. Πού βρίσκονται τα στοιχεία
+## 1. Πού βρίσκονται τα πράγματα
 
-- **Kit.** Το `packages/ui-kit/src` είναι αντίγραφο byte προς byte του upstream `src/` στο commit που έχει καρφιτσωθεί στο
-  `packages/ui-kit/UPSTREAM.md` (όπου καταγράφεται επίσης η άδεια χρήσης)· το `PATCHES.md` παραθέτει τις τοπικές
-  ενημερώσεις κώδικα (καμία). Καταναλώνεται ως πηγαίος κώδικας, χωρίς build: το `next.config.mjs` το μεταγλωττίζει, ενώ το
-  `tsconfig.json` αντιστοιχίζει το `@omniroute/ui-kit` → `packages/ui-kit/src` και το `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (τα `vitest.config.ts` και `vitest.mcp.config.ts` περιλαμβάνουν το ίδιο alias). Εισάγετε ένα
-  στοιχείο του kit μέσω του subpath του (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ποτέ
-  μέσω του barrel `@omniroute/ui-kit`: το barrel συμπεριλαμβάνει κάθε στοιχείο (μαζί με τον επιλογέα ημερομηνίας)
-  σε κάθε αρχείο που το εισάγει. Το stylesheet του kit εισάγεται μέσω του `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokens.** Το `packages/ui-kit/src/ci-tokens.css` δηλώνει τα tokens `--ci-*`· το `src/app/globals.css`
-  τα γεφυρώνει με τα παλαιότερα ονόματα του OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), ώστε οι υπάρχουσες αναγνώσεις `var(--color-*)` και τα βοηθητικά
-  στοιχεία του Tailwind να συνεχίσουν να λειτουργούν. Ο νέος κώδικας χρησιμοποιεί τα βοηθητικά στοιχεία του Tailwind (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ή κλάσεις του kit — ποτέ δεκαεξαδική τιμή
-  (το `tests/unit/design-kit-bridge.test.ts` επιβάλλει τη γέφυρα). Το `text-primary` επιλύεται σε
-  `--color-primary-ink` μέσω του `--text-color-primary` (lime-800 στο φωτεινό θέμα, η lime απόχρωση έμφασης στο σκοτεινό), ώστε
-  το κύριο κείμενο να παραμένει ευανάγνωστο, ενώ τα `bg-primary`/`border-primary` διατηρούν τη lime επιφάνεια. Οι σειρές γραφημάτων χρησιμοποιούν
-  `--color-chart-1` … `--color-chart-5`.
-- **Θέματα.** Το `<html className="ci-theme">` (`src/app/layout.tsx`) εντάσσει το έγγραφο στο θέμα του kit.
-  Η προτίμηση είναι `light`, `dark` ή `system` (`THEME_CONFIG.defaultTheme = "system"` στο
-  `src/shared/constants/appConfig.ts`· το `system` ακολουθεί το `prefers-color-scheme`). Η `applyTheme()` στο
-  `src/store/themeStore.ts` (η οποία αντικατοπτρίζεται από το ενσωματωμένο script αρχικοποίησης στο `src/app/layout.tsx`, που εκτελείται
-  πριν από το hydration) ορίζει το `data-theme="dark"|"light"` και εναλλάσσει ταυτόχρονα την κλάση `.dark` στο `<html>`.
-  Το σύνολο σκοτεινών tokens του kit βασίζεται στο `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`)·
-  οι προσαρμογές σκοτεινού θέματος του OmniRoute (το block `.dark` στο `globals.css`) και τα παλαιότερα βοηθητικά στοιχεία `dark:`
-  του Tailwind βασίζονται στην κλάση `.dark`. Δεν υπάρχουν προκαθορισμένες επιλογές χρώματος έμφασης: η έμφαση προέρχεται πάντα από το
-  kit και μια αποθηκευμένη προκαθορισμένη επιλογή από παλαιότερο build αφαιρείται κατά τη φόρτωση του store.
-- **Στοιχεία (adapters).** Το `src/shared/components/index.tsx` διατηρεί το API στοιχείων του OmniRoute (ίδια
-  ονόματα, default exports και props), ενώ τα primitives πίσω από αυτό είναι adapters που βασίζονται στο kit: φόρμες
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), επικαλύψεις και ανατροφοδότηση
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  δομή (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) και πίνακες
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Ένας adapter εισάγει το στοιχείο του kit
-  μέσω subpath και αντιστοιχίζει σε αυτό τα παλαιότερα props — για παράδειγμα, το `Button variant="primary"` είναι το
-  κουμπί `default` του kit (`--ci-button-primary-*`: η αντίστροφη επιφάνεια στο φωτεινό θέμα, η έμφαση με το
-  χρώμα κειμένου `--ci-color-accent-foreground` στο σκοτεινό), το `danger` είναι `destructive` και το `warning` είναι `outline` μαζί με
-  την επέκταση `.ci-button--warning`. Οι κανόνες `.ci-button--warning` και `.ci-badge[data-tone]` στο
-  τέλος του `globals.css` (`@layer components`) είναι επεκτάσεις του OmniRoute πάνω στις κλάσεις του kit.
-  Τα `tests/unit/ui/adapters/*.test.tsx` κατοχυρώνουν τη συμπεριφορά κάθε adapter.
-- **Κέλυφος.** Το `src/app/(dashboard)/layout.tsx` αποδίδει το `DashboardLayout`, το οποίο αποδίδει το
-  `src/shared/components/layouts/DashboardShell.tsx`: τα `SidebarProvider` / `Sidebar` /
-  `SidebarInset` του kit (`packages/ui-kit/src/sidebar.tsx`), με τη λογική πλοήγησης του OmniRoute στο
-  `src/shared/components/Sidebar.tsx`. Ένας σύνδεσμος «μετάβαση στο περιεχόμενο» προς το `#main-content` είναι το πρώτο στοιχείο
-  που μπορεί να λάβει εστίαση. Το `src/shared/components/Header.tsx` περιέχει το `SidebarTrigger` του kit (το μοναδικό στοιχείο
-  εναλλαγής της πλευρικής γραμμής στο κέλυφος), το `ProductSwitcher` της Keak και το στοιχείο ανοίγματος της παλέτας εντολών· εμφανίζει τον τίτλο της διαδρομής μόνο όταν
-  δεν έχει προσαρτηθεί κανένα `PageHeader` του kit (`.ci-page-header`) μέσα στο `#main-content`, ώστε μια σελίδα με το δικό της
-  `PageHeader` να έχει ένα μόνο `h1`. Το `src/shared/components/CommandPalette.tsx` είναι ένα `Dialog` του kit.
-- **Εικονίδια.** Το `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) επιλύει το όνομα (από το
-  λεξιλόγιο Material Symbols που χρησιμοποιούν οι οθόνες) μέσω του `ICON_MAP` (`src/shared/constants/iconMap.ts`) σε ένα
-  glyph του Lucide. Η γραμματοσειρά και το πακέτο Material Symbols έχουν αφαιρεθεί: ένα όνομα που λείπει από τον χάρτη αποδίδει ένα
-  ουδέτερο glyph αντικατάστασης (`data-icon-missing="true"`) και καταγράφει μια προειδοποίηση στην κονσόλα εκτός περιβάλλοντος παραγωγής.
-  Το `npm run gen:icon-map` εμφανίζει τα χρησιμοποιούμενα ονόματα που λείπουν από τον χάρτη
-  (το `tests/unit/icon-map-coverage.test.ts` αποτυγχάνει για κάθε όνομα χωρίς εικονίδιο Lucide·
-  το `tests/unit/icon-map-object-values.test.ts` καλύπτει ονόματα που αποθηκεύονται σε αντικείμενα αναζήτησης)·
-  το `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` μετατρέπει τα literal
-  spans `<span className="material-symbols-outlined">` σε `<Icon>`.
-- **Επωνυμία.** Το `src/shared/components/OmniRouteLogo.tsx` περιβάλλει το kit: το default export `OmniRouteLogo`
-  αποδίδει το `ProductIcon product="omniroute" variant="glyph"` (ενσωματωμένο SVG, ασφαλές ως προς το `basePath`) και το
-  `OmniRouteLockup` αποδίδει το `ProductLockup product="omniroute"` (προσβάσιμο όνομα «Keak OmniRoute») ή, για
-  παρόχους white-label, το δικό τους `name`/`logoSrc`. Οι προορισμοί του product switcher βρίσκονται στο
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Οι αυτόνομες
-  οθόνες — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` και `src/shared/components/ErrorPageScaffold.tsx`
-  — εμφανίζουν το lockup· το `tests/unit/brand-pages-static.test.ts` το διασφαλίζει.
+- **Kit.** Το `packages/ui-kit/src` είναι αντίγραφο byte-προς-byte του upstream `src/` στο commit που έχει καρφιτσωθεί στο `packages/ui-kit/UPSTREAM.md` (το οποίο καταγράφει επίσης την εξουσιοδότηση άδειας χρήσης)· το `PATCHES.md` απαριθμεί τα τοπικά patches (κανένα). Καταναλώνεται ως πηγαίος κώδικας, χωρίς build: το `next.config.mjs` το μεταγλωττίζει (transpile), και το `tsconfig.json` αντιστοιχίζει το `@omniroute/ui-kit` → `packages/ui-kit/src` και το `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (το `vitest.config.ts` και το `vitest.mcp.config.ts` φέρουν το ίδιο alias). Εισάγετε ένα component του kit μέσω του subpath του (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ποτέ μέσω του barrel `@omniroute/ui-kit`: το barrel τραβά κάθε component (συμπεριλαμβανομένου του date picker) σε κάθε importer. Το stylesheet του kit εισέρχεται μέσω του `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Tokens.** Το `packages/ui-kit/src/ci-tokens.css` δηλώνει τα tokens `--ci-*`· το `src/app/globals.css` τα γεφυρώνει με τα παλαιού τύπου ονόματα του OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), ώστε οι υπάρχουσες αναγνώσεις `var(--color-*)` και τα utilities του Tailwind να συνεχίζουν να λειτουργούν. Ο νέος κώδικας χρησιμοποιεί τα utilities του Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ή κλάσεις του kit — ποτέ τιμή hex (το `tests/unit/design-kit-bridge.test.ts` επιβάλλει τη γέφυρα). Το `text-primary` επιλύεται σε `--color-primary-ink` μέσω του `--text-color-primary` (lime-800 στο φωτεινό θέμα, το lime accent στο σκοτεινό), ώστε το πρωτεύον κείμενο να παραμένει αναγνώσιμο ενώ το `bg-primary`/`border-primary` διατηρούν την lime επιφάνεια. Οι σειρές γραφημάτων χρησιμοποιούν τα `--color-chart-1` … `--color-chart-5`.
+- **Θέματα.** Το `<html className="ci-theme">` (`src/app/layout.tsx`) εντάσσει το έγγραφο στο θέμα του kit. Η προτίμηση είναι `light`, `dark` ή `system` (`THEME_CONFIG.defaultTheme = "system"` στο `src/shared/constants/appConfig.ts`· το `system` ακολουθεί το `prefers-color-scheme`). Η `applyTheme()` στο `src/store/themeStore.ts` (την οποία αντιγράφει το inline bootstrap script στο `src/app/layout.tsx`, που εκτελείται πριν από το hydration) ορίζει `data-theme="dark"|"light"` και εναλλάσσει την κλάση `.dark` στο `<html>` μαζί. Το σετ σκοτεινών tokens του kit βασίζεται στο `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`)· οι δικές του OmniRoute σκοτεινές παρακάμψεις (το μπλοκ `.dark` στο `globals.css`) και τα παλαιού τύπου utilities `dark:` του Tailwind βασίζονται στην κλάση `.dark`. Δεν υπάρχουν προκαθορισμένα χρώματα accent: το accent προέρχεται πάντα από το kit, και ένα αποθηκευμένο preset από παλαιότερο build απορρίπτεται κατά τη φόρτωση του store.
+- **Components (προσαρμογείς).** Το `src/shared/components/index.tsx` διατηρεί το API components του OmniRoute (ίδια ονόματα, default exports και props), και τα primitives πίσω του είναι προσαρμογείς (adapters) πάνω στο kit: φόρμες (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays και feedback (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), δομή (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) και πίνακες (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Ένας προσαρμογέας εισάγει το component του kit μέσω subpath και αντιστοιχίζει τα παλαιού τύπου props πάνω του — για παράδειγμα το `Button variant="primary"` είναι το `default` κουμπί του kit (`--ci-button-primary-*`: η αντίστροφη επιφάνεια στο φωτεινό θέμα, το accent με το μελάνι του `--ci-color-accent-foreground` στο σκοτεινό), το `danger` είναι `destructive`, και το `warning` είναι `outline` συν την επέκταση `.ci-button--warning`. Οι κανόνες `.ci-button--warning` και `.ci-badge[data-tone]` στο τέλος του `globals.css` (`@layer components`) είναι επεκτάσεις του OmniRoute πάνω στις κλάσεις του kit. Τα `tests/unit/ui/adapters/*.test.tsx` καρφιτσώνουν κάθε προσαρμογέα.
+- **Shell.** Το `src/app/(dashboard)/layout.tsx` αποδίδει το `DashboardLayout`, το οποίο αποδίδει το `src/shared/components/layouts/DashboardShell.tsx`: τα `SidebarProvider` / `Sidebar` / `SidebarInset` του kit (`packages/ui-kit/src/sidebar.tsx`), με τη λογική πλοήγησης του OmniRoute στο `src/shared/components/Sidebar.tsx`. Ένας σύνδεσμος "skip to content" προς το `#main-content` είναι το πρώτο εστιάσιμο στοιχείο. Το `src/shared/components/Header.tsx` περιέχει το `SidebarTrigger` του kit (τη μοναδική εναλλαγή sidebar του shell), το `ProductSwitcher` του Keak και τον εκκινητή της παλέτας εντολών· εμφανίζει τον τίτλο της διαδρομής μόνο όσο κανένα `PageHeader` του kit (`.ci-page-header`) δεν είναι τοποθετημένο μέσα στο `#main-content`, ώστε μια σελίδα με δικό της `PageHeader` να έχει ένα μόνο `h1`. Το `src/shared/components/CommandPalette.tsx` είναι ένα `Dialog` του kit.
+- **Εικονίδια.** Το `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) επιλύει το όνομα (το λεξιλόγιο Material Symbols που χρησιμοποιούν οι οθόνες) μέσω του `ICON_MAP` (`src/shared/constants/iconMap.ts`) σε ένα γλυφό Lucide. Η γραμματοσειρά και το πακέτο Material Symbols έχουν αφαιρεθεί: ένα όνομα που λείπει από τον χάρτη αποδίδει ένα ουδέτερο γλυφό placeholder (`data-icon-missing="true"`) και καταγράφει μια προειδοποίηση στην κονσόλα εκτός παραγωγής. Η εντολή `npm run gen:icon-map` εκτυπώνει τα ονόματα σε χρήση που λείπουν από τον χάρτη (το `tests/unit/icon-map-coverage.test.ts` αποτυγχάνει σε οποιοδήποτε όνομα χωρίς εικονίδιο Lucide· το `tests/unit/icon-map-object-values.test.ts` καλύπτει ονόματα αποθηκευμένα σε αντικείμενα αναζήτησης)· το `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ξαναγράφει κυριολεκτικά spans `<span className="material-symbols-outlined">` σε `<Icon>`.
+- **Brand.** Το `src/shared/components/OmniRouteLogo.tsx` τυλίγει το kit: το default export `OmniRouteLogo` αποδίδει `ProductIcon product="omniroute" variant="glyph"` (inline SVG, ασφαλές ως προς το `basePath`) και το `OmniRouteLockup` αποδίδει `ProductLockup product="omniroute"` (προσβάσιμο όνομα "Keak OmniRoute") ή, για χειριστές white-label, τα δικά τους `name`/`logoSrc`. Οι προορισμοί του product-switcher βρίσκονται στο `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Οι αυτόνομες οθόνες — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` και `src/shared/components/ErrorPageScaffold.tsx` — εμφανίζουν το lockup· το `tests/unit/brand-pages-static.test.ts` το φρουρεί.
 
 ## 2. Κανόνες
 
-1. Tokens, ποτέ literals. Εξαιρέσεις που διατηρούνται σκόπιμα: το πάντα σκοτεινό τερματικό της κονσόλας, τα SVG
-   strokes του ReactFlow μέσω του `STATUS_HEX` (`src/shared/constants/statusColors.ts`) και οι κατηγορικές παλέτες
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) και
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Ποτέ μην τροποποιείτε το `packages/ui-kit/src` με το χέρι: συγχρονίστε το με `scripts/dev/sync-ui-kit.sh <commit>`· ο
-   έλεγχος pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) αποτυγχάνει για οποιοδήποτε byte
-   διαφέρει από το καρφιτσωμένο upstream commit (παραλείπεται με προειδοποίηση όταν απουσιάζει το upstream clone,
-   `UI_KIT_CLONE` ή `_references/cheaper-inference-ui-kit`). Όταν λείπει κάτι από το kit,
-   παρακάμψτε το στον adapter ή στην οθόνη και ζητήστε το από το upstream.
-3. Οι προεπιλογές κειμένου του kit είναι στα Αγγλικά (`label = "Loading"`, `loadingLabel = "Loading table"`…) — περάστε μεταφρασμένες
-   συμβολοσειρές από το `useTranslations(...)` κάθε φορά που ένα component του kit αποδίδει κείμενο.
-4. Τα utilities του Tailwind υπερισχύουν των κλάσεων των components του kit (το kit δηλώνει
-   `@layer theme, base, components, utilities` και οι κανόνες του βρίσκονται στο `components`) — χρησιμοποιήστε utilities για
-   αποστάσεις και διάταξη, όχι για να αλλάξετε τα χρώματα των components του kit.
-5. Επικεφαλίδες: `.ci-heading` (Inter, χωρίς tracking) για τίτλους σελίδων και ενοτήτων· `.ci-dashboard-display`
-   (Instrument Serif) μόνο για μεγάλο, αραιό κείμενο προβολής, όπως ο κωδικός κατάστασης στη σελίδα σφάλματος.
-6. Το `tests/unit/dashboard-kit-sweep.test.ts` επιβάλλει την υιοθέτηση του kit: κανένα span ligature του Material κάτω από
-   τα `src/app` ή `src/shared/components`· στο δέντρο του dashboard (`src/app/(dashboard)` και
-   `src/shared/components`) κανένα ανεπεξέργαστο `<select>`, `<textarea>` ή `<table>` και κανένα χειροποίητο
-   `role="dialog"` εκτός των καταγεγραμμένων εξαιρέσεων (το native branch του adapter `Select`,
-   `RequestLoggerDetail`)· κάθε ανεπεξέργαστο `<button>` ή `<input>` εκεί χρειάζεται ένα σχόλιο που να περιέχει
-   `kit-exception:` (με την αιτιολογία) και να τελειώνει το πολύ 3 γραμμές πιο πάνω· αποχρώσεις παλέτας και παραλλαγές `dark:`
-   επιτρέπονται μόνο στα αρχεία που παραθέτει το test.
-7. Επαληθεύστε και τα δύο themes και το viewport των 390 px πριν από ένα PR (στιγμιότυπα οθόνης)· το `tests/e2e/a11y.spec.ts` εκτελεί
-   το axe.
+1. Μαρτυρίες, ποτέ κυριολεκτικά. Εξαιρέσεις που διατηρούνται επίτηδες: το πάντα σκοτεινό τερματικό της κονσόλας και `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ο καθρέφτης με λυμένο εξάγωνο της παλέτας κατάστασης κιτ για καλούντες που χρειάζονται κυριολεκτικό εξάγωνο. Οι κατηγορικές παλέτες δεν αποτελούν πλέον εξαίρεση: χρησιμοποιούν τα πέντε διακριτικά γραφημάτων του κιτ (`--color-chart-1..5`) μέσω `src/shared/utils/categoricalPalette.ts` και, για στρατηγικές δρομολόγησης, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`. Οι άκρες ReactFlow και ο καμβάς ενορχήστρωσης διαβάζουν τις μεταβλητές `--orch-status-*` με επίγνωση του θέματος (`src/shared/components/flow/edgeStyles.ts`).
+2. Μην επιδιορθώνετε ποτέ `packages/ui-kit/src` με το χέρι: συγχρονισμός με `scripts/dev/sync-ui-kit.sh <commit>`; η πύλη pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) αποτυγχάνει σε οποιοδήποτε byte που διαφέρει από την καρφιτσωμένη ανάντη δέσμευση (παραλείπεται με μια προειδοποίηση όταν απουσιάζει ο κλώνος ανάντη, `UI_KIT_CLONE` ή `_references/cheaper-inference-ui-kit`). Όταν λείπει κάτι από το κιτ, δουλέψτε το στον προσαρμογέα ή στην οθόνη και ζητήστε το ανάντη.
+3. Οι προεπιλογές κειμένου κιτ είναι Αγγλικά (`label = "Loading"`, `loadingLabel = "Loading table"`…) — περάστε μεταφρασμένες συμβολοσειρές από `useTranslations(...)` κάθε φορά που ένα στοιχείο κιτ αποδίδει κείμενο.
+4. Τα βοηθητικά προγράμματα Tailwind κερδίζουν τις κατηγορίες συστατικών του κιτ (το κιτ δηλώνει `@layer theme, base, components, utilities` και οι κανόνες του ζουν σε `components`) — χρησιμοποιήστε βοηθητικά προγράμματα για την απόσταση και τη διάταξη, όχι για να ξαναχρωματίσετε τα εξαρτήματα του κιτ.
+5. Επικεφαλίδες: `.ci-heading` για τίτλους σελίδων και ενοτήτων. `.ci-dashboard-display` μόνο για μεγάλο, αραιό κείμενο εμφάνισης, όπως ο κωδικός κατάστασης σελίδας σφάλματος. Και οι δύο χρησιμοποιούν Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` προστατεύει την υιοθέτηση του κιτ: δεν υπάρχει άνοιγμα σύνδεσης υλικού κάτω από `src/app` ή `src/shared/components`. στο δέντρο του πίνακα οργάνων (`src/app/(dashboard)` και `src/shared/components`) δεν υπάρχει ακατέργαστο `<select>`, `<textarea>` ή `<table>` και κανένα `role="dialog"` χειροκίνητο εκτός των αναφερόμενων εξαιρέσεων (εγγενής κλάδος του προσαρμογέα `Select`, `RequestLoggerDetail`)· Κάθε ακατέργαστο `<button>` ή `<input>` εκεί χρειάζεται ένα σχόλιο που περιέχει `kit-exception:` (με τον λόγο) που τελειώνει το πολύ 3 γραμμές πάνω από αυτό. αποχρώσεις παλέτας και παραλλαγές `dark:` μόνο στα αρχεία που παραθέτει η δοκιμή.
+7. Επαληθεύστε και τα δύο θέματα και τη θύρα προβολής 390 px πριν από ένα PR (στιγμιότυπα οθόνης). `tests/e2e/a11y.spec.ts` τρέχει τσεκούρι.
 
 ## 3. Προσθήκη οθόνης
 
-1. Ανοίξτε τη σελίδα με το `PageHeader` του kit (`@omniroute/ui-kit/page-header`, `compact` μέσα στο
-   dashboard) — τίτλος, περιγραφή και `actions`. Στη συνέχεια, το header του shell παραλείπει τον δικό του τίτλο.
-2. Δημιουργήστε τα controls από το `@/shared/components` (τους adapters) και χρησιμοποιήστε components του kit μέσω subpath όπου δεν
-   υπάρχει adapter (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
-   `Slider`…).
-3. Εικονίδια: `<Icon name="…" />`. Ένα νέο όνομα προστίθεται στο `ICON_MAP` με το σημασιολογικά αντίστοιχο component του Lucide· το `npm run gen:icon-map` παραθέτει τα ονόματα που εξακολουθούν να λείπουν.
+1. Ξεκινήστε τη σελίδα με το `PageHeader` του kit (`@omniroute/ui-kit/page-header`, `compact` εντός
+   του dashboard) — τίτλος, περιγραφή και `actions`. Η κεφαλίδα του shell στη συνέχεια αφαιρεί τον
+   δικό της τίτλο.
+2. Χτίστε στοιχεία ελέγχου από το `@/shared/components` (τους adapters) και χρησιμοποιήστε
+   components του kit ανά subpath όπου δεν υπάρχει adapter
+   (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. Εικονίδια: `<Icon name="…" />`. Ένα νέο όνομα μπαίνει στο `ICON_MAP` με το σημασιολογικά
+   αντίστοιχο component Lucide· το `npm run gen:icon-map` απαριθμεί τα ονόματα που λείπουν ακόμη.
 4. Χρώματα: σημασιολογικά utilities (`text-success`, `bg-warning-bg`, `border-border`…) και
-   `var(--color-chart-N)` για σειρές γραφημάτων· χωρίς δεκαεξαδικές τιμές και χωρίς παραλλαγές `dark:` που απλώς επαναλαμβάνουν ένα χρώμα.
-5. Κείμενο: κάθε συμβολοσειρά, συμπεριλαμβανομένων των labels που περνάτε στα components του kit, προέρχεται από το `useTranslations`. Τα νέα
-   keys προστίθενται στα `src/i18n/messages/en.json`, `pt-BR.json` και `vi.json` (το test ισοτιμίας για τα Βιετναμικά απαιτεί
-   κάθε αγγλικό key)· τα υπόλοιπα locales συμπληρώνονται από τον συγχρονισμό i18n.
-6. Εκτελέστε τους ελέγχους πριν από το PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `var(--color-chart-N)` για σειρές γραφημάτων· καμία τιμή hex και καμία παραλλαγή `dark:` που
+   απλώς επαναλαμβάνει ένα χρώμα.
+5. Κείμενο: κάθε string, συμπεριλαμβανομένων των labels που περνάτε σε components του kit,
+   προέρχεται από το `useTranslations`. Τα νέα κλειδιά μπαίνουν στα `src/i18n/messages/en.json`,
+   `pt-BR.json` και `vi.json` (το τεστ parity των Βιετναμέζικων καρφιτσώνει κάθε αγγλικό κλειδί)·
+   τα υπόλοιπα locales συμπληρώνονται από τον συγχρονισμό i18n.
+6. Εκτελέστε τους φύλακες πριν από το PR: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (ο μόνος έλεγχος που εντοπίζει ένα διπλό import στο `iconMap.ts`),
-   `npm run check:ui-icu` και τα tests της ίδιας της οθόνης.
+   `npm run check:dashboard-typecheck` (ο μόνος έλεγχος που εντοπίζει ένα διπλό import στο
+   `iconMap.ts`), `npm run check:ui-icu`, και τα δικά της τεστ της οθόνης.
 
-## 4. Προσθήκη ή αλλαγή προσαρμογέα
+## 4. Προσθήκη ή αλλαγή adapter
 
-1. Διατηρήστε το δημόσιο API του `src/shared/components/index.tsx`: ίδια ονόματα εξαγωγών, προεπιλεγμένες εξαγωγές και
-   αποδεκτά props. Αντιστοιχίστε τα παλαιού τύπου props στο κιτ μέσα στον προσαρμογέα (δείτε το `Button.tsx`: `VARIANT_TO_KIT`,
+1. Διατήρησε το δημόσιο API του `src/shared/components/index.tsx`: ίδια ονόματα εξαγωγών, default exports και
+   αποδεκτά props. Αντιστοίχισε τα legacy props πάνω στο kit μέσα στον adapter (δες `Button.tsx`: `VARIANT_TO_KIT`,
    `SIZE_TO_KIT`).
-2. Εισαγάγετε το κιτ μέσω υποδιαδρομής (`@omniroute/ui-kit/<component>`).
-3. Οι προσωρινές λύσεις για ελλείψεις του κιτ πρέπει να βρίσκονται στον προσαρμογέα (ή στο `globals.css` `@layer components` όταν η διόρθωση αφορά
-   στυλ), ποτέ στο `packages/ui-kit/src`.
-4. Προσθέστε ή ενημερώστε το `tests/unit/ui/adapters/<name>.test.tsx`. Για έναν προσαρμογέα με πολλούς καλούντες, συγκρίνετε τη
-   αποδιδόμενη σήμανση πριν και μετά την αλλαγή — οι αλλαγές σε padding ή wrapper διαδίδονται σε κάθε οθόνη.
+2. Κάνε import το kit ανά subpath (`@omniroute/ui-kit/<component>`).
+3. Οι παρακάμψεις για κενά του kit ζουν στον adapter (ή στο `@layer components` του `globals.css` όταν η διόρθωση
+   είναι στυλ), ποτέ στο `packages/ui-kit/src`.
+4. Πρόσθεσε ή ενημέρωσε το `tests/unit/ui/adapters/<name>.test.tsx`. Για adapter με πολλούς καλούντες, σύγκρινε το
+   αποδοθέν markup πριν και μετά την αλλαγή — αλλαγές στο padding ή στο wrapper απλώνονται σε κάθε οθόνη.
 
-## 5. Ενημέρωση του κιτ
+## 5. Ενημέρωση του kit
 
-Το `scripts/dev/sync-ui-kit.sh <commit> [clone]` αντιγράφει το upstream `src/` στο συγκεκριμένο commit στο
-`packages/ui-kit/src` και εφαρμόζει τον μοναδικό επιτρεπόμενο μετασχηματισμό (αφαιρεί την κατάληξη `.js` από
-τις σχετικές εισαγωγές). Στη συνέχεια: ελέγξτε το `git diff packages/ui-kit`, πραγματοποιήστε έναν οπτικό έλεγχο στους παρόχους, στις ρυθμίσεις, στους συνδυασμούς,
-στη χρήση και στο endpoint και στα δύο θέματα, εκτελέστε τα `npm run check:ui-kit-snapshot` και `npm run test:vitest:ui` και
-ανοίξτε το PR με το upstream αρχείο καταγραφής αλλαγών.
+Το `scripts/dev/sync-ui-kit.sh <commit> [clone]` αντιγράφει το upstream `src/` σε εκείνο το commit μέσα στο
+`packages/ui-kit/src` και εφαρμόζει τον μοναδικό επιτρεπόμενο μετασχηματισμό (αφαιρεί την κατάληξη `.js` από τα
+σχετικά imports). Στη συνέχεια: έλεγξε το `git diff packages/ui-kit`, κάνε ένα οπτικό πέρασμα στις οθόνες providers,
+settings, combos, usage και endpoint και στα δύο θέματα, τρέξε `npm run check:ui-kit-snapshot` και
+`npm run test:vitest:ui`, και άνοιξε το PR με το upstream changelog.
 
-## 6. Ευρετήριο αναφοράς
+## 6. διαγράμματα README
+
+Τα δώδεκα διαγράμματα που ενσωματώνει η ρίζα `README.md` (`docs/diagrams/*.svg`) είναι το κιτ που εφαρμόζεται σε μια στατική εικόνα και δημιουργούνται, δεν σχεδιάζονται με το χέρι: 13 αρχεία γεννήτριας στο `scripts/docs/gen-readme-*.mjs` (δώδεκα διαγράμματα συν το πρόγραμμα οδήγησης `gen-readme-diagrams.mjs` ) και 12 δοκιμές αδράνειας στο `tests/unit/docs/readme-*-svg.test.ts`, ένα ανά διάγραμμα, κάθε byte's αρχείο με το com `test-unit`).
+
+- **Μαρτυρίες.** `scripts/docs/readme-diagram-theme.mjs` αντιγράφει την παλέτα από `packages/ui-kit/src/ci-tokens.css` (καρφιτσωμένο σε αυτό το αρχείο με `tests/unit/docs/readme-diagram-theme.test.ts`) και ορίζει τους ρόλους κειμένου στις προηγούμενες όψεις του κιτ — Instrument Serif για εμφάνιση, Inter για κείμενο UI, IBM Plex Mono για σχήματα και κώδικα — από τα πακέτα `@fontsource` (το ίδιο το ταμπλό χρησιμοποιεί το Switzer.0.60 του κιτ από το κιτ). Οι φωτεινές τιμές βρίσκονται στο `:root`, οι σκοτεινές τιμές πίσω από `prefers-color-scheme: dark`, μέσα στο αρχείο, επομένως κάθε εικόνα ακολουθεί το σχήμα του θεατή στο GitHub.
+- **Γραμματοσειρές.** `scripts/docs/readme-fonts.mjs` υποσυνθέτει αυτά τα αρχεία woff2 στα γλυφά που σχεδιάζει κάθε διάγραμμα και τα ενσωματώνει ως `@font-face` `data:` URIs — ο μόνος τρόπος με τον οποίο η τυπογραφία κιτ φτάνει σε μια εικόνα README, αφού GitHub Markdown δεν φέρει CSS και ο διακομιστής μεσολάβησης camo μπλοκάρει κάθε εξωτερική ανάκτηση. Τα υποσύνολα είναι μόνο λατινικά. τα γλυφά συμβόλων που επιστρέφουν στη στοίβα του συστήματος επιτρέπονται ένα προς ένα σε `SYMBOL_FALLBACKS`, και οποιεσδήποτε άλλες ακάλυπτες ρίψεις γλυφών.
+- **Αναγεννηθείς.** `npm run docs:readme-diagrams` ξαναγράφει και τα δώδεκα με σειρά README και εκτυπώνει μία γραμμή ανά αρχείο με το μέγεθός του. Μια μεμονωμένη γεννήτρια λειτουργεί επίσης μόνη της (`node scripts/docs/gen-readme-<name>.mjs`, `free-tier-budget` χρειάζεται `node --import tsx/esm` επειδή οι αριθμοί της προέρχονται από τον ζωντανό φορτωτή καταλόγου στο `open-sse/config/freeModelCatalog.ts`, η CI συνέπεια μιας αλλαγής καταλόγου είναι στο `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Δέσμευση της γεννήτριας και του SVG μαζί.
+- **Απόδειξη.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` αποδίδει ένα αρχείο με τον τρόπο που το εξυπηρετεί GitHub (μια ετικέτα `<img>`, `Content-Security-Policy` του camo , `image/svg+xml`), καταγράφει ένα φωτεινό και ένα σκοτεινό πλαίσιο και αναφέρει τα αιτήματα εξωτερικής γραμματοσειράς της σελίδας (πρέπει να είναι 0).
+- **Προϋπολογισμός.** Κάτω από 200 KB ανά αρχείο (κάθε δοκιμή παλιότητας το επιβεβαιώνει). Το 500 KB είναι το σκληρό καπάκι για οποιαδήποτε εικόνα README (ο κανόνας του επικυρωτή στούντιο SVG ).
+- **Αντίγραφο αμετάβλητο, μετράει από την πύλη.** Η αλλαγή επωνυμίας άλλαξε τύπο και παλέτα, όχι λέξεις: κάθε γεννήτρια φέρει το αντίγραφο του διαγράμματός της σε μια σταθερά `*_COPY` (ή το δημιουργεί από τον ζωντανό κατάλογο) που είναι τόσο το κείμενο που σχεδιάστηκε όσο και η είσοδος του υποσυνόλου γραμματοσειρών. Οι κανονικές φιγούρες παραμένουν σε κόμβους `<text>`, διαβάζονται από `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). οι δοκιμές παλαιότητας των διαγραμμάτων που διαβάζει η πύλη εκτελούν επίσης τους επικυρωτές τους στο αρχείο που δημιουργείται, έτσι ένα σχήμα που απομακρύνεται από τον κώδικα αποτυγχάνει στη δοκιμή — διορθώστε την πηγή που διαβάζει η πύλη, ποτέ τον αριθμό στη γεννήτρια.
+
+## 7. Ευρετήριο αναφορών
 
 - `src/app/globals.css` — γέφυρα token, παρακάμψεις `.dark`, επεκτάσεις OmniRoute `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — καρφιτσωμένο upstream commit και εξουσιοδότηση άδειας χρήσης· `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` και οι παρακείμενοι προσαρμογείς· `src/shared/components/layouts/DashboardShell.tsx`,
+- `src/shared/components/index.tsx` και οι adapters δίπλα του· `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`
