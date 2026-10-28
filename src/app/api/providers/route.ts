@@ -73,6 +73,11 @@ import {
 import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { hydrateCompatibleNodeCreation } from "@/lib/providers/compatibleNodeCreation";
+import {
+  compatibleQuotaAuthFor,
+  inheritCompatibleQuotaCheck,
+  isCompatibleQuotaProvider,
+} from "@/shared/utils/compatibleQuotaCheck";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 
 function projectCodexAccountPoolWithRoutingQuota(
@@ -342,6 +347,18 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: sanitizeErrorMessage(hydrated.error) }, { status: 400 });
       }
       providerSpecificData = hydrated.data;
+    }
+
+    if (isCompatibleQuotaProvider(provider) && providerSpecificData) {
+      // A key added after the node's "Quota check" was switched on gets the same preset.
+      providerSpecificData = inheritCompatibleQuotaCheck(
+        providerSpecificData,
+        await getProviderConnections({ provider }),
+        {
+          baseUrl: String(providerSpecificData.baseUrl ?? ""),
+          auth: compatibleQuotaAuthFor(provider),
+        }
+      );
     }
 
     providerSpecificData = normalizeProviderSpecificData(provider, providerSpecificData) || null;

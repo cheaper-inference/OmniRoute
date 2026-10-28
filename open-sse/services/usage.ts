@@ -51,6 +51,7 @@ export { buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 import { getAdobeFireflyUsage } from "./usage/adobeFirefly.ts";
 import { getOpenrouterUsage } from "./usage/openrouter.ts";
 import { getOpenAiCompatibleUsage } from "./usage/openaiCompatible.ts";
+import { isCompatibleQuotaProvider } from "@/shared/utils/compatibleQuotaCheck";
 import { getLlmgatewayUsage } from "./usage/llmgateway.ts";
 import { getLyceumUsage } from "./usage/lyceum.ts";
 import { getOllamaCloudUsage } from "./opencodeOllamaUsage.ts";
@@ -140,12 +141,12 @@ export async function getUsageForProvider(
     return await getMoonshotOpenPlatformUsage(connection);
   }
 
-  // openai-compatible-* ids are generated per connection, so they can never
-  // appear in the switch below or in USAGE_FETCHER_PROVIDERS. The connection
-  // itself declares where its quota lives (#13616); without that declaration
-  // this returns a message and the sync treats it as "nothing to show", exactly
-  // as it did before.
-  if (typeof provider === "string" && provider.startsWith("openai-compatible-")) {
+  // openai-compatible-* and anthropic-compatible-* ids are generated per
+  // connection, so they can never appear in the switch below or in
+  // USAGE_FETCHER_PROVIDERS. The connection itself declares where its quota
+  // lives (#13616); without that declaration this returns a message and the
+  // sync treats it as "nothing to show", exactly as it did before.
+  if (isCompatibleQuotaProvider(provider)) {
     return await getOpenAiCompatibleUsage(apiKey, providerSpecificData);
   }
 

@@ -1,0 +1,1 @@
+- **feat(dashboard):** "Quota check" toggle for OpenAI- and Anthropic-compatible nodes reads a standard `/credits` balance into Provider Limits; `anthropic-compatible-*` keys now use the configurable quota fetcher, which goes through the SSRF-guarded outbound fetch ([#18350](https://github.com/cheaper-inference/OmniRoute/pull/18350)) — thanks @MWGE22629

@@ -54,6 +54,92 @@ describe("EditCompatibleNodeModal (Phase 1b extraction)", () => {
     expect(c.querySelector('[role="dialog"]')).not.toBeNull();
   });
 
+  function quotaSwitch(root: HTMLElement) {
+    return root.querySelector<HTMLInputElement>(
+      'input[role="switch"][aria-label="providers.quotaCheck"]'
+    );
+  }
+
+  function quotaPathInput(root: HTMLElement) {
+    return root.querySelector<HTMLInputElement>('input[placeholder="/credits"]');
+  }
+
+  function clickSave(root: HTMLElement) {
+    const save = Array.from(root.querySelectorAll("button")).find(
+      (button) => button.textContent === "providers.save"
+    );
+    expect(save).toBeDefined();
+    act(() => save?.click());
+  }
+
+  function typeInto(input: HTMLInputElement, value: string) {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    act(() => {
+      setter?.call(input, value);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  }
+
+  it("Quota check toggle submits the standard /credits path when switched on", async () => {
+    const onSave = vi.fn(async () => {});
+    const c = renderModal(
+      <EditCompatibleNodeModal
+        isOpen
+        node={{ id: "anthropic-compatible-x", name: "Node", prefix: "nd", baseUrl: "https://x" }}
+        onSave={onSave}
+        onClose={() => {}}
+        isAnthropic
+      />
+    );
+    const toggle = quotaSwitch(c);
+    expect(toggle).not.toBeNull();
+    expect(toggle?.checked).toBe(false);
+    expect(quotaPathInput(c)).toBeNull();
+
+    act(() => toggle?.click());
+    expect(quotaPathInput(c)?.value).toBe("/credits");
+
+    clickSave(c);
+    await act(async () => {});
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave.mock.calls[0][0]).toMatchObject({
+      quotaCheck: { enabled: true, path: "/credits" },
+    });
+  });
+
+  it("Quota check reflects the connections' state and can be switched off", async () => {
+    const onSave = vi.fn(async () => {});
+    const c = renderModal(
+      <EditCompatibleNodeModal
+        isOpen
+        node={{
+          id: "openai-compatible-chat-x",
+          name: "Node",
+          prefix: "nd",
+          baseUrl: "https://x/v1",
+          quotaCheck: { enabled: true, path: "/balance" },
+        }}
+        onSave={onSave}
+        onClose={() => {}}
+      />
+    );
+    expect(quotaSwitch(c)?.checked).toBe(true);
+    const pathInput = quotaPathInput(c);
+    expect(pathInput?.value).toBe("/balance");
+    typeInto(pathInput as HTMLInputElement, "/v2/balance");
+    clickSave(c);
+    await act(async () => {});
+    expect(onSave.mock.calls[0][0]).toMatchObject({
+      quotaCheck: { enabled: true, path: "/v2/balance" },
+    });
+
+    act(() => quotaSwitch(c)?.click());
+    expect(quotaPathInput(c)).toBeNull();
+    clickSave(c);
+    await act(async () => {});
+    expect(onSave.mock.calls[1][0]).toMatchObject({ quotaCheck: { enabled: false } });
+  });
+
   it("renders nothing harmful when closed", () => {
     expect(() =>
       renderModal(

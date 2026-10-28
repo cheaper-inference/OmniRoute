@@ -1,6 +1,6 @@
 /**
  * usage/openaiCompatible.ts — a provider-agnostic quota fetcher for
- * `openai-compatible-*` connections (#13616).
+ * `openai-compatible-*` and `anthropic-compatible-*` connections (#13616).
  *
  * Every other fetcher in this directory hard-codes one upstream's URL, auth and
  * response shape. That works because those providers are known. An
@@ -32,6 +32,8 @@
  * reads 0/0 looks exhausted, and an operator would reasonably act on that.
  */
 
+import { SafeOutboundFetchError, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
+import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { type UsageQuota, createQuotaFromUsage } from "./quota.ts";
 
 /**
@@ -150,18 +152,30 @@ export async function getOpenAiCompatibleUsage(
 
   let body: unknown;
   try {
-    const response = await fetch(endpoint.url, {
+    // Same SSRF policy as every other provider outbound call: local/LAN hosts
+    // follow the operator's setting, cloud-metadata is always refused, and a
+    // redirect cannot carry the API key to another host.
+    const response = await safeOutboundFetch(endpoint.url, {
       method: endpoint.method ?? "GET",
       headers: buildAuthHeaders(endpoint, apiKey),
-      signal: AbortSignal.timeout(QUOTA_ENDPOINT_TIMEOUT_MS),
+      timeoutMs: QUOTA_ENDPOINT_TIMEOUT_MS,
+      guard: getProviderOutboundGuard(),
+      allowRedirect: false,
+      retry: false,
     });
     if (!response.ok) {
       return { message: `Quota endpoint returned HTTP ${response.status}.` };
     }
     body = await response.json();
-  } catch {
+  } catch (error) {
     // Deliberately not echoing the error: the URL is operator-supplied and the
     // message can carry it (and any query string) into the dashboard.
+    if (
+      error instanceof SafeOutboundFetchError &&
+      (error.code === "URL_GUARD_BLOCKED" || error.code === "INVALID_URL")
+    ) {
+      return { message: "Quota endpoint blocked by the outbound URL policy." };
+    }
     return { message: "Quota endpoint unreachable." };
   }
 

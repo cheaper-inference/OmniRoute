@@ -25,6 +25,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useNotificationStore } from "@/store/notificationStore";
 import { isClaudeCodeCompatibleProvider } from "@/shared/constants/providers";
+import { readCompatibleQuotaCheck } from "@/shared/utils/compatibleQuotaCheck";
 import type { ConnectionRowConnection } from "../components/ConnectionRow";
 import {
   buildSwapPriorityUpdates,
@@ -93,6 +94,10 @@ async function loadProviderConnectionsData(
           if (node) break;
         }
       }
+    }
+    // "Quota check" is stored on the node's connections; the edit modal reads it off the node.
+    if (node && connections && isCompatible) {
+      node = { ...node, quotaCheck: readCompatibleQuotaCheck(connections) };
     }
     return { connections, node, nodeResolved };
   } catch (error) {

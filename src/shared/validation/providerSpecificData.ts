@@ -142,6 +142,59 @@ function validateCacheBlock(data: Record<string, unknown>, ctx: z.RefinementCtx)
 }
 
 /**
+ * Path appended to a compatible node's base URL for the "Quota check" preset. It must stay
+ * on the node's own host: a leading single `/`, no scheme, no `//` authority, no backslash
+ * (some URL parsers read it as `/`) and no whitespace.
+ */
+export const compatibleQuotaPathSchema = z
+  .string()
+  .trim()
+  .max(200)
+  .regex(/^\/(?![/\\])[^\s\\]*$/, "Quota path must be a path starting with a single /");
+
+const quotaMappingPathSchema = z.string().max(500).optional();
+
+/** `providerSpecificData.quotaEndpoint` — see open-sse/services/usage/openaiCompatible.ts. */
+const quotaEndpointSchema = z.object({
+  url: z.string().max(2000).refine(isHttpUrl, "quotaEndpoint.url must be an http(s) URL"),
+  method: z
+    .string()
+    .regex(/^(GET|POST)$/i)
+    .optional(),
+  auth: z.enum(["bearer", "x-api-key", "none"]).optional(),
+  headers: z.record(z.string(), z.string().max(4000)).optional(),
+  plan: quotaMappingPathSchema,
+  quotas: z
+    .record(
+      z.string().max(100),
+      z.object({
+        used: quotaMappingPathSchema,
+        total: quotaMappingPathSchema,
+        remaining: quotaMappingPathSchema,
+        resetAt: quotaMappingPathSchema,
+        currency: z.string().max(20).optional(),
+        displayName: z.string().max(100).optional(),
+      })
+    )
+    .optional(),
+  preset: z.string().max(64).optional(),
+  quotaPath: compatibleQuotaPathSchema.optional(),
+});
+
+function validateQuotaEndpointField(value: unknown, ctx: z.RefinementCtx): void {
+  if (value === undefined || value === null) return;
+  const result = quotaEndpointSchema.safeParse(value);
+  if (result.success) return;
+  for (const issue of result.error.issues) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `providerSpecificData.quotaEndpoint: ${issue.message}`,
+      path: ["quotaEndpoint", ...issue.path.map((segment) => String(segment))],
+    });
+  }
+}
+
+/**
  * gheUrl must parse and use HTTPS. Shared by the Zod refinement above and by the
  * OAuth route's raw entry points (searchParams / device-flow extraData), so a
  * malformed or non-HTTPS enterprise URL is rejected before any upstream fetch.
@@ -159,6 +212,8 @@ export function validateProviderSpecificData(
   ctx: z.RefinementCtx
 ): void {
   if (!data) return;
+
+  validateQuotaEndpointField(data.quotaEndpoint, ctx);
 
   const gheUrl = data.gheUrl;
   if (gheUrl !== undefined) {

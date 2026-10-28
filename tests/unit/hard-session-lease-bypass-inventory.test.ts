@@ -199,7 +199,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // call site landed here without a golden-inventory update at the time.
     // +1: bulk PATCH reads the row to carry the operator-disable marker in
     // providerSpecificData next to isActive — a state read, not dispatch.
-    "src/app/api/providers/route.ts": 4,
+    // +1: creating a key on a compatible node reads its sibling rows to copy the
+    // node's "Quota check" preset — a state read, not dispatch (class C).
+    "src/app/api/providers/route.ts": 5,
     "src/app/api/providers/test-batch/route.ts": 2,
     "src/app/api/rate-limits/route.ts": 1,
     "src/app/api/services/dario/admin/import-from-omniroute/route.ts": 2,

@@ -4,7 +4,10 @@ import {
   normalizeModelSupportedEndpoints,
 } from "@/shared/constants/modelSupportedEndpoints";
 import { providerAllowsOptionalApiKey, resolveProviderId } from "@/shared/constants/providers";
-import { validateProviderSpecificData } from "@/shared/validation/providerSpecificData";
+import {
+  compatibleQuotaPathSchema,
+  validateProviderSpecificData,
+} from "@/shared/validation/providerSpecificData";
 import {
   isReservedProviderPrefix,
   reservedProviderPrefixMessage,
@@ -507,6 +510,11 @@ export const updateProviderNodeSchema = z
     customHeaders: customHeadersSchema,
     dailyQuotaResetTimezone: dailyQuotaResetTimezoneSchema,
     dailyQuotaResetHour: dailyQuotaResetHourSchema,
+    // "Quota check" toggle for compatible nodes: written to the node's connections as a
+    // standard-credits `quotaEndpoint` (src/shared/utils/compatibleQuotaCheck.ts).
+    quotaCheck: z
+      .object({ enabled: z.boolean(), path: compatibleQuotaPathSchema.optional() })
+      .optional(),
   })
   .superRefine((value, ctx) => {
     // Reserved-prefix guard (tokenrouter bug) — same rationale as the guard in
