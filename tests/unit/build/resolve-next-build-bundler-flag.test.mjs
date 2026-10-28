@@ -32,6 +32,11 @@ test("operator override is authoritative regardless of available RAM", () => {
       resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "1" }, memory),
       "--turbopack"
     );
+    assert.equal(
+      resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "" }, memory),
+      resolveNextBuildBundlerFlag({}, memory),
+      "blank values inherit automatic RAM selection"
+    );
     // Preserve the existing behavior for all explicitly set nonzero values.
     assert.equal(
       resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "yes" }, memory),
@@ -48,6 +53,10 @@ test("RAM advisory describes auto fallback, explicit risk and no message for lar
     /Turbopack explicitly selected/
   );
   assert.match(getLowMemoryBuildWarning({}, null), /unknown/);
+  assert.match(
+    getLowMemoryBuildWarning({ OMNIROUTE_USE_TURBOPACK: "" }, 8 * GiB),
+    /selecting webpack automatically/
+  );
   assert.equal(getLowMemoryBuildWarning({ OMNIROUTE_USE_TURBOPACK: "0" }, 8 * GiB), null);
   assert.equal(getLowMemoryBuildWarning({}, 16 * GiB + 1), null);
 });
