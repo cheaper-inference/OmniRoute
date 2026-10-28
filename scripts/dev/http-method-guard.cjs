@@ -6,6 +6,8 @@ const HIGH_RISK_METHOD_RULES = [
   [/^\/api\/auth\/login\/?$/, ["POST"]],
   [/^\/api\/auth\/logout\/?$/, ["POST"]],
   [/^\/api\/keys\/?$/, ["GET", "POST"]],
+  // Must precede the generic /api/keys/{id} rule: "import" is a static segment, not a key id.
+  [/^\/api\/keys\/import\/?$/, ["POST"]],
   [/^\/api\/keys\/[^/]+\/?$/, ["GET", "PATCH", "DELETE"]],
   [/^\/api\/keys\/[^/]+\/devices\/?$/, ["GET"]],
 ];

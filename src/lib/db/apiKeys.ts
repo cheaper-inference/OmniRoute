@@ -685,10 +685,13 @@ export async function pickApiKeyForInternalUse(
   }
 }
 
-export async function getApiKeyById(id: string) {
+export async function getApiKeyById(id: string, options: { readOnly?: boolean } = {}) {
   const db = getDbInstance() as ApiKeysDbLike;
-  const stmt = getPreparedStatements(db);
-  const row = stmt.getKeyById.get(id);
+  // Import retries must not trigger the first-use legacy secret backfill (on any row).
+  // The import domain has already ensured the schema before entering its transaction.
+  const row = options.readOnly
+    ? db.prepare<ApiKeyRow>("SELECT * FROM api_keys WHERE id = ?").get(id)
+    : getPreparedStatements(db).getKeyById.get(id);
   if (!row) return null;
   const camelRow = toRecord(rowToCamel(row)) as ApiKeyView;
   // Raw secret for the admin reveal route and by-id consumers; stored encrypted.

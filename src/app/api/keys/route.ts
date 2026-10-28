@@ -5,9 +5,8 @@ import {
   createApiKey,
   updateApiKeyPermissions,
 } from "@/lib/db/apiKeys";
-import { isCloudEnabled } from "@/lib/db/settings";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
-import { syncToCloud } from "@/lib/cloudSync";
+import { syncKeysToCloudIfEnabled } from "@/lib/api/keyCloudSync";
 import { createKeySchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { isApiKeyRevealEnabled, maskStoredApiKey } from "@/lib/apiKeyExposure";
@@ -168,20 +167,5 @@ export async function POST(request) {
   } catch (error) {
     log.error("keys", "Error creating key", error);
     return NextResponse.json({ error: "Failed to create key" }, { status: 500 });
-  }
-}
-
-/**
- * Sync API keys to Cloud if enabled
- */
-async function syncKeysToCloudIfEnabled() {
-  try {
-    const cloudEnabled = await isCloudEnabled();
-    if (!cloudEnabled) return;
-
-    const machineId = await getConsistentMachineId();
-    await syncToCloud(machineId);
-  } catch (error) {
-    log.error("keys", "Error syncing keys to cloud", error);
   }
 }
