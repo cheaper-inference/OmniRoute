@@ -371,13 +371,18 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
     let promptSentAt = 0;
     let videoUrl = "";
+    let isFinished = false;
 
     const videoPromise = new Promise<string>((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error("Timed out waiting for Veo video generation to complete (300s limit)"));
-      }, 300_000);
+        if (!isFinished) {
+          isFinished = true;
+          reject(new Error("Timed out waiting for Veo video generation to complete (600s limit)"));
+        }
+      }, 600_000);
 
       page.on("response", async (response: any) => {
+        if (isFinished) return;
         const url = response.url();
         const now = Date.now();
 
@@ -396,6 +401,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
           const aid = extractAssetId(url);
           if (!existingVideoUrls.has(url) && (!aid || !existingAssetIds.has(aid))) {
             console.log("[FLOW_DEBUG] RESOLVED video response with direct CDN URL:", url);
+            isFinished = true;
             clearTimeout(timeout);
             resolve(url);
             return;
@@ -411,6 +417,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         ) {
           try {
             const body = await response.text();
+            if (isFinished) return;
             if (body.includes("flow-content.google/video")) {
               const matches = body.matchAll(/(https:\/\/flow-content\.google\/video\/[^"\s\\]+)/g);
               for (const match of matches) {
@@ -425,6 +432,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
                   cleanUrl.includes("Signature=")
                 ) {
                   console.log("[FLOW_DEBUG] RESOLVED video response with clean URL:", cleanUrl);
+                  isFinished = true;
                   clearTimeout(timeout);
                   resolve(cleanUrl);
                   return;
@@ -481,78 +489,107 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     await clickApproveIfPresent(12_000);
 
     const pollPromise = (async () => {
-      for (let i = 0; i < 90; i++) {
-        await page.waitForTimeout(3_000);
-        await clickApproveIfPresent(500);
+      for (let i = 0; i < 200; i++) {
+        if (isFinished) return "";
+        try {
+          await page.waitForTimeout(3_000);
+        } catch {
+          return "";
+        }
+        if (isFinished) return "";
+        await clickApproveIfPresent(500).catch(() => {});
 
         if (Date.now() - promptSentAt < 15_000) continue;
+        if (isFinished) return "";
 
         // Check if there is an active generation progress card or container
-        const progressEl = page
-          .locator(
-            ".video-container, .media-option, .generation-card, [class*='generation-progress'], [class*='rendering'], [class*='media-card']"
-          )
-          .first();
-        if (await progressEl.isVisible({ timeout: 500 }).catch(() => false)) {
-          const text = await progressEl.innerText().catch(() => "");
-          if (text.includes("%") && !text.includes("100%")) {
-            console.log("[FLOW_DEBUG] Generation in progress:", text.replace(/\n/g, " "));
-            continue;
+        try {
+          const progressEl = page
+            .locator(
+              ".video-container, .media-option, .generation-card, [class*='generation-progress'], [class*='rendering'], [class*='media-card']"
+            )
+            .first();
+          if (await progressEl.isVisible({ timeout: 500 }).catch(() => false)) {
+            const text = await progressEl.innerText().catch(() => "");
+            if (text.includes("%") && !text.includes("100%")) {
+              console.log("[FLOW_DEBUG] Generation in progress:", text.replace(/\n/g, " "));
+              continue;
+            }
+            if (isFinished) return "";
+            // Click the container to open editor or trigger CDN stream
+            console.log("[FLOW_DEBUG] Clicking media container...");
+            await progressEl.click().catch(() => {});
+            await page.waitForTimeout(1_000).catch(() => {});
           }
-          // Click the container to open editor or trigger CDN stream
-          console.log("[FLOW_DEBUG] Clicking media container...");
-          await progressEl.click().catch(() => {});
-          await page.waitForTimeout(1_000);
-        }
+        } catch {}
+
+        if (isFinished) return "";
 
         // Check for video tag directly created anywhere in DOM
-        const videoSrc = await page.evaluate(() => {
-          const v = document.querySelector("video");
-          return v ? v.src || v.currentSrc : null;
-        });
-        if (videoSrc && videoSrc.includes("flow-content.google/video")) {
-          const aid = extractAssetId(videoSrc);
-          if (!existingVideoUrls.has(videoSrc) && (!aid || !existingAssetIds.has(aid))) {
-            console.log("[FLOW_DEBUG] RESOLVED video directly from <video> element:", videoSrc);
-            return videoSrc;
-          }
-        }
-
-        // Also check any download buttons or media action menus
-        const downloadBtn = page
-          .locator("button[aria-label*='Download'], button[aria-label*='Скачать'], a[download]")
-          .first();
-        if (await downloadBtn.isVisible({ timeout: 300 }).catch(() => false)) {
-          const href = await downloadBtn.getAttribute("href").catch(() => null);
-          if (href && href.includes("flow-content.google/video")) {
-            const aid = extractAssetId(href);
-            if (!existingVideoUrls.has(href) && (!aid || !existingAssetIds.has(aid))) {
-              console.log("[FLOW_DEBUG] RESOLVED video via download button href:", href);
-              return href;
+        try {
+          const videoSrc = await page
+            .evaluate(() => {
+              const v = document.querySelector("video");
+              return v ? v.src || v.currentSrc : null;
+            })
+            .catch(() => null);
+          if (videoSrc && videoSrc.includes("flow-content.google/video")) {
+            const aid = extractAssetId(videoSrc);
+            if (!existingVideoUrls.has(videoSrc) && (!aid || !existingAssetIds.has(aid))) {
+              console.log("[FLOW_DEBUG] RESOLVED video directly from <video> element:", videoSrc);
+              isFinished = true;
+              return videoSrc;
             }
           }
-        }
-        const videos = await page.$$eval("video", (els: any[]) =>
-          els
-            .map((e: any) => e.src || e.currentSrc)
-            .filter((s: string) => s && s.startsWith("http"))
-        );
-        const newVideos = videos.filter((v: string) => {
-          const aid = extractAssetId(v);
-          return (
-            !existingVideoUrls.has(v) &&
-            (!aid || !existingAssetIds.has(aid)) &&
-            v.includes("flow-content.google")
-          );
-        });
-        if (newVideos.length > 0) {
-          return newVideos[0];
-        }
+        } catch {}
+
+        if (isFinished) return "";
+
+        // Also check any download buttons or media action menus
+        try {
+          const downloadBtn = page
+            .locator("button[aria-label*='Download'], button[aria-label*='Скачать'], a[download]")
+            .first();
+          if (await downloadBtn.isVisible({ timeout: 300 }).catch(() => false)) {
+            const href = await downloadBtn.getAttribute("href").catch(() => null);
+            if (href && href.includes("flow-content.google/video")) {
+              const aid = extractAssetId(href);
+              if (!existingVideoUrls.has(href) && (!aid || !existingAssetIds.has(aid))) {
+                console.log("[FLOW_DEBUG] RESOLVED video via download button href:", href);
+                isFinished = true;
+                return href;
+              }
+            }
+          }
+          const videos = await page
+            .$$eval("video", (els: any[]) =>
+              els
+                .map((e: any) => e.src || e.currentSrc)
+                .filter((s: string) => s && s.startsWith("http"))
+            )
+            .catch(() => []);
+          const newVideos = videos.filter((v: string) => {
+            const aid = extractAssetId(v);
+            return (
+              !existingVideoUrls.has(v) &&
+              (!aid || !existingAssetIds.has(aid)) &&
+              v.includes("flow-content.google")
+            );
+          });
+          if (newVideos.length > 0) {
+            isFinished = true;
+            return newVideos[0];
+          }
+        } catch {}
       }
-      return await videoPromise;
+      return "";
     })();
 
-    videoUrl = await Promise.race([videoPromise, pollPromise]);
+    try {
+      videoUrl = await Promise.race([videoPromise, pollPromise]);
+    } finally {
+      isFinished = true;
+    }
     invalidateFlowCreditsCache();
 
     return {
@@ -782,22 +819,36 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
       await approveBtn.click();
     } catch {}
 
+    let isFinished = false;
     const pollPromise = (async () => {
       for (let i = 0; i < 12; i++) {
-        await page.waitForTimeout(5_000);
-        const imgs = await page.$$eval("img", (els: any[]) =>
-          els
-            .map((e: any) => e.src || e.currentSrc)
-            .filter((s: string) => s && s.includes("googleusercontent.com/asb/"))
-        );
-        if (imgs.length > 0) {
-          return imgs[0];
+        if (isFinished) return "";
+        try {
+          await page.waitForTimeout(5_000);
+        } catch {
+          return "";
         }
+        if (isFinished) return "";
+        try {
+          const imgs = await page.$$eval("img", (els: any[]) =>
+            els
+              .map((e: any) => e.src || e.currentSrc)
+              .filter((s: string) => s && s.includes("googleusercontent.com/asb/"))
+          );
+          if (imgs.length > 0) {
+            isFinished = true;
+            return imgs[0];
+          }
+        } catch {}
       }
-      throw new Error("Timeout polling image element");
+      return "";
     })();
 
-    imageUrl = await Promise.race([imagePromise, pollPromise]);
+    try {
+      imageUrl = await Promise.race([imagePromise, pollPromise]);
+    } finally {
+      isFinished = true;
+    }
     invalidateFlowCreditsCache();
 
     return {
