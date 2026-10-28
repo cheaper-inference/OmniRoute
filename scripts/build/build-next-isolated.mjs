@@ -263,9 +263,10 @@ export function resolveNextBuildEnv(baseEnv = process.env, platform = process.pl
   // was left unprotected. Respect an existing --max-old-space-size (Docker already
   // sets one — don't clobber/duplicate) and let OMNIROUTE_BUILD_MEMORY_MB override.
   // NOTE (#6409): --max-old-space-size only bounds V8's JS heap — it does NOT bound
-  // Turbopack's native (Rust, off-V8-heap) memory, which is the default bundler as of
-  // #6283. On memory-constrained machines, set OMNIROUTE_USE_TURBOPACK=0 (webpack
-  // fallback) instead of raising this heap value; see docs/reference/ENVIRONMENT.md.
+  // Turbopack's native (Rust, off-V8-heap) memory. Since #18184 an unset
+  // OMNIROUTE_USE_TURBOPACK already selects webpack at <= 16 GiB of effective RAM
+  // (resolveNextBuildBundlerFlag); if Turbopack still OOMs, set OMNIROUTE_USE_TURBOPACK=0
+  // instead of raising this heap value; see docs/reference/ENVIRONMENT.md.
   if (!/--max-old-space-size/.test(env.NODE_OPTIONS || "")) {
     // Default 8 GB (was 4 GB): the clean module graph peaks ~3.9 GB during the webpack
     // production pass, which brushed the old 4 GB ceiling on a borderline OOM. 8 GB gives

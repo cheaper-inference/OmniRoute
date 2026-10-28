@@ -27,7 +27,10 @@ test("default build uses webpack through 16 GiB and Turbopack above it", () => {
 
 test("operator override is authoritative regardless of available RAM", () => {
   for (const memory of [8 * GiB, 16 * GiB, 32 * GiB, null]) {
-    assert.equal(resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "0" }, memory), "--webpack");
+    assert.equal(
+      resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "0" }, memory),
+      "--webpack"
+    );
     assert.equal(
       resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "1" }, memory),
       "--turbopack"
