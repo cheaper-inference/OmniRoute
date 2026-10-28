@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
 version: 3.8.53
-lastUpdated: 2026-10-27
+lastUpdated: 2026-10-28
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-10-27
+> **Last generated:** 2026-10-28
 
-Total providers: **376**. See category breakdown below.
+Total providers: **378**. See category breakdown below.
 
 ## Categories
 
@@ -122,7 +122,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `zai-web` | `zw` | Z.ai Web | Web cookie | [link](https://chat.z.ai) | Copy the "token" value from chat.z.ai → DevTools → Application → Local Storage. Do not copy cookies; OmniRoute handles the per-request CAPTCHA through its browser transport. | — |
 | `zenmux-free` | `zmf` | ZenMux Free (Web) | Web cookie | [link](https://zenmux.ai) | Login at zenmux.ai, then export all cookies using EditThisCookie or Cookie-Editor and paste the full Cookie header string here. Refresh every ~30 days. | — |
 
-## API Key Providers (paid / paid-with-free-credits) (253)
+## API Key Providers (paid / paid-with-free-credits) (254)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -176,7 +176,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `command-code` | `cmd` | Command Code | API key | [link](https://commandcode.ai/) | Use a Command Code API key. Requests are sent to Command Code's /provider/v1/chat/completions endpoint. |
 | `coze` | `coze` | Coze | API key | [link](https://coze.com) | Get API key at coze.com/open/api |
 | `crof` | `crof` | CrofAI | API key | [link](https://crof.ai) | — |
-| `cursor-api` | `cua` | Cursor API | API key | [link](https://cursor.com/dashboard/api) | Paste a Cursor user API key (crsr_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key. |
+| `cursor-api` | `cua` | Cursor API | API key | [link](https://cursor.com/dashboard/api) | Paste a Cursor user API key (crsr_... or grok_...) from cursor.com/dashboard/api. OmniRoute exchanges it for a session token on demand; no IDE or cursor-agent install is needed. Usage bills to the Cursor plan that owns the key. |
 | `dahl` | `dahl` | Dahl | API key | [link](https://inference.dahl.global) | Click 'Add Account' to auto-generate a token, or add a manual API key. |
 | `daoxe` | `daoxe` | DaoXE | API key, aggregator | [link](https://daoxe.com) | — |
 | `databricks` | `databricks` | Databricks | API key, enterprise | [link](https://www.databricks.com) | — |
@@ -319,6 +319,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `reka` | `reka` | Reka | API key | [link](https://docs.reka.ai/chat/overview) | Use your Reka API key. OmniRoute supports the OpenAI-compatible base URL https://api.reka.ai/v1 and sends both Authorization and X-Api-Key headers for compatibility. |
 | `requesty` | `requesty` | Requesty | API key | [link](https://requesty.ai) | Free tier ~200 requests/day - multi-model routing gateway (300+ models) |
 | `routeway` | `routeway` | Routeway | API key | [link](https://routeway.ai) | Create a free API key at routeway.ai, then paste it here as a Bearer token. |
+| `runcrate` | `runcrate` | Runcrate | API key | [link](https://www.runcrate.ai) | Open models are free with your GitHub account |
 | `runwayml` | `runway` | Runway | API key, video | [link](https://docs.dev.runwayml.com) | Use your Runway API key in Authorization: Bearer <key>. OmniRoute targets the current Runway API at https://api.dev.runwayml.com/v1 and sends the required X-Runway-Version header automatically. |
 | `sambanova` | `samba` | SambaNova | API key | [link](https://sambanova.ai) | $5 free credits on signup (30-day validity), no credit card required |
 | `sap` | `sap` | SAP Generative AI Hub | API key, enterprise | [link](https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/generative-ai-hub-in-sap-ai-core) | Use your SAP AI Core bearer token. Base URL can be your AI_API_URL root or a deploymentUrl from Generative AI Hub. |
