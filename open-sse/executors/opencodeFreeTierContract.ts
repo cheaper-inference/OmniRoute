@@ -225,6 +225,60 @@ const GO_SURFACE_BASE_URL = "https://opencode.ai/zen/go/v1";
  */
 export const FREE_TIER_INFERENCE_BASE_URL = "https://opencode.ai/inference/v1";
 
+/**
+ * The credential the gated free-tier lane serves.
+ *
+ * Measured live on 2026-10-21 against `https://opencode.ai/inference/v1` (Chat
+ * Completions and Responses, three header styles, both the v1 and v2 identity
+ * shapes): the lane answers 200 to the literal `Bearer public` and to no
+ * `Authorization` at all, but 403 `Model access is disabled` to a real API key
+ * on every endpoint — so the operator's key, which the keyed `/zen/v1` lane
+ * needs, is exactly what must NOT travel on the anonymous lane the gated
+ * request is routed to. `opencode2api`'s anonymous lane pins the same literal
+ * (`Authorization: Bearer public`), which is the credential the official
+ * client's keyless free tier presents.
+ *
+ * `OPENCODE_FREE_TIER_CREDENTIAL` overrides it per install:
+ *
+ *   - unset / empty → `public` (the anonymous lane credential);
+ *   - `key` → keep the operator's API key (for an upstream that re-opens
+ *     free-tier access to keyed accounts);
+ *   - `none` / `off` → send no credential header at all;
+ *   - anything else → sent verbatim as the bearer token.
+ *
+ * Read per call, so a change takes effect immediately (same motif as
+ * `OPENCODE_FREE_TIER_REQUEST_CONTRACT`).
+ */
+export const FREE_TIER_PUBLIC_CREDENTIAL = "public";
+
+/** How the gated free-tier lane authenticates one request. */
+export type FreeTierCredential =
+  | { readonly mode: "key" }
+  | { readonly mode: "none" }
+  | { readonly mode: "literal"; readonly value: string };
+
+/** Resolve the free-tier credential for this request (env read per call). */
+export function resolveFreeTierCredential(): FreeTierCredential {
+  const raw = (process.env.OPENCODE_FREE_TIER_CREDENTIAL || "").trim();
+  if (raw === "") return { mode: "literal", value: FREE_TIER_PUBLIC_CREDENTIAL };
+  if (/^key$/i.test(raw)) return { mode: "key" };
+  if (/^(none|off)$/i.test(raw)) return { mode: "none" };
+  return { mode: "literal", value: raw };
+}
+
+/**
+ * Pick the bearer key for a request. Outside the gated lane (`freeTier` null) or in `key`
+ * mode the operator's key wins; `literal` sends the configured token and `none` sends nothing.
+ * `operatorKey` is lazy so Extra API Keys rotation only advances when that key is used.
+ */
+export function resolveGatedCredential(
+  freeTier: FreeTierCredential | null,
+  operatorKey: () => string | undefined
+): string | undefined {
+  if (!freeTier || freeTier.mode === "key") return operatorKey();
+  return freeTier.mode === "literal" ? freeTier.value : undefined;
+}
+
 /** Tell the surfaces apart by registry `baseUrl`, so provider ids and aliases stay out. */
 export function surfaceFromBaseUrl(baseUrl: string | null | undefined): OpencodeSurface {
   if (baseUrl === ZEN_SURFACE_BASE_URL) return "zen";

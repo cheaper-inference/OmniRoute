@@ -1,0 +1,1 @@
+- **refactor(api):** the dashboard and management proxy-assignment `PUT` routes share one `handleProxyAssignmentPut()` handler (auth, schema validation, persistence and dispatcher-cache invalidation keep their order; each route keeps its own failure message); behaviour is unchanged ([#17374](https://github.com/diegosouzapw/OmniRoute/pull/17374)) — thanks @JxnLexn

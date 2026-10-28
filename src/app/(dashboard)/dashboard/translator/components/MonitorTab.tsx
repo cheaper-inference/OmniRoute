@@ -1,8 +1,20 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useTranslations } from "next-intl";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, Badge, EmptyState } from "@/shared/components";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+// Direct module import keeps the tests' barrel stubs (Card/Badge/EmptyState) unchanged.
+import Button from "@/shared/components/Button";
 import { FORMAT_META } from "../exampleTemplates";
 
 interface MonitorTabProps {
@@ -35,13 +47,14 @@ interface StatCardProps {
   color: "blue" | "green" | "red" | "purple" | "amber" | "cyan";
 }
 
+// Stat accents on kit status/chart tokens (theme-aware).
 const COLOR_MAP: Record<StatCardProps["color"], { shell: string; icon: string }> = {
-  blue: { shell: "bg-blue-500/10", icon: "text-blue-500" },
-  green: { shell: "bg-green-500/10", icon: "text-green-500" },
-  red: { shell: "bg-red-500/10", icon: "text-red-500" },
-  purple: { shell: "bg-purple-500/10", icon: "text-purple-500" },
-  amber: { shell: "bg-amber-500/10", icon: "text-amber-500" },
-  cyan: { shell: "bg-cyan-500/10", icon: "text-cyan-500" },
+  blue: { shell: "bg-info/10", icon: "text-info" },
+  green: { shell: "bg-success/10", icon: "text-success" },
+  red: { shell: "bg-error/10", icon: "text-error" },
+  purple: { shell: "bg-chart-3/10", icon: "text-chart-3" },
+  amber: { shell: "bg-warning/10", icon: "text-warning" },
+  cyan: { shell: "bg-chart-2/10", icon: "text-chart-2" },
 };
 
 function StatCard({ icon, label, value, color }: StatCardProps) {
@@ -51,12 +64,7 @@ function StatCard({ icon, label, value, color }: StatCardProps) {
     <Card>
       <div className="p-4 flex items-center gap-3">
         <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${resolved.shell}`}>
-          <span
-            className={`material-symbols-outlined text-[22px] ${resolved.icon}`}
-            aria-hidden="true"
-          >
-            {icon}
-          </span>
+          <Icon name={icon} size={22} className={resolved.icon} />
         </div>
         <div>
           <p className="text-lg font-bold text-text-main">{value}</p>
@@ -149,12 +157,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
         className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted"
         data-testid="monitor-origin-hint"
       >
-        <span
-          className="material-symbols-outlined text-primary text-[20px] mt-0.5 shrink-0"
-          aria-hidden="true"
-        >
-          info
-        </span>
+        <Icon name="info" size={20} className="text-primary mt-0.5" />
         <p>
           {translateOrFallback(
             "monitorOriginHint",
@@ -194,8 +197,8 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
       </div>
 
       {/* Memory note */}
-      <div className="flex items-center gap-2 rounded-lg border border-amber-500/10 bg-amber-500/5 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
-        <span className="material-symbols-outlined text-[14px]">memory</span>
+      <div className="flex items-center gap-2 rounded-lg border border-warning/20 bg-warning-bg px-3 py-2 text-xs text-warning">
+        <Icon name="memory" size={14} />
         <p>
           {t("liveMonitorMemoryNote")}{" "}
           <span className="text-text-muted">{t("liveMonitorMemoryCapNote")}</span>
@@ -206,16 +209,15 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
       <Card>
         <div className="p-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span
-              className={`material-symbols-outlined text-[18px] ${autoRefresh ? "text-green-500 animate-pulse" : "text-text-muted"}`}
-              aria-hidden="true"
-            >
-              {autoRefresh ? "radio_button_checked" : "radio_button_unchecked"}
-            </span>
-            <button
-              type="button"
+            <Icon
+              name={autoRefresh ? "radio_button_checked" : "radio_button_unchecked"}
+              size={18}
+              className={autoRefresh ? "animate-pulse text-success" : "text-text-muted"}
+            />
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setAutoRefresh((prev) => !prev)}
-              className="text-sm text-text-main hover:text-primary transition-colors"
               aria-label={
                 autoRefresh
                   ? translateOrFallback("pauseAutoRefresh", "Pause auto-refresh")
@@ -226,7 +228,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
               {autoRefresh
                 ? translateOrFallback("liveAutoRefreshing", "Atualizando ao vivo")
                 : translateOrFallback("paused", "Pausado")}
-            </button>
+            </Button>
           </div>
           <div className="flex items-center gap-2">
             {/* Live/Paused badge */}
@@ -235,17 +237,9 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                 ? translateOrFallback("live", "Live")
                 : translateOrFallback("paused", "Paused")}
             </Badge>
-            <button
-              type="button"
-              onClick={() => void fetchHistory()}
-              className="flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
-              aria-label={tc("refresh")}
-            >
-              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-                refresh
-              </span>
+            <Button variant="ghost" size="sm" icon="refresh" onClick={() => void fetchHistory()}>
               {tc("refresh")}
-            </button>
+            </Button>
           </div>
         </div>
       </Card>
@@ -257,9 +251,7 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
 
           {loading ? (
             <div className="flex items-center justify-center py-12 text-text-muted">
-              <span className="material-symbols-outlined animate-spin mr-2" aria-hidden="true">
-                progress_activity
-              </span>
+              <Icon name="progress_activity" className="animate-spin mr-2" />
               {tc("loading")}
             </div>
           ) : events.length === 0 ? (
@@ -277,20 +269,20 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
               />
             </div>
           ) : (
-            <div className="overflow-x-auto" data-testid="monitor-events-table">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-xs text-text-muted border-b border-border">
-                    <th className="pb-2 pr-4">{t("time")}</th>
-                    <th className="pb-2 pr-4">{translateOrFallback("routeDetails", "Route")}</th>
-                    <th className="pb-2 pr-4">{t("source")}</th>
-                    <th className="pb-2 pr-4">{t("target")}</th>
-                    <th className="pb-2 pr-4">{t("model")}</th>
-                    <th className="pb-2 pr-4">{t("status")}</th>
-                    <th className="pb-2 text-right">{t("latency")}</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div data-testid="monitor-events-table">
+              <Table scrollbarLabel={t("recentTranslations")} className="text-sm">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("time")}</TableHead>
+                    <TableHead>{translateOrFallback("routeDetails", "Route")}</TableHead>
+                    <TableHead>{t("source")}</TableHead>
+                    <TableHead>{t("target")}</TableHead>
+                    <TableHead>{t("model")}</TableHead>
+                    <TableHead>{t("status")}</TableHead>
+                    <TableHead className="text-right">{t("latency")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {events.map((event, i) => {
                     const srcMeta = FORMAT_META[event.sourceFormat as keyof typeof FORMAT_META] ?? {
                       label: event.sourceFormat ?? "?",
@@ -302,17 +294,13 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                     };
 
                     return (
-                      <tr
-                        key={event.id ?? i}
-                        className="border-b border-border/50 hover:bg-bg-subtle/50 transition-colors"
-                        data-testid="monitor-event-row"
-                      >
-                        <td className="py-2 pr-4 text-xs text-text-muted whitespace-nowrap">
+                      <TableRow key={event.id ?? i} data-testid="monitor-event-row">
+                        <TableCell className="text-xs text-text-muted whitespace-nowrap">
                           {event.timestamp
                             ? new Date(event.timestamp).toLocaleTimeString()
                             : notAvailable}
-                        </td>
-                        <td className="py-2 pr-4 min-w-[220px]">
+                        </TableCell>
+                        <TableCell className="min-w-[220px]">
                           <div className="flex flex-col gap-1">
                             <div className="flex flex-wrap items-center gap-1.5">
                               <Badge variant="default" size="sm">
@@ -337,21 +325,21 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                               ) : null}
                             </div>
                           </div>
-                        </td>
-                        <td className="py-2 pr-4">
+                        </TableCell>
+                        <TableCell>
                           <Badge variant="default" size="sm">
                             {srcMeta.label}
                           </Badge>
-                        </td>
-                        <td className="py-2 pr-4">
+                        </TableCell>
+                        <TableCell>
                           <Badge variant="primary" size="sm">
                             {tgtMeta.label}
                           </Badge>
-                        </td>
-                        <td className="py-2 pr-4 text-xs font-mono text-text-muted break-all">
+                        </TableCell>
+                        <TableCell className="text-xs font-mono text-text-muted break-all">
                           {event.model ?? notAvailable}
-                        </td>
-                        <td className="py-2 pr-4">
+                        </TableCell>
+                        <TableCell>
                           {event.status === "success" ? (
                             <Badge variant="success" size="sm" dot>
                               {t("ok")}
@@ -361,15 +349,15 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                               {event.statusCode ?? t("errorShort")}
                             </Badge>
                           )}
-                        </td>
-                        <td className="py-2 text-right text-xs text-text-muted">
+                        </TableCell>
+                        <TableCell className="text-right text-xs text-text-muted">
                           {event.latency ? formatLatency(event.latency) : notAvailable}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>

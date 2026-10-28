@@ -1,0 +1,1 @@
+- **fix(deepseek):** native DeepSeek no longer returns HTTP 400 on structured-output requests: `json_schema` response_format is downgraded to `json_object` with the schema carried in the system prompt ([#18265](https://github.com/diegosouzapw/OmniRoute/pull/18265)) — thanks @yunaremaia, @claytontavaresdan

@@ -28,6 +28,13 @@
  */
 
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import {
+  buildGeminiUsageMetadata,
+  convertChunkWithUsage,
+  type GeminiUsageMetadata,
+  type GeminiUsageState,
+  type OpenAIUsage,
+} from "./geminiUsageMetadata.ts";
 
 /** Map OpenAI finish_reason → Gemini finishReason */
 export const OPENAI_TO_GEMINI_FINISH_REASON: Record<string, string> = {
@@ -54,15 +61,6 @@ interface OpenAIChoiceDelta {
 interface OpenAIChoice {
   delta?: OpenAIChoiceDelta;
   finish_reason?: string | null;
-}
-
-interface OpenAIUsage {
-  prompt_tokens?: number;
-  completion_tokens?: number;
-  total_tokens?: number;
-  completion_tokens_details?: {
-    reasoning_tokens?: number;
-  };
 }
 
 interface OpenAIStreamChunk {
@@ -94,7 +92,7 @@ interface GeminiPart {
  * chunks, keyed by `index`; we buffer them here and flush a complete
  * `functionCall` part once `finish_reason` arrives.
  */
-export interface GeminiToolCallState {
+export interface GeminiToolCallState extends GeminiUsageState {
   toolCallAccum?: Record<number, { id: string; name: string; arguments: string }>;
 }
 
@@ -102,13 +100,6 @@ interface GeminiCandidate {
   content: { role: "model"; parts: GeminiPart[] };
   index: number;
   finishReason?: string;
-}
-
-interface GeminiUsageMetadata {
-  promptTokenCount: number;
-  candidatesTokenCount: number;
-  totalTokenCount: number;
-  thoughtsTokenCount?: number;
 }
 
 interface GeminiStreamChunk {
@@ -191,17 +182,7 @@ export function openAIChunkToGeminiChunk(
 
   // Attach usage + modelVersion on the final chunk (when finish_reason is set).
   if (choice.finish_reason && parsed.usage) {
-    const u = parsed.usage;
-    const usageMetadata: GeminiUsageMetadata = {
-      promptTokenCount: u.prompt_tokens || 0,
-      candidatesTokenCount: u.completion_tokens || 0,
-      totalTokenCount: u.total_tokens || 0,
-    };
-    const reasoningTokens = u.completion_tokens_details?.reasoning_tokens;
-    if (reasoningTokens) {
-      usageMetadata.thoughtsTokenCount = reasoningTokens;
-    }
-    out.usageMetadata = usageMetadata;
+    out.usageMetadata = buildGeminiUsageMetadata(parsed.usage);
     out.modelVersion = parsed.model || fallbackModel;
   }
 
@@ -255,7 +236,12 @@ export function transformOpenAISSEToGeminiSSE(upstreamResponse: Response, model:
           continue;
         }
 
-        const geminiChunk = openAIChunkToGeminiChunk(parsed, model, toolCallState);
+        const geminiChunk = convertChunkWithUsage(
+          parsed,
+          model,
+          toolCallState,
+          openAIChunkToGeminiChunk
+        );
         if (!geminiChunk) continue;
 
         controller.enqueue(encoder.encode("data: " + JSON.stringify(geminiChunk) + "\r\n\r\n"));
@@ -275,7 +261,12 @@ export function transformOpenAISSEToGeminiSSE(upstreamResponse: Response, model:
       } catch {
         return;
       }
-      const geminiChunk = openAIChunkToGeminiChunk(parsed, model, toolCallState);
+      const geminiChunk = convertChunkWithUsage(
+        parsed,
+        model,
+        toolCallState,
+        openAIChunkToGeminiChunk
+      );
       if (!geminiChunk) return;
       controller.enqueue(encoder.encode("data: " + JSON.stringify(geminiChunk) + "\r\n\r\n"));
     },
@@ -411,17 +402,7 @@ export async function convertOpenAIResponseToGemini(
   };
 
   if (body.usage) {
-    const u = body.usage;
-    const usageMetadata: GeminiUsageMetadata = {
-      promptTokenCount: u.prompt_tokens || 0,
-      candidatesTokenCount: u.completion_tokens || 0,
-      totalTokenCount: u.total_tokens || 0,
-    };
-    const reasoningTokens = u.completion_tokens_details?.reasoning_tokens;
-    if (reasoningTokens) {
-      usageMetadata.thoughtsTokenCount = reasoningTokens;
-    }
-    geminiResponse.usageMetadata = usageMetadata;
+    geminiResponse.usageMetadata = buildGeminiUsageMetadata(body.usage);
   }
 
   return Response.json(geminiResponse, {

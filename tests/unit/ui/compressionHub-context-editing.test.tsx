@@ -181,7 +181,7 @@ describe("CompressionHub — Context Editing", () => {
     await flush();
 
     const toggle = container.querySelector(
-      'button[role="switch"][aria-label="Context Editing"]'
+      '[role="switch"][aria-label="Context Editing"]'
     ) as HTMLButtonElement | null;
     expect(toggle).not.toBeNull();
     expect(toggle?.getAttribute("aria-checked")).toBe("false");

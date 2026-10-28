@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
+import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
@@ -19,7 +20,7 @@ interface Props {
 }
 
 function isGlmResetProvider(provider: string): boolean {
-  return provider !== "codex";
+  return ["glm", "glm-cn", "glmt", "zai"].includes(provider);
 }
 
 export function getResetCreditWindowTitle(
@@ -27,6 +28,9 @@ export function getResetCreditWindowTitle(
   credit: CodexResetCreditView,
   tr: (key: string, fallback: string, values?: UsageTranslationValues) => string
 ): string {
+  if (provider === "claude") {
+    return credit.title || tr("claudeResetCreditDefaultTitle", "Claude limit reset");
+  }
   if (!isGlmResetProvider(provider)) {
     return credit.title || tr("resetCreditDefaultTitle", "Full reset");
   }
@@ -43,6 +47,12 @@ export function getResetCreditConfirmation(
   resetType: string | undefined,
   tr: (key: string, fallback: string, values?: UsageTranslationValues) => string
 ): string {
+  if (provider === "claude") {
+    return tr(
+      "confirmRedeemClaudeResetCredit",
+      "Redeeming immediately resets the eligible Claude usage limits and permanently consumes this credit."
+    );
+  }
   if (!isGlmResetProvider(provider)) {
     return tr(
       "confirmRedeemResetCredit",
@@ -139,9 +149,9 @@ function ResetCreditConfirmation({
 }) {
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+      <div className="rounded-lg border border-warning/30 bg-warning/10 p-4">
         <div className="flex items-start gap-3">
-          <span className="material-symbols-outlined text-amber-500">warning</span>
+          <Icon name="warning" className="text-warning" />
           <div>
             <p className="font-semibold text-text-main">
               {tr("confirmRedeemResetCreditTitle", "Redeem this reset credit?")}
@@ -251,7 +261,9 @@ export default function CodexResetCreditsModal({
       title={
         isGlmResetProvider(provider)
           ? tr("glmResetCreditsModalTitle", "GLM Coding Plan reset cards")
-          : tr("resetCreditsModalTitle", "Codex reset credits")
+          : provider === "claude"
+            ? tr("claudeResetCreditsModalTitle", "Claude reset credits")
+            : tr("resetCreditsModalTitle", "Codex reset credits")
       }
       size="lg"
       closeOnOverlay={!loading}
@@ -276,10 +288,15 @@ export default function CodexResetCreditsModal({
                   "glmResetCreditsModalExplainer",
                   "Reset cards are ordered by expiration. Choose the 5-hour or weekly window you want to reset."
                 )
-              : tr(
-                  "resetCreditsModalExplainer",
-                  "Credits are ordered by expiration. Automatic redemption always uses the credit that expires first."
-                )}
+              : provider === "claude"
+                ? tr(
+                    "claudeResetCreditsModalExplainer",
+                    "Available Claude reset credits and weekly session resets for this account."
+                  )
+                : tr(
+                    "resetCreditsModalExplainer",
+                    "Credits are ordered by expiration. Automatic redemption always uses the credit that expires first."
+                  )}
           </p>
           <ResetCreditList
             availableCount={availableCount}
@@ -326,7 +343,7 @@ function CreditSummary({
         <p className="mt-1 text-xs leading-relaxed text-text-muted">{credit.description}</p>
       )}
       <div className="mt-2 flex items-center gap-1.5 text-xs text-text-muted">
-        <span className="material-symbols-outlined text-[15px]">schedule</span>
+        <Icon name="schedule" size={15} />
         {expiry ? (
           <span>
             {tr("resetCreditExpiresAt", `Expires ${expiry}`, { date: expiry })}

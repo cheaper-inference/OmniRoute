@@ -1,5 +1,7 @@
 "use client";
 
+import Button from "@/shared/components/Button";
+
 // src/app/(dashboard)/dashboard/playground/components/CompareColumn.tsx
 
 import { useTranslations } from "next-intl";
@@ -45,9 +47,9 @@ export default function CompareColumn({ column, onCancel, onRemove }: CompareCol
               status === "streaming"
                 ? "bg-primary animate-pulse"
                 : status === "done"
-                  ? "bg-green-500"
+                  ? "bg-success"
                   : status === "error"
-                    ? "bg-destructive"
+                    ? "bg-error"
                     : "bg-text-muted/30"
             }`}
             aria-label={t("statusLabel", { status: t(`status.${status}`) })}
@@ -59,33 +61,35 @@ export default function CompareColumn({ column, onCancel, onRemove }: CompareCol
 
         <div className="flex items-center gap-1 shrink-0">
           {status === "streaming" && (
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => onCancel(id)}
-              className="text-[10px] px-1.5 py-0.5 rounded border border-border text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              className="h-auto min-h-0 px-1.5 py-0.5 text-[10px] text-text-muted"
               aria-label={t("cancelStream")}
             >
               {t("cancel")}
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => void copy(response, id)}
             disabled={response === ""}
-            className="p-0.5 rounded text-text-muted hover:text-text-main transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="text-text-muted"
             title={copied === id ? t("copiedCode") : t("copy")}
             aria-label={copied === id ? t("copiedCode") : t("copy")}
-          >
-            <span className="material-symbols-outlined text-[14px]">
-              {copied === id ? "check" : "content_copy"}
-            </span>
-          </button>
-          <button
+            icon={copied === id ? "check" : "content_copy"}
+          />
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => onRemove(id)}
-            className="p-0.5 rounded text-text-muted hover:text-destructive transition-colors"
+            className="text-text-muted hover:text-error"
             title={t("removeColumn")}
             aria-label={t("removeModelColumn", { model: model || t("noModel") })}
-          >
-            <span className="material-symbols-outlined text-[14px]">close</span>
-          </button>
+            icon="close"
+          />
         </div>
       </div>
 
@@ -101,7 +105,7 @@ export default function CompareColumn({ column, onCancel, onRemove }: CompareCol
         {status === "idle" && <p className="text-text-muted text-xs italic">{t("readyToRun")}</p>}
 
         {status === "error" && (
-          <div className="text-destructive text-xs bg-destructive/10 rounded p-2">
+          <div className="text-error text-xs bg-error/10 rounded p-2">
             <span className="font-medium">{t("errorLabel")}: </span>
             {errorMessage ?? t("unknownError")}
           </div>
