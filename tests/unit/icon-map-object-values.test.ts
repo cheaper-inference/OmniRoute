@@ -43,6 +43,11 @@ function braceBody(src: string, open: number): string | null {
   return null;
 }
 
+/** `\bNAME\b` matcher for an identifier, with every regex metacharacter escaped. */
+function identifierRe(name: string): RegExp {
+  return new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`);
+}
+
 /** Expressions that end up as an icon name: <Icon name={…}>, icon={…}, icon: …, span content. */
 export function iconSlotExpressions(src: string): string[] {
   const slots: string[] = [];
@@ -62,8 +67,7 @@ export function iconSlotExpressions(src: string): string[] {
   const hops: string[] = [];
   for (const m of src.matchAll(/\b(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*([^;\n]+)/g)) {
     const [, name, expr] = m;
-    if (slots.some((s) => new RegExp(`\\b${name.replace(/\$/g, "\\$")}\\b`).test(s)))
-      hops.push(expr);
+    if (slots.some((s) => identifierRe(name).test(s))) hops.push(expr);
   }
   return [...slots, ...hops];
 }
@@ -74,7 +78,7 @@ export function iconLookupValues(src: string): Array<{ object: string; value: st
   const found: Array<{ object: string; value: string }> = [];
   for (const m of src.matchAll(/\bconst\s+([A-Za-z_$][\w$]*)\s*(?::[^=]+)?=\s*\{/g)) {
     const name = m[1];
-    if (!slots.some((s) => new RegExp(`\\b${name.replace(/\$/g, "\\$")}\\b`).test(s))) continue;
+    if (!slots.some((s) => identifierRe(name).test(s))) continue;
     const body = braceBody(src, (m.index ?? 0) + m[0].length - 1);
     if (body == null) continue;
     const flat = !/\{/.test(body);

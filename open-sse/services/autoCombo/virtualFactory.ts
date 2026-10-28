@@ -69,6 +69,7 @@ import {
   recordAutoSurvivors,
 } from "./autoEvaluationTrace";
 import { computeAdvertisedLimits } from "./advertisedLimits";
+import { createCooperativeYieldBudget, type CooperativeYieldBudget } from "./cooperativeYield";
 
 export { computeAdvertisedLimits };
 
@@ -459,10 +460,6 @@ function getNoAuthCandidates(
 
 /** Creates a virtual AutoCombo configuration dynamically from connected providers. */
 
-// Catalog-scale pools can contain hundreds of models. Keep both candidate construction
-// and capability preparation cooperative instead of monopolising one event-loop turn.
-const VIRTUAL_AUTO_PREPARATION_YIELD_INTERVAL = 4;
-
 type PreparedCapabilityValues = {
   resolvedContextLength: number | null;
   resolvedMaxOutputTokens: number | null;
@@ -475,19 +472,18 @@ type PreparedCapabilityState = {
   /** Nested provider → model memo; collision-free for arbitrary model ids. */
   byTarget: Map<string, Map<string, PreparedCapabilityValues>>;
   resolvedSinceYield: number;
+  yieldBudget?: CooperativeYieldBudget;
   /** Build-local bulk maps; one per catalog prepare, never retained at runtime. */
   resolutionSnapshot: ModelCapabilityResolutionSnapshot;
 };
-
-function yieldVirtualAutoPreparationTurn(): Promise<void> {
-  return new Promise((resolve) => setImmediate(resolve));
-}
 
 export async function attachPreparedCapabilityValues(
   candidates: readonly VirtualAutoComboCandidate[],
   state: PreparedCapabilityState
 ): Promise<VirtualAutoComboCandidate[]> {
   const prepared: VirtualAutoComboCandidate[] = [];
+  let resolvedInThisCall = false;
+  const yieldBudget = (state.yieldBudget ??= createCooperativeYieldBudget());
   for (const candidate of candidates) {
     let byModel = state.byTarget.get(candidate.provider);
     if (!byModel) {
@@ -525,10 +521,8 @@ export async function attachPreparedCapabilityValues(
       };
       byModel.set(candidate.model, values);
       state.resolvedSinceYield++;
-      if (state.resolvedSinceYield >= VIRTUAL_AUTO_PREPARATION_YIELD_INTERVAL) {
-        state.resolvedSinceYield = 0;
-        await yieldVirtualAutoPreparationTurn();
-      }
+      resolvedInThisCall = true;
+      await yieldBudget.yieldIfDue();
     }
     prepared.push({
       ...candidate,
@@ -536,6 +530,8 @@ export async function attachPreparedCapabilityValues(
       quality: getQualityScore(candidate.provider, candidate.model),
     });
   }
+  // Preserve the snapshot's pre-publication yield without fixed per-item overhead.
+  if (resolvedInThisCall) await yieldBudget.ensureYielded();
   return prepared;
 }
 
@@ -614,7 +610,9 @@ export async function prepareVirtualAutoComboInputs(
   // Build one logical candidate per provider/model and keep account fallback as an
   // allowlist on that candidate. This avoids both the old "first registry model per
   // connection" blind spot and a connections × models Cartesian candidate pool.
-  let candidateModelsSinceYield = 0;
+  // Catalog-scale pools can contain hundreds of models. Keep both candidate construction
+  // and capability preparation cooperative instead of monopolising one event-loop turn.
+  const candidateBuildYield = createCooperativeYieldBudget();
   for (const [providerId, providerConnections] of connectionsByProvider) {
     const providerInfo = registry[providerId];
     const registryModelIds = Array.isArray(providerInfo?.models)
@@ -647,6 +645,14 @@ export async function prepareVirtualAutoComboInputs(
         (model: unknown): model is { id?: string } =>
           !!model && typeof model === "object" && !Array.isArray(model)
       );
+    const customModelIds = new Set(customModels.flatMap((model) => (model.id ? [model.id] : [])));
+    const syncedModelIdsByConnection = new Map<string, Set<string>>();
+    for (const [connectionId, models] of Object.entries(syncedByConnection)) {
+      syncedModelIdsByConnection.set(
+        connectionId,
+        new Set(models.flatMap((model) => (model.id ? [model.id] : [])))
+      );
+    }
     const userVisibleIds = new Set<string>();
     const nonChatIds = new Set<string>();
     for (const models of Object.values(syncedByConnection)) {
@@ -669,11 +675,7 @@ export async function prepareVirtualAutoComboInputs(
       : Array.from(new Set([...registryModelIds, ...defaultModelIds]));
 
     for (const modelId of modelIds) {
-      candidateModelsSinceYield++;
-      if (candidateModelsSinceYield >= VIRTUAL_AUTO_PREPARATION_YIELD_INTERVAL) {
-        candidateModelsSinceYield = 0;
-        await yieldVirtualAutoPreparationTurn();
-      }
+      await candidateBuildYield.yieldIfDue();
       if (hiddenModels?.has(modelId)) continue;
       if (nonChatIds.has(modelId)) continue;
 
@@ -683,9 +685,8 @@ export async function prepareVirtualAutoComboInputs(
           if (hasUserModels) {
             // User-synced models are scoped to the connections that carry them;
             // custom models are provider-wide like registry models.
-            const connSynced = syncedByConnection[conn.id] ?? [];
-            const isSyncedForConn = connSynced.some((m) => m.id === modelId);
-            const isCustomForProvider = customModels.some((m) => m.id === modelId);
+            const isSyncedForConn = syncedModelIdsByConnection.get(conn.id)?.has(modelId) === true;
+            const isCustomForProvider = customModelIds.has(modelId);
             return isSyncedForConn || isCustomForProvider || conn.defaultModel?.trim() === modelId;
           }
           // Registry models are provider-wide. A non-registry default (for a custom
@@ -929,22 +930,18 @@ function clonePreparedCandidates(
   }));
 }
 
-export async function createVirtualAutoComboFromPrepared(
-  prepared: PreparedVirtualAutoComboInputs,
-  variant: AutoVariant | undefined,
-  spec?: AutoComboSpec,
+/**
+ * #7819 (Level 2): per-API-key candidate exclusions. Fail-open — an absent
+ * apiKeyId/autoChannel (every caller before #7819) or a DB lookup failure
+ * both leave the pool untouched, so default (unconfigured) routing stays
+ * byte-identical to pre-#7819 behavior. Mutates `candidatePool` in place.
+ */
+async function applyCandidateOverrides(
+  candidatePool: VirtualAutoComboCandidate[],
   apiKeyId?: string,
   autoChannel?: string,
   traceInvocationId?: string
-): Promise<VirtualAutoCombo> {
-  let candidatePool = clonePreparedCandidates(
-    spec?.family ? prepared.familyCandidates : prepared.regularCandidates
-  );
-
-  // #7819 (Level 2): per-API-key candidate exclusions. Fail-open — an absent
-  // apiKeyId/autoChannel (every caller before #7819) or a DB lookup failure
-  // both leave the pool untouched, so default (unconfigured) routing stays
-  // byte-identical to pre-#7819 behavior.
+): Promise<void> {
   let excludedConnectionIds: Set<string> = new Set();
   if (apiKeyId && autoChannel) {
     try {
@@ -954,17 +951,162 @@ export async function createVirtualAutoComboFromPrepared(
     }
   }
   const overrideFilteredPool = filterExcludedCandidates(candidatePool, excludedConnectionIds);
-  if (overrideFilteredPool !== candidatePool) {
-    recordAutoDroppedCandidates(
-      traceInvocationId,
-      candidatePool,
-      overrideFilteredPool,
-      "candidate_override",
-      "candidate-override"
+  if (overrideFilteredPool === candidatePool) return;
+  recordAutoDroppedCandidates(
+    traceInvocationId,
+    candidatePool,
+    overrideFilteredPool,
+    "candidate_override",
+    "candidate-override"
+  );
+  candidatePool.length = 0;
+  candidatePool.push(...overrideFilteredPool);
+}
+
+/** Opt-in legacy behavior (category/tier only): keep the full pool when the overlay matches nothing. */
+function isFullPoolFallbackEnabled(spec: AutoComboSpec | undefined): boolean {
+  if (spec?.family) return false;
+  const flag = process.env.OMNIROUTE_AUTO_FREE_FALLBACK_TO_FULL_POOL;
+  return flag === "true" || flag === "1";
+}
+
+/**
+ * #4235 Phase B: narrow the pool by the `auto/<category>:<tier>` overlay
+ * (vision/reasoning capability, free/premium model tier).
+ *
+ * Default behavior: when the filter yields zero candidates, return an EMPTY
+ * pool — never silently fall back to the full pool. This makes
+ * `auto/coding:free` actually mean "free tier only" and prevents a paid
+ * expensive model from being picked just because no free provider is
+ * connected. Operators who want the old "never break routing, lose the bias"
+ * behavior can opt back in via the env var below.
+ *
+ * #6453: `auto/<family>` narrows by model family instead of category/tier. The
+ * two overlays are mutually exclusive on the spec (family takes precedence when
+ * both are somehow present, which callers never do in practice).
+ */
+function narrowPoolByCategoryTier(
+  candidatePool: VirtualAutoComboCandidate[],
+  spec: AutoComboSpec | undefined,
+  traceInvocationId?: string
+): VirtualAutoComboCandidate[] {
+  const candidateFilter = spec?.family
+    ? buildFamilyCandidateFilter(spec.family)
+    : spec
+      ? buildAutoCandidateFilter(spec.category, spec.tier)
+      : null;
+  if (!candidateFilter) return candidatePool;
+
+  const narrowed = candidatePool.filter((candidate) => candidateFilter(candidate));
+  recordAutoDroppedCandidates(
+    traceInvocationId,
+    candidatePool,
+    narrowed,
+    "category_tier",
+    "category-tier"
+  );
+  if (narrowed.length > 0) return narrowed;
+
+  const label = spec?.family
+    ? `auto/${spec.family}`
+    : `auto/${spec?.category ?? ""}${spec?.tier ? `:${spec.tier}` : ""}`;
+  if (isFullPoolFallbackEnabled(spec)) {
+    // Opt-in legacy behavior (category/tier only): warn loudly, then keep the full pool.
+    log.warn(
+      "AUTO",
+      `${label} matched no connected models; falling back to the full pool (OMNIROUTE_AUTO_FREE_FALLBACK_TO_FULL_POOL=true)`
     );
-    candidatePool.length = 0;
-    candidatePool.push(...overrideFilteredPool);
+    return candidatePool;
   }
+  // Family combos always degrade to an empty pool when unavailable — a family
+  // is a hard identity constraint, not a soft optimization bias, so there is
+  // no sensible "fall back to the full pool" behavior for it.
+  warnEmptyAutoPoolOnce(
+    label,
+    `${label} matched no connected models; returning an empty pool.${spec?.family ? "" : ' Set OMNIROUTE_AUTO_FREE_FALLBACK_TO_FULL_POOL=true to restore the legacy "use full pool" behavior.'}`
+  );
+  return [];
+}
+
+/**
+ * Subscription-first routing (`auto/subscription`, `auto/thrifty`). Applied
+ * AFTER the category/tier narrowing above because, unlike every other tier,
+ * these two select on the connection's billing class and its live quota
+ * state rather than on the model's catalog price — see
+ * `subscriptionLadder.ts` and `docs/routing/SUBSCRIPTION_LADDER.md`.
+ */
+function applySubscriptionLadder(
+  prepared: PreparedVirtualAutoComboInputs,
+  tier: "subscription" | "thrifty",
+  effectivePool: VirtualAutoComboCandidate[],
+  traceInvocationId?: string
+): VirtualAutoComboCandidate[] {
+  const ladderOptions = buildLadderOptions(prepared, tier);
+  const beforeCount = effectivePool.length;
+  const ordered =
+    tier === "subscription"
+      ? filterSubscriptionOnlyCandidates(effectivePool, ladderOptions)
+      : orderPoolByRung(effectivePool, ladderOptions);
+  recordAutoDroppedCandidates(
+    tier === "subscription" ? traceInvocationId : undefined,
+    effectivePool,
+    ordered,
+    "subscription_ladder",
+    "subscription-ladder"
+  );
+  if (tier === "subscription" && ordered.length === 0 && beforeCount > 0) {
+    // Intended, not a defect: the operator asked for plan-included capacity
+    // only, and right now there is none with verified headroom. Failing
+    // closed here is the entire promise of the id — the caller's existing
+    // empty-pool path turns it into a clear error rather than a silent,
+    // billable fallback.
+    warnEmptyAutoPoolOnce(
+      "auto/subscription",
+      "auto/subscription: no plan-included connection has verified quota headroom; " +
+        "returning an empty pool rather than falling back to paid capacity."
+    );
+  }
+  return ordered;
+}
+
+export async function selectVirtualAutoCandidatePool(
+  prepared: PreparedVirtualAutoComboInputs,
+  spec?: AutoComboSpec,
+  apiKeyId?: string,
+  autoChannel?: string,
+  traceInvocationId?: string
+): Promise<{
+  candidatePool: VirtualAutoComboCandidate[];
+  effectivePool: VirtualAutoComboCandidate[];
+}> {
+  const candidatePool = clonePreparedCandidates(
+    spec?.family ? prepared.familyCandidates : prepared.regularCandidates
+  );
+  await applyCandidateOverrides(candidatePool, apiKeyId, autoChannel, traceInvocationId);
+  if (candidatePool.length === 0) return { candidatePool, effectivePool: candidatePool };
+
+  let effectivePool = narrowPoolByCategoryTier(candidatePool, spec, traceInvocationId);
+  if (spec?.tier === "subscription" || spec?.tier === "thrifty") {
+    effectivePool = applySubscriptionLadder(prepared, spec.tier, effectivePool, traceInvocationId);
+  }
+  return { candidatePool, effectivePool };
+}
+
+export async function createVirtualAutoComboFromPrepared(
+  prepared: PreparedVirtualAutoComboInputs,
+  variant: AutoVariant | undefined,
+  spec?: AutoComboSpec,
+  apiKeyId?: string,
+  autoChannel?: string,
+  traceInvocationId?: string
+): Promise<VirtualAutoCombo> {
+  const { candidatePool, effectivePool } = await selectVirtualAutoCandidatePool(
+    prepared,
+    spec,
+    apiKeyId,
+    autoChannel,
+    traceInvocationId
+  );
   if (candidatePool.length === 0) {
     log.warn("AUTO", "No connected providers with valid credentials for virtual auto-combo");
     const emptyPool: string[] = [];
@@ -992,93 +1134,6 @@ export async function createVirtualAutoComboFromPrepared(
     };
   }
 
-  // #4235 Phase B: narrow the pool by the `auto/<category>:<tier>` overlay
-  // (vision/reasoning capability, free/premium model tier).
-  //
-  // Default behavior: when the filter yields zero candidates, return an EMPTY
-  // pool — never silently fall back to the full pool. This makes
-  // `auto/coding:free` actually mean "free tier only" and prevents a paid
-  // expensive model from being picked just because no free provider is
-  // connected. Operators who want the old "never break routing, lose the bias"
-  // behavior can opt back in via the env var below.
-  let effectivePool = candidatePool;
-  // #6453: `auto/<family>` narrows by model family instead of category/tier. The
-  // two overlays are mutually exclusive on the spec (family takes precedence when
-  // both are somehow present, which callers never do in practice).
-  const candidateFilter = spec?.family
-    ? buildFamilyCandidateFilter(spec.family)
-    : spec
-      ? buildAutoCandidateFilter(spec.category, spec.tier)
-      : null;
-  if (candidateFilter) {
-    const narrowed = candidatePool.filter((candidate) => candidateFilter(candidate));
-    recordAutoDroppedCandidates(
-      traceInvocationId,
-      candidatePool,
-      narrowed,
-      "category_tier",
-      "category-tier"
-    );
-    const label = spec?.family
-      ? `auto/${spec.family}`
-      : `auto/${spec?.category ?? ""}${spec?.tier ? `:${spec.tier}` : ""}`;
-    if (narrowed.length > 0) {
-      effectivePool = narrowed;
-    } else if (
-      !spec?.family &&
-      (process.env.OMNIROUTE_AUTO_FREE_FALLBACK_TO_FULL_POOL === "true" ||
-        process.env.OMNIROUTE_AUTO_FREE_FALLBACK_TO_FULL_POOL === "1")
-    ) {
-      // Opt-in legacy behavior (category/tier only): warn loudly, then keep the full pool.
-      log.warn(
-        "AUTO",
-        `${label} matched no connected models; falling back to the full pool (OMNIROUTE_AUTO_FREE_FALLBACK_TO_FULL_POOL=true)`
-      );
-    } else {
-      // Family combos always degrade to an empty pool when unavailable — a family
-      // is a hard identity constraint, not a soft optimization bias, so there is
-      // no sensible "fall back to the full pool" behavior for it.
-      warnEmptyAutoPoolOnce(
-        label,
-        `${label} matched no connected models; returning an empty pool.${spec?.family ? "" : ' Set OMNIROUTE_AUTO_FREE_FALLBACK_TO_FULL_POOL=true to restore the legacy "use full pool" behavior.'}`
-      );
-      effectivePool = [];
-    }
-  }
-
-  // Subscription-first routing (`auto/subscription`, `auto/thrifty`). Applied
-  // AFTER the category/tier narrowing above because, unlike every other tier,
-  // these two select on the connection's billing class and its live quota
-  // state rather than on the model's catalog price — see
-  // `subscriptionLadder.ts` and `docs/routing/SUBSCRIPTION_LADDER.md`.
-  if (spec?.tier === "subscription" || spec?.tier === "thrifty") {
-    const ladderOptions = buildLadderOptions(prepared, spec.tier);
-    const beforePool = effectivePool;
-    const beforeCount = effectivePool.length;
-    effectivePool =
-      spec.tier === "subscription"
-        ? filterSubscriptionOnlyCandidates(effectivePool, ladderOptions)
-        : orderPoolByRung(effectivePool, ladderOptions);
-    recordAutoDroppedCandidates(
-      spec.tier === "subscription" ? traceInvocationId : undefined,
-      beforePool,
-      effectivePool,
-      "subscription_ladder",
-      "subscription-ladder"
-    );
-    if (spec.tier === "subscription" && effectivePool.length === 0 && beforeCount > 0) {
-      // Intended, not a defect: the operator asked for plan-included capacity
-      // only, and right now there is none with verified headroom. Failing
-      // closed here is the entire promise of the id — the caller's existing
-      // empty-pool path turns it into a clear error rather than a silent,
-      // billable fallback.
-      warnEmptyAutoPoolOnce(
-        "auto/subscription",
-        "auto/subscription: no plan-included connection has verified quota headroom; " +
-          "returning an empty pool rather than falling back to paid capacity."
-      );
-    }
-  }
   let weights: ScoringWeights = { ...DEFAULT_WEIGHTS };
   let explorationRate = 0.05; // Default exploration rate
   let routerStrategy = "lkgp"; // All auto variants use LKGP

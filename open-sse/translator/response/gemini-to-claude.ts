@@ -1,3 +1,4 @@
+import { extractXmlInvokeBlocks } from "../helpers/xmlToolCalls.ts";
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import {
@@ -17,145 +18,6 @@ import {
 
 function normalizeToolName(name: string, toolNameMap: unknown, clientTools: unknown): string {
   return restoreDeclaredToolName(name, toolNameMap, clientTools);
-}
-
-function extractXmlInvokeBlocks(
-  text: string,
-  state: { _xmlInvokeBuffer?: string }
-): {
-  cleaned: string;
-  toolCalls: Array<{ id: string; name: string; args: Record<string, unknown> }>;
-} {
-  const toolCalls: Array<{ id: string; name: string; args: Record<string, unknown> }> = [];
-  const combined = (state._xmlInvokeBuffer || "") + text;
-  state._xmlInvokeBuffer = "";
-  let remaining = combined;
-  let cleaned = "";
-
-  while (remaining.length > 0) {
-    const invokeMatch = remaining.match(/<invoke\s+name="([^"]*)"\s*>/);
-    const toolCallTagMatch = remaining.match(/<tool_call>/);
-    const toolCallTextMatch = remaining.match(/TOOL_CALL\s+([A-Za-z0-9_]+):\s*/);
-
-    const matches = [
-      invokeMatch
-        ? { type: "invoke" as const, index: invokeMatch.index!, data: invokeMatch }
-        : null,
-      toolCallTagMatch
-        ? { type: "tool_call_tag" as const, index: toolCallTagMatch.index!, data: toolCallTagMatch }
-        : null,
-      toolCallTextMatch
-        ? {
-            type: "tool_call_text" as const,
-            index: toolCallTextMatch.index!,
-            data: toolCallTextMatch,
-          }
-        : null,
-    ]
-      .filter(Boolean)
-      .sort((a, b) => a!.index - b!.index);
-
-    if (matches.length === 0) {
-      cleaned += remaining;
-      break;
-    }
-
-    const first = matches[0]!;
-    cleaned += remaining.slice(0, first.index);
-    const rest = remaining.slice(first.index);
-
-    if (first.type === "invoke") {
-      const startMatch = first.data;
-      const endMatch = rest.match(/<\/invoke>/);
-      if (!endMatch) {
-        state._xmlInvokeBuffer = rest;
-        break;
-      }
-      const innerXml = rest.slice(startMatch[0].length, endMatch.index!);
-      const fullLength = endMatch.index! + endMatch[0].length;
-      const args: Record<string, string> = {};
-      const paramRegex = /<parameter\s+name="([^"]*)"[^>]*>([\s\S]*?)<\/parameter>/g;
-      let pm;
-      while ((pm = paramRegex.exec(innerXml)) !== null) {
-        args[pm[1]] = pm[2].trim();
-      }
-      toolCalls.push({
-        id: `toolu_xml_${Date.now()}_${toolCalls.length}`,
-        name: startMatch[1],
-        args,
-      });
-      remaining = rest.slice(fullLength);
-    } else if (first.type === "tool_call_tag") {
-      const endMatch = rest.match(/<\/tool_call>/);
-      if (!endMatch) {
-        state._xmlInvokeBuffer = rest;
-        break;
-      }
-      const innerJson = rest.slice("<tool_call>".length, endMatch.index!).trim();
-      const fullLength = endMatch.index! + "</tool_call>".length;
-      try {
-        const parsed = JSON.parse(innerJson) as Record<string, unknown>;
-        const name = (parsed.name || parsed.tool_name || "") as string;
-        const rawArgs = parsed.arguments || parsed.args || parsed.parameters || {};
-        const args: Record<string, unknown> =
-          typeof rawArgs === "string" ? JSON.parse(rawArgs) : (rawArgs as Record<string, unknown>);
-        if (name) {
-          toolCalls.push({ id: `toolu_txt_${Date.now()}_${toolCalls.length}`, name, args });
-        }
-      } catch {
-        cleaned += rest.slice(0, fullLength);
-      }
-      remaining = rest.slice(fullLength);
-    } else {
-      const startMatch = first.data;
-      const toolName = startMatch[1];
-      const afterPrefix = rest.slice(startMatch[0].length);
-      let depth = 0,
-        inString = false,
-        escape = false,
-        jsonEndIndex = -1;
-      for (let i = 0; i < afterPrefix.length; i++) {
-        const c = afterPrefix[i];
-        if (escape) {
-          escape = false;
-          continue;
-        }
-        if (c === "\\" && inString) {
-          escape = true;
-          continue;
-        }
-        if (c === '"') {
-          inString = !inString;
-          continue;
-        }
-        if (!inString) {
-          if (c === "{") depth++;
-          else if (c === "}") {
-            depth--;
-            if (depth === 0) {
-              jsonEndIndex = i + 1;
-              break;
-            }
-          }
-        }
-      }
-      if (jsonEndIndex === -1) {
-        state._xmlInvokeBuffer = rest;
-        break;
-      }
-      const jsonStr = afterPrefix.slice(0, jsonEndIndex);
-      const fullLength = startMatch[0].length + jsonEndIndex;
-      try {
-        const args = JSON.parse(jsonStr) as Record<string, unknown>;
-        toolCalls.push({ id: `toolu_txt_${Date.now()}_${toolCalls.length}`, name: toolName, args });
-      } catch {
-        cleaned += rest.slice(0, fullLength);
-      }
-      remaining = rest.slice(fullLength);
-    }
-  }
-
-  return { cleaned, toolCalls };
 }
 
 // Helper: flush any buffered Markdown boundary text before closing the open text block
@@ -512,21 +374,65 @@ export function geminiToClaudeResponse(chunk, state) {
   // ── Usage metadata ─────────────────────────────────────────────
   const usageMeta = response.usageMetadata || chunk.usageMetadata;
   if (usageMeta && typeof usageMeta === "object") {
+    const previousUsage = state.usage;
+    const previousRawInput =
+      (previousUsage?.input_tokens ?? 0) + (previousUsage?.cache_read_input_tokens ?? 0);
     const inputTokens =
-      typeof usageMeta.promptTokenCount === "number" ? usageMeta.promptTokenCount : 0;
+      typeof usageMeta.promptTokenCount === "number" &&
+      Number.isFinite(usageMeta.promptTokenCount) &&
+      usageMeta.promptTokenCount >= 0
+        ? usageMeta.promptTokenCount
+        : previousRawInput;
     const candidatesTokens =
-      typeof usageMeta.candidatesTokenCount === "number" ? usageMeta.candidatesTokenCount : 0;
+      typeof usageMeta.candidatesTokenCount === "number" &&
+      Number.isFinite(usageMeta.candidatesTokenCount) &&
+      usageMeta.candidatesTokenCount >= 0
+        ? usageMeta.candidatesTokenCount
+        : (previousUsage?.output_tokens ?? 0);
     const thoughtsTokens =
-      typeof usageMeta.thoughtsTokenCount === "number" ? usageMeta.thoughtsTokenCount : 0;
+      typeof usageMeta.thoughtsTokenCount === "number" &&
+      Number.isFinite(usageMeta.thoughtsTokenCount) &&
+      usageMeta.thoughtsTokenCount >= 0
+        ? usageMeta.thoughtsTokenCount
+        : 0;
+    const hasCachedCount = Object.prototype.hasOwnProperty.call(
+      usageMeta,
+      "cachedContentTokenCount"
+    );
+    const reportedCachedTokens = usageMeta.cachedContentTokenCount;
     const cachedTokens =
-      typeof usageMeta.cachedContentTokenCount === "number" ? usageMeta.cachedContentTokenCount : 0;
+      typeof reportedCachedTokens === "number" &&
+      Number.isFinite(reportedCachedTokens) &&
+      reportedCachedTokens >= 0 &&
+      reportedCachedTokens <= inputTokens
+        ? reportedCachedTokens
+        : undefined;
+    const previousCachedTokens = previousUsage?.cache_read_input_tokens;
+    const effectiveCachedTokens =
+      cachedTokens ??
+      (!hasCachedCount &&
+      typeof previousCachedTokens === "number" &&
+      previousCachedTokens <= inputTokens
+        ? previousCachedTokens
+        : undefined);
+
+    state.cacheEvidence = hasCachedCount
+      ? cachedTokens === undefined
+        ? "invalid"
+        : cachedTokens > 0
+          ? "hit"
+          : "miss"
+      : "unreported";
 
     state.usage = {
-      input_tokens: Math.max(0, inputTokens - cachedTokens),
+      input_tokens: Math.max(
+        0,
+        inputTokens - (typeof effectiveCachedTokens === "number" ? effectiveCachedTokens : 0)
+      ),
       output_tokens: candidatesTokens + thoughtsTokens,
     };
-    if (cachedTokens > 0) {
-      state.usage.cache_read_input_tokens = cachedTokens;
+    if (typeof effectiveCachedTokens === "number") {
+      state.usage.cache_read_input_tokens = effectiveCachedTokens;
     }
   }
 

@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | Датотека                      | Намена                                               |
 | ----------------------------- | ---------------------------------------------------- |
-| `providerRegistry.ts`         | Регистар chat-модела над каталогом од 375 провајдера |
+| `providerRegistry.ts`         | Регистар chat-модела над каталогом од 376 провајдера |
 | `providerModels.ts`           | Алијаси модела, мапирање формата                     |
 | `constants.ts`                | Тајмаути, лимити, статусни кодови                    |
 | `defaultThinkingSignature.ts` | Подразумевани потпис размишљања за Claude            |

@@ -14,248 +14,216 @@ a na-enyochakwa ya tupu ngalaba nyocha njirimara ọ bụla ọzọ amalite.
 
 ### Ọkwa 1 — LOCAL_ONLY
 
-**Ndị na-amanye ya:** `isLocalOnlyPath(path)` → nyocha host loopback  
-**Ụzọ mgbapụ:** Enweghị nke ndabara. E nwere obere mwepu maka path ndị dị na
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` mgbe arịrịọ ahụ nwere API key ziri ezi
-nke nwere scope `manage` (lee [Mwepu scope manage](#manage-scope-carve-out)).
+**Ihe na-amanye ya:** `isLocalOnlyPath(path)` → nlele host loopback
+**Ịgafere:** Enweghị n'ọnọdụ izizi. Nkwepụ warara maka ụzọ dị na
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` mgbe arịrịa ahụ na-ebu
+API key ziri ezi nke nwere oke `manage` (lee [Nkwepụ oke manage](#manage-scope-carve-out)).
 
-Route ndị a na-amalite child process ma ọ bụ na-eme runtime code. Ime ka traffic
-na-abụghị loopback nwee ike iru ha ga-enye onye mwakpo nwetara JWT ziri ezi
-(dịka ọmụmaatụ, site na tunnel Cloudflared/Ngrok) ohere ịkpalite mmalite
-process — otu CVE a ma ama
-([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+Ụzọ ndị a na-amụpụta child processes ma ọ bụ na-agba koodu runtime ọsọ. Ime ka
+traffic na-abụghị loopback ruo ha ga-eme ka onye na-awakpo nke nwetara JWT ziri
+ezi (dị ka, site na tunnel Cloudflared/Ngrok) kpalite mụpụta usoro — otu ụdị
+CVE a ma ama ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**Ihe GHSA-fhh6-4qxv-rpqj bụ (ụdị mwakpo ahụ):** server njikwa/agent
-na-ekpughe endpoint nke na-amalite subprocess (`npm install`, `node`, browser,
-proxy, `git`, `tar`, …). Ọ bụrụ na enwere ike iru endpoint ahụ site n'èzí host —
-n'ihi na onye na-ahụ maka sistemụ tinyere OmniRoute n'azụ tunnel
-nginx/Cloudflare/Tailscale ma JWT agbapụ, ma ọ bụ na ahazighị auth nke ọma —
-onye mwakpo ahụ na-agbanwe “ịkpọ API” ka ọ bụrụ “ịgba command na host”
-(remote code execution). OmniRoute na-egbochi nke a site n'ịmanye
-**nyocha host loopback n'enweghị ọnọdụ ọ bụla, tupu nyocha auth ọ bụla**, na
-route ọ bụla nwere ike ịmalite process: token gbapụrụ site na tunnel ka na-enweghị
-ike iru ebe a na-amalite process.
+**Ihe GHSA-fhh6-4qxv-rpqj bụ (ụdị mwakpo ahụ):** server nchịkwa/agent
+na-emeghe endpoint nke na-amalite subprocess (`npm install`, `node`, browser,
+proxy, `git`, `tar`, …). Ọ bụrụ na a pụrụ iru endpoint ahụ site n'èzí host —
+n'ihi na onye ọrụ ahụ tinyere OmniRoute n'azu tunnel nginx/Cloudflare/Tailscale
+ma JWT gbapụta, ma ọ bụ na e hazighị auth nke ọma — onye na-awakpo ahụ
+na-atụgharị "kụọ API" ka ọ bụrụ "gba iwu ọsọ n'elu host" (ịgba koodu ọsọ site
+n'ebe dị anya). OmniRoute na-emechi nke a site na ịmanye **nlele host loopback
+n'enweghị ọnọdụ, tupu nlele auth ọ bụla**, na ụzọ ọ bụla nwere ike ịmụpụta:
+token gbapụtara site na tunnel ka enweghị ike iru ebe mụpụta ahụ.
 
-**Nchịkọta LOCAL_ONLY zuru ezu.** Isi mmalite nwere ikike bụ
+**Nchịkọta LOCAL_ONLY zuru oke.** Isi ike kacha elu bụ
 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` dị na
-`src/server/authz/routeGuard.ts`; tebụl dị n'okpuru na-egosipụta ọnọdụ dị ugbu a.
-Gate `check-route-guard-membership` na-edepụta `route.ts` ọ bụla dị n'okpuru
-prefix ndị nwere ike ịmalite process ma mee ka CI daa ma ọ bụrụ na e kewaghị
-nke ọ bụla dịka local-only.
+`src/server/authz/routeGuard.ts`; tebụl dị n'okpuru na-egosipụta ọnọdụ ugbu a.
+Ọnụ ụzọ `check-route-guard-membership` na-agụta `route.ts` ọ bụla dị n'okpuru
+prefixes nwere ike ịmụpụta, ọ na-eme ka CI daa ọ bụrụ na a kọwaghị nke ọ bụla
+dị ka local-only.
 
-| Prefix / ụkpụrụ                                                                                          | Ihe mere o ji bụrụ naanị nke mpaghara                                                                            |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | Sava MCP — na-ebido njikọ stdio + ndị njikwa SSE                                                                 |
-| `/api/cli-tools/runtime/`                                                                                | Oge ọrụ ngwaọrụ CLI — na-eme koodu plugin ọ bụla                                                                 |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Ndị na-ede ntọala nke ngwaọrụ ọ bụla, ndị nwere ike imetụ binary/nhazi ngwaọrụ dị na host aka                    |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Otu mbido `getCliRuntimeStatus()` ahụ nke ụmụnne isii dị n'elu na-eji (GHSA-35fw-cv32-2373)                      |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Nnyocha ndepụta CLI — na-ebido `command -v` / `--version` maka ngwaọrụ ọ bụla (GHSA-35fw-cv32-2373)              |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Njikwa proxy Antigravity MITM (na-ebido/na-atụ proxy sistemụ aka)                                                |
-| `/api/modality-bridge/video/`                                                                            | Nnyocha oge ọrụ Video Bridge nke loopback a tụkwasịrị obi nke ọma na njikọ mwepụta ime                           |
-| `/api/services/`                                                                                         | Ọrụ agbakwunyere (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + mbido                            |
-| `/dashboard/providers/services/`                                                                         | Reverse proxy gaa na UI nke ọrụ agbakwunyere                                                                     |
-| `/api/tunnels/cloudflared`                                                                               | Na-etinye/na-ebido binary cloudflared                                                                            |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Na-etinye/na-achịkwa tailscaled na host                                                                          |
-| `/api/copilot/`                                                                                          | Draịva LLM na-enweghị nyocha njirimara — naanị CLI na ndabara                                                    |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — na-ebido sava MITM + ndezi DNS                                                                     |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — onye na-ege http-proxy ntị + proxy sistemụ                                                   |
-| `/api/settings/mitm`                                                                                     | Na-eme ka njide MITM rụọ ọrụ (ọnọdụ proxy n'ọkwa sistemụ)                                                        |
-| `/api/issue-agent/`                                                                                      | Agent nsogbu — na-ebido ngwaọrụ mpaghara megide repo                                                             |
-| `/api/plugins/`, `/api/plugins`                                                                          | Plugin — na-ebunye/na-eme site na `worker_threads` + `child_process`                                             |
-| `/api/middleware/`                                                                                       | Middleware onye ọrụ — na-ebunye/na-eme koodu onye na-ahụ maka sistemụ n'ime usoro ahụ                            |
-| `/api/system/version`                                                                                    | Mmelite akpaaka (naanị POST; ewepụrụ GET/HEAD/OPTIONS) — na-ebido `git checkout` + `npm install`                 |
-| `/api/db-backups/exportAll`                                                                              | Na-ebido `tar` maka ebe nchekwa mbupụ                                                                            |
-| `/api/local/`                                                                                            | Ndị na-ebido ihe mpaghara site n'otu ọpịpị (Redis ugbu a) — na-ebido podman/docker                               |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Usoro ndụ proxy Headroom — na-ebido Python CLI / na-eziga PID akara                                              |
-| `/api/jobs`, `/api/jobs/`                                                                                | Njikwa onye na-eme ọrụ — na-eme ọrụ ndị a haziri ka ha rụọ n'akụkụ host                                          |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` tupu ibubata nzere                                                               |
-| `/api/oauth/kiro/auto-import`                                                                            | Na-agụ faịlụ nzere Kiro CLI site na host                                                                         |
-| `/api/skills/collect/`                                                                                   | Nchịkọta nkà — na-achọpụta/na-etinye ngwaọrụ mpaghara                                                            |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Ndebanye aha + mmebe onye njikwa nka — na-erute mmalite sandbox container (GHSA-jx89)                            |
-| `/api/discovery/`                                                                                        | Nnyocha nchọpụta netwọkụ/onye na-eweta dị na mpaghara                                                            |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Na-amalite ihe nchọgharị nwere UI + nnọkọ VNC maka nbanye mmekọrịta                                              |
-| `/api/acp/agents`                                                                                        | ACP — na-achọpụta ma na-amalite faịlụ binary nke ndị nnọchi anya CLI dị na mpaghara                              |
-| `/api/resilience/connections`                                                                            | JSON nkwụsi ike nke akaụntụ ọ bụla (oge nchere, breaker, mkpọchi). HTML dashboard ahụ abụghị naanị nke mpaghara. |
-| `/api/providers/cursor/agent-availability`                                                               | Nnyocha mkpali-nwụnye nke dashboard — na-amalite `cursor-agent status --format json`                             |
-| `/api/providers/{id}/login` (regex)                                                                      | Na-ebido Playwright Chromium nwere UI maka nbanye site na kuki webụ                                              |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Usoro aka nwere UI + nbanye akpaaka site na ekwentị/SMS dabere na nnọkọ (na-amalite Playwright)                  |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Mmegharị nnọkọ Cursor nke aka — na-akpali `cursor-agent`                                                         |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Na-enyocha nsogbu nrụnye Codex CLI dị na mpaghara (na-amalite faịlụ binary ahụ)                                  |
+| Nsonaazụ / ụkpụrụ                                                                                        | Ihe mere ọ bụ naanị nke obodo                                                                               |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP server — na-ebido stdio bridges + SSE handlers                                                          |
+| `/api/cli-tools/runtime/`                                                                                | CLI tool runtime — na-agba ọsọ koodu plugin ọ bụla                                                          |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Ndị na-ede ntọala nke tool ọ bụla nke nwere ike ịmetụ binaries/config nke tool na host                      |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Otu spawn `getCliRuntimeStatus()` ahụ dị ka ụmụnna isii ya dị n'elu (GHSA-35fw-cv32-2373)                   |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI inventory probes — na-ebido `command -v` / `--version` maka tool ọ bụla (GHSA-35fw-cv32-2373)           |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Njikwa Antigravity MITM proxy (na-ebido/na-egosi system proxy)                                              |
+| `/api/modality-bridge/video/`                                                                            | Probe runtime Video Bridge trusted-loopback siri ike na bridge ntọpụ nke ime                                |
+| `/api/services/`                                                                                         | Ọrụ etinyere (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn                           |
+| `/dashboard/providers/services/`                                                                         | Reverse proxy na-eduga na UIs nke ọrụ etinyere                                                              |
+| `/api/tunnels/cloudflared`                                                                               | Na-etinye/na-ebido binary cloudflared                                                                       |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Na-etinye/na-achịkwa tailscaled na host                                                                     |
+| `/api/copilot/`                                                                                          | LLM driver na-enweghị nyocha njirimara — naanị CLI na ndabara                                               |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — na-ebido MITM server + ndezi DNS                                                              |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy listener + system proxy                                                      |
+| `/api/settings/mitm`                                                                                     | Na-eme ka MITM interception rụọ ọrụ (ọnọdụ proxy n'ọkwa sistemụ)                                            |
+| `/api/issue-agent/`                                                                                      | Issue agent — na-ebido ngwaọrụ obodo megide repo                                                            |
+| `/api/plugins/`, `/api/plugins`                                                                          | Plugins — na-ebu/na-agba ọsọ site na `worker_threads` + `child_process`                                     |
+| `/api/middleware/`                                                                                       | Middleware onye ọrụ — na-ebu/na-agba ọsọ koodu operator n'ime usoro ahụ                                     |
+| `/api/system/version`                                                                                    | Auto-update (POST naanị; a wepụrụ GET/HEAD/OPTIONS) — na-ebido `git checkout` + `npm install`               |
+| `/api/db-backups/exportAll`                                                                              | Na-ebido `tar` maka archive mbupụ                                                                           |
+| `/api/local/`                                                                                            | Ndị mgbalite obodo n'otu click (Redis ugbu a) — na-ebido podman/docker                                      |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Usoro ndụ Headroom proxy — na-ebido python CLI / na-eziga PID signal                                        |
+| `/api/jobs`, `/api/jobs/`                                                                                | Njikwa job runner — na-arụ ọrụ a haziri n'akụkụ host                                                        |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` tupu ịbubata creds                                                          |
+| `/api/oauth/kiro/auto-import`                                                                            | Na-agụ faịlụ njirimara Kiro CLI site na host                                                                |
+| `/api/skills/collect/`                                                                                   | Nchịkọta skill — na-achọpụta/na-etinye ngwaọrụ obodo                                                        |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Ndebanye njikwa Skill + igbu ọrụ — na-eru mmalite sandbox container (GHSA-jx89)                             |
+| `/api/discovery/`                                                                                        | Nyocha nchọpụta netwọk/provider mpaghara                                                                    |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Na-amalite browser headful + nnọkọ VNC maka nbanye mmekọrịta                                                |
+| `/api/acp/agents`                                                                                        | ACP — na-achọpụta ma na-amalite binaries nke agent CLI mpaghara                                             |
+| `/api/resilience/connections`                                                                            | JSON resilience maka akaụntụ ọ bụla (cooldown, breaker, lockout). HTML dashboard abụghị nke mpaghara naanị. |
+| `/api/providers/cursor/agent-availability`                                                               | Nlele install-nudge dashboard — na-amalite `cursor-agent status --format json`                              |
+| `/api/providers/{id}/login` (regex)                                                                      | Na-ebido Playwright Chromium headful maka nbanye web-cookie                                                 |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Usoro headful nke aka + nbanye akpaghị aka nke ekwentị/SMS dabere na nnọkọ (na-amalite Playwright)          |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Mmelite nnọkọ Cursor nke aka — na-akpali `cursor-agent`                                                     |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Na-enye nyocha ntinye Codex CLI mpaghara (na-amalite binary)                                                |
 
-**Nzaghachi mgbe e mebiri iwu:** `403 LOCAL_ONLY`
+**Nzaghachi na mmejọ:** `403 LOCAL_ONLY`
 
-#### Mwepu maka scope njikwa
+#### Nkwụsịtụ pụrụ iche nke manage-scope
 
-Enwere ike ịnweta otu obere akụkụ nke ụzọ LOCAL_ONLY site na adreesị na-abụghị loopback ma ọ bụrụ,
-na naanị ma ọ bụrụ, na arịrịọ ahụ bu `Authorization: Bearer <api-key>` nke
-metadata ya gụnyere scope `manage` (ma ọ bụ `admin`). A na-achịkwa mwepu ahụ
-n'ụzọ doro anya maka ụzọ ọ bụla site na `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ka
-ndabara maka ụzọ LOCAL_ONLY ọhụrụ ọ bụla wee nọgide bụrụ naanị-loopback siri ike. A ka na-ajụ
-arịrịọ na-enweghị nkwenye njirimara na arịrịọ nwere key na-abụghị nke njikwa site na
+Otu ngwa nke ụzọ LOCAL_ONLY NWERE IKE ịnweta site na non-loopback ma ọ bụrụ
+naanị ma arịrị ahụ na-ebu `Authorization: Bearer <api-key>` nke metadata ya
+gụnyere scope `manage` (ma ọ bụ `admin`). A na-achịkwa nkwụsịtụ a kpọmkwem
+maka ụzọ ọ bụla site na `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ka ndabara
+maka ụzọ LOCAL_ONLY ọhụrụ ọ bụla ka nọrọ strict-loopback. A ka na-ajụ arịrị
+ndị a na-enweghị nyocha na arịrị ndị nwere igodo na-abụghị manage site na
 `403 LOCAL_ONLY`.
 
-Taa, naanị prefix enwere ike ịgafe bụ `/api/mcp/`. E wepụrụ `/api/cli-tools/runtime/` na
-`/api/services/` n'ebumnuche n'ihi na ha nwere ike ịmalite subprocess ọ bụla
-(`npm install`, `node`), nke bụ kpọmkwem ụdị CVE e kere ọkwa
-LOCAL_ONLY iji gbochie.
+Taa, prefix naanị a nwere ike ịgafe bụ `/api/mcp/`. A gbara
+`/api/cli-tools/runtime/` na `/api/services/` na nzube n'ihi na ha nwere ike
+ịmalite subprocesses ọ bụla (`npm install`, `node`), nke bụ kpọmkwem ụdị CVE
+nke ogo LOCAL_ONLY dị iji gbochie.
 
-**#7895 — scope dị warara nke `mcp:connect`:** mwepu `/api/mcp/` NA-ANABATAKWA
-Bearer key nwere scope dị warara `mcp:connect`
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), nke a na-enyocha site na
-`hasMcpConnectOrManageScope()` n'ime `src/server/authz/policies/management.ts`.
-E nwere oke ya na `/api/mcp/` NAANỊ — `mcp:connect` anaghị enye ikike ọ bụla n'ụzọ njikwa
-ọ bụla ọzọ (gụnyere prefix ngafe LOCAL_ONLY ọ bụla ọzọ, ma ọ bụrụ na agbakwunye otu
-mgbe ọ bụla), ma e wepụrụ ya n'ebumnuche na
-`MANAGEMENT_API_KEY_SCOPES`. Key nwere `manage`/`admin` ka ga-agafe
-mwepu ahụ kpọmkwem dịka ọ dị na mbụ; `mcp:connect` bụ nhọrọ nwere ikike dị ala
-maka ndị na-akpọ oku MCP-naanị site n'ebe dị anya, ndị na-ekwesịghị ịchọ ohere njikwa sara mbara.
+**#7895 — `mcp:connect` scope warara:** nkwụsịtụ `/api/mcp/` NA-ANABATAKWA
+igodo Bearer ji scope warara `mcp:connect`
+(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), nke e
+nyochachara site na `hasMcpConnectOrManageScope()` na
+`src/server/authz/policies/management.ts`. Nke a bụ naanị maka `/api/mcp/` —
+`mcp:connect` anaghi enye ihe ọ bụla na ụzọ njikwa ọzọ ọ bụla (gụnyere prefix
+bypass LOCAL_ONLY ọzọ ọ bụla, ọ bụrụla na a gbakwunyere otu), ma a gbarakwa ya
+na nzube n'ime `MANAGEMENT_API_KEY_SCOPES`. Igodo ji `manage`/`admin` ka
+na-agafekwa nkwụsịtụ ahụ dị ka mbụ; `mcp:connect` bụ nhọrọ nke ohere dị ala
+maka ndị na-akpọ MCP naanị n'ebe dị anya bụ ndị na-agaghị achọ ohere njikwa
+sara mbara.
 
-| Arịrịọ                                                       | Ụzọ                        | Nsonaazụ                        |
-| ------------------------------------------------------------ | -------------------------- | ------------------------------- |
-| Na-abụghị loopback, enweghị Bearer                           | `/api/mcp/*`               | 403 LOCAL_ONLY                  |
-| Na-abụghị loopback, Bearer nwere scope `manage`              | `/api/mcp/*`               | Kwe ka ọ gafee                  |
-| Na-abụghị loopback, Bearer nwere scope `mcp:connect`         | `/api/mcp/*`               | Kwe ka ọ gafee                  |
-| Na-abụghị loopback, Bearer na-enweghị `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY                  |
-| Na-abụghị loopback, Bearer nwere scope `mcp:connect`         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                  |
-| Na-abụghị loopback, Bearer nwere scope `manage`              | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                  |
-| Loopback, Bearer ọ bụla/enweghị Bearer                       | LOCAL_ONLY ọ bụla          | Kwe ka ọ gafee (ọnụ ụzọ gafere) |
+| Arịrị                                                  | Ụzọ                        | Nsonaazụ                |
+| ------------------------------------------------------ | -------------------------- | ----------------------- |
+| Non-loopback, enweghị Bearer                           | `/api/mcp/*`               | 403 LOCAL_ONLY          |
+| Non-loopback, Bearer nwere scope `manage`              | `/api/mcp/*`               | Kwelwe                  |
+| Non-loopback, Bearer nwere scope `mcp:connect`         | `/api/mcp/*`               | Kwelwe                  |
+| Non-loopback, Bearer na-enweghị `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY          |
+| Non-loopback, Bearer nwere scope `mcp:connect`         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY          |
+| Non-loopback, Bearer nwere scope `manage`              | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY          |
+| Loopback, Bearer ọ bụla/enweghị                        | LOCAL_ONLY ọ bụla          | Kwelwe (ọnụ ụzọ gafere) |
 
-#### Nduzi onye ọrụ sistemụ & nyocha ndekọ
+#### Ntuziaka onye ọrụ & nyocha
 
-Ọ bụrụ na ị na-agba OmniRoute n'azụ reverse proxy ma ọ bụ tunnel (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok), nyocha loopback ahụ ka na-echebe ụzọ ndị nwere ike
-ịmalite usoro dị n'elu — a na-ajụ arịrịọ nke adreesị onye ahịa ya na-abụghị loopback site na
-`403 LOCAL_ONLY` **tupu nkwenye njirimara amalite**, ya mere JWT agbapụtala enweghị ike iru ebe a na-amalite usoro. Ọrụ abụọ
-nke onye ọrụ sistemụ ka dị:
+Ọ bụrụ na ị na-agba OmniRoute n'azụ reverse proxy ma ọ bụ tunnel (nginx,
+Caddy, Cloudflare Tunnel, Tailscale, Ngrok), nlele loopback ka na-echebe ụzọ
+ndị nwere ike ịmalite dị n'elu — a na-ajụ arịrị nke adreesị onye ahịa ya bụ
+non-loopback site na `403 LOCAL_ONLY` **tupu auth arụ ọrụ**, n'ihi ya, JWT na-
+efu n'ụzọ apụghị iru mmalite. Ọrụ onye ọrụ abụọ ka fọdụrụ:
 
-- **Anwala “idozi” 403 site n’ịgha adreesị IP onye ahịa ka ọ bụrụ loopback.** Ịtọ
-  `X-Forwarded-For: 127.0.0.1`, ma ọ bụ iji proxy nke na-edegharị adreesị isi mmalite ka ọ bụrụ
-  loopback, na-emepe ọzọ kpọmkwem ụdị RCE nke ọkwa a na-emechi. Mee ka
-  dashboard/API dị site na proxy — emela ka ụzọ ndị nwere ike ịmalite usoro dị.
-- **Debe ụzọ mgbapụ nke manage scope ka ọ bụrụ nke kacha nta.** Naanị `/api/mcp/` ka enwere ike ịgafe, ma
-  naanị site na API key nwere scope `manage`. Enweghị mgbe a ga-etinye
-  `SPAWN_CAPABLE_PREFIXES` na ndepụta ụzọ mgbapụ — schema zod na-ajụ ha, ebe
-  `isLocalOnlyBypassableByManageScope` na-egbochi ha n’oge mmemme na-agba (nchebe nwere ọtụtụ ọkwa),
-  nke a bụ ihe dashboard na-ekwu mgbe ọ sịrị “enweghị ike ime ka a gafee ya”. Otu
-  deny-list ahụ nwekwara ụzọ LOCAL_ONLY ole na ole na-adịghị amalite usoro mana nke a na-agaghị
-  ekwe ka e nweta site n’ebe dị anya — `/api/oauth/kiro/auto-import` (na-agụ faịlụ
-  nzere Kiro ndị dị naanị na host), `/api/discovery/` na `/api/issue-agent/`. Runtime
-  snapshot loader na-ewepụkwa ndebanye dị otu a na ahịrị ntọala echekwara, ebe
-  mbubata JSON ochie (`/api/settings/import-json`) anaghị ede igodo ụzọ mgbapụ ma ọlị.
-  Ndebanye `LOCAL_ONLY_API_PREFIXES` ọ bụla ga-adị na deny-list ma ọ bụ
-  a ga-enyocha ya dị ka nke tozuru maka ụzọ mgbapụ (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Ụzọ ndị nwere
-  dynamic-segment na static-path nwere ike ịmalite usoro n’okpuru `/api/providers/` (dịka `/login`,
-  `/refresh-cursor`) nọ n’okpuru regex-based `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` nke na-eso ya na
-  `src/shared/constants/spawnCapablePrefixes.ts`, ọ bụghị n’okpuru array
-  `SPAWN_CAPABLE_PREFIXES` dị larịị — array dị larịị ahụ ga-ekpuchi prefix
-  `/api/providers/` dum iji chọta ha, nke ga-eme ka osisi ụzọ ahụ gbasaa oke,
-  ebe dashboard ndị dị anya na-eji ya n’ụzọ ziri ezi maka CRUD nke provider.
+- **Ọ ghara ị "dozi" 403 site n'ịrụ adịgboroja IP nke client ka ọ bụrụ loopback.** Ịtọ `X-Forwarded-For: 127.0.0.1`, ma ọ bụ iji proxy na-edegharị adreesi isi ka ọ bụrụ loopback, na-emeghegharị otu ụdị RCE a nke ogo a mechiri. Gosi dashboard/API site na proxy — ọ bụghị routes nwere ike ịme spawn.
+- **Jide ka bypass manage-scope dị nta nke ukwuu.** Naanị `/api/mcp/` ka a pụrụ ịgafee, na naanị site na igodo API nwere scope `manage`. Enweghị ike itinye `SPAWN_CAPABLE_PREFIXES` na ndepụta bypass — zod schema na-ajụ ha, na `isLocalOnlyBypassableByManageScope` na-achị ha mgbe ọ na-agba ọrụ (defence-in-depth), nke bụ ihe dashboard pụtara site na "a na-apụghị ime ka a gafee ha". Deny-list otu ahụ na-ejikwa ụfọdụ routes LOCAL_ONLY na-amịghị spawn ma nke a gaghị-enwerịrị site n'ebe dị anya kwa — `/api/oauth/kiro/auto-import` (na-agụ faịlụ nzere Kiro nke host ahụ), `/api/discovery/` na `/api/issue-agent/`. Onye na-ebu snapshot mgbe ọ na-agba ọrụ na-ahapụkwa ndị a na ahịrị settings echekwara, na mbubata JSON ochie (`/api/settings/import-json`) adịghị ede igodo bypass. Onye ọ bụla n'ime `LOCAL_ONLY_API_PREFIXES` ga-adị n'ime deny-list ma ọ bụ ka a nyochaa ya dị ka tozuru maka bypass (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Routes nwere ike ịme spawn nke nwere dynamic-segment na static-path n'okpuru `/api/providers/` (dịka `/login`, `/refresh-cursor`) ka ndị enyi regex `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` na `src/shared/constants/spawnCapablePrefixes.ts` na-ekpuchi, ọ bụghị array kwụ ọtọ `SPAWN_CAPABLE_PREFIXES` — array kwụ ọtọ ahụ ga-ekpuchi prefix `/api/providers/` dum iji chụọ ha, nke ga-agbasaa osisi route karia akara nke dashboard ndị dị anya na-eji eme provider CRUD n'ụzọ ziri ezi.
 
-**Inyocha ohere nnweta** — iji chọpụta na ọ dịghị ihe sitere n’èzí host na-erute ụzọ ndị a:
+**Ịnyocha nnweta** — iji chọpụta na ọ nweghị ihe si n'èzí host na-eru routes ndị a:
 
-- Mepee **Authorization Inventory** na `/dashboard/settings/security`: ọ na-egosi
-  ndepụta prefix LOCAL_ONLY dị ugbu a, prefix ndị enwere ike ịgafe, na set
-  nwere ike ịmalite usoro nke a kọwara n’oge compilation (“enweghị ike ime ka a gafee ya”).
-- Jiri grep chọọ prefix ndị dị n’elu na reverse-proxy / access logs gị, jikọtara ha na
-  adreesị onye ahịa na-abụghị loopback. Nnweta ọ bụla dị otu a nke weghachiri `200` kama
-  `403 LOCAL_ONLY` pụtara na proxy ahụ na-ezo IP onye ahịa n’ezie — dozie proxy ahụ.
-- `403 LOCAL_ONLY` dị na logs OmniRoute maka otu n’ime ụzọ ndị a bụ ihe nche
-  na-arụ ọrụ dịka e bu n’obi, ọ bụghị njehie a ga-egbochi.
+- Meghee **Ndepụta Ikike** na `/dashboard/settings/security`: ọ na-egosi ndepụta prefix LOCAL_ONLY dị ndụ, ndị prefix a pụrụ ịgafee, na set spawn-capable ("a na-apụghị ime ka a gafee ha") nke oge compilation.
+- Chọọ log reverse-proxy / nnweta gị maka prefixes ndị dị n'elu jikọtara na adreesi client na-abụghị loopback. Kpataa ọ bụla dị otú ahụ nke weghachiri `200` kama `403 LOCAL_ONLY` pụtara na proxy na-ezobe IP nke client n'ezie — dozie proxy ahụ.
+- `403 LOCAL_ONLY` n'ime log ndị OmniRoute maka otu n'ime ụzọ ndị a bụ onye nche ahụ na-arụ ọrụ dịka e bu n'obi, ọ bụghị njehie a ga-emechi emechi.
 
-#### Ụzọ a pụrụ inweta n’ebe dị anya nwere ọnụ ụzọ nyocha n’ebe a na-akpọ ha
+#### Routes a pụrụ iru site n'ebe dị anya nke nwere ọnụ ụzọ ule call-site
 
-Ụfọdụ ụzọ ga-anọgide bụrụ ndị a pụrụ iru site na dashboard dị anya, mana ha na-eme nyocha n’akụkụ host
-(`which <binary>`, `<binary> --version`, `tailscale status --json`) maka ndị na-akpọ site n’ime mpaghara.
-Ha abụghị LOCAL_ONLY maka `GET`; kama nke ahụ, handler na-agụ mkpebi peer a tụkwasịrị obi
-site na `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ma na-eme nyocha ahụ
-naanị maka ndị na-akpọ sitere na `loopback` / `lan`. Onye na-akpọ sitere na `remote` na-enweta otu nhazi nzaghachi ahụ,
-nke e wuru site na isi mmalite ndị na-adịghị amalite usoro (ọnọdụ echekwara, ntọala, nyocha fs), nke nwere akara `probed: false`.
+Ụfọdụ routes ga-anọgide na-adị iru site na dashboard dị anya ma na-agba ule n'akụkụ host (`which <binary>`, `<binary> --version`, `tailscale status --json`) maka ndị na-akpọ oku n'ime. Ha abụghị LOCAL_ONLY maka `GET`; kama, handler na-agụ ikpe peer a tụkwasịrị obi site na `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ma na-agba ule ahụ naanị maka ndị na-akpọ oku `loopback` / `lan`. Onye na-akpọ oku `remote` na-enweta azịza nke otu ụdị ahụ e wuru site na isi na-amịghị spawn (steeti echekwara, settings, nlele fs), ka a kọwara `probed: false`.
 
-| Ụzọ                                                              | Nnyocha a na-awụlikwa maka ndị na-akpọ site n’ebe dị anya                    |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | Nnyocha runtime CLI (`allowLocalRuntimeProbe`) na mmalite usoro CLI-fallback |
-| `GET /api/headroom/status`                                       | `which headroom` na nyocha python `--version`                                |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`            |
-| `GET /api/tunnels/cloudflared` (ewepụghị GET na LOCAL_ONLY)      | Nchọgharị PATH nke `which cloudflared`                                       |
+| Route                                                            | Ule a gafere maka ndị na-akpọ oku dị anya                         |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | Ule CLI runtime (`allowLocalRuntimeProbe`) na spawn CLI-fallback  |
+| `GET /api/headroom/status`                                       | `which headroom` na ule python `--version`                        |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew` |
+| `GET /api/tunnels/cloudflared` (GET ewepụrụ ya na LOCAL_ONLY)    | Nchọpụta PATH `which cloudflared`                                 |
 
-Ụzọ ọgụgụ ọhụrụ nke na-enyocha host ga-agbaso otu ụkpụrụ ahụ, ma ọ bụ a ga-ekewa ya
-ozugbo dịka LOCAL_ONLY.
+Route ọgụgụ ọhụrụ ọ bụla na-agba host ule na-eso otu usoro ahụ, ma ọ bụ ka a kọwaa ya dịka LOCAL_ONLY kpamkpam.
 
-### Ọkwa 2 — ALWAYS_PROTECTED
+### Ogo 2 — ALWAYS_PROTECTED
 
-**Ihe na-amanye ya:** `isAlwaysProtectedPath(path)` → na-awụlikwa ụzọ mgbapụ `requireLogin=false`
-**Ụzọ mgbapụ:** Ọ dịghị mgbe `requireLogin=false`; a na-achọ JWT mgbe niile
+**Ndị na-amanye ya:** `isAlwaysProtectedPath(path)` → gafee bypass `requireLogin=false`
+**Bypass:** Ọ dịghị mgbe `requireLogin=false`; a chọrọ JWT mgbe niile
 
-Ụzọ ndị a na-emebi ihe ma ọ bụ enweghị ike ịtụgharị azụ. Ikwe ka ha dị na nrụnye
-“enweghị paswọọdụ” ga-apụta na onye ọ bụla nọ n’otu LAN nwere ike ihichapụ database ma ọ bụ kwụsị
-usoro server ahụ.
+Routes ndị a na-emebi emebi ma ọ bụ a na-apụghị ịghachi ha. Ịhapụ ha n'ịwụnye "enweghị paswọdụ" ga-apụtara na onye ọ bụla n'otu LAN nwere ike ihichapụ database ma ọ bụ gbuo usoro server.
 
-| Ụzọ                                       | Ihe kpatara ya                                                |
-| ----------------------------------------- | ------------------------------------------------------------- |
-| `/api/shutdown`                           | Na-akwụsị usoro server                                        |
-| `/api/settings/database`                  | Mbupụ, mbubata, na ihichapụ database                          |
-| `/api/db-backups`                         | Ohere zuru ezu na archive ndabere database                    |
-| `/api/settings/export-json`               | Na-ebupụ settings blob dum (gụnyere ihe nzuzo)                |
-| `/api/settings/import-json`               | Na-edochi settings blob dum                                   |
-| `/api/providers/health-autopilot/actions` | Na-eme autopilot remediation actions                          |
-| `/api/settings/obsidian`                  | Na-emepụta nzere WebDAV a pụrụ iji ọzọ maka vault root ọ bụla |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                  |
+| Ụzọ                                       | Ihe mere                                                                     |
+| ----------------------------------------- | ---------------------------------------------------------------------------- |
+| `/api/shutdown`                           | Na-ejedebe usoro server                                                      |
+| `/api/settings/database`                  | Mbupụ, mbubata, na nhichapụ database                                         |
+| `/api/db-backups`                         | Nnweta archive nchekwa database dum                                          |
+| `/api/settings/export-json`               | Na-ebupụ blob settings dum (gụnyere ihe nzuzo)                               |
+| `/api/settings/import-json`               | Na-edochi blob settings dum                                                  |
+| `/api/providers/health-autopilot/actions` | Na-agba omume ndozi autopilot                                                |
+| `/api/settings/obsidian`                  | Na-emepụta nzere WebDAV a pụrụ iji ugboro ugboro maka mgbọrọgwụ vault ọ bụla |
+| `/api/relay/tokens`                       | Na-emepụta, depụta, dezie ma kagbuo token relay                              |
+| `/api/cli-tools/apply`                    | Na-edegharị config CLI host nke onye ọrụ                                     |
+| `/api/cli-tools/guide-settings`           | Na-ede faịlụ config CLI ndị ntuziaka na-eduzi                                |
+| `/api/cli-tools/hermes-agent-settings`    | Na-ede config agent Hermes                                                   |
+| `/api/cli-tools/backups`                  | Na-eweghachi ma na-ehichapụ nchekwa config CLI                               |
+| `/api/log-export`                         | Na-ezipụ log oku n'ebe e haziri                                              |
+| `/api/restart`                            | Na-amalitegharị usoro server                                                 |
 
-**Nzaghachi mgbe e mebiri iwu:** `401 Authentication required`
+**Azịza mgbe emebiri iwu:** `401 Authentication required`
 
-`/api/settings/obsidian` na-ekpuchi child ya `/webdav`: `POST` na-atụ ọrụ faịlụ WebDAV —
-nke custom Node layer na-enye tupu Next.js, n’èzí pipeline a — gaa na root onye na-akpọ họọrọ,
-ma na-eweghachi nzere Basic emepụtara ọhụrụ, `DELETE` na-atụgharị ha, ebe `POST` nke parent na-echekwa
-token Obsidian REST API. GHSA-62vw zoro naanị ngosipụta paswọọdụ `GET`; nrụpụta nzere ahụ
-ka nọkwa n’ọkwa fail-open (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` na-ajụkwa
-vault nke bụ data directory, nke dị n’ime ya, ma ọ bụ nke nwere ya n’ime onwe ya.
+`/api/settings/obsidian` na-ekpuchi nwa ya bụ `/webdav`: `POST` na-eduzi ọrụ faịlụ WebDAV —
+nke oyi Node omenala na-eje ozi tupu Next.js, n'èzí pipeline a — na mgbọrọgwụ nke onye
+na-akpọ họrọ ma na-egosikwa ihe njirimara Basic ọhụrụ e mepụtara, `DELETE` na-atụgharị ha,
+ma `POST` nke nne na-echekwa token REST API nke Obsidian. GHSA-62vw mere na ọ zochiri
+igosipụta paswọdu nke `GET`; inyepụ ya ka dịrị n'ọkwa fail-open (GHSA-7pq4-8pvv-rx7r).
+`enableObsidianVaultSync()` na-agbakwụnye ju vault bụ ndekọ data, nke nọ n'ime ya, ma ọ bụ
+nke nwere ya.
 
-#### Mbupụ nzere bụ naanị maka operator
+#### Mbupụ na mweghachi ihe njirimara bụ naanị nke onye ọrụ
 
-Ọkwa dị n'elu na-ekpebi naanị ma achọrọ _ụfọdụ_ nzere njirimara. Ụzọ ndị na-ebudata
-nzere njirimara echekwara na-agbakwụnye nyocha nke abụọ n'ime handler: `GET /api/settings/export-json` (njikọ
-provider ndị e wepụchara izo ya ezo na raw API keys), `GET /api/db-backups/export` (faịlụ SQLite) na
-`GET /api/db-backups/exportAll` (ebe nchekwa zuru ezu) na-akpọ `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). Ọ na-anabata dashboard session, isiokwu CLI mpaghara, ma ọ bụ
-instance nke agbanyụrụ nbanye na ya, ma na-aza `403` nye API keys nke scope ọ bụla (gụnyere `manage`
-na `admin`) nakwa `oma_` access tokens. Mwepụta sync token (`POST /api/sync/tokens`) na-eji otu
-helper ahụ, tinyere token internal-service loopback a tụkwasịrị obi.
+Ọkwa dị n'elu ahụ na-ekpebi naanị ma a chọrọ _ụfọdụ_ ihe njirimara. Ụzọ ndị na-ebudata
+ihe njirimara echekwara na-agbakwụnye nlele nke abụọ n'ime onye njikwa:
+`GET /api/settings/export-json` (njikọ ndị na-ebụnye emeghechara na igodo API ndị dị larịị),
+`GET /api/db-backups/export` (faịlụ SQLite) na `GET /api/db-backups/exportAll` (ngwugwu zuru
+oke) na-akpọ `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). Ọ
+na-anabata nnọkọ dashboard, onye CLI nke ime obodo, ma ọ bụ ihe atụ e gbanyụrụ nbanye, ma
+na-azaa `403` nye igodo API nke ọkwa ọ bụla (gụnyere `manage` na `admin`) na token ntinye
+`oma_`. Ndị ya ha na-emebi ihe na-ejide oke otu ahụ: `POST /api/db-backups/import`
+(`.sqlite` ebuliri, gụnyere `dryRun=true`), `POST /api/db-backups` (weghachite ndabere
+echekwara site na id) na `POST /api/settings/import-json` (mweghachi JSON nke ochie)
+na-anọchi database dị ndụ ma ọ bụ usoro ntọala/njikọ/igodo API dum, n'ihi ya ihe njirimara
+igwe enwekwaghị ike ịkpasu ha. Ibibi ebe mweghachi na-ejidekwa oke otu ahụ:
+`DELETE /api/db-backups` (nhicha — debe N kachasị ọhụrụ / tụfuo ndị gafere ụbọchị D) na
+`PATCH /api/db-backups` (ntọala njide), n'ihi na njide echekwara bụ ihe kpọmkwem
+`cleanupDbBackups()` na-etinye mgbe ndabere akpaghị aka ọ bụla gasịrị
+(`src/lib/db/backup.ts`), n'ihi ya ihe njirimara igwe nke nwere ike ịchekwa `keepLatest: 1`
+ga-ebipụ ihe niile n'nseta na-esote. Idepụta na ịmepụta ndabere (`GET`/`PUT
+/api/db-backups`) na-ejigide nyocha nlekọta nkịtị. Inyepụ token mmekọrịta
+(`POST /api/sync/tokens`) na-eji onye enyemaka otu ahụ, gbakwunyere token ọrụ ime obodo
+loopback a tụkwasịrị obi.
 
-#### Credential exports and restores are operator-only
+### Bootstrap ntinye ọhụrụ bụ naanị loopback — site na onye otu ezigbo, ọ bụghị `Host`
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Mgbe a hazighị paswọdu nlekọta (na enweghị `INITIAL_PASSWORD`), `isAuthRequired()` dị na
+`src/shared/utils/apiAuth.ts` na-emepe bootstrap a na-amaghị aha **naanị maka ndị otu
+loopback**. A na-ekpebi loopback site na ngwaàmà ndị otu a tụkwasịrị obi, n'usoro: onye
+otu TCP ezigbo e ji token kamaa (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, ihe amụma ahụ
+na-ahụ), mkpebi `AUTHZ_HEADER_PEER_LOCALITY` nke pipeline n'onwe ya (ihe ndị njikwa ụzọ
+na-ahụ, a tụkwasịrị ya obi naanị mgbe a tọrọ `OMNIROUTE_PEER_STAMP_TOKEN`), ma ọ bụ onye
+otu socket ezigbo maka ndị na-akpọ ozugbo. A naghị aju `Host` / `nextUrl.hostname` ajụjụ
+mgbe ọ bụla, ma ide paswọdu mbụ (`POST /api/settings/require-login`) dị n'okpuru mgbochi
+otu ahụ kama ọ ga-emeghe nye onye otu netwọk ọ bụla (GHSA-7pq4-8pvv-rx7r).
+`managementPolicy` na-ebufe mkpebi `peerContext` nke ya n'ụzọ doro anya, n'ihi ya ndị isi
+nke arịrị MBỤ (tupu a wepụ ya) anaghị ekpebi ya mgbe ọ bụla.
 
-### Bootstrap nke nrụnye ọhụrụ bụ naanị maka loopback — dịka ezigbo peer si dị, ọ bụghị `Host`
+### Ọkwa 3 — NLEKỌTA (ndabara)
 
-Mgbe a na-ahazibeghị paswọọdụ njikwa (ma `INITIAL_PASSWORD` adịghị), `isAuthRequired()` dị na
-`src/shared/utils/apiAuth.ts` na-ahapụ bootstrap anonymous ka o meghee **naanị maka loopback peers**.
-A na-ekpebi loopback site na trusted peer signals, n'usoro a: ezigbo TCP peer nke token kara akara
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, nke policy na-ahụ), mkpebi `AUTHZ_HEADER_PEER_LOCALITY`
-nke pipeline n'onwe ya (nke route handlers na-ahụ, a na-atụkwasị ya obi naanị mgbe
-edobere `OMNIROUTE_PEER_STAMP_TOKEN`), ma ọ bụ ezigbo socket peer maka direct callers. A naghị
-eleba `Host` / `nextUrl.hostname` anya ma ọlị, a na-etinyekwa ide paswọọdụ mbụ
-(`POST /api/settings/require-login`) n'okpuru otu mmachi ahụ kama ime ka ọ ghe oghe nye
-network peer ọ bụla (GHSA-7pq4-8pvv-rx7r). `managementPolicy` na-ebufe mkpebi `peerContext`
-nke ya n'ụzọ doro anya, ka headers nke arịrịọ ORIGINAL (tupu strip) ghara ikpebi ya.
-
-### Ọkwa 3 — MANAGEMENT (ndabara)
-
-Ụzọ njikwa ndị ọzọ niile. Achọrọ njirimara ọ gwụla ma ahaziri `requireLogin=false`.
-CLI tokens nwere ike iji njirimara banye n'ụzọ ndị a (loopback + HMAC ziri ezi).
+Ụzọ nlekọta ndị ọzọ niile. A chọrọ nyocha e wezụga ma a hazie `requireLogin=false`. Token
+CLI nwere ike ịkwenye ụzọ ndị a (loopback + HMAC ziri ezi).
 
 ## Usoro nnyocha
 

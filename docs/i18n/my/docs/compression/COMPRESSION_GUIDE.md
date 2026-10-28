@@ -30,92 +30,93 @@ Client Request
 
 ---
 
-## Compression Mode များ
+## ချုံ့မှုန့်ခြင်း မုဒ်များ
 
-### Off
+### ပိတ်ထားခြင်း
 
-Compression မပြုလုပ်ပါ။ Message အားလုံးကို မပြောင်းလဲဘဲ ဖြတ်သန်းစေသည်။
+ချုံ့မှုန့်ခြင်း လုံးဝမပြုလုပ်ပါ။ မက်ဆေ့ခ်ျအားလုံး ပြောင်းလဲမှုမရှိဘဲ ဖြတ်သွားပါသည်။
 
-### Lite Mode (~15% ချွေတာမှု၊ <1ms latency)
+### Lite မုဒ် (~15% သက်သာစေခြင်း၊ <1ms ကြာချိန်)
 
-အဘေးကင်းဆုံး mode ဖြစ်ပြီး semantic အဓိပ္ပာယ်ကို လုံးဝမပြောင်းလဲဘဲ formatting ကိုသာ ရှင်းလင်းသည်-
+အလုံခြုံဆုံး မုဒ် — အဓိပ္ပာယ်ပြောင်းလဲမှု လုံးဝမရှိဘဲ ပုံစံသန့်ရှင်းရေးသာ လုပ်ဆောင်ပါသည်-
 
-| နည်းစနစ်                 | ဖော်ပြချက်                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------ |
-| `collapseWhitespace`     | ဆက်တိုက်ဖြစ်နေသော blank line များနှင့် စာကြောင်းအဆုံးရှိ space များကို ပေါင်းစည်းသည် |
-| `dedupSystemPrompt`      | ထပ်နေသော system message များကို ဖယ်ရှားသည်                                           |
-| `compressToolResults`    | ရှည်လျားလွန်းသော tool/function output များကို ချုံ့သည်                               |
-| `removeRedundantContent` | ထပ်တလဲလဲဖြစ်နေသော ညွှန်ကြားချက်များကို ဖယ်ရှားသည်                                    |
-| `replaceImageUrls`       | base64 image data URI များကို အတိုချုံ့သည်                                           |
+| နည်းလမ်း                 | ဖော်ပြချက်                                                                  |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `collapseWhitespace`     | ဆက်တိုက်ရှိနေသော ဗလာလိုင်းများနှင့် အဆုံးရှိ နေရာလွတ်များကို ပေါင်းစပ်ပါသည် |
+| `dedupSystemPrompt`      | ထပ်နေသော system မက်ဆေ့ခ်ျများကို ဖယ်ရှားပါသည်                               |
+| `compressToolResults`    | ရှည်လျားသော ကိရိယာ/ဖန်ရှင် ရလဒ်များကို ချုံ့မှုန့်ပါသည်                     |
+| `removeRedundantContent` | ထပ်နေသော ညွှန်ကြားချက်များကို ဖယ်ရှားပါသည်                                  |
+| `replaceImageUrls`       | base64 ပုံ data URI များကို ချွေးပါသည်                                      |
 
-**အသင့်တော်ဆုံးအခြေအနေ:** အမြဲဖွင့်ထားပြီး အသုံးပြုခြင်း၊ ဘေးကင်းရေးအလွန်အရေးကြီးသော workflow များ။
+**သင့်လျော်သည်-** အမြဲဖွင့်ထားသော အသုံးပြုမှု၊ လုံခြုံမှုအရေးပါသော workflow များ။
 
-### Standard Mode (~30% ချွေတာမှု)
+### Standard မုဒ် (~30% သက်သာစေခြင်း)
 
-[Caveman](https://github.com/JuliusBrussee/caveman) ကို အခြေခံထားပြီး အဓိပ္ပာယ်ကို ထိန်းသိမ်းထားကာ အပိုစကားလုံးများနှင့် ရှည်လျားသော စကားအသုံးအနှုန်းများကို ဖယ်ရှားသည်-
+[Caveman](https://github.com/JuliusBrussee/caveman) ကို အယူအဆရယူထားသည် — အဓိပ္ပာယ်ကို ထိန်းသိမ်းထားရင်း အပိုစကားလုံးများနှင့် ရှည်လျားသော ဝါကျဖွဲ့စည်းမှုများကို ဖယ်ရှားပါသည်-
 
-- အပိုစကားလုံးများ ("please", "I think", "basically", "actually") ကို ဖယ်ရှားသည်
-- ရှည်လျားသော စကားစုများကို ချုံ့သည် ("in order to" → "to", "as a result of" → "because")
-- ယဉ်ကျေးစွာ မသေမချာ ပြောဆိုထားမှုများကို ဖယ်ရှားသည် ("Would you mind...", "If you could possibly...")
-- Coding prompt များအတွက် ချိန်ညှိထားသော regex rule 30 ကျော် ပါဝင်သည်
+- အပိုစကားလုံးများ ("please", "I think", "basically", "actually") ကို ဖယ်ရှားပါသည်
+- ရှည်လျားသော စကားစုများကို သိပ်ဖို့ပါသည် ("in order to" → "to", "as a result of" → "because")
+- ယဉ်ကျေးစွာ ရှောင်လွှဲပြောဆိုမှုများ ("Would you mind...", "If you could possibly...") ကို ဖယ်ရှားပါသည်
+- ကုဒ်ရေးခြင်း prompt များအတွက် ချိန်ညှိထားသော regex စည်းမျဉ်း 30+
 
-**အသင့်တော်ဆုံးအခြေအနေ:** နေ့စဉ် coding workflow များ၊ ကုန်ကျစရိတ်ကို အလေးထားသော အဖွဲ့များ။
+**သင့်လျော်သည်-** နေ့စဉ် ကုဒ်ရေးခြင်း workflow များ၊ ကုန်ကျစရိတ်သက်သာလိုသော အဖွဲ့များ။
 
-### Aggressive Mode (~50% ချွေတာမှု)
+### Aggressive မုဒ် (~50% သက်သာစေခြင်း)
 
-ကြာရှည်သော session များအတွက် စမတ်ကျသည့် history စီမံခန့်ခွဲမှု-
+ရှည်လျားသော session များအတွက် စမတ်ကျသော မှတ်တမ်း စီမံခန့်ခွဲမှု-
 
-- **Message Aging** — အဟောင်းပိုင်း message များကို အဆင့်ဆင့် ပိုမိုချုံ့သွားသည်
-- **Tool Result Compression** — ရှည်လျားသော tool output များကို ဖြတ်တောက်ခြင်း သို့မဟုတ် ချန်လှပ်ခြင်း ပြုလုပ်သည် (ပထမ/နောက်ဆုံးစာကြောင်းများ၊
-  ကိုက်ညီသောစာကြောင်း filtering၊ JSON key ချုံ့ခြင်း)
-- **Structural Integrity Guards** — `tool_use` + `tool_result` အတွဲများ တစ်သမတ်တည်း ရှိနေစေရန် သေချာစေသည်
-- **Context Window Awareness** — model တစ်ခုချင်းစီ၏ token ကန့်သတ်ချက်များကို လိုက်နာသည်
+- **Message Aging** — မက်ဆေ့ခ်ျအဟောင်းများ အဆင့်လိုက် ချုံ့မှုန့်ခံရပါသည်
+- **Tool Result Compression** — ရှည်လျားသော ကိရိယာရလဒ်များကို ဖြတ်တိုက် သို့မဟုတ် ချန်လှပ်ပါသည်
+  (ပထမ/နောက်ဆုံး လိုင်းများ၊ match-line စစ်ထုတ်မှု၊ JSON key ချုံ့မှုန့်မှု)
+- **Structural Integrity Guards** — `tool_use` + `tool_result` တွဲများ တသမတ်တည်း ဆက်နွယ်နေစေရန် သေချာစေပါသည်
+- **Context Window Awareness** — မော်ဒယ်အလိုက် token ကန့်သတ်ချက်များကို လေးစားပါသည်
 
-**အသင့်တော်ဆုံးအခြေအနေ:** ကြာရှည်သော debugging session များ၊ ကြီးမားသော codebase များ။
+**သင့်လျော်သည်-** ရှည်လျားသော debugging session များ၊ ကြီးမားသော codebase များ။
 
-### Ultra Mode (~75% ချွေတာမှု)
+### Ultra မုဒ် (~75% သက်သာစေခြင်း)
 
-Token အလွန်အမင်း ချွေတာရန်လိုအပ်သော အခြေအနေများအတွက် အမြင့်ဆုံး compression-
+token အရေးပါသော အခြေအနေများအတွက် အများဆုံး ချုံ့မှုန့်ခြင်း-
 
-- **Heuristic Pruning** — ရမှတ်အခြေခံသည့် prose token pruning
-- **Structure Preservation** — fenced code block များ၊ inline code၊ URL နှင့် identifier များကို
-  tombstone အဖြစ် အစားထိုးပြီး မူရင်းအတိုင်း ပြန်လည်ဆက်စပ်ပေးသောကြောင့် မည်သည့်အခါမျှ pruning မလုပ်ပါ
-- **ရွေးချယ်နိုင်သော SLM tier** — configure လုပ်ထားပါက local model အသေးစားတစ်ခုသည် prune ရလဒ်ကို ထပ်မံကောင်းမွန်အောင် ပြင်ဆင်နိုင်သည်
-- Aggressive mode နှင့် သီးခြားလွတ်လပ်သည်။ Message aging၊ tool-result compression
-  သို့မဟုတ် fallback summarizer ကို မလုပ်ဆောင်ပါ (SLM-tier ချို့ယွင်းမှုဖြစ်မှသာ fallback pass ကို
-  aggressive မှတစ်ဆင့် လမ်းကြောင်းပြောင်းနိုင်သည်)
+- **Heuristic Pruning** — ရေးသားချက်အပိုင်းကို ရမှတ်အခြေပြု token ဖြတ်ထုတ်ခြင်း
+- **Structure Preservation** — fence လုပ်ထားသော ကုဒ်ဘလောက်များ၊ inline ကုဒ်၊ URL များနှင့် identifier
+  များကို tombstone လုပ်ပြီး မူရင်းအတိုင်း ပြန်ချုပ်ပါသည်၊ ဘယ်တော့မှ ဖြတ်ထုတ်ခံရမည် မဟုတ်ပါ
+- **Optional SLM tier** — စီစဉ်ပေးထားပါက ဒေသတွင်းမော်ဒယ်အသေးစားတစ်ခုက ဖြတ်ထုတ်မှုကို ပိုကောင်းအောင် လုပ်နိုင်ပါသည်
+- Aggressive မုဒ်နှင့် သီးခြားစွာ လုပ်ဆောင်ပါသည်- message aging၊ tool-result ချုံ့မှုန့်ခြင်း
+  သို့မဟုတ် fallback summarizer ကို မလည်ပတ်ပါ (SLM-tier ချို့ယွင်းမှုမှသာ fallback pass ကို
+  aggressive မှတစ်ဆင့် ပို့ပေးနိုင်ပါသည်)
 
-**အသင့်တော်ဆုံးအခြေအနေ:** Context ကန့်သတ်ချက်များကို ထပ်ခါတလဲလဲ ရောက်ရှိနေသောအခါ။
+**သင့်လျော်သည်-** context ကန့်သတ်ချက်ကို ထပ်ခါထပ်ခါ ရောက်နေချိန်များ။
 
-### RTK Mode (upstream အပိုင်းအခြား 60-90%)
+### RTK မုဒ် (60-90% upstream အကွာအဝေး)
 
-RTK mode ကို coding-agent session များတွင် ပေါ်လာသော ရှည်လျားလွန်းသည့် tool output များအတွက် အကောင်းဆုံးဖြစ်အောင် ပြုလုပ်ထားသည်-
+RTK မုဒ်သည် coding-agent session များတွင် ပေါ်လာတတ်သော ရှည်လျားသော ကိရိယာရလဒ်များအတွက် အကောင်းဆုံး ချိန်ညှိထားပါသည်-
 
-- `git status`၊ `git diff`၊ `git log`၊ test runner များ၊
-  TypeScript/Vite/Webpack build များ၊ ESLint/Biome/Prettier၊ npm audit/install များ၊ Docker log များ၊ infra
-  output နှင့် ယေဘုယျ shell output ကဲ့သို့သော command/output အမျိုးအစားများကို ရှာဖွေသိရှိသည်
-- `open-sse/services/compression/engines/rtk/filters/` မှ JSON filter pack များကို အသုံးပြုသည်
-- Project သို့မဟုတ် global `filters.toml` file များမှ RTK TOML schema v1 filter များကို import လုပ်ပြီး inline-test
-  validation နှင့် project file များအတွက် trust-gating ကို အသုံးပြုသည်
-- Inline verify sample များနှင့်အတူ built-in filter 55 ခု ပါဝင်သည်
-- ANSI control sequence များ၊ progress bar များ၊ ထပ်နေသောစာကြောင်းများနှင့် လက်တွေ့လုပ်ဆောင်ရန်မလိုသည့် noise များကို ဖယ်ရှားသည်
-- Failure များ၊ error များ၊ warning များ၊ ပြောင်းလဲထားသော file များ၊ အကျဉ်းချုပ်များနှင့် ရှည်လျားသော output ၏ အဆုံးပိုင်းကို ထိန်းသိမ်းထားသည်
-- Trust-gated project filter များ၊ global filter များနှင့် ရွေးချယ်နိုင်သော ဖုံးကွယ်ပြင်ဆင်ထားသည့် raw-output recovery ကို ပံ့ပိုးသည်
+- `git status`, `git diff`, `git log`, test runner များ၊ TypeScript/Vite/Webpack build များ၊
+  ESLint/Biome/Prettier, npm audit/install များ၊ Docker log များ၊ infra ရလဒ်နှင့်
+  ယေဘူယျ shell ရလဒ်များကဲ့သို့ command/output အမျိုးအစားများကို တွေ့ရှိခွဲခြားပါသည်
+- `open-sse/services/compression/engines/rtk/filters/` မှ JSON filter pack များကို အသုံးချပါသည်
+- project သို့မဟုတ် global `filters.toml` ဖိုင်များမှ RTK TOML schema v1 filter များကို သွင်းပါသည်၊
+  inline-test စစ်ဆေးမှုနှင့် project ဖိုင်များအတွက် trust-gating ပါဝင်ပါသည်
+- inline verify sample များပါဝင်သော built-in filter ၅၆ ခု ပါရှိလာပါသည်
+- ANSI control sequence များ၊ progress bar များ၊ ထပ်နေသော လိုင်းများနှင့် လုပ်ဆောင်နိုင်မှုမရှိသော ဆူညံသံများကို ဖယ်ရှားပါသည်
+- ပျက်စီးမှုများ၊ error များ၊ သတိပေးချက်များ၊ ပြောင်းလဲသွားသော ဖိုင်များ၊ အနှစ်ချုပ်များနှင့် ရှည်လျားသော ရလဒ်၏ နောက်ပိုင်းကို ထိန်းသိမ်းထားပါသည်
+- trust-gate လုပ်ထားသော project filter များ၊ global filter များနှင့် ရွေးချယ်နိုင်သော ဖုံးကွယ်ထားသော raw-output ပြန်လည်ရယူမှုကို ထောက်ပံ့ပါသည်
 
-**အသင့်တော်ဆုံးအခြေအနေ:** Shell၊ build၊ test၊ git၊ grep နှင့် file-output transcript များပါဝင်သော agent session များ။
+**သင့်လျော်သည်-** shell, build, test, git, grep နှင့် file-output transcript များ ပါဝင်သော agent session များ။
 
-### Stacked Mode (သတ်မှတ်ချက်နှင့်ကိုက်ညီသော အပိုင်းအခြား 78-95%)
+### Stacked မုဒ် (78-95% eligible အကွာအဝေး)
 
-Stacked mode သည် compression engine အများအပြားကို ကြိုတင်သတ်မှတ်ထားသော အစဉ်အတိုင်း လုပ်ဆောင်သည်။ Default pipeline မှာ-
+Stacked မုဒ်သည် ချုံ့မှုန့်ခြင်း engine များစွာကို သတ်မှတ်ထားသော အစဉ်လိုက် လည်ပတ်စေပါသည်။ ပုံသေ pipeline က-
 
 ```txt
 RTK -> Caveman
 ```
 
-ထိုအစီအစဉ်သည် terminal/tool output ကို ဦးစွာ ကျစ်လျစ်စေပြီးနောက် ကျန်ရှိသည့် သဘာဝဘာသာစကား prompt ကို Caveman semantic condensation ဖြင့် ချုံ့သည်။ Stacked pipeline များကို global အနေဖြင့် configure လုပ်နိုင်သလို routing combo များတွင် သတ်မှတ်ထားသော
-compression combo များမှတစ်ဆင့်လည်း configure လုပ်နိုင်သည်။
+ထိုအစဉ်က terminal/ကိရိယာ ရလဒ်ကို အရင် ချုံ့မှုန့်ထားပြီး၊ ကျန်ရှိသော သဘာဝဘာသာစကား prompt ကို
+Caveman semantic ချုံ့မှုန့်ခြင်း လုပ်ဆောင်ပါသည်။ Stacked pipeline များကို global အဆင့်တွင်
+သို့မဟုတ် routing combo များသို့ သတ်မှတ်ထားသော compression combo များမှတစ်ဆင့် စီစဉ်နိုင်ပါသည်။
 
-**အသင့်တော်ဆုံးအခြေအနေ:** ကြီးမားသော tool log များနှင့် လူကပေးသော ညွှန်ကြားချက်များ သို့မဟုတ် assistant အကျဉ်းချုပ်များ ရောနှောပါဝင်သည့် context။
+**သင့်လျော်သည်-** ကြီးမားသော ကိရိယာ log များနှင့် လူ၏ ညွှန်ကြားချက်များ သို့မဟုတ် assistant အနှစ်ချုပ်များ ရောနှောနေသော context များ။
 
 ---
 

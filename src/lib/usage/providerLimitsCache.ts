@@ -37,6 +37,13 @@ export function toProviderLimitsCacheEntry(
     message: typeof usage.message === "string" ? usage.message : null,
     fetchedAt,
     source,
+    ...(typeof usage.limitReached === "boolean" ? { limitReached: usage.limitReached } : {}),
+    ...(typeof usage.sparkLimitReached === "boolean"
+      ? { sparkLimitReached: usage.sparkLimitReached }
+      : {}),
+    ...(typeof usage.rateLimitReachedType === "string"
+      ? { rateLimitReachedType: usage.rateLimitReachedType }
+      : {}),
     bankedResetCredits: Number.isFinite(bankedResetCredits) ? bankedResetCredits : undefined,
     paidCredits: parseCodexPaidCredits(usage.paidCredits),
     billing: sanitizeProviderBillingStatus(usage.billing),

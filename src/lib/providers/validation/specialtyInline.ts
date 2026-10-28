@@ -53,7 +53,21 @@ export async function validateV0VercelProvider({ apiKey, providerSpecificData, i
 // auggie is a fully local, credential-less CLI passthrough — there is no API
 // key to check upstream. The only meaningful validation is confirming the
 // `auggie` binary is installed and runnable on this machine.
-export async function validateAuggieProvider() {
+//
+// The probe starts the `auggie` binary, so it only runs when this caller may make the host
+// start a process: remote-reachable routes pass `allowLocalSpawn: false` for non-loopback
+// callers (Hard Rules #15/#17); internal callers keep the default.
+export async function validateAuggieProvider({
+  allowLocalSpawn = true,
+}: { allowLocalSpawn?: boolean } = {}) {
+  if (!allowLocalSpawn) {
+    return {
+      valid: false,
+      error:
+        "Auggie is a local CLI; its validation runs only for requests from this machine. Validate the connection locally.",
+      unsupported: false,
+    };
+  }
   const { checkAuggieCliVersion } = await import("@omniroute/open-sse/executors/auggie.ts");
   const result = await checkAuggieCliVersion();
   if (!result.ok) {
@@ -73,7 +87,7 @@ export async function validateCursorApiProvider({ apiKey }: { apiKey?: string })
   if (!isCursorApiKey(key)) {
     return {
       valid: false,
-      error: "Cursor user API keys start with crsr_ (cursor.com/dashboard/api)",
+      error: "Cursor user API keys start with crsr_ or grok_ (cursor.com/dashboard/api)",
       unsupported: false,
       statusCode: 400,
     };

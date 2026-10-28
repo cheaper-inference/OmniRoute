@@ -25,8 +25,10 @@
     "confirm": "Apakah kamu yakin?",
     "refresh": "Segarkan",
     "close": "Tutup",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Halaman sebelumnya",
     "nextPage": "Halaman berikutnya",
+    "pagination": "Paginasi",
     "capsLockOn": "Caps Lock aktif",
     "dismissNotification": "Tutup notifikasi",
     "toggleColumns": "Alihkan kolom",
@@ -182,6 +184,7 @@
     "combos": "Kombinasi",
     "noModelsFound": "Tidak ada model yang ditemukan",
     "clear": "Hapus",
+    "clearFilters": "Hapus filter",
     "done": "Selesai",
     "selectAll": "Pilih semua",
     "unselectAll": "Batalkan semua pilihan",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Digunakan oleh {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Prabaca",
     "batchFilePreviewTruncated": "Menampilkan {shown} baris pertama ({total} total baris)",
-    "batchFileDownloadFull": "Unduh File Lengkap"
+    "batchFileDownloadFull": "Unduh File Lengkap",
+    "tokensPageTitle": "Token",
+    "tokensPageDescription": "Kirim token antar-kunci API, bagikan kode undangan, dan hubungkan server komunitas.",
+    "tokensServerUrlLabel": "URL server"
   },
   "disabled": "Dinonaktifkan",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Arahkan permintaan yang kehabisan anggaran ke penyedia/model fallback gratis darurat.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Server proxy telah dihentikan atau dimulai ulang.",
     "expandSidebar": "Luaskan bilah sisi",
     "collapseSidebar": "Ciutkan bilah sisi",
-    "themes": "Tema",
-    "presetColors": "Warna populer",
     "createTheme": "Buat tema",
     "chooseColor": "Pilih satu warna",
-    "themeCoral": "Koral",
-    "themeBlue": "Biru",
-    "themeRed": "Merah",
-    "themeGreen": "Hijau",
-    "themeViolet": "Ungu",
-    "themeOrange": "Oranye",
-    "themeCyan": "Sian",
     "cliToolsShort": "Alat",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Sistem Tema",
     "whitelabelingDesc": "Deskripsi White-label",
     "switchThemes": "Ganti Tema",
-    "themeAccentDesc": "Deskripsi Aksen Tema",
     "uploadFavicon": "Unggah Favicon",
     "themeDark": "Tema Gelap",
     "customLogoDesc": "Deskripsi Logo Kustom",
     "sidebarVisibilityToggle": "Tombol Visibilitas Bilah Samping",
-    "themeAccent": "Aksen Tema",
     "resetFavicon": "Atur Ulang Favicon",
     "whitelabeling": "Pelabelan Merek Kustom",
     "darkMode": "Mode Gelap",
@@ -1122,10 +1117,8 @@
     "customLogo": "Logo Kustom",
     "appearance": "Tampilan",
     "themeSelectionAria": "ARIA Pemilihan Tema",
-    "themeCreate": "Buat Tema",
     "customFaviconDesc": "Deskripsi Favicon Kustom",
     "logoPreview": "Pratinjau Logo",
-    "themeCustom": "Tema Kustom",
     "hideHealthLogsDesc": "Deskripsi Sembunyikan Log Kesehatan",
     "faviconPreview": "Pratinjau Favicon",
     "changelog": "Catatan Perubahan",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 atau @channelname",
       "chatIdHint": "Pengidentifikasi numerik unik atau nama pengguna publik dari chat/saluran.",
       "tutorial": "Cara mengonfigurasi webhook Telegram:"
-    }
+    },
+    "copy": "Salin",
+    "copied": "Disalin!",
+    "expandDetails": "Tampilkan detail",
+    "collapseDetails": "Sembunyikan detail"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "Panggilan (24j)",
     "mcpMetricSuccessRate": "Tingkat keberhasilan",
     "mcpMetricAvgDuration": "Durasi rata-rata",
-    "mcpMetricTopTool": "Alat Terbaik"
-  },
-  "themesPage": {
-    "title": "Tema",
-    "description": "Pilih tema prasetel atau buat tema sendiri dengan satu warna",
-    "presetColors": "Warna populer",
-    "customTheme": "Tema khusus",
-    "customThemeDesc": "Klik buat tema dan pilih satu warna",
-    "createTheme": "Buat tema",
-    "activePreset": "Tema aktif"
+    "mcpMetricTopTool": "Alat Terbaik",
+    "dismissError": "Tutup pesan kesalahan"
   },
   "header": {
     "logout": "Keluar",
     "quickNavigation": "Navigasi cepat",
     "quickNavigationTitle": "Navigasi cepat (⌘K / Ctrl+K)",
     "openQuickNavigation": "Buka navigasi cepat",
+    "openMenu": "Buka menu",
+    "products": "Produk Keak",
     "switchToLightMode": "Beralih ke mode terang",
     "switchToDarkMode": "Beralih ke mode gelap",
     "language": "Bahasa",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Kompatibel Antropis",
     "media": "Media",
     "mediaDescription": "Hasilkan gambar, video, dan musik",
-    "themes": "Tema",
-    "themesDescription": "Pilih tema warna untuk seluruh panel dasbor",
     "costsDescription": "Lacak pengeluaran, analisis tren, dan kelola anggaran AI Anda di semua penyedia",
     "cacheDescription": "Pantau efisiensi cache prompt penyedia dan penggunaan ulang respons semantik lokal.",
     "limitsDescription": "Konfigurasikan batas laju dan kuota per kunci API dan penyedia",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "Hanya koneksi yang dipilih",
     "selectAtLeastOneConnection": "Pilih setidaknya satu koneksi atau pilih Semua koneksi.",
     "allConnectionsDesc": "Kunci ini dapat menggunakan koneksi aktif apa pun.",
-    "restrictedToConnections": "Dibatasi untuk {count, plural, one {# koneksi} other {# koneksi}}."
+    "restrictedToConnections": "Dibatasi untuk {count, plural, one {# koneksi} other {# koneksi}}.",
+    "preferredConnections": "Koneksi pilihan",
+    "preferredConnectionsDesc": "Urutan prioritas per kunci. Jika koneksi pilihan tidak tersedia, perutean beralih ke koneksi memenuhi syarat berikutnya.",
+    "preferredConnectionsNone": "Tidak ada preferensi — strategi perutean bawaan digunakan.",
+    "preferredConnectionsClear": "Hapus",
+    "removeSelection": "Hapus {name}"
   },
   "auditLog": {
     "title": "Catatan Audit",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Konfigurasikan jembatan Gambar→Teks di pengaturan Jembatan Modality",
     "sttBridgeCta": "Konfigurasikan jembatan Ucapan→Teks di pengaturan Jembatan Modality",
     "existingConnection": "Koneksi yang ada",
-    "openrouterSttDescription": "Model speech-to-text OpenRouter menggunakan koneksi OpenRouter yang telah Anda konfigurasikan. Tidak diperlukan kredensial terpisah."
+    "openrouterSttDescription": "Model speech-to-text OpenRouter menggunakan koneksi OpenRouter yang telah Anda konfigurasikan. Tidak diperlukan kredensial terpisah.",
+    "modalityTabsAria": "Jenis media",
+    "serviceKindsAria": "Jenis layanan"
   },
   "search": {
     "searchQuery": "Kueri Pencarian",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "Tidak Dikenal",
     "cliproxyapiUpdate": "Perbarui",
     "cliproxyapiUpdateAvailable": "Pembaruan tersedia: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versi"
+    "cliproxyapiVersion": "Versi",
+    "removeMapping": "Hapus pemetaan"
   },
   "modelCatalog": {
     "title": "Model & Kombo",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "Kombo → {name}"
   },
   "combos": {
+    "title": "kombo",
+    "description": "Buat kombo model dengan perutean berbobot dan dukungan fallback",
+    "autoCatalogTitle": "Katalog perutean otomatis",
     "autoTosLoadError": "Kebijakan ketentuan layanan tidak dapat dimuat. Coba lagi sebelum mengubahnya.",
     "autoTosSaveError": "Kebijakan ketentuan layanan tidak dapat disimpan. Pengaturan sebelumnya masih ditampilkan. Coba lagi.",
     "autoTosIncludeLabel": "Sertakan penyedia bertanda ToS: avoid dalam auto",
     "autoTosDescription": "Nonaktif secara bawaan. Berlaku untuk semua kombinasi auto, bukan hanya satu akun. Menghubungkan penyedia tidak mengaktifkan opsi ini.",
-    "title": "kombo",
-    "description": "Buat kombo model dengan perutean berbobot dan dukungan fallback",
-    "autoCatalogTitle": "Katalog perutean otomatis",
     "autoCatalogTemplateCount": "{count} templat",
     "autoCatalogDescription": "Kombo otomatis/* bawaan diselesaikan secara dinamis dari penyedia yang terhubung. Gunakan salah satu ID ini sebagai bidang model — tidak perlu penyiapan.",
     "autoCatalogExpand": "Perluas katalog perutean otomatis",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "Belum ada kombo yang dikonfigurasi.",
     "playgroundCreateFirst": "Buat satu terlebih dahulu",
     "weighted": "Tertimbang",
+    "weightPercent": "Bobot (%)",
     "leastUsed": "Paling Sedikit Digunakan",
     "costOpt": "Pilihan Biaya",
     "strategyGuideTitle": "Cara menggunakan strategi ini",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# akun} other {# akun}}",
     "builderGlobalAdded": "Ditambahkan",
     "builderGlobalAdd": "Tambahkan",
+    "clearSearch": "Hapus pencarian",
     "manualModel": "Model manual",
     "manualModelInvalid": "Masukkan model sebagai penyedia/model.",
     "manualModelUnknownProvider": "Prefiks penyedia tidak dikenal.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "Tambahkan referensi combo",
     "builderPinnedAccount": "Akun yang Disematkan",
     "builderLegacyEntry": "Entri lama",
+    "builderStaleModel": "Tidak ada di katalog langsung",
     "reviewName": "Nama",
     "reviewStrategy": "Strategi",
     "reviewSteps": "Langkah",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "Panjang konten minimum (karakter)",
     "responseValidationJsonPaths": "Pemeriksaan JSON-path",
     "responseValidationAddCheck": "+ Tambah pemeriksaan",
+    "responseValidationRemoveCheck": "Hapus pemeriksaan",
+    "responseValidationPath": "Jalur JSON",
+    "responseValidationCondition": "Kondisi",
+    "responseValidationValue": "Nilai yang diharapkan",
     "agentFeaturesSystemMessageOverride": "Ganti pesan sistem",
     "agentFeaturesSystemMessagePlaceholder": "Anda adalah asisten ahli...",
     "agentFeaturesSystemMessageHint": "Penggantian pesan sistem untuk agen",
@@ -5288,7 +5292,8 @@
         "skipped": "sudah dikonfigurasi",
         "failed": "gagal"
       }
-    }
+    },
+    "stepProgress": "Progres penyiapan"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Penyedia ini dikecualikan dari auto secara bawaan",
@@ -6056,10 +6061,10 @@
     "apiFormatLabel": "Label Format API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Wilayah API Tiongkok",
-    "apiRegionHint": "Petunjuk Wilayah API",
-    "apiRegionInternational": "Wilayah API Internasional",
-    "apiRegionLabel": "Label Wilayah API",
+    "apiRegionChina": "Tiongkok Daratan",
+    "apiRegionHint": "Pilih wilayah endpoint yang digunakan untuk akses API dan pelacakan kuota.",
+    "apiRegionInternational": "Internasional",
+    "apiRegionLabel": "Wilayah API",
     "apikey": "Kunci API",
     "audio": "Audio",
     "audioProvidersHeading": "Penyedia Audio",
@@ -6080,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Saat akun ini mencapai batas penggunaan 5 jam dan Anthropic menawarkan jalur berprioritas lebih rendah, OmniRoute menerimanya dan terus mengirim permintaan dengan anthropic-usage-limit: slow hingga jendela diatur ulang, alih-alih mendinginkan koneksi. Batas mingguan tetap berlaku dan respons mungkin menunggu kapasitas yang tersedia.",
     "claudeAutoLimitResetLabel": "Atur ulang batas sesi secara otomatis (seminggu sekali)",
     "claudeAutoLimitResetDescription": "Saat akun ini mencapai batas penggunaan 5 jam dan pengaturan ulang batas sesi tersedia, OmniRoute mengklaimnya secara otomatis dan mencoba kembali dengan kecepatan penuh. Tindakan ini menggunakan pengaturan ulang akun yang tersedia seminggu sekali dan tetap dihitung terhadap batas mingguan.",
+    "codexPaidCreditsShort": "Kredit tambahan",
+    "codexPaidCreditsToggleTitle": "Izinkan kredit Codex berbayar setelah kuota langganan habis (dapat dikenakan biaya tambahan)",
+    "codexPaidCreditsEnabled": "Kredit Codex berbayar diaktifkan (dapat dikenakan biaya tambahan)",
+    "codexPaidCreditsDisabled": "Kredit Codex berbayar dinonaktifkan",
+    "failedUpdateCodexPaidCredits": "Gagal memperbarui kebijakan kredit Codex berbayar",
+    "allowCodexPaidCreditsLabel": "Izinkan kredit Codex berbayar",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Lewati cooldown transien agar koneksi ini tetap memenuhi syarat bahkan setelah kesalahan yang dapat dipulihkan (status terminal seperti diblokir/kedaluwarsa tetap berlaku).",
     "disableCoolingLabel": "Nonaktifkan cooldown untuk koneksi ini",
     "bulkPasteAdded": "{count, plural, one {1 kunci ditambahkan} other {# kunci ditambahkan}}",
@@ -6533,6 +6545,7 @@
       "monsterapi": "Dapatkan kunci API di monsterapi.ai",
       "moonshot": "Hubungkan Moonshot AI dengan kunci API.",
       "morph": "Tingkat gratis: 250 ribu kredit/bulan, $0",
+      "apmix": "Hubungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model.",
       "nanogpt": "Hubungkan NanoGPT dengan kunci API.",
       "nebius": "Kredit uji coba ~$1 saat pendaftaran untuk pengujian API",
       "nlpcloud": "NLP Cloud menggunakan API chatbot berpemilik alih-alih chat/completions OpenAI. OmniRoute menyesuaikan pesan OpenAI ke input/konteks/riwayat dan mengekspos katalog lokal model chatbot yang didukung.",
@@ -6621,7 +6634,7 @@
       "claude": "Hubungkan Claude Code dengan alur OAuth yang ada.",
       "cline": "Hubungkan Cline dengan alur OAuth yang ada.",
       "cursor": "Hubungkan Cursor IDE dengan alur OAuth yang ada.",
-      "cursor-api": "Hubungkan Cursor dengan kunci API pengguna (crsr_...) dari cursor.com/dashboard/api; sesi IDE tidak diperlukan.",
+      "cursor-api": "Hubungkan Cursor dengan kunci API pengguna (crsr_... atau grok_...) dari cursor.com/dashboard/api; tidak memerlukan sesi IDE.",
       "github": "Hubungkan GitHub Copilot dengan alur OAuth yang ada.",
       "gitlab-duo": "Aplikasi OAuth dengan cakupan ai_features + read_user. Konfigurasikan GITLAB_DUO_OAUTH_CLIENT_ID dan secara opsional GITLAB_DUO_OAUTH_CLIENT_SECRET pada instans OmniRoute ini.",
       "kilocode": "Hubungkan Kilo Code dengan alur OAuth yang ada.",
@@ -6629,8 +6642,7 @@
       "kiro": "Tingkat gratis: 50 kredit/bulan (~25K–100K token). ⚠️ ToS Kiro melarang penggunaan proksi/harness pihak ketiga.",
       "codex": "Hubungkan OpenAI Codex dengan alur OAuth yang ada.",
       "qwen": "Hubungkan Qwen Code dengan alur OAuth yang ada.",
-      "github-models": "Buat GitHub PAT dengan cakupan 'models: read' di github.com/settings/tokens",
-      "apmix": "Hubungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model."
+      "github-models": "Buat GitHub PAT dengan cakupan 'models: read' di github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} menerima ID model asli penyedia. Impor dari /models atau tambahkan ID khusus untuk perutean.",
     "bedrockModelsDescription": "Model Amazon Bedrock dicakup berdasarkan wilayah AWS. Impor dari /models atau tambahkan ID model Batuan Dasar yang diaktifkan di wilayah yang dipilih.",
@@ -6802,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Batas konkurensi per model",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Opsional: satu model=cap per baris, dicocokkan dengan ID model upstream yang persis sama. Permintaan berlebih diantrekan secara lokal; kosong berarti tanpa batas per model.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Entri konkurensi per model \"{entry}\" tidak valid — gunakan model=cap dengan cap berupa bilangan bulat dari 1 sampai {max}.",
-    "codexPaidCreditsShort": "Kredit tambahan",
-    "codexPaidCreditsToggleTitle": "Izinkan kredit Codex berbayar setelah kuota langganan habis (dapat dikenakan biaya tambahan)",
-    "codexPaidCreditsEnabled": "Kredit Codex berbayar diaktifkan (dapat dikenakan biaya tambahan)",
-    "codexPaidCreditsDisabled": "Kredit Codex berbayar dinonaktifkan",
-    "failedUpdateCodexPaidCredits": "Gagal memperbarui kebijakan kredit Codex berbayar",
-    "allowCodexPaidCreditsLabel": "Izinkan kredit Codex berbayar",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Entri konkurensi per model \"{entry}\" tidak valid — gunakan model=cap dengan cap berupa bilangan bulat dari 1 sampai {max}."
   },
   "settings": {
     "title": "Pengaturan",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "Pilih item bilah sisi yang akan ditampilkan. Mode Esensial membuat alat Lanjutan tetap dapat dicari.",
     "hideHealthLogs": "Sembunyikan Log Pemeriksaan Kesehatan",
     "hideHealthLogsDesc": "Saat AKTIF, sembunyikan pesan [HealthCheck] di konsol server",
-    "themeAccent": "Warna tema",
-    "themeAccentDesc": "Pilih warna preset atau buat tema Anda sendiri dengan satu warna",
-    "themeCreate": "Buat tema",
-    "themeCustom": "Tema kustom",
-    "themeBlue": "Biru",
-    "themeRed": "Merah",
-    "themeGreen": "Hijau",
-    "themeViolet": "Ungu",
-    "themeOrange": "Oranye",
-    "themeCyan": "Sian",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Sesuaikan nama dan logo aplikasi",
     "appName": "Nama Aplikasi",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "Sekarang",
       "coreConfigPath": "Berkas konfigurasi inti",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Jalur absolut .json (ekstensi huruf kecil). Kosong = tidak dibuat. Setiap sinkronisasi menulis '<path>'.generated di samping file yang diadopsi, tidak pernah ke dalamnya.",
+      "coreConfigPathDesc": "Jalur absolut .json/.yaml/.yml (ekstensi huruf kecil). Kosong = tidak dibuat. Setiap sinkronisasi menulis '<path>'.generated di samping file yang diadopsi, tidak pernah ke dalamnya.",
       "lastSwitchKind": "Alasan peralihan",
       "switchKind": {
         "ip_quota_429": "kuota",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "Diterapkan oleh: {mode}",
       "coreBinaryPath": "Jalur binari inti",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Opsional: memverifikasi file yang dihasilkan dengan binari inti sebelum mengganti file yang diadopsi. Biarkan kosong untuk terus menulis di sebelahnya. Direktori dibuat jika tidak ada."
+      "coreBinaryPathHelp": "Opsional: memverifikasi file yang dihasilkan dengan binari inti sebelum mengganti file yang diadopsi. Biarkan kosong untuk terus menulis di sebelahnya. Direktori dibuat jika tidak ada.",
+      "urlFeedlessHint": "Biarkan kosong untuk langganan selector saja: tetapkan URL kontrol di bawah, tidak ada umpan yang diambil, disegarkan, atau ditautkan."
     },
     "bulkHealthcheck": "Pemeriksaan Kesehatan Massal",
     "bulkHealthcheckDesc": "Uji semua proksi yang dikonfigurasi terhadap URL target untuk mengetahui mana yang berfungsi.",
@@ -7707,6 +7703,7 @@
     "configured": "dikonfigurasi",
     "none": "Tidak ada",
     "modelOverrideValuePlaceholder": "Nilai numerik",
+    "modelOverrideKey": "Kunci penggantian",
     "modelOverrideReasoningEffortsPlaceholder": "Dipisahkan dengan koma dalam bahasa Inggris, misalnya low, medium, high",
     "addKeyValue": "Tambahkan nilai kunci",
     "noModelOverrides": "Tidak ada override yang dikonfigurasi untuk model ini.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "Anda dapat mengganti harga default untuk model tertentu. Penggantian khusus lebih diprioritaskan dibandingkan harga yang terdeteksi otomatis.",
     "editPricing": "Sunting Harga",
     "viewFullDetails": "Lihat Detail Lengkap",
-    "themeCoral": "Koral",
     "adaptiveVolumeRouting": "Perutean Volume Adaptif",
     "adaptiveVolumeRoutingDesc": "Skalakan koneksi secara dinamis berdasarkan volume payload dan tekanan throughput.",
     "lkgpToggleTitle": "Penyedia Terakhir yang Diketahui Baik (LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "Kurangi penggunaan token dengan mengompresi prompt sebelum mengirimkannya ke penyedia",
     "autoCombosTitle": "Kombinasi Otomatis",
     "autoCombosDesc": "Izinkan kunci ini menggunakan kombinasi auto/* bawaan, yang secara otomatis memilih model dari setiap penyedia yang dikonfigurasi",
+    "ccDiscoveryAliasesTitle": "Alias discovery Claude Code",
+    "ccDiscoveryAliasesDesc": "Umumkan mirror kompatibilitas claude/... untuk model dan kombo yang sudah dapat diakses kunci ini",
     "compressionGuidanceFullGuideLink": "Panduan kompresi lengkap",
     "compressionGuidanceShow": "Detail",
     "compressionGuidanceHide": "Sembunyikan detail",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "Lolos",
     "tomlTestFailed": "Gagal",
     "tomlImportError": "Tidak dapat memproses file TOML RTK.",
-    "tomlFileReadError": "Tidak dapat membaca file TOML yang dipilih."
+    "tomlFileReadError": "Tidak dapat membaca file TOML yang dipilih.",
+    "viewMode": "Mode tampilan"
   },
   "compressionEngineConfig": {
     "loading": "Memuat…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "Paket bahasa: {packs}",
     "dragToReorder": "Seret untuk menyusun ulang langkah",
     "engine": "Mesin",
-    "intensity": "Intensitas"
+    "intensity": "Intensitas",
+    "compressionOverride": "Penggantian kompresi"
   },
   "compressionStudio": {
     "noRun": "Tidak ada proses kompresi yang tersedia.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "pemenang: {winner}",
     "encoder": "enkoder",
     "bytes": "byte",
-    "tokensCl100k": "token (cl100k)"
+    "tokensCl100k": "token (cl100k)",
+    "studioViews": "Tampilan Studio"
   },
   "omniglyph": {
     "preview": "Pratinjau",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "Pesan yang lebih pendek dari ini tidak dikompresi. Lebih rendah = lebih banyak kompresi.",
     "tooltipMinSavings": "Hanya kompres jika menyimpan setidaknya token sebanyak ini.",
     "ultraSettings": "Pengaturan Ultra",
-    "ultraSettingsDesc": "Kompresi semantik bertenaga SLM"
+    "ultraSettingsDesc": "Kompresi semantik bertenaga SLM",
+    "defaultLanguage": "Bahasa default",
+    "viewMode": "Mode tampilan"
   },
   "translator": {
     "title": "Penerjemah",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "Gagal mentransformasi stream"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kuota habis; penggunaan tambahan diizinkan, sehingga layanan berlanjut.",
+    "healthPaidCreditsBypass": "Kuota habis; kredit berbayar yang tersedia memungkinkan layanan berlanjut.",
+    "healthFilteringBypass": "Kuota habis; penyaringan kuota lokal dinonaktifkan, sehingga layanan berlanjut.",
     "title": "Penggunaan",
     "grokExtraUsageCredits": "Kredit Penggunaan Ekstra",
     "grokAutoTopUp": "Isi Ulang Otomatis",
@@ -9998,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Batasan Penyedia",
     "noProviders": "Tidak Ada Penyedia yang Terhubung",
+    "quotaAuthRequired": "Autentikasi diperlukan - masuk ke dasbor",
+    "quotaAuthRequiredHint": "Koneksi penyedia tidak dapat dimuat karena sesi dasbor tidak tersedia atau telah kedaluwarsa. Masuk dan muat ulang untuk melihat batas kuota Anda.",
     "connectProvidersForQuota": "Hubungkan ke penyedia dengan OAuth untuk melacak batas dan penggunaan kuota API Anda.",
     "accountsCount": "{count, plural, one {# akun} other {# akun}}",
     "filteredFromCount": "(difilter dari {count})",
@@ -10047,9 +10055,6 @@
     "tierLite": "Ringan",
     "tierUnknown": "Tidak diketahui",
     "statTotal": "Total",
-    "statCritical": "Kritis",
-    "statAlert": "Peringatan",
-    "statHealthy": "Sehat",
     "filterPurchaseTypeLabel": "Tipe",
     "filterTierLabel": "Tingkat",
     "purchaseAll": "Semua",
@@ -10288,10 +10293,64 @@
     "lastRefreshed": "Terakhir disegarkan",
     "providerQuota": "Kuota Penyedia",
     "providerQuotaHomeHint": "Status langsung di seluruh akun yang terhubung",
+    "claudeResetCreditDefaultTitle": "Reset batas Claude",
+    "confirmRedeemClaudeResetCredit": "Menukarkan akan langsung mereset batas penggunaan Claude yang memenuhi syarat dan menghabiskan kredit ini secara permanen.",
+    "claudeResetCreditsModalTitle": "Kredit reset Claude",
+    "claudeResetCreditsModalExplainer": "Kredit reset Claude dan reset sesi mingguan yang tersedia untuk akun ini.",
     "codexPaidCreditsLabel": "Kredit Codex berbayar",
     "codexPaidCreditsAvailable": "Tersedia (saldo tidak dilaporkan)",
     "codexPaidCreditsUnavailable": "Tidak tersedia atau batas pengeluaran tercapai",
-    "codexPaidCreditsUnlimited": "Tak terbatas"
+    "codexPaidCreditsUnlimited": "Tak terbatas",
+    "healthAccountHint": "Berdasarkan pengamatan terbaru, bukan pengujian langsung. Pilih akun untuk melihat detail.",
+    "healthRecovery": "Perkiraan pemulihan",
+    "healthAvailable": "Tersedia",
+    "healthRestricted": "Dibatasi sebagian",
+    "healthUnavailable": "Tidak tersedia",
+    "healthPeakHourProtection": "Perlindungan jam sibuk",
+    "healthCooldown": "Waktu tunggu",
+    "healthQuotaExhausted": "Kuota habis",
+    "healthOverview": "Ringkasan",
+    "layoutFull": "Lengkap",
+    "layoutCompact": "Ringkas",
+    "healthQuotaError": "Gagal membaca kuota",
+    "healthNoRuntime": "Status operasi tidak tersedia",
+    "healthPreviousSnapshot": "Penyegaran terakhir gagal; menampilkan hasil sebelumnya",
+    "healthPreviousFailure": "Permintaan terakhir gagal; masa tunggu berakhir",
+    "healthAwaitingSync": "Waktu reset telah lewat; menunggu sinkronisasi",
+    "healthVerdictUnavailable": "Hasil pemeriksaan ketersediaan tidak dapat diperoleh; hanya tingkat kuota yang ditampilkan",
+    "healthSummaryFailed": "Gagal membaca ringkasan operasi; informasi kunci model mungkin tidak lengkap",
+    "healthRuntimeObserved": "Status diperbarui {time}",
+    "healthQuotaObserved": "Kuota diamati {time}",
+    "healthOldestQuota": "Rekaman kuota tertua: {time}",
+    "healthRecoveryUnknown": "Waktu pemulihan tidak diketahui",
+    "healthDetailsHint": "Klik untuk detail dan tindakan",
+    "healthFiveHour": "5 jam",
+    "healthOverall": "Keseluruhan",
+    "healthAction": "Perlu tindakan",
+    "healthTitle": "Ketersediaan akun",
+    "healthDrag": "Seret untuk mengurutkan penyedia",
+    "healthDragPosition": "{provider}, {count, plural, other {posisi {position, number} dari #}}",
+    "healthResetOrder": "Pulihkan urutan bawaan",
+    "healthPool": "Kumpulan {name}",
+    "healthOtherPool": "Akun yang sama · {pool}: {status} (tersisa {remaining})",
+    "healthIncluded": "Termasuk {count, number} yang dibatasi sebagian",
+    "healthBannerUnavailable": "Akun sementara tidak tersedia: {count, number}",
+    "healthBannerAvailable": "Semua {count, number} akun tersedia",
+    "healthLegendHide": "Sembunyikan legenda",
+    "healthLegendShow": "Tampilkan legenda",
+    "healthLegendOk": "Padat = sisa kuota; tembus pandang = terpakai.",
+    "healthLegendCooldown": "Kuota {window} habis. Padat = waktu tunggu berlalu; tembus pandang = sisa waktu tunggu.",
+    "healthLegendAction": "Otorisasi kedaluwarsa atau akun diblokir; menunggu tidak menyelesaikannya.",
+    "healthLegendPartial": "Masih dapat digunakan. Ujung kuning = model atau kumpulan dibatasi.",
+    "healthWaited": "Sudah menunggu {percent}",
+    "healthWait": "Tunggu {duration} lagi (pulih pukul {time})",
+    "healthFastest": "Pemulihan tercepat dalam {duration}",
+    "healthRatio": "{available, number} / {active, number} tersedia",
+    "healthCd5": "5 jam · Waktu tunggu",
+    "healthCdw": "Mingguan · Waktu tunggu",
+    "healthRecentSuccessBypass": "Perutean mengizinkan akun ini karena ada permintaan yang berhasil baru-baru ini.",
+    "healthPurchasedBalanceBypass": "Saldo yang dibeli memungkinkan penggunaan berlanjut setelah kuota bawaan habis.",
+    "healthCutoffAtRequest": "Ambang kuota langsung diperiksa saat merutekan permintaan."
   },
   "modals": {
     "waitingAuth": "Menunggu Otorisasi",
@@ -11078,7 +11137,8 @@
       "message": "Pesan",
       "error": "Kesalahan",
       "completion": "Penyelesaian"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Obrolan Sederhana",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "{minutes}m yang lalu",
     "hoursAgo": "{hours}j yang lalu",
     "daysAgo": "{days}h yang lalu",
-    "entries": "Entri"
+    "entries": "Entri",
+    "viewSwitcherAria": "Tampilan cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Global",
@@ -11447,6 +11508,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Tindakan lainnya",
     "test": "Uji",
     "edit": "Ubah",
     "delete": "Hapus",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "Tidak ada entri yang valid ditemukan. Periksa formatnya dan coba lagi.",
     "bulkImportSuccess": "Impor selesai: {created} dibuat, {updated} diperbarui, {failed} gagal",
     "bulkImportErrorLine": "Baris {line}: {reason}",
-    "bulkImportMaxExceeded": "Maksimum 100 proxy per impor",
+    "bulkImportMaxExceeded": "Maksimum {max} proxy per impor",
     "bulkImportPreview": "Pratinjau",
     "clearAssignment": "(tugas yang jelas)",
     "bulkProxyAssignment": "Penugasan Proksi Massal",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "batas laju IP (429)",
     "poolSetAsideKindSlow": "respon lambat",
     "poolSetAsideKindGeoBlocked": "wilayah diblokir (403/451)",
+    "poolSetAsideKindOperatorReported": "gangguan dilaporkan oleh operator",
     "poolSetAsideUntil": "Kembali ke rotasi {endsAt}",
     "poolSetAsideRepeat": "Disisihkan {count, plural, one {# kali} other {# kali}}",
     "poolUnknownAddress": "Alamat tidak dikenal",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "Ekspor kode",
     "exportShort": "Ekspor",
     "noStateToExport": "Tidak ada data playground yang tersedia untuk diekspor.",
-    "closeExportModal": "Tutup modal ekspor",
     "close": "Tutup",
     "exportRealKeyWarning": "Peringatan keamanan: ekspor diblokir — kunci API asli terdeteksi dalam output. Harap reset kunci API Anda dan coba lagi.",
     "placeholderHintPrefix": "Ganti",
@@ -11809,7 +11871,8 @@
       "nextButton": "Berikutnya",
       "runButton": "Jalankan",
       "promptPlaceholder": "Masukkan pesan Anda… (Enter untuk mengirim, Shift+Enter untuk baris baru)"
-    }
+    },
+    "playgroundTabs": "Mode Playground"
   },
   "miniPlayground": {
     "endpoint": "Titik Akhir",
@@ -11880,7 +11943,8 @@
     "assistant": "Asisten",
     "errorLabel": "Kesalahan",
     "requestFailed": "Permintaan gagal",
-    "stop": "Berhenti"
+    "stop": "Berhenti",
+    "messageInputAria": "Pesan"
   },
   "requestLogger": {
     "recording": "Merekam",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "{count} rotasi akun",
       "resilienceRetried": "Giliran kosong dicoba ulang",
       "resilienceContinued": "Dilanjutkan di tengah stream",
-      "resilienceRecovered": "Dipulihkan oleh tindakan ketahanan"
-    }
+      "resilienceRecovered": "Dipulihkan oleh tindakan ketahanan",
+      "conversationContext": "Konteks Percakapan",
+      "goToBottom": "Ke bagian bawah",
+      "liveRefreshOn": "Penyegaran langsung: aktif",
+      "liveRefreshOff": "Penyegaran langsung: nonaktif",
+      "liveRefresh": "Penyegaran langsung",
+      "continuesFromParent": "berlanjut dari induk",
+      "continuesFrom": "Berlanjut dari {id}",
+      "viewConversation": "lihat percakapan",
+      "openConversation": "Buka percakapan {id}"
+    },
+    "tableLabel": "Log permintaan"
   },
   "proxyLogger": {
     "filterAll": "Semua",
@@ -12113,7 +12187,9 @@
     "colServedBy": "Dilayani oleh",
     "filterTraffic": "Lalu lintas",
     "filterTests": "Uji coba",
-    "filterSource": "Sumber"
+    "filterSource": "Sumber",
+    "tableLabel": "Log proksi",
+    "sortLogs": "Urutkan log"
   },
   "endpointOptions": {
     "speech": "Ucapan",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "HABIS",
     "statusAlerting": "PERINGATAN",
     "statusError": "KESALAHAN",
-    "moreSuffix": "+{count} lainnya"
+    "moreSuffix": "+{count} lainnya",
+    "feedFilterLabel": "Filter peristiwa"
   },
   "quotaShare": {
     "weightPercent": "Bobot %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "Tanpa Grup",
     "ungroupedHint": "Pool ini tidak ditetapkan ke grup yang dikenal. Edit pool untuk memindahkannya ke grup yang sebenarnya.",
     "removeFailed": "Tidak dapat menghapus kumpulan ini.",
-    "dismiss": "Tutup"
+    "dismiss": "Tutup",
+    "allocationsHeading": "Alokasi",
+    "wizardRemoveDimension": "Hapus dimensi",
+    "wizardRemoveKey": "Hapus kunci"
   },
   "plugins": {
     "title": "Plugin",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "Pembaruan pengaturan gagal",
       "serviceRevealApiKey": "{actor} menampilkan kunci API untuk {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Tutup pesan kesalahan"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "Buka sekarang",
       "message": "MITM Proxy sekarang berada di bawah AgentBridge.",
       "title": "Halaman ini telah berpindah"
-    }
+    },
+    "dnsOn": "DNS aktif",
+    "dnsOff": "DNS nonaktif",
+    "showServerSettings": "Tampilkan pengaturan server",
+    "hideServerSettings": "Sembunyikan pengaturan server",
+    "upstreamCaTesting": "Menguji…",
+    "removeMapping": "Hapus pemetaan",
+    "mappingSourcePlaceholder": "misalnya, gemini-3.6-flash-medium, atau * untuk semua yang belum dipetakan",
+    "mappingWildcardHint": "Gunakan * sebagai sumber untuk merutekan setiap model tanpa pemetaan eksplisit melalui OmniRoute ke target yang dipilih. Kecocokan sumber yang persis selalu diprioritaskan daripada *.",
+    "wizardDetectingModels": "Mendeteksi model dari lalu lintas yang dicegat...",
+    "wizardDetectedModels": "Menemukan {count, plural, one {# model} other {# model}} dalam lalu lintas yang dicegat. Pilih model yang ingin Anda tambahkan:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# model}} dipilih. Anda akan memetakannya ke model OmniRoute di layar berikutnya.",
+    "wizardAddModels": "Tambahkan {count, plural, one {# model} other {# model}}",
+    "wizardNoModelsDetected": "Belum ada model yang terdeteksi. Gunakan {agent} untuk membuat permintaan, lalu jalankan wizard ini lagi untuk mendeteksi model secara otomatis dari lalu lintas.",
+    "wizardNoModelsHint": "Atau tutup wizard ini dan tambahkan pemetaan secara manual di kartu agen."
   },
   "providerStats": {
     "unknownError": "Kesalahan tidak dikenal",
@@ -12686,7 +12781,11 @@
     "avgTtft": "TTFT Rata-rata",
     "avgTotal": "Total Rata-rata",
     "requestTelemetry": "Telemetri Permintaan",
-    "requestTelemetryDescription": "Rincian pipeline 7 fase (5 menit terakhir)"
+    "requestTelemetryDescription": "Rincian pipeline 7 fase (5 menit terakhir)",
+    "title": "Statistik penyedia",
+    "description": "Lalu lintas, latensi, dan tingkat keberhasilan per penyedia dan per model",
+    "combo": "Kombinasi",
+    "toggleModels": "Tampilkan model untuk {provider}"
   },
   "relay": {
     "title": "Proksi Relai Serverless",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "Tidak ada body permintaan.",
     "noResponseBody": "Tidak ada body respons.",
     "formatted": "Diformat",
-    "raw": "Mentah"
+    "raw": "Mentah",
+    "requestCount": "{count, plural, one {# permintaan} other {# permintaan}}",
+    "expandList": "Perluas daftar",
+    "collapseList": "Ciutkan daftar",
+    "snippetLanguage": "Bahasa cuplikan kode",
+    "headersTable": "Header",
+    "showSecrets": "Tampilkan rahasia",
+    "maskSecrets": "Samarkan rahasia",
+    "llmNotAvailable": "Metadata LLM tidak tersedia untuk permintaan ini.",
+    "llmStreamYes": "ya (SSE)",
+    "llmStreamNo": "tidak",
+    "llmTotalTokens": "Total: {count} token"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "Proporsi panggilan yang benar-benar dijawab oleh penyedia ini selama 24 jam terakhir. Tanda hubung berarti penyedia menerima terlalu sedikit lalu lintas untuk menentukan tingkat keberhasilan.",
     "reliabilitySample": "{successes} dari {requests} panggilan berhasil dalam {hours} jam terakhir",
     "reliabilityTooFew": "Hanya {requests} panggilan dalam {hours} jam terakhir — terlalu sedikit untuk menentukan tingkat keberhasilan",
-    "reliabilityNoTraffic": "Tidak ada panggilan yang tercatat dalam 24 jam terakhir"
+    "reliabilityNoTraffic": "Tidak ada panggilan yang tercatat dalam 24 jam terakhir",
+    "categoryFilter": "Kategori tugas"
   },
   "discovery": {
     "title": "Penemuan Penyedia",
@@ -13331,7 +13442,11 @@
     "method": "Metode",
     "auth": "Autentikasi",
     "feasibility": "Kelayakan",
-    "models": "Model"
+    "models": "Model",
+    "provider": "Penyedia",
+    "status": "Status",
+    "endpoint": "Endpoint",
+    "actions": "Tindakan"
   },
   "noAuthProvider": {
     "title": "Tidak memerlukan autentikasi",
@@ -13380,7 +13495,8 @@
     "ownProxy": "Proxy sendiri",
     "freeTierPause": "Model {model} dijeda (429), kembali pada {time}",
     "freeTierPauseProvider": "Dijeda (429), kembali pada {time}",
-    "freeTierPauseNote": "Jeda dalam proses pada instan ini"
+    "freeTierPauseNote": "Jeda dalam proses pada instan ini",
+    "proxyType": "Jenis proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "Pencapaian tersembunyi menanti...",
         "criteria": "Selesaikan pencapaian tersembunyi untuk mengungkap lencana ini."
       }
-    }
+    },
+    "leaderboardTitle": "Papan peringkat",
+    "leaderboardDescription": "Peringkat dan pencapaian di seluruh kunci API Anda",
+    "badgeLocked": "Terkunci"
   },
   "featureFlags": {
     "title": "Flag Fitur",
@@ -13794,6 +13913,7 @@
     "latency": "Latensi",
     "quota": "Kuota",
     "rangeWindow": "Jendela {range}",
+    "timeRange": "Rentang waktu",
     "runtimeHealthBlend": "kombinasi runtime/kesehatan",
     "averageResponseTime": "waktu respons rata-rata",
     "worstQuota": "Kuota terburuk",
@@ -13995,7 +14115,11 @@
     "learnMore": "Pelajari lebih lanjut",
     "changelogLoadFailed": "Tidak dapat memuat log perubahan. Silakan coba lagi nanti.",
     "retry": "Coba lagi",
-    "viewFullHistory": "Lihat riwayat lengkap di GitHub"
+    "viewFullHistory": "Lihat riwayat lengkap di GitHub",
+    "title": "Berita & log perubahan",
+    "description": "Pengumuman dari tim OmniRoute dan catatan rilis terbaru",
+    "viewLabel": "Lihat",
+    "loadingNews": "Memuat pengumuman..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "Status Pemutus Sirkuit Penyedia",
       "lastUpdate": "Pembaruan terakhir: {timestamp}",
       "uptimeMinutes": "{minutes} mnt",
-      "uptimeHoursMinutes": "{hours}j {minutes}m"
+      "uptimeHoursMinutes": "{hours}j {minutes}m",
+      "breakerClosed": "Tertutup",
+      "breakerNotClosed": "Terbuka atau setengah terbuka"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "Detail Pemeliharaan",
         "secondaryAction": "Status Sistem"
       }
+    },
+    "miniapp": {
+      "askAnything": "Tanyakan apa saja…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "Alat MCP",
     "scope": "Cakupan",
-    "apiKey": "Kunci API"
+    "apiKey": "Kunci API",
+    "visibleCount": "{visible} terlihat / total {total}",
+    "modeLabel": "Mode tampilan",
+    "jumpToNow": "Lompat ke waktu saat ini, garis NOW diatur ulang ke posisi {position}%",
+    "laneReuse": "Penggunaan ulang jalur",
+    "laneReuseLabel": "Jendela penggunaan ulang jalur (menit)",
+    "laneReuseHint": "Permintaan yang memiliki ID percakapan yang sama tetap berada di baris linimasa yang sama selama jeda di antaranya kurang dari jumlah menit ini.",
+    "laneReuseUnit": "mnt",
+    "autoRefresh": "Penyegaran otomatis",
+    "autoRefreshLabel": "Interval penyegaran otomatis (detik)",
+    "autoRefreshHint": "Seberapa sering linimasa mengambil ulang daftar permintaan dari server.",
+    "autoRefreshUnit": "dtk",
+    "zoomOut": "Perkecil",
+    "zoomIn": "Perbesar"
   },
   "metadata": {
     "compressionTitle": "Kompresi",

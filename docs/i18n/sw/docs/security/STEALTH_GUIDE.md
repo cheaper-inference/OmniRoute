@@ -16,40 +16,61 @@ Vipengele vya ufichaji vipo ili OmniRoute iweze kufanya kazi kama safu ya uoanif
 
 ---
 
-## Safu ya Alama za Utambulisho za TLS
+## Safu ya Utambuzi wa Alama za TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Vipindi endelevu vya `wreq-js` huundwa kwa uvivu kwa kila upeo wa akaunti na proksi iliyotatuliwa. `TlsClient` ya mchakato mzima huhifadhi vipindi visivyozidi 128 vinavyoiga **Chrome 124 kwenye macOS** kwa huduma asili zilizo nyuma ya Cloudflare. `TlsClient.fetch()` hushindwa kwa kufungwa wakati mazingira asilia ya utekelezaji hayapatikani; mpigaji anaweza kuchagua kwa uwazi njia mbadala nje ya kifungashio hiki.
+Vipindi endelevu vya `wreq-js` huundwa kwa njia ya uvivu kwa kila wigo wa akaunti na proksi iliyotatuliwa. `TlsClient` ya mchakato mzima huhifadhi kwenye bwawa vipindi visivyozidi 128 vinavyoiga **Chrome 124 kwenye macOS** kwa huduma za juu zilizo nyuma ya Cloudflare. `TlsClient.fetch()` hushindwa kwa hali iliyofungwa wakati mazingira asilia ya utekelezaji hayapatikani; mpigaji anaweza kuchagua waziwazi mbinu mbadala nje ya kifungashio hiki.
 
 - Wasifu wa kipindi: `browser: "chrome_124", os: "macos"`
 - Utatuzi wa proksi (kipaumbele): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (pia herufi ndogo)
-- Muda wa kusubiri: `TLS_CLIENT_TIMEOUT_MS` (hurithi kutoka `FETCH_TIMEOUT_MS`, chaguo-msingi 600000)
+- Muda wa kuisha: `TLS_CLIENT_TIMEOUT_MS` (hurithi kutoka `FETCH_TIMEOUT_MS`, chaguo-msingi 600000)
 - Response ya `wreq-js` inaoana na fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Kichunguzi cha baiti ya kwanza (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()` hutatuliwa mara tu vichwa vya huduma asili vinapowasili, kwa hivyo `TLS_CLIENT_TIMEOUT_MS` pekee haiwezi kuweka kikomo kwa mwili ambao hautoi kamwe baiti ya kwanza. `guardTlsFirstByte()` hushindanisha `read()` ya kwanza ya mwili dhidi ya `TLS_FIRST_BYTE_WATCHDOG_MS` (chaguo-msingi `10000`, `0` huizima); mwili wenye afya hauathiriwi, ilhali mwili uliokwama hughairi kisomaji cha wreq na kuruhusu mantiki iliyopo ya urejeaji wa TLS ya `proxyFetch` kuendelea hadi kwa kisambazaji cha moja kwa moja/proksi (ombi lisilo salama kuchezwa tena, k.m. POST yenye mwili, bado hutupa hitilafu badala ya kujaribiwa tena kimyakimya).
+- Kifuatiliaji cha baiti ya kwanza (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  hukamilika mara tu vichwa vya huduma ya juu vinapowasili, kwa hivyo `TLS_CLIENT_TIMEOUT_MS` pekee haiwezi kuweka kikomo kwa
+  mwili ambao hautoi kamwe baiti ya kwanza. `guardTlsFirstByte()` hushindanisha `read()` ya kwanza ya mwili
+  dhidi ya `TLS_FIRST_BYTE_WATCHDOG_MS` (chaguo-msingi `10000`, `0` huizima); mwili wenye hali nzuri
+  hauathiriwi, huku mwili uliokwama ukighairi kisomaji cha wreq na kuruhusu mantiki iliyopo ya
+  mbinu mbadala ya TLS ya `proxyFetch` iendelee hadi kwa kisambazaji cha moja kwa moja/proksi (ombi lisilo salama kurudiwa, kwa mfano
+  POST yenye mwili, bado hutupa hitilafu badala ya kujaribiwa tena kimyakimya).
 
-### Usafirishaji wa mtoa huduma kwa kutumia vidakuzi vya wavuti — wreq-js 3.2.0
+### Usafirishaji wa mtoa huduma wa vidakuzi vya wavuti — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` ni adapta ya pamoja kwa usafirishaji maalumu mitano wa vidakuzi vya wavuti ulio hapa chini. Kila kifungashio chepesi cha mtoa huduma huchagua wasifu wa kivinjari/mfumo wa uendeshaji. Adapta hutumia kipakiaji kimoja cha mazingira ya utekelezaji ya wreq na hifadhi ya usafirishaji katika `open-sse/utils/tlsClient.ts`, iliyowekewa funguo kulingana na wasifu + mfumo wa uendeshaji + proksi iliyotatuliwa, huku kila ombi likitumia `cookieMode: "ephemeral"`. Kwa hivyo akaunti na maombi hushiriki miunganisho ya kiwango cha usafirishaji, lakini kamwe hazishiriki kipindi cha wreq au hifadhi ya vidakuzi.
+`open-sse/services/tlsClientBase.ts` ni adapta inayoshirikiwa na njia tano maalumu za
+usafirishaji wa vidakuzi vya wavuti zilizo hapa chini. Kila kifungashio chepesi cha mtoa huduma huchagua wasifu wa kivinjari/OS. Adapta
+hutumia kipakiaji kimoja cha mazingira ya utekelezaji ya wreq na bwawa la usafirishaji katika `open-sse/utils/tlsClient.ts`, lenye ufunguo wa
+wasifu + OS + proksi iliyotatuliwa, huku kila ombi likitumia `cookieMode: "ephemeral"`. Kwa hivyo, akaunti na
+maombi hushiriki miunganisho ya kiwango cha usafirishaji, lakini kamwe hazishiriki kipindi cha wreq wala hifadhi ya vidakuzi.
 
-| Mtoa huduma | Wasifu        | Mfumo wa uendeshaji unaoigwa | Sera ya EOF ya mtiririko                  |
-| ----------- | ------------- | ---------------------------- | ----------------------------------------- |
-| Claude      | `chrome_146`  | Linux                        | jumuisha `[DONE]`                         |
-| Perplexity  | `firefox_148` | macOS                        | jumuisha `event: end_of_stream`           |
-| Grok        | `chrome_146`  | Linux                        | ondoa `[DONE]`                            |
-| Notion      | `chrome_146`  | Windows                      | jumuisha `[DONE]`                         |
-| LMArena     | `chrome_146`  | Windows                      | hakuna kiashiria; funga kwenye EOF asilia |
+| Mtoa huduma | Wasifu        | OS inayoigwa | Sera ya EOF ya mtiririko               |
+| ----------- | ------------- | ------------ | -------------------------------------- |
+| Claude      | `chrome_146`  | Linux        | jumuisha `[DONE]`                      |
+| Perplexity  | `firefox_151` | macOS        | jumuisha `event: end_of_stream`        |
+| Grok        | `chrome_146`  | Linux        | ondoa `[DONE]`                         |
+| Notion      | `chrome_146`  | Windows      | jumuisha `[DONE]`                      |
+| LMArena     | `chrome_146`  | Windows      | hakuna kiashiria; funga kwa EOF asilia |
 
-- Utiririshaji hutumia `ReadableStream` asilia ya jibu moja kwa moja; hakuna faili ya muda au mchakato saidizi unaoundwa.
-- Hadi baiti 256 za mwanzo hukaguliwa kabla ya kufichua mtiririko. Watoa huduma wa SSE huhifadhi kwenye bafa hitilafu zisizo za SSE; Grok/LMArena huweka changamoto za Cloudflare kuwa `403` na kurasa za kati za HTML kuwa `502`.
-- Muda asilia wa kusubiri ombi hubaki umefungwa na kikomo kamili cha mwisho cha JS. Kukwama hubatilisha na kufunga tu usafirishaji ulioathirika wa wasifu/mfumo wa uendeshaji/proksi kabla ya ombi linalofuata kuuunda upya.
-- Kipaumbele cha utatuzi wa proksi ni `proxyUrl` ya kila mwito → muktadha wa akaunti/dashibodi wa upeo wa ombi → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (ikiwemo lahaja za herufi ndogo). Hitilafu za utatuzi hushindwa kwa kufungwa badala ya kuvuja muunganisho wa moja kwa moja. LMArena hutatua kwa makusudi dhidi ya `arena.ai`.
-- `byteResponse` hurejesha URL ya `data:` yenye aina ya maudhui bila uharibifu wa UTF-8.
-- Hitilafu ni `TlsClientUnavailableError` (kifurushi/kiongezi hakipatikani), `TlsClientHangError` (kikomo cha muda kimepitwa), na `WreqTransportCapacityError` (msimbo wa hitilafu ya uwezo wa kipindi cha pamoja) wakati nafasi zote 128 zenye kikomo za wasifu/mfumo wa uendeshaji/proksi zinafanya kazi au zinafungwa.
+- Utiririshaji hutumia `ReadableStream` asilia ya jibu moja kwa moja; hakuna faili ya muda wala mchakato saidizi
+  unaoundwa.
+- Hadi baiti 256 za mwanzo hukaguliwa kabla ya kufichua mtiririko. Watoa huduma wa SSE huhifadhi kwenye bafa
+  hitilafu zisizo za SSE; Grok/LMArena huoanisha changamoto za Cloudflare na `403`, na kurasa za kati za HTML na `502`.
+- Muda asilia wa kuisha kwa ombi huendelea kufungwa na kikomo kamili cha mwisho cha JS. Kukwama hubatilisha
+  na kufunga tu usafirishaji ulioathiriwa wa wasifu/OS/proksi kabla ya ombi linalofuata kuuunda upya.
+- Kipaumbele cha utatuzi wa proksi ni `proxyUrl` ya kila mwito → muktadha wa akaunti/dashibodi wa ombi →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (ikiwemo aina za herufi ndogo). Hitilafu za utatuzi hushindwa
+  kwa hali iliyofungwa badala ya kuvuja muunganisho wa moja kwa moja. LMArena kwa makusudi hufanya utatuzi dhidi ya `arena.ai`.
+- `byteResponse` hurudisha URL ya `data:` yenye aina ya maudhui bila uharibifu wa UTF-8.
+- Hitilafu ni `TlsClientUnavailableError` (kifurushi/kiongezi hakipatikani), `TlsClientHangError`
+  (kikomo cha muda kimepitwa), na `WreqTransportCapacityError` (msimbo wa hitilafu ya uwezo wa kipindi unaoshirikiwa)
+  wakati nafasi zote 128 zenye kikomo za wasifu/OS/proksi zinatumika au zinafungwa.
 
-Kipindi cha jumla cha `TlsClient` kilicho hapo juu hubaki maalumu kwa hali endelevu ya vidakuzi inayotegemea kivinjari. Njia zote mbili hutumia tena kipakiaji kimoja cha moduli ya wreq kilichohifadhiwa na kihusishi cha mzunguko wa maisha ya mchakato; hifadhi zake hubaki tofauti kwa sababu muda wa kuishi wa vidakuzi vyake umetofautishwa kimakusudi.
+Kipindi cha jumla cha `TlsClient` kilicho hapo juu kinaendelea kuwa maalumu kwa hali endelevu ya vidakuzi
+inayoungwa mkono na kivinjari. Njia zote mbili hutumia tena kipakiaji kimoja cha moduli ya wreq kilichohifadhiwa na kiunganishi cha mzunguko wa maisha ya mchakato; mabwawa yake yanaendelea
+kuwa tofauti kwa sababu muda wa maisha wa vidakuzi vyake umetofautishwa kimakusudi.
 
-Wasifu huu unaungwa mkono na kifurushi kilichofungwa kwenye toleo mahususi, lakini kukubalika halisi na WAF kunaweza kubadilika bila kutegemea majaribio ya ndani ya mkataba. Thibitisha mabadiliko ya alama za utambulisho dhidi ya akaunti hai iliyoidhinishwa kwa uwazi kabla ya kudai usawa na kivinjari cha huduma asili.
+Wasifu unaungwa mkono na kifurushi kilichofungwa kwa toleo mahususi, lakini ukubalifu halisi wa WAF unaweza kubadilika bila kutegemea
+majaribio ya ndani ya mkataba. Thibitisha mabadiliko ya alama dhidi ya akaunti halisi iliyoidhinishwa waziwazi
+kabla ya kudai usawa na kivinjari cha huduma ya juu.
 
 ---
 

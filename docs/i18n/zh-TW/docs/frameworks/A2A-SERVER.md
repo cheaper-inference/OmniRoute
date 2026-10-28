@@ -162,7 +162,7 @@ OmniRoute 提供 6 個 A2A 技能,連接於 `src/lib/a2a/taskExecution.ts::A2A_S
 | 健康報告      | `health-report`      | 彙總各 provider 的熔斷器(circuit breaker)、冷卻與鎖定狀態                                                                      | health, resilience         | "顯示所有 providers 的健康狀態" |
 | 列出功能      | `list-capabilities`  | 以 markdown 表格回傳完整的 45 項 Agent Skills 目錄(23 個 API + 21 個 CLI + 1 個 config),並附上原始 SKILL.md URL 以供注入上下文 | catalog, discovery, skills | "列出所有 OmniRoute 功能"       |
 
-> Agent Card 應與即時的 375 個 provider 目錄保持一致;provider 數量與免費/免驗證的中繼資料皆取自執行時期註冊表(runtime registry)。
+> Agent Card 應與即時的 376 個 provider 目錄保持一致;provider 數量與免費/免驗證的中繼資料皆取自執行時期註冊表(runtime registry)。
 
 ### `list-capabilities` 技能詳細說明
 

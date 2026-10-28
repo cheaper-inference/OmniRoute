@@ -34,89 +34,88 @@ OmniRoute, istekler üst sağlayıcılara ulaşmadan önce **proaktif olarak** �
 
 ### Kapalı
 
-Sıkıştırma uygulanmaz. Tüm mesajlar değiştirilmeden iletilir.
+Sıkıştırma uygulanmaz. Tüm mesajlar değişiklik olmadan iletilir.
 
-### Hafif Mod (~%15 tasarruf, <1ms gecikme)
+### Lite Modu (~%15 tasarruf, <1ms gecikme)
 
-En güvenli mod — anlamsal değişiklik yoktur, yalnızca biçimlendirme temizliği yapılır:
+En güvenli mod — sıfır anlamsal değişiklik, yalnızca biçimlendirme temizliği:
 
 | Teknik                   | Açıklama                                                     |
 | ------------------------ | ------------------------------------------------------------ |
 | `collapseWhitespace`     | Ardışık boş satırları ve satır sonu boşluklarını birleştirir |
 | `dedupSystemPrompt`      | Yinelenen sistem mesajlarını kaldırır                        |
 | `compressToolResults`    | Ayrıntılı araç/fonksiyon çıktılarını sıkıştırır              |
-| `removeRedundantContent` | Yinelenen talimatları kaldırır                               |
-| `replaceImageUrls`       | Base64 görüntü veri URI'lerini kısaltır                      |
+| `removeRedundantContent` | Tekrarlanan talimatları ayıklar                              |
+| `replaceImageUrls`       | base64 görüntü veri URI'lerini kısaltır                      |
 
-**En uygun kullanım:** Sürekli kullanım, güvenliğin kritik olduğu iş akışları.
+**Şunlar için ideal:** Sürekli açık kullanım, güvenlik açısından kritik iş akışları.
 
 ### Standart Mod (~%30 tasarruf)
 
-[Caveman](https://github.com/JuliusBrussee/caveman)'den esinlenmiştir — anlamı korurken dolgu sözcüklerini ve gereksiz uzun ifadeleri kaldırır:
+[Caveman](https://github.com/JuliusBrussee/caveman)'den ilham alır — anlamı koruyarak dolgu sözcükleri ve uzun ifadeleri kaldırır:
 
-- Dolgu sözcüklerini kaldırır ("lütfen", "bence", "temelde", "aslında")
-- Gereksiz uzun ifadeleri kısaltır ("yapmak amacıyla" → "yapmak için", "sonucunda" → "nedeniyle")
-- Nezaket amaçlı ihtiyatlı ifadeleri kaldırır ("Sakıncası yoksa...", "Mümkünse...")
+- Dolgu sözcüklerini kaldırır ("please" (lütfen), "I think" (bence), "basically" (aslında), "actually" (doğrusu))
+- Uzun ifadeleri yoğunlaştırır ("in order to" → "to", "as a result of" → "because")
+- Nazik çekimser ifadeleri ayıklar ("Would you mind...", "If you could possibly...")
 - Kodlama istemleri için ayarlanmış 30'dan fazla regex kuralı
 
-**En uygun kullanım:** Günlük kodlama iş akışları, maliyet bilincine sahip ekipler.
+**Şunlar için ideal:** Günlük kodlama iş akışları, maliyet hassasiyeti olan ekipler.
 
 ### Agresif Mod (~%50 tasarruf)
 
 Uzun oturumlar için akıllı geçmiş yönetimi:
 
-- **Mesaj Yaşlandırma** — eski mesajlar giderek daha fazla sıkıştırılır
-- **Araç Sonucu Sıkıştırma** — uzun araç çıktıları kısaltılır veya atlanır (ilk/son satırlar,
-  eşleşen satırları filtreleme, JSON anahtarlarını sıkıştırma)
+- **Mesaj Eskitme** — eski mesajlar giderek artan oranda sıkıştırılır
+- **Araç Sonucu Sıkıştırma** — uzun araç çıktıları kırpılır veya elenir (ilk/son satırlar,
+  eşleşen satır filtreleme, JSON anahtar sıkıştırma)
 - **Yapısal Bütünlük Korumaları** — `tool_use` + `tool_result` çiftlerinin tutarlı kalmasını sağlar
 - **Bağlam Penceresi Farkındalığı** — modele özgü token sınırlarına uyar
 
-**En uygun kullanım:** Uzun hata ayıklama oturumları, büyük kod tabanları.
+**Şunlar için ideal:** Uzun hata ayıklama oturumları, büyük kod tabanları.
 
 ### Ultra Mod (~%75 tasarruf)
 
-Token kullanımının kritik olduğu senaryolar için maksimum sıkıştırma:
+Token açısından kritik senaryolar için maksimum sıkıştırma:
 
-- **Sezgisel Budama** — düzyazının puana dayalı olarak token düzeyinde budanması
+- **Sezgisel Budama** — düz metnin puana dayalı token budaması
 - **Yapı Koruma** — çitli kod blokları, satır içi kod, URL'ler ve tanımlayıcılar
-  yer tutucularla korunup sözcüğü sözcüğüne yeniden birleştirilir; hiçbir zaman budanmaz
+  işaretlenir (tombstone) ve olduğu gibi yeniden birleştirilir, asla budanmaz
 - **İsteğe bağlı SLM katmanı** — yapılandırıldığında küçük bir yerel model budamayı iyileştirebilir
-- Agresif moddan bağımsızdır: mesaj yaşlandırma, araç sonucu sıkıştırma
-  veya yedek özetleyiciyi çalıştırmaz (yalnızca bir SLM katmanı hatası, yedek geçişi
-  agresif mod üzerinden yönlendirebilir)
+- Agresif moddan bağımsızdır: mesaj eskitme, araç sonucu sıkıştırma veya yedek özetleyiciyi
+  çalıştırmaz (yalnızca bir SLM katmanı hatası, yedek geçişi agresif mod üzerinden yönlendirebilir)
 
-**En uygun kullanım:** Bağlam sınırlarına sürekli ulaştığınız durumlar.
+**Şunlar için ideal:** Bağlam sınırlarına tekrar tekrar ulaştığınızda.
 
-### RTK Modu (üst sağlayıcı tarafında %60-90 aralığı)
+### RTK Modu (%60-90 tek başına aralık)
 
-RTK modu, kodlama aracısı oturumlarında görülen ayrıntılı araç çıktıları için optimize edilmiştir:
+RTK modu, kodlama ajanı oturumlarında görülen ayrıntılı araç çıktıları için optimize edilmiştir:
 
-- `git status`, `git diff`, `git log`, test çalıştırıcıları,
-  TypeScript/Vite/Webpack derlemeleri, ESLint/Biome/Prettier, npm denetimleri/kurulumları, Docker günlükleri, altyapı
-  çıktıları ve genel kabuk çıktıları gibi komut/çıktı sınıflarını algılar
-- `open-sse/services/compression/engines/rtk/filters/` konumundaki JSON filtre paketlerini uygular
-- Proje veya genel `filters.toml` dosyalarından RTK TOML şema v1 filtrelerini; satır içi test
-  doğrulaması ve proje dosyaları için güven denetimiyle içe aktarır
-- Satır içi doğrulama örnekleriyle birlikte 55 yerleşik filtre sunar
-- ANSI kontrol dizilerini, ilerleme çubuklarını, yinelenen satırları ve işlem gerektirmeyen gürültüyü kaldırır
-- Başarısızlıkları, hataları, uyarıları, değiştirilen dosyaları, özetleri ve uzun çıktıların son kısmını korur
-- Güven denetimli proje filtrelerini, genel filtreleri ve isteğe bağlı olarak redakte edilmiş ham çıktı kurtarmayı destekler
+- `git status`, `git diff`, `git log`, test çalıştırıcıları, TypeScript/Vite/Webpack derlemeleri,
+  ESLint/Biome/Prettier, npm audit/kurulumları, Docker günlükleri, altyapı çıktısı ve genel
+  kabuk çıktısı gibi komut/çıktı sınıflarını algılar
+- `open-sse/services/compression/engines/rtk/filters/` altındaki JSON filtre paketlerini uygular
+- Proje veya genel `filters.toml` dosyalarından RTK TOML şema v1 filtrelerini içe aktarır; satır içi test
+  doğrulaması ve proje dosyaları için güven denetimi ile birlikte
+- Satır içi doğrulama örnekleriyle 56 yerleşik filtreyle gelir
+- ANSI kontrol dizilerini, ilerleme çubuklarını, tekrarlanan satırları ve eyleme dönüştürülemeyen gürültüyü kaldırır
+- Hataları, uyarıları, değişen dosyaları, özetleri ve uzun çıktının son kısmını korur
+- Güven denetimli proje filtrelerini, genel filtreleri ve isteğe bağlı gizlenmiş ham çıktı kurtarmayı destekler
 
-**En uygun kullanım:** Kabuk, derleme, test, git, grep ve dosya çıktısı dökümlerini içeren aracı oturumları.
+**Şunlar için ideal:** Kabuk, derleme, test, git, grep ve dosya çıktısı dökümleri içeren ajan oturumları.
 
-### Yığın Modu (uygun içerikte %78-95 aralığı)
+### Yığılmış Mod (%78-95 uygun aralık)
 
-Yığın modu, birden fazla sıkıştırma motorunu belirlenmiş bir sırayla çalıştırır. Varsayılan işlem hattı şöyledir:
+Yığılmış mod, birden fazla sıkıştırma motorunu belirleyici bir sırayla çalıştırır. Varsayılan işlem hattı:
 
 ```txt
 RTK -> Caveman
 ```
 
-Bu sıra önce terminal/araç çıktısını kompakt tutar, ardından kalan doğal dil istemine Caveman anlamsal yoğunlaştırmasını uygular.
-Yığın işlem hatları genel olarak veya yönlendirme kombinasyonlarına atanmış
-sıkıştırma kombinasyonları aracılığıyla yapılandırılabilir.
+Bu sıra, önce terminal/araç çıktısını kompakt tutar, ardından kalan doğal dil istemine
+Caveman anlamsal yoğunlaştırmasını uygular. Yığılmış işlem hatları genel olarak veya
+yönlendirme kombinasyonlarına atanan sıkıştırma kombinasyonları aracılığıyla yapılandırılabilir.
 
-**En uygun kullanım:** Büyük araç günlükleriyle birlikte insan talimatları veya asistan özetleri içeren karma bağlam.
+**Şunlar için ideal:** Büyük araç günlüklerinin yanı sıra insan talimatları veya asistan özetleri içeren karma bağlamlar.
 
 ---
 

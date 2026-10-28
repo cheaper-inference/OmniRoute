@@ -4,228 +4,76 @@
 
 ---
 
-> **အခြေအနေ:** ကိုးကားချက် — ဤနေရာတွင် ဖော်ပြထားသော စံသတ်မှတ်မှုကို **အကောင်အထည်ဖော်ပြီးဖြစ်သည်** (အဆင့် 1–6: grid wallpaper၊ primitives၊ status-color ဗဟိုချုပ်ကိုင်မှု၊ mono token၊ DataTable token migration၊ focus-ring → accent၊ Checkbox/Textarea primitives၊ `cn()` → tailwind-merge၊ standalone screen တိုင်းတွင် grid ထည့်သွင်းမှု၊ fluid 4K content shell၊ opaque data-table surfaces)။ ဤစာတမ်းသည် dashboard ၏ design tokens၊ components နှင့် conventions များအတွက် တရားဝင်စံညွှန်းဖော်ပြချက်ဖြစ်သည်။ ဆုံးဖြတ်ချက်တစ်ခုချင်းစီ၏ အကြောင်းရင်းကို ဖော်ပြရန် အောက်ပါအဆင့်ခွဲဖွဲ့စည်းပုံကို ဆက်လက်ထိန်းသိမ်းထားသည်။
-> **အကျုံးဝင်မှု:** OmniRoute dashboard (`src/`) နှင့် marketing site (`_mono_repo/omnirouteSite/`) တို့သည် **တူညီသော visual identity တစ်ခု** ကို မျှဝေကြသည် — တူညီသော graph-paper grid background (32px)၊ တူညီသော color tokens နှင့် စံသတ်မှတ်ထားသော components များ။
->
-> ထိန်းသိမ်းသူများအတွက် လက်တွေ့မှတ်ချက်များ:
->
-> - ကျန်ရှိနေသေးသော hardcoded hex values အချို့သည် **ရည်ရွယ်ချက်ရှိရှိ ထားရှိထားခြင်းဖြစ်သည်** (အမြဲမှောင်နေသော console terminal၊ ReactFlow SVG strokes) ဖြစ်ပြီး tokens များအဖြစ် **လုံးဝ** အစားမထိုးရပါ။
-> - လည်ပတ်နေသော instance တစ်ခုတွင် grid က "ပိုကြီး" နေခြင်းသည် code ကြောင့်မဟုတ်ဘဲ ဟောင်းနေသော build ကြောင့်ဖြစ်သည် — grid size သည် 32px ဖြစ်ပြီး site နှင့် တစ်ထပ်တည်းတူညီသည်။
-> - Dark-theme `--table-*` values များသည် migration မလုပ်မီ hardcoded rgba နှင့် byte တစ်ခုချင်းအထိ တူညီသည်။ light theme ကို ပြင်ဆင်ထားပြီးဖြစ်သည် (အလုပ်မလုပ်သော `var()` fallbacks များကြောင့် အမြဲမှောင်နေသည့် bug ရှိခဲ့သည်)။
+> **အခြေအနေ:** dashboard ကို **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) အပေါ်တွင် တည်ဆောက်ထားပြီး၊ workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snapshot ကို `packages/ui-kit/UPSTREAM.md` တွင် pin ထားကာ `npm run check:ui-kit-snapshot` ဖြင့် စောင့်ကြပ်ထားသည်) အဖြစ် vendored လုပ်ထားသည်။ Light သည် canonical theme ဖြစ်ပြီး မူလ preference မှာ `system` ဖြစ်သည်။ Accent မှာ Keak lime (`--ci-color-accent`) ဖြစ်သည်။ Inter (letter-spacing 0, `--ci-letter-spacing-ui`) သည် UI font family ဖြစ်ပြီး၊ Instrument Serif ကို စာသားရှားပါးသော အကြီးစား display text (`.ci-dashboard-display`) အတွက်သာ၊ IBM Plex Mono ကို code အတွက် အသုံးပြုသည် — အားလုံးကို `src/app/globals.css` ၏ ထိပ်ဆုံးရှိ `@fontsource/*` imports များမှတစ်ဆင့် self-hosted လုပ်ထားသည်။ Icon တိုင်းသည် Lucide glyph ဖြစ်သည်။
 
----
+## ၁. အရာများ တည်ရှိရာနေရာ
 
-## 1. ရည်ရွယ်ချက်
+- **ကိရိယာအစုံ (Kit).** `packages/ui-kit/src` သည် `packages/ui-kit/UPSTREAM.md` တွင် pin ချထားသော commit အချိန်က upstream `src/` ၏ byte-for-byte မိတ္တူ အတိအကျ ဖြစ်သည် (ထို ဖိုင်တွင် license ခွင့်ပြုချက်ကိုလည်း မှတ်သားထားသည်); `PATCHES.md` တွင် local patch များ (လုံးဝမရှိ) ကို ဖော်ပြထားသည်။ ၎င်းကို build မလုပ်ရဘဲ source အဖြစ် တိုက်ရိုက်အသုံးပြုသည် — `next.config.mjs` က ၎င်းကို transpile လုပ်ပေးပြီး၊ `tsconfig.json` က `@omniroute/ui-kit` → `packages/ui-kit/src` နှင့် `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` အဖြစ် map ချပေးသည် (`vitest.config.ts` နှင့် `vitest.mcp.config.ts` တွင်လည်း alias အတူတူ ပါဝင်သည်)။ kit component တစ်ခုကို ၎င်း၏ subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) ဖြင့်သာ import လုပ်ပါ၊ `@omniroute/ui-kit` barrel မှတစ်ဆင့် ဘယ်တော့မှ မလုပ်ပါနှင့် — barrel သည် component အားလုံးကို (date picker အပါအဝင်) import လုပ်သူတိုင်း၏ ထဲသို့ ဆွဲသွင်းလျက်ရှိသည်။ kit stylesheet သည် `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-ui.css"`) မှတစ်ဆင့် ဝင်ရောက်သည်။
+- **တိုကင်များ (Tokens).** `packages/ui-kit/src/ci-tokens.css` တွင် `--ci-*` token များကို ကြေငြာထားသည်; `src/app/globals.css` က ၎င်းတို့ကို legacy OmniRoute အမည်များ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) နှင့် ဆက်စပ် (bridge) ပေးထားသဖြင့်၊ လက်ရှိ `var(--color-*)` ဖတ်ရှုမှုများနှင့် Tailwind utility များ ဆက်လက် အလုပ်လုပ်နေဆဲ ဖြစ်သည်။ ကုဒသစ်များတွင် Tailwind utility များ (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) သို့မဟုတ် kit class များကိုသာ အသုံးပြုပါ — hex တန်ဖိုးကို ဘယ်တော့မှ အသုံးမပြုပါနှင့် (`tests/unit/design-kit-bridge.test.ts` က ဤ bridge ကို တင်းကြပ်စွာ စစ်ဆေးထားသည်)။ `text-primary` သည် `--text-color-primary` မှတစ်ဆင့် `--color-primary-ink` သို့ resolve ဖြစ်သွားသည် (light theme တွင် lime-800၊ dark theme တွင် lime accent)၊ ထို့ကြောင့် `bg-primary`/`border-primary` များက lime surface ကို ဆက်လက်ထိန်းသိမ်းထားစဉ် primary စာသားမှာ ဖတ်ရှုနိုင်စွမ်း ရှိနေဆဲ ဖြစ်သည်။ Chart series များတွင် `--color-chart-1` … `--color-chart-5` ကို အသုံးပြုသည်။
+- **အပြင်အဆင်များ (Themes).** `<html className="ci-theme">` (`src/app/layout.tsx`) သည် document ကို kit theme အသုံးပြုခြင်းထဲသို့ opt-in ဝင်ရောက်စေသည်။ preference မှာ `light`၊ `dark` သို့မဟုတ် `system` ဖြစ်နိုင်သည် (`src/shared/constants/appConfig.ts` ထဲတွင် `THEME_CONFIG.defaultTheme = "system"`; `system` သည် `prefers-color-scheme` ကို လိုက်နာသည်)။ `src/store/themeStore.ts` ရှိ `applyTheme()` (hydration မဖြစ်ပေါ်မီ run သော `src/app/layout.tsx` ထဲမှ inline bootstrap script ကလည်း ၎င်းကို ဆင်တူပုံစံဖြင့် အကောင်အထည်ဖော်ထားသည်) သည် `data-theme="dark"|"light"` ကို သတ်မှတ်ပြီး `<html>` ပေါ်ရှိ `.dark` class ကို တစ်ပြိုင်နက်တည်း toggle လုပ်သည်။ kit ၏ dark token set သည် `data-theme="dark"` ကို key အဖြစ် အခြေခံထားသည် (`packages/ui-kit/src/ci-tokens.css`); OmniRoute ၏ ကိုယ်ပိုင် dark override များ (`globals.css` ထဲရှိ `.dark` block) နှင့် legacy Tailwind `dark:` utility များကမူ `.dark` class ကို key အဖြစ် အခြေခံထားသည်။ accent color preset များ မရှိပါ — accent သည် အမြဲတမ်း kit မှသာ ဆင်းသက်လာပြီး၊ build အဟောင်းတစ်ခုမှ persist လုပ်ထားခဲ့သော preset မှာ store load လုပ်ချိန်တွင် စွန့်ပစ်ခံရသည်။
+- **Component များ (adapter များ).** `src/shared/components/index.tsx` သည် OmniRoute component API ကို (အမည်များ၊ default export များနှင့် props များ အတူတူတည်း) ထိန်းသိမ်းထားပြီး၊ ၎င်း၏ နောက်ခံရှိ primitive များမှာ kit ၏ အပေါ်တွင် တည်ဆောက်ထားသော adapter များ ဖြစ်သည် — form များ (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`)၊ overlay နှင့် feedback များ (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`)၊ ဖွဲ့စည်းပုံဆိုင်ရာ (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) နှင့် ဇယားများ (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)။ adapter တစ်ခုသည် kit component ကို subpath ဖြင့် import လုပ်ကာ legacy props များကို ၎င်းအပေါ် map ချပေးသည် — ဥပမာအားဖြင့် `Button variant="primary"` သည် kit `default` button ဖြစ်သည် (`--ci-button-primary-*`: light တွင် inverse surface၊ dark တွင် `--ci-color-accent-foreground` ink နှင့် တွဲဖက်ထားသော accent)၊ `danger` သည် `destructive` ဖြစ်ပြီး၊ `warning` မှာ `outline` အပေါ် `.ci-button--warning` extension ထပ်ပေါင်းထားခြင်း ဖြစ်သည်။ `globals.css` ၏ အဆုံးပိုင်းရှိ `.ci-button--warning` နှင့် `.ci-badge[data-tone]` rule များ (`@layer components`) သည် kit class များ၏ အပေါ်တွင် ထပ်ဆင့်တည်ဆောက်ထားသော OmniRoute extension များ ဖြစ်သည်။ `tests/unit/ui/adapters/*.test.tsx` သည် adapter တစ်ခုချင်းစီကို pin ချထားသည်။
+- **အက်ပ်ဘောင် (Shell).** `src/app/(dashboard)/layout.tsx` သည် `DashboardLayout` ကို render လုပ်ပြီး၊ ၎င်းက `src/shared/components/layouts/DashboardShell.tsx` ကို render လုပ်သည် — kit `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) ကို အသုံးပြုထားပြီး၊ OmniRoute ၏ navigation logic မှာ `src/shared/components/Sidebar.tsx` ထဲတွင် ရှိသည်။ `#main-content` သို့ ဦးတည်ထားသော "skip to content" (အကြောင်းအရာသို့ တိုက်ရိုက်ကျော်သွားရန်) link သည် focus လုပ်နိုင်သည့် ပထမဆုံး element ဖြစ်သည်။ `src/shared/components/Header.tsx` တွင် kit `SidebarTrigger` (shell ၏ တစ်ခုတည်းသော sidebar toggle)၊ Keak `ProductSwitcher` နှင့် command-palette ကို ဖွင့်ရန် ခလုတ်တို့ ပါဝင်သည်; ၎င်းသည် `#main-content` အတွင်းတွင် kit `PageHeader` (`.ci-page-header`) mount မဖြစ်ထားသည့် အချိန်မှာသာ route ခေါင်းစဉ်ကို ပြသသည် — ထို့ကြောင့် ကိုယ်ပိုင် `PageHeader` ရှိသော စာမျက်နှာတစ်ခုတွင် `h1` တစ်ခုတည်းသာ ရှိသည်။ `src/shared/components/CommandPalette.tsx` သည် kit `Dialog` တစ်ခု ဖြစ်သည်။
+- **အိုင်ကွန်များ (Icons).** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) သည် အမည်တစ်ခုကို (screen များ အသုံးပြုနေသော Material Symbols ဝေါဟာရ) `ICON_MAP` (`src/shared/constants/iconMap.ts`) မှတစ်ဆင့် Lucide glyph တစ်ခုသို့ resolve လုပ်သည်။ Material Symbols font နှင့် package များ မရှိတော့ပါ — map ထဲတွင် မပါဝင်သော အမည်တစ်ခုသည် neutral placeholder glyph (`data-icon-missing="true"`) ကို render လုပ်ပြီး၊ production အပြင်ဘက်ပတ်ဝန်းကျင်တွင် console warning ကို log ချသည်။ `npm run gen:icon-map` သည် map ထဲတွင် မပါဝင်သေးသည့် လက်ရှိအသုံးပြုနေသည့် အမည်များကို print ထုတ်ပြသည် (`tests/unit/icon-map-coverage.test.ts` သည် Lucide icon မရှိသော အမည်တိုင်းအတွက် fail ဖြစ်စေသည်; `tests/unit/icon-map-object-values.test.ts` သည် lookup object များထဲတွင် သိမ်းဆည်းထားသော အမည်များကို ဖုံးအုပ်စစ်ဆေးသည်); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` သည် literal `<span className="material-symbols-outlined">` span များကို `<Icon>` သို့ ပြင်ဆင်ရေးသားပေးသည်။
+- **အမှတ်တံဆိပ် (Brand).** `src/shared/components/OmniRouteLogo.tsx` သည် kit ကို wrap လုပ်ထားသည် — default export `OmniRouteLogo` သည် `ProductIcon product="omniroute" variant="glyph"` (inline SVG၊ `basePath` နှင့်လည်း လုံခြုံစွာ အလုပ်လုပ်နိုင်သော) ကို render လုပ်ပြီး၊ `OmniRouteLockup` သည် `ProductLockup product="omniroute"` (accessible name မှာ "Keak OmniRoute") ကို render လုပ်သည်၊ သို့မဟုတ် white-label operator များအတွက်ဆိုလျှင် ၎င်းတို့၏ ကိုယ်ပိုင် `name`/`logoSrc` ကို render လုပ်သည်။ Product-switcher ၏ ဦးတည်ရာများသည် `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) ထဲတွင် ရှိသည်။ Standalone screen များ — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` နှင့် `src/shared/components/ErrorPageScaffold.tsx` — များသည် lockup ကို ပြသသည်; `tests/unit/brand-pages-static.test.ts` က ၎င်းကို စောင့်ကြပ်ကာကွယ်ထားသည်။
 
-Marketing site (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) နှင့် product dashboard တို့သည် **product တစ်ခုတည်း** ကဲ့သို့ မြင်ရသင့်သည်။ Site သည် ၎င်း၏ palette ကို dashboard မှ ရယူအသုံးပြုထားပြီးဖြစ်သည် — ၎င်း၏ `css/tokens.css` တွင်ပင် _"Palette သည် OmniRoute dashboard (`src/app/globals.css`) ကို ထင်ဟပ်ထားသည်"_ ဟု ဆိုထားသည်။ ထို့ကြောင့် ၎င်းတို့နှစ်ခုသည် color အဆင့်တွင် ~80% ခန့် ကိုက်ညီပြီးဖြစ်သည်။ Dashboard တွင် လိုအပ်နေသေးသည်များမှာ:
+## 2. စည်းမျဉ်းများ
 
-1. Site က page တိုင်းတွင် အသုံးပြုထားသော **graph-paper grid wallpaper**။
-2. Site တွင်ရှိသော်လည်း dashboard တွင် မရှိသေးသော **မျှဝေသုံးစွဲသည့် design tokens** အချို့ (radius scale၊ brand gradient၊ `surface-2`၊ mono font)။
-3. **Component အဆင့် တစ်သမတ်တည်းဖြစ်မှု** — dashboard components အချို့သည် hardcoded hex/rgba များကို အသုံးပြုပြီး theme tokens များကို ကျော်လွှားထားသည်။
+1. Token များသာ သုံးပါ၊ literal များ ဘယ်သောအခါမျှ မသုံးပါနှင့်။ ရည်ရွယ်ချက်ဖြင့် ထားရှိထားသော ခြွင်းချက်များမှာ- အမြဲတမ်း dark ဖြစ်နေသော console terminal နှင့် `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — literal hex လိုအပ်သော caller များအတွက် kit status palette ၏ resolved-hex mirror ဖြစ်သည်။ Categorical palette များမှာ ခြွင်းချက် မဟုတ်တော့ပါ- ၎င်းတို့သည် kit ၏ chart token ငါးခု (`--color-chart-1..5`) ပေါ်တွင် `src/shared/utils/categoricalPalette.ts` မှတစ်ဆင့်လည်းကောင်း၊ routing strategy များအတွက်မှာ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` မှတစ်ဆင့်လည်းကောင်း အခြေပြုလှုပ်ရှားပါသည်။ ReactFlow edge များနှင့် orchestration canvas ကတော့ theme-aware ဖြစ်သော `--orch-status-*` variable များ (`src/shared/components/flow/edgeStyles.ts`) ကို ဖတ်ပါသည်။
+2. `packages/ui-kit/src` ကို လက်ဖြင့် ဘယ်တော့မျှ patch မလုပ်ပါနှင့်- `scripts/dev/sync-ui-kit.sh <commit>` ဖြင့် sync ပြုလုပ်ပါ။ Pre-commit gate ဖြစ်သော `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) သည် pinned upstream commit နှင့် ကွဲပြားသော byte တစ်ခုချင်းစီတိုင်းတွင် fail ဖြစ်ပါသည် (upstream clone ဖြစ်သော `UI_KIT_CLONE` သို့မဟုတ် `_references/cheaper-inference-ui-kit` မရှိသောအခါ သတိပေးချက်ဖြင့် ကျော်သွားပါသည်)။ Kit တွင် တစ်ခုခု မပါဝင်သောအခါ adapter သို့မဟုတ် screen အတွင်း workaround ပြုလုပ်ပြီး upstream ဆီသို့ တောင်းဆိုပါ။
+3. Kit text default များသည် အင်္ဂလိပ်စာ ဖြစ်ပါသည် (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit component တစ်ခုက text ကို render လုပ်သည့်အခါတိုင်း `useTranslations(...)` မှ ဘာသာပြန်ထားသော string များ ပေးပါ။
+4. Tailwind utility များသည် kit component class များအပေါ် ဦးစားပေးရသည် (kit သည် `@layer theme, base, components, utilities` ကို ကြေငြာထားပြီး ၎င်း၏ rule များသည် `components` တွင် ရှိသည်) — spacing နှင့် layout အတွက် utility များကို သုံးပါ၊ kit component များ၏ အရောင် ပြန်ပြောင်းရန်အတွက် မဟုတ်ပါ။
+5. Heading များ- page နှင့် section title များအတွက် `.ci-heading` (Inter, tracking မရှိ)၊ error-page status code ကဲ့သို့သော ကြီးမားပြီး နည်းပါးသော display text များအတွက်သာ `.ci-dashboard-display` (Instrument Serif) ကို သုံးပါ။
+6. `tests/unit/dashboard-kit-sweep.test.ts` သည် kit adoption ကို စောင့်ကြပ်ပါသည်- `src/app` သို့မဟုတ် `src/shared/components` အောက်တွင် Material ligature span မရှိရပါ။ dashboard tree (`src/app/(dashboard)` နှင့် `src/shared/components`) တွင် စာရင်းပြုစုထားသော ခြွင်းချက်များ (`Select` adapter ၏ native branch၊ `RequestLoggerDetail`) အပြင် raw `<select>`၊ `<textarea>` သို့မဟုတ် `<table>` နှင့် ကိုယ်ပိုင်လက်ဖြင့်ပြုလုပ်ထားသော `role="dialog"` မရှိရပါ။ ထိုနေရာရှိ raw `<button>` သို့မဟုတ် `<input>` တိုင်းသည် `kit-exception:` ပါဝင်သော (အကြောင်းပြချက်နှင့်အတူ) comment တစ်ခု လိုအပ်ပြီး ၎င်း၏အပေါ် အများဆုံး 3 ဘြိုင်း (line) အတွင်း ပြီးဆုံးရပါမည်။ Palette hue များနှင့် `dark:` variant များကို test စာရင်းပါ ဖိုင်များတွင်သာ ခွင့်ပြုပါသည်။
+7. PR မတင်မီ theme နှစ်ခုလုံးနှင့် 390 px viewport ကို စစ်ဆေးပါ (screenshot များ)။ `tests/e2e/a11y.spec.ts` သည် axe ကို run ပါသည်။
 
-ဤစာတမ်းသည် ခွဲခြမ်းစိတ်ဖြာချက်နှင့် အစီအစဉ်ဖြစ်သည်။
+## 3. Screen အသစ် ထည့်ခြင်း
 
----
+1. Page ကို kit `PageHeader` (`@omniroute/ui-kit/page-header`, dashboard အတွင်းတွင် `compact`) ဖြင့် စတင်ပါ — title၊ description နှင့် `actions` ပါဝင်သည်။ ထိုအခါ shell header သည် ၎င်း၏ ကိုယ်ပိုင် title ကို ဖယ်ရှားသွားပါမည်။
+2. Control များကို `@/shared/components` (adapter များ) မှ တည်ဆောက်ပြီး adapter မရှိသော နေရာများတွင် kit component များကို subpath ဖြင့် သုံးပါ (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…)။
+3. Icon များ- `<Icon name="…" />`။်အသစ်တစ်ခုကို အဓိပ္ပာယ်ကိုက်ညီသော Lucide component နှင့်အတူ `ICON_MAP` ထဲသို့ ထည့်ပါ။ `npm run gen:icon-map` သည် လစ်နေဆဲ အမည်များကို စာရင်းပြုပေးပါသည်။
+4. အရောင်များ- semantic utility များ (`text-success`, `bg-warning-bg`, `border-border`…) နှင့် chart series များအတွက် `var(--color-chart-N)` ကို သုံးပါ။ Hex တန်ဖိုးများ မသုံးပါနှင့်၊ အရောင်တစ်ခုကို ထပ်ခါထပ်ခါ ပြင်ဆင်ရုံသာဖြစ်သော `dark:` variant များ မသုံးပါနှင့်။
+5. Text- kit component များသို့ ပေးသော label များ အပါအဝင် string တိုင်းသည် `useTranslations` မှ လာရပါမည်။ Key အသစ်များကို `src/i18n/messages/en.json`, `pt-BR.json` နှင့် `vi.json` ထဲသို့ ထည့်ပါ (Vietnamese parity test သည် အင်္ဂလိပ် key တိုင်းကို pin ချထားသည်)။ ကျန် locale များကို i18n sync မှ ဖြည့်စွက်ပါသည်။
+6. PR မတင်မီ guard များကို run ပါ- `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck` (`iconMap.ts` ထဲတွင် import ထပ်နေမှုကို ဖမ်းနိုင်သော တစ်ခုတည်းသော စစ်ဆေးချက်), `npm run check:ui-icu` နှင့် ၎င်း screen ၏ ကိုယ်ပိုင် test များ။
 
-## 2. အခြေခံမူများ
+## 4. adapter ကို ထည့်ခြင်း သို့မဟုတ် ပြောင်းလဲခြင်း
 
-- **တစ်ခုတည်းသော အမှန်တရားရင်းမြစ် = `src/app/globals.css`။** Site သည် dashboard ကို ထင်ဟပ်ရမည်၊ ပြောင်းပြန်မဖြစ်ရ။ Tokens အသစ်များကို `globals.css` တွင် ဦးစွာထည့်သွင်းရမည်။
-- **Literals မဟုတ်ဘဲ tokens များကိုသာ အသုံးပြုရန်။** Components များသည် raw `#hex` များအစား semantic tokens (`bg-surface`, `text-primary`, `border-border`) ကို အသုံးပြုရမည်။
-- **သိမ်မွေ့ရမည်၊ ထင်ရှားလွန်းခြင်းမရှိရ။** Grid သည် content နောက်ခံတွင်ရှိသော မသိမသာ wallpaper တစ်ခုဖြစ်သည် — text contrast ကို လျော့ကျစေခြင်း သို့မဟုတ် UI နှင့် အမြင်ဆိုင်ရာ ပြိုင်ဆိုင်ခြင်း လုံးဝမဖြစ်ရ။
-- **Theme ကို သိရှိတုံ့ပြန်နိုင်ရမည်။** အရာအားလုံးသည် `.dark` (product ၏ ထင်ရှားသောအသွင်အပြင်) နှင့် light နှစ်မျိုးစလုံးတွင် အလုပ်လုပ်ရမည်။
-- **တိကျသော အဆင့်လိုက်ဖြန့်ချိမှု။** Grid + tokens ကို ဦးစွာဖြန့်ချိရန် (အန္တရာယ်နည်းပြီး မြင်သာမှုမြင့်မားသည်)၊ ထို့နောက် component ရှင်းလင်းပြင်ဆင်မှုများကို အဆင့်လိုက်ပြုလုပ်ရန်။
+1. `src/shared/components/index.tsx` ၏ public API ကို ထိန်းသိမ်းထားပါ — export အမည်များ၊ default export များနှင့် လက်ခံသည့် props များ အတူတူဖြစ်ရမည်။ legacy props များကို adapter အတွင်းတွင် kit ပေါ်သို့ map လုပ်ပါ (`Button.tsx` ကို ကြည့်ပါ: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`)။
+2. kit ကို subpath ဖြင့် import လုပ်ပါ (`@omniroute/ui-kit/<component>`)။
+3. kit ၏ လစ်လပ်ချက်များအတွက် workaround များကို adapter အတွင်းတွင် (သို့မဟုတ် ပြင်ဆင်ချက်က style ဖြစ်လျှင် `globals.css` `@layer components` အတွင်းတွင်) ထားရှိပါ၊ `packages/ui-kit/src` အတွင်းတွင် လုံးဝ မဟုတ်ပါ။
+4. `tests/unit/ui/adapters/<name>.test.tsx` ကို ထည့်ပါ သို့မဟုတ် update လုပ်ပါ။ caller များ များစွာရှိသော adapter တစ်ခုအတွက် ပြောင်းလဲမှုမပြုလုပ်မီနှင့် ပြုလုပ်ပြီးနောက် render လုပ်ထားသော markup ကို နှိုင်းယှဉ်ပါ — padding သို့မဟုတ် wrapper ပြောင်းလဲမှုများသည် screen တိုင်းသို့ ပျံ့နှံ့သွားသည်။
 
----
+## 5. kit ကို update လုပ်ခြင်း
 
-## 3. လက်ရှိအခြေအနေ — ကိုက်ညီပြီးဖြစ်သည့်အရာများနှင့် မကိုက်ညီသေးသည့်အရာများ
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` သည် အဆိုပါ commit ရှိ upstream `src/` ကို
+`packages/ui-kit/src` အတွင်းသို့ ကူးယူပြီး ခွင့်ပြုထားသော transformation တစ်ခုတည်းကို apply လုပ်သည် (၎င်းက relative import များမှ `.js` suffix ကို ဖယ်ထုတ်သည်)။ ထို့နောက်: `git diff packages/ui-kit` ကို review လုပ်ပါ၊ theme နှစ်ခုလုံးတွင် providers၊ settings၊ combos၊ usage နှင့် endpoint ကို visual စစ်ဆေးပါ၊ `npm run check:ui-kit-snapshot` နှင့် `npm run test:vitest:ui` ကို run ပါ၊ ပြီးလျှင် upstream changelog နှင့်အတူ PR ကို ဖွင့်ပါ။
 
-### 3.1 အရောင်များ — တစ်စုတစ်စည်းတည်းဖြစ်ပြီးသား ✅
+## 6. README diagram များ
 
-Brand color နှင့် surface တိုင်းသည် site နှင့် **value အရ** ကိုက်ညီပြီးသားဖြစ်သည် (အမည်များသာကွဲပြားသည် — dashboard တွင် `--color-` prefix ကို အသုံးပြုသည်)။ `src/app/globals.css:30-128` တွင် အတည်ပြုထားသည်:
+root `README.md` တွင် embed လုပ်ထားသော diagram တစ်ဆယ့်နှစ်ခု (`docs/diagrams/*.svg`) သည် kit ကို static image ပေါ်သို့ အသုံးချထားခြင်း ဖြစ်ပြီး၊ ၎င်းတို့ကို လက်ဖြင့် မရေးဆွဲဘဲ generate လုပ်ထားခြင်းဖြစ်သည် — `scripts/docs/gen-readme-*.mjs` ရှိ generator ဖိုင် ၁၃ ခု (diagram တစ်ဆယ့်နှစ်ခုအပြင် `gen-readme-diagrams.mjs` driver) နှင့် `tests/unit/docs/readme-*-svg.test.ts` ရှိ staleness test ၁၂ ခု (diagram တစ်ခုချင်းစီအတွက် တစ်ခုစီ) တို့ဖြစ်ပြီး၊ commit လုပ်ထားသောဖိုင်ကို ၎င်း၏ generator ၏ output နှင့် byte-by-byte နှိုင်းယှဉ်သည် (job `test-unit`)။
 
-| အယူအဆ                      | Site token (`tokens.css`)                   | Dashboard token (`globals.css`) | ကိုက်ညီမှု             |
-| -------------------------- | ------------------------------------------- | ------------------------------- | ---------------------- |
-| primary                    | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅                     |
-| primary-hover              | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅                     |
-| accent                     | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅                     |
-| accent-2                   | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (အမည်ပြောင်းထားသည်) |
-| accent-3                   | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (အမည်ပြောင်းထားသည်) |
-| success / warning / error  | `#22c55e / #f59e0b / #ef4444`               | တစ်ထပ်တည်းတူညီသည်               | ✅                     |
-| traffic lights             | `#ff5f56 / #ffbd2e / #27c93f`               | တစ်ထပ်တည်းတူညီသည်               | ✅                     |
-| dark bg / surface / border | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | တစ်ထပ်တည်းတူညီသည်               | ✅                     |
-| light bg / surface / text  | `#f9f9fb / #fff / #1a1a2e`                  | တစ်ထပ်တည်းတူညီသည်               | ✅                     |
+- **Token များ။** `scripts/docs/readme-diagram-theme.mjs` သည် palette ကို `packages/ui-kit/src/ci-tokens.css`
+  မှ ကူးယူပြီး (`tests/unit/docs/readme-diagram-theme.test.ts` ဖြင့် အဆိုပါဖိုင်နှင့် pin ချိတ်ထား) kit font face များပေါ်တွင် text role များကို သတ်မှတ်သည် — display အတွက် Instrument Serif၊ UI text အတွက် Inter၊ ကိန်းဂဏန်းများနှင့် code အတွက် IBM Plex Mono၊ dashboard အတွက် `src/app/globals.css` load လုပ်သော `@fontsource` package များနှင့် တူညီသည်။ light value များသည် `:root` ပေါ်တွင်၊ dark value များသည် `prefers-color-scheme: dark` နောက်တွင် ဖိုင်အတွင်းတွင် ရှိနေသောကြောင့် image တစ်ခုချင်းစီသည် GitHub ပေါ်တွင် ကြည့်ရှုသူ၏ scheme ကို လိုက်နာသည်။
+- **Font များ။** `scripts/docs/readme-fonts.mjs` သည် woff2 ဖိုင်များကို diagram တစ်ခုချင်းစီ ဆွဲထားသော glyph များသို့ subset လုပ်ပြီး ၎င်းတို့ကို `@font-face` `data:` URI များအဖြစ် embed လုပ်သည် — GitHub Markdown တွင် CSS မပါဝင်ပဲ camo proxy က external fetch တိုင်းကို block လုပ်သောကြောင့် kit typography ကို README image သို့ ရောက်ရှိစေနိုင်သော တစ်ခုတည်းသော နည်းလမ်းဖြစ်သည်။ subset များသည် latin-only ဖြစ်သည် — system stack သို့ fallback ဖြစ်သော symbol glyph များကို `SYMBOL_FALLBACKS` အတွင်းတွင် တစ်ခုချင်းစီ ခွင့်ပြုထားပြီး၊ အခြား မဖုံးလွှမ်းထားသော glyph မည်သည်ဖြစ်နေစေ throw လုပ်သည်။
+- **ပြန်လည်ထုတ်လုပ်ခြင်း။** `npm run docs:readme-diagrams` သည် တစ်ဆယ့်နှစ်ခုလုံးကို README အစဉ်အတိုင်း ပြင်ဆင်ရေးသားပြီး ဖိုင်တစ်ခုချင်းစီအတွက် ၎င်း၏အရွယ်အစားပါသော တစ်ကြောင်းစီ ပရင့်ထုတ်သည်။ generator တစ်ခုတည်းကိုလည်း သီးခြား run နိုင်သည် (`node scripts/docs/gen-readme-<name>.mjs`;
+  `free-tier-budget` သည် ၎င်း၏ကိန်းဂဏန်းများက `open-sse/config/freeModelCatalog.ts` ရှိ live catalog loader မှ လာသောကြောင့် `node --import tsx/esm` လိုအပ်သည်; catalog ပြောင်းလဲမှု၏ CI အကျိုးဆက်ကို
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` တွင် ကြည့်ပါ)။ generator နှင့် SVG ကို အတူတူ commit လုပ်ပါ။
+- **အထောက်အထား။** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` သည် ဖိုင်ကို GitHub serve လုပ်သည့်နည်းအတိုင်း (`<img>` tag တစ်ခု၊ camo ၏ `Content-Security-Policy`၊ `image/svg+xml`) render လုပ်ပြီး light frame နှင့် dark frame ကို capture လုပ်ကာ page ပြုလုပ်သော external font request များကို report လုပ်သည် (0 ဖြစ်ရမည်)။
+- **ဘတ်ဂျက်။** ဖိုင်တစ်ခုချင်းစီအတွက် 200 KB အောက် (staleness test တစ်ခုချင်းစီက ၎င်းကို assert လုပ်သည်); 500 KB သည် README image မည်သည့်အတွက်မဆို hard cap ဖြစ်သည် (SVG studio validator ၏ စည်းမျဉ်း)။
+- **Copy မပြောင်းလဲပါ၊ ကိန်းဂဏန်းများသည် gate မှ။** rebrand သည် typeface နှင့် palette ကို ပြောင်းလဲခဲ့သော်လည်း စကားလုံးများကို မပြောင်းလဲပါ — generator တစ်ခုချင်းစီသည် ၎င်း၏ diagram ၏ copy ကို `*_COPY` constant အတွင်းတွင် (သို့မဟုတ် live catalog မှ တည်ဆောက်၍) ဆောင်ထားပြီး၊ ထိုအရာက ဆွဲထားသော text နှင့် font-subset input နှစ်ခုလုံး ဖြစ်သည်။ Canonical ကိန်းဂဏန်းများကို `<text>` node များအတွင်းတွင် သိမ်းဆည်းထားပြီး `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`) ဖြင့် ဖတ်ရှုသည်; gate ဖတ်ရှုသော diagram များ၏ staleness test များကလည်း generate လုပ်ထားသောဖိုင်ပေါ်တွင် ၎င်း၏ validator များကို run သောကြောင့် code မှ လွဲသွားသော ကိန်းဂဏန်းတစ်ခုသည် test ကို fail စေသည် — gate ဖတ်ရှုသော source ကို ပြင်ပါ၊ generator အတွင်းရှိ ကိန်းဂဏန်းကို လုံးဝ မပြင်ပါနှင့်။
 
-**နိဂုံး:** ပြုလုပ်ရန် color migration မရှိပါ။ Identity ကို မျှဝေထားပြီးဖြစ်သည်။ ကျွန်ုပ်တို့သည် ၎င်းကို ပြန်လည်တည်ဆောက်နေခြင်းမဟုတ်ဘဲ _အပြီးသတ်နေခြင်း_ ဖြစ်သည်။
+## 7. ရည်ညွှန်း အညွှန်း
 
-### 3.2 ကွာဟချက်များ — dashboard တွင် လိုအပ်နေသေးသည့်အရာများ
-
-| ကွာဟချက်                | Site တွင်ရှိသည့်အရာ                                                            | Dashboard                                                                        | လုပ်ဆောင်ချက်                   |
-| ----------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- | ------------------------------- |
-| **Grid wallpaper**      | `body::before` graph-paper၊ `--grid-line`၊ `--grid-size 32px`၊ `--section-alt` | **✅ ထည့်သွင်းပြီး (Phase 1)**                                                   | **Part A**                      |
-| **Radius scale**        | `--radius 14px`၊ `--radius-sm 9px`                                             | `--radius 14px` ထည့်သွင်းပြီး၊ `-sm` + component ပြန်လည်ညွှန်းခြင်း ဆိုင်းငံ့ထား | **Part B / Phase 2**            |
-| **Brand gradient**      | `--grad-brand 135deg primary→accent-3`                                         | **✅ token ထည့်သွင်းပြီး (Phase 1)**၊ Phase 2 တွင် အသုံးပြုမည်                   | **Part B**                      |
-| **Nested surface**      | `--surface-2 #1c2230`                                                          | **✅ ထည့်သွင်းပြီး (Phase 1)**                                                   | **Part B**                      |
-| **Mono font**           | `--font-mono` (ui-monospace stack)                                             | ဆိုင်းငံ့ထား (Phase 4၊ အသုံးပြုမည့်နေရာများနှင့်အတူ)                             | **Part B**                      |
-| **`text-muted` (dark)** | `#8b8b9e`                                                                      | `#a1a1aa` (zinc-400)                                                             | ကိုက်ညီအောင်ညှိရန် — **Part B** |
-
-### 3.3 Theme သတ်မှတ်ခြင်း ယန္တရားများ (တစ်စုံတစ်ရာ မပျက်စီးစေရန်)
-
-- **Tailwind v4၊ CSS-first** (`tailwind.config.*` မရှိပါ)။ Token များကို `:root`/`.dark` တွင် သတ်မှတ်ထားပြီး `@theme inline` မှတစ်ဆင့် utility များထံ ဖော်ထုတ်ပေးထားသည် (`globals.css:130-179`)။
-- `<html>` ပေါ်ရှိ **`.dark` class မှတစ်ဆင့် Dark mode** (`globals.css:22` ရှိ `@custom-variant dark`) ကို စိတ်ကြိုက် Zustand store (`src/store/themeStore.ts`) ဖြင့် အဖွင့်အပိတ်လုပ်ပြီး၊ မူလ theme = `system` ဖြစ်သည် (`src/shared/constants/appConfig.ts:11`)။ Site ကမူ `html[data-theme="light"]` ကို အသုံးပြုသည် — **ယန္တရားများ ကွဲပြားသော်လည်း မည်သည့်အခါမျှ ဆုံတွေ့ခြင်းမရှိပါ** (origin သီးခြားစီဖြစ်သည်)၊ ထို့ကြောင့် ပဋိပက္ခမရှိပါ။ Dashboard ၏ `.dark` ယန္တရားကို ဆက်လက်ထိန်းသိမ်းထားမည်။
-- **Runtime primary override** ရှိသည် (`themeStore.ts:85-97`၊ preset များသည် `COLOR_THEMES` တွင်ရှိသည်) — အသုံးပြုသူများသည် `--color-primary` ကို ပြောင်းနိုင်သည်။ `--color-primary` ကို ကိုးကားသည့် token အသစ်တိုင်း (gradient စသည်) သည် အဆိုပါ override များကို အလိုအလျောက် ဆက်ခံသည်။ ✅
-- **Tailwind v4 သီးသန့်သတ်မှတ်ထားသော radius အမည်များ:** `--radius-sm/md/lg/...` သည် `rounded-*` utility များ၏ အခြေခံဖြစ်သည်။ ၎င်းတို့ကို ပြန်လည်သတ်မှတ်ပါက ရှိပြီးသား `rounded-*` တိုင်းကို နောက်ကြောင်းပြန် သက်ရောက်စေမည် (ဥပမာ `rounded-sm` ကို ဖိုင် 12 ခုတွင် အသုံးပြုထားသည်)။ ထို့ကြောင့် small-radius တန်ဖိုးနှင့် component ပြန်လည်ညွှန်းခြင်းကို consumer များနှင့်အတူ တစ်ပြိုင်နက် ပြောင်းလဲမည့် Phase 2 သို့ ရည်ရွယ်ချက်ရှိရှိ ရွှေ့ဆိုင်းထားသည်။
-
----
-
-## 4. အပိုင်း A — ဂရပ်စာရွက်ကွက် နောက်ခံ (အဓိက တောင်းဆိုချက်) — အကောင်အထည်ဖော်ပြီး (အဆင့် 1)
-
-### 4.1 ၎င်းက ဘာလဲ
-
-ဆိုက် (`_mono_repo/omnirouteSite/css/base.css`) မှ အတိအကျ အသုံးပြုထားသည့် နည်းလမ်းမှာ 1px မျဉ်း gradient နှစ်ခုကို ရေးဆွဲထားပြီး အကြောင်းအရာအားလုံး၏ နောက်ဘက် `z-index:-1` တွင် ရှိနေသည့် **ပုံသေ၊ viewport အပြည့် pseudo-element** တစ်ခုဖြစ်သည်။
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**`body` တွင် အလင်းမဖောက်သော `background-color` ရှိသော်လည်း ဤနည်းလမ်း အလုပ်လုပ်ရသည့်အကြောင်းရင်း:** `z-index:-1` ပါသော `::before` သည် element ၏ ကိုယ်ပိုင်နောက်ခံ၏ _အပေါ်တွင်_၊ သို့သော် ၎င်း၏ in-flow အကြောင်းအရာ၏ _အောက်တွင်_ ရေးဆွဲသည်။ ထို့ကြောင့် `--color-bg` သည် အခြေခံဖြည့်စွက်အရောင်ဖြစ်ပြီး grid ကို ၎င်းအပေါ်တွင် အလွှာထပ်ထားကာ app ကို grid အပေါ်တွင် render လုပ်သည်။
-
-### 4.2 Codebase တွင် ရှိပြီးသား နမူနာ
-
-`src/app/landing/page.tsx:16-26` သည် **စာမျက်နှာအလိုက် အလားတူ grid ကို အကောင်အထည်ဖော်ထားပြီးသားဖြစ်သည်** — သို့သော် **အနီရောင်** မျဉ်းများ (`#E54D5E`၊ opacity `0.06`) ကို **50px** ဖြင့် အသုံးပြုထားပြီး animated orbs များလည်း ပါဝင်သည်။ ထို့ကြောင့် ဤပုံစံသည် product ထဲတွင် အလုပ်လုပ်ကြောင်း သက်သေပြပြီးဖြစ်သည်။ ယခုလုပ်ဆောင်ချက်က ၎င်းကို **global ဖြစ်ပြီး theme နှင့် လိုက်လျောညီထွေသော** wallpaper အဖြစ် မြှင့်တင်ပေးသည်။
-
-### 4.3 ထည့်သွင်းထားသည့် Tokens များ (`globals.css` တွင်)
-
-```css
-:root {
-  /* light — သိပ်သည်းသော dashboard တွင် wallpaper ကို အမှန်တကယ် မြင်နိုင်စေရန်
-     ဆိုက်၏ 0.045 မှ grid opacity ကို မြှင့်ညှိထားသည် (cards/chrome များက viewport အများစုကို ဖုံးအုပ်ထားသည်) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* dark — တူညီသောအကြောင်းရင်းကြောင့် 0.035 မှ မြှင့်ညှိထားသည် */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 တစ်ခုတည်းသော အဟန့်အတား — ဖယ်ရှားပြီး
-
-Grid သည် တည်ဆောက်ပုံအရ global ဖြစ်သည် (panel၊ `auth`/`login`၊ error စာမျက်နှာများ — route အားလုံး — ကို တစ်ကြိမ်တည်း ဖုံးလွှမ်းသည်)။ Panel အတွင်း ၎င်းကို ဖုံးကွယ်ထားသည့် element **တစ်ခုတည်းသာ** ရှိခဲ့သည်-
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — အပြင်ဘက် wrapper သည် အလင်းမဖောက်သော `bg-bg` ကို ရေးဆွဲထားသည်။ ၎င်းအောက်ရှိ အရာအားလုံး (`<main>`၊ scroll container၊ `max-w-7xl` အတွင်းပိုင်း) သည် transparent ဖြစ်ပြီးသားဖြစ်သောကြောင့် **`bg-bg` ကို ဖယ်ရှားခြင်းဖြင့်** body grid ကို အကြောင်းအရာဧရိယာမှတစ်ဆင့် မြင်နိုင်စေသည် (`body` ၏ `--color-bg` သည် အခြေခံဖြည့်စွက်အရောင်အဖြစ် ဆက်လက်တည်ရှိသည်)။
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Chrome နှင့် အပြန်အလှန် သက်ရောက်မှု (sidebar / header)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) နှင့် `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) တို့သည် **အလင်းမဖောက်ဘဲ** ဆက်ရှိသည် → grid ကို **အကြောင်းအရာဧရိယာတွင်သာ** ပြသပြီး ၎င်းပတ်လည်တွင် အရောင်ပြည့် chrome ဖြင့် ဘောင်ခတ်ထားသည်။ တည်ငြိမ်သည့် ပုံသေဆက်တင်ဖြစ်ပြီး ဆိုက်တွင် chrome ကို canvas မှ ခွဲခြားထားသည့်ပုံစံနှင့် ကိုက်ညီသည် (ဆုံးဖြတ်ချက် D3 = အရောင်ပြည့်)။
-
-### 4.6 Login / auth / error စာမျက်နှာများ
-
-ဤစာမျက်နှာများသည် `<body>` အောက်တွင် တိုက်ရိုက် render လုပ်သည် (panel chrome မရှိပါ)။ ထို့ကြောင့် global grid သည် ၎င်းတို့၏ နောက်ခံတွင် အလိုအလျောက် ပေါ်လာသင့်သည်။ **အဆင့် 5 — ပြီးစီးပြီ:** သီးခြား full-screen wrapper များသည် အမှန်တကယ် အလင်းမဖောက်သော (`min-h-screen … bg-bg`၊ ဤနေရာတွင် `bg-bg` သည် `<body>` နှင့် တူညီသော အရောင်ပြည့်ဖြည့်စွက်မှုဖြစ်သည်) ကြောင့် dashboard မဟုတ်သော screen အားလုံးတွင် grid ကို ဖုံးကွယ်ထားခဲ့သည် — login တစ်ခုတည်းတွင်သာ မဟုတ်ပါ။ Shared wallpaper ကို မြင်နိုင်စေရန် ၎င်းတို့အားလုံးကို ယခု transparent ပြုလုပ်ထားသည်- `login`၊ `forgot-password`၊ `callback`၊ `maintenance`၊ `offline`၊ `status`၊ `terms`၊ `privacy`၊ `onboarding` နှင့် `ErrorPageScaffold` (`400`/`401` ကို လွှမ်းခြုံသည်)။ ဤပြောင်းလဲမှုဖြင့် **D4** ကို ပြီးစီးစေသည် (login တစ်ခုတည်းမှ သီးခြား screen အားလုံးသို့ တိုးချဲ့ထားသည်)။ `tests/unit/design-grid-background.test.ts` ဖြင့် ကာကွယ်စစ်ဆေးထားသည်။
-
-### 4.7 Landing စာမျက်နှာ
-
-`landing/page.tsx` သည် ၎င်း၏ ပိုမိုပြည့်စုံသော animated background (orbs + vignette) ကို ဆက်လက်ထားရှိသည် — ၎င်း၏ ကိုယ်ပိုင် marketing splash ဖြစ်သည် (ဆုံးဖြတ်ချက် D5 = လက်ရှိအတိုင်းထားရန်)။
-
----
-
-## 5. အပိုင်း B — Token များ တစ်စုတစ်စည်းတည်းဖြစ်အောင် ပြုလုပ်ခြင်း
-
-Phase 1 တွင် ဘေးထွက်သက်ရောက်မှုမရှိပြီး အမည်ချင်းတိုက်ဆိုင်မှုကင်းသည့် identity token များ (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`) ကို ထည့်သွင်းသည်။ Phase 2 တွင် radius scale ကို Tailwind နှင့် ချိတ်ဆက်ပြီး component များကို ၎င်းထံ ပြန်လည်ညွှန်းဆိုစေသည်။ Phase 4 တွင် `--font-mono` နှင့် ၎င်းကို အသုံးပြုသည့်နေရာများကို ထည့်သွင်းသည်။
-
-| Token                          | အကြောင်းရင်း                                                                        | Phase                                                   |
-| ------------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `--radius` / `--radius-sm`     | သီးခြားသတ်မှတ်ထားသော 6/8/12 အစား radius scale တစ်ခုတည်း (14/9)                      | 1 (တန်ဖိုး) / 2 (ချိတ်ဆက်ခြင်း + ပြန်လည်ညွှန်းဆိုခြင်း) |
-| `--grad-brand`                 | ဝဘ်ဆိုက်နှင့် ကိုက်ညီသည့် အဓိက CTA များအတွက် brand gradient (အနီ→ခရမ်းရောင်)        | 1 (token) / 2 (Button)                                  |
-| `--surface-2`                  | အဆင့်ဆင့်ထည့်သွင်းထားသော panel များ / table header များ / အတွင်းချိုင့်ဝင် row များ | 1                                                       |
-| `--font-mono`                  | Code block များ၊ terminal၊ ID များနှင့် endpoint များ                               | 4                                                       |
-| `--text-muted` ညှိနှိုင်းခြင်း | site↔panel အတွက် တန်ဖိုးတစ်ခုတည်း ရွေးချယ်ရန် (`#a1a1aa` ကို အကြံပြုသည်)            | 2                                                       |
-
-**D2 (text-muted):** site ၏ `#8b8b9e` နှင့် dashboard ၏ `#a1a1aa`။ **dashboard ၏ `#a1a1aa`** ကို ဆက်လက်အသုံးပြုပြီး ကိုက်ညီစေရန် _site_ ကို အပ်ဒိတ်လုပ်ရန် အကြံပြုသည်။ မြင်ကွင်းပိုင်းဆိုင်ရာ ပြောင်းလဲမှုသာဖြစ်သည်။
-
----
-
-## 6. အပိုင်း C — Component များကို စံသတ်မှတ်ခြင်း (Phases 2–4)
-
-စိတ်ကြိုက် component များ (shadcn/Radix မသုံးပါ)၊ Tailwind v4၊ semantic token များကို **အများအားဖြင့်** အသုံးပြုထားပြီးဖြစ်သည် (ဖိုင် 195 ခုက မျှဝေထားသော barrel ကို import လုပ်ထားသည်)။ လုပ်ဆောင်ရန်ကျန်သည်မှာ **ကျော်လွှားအသုံးပြုထားမှုများ** ကို ဖယ်ရှားခြင်းဖြစ်သည်။ မူလနေရာ- `src/shared/components/`။
-
-| #   | အကြောင်းအရာ                                | ဖိုင်(များ)                                                                                                                | ပြဿနာ → ရည်မှန်းချက်                                                                                                                                                | Phase |
-| --- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| C1  | **Radius ချိန်ညှိခြင်း**                   | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                  | ရောနှောနေသော 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                             | 2     |
-| C2  | **Button gradient + `accent` variant**     | `Button.tsx:5-12`                                                                                                          | primary သည် အနီ→အနီ အပြားပုံစံဖြစ်နေသည်၊ `--grad-brand` နှင့် ကိုက်ညီအောင်လုပ်ရန်၊ ပျောက်နေသော `accent` variant ကို ထည့်ရန်။ importer ~195 ခု — မြင်သာမှုအမြင့်ဆုံး | 2     |
-| C3  | **Table များ**                             | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                        | 100% inline hardcoded rgba + မရှိသော var များ၊ token များသို့ ရွှေ့ပြောင်းပြီး ကွဲလွဲနေသော style များကို ရပ်ဆိုင်းရန်                                               | 3     |
-| C4  | **Status color များကို ဗဟိုပြုခြင်း**      | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + helper 5 ခု | တူညီသော hex မိတ္တူ 6+ ခု → `--color-success/warning/error` ကို အခြေခံသည့် module တစ်ခုတည်း                                                                          | 3     |
-| C5  | **Card border**                            | `Card.tsx:39`                                                                                                              | `border-white/5` → brand `/8`                                                                                                                                       | 2     |
-| C6  | **Focus ring ညှိနှိုင်းခြင်း** ✅ ပြီးစီး  | `globals.css` ရှိ `--focus-ring` (accent) နှင့် form control များ၏ `ring-primary/30`                                       | global ring နှင့် ကိုက်ညီပြီး အနီရောင် error ring နှင့် ခွဲခြားနိုင်ရန် **accent (ခရမ်းရောင်)** ကို တစ်ပြေးညီသတ်မှတ်ထားသည်။ error သည် အနီရောင်အတိုင်း ဆက်ရှိမည်     | 4     |
-| C7  | **`Checkbox` + `Textarea` ထည့်သွင်းခြင်း** | inline `accentColor:#6366f1` ပါသော `<input>`/`<textarea>` အကြမ်းများ                                                       | token ဖြင့် ထိန်းချုပ်သည့် primitive များ                                                                                                                           | 4     |
-| C8  | **Hardcoded hex များ ရှင်းလင်းခြင်း**      | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, Modal dot များ၊ chart ဖိုင် ~14 ခု                                  | တိုက်ရိုက်တန်ဖိုးများ → token များ                                                                                                                                  | 4     |
-| C9  | **`cn()` → clsx + tailwind-merge**         | `src/shared/utils/cn.ts`                                                                                                   | အပြန်အလှန်ပဋိပက္ခဖြစ်သော class များ ထပ်ဆင့်နေသည်၊ C1 override များအတွက် လိုအပ်သည်                                                                                   | 2     |
-
-**Brand နှင့် ကိုက်ညီပြီးသား (token ဖြင့် ထိန်းချုပ်ထား၍ radius သာ လိုအပ်သည်):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`။
-
----
-
-## 7. ဖြန့်ချိမှုအစီအစဉ်
-
-- **အဆင့် 1 — Grid + identity tokens (ဤ PR)။** `globals.css` grid + `--surface-2`/`--grad-brand`/`--radius` token များ၊ `body::before` နောက်ခံပုံ၊ ပိတ်ဆို့နေသည့် `bg-bg` ကို ဖယ်ရှားခြင်း၊ ပြောင်းလဲမှုမရှိကြောင်း စစ်ဆေးသည့် static guard test။ အန္တရာယ်နည်းပြီး commit တစ်ခုတည်းဖြင့် ပြန်ပြောင်းနိုင်သည်။
-- **အဆင့် 2 — အခြေခံအစိတ်အပိုင်းများ (C1, C2, C5) — ဤ PR တွင် ပြီးစီး။** Semantic radius utility များဖြစ်သော `rounded-card` (14px) / `rounded-control` (9px) ကို `@theme` မှတစ်ဆင့် ထည့်သွင်းထားသည် (စိတ်ကြိုက်အမည်များဖြစ်သောကြောင့် မူလ `rounded-sm/md/lg/xl` များကို မထိခိုက်ပါ — ဖိုင် 400 လုံးကို သက်ရောက်မည့် အပြောင်းအလဲမျိုး မရှိပါ)၊ Card/Modal → 14px၊ Button/Input/Select → 9px၊ Button primary → `--grad-brand` (အနီ→ခရမ်း) + `accent` variant အသစ်၊ Card border များ → `border-border` token (0.08)။ **ရွှေ့ဆိုင်းထားသည်:** `cn()`→tailwind-merge (C9) သည် dependency အသစ်များ လိုအပ်သည်၊ အခြေခံအစိတ်အပိုင်းများက မျက်နှာပြင်အများစုကို လွှမ်းခြုံပေးထားသောကြောင့် နေရာအလိုက် သီးခြားသုံးထားသည့် `rounded-lg` များအား ရှင်းလင်းခြင်း (ဖိုင် 326 လုံး) ကို လက်ရှိအတိုင်း ချန်ထားသည်။
-- **အဆင့် 3 — အခြေအနေအရောင်များ + ဇယားများ (C3, C4) — ဤ PR တွင် ပြီးစီး။** ✅ **C4** (`src/shared/constants/statusColors.ts` — တစ်ခုတည်းသော ရင်းမြစ်အဖြစ် `STATUS_HEX`၊ `flow/edgeStyles.ts` + `TokenHealthBadge` ကို ယင်းသို့ ပြန်ညွှန်းထားပြီး အရောင်တန်ဖိုး/hex တူညီမှုကို ထိန်းသိမ်းထားသည်)။ ✅ **`--font-mono`** token။ ✅ **C3 (DataTable)** — inline rgba အားလုံးနှင့် အသုံးမဝင်တော့သော `var(--bg-table-header)` / `var(--text-secondary)` fallback များကို `--table-*` token အစု (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) ဖြင့် အစားထိုးထားသည်။ ယင်းတို့၏ **dark တန်ဖိုးများသည် ယခင် hardcoded rgba များနှင့် အတိအကျတူညီသည်** (dark တွင် byte အလိုက် တူညီသည်)၊ light တန်ဖိုးများက ယခင်က အမြဲတမ်း dark ဖြစ်နေသော light theme ကို ပြင်ဆင်ပေးသည်။ Header border → `--color-border`၊ secondary text → `--color-text-muted`။ **ပေါင်းစည်းခြင်းမပြုမီ မြင်ကွင်းပိုင်းဆိုင်ရာ စစ်ဆေးမှုတစ်ကြိမ် လိုအပ်သည်။** (မထိထားသောအရာများ: `logTableStyles.ts` နှင့် အမွေဆက်ခံလာသော Ant `.ant-table` rule များ — သီးခြားဖြစ်ပြီး ဦးစားပေးမှု နိမ့်သည်။)
-- **အဆင့် 4 — ရှင်းလင်းမှု (C6, C7, C9 ပြီးစီး၊ C8 ဆိုင်းငံ့)။** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge ကို dependency များအဖြစ် ထည့်သွင်းထားသည်) — ယခုအခါ ခေါ်ယူသူ၏ `className` သည် အခြေခံအစိတ်အပိုင်း၏ ပဋိပက္ခဖြစ်နေသော class ကို ထပ်ဆင့်စုပုံမည့်အစား မှန်ကန်စွာ _အစားထိုး_ ပေးသည်။ ✅ **C7** `Checkbox` + `Textarea` အခြေခံအစိတ်အပိုင်းအသစ်များ (token အခြေခံပြီး barrel မှ export လုပ်ထားသည်၊ ထပ်တိုးသည့်သဘောသာဖြစ်သည် — raw checkbox 32 ခု / raw textarea 41 ခုကို နောက်ပိုင်းတွင် တဖြည်းဖြည်း ပြောင်းလဲအသုံးပြုနိုင်သည်)။ ✅ **C6** focus-ring ညှိနှိုင်းမှု — form control များ (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) သည် ယခု global `--focus-ring` နှင့် ကိုက်ညီရန်နှင့် အနီရောင် error ring နှင့် ထပ်နေမှုကို ရပ်တန့်ရန် **accent (ခရမ်း)** ring ကို focus လုပ်သည်၊ အနီရောင် error state ကို မပြောင်းလဲထားပါ။ ⏳ **C8 hex-sweep သည် မစဉ်းစားဘဲ find/replace လုပ်ခြင်း မဟုတ်ပါ** — ရည်ရွယ်ချက်ရှိရှိ ထားထားသဖြင့် ဆက်လက်ထိန်းသိမ်းရမည့်အရာများကို အတည်ပြုပြီးဖြစ်သည်: `ConsoleLogViewer.tsx:240` (အမြဲ dark ဖြစ်သည့် terminal)၊ `TokenHealthBadge` popover၊ ReactFlow SVG stroke များ။ Theme အလိုက် အမှန်တကယ် ပြောင်းလဲရန် ရည်ရွယ်ထားသော hex များကိုသာ ပြောင်းရွှေ့ပါ။
-
-အဆင့်တစ်ခုချင်းစီအတွက်: `npm run lint` + `npm run typecheck:core` + မြင်ကွင်းပိုင်းဆိုင်ရာ စစ်ဆေးမှုတစ်ကြိမ်။
-
----
-
-## 8. ဆုံးဖြတ်ရန် ကျန်ရှိနေသောအချက်များ (အကြံပြုချက်များ)
-
-- **D1 — Button primary:** အနီ→အနီကို ဆက်ထားမည်လား၊ သို့မဟုတ် **အနီ→ခရမ်း `--grad-brand`** သို့ ပြောင်းမည်လား။ အကြံပြုချက်: **အနီ→ခရမ်း** (အဆင့် 2)။
-- **D2 — Grid လိုင်းအရောင်:** **neutral** (site ပုံစံ) — ရွေးချယ်ပြီး — သို့မဟုတ် brand-red။ အရွယ်အစား **32px** (ပိုင်ရှင်၏ အကြံပြုချက်အရ မူလ 46px မှ ~30% လျှော့ထားသည် — dashboard layout တွင် 46px cell များက ကြီးလွန်းသည်ဟု မြင်ရသည်)။
-- **D3 — Chrome အရောင်တောက်ပမှု:** sidebar/header **solid** — ရွေးချယ်ပြီး။
-- **D4 — Auth/login grid:** ✅ **ပြီးစီး (အဆင့် 5)** — login တစ်ခုတည်းသာမက standalone full-screen wrapper အားလုံးမှ အလင်းမဖောက်သော `bg-bg` ကို ဖယ်ရှားထားသဖြင့် screen အားလုံးတွင် grid ကို မြင်ရသည်။ §4.6 ကို ကြည့်ပါ။
-- **D5 — Landing page:** animation ပါသော splash ကို လက်ရှိအတိုင်း ထားပါ။ ရွေးချယ်ပြီး။
-- **D6 — Product တစ်ခုလုံးအတွက် radius 14/9:** အကြံပြုချက်: သုံးရန် (အဆင့် 2)။
-- **D7 — အဆင့် 1 ကို ဦးစွာ ဖြန့်ချိမည်:** ရွေးချယ်ပြီး။
-- **D8 — Layout အကျယ် (အဆင့် 5):** dashboard content shell ကို `max-w-7xl` (1280px) ဖြင့် ကန့်သတ်ထားခဲ့သောကြောင့် ကြီးမားသည့် monitor များတွင် ဘေးနှစ်ဖက်၌ ကျယ်ပြန့်သည့် နေရာလွတ်များဖြင့် အလယ်ဗဟိုသို့ ရောက်နေသည်။ ✅ **ပြီးစီး** — fluid `max-w-[3840px]` (4K အစစ်) အထိ မြှင့်ထားသည်။ ယခု content သည် viewport ကို ~4K အထိ လိုက်လျောညီထွေဖြစ်ပြီး ယင်းထက်ကျော်မှသာ အလယ်ဗဟိုသို့ ရောက်မည် (`DashboardLayout.tsx`)။ တမင်ကျဉ်းထားသော page များကို ဒီဇိုင်းအရ ကျဉ်းသည့်အတိုင်း ဆက်ထားသည် (`ProviderOnboardingWizard` max-w-5xl၊ `Rtk`/`CavemanContextPageClient` max-w-6xl)။
-- **D9 — အလင်းမဖောက်သော data table များ (အဆင့် 6):** dashboard content ဧရိယာသည် ယခု transparent ဖြစ်နေသဖြင့် (အဆင့် 5 တွင် grid နောက်ခံပုံကို ထိုးဖောက်မြင်နိုင်ရန်) container က အလင်းမဖောက်သော surface မဟုတ်သည့် data table များတွင် transparent even-row / alpha နိမ့်သည့် zebra များမှတစ်ဆင့် grid က ထိုးဖောက်မြင်နေရသည်။ ✅ **ပြီးစီး** — card မပါသည့် table အားလုံးသည် ယခု `bg-surface` ကို ရေးဆွဲသည် (သို့မဟုတ် `<DataTable>` အခြေခံအစိတ်အပိုင်းအတွက် ၎င်း၏ scroll container တွင် `background: var(--color-surface)`)။ ပြင်ဆင်ပြီးသည်များ: `DataTable` (အခြေခံအစိတ်အပိုင်း)၊ `ProxyLogger`/`RequestLoggerV2` (၎င်းတို့၏ `<Card>` ရှိ `bg-black/5 dark:bg-black/20` tint သည် tailwind-merge မှတစ်ဆင့် Card ၏ `bg-surface` ကို လွှမ်းမိုးနေခဲ့သည် → ~95% transparent)၊ `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`၊ ထို့အပြင် cache view များရှိ CSS-grid "table" နှစ်ခု (`bg-surface/35` → `bg-surface`)။ `<Card>`/Modal အတွင်း ရှိနှင့်ပြီးသော table များသည် အလင်းမဖောက်ကြောင်း စစ်ဆေးအတည်ပြုထားပြီး ရည်ရွယ်ချက်ရှိရှိ မထိထားပါ (ထိုနေရာတွင် bg-surface သည် အကျိုးသက်ရောက်မှုမရှိသော ထပ်နေမှုသာဖြစ်သည်)။ Grid ကိုယ်တိုင်မှာ **ပြောင်းလဲရန် မလိုအပ်ပါ** — dashboard `body::before` သည် site နှင့် byte အလိုက် တူညီသည် (`--grid-size: 32px`)၊ လက်ရှိ run နေသော instance တွင် တွေ့ရနိုင်သည့် "ပိုကြီးသော grid" သည် code ကြောင့်မဟုတ်ဘဲ `#4143` မတိုင်မီ build အဟောင်းကြောင့်ဖြစ်သည်။ `tests/unit/design-grid-background.test.ts` (အဆင့် 6 block) ဖြင့် ကာကွယ်စစ်ဆေးထားသည်။
-
----
-
-## 9. လုပ်ဆောင်မှုနယ်ပယ်ပြင်ပ / အန္တရာယ်များ
-
-- **အရောင်စုံပြောင်းလဲမှု မရှိပါ** — ရှိပြီးသားအရောင်များ ကိုက်ညီပြီးဖြစ်သည်။ လိုအပ်နေသော token များကိုသာ ထည့်သွင်းမည်။ ထုတ်ကုန်၏အရောင်များ ပြောင်းလဲသွားနိုင်သည့် အန္တရာယ် လုံးဝမရှိပါ။
-- **Theme engine ပြောင်းလဲမှု မရှိပါ** — `.dark` + Zustand store ကို ဆက်လက်အသုံးပြုမည်။
-- **Radius ပြောင်းလဲမှု (Phase 2) သည် ကျယ်ပြန့်သည်** — card/button/input အားလုံးအပေါ် သက်ရောက်မည်ဖြစ်သောကြောင့် merge မလုပ်မီ အချက်အလက်များပြားသည့် screen များ (table များ၊ modal များ) ကို မျက်မြင်စစ်ဆေးပါ။
-- **Table များ (C3)** တွင် hardcode လုပ်ထားသော styling အများဆုံးပါဝင်ပြီး regression ဖြစ်နိုင်သည့် မျက်နှာပြင်ဧရိယာလည်း အကျယ်ဆုံးဖြစ်သည် — ၎င်းတို့ကို သီးခြား PR တစ်ခုအဖြစ် ခွဲထုတ်ပါ။
-
----
-
-## 10. ကိုးကားချက်အညွှန်း
-
-| နယ်ပယ်                                       | Path                                                                                                                 |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Dashboard token များ                         | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Theme store                                  | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Panel shell (ဤနေရာတွင် grid ကို ဖွင့်ထားသည်) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                                       | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Grid ရှေ့ပြေးနမူနာ                           | `src/app/landing/page.tsx:16-26`                                                                                     |
-| အခြေခံ component များ                        | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Status အရောင် source များ                    | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn` utility                                 | `src/shared/utils/cn.ts`                                                                                             |
-| Phase 1 guard test                           | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Site ကိုးကားချက်                             | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — token ချိတ်ဆက်တံတား၊ `.dark` အစားထိုးချက်များ၊ OmniRoute `@layer components` တိုးချဲ့မှုများ
+- `packages/ui-kit/UPSTREAM.md` — ပင်ထားသော upstream commit နှင့် လိုင်စင် ခွင့်ပြုချက်; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` နှင့် ၎င်းနားရှိ adapter များ; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

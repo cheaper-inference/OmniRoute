@@ -25,8 +25,10 @@
     "confirm": "Kas olete kindel?",
     "refresh": "Värskenda",
     "close": "Sulge",
+    "dialogTitleFallback": "Dialoog",
     "previousPage": "Eelmine leht",
     "nextPage": "Järgmine leht",
+    "pagination": "Lehekülgjaotus",
     "capsLockOn": "Suurtähelukk on sisse lülitatud",
     "dismissNotification": "Sulge teavitus",
     "toggleColumns": "Kuva või peida veerud",
@@ -182,6 +184,7 @@
     "combos": "Kombinatsioonid",
     "noModelsFound": "Mudeleid ei leitud",
     "clear": "Tühjenda",
+    "clearFilters": "Tühjenda filtrid",
     "done": "Valmis",
     "selectAll": "Vali kõik",
     "unselectAll": "Tühista kõik valikud",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Kasutusel {count, plural, one {# pakktöötluses} other {# pakktöötluses}}",
     "batchFilePreview": "Eelvaade",
     "batchFilePreviewTruncated": "Kuvatakse esimesed {shown} rida (kokku {total} rida)",
-    "batchFileDownloadFull": "Laadi alla kogu fail"
+    "batchFileDownloadFull": "Laadi alla kogu fail",
+    "tokensPageTitle": "Tokenid",
+    "tokensPageDescription": "Saada tokeneid API-võtmete vahel, jaga kutsekoode ja ühenda kogukonnaservereid.",
+    "tokensServerUrlLabel": "Serveri URL"
   },
   "disabled": "Keelatud",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Suunake ammendunud eelarvega päringud tasuta hädaolukorra varupakkuja/-mudeli juurde.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Puhverserver on peatatud või taaskäivitub.",
     "expandSidebar": "Laienda külgriba",
     "collapseSidebar": "Ahenda külgriba",
-    "themes": "Teemad",
-    "presetColors": "Populaarsed värvid",
     "createTheme": "Loo teema",
     "chooseColor": "Vali üks värv",
-    "themeCoral": "Korallpunane",
-    "themeBlue": "Sinine",
-    "themeRed": "Punane",
-    "themeGreen": "Roheline",
-    "themeViolet": "Violetne",
-    "themeOrange": "Oranž",
-    "themeCyan": "Tsüaan",
     "cliToolsShort": "Tööriistad",
     "cache": "Vahemälu",
     "cacheShort": "Vahemälu",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Teemasüsteem",
     "whitelabelingDesc": "Oma kaubamärgiga kohandamise kirjeldus",
     "switchThemes": "Vaheta teemasid",
-    "themeAccentDesc": "Teema aktsentvärvi kirjeldus",
     "uploadFavicon": "Laadi favicon üles",
     "themeDark": "Tume teema",
     "customLogoDesc": "Kohandatud logo kirjeldus",
     "sidebarVisibilityToggle": "Külgriba nähtavuse lüliti",
-    "themeAccent": "Teema aktsentvärv",
     "resetFavicon": "Lähtesta favicon",
     "whitelabeling": "Oma kaubamärgiga kohandamine",
     "darkMode": "Tume režiim",
@@ -1122,10 +1117,8 @@
     "customLogo": "Kohandatud logo",
     "appearance": "Välimus",
     "themeSelectionAria": "Teema valimise ARIA",
-    "themeCreate": "Loo teema",
     "customFaviconDesc": "Kohandatud saidiikooni kirjeldus",
     "logoPreview": "Logo eelvaade",
-    "themeCustom": "Kohandatud teema",
     "hideHealthLogsDesc": "Seisundilogide peitmise kirjeldus",
     "faviconPreview": "Saidiikooni eelvaade",
     "changelog": "Muudatuste logi",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 või @channelname",
       "chatIdHint": "Vestluse/kanali kordumatu numbriline identifikaator või avalik kasutajanimi.",
       "tutorial": "Telegrami webhooki seadistamine:"
-    }
+    },
+    "copy": "Kopeeri",
+    "copied": "Kopeeritud!",
+    "expandDetails": "Kuva üksikasjad",
+    "collapseDetails": "Peida üksikasjad"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "Kutsed (24 h)",
     "mcpMetricSuccessRate": "Õnnestumismäär",
     "mcpMetricAvgDuration": "Keskmine kestus",
-    "mcpMetricTopTool": "Enim kasutatud tööriist"
-  },
-  "themesPage": {
-    "title": "Teemad",
-    "description": "Valige valmisteema või looge ühe värvi põhjal enda oma",
-    "presetColors": "Populaarsed värvid",
-    "customTheme": "Kohandatud teema",
-    "customThemeDesc": "Klõpsake nuppu „Loo teema“ ja valige üks värv",
-    "createTheme": "Loo teema",
-    "activePreset": "Aktiivne teema"
+    "mcpMetricTopTool": "Enim kasutatud tööriist",
+    "dismissError": "Sulge veateade"
   },
   "header": {
     "logout": "Logi välja",
     "quickNavigation": "Kiirnavigeerimine",
     "quickNavigationTitle": "Kiirnavigeerimine (⌘K / Ctrl+K)",
     "openQuickNavigation": "Ava kiirnavigeerimine",
+    "openMenu": "Ava menüü",
+    "products": "Keaki tooted",
     "switchToLightMode": "Lülitu heledale režiimile",
     "switchToDarkMode": "Lülitu tumedale režiimile",
     "language": "Keel",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Anthropicuga ühilduv",
     "media": "Meedia",
     "mediaDescription": "Loo pilte, videoid ja muusikat",
-    "themes": "Kujundusteemad",
-    "themesDescription": "Vali kogu juhtpaneelile värviteema",
     "costsDescription": "Jälgi kulutusi, analüüsi trende ja halda oma AI-eelarvet kõigi teenusepakkujate lõikes",
     "cacheDescription": "Jälgi teenusepakkujate promptide vahemälu tõhusust ja kohalike semantiliste vastuste taaskasutust.",
     "limitsDescription": "Seadista päringusageduse piirangud ja kvoodid API-võtme ning teenusepakkuja kaupa",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "Ainult valitud ühendused",
     "selectAtLeastOneConnection": "Vali vähemalt üks ühendus või suvand „Kõik ühendused“.",
     "allConnectionsDesc": "See võti võib kasutada mis tahes aktiivset ühendust.",
-    "restrictedToConnections": "Piiratud {count, plural, one {# ühendusega} other {# ühendusega}}."
+    "restrictedToConnections": "Piiratud {count, plural, one {# ühendusega} other {# ühendusega}}.",
+    "preferredConnections": "Eelistatud ühendused",
+    "preferredConnectionsDesc": "Võtmepõhine prioriteedijärjestus. Kui eelistatud ühendus pole saadaval, liigub suunamine järgmisele sobivale.",
+    "preferredConnectionsNone": "Eelistust pole määratud — kasutatakse vaikimisi suunamisstrateegiat.",
+    "preferredConnectionsClear": "Tühjenda",
+    "removeSelection": "Eemalda {name}"
   },
   "auditLog": {
     "title": "Auditilogi",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Seadista pilt→tekst-sild Modality Bridge’i seadetes",
     "sttBridgeCta": "Seadista kõne→teksti sild Modality Bridge’i seadetes",
     "existingConnection": "Olemasolev ühendus",
-    "openrouterSttDescription": "OpenRouteri kõnest tekstiks mudelid kasutavad teie seadistatud OpenRouteri ühendust. Eraldi autentimisandmeid pole vaja."
+    "openrouterSttDescription": "OpenRouteri kõnest tekstiks mudelid kasutavad teie seadistatud OpenRouteri ühendust. Eraldi autentimisandmeid pole vaja.",
+    "modalityTabsAria": "Meediatüüp",
+    "serviceKindsAria": "Teenuse tüüp"
   },
   "search": {
     "searchQuery": "Otsingupäring",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "Tundmatu",
     "cliproxyapiUpdate": "Värskenda",
     "cliproxyapiUpdateAvailable": "Saadaval on värskendus: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versioon"
+    "cliproxyapiVersion": "Versioon",
+    "removeMapping": "Eemalda vastendus"
   },
   "modelCatalog": {
     "title": "Mudelid ja kombod",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "Kombinatsioon → {name}"
   },
   "combos": {
+    "title": "Kombinatsioonid",
+    "description": "Loo kaalutud marsruutimise ja varuvalikute toega mudelikombinatsioone",
+    "autoCatalogTitle": "Automaatse marsruutimise kataloog",
     "autoTosLoadError": "Teenustingimuste reegleid ei saanud laadida. Enne nende muutmist proovige uuesti.",
     "autoTosSaveError": "Teenustingimuste reegleid ei saanud salvestada. Kuvatakse endiselt eelmine säte. Proovige uuesti.",
     "autoTosIncludeLabel": "Kaasa auto-valikusse pakkujad märkega ToS: avoid",
     "autoTosDescription": "Vaikimisi välja lülitatud. Kehtib kõigile auto-kombinatsioonidele, mitte ainult ühele kontole. Pakkuja ühendamine seda valikut ei lülita sisse.",
-    "title": "Kombinatsioonid",
-    "description": "Loo kaalutud marsruutimise ja varuvalikute toega mudelikombinatsioone",
-    "autoCatalogTitle": "Automaatse marsruutimise kataloog",
     "autoCatalogTemplateCount": "{count} malli",
     "autoCatalogDescription": "Sisseehitatud auto/* kombinatsioonid, mis määratakse dünaamiliselt ühendatud teenusepakkujate põhjal. Kasuta mudeli väljal ükskõik millist neist ID-dest — seadistamine pole vajalik.",
     "autoCatalogExpand": "Laienda automaatse marsruutimise kataloogi",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "Ühtegi kombot pole veel seadistatud.",
     "playgroundCreateFirst": "Looge esmalt kombo",
     "weighted": "Kaalutud",
+    "weightPercent": "Kaal (%)",
     "leastUsed": "Vähim kasutatud",
     "costOpt": "Kuluoptimeeritud",
     "strategyGuideTitle": "Kuidas seda strateegiat kasutada",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# konto} other {# kontot}}",
     "builderGlobalAdded": "Lisatud",
     "builderGlobalAdd": "Lisa",
+    "clearSearch": "Tühjenda otsing",
     "manualModel": "Käsitsi lisatav mudel",
     "manualModelInvalid": "Sisestage mudel kujul provider/model.",
     "manualModelUnknownProvider": "Tundmatu teenusepakkuja prefiks.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "Lisa kombo viide",
     "builderPinnedAccount": "Fikseeritud konto",
     "builderLegacyEntry": "Pärandkirje",
+    "builderStaleModel": "Pole reaalajas kataloogis",
     "reviewName": "Nimi",
     "reviewStrategy": "Strateegia",
     "reviewSteps": "Sammud",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "Sisu minimaalne pikkus (tähemärkides)",
     "responseValidationJsonPaths": "JSONPathi kontrollid",
     "responseValidationAddCheck": "+ Lisa kontroll",
+    "responseValidationRemoveCheck": "Eemalda kontroll",
+    "responseValidationPath": "JSON-i tee",
+    "responseValidationCondition": "Tingimus",
+    "responseValidationValue": "Eeldatav väärtus",
     "agentFeaturesSystemMessageOverride": "Alista süsteemisõnum",
     "agentFeaturesSystemMessagePlaceholder": "Oled asjatundlik assistent...",
     "agentFeaturesSystemMessageHint": "Agentide süsteemisõnumi alistus",
@@ -5288,7 +5292,8 @@
         "skipped": "juba seadistatud",
         "failed": "nurjus"
       }
-    }
+    },
+    "stepProgress": "Seadistamise edenemine"
   },
   "providers": {
     "tosAvoidNoticeTitle": "See pakkuja on vaikimisi auto-valikust välja jäetud",
@@ -6056,10 +6061,10 @@
     "apiFormatLabel": "API-vormingu silt",
     "apiKeyOptionalHint": "Jätke tühjaks, kui teie kohalik seadistus või teenusepakkuja ei nõua autentimist.",
     "apiKeyOptionalLabel": "API-võti (valikuline)",
-    "apiRegionChina": "API piirkond: Hiina",
-    "apiRegionHint": "API piirkonna vihje",
-    "apiRegionInternational": "API piirkond: rahvusvaheline",
-    "apiRegionLabel": "API piirkonna silt",
+    "apiRegionChina": "Mandri-Hiina",
+    "apiRegionHint": "Valige lõpp-punkti piirkond, mida kasutatakse API juurdepääsuks ja kvoodi jälgimiseks.",
+    "apiRegionInternational": "Rahvusvaheline",
+    "apiRegionLabel": "API piirkond",
     "apikey": "API-võti",
     "audio": "Heli",
     "audioProvidersHeading": "Heliteenuste pakkujate pealkiri",
@@ -6080,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Kui see konto jõuab oma 5-tunnise kasutuslimiidini ja Anthropic pakub madalama prioriteediga riba, aktsepteerib OmniRoute seda ja saadab jätkuvalt päringuid päisega anthropic-usage-limit: slow kuni aken lähtestub, selle asemel et ühendust jahutada. Nädalane limiit kehtib endiselt ja vastused võivad oodata vaba mahtuvuse järele.",
     "claudeAutoLimitResetLabel": "Lähtesta sessioonilimiit automaatselt (üks kord nädalas)",
     "claudeAutoLimitResetDescription": "Kui see konto jõuab oma 5-tunnise kasutuslimiidini ja sessioonilimiidi lähtestamine on saadaval, kasutab OmniRoute selle automaatselt ära ning proovib täiskiirusel uuesti. Kasutab konto ühekordset nädalast lähtestamist ja see arvestatakse endiselt nädalasesse limiiti.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Jäta ajutine ooteaeg vahele, et see ühendus jääks kasutatavaks ka pärast taastatavaid vigu (lõppolekud, nagu blokeeritud või aegunud, kehtivad endiselt).",
     "disableCoolingLabel": "Keela selle ühenduse ooteaeg",
     "bulkPasteAdded": "{count, plural, one {Lisati 1 võti} other {Lisati # võtit}}",
@@ -6533,6 +6545,7 @@
       "monsterapi": "Hangi API-võti aadressilt monsterapi.ai",
       "moonshot": "Ühenda Kimi API-võtmega.",
       "morph": "Tasuta pakett: 250K krediiti kuus, $0",
+      "apmix": "Ühenda Apmix API võtmega saidilt apmix.ai/dashboard — üks tellimus, palju mudeleid.",
       "nanogpt": "Ühenda NanoGPT API-võtmega.",
       "nebius": "Registreerumisel API testimiseks ~$1 proovikrediiti",
       "nlpcloud": "NLP Cloud kasutab OpenAI chat/completionsi asemel omanduslikku vestlusroboti API-t. OmniRoute kohandab OpenAI sõnumid sisendiks, kontekstiks ja ajalooks ning pakub toetatud vestlusrobotimudelite kohalikku kataloogi.",
@@ -6621,7 +6634,7 @@
       "claude": "Ühenda Claude Code olemasoleva OAuthi voo kaudu.",
       "cline": "Ühenda Cline olemasoleva OAuthi voo kaudu.",
       "cursor": "Ühenda Cursor IDE olemasoleva OAuthi voo kaudu.",
-      "cursor-api": "Ühenda Cursor kasutaja API-võtmega (crsr_...) aadressilt cursor.com/dashboard/api; IDE-seanssi pole vaja.",
+      "cursor-api": "Ühendage Cursor kasutaja API-võtmega (crsr_... või grok_...) lehelt cursor.com/dashboard/api; IDE-seanssi pole vaja.",
       "github": "Ühenda GitHub Copilot olemasoleva OAuthi voo kaudu.",
       "gitlab-duo": "OAuthi rakendus ulatustega ai_features + read_user. Seadista selles OmniRoute'i eksemplaris GITLAB_DUO_OAUTH_CLIENT_ID ja soovi korral GITLAB_DUO_OAUTH_CLIENT_SECRET.",
       "kilocode": "Ühenda Kilo Code olemasoleva OAuthi voo kaudu.",
@@ -6629,8 +6642,7 @@
       "kiro": "Tasuta pakett: 50 krediiti kuus (~25K–100K tokenit). ⚠️ Kiro kasutustingimused keelavad kolmanda osapoole puhverserveri või rakenduskesta kasutamise.",
       "codex": "Ühenda OpenAI Codex olemasoleva OAuth-vooga.",
       "qwen": "Ühenda Qwen Code olemasoleva OAuth-vooga.",
-      "github-models": "Loo aadressil github.com/settings/tokens GitHub PAT õigusega „models: read”",
-      "apmix": "Ühenda Apmix API võtmega saidilt apmix.ai/dashboard — üks tellimus, palju mudeleid."
+      "github-models": "Loo aadressil github.com/settings/tokens GitHub PAT õigusega „models: read”"
     },
     "passthroughModelsDescription": "{provider} aktsepteerib teenusepakkuja omavormingus mudeli-ID-sid. Impordi need lehelt /models või lisa marsruutimiseks kohandatud ID-d.",
     "bedrockModelsDescription": "Amazon Bedrocki mudelid on seotud AWS-i piirkonnaga. Impordi need lehelt /models või lisa valitud piirkonnas lubatud Bedrocki mudelite ID-d.",
@@ -6802,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Seaded",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "Valige, milliseid külgriba üksusi kuvada. Põhifunktsioonide valimisel jäävad täiustatud tööriistad otsinguga leitavaks.",
     "hideHealthLogs": "Peida tervisekontrolli logid",
     "hideHealthLogsDesc": "Kui see on sisse lülitatud, jäetakse [HealthCheck] sõnumid serverikonsoolis kuvamata",
-    "themeAccent": "Teema värv",
-    "themeAccentDesc": "Valige eelmääratud värv või looge ühe värviga oma teema",
-    "themeCreate": "Loo teema",
-    "themeCustom": "Kohandatud teema",
-    "themeBlue": "Sinine",
-    "themeRed": "Punane",
-    "themeGreen": "Roheline",
-    "themeViolet": "Violetne",
-    "themeOrange": "Oranž",
-    "themeCyan": "Tsüaan",
     "whitelabeling": "Bränding",
     "whitelabelingDesc": "Kohandage rakenduse nime ja logo",
     "appName": "Rakenduse nimi",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "Nüüd",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Põhibinaari tee",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Valikuline: kontrollib genereeritud faili põhibinaariga enne vastuvõetud faili asendamist. Jäta tühjaks, et kirjutada edasi selle kõrvale. Puuduv kataloog luuakse."
+      "coreBinaryPathHelp": "Valikuline: kontrollib genereeritud faili põhibinaariga enne vastuvõetud faili asendamist. Jäta tühjaks, et kirjutada edasi selle kõrvale. Puuduv kataloog luuakse.",
+      "urlFeedlessHint": "Jäta tühjaks ainult valiku tellimuse jaoks: määra allpool kontroll-URL-i, ühtegi RSS-voogu ei laadita, värskendata ega seota."
     },
     "bulkHealthcheck": "Hulgiviisiline seisundikontroll",
     "bulkHealthcheckDesc": "Testige kõiki seadistatud puhverservereid siht-URL-iga, et teha kindlaks, millised neist töötavad.",
@@ -7707,6 +7703,7 @@
     "configured": "seadistatud",
     "none": "Puudub",
     "modelOverrideValuePlaceholder": "Arvväärtus",
+    "modelOverrideKey": "Alistusvõti",
     "modelOverrideReasoningEffortsPlaceholder": "Komadega eraldatud ingliskeelsed väärtused, nt low, medium, high",
     "addKeyValue": "Lisa võtme-väärtuse paar",
     "noModelOverrides": "Selle mudeli jaoks pole alistusi seadistatud.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "Saate konkreetsete mudelite vaikehinnastuse asendada. Kohandatud hinnastust eelistatakse automaatselt tuvastatud hinnastusele.",
     "editPricing": "Muuda hinnastust",
     "viewFullDetails": "Kuva täielikud üksikasjad",
-    "themeCoral": "Korall",
     "adaptiveVolumeRouting": "Kohanduv mahupõhine marsruutimine",
     "adaptiveVolumeRoutingDesc": "Skaleerib ühendusi dünaamiliselt andmemahu ja läbilaskevõime koormuse põhjal.",
     "lkgpToggleTitle": "Viimane teadaolev toimiv teenusepakkuja (LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "Vähenda tokenite kasutust, tihendades viibad enne nende saatmist teenusepakkujatele",
     "autoCombosTitle": "Automaatsed kombinatsioonid",
     "autoCombosDesc": "Luba sellel võtmel kasutada sisseehitatud auto/* kombinatsioone, mis valivad mudeli automaatselt kõigi seadistatud teenusepakkujate seast",
+    "ccDiscoveryAliasesTitle": "Claude Code'i avastusaliased",
+    "ccDiscoveryAliasesDesc": "Avalda claude/... ühilduvuspeeglid mudelitele ja kombodele, millele see võti juba ligi pääseb",
     "compressionGuidanceFullGuideLink": "Põhjalik tihendamisjuhend",
     "compressionGuidanceShow": "Üksikasjad",
     "compressionGuidanceHide": "Peida üksikasjad",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "Läbitud",
     "tomlTestFailed": "Ebaõnnestunud",
     "tomlImportError": "RTK TOML-faili töötlemine nurjus.",
-    "tomlFileReadError": "Valitud TOML-faili lugemine nurjus."
+    "tomlFileReadError": "Valitud TOML-faili lugemine nurjus.",
+    "viewMode": "Kuvarežiim"
   },
   "compressionEngineConfig": {
     "loading": "Laadimine…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "Keelepaketid: {packs}",
     "dragToReorder": "Lohista etapi järjekorra muutmiseks",
     "engine": "Mootor",
-    "intensity": "Intensiivsus"
+    "intensity": "Intensiivsus",
+    "compressionOverride": "Pakkimise alistus"
   },
   "compressionStudio": {
     "noRun": "Tihenduskäitust pole saadaval.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "võitja: {winner}",
     "encoder": "kodeerija",
     "bytes": "baiti",
-    "tokensCl100k": "tokenit (cl100k)"
+    "tokensCl100k": "tokenit (cl100k)",
+    "studioViews": "Studio vaated"
   },
   "omniglyph": {
     "preview": "Eelvaade",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "Sellest lühemaid sõnumeid ei tihendata. Väiksem = rohkem tihendamist.",
     "tooltipMinSavings": "Tihenda ainult siis, kui see säästab vähemalt nii palju tokeneid.",
     "ultraSettings": "Ultraseaded",
-    "ultraSettingsDesc": "SLM-il põhinev semantiline tihendamine"
+    "ultraSettingsDesc": "SLM-il põhinev semantiline tihendamine",
+    "defaultLanguage": "Vaikekeel",
+    "viewMode": "Kuvarežiim"
   },
   "translator": {
     "title": "Tõlkija",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "Voo teisendamine nurjus"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kvoot on ammendunud; lisakasutus on lubatud, seega teenus jätkub.",
+    "healthPaidCreditsBypass": "Kvoot on ammendunud; saadaolevad tasulised krediidid võimaldavad teenust jätkata.",
+    "healthFilteringBypass": "Kvoot on ammendunud; kohalik kvoodifiltreerimine on välja lülitatud, seega teenus jätkub.",
     "title": "Kasutus",
     "grokExtraUsageCredits": "Täiendavad kasutuskrediidid",
     "grokAutoTopUp": "Automaatne saldo täiendamine",
@@ -9998,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Teenusepakkuja piirangud",
     "noProviders": "Ühtegi teenusepakkujat pole ühendatud",
+    "quotaAuthRequired": "Autentimine on nõutav – logige juhtpaneelile sisse",
+    "quotaAuthRequiredHint": "Teenusepakkujate ühendusi ei saanud laadida, kuna juhtpaneeli seanss puudub või on aegunud. Kvoodipiirangute nägemiseks logige sisse ja värskendage lehte.",
     "connectProvidersForQuota": "Looge OAuth-protokolli kaudu ühendus teenusepakkujatega, et jälgida oma API kvoodipiiranguid ja kasutust.",
     "accountsCount": "{count, plural, one {# konto} other {# kontot}}",
     "filteredFromCount": "(filtreeritud koguarvust {count})",
@@ -10047,9 +10055,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Tundmatu",
     "statTotal": "Kokku",
-    "statCritical": "Kriitiline",
-    "statAlert": "Hoiatus",
-    "statHealthy": "Korras",
     "filterPurchaseTypeLabel": "Tüüp",
     "filterTierLabel": "Tase",
     "purchaseAll": "Kõik",
@@ -10288,10 +10293,64 @@
     "lastRefreshed": "Viimati värskendatud",
     "providerQuota": "Teenusepakkuja kvoot",
     "providerQuotaHomeHint": "Ühendatud kontode reaalajas olek",
+    "claudeResetCreditDefaultTitle": "Claude'i limiidi lähtestamine",
+    "confirmRedeemClaudeResetCredit": "Lunastamine lähtestab kohe kohaldatavad Claude'i kasutuslimiidid ja kulutab selle krediidi jäädavalt.",
+    "claudeResetCreditsModalTitle": "Claude'i lähtestuskrediidid",
+    "claudeResetCreditsModalExplainer": "Selle konto saadaolevad Claude'i lähtestuskrediidid ja iganädalased seansilähtestused.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Põhineb viimastel vaatlustel, mitte reaalajas kontrollil. Üksikasjade jaoks valige konto.",
+    "healthRecovery": "Eeldatav taastumine",
+    "healthAvailable": "Saadaval",
+    "healthRestricted": "Osaliselt piiratud",
+    "healthUnavailable": "Pole saadaval",
+    "healthPeakHourProtection": "Tipptunni kaitse",
+    "healthCooldown": "Ooteaeg",
+    "healthQuotaExhausted": "Kvoot on ammendatud",
+    "healthOverview": "Ülevaade",
+    "layoutFull": "Täielik",
+    "layoutCompact": "Kompaktne",
+    "healthQuotaError": "Kvoodi lugemine nurjus",
+    "healthNoRuntime": "Tööolek pole saadaval",
+    "healthPreviousSnapshot": "Viimane värskendus nurjus; kuvatakse eelmine tulemus",
+    "healthPreviousFailure": "Viimane päring nurjus; ooteaeg lõppes",
+    "healthAwaitingSync": "Lähtestusaeg on möödunud; oodatakse sünkroonimist",
+    "healthVerdictUnavailable": "Saadavuse kontroll pole saadaval; kuvatakse ainult kvooditasemed",
+    "healthSummaryFailed": "Oleku kokkuvõtte lugemine nurjus; mudelilukud võivad puududa",
+    "healthRuntimeObserved": "Olek uuendatud {time}",
+    "healthQuotaObserved": "Kvoot vaadeldud {time}",
+    "healthOldestQuota": "Vanim kvooditõmmis: {time}",
+    "healthRecoveryUnknown": "Taastumisaeg teadmata",
+    "healthDetailsHint": "Üksikasjade ja toimingute vaatamiseks klõpsake",
+    "healthFiveHour": "5 tundi",
+    "healthOverall": "Üldine",
+    "healthAction": "Vajab sekkumist",
+    "healthTitle": "Kontode saadavus",
+    "healthDrag": "Lohista pakkujate järjestamiseks",
+    "healthDragPosition": "{provider}, {count, plural, one {asukoht {position, number} / #} other {asukoht {position, number} / #}}",
+    "healthResetOrder": "Taasta vaikejärjestus",
+    "healthPool": "{name} kogum",
+    "healthOtherPool": "Sama konto · {pool}: {status} ({remaining} alles)",
+    "healthIncluded": "{count, plural, one {Sisaldab # osaliselt piiratud kontot} other {Sisaldab # osaliselt piiratud kontot}}",
+    "healthBannerUnavailable": "{count, plural, one {# konto on ajutiselt kasutamatu} other {# kontot on ajutiselt kasutamatud}}",
+    "healthBannerAvailable": "{count, plural, one {# konto on kasutatav} other {Kõik # kontot on kasutatavad}}",
+    "healthLegendHide": "Peida legend",
+    "healthLegendShow": "Näita legendi",
+    "healthLegendOk": "Täisosa = allesjäänud kvoot; poolläbipaistev = kasutatud.",
+    "healthLegendCooldown": "Ajavahemiku {window} kvoot on otsas. Täisosa = oodatud aeg; poolläbipaistev = järelejäänud ooteaeg.",
+    "healthLegendAction": "Volitus aegunud või konto blokeeritud; ootamine ei aita.",
+    "healthLegendPartial": "Endiselt kasutatav. Kollane ülaosa = mudel või kogum on piiratud.",
+    "healthWaited": "Oodatud: {percent}",
+    "healthWait": "Veel {duration} (taastub {time})",
+    "healthFastest": "Varaseim taastumine {duration} pärast",
+    "healthRatio": "{available, plural, one {# / {active, number} kasutatav} other {# / {active, number} kasutatavad}}",
+    "healthCd5": "5 tundi · Ooteaeg",
+    "healthCdw": "Nädalane · Ooteaeg",
+    "healthRecentSuccessBypass": "Marsruutimine lubab seda kontot, sest päring õnnestus hiljuti.",
+    "healthPurchasedBalanceBypass": "Ostetud saldo võimaldab jätkata pärast kaasatud kvoodi ammendumist.",
+    "healthCutoffAtRequest": "Reaalajas kvoodilävendeid kontrollitakse päringu marsruutimisel."
   },
   "modals": {
     "waitingAuth": "Autoriseerimise ootel",
@@ -11078,7 +11137,8 @@
       "message": "Sõnum",
       "error": "Viga",
       "completion": "Lõpetamine"
-    }
+    },
+    "statusFilter": "Olek"
   },
   "templateNames": {
     "simple-chat": "Lihtne vestlus",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "{minutes} min tagasi",
     "hoursAgo": "{hours} t tagasi",
     "daysAgo": "{days} p tagasi",
-    "entries": "Kirjed"
+    "entries": "Kirjed",
+    "viewSwitcherAria": "Vahemälu vaade"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globaalne",
@@ -11447,6 +11508,7 @@
     "tableHealth": "Seisund (24 h)",
     "tableUsage": "Kasutus",
     "tableActions": "Toimingud",
+    "moreActions": "Rohkem toiminguid",
     "test": "Testi",
     "edit": "Muuda",
     "delete": "Kustuta",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "Ühtegi sobivat kirjet ei leitud. Kontrolli vormingut ja proovi uuesti.",
     "bulkImportSuccess": "Importimine lõpetatud: {created} loodud, {updated} värskendatud, {failed} nurjus",
     "bulkImportErrorLine": "Rida {line}: {reason}",
-    "bulkImportMaxExceeded": "Ühe impordiga saab importida kuni 100 puhverserverit",
+    "bulkImportMaxExceeded": "Ühe impordiga saab importida kuni {max} puhverserverit",
     "bulkImportPreview": "Eelvaade",
     "clearAssignment": "(eemalda määrang)",
     "bulkProxyAssignment": "Puhverserverite hulgimääramine",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "IP päringupiirang (429)",
     "poolSetAsideKindSlow": "aeglased vastused",
     "poolSetAsideKindGeoBlocked": "regiooniblokeeritud (403/451)",
+    "poolSetAsideKindOperatorReported": "operaatori poolt teatatud häire",
     "poolSetAsideUntil": "Tagasi rotatsioonis {endsAt}",
     "poolSetAsideRepeat": "Kõrvale pandud {count, plural, one {# kord} other {# korda}}",
     "poolUnknownAddress": "Tundmatu aadress",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "Ekspordi kood",
     "exportShort": "Ekspordi",
     "noStateToExport": "Eksportimiseks pole mänguvälja olekut saadaval.",
-    "closeExportModal": "Sulge eksportimise dialoog",
     "close": "Sulge",
     "exportRealKeyWarning": "Turvahoiatus: eksportimine blokeeriti — väljundis tuvastati tegelik API-võti. Lähtesta oma API-võti ja proovi uuesti.",
     "placeholderHintPrefix": "Asenda",
@@ -11809,7 +11871,8 @@
       "nextButton": "Edasi",
       "runButton": "Käivita",
       "promptPlaceholder": "Sisesta sõnum… (saatmiseks Enter, reavahetuseks Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground-režiimid"
   },
   "miniPlayground": {
     "endpoint": "Otspunkt",
@@ -11880,7 +11943,8 @@
     "assistant": "Assistent",
     "errorLabel": "Viga",
     "requestFailed": "Päring nurjus",
-    "stop": "Peata"
+    "stop": "Peata",
+    "messageInputAria": "Sõnum"
   },
   "requestLogger": {
     "recording": "Salvestamine",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "{count} konto vahetust",
       "resilienceRetried": "Tühja käiku korrati",
       "resilienceContinued": "Jätkati voo keskelt",
-      "resilienceRecovered": "Taastatud vastupidavustoiminguga"
-    }
+      "resilienceRecovered": "Taastatud vastupidavustoiminguga",
+      "conversationContext": "Vestluse kontekst",
+      "goToBottom": "Mine lõppu",
+      "liveRefreshOn": "Reaalajas värskendamine: sees",
+      "liveRefreshOff": "Reaalajas värskendamine: väljas",
+      "liveRefresh": "Reaalajas värskendamine",
+      "continuesFromParent": "jätkub ülemüksusest",
+      "continuesFrom": "Jätkub üksusest {id}",
+      "viewConversation": "Kuva vestlus",
+      "openConversation": "Ava vestlus {id}"
+    },
+    "tableLabel": "Päringulogid"
   },
   "proxyLogger": {
     "filterAll": "Kõik",
@@ -12113,7 +12187,9 @@
     "colServedBy": "Teenindab",
     "filterTraffic": "Liiklus",
     "filterTests": "Testid",
-    "filterSource": "Allikas"
+    "filterSource": "Allikas",
+    "tableLabel": "Puhverserveri logid",
+    "sortLogs": "Sordi logisid"
   },
   "endpointOptions": {
     "speech": "Kõne",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "AMMENDATUD",
     "statusAlerting": "HOIATUS",
     "statusError": "VIGA",
-    "moreSuffix": "+{count} veel"
+    "moreSuffix": "+{count} veel",
+    "feedFilterLabel": "Filtreeri sündmusi"
   },
   "quotaShare": {
     "weightPercent": "Kaal %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "Rühmitamata",
     "ungroupedHint": "Need kogumid ei ole määratud ühelegi teadaolevale rühmale. Kogumi päris rühma teisaldamiseks muuda kogumit.",
     "removeFailed": "Seda kogumit ei õnnestunud eemaldada.",
-    "dismiss": "Sulge"
+    "dismiss": "Sulge",
+    "allocationsHeading": "Jaotused",
+    "wizardRemoveDimension": "Eemalda dimensioon",
+    "wizardRemoveKey": "Eemalda võti"
   },
   "plugins": {
     "title": "Pistikprogrammid",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "Seadete uuendamine nurjus",
       "serviceRevealApiKey": "{actor} kuvas üksuse {target} API-võtme",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Sulge veateade"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "Ava kohe",
       "message": "MITM Proxy asub nüüd jaotises AgentBridge.",
       "title": "See leht on teisaldatud"
-    }
+    },
+    "dnsOn": "DNS sees",
+    "dnsOff": "DNS väljas",
+    "showServerSettings": "Kuva serveri seaded",
+    "hideServerSettings": "Peida serveri seaded",
+    "upstreamCaTesting": "Testimine…",
+    "removeMapping": "Eemalda vastendus",
+    "mappingSourcePlaceholder": "nt gemini-3.6-flash-medium või * kõigi vastendamata mudelite jaoks",
+    "mappingWildcardHint": "Kasuta lähteväärtusena märki *, et suunata kõik ilma selgesõnalise vastenduseta mudelid teenuse OmniRoute kaudu valitud sihtkohta. Täpsed lähtevasted on märgi * suhtes alati ülimuslikud.",
+    "wizardDetectingModels": "Kinni püütud liiklusest mudelite tuvastamine...",
+    "wizardDetectedModels": "Kinni püütud liiklusest leiti {count, plural, one {# mudel} other {# mudelit}}. Vali mudelid, mille soovid lisada:",
+    "wizardSelectedModels": "Valitud on {count, plural, one {# mudel} other {# mudelit}}. Järgmisel kuval saad need vastendada OmniRoute'i mudelitega.",
+    "wizardAddModels": "Lisa {count, plural, one {# mudel} other {# mudelit}}",
+    "wizardNoModelsDetected": "Ühtegi mudelit pole veel tuvastatud. Tee agendiga {agent} päring ja käivita seejärel viisard uuesti, et mudelid liiklusest automaatselt tuvastada.",
+    "wizardNoModelsHint": "Või sulge see viisard ja lisa vastendused agendikaardil käsitsi."
   },
   "providerStats": {
     "unknownError": "Tundmatu viga",
@@ -12686,7 +12781,11 @@
     "avgTtft": "Keskmine TTFT",
     "avgTotal": "Keskmine koguaeg",
     "requestTelemetry": "Päringute telemeetria",
-    "requestTelemetryDescription": "7-etapilise töötluskonveieri jaotus (viimased 5 minutit)"
+    "requestTelemetryDescription": "7-etapilise töötluskonveieri jaotus (viimased 5 minutit)",
+    "title": "Teenusepakkujate statistika",
+    "description": "Liiklus, latentsus ja edukusmäärad teenusepakkujate ning mudelite kaupa",
+    "combo": "Kombinatsioon",
+    "toggleModels": "Kuva teenusepakkuja {provider} mudelid"
   },
   "relay": {
     "title": "Serverivabad releeproksid",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "Päringu keha puudub.",
     "noResponseBody": "Vastuse keha puudub.",
     "formatted": "Vormindatud",
-    "raw": "Toorandmed"
+    "raw": "Toorandmed",
+    "requestCount": "{count, plural, one {# päring} other {# päringut}}",
+    "expandList": "Laienda loendit",
+    "collapseList": "Ahenda loend",
+    "snippetLanguage": "Koodilõigu keel",
+    "headersTable": "Päised",
+    "showSecrets": "Kuva salajased väärtused",
+    "maskSecrets": "Maski salajased väärtused",
+    "llmNotAvailable": "Selle päringu LLM-metaandmed pole saadaval.",
+    "llmStreamYes": "jah (SSE)",
+    "llmStreamNo": "ei",
+    "llmTotalTokens": "Kokku: {count} tokenit"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "Nende kutsete osakaal viimase 24 tunni jooksul, millele see teenusepakkuja tegelikult vastas. Kriips tähendab, et määra arvutamiseks oli liiklust liiga vähe.",
     "reliabilitySample": "Viimase {hours} tunni jooksul õnnestus {successes} kutset {requests}-st",
     "reliabilityTooFew": "Viimase {hours} tunni jooksul ainult {requests} kutset — määra arvutamiseks liiga vähe",
-    "reliabilityNoTraffic": "Viimase 24 tunni jooksul pole kutseid registreeritud"
+    "reliabilityNoTraffic": "Viimase 24 tunni jooksul pole kutseid registreeritud",
+    "categoryFilter": "Ülesande kategooria"
   },
   "discovery": {
     "title": "Teenusepakkujate avastamine",
@@ -13331,7 +13442,11 @@
     "method": "Meetod",
     "auth": "Autentimine",
     "feasibility": "Teostatavus",
-    "models": "Mudelid"
+    "models": "Mudelid",
+    "provider": "Teenusepakkuja",
+    "status": "Olek",
+    "endpoint": "Otspunkt",
+    "actions": "Toimingud"
   },
   "noAuthProvider": {
     "title": "Autentimine pole nõutav",
@@ -13380,7 +13495,8 @@
     "ownProxy": "Oma puhverserver",
     "freeTierPause": "Mudel {model} on pausil (429), tagasi {time}",
     "freeTierPauseProvider": "Pausil (429), tagasi {time}",
-    "freeTierPauseNote": "Protsessisisene paus selles instantsis"
+    "freeTierPauseNote": "Protsessisisene paus selles instantsis",
+    "proxyType": "Puhverserveri tüüp"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "Peidetud saavutus ootab...",
         "criteria": "Selle märgi avamiseks täida peidetud saavutus."
       }
-    }
+    },
+    "leaderboardTitle": "Edetabel",
+    "leaderboardDescription": "Teie API-võtmete edetabelikohad ja saavutused",
+    "badgeLocked": "Lukustatud"
   },
   "featureFlags": {
     "title": "Funktsioonilipud",
@@ -13794,6 +13913,7 @@
     "latency": "Latentsus",
     "quota": "Kvoot",
     "rangeWindow": "Ajavahemik: {range}",
+    "timeRange": "Ajavahemik",
     "runtimeHealthBlend": "käitusaja ja seisundi koondnäitaja",
     "averageResponseTime": "keskmine reageerimisaeg",
     "worstQuota": "Halvim kvoodiseis",
@@ -13995,7 +14115,11 @@
     "learnMore": "Lisateave",
     "changelogLoadFailed": "Muudatuste logi ei õnnestunud laadida. Proovige hiljem uuesti.",
     "retry": "Proovi uuesti",
-    "viewFullHistory": "Vaata täielikku ajalugu GitHubis"
+    "viewFullHistory": "Vaata täielikku ajalugu GitHubis",
+    "title": "Uudised ja muudatuste logi",
+    "description": "OmniRoute'i meeskonna teadaanded ja uusimad väljalaskemärkmed",
+    "viewLabel": "Vaata",
+    "loadingNews": "Teadaannete laadimine..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "Teenusepakkuja kaitselüliti olek",
       "lastUpdate": "Viimane uuendus: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} h {minutes} min"
+      "uptimeHoursMinutes": "{hours} h {minutes} min",
+      "breakerClosed": "Suletud",
+      "breakerNotClosed": "Avatud või poolavatud"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "Hoolduse üksikasjad",
         "secondaryAction": "Süsteemi olek"
       }
+    },
+    "miniapp": {
+      "askAnything": "Küsi mida tahes…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} nähtavat / kokku {total}",
+    "modeLabel": "Vaaterežiim",
+    "jumpToNow": "Liigu praegusele ajale; joon PRAEGU lähtestatakse asukohale {position}%",
+    "laneReuse": "Rea taaskasutus",
+    "laneReuseLabel": "Rea taaskasutuse ajavahemik (minutites)",
+    "laneReuseHint": "Sama vestluse ID-ga päringud jäävad ajaskaalal samale reale, kui nende vahe on väiksem kui määratud arv minuteid.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automaatne värskendamine",
+    "autoRefreshLabel": "Automaatse värskendamise intervall (sekundites)",
+    "autoRefreshHint": "Kui sageli laadib ajaskaala päringute loendi serverist uuesti.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Vähenda",
+    "zoomIn": "Suurenda"
   },
   "metadata": {
     "compressionTitle": "Tihendamine",

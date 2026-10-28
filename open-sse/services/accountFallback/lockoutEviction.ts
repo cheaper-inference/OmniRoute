@@ -46,8 +46,10 @@ export function evictLockoutOverflow(
     let evicted = 0;
     for (const key of modelFailureState.keys()) {
       if (evicted >= overflow) break;
-      if (!modelLockouts.has(key)) modelFailureState.delete(key);
-      evicted++;
+      if (!modelLockouts.has(key)) {
+        modelFailureState.delete(key);
+        evicted++;
+      }
     }
   }
 }

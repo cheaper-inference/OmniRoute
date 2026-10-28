@@ -25,8 +25,10 @@
     "confirm": "तुम्हाला खात्री आहे का?",
     "refresh": "रीफ्रेश करा",
     "close": "बंद करा",
+    "dialogTitleFallback": "संवादपेटी",
     "previousPage": "मागील पृष्ठ",
     "nextPage": "पुढील पृष्ठ",
+    "pagination": "पृष्ठांकन",
     "capsLockOn": "Caps Lock सुरू आहे",
     "dismissNotification": "सूचना काढून टाका",
     "toggleColumns": "कॉलम टॉगल करा",
@@ -182,6 +184,7 @@
     "combos": "कॉम्बो",
     "noModelsFound": "कोणतीही मॉडेल सापडली नाहीत",
     "clear": "साफ करा",
+    "clearFilters": "फिल्टर साफ करा",
     "done": "पूर्ण झाले",
     "selectAll": "सर्व निवडा",
     "unselectAll": "निवड रद्द करा",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# बॅच} other {# बॅचेस}}",
     "batchFilePreview": "पूर्वावलोकन",
     "batchFilePreviewTruncated": "पहिल्या {shown} ओळी दाखवत आहे ({total} एकूण ओळी)",
-    "batchFileDownloadFull": "पूर्ण फाइल डाउनलोड करा"
+    "batchFileDownloadFull": "पूर्ण फाइल डाउनलोड करा",
+    "tokensPageTitle": "टोकन",
+    "tokensPageDescription": "API कींमध्ये टोकन पाठवा, आमंत्रण कोड शेअर करा आणि समुदाय सर्व्हर कनेक्ट करा.",
+    "tokensServerUrlLabel": "सर्व्हर URL"
   },
   "disabled": "अक्षम",
   "featureFlagOmnirouteEmergencyFallbackDescription": "बजेट संपलेल्या विनंत्या आपत्कालीन मोफत फॉलबॅक प्रदाता/मॉडेलकडे रूट करा.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "प्रॉक्सी सर्व्हर थांबवण्यात आला आहे किंवा तो रीस्टार्ट होत आहे.",
     "expandSidebar": "साइडबार विस्तृत करा",
     "collapseSidebar": "साइडबार संकुचित करा",
-    "themes": "थीम्स",
-    "presetColors": "लोकप्रिय रंग",
     "createTheme": "थीम तयार करा",
     "chooseColor": "एक रंग निवडा",
-    "themeCoral": "प्रवाळी",
-    "themeBlue": "निळा",
-    "themeRed": "लाल",
-    "themeGreen": "हिरवा",
-    "themeViolet": "जांभळा",
-    "themeOrange": "नारिंगी",
-    "themeCyan": "सायन",
     "cliToolsShort": "साधने",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "थीम सिस्टम",
     "whitelabelingDesc": "व्हाइटलेबलिंगचे वर्णन",
     "switchThemes": "थीम्स बदला",
-    "themeAccentDesc": "थीम अॅक्सेंटचे वर्णन",
     "uploadFavicon": "फेविकॉन अपलोड करा",
     "themeDark": "गडद थीम",
     "customLogoDesc": "सानुकूल लोगोचे वर्णन",
     "sidebarVisibilityToggle": "साइडबार दृश्यमानता टॉगल",
-    "themeAccent": "थीम अॅक्सेंट",
     "resetFavicon": "फेविकॉन रीसेट करा",
     "whitelabeling": "व्हाइटलेबलिंग",
     "darkMode": "गडद मोड",
@@ -1122,10 +1117,8 @@
     "customLogo": "सानुकूल लोगो",
     "appearance": "स्वरूप",
     "themeSelectionAria": "थीम निवड Aria",
-    "themeCreate": "थीम तयार करा",
     "customFaviconDesc": "सानुकूल फेविकॉनचे वर्णन",
     "logoPreview": "लोगो पूर्वावलोकन",
-    "themeCustom": "सानुकूल थीम",
     "hideHealthLogsDesc": "आरोग्य नोंदी लपवण्याचे वर्णन",
     "faviconPreview": "फेविकॉन पूर्वावलोकन",
     "changelog": "बदलांची नोंद",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 किंवा @channelname",
       "chatIdHint": "चॅट/चॅनेलचा युनिक संख्यात्मक आयडेंटिफायर किंवा सार्वजनिक युझरनेम.",
       "tutorial": "Telegram वेबहूक कसा कॉन्फिगर करावा:"
-    }
+    },
+    "copy": "कॉपी करा",
+    "copied": "कॉपी केले!",
+    "expandDetails": "तपशील दाखवा",
+    "collapseDetails": "तपशील लपवा"
   },
   "compliance": {
     "auditTitle": "ऑडिट",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "कॉल (24 तास)",
     "mcpMetricSuccessRate": "यशाचा दर",
     "mcpMetricAvgDuration": "सरासरी कालावधी",
-    "mcpMetricTopTool": "उच्चतम साधन"
-  },
-  "themesPage": {
-    "title": "थीम्स",
-    "description": "पूर्वनिर्धारित थीम निवडा किंवा एका रंगाने तुमची स्वतःची थीम तयार करा",
-    "presetColors": "लोकप्रिय रंग",
-    "customTheme": "सानुकूल थीम",
-    "customThemeDesc": "‘थीम तयार करा’ वर क्लिक करा आणि एक रंग निवडा",
-    "createTheme": "थीम तयार करा",
-    "activePreset": "सक्रिय थीम"
+    "mcpMetricTopTool": "उच्चतम साधन",
+    "dismissError": "त्रुटी बंद करा"
   },
   "header": {
     "logout": "लॉग आउट",
     "quickNavigation": "जलद नेव्हिगेशन",
     "quickNavigationTitle": "जलद नेव्हिगेशन (⌘K / Ctrl+K)",
     "openQuickNavigation": "जलद नेव्हिगेशन उघडा",
+    "openMenu": "मेनू उघडा",
+    "products": "Keak उत्पादने",
     "switchToLightMode": "लाइट मोडवर स्विच करा",
     "switchToDarkMode": "डार्क मोडवर स्विच करा",
     "language": "भाषा",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Anthropic-सुसंगत",
     "media": "मीडिया",
     "mediaDescription": "प्रतिमा, व्हिडिओ आणि संगीत तयार करा",
-    "themes": "थीम्स",
-    "themesDescription": "संपूर्ण डॅशबोर्ड पॅनेलसाठी रंगसंगती निवडा",
     "costsDescription": "सर्व प्रदात्यांमधील खर्चाचा मागोवा घ्या, कलांचे विश्लेषण करा आणि तुमचे AI बजेट व्यवस्थापित करा",
     "cacheDescription": "प्रदात्याच्या प्रॉम्प्ट कॅशेची कार्यक्षमता आणि स्थानिक सिमॅंटिक प्रतिसादांचा पुनर्वापर यांचे निरीक्षण करा.",
     "limitsDescription": "प्रत्येक API की आणि प्रदात्यासाठी दरमर्यादा आणि कोटा कॉन्फिगर करा",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "फक्त निवडलेली कनेक्शन्स",
     "selectAtLeastOneConnection": "किमान एक कनेक्शन निवडा किंवा सर्व कनेक्शन्स निवडा.",
     "allConnectionsDesc": "ही की कोणतेही सक्रिय कनेक्शन वापरू शकते.",
-    "restrictedToConnections": "{count, plural, one {# कनेक्शनपुरते} other {# कनेक्शन्सपुरते}} मर्यादित."
+    "restrictedToConnections": "{count, plural, one {# कनेक्शनपुरते} other {# कनेक्शन्सपुरते}} मर्यादित.",
+    "preferredConnections": "पसंतीची कनेक्शन्स",
+    "preferredConnectionsDesc": "प्रत्येक कीसाठी प्राधान्य क्रम. पसंतीचे कनेक्शन उपलब्ध नसल्यास, राउटिंग पुढील पात्र कनेक्शनवर जाते.",
+    "preferredConnectionsNone": "कोणतीही पसंती सेट केलेली नाही — डीफॉल्ट राउटिंग धोरण वापरले जाते.",
+    "preferredConnectionsClear": "साफ करा",
+    "removeSelection": "{name} काढा"
   },
   "auditLog": {
     "title": "ऑडिट लॉग",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Modality Bridge सेटिंग्जमध्ये Image→Text ब्रिज कॉन्फिगर करा",
     "sttBridgeCta": "Modality Bridge सेटिंग्जमध्ये Speech→Text ब्रिज कॉन्फिगर करा",
     "existingConnection": "अस्तित्वात असलेला कनेक्शन",
-    "openrouterSttDescription": "OpenRouter स्पीच-टू-टेक्स्ट मॉडेल्स तुमच्या कॉन्फिगर केलेल्या OpenRouter कनेक्शनचा वापर करतात. स्वतंत्र प्रमाणपत्राची आवश्यकता नाही."
+    "openrouterSttDescription": "OpenRouter स्पीच-टू-टेक्स्ट मॉडेल्स तुमच्या कॉन्फिगर केलेल्या OpenRouter कनेक्शनचा वापर करतात. स्वतंत्र प्रमाणपत्राची आवश्यकता नाही.",
+    "modalityTabsAria": "मीडिया प्रकार",
+    "serviceKindsAria": "सेवा प्रकार"
   },
   "search": {
     "searchQuery": "शोध क्वेरी",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "अज्ञात",
     "cliproxyapiUpdate": "अद्यतन करा",
     "cliproxyapiUpdateAvailable": "उपलब्ध अद्यतन: v{current} → v{latest}",
-    "cliproxyapiVersion": "आवृत्ती"
+    "cliproxyapiVersion": "आवृत्ती",
+    "removeMapping": "मॅपिंग काढा"
   },
   "modelCatalog": {
     "title": "मॉडेल्स आणि कॉम्बोज",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "कॉम्बो → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid म्हणून चिन्हांकित प्रदाते auto मध्ये समाविष्ट करा",
-    "autoTosDescription": "मूलतः बंद. केवळ एका खात्याला नव्हे, सर्व auto कॉम्बोंना लागू होते. प्रदाता जोडल्याने हा पर्याय सुरू होत नाही.",
-    "autoTosSaveError": "ToS धोरण जतन करता आले नाही. आधीची सेटिंगच दिसत आहे. पुन्हा प्रयत्न करा.",
-    "autoTosLoadError": "ToS धोरण लोड करता आले नाही. बदलण्यापूर्वी पुन्हा प्रयत्न करा.",
     "title": "कॉम्बोज",
     "description": "भारित रूटिंग आणि फॉलबॅक समर्थनासह मॉडेल कॉम्बोज तयार करा",
     "autoCatalogTitle": "ऑटो-राउटिंग कॅटलॉग",
+    "autoTosLoadError": "ToS धोरण लोड करता आले नाही. बदलण्यापूर्वी पुन्हा प्रयत्न करा.",
+    "autoTosSaveError": "ToS धोरण जतन करता आले नाही. आधीची सेटिंगच दिसत आहे. पुन्हा प्रयत्न करा.",
+    "autoTosIncludeLabel": "ToS: avoid म्हणून चिन्हांकित प्रदाते auto मध्ये समाविष्ट करा",
+    "autoTosDescription": "मूलतः बंद. केवळ एका खात्याला नव्हे, सर्व auto कॉम्बोंना लागू होते. प्रदाता जोडल्याने हा पर्याय सुरू होत नाही.",
     "autoCatalogTemplateCount": "{count} टेम्पलेट्स",
     "autoCatalogDescription": "बिल्ट-इन ऑटो/* कॉम्बो कनेक्ट केलेल्या प्रदात्यांकडून डायनॅमिकपणे निराकरण केले. यापैकी कोणतेही आयडी मॉडेल फील्ड म्हणून वापरा — कोणत्याही सेटअपची आवश्यकता नाही.",
     "autoCatalogExpand": "स्वयं-राउटिंग कॅटलॉग विस्तृत करा",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "अद्याप कोणतेही कॉम्बो कॉन्फिगर केलेले नाहीत.",
     "playgroundCreateFirst": "प्रथम एक तयार करा",
     "weighted": "भारित",
+    "weightPercent": "वजन (%)",
     "leastUsed": "सर्वात कमी वापरलेले",
     "costOpt": "खर्च-अनुकूल",
     "strategyGuideTitle": "ही रणनीती कशी वापरावी",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# खाते} other {# खाती}}",
     "builderGlobalAdded": "जोडलेले",
     "builderGlobalAdd": "जोडा",
+    "clearSearch": "शोध साफ करा",
     "manualModel": "मॅन्युअल मॉडेल",
     "manualModelInvalid": "provider/model म्हणून मॉडेल प्रविष्ट करा.",
     "manualModelUnknownProvider": "अज्ञात प्रोव्हायडर प्रीफिक्स.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "कॉम्बो संदर्भ जोडा",
     "builderPinnedAccount": "पिन केलेले खाते",
     "builderLegacyEntry": "लेगसी नोंद",
+    "builderStaleModel": "लाइव्ह कॅटलॉगमध्ये नाही",
     "reviewName": "नाव",
     "reviewStrategy": "धोरण",
     "reviewSteps": "टप्पे",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "किमान सामग्री लांबी (अक्षरे)",
     "responseValidationJsonPaths": "JSON-path तपासण्या",
     "responseValidationAddCheck": "+ तपासणी जोडा",
+    "responseValidationRemoveCheck": "तपासणी काढा",
+    "responseValidationPath": "JSON पथ",
+    "responseValidationCondition": "अट",
+    "responseValidationValue": "अपेक्षित मूल्य",
     "agentFeaturesSystemMessageOverride": "सिस्टम संदेश ओव्हरराइड करा",
     "agentFeaturesSystemMessagePlaceholder": "तुम्ही एक तज्ज्ञ सहाय्यक आहात...",
     "agentFeaturesSystemMessageHint": "एजंटसाठी सिस्टम संदेश ओव्हरराइड",
@@ -5288,7 +5292,8 @@
         "skipped": "आधीच कॉन्फिगर केले आहे",
         "failed": "अयशस्वी"
       }
-    }
+    },
+    "stepProgress": "सेटअपची प्रगती"
   },
   "providers": {
     "tosAvoidNoticeTitle": "हा प्रदाता मूलतः auto मधून वगळलेला आहे",
@@ -6056,10 +6061,10 @@
     "apiFormatLabel": "API स्वरूपाचे लेबल",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "API प्रदेश: चीन",
-    "apiRegionHint": "API प्रदेशाची सूचना",
-    "apiRegionInternational": "API प्रदेश: आंतरराष्ट्रीय",
-    "apiRegionLabel": "API प्रदेशाचे लेबल",
+    "apiRegionChina": "मुख्यभूमी चीन",
+    "apiRegionHint": "API प्रवेश आणि कोटा ट्रॅकिंगसाठी वापरले जाणारे एंडपॉइंट क्षेत्र निवडा.",
+    "apiRegionInternational": "आंतरराष्ट्रीय",
+    "apiRegionLabel": "API क्षेत्र",
     "apikey": "API की",
     "audio": "ऑडिओ",
     "audioProvidersHeading": "ऑडिओ प्रदात्यांचे शीर्षक",
@@ -6080,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "जेव्हा हे खाते त्याच्या 5-तासांच्या वापर मर्यादेपर्यंत पोहोचते आणि Anthropic कमी-प्राधान्याचा मार्ग उपलब्ध करून देते, तेव्हा OmniRoute तो स्वीकारते आणि कनेक्शन थंड होऊ देण्याऐवजी विंडो रीसेट होईपर्यंत anthropic-usage-limit: slow सह विनंत्या पाठवत राहते. साप्ताहिक मर्यादा तरीही लागू राहते आणि अतिरिक्त क्षमता उपलब्ध होईपर्यंत प्रतिसादांना प्रतीक्षा करावी लागू शकते.",
     "claudeAutoLimitResetLabel": "सत्र मर्यादा स्वयंचलितपणे रीसेट करा (आठवड्यातून एकदा)",
     "claudeAutoLimitResetDescription": "जेव्हा हे खाते त्याच्या 5-तासांच्या वापर मर्यादेपर्यंत पोहोचते आणि सत्र-मर्यादा रीसेट उपलब्ध असतो, तेव्हा OmniRoute त्याचा स्वयंचलितपणे वापर करते आणि पूर्ण वेगाने पुन्हा प्रयत्न करते. यासाठी खात्याचा आठवड्यातून एकदा उपलब्ध असलेला रीसेट वापरला जातो आणि हा वापर तरीही साप्ताहिक मर्यादेत मोजला जातो.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "अस्थायी कूलडाउन वगळा जेणेकरून पुनर्प्राप्त करण्यायोग्य त्रुटींनंतरही हे कनेक्शन पात्र राहील (प्रतिबंधित/कालबाह्य यांसारख्या अंतिम स्थिती अजूनही लागू होतात).",
     "disableCoolingLabel": "या कनेक्शनसाठी कूलडाउन अक्षम करा",
     "bulkPasteAdded": "{count, plural, one {1 key जोडली} other {# keys जोडल्या}}",
@@ -6533,6 +6545,7 @@
       "monsterapi": "monsterapi.ai वर API की मिळवा",
       "moonshot": "Moonshot AI ला API की सह कनेक्ट करा.",
       "morph": "विनामूल्य स्तर: 250K क्रेडिट्स/महिना, $0",
+      "apmix": "apmix.ai/dashboard वरून API की सह Apmix कनेक्ट करा — एक सदस्यता, अनेक मॉडेल्स.",
       "nanogpt": "NanoGPT ला API की सह कनेक्ट करा.",
       "nebius": "API चाचणीसाठी साइनअपवर ~$1 चाचणी क्रेडिट्स",
       "nlpcloud": "NLP Cloud OpenAI chat/completions ऐवजी मालकीचे चॅटबॉट API वापरते. OmniRoute OpenAI संदेशांना इनपुट/संदर्भ/इतिहासाशी जुळवून घेते आणि समर्थित चॅटबॉट मॉडेल्सची स्थानिक कॅटलॉग प्रदर्शित करते.",
@@ -6629,8 +6642,7 @@
       "kiro": "मोफत स्तर: 50 क्रेडिट्स/महिना (~25K–100K टोकन्स). ⚠️ Kiro ToS तृतीय-पक्ष प्रॉक्सी/हार्नेसच्या वापरावर बंदी घालते.",
       "codex": "सध्याच्या OAuth फ्लोसह OpenAI Codex कनेक्ट करा.",
       "qwen": "सध्याच्या OAuth फ्लोसह Qwen Code कनेक्ट करा.",
-      "github-models": "github.com/settings/tokens वर 'models: read' स्कोपसह GitHub PAT तयार करा",
-      "apmix": "apmix.ai/dashboard वरून API की सह Apmix कनेक्ट करा — एक सदस्यता, अनेक मॉडेल्स."
+      "github-models": "github.com/settings/tokens वर 'models: read' स्कोपसह GitHub PAT तयार करा"
     },
     "passthroughModelsDescription": "{provider} प्रदाता-नेटिव्ह मॉडेल आयडी स्वीकारते. /मॉडेलमधून आयात करा किंवा राउटिंगसाठी सानुकूल आयडी जोडा.",
     "bedrockModelsDescription": "Amazon बेडरॉक मॉडेल्स AWS क्षेत्राद्वारे व्यापलेले आहेत. /मॉडेल्समधून आयात करा किंवा निवडलेल्या प्रदेशात सक्षम केलेले बेडरॉक मॉडेल आयडी जोडा.",
@@ -6802,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "सेटिंग्ज",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "साइडबारमधील कोणते घटक दाखवायचे ते निवडा. अत्यावश्यक पर्याय निवडल्यास प्रगत साधने शोधता येतात.",
     "hideHealthLogs": "आरोग्य तपासणी लॉग लपवा",
     "hideHealthLogsDesc": "सुरू असताना, सर्व्हर कन्सोलमधील [HealthCheck] संदेश दडपले जातात",
-    "themeAccent": "थीमचा रंग",
-    "themeAccentDesc": "पूर्वनिर्धारित रंग निवडा किंवा एका रंगासह स्वतःची थीम तयार करा",
-    "themeCreate": "थीम तयार करा",
-    "themeCustom": "सानुकूल थीम",
-    "themeBlue": "निळा",
-    "themeRed": "लाल",
-    "themeGreen": "हिरवा",
-    "themeViolet": "जांभळा",
-    "themeOrange": "नारिंगी",
-    "themeCyan": "सायन",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "ॲप्लिकेशनचे नाव आणि लोगो सानुकूलित करा",
     "appName": "ॲप्लिकेशनचे नाव",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "आता",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "कोर बायनरी पाथ",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "पर्यायी: वैकल्पिक आहे. अंगीकारलेली फाइल बदलण्यापूर्वी तयार केलेली फाइल कोर बायनरीसह पडताळते. शेजारीच लिहत राहण्यासाठी रिकामे सोडा. फोल्डर नसल्यास तो तयार होतो."
+      "coreBinaryPathHelp": "पर्यायी: वैकल्पिक आहे. अंगीकारलेली फाइल बदलण्यापूर्वी तयार केलेली फाइल कोर बायनरीसह पडताळते. शेजारीच लिहत राहण्यासाठी रिकामे सोडा. फोल्डर नसल्यास तो तयार होतो.",
+      "urlFeedlessHint": "फक्त निवडक दर्जेदार सदस्यतेसाठी रिकामे ठेवा: खालील नियंत्रण URL सेट करा, कोणतीही फीड मिळवली, रीफ्रेश केली किंवा बांधली जाणार नाही."
     },
     "bulkHealthcheck": "सामूहिक आरोग्य तपासणी",
     "bulkHealthcheckDesc": "कोणते प्रॉक्सी कार्यरत आहेत हे शोधण्यासाठी सर्व कॉन्फिगर केलेले प्रॉक्सी लक्ष्य URL वर तपासा.",
@@ -7707,6 +7703,7 @@
     "configured": "कॉन्फिगर केलेले",
     "none": "काहीही नाही",
     "modelOverrideValuePlaceholder": "संख्यात्मक मूल्य",
+    "modelOverrideKey": "ओव्हरराइड की",
     "modelOverrideReasoningEffortsPlaceholder": "स्वल्पविरामाने विभक्त केलेले इंग्रजी शब्द, उदा. low, medium, high",
     "addKeyValue": "की व्हॅल्यू जोडा",
     "noModelOverrides": "या मॉडेलसाठी कोणतेही ओव्हरराइड्स कॉन्फिगर केलेले नाहीत.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "तुम्ही विशिष्ट मॉडेल्ससाठी डीफॉल्ट किंमत बदलू शकता. सानुकूल बदलांना स्वयं-शोधलेल्या किंमतीपेक्षा प्राधान्य दिले जाते.",
     "editPricing": "किंमत संपादित करा",
     "viewFullDetails": "संपूर्ण तपशील पहा",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "अनुकूलनीय व्हॉल्यूम रूटिंग",
     "adaptiveVolumeRoutingDesc": "पेलोडचे प्रमाण आणि थ्रूपुटचा ताण यांनुसार कनेक्शन्स गतिशीलपणे स्केल करा.",
     "lkgpToggleTitle": "शेवटचा ज्ञात चांगला प्रदाता (LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "प्रदात्यांना पाठवण्यापूर्वी प्रॉम्प्ट संक्षिप्त करून टोकनचा वापर कमी करा",
     "autoCombosTitle": "स्वयंचलित कॉम्बो",
     "autoCombosDesc": "या कीला अंगभूत auto/* कॉम्बो वापरण्याची परवानगी द्या, जे कॉन्फिगर केलेल्या प्रत्येक प्रदात्यामधून स्वयंचलितपणे मॉडेल निवडतात",
+    "ccDiscoveryAliasesTitle": "Claude Code डिस्कव्हरी उपनामे",
+    "ccDiscoveryAliasesDesc": "ही की आधीच वापरू शकते अशा मॉडेल्स आणि कॉम्बोंसाठी claude/... सुसंगतता मिरर जाहीर करा",
     "compressionGuidanceFullGuideLink": "संपूर्ण कॉम्प्रेशन मार्गदर्शिका",
     "compressionGuidanceShow": "तपशील",
     "compressionGuidanceHide": "तपशील लपवा",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "यशस्वी",
     "tomlTestFailed": "अयशस्वी",
     "tomlImportError": "RTK TOML फाइलवर प्रक्रिया करता आली नाही.",
-    "tomlFileReadError": "निवडलेली TOML फाइल वाचता आली नाही."
+    "tomlFileReadError": "निवडलेली TOML फाइल वाचता आली नाही.",
+    "viewMode": "दृश्य मोड"
   },
   "compressionEngineConfig": {
     "loading": "लोड होत आहे…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "भाषा पॅक्स: {packs}",
     "dragToReorder": "पायरीचा क्रम बदलण्यासाठी ड्रॅग करा",
     "engine": "इंजिन",
-    "intensity": "तीव्रता"
+    "intensity": "तीव्रता",
+    "compressionOverride": "कॉम्प्रेशन ओव्हरराइड"
   },
   "compressionStudio": {
     "noRun": "कोणताही कॉम्प्रेशन रन उपलब्ध नाही.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "विजेता: {winner}",
     "encoder": "एन्कोडर",
     "bytes": "बाईट्स",
-    "tokensCl100k": "टोकन्स (cl100k)"
+    "tokensCl100k": "टोकन्स (cl100k)",
+    "studioViews": "Studio दृश्ये"
   },
   "omniglyph": {
     "preview": "पूर्वावलोकन",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "यापेक्षा लहान संदेश संकुचित केले जात नाहीत. लोअर = अधिक कॉम्प्रेशन.",
     "tooltipMinSavings": "कमीत कमी इतके टोकन वाचवले तरच संकुचित करा.",
     "ultraSettings": "अल्ट्रा सेटिंग्ज",
-    "ultraSettingsDesc": "SLM-चालित सिमेंटिक कॉम्प्रेशन"
+    "ultraSettingsDesc": "SLM-चालित सिमेंटिक कॉम्प्रेशन",
+    "defaultLanguage": "डीफॉल्ट भाषा",
+    "viewMode": "दृश्य मोड"
   },
   "translator": {
     "title": "भाषांतरक",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "स्ट्रीम रूपांतरित करण्यात अयशस्वी"
   },
   "usage": {
+    "healthExtraUsageBypass": "कोटा संपला आहे; अतिरिक्त वापराला परवानगी असल्यामुळे सेवा सुरू राहते.",
+    "healthPaidCreditsBypass": "कोटा संपला आहे; उपलब्ध सशुल्क क्रेडिटमुळे सेवा सुरू ठेवता येते.",
+    "healthFilteringBypass": "कोटा संपला आहे; स्थानिक कोटा फिल्टर बंद असल्यामुळे सेवा सुरू राहते.",
     "title": "वापर",
     "grokExtraUsageCredits": "अतिरिक्त वापर क्रेडिट्स",
     "grokAutoTopUp": "स्वयंचलित टॉप-अप",
@@ -9998,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "प्रदात्यांच्या मर्यादा",
     "noProviders": "कोणतेही प्रदाते कनेक्ट केलेले नाहीत",
+    "quotaAuthRequired": "प्रमाणीकरण आवश्यक आहे - डॅशबोर्डमध्ये साइन इन करा",
+    "quotaAuthRequiredHint": "डॅशबोर्ड सत्र उपलब्ध नसल्यामुळे किंवा कालबाह्य झाल्यामुळे प्रदाता कनेक्शन्स लोड करता आली नाहीत. तुमच्या कोटा मर्यादा पाहण्यासाठी साइन इन करा आणि रीफ्रेश करा.",
     "connectProvidersForQuota": "तुमच्या API कोटा मर्यादा आणि वापराचा मागोवा घेण्यासाठी OAuth वापरून प्रदात्यांशी कनेक्ट करा.",
     "accountsCount": "{count, plural, one {# खाते} other {# खाती}}",
     "filteredFromCount": "({count} मधून फिल्टर केलेले)",
@@ -10047,9 +10055,6 @@
     "tierLite": "लाईट",
     "tierUnknown": "अज्ञात",
     "statTotal": "एकूण",
-    "statCritical": "गंभीर",
-    "statAlert": "अलर्ट",
-    "statHealthy": "व्यवस्थित",
     "filterPurchaseTypeLabel": "प्रकार",
     "filterTierLabel": "स्तर",
     "purchaseAll": "सर्व",
@@ -10288,10 +10293,64 @@
     "lastRefreshed": "शेवटचे रिफ्रेश केलेले",
     "providerQuota": "प्रदाता कोटा",
     "providerQuotaHomeHint": "कनेक्ट केलेल्या खात्यांमधील थेट स्थिती",
+    "claudeResetCreditDefaultTitle": "Claude मर्यादा रीसेट",
+    "confirmRedeemClaudeResetCredit": "रिडीम केल्याने पात्र Claude वापर मर्यादा त्वरित रीसेट होतात आणि हे क्रेडिट कायमस्वरूपी वापरले जाते.",
+    "claudeResetCreditsModalTitle": "Claude रीसेट क्रेडिट्स",
+    "claudeResetCreditsModalExplainer": "या खात्यासाठी उपलब्ध Claude रीसेट क्रेडिट्स आणि साप्ताहिक सत्र रीसेट.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "अलीकडील निरीक्षणांवर आधारित, थेट चाचणी नाही. तपशीलांसाठी खाते निवडा.",
+    "healthRecovery": "पूर्ववत होण्याची अपेक्षित वेळ",
+    "healthAvailable": "उपलब्ध",
+    "healthRestricted": "अंशतः मर्यादित",
+    "healthUnavailable": "अनुपलब्ध",
+    "healthPeakHourProtection": "गर्दीच्या वेळेतील संरक्षण",
+    "healthCooldown": "प्रतीक्षा कालावधी",
+    "healthQuotaExhausted": "कोटा संपला",
+    "healthOverview": "आढावा",
+    "layoutFull": "पूर्ण",
+    "layoutCompact": "संक्षिप्त",
+    "healthQuotaError": "कोटा वाचण्यात अयशस्वी",
+    "healthNoRuntime": "कार्यस्थिती उपलब्ध नाही",
+    "healthPreviousSnapshot": "शेवटचे रिफ्रेश अयशस्वी; मागील निकाल दाखवत आहे",
+    "healthPreviousFailure": "शेवटची विनंती अयशस्वी; प्रतीक्षा वेळ संपली",
+    "healthAwaitingSync": "रीसेटची वेळ उलटली; समक्रमणाच्या प्रतीक्षेत",
+    "healthVerdictUnavailable": "उपलब्धता तपासणीचा निकाल मिळत नाही; फक्त कोटा पातळी दाखवल्या जात आहेत",
+    "healthSummaryFailed": "कार्यस्थितीचा सारांश वाचण्यात अयशस्वी; मॉडेल लॉकची माहिती नसू शकते",
+    "healthRuntimeObserved": "कार्यस्थिती अद्ययावत {time}",
+    "healthQuotaObserved": "कोट्याचे निरीक्षण {time}",
+    "healthOldestQuota": "सर्वात जुनी कोटा प्रतिमा: {time}",
+    "healthRecoveryUnknown": "पुनर्प्राप्तीची वेळ अज्ञात",
+    "healthDetailsHint": "तपशील आणि कृतींसाठी क्लिक करा",
+    "healthFiveHour": "५ तास",
+    "healthOverall": "एकूण",
+    "healthAction": "कृती आवश्यक",
+    "healthTitle": "खात्यांची उपलब्धता",
+    "healthDrag": "प्रदात्यांचा क्रम बदलण्यासाठी ओढा",
+    "healthDragPosition": "{provider}, {count, plural, one {# पैकी स्थान {position, number}} other {# पैकी स्थान {position, number}}}",
+    "healthResetOrder": "मूलभूत क्रम पुनर्स्थापित करा",
+    "healthPool": "{name} पूल",
+    "healthOtherPool": "त्याच खात्यातील {pool}: {status} ({remaining} शिल्लक)",
+    "healthIncluded": "{count, plural, one {अंशतः मर्यादित # खाते समाविष्ट आहे} other {अंशतः मर्यादित # खाती समाविष्ट आहेत}}",
+    "healthBannerUnavailable": "{count, plural, one {# खाते तात्पुरते अनुपलब्ध आहे} other {# खाती तात्पुरती अनुपलब्ध आहेत}}",
+    "healthBannerAvailable": "{count, plural, one {# खाते उपलब्ध आहे} other {सर्व # खाती उपलब्ध आहेत}}",
+    "healthLegendHide": "चिन्हांचे स्पष्टीकरण लपवा",
+    "healthLegendShow": "चिन्हांचे स्पष्टीकरण दाखवा",
+    "healthLegendOk": "ठळक = शिल्लक कोटा; अर्धपारदर्शक = वापरलेला.",
+    "healthLegendCooldown": "{window} कोटा संपला. ठळक = झालेले प्रतीक्षा अंतर; अर्धपारदर्शक = उरलेली प्रतीक्षा.",
+    "healthLegendAction": "अधिकृतता कालबाह्य किंवा खाते प्रतिबंधित; वाट पाहून सुटणार नाही.",
+    "healthLegendPartial": "अजून वापरता येते. पिवळे टोक = मॉडेल किंवा पूल मर्यादित.",
+    "healthWaited": "प्रतीक्षा पूर्ण: {percent}",
+    "healthWait": "आणखी {duration} ({time} वाजता पुनर्प्राप्ती)",
+    "healthFastest": "सर्वात लवकर पुनर्प्राप्ती {duration} नंतर",
+    "healthRatio": "{available, plural, one {# / {active, number} उपलब्ध} other {# / {active, number} उपलब्ध}}",
+    "healthCd5": "५ तास · प्रतीक्षा कालावधी",
+    "healthCdw": "साप्ताहिक · प्रतीक्षा कालावधी",
+    "healthRecentSuccessBypass": "अलीकडे विनंती यशस्वी झाल्यामुळे राउटिंग या खात्याला परवानगी देते.",
+    "healthPurchasedBalanceBypass": "समाविष्ट कोटा संपल्यानंतर खरेदी केलेल्या शिल्लकीतून वापर सुरू ठेवता येतो.",
+    "healthCutoffAtRequest": "विनंती राउट करताना थेट कोट्याच्या मर्यादा तपासल्या जातात."
   },
   "modals": {
     "waitingAuth": "अधिकृततेची प्रतीक्षा करत आहे",
@@ -11078,7 +11137,8 @@
       "message": "संदेश",
       "error": "त्रुटी",
       "completion": "पूर्णता"
-    }
+    },
+    "statusFilter": "स्थिती"
   },
   "templateNames": {
     "simple-chat": "साधे चॅट",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "{minutes}m पूर्वी",
     "hoursAgo": "{hours}h पूर्वी",
     "daysAgo": "{days}d पूर्वी",
-    "entries": "नोंदी"
+    "entries": "नोंदी",
+    "viewSwitcherAria": "कॅश दृश्य"
   },
   "proxyConfigModal": {
     "levelGlobal": "ग्लोबल",
@@ -11447,6 +11508,7 @@
     "tableHealth": "आरोग्य (24h)",
     "tableUsage": "वापर",
     "tableActions": "कृती",
+    "moreActions": "अधिक क्रिया",
     "test": "चाचणी करा",
     "edit": "संपादित करा",
     "delete": "हटवा",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "कोणत्याही वैध नोंदी आढळल्या नाहीत. स्वरूप तपासा आणि पुन्हा प्रयत्न करा.",
     "bulkImportSuccess": "आयात पूर्ण: {created} तयार केले, {updated} अद्यतनित केले, {failed} अयशस्वी",
     "bulkImportErrorLine": "ओळ {line}: {reason}",
-    "bulkImportMaxExceeded": "प्रति आयात कमाल 100 प्रॉक्सी",
+    "bulkImportMaxExceeded": "प्रति आयात कमाल {max} प्रॉक्सी",
     "bulkImportPreview": "पूर्वावलोकन",
     "clearAssignment": "(स्पष्ट असाइनमेंट)",
     "bulkProxyAssignment": "मोठ्या प्रमाणात प्रॉक्सी असाइनमेंट",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "IP दर मर्यादा (429)",
     "poolSetAsideKindSlow": "हळू प्रतिसाद",
     "poolSetAsideKindGeoBlocked": "क्षेत्र-अवरोधित (403/451)",
+    "poolSetAsideKindOperatorReported": "ऑपरेटरने नोंदवलेला आउटेज",
     "poolSetAsideUntil": "रोटेशनमध्ये परत {endsAt}",
     "poolSetAsideRepeat": "बाजूला ठेवले {count, plural, one {# वेळा} other {# वेळा}}",
     "poolUnknownAddress": "अज्ञात पत्ता",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "कोड निर्यात करा",
     "exportShort": "एक्सपोर्ट",
     "noStateToExport": "निर्यात करण्यासाठी कोणतीही प्लेग्राउंड स्थिती उपलब्ध नाही.",
-    "closeExportModal": "एक्सपोर्ट मोडल बंद करा",
     "close": "बंद करा",
     "exportRealKeyWarning": "सुरक्षा चेतावणी: एक्सपोर्ट ब्लॉक केले आहे — आउटपुटमध्ये एक वास्तविक API की आढळली आहे. कृपया तुमची API की रीसेट करा आणि पुन्हा प्रयत्न करा.",
     "placeholderHintPrefix": "बदला",
@@ -11809,7 +11871,8 @@
       "nextButton": "पुढे",
       "runButton": "चालवा",
       "promptPlaceholder": "तुमचा संदेश प्रविष्ट करा… (पाठवण्यासाठी Enter, नवीन ओळीसाठी Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground मोड"
   },
   "miniPlayground": {
     "endpoint": "एंडपॉइंट",
@@ -11880,7 +11943,8 @@
     "assistant": "सहाय्यक",
     "errorLabel": "त्रुटी",
     "requestFailed": "विनंती अयशस्वी झाली",
-    "stop": "थांबवा"
+    "stop": "थांबवा",
+    "messageInputAria": "संदेश"
   },
   "requestLogger": {
     "recording": "रेकॉर्डिंग सुरू आहे",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "{count} खाते रोटेशन",
       "resilienceRetried": "रिकामी फेरी पुन्हा प्रयत्न केली",
       "resilienceContinued": "स्ट्रीमच्या मध्यातून पुन्हा सुरू केले",
-      "resilienceRecovered": "लवचिकता कृतीद्वारे पुनर्प्राप्त"
-    }
+      "resilienceRecovered": "लवचिकता कृतीद्वारे पुनर्प्राप्त",
+      "conversationContext": "संभाषणाचा संदर्भ",
+      "goToBottom": "तळाशी जा",
+      "liveRefreshOn": "थेट रिफ्रेश: सुरू",
+      "liveRefreshOff": "थेट रिफ्रेश: बंद",
+      "liveRefresh": "थेट रिफ्रेश",
+      "continuesFromParent": "पालकापासून पुढे सुरू राहते",
+      "continuesFrom": "{id} पासून पुढे सुरू राहते",
+      "viewConversation": "संभाषण पहा",
+      "openConversation": "{id} संभाषण उघडा"
+    },
+    "tableLabel": "विनंती लॉग"
   },
   "proxyLogger": {
     "filterAll": "सर्व",
@@ -12113,7 +12187,9 @@
     "colServedBy": "द्वारे सेवा दिली",
     "filterTraffic": "वाहतूक",
     "filterTests": "चाचण्या",
-    "filterSource": "स्रोत"
+    "filterSource": "स्रोत",
+    "tableLabel": "प्रॉक्सी लॉग",
+    "sortLogs": "लॉग क्रमवारीत लावा"
   },
   "endpointOptions": {
     "speech": "वाणी",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "संपला",
     "statusAlerting": "इशारा सक्रिय",
     "statusError": "त्रुटी",
-    "moreSuffix": "+{count} आणखी"
+    "moreSuffix": "+{count} आणखी",
+    "feedFilterLabel": "इव्हेंट फिल्टर करा"
   },
   "quotaShare": {
     "weightPercent": "वजन %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "गट नसलेले",
     "ungroupedHint": "हे पूल्स कोणत्याही ज्ञात गटाला नियुक्त केलेले नाहीत. पूलला वास्तविक गटात हलवण्यासाठी तो संपादित करा.",
     "removeFailed": "हा पूल काढता आला नाही.",
-    "dismiss": "बंद करा"
+    "dismiss": "बंद करा",
+    "allocationsHeading": "वाटप",
+    "wizardRemoveDimension": "परिमाण काढून टाका",
+    "wizardRemoveKey": "की काढून टाका"
   },
   "plugins": {
     "title": "प्लगइन्स",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "सेटिंग्ज अपडेट अयशस्वी झाले",
       "serviceRevealApiKey": "{actor} ने {target} साठी API की उघड केली",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "त्रुटी बंद करा"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "आता जा",
       "message": "MITM प्रॉक्सी आता AgentBridge अंतर्गत कार्यरत आहे.",
       "title": "हे पृष्ठ हलवले गेले आहे"
-    }
+    },
+    "dnsOn": "DNS सुरू",
+    "dnsOff": "DNS बंद",
+    "showServerSettings": "सर्व्हर सेटिंग्ज दाखवा",
+    "hideServerSettings": "सर्व्हर सेटिंग्ज लपवा",
+    "upstreamCaTesting": "चाचणी सुरू आहे…",
+    "removeMapping": "मॅपिंग काढून टाका",
+    "mappingSourcePlaceholder": "उदा., gemini-3.6-flash-medium, किंवा मॅप न केलेल्या सर्वांसाठी *",
+    "mappingWildcardHint": "स्पष्ट मॅपिंग नसलेले प्रत्येक मॉडेल OmniRoute द्वारे निवडलेल्या लक्ष्याकडे रूट करण्यासाठी स्रोत म्हणून * वापरा. स्रोताची अचूक जुळणी नेहमी * पेक्षा प्राधान्य घेते.",
+    "wizardDetectingModels": "अडवलेल्या ट्रॅफिकमधून मॉडेल शोधत आहे...",
+    "wizardDetectedModels": "अडवलेल्या ट्रॅफिकमध्ये {count, plural, one {# मॉडेल} other {# मॉडेल्स}} आढळली. तुम्हाला जोडायची असलेली मॉडेल निवडा:",
+    "wizardSelectedModels": "{count, plural, one {# मॉडेल} other {# मॉडेल्स}} निवडली. पुढील स्क्रीनवर तुम्ही ती OmniRoute मॉडेलशी मॅप कराल.",
+    "wizardAddModels": "{count, plural, one {# मॉडेल} other {# मॉडेल्स}} जोडा",
+    "wizardNoModelsDetected": "अद्याप कोणतेही मॉडेल आढळले नाही. विनंती करण्यासाठी {agent} वापरा, त्यानंतर ट्रॅफिकमधून मॉडेल आपोआप शोधण्यासाठी हा विझार्ड पुन्हा चालवा.",
+    "wizardNoModelsHint": "किंवा हा विझार्ड बंद करा आणि एजंट कार्डमध्ये मॅपिंग व्यक्तिचलितपणे जोडा."
   },
   "providerStats": {
     "unknownError": "अपरिचित त्रुटी",
@@ -12686,7 +12781,11 @@
     "avgTtft": "सरासरी TTFT",
     "avgTotal": "सरासरी एकूण",
     "requestTelemetry": "रिक्वेस्ट टेलिमेट्री",
-    "requestTelemetryDescription": "7-टप्प्यांचे पाइपलाइन विश्लेषण (शेवटची 5 मिनिटे)"
+    "requestTelemetryDescription": "7-टप्प्यांचे पाइपलाइन विश्लेषण (शेवटची 5 मिनिटे)",
+    "title": "प्रदाता आकडेवारी",
+    "description": "प्रत्येक प्रदाता आणि प्रत्येक मॉडेलनुसार ट्रॅफिक, विलंब आणि यशाचे दर",
+    "combo": "संयोजन",
+    "toggleModels": "{provider} ची मॉडेल दाखवा"
   },
   "relay": {
     "title": "सर्व्हरलेस रिले प्रॉक्सी",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "कोणतीही रिक्वेस्ट बॉडी नाही.",
     "noResponseBody": "कोणतीही रिस्पॉन्स बॉडी नाही.",
     "formatted": "फॉर्मेट केलेले",
-    "raw": "रॉ"
+    "raw": "रॉ",
+    "requestCount": "{count, plural, one {# विनंती} other {# विनंत्या}}",
+    "expandList": "सूची विस्तृत करा",
+    "collapseList": "सूची संक्षिप्त करा",
+    "snippetLanguage": "स्निपेटची भाषा",
+    "headersTable": "हेडर्स",
+    "showSecrets": "गुप्त मूल्ये दाखवा",
+    "maskSecrets": "गुप्त मूल्ये झाका",
+    "llmNotAvailable": "या विनंतीसाठी LLM मेटाडेटा उपलब्ध नाही.",
+    "llmStreamYes": "होय (SSE)",
+    "llmStreamNo": "नाही",
+    "llmTotalTokens": "एकूण: {count} टोकन"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "गेल्या 24 तासांत या प्रदात्याने प्रत्यक्ष प्रतिसाद दिलेल्या कॉलचे प्रमाण. डॅशचा अर्थ असा की दर निश्चित करण्याइतकी रहदारी त्याने हाताळलेली नाही.",
     "reliabilitySample": "गेल्या {hours} तासांत {requests} पैकी {successes} कॉल यशस्वी झाले",
     "reliabilityTooFew": "गेल्या {hours} तासांत केवळ {requests} कॉल — दर निश्चित करण्यासाठी खूप कमी",
-    "reliabilityNoTraffic": "गेल्या 24 तासांत कोणतेही कॉल नोंदवलेले नाहीत"
+    "reliabilityNoTraffic": "गेल्या 24 तासांत कोणतेही कॉल नोंदवलेले नाहीत",
+    "categoryFilter": "कार्य श्रेणी"
   },
   "discovery": {
     "title": "प्रदाता शोध",
@@ -13331,7 +13442,11 @@
     "method": "पद्धत",
     "auth": "प्रमाणीकरण",
     "feasibility": "व्यवहार्यता",
-    "models": "मॉडेल्स"
+    "models": "मॉडेल्स",
+    "provider": "प्रदाता",
+    "status": "स्थिती",
+    "endpoint": "एंडपॉइंट",
+    "actions": "कृती"
   },
   "noAuthProvider": {
     "title": "प्रमाणीकरण आवश्यक नाही",
@@ -13380,7 +13495,8 @@
     "ownProxy": "स्वतःचा प्रॉक्सी",
     "freeTierPause": "मॉडेल {model} थांबले (429), {time} ला परत येईल",
     "freeTierPauseProvider": "थांबले (429), {time} ला परत येईल",
-    "freeTierPauseNote": "या इंस्टन्सवर प्रक्रियेतील थांबा"
+    "freeTierPauseNote": "या इंस्टन्सवर प्रक्रियेतील थांबा",
+    "proxyType": "प्रॉक्सी प्रकार"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "एक लपलेले यश वाट पाहत आहे...",
         "criteria": "हा बॅज उघड करण्यासाठी लपलेले यश पूर्ण करा."
       }
-    }
+    },
+    "leaderboardTitle": "अग्रक्रम तालिका",
+    "leaderboardDescription": "तुमच्या API कीजमधील क्रमवारी आणि कामगिरी",
+    "badgeLocked": "लॉक केलेले"
   },
   "featureFlags": {
     "title": "फीचर फ्लॅग्ज",
@@ -13794,6 +13913,7 @@
     "latency": "विलंबता",
     "quota": "कोटा",
     "rangeWindow": "{range} विंडो",
+    "timeRange": "कालावधी",
     "runtimeHealthBlend": "रनटाइम/आरोग्य मिश्रण",
     "averageResponseTime": "सरासरी प्रतिसाद वेळ",
     "worstQuota": "सर्वात वाईट कोटा",
@@ -13995,7 +14115,11 @@
     "learnMore": "अधिक जाणून घ्या",
     "changelogLoadFailed": "चेंजलॉग लोड करता आला नाही. कृपया नंतर पुन्हा प्रयत्न करा.",
     "retry": "पुन्हा प्रयत्न करा",
-    "viewFullHistory": "GitHub वर संपूर्ण इतिहास पहा"
+    "viewFullHistory": "GitHub वर संपूर्ण इतिहास पहा",
+    "title": "बातम्या आणि बदलसूची",
+    "description": "OmniRoute टीमच्या घोषणा आणि नवीनतम प्रकाशन नोंदी",
+    "viewLabel": "पाहा",
+    "loadingNews": "घोषणा लोड होत आहेत..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "प्रदाता सर्किट ब्रेकर स्थिती",
       "lastUpdate": "अखेरचा अद्यतन: {timestamp}",
       "uptimeMinutes": "{minutes}म",
-      "uptimeHoursMinutes": "{hours}त {minutes}म"
+      "uptimeHoursMinutes": "{hours}त {minutes}म",
+      "breakerClosed": "बंद",
+      "breakerNotClosed": "उघडे किंवा अर्धवट उघडे"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "देखभाल तपशील",
         "secondaryAction": "सिस्टम स्थिती"
       }
+    },
+    "miniapp": {
+      "askAnything": "काहीही विचारा…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} दृश्यमान / एकूण {total}",
+    "modeLabel": "दृश्य मोड",
+    "jumpToNow": "सध्याच्या वेळेवर जा, NOW रेषा {position}% स्थानावर रीसेट होते",
+    "laneReuse": "लेनचा पुनर्वापर",
+    "laneReuseLabel": "लेन पुनर्वापर कालावधी (मिनिटे)",
+    "laneReuseHint": "संभाषण आयडी समान असलेल्या विनंत्यांमधील अंतर इतक्या मिनिटांपेक्षा कमी असेपर्यंत त्या एकाच टाइमलाइन पंक्तीवर राहतात.",
+    "laneReuseUnit": "मि.",
+    "autoRefresh": "स्वयं-रीफ्रेश",
+    "autoRefreshLabel": "स्वयं-रीफ्रेश मध्यांतर (सेकंद)",
+    "autoRefreshHint": "टाइमलाइन सर्व्हरवरून विनंत्यांची सूची किती वेळाने पुन्हा आणते.",
+    "autoRefreshUnit": "से.",
+    "zoomOut": "झूम आउट",
+    "zoomIn": "झूम इन"
   },
   "metadata": {
     "compressionTitle": "संकुचन",

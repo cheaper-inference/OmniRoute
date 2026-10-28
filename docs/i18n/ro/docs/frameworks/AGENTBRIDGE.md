@@ -20,7 +20,7 @@ Atunci când un agent IDE (de ex., GitHub Copilot, Cursor, Claude Code) efectuea
 
 Acest lucru înseamnă că poți:
 
-- **Redirecționa orice agent către orice furnizor**: Copilot comunică cu OpenAI? Redirecționează-l către Anthropic Claude, Gemini sau oricare dintre cei 375 de furnizori ai OmniRoute.
+- **Redirecționa orice agent către orice furnizor**: Copilot comunică cu OpenAI? Redirecționează-l către Anthropic Claude, Gemini sau oricare dintre cei 376 de furnizori ai OmniRoute.
 - **Aplica mapări de modele**: `gemini-3-flash` → `claude-sonnet-4.7` transparent, la nivelul handlerului.
 - **Observa tot traficul agenților**: fiecare cerere interceptată este publicată în [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **Aplica reziliența OmniRoute**: rutarea combinată, întrerupătoarele de circuit, mecanismele de fallback și urmărirea costurilor funcționează și pentru traficul agenților IDE.

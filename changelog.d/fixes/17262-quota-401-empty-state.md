@@ -1,0 +1,1 @@
+- fix(dashboard): Provider Quota no longer reports "No Providers Connected" when the connection list is rejected with 401 (requireLogin=false installs, desktop app) (#17262, #17877)

@@ -31,6 +31,22 @@ import { useNotificationStore } from "@/store/notificationStore";
 import { useQuotaVisibility } from "./useQuotaVisibility";
 import QuotaCutoffModal from "./QuotaCutoffModal";
 import QuotaCardGrid from "./QuotaCardGrid";
+import QuotaLayoutPicker, { useQuotaLayout } from "./QuotaLayoutPicker";
+import HealthStats from "./HealthStats";
+import { readLimitsPreference } from "./providerOrder";
+import {
+  displayAccount,
+  matchesDisplayFilter,
+  DISPLAY_KINDS,
+  type DisplayFilter,
+} from "./availabilityDisplay";
+import { useAvailability } from "./useAvailability";
+import {
+  useConfirmedAvailabilityChange,
+  useSaveQuotaWindowThresholds,
+} from "./useConfirmedAvailabilityChange";
+import { useCachedQuotaPolling } from "./useCachedQuotaPolling";
+import { useAutomaticQuotaRequests } from "./useAutomaticQuotaRequests";
 import CodexResetCreditsModal from "./CodexResetCreditsModal";
 import { useVisibleQuotaData } from "./useVisibleQuotaData";
 import { useCodexResetCreditRedemption } from "./useCodexResetCreditRedemption";
@@ -39,6 +55,11 @@ import { formatAutoRefreshCountdown } from "./formatters";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
 import { compareTr } from "@/shared/utils/turkishText";
 import { fetchWithTimeout } from "@/shared/utils/fetchTimeout";
+import {
+  ConnectionsAuthError,
+  emptyQuotaCardKeys,
+  fetchDashboardConnections,
+} from "./fetchConnections";
 
 // Bound the two first-paint requests so a stalled connection cannot wedge
 // `initialLoading` on `true` and freeze the quota page on its skeleton forever
@@ -51,13 +72,11 @@ const LS_PURCHASE_FILTER = "omniroute:limits:purchaseFilter";
 const LS_STATUS_FILTER = "omniroute:limits:statusFilter";
 const LS_ENV_FILTER = "omniroute:limits:envFilter";
 const LS_PROVIDER_FILTER = "omniroute:limits:providerFilter";
-const LS_LAYOUT_MODE = "omniroute:limits:layoutMode";
 
 const MIN_FETCH_INTERVAL_MS = 30000;
 
 type PurchaseTypeKey = "all" | "oauth-free" | "oauth-sub" | "apikey";
-type StatusKey = "all" | "critical" | "alert" | "ok" | "empty";
-type LayoutMode = "full" | "compact";
+type StatusKey = "all" | "critical" | "alert" | "ok" | "empty" | "paused";
 
 const PURCHASE_TYPES: Array<{ key: PurchaseTypeKey; labelKey: string; fallback: string }> = [
   { key: "all", labelKey: "purchaseAll", fallback: "All" },
@@ -73,18 +92,6 @@ function getPurchaseType(authType: string | undefined, tierKey: string): Purchas
     return "oauth-sub";
   }
   return "oauth-free";
-}
-
-function getWorstStatus(quotas: any[] | undefined): StatusKey {
-  if (!quotas || quotas.length === 0) return "empty";
-  let worst: "ok" | "alert" = "ok";
-  for (const q of quotas) {
-    const pct = q.unlimited ? 100 : (q.remainingPercentage ?? calculatePercentage(q.used, q.total));
-    const level = quotaStatusLevel(pct);
-    if (level === "critical") return "critical";
-    if (level === "alert" && worst === "ok") worst = "alert";
-  }
-  return worst;
 }
 
 function getSoonestResetMs(quotas: any[] | undefined): number {
@@ -135,56 +142,51 @@ const QUOTA_TONE_CLASSES = {
 
 const getQuotaToneClasses = (pct: number) => QUOTA_TONE_CLASSES[quotaStatusLevel(pct)];
 
-const STATUS_TONE: Record<
-  StatusKey,
-  { bar: string; text: string; bg: string; ring: string; dot: string }
-> = {
-  all: {
-    bar: "var(--color-text-muted)",
-    text: "var(--color-text-main)",
-    bg: "var(--color-bg-subtle)",
-    ring: "var(--color-border)",
-    dot: "var(--color-text-muted)",
-  },
-  critical: {
-    bar: "var(--color-error)",
-    text: "var(--color-error)",
-    bg: "color-mix(in srgb, var(--color-error) 10%, transparent)",
-    ring: "color-mix(in srgb, var(--color-error) 40%, transparent)",
-    dot: "var(--color-error)",
-  },
-  alert: {
-    bar: "var(--color-warning)",
-    text: "var(--color-warning)",
-    bg: "color-mix(in srgb, var(--color-warning) 10%, transparent)",
-    ring: "color-mix(in srgb, var(--color-warning) 40%, transparent)",
-    dot: "var(--color-warning)",
-  },
-  ok: {
-    bar: "var(--color-success)",
-    text: "var(--color-success)",
-    bg: "color-mix(in srgb, var(--color-success) 10%, transparent)",
-    ring: "color-mix(in srgb, var(--color-success) 40%, transparent)",
-    dot: "var(--color-success)",
-  },
-  empty: {
-    bar: "var(--color-text-muted)",
-    text: "var(--color-text-muted)",
-    bg: "var(--color-bg-subtle)",
-    ring: "var(--color-border)",
-    dot: "var(--color-text-muted)",
-  },
-};
-
-// Worst aggregate across a list of statuses — drives the group header dot.
-function aggregateWorst(statuses: StatusKey[]): "critical" | "alert" | "ok" | "empty" {
-  let worst: "ok" | "alert" | "empty" = "empty";
-  for (const s of statuses) {
-    if (s === "critical") return "critical";
-    if (s === "alert" && worst !== "alert") worst = "alert";
-    if (s === "ok" && worst === "empty") worst = "ok";
+async function requestQuota(connectionId: string) {
+  const response = await fetch(`/api/usage/${connectionId}`);
+  if (response.ok) return { data: await response.json() };
+  const errorData = await response.json().catch(() => ({}));
+  const errorMsg = errorData.error || response.statusText;
+  if (response.status === 404) return { notFound: true };
+  if (response.status === 401) {
+    const error = /re-?authenticat|sign in|log in/i.test(errorMsg)
+      ? errorMsg
+      : `${errorMsg} — re-authenticate this account.`;
+    return { error };
   }
-  return worst;
+  throw new Error(`HTTP ${response.status}: ${errorMsg}`);
+}
+function passesQuotaStatusFilter(
+  conn: any,
+  statusFilter: DisplayFilter,
+  availabilityAccounts: Record<string, any>
+) {
+  if (statusFilter === "all") return true;
+  const account = availabilityAccounts[conn.id];
+  return !!account && matchesDisplayFilter(displayAccount(account), statusFilter);
+}
+function matchesVisibleQuotaConnection(
+  conn: any,
+  providerFilter: string,
+  tierFilter: string,
+  purchaseTypeFilter: PurchaseTypeKey,
+  statusFilter: DisplayFilter,
+  envFilter: string,
+  tierByConnection: Record<string, { key?: string }>,
+  purchaseTypeByConnection: Record<string, PurchaseTypeKey>,
+  availabilityAccounts: Record<string, any>
+) {
+  if (!matchesProviderFilter(conn, providerFilter)) return false;
+  const tierKey = tierByConnection[conn.id]?.key || "unknown";
+  if (tierFilter !== "all" && tierKey !== tierFilter) return false;
+  if (purchaseTypeFilter !== "all" && purchaseTypeByConnection[conn.id] !== purchaseTypeFilter)
+    return false;
+  if (!passesQuotaStatusFilter(conn, statusFilter, availabilityAccounts)) return false;
+  if (envFilter !== "all") {
+    const tag = (conn.providerSpecificData?.tag as string | undefined)?.trim() || "";
+    if (tag !== envFilter) return false;
+  }
+  return true;
 }
 
 interface ProviderLimitsProps {
@@ -234,42 +236,44 @@ export default function ProviderLimits({
   const [quotaData, setQuotaData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [activeConfirmations, setActiveConfirmations] = useState<
+    Record<string, { isActive: boolean; confirmedAt: string }>
+  >({});
+  const {
+    accounts: availabilityAccounts,
+    refreshAvailability,
+    summaryFailed,
+  } = useAvailability(connections, quotaData, errors, activeConfirmations);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Record<string, string>>({});
   const [refreshingAll, setRefreshingAll] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [authRequired, setAuthRequired] = useState(false);
   const [tierFilter, setTierFilter] = useState("all");
   const { quotaVisibility, handleHideQuota, handleShowQuota } = useQuotaVisibility(tr, notify);
-  const resetCreditRedemption = useCodexResetCreditRedemption(
-    tr,
-    setErrors,
-    setQuotaData,
-    setLastRefreshedAt
-  );
 
   const [purchaseTypeFilter, setPurchaseTypeFilter] = useState<PurchaseTypeKey>(() => {
     if (typeof window === "undefined") return "all";
-    const saved = localStorage.getItem(LS_PURCHASE_FILTER) as PurchaseTypeKey | null;
+    const saved = readLimitsPreference(LS_PURCHASE_FILTER) as PurchaseTypeKey;
     return saved && PURCHASE_TYPES.some((p) => p.key === saved) ? saved : "all";
   });
-  const [statusFilter, setStatusFilter] = useState<StatusKey>(() => {
-    if (typeof window === "undefined") return "all";
-    const saved = localStorage.getItem(LS_STATUS_FILTER) as StatusKey | null;
-    if (saved === "all" || saved === "critical" || saved === "alert" || saved === "ok")
-      return saved;
-    return "all";
+  const [statusFilter, setStatusFilter] = useState<DisplayFilter>(() => {
+    try {
+      const saved = localStorage.getItem(LS_STATUS_FILTER) as DisplayFilter;
+      return ["all", "critical", "alert", ...DISPLAY_KINDS].includes(saved) ? saved : "all";
+    } catch {
+      return "all";
+    }
   });
   const [envFilter, setEnvFilter] = useState<string>(() => {
     if (typeof window === "undefined") return "all";
-    return localStorage.getItem(LS_ENV_FILTER) || "all";
+    return readLimitsPreference(LS_ENV_FILTER);
   });
   const [providerFilter, setProviderFilter] = useState<string>(() => {
     if (typeof window === "undefined") return "all";
-    return localStorage.getItem(LS_PROVIDER_FILTER) || "all";
+    return readLimitsPreference(LS_PROVIDER_FILTER);
   });
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>(() => {
-    if (typeof window === "undefined") return "full";
-    return localStorage.getItem(LS_LAYOUT_MODE) === "compact" ? "compact" : "full";
-  });
+  const { layoutMode, selectLayout } = useQuotaLayout();
+  const { canRequestLive, scheduleLiveRetry } = useAutomaticQuotaRequests(layoutMode);
 
   const lastFetchTimeRef = useRef<Record<string, number>>({});
   const staleProbeRef = useRef<Record<string, number>>({});
@@ -302,42 +306,35 @@ export default function ProviderLimits({
     };
   }, []);
 
-  const saveQuotaWindowThresholds = useCallback(
-    async (connectionId: string, patch: Record<string, number | null> | null) => {
-      const res = await fetch(`/api/providers/${connectionId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quotaWindowThresholds: patch }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const newValue = data?.connection?.quotaWindowThresholds ?? null;
-      setConnections((prev) =>
-        prev.map((c) => (c.id === connectionId ? { ...c, quotaWindowThresholds: newValue } : c))
-      );
-    },
-    []
-  );
-
   const fetchConnections = useCallback(async () => {
     try {
-      const response = await fetchWithTimeout("/api/providers/client", {
-        timeoutMs: PROVIDER_LIMITS_FETCH_TIMEOUT_MS,
+      const list = await fetchDashboardConnections(PROVIDER_LIMITS_FETCH_TIMEOUT_MS, {
+        method: "GET",
+        cache: "no-store",
       });
-      if (!response.ok) throw new Error("Failed");
-      const data = await response.json();
-      const list = data.connections || [];
+      setAuthRequired(false);
       setConnections(list);
       return list;
-    } catch {
-      setConnections([]);
-      return [];
+    } catch (error) {
+      setAuthRequired(error instanceof ConnectionsAuthError);
+      return null;
     }
   }, []);
 
-  // Toggle a connection's active state straight from the quota overview, so an
-  // operator can park an account that is being routed to despite low quota.
-  // Mirrors saveQuotaWindowThresholds: PUT /api/providers/[id] + optimistic state.
+  const confirmAvailabilityChange = useConfirmedAvailabilityChange(
+    fetchConnections,
+    refreshAvailability
+  );
+  const saveQuotaWindowThresholds = useSaveQuotaWindowThresholds(confirmAvailabilityChange);
+  const resetCreditRedemption = useCodexResetCreditRedemption(
+    tr,
+    setErrors,
+    setQuotaData,
+    setLastRefreshedAt,
+    confirmAvailabilityChange
+  );
+
+  // Only the active field is confirmed by this write; all other runtime evidence is retained.
   const handleToggleActive = useCallback(
     async (connectionId: string, nextActive: boolean) => {
       setTogglingActiveId(connectionId);
@@ -348,9 +345,15 @@ export default function ProviderLimits({
           body: JSON.stringify({ isActive: nextActive }),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        setConnections((prev) =>
-          prev.map((c) => (c.id === connectionId ? { ...c, isActive: nextActive } : c))
+        setConnections((previous) =>
+          previous.map((c) => (c.id === connectionId ? { ...c, isActive: nextActive } : c))
         );
+        const confirmedAt = new Date().toISOString();
+        setActiveConfirmations((previous) => ({
+          ...previous,
+          [connectionId]: { isActive: nextActive, confirmedAt },
+        }));
+        void refreshAvailability();
         notify.success(
           nextActive
             ? tr("accountActivated", "Account activated")
@@ -362,7 +365,7 @@ export default function ProviderLimits({
         setTogglingActiveId(null);
       }
     },
-    [notify, tr]
+    [notify, tr, refreshAvailability]
   );
 
   const applyCachedQuotaState = useCallback(
@@ -396,17 +399,25 @@ export default function ProviderLimits({
     try {
       const response = await fetchWithTimeout("/api/usage/provider-limits", {
         timeoutMs: PROVIDER_LIMITS_FETCH_TIMEOUT_MS,
+        method: "GET",
+        cache: "no-store",
       });
       if (!response.ok) throw new Error("Failed");
       const data = await response.json();
       return data.caches || {};
     } catch {
-      return {};
+      return null;
     }
   }, []);
+  useCachedQuotaPolling(fetchConnections, fetchCachedProviderLimits, applyCachedQuotaState);
 
   const fetchQuota = useCallback(
-    async (connectionId: string, provider: string, options: { force?: boolean } = {}) => {
+    async (
+      connectionId: string,
+      provider: string,
+      options: { force?: boolean; automatic?: boolean } = {}
+    ) => {
+      if (options.automatic && !canRequestLive()) return;
       const force = options?.force === true;
       const now = Date.now();
       const lastFetch = lastFetchTimeRef.current[connectionId] || 0;
@@ -418,38 +429,27 @@ export default function ProviderLimits({
       setLoading((prev) => ({ ...prev, [connectionId]: true }));
       setErrors((prev) => ({ ...prev, [connectionId]: null }));
       try {
-        const response = await fetch(`/api/usage/${connectionId}`);
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          const errorMsg = errorData.error || response.statusText;
-          if (response.status === 404) return;
-          if (response.status === 401) {
-            // The on-demand path already attempts a forced, serialized re-mint
-            // before surfacing a 401, so a 401 here means the token is genuinely
-            // dead — make that actionable instead of a silent empty card.
-            const reauthMsg = /re-?authenticat|sign in|log in/i.test(errorMsg)
-              ? errorMsg
-              : `${errorMsg} — re-authenticate this account.`;
-            setQuotaData((prev) => ({
-              ...prev,
-              [connectionId]: { quotas: [], message: reauthMsg },
-            }));
-            setErrors((prev) => ({ ...prev, [connectionId]: reauthMsg }));
-            return;
-          }
-          throw new Error(`HTTP ${response.status}: ${errorMsg}`);
+        const result = await requestQuota(connectionId);
+        if (result.notFound) return;
+        if (result.error) {
+          setQuotaData((prev) => ({
+            ...prev,
+            [connectionId]: { ...(prev[connectionId] || { quotas: [] }), message: result.error },
+          }));
+          setErrors((prev) => ({ ...prev, [connectionId]: result.error }));
+          return;
         }
-        const data = await response.json();
+        const data = result.data;
         const parsedQuotas = parseQuotaData(provider, data);
 
         const hasStaleAfterReset = parsedQuotas.some((q: any) => q?.staleAfterReset === true);
-        if (hasStaleAfterReset) {
+        if (hasStaleAfterReset && canRequestLive()) {
           const lastProbeAt = staleProbeRef.current[connectionId] || 0;
           if (Date.now() - lastProbeAt >= MIN_FETCH_INTERVAL_MS) {
             staleProbeRef.current[connectionId] = Date.now();
-            setTimeout(() => {
-              fetchQuota(connectionId, provider, { force: true }).catch(() => {});
-            }, 5000);
+            scheduleLiveRetry(() => {
+              fetchQuota(connectionId, provider, { force: true, automatic: true }).catch(() => {});
+            });
           }
         }
 
@@ -476,43 +476,48 @@ export default function ProviderLimits({
         setLoading((prev) => ({ ...prev, [connectionId]: false }));
       }
     },
-    []
+    [canRequestLive, scheduleLiveRetry]
   );
 
   const refreshProvider = useCallback(
     async (connectionId: string, provider: string) => {
       await fetchQuota(connectionId, provider, { force: true });
+      await Promise.all([fetchConnections(), refreshAvailability()]);
     },
-    [fetchQuota]
+    [fetchQuota, fetchConnections, refreshAvailability]
   );
 
   const refreshingAllRef = useRef(false);
-  const refreshAll = useCallback(async () => {
-    if (refreshingAllRef.current) return;
-    refreshingAllRef.current = true;
-    const now = Date.now();
-    lastRefreshAllAtRef.current = now;
-    setAutoRefreshClock(now);
-    setRefreshingAll(true);
-    try {
-      const response = await fetch("/api/usage/provider-limits", { method: "POST" });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMsg = errorData.error || response.statusText;
-        throw new Error(errorMsg);
-      }
+  const refreshAll = useCallback(
+    async (automatic = false) => {
+      if (automatic && !canRequestLive()) return;
+      if (refreshingAllRef.current) return;
+      refreshingAllRef.current = true;
+      const now = Date.now();
+      lastRefreshAllAtRef.current = now;
+      setAutoRefreshClock(now);
+      setRefreshingAll(true);
+      try {
+        const response = await fetch("/api/usage/provider-limits", { method: "POST" });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const errorMsg = errorData.error || response.statusText;
+          throw new Error(errorMsg);
+        }
 
-      const data = await response.json();
-      const connectionList = await fetchConnections();
-      applyCachedQuotaState(connectionList, data.caches || {});
-      setErrors(data.errors || {});
-    } catch (error) {
-      console.error("Error refreshing all:", error);
-    } finally {
-      refreshingAllRef.current = false;
-      setRefreshingAll(false);
-    }
-  }, [applyCachedQuotaState, fetchConnections]);
+        const data = await response.json();
+        const [connectionList] = await Promise.all([fetchConnections(), refreshAvailability()]);
+        applyCachedQuotaState(connectionList, data.caches || {});
+        setErrors(data.errors || {});
+      } catch (error) {
+        console.error("Error refreshing all:", error);
+      } finally {
+        refreshingAllRef.current = false;
+        setRefreshingAll(false);
+      }
+    },
+    [applyCachedQuotaState, fetchConnections, refreshAvailability, canRequestLive]
+  );
 
   useEffect(() => {
     if (autoRefreshIntervalMs <= 0) return;
@@ -533,13 +538,13 @@ export default function ProviderLimits({
   }, [autoRefreshIntervalMs]);
 
   useEffect(() => {
-    if (autoRefreshIntervalMs <= 0) return;
+    if (layoutMode === "overview" || autoRefreshIntervalMs <= 0) return;
     if (document.visibilityState !== "visible") return;
     if (refreshingAllRef.current) return;
     if (autoRefreshClock - lastRefreshAllAtRef.current >= autoRefreshIntervalMs) {
-      void refreshAll();
+      void refreshAll(true);
     }
-  }, [autoRefreshClock, autoRefreshIntervalMs, refreshAll]);
+  }, [layoutMode, autoRefreshClock, autoRefreshIntervalMs, refreshAll]);
 
   useEffect(() => {
     const init = async () => {
@@ -548,7 +553,7 @@ export default function ProviderLimits({
         fetchConnections(),
         fetchCachedProviderLimits(),
       ]);
-      applyCachedQuotaState(connectionList, caches);
+      applyCachedQuotaState(connectionList || [], caches || {});
       setInitialLoading(false);
     };
     init().catch(() => {
@@ -620,13 +625,13 @@ export default function ProviderLimits({
     return out;
   }, [sortedConnections, tierByConnection]);
 
-  const statusByConnection = useMemo(() => {
-    const out: Record<string, StatusKey> = {};
-    for (const conn of sortedConnections) {
-      out[conn.id] = getWorstStatus(visibleQuotaData[conn.id]?.quotas);
-    }
-    return out;
-  }, [sortedConnections, visibleQuotaData]);
+  const statusByConnection = useMemo(
+    () =>
+      Object.fromEntries(
+        sortedConnections.map((conn) => [conn.id, availabilityAccounts[conn.id]?.status || "empty"])
+      ),
+    [sortedConnections, availabilityAccounts]
+  );
 
   const purchaseTypeCounts = useMemo(() => {
     const counts: Record<PurchaseTypeKey, number> = {
@@ -641,21 +646,6 @@ export default function ProviderLimits({
     }
     return counts;
   }, [sortedConnections, purchaseTypeByConnection]);
-
-  const statusCounts = useMemo(() => {
-    const counts: Record<StatusKey, number> = {
-      all: sortedConnections.length,
-      critical: 0,
-      alert: 0,
-      ok: 0,
-      empty: 0,
-    };
-    for (const conn of sortedConnections) {
-      const key = statusByConnection[conn.id] || "empty";
-      counts[key] = (counts[key] || 0) + 1;
-    }
-    return counts;
-  }, [sortedConnections, statusByConnection]);
 
   // Unique env tags from connections.providerSpecificData.tag — drives the
   // env chip filter. If no tag is set on any connection, the row hides.
@@ -679,19 +669,19 @@ export default function ProviderLimits({
   }, [sortedConnections]);
 
   const visibleConnections = useMemo(() => {
-    const filtered = sortedConnections.filter((conn) => {
-      if (!matchesProviderFilter(conn, providerFilter)) return false;
-      const tierKey = tierByConnection[conn.id]?.key || "unknown";
-      if (tierFilter !== "all" && tierKey !== tierFilter) return false;
-      if (purchaseTypeFilter !== "all" && purchaseTypeByConnection[conn.id] !== purchaseTypeFilter)
-        return false;
-      if (statusFilter !== "all" && statusByConnection[conn.id] !== statusFilter) return false;
-      if (envFilter !== "all") {
-        const tag = (conn.providerSpecificData?.tag as string | undefined)?.trim() || "";
-        if (tag !== envFilter) return false;
-      }
-      return true;
-    });
+    const filtered = sortedConnections.filter((conn) =>
+      matchesVisibleQuotaConnection(
+        conn,
+        providerFilter,
+        tierFilter,
+        purchaseTypeFilter,
+        statusFilter,
+        envFilter,
+        tierByConnection,
+        purchaseTypeByConnection,
+        availabilityAccounts
+      )
+    );
 
     // Provider rank stays the outer sort key so each group keeps its fixed
     // slot (mirrors dashboard/providers determinism); "critical first, then
@@ -702,7 +692,8 @@ export default function ProviderLimits({
       alert: 1,
       ok: 2,
       empty: 3,
-      all: 4,
+      paused: 4,
+      all: 5,
     };
     return [...filtered].sort((a, b) =>
       compareQuotaConnections(a, b, {
@@ -726,6 +717,7 @@ export default function ProviderLimits({
     purchaseTypeFilter,
     purchaseTypeByConnection,
     statusFilter,
+    availabilityAccounts,
     statusByConnection,
     envFilter,
     providerFilter,
@@ -748,15 +740,16 @@ export default function ProviderLimits({
   // per page open so it never loops on the quotaData it writes.
   const autoLiveFetchedRef = useRef(false);
   useEffect(() => {
+    if (layoutMode === "overview") return;
     if (initialLoading || autoLiveFetchedRef.current || visibleConnections.length === 0) return;
     autoLiveFetchedRef.current = true;
     for (const conn of visibleConnections) {
       const cached = quotaData[conn.id];
       if (shouldAutoRefreshQuota(conn.provider, cached)) {
-        void fetchQuota(conn.id, conn.provider, { force: true }).catch(() => {});
+        void fetchQuota(conn.id, conn.provider, { force: true, automatic: true }).catch(() => {});
       }
     }
-  }, [initialLoading, visibleConnections, quotaData, fetchQuota]);
+  }, [layoutMode, initialLoading, visibleConnections, quotaData, fetchQuota]);
 
   const handleSetPurchaseFilter = useCallback((value: PurchaseTypeKey) => {
     setPurchaseTypeFilter(value);
@@ -767,7 +760,7 @@ export default function ProviderLimits({
     }
   }, []);
 
-  const handleSetStatusFilter = useCallback((value: StatusKey) => {
+  const handleSetStatusFilter = useCallback((value: DisplayFilter) => {
     setStatusFilter(value);
     try {
       localStorage.setItem(LS_STATUS_FILTER, value);
@@ -792,18 +785,6 @@ export default function ProviderLimits({
     } catch {
       /* ignore */
     }
-  }, []);
-
-  const toggleLayoutMode = useCallback(() => {
-    setLayoutMode((current) => {
-      const next = current === "full" ? "compact" : "full";
-      try {
-        localStorage.setItem(LS_LAYOUT_MODE, next);
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
   }, []);
 
   const renderInlineQuotaSummary = (quotas: any[]) => {
@@ -850,14 +831,13 @@ export default function ProviderLimits({
   }
 
   if (sortedConnections.length === 0) {
+    const emptyCard = emptyQuotaCardKeys(authRequired);
     return (
       <Card padding="lg">
         <div className="text-center py-12">
           <Icon name="cloud_off" size={64} className="opacity-15" />
-          <h3 className="mt-4 text-lg font-semibold text-text-main">{t("noProviders")}</h3>
-          <p className="mt-2 text-sm text-text-muted max-w-[400px] mx-auto">
-            {t("connectProvidersForQuota")}
-          </p>
+          <h3 className="mt-4 text-lg font-semibold text-text-main">{t(emptyCard.title)}</h3>
+          <p className="mt-2 text-sm text-text-muted max-w-[400px] mx-auto">{t(emptyCard.hint)}</p>
         </div>
       </Card>
     );
@@ -877,32 +857,11 @@ export default function ProviderLimits({
         </div>
 
         <div className="flex items-center gap-2">
+          <QuotaLayoutPicker value={layoutMode} onChange={selectLayout} />
           <Button
             variant="outline"
             size="sm"
-            onClick={toggleLayoutMode}
-            aria-pressed={layoutMode === "compact"}
-            aria-label={
-              layoutMode === "compact"
-                ? "Switch to full quota layout"
-                : "Switch to compact quota layout"
-            }
-            title={
-              layoutMode === "compact"
-                ? "Switch to full quota layout"
-                : "Switch to compact quota layout"
-            }
-            className="gap-1.5 text-[13px]"
-          >
-            <Icon name={layoutMode === "compact" ? "view_agenda" : "grid_view"} size={16} />
-            <span className="hidden sm:inline">
-              {layoutMode === "compact" ? "Compact" : "Full"}
-            </span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={refreshAll}
+            onClick={() => void refreshAll()}
             disabled={refreshingAll}
             className="gap-1.5 text-[13px]"
             title={
@@ -931,51 +890,14 @@ export default function ProviderLimits({
       {showFilters && (
         <>
           {/* Summary stats — clickable status filter */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {(["all", "critical", "alert", "ok"] as StatusKey[]).map((key) => {
-              const tone = STATUS_TONE[key];
-              const labelMap: Record<string, string> = {
-                all: tr("statTotal", "Total"),
-                critical: tr("statCritical", "Critical"),
-                alert: tr("statAlert", "Alert"),
-                ok: tr("statHealthy", "Healthy"),
-              };
-              const active = statusFilter === key;
-              const count = statusCounts[key] || 0;
-              return (
-                <Button
-                  key={key}
-                  variant="outline"
-                  aria-pressed={active}
-                  onClick={() => handleSetStatusFilter(key)}
-                  className="block h-auto min-h-0 px-3 py-2.5 text-left font-normal"
-                  style={{
-                    background: active ? tone.bg : "var(--color-surface)",
-                    borderColor: active ? tone.ring : "var(--color-border)",
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] uppercase tracking-wider font-semibold text-text-muted">
-                      {labelMap[key]}
-                    </span>
-                    {key !== "all" && (
-                      <span
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ background: tone.dot }}
-                        aria-hidden
-                      />
-                    )}
-                  </div>
-                  <div
-                    className="mt-0.5 text-2xl font-bold tabular-nums"
-                    style={{ color: key === "all" ? "var(--color-text-main)" : tone.text }}
-                  >
-                    {count}
-                  </div>
-                </Button>
-              );
-            })}
-          </div>
+          <HealthStats
+            accounts={sortedConnections
+              .map((c) => availabilityAccounts[c.id])
+              .filter(Boolean)
+              .map((a) => displayAccount(a))}
+            value={statusFilter}
+            onChange={handleSetStatusFilter}
+          />
 
           {/* Purchase Type filter */}
           <div className="flex items-center gap-2 flex-wrap">
@@ -1084,6 +1006,8 @@ export default function ProviderLimits({
 
         <QuotaCardGrid
           connections={visibleConnections}
+          accounts={availabilityAccounts}
+          summaryFailed={summaryFailed}
           quotaData={visibleQuotaData}
           loading={loading}
           errors={errors}
@@ -1108,6 +1032,7 @@ export default function ProviderLimits({
           redeemingResetCreditId={resetCreditRedemption.redeemingResetCreditId}
           loadingResetCreditsId={resetCreditRedemption.loadingResetCreditsId}
           compact={layoutMode === "compact"}
+          overview={layoutMode === "overview"}
         />
       </div>
 

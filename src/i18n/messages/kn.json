@@ -25,8 +25,10 @@
     "confirm": "ನಿಮಗೆ ಖಚಿತವೇ?",
     "refresh": "ರಿಫ್ರೆಶ್ ಮಾಡಿ",
     "close": "ಮುಚ್ಚಿ",
+    "dialogTitleFallback": "ಸಂವಾದ ಪೆಟ್ಟಿಗೆ",
     "previousPage": "ಹಿಂದಿನ ಪುಟ",
     "nextPage": "ಮುಂದಿನ ಪುಟ",
+    "pagination": "ಪುಟ ವಿನ್ಯಾಸ",
     "capsLockOn": "Caps Lock ಆನ್ ಆಗಿದೆ",
     "dismissNotification": "ಅಧಿಸೂಚನೆಯನ್ನು ವಜಾಗೊಳಿಸಿ",
     "toggleColumns": "ಕಾಲಮ್ಗಳನ್ನು ಟಾಗಲ್ ಮಾಡಿ",
@@ -182,6 +184,7 @@
     "combos": "ಸಂಯೋಜನೆಗಳು",
     "noModelsFound": "ಯಾವುದೇ ಮಾದರಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
     "clear": "ತೆರವುಗೊಳಿಸಿ",
+    "clearFilters": "ಫಿಲ್ಟರ್ಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ",
     "done": "ಮುಗಿದಿದೆ",
     "selectAll": "ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ",
     "unselectAll": "ಎಲ್ಲದರ ಆಯ್ಕೆಯನ್ನು ರದ್ದುಮಾಡಿ",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# ಬ್ಯಾಚ್ನಲ್ಲಿ ಬಳಸಲಾಗಿದೆ} other {# ಬ್ಯಾಚ್ಗಳಲ್ಲಿ ಬಳಸಲಾಗಿದೆ}}",
     "batchFilePreview": "ಮುನ್ನೋಟ",
     "batchFilePreviewTruncated": "ಮೊದಲ {shown} ಸಾಲುಗಳನ್ನು ತೋರಿಸುತ್ತಿದೆ ({total} ಒಟ್ಟು ಸಾಲುಗಳು)",
-    "batchFileDownloadFull": "ಸಂಪೂರ್ಣ ಫೈಲ್ ಡೌನ್ಲೋಡ್ ಮಾಡಿ"
+    "batchFileDownloadFull": "ಸಂಪೂರ್ಣ ಫೈಲ್ ಡೌನ್ಲೋಡ್ ಮಾಡಿ",
+    "tokensPageTitle": "ಟೋಕನ್ಗಳು",
+    "tokensPageDescription": "API ಕೀಗಳ ನಡುವೆ ಟೋಕನ್ಗಳನ್ನು ಕಳುಹಿಸಿ, ಆಹ್ವಾನ ಕೋಡ್ಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ ಮತ್ತು ಸಮುದಾಯ ಸರ್ವರ್ಗಳನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+    "tokensServerUrlLabel": "ಸರ್ವರ್ URL"
   },
   "disabled": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ಬಜೆಟ್ ಖಾಲಿಯಾದ ವಿನಂತಿಗಳನ್ನು ತುರ್ತು ಉಚಿತ ಫಾಲ್ಬ್ಯಾಕ್ ಪ್ರೊವೈಡರ್/ಮಾಡೆಲ್ಗೆ ರೂಟ್ ಮಾಡಿ.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "ಪ್ರಾಕ್ಸಿ ಸರ್ವರ್ ಅನ್ನು ನಿಲ್ಲಿಸಲಾಗಿದೆ ಅಥವಾ ಅದು ಮರುಪ್ರಾರಂಭಗೊಳ್ಳುತ್ತಿದೆ.",
     "expandSidebar": "ಸೈಡ್ಬಾರ್ ವಿಸ್ತರಿಸಿ",
     "collapseSidebar": "ಸೈಡ್ಬಾರ್ ಕುಗ್ಗಿಸಿ",
-    "themes": "ಥೀಮ್ಗಳು",
-    "presetColors": "ಜನಪ್ರಿಯ ಬಣ್ಣಗಳು",
     "createTheme": "ಥೀಮ್ ರಚಿಸಿ",
     "chooseColor": "ಒಂದು ಬಣ್ಣ ಆಯ್ಕೆಮಾಡಿ",
-    "themeCoral": "ಕೋರಲ್",
-    "themeBlue": "ನೀಲಿ",
-    "themeRed": "ಕೆಂಪು",
-    "themeGreen": "ಹಸಿರು",
-    "themeViolet": "ವಯಲೆಟ್",
-    "themeOrange": "ಕಿತ್ತಳೆ",
-    "themeCyan": "ಸಯಾನ್",
     "cliToolsShort": "ಉಪಕರಣಗಳು",
     "cache": "ಕ್ಯಾಶ್",
     "cacheShort": "ಕ್ಯಾಶ್",
@@ -1103,12 +1100,10 @@
     "themeSystem": "ಥೀಮ್ ಸಿಸ್ಟಮ್",
     "whitelabelingDesc": "ವೈಟ್ ಲೇಬಲಿಂಗ್ ವಿವರಣೆ",
     "switchThemes": "ಥೀಮ್ಗಳನ್ನು ಬದಲಾಯಿಸಿ",
-    "themeAccentDesc": "ಥೀಮ್ ಆಕ್ಸೆಂಟ್ ವಿವರಣೆ",
     "uploadFavicon": "ಫೇವಿಕಾನ್ ಅಪ್ಲೋಡ್ ಮಾಡಿ",
     "themeDark": "ಡಾರ್ಕ್ ಥೀಮ್",
     "customLogoDesc": "ಕಸ್ಟಮ್ ಲೋಗೋ ವಿವರಣೆ",
     "sidebarVisibilityToggle": "ಸೈಡ್ಬಾರ್ ಗೋಚರತೆ ಟಾಗಲ್",
-    "themeAccent": "ಥೀಮ್ ಆಕ್ಸೆಂಟ್",
     "resetFavicon": "ಫೇವಿಕಾನ್ ಮರುಹೊಂದಿಸಿ",
     "whitelabeling": "ವೈಟ್ ಲೇಬಲಿಂಗ್",
     "darkMode": "ಡಾರ್ಕ್ ಮೋಡ್",
@@ -1122,10 +1117,8 @@
     "customLogo": "ಕಸ್ಟಮ್ ಲೋಗೋ",
     "appearance": "ಗೋಚರತೆ",
     "themeSelectionAria": "ಥೀಮ್ ಆಯ್ಕೆಯ Aria",
-    "themeCreate": "ಥೀಮ್ ರಚಿಸಿ",
     "customFaviconDesc": "ಕಸ್ಟಮ್ ಫೇವಿಕಾನ್ನ ವಿವರಣೆ",
     "logoPreview": "ಲೋಗೋ ಮುನ್ನೋಟ",
-    "themeCustom": "ಕಸ್ಟಮ್ ಥೀಮ್",
     "hideHealthLogsDesc": "ಆರೋಗ್ಯ ಲಾಗ್ಗಳನ್ನು ಮರೆಮಾಡುವಿಕೆಯ ವಿವರಣೆ",
     "faviconPreview": "ಫೇವಿಕಾನ್ ಮುನ್ನೋಟ",
     "changelog": "ಚೇಂಜ್ಲಾಗ್",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 ಅಥವಾ @channelname",
       "chatIdHint": "ಚಾಟ್/ಚಾನಲ್ನ ಅನನ್ಯ ಸಂಖ್ಯಾತ್ಮಕ ಗುರುತು ಅಥವಾ ಸಾರ್ವಜನಿಕ ಬಳಕೆದಾರಹೆಸರು.",
       "tutorial": "Telegram ವೆಬ್ಹುಕ್ ಅನ್ನು ಹೇಗೆ ಕಾನ್ಫಿಗರ್ ಮಾಡುವುದು:"
-    }
+    },
+    "copy": "ನಕಲಿಸಿ",
+    "copied": "ನಕಲಿಸಲಾಗಿದೆ!",
+    "expandDetails": "ವಿವರಗಳನ್ನು ತೋರಿಸಿ",
+    "collapseDetails": "ವಿವರಗಳನ್ನು ಮರೆಮಾಡಿ"
   },
   "compliance": {
     "auditTitle": "ತಪಾಸಣೆ",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "ಕರೆಗಳು (24 ಗಂ.)",
     "mcpMetricSuccessRate": "ಯಶಸ್ಸಿನ ದರ",
     "mcpMetricAvgDuration": "ಸರಾಸರಿ ಅವಧಿ",
-    "mcpMetricTopTool": "ಅಗ್ರ ಸಾಧನ"
-  },
-  "themesPage": {
-    "title": "ಥೀಮ್ಗಳು",
-    "description": "ಪೂರ್ವನಿರ್ಧರಿತ ಥೀಮ್ ಆಯ್ಕೆಮಾಡಿ ಅಥವಾ ಒಂದೇ ಬಣ್ಣದಿಂದ ನಿಮ್ಮದೇ ಥೀಮ್ ರಚಿಸಿ",
-    "presetColors": "ಜನಪ್ರಿಯ ಬಣ್ಣಗಳು",
-    "customTheme": "ಕಸ್ಟಮ್ ಥೀಮ್",
-    "customThemeDesc": "‘ಥೀಮ್ ರಚಿಸಿ’ ಕ್ಲಿಕ್ ಮಾಡಿ ಮತ್ತು ಒಂದು ಬಣ್ಣವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
-    "createTheme": "ಥೀಮ್ ರಚಿಸಿ",
-    "activePreset": "ಸಕ್ರಿಯ ಥೀಮ್"
+    "mcpMetricTopTool": "ಅಗ್ರ ಸಾಧನ",
+    "dismissError": "ದೋಷವನ್ನು ವಜಾಗೊಳಿಸಿ"
   },
   "header": {
     "logout": "ಲಾಗ್ ಔಟ್ ಮಾಡಿ",
     "quickNavigation": "ತ್ವರಿತ ನ್ಯಾವಿಗೇಶನ್",
     "quickNavigationTitle": "ತ್ವರಿತ ನ್ಯಾವಿಗೇಶನ್ (⌘K / Ctrl+K)",
     "openQuickNavigation": "ತ್ವರಿತ ನ್ಯಾವಿಗೇಶನ್ ತೆರೆಯಿರಿ",
+    "openMenu": "ಮೆನು ತೆರೆಯಿರಿ",
+    "products": "Keak ಉತ್ಪನ್ನಗಳು",
     "switchToLightMode": "ಲೈಟ್ ಮೋಡ್ಗೆ ಬದಲಾಯಿಸಿ",
     "switchToDarkMode": "ಡಾರ್ಕ್ ಮೋಡ್ಗೆ ಬದಲಾಯಿಸಿ",
     "language": "ಭಾಷೆ",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Anthropic-ಗೆ ಹೊಂದಾಣಿಕೆಯಾಗಿರುವುದು",
     "media": "ಮಾಧ್ಯಮ",
     "mediaDescription": "ಚಿತ್ರಗಳು, ವೀಡಿಯೊಗಳು ಮತ್ತು ಸಂಗೀತವನ್ನು ರಚಿಸಿ",
-    "themes": "ಥೀಮ್ಗಳು",
-    "themesDescription": "ಇಡೀ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪ್ಯಾನೆಲ್ಗೆ ಬಣ್ಣದ ಥೀಮ್ ಆಯ್ಕೆಮಾಡಿ",
     "costsDescription": "ಖರ್ಚುಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ, ಪ್ರವೃತ್ತಿಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಿ ಮತ್ತು ಎಲ್ಲಾ ಪ್ರೊವೈಡರ್ಗಳಾದ್ಯಂತ ನಿಮ್ಮ AI ಬಜೆಟ್ ಅನ್ನು ನಿರ್ವಹಿಸಿ",
     "cacheDescription": "ಪ್ರೊವೈಡರ್ ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಶ್ ದಕ್ಷತೆ ಮತ್ತು ಸ್ಥಳೀಯ ಅರ್ಥಸಂಬಂಧಿತ ಪ್ರತಿಕ್ರಿಯೆಗಳ ಮರುಬಳಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ.",
     "limitsDescription": "ಪ್ರತಿ API ಕೀ ಮತ್ತು ಪ್ರೊವೈಡರ್ಗೆ ರೇಟ್ ಲಿಮಿಟ್ಗಳು ಮತ್ತು ಕೋಟಾಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "ಆಯ್ಕೆಮಾಡಿದ ಸಂಪರ್ಕಗಳು ಮಾತ್ರ",
     "selectAtLeastOneConnection": "ಕನಿಷ್ಠ ಒಂದು ಸಂಪರ್ಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ ಅಥವಾ ಎಲ್ಲಾ ಸಂಪರ್ಕಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
     "allConnectionsDesc": "ಈ ಕೀ ಯಾವುದೇ ಸಕ್ರಿಯ ಸಂಪರ್ಕವನ್ನು ಬಳಸಬಹುದು.",
-    "restrictedToConnections": "{count, plural, one {# ಸಂಪರ್ಕಕ್ಕೆ} other {# ಸಂಪರ್ಕಗಳಿಗೆ}} ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."
+    "restrictedToConnections": "{count, plural, one {# ಸಂಪರ್ಕಕ್ಕೆ} other {# ಸಂಪರ್ಕಗಳಿಗೆ}} ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ.",
+    "preferredConnections": "ಆದ್ಯತೆಯ ಸಂಪರ್ಕಗಳು",
+    "preferredConnectionsDesc": "ಪ್ರತಿ ಕೀಗೆ ಆದ್ಯತೆಯ ಕ್ರಮ. ಆದ್ಯತೆಯ ಸಂಪರ್ಕ ಲಭ್ಯವಿಲ್ಲದಿದ್ದರೆ, ರೂಟಿಂಗ್ ಮುಂದಿನ ಅರ್ಹ ಸಂಪರ್ಕಕ್ಕೆ ಹೋಗುತ್ತದೆ.",
+    "preferredConnectionsNone": "ಯಾವುದೇ ಆದ್ಯತೆ ಹೊಂದಿಸಲಾಗಿಲ್ಲ — ಡೀಫಾಲ್ಟ್ ರೂಟಿಂಗ್ ತಂತ್ರವನ್ನು ಬಳಸಲಾಗುತ್ತದೆ.",
+    "preferredConnectionsClear": "ತೆರವುಗೊಳಿಸಿ",
+    "removeSelection": "{name} ಅನ್ನು ತೆಗೆದುಹಾಕಿ"
   },
   "auditLog": {
     "title": "ಆಡಿಟ್ ಲಾಗ್",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Modality Bridge ಸೆಟ್ಟಿಂಗ್ಗಳಲ್ಲಿ Image→Text ಬ್ರಿಡ್ಜ್ ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
     "sttBridgeCta": "Modality Bridge ಸೆಟ್ಟಿಂಗ್ಗಳಲ್ಲಿ Speech→Text ಬ್ರಿಡ್ಜ್ ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
     "existingConnection": "ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸಂಪರ್ಕ",
-    "openrouterSttDescription": "OpenRouter ಸ್ಪೀಚ್-ಟು-ಟೆಕ್ಸ್ಟ್ ಮಾದರಿಗಳು ನಿಮ್ಮ ಕಾನ್ಫಿಗರ್ ಮಾಡಿದ OpenRouter ಸಂಪರ್ಕವನ್ನು ಬಳಸುತ್ತವೆ. ಪ್ರತ್ಯೇಕ ರುಜುವಾತು ಅಗತ್ಯವಿಲ್ಲ."
+    "openrouterSttDescription": "OpenRouter ಸ್ಪೀಚ್-ಟು-ಟೆಕ್ಸ್ಟ್ ಮಾದರಿಗಳು ನಿಮ್ಮ ಕಾನ್ಫಿಗರ್ ಮಾಡಿದ OpenRouter ಸಂಪರ್ಕವನ್ನು ಬಳಸುತ್ತವೆ. ಪ್ರತ್ಯೇಕ ರುಜುವಾತು ಅಗತ್ಯವಿಲ್ಲ.",
+    "modalityTabsAria": "ಮಾಧ್ಯಮ ಪ್ರಕಾರ",
+    "serviceKindsAria": "ಸೇವೆಯ ಪ್ರಕಾರ"
   },
   "search": {
     "searchQuery": "ಹುಡುಕಾಟ ಪ್ರಶ್ನೆ",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "ಅಜ್ಞಾತ",
     "cliproxyapiUpdate": "ನವೀಕರಿಸಿ",
     "cliproxyapiUpdateAvailable": "ನವೀಕರಣ ಲಭ್ಯವಿದೆ: v{current} → v{latest}",
-    "cliproxyapiVersion": "ಆವೃತ್ತಿ"
+    "cliproxyapiVersion": "ಆವೃತ್ತಿ",
+    "removeMapping": "ಮ್ಯಾಪಿಂಗ್ ತೆಗೆದುಹಾಕಿ"
   },
   "modelCatalog": {
     "title": "ಮಾದರಿಗಳು ಮತ್ತು ಕಾಂಬೊಗಳು",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "ಕಾಂಬೊ → {name}"
   },
   "combos": {
+    "title": "ಸಂಯೋಜನೆಗಳು",
+    "description": "ತೂಕಾಧಾರಿತ ರೌಟಿಂಗ್ ಮತ್ತು ಫಾಲ್ಬ್ಯಾಕ್ ಬೆಂಬಲದೊಂದಿಗೆ ಮಾದರಿ ಸಂಯೋಜನೆಗಳನ್ನು ರಚಿಸಿ",
+    "autoCatalogTitle": "ಸ್ವಯಂಚಾಲಿತ ರೌಟಿಂಗ್ ಕ್ಯಾಟಲಾಗ್",
     "autoTosLoadError": "ಸೇವಾ ನಿಯಮಗಳ ನೀತಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಬದಲಾಯಿಸುವ ಮೊದಲು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "autoTosSaveError": "ಸೇವಾ ನಿಯಮಗಳ ನೀತಿಯನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಹಿಂದಿನ ಸೆಟ್ಟಿಂಗ್ ಇನ್ನೂ ತೋರಿಸಲಾಗುತ್ತಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "autoTosIncludeLabel": "ToS: avoid ಎಂದು ಗುರುತಿಸಲಾದ ಪೂರೈಕೆದಾರರನ್ನು auto ದಲ್ಲಿ ಸೇರಿಸಿ",
     "autoTosDescription": "ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ. ಇದು ಒಂದು ಖಾತೆಗೆ ಮಾತ್ರವಲ್ಲ, ಎಲ್ಲಾ auto ಸಂಯೋಜನೆಗಳಿಗೂ ಅನ್ವಯಿಸುತ್ತದೆ. ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸುವುದರಿಂದ ಈ ಆಯ್ಕೆ ಆನ್ ಆಗುವುದಿಲ್ಲ.",
-    "title": "ಸಂಯೋಜನೆಗಳು",
-    "description": "ತೂಕಾಧಾರಿತ ರೌಟಿಂಗ್ ಮತ್ತು ಫಾಲ್ಬ್ಯಾಕ್ ಬೆಂಬಲದೊಂದಿಗೆ ಮಾದರಿ ಸಂಯೋಜನೆಗಳನ್ನು ರಚಿಸಿ",
-    "autoCatalogTitle": "ಸ್ವಯಂಚಾಲಿತ ರೌಟಿಂಗ್ ಕ್ಯಾಟಲಾಗ್",
     "autoCatalogTemplateCount": "{count} ಟೆಂಪ್ಲೇಟ್ಗಳು",
     "autoCatalogDescription": "ಸಂಪರ್ಕಿತ ಪ್ರೊವೈಡರ್ಗಳಿಂದ ಡೈನಾಮಿಕ್ ಆಗಿ ನಿರ್ಧರಿಸಲಾಗುವ ಬಿಲ್ಟ್-ಇನ್ auto/* ಸಂಯೋಜನೆಗಳು. ಈ IDs ಗಳಲ್ಲಿ ಯಾವುದನ್ನಾದರೂ ಮಾದರಿ ಕ್ಷೇತ್ರವಾಗಿ ಬಳಸಿ — ಸೆಟಪ್ ಅಗತ್ಯವಿಲ್ಲ.",
     "autoCatalogExpand": "ಸ್ವಯಂಚಾಲಿತ ರೌಟಿಂಗ್ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ವಿಸ್ತರಿಸಿ",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "ಇನ್ನೂ ಯಾವುದೇ ಕಾಂಬೊಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿಲ್ಲ.",
     "playgroundCreateFirst": "ಮೊದಲು ಒಂದನ್ನು ರಚಿಸಿ",
     "weighted": "ತೂಕದ",
+    "weightPercent": "ತೂಕ (%)",
     "leastUsed": "ಕನಿಷ್ಠ-ಬಳಕೆಯ",
     "costOpt": "ವೆಚ್ಚ-ಆಪ್ಟಿಮೈಸ್ಡ್",
     "strategyGuideTitle": "ಈ ತಂತ್ರವನ್ನು ಹೇಗೆ ಬಳಸುವುದು",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# ಖಾತೆ} other {# ಖಾತೆಗಳು}}",
     "builderGlobalAdded": "ಸೇರಿಸಲಾಗಿದೆ",
     "builderGlobalAdd": "ಸೇರಿಸಿ",
+    "clearSearch": "ಹುಡುಕಾಟವನ್ನು ತೆರವುಗೊಳಿಸಿ",
     "manualModel": "ಹಸ್ತಚಾಲಿತ ಮಾದರಿ",
     "manualModelInvalid": "ಮಾದರಿಯನ್ನು provider/model ಸ್ವರೂಪದಲ್ಲಿ ನಮೂದಿಸಿ.",
     "manualModelUnknownProvider": "ಅಜ್ಞಾತ ಪೂರೈಕೆದಾರ ಪೂರ್ವಪ್ರತ್ಯಯ.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "ಕಾಂಬೊ ಉಲ್ಲೇಖವನ್ನು ಸೇರಿಸಿ",
     "builderPinnedAccount": "ಪಿನ್ ಮಾಡಿದ ಖಾತೆ",
     "builderLegacyEntry": "ಹಳೆಯ ನಮೂದು",
+    "builderStaleModel": "ಲೈವ್ ಕ್ಯಾಟಲಾಗ್‌ನಲ್ಲಿ ಇಲ್ಲ",
     "reviewName": "ಹೆಸರು",
     "reviewStrategy": "ಕಾರ್ಯತಂತ್ರ",
     "reviewSteps": "ಹಂತಗಳು",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "ಕನಿಷ್ಠ ವಿಷಯದ ಉದ್ದ (ಅಕ್ಷರಗಳು)",
     "responseValidationJsonPaths": "JSON-path ಪರಿಶೀಲನೆಗಳು",
     "responseValidationAddCheck": "+ ಪರಿಶೀಲನೆಯನ್ನು ಸೇರಿಸಿ",
+    "responseValidationRemoveCheck": "ಪರಿಶೀಲನೆಯನ್ನು ತೆಗೆದುಹಾಕಿ",
+    "responseValidationPath": "JSON ಪಥ",
+    "responseValidationCondition": "ಷರತ್ತು",
+    "responseValidationValue": "ನಿರೀಕ್ಷಿತ ಮೌಲ್ಯ",
     "agentFeaturesSystemMessageOverride": "ಸಿಸ್ಟಂ ಸಂದೇಶವನ್ನು ಅತಿಕ್ರಮಿಸಿ",
     "agentFeaturesSystemMessagePlaceholder": "ನೀವು ಪರಿಣತ ಸಹಾಯಕರಾಗಿದ್ದೀರಿ...",
     "agentFeaturesSystemMessageHint": "ಏಜೆಂಟ್ಗಳಿಗಾಗಿ ಸಿಸ್ಟಂ ಸಂದೇಶದ ಅತಿಕ್ರಮಣ",
@@ -5288,7 +5292,8 @@
         "skipped": "ಈಗಾಗಲೇ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ",
         "failed": "ವಿಫಲವಾಗಿದೆ"
       }
-    }
+    },
+    "stepProgress": "ಸೆಟಪ್ ಪ್ರಗತಿ"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ಈ ಪೂರೈಕೆದಾರರನ್ನು ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ auto ದಿಂದ ಹೊರಗಿಡಲಾಗಿದೆ",
@@ -6056,10 +6061,10 @@
     "apiFormatLabel": "API ಸ್ವರೂಪದ ಲೇಬಲ್",
     "apiKeyOptionalHint": "ನಿಮ್ಮ ಸ್ಥಳೀಯ ಸೆಟಪ್ ಅಥವಾ ಪೂರೈಕೆದಾರರಿಗೆ ದೃಢೀಕರಣದ ಅಗತ್ಯವಿಲ್ಲದಿದ್ದರೆ ಖಾಲಿ ಬಿಡಿ.",
     "apiKeyOptionalLabel": "API ಕೀ (ಐಚ್ಛಿಕ)",
-    "apiRegionChina": "API ಪ್ರದೇಶ: ಚೀನಾ",
-    "apiRegionHint": "API ಪ್ರದೇಶದ ಸುಳಿವು",
-    "apiRegionInternational": "API ಪ್ರದೇಶ: ಅಂತಾರಾಷ್ಟ್ರೀಯ",
-    "apiRegionLabel": "API ಪ್ರದೇಶದ ಲೇಬಲ್",
+    "apiRegionChina": "ಚೀನಾದ ಮುಖ್ಯ ಭೂಭಾಗ",
+    "apiRegionHint": "API ಪ್ರವೇಶ ಮತ್ತು ಕೋಟಾ ಟ್ರ್ಯಾಕಿಂಗ್ಗಾಗಿ ಬಳಸಲಾಗುವ ಎಂಡ್ಪಾಯಿಂಟ್ ಪ್ರದೇಶವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    "apiRegionInternational": "ಅಂತರರಾಷ್ಟ್ರೀಯ",
+    "apiRegionLabel": "API ಪ್ರದೇಶ",
     "apikey": "API ಕೀ",
     "audio": "ಆಡಿಯೊ",
     "audioProvidersHeading": "ಆಡಿಯೊ ಪೂರೈಕೆದಾರರ ಶೀರ್ಷಿಕೆ",
@@ -6540,6 +6545,7 @@
       "monsterapi": "monsterapi.ai ನಲ್ಲಿ API ಕೀ ಪಡೆಯಿರಿ.",
       "moonshot": "API ಕೀ ಬಳಸಿ Kimi ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "morph": "ಉಚಿತ ಹಂತ: ತಿಂಗಳಿಗೆ 250K ಕ್ರೆಡಿಟ್ಗಳು, $0",
+      "apmix": "apmix.ai/dashboard ನಿಂದ API ಕೀ ಮೂಲಕ Apmix ಅನ್ನು ಸಂಪರ್ಕಿಸಿ — ಒಂದು ಚಂದಾದಾರಿಕೆ, ಹಲವು ಮಾದರಿಗಳು.",
       "nanogpt": "API ಕೀ ಬಳಸಿ NanoGPT ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "nebius": "API ಪರೀಕ್ಷೆಗಾಗಿ ಸೈನ್ ಅಪ್ ಮಾಡಿದಾಗ ಸುಮಾರು $1 ಮೌಲ್ಯದ ಪ್ರಾಯೋಗಿಕ ಕ್ರೆಡಿಟ್ಗಳು",
       "nlpcloud": "NLP Cloud, OpenAI chat/completions ಬದಲಿಗೆ ಸ್ವಾಮ್ಯದ ಚಾಟ್ಬಾಟ್ API ಅನ್ನು ಬಳಸುತ್ತದೆ. OmniRoute, OpenAI ಸಂದೇಶಗಳನ್ನು ಇನ್ಪುಟ್/ಸಂದರ್ಭ/ಇತಿಹಾಸಕ್ಕೆ ಹೊಂದಿಸುತ್ತದೆ ಮತ್ತು ಬೆಂಬಲಿತ ಚಾಟ್ಬಾಟ್ ಮಾದರಿಗಳ ಸ್ಥಳೀಯ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಒದಗಿಸುತ್ತದೆ.",
@@ -6636,8 +6642,7 @@
       "kiro": "ಉಚಿತ ಹಂತ: ತಿಂಗಳಿಗೆ 50 ಕ್ರೆಡಿಟ್ಗಳು (~25K–100K ಟೋಕನ್ಗಳು). ⚠️ Kiro ToS ಮೂರನೇ-ಪಕ್ಷದ proxy/harness ಬಳಕೆಯನ್ನು ನಿಷೇಧಿಸುತ್ತದೆ.",
       "codex": "ಈಗಿರುವ OAuth ಹರಿವಿನ ಮೂಲಕ OpenAI Codex ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "qwen": "ಈಗಿರುವ OAuth ಹರಿವಿನ ಮೂಲಕ Qwen Code ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
-      "github-models": "github.com/settings/tokens ನಲ್ಲಿ 'models: read' ಸ್ಕೋಪ್ನೊಂದಿಗೆ GitHub PAT ರಚಿಸಿ",
-      "apmix": "apmix.ai/dashboard ನಿಂದ API ಕೀ ಮೂಲಕ Apmix ಅನ್ನು ಸಂಪರ್ಕಿಸಿ — ಒಂದು ಚಂದಾದಾರಿಕೆ, ಹಲವು ಮಾದರಿಗಳು."
+      "github-models": "github.com/settings/tokens ನಲ್ಲಿ 'models: read' ಸ್ಕೋಪ್ನೊಂದಿಗೆ GitHub PAT ರಚಿಸಿ"
     },
     "passthroughModelsDescription": "{provider} ಪೂರೈಕೆದಾರ-ಸ್ಥಳೀಯ ಮಾಡೆಲ್ IDಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. /models ನಿಂದ ಆಮದು ಮಾಡಿ ಅಥವಾ ರೂಟಿಂಗ್ಗಾಗಿ ಕಸ್ಟಮ್ IDಗಳನ್ನು ಸೇರಿಸಿ.",
     "bedrockModelsDescription": "Amazon Bedrock ಮಾಡೆಲ್ಗಳು AWS ಪ್ರದೇಶದ ವ್ಯಾಪ್ತಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತವೆ. /models ನಿಂದ ಆಮದು ಮಾಡಿ ಅಥವಾ ಆಯ್ಕೆಮಾಡಿದ ಪ್ರದೇಶದಲ್ಲಿ ಸಕ್ರಿಯಗೊಳಿಸಲಾದ Bedrock ಮಾಡೆಲ್ IDಗಳನ್ನು ಸೇರಿಸಿ.",
@@ -7105,16 +7110,6 @@
     "settingsSidebarDesc": "ಯಾವ ಸೈಡ್ಬಾರ್ ಐಟಂಗಳನ್ನು ತೋರಿಸಬೇಕೆಂದು ಆಯ್ಕೆಮಾಡಿ. ಅಗತ್ಯವಾದವು ಆಯ್ಕೆಯು ಸುಧಾರಿತ ಪರಿಕರಗಳನ್ನು ಹುಡುಕಬಹುದಾಗಿಯೇ ಇರಿಸುತ್ತದೆ.",
     "hideHealthLogs": "ಸ್ಥಿತಿ ಪರಿಶೀಲನೆ ಲಾಗ್ಗಳನ್ನು ಮರೆಮಾಡಿ",
     "hideHealthLogsDesc": "ON ಆಗಿರುವಾಗ, ಸರ್ವರ್ ಕನ್ಸೋಲ್ನಲ್ಲಿ [HealthCheck] ಸಂದೇಶಗಳನ್ನು ತೋರಿಸಬೇಡಿ",
-    "themeAccent": "ಥೀಮ್ ಬಣ್ಣ",
-    "themeAccentDesc": "ಪೂರ್ವನಿಗದಿತ ಬಣ್ಣವನ್ನು ಆಯ್ಕೆಮಾಡಿ ಅಥವಾ ಒಂದು ಬಣ್ಣದಿಂದ ನಿಮ್ಮದೇ ಥೀಮ್ ರಚಿಸಿ",
-    "themeCreate": "ಥೀಮ್ ರಚಿಸಿ",
-    "themeCustom": "ಕಸ್ಟಮ್ ಥೀಮ್",
-    "themeBlue": "ನೀಲಿ",
-    "themeRed": "ಕೆಂಪು",
-    "themeGreen": "ಹಸಿರು",
-    "themeViolet": "ನೇರಳೆ",
-    "themeOrange": "ಕಿತ್ತಳೆ",
-    "themeCyan": "ಸಯಾನ್",
     "whitelabeling": "ಬ್ರ್ಯಾಂಡಿಂಗ್",
     "whitelabelingDesc": "ಅಪ್ಲಿಕೇಶನ್ನ ಹೆಸರು ಮತ್ತು ಲೋಗೋವನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ",
     "appName": "ಅಪ್ಲಿಕೇಶನ್ ಹೆಸರು",
@@ -7255,7 +7250,7 @@
       "nextSwitchNow": "ಈಗ",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7261,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "ಕೋರ್ ಬೈನರಿ ಮಾರ್ಗ",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "ಐಚ್ಛಿಕ: ಅಳವಡಿಸಲಾದ ಫೈಲ್ ಅನ್ನು ಬದಲಾಯಿಸುವ ಮೊದಲು ಕೋರ್ ಬೈನರಿಯೊಂದಿಗೆ ಉತ್ಪಾದಿಸಲಾದ ಫೈಲ್ ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. ಪಕ್ಕದಲ್ಲೇ ಬರೆಯುವುದನ್ನು ಮುಂದುವರಿಸಲು ಖಾಲಿ ಬಿಡಿ. ಕಾಣೆದಾಗ ಕೋಶವನ್ನು ರಚಿಸಲಾಗುತ್ತದೆ."
+      "coreBinaryPathHelp": "ಐಚ್ಛಿಕ: ಅಳವಡಿಸಲಾದ ಫೈಲ್ ಅನ್ನು ಬದಲಾಯಿಸುವ ಮೊದಲು ಕೋರ್ ಬೈನರಿಯೊಂದಿಗೆ ಉತ್ಪಾದಿಸಲಾದ ಫೈಲ್ ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. ಪಕ್ಕದಲ್ಲೇ ಬರೆಯುವುದನ್ನು ಮುಂದುವರಿಸಲು ಖಾಲಿ ಬಿಡಿ. ಕಾಣೆದಾಗ ಕೋಶವನ್ನು ರಚಿಸಲಾಗುತ್ತದೆ.",
+      "urlFeedlessHint": "ಆಯ್ಕೆದಾರ-ಮಾತ್ರ ಚಂದಾದಾರಿಕೆಗಾಗಿ ಖಾಲಿ ಬಿಡಿ: ಕೆಳಗೆ ನಿಯಂತ್ರಣ URL ಅನ್ನು ಹೊಂದಿಸಿ, ಯಾವುದೇ ಫೀಡ್ ಪಡೆಯಲಾಗುವುದಿಲ್ಲ, ರಿಫ್ರೆಶ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ ಅಥವಾ ಬೈಂಡ್ ಮಾಡಲಾಗುವುದিলlg."
     },
     "bulkHealthcheck": "ಸಾಮೂಹಿಕ ಆರೋಗ್ಯ ಪರಿಶೀಲನೆ",
     "bulkHealthcheckDesc": "ಯಾವವು ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ ಎಂಬುದನ್ನು ಕಂಡುಹಿಡಿಯಲು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ ಎಲ್ಲಾ ಪ್ರಾಕ್ಸಿಗಳನ್ನು ಗುರಿ URL ವಿರುದ್ಧ ಪರೀಕ್ಷಿಸಿ.",
@@ -7707,6 +7703,7 @@
     "configured": "ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ",
     "none": "ಯಾವುದೂ ಇಲ್ಲ",
     "modelOverrideValuePlaceholder": "ಸಂಖ್ಯಾತ್ಮಕ ಮೌಲ್ಯ",
+    "modelOverrideKey": "ಓವರ್ರೈಡ್ ಕೀ",
     "modelOverrideReasoningEffortsPlaceholder": "ಇಂಗ್ಲಿಷ್ನಲ್ಲಿ ಅಲ್ಪವಿರಾಮದಿಂದ ಬೇರ್ಪಡಿಸಿದ ಮೌಲ್ಯಗಳು, ಉದಾ. low, medium, high",
     "addKeyValue": "ಕೀ-ಮೌಲ್ಯವನ್ನು ಸೇರಿಸಿ",
     "noModelOverrides": "ಈ ಮಾದರಿಗೆ ಯಾವುದೇ ಓವರ್ರೈಡ್ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿಲ್ಲ.",
@@ -7755,7 +7752,6 @@
     "customPricingNote": "ನಿರ್ದಿಷ್ಟ ಮಾದರಿಗಳಿಗೆ ಡೀಫಾಲ್ಟ್ ಬೆಲೆ ನಿಗದಿಯನ್ನು ನೀವು ಅತಿಕ್ರಮಿಸಬಹುದು. ಸ್ವಯಂ ಪತ್ತೆಹಚ್ಚಿದ ಬೆಲೆ ನಿಗದಿಗಿಂತ ಕಸ್ಟಮ್ ಅತಿಕ್ರಮಣಗಳಿಗೆ ಆದ್ಯತೆ ಇರುತ್ತದೆ.",
     "editPricing": "ಬೆಲೆ ನಿಗದಿಯನ್ನು ಸಂಪಾದಿಸಿ",
     "viewFullDetails": "ಪೂರ್ಣ ವಿವರಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
-    "themeCoral": "ಹವಳ",
     "adaptiveVolumeRouting": "ಹೊಂದಿಕೊಳ್ಳುವ ವಾಲ್ಯೂಮ್ ರೂಟಿಂಗ್",
     "adaptiveVolumeRoutingDesc": "ಪೇಲೋಡ್ ಪ್ರಮಾಣ ಮತ್ತು ಥ್ರೂಪುಟ್ ಒತ್ತಡದ ಆಧಾರದ ಮೇಲೆ ಸಂಪರ್ಕಗಳನ್ನು ಕ್ರಿಯಾತ್ಮಕವಾಗಿ ಸ್ಕೇಲ್ ಮಾಡಿ.",
     "lkgpToggleTitle": "ಕೊನೆಯದಾಗಿ ಸಮರ್ಪಕವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸಿದ ಪೂರೈಕೆದಾರ (LKGP)",
@@ -7850,6 +7846,8 @@
     "compressionDesc": "ಪೂರೈಕೆದಾರರಿಗೆ ಕಳುಹಿಸುವ ಮೊದಲು ಪ್ರಾಂಪ್ಟ್ಗಳನ್ನು ಸಂಕುಚಿತಗೊಳಿಸುವ ಮೂಲಕ ಟೋಕನ್ ಬಳಕೆಯನ್ನು ಕಡಿಮೆ ಮಾಡಿ",
     "autoCombosTitle": "ಸ್ವಯಂ ಕಾಂಬೊಗಳು",
     "autoCombosDesc": "ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ ಪ್ರತಿಯೊಂದು ಪೂರೈಕೆದಾರರಿಂದ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಒಂದು ಮಾದರಿಯನ್ನು ಆಯ್ಕೆಮಾಡುವ ಅಂತರ್ನಿರ್ಮಿತ auto/* ಕಾಂಬೊಗಳನ್ನು ಬಳಸಲು ಈ ಕೀಲಿಗೆ ಅನುಮತಿಸಿ",
+    "ccDiscoveryAliasesTitle": "Claude Code ಅನ್ವೇಷಣೆ ಅಲಿಯಾಸ್ಗಳು",
+    "ccDiscoveryAliasesDesc": "ಈ ಕೀಲಿಯು ಈಗಾಗಲೇ ಪ್ರವೇಶಿಸಬಹುದಾದ ಮಾಡೆಲ್ಗಳು ಮತ್ತು ಕಾಂಬೊಗಳಿಗಾಗಿ claude/... ಹೊಂದಾಣಿಕೆ ಮಿರರ್ಗಳನ್ನು ಜಾಹೀರಾತು ಮಾಡಿ",
     "compressionGuidanceFullGuideLink": "ಸಂಪೂರ್ಣ ಸಂಕೋಚನ ಮಾರ್ಗದರ್ಶಿ",
     "compressionGuidanceShow": "ವಿವರಗಳು",
     "compressionGuidanceHide": "ವಿವರಗಳನ್ನು ಮರೆಮಾಡಿ",
@@ -9035,7 +9033,8 @@
     "tomlTestPassed": "ಯಶಸ್ವಿಯಾಗಿದೆ",
     "tomlTestFailed": "ವಿಫಲವಾಗಿದೆ",
     "tomlImportError": "RTK TOML ಫೈಲ್ ಅನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
-    "tomlFileReadError": "ಆಯ್ಕೆಮಾಡಿದ TOML ಫೈಲ್ ಅನ್ನು ಓದಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."
+    "tomlFileReadError": "ಆಯ್ಕೆಮಾಡಿದ TOML ಫೈಲ್ ಅನ್ನು ಓದಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
+    "viewMode": "ವೀಕ್ಷಣಾ ಮೋಡ್"
   },
   "compressionEngineConfig": {
     "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
@@ -9257,7 +9256,8 @@
     "languagePacksList": "ಭಾಷಾ ಪ್ಯಾಕ್ಗಳು: {packs}",
     "dragToReorder": "ಹಂತದ ಕ್ರಮವನ್ನು ಬದಲಾಯಿಸಲು ಎಳೆಯಿರಿ",
     "engine": "ಎಂಜಿನ್",
-    "intensity": "ತೀವ್ರತೆ"
+    "intensity": "ತೀವ್ರತೆ",
+    "compressionOverride": "ಸಂಕೋಚನ ಓವರ್ರೈಡ್"
   },
   "compressionStudio": {
     "noRun": "ಯಾವುದೇ ಸಂಕುಚನ ರನ್ ಲಭ್ಯವಿಲ್ಲ.",
@@ -9317,7 +9317,8 @@
     "encoderWinner": "ವಿಜೇತ: {winner}",
     "encoder": "ಎನ್ಕೋಡರ್",
     "bytes": "ಬೈಟ್ಗಳು",
-    "tokensCl100k": "ಟೋಕನ್ಗಳು (cl100k)"
+    "tokensCl100k": "ಟೋಕನ್ಗಳು (cl100k)",
+    "studioViews": "Studio ವೀಕ್ಷಣೆಗಳು"
   },
   "omniglyph": {
     "preview": "ಮುನ್ನೋಟ",
@@ -9523,7 +9524,9 @@
     "tooltipMinLength": "ಇದಕ್ಕಿಂತ ಚಿಕ್ಕ ಸಂದೇಶಗಳನ್ನು ಸಂಕುಚಿಸಲಾಗುವುದಿಲ್ಲ. ಕಡಿಮೆ = ಹೆಚ್ಚು ಸಂಕುಚನ.",
     "tooltipMinSavings": "ಕನಿಷ್ಠ ಇಷ್ಟು ಟೋಕನ್ಗಳನ್ನು ಉಳಿಸಿದರೆ ಮಾತ್ರ ಸಂಕುಚಿಸಿ.",
     "ultraSettings": "ಅಲ್ಟ್ರಾ ಸೆಟ್ಟಿಂಗ್ಗಳು",
-    "ultraSettingsDesc": "SLM-ಚಾಲಿತ ಅರ್ಥಾಧಾರಿತ ಸಂಕುಚನ"
+    "ultraSettingsDesc": "SLM-ಚಾಲಿತ ಅರ್ಥಾಧಾರಿತ ಸಂಕುಚನ",
+    "defaultLanguage": "ಡೀಫಾಲ್ಟ್ ಭಾಷೆ",
+    "viewMode": "ವೀಕ್ಷಣಾ ಮೋಡ್"
   },
   "translator": {
     "title": "ಅನುವಾದಕ",
@@ -9835,6 +9838,9 @@
     "streamTransformFailed": "ಸ್ಟ್ರೀಮ್ ಅನ್ನು ಪರಿವರ್ತಿಸಲು ವಿಫಲವಾಗಿದೆ"
   },
   "usage": {
+    "healthExtraUsageBypass": "ಕೋಟಾ ಮುಗಿದಿದೆ; ಹೆಚ್ಚುವರಿ ಬಳಕೆಗೆ ಅನುಮತಿ ಇರುವುದರಿಂದ ಸೇವೆ ಮುಂದುವರಿಯುತ್ತದೆ.",
+    "healthPaidCreditsBypass": "ಕೋಟಾ ಮುಗಿದಿದೆ; ಲಭ್ಯವಿರುವ ಪಾವತಿಸಿದ ಕ್ರೆಡಿಟ್‌ಗಳಿಂದ ಸೇವೆ ಮುಂದುವರಿಯಬಹುದು.",
+    "healthFilteringBypass": "ಕೋಟಾ ಮುಗಿದಿದೆ; ಸ್ಥಳೀಯ ಕೋಟಾ ಫಿಲ್ಟರಿಂಗ್ ನಿಷ್ಕ್ರಿಯವಾಗಿರುವುದರಿಂದ ಸೇವೆ ಮುಂದುವರಿಯುತ್ತದೆ.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
@@ -10002,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "ಪೂರೈಕೆದಾರರ ಮಿತಿಗಳು",
     "noProviders": "ಯಾವುದೇ ಪೂರೈಕೆದಾರರು ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ",
+    "quotaAuthRequired": "ದೃಢೀಕರಣ ಅಗತ್ಯವಿದೆ - ಡ್ಯಾಶ್ಬೋರ್ಡ್ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    "quotaAuthRequiredHint": "ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸೆಷನ್ ಲಭ್ಯವಿಲ್ಲದಿರುವುದರಿಂದ ಅಥವಾ ಅವಧಿ ಮೀರಿರುವುದರಿಂದ ಪೂರೈಕೆದಾರರ ಸಂಪರ್ಕಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ನಿಮ್ಮ ಕೋಟಾ ಮಿತಿಗಳನ್ನು ನೋಡಲು ಸೈನ್ ಇನ್ ಮಾಡಿ ಮತ್ತು ರಿಫ್ರೆಶ್ ಮಾಡಿ.",
     "connectProvidersForQuota": "ನಿಮ್ಮ API ಕೋಟಾ ಮಿತಿಗಳು ಮತ್ತು ಬಳಕೆಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು OAuth ಮೂಲಕ ಪೂರೈಕೆದಾರರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ.",
     "accountsCount": "{count, plural, one {# ಖಾತೆ} other {# ಖಾತೆಗಳು}}",
     "filteredFromCount": "({count} ರಿಂದ ಫಿಲ್ಟರ್ ಮಾಡಲಾಗಿದೆ)",
@@ -10051,9 +10059,6 @@
     "tierLite": "ಲೈಟ್",
     "tierUnknown": "ಅಜ್ಞಾತ",
     "statTotal": "ಒಟ್ಟು",
-    "statCritical": "ಗಂಭೀರ",
-    "statAlert": "ಎಚ್ಚರಿಕೆ",
-    "statHealthy": "ಸುಸ್ಥಿತಿಯಲ್ಲಿ",
     "filterPurchaseTypeLabel": "ಪ್ರಕಾರ",
     "filterTierLabel": "ಟಿಯರ್",
     "purchaseAll": "ಎಲ್ಲಾ",
@@ -10291,7 +10296,61 @@
     "updatedShort": "ನವೀಕರಿಸಲಾಗಿದೆ",
     "lastRefreshed": "ಕೊನೆಯದಾಗಿ ರಿಫ್ರೆಶ್ ಮಾಡಲಾಗಿದೆ",
     "providerQuota": "ಪೂರೈಕೆದಾರರ ಕೋಟಾ",
-    "providerQuotaHomeHint": "ಸಂಪರ್ಕಿತ ಖಾತೆಗಳಾದ್ಯಂತ ಲೈವ್ ಸ್ಥಿತಿ"
+    "providerQuotaHomeHint": "ಸಂಪರ್ಕಿತ ಖಾತೆಗಳಾದ್ಯಂತ ಲೈವ್ ಸ್ಥಿತಿ",
+    "claudeResetCreditDefaultTitle": "Claude ಮಿತಿ ಮರುಹೊಂದಿಕೆ",
+    "confirmRedeemClaudeResetCredit": "ರಿಡೀಮ್ ಮಾಡುವುದು ಅರ್ಹ Claude ಬಳಕೆಯ ಮಿತಿಗಳನ್ನು ತಕ್ಷಣವೇ ಮರುಹೊಂದಿಸುತ್ತದೆ ಮತ್ತು ಈ ಕ್ರೆಡಿಟ್ ಅನ್ನು ಶಾಶ್ವತವಾಗಿ ಬಳಸಿಕೊಳ್ಳುತ್ತದೆ.",
+    "claudeResetCreditsModalTitle": "Claude ಮರುಹೊಂದಿಕೆ ಕ್ರೆಡಿಟ್‌ಗಳು",
+    "claudeResetCreditsModalExplainer": "ಈ ಖಾತೆಗೆ ಲಭ್ಯವಿರುವ Claude ಮರುಹೊಂದಿಕೆ ಕ್ರೆಡಿಟ್‌ಗಳು ಮತ್ತು ಸಾಪ್ತಾಹಿಕ ಸೆಶನ್ ಮರುಹೊಂದಿಕೆಗಳು.",
+    "healthAccountHint": "ಇತ್ತೀಚಿನ ಅವಲೋಕನಗಳ ಆಧಾರಿತ, ನೇರ ಪರೀಕ್ಷೆಯಲ್ಲ. ವಿವರಗಳಿಗಾಗಿ ಖಾತೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    "healthRecovery": "ನಿರೀಕ್ಷಿತ ಮರುಸ್ಥಾಪನೆ ಸಮಯ",
+    "healthAvailable": "ಲಭ್ಯವಿದೆ",
+    "healthRestricted": "ಭಾಗಶಃ ನಿರ್ಬಂಧಿತ",
+    "healthUnavailable": "ಲಭ್ಯವಿಲ್ಲ",
+    "healthPeakHourProtection": "ಗರಿಷ್ಠ ದಟ್ಟಣೆಯ ಸಮಯದ ರಕ್ಷಣೆ",
+    "healthCooldown": "ಕಾಯುವ ಅವಧಿ",
+    "healthQuotaExhausted": "ಕೋಟಾ ಮುಗಿದಿದೆ",
+    "healthOverview": "ಅವಲೋಕನ",
+    "layoutFull": "ಪೂರ್ಣ",
+    "layoutCompact": "ಸಂಕ್ಷಿಪ್ತ",
+    "healthQuotaError": "ಕೋಟಾ ಓದಲು ವಿಫಲವಾಗಿದೆ",
+    "healthNoRuntime": "ಕಾರ್ಯಾಚರಣೆಯ ಸ್ಥಿತಿ ಲಭ್ಯವಿಲ್ಲ",
+    "healthPreviousSnapshot": "ಕೊನೆಯ ನವೀಕರಣ ವಿಫಲವಾಗಿದೆ; ಹಿಂದಿನ ಫಲಿತಾಂಶ ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+    "healthPreviousFailure": "ಕೊನೆಯ ವಿನಂತಿ ವಿಫಲವಾಗಿದೆ; ಕಾಯುವ ಅವಧಿ ಮುಗಿದಿದೆ",
+    "healthAwaitingSync": "ಮರುಹೊಂದಿಸುವ ಸಮಯ ಮೀರಿದೆ; ಸಿಂಕ್‌ಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
+    "healthVerdictUnavailable": "ಉಪಲಭ್ಯತೆ ಪರಿಶೀಲನೆಯ ಫಲಿತಾಂಶ ಸಿಗುತ್ತಿಲ್ಲ; ಕೋಟಾ ಮಟ್ಟಗಳನ್ನು ಮಾತ್ರ ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+    "healthSummaryFailed": "ಸ್ಥಿತಿಯ ಸಾರಾಂಶ ಓದಲು ವಿಫಲವಾಗಿದೆ; ಮಾದರಿ ಲಾಕ್ ಮಾಹಿತಿ ಕಾಣೆಯಾಗಿರಬಹುದು",
+    "healthRuntimeObserved": "ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ {time}",
+    "healthQuotaObserved": "ಕೋಟಾ ಗಮನಿಸಲಾಗಿದೆ {time}",
+    "healthOldestQuota": "ಅತ್ಯಂತ ಹಳೆಯ ಕೋಟಾ ಚಿತ್ರ: {time}",
+    "healthRecoveryUnknown": "ಚೇತರಿಕೆಯ ಸಮಯ ತಿಳಿದಿಲ್ಲ",
+    "healthDetailsHint": "ವಿವರಗಳು ಮತ್ತು ಕ್ರಿಯೆಗಳಿಗಾಗಿ ಕ್ಲಿಕ್ ಮಾಡಿ",
+    "healthFiveHour": "5 ಗಂಟೆಗಳು",
+    "healthOverall": "ಒಟ್ಟಾರೆ",
+    "healthAction": "ಕ್ರಮ ಅಗತ್ಯ",
+    "healthTitle": "ಖಾತೆಗಳ ಲಭ್ಯತೆ",
+    "healthDrag": "ಪೂರೈಕೆದಾರರ ಕ್ರಮ ಬದಲಿಸಲು ಎಳೆಯಿರಿ",
+    "healthDragPosition": "{provider}, {count, plural, one {# ರಲ್ಲಿ {position, number} ನೇ ಸ್ಥಾನ} other {# ರಲ್ಲಿ {position, number} ನೇ ಸ್ಥಾನ}}",
+    "healthResetOrder": "ಪೂರ್ವನಿಯೋಜಿತ ಕ್ರಮ ಮರುಸ್ಥಾಪಿಸಿ",
+    "healthPool": "{name} ಪೂಲ್",
+    "healthOtherPool": "ಅದೇ ಖಾತೆಯ {pool}: {status} ({remaining} ಉಳಿದಿದೆ)",
+    "healthIncluded": "{count, plural, one {ಭಾಗಶಃ ನಿರ್ಬಂಧಿತ # ಖಾತೆಯನ್ನು ಒಳಗೊಂಡಿದೆ} other {ಭಾಗಶಃ ನಿರ್ಬಂಧಿತ # ಖಾತೆಗಳನ್ನು ಒಳಗೊಂಡಿದೆ}}",
+    "healthBannerUnavailable": "{count, plural, one {# ಖಾತೆ ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ} other {# ಖಾತೆಗಳು ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ}}",
+    "healthBannerAvailable": "{count, plural, one {# ಖಾತೆ ಲಭ್ಯವಿದೆ} other {ಎಲ್ಲಾ # ಖಾತೆಗಳು ಲಭ್ಯವಿವೆ}}",
+    "healthLegendHide": "ಸಂಕೇತಗಳ ವಿವರಣೆಯನ್ನು ಮರೆಮಾಡಿ",
+    "healthLegendShow": "ಸಂಕೇತಗಳ ವಿವರಣೆಯನ್ನು ತೋರಿಸಿ",
+    "healthLegendOk": "ಘನ = ಉಳಿದ ಕೋಟಾ; ಅರೆಪಾರದರ್ಶಕ = ಬಳಸಿದ ಕೋಟಾ.",
+    "healthLegendCooldown": "{window} ಕೋಟಾ ಮುಗಿದಿದೆ. ಘನ = ಕಳೆದ ಕಾಯುವಿಕೆ; ಅರೆಪಾರದರ್ಶಕ = ಉಳಿದ ಕಾಯುವಿಕೆ.",
+    "healthLegendAction": "ಅನುಮತಿ ಅವಧಿ ಮುಗಿದಿದೆ ಅಥವಾ ಖಾತೆ ನಿಷೇಧಿತ; ಕಾಯುವುದರಿಂದ ಸರಿಯಾಗುವುದಿಲ್ಲ.",
+    "healthLegendPartial": "ಇನ್ನೂ ಬಳಸಬಹುದು. ಹಳದಿ ತುದಿ = ಮಾದರಿ ಅಥವಾ ಪೂಲ್ ನಿರ್ಬಂಧಿತ.",
+    "healthWaited": "ಕಾದಿದ್ದು {percent}",
+    "healthWait": "ಇನ್ನೂ {duration} ({time}ಕ್ಕೆ ಮರುಲಭ್ಯ)",
+    "healthFastest": "ಮೊದಲ ಮರುಲಭ್ಯತೆ {duration} ನಂತರ",
+    "healthRatio": "{available, plural, one {# / {active, number} ಲಭ್ಯ} other {# / {active, number} ಲಭ್ಯ}}",
+    "healthCd5": "5 ಗಂಟೆಗಳು · ಕಾಯುವ ಅವಧಿ",
+    "healthCdw": "ವಾರದ · ಕಾಯುವ ಅವಧಿ",
+    "healthRecentSuccessBypass": "ಇತ್ತೀಚೆಗೆ ವಿನಂತಿ ಯಶಸ್ವಿಯಾದ ಕಾರಣ ರೌಟಿಂಗ್ ಈ ಖಾತೆಯನ್ನು ಅನುಮತಿಸುತ್ತದೆ.",
+    "healthPurchasedBalanceBypass": "ಒಳಗೊಂಡ ಕೋಟಾ ಮುಗಿದ ನಂತರ ಖರೀದಿಸಿದ ಉಳಿಕೆಯೊಂದಿಗೆ ಬಳಕೆ ಮುಂದುವರಿಸಬಹುದು.",
+    "healthCutoffAtRequest": "ವಿನಂತಿಯನ್ನು ರೌಟ್ ಮಾಡುವಾಗ ನೇರ ಕೋಟಾ ಮಿತಿಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ."
   },
   "modals": {
     "waitingAuth": "ದೃಢೀಕರಣಕ್ಕಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ",
@@ -11078,7 +11137,8 @@
       "message": "ಸಂದೇಶ",
       "error": "ದೋಷ",
       "completion": "ಪೂರ್ಣಗೊಳಿಸುವಿಕೆ"
-    }
+    },
+    "statusFilter": "ಸ್ಥಿತಿ"
   },
   "templateNames": {
     "simple-chat": "ಸರಳ ಚಾಟ್",
@@ -11259,7 +11319,8 @@
     "minutesAgo": "{minutes} ನಿಮಿಷಗಳ ಹಿಂದೆ",
     "hoursAgo": "{hours} ಗಂಟೆಗಳ ಹಿಂದೆ",
     "daysAgo": "{days} ದಿನಗಳ ಹಿಂದೆ",
-    "entries": "ನಮೂದುಗಳು"
+    "entries": "ನಮೂದುಗಳು",
+    "viewSwitcherAria": "ಕ್ಯಾಶ್ ವೀಕ್ಷಣೆ"
   },
   "proxyConfigModal": {
     "levelGlobal": "ಜಾಗತಿಕ",
@@ -11447,6 +11508,7 @@
     "tableHealth": "ಆರೋಗ್ಯ ಸ್ಥಿತಿ (24h)",
     "tableUsage": "ಬಳಕೆ",
     "tableActions": "ಕ್ರಿಯೆಗಳು",
+    "moreActions": "ಹೆಚ್ಚಿನ ಕ್ರಿಯೆಗಳು",
     "test": "ಪರೀಕ್ಷಿಸಿ",
     "edit": "ತಿದ್ದಿ",
     "delete": "ಅಳಿಸಿ",
@@ -11526,7 +11588,7 @@
     "bulkImportNoValidEntries": "ಯಾವುದೇ ಮಾನ್ಯ ನಮೂದುಗಳು ಕಂಡುಬಂದಿಲ್ಲ. ಸ್ವರೂಪವನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "bulkImportSuccess": "ಆಮದು ಪೂರ್ಣಗೊಂಡಿದೆ: {created} ರಚಿಸಲಾಗಿದೆ, {updated} ನವೀಕರಿಸಲಾಗಿದೆ, {failed} ವಿಫಲವಾಗಿದೆ",
     "bulkImportErrorLine": "ಸಾಲು {line}: {reason}",
-    "bulkImportMaxExceeded": "ಪ್ರತಿ ಆಮದಿಗೆ ಗರಿಷ್ಠ 100 ಪ್ರಾಕ್ಸಿಗಳು",
+    "bulkImportMaxExceeded": "ಪ್ರತಿ ಆಮದಿಗೆ ಗರಿಷ್ಠ {max} ಪ್ರಾಕ್ಸಿಗಳು",
     "bulkImportPreview": "ಪೂರ್ವವೀಕ್ಷಣೆ",
     "clearAssignment": "(ನಿಯೋಜನೆಯನ್ನು ತೆರವುಗೊಳಿಸಿ)",
     "bulkProxyAssignment": "ಸಾಮೂಹಿಕ ಪ್ರಾಕ್ಸಿ ನಿಯೋಜನೆ",
@@ -11587,6 +11649,7 @@
     "poolSetAsideKindIpQuota429": "IP ದರ ಮಿತಿ (429)",
     "poolSetAsideKindSlow": "ಮಂದ ಪ್ರತಿಕ್ರಿಯೆಗಳು",
     "poolSetAsideKindGeoBlocked": "ಪ್ರದೇಶ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ (403/451)",
+    "poolSetAsideKindOperatorReported": "ನಿರ್ವಾಹಕರಿಂದ ವರದಿಯಾದ ವ್ಯತ್ಯಯ",
     "poolSetAsideUntil": "ತಿರುಗುವಿಕೆಗೆ ಹಿಂತಿರುಗಿ {endsAt}",
     "poolSetAsideRepeat": "ಪಕ್ಕಕ್ಕೆ ಇರಿಸಲಾಗಿದೆ {count, plural, one {# ಬಾರಿ} other {# ಬಾರಿ}}",
     "poolUnknownAddress": "ಅಜ್ಞಾತ ವಿಳಾಸ",
@@ -11696,7 +11759,6 @@
     "exportCodeTitle": "ಕೋಡ್ ಅನ್ನು ರಫ್ತು ಮಾಡಿ",
     "exportShort": "ರಫ್ತು ಮಾಡಿ",
     "noStateToExport": "ರಫ್ತು ಮಾಡಲು ಯಾವುದೇ ಪ್ಲೇಗ್ರೌಂಡ್ ಸ್ಥಿತಿ ಲಭ್ಯವಿಲ್ಲ.",
-    "closeExportModal": "ರಫ್ತು ಮೋಡಲ್ ಮುಚ್ಚಿ",
     "close": "ಮುಚ್ಚಿ",
     "exportRealKeyWarning": "ಭದ್ರತಾ ಎಚ್ಚರಿಕೆ: ರಫ್ತು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ — ಔಟ್ಪುಟ್ನಲ್ಲಿ ನೈಜ API key ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ನಿಮ್ಮ API key ಅನ್ನು ಮರುಹೊಂದಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "placeholderHintPrefix": "ಈ",
@@ -11809,7 +11871,8 @@
       "nextButton": "ಮುಂದೆ",
       "runButton": "ಚಾಲನೆ ಮಾಡಿ",
       "promptPlaceholder": "ನಿಮ್ಮ ಸಂದೇಶವನ್ನು ನಮೂದಿಸಿ… (ಕಳುಹಿಸಲು Enter, ಹೊಸ ಸಾಲಿಗಾಗಿ Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground ಮೋಡ್ಗಳು"
   },
   "miniPlayground": {
     "endpoint": "ಎಂಡ್ಪಾಯಿಂಟ್",
@@ -11880,7 +11943,8 @@
     "assistant": "ಸಹಾಯಕ",
     "errorLabel": "ದೋಷ",
     "requestFailed": "ವಿನಂತಿ ವಿಫಲವಾಗಿದೆ",
-    "stop": "ನಿಲ್ಲಿಸಿ"
+    "stop": "ನಿಲ್ಲಿಸಿ",
+    "messageInputAria": "ಸಂದೇಶ"
   },
   "requestLogger": {
     "recording": "ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ",
@@ -12067,8 +12131,18 @@
       "resilienceRotations": "{count} ಖಾತೆ ಬದಲಾವಣೆಗಳು",
       "resilienceRetried": "ಖಾಲಿ ಸರದಿಯನ್ನು ಮರುಪ್ರಯತ್ನಿಸಲಾಗಿದೆ",
       "resilienceContinued": "ಸ್ಟ್ರೀಮ್ ಮಧ್ಯದಿಂದ ಮುಂದುವರಿಸಲಾಗಿದೆ",
-      "resilienceRecovered": "ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ ಕ್ರಿಯೆಯಿಂದ ಮರುಪಡೆಯಲಾಗಿದೆ"
-    }
+      "resilienceRecovered": "ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ ಕ್ರಿಯೆಯಿಂದ ಮರುಪಡೆಯಲಾಗಿದೆ",
+      "conversationContext": "ಸಂಭಾಷಣೆಯ ಸಂದರ್ಭ",
+      "goToBottom": "ಕೆಳಕ್ಕೆ ಹೋಗಿ",
+      "liveRefreshOn": "ನೇರ ರಿಫ್ರೆಶ್: ಆನ್",
+      "liveRefreshOff": "ನೇರ ರಿಫ್ರೆಶ್: ಆಫ್",
+      "liveRefresh": "ನೇರ ರಿಫ್ರೆಶ್",
+      "continuesFromParent": "ಪೇರೆಂಟ್ನಿಂದ ಮುಂದುವರಿಯುತ್ತದೆ",
+      "continuesFrom": "{id} ರಿಂದ ಮುಂದುವರಿಯುತ್ತದೆ",
+      "viewConversation": "ಸಂಭಾಷಣೆಯನ್ನು ವೀಕ್ಷಿಸಿ",
+      "openConversation": "ಸಂಭಾಷಣೆ {id} ತೆರೆಯಿರಿ"
+    },
+    "tableLabel": "ವಿನಂತಿ ಲಾಗ್ಗಳು"
   },
   "proxyLogger": {
     "filterAll": "ಎಲ್ಲಾ",
@@ -12113,7 +12187,9 @@
     "colServedBy": "ಸೇವಿತ بواسطة",
     "filterTraffic": "ಟ್ರಾಫಿಕ್",
     "filterTests": "ಪರೀಕ್ಷೆಗಳು",
-    "filterSource": "ಮೂಲ"
+    "filterSource": "ಮೂಲ",
+    "tableLabel": "ಪ್ರಾಕ್ಸಿ ಲಾಗ್ಗಳು",
+    "sortLogs": "ಲಾಗ್ಗಳನ್ನು ವಿಂಗಡಿಸಿ"
   },
   "endpointOptions": {
     "speech": "ಧ್ವನಿ",
@@ -12198,7 +12274,8 @@
     "statusExhausted": "ಖಾಲಿಯಾಗಿದೆ",
     "statusAlerting": "ಎಚ್ಚರಿಕೆ ನೀಡಲಾಗುತ್ತಿದೆ",
     "statusError": "ದೋಷ",
-    "moreSuffix": "+{count} ಇನ್ನಷ್ಟು"
+    "moreSuffix": "+{count} ಇನ್ನಷ್ಟು",
+    "feedFilterLabel": "ಈವೆಂಟ್ಗಳನ್ನು ಫಿಲ್ಟರ್ ಮಾಡಿ"
   },
   "quotaShare": {
     "weightPercent": "ತೂಕ %",
@@ -12365,7 +12442,10 @@
     "ungroupedTitle": "ಗುಂಪಿಗೆ ಸೇರಿಸದವು",
     "ungroupedHint": "ಈ ಪೂಲ್ಗಳನ್ನು ತಿಳಿದಿರುವ ಯಾವುದೇ ಗುಂಪಿಗೆ ನಿಯೋಜಿಸಲಾಗಿಲ್ಲ. ಅವುಗಳನ್ನು ಮಾನ್ಯ ಗುಂಪಿಗೆ ಸರಿಸಲು ಪೂಲ್ ಅನ್ನು ಸಂಪಾದಿಸಿ.",
     "removeFailed": "ಈ ಪೂಲ್ ಅನ್ನು ತೆಗೆದುಹಾಕಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
-    "dismiss": "ಮುಚ್ಚಿ"
+    "dismiss": "ಮುಚ್ಚಿ",
+    "allocationsHeading": "ಹಂಚಿಕೆಗಳು",
+    "wizardRemoveDimension": "ಆಯಾಮವನ್ನು ತೆಗೆದುಹಾಕಿ",
+    "wizardRemoveKey": "ಕೀಲಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"
   },
   "plugins": {
     "title": "ಪ್ಲಗಿನ್ಗಳು",
@@ -12523,7 +12603,8 @@
       "settingsUpdateFailed": "ಸೆಟ್ಟಿಂಗ್ಗಳ ನವೀಕರಣ ವಿಫಲವಾಗಿದೆ",
       "serviceRevealApiKey": "{actor} ಅವರು {target} ಗಾಗಿ API ಕೀಲಿಯನ್ನು ಬಹಿರಂಗಪಡಿಸಿದ್ದಾರೆ",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "ದೋಷವನ್ನು ಮುಚ್ಚಿ"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12737,21 @@
       "goNow": "ಈಗಲೇ ಹೋಗಿ",
       "message": "MITM Proxy ಈಗ AgentBridge ಅಡಿಯಲ್ಲಿ ಲಭ್ಯವಿದೆ.",
       "title": "ಈ ಪುಟವನ್ನು ಸ್ಥಳಾಂತರಿಸಲಾಗಿದೆ"
-    }
+    },
+    "dnsOn": "DNS ಆನ್",
+    "dnsOff": "DNS ಆಫ್",
+    "showServerSettings": "ಸರ್ವರ್ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ತೋರಿಸಿ",
+    "hideServerSettings": "ಸರ್ವರ್ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಮರೆಮಾಡಿ",
+    "upstreamCaTesting": "ಪರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ…",
+    "removeMapping": "ಮ್ಯಾಪಿಂಗ್ ತೆಗೆದುಹಾಕಿ",
+    "mappingSourcePlaceholder": "ಉದಾ., gemini-3.6-flash-medium, ಅಥವಾ ಮ್ಯಾಪ್ ಮಾಡದ ಎಲ್ಲದಕ್ಕೂ *",
+    "mappingWildcardHint": "ಸ್ಪಷ್ಟ ಮ್ಯಾಪಿಂಗ್ ಇಲ್ಲದ ಪ್ರತಿಯೊಂದು ಮಾಡೆಲ್ ಅನ್ನು OmniRoute ಮೂಲಕ ಆಯ್ಕೆಮಾಡಿದ ಗುರಿಗೆ ರೂಟ್ ಮಾಡಲು ಮೂಲವಾಗಿ * ಬಳಸಿ. ನಿಖರವಾದ ಮೂಲ ಹೊಂದಾಣಿಕೆಗಳು ಯಾವಾಗಲೂ * ಗಿಂತ ಆದ್ಯತೆ ಪಡೆಯುತ್ತವೆ.",
+    "wizardDetectingModels": "ಇಂಟರ್ಸೆಪ್ಟ್ ಮಾಡಿದ ಟ್ರಾಫಿಕ್ನಿಂದ ಮಾಡೆಲ್ಗಳನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗುತ್ತಿದೆ...",
+    "wizardDetectedModels": "ಇಂಟರ್ಸೆಪ್ಟ್ ಮಾಡಿದ ಟ್ರಾಫಿಕ್ನಲ್ಲಿ {count, plural, one {# ಮಾಡೆಲ್} other {# ಮಾಡೆಲ್ಗಳು}} ಕಂಡುಬಂದಿವೆ. ನೀವು ಸೇರಿಸಲು ಬಯಸುವವುಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ:",
+    "wizardSelectedModels": "{count, plural, one {# ಮಾಡೆಲ್} other {# ಮಾಡೆಲ್ಗಳು}} ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಪರದೆಯಲ್ಲಿ ಅವುಗಳನ್ನು OmniRoute ಮಾಡೆಲ್ಗಳಿಗೆ ಮ್ಯಾಪ್ ಮಾಡುವಿರಿ.",
+    "wizardAddModels": "{count, plural, one {# ಮಾಡೆಲ್} other {# ಮಾಡೆಲ್ಗಳು}} ಸೇರಿಸಿ",
+    "wizardNoModelsDetected": "ಇನ್ನೂ ಯಾವುದೇ ಮಾಡೆಲ್ಗಳು ಪತ್ತೆಯಾಗಿಲ್ಲ. ವಿನಂತಿಯನ್ನು ಮಾಡಲು {agent} ಬಳಸಿ, ನಂತರ ಟ್ರಾಫಿಕ್ನಿಂದ ಮಾಡೆಲ್ಗಳನ್ನು ಸ್ವಯಂ ಪತ್ತೆಹಚ್ಚಲು ಈ ವಿಝಾರ್ಡ್ ಅನ್ನು ಮತ್ತೆ ಚಲಾಯಿಸಿ.",
+    "wizardNoModelsHint": "ಅಥವಾ ಈ ವಿಝಾರ್ಡ್ ಅನ್ನು ಮುಚ್ಚಿ ಮತ್ತು ಏಜೆಂಟ್ ಕಾರ್ಡ್ನಲ್ಲಿ ಮ್ಯಾಪಿಂಗ್ಗಳನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ಸೇರಿಸಿ."
   },
   "providerStats": {
     "unknownError": "ಅಜ್ಞಾತ ದೋಷ",
@@ -12686,7 +12781,11 @@
     "avgTtft": "ಸರಾಸರಿ TTFT",
     "avgTotal": "ಸರಾಸರಿ ಒಟ್ಟು",
     "requestTelemetry": "ವಿನಂತಿ ಟೆಲಿಮೆಟ್ರಿ",
-    "requestTelemetryDescription": "7-ಹಂತದ ಪೈಪ್ಲೈನ್ ವಿವರ (ಕಳೆದ 5 ನಿಮಿಷಗಳು)"
+    "requestTelemetryDescription": "7-ಹಂತದ ಪೈಪ್ಲೈನ್ ವಿವರ (ಕಳೆದ 5 ನಿಮಿಷಗಳು)",
+    "title": "ಪ್ರೊವೈಡರ್ ಅಂಕಿಅಂಶಗಳು",
+    "description": "ಪ್ರತಿ ಪ್ರೊವೈಡರ್ ಮತ್ತು ಪ್ರತಿ ಮಾಡೆಲ್ನ ಟ್ರಾಫಿಕ್, ಲೇಟೆನ್ಸಿ ಮತ್ತು ಯಶಸ್ಸಿನ ದರಗಳು",
+    "combo": "ಸಂಯೋಜನೆ",
+    "toggleModels": "{provider} ಗಾಗಿ ಮಾಡೆಲ್ಗಳನ್ನು ತೋರಿಸಿ"
   },
   "relay": {
     "title": "ಸರ್ವರ್ಲೆಸ್ ರಿಲೇ ಪ್ರಾಕ್ಸಿಗಳು",
@@ -12847,7 +12946,18 @@
     "noRequestBody": "ವಿನಂತಿಯ ಬಾಡಿ ಇಲ್ಲ.",
     "noResponseBody": "ಪ್ರತಿಕ್ರಿಯೆಯ ಬಾಡಿ ಇಲ್ಲ.",
     "formatted": "ಸ್ವರೂಪಗೊಳಿಸಲಾಗಿದೆ",
-    "raw": "ಕಚ್ಚಾ"
+    "raw": "ಕಚ್ಚಾ",
+    "requestCount": "{count, plural, one {# ವಿನಂತಿ} other {# ವಿನಂತಿಗಳು}}",
+    "expandList": "ಪಟ್ಟಿಯನ್ನು ವಿಸ್ತರಿಸಿ",
+    "collapseList": "ಪಟ್ಟಿಯನ್ನು ಕುಗ್ಗಿಸಿ",
+    "snippetLanguage": "ಕೋಡ್ ತುಣುಕಿನ ಭಾಷೆ",
+    "headersTable": "ಹೆಡರ್ಗಳು",
+    "showSecrets": "ರಹಸ್ಯಗಳನ್ನು ತೋರಿಸಿ",
+    "maskSecrets": "ರಹಸ್ಯಗಳನ್ನು ಮರೆಮಾಚಿ",
+    "llmNotAvailable": "ಈ ವಿನಂತಿಗೆ LLM ಮೆಟಾಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ.",
+    "llmStreamYes": "ಹೌದು (SSE)",
+    "llmStreamNo": "ಇಲ್ಲ",
+    "llmTotalTokens": "ಒಟ್ಟು: {count} ಟೋಕನ್ಗಳು"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13416,8 @@
     "colReliabilityHelp": "ಕಳೆದ 24 ಗಂಟೆಗಳಲ್ಲಿ ಈ ಪೂರೈಕೆದಾರರು ನಿಜವಾಗಿ ಉತ್ತರಿಸಿದ ಕರೆಗಳ ಪ್ರಮಾಣ. ಡ್ಯಾಶ್ ಗುರುತು ಎಂದರೆ ಪ್ರಮಾಣವನ್ನು ನಿರ್ಧರಿಸಲು ಇದು ಸಾಕಷ್ಟು ಟ್ರಾಫಿಕ್ ಅನ್ನು ನಿರ್ವಹಿಸಿಲ್ಲ ಎಂದರ್ಥ.",
     "reliabilitySample": "ಕಳೆದ {hours} ಗಂಟೆಗಳಲ್ಲಿ {requests} ಕರೆಗಳಲ್ಲಿ {successes} ಯಶಸ್ವಿಯಾಗಿವೆ",
     "reliabilityTooFew": "ಕಳೆದ {hours} ಗಂಟೆಗಳಲ್ಲಿ ಕೇವಲ {requests} ಕರೆಗಳು — ಪ್ರಮಾಣವನ್ನು ನಿರ್ಧರಿಸಲು ತುಂಬಾ ಕಡಿಮೆ",
-    "reliabilityNoTraffic": "ಕಳೆದ 24 ಗಂಟೆಗಳಲ್ಲಿ ಯಾವುದೇ ಕರೆಗಳು ದಾಖಲಾಗಿಲ್ಲ"
+    "reliabilityNoTraffic": "ಕಳೆದ 24 ಗಂಟೆಗಳಲ್ಲಿ ಯಾವುದೇ ಕರೆಗಳು ದಾಖಲಾಗಿಲ್ಲ",
+    "categoryFilter": "ಕಾರ್ಯ ವರ್ಗ"
   },
   "discovery": {
     "title": "ಪೂರೈಕೆದಾರರ ಅನ್ವೇಷಣೆ",
@@ -13331,7 +13442,11 @@
     "method": "ವಿಧಾನ",
     "auth": "ದೃಢೀಕರಣ",
     "feasibility": "ಕಾರ್ಯಸಾಧ್ಯತೆ",
-    "models": "ಮಾದರಿಗಳು"
+    "models": "ಮಾದರಿಗಳು",
+    "provider": "ಪೂರೈಕೆದಾರ",
+    "status": "ಸ್ಥಿತಿ",
+    "endpoint": "ಎಂಡ್ಪಾಯಿಂಟ್",
+    "actions": "ಕ್ರಿಯೆಗಳು"
   },
   "noAuthProvider": {
     "title": "ಯಾವುದೇ ದೃಢೀಕರಣದ ಅಗತ್ಯವಿಲ್ಲ",
@@ -13380,7 +13495,8 @@
     "ownProxy": "ಸ್ವಂತ ಪ್ರಾಕ್ಸಿ",
     "freeTierPause": "ಮಾಡೆಲ್ {model} ವಿರಾಮಗೊಂಡಿದೆ (429), {time} ಗೆ ಮರಳುತ್ತದೆ",
     "freeTierPauseProvider": "ವಿರಾಮಗೊಂಡಿದೆ (429), {time} ಗೆ ಮರಳುತ್ತದೆ",
-    "freeTierPauseNote": "ಈ ಇನ್‌ಸ್ಟೆನ್ಸ್‌ನಲ್ಲಿ ಪ್ರಕ್ರಿಯೆಯೊಳಗಿನ ವಿರಾಮ"
+    "freeTierPauseNote": "ಈ ಇನ್‌ಸ್ಟೆನ್ಸ್‌ನಲ್ಲಿ ಪ್ರಕ್ರಿಯೆಯೊಳಗಿನ ವಿರಾಮ",
+    "proxyType": "ಪ್ರಾಕ್ಸಿ ಪ್ರಕಾರ"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13669,10 @@
         "description": "ಗುಪ್ತ ಸಾಧನೆಯೊಂದು ಕಾಯುತ್ತಿದೆ...",
         "criteria": "ಈ ಬ್ಯಾಡ್ಜ್ ಅನ್ನು ಬಹಿರಂಗಪಡಿಸಲು ಗುಪ್ತ ಸಾಧನೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ."
       }
-    }
+    },
+    "leaderboardTitle": "ಲೀಡರ್ಬೋರ್ಡ್",
+    "leaderboardDescription": "ನಿಮ್ಮ API ಕೀಗಳಾದ್ಯಂತದ ಶ್ರೇಯಾಂಕಗಳು ಮತ್ತು ಸಾಧನೆಗಳು",
+    "badgeLocked": "ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"
   },
   "featureFlags": {
     "title": "ವೈಶಿಷ್ಟ್ಯ ಫ್ಲ್ಯಾಗ್ಗಳು",
@@ -13794,6 +13913,7 @@
     "latency": "ಸುಪ್ತತೆ",
     "quota": "ಕೋಟಾ",
     "rangeWindow": "{range} ಅವಧಿ",
+    "timeRange": "ಸಮಯದ ವ್ಯಾಪ್ತಿ",
     "runtimeHealthBlend": "ರನ್ಟೈಮ್/ಆರೋಗ್ಯ ಸ್ಥಿತಿಯ ಸಂಯೋಜನೆ",
     "averageResponseTime": "ಸರಾಸರಿ ಪ್ರತಿಕ್ರಿಯೆ ಸಮಯ",
     "worstQuota": "ಅತ್ಯಂತ ಕಡಿಮೆ ಕೋಟಾ",
@@ -13995,7 +14115,11 @@
     "learnMore": "ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ",
     "changelogLoadFailed": "ಬದಲಾವಣೆಗಳ ದಾಖಲೆಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "retry": "ಮರುಪ್ರಯತ್ನಿಸಿ",
-    "viewFullHistory": "GitHub ನಲ್ಲಿ ಸಂಪೂರ್ಣ ಇತಿಹಾಸವನ್ನು ವೀಕ್ಷಿಸಿ"
+    "viewFullHistory": "GitHub ನಲ್ಲಿ ಸಂಪೂರ್ಣ ಇತಿಹಾಸವನ್ನು ವೀಕ್ಷಿಸಿ",
+    "title": "ಸುದ್ದಿ ಮತ್ತು ಬದಲಾವಣೆಗಳ ದಾಖಲೆ",
+    "description": "OmniRoute ತಂಡದ ಪ್ರಕಟಣೆಗಳು ಮತ್ತು ಇತ್ತೀಚಿನ ಬಿಡುಗಡೆ ಟಿಪ್ಪಣಿಗಳು",
+    "viewLabel": "ವೀಕ್ಷಿಸಿ",
+    "loadingNews": "ಪ್ರಕಟಣೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14670,9 @@
       "circuitBreakerState": "ಪೂರೈಕೆದಾರರ ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ ಸ್ಥಿತಿ",
       "lastUpdate": "ಕೊನೆಯ ನವೀಕರಣ: {timestamp}",
       "uptimeMinutes": "{minutes}ನಿ",
-      "uptimeHoursMinutes": "{hours}ಗಂ {minutes}ನಿ"
+      "uptimeHoursMinutes": "{hours}ಗಂ {minutes}ನಿ",
+      "breakerClosed": "ಮುಚ್ಚಲಾಗಿದೆ",
+      "breakerNotClosed": "ತೆರೆದಿದೆ ಅಥವಾ ಅರ್ಧ-ತೆರೆದಿದೆ"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14747,9 @@
         "primaryAction": "ನಿರ್ವಹಣೆಯ ವಿವರಗಳು",
         "secondaryAction": "ಸಿಸ್ಟಮ್ ಸ್ಥಿತಿ"
       }
+    },
+    "miniapp": {
+      "askAnything": "ಏನನ್ನಾದರೂ ಕೇಳಿ…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14940,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} ಗೋಚರಿಸುತ್ತಿವೆ / ಒಟ್ಟು {total}",
+    "modeLabel": "ವೀಕ್ಷಣಾ ಮೋಡ್",
+    "jumpToNow": "ಪ್ರಸ್ತುತ ಸಮಯಕ್ಕೆ ಹೋಗಿ, ಈಗಿನ ರೇಖೆಯು {position}% ಸ್ಥಾನಕ್ಕೆ ಮರುಹೊಂದಿಸಲ್ಪಡುತ್ತದೆ",
+    "laneReuse": "ಲೇನ್ ಮರುಬಳಕೆ",
+    "laneReuseLabel": "ಲೇನ್ ಮರುಬಳಕೆ ಅವಧಿ (ನಿಮಿಷಗಳು)",
+    "laneReuseHint": "ಒಂದೇ ಸಂಭಾಷಣೆ ಐಡಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳುವ ವಿನಂತಿಗಳ ನಡುವಿನ ಅಂತರವು ಇಷ್ಟು ನಿಮಿಷಗಳಿಗಿಂತ ಕಡಿಮೆ ಇರುವವರೆಗೆ ಅವು ಅದೇ ಕಾಲರೇಖೆಯ ಸಾಲಿನಲ್ಲಿ ಉಳಿಯುತ್ತವೆ.",
+    "laneReuseUnit": "ನಿಮಿ",
+    "autoRefresh": "ಸ್ವಯಂ-ರಿಫ್ರೆಶ್",
+    "autoRefreshLabel": "ಸ್ವಯಂ-ರಿಫ್ರೆಶ್ ಮಧ್ಯಂತರ (ಸೆಕೆಂಡುಗಳು)",
+    "autoRefreshHint": "ಕಾಲರೇಖೆಯು ಸರ್ವರ್ನಿಂದ ವಿನಂತಿಗಳ ಪಟ್ಟಿಯನ್ನು ಎಷ್ಟು ಬಾರಿ ಮರುಪಡೆಯುತ್ತದೆ.",
+    "autoRefreshUnit": "ಸೆ",
+    "zoomOut": "ಝೂಮ್ ಔಟ್",
+    "zoomIn": "ಝೂಮ್ ಇನ್"
   },
   "metadata": {
     "compressionTitle": "ಸಂಕುಚನ",

@@ -13,6 +13,9 @@ import { getModelUpstreamExtraHeaders } from "@/lib/db/models";
 import { resolveModelAlias } from "../../services/modelDeprecation.ts";
 import { CPA_FORCE_FAST_MODE_HEADER, shouldRequestClaudeFastMode } from "@/lib/providers/claudeFastMode";
 import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
+import { mergeUpstreamExtraHeaders } from "../../executors/base/headers.ts";
+import { resolveConnectionUpstreamOverrides } from "./connectionUpstreamOverrides.ts";
+import { FORMATS } from "../../translator/formats.ts";
 
 export function buildUpstreamHeadersForExecute(opts: {
   modelToCall: string;
@@ -88,4 +91,39 @@ export function buildUpstreamHeadersForExecute(opts: {
   }
 
   return upstreamHeaders;
+}
+
+/**
+ * Codex Responses-WebSocket bridge: merge the same per-model upstream headers (resolved id and its
+ * alias, top-level plus the `openai-responses` protocol layer) and connection custom headers /
+ * custom User-Agent that the HTTP/SSE path sends, on top of the executor's own headers, so a
+ * per-model override (e.g. a Codex `Version` that unlocks a model) is not lost on the WS upgrade.
+ * Mutates and returns `executorHeaders`.
+ */
+export function applyResponsesWsUpstreamHeaders(
+  executorHeaders: Record<string, string>,
+  opts: {
+    provider: string;
+    model: string;
+    providerSpecificData?: { customUserAgent?: unknown; customHeaders?: unknown } | null;
+  }
+): Record<string, string> {
+  const { connectionCustomUserAgent, connectionCustomHeaders } = resolveConnectionUpstreamOverrides(
+    opts.providerSpecificData
+  );
+  mergeUpstreamExtraHeaders(
+    executorHeaders,
+    buildUpstreamHeadersForExecute({
+      modelToCall: opts.model,
+      effectiveModel: opts.model,
+      provider: opts.provider,
+      model: opts.model,
+      resolvedModel: resolveModelAlias(opts.model, opts.provider),
+      sourceFormat: FORMATS.OPENAI_RESPONSES,
+      connectionCustomUserAgent,
+      connectionCustomHeaders,
+      settings: undefined,
+    })
+  );
+  return executorHeaders;
 }

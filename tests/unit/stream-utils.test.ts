@@ -2371,6 +2371,74 @@ test("createSSEStream passthrough forwards OpenAI usage-only empty choices chunk
   assert.deepEqual(onCompletePayload.responseBody.usage, usage);
 });
 
+test("createSSEStream translated Gemini path clears an invalid cache count after a hit", async () => {
+  let onCompletePayload = null;
+  await readTransformed(
+    [
+      `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: "hello" }] } }], usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 1, totalTokenCount: 11, cachedContentTokenCount: 4 } })}\n\n`,
+      `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: " world" }] }, finishReason: "STOP" }], usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 2, totalTokenCount: 12, cachedContentTokenCount: 20 } })}\n\n`,
+    ],
+    {
+      mode: "translate",
+      targetFormat: FORMATS.ANTIGRAVITY,
+      sourceFormat: FORMATS.OPENAI,
+      provider: "antigravity",
+      model: "antigravity/gemini-3.7-flash",
+      body: { messages: [{ role: "user", content: "hello" }] },
+      onComplete(payload) {
+        onCompletePayload = payload;
+      },
+    }
+  );
+  assert.equal(onCompletePayload.cacheEvidence, "invalid");
+  assert.equal(onCompletePayload.usage.cached_tokens, undefined);
+  assert.equal(onCompletePayload.responseBody.usage.cache_evidence, undefined);
+});
+
+test("createSSEStream passthrough preserves cache evidence across late snapshots", async () => {
+  let onCompletePayload = null;
+  await readTransformed(
+    [
+      `data: ${JSON.stringify({ id: "cache", choices: [{ delta: { content: "hello" } }], usage: { prompt_tokens: 10, completion_tokens: 1, total_tokens: 11, cached_tokens: 4 } })}\n\n`,
+      `data: ${JSON.stringify({ id: "cache", choices: [{ delta: {}, finish_reason: "stop" }], usage: { prompt_tokens: 10, completion_tokens: 2, total_tokens: 12 } })}\n\n`,
+    ],
+    {
+      mode: "passthrough",
+      sourceFormat: FORMATS.OPENAI,
+      provider: "openai-compatible",
+      model: "gpt-4.1-mini",
+      body: { messages: [{ role: "user", content: "hello" }] },
+      onComplete(payload) {
+        onCompletePayload = payload;
+      },
+    }
+  );
+  assert.equal(onCompletePayload.usage.cached_tokens, 4);
+  assert.equal(onCompletePayload.responseBody.usage.cached_tokens, undefined);
+});
+
+test("createSSEStream translated path clears a prior cache hit on explicit zero", async () => {
+  let onCompletePayload = null;
+  await readTransformed(
+    [
+      `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: "hello" }] } }], usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 1, totalTokenCount: 11, cachedContentTokenCount: 4 } })}\n\n`,
+      `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: " world" }] }, finishReason: "STOP" }], usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 2, totalTokenCount: 12, cachedContentTokenCount: 0 } })}\n\n`,
+    ],
+    {
+      mode: "translate",
+      targetFormat: FORMATS.ANTIGRAVITY,
+      sourceFormat: FORMATS.OPENAI,
+      provider: "antigravity",
+      model: "antigravity/gemini-3.7-flash",
+      body: { messages: [{ role: "user", content: "hello" }] },
+      onComplete(payload) {
+        onCompletePayload = payload;
+      },
+    }
+  );
+  assert.equal(onCompletePayload.usage.prompt_tokens_details.cached_tokens, 0);
+});
+
 test("createSSEStream passthrough logs empty response after tool_calls completion", async () => {
   let onCompletePayload = null;
   const text = await readTransformed(
