@@ -10,77 +10,76 @@ _අවසන් වරට යාවත්කාලීන කළේ: 2026-06-28_
 
 ## විධායක සාරාංශය
 
-OmniRoute යනු Next.js මත ගොඩනගා ඇති දේශීය AI රවුටින් ගේට්වේ එකක් සහ උපකරණ පුවරුවකි.
-එය තනි OpenAI-අනුකූල අන්ත ලක්ෂ්යයක් (`/v1/*`) සපයන අතර, පරිවර්තනය, fallback, token නැවුම් කිරීම සහ භාවිත නිරීක්ෂණය සමඟ බහු upstream සපයන්නන් හරහා ගමනාගමනය රවුට් කරයි.
+OmniRoute යනු Next.js මත ගොඩනගා ඇති දේශීය AI මාර්ගගත ද්වාර සහ උපකරණ පුවරුවකි. එය තනි OpenAI-අනුකූල අන්ත ලක්ෂ්‍යයක් (`/v1/*`) සපයන අතර පරිවර්තනය, පසුබැසීම, ටෝකන නැවුම් කිරීම සහ භාවිත ලුහුබැඳීම සමඟින් බහු උඩුගං සැපයුම්කරුවන් හරහා ගමනාගමනය සිදු කරයි.
 
-ප්රධාන හැකියාවන්:
+මූලික හැකියාවන්:
 
-- CLI/මෙවලම් සඳහා OpenAI-අනුකූල API අතුරුමුහුණත (සපයන්නන් 375ක්, executor මොඩියුල 156ක්)
-- සපයන්නන්ගේ ආකෘති අතර ඉල්ලීම්/ප්රතිචාර පරිවර්තනය
-- Model combo fallback (බහු-මාදිලි අනුක්රමය)
-- `compositeTiers` අනුව runtime අනුපිළිවෙළ සහිත ව්යුහගත combo පියවර (`provider + model + connection`)
-- ගිණුම් මට්ටමේ fallback (එක් සපයන්නෙකුට ගිණුම් කිහිපයක්)
-- ප්රධාන chat මාර්ගය තුළ quota පූර්ව පරීක්ෂාව සහ quota පිළිබඳ දැනුවත් P2C ගිණුම් තේරීම
-- OAuth + API-key සපයන්නන්ගේ සම්බන්ධතා කළමනාකරණය (OAuth සපයන්නන්ගේ මොඩියුල 27ක්)
-- `/v1/embeddings` හරහා embedding ජනනය (සපයන්නන් 18ක්)
-- `/v1/images/generations` හරහා රූප ජනනය (සපයන්නන් 10කට වැඩි, මාදිලි 20කට වැඩි)
-- `/v1/audio/transcriptions` හරහා ශ්රව්ය පිටපත්කරණය (සපයන්නන් 18ක්)
-- `/v1/audio/speech` හරහා පෙළ-සිට-කථනය (අන්තර්ගත සපයන්නන් 24ක්)
-- `/v1/videos/generations` හරහා වීඩියෝ ජනනය (ComfyUI + SD WebUI)
-- `/v1/music/generations` හරහා සංගීත ජනනය (ComfyUI)
-- `/v1/search` හරහා වෙබ් සෙවීම (සපයන්නන් 20ක්)
-- `/v1/moderations` හරහා අන්තර්ගත පාලනය
-- `/v1/rerank` හරහා නැවත ශ්රේණිගත කිරීම
-- තර්කන මාදිලි සඳහා think tag විග්රහ කිරීම (``)
-- දැඩි OpenAI SDK අනුකූලතාව සඳහා ප්රතිචාර පිරිසිදු කිරීම
-- සපයන්නන් අතර අනුකූලතාව සඳහා භූමිකා සාමාන්යකරණය (developer→system, system→user)
-- ව්යුහගත ප්රතිදාන පරිවර්තනය (json_schema → Gemini responseSchema)
-- සපයන්නන්, keys, aliases, combos, සැකසුම් සහ මිලකරණය සඳහා දේශීය ස්ථායී ගබඩාකරණය (DB මොඩියුල 122ක්)
-- භාවිතය/පිරිවැය නිරීක්ෂණය සහ ඉල්ලීම් සටහන්කරණය
-- බහු උපාංග/තත්ත්ව සමමුහුර්තකරණය සඳහා විකල්ප cloud sync
-- API ප්රවේශ පාලනය සඳහා IP allowlist/blocklist
-- Thinking budget කළමනාකරණය (passthrough/auto/custom/adaptive)
-- ගෝලීය system prompt ඇතුළත් කිරීම
-- Session නිරීක්ෂණය සහ fingerprinting
-- සපයන්නාට විශේෂිත පැතිකඩ සහිත, එක් එක් ගිණුම සඳහා වැඩිදියුණු කළ rate limiting
-- සපයන්නන්ගේ ප්රත්යස්ථතාව සඳහා circuit breaker රටාව
-- Mutex locking සහිත anti-thundering herd ආරක්ෂාව
-- Signature-පදනම් වූ ඉල්ලීම් අනුපිටපත් ඉවත් කිරීමේ cache
-- Domain ස්තරය: පිරිවැය රීති, fallback ප්රතිපත්තිය, lockout ප්රතිපත්තිය
-- Context Relay: ගිණුම් මාරු කිරීමේ අඛණ්ඩතාව සඳහා session handoff සාරාංශ
-- Domain තත්ත්ව ස්ථායීකරණය (fallbacks, budgets, lockouts සහ circuit breakers සඳහා SQLite write-through cache)
-- මධ්යගත ඉල්ලීම් ඇගයීම සඳහා ප්රතිපත්ති එන්ජිම (lockout → budget → fallback)
-- p50/p95/p99 latency සමූහනය සහිත ඉල්ලීම් telemetry
-- `combo_execution_key` / `combo_step_id` හරහා combo target telemetry සහ ඓතිහාසික combo target සෞඛ්යය
-- අන්තයේ සිට අන්තයට tracing සඳහා Correlation ID (X-Request-Id)
-- එක් එක් API key සඳහා අක්රිය කිරීමේ විකල්පය සහිත අනුකූලතා audit සටහන්කරණය
-- LLM ගුණාත්මකභාවය තහවුරු කිරීම සඳහා Eval framework
-- තත්ය කාලීන සපයන්නන්ගේ circuit breaker තත්ත්වය සහිත සෞඛ්ය උපකරණ පුවරුව
-- ප්රවාහන ක්රම 3ක් (stdio/SSE/Streamable HTTP) සහිත MCP Server (මෙවලම් 110ක්)
-- කුසලතා සහ task lifecycle සහිත A2A Server (JSON-RPC 2.0 + SSE)
-- මතක පද්ධතිය (නිස්සාරණය, ඇතුළත් කිරීම, නැවත ලබාගැනීම, සාරාංශකරණය)
-- කුසලතා පද්ධතිය (registry, executor, sandbox, අන්තර්ගත කුසලතා)
-- සහතික කළමනාකරණය සහ DNS හැසිරවීම සහිත MITM proxy
-- Prompt injection guard middleware
-- Caveman, RTK, stacked pipelines, compression combos, language packs සහ analytics සහිත prompt compression pipeline
-- ACP (Agent Communication Protocol) registry
-- Modular OAuth සපයන්නන් (`src/lib/oauth/providers/` යටතේ තනි මොඩියුල 22ක්)
-- Uninstall/full-uninstall scripts
-- OAuth පරිසර අලුත්වැඩියා ක්රියාව
-- OpenAI-අනුකූල WS clients සඳහා WebSocket bridge (`/v1/ws`)
-- Sync token කළමනාකරණය (නිකුත් කිරීම/අවලංගු කිරීම, ETag-versioned config bundle බාගැනීම)
-- GLM Thinking (`glmt`) පළමු පන්තියේ සපයන්නන්ගේ preset
-- දෙමුහුන් token ගණනය කිරීම (ඇස්තමේන්තු fallback සහිත සපයන්නා-පාර්ශ්වීය `/messages/count_tokens`)
-- Model alias ස්වයංක්රීය seeding (ආරම්භයේදී cross-proxy dialect සාමාන්යකරණ 30කට වැඩි)
-- SSRF guard, private URL අවහිර කිරීම සහ වින්යාස කළ හැකි retry සහිත ආරක්ෂිත outbound fetch
-- වින්යාස කළ හැකි `requestRetry` සහ `maxRetryIntervalSec` සහිත cooldown පිළිබඳ දැනුවත් chat retries
-- ආරම්භයේදී Zod සමඟ runtime පරිසර වලංගුකරණය
-- Pagination, provider CRUD events සහ SSRF-blocked වලංගුකරණ සටහන්කරණය සහිත compliance audit v2
+- CLI/tools සඳහා OpenAI-අනුකූල API මතුපිට (සපයන්නන් 377, විධායක මොඩියුල 156)
+- සපයන්නන්ගේ ආකෘති හරහාRequest/response පරිවර්තනය
+- Model Combo Falback (බහු මාදිලි අනුපිළිවෙල)
+- `compositeTiers` මඟින් ධාවන කාල අනුපිළිවෙල සමඟ ව්‍යුහගත සංයුක්ත පියවර (`provider + model + connection`).
+- ගිණුම් මට්ටමේ පසුබැසීම (සපයන්නෙකුට බහු ගිණුම්)
+- ප්‍රධාන කතාබස් මාර්ගයේ කෝටා පෙර පියාසර කිරීම සහ කෝටා-දැනුවත් P2C ගිණුම් තේරීම
+- OAuth + API-ප්‍රධාන සැපයුම්කරු සම්බන්ධතා කළමනාකරණය ( OAuth සපයන්නාගේ මොඩියුල 27)
+- `/v1/embeddings` හරහා උත්පාදනය කාවැද්දීම (සපයන්නන් 18)
+- `/v1/images/generations` හරහා රූප උත්පාදනය (10 + සපයන්නන්, 20 + මාදිලි)
+- `/v1/audio/transcriptions` හරහා ශ්‍රව්‍ය පිටපත් කිරීම (සපයන්නන් 18)
+- `/v1/audio/speech` හරහා පෙළ සිට කථනය (24 බිල්ට් සපයන්නන්)
+- `/v1/videos/generations` හරහා වීඩියෝ උත්පාදනය (ComfyUI + SD WebUI)
+- `/v1/music/generations` (ComfyUI) හරහා සංගීත උත්පාදනය
+- `/v1/search` හරහා වෙබ් සෙවීම (සපයන්නන් 20)
+- `/v1/moderations` හරහා නවීකරණය
+- `/v1/rerank` හරහා නැවත ශ්‍රේණිගත කිරීම
+- තර්ක කිරීමේ ආකෘති සඳහා ටැග් විග්‍රහ කිරීම (`<think>...</think>`) සිතන්න
+- දැඩි OpenAI SDK අනුකූලතාව සඳහා ප්‍රතිචාර සනීපාරක්ෂකකරණය
+- හරස් සපයන්නාගේ ගැළපුම සඳහා භූමිකාව සාමාන්‍යකරණය (සංවර්ධක → පද්ධතිය, පද්ධති→ පරිශීලක)
+- ව්‍යුහගත ප්‍රතිදාන පරිවර්තනය (json_schema → Gemini responseSchema)
+- සපයන්නන්, යතුරු, අන්වර්ථ, සංයෝජන, සැකසීම්, මිලකරණය ( DB මොඩියුල 122) සඳහා දේශීය අඛණ්ඩ පැවැත්ම
+- Usage/cost ලුහුබැඳීම සහ ලොග් කිරීම ඉල්ලීම
+- multi-device/state සමමුහුර්ත කිරීම සඳහා විකල්ප වලාකුළු සමමුහුර්තකරණය
+- API ප්රවේශ පාලනය සඳහාIP allowlist/blocklist
+- චින්තන අයවැය කළමනාකරණය (passthrough/auto/custom/adaptive)
+- ගෝලීය පද්ධති ක්ෂණික එන්නත් කිරීම
+- සැසි ලුහුබැඳීම සහ ඇඟිලි සලකුණු
+- සැපයුම්කරු-විශේෂිත පැතිකඩ සමඟ එක් ගිණුමකට වැඩි දියුණු කළ අනුපාතය සීමා කිරීම
+- සැපයුම්කරුගේ ඔරොත්තු දීමේ හැකියාව සඳහා පරිපථ කඩන රටාව
+- මුටෙක්ස් අගුලු දැමීම සමඟින් ගිගුරුම් විරෝධී රංචු ආරක්ෂාව
+- අත්සන මත පදනම් වූ ඉල්ලීම් අඩු කිරීමේ හැඹිලිය
+- වසම් ස්තරය: පිරිවැය රීති, පසුබැසීමේ ප්‍රතිපත්තිය, අගුලු දැමීමේ ප්‍රතිපත්තිය
+- සන්දර්භය රිලේ: ගිණුම් භ්‍රමණ අඛණ්ඩතාව සඳහා සැසි භාර දීමේ සාරාංශ
+- වසම් රාජ්‍ය ස්ථීරභාවය ( වැටීම්, අයවැය, අගුලු දැමීම්, පරිපථ කඩනයන් සඳහාSQLite ලිවීම-හරහා හැඹිලිය)
+- මධ්‍යගත ඉල්ලීම් ඇගයීම සඳහා ප්‍රතිපත්ති එන්ජිම (lockout → අයවැය → පසුබැසීම)
+- p50/p95/p99 ප්‍රමාදය එකතු කිරීම සමඟින් ටෙලිමෙට්‍රි ඉල්ලන්න
+- Combo target telemetry සහ historical combo target health `combo_execution_key` / `combo_step_id` හරහා
+- සහසම්බන්ධය ID (X-Request-Id) අන්තයේ සිට අවසානය දක්වා සොයා ගැනීම සඳහා
+- API යතුරකින් ඉවත් වීම සමග අනුකූලතා විගණන ලොග් වීම
+- LLM තත්ත්ව සහතිකය සඳහා Eval රාමුව
+- තත්‍ය කාලීන සැපයුම්කරු පරිපථ කඩන තත්ත්වය සහිත සෞඛ්‍ය උපකරණ පුවරුව
+- MCP සේවාදායකය (මෙවලම් 110) ප්‍රවාහන 3ක් (stdio/SSE/Streamable HTTP)
+- A2A සේවාදායකය (JSON-RPC 2.0 + SSE) කුසලතා සහ කාර්ය ජීවන චක්‍රය සමඟ
+- මතක පද්ධතිය (නිස්සාරණය, එන්නත් කිරීම, ලබා ගැනීම, සාරාංශ කිරීම)
+- නිපුණතා පද්ධතිය (රෙජිස්ට්‍රි, ක්‍රියාත්මක කරන්නා, වැලිපිල්ල, ගොඩනඟන ලද කුසලතා)
+- සහතික කළමනාකරණය සහ DNS හැසිරවීම සමඟ MITM proxy
+- ඉක්මන් එන්නත් ආරක්ෂක මිඩ්ල්වෙයාර්
+- Caveman, RTK, ස්ටැක් කරන ලද නල මාර්ග, සම්පීඩන සංයෝජන, භාෂා ඇසුරුම් සහ විශ්ලේෂණ සමඟ ඉක්මන් සම්පීඩන නල මාර්ගය
+- ACP (නියෝජිත සන්නිවේදන ප්‍රොටෝකෝලය) රෙජිස්ට්‍රිය
+- මොඩියුලර් OAuth සපයන්නන් ( `src/lib/oauth/providers/` යටතේ තනි මොඩියුල 22)
+- Uninstall/full-uninstall ස්ක්‍රිප්ට්
+- OAuth පරිසරය අලුත්වැඩියා කිරීමේ ක්‍රියාව
+- OpenAI-අනුකූල WS සේවාදායකයන් සඳහාWebSocket පාලම (`/v1/ws`)
+- සමමුහුර්ත ටෝකන් කළමනාකරණය (issue/revoke, ETag-අනුවාද සහිත වින්‍යාස මිටි බාගැනීම)
+- GLM චින්තනය (`glmt`) පළමු පන්තියේ සැපයුම්කරු පෙරසැකසුම
+- දෙමුහුන් ටෝකන් ගණන් කිරීම (ඇස්තමේන්තු පසුබැසීම සමඟ සැපයුම්කරුගේ පැත්තේ `/messages/count_tokens` )
+- මාදිලිය අන්වර්ථය ස්වයං-බීජ කිරීම (ආරම්භයේදී 30 + හරස් ප්‍රොක්සි උපභාෂා සාමාන්‍යකරණය)
+- SSRF ආරක්ෂකය, පුද්ගලික URL අවහිර කිරීම සහ වින්‍යාසගත කළ හැකි නැවත උත්සාහ කිරීම සමඟ ආරක්ෂිත පිටතට ගෙන ඒම
+- වින්‍යාසගත කළ හැකි `requestRetry` සහ `maxRetryIntervalSec` සමඟ Cooldown-aware chat නැවත උත්සාහ කරයි
+- ආරම්භයේදී Zod සමඟ ධාවන කාල පරිසරය වලංගු කිරීම
+- පිටුකරණය, සැපයුම්කරු CRUD සිදුවීම් සහ SSRF-අවහිර කළ වලංගුකරණ ලොග් කිරීම සමඟ අනුකූලතා විගණනය v2
 
-ප්රධාන runtime ආකෘතිය:
+ප්‍රාථමික ධාවන කාල ආකෘතිය:
 
-- `src/app/api/*` යටතේ ඇති Next.js app routes මඟින් dashboard APIs සහ compatibility APIs යන දෙකම ක්රියාත්මක කරයි
-- `src/sse/*` + `open-sse/*` තුළ ඇති හවුල් SSE/routing core එකක් සපයන්නන්ගේ ක්රියාත්මක කිරීම, පරිවර්තනය, streaming, fallback සහ භාවිතය හසුරුවයි
+- `src/app/api/*` යටතේNext.js යෙදුම් මාර්ග උපකරණ පුවරුව APIs සහ ගැළපුම APIs යන දෙකම ක්‍රියාත්මක කරයි
+- `src/sse/*` + `open-sse/*` හි හවුල් SSE/routing හරයක් සැපයුම්කරු ක්‍රියාත්මක කිරීම, පරිවර්තනය, ප්‍රවාහය, පසුබැසීම සහ භාවිතය හසුරුවයි
 
 ## යොමු රූප සටහන්
 
@@ -114,43 +113,51 @@ v3.8.0 වේදිකාව සඳහා සම්මත, අනුවාද �
 - දේශීය ක්රියාවලියෙන් පිටත සැපයුම්කරුගේ SLA/පාලන තලය
 - බාහිර CLI ද්විමය ගොනුම (Claude CLI, Codex CLI, ආදිය)
 
-## උපකරණ පුවරු අතුරුමුහුණත (වත්මන්)
+## ඩෑෂ්බෝඩ් මතුපිට (වත්මන්)
 
 `src/app/(dashboard)/dashboard/` යටතේ ඇති ප්රධාන පිටු:
 
-- `/dashboard` — ඉක්මන් ආරම්භය + සැපයුම්කරුවන්ගේ දළ විශ්ලේෂණය
-- `/dashboard/endpoint` — අන්ත ලක්ෂ්ය ප්රොක්සිය + MCP + A2A + API අන්ත ලක්ෂ්ය ටැබ්
+- `/dashboard` — ඉක්මන් ආරම්භය + සැපයුම්කරු පිළිබඳ දළ විශ්ලේෂණය
+- `/dashboard/endpoint` — endpoint proxy + MCP + A2A + API endpoint ටැබ්
 - `/dashboard/providers` — සැපයුම්කරු සම්බන්ධතා සහ අක්තපත්ර
-- `/dashboard/combos` — සංයෝජන උපායමාර්ග, සැකිලි, පියවර-පාදක නිර්මාණකය, ආකෘති මාර්ගගත කිරීමේ නීති, අතින් සුරැකෙන අනුපිළිවෙළ
-- `/dashboard/auto-combo` — Auto Combo Engine: ලකුණුකරණ බර, මාදිලි ඇසුරුම්, අතථ්ය කර්මාන්තශාලා පෙරසැකසුම්, දුරමිතික දත්ත
+- `/dashboard/combos` — combo උපායමාර්ග, සැකිලි, පියවර මත පදනම් වූ builder, model routing නීති, අතින් පවත්වාගෙන යන අනුපිළිවෙළ
+- `/dashboard/auto-combo` — Auto Combo Engine: ලකුණුකරණ බර, mode packs, virtual factory පෙරසිටුවම්, telemetry
 - `/dashboard/costs` — පිරිවැය සමූහනය සහ මිල දෘශ්යතාව
-- `/dashboard/analytics` — භාවිත විශ්ලේෂණ, ඇගයීම්, සංයෝජන ඉලක්ක සෞඛ්යය
-- `/dashboard/limits` — කෝටා/අනුපාත පාලන
-- `/dashboard/cli-tools` — CLI හඳුන්වාදීම, ධාවන පරිසර හඳුනාගැනීම, වින්යාස උත්පාදනය
-- `/dashboard/agents` — හඳුනාගත් ACP නියෝජිතයන් + අභිරුචි නියෝජිත ලියාපදිංචිය
-- `/dashboard/cloud-agents` — වලාකුළේ සත්කාරකත්වය ලබන නියෝජිත කාර්යයන් (Codex Cloud, Devin, Jules) සහ කාර්ය ජීවන චක්රය
-- `/dashboard/skills` — A2A කුසලතා ලේඛනය, සෑන්ඩ්බොක්ස් ක්රියාත්මක කිරීම, අන්තර්නිර්මිත කුසලතා නාමාවලිය
-- `/dashboard/memory` — ස්ථිර සංවාදාත්මක මතකය පරීක්ෂා කිරීම සහ ලබාගැනීම
-- `/dashboard/webhooks` — පිටතට යන webhook දායකත්ව, රහස් භ්රමණය, නැවත උත්සාහ කිරීමේ සංඛ්යාලේඛන
-- `/dashboard/batch` — කාණ්ඩ කාර්ය ඉදිරිපත් කිරීම සහ ප්රගතිය
-- `/dashboard/cache` — read-through සහ තර්කන හැඹිලි සංඛ්යාලේඛන, ඉවත් කිරීමේ පාලන
-- `/dashboard/playground` — වින්යාස කළ ඕනෑම සංයෝජනයක්/ආකෘතියක් සමඟ අන්තර්ක්රියාකාරී කතාබස් පරීක්ෂණ අවකාශය
-- `/dashboard/changelog` — යෙදුම-තුළ වෙනස්කම් ලේඛන දසුන (`CHANGELOG.md` විදැහුම් කරයි)
-- `/dashboard/system` — ධාවන පරිසර රෝග විනිශ්චය, අනුවාද තොරතුරු, පරිසර සත්යාපන අතුරුමුහුණත
+- `/dashboard/analytics` — භාවිත විශ්ලේෂණ, ඇගයීම්, combo target සෞඛ්යය
+- `/dashboard/limits` — quota/rate පාලන
+- `/dashboard/cli-tools` — CLI ආරම්භක සැකසුම, runtime හඳුනාගැනීම, config ජනනය
+- `/dashboard/agents` — හඳුනාගත් ACP agents + අභිරුචි agent ලියාපදිංචිය
+- `/dashboard/cloud-agents` — cloud-hosted agent කාර්යයන් (Codex Cloud, Devin, Jules) සහ කාර්ය ජීවන චක්රය
+- `/dashboard/skills` — A2A skill registry, sandbox ක්රියාත්මක කිරීම, අන්තර්ගත skill නාමාවලිය
+- `/dashboard/memory` — ස්ථිර සංවාද මතකය පරීක්ෂා කිරීම සහ නැවත ලබාගැනීම
+- `/dashboard/webhooks` — පිටතට යන webhook දායකත්ව, රහස් යතුරු මාරු කිරීම, නැවත උත්සාහ කිරීමේ සංඛ්යාලේඛන
+- `/dashboard/batch` — batch job ඉදිරිපත් කිරීම සහ ප්රගතිය
+- `/dashboard/cache` — read-through සහ reasoning cache සංඛ්යාලේඛන, ඉවත් කිරීමේ පාලන
+- `/dashboard/playground` — වින්යාස කළ ඕනෑම combo/model එකකට එරෙහි අන්තර්ක්රියාකාරී chat playground
+- `/dashboard/changelog` — යෙදුම තුළ changelog නරඹනය (`CHANGELOG.md` render කරයි)
+- `/dashboard/system` — runtime නිර්ණය, අනුවාද තොරතුරු, පරිසරය වලංගු කිරීමේ මතුපිට
 - `/dashboard/onboarding` — නව ස්ථාපනයන් සඳහා පළමු ධාවන සැකසුම් විශාරදය
-- `/dashboard/media` — රූප/වීඩියෝ/සංගීත පරීක්ෂණ අවකාශය
-- `/dashboard/search-tools` — සෙවුම් සැපයුම්කරු පරීක්ෂාව සහ ඉතිහාසය
-- `/dashboard/health` — ක්රියාකාරී කාලය, පරිපථ බිඳින්නන්, අනුපාත සීමා, කෝටා-අධීක්ෂිත සැසි
-- `/dashboard/logs` — ඉල්ලීම්/ප්රොක්සි/විගණන/කොන්සෝල ලොග
-- `/dashboard/settings` — පද්ධති සැකසුම් ටැබ් (සාමාන්ය, මාර්ගගත කිරීම, පෙරනිමි සංයෝජන, ආදිය)
-- `/dashboard/context/caveman` — Caveman සම්පීඩන නීති, භාෂා ඇසුරුම්, පෙරදසුන සහ ප්රතිදාන මාදිලිය
-- `/dashboard/context/rtk` — RTK විධාන-ප්රතිදාන පෙරහන්, පෙරදසුන සහ ධාවන පරිසර ආරක්ෂක සැකසුම්
-- `/dashboard/context/combos` — මාර්ගගත කිරීමේ සංයෝජනවලට පැවරූ නම් කළ සම්පීඩන නල මාර්ග
-- `/dashboard/translator` — පරිවර්තක පරීක්ෂාව සහ ඉල්ලීම් ආකෘති පරිවර්තන පෙරදසුන
-- `/dashboard/audit` — පිටුකරණය සහ ව්යුහගත පාරදත්ත සහිත අනුකූලතා විගණන ලොග බ්රවුසරය
-- `/dashboard/usage` — `usage_history` සමඟ සම්බන්ධ වූ එක් එක් ඉල්ලීම සඳහා භාවිත බ්රවුසරය
-- `/dashboard/compression` — සම්පීඩන විශ්ලේෂණ, සංඛ්යාලේඛන සහ නල මාර්ග පැවරීම
-- `/dashboard/api-manager` — API යතුරු ජීවන චක්රය සහ ආකෘති අවසර
+- `/dashboard/media` — රූප/වීඩියෝ/සංගීත playground
+- `/dashboard/search-tools` — සෙවුම් සැපයුම්කරු පරීක්ෂා කිරීම සහ ඉතිහාසය
+- `/dashboard/health` — uptime, circuit breakers, rate limits, quota නිරීක්ෂිත sessions
+- `/dashboard/logs` — request/proxy/audit/console logs
+- `/dashboard/settings` — පද්ධති සැකසුම් ටැබ් (සාමාන්ය, routing, combo පෙරනිමි ආදිය)
+- `/dashboard/context/caveman` — Caveman සම්පීඩන නීති, භාෂා ඇසුරුම්, පෙරදසුන සහ ප්රතිදාන ආකාරය
+- `/dashboard/context/rtk` — RTK command-output filters, පෙරදසුන සහ runtime ආරක්ෂණ සැකසුම්
+- `/dashboard/context/combos` — routing combos වෙත පවරා ඇති නම් කළ සම්පීඩන pipelines
+- `/dashboard/translator` — translator පරීක්ෂාව සහ request ආකෘති පරිවර්තන පෙරදසුන
+- `/dashboard/audit` — pagination සහ ව්යුහගත metadata සහිත අනුකූලතා audit log බ්රවුසරය
+- `/dashboard/usage` — `usage_history` වෙත සම්බන්ධ එක් එක් request සඳහා භාවිත බ්රවුසරය
+- `/dashboard/compression` — සම්පීඩන විශ්ලේෂණ, සංඛ්යාලේඛන සහ pipeline පැවරීම
+- `/dashboard/api-manager` — API key ජීවන චක්රය සහ model අවසර
+
+UI ස්තරය: සෑම පිටුවක්ම එක් shell එකක් තුළ render වේ — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (kit එකේ
+`SidebarProvider`/`SidebarInset`, OmniRoute හි `Sidebar.tsx` සහ `Header.tsx`). පිටු තම
+ගොඩනැගුම් කොටස් `@/shared/components` වෙතින් (`packages/ui-kit` තුළ vendor කර ඇති Keak CI UI Kit මත ඇති adapters)
+හෝ kit component උපමාර්ගවලින් (`@omniroute/ui-kit/table`, `…/page-header`) import කරන අතර,
+icons `<Icon>` හරහා (`ICON_MAP` → Lucide) ලබාගනී. Theme එක (`system` පෙරනිමියෙන්, light/dark) සහ tokens,
+`src/app/globals.css` හි bridge එක හරහා kit එකෙන් පැමිණේ. විස්තර: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## ඉහළ මට්ටමේ පද්ධති සන්දර්භය
 

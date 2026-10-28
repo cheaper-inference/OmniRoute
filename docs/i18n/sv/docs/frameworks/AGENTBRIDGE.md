@@ -16,34 +16,34 @@ AgentBridge är OmniRoutes MITM-proxy (Man-in-the-Middle) som avlyssnar HTTPS-tr
 
 ### Vad är AgentBridge?
 
-När en IDE-agent (t.ex. GitHub Copilot, Cursor, Claude Code) gör ett API-anrop ansluter den direkt till AI-leverantören uppströms (OpenAI, Anthropic osv.). AgentBridge fångar upp anslutningen transparent på TLS-nivå — utan att någon ändring av agentens konfiguration krävs — och skriver om begäran via OmniRoute.
+När en IDE agent (t.ex. GitHub Copilot, Cursor, Claude Code) ringer ett API samtal ansluter den direkt till uppströms AI leverantören (OpenAI, Anthropic, etc.). AgentBridge fångar upp den anslutningen transparent på TLS nivån – utan att kräva någon agentkonfigurationsändring – och skriver om begäran genom OmniRoute.
 
-Det innebär att du kan:
+Det betyder att du kan:
 
-- **Dirigera om valfri agent till valfri leverantör**: Pratar Copilot med OpenAI? Omdirigera den till Anthropic Claude, Gemini eller någon av OmniRoutes 375 leverantörer.
-- **Tillämpa modellmappningar**: `gemini-3-flash` → `claude-sonnet-4.7` transparent på hanterarnivå.
-- **Observera all agenttrafik**: varje uppfångad begäran publiceras till [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Utnyttja OmniRoutes motståndskraft**: komboroutning, circuit breakers, fallback-mekanismer och kostnadsspårning fungerar även för IDE-agenttrafik.
+- **Omdirigera vilken agent som helst till vilken leverantör som helst** : Copilot pratar med OpenAI? Omdirigera den till Anthropic Claude, Gemini, eller någon av OmniRoute 377 leverantörer.
+- **Tillämpa modellmappningar** : `gemini-3-flash` → `claude-sonnet-4.7` transparent på hanterarnivå.
+- **Observera all agenttrafik** : varje avlyssnad begäran publiceras till [Trafikinspektören](./TRAFFIC_INSPECTOR.md).
+- **Applicera OmniRoute resilience** : kombinerad routing, strömbrytare, fallbacks och kostnadsspårningsarbete för IDE agenttrafik också.
 
-### Positionering mot marknaden
+### Positionering kontra marknaden
 
-| Funktion                | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity             |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot          |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)              |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex            |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE              |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries          |    —    |    ✓     |        —        |             ✓             |
-| Claude Code             |    —    |    —     |        ✓        |             ✓             |
-| Open Code               |    —    |    —     |        ✓        |             ✓             |
-| Trae                    |    —    |    —     |        —        |       🔍 Undersöker       |
-| Instrumentpanel (UI)    |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector       |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute-routning      |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI för modellmappning   |    ✗    |    ✗     |        ✗        |             ✓             |
-| Bypass-lista            |    ✗    |    ✗     |        ✓        |             ✓             |
-| CA-certifikat uppströms |    ✗    |    ✗     |        ✓        |             ✓             |
+| Särdrag            | 9 router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| ------------------ | :------: | :------: | :-------------: | :-----------------------: |
+| Antigravity        |    ✓     |    ✓     |        —        |             ✓             |
+| GitHub Copilot     |    ✓     |    ✓     |        —        |             ✓             |
+| Kiro (AWS)         |    ✓     |    ✓     |        —        |             ✓             |
+| OpenAI Codex       |    —     |    ✓     |        —        |             ✓             |
+| Cursor IDE         |    ✓     |    ✓     |        —        |             ✓             |
+| Zed industrier     |    —     |    ✓     |        —        |             ✓             |
+| Claude kod         |    —     |    —     |        ✓        |             ✓             |
+| Öppna kod          |    —     |    —     |        ✓        |             ✓             |
+| Trae               |    —     |    —     |        —        |       🔍 Undersöker       |
+| Instrumentbräda UI |    ✓     |    ✗     |        ✗        |             ✓             |
+| Trafikinspektör    |    ✗     |    ✗     |        ✓        |             ✓             |
+| OmniRoute routing  |    ✗     |    ✗     |        ✗        |             ✓             |
+| Modellmappning UI  |    ✗     |    ✗     |        ✗        |             ✓             |
+| Bypass lista       |    ✗     |    ✗     |        ✓        |             ✓             |
+| Uppströms CA cert  |    ✗     |    ✗     |        ✓        |             ✓             |
 
 ---
 

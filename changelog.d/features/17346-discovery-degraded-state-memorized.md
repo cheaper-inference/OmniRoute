@@ -1,0 +1,1 @@
+- **feat(discovery):** the provider page now shows the outcome of the last model discovery of each connection — a failed discovery keeps its cause and its age on the connection row instead of looking healthy on the next read ([#17346](https://github.com/diegosouzapw/OmniRoute/pull/17346)) — thanks @maxmad64bis (with thanks to @marian-paun for the diagnosis in #16823)

@@ -648,27 +648,29 @@ sudo systemctl enable --now omniroute-update.path
 Tjänsten tar bort begäran före hämtningen så att en misslyckad körning inte skapar en loop. Utan
 `DOCKER_UPDATE_TRIGGER_FILE` behåller instrumentpanelen det manuella kommandoflödet.
 
-## Tillgänglighet: SQLite-standardkonfigurationen har en enda replik
+## Tillgänglighet: standard SQLite är en kopia
 
-Standardkonfigurationen för OmniRoute i Docker/Kubernetes är **en Node-process + en SQLite-skrivare**. Hög tillgänglighet **stöds inte** med den topologin.
+Lager Docker / Kubernetes OmniRoute är** en nodprocess + en SQLite skrivare** . Hög tillgänglighet är** stöds inte** på den topologin.
 
-| Begränsning                              | Konsekvens                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| En enda skrivare                         | Kör **inte** flera repliker mot samma SQLite-fil. Det skadar databasen.                                                                                                                                                                                                                                                                           |
-| Återskapande/omstart/HEALTHCHECK-dödning | **Fullständigt avbrott** för pågående SSE, instrumentpanelsessioner och tillstånd i minnet. Alla anslutna klienter kopplas från. Nya begäranden under perioden utan någon slutpunkt får svaret **`502 Bad Gateway: Unknown error`** från reverse proxyn, inte OmniRoute-JSON — klienterna kan inte skilja detta från ett leverantörsfel (#11015). |
-| Samma händelseloop som `/healthz`        | En belastad katalog- eller komprimeringscykel kan fördröja kontroller; en kort tidsgräns startar då om den **enda** repliken.                                                                                                                                                                                                                     |
+| Tvång                                    | Följd                                                                                                                                                                                                                                                                                                                |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ensam författare                         | Do** inte** kör flera repliker mot samma SQLite fil. Det korrumperar DB.                                                                                                                                                                                                                                             |
+| Återskapa / starta om / HEALTHCHECK kill | **Fullt avbrott** av SSE under flygning, dashboardsessioner och minnestillstånd. Varje ansluten klient tappar. Nya förfrågningar under det tomma slutpunktsfönstret får en omvänd proxy**`502 Bad Gateway: Unknown error`** , inte OmniRoute JSON — klienter kan inte skilja detta från ett leverantörsfel (#11015). |
+| Samma händelseloop som `/healthz`        | En upptagen katalog eller kompressionsbock kan fördröja sonder; en kort timeout startar sedan om** endast** kopia.                                                                                                                                                                                                   |
 
-**Kontrollmatris** (se även [rekommendationer för Kubernetes-kontroller](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Sondmatris** (se även [Kubernetes sondrekommendationer](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Kontroll               | Mål                                                         | Använd inte                                                   |
-| ---------------------- | ----------------------------------------------------------- | ------------------------------------------------------------- |
-| Livskontroll           | TCP på `PORT` (standard `20128`) eller mjuk HTTP `/healthz` | `/api/monitoring/health`                                      |
-| Beredskapskontroll     | HTTP `GET /healthz`                                         | Snäva tidsgränser som tolkar en upptagen händelseloop som död |
-| Djupkontroll/människor | `/api/monitoring/health`                                    | Automatisk kubelet-livskontroll                               |
+| Sond             | Mål                                                          | Använd inte                                                  |
+| ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Livlighet        | TCP på `PORT` (standard `20128`), eller mjuk HTTP `/healthz` | `/api/monitoring/health`                                     |
+| Beredskap        | HTTP `GET /healthz`                                          | Snäva timeouts som behandlar händelseslinga upptagen som död |
+| Djup / människor | `/api/monitoring/health`                                     | Automatiserad kubelet livlighet                              |
 
-**Uppgraderingar:** räkna med att varje session kopplas från. Töm klientanslutningarna om du kan; det finns ingen rullande uppdatering med SQLite-standardkonfigurationen. Compose-inställningen `restart: unless-stopped` tillsammans med Docker `HEALTHCHECK` ersätter också den enda processen när containern har statusen Unhealthy — med samma konsekvenser.
+**Uppgraderingar:** förvänta dig att varje session minskar. Dränera kunder om du kan; det finns ingen rullande uppdatering på standard SQLite. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` kommer också att ersätta den enda processen när behållaren är ohälsosam – samma sprängradie.
 
-Kubernetes-exempel för en **enda replik** (Recreate krävs; öka inte `replicas` mot en enda SQLite-fil):
+Färdiga manifest och ett Helm-diagram live i `deploy/kubernetes/` och `deploy/helm/omniroute/` — se [Kubernetes-distributionsguiden](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes-utdrag för en** enstaka replika** (Återskapa krävs; höj inte `replicas` mot en SQLite -fil):
 
 ```yaml
 spec:
@@ -695,9 +697,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop`-väntetiden gör att kube kan ta bort Service-endpoints före SIGTERM, så att **ny** trafik inte längre skickas till processen som håller på att avslutas. Pågående SSE för `/v1/responses` får upp till `SHUTDOWN_TIMEOUT_MS` (standardvärde 30 s) på sig att slutföras via resurskrävande åtkomstlås (#11015). Nya förfrågningar som ändå når processen får `503` + `Retry-After: 5`. Tomrummet utan endpoints vid Recreate, tills ersättningen är Ready, innebär fortfarande ett fullständigt avbrott – det beror på SQLite-topologin, inte på en felkonfigurerad probe.
+`preStop` sleep låter kube släppa tjänstens slutpunkter före SIGTERM så** ny** trafiken slutar drabba den döende processen. In-flight `/v1/responses` SSE dräneras upp till `SHUTDOWN_TIMEOUT_MS` (standard 30s) via tungviktsleasingavtal (#11015). Nya förfrågningar som fortfarande når processen får `503` + `Retry-After: 5`. Återskapa tomt slutpunktsgap tills ersättningen är klar förblir ett hårt avbrott – det vill säga SQLite topologin, inte en felkonfiguration av sond.
 
-Extern Postgres/HA med flera skrivande instanser är **inte** en dokumenterad standardlösning. Om du behöver HA bör du behålla en enda replika eller använda en topologi som projektet har testat och dokumenterat separat. Arbetet med Postgres/MySQL finns i [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Fram tills det är tillgängligt är det enda sättet som stöds för att utöka kapaciteten för **stora** `/v1/responses` att använda N oberoende processer (nästa avsnitt), inte `replicas > 1` på en och samma volym.
+Extern Postgres / multi-writer HA är** inte** en dokumenterad lagerbana. Om du behöver HA, behåll en enstaka replik eller kör en topologi som projektet har testat och dokumenterat separat. Postgres/MySQL verket bor i [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Tills det skickas, det enda stödda sättet att föröka sig** stor** `/v1/responses` kapaciteten är N oberoende processer (nästa avsnitt), inte `replicas > 1` på en volym.
 
 ## Utskalning: N oberoende processer
 

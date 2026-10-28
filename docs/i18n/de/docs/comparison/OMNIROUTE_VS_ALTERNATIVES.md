@@ -37,13 +37,13 @@ Objektiver Funktionsvergleich mit beliebten Open-Source-KI-Routern.
 | **Tunnel-Unterstützung (Cloudflared, Tailscale, Ngrok)** |                     ✅                      |        ❌         |        n/a        |        n/a         |
 | **Lizenz**                                               |                     MIT                     |        MIT        |    proprietär     |     proprietär     |
 
-## Wann Sie OmniRoute wählen sollten
+## Wann sollte man OmniRoute wählen?
 
-- Sie hosten selbst und wünschen **maximale Anbieterabdeckung** (375 Anbieter, 155 kostenlose Katalogeinträge ohne Authentifizierung)
-- Sie benötigen einen **integrierten MCP-Server** (LLM-Tools, Speicher und Skills, die als Tools bereitgestellt werden)
-- Sie benötigen das **A2A-Protokoll** für Agent-zu-Agent-Workflows
-- Sie wünschen **Fingerprint-Verschleierung** (JA3/JA4), um eine Erkennung durch vorgelagerte CAPTCHAs zu vermeiden
-- Sie benötigen **Enterprise-Funktionen** (Guardrails, Evals, Audit-Trail) ohne SaaS-Rechnung
+- Sie sind selbst Gastgeber und möchten** maximale Anbieterabdeckung** (377 Anbieter, 155 free/no-auth -Katalogeinträge)
+- Du brauchst ein** Integrierter MCP -Server** (LLM Werkzeuge, Gedächtnis, Fähigkeiten, die als Werkzeuge offengelegt werden)
+- Du brauchst**A2A -Protokoll** für Agent-zu-Agent-Workflows
+- Du willst** Fingerabdruck-Stealth** (JA3/JA4), um eine Erkennung durch vorgeschaltetes CAPTCHAs zu vermeiden
+- Du brauchst** Unternehmensfunktionen** (Leitplanken, Bewertungen, Prüfpfad) ohne SaaS -Rechnung
 
 ## Wann Sie LiteLLM wählen sollten
 

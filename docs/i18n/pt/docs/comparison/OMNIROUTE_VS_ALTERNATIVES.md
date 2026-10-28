@@ -37,13 +37,13 @@ Comparação objetiva de funcionalidades face a routers de IA open-source popula
 | **Suporte de túneis (Cloudflared, Tailscale, Ngrok)**        |                       ✅                        |          ❌           |        n/a        |     n/a      |
 | **Licença**                                                  |                       MIT                       |          MIT          |   proprietária    | proprietária |
 
-## Quando escolher o OmniRoute
+## Quando escolher OmniRoute
 
-- Faz self-hosting e pretende a **máxima cobertura de fornecedores** (375 fornecedores, 155 entradas de catálogo gratuitas/sem autenticação)
-- Precisa de um **servidor MCP integrado** (ferramentas LLM, memória e competências expostas como ferramentas)
-- Precisa do **protocolo A2A** para fluxos de trabalho agente-a-agente
-- Pretende **furtividade de fingerprint** (JA3/JA4) para evitar a deteção por CAPTCHAs a montante
-- Precisa de **funcionalidades empresariais** (guardrails, avaliações, registo de auditoria) sem uma fatura de SaaS
+- Você auto-hospeda-se e quer** cobertura máxima do prestador** (377 fornecedores, 155 entradas de catálogo free/no-auth )
+- Precisa de um** servidor MCP integrado** (ferramentas LLM, memória, competências expostas como ferramentas)
+- Você precisa** protocolo A2A** para fluxos de trabalho entre agentes
+- Você quer** furtividade de impressão digital** (JA3/JA4) para evitar a detecção pelo CAPTCHAs a montante
+- Você precisa** recursos empresariais** (guarda-corpos, avaliações, audit trail) sem uma conta SaaS
 
 ## Quando escolher o LiteLLM
 

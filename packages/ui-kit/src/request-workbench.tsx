@@ -24,6 +24,7 @@ import { Textarea } from "./textarea";
 import { cn } from "./lib/utils";
 
 export type RequestWorkbenchState = "empty" | "loading" | "streaming" | "success" | "error";
+export type RequestWorkbenchVariant = "default" | "onboarding";
 
 export interface RequestModelOption {
   value: string;
@@ -232,6 +233,8 @@ export function RequestHeaders({ className, headers = {}, defaultOpen = false, .
 }
 
 export interface LiveResponsePanelProps extends ComponentProps<"section"> {
+  /** Onboarding shows a compact, theme-aware answer without request metrics or headers. */
+  variant?: RequestWorkbenchVariant;
   state?: RequestWorkbenchState;
   result?: RequestResultData;
   errorMessage?: ReactNode;
@@ -239,21 +242,22 @@ export interface LiveResponsePanelProps extends ComponentProps<"section"> {
   onRetry?: ComponentProps<"button">["onClick"];
 }
 
-export function LiveResponsePanel({ className, state = "empty", result = {}, errorMessage = "The request could not be completed. Check the request and try again.", streamingOutput, onRetry, ...props }: LiveResponsePanelProps) {
+export function LiveResponsePanel({ className, variant = "default", state = "empty", result = {}, errorMessage = "The request could not be completed. Check the request and try again.", streamingOutput, onRetry, ...props }: LiveResponsePanelProps) {
   const headers = result.headers ?? {};
+  const onboarding = variant === "onboarding";
   return (
-    <section data-slot="live-response-panel" data-state={state} className={cn("ci-live-response", className)} {...props}>
+    <section data-slot="live-response-panel" data-variant={onboarding ? variant : undefined} data-state={state} className={cn("ci-live-response", className)} {...props}>
       <header className="ci-live-response__header">
-        <span>Live response</span>
+        <span>{onboarding ? "Response" : "Live response"}</span>
         {state === "success" && <Badge variant="live">Complete</Badge>}
         {state === "streaming" && <Badge variant="live">Streaming</Badge>}
       </header>
 
-      {state === "empty" && <div className="ci-live-response__empty"><span><Play aria-hidden="true" /></span><strong>Response appears here</strong><p>Run the request to inspect model output, latency, and savings.</p></div>}
-      {state === "loading" && <div className="ci-live-response__loading" role="status"><span className="ci-response-loader" aria-hidden="true"><i /><i /><i /></span><strong>Sending request</strong><p>Connecting to an eligible provider…</p></div>}
+      {state === "empty" && <div className="ci-live-response__empty">{!onboarding && <span><Play aria-hidden="true" /></span>}<strong>Response appears here</strong><p>{onboarding ? "Send a request to see your model’s answer." : "Run the request to inspect model output, latency, and savings."}</p></div>}
+      {state === "loading" && <div className="ci-live-response__loading" role="status"><span className="ci-response-loader" aria-hidden="true"><i /><i /><i /></span><strong>Sending request</strong><p>{onboarding ? "Waiting for your model’s response…" : "Connecting to an eligible provider…"}</p></div>}
       {state === "streaming" && <div className="ci-live-response__stream" role="status"><p>{streamingOutput ?? "Receiving response"}<span aria-hidden="true" /></p><small>Receiving tokens…</small></div>}
       {state === "error" && <div className="ci-live-response__error" role="alert"><AlertCircle aria-hidden="true" /><div><strong>Request failed</strong><p>{errorMessage}</p>{onRetry ? <Button variant="outline" size="sm" onClick={onRetry}>Try again</Button> : null}</div></div>}
-      {state === "success" && <div className="ci-live-response__success"><RequestResultMetrics result={result} />{result.output != null ? <div className="ci-response-output"><span>Assistant output</span><p>{result.output}</p></div> : null}{Object.keys(headers).length ? <RequestHeaders headers={headers} /> : null}</div>}
+      {state === "success" && <div className="ci-live-response__success" role={onboarding ? "status" : undefined}>{!onboarding && <RequestResultMetrics result={result} />}{result.output != null ? <div className="ci-response-output">{!onboarding && <span>Assistant output</span>}<p>{result.output}</p></div> : null}{!onboarding && Object.keys(headers).length ? <RequestHeaders headers={headers} /> : null}</div>}
     </section>
   );
 }
@@ -272,10 +276,23 @@ const DEFAULT_PARAMETERS: ParameterControlValues = {
 };
 
 export interface RequestWorkbenchProps extends Omit<ComponentProps<"section">, "onSubmit" | "title"> {
+  /** A simple model, prompt, and response flow. Default retains every playground control. */
+  variant?: RequestWorkbenchVariant;
+  /** Pass null for both title and description to omit the onboarding header. */
   title?: ReactNode;
   description?: ReactNode;
   endpoint?: string;
   models?: RequestModelOption[];
+  /** Controlled selection; pair with onModelChange. */
+  model?: string;
+  defaultModel?: string;
+  onModelChange?: (value: string) => void;
+  /** Controlled prompt; pair with onPromptChange to keep optional code samples in sync. */
+  prompt?: string;
+  onPromptChange?: (value: string) => void;
+  disabled?: boolean;
+  /** Defaults to 4000 for onboarding, and no limit for the full workbench. */
+  promptMaxLength?: number;
   status?: RequestWorkbenchState;
   result?: RequestResultData;
   errorMessage?: ReactNode;
@@ -293,10 +310,18 @@ export interface RequestWorkbenchProps extends Omit<ComponentProps<"section">, "
 
 export function RequestWorkbench({
   className,
-  title = "New request",
-  description = "Choose a model, send a real prompt, and inspect request-level savings.",
+  variant = "default",
+  title = variant === "onboarding" ? "Try your first request" : "New request",
+  description = variant === "onboarding" ? "Choose a model and send a message. Your response appears below." : "Choose a model, send a real prompt, and inspect request-level savings.",
   endpoint = "POST /chat/completions",
   models = [],
+  model: controlledModel,
+  defaultModel,
+  onModelChange,
+  prompt: controlledPrompt,
+  onPromptChange,
+  disabled = false,
+  promptMaxLength,
   status = "empty",
   result,
   errorMessage,
@@ -313,32 +338,48 @@ export function RequestWorkbench({
   ...props
 }: RequestWorkbenchProps) {
   const id = useId();
-  const [model, setModel] = useState(models[0]?.value ?? "");
-  const [prompt, setPrompt] = useState(defaultPrompt);
+  const onboarding = variant === "onboarding";
+  const [localModel, setLocalModel] = useState(defaultModel ?? models[0]?.value ?? "");
+  const [localPrompt, setLocalPrompt] = useState(defaultPrompt);
+  const model = controlledModel ?? (onboarding && !models.some(option => option.value === localModel) ? models[0]?.value ?? "" : localModel);
+  const prompt = controlledPrompt ?? localPrompt;
+  const pending = status === "loading" || status === "streaming";
+  const editorDisabled = disabled || (onboarding && pending);
+  const maxLength = promptMaxLength ?? (onboarding ? 4000 : undefined);
+  const validModel = !!model && (!onboarding || models.some(option => option.value === model));
+  const validPrompt = !!prompt.trim() && (maxLength === undefined || prompt.length <= maxLength);
+  const canRun = !disabled && validModel && validPrompt && walletStatus === "connected" && (!onboarding || (!pending && !!onRun));
+  const setModel = (value: string) => { if (controlledModel === undefined) setLocalModel(value); onModelChange?.(value); };
+  const setPrompt = (value: string) => { if (controlledPrompt === undefined) setLocalPrompt(value); onPromptChange?.(value); };
   const [parameters, setParameters] = useState(DEFAULT_PARAMETERS);
   const modelOptions = useMemo(() => models.map((option) => ({
     value: option.value,
     label: <span className="ci-request-model-option"><ModelIdentity name={option.label} provider={option.provider} logo={option.logo} /><small>{option.meta}</small></span>,
   })), [models]);
+  const run = () => {
+    if ((onboarding || disabled) && !canRun) return;
+    onRun?.({ model, prompt, parameters });
+  };
 
   return (
-    <section data-slot="request-workbench" className={cn("ci-request-workbench", className)} {...props}>
-      <header className="ci-request-workbench__header"><div><h2>{title}</h2><p>{description}</p></div></header>
+    <section data-slot="request-workbench" data-variant={onboarding ? variant : undefined} className={cn("ci-request-workbench", className)} {...props}>
+      {(!onboarding || title != null || description != null) && <header className="ci-request-workbench__header"><div>{(!onboarding || title != null) && <h2>{title}</h2>}{(!onboarding || description != null) && <p>{description}</p>}</div></header>}
       <div className="ci-request-workbench__grid">
         <div className="ci-request-editor">
-          <Field label="Model" htmlFor={`${id}-model`} hint="Live marketplace pricing; never above provider list price.">
-            <Select id={`${id}-model`} name="model" value={model} onValueChange={setModel} options={modelOptions} placeholder="Choose a model" />
+          <Field label="Model" htmlFor={`${id}-model`} hint={onboarding ? models.length ? undefined : "No models are available yet. Try again in a moment." : "Live marketplace pricing; never above provider list price."}>
+            <Select id={`${id}-model`} name="model" value={model} onValueChange={setModel} options={modelOptions} placeholder="Choose a model" disabled={editorDisabled || (onboarding && !models.length)} />
           </Field>
           <Field label="Prompt" htmlFor={`${id}-prompt`}>
-            <Textarea id={`${id}-prompt`} value={prompt} onChange={(event) => setPrompt(event.target.value)} />
+            <Textarea id={`${id}-prompt`} value={prompt} onChange={(event) => setPrompt(event.target.value)} disabled={editorDisabled} maxLength={maxLength} />
           </Field>
-          <ParameterControls value={parameters} onValueChange={setParameters} />
-          <WalletStatusNotice status={walletStatus} estimatedMaximum={estimatedMaximum} onAction={onWalletAction} />
-          <Button onClick={() => onRun?.({ model, prompt, parameters })} loading={status === "loading"} disabled={!model || !prompt.trim() || walletStatus !== "connected"}><Play aria-hidden="true" />{status === "loading" ? "Running request" : "Run request"}</Button>
+          {!onboarding && <ParameterControls value={parameters} onValueChange={setParameters} />}
+          {!onboarding && <WalletStatusNotice status={walletStatus} estimatedMaximum={estimatedMaximum} onAction={onWalletAction} />}
+          {onboarding && walletStatus !== "connected" && <p className="ci-request-workbench__notice" role="status">{walletStatus === "insufficient" ? "Add credit before sending your request." : "Confirm your payment before sending your request."}</p>}
+          <Button onClick={run} loading={onboarding ? pending : status === "loading"} disabled={!canRun}><Play aria-hidden="true" />{onboarding ? pending ? "Sending request" : "Send request" : status === "loading" ? "Running request" : "Run request"}</Button>
         </div>
-        <LiveResponsePanel state={status} result={result} errorMessage={errorMessage} streamingOutput={streamingOutput} onRetry={onRun ? () => onRun({ model, prompt, parameters }) : undefined} />
+        {(!onboarding || status !== "empty") && <LiveResponsePanel variant={variant} state={status} result={result} errorMessage={errorMessage} streamingOutput={streamingOutput} onRetry={onRun && !disabled && (!onboarding || canRun) ? run : undefined} />}
       </div>
-      {code != null || codeLines != null ? <footer className="ci-request-workbench__code"><CodePreview filename={codeFilename} language={codeLanguage} metadata={endpoint} code={code} lines={codeLines} /></footer> : null}
+      {!onboarding && (code != null || codeLines != null) ? <footer className="ci-request-workbench__code"><CodePreview filename={codeFilename} language={codeLanguage} metadata={endpoint} code={code} lines={codeLines} /></footer> : null}
     </section>
   );
 }

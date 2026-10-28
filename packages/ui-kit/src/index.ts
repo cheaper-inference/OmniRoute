@@ -323,6 +323,7 @@ export {
   type RequestResultMetricsProps,
   type RequestWorkbenchProps,
   type RequestWorkbenchState,
+  type RequestWorkbenchVariant,
   type WalletStatus,
   type WalletStatusNoticeProps,
 } from "./request-workbench";
@@ -356,3 +357,8 @@ export { KeakMark, KeakLogo, ProductIcon, ProductLockup, ProductSwitcher, Editor
   type ProductSwitcherItem, type ProductSwitcherProps, type EditorialSectionProps, type EditorialCardProps,
 } from "./keak-brand";
 export { InvoiceDocument, type InvoiceDocumentProps, type InvoiceDocumentParty } from "./invoice-document";
+
+export { IntegrationSetup, type IntegrationSetupProps, type IntegrationSetupStep } from "./integration-setup";
+
+export { IntegrationResources, type IntegrationResource, type IntegrationResourcesProps } from "./integration-resources";
+export { TokenSavingsList, ClientQuickStart, OverviewPanels, type TokenSavingsItem, type QuickStartIntegration, type OverviewPanelsProps } from "./overview-patterns";

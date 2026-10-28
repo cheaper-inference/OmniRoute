@@ -15,236 +15,200 @@
 
 ### அடுக்கு 1 — LOCAL_ONLY
 
-**செயல்படுத்தப்படுவது:** `isLocalOnlyPath(path)` → loopback host சரிபார்ப்பு  
-**தவிர்ப்பு:** இயல்புநிலையில் எதுவுமில்லை. கோரிக்கையில் `manage` scope கொண்ட செல்லுபடியாகும் API key இருக்கும்போது, `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-இல் உள்ள பாதைகளுக்கு மட்டும் குறுகிய விதிவிலக்கு வழங்கப்படுகிறது ([Manage-scope விதிவிலக்கு](#manage-scope-carve-out) என்பதைப் பார்க்கவும்).
+**செயல்படுத்துவது:** `isLocalOnlyPath(path)` → லூப்பேக் ஹோஸ்ட் சரிபார்ப்பு
+**புறக்கணிப்பு:** இயல்பாக எதுவும் இல்லை. கோரிக்கை `manage` ஸ்கோப்புடன் சரியான
+API விசையைக் கொண்டிருக்கும்போது `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-இல் உள்ள
+பாதைகளுக்கு குறுகிய விலக்கு (பார்க்கவும் [Manage-scope விலக்கு](#manage-scope-carve-out)).
 
-இந்த வழித்தடங்கள் child process-களைத் தொடங்குகின்றன அல்லது runtime code-ஐ இயக்குகின்றன. இவற்றை loopback அல்லாத போக்குவரத்துக்கு வெளிப்படுத்துவது, செல்லுபடியாகும் JWT-ஐப் பெற்ற தாக்குநர் (எ.கா., Cloudflared/Ngrok tunnel வழியாக) process spawning-ஐத் தூண்ட அனுமதிக்கும் — இது அறியப்பட்ட ஒரு CVE வகையாகும் ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+இந்த ரூட்டுகள் சைல்டு ப்ராசஸ்களை உருவாக்குகின்றன அல்லது ரன்டைம் கோடை இயக்குகின்றன.
+அவற்றை லூப்பேக் அல்லாத ட்ராஃபிக்கிற்கு வெளிப்படுத்துவது, சரியான JWT-ஐப் பெற்ற
+தாக்குபவருக்கு (எ.கா., Cloudflared/Ngrok டன்னல் வழியாக) ப்ராசஸ் ஸ்பானிங்கைத் தூண்ட
+அனுமதிக்கும் — இது அறியப்பட்ட CVE வகுப்பு
+([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**GHSA-fhh6-4qxv-rpqj என்பது என்ன (தாக்குதல் வகை):** ஒரு management/agent server, subprocess ஒன்றைத் தொடங்கும் endpoint-ஐ வெளிப்படுத்துகிறது (`npm install`, `node`, ஒரு browser, ஒரு proxy, `git`, `tar`, …). அந்த endpoint-ஐ host-க்கு வெளியில் இருந்து அணுக முடிந்தால் — operator, OmniRoute-ஐ nginx/Cloudflare/Tailscale tunnel-க்குப் பின்னால் வைத்திருப்பதாலும் JWT கசிந்திருப்பதாலும், அல்லது auth தவறாக உள்ளமைக்கப்பட்டிருப்பதாலும் — தாக்குநர் "API ஒன்றை அழைப்பதை" "host-இல் command ஒன்றை இயக்குவதாக" மாற்றுகிறார் (remote code execution). Spawn செய்யக்கூடிய ஒவ்வொரு வழித்தடத்திலும், **எந்த auth சரிபார்ப்புக்கும் முன்பாக, நிபந்தனையின்றி loopback host சரிபார்ப்பைச் செயல்படுத்துவதன் மூலம்** OmniRoute இதைத் தடுக்கிறது: tunnel வழியாக token கசிந்தாலும், அது spawn செயல்பாட்டை அடைய முடியாது.
+**GHSA-fhh6-4qxv-rpqj என்பது என்ன (தாக்குதல் வகுப்பு):** ஒரு மேலாண்மை/ஏஜென்ட்
+சர்வர் ஒரு சப்ராசஸை (`npm install`, `node`, ஒரு பிரவுசர், ஒரு ப்ராக்ஸி, `git`,
+`tar`, …) துவக்கும் எண்ட்பாயிண்ட்டை வெளிப்படுத்துகிறது. அந்த எண்ட்பாயிண்ட்
+ஹோஸ்டுக்கு வெளியிலிருந்து அணுகக்கூடியதாக இருந்தால் — ஏனெனில் ஆபரேட்டர் OmniRoute-ஐ
+ஒரு nginx/Cloudflare/Tailscale டன்னலுக்குப் பின்னால் வைத்திருந்து ஒரு JWT கசிந்தது,
+அல்லது ஆத் தவறாகக் கட்டமைக்கப்பட்டது — தாக்குபவர் "ஒரு API-ஐ அழைப்பது" என்பதை
+"ஹோஸ்டில் ஒரு கமாண்டை இயக்குவது" என மாற்றுகிறார் (ரிமோட் கோட் எக்ஸிகியூஷன்).
+OmniRoute இதை, ஒவ்வொரு ஸ்பான்-திறன் கொண்ட ரூட்டிலும் **எந்த ஆத் சரிபார்ப்புக்கும்
+முன், நிபந்தனையின்றி லூப்பேக் ஹோஸ்ட் சரிபார்ப்பை** செயல்படுத்துவதன் மூலம் மூடுகிறது:
+ஒரு டன்னல் வழியாகக் கசிந்த டோக்கன் கூட ஸ்பானை அடைய முடியாது.
 
-**முழுமையான LOCAL_ONLY தொகுப்பு.** அதிகாரப்பூர்வ மூலம் `src/server/authz/routeGuard.ts`-இல் உள்ள `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` ஆகும்; கீழேயுள்ள அட்டவணை தற்போதைய நிலையைப் பிரதிபலிக்கிறது. Spawn செய்யக்கூடிய prefix-களின் கீழுள்ள ஒவ்வொரு `route.ts`-ஐயும் `check-route-guard-membership` gate கணக்கிட்டு, அவற்றில் ஏதேனும் local-only என வகைப்படுத்தப்படவில்லை என்றால் CI-ஐத் தோல்வியடையச் செய்கிறது.
+**முழு LOCAL_ONLY தொகுப்பு.** அதிகாரப்பூர்வ ஆதாரம்
+`src/server/authz/routeGuard.ts`-இல் உள்ள `LOCAL_ONLY_API_PREFIXES` /
+`LOCAL_ONLY_API_PATTERNS` ஆகும்; கீழே உள்ள அட்டவணை தற்போதைய நிலையை
+பிரதிபலிக்கிறது. `check-route-guard-membership` கேட் ஸ்பான்-திறன் கொண்ட
+ப்ரீஃபிக்ஸ்களின் கீழ் உள்ள ஒவ்வொரு `route.ts`-ஐயும் கணக்கிடுகிறது, மேலும்
+ஏதேனும் ஒன்று லோக்கல்-ஓன்லியாக வகைப்படுத்தப்படவில்லை என்றால் CI-ஐ
+தோல்வியடையச் செய்கிறது.
 
-| முன்னொட்டு / முறை                                                                                        | இது ஏன் உள்ளகத்தில் மட்டும் செயல்படுகிறது                                                                                                 |
-| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP சேவையகம் — stdio இணைப்புப் பாலங்கள் + SSE கையாளிகளைத் தொடங்குகிறது                                                                    |
-| `/api/cli-tools/runtime/`                                                                                | CLI கருவி இயக்கச்சூழல் — எந்தவொரு செருகுநிரல் குறியீட்டையும் இயக்குகிறது                                                                  |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | ஹோஸ்டில் உள்ள கருவி இருமங்கள்/கட்டமைப்பைத் தொடக்கூடிய, ஒவ்வொரு கருவிக்குமான அமைப்பு எழுதிகள்                                              |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | மேலே உள்ள ஆறு இணை கருவிகளைப் போலவே `getCliRuntimeStatus()` செயல்முறையைத் தொடங்குகிறது (GHSA-35fw-cv32-2373)                               |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI இருப்புப்பட்டியல் ஆய்வுகள் — ஒவ்வொரு கருவிக்கும் `command -v` / `--version` செயல்முறையைத் தொடங்குகின்றன (GHSA-35fw-cv32-2373)         |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM பதிலாள் கட்டுப்பாடு (கணினிப் பதிலாளைத் தொடங்குகிறது/அதற்குச் சுட்டுகிறது)                                                |
-| `/api/modality-bridge/video/`                                                                            | கண்டிப்பாக நம்பகமான loopback Video Bridge இயக்கச்சூழல் ஆய்வு மற்றும் உள்ளகப் பிரித்தெடுப்புப் பாலம்                                       |
-| `/api/services/`                                                                                         | உட்பொதிக்கப்பட்ட சேவைகள் (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + செயல்முறைத் தொடக்கம்                              |
-| `/dashboard/providers/services/`                                                                         | உட்பொதிக்கப்பட்ட சேவை UI-களுக்கான எதிர்த்திசைப் பதிலாள்                                                                                   |
-| `/api/tunnels/cloudflared`                                                                               | cloudflared இருமத்தை நிறுவி/தொடங்குகிறது                                                                                                  |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | ஹோஸ்டில் tailscaled-ஐ நிறுவுகிறது/கட்டுப்படுத்துகிறது                                                                                     |
-| `/api/copilot/`                                                                                          | அங்கீகரிக்கப்படாத LLM இயக்கி — இயல்பாக CLI-க்கு மட்டும்                                                                                   |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM சேவையகத்தைத் தொடங்கி + DNS திருத்தங்களைச் செய்கிறது                                                                    |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy கேட்பான் + கணினிப் பதிலாள்                                                                                 |
-| `/api/settings/mitm`                                                                                     | MITM இடைமறிப்பைச் செயல்படுத்துகிறது (கணினி-நிலை பதிலாள் நிலை)                                                                             |
-| `/api/issue-agent/`                                                                                      | சிக்கல் முகவர் — களஞ்சியத்திற்கு எதிராக உள்ளகக் கருவிகளைத் தொடங்குகிறது                                                                   |
-| `/api/plugins/`, `/api/plugins`                                                                          | செருகுநிரல்கள் — `worker_threads` + `child_process` வழியாக ஏற்றி/இயக்குகிறது                                                              |
-| `/api/middleware/`                                                                                       | பயனர் இடைநிலை மென்பொருள் — இயக்குநர் குறியீட்டைச் செயல்முறைக்குள்ளேயே ஏற்றி/இயக்குகிறது                                                   |
-| `/api/system/version`                                                                                    | தானியங்குப் புதுப்பிப்பு (POST மட்டும்; GET/HEAD/OPTIONS-க்கு விலக்கு) — `git checkout` + `npm install` செயல்முறைகளைத் தொடங்குகிறது       |
-| `/api/db-backups/exportAll`                                                                              | ஏற்றுமதிக் காப்பகத்திற்காக `tar` செயல்முறையைத் தொடங்குகிறது                                                                               |
-| `/api/local/`                                                                                            | ஒற்றைக் கிளிக் உள்ளகத் தொடக்கிகள் (தற்போது Redis) — podman/docker செயல்முறைகளைத் தொடங்குகிறது                                             |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom பதிலாள் வாழ்நாள் சுழற்சி — python CLI-ஐத் தொடங்குகிறது / PID-க்குச் சமிக்ஞைகளை அனுப்புகிறது                                      |
-| `/api/jobs`, `/api/jobs/`                                                                                | பணி இயக்கிக் கட்டுப்பாடு — திட்டமிடப்பட்ட ஹோஸ்ட்-பக்கப் பணியை இயக்குகிறது                                                                 |
-| `/api/oauth/cursor/auto-import`                                                                          | நற்சான்றுகளை இறக்குமதி செய்வதற்கு முன் `execFile("which", ["cursor"])`-ஐ இயக்குகிறது                                                      |
-| `/api/oauth/kiro/auto-import`                                                                            | ஹோஸ்டிலிருந்து Kiro CLI நற்சான்றுக் கோப்புகளைப் படிக்கிறது                                                                                |
-| `/api/skills/collect/`                                                                                   | திறன் சேகரிப்பு — உள்ளகக் கருவிகளைக் கண்டறிந்து/நிறுவுகிறது                                                                               |
-| `/api/skills/install`, `/api/skills/executions`                                                          | திறன் கையாளுநர் பதிவுசெய்தல் + செயல்படுத்தல் — sandbox container உருவாக்கத்தை அணுகும் (GHSA-jx89)                                         |
-| `/api/discovery/`                                                                                        | உள்ளக நெட்வொர்க்/வழங்குநர் கண்டறிதல் ஆய்வுகள்                                                                                             |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | ஊடாடும் உள்நுழைவுகளுக்காக காட்சியுடனான browser + VNC அமர்வை உருவாக்கும்                                                                   |
-| `/api/acp/agents`                                                                                        | ACP — உள்ளக CLI agent binary-களைக் கண்டறிந்து உருவாக்கும்                                                                                 |
-| `/api/resilience/connections`                                                                            | கணக்கு வாரியான மீட்சித்திறன் JSON (காத்திருப்புக் காலம், circuit breaker, lockout). dashboard HTML உள்ளகத்திற்கு மட்டும் கட்டுப்பட்டதல்ல. |
-| `/api/providers/cursor/agent-availability`                                                               | dashboard நிறுவல்-தூண்டல் சரிபார்ப்பு — `cursor-agent status --format json`-ஐ உருவாக்கும்                                                 |
-| `/api/providers/{id}/login` (regex)                                                                      | web-cookie உள்நுழைவுக்காக காட்சியுடனான Playwright Chromium-ஐத் தொடங்கும்                                                                  |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | கைமுறை காட்சியுடனான செயல்முறை + அமர்வு அடிப்படையிலான தொலைபேசி/SMS தானியங்கு உள்நுழைவு (Playwright-ஐ உருவாக்கும்)                          |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | கைமுறை Cursor அமர்வுப் புதுப்பிப்பு — `cursor-agent`-ஐத் தூண்டும்                                                                         |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | உள்ளக Codex CLI நிறுவலைக் கண்டறிந்து பகுப்பாய்வு செய்யும் (binary-ஐ உருவாக்கும்)                                                          |
+| முன்னொட்டு / மாதிரி                                                                                      | இது ஏன் உள்ளக-மட்டும்                                                                                               |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP சர்வர் — stdio பிரிட்ஜ்கள் + SSE ஹேண்ட்லர்களை ஸ்பான் செய்கிறது                                                  |
+| `/api/cli-tools/runtime/`                                                                                | CLI கருவி ரன்டைம் — தன்னிச்சையான ப்ளகின் குறியீட்டை இயக்குகிறது                                                     |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | ஹோஸ்டில் உள்ள கருவி பைனரிகள்/கன்ஃபிக் ஆகியவற்றைத் தொடக்கூடிய கருவி-வாரியான அமைப்பு எழுத்தாளர்கள்                    |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | மேலே உள்ள ஆறு சகோதரங்களைப் போலவே அதே `getCliRuntimeStatus()` ஸ்பான் (GHSA-35fw-cv32-2373)                           |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI இன்வென்டரி ஆய்வுகள் — ஒவ்வொரு கருவிக்கும் `command -v` / `--version` ஐ ஸ்பான் செய்கிறது (GHSA-35fw-cv32-2373)   |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM ப்ராக்ஸி கட்டுப்பாடு (கணினி ப்ராக்ஸியை ஸ்பான் செய்கிறது/சுட்டிக்காட்டுகிறது)                       |
+| `/api/modality-bridge/video/`                                                                            | கடுமையான நம்பகமான-லூப்பேக் Video Bridge ரன்டைம் ஆய்வு மற்றும் உள் எக்ஸ்ட்ராக்ஷன் பிரிட்ஜ்                           |
+| `/api/services/`                                                                                         | உட்பொதிக்கப்பட்ட சேவைகள் (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + ஸ்பான்                      |
+| `/dashboard/providers/services/`                                                                         | உட்பொதிக்கப்பட்ட சேவை UI-களுக்கான ரிவர்ஸ் ப்ராக்ஸி                                                                  |
+| `/api/tunnels/cloudflared`                                                                               | cloudflared பைனரியை நிறுவுகிறது/ஸ்பான் செய்கிறது                                                                    |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | ஹோஸ்டில் tailscaled ஐ நிறுவுகிறது/கட்டுப்படுத்துகிறது                                                               |
+| `/api/copilot/`                                                                                          | அங்கீகாரமற்ற LLM டிரைவர் — இயல்பாக CLI-மட்டும்                                                                      |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM சர்வரை ஸ்பான் செய்கிறது + DNS திருத்தங்கள்                                                       |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy லிசனர் + கணினி ப்ராக்ஸி                                                              |
+| `/api/settings/mitm`                                                                                     | MITM இடைமறிப்பை இயக்குகிறது (கணினி-நிலை ப்ராக்ஸி நிலை)                                                              |
+| `/api/issue-agent/`                                                                                      | Issue agent — ரெப்போவுக்கு எதிராக உள்ளக கருவிகளை ஸ்பான் செய்கிறது                                                   |
+| `/api/plugins/`, `/api/plugins`                                                                          | ப்ளகின்கள் — `worker_threads` + `child_process` வழியாக ஏற்றுதல்/இயக்குதல்                                           |
+| `/api/middleware/`                                                                                       | பயனர் மிடில்வேர் — இன்-ப்ராசஸில் ஆபரேட்டர் குறியீட்டை ஏற்றுகிறது/இயக்குகிறது                                        |
+| `/api/system/version`                                                                                    | தானியங்கு-புதுப்பிப்பு (POST மட்டும்; GET/HEAD/OPTIONS விலக்கு) — `git checkout` + `npm install` ஐ ஸ்பான் செய்கிறது |
+| `/api/db-backups/exportAll`                                                                              | ஏற்றுமதி ஆர்க்கைவுக்காக `tar` ஐ ஸ்பான் செய்கிறது                                                                    |
+| `/api/local/`                                                                                            | 1-கிளிக் உள்ளக லாஞ்சர்கள் (இன்று Redis) — podman/docker ஐ ஸ்பான் செய்கிறது                                          |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom ப்ராக்ஸி லைஃப்சைக்கிள் — python CLI ஐ ஸ்பான் செய்கிறது / PID க்கு சிக்னல் அனுப்புகிறது                     |
+| `/api/jobs`, `/api/jobs/`                                                                                | ஜாப் ரன்னர் கட்டுப்பாடு — திட்டமிடப்பட்ட ஹோஸ்ட்-பக்க வேலையை இயக்குகிறது                                             |
+| `/api/oauth/cursor/auto-import`                                                                          | க்ரெட்களை இறக்குமதி செய்வதற்கு முன் `execFile("which", ["cursor"])`                                                 |
+| `/api/oauth/kiro/auto-import`                                                                            | ஹோஸ்டிலிருந்து Kiro CLI நற்சான்றிதழ் கோப்புகளைப் படிக்கிறது                                                         |
+| `/api/skills/collect/`                                                                                   | ஸ்கில் சேகரிப்பு — உள்ளக கருவிகளைக் கண்டறிகிறது/நிறுவுகிறது                                                         |
+| `/api/skills/install`, `/api/skills/executions`                                                          | ஸ்கில் ஹேண்ட்லர் பதிவு + செயலாக்கம் — சாண்ட்பாக்ஸ் கன்டெய்னர் ஸ்பானை அடைகிறது (GHSA-jx89)                           |
+| `/api/discovery/`                                                                                        | லோக்கல் நெட்வொர்க்/வழங்குநர் கண்டறிதல் ஆய்வுகள்                                                                     |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | இன்டராக்டிவ் உள்நுழைவுகளுக்காக ஹெட்ஃபுல் பிரவுசர் + VNC அமர்வை ஸ்பான் செய்கிறது                                     |
+| `/api/acp/agents`                                                                                        | ACP — லோக்கல் CLI ஏஜென்ட் பைனரிகளைக் கண்டறிந்து ஸ்பான் செய்கிறது                                                    |
+| `/api/resilience/connections`                                                                            | கணக்கு வாரியான ரெசிலியன்ஸ் JSON (கூல்டவுன், பிரேக்கர், லாக்அவுட்). டாஷ்போர்டு HTML லோக்கல்-மட்டும் அல்ல.            |
+| `/api/providers/cursor/agent-availability`                                                               | டாஷ்போர்டு நிறுவல்-நட்ஜ் சரிபார்ப்பு — `cursor-agent status --format json` ஐ ஸ்பான் செய்கிறது                       |
+| `/api/providers/{id}/login` (regex)                                                                      | வெப்-குக்கீ உள்நுழைவுக்காக ஹெட்ஃபுல் Playwright Chromium ஐ தொடங்குகிறது                                             |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | மேனுவல் ஹெட்ஃபுல் ஓட்டம் + அமர்வு அடிப்படையிலான தொலைபேசி/SMS தானியங்கு உள்நுழைவு (Playwright ஐ ஸ்பான் செய்கிறது)    |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | மேனுவல் Cursor அமர்வு புதுப்பிப்பு — `cursor-agent` ஐ நட்ஜ் செய்கிறது                                               |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | லோக்கல் Codex CLI நிறுவலைப் பரிசோதிக்கிறது (பைனரியை ஸ்பான் செய்கிறது)                                               |
 
-**மீறலின்போதான பதில்:** `403 LOCAL_ONLY`
+**மீறலுக்கான பதில்:** `403 LOCAL_ONLY`
 
-#### Manage-scope விதிவிலக்கு
+#### Manage ஸ்கோப் கார்வ்-அவுட்
 
-LOCAL_ONLY பாதைகளின் ஒரு துணைத்தொகுதியை, கோரிக்கையில் `manage` scope (அல்லது
-`admin`) கொண்ட metadata உடைய `Authorization: Bearer <api-key>` இருந்தால் மட்டுமே,
-loopback அல்லாத இடங்களிலிருந்தும் அணுகலாம். இந்த விதிவிலக்கு ஒவ்வொரு பாதைக்கும்
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` மூலம் வெளிப்படையாகக் கட்டுப்படுத்தப்படுகிறது;
-எனவே எந்தப் புதிய LOCAL_ONLY பாதைக்கும் இயல்புநிலை strict-loopback ஆகவே இருக்கும்.
-அங்கீகரிக்கப்படாத கோரிக்கைகளும் manage அல்லாத key-களைக் கொண்ட கோரிக்கைகளும் இன்னும்
-`403 LOCAL_ONLY` மூலம் நிராகரிக்கப்படும்.
+LOCAL_ONLY பாதைகளின் ஒரு துணைக்குழுவை, கோரிக்கையில் `Authorization: Bearer <api-key>` உள்ளதாகவும், அதன் மெட்டாடேட்டாவில் `manage` ஸ்கோப் (அல்லது `admin`) இருந்தால் மட்டுமே, லூப்பேக் அல்லாத இடங்களிலிருந்தும் அணுகலாம். இந்த கார்வ்-அவுட் `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` மூலம் பாதை வாரியாக வெளிப்படையாகக் கட்டுப்படுத்தப்படுகிறது, இதனால் எந்தப் புதிய LOCAL_ONLY பாதைக்கும் இயல்புநிலை கண்டிப்பான-லூப்பேக்காகவே இருக்கும். அங்கீகரிக்கப்படாத கோரிக்கைகள் மற்றும் manage அல்லாத விசைகள் கொண்ட கோரிக்கைகள் இன்னும் `403 LOCAL_ONLY` உடன் நிராகரிக்கப்படுகின்றன.
 
-தற்போது விதிவிலக்கு பெறக்கூடிய ஒரே prefix `/api/mcp/` ஆகும். `/api/cli-tools/runtime/` மற்றும்
-`/api/services/` ஆகியவை தன்னிச்சையான subprocess-களை (`npm install`, `node`)
-உருவாக்கக்கூடியவை என்பதால் வேண்டுமென்றே விலக்கப்பட்டுள்ளன; LOCAL_ONLY அடுக்கு
-தடுப்பதற்காகவே இருக்கும் துல்லியமான CVE வகை இதுதான்.
+இன்று, பைபாஸ் செய்யக்கூடிய ஒரே முன்னொட்டு `/api/mcp/` ஆகும். `/api/cli-tools/runtime/` மற்றும் `/api/services/` வேண்டுமென்றே விலக்கப்பட்டுள்ளன, ஏனெனில் அவை தன்னிச்சையான துணைசெயலிகளை (`npm install`, `node`) ஸ்பான் செய்ய முடியும் — இதுவே LOCAL_ONLY அடுக்கு தடுக்க விளைக்கப்பட்டுள்ள சரியான CVE வகை.
 
-**#7895 — `mcp:connect` குறுகிய scope:** `/api/mcp/` விதிவிலக்கு, குறுகிய
-`mcp:connect` scope-ஐக் கொண்ட Bearer key-யையும் ஏற்கிறது
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`); இது
-`src/server/authz/policies/management.ts`-இல் உள்ள `hasMcpConnectOrManageScope()`
-மூலம் சரிபார்க்கப்படுகிறது. இது `/api/mcp/`-க்கு மட்டுமே வரையறுக்கப்பட்டுள்ளது —
-`mcp:connect` வேறு எந்த management route-க்கும் (எதிர்காலத்தில் சேர்க்கப்படக்கூடிய
-மற்ற அனைத்து LOCAL_ONLY bypass prefix-களையும் சேர்த்து) எந்த அனுமதியையும்
-வழங்காது; மேலும் இது வேண்டுமென்றே `MANAGEMENT_API_KEY_SCOPES`-இலிருந்து
-விலக்கப்பட்டுள்ளது. `manage`/`admin` கொண்ட key முன்பைப் போலவே இந்த விதிவிலக்கைக்
-கடக்கும்; விரிவான management அணுகல் தேவைப்படக்கூடாத தொலைநிலை MCP-மட்டும்
-அழைப்பாளர்களுக்கு `mcp:connect` குறைந்த சிறப்புரிமையுள்ள மாற்றாகும்.
+**#7895 — `mcp:connect` குறுகிய ஸ்கோப்:** `/api/mcp/` கார்வ்-அவுட், குறுகிய `mcp:connect` ஸ்கோப் கொண்ட Bearer விசையையும் ஏற்கிறது (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), இது `src/server/authz/policies/management.ts` இல் உள்ள `hasMcpConnectOrManageScope()` மூலம் சரிபார்க்கப்படுகிறது. இது `/api/mcp/` க்கு மட்டுமே — `mcp:connect` வேறு எந்த மேலாண்மை ரூட்டிலும் (எதிர்காலத்தில் சேர்க்கப்பட்டால்கூட, வேறு எந்த LOCAL_ONLY பைபாஸ் முன்னொட்டிலும்) எதையும் வழங்காது, மேலும் இது வேண்டுமென்றே `MANAGEMENT_API_KEY_SCOPES` இலிருந்து விலக்கப்பட்டுள்ளது. `manage`/`admin` கொண்ட விசை இன்னும் முன்பு போலவே கார்வ்-அவுட்டைக் கடக்கிறது; `mcp:connect` என்பது பரந்த மேலாண்மை அணுகல் தேவையில்லாத தொலை MCP-மட்டும் அழைப்பாளர்களுக்கான குறைந்த-சலுகை மாற்று.
 
-| கோரிக்கை                                                | பாதை                       | முடிவு                            |
-| ------------------------------------------------------- | -------------------------- | --------------------------------- |
-| Loopback அல்லாதது, Bearer இல்லை                         | `/api/mcp/*`               | 403 LOCAL_ONLY                    |
-| Loopback அல்லாதது, `manage` scope கொண்ட Bearer          | `/api/mcp/*`               | அனுமதி                            |
-| Loopback அல்லாதது, `mcp:connect` scope கொண்ட Bearer     | `/api/mcp/*`               | அனுமதி                            |
-| Loopback அல்லாதது, `manage`/`mcp:connect` இல்லாத Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY                    |
-| Loopback அல்லாதது, `mcp:connect` scope கொண்ட Bearer     | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                    |
-| Loopback அல்லாதது, `manage` scope கொண்ட Bearer          | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                    |
-| Loopback, ஏதேனும்/இல்லாத Bearer                         | ஏதேனும் LOCAL_ONLY         | அனுமதி (கட்டுப்பாட்டைக் கடக்கும்) |
+| கோரிக்கை                                                | பாதை                       | முடிவு                         |
+| ------------------------------------------------------- | -------------------------- | ------------------------------ |
+| லூப்பேக் அல்லாதது, Bearer இல்லை                         | `/api/mcp/*`               | 403 LOCAL_ONLY                 |
+| லூப்பேக் அல்லாதது, `manage` ஸ்கோப் கொண்ட Bearer         | `/api/mcp/*`               | அனுமதி                         |
+| லூப்பேக் அல்லாதது, `mcp:connect` ஸ்கோப் கொண்ட Bearer    | `/api/mcp/*`               | அனுமதி                         |
+| லூப்பேக் அல்லாதது, `manage`/`mcp:connect` இல்லாத Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY                 |
+| லூப்பேக் அல்லாதது, `mcp:connect` ஸ்கோப் கொண்ட Bearer    | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                 |
+| லூப்பேக் அல்லாதது, `manage` ஸ்கோப் கொண்ட Bearer         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                 |
+| லூப்பேக், ஏதேனும்/Bearer இல்லை                          | எந்த LOCAL_ONLY-யும்       | அனுமதி (கேட் வெற்றி பெறுகிறது) |
 
-#### இயக்குநர் வழிகாட்டுதலும் தணிக்கையும்
+#### ஆபரேட்டர் வழிகாட்டுதல் & தணிக்கை
 
-OmniRoute-ஐ reverse proxy அல்லது tunnel-க்கு (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok) பின்னால் இயக்கினாலும், loopback சரிபார்ப்பு மேலே உள்ள
-உருவாக்கத் திறனுள்ள route-களைத் தொடர்ந்து பாதுகாக்கும் — client address
-loopback அல்லாத ஒரு கோரிக்கை, **auth இயங்குவதற்கு முன்பே** `403 LOCAL_ONLY`
-மூலம் நிராகரிக்கப்படுகிறது; எனவே கசிந்த JWT ஒன்றால் உருவாக்கச் செயல்பாட்டை
-அணுக முடியாது. இயக்குநருக்கு இரண்டு பொறுப்புகள் மீதமுள்ளன:
+OmniRoute ஐ ஒரு ரிவர்ஸ் ப்ராக்ஸி அல்லது டன்னலுக்குப் பின்னால் (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok) இயக்கினாலும், லூப்பேக் சரிபார்ப்பு மேலே உள்ள ஸ்பான்-திறன் கொண்ட ரூட்டுகளை இன்னும் பாதுகாக்கிறது — கிளையன்ட் முகவரி லூப்பேக் அல்லாத கோரிக்கை `403 LOCAL_ONLY` உடன் **அங்கீகாரம் இயங்குவதற்கு முன்** நிராகரிக்கப்படுகிறது, எனவே கசிந்த JWT ஒரு ஸ்பானை அடைய முடியாது. இரண்டு ஆபரேட்டர் பொறுப்புகள் உள்ளன:
 
-- **கிளையன்ட் IP-ஐ loopback ஆகப் போலியாக உருவாக்கி 403-ஐச் "சரிசெய்ய" வேண்டாம்.**
-  `X-Forwarded-For: 127.0.0.1` என அமைப்பது அல்லது மூல முகவரியை
-  loopback ஆக மாற்றியெழுதும் proxy-ஐப் பயன்படுத்துவது, இந்த அடுக்கு மூடும் அதே RCE வகையை
-  மீண்டும் திறக்கிறது. Proxy வழியாக dashboard/API-ஐ வெளிப்படுத்துங்கள் — spawn செய்யக்கூடிய வழித்தடங்களை ஒருபோதும் வெளிப்படுத்த வேண்டாம்.
-- **manage-scope bypass-ஐ குறைந்தபட்சமாக வைத்திருங்கள்.** `/api/mcp/` மட்டுமே bypass செய்யக்கூடியது, அதுவும்
-  `manage` scope கொண்ட API key மூலம் மட்டுமே. `SPAWN_CAPABLE_PREFIXES`-ஐ ஒருபோதும்
-  bypass பட்டியலில் சேர்க்க முடியாது — zod schema அவற்றை நிராகரிக்கிறது, மேலும்
-  runtime-இல் `isLocalOnlyBypassableByManageScope` அவற்றை மறுக்கிறது (defence-in-depth);
-  இதைத்தான் dashboard, "bypass செய்யக்கூடியதாக மாற்ற முடியாது" என்று குறிப்பிடுகிறது. இதே
-  deny-list, spawn செய்யாத ஆனால் தொலைவிலிருந்து ஒருபோதும்
-  அணுகக்கூடாத சில LOCAL_ONLY வழித்தடங்களையும் கொண்டுள்ளது — `/api/oauth/kiro/auto-import` (host-local Kiro
-  credential கோப்புகளைப் படிக்கிறது), `/api/discovery/` மற்றும் `/api/issue-agent/`. Runtime
-  snapshot loader-ம் சேமிக்கப்பட்ட settings row-இலிருந்து இத்தகைய பதிவுகளை நீக்குகிறது; மேலும்
-  பழைய JSON import (`/api/settings/import-json`) bypass key-களை ஒருபோதும் எழுதாது.
-  ஒவ்வொரு `LOCAL_ONLY_API_PREFIXES` பதிவும் deny-list-இல் இருக்க வேண்டும் அல்லது
-  bypass-க்கு தகுதியானதாக மதிப்பாய்வு செய்யப்பட்டிருக்க வேண்டும் (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). `/api/providers/`-ன் கீழுள்ள dynamic-segment
-  மற்றும் static-path spawn செய்யக்கூடிய வழித்தடங்கள் (எ.கா. `/login`,
-  `/refresh-cursor`) flat
-  `SPAWN_CAPABLE_PREFIXES` array-ஆல் அல்லாமல், `src/shared/constants/spawnCapablePrefixes.ts`-இல் உள்ள regex அடிப்படையிலான `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` துணை அமைப்பால் கையாளப்படுகின்றன — அவற்றைக் கண்டறிய flat array
-  முழு `/api/providers/` prefix-ஐ உள்ளடக்க வேண்டியிருக்கும்; இது
-  தொலைநிலை dashboard-கள் provider CRUD-க்காக முறையாகப் பயன்படுத்தும் route tree-ஐ தேவையற்ற அளவு விரிவாகத் தடுக்கும்.
+- **கிளையன்ட் IP-ஐ loopback ஆகப் போலியமைத்து 403-ஐ "சரிசெய்ய" வேண்டாம்.**
+  `X-Forwarded-For: 127.0.0.1` என அமைப்பது, அல்லது மூல முகவரியை loopback ஆக
+  மாற்றியமைக்கும் ஒரு ப்ராக்ஸி, இந்த அடுக்கு மூடிவைக்கும் RCE வகுப்பையே மீண்டும்
+  திறந்துவிடுகிறது. டாஷ்போர்டு/API-ஐ ப்ராக்ஸி வழியாக வெளிப்படுத்துங்கள் — spawn-திறன்
+  கொண்ட ரூட்டுகளை ஒருபோதும் அப்படிச் செய்யாதீர்கள்.
+- **manage-scope bypass-ஐ குறைந்தபட்சமாக வைத்திருங்கள்.** `/api/mcp/` மட்டுமே
+  bypass செய்யப்படக்கூடியது, அதுவும் `manage`-scope கொண்ட API விசை மூலம் மட்டுமே.
+  `SPAWN_CAPABLE_PREFIXES` ஒருபோதும் bypass பட்டியலில் சேர்க்க முடியாது — zod ஸ்கீமா
+  அவற்றை நிராகரிக்கிறது, மேலும் `isLocalOnlyBypassableByManageScope` ரன்டைமில்
+  அவற்றை மறுக்கிறது (defence-in-depth), இதுவே டாஷ்போர்டு "bypass செய்யப்பட முடியாது"
+  என்று குறிப்பிடுவதன் பொருள். அதே deny-list-இல், spawn செய்யாத ஆனால் ரிமோட்டில்
+  இருந்தும் அணுகப்படக்கூடாத சில LOCAL_ONLY ரூட்டுகளும் உள்ளன —
+  `/api/oauth/kiro/auto-import` (host-லோக்கல் Kiro நற்சான்றுக் கோப்புகளைப் படிக்கிறது),
+  `/api/discovery/` மற்றும் `/api/issue-agent/`. ரன்டைம் ஸ்னாப்ஷாட் ஏற்றியும் சேமிக்கப்பட்ட
+  அமைப்பு வரிசையிலிருந்து அத்தகைய உள்ளீடுகளை நீக்கிவிடுகிறது, மேலும் பழைய JSON
+  இறக்குமதி (`/api/settings/import-json`) bypass விசைகளை ஒருபோதும் எழுதாது. ஒவ்வொரு
+  `LOCAL_ONLY_API_PREFIXES` உள்ளீடும் deny-list-இல் இருக்க வேண்டும் அல்லது
+  bypass-தகுதி உடையதாக மதிப்பாய்வு செய்யப்பட வேண்டும்
+  (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). `/api/providers/` கீழ்
+  உள்ள டைனமிக்-செக்மென்ட் மற்றும் ஸ்டாடிக்-பாத் spawn-திறன் கொண்ட ரூட்டுகள்
+  (எ.கா. `/login`, `/refresh-cursor`) `src/shared/constants/spawnCapablePrefixes.ts`-இல்
+  உள்ள regex அடிப்படையிலான `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS`
+  துணையால் உள்ளடக்கப்படுகின்றன, பிளாட் `SPAWN_CAPABLE_PREFIXES` அணியால் அல்ல —
+  பிளாட் அணி அவற்றைப் பிடிக்க முழு `/api/providers/` முன்னொட்டையும் உள்ளடக்க
+  வேண்டியிருக்கும், இது ரிமோட் டாஷ்போர்டுகள் provider CRUD-க்கு நியாயமாகப்
+  பயன்படுத்தும் ரூட் ட்ரீயை அளவுக்கதிகமாக விரிவாக்கிவிடும்.
 
-**அணுகலைத் தணிக்கை செய்தல்** — host-க்கு வெளியிலிருந்து எதுவும் இந்த வழித்தடங்களை அணுகவில்லை என்பதைச் சரிபார்க்க:
+**அணுகலைத் தணிக்கை செய்தல்** — host-க்கு வெளியே இருந்து எதுவும் இந்த ரூட்டுகளை அடையவில்லை என்பதைச் சரிபார்க்க:
 
 - `/dashboard/settings/security`-இல் உள்ள **Authorization Inventory**-ஐத் திறக்கவும்: அது
-  நேரடி LOCAL_ONLY prefix பட்டியல், bypass செய்யக்கூடிய prefix-கள் மற்றும் compile-time
-  spawn செய்யக்கூடிய ("bypass செய்யக்கூடியதாக மாற்ற முடியாது") தொகுப்பைக் காட்டுகிறது.
-- மேலே உள்ள prefix-களுடன் non-loopback கிளையன்ட் முகவரி இணைந்துள்ளதா என்று உங்கள்
-  reverse-proxy / access log-களில் grep செய்யவும். `403 LOCAL_ONLY` என்பதற்குப் பதிலாக
-  `200` வழங்கிய அத்தகைய hit ஏதேனும் இருந்தால், proxy உண்மையான கிளையன்ட் IP-ஐ மறைக்கிறது என்று பொருள் — proxy-ஐச் சரிசெய்யவும்.
-- இந்தப் பாதைகளில் ஒன்றுக்காக OmniRoute-ன் log-களில் தோன்றும் `403 LOCAL_ONLY` என்பது guard
-  திட்டமிட்டபடி செயல்படுவதைக் குறிக்கிறது; ஒடுக்க வேண்டிய பிழை அல்ல.
+  நேரடி LOCAL_ONLY முன்னொட்டுப் பட்டியலை, எந்த முன்னொட்டுகள் bypass செய்யப்படக்கூடியவை
+  என்பதை, மற்றும் கம்பைல்-டைம் spawn-திறன் ("bypass செய்யப்பட முடியாது") தொகுப்பைக் காட்டுகிறது.
+- மேலே உள்ள முன்னொட்டுகளை loopback அல்லாத கிளையன்ட் முகவரியுடன் இணைத்து, உங்கள்
+  ரிவர்ஸ்-ப்ராக்ஸி / அணுகல் லாக்களில் grep செய்யவும். `403 LOCAL_ONLY`-க்குப் பதிலாக `200`
+  திருப்பிய அத்தகைய எந்த ஹிட்டும், ப்ராக்ஸி உண்மையான கிளையன்ட் IP-ஐ மறைக்கிறது என்பதைக்
+  குறிக்கிறது — ப்ராக்ஸியைச் சரிசெய்யவும்.
+- இந்தப் பாதைகளில் ஒன்றுக்கு OmniRoute-ன் லாக்களில் தோன்றும் `403 LOCAL_ONLY`, காவலன்
+  வடிவமைக்கப்பட்டபடி செயல்படுவதைக் குறிக்கிறது, அடக்க வேண்டிய பிழை அல்ல.
 
-#### Call-site probe gate கொண்ட தொலைவிலிருந்து அணுகக்கூடிய வழித்தடங்கள்
+#### கால்-சைட் probe கேட் கொண்ட ரிமோட்டில் அணுகக்கூடிய ரூட்டுகள்
 
-சில வழித்தடங்கள் தொலைநிலை dashboard-இலிருந்து அணுகக்கூடியவையாகவே இருக்க வேண்டும்; ஆனால் உள்ளூர் caller-களுக்காக
-host-side probe (`which <binary>`, `<binary> --version`, `tailscale status --json`) ஒன்றை இயக்குகின்றன.
-அவை `GET`-க்கு LOCAL_ONLY அல்ல; அதற்கு பதிலாக handler, நம்பகமான peer தீர்ப்பை
-`getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) மூலம் படித்து, `loopback` / `lan`
-caller-களுக்கு மட்டுமே probe-ஐ இயக்குகிறது. `remote` caller-க்கு spawn செய்யாத
-மூலங்களிலிருந்து (சேமிக்கப்பட்ட state, settings, fs checks) உருவாக்கப்பட்ட அதே response வடிவம்,
-`probed: false` எனக் குறிக்கப்பட்டு வழங்கப்படுகிறது.
+சில ரூட்டுகள் ரிமோட் டாஷ்போர்டிலிருந்து அணுகக்கூடியதாகவே இருக்க வேண்டும், ஆனால் லோக்கல்
+அழைப்பாளர்களுக்கு host-பக்க probe-ஐ இயக்குகின்றன (`which <binary>`, `<binary> --version`,
+`tailscale status --json`). அவை `GET`-க்கு LOCAL_ONLY அல்ல; அதற்குப் பதிலாக ஹேண்ட்லர்
+நம்பகமான பியர் தீர்ப்பை `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) மூலம்
+படித்து, `loopback` / `lan` அழைப்பாளர்களுக்கு மட்டுமே probe-ஐ இயக்குகிறது. `remote`
+அழைப்பாளர் spawn செய்யாத ஆதாரங்களிலிருந்து (நிலைநிறுத்தப்பட்ட நிலை, அமைப்புகள், fs
+சோதனைகள்) உருவாக்கப்பட்ட அதே பதில் வடிவத்தைப் பெறுகிறார், அது `probed: false` எனக்
+குறிக்கப்படுகிறது.
 
-| வழித்தடம்                                                              | தொலைநிலை caller-களுக்குத் தவிர்க்கப்படும் probe                         |
-| ---------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`           | CLI runtime probe (`allowLocalRuntimeProbe`) மற்றும் CLI-fallback spawn |
-| `GET /api/headroom/status`                                             | `which headroom` மற்றும் python `--version` probe-கள்                   |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`       | `which tailscale`, `tailscale status/funnel --json`, `which brew`       |
-| `GET /api/tunnels/cloudflared` (LOCAL_ONLY-இலிருந்து GET-க்கு விலக்கு) | `which cloudflared` PATH தேடல்                                          |
+| ரூட்                                                              | ரிமோட் அழைப்பாளர்களுக்கு தவிர்க்கப்படும் probe                           |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`      | CLI ரன்டைம் probe (`allowLocalRuntimeProbe`) மற்றும் CLI-ஃபால்பேக் spawn |
+| `GET /api/headroom/status`                                        | `which headroom` மற்றும் python `--version` probe-கள்                    |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`  | `which tailscale`, `tailscale status/funnel --json`, `which brew`        |
+| `GET /api/tunnels/cloudflared` (LOCAL_ONLY-இலிருந்து GET விலக்கு) | `which cloudflared` PATH தேடல்                                           |
 
-Host-ஐ probe செய்யும் புதிய read route இதே வடிவத்தைப் பின்பற்ற வேண்டும் அல்லது
-முழுமையாக LOCAL_ONLY என வகைப்படுத்தப்பட வேண்டும்.
+host-ஐ probe செய்யும் புதிய ரீட் ரூட் அதே முறையைப் பின்பற்றுகிறது, அல்லது நேரடியாக
+LOCAL_ONLY என வகைப்படுத்தப்படுகிறது.
 
 ### அடுக்கு 2 — ALWAYS_PROTECTED
 
-**இதனால் அமல்படுத்தப்படுகிறது:** `isAlwaysProtectedPath(path)` → `requireLogin=false` bypass-ஐத் தவிர்க்கும்
-**Bypass:** `requireLogin=false` ஆக இருக்கும்போது எதுவுமில்லை; JWT எப்போதும் தேவை
+**செயல்படுத்துவது:** `isAlwaysProtectedPath(path)` → `requireLogin=false` bypass-ஐத் தவிர்த்தல்
+**Bypass:** `requireLogin=false` ஆக இருக்கும்போது எதுவும் இல்லை; JWT எப்போதும் கட்டாயம்
 
-இந்த வழித்தடங்கள் அழிவை ஏற்படுத்தக்கூடியவை அல்லது மாற்ற முடியாதவை. "கடவுச்சொல் இல்லாத"
-நிறுவலில் இவற்றை அனுமதிப்பது, அதே LAN-இல் உள்ள எவரும் database-ஐ முழுமையாக அழிக்கவோ
-server process-ஐ நிறுத்தவோ முடியும் என்பதைக் குறிக்கும்.
+இந்த ரூட்டுகள் அழிப்பானவை அல்லது மீள முடியாதவை. "கடவுச்சொல் இல்லாத" நிறுவலில் அவற்றை
+அனுமதிப்பது என்பது அதே LAN-இல் உள்ள எவரும் டேட்டாபேஸை அழித்துவிடவோ அல்லது சர்வர்
+செயல்முறையை நிறுத்திவிடவோ முடியும் என்று பொருள்.
 
-| பாதை                                      | காரணம்                                                                                 |
-| ----------------------------------------- | -------------------------------------------------------------------------------------- |
-| `/api/shutdown`                           | Server process-ஐ நிறுத்துகிறது                                                         |
-| `/api/settings/database`                  | Database export, import மற்றும் முழுமையான அழிப்பு                                      |
-| `/api/db-backups`                         | முழு database backup archive-க்கான அணுகல்                                              |
-| `/api/settings/export-json`               | முழு settings blob-ஐ export செய்கிறது (ரகசியங்கள் உட்பட)                               |
-| `/api/settings/import-json`               | முழு settings blob-ஐ மாற்றுகிறது                                                       |
-| `/api/providers/health-autopilot/actions` | Autopilot remediation செயல்களை இயக்குகிறது                                             |
-| `/api/settings/obsidian`                  | எந்த vault root-க்கும் மீண்டும் பயன்படுத்தக்கூடிய WebDAV credential-களை உருவாக்குகிறது |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                           |
+| பாதை                                      | காரணம்                                                                    |
+| ----------------------------------------- | ------------------------------------------------------------------------- |
+| `/api/shutdown`                           | சர்வர் செயல்முறையை முடித்துவிடுகிறது                                      |
+| `/api/settings/database`                  | டேட்டாபேஸ் ஏற்றுமதி, இறக்குமதி மற்றும் அழிப்பு                            |
+| `/api/db-backups`                         | முழு டேட்டாபேஸ் காப்புப்பிரதி காப்பக அணுகல்                               |
+| `/api/settings/export-json`               | முழு அமைப்புகள் blob-ஐ ஏற்றுமதி செய்கிறது (ரகசியங்கள் உட்பட)              |
+| `/api/settings/import-json`               | முழு அமைப்புகள் blob-ஐ மாற்றிவிடுகிறது                                    |
+| `/api/providers/health-autopilot/actions` | ஆட்டோபைலட் சரிசெய்யும் நடவடிக்கைகளை இயக்குகிறது                           |
+| `/api/settings/obsidian`                  | எந்த vault ரூட்டிற்கும் மீள்பயன்பாட்டு WebDAV நற்சான்றுகளை உருவாக்குகிறது |
+| `/api/relay/tokens`                       | ரிலே டோக்கன்களை உருவாக்கி, பட்டியலிட்டு, திருத்தி, ரத்து செய்கிறது        |
+| `/api/cli-tools/apply`                    | ஆபரேட்டரின் host CLI கான்ஃபிகை மீளெழுதுகிறது                              |
+| `/api/cli-tools/guide-settings`           | வழிகாட்டி சார்ந்த CLI கான்ஃபிக் கோப்புகளை எழுதுகிறது                      |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes ஏஜென்ட் கான்ஃபிகை எழுதுகிறது                                       |
+| `/api/cli-tools/backups`                  | CLI கான்ஃபிக் காப்புப்பிரதிகளை மீட்டெடுத்து நீக்குகிறது                   |
+| `/api/log-export`                         | கால் லாக்களை கான்ஃபிகர் செய்யப்பட்ட இலக்கிற்கு அனுப்புகிறது               |
+| `/api/restart`                            | சர்வர் செயல்முறையை மீண்டும் தொடங்குகிறது                                  |
 
-**மீறலுக்கான response:** `401 Authentication required`
+**மீறலின் போது பதில்:** `401 Authentication required`
 
-`/api/settings/obsidian`, அதன் `/webdav` child-ஐ உள்ளடக்குகிறது: `POST`, Next.js-க்கு முன்பாக இந்த pipeline-க்கு வெளியே
-custom Node layer மூலம் வழங்கப்படும் WebDAV file service-ஐ, caller தேர்ந்தெடுத்த root-ஐச் சுட்டுமாறு அமைத்து,
-புதிதாக உருவாக்கப்பட்ட Basic credential-களைத் திருப்பியளிக்கிறது; `DELETE` அவற்றை மாற்றுகிறது; மேலும் parent `POST`,
-Obsidian REST API token-ஐச் சேமிக்கிறது. GHSA-62vw, `GET` password வெளிப்பாட்டை மட்டுமே மறைத்தது; credential வழங்கல்
-இன்னமும் fail-open அடுக்கிலேயே இருந்தது (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` கூடுதலாக,
-data directory-ஆக இருக்கும், அதற்குள் அமைந்திருக்கும் அல்லது அதை உள்ளடக்கும் vault-ஐ மறுக்கிறது.
+`/api/settings/obsidian` அதன் `/webdav` குழந்தையை உள்ளடக்குகிறது: `POST` WebDAV கோப்பு சேவையை — Next.js-க்கு முன் தனிப்பயன் Node அடுக்கால் வழங்கப்படுவது, இந்த பைப்லைனுக்கு வெளியே — அழைப்பாளர் தேர்ந்தெடுத்த ரூட்டை நோக்கி அமைத்து, புதிதாக உருவாக்கப்பட்ட Basic சான்றுகளைத் திருப்பி அனுப்புகிறது, `DELETE` அவற்றைச் சுழற்றுகிறது, மேலும் பெற்றோர் `POST` Obsidian REST API டோக்கனைச் சேமிக்கிறது. GHSA-62vw `GET` கடவுச்சொல் வெளிப்பாட்டை மறைத்தது மட்டுமே; வழங்கல் இன்னும் fail-open அடுக்கிலேயே இருந்தது (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` கூடுதலாக, தரவு அடைவாகவுள்ள, அதனுள் அமைந்துள்ள, அல்லது அதைக் கொண்டுள்ள vault-ஐ மறுக்கிறது.
 
-#### Credential export-கள் operator-களுக்கு மட்டுமே
+#### சான்று ஏற்றுமதிகளும் மீட்டெடுப்புகளும் ஆபரேட்டருக்கு மட்டுமே
 
-மேலுள்ள அடுக்கு _ஏதேனும்_ ஒரு நற்சான்று தேவையா என்பதை மட்டுமே தீர்மானிக்கிறது. சேமிக்கப்பட்ட
-நற்சான்றுகளைப் பதிவிறக்கும் வழித்தடங்கள் handler-இல் இரண்டாவது சரிபார்ப்பைச் சேர்க்கின்றன:
-`GET /api/settings/export-json` (மறைவிலக்கப்பட்ட provider இணைப்புகள் மற்றும் மூல API விசைகள்),
-`GET /api/db-backups/export` (SQLite கோப்பு) மற்றும் `GET /api/db-backups/exportAll`
-(முழுக் காப்பகம்) ஆகியவை `requireOperatorCredential()`-ஐ
-(`src/lib/api/operatorCredential.ts`) அழைக்கின்றன. இது dashboard session, உள்ளக CLI subject,
-அல்லது உள்நுழைவு முடக்கப்பட்ட instance ஆகியவற்றை ஏற்றுக்கொள்கிறது; மேலும் எந்த scope-இன் API
-விசைகளுக்கும் (`manage` மற்றும் `admin` உட்பட), `oma_` access token-களுக்கும் `403` எனப்
-பதிலளிக்கிறது. Sync token வழங்கல் (`POST /api/sync/tokens`) அதே helper-ஐயும், கூடுதலாக
-நம்பகமான loopback internal-service token-ஐயும் பயன்படுத்துகிறது.
+மேலே உள்ள அடுக்கு _ஏதேனும்_ சான்று தேவையா என்பதை மட்டுமே தீர்மானிக்கிறது. சேமிக்கப்பட்ட சான்றுகளைப் பதிவிறக்கும் ரூட்டுகள் ஹேண்ட்லரில் இரண்டாவது சரிபார்ப்பைச் சேர்க்கின்றன: `GET /api/settings/export-json` (டிக்ரிப்ட் செய்யப்பட்ட வழங்குநர் இணைப்புகள் மற்றும் மூல API விசைகள்), `GET /api/db-backups/export` (SQLite கோப்பு) மற்றும் `GET /api/db-backups/exportAll` (முழு ஆர்க்கைவ்) ஆகியவை `requireOperatorCredential()`-ஐ அழைக்கின்றன (`src/lib/api/operatorCredential.ts`). இது டாஷ்போர்டு அமர்வையோ, உள்ளூர் CLI சப்ஜெக்டையோ, அல்லது உள்நுழைவு முடக்கப்பட்ட நிகழ்வையோ ஏற்கிறது; எந்த ஸ்கோப்பின் API விசைகளுக்கும் (`manage` மற்றும் `admin` உட்பட) மற்றும் `oma_` அணுகல் டோக்கன்களுக்கும் `403` எனப் பதிலளிக்கிறது. அழிவூட்டும் எதிர் செயல்களும் அதே எல்லையைக் காக்கின்றன: `POST /api/db-backups/import` (பதிவேற்றப்பட்ட `.sqlite`, `dryRun=true` உட்பட), `POST /api/db-backups` (சேமிக்கப்பட்ட காப்புப்பிரதியை id மூலம் மீட்டெடுத்தல்) மற்றும் `POST /api/settings/import-json` (பழைய JSON மீட்டெடுப்பு) ஆகியவை நேரடி தரவுத்தளம் அல்லது முழு அமைப்புகள்/இணைப்புகள்/API-விசை தொகுப்பையும் மாற்றுவதால், ஒரு மெஷின் சான்றும் அவற்றைத் தூண்ட முடியாது. மீட்டெடுப்பு புள்ளிகளை அழிப்பதும் அதே எல்லையைக் காக்கிறது: `DELETE /api/db-backups` (சுத்தம் — சமீபத்திய N-ஐத் தக்கவை / D நாட்களுக்குப் பழையதை நீக்கு) மற்றும் `PATCH /api/db-backups` (தக்கவைப்பு அமைப்புகள்), ஏனெனில் நிலைத்துச் சேமிக்கப்பட்ட தக்கவைப்பு என்பது ஒவ்வொரு தானியங்கு காப்புப்பிரதிக்குப் பிறகும் `cleanupDbBackups()` பயன்படுத்தும் விஷயமே ஆகும் (`src/lib/db/backup.ts`); எனவே `keepLatest: 1` ஐச் சேமிக்கக்கூடிய ஒரு மெஷின் சான்று அடுத்த ஸ்னாப்ஷாட்டில் எல்லாவற்றையும் கத்தரித்துவிடும். காப்புப்பிரதிகளைப் பட்டியலிடுவதும் உருவாக்குவதும் (`GET`/`PUT /api/db-backups`) சாதாரண மேலாண்மை அங்கீகாரத்தையே தக்கவைக்கின்றன. சிங்க் டோக்கன் வழங்கல் (`POST /api/sync/tokens`) அதே ஹெல்ப்பரைப் பயன்படுத்துகிறது, கூடவே நம்பகமான லூப்பேக் உள்-சேவை டோக்கனையும்.
 
-#### Credential exports and restores are operator-only
+### புதிய நிறுவல் பூட்ஸ்ட்ராப் லூப்பேக்-மட்டும் — `Host` அல்ல, உண்மையான பியர் மூலம்
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
-
-### புதிய நிறுவலின் bootstrap loopback-க்கு மட்டுமே — `Host` மூலம் அல்ல, உண்மையான peer மூலம்
-
-Management password எதுவும் அமைக்கப்படாமல் (மேலும் `INITIAL_PASSWORD` இல்லாமல்) இருக்கும்போது,
-`src/shared/utils/apiAuth.ts`-இல் உள்ள `isAuthRequired()` அநாமதேய bootstrap-ஐ **loopback
-peer-களுக்கு மட்டுமே** திறந்துவைக்கிறது. நம்பகமான peer signal-களிலிருந்து பின்வரும் வரிசையில்
-loopback தீர்மானிக்கப்படுகிறது: token மூலம் முத்திரையிடப்பட்ட உண்மையான TCP peer
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, policy காண்பது), pipeline-இன் சொந்த
-`AUTHZ_HEADER_PEER_LOCALITY` தீர்ப்பு (route handler-கள் காண்பது,
-`OMNIROUTE_PEER_STAMP_TOKEN` அமைக்கப்பட்டிருக்கும்போது மட்டுமே நம்பகமானது), அல்லது நேரடி
-caller-களுக்கான உண்மையான socket peer. `Host` / `nextUrl.hostname` ஒருபோதும் பரிசீலிக்கப்படாது;
-மேலும் முதல் password எழுதுதல் (`POST /api/settings/require-login`) ஒவ்வொரு network peer-க்கும்
-திறந்திருப்பதற்குப் பதிலாக அதே கட்டுப்பாட்டின் கீழ் உள்ளது (GHSA-7pq4-8pvv-rx7r).
-`managementPolicy` அதன் சொந்த `peerContext` தீர்ப்பை வெளிப்படையாகக் கீழே அனுப்புகிறது; எனவே
-ORIGINAL (strip செய்யப்படுவதற்கு முந்தைய) request-இன் header-கள் அதை ஒருபோதும்
-தீர்மானிப்பதில்லை.
+மேலாண்மை கடவுச்சொல் எதுவும் கட்டமைக்கப்படாத நிலையில் (மற்றும் `INITIAL_PASSWORD` இல்லாமல்), `src/shared/utils/apiAuth.ts`-இல் உள்ள `isAuthRequired()` அநாமதேய பூட்ஸ்ட்ராப்பை **லூப்பேக் பியர்களுக்கு மட்டுமே** திறந்து வைக்கிறது. லூப்பேக் என்பது நம்பகமான பியர் சமிக்ஞைகளிலிருந்து, வரிசையாகத் தீர்மானிக்கப்படுகிறது: டோக்கன்-முத்திரையிடப்பட்ட உண்மையான TCP பியர் (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, பாலிசி காண்பது), பைப்லைனின் சொந்த `AUTHZ_HEADER_PEER_LOCALITY` தீர்ப்பு (ரூட் ஹேண்ட்லர்கள் காண்பது, `OMNIROUTE_PEER_STAMP_TOKEN` அமைக்கப்பட்டிருக்கும் வரை மட்டுமே நம்பகமானது), அல்லது நேரடி அழைப்பாளர்களுக்கு உண்மையான சாக்கெட் பியர். `Host` / `nextUrl.hostname` ஒருபோதும் கலந்தாலோசிக்கப்படுவதில்லை, மேலும் முதல்-கடவுச்சொல் எழுத்து (`POST /api/settings/require-login`) ஒவ்வொரு நெட்வொர்க் பியருக்கும் திறந்திருக்காமல் அதே கட்டுப்பாட்டின் கீழேயே உள்ளது (GHSA-7pq4-8pvv-rx7r). `managementPolicy` தனது சொந்த `peerContext` தீர்ப்பை வெளிப்படையாகக் கீழே அனுப்புகிறது, எனவே அசல் (ஸ்ட்ரிப்-செய்வதற்கு முந்தைய) கோரிக்கையின் ஹெட்டர்கள் அதை ஒருபோதும் தீர்மானிப்பதில்லை.
 
 ### அடுக்கு 3 — MANAGEMENT (இயல்புநிலை)
 
-மற்ற அனைத்து management வழித்தடங்களும். `requireLogin=false` என அமைக்கப்படாத வரை
-அங்கீகரிப்பு தேவை. CLI token-கள் இந்த வழித்தடங்களை அங்கீகரிக்க முடியும் (loopback + செல்லுபடியாகும்
-HMAC).
+மற்ற அனைத்து மேலாண்மை ரூட்டுகள். `requireLogin=false` கட்டமைக்கப்படாத வரை அங்கீகாரம் தேவை. CLI டோக்கன்கள் இந்த ரூட்டுகளை அங்கீகரிக்க முடியும் (லூப்பேக் + செல்லுபடியாகும் HMAC).
 
 ## மதிப்பீட்டு வரிசை
 
