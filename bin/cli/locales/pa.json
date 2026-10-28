@@ -123,7 +123,9 @@
       "maxCostOpt": "ਪ੍ਰਤੀ ਦਿਨ ਵੱਧ ਤੋਂ ਵੱਧ ਲਾਗਤ (USD)",
       "allowedModelsOpt": "ਮਨਜ਼ੂਰਸ਼ੁਦਾ ਮਾਡਲਾਂ ਦੀ ਕਾਮਿਆਂ ਨਾਲ ਵੱਖ ਕੀਤੀ ਸੂਚੀ",
       "nothingToSet": "ਕੋਈ ਨੀਤੀ ਖੇਤਰ ਪ੍ਰਦਾਨ ਨਹੀਂ ਕੀਤਾ ਗਿਆ। --rate-limit, --max-cost, ਜਾਂ --allowed-models ਵਰਤੋ।",
-      "updated": "ਨੀਤੀ ਅੱਪਡੇਟ ਕੀਤੀ ਗਈ।"
+      "updated": "ਨੀਤੀ ਅੱਪਡੇਟ ਕੀਤੀ ਗਈ।",
+      "modelAccessModeOpt": "ਮਾਡਲ ਪਹੁੰਚ ਮੋਡ (all | restricted)",
+      "unrestrictedOpt": "ਸਾਰੇ ਮਾਡਲਾਂ ਨੂੰ ਇਜਾਜ਼ਤ ਦਿਓ (--model-access-mode all)"
     },
     "expiration": {
       "title": "ਕੁੰਜੀ ਦੀ ਮਿਆਦ ਸਮਾਪਤੀ",

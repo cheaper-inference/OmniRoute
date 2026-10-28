@@ -298,13 +298,13 @@ Comportamenti principali:
 
 ## 🔑 Token di sincronizzazione e bundle di configurazione _(v3.6.6+)_
 
-L'accesso da più dispositivi e da parte di operatori esterni è ora possibile tramite **token di sincronizzazione con ambito definito**:
+L'accesso da più dispositivi e da parte di operatori esterni è ora possibile tramite **token di sincronizzazione con ambiti definiti**:
 
-- **`POST /api/sync/tokens`** — Emette un nuovo token di sincronizzazione (con ambito definito e scadenza opzionale)
+- **`POST /api/sync/tokens`** — Emette un nuovo token di sincronizzazione (con ambiti definiti e scadenza facoltativa)
 - **`DELETE /api/sync/tokens/:id`** — Revoca un token
-- **`GET /api/sync/bundle`** — Scarica uno snapshot JSON con versione e identificato tramite ETag di tutte le impostazioni non sensibili (password oscurate)
+- **`GET /api/sync/bundle`** — Scarica uno snapshot JSON della configurazione, dotato di versione e identificato tramite ETag (autenticato esclusivamente con un token di sincronizzazione). Le impostazioni di autenticazione, come la password della dashboard, vengono rimosse, ma le credenziali dei provider e le chiavi API sono incluse; pertanto, il file deve essere trattato come un segreto
 
-Il bundle di configurazione viene generato da `src/lib/sync/bundle.ts`. I client confrontano l'header di risposta `ETag` per rilevare le modifiche senza scaricare nuovamente l'intero payload.
+Il bundle di configurazione viene generato da `src/lib/sync/bundle.ts`. I client confrontano l'header di risposta `ETag` per rilevare le modifiche senza scaricare nuovamente l'intero payload. Dalla CLI, `omniroute sync bundle <outPath> --token <syncToken>` (oppure `OMNIROUTE_SYNC_TOKEN`) lo salva in un file accessibile esclusivamente al proprietario.
 
 ---
 

@@ -1,5 +1,5 @@
 import { buildErrorBody } from "./error.ts";
-import type { StreamFailurePayload } from "./streamErrorFormat.ts";
+import type { StreamFailurePayload, StreamFailureSnapshot } from "./streamErrorFormat.ts";
 import type { StreamTiming } from "./streamTiming.ts";
 
 type CompletePayload = {
@@ -18,6 +18,7 @@ type CompletePayload = {
 type AborterContext = {
   onFailure?: ((payload: StreamFailurePayload) => boolean | void | Promise<void>) | null;
   onComplete?: ((payload: CompletePayload) => void) | null;
+  attachFailureSnapshot?: () => StreamFailureSnapshot | undefined;
   getUsage: () => unknown;
   timing: StreamTiming;
   buildProviderPayload: () => unknown;
@@ -37,6 +38,11 @@ export function createStreamFailureAborter(context: AborterContext) {
   ): void => {
     let handled = false;
     context.timing.markInterrupted();
+    try {
+      failure.streamSnapshot ??= context.attachFailureSnapshot?.();
+    } catch (error) {
+      console.debug("[STREAM] attach failure snapshot error:", error);
+    }
     if (context.onFailure) {
       try {
         handled = context.onFailure(failure) === true;

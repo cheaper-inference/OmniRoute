@@ -1,5 +1,6 @@
 // Pure shared primitives for the OpenAI Responses <-> Chat Completions request
 // translators. Extracted verbatim from openai-responses.ts (no host imports).
+import { getProviderModels, supportsClaudeMaxEffort } from "../../../config/providerModels.ts";
 
 export type JsonRecord = Record<string, unknown>;
 export const RESPONSES_STORE_MARKER = "_omnirouteResponsesStore";
@@ -54,22 +55,49 @@ const CODEX_MAX_EFFORT_MODEL_PATTERN =
   /^(?:gpt-5\.6-(?:sol|terra|luna)|gpt-6(?:\.1)?-(?:astra|sol|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
 const KIRO_GPT_5_6_MODEL_PATTERN =
   /^(?:kiro|kr)\/gpt-5\.6-(?:sol|terra|luna)(?:-(?:none|low|medium|high|xhigh|max))?$/;
+const KIRO_OPUS_5_5_MODEL_PATTERN = /^(?:kiro|kr)\/claude-opus-5(?:\.|-)5(?:-thinking)?$/;
 
-function supportsNativeMaxReasoningEffort(model: unknown): boolean {
+function supportsNativeMaxReasoningEffort(model: unknown, targetFormat?: unknown): boolean {
+  const originalModel = toString(model).trim().toLowerCase();
+  const kiroModel =
+    targetFormat === "kiro" && !originalModel.includes("/")
+      ? `kiro/${originalModel}`
+      : originalModel;
   const normalizedModel = toString(model)
     .trim()
     .toLowerCase()
     .replace(/^(?:codex|cx)\//, "");
   return (
     CODEX_MAX_EFFORT_MODEL_PATTERN.test(normalizedModel) ||
-    KIRO_GPT_5_6_MODEL_PATTERN.test(toString(model).trim().toLowerCase())
+    KIRO_GPT_5_6_MODEL_PATTERN.test(kiroModel) ||
+    KIRO_OPUS_5_5_MODEL_PATTERN.test(kiroModel)
   );
 }
 
-export function normalizeResponsesReasoningEffort(value: unknown, model?: unknown): string {
+// Claude targets accept a literal `max` effort on the models that support it
+// (Anthropic effort docs). The Anthropic registry entry is authoritative when it
+// declares the model's effort tiers (e.g. Sonnet 5.5 stops at xhigh); otherwise
+// fall back to the same family check the openai -> claude translator applies.
+function supportsClaudeTargetMaxEffort(model: unknown): boolean {
+  const modelId = toString(model).trim().toLowerCase();
+  const bareModelId = modelId.slice(modelId.lastIndexOf("/") + 1);
+  if (!bareModelId) return false;
+  const declaredEfforts = getProviderModels("claude").find(
+    (entry) => entry.id === bareModelId || entry.aliases?.includes(bareModelId)
+  )?.supportedThinkingEfforts;
+  if (Array.isArray(declaredEfforts)) return declaredEfforts.includes("max");
+  return supportsClaudeMaxEffort(bareModelId);
+}
+
+export function normalizeResponsesReasoningEffort(
+  value: unknown,
+  model?: unknown,
+  targetFormat?: unknown
+): string {
   const effort = toString(value).toLowerCase();
   if (effort !== "max") return effort;
-  return supportsNativeMaxReasoningEffort(model) ? "max" : "xhigh";
+  if (targetFormat === "claude" && supportsClaudeTargetMaxEffort(model)) return "max";
+  return supportsNativeMaxReasoningEffort(model, targetFormat) ? "max" : "xhigh";
 }
 
 export function shouldRequestClaudeSummarizedThinking(value: unknown): boolean {

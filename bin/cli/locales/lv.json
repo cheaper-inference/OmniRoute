@@ -123,7 +123,9 @@
       "maxCostOpt": "Maksimālā izmaksas dienā (USD)",
       "allowedModelsOpt": "Ar komatiem atdalīts atļauto modeļu saraksts",
       "nothingToSet": "Nav sniegtu politikas lauku. Izmantojiet --rate-limit, --max-cost vai --allowed-models.",
-      "updated": "Politika atjaunināta."
+      "updated": "Politika atjaunināta.",
+      "modelAccessModeOpt": "Modeļu piekļuves režīms (all | restricted)",
+      "unrestrictedOpt": "Atļaut visus modeļus (--model-access-mode all)"
     },
     "expiration": {
       "title": "Atslēgu derīguma termiņš",

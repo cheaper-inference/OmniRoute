@@ -42,84 +42,84 @@ Traffic Inspector on OmniRoute’i sisseehitatud HTTPS-liikluse silur — Charle
 
 Traffic Inspector toetab **5 samaaegset hõiveallikat**. Igaüht saab teistest sõltumatult sisse ja välja lülitada. Iga `InterceptedRequest`-i (`src/mitm/inspector/types.ts`) väli `source` on üks järgmistest: `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` või `"tproxy"`.
 
-### Režiim 1 — AgentBridge (vaikimisi alati sisse lülitatud)
+### Režiim 1 — AgentBridge (vaikimisi, alati sees)
 
-**Allikas:** AgentBridge'i töötlejad (`src/mitm/handlers/base.ts`)
-**Mehhanism:** Iga `intercept()`-i väljakutse klassis `MitmHandlerBase` kutsub enne edastamist välja `hookBufferStart()`-i ja lõpetamisel `hookBufferUpdate()`-i. Täiendavat seadistamist pole vaja — töötab kohe, kui AgentBridge töötab.
-**Ulatus:** AgentBridge'is seadistatud 9 IDE agenti
+**Allikas:** AgentBridge'i töötlejad (`src/mitm/handlers/base.ts`)  
+**Mehhanism:** Iga `intercept()`-i väljakutse klassis `MitmHandlerBase` kutsub enne edastamist välja `hookBufferStart()` ja lõpetamisel `hookBufferUpdate()`. Täiendavat seadistamist pole vaja — töötab kohe, kui AgentBridge töötab.  
+**Ulatus:** AgentBridge'is seadistatud 9 IDE agenti  
 **Märkus:** `InterceptedRequest`-i väli `source` = `"agent-bridge"`
 
 ### Režiim 2 — Kohandatud hostid (DNS-i ümbersuunamine)
 
-**Allikas:** Kasutaja määratud hostide loend (tabel `inspector_custom_hosts`)
-**Mehhanism:** Hosti lisamisel kasutajaliidese kaudu lisatakse faili `/etc/hosts` rida `127.0.0.1 <host>` (nõuab sudo õigusi). Olemasolev AgentBridge'i MITM-server (port 443) genereerib uue hosti jaoks dünaamiliselt SNI-sertifikaadi.
-**Ulatus:** Kõik lisatud hosti kasutavad rakendused — rakenduse konfiguratsiooni pole vaja muuta
+**Allikas:** Kasutaja määratud hostide loend (tabel `inspector_custom_hosts`)  
+**Mehhanism:** Hosti lisamisel kasutajaliidese kaudu lisatakse faili `/etc/hosts` kirje `127.0.0.1 <host>` (nõuab sudo-õigusi). Olemasolev AgentBridge'i MITM-server (port 443) genereerib uuele hostile dünaamiliselt SNI-sertifikaadi.  
+**Ulatus:** Kõik lisatud hosti kasutavad rakendused — rakenduse seadistust pole vaja muuta  
 **Märkus:** `source` = `"custom-host"`
 
 Kasutusjuhtude näited:
 
-- Python-skriptidest aadressile `api.openai.com` suunatud liikluse jälgimine
-- `my-internal-llm.company.com` silumine
-- Samas võrgus olevate mobiilseadmete liikluse hõivamine (ARP-võltsimise kaudu — edasijõudnutele)
+- Python-skriptidest lähtuva `api.openai.com`-i liikluse jälgimine
+- `my-internal-llm.company.com`-i silumine
+- Samas võrgus olevate mobiilseadmete liikluse hõivamine (ARP-spoofingu kaudu — edasijõudnutele)
 
-### Režiim 3 — HTTP_PROXY kuular (port 8080)
+### Režiim 3 — HTTP_PROXY kuulaja (port 8080)
 
-**Allikas:** Keskkonnamuutujaid `HTTP_PROXY`/`HTTPS_PROXY` kasutavad rakendused
-**Mehhanism:** Teisene kuular pordil 8080 (`src/mitm/inspector/httpProxyServer.ts`), mis toimib standardse selgesõnalise HTTP/HTTPS-proksina. Võtab vastu `CONNECT`-tunneleid (HTTPS) ja otseseid HTTP-päringuid.
-**Ulatus:** Kõik rakendused, mis arvestavad keskkonnamuutujat `HTTP_PROXY` — DNS-i pole vaja muuta ja sudo õigusi pole vaja
+**Allikas:** Keskkonnamuutujaid `HTTP_PROXY`/`HTTPS_PROXY` kasutavad rakendused  
+**Mehhanism:** Pordil 8080 töötav sekundaarne kuulaja (`src/mitm/inspector/httpProxyServer.ts`), mis toimib standardse otsese HTTP-/HTTPS-puhverserverina. Võtab vastu `CONNECT`-tunneleid (HTTPS) ja otseseid HTTP-päringuid.  
+**Ulatus:** Kõik rakendused, mis arvestavad keskkonnamuutujat `HTTP_PROXY` — DNS-i pole vaja muuta ja sudo-õigusi pole vaja  
 **Märkus:** `source` = `"http-proxy"`
 
 ```bash
 # Ühe käsu kiire hõivamine:
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
-# Püsiv hõivamine shelliseansis:
+# Püsiv hõivamine shelliseansi jooksul:
 export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS-i piirang:** HTTPS-i `CONNECT`-tunnelitest hõivatakse vaikimisi ainult metaandmed (host, port, ajastus) — TLS-i sisu ei dekrüptita.
+**TLS-i piirang:** HTTPS liigub läbi tavalise `CONNECT`-tunneli: kuulaja edastab krüptitud baidid muutmata kujul ja salvestab ainult metaandmed (host, port, ajastus). See ei dekrüpti HTTPS-i kunagi ning selle režiimi jaoks pole dekrüptimist lubavat seadistust. HTTPS-i kehade hõivamiseks suunake host läbi režiimi 1 (AgentBridge), režiimi 2 (kohandatud hostid) või režiimi 5 (TPROXY dekrüptimine).
 
-**Pordikonflikt:** Kui port 8080 on kasutusel, tagastab AgentBridge struktureeritud veaga vastuse 409. Muutke porti keskkonnamuutuja `INSPECTOR_HTTP_PROXY_PORT` kaudu.
+**Pordikonflikt:** Kui port 8080 on kasutusel, tagastab AgentBridge struktureeritud veaga oleku 409. Muutke porti keskkonnamuutuja `INSPECTOR_HTTP_PROXY_PORT` kaudu.
 
-### Režiim 4 — Süsteemiülene proksi (edasijõudnutele, valikuline)
+### Režiim 4 — Süsteemiülene puhverserver (edasijõudnutele, valikuline)
 
-**Allikas:** Operatsioonisüsteemi taseme proksisätted (rakenduvad kõigile masina rakendustele)
-**Mehhanism:** Kasutab operatsioonisüsteemi API-sid kogu HTTP/HTTPS-liikluse suunamiseks läbi HTTP_PROXY kuulaja:
+**Allikas:** Operatsioonisüsteemi taseme puhverserveri sätted (rakenduvad kõigile masina rakendustele)  
+**Mehhanism:** Kasutab operatsioonisüsteemi API-sid, et suunata kogu HTTP-/HTTPS-liiklus läbi HTTP_PROXY kuulaja:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Ulatus:** Kõik masina rakendused, mis arvestavad süsteemi proksisätteid
+  **Ulatus:** Kõik masina rakendused, mis arvestavad süsteemi puhverserveri sätteid
   **Märkus:** `source` = `"system-proxy"`
 
-**Ohutusmehhanismid:**
+**Turvamehhanismid:**
 
 - Automaatse väljalülitamise taimer (vaikimisi 30 minutit, seadistatav muutuja `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` kaudu)
-- Süsteemi varasem proksiolek salvestatakse andmebaasi ja taastatakse ennistamisel
-- Kui kasutaja lahkub aktiivse funktsiooni ajal lehelt, kuvab töölaud viiba „Süsteemiproksi ennistamine“
-- Kasutajaliides kuvab märgi `⚠ Edasijõudnutele` ja eraldi kinnitamise märkeruudu
+- Süsteemi puhverserveri eelmine olek salvestatakse andmebaasi ja taastatakse muudatuse tagasivõtmisel
+- Kui kasutaja liigub aktiivse funktsiooni ajal lehelt ära, kuvab töölaud viiba „Süsteemi puhverserveri ennistamine”
+- Kasutajaliides kuvab sildi `⚠ Edasijõudnutele` ja selgesõnalise kinnituse märkeruudu
 
 ### Režiim 5 — TPROXY läbipaistev dekrüptimine (Linux, root, valikuline)
 
-**Allikas:** Kerneli TPROXY + poliitikapõhine marsruutimine (`src/mitm/tproxy/`)
-**Mehhanism:** Märgistab `mangle OUTPUT`-is uued kohalikud väljaminevad TCP-ühendused sihtporti (vaikimisi `443`), `ip rule` suunab märgistatud paketid ümber kohalikku edastusse ning `mangle PREROUTING`-i sihtmärk `TPROXY` annab need üle läbipaistvale (**IP_TRANSPARENT**) kuulajale (vaikimisi port `8443`). Kuulaja lõpetab TLS-ühenduse dünaamilise CA poolt **iga SNI-hostinime jaoks nõudmisel** väljastatud lõppsertifikaadiga, hõivab dekrüptitud andmevahetuse ja edastab päringu uuesti krüptituna algsele sihtkohale.
-**Ulatus:** **Suvalised** sihthostid sihtpordil — `/etc/hosts`-i võltsimist, `HTTP_PROXY` keskkonnamuutujat ega süsteemiüleste proksisätete muutmist pole vaja. Pealtkuulatava protsessi konfiguratsiooni pole vaja muuta, kuid see peab dünaamilist CA-d usaldama.
+**Allikas:** Kerneli TPROXY + reeglipõhine marsruutimine (`src/mitm/tproxy/`)  
+**Mehhanism:** Märgistab `mangle OUTPUT`-is uued kohalikud väljaminevad TCP-ühendused sihtporti (vaikimisi `443`), `ip rule` suunab märgistatud paketid ümber kohalikku edastusse ning `mangle PREROUTING`-u sihtmärk `TPROXY` annab need üle läbipaistvale (**IP_TRANSPARENT**) kuulajale (vaikimisi port `8443`). Kuulaja lõpetab TLS-ühenduse lehtsertifikaadiga, mille dünaamiline CA väljastab **nõudmisel iga SNI-hostinime kohta eraldi**, hõivab dekrüptitud andmevahetuse ning edastab päringu uuesti krüptituna algsesse sihtkohta.  
+**Ulatus:** **Suvalised** sihthostid sihtpordil — pole vaja faili `/etc/hosts` võltsimist, keskkonnamuutujat `HTTP_PROXY` ega süsteemiülese puhverserveri muutmist. Pealtkuulatava protsessi seadistust pole vaja muuta, kuid see peab dünaamilist CA-d usaldama.  
 **Märkus:** `source` = `"tproxy"`
 
-**Nõuded:** Ainult Linux (**IP_TRANSPARENT** on saadaval ainult Linuxis), võimekus **CAP_NET_ADMIN** (root) ja natiivne N-API lisamoodul, mis tuleb kompileerida C-tööriistaahelaga (`npm run build:native:tproxy`). Kui need pole saadaval, on töölaua lüliti keelatud kohtspikriga „TPROXY dekrüptimine nõuab Linuxit + root-õigusi + natiivset lisamoodulit“. Tulemüürireegleid rakendatakse ja ennistatakse transaktsiooniliselt (krahh ei jäta kunagi `mangle`-reeglit alles) ning need eemaldatakse taaskäivitamisel. SO_MARK-il põhinev tsüklivastane kaitse takistab proksi enda uuesti krüptitud edastuse korduvat pealtkuulamist.
+**Nõuded:** Ainult Linux (**IP_TRANSPARENT** on saadaval ainult Linuxis), võimekus **CAP_NET_ADMIN** (root) ja omamaine N-API lisamoodul, mis tuleb koostada C-tööriistaahelaga (`npm run build:native:tproxy`). Kui need pole saadaval, on töölaua lüliti keelatud ja kuvatakse kohtspikker „TPROXY dekrüptimine nõuab Linuxit + root-õigusi + omamaist lisamoodulit”. Tulemüürireeglid rakendatakse ja võetakse tagasi transaktsiooniliselt (krahh ei jäta kunagi `mangle`-reeglit alles) ning need kustutatakse taaskäivitamisel. SO_MARK-il põhinev silmusevastane kaitse takistab puhverserveri enda uuesti krüptitud edastuse uuesti pealtkuulamist.
 
-See on mahukas alamsüsteem, millel on oma spetsiaalne operaatorijuhend — täieliku tulemüüriretsepti, SNI-põhise dünaamilise CA + usaldusväärsuse hoidla installeri, ainult kohaliku marsruudi, tsüklivastase kaitse üksikasjade ja konfiguratsiooniskeemi jaoks vaadake faili `docs/security/MITM-TPROXY-DECRYPT.md` (git; seda ei kompileerita asukohta `/docs`). Lülitit juhitakse `GET / POST / DELETE /api/tools/agent-bridge/tproxy` kaudu (märkus: marsruut asub AgentBridge'i prefiksi, mitte Traffic Inspectori prefiksi all).
+See on mahukas alamsüsteem, millel on oma eraldiseisev operaatorijuhend — täieliku tulemüüriretsepti, SNI-põhise dünaamilise CA ja usaldushoidla installeri, ainult kohaliku marsruudi, silmusevastase kaitse üksikasjade ning seadistusskeemi kohta vaadake faili `docs/security/MITM-TPROXY-DECRYPT.md` (git; seda ei kompileerita kataloogi `/docs`). Lülitit juhitakse marsruutidega `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (märkus: marsruut asub AgentBridge'i, mitte Traffic Inspectori prefiksi all).
 
 ### Hõiverežiimide võrdlus
 
-| Režiim                 | Seadistamine                  |            Sudo?             | Ulatus                                   | Märkused                                                                                                                                 |
-| ---------------------- | ----------------------------- | :--------------------------: | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Automaatne                    |    Üks kord (sert+hosts)     | 9 IDE agenti                             | Vaikimisi sisse lülitatud                                                                                                                |
-| 2. Kohandatud hostid   | Sisestamine hostipõhiselt     |       Jah (hosts-fail)       | Kõik seda hosti kasutavad rakendused     | Säilitatakse andmebaasis                                                                                                                 |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`      |              Ei              | Keskkonnamuutujaid arvestavad rakendused | Port 8080, vaikimisi TLS-i dekrüptimist ei toimu                                                                                         |
-| 4. Süsteemiülene       | Lülita ümber + kinnita        |             Jah              | Kõik masina rakendused                   | Automaatne väljalülitamine 30 min pärast                                                                                                 |
-| 5. TPROXY dekrüptimine | Lüliti (Linux + omakomponent) | Jah (root + CA installimine) | Kõik sihtpordi hostid                    | Dekrüptib suvalisi hoste; vaikimisi välja lülitatud — vt `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei kompileerita kataloogi `/docs`) |
+| Režiim                 | Seadistamine                         |           Sudo?           | Ulatus                                   | Märkused                                                                                                                                 |
+| ---------------------- | ------------------------------------ | :-----------------------: | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Automaatne                           |   Üks kord (sert+hosts)   | 9 IDE agenti                             | Vaikimisi sisse lülitatud                                                                                                                |
+| 2. Kohandatud hostid   | Sisestus hosti kaupa                 |     Jah (hosts-fail)      | Kõik seda hosti kasutavad rakendused     | Salvestatakse andmebaasi                                                                                                                 |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`             |            Ei             | Keskkonnamuutujaid arvestavad rakendused | Port 8080; HTTPS tunneldatakse CONNECT-iga (ainult metaandmed, ei dekrüptita kunagi)                                                     |
+| 4. Süsteemiülene       | Lüliti + kinnitus                    |            Jah            | Kõik masina rakendused                   | Keelatakse automaatselt 30 minuti pärast                                                                                                 |
+| 5. TPROXY dekrüptimine | Lüliti (Linux + natiivne lisamoodul) | Jah (root + CA paigaldus) | Kõik sihtporti kasutavad hostid          | Dekrüptib suvalisi hoste; vaikimisi välja lülitatud — vt `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei kompileerita kataloogi `/docs`) |
 
 ---
 
@@ -341,29 +341,29 @@ Eksportige aadressi `GET /api/tools/traffic-inspector/sessions/{id}/export.har` 
 
 ## §6 Turvalisus
 
-Traffic Inspector kuvab **kogu pealtkuulatud HTTPS-liikluse**, sealhulgas autoriseerimispäised ja päringukehad. Kasutusel on järgmised kontrollmeetmed:
+Traffic Inspector kuvab **kogu pealtkuulatud HTTPS-liikluse**, sealhulgas autoriseerimispäised ja päringukehad. Rakendatud on järgmised turvameetmed:
 
-| Kontrollmeede              | Üksikasjad                                                                                                                                                                                                      |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**             | Kõik marsruudid ja WebSocketi lõpp-punkt on juurdepääsetavad ainult loopback-liidese kaudu (jõustatakse failis `routeGuard.ts` enne autentimist)                                                                |
-| **Saladuste maskimine**    | Lineaarne `maskSecret()`-skanner peidab RFC 6750 Beareri identimisteabe, teenusepakkuja prefiksiga võtmed ja pikad läbipaistmatud sõned enne `TrafficBuffer.push()`-i                                           |
-| **Keha mahupiirang**       | Kehad, mis on suuremad kui `INSPECTOR_MAX_BODY_KB` (vaikimisi 1024 KB), kärbitakse teatega `"(jõudluse huvides kärbitud)"`                                                                                      |
-| **Päiste sanitiseerimine** | Nimed teisendatakse väiketähtedeks; kadreerimis-, hop-by-hop- ja puhverserveri autentimispäised eemaldatakse; küpsised peidetakse täielikult; identimisteabe väärtused edastatakse funktsioonile `maskSecret()` |
-| **CSP**                    | Traffic Inspectori lehtedel rakendatakse ranget sisuturbepoliitikat, et vältida XSS-i sisestatud vastusekehade kaudu                                                                                            |
-| **Vaikimisi ei püsi**      | `TrafficBuffer` asub mälus ja kaob serveri taaskäivitamisel. Seansid säilitatakse ainult siis, kui need selgesõnaliselt salvestatakse                                                                           |
+| Turvameede                 | Üksikasjad                                                                                                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**             | Kõik marsruudid ja WebSocketi lõpp-punkt on ligipääsetavad ainult loopback-liidese kaudu (jõustatakse failis `routeGuard.ts` enne autentimist)                                                              |
+| **Saladuste maskimine**    | Lineaarne `maskSecret()`-skanner peidab RFC 6750 Bearer-mandaadid, teenusepakkuja prefiksiga võtmed ja pikad läbipaistmatud sõned enne `TrafficBuffer.push()` kutset                                        |
+| **Keha suuruse piirang**   | Kehad, mis on suuremad kui `INSPECTOR_MAX_BODY_KB` (vaikimisi 1024 KB), kärbitakse teatega `"(jõudluse huvides kärbitud)"`                                                                                  |
+| **Päiste puhastamine**     | Nimed teisendatakse väiketähtedeks; kaadristamise, hop-by-hop- ja puhverserveri autentimise päised eemaldatakse; küpsised peidetakse täielikult; mandaadiväärtused edastatakse funktsioonile `maskSecret()` |
+| **CSP**                    | Traffic Inspectori lehtedel kasutatakse ranget sisu turbepoliitikat, et vältida sisestatud vastusekehade kaudu toimuvat XSS-i                                                                               |
+| **Vaikimisi ei säilitata** | `TrafficBuffer` asub mälus ja selle sisu kaob serveri taaskäivitamisel. Seansid säilitatakse ainult siis, kui need sõnaselgelt salvestatakse                                                                |
 
 ### Rakendatud ranged reeglid
 
-| Reegel                            | Rakendus                                                                                     |
+| Reegel                            | Rakendamine                                                                                  |
 | --------------------------------- | -------------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Kõik Traffic Inspectori marsruutide HTTP-veavastused sanitiseeritakse                        |
+| **#12** `sanitizeErrorMessage`    | Kõik Traffic Inspectori marsruutide HTTP-tõrkevastused puhastatakse                          |
 | **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` on LOCAL_ONLY + SPAWN_CAPABLE (süsteemi puhverserveri käsud) |
 
 ### Teadaolevad piirangud
 
 - **Kogu süsteemi hõlmav puhverserverirežiim** mõjutab kõiki masinas olevaid rakendusi, sealhulgas VPN-kliente ja SSO-d. Kasutage seda alati koos automaatse väljalülitamise taimeriga. Ärge kasutage seda jagatud masinates.
-- **CONNECT-tunneli HTTPS**: režiim 3 (HTTP_PROXY) hõivab HTTPS-sihtkohtade puhul ainult tunneli metaandmed, välja arvatud juhul, kui TLS-i pealtkuulamine on lubatud. See on taotluslik — läbipaistev hõivamine ilma AgentBridge'i serdi usaldamiseta katkestaks nende rakenduste TLS-kontrolli.
-- **Mõnes komponendis püsiprogrammeeritud sõned**: mõnes kasutajaliidese komponendis (F7/F8) on väike arv püsiprogrammeeritud sõnesid, mida i18n-võtmed veel ei kata. Need on i18n-i lünkade aruandes teadaoleva piiranguna dokumenteeritud; need viiakse üle järgmises etapis. Mõjutatud sõned on kasutajaliidese dekoratiivsed sildid, mis ei vaja funktsionaalseks kasutamiseks tõlkimist.
+- **CONNECT-tunneli HTTPS**: režiim 3 (HTTP_PROXY) hõivab HTTPS-sihtkohtade puhul ainult tunneli metaandmed ega dekrüpti neid kunagi. See on taotluslik — dekrüptimiseks peaks iga klient usaldama MITM-sertifikaati, mistõttu hoiab kuulaja HTTPS-liikluse läbivalt krüpteerituna. Kui vajate HTTPS-kehasid, kasutage AgentBridge'i, Custom Hostsi või TPROXY dekrüptimist.
+- **Mõnes komponendis püsikodeeritud sõned**: mõnes kasutajaliidese komponendis (F7/F8) on väike arv püsikodeeritud sõnesid, mida i18n-võtmed veel ei hõlma. Need on i18n-i lünkade aruandes dokumenteeritud teadaoleva piiranguna; need viiakse üle järgmises etapis. Mõjutatud sõned on kasutajaliidese dekoratiivsed sildid, mis ei vaja funktsionaalseks kasutamiseks tõlkimist.
 
 ---
 
@@ -428,69 +428,69 @@ Kui puhver saavutab väärtuse `INSPECTOR_BUFFER_SIZE` (vaikimisi 1000), tõrjuv
 
 ## §8 API viide
 
-Kõik marsruudid on `LOCAL_ONLY` (ainult tagasisideaadressilt) ja `SPAWN_CAPABLE` (süsteemiproksi käsud). Vaadake faili `src/server/authz/routeGuard.ts`.
+Kõik marsruudid on `LOCAL_ONLY` (ainult loopback) ja `SPAWN_CAPABLE` (süsteemi puhverserveri käsud). Vt `src/server/authz/routeGuard.ts`.
 
 Baastee: `/api/tools/traffic-inspector/`
 
-### Päringute haldamine
+### Päringute haldus
 
 | Meetod | Tee                         | Kirjeldus                                                                              |
 | ------ | --------------------------- | -------------------------------------------------------------------------------------- |
 | GET    | `/requests`                 | Päringute loend (filtreeritav: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
 | GET    | `/requests/{id}`            | Üksiku päringu üksikasjad                                                              |
-| DELETE | `/requests`                 | Mälusisese puhvri tühjendamine                                                         |
-| POST   | `/requests/{id}/replay`     | Sama päringu uuesti käivitamine OmniRoute'i ruuteri kaudu                              |
-| PUT    | `/requests/{id}/annotation` | Päringu märkuse salvestamine või värskendamine                                         |
+| DELETE | `/requests`                 | Tühjenda mälupuhver                                                                    |
+| POST   | `/requests/{id}/replay`     | Käivita sama päring OmniRoute'i ruuteri kaudu uuesti                                   |
+| PUT    | `/requests/{id}/annotation` | Salvesta või uuenda päringu märkust                                                    |
 
 ### WebSocket
 
-| Meetod | Tee   | Kirjeldus                                                                                                          |
-| ------ | ----- | ------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/ws` | WebSocketi reaalajas voog. Saadab ühenduse loomisel sündmuse `snapshot`, seejärel sündmused `new`/`update`/`clear` |
+| Meetod | Tee   | Kirjeldus                                                                                          |
+| ------ | ----- | -------------------------------------------------------------------------------------------------- |
+| GET    | `/ws` | Reaalajas WebSocketi voog. Ühendamisel saadab `snapshot`, seejärel `new`/`update`/`clear` sündmusi |
 
-### Eksportimine
+### Eksport
 
-| Meetod | Tee           | Kirjeldus                                       |
-| ------ | ------------- | ----------------------------------------------- |
-| GET    | `/export.har` | Praeguse filtreeritud loendi eksport HAR 1.2-na |
+| Meetod | Tee           | Kirjeldus                                              |
+| ------ | ------------- | ------------------------------------------------------ |
+| GET    | `/export.har` | Ekspordi praegune filtreeritud loend HAR 1.2 vormingus |
 
 ### Kohandatud hostid
 
-| Meetod | Tee             | Kirjeldus                                               |
-| ------ | --------------- | ------------------------------------------------------- |
-| GET    | `/hosts`        | Kohandatud hostide loend                                |
-| POST   | `/hosts`        | Hosti lisamine (muudab automaatselt faili `/etc/hosts`) |
-| DELETE | `/hosts/{host}` | Hosti eemaldamine                                       |
-| PATCH  | `/hosts/{host}` | `enabled` oleku ümberlülitamine                         |
+| Meetod | Tee             | Kirjeldus                                    |
+| ------ | --------------- | -------------------------------------------- |
+| GET    | `/hosts`        | Kohandatud hostide loend                     |
+| POST   | `/hosts`        | Lisa host (muudab automaatselt `/etc/hosts`) |
+| DELETE | `/hosts/{host}` | Eemalda host                                 |
+| PATCH  | `/hosts/{host}` | Lülita `enabled` olekut                      |
 
 ### Hõiverežiimid
 
-| Meetod | Tee                           | Kirjeldus                                                                       |
-| ------ | ----------------------------- | ------------------------------------------------------------------------------- |
-| GET    | `/capture-modes`              | AgentBridge'i / kohandatud hostide / HTTP_PROXY / süsteemiproksi režiimide olek |
-| POST   | `/capture-modes/http-proxy`   | HTTP_PROXY kuulaja käivitamine/peatamine (`{action: "start"\|"stop"}`)          |
-| POST   | `/capture-modes/system-proxy` | Süsteemiülese proksi rakendamine/ennistamine (`{action: "apply"\|"revert"}`)    |
+| Meetod | Tee                           | Kirjeldus                                                                               |
+| ------ | ----------------------------- | --------------------------------------------------------------------------------------- |
+| GET    | `/capture-modes`              | AgentBridge'i / kohandatud hostide / HTTP_PROXY / süsteemi puhverserveri režiimide olek |
+| POST   | `/capture-modes/http-proxy`   | Käivita/peata HTTP_PROXY kuulaja (`{action: "start"\|"stop"}`)                          |
+| POST   | `/capture-modes/system-proxy` | Rakenda/tühista süsteemiülene puhverserver (`{action: "apply"\|"revert"}`)              |
 
-> **TPROXY dekrüptimist** (hõiverežiim 5) juhib **eraldi** marsruut
-> AgentBridge'i prefiksi all — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` —, mitte
-> prefiksi `/api/tools/traffic-inspector/` all. Vaadake faili
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; pole kompileeritud asukohta `/docs`).
+> **TPROXY dekrüptimist** (hõiverežiim 5) juhib **eraldi** marsruut AgentBridge'i
+> prefiksi all — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` —, mitte
+> `/api/tools/traffic-inspector/` all. Vt
+> `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei kompileerita `/docs` alla).
 
 ### Seansid
 
-| Meetod | Tee                         | Kirjeldus                                                                   |
-| ------ | --------------------------- | --------------------------------------------------------------------------- |
-| POST   | `/sessions`                 | Salvestamise alustamine (`{name?: string}`)                                 |
-| PATCH  | `/sessions/{id}`            | Peatamine või ümbernimetamine (`{action: "stop"\|"rename", name?: string}`) |
-| GET    | `/sessions`                 | Kõigi salvestatud seansside loend                                           |
-| GET    | `/sessions/{id}`            | Seansi hetktõmmis (kõik päringud)                                           |
-| DELETE | `/sessions/{id}`            | Seansi kustutamine                                                          |
-| GET    | `/sessions/{id}/export.har` | Seansi eksportimine HAR 1.2-na                                              |
+| Meetod | Tee                         | Kirjeldus                                                            |
+| ------ | --------------------------- | -------------------------------------------------------------------- |
+| POST   | `/sessions`                 | Alusta salvestamist (`{name?: string}`)                              |
+| PATCH  | `/sessions/{id}`            | Peata või nimeta ümber (`{action: "stop"\|"rename", name?: string}`) |
+| GET    | `/sessions`                 | Kõigi salvestatud seansside loend                                    |
+| GET    | `/sessions/{id}`            | Seansi hetktõmmis (kõik päringud)                                    |
+| DELETE | `/sessions/{id}`            | Kustuta seanss                                                       |
+| GET    | `/sessions/{id}/export.har` | Ekspordi seanss HAR 1.2 vormingus                                    |
 
-### Sisemine vastuvõtt (D4 varumehhanism)
+### Sisemine sisestus (D4 varuvariant)
 
-| Meetod | Tee                | Kirjeldus                                                                                                            |
-| ------ | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/internal/ingest` | Võtab vastu pealtkuulatud päringu faili `server.cjs` läbiva tee kaudu; nõuab päist `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| Meetod | Tee                | Kirjeldus                                                                                                     |
+| ------ | ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| POST   | `/internal/ingest` | Võtab vastu `server.cjs` läbiva tee pealt kinni püütud päringu; nõuab `INSPECTOR_INTERNAL_INGEST_TOKEN` päist |
 
 Täielikud OpenAPI skeemid: `docs/openapi.yaml` → silt `Traffic Inspector`.

@@ -31,6 +31,7 @@ type GeminiToOpenAIState = {
   textualReasoningTagBuffer?: string;
   activeTextualReasoningTag?: string;
   textualReasoningContentBuffer?: string;
+  cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   usage?: {
     prompt_tokens: number;
     completion_tokens: number;
@@ -648,16 +649,43 @@ export function geminiToOpenAIResponse(chunk, state) {
   // Usage metadata - extract before finish reason so we can include it
   const usageMeta = response.usageMetadata || chunk.usageMetadata;
   if (usageMeta && typeof usageMeta === "object") {
-    const cachedTokens =
-      typeof usageMeta.cachedContentTokenCount === "number" ? usageMeta.cachedContentTokenCount : 0;
+    const previousUsage = state.usage;
     const promptTokenCountRaw =
-      typeof usageMeta.promptTokenCount === "number" ? usageMeta.promptTokenCount : 0;
+      typeof usageMeta.promptTokenCount === "number" &&
+      Number.isFinite(usageMeta.promptTokenCount) &&
+      usageMeta.promptTokenCount >= 0
+        ? usageMeta.promptTokenCount
+        : (previousUsage?.prompt_tokens ?? 0);
+    const hasCachedCount = Object.prototype.hasOwnProperty.call(
+      usageMeta,
+      "cachedContentTokenCount"
+    );
+    const reportedCachedTokens = usageMeta.cachedContentTokenCount;
+    const cachedTokens =
+      typeof reportedCachedTokens === "number" &&
+      Number.isFinite(reportedCachedTokens) &&
+      reportedCachedTokens >= 0 &&
+      reportedCachedTokens <= promptTokenCountRaw
+        ? reportedCachedTokens
+        : undefined;
     const thoughtsTokens =
-      typeof usageMeta.thoughtsTokenCount === "number" ? usageMeta.thoughtsTokenCount : 0;
+      typeof usageMeta.thoughtsTokenCount === "number" &&
+      Number.isFinite(usageMeta.thoughtsTokenCount) &&
+      usageMeta.thoughtsTokenCount >= 0
+        ? usageMeta.thoughtsTokenCount
+        : 0;
     let candidatesTokens =
-      typeof usageMeta.candidatesTokenCount === "number" ? usageMeta.candidatesTokenCount : 0;
+      typeof usageMeta.candidatesTokenCount === "number" &&
+      Number.isFinite(usageMeta.candidatesTokenCount) &&
+      usageMeta.candidatesTokenCount >= 0
+        ? usageMeta.candidatesTokenCount
+        : (previousUsage?.completion_tokens ?? 0);
     const totalTokens =
-      typeof usageMeta.totalTokenCount === "number" ? usageMeta.totalTokenCount : 0;
+      typeof usageMeta.totalTokenCount === "number" &&
+      Number.isFinite(usageMeta.totalTokenCount) &&
+      usageMeta.totalTokenCount >= 0
+        ? usageMeta.totalTokenCount
+        : (previousUsage?.total_tokens ?? 0);
 
     // prompt_tokens = promptTokenCount (includes cached tokens, matching claude-to-openai.js behavior)
     const promptTokens = promptTokenCountRaw;
@@ -671,16 +699,34 @@ export function geminiToOpenAIResponse(chunk, state) {
     // completion_tokens = candidatesTokenCount + thoughtsTokenCount (match Go code)
     const completionTokens = candidatesTokens + thoughtsTokens;
 
+    const previousCachedTokens = previousUsage?.prompt_tokens_details?.cached_tokens;
+
+    // Usage snapshots are cumulative. Keep the latest valid cache count, and do
+    // not erase it when a later snapshot omits cache metadata.
+    const effectiveCachedTokens =
+      cachedTokens ??
+      (!hasCachedCount &&
+      typeof previousCachedTokens === "number" &&
+      previousCachedTokens <= promptTokens
+        ? previousCachedTokens
+        : undefined);
+    const cacheEvidence = !hasCachedCount
+      ? "unreported"
+      : cachedTokens === undefined
+        ? "invalid"
+        : cachedTokens > 0
+          ? "hit"
+          : "miss";
+    state.cacheEvidence = cacheEvidence;
     state.usage = {
       prompt_tokens: promptTokens,
       completion_tokens: completionTokens,
-      total_tokens: totalTokens,
+      // Gemini may omit totalTokenCount; derive it instead of reporting 0.
+      total_tokens: totalTokens || promptTokens + completionTokens,
     };
-
-    // Add prompt_tokens_details if cached tokens exist
-    if (cachedTokens > 0) {
+    if (typeof effectiveCachedTokens === "number") {
       state.usage.prompt_tokens_details = {
-        cached_tokens: cachedTokens,
+        cached_tokens: effectiveCachedTokens,
       };
     }
 

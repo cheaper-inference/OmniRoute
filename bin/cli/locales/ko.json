@@ -123,7 +123,9 @@
       "maxCostOpt": "일일 최대 비용(USD)",
       "allowedModelsOpt": "허용된 모델의 쉼표로 구분된 목록",
       "nothingToSet": "제공된 정책 필드가 없습니다. --rate-limit, --max-cost 또는 --allowed-models를 사용하세요.",
-      "updated": "정책이 업데이트되었습니다."
+      "updated": "정책이 업데이트되었습니다.",
+      "modelAccessModeOpt": "모델 접근 모드 (all | restricted)",
+      "unrestrictedOpt": "모든 모델 허용 (--model-access-mode all)"
     },
     "expiration": {
       "title": "키 만료",

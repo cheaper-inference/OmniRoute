@@ -1,1 +1,0 @@
-- **fix(db):** pre-migration snapshots are now pruned by the configured retention outside the migration window, even with automatic backups off ([#16363](https://github.com/diegosouzapw/OmniRoute/pull/16363)) — thanks @maxmad64bis

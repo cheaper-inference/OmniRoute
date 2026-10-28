@@ -123,7 +123,9 @@
       "maxCostOpt": "1 日あたりの最大コスト（USD）",
       "allowedModelsOpt": "許可するモデルのカンマ区切りリスト",
       "nothingToSet": "ポリシーフィールドが指定されていません。--rate-limit、--max-cost、または --allowed-models を使用してください。",
-      "updated": "ポリシーを更新しました。"
+      "updated": "ポリシーを更新しました。",
+      "modelAccessModeOpt": "モデルアクセスモード (all | restricted)",
+      "unrestrictedOpt": "すべてのモデルを許可 (--model-access-mode all)"
     },
     "expiration": {
       "title": "キーの有効期限",

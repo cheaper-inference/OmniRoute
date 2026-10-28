@@ -111,162 +111,162 @@ unit shards፣ integration፣ vitest፣ lint/typecheck፣ docs-sync፣ `check:pa
 
 ## ዝርዝር የማረጋገጫ ዝርዝር
 
-### ከRelease በፊት
+### ከልቀት በፊት
 
-- [ ] ለዚህ release የታለሙ ሁሉም PRዎች ወደ `release/vX.Y.0` ተዋህደዋል
-- [ ] ለዚህ version ክፍት የሆኑ ሁሉም Linear/issue ንጥሎች ተዘግተዋል ወይም ወደ ቀጣዩ milestone ተዘዋውረዋል
-- [ ] በ`release/vX.Y.0` branch ላይ CI ሙሉ በሙሉ አልፏል
-- [ ] በcode ውስጥ የ`TODO(release)` ምልክቶች የሉም፦ `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker base image ወቅታዊ ነው (አሁን `node:24.15.0-trixie-slim`)
+- [ ] ለዚህ ልቀት የታለሙ ሁሉም PRs ወደ `release/vX.Y.0` ተዋህደዋል
+- [ ] ለዚህ ስሪት ያሉ ሁሉም ክፍት Linear/issue ንጥሎች ተዘግተዋል ወይም ወደ ቀጣዩ ምዕራፍ ተላልፈዋል
+- [ ] CI በ`release/vX.Y.0` ቅርንጫፍ ላይ ስኬታማ ነው
+- [ ] በኮዱ ውስጥ ምንም `TODO(release)` ምልክቶች የሉም፦ `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker መሠረታዊ ምስል ወቅታዊ ነው (በአሁኑ ጊዜ `node:24.15.0-trixie-slim`)
 
-### Version እና Changelog
+### ስሪት እና የለውጥ ማስታወሻ
 
-- [ ] `/version-bump-cc <patch|minor|major>` ያሂዱ (Claude Code skill)
-  - `package.json`፣ `electron/package.json` ላይ version ይጨምራል
-  - ከመጨረሻው tag በኋላ ካሉ git commits `CHANGELOG.md`ን እንደገና ያመነጫል
-  - የREADME.md badgesን ያዘምናል
-- [ ] CHANGELOG.mdን በእጅ ይገምግሙ እና ካስፈለገ commit messagesን ያጽዱ
-- [ ] በ`CHANGELOG.md` ውስጥ ያለው የቅርብ ጊዜ semver ክፍል ከ`package.json` version ጋር እኩል መሆኑን ያረጋግጡ
-- [ ] ለወደፊት ሥራ `## [Unreleased]`ን እንደ መጀመሪያው changelog ክፍል ያቆዩ
-- [ ] `docs/openapi.yaml`ን ያዘምኑ → `info.version` ከ`package.json` version ጋር እኩል መሆን አለበት
+- [ ] `/version-bump-cc <patch|minor|major>` ያሂዱ (የClaude Code ክህሎት)
+  - `package.json`፣ `electron/package.json` ስሪቶችን ያሳድጋል
+  - ከመጨረሻው መለያ በኋላ ካሉ git commits `CHANGELOG.md`ን እንደገና ያመነጫል
+  - የREADME.md ባጆችን ያዘምናል
+- [ ] CHANGELOG.mdን በእጅ ይገምግሙ እና አስፈላጊ ከሆነ commit መልዕክቶችን ያጽዱ
+- [ ] በ`CHANGELOG.md` ውስጥ ያለው የቅርብ ጊዜ semver ክፍል ከ`package.json` ስሪት ጋር እኩል መሆኑን ያረጋግጡ
+- [ ] ለወደፊት ሥራ `## [Unreleased]`ን እንደ መጀመሪያው የለውጥ ማስታወሻ ክፍል ያቆዩ
+- [ ] `docs/openapi.yaml` → `info.version` ከ`package.json` ስሪት ጋር እኩል መሆን አለበት
 
-### የCode ጥራት
+### የኮድ ጥራት
 
-- [ ] `npm run lint` — 0 errors (warnings ከዚህ በፊት የነበሩ ናቸው)
+- [ ] `npm run lint` — 0 ስህተቶች (ማስጠንቀቂያዎች ቀድሞ የነበሩ ናቸው)
 - [ ] `npm run typecheck:core` — ንጹሕ
-- [ ] `npm run typecheck:noimplicit:core` — ንጹሕ (strict)
-- [ ] `npm run check:cycles` — circular deps የሉም
-- [ ] `npm run check:any-budget:t11` — በbudget ውስጥ
+- [ ] `npm run typecheck:noimplicit:core` — ንጹሕ (ጥብቅ)
+- [ ] `npm run check:cycles:ratchet` — በተወሰነው `metrics.cycles` ገደብ ውስጥ (`check:cycles` ብቻውን በማንኛውም ዙር ላይ በ1 ይወጣል፣ #15281)
+- [ ] `npm run check:any-budget:t11` — በበጀቱ ውስጥ
 - [ ] `npm run check:route-validation:t06` — ንጹሕ
-- [ ] `npm run check:node-runtime` — የሚደገፈው ዝቅተኛ runtime መስፈርት ተሟልቷል (`>=22.22.2 <23`, `>=24.0.0 <27`፣ በ`src/shared/utils/nodeRuntimeSupport.ts` ውስጥ ባለው `SUPPORTED_NODE_RANGE` መሠረት፤ ከ`package.json` `engines` ጋር የተጣጣመ)
+- [ ] `npm run check:node-runtime` — የሚደገፈው ዝቅተኛ የruntime መስፈርት ተሟልቷል (`>=22.22.2 <23`፣ `>=24.0.0 <27`፣ በ`src/shared/utils/nodeRuntimeSupport.ts` ውስጥ ባለው `SUPPORTED_NODE_RANGE` መሠረት፤ ከ`package.json` `engines` ጋር የተጣጣመ)
 
 ### ሙከራ
 
 - [ ] `npm run test:unit` — ያልፋል
 - [ ] `npm run test:vitest` — ያልፋል (MCP server፣ autoCombo፣ cache)
-- [ ] `npm run test:coverage` — የ60/60/60/60 መግቢያ-ፍተሻ ተሟልቷል (statements/lines/functions/branches)
+- [ ] `npm run test:coverage` — የ60/60/60/60 መስፈርት ተሟልቷል (መግለጫዎች/መስመሮች/ፋንክሽኖች/ቅርንጫፎች)
 - [ ] `npm run test:integration` — ያልፋል (ለውጦቹ DB / handlersን የሚነኩ ከሆነ)
-- [ ] `npm run test:combo:matrix` — ያልፋል (የcombo strategy ማትሪክስ፦ የሁሉም 19 public routing strategies የምርጫ ውሳኔዎችን በተወሰነና በሚደገም መንገድ ያረጋግጣል፤ combo routing፣ strategy resolution ወይም fallback logic ሲነኩ ያሂዱት)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **አማራጭ/በእጅ** (በመግቢያ-ፍተሻ የተገደበ የreal-upstream smoke፤ ከVPS `root@192.168.0.15` የread-only DB snapshotን ይጭናል፤ real providersን ይጠቀማል፣ credits ያስከፍላል፤ በCI ውስጥ ፈጽሞ አይሠራም፤ ያለመግቢያ-ፍተሻው በንጽህና ይዘለላል)
-- [ ] `npm run test:combo:live:vps` — **አማራጭ/በእጅ** (Phase-3 VPS live smoke፦ በplain Node ESM በኩል live `.15` serverን የሚፈትኑ 7 HTTP scenarios፤ `ssh root@192.168.0.15` ያስፈልጋል፤ `__live_test__*` combosን ብቻ ይፈጥራል/ይሰርዛል፤ real providersን ይጠቀማል፤ በCI ውስጥ ፈጽሞ አይሠራም)
+- [ ] `npm run test:combo:matrix` — ያልፋል (የcombo ስትራቴጂ ማትሪክስ፦ የሁሉም 19 ይፋዊ የrouting ስትራቴጂዎች ምርጫ ውሳኔዎችን በወጥነት ያረጋግጣል፤ combo routing፣ strategy resolution ወይም fallback logicን ሲነኩ ያሂዱ)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **አማራጭ/በእጅ** (በመቆጣጠሪያ የተገደበ የእውነተኛ-upstream smoke ሙከራ፤ ከVPS `root@192.168.0.15` የማንበብ-ብቻ DB snapshot ይጠቀማል፤ እውነተኛ providersን ይጠቀማል፣ credits ያስከፍላል፤ በCI ውስጥ ፈጽሞ አይሄድም፤ መቆጣጠሪያው ከሌለ በንጽሕና ይዘላል)
+- [ ] `npm run test:combo:live:vps` — **አማራጭ/በእጅ** (የPhase-3 VPS የቀጥታ smoke ሙከራ፦ በplain Node ESM በኩል በቀጥታ `.15` server ላይ 7 HTTP ሁኔታዎች፤ `ssh root@192.168.0.15` ያስፈልጋል፤ `__live_test__*` combosን ብቻ ይፈጥራል/ይሰርዛል፤ እውነተኛ providersን ይጠቀማል፤ በCI ውስጥ ፈጽሞ አይሄድም)
 - [ ] `npm run test:e2e` — ያልፋል (የUI ለውጦች)
 - [ ] `npm run test:protocols:e2e` — ያልፋል (የMCP/A2A ለውጦች)
 - [ ] `npm run test:ecosystem` — ያልፋል
 
 ### Hooks (በHusky የተረጋገጡ)
 
-የHusky hooks በ`.husky/` ውስጥ ይገኛሉ እና git operations ሲካሄዱ በራስ-ሰር ይሠራሉ።
+የHusky hooks በ`.husky/` ውስጥ ይገኛሉ እና በgit ክወናዎች ጊዜ በራስ-ሰር ይሄዳሉ።
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** ፈጣንና ውጤታቸው ቋሚ የሆኑ መግቢያ-ፍተሻዎች — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 ላይ የነቃ)። `test:unit`ን ሆን ብሎ አያካትትም (ቀርፋፋ ነው፤ በCI `test-unit` job ይሸፈናል)።
-  - release branchesን ከመግፋትዎ በፊት `npm run test:unit`ን በእጅ ያሂዱ።
+- **pre-push:** ፈጣንና ወጥ መቆጣጠሪያዎች — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 ሥራ ላይ ውሏል)። `test:unit`ን ሆን ብሎ አያካትትም (ዘገምተኛ ነው፤ በCI `test-unit` job ይሸፈናል)።
+  - የልቀት ቅርንጫፎችን ከመግፋት በፊት `npm run test:unit`ን በእጅ ያሂዱ።
 
-አንድ hook ካልተሳካ፦ ዋናውን ችግር ያስተካክሉ፤ `--no-verify`ን በመጠቀም አያልፉት።
+አንድ hook ካልተሳካ፦ መሠረታዊውን ችግር ያስተካክሉ፤ በ`--no-verify` አይለፉት።
 
-### Conventional Commits
+### መደበኛ Commits
 
-ለrelease የታቀዱ ሁሉም commits የ`type(scope): subject` ቅርጸትን መከተል አለባቸው።
+ከልቀቱ ጋር የሚካተቱ ሁሉም commits የ`type(scope): subject` ቅርጸትን መከተል አለባቸው።
 
-**ትክክለኛ types፦** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**ትክክለኛ types:** `feat`፣ `fix`፣ `refactor`፣ `docs`፣ `test`፣ `chore`፣ `perf`፣ `style`፣ `ci`
 
-**ትክክለኛ scopes፦** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**ትክክለኛ scopes:** `db`፣ `sse`፣ `oauth`፣ `dashboard`፣ `api`፣ `cli`፣ `docker`፣ `ci`፣ `mcp`፣ `a2a`፣ `memory`፣ `skills`፣ `cloud-agent`፣ `guardrails`፣ `compression`፣ `auto-combo`፣ `resilience`፣ `providers`፣ `executors`፣ `translator`፣ `domain`፣ `authz`
 
-Breaking changes፦ `BREAKING CHANGE:` footer ወይም ከscope በኋላ `!` ያክሉ (ለምሳሌ፦ `feat(api)!: drop /v0`)።
+የሚያቋርጡ ለውጦች፦ `BREAKING CHANGE:` footer ወይም ከscope በኋላ `!` ያክሉ (ለምሳሌ `feat(api)!: drop /v0`)።
 
 ### ሰነድ
 
-- [ ] `npm run check:docs-sync` ያልፋል (በ pre-commit በራስ-ሰር ይከናወናል)
-- [ ] `npm run check:docs-all` ያልፋል (ሁሉን አቀፍ፦ docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` በ0 ይወጣል — በኮድ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` መካከል ያለው የenv ውል እንደተጠበቀ ነው
-- [ ] `npm run check:doc-links` በ0 ይወጣል — ከመልሶ ማዋቀር በኋላ የተበላሹ ውስጣዊ የmarkdown ማጣቀሻዎች የሉም
-- [ ] `docs/architecture/ARCHITECTURE.md` ለማከማቻ/runtime ልዩነት ተገምግሟል
-- [ ] `docs/guides/TROUBLESHOOTING.md` ለenv var እና ለክወና ልዩነት ተገምግሟል
+- [ ] `npm run check:docs-sync` ያልፋል (በpre-commit በራስ-ሰር ይሄዳል)
+- [ ] `npm run check:docs-all` ያልፋል (አጠቃላይ፦ docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` በ0 ይወጣል — የኮድ ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env ውል ሳይበላሽ ቆይቷል
+- [ ] `npm run check:doc-links` በ0 ይወጣል — እንደገና ከተዋቀረ በኋላ የተበላሹ ውስጣዊ markdown ማጣቀሻዎች የሉም
+- [ ] `docs/architecture/ARCHITECTURE.md` ለstorage/runtime መዛባት ተገምግሟል
+- [ ] `docs/guides/TROUBLESHOOTING.md` ለenv var እና የክወና መዛባት ተገምግሟል
 - [ ] `.env.example` ከተለወጠ፦ `docs/reference/ENVIRONMENT.md` ተዘምኗል
 - [ ] አዲሱ ባህሪ UI ካለው፦ `docs/guides/USER_GUIDE.md` ይጠቅሰዋል
 - [ ] አዲሱ ባህሪ API ካለው፦ `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` ተዘምነዋል
 - [ ] አዲሱ ባህሪ module ከሆነ፦ ራሱን የቻለ `docs/<MODULE>.md` አለ
-- [ ] ተኳኋኝነትን የሚያቋርጥ ለውጥ ከሆነ፦ `docs/guides/TROUBLESHOOTING.md` የሽግግር ማስታወሻ አለው
+- [ ] የሚያቋርጥ ለውጥ ከሆነ፦ `docs/guides/TROUBLESHOOTING.md` የmigration ማስታወሻ አለው
 
 ### i18n
 
-- [ ] `npm run i18n:check` በ0 ይወጣል — የትርጉም ሁኔታው (`.i18n-state.json`) ከምንጭ ሰነዶች ጋር የተመሳሰለ ነው (በstrict mode ውስጥ የተለያዩ ምንጮች የሉም፤ ለመጨረሻ ደቂቃ የሰነድ ማስተካከያዎች የwarn-mode ምክር ተቀባይነት አለው፣ ነገር ግን tag ከማድረግ በፊት 0 መሆን አለበት)
-- [ ] `npm run i18n:check-ui-coverage` በ0 ይወጣል — እያንዳንዱ የUI locale ከ80% የሽፋን ዝቅተኛ ገደብ ላይ ወይም ከዚያ በላይ ነው
-- [ ] `npm run i18n:sync-ui:dry` በሁሉም 42 locales ውስጥ 0 የጎደሉ keys እንዳሉ ሪፖርት ያደርጋል
-- [ ] የምንጭ የእንግሊዝኛ ሰነዶች ከተለወጡ፣ tag ከማድረግ በፊት `npm run i18n:run` ያሂዱ (በ`.env` ውስጥ `OMNIROUTE_TRANSLATION_API_KEY` ያስፈልገዋል)
-- [ ] የትርጉም አስተዋጽኦዎች አነስተኛ ከሆኑ ወደ ቀጣዩ release ሊዘገዩ ይችላሉ (በCHANGELOG ውስጥ ይከታተሉ)
+- [ ] `npm run i18n:check` በ0 ይወጣል — የትርጉም ሁኔታ (`.i18n-state.json`) ከምንጭ ሰነዶች ጋር የተመሳሰለ ነው (በstrict mode ውስጥ የተዛቡ ምንጮች የሉም፤ የwarn-mode ምክር ለመጨረሻ ደቂቃ የሰነድ ማስተካከያዎች ተቀባይነት አለው፣ ነገር ግን መለያ ከመስጠት በፊት 0 መሆን አለበት)
+- [ ] `npm run i18n:check-ui-coverage` በ0 ይወጣል — እያንዳንዱ የUI locale ከ80% የሽፋን ዝቅተኛ ገደብ ላይ ወይም በላይ ነው
+- [ ] `npm run i18n:sync-ui:dry` በሁሉም 66 ዒላማ locales ላይ 0 የጎደሉ keys ሪፖርት ያደርጋል (ከ`en` ምንጭ በስተቀር እያንዳንዱ locale)
+- [ ] የምንጭ የእንግሊዝኛ ሰነዶች ከተለወጡ፣ መለያ ከመስጠት በፊት `npm run i18n:run`ን ያሂዱ (በ`.env` ውስጥ `OMNIROUTE_TRANSLATION_API_KEY` ያስፈልጋል)
+- [ ] አነስተኛ ከሆኑ የትርጉም አስተዋጽኦዎች ወደ ቀጣዩ ልቀት ሊዘገዩ ይችላሉ (በCHANGELOG ውስጥ ይከታተሉ)
 
-### የውሂብ ጎታ ሽግግሮች
+### የውሂብ ጎታ Migrations
 
 - [ ] `src/lib/db/migrations/` አዲስ ፋይሎች ካሉት፦
-  - [ ] እያንዳንዱ migration በተደጋጋሚ ቢከናወንም ተመሳሳይ ውጤት ይሰጣል (`CREATE TABLE IF NOT EXISTS`፣ ወዘተ)
-  - [ ] Migrations በtransactions ውስጥ ተጠቃለዋል
+  - [ ] እያንዳንዱ migration idempotent ነው (`CREATE TABLE IF NOT EXISTS`፣ ወዘተ)
+  - [ ] Migrations በtransactions ውስጥ ተጠቅልለዋል
   - [ ] በትክክል ተቆጥረዋል (በቅደም ተከተሉ ውስጥ ክፍተቶች የሉም)
-- [ ] በአዲስ installation ላይ ይፈትሹ፦ `~/.omniroute/omniroute.db`ን ሰርዘው `npm run dev`ን ያሂዱ
-- [ ] በነባር installation ላይ ይፈትሹ፦ DBን ምትኬ ያስቀምጡ፣ migrationን ያሂዱ፣ schemaውን ያረጋግጡ
-- [ ] Migration ሰንጠረዦችን እንደገና ከጻፈ WAL ፋይሎች (`-wal`, `-shm`) በትክክል ተይዘዋል
+- [ ] በአዲስ ጭነት ላይ ይፈትሹ፦ `~/.omniroute/omniroute.db`ን ይሰርዙ እና `npm run dev`ን ያሂዱ
+- [ ] በነባር ጭነት ላይ ይፈትሹ፦ DBን ምትኬ ያስቀምጡ፣ migrationን ያሂዱ፣ schemaን ያረጋግጡ
+- [ ] migration ሠንጠረዦችን እንደገና የሚጽፍ ከሆነ WAL ፋይሎች (`-wal`፣ `-shm`) በትክክል ተይዘዋል
 
-### የProvider ካታሎግ (በZod የተረጋገጠ)
+### የአቅራቢዎች ካታሎግ (በZod የተረጋገጠ)
 
-- [ ] የ`src/shared/constants/providers.ts` Zod schema በመጫኛ ጊዜ ትክክለኛ ነው
-  - [ ] ሁሉም providers የሚያስፈልጉ መስኮች አሏቸው (`id`, `label`, `kind`፣ ወዘተ)
-  - [ ] ለአዲስ ነጻ providers `freeNote` ቀርቧል
-  - [ ] የOAuth providers `oauthConfig` በ`src/lib/oauth/constants/oauth.ts` ውስጥ ተመዝግቧል
-- [ ] አዲስ provider ከታከለ፦ ተዛማጅ executor በ`open-sse/executors/` ውስጥ አለ
-- [ ] OpenAI ያልሆነ format ከሆነ፦ translator በ`open-sse/translator/` ውስጥ አለ
-- [ ] Models በ`open-sse/config/providerRegistry.ts` ውስጥ ተመዝግበዋል
-- [ ] በ`tests/unit/` ውስጥ ያሉ unit tests የprovider ምደባን እና routingን ይሸፍናሉ
+- [ ] `src/shared/constants/providers.ts` የZod schema በመጫኛ ጊዜ ትክክለኛ ነው
+  - [ ] ሁሉም አቅራቢዎች አስፈላጊ መስኮች (`id`, `label`, `kind`, ወዘተ) አሏቸው
+  - [ ] ለአዲስ ነጻ አቅራቢዎች `freeNote` ቀርቧል
+  - [ ] የOAuth አቅራቢዎች `oauthConfig` በ`src/lib/oauth/constants/oauth.ts` ውስጥ ተመዝግቧል
+- [ ] አዲስ አቅራቢ ከታከለ፦ ተዛማጅ አስፈጻሚ በ`open-sse/executors/` ውስጥ አለ
+- [ ] OpenAI ያልሆነ ቅርጸት ከሆነ፦ ተርጓሚ በ`open-sse/translator/` ውስጥ አለ
+- [ ] ሞዴሎች በ`open-sse/config/providerRegistry.ts` ውስጥ ተመዝግበዋል
+- [ ] በ`tests/unit/` ውስጥ ያሉ የክፍል ሙከራዎች የአቅራቢ ምደባንና ማዘዋወርን ይሸፍናሉ
 
 ### ዴስክቶፕ (Electron)
 
 `electron/` ከተለወጠ፦
 
 - [ ] `npm run electron:smoke:packaged` ያልፋል
-- [ ] Builds ቢያንስ ለ`:win`፣ `:mac`፣ `:linux` ከአንዱ ጋር ተፈትሸዋል
-- [ ] የኮድ ፊርማ certs ጊዜያቸው አላለፈም (ፊርማ የሚደረግ ከሆነ)
-- [ ] የ`electron/package.json` version ከዋናው `package.json` ጋር ይዛመዳል
-- [ ] ወደ `stable` release የሚደረግ ከሆነ የራስ-ሰር ዝማኔ channel pointer ተዘምኗል
+- [ ] ግንባታዎች ቢያንስ ለአንዱ `:win`, `:mac`, `:linux` ተፈትነዋል
+- [ ] የኮድ ፊርማ ሰርተፊኬቶች ጊዜያቸው አላለፈም (ፊርማ የሚደረግ ከሆነ)
+- [ ] የ`electron/package.json` ስሪት ከዋናው `package.json` ጋር ይዛመዳል
+- [ ] ወደ `stable` የሚለቀቅ ከሆነ የራስ-ሰር ማዘመኛ ቻናል ጠቋሚው ተዘምኗል
 
-### የBuild አቀማመጥ
+### የግንባታ አቀማመጥ
 
-Repositoryው ሦስት የተለያዩ የውጤት directoriesን ይጠቀማል — ፈጽሞ አታደባልቋቸው፦
+ማከማቻው ሦስት የተለያዩ የውጤት ማውጫዎችን ይጠቀማል — ፈጽሞ አትቀላቅሏቸው፦
 
-| Directory | ዓላማ                                                | ክትትል ይደረግበታል?   |
-| --------- | -------------------------------------------------- | --------------- |
-| `src/`    | የመተግበሪያ ምንጭ (TypeScript / TSX)                     | አዎ              |
-| `.build/` | የBuild መካከለኛ ውጤቶች — የ`next build` ውጤት (`distDir`)  | አይ (gitignored) |
-| `dist/`   | ሊላክ የሚችል npm bundle — በ`assembleStandalone` የተሰበሰበ | አይ (gitignored) |
+| ማውጫ       | ዓላማ                                                | ክትትል ይደረግበታል?     |
+| --------- | -------------------------------------------------- | ----------------- |
+| `src/`    | የመተግበሪያ ምንጭ (TypeScript / TSX)                     | አዎ                |
+| `.build/` | የግንባታ መካከለኛ ውጤቶች — የ`next build` ውጤት (`distDir`)   | አይ (`gitignored`) |
+| `dist/`   | ለማሰራጨት ዝግጁ የnpm ጥቅል — በ`assembleStandalone` የሚሰበሰብ | አይ (`gitignored`) |
 
-> **የኦፕሬተር ማስታወሻ፦** የርቀት VPS image directory `/usr/lib/node_modules/omniroute/app/` ሆኖ ይቀጥላል።
-> የተንቀሳቀሰው **በrepository ውስጥ ያለው** የbuild ውጤት ብቻ ነው (`app/` → `dist/`)። የdeploy skills
-> የ`dist/` ይዘቶችን ወደ ርቀት `app/` dir በrsync ያስተላልፋሉ — ምንም የVPS path ለውጥ አያስፈልግም።
+> **የኦፕሬተር ማስታወሻ፦** የርቀት VPS ምስል ማውጫ `/usr/lib/node_modules/omniroute/app/` ሆኖ ይቀጥላል።
+> የተዛወረው **በማከማቻው ውስጥ ያለው** የግንባታ ውጤት ብቻ ነው (`app/` → `dist/`)። የማሰማራት ክህሎቶቹ
+> የ`dist/` ይዘቶችን ወደ ርቀት `app/` ማውጫ rsync ያደርጋሉ — የVPS ዱካ ለውጥ አያስፈልግም።
 
-**የአንድ-build ፍሰት፦**
+**የአንድ-ጊዜ ግንባታ ፍሰት፦**
 
 ```
 npm run build:release
   └─ rm -rf .build dist          (ማጽዳት)
   └─ next build → .build/next/   (መካከለኛ ውጤቶች)
-  └─ assembleStandalone          (standalone + static + public + nativesን ወደ dist/ ይቀዳል)
-  └─ writes dist/BUILD_SHA       (የHEAD sentinel)
+  └─ assembleStandalone          (standalone + static + public + natives ወደ dist/ ይቀዳል)
+  └─ dist/BUILD_SHA ይጽፋል       (የHEAD ጠቋሚ)
 ```
 
-ለdeploy `npm run build`ን ካስኬዱ በኋላ የተለየ `npm run build:cli` አታሂዱ — በአንድ command ውስጥ ንጹሕ rebuild + sentinel የሚያከናውነውን
+ለማሰማራት `npm run build` ካስኬዱ በኋላ በተናጠል `npm run build:cli` አያስኪዱ — በአንድ ትዕዛዝ ንጹሕ ዳግም ግንባታና ጠቋሚ የሚያከናውነውን
 `npm run build:release` ይጠቀሙ።
 
-### የArtifact ማረጋገጫ
+### የአርቲፋክት ማረጋገጫ
 
-- [ ] `npm run build:release` ይሳካል እና `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` ንጹሕ ነው — `app.__qa_backup`፣ `scripts/scratch`፣ `package-lock.json` ወይም ሌላ የአካባቢ ቅሪት የለም
-- [ ] ከbuild በኋላ `dist/server.js` አለ
-- [ ] አማራጭ የአካባቢ packaged-runtime smoke፦ ከ`npm run dev:candidate -- build` በኋላ `npm run dev:candidate -- validate` የታሸገውን tarball በተነጠለ `DATA_DIR` ላይ ያስነሳል እና `/api/health` + `/v1/models`ን ይፈትሻል ([የአስተዋጽኦ ወርቃማ መንገድ](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop)ን ይመልከቱ)
+- [ ] `npm run build:release` በተሳካ ሁኔታ ይጠናቀቃል እና `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` ንጹሕ ነው — `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, ወይም ሌላ የአካባቢ ቅሪት የለም
+- [ ] ከግንባታው በኋላ `dist/server.js` አለ
+- [ ] አማራጭ የአካባቢ packaged-runtime የጭስ ሙከራ፦ ከ`npm run dev:candidate -- build` በኋላ `npm run dev:candidate -- validate` የታሸገውን tarball በተነጠለ `DATA_DIR` ላይ ያስነሳና `/api/health` + `/v1/models` ይፈትሻል ([የአስተዋጽኦ ወርቃማ መንገድ](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop)ን ይመልከቱ)
 
-### Tag ማድረግ እና Release
+### መለያ መስጠት እና ልቀት
 
-- [ ] `/generate-release-cc`ን ያሂዱ (Claude Code skill)፦
-  - `vX.Y.Z` tag ይፈጥራል
-  - Tagን እና branchን push ያደርጋል
-  - ከchangelog body ጋር GitHub Release ይከፍታል
-  - Electron installersን ያያይዛል (ከተገነቡ)
+- [ ] `/generate-release-cc`ን ያስኪዱ (የClaude Code ክህሎት)፦
+  - `vX.Y.Z` መለያ ይፈጥራል
+  - መለያውንና ቅርንጫፉን ይገፋል
+  - የለውጥ ማስታወሻ ይዘት ያለው GitHub Release ይከፍታል
+  - የElectron ጫኚዎችን ያያይዛል (ከተገነቡ)
 - [ ] ወይም በእጅ፦
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -274,46 +274,46 @@ npm run build:release
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Deploy
+### ማሰማራት
 
-የDeploy skills ቀላሉን የrsync ፍሰት ይጠቀማሉ — `npm pack` የለም፣ `npm i -g` የለም፦
+የማሰማራት ክህሎቶች ቀላሉን የrsync ፍሰት ይጠቀማሉ — `npm pack` የለም፣ `npm i -g` የለም፦
 
-- [ ] ከዒላማው ጋር የሚዛመደውን deploy skill ይጠቀሙ፦
+- [ ] ከዒላማው ጋር የሚዛመደውን የማሰማራት ክህሎት ይጠቀሙ፦
   - `/deploy-vps-local-cc` — የአካባቢ VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — ሁለቱም
 - [ ] ከማሰማራትዎ በፊት `dist/BUILD_SHA` == `git rev-parse --short HEAD` መሆኑን ያረጋግጡ
-- [ ] Build የግድ `node_modules` እውነተኛ በሆነበት ቦታ መከናወን አለበት (ዋናው checkout ወይም `npm ci` የተከናወነበት worktree — symlink የተደረገ worktree መሆን የለበትም)
-- [ ] የተሰማራውን instance በSmoke test ይፈትሹ፦
-  - `/dashboard/health` ይክፈቱ → የስሪት ሕብረቁምፊው ከrelease ጋር እንደሚዛመድ ያረጋግጡ
-  - በሚታወቅ provider ላይ የ`/v1/chat/completions` ጥያቄ ያስኪዱ
+- [ ] ግንባታው `node_modules` እውነተኛ በሆነበት ቦታ መካሄድ አለበት (ዋና checkout ወይም `npm ci` የተካሄደበት worktree — symlink የተደረገ worktree አይደለም)
+- [ ] የተሰማራውን instance የጭስ ሙከራ ያድርጉ፦
+  - `/dashboard/health`ን ይክፈቱ → የስሪት ሕብረቁምፊው ከልቀቱ ጋር መዛመዱን ያረጋግጡ
+  - በሚታወቅ አቅራቢ ላይ የ`/v1/chat/completions` ጥያቄ ያስኪዱ
   - `/api/monitoring/health` የ`CLOSED` circuit breakers እንደሚመልስ ያረጋግጡ
-  - MCP transports ምላሽ እንደሚሰጡ ያረጋግጡ (`/mcp` HTTP፣ `/mcp-sse` SSE)
+  - የMCP transports ምላሽ እንደሚሰጡ ያረጋግጡ (`/mcp` HTTP፣ `/mcp-sse` SSE)
 
-### ከrelease በኋላ
+### ከልቀት በኋላ
 
-- [ ] `/capture-release-evidences-cc` ያስኪዱ (Claude Code skill)
-  - የአዳዲስ ባህሪያትን WebP screenshots/recordings ይቀርጻል
-  - ከrelease notes / blog post ጋር ያያይዛል
-- [ ] GitHub Discussions / Discordን በrelease ማስታወቂያ ያዘምኑ
-- [ ] ለሚቀጥለው ስሪት milestone ይክፈቱ
-- [ ] ወሳኝ ከሆነ፦ ውይይቱን pin ያድርጉ ወይም በመተግበሪያ ውስጥ ለሚታየው banner በ`news.json` ውስጥ ይለጥፉ
+- [ ] `/capture-release-evidences-cc`ን ያስኪዱ (የClaude Code ክህሎት)
+  - የአዲስ ባህሪያት WebP ቅጽበታዊ ምስሎችን/ቀረጻዎችን ይይዛል
+  - ከልቀት ማስታወሻዎች / የብሎግ ልጥፍ ጋር ያያይዛል
+- [ ] GitHub Discussions / Discordን በልቀት ማስታወቂያ ያዘምኑ
+- [ ] ለቀጣዩ ስሪት milestone ይክፈቱ
+- [ ] ወሳኝ ከሆነ፦ ውይይቱን pin ያድርጉ ወይም ለውስጠ-መተግበሪያ ባነር በ`news.json` ውስጥ ይለጥፉ
 
-### የRadar ይፋዊ ማስጀመሪያ መግቢያ መስፈርት
+### የRadar ይፋዊ-ማስጀመሪያ መግቢያ መስፈርት
 
-የRadar ማስታወቂያው ሆን ተብሎ በ`active: false` commit ተደርጓል። ማግበር ከዚህ በታች ያሉት እያንዳንዳቸው በማስረጃ ከተረጋገጡ በኋላ የሚደረግ የተለየ
+የRadar ማስታወቂያው ሆን ተብሎ በ`active: false` commit ተደርጓል። ከታች ያሉት ንጥሎች በሙሉ ማስረጃ ከቀረበላቸው በኋላ ማግበር በተናጠል
 ለውጥ ነው፦
 
-- [ ] ሁሉም በተደራራቢነት የቀረቡ Radar PRs merge ተደርገዋል እና የrelease-tip CI አረንጓዴ ነው
-- [ ] `RADAR_ENABLED` በነባሪነት እንደጠፋ ሆኖ የOSS Radar routesን deploy እና smoke test ያድርጉ
-- [ ] በተሰየመው Radar host ላይ `GET /planos`፣ `/termos`፣ `/privacidade` እና `/reembolso`ን smoke test ያድርጉ
-- [ ] የoperator ማንነት/የመገኛ መረጃ/አድራሻ እና በowner የጸደቀውን የሕግ ግምገማ በግል service ውስጥ ይመዝግቡ
-- [ ] Stripe Checkoutን እና signed webhookን በtest mode ብቻ ይፈትሹ
-- [ ] በጸደቀው sender/domain አንድ የተመሰጠረ transactional-email delivery ይፈትሹ
-- [ ] የbackup restoreን እና አንድ በክትትል ስር የሚከናወን፣ ወጪው ገደብ ያለው research run በማስረጃ ያረጋግጡ
-- [ ] የdonation ማስረጃን ከመቀበልዎ በፊት የBRL/PIX ግምገማ ፖሊሲውን ያጽድቁ
-- [ ] ይፋዊ Checkoutን ያንቁት ከላይ ያሉት መግቢያ መስፈርቶች ከተሟሉ በኋላ ብቻ ነው፤ ከዚያም አዲሱን `news.json` ID ያግብሩ
-- [ ] የHome banner በአካባቢያዊ ቋንቋ የተተረጎመ copy እንደሚጠቀም እና የቆየ ID dismissed ከተደረገ በኋላ አዲስ ID እንደገና እንደሚታይ ያረጋግጡ
+- [ ] ሁሉም በተደራራቢ የቀረቡ የRadar PRs ተዋህደዋል እና የrelease-tip CI አረንጓዴ ነው
+- [ ] `RADAR_ENABLED` አሁንም በነባሪነት ጠፍቶ ሳለ የOSS Radar routesን ያሰማሩና የጭስ ሙከራ ያድርጉ
+- [ ] በተሰየመው የRadar host ላይ `GET /planos`, `/termos`, `/privacidade`, እና `/reembolso` የጭስ ሙከራ ያድርጉ
+- [ ] በግል አገልግሎቱ ውስጥ የኦፕሬተሩን ማንነት/መገኛ/አድራሻ እና በባለቤቱ የጸደቀውን የሕግ ግምገማ ይመዝግቡ
+- [ ] Stripe Checkoutን እና ፊርማ የተደረገበትን webhook በሙከራ ሁነታ ብቻ ይፈትሹ
+- [ ] በተፈቀደው ላኪ/domain አንድ የተመሰጠረ የግብይት ኢሜይል መላክን ይፈትሹ
+- [ ] የbackup መመለስን እና አንድ ክትትል የተደረገበት፣ የበጀት ገደብ ያለው የምርምር ሂደት ያረጋግጡ
+- [ ] የልገሳ ማስረጃ ከመቀበልዎ በፊት የBRL/PIX ግምገማ ፖሊሲውን ያጽድቁ
+- [ ] ይፋዊ Checkoutን ከቀደሙት መግቢያ መስፈርቶች በኋላ ብቻ ያንቁ፣ ከዚያም አዲሱን የ`news.json` ID ያግብሩ
+- [ ] የHome ባነሩ አካባቢያዊ ትርጉም ያለው ጽሑፍ እንደሚጠቀም እና አዲስ ID አሮጌ ID ውድቅ ከተደረገ በኋላ እንደገና እንደሚታይ ያረጋግጡ
 
 ## የተካተቱ አገልግሎቶች ፈጣን ሙከራ (v3.8.4+)
 
@@ -385,42 +385,45 @@ npm run build:release
 
 ---
 
-## 3.9.0 LTS ቅርንጫፍ መለያየት (በ3.8.58 የተለማመደ)
+## 3.9.0 LTS መቁረጥ (በ3.8.58 የተለማመደ)
 
-ከv3.8.59 በኋላ የሚመጣው ስሪት 3.9.0 ሲሆን፣ የዚህ የቅርብ ጊዜ ኮሚት ለረጅም ጊዜ ወደሚቆዩ ሁለት ቅርንጫፎች ይከፈላል፦
-`stable/v3` (የv3 LTS መስመር፣ npm `latest`) እና `develop` (v4፣ ወደ 4.0.0 የተሻሻለ፣ npm
+ከv3.8.59 በኋላ ቀጣዩ ስሪት 3.9.0 ነው፣ እና የመጨረሻው commit ሁለት ረጅም ጊዜ የሚቆዩ ቅርንጫፎች ይሆናል፦
+`stable/v3` (የv3 LTS መስመር፣ npm `latest`) እና `develop` (v4፣ ወደ 4.0.0 የተጨመረ፣ npm
 `nightly`)። የቅርንጫፍ/ቻናል ሞዴሉ፣ forward-port እና መለያዎቹ በ
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ውስጥ ይገኛሉ፤ ዕቅዱም በ[ROADMAP](../../ROADMAP.md) (ደረጃ 3) ውስጥ ይገኛል። መለያየቱ አንድ ጊዜ ብቻ ይካሄዳል፤
-3.8.58 ሂደቱን ከመጀመሪያ እስከ መጨረሻ በfork ላይ ይለማመዳል፣ 3.8.59 ደግሞ በ
-[GO/NO-GO ማረጋገጫ ዝርዝር](./LTS_GO_NO_GO.md) ይዘጋል።
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ውስጥ ይገኛሉ፤ ዕቅዱም በ[ROADMAP](../../ROADMAP.md) (ደረጃ 3) ውስጥ ይገኛል። መቁረጡ አንድ ጊዜ ብቻ ይከናወናል፤
+3.8.58 በfork ላይ ከመጀመሪያ እስከ መጨረሻ ልምምድ ያደርግበታል፣ 3.8.59 ደግሞ በ
+[GO/NO-GO የማረጋገጫ ዝርዝር](./LTS_GO_NO_GO.md) ይዘጋል።
 
-### የሙከራ አሂድ (ለንባብ ብቻ፣ በማንኛውም ጊዜ አስተማማኝ)
+### የሙከራ አሂድ (ለንባብ ብቻ፣ በማንኛውም ጊዜ ደህንነቱ የተጠበቀ)
 
 ```bash
-npm run release:dry-run-lts-cut                       # ትክክለኛው መለያየት፦ 3.9.0 ከHEAD፣ ቀዳሚው tag v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # የምንጩን commit ይወስኑ
+npm run release:dry-run-lts-cut                       # እውነተኛው መቁረጥ፦ 3.9.0 ከHEAD፣ የቀድሞው tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # የምንጭ commitን አስ固定
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ምንም ነገር አያስፈጽምም፤ git እና `gh`ን አንብቦ
-ሙሉውን ቅደም ተከተል ያትማል — ቅድመ ሁኔታዎች (ምንጩ ሊፈታ የሚችል መሆኑ፣ ቀዳሚው tag መኖሩ፣ `package.json`
-የዒላማው ስሪት መሆኑ፣ አንድ `release-freeze` issue ክፍት መሆኑ፣ ባለው የልቀት ቅርንጫፍ ላይ
-ክፍት `Release branch not green` issue አለመኖሩ — የማይኖር ቅርንጫፍ `?` ያልታወቀ ብሎ ያሳያል፣ በፍጹም
-green አይባልም — የMergify `release` queue መዋቀሩ (G11፦ `queue_rules`፣ `checks_timeout`፣
-መለያ `queue`)፣ የ`release/*` ruleset አሁንም መሰረዝን እና force-pushን መከልከሉ፣ እንዲሁም
-`stable/v3` እና `develop` ገና አለመኖራቸው)፣ ሁለቱ የቅርንጫፍ ደረጃዎች፣ የትኞቹ የቦዘኑ workflow
-triggerዎች እና `if:` ሁኔታዎች true እንደሚሆኑ (እና የትኞቹ በrepository variable እንደታገዱ ወይም
-ወደ canonical repository እንደተወሰኑ)፣ የሚጠበቁት dist-tagዎች (`latest` → 3.9.0፣ `next` እና
-`nightly` ባዶ) እና rollback። Exit `0` = `RESULT: READY`፣ `1` = አንድ ከልካይ ቅድመ ሁኔታ
-አልተሳካም (`✗`)፣ `2` = የአጠቃቀም ስህተት። `--advisory <id,...>` አንድን ማረጋገጫ ሳይደብቀው
+`scripts/release/dry-run-lts-cut.mjs` ምንም ነገር አያስፈጽምም፦ git እና `gh`ን አንብቦ
+ሙሉውን ቅደም ተከተል ያትማል — ቅድመ ሁኔታዎች (ምንጩ ይፈታል፣ የምንጭ repositoryው ሙሉ history አለው —
+shallow clone `stable/v3`ን push ማድረግ አይችልም፣ ተቀባዩ ወገን በመጀመሪያው
+grafted parent ላይ packን ውድቅ ያደርጋል፤ ስለዚህ ከሙሉ clone ላይ ይቁረጡ ወይም መጀመሪያ `git fetch --unshallow origin` ያሂዱ —
+የቀድሞው tag አለ፣ `package.json` የዒላማው ስሪት ነው፣ የ`release-freeze` issue ክፍት ነው፣
+እና በነባር release branch ላይ ክፍት `Release branch not green` issue የለም —
+የሌለ branch `?` ያልታወቀ ብሎ ይመልሳል፣ ፈጽሞ green አይባልም —
+የMergify `release` queue ተዋቅሯል (G11፦ `queue_rules`፣ `checks_timeout`፣
+መለያ `queue`)፣ የ`release/*` ruleset አሁንም መሰረዝን እና force-pushን ይከለክላል፣ እንዲሁም
+`stable/v3` እና `develop` ገና የሉም)፣ ሁለቱን የbranch ደረጃዎች፣ የትኞቹ የቦዘኑ workflow
+triggerዎች እና `if:` ሁኔታዎች true እንደሚሆኑ (እና የትኞቹ በrepository variable
+እንደታገዱ ወይም ወደ canonical repository እንደተወሰኑ)፣ የሚጠበቁ dist-tagዎችን (`latest` → 3.9.0፣
+`next` እና `nightly` ባዶ) እና rollbackን ያትማል። መውጫ `0` = `RESULT: READY`፣ `1` = አጋጅ ቅድመ ሁኔታ
+አልተሳካም (`✗`)፣ `2` = የአጠቃቀም ስህተት። `--advisory <id,...>` ማረጋገጫን ሳይደብቀው
 ወደ ማስጠንቀቂያ (`!`) ዝቅ ያደርገዋል።
 
-የትክክለኛውን መለያየት የሙከራ አሂድ የ3.9.0 release freeze ገና ክፍት እያለ ያከናውኑ — ቅርንጫፎቹ
+የ3.9.0 release freeze ክፍት እያለ የእውነተኛውን መቁረጥ dry-run ያሂዱ — ቅርንጫፎቹ
 ከtag በኋላ እና ደረጃ 12c freezeን ከማንሳቱ በፊት ይፈጠራሉ።
 
 ### የ3.8.58 ልምምድ (በfork ላይ ብቻ)
 
 ```bash
-# 1. በአሁኑ tip ላይ በልምምድ መለኪያዎች የሙከራ አሂዱን ያከናውኑ
+# 1. በአሁኑ tip ላይ በልምምድ መለኪያዎች dry-run ያሂዱ
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
@@ -430,45 +433,45 @@ git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. በfork ውስጥ ያሉትን የቦዘኑ workflows ይሞክሩ (የሙከራ አሂዱ canonical-repository pin
-#    ባመለከተበት ቦታ workflow_dispatchን ይጠቀሙ)፣ ከዚያ rollback ያድርጉ
+# 3. በfork ውስጥ የቦዘኑ workflowዎችን ይሞክሩ (dry-run
+#    የcanonical-repository pin በሚዘግብበት ቦታ workflow_dispatch)፣ ከዚያ rollback ያድርጉ
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
 የdevelop bump commit በgit plumbing ይገነባል (ምንም working tree አይነካም) እና
-ከcycle-open commit ጋር ተመሳሳይ የሆኑትን አምስት ፋይሎች ያሻሽላል፦ `package.json`፣ `open-sse/package.json`፣
+ከcycle-open commit ጋር ተመሳሳይ የሆኑትን አምስት ፋይሎች ይጨምራል፦ `package.json`፣ `open-sse/package.json`፣
 `electron/package.json`፣ `package-lock.json` እና `docs/openapi.yaml`። የ`[4.0.0]`
-CHANGELOG ክፍል እና የi18n ተጓዳኞቹ በ`develop` ላይ ከመጀመሪያው
-PR በፊት ይከፈታሉ። scriptው የnpm dist-tagዎችን በፍጹም አይለውጥም — እነዚያን በscratch package ላይ ይለማመዱ።
+CHANGELOG ክፍል እና የi18n አቻዎቹ በ`develop` ላይ ከመጀመሪያው PR በፊት ይከፈታሉ።
+scriptው የnpm dist-tagዎችን ፈጽሞ አይለውጥም — እነዚያን በscratch package ላይ ይለማመዱ።
 
-### የPR ቅድመ-ዕይታ artifact (አንድ ጊዜ ይገንቡ፣ ተመሳሳይ bytes ያስተዋውቁ)
+### የPR ቅድመ-ዕይታ artifact (አንድ ጊዜ ይገንቡ፣ ተመሳሳዩን bytes ያስተዋውቁ)
 
 `.github/workflows/preview-artifact.yml` ከPR head አንድ የproduction tarball ይገነባል እና
-ያንኑ ትክክለኛ build ያረጋግጣል (#8084 ክፍል (a))። ለተመሳሳይ repository PRዎች ብቻ፤ ምንም ነገር አይታተምም።
+ያንኑ ትክክለኛ build ያረጋግጣል (#8084 ክፍል (a))። በተመሳሳይ repository ውስጥ ያሉ PRዎች ብቻ፤ ምንም ነገር አይታተምም።
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # ወይም `preview-artifact` መለያን ያክሉ
+gh workflow run preview-artifact.yml -f pr_number=<N>   # ወይም የ`preview-artifact` መለያን ያክሉ
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # የቅድመ-ዕይታ ጭነት
 ```
 
-አሂዱ `npm ci`፣ `npm run build:release`፣ `npm run check:pack-artifact`ን ያከናውናል፣
-tarballን ያሽጋል፣ `npm run check:pack-boot`ን ያስኬዳል (ሐሰተኛ secrets፣ ጊዜያዊ data dir)፣ እንደገና ያሽጋል እና
-digestው ተመሳሳይ ካልሆነ ያልፋል፤ ከዚያ `artifact-identity.json`ን (head SHA፣ base
+አሂዱ `npm ci`፣ `npm run build:release`፣ `npm run check:pack-artifact`ን ያስፈጽማል፣
+tarballን ያሽጋል፣ `npm run check:pack-boot`ን (ሐሰተኛ secrets፣ ጊዜያዊ data dir) ያሂዳል፣ እንደገና ያሽጋል እና
+digestው ተመሳሳይ ካልሆነ ያልተሳካ ይሆናል፤ ከዚያ `artifact-identity.json`ን (head SHA፣ base
 SHA፣ lockfile hash፣ platform፣ arch፣ node ABI፣ bundler፣ build policy —
-`scripts/release/artifact-identity.mjs`) ይመዘግባል እና tarballን በተለየ job ያረጋግጣል። ቅድመ-ዕይታን ማስተዋወቅ
-ማለት ያንን tarball መጫን ነው፦ ከsource ዳግም አይገንቡ።
+`scripts/release/artifact-identity.mjs`) ይመዘግባል እና tarballን በተለየ job ያረጋግጣል።
+ቅድመ-ዕይታን ማስተዋወቅ ማለት ያንን tarball መጫን ነው፦ ከsource ፈጽሞ እንደገና አይገንቡ።
 
-### መለያየቱ (3.9.0፣ ከGO በኋላ)
+### መቁረጡ (3.9.0፣ ከGO በኋላ)
 
 1. GO በ[LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) ውስጥ ተመዝግቧል።
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY`ን ያትማል።
-3. የሙከራ አሂዱ ባተማቸው ትዕዛዞች ቅርንጫፎቹን በ`origin` ላይ በእጅ ይፍጠሩ — scriptው
-   ወደ `origin` push ለማድረግ ፈቃደኛ አይሆንም። የተገመገመ develop commitን እንደገና ለመጠቀም፣ መጀመሪያ
-   በ3.9.0 tip ላይ የ`--execute` ልምምድን በforkዎ ላይ ያከናውኑ፤ ሁለቱንም SHAዎች ያትማል፣ እና
+3. dry-run በሚያትማቸው commands `origin` ላይ ቅርንጫፎቹን በእጅ ይፍጠሩ —
+   scriptው ወደ `origin` push ማድረግን ውድቅ ያደርጋል። የተገመገመ develop commitን እንደገና ለመጠቀም
+   መጀመሪያ በforkዎ ላይ የ`--execute` ልምምዱን ከ3.9.0 tip ጋር ያሂዱ፤ ሁለቱንም SHAዎች ያትማል፣ እና
    ተመሳሳይ commits push ሊደረጉ ይችላሉ፦
 
    ```bash
@@ -476,16 +479,15 @@ SHA፣ lockfile hash፣ platform፣ arch፣ node ABI፣ bundler፣ build policy 
    ```
 
 4. የመጀመሪያው PR ከመዋሃዱ በፊት `stable/v3` እና `develop`ን ይጠብቁ (rulesets + merge queue)።
-5. የቦዘኑ workflows ቅርንጫፎቹ በመኖራቸው ይነቃሉ፦ `forward-port.yml` (ወደ
-   `stable/v3` push)፣ `validate-stable-pr.yml` (ወደ `stable/v3` የሚደረጉ PRዎች) እና `nightly-v4-build.yml`
-   (`develop`ን ይገነባል)። በቀጥታ ከመጀመሩ በፊት የ`secrets.FORWARD_PORT_TOKEN` repository secretን ያዘጋጁ (CI በ
-   forward-port PRዎች ላይ እንዲሰራ)፤ ባለቤቱ repository
+5. የቦዘኑት workflows ቅርንጫፎቹ ሲኖሩ ይነቃሉ፦ `forward-port.yml` (ወደ
+   `stable/v3` push ሲደረግ)፣ `validate-stable-pr.yml` (ወደ `stable/v3` የሚቀርቡ PRs) እና `nightly-v4-build.yml`
+   (`develop`ን ይገነባል)። በቀጥታ ሥራ ከመጀመሩ በፊት የ`secrets.FORWARD_PORT_TOKEN` repository secretን ያዘጋጁ (በዚህም CI በ
+   forward-port PRs ላይ እንዲሠራ)፤ ባለቤቱ የrepository
    variable `vars.NIGHTLY_PUBLISH`ን ወደ `true` እስኪያዘጋጅ እና npm Trusted Publishing
-   `nightly-v4-build.yml`ን እስኪቀበል ድረስ nightly publishing ጠፍቶ ይቆያል። የቻናል መፍቻው `scripts/release/dist-tag.mjs` ነው፤
-   `npm-publish.yml` የሚጠቀምበትም ያው resolver ነው።
-6. ቻናሎቹን ያረጋግጡ፦ `npm view omniroute dist-tags --json` `latest` = 3.9.0 እንደሆነ እና
-   v4 እስኪታተም ድረስ `next` / `nightly` አለመኖራቸውን ያሳያል።
-7. ካስፈለገ rollback፦ `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+   `nightly-v4-build.yml`ን እስኪቀበል ድረስ የሌሊት ህትመት እንደቦዘነ ይቆያል። የchannel መወሰኛው `scripts/release/dist-tag.mjs` ሲሆን፣ `npm-publish.yml` የሚጠቀምበትም ይኸው መወሰኛ ነው።
+6. Channelsን ያረጋግጡ፦ `npm view omniroute dist-tags --json` `latest` = 3.9.0 እንደሆነ እና v4 እስኪታተም ድረስ
+   `next` / `nightly` እንደሌሉ ያሳያል።
+7. ካስፈለገ rollback ለማድረግ፦ `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    እና `npm dist-tag add omniroute@3.8.59 latest`።
 
 ---

@@ -123,7 +123,9 @@
       "maxCostOpt": "ஒரு நாளுக்கான அதிகபட்ச செலவு (USD)",
       "allowedModelsOpt": "அனுமதிக்கப்பட்ட மாதிரிகளின் காற்புள்ளியால் பிரிக்கப்பட்ட பட்டியல்",
       "nothingToSet": "கொள்கைப் புலங்கள் எதுவும் வழங்கப்படவில்லை. --rate-limit, --max-cost அல்லது --allowed-models ஐப் பயன்படுத்தவும்.",
-      "updated": "கொள்கை புதுப்பிக்கப்பட்டது."
+      "updated": "கொள்கை புதுப்பிக்கப்பட்டது.",
+      "modelAccessModeOpt": "மாதிரி அணுகல் முறை (all | restricted)",
+      "unrestrictedOpt": "அனைத்து மாதிரிகளையும் அனுமதி (--model-access-mode all)"
     },
     "expiration": {
       "title": "விசை காலாவதி",

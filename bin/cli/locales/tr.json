@@ -123,7 +123,9 @@
       "maxCostOpt": "Günlük maksimum maliyet (USD)",
       "allowedModelsOpt": "İzin verilen modellerin virgülle ayrılmış listesi",
       "nothingToSet": "Hiçbir politika alanı sağlanmadı. --rate-limit, --max-cost veya --allowed-models kullanın.",
-      "updated": "Politika güncellendi."
+      "updated": "Politika güncellendi.",
+      "modelAccessModeOpt": "Model erişim modu (all | restricted)",
+      "unrestrictedOpt": "Tüm modellere izin ver (--model-access-mode all)"
     },
     "expiration": {
       "title": "Anahtar Süre Sonu",

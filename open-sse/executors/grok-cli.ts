@@ -32,6 +32,7 @@ import {
   restoreGrokBuildNamespaceToolCalls,
 } from "./grokCliNamespaceTools.ts";
 import { stripForeignGrokBuildReasoning } from "./grokCliReasoningReplay.ts";
+import { capGrokBuildTools } from "./grokCliToolCap.ts";
 import { normalizeGrokBuildToolSchemas } from "./grokCliToolSchema.ts";
 
 const GROK_BUILD_MAX_TOOLS = 200;
@@ -360,7 +361,7 @@ export class GrokCliExecutor extends BaseExecutor {
     const base = super.transformRequest(model, body, stream, _credentials);
     const transformed = asRequestRecord(base);
     if (!transformed.model) {
-      transformed.model = model || "grok-composer-2.5-fast";
+      transformed.model = model || "grok-4.7";
     }
     transformed.stream = !!stream;
 
@@ -398,9 +399,14 @@ export class GrokCliExecutor extends BaseExecutor {
       transformed.tool_choice = "required";
     }
 
-    // xAI's cli-chat-proxy rejects requests containing more than 200 tools.
-    if (Array.isArray(transformed.tools) && transformed.tools.length > GROK_BUILD_MAX_TOOLS) {
-      transformed.tools = transformed.tools.slice(0, GROK_BUILD_MAX_TOOLS);
+    // xAI's cli-chat-proxy rejects requests containing more than 200 tools. The cap keeps
+    // hosted web_search/x_search tools and the function tool_choice forces.
+    if (Array.isArray(transformed.tools)) {
+      transformed.tools = capGrokBuildTools(
+        transformed.tools,
+        transformed.tool_choice,
+        GROK_BUILD_MAX_TOOLS
+      );
     }
     // Grok Build refuses a root anyOf/oneOf with a `$ref` or non-object branch
     // (`invalid_client_tool_schema`), e.g. Codex desktop's `automation_update`.

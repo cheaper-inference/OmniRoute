@@ -11,8 +11,10 @@ export async function GET() {
   try {
     const connections = await getProviderConnections();
 
+    const runtimeObservedAt = new Date().toISOString();
     const clientConnections = connections.map((c) => ({
       ...c,
+      runtimeObservedAt,
       apiKey: c.apiKey ? maskStoredApiKey(c.apiKey) : undefined,
       accessToken: undefined,
       refreshToken: undefined,

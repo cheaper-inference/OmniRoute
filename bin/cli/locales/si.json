@@ -123,7 +123,9 @@
       "maxCostOpt": "දිනකට උපරිම පිරිවැය (USD)",
       "allowedModelsOpt": "කොමාවලින් වෙන් කළ, අවසර ලත් මොඩල ලැයිස්තුව",
       "nothingToSet": "ප්රතිපත්ති ක්ෂේත්ර කිසිවක් ලබා දී නැත. --rate-limit, --max-cost, හෝ --allowed-models භාවිත කරන්න.",
-      "updated": "ප්රතිපත්තිය යාවත්කාලීන කරන ලදී."
+      "updated": "ප්රතිපත්තිය යාවත්කාලීන කරන ලදී.",
+      "modelAccessModeOpt": "මාදිලි ප්‍රවේශ ආකාරය (all | restricted)",
+      "unrestrictedOpt": "සියලු මාදිලිවලට ඉඩ දෙන්න (--model-access-mode all)"
     },
     "expiration": {
       "title": "යතුරු කල් ඉකුත් වීම",

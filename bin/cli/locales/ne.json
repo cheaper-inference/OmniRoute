@@ -123,7 +123,9 @@
       "maxCostOpt": "प्रति दिन अधिकतम लागत (USD)",
       "allowedModelsOpt": "अनुमति प्राप्त मोडेलहरूको अल्पविरामले छुट्याइएको सूची",
       "nothingToSet": "कुनै नीति फिल्ड प्रदान गरिएको छैन। --rate-limit, --max-cost, वा --allowed-models प्रयोग गर्नुहोस्।",
-      "updated": "नीति अद्यावधिक गरियो।"
+      "updated": "नीति अद्यावधिक गरियो।",
+      "modelAccessModeOpt": "मोडेल पहुँच मोड (all | restricted)",
+      "unrestrictedOpt": "सबै मोडेललाई अनुमति दिनुहोस् (--model-access-mode all)"
     },
     "expiration": {
       "title": "कुञ्जीको म्याद समाप्ति",

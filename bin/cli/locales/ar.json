@@ -123,7 +123,9 @@
       "maxCostOpt": "الحد الأقصى للتكلفة اليومية (USD)",
       "allowedModelsOpt": "قائمة بالنماذج المسموح بها مفصولة بفواصل",
       "nothingToSet": "لم يتم توفير أي حقول للسياسة. استخدم --rate-limit أو --max-cost أو --allowed-models.",
-      "updated": "تم تحديث السياسة."
+      "updated": "تم تحديث السياسة.",
+      "modelAccessModeOpt": "وضع الوصول إلى النماذج (all | restricted)",
+      "unrestrictedOpt": "السماح بجميع النماذج (--model-access-mode all)"
     },
     "expiration": {
       "title": "انتهاء صلاحية المفتاح",

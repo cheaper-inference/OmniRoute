@@ -72,7 +72,10 @@ export function applyClaudeEffortVariant(opts: {
   if (typeof effectiveModel === "string") {
     const { baseModel, effort } = splitClaudeEffortSuffix(effectiveModel);
     const isDirectClaudeLane = provider === "claude" || isClaudeCodeCompatibleProvider(provider);
-    if (effort && (isDirectClaudeLane || isKnownClaudeEffortBaseModel(baseModel))) {
+    // Anthropic's dotted catalog aliases must resolve before checking the known base.
+    const knownBase =
+      provider === "anthropic" ? resolveProviderModelAlias(provider, baseModel) : baseModel;
+    if (effort && (isDirectClaudeLane || isKnownClaudeEffortBaseModel(knownBase))) {
       // The suffixed id was resolved before it was split, so the provider alias (for example the
       // dotted `claude-haiku-4.5` that Anthropic only accepts as `claude-haiku-4-5`) has to be
       // applied to the base id here too.

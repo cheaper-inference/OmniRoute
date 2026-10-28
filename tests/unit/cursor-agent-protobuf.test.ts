@@ -7,6 +7,7 @@ import {
   buildAgentRequestBody,
   iterateConnectFrames,
   decodeAgentServerMessage,
+  decodeKvServerEvent,
   flattenMessages,
   wrapConnectFrame,
   encodeExecReadRejected,
@@ -28,6 +29,15 @@ import {
   encodeRequestContextResponse,
   openAIToolsToMcpDefs,
 } from "../../open-sse/utils/cursorAgentProtobuf";
+import {
+  WT_LEN,
+  WT_VARINT,
+  encodeBytes,
+  encodeMessage,
+  encodeUInt32Field,
+  decodeFields,
+  findField,
+} from "../../open-sse/utils/cursorAgentProtobuf/wire";
 
 test("resolveRequestedModel maps cursor-agent's client-side aliases", () => {
   assert.deepEqual(resolveRequestedModel("auto"), { modelId: "default", parameters: [] });
@@ -555,6 +565,125 @@ test("encodeKvSetBlobResult is an empty ack", () => {
   const framed = encodeKvSetBlobResult(7);
   const payload = unwrapFrame(framed);
   assert.equal(payload[0], 26); // (3<<3)|2 = kv_client_message
+});
+
+// ─── KV ack request_metadata round-trip ─────────────────────────────────────
+// KvServerMessage { id (1), get_blob_args (2) | set_blob_args (3), request_metadata (4) }
+// carries opaque bytes the KvClientMessage ack MUST echo verbatim as its own field 4 —
+// dropping them desyncs the AgentService session (empty turns / hangs). These tests drive
+// the real decode → encode path so a refactor that loses the echo turns red.
+
+const KV_BLOB_ID = Buffer.from("ab".repeat(32), "hex");
+
+function buildKvServerFrame(kvId: number, variant: "get" | "set", metadata: Buffer | null): Buffer {
+  const parts: Buffer[] = [];
+  if (kvId !== 0) parts.push(encodeUInt32Field(1, kvId));
+  if (variant === "get") {
+    parts.push(encodeMessage(2, [encodeBytes(1, KV_BLOB_ID)]));
+  } else {
+    parts.push(encodeMessage(3, [encodeBytes(1, KV_BLOB_ID), encodeBytes(2, Buffer.from("turn"))]));
+  }
+  if (metadata) parts.push(encodeBytes(4, metadata));
+  return encodeMessage(4, parts); // AgentServerMessage.kv_server_message
+}
+
+function decodeKvAck(framed: Buffer) {
+  const top = decodeFields(unwrapFrame(framed));
+  assert.equal(top.length, 1);
+  const kvClient = top[0];
+  assert.equal(kvClient.fieldNumber, 3); // AgentClientMessage.kv_client_message
+  if (kvClient.wireType !== WT_LEN) throw new Error("kv_client_message must be length-delimited");
+  return { raw: kvClient.bytes, fields: decodeFields(kvClient.bytes) };
+}
+
+function metadataOf(fields: ReturnType<typeof decodeFields>): Buffer | null {
+  const f = findField(fields, 4);
+  if (!f) return null;
+  if (f.wireType !== WT_LEN) throw new Error("request_metadata must be length-delimited");
+  return f.bytes;
+}
+
+function ackFor(serverFrame: Buffer, blob = Buffer.from("conversation-state", "utf8")): Buffer {
+  const event = decodeKvServerEvent(serverFrame);
+  if (!event) throw new Error("expected a kv server event");
+  return event.kind === "kv_get_blob"
+    ? encodeKvGetBlobResult(event.kvId, blob, event.requestMetadata)
+    : encodeKvSetBlobResult(event.kvId, event.requestMetadata);
+}
+
+test("KV get ack echoes server request_metadata as field 4", () => {
+  const metadata = Buffer.from("checkpoint-turn-42", "utf8");
+  const { fields } = decodeKvAck(ackFor(buildKvServerFrame(7, "get", metadata)));
+  const id = findField(fields, 1);
+  assert.equal(id?.wireType, WT_VARINT);
+  assert.equal(id?.wireType === WT_VARINT ? Number(id.varint) : -1, 7);
+  const getResult = findField(fields, 2);
+  if (getResult?.wireType !== WT_LEN) throw new Error("get_blob_result missing");
+  const blob = findField(decodeFields(getResult.bytes), 1);
+  assert.equal(blob?.wireType === WT_LEN ? blob.bytes.toString("utf8") : "", "conversation-state");
+  assert.equal(metadataOf(fields)?.toString("utf8"), "checkpoint-turn-42");
+});
+
+test("KV set ack echoes server request_metadata as field 4", () => {
+  const metadata = Buffer.from("blob-lineage-v1", "utf8");
+  const { fields } = decodeKvAck(ackFor(buildKvServerFrame(3, "set", metadata)));
+  const id = findField(fields, 1);
+  assert.equal(id?.wireType === WT_VARINT ? Number(id.varint) : -1, 3);
+  assert.ok(findField(fields, 3), "set_blob_result present");
+  assert.equal(metadataOf(fields)?.toString("utf8"), "blob-lineage-v1");
+});
+
+test("KV acks omit field 4 when the server sent no or empty request_metadata", () => {
+  for (const variant of ["get", "set"] as const) {
+    for (const metadata of [null, Buffer.alloc(0)]) {
+      const { fields } = decodeKvAck(ackFor(buildKvServerFrame(9, variant, metadata)));
+      assert.equal(findField(fields, 4), undefined, `${variant} ack, metadata=${metadata}`);
+    }
+  }
+});
+
+test("KV acks preserve arbitrary binary request_metadata byte-for-byte", () => {
+  const metadata = Buffer.from([0, 255, 1, 0, 128, 127, 255, 254]);
+  for (const variant of ["get", "set"] as const) {
+    const { fields } = decodeKvAck(ackFor(buildKvServerFrame(11, variant, metadata)));
+    assert.deepEqual(metadataOf(fields), metadata);
+  }
+});
+
+test("KV ack field order is id (1) → result (2|3) → request_metadata (4)", () => {
+  const metadata = Buffer.from("order", "utf8");
+  for (const [variant, resultField] of [
+    ["get", 2],
+    ["set", 3],
+  ] as const) {
+    const { raw, fields } = decodeKvAck(ackFor(buildKvServerFrame(5, variant, metadata)));
+    assert.deepEqual(
+      fields.map((f) => f.fieldNumber),
+      [1, resultField, 4]
+    );
+    assert.equal(raw[0], (1 << 3) | WT_VARINT);
+    assert.equal(raw[1], 5);
+    assert.equal(raw[2], (resultField << 3) | WT_LEN);
+    // Metadata is the trailing field: tag 0x22, length, then the payload.
+    assert.equal(raw[raw.length - metadata.length - 2], (4 << 3) | WT_LEN);
+    assert.ok(raw.subarray(raw.length - metadata.length).equals(metadata));
+  }
+});
+
+test("KV ack omits the id field when kvId is 0 but still echoes request_metadata", () => {
+  const metadata = Buffer.from("zero-id", "utf8");
+  for (const [variant, resultField] of [
+    ["get", 2],
+    ["set", 3],
+  ] as const) {
+    const { fields } = decodeKvAck(ackFor(buildKvServerFrame(0, variant, metadata)));
+    assert.equal(findField(fields, 1), undefined);
+    assert.deepEqual(
+      fields.map((f) => f.fieldNumber),
+      [resultField, 4]
+    );
+    assert.equal(metadataOf(fields)?.toString("utf8"), "zero-id");
+  }
 });
 
 // ─── Phase 1: MCP tool definition body ──────────────────────────────────────

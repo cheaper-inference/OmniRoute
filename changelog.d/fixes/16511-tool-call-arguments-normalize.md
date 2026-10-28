@@ -1,1 +1,0 @@
-- **fix(translator):** normalize tool-call arguments to valid JSON before upstream dispatch — missing/null/empty arguments become `"{}"` and malformed replayed fragments no longer trigger strict-upstream 400s ([#16511](https://github.com/diegosouzapw/OmniRoute/pull/16511)) — thanks @dungartoriaaa and @vianhanif

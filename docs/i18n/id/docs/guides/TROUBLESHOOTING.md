@@ -33,37 +33,37 @@ Masalah umum dan solusi untuk OmniRoute.
 
 ---
 
-## Pemecahan Masalah Terperinci
+## Pemecahan Masalah Mendetail
 
 ---
 
 ### Pembatasan Laju pada Penyedia Gratis (429 / 400 / 401)
 
-**Gejala**: Saat menggunakan `model: "auto"` dengan penyedia gratis/tanpa autentikasi (opencode, auggie, dll.), Anda sesekali mendapatkan `HTTP 429`, `400`, atau `401` alih-alih jawaban. Permintaan berhasil saat prompt yang sama dicoba kembali beberapa saat kemudian, tetapi otomatisasi (cron job, agen, skrip) terhenti pada kegagalan pertama.
+**Gejala**: Saat menggunakan `model: "auto"` dengan penyedia gratis/tanpa autentikasi (auggie, dll.), Anda terkadang mendapatkan `HTTP 429`, `400`, atau `401`, bukan jawaban. Permintaan berhasil ketika prompt yang sama dicoba ulang beberapa saat kemudian, tetapi otomatisasi (tugas cron, agen, skrip) terhenti pada kegagalan pertama.
 
 **Penyebab utama**: Tiga mode kegagalan independen terjadi secara bersamaan:
 
-1. **Batas laju penyedia (`429`)**: Tingkat gratis dapat memberlakukan kuota per jendela waktu. Rentetan panggilan paralel menghabiskannya, sehingga permintaan berikutnya ditolak hingga jendela tersebut direset.
-2. **Model rusak dalam passthrough (`400`/`401`)**: Pool `auto/*` dapat menyertakan model passthrough dari `opencode` yang terdaftar dalam katalog tetapi tidak memiliki kredensial aktif (misalnya `oc/north-mini-code-free` → `401`). Auto-router mencoba salah satunya, gagal, dan galat diteruskan sebelum fallback sempat dijalankan.
+1. **Pembatasan laju penyedia (`429`)**: Tingkat gratis dapat menerapkan kuota per jendela waktu. Lonjakan panggilan paralel menghabiskannya, sehingga permintaan berikutnya ditolak hingga jendela diatur ulang.
+2. **Model rusak dalam passthrough (`400`/`401`)**: Kumpulan `auto/*` dapat menyertakan model passthrough yang terdaftar dalam katalog, tetapi tidak memiliki kredensial aktif (→ `401`). Auto-router mencoba salah satunya, gagal, dan galat diteruskan sebelum mekanisme fallback sempat dijalankan.
 3. **Amplifikasi konkurensi (`429` saat beban tinggi)**: Ketika beberapa sesi agen/cron mengakses `auto` secara bersamaan, laju permintaan gabungan melampaui batas yang dapat ditoleransi penyedia gratis, sehingga panggilan yang sah ditandai sebagai penyalahgunaan.
 
 **Perbaikan terverifikasi (dilaporkan komunitas, 2026-08-10)**: sesuaikan tiga variabel lingkungan agar rotasi, konkurensi, dan fallback dapat menangani fluktuasi tingkat gratis alih-alih gagal karenanya:
 
 ```bash
 export OMNIROUTE_ROTATE_ON_400=true           # beralih ke model/penyedia lain saat 400/401 (melewati model passthrough yang rusak)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # batas penerimaan eksplisit untuk beban berat (secara default tidak disetel: tidak ada batas jumlah permintaan, lihat catatan di bawah)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # batas penerimaan eksplisit untuk beban berat (secara default tidak ditetapkan: tanpa batas jumlah permintaan, lihat catatan di bawah)
 export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # tingkatkan waktu tunggu terbatas melampaui nilai default RATE_LIMIT_MAX_WAIT_MS untuk upstream yang lambat
 ```
 
-Tetapkan variabel ini di lingkungan proses OmniRoute (daemon, misalnya melalui plist LaunchAgent atau `systemctl edit`), lalu mulai ulang OmniRoute. Flag rotasi adalah pengungkit tunggal yang paling berdampak: flag ini mengubah kegagalan total menjadi percobaan ulang transparan menggunakan penyedia yang sehat di dalam pool.
+Tetapkan variabel tersebut dalam lingkungan proses OmniRoute (daemon, misalnya melalui plist LaunchAgent atau `systemctl edit`), lalu mulai ulang OmniRoute. Flag rotasi adalah pengungkit tunggal dengan dampak terbesar: flag ini mengubah kegagalan total menjadi percobaan ulang transparan terhadap penyedia yang sehat dalam kumpulan.
 
-**Catatan**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` membatasi jumlah permintaan berat — berkonteks panjang — yang berjalan sekaligus; batas tersebut merupakan gerbang penerimaan, bukan pembatas laju penyedia. **Pembaruan #503-fanout:** variabel ini tidak lagi disetel secara default (sekarang hanya berlaku jika dikonfigurasi secara eksplisit, seperti di atas) — penerimaan beban berat kini dibatasi oleh anggaran byte yang diturunkan secara otomatis (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) dan menyesuaikan skalanya berdasarkan batas memori aktual host, sehingga deployment baru seharusnya mengalami jauh lebih sedikit penolakan `503 chat_admission_busy` tanpa perlu menyetel variabel ini sama sekali; menyetelnya secara eksplisit di sini tetap berfungsi persis seperti yang didokumentasikan. Override anggaran byte eksplisit dibatasi ke rentang 8 MiB–2 GiB. `413 body_exceeds_budget` bukanlah kondisi sementara: tingkatkan anggaran byte tersebut, turunkan `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, atau tingkatkan batas memori proses. Pelepasan `inflight_bytes_budget` merupakan kontensi sementara dan tetap dapat dicoba ulang. Pembatasan laju per penyedia (`open-sse/services/rateLimitManager.ts`) diatur secara terpisah oleh `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, dan `RATE_LIMIT_AUTO_ENABLE` — lihat `.env.example`.
+**Catatan**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` membatasi jumlah permintaan beban berat — berkonteks panjang — yang berjalan secara bersamaan; batas tersebut merupakan gerbang penerimaan, bukan pembatas laju penyedia. **Pembaruan #503-fanout:** variabel ini tidak lagi ditetapkan secara default (sekarang hanya berlaku ketika dikonfigurasi secara eksplisit, seperti di atas) — penerimaan beban berat kini dibatasi oleh anggaran byte yang diperoleh secara otomatis (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) dan menyesuaikan diri berdasarkan batas memori aktual host, sehingga deployment baru seharusnya mengalami jauh lebih sedikit penolakan `503 chat_admission_busy` tanpa perlu menetapkan variabel ini sama sekali; menetapkannya secara eksplisit di sini tetap berfungsi persis seperti yang didokumentasikan. Penggantian eksplisit anggaran byte dibatasi ke 8 MiB–2 GiB. Respons `413 body_exceeds_budget` bukanlah kondisi sementara: tingkatkan anggaran byte tersebut, turunkan `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, atau tingkatkan batas memori proses. Pelepasan `inflight_bytes_budget` merupakan persaingan sumber daya sementara dan tetap dapat dicoba ulang. Pembatasan laju per penyedia (`open-sse/services/rateLimitManager.ts`) diatur secara terpisah oleh `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, dan `RATE_LIMIT_AUTO_ENABLE` — lihat `.env.example`.
 
-**Cara memverifikasi bahwa perbaikan berhasil**: jalankan agen/cron Anda dua kali secara berurutan dalam waktu singkat dan pastikan keduanya berhasil. Sebelum perbaikan, proses kedua biasanya menghasilkan `429`/`401`. Setelah perbaikan, kegagalan (jika ada) dicoba ulang secara transparan dan panggilan selesai. Anda juga dapat menjalankan `curl /monitoring/health` dan memantau bidang `rateLimitedUntil` pada koneksi penyedia serta `circuitBreakers.providerBreakers[].state` untuk penyedia yang terdampak — statusnya dapat berupa `CLOSED`, `DEGRADED`, `OPEN`, atau `HALF_OPEN` (lihat `src/shared/utils/circuitBreaker.ts`), dan penyedia yang terus mengalami kegagalan akan beralih dari `CLOSED → DEGRADED → OPEN` sebelum jendela pengaturan ulang mengizinkan sebuah probe (`HALF_OPEN`).
+**Cara memverifikasi bahwa perbaikan berhasil**: jalankan agen/cron Anda dua kali secara berurutan dalam waktu singkat dan pastikan keduanya berhasil. Sebelum perbaikan, eksekusi kedua biasanya menghasilkan `429`/`401`. Setelah perbaikan, kegagalan (jika ada) dicoba ulang secara transparan dan panggilan selesai. Anda juga dapat menjalankan `curl /monitoring/health` dan memantau bidang `rateLimitedUntil` pada koneksi penyedia serta `circuitBreakers.providerBreakers[].state` untuk penyedia yang terdampak — statusnya merupakan salah satu dari `CLOSED`, `DEGRADED`, `OPEN`, atau `HALF_OPEN` (lihat `src/shared/utils/circuitBreaker.ts`), dan penyedia yang terus mengalami kegagalan akan berubah dari `CLOSED → DEGRADED → OPEN` sebelum jendela pengaturan ulang mengizinkan probe diteruskan (`HALF_OPEN`).
 
-**Jika Anda masih melihat 429**: akun aktif untuk penyedia tersebut benar-benar telah menghabiskan _kuota_-nya (bukan sekadar terkena pembatasan laju). Tambahkan akun kedua untuk penyedia yang sama di dasbor OmniRoute → Providers → Accounts, atau gunakan penyedia gratis lain sebagai kombinasi (misalnya `routeway`, `auggie`). Rotasi hanya membantu mengatasi pembatasan laju sementara/400/401; kehabisan kuota secara mutlak memerlukan kredensial kedua atau penyedia lain.
+**Jika Anda masih melihat 429**: akun aktif untuk penyedia tersebut benar-benar telah menghabiskan _kuotanya_ (bukan sekadar batas laju). Tambahkan akun kedua untuk penyedia yang sama di dasbor OmniRoute → Providers → Accounts, atau sertakan penyedia gratis lain (misalnya `routeway`, `auggie`). Rotasi hanya membantu mengatasi pembatasan laju/400/401 sementara; kehabisan kuota sepenuhnya memerlukan kredensial kedua atau penyedia lain.
 
-**Jika Anda melihat 403 pada model visi (`auto/vision`, `bazaarlink/*`)**: akun yang terhubung tidak memiliki paket berbayar yang mencakup visi, atau kunci API tidak memiliki izin yang memadai. Verifikasikan di dasbor penyedia bahwa cakupan kunci mencakup visi/multimodal, atau hubungkan akun tingkat berbayar dan pertahankan akun tersebut sebagai target visi.
+**Jika Anda melihat 403 pada model visi (`auto/vision`, `bazaarlink/*`)**: akun yang terhubung tidak memiliki paket berbayar yang mencakup visi, atau kunci API memiliki izin yang tidak memadai. Verifikasikan di dasbor penyedia bahwa cakupan kunci mencakup visi/multimodal, atau hubungkan akun tingkat berbayar dan pertahankan akun tersebut sebagai target visi.
 
 ---
 
@@ -90,11 +90,11 @@ Peringatan tersebut berasal dari rentang dependensi peer usang dalam paket pihak
 
 ---
 
-## Peringatan Pemblokiran Skrip npm install (instalasi global)
+## Peringatan npm install-scripts Diblokir (instalasi global)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Saat menjalankan `npm install -g omniroute`, versi npm yang lebih baru (v11+ dan v12+) secara default memblokir skrip siklus hidup paket dan menampilkan peringatan skrip instalasi:
+Saat menjalankan `npm install -g omniroute`, versi npm yang lebih baru (v11+ dan v12+) secara default memblokir skrip siklus hidup paket dan menampilkan peringatan install-scripts:
 
 ```
 npm warn install-scripts 7 paket memiliki skrip instalasi yang diblokir karena tidak tercakup oleh allowScripts:
@@ -104,25 +104,25 @@ npm warn install-scripts 7 paket memiliki skrip instalasi yang diblokir karena t
 
 ### Apakah peringatan ini dapat diabaikan?
 
-**Sebagian, tetapi menjalankannya tanpa skrip tidak disarankan.** OmniRoute menyediakan fallback yang aman: jika binding native `better-sqlite3` tidak dapat dimuat dari bundel mandiri, aplikasi akan beralih menggunakan driver alternatif seperti `node:sqlite` atau `sql.js` (lihat [Resolusi Runtime SQLite](../ops/SQLITE_RUNTIME.md)). Server tetap dapat dijalankan, tetapi penggunaan fallback WASM seperti `sql.js` menonaktifkan mode WAL (Write-Ahead Logging) SQLite serta meningkatkan overhead memori dan sinkronisasi disk.
+**Sebagian, tetapi menjalankan aplikasi tanpa skrip tidak disarankan.** OmniRoute menyertakan mekanisme fallback yang aman: jika binding native `better-sqlite3` tidak dapat dimuat dari bundel mandiri, aplikasi akan beralih melalui driver alternatif seperti `node:sqlite` atau `sql.js` (lihat [Resolusi Runtime SQLite](../ops/SQLITE_RUNTIME.md)). Server akan tetap berjalan, tetapi penggunaan fallback WASM seperti `sql.js` akan menonaktifkan mode WAL (Write-Ahead Logging) SQLite serta meningkatkan overhead memori dan sinkronisasi disk.
 
 ### Skrip mana yang benar-benar diperlukan?
 
-Tidak semua skrip yang diblokir diperlukan untuk menjalankan OmniRoute:
+Tidak semua skrip yang diblokir penting untuk menjalankan OmniRoute:
 
-- **Esensial (`omniroute`, `better-sqlite3`):** OmniRoute dijalankan dari bundel aplikasi mandiri Next.js (`dist/`). Selama instalasi, npm mengunduh atau mengompilasi driver SQLite native khusus host di `node_modules/better-sqlite3/` tingkat teratas. Skrip `postinstall` OmniRoute (`scripts/build/postinstall.mjs`) kemudian memverifikasi dan menyalin biner khusus host tersebut ke `dist/node_modules/` agar server mandiri dapat mengaksesnya. Jika skrip postinstall `omniroute` diblokir, langkah penyalinan ini akan dilewati.
-- **Opsional/transitif (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Paket-paket ini merupakan helper build, alat watcher, atau utilitas keychain sistem. Mengizinkannya akan mencegah peringatan build, tetapi paket-paket tersebut tidak diperlukan untuk fungsionalitas perutean inti.
-- **Dikecualikan (`onnxruntime-node`):** Dependensi opsional untuk embedding AI lokal dan **tidak** diperlukan agar OmniRoute dapat dijalankan. Skrip postinstall-nya mengunduh aset CUDA sebesar ~300MB dari NuGet; jangan sertakan dalam daftar yang diizinkan kecuali Anda memang bermaksud menggunakan akselerasi ONNX lokal pada perangkat keras yang didukung.
+- **Esensial (`omniroute`, `better-sqlite3`):** OmniRoute berjalan dari bundel aplikasi mandiri Next.js (`dist/`). Selama instalasi, npm mengunduh atau mengompilasi driver SQLite native khusus host di `node_modules/better-sqlite3/` tingkat teratas. Skrip `postinstall` OmniRoute (`scripts/build/postinstall.mjs`) kemudian memverifikasi dan menyalin biner khusus host tersebut ke `dist/node_modules/` agar server mandiri dapat mengaksesnya. Jika skrip postinstall `omniroute` diblokir, langkah penyalinan ini akan dilewati.
+- **Opsional/transitif (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Paket-paket ini merupakan alat bantu build, alat pemantau, atau utilitas keychain sistem. Mengizinkannya akan mencegah peringatan build, tetapi paket-paket tersebut tidak diperlukan untuk fungsionalitas perutean inti.
+- **Dikecualikan (`onnxruntime-node`):** Dependensi opsional untuk embedding AI lokal dan **tidak** diperlukan agar OmniRoute dapat berjalan. Skrip postinstall-nya mengunduh aset CUDA berukuran sekitar 300MB dari NuGet; jangan sertakan paket ini dalam daftar izin kecuali Anda memang bermaksud menggunakan akselerasi ONNX lokal pada perangkat keras yang didukung.
 
 ### Perbaikan yang disarankan
 
-Untuk mengizinkan skrip instalasi yang diperlukan selama instalasi global dan menyembunyikan peringatan, teruskan `--allow-scripts` untuk OmniRoute dan dependensi native-nya:
+Untuk mengizinkan skrip instalasi yang diperlukan selama instalasi global dan menghilangkan peringatan, gunakan `--allow-scripts` untuk OmniRoute dan dependensi native-nya:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Sebagai alternatif, untuk mengonfigurasi hal ini secara permanen bagi semua instalasi global pada akun pengguna Anda:
+Sebagai alternatif, untuk mengonfigurasi ini secara permanen bagi semua instalasi global pada akun pengguna Anda:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user

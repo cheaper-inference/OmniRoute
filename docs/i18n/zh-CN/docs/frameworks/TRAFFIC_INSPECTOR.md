@@ -40,23 +40,23 @@ Traffic Inspector 是 OmniRoute 内置的 HTTPS 流量调试器——类似于 C
 
 ## §2 捕获模式
 
-流量检查器支持 **5 个并行捕获源**。每个捕获源都可以独立开启或关闭。每个 `InterceptedRequest`（`src/mitm/inspector/types.ts`）上的 `source` 字段是 `"agent-bridge"`、`"custom-host"`、`"http-proxy"`、`"system-proxy"` 或 `"tproxy"` 之一。
+Traffic Inspector 支持 **5 个并行捕获源**。每个捕获源都可以独立启用或禁用。每个 `InterceptedRequest`（`src/mitm/inspector/types.ts`）中的 `source` 字段是 `"agent-bridge"`、`"custom-host"`、`"http-proxy"`、`"system-proxy"` 或 `"tproxy"` 之一。
 
-### 模式 1 — AgentBridge（默认，始终开启）
+### 模式 1 — AgentBridge（默认，始终启用）
 
-**来源：** AgentBridge 处理程序（`src/mitm/handlers/base.ts`）
-**机制：** `MitmHandlerBase` 中的每次 `intercept()` 调用都会在转发前调用 `hookBufferStart()`，并在完成时调用 `hookBufferUpdate()`。无需额外配置——AgentBridge 一经运行即可工作。
-**覆盖范围：** AgentBridge 中配置的 9 个 IDE 智能体
+**来源：** AgentBridge 处理程序（`src/mitm/handlers/base.ts`）  
+**机制：** `MitmHandlerBase` 中的每次 `intercept()` 调用都会在转发前调用 `hookBufferStart()`，并在完成时调用 `hookBufferUpdate()`。无需任何额外配置——AgentBridge 一旦运行即可工作。  
+**覆盖范围：** AgentBridge 中配置的 9 个 IDE 智能体  
 **注意：** `InterceptedRequest` 中的 `source` 字段 = `"agent-bridge"`
 
 ### 模式 2 — 自定义主机（DNS 重定向）
 
-**来源：** 用户定义的主机列表（`inspector_custom_hosts` 表）
-**机制：** 通过 UI 添加主机时，会将 `127.0.0.1 <host>` 添加到 `/etc/hosts`（需要 sudo）。现有的 AgentBridge MITM 服务器（端口 443）会动态为新主机生成 SNI 证书。
-**覆盖范围：** 使用所添加主机的任何应用程序——无需更改应用配置
+**来源：** 用户定义的主机列表（`inspector_custom_hosts` 表）  
+**机制：** 通过 UI 添加主机时，会将 `127.0.0.1 <host>` 添加到 `/etc/hosts`（需要 sudo）。现有的 AgentBridge MITM 服务器（端口 443）会为新主机动态生成 SNI 证书。  
+**覆盖范围：** 使用所添加主机的任何应用程序——无需更改应用配置  
 **注意：** `source` = `"custom-host"`
 
-示例用例：
+用例示例：
 
 - 监控 Python 脚本对 `api.openai.com` 的访问
 - 调试 `my-internal-llm.company.com`
@@ -64,13 +64,13 @@ Traffic Inspector 是 OmniRoute 内置的 HTTPS 流量调试器——类似于 C
 
 ### 模式 3 — HTTP_PROXY 监听器（端口 8080）
 
-**来源：** 使用 `HTTP_PROXY`/`HTTPS_PROXY` 环境变量的应用程序
-**机制：** 端口 8080 上的辅助监听器（`src/mitm/inspector/httpProxyServer.ts`），充当标准的显式 HTTP/HTTPS 代理。接受 `CONNECT` 隧道（HTTPS）和直接 HTTP 请求。
-**覆盖范围：** 任何遵循 `HTTP_PROXY` 环境变量的应用程序——无需更改 DNS，无需 sudo
+**来源：** 使用 `HTTP_PROXY`/`HTTPS_PROXY` 环境变量的应用程序  
+**机制：** 位于端口 8080 的辅助监听器（`src/mitm/inspector/httpProxyServer.ts`），作为标准的显式 HTTP/HTTPS 代理运行。接受 `CONNECT` 隧道（HTTPS）和直接 HTTP 请求。  
+**覆盖范围：** 任何遵循 `HTTP_PROXY` 环境变量的应用程序——无需更改 DNS，无需 sudo  
 **注意：** `source` = `"http-proxy"`
 
 ```bash
-# 快速捕获单条命令的流量：
+# 快速捕获单个命令的流量：
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
 # 在 shell 会话中持续捕获：
@@ -78,14 +78,14 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS 限制：** HTTPS `CONNECT` 隧道仅捕获元数据（主机、端口、计时）——默认情况下不会解密 TLS 正文。
+**TLS 限制：** HTTPS 通过普通的 `CONNECT` 隧道传输：监听器原样中继加密字节，仅记录元数据（主机、端口、时间信息）。它绝不会解密 HTTPS，并且此模式下没有任何设置可以启用解密。若要捕获 HTTPS 正文，请通过模式 1（AgentBridge）、模式 2（自定义主机）或模式 5（TPROXY 解密）路由该主机。
 
-**端口冲突：** 如果端口 8080 已被占用，AgentBridge 会返回 409 和结构化错误。可通过 `INSPECTOR_HTTP_PROXY_PORT` 环境变量更改端口。
+**端口冲突：** 如果端口 8080 已被占用，AgentBridge 会返回带有结构化错误的 409。可通过 `INSPECTOR_HTTP_PROXY_PORT` 环境变量更改端口。
 
-### 模式 4 — 系统级代理（高级，选择启用）
+### 模式 4 — 系统级代理（高级，可选启用）
 
-**来源：** 操作系统级代理设置（应用于计算机上的所有应用程序）
-**机制：** 使用操作系统 API 将所有 HTTP/HTTPS 流量重定向至 HTTP_PROXY 监听器：
+**来源：** 操作系统级代理设置（适用于计算机上的所有应用程序）  
+**机制：** 使用操作系统 API 将所有 HTTP/HTTPS 流量重定向到 HTTP_PROXY 监听器：
 
 - **macOS：** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux：** `gsettings set org.gnome.system.proxy` + `/etc/environment`
@@ -96,30 +96,30 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **安全机制：**
 
 - 自动禁用计时器（默认 30 分钟，可通过 `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` 配置）
-- 先前的系统代理状态会保存在数据库中，并在还原时恢复
-- 如果用户在系统代理处于活动状态时离开页面，仪表板会显示“正在还原系统代理”提示
+- 先前的系统代理状态会保存在 DB 中，并在还原时恢复
+- 如果用户在系统代理启用期间离开页面，Dashboard 会显示“正在还原系统代理”提示
 - UI 显示 `⚠ 高级` 徽章和明确的确认复选框
 
-### 模式 5 — TPROXY 透明解密（Linux、root、选择启用）
+### 模式 5 — TPROXY 透明解密（Linux、root、可选启用）
 
-**来源：** 内核 TPROXY + 策略路由（`src/mitm/tproxy/`）
-**机制：** 在 `mangle OUTPUT` 中标记发往目标端口（默认为 `443`）的新本地出站 TCP 连接，由 `ip rule` 将标记的数据包重新路由至本地传送，再由 `mangle PREROUTING` 的 `TPROXY` 目标将其交给透明（**IP_TRANSPARENT**）监听器（默认端口 `8443`）。监听器使用动态 CA 按需为**每个 SNI 主机名签发**叶证书以终止 TLS，捕获解密后的交换内容，然后重新加密请求并将其转发至原始目标。
-**覆盖范围：** 目标端口上的**任意**目标主机——无需伪造 `/etc/hosts`，无需 `HTTP_PROXY` 环境变量，也无需修改系统级代理。被拦截的进程无需更改任何配置，但必须信任动态 CA。
+**来源：** 内核 TPROXY + 策略路由（`src/mitm/tproxy/`）  
+**机制：** 在 `mangle OUTPUT` 中标记发往目标端口（默认 `443`）的新本地出站 TCP 连接，`ip rule` 将已标记的数据包重新路由到本地传递，而 `mangle PREROUTING` 的 `TPROXY` 目标会将其交给透明（**IP_TRANSPARENT**）监听器（默认端口 `8443`）。监听器使用动态 CA 按每个 SNI 主机名按需签发的叶证书终止 TLS，捕获解密后的通信，并将请求重新加密后转发到原始目标。  
+**覆盖范围：** 目标端口上的**任意**目标主机——无需伪造 `/etc/hosts`，无需 `HTTP_PROXY` 环境变量，也无需修改系统级代理。被拦截的进程无需更改配置，但必须信任动态 CA。  
 **注意：** `source` = `"tproxy"`
 
-**要求：** 仅限 Linux（**IP_TRANSPARENT** 仅适用于 Linux）、**CAP_NET_ADMIN** 能力（root），以及必须使用 C 工具链构建的原生 N-API 插件（`npm run build:native:tproxy`）。不可用时，仪表板开关将被禁用，并显示工具提示“TPROXY 解密需要 Linux + root + 原生插件”。防火墙规则以事务方式应用/还原（崩溃绝不会遗留 `mangle` 规则），并在重启时清除。基于 SO_MARK 的防循环机制可防止代理自身重新加密后的转发流量再次被拦截。
+**要求：** 仅支持 Linux（**IP_TRANSPARENT** 仅适用于 Linux），需要 **CAP_NET_ADMIN** 能力（root），以及必须使用 C 工具链构建的原生 N-API 插件（`npm run build:native:tproxy`）。当这些条件不满足时，Dashboard 中的开关会被禁用，并显示工具提示“TPROXY 解密需要 Linux + root + 原生插件”。防火墙规则以事务方式应用/还原（崩溃绝不会遗留 `mangle` 规则），并在重启时清除。基于 SO_MARK 的防循环机制可防止代理自身重新加密并转发的流量再次被拦截。
 
-这是一个规模较大的子系统，拥有专门的操作指南——有关完整的防火墙配置方案、按 SNI 动态生成的 CA + 信任库安装程序、仅限本地的路由、防循环细节以及配置架构，请参阅 `docs/security/MITM-TPROXY-DECRYPT.md`（位于 git 中；不会编译到 `/docs`）。该开关由 `GET / POST / DELETE /api/tools/agent-bridge/tproxy` 驱动（注意：该路由位于 AgentBridge 前缀下，而不是流量检查器前缀下）。
+这是一个庞大的子系统，拥有专用的运维指南——有关完整的防火墙配置、按 SNI 动态生成 CA + 信任存储安装程序、仅限本地的路由、防循环细节和配置模式，请参阅 `docs/security/MITM-TPROXY-DECRYPT.md`（位于 git 中；不会编译到 `/docs`）。该开关由 `GET / POST / DELETE /api/tools/agent-bridge/tproxy` 驱动（注意：该路由位于 AgentBridge 前缀下，而不是 Traffic Inspector 前缀下）。
 
 ### 捕获模式比较
 
-| 模式           | 设置                         |     需要 Sudo？      | 作用范围             | 备注                                                                                                      |
-| -------------- | ---------------------------- | :------------------: | -------------------- | --------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge | 自动                         | 一次（证书 + hosts） | 9 个 IDE 代理        | 默认开启                                                                                                  |
-| 2. 自定义主机  | 按主机输入                   |   是（hosts 文件）   | 使用该主机的任何应用 | 持久化存储在数据库中                                                                                      |
-| 3. HTTP_PROXY  | `export HTTPS_PROXY=...`     |          否          | 遵循环境变量的应用   | 端口 8080，默认不进行 TLS 解密                                                                            |
-| 4. 系统级      | 切换开关并确认               |          是          | 计算机上的所有应用   | 30 分钟后自动禁用                                                                                         |
-| 5. TPROXY 解密 | 切换开关（Linux + 原生插件） | 是（root + 安装 CA） | 目标端口上的任何主机 | 解密任意主机；默认关闭 — 请参阅 `docs/security/MITM-TPROXY-DECRYPT.md`（git 中提供；未编译到 `/docs` 中） |
+| 模式           | 设置                     |     需要 Sudo？      | 覆盖范围             | 备注                                                                                                      |
+| -------------- | ------------------------ | :------------------: | -------------------- | --------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge | 自动                     | 一次（证书 + hosts） | 9 个 IDE 代理        | 默认启用                                                                                                  |
+| 2. 自定义主机  | 按主机输入               |   是（hosts 文件）   | 使用该主机的任何应用 | 持久化存储在数据库中                                                                                      |
+| 3. HTTP_PROXY  | `export HTTPS_PROXY=...` |          否          | 遵循环境变量的应用   | 端口 8080；HTTPS 通过 CONNECT 建立隧道（仅获取元数据，从不解密）                                          |
+| 4. 系统范围    | 切换并确认               |          是          | 机器上的所有应用     | 30 分钟后自动禁用                                                                                         |
+| 5. TPROXY 解密 | 切换（Linux + 原生插件） | 是（root + 安装 CA） | 目标端口上的任何主机 | 解密任意主机；默认关闭——请参阅 `docs/security/MITM-TPROXY-DECRYPT.md`（位于 git 中；未编译到 `/docs` 中） |
 
 ---
 
@@ -334,18 +334,18 @@ macOS/Windows 上，该函数返回 `null`（存根；对 `lsof`/`GetExtendedTcp
 
 ## §6 安全性
 
-流量检查器会显示**所有被拦截的 HTTPS 流量**，包括授权标头和请求正文。现有以下控制措施：
+流量检查器会显示**所有被拦截的 HTTPS 流量**，包括授权标头和请求正文。目前已实施以下控制措施：
 
-| 控制措施         | 详细信息                                                                                                                  |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**   | 所有路由和 WebSocket 端点仅限环回访问（在身份验证之前由 `routeGuard.ts` 强制执行）                                        |
-| **敏感信息掩码** | 线性 `maskSecret()` 扫描器会在 `TrafficBuffer.push()` 之前遮盖 RFC 6750 Bearer 凭据、带提供者前缀的密钥和较长的不透明令牌 |
-| **正文大小上限** | 大于 `INSPECTOR_MAX_BODY_KB`（默认值为 1024 KB）的正文将被截断，并附带 `“出于性能考虑已截断”` 提示                        |
-| **标头清理**     | 名称转换为小写；移除分帧/逐跳标头和代理身份验证标头；Cookie 被完全遮盖；凭据值交由 `maskSecret()` 处理                    |
-| **CSP**          | 在流量检查器页面上实施严格的内容安全策略，防止通过注入响应正文实施 XSS                                                    |
-| **默认不持久化** | `TrafficBuffer` 存储于内存中，并会在服务器重启时丢失。仅在明确录制会话时才会持久化会话                                    |
+| 控制措施         | 详情                                                                                                                    |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**   | 所有路由和 WebSocket 端点仅允许通过环回地址访问（在身份验证前由 `routeGuard.ts` 强制执行）                              |
+| **敏感信息掩码** | 线性 `maskSecret()` 扫描器会在 `TrafficBuffer.push()` 前遮盖 RFC 6750 Bearer 凭据、带提供者前缀的密钥和较长的不透明令牌 |
+| **正文大小上限** | 大于 `INSPECTOR_MAX_BODY_KB`（默认 1024 KB）的正文将被截断，并附加 `"(为提高性能而截断)"` 提示                          |
+| **标头清理**     | 名称将转换为小写；帧控制/逐跳标头及代理身份验证标头将被丢弃；Cookie 将被完全遮盖；凭据值交由 `maskSecret()` 处理        |
+| **CSP**          | 流量检查器页面采用严格的内容安全策略，以防止通过注入的响应正文发起 XSS                                                  |
+| **默认不持久化** | `TrafficBuffer` 存储在内存中，服务器重启后会丢失。仅在明确录制时才会持久化会话                                          |
 
-### 应用的硬性规则
+### 已应用的硬性规则
 
 | 规则                              | 应用方式                                                                      |
 | --------------------------------- | ----------------------------------------------------------------------------- |
@@ -354,9 +354,9 @@ macOS/Windows 上，该函数返回 `null`（存根；对 `lsof`/`GetExtendedTcp
 
 ### 已知限制
 
-- **系统级代理模式**会影响计算机上的所有应用程序，包括 VPN 客户端和 SSO。请始终与自动禁用计时器配合使用。请勿在共享计算机上使用。
-- **CONNECT 隧道 HTTPS**：除非启用 TLS 拦截，否则模式 3 (HTTP_PROXY) 仅捕获 HTTPS 目标的隧道元数据。这是有意为之 — 如果应用不信任 AgentBridge 证书，透明捕获会破坏这些应用的 TLS 验证。
-- **部分组件中的硬编码字符串**：某些 UI 组件 (F7/F8) 包含少量尚未由 i18n 键覆盖的硬编码字符串。这些内容已在 i18n 缺口报告中记录为已知限制；后续将进行迁移。受影响的字符串是 UI 装饰性标签，不翻译也不会影响功能使用。
+- **系统级代理模式**会影响机器上的所有应用程序，包括 VPN 客户端和 SSO。请始终配合自动禁用计时器使用。请勿在共享机器上使用。
+- **CONNECT 隧道 HTTPS**：模式 3（HTTP_PROXY）仅捕获 HTTPS 目标的隧道元数据，绝不会对其进行解密。这是有意为之——解密将要求每个客户端信任 MITM 证书，因此监听器会保持 HTTPS 端到端加密。当您需要 HTTPS 正文时，请使用 AgentBridge、Custom Hosts 或 TPROXY 解密。
+- **部分组件中的硬编码字符串**：某些 UI 组件（F7/F8）中有少量硬编码字符串尚未由 i18n 键覆盖。这些字符串已在 i18n 差距报告中记录为已知限制，并将在后续处理中迁移。受影响的字符串是 UI 装饰性标签，不翻译也不会影响功能使用。
 
 ---
 
@@ -421,7 +421,7 @@ netsh winhttp reset proxy
 
 ## §8 API 参考
 
-所有路由均为 `LOCAL_ONLY`（仅限环回地址）和 `SPAWN_CAPABLE`（系统代理命令）。请参阅 `src/server/authz/routeGuard.ts`。
+所有路由均为 `LOCAL_ONLY`（仅限回环地址）和 `SPAWN_CAPABLE`（系统代理命令）。请参阅 `src/server/authz/routeGuard.ts`。
 
 基础路径：`/api/tools/traffic-inspector/`
 
@@ -433,13 +433,13 @@ netsh winhttp reset proxy
 | GET    | `/requests/{id}`            | 单个请求的详细信息                                                         |
 | DELETE | `/requests`                 | 清空内存缓冲区                                                             |
 | POST   | `/requests/{id}/replay`     | 通过 OmniRoute 路由器重新执行同一请求                                      |
-| PUT    | `/requests/{id}/annotation` | 保存或更新请求备注                                                         |
+| PUT    | `/requests/{id}/annotation` | 保存或更新请求的备注                                                       |
 
 ### WebSocket
 
 | 方法 | 路径  | 描述                                                                           |
 | ---- | ----- | ------------------------------------------------------------------------------ |
-| GET  | `/ws` | 实时 WebSocket 流。连接时发送 `snapshot`，之后发送 `new`/`update`/`clear` 事件 |
+| GET  | `/ws` | 实时 WebSocket 流。连接时发送 `snapshot`，随后发送 `new`/`update`/`clear` 事件 |
 
 ### 导出
 
@@ -464,10 +464,10 @@ netsh winhttp reset proxy
 | POST | `/capture-modes/http-proxy`   | 启动/停止 HTTP_PROXY 监听器（`{action: "start"\|"stop"}`） |
 | POST | `/capture-modes/system-proxy` | 应用/还原系统级代理（`{action: "apply"\|"revert"}`）       |
 
-> **TPROXY 解密**（捕获模式 5）由 AgentBridge 前缀下的**单独**路由驱动 —
-> `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — 不位于
+> **TPROXY 解密**（捕获模式 5）由 AgentBridge 前缀下的**独立**路由驱动
+> — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — 而不在
 > `/api/tools/traffic-inspector/` 下。请参阅
-> `docs/security/MITM-TPROXY-DECRYPT.md`（位于 git 中；不会编译到 `/docs`）。
+> `docs/security/MITM-TPROXY-DECRYPT.md`（git 中；未编译到 `/docs` 中）。
 
 ### 会话
 

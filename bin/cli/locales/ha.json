@@ -123,7 +123,9 @@
       "maxCostOpt": "Matsakaicin kuɗi a rana (USD)",
       "allowedModelsOpt": "Jerin samfuran da aka yarda da su, waɗanda aka raba da waƙafi",
       "nothingToSet": "Ba a bayar da wani filin manufa ba. Yi amfani da --rate-limit, --max-cost, ko --allowed-models.",
-      "updated": "An sabunta manufar."
+      "updated": "An sabunta manufar.",
+      "modelAccessModeOpt": "Yanayin samun damar samfura (all | restricted)",
+      "unrestrictedOpt": "Ba da izinin duk samfura (--model-access-mode all)"
     },
     "expiration": {
       "title": "Ƙarewar Wa'adin Maɓalli",

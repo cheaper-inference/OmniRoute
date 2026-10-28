@@ -12,17 +12,18 @@ Ngumu, mafunzo kuhusu PII). Isome kikamilifu; usiongeze tena sheria za mradi hap
 chini kinatumika kwa Claude Code PEKEE — maboresho ya kiutendaji ya sheria ambazo tayari
 zimefafanuliwa katika `AGENTS.md`.
 
-## Utengaji wa worktree — mahususi kwa Claude Code
+## Kutengwa kwa worktree — maelezo mahususi ya Claude Code
 
-Itifaki kamili ya lazima ya worktree (uthibitishaji wa tawi msingi, njia rasmi ya
-`.claude/worktrees/`, `cp -al` node_modules, sheria za kuondoa) iko katika `AGENTS.md` → Git Workflow
-→ "Worktree isolation". Mambo mahususi kwa Claude Code:
+Itifaki kamili ya lazima ya worktree (uthibitisho wa base-branch, njia rasmi ya
+`.claude/worktrees/`, `cp -al` node_modules, sheria za kusafisha) iko katika
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (imefupishwa katika `AGENTS.md` →
+Git Workflow → "Worktree isolation"). Mambo mahususi ya Claude Code:
 
-- Thibitisha tawi msingi na mwendeshaji kupitia `AskUserQuestion` (Sheria Ngumu #19) isipokuwa
-  tayari amekwambia.
-- Pendelea zana asilia ya `EnterWorktree` — tayari huunda worktree chini ya
-  `.claude/worktrees/` (njia rasmi). Unda worktree kwa amri ya `git worktree add`
-  iliyoandikwa kwenye nyaraka, kisha uite `EnterWorktree` ukitumia `path` yake.
+- Thibitisha base branch na mwendeshaji kupitia `AskUserQuestion` (Hard Rule #19) isipokuwa
+  wameshakuambia.
+- Tumia zana asilia ya `EnterWorktree` — tayari huunda worktrees chini ya
+  `.claude/worktrees/` (njia rasmi). Unda worktree kwa amri iliyoandikwa ya `git
+worktree add`, kisha ita `EnterWorktree` kwa kutumia `path` yake.
 
 ## Usalama kati ya vipindi — mahususi kwa Claude Code
 

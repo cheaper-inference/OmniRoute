@@ -123,7 +123,9 @@
       "maxCostOpt": "प्रति दिन अधिकतम लागत (USD)",
       "allowedModelsOpt": "अनुमत मॉडल की कॉमा से अलग की गई सूची",
       "nothingToSet": "कोई नीति फ़ील्ड प्रदान नहीं की गई। --rate-limit, --max-cost, या --allowed-models का उपयोग करें।",
-      "updated": "नीति अपडेट की गई।"
+      "updated": "नीति अपडेट की गई।",
+      "modelAccessModeOpt": "मॉडल एक्सेस मोड (all | restricted)",
+      "unrestrictedOpt": "सभी मॉडल की अनुमति दें (--model-access-mode all)"
     },
     "expiration": {
       "title": "कुंजी की समाप्ति",

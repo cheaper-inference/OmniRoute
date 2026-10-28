@@ -520,7 +520,7 @@ Fail `-wal` hilang tetapi `-shm` dan DB utama masih utuh:
 omniroute
 ```
 
-Jika SQLite tidak dapat melakukan pemulihan automatik:
+Jika SQLite tidak dapat melakukan pemulihan secara automatik:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite ".recover" > recovered.sql
@@ -533,14 +533,17 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Pulihkan daripada sandaran:
 
 ```bash
-omniroute sync pull --merge   # atau: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` hanya memuat turun arkib `.tar.gz` penuh daripada pelayan yang sedang berjalan
+(`GET /api/db-backups/exportAll`, bukti kelayakan pengendali diperlukan); arahan ini tidak memulihkan apa-apa.
 
 ### Senario 3: Kunci Penyulitan Hilang
 
-**Pemulihan tidak boleh dilakukan** tanpa kunci tersebut. Medan yang disulitkan tidak boleh dibaca. Tambahkan semula semua penyedia secara manual dengan kelayakan baharu.
+**Pemulihan tidak dapat dilakukan** tanpa kunci tersebut. Medan yang disulitkan tidak dapat dibaca. Tambahkan semula semua penyedia secara manual menggunakan bukti kelayakan baharu.
 
-> **Mitigasi**: Sentiasa sandarkan kunci penyulitan secara berasingan, sebaik-baiknya dalam pengurus kata laluan atau KMS.
+> **Langkah mitigasi**: Sentiasa sandarkan kunci penyulitan secara berasingan, sebaik-baiknya dalam pengurus kata laluan atau KMS.
 
 ### Senario 4: Cakera Penuh
 

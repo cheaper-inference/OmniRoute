@@ -123,7 +123,9 @@
       "maxCostOpt": "প্রতিদিনের সর্বোচ্চ খরচ (USD)",
       "allowedModelsOpt": "অনুমোদিত মডেলগুলোর কমা-বিভাজিত তালিকা",
       "nothingToSet": "কোনো নীতি ফিল্ড দেওয়া হয়নি। --rate-limit, --max-cost, অথবা --allowed-models ব্যবহার করুন।",
-      "updated": "নীতি আপডেট করা হয়েছে।"
+      "updated": "নীতি আপডেট করা হয়েছে।",
+      "modelAccessModeOpt": "মডেল অ্যাক্সেস মোড (all | restricted)",
+      "unrestrictedOpt": "সব মডেল অনুমোদন করুন (--model-access-mode all)"
     },
     "expiration": {
       "title": "কী-এর মেয়াদ শেষ হওয়া",

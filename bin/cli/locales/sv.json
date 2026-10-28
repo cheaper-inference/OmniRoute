@@ -123,7 +123,9 @@
       "maxCostOpt": "Maximal kostnad per dag (USD)",
       "allowedModelsOpt": "Kommaseparerad lista över tillåtna modeller",
       "nothingToSet": "Inga policyfält har angetts. Använd --rate-limit, --max-cost eller --allowed-models.",
-      "updated": "Policyn har uppdaterats."
+      "updated": "Policyn har uppdaterats.",
+      "modelAccessModeOpt": "Åtkomstläge för modeller (all | restricted)",
+      "unrestrictedOpt": "Tillåt alla modeller (--model-access-mode all)"
     },
     "expiration": {
       "title": "Nyckelns utgångsdatum",

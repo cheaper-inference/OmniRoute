@@ -123,7 +123,9 @@
       "maxCostOpt": "Coût maximal par jour (USD)",
       "allowedModelsOpt": "Liste des modèles autorisés, séparés par des virgules",
       "nothingToSet": "Aucun champ de politique fourni. Utilisez --rate-limit, --max-cost ou --allowed-models.",
-      "updated": "Politique mise à jour."
+      "updated": "Politique mise à jour.",
+      "modelAccessModeOpt": "Mode d’accès aux modèles (all | restricted)",
+      "unrestrictedOpt": "Autoriser tous les modèles (--model-access-mode all)"
     },
     "expiration": {
       "title": "Expiration des clés",

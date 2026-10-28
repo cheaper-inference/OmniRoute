@@ -123,7 +123,9 @@
       "maxCostOpt": "Gündəlik maksimum xərc (USD)",
       "allowedModelsOpt": "İcazə verilən modellərin vergüllə ayrılmış siyahısı",
       "nothingToSet": "Heç bir siyasət sahəsi təqdim edilməyib. --rate-limit, --max-cost və ya --allowed-models istifadə edin.",
-      "updated": "Siyasət yeniləndi."
+      "updated": "Siyasət yeniləndi.",
+      "modelAccessModeOpt": "Modelə giriş rejimi (all | restricted)",
+      "unrestrictedOpt": "Bütün modellərə icazə ver (--model-access-mode all)"
     },
     "expiration": {
       "title": "Açarın etibarlılıq müddəti",

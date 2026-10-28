@@ -1,1 +1,0 @@
-- **fix(notion-web):** a Notion web response at status 400 or above now sets that sink's upstream status instead of looking like a transport failure ([#16371](https://github.com/diegosouzapw/OmniRoute/pull/16371)) — thanks @maxmad64bis

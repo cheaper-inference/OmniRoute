@@ -123,7 +123,9 @@
       "maxCostOpt": "ថ្លៃចំណាយអតិបរមាក្នុងមួយថ្ងៃ (USD)",
       "allowedModelsOpt": "បញ្ជីម៉ូដែលដែលអនុញ្ញាត បំបែកដោយសញ្ញាក្បៀស",
       "nothingToSet": "មិនមានវាលគោលការណ៍ដែលបានផ្ដល់ទេ។ ប្រើ --rate-limit, --max-cost ឬ --allowed-models។",
-      "updated": "បានធ្វើបច្ចុប្បន្នភាពគោលការណ៍។"
+      "updated": "បានធ្វើបច្ចុប្បន្នភាពគោលការណ៍។",
+      "modelAccessModeOpt": "របៀបចូលប្រើម៉ូដែល (all | restricted)",
+      "unrestrictedOpt": "អនុញ្ញាតម៉ូដែលទាំងអស់ (--model-access-mode all)"
     },
     "expiration": {
       "title": "ការផុតកំណត់សោ",

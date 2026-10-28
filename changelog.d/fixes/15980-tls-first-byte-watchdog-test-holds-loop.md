@@ -1,1 +1,0 @@
-- **fix(sse):** first-byte watchdog suite holds its own loop so it reports 3 pass instead of 3 cancelled ([#15980](https://github.com/diegosouzapw/OmniRoute/pull/15980)) — thanks @maxmad64bis

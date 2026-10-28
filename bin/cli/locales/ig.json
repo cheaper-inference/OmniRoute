@@ -123,7 +123,9 @@
       "maxCostOpt": "Ọnụ ahịa kachasị kwa ụbọchị (USD)",
       "allowedModelsOpt": "Ndepụta ụdịdị e kwere ekwe nke rikoma kewara",
       "nothingToSet": "Enweghị mpaghara iwu e nyere. Jiri --rate-limit, --max-cost, ma ọ bụ --allowed-models.",
-      "updated": "Emelitela iwu."
+      "updated": "Emelitela iwu.",
+      "modelAccessModeOpt": "Ụdị ohere ịnweta ụdị (all | restricted)",
+      "unrestrictedOpt": "Kwe ka ụdị niile (--model-access-mode all)"
     },
     "expiration": {
       "title": "Mmebi Oge Igodo",

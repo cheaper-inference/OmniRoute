@@ -14,7 +14,10 @@ import {
   getGitHubCopilotRefreshHeaders,
 } from "../config/providerHeaderProfiles.ts";
 import { sanitizeResponsesInputItems } from "../services/responsesInputSanitizer.ts";
-import { stripUnsupportedParams } from "../translator/paramSupport.ts";
+import {
+  isGithubTemperatureUnsupportedModel,
+  stripUnsupportedParams,
+} from "../translator/paramSupport.ts";
 import {
   COPILOT_AUTO_API_VERSION,
   COPILOT_AUTO_TIMEOUT_MS,
@@ -202,17 +205,14 @@ export class GithubExecutor extends BaseExecutor {
       modifiedBody.tools = modifiedBody.tools.slice(0, 128);
     }
 
-    // GitHub Copilot's gpt-5.4 family rejects requests carrying `temperature` with HTTP 400:
-    //   "Unsupported parameter: 'temperature' is not supported with this model."
+    // GitHub Copilot's GPT-5.4+ and GPT-6.x models reject requests carrying `temperature`
+    // with HTTP 400: "Unsupported parameter: 'temperature' is not supported with this model."
     // OmniRoute's existing `stripGpt5SamplingWhenReasoning` guard only fires for
     // provider==="openai" (raw api.openai.com Chat Completions), so GitHub Copilot routes
-    // never hit it. Strip temperature here unconditionally for gpt-5.4 so the 400 cannot
-    // reach the user. Port from 9router#612 (closes upstream #536).
-    if (
-      typeof model === "string" &&
-      /gpt-5\.4/i.test(model) &&
-      modifiedBody.temperature !== undefined
-    ) {
+    // never hit it. Strip temperature here unconditionally (chat and Responses bodies) so the
+    // 400 cannot reach the user. Same predicate as the "github" rule in paramSupport.ts so
+    // the two can't drift. Port from 9router#612 (closes upstream #536) and 9router#4706.
+    if (isGithubTemperatureUnsupportedModel(model) && modifiedBody.temperature !== undefined) {
       delete modifiedBody.temperature;
     }
 

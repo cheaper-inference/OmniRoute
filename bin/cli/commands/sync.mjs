@@ -1,9 +1,10 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { basename } from "node:path";
 import { createInterface } from "node:readline";
-import { apiFetch, getBaseUrl, isRouteUnavailableStatus } from "../api.mjs";
+import { apiFetch, isRouteUnavailableStatus } from "../api.mjs";
 import { emit } from "../output.mjs";
 import { t } from "../i18n.mjs";
+import { readImportFile, runImportDryRun } from "./sync-import.mjs";
 
 function fmtTs(v) {
   if (!v) return "-";
@@ -18,12 +19,6 @@ async function confirm(q) {
       resolve(a.trim().toLowerCase() === "y");
     });
   });
-}
-
-function authHeaders(opts) {
-  const h = { accept: "application/json" };
-  if (opts.apiKey) h["Authorization"] = `Bearer ${opts.apiKey}`;
-  return h;
 }
 
 const syncTokenSchema = [
@@ -242,6 +237,53 @@ export async function runSyncInitialize(globalOpts = {}) {
   return 0;
 }
 
+const IMPORT_PATH = "/api/db-backups/import";
+// Uploading + validating + swapping a large database can outlast the 30 s default timeout.
+const IMPORT_TIMEOUT_MS = 300_000;
+
+function importFailureHint(status) {
+  if (status === 401 || status === 403) {
+    return (
+      "importing replaces the whole database, so it requires an operator credential: run this " +
+      "on the server host (local CLI credential) or sign in to the dashboard; API keys and " +
+      "remote access tokens are refused."
+    );
+  }
+  return routeUnavailableHint(status, `POST ${IMPORT_PATH}`);
+}
+
+/**
+ * `omniroute sync import <file> [--dry-run]` — replace the server's database with a `.sqlite`
+ * backup via `POST /api/db-backups/import`. With `--dry-run` the file is only validated
+ * locally and the server is never contacted: an older server ignores `dryRun` and would
+ * replace the live database.
+ */
+export async function runSyncImport(filePath, opts = {}, globalOpts = {}) {
+  const { buf, exitCode: readExit } = readImportFile(filePath);
+  if (!buf) return readExit;
+  if (opts.dryRun) return runImportDryRun(filePath, buf, globalOpts);
+
+  const name = basename(filePath);
+  const query = name.endsWith(".sqlite") ? `?filename=${encodeURIComponent(name)}` : "";
+  const { res, exitCode } = await sendSyncRequest(
+    "sync import",
+    `${IMPORT_PATH}${query}`,
+    globalOpts,
+    {
+      method: "POST",
+      headers: { "content-type": "application/octet-stream" },
+      body: buf,
+      timeout: IMPORT_TIMEOUT_MS,
+      // A replace is not something to replay blindly after a gateway error.
+      retry: false,
+    }
+  );
+  if (!res) return exitCode;
+  if (!res.ok) return reportFailure("sync import", res, importFailureHint(res.status));
+  emit(await res.json(), globalOpts);
+  return 0;
+}
+
 export function registerSync(program) {
   const sync = program.command("sync").description(t("sync.description"));
 
@@ -276,24 +318,12 @@ export function registerSync(program) {
     .description(t("sync.import.description"))
     .option("--dry-run", t("sync.import.dryRun"))
     .action(async (bundlePath, opts, cmd) => {
-      const globalOpts = cmd.optsWithGlobals();
-      const body = readFileSync(bundlePath);
-      const res = await fetch(
-        `${getBaseUrl(globalOpts)}/api/db-backups/import?dryRun=${opts.dryRun ? "true" : "false"}`,
-        {
-          method: "POST",
-          headers: {
-            ...authHeaders(globalOpts),
-            "Content-Type": "application/octet-stream",
-          },
-          body,
-        }
+      const exitCode = await runSyncImport(
+        bundlePath,
+        { dryRun: !!opts.dryRun },
+        cmd.optsWithGlobals()
       );
-      if (!res.ok) {
-        process.stderr.write(`HTTP ${res.status}\n`);
-        process.exit(1);
-      }
-      emit(await res.json(), globalOpts);
+      if (exitCode !== 0) process.exit(exitCode);
     });
 
   sync.command("initialize").action(async (opts, cmd) => {

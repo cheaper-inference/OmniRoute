@@ -1,1 +1,0 @@
-- **fix(sse):** a Claude `refusal` and Bedrock `content_filtered` or `guardrail_intervened` stops now reach OpenAI-format clients as `content_filter`, and `model_context_window_exceeded` as `length`, instead of a clean `stop`, in the Claude stream translator and the Bedrock executor.

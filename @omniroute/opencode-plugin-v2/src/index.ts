@@ -3,15 +3,18 @@ import {
   optionalTierFingerprint,
   catalogContentFingerprint,
   createLogger,
+  setHostSink,
   defaultOmniRouteCombosFetcher,
   defaultOmniRouteEnrichmentFetcher,
   defaultOmniRouteModelsFetcher,
   defaultOmniRouteProvidersFetcher,
+  type LogLevel,
   type OmniRouteEnrichmentMap,
   type OmniRouteProviderConnection,
 } from "./shared/index.js";
 import type { OmniRouteRawCombo, OmniRouteRawModelEntry } from "./shared/index.js";
 import { buildProviderPayload, collectCatalog } from "./catalog.js";
+import { usesModelsComboSource } from "./combos-source.js";
 import {
   UNREACHABLE_COOLDOWN_MS,
   memoryCacheKey,
@@ -72,6 +75,31 @@ export default Plugin.define({
     resolved.logger = log;
     resolved.logLevel = parsed.logLevel;
     resolved.startupDebug = parsed.startupDebug;
+    // Forward plugin lines to the host log when the host exposes one, so a
+    // service install (stdout lost) still records warnings. Defensive at
+    // every level: without it the console output above stays the only copy.
+    try {
+      const maybeClient = (ctx as { client?: unknown }).client as
+        { app?: { log?: unknown } } | undefined;
+      const appLog = maybeClient?.app?.log;
+      if (typeof appLog === "function") {
+        const hostLog = appLog as (input: {
+          body: { service: string; level: LogLevel; message: string };
+        }) => unknown;
+        setHostSink((level, message) => {
+          const out = hostLog({
+            body: { service: "[omniroute-plugin]", level, message },
+          });
+          return out;
+        });
+      }
+    } catch (err) {
+      // The probe itself threw (a throwing getter on the host object):
+      // trace it on the console so a missed host log is never silent.
+      console.warn(
+        `[omniroute-plugin] [WARN] host log probe failed, keeping console output: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
     log.info(`[omniroute-v2] init providerId=${X}`);
     // The inference key stands in below when no management token is set, and
     // gateways usually reject that stand-in with 401/403. Say so once here,
@@ -166,6 +194,9 @@ export default Plugin.define({
       resolved.managementReadToken === undefined
     );
     const fetchCombosSafe = async (): Promise<SourceResult<OmniRouteRawCombo[]>> => {
+      // Opt-in models source: the combo rows already arrive in /v1/models,
+      // so /api/combos is not requested at all (default "api" keeps it).
+      if (usesModelsComboSource(resolved)) return { ok: true, value: [] };
       try {
         return {
           ok: true,

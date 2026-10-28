@@ -298,13 +298,13 @@ Főbb működési jellemzők:
 
 ## 🔑 Szinkronizálási tokenek és konfigurációs csomag _(v3.6.6+)_
 
-A többeszközös és külső operátori hozzáférés mostantól **hatókörrel rendelkező szinkronizálási tokeneken** keresztül lehetséges:
+A többeszközös és külső üzemeltetői hozzáférés mostantól **hatókörrel rendelkező szinkronizálási tokeneken** keresztül lehetséges:
 
-- **`POST /api/sync/tokens`** — Új szinkronizálási token kibocsátása (meghatározott hatókörrel és opcionális lejárattal)
+- **`POST /api/sync/tokens`** — Új szinkronizálási token kiadása (meghatározott hatókörrel és opcionális lejárattal)
 - **`DELETE /api/sync/tokens/:id`** — Token visszavonása
-- **`GET /api/sync/bundle`** — Az összes nem érzékeny beállítás verziózott, ETag-kulcsú JSON-pillanatképének letöltése (a jelszavak kitakarásával)
+- **`GET /api/sync/bundle`** — A konfiguráció verziózott, ETag-kulcsú JSON-pillanatképének letöltése (kizárólag szinkronizálási tokennel hitelesítve). A hitelesítési beállítások, például az irányítópult jelszava, el vannak távolítva, a szolgáltatói hitelesítő adatok és az API-kulcsok azonban szerepelnek benne, ezért a fájlt bizalmas adatként kell kezelni
 
-A konfigurációs csomagot a `src/lib/sync/bundle.ts` állítja elő. A felhasználó rendszerek az `ETag` válaszfejléc összehasonlításával észlelhetik a változásokat a teljes tartalom újbóli letöltése nélkül.
+A konfigurációs csomagot a `src/lib/sync/bundle.ts` állítja elő. A fogyasztók az `ETag` válaszfejléc összehasonlításával észlelhetik a változásokat a teljes tartalom ismételt letöltése nélkül. A CLI használatával az `omniroute sync bundle <outPath> --token <syncToken>` (vagy az `OMNIROUTE_SYNC_TOKEN`) egy kizárólag a tulajdonos által hozzáférhető fájlba menti azt.
 
 ---
 

@@ -37,33 +37,33 @@ OmniRoute'i levinud probleemid ja nende lahendused.
 
 ---
 
-### Tasuta teenusepakkujate päringusageduse piirangud (429 / 400 / 401)
+### Tasuta teenusepakkujate päringusageduse piiramine (429 / 400 / 401)
 
-**Sümptom**: Kui kasutate `model: "auto"` koos tasuta või autentimist mittevajavate teenusepakkujatega (opencode, auggie jne), saate vastuste asemel aeg-ajalt veateate `HTTP 429`, `400` või `401`. Kui proovite sama viipa mõne hetke pärast uuesti, õnnestuvad päringud, kuid automatiseerimine (cron-tööd, agendid, skriptid) katkeb esimese tõrke korral.
+**Sümptom**: Kui kasutate valikut `model: "auto"` tasuta/autentimiseta teenusepakkujatega (auggie jne), saate vastuste asemel aeg-ajalt veateate `HTTP 429`, `400` või `401`. Kui proovite sama viipa mõni hetk hiljem uuesti, õnnestuvad päringud, kuid automatiseerimine (cron-tööd, agendid, skriptid) katkeb esimese tõrke korral.
 
-**Algpõhjus**: Korraga mõjuvad kolm sõltumatut tõrkerežiimi:
+**Algpõhjus**: kolm sõltumatut tõrkerežiimi kuhjuvad:
 
-1. **Teenusepakkuja päringulimiit (`429`)**: Tasuta paketid võivad rakendada ajavahemikupõhist kvooti. Paralleelpäringute puhang ammendab selle, mistõttu keeldutakse järgmisest päringust kuni ajavahemiku lähtestumiseni.
-2. **Katkine mudel läbivahendusrežiimis (`400`/`401`)**: `auto/*` kogumid võivad sisaldada `opencode`-i läbivahendusmudeleid, mis on kataloogis registreeritud, kuid millel puuduvad kehtivad autentimisandmed (nt `oc/north-mini-code-free` → `401`). Automaatne marsruuter proovib üht neist, ebaõnnestub ja viga edastatakse enne varuvariandi rakendumist.
-3. **Samaaegsuse võimendav mõju (`429` koormuse all)**: Kui mitu agendi- või cron-seanssi kasutavad korraga valikut `auto`, ületab päringute koondsagedus tasuta teenusepakkujate taluvuspiiri ning õiguspärased päringud märgitakse kuritarvitusena.
+1. **Teenusepakkuja päringusageduse piirang (`429`)**: tasuta paketid võivad rakendada ajavahemikupõhist kvooti. Paralleelpäringute puhang ammendab selle, mistõttu lükatakse järgmine päring tagasi kuni ajavahemiku lähtestamiseni.
+2. **Katkine mudel otseedastuses (`400`/`401`)**: `auto/*` kogumid võivad sisaldada otseedastusmudeleid, mis on kataloogis registreeritud, kuid millel puuduvad kehtivad pääsuandmed (→ `401`). Automaatne marsruuter proovib ühte neist, see ebaõnnestub ja tõrge edastatakse enne, kui varuvariandile ümberlülitumine jõustub.
+3. **Samaaegsuse võimendumine (`429` koormuse all)**: kui mitu agendi-/cron-seanssi kasutavad korraga valikut `auto`, ületab päringute kogusagedus tasuta teenusepakkujate taluvuspiiri, mistõttu märgitakse õiguspärased päringud kuritarvituseks.
 
-**Kontrollitud lahendus (kogukonna teatatud, 2026-08-10)**: kohandage kolme keskkonnamuutujat, et roteerimine, samaaegsuse piiramine ja varuvariant taluksid tasuta pakettide ebastabiilsust, mitte ei katkeks selle tõttu:
+**Kontrollitud lahendus (kogukonna teatatud, 2026-08-10)**: häälestage kolm keskkonnamuutujat nii, et roteerimine, samaaegsuse piiramine ja varuvariandile ümberlülitumine neelaksid tasuta paketi ebastabiilsuse, selle asemel et selle tõttu katkeda:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # liigu vea 400/401 korral teise mudeli või teenusepakkuja juurde (jätab katkised läbivahendusmudelid vahele)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # mahukate päringute vastuvõtu selgesõnaline ülempiir (vaikimisi määramata: päringute arvu piirang puudub, vt märkust allpool)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # pikenda piiratud ooteaega aeglaste ülesvooluteenuste jaoks üle RATE_LIMIT_MAX_WAIT_MS vaikeväärtuse
+export OMNIROUTE_ROTATE_ON_400=true           # lülitub tõrke 400/401 korral teisele mudelile/teenusepakkujale (jätab katkised otseedastusmudelid vahele)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # raskete päringute vastuvõtu selgesõnaline ülempiir (vaikimisi määramata: päringute arv pole piiratud, vt märkust allpool)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # pikendab piiratud ooteaega aeglaste ülavooteenuste jaoks üle RATE_LIMIT_MAX_WAIT_MS vaikeväärtuse
 ```
 
-Määrake need OmniRoute'i protsessi keskkonnas (deemonis, nt LaunchAgenti plist-faili või `systemctl edit` kaudu) ja taaskäivitage seejärel OmniRoute. Roteerimislipp on neist kõige mõjusam: see muudab pöördumatu tõrke läbipaistvaks korduskatseks kogumis oleva töötava teenusepakkujaga.
+Määrake need OmniRoute'i protsessi keskkonnas (deemonis, näiteks LaunchAgenti plist-faili või `systemctl edit` kaudu) ja taaskäivitage seejärel OmniRoute. Roteerimislipp on kõige mõjusam abinõu: see muudab täieliku tõrke läbipaistvaks korduskatseks kogumis oleva toimiva teenusepakkuja kaudu.
 
-**Märkus**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` piirab korraga töötavate mahukate — pika kontekstiga — päringute arvu; see piir on vastuvõtulüüs, mitte teenusepakkuja päringusageduse piiraja. **#503-fanout värskendus:** seda muutujat ei määrata enam vaikimisi (see rakendub nüüd ainult siis, kui see on selgesõnaliselt seadistatud, nagu eespool) — mahukate päringute vastuvõttu piirab selle asemel automaatselt tuletatud baidieelarve (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), mis kohandub hosti tegeliku mälupiirangu järgi. Seetõttu peaks värske juurutus andma märksa vähem tõrkeid `503 chat_admission_busy`, ilma et seda muutujat oleks üldse vaja määrata; selle selgesõnaline määramine siin töötab endiselt täpselt dokumenteeritud viisil. Selgesõnaliselt määratud baidieelarve väärtused piiratakse vahemikku 8 MiB–2 GiB. Tõrge `413 body_exceeds_budget` ei ole ajutine: suurendage baidieelarvet, vähendage väärtust `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` või suurendage protsessi mälupiirangut. Koormuse hajutamine põhjusega `inflight_bytes_budget` tuleneb ajutisest ressursikonkurentsist ja päringut võib uuesti proovida. Teenusepakkujapõhist päringusageduse piiramist (`open-sse/services/rateLimitManager.ts`) juhivad eraldi `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` ja `RATE_LIMIT_AUTO_ENABLE` — vt `.env.example`.
+**Märkus**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` piirab korraga käitatavate raskete ehk pika kontekstiga päringute arvu; see piirang on vastuvõtulüüs, mitte teenusepakkuja päringusageduse piiraja. **#503-fanout värskendus:** seda muutujat ei määrata enam vaikimisi (nüüd rakendub see ainult siis, kui see on selgesõnaliselt seadistatud, nagu ülal) — raskete päringute vastuvõttu piirab selle asemel automaatselt tuletatud baidieelarve (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), mis skaleerub hosti tegeliku mälupiirangu järgi, seega peaks värske juurutus saama märksa vähem `503 chat_admission_busy` tagasilükkamisi, ilma et seda muutujat oleks üldse vaja määrata; selle selgesõnaline määramine siin toimib endiselt täpselt dokumenteeritud viisil. Selgesõnalised baidieelarve ülekirjutused piiratakse vahemikku 8 MiB–2 GiB. `413 body_exceeds_budget` ei ole ajutine: suurendage baidieelarvet, vähendage väärtust `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` või suurendage protsessi mälupiirangut. `inflight_bytes_budget` tõttu koormuse vähendamine tuleneb ajutisest ressursikonkurentsist ja selle korral saab päringut uuesti proovida. Teenusepakkujakohast päringusageduse piiramist (`open-sse/services/rateLimitManager.ts`) juhivad eraldi `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` ja `RATE_LIMIT_AUTO_ENABLE` — vt `.env.example`.
 
-**Kuidas kontrollida, et see töötas**: käivitage oma agent/cron kaks korda kiiresti järjest ja veenduge, et mõlemad käivitused õnnestuvad. Enne parandust annab teine käivitus tavaliselt vea `429`/`401`. Pärast parandust proovitakse ebaõnnestunud päringuid (kui neid esineb) automaatselt uuesti ja kutse viiakse lõpule. Samuti võite käivitada `curl /monitoring/health` ning jälgida teenusepakkujate ühenduste välja `rateLimitedUntil` ja mõjutatud teenusepakkujate välja `circuitBreakers.providerBreakers[].state` — olek on üks järgmistest: `CLOSED`, `DEGRADED`, `OPEN` või `HALF_OPEN` (vt `src/shared/utils/circuitBreaker.ts`) ning jätkuvalt ebaõnnestuva teenusepakkuja olek muutub `CLOSED → DEGRADED → OPEN`, enne kui lähtestamisaken lubab proovipäringu läbi (`HALF_OPEN`).
+**Kuidas kontrollida, kas lahendus toimis**: käivitage oma agent/cron kaks korda kiiresti järjest ja veenduge, et mõlemad käivitused õnnestuvad. Enne parandust annab teine käivitus tavaliselt tõrke `429`/`401`. Pärast parandust proovitakse tõrkunud päringuid (kui neid esineb) läbipaistvalt uuesti ja kutse viiakse lõpule. Samuti saate teha päringu `curl /monitoring/health` ning jälgida teenusepakkuja ühenduste välja `rateLimitedUntil` ja mõjutatud teenusepakkujate välja `circuitBreakers.providerBreakers[].state` — olek on üks järgmistest: `CLOSED`, `DEGRADED`, `OPEN` või `HALF_OPEN` (vt `src/shared/utils/circuitBreaker.ts`) ning korduvalt tõrkuva teenusepakkuja olek muutub `CLOSED → DEGRADED → OPEN`, enne kui lähtestusaken lubab proovipäringu läbi (`HALF_OPEN`).
 
-**Kui näete endiselt viga 429**: selle teenusepakkuja aktiivse konto _kvoot_ on päriselt ammendunud (tegu pole üksnes päringusageduse piiranguga). Lisage OmniRoute’i juhtpaneelil sama teenusepakkuja jaoks teine konto: Providers → Accounts, või lisage mõni muu tasuta teenusepakkuja (nt `routeway`, `auggie`). Rotatsioon aitab ainult ajutiste päringusageduse piirangute ja vigade 400/401 korral; kvoodi täielik ammendumine nõuab teisi autentimisandmeid või teist teenusepakkujat.
+**Kui näete endiselt tõrget 429**: selle teenusepakkuja aktiivse konto _kvoot_ on päriselt ammendunud (tegu pole üksnes päringusageduse piiranguga). Lisage OmniRoute'i juhtpaneelil sama teenusepakkuja jaoks teine konto → Providers → Accounts või kaasake mõni muu tasuta teenusepakkuja (nt `routeway`, `auggie`). Roteerimine aitab ainult ajutiste päringusageduse piirangute ning tõrgete 400/401 korral; kvoodi täielik ammendumine nõuab teisi pääsuandmeid või teist teenusepakkujat.
 
-**Kui näete visioonimudelite (`auto/vision`, `bazaarlink/*`) puhul viga 403**: ühendatud kontol puudub visiooni sisaldav tasuline pakett või API-võtmel pole piisavaid õigusi. Kontrollige teenusepakkuja juhtpaneelil, et võtme õiguste ulatus hõlmaks visiooni/multimodaalsust, või ühendage tasulise paketiga konto ja jätke see visiooni sihtkontoks.
+**Kui näete nägemismudelite (`auto/vision`, `bazaarlink/*`) puhul tõrget 403**: ühendatud kontol puudub nägemisfunktsiooni sisaldav tasuline pakett või API-võtmel pole piisavaid õigusi. Kontrollige teenusepakkuja juhtpaneelil, et võtme ulatus hõlmaks nägemis-/multimodaalseid funktsioone, või ühendage tasulise paketiga konto ja jätke see nägemispäringute sihtkohaks.
 
 ---
 
@@ -90,7 +90,7 @@ Hoiatused tulenevad kolmanda osapoole pakettide aegunud partner-sõltuvuste vahe
 
 ---
 
-## Blokeeritud `npm` installiskriptide hoiatus (globaalne install)
+## npm-i installiskriptide blokeerimise hoiatus (globaalne installimine)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
@@ -104,34 +104,34 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### Kas seda hoiatust võib eirata?
 
-**Osaliselt, kuid ilma skriptideta käivitamine pole soovitatav.** OmniRoute sisaldab sujuvaid varulahendusi: kui natiivseid `better-sqlite3` sidumisi ei saa autonoomsest komplektist laadida, kasutab rakendus alternatiivseid draivereid, nagu `node:sqlite` või `sql.js` (vt [SQLite'i käituskeskkonna lahendamine](../ops/SQLITE_RUNTIME.md)). Server käivitub endiselt, kuid WASM-i varulahenduste, nagu `sql.js`, kasutamine keelab SQLite'i WAL-režiimi (ettekirjutuslogimine) ning suurendab mälu- ja kettasünkroonimise lisakulu.
+**Osaliselt, kuid ilma skriptideta käivitamine pole soovitatav.** OmniRoute sisaldab sujuvaid varulahendusi: kui natiivseid `better-sqlite3` sidemeid ei õnnestu eraldiseisvast komplektist laadida, kasutab rakendus alternatiivseid draivereid, nagu `node:sqlite` või `sql.js` (vt [SQLite'i käituskeskkonna valimine](../ops/SQLITE_RUNTIME.md)). Server käivitub endiselt, kuid WASM-varulahenduste, nagu `sql.js`, kasutamine keelab SQLite'i WAL-režiimi (Write-Ahead Logging ehk ette kirjutamisega logimine) ning suurendab mälu- ja kettasünkroonimise koormust.
 
 ### Millised skriptid on tegelikult vajalikud?
 
 Kõik blokeeritud skriptid pole OmniRoute'i käitamiseks hädavajalikud:
 
-- **Hädavajalikud (`omniroute`, `better-sqlite3`):** OmniRoute käitatakse Next.js-i autonoomsest rakendusekomplektist (`dist/`). Installimise ajal laadib npm alla või kompileerib hostipõhise natiivse SQLite'i draiveri ülataseme kataloogis `node_modules/better-sqlite3/`. Seejärel kontrollib OmniRoute'i `postinstall` skript (`scripts/build/postinstall.mjs`) neid hostipõhiseid binaarfaile ja kopeerib need kataloogi `dist/node_modules/`, et autonoomne server pääseks neile juurde. Kui `omniroute`'i postinstall-skript blokeeritakse, jäetakse see kopeerimisetapp vahele.
-- **Valikulised/transitiivsed (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Need on kompileerimise abivahendid, jälgimistööriistad või süsteemi võtmehoidla utiliidid. Nende lubamine väldib kompileerimishoiatusi, kuid need pole põhilise marsruutimisfunktsionaalsuse jaoks vajalikud.
-- **Välistatud (`onnxruntime-node`):** Valikuline sõltuvus kohalike tehisintellekti vektoriesituste jaoks ja **ei ole** OmniRoute'i käitamiseks vajalik. Selle postinstall-skript laadib NuGetist alla ligikaudu 300 MB CUDA ressursse; ärge lisage seda lubamisloendisse, välja arvatud juhul, kui kavatsete toetatud riistvaral kasutada kohalikku ONNX-kiirendust.
+- **Hädavajalikud (`omniroute`, `better-sqlite3`):** OmniRoute töötab Next.js-i eraldiseisva rakenduse komplektist (`dist/`). Installimise ajal laadib npm alla või kompileerib hostipõhise natiivse SQLite'i draiveri ülemise taseme kataloogis `node_modules/better-sqlite3/`. Seejärel kontrollib OmniRoute'i `postinstall`-skript (`scripts/build/postinstall.mjs`) neid hostipõhiseid binaarfaile ja kopeerib need kataloogi `dist/node_modules/`, et eraldiseisev server neile juurde pääseks. Kui `omniroute`-i postinstall-skript on blokeeritud, jäetakse see kopeerimisetapp vahele.
+- **Valikulised/transitiivsed (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Need on koostamise abitööriistad, failimuudatuste jälgimise tööriistad või süsteemi võtmehoidla utiliidid. Nende lubamine väldib koostamishoiatusi, kuid OmniRoute'i põhifunktsioonide jaoks pole need vajalikud.
+- **Välistatud (`onnxruntime-node`):** See on valikuline sõltuvus kohalike tehisintellekti vektoresituste jaoks ega ole OmniRoute'i käitamiseks **vajalik**. Selle postinstall-skript laadib NuGetist alla ligikaudu 300 MB CUDA ressursse; ärge lisage seda lubatud skriptide loendisse, kui te ei kavatse toetatud riistvaral sõnaselgelt kohalikku ONNX-kiirendust kasutada.
 
 ### Soovitatav lahendus
 
-Vajalike installiskriptide lubamiseks globaalse installi ajal ja hoiatuste peitmiseks edastage OmniRoute'i ning selle natiivsete sõltuvuste jaoks `--allow-scripts`:
+Nõutavate installiskriptide lubamiseks globaalse installimise ajal ja hoiatuste vaigistamiseks edastage OmniRoute'i ning selle natiivsete sõltuvuste jaoks `--allow-scripts`:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Teise võimalusena saate selle kõigi oma kasutajakonto globaalsete installide jaoks püsivalt seadistada:
+Teise võimalusena saate selle oma kasutajakonto kõigi globaalsete installimiste jaoks püsivalt seadistada:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### Kontrollige installi
+### Kontrollige installimist
 
-Pärast installimist käivitage sisseehitatud diagnostikatööriist, et veenduda natiivsete sidumiste ja käituskeskkonna korrasolekus:
+Pärast installimist käivitage sisseehitatud diagnostikatööriist, et veenduda natiivsete sidemete ja käituskeskkonna korrasolekus:
 
 ```bash
 omniroute doctor

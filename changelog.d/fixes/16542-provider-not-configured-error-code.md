@@ -1,1 +1,0 @@
-- **fix(api):** report a provider with no connected account as `provider_not_configured` instead of `invalid_api_key` (single-model 401) or `model_not_found` (combo 404); HTTP status and type are unchanged, so clients that keyed re-auth on `invalid_api_key` no longer do for this case ([#16542](https://github.com/diegosouzapw/OmniRoute/pull/16542)) — thanks @haumanto

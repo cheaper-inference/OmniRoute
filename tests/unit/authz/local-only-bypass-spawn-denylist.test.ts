@@ -62,9 +62,6 @@ const CODE_EXEC_ROUTES: ReadonlyArray<{ prefix: string; sample: string }> = [
   { prefix: "/dashboard/providers/services/", sample: "/dashboard/providers/services/x/embed/" },
   { prefix: "/api/discovery/", sample: "/api/discovery/scan" },
   { prefix: "/api/issue-agent/", sample: "/api/issue-agent/runs" },
-  { prefix: "/api/providers/validate", sample: "/api/providers/validate" },
-  { prefix: "/api/providers/import", sample: "/api/providers/import" },
-  { prefix: "/api/providers/bulk", sample: "/api/providers/bulk" },
   // Not a spawn: reads host-local Kiro credential files (kiro-cli SQLite, ~/.aws/sso/cache).
   // Held to the same never-bypassable bar so a manage-scoped key cannot read them remotely.
   { prefix: "/api/oauth/kiro/auto-import", sample: "/api/oauth/kiro/auto-import" },
@@ -93,6 +90,30 @@ async function applyBypass(prefixes: string[]) {
 for (const { prefix, sample } of CODE_EXEC_ROUTES) {
   test(`schema refuses ${prefix} in the manage-scope bypass list`, () => {
     assert.equal(isLocalOnlyPath(sample), true, `${sample} must be LOCAL_ONLY`);
+    assert.equal(schemaRejectsBypassPrefix(prefix), true);
+  });
+}
+
+/**
+ * Spawn-capable routes that are deliberately NOT path-gated: #16366 (#15159 S-01) moved the
+ * devin validator spawn to a call-site gate on the trusted peer-locality header so
+ * reverse-proxied dashboards can validate keys again. They stay on the manage-scope
+ * deny-list regardless — a future path-level re-classification must never make them
+ * whitelistable — but `isLocalOnlyPath()` is false for them by design.
+ */
+const CALL_SITE_GATED_SPAWN_ROUTES: ReadonlyArray<{ prefix: string; sample: string }> = [
+  { prefix: "/api/providers/validate", sample: "/api/providers/validate" },
+  { prefix: "/api/providers/import", sample: "/api/providers/import" },
+  { prefix: "/api/providers/bulk", sample: "/api/providers/bulk" },
+];
+
+for (const { prefix, sample } of CALL_SITE_GATED_SPAWN_ROUTES) {
+  test(`schema still refuses call-site-gated ${prefix} in the manage-scope bypass list`, () => {
+    assert.equal(
+      isLocalOnlyPath(sample),
+      false,
+      `${sample} is remote-reachable by design (#16366); the spawn is gated at its call site`
+    );
     assert.equal(schemaRejectsBypassPrefix(prefix), true);
   });
 }

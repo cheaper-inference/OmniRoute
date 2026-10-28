@@ -37,33 +37,33 @@ Probleme frecvente și soluții pentru OmniRoute.
 
 ---
 
-### Limitarea solicitărilor la furnizorii gratuiți (429 / 400 / 401)
+### Limitarea ratei la furnizorii gratuiți (429 / 400 / 401)
 
-**Simptom**: Atunci când folosiți `model: "auto"` cu furnizori gratuiți/fără autentificare (opencode, auggie etc.), primiți intermitent `HTTP 429`, `400` sau `401` în locul răspunsurilor. Solicitările reușesc dacă încercați din nou cu același prompt câteva momente mai târziu, dar automatizarea (sarcini cron, agenți, scripturi) eșuează la prima eroare.
+**Simptom**: Când utilizați `model: "auto"` cu furnizori gratuiți/fără autentificare (auggie etc.), primiți intermitent `HTTP 429`, `400` sau `401` în locul răspunsurilor. Solicitările reușesc atunci când retrimiteți aceeași cerere câteva momente mai târziu, însă automatizările (sarcini cron, agenți, scripturi) se întrerup la prima eroare.
 
-**Cauza principală**: Trei moduri independente de eșec se suprapun:
+**Cauză principală**: Se cumulează trei moduri de defectare independente:
 
-1. **Limitarea solicitărilor de către furnizor (`429`)**: Nivelurile gratuite pot impune o cotă per interval. O rafală de apeluri paralele o epuizează, astfel încât următoarea solicitare este refuzată până la resetarea intervalului.
-2. **Model nefuncțional în passthrough (`400`/`401`)**: Grupurile `auto/*` pot include modele passthrough de la `opencode` care sunt înregistrate în catalog, dar nu au acreditări active (de exemplu, `oc/north-mini-code-free` → `401`). Routerul automat încearcă unul dintre ele, eșuează, iar eroarea este propagată înainte ca mecanismul de comutare la o alternativă să intre în funcțiune.
-3. **Amplificarea concurenței (`429` sub sarcină)**: Atunci când mai multe sesiuni de agent/cron accesează simultan `auto`, rata agregată a solicitărilor depășește ceea ce tolerează furnizorii gratuiți, astfel încât apelurile legitime sunt marcate drept abuzive.
+1. **Limitarea ratei de către furnizor (`429`)**: Nivelurile gratuite pot impune o cotă pentru fiecare interval de timp. Un val de apeluri paralele o epuizează, astfel încât următoarea solicitare este refuzată până la resetarea intervalului.
+2. **Model nefuncțional în modul passthrough (`400`/`401`)**: Pool-urile `auto/*` pot include modele passthrough care sunt înregistrate în catalog, dar nu au credențiale active (→ `401`). Routerul automat încearcă unul, acesta eșuează, iar eroarea se propagă înainte de activarea mecanismului de fallback.
+3. **Amplificare prin concurență (`429` sub sarcină)**: Când mai multe sesiuni de agent/cron accesează simultan `auto`, rata agregată a solicitărilor depășește nivelul tolerat de furnizorii gratuiți, astfel încât apelurile legitime sunt marcate drept abuzive.
 
-**Remediere verificată (raportată de comunitate, 2026-08-10)**: ajustați trei variabile de mediu astfel încât rotația, concurența și comutarea la alternative să absoarbă fluctuațiile nivelului gratuit, în loc să eșueze din cauza lor:
+**Remediere verificată (raportată de comunitate, 2026-08-10)**: ajustați trei variabile de mediu astfel încât rotația, concurența și mecanismul de fallback să absoarbă instabilitatea nivelului gratuit, în loc ca procesul să se oprească din cauza acesteia:
 
 ```bash
 export OMNIROUTE_ROTATE_ON_400=true           # trece la alt model/furnizor la 400/401 (omite modelele passthrough nefuncționale)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # limită explicită de admitere pentru sarcini grele (implicit nesetată: fără limită a numărului de solicitări, consultați nota de mai jos)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # mărește așteptarea limitată peste valoarea implicită RATE_LIMIT_MAX_WAIT_MS pentru serviciile upstream lente
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # plafon explicit de admitere pentru solicitările grele (implicit nesetat: fără limită privind numărul de solicitări, consultați nota de mai jos)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # mărește timpul de așteptare limitat peste valoarea implicită RATE_LIMIT_MAX_WAIT_MS pentru serviciile upstream lente
 ```
 
-Setați-le în mediul procesului OmniRoute (daemonul, de exemplu prin plist-ul LaunchAgent sau `systemctl edit`), apoi reporniți OmniRoute. Indicatorul de rotație este pârghia cu cel mai mare impact: acesta transformă un eșec definitiv într-o reîncercare transparentă la un furnizor funcțional din grup.
+Setați-le în mediul procesului OmniRoute (daemonul, de exemplu prin fișierul plist LaunchAgent sau `systemctl edit`), apoi reporniți OmniRoute. Indicatorul de rotație este pârghia cu cel mai mare impact: transformă o eroare definitivă într-o reîncercare transparentă folosind un furnizor funcțional din pool.
 
-**Notă**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` limitează numărul de solicitări grele — cu un context lung — care rulează simultan; limita este o poartă de admitere, nu un mecanism de limitare a solicitărilor furnizorului. **Actualizare #503-fanout:** această variabilă nu mai este setată implicit (acum se aplică numai atunci când este configurată explicit, ca mai sus) — admiterea solicitărilor grele este controlată în schimb de un buget de octeți derivat automat (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), care se adaptează în funcție de limita reală de memorie a gazdei, astfel încât o implementare nouă ar trebui să înregistreze mult mai puține respingeri `503 chat_admission_busy` fără a seta deloc această variabilă; setarea sa explicită aici continuă să funcționeze exact conform documentației. Suprascrierile explicite ale bugetului de octeți sunt limitate la intervalul 8 MiB–2 GiB. O eroare `413 body_exceeds_budget` nu este temporară: măriți acel buget de octeți, reduceți `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` sau măriți limita de memorie a procesului. O eliminare `inflight_bytes_budget` indică o competiție temporară pentru resurse și permite în continuare reîncercarea. Limitarea solicitărilor pentru fiecare furnizor (`open-sse/services/rateLimitManager.ts`) este controlată separat prin `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` și `RATE_LIMIT_AUTO_ENABLE` — consultați `.env.example`.
+**Notă**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` limitează numărul solicitărilor grele — cu context lung — care rulează simultan; limita este o poartă de admitere, nu un limitator al ratei furnizorului. **Actualizare #503-fanout:** această variabilă nu mai este setată implicit (acum se aplică doar atunci când este configurată explicit, ca mai sus) — admiterea solicitărilor grele este controlată în schimb de un buget de octeți derivat automat (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), care se dimensionează în funcție de limita reală de memorie a gazdei, astfel încât o implementare nouă ar trebui să întâmpine mult mai puține respingeri `503 chat_admission_busy` fără a seta deloc această variabilă; setarea sa explicită aici continuă să funcționeze exact conform documentației. Suprascrierile explicite ale bugetului de octeți sunt limitate la intervalul 8 MiB–2 GiB. Un răspuns `413 body_exceeds_budget` nu este tranzitoriu: măriți acel buget de octeți, reduceți `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` sau măriți limita de memorie a procesului. O respingere `inflight_bytes_budget` indică o concurență temporară pentru resurse și poate fi reîncercată. Limitarea ratei pentru fiecare furnizor (`open-sse/services/rateLimitManager.ts`) este administrată separat prin `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` și `RATE_LIMIT_AUTO_ENABLE` — consultați `.env.example`.
 
-**Cum verificați că a funcționat**: rulați agentul/sarcina cron de două ori în succesiune rapidă și confirmați că ambele rulări reușesc. Înainte de remediere, a doua rulare generează de obicei `429`/`401`. După remediere, eșecurile (dacă există) sunt reîncercate în mod transparent, iar apelul se finalizează. De asemenea, puteți rula `curl /monitoring/health` și urmări câmpul `rateLimitedUntil` pentru conexiunile furnizorilor și `circuitBreakers.providerBreakers[].state` pentru furnizorii afectați — starea este una dintre `CLOSED`, `DEGRADED`, `OPEN` sau `HALF_OPEN` (consultați `src/shared/utils/circuitBreaker.ts`), iar un furnizor care continuă să eșueze va trece prin `CLOSED → DEGRADED → OPEN` înainte ca intervalul de resetare să permită o solicitare de testare (`HALF_OPEN`).
+**Cum verificați dacă a funcționat**: rulați agentul/sarcina cron de două ori într-un interval scurt și confirmați că ambele execuții reușesc. Înainte de remediere, a doua execuție generează de obicei `429`/`401`. După remediere, erorile (dacă există) sunt reîncercate transparent, iar apelul se finalizează. De asemenea, puteți utiliza `curl /monitoring/health` și urmări câmpul `rateLimitedUntil` pentru conexiunile furnizorilor și `circuitBreakers.providerBreakers[].state` pentru furnizorii afectați — starea este una dintre `CLOSED`, `DEGRADED`, `OPEN` sau `HALF_OPEN` (consultați `src/shared/utils/circuitBreaker.ts`), iar un furnizor care continuă să eșueze va trece prin `CLOSED → DEGRADED → OPEN` înainte ca intervalul de resetare să permită o solicitare de test (`HALF_OPEN`).
 
-**Dacă întâmpinați în continuare eroarea 429**: contul activ pentru furnizorul respectiv și-a epuizat efectiv _cota_ (nu doar limita de frecvență). Adăugați un al doilea cont pentru același furnizor în panoul de control OmniRoute → Providers → Accounts sau includeți un alt furnizor gratuit (de exemplu, `routeway`, `auggie`). Rotația ajută doar în cazul erorilor tranzitorii de limitare a frecvenței/400/401; epuizarea completă a cotei necesită un al doilea set de acreditări sau un alt furnizor.
+**Dacă încă primiți 429**: contul activ pentru furnizorul respectiv și-a epuizat efectiv _cota_ (nu doar limita de rată). Adăugați un al doilea cont pentru același furnizor în panoul OmniRoute → Providers → Accounts sau includeți un alt furnizor gratuit (de exemplu, `routeway`, `auggie`). Rotația ajută numai în cazul limitărilor tranzitorii ale ratei și al erorilor 400/401; epuizarea completă a cotei necesită o a doua credențială sau un furnizor diferit.
 
-**Dacă întâmpinați eroarea 403 la modelele de viziune (`auto/vision`, `bazaarlink/*`)**: contul conectat nu are un plan plătit care să includă funcționalități de viziune sau cheia API nu are permisiuni suficiente. Verificați în panoul de control al furnizorului dacă domeniul de acces al cheii include funcționalități de viziune/multimodale sau conectați un cont cu abonament plătit și păstrați-l ca țintă pentru funcționalitățile de viziune.
+**Dacă primiți 403 pentru modelele de viziune (`auto/vision`, `bazaarlink/*`)**: contul conectat nu are un plan plătit care include capabilități de viziune sau cheia API nu are permisiuni suficiente. Verificați în panoul furnizorului dacă domeniul de acces al cheii include funcționalități de viziune/multimodale sau conectați un cont cu abonament plătit și păstrați-l drept țintă pentru viziune.
 
 ---
 
@@ -90,33 +90,33 @@ Avertismentele provin din intervale învechite ale dependențelor peer din pache
 
 ---
 
-## Avertisment privind blocarea scripturilor npm install (instalare globală)
+## Avertisment privind blocarea scripturilor de instalare npm (instalare globală)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-La rularea comenzii `npm install -g omniroute`, versiunile npm mai noi (v11+ și v12+) blochează implicit scripturile ciclului de viață al pachetelor și afișează un avertisment privind scripturile de instalare:
+Când rulați `npm install -g omniroute`, versiunile npm mai noi (v11+ și v12+) blochează implicit scripturile ciclului de viață al pachetelor și afișează un avertisment privind scripturile de instalare:
 
 ```
-npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts 7 pachete au avut scripturile de instalare blocate deoarece nu sunt incluse în allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Poate fi ignorat acest avertisment?
 
-**Parțial, însă rularea fără scripturi nu este recomandată.** OmniRoute include mecanisme alternative robuste: dacă bindingurile native `better-sqlite3` nu pot fi încărcate din pachetul autonom, aplicația recurge la drivere alternative precum `node:sqlite` sau `sql.js` (consultați [Rezolvarea SQLite la rulare](../ops/SQLITE_RUNTIME.md)). Serverul va porni în continuare, însă rularea cu soluții alternative WASM precum `sql.js` dezactivează modul WAL (Write-Ahead Logging) al SQLite și mărește consumul de memorie și costul sincronizării pe disc.
+**Parțial, însă rularea fără scripturi nu este recomandată.** OmniRoute include mecanisme alternative robuste: dacă bindingurile native `better-sqlite3` nu pot fi încărcate din pachetul autonom, aplicația recurge la drivere alternative, precum `node:sqlite` sau `sql.js` (consultați [Rezolvarea mediului de execuție SQLite](../ops/SQLITE_RUNTIME.md)). Serverul va porni în continuare, însă rularea cu alternative WASM precum `sql.js` dezactivează modul WAL (Write-Ahead Logging) al SQLite și crește consumul de memorie și costurile de sincronizare cu discul.
 
-### Ce scripturi sunt efectiv necesare?
+### Ce scripturi sunt necesare în mod efectiv?
 
 Nu toate scripturile blocate sunt esențiale pentru rularea OmniRoute:
 
-- **Esențiale (`omniroute`, `better-sqlite3`):** OmniRoute rulează dintr-un pachet autonom al aplicației Next.js (`dist/`). În timpul instalării, npm descarcă sau compilează driverul SQLite nativ specific sistemului gazdă în directorul de nivel superior `node_modules/better-sqlite3/`. Scriptul `postinstall` al OmniRoute (`scripts/build/postinstall.mjs`) verifică și copiază apoi aceste binare specifice sistemului gazdă în `dist/node_modules/`, astfel încât serverul autonom să le poată accesa. Dacă scriptul postinstall al `omniroute` este blocat, acest pas de copiere este omis.
-- **Opționale/tranzitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Acestea sunt utilitare de build, instrumente de monitorizare sau utilitare pentru gestionarea sistemului de chei. Permiterea lor previne avertismentele de build, însă nu sunt necesare pentru funcționalitatea principală de rutare.
-- **Exclus (`onnxruntime-node`):** Este o dependență opțională pentru embeddinguri AI locale și **nu** este necesară pentru rularea OmniRoute. Scriptul său postinstall descarcă aproximativ 300 MB de resurse CUDA de pe NuGet; nu îl includeți în lista de permisiuni decât dacă intenționați în mod explicit să utilizați accelerarea ONNX locală pe hardware compatibil.
+- **Esențiale (`omniroute`, `better-sqlite3`):** OmniRoute rulează dintr-un pachet autonom al aplicației Next.js (`dist/`). În timpul instalării, npm descarcă sau compilează driverul SQLite nativ specific sistemului gazdă în directorul principal `node_modules/better-sqlite3/`. Scriptul `postinstall` al OmniRoute (`scripts/build/postinstall.mjs`) verifică apoi și copiază aceste fișiere binare specifice sistemului gazdă în `dist/node_modules/`, astfel încât serverul autonom să le poată accesa. Dacă scriptul postinstall al `omniroute` este blocat, acest pas de copiere este omis.
+- **Opționale/tranzitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Acestea sunt instrumente auxiliare pentru compilare, instrumente de monitorizare sau utilitare pentru gestionarea acreditărilor sistemului. Permiterea lor previne avertismentele de compilare, însă ele nu sunt necesare pentru funcționalitatea principală de rutare.
+- **Exclus (`onnxruntime-node`):** O dependență opțională pentru embeddinguri AI locale, care **nu** este necesară pentru rularea OmniRoute. Scriptul său postinstall descarcă aproximativ 300 MB de resurse CUDA de pe NuGet; nu îl includeți în lista de permisiuni decât dacă intenționați în mod explicit să utilizați accelerarea ONNX locală pe hardware compatibil.
 
 ### Soluția recomandată
 
-Pentru a permite scripturile de instalare necesare în timpul unei instalări globale și pentru a elimina avertismentele, specificați `--allow-scripts` pentru OmniRoute și dependențele sale native:
+Pentru a permite scripturile de instalare necesare în timpul unei instalări globale și pentru a elimina avertismentele, transmiteți `--allow-scripts` pentru OmniRoute și dependențele sale native:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### Verificați instalarea
 
-După instalare, rulați instrumentul de diagnosticare încorporat pentru a vă asigura că bindingurile native și mediul de rulare funcționează corect:
+După instalare, rulați instrumentul de diagnosticare încorporat pentru a vă asigura că bindingurile native și mediul de execuție funcționează corect:
 
 ```bash
 omniroute doctor

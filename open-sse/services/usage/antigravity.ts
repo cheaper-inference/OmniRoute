@@ -20,7 +20,7 @@ import {
   isUserVisibleAntigravityQuotaModelId,
   toClientAntigravityQuotaModelId,
 } from "../../config/antigravityModelAliases.ts";
-import { isDiscoverableAgyModelId } from "../../config/agyModels.ts";
+import { isUserVisibleAgyQuotaModelId } from "../../config/agyModels.ts";
 import { getDbInstance } from "@/lib/db/core";
 import {
   applyAntigravityClientProfileHeaders,
@@ -662,7 +662,7 @@ export async function getAntigravityUsage(
         !modelKey ||
         info.isInternal === true ||
         !(provider === "agy"
-          ? isDiscoverableAgyModelId(modelKey)
+          ? isUserVisibleAgyQuotaModelId(modelKey)
           : isUserVisibleAntigravityQuotaModelId(modelKey)) ||
         Object.keys(quotaInfo).length === 0
       ) {
@@ -720,7 +720,7 @@ export async function getAntigravityUsage(
       if (
         quotas[modelKey] ||
         !(provider === "agy"
-          ? isDiscoverableAgyModelId(modelKey)
+          ? isUserVisibleAgyQuotaModelId(modelKey)
           : isUserVisibleAntigravityQuotaModelId(modelKey))
       ) {
         continue;

@@ -12,17 +12,17 @@
 
 ## Šta je to
 
-OmniRoute registruje 329 provajdera, uključujući 155 unosa u katalogu označenih kao **besplatno/bez-autentifikacije** (bez-autentifikacije, besplatni nivo OAuth, ili besplatni nivo API ključa — pogledajte [Vodič za besplatne nivoe](../getting-started/FREE-TIERS-GUIDE.md) i kompletan [Direktorijum besplatnih nivoa](../reference/FREE_TIERS.md)). Kvaka je u tome: besplatni provajderi se drastično razlikuju po kvalitetu modela. Provajder bez autentifikacije koji nudi vrhunski model je mnogo korisniji od onog koji nudi mali, zastarjeli model.
+OmniRoute registruje 377 provajdera, uključujući 155 označenih kataloških zapisa**free/no-auth** (no-auth, free-tier OAuth ili free-tier API ključ — pogledajte [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) i puni [direktorij Free Tiers](../reference/FREE_TIERS.md) ). Kvaka: besplatni provajderi se jako razlikuju po kvaliteti modela. Ne-auth provajder koji opslužuje granični model je daleko korisniji od onog koji opslužuje mali naslijeđeni model.
 
-**Rangiranje besplatnih provajdera** odgovara na pitanje "**koji besplatni provajder mi daje najbolji model?**" spajanjem kataloga svakog besplatnog provajdera sa **crowd-sourced rezultatima kvaliteta** sa **Arena AI rang liste** (ELO zasnovan na ljudskim preferencijama, ista ideja iza LMArena chatbot arene). Provajderi se zatim rangiraju prema snazi njihovog **najboljeg besplatnog modela**.
+**Free Provider Rankings** odgovori "** koji besplatni provajder mi daje najbolji model?** " pridruživanjem katalogu svakog besplatnog provajdera sa** ocjene kvaliteta prikupljene od strane publike** od** Arena AI rang lista** (ljudske preferencije ELO, ista ideja iza LMArena chatbot arene). Ponuđači se zatim rangiraju prema njihovoj snazi** najbolji besplatni model** .
 
 Rangiranje se izračunava iz tri stvarna izvora:
 
-1. Liste besplatnih provajdera — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` unosi označeni sa `hasFree` (`src/shared/constants/providers.ts`).
+1. Liste besplatnih dobavljača — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` unosi označeni `hasFree` (`src/shared/constants/providers.ts`).
 2. Katalog modela svakog provajdera iz registra provajdera (`open-sse/config/providerRegistry.ts`).
-3. Rezultati prilagođenosti zadatku izvedeni iz ELO-a, pohranjeni u `model_intelligence` DB tabeli od strane Arena ELO sync engine-a (`src/lib/arenaEloSync.ts`).
+3. Rezultati usklađivanja zadataka izvedeni iz ELO-a pohranjeni u tablici `model_intelligence` DB pomoću mehanizma za sinhronizaciju Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Logika spajanja se nalazi u `src/lib/freeProviderRankings.ts`.
+Logika spajanja živi u `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -100,86 +100,106 @@ Oblik odgovora:
 
 ---
 
-## Kako funkcionira bodovanje
+## Kako rezultati funkcionišu
 
-### Izvor: Arena AI leaderboard
+### Izvor: Arena AI rang lista
 
-Mehanizam za sinkronizaciju Arena ELO (`src/lib/arenaEloSync.ts`) dohvaća dvije tablice s rezultatima — `text` i `code` — s Arena AI leaderboard API-ja (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Svaki unos u tablici s rezultatima sadrži naziv modela, dobavljača, ELO `score`, interval pouzdanosti i broj glasova.
+Arena ELO sync mehanizam (`src/lib/arenaEloSync.ts`) preuzima dvije rang liste — `text`
+i `code` — sa Arena AI leaderboard API-ja
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Kada taj API ne vrati
+upotrebljivu listu, mehanizam se vraća na službeni `lmarena-ai/leaderboard-dataset` na
+Hugging Face datasets-serveru (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` prijavljuje `activeSource`, `lastError` i
+`lastFailedAt`. Svaki unos rang liste
+nosi naziv modela, dobavljača, ELO `score`, interval pouzdanosti i broj glasova.
 
-Kategorije tablice s rezultatima mapiraju se na kategorije zadataka OmniRoute:
+Kategorije rang liste mapiraju se na OmniRoute kategorije zadataka:
 
-| Arena tablica s rezultatima | OmniRoute kategorije zadataka                     |
-| --------------------------- | ------------------------------------------------- |
-| `text`                      | `default`, `review`, `documentation`, `debugging` |
-| `code`                      | `coding`                                          |
+| Arena rang lista | OmniRoute kategorije zadataka                     |
+| ---------------- | ------------------------------------------------- |
+| `text`           | `default`, `review`, `documentation`, `debugging` |
+| `code`           | `coding`                                          |
 
-### Normalizacija (rezultat prilagođenosti zadatku)
+### Normalizacija (rezultat pogodnosti za zadatak)
 
-Sirovi ELO rezultati se normaliziraju po tablici s rezultatima u **vrijednost prilagođenosti zadatku u `[0.4, 0.98]`**:
+Sirovi ELO rezultati normaliziraju se po rang listi u **vrijednost pogodnosti za zadatak u `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Rezultat nikada ne dostiže `0` ili `1`, ostavljajući prostora za korisnička nadjačavanja (overrides). Ovo je `score` polje koje vidite u odgovoru API-ja i oznaka prikazana na kontrolnoj ploči.
+Rezultat nikada ne doseže `0` ili `1`, ostavljajući prostora za korisnička nadjačavanja. Ovo je
+polje `score` koje vidite u odgovoru API-ja i oznaka prikazana na kontrolnoj ploči.
 
 ### Pouzdanost
 
-Svaki unos dobiva razinu pouzdanosti na temelju broja glasova na Areni:
+Svaki unos dobiva nivo pouzdanosti na osnovu broja glasova na Areni:
 
 | Pouzdanost | Glasovi |
 | ---------- | ------- |
-| `high`     | ≥ 5,000 |
-| `medium`   | ≥ 1,000 |
-| `low`      | < 1,000 |
+| `high`     | ≥ 5.000 |
+| `medium`   | ≥ 1.000 |
+| `low`      | < 1.000 |
 
 ### Pohrana i svježina
 
-Normalizirani unosi zapisuju se u `model_intelligence` DB tablicu s `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Unosi **istječu nakon 7 dana**, tako da dobavljač koji prestane sa sinkronizacijom na kraju ispada umjesto da poslužuje zastarjele podatke.
+Normalizirani unosi upisuju se u DB tabelu `model_intelligence` sa
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Unosi **ističu nakon
+7 dana**, pa dobavljač koji prestane sa sinhronizacijom na kraju ispada, umjesto da servira
+zastarjele podatke.
 
-Sinkronizacija je **uključena prema zadanim postavkama**:
+Sinhronizacija se izvršava **po zadanom uključena**:
 
-- Pokreće se jednom pri pokretanju poslužitelja, a zatim na periodičnom tajmeru (`src/lib/arenaEloSync.ts`, povezano iz `src/instrumentation-node.ts`).
-- Ona **ne blokira i nikada nije fatalna** — ako dohvaćanje iz izvora ne uspije, OmniRoute nastavlja raditi, a ljestvice jednostavno prikazuju posljednje dobre podatke (ili prazno stanje).
+- Pokreće se jednom pri pokretanju servera, a zatim na periodični tajmer
+  (`src/lib/arenaEloSync.ts`, povezano iz `src/instrumentation-node.ts`).
+- **Nije blokirajuća i nikada nije fatalna** — ako preuzimanje s udaljenog izvora ne uspije, OmniRoute nastavlja
+  raditi, a rangiranja jednostavno prikazuju posljednje ispravne podatke (ili prazno stanje).
 
-Dvije varijable okruženja je kontroliraju (dokumentirano u [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
+Dvije varijable okruženja to kontroliraju (dokumentirano u
+[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
 | Varijabla                 | Zadano        | Svrha                                                         |
 | ------------------------- | ------------- | ------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Postavite na `false` za isključivanje odlazne sinkronizacije. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Interval sinkronizacije, u sekundama.                         |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Postavite na `false` da odustanete od odlazne sinhronizacije. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Interval sinhronizacije, u sekundama.                         |
 
-### Ručna sinkronizacija / status / brisanje
+### Ručna sinhronizacija / status / brisanje
 
-Za operatere, autentificirana upravljačka krajnja točka (endpoint) izlaže ručnu kontrolu (`src/app/api/intelligence/sync/route.ts` — zahtijeva upravljačku autentifikaciju):
+Za operatere, autentificirani upravljački endpoint izlaže ručnu kontrolu
+(`src/app/api/intelligence/sync/route.ts` — zahtijeva upravljačku autentifikaciju):
 
 ```
-GET    /api/intelligence/sync          # trenutni status sinkronizacije (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # pokretanje ručne sinkronizacije; body: { "dryRun": true } za pregled bez zapisivanja
-DELETE /api/intelligence/sync          # brisanje svih sinkroniziranih arena_elo unosa inteligencije
+GET    /api/intelligence/sync          # current sync status (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # trigger a manual sync; body: { "dryRun": true } to preview without writing
+DELETE /api/intelligence/sync          # clear all synced arena_elo intelligence entries
 ```
 
-Ako je stranica s ljestvicama prazna, ručni `POST /api/intelligence/sync` (ili jednostavno ponovno pokretanje poslužitelja) je ponovno popunjava.
+Ako je stranica s rangiranjima prazna, ručni `POST /api/intelligence/sync` (ili jednostavno
+ponovno pokretanje servera) ponovno je popunjava.
 
-### Usklađivanje modela s tablicom s rezultatima
+### Usparivanje modela s rang listom
 
-ID-ovi modela u registru i nazivi modela na Areni se ne podudaraju uvijek točno. Ljestvica koristi fleksibilno podudaranje (`findMatchingIntelligence` u `src/lib/freeProviderRankings.ts`):
+ID-ovi modela u registru i nazivi modela na Areni ne podudaraju se uvijek tačno. Rangiranje koristi
+fleksibilno usparivanje (`findMatchingIntelligence` u `src/lib/freeProviderRankings.ts`):
 
-1. Točno podudaranje s normaliziranim ID-om modela.
+1. Tačno podudaranje normaliziranog ID-a modela.
 2. Podudaranje nakon uklanjanja završnog sufiksa verzije (npr. `kimi-k2.6` → `kimi-k2`).
-3. Podudaranje prefiksa (naziv modela na tablici s rezultatima je prefiks ID-a registra).
+3. Podudaranje prefiksa (naziv modela s rang liste je prefiks ID-a iz registra).
 
-Na strani sinkronizacije, poznati prefiksi dobavljača (`anthropic/`, `openai/`, `google/`, …) se uklanjaju, a mala mapa aliasa proširuje kanonske nazive u varijante koje OmniRoute koristi interno, tako da modeli ostaju pretraživi pod bilo kojim nazivom.
+Na strani sinhronizacije, poznati prefiksi dobavljača (`anthropic/`, `openai/`, `google/`, …)
+uklanjaju se, a mala mapa alijasa proširuje kanonske nazive u varijante koje OmniRoute koristi
+interno, tako da modeli ostaju pronađivi pod bilo kojim nazivom.
 
 ### Kako se dobavljač rangira
 
 Za svakog besplatnog dobavljača, mehanizam ocjenjuje svaki model u njegovom katalogu, a zatim:
 
-- **Top Model** = model dobavljača s najvišom ocjenom.
-- **Avg Score** = prosječna ocjena svih ocijenjenih modela tog dobavljača.
-- **Models** = koliko je modela dobavljača imalo Arena ocjenu.
+- **Top Model** = model dobavljača s najvišim rezultatom.
+- **Avg Score** = prosječan rezultat svih ocijenjenih modela tog dobavljača.
+- **Models** = koliko modela dobavljača je imalo Arena rezultat.
 
-Dobavljači su sortirani prvo prema **rezultatu top modela**, a zatim prema prosječnom rezultatu. Ovo nagrađuje dobavljača koji nudi barem jedan snažan besplatni model.
+Dobavljači se sortiraju prvo po **rezultatu najboljeg modela**, a zatim po prosječnom rezultatu. Ovo nagrađuje
+dobavljača koji nudi barem jedan jak besplatni model.
 
 ---
 

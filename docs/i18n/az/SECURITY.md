@@ -31,22 +31,12 @@ OmniRoute-da təhlükəsizlik zəifliyi aşkar etsəniz, lütfən, onu məsuliyy
 
 ## LTS dəstək müddəti (v3.9.x)
 
-3.8.59-dan sonrakı versiya **3.9.0**-dır və bu versiya
-`stable/v3` budağında uzunmüddətli dəstək xəttini açır (baxın: [`ROADMAP.md`](ROADMAP.md) → "Mərhələ 3 — v3.9.0 LTS").
+3.8.59-dan sonrakı versiya **3.9.0**-dır və bu versiya `stable/v3` budağında uzunmüddətli dəstək xəttini açır (baxın: [`ROADMAP.md`](ROADMAP.md) → "Mərhələ 3 — v3.9.0 LTS").
 
-- **`stable/v3` nələri qəbul edir:** xəta düzəlişləri, təhlükəsizlik yamaları və provayder yeniləmələri. Yeni
-  funksiyalar v4 kanalına əlavə olunur; LTS xəttində sabitlik prioritetdir. `npm install omniroute`
-  (`latest` dist-teqi) bütün v4 dövrü ərzində v3-də qalır.
-- **Müddətin uzunluğu:** `<T-GAP-3: sahibin qərarı gözlənilir — ROADMAP.md faylına baxın>`. v4.0 GA-dan
-  sonra (`latest` v4-ə keçdikdə) dəstək müddətinin uzunluğu **hələ müəyyən edilməyib**; texniki xidmətçi bunu
-  elan etdikdə bu bölmə yenilənəcək. O vaxta qədər bitmə tarixinin olduğunu güman etməyin.
-- **LTS xəttində zəifliyin bildirilməsi:** digər versiyalarla eyni kanaldan —
-  şəxsi [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) vasitəsilə,
-  heç vaxt ictimai problem kimi deyil. Hansı versiyanı sınaqdan keçirdiyinizi qeyd edin (məsələn, `3.9.2`);
-  düzəlişlər `stable/v3` budağına əlavə olunur və v4-ə irəli daşınır.
-- **LTS keçidi zamanı təhlükəsizlik üzrə baza səviyyəsi:** ölçülmüş skaner vəziyyəti, marşrut qoruyucusu və
-  ictimai etimadnamələrə dair sübutlar
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) sənədində qeyd olunur.
+- **`stable/v3` nələri qəbul edir:** xəta düzəlişləri, təhlükəsizlik yamaqları və provayder yeniləmələri. Yeni funksiyalar v4 kanalına daxil edilir; LTS xəttində sabitlik prioritetdir. `npm install omniroute` (`latest` dist-teqi) bütün v4 dövrü ərzində v3-də qalır.
+- **Dəstək müddəti:** `stable/v3` **3.9.0 buraxılışından sonra 12 ay ərzində və ya v4.0.0 `latest` kimi dərc edildikdən sonrakı 90 gün ərzində — bunlardan hansı daha gec başa çatarsa, həmin tarixədək təhlükəsizlik düzəlişləri və kritik reqressiya düzəlişləri** alır. Nəticədə müəyyən edilən bitmə tarixi 3.9.0 buraxılış qeydlərində və buraxılış həyata keçirildikdə [`ROADMAP.md`](ROADMAP.md) faylında qeyd olunur.
+- **LTS xəttində zəifliyin bildirilməsi:** digər versiyalarda olduğu kimi eyni kanaldan — məxfi [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) vasitəsilə bildirilməli, heç vaxt açıq məsələ yaradılmamalıdır. Hansı versiyanı sınaqdan keçirdiyinizi qeyd edin (məsələn, `3.9.2`); düzəlişlər `stable/v3` budağına daxil edilir və v4-ə ötürülür.
+- **LTS buraxılışı zamanı təhlükəsizlik baza səviyyəsi:** skanerin ölçülmüş vəziyyəti, marşrut qoruyucusu və açıq etimadnamələrə dair sübutlar [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) faylında qeydə alınır.
 
 ---
 

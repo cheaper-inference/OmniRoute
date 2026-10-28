@@ -1,7 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Card, Input, Toggle } from "@/shared/components";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Input from "@/shared/components/Input";
+import Toggle from "@/shared/components/Toggle";
 import ApiKeyFilterChip from "./ApiKeyFilterChip";
 import type { KeyStatus, KeyType, ApiKeyCounts } from "../apiManagerPageUtils";
 
@@ -41,25 +44,25 @@ export default function ApiKeyFilterBar({
     {
       value: "active",
       label: t("filterStatusActive"),
-      dotColor: "bg-green-500",
+      dotColor: "bg-success",
       count: counts.active,
     },
     {
       value: "disabled",
       label: t("filterStatusDisabled"),
-      dotColor: "bg-gray-500",
+      dotColor: "bg-text-muted",
       count: counts.disabled,
     },
     {
       value: "banned",
       label: t("filterStatusBanned"),
-      dotColor: "bg-red-500",
+      dotColor: "bg-error",
       count: counts.banned,
     },
     {
       value: "expired",
       label: t("filterStatusExpired"),
-      dotColor: "bg-amber-500",
+      dotColor: "bg-warning",
       count: counts.expired,
     },
   ];
@@ -74,19 +77,19 @@ export default function ApiKeyFilterBar({
     {
       value: "standard",
       label: t("filterTypeStandard"),
-      dotColor: "bg-slate-500",
+      dotColor: "bg-text-muted",
       count: counts.standard,
     },
     {
       value: "manage",
       label: t("filterTypeManage"),
-      dotColor: "bg-rose-500",
+      dotColor: "bg-error",
       count: counts.manage,
     },
     {
       value: "restricted",
       label: t("filterTypeRestricted"),
-      dotColor: "bg-amber-500",
+      dotColor: "bg-warning",
       count: counts.restricted,
     },
   ];
@@ -106,13 +109,14 @@ export default function ApiKeyFilterBar({
               inputClassName={searchQuery ? "pr-9" : ""}
             />
             {searchQuery && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => onSearchChange("")}
-                className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-text-muted hover:text-text-primary transition-colors"
+                className="absolute inset-y-0 right-1 my-auto text-text-muted"
                 aria-label={tc("clear")}
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
+                icon="close"
+              />
             )}
           </div>
           <Toggle

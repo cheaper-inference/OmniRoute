@@ -123,7 +123,9 @@
       "maxCostOpt": "പ്രതിദിന പരമാവധി ചെലവ് (USD)",
       "allowedModelsOpt": "അനുവദിച്ച മോഡലുകളുടെ കോമ ഉപയോഗിച്ച് വേർതിരിച്ച പട്ടിക",
       "nothingToSet": "നയ ഫീൽഡുകളൊന്നും നൽകിയിട്ടില്ല. --rate-limit, --max-cost, അല്ലെങ്കിൽ --allowed-models ഉപയോഗിക്കുക.",
-      "updated": "നയം അപ്ഡേറ്റ് ചെയ്തു."
+      "updated": "നയം അപ്ഡേറ്റ് ചെയ്തു.",
+      "modelAccessModeOpt": "മോഡൽ ആക്സസ് മോഡ് (all | restricted)",
+      "unrestrictedOpt": "എല്ലാ മോഡലുകളും അനുവദിക്കുക (--model-access-mode all)"
     },
     "expiration": {
       "title": "കീ കാലഹരണപ്പെടൽ",

@@ -123,7 +123,9 @@
       "maxCostOpt": "עלות מרבית ליום (USD)",
       "allowedModelsOpt": "רשימה מופרדת בפסיקים של מודלים מורשים",
       "nothingToSet": "לא סופקו שדות מדיניות. השתמשו ב---rate-limit, ב---max-cost או ב---allowed-models.",
-      "updated": "המדיניות עודכנה."
+      "updated": "המדיניות עודכנה.",
+      "modelAccessModeOpt": "מצב גישה למודלים (all | restricted)",
+      "unrestrictedOpt": "אפשר את כל המודלים (--model-access-mode all)"
     },
     "expiration": {
       "title": "תפוגת מפתח",

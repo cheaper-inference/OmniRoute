@@ -8,14 +8,14 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Entwicklungsumgebung
+## Entwicklungsumgebung einrichten
 
 ### Voraussetzungen
 
-- **Node.js** `>=22.22.3 <23` oder `>=24.0.0 <27` (empfohlen: 24 LTS)
+- **Node.js** `>=22.22.2 <23` oder `>=24.0.0 <27` (empfohlen: 24 LTS)
 - **npm** 10+
 
-> **Benutzer von npm v11+ (Node 24+):** Überprüfen Sie nach `npm install`, ob die nativen Module installiert wurden:
+> **Nutzer von npm v11+ (Node 24+):** Überprüfen Sie nach `npm install`, ob native Module installiert wurden:
 > `node -e "require('better-sqlite3')"`. Falls der Befehl mit `MODULE_NOT_FOUND` fehlschlägt,
 > führen Sie `npm approve-scripts better-sqlite3 && npm install` aus. Siehe
 > [Fehlerbehebung](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -33,23 +33,23 @@ npm install
 ### Umgebungsvariablen
 
 ```bash
-# Erstellen Sie Ihre .env aus der Vorlage
+# Erstellen Sie Ihre .env anhand der Vorlage
 cp .env.example .env
 
-# Erforderliche Geheimnisse generieren
+# Erforderliche Secrets generieren
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Wichtige Variablen für die Entwicklung:
 
-| Variable               | Entwicklungsstandardwert | Beschreibung                              |
-| ---------------------- | ------------------------ | ----------------------------------------- |
-| `PORT`                 | `20128`                  | Server-Port                               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis-URL für das Frontend                |
-| `JWT_SECRET`           | (oben generieren)        | Geheimnis für JWT-Signaturen              |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Passwort für die erste Anmeldung          |
-| `APP_LOG_LEVEL`        | `info`                   | Ausführlichkeitsstufe der Protokollierung |
+| Variable               | Entwicklungsstandardwert | Beschreibung                             |
+| ---------------------- | ------------------------ | ---------------------------------------- |
+| `PORT`                 | `20128`                  | Server-Port                              |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis-URL für das Frontend               |
+| `JWT_SECRET`           | (oben generieren)        | Secret zum Signieren von JWTs            |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Passwort für die erste Anmeldung         |
+| `APP_LOG_LEVEL`        | `info`                   | Ausführlichkeitsgrad der Protokollierung |
 
 ### Dashboard-Einstellungen
 
@@ -60,7 +60,7 @@ Das Dashboard bietet UI-Umschalter für Funktionen, die auch über Umgebungsvari
 | Einstellungen → Erweitert | Debug-Modus                   | Debug-Protokolle für Anfragen aktivieren (UI) |
 | Einstellungen → Allgemein | Sichtbarkeit der Seitenleiste | Bereiche der Seitenleiste ein-/ausblenden     |
 
-Diese Einstellungen werden in der Datenbank gespeichert, bleiben über Neustarts hinweg erhalten und überschreiben nach ihrer Festlegung die Standardwerte der Umgebungsvariablen.
+Diese Einstellungen werden in der Datenbank gespeichert, bleiben über Neustarts hinweg erhalten und überschreiben die Standardwerte der Umgebungsvariablen, sobald sie festgelegt wurden.
 
 ### Lokal ausführen
 
@@ -72,21 +72,19 @@ npm run dev
 npm run build    # next build → .build/next/, dann assembleStandalone → dist/
 npm run start
 
-# Schnelle reine Backend-/API-Kompilierung für Änderungen von Mitwirkenden
+# Schnelles Kompilieren nur des Backends/der API für Änderungen von Mitwirkenden
 npm run build:contributor
 
-# Release-Build (vollständiger Neuaufbau + HEAD-Sentinel — für die Bereitstellung erforderlich)
+# Release-Build (vollständiger Neuaufbau + HEAD-Kennmarke — für die Bereitstellung erforderlich)
 npm run build:release   # rm -rf .build dist && Build + schreibt dist/BUILD_SHA
 
 # Übliche Port-Konfiguration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Der Contributor-Build führt ausschließlich eine Kompilierungsvalidierung durch: Er erstellt weder die eigenständige
-Distribution noch optionale native Paketierungsartefakte. Verwenden Sie den regulären Produktions-Build, wenn
-Sie das auslieferbare Bundle validieren müssen.
+Der Contributor-Build führt ausschließlich eine Validierung durch Kompilierung aus: Er erstellt weder die eigenständige Distribution noch optionale native Paketierungsressourcen. Verwenden Sie den regulären Produktions-Build, wenn Sie das auslieferbare Bundle validieren müssen.
 
-### Struktur der Build-Ausgabe
+### Verzeichnisstruktur der Build-Ausgabe
 
 | Verzeichnis | Inhalt                                                                                     | Versioniert |
 | ----------- | ------------------------------------------------------------------------------------------ | ----------- |
@@ -99,21 +97,21 @@ Die Build-Pipeline besteht aus einem einzigen Durchlauf:
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js-Ausgabe)
-  └─ assembleStandalone()                 (kopiert Standalone-Dateien + statische Dateien + öffentliche Dateien + native Assets)
-       └─ Ausgabe: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (kopiert Standalone-, statische, öffentliche und native Ressourcen)
+       └─ Ausgabe: dist/                  (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` bereinigt zunächst zusätzlich beide Verzeichnisse und schreibt
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als Integritäts-Sentinel für die Bereitstellung.
+`npm run build:release` bereinigt zusätzlich zuerst beide Verzeichnisse und schreibt
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als Integritätskennmarke für die Bereitstellung.
 
-`npm run build:contributor` verwendet das reine Backend-Build-Profil. Während des Builds werden
-Dashboard-UI-Dateien vorübergehend durch Stubs ersetzt, API-Routen-Handler beibehalten und die Originaldateien
-nach dem Build wiederhergestellt. Verwenden Sie `npm run build` für Änderungen an der Dashboard-UI oder für eine
-vollständige Release-Validierung; das Contributor-Profil ist kein Ersatz für den Release-Build.
+`npm run build:contributor` verwendet das reine Backend-Build-Profil. Während des Builds ersetzt es vorübergehend
+Dashboard-UI-Dateien durch Platzhalter, behält API-Routen-Handler bei und stellt nach dem Build die ursprünglichen Dateien
+wieder her. Verwenden Sie `npm run build` für Änderungen, die sich auf die Dashboard-UI auswirken, oder für eine vollständige
+Release-Validierung; das Contributor-Profil ist kein Ersatz für den Release-Build.
 
-> **Hinweis zur VPS-Bereitstellung:** Das Remote-Image-Verzeichnis `/usr/lib/node_modules/omniroute/app/`
-> bleibt unverändert. Die Bereitstellungs-Skills synchronisieren den Inhalt von `dist/` per rsync dorthin.
-> Nur der Pfad der Build-Ausgabe im Repository wurde geändert (`app/` → `dist/`).
+> **Hinweis zur VPS-Bereitstellung:** Das entfernte Image-Verzeichnis `/usr/lib/node_modules/omniroute/app/`
+> bleibt unverändert. Die Deployment-Skills synchronisieren den Inhalt von `dist/` per rsync dorthin.
+> Nur der Build-Ausgabepfad innerhalb des Repositorys wurde verschoben (`app/` → `dist/`).
 
 Standard-URLs:
 
@@ -173,15 +171,15 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 # Alle Tests (Unit + Vitest + Ökosystem + E2E)
 npm run test:all
 
-# Einzelne Testdatei (nativer Test-Runner von Node.js — die meisten Tests verwenden diesen)
+# Einzelne Testdatei (nativer Node.js-Test-Runner — die meisten Tests verwenden diesen)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Nur die von deiner Änderung betroffenen Unit-Tests (derselbe TIA-Selektor wie beim CI-Gate, #8084)
+# Nur die von Ihrer Änderung betroffenen Unit-Tests (derselbe TIA-Selektor wie im CI-Gate, #8084)
 npm run test:scoped            # Änderungen im letzten Commit (oder im Arbeitsverzeichnis)
-npm run test:scoped:staged     # nur bereitgestellte Änderungen — eignet sich gut für einen Pre-Commit-Lauf
+npm run test:scoped:staged     # nur vorgemerkte Änderungen — gut für einen Pre-Commit-Lauf geeignet
 npm run test:scoped:full       # zuerst die Import-Graph-Zuordnung neu erstellen (nach dem Hinzufügen/Verschieben von Dateien)
-# Exit 1 + „run the full suite“ bedeutet, dass eine Hub-Datei (tsconfig, package.json, …) oder eine
-# nicht zugeordnete Quelldatei geändert wurde — der Selektor schlägt sicher fehl und überspringt niemals unbemerkt Tests.
+# Exit 1 + „vollständige Suite ausführen“ bedeutet, dass eine zentrale Datei (tsconfig, package.json, …) oder eine
+# nicht zugeordnete Quelldatei geändert wurde — der Selektor bricht sicher ab und überspringt niemals unbemerkt Tests.
 
 # Vitest (MCP-Server, autoCombo, Cache)
 npm run test:vitest
@@ -203,43 +201,44 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Durch Gate geschützter Combo-Smoke-Test mit echten Upstream-Diensten (erfordert VPS-Zugriff + Guthaben bei echten Anbietern)
-# Greift auf ECHTE Anbieter zu — verursacht geringe Kosten. Wird NIEMALS in CI ausgeführt. Wird ohne Gate ordnungsgemäß übersprungen.
-# Erforderlich: Zugriff per ssh root@192.168.0.15 (bezieht einen schreibgeschützten DB-Snapshot vom VPS).
+# Abgesicherter Combo-Smoke-Test mit echten Upstream-Diensten (erfordert VPS-Zugriff und echtes Provider-Guthaben)
+# Greift auf ECHTE Provider zu — verursacht geringe Kosten. Wird NIEMALS in CI ausgeführt. Wird ohne aktiviertes Gate sauber übersprungen.
+# Erfordert: Zugriff per ssh root@192.168.0.15 (bezieht einen schreibgeschützten DB-Snapshot vom VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Live-Smoke-Test für den Phase-3-VPS — reine Node-ESM-Skripte, die direkt auf den Live-Server .15 zugreifen.
-# Erfordert: Zugriff per ssh root@192.168.0.15 (Combos werden per SSH sqlite erstellt/entfernt).
-# Greift auf ECHTE Anbieter zu (geringe Kosten). Erstellt/löscht ausschließlich __live_test__*-Combos. Wird NIEMALS in CI ausgeführt.
-# REQUIRE_API_KEY=false auf .15, daher ist kein API-Schlüssel erforderlich; COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY werden jedoch berücksichtigt, falls gesetzt.
+# Phase-3-Live-Smoke-Test auf dem VPS — einfache Node-ESM-Skripte, die direkt auf den Live-Server .15 zugreifen.
+# Erfordert: Zugriff per ssh root@192.168.0.15 (Combos werden über SSH und sqlite erstellt/entfernt).
+# Greift auf ECHTE Provider zu (geringe Kosten). Erstellt/löscht nur __live_test__*-Combos. Wird NIEMALS in CI ausgeführt.
+# REQUIRE_API_KEY=false auf .15, daher ist kein API-Schlüssel erforderlich; COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY werden jedoch berücksichtigt, wenn sie gesetzt sind.
 npm run test:combo:live:vps              # 7 HTTP-Szenarien (Priorität/Round-Robin/gewichtet/Kosten/Fusion/automatisch + Zustand)
-npm run test:combo:live:vps:failover     # fügt ein echtes anbieterübergreifendes Failover-Szenario hinzu (insgesamt 8)
+npm run test:combo:live:vps:failover     # fügt ein echtes providerübergreifendes Failover-Szenario hinzu (insgesamt 8)
 ```
 
-Hinweise zur Testabdeckung:
+Hinweise zur Coverage:
 
-- `npm run test:coverage` misst die Quellcodeabdeckung für die Haupt-Unit-Test-Suite, schließt `tests/**` aus und umfasst `open-sse/**`
-- Pull Requests müssen das Coverage-Gate bei **60 %+** für Anweisungen/Zeilen/Funktionen/Verzweigungen halten
+- `npm run test:coverage` misst die Quellcode-Coverage für die primäre Unit-Test-Suite, schließt `tests/**` aus und bezieht `open-sse/**` ein
+- Pull Requests müssen das Coverage-Gate bei **60 % oder mehr** für Anweisungen/Zeilen/Funktionen/Verzweigungen halten
 - Wenn ein PR Produktionscode in `src/`, `open-sse/`, `electron/` oder `bin/` ändert, müssen im selben PR automatisierte Tests hinzugefügt oder aktualisiert werden
 - `npm run coverage:report` gibt den detaillierten Bericht für jede einzelne Datei aus dem letzten Coverage-Lauf aus
 - `npm run test:coverage:legacy` behält die ältere Metrik für historische Vergleiche bei
-- Siehe `docs/ops/COVERAGE_PLAN.md` für den phasenweisen Plan zur Verbesserung der Testabdeckung
+- Siehe `docs/ops/COVERAGE_PLAN.md` für den schrittweisen Plan zur Verbesserung der Coverage
 
 ### Anforderungen an Pull Requests
 
-Verwende vor dem Öffnen eines PR den
-[Golden Path für Beiträge](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), um die fokussierte Schleife für
-deine Änderungen auszuführen. Die vollständige Unit-Test-Suite (4 CI-Shards), Vitest, das Coverage-Gate von **60 %+** und
-der Produktions-Build liegen in der Verantwortung von CI — sie lokal auszuführen, liefert keine zusätzlichen Erkenntnisse,
-die dir die PR-Prüfungen nicht ohnehin liefern würden, und kann auf kleineren Rechnern den Host überlasten (#8084):
+Verwenden Sie vor dem Öffnen eines PR den
+[bewährten Beitragsablauf](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), um die fokussierte Schleife für
+Ihre Änderungen auszuführen. Die vollständige Unit-Test-Suite (4 CI-Shards), Vitest, das Coverage-Gate von **60 % oder mehr** und
+der Produktions-Build liegen in der Verantwortung von CI — ihre lokale Ausführung liefert keine zusätzlichen Erkenntnisse, die nicht bereits durch die PR-Prüfungen
+bereitgestellt werden, und kann auf kleineren Rechnern den Host überlasten (#8084):
 
-- Führe die Testdateien aus, die deine Änderung abdecken: `node --import tsx/esm --test tests/unit/<file>.test.ts`
-- Führe `npm run lint` aus
-- Füge im selben PR automatisierte Tests hinzu oder aktualisiere sie, wenn Produktionscode geändert wird
-- Nenne die geänderten oder hinzugefügten Testdateien in der PR-Beschreibung, wenn Produktionscode geändert wurde
-- Prüfe das SonarQube-Ergebnis im PR, wenn die Projekt-Secrets in CI konfiguriert sind
+- Führen Sie die Testdateien aus, die Ihre Änderung abdecken: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Führen Sie `npm run lint` aus
+- Fügen Sie im selben PR automatisierte Tests hinzu oder aktualisieren Sie diese, wenn Produktionscode geändert wird
+- Platzieren Sie in `node:test`-Dateien jedes `await` auf oberster Ebene (wie `await import(...)`) vor dem ersten `test()` / `describe()`: Unter `--test-force-exit` können danach registrierte Tests unbemerkt überhaupt nicht ausgeführt werden (#18045; erzwungen durch `npm run check:test-tla-order`)
+- Führen Sie die geänderten oder hinzugefügten Testdateien in der PR-Beschreibung auf, wenn Produktionscode geändert wurde
+- Prüfen Sie das SonarQube-Ergebnis für den PR, wenn die Projekt-Secrets in CI konfiguriert sind
 
-Aktueller Teststatus: **122 Unit-Test-Dateien** mit Abdeckung für:
+Aktueller Teststatus: **122 Unit-Testdateien** für:
 
 - Provider-Übersetzer und Formatkonvertierung
 - Ratenbegrenzung, Circuit Breaker und Resilienz
@@ -288,65 +287,72 @@ Anwendungsbeispiele findest du unter `open-sse/utils/stream.ts` und `open-sse/ut
 
 ---
 
-## Project Structure
+## Projektstruktur
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Dashboard-Seiten (23 Abschnitte)
+│   ├── api/                # API-Routen (51 Verzeichnisse)
+│   └── login/              # Authentifizierungsseiten (.tsx)
+├── domain/                 # Richtlinien-Engine (policyEngine, comboResolver, costRules usw.)
+├── lib/                    # Zentrale Geschäftslogik (.ts)
+│   ├── a2a/                # Server für das Agent-to-Agent-v0.3-Protokoll
+│   ├── acp/                # Registry für das Agent Communication Protocol
+│   ├── compliance/         # Engine für Compliance-Richtlinien
+│   ├── db/                 # SQLite-Domänenmodule + 130 Migrationen
+│   ├── memory/             # Persistenter Konversationsspeicher
+│   ├── oauth/              # OAuth-Anbieter, -Dienste und -Hilfsprogramme
+│   ├── skills/             # Erweiterbares Skill-Framework
+│   ├── usage/              # Nutzungsverfolgung und Kostenberechnung
+│   └── localDb.ts          # Nur Reexport-Schicht — hier niemals Logik hinzufügen
+├── middleware/              # Anfrage-Middleware (promptInjectionGuard)
+├── mitm/                   # MITM-Proxy (Zertifikate, DNS, Ziel-Routing)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React-Komponenten (.tsx)
+│   ├── constants/          # Anbieterdefinitionen (329), MCP-Berechtigungsbereiche, 20 Routing-Strategien
+│   ├── utils/              # Circuit Breaker, Bereinigung, Authentifizierungshilfen
+│   └── validation/         # Zod-v4-Schemas
+└── sse/                    # SSE-Proxy-Pipeline
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse-Workspace
+├── executors/              # 150 Executor-Module (Executor-Klassen + anbieterspezifische Hilfsfunktionen)
+├── handlers/               # 11 Anfrage-Handler (Chat, Antworten, Einbettungen, Bilder usw.)
+├── mcp-server/             # MCP-Server (110 eindeutige Tools, 3 Transporte, 33 Berechtigungsbereiche)
+├── services/               # 178 Dienste der obersten Ebene (combo, autoCombo, rateLimitManager usw.)
+├── translator/             # Formatübersetzer (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses-API-Transformer
+└── utils/                  # 22 Hilfsprogrammmodule (Streams, TLS, Proxy, Protokollierung)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Plattformübergreifende Electron-Desktop-App
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js-Test-Runner (1.574 Testdateien)
+├── integration/            # Integrationstests
+├── e2e/                    # Playwright-Tests
+├── security/               # Sicherheitstests
+├── translator/             # Übersetzerspezifische Tests
+└── load/                   # Lasttests
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Aufzeichnungen zu Architekturentscheidungen
+├── architecture/            # Systemarchitektur und Resilienz
+├── comparison/              # OmniRoute im Vergleich zu Alternativen
+├── compression/             # Komprimierungsleitfäden und -regeln
+├── dev/                     # Entwicklungsleitfäden
+├── diagrams/                # Architekturdiagramme
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Benutzerhandbuch, Docker, Einrichtung, Fehlerbehebung
+├── i18n/                    # Internationalisierte README-Übersetzungen
+├── marketing/               # Marketingmaterialien
+├── ops/                     # Bereitstellung, Proxy, Abdeckung, Releases
+├── providers/               # Anbieterspezifische Dokumentation
+├── reference/               # API-Referenz, Umgebungsvariablen, CLI-Tools, kostenlose Kontingente
+├── releases/                # Versionshinweise
+├── routing/                 # Auto-Combo-Engine, Wiedergabe von Schlussfolgerungen
+├── screenshots/             # Dashboard-Screenshots
+├── security/                # Schutzmechanismen, Compliance, Tarnung, Tokens
+└── specs/                   # Designspezifikationen
 ```
 
 ---
@@ -406,9 +412,13 @@ Unit-Tests in `tests/unit/` schreiben, die mindestens Folgendes abdecken:
 
 ---
 
-## Releasing
+## Veröffentlichung
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Veröffentlichungen werden über den Workflow `/generate-release` verwaltet. Wenn ein neues GitHub Release erstellt wird, wird das Paket über GitHub Actions **automatisch auf npm veröffentlicht**.
+
+Verwenden Sie für VPS-Deployments `npm run build:release` (nicht `npm run build`) — dieser Befehl führt einen sauberen
+Neuaufbau durch, stellt das Bundle in `dist/` zusammen und schreibt die Sentinel-Datei `dist/BUILD_SHA`.
+Verwenden Sie anschließend die Skills `/deploy-vps-*-cc`, die `dist/` per rsync mit dem Remote-Verzeichnis `app/` synchronisieren.
 
 ---
 

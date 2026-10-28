@@ -13,7 +13,7 @@ coverage, and reconciliation steps.
 
 ### Prerequisites
 
-- **Node.js** `>=22.22.3 <23`, or `>=24.0.0 <27` (recommended: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, or `>=24.0.0 <27` (recommended: 24 LTS)
 - **npm** 10+
 
 > **npm v11+ users (Node 24+):** After `npm install`, verify native modules were installed:
@@ -237,6 +237,7 @@ checks will not already give you, and on smaller machines it can saturate the ho
 - Run the test files that cover your change: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Run `npm run lint`
 - Include or update automated tests in the same PR whenever production code changes
+- In `node:test` files, put every top-level `await` (such as `await import(...)`) before the first `test()` / `describe()`: under `--test-force-exit`, tests registered after it can silently never run (#18045; enforced by `npm run check:test-tla-order`)
 - Include the changed or added test files in the PR description when production code changed
 - Check the SonarQube result on the PR when the project secrets are configured in CI
 
@@ -312,13 +313,13 @@ src/                        # TypeScript (.ts / .tsx)
 ├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
 │   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, 19 routing strategies
+│   ├── constants/          # Provider definitions (329), MCP scopes, 20 routing strategies
 │   ├── utils/              # Circuit breaker, sanitizer, auth helpers
 │   └── validation/         # Zod v4 schemas
 └── sse/                    # SSE proxy pipeline
 
 open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
 ├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
 ├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
 ├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)

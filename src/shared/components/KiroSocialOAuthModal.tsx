@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "./Icon";
 import Modal from "./Modal";
 import Button from "./Button";
 import { copyToClipboard } from "@/shared/utils/clipboard";
@@ -150,9 +151,7 @@ export default function KiroSocialOAuthModal({
         {step === "loading" && (
           <div className="text-center py-6">
             <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-primary animate-spin">
-                progress_activity
-              </span>
+              <Icon name="progress_activity" size={30} className="text-primary animate-spin" />
             </div>
             <h3 className="text-lg font-semibold mb-2">{t("initializing")}</h3>
             <p className="text-sm text-text-muted">{t("settingUp", { providerName })}</p>
@@ -162,9 +161,7 @@ export default function KiroSocialOAuthModal({
         {step === "polling" && (
           <div className="text-center py-6">
             <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-primary animate-pulse">
-                open_in_browser
-              </span>
+              <Icon name="open_in_browser" size={30} className="text-primary animate-pulse" />
             </div>
             <h3 className="text-lg font-semibold mb-2">{t("openIncognito")}</h3>
             <p className="text-sm text-text-muted mb-3">{t("incognitoDescription")}</p>
@@ -179,13 +176,16 @@ export default function KiroSocialOAuthModal({
                   >
                     {authUrl.length > 80 ? authUrl.slice(0, 80) + "..." : authUrl}
                   </a>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => copyToClipboard(authUrl)}
-                    className="shrink-0 p-1 rounded hover:bg-sidebar"
+                    className="shrink-0"
                     title={t("copyLink")}
+                    aria-label={t("copyLink")}
                   >
-                    <span className="material-symbols-outlined text-base">content_copy</span>
-                  </button>
+                    <Icon name="content_copy" size={16} />
+                  </Button>
                 </div>
               </div>
             )}
@@ -196,9 +196,7 @@ export default function KiroSocialOAuthModal({
               </div>
             )}
             <div className="flex items-center justify-center gap-2 text-sm text-text-muted">
-              <span className="material-symbols-outlined text-base animate-spin">
-                progress_activity
-              </span>
+              <Icon name="progress_activity" size={16} className="animate-spin" />
               {t("waiting")}
             </div>
             <div className="mt-6">
@@ -211,10 +209,8 @@ export default function KiroSocialOAuthModal({
 
         {step === "success" && (
           <div className="text-center py-6">
-            <div className="size-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-green-600">
-                check_circle
-              </span>
+            <div className="size-16 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
+              <Icon name="check_circle" size={30} className="text-success" />
             </div>
             <h3 className="text-lg font-semibold mb-2">{t("successTitle")}</h3>
             <p className="text-sm text-text-muted mb-4">
@@ -228,11 +224,11 @@ export default function KiroSocialOAuthModal({
 
         {step === "error" && (
           <div className="text-center py-6">
-            <div className="size-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-red-600">error</span>
+            <div className="size-16 mx-auto mb-4 rounded-full bg-error/10 flex items-center justify-center">
+              <Icon name="error" size={30} className="text-error" />
             </div>
             <h3 className="text-lg font-semibold mb-2">{t("errorTitle")}</h3>
-            <p className="text-sm text-red-600 mb-4">{error}</p>
+            <p className="text-sm text-error mb-4">{error}</p>
             <div className="flex gap-2">
               <Button onClick={handleClose} variant="ghost" fullWidth>
                 {t("close")}

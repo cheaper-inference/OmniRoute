@@ -111,11 +111,11 @@ E2E matrisini herhangi bir etiket olmadan otomatik olarak atlar.
 
 ## Ayrıntılı Kontrol Listesi
 
-### Sürüm öncesi
+### Sürüm Öncesi
 
-- [ ] Bu sürümü hedefleyen tüm PR'lar `release/vX.Y.0` dalına birleştirildi
-- [ ] Bu sürüm için açık olan tüm Linear/issue öğeleri kapatıldı veya sonraki kilometre taşına taşındı
-- [ ] `release/vX.Y.0` dalında CI yeşil
+- [ ] Bu sürümü hedefleyen tüm PR'lar `release/vX.Y.0` dalıyla birleştirildi
+- [ ] Bu sürüm için açık olan tüm Linear/sorun öğeleri kapatıldı veya bir sonraki kilometre taşına taşındı
+- [ ] `release/vX.Y.0` dalında CI başarılı
 - [ ] Kodda `TODO(release)` işaretçisi yok: `grep -r "TODO(release)" src/ open-sse/`
 - [ ] Docker temel imajı güncel (şu anda `node:24.15.0-trixie-slim`)
 
@@ -125,9 +125,9 @@ E2E matrisini herhangi bir etiket olmadan otomatik olarak atlar.
   - `package.json`, `electron/package.json` sürümlerini yükseltir
   - Son etiketten bu yana yapılan git commit'lerinden `CHANGELOG.md` dosyasını yeniden oluşturur
   - README.md rozetlerini günceller
-- [ ] CHANGELOG.md dosyasını elle gözden geçirin ve gerekirse commit mesajlarını temizleyin
+- [ ] CHANGELOG.md dosyasını elle inceleyin ve gerekirse commit mesajlarını düzenleyin
 - [ ] `CHANGELOG.md` içindeki en son semver bölümünün `package.json` sürümüne eşit olduğundan emin olun
-- [ ] Yaklaşan çalışmalar için `## [Unreleased]` bölümünü değişiklik günlüğünün ilk bölümü olarak tutun
+- [ ] Gelecekteki çalışmalar için `## [Unreleased]` bölümünü değişiklik günlüğünün ilk bölümü olarak tutun
 - [ ] `docs/openapi.yaml` dosyasını güncelleyin → `info.version`, `package.json` sürümüne eşit olmalıdır
 
 ### Kod Kalitesi
@@ -135,106 +135,106 @@ E2E matrisini herhangi bir etiket olmadan otomatik olarak atlar.
 - [ ] `npm run lint` — 0 hata (uyarılar önceden mevcuttur)
 - [ ] `npm run typecheck:core` — temiz
 - [ ] `npm run typecheck:noimplicit:core` — temiz (katı)
-- [ ] `npm run check:cycles` — döngüsel bağımlılık yok
-- [ ] `npm run check:any-budget:t11` — bütçe dahilinde
+- [ ] `npm run check:cycles:ratchet` — sabitlenmiş `metrics.cycles` üst sınırı içinde (`check:cycles` tek başına herhangi bir döngüde 1 koduyla çıkar, #15281)
+- [ ] `npm run check:any-budget:t11` — bütçe içinde
 - [ ] `npm run check:route-validation:t06` — temiz
-- [ ] `npm run check:node-runtime` — desteklenen asgari çalışma zamanı karşılanıyor (`>=22.22.2 <23`, `>=24.0.0 <27`; `src/shared/utils/nodeRuntimeSupport.ts` içindeki `SUPPORTED_NODE_RANGE` uyarınca; `package.json` içindeki `engines` ile uyumlu)
+- [ ] `npm run check:node-runtime` — desteklenen çalışma zamanı alt sınırı karşılanıyor (`>=22.22.2 <23`, `>=24.0.0 <27`; `src/shared/utils/nodeRuntimeSupport.ts` içindeki `SUPPORTED_NODE_RANGE` uyarınca; `package.json` içindeki `engines` ile uyumlu)
 
 ### Test
 
 - [ ] `npm run test:unit` — başarılı
 - [ ] `npm run test:vitest` — başarılı (MCP sunucusu, autoCombo, önbellek)
-- [ ] `npm run test:coverage` — 60/60/60/60 eşiği karşılanıyor (ifadeler/satırlar/fonksiyonlar/dallar)
-- [ ] `npm run test:integration` — başarılı (değişiklikler DB'ye / işleyicilere dokunuyorsa)
-- [ ] `npm run test:combo:matrix` — başarılı (combo stratejisi matrisi: 19 genel yönlendirme stratejisinin tamamının seçim kararlarını belirlenimci biçimde kanıtlar; combo yönlendirmesine, strateji çözümlemesine veya geri dönüş mantığına dokunulduğunda çalıştırın)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **isteğe bağlı/elle** (kapılı gerçek üst sağlayıcı duman testi; VPS `root@192.168.0.15` üzerinden salt okunur bir DB anlık görüntüsü alır; gerçek sağlayıcılara istek gönderir, kredi harcar; CI'da asla çalışmaz; kapı olmadan sorunsuzca atlanır)
-- [ ] `npm run test:combo:live:vps` — **isteğe bağlı/elle** (3. Aşama VPS canlı duman testi: düz Node ESM aracılığıyla canlı `.15` sunucusuna karşı 7 HTTP senaryosu; `ssh root@192.168.0.15` gerektirir; yalnızca `__live_test__*` combo'larını oluşturur/siler; gerçek sağlayıcılara istek gönderir; CI'da asla çalışmaz)
+- [ ] `npm run test:coverage` — 60/60/60/60 eşiği karşılandı (ifadeler/satırlar/fonksiyonlar/dallar)
+- [ ] `npm run test:integration` — başarılı (değişiklikler DB / işleyicilere dokunuyorsa)
+- [ ] `npm run test:combo:matrix` — başarılı (combo stratejisi matrisi: herkese açık 19 yönlendirme stratejisinin seçim kararlarını deterministik olarak kanıtlar; combo yönlendirmesi, strateji çözümleme veya geri dönüş mantığı değiştirildiğinde çalıştırın)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **isteğe bağlı/elle** (geçitli gerçek üst sistem duman testi; VPS `root@192.168.0.15` üzerinden salt okunur bir DB anlık görüntüsü alır; gerçek sağlayıcılara istek gönderir ve kredi harcar; CI'da hiçbir zaman çalışmaz; geçit olmadan düzgün biçimde atlanır)
+- [ ] `npm run test:combo:live:vps` — **isteğe bağlı/elle** (Aşama-3 VPS canlı duman testi: düz Node ESM aracılığıyla canlı `.15` sunucusuna karşı 7 HTTP senaryosu; `ssh root@192.168.0.15` gerektirir; yalnızca `__live_test__*` combo'larını oluşturur/siler; gerçek sağlayıcılara istek gönderir; CI'da hiçbir zaman çalışmaz)
 - [ ] `npm run test:e2e` — başarılı (UI değişiklikleri)
 - [ ] `npm run test:protocols:e2e` — başarılı (MCP/A2A değişiklikleri)
 - [ ] `npm run test:ecosystem` — başarılı
 
-### Hook'lar (Husky ile doğrulanır)
+### Hook'lar (Husky ile Doğrulandı)
 
 Husky hook'ları `.husky/` içinde bulunur ve git işlemlerinde otomatik olarak çalışır.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** hızlı belirlenimci kontroller — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 tarihinde etkinleştirildi). `test:unit` kasıtlı olarak hariç tutulur (yavaştır; CI `test-unit` işi tarafından kapsanır).
+- **pre-push:** hızlı deterministik geçitler — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (2026-06-13 tarihinde etkinleştirildi). `test:unit` kasıtlı olarak hariç tutulur (yavaş; CI `test-unit` işi tarafından kapsanır).
   - Sürüm dallarını göndermeden önce `npm run test:unit` komutunu elle çalıştırın.
 
-Bir hook başarısız olursa: temel sorunu düzeltin, `--no-verify` ile atlamayın.
+Bir hook başarısız olursa temel sorunu düzeltin; `--no-verify` ile atlamayın.
 
 ### Conventional Commits
 
-Sürüme dahil edilecek tüm commit'ler `type(scope): subject` biçimini izlemelidir.
+Sürüme dahil edilecek tüm commit'ler `type(scope): subject` biçimine uymalıdır.
 
 **Geçerli türler:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
 **Geçerli kapsamlar:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Uyumluluğu bozan değişiklikler: `BREAKING CHANGE:` alt bilgisini veya kapsamdan sonra `!` ekleyin (ör. `feat(api)!: drop /v0`).
+Kırıcı değişiklikler: `BREAKING CHANGE:` alt bilgisini veya kapsamdan sonra `!` ekleyin (ör. `feat(api)!: drop /v0`).
 
 ### Dokümantasyon
 
 - [ ] `npm run check:docs-sync` başarılı (pre-commit tarafından otomatik çalıştırılır)
 - [ ] `npm run check:docs-all` başarılı (şemsiye komut: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 0 koduyla sonlanıyor — kod ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` ortam değişkeni sözleşmesi sağlam
-- [ ] `npm run check:doc-links` 0 koduyla sonlanıyor — yeniden yapılandırma sonrasında bozuk dahili markdown referansı yok
-- [ ] `docs/architecture/ARCHITECTURE.md`, depolama/çalışma zamanı sapması açısından gözden geçirildi
-- [ ] `docs/guides/TROUBLESHOOTING.md`, ortam değişkeni ve operasyonel sapma açısından gözden geçirildi
+- [ ] `npm run check:env-doc-sync` 0 koduyla çıkar — kod ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` ortam sözleşmesi sağlamdır
+- [ ] `npm run check:doc-links` 0 koduyla çıkar — yeniden yapılandırma sonrasında bozuk dahili markdown referansı yoktur
+- [ ] `docs/architecture/ARCHITECTURE.md`, depolama/çalışma zamanı sapması açısından incelendi
+- [ ] `docs/guides/TROUBLESHOOTING.md`, ortam değişkeni ve operasyonel sapma açısından incelendi
 - [ ] `.env.example` değiştiyse: `docs/reference/ENVIRONMENT.md` güncellendi
-- [ ] Yeni özelliğin bir kullanıcı arayüzü varsa: `docs/guides/USER_GUIDE.md` bu özellikten bahsediyor
+- [ ] Yeni özelliğin bir UI'ı varsa: `docs/guides/USER_GUIDE.md` dosyasında belirtiliyor
 - [ ] Yeni özelliğin bir API'si varsa: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` güncellendi
-- [ ] Yeni özellik bir modülse: özel bir `docs/<MODULE>.md` mevcut
-- [ ] Geriye dönük uyumsuz bir değişiklik varsa: `docs/guides/TROUBLESHOOTING.md` bir geçiş notu içeriyor
+- [ ] Yeni özellik bir modülse: özel bir `docs/<MODULE>.md` dosyası mevcut
+- [ ] Kırıcı değişiklik varsa: `docs/guides/TROUBLESHOOTING.md` bir geçiş notu içeriyor
 
 ### i18n
 
-- [ ] `npm run i18n:check` 0 koduyla sonlanıyor — çeviri durumu (`.i18n-state.json`) kaynak belgelerle senkronize (katı modda sapmış kaynak yok; son dakika belge düzenlemeleri için uyarı modu önerileri kabul edilebilir, ancak etiketlemeden önce sonuç 0 olmalıdır)
-- [ ] `npm run i18n:check-ui-coverage` 0 koduyla sonlanıyor — her kullanıcı arayüzü yerel ayarı %80 kapsama alt sınırında veya üzerinde
-- [ ] `npm run i18n:sync-ui:dry`, 42 yerel ayarın tamamında 0 eksik anahtar bildiriyor
-- [ ] İngilizce kaynak belgeler değiştiyse etiketlemeden önce `npm run i18n:run` komutunu çalıştırın (`.env` içinde `OMNIROUTE_TRANSLATION_API_KEY` gerektirir)
-- [ ] Küçük çaplı çeviri katkıları bir sonraki sürüme ertelenebilir (CHANGELOG içinde takip edin)
+- [ ] `npm run i18n:check` 0 koduyla çıkar — çeviri durumu (`.i18n-state.json`) kaynak belgelerle senkronizedir (katı modda sapmış kaynak yoktur; son dakika belge düzeltmeleri için uyarı modu önerisi kabul edilebilir, ancak etiketlemeden önce 0 olmalıdır)
+- [ ] `npm run i18n:check-ui-coverage` 0 koduyla çıkar — her UI yerel ayarı %80 kapsam alt sınırında veya üzerindedir
+- [ ] `npm run i18n:sync-ui:dry`, 66 hedef yerel ayarın tamamında 0 eksik anahtar bildirir (`en` kaynağı dışındaki her yerel ayar)
+- [ ] Kaynak İngilizce belgeler değiştiyse etiketlemeden önce `npm run i18n:run` komutunu çalıştırın (`.env` içinde `OMNIROUTE_TRANSLATION_API_KEY` gerektirir)
+- [ ] Küçük çaplıysa çeviri katkıları bir sonraki sürüme ertelenebilir (CHANGELOG içinde takip edin)
 
 ### Veritabanı Geçişleri
 
-- [ ] `src/lib/db/migrations/` yeni dosyalar içeriyorsa:
-  - [ ] Her geçiş idempotent (`CREATE TABLE IF NOT EXISTS` vb.)
-  - [ ] Geçişler transaction'lar içine alındı
-  - [ ] Doğru numaralandırıldı (sıralamada boşluk yok)
-- [ ] Temiz kurulumda test edin: `~/.omniroute/omniroute.db` dosyasını silin ve `npm run dev` komutunu çalıştırın
-- [ ] Mevcut kurulumda test edin: veritabanını yedekleyin, geçişi çalıştırın, şemayı doğrulayın
-- [ ] Geçiş tabloları yeniden yazıyorsa WAL dosyaları (`-wal`, `-shm`) doğru şekilde işlendi
+- [ ] `src/lib/db/migrations/` içinde yeni dosyalar varsa:
+  - [ ] Her geçiş idempotent'tir (`CREATE TABLE IF NOT EXISTS` vb.)
+  - [ ] Geçişler transaction'lar içine alınmıştır
+  - [ ] Doğru şekilde numaralandırılmıştır (sırada boşluk yoktur)
+- [ ] Yeni kurulumda test edin: `~/.omniroute/omniroute.db` dosyasını silin ve `npm run dev` komutunu çalıştırın
+- [ ] Mevcut kurulumda test edin: DB'yi yedekleyin, geçişi çalıştırın, şemayı doğrulayın
+- [ ] Geçiş tabloları yeniden yazıyorsa WAL dosyaları (`-wal`, `-shm`) doğru şekilde işlenir
 
-### Sağlayıcı Kataloğu (Zod ile doğrulanır)
+### Sağlayıcı Kataloğu (Zod ile doğrulanmış)
 
 - [ ] `src/shared/constants/providers.ts` Zod şeması yükleme sırasında geçerli
-  - [ ] Tüm sağlayıcılar gerekli alanlara sahip (`id`, `label`, `kind` vb.)
-  - [ ] Yeni ücretsiz sağlayıcılar için `freeNote` sağlandı
+  - [ ] Tüm sağlayıcılarda gerekli alanlar (`id`, `label`, `kind` vb.) mevcut
+  - [ ] Yeni ücretsiz sağlayıcılar için `freeNote` sağlanmış
   - [ ] OAuth sağlayıcılarının `oauthConfig` yapılandırması `src/lib/oauth/constants/oauth.ts` içinde kayıtlı
 - [ ] Yeni sağlayıcı eklendiyse: `open-sse/executors/` içinde karşılık gelen yürütücü mevcut
-- [ ] OpenAI dışı bir biçimse: `open-sse/translator/` içinde çevirici mevcut
+- [ ] OpenAI dışı bir biçim kullanılıyorsa: `open-sse/translator/` içinde çevirici mevcut
 - [ ] Modeller `open-sse/config/providerRegistry.ts` içinde kayıtlı
 - [ ] `tests/unit/` içindeki birim testleri sağlayıcı sınıflandırmasını ve yönlendirmeyi kapsıyor
 
 ### Masaüstü (Electron)
 
-`electron/` değiştiyse:
+`electron/` değiştirildiyse:
 
 - [ ] `npm run electron:smoke:packaged` başarılı
 - [ ] Derlemeler `:win`, `:mac`, `:linux` seçeneklerinden en az biri için test edildi
 - [ ] Kod imzalama sertifikalarının süresi dolmamış (imzalama yapılıyorsa)
-- [ ] `electron/package.json` sürümü kök `package.json` sürümüyle eşleşiyor
-- [ ] `stable` kanalına sürüm çıkarılıyorsa otomatik güncelleme kanalı işaretçisi güncellendi
+- [ ] `electron/package.json` sürümü, kök dizindeki `package.json` sürümüyle eşleşiyor
+- [ ] `stable` kanalında yayımlanıyorsa otomatik güncelleme kanal işaretçisi güncellendi
 
 ### Derleme Düzeni
 
 Depo üç ayrı çıktı dizini kullanır — bunları asla birbirine karıştırmayın:
 
-| Dizin     | Amaç                                                            | İzleniyor mu?        |
-| --------- | --------------------------------------------------------------- | -------------------- |
-| `src/`    | Uygulama kaynağı (TypeScript / TSX)                             | Evet                 |
-| `.build/` | Derleme ara çıktıları — `next build` çıktısı (`distDir`)        | Hayır (gitignore'da) |
-| `dist/`   | Dağıtılabilir npm paketi — `assembleStandalone` ile oluşturulur | Hayır (gitignore'da) |
+| Dizin     | Amaç                                                      | İzleniyor mu?      |
+| --------- | --------------------------------------------------------- | ------------------ |
+| `src/`    | Uygulama kaynağı (TypeScript / TSX)                       | Evet               |
+| `.build/` | Derleme ara çıktıları — `next build` çıktısı (`distDir`)  | Hayır (gitignored) |
+| `dist/`   | Dağıtılabilir npm paketi — `assembleStandalone` oluşturur | Hayır (gitignored) |
 
 > **Operatör notu:** uzak VPS görüntü dizini `/usr/lib/node_modules/omniroute/app/` olarak kalır.
 > Yalnızca **depo içindeki** derleme çıktısı taşındı (`app/` → `dist/`). Dağıtım becerileri,
@@ -246,28 +246,28 @@ Depo üç ayrı çıktı dizini kullanır — bunları asla birbirine karıştı
 npm run build:release
   └─ rm -rf .build dist          (temizleme)
   └─ next build → .build/next/   (ara çıktılar)
-  └─ assembleStandalone          (standalone + static + public + natives öğelerini dist/ içine kopyalar)
-  └─ dist/BUILD_SHA yazar        (HEAD gözcüsü)
+  └─ assembleStandalone          (standalone + static + public + natives içeriklerini → dist/ dizinine kopyalar)
+  └─ writes dist/BUILD_SHA       (HEAD doğrulama işareti)
 ```
 
-Dağıtım için `npm run build` ve ardından ayrı bir `npm run build:cli` çalıştırmayın —
-tek komutta temiz bir yeniden derleme + gözcü oluşturan `npm run build:release` komutunu kullanın.
+Dağıtım için `npm run build` komutunu ve ardından ayrı bir `npm run build:cli` komutunu ÇALIŞTIRMAYIN —
+tek komutla temiz bir yeniden derleme ve doğrulama işareti oluşturan `npm run build:release` komutunu kullanın.
 
-### Artefakt Doğrulama
+### Yapıt Doğrulaması
 
 - [ ] `npm run build:release` başarılı ve `dist/BUILD_SHA` == `git rev-parse --short HEAD`
 - [ ] `npm run check:pack-artifact` temiz — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` veya başka yerel kalıntı yok
 - [ ] Derlemeden sonra `dist/server.js` mevcut
-- [ ] İsteğe bağlı yerel paketlenmiş çalışma zamanı smoke testi: `npm run dev:candidate -- build` sonrasında `npm run dev:candidate -- validate`, paketlenmiş tarball'u yalıtılmış bir `DATA_DIR` üzerinde başlatır ve `/api/health` + `/v1/models` uç noktalarını denetler (bkz. [Katkı Altın Yolu](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] İsteğe bağlı yerel paketlenmiş çalışma zamanı duman testi: `npm run dev:candidate -- build` sonrasında `npm run dev:candidate -- validate`, paketlenmiş tarball'ı yalıtılmış bir `DATA_DIR` üzerinde başlatır ve `/api/health` + `/v1/models` uçlarını kontrol eder (bkz. [Katkı İçin Önerilen Yol](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
 
-### Etiketleme ve Sürüm
+### Etiketleme ve Sürüm Yayımlama
 
 - [ ] `/generate-release-cc` komutunu çalıştırın (Claude Code becerisi):
   - `vX.Y.Z` etiketini oluşturur
   - Etiketi ve dalı gönderir
-  - Değişiklik günlüğü metniyle GitHub Release açar
+  - Değişiklik günlüğü gövdesiyle bir GitHub Release açar
   - Electron yükleyicilerini ekler (derlendiyse)
-- [ ] Veya manuel olarak:
+- [ ] Alternatif olarak manuel biçimde:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
@@ -283,36 +283,37 @@ Dağıtım becerileri hafif rsync akışını kullanır — `npm pack` veya `npm
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — her ikisi
 - [ ] Dağıtımdan önce `dist/BUILD_SHA` == `git rev-parse --short HEAD` olduğunu doğrulayın
-- [ ] Derleme, `node_modules` dizininin gerçek olduğu bir yerde çalıştırılmalıdır (ana çalışma kopyası veya `npm ci` çalıştırılmış worktree — sembolik bağlantılı bir worktree DEĞİL)
-- [ ] Dağıtılan örnekte temel işlev testlerini gerçekleştirin:
-  - `/dashboard/health` sayfasını açın → sürüm dizesinin yayımla eşleştiğini kontrol edin
+- [ ] Derleme, `node_modules` dizininin gerçek olduğu yerde çalıştırılmalıdır (ana çalışma kopyası veya `npm ci` çalıştırılmış worktree — sembolik bağlantılı bir worktree DEĞİL)
+- [ ] Dağıtılan örnekte duman testi gerçekleştirin:
+  - `/dashboard/health` sayfasını açın → sürüm dizesinin yayımlanan sürümle eşleştiğini kontrol edin
   - Bilinen bir sağlayıcıya karşı `/v1/chat/completions` isteği çalıştırın
-  - `/api/monitoring/health` yanıtındaki devre kesicilerin `CLOSED` olduğunu doğrulayın
+  - `/api/monitoring/health` yanıtının `CLOSED` devre kesicileri döndürdüğünü doğrulayın
   - MCP aktarımlarının yanıt verdiğini doğrulayın (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Yayım sonrası
+### Sürüm Sonrası
 
 - [ ] `/capture-release-evidences-cc` komutunu çalıştırın (Claude Code becerisi)
   - Yeni özelliklerin WebP ekran görüntülerini/kayıtlarını alır
-  - Bunları yayım notlarına / blog gönderisine ekler
-- [ ] GitHub Discussions / Discord'u yayım duyurusuyla güncelleyin
-- [ ] Sonraki sürüm için bir kilometre taşı açın
-- [ ] Kritikse: tartışmayı sabitleyin veya uygulama içi banner için `news.json` dosyasında yayımlayın
+  - Bunları sürüm notlarına / blog gönderisine ekler
+- [ ] GitHub Discussions / Discord'u sürüm duyurusuyla güncelleyin
+- [ ] Sonraki sürüm için kilometre taşı açın
+- [ ] Kritikse: tartışmayı sabitleyin veya uygulama içi banner için `news.json` içinde gönderi yayımlayın
 
-### Radar genel kullanıma açma geçidi
+### Radar genel kullanıma açma kapısı
 
-Radar duyurusu kasıtlı olarak `active: false` ayarıyla commit edilmiştir. Etkinleştirme, aşağıdaki her bir madde kanıtlandıktan sonra yapılacak ayrı bir değişikliktir:
+Radar duyurusu kasıtlı olarak `active: false` ile kaydedilmiştir. Etkinleştirme, aşağıdaki her madde
+kanıtlandıktan sonra yapılacak ayrı bir değişikliktir:
 
-- [ ] Üst üste bağlı tüm Radar PR'ları birleştirilmiş ve sürüm ucundaki CI başarılı
-- [ ] OSS Radar rotalarını, `RADAR_ENABLED` varsayılan olarak hâlâ kapalıyken dağıtın ve temel işlev testlerinden geçirin
-- [ ] Belirtilen Radar ana makinesinde `GET /planos`, `/termos`, `/privacidade` ve `/reembolso` uç noktalarında temel işlev testlerini gerçekleştirin
-- [ ] Operatörün kimlik/iletişim/adres bilgilerini ve sahibin onayladığı hukuki incelemeyi özel hizmette kaydedin
-- [ ] Stripe Checkout'u ve imzalı webhook'u yalnızca test modunda deneyin
-- [ ] Onaylanmış gönderici/alan adıyla şifrelenmiş bir işlem e-postası teslimatını deneyin
-- [ ] Yedekten geri yükleme işlemini ve gözetimli, bütçe sınırı belirlenmiş tek bir araştırma çalıştırmasını kanıtlayın
+- [ ] Yığın hâlindeki tüm Radar PR'ları birleştirildi ve sürüm ucundaki CI başarılı
+- [ ] OSS Radar rotalarını, `RADAR_ENABLED` varsayılan olarak hâlâ kapalıyken dağıtın ve duman testinden geçirin
+- [ ] Belirtilen Radar ana makinesinde `GET /planos`, `/termos`, `/privacidade` ve `/reembolso` için duman testi gerçekleştirin
+- [ ] Operatörün kimliğini/iletişim bilgilerini/adresini ve sahip tarafından onaylanmış hukuki incelemeyi özel servise kaydedin
+- [ ] Stripe Checkout'u ve imzalı webhook'u yalnızca test modunda çalıştırın
+- [ ] Onaylanmış gönderici/alan adıyla şifrelenmiş bir işlemsel e-posta teslimatını çalıştırın
+- [ ] Yedekten geri yüklemeyi ve gözetimli, bütçe sınırı belirlenmiş bir araştırma çalıştırmasını kanıtlayın
 - [ ] Bağış kanıtlarını kabul etmeden önce BRL/PIX inceleme politikasını onaylayın
-- [ ] Herkese açık Checkout'u yalnızca önceki geçitlerden sonra etkinleştirin, ardından yeni `news.json` kimliğini etkinleştirin
-- [ ] Ana Sayfa banner'ının yerelleştirilmiş metin kullandığını ve eski bir kimlik kapatıldıktan sonra yeni bir kimliğin yeniden göründüğünü doğrulayın
+- [ ] Genel Checkout'u yalnızca önceki kapılardan geçildikten sonra etkinleştirin, ardından yeni `news.json` ID'sini etkinleştirin
+- [ ] Ana Sayfa banner'ının yerelleştirilmiş metin kullandığını ve eski bir ID kapatıldıktan sonra yeni bir ID'nin yeniden göründüğünü doğrulayın
 
 ## Gömülü Hizmetler smoke testi (v3.8.4+)
 
@@ -385,11 +386,11 @@ Herhangi bir v3.8.x sürümünü yayımlamadan önce şu ek öğeleri doğrulay�
 
 ## 3.9.0 LTS ayrımı (3.8.58'de prova edildi)
 
-v3.8.59'dan sonraki sürüm 3.9.0'dır ve bu sürümün ucu, uzun ömürlü iki dala dönüşür:
+v3.8.59'dan sonraki sürüm 3.9.0'dır ve bu sürümün uç noktası iki uzun ömürlü dala dönüşür:
 `stable/v3` (v3 LTS hattı, npm `latest`) ve `develop` (v4, 4.0.0'a yükseltilmiş, npm
 `nightly`). Dal/kanal modeli, ileri taşıma ve etiketler
 [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) dosyasında; plan ise [ROADMAP](../../ROADMAP.md) (Aşama 3) içindedir. Ayrım bir kez çalıştırılır;
-3.8.58 bunu bir fork üzerinde baştan sona prova eder ve 3.8.59,
+3.8.58 bunu bir fork üzerinde baştan sona prova eder ve 3.8.59
 [GO/NO-GO kontrol listesi](./LTS_GO_NO_GO.md) ile kapanır.
 
 ### Deneme çalıştırması (salt okunur, her zaman güvenli)
@@ -399,51 +400,56 @@ npm run release:dry-run-lts-cut                       # gerçek ayrım: HEAD'den
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # kaynak commit'i sabitle
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` hiçbir şey yürütmez: git ve `gh` verilerini okur ve
-tüm diziyi yazdırır — ön koşullar (kaynak çözümlenebiliyor, önceki etiket mevcut, `package.json`
-hedef sürümde, bir `release-freeze` issue'su açık, mevcut bir release dalında açık bir
-`Release branch not green` issue'su yok — var olmayan bir dal yeşil değil, `?` bilinmiyor
-olarak raporlanır — Mergify `release` kuyruğu yapılandırılmış (G11: `queue_rules`,
-`checks_timeout`, `queue` etiketi), `release/*` kurallar kümesi silme ve force-push işlemlerini
-hâlâ engelliyor ve `stable/v3` ile `develop` henüz mevcut değil), iki dal adımı, hangi atıl
-workflow tetikleyicilerinin ve `if:` koşullarının doğru hâle geldiği (ve hangilerinin bir
-repository değişkeni tarafından engellenmeye devam ettiği ya da canonical repository'ye
-sabitlendiği), beklenen dist-tag'ler (`latest` → 3.9.0, `next` ve `nightly` boş) ve geri alma.
-Çıkış kodu `0` = `RESULT: READY`, `1` = engelleyici bir ön koşul başarısız oldu (`✗`),
-`2` = kullanım hatası. `--advisory <id,...>`, bir kontrolü gizlemeden uyarıya (`!`) indirger.
+`scripts/release/dry-run-lts-cut.mjs` hiçbir şeyi yürütmez: git ve `gh` verilerini okur ve
+tüm diziyi yazdırır — önkoşullar (kaynak çözümleniyor, kaynak depo eksiksiz geçmişe sahip —
+sığ bir klon `stable/v3` dalını gönderemez; alıcı taraf paketi ilk
+aşılanmış üst commit'te reddeder, bu nedenle ayrımı eksiksiz bir klondan yapın veya önce
+`git fetch --unshallow origin` çalıştırın — önceki etiket mevcut, `package.json` hedef
+sürümde, açık bir `release-freeze` kaydı var, mevcut bir yayın dalında açık
+`Release branch not green` kaydı yok — mevcut olmayan bir dal `?` bilinmiyor olarak
+raporlanır, hiçbir zaman yeşil sayılmaz — Mergify `release` kuyruğu yapılandırılmış
+(G11: `queue_rules`, `checks_timeout`, `queue` etiketi), `release/*` kural kümesi silmeyi ve
+zorlamalı göndermeyi hâlâ engelliyor ve `stable/v3` ile `develop` henüz mevcut değil), iki
+dal adımı, hangi atıl iş akışı tetikleyicilerinin ve `if:` koşullarının doğru hâle geldiği
+(ve hangilerinin bir depo değişkeni tarafından engellenmeye devam ettiği veya kanonik
+depoya sabitlendiği), beklenen dist-tag'ler (`latest` → 3.9.0, `next` ve `nightly` boş)
+ve geri alma işlemi. Çıkış kodu `0` = `RESULT: READY`, `1` = engelleyici bir önkoşul
+başarısız oldu (`✗`), `2` = kullanım hatası. `--advisory <id,...>`, bir denetimi gizlemeden
+uyarı (`!`) düzeyine indirger.
 
-Gerçek ayrımın deneme çalıştırmasını 3.9.0 release freeze hâlâ açıkken çalıştırın — dallar
-etiketten sonra ve Aşama 12c freeze'i kaldırmadan önce oluşturulur.
+Gerçek ayrımın deneme çalıştırmasını 3.9.0 yayın dondurması hâlâ açıkken çalıştırın — dallar
+etiketten sonra ve Aşama 12c dondurmayı kaldırmadan önce oluşturulur.
 
 ### 3.8.58 provası (yalnızca fork)
 
 ```bash
-# 1. Geçerli uçta prova parametreleriyle deneme çalıştırması yapın
+# 1. Geçerli uç noktada prova parametreleriyle deneme çalıştırması
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Bir FORK remote'una karşı yürütün (origin veya URL'si canonical
-#    repository olan herhangi bir remote reddedilir; her adım terminalde onay ister)
+# 2. Bir FORK uzak deposuna karşı yürütün (origin veya URL'si kanonik depo olan
+#    herhangi bir uzak depo reddedilir; her adım terminalde onay ister)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Fork'taki atıl workflow'ları çalıştırın (deneme çalıştırmasının canonical-repository
-#    sabitlemesi bildirdiği yerlerde workflow_dispatch), ardından geri alın
+# 3. Fork'taki atıl iş akışlarını çalıştırın (deneme çalıştırmasının kanonik depo
+#    sabitlemesi raporladığı yerlerde workflow_dispatch), ardından geri alın
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop yükseltme commit'i git plumbing ile oluşturulur (çalışma ağacına dokunulmaz) ve
-bir döngü açma commit'iyle aynı beş dosyayı yükseltir: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` ve `docs/openapi.yaml`. `[4.0.0]`
-CHANGELOG bölümü ve i18n karşılıkları, ilk PR'ından önce `develop` üzerinde açılır.
-Betik npm dist-tag'lerini hiçbir zaman değiştirmez — bunları geçici bir paket üzerinde prova edin.
+develop yükseltme commit'i git tesisatıyla oluşturulur (çalışma ağacına dokunulmaz) ve
+döngü açılış commit'iyle aynı beş dosyayı yükseltir: `package.json`,
+`open-sse/package.json`, `electron/package.json`, `package-lock.json` ve
+`docs/openapi.yaml`. `[4.0.0]` CHANGELOG bölümü ve bunun i18n yansıları daha sonra,
+ilk PR'ından önce `develop` üzerinde açılır. Betik npm dist-tag'lerini hiçbir zaman
+değiştirmez — bunları geçici bir paket üzerinde prova edin.
 
-### PR önizleme artifact'i (bir kez derleyin, aynı byte'ları terfi ettirin)
+### PR önizleme yapıtı (bir kez derleyin, aynı baytları terfi ettirin)
 
-`.github/workflows/preview-artifact.yml`, bir PR ucundan tek bir production tarball'ı derler
-ve tam olarak bu derlemeyi doğrular (#8084 dilimi (a)). Yalnızca aynı repository'deki
+`.github/workflows/preview-artifact.yml`, bir PR uç noktasından tek bir üretim tarball'ı
+derler ve tam olarak bu derlemeyi doğrular (#8084 dilimi (a)). Yalnızca aynı depodaki
 PR'lar; hiçbir şey yayımlanmaz.
 
 ```bash
@@ -455,37 +461,38 @@ npm install -g ./omniroute-*.tgz                          # önizleme kurulumu
 ```
 
 Çalıştırma; `npm ci`, `npm run build:release` ve `npm run check:pack-artifact` komutlarını
-çalıştırır, tarball'ı paketler, `npm run check:pack-boot` komutunu (sahte secret'lar, geçici
-veri dizini) çalıştırır, yeniden paketler ve özet aynı değilse başarısız olur; ardından
-`artifact-identity.json` (head SHA, base SHA, lockfile hash'i, platform, mimari, node ABI,
-bundler, derleme politikası — `scripts/release/artifact-identity.mjs`) kaydını oluşturur ve
-tarball için ayrı bir job'da attestation üretir. Bir önizlemeyi terfi ettirmek, bu tarball'ı
-kurmak anlamına gelir: hiçbir zaman kaynaktan yeniden derlemeyin.
+yürütür, tarball'ı paketler, `npm run check:pack-boot` komutunu çalıştırır (sahte gizli
+değerler, geçici veri dizini), yeniden paketler ve özet aynı değilse başarısız olur;
+ardından `artifact-identity.json` dosyasını (uç SHA, temel SHA, kilit dosyası karması,
+platform, mimari, node ABI, paketleyici, derleme ilkesi —
+`scripts/release/artifact-identity.mjs`) kaydeder ve ayrı bir işte tarball için tasdik
+oluşturur. Bir önizlemeyi terfi ettirmek, söz konusu tarball'ı kurmak anlamına gelir:
+asla kaynaktan yeniden derlemeyin.
 
 ### Ayrım (3.9.0, GO sonrasında)
 
-1. GO, [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) içinde kaydedilir.
+1. GO, [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) dosyasına kaydedilir.
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0`, `RESULT: READY` çıktısını verir.
-3. Deneme çalıştırmasının yazdırdığı komutlarla dalları `origin` üzerinde elle oluşturun —
-   betik `origin`'e push etmeyi reddeder. İncelenmiş bir develop commit'ini yeniden kullanmak
-   için önce 3.9.0 ucunda fork'unuza karşı `--execute` provasını çalıştırın; bu işlem her iki
-   SHA'yı da yazdırır ve aynı commit'ler push edilebilir:
+3. Dalları, deneme çalıştırmasının yazdırdığı komutlarla `origin` üzerinde elle oluşturun —
+   betik `origin` hedefine göndermeyi reddeder. İncelenmiş bir develop commit'ini yeniden
+   kullanmak için önce 3.9.0 uç noktasında fork'unuza karşı `--execute` provasını çalıştırın;
+   bu işlem her iki SHA'yı da yazdırır ve aynı commit'ler gönderilebilir:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. İlk PR birleştirilmeden önce `stable/v3` ve `develop` dallarını koruyun (kurallar kümeleri + merge queue).
-5. Atıl workflow'lar dalın varlığıyla etkinleşir: `forward-port.yml` (`stable/v3` dalına push),
+4. İlk PR birleştirilmeden önce `stable/v3` ve `develop` dallarını koruyun (kural kümeleri + birleştirme kuyruğu).
+5. Etkin olmayan iş akışları, dalların varlığıyla etkinleşir: `forward-port.yml` (`stable/v3` dalına push),
    `validate-stable-pr.yml` (`stable/v3` dalına yönelik PR'lar) ve `nightly-v4-build.yml`
-   (`develop` dalını derler). Canlıya geçmeden önce `secrets.FORWARD_PORT_TOKEN` repository secret'ını
-   ayarlayın (böylece CI, forward-port PR'larında çalışır); nightly yayımlama, sahibi
-   `vars.NIGHTLY_PUBLISH` repository değişkenini `true` olarak ayarlayana ve npm Trusted Publishing
-   `nightly-v4-build.yml` dosyasını kabul edene kadar kapalı kalır. Kanal çözümleme işlemi,
-   `npm-publish.yml` tarafından kullanılan çözümleyiciyle aynı olan
-   `scripts/release/dist-tag.mjs` tarafından yapılır.
-6. Kanalları doğrulayın: `npm view omniroute dist-tags --json`, `latest` = 3.9.0 değerini ve
-   v4 yayımlanana kadar `next` / `nightly` olmadığını gösterir.
+   (`develop` dalını derler). Canlıya geçmeden önce `secrets.FORWARD_PORT_TOKEN` depo gizli
+   bilgisini ayarlayın (böylece CI, ileri taşıma PR'larında çalışır); gecelik yayımlama, depo
+   sahibi `vars.NIGHTLY_PUBLISH` depo değişkenini `true` olarak ayarlayana ve npm Trusted Publishing
+   `nightly-v4-build.yml` dosyasını kabul edene kadar kapalı kalır. Kanal çözümlemesi,
+   `npm-publish.yml` tarafından da kullanılan aynı çözümleyici olan `scripts/release/dist-tag.mjs`
+   tarafından gerçekleştirilir.
+6. Kanalları doğrulayın: `npm view omniroute dist-tags --json`, `latest` = 3.9.0 değerini gösterir ve
+   v4 yayımlanana kadar `next` / `nightly` bulunmaz.
 7. Gerekirse geri alın: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    ve `npm dist-tag add omniroute@3.8.59 latest`.
 

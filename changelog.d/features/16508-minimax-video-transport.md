@@ -1,1 +1,0 @@
-- **feat(video):** MiniMax Hailuo text-to-video now works through a native create → poll → file-retrieve transport (previously listed but rejected with `Unsupported video format`) ([#16508](https://github.com/diegosouzapw/OmniRoute/pull/16508)) — thanks @octo-patch

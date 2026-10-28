@@ -40,51 +40,51 @@ Traffic Inspector, OmniRoute'un yerleşik HTTPS trafik hata ayıklayıcısıdır
 
 ## §2 Yakalama modları
 
-Traffic Inspector **eş zamanlı 5 yakalama kaynağını** destekler. Her biri bağımsız olarak açılıp kapatılabilir. Her `InterceptedRequest` (`src/mitm/inspector/types.ts`) üzerindeki `source` alanı `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` veya `"tproxy"` değerlerinden biridir.
+Traffic Inspector, **eşzamanlı 5 yakalama kaynağını** destekler. Her biri bağımsız olarak açılıp kapatılabilir. Her `InterceptedRequest` (`src/mitm/inspector/types.ts`) üzerindeki `source` alanı `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` veya `"tproxy"` değerlerinden biridir.
 
 ### Mod 1 — AgentBridge (varsayılan, her zaman açık)
 
-**Kaynak:** AgentBridge işleyicileri (`src/mitm/handlers/base.ts`)  
-**Mekanizma:** `MitmHandlerBase` içindeki her `intercept()` çağrısı, yönlendirmeden önce `hookBufferStart()` ve tamamlandığında `hookBufferUpdate()` çağrısını yapar. Ek yapılandırma gerektirmez; AgentBridge çalışmaya başlar başlamaz kullanılabilir.  
-**Kapsam:** AgentBridge içinde yapılandırılmış 9 IDE aracısı  
+**Kaynak:** AgentBridge işleyicileri (`src/mitm/handlers/base.ts`)
+**Mekanizma:** `MitmHandlerBase` içindeki her `intercept()` çağrısı, iletmeden önce `hookBufferStart()` ve tamamlandığında `hookBufferUpdate()` çağrılarını yapar. Ek yapılandırma gerektirmez — AgentBridge çalışmaya başlar başlamaz çalışır.
+**Kapsam:** AgentBridge'de yapılandırılmış 9 IDE aracısı
 **Not:** `InterceptedRequest` içindeki `source` alanı = `"agent-bridge"`
 
 ### Mod 2 — Özel Hostlar (DNS yönlendirmesi)
 
-**Kaynak:** Kullanıcı tanımlı host listesi (`inspector_custom_hosts` tablosu)  
-**Mekanizma:** Kullanıcı arayüzü üzerinden bir host eklemek, `/etc/hosts` dosyasına `127.0.0.1 <host>` ekler (sudo gerektirir). Mevcut AgentBridge MITM sunucusu (443 numaralı port), yeni host için dinamik olarak bir SNI sertifikası oluşturur.  
-**Kapsam:** Eklenen hostu kullanan tüm uygulamalar; uygulama yapılandırmasında değişiklik gerekmez  
+**Kaynak:** Kullanıcı tanımlı host listesi (`inspector_custom_hosts` tablosu)
+**Mekanizma:** Kullanıcı arayüzü üzerinden bir host eklemek, `/etc/hosts` dosyasına `127.0.0.1 <host>` satırını ekler (sudo gerektirir). Mevcut AgentBridge MITM sunucusu (443 numaralı port), yeni host için dinamik olarak bir SNI sertifikası oluşturur.
+**Kapsam:** Eklenen hostu kullanan tüm uygulamalar — uygulama yapılandırmasının değiştirilmesi gerekmez
 **Not:** `source` = `"custom-host"`
 
-Örnek kullanım senaryoları:
+Örnek kullanım durumları:
 
-- Python betiklerinden gelen `api.openai.com` trafiğini izleme
-- `my-internal-llm.company.com` hatalarını ayıklama
+- Python betiklerinden `api.openai.com` trafiğini izleme
+- `my-internal-llm.company.com` için hata ayıklama
 - Aynı ağdaki mobil cihazlardan gelen trafiği yakalama (ARP sahteciliği aracılığıyla — ileri düzey)
 
 ### Mod 3 — HTTP_PROXY dinleyicisi (8080 numaralı port)
 
-**Kaynak:** `HTTP_PROXY`/`HTTPS_PROXY` ortam değişkenlerini kullanan uygulamalar  
-**Mekanizma:** Standart bir açık HTTP/HTTPS proxy'si olarak çalışan, 8080 numaralı porttaki ikincil dinleyici (`src/mitm/inspector/httpProxyServer.ts`). `CONNECT` tünellerini (HTTPS) ve doğrudan HTTP isteklerini kabul eder.  
-**Kapsam:** `HTTP_PROXY` ortam değişkenine uyan tüm uygulamalar; DNS değişikliği ve sudo gerekmez  
+**Kaynak:** `HTTP_PROXY`/`HTTPS_PROXY` ortam değişkenlerini kullanan uygulamalar
+**Mekanizma:** Standart bir açık HTTP/HTTPS proxy'si olarak çalışan, 8080 numaralı porttaki ikincil dinleyici (`src/mitm/inspector/httpProxyServer.ts`). `CONNECT` tünellerini (HTTPS) ve doğrudan HTTP isteklerini kabul eder.
+**Kapsam:** `HTTP_PROXY` ortam değişkenine uyan tüm uygulamalar — DNS değişikliği veya sudo gerekmez
 **Not:** `source` = `"http-proxy"`
 
 ```bash
 # Tek bir komut için hızlı yakalama:
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
-# Bir kabuk oturumu boyunca kalıcı yakalama:
+# Bir kabuk oturumunda kalıcı yakalama:
 export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS sınırlaması:** HTTPS `CONNECT` tünellerinde varsayılan olarak yalnızca meta veriler (host, port, zamanlama) yakalanır; TLS gövdesinin şifresi çözülmez.
+**TLS sınırlaması:** HTTPS, düz bir `CONNECT` tünelinden geçer: dinleyici şifrelenmiş baytları değiştirmeden aktarır ve yalnızca meta verileri (host, port, zamanlama) kaydeder. HTTPS'nin şifresini hiçbir zaman çözmez ve bu mod için şifre çözmeyi etkinleştiren bir ayar yoktur. HTTPS gövdelerini yakalamak için hostu Mod 1 (AgentBridge), Mod 2 (Özel Hostlar) veya Mod 5 (TPROXY şifre çözme) üzerinden yönlendirin.
 
-**Port çakışması:** 8080 numaralı port kullanımdaysa AgentBridge, yapılandırılmış bir hatayla birlikte 409 yanıtı döndürür. Portu `INSPECTOR_HTTP_PROXY_PORT` ortam değişkeni aracılığıyla değiştirin.
+**Port çakışması:** 8080 numaralı port kullanımdaysa AgentBridge, yapılandırılmış bir hatayla birlikte 409 döndürür. Portu `INSPECTOR_HTTP_PROXY_PORT` ortam değişkeni aracılığıyla değiştirin.
 
 ### Mod 4 — Sistem genelinde proxy (ileri düzey, isteğe bağlı)
 
-**Kaynak:** İşletim sistemi düzeyindeki proxy ayarları (makinedeki tüm uygulamalara uygulanır)  
+**Kaynak:** İşletim sistemi düzeyindeki proxy ayarları (makinedeki tüm uygulamalara uygulanır)
 **Mekanizma:** Tüm HTTP/HTTPS trafiğini HTTP_PROXY dinleyicisi üzerinden yönlendirmek için işletim sistemi API'lerini kullanır:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
@@ -95,31 +95,31 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 
 **Güvenlik mekanizmaları:**
 
-- Otomatik devre dışı bırakma zamanlayıcısı (varsayılan olarak 30 dakika; `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` aracılığıyla yapılandırılabilir)
+- Otomatik devre dışı bırakma zamanlayıcısı (varsayılan 30 dk.; `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` aracılığıyla yapılandırılabilir)
 - Önceki sistem proxy durumu veritabanına kaydedilir ve geri alma sırasında geri yüklenir
-- Kullanıcı özellik etkinken sayfadan ayrılırsa pano, "Sistem proxy'si geri alınıyor" istemini gösterir
-- Kullanıcı arayüzü `⚠ İleri Düzey` rozeti ve açık bir onay kutusu gösterir
+- Sistem proxy'si etkinken kullanıcı sayfadan ayrılırsa pano, "Sistem proxy'si geri alınıyor" istemini gösterir
+- Kullanıcı arayüzü, `⚠ İleri Düzey` rozeti ve açık bir onay kutusu gösterir
 
 ### Mod 5 — TPROXY şeffaf şifre çözme (Linux, root, isteğe bağlı)
 
-**Kaynak:** Çekirdek TPROXY + ilke yönlendirmesi (`src/mitm/tproxy/`)  
-**Mekanizma:** `mangle OUTPUT` içinde hedef porta (varsayılan olarak `443`) yönelik yeni yerel giden TCP bağlantılarını işaretler; bir `ip rule`, işaretlenmiş paketleri yerel teslimata yeniden yönlendirir ve `mangle PREROUTING` içindeki `TPROXY` hedefi bunları şeffaf (**IP_TRANSPARENT**) bir dinleyiciye (varsayılan olarak `8443` numaralı port) aktarır. Dinleyici, dinamik bir CA tarafından **istek üzerine her SNI host adı için** düzenlenen bir yaprak sertifikayla TLS'yi sonlandırır, şifresi çözülmüş alışverişi yakalar ve isteği yeniden şifreleyerek özgün hedefe iletir.  
-**Kapsam:** Hedef porttaki **herhangi bir** hedef host; `/etc/hosts` sahteciliği, `HTTP_PROXY` ortam değişkeni veya sistem genelinde proxy değişikliği gerekmez. Trafiğine müdahale edilen işlem için yapılandırma değişikliği gerekmez ancak işlem dinamik CA'ya güvenmelidir.  
+**Kaynak:** Çekirdek TPROXY + ilke yönlendirmesi (`src/mitm/tproxy/`)
+**Mekanizma:** `mangle OUTPUT` içinde hedef bir porta (varsayılan `443`) yönelik yeni yerel giden TCP bağlantılarını işaretler; bir `ip rule`, işaretlenmiş paketleri yerel teslimata yeniden yönlendirir ve `mangle PREROUTING` içindeki `TPROXY` hedefi, paketleri şeffaf (**IP_TRANSPARENT**) bir dinleyiciye (varsayılan port `8443`) iletir. Dinleyici, dinamik bir CA tarafından **istek üzerine her SNI host adı için** verilen bir uç sertifikasıyla TLS'yi sonlandırır, şifresi çözülmüş alışverişi yakalar ve isteği yeniden şifreleyerek özgün hedefe iletir.
+**Kapsam:** Hedef porttaki **herhangi bir** hedef host — `/etc/hosts` sahteciliği, `HTTP_PROXY` ortam değişkeni veya sistem genelinde proxy değişikliği gerekmez. Yakalanan süreçte herhangi bir yapılandırma değişikliği gerekmez ancak sürecin dinamik CA'ya güvenmesi gerekir.
 **Not:** `source` = `"tproxy"`
 
-**Gereksinimler:** Yalnızca Linux (**IP_TRANSPARENT** yalnızca Linux'ta kullanılabilir), **CAP_NET_ADMIN** yeteneği (root) ve C araç zinciriyle derlenmesi gereken yerel bir N-API eklentisi (`npm run build:native:tproxy`). Bunlar kullanılamadığında panodaki seçenek, "TPROXY şifre çözme Linux + root + yerel eklenti gerektirir" araç ipucuyla devre dışı bırakılır. Güvenlik duvarı kuralları işlemsel olarak uygulanır/geri alınır (bir çökme hiçbir zaman geride bir `mangle` kuralı bırakmaz) ve yeniden başlatma sırasında temizlenir. SO_MARK tabanlı bir döngü önleme mekanizması, proxy'nin kendi yeniden şifrelenmiş iletiminin tekrar yakalanmasını engeller.
+**Gereksinimler:** Yalnızca Linux (**IP_TRANSPARENT** yalnızca Linux'ta kullanılabilir), **CAP_NET_ADMIN** yeteneği (root) ve bir C araç zinciriyle derlenmesi gereken yerel bir N-API eklentisi (`npm run build:native:tproxy`). Kullanılamadığında pano anahtarı, "TPROXY şifre çözme Linux + root + yerel eklenti gerektirir" araç ipucuyla devre dışı bırakılır. Güvenlik duvarı kuralları işlemsel olarak uygulanır/geri alınır (bir çökme hiçbir zaman geride bir `mangle` kuralı bırakmaz) ve yeniden başlatma sırasında temizlenir. SO_MARK tabanlı bir döngü önleme mekanizması, proxy'nin kendi yeniden şifrelenmiş iletiminin tekrar yakalanmasını önler.
 
-Bu, kendine ait özel bir operatör kılavuzu bulunan kapsamlı bir alt sistemdir. Güvenlik duvarı tarifinin tamamı, SNI başına dinamik CA + güven deposu yükleyicisi, yalnızca yerel rota, döngü önleme ayrıntıları ve yapılandırma şeması için `docs/security/MITM-TPROXY-DECRYPT.md` belgesine bakın (git; `/docs` içine derlenmez). Seçenek, `GET / POST / DELETE /api/tools/agent-bridge/tproxy` tarafından yönetilir (not: rota, Traffic Inspector öneki altında değil, AgentBridge öneki altında bulunur).
+Bu, kendine ait özel bir operatör kılavuzu bulunan kapsamlı bir alt sistemdir — güvenlik duvarı tarifinin tamamı, SNI başına dinamik CA + güven deposu yükleyicisi, yalnızca yerel rota, döngü önleme ayrıntıları ve yapılandırma şeması için `docs/security/MITM-TPROXY-DECRYPT.md` dosyasına (git; `/docs` içine derlenmez) bakın. Anahtar, `GET / POST / DELETE /api/tools/agent-bridge/tproxy` tarafından yönetilir (not: rota, Traffic Inspector öneki altında değil, AgentBridge öneki altında bulunur).
 
-### Yakalama modlarının karşılaştırması
+### Yakalama modu karşılaştırması
 
-| Mod                   | Kurulum                          |           Sudo?           | Kapsam                                | Notlar                                                                                                                                        |
-| --------------------- | -------------------------------- | :-----------------------: | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge        | Otomatik                         | Bir kez (sertifika+hosts) | 9 IDE aracısı                         | Varsayılan olarak açık                                                                                                                        |
-| 2. Özel Hostlar       | Host başına giriş                |   Evet (hosts dosyası)    | Bu hostu kullanan tüm uygulamalar     | DB'de kalıcı olarak saklanır                                                                                                                  |
-| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`         |           Hayır           | Ortam değişkenlerine uyan uygulamalar | Port 8080, varsayılan olarak TLS şifre çözme yok                                                                                              |
-| 4. Sistem geneli      | Aç/kapat + onayla                |           Evet            | Makinedeki tüm uygulamalar            | 30 dakika içinde otomatik olarak devre dışı bırakılır                                                                                         |
-| 5. TPROXY şifre çözme | Aç/kapat (Linux + yerel eklenti) | Evet (root + CA kurulumu) | Hedef porttaki tüm hostlar            | Herhangi bir hostun şifresini çözer; varsayılan olarak kapalıdır — bkz. `docs/security/MITM-TPROXY-DECRYPT.md` (git; `/docs` içine derlenmez) |
+| Mod                   | Kurulum                          |           Sudo?           | Erişim                                | Notlar                                                                                                                                      |
+| --------------------- | -------------------------------- | :-----------------------: | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge        | Otomatik                         |   Bir kez (cert+hosts)    | 9 IDE aracısı                         | Varsayılan olarak açık                                                                                                                      |
+| 2. Özel Hostlar       | Host başına giriş                |   Evet (hosts dosyası)    | Bu hostu kullanan tüm uygulamalar     | Veritabanında kalıcı olarak saklanır                                                                                                        |
+| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`         |           Hayır           | Ortam değişkenlerine uyan uygulamalar | Port 8080; HTTPS, CONNECT üzerinden tünellenir (yalnızca meta veriler, asla şifresi çözülmez)                                               |
+| 4. Sistem geneli      | Aç/kapat + onay                  |           Evet            | Makinedeki tüm uygulamalar            | 30 dakika içinde otomatik olarak devre dışı bırakılır                                                                                       |
+| 5. TPROXY şifre çözme | Aç/kapat (Linux + yerel eklenti) | Evet (root + CA kurulumu) | Hedef porttaki tüm hostlar            | İstenen hostların şifresini çözer; varsayılan olarak kapalıdır — bkz. `docs/security/MITM-TPROXY-DECRYPT.md` (git; `/docs` içine derlenmez) |
 
 ---
 
@@ -342,29 +342,29 @@ Her oturum şu biçimlerde dışa aktarılabilir:
 
 ## §6 Güvenlik
 
-Trafik Denetleyicisi, yetkilendirme üstbilgileri ve istek gövdeleri dâhil olmak üzere **yakalanan tüm HTTPS trafiğini** gösterir. Aşağıdaki denetimler uygulanmaktadır:
+Traffic Inspector, yetkilendirme başlıkları ve istek gövdeleri dahil olmak üzere **yakalanan tüm HTTPS trafiğini** gösterir. Aşağıdaki kontroller uygulanmaktadır:
 
-| Denetim                             | Ayrıntılar                                                                                                                                                                                                      |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                      | Tüm rotalar ve WebSocket uç noktası yalnızca geri döngü üzerinden erişilebilir (kimlik doğrulamadan önce `routeGuard.ts` içinde zorunlu kılınır)                                                                |
-| **Gizli bilgi maskeleme**           | Doğrusal `maskSecret()` tarayıcısı, `TrafficBuffer.push()` öncesinde RFC 6750 Bearer kimlik bilgilerini, sağlayıcı ön ekli anahtarları ve uzun opak belirteçleri sansürler                                      |
-| **Gövde boyutu sınırı**             | `INSPECTOR_MAX_BODY_KB` değerinden büyük gövdeler (varsayılan 1024 KB), `"(performans için kısaltıldı)"` bildirimiyle kısaltılır                                                                                |
-| **Üstbilgi temizleme**              | Adlar küçük harfe dönüştürülür; çerçeveleme/atlama noktaları arası ve proxy kimlik doğrulama üstbilgileri kaldırılır; çerezler tamamen sansürlenir; kimlik bilgisi değerleri `maskSecret()` işlevine devredilir |
-| **CSP**                             | Eklenmiş yanıt gövdeleri üzerinden XSS saldırılarını önlemek için Trafik Denetleyicisi sayfalarında katı İçerik Güvenliği Politikası uygulanır                                                                  |
-| **Varsayılan olarak kalıcılık yok** | `TrafficBuffer` bellekte tutulur ve sunucu yeniden başlatıldığında kaybolur. Oturumlar yalnızca açıkça kaydedildiklerinde kalıcı hâle getirilir                                                                 |
+| Kontrol                                | Ayrıntılar                                                                                                                                                                                     |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                         | Tüm rotalar ve WebSocket uç noktası yalnızca loopback üzerinden erişilebilir (`routeGuard.ts` içinde kimlik doğrulamadan önce zorunlu kılınır)                                                 |
+| **Gizli bilgi maskeleme**              | Doğrusal `maskSecret()` tarayıcısı, `TrafficBuffer.push()` öncesinde RFC 6750 Bearer kimlik bilgilerini, sağlayıcı önekli anahtarları ve uzun opak token'ları gizler                           |
+| **Gövde boyutu sınırı**                | `INSPECTOR_MAX_BODY_KB` değerini (varsayılan 1024 KB) aşan gövdeler, `"(performans için kısaltıldı)"` bildirimiyle kısaltılır                                                                  |
+| **Başlık temizleme**                   | Adlar küçük harfe dönüştürülür; çerçeveleme/hop-by-hop ve proxy kimlik doğrulama başlıkları kaldırılır; çerezler tamamen gizlenir; kimlik bilgisi değerleri `maskSecret()` işlevine devredilir |
+| **CSP**                                | Eklenen yanıt gövdeleri üzerinden XSS'yi önlemek için Traffic Inspector sayfalarında katı Content Security Policy uygulanır                                                                    |
+| **Varsayılan olarak kalıcılık yoktur** | `TrafficBuffer` bellekte tutulur ve sunucu yeniden başlatıldığında kaybolur. Oturumlar yalnızca açıkça kaydedildiğinde kalıcı hâle getirilir                                                   |
 
 ### Uygulanan Kesin Kurallar
 
-| Kural                             | Uygulama                                                                                                 |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Trafik Denetleyicisi rotalarından gelen tüm HTTP hata yanıtları temizlenir                               |
-| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/`, LOCAL_ONLY + SPAWN_CAPABLE özelliğine sahiptir (sistem proxy komutları) |
+| Kural                             | Uygulama                                                                                           |
+| --------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **#12** `sanitizeErrorMessage`    | Traffic Inspector rotalarından gelen tüm HTTP hata yanıtları temizlenir                            |
+| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/`, LOCAL_ONLY + SPAWN_CAPABLE kapsamındadır (sistem proxy komutları) |
 
 ### Bilinen sınırlamalar
 
-- **Sistem genelinde proxy modu**, VPN istemcileri ve SSO dâhil olmak üzere makinedeki tüm uygulamaları etkiler. Her zaman otomatik devre dışı bırakma zamanlayıcısıyla kullanın. Paylaşılan makinelerde kullanmayın.
-- **CONNECT tüneli HTTPS**: Mod 3 (HTTP_PROXY), TLS yakalama etkinleştirilmediği sürece HTTPS hedefleri için yalnızca tünel meta verilerini yakalar. Bu tasarım gereğidir — AgentBridge sertifikasına güvenilmeden yapılan şeffaf yakalama, söz konusu uygulamalarda TLS doğrulamasını bozar.
-- **Bazı bileşenlerde sabit kodlanmış dizeler**: Bazı kullanıcı arayüzü bileşenlerinde (F7/F8), henüz i18n anahtarları kapsamına alınmamış az sayıda sabit kodlanmış dize bulunmaktadır. Bunlar, i18n boşluk raporunda Bilinen Sınırlama olarak belgelenmiştir; sonraki bir geçişte taşınacaklardır. Etkilenen dizeler, işlevsel kullanım için çevrilmesi gerekmeyen dekoratif kullanıcı arayüzü etiketleridir.
+- **Sistem genelinde proxy modu**, VPN istemcileri ve SSO dahil olmak üzere makinedeki tüm uygulamaları etkiler. Her zaman otomatik devre dışı bırakma zamanlayıcısıyla kullanın. Paylaşılan makinelerde kullanmayın.
+- **CONNECT tüneli üzerinden HTTPS**: Mod 3 (HTTP_PROXY), HTTPS hedefleri için yalnızca tünel meta verilerini yakalar ve bunların şifresini hiçbir zaman çözmez. Bu tasarım gereğidir — şifre çözme, her istemcinin bir MITM sertifikasına güvenmesini gerektirir; bu nedenle dinleyici HTTPS trafiğini uçtan uca şifreli tutar. HTTPS gövdelerine ihtiyaç duyduğunuzda AgentBridge, Custom Hosts veya TPROXY decrypt kullanın.
+- **Bazı bileşenlerde sabit kodlanmış dizeler**: Bazı UI bileşenlerinde (F7/F8), henüz i18n anahtarları kapsamına alınmamış az sayıda sabit kodlanmış dize bulunmaktadır. Bunlar, i18n eksiklik raporunda Bilinen Sınırlama olarak belgelenmiştir; sonraki bir geçişte taşınacaktır. Etkilenen dizeler, işlevsel kullanım için çeviri gerektirmeyen dekoratif UI etiketleridir.
 
 ---
 
@@ -429,19 +429,19 @@ Arabellek `INSPECTOR_BUFFER_SIZE` değerine (varsayılan 1000) ulaştığında, 
 
 ## §8 API referansı
 
-Tüm rotalar `LOCAL_ONLY` (yalnızca geri döngü) ve `SPAWN_CAPABLE` (sistem proxy komutları) niteliğindedir. Bkz. `src/server/authz/routeGuard.ts`.
+Tüm rotalar `LOCAL_ONLY` (yalnızca loopback) ve `SPAWN_CAPABLE` (sistem proxy komutları) özelliğine sahiptir. Bkz. `src/server/authz/routeGuard.ts`.
 
 Temel yol: `/api/tools/traffic-inspector/`
 
 ### İstek yönetimi
 
-| Yöntem | Yol                         | Açıklama                                                                                     |
-| ------ | --------------------------- | -------------------------------------------------------------------------------------------- |
-| GET    | `/requests`                 | İstekleri listeler (filtrelenebilir: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
-| GET    | `/requests/{id}`            | Tek bir isteğin ayrıntıları                                                                  |
-| DELETE | `/requests`                 | Bellek içi arabelleği temizler                                                               |
-| POST   | `/requests/{id}/replay`     | Aynı isteği OmniRoute yönlendiricisi üzerinden yeniden yürütür                               |
-| PUT    | `/requests/{id}/annotation` | Bir istek üzerindeki notu kaydeder veya günceller                                            |
+| Yöntem | Yol                         | Açıklama                                                                                    |
+| ------ | --------------------------- | ------------------------------------------------------------------------------------------- |
+| GET    | `/requests`                 | İstekleri listele (filtrelenebilir: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
+| GET    | `/requests/{id}`            | Tek bir isteğin ayrıntıları                                                                 |
+| DELETE | `/requests`                 | Bellek içi arabelleği temizle                                                               |
+| POST   | `/requests/{id}/replay`     | Aynı isteği OmniRoute yönlendiricisi üzerinden yeniden yürüt                                |
+| PUT    | `/requests/{id}/annotation` | Bir istek üzerindeki notu kaydet veya güncelle                                              |
 
 ### WebSocket
 
@@ -451,47 +451,47 @@ Temel yol: `/api/tools/traffic-inspector/`
 
 ### Dışa aktarma
 
-| Yöntem | Yol           | Açıklama                                                 |
-| ------ | ------------- | -------------------------------------------------------- |
-| GET    | `/export.har` | Geçerli filtrelenmiş listeyi HAR 1.2 olarak dışa aktarır |
+| Yöntem | Yol           | Açıklama                                               |
+| ------ | ------------- | ------------------------------------------------------ |
+| GET    | `/export.har` | Geçerli filtrelenmiş listeyi HAR 1.2 olarak dışa aktar |
 
-### Özel ana bilgisayarlar
+### Özel ana makineler
 
-| Yöntem | Yol             | Açıklama                                                       |
-| ------ | --------------- | -------------------------------------------------------------- |
-| GET    | `/hosts`        | Özel ana bilgisayarları listeler                               |
-| POST   | `/hosts`        | Ana bilgisayar ekler (`/etc/hosts` otomatik olarak düzenlenir) |
-| DELETE | `/hosts/{host}` | Ana bilgisayarı kaldırır                                       |
-| PATCH  | `/hosts/{host}` | `enabled` durumunu değiştirir                                  |
+| Yöntem | Yol             | Açıklama                                                  |
+| ------ | --------------- | --------------------------------------------------------- |
+| GET    | `/hosts`        | Özel ana makineleri listele                               |
+| POST   | `/hosts`        | Ana makine ekle (`/etc/hosts` otomatik olarak düzenlenir) |
+| DELETE | `/hosts/{host}` | Ana makineyi kaldır                                       |
+| PATCH  | `/hosts/{host}` | `enabled` durumunu değiştir                               |
 
 ### Yakalama modları
 
-| Yöntem | Yol                           | Açıklama                                                                           |
-| ------ | ----------------------------- | ---------------------------------------------------------------------------------- |
-| GET    | `/capture-modes`              | AgentBridge / özel ana bilgisayarlar / HTTP_PROXY / sistem proxy modlarının durumu |
-| POST   | `/capture-modes/http-proxy`   | HTTP_PROXY dinleyicisini başlatır/durdurur (`{action: "start"\|"stop"}`)           |
-| POST   | `/capture-modes/system-proxy` | Sistem genelindeki proxy'yi uygular/geri alır (`{action: "apply"\|"revert"}`)      |
+| Yöntem | Yol                           | Açıklama                                                                       |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------ |
+| GET    | `/capture-modes`              | AgentBridge / özel ana makineler / HTTP_PROXY / sistem proxy modlarının durumu |
+| POST   | `/capture-modes/http-proxy`   | HTTP_PROXY dinleyicisini başlat/durdur (`{action: "start"\|"stop"}`)           |
+| POST   | `/capture-modes/system-proxy` | Sistem genelindeki proxy'yi uygula/geri al (`{action: "apply"\|"revert"}`)     |
 
-> **TPROXY şifre çözme** (yakalama modu 5), AgentBridge öneki altında bulunan
-> **ayrı** bir rota tarafından yönetilir — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` —
+> **TPROXY şifre çözme** (yakalama modu 5), AgentBridge öneki altındaki
+> **ayrı** bir rota üzerinden yönetilir — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` —
 > `/api/tools/traffic-inspector/` altında değildir. Bkz.
 > `docs/security/MITM-TPROXY-DECRYPT.md` (git; `/docs` içine derlenmez).
 
 ### Oturumlar
 
-| Yöntem | Yol                         | Açıklama                                                                       |
-| ------ | --------------------------- | ------------------------------------------------------------------------------ |
-| POST   | `/sessions`                 | Kaydı başlatır (`{name?: string}`)                                             |
-| PATCH  | `/sessions/{id}`            | Durdurur veya yeniden adlandırır (`{action: "stop"\|"rename", name?: string}`) |
-| GET    | `/sessions`                 | Kaydedilmiş tüm oturumları listeler                                            |
-| GET    | `/sessions/{id}`            | Oturum anlık görüntüsü (tüm istekler)                                          |
-| DELETE | `/sessions/{id}`            | Oturumu siler                                                                  |
-| GET    | `/sessions/{id}/export.har` | Oturumu HAR 1.2 olarak dışa aktarır                                            |
+| Yöntem | Yol                         | Açıklama                                                                   |
+| ------ | --------------------------- | -------------------------------------------------------------------------- |
+| POST   | `/sessions`                 | Kaydı başlat (`{name?: string}`)                                           |
+| PATCH  | `/sessions/{id}`            | Durdur veya yeniden adlandır (`{action: "stop"\|"rename", name?: string}`) |
+| GET    | `/sessions`                 | Kaydedilmiş tüm oturumları listele                                         |
+| GET    | `/sessions/{id}`            | Oturum anlık görüntüsü (tüm istekler)                                      |
+| DELETE | `/sessions/{id}`            | Oturumu sil                                                                |
+| GET    | `/sessions/{id}/export.har` | Oturumu HAR 1.2 olarak dışa aktar                                          |
 
 ### Dahili alım (D4 geri dönüşü)
 
-| Yöntem | Yol                | Açıklama                                                                                                          |
-| ------ | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| POST   | `/internal/ingest` | `server.cjs` geçiş yolundan yakalanan isteği kabul eder; `INSPECTOR_INTERNAL_INGEST_TOKEN` üst bilgisi gerektirir |
+| Yöntem | Yol                | Açıklama                                                                                                                  |
+| ------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/internal/ingest` | `server.cjs` geçiş yolundan gelen yakalanmış isteği kabul eder; `INSPECTOR_INTERNAL_INGEST_TOKEN` üstbilgisini gerektirir |
 
 Tam OpenAPI şemaları: `docs/openapi.yaml` → `Traffic Inspector` etiketi.

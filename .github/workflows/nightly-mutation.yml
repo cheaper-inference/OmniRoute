@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   stryker:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: Stryker mutation (batch ${{ matrix.batch.name }} — advisory)
     runs-on: ubuntu-latest
     # Mutation testing is expensive. History of the budget:
@@ -113,6 +113,8 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
       - name: Restore Stryker incremental cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -145,7 +147,7 @@ jobs:
   mutation-ratchet:
     name: Mutation score ratchet (blocking)
     needs: stryker
-    if: ${{ always() && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
+    if: ${{ always() && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

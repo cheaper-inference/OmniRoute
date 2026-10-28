@@ -1,6 +1,8 @@
 import { createHash } from "crypto";
 
 import { cleanJSONSchemaForAntigravity } from "./geminiHelper.ts";
+import { createSchemaBudget } from "./schemaBudget.ts";
+import type { SchemaBudget } from "./schemaBudget.ts";
 
 type GeminiFunctionDeclaration = {
   name: string;
@@ -16,6 +18,8 @@ type GeminiTool = {
 type GeminiToolSanitizationOptions = {
   stripNamespace?: boolean;
   toolNameMap?: Map<string, string> | null;
+  /** Request-wide `$ref` expansion budget; one is created per call when absent. */
+  schemaBudget?: SchemaBudget;
 };
 
 const MAX_GEMINI_TOOL_NAME_LENGTH = 64;
@@ -231,6 +235,7 @@ export function buildGeminiTools(
   // sanitized form, or the same raw name repeated across tool groups).
   const seenToolNames = new Set<string>();
   let googleSearchTool: GeminiTool | null = null;
+  const schemaOptions = { budget: options.schemaBudget ?? createSchemaBudget(), location: "tools" };
 
   for (const rawTool of tools) {
     if (!isRecord(rawTool)) {
@@ -255,7 +260,10 @@ export function buildGeminiTools(
         functionDeclarations.push({
           name: sanitizedName,
           description: typeof fn.description === "string" ? fn.description : "",
-          parameters: cleanJSONSchemaForAntigravity(toGeminiParametersSchema(fn.parameters)),
+          parameters: cleanJSONSchemaForAntigravity(
+            toGeminiParametersSchema(fn.parameters),
+            schemaOptions
+          ),
         });
       }
       continue;
@@ -268,7 +276,10 @@ export function buildGeminiTools(
         functionDeclarations.push({
           name: sanitizedName,
           description: typeof rawTool.description === "string" ? rawTool.description : "",
-          parameters: cleanJSONSchemaForAntigravity(toGeminiParametersSchema(rawTool.input_schema)),
+          parameters: cleanJSONSchemaForAntigravity(
+            toGeminiParametersSchema(rawTool.input_schema),
+            schemaOptions
+          ),
         });
       }
       continue;
@@ -286,7 +297,10 @@ export function buildGeminiTools(
         functionDeclarations.push({
           name: sanitizedName,
           description: typeof fn.description === "string" ? fn.description : "",
-          parameters: cleanJSONSchemaForAntigravity(toGeminiParametersSchema(fn.parameters)),
+          parameters: cleanJSONSchemaForAntigravity(
+            toGeminiParametersSchema(fn.parameters),
+            schemaOptions
+          ),
         });
       }
     }

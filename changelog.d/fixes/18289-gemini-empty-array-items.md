@@ -1,0 +1,1 @@
+- **fix(sse):** Gemini tool schemas now type empty or typeless array `items` (`items: {}` or items emptied by keyword stripping) at any depth instead of sending them typeless ([#18289](https://github.com/cheaper-inference/OmniRoute/pull/18289)) — thanks @TomSeestern

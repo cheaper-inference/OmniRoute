@@ -11,17 +11,18 @@
 các bài học về PII). Hãy đọc toàn bộ; không thêm lại các quy tắc của dự án tại đây. Mọi nội dung bên dưới CHỈ áp dụng
 cho Claude Code — các tinh chỉnh vận hành đối với những quy tắc đã được định nghĩa trong `AGENTS.md`.
 
-## Cô lập worktree — các chi tiết dành riêng cho Claude Code
+## Cách ly worktree — các điểm riêng của Claude Code
 
-Giao thức worktree bắt buộc đầy đủ (xác nhận nhánh cơ sở, đường dẫn chuẩn
-`.claude/worktrees/`, `cp -al` node_modules, quy tắc dọn dẹp) nằm trong `AGENTS.md` → Quy trình Git → "Cô lập
-worktree". Các điểm dành riêng cho Claude Code:
+Giao thức bắt buộc đầy đủ về worktree (xác nhận nhánh gốc, đường dẫn chuẩn
+`.claude/worktrees/`, `cp -al` node_modules, quy tắc dọn dẹp) nằm trong
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (được tóm tắt trong `AGENTS.md` →
+Git Workflow → "Worktree isolation"). Các điểm riêng của Claude Code:
 
-- Xác nhận nhánh cơ sở với người vận hành thông qua `AskUserQuestion` (Quy tắc Cứng #19), trừ khi họ
+- Xác nhận nhánh gốc với người vận hành qua `AskUserQuestion` (Quy tắc cứng #19) trừ khi họ
   đã cho bạn biết.
-- Ưu tiên công cụ gốc `EnterWorktree` — công cụ này đã tạo các worktree trong
+- Ưu tiên dùng công cụ gốc `EnterWorktree` — nó đã tạo worktree dưới
   `.claude/worktrees/` (đường dẫn chuẩn). Tạo worktree bằng lệnh `git
-worktree add` đã được ghi lại trong tài liệu, sau đó gọi `EnterWorktree` với `path` của nó.
+worktree add` đã được tài liệu hóa, sau đó gọi `EnterWorktree` với `path` của nó.
 
 ## An toàn giữa các phiên — các chi tiết dành riêng cho Claude Code
 

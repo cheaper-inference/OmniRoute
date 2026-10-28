@@ -3,6 +3,7 @@
 
 import { stripUnsupportedRegexPatterns } from "../../translator/helpers/schemaCoercion.ts";
 import { coerceSchemaValueShapes } from "../../translator/helpers/schemaValueShapes.ts";
+import { readToolStrict, restoreToolStrict } from "../../translator/helpers/toolStrict.ts";
 
 // Responses-API hosted tool types that OpenAI/Codex executes server-side.
 // These arrive shaped as `{ type, ...params }` with no `function` object and no `name` —
@@ -253,14 +254,15 @@ export function normalizeCodexTools(
             !Array.isArray(functionObject.parameters)
           ? functionObject.parameters
           : { type: "object", properties: {} };
+    // Keep the client-declared strict (boolean or LangChain's `null` opt-out): an omitted
+    // strict means strict-normalized on Responses, so only fall back when undeclared.
+    const declaredStrict = readToolStrict(tool);
     const strict =
-      typeof tool.strict === "boolean"
-        ? tool.strict
-        : typeof functionObject?.strict === "boolean"
-          ? functionObject.strict
-          : typeof options?.defaultFunctionStrict === "boolean"
-            ? options.defaultFunctionStrict
-            : undefined;
+      declaredStrict !== undefined
+        ? declaredStrict
+        : typeof options?.defaultFunctionStrict === "boolean"
+          ? options.defaultFunctionStrict
+          : undefined;
 
     // Codex/OpenAI Responses API rejects `pattern` fields using regex lookaround
     // (e.g. `^(?=.*@).+$`) with a 400 "regex lookaround is not supported" error.
@@ -279,7 +281,7 @@ export function normalizeCodexTools(
     tool.name = name.slice(0, 128);
     if (description) tool.description = description;
     tool.parameters = sanitizedParameters;
-    if (strict !== undefined) tool.strict = strict;
+    restoreToolStrict(tool, strict);
 
     validToolNames.add(name);
     return true;

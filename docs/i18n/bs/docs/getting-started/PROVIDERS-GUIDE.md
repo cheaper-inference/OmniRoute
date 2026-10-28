@@ -10,79 +10,84 @@
 
 ---
 
-## Šta je provajder?
+## Šta je pružalac usluga?
 
-Zamislite provajdera kao **telefonskog operatera**. Baš kao što vam je potreban telefonski operater za obavljanje poziva, potreban vam je AI provajder za korišćenje AI modela. OmniRoute je kao telefon koji radi sa **svim operaterima** — možete se automatski prebacivati između njih.
+Zamislite pružaoca usluga kao **mobilnog operatera**. Baš kao što vam je za upućivanje poziva potreban mobilni operater, za korištenje AI modela potreban vam je pružalac AI usluga. OmniRoute je poput telefona koji radi sa **svim operaterima** — možete se automatski prebacivati između njih.
 
-### Vrste provajdera
+### Vrste pružalaca usluga
 
-| Vrsta           | Šta je to                         | Primjeri                          | Cijena                 |
-| --------------- | --------------------------------- | --------------------------------- | ---------------------- |
-| **Besplatno**   | Nije potrebno plaćanje            | Kiro, OpenCode Free, Pollinations | $0                     |
-| **API ključ**   | Potreban vam je API ključ         | OpenAI, Anthropic, Google         | Plaćanje po korišćenju |
-| **OAuth**       | Prijavite se svojim nalogom       | Claude Code, GitHub Copilot       | Pretplata              |
-| **Web kolačić** | Koristi sesiju vašeg pretraživača | ChatGPT Web (Codex), Gemini Web   | $0 (koristi vaš nalog) |
+| Vrsta           | Šta predstavlja                   | Primjeri                        | Trošak                    |
+| --------------- | --------------------------------- | ------------------------------- | ------------------------- |
+| **Besplatno**   | Plaćanje nije potrebno            | Kiro, Pollinations              | $0                        |
+| **API ključ**   | Potreban vam je API ključ         | OpenAI, Anthropic, Google       | Plaćanje prema korištenju |
+| **OAuth**       | Prijava putem vašeg računa        | Claude Code, GitHub Copilot     | Pretplata                 |
+| **Web kolačić** | Koristi vašu sesiju u pregledniku | ChatGPT Web (Codex), Gemini Web | $0 (koristi vaš račun)    |
 
-### Provajderi sa web kolačićima
+### Pružaoci usluga putem web kolačića
 
-Pogledajte **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** za opšta uputstva za podešavanje, ograničenja, rješavanje problema i smjernice za autentifikaciju specifične za provajdera.
+Pogledajte **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** za opće upute za postavljanje, ograničenja, rješavanje problema i smjernice za autentifikaciju specifične za pojedine pružaoce usluga.
 ---
 
-## Brzi početak: Povežite svog prvog provajdera
+## Brzi početak: Povežite svog prvog pružaoca usluga
 
-### Opciono podešavanje besplatnog provajdera pri prvom pokretanju
+### Opcionalno početno postavljanje besplatnih pružalaca usluga
 
-Čarobnjak za prvo pokretanje nudi eksplicitnu karticu **Set up free providers**. On izvodi trenutnu listu prihvatljivih provajdera iz OmniRoute registra provajdera bez autentifikacije, a zatim vam omogućava da pregledate i poništite izbor svakog provajdera prije potvrde. OmniRoute prikazuje obavještenje o oprezu provajdera i link do njegove stranice kako biste prvo mogli pregledati uslove treće strane, privatnost, dostupnost i ograničenja stope (rate limits).
+Čarobnjak za prvo pokretanje nudi posebnu karticu **Postavi besplatne pružaoce usluga**. On izvodi trenutnu
+listu dostupnih pružalaca usluga iz OmniRoute registra pružalaca koji ne zahtijevaju autentifikaciju, a zatim vam omogućava da pregledate i poništite odabir svakog
+pružaoca prije potvrde. OmniRoute prikazuje upozorenje pružaoca usluga i poveznicu do njegove stranice
+kako biste prvo mogli pregledati uslove treće strane, pravila privatnosti, dostupnost i ograničenja brzine.
 
-Ova radnja je opciona: završetak čarobnjaka nikada ne kreira veze sa besplatnim provajderima tiho. Kreira samo provajdere koji još uvijek nedostaju, ostavlja postojeće prilagođene veze netaknutim i pojedinačno izvještava o kreiranim, već konfigurisanim i neuspjelim provajderima. Možete bezbjedno ponovo pokušati samo neuspjele nakon djelimičnog rezultata.
+Ova radnja je opcionalna: dovršavanje čarobnjaka nikada ne stvara veze s besplatnim pružaocima usluga bez vašeg znanja.
+Kreiraju se samo veze s pružaocima koji još uvijek nedostaju, postojeće prilagođene veze ostaju
+nepromijenjene, a kreirani, već konfigurirani i neuspješni pružaoci prijavljuju se pojedinačno. Nakon djelimičnog rezultata možete
+sigurno ponovo pokušati uspostaviti samo neuspjele veze.
 
-### Opcija A: Besplatni provajder (bez kreditne kartice)
+### Opcija A: Besplatni pružalac usluga (bez kreditne kartice)
 
-1. Otvorite kontrolnu tablu na `http://localhost:20128`
-2. Idite na **Providers** → **Add Provider**
-3. Izaberite jednog od ovih besplatnih provajdera:
-   - **Kiro AI** — Besplatni Claude modeli (nije potrebna autentifikacija)
-   - **OpenCode Free** — Besplatni GPT modeli (nije potrebna autentifikacija)
-   - **Pollinations** — Besplatni GPT-5, Claude, Gemini (nije potreban ključ)
-   - **LongCat** — 10M tokena besplatno (jednokratna dodjela, zahtijeva nalog + KYC)
-   - **Cloudflare AI** — 50+ modela, 10K neurona/dan
-   - **MLX Gemma 26B** — Lokalni Apple Silicon model (~38.5 tok/s, ~15.9GB RAM)
-   - **MLX Qwen 3.8 27B** — Lokalni Apple Silicon model (~9.1 tok/s, ~13.1GB RAM)
-4. Kliknite na **Connect**
-5. Gotovo! Sada imate besplatan AI pristup.
+1. Otvorite kontrolnu ploču na adresi `http://localhost:20128`
+2. Idite na **Pružaoci usluga** → **Dodaj pružaoca usluga**
+3. Odaberite jednog od ovih besplatnih pružalaca usluga:
+   - **Kiro AI** — Besplatni Claude modeli (autentifikacija nije potrebna)
+   - **Pollinations** — Besplatni GPT-5, Claude i Gemini (ključ nije potreban)
+   - **LongCat** — 10M besplatnih tokena (jednokratna dodjela, zahtijeva račun + KYC)
+   - **Cloudflare AI** — Više od 50 modela, 10K neurona/dan
+   - **MLX Gemma 26B** — Lokalni Apple Silicon model (~38.5 tokena/s, ~15.9GB RAM-a)
+   - **MLX Qwen 3.8 27B** — Lokalni Apple Silicon model (~9.1 tokena/s, ~13.1GB RAM-a)
+4. Kliknite **Poveži**
+5. Gotovo! Sada imate besplatan pristup vještačkoj inteligenciji.
 
-### Opcija B: Provajder sa API ključem (plaćeni)
+### Opcija B: Pružalac usluga s API ključem (plaćeno)
 
-1. Nabavite API ključ sa veb stranice provajdera:
+1. Preuzmite API ključ s web-stranice pružaoca usluga:
    - **OpenAI**: https://platform.openai.com/api-keys
    - **Anthropic**: https://console.anthropic.com/
    - **Google**: https://aistudio.google.com/apikey
    - **DeepSeek**: https://platform.deepseek.com/
    - **Groq**: https://console.groq.com/
-2. Otvorite kontrolnu tablu na `http://localhost:20128`
-3. Idite na **Providers** → **Add Provider**
-4. Izaberite svog provajdera
-5. Nalijepite svoj API ključ
-6. Kliknite na **Connect**
-7. Gotovo! Sada imate pristup modelima tog provajdera.
+2. Otvorite kontrolnu ploču na adresi `http://localhost:20128`
+3. Idite na **Pružaoci usluga** → **Dodaj pružaoca usluga**
+4. Odaberite svog pružaoca usluga
+5. Zalijepite svoj API ključ
+6. Kliknite **Poveži**
+7. Gotovo! Sada imate pristup modelima tog pružaoca usluga.
 
-### Opcija C: OAuth provajder (pretplata)
+### Opcija C: OAuth pružalac usluga (pretplata)
 
-1. Otvorite kontrolnu tablu na `http://localhost:20128`
-2. Idite na **Providers** → **Add Provider**
-3. Izaberite svog provajdera (npr. Claude Code, GitHub Copilot)
-4. Kliknite na **Connect with OAuth**
-5. Prijavite se svojim nalogom
-6. Gotovo! Sada imate pristup svojim modelima pretplate.
+1. Otvorite kontrolnu ploču na adresi `http://localhost:20128`
+2. Idite na **Pružaoci usluga** → **Dodaj pružaoca usluga**
+3. Odaberite svog pružaoca usluga (npr. Claude Code, GitHub Copilot)
+4. Kliknite **Poveži putem OAuth-a**
+5. Prijavite se svojim računom
+6. Gotovo! Sada imate pristup modelima iz svoje pretplate.
 
 ### Opcija D: Lokalni MLX modeli (Apple Silicon)
 
-Za Apple Silicon Mac računare sa objedinjenom memorijom, OmniRoute podržava povezivanje sa lokalnim MLX modelima koji rade putem `mlx-lm.server` kao obični lokalni provajderi kompatibilni sa OpenAI.
+Za Apple Silicon Mac računare s objedinjenom memorijom, OmniRoute podržava povezivanje s lokalnim MLX modelima koji se pokreću putem `mlx-lm.server` kao uobičajeni lokalni pružaoci kompatibilni s OpenAI-jem.
 
 #### Preduslovi
 
-- **Apple Silicon Mac** (M1/M2/M3/M4) sa preporučenih 24GB+ objedinjene memorije
-- **uv** menadžer paketa: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **Apple Silicon Mac** (M1/M2/M3/M4) s preporučenih 24GB+ objedinjene memorije
+- **uv** upravitelj paketa: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
 #### Brzi početak
@@ -90,14 +95,14 @@ Za Apple Silicon Mac računare sa objedinjenom memorijom, OmniRoute podržava po
 1. **Instalirajte zavisnosti**:
 
    ```bash
-   # Install uv if not already installed
+   # Instalirajte uv ako već nije instaliran
    curl -LsSf https://astral.sh/uv/install.sh | sh
 
-   # Install mlx-lm
+   # Instalirajte mlx-lm
    uv pip install mlx-lm
    ```
 
-2. **Ručno pokrenite MLX servere** (u zasebnim terminalima):
+2. **Ručno pokrenite MLX servere** (u odvojenim terminalima):
 
    ```bash
    # Terminal 1: Gemma 4 26B A4B IT-QAT (port 11435)
@@ -107,40 +112,40 @@ Za Apple Silicon Mac računare sa objedinjenom memorijom, OmniRoute podržava po
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **Povežite se na OmniRoute kontrolnoj tabli**:
-   - Idite na **Providers** → **Add Provider**
-   - Izaberite **MLX Gemma 26B** ili **MLX Qwen 3.8 27B**
-   - Kliknite na **Connect** (nije potreban API ključ)
+3. **Povežite se putem OmniRoute kontrolne ploče**:
+   - Idite na **Pružaoci usluga** → **Dodaj pružaoca usluga**
+   - Odaberite **MLX Gemma 26B** ili **MLX Qwen 3.8 27B**
+   - Kliknite **Poveži** (API ključ nije potreban)
 
-4. **Koristite sa OpenCode**:
+4. **Koristite s OpenCodeom**:
    ```bash
-   # Configure OpenCode to use OmniRoute
+   # Konfigurirajte OpenCode da koristi OmniRoute
    opencode config set api.base_url http://localhost:20128/v1
    opencode config set api.key <your-omniroute-api-key>
 
-   # Use MLX models
+   # Koristite MLX modele
    opencode run --model mlx-gemma/gemma-4-26b
    opencode run --model mlx-qwen/qwen3.8-27b
    ```
 
 #### Upravljanje memorijom
 
-**Važno**: Sa 24GB objedinjene memorije, samo **jedan veliki MLX model može raditi u isto vrijeme**.
+**Važno**: S 24GB objedinjene memorije, istovremeno se može pokretati samo **jedan veliki MLX model**.
 
-- Gemma 26B: ~15.9GB vršne memorije
-- Qwen 3.8 27B: ~13.1GB vršne memorije
+- Gemma 26B: ~15.9GB vršne potrošnje memorije
+- Qwen 3.8 27B: ~13.1GB vršne potrošnje memorije
 
-Ovo morate upravljati ručno:
+Ovim morate upravljati ručno:
 
-- Pokrenite samo jedan MLX server odjednom, ili
-- Pokrenite oba na odvojenim mašinama, ili
+- Pokrećite samo jedan MLX server istovremeno ili
+- Pokrenite ih na odvojenim računarima ili
 - Zaustavite jedan prije pokretanja drugog
 
-OmniRoute ne upravlja automatski procesima MLX servera — on samo usmjerava zahtjeve ka OpenAI-kompatibilnim krajnjim tačkama koje konfigurišete.
+OmniRoute ne upravlja automatski procesima MLX servera — on samo usmjerava zahtjeve prema krajnjim tačkama kompatibilnim s OpenAI-jem koje konfigurirate.
 
-#### Podrška za pozivanje alata (Tool Calling)
+#### Podrška za pozivanje alata
 
-Oba modela podržavaju OpenAI-kompatibilno pozivanje alata. Testirajte sa:
+Oba modela podržavaju pozivanje alata kompatibilno s OpenAI-jem. Testirajte pomoću:
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -155,31 +160,30 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 #### Rješavanje problema
 
-| Problem                    | Rješenje                                                                                     |
-| -------------------------- | -------------------------------------------------------------------------------------------- |
-| Server se ne pokreće       | Provjerite `uv run mlx_lm.server --help` i potvrdite ID-ove modela                           |
-| Nedostatak memorije        | Osigurajte da radi samo jedan model; zatvorite druge aplikacije; provjerite Activity Monitor |
-| Veza odbijena              | Provjerite da li server radi na ispravnom portu (11435/11436)                                |
-| Spori odgovori             | Prvi zahtjev učitava model u memoriju (~30-60s); naredni zahtjevi su brzi                    |
-| Pozivanje alata neuspješno | Osigurajte da model podržava alate; provjerite OmniRoute logove za greške u prijevodu        |
+| Problem                     | Rješenje                                                                                            |
+| --------------------------- | --------------------------------------------------------------------------------------------------- |
+| Server se ne pokreće        | Provjerite `uv run mlx_lm.server --help` i ID-ove modela                                            |
+| Nedovoljno memorije         | Osigurajte da je pokrenut samo jedan model; zatvorite druge aplikacije; provjerite Activity Monitor |
+| Veza je odbijena            | Provjerite je li server pokrenut na odgovarajućem portu (11435/11436)                               |
+| Spori odgovori              | Prvi zahtjev učitava model u memoriju (~30-60s); naredni zahtjevi su brzi                           |
+| Pozivanje alata ne uspijeva | Provjerite podržava li model alate; provjerite OmniRoute zapise radi grešaka u prevođenju           |
 
 ---
 
-## Najbolji besplatni pružaoci usluga
+## Najbolji besplatni pružaoci
 
 Ovi pružaoci nude **besplatan pristup** bez kreditne kartice:
 
-| Pružalac          | Besplatna kvota             | Modeli                                   | Način povezivanja             |
+| Pružalac          | Besplatna kvota             | Modeli                                   | Kako se povezati              |
 | ----------------- | --------------------------- | ---------------------------------------- | ----------------------------- |
 | **Kiro AI**       | 50 kredita mjesečno         | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Autentifikacija nije potrebna |
-| **OpenCode Free** | Neograničeno                | GPT-4o, Claude, Gemini                   | Autentifikacija nije potrebna |
 | **Pollinations**  | Ključ nije potreban         | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Autentifikacija nije potrebna |
 | **LongCat**       | 10M jednokratno             | LongCat-2.0                              | API ključ + KYC               |
-| **Cloudflare AI** | 10K neurona dnevno          | Više od 50 modela                        | Autentifikacija nije potrebna |
+| **Cloudflare AI** | 10K neurona dnevno          | 50+ modela                               | Autentifikacija nije potrebna |
 | **NVIDIA NIM**    | ~40 RPM                     | 129 modela                               | Potreban je API ključ         |
 | **Cerebras**      | $5 kredita pri registraciji | GLM 4.7, GPT-OSS 120B                    | API ključ + kartica           |
 
-**Savjet**: Povežite više besplatnih pružalaca za **neograničenu besplatnu umjetnu inteligenciju** s automatskim prebacivanjem na rezervnog pružaoca!
+**Savjet**: Povežite više besplatnih pružalaca za **neograničen besplatni AI** s automatskim prebacivanjem na alternativu!
 
 ---
 
@@ -232,22 +236,22 @@ Vaš provajder je sada povezan. Možete ga koristiti sa `model: "auto"` ili dire
 
 ---
 
-## Korištenje više provajdera
+## Korištenje više pružatelja usluga
 
-OmniRoute najbolje radi sa **više provajdera**. Ovo vam omogućava:
+OmniRoute najbolje radi s **više pružatelja usluga**. To vam omogućava:
 
-- **Automatska rezervna opcija (fallback)** — Ako jedan provajder zakaže, OmniRoute pokušava sa sljedećim
-- **Optimizacija troškova** — OmniRoute bira najjeftinijeg provajdera za svaki zahtjev
-- **Optimizacija brzine** — OmniRoute bira najbržeg provajdera za svaki zahtjev
-- **Optimizacija kvaliteta** — OmniRoute bira najboljeg provajdera za svaki zadatak
+- **Automatski prelazak na rezervnog pružatelja** — Ako jedan pružatelj ne uspije, OmniRoute pokušava sa sljedećim
+- **Optimizaciju troškova** — OmniRoute bira najjeftinijeg pružatelja za svaki zahtjev
+- **Optimizaciju brzine** — OmniRoute bira najbržeg pružatelja za svaki zahtjev
+- **Optimizaciju kvaliteta** — OmniRoute bira najboljeg pružatelja za svaki zadatak
 
-### Preporučeno podešavanje
+### Preporučena postavka
 
-Povežite najmanje **3 provajdera** za najbolje iskustvo:
+Povežite najmanje **3 pružatelja usluga** za najbolje iskustvo:
 
-1. **Jedan besplatni provajder** (Kiro, OpenCode Free ili Pollinations) — Uvijek dostupan
-2. **Jedan brzi provajder** (Groq, Cerebras) — Za brze odgovore
-3. **Jedan kvalitetni provajder** (OpenAI, Anthropic, Google) — Za složene zadatke
+1. **Jedan besplatni pružatelj** (Kiro ili Pollinations) — Uvijek dostupan
+2. **Jedan brzi pružatelj** (Groq, Cerebras) — Za brze odgovore
+3. **Jedan kvalitetni pružatelj** (OpenAI, Anthropic, Google) — Za složene zadatke
 
 Zatim koristite `model: "auto"` i OmniRoute će automatski odabrati najboljeg za svaki zahtjev.
 
@@ -329,29 +333,29 @@ i podesivo vremensko ograničenje zasebna su poboljšanja; ovo ponašanje ih ne 
 
 ## Česta pitanja
 
-### "Da li moram platiti za korištenje OmniRoute-a?"
+### "Moram li platiti korištenje OmniRoutea?"
 
-**Ne!** OmniRoute je besplatan i otvorenog koda. Možete koristiti besplatne provajdere (Kiro, OpenCode Free, Pollinations) bez ikakvog plaćanja. Plaćate samo ako odlučite koristiti plaćene provajdere.
+**Ne!** OmniRoute je besplatan i otvorenog koda. Možete koristiti besplatne pružaoce usluga (Kiro, Pollinations) bez ikakvog plaćanja. Plaćate samo ako odlučite koristiti pružaoce usluga koji se plaćaju.
 
-### "S kojim provajderom trebam početi?"
+### "S kojim pružaocem usluga trebam početi?"
 
-Počnite sa **Kiro AI** — besplatan je, ne zahtijeva API ključ i omogućava vam pristup Claude modelima. Zatim dodajte više provajdera po potrebi.
+Počnite s **Kiro AI** — besplatan je, ne zahtijeva API ključ i omogućava vam pristup Claude modelima. Zatim po potrebi dodajte još pružalaca usluga.
 
-### "Mogu li koristiti više provajdera istovremeno?"
+### "Mogu li istovremeno koristiti više pružalaca usluga?"
 
-**Da!** To je cijela poenta OmniRoute-a. Povežite više provajdera i koristite `model: "auto"` kako bi OmniRoute odabrao najbolji za svaki zahtjev.
+**Da!** To je glavna svrha OmniRoutea. Povežite više pružalaca usluga i koristite `model: "auto"` kako bi OmniRoute odabrao najboljeg za svaki zahtjev.
 
-### "Šta ako provajder prestane raditi?"
+### "Šta ako pružalac usluga prestane raditi?"
 
-OmniRoute automatski preskače neuspješne provajdere i pokušava sa sljedećim. Ne morate ništa raditi.
+OmniRoute automatski preskače pružaoce usluga koji ne rade i pokušava sa sljedećim. Ne morate ništa poduzimati.
 
-### "Kako da isključim provajdera?"
+### "Kako mogu prekinuti vezu s pružaocem usluga?"
 
-Idite na Providers → kliknite na provajdera → kliknite na **Disconnect**.
+Idite na Providers → kliknite na pružaoca usluga → kliknite **Disconnect**.
 
 ### "Mogu li koristiti svoje postojeće API ključeve?"
 
-**Da!** Ako već imate API ključeve za OpenAI, Anthropic, Google, itd., možete ih koristiti u OmniRoute-u. Samo ih zalijepite prilikom povezivanja provajdera.
+**Da!** Ako već imate API ključeve za OpenAI, Anthropic, Google itd., možete ih koristiti u OmniRouteu. Samo ih zalijepite prilikom povezivanja pružaoca usluga.
 
 ---
 

@@ -1,1 +1,0 @@
-- **fix(sse):** Gemini tool schemas drop `errorMessage` and `cache_control` keywords and expand shorthand property entries like `"metadata": "object"`, fixing HTTP 400s ([#16295](https://github.com/diegosouzapw/OmniRoute/pull/16295)) — thanks @louisphamdev, @WellArtDev

@@ -9,7 +9,7 @@ export const ANTIGRAVITY_VERSION_FETCH_TIMEOUT_MS = 5_000;
 // buckets for newer models (e.g. Gemini 3.7 Flash) to IDE clients >= 2.5.5, and the public
 // updater feed can lag behind that, so the resolver never reports anything older than this.
 export const ANTIGRAVITY_IDE_FALLBACK_VERSION = "2.5.5";
-export const ANTIGRAVITY_CLI_FALLBACK_VERSION = "1.1.5";
+export const ANTIGRAVITY_CLI_FALLBACK_VERSION = "1.3.4";
 
 type VersionCache = {
   fetchedAt: number;

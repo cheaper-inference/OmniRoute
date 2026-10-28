@@ -19,43 +19,42 @@ OmniRoute **mengagregatkan** sambungan yang dikonfigurasikan ke dalam satu titik
 
 ---
 
-## Penyedia Akses Percuma Representatif
+## Penyedia Akses Percuma Utama
 
 ### Akses Berulang, Tanpa Kunci, atau Tanpa Had
 
-Penyedia ini mempunyai laluan akses percuma yang berulang, tanpa kunci, atau tanpa had dalam katalog yang diaudit. “Tanpa had” bermaksud tiada had token yang diterbitkan; had kadar, keserentakan, akaun, wilayah dan dasar masih boleh dikenakan:
+Penyedia ini mempunyai kaedah akses percuma yang berulang, tanpa kunci, atau tanpa had dalam katalog yang diaudit. “Tanpa had” bermaksud tiada had token yang diterbitkan; had kadar, keserentakan, akaun, wilayah dan dasar masih boleh dikenakan:
 
-| Penyedia          | Model                                                                                           | Kuota                                                                                                                             | Cara Menyambung                                                                                           |
-| ----------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 dan lain-lain                                       | Katalog yang diaudit menganggarkan kumpulan kongsi bulanan sebanyak 25K token                                                     | Aliran OAuth/akaun; Syarat Perkhidmatan ditandai `avoid` dalam katalog                                    |
-| **OpenCode Free** | Set model `*-free` semasa dalam daftar penyedia                                                 | Tanpa kunci; tiada had token yang diterbitkan                                                                                     | Tiada kelayakan penyedia; Syarat Perkhidmatan ditandai `avoid`                                            |
-| **Pollinations**  | Set model tanpa kunci semasa; sesetengah model terdahulu telah dihentikan atau memerlukan kunci | Tanpa kunci; tiada had token yang diterbitkan                                                                                     | Tiada kelayakan penyedia untuk model tanpa kunci                                                          |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 dan lain-lain                       | Kunci API percuma (tiada had kadar, tiada kad); **setiap permintaan dilog** untuk penyelidikan (tarik diri di logfare.ai/consent) | Kunci segera di logfare.ai/register; Syarat Perkhidmatan/privasi di logfare.ai/tos dan logfare.ai/privacy |
-| **Cloudflare AI** | Katalog Workers AI                                                                              | Kumpulan yang diaudit menganggarkan ~30M token/bulan berdasarkan unit penggunaan yang diterbitkan                                 | Akaun Cloudflare dan kelayakan API                                                                        |
-| **Gemini**        | Keluarga Gemini Flash                                                                           | Had kadar projek/model yang berubah-ubah; tiada peruntukan token bulanan tetap disertakan dalam angka utama                       | Kunci API Google AI Studio; semak had aktif projek                                                        |
-| **Groq**          | Model Llama, GPT-OSS dan Qwen                                                                   | Kumpulan yang diaudit menganggarkan ~15M token/bulan                                                                              | Kunci API Groq; had kadar dikenakan                                                                       |
+| Penyedia          | Model                                                                                           | Kuota                                                                                                                             | Cara Menyambung                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 dan lain-lain                                       | Katalog yang diaudit menganggarkan kumpulan bulanan dikongsi sebanyak 25K token                                                   | Aliran OAuth/akaun; ToS ditandai sebagai `avoid` dalam katalog                            |
+| **Pollinations**  | Set model tanpa kunci semasa; sesetengah model terdahulu telah dihentikan atau memerlukan kunci | Tanpa kunci; tiada had token yang diterbitkan                                                                                     | Tiada bukti kelayakan penyedia untuk model tanpa kunci                                    |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 dan banyak lagi                     | Kunci API percuma (tiada had kadar, tiada kad); **setiap permintaan dilog** untuk penyelidikan (tarik diri di logfare.ai/consent) | Kunci segera di logfare.ai/register; ToS/privasi di logfare.ai/tos dan logfare.ai/privacy |
+| **Cloudflare AI** | Katalog Workers AI                                                                              | Kumpulan yang diaudit menganggarkan ~30M token/bulan berdasarkan unit penggunaan yang diterbitkan                                 | Akaun Cloudflare dan bukti kelayakan API                                                  |
+| **Gemini**        | Keluarga Gemini Flash                                                                           | Had kadar projek/model yang berubah-ubah; tiada peruntukan token bulanan tetap disertakan dalam tajuk utama                       | Kunci API Google AI Studio; semak had aktif projek                                        |
+| **Groq**          | Model Llama, GPT-OSS dan Qwen                                                                   | Kumpulan yang diaudit menganggarkan ~15M token/bulan                                                                              | Kunci API Groq; had kadar dikenakan                                                       |
 
 ### Geran Pendaftaran dan Kredit Khusus Penyedia
 
-Penyedia ini menawarkan geran pendaftaran atau kredit promosi, tertakluk pada peraturan kelayakan mereka. Seperti yang disahkan pada 2026-10-08, [harga Cerebras](https://www.cerebras.ai/pricing) memerlukan kaedah pembayaran untuk kredit sekali sahaja sebanyak $5 yang tamat tempoh selepas 30 hari; ia bukan kuota token berulang. [Had kadar Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) berbeza mengikut projek, model dan peringkat, maka ia tidak ditukarkan kepada geran token bulanan yang dijamin.
+Penyedia ini menawarkan geran pendaftaran atau kredit promosi, tertakluk pada peraturan kelayakan mereka. Seperti yang disahkan pada 2026-10-08, [harga Cerebras](https://www.cerebras.ai/pricing) memerlukan kaedah pembayaran untuk kredit sekali beri sebanyak $5 yang tamat tempoh selepas 30 hari; ia bukan kuota token berulang. [Had kadar Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) berbeza mengikut projek, model dan peringkat, jadi had tersebut tidak ditukarkan kepada geran token bulanan yang dijamin.
 
-| Penyedia      | Kredit Percuma                                                                            | Model                         | Cara Mendapatkannya                                              |
-| ------------- | ----------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------- |
-| **Cerebras**  | Kredit promosi sekali sahaja sebanyak $5; tamat tempoh selepas 30 hari                    | Katalog inferens semasa       | Akaun dan kaedah pembayaran yang sah                             |
-| **DeepSeek**  | 5M token percuma                                                                          | DeepSeek V4                   | Daftar di platform.deepseek.com                                  |
-| **LongCat**   | Geran sekali sahaja sebanyak 10M token                                                    | LongCat 2.0                   | Kunci API + KYC; bayar mengikut penggunaan selepas geran         |
-| **Vertex AI** | Kredit pendaftaran sebanyak $300 yang diwakili sebagai ~300M token dalam model belanjawan | Gemini dan model rakan kongsi | Akaun Google Cloud; peraturan pengebilan dan kelayakan dikenakan |
+| Penyedia      | Kredit Percuma                                                                   | Model                         | Cara Mendapatkannya                                              |
+| ------------- | -------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------- |
+| **Cerebras**  | Kredit promosi sekali beri sebanyak $5; tamat tempoh selepas 30 hari             | Katalog inferens semasa       | Akaun dan kaedah pembayaran yang sah                             |
+| **DeepSeek**  | 5M token percuma                                                                 | DeepSeek V4                   | Daftar di platform.deepseek.com                                  |
+| **LongCat**   | Geran sekali beri sebanyak 10M token                                             | LongCat 2.0                   | Kunci API + KYC; bayar mengikut penggunaan selepas geran         |
+| **Vertex AI** | Kredit pendaftaran $300 yang diwakili sebagai ~300M token dalam model belanjawan | Gemini dan model rakan kongsi | Akaun Google Cloud; peraturan pengebilan dan kelayakan dikenakan |
 
 ### Akses Terhad Lain
 
-Penyedia ini mempunyai **peringkat percuma** dengan had khusus:
+Penyedia ini mempunyai **peringkat percuma** dengan had tertentu:
 
-| Penyedia                   | Had Percuma                                                                                                         | Model                                | Paling Sesuai Untuk |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------- |
-| **GitHub Models**          | Kumpulan kongsi yang diaudit menganggarkan ~18M token/bulan                                                         | Penilaian model yang luas            |
-| **Hugging Face**           | Kumpulan bulanan berulang yang kecil                                                                                | Eksperimen dan kepelbagaian model    |
-| **OpenRouter free models** | Kumpulan kongsi dengan had permintaan; tambah nilai sekali sahaja yang bersifat pilihan meningkatkan elaun berulang | Katalog sandaran yang luas           |
-| **AI Horde**               | Kapasiti komuniti tanpa kunci; ketersediaan berbeza-beza                                                            | Inferens teragih secara oportunistik |
+| Penyedia                   | Had Percuma                                                                                                  | Model                                | Paling Sesuai Untuk |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------ | ------------------- |
+| **GitHub Models**          | Kumpulan dikongsi yang diaudit menganggarkan ~18M token/bulan                                                | Penilaian pelbagai model             |
+| **Hugging Face**           | Kumpulan bulanan berulang yang kecil                                                                         | Eksperimen dan kepelbagaian model    |
+| **OpenRouter free models** | Kumpulan dikongsi dengan had permintaan; tambah nilai sekali beri secara pilihan meningkatkan elaun berulang | Katalog sandaran yang luas           |
+| **AI Horde**               | Kapasiti komuniti tanpa kunci; ketersediaan berbeza-beza                                                     | Inferens teragih secara oportunistik |
 
 ---
 

@@ -123,7 +123,9 @@
       "maxCostOpt": "በቀን ከፍተኛው ወጪ (USD)",
       "allowedModelsOpt": "በነጠላ ሰረዝ የተለዩ የተፈቀዱ ሞዴሎች ዝርዝር",
       "nothingToSet": "ምንም የፖሊሲ መስኮች አልቀረቡም። --rate-limit፣ --max-cost ወይም --allowed-models ይጠቀሙ።",
-      "updated": "ፖሊሲው ዘምኗል።"
+      "updated": "ፖሊሲው ዘምኗል።",
+      "modelAccessModeOpt": "የሞዴል መዳረሻ ሁነታ (all | restricted)",
+      "unrestrictedOpt": "ሁሉንም ሞዴሎች ፍቀድ (--model-access-mode all)"
     },
     "expiration": {
       "title": "የቁልፍ ጊዜ ማብቂያ",

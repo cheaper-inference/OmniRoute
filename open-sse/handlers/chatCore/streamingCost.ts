@@ -6,15 +6,20 @@
  * completed streaming response and records it against the api key. onStreamComplete is synchronous,
  * so this is a sync fire-and-forget driven through calculateCost().then().catch() that never throws
  * to the caller. calculateCost and recordCost are injected so the hook stays decoupled. Behaviour
- * is byte-identical to the previous inline block.
+ * is byte-identical to the previous inline block. A resolver may return the detailed
+ * `{ costUsd, priced }` result instead of a bare number; an unpriced one is reported through
+ * `recordUnpricedCost` so a metered model with no price is not silently charged $0.
  */
+
+/** The `{ costUsd, priced }` shape of `calculateCostDetailed` (lib/usage/costCalculator). */
+type DetailedCost = { costUsd: number; priced: boolean; failed?: boolean };
 
 type CostResolver = (
   provider: string,
   model: string,
   usage: Record<string, number | undefined> | null | undefined,
   options: { serviceTier?: string }
-) => Promise<number>;
+) => Promise<number | DetailedCost>;
 
 /** Extra per-request ledger context threaded from the handler. */
 type LedgerDetails = {
@@ -53,6 +58,7 @@ export function recordStreamingCost(args: {
       requestId?: string | null;
     }
   ) => void;
+  recordUnpricedCost?: (apiKeyId: string, cost: DetailedCost) => void;
   ledger?: LedgerDetails;
 }): void {
   if (!args.apiKeyId || !args.streamUsage) return;
@@ -60,7 +66,10 @@ export function recordStreamingCost(args: {
   const apiKeyId = args.apiKeyId;
   args
     .calculateCost(args.provider, args.model, args.streamUsage, { serviceTier: args.serviceTier })
-    .then((estimatedCost) => {
+    .then((resolved) => {
+      const cost = typeof resolved === "number" ? { costUsd: resolved, priced: true } : resolved;
+      if (!cost.priced) args.recordUnpricedCost?.(apiKeyId, cost);
+      const estimatedCost = cost.costUsd;
       if (estimatedCost > 0) {
         args.recordCost(apiKeyId, estimatedCost, {
           provider: args.provider,

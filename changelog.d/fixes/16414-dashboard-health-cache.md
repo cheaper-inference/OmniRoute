@@ -1,1 +1,0 @@
-- **fix(monitoring):** dashboard polling reuses the health snapshot for 30 seconds to reduce repeated event-loop aggregation.

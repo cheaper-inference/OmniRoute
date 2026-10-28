@@ -92,6 +92,24 @@
       "justification": "Same as @eloqnt/config: next-intl transitive, registry SPDX MIT, locked 0.0.3 tarball omits license field and LICENSE file so the checker reports UNKNOWN. Re-review with the next-intl range bump.",
       "risk": "low",
       "reviewAt": "v4.0.0"
+    },
+    "@fontsource/ibm-plex-mono": {
+      "license": "OFL-1.1",
+      "justification": "SIL Open Font License 1.1 covers only the font files shipped by @fontsource/ibm-plex-mono (self-hosted dashboard typography added by the Keak CI UI Kit migration, KEA-7886). OFL-1.1 permits bundling, embedding and redistribution of the fonts with software of any license as long as the fonts themselves are not sold on their own and keep their notices; it places no copyleft or attribution requirement on OmniRoute's code. The fonts are served as static assets, never modified.",
+      "risk": "low",
+      "reviewAt": "v4.0.0"
+    },
+    "@fontsource/instrument-serif": {
+      "license": "OFL-1.1",
+      "justification": "SIL Open Font License 1.1 covers only the font files shipped by @fontsource/instrument-serif (self-hosted dashboard typography added by the Keak CI UI Kit migration, KEA-7886). OFL-1.1 permits bundling, embedding and redistribution of the fonts with software of any license as long as the fonts themselves are not sold on their own and keep their notices; it places no copyleft or attribution requirement on OmniRoute's code. The fonts are served as static assets, never modified.",
+      "risk": "low",
+      "reviewAt": "v4.0.0"
+    },
+    "@fontsource/inter": {
+      "license": "OFL-1.1",
+      "justification": "SIL Open Font License 1.1 covers only the font files shipped by @fontsource/inter (self-hosted dashboard typography added by the Keak CI UI Kit migration, KEA-7886). OFL-1.1 permits bundling, embedding and redistribution of the fonts with software of any license as long as the fonts themselves are not sold on their own and keep their notices; it places no copyleft or attribution requirement on OmniRoute's code. The fonts are served as static assets, never modified.",
+      "risk": "low",
+      "reviewAt": "v4.0.0"
     }
   }
 }

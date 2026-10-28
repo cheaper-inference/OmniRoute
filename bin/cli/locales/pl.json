@@ -123,7 +123,9 @@
       "maxCostOpt": "Maksymalny koszt dzienny (USD)",
       "allowedModelsOpt": "Rozdzielona przecinkami lista dozwolonych modeli",
       "nothingToSet": "Nie podano żadnych pól zasad. Użyj --rate-limit, --max-cost lub --allowed-models.",
-      "updated": "Zasady zostały zaktualizowane."
+      "updated": "Zasady zostały zaktualizowane.",
+      "modelAccessModeOpt": "Tryb dostępu do modeli (all | restricted)",
+      "unrestrictedOpt": "Zezwól na wszystkie modele (--model-access-mode all)"
     },
     "expiration": {
       "title": "Wygaśnięcie klucza",

@@ -17,7 +17,12 @@ import { sanitizeErrorMessage } from "../utils/errorSanitization.ts";
 import { formatSSE } from "../utils/streamHelpers.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { PARKED_STREAM_HEADER, PARKED_STREAM_VALUE } from "../utils/streamReadiness.ts";
-import { isProxyAvoided, proxyEgressKey, proxySetAsideSeq } from "../utils/proxyRefusalMemory.ts";
+import {
+  isProxyAvoided,
+  proxyEgressKey,
+  proxySetAsideSeq,
+  proxySetAsideStatus,
+} from "../utils/proxyRefusalMemory.ts";
 import { maskAccountId, type RotatableAccount } from "./accountRotation.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
 import { noteResilienceAction } from "@/lib/usage/resilienceActionsContext.ts";
@@ -139,6 +144,32 @@ async function defaultReadMarker(markerPath: string): Promise<{ mtimeMs: number;
 export function parkWaitMs(ttlLeftMs: number | null): number {
   if (ttlLeftMs === null) return PARK_WAIT_MS;
   return Math.min(PARK_WAIT_MS, Math.max(0, ttlLeftMs));
+}
+
+/**
+ * Park wait while every egress sits aside for quota: the nearest real
+ * set-aside end, or null when no park is due on this path. A key that is
+ * null, unknown, or free means dispatch can still try it, so the received
+ * counter stays the trigger. A key set aside for anything but quota (slow,
+ * transport, unreachable, geo) vetoes too: the wake-up only serves fresh
+ * members, so waiting for a quota end would idle for nothing. The wait never
+ * exceeds the existing park window.
+ */
+export function setAsideParkWaitMs(
+  keys: Array<string | null>,
+  nowMs: number = Date.now()
+): number | null {
+  let nearest: number | null = null;
+  for (const key of keys) {
+    if (key === null) return null;
+    const status = proxySetAsideStatus(key, nowMs);
+    if (!status.setAside || !status.quotaOnly || status.endsAt === null) return null;
+    if (nearest === null || status.endsAt < nearest) nearest = status.endsAt;
+  }
+  if (nearest === null) return null;
+  const wait = nearest - nowMs;
+  if (wait <= 0 || wait > PARK_WAIT_MS) return null;
+  return wait;
 }
 
 /**

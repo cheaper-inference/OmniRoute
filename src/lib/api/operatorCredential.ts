@@ -14,6 +14,12 @@ export interface OperatorCredentialOptions {
    * an internal service actually calls (sync token issuance) should opt in.
    */
   allowInternalService?: boolean;
+  /**
+   * The action is a credential surface that stays authenticated even when login is disabled
+   * (the `ALWAYS_PROTECTED_API_PATHS` tier): an open instance no longer counts as the operator,
+   * so an API key presented on an open instance is still refused. Off by default.
+   */
+  alwaysRequireAuth?: boolean;
 }
 
 /**
@@ -36,19 +42,30 @@ export async function resolveOperatorCredential(
   request: Request,
   options: OperatorCredentialOptions = {}
 ): Promise<OperatorCredentialKind | null> {
-  if (!(await isAuthRequired(request, { ignorePublicRoute: true }))) return "open_instance";
+  if (!options.alwaysRequireAuth && !(await isAuthRequired(request, { ignorePublicRoute: true }))) {
+    return "open_instance";
+  }
   if (await isDashboardSessionAuthenticated(request)) return "dashboard_session";
   if (options.allowInternalService && isTrustedLoopbackInternalServiceRequest(request)) {
     return "internal_service";
   }
+  if (await isLocalCliCredential(request)) return "local_cli";
+  return null;
+}
+
+/**
+ * Is the caller the machine-bound local CLI? Either the authz pipeline already validated
+ * the loopback CLI token and stamped the subject, or (raw callers that skip the pipeline)
+ * the token is validated here, loopback-only.
+ */
+export async function isLocalCliCredential(request: Request): Promise<boolean> {
   if (
     request.headers.get(AUTHZ_HEADER_AUTH_KIND) === "management_key" &&
     request.headers.get(AUTHZ_HEADER_AUTH_LABEL) === "local-cli-token"
   ) {
-    return "local_cli";
+    return true;
   }
-  if (await isCliTokenAuthValid(request)) return "local_cli";
-  return null;
+  return isCliTokenAuthValid(request);
 }
 
 export type OperatorAuthVerdict =
@@ -64,13 +81,16 @@ export async function requireOperatorCredential(
   request: Request,
   options: OperatorCredentialOptions & { forbiddenMessage: string }
 ): Promise<OperatorAuthVerdict> {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, {
+    alwaysRequireAuth: options.alwaysRequireAuth,
+  });
   if (authError) return { ok: false, response: authError };
 
   let operator: OperatorCredentialKind | null;
   try {
     operator = await resolveOperatorCredential(request, {
       allowInternalService: options.allowInternalService,
+      alwaysRequireAuth: options.alwaysRequireAuth,
     });
   } catch {
     return {
@@ -98,3 +118,7 @@ export async function requireOperatorCredential(
 /** 403 message shared by every route that downloads stored credentials or a database copy. */
 export const CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE =
   "Exporting stored credentials requires a signed-in dashboard session or the local CLI; API keys and access tokens cannot download backups.";
+
+/** 403 message shared by every route that restores a backup over the live database or settings. */
+export const CREDENTIAL_IMPORT_FORBIDDEN_MESSAGE =
+  "Restoring a backup requires a signed-in dashboard session or the local CLI; API keys and access tokens cannot replace the database.";

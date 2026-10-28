@@ -123,7 +123,9 @@
       "maxCostOpt": "Maksimaalne kulu päevas (USD)",
       "allowedModelsOpt": "Komadega eraldatud lubatud mudelite loend",
       "nothingToSet": "Reeglistiku välju ei esitatud. Kasuta --rate-limit, --max-cost või --allowed-models.",
-      "updated": "Reeglistik on uuendatud."
+      "updated": "Reeglistik on uuendatud.",
+      "modelAccessModeOpt": "Mudelite juurdepääsurežiim (all | restricted)",
+      "unrestrictedOpt": "Luba kõik mudelid (--model-access-mode all)"
     },
     "expiration": {
       "title": "Võtme kehtivusaeg",

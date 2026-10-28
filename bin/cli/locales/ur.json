@@ -123,7 +123,9 @@
       "maxCostOpt": "فی دن زیادہ سے زیادہ لاگت (USD)",
       "allowedModelsOpt": "اجازت یافتہ ماڈلز کی کاما سے جدا فہرست",
       "nothingToSet": "پالیسی کا کوئی فیلڈ فراہم نہیں کیا گیا۔ --rate-limit، --max-cost، یا --allowed-models استعمال کریں۔",
-      "updated": "پالیسی اپ ڈیٹ کر دی گئی۔"
+      "updated": "پالیسی اپ ڈیٹ کر دی گئی۔",
+      "modelAccessModeOpt": "ماڈل تک رسائی کا طریقہ (all | restricted)",
+      "unrestrictedOpt": "تمام ماڈلز کی اجازت دیں (--model-access-mode all)"
     },
     "expiration": {
       "title": "کلید کی میعاد",

@@ -72,6 +72,16 @@ curl -i \
 
 Ei-manage-avain (tai ei Bearer-otsaketta) palauttaa `403 LOCAL_ONLY`. Sisarprefiksin `/api/cli-tools/runtime/*` ohitus ei ole tarkoituksellisesti mahdollista – katso [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origin-tarkistus
+
+Todennuksen jälkeen jokaisen `/api/mcp/*`-pyynnön — transporttien ja hallintareittien, kuten `status`, `tools`, `audit`, `restart` — `Origin`-otsake tarkistetaan kutsujasta riippumatta (API-avain, CLI-tunniste, hallintapaneelin istunto tai anonyymi loopback kirjautumisen ollessa pois päältä). Tämä on MCP Streamable HTTP -määrityksen vaatima suojaus DNS rebindingia vastaan.
+
+- **Ei `Origin`-otsaketta** → sallittu. OmniRoute CLI, SDK ja IDE-asiakkaat eivät lähetä sitä.
+- **Sallittu `Origin`** → `localhost` / `127.0.0.1` / `[::1]` missä tahansa portissa tai OmniRouten oma julkinen origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, luotetun käänteisvälityspalvelimen välittämä origin (`OMNIROUTE_TRUST_PROXY`, vain kun base URL -osoitetta ei ole asetettu) tai suoraan käytetty loopback-/LAN-IP-isäntä. Pelkkä `Host`-otsake ei koskaan tee originista luotettua.
+- **Mikä tahansa muu `Origin`, myös `null`** → `403` ja JSON-RPC-virherunko: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Hallintapaneelin istunto, jolla on kelvollinen CSRF-tunniste, hyväksytään edelleen kuten muissakin hallintapaneelin kirjoituksissa.
+
+Käänteisvälityspalvelimen takana tarjoiltu selainpohjainen MCP-asiakas tarvitsee `OMNIROUTE_PUBLIC_BASE_URL`-asetuksen; muille origineille ei ole sallittujen luetteloa. CORS-esipyyntöä (`OPTIONS`) ei tarkisteta Originin osalta; sitä seuraava pyyntö tarkistetaan.
+
 ## IDE-kokoonpano
 
 Katso [MCP-asiakaskokoonpano](../guides/SETUP_GUIDE.md#mcp-client-configuration) Claude Desktopin, Cursorin, Clinen ja yhteensopivien MCP-asiakasohjelmien asetuksia varten.
@@ -280,109 +290,111 @@ Sekä SSE- että suoratoistettavat HTTP-siirrot ovat estettyjä, kunnes MCP-palv
 ## Todennus ja käyttöoikeusalueet
 
 MCP-työkalukutsut lukevat käyttöoikeusaluemerkkijonot kutsujalta. Tämä tarkistus on yksi kolmesta
-toisistaan riippumattomasta nimiavaruudesta. Yhden tarkistimen hyväksyntä ei tarkoita muiden hyväksyntää.
+erillisestä nimiavaruudesta. Yhden tarkistimen hyväksyntä ei tarkoita muiden hyväksyntää.
 Säännöt on kuvattu kohdassa [Kolme käyttöoikeusalueiden nimiavaruutta](#three-scope-namespaces).
 Työkaluluettelo on kohdassa [MCP-työkalujen käyttöoikeusalueet](#mcp-tool-scopes).
 
 ### Kolme käyttöoikeusalueiden nimiavaruutta
 
 API-avaimen `manage`, MCP-työkalun `read:compression` ja
-`oma_live_…`-käyttöoikeustunnuksen `read` ovat kolme eri valtuutusta. Kutsujat, jotka lähettävät `read`-
-käyttöoikeustunnuksen hallinnan muutosreitille, saavat HTTP 403 -vastauksen
+`oma_live_…`-käyttöoikeustunnuksen `read` ovat kolme eri valtuutusta. Kutsujat, jotka lähettävät `read`-käyttöoikeustunnuksen
+hallinnan muuttavalle reitille, saavat HTTP 403 -vastauksen
 `Access token scope 'read' is insufficient; 'write' required.`
-Tätä tasoa käsittelee `scopeSatisfies`. Se ei tarkista MCP-taulukkoa, eikä MCP:n
-täsmäytin tarkista sitä.
+Kyseinen järjestys on `scopeSatisfies`. Se ei käytä MCP-taulukkoa, eikä MCP:n
+täsmäytin käytä sitä.
 
-| Nimiavaruus                       | Tunnistetieto                                                                | Tarkistin               | Hyväksyntä sallii                                                 |
-| :-------------------------------- | :--------------------------------------------------------------------------- | :---------------------- | :---------------------------------------------------------------- |
-| API-avaimen hallinta              | `api_keys.scopes`                                                            | `hasManageScope`        | Hallinnan REST-rajapinnan kyseiselle Bearer-avaimelle             |
-| API-avaimen lisäys                | sama taulukko, yksi täsmällinen merkkijono                                   | alla nimetty apufunktio | Vain kyseisen yksittäisen ominaisuuden                            |
-| MCP-työkalujen käyttöoikeusalueet | sama taulukko, muussa tapauksessa MCP `_meta`, sitten `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | Kyseisen työkalun, kun valvonta on käytössä                       |
-| Käyttöoikeustunnus                | `oma_live_…`                                                                 | `scopeSatisfies`        | Hallintareitin, jonka metodi ja polku edellyttävät kyseistä tasoa |
+| Nimiavaruus            | Tunnistetieto                                                      | Tarkistin               | Hyväksyntä sallii                                                 |
+| :--------------------- | :----------------------------------------------------------------- | :---------------------- | :---------------------------------------------------------------- |
+| API-avainten hallinta  | `api_keys.scopes`                                                  | `hasManageScope`        | Hallinnan REST-rajapinnan kyseiselle Bearer-avaimelle             |
+| API-avaimen lisäoikeus | sama taulukko, yksi täsmällinen merkkijono                         | alla nimetty apufunktio | Vain kyseisen yksittäisen toiminnon                               |
+| MCP-työkalujen alueet  | sama taulukko, muutoin MCP `_meta`, muutoin `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | Kyseisen työkalun, kun valvonta on käytössä                       |
+| Käyttöoikeustunnus     | `oma_live_…`                                                       | `scopeSatisfies`        | Hallintareitin, jonka metodi ja polku edellyttävät kyseistä tasoa |
 
-Kunkin tunnistetiedon luonti käsitellään kohdassa
-[Hallinnan todennus](../guides/MANAGEMENT-AUTH.md).
+Kunkin tunnistetiedon luominen käsitellään kohdassa
+[Hallinnan todentaminen](../guides/MANAGEMENT-AUTH.md).
 
 #### API-avainten käyttöoikeusalueet
 
-Yksi `api_keys.scopes`-taulukko palvelee kahta tehtävää. Niissä käytetään eri funktioita.
+Yksi `api_keys.scopes`-taulukko palvelee kahta tarkoitusta. Niissä käytetään eri funktioita.
 
 **Hallinnan REST-rajapinta.** `manage` ja `admin` ovat
 `MANAGEMENT_API_KEY_SCOPES`-joukon jäseniä (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` valtuuttaa kyseisen avaimen hallintareiteille. `admin` antaa
-hallintaoikeuden näillä reiteillä. Sana `admin` ei tässä tarkoita
+`hasManageScope` valtuuttaa kyseisen avaimen hallintareiteille. `admin`
+mahdollistaa hallinnan kyseisillä reiteillä. Sana `admin` ei tässä tarkoita
 käyttöoikeustunnuksen tasoa, eikä se laajene MCP-työkalujen käyttöoikeusalueiksi.
 
-**Lisättävät merkkijonot.** Kukin niistä tarkistetaan täsmällisellä jäsenyystestillä, ja ne kaikki pysyvät
+**Lisättävät merkkijonot.** Jokainen niistä testataan täsmällisenä jäsenyytenä, ja ne kaikki pysyvät
 `MANAGEMENT_API_KEY_SCOPES`-joukon ulkopuolella.
 
-| Käyttöoikeusalue               | Hyväksyntä sallii                                                                                                                                                                                 |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mcp:connect`                  | Vain ei-loopback-yhteyksien `/api/mcp/` LOCAL_ONLY -poikkeuksen (`hasMcpConnectOrManageScope`). Avain, jolla on `manage` tai `admin`, läpäisee myös tämän poikkeuksen.                            |
-| `self:usage`                   | Tämän avaimen `GET /api/v1/me/status` -pyynnön (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` lisää tämän käyttöoikeusalueen luonnin yhteydessä (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Ylävirran tilien kiintiöt kyseisessä tilakuormassa (`src/lib/usage/apiKeySelfService.ts`). Tilareitti edellyttää edelleen käyttöoikeusaluetta `self:usage`.                                       |
-| `policy:bypass-provider-quota` | Tämän avaimen päättelykutsut ohittavat palveluntarjoajan kiintiökäytännön (`hasProviderQuotaBypassScope` tiedostossa `src/sse/handlers/chat.ts`).                                                 |
+| Käyttöoikeusalue               | Hyväksyntä sallii                                                                                                                                                                                |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Vain muun kuin loopback-osoitteen `/api/mcp/`-reitin LOCAL_ONLY-poikkeuksen (`hasMcpConnectOrManageScope`). Avain, jolla on `manage` tai `admin`, läpäisee silti kyseisen poikkeuksen.           |
+| `self:usage`                   | Tämän avaimen `GET /api/v1/me/status` -kutsun (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` lisää tämän käyttöoikeusalueen luonnin yhteydessä (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Ylävirran tilikiintiöt kyseisessä tilavastauksessa (`src/lib/usage/apiKeySelfService.ts`). Tilareitti edellyttää edelleen `self:usage`-käyttöoikeusaluetta.                                      |
+| `policy:bypass-provider-quota` | Tämän avaimen päättelykutsut ohittavat palveluntarjoajan kiintiökäytännön (`hasProviderQuotaBypassScope` tiedostossa `src/sse/handlers/chat.ts`).                                                |
 
 #### Täsmäytys
 
-Luettelo on taulukko kohdassa [MCP-työkalujen käyttöoikeusalueet](#mcp-tool-scopes). Älä
-pidä tiedoston `src/shared/constants/mcpScopes.ts` muuttujaa `MCP_SCOPE_LIST` kyseisenä luettelona:
-se on alkuperäinen tyypitetty osajoukko. Myöhemmät työkalut määrittävät sen rinnalla lisää käyttöoikeusalueita
-(`read:notion`, `read:skills`, `read:local-corpus` ja taulukon muut käyttöoikeusalueet).
+Luettelo on kohdassa [MCP-työkalujen käyttöoikeusalueet](#mcp-tool-scopes) oleva taulukko. Älä
+käsittele tiedoston `src/shared/constants/mcpScopes.ts` arvoa `MCP_SCOPE_LIST` kyseisenä luettelona:
+se on alkuperäinen tyypitetty osajoukko. Myöhemmät työkalut määrittävät sen rinnalla muita käyttöoikeusalueita
+(`read:notion`, `read:skills`, `read:local-corpus` sekä taulukon muut alueet).
 
 Tiedoston `open-sse/mcp-server/scopeEnforcement.ts` `evaluateToolScopes` sallii kutsun,
 kun jokainen vaadittu käyttöoikeusalue vastaa jotakin myönnettyä käyttöoikeusaluetta:
 
-- `*` vastaa kaikkia vaadittuja käyttöoikeusalueita.
+- `*` vastaa jokaista vaadittua käyttöoikeusaluetta.
 - Myönnetty käyttöoikeusalue, joka päättyy merkkiin `*`, vastaa vaadittua käyttöoikeusaluetta, joka alkaa
-  tähteä edeltävällä etuliitteellä. `read:*` vastaa käyttöoikeusaluetta `read:compression`.
+  tähteä edeltävällä etuliitteellä. `read:*` vastaa aluetta `read:compression`.
 - Kaikki muut myönnetyt käyttöoikeusalueet vastaavat vain täysin samaa vaadittua merkkijonoa.
 
-Avain, jonka käyttöoikeusalueet ovat `["manage"]`, ei läpäise `scopeMatches`-tarkistusta käyttöoikeusalueelle `read:compression`.
-Sama kutsu hylätään myös käyttöoikeusalueilla `admin`, `mcp:connect`, `read` ja `write`, jos ne
-ovat ainoat myönnetyt merkkijonot. MCP-työkalujen käyttöoikeusalueilla ei ole hierarkiaa
+Avain, jonka käyttöoikeusalueet ovat `["manage"]`, ei läpäise `scopeMatches`-tarkistusta alueelle `read:compression`.
+Sama kutsu epäonnistuu arvoilla `admin`, `mcp:connect`, `read` ja `write`, kun ne
+ovat ainoat myönnetyt merkkijonot. MCP-työkalujen käyttöoikeusalueiden välillä ei ole hierarkiaa
 lukuun ottamatta lopussa olevaa merkkiä `*`.
 
 Valvonta ei ole käytössä, ellei `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (oletus
-`false`). Kun valvonta ei ole käytössä, `evaluateToolScopes` sallii kutsun ja ohittaa
-luettelon. Kun valvonta on käytössä, HTTP käyttää Bearer-avaimen `api_keys.scopes`-arvoa
-`authInfo`-tietona (katso [HTTP:n avainkohtainen käyttöoikeusalueiden sidonta](#per-key-http-scope-binding-7895)).
-Jos avaimen käyttöoikeusalueita ei voida selvittää, myönnetty joukko määräytyy ensin MCP:n `_meta`-arvosta ja sitten
-`OMNIROUTE_MCP_SCOPES`-arvosta.
+`false`). Kun se ei ole käytössä, `evaluateToolScopes` sallii kutsun ja ohittaa
+luettelon. Kun se on käytössä, HTTP käyttää Bearer-avaimen `api_keys.scopes`-taulukkoa
+`authInfo`-arvona (katso [Avainkohtainen HTTP-käyttöoikeusalueiden sidonta](#per-key-http-scope-binding-7895)).
+Jos avaimelle ei löydy käyttöoikeusalueita, myönnetty joukko haetaan seuraavaksi MCP:n `_meta`-kentästä ja sitten
+`OMNIROUTE_MCP_SCOPES`-muuttujasta.
 
 #### Käyttöoikeustunnusten käyttöoikeusalueet
 
-`oma_live_…`-tunnukset (`src/lib/accessTokens/scopes.ts`) sisältävät tason `read`, `write`
-tai `admin`. `scopeSatisfies` käsittelee näitä tasoina: `admin` kattaa tasot `write` ja `read`, ja
+`oma_live_…`-tunnuksilla (`src/lib/accessTokens/scopes.ts`) on `read`, `write`
+tai `admin`. `scopeSatisfies` käyttää järjestystasoa: `admin` kattaa tasot `write` ja `read`, ja
 `write` kattaa tason `read`. Tuntemattomat käyttöoikeusalueet eivät kata mitään.
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) vertaa kyseistä
-tasoa funktion `inferRequiredScope` (`src/server/authz/accessScopes.ts`) tulokseen:
+tasoa `inferRequiredScope`-funktion (`src/server/authz/accessScopes.ts`) tulokseen:
 
 - `GET`, `HEAD` ja `OPTIONS` edellyttävät tasoa `read`.
 - Kaikki muut metodit edellyttävät tasoa `write`.
-- `ADMIN_SCOPE_PREFIXES`-joukon polut edellyttävät tasoa `admin` kaikilla metodeilla. `/api/mcp`
-  on kyseisessä luettelossa, joten `write`-käyttöoikeustunnus ei silti voi kutsua MCP:n HTTP-
-  rajapintaa.
-- `ADMIN_MUTATION_PREFIXES`-joukon polut edellyttävät tasoa `admin` vain muutoksissa.
+- `ADMIN_SCOPE_PREFIXES`-joukossa olevat polut edellyttävät tasoa `admin` jokaisella metodilla. `/api/mcp`
+  on kyseisessä luettelossa, joten `write`-käyttöoikeustunnus ei silti voi kutsua MCP:n HTTP-rajapintaa.
+- `ADMIN_MUTATION_PREFIXES`-joukossa olevat polut edellyttävät tasoa `admin` vain muutoksille.
+- `ADMIN_MUTATION_EXACT_PATHS`-joukossa olevat polut (`/api/settings`,
+  `/api/settings/require-login`) edellyttävät tasoa `admin` vain muutoksille ja vain
+  kyseisellä täsmällisellä polulla — muut `/api/settings/*`-alireitit säilyttävät tason `write`.
 
 `PATCH /api/keys/{id}` on mutaatio eikä kuulu kyseisiin ylläpitäjäluetteloihin, joten
-`read`-tunnus saa 403-vastauksen:
+`read`-tunniste saa vastaukseksi 403
 `Access token scope 'read' is insufficient; 'write' required.`
-`write`- tai `admin`-käyttötunnus täyttää kyseisen reitin vaatimukset. Hallintapaneelin JWT,
-loopback-CLI:n machine-id-tunnus ja API-avain, jolla on `manage`- tai `admin`-oikeus, käyttävät
-muita haaroja, eikä tämä tasoluokitus rajoita niitä.
+`write`- tai `admin`-käyttötunniste täyttää kyseisen reitin vaatimukset. Hallintapaneelin JWT,
+takaisinkytkentäosoitetta käyttävän CLI:n konetunnus ja API-avain, jolla on `manage`- tai `admin`-oikeudet, kulkevat
+muita haaroja pitkin, eikä tämä tasoluokitus rajoita niitä.
 
-Käyttötunnus, joka läpäisee `/api/mcp`-reitin `scopeSatisfies`-tarkistuksen, on läpäissyt
-vain hallintaportin. Työkalukutsut tarkistavat edelleen API-avaimen käyttöoikeusalueet
-`scopeMatches`-toiminnolla. Käyttötunnuksen tasoluokitus ei ole `scopeMatches`-toiminnon syöte.
+Käyttötunniste, joka läpäisee `scopeSatisfies`-tarkistuksen `/api/mcp`-reitillä, on läpäissyt
+vain hallintaportin. Työkalukutsut tarkistavat edelleen API-avainten käyttöoikeusalueet
+`scopeMatches`-toiminnolla. Käyttötunnisteen tasoluokitus ei ole `scopeMatches`-toiminnon syöte.
 
 ### MCP-työkalujen käyttöoikeusalueet
 
 Käyttöoikeusalueiden valvonta on keskitetty tiedostoon `open-sse/mcp-server/scopeEnforcement.ts`.
 Jokainen työkalu edellyttää tiettyjä käyttöoikeusalueita:
 
-| Käyttöalue            | Työkalut                                                                                                                                                                       |
+| Käyttöoikeusalue      | Työkalut                                                                                                                                                                       |
 | :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                              |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                      |
@@ -420,51 +432,45 @@ Jokainen työkalu edellyttää tiettyjä käyttöoikeusalueita:
 
 Jokerimerkillisiä käyttöoikeusalueita tuetaan: `read:*` myöntää kaikki lukuoikeusalueet, `*` myöntää täydet käyttöoikeudet.
 
-### `mcp:connect` — suppea reittikohtainen käyttöoikeus (#7895)
+### `mcp:connect` — rajattu reittioikeus (#7895)
 
-HTTP/SSE MCP -siirtotavan (`/api/mcp/*`) käyttäminen muusta kuin loopback-osoitteesta edellyttää
-`/api/mcp/`-polun LOCAL_ONLY-poikkeusta (katso `docs/security/ROUTE_GUARD_TIERS.md`). Aiemmin
-tämä poikkeus hyväksyi vain API-avaimen, jolla oli täydet `manage`/`admin`-oikeudet — liian laajat
-oikeudet kutsujalle, jonka tarvitsee vain viestiä MCP:n kanssa. `src/shared/constants/managementScopes.ts`
-vie nyt `MCP_CONNECT_SCOPE = "mcp:connect"`-vakion: täydentävän, suppean käyttöoikeusalueen (saman
-ennakkotapauksen mukaisesti kuin `SELF_USAGE_SCOPE`), joka valtuuttaa VAIN `/api/mcp/`-ohituksen
-tiedostossa `src/server/authz/policies/management.ts` — se ei myönnä pääsyä muille hallintareiteille,
-ja se on tarkoituksella jätetty `MANAGEMENT_API_KEY_SCOPES`-joukon ULKOPUOLELLE. Avain, jolla on
-`manage`/`admin`-oikeus, läpäisee poikkeuksen edelleen muuttumattomasti; `mcp:connect` on
-vähäisemmän käyttöoikeustason vaihtoehto vain MCP:tä käyttäville etäkutsujille, ja se tarkistetaan
-funktiolla `hasMcpConnectOrManageScope()`.
+HTTP/SSE MCP -siirron (`/api/mcp/*`) käyttäminen muusta kuin loopback-osoitteesta edellyttää
+`/api/mcp/`-reitin LOCAL_ONLY-poikkeusta (katso `docs/security/ROUTE_GUARD_TIERS.md`). Aiemmin
+tämä poikkeus hyväksyi vain API-avaimen, jolla oli täydellinen `manage`/`admin`-käyttöoikeusalue — tämä oli liian laaja
+kutsujalle, jonka tarvitsee vain kommunikoida MCP:n kanssa. `src/shared/constants/managementScopes.ts` vie nyt
+`MCP_CONNECT_SCOPE = "mcp:connect"`-vakion: täydentävän, rajatun käyttöoikeusalueen (sama ennakkotapaus kuin
+`SELF_USAGE_SCOPE`), joka valtuuttaa VAIN `/api/mcp/`-ohituksen tiedostossa
+`src/server/authz/policies/management.ts` — se ei myönnä pääsyä muille hallintareiteille,
+ja se on tarkoituksella jätetty POIS `MANAGEMENT_API_KEY_SCOPES`-joukosta. Avain, jolla on `manage`/`admin`-oikeus,
+läpäisee poikkeuksen edelleen muuttumattomana; `mcp:connect` on vähäisempien oikeuksien vaihtoehto
+MCP:tä etänä käyttäville kutsujille, ja se tarkistetaan `hasMcpConnectOrManageScope()`-funktiolla.
 
-### HTTP-käyttöoikeusalueiden sitominen avainkohtaisesti (#7895)
+### Avainkohtainen HTTP-käyttöoikeusalueiden sidonta (#7895)
 
-HTTP/SSE-yhteyksissä `open-sse/mcp-server/httpTransport.ts` selvittää nyt kutsujan todelliset
-`api_keys.scopes`-oikeudet funktion `resolveMcpCallerAuthInfo()` avulla
-(`open-sse/mcp-server/httpAuthContext.ts`) ja välittää ne MCP SDK:n kutsulle
-`transport.handleRequest(req, { authInfo })`, joten kuhunkin työkalukutsuun saapuva
-`extra.authInfo.scopes` kuvastaa Bearer-avaimen omia käyttöoikeusalueita.
-`scopeEnforcement.ts`-tiedoston `resolveCallerScopeContext()` priorisoi jo `authInfo`-tiedot
-ennen `_meta`-arvoa ja `OMNIROUTE_MCP_SCOPES`-ympäristömuuttujan varavaihtoehtoa — tämä muutos
-vain täyttää ensimmäisen, korkeimman prioriteetin lähteen, jota ei aiemmin syötetty HTTP:n kautta.
-Kun API-avainta ei voida selvittää (otsake puuttuu tai avain on virheellinen), `authInfo` pysyy
-arvossa `undefined`, ja selvitys jatkuu nykyiseen `meta`/ympäristömuuttujaketjuun muuttumattomana.
-stdio-siirtotavalla ei ole kutsujakohtaista identiteettiä (katso `mcpCallerIdentity.ts`), joten
-muutos ei vaikuta siihen — se käyttää edelleen `_meta`/ympäristömuuttujan varavaihtoehtoketjua.
+HTTP/SSE-yhteydessä `open-sse/mcp-server/httpTransport.ts` selvittää nyt kutsujan todelliset
+`api_keys.scopes`-arvot `resolveMcpCallerAuthInfo()`-funktion avulla (`open-sse/mcp-server/httpAuthContext.ts`)
+ja välittää ne MCP SDK:n `transport.handleRequest(req, { authInfo })`-kutsulle, jotta
+jokaiseen työkalukutsuun päätyvä `extra.authInfo.scopes` kuvastaa Bearer-avaimen omia käyttöoikeusalueita.
+`scopeEnforcement.ts`-tiedoston `resolveCallerScopeContext()` asetti jo `authInfo`-tiedot
+`_meta`-tietojen ja `OMNIROUTE_MCP_SCOPES`-ympäristömuuttujan varatavan edelle — tämä muutos vain täyttää ensimmäisen,
+korkeimman prioriteetin lähteen, jota ei aiemmin syötetty HTTP:n kautta. Kun mitään API-avainta ei pystytä selvittämään
+(otsake puuttuu tai avain on virheellinen), `authInfo` pysyy arvossa `undefined`, ja selvitys jatkuu
+olemassa olevaan `meta`-/ympäristömuuttujaketjuun ennallaan. stdio ei sisällä kutsujakohtaista identiteettiä (katso
+`mcpCallerIdentity.ts`), eikä muutos vaikuta siihen — se käyttää edelleen `_meta`-/ympäristömuuttujan varaketjua.
 
-**Käyttöoikeuksien valvonta pakotetaan käyttöön suppeasti rajatuille HTTP/SSE-kutsujille
-`OMNIROUTE_MCP_ENFORCE_SCOPES`-arvosta riippumatta.** `OMNIROUTE_MCP_ENFORCE_SCOPES`-muuttujan
-oletusarvo `false` on turvallinen vain paikallisessa yhden operaattorin stdio-työnkulussa, jossa
-ei ole kutsujakohtaista identiteettiä, johon käyttöoikeudet voitaisiin rajata.
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` ottaa työkalukohtaisen käyttöoikeuksien
-valvonnan ehdottomasti käyttöön (`shouldForceScopeEnforcement()` tiedostossa
-`scopeEnforcement.ts`) aina, kun `resolveCallerScopeContext()` on selvittänyt arvon
-`source === "authInfo"` (eli todellisen avainkohtaisen HTTP Authorization -otsakkeen, vain
-HTTP/SSE-yhteyksissä) JA kyseisellä avaimella ei ole täyttä `manage`/`admin`-oikeutta. Tämä
-sulkee aukon, jossa VAIN suppean `mcp:connect`-ohitusoikeuden omaava avain — jonka edellä
-dokumentoidaan valtuuttavan ainoastaan `/api/mcp/`-polun LOCAL_ONLY-poikkeuksen — voisi muutoin
-kutsua kaikkia MCP-työkaluja sen jälkeen, kun operaattori on ottanut MCP:n etäkäytön tai muun kuin
-loopback-käytön käyttöön, yksinkertaisesti siksi, että `OMNIROUTE_MCP_ENFORCE_SCOPES` toimitetaan
-oletusarvolla `false`. Täydet `manage`/`admin`-oikeudet sisältävä avain HTTP:n kautta sekä kaikki
-stdio-/paikalliset kutsujat säilyttävät nykyisen `OMNIROUTE_MCP_ENFORCE_SCOPES`-muuttujalla
-ohjatun toimintansa muuttumattomana.
+**Valvonta pakotetaan käyttöön rajatuilla käyttöoikeusalueilla varustetuille HTTP/SSE-kutsujille
+`OMNIROUTE_MCP_ENFORCE_SCOPES`-arvosta riippumatta.** `OMNIROUTE_MCP_ENFORCE_SCOPES`-muuttujan oletusarvo `false` on turvallinen vain
+paikallisessa/stdio-pohjaisessa yhden operaattorin käytössä, jossa ei ole kutsujakohtaista identiteettiä käyttöoikeusalueiden
+kohdistamista varten. `open-sse/mcp-server/server.ts::withScopeEnforcement()` ottaa työkalukohtaisen käyttöoikeusalueiden
+valvonnan käyttöön ehdoitta (`shouldForceScopeEnforcement()` tiedostossa `scopeEnforcement.ts`)
+aina, kun `resolveCallerScopeContext()` on selvittänyt arvon
+`source === "authInfo"` (eli todellisen avainkohtaisen HTTP Authorization -otsakkeen, vain HTTP/SSE) JA kyseisellä
+avaimella ei ole täydellistä `manage`/`admin`-käyttöoikeusaluetta. Tämä korjaa aukon, jossa avain, jolla on VAIN
+rajattu `mcp:connect`-ohitusoikeus — jonka yllä dokumentoidaan valtuuttavan ainoastaan
+`/api/mcp/`-reitin LOCAL_ONLY-poikkeuksen — voisi muutoin kutsua kaikkia MCP-työkaluja, kun operaattori
+on ottanut käyttöön MCP:n etäkäytön tai käytön muusta kuin loopback-osoitteesta, vain koska `OMNIROUTE_MCP_ENFORCE_SCOPES` toimitetaan
+oletusarvolla `false`. HTTP:n kautta käytettävä täydellinen `manage`/`admin`-avain sekä kaikki stdio-/paikalliset kutsujat säilyttävät
+nykyisen, `OMNIROUTE_MCP_ENFORCE_SCOPES`-muuttujalla ohjatun toiminnan ennallaan.
 
 ---
 

@@ -28,6 +28,9 @@
 - [`POST /api/settings/require-login`](#post-apisettingsrequire-login)
 - [`GET /api/settings/ip-filter`](#get-apisettingsip-filter)
 - [`PUT /api/settings/ip-filter`](#put-apisettingsip-filter)
+- [`GET /api/settings/pii`](#get-apisettingspii)
+- [`PUT /api/settings/pii`](#put-apisettingspii)
+- [`POST /api/settings/pii/test`](#post-apisettingspiitest)
 - [`GET /api/settings/system-prompt`](#get-apisettingssystem-prompt)
 - [`PUT /api/settings/system-prompt`](#put-apisettingssystem-prompt)
 - [`GET /api/settings/thinking-budget`](#get-apisettingsthinking-budget)
@@ -52,6 +55,7 @@
 - [`GET /api/settings/database`](#get-apisettingsdatabase)
 - [`PUT /api/settings/database`](#put-apisettingsdatabase)
 - [`PATCH /api/settings/database`](#patch-apisettingsdatabase)
+- [`POST /api/settings/database/integrity-check`](#post-apisettingsdatabaseintegrity-check)
 - [`POST /api/settings/database/refresh-stats`](#post-apisettingsdatabaserefresh-stats)
 - [`GET /api/settings/database/vacuum`](#get-apisettingsdatabasevacuum)
 - [`POST /api/settings/database/vacuum`](#post-apisettingsdatabasevacuum)
@@ -134,6 +138,10 @@
 - [`PUT /api/settings/task-routing`](#put-apisettingstask-routing)
 - [`GET /api/settings/tier-config`](#get-apisettingstier-config)
 - [`PUT /api/settings/tier-config`](#put-apisettingstier-config)
+- [`GET /api/settings/transfer/catalog`](#get-apisettingstransfercatalog)
+- [`POST /api/settings/transfer/export`](#post-apisettingstransferexport)
+- [`POST /api/settings/transfer/preview`](#post-apisettingstransferpreview)
+- [`POST /api/settings/transfer/import`](#post-apisettingstransferimport)
 
 ### GET /api/settings/memory
 
@@ -243,6 +251,8 @@ curl http://localhost:20128/api/settings \
 ### PATCH /api/settings
 
 Update settings
+
+Security-policy keys (`requireLogin`, `newPassword`, every `oidc*` key, `corsOrigins`, `bruteForceProtection`, the LOCAL_ONLY bypass list) need `currentPassword` and an operator credential (dashboard session, local CLI, or login disabled); API keys of any scope and `oma_` access tokens get 403 on them. Ordinary settings stay writable for a manage-scoped key or an `admin` access token. Every mutation needs the `admin` access-token scope.
 
 ```bash
 curl -X PATCH http://localhost:20128/api/settings \
@@ -382,7 +392,9 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
 
 ### POST /api/settings/require-login
 
-Toggle login requirement
+Set the management password and/or toggle the login requirement
+
+Open without a credential only during the first-run bootstrap window (no password configured yet). Afterwards the write is operator-only: a dashboard session, the local CLI, or an instance with login disabled. API keys of any scope and `oma_` access tokens are refused with 403. A dashboard session must send `currentPassword` to replace an existing password; the local CLI may reset it without one (recovery path).
 
 ```bash
 curl -X POST http://localhost:20128/api/settings/require-login \
@@ -411,6 +423,49 @@ Configure IP filtering with blacklist/whitelist modes, add/remove individual IPs
 
 ```bash
 curl -X PUT http://localhost:20128/api/settings/ip-filter \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/settings/pii
+
+Get PII masking settings
+
+Returns the opt-in flag state (`PII_REDACTION_ENABLED`, `PII_RESPONSE_SANITIZATION`),
+the per-type selection (`enabledTypes`, `null` = all built-in types), the custom
+patterns and in-memory detection counters (counts only, never matched values).
+
+
+```bash
+curl http://localhost:20128/api/settings/pii \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### PUT /api/settings/pii
+
+Update PII masking settings
+
+Replaces the per-type selection and/or the custom pattern list. Custom regex patterns
+that fail the safe-regex (catastrophic backtracking) check, do not compile, or match an
+empty string are refused with 400. Does not turn masking on.
+
+
+```bash
+curl -X PUT http://localhost:20128/api/settings/pii \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/pii/test
+
+Test a custom PII pattern
+
+Dry-runs one pattern against a sample of at most 8 KB. Nothing is stored.
+
+```bash
+curl -X POST http://localhost:20128/api/settings/pii/test \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -657,6 +712,19 @@ PATCH settings › database
 
 ```bash
 curl -X PATCH http://localhost:20128/api/settings/database \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/database/integrity-check
+
+POST settings › database › integrity check
+
+Runs SQLite `PRAGMA quick_check` on demand and stores the result. Reading the storage settings (GET /api/settings/database) only returns the last stored result and never runs the scan.
+
+```bash
+curl -X POST http://localhost:20128/api/settings/database/integrity-check \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -1487,6 +1555,56 @@ PUT settings › tier config
 
 ```bash
 curl -X PUT http://localhost:20128/api/settings/tier-config \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/settings/transfer/catalog
+
+GET settings › transfer › catalog
+
+Provider accounts selectable for a selective transfer (id, provider, auth type, name, email, group). Never returns a credential.
+
+```bash
+curl http://localhost:20128/api/settings/transfer/catalog \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/settings/transfer/export
+
+POST settings › transfer › export
+
+Seals the selected provider accounts, plus the custom provider nodes they use, under the caller's passphrase (scrypt + AES-256-GCM) and returns the file as an attachment. Credentials are never written in plaintext; the cleartext header carries counts only.
+
+```bash
+curl -X POST http://localhost:20128/api/settings/transfer/export \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/transfer/preview
+
+POST settings › transfer › preview
+
+Opens a transfer file with its passphrase and reports, per account and provider node, whether it is new, identical, in conflict or unsupported on this install, with the allowed actions (add, skip, replace). Writes nothing and never returns a credential.
+
+```bash
+curl -X POST http://localhost:20128/api/settings/transfer/preview \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/transfer/import
+
+POST settings › transfer › import
+
+Applies a transfer file with per-item decisions keyed `connection:<id>` / `node:<id>` (add, skip, replace; omitted keys use the recommended action). Every decision is validated before the first write, a pre-import database backup is taken, nothing is deleted, and destination priority, active flag and proxy settings are kept.
+
+```bash
+curl -X POST http://localhost:20128/api/settings/transfer/import \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'

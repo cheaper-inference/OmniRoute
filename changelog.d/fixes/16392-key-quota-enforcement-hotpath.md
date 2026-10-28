@@ -1,1 +1,0 @@
-- **fix(api):** Skip usage-counter reads and monthly cost-ledger aggregation for API-key quota dimensions without configured limits. Keep configured quotas enforced and dashboard usage totals unchanged.

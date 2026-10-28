@@ -72,6 +72,16 @@ curl -i \
 
 Key na-enweghị `manage` (ma ọ bụ enweghị Bearer) na-eweghachi `403 LOCAL_ONLY`. E kpachapụrụ anya mee ka prefix ibe ya `/api/cli-tools/runtime/*` ghara inwe ike ịgafe mmachi ahụ — lee [Ọkwa Route Guard — Mwepu maka manage-scope](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Nkwado Origin
+
+Mgbe nkwenye gasịrị, a na-enyocha isi `Origin` nke arịrịọ ọ bụla gaa na `/api/mcp/*` — transport na ụzọ nchịkwa dịka `status`, `tools`, `audit`, `restart` — n'agbanyeghị onye na-akpọ (igodo API, tokin CLI, nnọkọ dashboard, ma ọ bụ loopback na-enweghị aha mgbe agbanyụrụ nbanye). Nke a bụ nchebe DNS rebinding nke nkọwapụta MCP Streamable HTTP chọrọ.
+
+- **Enweghị isi `Origin`** → a kwadoro ya. OmniRoute CLI, SDK na ndị ahịa IDE anaghị eziga ya.
+- **`Origin` a kwadoro** → `localhost` / `127.0.0.1` / `[::1]` na port ọ bụla, ma ọ bụ origin ọha nke OmniRoute n'onwe ya: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin nke reverse proxy a tụkwasịrị obi zigara (`OMNIROUTE_TRUST_PROXY`, naanị mgbe edobeghị base URL), ma ọ bụ onye nnabata IP loopback/LAN a na-abanye ozugbo. Naanị isi `Host` anaghị eme ka origin ọ bụla bụrụ nke a tụkwasịrị obi.
+- **`Origin` ọ bụla ọzọ, gụnyere `null`** → `403` ya na ahụ njehie JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. A ka na-anabata nnọkọ dashboard nke na-egosi tokin CSRF ziri ezi, dịka ndị ọzọ dashboard na-ede.
+
+Onye ahịa MCP nke ihe nchọgharị a na-enye n'azụ reverse proxy chọrọ `OMNIROUTE_PUBLIC_BASE_URL`; enweghị ndepụta ikike maka origins ndị ọzọ. A naghị enyocha Origin na arịrịọ mbụ CORS (`OPTIONS`); a na-enyocha arịrịọ na-esote ya.
+
 ## Nhazi IDE
 
 Lee [Nhazi MCP Client](../guides/SETUP_GUIDE.md#mcp-client-configuration) maka nhazi Claude Desktop,
@@ -291,104 +301,105 @@ A na-egbochi ma mbufe SSE ma Streamable HTTP ruo mgbe agbanyere sava MCP na Sett
 
 ## Nyocha njirimara & Oke ikike
 
-Oku ngwaọrụ MCP na-agụ eriri oke ikike site n'aka onye na-akpọ ya. Nlele ahụ bụ otu n'ime ngalaba aha atọ nọọrọ onwe ha. Ịgafe otu onye nyocha apụtaghị na a gafere ndị ọzọ. Iwu ndị ahụ dị na [Ngalaba aha oke ikike atọ](#three-scope-namespaces).
-Katalọgụ ngwaọrụ ahụ dị na [Oke ikike ngwaọrụ MCP](#mcp-tool-scopes).
+Oku ngwaọrụ MCP na-agụ eriri oke ikike sitere n'aka onye na-akpọ ya. Nlele ahụ bụ otu n'ime ngalaba aha atọ nọọrọ onwe ha. Ịgafe otu onye nyocha apụtaghị ịgafe ndị ọzọ. Iwu ndị ahụ dị na [Ngalaba aha oke ikike atọ](#three-scope-namespaces).
+Katalọgụ ngwaọrụ dị na [Oke ikike ngwaọrụ MCP](#mcp-tool-scopes).
 
 ### Ngalaba aha oke ikike atọ
 
-`manage` dị na API key, `read:compression` dị na ngwaọrụ MCP, na `read` dị na
-token nnweta `oma_live_…` bụ ikike atọ dị iche iche. Ndị na-akpọ ọrụ ndị zitere token nnweta `read`
-na route njikwa na-agbanwe data ga-enweta HTTP 403
+`manage` dị na igodo API, `read:compression` dị na ngwaọrụ MCP, na `read` dị na token nnweta `oma_live_…` bụ ikike atọ dị iche iche. Ndị na-akpọ oku zigara token nnweta `read` na ụzọ njikwa na-agbanwe data na-enweta HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Ọkwa ahụ bụ `scopeSatisfies`. Ọ naghị enyocha tebụl MCP, onye ntụnyere MCP
-anaghịkwa enyocha ya.
+Ọkwa ahụ bụ `scopeSatisfies`. Ọ naghị enyocha tebụl MCP, onye na-eme ndakọrịta MCP anaghịkwa enyocha ya.
 
-| Ngalaba aha        | Ihe njirimara                                                                  | Onye nyocha                | Ihe ịgafe na-enye ohere                           |
-| :----------------- | :----------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------ |
-| Njikwa API-key     | `api_keys.scopes`                                                              | `hasManageScope`           | REST njikwa maka Bearer key ahụ                   |
-| Mgbakwunye API-key | otu array ahụ, otu eriri kpọmkwem                                              | helper akpọrọ aha n'okpuru | Naanị otu ikike ahụ                               |
-| Oke ngwaọrụ MCP    | otu array ahụ, ma ọ bụghị ya MCP `_meta`, ma ọ bụghị ya `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | Ngwaọrụ ahụ, ozugbo agbanyere mmanye              |
-| Token nnweta       | `oma_live_…`                                                                   | `scopeSatisfies`           | Route njikwa nke method na path ya chọrọ ọkwa ahụ |
+| Ngalaba aha           | Ihe njirimara                                                                  | Onye nyocha                  | Ihe ngafe na-enye ohere                         |
+| :-------------------- | :----------------------------------------------------------------------------- | :--------------------------- | :---------------------------------------------- |
+| Njikwa igodo API      | `api_keys.scopes`                                                              | `hasManageScope`             | REST njikwa maka igodo Bearer ahụ               |
+| Mgbakwunye igodo API  | otu array ahụ, otu eriri dabara kpọmkwem                                       | enyemaka akpọrọ aha n'okpuru | Naanị otu ikike ahụ                             |
+| Oke ikike ngwaọrụ MCP | otu array ahụ, ma ọ bụghị ya MCP `_meta`, ma ọ bụghị ya `OMNIROUTE_MCP_SCOPES` | `scopeMatches`               | Ngwaọrụ ahụ, ozugbo agbanyere mmanye            |
+| Token nnweta          | `oma_live_…`                                                                   | `scopeSatisfies`             | Ụzọ njikwa nke method na path ya chọrọ ọkwa ahụ |
 
-A kọwara imepụta ihe njirimara ọ bụla na
+A kọwara otu esi emepụta ihe njirimara nke ọ bụla na
 [Nyocha njirimara njikwa](../guides/MANAGEMENT-AUTH.md).
 
-#### Oke ikike API-key
+#### Oke ikike igodo API
 
 Otu array `api_keys.scopes` na-arụ ọrụ abụọ. Ha na-eji function dị iche iche.
 
 **REST njikwa.** `manage` na `admin` bụ ndị otu
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` bụ ihe na-enye key ahụ ikike maka route njikwa. `admin`
-nwere ike ijikwa route ndị ahụ. Okwu `admin` ebe a abụghị
-ọkwa token nnweta, ọ naghịkwa agbasapụ ghọọ oke ikike ngwaọrụ MCP.
+`hasManageScope` bụ ihe na-enye igodo ahụ ikike maka ụzọ njikwa. `admin` nwere
+ikike njikwa n'ụzọ ndị ahụ. Okwu `admin` n'ebe a abụghị ọkwa token nnweta,
+ọ naghịkwa agbasa ghọọ oke ikike ngwaọrụ MCP.
 
-**Eriri mgbakwunye.** Nke ọ bụla bụ nnwale kpọmkwem nke ịbụ onye otu, nke ọ bụla
+**Eriri mgbakwunye.** Nke ọ bụla bụ ule ịbụ onye otu dabara kpọmkwem, nke ọ bụla
 na-anọkwa n'èzí `MANAGEMENT_API_KEY_SCOPES`.
 
-| Oke ikike                      | Ihe ịgafe na-enye ohere                                                                                                                                                         |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mcp:connect`                  | Naanị mwepu LOCAL_ONLY nke `/api/mcp/` na-abụghị loopback (`hasMcpConnectOrManageScope`). Key nwere `manage` ma ọ bụ `admin` ka ga-agafe mwepu ahụ.                             |
-| `self:usage`                   | `GET /api/v1/me/status` maka key a (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` na-agbakwunye oke ikike a mgbe a na-emepụta (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Oke account upstream dị n'ime payload status ahụ (`src/lib/usage/apiKeySelfService.ts`). Route status ahụ ka chọrọ `self:usage`.                                                |
-| `policy:bypass-provider-quota` | Oku inference nke key a na-amafe policy provider-quota (`hasProviderQuotaBypassScope` dị na `src/sse/handlers/chat.ts`).                                                        |
+| Oke ikike                      | Ihe ngafe na-enye ohere                                                                                                                                                              |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Naanị mwepu LOCAL_ONLY maka `/api/mcp/` na-abụghị loopback (`hasMcpConnectOrManageScope`). Igodo nwere `manage` ma ọ bụ `admin` ka na-agafe mwepu ahụ.                               |
+| `self:usage`                   | `GET /api/v1/me/status` maka igodo a (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` na-agbakwunye oke ikike a mgbe a na-emepụta ya (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Oke kvota akaụntụ upstream dị n'ime payload ọkwa ahụ (`src/lib/usage/apiKeySelfService.ts`). Ụzọ ọkwa ahụ ka na-achọ `self:usage`.                                                   |
+| `policy:bypass-provider-quota` | Oku inference nke igodo a na-agafe amụma kvota provider (`hasProviderQuotaBypassScope` dị na `src/sse/handlers/chat.ts`).                                                            |
 
-#### Ntụnyere
+#### Ndakọrịta
 
 Katalọgụ ahụ bụ tebụl dị n'okpuru [Oke ikike ngwaọrụ MCP](#mcp-tool-scopes). Elela
 `MCP_SCOPE_LIST` dị na `src/shared/constants/mcpScopes.ts` anya dị ka katalọgụ ahụ:
-ọ bụ subset mbụ e nyere type. Ngwaọrụ ndị e tinyere mgbe e mesịrị na-ekwupụta oke ikike ndị ọzọ n'akụkụ ya
+ọ bụ subset typed mbụ. Ngwaọrụ ndị e tinyere mgbe e mesịrị na-ekwupụta oke ikike ndị ọzọ n'akụkụ ya
 (`read:notion`, `read:skills`, `read:local-corpus`, na ndị ọzọ dị na tebụl ahụ).
 
-`evaluateToolScopes` dị na `open-sse/mcp-server/scopeEnforcement.ts` na-enye ohere maka oku
-mgbe oke ikike niile achọrọ dabara na ụfọdụ oke ikike enyere:
+`evaluateToolScopes` dị na `open-sse/mcp-server/scopeEnforcement.ts` na-enye ohere oku
+mgbe oke ikike niile achọrọ dabara na otu oke ikike enyere:
 
-- `*` na-adaba na oke ikike ọ bụla achọrọ.
-- Oke ikike enyere nke ji `*` kwụsị na-adaba na oke ikike achọrọ nke ji
-  prefix dị tupu kpakpando ahụ malite. `read:*` na-adaba na `read:compression`.
-- Oke ikike ọ bụla ọzọ enyere na-adaba naanị na eriri achọrọ nke yiri ya kpọmkwem.
+- `*` dabara na oke ikike niile achọrọ.
+- Oke ikike enyere nke kwụsịrị na `*` na-adaba na oke ikike achọrọ nke malitere
+  na prefix dị tupu akara kpakpando ahụ. `read:*` na-adaba na `read:compression`.
+- Oke ikike enyere ndị ọzọ niile na-adaba naanị na eriri achọrọ yiri ha kpọmkwem.
 
-Key nke oke ikike ya bụ `["manage"]` agaghị agafe `scopeMatches` maka `read:compression`.
-Otu oku ahụ agaghị agafekwa maka `admin`, `mcp:connect`, `read`, na `write` mgbe ndị ahụ
-bụ naanị eriri enyere. Enweghị usoro ọkwa n'etiti oke ikike ngwaọrụ MCP
-karịrị `*` dị na njedebe.
+Igodo nke oke ikike ya bụ `["manage"]` anaghị agafe `scopeMatches` maka `read:compression`.
+Otu oku ahụ anaghịkwa agafe maka `admin`, `mcp:connect`, `read`, na `write` mgbe ndị ahụ
+bụ naanị eriri enyere. Enweghị hierarchy n'etiti oke ikike ngwaọrụ MCP
+karịa `*` dị na njedebe.
 
-A naghị agbanye mmanye ma ọ bụrụ na `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ndabara bụ
-`false`). Mgbe agbanyụghị ya, `evaluateToolScopes` na-enye ohere maka oku ahụ ma na-amafe
-katalọgụ ahụ. Mgbe agbanyere ya, HTTP na-eji `api_keys.scopes` nke Bearer key ahụ dịka
-`authInfo` (lee [Njikọ oke ikike HTTP nke key ọ bụla](#per-key-http-scope-binding-7895)).
-Mgbe enweghị oke ikike key a chọtara, otu ikike enyere na-aga n'ihu na MCP `_meta`, emesịa
+A naghị agbanye mmanye ma ọ bụrụ na `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ndabara
+bụ `false`). Mgbe agbanyụghị ya, `evaluateToolScopes` na-enye ohere oku ahụ ma na-amafere
+katalọgụ ahụ. Mgbe agbanyere ya, HTTP na-eji `api_keys.scopes` nke igodo Bearer dị ka
+`authInfo` (lee [Ijikọ oke ikike HTTP n'otu igodo](#per-key-http-scope-binding-7895)).
+Mgbe enweghị oke ikike igodo a chọtara, set nke ikike enyere na-aga n'ihu gaa na MCP `_meta`, emesịa
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Oke ikike token nnweta
 
-Token `oma_live_…` (`src/lib/accessTokens/scopes.ts`) nwere `read`, `write`,
-ma ọ bụ `admin`. `scopeSatisfies` bụ ọkwa: `admin` na-ekpuchi `write` na `read`, ebe
-`write` na-ekpuchi `read`. Oke ikike ndị a na-amaghị anaghị ekpuchi ihe ọ bụla.
+Token `oma_live_…` (`src/lib/accessTokens/scopes.ts`) na-ebu `read`, `write`,
+ma ọ bụ `admin`. `scopeSatisfies` bụ ọkwa: `admin` kpuchiri `write` na `read`, ebe
+`write` kpuchiri `read`. Oke ikike a na-amaghị anaghị ekpuchi ihe ọ bụla.
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) na-atụnyere ọkwa ahụ
 na `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD`, na `OPTIONS` chọrọ `read`.
-- Method ọ bụla ọzọ chọrọ `write`.
+- Method ndị ọzọ niile chọrọ `write`.
 - Path ndị dị na `ADMIN_SCOPE_PREFIXES` chọrọ `admin` maka method ọ bụla. `/api/mcp`
-  dị na list ahụ, ya mere token nnweta `write` ka enweghị ike ịkpọ elu HTTP MCP.
-- Path ndị dị na `ADMIN_MUTATION_PREFIXES` chọrọ `admin` naanị maka mgbanwe data.
+  dị na ndepụta ahụ, ya mere token nnweta `write` ka enweghị ike ịkpọ elu HTTP nke MCP.
+- Path ndị dị na `ADMIN_MUTATION_PREFIXES` chọrọ `admin` naanị maka mgbanwe.
+- Path ndị dị na `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) chọrọ `admin` naanị maka mgbanwe, nakwa naanị na
+  path ahụ kpọmkwem — sub-route `/api/settings/*` ndị ọzọ ka na-eji `write`.
 
-`PATCH /api/keys/{id}` bụ mgbanwe, ọ dịghịkwa na ndepụta admin ndị ahụ, ya mere token nwere
+`PATCH /api/keys/{id}` bụ mgbanwe ma ọ dịghị na ndepụta admin ndị ahụ, ya mere token
 `read` na-enweta 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Token nnweta nwere `write` ma ọ bụ `admin` na-emezu ihe route ahụ chọrọ. JWT dashboard, token machine-id nke loopback CLI, na API key nwere `manage` ma ọ bụ `admin` na-agafe
-alaka ndị ọzọ, rank a anaghịkwa egbochi ha.
+Token nnweta `write` ma ọ bụ `admin` na-emezu ihe ụzọ ahụ chọrọ. JWT dashboard, token
+machine-id nke loopback CLI, na API key nwere `manage` ma ọ bụ `admin` na-agbaso
+ụzọ ndị ọzọ, ọkwa a anaghịkwa amachi ha.
 
-Token nnweta nke gafere `scopeSatisfies` maka `/api/mcp` agafela naanị
-ọnụ ụzọ njikwa ahụ. Oku ngwaọrụ ka na-eji `scopeMatches` atụnyere scope nke API key.
-Rank nke token nnweta abụghị ntinye na `scopeMatches`.
+Token nnweta nke gafere `scopeSatisfies` maka `/api/mcp` agafeela naanị
+ọnụ ụzọ njikwa. Oku ngwaọrụ ka na-eji `scopeMatches` enyocha scope
+API key. Ọkwa token nnweta abụghị ntinye nye `scopeMatches`.
 
 ### Scope ngwaọrụ MCP
 
 A chịkọtara mmanye scope n'otu ebe na `open-sse/mcp-server/scopeEnforcement.ts`.
-Ngwaọrụ ọ bụla chọrọ scope ụfọdụ:
+Ngwaọrụ ọ bụla chọrọ scope ndị akọwapụtara:
 
 | Oke ikike             | Ngwaọrụ                                                                                                                                                                      |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -426,49 +437,47 @@ Ngwaọrụ ọ bụla chọrọ scope ụfọdụ:
 | `write:obsidian`      | Ngwa odide 9 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                            |
 
-A na-akwado scope wildcard: `read:*` na-enye scope ọgụgụ niile, `*` na-enye ohere zuru ezu.
+A na-akwado oke wildcard: `read:*` na-enye oke ọgụgụ niile, `*` na-enye ohere zuru ezu.
 
-### `mcp:connect` — ikike route dị warara (#7895)
+### `mcp:connect` — ikike ụzọ dị warara (#7895)
 
-Iji rute na transport HTTP/SSE MCP (`/api/mcp/*`) site na adreesị na-abụghị loopback chọrọ
-mwepu LOCAL_ONLY nke `/api/mcp/` (lee `docs/security/ROUTE_GUARD_TIERS.md`). N’oge gara aga,
-mwepu ahụ na-anabata naanị API key nwere scope `manage`/`admin` zuru ezu — nke sara mbara karịa
-ihe caller chọrọ ma ọ bụrụ na naanị ihe ọ chọrọ bụ ịkparịta ụka na MCP. Ugbu a,
-`src/shared/constants/managementScopes.ts` na-ebupụ
-`MCP_CONNECT_SCOPE = "mcp:connect"`: scope dị warara a na-agbakwunye (n’ịgbaso otu ụkpụrụ ahụ dịka
-`SELF_USAGE_SCOPE`) nke na-enye ikike naanị maka bypass `/api/mcp/` dị na
-`src/server/authz/policies/management.ts` — ọ naghị enye ohere na management route ọ bụla ọzọ,
-ma e kpachapụrụ anya hapụ ya N’ÈZÍ `MANAGEMENT_API_KEY_SCOPES`. Key nwere `manage`/`admin`
-ka na-agafe mwepu ahụ n’enweghị mgbanwe; `mcp:connect` bụ nhọrọ nwere ikike dị ala maka
-ndị caller remote chọrọ naanị MCP, nke a na-enyocha site na `hasMcpConnectOrManageScope()`.
+Iji ruo na mbufe HTTP/SSE MCP (`/api/mcp/*`) site na ebe na-abụghị loopback chọrọ
+mwepu LOCAL_ONLY nke `/api/mcp/` (lee `docs/security/ROUTE_GUARD_TIERS.md`). N’akụkọ ihe mere eme,
+mwepu ahụ na-anabata naanị API key nwere oke `manage`/`admin` zuru ezu — nke sara mbara karịa ihe
+onye na-akpọ oku nke chọrọ naanị ịkparịta ụka na MCP chọrọ. `src/shared/constants/managementScopes.ts` na
+-ebupụzi `MCP_CONNECT_SCOPE = "mcp:connect"`: oke mgbakwunye dị warara (nke na-agbaso otu ụkpụrụ ahụ dị ka
+`SELF_USAGE_SCOPE`) nke na-enye ikike NANI maka ngafe `/api/mcp/` dị na
+`src/server/authz/policies/management.ts` — ọ naghị enye ohere ọ bụla ọzọ n’ụzọ njikwa
+ma kpachapụrụ anya debe ya N’ÈZÍ `MANAGEMENT_API_KEY_SCOPES`. Key nwere `manage`/`admin`
+ka na-agafe mwepu ahụ na-enweghị mgbanwe; `mcp:connect` bụ nhọrọ nwere ikike dị ala maka
+ndị na-akpọ oku n’ebe dị anya bụ́ ndị na-eji naanị MCP, nke a na-enyocha site na `hasMcpConnectOrManageScope()`.
 
-### Ijikọta scope HTTP n’otu key n’otu key (#7895)
+### Njikọ oke HTTP n’otu key n’otu (#7895)
 
-N’elu HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` na-achọpụtazi ezigbo
-`api_keys.scopes` nke caller site na `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
+Site na HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` na-achọpụtazi ezigbo
+`api_keys.scopes` nke onye na-akpọ oku site na `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
 ma nyefee ya na `transport.handleRequest(req, { authInfo })` nke MCP SDK, ka
-`extra.authInfo.scopes` nke na-erute oku tool ọ bụla gosipụta scope nke Bearer key ahụ n’onwe ya.
-`resolveCallerScopeContext()` dị na `scopeEnforcement.ts` ebularị `authInfo` ụzọ karịa
-`_meta` na fallback env `OMNIROUTE_MCP_SCOPES` — nke a na-ejupụta naanị source mbụ ahụ,
-nke nwere priority kachasị elu, nke na-enwetaghị data na mbụ n’elu HTTP. Mgbe enweghị API key
-a chọpụtara (enweghị header, key ezighi ezi), `authInfo` na-anọ `undefined`, resolution wee daba na
-chain `meta`/env dị ugbu a n’enweghị mgbanwe. stdio enweghị identity pụrụ iche maka caller ọ bụla (lee
-`mcpCallerIdentity.ts`) ya mere nke a anaghị emetụta ya — ọ na-anọgide na chain fallback `_meta`/env.
+`extra.authInfo.scopes` nke rutere oku ngwa ọ bụla wee gosipụta oke nke Bearer key ahụ n’onwe ya.
+`resolveCallerScopeContext()` nke `scopeEnforcement.ts` ebutelarị `authInfo` ụzọ karịa
+`_meta` na ndabere env `OMNIROUTE_MCP_SCOPES` — nke a na-ejupụta naanị isi mmalite mbụ ahụ,
+nke nwere mkpa kachasị elu, nke a na-enyeghị ozi mbụ site na HTTP. Mgbe enweghị API key a chọpụtara
+(enweghị header, key na-adịghị irè), `authInfo` na-anọgide `undefined`, nchọpụta ahụ wee daba na
+usoro `meta`/env dịbu adị na-enweghị mgbanwe. stdio enweghị njirimara onye na-akpọ oku n’otu n’otu (lee
+`mcpCallerIdentity.ts`) ma nke a anaghị emetụta ya — ọ ka na-eji usoro ndabere `_meta`/env.
 
-**A na-amanye enforcement ka ọ dị ọkụ maka ndị caller HTTP/SSE nwere scope dị warara n’agbanyeghị
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** Ndabara `false` nke `OMNIROUTE_MCP_ENFORCE_SCOPES` dị naanị
-mma maka usoro local/stdio nke otu operator, ebe enweghị identity pụrụ iche nke caller a ga-eji scope
-tụnyere. `open-sse/mcp-server/server.ts::withScopeEnforcement()` na-agbanye enforcement scope
-nke tool ọ bụla n’enweghị ọnọdụ (`shouldForceScopeEnforcement()` dị na `scopeEnforcement.ts`)
+**A na-amanye mmejuputa iwu maka ndị na-akpọ oku HTTP/SSE nwere oke dị warara n’agbanyeghị
+`OMNIROUTE_MCP_ENFORCE_SCOPES`.** Ndabara `OMNIROUTE_MCP_ENFORCE_SCOPES` ịbụ `false` dị nchebe naanị
+maka usoro onye njikwa naanị nke local/stdio, ebe enweghị njirimara onye na-akpọ oku n’otu n’otu a ga-eji
+tulee oke. `open-sse/mcp-server/server.ts::withScopeEnforcement()` na-eme ka mmejuputa oke
+n’otu ngwa n’otu rụọ ọrụ n’enweghị ọnọdụ (`shouldForceScopeEnforcement()` dị na `scopeEnforcement.ts`)
 mgbe ọ bụla `resolveCallerScopeContext()` chọpụtara
-`source === "authInfo"` (ya bụ, ezigbo HTTP Authorization header pụrụ iche n’otu key, naanị HTTP/SSE) MA key ahụ
-enweghị scope `manage`/`admin` zuru ezu. Nke a na-emechi oghere ebe key nwere NANỊ
-scope bypass dị warara `mcp:connect` — nke akọwara n’elu dịka nke na-enye ikike naanị maka
-mwepu LOCAL_ONLY nke `/api/mcp/` — nwere ike ma ọ bụghị ya ịkpọ tool MCP niile ozugbo operator
-gbanyere ohere MCP remote/nke na-abụghị loopback, naanị n’ihi na
-`OMNIROUTE_MCP_ENFORCE_SCOPES` na-abịa na ndabara
-`false`. Key `manage`/`admin` zuru ezu n’elu HTTP, yana caller stdio/local ọ bụla, na-edobe
-omume dị ugbu a nke `OMNIROUTE_MCP_ENFORCE_SCOPES` na-achị n’enweghị mgbanwe.
+`source === "authInfo"` (ya bụ, ezigbo HTTP Authorization header nke otu key, naanị HTTP/SSE) MA key ahụ
+enweghị oke `manage`/`admin` zuru ezu. Nke a na-emechi oghere ebe key nwere NANI
+oke ngafe dị warara `mcp:connect` — nke akọwara n’elu dịka nke na-enye ikike naanị maka
+mwepu LOCAL_ONLY nke `/api/mcp/` — nwere ike ịkpọ ngwa MCP niile ozugbo onye njikwa
+mere ka ohere MCP dị anya/nke na-abụghị loopback rụọ ọrụ, naanị n’ihi na `OMNIROUTE_MCP_ENFORCE_SCOPES`
+na-abịa na `false` dịka ndabara. Key `manage`/`admin` zuru ezu site na HTTP, yana onye na-akpọ oku
+stdio/local ọ bụla, na-edobe omume dịbu adị nke `OMNIROUTE_MCP_ENFORCE_SCOPES` na-achịkwa na-enweghị mgbanwe.
 
 ---
 

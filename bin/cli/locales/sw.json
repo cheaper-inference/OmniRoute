@@ -123,7 +123,9 @@
       "maxCostOpt": "Gharama ya juu kwa siku (USD)",
       "allowedModelsOpt": "Orodha ya miundo inayoruhusiwa iliyotenganishwa kwa koma",
       "nothingToSet": "Hakuna sehemu za sera zilizotolewa. Tumia --rate-limit, --max-cost, au --allowed-models.",
-      "updated": "Sera imesasishwa."
+      "updated": "Sera imesasishwa.",
+      "modelAccessModeOpt": "Hali ya ufikiaji wa modeli (all | restricted)",
+      "unrestrictedOpt": "Ruhusu modeli zote (--model-access-mode all)"
     },
     "expiration": {
       "title": "Kuisha kwa Muda wa Ufunguo",

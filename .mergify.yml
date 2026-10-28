@@ -33,6 +33,10 @@ queue_rules:
       - label=queue
       - -draft
       - -conflict
+      # A reviewed integration candidate must never be squashed by this queue,
+      # including when its second approval label is missing or its ref changed.
+      - -label=integration-reviewed
+      - -head~=^fix/relay-integration-candidate-
     # "Everything that ran is green, nothing still running, AND the always-on
     # anchor check succeeded" — robust to the path-filtered fast-gates (docs-only
     # PRs skip code jobs; matrix shard names vary) while never fail-open: a PR with
@@ -58,6 +62,8 @@ queue_rules:
       - "#check-pending=0"
       - "#check-success>=1"
       - check-success=Merge integrity (changelog + generated skills)
+      - check-success=Gate / CI
+      - check-success=Gate / Quality
     # NO batching: 'Merge Queue Batch' requires a paid Mergify tier (live finding
     # 2026-07-15 — the queue command fails with "Cannot use Merge Queue batch" on
     # the free plan; #7220). Serial queue (1 PR at a time) still automates the train.
@@ -77,6 +83,34 @@ queue_rules:
     checks_timeout: 240 min
     # Squash keeps the one-commit-per-PR history the CHANGELOG reconciliation expects.
     merge_method: squash
+
+  # One already-composed PR, NOT Mergify's paid multi-PR batching feature.
+  # Activation requires this configuration to land on the default branch first.
+  # See docs/ops/RELAY_INTEGRATION_QUEUE.md for ownership, admission and readback.
+  - name: relay-integration
+    queue_conditions:
+      - base=release/v3.8.52
+      - head=fix/relay-integration-candidate-20261015
+      - author=diegosouzapw
+      - label=queue
+      - label=integration-reviewed
+      - -draft
+      - -conflict
+    merge_conditions:
+      - or:
+          - "#check-failure=0"
+          - and:
+              - "#check-failure=1"
+              - check-failure=Build (advisory)
+      - "#check-pending=0"
+      - "#check-success>=1"
+      - check-success=Merge integrity (changelog + generated skills)
+      - check-success=Gate / CI
+      - check-success=Gate / Quality
+    checks_timeout: 240 min
+    # Preserve the reviewed original PR heads; rebasing or squash would lose them.
+    update_method: merge
+    merge_method: merge
 
 pull_request_rules:
   - name: clean up the queue label after merge

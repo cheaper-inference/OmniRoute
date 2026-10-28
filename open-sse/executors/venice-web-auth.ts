@@ -6,7 +6,7 @@
  * Flow mirrors adapta-web: GET /v1/client -> POST /v1/client/sessions/{id}/tokens.
  */
 
-import { createHash } from "node:crypto";
+import { opaqueTokenFingerprint } from "../utils/opaqueTokenFingerprint.ts";
 
 export const VENICE_APP_URL = "https://venice.ai";
 export const VENICE_CLERK_URL = "https://clerk.venice.ai";
@@ -36,8 +36,7 @@ const inflight = new Map<string, Promise<string>>();
 
 // Hash the whole cookie: every Clerk `__client` JWT starts with the same header, so a
 // prefix key would hand one account's session JWT to another (#15846).
-const cacheKey = (clientJwt: string): string =>
-  createHash("sha256").update(clientJwt).digest("hex");
+const cacheKey = (clientJwt: string): string => opaqueTokenFingerprint(clientJwt);
 
 /** Accepts `__client=<jwt>`, a full Cookie header, or the bare value. */
 export function extractClientJwt(raw: string): string {

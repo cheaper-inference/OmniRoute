@@ -123,7 +123,9 @@
       "maxCostOpt": "每日最大成本（美元）",
       "allowedModelsOpt": "逗号分隔的允许模型列表",
       "nothingToSet": "未提供策略字段。使用 --rate-limit、--max-cost 或 --allowed-models。",
-      "updated": "策略已更新。"
+      "updated": "策略已更新。",
+      "modelAccessModeOpt": "模型访问模式 (all | restricted)",
+      "unrestrictedOpt": "允许所有模型 (--model-access-mode all)"
     },
     "expiration": {
       "title": "密钥过期",

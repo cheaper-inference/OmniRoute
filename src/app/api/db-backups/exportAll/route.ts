@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDbInstance, SQLITE_FILE } from "@/lib/db/core";
 import { exportAllSummaryRows } from "@/lib/db/backup";
-import { CALL_LOGS_DIR } from "@/lib/usage/callLogArtifacts";
+import { getCallLogsDir } from "@/lib/usage/callLogArtifacts";
 import fs from "fs";
 import path from "path";
 import os from "os";
@@ -14,7 +14,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
 /**
  * GET /api/db-backups/exportAll
- * Exports the entire database + settings as a ZIP archive
+ * Exports the entire database + settings as a tar.gz archive
  * Security: operator-only (dashboard session, local CLI, or login disabled); API keys
  * and `oma_` access tokens get 403.
  */
@@ -43,29 +43,33 @@ async function buildFullExportResponse(): Promise<Response> {
     // Use mkdtempSync (exclusive creation, random suffix) instead of a
     // deterministic timestamp path — a predictable path lets a local
     // attacker pre-place a symlink and redirect the write (TOCTOU).
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-export-"));
-    const zipPath = path.join(os.tmpdir(), `omniroute-full-backup-${timestamp}.zip`);
+    const workDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-export-"));
+    const payloadDir = path.join(workDir, path.basename(workDir));
+    const archiveName = `omniroute-full-backup-${timestamp}.tar.gz`;
+    const tarPath = path.join(workDir, archiveName);
 
     try {
+      fs.mkdirSync(payloadDir);
       // 1. Export database using native backup API
-      const dbBackupPath = path.join(tempDir, "storage.sqlite");
+      const dbBackupPath = path.join(payloadDir, "storage.sqlite");
       await db.backup(dbBackupPath);
 
       // 2–5. Export settings, combos, provider connections, API keys (via db module)
       const { settings, combos, providers, apiKeys, reasoningRoutingRules } =
         exportAllSummaryRows();
-      fs.writeFileSync(path.join(tempDir, "settings.json"), JSON.stringify(settings, null, 2));
-      fs.writeFileSync(path.join(tempDir, "combos.json"), JSON.stringify(combos, null, 2));
-      fs.writeFileSync(path.join(tempDir, "providers.json"), JSON.stringify(providers, null, 2));
-      fs.writeFileSync(path.join(tempDir, "api-keys.json"), JSON.stringify(apiKeys, null, 2));
+      fs.writeFileSync(path.join(payloadDir, "settings.json"), JSON.stringify(settings, null, 2));
+      fs.writeFileSync(path.join(payloadDir, "combos.json"), JSON.stringify(combos, null, 2));
+      fs.writeFileSync(path.join(payloadDir, "providers.json"), JSON.stringify(providers, null, 2));
+      fs.writeFileSync(path.join(payloadDir, "api-keys.json"), JSON.stringify(apiKeys, null, 2));
       fs.writeFileSync(
-        path.join(tempDir, "reasoning-routing-rules.json"),
+        path.join(payloadDir, "reasoning-routing-rules.json"),
         JSON.stringify(reasoningRoutingRules, null, 2)
       );
 
       // 6. Export call log artifacts directory
-      if (CALL_LOGS_DIR && fs.existsSync(CALL_LOGS_DIR)) {
-        fs.cpSync(CALL_LOGS_DIR, path.join(tempDir, "call_logs"), { recursive: true });
+      const callLogsDir = getCallLogsDir();
+      if (callLogsDir && fs.existsSync(callLogsDir)) {
+        fs.cpSync(callLogsDir, path.join(payloadDir, "call_logs"), { recursive: true });
       }
 
       // 7. Export metadata
@@ -83,21 +87,15 @@ async function buildFullExportResponse(): Promise<Response> {
           "call_logs/ - Detailed call log artifacts",
         ],
       };
-      fs.writeFileSync(path.join(tempDir, "metadata.json"), JSON.stringify(metadata, null, 2));
+      fs.writeFileSync(path.join(payloadDir, "metadata.json"), JSON.stringify(metadata, null, 2));
 
-      // Create ZIP using tar (available on all Linux/macOS, and the archiver npm package is not installed)
-      // We'll use Node.js built-in zlib to create a simple tar.gz instead
-      const tarPath = zipPath.replace(".zip", ".tar.gz");
-      execFileSync("tar", ["-czf", tarPath, "-C", path.dirname(tempDir), path.basename(tempDir)], {
+      // A bare filename avoids GNU tar interpreting a Windows drive colon as a
+      // remote archive. The exclusive work directory also isolates concurrent exports.
+      execFileSync("tar", ["-czf", archiveName, path.basename(payloadDir)], {
+        cwd: workDir,
         timeout: 30000,
       });
-
-      // Read the archive
       const archiveBuffer = fs.readFileSync(tarPath);
-
-      // Cleanup
-      fs.rmSync(tempDir, { recursive: true, force: true });
-      fs.unlinkSync(tarPath);
 
       return new NextResponse(archiveBuffer, {
         status: 200,
@@ -107,15 +105,13 @@ async function buildFullExportResponse(): Promise<Response> {
           "Content-Length": archiveBuffer.length.toString(),
         },
       });
-    } catch (innerError) {
-      // Cleanup on error
+    } finally {
+      // Includes partial archives from tar failures and timeouts.
       try {
-        if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
-        if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+        fs.rmSync(workDir, { recursive: true, force: true });
       } catch {
-        /* ignore cleanup errors */
+        // Cleanup must not replace the original export error or response.
       }
-      throw innerError;
     }
   } catch (error: unknown) {
     console.error("[ExportAll] Error:", error);

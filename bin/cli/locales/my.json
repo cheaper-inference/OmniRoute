@@ -123,7 +123,9 @@
       "maxCostOpt": "တစ်ရက်လျှင် အများဆုံးကုန်ကျစရိတ် (USD)",
       "allowedModelsOpt": "အသုံးပြုခွင့်ပြုထားသော မော်ဒယ်များ၏ ကော်မာခြားစာရင်း",
       "nothingToSet": "မူဝါဒအကွက်များ ထည့်သွင်းပေးထားခြင်း မရှိပါ။ --rate-limit၊ --max-cost သို့မဟုတ် --allowed-models ကို အသုံးပြုပါ။",
-      "updated": "မူဝါဒကို အပ်ဒိတ်လုပ်ပြီးပါပြီ။"
+      "updated": "မူဝါဒကို အပ်ဒိတ်လုပ်ပြီးပါပြီ။",
+      "modelAccessModeOpt": "မော်ဒယ် အသုံးပြုခွင့်မုဒ် (all | restricted)",
+      "unrestrictedOpt": "မော်ဒယ်အားလုံးကို ခွင့်ပြုပါ (--model-access-mode all)"
     },
     "expiration": {
       "title": "ကီးသက်တမ်းကုန်ဆုံးမှု",

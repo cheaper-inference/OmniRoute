@@ -143,8 +143,12 @@ test("skills modules consumed outside src/lib/skills export exactly this surface
     ],
     skillssh: [
       "SkillsShSearchResponseSchema",
+      "SkillsShSkillIdSchema",
       "SkillsShSkillSchema",
+      "SkillsShSourceSchema",
+      "SkillsShVersionSchema",
       "fetchSkillMd",
+      "isValidSkillsShSource",
       "searchSkillsSh",
     ],
     stableJson: ["canonicalJson", "canonicalJsonSha256", "deriveToolRequestIdentity"],

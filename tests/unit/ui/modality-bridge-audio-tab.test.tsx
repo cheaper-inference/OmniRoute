@@ -2,12 +2,26 @@
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+// The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
+// <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
+import { kitSelectOptions, kitSelectTriggers } from "../../helpers/kitSelect";
 
 import ModalityBridgeAudioTab from "@/app/(dashboard)/dashboard/settings/components/modalityBridge/ModalityBridgeAudioTab";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
+
+// KEA-7886: the advanced numeric fields live in the kit Accordion (Collapsible adapter), which
+// mounts its body only while open — expand "modalityBridgeAdvanced" before querying them.
+function openAdvanced(root: HTMLElement): void {
+  const trigger = Array.from(
+    root.querySelectorAll<HTMLButtonElement>("[data-slot=accordion-trigger]")
+  ).find((button) => button.textContent?.includes("modalityBridgeAdvanced"));
+  if (trigger && trigger.getAttribute("aria-expanded") !== "true") {
+    act(() => trigger.click());
+  }
+}
 
 const roots: Array<{ root: Root; el: HTMLDivElement }> = [];
 
@@ -94,6 +108,8 @@ describe("ModalityBridgeAudioTab", () => {
       root.render(<ModalityBridgeAudioTab />);
     });
     roots.push({ root, el });
+    await waitFor(() => el.querySelector('[role="switch"]') !== null, "audio card");
+    openAdvanced(el);
     await waitFor(
       () => el.querySelector('[data-testid="modality-bridge-audio-timeout"]') !== null,
       "audio settings"
@@ -103,15 +119,15 @@ describe("ModalityBridgeAudioTab", () => {
 
   it("shows only transcription models and exposes selectable Auto", async () => {
     const el = await render();
-    expect(fetchMock).toHaveBeenCalledWith("/api/models/catalog");
-    await waitFor(
-      () =>
-        Array.from(el.querySelectorAll("option")).some(
-          (option) => option.value === "deepgram/nova-3"
-        ),
-      "STT models"
-    );
-    const optionValues = Array.from(el.querySelectorAll("option")).map((option) => option.value);
+    expect(fetchMock).toHaveBeenCalledWith("/api/models/catalog", {
+      signal: expect.any(AbortSignal),
+    });
+    // the model picker is disabled until its catalog has loaded
+    await waitFor(() => {
+      const trigger = kitSelectTriggers(el)[0] as HTMLButtonElement | undefined;
+      return !!trigger && !trigger.disabled;
+    }, "STT models");
+    const optionValues = kitSelectOptions(kitSelectTriggers(el)[0]).map((option) => option.value);
     expect(optionValues).toContain("");
     expect(optionValues).toContain("deepgram/nova-3");
     expect(optionValues).not.toContain("deepgram/aura");

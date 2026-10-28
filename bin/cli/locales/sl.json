@@ -123,7 +123,9 @@
       "maxCostOpt": "Največji strošek na dan (USD)",
       "allowedModelsOpt": "Seznam dovoljenih modelov, ločenih z vejicami",
       "nothingToSet": "Podano ni bilo nobeno polje pravilnika. Uporabite --rate-limit, --max-cost ali --allowed-models.",
-      "updated": "Pravilnik je posodobljen."
+      "updated": "Pravilnik je posodobljen.",
+      "modelAccessModeOpt": "Način dostopa do modelov (all | restricted)",
+      "unrestrictedOpt": "Dovoli vse modele (--model-access-mode all)"
     },
     "expiration": {
       "title": "Potek veljavnosti ključa",

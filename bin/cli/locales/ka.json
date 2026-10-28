@@ -123,7 +123,9 @@
       "maxCostOpt": "მაქსიმალური დღიური ხარჯი (USD)",
       "allowedModelsOpt": "ნებადართული მოდელების მძიმით გამოყოფილი სია",
       "nothingToSet": "პოლიტიკის ველები არ არის მოწოდებული. გამოიყენეთ --rate-limit, --max-cost ან --allowed-models.",
-      "updated": "პოლიტიკა განახლდა."
+      "updated": "პოლიტიკა განახლდა.",
+      "modelAccessModeOpt": "მოდელებზე წვდომის რეჟიმი (all | restricted)",
+      "unrestrictedOpt": "ყველა მოდელის დაშვება (--model-access-mode all)"
     },
     "expiration": {
       "title": "გასაღების მოქმედების ვადა",

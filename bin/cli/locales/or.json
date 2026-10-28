@@ -123,7 +123,9 @@
       "maxCostOpt": "ପ୍ରତିଦିନ ସର୍ବାଧିକ ଖର୍ଚ୍ଚ (USD)",
       "allowedModelsOpt": "ଅନୁମୋଦିତ ମଡେଲ୍‌ଗୁଡ଼ିକର କମା-ପୃଥକ ତାଲିକା",
       "nothingToSet": "କୌଣସି ନୀତି ଫିଲ୍ଡ ପ୍ରଦାନ କରାଯାଇନାହିଁ। --rate-limit, --max-cost, କିମ୍ବା --allowed-models ବ୍ୟବହାର କରନ୍ତୁ।",
-      "updated": "ନୀତି ଅପଡେଟ୍ କରାଗଲା।"
+      "updated": "ନୀତି ଅପଡେଟ୍ କରାଗଲା।",
+      "modelAccessModeOpt": "ମଡେଲ୍ ଆକ୍ସେସ୍ ମୋଡ୍ (all | restricted)",
+      "unrestrictedOpt": "ସମସ୍ତ ମଡେଲ୍ ଅନୁମତି ଦିଅନ୍ତୁ (--model-access-mode all)"
     },
     "expiration": {
       "title": "କୀର ମିଆଦ ସମାପ୍ତି",

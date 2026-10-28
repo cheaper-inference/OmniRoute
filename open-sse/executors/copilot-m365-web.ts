@@ -53,6 +53,15 @@ export function __setCopilotM365WebSocketForTesting(ctor: typeof WebSocket): () 
   };
 }
 
+/**
+ * Cap on the pending (unterminated) frame buffer of a wsChat socket. Complete
+ * frames are split out on every socket message, so only partial frames are
+ * retained; past this cap the turn aborts instead of accumulating the buffer
+ * without bound. Same 1 MiB budget as the claude-web SSE reader
+ * (`MAX_CLAUDE_WEB_SSE_PENDING_CHARS`).
+ */
+const MAX_COPILOT_WS_PENDING_CHARS = 1024 * 1024;
+
 function sseChunk(model: string, delta: JsonRecord, finishReason: string | null = null): string {
   return `data: ${JSON.stringify({
     id: `chatcmpl-copilot-m365-${Date.now()}`,
@@ -307,6 +316,20 @@ export class CopilotM365WebExecutor extends BaseExecutor {
             FETCH_TIMEOUT_MS
           );
 
+          // Aborts the turn when the pending (unterminated) frame buffer passes the
+          // cap, returning true so the caller skips the frame loop. Complete frames
+          // are split out on every socket message, so only partial frames are retained.
+          const abortIfBufferOverCap = (): boolean => {
+            if (buffer.length <= MAX_COPILOT_WS_PENDING_CHARS) return false;
+            clearTimeout(timeout);
+            log?.debug?.(
+              "COPILOT_WS",
+              `pending frame buffer exceeded the size limit (${buffer.length} chars)`
+            );
+            abort("Microsoft 365 Copilot pending frame buffer exceeded the size limit");
+            return true;
+          };
+
           try {
             const wsUrlParts = new URL(input.wsUrl);
             // #10718 — the invocation must echo the ids riding in the WS URL query
@@ -376,6 +399,7 @@ export class CopilotM365WebExecutor extends BaseExecutor {
               buffer += data.toString();
               const split = splitFrames(buffer);
               buffer = split.rest;
+              if (abortIfBufferOverCap()) return;
 
               for (const rawFrame of split.frames) {
                 const frame = parseFrame(rawFrame);

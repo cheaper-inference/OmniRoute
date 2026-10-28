@@ -1,1 +1,0 @@
-- **fix(mitm):** AgentBridge cert download, status, trust and untrust now use the active certificate. Root-CA installs get `ca.crt` instead of the legacy `server.crt`, with a filename for each mode and a not-found message that matches the mode ([#16643](https://github.com/diegosouzapw/OmniRoute/pull/16643))

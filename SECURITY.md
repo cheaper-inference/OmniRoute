@@ -33,9 +33,10 @@ After 3.8.59 the next version is **3.9.0**, which opens the long-term support li
 - **What `stable/v3` receives:** bug fixes, security patches and provider updates. New
   features go to the v4 channel; the LTS line is stability-first. `npm install omniroute`
   (the `latest` dist-tag) stays on v3 during the whole v4 cycle.
-- **Window duration:** `<T-GAP-3: owner decision pending — see ROADMAP.md>`. The length of
-  the window after v4.0 GA (when `latest` switches to v4) has **not been decided yet**; this
-  section is updated when the maintainer announces it. Until then, do not assume an end date.
+- **Window duration:** `stable/v3` receives **security fixes and critical regressions for
+  12 months after the 3.9.0 cut, or until 90 days after v4.0.0 is published as `latest` —
+  whichever is later**. The resulting end date is recorded in the 3.9.0 release notes and in
+  [`ROADMAP.md`](ROADMAP.md) when the cut happens.
 - **Reporting a vulnerability in the LTS line:** same channel as any other version —
   a private [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
   never a public issue. Say which version you tested (for example `3.9.2`); fixes land on

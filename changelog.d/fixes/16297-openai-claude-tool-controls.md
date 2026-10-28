@@ -1,1 +1,0 @@
-- **fix(sse):** OpenAI↔Claude translation now preserves `allowed_tools`, `parallel_tool_calls: false` and tool-level `strict` ([#16297](https://github.com/diegosouzapw/OmniRoute/pull/16297)) — thanks @Android-Login-Analysis

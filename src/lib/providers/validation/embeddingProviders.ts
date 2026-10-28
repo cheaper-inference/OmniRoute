@@ -1,3 +1,4 @@
+import { evaluateAuthProbeStatus } from "./authProbeStatus";
 // Embedding / rerank / clarifai provider key validators. Extracted from validation.ts (god-file
 // decomposition) — top-level functions with no dispatcher-state captures; behavior is byte-identical
 // to the original inline defs.
@@ -78,24 +79,7 @@ export async function validateEmbeddingApiProvider({
       }),
     });
 
-    if (response.status === 401 || response.status === 403) {
-      return { valid: false, error: "Invalid API key" };
-    }
-
-    if (
-      response.ok ||
-      response.status === 400 ||
-      response.status === 422 ||
-      response.status === 429
-    ) {
-      return { valid: true, error: null };
-    }
-
-    if (response.status >= 500) {
-      return { valid: false, error: `Provider unavailable (${response.status})` };
-    }
-
-    return { valid: false, error: `Validation failed: ${response.status}` };
+    return evaluateAuthProbeStatus(response);
   } catch (error: any) {
     return toValidationErrorResult(error);
   }
@@ -202,7 +186,12 @@ export async function validateJinaFoundationProvider({
   }
 }
 
-export async function validateRerankApiProvider({ apiKey, providerSpecificData = {}, url, modelId }: any) {
+export async function validateRerankApiProvider({
+  apiKey,
+  providerSpecificData = {},
+  url,
+  modelId,
+}: any) {
   if (!url) {
     return { valid: false, error: "Missing rerank endpoint" };
   }
@@ -220,24 +209,7 @@ export async function validateRerankApiProvider({ apiKey, providerSpecificData =
       }),
     });
 
-    if (response.status === 401 || response.status === 403) {
-      return { valid: false, error: "Invalid API key" };
-    }
-
-    if (
-      response.ok ||
-      response.status === 400 ||
-      response.status === 422 ||
-      response.status === 429
-    ) {
-      return { valid: true, error: null };
-    }
-
-    if (response.status >= 500) {
-      return { valid: false, error: `Provider unavailable (${response.status})` };
-    }
-
-    return { valid: false, error: `Validation failed: ${response.status}` };
+    return evaluateAuthProbeStatus(response);
   } catch (error: any) {
     return toValidationErrorResult(error);
   }

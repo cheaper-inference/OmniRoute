@@ -123,7 +123,9 @@
       "maxCostOpt": "ค่าใช้จ่ายสูงสุดต่อวัน (USD)",
       "allowedModelsOpt": "รายการโมเดลที่อนุญาตโดยคั่นด้วยจุลภาค",
       "nothingToSet": "ไม่ได้ระบุฟิลด์นโยบาย โปรดใช้ --rate-limit, --max-cost หรือ --allowed-models",
-      "updated": "อัปเดตนโยบายแล้ว"
+      "updated": "อัปเดตนโยบายแล้ว",
+      "modelAccessModeOpt": "โหมดการเข้าถึงโมเดล (all | restricted)",
+      "unrestrictedOpt": "อนุญาตทุกโมเดล (--model-access-mode all)"
     },
     "expiration": {
       "title": "การหมดอายุของคีย์",

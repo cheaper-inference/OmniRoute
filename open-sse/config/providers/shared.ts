@@ -226,6 +226,13 @@ export interface RegistryEntry {
    */
   forceStream?: boolean;
   /**
+   * Opt-in for providers that use prompt-emulated tool calling (e.g. web-session
+   * providers like opencode, duckduckgo-web, cloudflare-playground). When set to
+   * "emulated", the combo tool-calling filter will keep these providers eligible
+   * even though their registry/capability rows report toolCalling:false.
+   */
+  toolCalling?: "emulated" | boolean;
+  /**
    * Literal API key sent as the bearer token when the request has no real
    * credential (synthetic noauth fallback). Lets a primarily-authenticated
    * provider expose its free tier anonymously: e.g. Kilo's gateway accepts
@@ -433,6 +440,8 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "Llama-4-Maverick-17B-128E-Instruct",
     "Meta-Llama-3.3-70B-Instruct",
     "gpt-oss-120b",
+    "DeepSeek-V3.1",
+    "gemma-4-31B-it",
   ]),
   nscale: buildModels([
     "moonshotai/Kimi-K2.5",
@@ -447,14 +456,37 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "Qwen2.5-Coder-32B-Instruct",
     "Mistral-Small-3.2-24B-Instruct-2506",
   ]),
-  baseten: buildModels([
-    "moonshotai/Kimi-K2.6",
-    "deepseek-ai/DeepSeek-V4-Pro",
-    "zai-org/GLM-5",
-    "MiniMaxAI/MiniMax-M2.5",
-    "nvidia/Nemotron-120B-A12B",
-    "openai/gpt-oss-120b",
-  ]),
+  // Offline seed from Baseten's supported-models table; live discovery is authoritative.
+  baseten: [
+    { id: "zai-org/GLM-5.3", name: "GLM 5.3", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.3-Fast", name: "GLM 5.3 Fast", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.3-Flash", name: "GLM 5.3 Flash", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.2", name: "GLM 5.2", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.2-Fast", name: "GLM 5.2 Fast", contextLength: 1048576 },
+    { id: "zai-org/GLM-4.7", name: "GLM 4.7", contextLength: 200000 },
+    { id: "deepseek-ai/DeepSeek-V4-Pro", name: "DeepSeek V4 Pro", contextLength: 1048576 },
+    {
+      id: "deepseek-ai/DeepSeek-V4-Pro-0813",
+      name: "DeepSeek V4 Pro 0813",
+      contextLength: 1048576,
+    },
+    {
+      id: "deepseek-ai/DeepSeek-V4-Flash-0731",
+      name: "DeepSeek V4 Flash 0731",
+      contextLength: 1048576,
+    },
+    { id: "moonshotai/Kimi-K3", name: "Kimi K3", contextLength: 1048576 },
+    { id: "moonshotai/Kimi-K2.6", name: "Kimi K2.6", contextLength: 262144 },
+    { id: "moonshotai/Kimi-K2.7-Code", name: "Kimi K2.7 Code", contextLength: 262144 },
+    { id: "openai/gpt-oss-120b", name: "GPT OSS 120B", contextLength: 131072 },
+    {
+      id: "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B",
+      name: "Nemotron 3 Ultra",
+      contextLength: 202000,
+    },
+    { id: "thinkingmachines/inkling", name: "Inkling", contextLength: 1048576 },
+    { id: "thinkingmachines/inkling-small", name: "Inkling Small", contextLength: 1048576 },
+  ],
   publicai: buildModels([
     "swiss-ai/apertus-70b-instruct",
     "swiss-ai/Apertus-8B-Instruct-2509",

@@ -16,43 +16,42 @@ OmniRoute **hujumuisha** miunganisho iliyosanidiwa katika endpoint moja. Bado un
 
 ---
 
-## Watoa Huduma Wakilishi wenye Ufikiaji Bila Malipo
+## Watoa Huduma Wawakilishi wa Ufikiaji Bila Malipo
 
 ### Ufikiaji Unaorudiwa, Usiohitaji Ufunguo, au Usio na Kikomo
 
-Watoa huduma hawa wana njia ya ufikiaji bila malipo inayorudiwa, isiyohitaji ufunguo, au isiyo na kikomo katika katalogi iliyokaguliwa. “Isiyo na kikomo” inamaanisha hakuna kikomo cha tokeni kilichochapishwa; vikomo vya kasi, miunganisho ya wakati mmoja, akaunti, maeneo na sera bado vinaweza kutumika:
+Watoa huduma hawa wana njia ya ufikiaji bila malipo inayorudiwa, isiyohitaji ufunguo, au isiyo na kikomo katika katalogi iliyokaguliwa. “Isiyo na kikomo” humaanisha hakuna kikomo cha tokeni kilichochapishwa; vikomo vya kasi, matumizi ya wakati mmoja, akaunti, eneo na sera bado vinaweza kutumika:
 
-| Mtoa Huduma       | Modeli                                                                                                     | Kiwango                                                                                                                                               | Jinsi ya Kuunganisha                                                                                       |
-| ----------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, na nyinginezo                                                 | Katalogi iliyokaguliwa inakadiria hazina ya pamoja ya tokeni 25K kwa mwezi                                                                            | Mtiririko wa OAuth/akaunti; ToS imetiwa alama `avoid` katika katalogi                                      |
-| **OpenCode Free** | Seti ya sasa ya modeli za `*-free` katika sajili ya mtoa huduma                                            | Haihitaji ufunguo; hakuna kikomo cha tokeni kilichochapishwa                                                                                          | Hakuna kitambulisho cha mtoa huduma; ToS imetiwa alama `avoid`                                             |
-| **Pollinations**  | Seti ya sasa ya modeli zisizohitaji ufunguo; baadhi ya modeli za zamani zimesitishwa au zinahitaji ufunguo | Haihitaji ufunguo; hakuna kikomo cha tokeni kilichochapishwa                                                                                          | Hakuna kitambulisho cha mtoa huduma kwa modeli zisizohitaji ufunguo                                        |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, na nyinginezo                                 | Ufunguo wa API bila malipo (hakuna vikomo vya kasi, hakuna kadi); **kila ombi linarekodiwa** kwa ajili ya utafiti (jiondoe katika logfare.ai/consent) | Pata ufunguo papo hapo katika logfare.ai/register; ToS/faragha katika logfare.ai/tos na logfare.ai/privacy |
-| **Cloudflare AI** | Katalogi ya Workers AI                                                                                     | Hazina iliyokaguliwa inakadiria takriban tokeni 30M kwa mwezi kutokana na vipimo vya matumizi vilivyochapishwa                                        | Akaunti ya Cloudflare na vitambulisho vya API                                                              |
-| **Gemini**        | Familia ya Gemini Flash                                                                                    | Vikomo vya kasi vinavyotofautiana kulingana na mradi/modeli; hakuna mgao maalumu wa kila mwezi wa tokeni uliojumuishwa katika muhtasari               | Ufunguo wa API wa Google AI Studio; angalia vikomo vinavyotumika vya mradi                                 |
-| **Groq**          | Modeli za Llama, GPT-OSS, na Qwen                                                                          | Hazina iliyokaguliwa inakadiria takriban tokeni 15M kwa mwezi                                                                                         | Ufunguo wa API wa Groq; vikomo vya kasi vinatumika                                                         |
+| Mtoa Huduma       | Modeli                                                                                                     | Kiwango                                                                                                                                                | Jinsi ya Kuunganisha                                                                                        |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, na nyingine                                                   | Katalogi iliyokaguliwa inakadiria hazina ya pamoja ya tokeni 25K kwa mwezi                                                                             | Mtiririko wa OAuth/akaunti; ToS imewekewa alama `avoid` katika katalogi                                     |
+| **Pollinations**  | Seti ya sasa ya modeli zisizohitaji ufunguo; baadhi ya modeli za zamani zimesitishwa au zinahitaji ufunguo | Haihitaji ufunguo; hakuna kikomo cha tokeni kilichochapishwa                                                                                           | Hakuna kitambulisho cha mtoa huduma kinachohitajika kwa modeli zisizohitaji ufunguo                         |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, na nyingine                                   | Ufunguo wa API bila malipo (hakuna vikomo vya kasi, hakuna kadi); **kila ombi linarekodiwa** kwa ajili ya utafiti (jiondoe kupitia logfare.ai/consent) | Pata ufunguo mara moja kupitia logfare.ai/register; ToS/faragha katika logfare.ai/tos na logfare.ai/privacy |
+| **Cloudflare AI** | Katalogi ya Workers AI                                                                                     | Hazina iliyokaguliwa inakadiria ~30M za tokeni/mwezi kutokana na vipimo vya matumizi vilivyochapishwa                                                  | Akaunti ya Cloudflare na vitambulisho vya API                                                               |
+| **Gemini**        | Familia ya Gemini Flash                                                                                    | Vikomo vinavyobadilika vya kasi kulingana na mradi/modeli; hakuna mgao maalumu wa kila mwezi wa tokeni uliojumuishwa kwenye muhtasari                  | Ufunguo wa API wa Google AI Studio; angalia vikomo vinavyotumika vya mradi                                  |
+| **Groq**          | Modeli za Llama, GPT-OSS, na Qwen                                                                          | Hazina iliyokaguliwa inakadiria ~15M za tokeni/mwezi                                                                                                   | Ufunguo wa API wa Groq; vikomo vya kasi vinatumika                                                          |
 
-### Migawo ya Kujisajili na Salio Maalumu kwa Watoa Huduma
+### Mgao wa Kujisajili na Salio Maalumu kwa Mtoa Huduma
 
-Watoa huduma hawa hutoa migawo ya kujisajili au salio la matangazo, kulingana na masharti yao ya ustahiki. Kama ilivyothibitishwa tarehe 2026-10-08, [bei za Cerebras](https://www.cerebras.ai/pricing) zinahitaji njia ya malipo ili kupata salio la mara moja la $5 ambalo muda wake unaisha baada ya siku 30; si kiwango cha tokeni kinachorudiwa. [Vikomo vya kasi vya Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) hutofautiana kulingana na mradi, modeli na daraja, kwa hivyo havibadilishwi kuwa mgao wa tokeni wa kila mwezi uliohakikishwa.
+Watoa huduma hawa hutoa mgao wa kujisajili au salio la matangazo, kulingana na masharti yao ya kustahiki. Kama ilivyothibitishwa tarehe 2026-10-08, [bei za Cerebras](https://www.cerebras.ai/pricing) zinahitaji njia ya malipo ili kupata salio la mara moja la $5 ambalo muda wake unaisha baada ya siku 30; si kiwango cha tokeni kinachorudiwa. [Vikomo vya kasi vya Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) hutofautiana kulingana na mradi, modeli na daraja, kwa hivyo havibadilishwi kuwa mgao wa tokeni wa kila mwezi uliohakikishwa.
 
-| Mtoa Huduma   | Salio Bila Malipo                                                                              | Modeli                         | Jinsi ya Kulipata                                                 |
-| ------------- | ---------------------------------------------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------------- |
-| **Cerebras**  | Salio la matangazo la mara moja la $5; muda wake unaisha baada ya siku 30                      | Katalogi ya sasa ya uinferensi | Akaunti na njia halali ya malipo                                  |
-| **DeepSeek**  | Tokeni 5M bila malipo                                                                          | DeepSeek V4                    | Jisajili katika platform.deepseek.com                             |
-| **LongCat**   | Mgao wa mara moja wa tokeni 10M                                                                | LongCat 2.0                    | Ufunguo wa API + KYC; lipa kadiri unavyotumia baada ya mgao       |
-| **Vertex AI** | Salio la kujisajili la $300 linalowakilishwa kama takriban tokeni 300M katika modeli ya bajeti | Gemini na modeli za washirika  | Akaunti ya Google Cloud; sheria za utozaji na ustahiki zinatumika |
+| Mtoa Huduma   | Salio Bila Malipo                                                                         | Modeli                         | Jinsi ya Kulipata                                                 |
+| ------------- | ----------------------------------------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------------- |
+| **Cerebras**  | Salio la matangazo la mara moja la $5; muda wake unaisha baada ya siku 30                 | Katalogi ya sasa ya uelekezaji | Akaunti na njia halali ya malipo                                  |
+| **DeepSeek**  | Tokeni 5M bila malipo                                                                     | DeepSeek V4                    | Jisajili kupitia platform.deepseek.com                            |
+| **LongCat**   | Mgao wa mara moja wa tokeni 10M                                                           | LongCat 2.0                    | Ufunguo wa API + KYC; lipa kadiri unavyotumia baada ya mgao       |
+| **Vertex AI** | Salio la kujisajili la $300 linalowakilishwa kama ~300M za tokeni katika modeli ya bajeti | Gemini na modeli za washirika  | Akaunti ya Google Cloud; sheria za utozaji na ustahiki zinatumika |
 
-### Ufikiaji Mwingine wenye Vikomo
+### Ufikiaji Mwingine Wenye Kikomo
 
 Watoa huduma hawa wana **madaraja ya bila malipo** yenye vikomo maalumu:
 
-| Mtoa Huduma                | Kikomo cha Bila Malipo                                                                            | Modeli                                   | Inafaa Zaidi Kwa |
-| -------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------- | ---------------- |
-| **GitHub Models**          | Hazina ya pamoja iliyokaguliwa inakadiria takriban tokeni 18M kwa mwezi                           | Tathmini pana ya modeli                  |
-| **Hugging Face**           | Hazina ndogo inayorudiwa kila mwezi                                                               | Majaribio na aina mbalimbali za modeli   |
-| **OpenRouter free models** | Hazina ya pamoja yenye kikomo cha maombi; nyongeza ya hiari ya mara moja huongeza mgao unaorudiwa | Katalogi pana ya akiba                   |
-| **AI Horde**               | Uwezo wa jumuiya usiohitaji ufunguo; upatikanaji hutofautiana                                     | Uinferensi uliosambazwa wa kutumia fursa |
+| Mtoa Huduma                | Kikomo cha Bila Malipo                                                                                  | Modeli                            | Inafaa Zaidi Kwa |
+| -------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------- | ---------------- |
+| **GitHub Models**          | Hazina ya pamoja iliyokaguliwa inakadiriwa kuwa ~18M za tokeni/mwezi                                    | Tathmini pana ya modeli           |
+| **Hugging Face**           | Hazina ndogo ya kila mwezi inayorudiwa                                                                  | Majaribio na anuwai ya modeli     |
+| **OpenRouter free models** | Hazina ya pamoja yenye kikomo cha maombi; nyongeza ya hiari ya mara moja huongeza kiwango kinachorudiwa | Katalogi pana ya akiba            |
+| **AI Horde**               | Uwezo wa jumuiya usiohitaji ufunguo; upatikanaji hutofautiana                                           | Uelekezaji nyemelezi uliosambazwa |
 
 ---
 

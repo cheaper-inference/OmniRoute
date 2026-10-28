@@ -26,7 +26,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { execSync } from "node:child_process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
@@ -91,6 +90,9 @@ const IGNORE_FROM_CODE = new Set([
   // bundler is active — framework-internal. The OmniRoute-facing knob is
   // OMNIROUTE_USE_TURBOPACK (scripts/dev/run-next.mjs), which IS documented.
   "TURBOPACK",
+  // Electron sets this on its embedded Node server; children must preserve Node mode.
+  // Runtime-owned context, never a user-facing OmniRoute setting (#16454).
+  "ELECTRON_RUN_AS_NODE",
   "NODE_TEST_CONTEXT",
   "VITEST",
   // Instruction snippet shown to users (Traffic Inspector HttpProxySnippetCard) — not OmniRoute config.
@@ -356,21 +358,69 @@ export function parseEnvDocVars(text) {
   return vars;
 }
 
+/** Roots scanned for `process.env.X` references, relative to the repo root. */
+export const CODE_SCAN_ROOTS = [
+  "src",
+  "open-sse",
+  "bin",
+  "scripts",
+  "electron/main.js",
+  "electron/preload.js",
+];
+
+const CODE_ENV_REF = /process\.env\.([A-Z][A-Z0-9_]+)/g;
+
 /**
- * Collect environment variable references in source code via grep against
- * the `process.env` member access pattern.
+ * Collect environment variable references in source code.
+ *
+ * Pure Node on purpose. This used to shell out to
+ * `grep -rhoE … 2>/dev/null || true`; on Windows that line runs through cmd.exe,
+ * where `2>/dev/null` is an invalid path, so the command printed an error,
+ * `|| true` swallowed it, and the scan returned ZERO variables — the
+ * "in code but missing from .env.example" check then passed vacuously.
+ *
+ * Mirrors the grep it replaces: recursive, symlinks not followed, files that
+ * contain a NUL byte (binary) skipped, missing roots ignored.
+ *
+ * @param {{ cwd?: string, roots?: readonly string[] }} [options]
+ * @returns {Set<string>}
  */
-function scanCodeVars({ cwd } = {}) {
+export function scanCodeVars({ cwd, roots = CODE_SCAN_ROOTS } = {}) {
   const repoRoot = cwd ?? REPO_ROOT;
-  const stdout = execSync(
-    "grep -rhoE 'process\\.env\\.[A-Z][A-Z0-9_]+' " +
-      "src/ open-sse/ bin/ scripts/ electron/main.js electron/preload.js 2>/dev/null || true",
-    { cwd: repoRoot, encoding: "utf8", maxBuffer: 20 * 1024 * 1024 }
-  );
   const vars = new Set();
-  for (const line of stdout.split("\n")) {
-    const m = line.match(/^process\.env\.([A-Z][A-Z0-9_]+)$/);
-    if (m) vars.add(m[1]);
+  const scanFile = (file) => {
+    let text;
+    try {
+      text = fs.readFileSync(file, "utf8");
+    } catch {
+      return;
+    }
+    if (text.includes("\0")) return;
+    for (const m of text.matchAll(CODE_ENV_REF)) vars.add(m[1]);
+  };
+  const walk = (dir) => {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.isFile()) scanFile(full);
+    }
+  };
+  for (const root of roots) {
+    const full = path.join(repoRoot, root);
+    let stat;
+    try {
+      stat = fs.lstatSync(full);
+    } catch {
+      continue;
+    }
+    if (stat.isDirectory()) walk(full);
+    else if (stat.isFile()) scanFile(full);
   }
   return vars;
 }

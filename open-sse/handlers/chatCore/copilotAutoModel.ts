@@ -99,7 +99,7 @@ export async function resolveCopilotAuto(
     sessionKey,
     log,
   });
-  if (!resolution.ok) {
+  if (resolution.ok === false) {
     return {
       model,
       credentials,

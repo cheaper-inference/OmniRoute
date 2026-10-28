@@ -123,7 +123,9 @@
       "maxCostOpt": "Μέγιστο κόστος ανά ημέρα (USD)",
       "allowedModelsOpt": "Λίστα επιτρεπόμενων μοντέλων διαχωρισμένη με κόμμα",
       "nothingToSet": "Δεν παρασχέθηκαν πεδία πολιτικής. Χρησιμοποιήστε --rate-limit, --max-cost ή --allowed-models.",
-      "updated": "Η πολιτική ενημερώθηκε."
+      "updated": "Η πολιτική ενημερώθηκε.",
+      "modelAccessModeOpt": "Λειτουργία πρόσβασης μοντέλων (all | restricted)",
+      "unrestrictedOpt": "Να επιτρέπονται όλα τα μοντέλα (--model-access-mode all)"
     },
     "expiration": {
       "title": "Λήξη Κλειδιού",

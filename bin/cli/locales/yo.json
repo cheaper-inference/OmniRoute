@@ -123,7 +123,9 @@
       "maxCostOpt": "Ìnáwó tó pọ̀ jù lọ fún ọjọ́ kan (USD)",
       "allowedModelsOpt": "Àtòjọ àwọn módẹ́lì tí a fàyè gbà, tí a fi àmì kọ́mà yà sọ́tọ̀",
       "nothingToSet": "Kò sí ààyè ìlànà kankan tí a pèsè. Lo --rate-limit, --max-cost, tàbí --allowed-models.",
-      "updated": "A ti ṣàfikún ìlànà náà."
+      "updated": "A ti ṣàfikún ìlànà náà.",
+      "modelAccessModeOpt": "Ìpo ìráyè sí àwòṣe (all | restricted)",
+      "unrestrictedOpt": "Gba gbogbo àwòṣe láàyè (--model-access-mode all)"
     },
     "expiration": {
       "title": "Ìparí Àkókò Kọ́kọ́rọ́",

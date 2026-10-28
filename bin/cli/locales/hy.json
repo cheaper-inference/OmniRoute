@@ -123,7 +123,9 @@
       "maxCostOpt": "Օրական առավելագույն ծախսը (USD)",
       "allowedModelsOpt": "Թույլատրված մոդելների՝ ստորակետերով բաժանված ցանկը",
       "nothingToSet": "Քաղաքականության դաշտեր չեն տրամադրվել։ Օգտագործեք --rate-limit, --max-cost կամ --allowed-models։",
-      "updated": "Քաղաքականությունը թարմացվել է։"
+      "updated": "Քաղաքականությունը թարմացվել է։",
+      "modelAccessModeOpt": "Մոդելների հասանելիության ռեժիմ (all | restricted)",
+      "unrestrictedOpt": "Թույլատրել բոլոր մոդելները (--model-access-mode all)"
     },
     "expiration": {
       "title": "Բանալու վավերականության ժամկետի ավարտ",

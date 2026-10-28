@@ -298,13 +298,13 @@ Keskeiset toimintatavat:
 
 ## 🔑 Synkronointitunnukset ja määrityspaketti _(v3.6.6+)_
 
-Useiden laitteiden ja ulkoisten operaattoreiden käyttö on nyt mahdollista **rajattujen synkronointitunnusten** avulla:
+Usean laitteen ja ulkoisten operaattoreiden käyttö on nyt mahdollista **rajattujen synkronointitunnusten** avulla:
 
-- **`POST /api/sync/tokens`** — Luo uusi synkronointitunnus (rajattu, valinnainen vanhenemisaika)
+- **`POST /api/sync/tokens`** — Myönnä uusi synkronointitunnus (rajattu, valinnaisella vanhentumisajalla)
 - **`DELETE /api/sync/tokens/:id`** — Peruuta tunnus
-- **`GET /api/sync/bundle`** — Lataa versioitu, ETag-tunnisteella yksilöity JSON-tilannevedos kaikista ei-arkaluonteisista asetuksista (salasanat peitettyinä)
+- **`GET /api/sync/bundle`** — Lataa versioitu, ETag-avaimella yksilöity JSON-tilannevedos määrityksistä (todennus vain synkronointitunnuksella). Todennusasetukset, kuten hallintapaneelin salasana, poistetaan, mutta palveluntarjoajien tunnistetiedot ja API-avaimet sisällytetään, joten käsittele tiedostoa salaisuutena
 
-Määrityspaketin muodostaa `src/lib/sync/bundle.ts`. Kuluttajat vertaavat `ETag`-vastausotsaketta havaitakseen muutokset ilman koko hyötykuorman lataamista uudelleen.
+Määrityspaketti luodaan tiedostossa `src/lib/sync/bundle.ts`. Käyttäjät vertaavat `ETag`-vastausotsaketta havaitakseen muutokset lataamatta koko sisältöä uudelleen. CLI:stä komento `omniroute sync bundle <outPath> --token <syncToken>` (tai `OMNIROUTE_SYNC_TOKEN`) tallentaa sen tiedostoon, johon vain omistajalla on käyttöoikeus.
 
 ---
 

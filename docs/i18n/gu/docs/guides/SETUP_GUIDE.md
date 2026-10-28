@@ -136,37 +136,37 @@ omniroute providers validate
 
 ---
 
-## CLI ટૂલ કૉન્ફિગરેશન
+## CLI સાધન ગોઠવણી
 
-### 1) પ્રોવાઇડર્સ કનેક્ટ કરો અને API કી બનાવો
+### 1) પ્રદાતાઓને જોડો અને API કી બનાવો
 
-1. Dashboard → `Providers` ખોલો અને ઓછામાં ઓછો એક પ્રોવાઇડર કનેક્ટ કરો (OAuth અથવા API કી).
+1. Dashboard → `Providers` ખોલો અને ઓછામાં ઓછા એક પ્રદાતાને જોડો (OAuth અથવા API કી).
 2. Dashboard → `Endpoints` ખોલો અને API કી બનાવો.
-3. (વૈકલ્પિક) Dashboard → `Combos` ખોલો અને તમારી ફૉલબૅક ચેઇન સેટ કરો.
+3. (વૈકલ્પિક) Dashboard → `Combos` ખોલો અને તમારી ફૉલબૅક શૃંખલા સેટ કરો.
 
-### 2) તમારા કોડિંગ ટૂલને નિર્દેશિત કરો
+### 2) તમારા કોડિંગ સાધનને નિર્દેશિત કરો
 
 ```txt
-બેઝ URL: http://localhost:20128/v1
+મૂળ URL: http://localhost:20128/v1
 API કી:  [Endpoint પેજ પરથી કૉપિ કરો]
-મોડલ:    if/qwen3.8-max-preview (અથવા કોઈપણ પ્રોવાઇડર/મોડલ પ્રીફિક્સ)
+મોડેલ:    if/qwen3.8-max-preview (અથવા કોઈપણ પ્રદાતા/મોડેલ પ્રીફિક્સ)
 ```
 
-જો તમારું એડિટર `Authorization: Bearer ...` મોકલી શકતું ન હોય, તો તેના બદલે ટોકનાઇઝ્ડ કમ્પેટિબિલિટી બેઝનો ઉપયોગ કરો:
+જો તમારું એડિટર `Authorization: Bearer ...` મોકલી શકતું ન હોય, તો તેના બદલે ટોકનયુક્ત સુસંગતતા બેઝનો ઉપયોગ કરો:
 
 ```txt
-બેઝ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-મોડલ્સ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+મૂળ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+મોડેલ્સ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 ચૅટ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
 Ollama ટૅગ્સ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
 Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode અને OpenAI-સુસંગત SDKs સાથે કાર્ય કરે છે.
 
-#### `setup-*` વડે ઑટો-કૉન્ફિગર કરો
+#### `setup-*` વડે સ્વચાલિત રીતે ગોઠવો
 
-બેઝ URL અને કીને મૅન્યુઅલી પેસ્ટ કરવાને બદલે, OmniRoute ને લાઇવ મોડલ કૅટલૉગમાંથી દરેક ટૂલનું
-પોતાનું કૉન્ફિગ લખવા દો. દરેક ટૂલ માટે એક કમાન્ડ:
+મૂળ URL અને કી હાથથી પેસ્ટ કરવાને બદલે, OmniRoute ને લાઇવ મોડેલ કૅટલૉગમાંથી દરેક સાધનની
+પોતાની ગોઠવણી લખવા દો. દરેક સાધન માટે એક કમાન્ડ:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml પ્રોફાઇલ્સ
@@ -175,24 +175,25 @@ omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-સુ�
 omniroute setup-cline        # Cline CLI + VS Code એક્સ્ટેન્શન સેટિંગ્સ
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor ના ઇન-ઍપ પગલાં પ્રિન્ટ કરે છે
+omniroute setup-cursor       # Cursorનાં ઍપની અંદરનાં પગલાં પ્રિન્ટ કરે છે
 omniroute setup-roo          # Roo Code ઇમ્પોર્ટ + autoImport પોઇન્ટર
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-સ્થાનિક ટૂલને **રિમોટ** OmniRoute સામે કૉન્ફિગર કરવા માટે દરેક કમાન્ડ `--remote <url> --api-key <key>` સ્વીકારે છે, તેમજ પૂર્વાવલોકન માટે `--dry-run` સ્વીકારે છે. યોગ્ય
-env ઇન્જેક્ટ કરીને અને કોઈ કૉન્ફિગ લખ્યા વિના CLI લૉન્ચ કરવા માટે સામાન્ય લૉન્ચર
+દરેક કમાન્ડ સ્થાનિક સાધનને **રિમોટ** OmniRoute સામે ગોઠવવા માટે `--remote <url> --api-key <key>` સ્વીકારે છે, તેમજ પૂર્વાવલોકન માટે `--dry-run` સ્વીકારે છે. યોગ્ય
+env ઇન્જેક્ટ કરીને અને કોઈપણ ગોઠવણી લખ્યા વિના CLI શરૂ કરવા માટે, સામાન્ય લૉન્ચર
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) નો ઉપયોગ કરો;
-જૂના પ્રતિ-ટૂલ લૉન્ચર્સ `omniroute launch` (Claude Code) અને
-`omniroute launch-codex` (Codex) ઉપલબ્ધ રહે છે.
+જૂના દરેક-સાધન માટેના લૉન્ચર્સ `omniroute launch` (Claude Code) અને
+`omniroute launch-codex` (Codex) હજી પણ ઉપલબ્ધ છે.
 
-સંપૂર્ણ કોષ્ટક માટે (દરેક કમાન્ડ શું લખે છે, દરેક ફ્લૅગ, સ્થાનિક વિરુદ્ધ રિમોટ, બેઝ-URL
-`/v1` પરંપરાઓ), **[CLI ઇન્ટિગ્રેશન્સ](./CLI-INTEGRATIONS.md)** જુઓ.
+સંપૂર્ણ કોષ્ટક માટે (દરેક કમાન્ડ શું લખે છે, દરેક ફ્લૅગ, સ્થાનિક વિરુદ્ધ રિમોટ, મૂળ-URL
+`/v1` પ્રણાલીઓ), **[CLI એકીકરણો](./CLI-INTEGRATIONS.md)** જુઓ.
 
-વિગતવાર પ્રતિ-ટૂલ કૉન્ફિગરેશન (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot અને વધુ) માટે, સમર્પિત **[CLI ટૂલ્સ માર્ગદર્શિકા](../reference/CLI-TOOLS.md)** જુઓ.
+દરેક સાધનની વિગતવાર ગોઠવણી માટે (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot અને વધુ), સમર્પિત **[CLI સાધનો માર્ગદર્શિકા](../reference/CLI-TOOLS.md)** જુઓ.
 
 ---
 
@@ -321,9 +322,9 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) ટેમ્પલેટ
+## Void Linux (xbps-src) ટેમ્પલેટ
 
-Void Linux વપરાશકર્તાઓ `xbps-src`નો ઉપયોગ કરીને મૂળ પૅકેજ બનાવી શકે છે. આ બ્લૉકને `srcpkgs/omniroute/template` તરીકે સાચવો:
+Void Linux વપરાશકર્તાઓ માટે, તમે `xbps-src` નો ઉપયોગ કરીને મૂળ પૅકેજ બનાવી શકો છો. આ બ્લૉકને `srcpkgs/omniroute/template` તરીકે સાચવો:
 
 ```bash
 # 'omniroute' માટેની ટેમ્પલેટ ફાઇલ
@@ -337,7 +338,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# દરેક રિલીઝ માટે આ રીતે checksum ફરીથી બનાવો:
+# દરેક રિલીઝ માટે આ રીતે ચેકસમ ફરીથી બનાવો:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

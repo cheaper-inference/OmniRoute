@@ -1,1 +1,0 @@
-- **fix(translator):** keep Claude turns whose only block is `container_upload` or another unrecognized type instead of silently dropping them — forwarded verbatim to Claude targets, a type-only notice on OpenAI-format targets ([#16699](https://github.com/diegosouzapw/OmniRoute/pull/16699)) — thanks @semihisikman

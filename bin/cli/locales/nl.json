@@ -123,7 +123,9 @@
       "maxCostOpt": "Maximale kosten per dag (USD)",
       "allowedModelsOpt": "Door komma's gescheiden lijst met toegestane modellen",
       "nothingToSet": "Geen beleidsvelden opgegeven. Gebruik --rate-limit, --max-cost of --allowed-models.",
-      "updated": "Beleid bijgewerkt."
+      "updated": "Beleid bijgewerkt.",
+      "modelAccessModeOpt": "Toegangsmodus voor modellen (all | restricted)",
+      "unrestrictedOpt": "Alle modellen toestaan (--model-access-mode all)"
     },
     "expiration": {
       "title": "Vervaldatum van sleutel",

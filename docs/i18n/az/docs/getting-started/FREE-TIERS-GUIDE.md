@@ -16,43 +16,42 @@ OmniRoute konfiqurasiya edilmiş bağlantıları bir son nöqtədə **birləşdi
 
 ---
 
-## Pulsuz Giriş Təmin Edən Nümunəvi Provayderlər
+## Təmsilçi Pulsuz Giriş Təminatçıları
 
 ### Təkrarlanan, Açarsız və ya Limitsiz Giriş
 
-Bu provayderlər yoxlanılmış kataloqda təkrarlanan, açarsız və ya limitsiz pulsuz giriş imkanı təqdim edir. “Limitsiz” dərc edilmiş token limitinin olmaması deməkdir; sorğu tezliyi, paralel istifadə, hesab, regional və siyasət məhdudiyyətləri yenə də tətbiq oluna bilər:
+Bu təminatçıların yoxlanılmış kataloqda təkrarlanan, açarsız və ya limitsiz pulsuz giriş imkanı var. “Limitsiz” dərc edilmiş token limitinin olmaması deməkdir; sürət, paralel sorğu, hesab, regional və siyasət məhdudiyyətləri yenə də tətbiq oluna bilər:
 
-| Provayder         | Modellər                                                                           | Kvota                                                                                                                                                             | Qoşulma Qaydası                                                                                           |
-| ----------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 və digərləri                           | Yoxlanılmış kataloq aylıq ortaq hovuzun 25K token olduğunu təxmin edir                                                                                            | OAuth/hesab prosesi; kataloqda ToS `avoid` olaraq işarələnib                                              |
-| **OpenCode Free** | Provayder reyestrindəki cari `*-free` model dəsti                                  | Açarsız; dərc edilmiş token limiti yoxdur                                                                                                                         | Provayder giriş məlumatları tələb olunmur; ToS `avoid` olaraq işarələnib                                  |
-| **Pollinations**  | Cari açarsız model dəsti; bəzi əvvəlki modellər dayandırılıb və ya açar tələb edir | Açarsız; dərc edilmiş token limiti yoxdur                                                                                                                         | Açarsız modellər üçün provayder giriş məlumatları tələb olunmur                                           |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 və digərləri           | Pulsuz API açarı (sorğu tezliyi limiti və kart tələbi yoxdur); tədqiqat məqsədilə **hər sorğu qeydə alınır** (logfare.ai/consent ünvanında imtina edə bilərsiniz) | Açarı dərhal logfare.ai/register ünvanından əldə edin; ToS/məxfilik: logfare.ai/tos və logfare.ai/privacy |
-| **Cloudflare AI** | Workers AI kataloqu                                                                | Yoxlanılmış hovuz dərc edilmiş istifadə vahidlərinə əsasən ayda ~30M token olaraq qiymətləndirilir                                                                | Cloudflare hesabı və API giriş məlumatları                                                                |
-| **Gemini**        | Gemini Flash ailəsi                                                                | Layihə/model üzrə dəyişən sorğu tezliyi limitləri; əsas təklifə sabit aylıq token ayrılması daxil deyil                                                           | Google AI Studio API açarı; layihənin aktiv limitlərini yoxlayın                                          |
-| **Groq**          | Llama, GPT-OSS və Qwen modelləri                                                   | Yoxlanılmış hovuz ayda ~15M token olaraq qiymətləndirilir                                                                                                         | Groq API açarı; sorğu tezliyi limitləri tətbiq olunur                                                     |
+| Təminatçı         | Modellər                                                                           | Kvota                                                                                                                                            | Necə Qoşulmalı                                                                                                                                    |
+| ----------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 və digərləri                           | Yoxlanılmış kataloq aylıq 25K-token həcmində ortaq hovuz olduğunu təxmin edir                                                                    | OAuth/hesab prosesi; kataloqda Xidmət Şərtləri `avoid` kimi işarələnib                                                                            |
+| **Pollinations**  | Cari açarsız model dəsti; bəzi əvvəlki modellər dayandırılıb və ya açar tələb edir | Açarsızdır; dərc edilmiş token limiti yoxdur                                                                                                     | Açarsız modellər üçün təminatçı giriş məlumatları tələb olunmur                                                                                   |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 və digərləri           | Pulsuz API açarı (sürət limiti və kart tələbi yoxdur); tədqiqat üçün **hər sorğu qeydə alınır** (logfare.ai/consent ünvanında imtina etmək olar) | Açarı dərhal logfare.ai/register ünvanından əldə edin; Xidmət Şərtləri və məxfilik qaydaları logfare.ai/tos və logfare.ai/privacy ünvanlarındadır |
+| **Cloudflare AI** | Workers AI kataloqu                                                                | Yoxlanılmış hovuz dərc edilmiş istifadə vahidlərinə əsasən ayda ~30M token olduğunu təxmin edir                                                  | Cloudflare hesabı və API giriş məlumatları                                                                                                        |
+| **Gemini**        | Gemini Flash ailəsi                                                                | Layihə/model üzrə dəyişən sürət limitləri; əsas təklifə sabit aylıq token paketi daxil deyil                                                     | Google AI Studio API açarı; layihənin aktiv limitlərini yoxlayın                                                                                  |
+| **Groq**          | Llama, GPT-OSS və Qwen modelləri                                                   | Yoxlanılmış hovuz ayda ~15M token olduğunu təxmin edir                                                                                           | Groq API açarı; sürət limitləri tətbiq olunur                                                                                                     |
 
-### Qeydiyyat Bonusları və Provayderə Xas Kreditlər
+### Qeydiyyat Bonusları və Təminatçıya Xas Kreditlər
 
-Bu provayderlər uyğunluq qaydalarına tabe olmaqla qeydiyyat bonusları və ya promosyon kreditləri təklif edir. 2026-10-08 tarixində təsdiqləndiyi kimi, [Cerebras qiymətləri](https://www.cerebras.ai/pricing) 30 gündən sonra müddəti bitən birdəfəlik $5 kredit üçün ödəniş üsulu tələb edir; bu, təkrarlanan token kvotası deyil. [Gemini sorğu tezliyi limitləri](https://ai.google.dev/gemini-api/docs/rate-limits) layihə, model və səviyyəyə görə dəyişdiyi üçün onlar zəmanətli aylıq token ayrılmasına çevrilmir.
+Bu təminatçılar uyğunluq qaydalarına tabe olmaqla qeydiyyat bonusları və ya promosyon kreditləri təklif edirlər. 2026-10-08 tarixində təsdiqləndiyi kimi, [Cerebras qiymətləri](https://www.cerebras.ai/pricing) 30 gündən sonra müddəti bitən birdəfəlik $5 kredit üçün ödəniş üsulu tələb edir; bu, təkrarlanan token kvotası deyil. [Gemini sürət limitləri](https://ai.google.dev/gemini-api/docs/rate-limits) layihə, model və səviyyəyə görə dəyişir, buna görə də onlar zəmanətli aylıq token paketinə çevrilmir.
 
-| Provayder     | Pulsuz Kreditlər                                                   | Modellər                    | Əldə Etmə Qaydası                                               |
-| ------------- | ------------------------------------------------------------------ | --------------------------- | --------------------------------------------------------------- |
-| **Cerebras**  | Birdəfəlik $5 promosyon krediti; 30 gündən sonra müddəti bitir     | Cari inferensiya kataloqu   | Hesab və etibarlı ödəniş üsulu                                  |
-| **DeepSeek**  | 5M pulsuz token                                                    | DeepSeek V4                 | platform.deepseek.com ünvanında qeydiyyatdan keçin              |
-| **LongCat**   | Birdəfəlik 10M token bonusu                                        | LongCat 2.0                 | API açarı + KYC; bonusdan sonra istifadəyə görə ödəniş          |
-| **Vertex AI** | Büdcə modelində ~300M token kimi göstərilən $300 qeydiyyat krediti | Gemini və tərəfdaş modellər | Google Cloud hesabı; ödəniş və uyğunluq qaydaları tətbiq olunur |
+| Təminatçı     | Pulsuz Kreditlər                                                   | Modellər                    | Necə Əldə Etməli                                                         |
+| ------------- | ------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------------------ |
+| **Cerebras**  | Birdəfəlik $5 promosyon krediti; müddəti 30 gündən sonra bitir     | Cari inferensiya kataloqu   | Hesab və etibarlı ödəniş üsulu                                           |
+| **DeepSeek**  | 5M pulsuz token                                                    | DeepSeek V4                 | platform.deepseek.com ünvanında qeydiyyatdan keçin                       |
+| **LongCat**   | Birdəfəlik 10M-token bonusu                                        | LongCat 2.0                 | API açarı + KYC; bonusdan sonra istifadəyə görə ödəniş                   |
+| **Vertex AI** | Büdcə modelində ~300M token kimi göstərilən $300 qeydiyyat krediti | Gemini və tərəfdaş modellər | Google Cloud hesabı; fakturalandırma və uyğunluq qaydaları tətbiq olunur |
 
 ### Digər Məhdud Giriş İmkanları
 
-Bu provayderlərin xüsusi limitləri olan **pulsuz səviyyələri** var:
+Bu təminatçıların xüsusi limitləri olan **pulsuz səviyyələri** var:
 
-| Provayder                  | Pulsuz Limit                                                                                         | Modellər                                | Ən Uyğun İstifadə Sahəsi |
-| -------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------ |
-| **GitHub Models**          | Yoxlanılmış ortaq hovuz ayda ~18M token olaraq qiymətləndirilir                                      | Geniş model qiymətləndirilməsi          |
-| **Hugging Face**           | Kiçik, təkrarlanan aylıq hovuz                                                                       | Təcrübələr və model müxtəlifliyi        |
-| **OpenRouter free models** | Ortaq, sorğu sayı məhdud hovuz; istəyə bağlı birdəfəlik balans artırımı təkrarlanan limiti yüksəldir | Geniş ehtiyat kataloqu                  |
-| **AI Horde**               | Açarsız icma tutumu; əlçatanlıq dəyişir                                                              | Fürsətə əsaslanan paylanmış inferensiya |
+| Təminatçı                       | Pulsuz Limit                                                                                         | Modellər                             | Ən Uyğun İstifadə |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------ | ----------------- |
+| **GitHub Models**               | Yoxlanılmış ortaq hovuz ayda ~18M token olduğunu təxmin edir                                         | Geniş model qiymətləndirilməsi       |
+| **Hugging Face**                | Kiçik, təkrarlanan aylıq hovuz                                                                       | Təcrübələr və model müxtəlifliyi     |
+| **OpenRouter pulsuz modelləri** | Ortaq, sorğu sayı məhdud hovuz; istəyə bağlı birdəfəlik balans artırımı təkrarlanan limiti yüksəldir | Geniş ehtiyat kataloqu               |
+| **AI Horde**                    | Açarsız icma tutumu; əlçatanlıq dəyişir                                                              | Fürsət olduqda paylanmış inferensiya |
 
 ---
 

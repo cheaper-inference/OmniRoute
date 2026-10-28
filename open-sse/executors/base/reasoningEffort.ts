@@ -13,6 +13,7 @@ import {
   clampToLearned,
   REASONING_EFFORT_ORDER,
 } from "../../services/learnedReasoningEffortCaps.ts";
+import { isBasetenReasoningModel, mapBasetenReasoningParams } from "./basetenReasoning.ts";
 
 /**
  * Sanitize reasoning_effort for providers that don't accept all values.
@@ -84,12 +85,7 @@ export function isOllamaCloudProvider(provider: string): boolean {
 }
 
 export function isOpencodeGoProvider(provider: string): boolean {
-  return (
-    provider === "opencode-go" ||
-    provider === "opencode-zen" ||
-    provider === "opencode" ||
-    provider === "opencode_go"
-  );
+  return provider === "opencode-go" || provider === "opencode-zen" || provider === "opencode_go";
 }
 
 export function isSenseNovaDeepSeekV4Flash(provider: string, model: string | undefined): boolean {
@@ -325,6 +321,9 @@ export function sanitizeReasoningEffortForProvider(
 ): unknown {
   if (isNvidiaGlm52(provider, model)) {
     return mapNvidiaGlm52ReasoningParams(body, provider, model, log);
+  }
+  if (isBasetenReasoningModel(provider, model)) {
+    return mapBasetenReasoningParams(body, provider, model, log);
   }
 
   if (!body || typeof body !== "object" || Array.isArray(body)) return body;

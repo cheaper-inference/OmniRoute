@@ -6,12 +6,14 @@ import {
   isAllRateLimitedCredentials,
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
-import {
-  buildErrorBody,
-  sanitizeErrorMessage,
-} from "@omniroute/open-sse/utils/error.ts";
+import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  isKeyScopeBlockedCredentials,
+  keyScopeBlockedResponse,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 
 const ELEVENLABS_API_BASE = "https://api.elevenlabs.io/v1";
 const ALLOWED_RESPONSE_HEADERS = [
@@ -19,6 +21,8 @@ const ALLOWED_RESPONSE_HEADERS = [
   "content-disposition",
   "request-id",
   "retry-after",
+  "character-cost",
+  "song-id",
 ] as const;
 
 type ElevenLabsCredentials = {
@@ -47,14 +51,24 @@ function proxyResponseHeaders(upstream: Response): Headers {
 export async function proxyElevenLabsRequest(
   request: Request,
   pathname: string,
-  init: Omit<RequestInit, "headers"> = {}
+  init: Omit<RequestInit, "headers"> = {},
+  options: { model?: string; contentType?: string } = {}
 ): Promise<Response> {
-  const policy = await enforceApiKeyPolicy(request, null);
+  const policy = await enforceApiKeyPolicy(request, options.model ?? null);
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: the ElevenLabs connection must be one the caller key may use.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
 
-  const credentials = (await getProviderCredentialsWithQuotaPreflight(
-    "elevenlabs"
-  )) as ElevenLabsCredentials | null;
+  const selection = await getProviderCredentialsWithQuotaPreflight(
+    "elevenlabs",
+    null,
+    scope.allowedConnections
+  );
+  if (isKeyScopeBlockedCredentials(selection)) {
+    return keyScopeBlockedResponse("elevenlabs", selection);
+  }
+  const credentials = selection as ElevenLabsCredentials | null;
   if (credentials && isAllRateLimitedCredentials(credentials)) {
     return rateLimitedProviderResponse("elevenlabs", credentials);
   }
@@ -74,13 +88,13 @@ export async function proxyElevenLabsRequest(
   upstreamUrl.search = incomingUrl.search;
   const headers = new Headers();
   headers.set("xi-api-key", apiKey);
-  const contentType = request.headers.get("content-type");
+  const contentType = options.contentType ?? request.headers.get("content-type");
   if (contentType) headers.set("content-type", contentType);
   const accept = request.headers.get("accept");
   if (accept) headers.set("accept", accept);
 
   try {
-    const upstream = await fetch(upstreamUrl, { ...init, headers });
+    const upstream = await fetch(upstreamUrl, { ...init, headers, signal: request.signal });
     if (upstream.ok) {
       await clearRecoveredProviderState(credentials as Record<string, unknown>);
     }
@@ -94,9 +108,7 @@ export async function proxyElevenLabsRequest(
       JSON.stringify(
         buildErrorBody(
           502,
-          sanitizeErrorMessage(
-            error instanceof Error ? error.message : "ElevenLabs request failed"
-          )
+          sanitizeErrorMessage(error instanceof Error ? error.message : "ElevenLabs request failed")
         )
       ),
       {

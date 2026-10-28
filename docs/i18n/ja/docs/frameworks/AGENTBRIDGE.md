@@ -14,36 +14,36 @@ AgentBridge は、IDE AI エージェントからの HTTPS トラフィックを
 
 ## §1 概要
 
-### AgentBridge とは？
+### AgentBridgeとは何ですか？
 
-IDE エージェント（例: GitHub Copilot、Cursor、Claude Code）が API を呼び出すと、上流の AI プロバイダー（OpenAI、Anthropic など）へ直接接続します。AgentBridge は、エージェント側の設定を変更することなく、その接続を TLS レベルで透過的に傍受し、リクエストが OmniRoute を経由するように書き換えます。
+IDEエージェント ( GitHub Copilot、 Cursor、 Claudeコードなど) がAPI呼び出しを行うと、上流のAIプロバイダー (OpenAI、 Anthropicなど) に直接接続します。 AgentBridge 、エージェント構成の変更を必要とせずに、その接続をTLSレベルで透過的にインターセプトし、 OmniRouteを通じてリクエストを書き換えます。
 
-これにより、以下が可能になります。
+つまり、次のことが可能になります。
 
-- **任意のエージェントを任意のプロバイダーへ再ルーティング**: Copilot が OpenAI と通信していますか？Anthropic Claude、Gemini、または OmniRoute が提供する 352 のプロバイダーのいずれかへリダイレクトできます。
-- **モデルマッピングを適用**: ハンドラーレベルで `gemini-3-flash` → `claude-sonnet-4.7` のように透過的にマッピングできます。
-- **すべてのエージェントトラフィックを監視**: 傍受されたすべてのリクエストが [Traffic Inspector](./TRAFFIC_INSPECTOR.md) に送信されます。
-- **OmniRoute の耐障害性を適用**: コンボルーティング、サーキットブレーカー、フォールバック、コスト追跡を IDE エージェントのトラフィックにも適用できます。
+- **エージェントを任意のプロバイダーに再ルーティングする**: Copilot OpenAIと話していますか?それをAnthropic Claude、 Gemini、またはOmniRouteの 377 プロバイダーのいずれかにリダイレクトします。
+- **モデルマッピングを適用する**: `gemini-3-flash` → `claude-sonnet-4.7`ハンドラーレベルで透過的に。
+- **すべてのエージェントのトラフィックを監視する**: 傍受されたすべてのリクエストは[Traffic Inspector](./TRAFFIC_INSPECTOR.md)に公開されます。
+- **OmniRouteレジリエンスを適用する**: コンボ ルーティング、サーキット ブレーカー、フォールバック、コスト トラッキングは、 IDEエージェント トラフィックに対しても機能します。
 
-### 市場における位置付け
+### ポジショニングと市場の比較
 
-| 機能                   | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ---------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity            |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot         |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)             |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex           |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE             |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries         |    —    |    ✓     |        —        |             ✓             |
-| Claude Code            |    —    |    —     |        ✓        |             ✓             |
-| Open Code              |    —    |    —     |        ✓        |             ✓             |
-| Trae                   |    —    |    —     |        —        |         🔍 調査中         |
-| ダッシュボード UI      |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector      |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute ルーティング |    ✗    |    ✗     |        ✗        |             ✓             |
-| モデルマッピング UI    |    ✗    |    ✗     |        ✗        |             ✓             |
-| バイパスリスト         |    ✗    |    ✗     |        ✓        |             ✓             |
-| 上流 CA 証明書         |    ✗    |    ✗     |        ✓        |             ✓             |
+| 特徴                     | 9ルーター | アンチAPI | llm-インターセプター | **OmniRoute AgentBridge** |
+| ------------------------ | :-------: | :-------: | :------------------: | :-----------------------: |
+| Antigravity              |     ✓     |     ✓     |          —           |             ✓             |
+| GitHub Copilot           |     ✓     |     ✓     |          —           |             ✓             |
+| Kiro (AWS)               |     ✓     |     ✓     |          —           |             ✓             |
+| OpenAI Codex             |     —     |     ✓     |          —           |             ✓             |
+| Cursor IDE               |     ✓     |     ✓     |          —           |             ✓             |
+| Zedインダストリーズ      |     —     |     ✓     |          —           |             ✓             |
+| Claudeコード             |     —     |     —     |          ✓           |             ✓             |
+| オープンコード           |     —     |     —     |          ✓           |             ✓             |
+| トレイ                   |     —     |     —     |          —           |         🔍調査中          |
+| ダッシュボードUI         |     ✓     |     ✗     |          ✗           |             ✓             |
+| 交通監視官               |     ✗     |     ✗     |          ✓           |             ✓             |
+| OmniRouteルーティング    |     ✗     |     ✗     |          ✗           |             ✓             |
+| モデルマッピングUI       |     ✗     |     ✗     |          ✗           |             ✓             |
+| バイパスリスト           |     ✗     |     ✗     |          ✓           |             ✓             |
+| アップストリームCA証明書 |     ✗     |     ✗     |          ✓           |             ✓             |
 
 ---
 
@@ -187,22 +187,22 @@ Traffic Inspector バッファやログに入る**前に**適用されます。�
 
 ## §3 セットアップ
 
-### 3.1 MITM サーバーの起動／停止
+### 3.1 MITM サーバーの起動/停止
 
 `/dashboard/tools/agent-bridge` にある AgentBridge サーバーカードを使用します。
 
-| 操作                 | 説明                                                                 |
-| -------------------- | -------------------------------------------------------------------- |
-| サーバーを起動       | ポート 443 で `src/mitm/server.cjs` を起動                           |
-| サーバーを停止       | 子プロセスを正常にシャットダウン                                     |
-| サーバーを再起動     | 停止してから起動（ターゲットの変更を反映）                           |
-| 証明書を信頼         | `DATA_DIR/mitm/ca.crt` を OS の信頼ストアにインストール              |
-| 証明書をダウンロード | 手動インストール用の `ca.crt` をダウンロード                         |
-| 証明書を再生成       | 新しい CA キーペアを作成（既存のエージェント別証明書はすべて無効化） |
+| 操作                 | 説明                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| サーバーを起動       | ポート 443 で `src/mitm/server.cjs` を起動します。ルート CA モデルでは、初回起動時に `ca.crt` を作成し、sudo パスワードを利用できる場合はアクティブな証明書を信頼済みにします                                                                                                                                                                                                                                                                       |
+| サーバーを停止       | 子プロセスを正常にシャットダウンします                                                                                                                                                                                                                                                                                                                                                                                                              |
+| サーバーを再起動     | 停止してから起動します（ターゲットの変更と再生成された証明書が反映されます）                                                                                                                                                                                                                                                                                                                                                                        |
+| 証明書を信頼         | アクティブな証明書を OS の信頼ストアにインストールします。ルート CA モデルでは `DATA_DIR/mitm/ca.crt`、従来のリーフ証明書を使用するインストールでは `DATA_DIR/mitm/server.crt` です                                                                                                                                                                                                                                                                 |
+| 証明書をダウンロード | 手動インストール用にアクティブな証明書をダウンロードします（`omniroute-mitm-ca.crt` = `ca.crt`、従来のリーフ証明書を使用するインストールでは `omniroute-mitm.crt` = `server.crt`）                                                                                                                                                                                                                                                                  |
+| 証明書を再生成       | 証明書モデルは変更しません。従来のリーフ証明書を使用するインストールでは、新しい `server.crt`/`server.key` を発行します（配信するにはサーバーを再起動してください）。ルート CA モデルでは `ca.crt`/`ca.key` をローテーションしますが、サーバーの実行中は拒否されます。信頼済みの古い CA は最初に信頼解除され（sudo パスワードが必要）、解除できない場合はローテーションが中止されます。その後、クライアントで新しい CA を再度信頼する必要があります |
 
 ### 3.2 証明書を信頼する
 
-IDE が MITM 接続を受け入れるには、事前に AgentBridge CA 証明書を OS で信頼する必要があります。
+IDE が MITM 接続を受け入れるには、事前に AgentBridge CA 証明書を OS で信頼済みにする必要があります。
 
 **Linux（NSS — Chrome/Firefox）：**
 
@@ -223,25 +223,39 @@ sudo security add-trusted-cert -d -r trustRoot \
 certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 ```
 
-または、ダッシュボードの「証明書を信頼」ボタンを使用します（OS に適したコマンドが実行され、必要に応じて sudo プロンプトが表示されます）。
+または、ダッシュボードの「証明書を信頼」ボタンを使用します（OS に適したコマンドを実行し、必要に応じて sudo パスワードの入力を求めます）。
 
 #### Electron ベースの IDE は OS の信頼ストアを無視する（`NODE_EXTRA_CA_CERTS`）
 
-一部の IDE、特に **Antigravity IDE** や、その他の Electron / VS Code 派生アプリには独自の Node.js ランタイムが同梱されており、外向きの `fetch`/HTTPS では **OS の信頼ストアを参照しません**。OS/NSS レベルで CA を信頼すれば、IDE のネイティブな**バックエンド**（たとえば、OS の CA バンドルを使用する Go 言語サーバー）には十分ですが、**Electron フロントエンド**では依然として TLS が失敗します。これは、MITM ログ上ではバックエンドのブートストラップ呼び出しが `200` を返しているにもかかわらず、アプリが_ログアウト状態_になったり、_「接続エラー」_が表示されたりする形で現れます。次の 2 つの手順が必要であり、どちらも重要です。
+一部の IDE（特に **Antigravity IDE** や、その他の Electron / VS Code 派生アプリ）には、
+送信 `fetch`/HTTPS に対して **OS の信頼ストアを参照しない** 独自の Node.js ランタイムが
+バンドルされています。OS/NSS レベルで CA を信頼するだけで、IDE のネイティブな
+**バックエンド**（例：OS の CA バンドルを使用する Go 言語サーバー）には十分ですが、
+**Electron フロントエンド**では依然として TLS が失敗します。MITM ログでバックエンドの
+ブートストラップ呼び出しが `200` を返しているにもかかわらず、アプリでは_ログアウト状態_
+になったり、_"接続エラー"_が表示されたりします。次の 2 つの手順が必要であり、どちらも
+重要です。
 
-1. ランタイムに CA を明示的に指定します。
+1. ランタイムで CA を明示的に指定します。
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **そのシェルから IDE を起動します。** デスクトップアイコン、Dock、またはスタートメニューから起動した場合、シェルの export は継承されません。また、`~/.config/environment.d/*.conf` が適用されるのは、新しくグラフィカルログインした後だけです。最初に IDE を完全に終了してください。Electron のシングルトンロックにより、2 回目の起動では既存のプロセスにフォーカスが移るだけで、新しい環境は無視されます。
+2. **そのシェルから IDE を起動します。** デスクトップアイコン / Dock / スタートメニュー
+   から起動しても、シェルのエクスポートは継承されません。また、
+   `~/.config/environment.d/*.conf` が適用されるのは、新しくグラフィカルログインした後だけです。
+   まず IDE を完全に終了してください。Electron のシングルトンロックにより、2 回目の起動では
+   既存のプロセスが前面に表示されるだけで、新しい環境は無視されます。
 
-上記の OS 信頼ストアと NSS の手順も引き続き必要です（一部の認証フローで使用される Chromium ネットワークスタックはユーザー単位の NSS ストアを参照し、`*.googleapis.com` に対する独自の静的ピンも保持していますが、ローカルで信頼された CA によって上書きされます）。`NODE_EXTRA_CA_CERTS` は、それに加えて Node の `fetch` 経路をカバーします。
+上記の OS での信頼設定と NSS の手順は、引き続き必要です（一部の認証フローで使用される
+Chromium ネットワークスタックはユーザー単位の NSS ストアを参照し、`*.googleapis.com` に
+対する独自の静的ピンも持っていますが、ローカルで信頼された CA によって上書きされます）。
+これに加えて、`NODE_EXTRA_CA_CERTS` が Node の `fetch` 経路をカバーします。
 
 ### 3.3 DNS ルーティング
 
-インターセプトする各エージェントについて、その API ホストが `127.0.0.1` に解決される必要があります。セットアップウィザードでエージェントの DNS を切り替えると、AgentBridge が `/etc/hosts` のエントリを自動的に管理します。
+インターセプトする各エージェントについて、その API ホストが `127.0.0.1` に名前解決される必要があります。セットアップウィザードでエージェントの DNS を切り替えると、AgentBridge が `/etc/hosts` のエントリを自動的に管理します。
 
-GitHub Copilot 用の `/etc/hosts` エントリの例：
+GitHub Copilot の `/etc/hosts` エントリ例：
 
 ```
 127.0.0.1 api.githubcopilot.com
@@ -257,59 +271,66 @@ GitHub Copilot 用の `/etc/hosts` エントリの例：
 | `gpt-4o`                               | `claude-sonnet-4.7`           |
 | `*`（ワイルドカード）                  | `claude-haiku-4.7`            |
 
-ワイルドカード `*` は、認識されないすべてのモデルを指定したターゲットにマッピングします。設定は `agent_bridge_mappings` テーブルに永続化されます。
+ワイルドカード `*` は、認識されないすべてのモデルを指定されたターゲットにマッピングします。設定は `agent_bridge_mappings` テーブルに永続化されます。
 
-> **ヒント — エージェントの実際のモデル ID を確認する。** IDE は、UI ラベルとは異なるモデル名や、メジャーバージョン間で変更されるモデル名を送信する場合があります。たとえば、**Antigravity 2** は通信時に `gemini-3.1-pro-low`、`gemini-pro-agent`、`gemini-3.1-flash-lite` を送信します。古いドキュメントに記載されている `gemini-2.5-pro` ではありません。一致するマッピングがない状態でチャットを 1 回送信すると、MITM が受信した正確な `model:` をログに記録し、リクエストをそのまま通過させます。そのリテラル値をマッピングすると、次のリクエストからインターセプトされ、ターゲットへルーティングされます。
+> **ヒント — エージェントの実際のモデル ID を確認する。** IDE は、UI 上のラベルとは異なり、
+> メジャーバージョン間で変更されるモデル名を送信する場合があります。たとえば **Antigravity 2** は、
+> 古いドキュメントに記載されている `gemini-2.5-pro` ではなく、`gemini-3.1-pro-low`、
+> `gemini-pro-agent`、`gemini-3.1-flash-lite` を通信上で送信します。一致するマッピングがない状態で
+> チャットを 1 回送信してください。MITM は受信した正確な `model:` をログに記録し、リクエストを
+> そのまま転送します。そのリテラル値をマッピングすると、次のリクエストからインターセプトされ、
+> 指定したターゲットへルーティングされます。
 
 ### 3.5 リスクに関する注意事項
 
-AgentBridge は、IDE が上流プロバイダーへの認証に使用する資格情報（OAuth トークン、API キー）をインターセプトします。これらは**ログ記録前にマスクされます**（§2.7 を参照）が、OmniRoute の MITM レイヤーからは参照可能です。各エージェントを初めて有効化すると、閉じることができるリスク通知モーダルが表示されます。
+AgentBridge は、IDE がアップストリームプロバイダーとの認証に使用する認証情報（OAuth トークン、API キー）をインターセプトします。これらは**ログ記録前にマスクされます**（§2.7 を参照）が、OmniRoute の MITM レイヤーからは参照できます。各エージェントを初めて有効化すると、閉じることができるリスク通知モーダルが表示されます。
 
 ### 3.6 メンテナンスと診断
 
-ダッシュボードには、これまで UI がなかった運用上の MITM ルートを表示する**メンテナンスと診断**カード（`AgentBridgeMaintenanceCard`、`src/app/(dashboard)/dashboard/tools/agent-bridge/components/` 内）があります。そのサブタイトルは、_「キャプチャパイプラインをセルフテストし、残っているシステム状態を元に戻し、セットアップをマシン間で移行します。」_ です。カードのクライアントヘルパーは `src/lib/inspector/agentBridgeMaintenanceApi.ts` にあります。
+ダッシュボードには、これまで UI がなかった運用用 MITM ルートを表示する **メンテナンスと診断**カード（`AgentBridgeMaintenanceCard`、`src/app/(dashboard)/dashboard/tools/agent-bridge/components/` 内）があります。サブタイトルは、_「キャプチャパイプラインを自己テストし、残存するシステム状態を元に戻し、セットアップをマシン間で移行します。」_ です。カードのクライアントヘルパーは `src/lib/inspector/agentBridgeMaintenanceApi.ts` にあります。
 
 | ボタン                 | ルート                                 | 機能                                                                                                                                                                                                               |
 | ---------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **診断**               | `GET /api/tools/agent-bridge/diagnose` | キャプチャパイプラインのセルフテストを実行し、チェックごとのレポート（✓/✗ + 修復のヒント）を表示します。                                                                                                           |
-| **修復**               | `POST /api/tools/agent-bridge/repair`  | クラッシュまたは SIGKILL によって残された孤立した MITM システム状態（DNS スプーフエントリ、ルート CA、システムプロキシ）を元に戻します。冪等であり、状態に問題がなければ「修復するものはありません」と報告します。 |
-| **CA を削除**          | `DELETE /api/tools/agent-bridge/cert`  | OS の信頼ストアから MITM ルート CA の信頼を解除して削除します（明示的かつ冪等）。CA が現在信頼されている場合にのみ表示され、インラインの「CA を削除しますか？」という確認が必要です。                              |
+| **診断**               | `GET /api/tools/agent-bridge/diagnose` | キャプチャパイプラインの自己テストを実行し、チェックごとのレポート（✓/✗ + 修正のヒント）を表示します。                                                                                                             |
+| **修復**               | `POST /api/tools/agent-bridge/repair`  | クラッシュまたは SIGKILL 後に残された孤立 MITM システム状態（DNS スプーフィングエントリ、ルート CA、システムプロキシ）を元に戻します。冪等であり、状態がクリーンな場合は「修復する項目はありません」と報告します。 |
+| **CA を削除**          | `DELETE /api/tools/agent-bridge/cert`  | OS のトラストストアで MITM ルート CA の信頼を解除し、削除します（明示的かつ冪等）。CA が現在信頼されている場合にのみ表示され、インラインの「CA を削除しますか？」という確認が必要です。                            |
 | **設定をエクスポート** | `GET /api/tools/agent-bridge/config`   | ポータブル設定 JSON をダウンロードします（§3.7 を参照）。                                                                                                                                                          |
 | **設定をインポート**   | `POST /api/tools/agent-bridge/config`  | 以前にエクスポートした設定 JSON をアップロードします（§3.7 を参照）。                                                                                                                                              |
 
-各エージェントカードには、固有の **デフォルトに戻す** ボタン（`POST
-/api/tools/agent-bridge/agents/{id}/reset`）もあります。これはエージェント単位でワンクリックで元に戻す機能であり、その
-エージェントのホストについてのみスプーフを解除し、保存済みのモデルマッピングを消去して、`dns_enabled`/`setup_completed`
-の状態をリセットします。これにより、IDE を完全に再起動すると、再び実際のアップストリームと通信するようになります。共有
-MITM サーバーやルート CA には影響しません（他のエージェントが引き続き依存している可能性があります）。これらには、
-サーバーカードおよび上記の **CA を削除** アクションから引き続きアクセスできます。Windows では、Windows DNS Client が hosts ファイルのエントリをキャッシュし、
-削除直後のスプーフをそのままでは破棄しないため、ベストエフォートで `ipconfig /flushdns` も実行します。
+各エージェントカードには、専用の**デフォルトに戻す**ボタン（`POST
+/api/tools/agent-bridge/agents/{id}/reset`）もあります。これはエージェントごとにワンクリックで元に戻す機能で、その
+エージェントのホストに対するスプーフィングのみを解除し、保存済みのモデルマッピングを消去して、`dns_enabled`/`setup_completed`
+状態をリセットします。これにより、IDE を完全に再起動すると、再び実際のアップストリームと通信するようになります。この操作は、
+共有 MITM サーバーやルート CA には影響しません（ほかのエージェントが引き続き依存している可能性があるため）。これらには、
+サーバーカードおよび上記の **CA を削除**アクションから引き続きアクセスできます。Windows では、Windows DNS Client が
+hosts ファイルのエントリをキャッシュし、削除直後のスプーフィングをそのままでは破棄しないため、ベストエフォートで
+`ipconfig /flushdns` も実行します。
 
-**診断チェック**（`src/mitm/inspector/diagnostics.ts` の `summarizeDiagnostics()`）。このルートは各項目に対して副作用を伴うプローブを実行し、その真偽値を純粋なサマライザーに渡します。単一の `healthy` 判定と、失敗ごとのヒントが返されます。
+**診断チェック**（`src/mitm/inspector/diagnostics.ts` 内の `summarizeDiagnostics()`）。ルートは各項目に対して副作用を伴うプローブを実行し、その真偽値を純粋なサマライザーへ渡します。単一の `healthy` 判定と、各失敗に対するヒントが返されます。
 
-| チェック名         | 検証内容                                                        | 失敗時のヒント                                                                                                                                          |
-| ------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server-running`   | MITM サーバープロセスが実行中であること                         | 「MITM サーバーが実行されていません。AgentBridge タブから起動してください。」                                                                           |
-| `server-reachable` | MITM サーバーがそのポートで接続を受け入れること（TCP プローブ） | 「MITM サーバーがそのポートで接続を受け入れていません。ポートが空いていること、およびそのポートをバインドする権限があることを確認してください。」       |
-| `cert-exists`      | MITM 証明書がディスク上に生成されていること                     | 「MITM 証明書がまだ生成されていません。AgentBridge タブから生成してください。」                                                                         |
-| `cert-trusted`     | MITM ルート CA が OS の信頼ストアに登録されていること           | 「MITM ルート CA が OS の信頼ストアで信頼されていないため、TLS インターセプトが失敗します。AgentBridge タブから証明書を信頼してください。」             |
-| `dns-configured`   | 対象ホスト名が `/etc/hosts` でスプーフされていること            | 「対象ホスト名が /etc/hosts でスプーフされていないため、トラフィックがプロキシに到達しません。キャプチャするエージェントの DNS を有効にしてください。」 |
+| チェック名         | 検証内容                                                        | 失敗時のヒント                                                                                                                                                |
+| ------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | MITM サーバープロセスが稼働していること                         | 「MITM サーバーが稼働していません。AgentBridge タブから起動してください。」                                                                                   |
+| `server-reachable` | MITM サーバーがそのポートで接続を受け付けること（TCP プローブ） | 「MITM サーバーがそのポートで接続を受け付けていません。ポートが空いていること、およびそのポートをバインドする権限があることを確認してください。」             |
+| `cert-exists`      | MITM 証明書がディスク上に生成されていること                     | 「MITM 証明書がまだ生成されていません。AgentBridge タブから生成してください。」                                                                               |
+| `cert-trusted`     | MITM ルート CA が OS のトラストストアに登録されていること       | 「MITM ルート CA が OS のトラストストアで信頼されていないため、TLS インターセプトは失敗します。AgentBridge タブから証明書を信頼してください。」               |
+| `dns-configured`   | 対象ホスト名が `/etc/hosts` でスプーフィングされていること      | 「対象ホスト名が /etc/hosts でスプーフィングされていないため、トラフィックがプロキシに到達しません。キャプチャするエージェントの DNS を有効にしてください。」 |
 
-**孤立状態バナー：** クラッシュによって残された状態（DNS スプーフ / CA / システムプロキシ）をページが検出すると、カードに琥珀色のバナー — _「以前のセッションによるシステム状態（DNS スプーフ、CA、またはシステムプロキシ）が残っています。修復を実行してクリーンアップしてください。」_ — が表示され、**修復** ボタンが強調表示されます。`Repair` は ProxyBridge の `--cleanup` フラグに相当するアプリケーション層の機能です（`src/mitm/manager.ts` の `repairMitm()` に処理を委譲します）。
+**孤立状態バナー：** ページがクラッシュ後に残された状態（DNS スプーフィング / CA / システムプロキシ）を検出すると、カードに琥珀色のバナー — _「以前のセッションによってシステム状態（DNS スプーフィング、CA、またはシステムプロキシ）が残されています。修復を実行してクリーンアップしてください。」_ — が表示され、**修復**ボタンが強調表示されます。`Repair` は ProxyBridge の `--cleanup` フラグに相当するアプリケーションレイヤーの機能です（`src/mitm/manager.ts` 内の `repairMitm()` に処理を委譲します）。
 
-> MITM ルート CA は、sudo プロンプトが繰り返し表示されないよう、停止後もインストールされた
-> 状態が維持されます（mitmproxy/Charles と同じ動作）。そのため、停止時に自動的に削除されるのではなく、
-> 明示的な **CA を削除** アクションで削除します。
+> MITM ルート CA は、sudo プロンプトが繰り返し表示されるのを避けるため、停止/起動をまたいでインストールされたまま維持されます
+> （mitmproxy/Charles と同じ動作です）。そのため、停止時に自動的に削除されるのではなく、
+> 明示的な **CA を削除** 操作によって削除します。
 
 ### 3.7 ポータブル設定のインポート/エクスポート
 
-AgentBridge は、**オペレーターが調整可能な**状態をバージョン付き JSON BLOB にシリアライズできるため、複数のマシン間でセットアップを複製できます。シリアライザーは `src/lib/inspector/configPortability.ts`（`exportConfig()` / `importConfig()`）であり、`AgentBridgeConfigSchema` によって検証されます。
+AgentBridge は、**オペレーターが調整可能な**状態をバージョン付き JSON BLOB にシリアライズできるため、設定を複数のマシン間で複製できます。シリアライザーは `src/lib/inspector/configPortability.ts`（`exportConfig()` / `importConfig()`）であり、`AgentBridgeConfigSchema` によって検証されます。
 
-エクスポートには、次の 3 つの要素のみが含まれます（組み込みのデフォルトは意図的にエクスポート**されない**ため、インポートによって重複したり競合したりすることはありません）。
+エクスポートには、次の 3 つの要素だけが含まれます（組み込みのデフォルト値は意図的にエクスポート**されません**。そのため、インポートによってデフォルト値が重複したり競合したりすることはありません）。
 
 | フィールド       | ソース                                                         | 備考                                                                         |
 | ---------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `bypassPatterns` | ユーザー定義のバイパスパターン（`agent_bridge_bypass`）        | デフォルトの bank/gov/okta パターンは除外される                              |
+| `bypassPatterns` | ユーザー定義のバイパスパターン（`agent_bridge_bypass`）        | デフォルトの銀行/政府/Okta パターンは除外されます                            |
 | `customHosts`    | Traffic Inspector のカスタムホスト（`inspector_custom_hosts`） | 各要素: `{ host, kind: "llm"\|"app"\|"custom", label? }`                     |
 | `agentMappings`  | エージェントごとのモデルマッピング（`agent_bridge_mappings`）  | マッピングを持つ各エージェントについて `{ [agentId]: [{ source, target }] }` |
 
@@ -325,13 +346,13 @@ AgentBridge は、**オペレーターが調整可能な**状態をバージョ�
 }
 ```
 
-**インポート時の動作**（`POST /api/tools/agent-bridge/config`）: バイパスパターンとエージェントごとのマッピングは**すべて置き換え**られます。カスタムホストは**冪等に**追加されます（`INSERT OR IGNORE`）。レスポンスには、それぞれが何件適用されたかが示されます。
+**インポート時の動作**（`POST /api/tools/agent-bridge/config`）: バイパスパターンとエージェントごとのマッピングは**すべて置き換えられます**。カスタムホストは**冪等に**追加されます（`INSERT OR IGNORE`）。レスポンスには、それぞれに適用された件数が含まれます。
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-設定に**含まれないもの**: サーバーの実行状態、証明書パス、エージェントごとの DNS 状態、上流 CA パス、および TPROXY 設定。これらは移植可能なプリファレンスではなく、ホスト/ランタイムの状態です。
+設定に**含まれないもの**: サーバーの実行状態、証明書パス、エージェントごとの DNS 状態、アップストリーム CA パス、および TPROXY 設定。これらはポータブルな設定項目ではなく、ホスト/ランタイムの状態です。
 
 ---
 
@@ -491,38 +512,38 @@ AgentBridgeがインターセプトしているものの、すべてのリクエ
 
 ## §7 API リファレンス
 
-すべてのルートは `LOCAL_ONLY`（ループバック限定で、認証前に適用）かつ `SPAWN_CAPABLE` です。`src/server/authz/routeGuard.ts` を参照してください。
+すべてのルートは `LOCAL_ONLY`（ループバック限定。認証前に適用）かつ `SPAWN_CAPABLE` です。`src/server/authz/routeGuard.ts` を参照してください。
 
 ベースパス: `/api/tools/agent-bridge/`
 
-| メソッド            | パス                                           | 説明                                                                                                                        |
-| ------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | サーバー全体の状態 + エージェントごとの検出結果/ステータス                                                                  |
-| GET                 | `/api/tools/agent-bridge/agents`               | 登録済みエージェントの一覧（id、名前、ホスト、利用可否、状態）                                                              |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | 単一エージェントの状態（ターゲット設定 + 検出結果 + 保存済み状態）                                                          |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | エージェントの `setup_completed` を更新                                                                                     |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | エージェントの検出プローブを実行（`installed`、`version?`、`path?`）                                                        |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | エージェントの DNS を有効化/無効化（`{enabled: boolean}`）                                                                  |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | エージェントのモデルマッピング                                                                                              |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | モデルマッピングを置換                                                                                                      |
-| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | デフォルトに復元: このエージェントの DNS 偽装を解除し、マッピングを消去して状態をリセット（§3.6 を参照）                    |
-| POST                | `/api/tools/agent-bridge/server`               | サーバーを起動/停止/再起動（`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`）                         |
-| GET                 | `/api/tools/agent-bridge/cert`                 | 証明書の状態（`exists`、`trusted`、`path`）                                                                                 |
-| POST                | `/api/tools/agent-bridge/cert`                 | MITM ルート CA を信頼（インストール）                                                                                       |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | MITM ルート CA の信頼を解除（削除）— べき等（§3.6 を参照）                                                                  |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | 自己署名 MITM 証明書を再生成                                                                                                |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | ダウンロード用に PEM 証明書をストリーミング                                                                                 |
-| GET                 | `/api/tools/agent-bridge/bypass`               | バイパスパターンの一覧（`default` + `user`）                                                                                |
-| POST                | `/api/tools/agent-bridge/bypass`               | ユーザー定義のバイパスパターンを一括置換                                                                                    |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | ユーザー定義のバイパスパターンを 1 件削除                                                                                   |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | キャプチャパイプラインのセルフテスト（§3.6 を参照）                                                                         |
-| POST                | `/api/tools/agent-bridge/repair`               | 孤立した MITM システム状態を元に戻す（§3.6 を参照）                                                                         |
-| GET                 | `/api/tools/agent-bridge/config`               | 移植可能な設定 JSON をエクスポート（§3.7 を参照）                                                                           |
-| POST                | `/api/tools/agent-bridge/config`               | 移植可能な設定 JSON をインポート（§3.7 を参照）                                                                             |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | 設定済みのアップストリーム CA パスを取得                                                                                    |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | アップストリーム CA パスを検証して永続化                                                                                    |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | アップストリーム CA パスを検証のみ（ドライラン）— 永続化しない                                                              |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY 透過復号キャプチャモード — `docs/security/MITM-TPROXY-DECRYPT.md` を参照（git 上にあり、`/docs` には組み込まれない） |
+| メソッド            | パス                                           | 説明                                                                                                                            |
+| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | サーバー全体の状態 + エージェントごとの検出結果/ステータス                                                                      |
+| GET                 | `/api/tools/agent-bridge/agents`               | 登録済みエージェント（id、名前、ホスト、利用可否、状態）の一覧                                                                  |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | 1つのエージェントの状態（ターゲット設定 + 検出結果 + 保存済み状態）                                                             |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | エージェントの `setup_completed` を更新                                                                                         |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | エージェントの検出プローブを実行（`installed`、`version?`、`path?`）                                                            |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | エージェントの DNS を有効化/無効化（`{enabled: boolean}`）                                                                      |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | エージェントのモデルマッピング                                                                                                  |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | モデルマッピングを置換                                                                                                          |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | デフォルトに復元: このエージェントの DNS スプーフィングを解除し、マッピングを消去して状態をリセット（§3.6 を参照）              |
+| POST                | `/api/tools/agent-bridge/server`               | サーバーを起動/停止/再起動（`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`）                             |
+| GET                 | `/api/tools/agent-bridge/cert`                 | 証明書の状態（`exists`、`trusted`、`path`）                                                                                     |
+| POST                | `/api/tools/agent-bridge/cert`                 | MITM ルート CA を信頼（インストール）                                                                                           |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | MITM ルート CA の信頼を解除（削除）— 冪等（§3.6 を参照）                                                                        |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | 証明書モデルを変更せずにアクティブな証明書を再生成（レガシーリーフ、またはルート CA のローテーション — §3.1 を参照）            |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | アクティブな PEM 証明書をダウンロード用にストリーミング（ルート CA モデルでは `ca.crt`、レガシーリーフ環境では `server.crt`）   |
+| GET                 | `/api/tools/agent-bridge/bypass`               | バイパスパターン（`default` + `user`）の一覧                                                                                    |
+| POST                | `/api/tools/agent-bridge/bypass`               | ユーザー定義のバイパスパターンを一括置換                                                                                        |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | ユーザー定義のバイパスパターンを1件削除                                                                                         |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | キャプチャパイプラインのセルフテスト（§3.6 を参照）                                                                             |
+| POST                | `/api/tools/agent-bridge/repair`               | 孤立した MITM システム状態を元に戻す（§3.6 を参照）                                                                             |
+| GET                 | `/api/tools/agent-bridge/config`               | ポータブル設定 JSON をエクスポート（§3.7 を参照）                                                                               |
+| POST                | `/api/tools/agent-bridge/config`               | ポータブル設定 JSON をインポート（§3.7 を参照）                                                                                 |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | 設定済みのアップストリーム CA パスを取得                                                                                        |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | アップストリーム CA パスを検証して永続化                                                                                        |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | アップストリーム CA パスを検証のみ（ドライラン）— 永続化しない                                                                  |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY 透過的復号キャプチャモード — `docs/security/MITM-TPROXY-DECRYPT.md` を参照（git 上にあり、`/docs` には組み込まれません） |
 
 完全な OpenAPI スキーマ: `docs/openapi.yaml` → タグ `AgentBridge`。
 

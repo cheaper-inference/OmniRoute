@@ -123,7 +123,9 @@
       "maxCostOpt": "Costul maxim pe zi (USD)",
       "allowedModelsOpt": "Listă de modele permise, separate prin virgulă",
       "nothingToSet": "Nu au fost furnizate câmpuri pentru politică. Utilizați --rate-limit, --max-cost sau --allowed-models.",
-      "updated": "Politica a fost actualizată."
+      "updated": "Politica a fost actualizată.",
+      "modelAccessModeOpt": "Mod de acces la modele (all | restricted)",
+      "unrestrictedOpt": "Permite toate modelele (--model-access-mode all)"
     },
     "expiration": {
       "title": "Expirarea cheii",

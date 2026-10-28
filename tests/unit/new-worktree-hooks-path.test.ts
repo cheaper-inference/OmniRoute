@@ -63,7 +63,7 @@ function runWithHooksPath(hooksPath: (main: string) => string | undefined) {
   writeExecutableHook(join(main, ".husky", "_"));
   const value = hooksPath(main);
   if (value !== undefined) git(main, "config", "core.hooksPath", value);
-  return spawnSync("sh", [SCRIPT_PATH, "fix/probe", BASE], {
+  return spawnSync("bash", [SCRIPT_PATH, "fix/probe", BASE], {
     cwd: main,
     env: ENV,
     encoding: "utf8",

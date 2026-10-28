@@ -1,1 +1,0 @@
-- fix(images): route POST /v1/images/generations to image models synced from user-defined OpenAI-compatible providers (#14989)

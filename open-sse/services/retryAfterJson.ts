@@ -91,7 +91,7 @@ export function parseDelayString(value: unknown): number | null {
 
 // Gemini/Google RPC 429 bodies embed the short throttle hint as
 // `error.details[].{"@type": ".../google.rpc.RetryInfo", "retryDelay": "26s"}`.
-function retryInfoDetailsMs(details: unknown): number | null {
+export function retryInfoDetailsMs(details: unknown): number | null {
   for (const detail of Array.isArray(details) ? details : []) {
     const detailRecord = objectRecord(detail);
     const type = String(detailRecord["@type"] ?? "");
@@ -172,4 +172,59 @@ export function parseDetailedRetryHintFromJsonBody(
 
 export function parseRetryHintFromJsonBody(body: string, maxMs: number): number | null {
   return parseDetailedRetryHintFromJsonBody(body, maxMs)?.retryAfterMs ?? null;
+}
+
+// Google RPC quota 429s list the exhausted quotas as
+// `error.details[].{"@type": ".../google.rpc.QuotaFailure", "violations": [{"quotaId": ...}]}`.
+// A `quotaId` naming a per-day quota (e.g. "GenerateRequestsPerDayPerProjectPerModel-FreeTier")
+// will not clear when the seconds-scale RetryInfo that rides along expires.
+const QUOTA_FAILURE_TYPE_RE = /google\.rpc\.QuotaFailure/;
+const PER_DAY_QUOTA_ID_RE = /perday/i;
+// Raw-text fallback for bodies that are not (only) JSON. Bounded quantifiers and a
+// negated class keep it linear on untrusted input (ReDoS rule).
+const PER_DAY_QUOTA_ID_TEXT_RE = /"quotaId"\s{0,8}:\s{0,8}"[^"]{0,200}perday/i;
+
+function detailsDailyQuotaIds(details: unknown): string[] {
+  const quotaIds: string[] = [];
+  for (const detail of Array.isArray(details) ? details : []) {
+    const detailRecord = objectRecord(detail);
+    if (!QUOTA_FAILURE_TYPE_RE.test(String(detailRecord["@type"] ?? ""))) continue;
+    const violations = detailRecord.violations;
+    for (const violation of Array.isArray(violations) ? violations : []) {
+      const quotaId = objectRecord(violation).quotaId;
+      if (typeof quotaId === "string" && PER_DAY_QUOTA_ID_RE.test(quotaId)) quotaIds.push(quotaId);
+    }
+  }
+  return quotaIds;
+}
+
+/**
+ * The daily (`quotaId` ...PerDay...) quota ids a Google-shaped 429 body reports in its
+ * `google.rpc.QuotaFailure` details. Accepts a parsed body or its JSON text; [] otherwise.
+ */
+export function googleDailyQuotaIds(body: unknown): string[] {
+  let parsed = body;
+  if (typeof body === "string") {
+    try {
+      parsed = JSON.parse(body);
+    } catch {
+      return [];
+    }
+  }
+  if (!parsed || typeof parsed !== "object") return [];
+  const root = objectRecord(parsed);
+  return detailsDailyQuotaIds(objectRecord(root.error).details ?? root.details);
+}
+
+/**
+ * True when a Google-shaped 429 body reports a daily quota violation. Accepts the raw
+ * body text, an already-parsed body, or a prose message carrying the QuotaFailure detail.
+ */
+export function hasGoogleDailyQuotaViolation(body: unknown): boolean {
+  if (googleDailyQuotaIds(body).length > 0) return true;
+  return (
+    typeof body === "string" &&
+    QUOTA_FAILURE_TYPE_RE.test(body) &&
+    PER_DAY_QUOTA_ID_TEXT_RE.test(body)
+  );
 }

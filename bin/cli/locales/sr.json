@@ -123,7 +123,9 @@
       "maxCostOpt": "Maksimalan trošak po danu (USD)",
       "allowedModelsOpt": "Lista dozvoljenih modela, razdvojena zarezima",
       "nothingToSet": "Nisu prosleđena polja polise. Koristite --rate-limit, --max-cost, ili --allowed-models.",
-      "updated": "Polisa je ažurirana."
+      "updated": "Polisa je ažurirana.",
+      "modelAccessModeOpt": "Режим приступа моделима (all | restricted)",
+      "unrestrictedOpt": "Дозволи све моделе (--model-access-mode all)"
     },
     "expiration": {
       "title": "Isticanje ključa",

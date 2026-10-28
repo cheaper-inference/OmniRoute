@@ -123,7 +123,9 @@
       "maxCostOpt": "حداکثر هزینه روزانه (USD)",
       "allowedModelsOpt": "فهرست مدلهای مجاز، با ویرگول از هم جداشده",
       "nothingToSet": "هیچ فیلدی برای سیاست ارائه نشده است. از --rate-limit، --max-cost یا --allowed-models استفاده کنید.",
-      "updated": "سیاست بهروزرسانی شد."
+      "updated": "سیاست بهروزرسانی شد.",
+      "modelAccessModeOpt": "حالت دسترسی به مدل‌ها (all | restricted)",
+      "unrestrictedOpt": "اجازه دادن به همه مدل‌ها (--model-access-mode all)"
     },
     "expiration": {
       "title": "انقضای کلید",

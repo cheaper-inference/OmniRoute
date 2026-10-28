@@ -1,1 +1,0 @@
-- **fix(favicon):** redirect to the default icon with an absolute URL instead of failing ([#16336](https://github.com/diegosouzapw/OmniRoute/pull/16336)) — thanks @maxmad64bis

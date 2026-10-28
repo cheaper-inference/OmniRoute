@@ -123,7 +123,9 @@
       "maxCostOpt": "Bir kunlik maksimal xarajat (USD)",
       "allowedModelsOpt": "Ruxsat etilgan modellarning vergul bilan ajratilgan ro‘yxati",
       "nothingToSet": "Siyosat maydonlari taqdim etilmadi. --rate-limit, --max-cost yoki --allowed-models parametridan foydalaning.",
-      "updated": "Siyosat yangilandi."
+      "updated": "Siyosat yangilandi.",
+      "modelAccessModeOpt": "Modelga kirish rejimi (all | restricted)",
+      "unrestrictedOpt": "Barcha modellarga ruxsat berish (--model-access-mode all)"
     },
     "expiration": {
       "title": "Kalitning amal qilish muddati",

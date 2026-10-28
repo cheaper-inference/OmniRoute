@@ -119,3 +119,16 @@ export function combineCredentialChecks(
     return scoped === true && usable === true ? true : null;
   };
 }
+
+/**
+ * Credential check a bridge uses to pick a model on behalf of the caller key:
+ * the key scope's check, combined with an injected base check when one is
+ * given. Without a scope the base check is returned unchanged.
+ */
+export function scopedCredentialCheck(
+  base: ((model: string) => Promise<boolean | null>) | undefined,
+  scope: VisionBridgeKeyScope | null
+): ((model: string) => Promise<boolean | null>) | undefined {
+  if (!scope) return base;
+  return base ? combineCredentialChecks(base, scope) : scope.hasUsableCredentials;
+}

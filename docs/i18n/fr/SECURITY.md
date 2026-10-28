@@ -29,22 +29,23 @@ Si vous découvrez une vulnérabilité de sécurité dans OmniRoute, veuillez la
 | 3.7.x   | ✅ Sécurité                                            |
 | < 3.7.0 | ❌ Non prise en charge                                 |
 
-## Période de support LTS (v3.9.x)
+## Fenêtre de support LTS (v3.9.x)
 
-Après 3.8.59, la prochaine version est **3.9.0**, qui inaugure la branche de support à long terme
+Après la version 3.8.59, la prochaine version est **3.9.0**. Elle inaugure la branche de support à long terme sur
 `stable/v3` (voir [`ROADMAP.md`](ROADMAP.md) → « Phase 3 — v3.9.0 LTS »).
 
-- **Ce que reçoit `stable/v3` :** des corrections de bogues, des correctifs de sécurité et des mises à jour des fournisseurs. Les nouvelles
-  fonctionnalités sont destinées au canal v4 ; la branche LTS privilégie avant tout la stabilité. `npm install omniroute`
-  (le dist-tag `latest`) reste sur v3 pendant tout le cycle v4.
-- **Durée de la période :** `<T-GAP-3: owner decision pending — see ROADMAP.md>`. La durée de
-  la période après la disponibilité générale de v4.0 (lorsque `latest` passe à v4) **n’a pas encore été décidée** ; cette
-  section sera mise à jour lorsque le mainteneur l’annoncera. D’ici là, ne présumez aucune date de fin.
-- **Signalement d’une vulnérabilité dans la branche LTS :** utilisez le même canal que pour toute autre version —
+- **Ce que reçoit `stable/v3` :** des corrections de bogues, des correctifs de sécurité et des mises à jour de fournisseurs. Les nouvelles
+  fonctionnalités sont destinées au canal v4 ; la stabilité est la priorité de la branche LTS. `npm install omniroute`
+  (le dist-tag `latest`) reste sur la v3 pendant tout le cycle de la v4.
+- **Durée de la fenêtre :** `stable/v3` reçoit **des correctifs de sécurité et des corrections de régressions critiques pendant
+  12 mois après la publication de la version 3.9.0, ou jusqu’à 90 jours après la publication de v4.0.0 avec le dist-tag `latest` —
+  selon l’échéance la plus tardive**. La date de fin qui en résulte est consignée dans les notes de publication de la version 3.9.0 et dans
+  [`ROADMAP.md`](ROADMAP.md) au moment de sa publication.
+- **Signaler une vulnérabilité dans la branche LTS :** utilisez le même canal que pour toute autre version —
   un [avis de sécurité GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privé,
-  jamais un ticket public. Indiquez la version testée (par exemple `3.9.2`) ; les correctifs sont intégrés à
-  `stable/v3`, puis rétroportés vers v4.
-- **Référence de sécurité lors de la création de la branche LTS :** l’état mesuré par les analyseurs, les preuves relatives à la protection des routes et
+  jamais un ticket public. Indiquez la version que vous avez testée (par exemple `3.9.2`) ; les correctifs sont intégrés à
+  `stable/v3`, puis reportés en aval vers la v4.
+- **Référence de sécurité lors de la publication LTS :** l’état mesuré par l’analyseur, les preuves relatives à la protection des routes et
   aux identifiants publics sont consignés dans
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 

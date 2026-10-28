@@ -123,7 +123,9 @@
       "maxCostOpt": "Maximale Kosten pro Tag (USD)",
       "allowedModelsOpt": "Kommagetrennte Liste zulässiger Modelle",
       "nothingToSet": "Keine Richtlinienfelder angegeben. Verwenden Sie --rate-limit, --max-cost oder --allowed-models.",
-      "updated": "Richtlinie aktualisiert."
+      "updated": "Richtlinie aktualisiert.",
+      "modelAccessModeOpt": "Modellzugriffsmodus (all | restricted)",
+      "unrestrictedOpt": "Alle Modelle erlauben (--model-access-mode all)"
     },
     "expiration": {
       "title": "Schlüsselablauf",

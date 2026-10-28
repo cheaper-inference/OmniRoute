@@ -18,6 +18,8 @@ import path from "node:path";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-audio-combo-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+const originalApiKeySecret = process.env.API_KEY_SECRET;
+process.env.API_KEY_SECRET = "audio-alias-unit-test-only";
 
 const core = await import("../../src/lib/db/core.ts");
 const { createCombo } = await import("../../src/lib/db/combos.ts");
@@ -28,6 +30,8 @@ const originalFetch = globalThis.fetch;
 
 test.after(() => {
   globalThis.fetch = originalFetch;
+  if (originalApiKeySecret === undefined) delete process.env.API_KEY_SECRET;
+  else process.env.API_KEY_SECRET = originalApiKeySecret;
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
@@ -75,6 +79,8 @@ test("a combo name is expanded to its target instead of being rejected", async (
     models: [{ provider: "localstt", model: "whisper-1" }],
   } as Parameters<typeof createCombo>[0]);
 
+  await updateSettings({ modelAliases: { transcricao: "bogus/not-the-combo-target" } });
+
   const upstreamCalls: string[] = [];
   globalThis.fetch = (async (url: RequestInfo | URL) => {
     upstreamCalls.push(String(url));
@@ -110,4 +116,82 @@ test("an unknown bare name is still rejected with the format hint", async () => 
 
   assert.equal(res.status, 400);
   assert.match(body, /Invalid transcription model/);
+});
+
+const { updateSettings } = await import("../../src/lib/db/settings.ts");
+
+for (const [name, settings, requested] of [
+  ["exact", { modelAliases: { "client-stt": "alias-audio/whisper-1" } }, "client-stt"],
+  [
+    "wildcard",
+    { wildcardAliases: [{ pattern: "client-stt-*", target: "alias-audio/whisper-1" }] },
+    "client-stt-v1",
+  ],
+] as const) {
+  test(`settings ${name} alias preserves the multipart upload`, async () => {
+    await createProviderNode({
+      type: "openai-compatible",
+      name: "Alias audio",
+      prefix: "alias-audio",
+      apiType: "audio-transcriptions",
+      authType: "none",
+      baseUrl: "http://localhost:19999/v1",
+    });
+    await updateSettings({ modelAliases: {}, wildcardAliases: [], ...settings });
+    let sent: FormData | undefined;
+    globalThis.fetch = (async (_input, init) => {
+      sent = await new Response(init?.body, {
+        headers: { "Content-Type": new Headers(init?.headers).get("Content-Type")! },
+      }).formData();
+      return new Response(JSON.stringify({ text: "alias worked" }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof fetch;
+    const fd = new FormData();
+    fd.set("model", requested);
+    fd.set("file", makeWav(), "sample.wav");
+    fd.set("language", "en");
+    fd.set("prompt", "keep this prompt");
+    const res = await route.POST(
+      new Request("http://localhost/v1/audio/transcriptions", {
+        method: "POST",
+        body: fd,
+      })
+    );
+    assert.equal(res.status, 200, await res.clone().text());
+    assert.equal(sent?.get("model"), "whisper-1");
+    assert.equal(sent?.get("language"), "en");
+    assert.equal(sent?.get("prompt"), "keep this prompt");
+    assert.deepEqual(
+      await (sent?.get("file") as File).arrayBuffer(),
+      await makeWav().arrayBuffer()
+    );
+  });
+}
+
+test("alias targets cannot bypass blocked model policy", async () => {
+  const { createApiKey, updateApiKeyPermissions } = await import("../../src/lib/db/apiKeys.ts");
+  const key = await createApiKey("alias-policy-test", "test-machine");
+  await updateApiKeyPermissions(key.id, { blockedModels: ["alias-audio/whisper-1"] });
+  await updateSettings({
+    modelAliases: { "blocked-alias": "alias-audio/whisper-1" },
+    wildcardAliases: [],
+  });
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    return new Response("{}");
+  }) as typeof fetch;
+  const fd = new FormData();
+  fd.set("model", "blocked-alias");
+  fd.set("file", makeWav(), "sample.wav");
+  const res = await route.POST(
+    new Request("http://localhost/v1/audio/transcriptions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key.key}` },
+      body: fd,
+    })
+  );
+  assert.equal(res.status, 403, await res.clone().text());
+  assert.equal(calls, 0);
 });

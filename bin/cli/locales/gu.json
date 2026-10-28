@@ -123,7 +123,9 @@
       "maxCostOpt": "પ્રતિ દિવસ મહત્તમ ખર્ચ (USD)",
       "allowedModelsOpt": "મંજૂર મોડેલોની અલ્પવિરામથી અલગ કરેલી સૂચિ",
       "nothingToSet": "કોઈ નીતિ ફીલ્ડ આપવામાં આવી નથી. --rate-limit, --max-cost, અથવા --allowed-models નો ઉપયોગ કરો.",
-      "updated": "નીતિ અપડેટ થઈ."
+      "updated": "નીતિ અપડેટ થઈ.",
+      "modelAccessModeOpt": "મોડેલ ઍક્સેસ મોડ (all | restricted)",
+      "unrestrictedOpt": "બધા મોડેલને મંજૂરી આપો (--model-access-mode all)"
     },
     "expiration": {
       "title": "કીની સમાપ્તિ",

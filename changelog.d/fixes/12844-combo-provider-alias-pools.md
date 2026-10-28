@@ -1,1 +1,0 @@
-- Reuse direct-auth provider alias pools in combo/auto discovery so Antigravity CLI and OpenCode accounts remain visible to scoring, quota, tags and affinity while preserving account restrictions. (#12844)

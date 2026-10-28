@@ -48,15 +48,15 @@ ga-arụ ọrụ ozugbo), na-enyocha ahụike sava, ma na-eme exec nke `claude`.
 
 ---
 
-## Aha nnọchi maka nchọpụta — mee ka ụdịdị na-abụghị Claude pụta na onye-ahọpụta `/model`
+## Aha nnọchi nchọpụta — ịme ka models ndị na-abụghị nke Claude pụta na `/model` picker
 
-Nchọpụta ụdịdị gateway nke Claude Code na-edepụta naanị id ndị malitere na `claude`
-ma ọ bụ `anthropic`, ya mere, mgbe `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, onye-ahọpụta
-`/model` nke mbụ na-egosikarị **naanị** ụdịdị Claude/Anthropic nke OmniRoute — ụdịdị
-`kimi/kimi-k2.6` ma ọ bụ `glm/glm-5.2` agaghị apụta ma ọlị, n'agbanyeghị na a pụrụ iduzi ya nke ọma.
+Nchọpụta model gateway nke Claude Code na-edepụta naanị ids ndị na-amalite na `claude`
+ma ọ bụ `anthropic`, ya mere, na `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`,
+picker `/model` nke eke na-egosikarị **naanị** models Claude/Anthropic nke OmniRoute —
+`kimi/kimi-k2.6` ma ọ bụ `glm/glm-5.2` anaghị apụtara, ọbụlagodi na a na-eduzi ya nke ọma.
 
-OmniRoute nwere ike ịmepụta oyiri nke ụdịdị ọ bụla enyere ikike (na combo) n'okpuru id `claude/…` ka ọ
-gafee nzacha ahụ ma pụta na onye-ahọpụta:
+OmniRoute nwere ike ịmeghari (mirror) model ọ bụla arụnyere ọrụ (na combo) n'okpuru id
+`claude/…` ka ọ wee gafere nzacha ahụ wee pụta na picker:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,38 +64,46 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Mgbe ịhọrọ otu n'ime ndị a na Claude Code, OmniRoute na-ewepụ mkpuchi `claude/`
-wee weghachite ya na id n'ezie tupu iduzi ya — a na-ahapụ id ezigbo `claude/<real-claude-model>`
-(nke bụ Claude OAuth provider n'ezie) na-emetụghị ya aka mgbe niile.
+Mgbe ị họọrọ otu n'ime ndị a na Claude Code, OmniRoute na-ewepụ mkpuchi `claude/`
+ahụ ka ọ laghachi na id nke eke tupu ọ dọtụzie — id `claude/<real-claude-model>`
+nke eke (provider Claude OAuth nke eke) ka a na-ahapụ ka ọ dị mgbe niile.
 
-**A na-agbanyụ nke a na ndabara**, ọnụ ụzọ ọkwa atọ na-achịkwa ya (nke kacha
-kpọmkwem na-ebute ụzọ), ka OmniRoute nkịtị ghara ime katalọgụ ya okpukpu abụọ maka ndị ahịa na-adịghị eji
-Claude Code:
+Na ndabara, naanị ids ntọala ka a na-emeghari. Mgbe a gbadoro feature flag
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` nke bụ opt-in, a na-emeghari variants nke mbọ
+ncheghari (reasoning-effort) ndị catalog edeputala (dịka `codex/gpt-6-sol-high`) dị ka
+id ọ bụla ọzọ, ka Claude Code wee nwee ike ịhọrọ ọkwa mbọ doro anya, ma a naghị emeghari
+`auto/*` ids e wuru n'ime ndị request path na-enweghị ike ịmepụta. Ma a na-edepụtara
+variants mbọ ndị ahụ ọ bụla ka `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` ka na-achịkwa —
+nmeghari a anaghị etinye variant ọ bụla nke catalog ntọala na-enweghị.
 
-| Ọkwa         | Ebe                                                                             |
-| ------------ | ------------------------------------------------------------------------------- |
-| Ụdịdị        | Ibe nkọwa provider → mgba ọkụ "Gosipụta na Claude Code" maka ụdịdị ọ bụla       |
-| Provider     | Ibe nkọwa provider → mgba ọkụ ọkwa-provider (na-emetụta ụdịdị ya niile)         |
-| Zuru ụwa ọnụ | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (agbanyụrụ na ndabara) |
+**Nke a gbanyụrụ na ndabara** ma ọnụ ụzọ n'ọkwa atọ na-achịkwa ya (nke kacha kpọmkwem
+na-emeri), ka OmniRoute nkịtị wee ghara ịme ka catalog ya gbaa ugboro abụọ maka clients
+ndị na-adịghị eji Claude Code:
 
-Environment variable `EXPOSE_CC_DISCOVERY_ALIASES` na-amanye ka a gbanye ọkwa zuru ụwa ọnụ
-ma na-ebute ụzọ karịa mgbanwe e mere na dashboard (ihuenyo Feature Flags na-egosi
-ndetu "na-arụ ọrụ site na environment variable" mgbe ọ mere). Mgba ọkụ nke provider ọ bụla na
-ụdịdị ọ bụla na-emezi ya ọzọ site n'ebe ahụ — dịka ọmụmaatụ, ọ bụrụ na agbanyụrụ nke zuru ụwa ọnụ ma gbanye Kimi provider,
-naanị ụdịdị Kimi ka a ga-egosipụta.
+| Ọkwa     | Ebe                                                                          |
+| -------- | ---------------------------------------------------------------------------- |
+| Model    | Peeji nkọwa provider → toggle "Expose in Claude Code" maka model ọ bụla      |
+| Provider | Peeji nkọwa provider → toggle n'ọkwa provider (na-ekpuchi models ya niile)   |
+| Izugbe   | Ntọala → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (gbanyụrụ na ndabara) |
 
-> ⚠️ **Window adabaghị na ụdịdị na-abụghị Claude.** Claude Code na-ewere na id ọ bụla ọ na-amataghị
-> nwere context window 200K (ọ pụghị ịgụ window n'ezie site na
-> `/v1/models`). Maka ụdịdị nwere window ka ukwuu (dịka 256K nke Kimi K2), debe
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na uru dị ala karịa window n'ezie nke ụdịdị ahụ ka
-> mkpakọ na-akpaghị aka ghara ịmalite tupu oge eruo. Profaịlụ ndị e mepụtara n'elu emeelarị
-> nke a maka ụdịdị ọ bụla.
+Variable gburugburu `EXPOSE_CC_DISCOVERY_ALIASES` na-amanye ọkwa izugbe ka ọ gbado
+ma na-akaria mwakpochi (override) nke dashboard n'isi (ihe nleta Feature Flags na-egosi
+ndetu "arụnyere ọrụ site na variable gburugburu" mgbe nke ahụ mere). Toggles nke
+provider ọ bụla na nke model ọ bụla na-akpachapụ ya anya site ebe ahụ — dịka ọmụmaatụ,
+izugbe gbanyụrụ + provider Kimi gbadoro na-egosipụta naanị models nke Kimi.
+
+> ⚠️ **Adabaghị nke window na models ndị na-abụghị nke Claude.** Claude Code na-ewere
+> dịka o nwere window context 200K maka id ọ bụla ọ na-amaghị (ọ nweghị ike ịgụ window
+> nke eke site na `/v1/models`). Maka model nwere window karịrị nke ahụ n'ibu (dịka
+> 256K nke Kimi K2), debe `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na uru dị n'okpuru window
+> nke eke nke model ahụ ka auto-compaction ghara ịmalite tupu oge eruo. Profiles e
+> mepụtara n'elu emeela nke a maka model ọ bụla.
 
 ---
 
-## Ngalaba nnabata na dashboard
+## Nkwado mbido na dashboard
 
-Kaadị ngwáọrụ Claude (**Dashboard → CLI Code**) na-egosipụta kpọmkwem iberibe `settings.json`
+Kaadị ngwaọrụ Claude (**Dashboard → CLI Code**) na-egosipụta kpọmkwem akụkụ `settings.json`
 maka instance a, n'akụkụ bọtịnụ ozi discovery-alias, yana bọtịnụ idetuo:
 
 ```jsonc
@@ -108,18 +116,32 @@ maka instance a, n'akụkụ bọtịnụ ozi discovery-alias, yana bọtịnụ
 }
 ```
 
-URL ntọala ahụ bụ nke kaadị ahụ chọpụtara (gụnyere override ahaziri iche nke ị pịnyere), nke
-emelarị ka ọ bụrụ otu ụkpụrụ — enweghị mgbakwunye `/v1`, enweghị slash n'azụ. **A naghị egosipụta key ahụ ma ọlị**: ngalaba ahụ na-eji
-placeholder abịa, ya mere screenshot ma ọ bụ snippet e tinyere enweghị ike ikpughe ya. Dochie ya na key gị.
+URL ntọala bụ nke kaadị ahụ chọpụtara (gụnyere nhazi omenala i tinyere), nke ahazilarị nke ọma
+— enweghị suffix `/v1`, enweghị slash n'azụ. **A naghị egosipụta key ahụ ma ọlị**: block ahụ na-eji
+placeholder abịa, ya mere screenshot ma ọ bụ snippet e nyefere agaghị ekpughe ya. Tapawa key gị n'ọnọdụ ya.
 
-Tinye `CLAUDE_CODE_AUTO_COMPACT_WINDOW` n'okpuru otu ngalaba `env` ahụ maka model ọ bụla nke ezigbo
-context window ya na-abụghị 200K — Claude Code na-ewere na ọ bụ 200K maka id ọ bụla ọ na-amaghị, ya mere
-auto-compaction ga-eme n'ebe na-ekwesịghị ekwesị ma ọ bụghị ya (lee ịdọ aka ná ntị dị na ngalaba gara aga).
-Onye na-ewu snippet na-anabatakwa value ahụ, ya mere caller maara window nke model a na-achọ
-nwere ike iwepụta ya ozugbo.
+Tinye `CLAUDE_CODE_AUTO_COMPACT_WINDOW` n'okpuru otu block `env` ahụ maka model ọ bụla nke ezigbo
+context window ya na-abụghị 200K — Claude Code na-ewere na id ọ bụla ọ na-amataghị nwere 200K, ya mere
+auto-compaction ga-eme n'oge na-ekwesịghị ekwesị ma ọ bụghị ya (lee ịdọ aka ná ntị dị na ngalaba gara aga).
+Onye na-ewu snippet ahụ na-anabatakwa uru ahụ, ya mere onye na-akpọ ya nke maara window nke model ezubere
+iche nwere ike iwepụta ya ozugbo.
 
 Isi mmalite: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (builder dị ọcha,
 nke e ji unit test nwalee) nke `ClaudeGatewayOnboardingBlock` na-egosipụta.
+
+### Kpọchie otu akaụntụ (nhọrọ)
+
+Iji zipụ arịrịọ Claude Code niile site n'otu akaụntụ provider akọwapụtara, tinye header
+`x-omniroute-connection` site na `ANTHROPIC_CUSTOM_HEADERS` n'ime otu block `env` ahụ:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Detuo id ahụ site na chip `xxxxxxxx…` dị n'ahịrị connection na peeji provider ahụ. Mkpọchi ahụ na-emetụta
+naanị id nke otu model (`provider/model`), ọ bụghị combo. Lee
+[Ịkpọchi akaụntụ maka arịrịọ ọ bụla](../reference/API_REFERENCE.md#account-pinning-per-request) maka
+omume fallback ya kpọmkwem.
 
 ---
 

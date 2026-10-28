@@ -123,7 +123,9 @@
       "maxCostOpt": "Max cost per day (USD)",
       "allowedModelsOpt": "Comma-separated list of allowed models",
       "nothingToSet": "No policy fields provided. Use --rate-limit, --max-cost, or --allowed-models.",
-      "updated": "Policy updated."
+      "updated": "Policy updated.",
+      "modelAccessModeOpt": "Model access mode (all | restricted)",
+      "unrestrictedOpt": "Allow all models (--model-access-mode all)"
     },
     "expiration": {
       "title": "Key Expiration",
@@ -1179,8 +1181,8 @@
       "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
-      "description": "Import a bundle file",
-      "dryRun": "Validate without applying"
+      "description": "Replace the server database with a .sqlite backup",
+      "dryRun": "Validate the backup locally; never contacts the server"
     },
     "tokens": {
       "description": "Manage sync tokens",

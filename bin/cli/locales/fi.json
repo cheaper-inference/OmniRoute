@@ -123,7 +123,9 @@
       "maxCostOpt": "Enimmäiskustannus päivässä (USD)",
       "allowedModelsOpt": "Pilkuilla eroteltu luettelo sallituista malleista",
       "nothingToSet": "Käytäntökenttiä ei annettu. Käytä valintaa --rate-limit, --max-cost tai --allowed-models.",
-      "updated": "Käytäntö päivitettiin."
+      "updated": "Käytäntö päivitettiin.",
+      "modelAccessModeOpt": "Mallien käyttötila (all | restricted)",
+      "unrestrictedOpt": "Salli kaikki mallit (--model-access-mode all)"
     },
     "expiration": {
       "title": "Avaimen vanheneminen",

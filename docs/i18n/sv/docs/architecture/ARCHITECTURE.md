@@ -10,77 +10,76 @@ _Senast uppdaterad: 2026-06-28_
 
 ## Sammanfattning
 
-OmniRoute är en lokal AI-routningsgateway och kontrollpanel byggd på Next.js.
-Den tillhandahåller en enda OpenAI-kompatibel slutpunkt (`/v1/*`) och dirigerar trafik mellan flera uppströmsleverantörer med översättning, reservväxling, tokenförnyelse och användningsspårning.
+OmniRoute är en lokal AI -routinggateway och instrumentpanel byggd på Next.js. Den tillhandahåller en enda OpenAI-kompatibel slutpunkt (`/v1/*`) och dirigerar trafik över flera uppströmsleverantörer med översättning, reserv, tokenuppdatering och användningsspårning.
 
-Huvudfunktioner:
+Kärnfunktioner:
 
-- OpenAI-kompatibelt API-gränssnitt för CLI/verktyg (372 leverantörer, 148 exekverare)
-- Översättning av förfrågningar och svar mellan leverantörsformat
-- Reservväxling för modellkombinationer (sekvens med flera modeller)
-- Strukturerade kombinationssteg (`provider + model + connection`) med körningsordning baserad på `compositeTiers`
-- Reservväxling på kontonivå (flera konton per leverantör)
-- Förhandskontroll av kvot och kvotmedvetet P2C-kontoval i huvudflödet för chatt
-- Hantering av leverantörsanslutningar med OAuth och API-nycklar (27 OAuth-leverantörsmoduler)
-- Generering av inbäddningar via `/v1/embeddings` (18 leverantörer)
-- Bildgenerering via `/v1/images/generations` (över 10 leverantörer, över 20 modeller)
-- Ljudtranskribering via `/v1/audio/transcriptions` (18 leverantörer)
+- OpenAI-kompatibel API -yta för CLI/tools (377 leverantörer, 156 executor-moduler)
+- Request/response -översättning över leverantörsformat
+- Modellkombination fallback (multimodellsekvens)
+- Strukturerade kombinationssteg (`provider + model + connection`) med körtidsordning efter `compositeTiers`
+- Reserv på kontonivå (flera konto per leverantör)
+- Quot preflight och kvotmedvetet P2C kontoval i huvudchattvägen
+- OAuth + API-nyckel leverantör anslutningshantering (27 OAuth leverantörsmoduler)
+- Inbäddningsgenerering via `/v1/embeddings` (18 leverantörer)
+- Bildgenerering via `/v1/images/generations` (10 + leverantörer, 20 + modeller)
+- Ljudtranskription via `/v1/audio/transcriptions` (18 leverantörer)
 - Text-till-tal via `/v1/audio/speech` (24 inbyggda leverantörer)
 - Videogenerering via `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Musikgenerering via `/v1/music/generations` (ComfyUI)
 - Webbsökning via `/v1/search` (20 leverantörer)
-- Moderering via `/v1/moderations`
-- Omrangordning via `/v1/rerank`
-- Tolkning av think-taggar (``) för resonerande modeller
-- Sanering av svar för strikt kompatibilitet med OpenAI SDK
-- Normalisering av roller (developer→system, system→user) för kompatibilitet mellan leverantörer
-- Konvertering av strukturerade utdata (json_schema → Gemini responseSchema)
-- Lokal beständig lagring för leverantörer, nycklar, alias, kombinationer, inställningar och prissättning (122 databasmoduler)
-- Spårning av användning och kostnader samt loggning av förfrågningar
-- Valfri molnsynkronisering för synkronisering mellan flera enheter och av tillstånd
-- Tillåtelselista/blockeringslista för IP-adresser för åtkomstkontroll till API:et
-- Hantering av tankebudget (vidarebefordran/automatisk/anpassad/adaptiv)
-- Global injicering av systemprompt
-- Sessionsspårning och fingeravtrycksidentifiering
-- Förbättrad hastighetsbegränsning per konto med leverantörsspecifika profiler
-- Circuit breaker-mönster för leverantörsresiliens
-- Skydd mot anstormningseffekten med mutex-låsning
-- Signaturbaserad cache för deduplicering av förfrågningar
-- Domänlager: kostnadsregler, reservväxlingspolicy, spärrpolicy
-- Context Relay: sammanfattningar för sessionsöverlämning som bevarar kontinuitet vid kontorotation
-- Beständig lagring av domäntillstånd (genomskrivningscache i SQLite för reservväxlingar, budgetar, spärrar och circuit breakers)
-- Policymotor för centraliserad utvärdering av förfrågningar (spärr → budget → reservväxling)
-- Telemetri för förfrågningar med aggregering av p50-/p95-/p99-latens
-- Telemetri för kombinationsmål och historisk hälsostatus för kombinationsmål via `combo_execution_key` / `combo_step_id`
-- Korrelations-ID (X-Request-Id) för heltäckande spårning
-- Granskningsloggning för regelefterlevnad med möjlighet att välja bort per API-nyckel
-- Eval-ramverk för kvalitetssäkring av LLM:er
-- Hälsokontrollpanel med realtidsstatus för leverantörernas circuit breakers
-- MCP-server (110 verktyg) med 3 transporter (stdio/SSE/Streamable HTTP)
-- A2A-server (JSON-RPC 2.0 + SSE) med färdigheter och uppgiftslivscykel
-- Minnessystem (extrahering, injicering, hämtning, sammanfattning)
-- Färdighetssystem (register, exekverare, sandlåda, inbyggda färdigheter)
-- MITM-proxy med certifikathantering och DNS-hantering
-- Middleware för skydd mot promptinjektion
-- Pipeline för promptkomprimering med Caveman, RTK, staplade pipelines, komprimeringskombinationer, språkpaket och analys
-- ACP-register (Agent Communication Protocol)
-- Modulära OAuth-leverantörer (22 separata moduler under `src/lib/oauth/providers/`)
-- Skript för avinstallation/fullständig avinstallation
-- Åtgärd för reparation av OAuth-miljön
-- WebSocket-brygga för OpenAI-kompatibla WS-klienter (`/v1/ws`)
-- Hantering av synkroniseringstoken (utfärdande/återkallning, nedladdning av ETag-versionerat konfigurationspaket)
-- GLM Thinking (`glmt`) som förstklassig leverantörsförinställning
-- Hybridräkning av token (leverantörssidan `/messages/count_tokens` med estimering som reserv)
-- Automatisk initiering av modellalias (över 30 normaliseringar mellan olika proxydialekter vid start)
-- Säker utgående hämtning med SSRF-skydd, blockering av privata URL:er och konfigurerbara återförsök
-- Cooldown-medvetna återförsök för chatt med konfigurerbara `requestRetry` och `maxRetryIntervalSec`
-- Validering av körningsmiljön med Zod vid start
-- Regelefterlevnadsgranskning v2 med sidnumrering, CRUD-händelser för leverantörer och loggning av SSRF-blockerad validering
+- Moderationer via `/v1/moderations`
+- Omrankning via `/v1/rerank`
+- Tänk taggparsning (`<think>...</think>`) för resonemangsmodeller
+- Svarssanering för strikt OpenAI SDK kompatibilitet
+- Rollnormalisering (utvecklare → system, system → användare) för kompatibilitet mellan leverantörer
+- Konvertering av strukturerad utdata (json_schema → Gemini responseSchema)
+- Lokal persistens för leverantörer, nycklar, alias, kombinationer, inställningar, prissättning (122 DB moduler)
+- Usage/cost -spårning och förfrågningsloggning
+- Valfri molnsynkronisering för multi-device/state synkronisering
+- IP allowlist/blocklist för API åtkomstkontroll
+- Tänkande budgethantering (passthrough/auto/custom/adaptive)
+- Global system snabb injektion
+- Sessionsspårning och fingeravtryck
+- Förbättrad prisbegränsning per konto med leverantörsspecifika profiler
+- Strömbrytarmönster för leverantörens motståndskraft
+- Anti-dundrande flockskydd med mutex-låsning
+- Signaturbaserad cache för begärandeduplicering
+- Domänlager: kostnadsregler, reservpolicy, lockoutpolicy
+- Kontextrelä: sammanfattningar av sessionsöverlämning för kontinuitet i kontorotation
+- Domäntillståndsbeständighet (SQLite -genomskrivningscache för reservdelar, budgetar, lockouter, strömbrytare)
+- Policymotor för centraliserad utvärdering av begäran (lockout → budget → fallback)
+- Begär telemetri med p50/p95/p99 latensaggregation
+- Combo target telemetri och historisk combo target hälsa via `combo_execution_key` / `combo_step_id`
+- Korrelation ID (X-Request-Id) för spårning från ände till ände
+- Efterlevnadsrevisionsloggning med opt-out per API -nyckel
+- Eval ramverk för LLM kvalitetssäkring
+- Hälsoinstrumentbräda med strömbrytarstatus för leverantör i realtid
+- MCP Server (110 verktyg) med 3 transporter (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) med färdigheter och uppgiftslivscykel
+- Minnessystem (extraktion, injektion, hämtning, sammanfattning)
+- Färdighetssystem (register, executor, sandlåda, inbyggda färdigheter)
+- MITM proxy med certifikathantering och DNS -hantering
+- Snabb mellanvara för injektionsskydd
+- Snabbkompressionspipeline med Caveman, RTK, staplade pipelines, kompressionskombinationer, språkpaket och analyser
+- ACP registret (Agent Communication Protocol).
+- Modulära OAuth leverantörer (22 individuella moduler under `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall skript
+- OAuth miljöreparationsåtgärd
+- WebSocket brygga för OpenAI-kompatibla WS klienter (`/v1/ws`)
+- Hantering av synkroniseringstoken (issue/revoke, nedladdning av konfigurationspaket med ETag-version)
+- GLM Thinking (`glmt`) förstklassig leverantörsförinställning
+- Hybrid tokenräkning ( `/messages/count_tokens` på leverantörssidan med uppskattning som reserv)
+- Modellalias automatisk seeding (30 + kors-proxy-dialektnormaliseringar vid start)
+- Säker utgående hämtning med SSRF vakt, privat URL blockering och konfigurerbart försök igen
+- Cooldown-medvetna chattförsök med konfigurerbara `requestRetry` och `maxRetryIntervalSec`
+- Körtidsmiljövalidering med Zod vid start
+- Efterlevnadsrevision v2 med paginering, leverantörs CRUD händelser och SSRF-blockerad valideringsloggning
 
-Primär körningsmodell:
+Primär körtidsmodell:
 
-- Next.js-apprutter under `src/app/api/*` implementerar både API:er för kontrollpanelen och kompatibilitets-API:er
-- En gemensam SSE- och routningskärna i `src/sse/*` + `open-sse/*` hanterar leverantörskörning, översättning, strömning, reservväxling och användning
+- Next.js apprutter under `src/app/api/*` implementerar både instrumentpanelen APIs och kompatibilitet APIs
+- En delad SSE/routing kärna i `src/sse/*` + `open-sse/*` hanterar leverantörsexekvering, översättning, streaming, reserv och användning
 
 ## Referensdiagram
 
@@ -114,43 +113,51 @@ resten länkas från sina domänspecifika guider.
 - Leverantörens SLA/kontrollplan utanför den lokala processen
 - Själva de externa CLI-binärfilerna (Claude CLI, Codex CLI osv.)
 
-## Kontrollpanelens aktuella yta
+## Dashboardyta (Aktuell)
 
 Huvudsidor under `src/app/(dashboard)/dashboard/`:
 
 - `/dashboard` — snabbstart + leverantörsöversikt
-- `/dashboard/endpoint` — slutpunktsproxy + MCP + A2A + flikar för API-slutpunkter
+- `/dashboard/endpoint` — endpoint-proxy + MCP + A2A + flikar för API-endpoints
 - `/dashboard/providers` — leverantörsanslutningar och autentiseringsuppgifter
-- `/dashboard/combos` — kombinationsstrategier, mallar, stegbaserad byggare, regler för modelldirigering, manuell beständig ordning
-- `/dashboard/auto-combo` — Auto Combo Engine: poängvikter, lägespaket, förinställningar för virtuella fabriker, telemetri
+- `/dashboard/combos` — kombinationsstrategier, mallar, stegbaserad byggare, regler för modellroutning, manuell beständig sortering
+- `/dashboard/auto-combo` — Auto Combo Engine: poängvikter, lägespaket, virtuella fabrikskonfigurationer, telemetri
 - `/dashboard/costs` — kostnadsaggregering och prisöversikt
 - `/dashboard/analytics` — användningsanalys, utvärderingar, hälsostatus för kombinationsmål
-- `/dashboard/limits` — kvot-/hastighetskontroller
-- `/dashboard/cli-tools` — introduktion till CLI, identifiering av körmiljö, konfigurationsgenerering
+- `/dashboard/limits` — kvot- och hastighetskontroller
+- `/dashboard/cli-tools` — introduktion till CLI, identifiering av körningsmiljö, konfigurationsgenerering
 - `/dashboard/agents` — identifierade ACP-agenter + registrering av anpassade agenter
-- `/dashboard/cloud-agents` — uppgifter för molnbaserade agenter (Codex Cloud, Devin, Jules) och uppgifternas livscykel
-- `/dashboard/skills` — A2A-färdighetsregister, körning i sandlåda, inbyggd färdighetskatalog
+- `/dashboard/cloud-agents` — molnbaserade agentuppgifter (Codex Cloud, Devin, Jules) och uppgifternas livscykel
+- `/dashboard/skills` — A2A-färdighetsregister, körning i sandlåda, katalog över inbyggda färdigheter
 - `/dashboard/memory` — inspektion och hämtning av beständigt konversationsminne
 - `/dashboard/webhooks` — utgående webhook-prenumerationer, rotation av hemligheter, statistik över återförsök
 - `/dashboard/batch` — inskickning av batchjobb och förlopp
-- `/dashboard/cache` — statistik för genomläsnings- och resonemangscache, kontroller för avhysning
-- `/dashboard/playground` — interaktiv chattmiljö mot valfri konfigurerad kombination/modell
+- `/dashboard/cache` — statistik för genomläsnings- och resonemangscache, kontroller för tömning
+- `/dashboard/playground` — interaktiv chattlekplats för valfri konfigurerad kombination/modell
 - `/dashboard/changelog` — ändringsloggvisare i appen (renderar `CHANGELOG.md`)
 - `/dashboard/system` — körningsdiagnostik, versionsinformation, vy för miljövalidering
-- `/dashboard/onboarding` — konfigurationsguide vid första körningen för nya installationer
-- `/dashboard/media` — testmiljö för bilder/video/musik
+- `/dashboard/onboarding` — installationsguide vid första körningen för nya installationer
+- `/dashboard/media` — lekplats för bilder/video/musik
 - `/dashboard/search-tools` — testning av sökleverantörer och historik
-- `/dashboard/health` — drifttid, kretsbrytare, hastighetsgränser, kvotövervakade sessioner
-- `/dashboard/logs` — loggar för begäranden/proxy/granskning/konsol
-- `/dashboard/settings` — flikar för systeminställningar (allmänt, dirigering, standardvärden för kombinationer osv.)
+- `/dashboard/health` — upptid, kretsbrytare, hastighetsgränser, kvotövervakade sessioner
+- `/dashboard/logs` — förfrågnings-, proxy-, gransknings- och konsolloggar
+- `/dashboard/settings` — flikar för systeminställningar (allmänt, routning, standardvärden för kombinationer osv.)
 - `/dashboard/context/caveman` — Caveman-komprimeringsregler, språkpaket, förhandsgranskning och utdataläge
-- `/dashboard/context/rtk` — RTK-filter för kommandoutdata, förhandsgranskning och säkerhetsinställningar för körmiljön
-- `/dashboard/context/combos` — namngivna komprimeringspipelines tilldelade dirigeringskombinationer
-- `/dashboard/translator` — inspektion av översättaren och förhandsgranskning av konvertering av begärandeformat
-- `/dashboard/audit` — webbläsare för regelefterlevnadsloggar med sidindelning och strukturerade metadata
-- `/dashboard/usage` — användningshistorik per begäran kopplad till `usage_history`
+- `/dashboard/context/rtk` — RTK-filter för kommandoutdata, förhandsgranskning och säkerhetsinställningar för körningsmiljön
+- `/dashboard/context/combos` — namngivna komprimeringspipelines tilldelade till routningskombinationer
+- `/dashboard/translator` — inspektion av översättaren och förhandsgranskning av konvertering av förfrågningsformat
+- `/dashboard/audit` — webbläsare för granskningsloggar för regelefterlevnad, med paginering och strukturerade metadata
+- `/dashboard/usage` — webbläsare för användning per förfrågan, kopplad till `usage_history`
 - `/dashboard/compression` — komprimeringsanalys, statistik och tilldelning av pipelines
 - `/dashboard/api-manager` — API-nycklars livscykel och modellbehörigheter
+
+Gränssnittslager: varje sida renderas i ett gemensamt skal — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (paketets
+`SidebarProvider`/`SidebarInset`, OmniRoutes `Sidebar.tsx` och `Header.tsx`). Sidorna importerar sina
+byggblock från `@/shared/components` (adaptrar ovanpå det incheckade Keak CI UI Kit i
+`packages/ui-kit`) eller från komponentundersökvägar i paketet (`@omniroute/ui-kit/table`, `…/page-header`), och
+ikoner via `<Icon>` (`ICON_MAP` → Lucide). Tema (`system` som standard, ljust/mörkt) och designvariabler kommer
+från paketet via bryggan i `src/app/globals.css`. Mer information: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Systemkontext på hög nivå
 
@@ -351,36 +358,37 @@ Fördjupning: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ## Viktiga delsystem (v3.8.0)
 
-### A. Auto Combo-motorn
+### A. Automatisk kombinationsmotor
 
-Auto Combo poängsätter och väljer dynamiskt dirigeringsmål vid tidpunkten för begäran, i stället för
-att förlita sig på en statisk kombinationsdefinition. Den driver modellprefixfamiljen `auto/*`.
+Automatisk kombination poängsätter och väljer dynamiskt routningsmål vid tidpunkten för begäran, i stället för att
+förlita sig på en statisk kombinationsdefinition. Den driver modellprefixfamiljen `auto/*`.
 
-- Motorns startpunkt: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
+- Motoringång: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Matchningslösare: `src/domain/comboResolver.ts` (automatisk identifiering av prefixet `auto/`)
+- Matchare: `src/domain/comboResolver.ts` (automatisk identifiering av prefixet `auto/`)
 - Kontrollpanel: `/dashboard/auto-combo`
 - Telemetri: SQLite-tabellen `auto_combo_decisions`
 
 Viktiga funktioner:
 
-- **19 dirigeringsstrategier** (prioritet, viktad, fyll-först, turordning, P2C, slumpmässig,
-  minst använd, kostnadsoptimerad, återställningsmedveten, återställningsfönster, marginal, strikt slumpmässig,
-  **auto**, lkgp, kontextoptimerad, kontextrelä, **fusion**, samt en reservväg) —
-  auto är det främsta tillägget i v3.8.0; `fusion` (utspridning till panel + domarsyntes,
+- **20 routningsstrategier** (prioritet, viktad, fyll först, round-robin, P2C, slumpmässig,
+  minst använd, kostnadsoptimerad, återställningsmedveten, återställningsfönster, marginal, kvotviktad,
+  strikt slumpmässig, **auto**, lkgp, kontextoptimerad, cacheoptimerad, kontextvidarebefordran, **fusion**,
+  pipeline) —
+  auto är det främsta tillägget i v3.8.0; `fusion` (panelutspridning + domarsyntes,
   `open-sse/services/fusion.ts`) är nytt i v3.8.36.
 - **Poängsättning med 16 faktorer**: kvot, hälsa, invers kostnad, invers latens, uppgiftslämplighet och
   ytterligare tio. Den kanoniska tabellen över faktorer och deras standardvikter finns i
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — att återge den här skulle
-  skapa ännu en plats där den kan bli inaktuell.
+  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — att upprepa den här skulle
+  ge den ytterligare en plats där den kan bli inaktuell.
 - **Virtuell fabrik** materialiserar tillfälliga kombinationer när ingen matchande namngiven kombination
-  finns, med kandidater hämtade från felfria, aktiva leverantörsanslutningar.
+  finns och hämtar kandidater från aktiva, fungerande leverantörsanslutningar.
 - **Automatiska prefix**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — vart och ett stöds av en finjusterad viktprofil.
+  `auto/smart`, `auto/lkgp` — vart och ett med en finjusterad viktprofil.
 - **6 lägespaket**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
   `reliability-first` och `chaos-mode` — förinställda viktkonfigurationer som kan anropas från
-  kontrollpanelen. (Ska inte förväxlas med prefixen `auto/*` ovan, vilka är
-  varianter som används vid tidpunkten för begäran.)
+  kontrollpanelen. (Ska inte förväxlas med prefixen `auto/*` ovan, som är
+  varianter vid tidpunkten för begäran.)
 
 Fullständig algoritmisk information (faktorformler, viktjustering) finns i
 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
@@ -388,52 +396,52 @@ Fullständig algoritmisk information (faktorformler, viktjustering) finns i
 ### B. Molnagenter
 
 Molnagenter kapslar in tredjepartsplattformar för värdbaserade kodagenter (Codex Cloud, Devin,
-Jules) bakom en enhetlig, databasstödd livscykel för uppgifter. Alla slutpunkter för att skapa/inspektera
+Jules) bakom en enhetlig, databasstödd livscykel för uppgifter. Alla slutpunkter för att skapa och inspektera
 uppgifter kräver hanteringsautentisering.
 
 - Modulrot: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, plus underkataloger per agent under `agents/`)
+  `types.ts`, `db.ts`, samt underkataloger per agent under `agents/`)
 - Implementeringar per agent: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Offentliga slutpunkter: `/api/v1/agents/tasks/*` (lista/skapa/hämta/avbryt)
+- Publika slutpunkter: `/api/v1/agents/tasks/*` (lista/skapa/hämta/avbryt)
 - Hanteringsslutpunkter: `/api/cloud/*` (etablering, status, batch)
 - Kontrollpanel: `/dashboard/cloud-agents`
 - Lagring: tabellen `cloud_agent_tasks`
 
-Information om etablering per agent och OAuth-specifika detaljer finns i
+Information om etablering och OAuth-specifika detaljer för respektive agent finns i
 [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Skyddsregler
+### C. Skyddsräcken
 
-Modulen för skyddsregler är ett mellanprogramlager som kan laddas om under drift och som inspekterar begäranden
-och svar efter personligt identifierbar information, promptinjektion och osäkert visuellt innehåll. Överträdelser
-avbryter begäran med HTTP **503** samt en strukturerad felkod, vilket gör att
-nedströmsanropare kan försöka igen eller välja en annan gren.
+Modulen för skyddsräcken är ett mellanprogramlager som kan laddas om under drift och som granskar begäranden
+och svar efter personligt identifierbar information (PII), promptinjektion och osäkert bildinnehåll. Överträdelser
+avbryter begäran direkt med HTTP **503** samt en strukturerad felkod, vilket gör att
+nedströmsanropare kan försöka igen eller förgrena sig.
 
 - Modulrot: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
   `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Omladdning under drift: registret bevakar konfigurationsändringar och bygger om kedjan på plats
-- Inkopplingspunkter: starten av chatthanteraren, bildgenereringshanteraren, svarssaneraren
-- HTTP-kontrakt: överträdelser visas som `503` med `error.code = "GUARDRAIL_VIOLATION"`
+- Omladdning under drift: registret övervakar konfigurationsändringar och bygger om kedjan på plats
+- Integreringspunkter: chattbehandlarens ingång, behandlare för bildgenerering, svarssanering
+- HTTP-kontrakt: överträdelser exponeras som `503` med `error.code = "GUARDRAIL_VIOLATION"`
 
-Information om hur regeluppsättningar skapas och tröskelvärden finjusteras finns i
+Information om hur regeluppsättningar skapas och tröskelvärden justeras finns i
 [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Domänlager
 
-Namnrymden `src/domain/` centraliserar policybeslut så att rutthanterare inte
-själva behöver sätta samman logik för låsning/budget/reservlösningar.
+Namnrymden `src/domain/` centraliserar policybeslut så att ruttbehandlare inte
+själva behöver sammanställa logik för spärrar, budgetar och reservvägar.
 
-- Policymotor: `src/domain/policyEngine.ts` — en enda startpunkt för
-  utvärdering före exekvering (låsning → budget → reservordning)
+- Policymotor: `src/domain/policyEngine.ts` — gemensam ingångspunkt för
+  utvärdering före körning (spärr → budget → reservordning)
 - Kostnadsregler: `src/domain/costRules.ts`
 - Reservpolicy: `src/domain/fallbackPolicy.ts`
-- Låsningspolicy: `src/domain/lockoutPolicy.ts`
-- Taggbaserad dirigering: `src/domain/tagRouter.ts`
-- Kombinationslösare: `src/domain/comboResolver.ts` — löser kombinationsnamn, auto/\*
-  prefix och modellmål med jokertecken till konkreta exekveringsplaner
-- Kopplare för anslutnings-/modellregler: `src/domain/connectionModelRules.ts`
+- Spärrpolicy: `src/domain/lockoutPolicy.ts`
+- Taggbaserad routning: `src/domain/tagRouter.ts`
+- Kombinationsmatchare: `src/domain/comboResolver.ts` — matchar kombinationsnamn, auto/\*
+  -prefix och jokerteckenbaserade modellmål mot konkreta körningsplaner
+- Sammanfogare för anslutnings-/modellregler: `src/domain/connectionModelRules.ts`
 - Ögonblicksbilder av modelltillgänglighet: `src/domain/modelAvailability.ts`
-- Spårning av leverantörers utgångstid: `src/domain/providerExpiration.ts`
+- Spårning av leverantörers giltighetstid: `src/domain/providerExpiration.ts`
 - Kvotcache: `src/domain/quotaCache.ts`
 - Degraderingstillstånd: `src/domain/degradation.ts`
 - Konfigurationsgranskning: `src/domain/configAudit.ts`
@@ -442,73 +450,73 @@ själva behöver sätta samman logik för låsning/budget/reservlösningar.
 
 ### E. Auktoriseringspipeline
 
-Auktoriseringspipelinen klassificerar varje inkommande begäran och tillämpar den
-lämpliga policykedjan före vidarebefordran.
+Auktoriseringspipelinen klassificerar varje inkommande begäran och tillämpar
+lämplig policykedja före vidarebefordran.
 
 - Pipelineingång: `src/server/authz/pipeline.ts`
-- Begärandeklassificerare: `src/server/authz/classify.ts` — skiljer offentliga
-  kompatibilitetsrutter från administrationsrutter
-- Inventering av offentliga rutter: `src/shared/constants/publicApiRoutes.ts`
-- Policyer: `src/server/authz/policies/` — sammansättningsbara predikat
+- Begärandeklassificerare: `src/server/authz/classify.ts` — skiljer publika
+  kompatibilitetsrutter från hanteringsrutter
+- Inventering av publika rutter: `src/shared/constants/publicApiRoutes.ts`
+- Policyer: `src/server/authz/policies/` — komponerbara predikat
   (`requireApiKey`, `requireManagement`, `requireFreshAuth` osv.)
-- Headerverktyg: `src/server/authz/headers.ts`
-- Verifieringshjälpare: `src/server/authz/assertAuth.ts`
+- Rubrikverktyg: `src/server/authz/headers.ts`
+- Kontrollhjälpare: `src/server/authz/assertAuth.ts`
 - Begärandekontext: `src/server/authz/context.ts`
 
-Offentliga rutter och administrationsrutter har en strikt gräns: API:er för agent/cooldown och
-providerändringar kräver administrationsautentisering (HTTP 401 om den saknas).
+Publika rutter och hanteringsrutter har en strikt gräns: API:er för agenter/nedkylning och
+leverantörsändringar kräver hanteringsautentisering (HTTP 401 om den saknas).
 
 Fullständiga regler för ruttklassificering finns i
 [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. FSM för arbetsflöden och uppgiftsmedveten router
+### F. Arbetsflödes-FSM och uppgiftsmedveten router
 
-En router som drivs av en ändlig tillståndsmaskin och ligger ovanpå kombinationsvalet för att dirigera
-trafik baserat på den identifierade arbetsflödesfasen (planering, exekvering,
-granskning) samt affinitet till bakgrundsuppgifter.
+En router som drivs av en ändlig tillståndsmaskin och ligger ovanpå kombinationsvalet för att styra
+trafik baserat på det identifierade arbetsflödessteget (planering, körning,
+granskning) och affinitet till bakgrundsuppgifter.
 
-- FSM för arbetsflöden: `open-sse/services/workflowFSM.ts`
+- FSM för arbetsflöde: `open-sse/services/workflowFSM.ts`
 - Uppgiftsmedveten router: `open-sse/services/taskAwareRouter.ts`
 - Detektor för bakgrundsuppgifter: `open-sse/services/backgroundTaskDetector.ts`
 - Avsiktsklassificerare: `open-sse/services/intentClassifier.ts`
 
-FSM-övergångarna matas in i Auto Combos poängsättning, vilket styr mot billigare modeller
-för bakgrunds-/automatiseringsuppgifter och mot kraftfullare modeller för interaktiva
+FSM-övergångarna matas in i Auto Combos poängsättning, vilket gynnar billigare modeller
+för bakgrunds-/automatiseringsuppgifter och kraftfullare modeller för interaktiva
 planerings-/granskningssteg.
 
-### G. Providerspecifik feltålighet
+### G. Leverantörsspecifik motståndskraft
 
-Flera providers levereras med särskilda moduler för feltålighet och stealth som bygger vidare på
-de globala lagren för kretsbrytning, anslutningspaus och modellspärr:
+Flera leverantörer tillhandahåller särskilda moduler för motståndskraft och smygfunktioner som bygger vidare på
+de globala lagren för kretsbrytare, anslutningsvänteperioder och modellblockeringar:
 
-- Antigravity 429-motor: `open-sse/services/antigravity429Engine.ts` (roterar
-  identitet, rensar svarshuvuden och hanterar spårning av krediter/versioner via
+- Antigravitys 429-motor: `open-sse/services/antigravity429Engine.ts` (roterar
+  identitet, rensar svarshuvuden, hanterar spårning av krediter/versioner via
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- Kvotpolicy för ModelScope: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (handshake för kompatibilitetskanal): `open-sse/services/claudeCodeCCH.ts`,
+- ModelScopes kvotpolicy: `open-sse/services/modelscopePolicy.ts`
+- Claude Code CCH (kompatibilitetskanalens handskakning): `open-sse/services/claudeCodeCCH.ts`,
   samt `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
   `claudeCodeToolRemapper.ts`
-- Formning av Claude Code-fingeravtryck: `open-sse/services/claudeCodeFingerprint.ts`
+- Utformning av Claude Code-fingeravtryck: `open-sse/services/claudeCodeFingerprint.ts`
 - Obfuskering av Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
 
-Den fullständiga stealth-handboken och driftsvägledningen finns i
+En fullständig handbok för smygfunktioner och operativ vägledning finns i
 `docs/security/STEALTH_GUIDE.md` (git; kompileras inte till `/docs`).
 
 ### H. Webhooks, resonemangscache, läscache
 
-- **Webhooks** — utgående leverans av provider-, konto- och uppgiftshändelser.
+- **Webhooks** — utgående distribution av leverantörs-, konto- och uppgiftshändelser.
   - Dispatcher: `src/lib/webhookDispatcher.ts`
   - Lagring: SQLite-tabellen `webhooks` (via `src/lib/db/webhooks.ts`)
   - Kontrollpanel: `/dashboard/webhooks` (prenumerationer, hemligheter, historik över återförsök)
-  - Händelsetaxonomi och semantik för återförsök finns i [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Resonemangscache** — återuppspelningsbara resonemangsblock för providers som genererar
-  tanketokens (Claude, GLMT osv.), så att efterföljande steg kan hoppa över förnyat resonemang.
+  - Händelsetaxonomi och semantik för återförsök beskrivs i [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Resonemangscache** — återuppspelningsbara resonemangsblock för leverantörer som genererar
+  tanketokens (Claude, GLMT osv.), så att efterföljande steg kan hoppa över att resonera på nytt.
   - Databaslager: `src/lib/db/reasoningCache.ts`
   - Tjänstelager: `open-sse/services/reasoningCache.ts`
-  - Semantik för återuppspelning finns i [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Läscache** — kortlivad svarscache som indexeras efter signatur och används för att
-  slå samman identiska återförsök från trasiga SDK:er uppströms.
+  - Semantik för återuppspelning beskrivs i [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Läscache** — kortlivad svarscache indexerad efter signatur som används för att
+  slå samman identiska återförsök från felaktiga uppströms-SDK:er.
   - Databaslager: `src/lib/db/readCache.ts`
   - Statistikslutpunkt: `GET /api/cache/stats`, kontrollpanel på `/dashboard/cache`
 
@@ -534,16 +542,17 @@ Domäntillståndsdatabas (SQLite):
 - Tabeller (skapade i `src/lib/db/core.ts`): `domain_fallback_chains`, `domain_budgets`, `domain_cost_history`, `domain_lockout_state`, `domain_circuit_breakers`
 - Genomskrivningscache: minnesbaserade Maps är auktoritativa under körning; ändringar skrivs synkront till SQLite; tillståndet återställs från databasen vid kallstart
 
-## 4) Ytor för autentisering och säkerhet
+## 4) Autentisering + säkerhetsytor
 
 - Cookie-autentisering för kontrollpanelen: `src/proxy.ts`, `src/app/api/auth/login/route.ts`
 - Generering/verifiering av API-nycklar: `src/shared/utils/apiKey.ts`
-- Leverantörshemligheter lagras i poster i `providerConnections`
+- Leverantörshemligheter lagras i posterna i `providerConnections`
 - Stöd för utgående proxy via `open-sse/utils/proxyFetch.ts` (miljövariabler) och `open-sse/utils/networkProxy.ts` (konfigurerbart per leverantör eller globalt)
-- SSRF-/URL-skydd för utgående trafik: `src/shared/network/outboundUrlGuard.ts` — blockerar privata intervall, loopback-intervall och länklokala intervall för alla leverantörsanrop
-- Validering av körmiljön: `src/lib/env/runtimeEnv.ts` — Zod-schema för alla miljövariabler, presenteras som fel/varningar vid uppstart
-- Synkroniseringstoken: `src/lib/db/syncTokens.ts` — avgränsade token för slutpunkter som laddar ned konfigurationspaket; stöds av SQLite-tabellen `sync_tokens` (migrering `024_create_sync_tokens.sql`)
-- Autentisering vid WebSocket-handskakning: `src/lib/ws/handshake.ts` — validerar WS-uppgraderingsförfrågningar via API-nyckel eller sessionscookie
+- SSRF-/URL-skydd för utgående trafik: `src/shared/network/outboundUrlGuard.ts` — värdkontroller för leverantörsanrop och webhookmål; läget hämtas från `src/shared/network/outboundUrlGuardPolicy.ts` (flaggor i `docs/reference/ENVIRONMENT.md`)
+- Validering av körningsmiljön: `src/lib/env/runtimeEnv.ts` — Zod-schema för alla miljövariabler, som visas som fel/varningar vid uppstart
+- Synkroniseringstoken: `src/lib/db/syncTokens.ts` — omfångsbegränsade token för slutpunkter som hämtar konfigurationspaket; stöds av SQLite-tabellen `sync_tokens` (migrering `024_create_sync_tokens.sql`)
+- Autentisering vid WebSocket-handskakning: `src/lib/ws/handshake.ts` — validerar WS-uppgraderingsbegäranden via API-nyckel eller sessionscookie
+- WebSocket-autentisering för kontrollpanelen i realtid: `src/server/ws/liveServer.ts` — sidoprocessen (port `LIVE_WS_PORT`) godtar en sessionscookie för kontrollpanelen eller en Bearer-API-nyckel med ett hanteringsomfång (`manage`/`admin`); nycklar enbart för inferens nekas. Dess interna publiceringsslutpunkt `POST /__omniroute_event` godtar endast loopback-motparter när inget huvud för proxyhopp (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) finns med
 
 ## 5) Molnsynkronisering
 

@@ -1,0 +1,1 @@
+- **fix(combo):** Interleave hedged launches across model groups, limit the identical-error early stop to HTTP 400 under serial dispatch, isolate thrown branch failures so surviving hedged branches keep running, and stop counting a local `409 turn_in_progress` against the account cooldown ([#17901](https://github.com/cheaper-inference/OmniRoute/pull/17901)) — thanks @edosulai

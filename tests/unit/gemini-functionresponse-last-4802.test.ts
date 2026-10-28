@@ -8,6 +8,9 @@ import assert from "node:assert/strict";
 // user turn whose last part is not a functionResponse with
 // 400 INVALID_ARGUMENT "Requests ending with a model turn are not supported."
 // [text, functionResponse] is accepted by Gemini 4, 3.x and 2.5 alike.
+// On the Claude -> Gemini path #16601 goes one step further: that leading text is
+// folded into functionResponse.response.result, so the turn carries the functionResponse
+// alone (Vertex Gemini 3.6+ Flash rejects text next to a functionResponse, #16443).
 
 const { openaiToGeminiRequest, mergeConsecutiveSameRoleContents } =
   await import("../../open-sse/translator/request/openai-to-gemini.ts");
@@ -101,7 +104,12 @@ test("Claude -> Gemini: tool_result followed by user turn puts functionResponse 
     "expected a functionResponse part in the trailing user turn"
   );
   assert.equal(partKind(last.parts[last.parts.length - 1]), "functionResponse");
-  assert.deepEqual(last.parts[0], { text: "system reminder here" });
+  // The reminder is not dropped: it is folded into the response (#16601), leaving the
+  // functionResponse as the only part of the turn.
+  assert.deepEqual(last.parts.map(partKind), ["functionResponse"]);
+  const fr = last.parts[0].functionResponse as { name: string; response: { result: unknown } };
+  assert.equal(fr.name, "read");
+  assert.equal(fr.response.result, "file contents\nsystem reminder here");
 });
 
 test("mergeConsecutiveSameRoleContents keeps order stable within text and functionResponse groups", () => {

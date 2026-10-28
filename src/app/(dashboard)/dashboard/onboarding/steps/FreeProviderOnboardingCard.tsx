@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Checkbox } from "@omniroute/ui-kit/checkbox";
+import Button from "@/shared/components/Button";
 
 interface FreeProviderOption {
   id: string;
@@ -102,47 +104,40 @@ export function FreeProviderOnboardingCard() {
 
       <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
         {providers.map((provider) => (
-          <label
+          <Checkbox
             key={provider.id}
-            className="flex cursor-pointer items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3"
-          >
-            <input
-              type="checkbox"
-              checked={selectedIds.includes(provider.id)}
-              onChange={() => toggleProvider(provider.id)}
-              className="mt-1 accent-primary"
-            />
-            <span className="min-w-0 flex-1">
-              <span className="block text-xs font-medium text-text-main">{provider.name}</span>
-              <span className="mt-1 block text-[11px] leading-relaxed text-amber-300/90">
-                {provider.caution}
-              </span>
-              <a
-                href={provider.website}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-1 inline-block text-[11px] text-primary hover:underline"
-                onClick={(event) => event.stopPropagation()}
-              >
-                {t("reviewProviderSite")}
-              </a>
-            </span>
-          </label>
+            card
+            checked={selectedIds.includes(provider.id)}
+            onChange={() => toggleProvider(provider.id)}
+            label={<span className="text-xs font-medium text-text-main">{provider.name}</span>}
+            description={
+              <>
+                <span className="block text-[11px] leading-relaxed text-warning">
+                  {provider.caution}
+                </span>
+                <a
+                  href={provider.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-block text-[11px] text-primary hover:underline"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  {t("reviewProviderSite")}
+                </a>
+              </>
+            }
+          />
         ))}
       </div>
 
-      <label className="flex cursor-pointer items-start gap-2 text-xs text-text-muted">
-        <input
-          data-testid="free-provider-confirmation"
-          type="checkbox"
-          checked={confirmed}
-          onChange={(event) => setConfirmed(event.target.checked)}
-          className="mt-0.5 accent-primary"
-        />
-        <span>{t("confirmation")}</span>
-      </label>
+      <Checkbox
+        data-testid="free-provider-confirmation"
+        checked={confirmed}
+        onChange={(event) => setConfirmed(event.target.checked)}
+        label={<span className="text-xs text-text-muted">{t("confirmation")}</span>}
+      />
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
       {results.length > 0 && (
         <ul className="space-y-1 text-xs text-text-muted">
           {results.map((result) => (
@@ -154,24 +149,24 @@ export function FreeProviderOnboardingCard() {
       )}
 
       <div className="flex flex-wrap gap-2">
-        <button
+        <Button
           data-testid="setup-free-providers"
-          type="button"
+          variant="primary"
+          size="sm"
           disabled={!confirmed || selectedIds.length === 0 || submitting}
           onClick={() => void submit()}
-          className="rounded-lg bg-primary px-4 py-2 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? t("settingUp") : t("setupSelected")}
-        </button>
+        </Button>
         {failedIds.length > 0 && (
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             disabled={submitting}
             onClick={() => void submit(failedIds)}
-            className="rounded-lg border border-white/10 px-4 py-2 text-xs text-text-main disabled:opacity-50"
           >
             {t("retryFailed")}
-          </button>
+          </Button>
         )}
       </div>
     </section>

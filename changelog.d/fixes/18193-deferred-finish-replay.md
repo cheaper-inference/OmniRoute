@@ -1,0 +1,1 @@
+- **fix(translator):** OpenAI→Claude deferred-finish flush no longer replays the finish chunk's trailing text / tool-arg fragment, which produced invalid tool-input JSON ([#18193](https://github.com/cheaper-inference/OmniRoute/pull/18193))

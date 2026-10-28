@@ -58,7 +58,7 @@ export function useImprovePrompt(): UseImprovePrompt {
         setLoading(false);
       }
     },
-    [],
+    []
   );
 
   return {

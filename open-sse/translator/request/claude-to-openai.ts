@@ -1,6 +1,11 @@
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
+import {
+  isClaudeServerWebSearchTool,
+  isSoleClaudeServerWebSearchTool,
+} from "../helpers/claudeServerWebSearch.ts";
+import { chatStrictFrom } from "../helpers/toolStrict.ts";
 
 type JsonRecord = Record<string, unknown>;
 const TOOL_CHOICE_ANY = ["a", "n", "y"].join("");
@@ -39,16 +44,6 @@ function normalizeOpenAIReasoningEffort(effort: unknown): string | undefined {
   return normalized || undefined;
 }
 
-function isClaudeServerWebSearchTool(tool: unknown): tool is JsonRecord {
-  if (!tool || typeof tool !== "object" || Array.isArray(tool)) return false;
-  const record = tool as JsonRecord;
-  return (
-    record.name === "web_search" &&
-    typeof record.type === "string" &&
-    /^web_search_\d{8}$/.test(record.type)
-  );
-}
-
 function toStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -79,13 +74,50 @@ function hasClaudeServerWebSearchTool(tools: unknown): boolean {
   return Array.isArray(tools) && tools.some((tool) => isClaudeServerWebSearchTool(tool));
 }
 
-function shouldUseNativeResponsesWebSearch(credentials: unknown): boolean {
-  return (
-    credentials !== null &&
-    typeof credentials === "object" &&
-    !Array.isArray(credentials) &&
-    (credentials as JsonRecord)._targetFormat === FORMATS.OPENAI_RESPONSES
-  );
+// Target formats whose translator understands the native web-search marker
+// `{ type: "web_search" }` that convertClaudeServerWebSearchTool emits: OpenAI
+// Responses consumes it directly, and the Gemini/Antigravity lane maps it to
+// Google Search grounding (`{ googleSearch: {} }`) in
+// geminiToolsSanitizer.ts::toGeminiGoogleSearchTool. Every other target keeps
+// receiving the plain `web_search` function the server tool degrades to.
+const NATIVE_WEB_SEARCH_TARGET_FORMATS = new Set<string>([
+  FORMATS.OPENAI_RESPONSES,
+  FORMATS.GEMINI,
+  FORMATS.ANTIGRAVITY,
+]);
+
+function nativeWebSearchTargetFormat(credentials: unknown): string | null {
+  if (credentials === null || typeof credentials !== "object" || Array.isArray(credentials)) {
+    return null;
+  }
+  const targetFormat = (credentials as JsonRecord)._targetFormat;
+  return typeof targetFormat === "string" && NATIVE_WEB_SEARCH_TARGET_FORMATS.has(targetFormat)
+    ? targetFormat
+    : null;
+}
+
+// OpenAI service_tier values. Anthropic's "standard_only" has no OpenAI twin beyond
+// "default"; "fast" is the alias the Codex billing/executor path already accepts.
+const OPENAI_SERVICE_TIERS = new Set(["auto", "default", "flex", "priority", "scale"]);
+const CLAUDE_TO_OPENAI_SERVICE_TIER: Record<string, string> = {
+  standard_only: "default",
+  fast: "priority",
+};
+// Only targets known to accept a top-level service_tier get it; strict
+// OpenAI-compatible gateways reject unknown fields with a 400.
+const SERVICE_TIER_PROVIDERS = new Set(["openai", "azure-openai", "codex"]);
+
+/** Client service_tier to keep across the Claude → OpenAI pivot, or undefined to drop it. */
+function resolveOpenAIServiceTier(tier: unknown, credentials: unknown): string | undefined {
+  if (typeof tier !== "string") return undefined;
+  const provider =
+    credentials !== null && typeof credentials === "object" && !Array.isArray(credentials)
+      ? (credentials as JsonRecord)._provider
+      : undefined;
+  if (typeof provider !== "string" || !SERVICE_TIER_PROVIDERS.has(provider)) return undefined;
+  const normalized = tier.trim().toLowerCase();
+  const mapped = CLAUDE_TO_OPENAI_SERVICE_TIER[normalized] ?? normalized;
+  return OPENAI_SERVICE_TIERS.has(mapped) ? mapped : undefined;
 }
 
 // Convert Claude request to OpenAI format
@@ -113,7 +145,7 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
 
   // Max tokens
   if (body.max_tokens) {
-    result.max_tokens = adjustMaxTokens(body);
+    result.max_tokens = adjustMaxTokens(body, { honorExplicitCap: true });
   }
 
   // Temperature
@@ -247,14 +279,30 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
     result.messages.push({ role: "user", content: "(continue)" });
   }
 
-  const useNativeResponsesWebSearch = shouldUseNativeResponsesWebSearch(credentials);
+  const nativeWebSearchTarget = nativeWebSearchTargetFormat(credentials);
+  const useResponsesWebSearch = nativeWebSearchTarget === FORMATS.OPENAI_RESPONSES;
+  // Gemini/Antigravity grounding is enabled only when the Claude server tool is the
+  // request's SOLE tool (the Claude Code WebSearch sub-request shape). An agent turn
+  // that merely declares the server tool alongside its own functions must keep those
+  // functions — grounding there would drop them (Antigravity 400s on a built-in tool
+  // mixed with functionDeclarations), so the mixed case drops the server tool instead
+  // and leaves the custom functions untouched, as it did before this lane existed.
+  const geminiGroundingTarget =
+    nativeWebSearchTarget === FORMATS.GEMINI || nativeWebSearchTarget === FORMATS.ANTIGRAVITY;
+  const useGeminiGrounding = geminiGroundingTarget && isSoleClaudeServerWebSearchTool(body.tools);
 
   // Tools
   if (body.tools && Array.isArray(body.tools)) {
     const normalizedTools = body.tools
       .map((tool) => {
-        if (useNativeResponsesWebSearch && isClaudeServerWebSearchTool(tool)) {
-          return convertClaudeServerWebSearchTool(tool);
+        if (isClaudeServerWebSearchTool(tool)) {
+          if (useResponsesWebSearch || useGeminiGrounding) {
+            return convertClaudeServerWebSearchTool(tool);
+          }
+          // Mixed Gemini/Antigravity request: drop the server tool rather than
+          // degrade it to a plain `web_search` functionDeclaration (which the
+          // Antigravity envelope then strips anyway) or enable grounding.
+          if (geminiGroundingTarget) return null;
         }
 
         if (!tool || typeof tool !== "object" || Array.isArray(tool)) return null;
@@ -268,8 +316,9 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
             name,
             description: typeof record.description === "string" ? record.description : "", // fix: never null (#276)
             parameters: normalizeToolSchema(record.input_schema),
-            // Preserve tool-level strict schema enforcement (9router#4172).
-            ...(record.strict === true ? { strict: true } : {}),
+            // Preserve tool-level strict schema enforcement (9router#4172). Only booleans
+            // carry over; omitted stays omitted (non-strict on Chat).
+            ...chatStrictFrom(record),
           },
         };
       })
@@ -284,7 +333,7 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
   if (body.tool_choice) {
     result.tool_choice = convertToolChoice(
       body.tool_choice,
-      useNativeResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
+      useResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
     );
     // Claude carries the single-call restriction on tool_choice (9router#4171).
     if (body.tool_choice?.disable_parallel_tool_use === true) {
@@ -317,6 +366,11 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
   ) {
     result.reasoning_effort = "none";
   }
+
+  // Keep a client-sent tier across the pivot: billing reads it from the source body,
+  // so dropping it here made the reported tier and the tier actually served diverge.
+  const serviceTier = resolveOpenAIServiceTier(body.service_tier, credentials);
+  if (serviceTier) result.service_tier = serviceTier;
 
   return result;
 }
@@ -588,6 +642,14 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
                   : JSON.stringify(block.content));
           } else if (block.content) {
             resultContent = JSON.stringify(block.content);
+          }
+
+          // The OpenAI tool role has no is_error field (strict upstreams reject
+          // unknown message fields): keep the failure visible with a marker.
+          if (block.is_error === true) {
+            resultContent = resultContent
+              ? `[tool_error: true]\n${resultContent}`
+              : "[tool_error: true]";
           }
 
           toolResults.push({

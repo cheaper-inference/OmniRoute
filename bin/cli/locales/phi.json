@@ -123,7 +123,9 @@
       "maxCostOpt": "Pinakamataas na gastos kada araw (USD)",
       "allowedModelsOpt": "Listahan ng mga pinapayagang model na pinaghihiwalay ng kuwit",
       "nothingToSet": "Walang ibinigay na field ng patakaran. Gamitin ang --rate-limit, --max-cost, o --allowed-models.",
-      "updated": "Na-update ang patakaran."
+      "updated": "Na-update ang patakaran.",
+      "modelAccessModeOpt": "Mode ng access sa modelo (all | restricted)",
+      "unrestrictedOpt": "Payagan ang lahat ng modelo (--model-access-mode all)"
     },
     "expiration": {
       "title": "Pag-expire ng Key",

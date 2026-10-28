@@ -123,7 +123,9 @@
       "maxCostOpt": "Custo máximo por dia (USD)",
       "allowedModelsOpt": "Lista de modelos permitidos (separados por vírgula)",
       "nothingToSet": "Nenhum campo de política fornecido. Use --rate-limit, --max-cost ou --allowed-models.",
-      "updated": "Política atualizada."
+      "updated": "Política atualizada.",
+      "modelAccessModeOpt": "Modo de acesso aos modelos (all | restricted)",
+      "unrestrictedOpt": "Permitir todos os modelos (--model-access-mode all)"
     },
     "expiration": {
       "title": "Expiração de Chaves",
@@ -1179,8 +1181,8 @@
       "token": "Token de sincronização (de `sync tokens create`); padrão: OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
-      "description": "Importar arquivo bundle",
-      "dryRun": "Validar sem aplicar"
+      "description": "Substituir o banco do servidor por um backup .sqlite",
+      "dryRun": "Validar o backup localmente; nunca contata o servidor"
     },
     "tokens": {
       "description": "Gerenciar tokens de sincronização",

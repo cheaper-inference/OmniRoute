@@ -1,1 +1,0 @@
-- fix(auto-combo): RulesStrategy now honours the routing weights (mode pack / category overlay) instead of always using DEFAULT_WEIGHTS on virtual `auto/*` routes (#15546)

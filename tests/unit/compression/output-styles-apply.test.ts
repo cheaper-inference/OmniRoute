@@ -307,3 +307,158 @@ test("never introduces a system message at messages[0]", () => {
     assert.notEqual(r.body.messages?.[0]?.role, "system");
   }
 });
+
+// Port of 9router#4056: behavioral style prompts measurably degrade multimodal grounding on
+// susceptible models, so a turn carrying an image/audio/file skips the injection entirely.
+test("skips injection when an OpenAI chat turn carries an image_url part", () => {
+  const body = {
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "What color is this image?" },
+          { type: "image_url", image_url: { url: "data:image/png;base64,AAAA" } },
+        ],
+      },
+    ],
+  };
+  const r = applyOutputStyles(body, sel(["less-code", "full"]));
+  assert.equal(r.applied, false);
+  assert.equal(r.skippedReason, "media_content");
+  assert.equal(r.body, body);
+});
+
+test("skips injection when an OpenAI chat turn carries audio or a file", () => {
+  for (const part of [
+    { type: "input_audio", input_audio: { data: "AAAA", format: "wav" } },
+    { type: "file", file: { file_data: "data:application/pdf;base64,AAAA" } },
+  ]) {
+    const r = applyOutputStyles(
+      { messages: [{ role: "user", content: [{ type: "text", text: "Describe." }, part] }] },
+      sel(["terse-prose", "full"])
+    );
+    assert.equal(r.applied, false, part.type);
+    assert.equal(r.skippedReason, "media_content", part.type);
+  }
+});
+
+test("skips injection on a Responses body with an input_image part", () => {
+  const body = {
+    input: [
+      {
+        role: "user",
+        content: [
+          { type: "input_text", text: "What color is this?" },
+          { type: "input_image", image_url: "data:image/png;base64,AAAA" },
+        ],
+      },
+    ],
+  };
+  const r = applyOutputStyles(body, sel(["less-code", "full"]));
+  assert.equal(r.applied, false);
+  assert.equal(r.skippedReason, "media_content");
+  assert.equal(r.body.instructions, undefined);
+});
+
+test("skips injection when a Claude tool_result carries an image (screenshot path)", () => {
+  const body = {
+    system: "You are a coding agent.",
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: "t1",
+            content: [
+              { type: "image", source: { type: "base64", media_type: "image/png", data: "AA" } },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  const r = applyOutputStyles(body, sel(["terse-prose", "full"]));
+  assert.equal(r.applied, false);
+  assert.equal(r.skippedReason, "media_content");
+  assert.equal(r.body.system, "You are a coding agent.");
+});
+
+test("skips injection on Claude document and Gemini inlineData/fileData parts", () => {
+  const bodies = [
+    {
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "document", source: { type: "base64", data: "AA" } }],
+        },
+      ],
+    },
+    {
+      contents: [{ role: "user", parts: [{ inlineData: { mimeType: "image/png", data: "AA" } }] }],
+      messages: [{ role: "user", content: "hi" }],
+    },
+    {
+      contents: [{ role: "user", parts: [{ fileData: { fileUri: "gs://bucket/a.pdf" } }] }],
+      input: "hi",
+    },
+  ];
+  for (const body of bodies) {
+    const r = applyOutputStyles(body, sel(["terse-prose", "full"]));
+    assert.equal(r.applied, false);
+    assert.equal(r.skippedReason, "media_content");
+  }
+});
+
+test("media skip is not gated on the Auto-Clarity toggle", () => {
+  const r = applyOutputStyles(
+    {
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "image_url", image_url: { url: "https://example.com/a.png" } }],
+        },
+      ],
+    },
+    sel(["terse-prose", "full"]),
+    "en",
+    { autoClarity: false }
+  );
+  assert.equal(r.applied, false);
+  assert.equal(r.skippedReason, "media_content");
+});
+
+test("text-only turns and tool schemas mentioning image still get the injection", () => {
+  const body = {
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: "render",
+          parameters: {
+            type: "object",
+            properties: { image: { type: "string" }, file: { type: "string" } },
+          },
+        },
+      },
+    ],
+    messages: [
+      { role: "user", content: [{ type: "text", text: "Refactor this module." }] },
+      {
+        role: "assistant",
+        content: null,
+        tool_calls: [
+          {
+            id: "c1",
+            type: "function",
+            function: { name: "render", arguments: '{"type":"image"}' },
+          },
+        ],
+      },
+      { role: "tool", tool_call_id: "c1", content: '{"type":"image_url"}' },
+    ],
+  };
+  const r = applyOutputStyles(body, sel(["less-code", "full"]));
+  assert.equal(r.applied, true);
+  assert.equal(r.skippedReason, undefined);
+});

@@ -123,7 +123,9 @@
       "maxCostOpt": "Kos maksimum sehari (USD)",
       "allowedModelsOpt": "Senarai model yang dibenarkan, dipisahkan dengan koma",
       "nothingToSet": "Tiada medan dasar diberikan. Gunakan --rate-limit, --max-cost, atau --allowed-models.",
-      "updated": "Dasar telah dikemas kini."
+      "updated": "Dasar telah dikemas kini.",
+      "modelAccessModeOpt": "Mod akses model (all | restricted)",
+      "unrestrictedOpt": "Benarkan semua model (--model-access-mode all)"
     },
     "expiration": {
       "title": "Tamat Tempoh Kunci",

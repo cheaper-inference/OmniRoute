@@ -16,43 +16,42 @@ OmniRoute **koondab** seadistatud ühendused ühte lõpp-punkti. Peate endiselt 
 
 ---
 
-## Tüüpilised tasuta juurdepääsuga teenusepakkujad
+## Tüüpilised tasuta juurdepääsu pakkujad
 
-### Korduv, võtmeta või piiramata juurdepääs
+### Korduv, võtmeta või piiramatu juurdepääs
 
-Nendel teenusepakkujatel on auditeeritud kataloogis korduv, võtmeta või piiramata tasuta juurdepääsu võimalus. „Piiramata” tähendab, et avaldatud tokenilimiit puudub; siiski võivad kehtida päringusageduse, samaaegsuse, konto, piirkonna ja eeskirjadega seotud piirangud:
+Nendel pakkujatel on auditeeritud kataloogis korduv, võtmeta või piiramatu tasuta juurdepääsu võimalus. „Piiramatu” tähendab, et avaldatud tokenipiirang puudub; siiski võivad kehtida päringusageduse, samaaegsuse, konto, piirkondlikud ja eeskirjadest tulenevad piirangud:
 
-| Teenusepakkuja    | Mudelid                                                                                 | Kvoot                                                                                                                                                     | Ühenduse loomine                                                                                                                |
+| Pakkuja           | Mudelid                                                                                 | Kvoot                                                                                                                                                     | Ühenduse loomine                                                                                                                |
 | ----------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 ja teised                                   | Auditeeritud kataloogi hinnangul ühine 25K-tokeniline kuine maht                                                                                          | OAuthi-/kontovoog; teenusetingimused on kataloogis tähistatud kui `avoid`                                                       |
-| **OpenCode Free** | Praegune `*-free` mudelikomplekt teenusepakkujate registris                             | Võtmeta; avaldatud tokenilimiit puudub                                                                                                                    | Teenusepakkuja pääsukinnitus pole vajalik; teenusetingimused on tähistatud kui `avoid`                                          |
-| **Pollinations**  | Praegune võtmeta mudelikomplekt; mõned varasemad mudelid on lõpetatud või nõuavad võtit | Võtmeta; avaldatud tokenilimiit puudub                                                                                                                    | Võtmeta mudelite jaoks pole teenusepakkuja pääsukinnitust vaja                                                                  |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 ja teised                   | Tasuta API-võti (päringusageduse piiranguteta, kaarti pole vaja); **iga päring logitakse** teadusuuringute jaoks (loobumine aadressil logfare.ai/consent) | Võti kohe aadressilt logfare.ai/register; teenusetingimused ja privaatsusteave aadressidel logfare.ai/tos ja logfare.ai/privacy |
-| **Cloudflare AI** | Workers AI kataloog                                                                     | Auditeeritud mahu hinnang on avaldatud kasutusühikute põhjal ~30M tokenit kuus                                                                            | Cloudflare'i konto ja API pääsukinnitused                                                                                       |
-| **Gemini**        | Gemini Flashi mudelipere                                                                | Projektist/mudelist sõltuvad päringusageduse piirangud; põhipakkumine ei sisalda kindlat kuist tokenitoetust                                              | Google AI Studio API-võti; kontrollige projekti aktiivseid piiranguid                                                           |
-| **Groq**          | Llama, GPT-OSS ja Qwen mudelid                                                          | Auditeeritud mahu hinnang on ~15M tokenit kuus                                                                                                            | Groqi API-võti; kehtivad päringusageduse piirangud                                                                              |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 ja teised                                   | Auditeeritud kataloogi hinnangul ühine igakuine 25K tokeni reserv                                                                                         | OAuthi-/kontovoog; kasutustingimused on kataloogis märgistatud kui `avoid`                                                      |
+| **Pollinations**  | Praegune võtmeta mudelite valik; mõned varasemad mudelid on lõpetatud või nõuavad võtit | Võtmeta; avaldatud tokenipiirang puudub                                                                                                                   | Võtmeta mudelite jaoks pole pakkuja autentimisandmeid vaja                                                                      |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 ja teised                   | Tasuta API-võti (päringusageduse piiranguteta, kaarti pole vaja); **iga päring logitakse** teadusuuringute jaoks (loobumine aadressil logfare.ai/consent) | Võti kohe aadressilt logfare.ai/register; kasutustingimused ja privaatsusteave aadressidel logfare.ai/tos ja logfare.ai/privacy |
+| **Cloudflare AI** | Workers AI kataloog                                                                     | Auditeeritud reservi hinnang on avaldatud kasutusühikute põhjal ~30M tokenit kuus                                                                         | Cloudflare'i konto ja API autentimisandmed                                                                                      |
+| **Gemini**        | Gemini Flashi mudeliperekond                                                            | Projektist ja mudelist sõltuvad päringusageduse piirangud; põhipakkumine ei sisalda fikseeritud igakuist tokenitoetust                                    | Google AI Studio API-võti; kontrollige projekti aktiivseid piiranguid                                                           |
+| **Groq**          | Llama, GPT-OSS ja Qwen mudelid                                                          | Auditeeritud reservi hinnang on ~15M tokenit kuus                                                                                                         | Groqi API-võti; kehtivad päringusageduse piirangud                                                                              |
 
-### Registreerumistoetused ja teenusepakkujapõhised krediidid
+### Registreerumistoetused ja pakkujapõhised krediidid
 
-Need teenusepakkujad pakuvad registreerumistoetusi või sooduskrediite, millele kehtivad nende nõuetele vastavuse reeglid. 2026-10-08 seisuga nõuab [Cerebrase hinnakiri](https://www.cerebras.ai/pricing) ühekordse 5 $ krediidi saamiseks makseviisi ning krediit aegub 30 päeva pärast; see ei ole korduv tokenikvoot. [Gemini päringusageduse piirangud](https://ai.google.dev/gemini-api/docs/rate-limits) erinevad projekti, mudeli ja taseme järgi, mistõttu neid ei teisendata garanteeritud kuiseks tokenitoetuseks.
+Need pakkujad annavad registreerumistoetusi või sooduskrediiti vastavalt oma sobivusreeglitele. 2026-10-08 seisuga kinnitatud [Cerebrase hinnakiri](https://www.cerebras.ai/pricing) nõuab makseviisi ühekordse $5 krediidi saamiseks, mis aegub 30 päeva pärast; see ei ole korduv tokenikvoot. [Gemini päringusageduse piirangud](https://ai.google.dev/gemini-api/docs/rate-limits) sõltuvad projektist, mudelist ja paketist, mistõttu neid ei teisendata garanteeritud igakuiseks tokenitoetuseks.
 
-| Teenusepakkuja | Tasuta krediidid                                                      | Mudelid                     | Kuidas saada                                                          |
-| -------------- | --------------------------------------------------------------------- | --------------------------- | --------------------------------------------------------------------- |
-| **Cerebras**   | Ühekordne 5 $ sooduskrediit; aegub 30 päeva pärast                    | Praegune inferentsikataloog | Konto ja kehtiv makseviis                                             |
-| **DeepSeek**   | 5M tasuta tokenit                                                     | DeepSeek V4                 | Registreeruge aadressil platform.deepseek.com                         |
-| **LongCat**    | Ühekordne 10M-tokeniline toetus                                       | LongCat 2.0                 | API-võti + KYC; pärast toetuse lõppemist kasutuspõhine tasu           |
-| **Vertex AI**  | 300 $ registreerumiskrediit, mis vastab eelarvemudelis ~300M tokenile | Gemini ja partnermudelid    | Google Cloudi konto; kehtivad arvelduse ja nõuetele vastavuse reeglid |
+| Pakkuja       | Tasuta krediit                                                       | Mudelid                      | Kuidas saada                                                    |
+| ------------- | -------------------------------------------------------------------- | ---------------------------- | --------------------------------------------------------------- |
+| **Cerebras**  | Ühekordne $5 sooduskrediit; aegub 30 päeva pärast                    | Praegune inferentsikataloog  | Konto ja kehtiv makseviis                                       |
+| **DeepSeek**  | 5M tasuta tokenit                                                    | DeepSeek V4                  | Registreeruge aadressil platform.deepseek.com                   |
+| **LongCat**   | Ühekordne 10M tokeni toetus                                          | LongCat 2.0                  | API-võti + KYC; pärast toetuse lõppemist kasutuspõhine maksmine |
+| **Vertex AI** | $300 registreerumiskrediit, mis vastab eelarvemudelis ~300M tokenile | Gemini ja partnerite mudelid | Google Cloudi konto; kehtivad arvelduse ja sobivuse reeglid     |
 
 ### Muu piiratud juurdepääs
 
-Nendel teenusepakkujatel on konkreetsete piirangutega **tasuta paketid**:
+Nendel pakkujatel on konkreetsete piirangutega **tasuta paketid**:
 
-| Teenusepakkuja                 | Tasuta limiit                                                                                | Mudelid                                | Sobib kõige paremini |
-| ------------------------------ | -------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------- |
-| **GitHub Models**              | Auditeeritud ühise mahu hinnang on ~18M tokenit kuus                                         | Mitmesuguste mudelite hindamine        |
-| **Hugging Face**               | Väike korduv kuine maht                                                                      | Eksperimendid ja mudelite mitmekesisus |
-| **OpenRouteri tasuta mudelid** | Ühine päringupiiranguga maht; valikuline ühekordne lisamakse suurendab korduvat kasutusmahtu | Lai varumudelite kataloog              |
-| **AI Horde**                   | Võtmeta kogukonnaressurss; saadavus varieerub                                                | Võimalusepõhine hajutatud inferents    |
+| Pakkuja                        | Tasuta piirang                                                                              | Mudelid                             | Sobib kõige paremini |
+| ------------------------------ | ------------------------------------------------------------------------------------------- | ----------------------------------- | -------------------- |
+| **GitHub Models**              | Auditeeritud ühise reservi hinnang on ~18M tokenit kuus                                     | Lai mudelite hindamise valik        |
+| **Hugging Face**               | Väike korduv igakuine reserv                                                                | Katsed ja mudelite mitmekesisus     |
+| **OpenRouteri tasuta mudelid** | Ühine päringupiiranguga reserv; valikuline ühekordne lisakrediit suurendab korduvat limiiti | Lai varumudelite kataloog           |
+| **AI Horde**                   | Võtmeta kogukonnapõhine võimsus; saadavus varieerub                                         | Võimalusepõhine hajutatud inferents |
 
 ---
 

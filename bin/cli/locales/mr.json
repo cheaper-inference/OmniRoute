@@ -123,7 +123,9 @@
       "maxCostOpt": "प्रतिदिन कमाल खर्च (USD)",
       "allowedModelsOpt": "अनुमत मॉडेल्सची स्वल्पविरामाने विभक्त केलेली सूची",
       "nothingToSet": "कोणतीही धोरण फील्ड प्रदान केलेली नाहीत. --rate-limit, --max-cost किंवा --allowed-models वापरा.",
-      "updated": "धोरण अपडेट केले."
+      "updated": "धोरण अपडेट केले.",
+      "modelAccessModeOpt": "मॉडेल प्रवेश मोड (all | restricted)",
+      "unrestrictedOpt": "सर्व मॉडेलना परवानगी द्या (--model-access-mode all)"
     },
     "expiration": {
       "title": "कीची कालबाह्यता",

@@ -72,6 +72,16 @@ curl -i \
 
 Key marar `manage` (ko rashin Bearer) yana mayar da `403 LOCAL_ONLY`. An tsara sibling prefix `/api/cli-tools/runtime/*` da gangan don kada a iya kauce wa wannan iyaka — duba [Matakan Route Guard — keɓantacciyar damar manage-scope](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Tabbatar da Origin
+
+Bayan tantancewa, kowace buƙata zuwa `/api/mcp/*` — transport da hanyoyin gudanarwa kamar `status`, `tools`, `audit`, `restart` — ana tabbatar da kan `Origin` ɗinta, ko wane ne mai kira (maɓallin API, alamar CLI, zaman dashboard, ko loopback mara suna idan an kashe shiga). Wannan ita ce kariyar DNS rebinding da ƙa'idar MCP Streamable HTTP ta wajabta.
+
+- **Babu kan `Origin`** → an yarda. OmniRoute CLI, SDK da abokan cinikin IDE ba sa aika shi.
+- **`Origin` da aka yarda** → `localhost` / `127.0.0.1` / `[::1]` a kowane port, ko origin na jama'a na OmniRoute kansa: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin da amintaccen reverse proxy ya tura (`OMNIROUTE_TRUST_PROXY`, kawai idan ba a saita base URL ba), ko mai masaukin IP na loopback/LAN da ake shiga kai tsaye. Kan `Host` shi kaɗai ba zai taɓa sa wani origin ya zama amintacce ba.
+- **Kowane `Origin` dabam, har da `null`** → `403` tare da jikin kuskuren JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Zaman dashboard da ya gabatar da ingantacciyar alamar CSRF har yanzu ana karɓa, kamar sauran rubuce-rubucen dashboard.
+
+Abokin ciniki na MCP na mai bincike da ake bayarwa a bayan reverse proxy yana buƙatar `OMNIROUTE_PUBLIC_BASE_URL`; babu jerin izini ga wasu origins. Ba a duba Origin a buƙatar farko ta CORS (`OPTIONS`) ba; ana duba buƙatar da ke biye.
+
 ## Saitin IDE
 
 Duba [Saitin Abokin Cinikin MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) don saita Claude Desktop,
@@ -291,107 +301,109 @@ Ana toshe dukkan jigilar SSE da Streamable HTTP har sai an kunna sabar MCP a cik
 
 ## Tabbatar da Shaida & Iyakokin Izini
 
-Kiran kayan aikin MCP suna karanta kirtanin iyakokin izini daga mai kira. Wannan binciken yana ɗaya daga cikin
-wuraren suna guda uku masu zaman kansu. Samun izini daga mai bincike ɗaya ba yana nufin an samu daga sauran ba.
-Dokokin suna cikin [Wuraren suna uku na iyakokin izini](#three-scope-namespaces).
-Kasidar kayan aikin tana cikin [Iyakokin izinin kayan aikin MCP](#mcp-tool-scopes).
+Kiran kayan aikin MCP yana karanta jerin iyakokin izini daga mai kira. Wannan binciken yana ɗaya daga cikin
+rukunai uku masu zaman kansu. Samun izini daga mai dubawa ɗaya ba yana nufin an samu izini daga sauran ba.
+Dokokin suna cikin [Rukunin iyakokin izini uku](#three-scope-namespaces).
+Kasidar kayan aikin tana cikin [Iyakokin kayan aikin MCP](#mcp-tool-scopes).
 
-### Wuraren suna uku na iyakokin izini
+### Rukunin iyakokin izini uku
 
 `manage` a kan maɓallin API, `read:compression` a kan kayan aikin MCP, da `read` a kan
-alamar samun dama ta `oma_live_…` izini ne guda uku mabambanta. Masu kira da suka aika alamar samun dama ta `read`
-zuwa hanyar gudanarwa mai yin canji suna samun HTTP 403
+alamar samun dama ta `oma_live_…` izini ne uku daban-daban. Masu kira da suka aika alamar samun dama ta `read`
+zuwa hanyar gudanarwa mai yin canji za su samu HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Wannan matsayi shi ne `scopeSatisfies`. Ba ya duba teburin MCP, haka kuma mai daidaita MCP
+Wannan matakin shi ne `scopeSatisfies`. Ba ya duba jadawalin MCP, haka kuma mai daidaita MCP
 ba ya duba shi.
 
-| Wurin suna                      | Shaidar shiga                                                                 | Mai bincike                     | Abin da samun izini yake ba da dama                                         |
-| :------------------------------ | :---------------------------------------------------------------------------- | :------------------------------ | :-------------------------------------------------------------------------- |
-| Gudanarwar maɓallin API         | `api_keys.scopes`                                                             | `hasManageScope`                | REST na gudanarwa don wannan maɓallin Bearer                                |
-| Ƙarin maɓallin API              | wannan jerin, kirtani guda ɗaya da ya yi daidai                               | mataimakin da aka ambata a ƙasa | Wannan damar guda ɗaya kawai                                                |
-| Iyakokin izinin kayan aikin MCP | wannan jerin, in ba haka ba MCP `_meta`, in ba haka ba `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                  | Wannan kayan aikin, da zarar an kunna tilastawa                             |
-| Alamar samun dama               | `oma_live_…`                                                                  | `scopeSatisfies`                | Hanyar gudanarwa wadda hanyar aikinta da hanyarta ke buƙatar wannan matsayi |
+| Rukuni                    | Shaidar shiga                                                               | Mai dubawa                      | Abin da samun izini ke ba da dama                                          |
+| :------------------------ | :-------------------------------------------------------------------------- | :------------------------------ | :------------------------------------------------------------------------- |
+| Gudanar da maɓallin API   | `api_keys.scopes`                                                           | `hasManageScope`                | REST na gudanarwa don wannan maɓallin Bearer                               |
+| Ƙarin izinin maɓallin API | jerin guda, daidaitacciyar kirtani guda                                     | mataimakin da aka ambata a ƙasa | Wannan damar kaɗai                                                         |
+| Iyakokin kayan aikin MCP  | jerin guda, in ba haka ba MCP `_meta`, in ba haka ba `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                  | Wannan kayan aikin, bayan an kunna tilasta doka                            |
+| Alamar samun dama         | `oma_live_…`                                                                | `scopeSatisfies`                | Hanyar gudanarwa wadda hanyar HTTP da hanyarta suke buƙatar wannan matakin |
 
-An bayyana samar da kowace shaidar shiga a cikin
+An bayyana yadda ake ƙirƙirar kowace shaida a cikin
 [Tabbatar da Shaidar Gudanarwa](../guides/MANAGEMENT-AUTH.md).
 
 #### Iyakokin izinin maɓallin API
 
-Jerin `api_keys.scopes` guda ɗaya yana aiwatar da ayyuka biyu. Suna amfani da ayyuka mabambanta.
+Jerin `api_keys.scopes` guda ɗaya yana gudanar da ayyuka biyu. Suna amfani da ayyuka daban-daban.
 
 **REST na gudanarwa.** `manage` da `admin` su ne mambobin
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` ne ke ba da izinin hanyoyin gudanarwa ga wannan maɓalli. `admin` yana
-da ikon gudanarwa a waɗannan hanyoyin. Kalmar `admin` a nan ba matsayi ba ce na
-alamar samun dama, kuma ba ta faɗaɗa zuwa iyakokin izinin kayan aikin MCP.
+`hasManageScope` ne ke ba da izinin hanyoyin gudanarwa ga wannan maɓallin. `admin` yana
+iya gudanarwa a waɗannan hanyoyin. Kalmar `admin` a nan ba matakin
+alamar samun dama ba ce, kuma ba ta faɗaɗa zuwa iyakokin izinin kayan aikin MCP.
 
-**Kirtanin ƙari.** Kowannensu gwajin kasancewa daidai ne, kuma kowannensu yana nan
+**Ƙarin kirtani.** Kowannensu gwajin kasancewa ne na daidaitaccen rubutu, kuma kowannensu yana kasancewa
 a wajen `MANAGEMENT_API_KEY_SCOPES`.
 
-| Iyakacin izini                 | Abin da samun izini yake ba da dama                                                                                                                                                           |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Keɓewar LOCAL_ONLY ta `/api/mcp/` wadda ba loopback ba kawai (`hasMcpConnectOrManageScope`). Maɓalli mai `manage` ko `admin` har yanzu yana wuce wannan keɓewar.                              |
-| `self:usage`                   | `GET /api/v1/me/status` don wannan maɓalli (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` yana ƙara wannan iyakacin izini lokacin ƙirƙirawa (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Ƙayyadaddun asusun upstream a cikin wannan bayanan matsayin (`src/lib/usage/apiKeySelfService.ts`). Har yanzu hanyar matsayin tana buƙatar `self:usage`.                                      |
-| `policy:bypass-provider-quota` | Kiran inference na wannan maɓalli suna tsallake manufar ƙayyadadden mai samarwa (`hasProviderQuotaBypassScope` a cikin `src/sse/handlers/chat.ts`).                                           |
+| Iyakokin izini                 | Abin da samun izini ke ba da dama                                                                                                                                                 |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Keɓancewar LOCAL_ONLY ta `/api/mcp/` da ba ta loopback ba kawai (`hasMcpConnectOrManageScope`). Maɓalli mai `manage` ko `admin` har yanzu yana wuce wannan keɓancewar.            |
+| `self:usage`                   | `GET /api/v1/me/status` don wannan maɓallin (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` yana ƙara wannan izini yayin ƙirƙira (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Ƙayyadaddun asusun upstream a cikin wannan bayanan matsayin (`src/lib/usage/apiKeySelfService.ts`). Har yanzu hanyar matsayin tana buƙatar `self:usage`.                          |
+| `policy:bypass-provider-quota` | Kiran inference na wannan maɓallin yana tsallake manufar ƙayyadaddun mai samarwa (`hasProviderQuotaBypassScope` a cikin `src/sse/handlers/chat.ts`).                              |
 
 #### Daidaitawa
 
-Kasidar ita ce teburin da ke ƙarƙashin [Iyakokin izinin kayan aikin MCP](#mcp-tool-scopes). Kada a
+Kasidar ita ce jadawalin da ke ƙarƙashin [Iyakokin kayan aikin MCP](#mcp-tool-scopes). Kada a
 ɗauki `MCP_SCOPE_LIST` da ke cikin `src/shared/constants/mcpScopes.ts` a matsayin wannan kasidar:
-shi ne asalin ƙaramin rukuni mai nau'i. Kayan aikin da aka ƙara daga baya suna ayyana ƙarin iyakokin izini a gefensa
-(`read:notion`, `read:skills`, `read:local-corpus`, da sauran abubuwan teburin).
+ita ce ƙaramin rukunin asali mai nau'i. Kayan aikin da suka zo daga baya suna ayyana ƙarin iyakokin izini a gefensa
+(`read:notion`, `read:skills`, `read:local-corpus`, da sauran abubuwan da ke cikin jadawalin).
 
-`evaluateToolScopes` da ke cikin `open-sse/mcp-server/scopeEnforcement.ts` yana ba da damar kira
-idan kowane iyakacin izini da ake buƙata ya dace da wani iyakacin izini da aka bayar:
+`evaluateToolScopes` a cikin `open-sse/mcp-server/scopeEnforcement.ts` yana ba da damar kira
+idan kowane iyakar izini da ake buƙata ya dace da wani iyakar izini da aka bayar:
 
-- `*` yana dacewa da kowane iyakacin izini da ake buƙata.
-- Iyakacin izini da aka bayar wanda ya ƙare da `*` yana dacewa da iyakacin izini da ake buƙata wanda ya fara da
+- `*` yana dacewa da kowane iyakar izini da ake buƙata.
+- Iyakar izini da aka bayar wanda ya ƙare da `*` yana dacewa da iyakar izini da ake buƙata wanda ya fara da
   prefix ɗin da ke gaban tauraron. `read:*` yana dacewa da `read:compression`.
-- Duk wani iyakacin izini da aka bayar yana dacewa ne kawai da kirtanin da ake buƙata mai kama da shi daidai.
+- Duk wani iyakar izini da aka bayar yana dacewa ne kawai da kirtanin da yake daidai da shi.
 
-Maɓalli wanda iyakokin izininsa suke `["manage"]` ba ya wuce `scopeMatches` don `read:compression`.
-Haka kiran yake gaza don `admin`, `mcp:connect`, `read`, da `write` idan waɗannan
-su ne kawai kirtanin da aka bayar. Babu wani tsarin matsayi tsakanin iyakokin izinin kayan aikin MCP
-sai dai `*` da ke ƙarshe.
+Maɓalli wanda iyakokin izininsa su ne `["manage"]` ba zai wuce `scopeMatches` don `read:compression` ba.
+Kira iri ɗaya ba zai wuce ba ga `admin`, `mcp:connect`, `read`, da `write` idan waɗannan
+su ne kawai kirtanin da aka bayar. Babu tsarin fifiko tsakanin iyakokin izinin kayan aikin MCP
+sai dai `*` da ke ƙarshen kirtani.
 
-Tilastawa a kashe take sai idan `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (tsoho
-`false`). Yayin da take kashe, `evaluateToolScopes` yana ba da damar kiran kuma yana tsallake
-kasidar. Yayin da take kunne, HTTP yana amfani da `api_keys.scopes` na maɓallin Bearer a matsayin
-`authInfo` (duba [Ɗaure iyakokin izinin HTTP bisa kowane maɓalli](#per-key-http-scope-binding-7895)).
-Idan ba a samo iyakokin izinin maɓalli ba, saitin da aka bayar yana koma wa MCP `_meta`, sannan
+Tilasta doka a kashe yake sai idan `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (tsoho
+`false`). Yayin da yake kashe, `evaluateToolScopes` yana ba da damar kiran kuma yana tsallake
+kasidar. Yayin da yake kunne, HTTP yana amfani da `api_keys.scopes` na maɓallin Bearer a matsayin
+`authInfo` (duba [Ɗaure iyakar izinin HTTP ga kowane maɓalli](#per-key-http-scope-binding-7895)).
+Lokacin da ba a sami iyakokin izinin maɓalli ba, rukunin da aka bayar yana koma wa MCP `_meta`, sannan
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Iyakokin izinin alamar samun dama
 
 Alamomin `oma_live_…` (`src/lib/accessTokens/scopes.ts`) suna ɗauke da `read`, `write`,
-ko `admin`. `scopeSatisfies` matsayi ne: `admin` yana rufe `write` da `read`, kuma
-`write` yana rufe `read`. Iyakokin izini da ba a sani ba ba sa rufe komai.
+ko `admin`. `scopeSatisfies` mataki ne: `admin` ya ƙunshi `write` da `read`, sannan
+`write` ya ƙunshi `read`. Iyakokin izini da ba a sani ba ba sa ba da wata dama.
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) yana kwatanta wannan
-matsayi da `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+matakin da `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD`, da `OPTIONS` suna buƙatar `read`.
-- Kowace hanya ta dabam tana buƙatar `write`.
-- Hanyoyin da ke cikin `ADMIN_SCOPE_PREFIXES` suna buƙatar `admin` ga kowace hanyar aiki. `/api/mcp`
-  yana cikin wannan jeri, don haka alamar samun dama ta `write` har yanzu ba za ta iya kiran farfajiyar HTTP ta MCP ba.
+- Kowace hanya ta HTTP dabam tana buƙatar `write`.
+- Hanyoyin da ke cikin `ADMIN_SCOPE_PREFIXES` suna buƙatar `admin` ga kowace hanyar HTTP. `/api/mcp`
+  tana cikin wannan jeri, saboda haka alamar samun dama ta `write` har yanzu ba za ta iya kiran farfajiyar HTTP ta MCP ba.
 - Hanyoyin da ke cikin `ADMIN_MUTATION_PREFIXES` suna buƙatar `admin` ne kawai don canje-canje.
+- Hanyoyin da ke cikin `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) suna buƙatar `admin` ne kawai don canje-canje, kuma a kan
+  wannan takamaiman hanyar kaɗai — sauran ƙananan hanyoyin `/api/settings/*` suna ci gaba da amfani da `write`.
 
-`PATCH /api/keys/{id}` aiki ne na sauyi kuma baya cikin waɗancan jerin admin, don haka token mai
+`PATCH /api/keys/{id}` aikin sauyi ne kuma ba ya cikin waɗancan jerin masu gudanarwa, don haka token mai izinin
 `read` yana karɓar 403
-`Faɗin izinin access token na 'read' bai isa ba; ana buƙatar 'write'.`
-Access token mai `write` ko `admin` yana biyan buƙatar wannan route. JWT na dashboard,
-token na machine-id na loopback CLI, da API key mai `manage` ko `admin` suna bi ta
-wasu rassan kuma wannan matsayi ba ya taƙaita su.
+`Access token scope 'read' is insufficient; 'write' required.`
+Token na samun dama mai izinin `write` ko `admin` yana cika sharuddan wannan hanyar. JWT na dashboard, token na machine-id na loopback CLI, da API key mai `manage` ko `admin` suna bi ta
+wasu rassan daban kuma wannan matsayi ba ya taƙaita su.
 
-Access token da ya wuce `scopeSatisfies` don `/api/mcp` ya tsallake
-shingen gudanarwa ne kawai. Har yanzu kiran tools yana gudanar da `scopeMatches` a kan scopes na API-key.
-Matsayin access-token ba ya cikin abubuwan shigarwa na `scopeMatches`.
+Token na samun dama da ya wuce `scopeSatisfies` don `/api/mcp` ya tsallake
+ƙofar gudanarwa kawai. Har yanzu kiran kayan aiki yana gudanar da `scopeMatches` a kan scopes na API-key.
+Matsayin token na samun dama ba ya cikin abubuwan shigarwa na `scopeMatches`.
 
-### Scopes na tools na MCP
+### Scopes na kayan aikin MCP
 
-Ana gudanar da tabbatar da scopes a wuri guda a `open-sse/mcp-server/scopeEnforcement.ts`.
-Kowane tool yana buƙatar takamaiman scopes:
+Ana gudanar da tilasta scopes a wuri guda cikin `open-sse/mcp-server/scopeEnforcement.ts`.
+Kowane kayan aiki yana buƙatar takamaiman scopes:
 
 | Iyaka                 | Kayan aiki                                                                                                                                                                              |
 | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -429,47 +441,48 @@ Kowane tool yana buƙatar takamaiman scopes:
 | `write:obsidian`      | Kayan aikin rubutawa 9 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                       |
 
-Ana goyon bayan faɗin izini na wildcard: `read:*` yana ba da dukkan izinin karantawa, `*` yana ba da cikakkiyar dama.
+Ana goyon bayan iyakokin wildcard: `read:*` yana ba da dukkan iyakokin karantawa, `*` kuma yana ba da cikakkiyar dama.
 
 ### `mcp:connect` — takamaiman damar hanya (#7895)
 
-Isa ga jigilar HTTP/SSE MCP (`/api/mcp/*`) daga adireshin da ba loopback ba yana buƙatar
-keɓancewar LOCAL_ONLY ta `/api/mcp/` (duba `docs/security/ROUTE_GUARD_TIERS.md`). A baya,
-wannan keɓancewar tana karɓar maɓallin API mai cikakken izinin `manage`/`admin` ne kawai — wanda ya yi faɗi sosai ga
-mai kira da kawai yake buƙatar sadarwa da MCP. Yanzu `src/shared/constants/managementScopes.ts`
-yana fitar da `MCP_CONNECT_SCOPE = "mcp:connect"`: ƙarin takamaiman izini (mai bin irin tsarin
-`SELF_USAGE_SCOPE`) wanda ke ba da izini ga kaucewar `/api/mcp/` KAWAI a cikin
-`src/server/authz/policies/management.ts` — ba ya ba da damar shiga wata hanyar gudanarwa
-kuma da gangan BA a saka shi cikin `MANAGEMENT_API_KEY_SCOPES` ba. Maɓallin da ke ɗauke da `manage`/`admin`
-har yanzu yana wuce keɓancewar ba tare da canji ba; `mcp:connect` madadi ne mai ƙarancin gata ga
-masu kiran MCP na nesa kawai, wanda ake bincikawa ta `hasMcpConnectOrManageScope()`.
+Isa ga hanyar jigilar HTTP/SSE MCP (`/api/mcp/*`) daga wurin da ba loopback ba yana buƙatar
+keɓewar LOCAL_ONLY ta `/api/mcp/` (duba `docs/security/ROUTE_GUARD_TIERS.md`). A baya,
+wannan keɓewar tana karɓar maɓallin API mai cikakken iyakar `manage`/`admin` ne kawai — wanda ya
+yi faɗi sosai ga mai kira da ke buƙatar sadarwa da MCP kawai. Yanzu
+`src/shared/constants/managementScopes.ts` yana fitar da
+`MCP_CONNECT_SCOPE = "mcp:connect"`: iyaka ce ta ƙari kuma takamaimai (mai bin irin tsarin
+`SELF_USAGE_SCOPE`) wadda ke ba da izini ga kaucewar `/api/mcp/` KAWAI a cikin
+`src/server/authz/policies/management.ts` — ba ta ba da damar wata hanyar gudanarwa ba
+kuma da gangan BA a saka ta cikin `MANAGEMENT_API_KEY_SCOPES` ba. Maɓallin da ke ɗauke da `manage`/`admin`
+har yanzu yana wuce keɓewar ba tare da canji ba; `mcp:connect` madadi ne mai ƙarancin izini ga
+masu kiran MCP kawai daga nesa, wanda ake dubawa ta hanyar `hasMcpConnectOrManageScope()`.
 
-### Ɗaure izinin HTTP ga kowane maɓalli (#7895)
+### Ɗaura iyakar HTTP ga kowane maɓalli (#7895)
 
 Ta HTTP/SSE, yanzu `open-sse/mcp-server/httpTransport.ts` yana gano ainihin
-`api_keys.scopes` na mai kira ta `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-kuma yana miƙa shi zuwa `transport.handleRequest(req, { authInfo })` na MCP SDK, don haka
-`extra.authInfo.scopes` da ke isa ga kowane kiran kayan aiki yana nuna izinin maɓallin Bearer ɗin kansa.
-`resolveCallerScopeContext()` na `scopeEnforcement.ts` ya riga ya fifita `authInfo` a kan
-madadin `_meta` da env na `OMNIROUTE_MCP_SCOPES` — wannan kawai yana cika wannan tushe na farko,
+`api_keys.scopes` na mai kira ta hanyar `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
+kuma yana miƙa shi ga `transport.handleRequest(req, { authInfo })` na MCP SDK, saboda haka
+`extra.authInfo.scopes` da ke isa ga kowane kiran kayan aiki yana nuna iyakokin maɓallin Bearer ɗin kansa.
+`resolveCallerScopeContext()` na `scopeEnforcement.ts` ya riga ya ba `authInfo` fifiko a kan
+madadin `_meta` da env na `OMNIROUTE_MCP_SCOPES` — wannan kawai yana cike wannan tushe na farko,
 mafi fifiko, wanda a baya ba a samar masa da bayanai ta HTTP ba. Idan ba a gano wani maɓallin API ba
-(babu header, ko maɓallin ba daidai ba ne), `authInfo` zai ci gaba da kasancewa `undefined` kuma ganowa zai koma ga
-jerin madadin `meta`/env da ake da shi ba tare da canji ba. stdio ba shi da shaidar kowane mai kira (duba
-`mcpCallerIdentity.ts`) kuma wannan bai shafe shi ba — zai ci gaba da amfani da jerin madadin `_meta`/env.
+(babu header, ko maɓalli ba daidai ba), `authInfo` zai kasance `undefined`, sannan ganowa zai koma zuwa
+jerin `meta`/env da ake da shi ba tare da canji ba. stdio ba shi da shaidar kowane mai kira (duba
+`mcpCallerIdentity.ts`) kuma wannan bai shafe shi ba — yana ci gaba da amfani da jerin madadin `_meta`/env.
 
-**Ana tilasta aiwatar da izini ga masu kiran HTTP/SSE masu takamaiman izini ba tare da la’akari da
-`OMNIROUTE_MCP_ENFORCE_SCOPES` ba.** Kasancewar tsoffin ƙimar `OMNIROUTE_MCP_ENFORCE_SCOPES` ita ce `false` yana da
-aminci ne kawai ga tsarin mai aiki guda ɗaya na gida/stdio, inda babu shaidar kowane mai kira da za a daidaita
-da izini. `open-sse/mcp-server/server.ts::withScopeEnforcement()` yana kunna aiwatar da izinin
-kowane kayan aiki ba tare da sharadi ba (`shouldForceScopeEnforcement()` a cikin `scopeEnforcement.ts`)
+**Ana tilasta aiwatar da iyakoki ga masu kiran HTTP/SSE masu ƙuntatattun iyakoki ba tare da la’akari da
+`OMNIROUTE_MCP_ENFORCE_SCOPES` ba.** Kasancewar tsoffin ƙimar `OMNIROUTE_MCP_ENFORCE_SCOPES` ita ce `false`
+yana da aminci ne kawai ga tsarin mai sarrafawa guda ɗaya na local/stdio, inda babu shaidar kowane mai kira da za a
+takaita. `open-sse/mcp-server/server.ts::withScopeEnforcement()` yana kunna aiwatar da iyakar kowane kayan aiki
+ba tare da sharadi ba (`shouldForceScopeEnforcement()` a cikin `scopeEnforcement.ts`)
 duk lokacin da `resolveCallerScopeContext()` ya gano
-`source === "authInfo"` (wato ainihin header na HTTP Authorization na kowane maɓalli, na HTTP/SSE kawai) KUMA
-wannan maɓallin ba ya ɗauke da cikakken izinin `manage`/`admin`. Wannan yana rufe giɓin da maɓallin da ke ɗauke da izinin
-kaucewa na `mcp:connect` KAWAI — wanda aka bayyana a sama cewa ba ya ba da izini ga komai sai
-keɓancewar LOCAL_ONLY ta `/api/mcp/` — zai iya kiran kowane kayan aikin MCP bayan mai gudanarwa
-ya kunna damar MCP ta nesa/wadda ba loopback ba, kawai saboda tsohuwar ƙimar
-`OMNIROUTE_MCP_ENFORCE_SCOPES` ita ce `false`. Cikakken maɓallin `manage`/`admin` ta HTTP, da duk wani
-mai kiran stdio/na gida, za su ci gaba da amfani da halayen da ake da su wanda
+`source === "authInfo"` (wato, ainihin header ɗin HTTP Authorization na kowane maɓalli, na HTTP/SSE kawai) KUMA
+wannan maɓallin ba ya ɗauke da cikakken iyakar `manage`/`admin`. Wannan yana toshe gibin da maɓalli mai ɗauke da
+takamaiman iyakar kaucewa ta `mcp:connect` KAWAI — wadda aka bayyana a sama cewa ba ta ba da izinin komai ba sai
+keɓewar LOCAL_ONLY ta `/api/mcp/` — zai iya kiran duk wani kayan aikin MCP bayan mai sarrafawa ya
+kunna damar MCP daga nesa/wurin da ba loopback ba, kawai saboda tsoffin ƙimar da
+`OMNIROUTE_MCP_ENFORCE_SCOPES` ke zuwa da ita ita ce `false`. Cikakken maɓallin `manage`/`admin` ta HTTP, da
+kowane mai kiran stdio/local, suna ci gaba da amfani da tsarin da ake da shi wanda
 `OMNIROUTE_MCP_ENFORCE_SCOPES` ke sarrafawa ba tare da canji ba.
 
 ---

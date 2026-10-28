@@ -25,8 +25,10 @@
     "confirm": "کیا آپ کو یقین ہے؟",
     "refresh": "تازہ کریں",
     "close": "بند کریں",
+    "dialogTitleFallback": "ڈائیلاگ",
     "previousPage": "پچھلا صفحہ",
     "nextPage": "اگلا صفحہ",
+    "pagination": "صفحہ بندی",
     "capsLockOn": "Caps Lock آن ہے",
     "dismissNotification": "نوٹیفکیشن خارج کریں",
     "toggleColumns": "کالمز کو ٹوگل کریں",
@@ -182,6 +184,7 @@
     "combos": "کمبوز",
     "noModelsFound": "کوئی ماڈل نہیں ملا",
     "clear": "صاف کریں",
+    "clearFilters": "فلٹرز صاف کریں",
     "done": "ہو گیا",
     "selectAll": "سب منتخب کریں",
     "unselectAll": "انتخاب ہٹائیں",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "استعمال کیا گیا {count, plural, one {# بیچ} other {# بیچوں}}",
     "batchFilePreview": "پیش نظارہ",
     "batchFilePreviewTruncated": "پہلی {shown} لائنیں دکھا رہے ہیں ({total} کل لائنیں)",
-    "batchFileDownloadFull": "مکمل فائل ڈاؤن لوڈ کریں"
+    "batchFileDownloadFull": "مکمل فائل ڈاؤن لوڈ کریں",
+    "tokensPageTitle": "ٹوکنز",
+    "tokensPageDescription": "API کلیدوں کے درمیان ٹوکنز بھیجیں، دعوتی کوڈز شیئر کریں اور کمیونٹی سرورز منسلک کریں۔",
+    "tokensServerUrlLabel": "سرور URL"
   },
   "disabled": "غیر فعال",
   "featureFlagOmnirouteEmergencyFallbackDescription": "بجٹ ختم ہونے والی درخواستوں کو ہنگامی مفت متبادل provider/model کی طرف بھیجیں۔",
@@ -1017,6 +1023,15 @@
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "خودکار صفائی کے عمل کو OMNIROUTE_BATCH_RETENTION_DAYS سے زیادہ پرانی اختتامی حالت والی (مکمل/ناکام/منسوخ/میعاد ختم شدہ) Batch API جابز، ان کے ہر سطر کے چیک پوائنٹس سمیت، حذف کرنے دیں اور ان اپ لوڈ شدہ فائلوں کا BLOB مواد صاف کر دیں جن کی اپنی expires_at گزر چکی ہو۔ بطور ڈیفالٹ بند: آپریٹر کے فعال کرنے تک ہر موجودہ انسٹالیشن یہ ڈیٹا بالکل پہلے کی طرح برقرار رکھتی ہے۔ آپریٹر کی جانب سے شروع کیا جانے والا DELETE /api/v1/batches/delete-completed روٹ دونوں صورتوں میں غیر متاثر رہتا ہے — یہ ایک الگ، غیر مشروط عوامی API معاہدہ ہے۔",
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "منجمد جامد سیڈ کے بجائے OAuth بیئرر ٹوکن استعمال کرتے ہوئے https://api.x.ai/v1/models سے xai-oauth کنکشنز کے لیے لائیو xAI ماڈل کیٹلاگ حاصل کریں۔ بطور ڈیفالٹ بند: xai-oauth جامد سیڈ کو بغیر تبدیلی کے پیش کرتا رہتا ہے۔ ریزولیوشن میں کسی بھی خرابی کی صورت میں، دریافت دوبارہ سیڈ استعمال کرتی ہے۔",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "سرور کے درخواستیں قبول کرنا شروع کرنے کے بعد اسٹارٹ اپ ڈیٹابیس کی سالمیت/صحت کی جانچ چلائیں، بجائے اس کے کہ اس کی تکمیل تک اسٹارٹ اپ رکا رہے۔ بطور ڈیفالٹ بند: اسٹارٹ اپ اس تبدیلی سے پہلے کی طرح جانچ مکمل ہونے تک رکا رہتا ہے، اس لیے خراب ڈیٹابیس پہلی درخواست پیش کیے جانے سے پہلے ہی پکڑا جاتا ہے۔",
+  "featureFlagCatalogMirrorRefinementsEnabledDescription": "/v1/models پر claude/ دریافت اور functional-gateway مررز کو بہتر بنائیں۔ بطور ڈیفالٹ بند: دونوں مرر پاسز بالکل پہلے کی طرح برتاؤ کرتے ہیں۔ فعال ہونے پر: claude/ دریافت کے مررز فہرست شدہ reasoning-effort ویریئنٹس (-low/-medium/-high/-xhigh) کا بھی احاطہ کرتے ہیں، ایسے بلٹ اِن auto/* ids کو نظر انداز کرتے ہیں جنہیں درخواست کا پاتھ تشکیل نہیں دے سکتا، اور پہلے سے فہرست شدہ alias کو بھی نظر انداز کرتے ہیں؛ functional-gateway مررز combos اور OmniRoute کے بنائے ہوئے ids (claude/, no-think/) کو نظر انداز کرتے ہیں، مالک کو owned_by سے لیتے ہیں، مالک کو کبھی اس کا اپنا gateway نہیں بناتے، blockedProviders میں غیر فعال gateways اور gateway کے مستند لائیو کیٹلاگ سے باہر موجود models کو نظر انداز کرتے ہیں۔",
+  "featureFlagOpencodePublishedCatalogRoutingEnabledDescription": "کسی واضح رجسٹری اینڈ پوائنٹ کے بغیر OpenCode Zen اور OpenCode Go ماڈلز کو اپنی درخواست کا انٹرفیس (@ai-sdk/openai کے لیے Responses، @ai-sdk/anthropic کے لیے Messages) شائع شدہ models.opencode.ai کیٹلاگ سے لینے دیں، جسے پس منظر میں ہر 6 گھنٹے بعد پڑھا جاتا ہے۔ بطور ڈیفالٹ بند: اینڈ پوائنٹ حسبِ سابق بعینہٖ رجسٹری کے تخمینی اصولوں سے حاصل ہوتا ہے اور کیٹلاگ کبھی بازیافت نہیں کیا جاتا۔",
+  "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go کی درخواستوں پر OpenCode v2 CLI کلائنٹ فنگرپرنٹ بھیجیں: opencode/latest/<2.x>/cli User-Agent اور x-opencode-client cli، اور فری ٹیر کی درخواستوں پر v2 سیشن ہیڈرز، v2 CLI read/shell ٹول اسکیمے، اور کوئی tool_choice \"none\" نہیں۔ بطور ڈیفالٹ بند: ہر OpenCode درخواست موجودہ شناخت، ہیڈرز اور باڈی کو بغیر کسی تبدیلی کے برقرار رکھتی ہے۔",
+  "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "جب ٹول کالنگ پری فلٹر چلنے سے پہلے ہی کسی آٹو کومبو کا امیدوار پول خالی ہو (کول ڈاؤن، لاک آؤٹ یا وسائل ختم ہونے کی وجہ سے ہر ہدف چھوڑ دیا گیا ہو)، تو پرانے 400 \"کوئی ہدف ٹول کالنگ کو سپورٹ نہیں کرتا\" capability_mismatch کے بجائے 503 no_eligible_targets جواب دیں۔ بطور ڈیفالٹ غیر فعال: خالی پول کے لیے پرانا 400 ہی برقرار رہتا ہے۔",
+  "featureFlagModelEndpointCapabilityGateEnabledDescription": "قابلِ اعتماد ماڈل اینڈ پوائنٹ ٹیگز (جو فراہم کنندہ کی کیٹلاگ میں درج ہوں، کسی مخصوص ماڈل id سے اخذ کیے گئے ہوں، یا آپریٹر نے مقرر کیے ہوں) نافذ کریں: /v1/chat/completions، /v1/embeddings، /v1/rerank، /v1/images/generations، /v1/videos/generations، /v1/music/generations اور /v1/audio/* پر ایسے اینڈ پوائنٹ کو بھیجی گئی درخواست، جسے ماڈل سپورٹ نہیں کرتا، روانگی سے پہلے HTTP 400 کے ساتھ مسترد کریں؛ جن ماڈلز کے ٹیگ شدہ اینڈ پوائنٹس کے لیے کوئی OmniRoute اڈاپٹر موجود نہ ہو، انہیں /v1/models سے چھپائیں؛ اور ایسے ماڈلز کے لیے ڈیش بورڈ ماڈل ٹیسٹ کا جواب 422 کے ساتھ دیں۔ بطور ڈیفالٹ بند: اینڈ پوائنٹ ٹیگز صرف معلوماتی رہیں گے اور درخواستیں بالکل پہلے کی طرح روانہ کی جائیں گی۔",
+  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "سادہ anthropic-compatible ریلے پر، گفتگو کے درمیان آنے والے سسٹم ٹرنز کو اعلیٰ سطح کے سسٹم پرامپٹ میں منتقل کرنے کے بجائے پیغامات کی فہرست میں ہی رکھیں، تاکہ کیش شدہ پرامپٹ کا سابقہ تمام ٹرنز میں مستحکم رہے۔ یہ صرف اس وقت لاگو ہوتا ہے جب کلائنٹ نے خود mid-conversation-system-2026-04-07 بیٹا بھیجا ہو۔ بطور ڈیفالٹ بند ہے: پہلے کی طرح ہر سسٹم ٹرن کو بعینہٖ سسٹم پرامپٹ میں منتقل کیا جاتا ہے، کیونکہ اس بیٹا کے بغیر ریلے پیغامات کی فہرست میں موجود سسٹم ٹرنز کو مسترد کر دیتے ہیں۔",
+  "featureFlagModelsDevEffortTiersEnabledDescription": "جب نہ کوئی آپریٹر اوور رائیڈ اور نہ ہی فراہم کنندہ رجسٹری کسی سطح کا اعلان کرے تو models.dev کی شائع کردہ استدلالی کوشش کی سطحیں استعمال کریں، صرف معلوم کوشش کی سطحیں برقرار رکھیں، اور اعلان کردہ سطحوں کی خالی فہرست کو \"کوئی سطح نہیں\" سمجھیں۔ بطورِ طے شدہ غیر فعال: ماڈل کیٹلاگ اور حل شدہ کوشش کی سطحیں بالکل پہلے جیسی رہیں گی۔",
+  "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* درخواستوں کو حل شدہ ماڈل صلاحیتوں (وژن، استدلال، سوچ) اور مشاہدہ شدہ معیار کے اسکور کے ساتھ، ایک ہی بلک ریڈ میں، امیدواروں کا پول بنانے دیتا ہے۔ بطور ڈیفالٹ بند: درخواست کے وقت امیدواروں کے وزن بالکل پہلے جیسے رہتے ہیں۔ آن ہونے پر: یہ سگنل اسنیپ شاٹ کے وزن میں شامل ہوتے ہیں، اس لیے امیدواروں کے وزن اور انتخاب بدل سکتے ہیں۔",
+  "featureFlagCredentialHealthRetestAutoDisabledDescription": "کریڈینشل ہیلتھ سویپ کو ان کنکشنز کی دوبارہ جانچ کرنے دیں جنہیں گیٹ وے نے خود بند کیا تھا (ہر ایک کی زیادہ سے زیادہ ہر 6 گھنٹے میں ایک بار، اور فی سویپ 5 کنکشنز)، اور دوبارہ جانچ کامیاب ہونے پر کنکشن کو پھر سے فعال کر دیں۔ بطور ڈیفالٹ بند: ایسے کنکشنز اس وقت تک بند رہتے ہیں جب تک کوئی آپریٹر کارروائی نہ کرے۔ آپریٹر کی جانب سے غیر فعال کیے گئے اور مستقل طور پر پابندی زدہ کنکشنز کی کبھی دوبارہ جانچ نہیں کی جاتی۔",
   "sidebar": {
     "home": "ہوم",
     "dashboard": "ڈیش بورڈ",
@@ -1076,17 +1091,8 @@
     "serverDisconnectedMsg": "پراکسی سرور روک دیا گیا ہے یا دوبارہ شروع ہو رہا ہے۔",
     "expandSidebar": "سائیڈ بار پھیلائیں",
     "collapseSidebar": "سائیڈ بار سمیٹیں",
-    "themes": "تھیمز",
-    "presetColors": "مقبول رنگ",
     "createTheme": "تھیم بنائیں",
     "chooseColor": "ایک رنگ منتخب کریں",
-    "themeCoral": "مرجانی",
-    "themeBlue": "نیلا",
-    "themeRed": "سرخ",
-    "themeGreen": "سبز",
-    "themeViolet": "بنفشی",
-    "themeOrange": "نارنجی",
-    "themeCyan": "سائین",
     "cliToolsShort": "ٹولز",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1094,12 +1100,10 @@
     "themeSystem": "تھیم سسٹم",
     "whitelabelingDesc": "وائٹ لیبلنگ کی تفصیل",
     "switchThemes": "تھیمز تبدیل کریں",
-    "themeAccentDesc": "تھیم کے نمایاں رنگ کی تفصیل",
     "uploadFavicon": "فیویکون اپ لوڈ کریں",
     "themeDark": "گہری تھیم",
     "customLogoDesc": "حسبِ ضرورت لوگو کی تفصیل",
     "sidebarVisibilityToggle": "سائیڈ بار کی مرئیت کا ٹوگل بٹن",
-    "themeAccent": "تھیم کا نمایاں رنگ",
     "resetFavicon": "فیویکون ری سیٹ کریں",
     "whitelabeling": "وائٹ لیبلنگ",
     "darkMode": "ڈارک موڈ",
@@ -1113,10 +1117,8 @@
     "customLogo": "حسبِ منشا لوگو",
     "appearance": "ظاہری شکل",
     "themeSelectionAria": "تھیم کے انتخاب کا Aria",
-    "themeCreate": "تھیم بنائیں",
     "customFaviconDesc": "حسبِ منشا فیویکن کی تفصیل",
     "logoPreview": "لوگو کا پیش منظر",
-    "themeCustom": "حسبِ منشا تھیم",
     "hideHealthLogsDesc": "ہیلتھ لاگز چھپانے کی تفصیل",
     "faviconPreview": "فیویکن کا پیش منظر",
     "changelog": "تبدیلیوں کی فہرست",
@@ -1343,7 +1345,9 @@
       "open": "کھولیں",
       "close": "بند کریں"
     },
-    "noResults": "کوئی نتائج نہیں"
+    "noResults": "کوئی نتائج نہیں",
+    "costsTeams": "ٹیمیں",
+    "costsTeamsSubtitle": "ٹیم کے لاگت مراکز"
   },
   "webhooks": {
     "title": "ویب ہکس",
@@ -1476,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 یا @channelname",
       "chatIdHint": "چیٹ/چینل کا منفرد عددی شناخت کنندہ یا عوامی صارف نام۔",
       "tutorial": "Telegram ویب ہک کنفیگر کرنے کا طریقہ:"
-    }
+    },
+    "copy": "کاپی کریں",
+    "copied": "کاپی ہو گیا!",
+    "expandDetails": "تفصیلات دکھائیں",
+    "collapseDetails": "تفصیلات چھپائیں"
   },
   "compliance": {
     "auditTitle": "آڈٹ",
@@ -1588,22 +1596,16 @@
     "mcpMetricCalls24h": "کالیں (24 گھنٹے)",
     "mcpMetricSuccessRate": "کامیابی کی شرح",
     "mcpMetricAvgDuration": "اوسط دورانیہ",
-    "mcpMetricTopTool": "بہترین ٹول"
-  },
-  "themesPage": {
-    "title": "تھیمز",
-    "description": "پہلے سے تیار تھیم منتخب کریں یا ایک ہی رنگ سے اپنا تھیم بنائیں",
-    "presetColors": "مقبول رنگ",
-    "customTheme": "حسبِ منشا تھیم",
-    "customThemeDesc": "تھیم بنائیں پر کلک کریں اور ایک رنگ منتخب کریں",
-    "createTheme": "تھیم بنائیں",
-    "activePreset": "فعال تھیم"
+    "mcpMetricTopTool": "بہترین ٹول",
+    "dismissError": "خرابی مسترد کریں"
   },
   "header": {
     "logout": "لاگ آؤٹ",
     "quickNavigation": "فوری نیویگیشن",
     "quickNavigationTitle": "فوری نیویگیشن (⌘K / Ctrl+K)",
     "openQuickNavigation": "فوری نیویگیشن کھولیں",
+    "openMenu": "مینو کھولیں",
+    "products": "Keak مصنوعات",
     "switchToLightMode": "لائٹ موڈ پر سوئچ کریں",
     "switchToDarkMode": "ڈارک موڈ پر سوئچ کریں",
     "language": "زبان",
@@ -1631,8 +1633,6 @@
     "anthropicCompatible": "Anthropic سے ہم آہنگ",
     "media": "میڈیا",
     "mediaDescription": "تصاویر، ویڈیوز، اور موسیقی بنائیں",
-    "themes": "تھیمز",
-    "themesDescription": "پورے ڈیش بورڈ پینل کے لیے رنگ کی تھیم منتخب کریں",
     "costsDescription": "تمام فراہم کنندگان پر اخراجات ٹریک کریں، رجحانات کا تجزیہ کریں، اور اپنے AI بجٹ کا نظم کریں",
     "cacheDescription": "فراہم کنندہ کے پرامپٹ کیش کی کارکردگی اور مقامی معنوی جوابات کے دوبارہ استعمال کی نگرانی کریں۔",
     "limitsDescription": "ہر API کلید اور فراہم کنندہ کے لیے شرح کی حدود اور کوٹے تشکیل دیں",
@@ -1704,7 +1704,8 @@
     "settingsAdvancedDescription": "اعلیٰ درجے کے پے لوڈ قواعد، درخواست کی حدود، اور پراکسی API کی ترتیبات",
     "mitmProxyDescription": "ٹریفک کے معائنے اور ڈیبگنگ کے لیے MITM پراکسی کی ترتیبات کنفیگر کریں",
     "oneProxyDescription": "اعلیٰ درجے کی پراکسی چیننگ کے لیے 1Proxy کی ترتیبات کنفیگر کریں",
-    "omniSkillsDescription": "خودکار پرامپٹ اور ٹول کے نفاذ کے لیے سینڈ باکس اسکلز انسٹال اور منظم کریں"
+    "omniSkillsDescription": "خودکار پرامپٹ اور ٹول کے نفاذ کے لیے سینڈ باکس اسکلز انسٹال اور منظم کریں",
+    "teamsDescription": "ٹیم کی لاگت کے تخمینے اور مشترکہ نرم بجٹ"
   },
   "cloudSyncStatus": {
     "synced": "مطابقت پذیر",
@@ -2470,6 +2471,9 @@
     "emptyFilterClear": "فلٹرز صاف کریں",
     "disableNonPublicModels": "غیر عوامی ماڈلز کو غیر فعال کریں",
     "disableNonPublicModelsDesc": "ان ماڈلز کے لیے درخواستوں کو مسترد کریں جو فراہم کنندہ کے کیٹلاگ میں دریافت نہیں ہوئے یا عوامی کے طور پر نشان زد نہیں ہیں",
+    "forcedModel": "لازمی ماڈل",
+    "forcedModelDesc": "اس کلید سے کی گئی ہر چیٹ درخواست کو اس ماڈل یا کومبو کی طرف بھیجیں، چاہے کلائنٹ کوئی بھی ماڈل مانگے (یا کوئی نہ بھیجے)۔ کلید کی ماڈل، کومبو اور بجٹ کی حدیں پھر بھی لاگو رہتی ہیں۔",
+    "forcedModelPlaceholder": "لازمی نہیں: کلائنٹ کا مانگا ہوا ماڈل استعمال کریں",
     "normalKeysSection": "عام کیز",
     "quotaKeysSection": "کوٹہ کیز",
     "bypassProviderQuota": "فراہم کنندہ کے کوٹہ کی حد کو نظرانداز کریں",
@@ -2483,7 +2487,12 @@
     "onlySelectedConnections": "صرف منتخب کنکشنز",
     "selectAtLeastOneConnection": "کم از کم ایک کنکشن منتخب کریں یا تمام کنکشنز کا انتخاب کریں۔",
     "allConnectionsDesc": "یہ کلید کوئی بھی فعال کنکشن استعمال کر سکتی ہے۔",
-    "restrictedToConnections": "{count, plural, one {# کنکشن} other {# کنکشنز}} تک محدود۔"
+    "restrictedToConnections": "{count, plural, one {# کنکشن} other {# کنکشنز}} تک محدود۔",
+    "preferredConnections": "ترجیحی کنکشنز",
+    "preferredConnectionsDesc": "ہر کلید کے لیے ترجیحی ترتیب۔ اگر کوئی ترجیحی کنکشن دستیاب نہ ہو تو روٹنگ اگلے اہل کنکشن پر منتقل ہو جاتی ہے۔",
+    "preferredConnectionsNone": "کوئی ترجیح مقرر نہیں — طے شدہ روٹنگ حکمت عملی استعمال ہوتی ہے۔",
+    "preferredConnectionsClear": "صاف کریں",
+    "removeSelection": "{name} ہٹائیں"
   },
   "auditLog": {
     "title": "آڈٹ لاگ",
@@ -2595,7 +2604,9 @@
     "imageToTextBridgeCta": "Modality Bridge کی سیٹنگز میں Image→Text پل کو ترتیب دیں",
     "sttBridgeCta": "Modality Bridge کی سیٹنگز میں Speech→Text پل کو ترتیب دیں",
     "existingConnection": "موجودہ کنکشن",
-    "openrouterSttDescription": "OpenRouter تقریر سے متن ماڈل آپ کے ترتیب دیے گئے OpenRouter کنکشن کا استعمال کرتے ہیں۔ کوئی علیحدہ اسناد کی ضرورت نہیں ہے۔"
+    "openrouterSttDescription": "OpenRouter تقریر سے متن ماڈل آپ کے ترتیب دیے گئے OpenRouter کنکشن کا استعمال کرتے ہیں۔ کوئی علیحدہ اسناد کی ضرورت نہیں ہے۔",
+    "modalityTabsAria": "میڈیا کی قسم",
+    "serviceKindsAria": "سروس کی قسم"
   },
   "search": {
     "searchQuery": "تلاش کا استفسار",
@@ -2970,6 +2981,7 @@
       "amp": "اس وقت استعمال کریں جب آپ Amp کے مختصر ورک فلوز چاہتے ہوں، لیکن پھر بھی OmniRoute کے عرفی نام اور روٹنگ کے قواعد کا نفاذ درکار ہو۔",
       "hermes": "اس وقت استعمال کریں جب آپ کو فوری کاموں کے لیے ہلکا پھلکا، ٹرمینل میں براہِ راست چلنے والا AI اسسٹنٹ درکار ہو۔",
       "hermes-agent": "تب استعمال کریں جب آپ کو Hermes Agent (از Nousresearch) کی ضرورت ہو جس میں ڈیفالٹ، ڈیلیگیشن، ویژن اور معاون ماڈلز OmniRoute کے ذریعے روٹ کیے گئے ہوں۔",
+      "whycodes": "تب استعمال کریں جب آپ WhyCodes کو OmniRoute کی طرف متعین ایک کثیر المقاصد خود مختار CLI ایجنٹ (TUI، نام والے ایجنٹس، میموری، swarm) کے طور پر چاہیں۔",
       "custom": "حسبِ ضرورت ٹول کے نفاذ یا عمومی OpenAI-compatible کنفیگریشنز کے لیے استعمال کریں۔"
     },
     "toolDescriptions": {
@@ -3009,7 +3021,9 @@
       "prime-agent": "Prime Agent — OpenAI-compatible پرووائیڈر سپورٹ کے ساتھ خود کو بہتر بنانے والا RLM کوڈنگ ہارنس",
       "warp": "کسٹم پرووائیڈر سپورٹ کے ساتھ Warp AI ٹرمینل",
       "agent-deck": "Agent Deck ملٹی ایجنٹ آرکیسٹریٹر",
-      "5dive": "5dive — خود میزبان کوڈنگ ایجنٹس کا بیڑا؛ ایک auth پروفائل ان سب کو OmniRoute کی طرف بھیجتی ہے"
+      "5dive": "5dive — خود میزبان کوڈنگ ایجنٹس کا بیڑا؛ ایک auth پروفائل ان سب کو OmniRoute کی طرف بھیجتی ہے",
+      "whycodes": "OpenAI سے مطابقت رکھنے والے base URL کے ساتھ WhyCodes خود مختار CLI ایجنٹ",
+      "zed": "Zed کوڈ ایڈیٹر — OpenAI سے مطابقت رکھنے والے فراہم کنندہ کے ذریعے بلٹ اِن ایجنٹ"
     },
     "guides": {
       "cursor": {
@@ -3240,6 +3254,9 @@
     "copilotReloadInstruction": "پھر VS Code کو دوبارہ لوڈ کریں اور ان پٹ پرامپٹ میں API key سیٹ کریں۔",
     "wireApiChatCompletions": "چیٹ کی تکمیل (/چیٹ/کمپلیشنز)",
     "wireApiResponses": "Responses API (/responses)",
+    "codexModelCatalog": "Codex کے ‎/model پِکر میں OmniRoute ماڈلز دکھائیں",
+    "codexModelCatalogHint": "انسٹال شدہ Codex کے اپنے ماڈل کیٹلاگ سے ~/.codex/omniroute-models.json لکھتا ہے (فی ماڈل تقریباً 60 KB)۔ Codex اپ گریڈ کرنے کے بعد دوبارہ لاگو کریں۔",
+    "codexCatalogWarning": "Codex کا ‎/model پِکر اپ ڈیٹ نہیں ہوا: OmniRoute انسٹال شدہ Codex کا ماڈل کیٹلاگ نہیں پڑھ سکا۔",
     "cliproxyapiActionFailed": "عمل ناکام ہوگیا",
     "cliproxyapiActionSucceeded": "عمل کامیاب ہوا",
     "cliproxyapiCheckUpdates": "اپ ڈیٹس چیک کریں",
@@ -3262,7 +3279,8 @@
     "cliproxyapiUnknown": "نامعلوم",
     "cliproxyapiUpdate": "اپ ڈیٹ",
     "cliproxyapiUpdateAvailable": "اپ ڈیٹ دستیاب ہے: v{current} → v{latest}",
-    "cliproxyapiVersion": "ورژن"
+    "cliproxyapiVersion": "ورژن",
+    "removeMapping": "میپنگ ہٹائیں"
   },
   "modelCatalog": {
     "title": "ماڈلز اور کمبوز",
@@ -3326,6 +3344,18 @@
     "maxMembersPlaceholder": "مثلاً 10",
     "testSelected": "منتخب کردہ ٹیسٹ کریں ({count})",
     "testAllFiltered": "تمام فلٹر شدہ ٹیسٹ کریں ({count})",
+    "visibility": "مرئیت",
+    "allVisibility": "نظر آنے والے اور چھپے ہوئے",
+    "visibleOnly": "نظر آنے والے",
+    "hiddenOnly": "چھپے ہوئے",
+    "visibleColumn": "نظر آتا ہے",
+    "hideModel": "{name} کو /v1/models سے چھپائیں",
+    "showModel": "{name} کو /v1/models میں دکھائیں",
+    "hiddenBadge": "چھپا ہوا",
+    "hideFiltered": "فلٹر شدہ چھپائیں ({count})",
+    "showFiltered": "فلٹر شدہ دکھائیں ({count})",
+    "visibilityCounts": "{visible} نظر آنے والے · {hidden} چھپے ہوئے · کل {total}",
+    "visibilityUpdateFailed": "ماڈل کی مرئیت اپ ڈیٹ کرنے میں ناکامی",
     "cancel": "منسوخ کریں",
     "clearResults": "نتائج صاف کریں",
     "testing": "ٹیسٹ جاری ہے...",
@@ -3387,6 +3417,10 @@
     "title": "کمبوز",
     "description": "وزنی روٹنگ اور فال بیک سپورٹ کے ساتھ ماڈل کمبوز بنائیں",
     "autoCatalogTitle": "آٹو روٹنگ کیٹلاگ",
+    "autoTosLoadError": "ToS پالیسی لوڈ نہیں ہو سکی۔ اسے بدلنے سے پہلے دوبارہ کوشش کریں۔",
+    "autoTosSaveError": "ToS پالیسی محفوظ نہیں ہو سکی۔ پچھلی ترتیب اب بھی دکھائی جا رہی ہے۔ دوبارہ کوشش کریں۔",
+    "autoTosIncludeLabel": "ToS: avoid کے نشان والے فراہم کنندگان کو auto میں شامل کریں",
+    "autoTosDescription": "بطور ڈیفالٹ بند ہے۔ صرف ایک اکاؤنٹ نہیں بلکہ تمام auto کومبوز پر لاگو ہوتا ہے۔ فراہم کنندہ کو جوڑنے سے یہ اختیار فعال نہیں ہوتا۔",
     "autoCatalogTemplateCount": "{count} ٹیمپلیٹس",
     "autoCatalogDescription": "بلٹ ان آٹو/* کومبوز مربوط فراہم کنندگان سے متحرک طور پر حل ہوئے۔ ان میں سے کسی بھی ID کو بطور ماڈل فیلڈ استعمال کریں — کسی سیٹ اپ کی ضرورت نہیں۔",
     "autoCatalogExpand": "آٹو روٹنگ کیٹلاگ کو پھیلائیں۔",
@@ -3498,6 +3532,9 @@
     "moveUp": "اوپر منتقل کریں",
     "moveDown": "نیچے منتقل کریں",
     "removeModel": "ہٹائیں",
+    "testStep": "اس ماڈل کی جانچ کریں",
+    "testStepRunning": "جانچ جاری ہے…",
+    "testStepNotTestable": "صرف واحد ماڈل والے مراحل کی جانچ کی جا سکتی ہے",
     "saving": "محفوظ کیا جا رہا ہے...",
     "liveNoProviders": "ابھی تک کوئی فراہم کنندگان نہیں دیکھے گئے۔",
     "liveFleetDataHint": "فلیٹ ڈیٹا لائیو کومبو ایونٹس کے ذریعے موصول ہوتا ہے۔",
@@ -3539,6 +3576,7 @@
     "playgroundNoCombosYet": "ابھی تک کوئی کومبوز کنفیگر نہیں کیے گئے۔",
     "playgroundCreateFirst": "پہلے ایک بنائیں",
     "weighted": "وزن شدہ",
+    "weightPercent": "وزن (%)",
     "leastUsed": "سب سے کم استعمال شدہ",
     "costOpt": "لاگت کے لحاظ سے بہتر",
     "strategyGuideTitle": "اس حکمتِ عملی کو کیسے استعمال کریں",
@@ -3700,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# اکاؤنٹ} other {# اکاؤنٹس}}",
     "builderGlobalAdded": "شامل کیا گیا",
     "builderGlobalAdd": "شامل کریں",
+    "clearSearch": "تلاش صاف کریں",
     "manualModel": "مینول ماڈل",
     "manualModelInvalid": "ماڈل کو provider/model کے طور پر درج کریں۔",
     "manualModelUnknownProvider": "نامعلوم فراہم کنندہ کا پریفکس۔",
@@ -3916,6 +3955,7 @@
     "builderComboRefStep": "کومبو حوالہ شامل کریں",
     "builderPinnedAccount": "پن شدہ اکاؤنٹ",
     "builderLegacyEntry": "لیگیسی اندراج",
+    "builderStaleModel": "لائیو کیٹلاگ میں نہیں ہے",
     "reviewName": "نام",
     "reviewStrategy": "حکمتِ عملی",
     "reviewSteps": "مراحل",
@@ -3953,6 +3993,10 @@
     "responseValidationMinLength": "مواد کی کم از کم لمبائی (حروف)",
     "responseValidationJsonPaths": "JSON-path کی جانچیں",
     "responseValidationAddCheck": "+ جانچ شامل کریں",
+    "responseValidationRemoveCheck": "چیک ہٹائیں",
+    "responseValidationPath": "JSON پاتھ",
+    "responseValidationCondition": "شرط",
+    "responseValidationValue": "متوقع قدر",
     "agentFeaturesSystemMessageOverride": "سسٹم پیغام کو اوور رائیڈ کریں",
     "agentFeaturesSystemMessagePlaceholder": "آپ ایک ماہر معاون ہیں...",
     "agentFeaturesSystemMessageHint": "ایجنٹس کے لیے سسٹم پیغام کا اوور رائیڈ",
@@ -4090,6 +4134,9 @@
     "showingTopCostRows": "مطابق {total} قطاروں میں سے {shown} دکھائی جا رہی ہیں (سرفہرست 50)۔"
   },
   "endpoint": {
+    "cloudUploadDestination": "کلاؤڈ سنک کی منزل (مقامی بیک اپ کی نہیں):",
+    "cloudUploadWarning": "نئی تنصیبات میں کلاؤڈ سنک بطور ڈیفالٹ بند ہوتا ہے۔ اسے فعال کرنے سے فراہم کنندگان کی API کلیدیں، OAuth کے رسائی اور ریفریش ٹوکن، OmniRoute کی API کلیدیں اور ترتیب اوپر دی گئی منزل پر ابھی اور آئندہ سنک کے دوران اپ لوڈ ہوتے ہیں۔ یہ اسٹوریج میں موجود مقامی بیک اپ سے الگ ہے۔ اسے صرف تب فعال کریں جب آپ کو اس سرور پر بھروسا ہو۔",
+    "cloudUploadConsent": "میں یہ سمجھتا/سمجھتی ہوں اور اپنی شناختی اسناد اس منزل پر اپ لوڈ کرنے کی اجازت دیتا/دیتی ہوں۔",
     "title": "API اینڈپوائنٹ",
     "subtitle": "زیادہ تر SDKs اور ٹولز کے ساتھ OpenAI سے ہم آہنگ اینڈپوائنٹ استعمال کریں۔",
     "testEndpoint": "اینڈپوائنٹ آزمائیں →",
@@ -5265,9 +5312,13 @@
         "skipped": "پہلے سے ترتیب دیا گیا",
         "failed": "ناکام"
       }
-    }
+    },
+    "stepProgress": "سیٹ اپ کی پیش رفت"
   },
   "providers": {
+    "tosAvoidNoticeTitle": "یہ فراہم کنندہ بطور ڈیفالٹ auto سے خارج ہے",
+    "tosAvoidNoticeDescription": "اس کی ToS حیثیت avoid ہے۔ اکاؤنٹ جوڑنے سے یہ پالیسی تبدیل نہیں ہوتی۔ تمام auto کومبوز کے لیے عالمی اختیار فعال کرنے سے پہلے فراہم کنندہ کی شرائط پڑھیں۔",
+    "tosAvoidNoticeAction": "auto پالیسی دیکھیں",
     "codexReleaseCooldown": "Clear local cooldown",
     "codexReleaseCooldownHint": "Allow this Codex account to be tried again. Does not redeem a reset credit or change upstream limits.",
     "codexReleasingCooldown": "Clearing…",
@@ -5359,6 +5410,12 @@
     "reorderByAvailabilityTitle": "دستیابی کے مطابق کنکشنز کو دوبارہ ترتیب دیں",
     "reorderByAvailabilityError": "دستیابی کے مطابق کنکشنز کو دوبارہ ترتیب دینے میں ناکامی",
     "distributeProxies": "پروکسیز تقسیم کریں",
+    "clearAccountProxies": "اکاؤنٹ پراکسیز ہٹائیں",
+    "clearAccountProxyAssignments": "تفویضات ہٹائیں",
+    "clearAccountProxiesConfirm": "اس فراہم کنندہ کے تمام {count} اکاؤنٹس سے انفرادی پراکسی تفویضات ہٹا دیں، بشمول غیر فعال اکاؤنٹس؟ محفوظ شدہ پراکسیز اور فراہم کنندہ/عالمی تفویضات برقرار رہیں گی۔ اکاؤنٹس دوبارہ فراہم کنندہ/عالمی پراکسی ترتیبات اپنائیں گے۔",
+    "accountProxiesCleared": "اکاؤنٹ پراکسی تفویضات ہٹا دی گئیں۔",
+    "clearAccountProxiesPartial": "{count} اکاؤنٹ (اکاؤنٹس) کو مکمل طور پر ری سیٹ نہیں کیا جا سکا۔ دکھائی گئی تفویضات تازہ کر دی گئی ہیں؛ آپ دوبارہ کوشش کر سکتے ہیں۔",
+    "clearAccountProxiesError": "اکاؤنٹ پراکسیز کو ری سیٹ یا ان کی حیثیت کو تازہ نہیں کیا جا سکا۔ براہ کرم دوبارہ لوڈ کر کے پھر کوشش کریں۔",
     "distributing": "تقسیم کیا جا رہا ہے...",
     "selectedCount": "{count, plural, one {# منتخب شدہ} other {# منتخب شدہ}}",
     "accountsCount": "{count, plural, one {# اکاؤنٹ} other {# اکاؤنٹس}}",
@@ -5480,6 +5537,9 @@
     "baseUrlLabel": "بنیادی URL",
     "apiTypeLabel": "API کی قسم",
     "prefixHint": "لازمی۔ ماڈل کے ناموں کے لیے منفرد سابقہ۔",
+    "providerIdSuffixLabel": "فراہم کنندہ ID لاحقہ",
+    "providerIdSuffixHint": "اختیاری۔ بے ترتیب ID کے بجائے فراہم کنندہ ID میں شامل کیا جاتا ہے (صرف حروف، اعداد، -، _ اور .)۔ بے ترتیب ID کے لیے خالی چھوڑیں۔ بعد میں تبدیل نہیں کیا جا سکتا۔",
+    "providerIdConflict": "اس ID والا فراہم کنندہ پہلے سے موجود ہے۔ کوئی دوسرا ID لاحقہ منتخب کریں۔",
     "nameHint": "لازمی۔ اس نوڈ کے لیے ایک آسان لیبل۔",
     "baseUrlHint": "لازمی۔ فراہم کنندہ کی API کا بنیادی URL۔",
     "iconUrlLabel": "آئیکن URL",
@@ -5544,6 +5604,7 @@
     "allModelsAlreadyImported": "تمام ماڈلز پہلے ہی درآمد کیے جا چکے ہیں",
     "noNewModelsToImport": "درآمد کرنے کے لیے کوئی نیا ماڈل نہیں — تمام ماڈلز پہلے ہی رجسٹری یا حسبِ ضرورت ماڈلز کی فہرست میں موجود ہیں",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "ماڈل دریافت ناکام {time}",
     "skippingExistingModels": "پہلے سے موجود {count} ماڈلز چھوڑے جا رہے ہیں",
     "autoSync": "خودکار مطابقت پذیری",
     "autoSyncShort": "مطابقت پذیری",
@@ -5561,6 +5622,10 @@
     "autoSyncTooltip": "بطور ڈیفالٹ ہر 6 گھنٹے بعد ماڈل کی فہرست خودکار طور پر ریفریش کریں (MODEL_SYNC_INTERVAL_HOURS کے ذریعے قابلِ ترتیب)",
     "autoSyncEnabled": "خودکار مطابقت پذیری فعال ہے — ماڈلز وقتاً فوقتاً تازہ ہوتے رہیں گے",
     "autoSyncDisabled": "خودکار مطابقت پذیری غیر فعال ہے",
+    "autoSyncLastSynced": "{time} مطابقت پذیر ہوا",
+    "autoSyncNeverSynced": "کبھی مطابقت پذیر نہیں ہوا",
+    "autoSyncImmediateFailed": "خودکار مطابقت پذیری فعال ہے، مگر ماڈلز کی فوری تازہ کاری ناکام رہی",
+    "autoSyncImmediatePartialFailure": "خودکار مطابقت پذیری فعال ہے، مگر کچھ ماڈلز کی فوری تازہ کاری ناکام رہی",
     "autoSyncToggleFailed": "خودکار مطابقت پذیری تبدیل کرنے میں ناکامی",
     "autoSyncPartialFailure": "کچھ کنکشنز کے لیے خودکار مطابقت پذیری اپ ڈیٹ ہو گئی، مگر سب کے لیے نہیں",
     "clearAllModels": "تمام ماڈلز صاف کریں",
@@ -5698,12 +5763,32 @@
     "perKeyProxyEnabledTitle": "اس فراہم کنندہ کے لیے فی کلید پراکسی تفویض فعال ہے",
     "perKeyProxyDisabledTitle": "اس فراہم کنندہ کے لیے فی کلید پراکسی تفویض غیر فعال ہے",
     "autoPriority": "Auto: {priority}",
+    "copyConnectionId": "کنکشن ID کاپی کریں۔ درخواست کو اس اکاؤنٹ پر پن کرنے کے لیے اسے {header} درخواست ہیڈر میں بھیجیں۔",
+    "connectionIdCopied": "کاپی ہو گیا",
+    "connectionPinTip": "مشورہ: کسی درخواست کو ایک اکاؤنٹ پر پن کرنے کے لیے، اس کا کنکشن ID {header} درخواست ہیڈر میں بھیجیں (کاپی کرنے کے لیے کنکشن کی ID چپ پر کلک کریں)۔ پن کیا گیا اکاؤنٹ ہی استعمال ہوتا ہے؛ جب وہ کول ڈاؤن میں ہو یا کوٹا ختم ہو جائے تو درخواستیں دوسرے اکاؤنٹس پر چلی جاتی ہیں۔",
     "proxy": "Proxy",
     "retestAuthentication": "توثیق دوبارہ جانچیں",
     "retest": "دوبارہ جانچیں",
+    "pingNow": {
+      "label": "ابھی پنگ کریں",
+      "title": "اس اکاؤنٹ کی کوٹا ونڈو شروع کرنے کے لیے ابھی ایک چھوٹی درخواست بھیجیں۔ کوٹا خرچ ہوتا ہے؛ Auto-Ping تبدیل نہیں ہوتا۔",
+      "completed": "پنگ مکمل ہو گیا۔",
+      "busy": "اس اکاؤنٹ کے لیے پہلے سے ایک پنگ چل رہا ہے۔",
+      "inactive": "پنگ کرنے سے پہلے اس اکاؤنٹ کو فعال کریں۔",
+      "unavailable": "اکاؤنٹ یا فراہم کنندہ اس وقت دستیاب نہیں؛ کوئی درخواست نہیں بھیجی گئی۔",
+      "noModel": "کوئی پنگ ماڈل دستیاب نہیں؛ کوئی درخواست نہیں بھیجی گئی۔",
+      "authFailed": "تصدیق ناکام ہو گئی۔ اس اکاؤنٹ کو دوبارہ جوڑیں۔",
+      "quotaUnavailable": "کوٹا دستیاب نہیں؛ کوئی درخواست نہیں بھیجی گئی۔",
+      "quotaExhausted": "کوٹا ختم ہو گیا؛ کوئی درخواست نہیں بھیجی گئی۔",
+      "notCompleted": "فراہم کنندہ نے پنگ مکمل نہیں کیا۔",
+      "timeout": "پنگ کا وقت ختم ہو گیا؛ پھر بھی یہ پہنچ گیا ہو سکتا ہے۔ دوبارہ کوشش کرنے سے پہلے کوٹا چیک کریں۔",
+      "failed": "پنگ ناکام ہو گیا۔"
+    },
     "disableConnection": "کنکشن غیر فعال کریں",
     "enableConnection": "کنکشن فعال کریں",
     "reauthenticateConnection": "اس کنکشن کی دوبارہ توثیق کریں",
+    "verifyAccount": "اکاؤنٹ کی تصدیق کریں",
+    "verifyAccountHint": "Google اس اکاؤنٹ کی تصدیق کا تقاضا کرتا ہے۔ لنک کھولیں، جانچ مکمل کریں، پھر دوبارہ کوشش کریں۔",
     "proxyConfig": "پراکسی کنفیگریشن",
     "aliasExistsAlert": "عرف \"{alias}\" پہلے سے موجود ہے۔ براہِ کرم کوئی مختلف ماڈل استعمال کریں یا موجودہ عرف میں ترمیم کریں۔",
     "aliasInputPlaceholder": "عرف کا نام",
@@ -5738,6 +5823,7 @@
     "contextWindowOverridePlaceholder": "مثلاً 131072",
     "contextWindowOverrideHint": "جب فراہم کنندہ غلط رپورٹ کرے تو دستی طور پر اس ماڈل کی اصل کانٹیکسٹ ونڈو (ٹوکنز) سیٹ کریں۔ یہ خودکار طور پر شناخت شدہ/کیٹلاگ کی اقدار پر فوقیت رکھتا ہے اور کومبو روٹنگ کو ماڈل کو چھوڑنے سے روکتا ہے۔",
     "contextWindowOverrideInvalid": "کانٹیکسٹ ونڈو اوور رائیڈ ٹوکنز کا ایک مثبت مکمل عدد ہونا چاہیے",
+    "maxOutputTokenOverrideInvalid": "زیادہ سے زیادہ آؤٹ پٹ ٹوکنز اوور رائیڈ ٹوکنز کا ایک مثبت مکمل عدد ہونا چاہیے",
     "visionCapableLabel": "ویژن کے قابل",
     "visionCapableHint": "جب فراہم کنندہ کا ڈسکوری میٹا ڈیٹا تصویر کے ان پٹ موڈیلٹی کی اطلاع نہ دے تو دستی طور پر اس ماڈل کو ویژن کے قابل کے طور پر نشان زد کریں (سیلف ہوسٹڈ/مقامی بیک اینڈز کے لیے عام ہے)۔",
     "compatParamFiltersLabel": "پیرامیٹر فلٹرز",
@@ -5996,10 +6082,10 @@
     "apiFormatLabel": "API فارمیٹ کا لیبل",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "API خطہ: چین",
-    "apiRegionHint": "API خطے کا اشارہ",
-    "apiRegionInternational": "API خطہ: بین الاقوامی",
-    "apiRegionLabel": "API خطے کا لیبل",
+    "apiRegionChina": "برّی چین",
+    "apiRegionHint": "API تک رسائی اور کوٹہ ٹریکنگ کے لیے استعمال ہونے والا اینڈ پوائنٹ خطہ منتخب کریں۔",
+    "apiRegionInternational": "بین الاقوامی",
+    "apiRegionLabel": "API خطہ",
     "apikey": "API کلید",
     "audio": "آڈیو",
     "audioProvidersHeading": "آڈیو فراہم کنندگان کی سرخی",
@@ -6020,6 +6106,13 @@
     "claudeLowPriorityModeDescription": "جب یہ اکاؤنٹ اپنی 5 گھنٹے کی استعمال کی حد تک پہنچ جاتا ہے اور Anthropic کم ترجیحی لین پیش کرتا ہے، تو OmniRoute اسے قبول کرتا ہے اور ونڈو ری سیٹ ہونے تک anthropic-usage-limit: slow کے ساتھ درخواستیں بھیجتا رہتا ہے، بجائے اس کے کہ کنکشن کو عارضی طور پر روک دے۔ ہفتہ وار حد بدستور لاگو رہتی ہے اور جوابات کو اضافی گنجائش دستیاب ہونے تک انتظار کرنا پڑ سکتا ہے۔",
     "claudeAutoLimitResetLabel": "سیشن کی حد خودکار طور پر ری سیٹ کریں (ہفتے میں ایک بار)",
     "claudeAutoLimitResetDescription": "جب یہ اکاؤنٹ اپنی 5 گھنٹے کی استعمال کی حد تک پہنچ جاتا ہے اور سیشن کی حد ری سیٹ کرنے کا اختیار دستیاب ہوتا ہے، تو OmniRoute اسے خودکار طور پر استعمال کرتا ہے اور پوری رفتار سے دوبارہ کوشش کرتا ہے۔ یہ اکاؤنٹ کا ہفتے میں ایک بار دستیاب ری سیٹ استعمال کرتا ہے اور پھر بھی ہفتہ وار حد میں شمار ہوتا ہے۔",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "عارضی کول ڈاؤن کو چھوڑیں تاکہ یہ کنکشن قابلِ بحالی غلطیوں کے بعد بھی اہل رہے (حتمی حالتیں جیسے banned/expired اب بھی لاگو ہوں گی)۔",
     "disableCoolingLabel": "اس کنکشن کے لیے کول ڈاؤن غیر فعال کریں",
     "bulkPasteAdded": "{count, plural, one {1 کلید شامل کی گئی} other {# کلیدیں شامل کی گئیں}}",
@@ -6181,6 +6274,16 @@
     "supportedEndpointEmbeddings": "Supported Endpoint Embeddings",
     "supportedEndpointImages": "Supported Endpoint Images",
     "supportedEndpointsLabel": "Supported Endpoints Label",
+    "endpointCapabilitiesEdit": "ماڈل اینڈ پوائنٹس میں ترمیم کریں",
+    "endpointCapabilitiesReset": "دریافت شدہ پر دوبارہ سیٹ کریں",
+    "endpointCapabilitiesDefaulted": "فرض کردہ",
+    "endpointCapabilitiesDeclared": "درج شدہ",
+    "endpointCapabilitiesInferred": "اخذ کردہ",
+    "endpointCapabilitiesOperator": "دستی",
+    "endpointCapabilitiesSave": "اینڈ پوائنٹس محفوظ کریں",
+    "endpointCapabilitiesSaveFailed": "ماڈل اینڈ پوائنٹس اپ ڈیٹ نہیں ہو سکے",
+    "endpointCapabilitiesResetFailed": "ماڈل اینڈ پوائنٹس دوبارہ سیٹ نہیں ہو سکے",
+    "endpointCapabilitiesNoAdapter": "اس اینڈ پوائنٹ کے لیے فراہم کنندہ کا کوئی اڈاپٹر موجود نہیں",
     "tagGroupHint": "ٹیگ گروپ کا اشارہ",
     "tagGroupLabel": "ٹیگ گروپ کا لیبل",
     "tagGroupPlaceholder": "ٹیگ گروپ کی مثال",
@@ -6463,6 +6566,7 @@
       "monsterapi": "monsterapi.ai پر API کی حاصل کریں",
       "moonshot": "Moonshot AI کو ایک API کی کے ساتھ منسلک کریں۔",
       "morph": "مفت درجہ: 250K کریڈٹس/ماہ، $0",
+      "apmix": "apmix.ai/dashboard سے API کی کے ساتھ Apmix جوڑیں — ایک سبسکرپشن، کئی ماڈلز۔",
       "nanogpt": "NanoGPT کو ایک API کی کے ساتھ منسلک کریں۔",
       "nebius": "API ٹیسٹنگ کے لیے سائن اپ پر تقریباً $1 آزمائشی کریڈٹس",
       "nlpcloud": "NLP Cloud، OpenAI chat/completions کے بجائے ایک ملکیتی چیٹ بوٹ API استعمال کرتا ہے۔ OmniRoute، OpenAI پیغامات کو ان پٹ/سیاق و سباق/ہسٹری کے مطابق ڈھالتا ہے اور تعاون یافتہ چیٹ بوٹ ماڈلز کا مقامی کیٹلاگ ظاہر کرتا ہے۔",
@@ -6559,8 +6663,7 @@
       "kiro": "مفت پلان: 50 کریڈٹس/مہینہ (~25K–100K ٹوکنز)۔ ⚠️ Kiro ToS فریقِ ثالث کے پراکسی/ہارنس کے استعمال سے منع کرتا ہے۔",
       "codex": "OpenAI Codex کو موجودہ OAuth فلو سے منسلک کریں۔",
       "qwen": "Qwen Code کو موجودہ OAuth فلو سے منسلک کریں۔",
-      "github-models": "github.com/settings/tokens پر 'models: read' اسکوپ کے ساتھ ایک GitHub PAT بنائیں",
-      "apmix": "apmix.ai/dashboard سے API کی کے ساتھ Apmix جوڑیں — ایک سبسکرپشن، کئی ماڈلز۔"
+      "github-models": "github.com/settings/tokens پر 'models: read' اسکوپ کے ساتھ ایک GitHub PAT بنائیں"
     },
     "passthroughModelsDescription": "{provider} فراہم کنندہ کے مقامی ماڈل IDs کو قبول کرتا ہے۔ /ماڈلز سے درآمد کریں یا روٹنگ کے لیے حسب ضرورت IDs شامل کریں۔",
     "bedrockModelsDescription": "ایمیزون بیڈرک ماڈلز کا دائرہ AWS ریجن کے ذریعہ کیا گیا ہے۔ /ماڈلز سے درآمد کریں یا منتخب علاقے میں فعال کردہ Bedrock ماڈل IDs شامل کریں۔",
@@ -6732,14 +6835,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "ترتیبات",
@@ -7035,16 +7131,6 @@
     "settingsSidebarDesc": "منتخب کریں کہ سائیڈبار میں کون سے آئٹمز دکھانے ہیں۔ ضروریات کی ترتیب میں اعلیٰ ٹولز قابلِ تلاش رہتے ہیں۔",
     "hideHealthLogs": "ہیلتھ چیک لاگز چھپائیں",
     "hideHealthLogsDesc": "فعال ہونے پر، سرور کنسول میں [HealthCheck] پیغامات چھپا دیں",
-    "themeAccent": "تھیم کا رنگ",
-    "themeAccentDesc": "پہلے سے طے شدہ رنگ منتخب کریں یا ایک رنگ سے اپنی تھیم بنائیں",
-    "themeCreate": "تھیم بنائیں",
-    "themeCustom": "حسبِ ضرورت تھیم",
-    "themeBlue": "نیلا",
-    "themeRed": "سرخ",
-    "themeGreen": "سبز",
-    "themeViolet": "بنفشی",
-    "themeOrange": "نارنجی",
-    "themeCyan": "سیان",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "ایپلیکیشن کے نام اور لوگو کو حسبِ ضرورت بنائیں",
     "appName": "ایپلیکیشن کا نام",
@@ -7089,6 +7175,8 @@
         "NEEDS_CORE_NOT_CONFIGURED": "اس سبسکرپشن میں ایسے نوڈز ہیں جنہیں لوکل پراکسی کور (SS/VMess/Trojan/VLESS) کی ضرورت ہے؛ جب تک آپ local-core SOCKS5 اینڈ پوائنٹ کنفیگر نہیں کرتے، انہیں روٹ نہیں کیا جائے گا۔",
         "NO_USABLE_NODES": "سبسکرپشن سے کوئی قابل استعمال نوڈز حاصل نہیں ہوئے (http/https/socks5 یا لوکل کور اینڈ پوائنٹ والے نوڈز)۔",
         "SELECTOR_SWITCH_FAILED": "پروکسی-کور کنٹرول کال ناکام رہی؛ پچھلا راستہ فعال رہتا ہے۔ کنٹرول URL اور سیکرٹ چیک کریں، پھر ریفریش کریں۔",
+        "SELECTOR_EARLY_NO_CONTROL": "کوئی کنٹرول URL نہیں",
+        "SELECTOR_EARLY_UNMAPPED": "کوئی مماثل سبسکرپشن نہیں",
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "تیار کردہ بنیادی ترتیب اپنائی گئی فائل کی جگہ نہیں لے سکی؛ اس کے بجائے ساتھ والی نقل برقرار رکھی گئی۔",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
@@ -7120,6 +7208,7 @@
       "createSubscription": "سبسکرپشن بنائیں",
       "loading": "لوڈ ہو رہا ہے…",
       "noSubscriptions": "ابھی تک کوئی رکنیت نہیں ہے۔ شروع کرنے کے لیے \"سبسکرپشن شامل کریں\" پر کلک کریں۔",
+      "earlySkipsSinceRestart": "آخری ری اسٹارٹ کے بعد سے سلیکٹر کے چھوڑے گئے",
       "statusOk": "ٹھیک ہے",
       "statusError": "خرابی",
       "statusEmpty": "خالی",
@@ -7182,7 +7271,7 @@
       "nextSwitchNow": "ابھی",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7193,7 +7282,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "بنیائی بائنیری کا پاتھ",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "اختیاری: تبدیلی سے پہلے تیار کردہ فائل کو بنیائی بائنیری سے تصدیق کرتی ہے۔ ساتھ لکھنا جاری رکھنے کے لیے خالی چھوڑیں۔ فولڈر موجود نہ ہونے پر بنایا جاتا ہے۔"
+      "coreBinaryPathHelp": "اختیاری: تبدیلی سے پہلے تیار کردہ فائل کو بنیائی بائنیری سے تصدیق کرتی ہے۔ ساتھ لکھنا جاری رکھنے کے لیے خالی چھوڑیں۔ فولڈر موجود نہ ہونے پر بنایا جاتا ہے۔",
+      "urlFeedlessHint": "صرف منتخب کرنے والے سبسکرپشن کے لیے خالی چھوڑیں: نیچے کنٹرول URL سیٹ کریں، کوئی فیچ لنچ نہ لیا، نہ ریفرش یا باؤنڈ ہوگی۔"
     },
     "bulkHealthcheck": "اجتماعی ہیلتھ چیک",
     "bulkHealthcheckDesc": "تمام ترتیب شدہ پراکسیز کو ہدف URL پر جانچیں تاکہ معلوم ہو سکے کہ کون سی کام کرتی ہیں۔",
@@ -7634,6 +7724,7 @@
     "configured": "کنفیگر شدہ",
     "none": "کوئی نہیں",
     "modelOverrideValuePlaceholder": "عددی قدر",
+    "modelOverrideKey": "اوور رائیڈ کلید",
     "modelOverrideReasoningEffortsPlaceholder": "انگریزی میں کوما سے علیحدہ، مثلاً low, medium, high",
     "addKeyValue": "کی ویلیو شامل کریں",
     "noModelOverrides": "اس ماڈل کے لیے کوئی اوور رائیڈز کنفیگر نہیں کیے گئے۔",
@@ -7682,7 +7773,6 @@
     "customPricingNote": "آپ مخصوص ماڈلز کے لیے ڈیفالٹ قیمتوں کو اوور رائیڈ کر سکتے ہیں۔ حسبِ ضرورت اوور رائیڈز کو خودکار طور پر شناخت شدہ قیمتوں پر ترجیح حاصل ہوتی ہے۔",
     "editPricing": "قیمتوں میں ترمیم کریں",
     "viewFullDetails": "مکمل تفصیلات دیکھیں",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "حجم کے مطابق انکولی روٹنگ",
     "adaptiveVolumeRoutingDesc": "پے لوڈ کے حجم اور تھروپٹ کے دباؤ کی بنیاد پر کنکشنز کو متحرک طور پر اسکیل کریں۔",
     "lkgpToggleTitle": "آخری معلوم کامیاب فراہم کنندہ (LKGP)",
@@ -7777,6 +7867,8 @@
     "compressionDesc": "فراہم کنندگان کو بھیجنے سے پہلے پرامپٹس کو کمپریس کر کے ٹوکن کا استعمال کم کریں",
     "autoCombosTitle": "خودکار کومبوز",
     "autoCombosDesc": "اس کلید کو پہلے سے موجود auto/* کومبوز استعمال کرنے کی اجازت دیں، جو ہر ترتیب شدہ فراہم کنندہ سے خودکار طور پر ایک ماڈل منتخب کرتے ہیں",
+    "ccDiscoveryAliasesTitle": "Claude Code دریافت کے عرفی نام",
+    "ccDiscoveryAliasesDesc": "ان ماڈلز اور کمبوز کے لیے claude/... مطابقت مررز کی تشہیر کریں جن تک یہ کلید پہلے ہی رسائی رکھتی ہے",
     "compressionGuidanceFullGuideLink": "مکمل کمپریشن گائیڈ",
     "compressionGuidanceShow": "تفصیلات",
     "compressionGuidanceHide": "تفصیلات چھپائیں",
@@ -8110,6 +8202,9 @@
     "storageIntegrityCheck": "انٹیگریٹی چیک",
     "storageIntegrityOk": "✓ ٹھیک ہے۔",
     "storageIntegrityError": "✗ غلطی",
+    "storageIntegrityLastCheck": "آخری بار چیک {date}",
+    "storageIntegrityRunCheck": "سلامت کی جانچ چلائیں",
+    "storageIntegrityCheckFailed": "درستگی کی جانچ ناکام ہو گئی",
     "storageUsageTokenBuffer": "ٹوکن بفر کا استعمال",
     "storageUsageTokenBufferDesc": "سسٹم پرامپٹ اوور ہیڈ کو شمار کرنے کے لیے رپورٹ کردہ استعمال میں اضافی ٹوکنز شامل کیے گئے۔",
     "storageUsageTokenBufferHint": "را پرووائیڈر ٹوکن کاؤنٹس رپورٹ کرنے کے لیے 0 پر سیٹ کریں۔ ڈیفالٹ: 2000۔",
@@ -8228,6 +8323,14 @@
       "terse-cjk": {
         "label": "مختصر CJK (文言)",
         "description": "کلاسیکی چینی انتہائی مختصر انداز (صرف چینی زبان کے لیے دستیاب ہے)۔"
+      },
+      "antislop-ui": {
+        "label": "Antislop UI فلٹر",
+        "description": "مقصد کی جانچ شدہ بصری عناصر: کوئی عام گریڈینٹ، ٹیمپلیٹ لے آؤٹ یا بےکار کنٹرول نہیں۔"
+      },
+      "antislop-copy": {
+        "label": "Antislop متن اور انسانی فلٹر",
+        "description": "دیانت دار متن اور لوگوں کے لیے اصول: AI کے آثار نہیں، WCAG AA کنٹراسٹ، کی بورڈ، حالتیں، موبائل ری فلو۔"
       }
     },
     "resilienceWaitForCooldown": "کولڈاؤن کا انتظار کریں۔",
@@ -8312,6 +8415,38 @@
     "codexAutoPingWarning": "ہر پنگ پر حقیقی Codex کوٹے کی معمولی مقدار استعمال ہوتی ہے۔ بطور ڈیفالٹ بند ہے — صرف ان کنکشنز کے لیے فعال کریں جن پر آپ واقعی انحصار کرتے ہیں۔",
     "codexAutoPingSaveError": "Codex آٹو پنگ کی ترتیب اپ ڈیٹ کرنے میں ناکامی",
     "codexAutoPingToggleAria": "{connection} کے لیے Codex کوٹا آٹو پنگ ٹوگل کریں",
+    "codexWakeups": {
+      "title": "شیڈول شدہ ویک اپ",
+      "desc": "منتخب اکاؤنٹس کو شیڈول کے مطابق پنگ بھیجتا ہے تاکہ ان کی کوٹا ونڈو آپ کے چاہے ہوئے وقت پر شروع ہو۔ ہر رن تھوڑا سا اصلی Codex کوٹا خرچ کرتا ہے۔",
+      "name": "نام",
+      "accounts": "اکاؤنٹس",
+      "scheduleKind": "شیڈول",
+      "daily": "روزانہ مقررہ وقت پر",
+      "interval": "ہر N منٹ بعد",
+      "time": "وقت",
+      "timezone": "ٹائم زون",
+      "days": "دن",
+      "minutes": "منٹوں میں وقفہ (5–10080)",
+      "add": "ویک اپ شامل کریں",
+      "runNow": "ابھی چلائیں",
+      "delete": "حذف کریں",
+      "toggleAria": "ویک اپ {name} فعال کریں",
+      "everyMinutes": "ہر {minutes} منٹ",
+      "dailyAt": "{days} کو {time} بجے ({timezone})",
+      "nextRun": "اگلا رن: {time}",
+      "lastRun": "پچھلا رن: {status}",
+      "saveError": "ویک اپ محفوظ نہیں ہو سکا۔ نام، اکاؤنٹس اور شیڈول چیک کریں۔",
+      "actionError": "کارروائی ناکام رہی۔ تھوڑی دیر بعد دوبارہ کوشش کریں۔",
+      "runStarted": "رن شروع ہو گیا۔",
+      "status": {
+        "running": "چل رہا ہے",
+        "succeeded": "کامیاب",
+        "failed": "ناکام",
+        "skipped": "چھوڑ دیا گیا",
+        "partial": "جزوی طور پر کامیاب",
+        "interrupted": "منقطع"
+      }
+    },
     "codexFastTierTierLabel": "سروس ٹیئر",
     "codexFastTierTierPriority": "ترجیح",
     "codexFastTierTierFlex": "فلیکس",
@@ -8683,6 +8818,7 @@
     "cliproxyapiPort": "پورٹ",
     "qdrantHost": "میزبان",
     "qdrantCollection": "اجتماع",
+    "catalogVisibilityHint": "چھپے ہوئے ماڈل ID کو انہی رسائی اجازتوں کے ساتھ اب بھی کال کیا جا سکتا ہے۔",
     "catalogScopeTitle": "Models API کی فہرست",
     "catalogScopeDesc": "یہ کلید GET /v1/models میں کیا ظاہر کرتی ہے۔ فہرست محدود کرنے سے کبھی بھی اس بات پر اثر نہیں پڑتا کہ کلید کن ماڈلز کو کال کر سکتی ہے۔",
     "catalogScopeAll": "دونوں",
@@ -8789,7 +8925,52 @@
     "resilienceTokenRefreshScopeProvider": "فراہم کنندہ (تمام اکاؤنٹس ایک ہی بریکر کا اشتراک کرتے ہیں)",
     "resilienceTokenRefreshScopeConnection": "کنکشن (ہر اکاؤنٹ کا اپنا بریکر ہوتا ہے)",
     "resilienceTokenRefreshThreshold": "روکنے سے پہلے ناکامیاں",
-    "resilienceTokenRefreshCooldown": "ٹرپ ہونے کے بعد وقفہ"
+    "resilienceTokenRefreshCooldown": "ٹرپ ہونے کے بعد وقفہ",
+    "piiMasking": {
+      "title": "ذاتی ڈیٹا کی پردہ پوشی",
+      "description": "منتخب کریں کہ کس قسم کا ذاتی ڈیٹا چھپایا جائے اور اپنے پیٹرن شامل کریں۔ پردہ پوشی تب تک بند رہتی ہے جب تک آپ نیچے دکھائے گئے فیچر فلیگز آن نہ کریں۔",
+      "requestFlag": "درخواستوں کی پردہ پوشی",
+      "responseFlag": "جوابات کی صفائی",
+      "templates": "سانچے",
+      "template": {
+        "minimal": "کم سے کم",
+        "standard": "معیاری",
+        "financial": "مالیاتی",
+        "brazilian": "برازیلی",
+        "usa": "امریکہ",
+        "full": "مکمل"
+      },
+      "builtinTypes": "بلٹ اِن اقسام",
+      "types": {
+        "email": "ای میل پتے",
+        "phone_us": "امریکی فون نمبر",
+        "phone_br": "برازیلی فون نمبر",
+        "ssn": "امریکی سوشل سیکیورٹی نمبر",
+        "credit_card": "کریڈٹ کارڈ نمبر",
+        "cpf": "CPF (برازیلی ٹیکس دہندہ شناخت)",
+        "cnpj": "CNPJ (برازیلی کمپنی شناخت)",
+        "ip_address": "IPv4 پتے",
+        "ipv6_address": "IPv6 پتے",
+        "aws_key": "AWS رسائی کیز",
+        "api_key_generic": "API کیز اور ٹوکنز"
+      },
+      "customPatterns": "حسب ضرورت پیٹرن",
+      "customPatternsDesc": "مماثلتیں [CUSTOM_REDACTED] سے بدل دی جاتی ہیں۔ زیادہ سے زیادہ {max} پیٹرن۔ تباہ کن بیک ٹریکنگ کے خطرے والے پیٹرن مسترد کیے جاتے ہیں۔",
+      "typeRegex": "ریگولر ایکسپریشن",
+      "typeWildcard": "وائلڈ کارڈ (* اور ?)",
+      "pattern": "پیٹرن",
+      "flags": "فلیگز (i, m, s, u)",
+      "sampleText": "پیٹرن جانچنے کے لیے نمونہ متن",
+      "test": "جانچیں",
+      "testMatches": "مماثلتیں: {count}",
+      "testFailed": "پیٹرن مسترد: {message}",
+      "add": "پیٹرن شامل کریں",
+      "saved": "محفوظ ہو گیا",
+      "saveFailed": "محفوظ نہیں ہو سکا: {message}",
+      "statsTitle": "دوبارہ شروع ہونے کے بعد سے نشاندہیاں",
+      "statsEmpty": "ابھی تک کوئی نشاندہی نہیں۔",
+      "statsRequest": "درخواستیں"
+    }
   },
   "contextRtk": {
     "title": "RTK انجن",
@@ -8873,7 +9054,8 @@
     "tomlTestPassed": "پاس",
     "tomlTestFailed": "ناکام",
     "tomlImportError": "RTK TOML فائل پر کارروائی نہیں کی جا سکی۔",
-    "tomlFileReadError": "منتخب کردہ TOML فائل کو پڑھا نہیں جا سکا۔"
+    "tomlFileReadError": "منتخب کردہ TOML فائل کو پڑھا نہیں جا سکا۔",
+    "viewMode": "دیکھنے کا موڈ"
   },
   "compressionEngineConfig": {
     "loading": "لوڈ ہو رہا ہے…",
@@ -9095,7 +9277,8 @@
     "languagePacksList": "زبان کے پیک: {packs}",
     "dragToReorder": "مرحلے کو دوبارہ ترتیب دینے کے لیے گھسیٹیں",
     "engine": "انجن",
-    "intensity": "شدت"
+    "intensity": "شدت",
+    "compressionOverride": "کمپریشن اوور رائیڈ"
   },
   "compressionStudio": {
     "noRun": "کوئی کمپریشن رن دستیاب نہیں ہے۔",
@@ -9155,7 +9338,8 @@
     "encoderWinner": "فاتح: {winner}",
     "encoder": "انکوڈر",
     "bytes": "بائٹس",
-    "tokensCl100k": "ٹوکنز (cl100k)"
+    "tokensCl100k": "ٹوکنز (cl100k)",
+    "studioViews": "Studio ویوز"
   },
   "omniglyph": {
     "preview": "پیش منظر",
@@ -9361,7 +9545,9 @@
     "tooltipMinLength": "اس سے چھوٹے پیغامات کو کمپریس نہیں کیا جاتا ہے۔ کم = زیادہ کمپریشن۔",
     "tooltipMinSavings": "صرف اس صورت میں کمپریس کریں جب یہ کم از کم اتنے ٹوکن بچاتا ہے۔",
     "ultraSettings": "الٹرا سیٹنگز",
-    "ultraSettingsDesc": "SLM سے چلنے والا سیمنٹک کمپریشن"
+    "ultraSettingsDesc": "SLM سے چلنے والا سیمنٹک کمپریشن",
+    "defaultLanguage": "ڈیفالٹ زبان",
+    "viewMode": "دیکھنے کا موڈ"
   },
   "translator": {
     "title": "مترجم",
@@ -9673,6 +9859,9 @@
     "streamTransformFailed": "اسٹریم کو تبدیل کرنے میں ناکامی"
   },
   "usage": {
+    "healthExtraUsageBypass": "کوٹا ختم ہو گیا ہے؛ اضافی استعمال کی اجازت ہے، اس لیے سروس جاری ہے۔",
+    "healthPaidCreditsBypass": "کوٹا ختم ہو گیا ہے؛ دستیاب ادا شدہ کریڈٹ سے سروس جاری رہ سکتی ہے۔",
+    "healthFilteringBypass": "کوٹا ختم ہو گیا ہے؛ مقامی کوٹا فلٹر بند ہے، اس لیے سروس جاری ہے۔",
     "title": "استعمال",
     "grokExtraUsageCredits": "اضافی استعمال کے کریڈٹس",
     "grokAutoTopUp": "خودکار ٹاپ اپ",
@@ -9836,6 +10025,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "فراہم کنندہ کی حدود",
     "noProviders": "کوئی فراہم کنندہ منسلک نہیں",
+    "quotaAuthRequired": "تصدیق درکار ہے - ڈیش بورڈ میں سائن اِن کریں",
+    "quotaAuthRequiredHint": "فراہم کنندہ کنکشنز لوڈ نہیں کیے جا سکے کیونکہ ڈیش بورڈ سیشن موجود نہیں ہے یا اس کی میعاد ختم ہو چکی ہے۔ اپنے کوٹہ کی حدود دیکھنے کے لیے سائن اِن کریں اور ریفریش کریں۔",
     "connectProvidersForQuota": "اپنے API کوٹے کی حدود اور استعمال کو ٹریک کرنے کے لیے OAuth کے ذریعے فراہم کنندگان سے منسلک ہوں۔",
     "accountsCount": "{count, plural, one {# اکاؤنٹ} other {# اکاؤنٹس}}",
     "filteredFromCount": "({count} میں سے فلٹر شدہ)",
@@ -9847,6 +10038,9 @@
     "hideQuotaRow": "اس کوٹہ کی قطار کو چھپائیں",
     "showQuotaRow": "اس کوٹہ کی قطار کو دکھائیں",
     "hiddenQuotaRowsLabel": "چھپا ہوا:",
+    "quotaSpeedTitle": "اس اکاؤنٹ پر حالیہ ڈی کوڈ رفتار (آخری {count} کامیاب درخواستیں)",
+    "quotaSpeedLine": "{model}: {avg} tok/s اوسط · آخری {last} · TTFT {ttft}s (n={samples})",
+    "quotaSpeedLineNoTtft": "{model}: {avg} tok/s اوسط · آخری {last} (n={samples})",
     "quotaVisibilityUpdateFailed": "کوٹہ کی نمائش کو اپ ڈیٹ کرنے میں ناکامی",
     "account": "اکاؤنٹ",
     "modelQuotas": "ماڈل کوٹے",
@@ -9882,9 +10076,6 @@
     "tierLite": "لائٹ",
     "tierUnknown": "نامعلوم",
     "statTotal": "کل",
-    "statCritical": "سنگین",
-    "statAlert": "انتباہ",
-    "statHealthy": "صحت مند",
     "filterPurchaseTypeLabel": "قسم",
     "filterTierLabel": "درجہ",
     "purchaseAll": "تمام",
@@ -10123,10 +10314,64 @@
     "lastRefreshed": "آخری بار ریفریش کیا گیا",
     "providerQuota": "فراہم کنندہ کا کوٹہ",
     "providerQuotaHomeHint": "منسلک اکاؤنٹس میں لائیو اسٹیٹس",
+    "claudeResetCreditDefaultTitle": "Claude لمٹ ری سیٹ",
+    "confirmRedeemClaudeResetCredit": "ریڈیم کرنے سے فوری طور پر اہل Claude کے استعمال کی حدود ری سیٹ ہو جاتی ہیں اور یہ کریڈٹ مستقل طور پر خرچ ہو جاتا ہے۔",
+    "claudeResetCreditsModalTitle": "Claude ری سیٹ کریڈٹس",
+    "claudeResetCreditsModalExplainer": "اس اکاؤنٹ کے لیے دستیاب Claude ری سیٹ کریڈٹس اور ہفتہ وار سیشن ری سیٹس۔",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "حالیہ مشاہدات پر مبنی، براہ راست جانچ نہیں۔ تفصیلات کے لیے اکاؤنٹ منتخب کریں۔",
+    "healthRecovery": "بحالی کا متوقع وقت",
+    "healthAvailable": "دستیاب",
+    "healthRestricted": "جزوی طور پر محدود",
+    "healthUnavailable": "غیر دستیاب",
+    "healthPeakHourProtection": "مصروف اوقات کا تحفظ",
+    "healthCooldown": "انتظار کی مدت",
+    "healthQuotaExhausted": "کوٹا ختم ہو گیا",
+    "healthOverview": "جائزہ",
+    "layoutFull": "مکمل",
+    "layoutCompact": "مختصر",
+    "healthQuotaError": "کوٹہ پڑھنے میں ناکامی",
+    "healthNoRuntime": "عملی حالت دستیاب نہیں",
+    "healthPreviousSnapshot": "آخری تازہ کاری ناکام؛ پچھلا نتیجہ دکھایا جا رہا ہے",
+    "healthPreviousFailure": "آخری درخواست ناکام؛ انتظار کا وقت ختم ہو گیا",
+    "healthAwaitingSync": "ری سیٹ کا وقت گزر گیا؛ ہم وقت سازی کا انتظار",
+    "healthVerdictUnavailable": "دستیابی کی جانچ کا نتیجہ نہیں مل رہا؛ صرف کوٹے کی سطحیں دکھائی جا رہی ہیں",
+    "healthSummaryFailed": "عملی خلاصہ پڑھنے میں ناکامی؛ ماڈل لاک کی معلومات غائب ہو سکتی ہیں",
+    "healthRuntimeObserved": "عملی حالت کی تازہ کاری {time}",
+    "healthQuotaObserved": "کوٹے کا مشاہدہ {time}",
+    "healthOldestQuota": "کوٹے کا قدیم ترین عکس: {time}",
+    "healthRecoveryUnknown": "بحالی کا وقت نامعلوم",
+    "healthDetailsHint": "تفصیلات اور کارروائیوں کے لیے کلک کریں",
+    "healthFiveHour": "۵ گھنٹے",
+    "healthOverall": "مجموعی",
+    "healthAction": "کارروائی درکار",
+    "healthTitle": "اکاؤنٹس کی دستیابی",
+    "healthDrag": "فراہم کنندگان کی ترتیب بدلنے کے لیے کھینچیں",
+    "healthDragPosition": "{provider}, {count, plural, one {# میں سے مقام {position, number}} other {# میں سے مقام {position, number}}}",
+    "healthResetOrder": "طے شدہ ترتیب بحال کریں",
+    "healthPool": "{name} پول",
+    "healthOtherPool": "اسی اکاؤنٹ کا {pool}: {status} (باقی {remaining})",
+    "healthIncluded": "{count, plural, one {جزوی طور پر محدود # اکاؤنٹ شامل ہے} other {جزوی طور پر محدود # اکاؤنٹس شامل ہیں}}",
+    "healthBannerUnavailable": "{count, plural, one {# اکاؤنٹ عارضی طور پر غیر دستیاب ہے} other {# اکاؤنٹس عارضی طور پر غیر دستیاب ہیں}}",
+    "healthBannerAvailable": "{count, plural, one {# اکاؤنٹ دستیاب ہے} other {تمام # اکاؤنٹس دستیاب ہیں}}",
+    "healthLegendHide": "علامتوں کی وضاحت چھپائیں",
+    "healthLegendShow": "علامتوں کی وضاحت دکھائیں",
+    "healthLegendOk": "ٹھوس = باقی کوٹا؛ نیم شفاف = استعمال شدہ۔",
+    "healthLegendCooldown": "{window} کا کوٹا ختم۔ ٹھوس = گزرا انتظار؛ نیم شفاف = باقی انتظار۔",
+    "healthLegendAction": "اجازت ختم یا اکاؤنٹ بند؛ انتظار سے درست نہیں ہوگا۔",
+    "healthLegendPartial": "اب بھی قابل استعمال۔ پیلا سرا = ماڈل یا پول محدود۔",
+    "healthWaited": "انتظار مکمل: {percent}",
+    "healthWait": "مزید {duration} ({time} پر بحالی)",
+    "healthFastest": "جلد ترین بحالی {duration} بعد",
+    "healthRatio": "{available, plural, one {# / {active, number} دستیاب} other {# / {active, number} دستیاب}}",
+    "healthCd5": "۵ گھنٹے · انتظار کی مدت",
+    "healthCdw": "ہفتہ وار · انتظار کی مدت",
+    "healthRecentSuccessBypass": "حال ہی میں ایک درخواست کامیاب ہونے کی وجہ سے روٹنگ اس اکاؤنٹ کو اجازت دیتی ہے۔",
+    "healthPurchasedBalanceBypass": "شامل کوٹا ختم ہونے کے بعد خریدے گئے بیلنس سے استعمال جاری رہ سکتا ہے۔",
+    "healthCutoffAtRequest": "لائیو کوٹا کی حدیں درخواست کو روٹ کرتے وقت جانچی جاتی ہیں۔"
   },
   "modals": {
     "waitingAuth": "اجازت کا انتظار ہے",
@@ -10913,7 +11158,8 @@
       "message": "پیغام",
       "error": "خرابی",
       "completion": "تکمیل"
-    }
+    },
+    "statusFilter": "حیثیت"
   },
   "templateNames": {
     "simple-chat": "سادہ چیٹ",
@@ -11094,7 +11340,8 @@
     "minutesAgo": "{minutes}m پہلے",
     "hoursAgo": "{hours}h پہلے",
     "daysAgo": "{days}d پہلے",
-    "entries": "اندراجات"
+    "entries": "اندراجات",
+    "viewSwitcherAria": "کیش ویو"
   },
   "proxyConfigModal": {
     "levelGlobal": "عالمی",
@@ -11282,6 +11529,7 @@
     "tableHealth": "صحت (24 گھنٹے)",
     "tableUsage": "استعمال",
     "tableActions": "اقدامات",
+    "moreActions": "مزید کارروائیاں",
     "test": "جانچ کریں",
     "edit": "ترمیم کریں",
     "delete": "حذف کریں",
@@ -11361,7 +11609,7 @@
     "bulkImportNoValidEntries": "کوئی درست اندراجات نہیں ملے۔ فارمیٹ چیک کریں اور دوبارہ کوشش کریں۔",
     "bulkImportSuccess": "درآمد مکمل: {created} بنایا گیا، {updated} اپ ڈیٹ، {failed} ناکام",
     "bulkImportErrorLine": "لائن {line}: {reason}",
-    "bulkImportMaxExceeded": "زیادہ سے زیادہ 100 پراکسی فی درآمد",
+    "bulkImportMaxExceeded": "زیادہ سے زیادہ {max} پراکسی فی درآمد",
     "bulkImportPreview": "پیش نظارہ",
     "clearAssignment": "(واضح تفویض)",
     "bulkProxyAssignment": "بلک پراکسی اسائنمنٹ",
@@ -11422,6 +11670,7 @@
     "poolSetAsideKindIpQuota429": "IP شرح کی حد (429)",
     "poolSetAsideKindSlow": "سست جوابات",
     "poolSetAsideKindGeoBlocked": "علاقہ مسدود (403/451)",
+    "poolSetAsideKindOperatorReported": "آپریٹر کی جانب سے اطلاع دی گئی خرابی",
     "poolSetAsideUntil": "روٹیشن میں واپس {endsAt}",
     "poolSetAsideRepeat": "الگ رکھا گیا {count, plural, one {# بار} other {# بار}}",
     "poolUnknownAddress": "نامعلوم پتہ",
@@ -11531,7 +11780,6 @@
     "exportCodeTitle": "کوڈ برآمد کریں",
     "exportShort": "ایکسپورٹ",
     "noStateToExport": "برآمد کرنے کے لیے playground کی کوئی حالت دستیاب نہیں ہے۔",
-    "closeExportModal": "ایکسپورٹ ماڈل بند کریں",
     "close": "بند کریں",
     "exportRealKeyWarning": "سیکیورٹی وارننگ: ایکسپورٹ بلاک کر دی گئی ہے — آؤٹ پٹ میں ایک حقیقی API کی کا پتہ چلا ہے۔ براہ کرم اپنی API کی کو ری سیٹ کریں اور دوبارہ کوشش کریں۔",
     "placeholderHintPrefix": "تبدیل کریں",
@@ -11644,7 +11892,8 @@
       "nextButton": "اگلا",
       "runButton": "چلائیں",
       "promptPlaceholder": "اپنا پیغام درج کریں… (بھیجنے کے لیے Enter، نئی لائن کے لیے Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground موڈز"
   },
   "miniPlayground": {
     "endpoint": "اینڈ پوائنٹ",
@@ -11715,7 +11964,8 @@
     "assistant": "اسسٹنٹ",
     "errorLabel": "خرابی",
     "requestFailed": "درخواست ناکام ہو گئی",
-    "stop": "روکیں"
+    "stop": "روکیں",
+    "messageInputAria": "پیغام"
   },
   "requestLogger": {
     "recording": "ریکارڈنگ",
@@ -11902,8 +12152,18 @@
       "resilienceRotations": "{count} اکاؤنٹ گردشیں",
       "resilienceRetried": "خالی باری دوبارہ آزمائی گئی",
       "resilienceContinued": "اسٹریم کے درمیان سے دوبارہ شروع کیا گیا",
-      "resilienceRecovered": "لچک کی کارروائی سے بحال کیا گیا"
-    }
+      "resilienceRecovered": "لچک کی کارروائی سے بحال کیا گیا",
+      "conversationContext": "گفتگو کا سیاق و سباق",
+      "goToBottom": "نیچے جائیں",
+      "liveRefreshOn": "لائیو ریفریش: آن",
+      "liveRefreshOff": "لائیو ریفریش: آف",
+      "liveRefresh": "لائیو ریفریش",
+      "continuesFromParent": "پیرنٹ سے جاری ہے",
+      "continuesFrom": "{id} سے جاری ہے",
+      "viewConversation": "گفتگو دیکھیں",
+      "openConversation": "گفتگو {id} کھولیں"
+    },
+    "tableLabel": "درخواست کے لاگز"
   },
   "proxyLogger": {
     "filterAll": "سبھی",
@@ -11948,7 +12208,9 @@
     "colServedBy": "کی طرف سے فراہم کردہ",
     "filterTraffic": "ٹریفک",
     "filterTests": "ٹیسٹ",
-    "filterSource": "ماخذ"
+    "filterSource": "ماخذ",
+    "tableLabel": "پراکسی لاگز",
+    "sortLogs": "لاگز ترتیب دیں"
   },
   "endpointOptions": {
     "speech": "تقریر",
@@ -12033,7 +12295,8 @@
     "statusExhausted": "ختم شدہ",
     "statusAlerting": "انتباہ جاری",
     "statusError": "خرابی",
-    "moreSuffix": "+{count} مزید"
+    "moreSuffix": "+{count} مزید",
+    "feedFilterLabel": "ایونٹس فلٹر کریں"
   },
   "quotaShare": {
     "weightPercent": "وزن %",
@@ -12200,7 +12463,10 @@
     "ungroupedTitle": "بغیر گروپ کے",
     "ungroupedHint": "یہ پولز کسی معلوم گروپ کو تفویض نہیں کیے گئے ہیں۔ کسی پول کو حقیقی گروپ میں منتقل کرنے کے لیے اس میں ترمیم کریں۔",
     "removeFailed": "اس پول کو ہٹایا نہیں جا سکا۔",
-    "dismiss": "بند کریں"
+    "dismiss": "بند کریں",
+    "allocationsHeading": "مختصات",
+    "wizardRemoveDimension": "جہت ہٹائیں",
+    "wizardRemoveKey": "کلید ہٹائیں"
   },
   "plugins": {
     "title": "پلگ اِنز",
@@ -12358,7 +12624,8 @@
       "settingsUpdateFailed": "سیٹنگز اپ ڈیٹ ناکام ہو گئی",
       "serviceRevealApiKey": "{actor} نے {target} کے لیے API key ظاہر کی",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "خرابی بند کریں"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12491,7 +12758,21 @@
       "goNow": "ابھی جائیں",
       "message": "MITM Proxy اب AgentBridge کے تحت کام کرتا ہے۔",
       "title": "یہ صفحہ منتقل ہو گیا ہے"
-    }
+    },
+    "dnsOn": "DNS فعال",
+    "dnsOff": "DNS غیر فعال",
+    "showServerSettings": "سرور کی ترتیبات دکھائیں",
+    "hideServerSettings": "سرور کی ترتیبات چھپائیں",
+    "upstreamCaTesting": "جانچ جاری ہے…",
+    "removeMapping": "میپنگ ہٹائیں",
+    "mappingSourcePlaceholder": "مثلاً gemini-3.6-flash-medium، یا تمام غیر میپ شدہ ماڈلز کے لیے *",
+    "mappingWildcardHint": "ہر ایسے ماڈل کو، جس کی واضح میپنگ موجود نہیں، OmniRoute کے ذریعے منتخب ہدف تک روٹ کرنے کے لیے * کو ماخذ کے طور پر استعمال کریں۔ ماخذ کے عین مطابق میچ کو ہمیشہ * پر ترجیح دی جاتی ہے۔",
+    "wizardDetectingModels": "انٹرسیپٹ شدہ ٹریفک سے ماڈلز کا پتہ لگایا جا رہا ہے...",
+    "wizardDetectedModels": "انٹرسیپٹ شدہ ٹریفک میں {count, plural, one {# ماڈل} other {# ماڈلز}} ملے۔ جنہیں آپ شامل کرنا چاہتے ہیں انہیں منتخب کریں:",
+    "wizardSelectedModels": "{count, plural, one {# ماڈل} other {# ماڈلز}} منتخب ہیں۔ اگلی اسکرین پر آپ انہیں OmniRoute ماڈلز سے میپ کریں گے۔",
+    "wizardAddModels": "{count, plural, one {# ماڈل} other {# ماڈلز}} شامل کریں",
+    "wizardNoModelsDetected": "ابھی تک کسی ماڈل کا پتہ نہیں چلا۔ درخواست کرنے کے لیے {agent} استعمال کریں، پھر ٹریفک سے ماڈلز کا خودکار طور پر پتہ لگانے کے لیے یہ وزرڈ دوبارہ چلائیں۔",
+    "wizardNoModelsHint": "یا یہ وزرڈ بند کریں اور ایجنٹ کارڈ میں دستی طور پر میپنگز شامل کریں۔"
   },
   "providerStats": {
     "unknownError": "نامعلوم خرابی",
@@ -12521,7 +12802,11 @@
     "avgTtft": "اوسط TTFT",
     "avgTotal": "اوسط کل",
     "requestTelemetry": "درخواست ٹیلی میٹری",
-    "requestTelemetryDescription": "7-مرحلہ پائپ لائن کی تفصیلات (آخری 5 منٹ)"
+    "requestTelemetryDescription": "7-مرحلہ پائپ لائن کی تفصیلات (آخری 5 منٹ)",
+    "title": "فراہم کنندہ کے اعداد و شمار",
+    "description": "فی فراہم کنندہ اور فی ماڈل ٹریفک، تاخیر اور کامیابی کی شرحیں",
+    "combo": "کومبو",
+    "toggleModels": "{provider} کے ماڈلز دکھائیں"
   },
   "relay": {
     "title": "سرور لیس ریلے پراکسیز",
@@ -12682,7 +12967,18 @@
     "noRequestBody": "درخواست کی کوئی باڈی نہیں ہے۔",
     "noResponseBody": "جواب کی کوئی باڈی نہیں ہے۔",
     "formatted": "فارمیٹ شدہ",
-    "raw": "خام"
+    "raw": "خام",
+    "requestCount": "{count, plural, one {# درخواست} other {# درخواستیں}}",
+    "expandList": "فہرست پھیلائیں",
+    "collapseList": "فہرست سمیٹیں",
+    "snippetLanguage": "اسنیپٹ کی زبان",
+    "headersTable": "ہیڈرز",
+    "showSecrets": "خفیہ معلومات دکھائیں",
+    "maskSecrets": "خفیہ معلومات چھپائیں",
+    "llmNotAvailable": "اس درخواست کے لیے LLM میٹا ڈیٹا دستیاب نہیں ہے۔",
+    "llmStreamYes": "ہاں (SSE)",
+    "llmStreamNo": "نہیں",
+    "llmTotalTokens": "کل: {count} ٹوکنز"
   },
   "cliCommon": {
     "companion": {
@@ -13141,7 +13437,8 @@
     "colReliabilityHelp": "گزشتہ 24 گھنٹوں میں اس فراہم کنندہ کی جانب سے حقیقتاً جواب دی گئی کالز کا تناسب۔ ڈیش کا مطلب ہے کہ شرح بتانے کے لیے اس نے بہت کم ٹریفک سنبھالی۔",
     "reliabilitySample": "گزشتہ {hours} گھنٹوں میں {requests} میں سے {successes} کالز کامیاب ہوئیں",
     "reliabilityTooFew": "گزشتہ {hours} گھنٹوں میں صرف {requests} کالز — شرح بتانے کے لیے بہت کم",
-    "reliabilityNoTraffic": "گزشتہ 24 گھنٹوں میں کوئی کال ریکارڈ نہیں ہوئی"
+    "reliabilityNoTraffic": "گزشتہ 24 گھنٹوں میں کوئی کال ریکارڈ نہیں ہوئی",
+    "categoryFilter": "کام کا زمرہ"
   },
   "discovery": {
     "title": "فراہم کنندہ کی دریافت",
@@ -13166,7 +13463,11 @@
     "method": "طریقہ",
     "auth": "تصدیق",
     "feasibility": "امکان",
-    "models": "ماڈلز"
+    "models": "ماڈلز",
+    "provider": "فراہم کنندہ",
+    "status": "حیثیت",
+    "endpoint": "اینڈ پوائنٹ",
+    "actions": "کارروائیاں"
   },
   "noAuthProvider": {
     "title": "کسی تصدیق کی ضرورت نہیں ہے",
@@ -13215,7 +13516,8 @@
     "ownProxy": "اپنی پراکسی",
     "freeTierPause": "ماڈل {model} جاری (429), {time} پر واپس آئے گا",
     "freeTierPauseProvider": "جاری (429), {time} پر واپس آئے گا",
-    "freeTierPauseNote": "اس انسٹینس پر ان پراسیس پاز"
+    "freeTierPauseNote": "اس انسٹینس پر ان پراسیس پاز",
+    "proxyType": "پراکسی کی قسم"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13388,7 +13690,10 @@
         "description": "ایک پوشیدہ کامیابی کا انتظار ہے...",
         "criteria": "اس بیج کو ظاہر کرنے کے لیے پوشیدہ کامیابی مکمل کریں۔"
       }
-    }
+    },
+    "leaderboardTitle": "لیڈر بورڈ",
+    "leaderboardDescription": "آپ کی تمام API کلیدوں کی درجہ بندیاں اور کامیابیاں",
+    "badgeLocked": "مقفل"
   },
   "featureFlags": {
     "title": "فیچر فلیگز",
@@ -13629,6 +13934,7 @@
     "latency": "تاخیر",
     "quota": "کوٹہ",
     "rangeWindow": "{range} ونڈو",
+    "timeRange": "وقت کی حد",
     "runtimeHealthBlend": "رن ٹائم/صحت کا امتزاج",
     "averageResponseTime": "اوسط ردعمل کا وقت",
     "worstQuota": "بدترین کوٹہ",
@@ -13830,7 +14136,11 @@
     "learnMore": "مزید جانیں",
     "changelogLoadFailed": "چینج لاگ لوڈ نہیں ہو سکا۔ براہ کرم بعد میں دوبارہ کوشش کریں۔",
     "retry": "دوبارہ کوشش کریں",
-    "viewFullHistory": "GitHub پر مکمل ہسٹری دیکھیں"
+    "viewFullHistory": "GitHub پر مکمل ہسٹری دیکھیں",
+    "title": "خبریں اور تبدیلیوں کا ریکارڈ",
+    "description": "OmniRoute ٹیم کے اعلانات اور تازہ ترین ریلیز نوٹس",
+    "viewLabel": "دیکھیں",
+    "loadingNews": "اعلانات لوڈ ہو رہے ہیں..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14232,7 +14542,8 @@
       "never": "-",
       "failureCount": "ناکامیوں کی تعداد",
       "retryAfterMs": "بعد میں دوبارہ کوشش کریں (ms)",
-      "lastFailureKind": "آخری ناکامی کی قسم"
+      "lastFailureKind": "آخری ناکامی کی قسم",
+      "lastClose": "آخری بند"
     },
     "empty": {
       "title": "کوئی کنکشن نہیں",
@@ -14380,7 +14691,9 @@
       "circuitBreakerState": "پرووائیڈر سرکٹ بریکر کی حالت",
       "lastUpdate": "آخری اپ ڈیٹ: {timestamp}",
       "uptimeMinutes": "{minutes}منٹ",
-      "uptimeHoursMinutes": "{hours}گھنٹے {minutes}منٹ"
+      "uptimeHoursMinutes": "{hours}گھنٹے {minutes}منٹ",
+      "breakerClosed": "بند",
+      "breakerNotClosed": "کھلا یا نصف کھلا"
     },
     "statusPages": {
       "400": {
@@ -14455,6 +14768,9 @@
         "primaryAction": "نگہداشت کی تفصیلات",
         "secondaryAction": "نظام کی حیثیت"
       }
+    },
+    "miniapp": {
+      "askAnything": "کچھ بھی پوچھیں…"
     }
   },
   "kiroAuthModal": {
@@ -14488,7 +14804,10 @@
     "importing": "درآمد ہو رہا ہے...",
     "apiKeyPlaceholder": "اپنی {providerLabel} API کلید پیسٹ کریں...",
     "apiKeyStoredDescription": "طویل مدتی بیئرر اسناد کے طور پر محفوظ کردہ خفیہ کردہ۔ کوئی ریفریش فلو نہیں ہے۔",
-    "apiKeyRegionDescription": "کیز کے لیے AWS علاقہ (ڈیفالٹ: us-east-1)",
+    "apiKeyRegionAuto": "خودکار طور پر شناخت کریں (تجویز کردہ)",
+    "apiKeyRegionUsEast1": "امریکہ مشرق (شمالی ورجینیا)",
+    "apiKeyRegionEuCentral1": "یورپ (فرینکفرٹ)",
+    "apiKeyRegionAutoDescription": "خودکار شناخت پہلے امریکہ مشرق، پھر یورپ (فرینکفرٹ) آزماتی ہے اور وہ ریجن محفوظ کرتی ہے جہاں کلید کام کرتی ہے۔",
     "validating": "جانچ رہے ہیں...",
     "validateAndSaveApiKey": "API کی کلید کی توثیق کریں اور محفوظ کریں",
     "errorAutoDetect": "ٹوکین خودکار طور پر شناخت نہیں کیا جا سکا",
@@ -14548,7 +14867,10 @@
     "distributeProxies": {
       "distributing": "تقسیم کیا جا رہا ہے...",
       "complete": "مکمل کریں",
-      "defaultLabel": "پراکسیز تقسیم کریں"
+      "defaultLabel": "پراکسیز تقسیم کریں",
+      "confirmMessage": "اس گروپ کے ہر اکاؤنٹ کو محفوظ شدہ پراکسیز تفویض کریں؟ یہ موجودہ اکاؤنٹ تفویضات کو بدل دے گا اور پراکسی روٹنگ فعال کر دے گا، بشمول غیر فعال اکاؤنٹس کے لیے۔",
+      "confirmDistribute": "پراکسیز تقسیم کریں",
+      "cancel": "منسوخ کریں"
     }
   },
   "providerTest": {
@@ -14639,7 +14961,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} نظر آ رہے ہیں / کل {total}",
+    "modeLabel": "منظر کا موڈ",
+    "jumpToNow": "موجودہ وقت پر جائیں، ابھی کی لائن دوبارہ {position}% مقام پر آ جائے گی",
+    "laneReuse": "لین کا دوبارہ استعمال",
+    "laneReuseLabel": "لین کے دوبارہ استعمال کی مدت (منٹ)",
+    "laneReuseHint": "ایک ہی گفتگو کی شناخت رکھنے والی درخواستیں ٹائم لائن کی اسی قطار میں رہتی ہیں، بشرطیکہ ان کے درمیان وقفہ اتنے منٹ سے کم ہو۔",
+    "laneReuseUnit": "منٹ",
+    "autoRefresh": "خودکار تازہ کاری",
+    "autoRefreshLabel": "خودکار تازہ کاری کا وقفہ (سیکنڈ)",
+    "autoRefreshHint": "ٹائم لائن سرور سے درخواستوں کی فہرست کتنی بار دوبارہ حاصل کرتی ہے۔",
+    "autoRefreshUnit": "سیکنڈ",
+    "zoomOut": "زوم آؤٹ",
+    "zoomIn": "زوم اِن"
   },
   "metadata": {
     "compressionTitle": "کمپریشن",
@@ -14843,6 +15178,83 @@
     "dismissAriaLabel": "بند کریں"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "/v1/models کیٹلاگ میں سوچنے کی سطح کی مختلف صورتوں (مثلاً -low، -medium، -high) کی تخلیق غیر فعال کریں۔",
+  "teamCosts": {
+    "title": "ٹیم کی لاگت",
+    "subtitle": "مشترکہ نرم بجٹ اور کیٹلاگ کی لاگت کے تخمینے منظم کریں۔",
+    "refresh": "ریفریش کریں",
+    "create": "ٹیم بنائیں",
+    "edit": "ٹیم میں ترمیم کریں",
+    "archive": "آرکائیو کریں",
+    "selectTeam": "ٹیمیں",
+    "searchTeams": "ٹیمیں تلاش کریں",
+    "statusFilter": "ٹیم کی حالت",
+    "active": "فعال",
+    "archived": "آرکائیو شدہ · صرف پڑھنے کے لیے",
+    "allTeams": "تمام ٹیمیں",
+    "noTeams": "کوئی مماثل ٹیم نہیں۔",
+    "selectHint": "لاگت دیکھنے کے لیے ٹیم بنائیں یا منتخب کریں۔",
+    "loading": "ٹیم کی لاگت لوڈ ہو رہی ہے…",
+    "budgetTitle": "موجودہ نرم بجٹ",
+    "budgetSubtitle": "کامیاب ریکارڈ شدہ استعمال · رولنگ ونڈو · رپورٹ کی تاریخوں سے آزاد",
+    "archivedBudget": "آرکائیو شدہ: بجٹ کا نفاذ غیر فعال ہے۔ تاریخی رپورٹیں دستیاب رہتی ہیں۔",
+    "unlimited": "لامحدود — کوئی مشترکہ نرم بجٹ ترتیب نہیں دیا گیا۔",
+    "budgetUnavailable": "بجٹ کی حالت دستیاب نہیں۔ دوبارہ کوشش کے لیے ریفریش کریں۔",
+    "used": "کامیاب استعمال",
+    "maximum": "بجٹ کی زیادہ سے زیادہ حد",
+    "remaining": "معلوم بقایا",
+    "resets": "ری سیٹ ہوگا",
+    "unpricedBudget": "کامیاب استعمال کے کچھ حصے کی قیمت نامعلوم ہے۔ معلوم مجموعہ نامکمل ہے؛ بجٹ کا نفاذ اس ونڈو کو حد سے تجاوز شدہ مانتا ہے۔",
+    "overBudget": "بجٹ کی حد پہنچ گئی یا تجاوز ہو گیا · {amount} زیادہ",
+    "reportTitle": "استعمال کی رپورٹ",
+    "reportSubtitle": "تمام کوششیں · USD میں کیٹلاگ تخمینہ، انوائس نہیں · مکمل UTC تاریخیں",
+    "reportPeriod": "رپورٹ کی مدت",
+    "day1": "1 دن",
+    "day7": "7 دن",
+    "day30": "30 دن",
+    "allTime": "تمام وقت",
+    "reportSpend": "رپورٹ کا تخمینی خرچ",
+    "requests": "درخواستیں",
+    "assignedKeys": "تفویض کردہ کلیدیں",
+    "unpricedReport": "اس رپورٹ میں نامعلوم قیمتیں ہیں۔ تخمینی خرچ نامکمل ہے۔",
+    "breakdown": "API کلید کے لحاظ سے لاگت",
+    "noUsage": "اس رپورٹ کی مدت میں کوئی استعمال نہیں۔",
+    "keyName": "API کلید کا نام",
+    "tokens": "ان پٹ + آؤٹ پٹ ٹوکنز",
+    "unnamedKey": "بے نام یا حذف شدہ کلید",
+    "unpriced": "نامعلوم قیمت",
+    "members": "رکنیت",
+    "memberSubtitle": "رکنیت بدلنے سے تاریخی خرچ اصل ٹیم کے پاس ہی رہتا ہے۔",
+    "searchKeys": "کلیدیں یا موجودہ مالکان تلاش کریں",
+    "chooseKey": "ایک API کلید منتخب کریں",
+    "unassigned": "تفویض نہیں",
+    "ownership": "موجودہ بلنگ ٹیم: {team}",
+    "assign": "تفویض کریں",
+    "remove": "ہٹائیں",
+    "noMembers": "کوئی موجودہ رکن نہیں۔ تاریخی استعمال اب بھی بجٹ میں شمار ہو سکتا ہے۔",
+    "assignedAt": "{date} کو تفویض کیا گیا (UTC)",
+    "name": "ٹیم کا نام",
+    "description": "تفصیل",
+    "enableBudget": "مشترکہ نرم بجٹ فعال کریں",
+    "amount": "بجٹ کی رقم (USD)",
+    "duration": "رولنگ بجٹ ونڈو",
+    "cancel": "منسوخ کریں",
+    "save": "محفوظ کریں",
+    "confirm": "تصدیق کریں",
+    "transferTitle": "کلید کی منتقلی کی تصدیق کریں",
+    "transferMessage": "کیا یہ کلید “{source}” سے “{destination}” میں منتقل کریں؟ تاریخی خرچ اصل ٹیم کے پاس رہتا ہے۔",
+    "removeTitle": "کلید کی تفویض ہٹائیں",
+    "removeMessage": "کیا یہ کلید “{team}” سے ہٹائیں؟ تاریخی خرچ اسی ٹیم میں رہتا ہے۔",
+    "archiveTitle": "ٹیم آرکائیو کریں",
+    "archiveMessage": "کیا “{team}” کو آرکائیو کریں؟ تمام موجودہ بندھن بند ہو جاتے ہیں اور بجٹ کا نفاذ رک جاتا ہے۔ تاریخی رپورٹیں دستیاب رہتی ہیں۔",
+    "invalidName": "نام (1–200 حروف) اور زیادہ سے زیادہ 2,000 حروف کی تفصیل درج کریں۔",
+    "invalidAmount": "صفر سے بڑی محدود بجٹ رقم درج کریں۔",
+    "unauthorized": "جاری رکھنے کے لیے انتظامی ڈیش بورڈ میں سائن اِن کریں۔",
+    "forbidden": "آپ کو ٹیمیں منظم کرنے کی اجازت نہیں۔ آپ کا اندراج محفوظ ہے۔",
+    "notFound": "یہ ٹیم یا تفویض اب موجود نہیں۔",
+    "conflict": "تفویض یا ٹیم بدل گئی ہے۔ دوبارہ کوشش سے پہلے ریفریش کریں اور موجودہ ملکیت کی تصدیق کریں۔",
+    "failed": "درخواست ناکام ہو گئی۔ آپ کا اندراج محفوظ ہے؛ براہِ کرم دوبارہ کوشش کریں۔",
+    "partialBudget": "کچھ محفوظ کردہ روزانہ بکٹ ونڈو کی حد سے ٹکراتے ہیں اور درست طور پر تقسیم نہیں ہو سکتے۔ دکھایا گیا خرچ نامکمل ہے؛ بقیہ گنجائش دستیاب نہیں۔ موجودہ نرم بجٹ پالیسی میں کوئی تبدیلی نہیں۔"
+  },
   "connectionTest": {
     "title": "آزمائشی پیغام",
     "description": "اس اکاؤنٹ کے ذریعے ایک حقیقی درخواست بھیجیں۔ اس میں کوٹے کی معمولی مقدار استعمال ہوتی ہے اور فراہم کنندہ کے لحاظ سے استعمال کی ونڈو شروع ہو سکتی ہے۔",
@@ -14864,5 +15276,46 @@
     "saveMessage": "پیغام محفوظ کریں",
     "defaultModel": "ڈیفالٹ آزمائشی ماڈل",
     "defaultModelHint": "اس اکاؤنٹ کے لیے ٹیسٹ پیغام کے بٹنوں کے ذریعے خودکار طور پر استعمال کیا جاتا ہے۔ کنکشن کے ساتھ محفوظ کیا جاتا ہے؛ کوئی پیغام نہیں بھیجا جاتا۔"
+  },
+  "providerTransfer": {
+    "open": "منتخب منتقلی",
+    "title": "فراہم کنندگان کی منتخب منتقلی",
+    "description": "منتخب فراہم کنندہ اکاؤنٹس (اور ان کے استعمال کردہ حسب ضرورت فراہم کنندہ نوڈز) کو کسی دوسری OmniRoute تنصیب میں منتقل کریں۔ فائل ایک پاس فریز سے سیل ہوتی ہے، اور درآمد کبھی کچھ حذف نہیں کرتی۔",
+    "exportTab": "برآمد",
+    "importTab": "درآمد",
+    "searchPlaceholder": "اکاؤنٹس تلاش کریں…",
+    "selectAll": "سب منتخب کریں",
+    "clearSelection": "صاف کریں",
+    "selectedCount": "{count} منتخب",
+    "noAccounts": "کوئی مماثل فراہم کنندہ اکاؤنٹ نہیں۔",
+    "loadFailed": "فراہم کنندہ اکاؤنٹس لوڈ نہیں ہو سکے۔",
+    "passphrase": "پاس فریز",
+    "passphraseConfirm": "پاس فریز کی تصدیق کریں",
+    "passphraseHint": "کم از کم {min} حروف۔ یہ کبھی محفوظ نہیں ہوتا؛ اس کے بغیر فائل نہیں کھلتی۔",
+    "passphraseMismatch": "پاس فریز مماثل نہیں ہیں۔",
+    "oauthWarning": "جو OAuth اکاؤنٹس ریفریش ٹوکن بدلتے ہیں وہ دوسری تنصیب کے ریفریش کرنے پر ایک تنصیب میں کام کرنا بند کر سکتے ہیں۔",
+    "acknowledge": "میں سمجھتا/سمجھتی ہوں کہ اس فائل میں منتخب اکاؤنٹس کی API کلیدیں اور ٹوکن اس پاس فریز سے سیل شدہ موجود ہیں۔",
+    "exportButton": "منتخب برآمد کریں",
+    "exportDone": "{count} اکاؤنٹس برآمد ہو گئے۔",
+    "exportFailed": "برآمد ناکام رہی۔",
+    "chooseFile": "منتقلی فائل منتخب کریں",
+    "invalidFile": "یہ OmniRoute فراہم کنندہ منتقلی فائل نہیں ہے۔",
+    "previewButton": "پیش نظارہ",
+    "previewFailed": "منتقلی فائل پڑھی نہیں جا سکی۔",
+    "summary": "اس فائل میں {connections} اکاؤنٹس اور {nodes} فراہم کنندہ نوڈز ہیں۔ کچھ بھی حذف نہیں ہوگا۔",
+    "statusNew": "نیا",
+    "statusIdentical": "یکساں",
+    "statusConflict": "تصادم",
+    "statusUnsupported": "معاونت نہیں",
+    "actionAdd": "شامل کریں",
+    "actionSkip": "چھوڑیں",
+    "actionReplace": "تبدیل کریں",
+    "providerNode": "فراہم کنندہ نوڈ",
+    "importButton": "درآمد",
+    "importFailed": "درآمد ناکام رہی۔",
+    "importSuccess": "{connections} اکاؤنٹس اور {nodes} فراہم کنندہ نوڈز درآمد ہوئے؛ {skipped} چھوڑ دیے گئے۔"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "موجودہ مقام سے شروع کریں (موجودہ لاگز چھوڑ دیں)"
   }
 }

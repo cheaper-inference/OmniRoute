@@ -123,7 +123,9 @@
       "maxCostOpt": "Максимален разход на ден (USD)",
       "allowedModelsOpt": "Списък с разрешени модели, разделени със запетаи",
       "nothingToSet": "Не са предоставени полета за политиката. Използвайте --rate-limit, --max-cost или --allowed-models.",
-      "updated": "Политиката е актуализирана."
+      "updated": "Политиката е актуализирана.",
+      "modelAccessModeOpt": "Режим на достъп до модели (all | restricted)",
+      "unrestrictedOpt": "Разрешаване на всички модели (--model-access-mode all)"
     },
     "expiration": {
       "title": "Изтичане на валидността на ключа",

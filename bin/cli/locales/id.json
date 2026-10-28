@@ -123,7 +123,9 @@
       "maxCostOpt": "Biaya maksimum per hari (USD)",
       "allowedModelsOpt": "Daftar model yang diizinkan, dipisahkan dengan koma",
       "nothingToSet": "Tidak ada kolom kebijakan yang diberikan. Gunakan --rate-limit, --max-cost, atau --allowed-models.",
-      "updated": "Kebijakan telah diperbarui."
+      "updated": "Kebijakan telah diperbarui.",
+      "modelAccessModeOpt": "Mode akses model (all | restricted)",
+      "unrestrictedOpt": "Izinkan semua model (--model-access-mode all)"
     },
     "expiration": {
       "title": "Kedaluwarsa Kunci",

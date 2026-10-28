@@ -123,7 +123,9 @@
       "maxCostOpt": "Costo massimo giornaliero (USD)",
       "allowedModelsOpt": "Elenco separato da virgole dei modelli consentiti",
       "nothingToSet": "Nessun campo dei criteri specificato. Usa --rate-limit, --max-cost o --allowed-models.",
-      "updated": "Criteri aggiornati."
+      "updated": "Criteri aggiornati.",
+      "modelAccessModeOpt": "Modalità di accesso ai modelli (all | restricted)",
+      "unrestrictedOpt": "Consenti tutti i modelli (--model-access-mode all)"
     },
     "expiration": {
       "title": "Scadenza della chiave",

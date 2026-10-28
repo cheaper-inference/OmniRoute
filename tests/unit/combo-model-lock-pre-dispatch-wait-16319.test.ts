@@ -23,12 +23,16 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const core = await import("../../src/lib/db/core.ts");
 const { resetAllComboMetrics } = await import("../../open-sse/services/comboMetrics.ts");
-const { recordModelLockoutFailure, clearAllModelLockouts } =
+const { recordModelLockoutFailure, clearAllModelLockouts, getModelLockoutInfo, isModelLocked } =
   await import("../../open-sse/services/accountFallback.ts");
 
 const log = { info() {}, warn() {}, error() {}, debug() {} };
 
-function run(comboOverrides: Record<string, unknown>, settings: Record<string, unknown> | null) {
+function run(
+  comboOverrides: Record<string, unknown>,
+  settings: Record<string, unknown> | null,
+  isModelAvailable: () => Promise<boolean> = async () => true
+) {
   const calls: string[] = [];
   const promise = handleComboChat({
     body: {},
@@ -46,7 +50,7 @@ function run(comboOverrides: Record<string, unknown>, settings: Record<string, u
         headers: { "content-type": "application/json" },
       });
     },
-    isModelAvailable: async () => true,
+    isModelAvailable,
     log,
     settings,
     allCombos: null,
@@ -82,6 +86,62 @@ test("a short transient model lock is waited out and the combo re-dispatches (#1
   assert.equal(res.status, 200);
   assert.deepEqual(calls, ["zai/glm-5.3-flash"], "the target must be retried after the wait");
   assert.ok(elapsed >= 1100, `expected to wait out the ~1.2s lock, took ${elapsed}ms`);
+});
+
+test("an unpinned target is not skipped while another connection is free (#16551)", async () => {
+  recordModelLockoutFailure("zai", "connection-1", "glm-5.3-flash", "rate_limit", 429, 0, null, {
+    exactCooldownMs: 1200,
+  });
+  assert.equal(isModelLocked("zai", "", "glm-5.3-flash"), false);
+  assert.equal(getModelLockoutInfo("zai", "connection-2", "glm-5.3-flash"), null);
+
+  const started = Date.now();
+  const { promise, calls } = run({}, null);
+  const res = await promise;
+  const elapsed = Date.now() - started;
+
+  assert.equal(res.status, 200);
+  assert.deepEqual(calls, ["zai/glm-5.3-flash"], "the pre-dispatch gate must not skip");
+  assert.ok(elapsed < 1000, `a free connection must not be waited out, took ${elapsed}ms`);
+});
+
+test("every locked connection waits on the earliest transient expiry (#16551)", async () => {
+  recordModelLockoutFailure(
+    "zai",
+    "connection-quota",
+    "glm-5.3-flash",
+    "quota_exhausted",
+    429,
+    0,
+    null,
+    {
+      exactCooldownMs: 400,
+    }
+  );
+  recordModelLockoutFailure("zai", "connection-1", "glm-5.3-flash", "rate_limit", 429, 0, null, {
+    exactCooldownMs: 4000,
+  });
+  recordModelLockoutFailure("zai", "connection-2", "glm-5.3-flash", "rate_limit", 429, 0, null, {
+    exactCooldownMs: 1200,
+  });
+
+  const started = Date.now();
+  const { promise, calls } = run(
+    {},
+    {
+      resilienceSettings: {
+        comboCooldownWait: { enabled: true, maxWaitMs: 2000, maxAttempts: 1, budgetMs: 300_000 },
+      },
+    },
+    async () => false
+  );
+  const res = await promise;
+  const elapsed = Date.now() - started;
+
+  assert.equal(calls.length, 0, "a fully locked pool must not dispatch");
+  assert.ok(elapsed >= 1100, `expected the earliest ~1.2s transient lock, took ${elapsed}ms`);
+  assert.ok(elapsed < 2500, `must not wait out the later 4s lock, took ${elapsed}ms`);
+  assert.equal(res.status, 429);
 });
 
 test("a quota model lock is never waited out and advertises no model-lock retry-after", async () => {

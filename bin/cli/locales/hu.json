@@ -123,7 +123,9 @@
       "maxCostOpt": "Napi maximális költség (USD)",
       "allowedModelsOpt": "Engedélyezett modellek vesszővel elválasztott listája",
       "nothingToSet": "Nincsenek megadva házirendmezők. Használja a --rate-limit, --max-cost vagy --allowed-models kapcsolót.",
-      "updated": "A házirend frissítve."
+      "updated": "A házirend frissítve.",
+      "modelAccessModeOpt": "Modellhozzáférési mód (all | restricted)",
+      "unrestrictedOpt": "Minden modell engedélyezése (--model-access-mode all)"
     },
     "expiration": {
       "title": "Kulcs lejárata",

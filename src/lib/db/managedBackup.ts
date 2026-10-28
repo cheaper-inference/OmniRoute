@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { SqliteAdapter } from "./adapters/types";
 import { pruneBackupDirectory, resolveDbBackupRetention } from "./backupRetention";
+import { chmodQuiet, DB_SECRET_DIR_MODE, DB_SECRET_FILE_MODE } from "./filePermissions";
 
 interface SqlJsSnapshotDatabase {
   constructor: unknown;
@@ -43,7 +44,7 @@ export function createManagedDbBackup(
 ): boolean {
   try {
     if (!fs.existsSync(backupDir)) {
-      fs.mkdirSync(backupDir, { recursive: true });
+      fs.mkdirSync(backupDir, { recursive: true, mode: DB_SECRET_DIR_MODE });
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -68,6 +69,8 @@ export function createManagedDbBackup(
       }
     } else {
       db.exec(`VACUUM INTO '${escapedBackupPath}'`);
+      // SQLite creates the VACUUM INTO target itself, so it inherits the umask.
+      chmodQuiet(backupPath, DB_SECRET_FILE_MODE);
     }
     console.log(`[DB] Backup created (${reason}): ${backupPath}`);
 

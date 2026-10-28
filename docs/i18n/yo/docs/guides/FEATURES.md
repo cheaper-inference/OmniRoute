@@ -296,15 +296,15 @@ OmniRoute ti ń ṣe àtìlẹ́yìn fún **àwọn WebSocket client tó bá Ope
 
 ---
 
-## 🔑 Àwọn Tókìnù Ìṣiṣẹ́pọ̀ & Àkójọpọ̀ Àtòjọ-ètò _(v3.6.6+)_
+## 🔑 Àwọn Tókìnì Ìṣiṣẹ́pọ̀ & Àkójọpọ̀ Àtòjọ́-ètò _(v3.6.6+)_
 
-Ìráàyèsí láti ọ̀pọ̀ ẹ̀rọ àti láti ọ̀dọ̀ àwọn olùṣiṣẹ́ àgbékalẹ̀ òde ti ṣeé ṣe báyìí nípasẹ̀ **àwọn tókìnù ìṣiṣẹ́pọ̀ tí a fi ààlà sí**:
+Ìráyè lórí ọ̀pọ̀ ẹ̀rọ àti ti olùṣàkóso ìta ti ṣeé ṣe báyìí nípasẹ̀ **àwọn tókìnì ìṣiṣẹ́pọ̀ tí a fi ààlà sí**:
 
-- **`POST /api/sync/tokens`** — Ṣẹ̀dá tókìnù ìṣiṣẹ́pọ̀ tuntun (tí a fi ààlà sí, pẹ̀lú àkókò ìparí tí kò pọn dandan)
-- **`DELETE /api/sync/tokens/:id`** — Fagilé tókìnù kan
-- **`GET /api/sync/bundle`** — Ṣe àgbàsílẹ̀ àwòrán-ipò JSON tí a fi ẹ̀yà àti ETag ṣe àmì rẹ̀, tó ní gbogbo àwọn àtòjọ-ètò tí kì í ṣe àṣírí (a fi àwọn ọ̀rọ̀ aṣínà pamọ́)
+- **`POST /api/sync/tokens`** — Ṣẹ̀dá tókìnì ìṣiṣẹ́pọ̀ tuntun (tí a fi ààlà sí, pẹ̀lú àkókò ìparí tí kò pọn dandan)
+- **`DELETE /api/sync/tokens/:id`** — Fagilé tókìnì kan
+- **`GET /api/sync/bundle`** — Ṣàtẹ̀jáde àwòrán JSON tí ó ní ẹ̀yà, tí ETag sì jẹ́ kọ́kọ́rọ́ rẹ̀, ti àtòjọ́-ètò náà (a fi tókìnì ìṣiṣẹ́pọ̀ nìkan ṣe ìfàṣẹsí). A máa yọ àwọn ètò ìfàṣẹsí bíi ọ̀rọ̀ aṣínà pánẹ́ẹ̀lì ìṣàkóso kúrò, ṣùgbọ́n àwọn ẹ̀rí ìdánimọ̀ olùpèsè àti àwọn kọ́kọ́rọ́ API wà nínú rẹ̀, nítorí náà ka fáìlì náà sí àṣírí
 
-`src/lib/sync/bundle.ts` ló ń kọ àkójọpọ̀ àtòjọ-ètò náà. Àwọn olùlò máa ń fi àkọlé ìdáhùn `ETag` wé ara wọn láti ṣàwárí àwọn ìyípadà láìní láti tún gbogbo ẹrù dátà náà ṣe àgbàsílẹ̀.
+`src/lib/sync/bundle.ts` ni a fi ń kọ àkójọpọ̀ àtòjọ́-ètò náà. Àwọn olùlò máa ń fi àkọlé èsì `ETag` wé ara wọn láti ṣàwárí àwọn ìyípadà láìṣe àtẹ̀jáde gbogbo àkóónú náà lẹ́ẹ̀kan sí i. Láti CLI, `omniroute sync bundle <outPath> --token <syncToken>` (tàbí `OMNIROUTE_SYNC_TOKEN`) máa ń fi pamọ́ sínú fáìlì tí olówó rẹ̀ nìkan lè lò.
 
 ---
 

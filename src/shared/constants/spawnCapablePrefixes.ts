@@ -43,9 +43,10 @@ export const SPAWN_CAPABLE_PREFIXES: ReadonlyArray<string> = [
   "/api/cli-tools/pi-settings", // GET probes the `pi` binary via getCliRuntimeStatus()
   "/api/cli-tools/smelt-settings", // GET probes the `smelt` binary via getCliRuntimeStatus()
   "/api/cli-tools/status", // GET calls getCliRuntimeStatus() per CLI_TOOL_IDS entry
+  "/api/cli-tools/whycodes-settings", // GET probes the `whycodes` binary via getCliRuntimeStatus()
   "/api/services/", // T-10: can run npm install + spawn node processes
   "/api/version-manager/", // downloads, unpacks and runs the CLIProxyAPI binary (Hard Rules #15 + #17)
-  "/api/tunnels/cloudflared", // POST installs/starts/stops cloudflared; safe methods remain read-only exempt
+  "/api/tunnels/cloudflared", // POST installs/starts/stops cloudflared; safe methods are exempt and only probe the binary for loopback/LAN callers
   "/api/tunnels/tailscale/disable", // stops Funnel and may stop tailscaled/Tailscale service
   "/api/tunnels/tailscale/enable", // starts tailscaled/login/funnel subprocesses
   "/api/tunnels/tailscale/install", // downloads/installs Tailscale and starts its daemon

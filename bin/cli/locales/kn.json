@@ -123,7 +123,9 @@
       "maxCostOpt": "ಪ್ರತಿ ದಿನದ ಗರಿಷ್ಠ ವೆಚ್ಚ (USD)",
       "allowedModelsOpt": "ಅನುಮತಿಸಲಾದ ಮಾದರಿಗಳ ಅಲ್ಪವಿರಾಮದಿಂದ ಬೇರ್ಪಡಿಸಿದ ಪಟ್ಟಿ",
       "nothingToSet": "ಯಾವುದೇ ನೀತಿ ಕ್ಷೇತ್ರಗಳನ್ನು ಒದಗಿಸಲಾಗಿಲ್ಲ. --rate-limit, --max-cost, ಅಥವಾ --allowed-models ಬಳಸಿ.",
-      "updated": "ನೀತಿಯನ್ನು ನವೀಕರಿಸಲಾಗಿದೆ."
+      "updated": "ನೀತಿಯನ್ನು ನವೀಕರಿಸಲಾಗಿದೆ.",
+      "modelAccessModeOpt": "ಮಾದರಿ ಪ್ರವೇಶ ಮೋಡ್ (all | restricted)",
+      "unrestrictedOpt": "ಎಲ್ಲಾ ಮಾದರಿಗಳನ್ನು ಅನುಮತಿಸಿ (--model-access-mode all)"
     },
     "expiration": {
       "title": "ಕೀ ಅವಧಿ ಮುಕ್ತಾಯ",

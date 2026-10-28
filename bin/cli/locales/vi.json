@@ -123,7 +123,9 @@
       "maxCostOpt": "Chi phí tối đa mỗi ngày (USD)",
       "allowedModelsOpt": "Danh sách các mô hình được phép, phân tách bằng dấu phẩy",
       "nothingToSet": "Chưa cung cấp trường chính sách nào. Hãy sử dụng --rate-limit, --max-cost hoặc --allowed-models.",
-      "updated": "Đã cập nhật chính sách."
+      "updated": "Đã cập nhật chính sách.",
+      "modelAccessModeOpt": "Chế độ truy cập mô hình (all | restricted)",
+      "unrestrictedOpt": "Cho phép tất cả mô hình (--model-access-mode all)"
     },
     "expiration": {
       "title": "Thời hạn khóa",

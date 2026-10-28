@@ -72,6 +72,16 @@ curl -i \
 
 Raktas be `manage` aprėpties (arba be Bearer) grąžina `403 LOCAL_ONLY`. Susijusio prefikso `/api/cli-tools/runtime/*` tyčia NEGALIMA apeiti — žr. [Maršrutų apsaugos lygiai — `manage` aprėpties išimtis](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origin tikrinimas
+
+Po autentifikavimo kiekvienos užklausos į `/api/mcp/*` — transportų ir valdymo maršrutų, tokių kaip `status`, `tools`, `audit`, `restart` — `Origin` antraštė tikrinama nepriklausomai nuo kviečiančiojo (API raktas, CLI žetonas, valdymo skydelio sesija ar anoniminis loopback išjungus prisijungimą). Tai MCP Streamable HTTP specifikacijos reikalaujama apsauga nuo DNS rebinding.
+
+- **Nėra `Origin` antraštės** → leidžiama. OmniRoute CLI, SDK ir IDE klientai jos nesiunčia.
+- **Leidžiamas `Origin`** → `localhost` / `127.0.0.1` / `[::1]` bet kuriame prievade arba paties OmniRoute viešasis origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, patikimo atvirkštinio tarpinio serverio persiųstas origin (`OMNIROUTE_TRUST_PROXY`, tik kai nenustatytas base URL) arba tiesiogiai pasiekiamas loopback/LAN IP serveris. Vien `Host` antraštė niekada nepadaro origin patikimu.
+- **Bet koks kitas `Origin`, įskaitant `null`** → `403` su JSON-RPC klaidos turiniu: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Valdymo skydelio sesija su galiojančiu CSRF žetonu vis tiek priimama, kaip ir kitų valdymo skydelio rašymų atveju.
+
+Naršyklės MCP klientui už atvirkštinio tarpinio serverio reikia `OMNIROUTE_PUBLIC_BASE_URL`; kitiems origin leidžiamųjų sąrašo nėra. Išankstinė CORS užklausa (`OPTIONS`) pagal Origin netikrinama; po jos einanti užklausa — tikrinama.
+
 ## IDE konfigūracija
 
 Žr. [MCP kliento konfigūraciją](../guides/SETUP_GUIDE.md#mcp-client-configuration), skirtą Claude Desktop,
@@ -291,24 +301,26 @@ SSE ir srautinis HTTP transportas blokuojami, kol MCP serveris neįjungtas nusta
 
 ## Autentifikavimas ir aprėptys
 
-MCP įrankių iškvietimai nuskaito aprėpties eilutes iš iškvietėjo. Ši patikra yra viena iš trijų nepriklausomų vardų sričių. Vienos tikrintuvo patikros sėkmė nereiškia kitų patikrų sėkmės. Taisyklės aprašytos skyriuje [Trys aprėpčių vardų sritys](#three-scope-namespaces).
+MCP įrankių iškvietimai nuskaito aprėpties eilutes iš iškvietėjo. Ši patikra yra viena iš trijų
+nepriklausomų vardų sričių. Vienos tikrinimo priemonės patvirtinimas nereiškia kitų patvirtinimo.
+Taisyklės pateiktos skyriuje [Trys aprėpčių vardų sritys](#three-scope-namespaces).
 Įrankių katalogas pateiktas skyriuje [MCP įrankių aprėptys](#mcp-tool-scopes).
 
 ### Trys aprėpčių vardų sritys
 
-`manage` API rakte, `read:compression` MCP įrankyje ir `read` prieigos prieigos rakte
-`oma_live_…` yra trys skirtingi leidimai. Iškvietėjai, siunčiantys `read`
-prieigos raktą į valdymo maršrutą, kuris keičia duomenis, gauna HTTP 403
+`manage` API rakte, `read:compression` MCP įrankyje ir `read`
+`oma_live_…` prieigos prieigos rakte yra trys skirtingi leidimai. Iškvietėjai, kurie siunčia `read`
+prieigos raktą į būseną keičiančią valdymo galinę prieigą, gauna HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Šį rangą tikrina `scopeSatisfies`. Ji nesikreipia į MCP lentelę, o MCP
-atitikties tikrintuvas nesikreipia į ją.
+Šis rangas yra `scopeSatisfies`. Jis netikrina MCP lentelės, o MCP
+atitikties tikrintuvas netikrina jo.
 
-| Vardų sritis                 | Kredencialas                                                                  | Tikrintuvas                         | Sėkminga patikra leidžia                                     |
-| :--------------------------- | :---------------------------------------------------------------------------- | :---------------------------------- | :----------------------------------------------------------- |
-| API rakto valdymas           | `api_keys.scopes`                                                             | `hasManageScope`                    | Valdymo REST užklausas naudojant tą Bearer raktą             |
-| API rakto papildoma aprėptis | tas pats masyvas, viena tiksli eilutė                                         | toliau nurodytas pagalbinis metodas | Tik tą vieną galimybę                                        |
-| MCP įrankių aprėptys         | tas pats masyvas, kitu atveju MCP `_meta`, kitu atveju `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                      | Tą įrankį, kai aprėpčių taikymas įjungtas                    |
-| Prieigos raktas              | `oma_live_…`                                                                  | `scopeSatisfies`                    | Valdymo maršrutą, kurio metodui ir keliui būtinas tas rangas |
+| Vardų sritis         | Kredencialas                                                                  | Tikrintuvas                             | Patvirtinimas leidžia                                            |
+| :------------------- | :---------------------------------------------------------------------------- | :-------------------------------------- | :--------------------------------------------------------------- |
+| API rakto valdymas   | `api_keys.scopes`                                                             | `hasManageScope`                        | Valdymo REST operacijas su tuo Bearer raktu                      |
+| API rakto priedas    | tas pats masyvas, viena tiksliai sutampanti eilutė                            | toliau nurodytas pagalbinis komponentas | Tik tą vieną galimybę                                            |
+| MCP įrankių aprėptys | tas pats masyvas, kitu atveju MCP `_meta`, kitu atveju `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                          | Tą įrankį, kai vykdymo užtikrinimas įjungtas                     |
+| Prieigos raktas      | `oma_live_…`                                                                  | `scopeSatisfies`                        | Valdymo galinę prieigą, kurios metodui ir keliui reikia to rango |
 
 Kiekvieno kredencialo išdavimas aprašytas skyriuje
 [Valdymo autentifikavimas](../guides/MANAGEMENT-AUTH.md).
@@ -319,77 +331,80 @@ Vienas `api_keys.scopes` masyvas naudojamas dviem užduotims. Joms naudojamos sk
 
 **Valdymo REST.** `manage` ir `admin` yra
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) nariai.
-`hasManageScope` autorizuoja valdymo maršrutus tam raktui. `admin` suteikia
-valdymo galimybes tuose maršrutuose. Žodis `admin` čia nėra
+`hasManageScope` autorizuoja to rakto prieigą prie valdymo galinių prieigų. `admin`
+tose galinėse prieigose suteikia valdymo galimybę. Žodis `admin` čia nėra
 prieigos rakto rangas ir nėra išplečiamas į MCP įrankių aprėptis.
 
 **Papildomos eilutės.** Kiekvienai jų atliekama tikslios narystės patikra, ir kiekviena jų lieka
 už `MANAGEMENT_API_KEY_SCOPES` ribų.
 
-| Aprėptis                       | Sėkminga patikra leidžia                                                                                                                                                |
-| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Tik ne grįžtamosios sąsajos `/api/mcp/` išimtį iš LOCAL_ONLY (`hasMcpConnectOrManageScope`). Raktas su `manage` arba `admin` taip pat atitinka šią išimtį.              |
-| `self:usage`                   | `GET /api/v1/me/status` šiam raktui (`src/app/api/v1/me/status/route.ts`). Kuriant per `POST /api/keys`, ši aprėptis pridedama (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Išorinės paskyros kvotas tame būsenos atsake (`src/lib/usage/apiKeySelfService.ts`). Būsenos maršrutui vis tiek būtina `self:usage`.                                    |
-| `policy:bypass-provider-quota` | Šio rakto išvadų užklausoms netaikoma teikėjo kvotos politika (`hasProviderQuotaBypassScope` faile `src/sse/handlers/chat.ts`).                                         |
+| Aprėptis                       | Patvirtinimas leidžia                                                                                                                                                       |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Tik ne grįžtamojo ryšio adreso `/api/mcp/` LOCAL_ONLY išimtį (`hasMcpConnectOrManageScope`). Raktas su `manage` arba `admin` taip pat atitinka šios išimties sąlygas.       |
+| `self:usage`                   | Šiam raktui skirtą `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` kurdamas prideda šią aprėptį (`normalizeSelfServiceScopesForCreate`).    |
+| `self:account-quota`           | Pirminio paslaugų teikėjo paskyros kvotas tame būsenos naudingajame turinyje (`src/lib/usage/apiKeySelfService.ts`). Būsenos galinei prieigai vis tiek reikia `self:usage`. |
+| `policy:bypass-provider-quota` | Šio rakto išvadų generavimo iškvietimai praleidžia paslaugų teikėjo kvotos strategiją (`hasProviderQuotaBypassScope` faile `src/sse/handlers/chat.ts`).                     |
 
 #### Atitikties tikrinimas
 
 Katalogas yra lentelė, pateikta skyriuje [MCP įrankių aprėptys](#mcp-tool-scopes). Nelaikykite
-`MCP_SCOPE_LIST`, esančio `src/shared/constants/mcpScopes.ts`, tuo katalogu:
-tai pradinis tipizuotas poaibis. Vėliau pridėti įrankiai deklaruoja papildomas aprėptis šalia jo
-(`read:notion`, `read:skills`, `read:local-corpus` ir likusią lentelės dalį).
+`MCP_SCOPE_LIST`, esančio `src/shared/constants/mcpScopes.ts`, šiuo katalogu:
+tai pradinis tipizuotas poaibis. Vėliau pridėti įrankiai šalia jo deklaruoja papildomas aprėptis
+(`read:notion`, `read:skills`, `read:local-corpus` ir likusias lentelėje pateiktas aprėptis).
 
 `evaluateToolScopes`, esanti `open-sse/mcp-server/scopeEnforcement.ts`, leidžia iškvietimą,
-kai kiekviena būtina aprėptis atitinka kurią nors suteiktą aprėptį:
+kai kiekviena reikalaujama aprėptis atitinka kurią nors suteiktą aprėptį:
 
-- `*` atitinka kiekvieną būtiną aprėptį.
-- Suteikta aprėptis, kuri baigiasi `*`, atitinka būtiną aprėptį, prasidedančią
-  prieš žvaigždutę esančiu prefiksu. `read:*` atitinka `read:compression`.
-- Kiekviena kita suteikta aprėptis atitinka tik identišką būtiną eilutę.
+- `*` atitinka kiekvieną reikalaujamą aprėptį.
+- Suteikta aprėptis, kuri baigiasi `*`, atitinka reikalaujamą aprėptį, prasidedančią
+  prieš žvaigždutę esančiu priešdėliu. `read:*` atitinka `read:compression`.
+- Kiekviena kita suteikta aprėptis atitinka tik identišką reikalaujamą eilutę.
 
-Raktas, kurio aprėptys yra `["manage"]`, neatitinka `scopeMatches` tikrinant `read:compression`.
-Tas pats iškvietimas neatitinka ir su `admin`, `mcp:connect`, `read` bei `write`, kai tai
-yra vienintelės suteiktos eilutės. Tarp MCP įrankių aprėpčių nėra jokios hierarchijos,
-išskyrus pabaigoje esančią `*`.
+Raktas, kurio aprėptys yra `["manage"]`, nepraeina `scopeMatches` patikros dėl `read:compression`.
+Tas pats iškvietimas nepavyksta naudojant `admin`, `mcp:connect`, `read` ir `write`, kai tai
+yra vienintelės suteiktos eilutės. MCP įrankių aprėptys neturi jokios hierarchijos,
+išskyrus gale esantį `*`.
 
-Aprėpčių taikymas išjungtas, nebent `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (numatytoji reikšmė
+Vykdymo užtikrinimas išjungtas, nebent `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (numatytoji reikšmė
 `false`). Kol jis išjungtas, `evaluateToolScopes` leidžia iškvietimą ir praleidžia
-katalogą. Kai jis įjungtas, HTTP naudoja Bearer rakto `api_keys.scopes` kaip
-`authInfo` (žr. [HTTP aprėpčių susiejimas pagal raktą](#per-key-http-scope-binding-7895)).
-Kai nepavyksta nustatyti jokių rakto aprėpčių, suteiktų aprėpčių rinkinys pirmiausia imamas iš MCP `_meta`, o tada iš
+katalogą. Kai jis įjungtas, HTTP kaip `authInfo` naudoja Bearer rakto `api_keys.scopes`
+(žr. [HTTP aprėpčių susiejimas pagal raktą](#per-key-http-scope-binding-7895)).
+Kai nepavyksta nustatyti rakto aprėpčių, suteiktas rinkinys pirmiausia perimamas iš MCP `_meta`, o tada iš
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Prieigos rakto aprėptys
 
 `oma_live_…` prieigos raktai (`src/lib/accessTokens/scopes.ts`) turi `read`, `write`
-arba `admin`. `scopeSatisfies` naudoja rangus: `admin` apima `write` ir `read`, o
+arba `admin`. `scopeSatisfies` yra rangas: `admin` apima `write` ir `read`, o
 `write` apima `read`. Nežinomos aprėptys nieko neapima.
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) palygina šį
 rangą su `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- `GET`, `HEAD` ir `OPTIONS` būtina `read`.
-- Kiekvienam kitam metodui būtina `write`.
-- Keliams, esantiems `ADMIN_SCOPE_PREFIXES`, kiekvienam metodui būtina `admin`. `/api/mcp`
+- `GET`, `HEAD` ir `OPTIONS` reikia `read`.
+- Kiekvienam kitam metodui reikia `write`.
+- Keliams, esantiems `ADMIN_SCOPE_PREFIXES`, kiekvienam metodui reikia `admin`. `/api/mcp`
   yra šiame sąraše, todėl `write` prieigos raktas vis tiek negali iškviesti MCP HTTP
   sąsajos.
-- Keliams, esantiems `ADMIN_MUTATION_PREFIXES`, `admin` būtina tik duomenis keičiančioms operacijoms.
+- Keliams, esantiems `ADMIN_MUTATION_PREFIXES`, `admin` reikia tik būseną keičiančioms operacijoms.
+- Keliams, esantiems `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`), `admin` reikia tik būseną keičiančioms operacijoms ir tik
+  tame tiksliame kelyje — kitoms `/api/settings/*` antrinėms galinėms prieigoms ir toliau pakanka `write`.
 
-`PATCH /api/keys/{id}` yra keitimo operacija ir nėra įtraukta į šiuos administratoriaus sąrašus, todėl
-`read` prieigos raktas gauna 403
+`PATCH /api/keys/{id}` yra keitimo operacija ir nėra tuose administratoriaus sąrašuose, todėl
+`read` prieigos raktas gauna 403 atsakymą:
 `Access token scope 'read' is insufficient; 'write' required.`
 `write` arba `admin` prieigos raktas atitinka šio maršruto reikalavimus. Valdymo skydelio JWT,
-CLI atgalinio ryšio machine-id prieigos raktas ir API raktas su `manage` arba `admin` patenka į
-kitas šakas ir šis rangas jų neapriboja.
+grįžtamojo ryšio CLI įrenginio ID prieigos raktas ir API raktas su `manage` arba `admin`
+patenka į kitas šakas, todėl šis rangas jų neapriboja.
 
-Prieigos raktas, kuriam `/api/mcp` atveju `scopeSatisfies` grąžina teigiamą rezultatą, įveikė tik
-valdymo patikrą. Įrankių iškvietimams vis tiek vykdomas `scopeMatches` tikrinimas pagal API rakto
-aprėptis. Prieigos rakto rangas nėra `scopeMatches` įvesties duomuo.
+Prieigos raktas, kuriam `scopeSatisfies` patikra dėl `/api/mcp` yra sėkminga, įveikia
+tik valdymo prieigos patikrą. Įrankių iškvietimams vis tiek vykdoma `scopeMatches`
+patikra pagal API rakto aprėptis. Prieigos rakto rangas nėra `scopeMatches` įvesties duomuo.
 
 ### MCP įrankių aprėptys
 
-Aprėpčių kontrolė centralizuota faile `open-sse/mcp-server/scopeEnforcement.ts`.
+Aprėpčių reikalavimų vykdymas centralizuotas faile `open-sse/mcp-server/scopeEnforcement.ts`.
 Kiekvienam įrankiui reikalingos konkrečios aprėptys:
 
 | Aprėptis              | Įrankiai                                                                                                                                                                           |
@@ -428,48 +443,48 @@ Kiekvienam įrankiui reikalingos konkrečios aprėptys:
 | `write:obsidian`      | 9 rašymo įrankiai — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                  |
 
-Palaikomos apibendrinamosios aprėptys: `read:*` suteikia visas skaitymo aprėptis, o `*` suteikia visišką prieigą.
+Palaikomos aprėptys su pakaitos simboliais: `read:*` suteikia visas skaitymo aprėptis, o `*` suteikia visišką prieigą.
 
-### `mcp:connect` — siaurai apibrėžta maršruto teisė (#7895)
+### `mcp:connect` — siaura maršruto galimybė (#7895)
 
-Norint pasiekti HTTP/SSE MCP transportą (`/api/mcp/*`) ne iš grįžtamojo ryšio sąsajos, reikalinga
-`/api/mcp/` LOCAL_ONLY išimtis (žr. `docs/security/ROUTE_GUARD_TIERS.md`). Anksčiau
-ši išimtis priimdavo tik API raktą su visa `manage`/`admin` aprėptimi — tai pernelyg plačios teisės
-kviečiančiajai šaliai, kuriai reikia tik susisiekti su MCP. Dabar `src/shared/constants/managementScopes.ts`
-eksportuoja `MCP_CONNECT_SCOPE = "mcp:connect"`: papildomą, siaurai apibrėžtą aprėptį (pagal tą patį precedentą kaip
-`SELF_USAGE_SCOPE`), kuri suteikia teisę TIK apeiti `/api/mcp/` apribojimą faile
+Norint pasiekti HTTP/SSE MCP perdavimo sluoksnį (`/api/mcp/*`) ne iš grįžtamojo ryšio
+sąsajos, reikalinga `/api/mcp/` LOCAL_ONLY išimtis (žr. `docs/security/ROUTE_GUARD_TIERS.md`). Anksčiau
+ši išimtis priimdavo tik API raktą su visa `manage`/`admin` aprėptimi — tai pernelyg plačios
+teisės iškvietėjui, kuriam reikia tik palaikyti ryšį su MCP. `src/shared/constants/managementScopes.ts` dabar
+eksportuoja `MCP_CONNECT_SCOPE = "mcp:connect"`: papildomą, siaurą aprėptį (pagal tą patį precedentą kaip
+`SELF_USAGE_SCOPE`), kuri autorizuoja TIK `/api/mcp/` apėjimą faile
 `src/server/authz/policies/management.ts` — ji nesuteikia prieigos prie jokių kitų valdymo maršrutų
-ir sąmoningai NĖRA įtraukta į `MANAGEMENT_API_KEY_SCOPES`. Raktas, turintis `manage`/`admin`,
-vis dar gali naudotis šia išimtimi be pakeitimų; `mcp:connect` yra mažesnių privilegijų alternatyva
-nuotolinėms, tik MCP naudojančioms kviečiančiosioms šalims, tikrinama naudojant `hasMcpConnectOrManageScope()`.
+ir sąmoningai NĖRA įtraukta į `MANAGEMENT_API_KEY_SCOPES`. Raktas, turintis `manage`/`admin`
+aprėptį, vis dar gali naudotis išimtimi be pakeitimų; `mcp:connect` yra mažesnių privilegijų alternatyva,
+skirta nuotoliniams tik MCP naudojantiems iškvietėjams ir tikrinama naudojant `hasMcpConnectOrManageScope()`.
 
 ### HTTP aprėpčių susiejimas su konkrečiu raktu (#7895)
 
-Naudojant HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` dabar nustato tikrąsias kviečiančiosios šalies
+Naudojant HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` dabar nustato tikrąsias iškvietėjo
 `api_keys.scopes` naudodamas `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
 ir perduoda jas MCP SDK metodui `transport.handleRequest(req, { authInfo })`, todėl
 kiekvieną įrankio iškvietimą pasiekiančios `extra.authInfo.scopes` atspindi paties Bearer rakto aprėptis.
 `scopeEnforcement.ts` funkcija `resolveCallerScopeContext()` jau teikė pirmenybę `authInfo`, o ne
-`_meta` ir `OMNIROUTE_MCP_SCOPES` aplinkos kintamojo atsarginiams šaltiniams — šiuo pakeitimu tik užpildomas pirmasis,
-aukščiausio prioriteto šaltinis, kuris anksčiau nebuvo pateikiamas per HTTP. Kai nepavyksta nustatyti jokio API rakto
-(nėra antraštės arba raktas netinkamas), `authInfo` lieka `undefined`, o nustatymas be pakeitimų pereina prie
-esamos `meta` / aplinkos kintamojo grandinės. stdio neturi konkrečios kviečiančiosios šalies tapatybės (žr.
-`mcpCallerIdentity.ts`) ir šis pakeitimas jo neveikia — jis ir toliau naudoja `_meta` / aplinkos kintamojo atsarginę grandinę.
+`_meta` ir `OMNIROUTE_MCP_SCOPES` aplinkos kintamojo atsarginiam variantui — šiuo pakeitimu tik užpildomas šis pirmasis,
+aukščiausio prioriteto šaltinis, kuris anksčiau per HTTP nebuvo užpildomas. Kai nepavyksta nustatyti jokio API rakto
+(nėra antraštės, raktas netinkamas), `authInfo` lieka `undefined`, o nustatymas be pakeitimų pereina prie
+esamos `meta`/aplinkos kintamojo grandinės. stdio neturi kiekvienam iškvietėjui atskiros tapatybės (žr.
+`mcpCallerIdentity.ts`) ir šis pakeitimas jo neveikia — jis toliau naudoja `_meta`/aplinkos kintamojo atsarginę grandinę.
 
-**Siauras aprėptis turinčioms HTTP/SSE kviečiančiosioms šalims vykdymo užtikrinimas įjungiamas priverstinai,
-neatsižvelgiant į `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Numatytoji `OMNIROUTE_MCP_ENFORCE_SCOPES` reikšmė `false` yra
-saugi tik vietiniam / stdio vieno operatoriaus darbo režimui, kuriame nėra konkrečios kviečiančiosios šalies tapatybės,
-pagal kurią būtų galima taikyti aprėptis. `open-sse/mcp-server/server.ts::withScopeEnforcement()` besąlygiškai įjungia
-aprėpčių tikrinimą kiekvienam įrankiui (`shouldForceScopeEnforcement()` faile `scopeEnforcement.ts`),
+**Siauros aprėpties HTTP/SSE iškvietėjams vykdymo užtikrinimas priverstinai įjungiamas,
+nepaisant `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Numatytoji `OMNIROUTE_MCP_ENFORCE_SCOPES` reikšmė `false` yra
+saugi tik vietiniame/stdio vieno operatoriaus darbo scenarijuje, kuriame nėra atskiros iškvietėjo tapatybės,
+pagal kurią būtų galima taikyti aprėptis. `open-sse/mcp-server/server.ts::withScopeEnforcement()` besąlygiškai
+įjungia kiekvieno įrankio aprėpčių vykdymo užtikrinimą (`shouldForceScopeEnforcement()` faile `scopeEnforcement.ts`),
 kai `resolveCallerScopeContext()` nustato
 `source === "authInfo"` (t. y. tikrą konkretaus rakto HTTP Authorization antraštę, naudojamą tik per HTTP/SSE) IR tas
 raktas neturi visos `manage`/`admin` aprėpties. Taip pašalinama spraga, dėl kurios raktas, turintis TIK
-siaurąją `mcp:connect` apėjimo aprėptį — pirmiau aprašytą kaip suteikiančią teisę tik pasinaudoti
-`/api/mcp/` LOCAL_ONLY išimtimi — kitu atveju galėtų iškviesti kiekvieną MCP įrankį, kai operatorius
-įjungia nuotolinę / ne grįžtamojo ryšio MCP prieigą, vien todėl, kad numatytoji
-`OMNIROUTE_MCP_ENFORCE_SCOPES` reikšmė yra `false`. HTTP ryšiu naudojamam raktui su visa `manage`/`admin`
-aprėptimi ir kiekvienai stdio / vietinei kviečiančiajai šaliai esamas, nuo `OMNIROUTE_MCP_ENFORCE_SCOPES`
-priklausantis veikimas išlieka nepakitęs.
+siaurą `mcp:connect` apėjimo aprėptį — pirmiau dokumentuotą kaip suteikiančią teisę tik
+apeiti `/api/mcp/` LOCAL_ONLY apribojimą — galėtų iškviesti kiekvieną MCP įrankį, operatoriui
+įjungus nuotolinę / ne grįžtamojo ryšio MCP prieigą, vien todėl, kad numatytoji
+`OMNIROUTE_MCP_ENFORCE_SCOPES` reikšmė yra `false`. HTTP naudojamas raktas su visa `manage`/`admin` aprėptimi
+ir kiekvienas stdio / vietinis iškvietėjas išlaiko esamą veikimą, valdomą
+`OMNIROUTE_MCP_ENFORCE_SCOPES`, be pakeitimų.
 
 ---
 

@@ -155,6 +155,8 @@ curl http://localhost:20128/api/keys/groups/{id} \
 
 PUT keys › groups › <id>
 
+Updates the group. Setting isActive to false pauses its allow rules while preserving membership restrictions and deny rules. Other active groups may still grant access unless a deny matches. Keys belonging only to inactive groups have no group grants. Keys without groups remain unrestricted by group policy; per-key restrictions still apply.
+
 ```bash
 curl -X PUT http://localhost:20128/api/keys/groups/{id} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \

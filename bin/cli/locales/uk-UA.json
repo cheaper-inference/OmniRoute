@@ -123,7 +123,9 @@
       "maxCostOpt": "Максимальна вартість на день (USD)",
       "allowedModelsOpt": "Список дозволених моделей, розділених комами",
       "nothingToSet": "Поля політики не надано. Використовуйте --rate-limit, --max-cost або --allowed-models.",
-      "updated": "Політику оновлено."
+      "updated": "Політику оновлено.",
+      "modelAccessModeOpt": "Режим доступу до моделей (all | restricted)",
+      "unrestrictedOpt": "Дозволити всі моделі (--model-access-mode all)"
     },
     "expiration": {
       "title": "Термін дії ключа",

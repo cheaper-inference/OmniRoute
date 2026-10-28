@@ -103,6 +103,25 @@ test("v1 health route mirrors the persistent blocked history", async () => {
   assert.ok((item.blockedHistory?.ageMs ?? -1) >= 0, "v1 age clamped non-negative");
 });
 
+test("both health endpoints retain management authentication for invalid credentials", async () => {
+  process.env.INITIAL_PASSWORD = "test-password";
+  try {
+    for (const [handler, url] of [
+      [settingsGet, "/api/settings/proxies/health"],
+      [v1Get, "/api/v1/management/proxies/health"],
+    ] as const) {
+      const response = await handler(
+        new Request(`http://localhost${url}`, {
+          headers: { authorization: "Bearer invalid-test-key" },
+        })
+      );
+      assert.equal(response.status, 403);
+    }
+  } finally {
+    delete process.env.INITIAL_PASSWORD;
+  }
+});
+
 test.after(() => {
   clearSweepVerdicts();
   clearBlockedHistoryForTesting();

@@ -123,7 +123,9 @@
       "maxCostOpt": "Maximálne náklady za deň (USD)",
       "allowedModelsOpt": "Zoznam povolených modelov oddelených čiarkami",
       "nothingToSet": "Neboli zadané žiadne polia zásad. Použite --rate-limit, --max-cost alebo --allowed-models.",
-      "updated": "Zásady boli aktualizované."
+      "updated": "Zásady boli aktualizované.",
+      "modelAccessModeOpt": "Režim prístupu k modelom (all | restricted)",
+      "unrestrictedOpt": "Povoliť všetky modely (--model-access-mode all)"
     },
     "expiration": {
       "title": "Vypršanie platnosti kľúča",

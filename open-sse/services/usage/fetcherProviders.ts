@@ -47,11 +47,12 @@ export const USAGE_FETCHER_PROVIDERS = [
   "bailian-coding-plan",
   "qwen-cloud-token-plan",
   "nanogpt",
+  // NaN.Builders per-model token counters (GET cloud-api.nan.builders/api/usage/quota)
+  "nan",
   "apmix",
   "deepseek",
   "moonshot",
   "kimi",
-  "opencode",
   "opencode-zen",
   "xiaomi-mimo",
   "xiaomi-mimo-token-plan",
@@ -105,11 +106,16 @@ export const USAGE_FETCHER_PROVIDERS = [
   // AgentRouter (New-API) console balance (GET /api/user/self)
   "agentrouter",
   "kilocode",
+  // StepFun account balance (GET /v1/accounts; base URL override selects
+  // China vs international platform, mirroring the chat path)
+  "stepfun",
   // Devin CLI agentic quota (Codeium seat-management GetUserStatus, protobuf)
   "devin-cli",
   // ChatPlayground subscription and daily credits (GET /api/user)
   "chatplayground",
   "cpl",
+  // Cloudflare Workers AI daily neurons (GraphQL Analytics aiInferenceAdaptiveGroups)
+  "cloudflare-ai",
 ] as const;
 
 export type UsageFetcherProvider = (typeof USAGE_FETCHER_PROVIDERS)[number];

@@ -40,32 +40,32 @@ Is maolán fáinne comhroinnte sa chuimhne é an `TrafficBuffer` (`src/mitm/insp
 
 ## §2 Móid ghabhála
 
-Tacaíonn Traffic Inspector le **5 fhoinse ghabhála chomhuaineacha**. Is féidir gach ceann díobh a scoránú go neamhspleách. Tá an réimse `source` ar gach `InterceptedRequest` (`src/mitm/inspector/types.ts`) ar cheann de `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"`, nó `"tproxy"`.
+Tacaíonn Traffic Inspector le **5 fhoinse ghabhála chomhuaineacha**. Is féidir gach ceann acu a scoránú go neamhspleách. Tá an réimse `source` ar gach `InterceptedRequest` (`src/mitm/inspector/types.ts`) ar cheann de `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"`, nó `"tproxy"`.
 
 ### Mód 1 — AgentBridge (réamhshocrú, ar siúl i gcónaí)
 
 **Foinse:** Láimhseálaithe AgentBridge (`src/mitm/handlers/base.ts`)
-**Meicníocht:** Glaonn gach glao `intercept()` in `MitmHandlerBase` ar `hookBufferStart()` sula gcuirtear ar aghaidh é agus ar `hookBufferUpdate()` nuair a bhíonn sé críochnaithe. Níl aon chumraíocht bhreise de dhíth — oibríonn sé a luaithe a bhíonn AgentBridge ag rith.
+**Meicníocht:** Glaonn gach glao `intercept()` in `MitmHandlerBase` ar `hookBufferStart()` sula gcuirtear ar aghaidh é agus ar `hookBufferUpdate()` nuair a chuirtear i gcrích é. Ní theastaíonn aon chumraíocht bhreise — oibríonn sé a luaithe a bhíonn AgentBridge ag rith.
 **Raon:** Na 9 ngníomhaire IDE atá cumraithe in AgentBridge
 **Nóta:** Réimse `source` in `InterceptedRequest` = `"agent-bridge"`
 
 ### Mód 2 — Óstaigh Shaincheaptha (atreorú DNS)
 
-**Foinse:** Liosta óstach arna shainiú ag an úsáideoir (tábla `inspector_custom_hosts`)
-**Meicníocht:** Nuair a chuirtear óstach leis tríd an gcomhéadan úsáideora, cuirtear `127.0.0.1 <host>` le `/etc/hosts` (tá sudo de dhíth). Gineann an freastalaí MITM AgentBridge atá ann cheana (port 443) teastas SNI go dinimiciúil don óstach nua.
-**Raon:** Aon fheidhmchlár a úsáideann an t-óstach a cuireadh leis — ní gá cumraíocht an fheidhmchláir a athrú
+**Foinse:** Liosta óstach sainithe ag an úsáideoir (tábla `inspector_custom_hosts`)
+**Meicníocht:** Nuair a chuirtear óstach leis tríd an gcomhéadan úsáideora, cuirtear `127.0.0.1 <host>` le `/etc/hosts` (teastaíonn sudo). Gineann freastalaí MITM reatha AgentBridge (port 443) teastas SNI go dinimiciúil don óstach nua.
+**Raon:** Aon fheidhmchlár a úsáideann an t-óstach breise — ní gá cumraíocht an fheidhmchláir a athrú
 **Nóta:** `source` = `"custom-host"`
 
 Samplaí de chásanna úsáide:
 
 - Monatóireacht a dhéanamh ar `api.openai.com` ó scripteanna Python
 - Dífhabhtú a dhéanamh ar `my-internal-llm.company.com`
-- Trácht a ghabháil ó ghléasanna móibíleacha ar an líonra céanna (trí bhréagú ARP — ardleibhéal)
+- Trácht ó ghléasanna móibíleacha ar an líonra céanna a ghabháil (trí bhréagú ARP — ardleibhéal)
 
 ### Mód 3 — Éisteoir HTTP_PROXY (port 8080)
 
 **Foinse:** Feidhmchláir a úsáideann athróga timpeallachta `HTTP_PROXY`/`HTTPS_PROXY`
-**Meicníocht:** Éisteoir tánaisteach ar phort 8080 (`src/mitm/inspector/httpProxyServer.ts`) a fheidhmíonn mar ghnáthsheachfhreastalaí sainráite HTTP/HTTPS. Glacann sé le tolláin `CONNECT` (HTTPS) agus iarratais dhíreacha HTTP.
+**Meicníocht:** Éisteoir tánaisteach ar phort 8080 (`src/mitm/inspector/httpProxyServer.ts`) a fheidhmíonn mar sheachfhreastalaí sainráite caighdeánach HTTP/HTTPS. Glacann sé le tolláin `CONNECT` (HTTPS) agus le hiarratais dhíreacha HTTP.
 **Raon:** Aon fheidhmchlár a urramaíonn timpeallacht `HTTP_PROXY` — gan athrú DNS, gan sudo
 **Nóta:** `source` = `"http-proxy"`
 
@@ -73,53 +73,53 @@ Samplaí de chásanna úsáide:
 # Gabháil thapa le haghaidh ordú aonair:
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
-# Gabháil mharthanach i seisiún blaoisce:
+# Gabháil mharthanach i seisiún bhlaoisce:
 export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**Teorainn TLS:** Ní ghabhtar tolláin HTTPS `CONNECT` ach mar mheiteashonraí (óstach, port, uainiú) — ní dhíchriptítear corp TLS de réir réamhshocraithe.
+**Teorainn TLS:** Téann HTTPS trí ghnáth-thollán `CONNECT`: seolann an t-éisteoir na bearta criptithe ar aghaidh gan athrú agus ní thaifeadann sé ach meiteashonraí (óstach, port, uainiú). Ní dhíchriptíonn sé HTTPS riamh, agus níl aon socrú ann a chuireann díchriptiú ar siúl don mhód seo. Chun corpáin HTTPS a ghabháil, seol an t-óstach trí Mhód 1 (AgentBridge), Mód 2 (Óstaigh Shaincheaptha) nó Mód 5 (díchriptiú TPROXY).
 
 **Coinbhleacht poirt:** Má tá port 8080 in úsáid, seolann AgentBridge 409 ar ais le hearráid struchtúrtha. Athraigh an port tríd an athróg timpeallachta `INSPECTOR_HTTP_PROXY_PORT`.
 
-### Mód 4 — Seachfhreastalaí ar fud an chórais (ardleibhéal, rogha isteach)
+### Mód 4 — Seachfhreastalaí ar fud an chórais (ardleibhéal, roghnach)
 
-**Foinse:** Socruithe seachfhreastalaí ar leibhéal an OS (baineann siad le gach feidhmchlár ar an ríomhaire)
-**Meicníocht:** Úsáideann sé APIanna an OS chun an trácht HTTP/HTTPS uile a atreorú tríd an éisteoir HTTP_PROXY:
+**Foinse:** Socruithe seachfhreastalaí ar leibhéal an chórais oibriúcháin (baineann siad le gach feidhmchlár ar an meaisín)
+**Meicníocht:** Úsáideann sé APIanna an chórais oibriúcháin chun gach trácht HTTP/HTTPS a atreorú tríd an éisteoir HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Raon:** Gach feidhmchlár ar an ríomhaire a urramaíonn socruithe seachfhreastalaí an chórais
+  **Raon:** Gach feidhmchlár ar an meaisín a urramaíonn socruithe seachfhreastalaí an chórais
   **Nóta:** `source` = `"system-proxy"`
 
 **Meicníochtaí sábháilteachta:**
 
 - Uaineadóir uathdhíchumasaithe (30 nóiméad de réir réamhshocraithe, inchumraithe trí `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Sábháiltear staid roimhe seo sheachfhreastalaí an chórais sa DB agus aisghairtear í nuair a fhilltear
-- Taispeánann an deais leid "Seachfhreastalaí an chórais á fhilleadh" má dhéanann an t-úsáideoir nascleanúint ar shiúl agus é gníomhach
-- Taispeánann an comhéadan úsáideora suaitheantas `⚠ Ardleibhéal` + ticbhosca follasach deimhnithe
+- Sábháiltear staid roimhe seo sheachfhreastalaí an chórais sa DB agus athchóirítear í nuair a dhéantar an t-athrú a chealú
+- Taispeánann an deais an leid "Seachfhreastalaí an chórais á thabhairt ar ais" má fhágann an t-úsáideoir an leathanach agus é gníomhach
+- Taispeánann an comhéadan úsáideora suaitheantas `⚠ Ardleibhéal` + ticbhosca deimhnithe sainráite
 
-### Mód 5 — Díchriptiú trédhearcach TPROXY (Linux, root, rogha isteach)
+### Mód 5 — Díchriptiú trédhearcach TPROXY (Linux, root, roghnach)
 
-**Foinse:** TPROXY eithne + ródú beartais (`src/mitm/tproxy/`)
-**Meicníocht:** Marcálann sé naisc TCP áitiúla nua amach chuig spriocphort (`443` de réir réamhshocraithe) in `mangle OUTPUT`, athródaíonn `ip rule` na paicéid mharcáilte chuig seachadadh áitiúil, agus tugann sprioc `TPROXY` de chuid `mangle PREROUTING` iad d'éisteoir trédhearcach (**IP_TRANSPARENT**) (`8443` mar phort réamhshocraithe). Cuireann an t-éisteoir deireadh le TLS le teastas duille arna eisiúint **do gach óstainm SNI ar éileamh** ag CA dinimiciúil, gabhann sé an malartú díchriptithe, agus cuireann sé an t-iarratas ar aghaidh, athchriptithe, chuig an gceann scríbe bunaidh.
-**Raon:** Óstaigh chinn scríbe **threallacha** ar an spriocphort — gan bhréagú `/etc/hosts`, gan timpeallacht `HTTP_PROXY`, gan athrú ar sheachfhreastalaí an chórais ar fad. Ní gá aon athrú cumraíochta a dhéanamh ar an bpróiseas idircheaptha, ach caithfidh sé muinín a bheith aige as an CA dinimiciúil.
+**Foinse:** TPROXY na heithne + ródú beartais (`src/mitm/tproxy/`)
+**Meicníocht:** Marcálann sé naisc TCP áitiúla nua amach chuig port sprice (de réir réamhshocraithe `443`) in `mangle OUTPUT`; atreoraíonn `ip rule` na paicéid mharcáilte chuig seachadadh áitiúil; agus tugann sprioc `TPROXY` in `mangle PREROUTING` iad d’éisteoir trédhearcach (**IP_TRANSPARENT**) (port `8443` de réir réamhshocraithe). Críochnaíonn an t-éisteoir TLS le teastas duille arna eisiúint **do gach óstainm SNI ar éileamh** ag CA dinimiciúil, gabhann sé an malartú díchriptithe, agus cuireann sé an t-iarratas ar aghaidh chuig an mbuncheann scríbe agus é athchriptithe.
+**Raon:** Óstaigh chinn scríbe **ar bith** ar an bport sprice — gan bhréagú `/etc/hosts`, gan timpeallacht `HTTP_PROXY`, gan seachfhreastalaí ar fud an chórais a athrú. Ní gá aon athrú cumraíochta a dhéanamh ar an bpróiseas idircheaptha, ach caithfidh sé muinín a bheith aige as an CA dinimiciúil.
 **Nóta:** `source` = `"tproxy"`
 
-**Riachtanais:** Linux amháin (níl **IP_TRANSPARENT** ar fáil ach ar Linux), an cumas **CAP_NET_ADMIN** (root), agus breiseán dúchasach N-API nach mór a thógáil le slabhra uirlisí C (`npm run build:native:tproxy`). Nuair nach mbíonn siad ar fáil, díchumasaítear scorán na deaise leis an leid uirlise "Éilíonn díchriptiú TPROXY Linux + root + an breiseán dúchasach". Cuirtear na rialacha balla dóiteáin i bhfeidhm agus aisiompaítear iad go hidirbheartach (ní fhágann tuairt riail `mangle` ina diaidh riamh) agus glantar iad nuair a atosaítear an córas. Cuireann frithlúb bunaithe ar SO_MARK cosc ar sheoladh athchriptithe an tseachfhreastalaí féin a bheith idircheaptha arís.
+**Riachtanais:** Linux amháin (níl **IP_TRANSPARENT** ar fáil ach ar Linux), cumas **CAP_NET_ADMIN** (root), agus breiseán dúchasach N-API nach mór a thógáil le tacar uirlisí C (`npm run build:native:tproxy`). Nuair nach mbíonn sé ar fáil, díchumasaítear an scorán ar an deais leis an leid uirlise "Teastaíonn Linux + root + an breiseán dúchasach le haghaidh díchriptiú TPROXY". Cuirtear rialacha an bhalla dóiteáin i bhfeidhm agus cealaítear iad go hidirbheartach (ní fhágann tuairt riail `mangle` ina diaidh choíche), agus glantar iad nuair a atosaítear an córas. Cuireann frithlúb bunaithe ar SO_MARK cosc ar réamhsheoladh athchriptithe an tseachfhreastalaí féin a bheith idircheaptha arís.
 
-Is fochóras suntasach é seo a bhfuil treoir thiomnaithe oibreora dá chuid féin aige — féach `docs/security/MITM-TPROXY-DECRYPT.md` (git; ní thiomsaítear é isteach in `/docs`) le haghaidh oideas iomlán an bhalla dóiteáin, an CA dinimiciúil do gach SNI + suiteálaí an stóir iontaoibhe, an bealach áitiúil amháin, sonraí frithlúibe, agus scéimre na cumraíochta. Tá an scorán á rialú ag `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (nóta: tá an bealach faoin réimír AgentBridge, ní faoin réimír Traffic Inspector).
+Is fochóras suntasach é seo a bhfuil a threoir oibreora thiomnaithe féin aige — féach `docs/security/MITM-TPROXY-DECRYPT.md` (git; ní thiomsaítear isteach in `/docs` é) chun an t-oideas iomlán don bhalla dóiteáin, an CA dinimiciúil in aghaidh SNI + suiteálaí an stóir iontaoibhe, an bealach logánta amháin, sonraí frithlúibe, agus scéimre na cumraíochta a fháil. Tá an scorán á rialú ag `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (tabhair faoi deara: tá an bealach faoin réimír AgentBridge, ní faoin réimír Traffic Inspector).
 
 ### Comparáid idir na móid ghabhála
 
-| Mód                  | Socrú                                |          Sudo?           | Raon feidhme                          | Nótaí                                                                                                                                                                 |
-| -------------------- | ------------------------------------ | :----------------------: | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge       | Uathoibríoch                         | Uair amháin (cert+hosts) | 9 ngníomhaire IDE                     | Cumasaithe de réir réamhshocraithe                                                                                                                                    |
-| 2. Óstaigh Chustaim  | Ionchur de réir óstaigh              |    Tá (comhad hosts)     | Aon aip a úsáideann an t-óstach sin   | Coinnithe sa DB                                                                                                                                                       |
-| 3. HTTP_PROXY        | `export HTTPS_PROXY=...`             |           Níl            | Aipeanna a urramaíonn an timpeallacht | Port 8080, gan díchriptiú TLS de réir réamhshocraithe                                                                                                                 |
-| 4. Ar fud an chórais | Scoránú + deimhniú                   |            Tá            | Gach aip ar an ríomhaire              | Díchumasaítear go huathoibríoch i gceann 30 nóiméad                                                                                                                   |
-| 5. Díchriptiú TPROXY | Scoránú (Linux + breiseán dúchasach) | Tá (root + suiteáil CA)  | Aon óstach ar an spriocphort          | Díchriptíonn sé óstaigh threallacha; díchumasaithe de réir réamhshocraithe — féach `docs/security/MITM-TPROXY-DECRYPT.md` (git; ní thiomsaítear isteach in `/docs` é) |
+| Mód                      | Socrú                                |          Sudo?           | Raon feidhme                          | Nótaí                                                                                                                                                               |
+| ------------------------ | ------------------------------------ | :----------------------: | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge           | Uathoibríoch                         | Uair amháin (cert+hosts) | 9 ngníomhaire IDE                     | Cumasaithe de réir réamhshocraithe                                                                                                                                  |
+| 2. Óstaigh Shaincheaptha | Ionchur de réir óstaigh              |    Sea (comhad hosts)    | Aon aip a úsáideann an t-óstach sin   | Marthanach sa DB                                                                                                                                                    |
+| 3. HTTP_PROXY            | `export HTTPS_PROXY=...`             |           Níl            | Aipeanna a urramaíonn an timpeallacht | Port 8080; cuirtear HTTPS trí thollán CONNECT (meiteashonraí amháin, ní dhíchriptítear riamh é)                                                                     |
+| 4. Ar fud an chórais     | Scoránú + deimhniú                   |           Sea            | Gach aip ar an meaisín                | Díchumasú uathoibríoch tar éis 30 nóiméad                                                                                                                           |
+| 5. Díchriptiú TPROXY     | Scoránú (Linux + breiseán dúchasach) | Sea (root + suiteáil CA) | Aon óstach ar an spriocphort          | Díchriptíonn sé óstaigh threallacha; díchumasaithe de réir réamhshocraithe — féach `docs/security/MITM-TPROXY-DECRYPT.md` (git; gan é a thiomsú isteach in `/docs`) |
 
 ---
 
@@ -342,29 +342,29 @@ Easpórtáil trí `GET /api/tools/traffic-inspector/sessions/{id}/export.har` n�
 
 ## §6 Slándáil
 
-Taispeánann an Cigire Tráchta **an trácht HTTPS idircheaptha ar fad**, lena n-áirítear ceanntásca údaraithe agus coirp iarratais. Tá na rialuithe seo a leanas i bhfeidhm:
+Taispeánann an Cigire Tráchta **an trácht HTTPS idircheaptha go léir**, lena n-áirítear ceanntásca údaraithe agus coirp iarratais. Tá na rialuithe seo a leanas i bhfeidhm:
 
-| Rialú                                           | Sonraí                                                                                                                                                                                            |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                                  | Tá gach bealach agus críochphointe WebSocket teoranta don loopback amháin (forfheidhmithe in `routeGuard.ts` roimh fhíordheimhniú)                                                                |
-| **Mascadh rún**                                 | Folaíonn scanóir líneach `maskSecret()` dintiúir Bearer RFC 6750, eochracha le réimír soláthraí agus comharthaí fada doiléire roimh `TrafficBuffer.push()`                                        |
-| **Teorainn mhéid an choirp**                    | Ciorraítear coirp > `INSPECTOR_MAX_BODY_KB` (réamhshocrú 1024 KB) agus cuirtear an fógra `"(ciorraithe ar mhaithe le feidhmíocht)"` leo                                                           |
-| **Sláintiú ceanntásc**                          | Tiontaítear ainmneacha go litreacha beaga; baintear ceanntásca frámaithe/hop-by-hop agus seachfhíordheimhnithe; foláirtear fianáin go hiomlán; tarmligeann luachanna dintiúr chuig `maskSecret()` |
-| **CSP**                                         | Beartas Slándála Ábhair dian ar leathanaigh an Chigire Tráchta chun XSS trí choirp freagartha insteallta a chosc                                                                                  |
-| **Gan bhuanseasmhacht de réir réamhshocraithe** | Tá an `TrafficBuffer` sa chuimhne agus cailltear é nuair a atosaítear an freastalaí. Ní bhuantar seisiúin ach amháin nuair a thaifeadtar iad go sainráite                                         |
+| Rialú                                       | Sonraí                                                                                                                                                                                                                            |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                              | Tá gach bealach agus críochphointe WebSocket teoranta don lúb siar amháin (forfheidhmítear é in `routeGuard.ts` roimh fhíordheimhniú)                                                                                             |
+| **Mascadh rún**                             | Folaíonn scanóir líneach `maskSecret()` dintiúir Bearer RFC 6750, eochracha le réimír soláthraí agus comharthaí fada doiléire sula nglaoitear `TrafficBuffer.push()` orthu                                                        |
+| **Teorainn ar mhéid an choirp**             | Ciorraítear coirp > `INSPECTOR_MAX_BODY_KB` (1024 KB de réir réamhshocraithe) agus cuirtear an fógra `"(ciorraithe ar mhaithe le feidhmíocht)"` leo                                                                               |
+| **Sláintiú ceanntásca**                     | Tiontaítear ainmneacha go cás íochtair; fágtar ceanntásca frámaithe/hop-by-hop agus ceanntásca fíordheimhnithe seachfhreastalaí ar lár; folaithear fianáin go hiomlán; cuirtear luachanna dintiúr ar aghaidh chuig `maskSecret()` |
+| **CSP**                                     | Beartas Slándála Ábhair docht ar leathanaigh an Chigire Tráchta chun XSS trí choirp freagartha insteallta a chosc                                                                                                                 |
+| **Gan marthanacht de réir réamhshocraithe** | Tá an `TrafficBuffer` sa chuimhne agus cailltear é nuair a atosaítear an freastalaí. Ní bhuanaítear seisiúin ach amháin nuair a thaifeadtar iad go sainráite                                                                      |
 
-### Rialacha Dochta a chuirtear i bhfeidhm
+### Rialacha dochta curtha i bhfeidhm
 
 | Riail                             | Cur i bhfeidhm                                                                                   |
 | --------------------------------- | ------------------------------------------------------------------------------------------------ |
-| **#12** `sanitizeErrorMessage`    | Sláintítear gach freagra earráide HTTP ó bhealaí an Chigire Tráchta                              |
+| **#12** `sanitizeErrorMessage`    | Sláintítear gach freagairt earráide HTTP ó bhealaí an Chigire Tráchta                            |
 | **#15 + #17** `isLocalOnlyPath()` | Tá `/api/tools/traffic-inspector/` LOCAL_ONLY + SPAWN_CAPABLE (orduithe seachfhreastalaí córais) |
 
 ### Teorainneacha aitheanta
 
-- Bíonn tionchar ag **mód seachfhreastalaí ar fud an chórais** ar gach feidhmchlár ar an ríomhaire, lena n-áirítear cliaint VPN agus SSO. Úsáid i gcónaí é leis an amadóir uathdhíchumasaithe. Ná húsáid ar ríomhairí comhroinnte é.
-- **HTTPS tolláin CONNECT**: Ní ghabhann Mód 3 (HTTP_PROXY) ach meiteashonraí tolláin le haghaidh cinn scríbe HTTPS mura bhfuil idircheapadh TLS cumasaithe. Is d'aon ghnó é seo — bhrisfeadh gabháil thrédhearcach fíorú TLS do na haipeanna sin mura mbeadh muinín as teastas AgentBridge.
-- **Teaghráin chrua-chódaithe i roinnt comhpháirteanna**: Tá líon beag teaghrán crua-chódaithe i roinnt comhpháirteanna den Chomhéadan Úsáideora (F7/F8) nach bhfuil clúdaithe fós ag eochracha i18n. Tá siad seo doiciméadaithe mar Theorainn Aitheanta sa tuarascáil ar bhearnaí i18n; aistreofar iad i dtriail leantach. Is lipéid mhaisiúla sa Chomhéadan Úsáideora iad na teaghráin lena mbaineann agus ní gá iad a aistriú le haghaidh úsáid fheidhmiúil.
+- Bíonn tionchar ag **mód seachfhreastalaí ar fud an chórais** ar gach feidhmchlár ar an meaisín, lena n-áirítear cliaint VPN agus SSO. Bain úsáid as i gcónaí leis an amadóir uathdhíchumasaithe. Ná húsáid ar mheaisíní comhroinnte é.
+- **HTTPS tolláin CONNECT**: Ní ghabhann Mód 3 (HTTP_PROXY) ach meiteashonraí tolláin le haghaidh cinn scríbe HTTPS agus ní dhíchriptíonn sé iad riamh. Is d’aon ghnó é seo — bheadh ar gach cliant muinín a bheith aige as teastas MITM chun iad a dhíchriptiú, mar sin coinníonn an t-éisteoir HTTPS criptithe ó cheann ceann. Úsáid AgentBridge, Custom Hosts nó díchriptiú TPROXY nuair a bhíonn coirp HTTPS de dhíth ort.
+- **Teaghráin chrua-chódaithe i roinnt comhpháirteanna**: Tá líon beag teaghrán crua-chódaithe i roinnt comhpháirteanna comhéadain úsáideora (F7/F8) nach bhfuil clúdaithe ag eochracha i18n go fóill. Tá siad seo doiciméadaithe mar Theorainn Aitheanta sa tuarascáil bearna i18n; aistreofar iad i mbabhta leantach. Is lipéid mhaisiúla chomhéadain úsáideora iad na teaghráin lena mbaineann agus ní gá iad a aistriú le haghaidh úsáid fheidhmiúil.
 
 ---
 
@@ -429,25 +429,25 @@ Nuair a shroicheann an maolán `INSPECTOR_BUFFER_SIZE` (1000 de réir réamhshoc
 
 ## §8 Tagairt API
 
-Tá gach bealach `LOCAL_ONLY` (aisfhillte amháin) agus `SPAWN_CAPABLE` (orduithe seachfhreastalaí córais). Féach `src/server/authz/routeGuard.ts`.
+Tá gach bealach `LOCAL_ONLY` (aischúb amháin) agus `SPAWN_CAPABLE` (orduithe seachfhreastalaí córais). Féach `src/server/authz/routeGuard.ts`.
 
 Bunchonair: `/api/tools/traffic-inspector/`
 
-### Bainistíocht iarratas
+### Bainistiú iarratas
 
 | Modh   | Conair                      | Cur síos                                                                                 |
 | ------ | --------------------------- | ---------------------------------------------------------------------------------------- |
 | GET    | `/requests`                 | Liostaigh iarratais (in-scagtha: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
 | GET    | `/requests/{id}`            | Sonraí iarratais aonair                                                                  |
 | DELETE | `/requests`                 | Glan an maolán cuimhne                                                                   |
-| POST   | `/requests/{id}/replay`     | Rith an t-iarratas céanna arís trí ródaire OmniRoute                                     |
+| POST   | `/requests/{id}/replay`     | Athfheidhmigh an t-iarratas céanna trí ródaire OmniRoute                                 |
 | PUT    | `/requests/{id}/annotation` | Sábháil nó nuashonraigh nóta ar iarratas                                                 |
 
 ### WebSocket
 
-| Modh | Conair | Cur síos                                                                                       |
-| ---- | ------ | ---------------------------------------------------------------------------------------------- |
-| GET  | `/ws`  | Sruth beo WebSocket. Seolann sé `snapshot` ar cheangal, ansin teagmhais `new`/`update`/`clear` |
+| Modh | Conair | Cur síos                                                                                           |
+| ---- | ------ | -------------------------------------------------------------------------------------------------- |
+| GET  | `/ws`  | Sruth beo WebSocket. Seolann sé `snapshot` ar nascadh, agus ansin teagmhais `new`/`update`/`clear` |
 
 ### Easpórtáil
 
@@ -457,31 +457,31 @@ Bunchonair: `/api/tools/traffic-inspector/`
 
 ### Óstaigh shaincheaptha
 
-| Modh   | Conair          | Cur síos                                                              |
-| ------ | --------------- | --------------------------------------------------------------------- |
-| GET    | `/hosts`        | Liostaigh óstaigh shaincheaptha                                       |
-| POST   | `/hosts`        | Cuir óstach leis (cuireann sé `/etc/hosts` in eagar go huathoibríoch) |
-| DELETE | `/hosts/{host}` | Bain óstach                                                           |
-| PATCH  | `/hosts/{host}` | Scoránaigh `enabled`                                                  |
+| Modh   | Conair          | Cur síos                                                           |
+| ------ | --------------- | ------------------------------------------------------------------ |
+| GET    | `/hosts`        | Liostaigh óstaigh shaincheaptha                                    |
+| POST   | `/hosts`        | Cuir óstach leis (cuireann `/etc/hosts` in eagar go huathoibríoch) |
+| DELETE | `/hosts/{host}` | Bain óstach                                                        |
+| PATCH  | `/hosts/{host}` | Scoránaigh `enabled`                                               |
 
-### Móid gabhála
+### Modhanna gabhála
 
-| Modh | Conair                        | Cur síos                                                                               |
-| ---- | ----------------------------- | -------------------------------------------------------------------------------------- |
-| GET  | `/capture-modes`              | Staid mhóid AgentBridge / óstaigh shaincheaptha / HTTP_PROXY / seachfhreastalaí córais |
-| POST | `/capture-modes/http-proxy`   | Tosaigh/stop éisteoir HTTP_PROXY (`{action: "start"\|"stop"}`)                         |
-| POST | `/capture-modes/system-proxy` | Cuir seachfhreastalaí uile-chórais i bhfeidhm/ar ais (`{action: "apply"\|"revert"}`)   |
+| Modh | Conair                        | Cur síos                                                                                         |
+| ---- | ----------------------------- | ------------------------------------------------------------------------------------------------ |
+| GET  | `/capture-modes`              | Staid mhodhanna AgentBridge / óstaigh shaincheaptha / HTTP_PROXY / seachfhreastalaí córais       |
+| POST | `/capture-modes/http-proxy`   | Tosaigh/stop éisteoir HTTP_PROXY (`{action: "start"\|"stop"}`)                                   |
+| POST | `/capture-modes/system-proxy` | Cuir seachfhreastalaí ar fud an chórais i bhfeidhm nó cealaigh é (`{action: "apply"\|"revert"}`) |
 
-> Tá **díchriptiú TPROXY** (mód gabhála 5) á rialú ag bealach **ar leith** faoin
-> réimír AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — ní
+> Tá **díchriptiú TPROXY** (modh gabhála 5) á thiomáint ag bealach **ar leith** faoin
+> réimír AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — agus níl sé
 > faoi `/api/tools/traffic-inspector/`. Féach
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; níl sé tiomsaithe isteach in `/docs`).
+> `docs/security/MITM-TPROXY-DECRYPT.md` (git; ní thiomsaítear isteach in `/docs` é).
 
 ### Seisiúin
 
 | Modh   | Conair                      | Cur síos                                                          |
 | ------ | --------------------------- | ----------------------------------------------------------------- |
-| POST   | `/sessions`                 | Tosaigh ag taifeadadh (`{name?: string}`)                         |
+| POST   | `/sessions`                 | Tosaigh taifeadadh (`{name?: string}`)                            |
 | PATCH  | `/sessions/{id}`            | Stop nó athainmnigh (`{action: "stop"\|"rename", name?: string}`) |
 | GET    | `/sessions`                 | Liostaigh gach seisiún sábháilte                                  |
 | GET    | `/sessions/{id}`            | Léargas seisiúin (gach iarratas)                                  |
@@ -492,6 +492,6 @@ Bunchonair: `/api/tools/traffic-inspector/`
 
 | Modh | Conair             | Cur síos                                                                                                                        |
 | ---- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| POST | `/internal/ingest` | Glacann sé le hiarratas idircheaptha ó chonair tréchuir `server.cjs`; teastaíonn an ceanntásc `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| POST | `/internal/ingest` | Glacann sé le hiarratas idircheaptha ó chonair pas-trí `server.cjs`; tá ceanntásc `INSPECTOR_INTERNAL_INGEST_TOKEN` riachtanach |
 
-Scéimrí iomlána OpenAPI: `docs/openapi.yaml` → clib `Traffic Inspector`.
+Scéimeanna iomlána OpenAPI: `docs/openapi.yaml` → clib `Traffic Inspector`.

@@ -123,7 +123,9 @@
       "maxCostOpt": "Costas uasta in aghaidh an lae (USD)",
       "allowedModelsOpt": "Liosta de mhúnlaí ceadaithe scartha le camóga",
       "nothingToSet": "Níor soláthraíodh aon réimsí polasaí. Úsáid --rate-limit, --max-cost, nó --allowed-models.",
-      "updated": "Polasaí nuashonraithe."
+      "updated": "Polasaí nuashonraithe.",
+      "modelAccessModeOpt": "Mód rochtana samhlacha (all | restricted)",
+      "unrestrictedOpt": "Ceadaigh gach samhail (--model-access-mode all)"
     },
     "expiration": {
       "title": "Seanlá Eochrach",
