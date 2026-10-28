@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Omejitve ponudnikov",
     "noProviders": "Noben ponudnik ni povezan",
+    "quotaAuthRequired": "Zahtevana je avtentikacija – prijavite se v nadzorno ploščo",
+    "quotaAuthRequiredHint": "Povezav s ponudniki ni bilo mogoče naložiti, ker seja nadzorne plošče manjka ali je potekla. Prijavite se in osvežite stran, da si ogledate omejitve kvote.",
     "connectProvidersForQuota": "Povežite se s ponudniki prek OAuth, da spremljate omejitve in porabo kvote API-ja.",
     "accountsCount": "{count, plural, one {# račun} two {# računa} few {# računi} other {# računov}}",
     "filteredFromCount": "(filtrirano izmed {count})",

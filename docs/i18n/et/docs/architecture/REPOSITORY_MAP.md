@@ -111,150 +111,150 @@ OmniRoute/
 
 ---
 
-## `src/` — Next.js rakendus
+## `src/` — Next.js-i rakendus
 
 ```
 src/
-├── app/                 # App Router (lehed + API-marsruudid + olekulehed + sihtleht)
-├── lib/                 # Põhiteegid / domeenimoodulid (80 alamkausta + ~70 tipptaseme faili)
-├── domain/              # Puhas domeeniloogika (poliitikamootor, tagavaralahendus, maksumus, lukustus, comboResolver, hindamine)
-├── server/              # Ainult serveri moodulid (authz-torustik, cors, autentimise vahevara) — kliendist ei tohi importida
-├── shared/              # Serveri ja kliendi vahel jagatav, kus see on ohutu (konstandid, tüübid, valideerimine, lepingud, utiliidid)
-├── i18n/                # next-intl konfiguratsioon + lokaadipõhine sõnumite JSON (67 lokaati)
-├── middleware/          # Next.js vahevara (päringu rikastamine, lokaadi tuvastamine)
-├── mitm/                # MITM-proksi tuum: sertifikaadi genereerimine/paigaldamine, handlers, targets, inspector, masks, passthrough
-│   ├── handlers/        # 9 IDE-agendi käsitlejaklassi, mis laiendavad MitmHandlerBase'i (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Liikluse jäädvustamise kiht: buffer (mälusisene ringpuhver), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Mudeliadapteri liimkood (pärand-shim)
-├── scripts/             # Koodipuu-sisesed hooldusskriptid (nt backfillAggregation)
-├── sse/                 # Pärand-SSE käsitlejad/teenused (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Pärand mälusisene salv (järk-järgult asendamisel src/lib/db-ga)
+├── app/                 # App Router (lehed + API marsruudid + olekulehed + avaleht)
+├── lib/                 # Põhiteegid / domeenimoodulid (80 alamkataloogi + ~70 tipptaseme faili)
+├── domain/              # Puhas domeeniloogika (reeglimootor, varuvalik, kulu, lukustus, comboResolver, hindamine)
+├── server/              # Ainult serveri moodulid (authz-konveier, cors, autentimise vahevara) — kliendist ei saa importida
+├── shared/              # Serveri ja kliendi vahel jagatud, kui see on turvaline (konstandid, tüübid, valideerimine, lepingud, utiliidid)
+├── i18n/                # next-intl-i konfiguratsioon + lokaadipõhised sõnumite JSON-failid (67 lokaati)
+├── middleware/          # Next.js-i vahevara (päringute rikastamine, lokaadi tuvastamine)
+├── mitm/                # MITM-puhverserveri tuum: sertide genereerimine/installimine, töötlejad, sihtkohad, inspektor, maskid, läbipääs
+│   ├── handlers/        # 9 IDE-agendi töötlejaklassi, mis laiendavad klassi MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Liikluse hõivekiht: puhver (mälusisene ringpuhver), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Mudeliadapterite ühenduskiht (pärandühilduvuskiht)
+├── scripts/             # Lähtekoodipuusisesed hooldusskriptid (nt backfillAggregation)
+├── sse/                 # Pärand-SSE töötlejad/teenused (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Pärand-mälusisene andmehoidla (asendatakse järk-järgult lahendusega src/lib/db)
 ├── types/               # Jagatud TS-i tüübifailid
-├── instrumentation.ts   # Next.js telemeetria hook (brauser + edge)
-├── instrumentation-node.ts  # Ainult Node'i instrumentatsioon
-└── proxy.ts             # HTTP-proksi sisenemispunkti shim
+├── instrumentation.ts   # Next.js-i telemeetriahaak (brauser + serv)
+├── instrumentation-node.ts  # Ainult Node'i instrumentimine
+└── proxy.ts             # HTTP-puhverserveri sisendühilduvuskiht
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Path                                                                         | Purpose                                                                                                                                                                                                                                                                                                                           |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | Avalik OpenAI-ühilduv API (~25 alamteed: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers jne)                                                                                                                                           |
-| `app/api/v1beta/`                                                            | Gemini-stiilis API lõppunktid                                                                                                                                                                                                                                                                                                     |
-| `app/api/playground/`                                                        | Playground Studio marsruudid: `improve-prompt/` (POST — LLM-i promptide ümberkirjutaja), `presets/` (GET loend / POST loomine), `presets/[id]/` (GET / PUT / DELETE) — vt `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                  |
-| `app/api/` (non-v1)                                                          | Haldus-/administraatorimarsruudid (~60 kataloogi: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools jne)                                                                                                                                             |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 marsruuti (serveri juhtimine, agendi olek/DNS/vastendused, möödalase, sertifikaat, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Vt `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                    |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ marsruuti (requests, sessions, hosts, capture-modes, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Vt `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                                 |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 sisendpunkt (`POST /a2a`)                                                                                                                                                                                                                                                                                        |
-| `app/.well-known/agent.json/`                                                | A2A agendikaart (avastamine)                                                                                                                                                                                                                                                                                                      |
-| `app/(dashboard)/dashboard/`                                                 | Armatuurlaua UI lehed (50+ sektsiooni, ~118 page.tsx faili: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity jne)                                                                                                                                               |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 vahekaarti: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — vt `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                                  |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plaan 21): `page.tsx` (kolme vahekaardiga koorik), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge'i armatuurlaualeht — serveri kaart, 9 agendi kaarti, seadistusviisard, mudelite vastendamine, möödalasete loend. i18n PT-BR + EN. Vt `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspectori armatuurlaualeht — DevToolsi poolitatud vaade, 7 detailide vahekaarti, 4 jäädvustusrežiimi lülitit, seansi salvestaja, konteksti värvimine. i18n PT-BR + EN. Vt `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                        |
-| `app/(dashboard)/dashboard/activity/`                                        | Tegevuste voo leht (B grupp): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — vaata `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                          |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvoodi jagamise leht (B grupp): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                       |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Teenusepakkuja plaani seadistusleht (B grupp): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvoodi mõõtmete alistus ühenduse kaupa                                                                                                                                                                                               |
-| `app/docs/`                                                                  | Sisseehitatud dokumentatsiooni vaatur (renderdab `docs/*.md`)                                                                                                                                                                                                                                                                     |
-| `app/landing/`                                                               | Turunduslik sihtleht                                                                                                                                                                                                                                                                                                              |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Autentimisega seotud lehed                                                                                                                                                                                                                                                                                                        |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP vealehed                                                                                                                                                                                                                                                                                                                     |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Staatilised/olekulehed                                                                                                                                                                                                                                                                                                            |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Juurpaigutus, avaleht, PWA manifest, globaalne CSS                                                                                                                                                                                                                                                                                |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Veapiirid                                                                                                                                                                                                                                                                                                                         |
+| Tee                                                                          | Otstarve                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | Avalik OpenAI-ga ühilduv API (~25 alammarsruuti: vestlus, tekstiloome, manused, failid, pakktöötlus, heli, pildid, videod, muusika, ümberjärjestamine, modereerimine, otsing, ws, agendid, kontod, teenusepakkujad jne)                                                                                                     |
+| `app/api/v1beta/`                                                            | Gemini-laadsed API lõpp-punktid                                                                                                                                                                                                                                                                                             |
+| `app/api/playground/`                                                        | Playground Studio marsruudid: `improve-prompt/` (POST — LLM-viiba ümberkirjutaja), `presets/` (GET loend / POST loomine), `presets/[id]/` (GET / PUT / DELETE) — vt `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                  |
+| `app/api/` (mitte-v1)                                                        | Haldus- ja administraatorimarsruudid (~60 kataloogi: teenusepakkujad, kombinatsioonid, seaded, mcp, a2a, hindamised, mälu, oskused, veebihaagid, vastavus, tõrkekindlus, seire, tunnelid, cli-tööriistad jne)                                                                                                               |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge’i REST API — 12 marsruuti (serveri juhtimine, agendi olek/DNS/vastendused, möödaviik, sertifikaat, ülesvoolu-CA). LOCAL_ONLY + SPAWN_CAPABLE. Vt `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                           |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspectori REST + WS API — üle 16 marsruudi (päringud, seansid, hostid, hõiverežiimid, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. Vt `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                      |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 sisenemispunkt (`POST /a2a`)                                                                                                                                                                                                                                                                               |
+| `app/.well-known/agent.json/`                                                | A2A agendikaart (avastamine)                                                                                                                                                                                                                                                                                                |
+| `app/(dashboard)/dashboard/`                                                 | Töölaua kasutajaliidese lehed (üle 50 jaotise, ~118 page.tsx-faili: teenusepakkujad, kombinatsioonid, seaded, mälu, oskused, veebihaagid, hindamised, audit, pakktöötlus, vahemälu, kulud, seisund, süsteem, tegevus jne)                                                                                                   |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio kasutajaliides (3 vahekaarti: otsing/kraapimine/võrdlemine + SearchConceptCard + ProviderCatalog) — vt `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                         |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plaan 21): `page.tsx` (3 vahekaardiga kest), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge’i töölaualeht — serverikaart, 9 agendikaarti, seadistusviisard, mudelite vastendamine, möödaviikude loend. i18n PT-BR + EN. Vt `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspectori töölaualeht — DevToolsi poolitatud vaade, 7 üksikasjade vahekaarti, 4 hõiverežiimi lülitit, seansisalvesti, konteksti värvimine. i18n PT-BR + EN. Vt `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                             |
+| `app/(dashboard)/dashboard/activity/`                                        | Tegevusvoo leht (rühm B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — vt `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                           |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvoodi jagamise leht (rühm B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                  |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Teenusepakkuja paketi konfiguratsioonileht (rühm B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvoodimõõtmete ühendusepõhine ülekirjutamine                                                                                                                                                                             |
+| `app/docs/`                                                                  | Sisseehitatud dokumentatsioonivaatur (renderdab faile `docs/*.md`)                                                                                                                                                                                                                                                          |
+| `app/landing/`                                                               | Turunduslik sihtleht                                                                                                                                                                                                                                                                                                        |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Autentimisega seotud lehed                                                                                                                                                                                                                                                                                                  |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP-tõrkelehed                                                                                                                                                                                                                                                                                                             |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Staatilised/olekulehed                                                                                                                                                                                                                                                                                                      |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Juurpaigutus, avaleht, PWA manifest, globaalne CSS                                                                                                                                                                                                                                                                          |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Tõrkepiirid                                                                                                                                                                                                                                                                                                                 |
 
 ### `src/lib/` — Põhiteegid (~50 moodulit)
 
-| Moodul                                   | Eesmärk                                                                                                                                                                                                                                                                                                               |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A protokolli ülesannete haldur, oskused (5), voogedastus                                                                                                                                                                                                                                                            |
-| `acp/`                                   | CLI agentide register (kohalike CLI-de avastamine — vt `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                    |
-| `api/`                                   | Jagatud API abifunktsioonid (`requireManagementAuth`, valideerimine)                                                                                                                                                                                                                                                  |
-| `auth/`                                  | Sessioon, paroolide räsimine, tokenite valideerimine                                                                                                                                                                                                                                                                  |
-| `batches/`                               | OpenAI Batches API käsitlejad                                                                                                                                                                                                                                                                                         |
-| `catalog/`                               | Teenusepakkujate kataloogi Zod-valideerimine + võimekuste lahendamine                                                                                                                                                                                                                                                 |
-| `cloudAgent/`                            | Pilveagendid (Codex Cloud, Devin, Jules) — vt `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                        |
-| `combos/`                                | Kombode lahendamine + ümberjärjestamise abifunktsioonid                                                                                                                                                                                                                                                               |
-| `audit/`                                 | Tegevusvoo abifunktsioonid: `highLevelActions.ts` (lubatusloend + `isHighLevelAction()`), `activityIcons.ts` (tegevus → ikooni/tegusõna vastendus), `timeline.ts` (groupByDay/relativeTime) — vt `docs/architecture/MONITORING_SECTIONS.md`                                                                           |
-| `compliance/`                            | Auditilogi + teenusepakkujate audit — vt `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                |
-| `compression/`                           | Tihendusmootori liimkood (mootorid asuvad kataloogis `open-sse/services/compression/`)                                                                                                                                                                                                                                |
-| `config/`                                | Käitusaja konfiguratsiooni abifunktsioonid                                                                                                                                                                                                                                                                            |
-| `db/`                                    | 120+ domeeni andmebaasimoodulit + 168 migratsiooni (SQLite'i puhul käi alati siit läbi)                                                                                                                                                                                                                               |
-| `quota/`                                 | Kvoodijagamise mootor: `dimensions.ts` (tüübid/Zod), `types.ts` (QuotaStore liides), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — vt `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Radari tasuta mudelite kataloogiklient: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — vt `docs/frameworks/RADAR.md`                                                                                                                                    |
-| `display/`                               | Kasutajaliidese vormindamise abifunktsioonid (maksumus, latentsus jne)                                                                                                                                                                                                                                                |
-| `embeddings/`                            | Embeddingute teenuse abifunktsioonid                                                                                                                                                                                                                                                                                  |
-| `env/`                                   | Keskkonnamuutujate parsimine + valideerimine                                                                                                                                                                                                                                                                          |
-| `evals/`                                 | Hindamisraamistik (komplektid, käivitaja, käituskeskkond) — vt `docs/frameworks/EVALS.md`                                                                                                                                                                                                                             |
-| `guardrails/`                            | PII-maskeerija, prompt injection, visioonisild — vt `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                     |
-| `jobs/`                                  | Taustatööd (cron-laadsed)                                                                                                                                                                                                                                                                                             |
-| `memory/`                                | Vestlusmälu (SQLite FTS5 + sqlite-vec hübriid-RRF + Qdrant 2. tase) — vt `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                  |
-| `memory/embedding/`                      | Mitmeallikane embeddingukiht: `index.ts` (lahendaja), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plaan 21)                                                                                                                                                                       |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 mähis — KNN brute-force + hübriid-RRF (FTS5 + vektor, k=60). Laisk-init, degradeerub sujuvalt, kui sqlite-vec pole saadaval. (plaan 21)                                                                                                                                                             |
-| `memory/reindex.ts`                      | `runReindexBatch()` — töötleb taustal mäluüksusi väärtusega `needs_reindex=1`; kutsutakse välja `POST /api/memory/reindex` ja laisa tagasitäitmise tee kaudu. (plaan 21)                                                                                                                                              |
-| `monitoring/`                            | Tervisekontrollid, mõõdikute saatmine                                                                                                                                                                                                                                                                                 |
-| `oauth/`                                 | OAuth/import-vood 22 pakkujamooduli jaoks (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                 |
-| `plugins/`                               | Pluginate register                                                                                                                                                                                                                                                                                                    |
-| `promptCache/`                           | Anthropicu stiilis prompt-vahemälu murdepunktid                                                                                                                                                                                                                                                                       |
-| `skills/`                                | Oskuste raamistik (sisseehitatud + turg + SkillsSH) — vt `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                  |
-| `playground/`                            | Playground Studio jagatud abifunktsioonid: `codeExport.ts` (curl/Python/TS generaator), `promptImprover.ts` (metavihiprompti ehitaja), `streamMetrics.ts` (puhas TTFT/TPS), `types.ts` (hinnatabel) — vt `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                       |
-| `webhookDispatcher.ts`                   | HMAC-webhookide edastus — vt `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                            |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnelihaldurid — vt `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                      |
-| `cloudSync.ts`, `initCloudSync.ts`       | Oleku valikuline pilvesünkroniseerimine                                                                                                                                                                                                                                                                               |
-| `localDb.ts`                             | Db-moodulite taas-ekspordi barrel (loogikat ei sisalda — ainult taas-ekspordid)                                                                                                                                                                                                                                       |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Päringute vahemällu salvestamine + idempotentsus                                                                                                                                                                                                                                                                      |
-| (~30 top-level faili veel)               | Spetsialiseeritud abifunktsioonid (logEnv, modelsDevSync, piiSanitizer jne)                                                                                                                                                                                                                                           |
+| Moodul                                   | Otstarve                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A-protokolli ülesannete haldur, oskused (5), voogedastus                                                                                                                                                                                                                                                                 |
+| `acp/`                                   | CLI-agentide register (kohalike CLI-de tuvastamine — vt `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                        |
+| `api/`                                   | Jagatud API abifunktsioonid (`requireManagementAuth`, valideerimine)                                                                                                                                                                                                                                                       |
+| `auth/`                                  | Seanss, paroolide räsimine, lubade valideerimine                                                                                                                                                                                                                                                                           |
+| `batches/`                               | OpenAI Batches API töötlejad                                                                                                                                                                                                                                                                                               |
+| `catalog/`                               | Teenusepakkujate kataloogi Zod-valideerimine ja võimekuste tuvastamine                                                                                                                                                                                                                                                     |
+| `cloudAgent/`                            | Pilveagendid (Codex Cloud, Devin, Jules) — vt `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                             |
+| `combos/`                                | Kombinatsioonide tuvastamise ja ümberjärjestamise abifunktsioonid                                                                                                                                                                                                                                                          |
+| `audit/`                                 | Tegevusvoo abifunktsioonid: `highLevelActions.ts` (lubatud väärtuste loend + `isHighLevelAction()`), `activityIcons.ts` (tegevuse → ikooni/tegusõna vastendus), `timeline.ts` (groupByDay/relativeTime) — vt `docs/architecture/MONITORING_SECTIONS.md`                                                                    |
+| `compliance/`                            | Auditilogi ja teenusepakkujate audit — vt `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                    |
+| `compression/`                           | Tihendusmootorite sidustuskiht (mootorid asuvad kataloogis `open-sse/services/compression/`)                                                                                                                                                                                                                               |
+| `config/`                                | Käitusaegse konfiguratsiooni abifunktsioonid                                                                                                                                                                                                                                                                               |
+| `db/`                                    | Üle 120 domeenipõhise andmebaasimooduli ja 168 migratsiooni (SQLite'i puhul kasuta alati neid)                                                                                                                                                                                                                             |
+| `quota/`                                 | Kvootide jagamise mootor: `dimensions.ts` (tüübid/Zod), `types.ts` (QuotaStore'i liides), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — vt `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Radari tasuta mudelite kataloogi klient: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — vt `docs/frameworks/RADAR.md`                                                                                                                                        |
+| `display/`                               | Kasutajaliidese vormindamise abifunktsioonid (maksumus, latentsus jne)                                                                                                                                                                                                                                                     |
+| `embeddings/`                            | Manustamisteenuse abifunktsioonid                                                                                                                                                                                                                                                                                          |
+| `env/`                                   | Keskkonnamuutujate parsimine ja valideerimine                                                                                                                                                                                                                                                                              |
+| `evals/`                                 | Hindamisraamistik (komplektid, käitaja, käituskeskkond) — vt `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                    |
+| `guardrails/`                            | Isikuandmete maskeerija, viibasisestuse kaitse, visioonisild — vt `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                            |
+| `jobs/`                                  | Taustatööd (croni-laadsed)                                                                                                                                                                                                                                                                                                 |
+| `memory/`                                | Vestlusmälu (SQLite FTS5 + sqlite-vec hübriidne RRF + Qdranti 2. tase) — vt `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                    |
+| `memory/embedding/`                      | Mitme allikaga manustamiskiht: `index.ts` (lahendaja), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plaan 21)                                                                                                                                                                           |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ümbris — KNN-i täielik otsing + hübriidne RRF (FTS5 + vektor, k=60). Viivitusega lähtestamine, sqlite-veci puudumisel töötab piiratud funktsionaalsusega edasi. (plaan 21)                                                                                                                               |
+| `memory/reindex.ts`                      | `runReindexBatch()` — töötleb taustal mälukirjeid, millel on `needs_reindex=1`; seda kutsuvad `POST /api/memory/reindex` ja viivitusega tagantjärele täitmise tee. (plaan 21)                                                                                                                                              |
+| `monitoring/`                            | Tervisekontrollid, mõõdikute väljastamine                                                                                                                                                                                                                                                                                  |
+| `oauth/`                                 | OAuthi/importimise vood 22 pakkujamooduli jaoks (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                |
+| `plugins/`                               | Pistikprogrammide register                                                                                                                                                                                                                                                                                                 |
+| `promptCache/`                           | Anthropicu-laadsed viibavahemälu murdepunktid                                                                                                                                                                                                                                                                              |
+| `skills/`                                | Oskuste raamistik (sisseehitatud + kauplemiskoht + SkillsSH) — vt `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                              |
+| `playground/`                            | Playground Studio jagatud abifunktsioonid: `codeExport.ts` (curl/Pythoni/TS-i generaator), `promptImprover.ts` (metaviiba koostaja), `streamMetrics.ts` (puhas TTFT/TPS), `types.ts` (hinnastustabel) — vt `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                          |
+| `webhookDispatcher.ts`                   | HMAC-veebikonksude edastamine — vt `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                           |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnelihaldurid — vt `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                           |
+| `cloudSync.ts`, `initCloudSync.ts`       | Valikuline oleku sünkroonimine pilvega                                                                                                                                                                                                                                                                                     |
+| `localDb.ts`                             | Taasekspordi koondmoodul andmebaasimoodulitele (loogika puudub — ainult taasekspordid)                                                                                                                                                                                                                                     |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | Päringute vahemällu salvestamine + idempotentsus                                                                                                                                                                                                                                                                           |
+| (~30 muud tipptaseme faili)              | Spetsialiseeritud abifunktsioonid (logEnv, modelsDevSync, piiSanitizer jne)                                                                                                                                                                                                                                                |
 
 ### `src/lib/db/` — Andmebaas (147 moodulit + 208 migratsiooni)
 
-| Alamkaust                 | Eesmärk                                                                                                                                                                      |
+| Alamkataloog              | Otstarve                                                                                                                                                                     |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()` singleton WAL-journalinguga                                                                                                                                |
-| `db/migrations/`          | Versioonitud SQL-failid (idempotentsed, transaktsioonilised). `073_memory_vec.sql` lisab `memory_vec_meta` + `needs_reindex` veeru (plaan 21).                               |
-| `db/playgroundPresets.ts` | Playground Studio eelseadete CRUD-moodul (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)      |
+| `db/core.ts`              | `getDbInstance()` singleton koos WAL-logimisega                                                                                                                              |
+| `db/migrations/`          | Versioonitud SQL-failid (idempotentsed, transaktsioonilised). `073_memory_vec.sql` lisab `memory_vec_meta` + veeru `needs_reindex` (plaan 21).                               |
+| `db/playgroundPresets.ts` | Playground Studio eelseadistuste CRUD-moodul (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)  |
 | `db/memoryVec.ts`         | CRUD tabelile `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` jne (plaan 21)              |
 | `db/<domain>.ts`          | Üks moodul domeeni kohta: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache jne. |
 
 ### `src/domain/`
 
-| Moodul                 | Eesmärk                                          |
-| ---------------------- | ------------------------------------------------ |
-| `policy.ts`            | Poliitikamootor                                  |
-| `fallbackPolicy.ts`    | Fallbacki otsustuspuu                            |
-| `costRules.ts`         | Kulu arvutamise reeglid                          |
-| `lockoutPolicy.ts`     | Mudeli/ühenduse blokeerimispoliitika             |
-| `tagRouter.ts`         | Sildipõhine marsruutimine                        |
-| `comboResolver.ts`     | Combo lahendamine (kasutab combo-mootor)         |
-| `modelAvailability.ts` | Mudelipõhine saadavuse kontroll                  |
-| `assessment/`          | Mudelite hindamine (RFC-AUTO-ASSESSMENT 1. faas) |
+| Moodul                 | Otstarve                                                  |
+| ---------------------- | --------------------------------------------------------- |
+| `policy.ts`            | Reeglimootor                                              |
+| `fallbackPolicy.ts`    | Varuvaliku otsustuspuu                                    |
+| `costRules.ts`         | Kulude arvutamise reeglid                                 |
+| `lockoutPolicy.ts`     | Mudeli/ühenduse lukustamise reegel                        |
+| `tagRouter.ts`         | Sildipõhine marsruutimine                                 |
+| `comboResolver.ts`     | Kombinatsiooni lahendamine (kasutab kombinatsioonimootor) |
+| `modelAvailability.ts` | Saadavuse kontroll mudeli kaupa                           |
+| `assessment/`          | Mudeli hindamine (RFC-AUTO-ASSESSMENT-i 1. etapp)         |
 
 ### `src/server/`
 
-| Moodul   | Eesmärk                                                                                           |
-| -------- | ------------------------------------------------------------------------------------------------- |
-| `authz/` | Autoriseerimise toru: `classify` → `policies` → `enforce` — vt `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | CORS-i konfiguratsioon                                                                            |
-| `auth/`  | Sessiooni vahevara                                                                                |
+| Moodul   | Otstarve                                                                                            |
+| -------- | --------------------------------------------------------------------------------------------------- |
+| `authz/` | Autoriseerimiskonveier: `classify` → `policies` → `enforce` — vt `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | CORS-i konfiguratsioon                                                                              |
+| `auth/`  | Seansi vahevara                                                                                     |
 
 ### `src/shared/`
 
-| Moodul                           | Eesmärk                                                                                                           |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `components/`                    | Armatuurlaua komponentide API: adapterid paketi `packages/ui-kit` kohal — vt `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: ekraanidel kasutatavad ikooninimed → Lucide'i komponendid (`<Icon>`)                                  |
-| `constants/providers.ts`         | **376 teenusepakkujat** koos Zod-valideerimisega (tõesuse allikas)                                                |
-| `constants/cliTools.ts`          | Väliste CLI-tööriistade register                                                                                  |
-| `constants/routingStrategies.ts` | **20 marsruutimisstrateegiat** koos prioriteetidega                                                               |
-| `constants/publicApiRoutes.ts`   | Marsruudid, mis nõuavad Bearer-autentimist (võrreldes haldusautentimisega)                                        |
-| `constants/upstreamHeaders.ts`   | Päiste keelunimekiri ülesvoolupäringute jaoks                                                                     |
-| `validation/schemas.ts`          | ~80 Zod-skeemi (API-lepingute ainus tõese allikas)                                                                |
-| `validation/helpers.ts`          | Zod-valideerimise abifunktsioonid (`validateBody` jne)                                                            |
-| `types/`                         | Jagatud TS-tüübid                                                                                                 |
-| `contracts/`                     | Avaliku API lepingud (tarbitakse `files:` kaudu failis `package.json`)                                            |
-| `utils/circuitBreaker.ts`        | Teenusepakkujate rikkekatkesti (vt `docs/architecture/RESILIENCE_GUIDE.md`)                                       |
-| `utils/apiAuth.ts`               | API-võtme valideerimine, ulatuse kontrollimine                                                                    |
-| `utils/fetchTimeout.ts`          | Ajalõpu- ja katkestusümbrised ülesvoolu fetch-päringutele                                                         |
-| `utils/releaseNotes.ts`          | Suletud v2/legacy teadaannete parser, lokaliseerimine ja ID-põhine tagasilükkamine                                |
+| Moodul                           | Otstarve                                                                                              |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `components/`                    | Töölaua komponentide API: adapterid `packages/ui-kit` jaoks — vt `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: kuvadel kasutatavad ikooninimed → Lucide'i komponendid (`<Icon>`)                         |
+| `constants/providers.ts`         | **376 teenusepakkujat** Zodi valideerimisega (tõeallikas)                                             |
+| `constants/cliTools.ts`          | Väliste CLI-tööriistade register                                                                      |
+| `constants/routingStrategies.ts` | **20 marsruutimisstrateegiat** koos prioriteetidega                                                   |
+| `constants/publicApiRoutes.ts`   | Marsruudid, mis nõuavad Bearer-autentimist (haldusautentimise asemel)                                 |
+| `constants/upstreamHeaders.ts`   | Päiste keeluloend ülesvoolupäringute jaoks                                                            |
+| `validation/schemas.ts`          | ~80 Zodi skeemi (API-lepingute ainus tõeallikas)                                                      |
+| `validation/helpers.ts`          | Zodi valideerimise abifunktsioonid (`validateBody` jne)                                               |
+| `types/`                         | Jagatud TS-tüübid                                                                                     |
+| `contracts/`                     | Avaliku API lepingud (kasutatakse `package.json` väljal `files:`)                                     |
+| `utils/circuitBreaker.ts`        | Teenusepakkuja kaitselüliti (vt `docs/architecture/RESILIENCE_GUIDE.md`)                              |
+| `utils/apiAuth.ts`               | API-võtme valideerimine, õiguste kontrollimine                                                        |
+| `utils/fetchTimeout.ts`          | Ajalõpu ja katkestamise ümbrised ülesvoolu fetch-päringute jaoks                                      |
+| `utils/releaseNotes.ts`          | Suletud v2/pärandteadaannete parser, lokaliseerimine ja ID-põhine peitmine                            |
 
 ---
 
@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Avalik dokumentatsioon (7 juurfaili + 17 alamkausta)
+## `docs/` — Avalik dokumentatsioon (7 juurfaili + 17 alamkataloogi)
 
 ### Ülataseme juhendid
 
-| Dok                         | Eesmärk                                                                                                         |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Kõrgetasemeline arhitektuur, alamsüsteemide kaart, armatuurlaua liides                                          |
-| `CODEBASE_DOCUMENTATION.md` | Tehniline teatmik: kataloogid, moodulid, kokkulepped                                                            |
-| `FEATURES.md`               | Funktsioonide maatriks koos v3.8 esiletõstetega                                                                 |
-| `USER_GUIDE.md`             | Lõppkasutaja juhend (seadistus, mudelid, kombod, CLI-d, heli jne)                                               |
-| `API_REFERENCE.md`          | API lõpp-punktide teatmik koos autentimismudeliga                                                               |
-| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsioon (121 rada)                                                                         |
-| `SETUP_GUIDE.md`            | Paigaldusviisid (npm, npx, Docker, Electron, Termux, lähtekood)                                                 |
-| `ENVIRONMENT.md`            | Kõik keskkonnamuutujad (~800 dokumenteeritud, ~3050 rida failis `.env.example`)                                 |
-| `TROUBLESHOOTING.md`        | Levinud vead + v3.8.0 teadaolevad probleemid                                                                    |
-| `RELEASE_CHECKLIST.md`      | Täielik väljalaskevoog (skills, husky, conventional commits, juurutamine)                                       |
-| `COVERAGE_PLAN.md`          | Testikatvuse eesmärgid ja praegune olukord                                                                      |
-| `FREE_TIERS.md`             | Kureeritud tasuta taseme pakkujad (48+ tasuta + 11 OAuth)                                                       |
-| `CLI-TOOLS.md`              | Välised CLI integratsioonid + sisemine OmniRoute CLI                                                            |
-| `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaati                                                                    |
-| `UNINSTALL.md`              | Puhta eemaldamise sammud                                                                                        |
-| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** 376 teenusepakkuja kataloog (taasgenereerimine: `npm run gen:provider-reference`) |
+| Dok                         | Eesmärk                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | Kõrgtaseme arhitektuur, alamsüsteemide kaart, armatuurlaua pind                                        |
+| `CODEBASE_DOCUMENTATION.md` | Tehniline viide: kataloogid, moodulid, konventsioonid                                                  |
+| `FEATURES.md`               | Funktsioonimaatriks koos v3.8 esiletõstetega                                                           |
+| `USER_GUIDE.md`             | Lõppkasutaja juhend (seadistus, mudelid, kombod, CLI-d, heli jne)                                      |
+| `API_REFERENCE.md`          | API lõpp-punktide viide koos autentimismudeliga                                                        |
+| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsioon (121 teed)                                                                |
+| `SETUP_GUIDE.md`            | Paigaldusmeetodid (npm, npx, Docker, Electron, Termux, lähtekood)                                      |
+| `ENVIRONMENT.md`            | Kõik keskkonnamuutujad (~800 dokumenteeritud, ~3 050 rida `.env.example`-is)                           |
+| `TROUBLESHOOTING.md`        | Levinud vead + v3.8.0 teadaolevad probleemid                                                           |
+| `RELEASE_CHECKLIST.md`      | Täielik väljalaskevoog (skills, husky, conventional commits, juurutus)                                 |
+| `COVERAGE_PLAN.md`          | Kattuvuse eesmärgid ja praegune seis                                                                   |
+| `FREE_TIERS.md`             | Kureeritud tasuta taseme pakkujad (48+ tasuta + 11 OAuth-i)                                            |
+| `CLI-TOOLS.md`              | Välised CLI-integreerimised + sisemine OmniRoute CLI                                                   |
+| `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaati                                                           |
+| `UNINSTALL.md`              | Puhta desinstallimise sammud                                                                           |
+| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** 376 pakkuja kataloog (regenereerimine: `npm run gen:provider-reference`) |
 
-### Alamsüsteemide põhjalikud ülevaated
+### Alamsüsteemide süvitsiminekud
 
-| Dok                                           | Eesmärk                                                                         |
-| --------------------------------------------- | ------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | MCP server: 110 tööriista, 3 transporti, 33 ulatust, REST lõpp-punktid          |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 skills, REST abivahendid, agendikaart                     |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Ühtne juhend: A2A vs ACP vs Cloud Agents                                        |
-| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules orkestreerimine                                     |
-| `SKILLS.md`                                   | Skills raamistik (sisseehitatud + marketplace + SkillsSH + liivakast)           |
-| `RADAR.md`                                    | Radari tasuta mudelite kataloogi ülekate (`RADAR_ENABLED`, vaikimisi väljas)    |
-| `MEMORY.md`                                   | Mälusüsteem (SQLite FTS5 + Qdrant)                                              |
-| `EVALS.md`                                    | Eval raamistik (komplektid, käivitused, rubriigid)                              |
-| `GUARDRAILS.md`                               | PII maskeerija, prompt injection, visioonisild                                  |
-| `COMPLIANCE.md`                               | Auditilogi, säilitamine, noLog-st loobumine                                     |
-| `WEBHOOKS.md`                                 | HMAC-allkirjastatud webhookide kohaletoimetamine                                |
-| `REASONING_REPLAY.md`                         | Hübriidne mälus/SQLite'i vahemälu `reasoning_content` jaoks                     |
-| `AUTHZ_GUIDE.md`                              | Autoriseerimise konveier (`classify` → `policies` → `enforce`)                  |
-| `RESILIENCE_GUIDE.md`                         | Kaitselüliti + cooldown + mudeli blokeering                                     |
-| `docs/security/STEALTH_GUIDE.md` (ainult git) | TLS sõrmejälgedamine (JA3/JA4), Claude Code CCH, MITM sert                      |
-| `AUTO-COMBO.md`                               | Auto Combo mootor (16-faktoriline skoorimine, 6 režiimipakki, virtuaalne tehas) |
+| Dok                                             | Eesmärk                                                                               |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                                 | MCP server: 110 tööriista, 3 transporti, 33 skoopi, REST-i lõpp-punktid               |
+| `A2A-SERVER.md`                                 | A2A v0.3: JSON-RPC, 6 oskust, REST-i abimeetodid, agendikaart                         |
+| `AGENT_PROTOCOLS_GUIDE.md`                      | Ühtne juhend: A2A vs ACP vs Cloud Agents                                              |
+| `CLOUD_AGENT.md`                                | Codex Cloud / Devin / Jules orkestreerimine                                           |
+| `SKILLS.md`                                     | Skills-raamistik (sisseehitatud + turuplats + SkillsSH + liivakast)                   |
+| `RADAR.md`                                      | Radari tasuta mudelite kataloogi ülekate (`RADAR_ENABLED`, vaikimisi välja lülitatud) |
+| `MEMORY.md`                                     | Mälusüsteem (SQLite FTS5 + Qdrant)                                                    |
+| `EVALS.md`                                      | Hindamisraamistik (komplektid, käivitused, ruubrikud)                                 |
+| `GUARDRAILS.md`                                 | PII-maskeerija, käskluse injektsioon, nägemissild                                     |
+| `COMPLIANCE.md`                                 | Auditilogi, säilitamine, noLog-st loobumine                                           |
+| `WEBHOOKS.md`                                   | HMAC-allkirjastatud webhooki kohaletoimetamine                                        |
+| `REASONING_REPLAY.md`                           | Hübriidne mälu-/SQLite-vahemälu `reasoning_content` jaoks                             |
+| `AUTHZ_GUIDE.md`                                | Autoriseerimiskonveier (`classify` → `policies` → `enforce`)                          |
+| `RESILIENCE_GUIDE.md`                           | Ahelakatkesti + cooldown + mudeli lukustus                                            |
+| `docs/security/STEALTH_GUIDE.md` (ainult gitis) | TLS-i sõrmejäljetuvastus (JA3/JA4), Claude Code CCH, MITM-sertifikaat                 |
+| `AUTO-COMBO.md`                                 | Auto Combo mootor (16-teguriline hindamine, 6 režiimipaketti, virtuaaltehas)          |
 
 ### Tihendamine
 
-| Dok                             | Eesmärk                                    |
-| ------------------------------- | ------------------------------------------ |
-| `COMPRESSION_GUIDE.md`          | Tihendamisrežiimide ülevaade + tegevuskava |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK mootorid, registri leping    |
-| `COMPRESSION_RULES_FORMAT.md`   | Cavemani reeglipaki JSON-skeem             |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Keelekohtane reeglipakkide inventuur       |
-| `RTK_COMPRESSION.md`            | RTK deklaratiivne konveier (56 filtrit)    |
+| Dok                             | Eesmärk                                 |
+| ------------------------------- | --------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Tihendamisrežiimide ülevaade + teekaart |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK mootorid, registri leping |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman reeglipaki JSON-skeem           |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Keelekohtane reeglipakkide inventuur    |
+| `RTK_COMPRESSION.md`            | RTK deklaratiivne konveier (56 filtrit) |
 
 ### Juurutamine
 
-| Dokument                     | Eesmärk                                                                         |
-| ---------------------------- | ------------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Dockeri ehitus, profiilid (base/cli/host/cliproxyapi), Redise sidecar-konteiner |
-| `VM_DEPLOYMENT_GUIDE.md`     | Üldine VM/VPS juurutus (Ubuntu/Debian + nginx + systemd)                        |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io juurutus (praegu ainult hiina keeles)                                    |
-| `TERMUX_GUIDE.md`            | Androidi headless-kasutus Termuxi kaudu                                         |
-| `PWA_GUIDE.md`               | Progressiivse veebirakenduse (PWA) paigaldamine + service worker                |
-| `ELECTRON_GUIDE.md`          | Töölauarakenduse ehitamine + allkirjastamine + levitamine                       |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                          |
-| `PROXY_GUIDE.md`             | 4-tasemeline väljuvproksi + 1proxy turuplats                                    |
+| Dok                          | Eesmärk                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Dockeri ehitamine, profiilid (base/cli/host/cliproxyapi), Redis'i sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Üldine VM-i/VPS-i juurutus (Ubuntu/Debian + nginx + systemd)              |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io juurutus (praegu ainult hiina keeles)                              |
+| `TERMUX_GUIDE.md`            | Androidi headless-režiim Termuxi kaudu                                    |
+| `PWA_GUIDE.md`               | Progressiivse veebirakenduse installimine + service worker                |
+| `ELECTRON_GUIDE.md`          | Töölauarakenduse ehitamine + allkirjastamine + levitamine                 |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                    |
+| `PROXY_GUIDE.md`             | 4-tasemeline väljuvproksi + 1proxy turuplats                              |
 
-### Alamkataloogid
+### Alamkaustad
 
-| Alamkataloog          | Eesmärk                                                                                                                                                                                                     |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokaliseeritud dokumentatsiooni tõlked (41 lokaati)                                                                                                                                                         |
-| `docs/screenshots/`   | Juhendite pildiressursid                                                                                                                                                                                    |
-| `_tasks/superpowers/` | Superpowers'i plaanid/spetsifikatsioonid (`writing-plans`/`brainstorming`) + uurimistöö — isoleeritud, eraldi versioonitav repo, mida põhipuu gitignore'ib. Vt CLAUDE.md → "Planning & Research Artifacts". |
+| Alamkaust             | Eesmärk                                                                                                                                                                                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokaliseeritud dokumentide tõlked (41 lokaati)                                                                                                                                                                                                     |
+| `docs/screenshots/`   | Juhendite pildimaterjal                                                                                                                                                                                                                            |
+| `_tasks/superpowers/` | Plaanid ja spetsifikatsioonid tööriistast superpowers (`writing-plans`/`brainstorming`) + uurimused — isoleeritud, eraldi versioonitav repositoorium, mille põhipuu on gitignore'iga välja jätnud. Vt CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

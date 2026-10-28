@@ -71,7 +71,7 @@
 
 |                                         |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Dostawcy                             |            352            |   **358**   |          375          |
+| 🌐 Dostawcy                             |            352            |   **358**   |          376          |
 | 🧠 Unikalne identyfikatory modeli czatu |           1320            |  **1374**   |         1475          |
 | 🖼️ Most modalności                      | 🆕 obraz + dźwięk + wideo |      ✓      |           ✓           |
 | 📡 Bezpłatny katalog Radar              |       🆕 opcjonalny       |      ✓      |           ✓           |

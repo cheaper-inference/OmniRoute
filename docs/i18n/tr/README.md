@@ -71,7 +71,7 @@
 
 |                                       |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Sağlayıcılar                       |           352           |   **358**   |          375          |
+| 🌐 Sağlayıcılar                       |           352           |   **358**   |          376          |
 | 🧠 Benzersiz sohbet modeli kimlikleri |          1320           |  **1374**   |         1475          |
 | 🖼️ Modalite Köprüsü                   | 🆕 görsel + ses + video |      ✓      |           ✓           |
 | 📡 Radar ücretsiz katalog             | 🆕 isteğe bağlı katılım |      ✓      |           ✓           |

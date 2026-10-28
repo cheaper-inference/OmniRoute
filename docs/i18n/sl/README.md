@@ -71,7 +71,7 @@
 
 |                                         |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 Ponudniki                            |          352          |   **358**   |          375          |
+| 🌐 Ponudniki                            |          352          |   **358**   |          376          |
 | 🧠 Edinstveni ID-ji klepetalnih modelov |         1320          |  **1374**   |         1475          |
 | 🖼️ Most med modalnostmi                 | 🆕 vid + zvok + video |      ✓      |           ✓           |
 | 📡 Brezplačni katalog Radar             |     🆕 po izbiri      |      ✓      |           ✓           |

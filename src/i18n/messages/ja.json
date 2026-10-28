@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "プロバイダーの制限",
     "noProviders": "プロバイダーが接続されていません",
+    "quotaAuthRequired": "認証が必要です - ダッシュボードにサインインしてください",
+    "quotaAuthRequiredHint": "ダッシュボードのセッションが存在しないか期限切れのため、プロバイダー接続を読み込めませんでした。サインインして更新すると、クォータ制限を確認できます。",
     "connectProvidersForQuota": "OAuth を使用してプロバイダーに接続し、API クォータの制限と使用状況を追跡します。",
     "accountsCount": "{count, plural, one {#件のアカウント} other {#件のアカウント}}",
     "filteredFromCount": "({count} からフィルタリング)",

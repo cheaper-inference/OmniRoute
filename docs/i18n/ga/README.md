@@ -71,7 +71,7 @@
 
 |                                        |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Soláthraithe                        |           352           |   **358**   |          375          |
+| 🌐 Soláthraithe                        |           352           |   **358**   |          376          |
 | 🧠 Aitheantóirí uathúla samhail comhrá |          1320           |  **1374**   |         1475          |
 | 🖼️ Droichead Modhalachta               | 🆕 fís + fuaim + físeán |      ✓      |           ✓           |
 | 📡 Catalóg saor in aisce Radar         |       🆕 roghnach       |      ✓      |           ✓           |

@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Szolgáltatói korlátok",
     "noProviders": "Nincs szolgáltató csatlakozva",
+    "quotaAuthRequired": "Hitelesítés szükséges – jelentkezzen be az irányítópultra",
+    "quotaAuthRequiredHint": "A szolgáltatói kapcsolatok nem tölthetők be, mert az irányítópult munkamenete hiányzik vagy lejárt. Jelentkezzen be, majd frissítse az oldalt a kvótakorlátok megtekintéséhez.",
     "connectProvidersForQuota": "Csatlakozzon OAuth szolgáltatókhoz az API-kvótakorlátok és -használat nyomon követéséhez.",
     "accountsCount": "{count, plural, one {# fiók} other {# fiók}}",
     "filteredFromCount": "(szűrve innen: {count})",

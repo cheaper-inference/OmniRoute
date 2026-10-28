@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limiti provajdera",
     "noProviders": "Nijedan provajder nije povezan",
+    "quotaAuthRequired": "Potrebna je autentifikacija – prijavite se na kontrolnu ploču",
+    "quotaAuthRequiredHint": "Veze s pružaocima usluga nije bilo moguće učitati jer sesija kontrolne ploče nedostaje ili je istekla. Prijavite se i osvježite stranicu kako biste vidjeli ograničenja svojih kvota.",
     "connectProvidersForQuota": "Povežite se sa provajderima putem OAuth-a kako biste pratili svoje API kvote i potrošnju.",
     "accountsCount": "{count, plural, one {# račun} other {# računa}}",
     "filteredFromCount": "(filtrirano od {count})",

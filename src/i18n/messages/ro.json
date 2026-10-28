@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limitele furnizorului",
     "noProviders": "Niciun furnizor conectat",
+    "quotaAuthRequired": "Autentificare necesară - conectați-vă la panoul de control",
+    "quotaAuthRequiredHint": "Conexiunile furnizorilor nu au putut fi încărcate deoarece sesiunea panoului de control lipsește sau a expirat. Conectați-vă și reîmprospătați pagina pentru a vedea limitele cotelor.",
     "connectProvidersForQuota": "Conectați-vă la furnizori cu OAuth pentru a urmări limitele și utilizarea cotelor API.",
     "accountsCount": "{count, plural, one {# cont} other {# conturi}}",
     "filteredFromCount": "(filtrat din {count})",

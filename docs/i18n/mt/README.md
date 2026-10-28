@@ -71,7 +71,7 @@
 
 |                                    |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ---------------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 Fornituri                       |            352             |   **358**   |          375          |
+| 🌐 Fornituri                       |            352             |   **358**   |          376          |
 | 🧠 IDs uniċi tal-mudelli ta' chat  |            1320            |  **1374**   |         1475          |
 | 🖼️ Pont tal-Modalitajiet           | 🆕 viżjoni + awdjo + vidjo |      ✓      |           ✓           |
 | 📡 Katalogu ħieles tar-Radar       |         🆕 opt-in          |      ✓      |           ✓           |

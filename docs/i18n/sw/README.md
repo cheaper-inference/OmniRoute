@@ -71,7 +71,7 @@
 
 |                                                 |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Watoa huduma                                 |           352            |   **358**   |          375          |
+| 🌐 Watoa huduma                                 |           352            |   **358**   |          376          |
 | 🧠 Vitambulisho vya kipekee vya modeli za gumzo |           1320           |  **1374**   |         1475          |
 | 🖼️ Daraja la Modali                             | 🆕 maono + sauti + video |      ✓      |           ✓           |
 | 📡 Katalogi ya bure ya Radar                    |       🆕 kujiunga        |      ✓      |           ✓           |

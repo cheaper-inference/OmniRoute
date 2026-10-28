@@ -115,146 +115,146 @@ OmniRoute/
 
 ```
 src/
-├── app/                 # යෙදුම් රවුටරය (පිටු + API මාර්ග + තත්ත්ව පිටු + ප්රවේශ පිටුව)
+├── app/                 # App Router (පිටු + API මාර්ග + තත්ත්ව පිටු + ගොඩබැසීමේ පිටුව)
 ├── lib/                 # මූලික පුස්තකාල / වසම් මොඩියුල (උපනාමාවලි 80ක් + ඉහළ මට්ටමේ ගොනු ~70ක්)
-├── domain/              # පිරිසිදු වසම් තර්කනය (ප්රතිපත්ති එන්ජිම, පසුබැසීම, පිරිවැය, අගුලු දැමීම, comboResolver, තක්සේරුව)
-├── server/              # සේවාදායකයට පමණක් අදාළ මොඩියුල (authz නලමාර්ගය, cors, සත්යාපන middleware) — සේවාලාභියා වෙතින් import කළ නොහැක
-├── shared/              # ආරක්ෂිත අවස්ථාවලදී සේවාදායකය සහ සේවාලාභියා අතර බෙදාගත් දෑ (නියත, වර්ග, වලංගුකරණය, ගිවිසුම්, උපයෝගිතා)
-├── i18n/                # next-intl වින්යාසය + එක් එක් locale සඳහා පණිවිඩ JSON (locale 67ක්)
-├── middleware/          # Next.js middleware (ඉල්ලීම් වැඩිදියුණු කිරීම, locale හඳුනාගැනීම)
-├── mitm/                # MITM ප්රොක්සි හරය: සහතික උත්පාදනය/ස්ථාපනය, හසුරුවන්නන්, ඉලක්ක, පරීක්ෂකය, ආවරණ, සෘජු යැවීම
-│   ├── handlers/        # MitmHandlerBase දිගු කරන IDE-agent හසුරුවන පන්ති 9ක් (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # ගමනාගමන ග්රහණ ස්තරය: buffer (මතකය තුළ ඇති වළලු බෆරය), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # ආකෘති ඇඩැප්ටර සම්බන්ධකය (පැරණි ගැළපුම් ස්තරය)
+├── domain/              # පිරිසිදු වසම් තර්කනය (ප්රතිපත්ති එන්ජිම, ආදේශකය, පිරිවැය, අගුලු දැමීම, comboResolver, ඇගයීම)
+├── server/              # සේවාදායකයට පමණක් සීමා වූ මොඩියුල (අවසර පාලන නළ මාර්ගය, cors, සත්යාපන මිඩ්ල්වෙයාර්) — සේවාලාභියා වෙතින් ආයාත කළ නොහැක
+├── shared/              # ආරක්ෂිත අවස්ථාවල සේවාදායකය සහ සේවාලාභියා අතර බෙදාගන්නා දෑ (නියතයන්, වර්ග, වලංගුකරණය, ගිවිසුම්, උපයෝගිතා)
+├── i18n/                # next-intl වින්යාසය + එක් එක් පෙදෙස සඳහා පණිවිඩ JSON (පෙදෙස් 67ක්)
+├── middleware/          # Next.js මිඩ්ල්වෙයාර් (ඉල්ලීම් වැඩිදියුණු කිරීම, පෙදෙස් හඳුනාගැනීම)
+├── mitm/                # MITM ප්රොක්සි හරය: සහතික උත්පාදනය/ස්ථාපනය, හැසිරවුම්කරුවන්, ඉලක්ක, පරීක්ෂකය, ආවරණ, සෘජු යැවීම
+│   ├── handlers/        # MitmHandlerBase විස්තාරණය කරන IDE නියෝජිත හැසිරවුම්කරු පන්ති 9ක් (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # ගමනාගමන ග්රහණ ස්තරය: බෆරය (මතකය තුළ ඇති වළලු ආකාරය), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # ආකෘති ඇඩැප්ටර සම්බන්ධකය (පැරණි අනුකූලතා ස්තරය)
 ├── scripts/             # ව්යාපෘතිය තුළ ඇති නඩත්තු ස්ක්රිප්ට් (උදා., backfillAggregation)
-├── sse/                 # පැරණි SSE හසුරුවන්නන්/සේවා (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # පැරණි මතකය තුළ ඇති ගබඩාව (src/lib/db සඳහා ක්රමයෙන් ඉවත් කරමින් පවතී)
+├── sse/                 # පැරණි SSE හැසිරවුම්කරුවන්/සේවා (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # පැරණි මතකය තුළ ඇති ගබඩාව (src/lib/db වෙනුවෙන් ක්රමානුකූලව ඉවත් කරමින් පවතී)
 ├── types/               # බෙදාගත් TS වර්ග ගොනු
-├── instrumentation.ts   # Next.js දුරමාන hook එක (බ්රවුසරය + Edge)
-├── instrumentation-node.ts  # Node සඳහා පමණක් වන උපකරණකරණය
-└── proxy.ts             # HTTP ප්රොක්සි ප්රවේශ ගැළපුම් ස්තරය
+├── instrumentation.ts   # Next.js දුරමාන හුක් එක (බ්රවුසරය + එජ්)
+├── instrumentation-node.ts  # Node සඳහා පමණක් වූ උපකරණකරණය
+└── proxy.ts             # HTTP-ප්රොක්සි ප්රවේශ අනුකූලතා ස්තරය
 ```
 
-### `src/app/` — යෙදුම් රවුටරය (Next.js 16)
+### `src/app/` — App Router (Next.js 16)
 
-| මාර්ගය                                                                       | අරමුණ                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | පොදු OpenAI-අනුකූල API එක (~25 උප-මාර්ග: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers ආදිය)                                                                                                                               |
-| `app/api/v1beta/`                                                            | Gemini-ශෛලියේ API අන්ත ලක්ෂ්ය                                                                                                                                                                                                                                                                                          |
-| `app/api/playground/`                                                        | Playground Studio මාර්ග: `improve-prompt/` (POST — LLM ප්රේරක නැවත ලියනය), `presets/` (GET ලැයිස්තුව / POST නිර්මාණය), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` බලන්න                                                                                                             |
-| `app/api/` (v1 නොවන)                                                         | කළමනාකරණ/පරිපාලක මාර්ග (~60 නාමාවලි: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools ආදිය)                                                                                                                                              |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — මාර්ග 12ක් (සේවාදායක පාලනය, නියෝජිත තත්ත්වය/DNS/සිතියම්කරණ, මඟහැරීම, සහතිකය, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` බලන්න.                                                                                                                               |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — මාර්ග 16කට වැඩි ගණනක් (ඉල්ලීම්, සැසි, ධාරක, ග්රහණ ආකාර, නිර්යාතය, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` බලන්න.                                                                                                                                  |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ප්රවේශ ලක්ෂ්යය (`POST /a2a`)                                                                                                                                                                                                                                                                          |
-| `app/.well-known/agent.json/`                                                | A2A Agent Card (සොයාගැනීම)                                                                                                                                                                                                                                                                                             |
-| `app/(dashboard)/dashboard/`                                                 | උපකරණ පුවරු UI පිටු (කොටස් 50කට වැඩි, page.tsx ගොනු ~118ක්: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity ආදිය)                                                                                                                                   |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (ටැබ් 3ක්: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` බලන්න                                                                                                                                                                        |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (සැලැස්ම 21): `page.tsx` (ටැබ් 3ක කවචය), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge උපකරණ පුවරු පිටුව — සේවාදායක කාඩ්පත, නියෝජිත කාඩ්පත් 9ක්, සැකසුම් විශාරදය, ආකෘති සිතියම්කරණය, මඟහැරීම් ලැයිස්තුව. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` බලන්න.                                                                                                                                 |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector උපකරණ පුවරු පිටුව — DevTools බෙදුම් දසුන, විස්තර ටැබ් 7ක්, ග්රහණ ආකාර ටොගල් 4ක්, සැසි පටිගතකරණය, සන්දර්භ වර්ණකරණය. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` බලන්න.                                                                                                                    |
-| `app/(dashboard)/dashboard/activity/`                                        | ක්රියාකාරකම් සංග්රහ පිටුව (B කණ්ඩායම): `page.tsx` (සේවාදායකය) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` බලන්න                                                                                                   |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | කෝටා බෙදාගැනීමේ පිටුව (B කණ්ඩායම): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                         |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | සැපයුම්කරු සැලසුම් වින්යාස පිටුව (B කණ්ඩායම): `page.tsx` + `ProviderPlanConfigClient.tsx` — සම්බන්ධතාව අනුව කෝටා මාන අතික්රමණය                                                                                                                                                                                         |
-| `app/docs/`                                                                  | කාවැද්දූ ලේඛන දර්ශකය (`docs/*.md` විදැහුම් කරයි)                                                                                                                                                                                                                                                                       |
-| `app/landing/`                                                               | අලෙවිකරණ ආරම්භක පිටුව                                                                                                                                                                                                                                                                                                  |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | සත්යාපනයට අදාළ පිටු                                                                                                                                                                                                                                                                                                    |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP දෝෂ පිටු                                                                                                                                                                                                                                                                                                          |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | ස්ථිතික/තත්ත්ව පිටු                                                                                                                                                                                                                                                                                                    |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | මූලික සැලැස්ම, මුල් පිටුව, PWA මැනිෆෙස්ටය, ගෝලීය CSS                                                                                                                                                                                                                                                                   |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | දෝෂ සීමා                                                                                                                                                                                                                                                                                                               |
+| මාර්ගය                                                                       | අරමුණ                                                                                                                                                                                                                                                                                                                        |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | පොදු OpenAI-අනුකූල API එක (~25 උප-මාර්ග: කතාබස්, සම්පූර්ණ කිරීම්, embeddings, ගොනු, කාණ්ඩ, ශ්රව්ය, රූප, වීඩියෝ, සංගීතය, නැවත ශ්රේණිගත කිරීම, මධ්යස්ථකරණ, සෙවීම, ws, agents, accounts, providers ආදිය)                                                                                                                        |
+| `app/api/v1beta/`                                                            | Gemini-ශෛලියේ API endpoints                                                                                                                                                                                                                                                                                                  |
+| `app/api/playground/`                                                        | Playground Studio මාර්ග: `improve-prompt/` (POST — LLM prompt නැවත ලියනය), `presets/` (GET ලැයිස්තුව / POST නිර්මාණය), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` බලන්න                                                                                                                   |
+| `app/api/` (v1 නොවන)                                                         | කළමනාකරණ/admin මාර්ග (~60 directories: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools ආදිය)                                                                                                                                                  |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — මාර්ග 12ක් (server පාලනය, agent තත්ත්වය/DNS/mappings, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` බලන්න.                                                                                                                                              |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — මාර්ග 16කට වැඩි ගණනක් (requests, sessions, hosts, capture-modes, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` බලන්න.                                                                                                                                 |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 පිවිසුම් ස්ථානය (`POST /a2a`)                                                                                                                                                                                                                                                                               |
+| `app/.well-known/agent.json/`                                                | A2A Agent Card (සොයාගැනීම)                                                                                                                                                                                                                                                                                                   |
+| `app/(dashboard)/dashboard/`                                                 | Dashboard UI පිටු (කොටස් 50කට වැඩි, page.tsx ගොනු ~118ක්: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity ආදිය)                                                                                                                                           |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (tabs 3ක්: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` බලන්න                                                                                                                                                                              |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (සැලැස්ම 21): `page.tsx` (tabs 3ක shell එකක්), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge dashboard පිටුව — server card, agent cards 9ක්, setup wizard, model mapping, bypass list. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` බලන්න.                                                                                                                                                               |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector dashboard පිටුව — DevTools split, detail tabs 7ක්, capture mode toggles 4ක්, session recorder, context colorization. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` බලන්න.                                                                                                                        |
+| `app/(dashboard)/dashboard/activity/`                                        | ක්රියාකාරකම් සංග්රහ පිටුව (B කාණ්ඩය): `page.tsx` (සේවාදායකය) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` බලන්න                                                                                                          |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | කෝටා බෙදාගැනීමේ පිටුව (B කාණ්ඩය): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | සැපයුම්කරුගේ සැලසුම් වින්යාස පිටුව (B කාණ්ඩය): `page.tsx` + `ProviderPlanConfigClient.tsx` — එක් එක් සම්බන්ධතාව අනුව කෝටා මාන අභිබවා යාම                                                                                                                                                                                     |
+| `app/docs/`                                                                  | කාවැද්දූ ලේඛන නරඹනය (`docs/*.md` විදැහුම් කරයි)                                                                                                                                                                                                                                                                              |
+| `app/landing/`                                                               | අලෙවිකරණ ආරම්භක පිටුව                                                                                                                                                                                                                                                                                                        |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | සත්යාපනයට අදාළ පිටු                                                                                                                                                                                                                                                                                                          |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP දෝෂ පිටු                                                                                                                                                                                                                                                                                                                |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | ස්ථිතික/තත්ත්ව පිටු                                                                                                                                                                                                                                                                                                          |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | මූල සැලැස්ම, මුල් පිටුව, PWA මැනිෆෙස්ට් ගොනුව, ගෝලීය CSS                                                                                                                                                                                                                                                                     |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | දෝෂ සීමා                                                                                                                                                                                                                                                                                                                     |
 
-### `src/lib/` — මූලික පුස්තකාල (මොඩියුල ~50ක්)
+### `src/lib/` — මූලික පුස්තකාල (මොඩියුල ~50)
 
 | මොඩියුලය                                 | අරමුණ                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | A2A ප්රොටෝකෝල කාර්ය කළමනාකරු, කුසලතා (5), ප්රවාහකරණය                                                                                                                                                                                                                                                                         |
 | `acp/`                                   | CLI නියෝජිත රෙජිස්ට්රිය (දේශීය CLI සොයාගැනීම — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` බලන්න)                                                                                                                                                                                                                             |
-| `api/`                                   | හවුල් API උපකාරක (`requireManagementAuth`, වලංගුකරණය)                                                                                                                                                                                                                                                                        |
-| `auth/`                                  | සැසිය, මුරපද හැෂ්කරණය, ටෝකන වලංගුකරණය                                                                                                                                                                                                                                                                                        |
-| `batches/`                               | OpenAI Batches API හසුරුවන්නන්                                                                                                                                                                                                                                                                                               |
-| `catalog/`                               | සැපයුම්කරු නාමාවලියේ Zod වලංගුකරණය + හැකියා නිරාකරණය                                                                                                                                                                                                                                                                         |
-| `cloudAgent/`                            | වලාකුළු නියෝජිතයන් (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` බලන්න                                                                                                                                                                                                                                      |
-| `combos/`                                | සංයෝජන නිරාකරණය + නැවත අනුපිළිවෙළට සැකසීමේ උපකාරක                                                                                                                                                                                                                                                                            |
-| `audit/`                                 | ක්රියාකාරකම් සංග්රහ උපකාරක: `highLevelActions.ts` (අවසර ලැයිස්තුව + `isHighLevelAction()`), `activityIcons.ts` (ක්රියාව → නිරූපකය/ක්රියාපදය සිතියම්ගත කිරීම), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` බලන්න                                                                     |
-| `compliance/`                            | විගණන ලොගය + සැපයුම්කරු විගණනය — `docs/security/COMPLIANCE.md` බලන්න                                                                                                                                                                                                                                                         |
-| `compression/`                           | සම්පීඩන එන්ජින් සම්බන්ධකය (එන්ජින් `open-sse/services/compression/` තුළ පිහිටා ඇත)                                                                                                                                                                                                                                           |
-| `config/`                                | ධාවනකාල වින්යාස උපකාරක                                                                                                                                                                                                                                                                                                       |
-| `db/`                                    | වසම් DB මොඩියුල 120+ ක් + සංක්රමණ 168 ක් (SQLite සඳහා සැමවිටම මෙය හරහා යන්න)                                                                                                                                                                                                                                                 |
+| `api/`                                   | හවුල් API සහායක (`requireManagementAuth`, වලංගුකරණය)                                                                                                                                                                                                                                                                         |
+| `auth/`                                  | සැසිය, මුරපද හෑෂ්කරණය, ටෝකන වලංගුකරණය                                                                                                                                                                                                                                                                                        |
+| `batches/`                               | OpenAI Batches API හසුරුවන                                                                                                                                                                                                                                                                                                   |
+| `catalog/`                               | සපයන්නන්ගේ නාමාවලිය සඳහා Zod වලංගුකරණය + හැකියා නිරාකරණය                                                                                                                                                                                                                                                                     |
+| `cloudAgent/`                            | ක්ලවුඩ් නියෝජිතයන් (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` බලන්න                                                                                                                                                                                                                                      |
+| `combos/`                                | සංයෝජන නිරාකරණය + නැවත අනුපිළිවෙළට සැකසීමේ සහායක                                                                                                                                                                                                                                                                             |
+| `audit/`                                 | ක්රියාකාරකම් සංග්රහ සහායක: `highLevelActions.ts` (අවසර ලැයිස්තුව + `isHighLevelAction()`), `activityIcons.ts` (ක්රියාව → නිරූපකය/ක්රියාපදය සිතියම), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` බලන්න                                                                               |
+| `compliance/`                            | විගණන ලොගය + සපයන්නන්ගේ විගණනය — `docs/security/COMPLIANCE.md` බලන්න                                                                                                                                                                                                                                                         |
+| `compression/`                           | සම්පීඩන එන්ජින් සම්බන්ධකය (එන්ජින් `open-sse/services/compression/` තුළ පවතී)                                                                                                                                                                                                                                                |
+| `config/`                                | ධාවනකාල වින්යාස සහායක                                                                                                                                                                                                                                                                                                        |
+| `db/`                                    | වසම් DB මොඩියුල 120+ + සංක්රමණ 168ක් (SQLite සඳහා සැමවිටම මෙය හරහා යන්න)                                                                                                                                                                                                                                                     |
 | `quota/`                                 | කෝටා බෙදාගැනීමේ එන්ජිම: `dimensions.ts` (වර්ග/Zod), `types.ts` (QuotaStore අතුරුමුහුණත), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` බලන්න |
-| `radar/`                                 | Radar නිදහස්-ආකෘති නාමාවලි සේවාලාභියා: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` බලන්න                                                                                                                                         |
-| `display/`                               | UI ආකෘතිකරණ සහායක (පිරිවැය, ප්රමාදය ආදිය)                                                                                                                                                                                                                                                                                    |
-| `embeddings/`                            | Embeddings සේවා සහායක                                                                                                                                                                                                                                                                                                        |
+| `radar/`                                 | Radar නිදහස්-මාදිලි නාමාවලි සේවාදායකය: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` බලන්න                                                                                                                                         |
+| `display/`                               | UI ආකෘතිකරණ උපකාරක (පිරිවැය, ප්රමාදය, ආදිය)                                                                                                                                                                                                                                                                                  |
+| `embeddings/`                            | Embeddings සේවා උපකාරක                                                                                                                                                                                                                                                                                                       |
 | `env/`                                   | පරිසර විචල්ය විග්රහ කිරීම + වලංගුකරණය                                                                                                                                                                                                                                                                                        |
 | `evals/`                                 | ඇගයීම් රාමුව (කට්ටල, ධාවකය, ධාවන පරිසරය) — `docs/frameworks/EVALS.md` බලන්න                                                                                                                                                                                                                                                  |
 | `guardrails/`                            | PII ආවරණකය, prompt injection, දෘශ්ය පාලම — `docs/security/GUARDRAILS.md` බලන්න                                                                                                                                                                                                                                               |
-| `jobs/`                                  | පසුබිම් කාර්ය (cron-ආකාරයේ)                                                                                                                                                                                                                                                                                                  |
-| `memory/`                                | සංවාද මතකය (SQLite FTS5 + sqlite-vec දෙමුහුන් RRF + Qdrant ස්තරය 2) — `docs/frameworks/MEMORY.md` බලන්න                                                                                                                                                                                                                      |
+| `jobs/`                                  | පසුබිම් කාර්යයන් (cron-ආකාරයේ)                                                                                                                                                                                                                                                                                               |
+| `memory/`                                | සංවාදාත්මක මතකය (SQLite FTS5 + sqlite-vec දෙමුහුන් RRF + Qdrant ස්තරය 2) — `docs/frameworks/MEMORY.md` බලන්න                                                                                                                                                                                                                 |
 | `memory/embedding/`                      | බහු-මූලාශ්ර embedding ස්තරය: `index.ts` (විසඳුම්කාරකය), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (සැලැස්ම 21)                                                                                                                                                                          |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ආවරණකය — KNN brute-force + දෙමුහුන් RRF (FTS5 + දෛශිකය, k=60). අවශ්ය විට ආරම්භ වන අතර, sqlite-vec නොමැති විට අසාර්ථක නොවී සීමිත ක්රියාකාරීත්වයකට පහළ යයි. (සැලැස්ම 21)                                                                                                                                     |
-| `memory/reindex.ts`                      | `runReindexBatch()` — පසුබිමේ `needs_reindex=1` සහිත මතක සකසයි; `POST /api/memory/reindex` සහ අවශ්ය විට සිදු කරන පසු-පිරවුම් මාර්ගය මඟින් කැඳවනු ලැබේ. (සැලැස්ම 21)                                                                                                                                                          |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ආවරණකය — KNN සම්පූර්ණ-සෙවුම + දෙමුහුන් RRF (FTS5 + vector, k=60). අවශ්ය විට ආරම්භ වන අතර, sqlite-vec ලබා ගත නොහැකි විට නිසි ලෙස සීමිත තත්ත්වයකට පත්වේ. (සැලැස්ම 21)                                                                                                                                        |
+| `memory/reindex.ts`                      | `runReindexBatch()` — `needs_reindex=1` සහිත මතක පසුබිමේ සකසයි; `POST /api/memory/reindex` සහ අවශ්ය විට පසුපිරවුම් මාර්ගය මඟින් කැඳවනු ලැබේ. (සැලැස්ම 21)                                                                                                                                                                    |
 | `monitoring/`                            | සෞඛ්ය පරීක්ෂණ, ප්රමිතික නිකුත් කිරීම                                                                                                                                                                                                                                                                                         |
 | `oauth/`                                 | සැපයුම්කරු මොඩියුල 22ක් සඳහා OAuth/ආයාත ප්රවාහ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                   |
-| `plugins/`                               | Plugin ලේඛනය                                                                                                                                                                                                                                                                                                                 |
+| `plugins/`                               | ප්ලගිනය ලේඛනය                                                                                                                                                                                                                                                                                                                |
 | `promptCache/`                           | Anthropic-ආකාරයේ prompt cache විරාම ලක්ෂ්ය                                                                                                                                                                                                                                                                                   |
-| `skills/`                                | Skills රාමුව (අන්තර්ගත + වෙළඳපොළ + SkillsSH) — `docs/frameworks/SKILLS.md` බලන්න                                                                                                                                                                                                                                             |
-| `playground/`                            | Playground Studio හවුල් සහායක: `codeExport.ts` (curl/Python/TS ජනකය), `promptImprover.ts` (මෙටා-ප්රොම්ප්ට් සාදකය), `streamMetrics.ts` (ශුද්ධ TTFT/TPS), `types.ts` (මිලකරණ වගුව) — `docs/frameworks/PLAYGROUND_STUDIO.md` බලන්න                                                                                              |
+| `skills/`                                | Skills රාමුව (අන්තර්ගත + marketplace + SkillsSH) — `docs/frameworks/SKILLS.md` බලන්න                                                                                                                                                                                                                                         |
+| `playground/`                            | Playground Studio හවුල් සහායක: `codeExport.ts` (curl/Python/TS උත්පාදකය), `promptImprover.ts` (මෙටා-ප්රොම්ප්ට් සාදනය), `streamMetrics.ts` (ශුද්ධ TTFT/TPS), `types.ts` (මිලකරණ වගුව) — `docs/frameworks/PLAYGROUND_STUDIO.md` බලන්න                                                                                          |
 | `webhookDispatcher.ts`                   | HMAC webhook බෙදාහැරීම — `docs/frameworks/WEBHOOKS.md` බලන්න                                                                                                                                                                                                                                                                 |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ටනල් කළමනාකරුවන් — `docs/ops/TUNNELS_GUIDE.md` බලන්න                                                                                                                                                                                                                                                                         |
-| `cloudSync.ts`, `initCloudSync.ts`       | තත්ත්වය සඳහා විකල්ප cloud sync                                                                                                                                                                                                                                                                                               |
-| `localDb.ts`                             | db මොඩියුල සඳහා නැවත-අපනයන barrel එක (තාර්කික ක්රියාකාරීත්වයක් නැත — නැවත-අපනයන පමණි)                                                                                                                                                                                                                                        |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | ඉල්ලීම් caching + idempotency                                                                                                                                                                                                                                                                                                |
+| `cloudSync.ts`, `initCloudSync.ts`       | තත්ත්වයේ විකල්ප cloud සමමුහුර්තකරණය                                                                                                                                                                                                                                                                                          |
+| `localDb.ts`                             | db මොඩියුල සඳහා නැවත-නිර්යාත barrel එක (තර්කනයක් නැත — නැවත-නිර්යාත පමණි)                                                                                                                                                                                                                                                    |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | ඉල්ලීම් හැඹිලිගත කිරීම + idempotency                                                                                                                                                                                                                                                                                         |
 | (තවත් ඉහළ මට්ටමේ ගොනු ~30ක්)             | විශේෂිත සහායක (logEnv, modelsDevSync, piiSanitizer, ආදිය)                                                                                                                                                                                                                                                                    |
 
-### `src/lib/db/` — දත්ත සමුදාය (මොඩියුල 147ක් + migration 208ක්)
+### `src/lib/db/` — දත්ත සමුදාය (මොඩියුල 147ක් + සංක්රමණ 208ක්)
 
-| උපබහලුම                   | අරමුණ                                                                                                                                                                                       |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL journaling සහිත `getDbInstance()` singleton එක                                                                                                                                          |
-| `db/migrations/`          | අනුවාදගත SQL ගොනු (idempotent, transactional). `073_memory_vec.sql` මඟින් `memory_vec_meta` + `needs_reindex` තීරුව එක් කරයි (සැලැස්ම 21).                                                  |
-| `db/playgroundPresets.ts` | Playground Studio preset සඳහා CRUD මොඩියුලය (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                  |
-| `db/memoryVec.ts`         | `memory_vec_meta` සඳහා CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, ආදිය (සැලැස්ම 21)                             |
-| `db/<domain>.ts`          | එක් එක් domain එක සඳහා එක් මොඩියුලයක්: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, ආදිය. |
+| උපනාමාවලිය                | අරමුණ                                                                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | WAL journaling සහිත `getDbInstance()` singleton එක                                                                                                                                    |
+| `db/migrations/`          | අනුවාදගත SQL ගොනු (idempotent, transactional). `073_memory_vec.sql` මඟින් `memory_vec_meta` + `needs_reindex` තීරුව එක් කරයි (සැලැස්ම 21).                                            |
+| `db/playgroundPresets.ts` | Playground Studio පෙරසැකසුම් සඳහා CRUD මොඩියුලය (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)        |
+| `db/memoryVec.ts`         | `memory_vec_meta` සඳහා CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, ආදිය (සැලැස්ම 21)                       |
+| `db/<domain>.ts`          | එක් එක් වසම සඳහා එක් මොඩියුලයක්: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, ආදිය. |
 
 ### `src/domain/`
 
 | මොඩියුලය               | අරමුණ                                           |
 | ---------------------- | ----------------------------------------------- |
 | `policy.ts`            | ප්රතිපත්ති එන්ජිම                               |
-| `fallbackPolicy.ts`    | Fallback තීරණ වෘක්ෂය                            |
-| `costRules.ts`         | පිරිවැය ගණනය කිරීමේ රීති                        |
-| `lockoutPolicy.ts`     | Model/connection lockout ප්රතිපත්තිය            |
-| `tagRouter.ts`         | Tag-පාදක routing                                |
-| `comboResolver.ts`     | Combo විසඳීම (combo engine විසින් භාවිත කෙරේ)   |
-| `modelAvailability.ts` | එක් එක් model සඳහා ලබාගත හැකි බව පරීක්ෂා කිරීම  |
-| `assessment/`          | Model ඇගයීම (RFC-AUTO-ASSESSMENT හි පළමු අදියර) |
+| `fallbackPolicy.ts`    | ආදේශක තීරණ වෘක්ෂය                               |
+| `costRules.ts`         | පිරිවැය ගණනය කිරීමේ නීති                        |
+| `lockoutPolicy.ts`     | ආකෘති/සම්බන්ධතා අගුලු දැමීමේ ප්රතිපත්තිය        |
+| `tagRouter.ts`         | ටැග්-පාදක මාර්ගගත කිරීම                         |
+| `comboResolver.ts`     | Combo විසඳීම (combo එන්ජිම භාවිත කරයි)          |
+| `modelAvailability.ts` | එක් එක් ආකෘතිය සඳහා ලබාගත හැකි බව පරීක්ෂා කිරීම |
+| `assessment/`          | ආකෘති ඇගයීම (RFC-AUTO-ASSESSMENT හි අදියර 1)    |
 
 ### `src/server/`
 
-| මොඩියුලය | අරමුණ                                                                                                   |
-| -------- | ------------------------------------------------------------------------------------------------------- |
-| `authz/` | බලය පැවරීමේ pipeline එක: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` බලන්න |
-| `cors/`  | CORS වින්යාසය                                                                                           |
-| `auth/`  | Session middleware                                                                                      |
+| මොඩියුලය | අරමුණ                                                                                               |
+| -------- | --------------------------------------------------------------------------------------------------- |
+| `authz/` | අවසර දීමේ නල මාර්ගය: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` බලන්න |
+| `cors/`  | CORS වින්යාසය                                                                                       |
+| `auth/`  | සැසි middleware                                                                                     |
 
 ### `src/shared/`
 
-| මොඩියුලය                         | අරමුණ                                                                                             |
-| -------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `components/`                    | ඩෑෂ්බෝඩ් සංරචක API: `packages/ui-kit` මත ඇති ඇඩැප්ටර — `docs/architecture/DESIGN_SYSTEM.md` බලන්න |
-| `constants/iconMap.ts`           | `ICON_MAP`: තිර මඟින් භාවිත කරන අයිකන නම් → Lucide සංරචක (`<Icon>`)                               |
-| `constants/providers.ts`         | Zod වලංගුකරණය සහිත **සැපයුම්කරුවන් 376ක්** (සත්යයේ මූලාශ්රය)                                      |
-| `constants/cliTools.ts`          | බාහිර CLI මෙවලම් රෙජිස්ට්රිය                                                                      |
-| `constants/routingStrategies.ts` | ප්රමුඛතා සහිත **මාර්ගගත කිරීමේ උපායමාර්ග 20ක්**                                                   |
-| `constants/publicApiRoutes.ts`   | Bearer (කළමනාකරණයට සාපේක්ෂව) සත්යාපනය අවශ්ය මාර්ග                                                 |
-| `constants/upstreamHeaders.ts`   | උඩුගං ඉල්ලීම් සඳහා ශීර්ෂක ප්රතික්ෂේප ලැයිස්තුව                                                    |
-| `validation/schemas.ts`          | Zod ස්කීමා ~80ක් (API ගිවිසුම් සඳහා එකම සත්ය මූලාශ්රය)                                            |
-| `validation/helpers.ts`          | Zod වලංගුකරණ සහායක (`validateBody`, ආදිය)                                                         |
-| `types/`                         | හවුල් TS වර්ග                                                                                     |
-| `contracts/`                     | පොදු API ගිවිසුම් (`package.json` හි `files:` මඟින් භාවිත කෙරේ)                                   |
-| `utils/circuitBreaker.ts`        | සැපයුම්කරු පරිපථ බිඳිනය (`docs/architecture/RESILIENCE_GUIDE.md` බලන්න)                           |
-| `utils/apiAuth.ts`               | API යතුරු වලංගුකරණය, විෂය පථ පරීක්ෂා කිරීම                                                        |
-| `utils/fetchTimeout.ts`          | උඩුගං fetch සඳහා කල් ඉකුත්වීමේ/අවලංගු කිරීමේ ආවරණක                                                |
-| `utils/releaseNotes.ts`          | වසා දැමූ v2/පැරණි නිවේදන විග්රහකය, දේශීයකරණය සහ ID ඉවත දැමීම                                      |
+| මොඩියුලය                         | අරමුණ                                                                                              |
+| -------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `components/`                    | Dashboard සංරචක API: `packages/ui-kit` මත ඇති ඇඩැප්ටර — `docs/architecture/DESIGN_SYSTEM.md` බලන්න |
+| `constants/iconMap.ts`           | `ICON_MAP`: තිර භාවිත කරන අයිකන නාම → Lucide සංරචක (`<Icon>`)                                      |
+| `constants/providers.ts`         | Zod වලංගුකරණය සහිත **සපයන්නන් 376ක්** (සත්යයේ මූලාශ්රය)                                            |
+| `constants/cliTools.ts`          | බාහිර CLI මෙවලම් ලේඛනය                                                                             |
+| `constants/routingStrategies.ts` | ප්රමුඛතා සහිත **මාර්ගගත කිරීමේ උපායමාර්ග 20ක්**                                                    |
+| `constants/publicApiRoutes.ts`   | (කළමනාකරණ සත්යාපනයට සාපේක්ෂව) Bearer සත්යාපනය අවශ්ය මාර්ග                                          |
+| `constants/upstreamHeaders.ts`   | upstream ඉල්ලීම් සඳහා header ප්රතික්ෂේප ලැයිස්තුව                                                  |
+| `validation/schemas.ts`          | Zod schemas ~80ක් (API ගිවිසුම් සඳහා තනි සත්ය මූලාශ්රය)                                            |
+| `validation/helpers.ts`          | Zod වලංගුකරණ සහායක (`validateBody`, ආදිය)                                                          |
+| `types/`                         | හවුල් TS වර්ග                                                                                      |
+| `contracts/`                     | පොදු API ගිවිසුම් (`package.json` හි `files:` මඟින් භාවිත කෙරේ)                                    |
+| `utils/circuitBreaker.ts`        | සපයන්නාගේ circuit breaker (`docs/architecture/RESILIENCE_GUIDE.md` බලන්න)                          |
+| `utils/apiAuth.ts`               | API යතුරු වලංගුකරණය සහ scope පරීක්ෂාව                                                              |
+| `utils/fetchTimeout.ts`          | upstream fetch සඳහා timeout/abort wrappers                                                         |
+| `utils/releaseNotes.ts`          | වසා දැමූ v2/legacy නිවේදන parser එක, දේශීයකරණය සහ ID ඉවත දැමීම                                     |
 
 ---
 
@@ -391,7 +391,7 @@ open-sse/
 
 ---
 
-## `docs/` — පොදු ලේඛනය (මූල ගොනු 7 + උප නාමාවලි 17)
+## `docs/` — පොදු ලියකියවිලි (මූල ගොනු 7 + උපබහලුම් 17)
 
 ### ඉහළ මට්ටමේ මාර්ගෝපදේශ
 
@@ -399,16 +399,16 @@ open-sse/
 | --------------------------- | ------------------------------------------------------------------------------------------------- |
 | `ARCHITECTURE.md`           | ඉහළ මට්ටමේ ගෘහ නිර්මාණ ශිල්පය, උපපද්ධති සිතියම, උපකරණ පුවරු මතුපිට                                |
 | `CODEBASE_DOCUMENTATION.md` | ඉංජිනේරු යොමුව: නාමාවලි, මොඩියුල, සම්මුතීන්                                                       |
-| `FEATURES.md`               | v3.8 කැපී පෙනෙන අංග සමඟ අංග න්යාසය                                                                |
-| `USER_GUIDE.md`             | අවසන් පරිශීලක අත්පොත (ස්ථාපනය, ආකෘති, combos, CLIs, ශ්රව්ය ආදි)                                   |
+| `FEATURES.md`               | v3.8 කැපී පෙනෙන කරුණු සමඟ විශේෂාංග න්යාසය                                                         |
+| `USER_GUIDE.md`             | අන්තිම පරිශීලක අත්පොත (ස්ථාපනය, ආකෘති, combos, CLIs, ශ්රව්ය, ආදී)                                 |
 | `API_REFERENCE.md`          | සත්යාපන ආකෘතිය සමඟ API endpoint යොමුව                                                             |
-| `openapi.yaml`              | OpenAPI 3.0 පිරිවිතරය (paths 121)                                                                 |
+| `openapi.yaml`              | OpenAPI 3.0 පිරිවිතර (මාර්ග 121)                                                                  |
 | `SETUP_GUIDE.md`            | ස්ථාපන ක්රම (npm, npx, Docker, Electron, Termux, මූලාශ්රය)                                        |
-| `ENVIRONMENT.md`            | සියලුම පරිසර විචල්යයන් (~800 ලේඛනගත, පේළි ~3,050 `.env.example`)                                  |
-| `TROUBLESHOOTING.md`        | පොදු දෝෂ + v3.8.0 දන්නා ගැටලු                                                                     |
-| `RELEASE_CHECKLIST.md`      | සම්පූර්ණ නිකුතු ප්රවාහය (skills, husky, conventional commits, යෙදවුම)                             |
+| `ENVIRONMENT.md`            | සියලුම පරිසර විචල්යයන් (~800 ලේඛනගත, `.env.example` පේළි ~3,050)                                  |
+| `TROUBLESHOOTING.md`        | සාමාන්ය දෝෂ + v3.8.0 දන්නා ගැටලු                                                                  |
+| `RELEASE_CHECKLIST.md`      | සම්පූර්ණ නිකුතු ප්රවාහය (skills, husky, conventional commits, යෙදවීම)                             |
 | `COVERAGE_PLAN.md`          | ආවරණ ඉලක්ක සහ වත්මන් තත්ත්වය                                                                      |
-| `FREE_TIERS.md`             | තෝරාගත් නොමිලේ-මට්ටමේ සැපයුම්කරුවන් (නොමිලේ 48+ + OAuth 11)                                       |
+| `FREE_TIERS.md`             | තෝරාගත් නොමිලේ-ස්ථර සැපයුම්කරුවන් (නොමිලේ 48+ + OAuth 11)                                         |
 | `CLI-TOOLS.md`              | බාහිර CLI ඒකාබද්ධ කිරීම් + අභ්යන්තර OmniRoute CLI                                                 |
 | `I18N.md`                   | i18n ගෘහ නිර්මාණ ශිල්පය, භාෂාවක් එකතු කිරීම, locales 67                                           |
 | `UNINSTALL.md`              | පිරිසිදු අස්ථාපන පියවර                                                                            |
@@ -416,55 +416,55 @@ open-sse/
 
 ### උපපද්ධති ගැඹුරු විශ්ලේෂණ
 
-| ලේඛනය                                       | අරමුණ                                                                  |
-| ------------------------------------------- | ---------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP සේවාදායකය: මෙවලම් 110, transports 3, scopes 33, REST endpoints     |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, skills 6, REST උපකාරක, agent card                  |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | ඒකාබද්ධ මාර්ගෝපදේශය: A2A vs ACP vs Cloud Agents                        |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules සම්බන්ධීකරණය                               |
-| `SKILLS.md`                                 | Skills රාමුව (built-in + marketplace + SkillsSH + sandbox)             |
-| `RADAR.md`                                  | Radar නොමිලේ-ආකෘති නාමාවලි ආවරණය (`RADAR_ENABLED`, පෙරනිමියෙන් අක්රීය) |
-| `MEMORY.md`                                 | මතක පද්ධතිය (SQLite FTS5 + Qdrant)                                     |
-| `EVALS.md`                                  | Eval රාමුව (suites, runs, rubrics)                                     |
-| `GUARDRAILS.md`                             | PII ආවරකය, prompt injection, vision bridge                             |
-| `COMPLIANCE.md`                             | විගනන ලොගය, රඳවා තබා ගැනීම, noLog opt-out                              |
-| `WEBHOOKS.md`                               | HMAC-අත්සන් කළ webhook බෙදාහැරීම                                       |
-| `REASONING_REPLAY.md`                       | `reasoning_content` සඳහා දෙමුහුන් memory/SQLite කෑෂය                   |
-| `AUTHZ_GUIDE.md`                            | අවසර පයිප්පය (`classify` → `policies` → `enforce`)                     |
-| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + ආකෘති අගුළු දැමීම                         |
-| `docs/security/STEALTH_GUIDE.md` (git only) | TLS ඇඟිලි සලකුණු (JA3/JA4), Claude Code CCH, MITM සහතිකය               |
-| `AUTO-COMBO.md`                             | Auto Combo එන්ජිම (සාධක-16 ලකුණු දීම, mode packs 6, virtual factory)   |
+| ලේඛනය                                       | අරමුණ                                                                        |
+| ------------------------------------------- | ---------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | MCP සේවාදායකය: මෙවලම් 110, සම්ප්රේෂණ 3, විෂය පථ 33, REST endpoints           |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, කුසලතා 6, REST උපකාරක, නියෝජිත කාඩ්පත                    |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | ඒකාබද්ධ මාර්ගෝපදේශය: A2A එදිරිව ACP එදිරිව Cloud Agents                      |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules සංයොජනය                                          |
+| `SKILLS.md`                                 | Skills රාමුව (built-in + marketplace + SkillsSH + sandbox)                   |
+| `RADAR.md`                                  | Radar නොමිලේ-ආකෘති නාමාවලි ආවරණය (`RADAR_ENABLED`, පෙරනිමියෙන් අක්රීය)       |
+| `MEMORY.md`                                 | මතක පද්ධතිය (SQLite FTS5 + Qdrant)                                           |
+| `EVALS.md`                                  | Eval රාමුව (suites, ධාවන, rubrics)                                           |
+| `GUARDRAILS.md`                             | PII වෙස් මුහුණුව, prompt injection, vision bridge                            |
+| `COMPLIANCE.md`                             | විගණන ලොගය, රඳවා තබා ගැනීම, noLog ඉවත්වීම                                    |
+| `WEBHOOKS.md`                               | HMAC-අත්සන් කළ webhook බෙදාහැරීම                                             |
+| `REASONING_REPLAY.md`                       | `reasoning_content` සඳහා දෙමුහුන් මතක/SQLite හැඹිලිය                         |
+| `AUTHZ_GUIDE.md`                            | අවසර පයිප්ප මාර්ගය (`classify` → `policies` → `enforce`)                     |
+| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + ආකෘති අගුළු දැමීම                               |
+| `docs/security/STEALTH_GUIDE.md` (git only) | TLS ඇඟිලි සලකුණු කිරීම (JA3/JA4), Claude Code CCH, MITM සහතිකය               |
+| `AUTO-COMBO.md`                             | Auto Combo එන්ජිම (සාධක-16 ලකුණු කිරීම, මාදිලි පැකේජ 6, අථත්ය කර්මාන්තශාලාව) |
 
 ### සම්පීඩනය
 
-| ලේඛනය                           | අරමුණ                                         |
-| ------------------------------- | --------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | සම්පීඩන ආකාර සහ සැලැස්ම සමාලෝචනය              |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK එන්ජින්, registry කොන්ත්රාත්තුව |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman රීති පැකේජ JSON schema                |
-| `COMPRESSION_LANGUAGE_PACKS.md` | භාෂාව අනුව රීති පැකේජ ඉන්වෙන්ටරිය             |
-| `RTK_COMPRESSION.md`            | RTK ප්රකාශාත්මක පයිප්පය (පෙරහන් 56)           |
+| ලේඛනය                           | අරමුණ                                 |
+| ------------------------------- | ------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | සම්පීඩන ආකාර දළ විචාරය + සැලැස්ම      |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK එන්ජින්, ලේඛන ගිවිසුම   |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman නීති පැකේජ JSON schema        |
+| `COMPRESSION_LANGUAGE_PACKS.md` | භාෂාව අනුව නීති පැකේජ ඉන්වෙන්ටරිය     |
+| `RTK_COMPRESSION.md`            | RTK ප්රකාශන පයිප්ප මාර්ගය (පෙරහන් 56) |
 
-### යෙදවුම
+### යෙදවීම
 
 | ලේඛනය                        | අරමුණ                                                              |
 | ---------------------------- | ------------------------------------------------------------------ |
 | `DOCKER_GUIDE.md`            | Docker ගොඩනැගීම, පැතිකඩ (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | සාමාන්ය VM/VPS යොදවීම (Ubuntu/Debian + nginx + systemd)            |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io යොදවීම (දැනට චීන භාෂාවෙන් පමණි)                             |
+| `VM_DEPLOYMENT_GUIDE.md`     | සාමාන්ය VM/VPS යෙදවීම (Ubuntu/Debian + nginx + systemd)            |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io යෙදවීම (දැනට චීන භාෂාවෙන් පමණි)                             |
 | `TERMUX_GUIDE.md`            | Termux හරහා Android headless                                       |
 | `PWA_GUIDE.md`               | Progressive Web App ස්ථාපනය + service worker                       |
 | `ELECTRON_GUIDE.md`          | ඩෙස්ක්ටොප් යෙදුම ගොඩනැගීම + අත්සන් කිරීම + බෙදාහැරීම               |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                             |
-| `PROXY_GUIDE.md`             | මට්ටම්-4 outbound proxy + 1proxy marketplace                       |
+| `PROXY_GUIDE.md`             | මට්ටම්-4 පිටතට යන proxy + 1proxy වෙළඳපොළ                           |
 
-### උපනාමාවලි
+### උප-නාමාවලි
 
-| උපනාමාවලිය            | අරමුණ                                                                                                                                                                                                             |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | දේශීයකරණය කළ ලේඛන පරිවර්තන (locales 41)                                                                                                                                                                           |
-| `docs/screenshots/`   | මාර්ගෝපදේශ සඳහා රූප සම්පත්                                                                                                                                                                                        |
-| `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) වෙතින් සැලසුම්/පිරිවිතර + පර්යේෂණ — හුදෙකලා කළ, වෙනම අනුවාදනය කරන ලද repo එකක්, ප්රධාන ගස මඟින් gitignore කර ඇත. CLAUDE.md → "Planning & Research Artifacts" බලන්න. |
+| උප-නාමාවලිය           | අරමුණ                                                                                                                                                                                                       |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | දේශීයකරණය කළ ලේඛන පරිවර්තන (locales 41)                                                                                                                                                                     |
+| `docs/screenshots/`   | මාර්ගෝපදේශ සඳහා රූප සම්පත්                                                                                                                                                                                  |
+| `_tasks/superpowers/` | superpowers වෙතින් සැලසුම්/පිරිවිතර (`writing-plans`/`brainstorming`) + පර්යේෂණ — හුදෙකලා, වෙනම අනුවාදනය කළ repo එකක්, ප්රධාන ගස විසින් gitignore කර ඇත. CLAUDE.md → "Planning & Research Artifacts" බලන්න. |
 
 ---
 

@@ -71,7 +71,7 @@
 
 |                                   |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 Furnizori                      |            352             |   **358**   |          375          |
+| 🌐 Furnizori                      |            352             |   **358**   |          376          |
 | 🧠 ID-uri unice de modele de chat |            1320            |  **1374**   |         1475          |
 | 🖼️ Punte de modalități            | 🆕 viziune + audio + video |      ✓      |           ✓           |
 | 📡 Catalog gratuit Radar          |         🆕 opt-in          |      ✓      |           ✓           |

@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "공급자 한도",
     "noProviders": "연결된 제공업체 없음",
+    "quotaAuthRequired": "인증 필요 - 대시보드에 로그인하세요",
+    "quotaAuthRequiredHint": "대시보드 세션이 없거나 만료되어 제공업체 연결을 불러올 수 없습니다. 할당량 한도를 확인하려면 로그인한 후 새로고침하세요.",
     "connectProvidersForQuota": "OAuth를 통해 공급자에 연결하여 API 할당량 한도 및 사용량을 추적하세요.",
     "accountsCount": "{count, plural, one {#개 계정} other {#개 계정}}",
     "filteredFromCount": "({count}에서 필터링됨)",

@@ -115,21 +115,21 @@ OmniRoute/
 
 ```
 src/
-├── app/                 # App Router (પૃષ્ઠો + API રૂટ્સ + સ્થિતિ પૃષ્ઠો + લેન્ડિંગ)
-├── lib/                 # મુખ્ય લાઇબ્રેરીઓ / ડોમેન મોડ્યુલો (80 સબડિરેક્ટરીઓ + ~70 ટોચ-સ્તરની ફાઇલો)
-├── domain/              # શુદ્ધ ડોમેન લૉજિક (પૉલિસી એન્જિન, ફૉલબૅક, ખર્ચ, લૉકઆઉટ, comboResolver, મૂલ્યાંકન)
-├── server/              # માત્ર સર્વર માટેના મોડ્યુલો (ઑથોરાઇઝેશન પાઇપલાઇન, cors, ઑથ મિડલવેર) — ક્લાયન્ટમાંથી ઇમ્પોર્ટ કરી શકાતા નથી
-├── shared/              # જ્યાં સુરક્ષિત હોય ત્યાં સર્વર અને ક્લાયન્ટ વચ્ચે શેર કરેલું (કોન્સ્ટન્ટ્સ, ટાઇપ્સ, વૅલિડેશન, કૉન્ટ્રેક્ટ્સ, યુટિલિટીઝ)
-├── i18n/                # next-intl કૉન્ફિગ + દરેક લોકેલ માટે સંદેશ JSON (67 લોકેલ)
+├── app/                 # App Router (પેજ + API રૂટ + સ્થિતિ પેજ + લેન્ડિંગ પેજ)
+├── lib/                 # મુખ્ય લાઇબ્રેરીઓ / ડોમેન મોડ્યુલ (80 સબડિરેક્ટરી + ~70 ટોચ-સ્તરની ફાઇલો)
+├── domain/              # શુદ્ધ ડોમેન લોજિક (પોલિસી એન્જિન, ફૉલબૅક, ખર્ચ, લૉકઆઉટ, comboResolver, મૂલ્યાંકન)
+├── server/              # માત્ર સર્વર માટેના મોડ્યુલ (authz પાઇપલાઇન, cors, auth મિડલવેર) — ક્લાયન્ટમાંથી ઇમ્પોર્ટ કરી શકાતા નથી
+├── shared/              # જ્યાં સુરક્ષિત હોય ત્યાં સર્વર અને ક્લાયન્ટ વચ્ચે વહેંચાયેલું (કોન્સ્ટન્ટ, પ્રકારો, વેલિડેશન, કોન્ટ્રાક્ટ, યુટિલિટી)
+├── i18n/                # next-intl કૉન્ફિગ + દરેક લોકેલ માટેનો મેસેજ JSON (67 લોકેલ)
 ├── middleware/          # Next.js મિડલવેર (રિક્વેસ્ટ સંવર્ધન, લોકેલ શોધ)
-├── mitm/                # MITM પ્રૉક્સી કોર: સર્ટિફિકેટ જનરેશન/ઇન્સ્ટોલેશન, હૅન્ડલર્સ, ટાર્ગેટ્સ, ઇન્સ્પેક્ટર, માસ્ક્સ, પાસથ્રૂ
-│   ├── handlers/        # MitmHandlerBase ને વિસ્તૃત કરતા 9 IDE-એજન્ટ હૅન્ડલર ક્લાસ (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+├── mitm/                # MITM પ્રૉક્સી કોર: સર્ટિફિકેટ જનરેશન/ઇન્સ્ટોલેશન, હેન્ડલર, ટાર્ગેટ, ઇન્સ્પેક્ટર, માસ્ક, પાસથ્રૂ
+│   ├── handlers/        # MitmHandlerBase ને એક્સ્ટેન્ડ કરતા 9 IDE-એજન્ટ હેન્ડલર ક્લાસ (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
 │   └── inspector/       # ટ્રાફિક કૅપ્ચર સ્તર: બફર (ઇન-મેમરી રિંગ), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # મૉડલ ઍડેપ્ટર ગ્લૂ (લેગસી શિમ)
-├── scripts/             # ઇન-ટ્રી જાળવણી સ્ક્રિપ્ટ્સ (દા.ત., backfillAggregation)
-├── sse/                 # લેગસી SSE હૅન્ડલર્સ/સેવાઓ (chat.ts, chatHelpers.ts, services/auth.ts)
+├── models/              # મોડેલ એડેપ્ટર ગ્લૂ (લેગસી શિમ)
+├── scripts/             # ટ્રીની અંદરના જાળવણી સ્ક્રિપ્ટ (દા.ત., backfillAggregation)
+├── sse/                 # લેગસી SSE હેન્ડલર/સર્વિસ (chat.ts, chatHelpers.ts, services/auth.ts)
 ├── store/               # લેગસી ઇન-મેમરી સ્ટોર (src/lib/db ની તરફેણમાં તબક્કાવાર દૂર કરવામાં આવી રહ્યો છે)
-├── types/               # શેર કરેલી TS ટાઇપ ફાઇલો
+├── types/               # વહેંચાયેલ TS પ્રકાર ફાઇલો
 ├── instrumentation.ts   # Next.js ટેલિમેટ્રી હૂક (બ્રાઉઝર + એજ)
 ├── instrumentation-node.ts  # માત્ર Node માટેનું ઇન્સ્ટ્રુમેન્ટેશન
 └── proxy.ts             # HTTP-પ્રૉક્સી એન્ટ્રી શિમ
@@ -137,83 +137,83 @@ src/
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Path                                                                         | હેતુ                                                                                                                                                                                                                                                                                                              |
+| પાથ                                                                          | હેતુ                                                                                                                                                                                                                                                                                                              |
 | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | જાહેર OpenAI-સુસંગત API (~25 ઉપ-રૂટ્સ: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers વગેરે)                                                                                                                           |
+| `app/api/v1/`                                                                | જાહેર OpenAI-સુસંગત API (~25 ઉપ-રૂટ્સ: ચેટ, કમ્પ્લીશન્સ, એમ્બેડિંગ્સ, ફાઇલો, બેચિસ, ઑડિયો, છબીઓ, વિડિઓઝ, સંગીત, રીરૅન્ક, મોડરેશન્સ, શોધ, ws, એજન્ટ્સ, એકાઉન્ટ્સ, પ્રોવાઇડર્સ વગેરે)                                                                                                                               |
 | `app/api/v1beta/`                                                            | Gemini-શૈલીના API એન્ડપોઇન્ટ્સ                                                                                                                                                                                                                                                                                    |
 | `app/api/playground/`                                                        | Playground Studio રૂટ્સ: `improve-prompt/` (POST — LLM પ્રોમ્પ્ટ રીરાઇટર), `presets/` (GET સૂચિ / POST બનાવવું), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` જુઓ                                                                                                                |
-| `app/api/` (non-v1)                                                          | મેનેજમેન્ટ/એડમિન રૂટ્સ (~60 ડિરેક્ટરીઓ: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools વગેરે)                                                                                                                                     |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 રૂટ્સ (સર્વર નિયંત્રણ, એજન્ટ સ્થિતિ/DNS/મેપિંગ્સ, બાયપાસ, પ્રમાણપત્ર, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` જુઓ.                                                                                                                                |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ રૂટ્સ (વિનંતીઓ, સેશન્સ, હોસ્ટ્સ, કેપ્ચર મોડ્સ, નિકાસ, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` જુઓ.                                                                                                                                       |
+| `app/api/` (non-v1)                                                          | મેનેજમેન્ટ/એડમિન રૂટ્સ (~60 ડિરેક્ટરીઝ: પ્રોવાઇડર્સ, કોમ્બોઝ, સેટિંગ્સ, mcp, a2a, મૂલ્યાંકનો, મેમરી, સ્કિલ્સ, વેબહુક્સ, અનુપાલન, સ્થિતિસ્થાપકતા, મોનિટરિંગ, ટનલ્સ, cli-tools વગેરે)                                                                                                                               |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 રૂટ્સ (સર્વર નિયંત્રણ, એજન્ટ સ્થિતિ/DNS/મેપિંગ્સ, બાયપાસ, સર્ટિફિકેટ, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` જુઓ.                                                                                                                                |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ રૂટ્સ (વિનંતીઓ, સેશન્સ, હોસ્ટ્સ, કૅપ્ચર-મોડ્સ, નિકાસ, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` જુઓ.                                                                                                                                       |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 પ્રવેશ બિંદુ (`POST /a2a`)                                                                                                                                                                                                                                                                       |
-| `app/.well-known/agent.json/`                                                | A2A એજન્ટ કાર્ડ (શોધ)                                                                                                                                                                                                                                                                                             |
-| `app/(dashboard)/dashboard/`                                                 | ડૅશબોર્ડ UI પૃષ્ઠો (50+ વિભાગો, ~118 page.tsx ફાઇલો: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity વગેરે)                                                                                                                                    |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 ટૅબ્સ: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` જુઓ                                                                                                                                                                      |
+| `app/.well-known/agent.json/`                                                | A2A Agent Card (શોધ)                                                                                                                                                                                                                                                                                              |
+| `app/(dashboard)/dashboard/`                                                 | ડૅશબોર્ડ UI પૃષ્ઠો (50+ વિભાગો, ~118 page.tsx ફાઇલો: પ્રોવાઇડર્સ, કોમ્બોઝ, સેટિંગ્સ, મેમરી, સ્કિલ્સ, વેબહુક્સ, મૂલ્યાંકનો, ઑડિટ, બેચ, કૅશ, ખર્ચ, સ્વાસ્થ્ય, સિસ્ટમ, પ્રવૃત્તિ વગેરે)                                                                                                                              |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 ટૅબ્સ: શોધ/સ્ક્રેપ/તુલના + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` જુઓ                                                                                                                                                                          |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (યોજના 21): `page.tsx` (3-ટૅબ શેલ), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge ડૅશબોર્ડ પૃષ્ઠ — સર્વર કાર્ડ, 9 એજન્ટ કાર્ડ્સ, સેટઅપ વિઝાર્ડ, મોડેલ મેપિંગ, બાયપાસ સૂચિ. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` જુઓ.                                                                                                                                                       |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector ડૅશબોર્ડ પૃષ્ઠ — DevTools વિભાજિત દૃશ્ય, 7 વિગતવાર ટૅબ્સ, 4 કેપ્ચર મોડ ટૉગલ્સ, સેશન રેકોર્ડર, સંદર્ભનું રંગીકરણ. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` જુઓ.                                                                                                                   |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector ડૅશબોર્ડ પૃષ્ઠ — DevTools સ્પ્લિટ, 7 વિગત ટૅબ્સ, 4 કૅપ્ચર મોડ ટૉગલ્સ, સેશન રેકોર્ડર, સંદર્ભ કલરાઇઝેશન. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` જુઓ.                                                                                                                             |
 | `app/(dashboard)/dashboard/activity/`                                        | પ્રવૃત્તિ ફીડ પેજ (ગ્રુપ B): `page.tsx` (સર્વર) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` જુઓ                                                                                                              |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | ક્વોટા શેરિંગ પેજ (ગ્રુપ B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                          |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | પ્રદાતા પ્લાન કૉન્ફિગ પેજ (ગ્રુપ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — દરેક કનેક્શન માટે ક્વોટા ડાયમેન્શન ઓવરરાઇડ                                                                                                                                                                                     |
-| `app/docs/`                                                                  | એમ્બેડ કરેલું દસ્તાવેજીકરણ વ્યૂઅર (`docs/*.md` રેન્ડર કરે છે)                                                                                                                                                                                                                                                     |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | પ્રોવાઇડર પ્લાન કૉન્ફિગ પેજ (ગ્રુપ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — પ્રતિ કનેક્શન ક્વોટા પરિમાણોનું ઓવરરાઇડ                                                                                                                                                                                      |
+| `app/docs/`                                                                  | એમ્બેડેડ દસ્તાવેજીકરણ વ્યૂઅર (`docs/*.md` રેન્ડર કરે છે)                                                                                                                                                                                                                                                          |
 | `app/landing/`                                                               | માર્કેટિંગ લેન્ડિંગ પેજ                                                                                                                                                                                                                                                                                           |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | પ્રમાણીકરણ-સંબંધિત પેજ                                                                                                                                                                                                                                                                                            |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP ભૂલ પેજ                                                                                                                                                                                                                                                                                                      |
 | `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | સ્ટેટિક/સ્ટેટસ પેજ                                                                                                                                                                                                                                                                                                |
 | `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | રૂટ લેઆઉટ, હોમ, PWA મેનિફેસ્ટ, ગ્લોબલ CSS                                                                                                                                                                                                                                                                         |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | ભૂલ બાઉન્ડરીઓ                                                                                                                                                                                                                                                                                                     |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | ભૂલ સીમાઓ                                                                                                                                                                                                                                                                                                         |
 
 ### `src/lib/` — મુખ્ય લાઇબ્રેરીઓ (~50 મોડ્યુલ)
 
 | મોડ્યુલ                                  | હેતુ                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `a2a/`                                   | A2A પ્રોટોકોલ ટાસ્ક મેનેજર, કૌશલ્યો (5), સ્ટ્રીમિંગ                                                                                                                                                                                                                                                                      |
+| `a2a/`                                   | A2A પ્રોટોકૉલ ટાસ્ક મેનેજર, કૌશલ્યો (5), સ્ટ્રીમિંગ                                                                                                                                                                                                                                                                      |
 | `acp/`                                   | CLI એજન્ટ રજિસ્ટ્રી (સ્થાનિક CLI શોધ — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` જુઓ)                                                                                                                                                                                                                                   |
 | `api/`                                   | સહિયારા API સહાયકો (`requireManagementAuth`, માન્યતા ચકાસણી)                                                                                                                                                                                                                                                             |
-| `auth/`                                  | સત્ર, પાસવર્ડ હેશિંગ, ટોકન માન્યતા ચકાસણી                                                                                                                                                                                                                                                                                |
-| `batches/`                               | OpenAI Batches API હેન્ડલર્સ                                                                                                                                                                                                                                                                                             |
-| `catalog/`                               | પ્રદાતા કેટલોગ માટે Zod માન્યતા ચકાસણી + ક્ષમતા નિર્ધારણ                                                                                                                                                                                                                                                                 |
+| `auth/`                                  | સેશન, પાસવર્ડ હૅશિંગ, ટોકન માન્યતા ચકાસણી                                                                                                                                                                                                                                                                                |
+| `batches/`                               | OpenAI Batches API હૅન્ડલર્સ                                                                                                                                                                                                                                                                                             |
+| `catalog/`                               | પ્રદાતા કૅટલૉગ માટે Zod માન્યતા ચકાસણી + ક્ષમતા રિઝોલ્યુશન                                                                                                                                                                                                                                                               |
 | `cloudAgent/`                            | ક્લાઉડ એજન્ટ્સ (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` જુઓ                                                                                                                                                                                                                                        |
-| `combos/`                                | કોમ્બો નિર્ધારણ + પુનઃક્રમબદ્ધતા સહાયકો                                                                                                                                                                                                                                                                                  |
-| `audit/`                                 | પ્રવૃત્તિ ફીડ સહાયકો: `highLevelActions.ts` (મંજૂરીસૂચિ + `isHighLevelAction()`), `activityIcons.ts` (ક્રિયા → આઇકન/ક્રિયાપદ મેપ), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` જુઓ                                                                                              |
-| `compliance/`                            | ઓડિટ લોગ + પ્રદાતા ઓડિટ — `docs/security/COMPLIANCE.md` જુઓ                                                                                                                                                                                                                                                              |
-| `compression/`                           | કમ્પ્રેશન એન્જિન સંયોજન (એન્જિનો `open-sse/services/compression/`માં સ્થિત છે)                                                                                                                                                                                                                                           |
-| `config/`                                | રનટાઇમ રૂપરેખાંકન સહાયકો                                                                                                                                                                                                                                                                                                 |
-| `db/`                                    | 120+ ડોમેન DB મોડ્યુલો + 168 માઇગ્રેશનો (SQLite માટે હંમેશાં આ મારફતે જ જાઓ)                                                                                                                                                                                                                                             |
+| `combos/`                                | કોમ્બો રિઝોલ્યુશન + પુનઃક્રમબદ્ધતા સહાયકો                                                                                                                                                                                                                                                                                |
+| `audit/`                                 | પ્રવૃત્તિ ફીડ સહાયકો: `highLevelActions.ts` (અનુમતિસૂચિ + `isHighLevelAction()`), `activityIcons.ts` (ક્રિયા → આઇકન/ક્રિયાપદ નકશો), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` જુઓ                                                                                             |
+| `compliance/`                            | ઑડિટ લૉગ + પ્રદાતા ઑડિટ — `docs/security/COMPLIANCE.md` જુઓ                                                                                                                                                                                                                                                              |
+| `compression/`                           | કમ્પ્રેશન એન્જિન સંકલન (એન્જિનો `open-sse/services/compression/`માં સ્થિત છે)                                                                                                                                                                                                                                            |
+| `config/`                                | રનટાઇમ કૉન્ફિગ સહાયકો                                                                                                                                                                                                                                                                                                    |
+| `db/`                                    | 120+ ડોમેન DB મોડ્યુલો + 168 માઇગ્રેશનો (SQLite માટે હંમેશાં અહીંથી જ કાર્ય કરો)                                                                                                                                                                                                                                         |
 | `quota/`                                 | ક્વોટા શેરિંગ એન્જિન: `dimensions.ts` (પ્રકારો/Zod), `types.ts` (QuotaStore ઇન્ટરફેસ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` જુઓ |
-| `radar/`                                 | Radar મફત-મોડેલ કેટલોગ ક્લાયન્ટ: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` જુઓ                                                                                                                                             |
-| `display/`                               | UI ફોર્મેટિંગ સહાયકો (ખર્ચ, વિલંબતા વગેરે)                                                                                                                                                                                                                                                                               |
-| `embeddings/`                            | એમ્બેડિંગ્સ સેવા સહાયકો                                                                                                                                                                                                                                                                                                  |
-| `env/`                                   | એન્વાયરમેન્ટ વેરિએબલ પાર્સિંગ + માન્યતા ચકાસણી                                                                                                                                                                                                                                                                           |
-| `evals/`                                 | મૂલ્યાંકન ફ્રેમવર્ક (સ્યુટ્સ, રનર, રનટાઇમ) — `docs/frameworks/EVALS.md` જુઓ                                                                                                                                                                                                                                              |
+| `radar/`                                 | Radar ફ્રી-મોડેલ કેટલોગ ક્લાયન્ટ: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` જુઓ                                                                                                                                            |
+| `display/`                               | UI ફોર્મેટિંગ સહાયકો (કિંમત, વિલંબતા વગેરે)                                                                                                                                                                                                                                                                              |
+| `embeddings/`                            | Embeddings સેવા સહાયકો                                                                                                                                                                                                                                                                                                   |
+| `env/`                                   | Env વેરિએબલ પાર્સિંગ + માન્યતા ચકાસણી                                                                                                                                                                                                                                                                                    |
+| `evals/`                                 | Eval ફ્રેમવર્ક (સ્યુટ્સ, રનર, રનટાઇમ) — `docs/frameworks/EVALS.md` જુઓ                                                                                                                                                                                                                                                   |
 | `guardrails/`                            | PII માસ્કર, પ્રોમ્પ્ટ ઇન્જેક્શન, વિઝન બ્રિજ — `docs/security/GUARDRAILS.md` જુઓ                                                                                                                                                                                                                                          |
 | `jobs/`                                  | બૅકગ્રાઉન્ડ જૉબ્સ (cron જેવા)                                                                                                                                                                                                                                                                                            |
 | `memory/`                                | સંવાદાત્મક મેમરી (SQLite FTS5 + sqlite-vec હાઇબ્રિડ RRF + Qdrant ટિયર 2) — `docs/frameworks/MEMORY.md` જુઓ                                                                                                                                                                                                               |
-| `memory/embedding/`                      | બહુ-સ્રોત એમ્બેડિંગ સ્તર: `index.ts` (રિઝોલ્વર), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (યોજના 21)                                                                                                                                                                               |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 રૅપર — KNN બ્રૂટ-ફોર્સ + હાઇબ્રિડ RRF (FTS5 + વેક્ટર, k=60). લેઝી-ઇનિશિયલાઇઝ થાય છે અને sqlite-vec ઉપલબ્ધ ન હોય ત્યારે સુગમતાથી ઘટેલી કાર્યક્ષમતા સાથે કાર્ય કરે છે. (યોજના 21)                                                                                                                        |
-| `memory/reindex.ts`                      | `runReindexBatch()` — બૅકગ્રાઉન્ડમાં `needs_reindex=1` ધરાવતી મેમરીઓ પર પ્રક્રિયા કરે છે; `POST /api/memory/reindex` અને લેઝી-બૅકફિલ પાથ દ્વારા કૉલ થાય છે. (યોજના 21)                                                                                                                                                   |
+| `memory/embedding/`                      | બહુ-સ્રોત embedding સ્તર: `index.ts` (રિઝોલ્વર), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (યોજના 21)                                                                                                                                                                               |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 રૅપર — KNN બ્રુટ-ફોર્સ + હાઇબ્રિડ RRF (FTS5 + વેક્ટર, k=60). લેઝી-ઇનિશિયલાઇઝેશન, sqlite-vec ઉપલબ્ધ ન હોય ત્યારે સુચારુ રીતે ક્ષમતા ઘટાડે છે. (યોજના 21)                                                                                                                                                |
+| `memory/reindex.ts`                      | `runReindexBatch()` — બૅકગ્રાઉન્ડમાં `needs_reindex=1` ધરાવતી મેમરીઓને પ્રોસેસ કરે છે; `POST /api/memory/reindex` અને લેઝી-બૅકફિલ પાથ દ્વારા કૉલ થાય છે. (યોજના 21)                                                                                                                                                      |
 | `monitoring/`                            | હેલ્થ ચેક્સ, મેટ્રિક્સ ઉત્સર્જન                                                                                                                                                                                                                                                                                          |
 | `oauth/`                                 | 22 પ્રોવાઇડર મોડ્યુલો માટે OAuth/ઇમ્પોર્ટ ફ્લોઝ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                              |
 | `plugins/`                               | પ્લગઇન રજિસ્ટ્રી                                                                                                                                                                                                                                                                                                         |
 | `promptCache/`                           | Anthropic-શૈલીના પ્રોમ્પ્ટ કૅશ બ્રેકપોઇન્ટ્સ                                                                                                                                                                                                                                                                             |
-| `skills/`                                | સ્કિલ્સ ફ્રેમવર્ક (બિલ્ટ-ઇન + માર્કેટપ્લેસ + SkillsSH) — `docs/frameworks/SKILLS.md` જુઓ                                                                                                                                                                                                                                 |
-| `playground/`                            | Playground Studio માટેના શેર કરેલા સહાયકો: `codeExport.ts` (curl/Python/TS જનરેટર), `promptImprover.ts` (મેટા-પ્રોમ્પ્ટ બિલ્ડર), `streamMetrics.ts` (શુદ્ધ TTFT/TPS), `types.ts` (કિંમત કોષ્ટક) — `docs/frameworks/PLAYGROUND_STUDIO.md` જુઓ                                                                             |
+| `skills/`                                | Skills ફ્રેમવર્ક (બિલ્ટ-ઇન + માર્કેટપ્લેસ + SkillsSH) — `docs/frameworks/SKILLS.md` જુઓ                                                                                                                                                                                                                                  |
+| `playground/`                            | Playground Studio માટેના સહિયારા સહાયકો: `codeExport.ts` (curl/Python/TS જનરેટર), `promptImprover.ts` (મેટા-પ્રોમ્પ્ટ બિલ્ડર), `streamMetrics.ts` (શુદ્ધ TTFT/TPS), `types.ts` (કિંમત કોષ્ટક) — `docs/frameworks/PLAYGROUND_STUDIO.md` જુઓ                                                                               |
 | `webhookDispatcher.ts`                   | HMAC વેબહૂક ડિલિવરી — `docs/frameworks/WEBHOOKS.md` જુઓ                                                                                                                                                                                                                                                                  |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ટનલ મેનેજરો — `docs/ops/TUNNELS_GUIDE.md` જુઓ                                                                                                                                                                                                                                                                            |
 | `cloudSync.ts`, `initCloudSync.ts`       | સ્ટેટનું વૈકલ્પિક ક્લાઉડ સિંક                                                                                                                                                                                                                                                                                            |
-| `localDb.ts`                             | db મોડ્યુલો માટે રી-એક્સપોર્ટ બેરલ (કોઈ લોજિક નહીં — ફક્ત રી-એક્સપોર્ટ)                                                                                                                                                                                                                                                  |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | વિનંતી કૅશિંગ + આઇડેમ્પોટેન્સી                                                                                                                                                                                                                                                                                           |
-| (લગભગ 30 વધુ ટોચ-સ્તરની ફાઇલો)           | વિશિષ્ટ સહાયકો (logEnv, modelsDevSync, piiSanitizer, વગેરે)                                                                                                                                                                                                                                                              |
+| `localDb.ts`                             | db મોડ્યુલો માટે રી-એક્સપોર્ટ બેરલ (કોઈ લોજિક નહીં — માત્ર રી-એક્સપોર્ટ્સ)                                                                                                                                                                                                                                               |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | રિક્વેસ્ટ કૅશિંગ + આઇડેમ્પોટન્સી                                                                                                                                                                                                                                                                                         |
+| (લગભગ 30 વધુ ટૉપ-લેવલ ફાઇલો)             | વિશિષ્ટ સહાયકો (logEnv, modelsDevSync, piiSanitizer વગેરે)                                                                                                                                                                                                                                                               |
 
 ### `src/lib/db/` — ડેટાબેઝ (147 મોડ્યુલો + 208 માઇગ્રેશનો)
 
-| ઉપડિરેક્ટરી               | હેતુ                                                                                                                                                                              |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL જર્નલિંગ સાથે `getDbInstance()` સિંગલટન                                                                                                                                       |
-| `db/migrations/`          | વર્ઝન કરેલી SQL ફાઇલો (આઇડેમ્પોટેન્ટ, ટ્રાન્ઝેક્શનલ). `073_memory_vec.sql` `memory_vec_meta` + `needs_reindex` કૉલમ ઉમેરે છે (યોજના 21).                                          |
-| `db/playgroundPresets.ts` | Playground Studio પ્રીસેટ્સ માટેનું CRUD મોડ્યુલ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)   |
-| `db/memoryVec.ts`         | `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) માટે CRUD + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, વગેરે (યોજના 21)                    |
-| `db/<domain>.ts`          | દરેક ડોમેન માટે એક મોડ્યુલ: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, વગેરે. |
+| સબડિરેક્ટરી               | હેતુ                                                                                                                                                                             |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | WAL જર્નલિંગ સાથેનો `getDbInstance()` સિંગલટન                                                                                                                                    |
+| `db/migrations/`          | વર્ઝનવાળી SQL ફાઇલો (આઇડેમ્પોટન્ટ, ટ્રાન્ઝેક્શનલ). `073_memory_vec.sql`, `memory_vec_meta` + `needs_reindex` કૉલમ ઉમેરે છે (યોજના 21).                                           |
+| `db/playgroundPresets.ts` | Playground Studio પ્રીસેટ્સ માટે CRUD મોડ્યુલ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)     |
+| `db/memoryVec.ts`         | `memory_vec_meta` માટે CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` વગેરે (યોજના 21)                    |
+| `db/<domain>.ts`          | દરેક ડોમેન માટે એક મોડ્યુલ: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache વગેરે. |
 
 ### `src/domain/`
 
@@ -222,11 +222,11 @@ src/
 | `policy.ts`            | નીતિ એન્જિન                                                |
 | `fallbackPolicy.ts`    | ફૉલબૅક નિર્ણય વૃક્ષ                                        |
 | `costRules.ts`         | ખર્ચ ગણતરીના નિયમો                                         |
-| `lockoutPolicy.ts`     | મૉડલ/કનેક્શન લૉકઆઉટ નીતિ                                   |
-| `tagRouter.ts`         | ટૅગ-આધારિત રાઉટિંગ                                         |
-| `comboResolver.ts`     | કૉમ્બો રિઝોલ્યુશન (કૉમ્બો એન્જિન દ્વારા ઉપયોગમાં લેવાય છે) |
-| `modelAvailability.ts` | દરેક મૉડલ માટે ઉપલબ્ધતાની ચકાસણી                           |
-| `assessment/`          | મૉડલ મૂલ્યાંકન (RFC-AUTO-ASSESSMENT નો તબક્કો 1)           |
+| `lockoutPolicy.ts`     | મોડલ/કનેક્શન લૉકઆઉટ નીતિ                                   |
+| `tagRouter.ts`         | ટૅગ-આધારિત રૂટિંગ                                          |
+| `comboResolver.ts`     | કોમ્બો રિઝોલ્યુશન (કોમ્બો એન્જિન દ્વારા ઉપયોગમાં લેવાય છે) |
+| `modelAvailability.ts` | પ્રતિ-મોડલ ઉપલબ્ધતા તપાસ                                   |
+| `assessment/`          | મોડલ મૂલ્યાંકન (RFC-AUTO-ASSESSMENT નો તબક્કો 1)           |
 
 ### `src/server/`
 
@@ -238,23 +238,23 @@ src/
 
 ### `src/shared/`
 
-| મોડ્યુલ                          | હેતુ                                                                                                  |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `components/`                    | ડેશબોર્ડ કોમ્પોનેન્ટ API: `packages/ui-kit` પરના ઍડેપ્ટર્સ — `docs/architecture/DESIGN_SYSTEM.md` જુઓ |
-| `constants/iconMap.ts`           | `ICON_MAP`: સ્ક્રીન્સ દ્વારા ઉપયોગમાં લેવાતા આઇકન નામો → Lucide કોમ્પોનેન્ટ્સ (`<Icon>`)              |
-| `constants/providers.ts`         | Zod માન્યતા સાથેના **376 પ્રોવાઇડર્સ** (સત્યનો અધિકૃત સ્ત્રોત)                                        |
-| `constants/cliTools.ts`          | બાહ્ય CLI ટૂલ રજિસ્ટ્રી                                                                               |
-| `constants/routingStrategies.ts` | પ્રાથમિકતાઓ સાથેની **20 રાઉટિંગ વ્યૂહરચનાઓ**                                                          |
-| `constants/publicApiRoutes.ts`   | એવા રૂટ્સ કે જેને (મેનેજમેન્ટની સરખામણીમાં) Bearer પ્રમાણીકરણની જરૂર પડે છે                           |
-| `constants/upstreamHeaders.ts`   | અપસ્ટ્રીમ વિનંતીઓ માટે હેડર પ્રતિબંધ-સૂચિ                                                             |
-| `validation/schemas.ts`          | ~80 Zod સ્કીમા (API કોન્ટ્રાક્ટ્સ માટે સત્યનો એકમાત્ર સ્ત્રોત)                                        |
-| `validation/helpers.ts`          | Zod માન્યતા સહાયકો (`validateBody`, વગેરે)                                                            |
-| `types/`                         | શેર્ડ TS પ્રકારો                                                                                      |
-| `contracts/`                     | જાહેર API કોન્ટ્રાક્ટ્સ (`package.json` માં `files:` દ્વારા ઉપયોગમાં લેવાતા)                          |
-| `utils/circuitBreaker.ts`        | પ્રોવાઇડર સર્કિટ બ્રેકર (`docs/architecture/RESILIENCE_GUIDE.md` જુઓ)                                 |
-| `utils/apiAuth.ts`               | API કી માન્યતા, સ્કોપની ચકાસણી                                                                        |
-| `utils/fetchTimeout.ts`          | અપસ્ટ્રીમ fetch માટે ટાઇમઆઉટ/અબોર્ટ રૅપર્સ                                                            |
-| `utils/releaseNotes.ts`          | બંધ કરાયેલ v2/લેગસી જાહેરાત પાર્સર, સ્થાનિકીકરણ અને ID ડિસમિસલ                                        |
+| મોડ્યુલ                          | હેતુ                                                                                                 |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `components/`                    | ડૅશબોર્ડ કોમ્પોનન્ટ API: `packages/ui-kit` પરના ઍડૅપ્ટર્સ — `docs/architecture/DESIGN_SYSTEM.md` જુઓ |
+| `constants/iconMap.ts`           | `ICON_MAP`: સ્ક્રીન્સ દ્વારા ઉપયોગમાં લેવાતા આઇકનનાં નામ → Lucide કોમ્પોનન્ટ્સ (`<Icon>`)            |
+| `constants/providers.ts`         | Zod માન્યતા સાથેના **376 પ્રદાતાઓ** (સત્યનો અધિકૃત સ્રોત)                                            |
+| `constants/cliTools.ts`          | બાહ્ય CLI ટૂલ રજિસ્ટ્રી                                                                              |
+| `constants/routingStrategies.ts` | પ્રાથમિકતાઓ સાથેની **20 રૂટિંગ વ્યૂહરચનાઓ**                                                          |
+| `constants/publicApiRoutes.ts`   | એવા રૂટ્સ કે જેને (મેનેજમેન્ટની સરખામણીએ) Bearer પ્રમાણીકરણ જરૂરી છે                                 |
+| `constants/upstreamHeaders.ts`   | અપસ્ટ્રીમ વિનંતીઓ માટે હેડર ડિનાઇલિસ્ટ                                                               |
+| `validation/schemas.ts`          | ~80 Zod સ્કીમા (API કોન્ટ્રાક્ટ્સ માટે સત્યનો એકમાત્ર સ્રોત)                                         |
+| `validation/helpers.ts`          | Zod માન્યતા સહાયકો (`validateBody`, વગેરે)                                                           |
+| `types/`                         | સહિયારા TS પ્રકારો                                                                                   |
+| `contracts/`                     | જાહેર API કોન્ટ્રાક્ટ્સ (`package.json` માં `files:` દ્વારા ઉપયોગમાં લેવાતા)                         |
+| `utils/circuitBreaker.ts`        | પ્રદાતા સર્કિટ બ્રેકર (`docs/architecture/RESILIENCE_GUIDE.md` જુઓ)                                  |
+| `utils/apiAuth.ts`               | API કી માન્યતા, સ્કોપ ચકાસણી                                                                         |
+| `utils/fetchTimeout.ts`          | અપસ્ટ્રીમ fetch માટે ટાઇમઆઉટ/એબોર્ટ રૅપર્સ                                                           |
+| `utils/releaseNotes.ts`          | બંધ કરાયેલ v2/લેગસી જાહેરાત પાર્સર, સ્થાનિકીકરણ અને ID બરતરફીકરણ                                     |
 
 ---
 
@@ -397,22 +397,22 @@ open-sse/
 
 | દસ્તાવેજ                    | હેતુ                                                                              |
 | --------------------------- | --------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | હાઇ-લેવલ આર્કિટેક્ચર, સબસિસ્ટમ મેપ, ડેશબોર્ડ સપાટી                                |
-| `CODEBASE_DOCUMENTATION.md` | એન્જિનિયરિંગ સંદર્ભ: ડિરેક્ટરીઓ, મોડ્યુલ્સ, કન્વેન્શન્સ                           |
+| `ARCHITECTURE.md`           | ઉચ્ચ-સ્તરીય આર્કિટેક્ચર, સબસિસ્ટમ નકશો, ડેશબોર્ડ સપાટી                            |
+| `CODEBASE_DOCUMENTATION.md` | એન્જિનિયરિંગ સંદર્ભ: ડિરેક્ટરીઓ, મોડ્યૂલો, કન્વેન્શનો                             |
 | `FEATURES.md`               | v3.8 હાઇલાઇટ્સ સાથે ફીચર મેટ્રિક્સ                                                |
-| `USER_GUIDE.md`             | એન્ડ-યુઝર મેન્યુઅલ (સેટઅપ, મોડલ્સ, કોમ્બો, CLIs, ઓડિયો, વગેરે)                    |
+| `USER_GUIDE.md`             | અંતિમ-વપરાશકર્તા મેન્યુઅલ (સેટઅપ, મોડલ્સ, કોમ્બો, CLIs, ઓડિયો, વગેરે)             |
 | `API_REFERENCE.md`          | ઓથ મોડલ સાથે API એન્ડપોઇન્ટ સંદર્ભ                                                |
 | `openapi.yaml`              | OpenAPI 3.0 સ્પેક (121 પાથ્સ)                                                     |
 | `SETUP_GUIDE.md`            | ઇન્સ્ટોલ પદ્ધતિઓ (npm, npx, Docker, Electron, Termux, સોર્સ)                      |
-| `ENVIRONMENT.md`            | તમામ env વેરિયેબલ્સ (~800 દસ્તાવેજીત, ~3,050 લાઇન્સ `.env.example`)               |
-| `TROUBLESHOOTING.md`        | સામાન્ય એરર + v3.8.0 જાણીતી સમસ્યાઓ                                               |
-| `RELEASE_CHECKLIST.md`      | સંપૂર્ણ રિલીઝ ફ્લો (સ્કિલ્સ, husky, કન્વેન્શનલ કમિટ્સ, ડિપ્લોય)                   |
+| `ENVIRONMENT.md`            | બધા env vars (~800 દસ્તાવેજીત, ~3,050 લાઇન્સ `.env.example`)                      |
+| `TROUBLESHOOTING.md`        | સામાન્ય ભૂલો + v3.8.0 જ્ઞાત સમસ્યાઓ                                               |
+| `RELEASE_CHECKLIST.md`      | સંપૂર્ણ રિલીઝ ફ્લો (સ્કિલ્સ, husky, conventional commits, ડિપ્લોય)                |
 | `COVERAGE_PLAN.md`          | કવરેજ લક્ષ્યો અને વર્તમાન સ્થિતિ                                                  |
 | `FREE_TIERS.md`             | ક્યુરેટેડ ફ્રી-ટિયર પ્રોવાઇડર્સ (48+ ફ્રી + 11 OAuth)                             |
-| `CLI-TOOLS.md`              | એક્સટર્નલ CLI ઇન્ટિગ્રેશન્સ + ઇન્ટર્નલ OmniRoute CLI                              |
+| `CLI-TOOLS.md`              | બાહ્ય CLI ઇન્ટિગ્રેશન્સ + આંતરિક OmniRoute CLI                                    |
 | `I18N.md`                   | i18n આર્કિટેક્ચર, ભાષા ઉમેરવી, 67 લોકેલ્સ                                         |
-| `UNINSTALL.md`              | ક્લીન અનઇન્સ્ટોલ સ્ટેપ્સ                                                          |
-| `PROVIDER_REFERENCE.md`     | 376 પ્રોવાઇડર્સનો **ઓટો-જનરેટેડ** કેટલોગ (રીજન: `npm run gen:provider-reference`) |
+| `UNINSTALL.md`              | સ્વચ્છ અનઇન્સ્ટોલ પગલાં                                                           |
+| `PROVIDER_REFERENCE.md`     | 376 પ્રોવાઇડર્સનો **ઓટો-જનરેટેડ** કેટલોગ (રિજન: `npm run gen:provider-reference`) |
 
 ### સબસિસ્ટમ ડીપ-ડાઇવ્સ
 
@@ -420,12 +420,12 @@ open-sse/
 | ------------------------------------------- | ---------------------------------------------------------------------- |
 | `MCP-SERVER.md`                             | MCP સર્વર: 110 ટૂલ્સ, 3 ટ્રાન્સપોર્ટ્સ, 33 સ્કોપ્સ, REST એન્ડપોઇન્ટ્સ  |
 | `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 સ્કિલ્સ, REST હેલ્પર્સ, એજન્ટ કાર્ડ              |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | યુનિફાઇડ ગાઇડ: A2A vs ACP vs Cloud Agents                              |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | એકીકૃત ગાઇડ: A2A vs ACP vs Cloud Agents                                |
 | `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules ઓર્કેસ્ટ્રેશન                              |
 | `SKILLS.md`                                 | સ્કિલ્સ ફ્રેમવર્ક (બિલ્ટ-ઇન + માર્કેટપ્લેસ + SkillsSH + સેન્ડબોક્સ)    |
 | `RADAR.md`                                  | Radar ફ્રી-મોડલ કેટલોગ ઓવરલે (`RADAR_ENABLED`, ડિફોલ્ટ રૂપે બંધ)       |
 | `MEMORY.md`                                 | મેમરી સિસ્ટમ (SQLite FTS5 + Qdrant)                                    |
-| `EVALS.md`                                  | Eval ફ્રેમવર્ક (સ્યુટ્સ, રન્સ, રુબ્રિક્સ)                              |
+| `EVALS.md`                                  | Eval ફ્રેમવર્ક (સ્યુટ્સ, રન્સ, રૂબ્રિક્સ)                              |
 | `GUARDRAILS.md`                             | PII માસ્કર, પ્રોમ્પ્ટ ઇન્જેક્શન, વિઝન બ્રિજ                            |
 | `COMPLIANCE.md`                             | ઓડિટ લોગ, રિટેન્શન, noLog ઓપ્ટ-આઉટ                                     |
 | `WEBHOOKS.md`                               | HMAC-સાઇન્ડ વેબહૂક ડિલિવરી                                             |
@@ -439,32 +439,32 @@ open-sse/
 
 | દસ્તાવેજ                        | હેતુ                                          |
 | ------------------------------- | --------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | કમ્પ્રેશન મોડ્સની ઝાંખી + રોડમેપ              |
+| `COMPRESSION_GUIDE.md`          | કમ્પ્રેશન મોડ્સ + રોડમેપનું અવલોકન            |
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK એન્જિન્સ, રજિસ્ટ્રી કોન્ટ્રાક્ટ |
 | `COMPRESSION_RULES_FORMAT.md`   | Caveman રૂલ પેક JSON સ્કીમા                   |
-| `COMPRESSION_LANGUAGE_PACKS.md` | પ્રતિ-ભાષા રૂલ પેક ઇન્વેન્ટરી                 |
+| `COMPRESSION_LANGUAGE_PACKS.md` | દરેક ભાષા માટેના રૂલ પેક ઇન્વેન્ટરી           |
 | `RTK_COMPRESSION.md`            | RTK ડિક્લેરેટિવ પાઇપલાઇન (56 ફિલ્ટર્સ)        |
 
 ### ડિપ્લોયમેન્ટ
 
-| દસ્તાવેજ                     | હેતુ                                                                |
+| દસ્તાવેજ                     | હेतુ                                                                |
 | ---------------------------- | ------------------------------------------------------------------- |
 | `DOCKER_GUIDE.md`            | Docker બિલ્ડ, પ્રોફાઇલ્સ (base/cli/host/cliproxyapi), Redis સાઇડકાર |
 | `VM_DEPLOYMENT_GUIDE.md`     | સામાન્ય VM/VPS ડિપ્લોયમેન્ટ (Ubuntu/Debian + nginx + systemd)       |
 | `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ડિપ્લોયમેન્ટ (હાલમાં ફક્ત ચાઇનીઝમાં)                         |
 | `TERMUX_GUIDE.md`            | Termux દ્વારા Android હેડલેસ                                        |
-| `PWA_GUIDE.md`               | Progressive Web App ઇન્સ્ટોલ + service worker                       |
+| `PWA_GUIDE.md`               | Progressive Web App ઇન્સ્ટોલ + સર્વિસ વર્કર                         |
 | `ELECTRON_GUIDE.md`          | ડેસ્કટોપ એપ બિલ્ડ + સાઇન + ડિસ્ટ્રિબ્યુટ                            |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                              |
 | `PROXY_GUIDE.md`             | 4-સ્તરીય આઉટબાઉન્ડ પ્રોક્સી + 1proxy માર્કેટપ્લેસ                   |
 
 ### સબડિરેક્ટરીઓ
 
-| સબડિર                 | હેતુ                                                                                                                                                                                                     |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | સ્થાનિકીકૃત દસ્તાવેજ અનુવાદો (41 લોકેલ્સ)                                                                                                                                                                |
-| `docs/screenshots/`   | ગાઇડ્સ માટે ઇમેજ એસેટ્સ                                                                                                                                                                                  |
-| `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) તરફથી પ્લાન્સ/સ્પેક્સ + રિસર્ચ — અલગ રહેલું, અલગથી વર્ઝન કરેલું રેપો, મુખ્ય ટ્રી દ્વારા gitignore કરેલું. જુઓ CLAUDE.md → "Planning & Research Artifacts". |
+| સબડિર                 | હेतુ                                                                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | સ્થાનિકીકૃત દસ્તાવેજ અનુવાદો (41 લોકેલ્સ)                                                                                                                                                        |
+| `docs/screenshots/`   | માર્ગદર્શિકાઓ માટે છબી એસેટ્સ                                                                                                                                                                    |
+| `_tasks/superpowers/` | સુપરપાવર્સ (`writing-plans`/`brainstorming`) માંથી પ્લાન્સ/સ્પેક્સ + સંશોધન — અલગ રાખેલું, અલગથી-વર્ઝન્ડ રેપો, મુખ્ય ટ્રી દ્વારા gitignored. જુઓ CLAUDE.md → "પ્લાનિંગ અને સંશોધન આર્ટિફેક્ટ્સ". |
 
 ---
 
