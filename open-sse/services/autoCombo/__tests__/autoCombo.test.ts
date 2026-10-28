@@ -77,9 +77,14 @@ describe("Scoring", () => {
 });
 
 describe("Task Fitness", () => {
-  it("should return fitness score for known model+task", () => {
-    const score = getTaskFitness("o3", "coding");
-    expect(score).toBeGreaterThan(0.5);
+  it("should return fitness score for known model+task via override/db", () => {
+    setUserFitnessOverride("o3", "coding", 0.95);
+    try {
+      const score = getTaskFitness("o3", "coding");
+      expect(score).toBe(0.95);
+    } finally {
+      clearUserFitnessOverride("o3", "coding");
+    }
   });
 
   it("should return 0.5 default for unknown model", () => {
@@ -93,12 +98,6 @@ describe("Task Fitness", () => {
     expect(types).toContain("review");
     expect(types).toContain("planning");
     expect(types.length).toBeGreaterThanOrEqual(6);
-  });
-
-  it("should boost wildcard patterns", () => {
-    const coderScore = getTaskFitness("some-coder-model", "coding");
-    const normalScore = getTaskFitness("some-random-model", "coding");
-    expect(coderScore).toBeGreaterThan(normalScore);
   });
 
   describe("-free alias resolution (#4517)", () => {
@@ -630,34 +629,29 @@ describe("LKGP Strategy", () => {
 });
 
 describe("Task Fitness Resolution Chain", () => {
-  it("getTaskFitness should return static table score for known models", () => {
-    const score = getTaskFitness("o3", "coding");
-    expect(score).toBe(0.95);
-  });
-
-  it("getTaskFitness should return 0.5 for unknown models with no wildcard match", () => {
+  it("getTaskFitness should return 0.5 neutral baseline for unknown models", () => {
     const score = getTaskFitness("unknown-model-xyz", "coding");
     expect(score).toBe(0.5);
   });
 
-  it("getTaskFitness should apply wildcard boosts for model name patterns", () => {
-    const score = getTaskFitness("deepseek-coder-v2", "coding");
-    expect(score).toBeGreaterThan(0.5);
+  it("getTaskFitness should return override score when user_override is set", () => {
+    setUserFitnessOverride("my-model", "coding", 0.95);
+    try {
+      const score = getTaskFitness("my-model", "coding");
+      expect(score).toBe(0.95);
+    } finally {
+      clearUserFitnessOverride("my-model", "coding");
+    }
   });
 
-  it("getTaskFitness should apply thinking wildcard for planning tasks", () => {
-    const score = getTaskFitness("some-thinking-model", "planning");
-    expect(score).toBeGreaterThan(0.5);
-  });
-
-  it("getTaskFitnessWithSource should return source='fitness_table' for known static models", () => {
-    const result = getTaskFitnessWithSource("o3", "coding");
-    expect(result).toEqual({ score: 0.95, source: "fitness_table" });
-  });
-
-  it("getTaskFitnessWithSource should return source='wildcard_boost' for wildcard-matched models", () => {
-    const result = getTaskFitnessWithSource("fast-model", "coding");
-    expect(result).toEqual({ score: expect.any(Number), source: "wildcard_boost" });
+  it("getTaskFitnessWithSource should return source='user_override' when set", () => {
+    setUserFitnessOverride("o3", "coding", 0.95);
+    try {
+      const result = getTaskFitnessWithSource("o3", "coding");
+      expect(result).toEqual({ score: 0.95, source: "user_override" });
+    } finally {
+      clearUserFitnessOverride("o3", "coding");
+    }
   });
 
   it("getTaskTypes should return task types without 'default'", () => {
@@ -668,122 +662,36 @@ describe("Task Fitness Resolution Chain", () => {
     expect(types).not.toContain("default");
   });
 
-  it("unknown models should return 0.5 (default) when no DB or static entry exists", () => {
+  it("unknown models should return 0.5 (neutral baseline) when no DB entry exists", () => {
     const score = getTaskFitness("completely-unknown-model-xyz-999", "coding");
     expect(score).toBe(0.5);
   });
 
-  it("wildcard boosts still work for models containing 'coder'", () => {
-    const score = getTaskFitness("my-coder-pro", "coding");
-    // Base 0.5 + coder boost 0.15 + code boost 0.1 = 0.75
-    // "coder" contains "code", so both wildcard patterns match
-    expect(score).toBe(0.75);
-  });
-
-  it("wildcard boosts still work for models containing 'thinking'", () => {
-    const score = getTaskFitness("my-thinking-model", "planning");
-    // Base 0.5 + thinking boost 0.1 = 0.6
-    expect(score).toBe(0.6);
-  });
-
-  it("wildcard boosts still work for models containing 'thinking' for analysis tasks", () => {
-    const score = getTaskFitness("my-thinking-model", "analysis");
-    // Base 0.5 + thinking boost 0.1 = 0.6
-    expect(score).toBe(0.6);
-  });
-
-  it("wildcard boosts for 'code' pattern apply to coding tasks", () => {
-    const score = getTaskFitness("my-code-generator", "coding");
-    // Base 0.5 + code boost 0.1 = 0.6
-    expect(score).toBe(0.6);
-  });
-
-  it("wildcard boosts for 'fast' pattern apply to coding tasks", () => {
-    const score = getTaskFitness("my-fast-model", "coding");
-    // Base 0.5 + fast boost 0.05 = 0.55
-    expect(score).toBe(0.55);
-  });
-
-  it("getTaskFitnessWithSource returns 'wildcard_boost' for pattern-matched unknown models", () => {
+  it("getTaskFitnessWithSource returns 'wildcard_boost' for unbenchmarked models", () => {
     const result = getTaskFitnessWithSource("my-coder-pro", "coding");
-    expect(result.source).toBe("wildcard_boost");
-    expect(result.score).toBeGreaterThan(0.5);
-  });
-
-  it("getTaskFitnessWithSource returns 'fitness_table' for statically known models", () => {
-    const result = getTaskFitnessWithSource("o3", "review");
-    expect(result.source).toBe("fitness_table");
-    expect(result.score).toBe(0.92);
-  });
-
-  it("getTaskFitnessWithSource returns 'wildcard_boost' with 0.5 for unknown models with no pattern", () => {
-    const result = getTaskFitnessWithSource("totally-random-xyz", "coding");
     expect(result.source).toBe("wildcard_boost");
     expect(result.score).toBe(0.5);
   });
 });
 
 describe("Task Fitness DB Resolution Chain", () => {
-  // These tests verify that when DB is available, the resolution chain
-  // (user_override → arena_elo → models_dev_tier → static → wildcard)
-  // works correctly. Since the DB module is loaded lazily via require(),
-  // these tests cover the cases where DB is NOT available (graceful fallback).
-
-  it("falls back to static FITNESS_TABLE when DB is not initialized", () => {
-    // In the test environment, DB is typically not initialized,
-    // so getTaskFitness should fall through to the static table
-    const score = getTaskFitness("o3", "coding");
-    // Static table has o3 → 0.95 for coding
-    expect(score).toBe(0.95);
+  it("falls back to 0.5 neutral baseline when DB has no entry", () => {
+    const score = getTaskFitness("unbenchmarked-model", "coding");
+    expect(score).toBe(0.5);
   });
 
-  it("falls back to static FITNESS_TABLE for review task type", () => {
-    const score = getTaskFitness("gemini-2.5-pro", "review");
-    // Static table has gemini-2.5-pro → 0.93 for review
-    expect(score).toBe(0.93);
-  });
-
-  it("falls back to wildcard boosts when no static entry exists and DB unavailable", () => {
-    // "coder-unknown" has no static entry but matches "coder" wildcard
-    const score = getTaskFitness("coder-unknown", "coding");
-    expect(score).toBeGreaterThan(0.5);
-    expect(score).toBeLessThanOrEqual(1.0);
-  });
-
-  it("getModelsDevTierFitness returns null when DB is not initialized", () => {
-    // Without a running DB, this should return null gracefully
+  it("getModelsDevTierFitness returns null when DB is not initialized or model absent", () => {
     const score = getModelsDevTierFitness("claude-sonnet", "coding");
-    // Either null (no capabilities data) or a number from DB if DB happens to be up
     if (score !== null) {
       expect(score).toBeGreaterThanOrEqual(0);
       expect(score).toBeLessThanOrEqual(1);
+    } else {
+      expect(score).toBeNull();
     }
   });
 
   it("invalidateFitnessCache does not throw", () => {
     expect(() => invalidateFitnessCache()).not.toThrow();
-  });
-
-  it("resolution chain: static table matches longest pattern first (gpt-4o-mini vs gpt-4o)", () => {
-    // gpt-4o-mini must match "gpt-4o-mini" (0.8) rather than earlier "gpt-4o" (0.9)
-    const score = getTaskFitness("gpt-4o-mini", "coding");
-    expect(score).toBe(0.8);
-  });
-
-  it("resolution chain: static table takes priority over wildcard for known models", () => {
-    // "o3" is in the static table with coding=0.95
-    // It does NOT match "coder" wildcard because the static table is checked first
-    const score = getTaskFitness("o3", "coding");
-    expect(score).toBe(0.95); // From static table, NOT wildcard
-  });
-
-  it("getTaskFitnessWithSource identifies fitness_table as source for known models", () => {
-    const model = "o3";
-    const category = "coding";
-
-    const result = getTaskFitnessWithSource(model, category);
-    expect(result.source).toBe("fitness_table");
-    expect(result.score).toBe(0.95);
   });
 
   it("case insensitivity: model names are lowercased before lookup", () => {

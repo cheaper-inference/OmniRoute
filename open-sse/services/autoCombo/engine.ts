@@ -166,7 +166,7 @@ function groupIntoTiers(candidates: ScoredProvider[]): Record<TierName, ScoredPr
   for (const c of candidates) {
     const delta = best - c.score;
     if (delta <= SCORE_EPSILON) top.push(c);
-    else if (range <= SCORE_EPSILON || delta <= range * 0.3) mid.push(c);
+    else if (delta <= range * 0.1) mid.push(c);
     else rest.push(c);
   }
 

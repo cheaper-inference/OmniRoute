@@ -20,15 +20,38 @@ type IntelEntry = {
   eloRaw: number | null;
   confidence: string | null;
   category: string;
+  permaslug?: string | null;
+  model?: string;
+  metric?: string | null;
 };
 
 function e(
   score: number,
-  category = "default",
+  categoryOrOpts:
+    | string
+    | {
+        category?: string;
+        eloRaw?: number | null;
+        confidence?: string | null;
+        permaslug?: string;
+        model?: string;
+        metric?: string;
+      } = "default",
   eloRaw: number | null = null,
   confidence: string | null = "high"
 ): IntelEntry {
-  return { score, eloRaw, confidence, category };
+  if (typeof categoryOrOpts === "object" && categoryOrOpts !== null) {
+    return {
+      score,
+      category: categoryOrOpts.category ?? "default",
+      eloRaw: categoryOrOpts.eloRaw ?? null,
+      confidence: categoryOrOpts.confidence ?? "high",
+      permaslug: categoryOrOpts.permaslug ?? null,
+      model: categoryOrOpts.model,
+      metric: categoryOrOpts.metric ?? null,
+    };
+  }
+  return { score, eloRaw, confidence, category: categoryOrOpts };
 }
 
 function buildMap(entries: Record<string, IntelEntry[]>): Map<string, IntelEntry[]> {
@@ -210,6 +233,18 @@ describe("findMatchingIntelligence", () => {
     assert.equal(result.score, 0.95);
     assert.equal(result.permaslug, "anthropic/claude-opus-5.5-20260921");
   });
+
+  it("matches stem candidate (e.g. nemotron-3-ultra) to versioned benchmark entry (e.g. nemotron-3-ultra-550b-a55b-20260604)", () => {
+    const map = buildMap({
+      "nemotron-3-ultra-550b-a55b-20260604": [
+        e(0.49, { model: "nemotron-3-ultra-550b-a55b-20260604" }),
+      ],
+    });
+    const result = findMatchingIntelligence("ollama-cloud/nemotron-3-ultra", map);
+    assert.ok(result);
+    assert.equal(result.score, 0.49);
+    assert.equal(result.matchedModel, "nemotron-3-ultra-550b-a55b-20260604");
+  });
 });
 
 describe("candidateIntelligenceKeys", () => {
@@ -268,5 +303,33 @@ describe("mergeProviderModels with custom precedence and synced models", () => {
     assert.ok(merged.some((m) => m.id === "auto"));
     assert.ok(merged.some((m) => m.id === "minimax/minimax-m3.1-flash:free" && m.isFree === true));
     assert.ok(merged.some((m) => m.id === "custom-extra" && m.isFree === true));
+  });
+
+  it("drops unsynced static registry models when live synced models exist (#auto-pool-visible-only)", () => {
+    const registry = [
+      { id: "retired-static-model", name: "Retired Static Model", isFree: true },
+      { id: "active-model", name: "Active Model", isFree: true },
+    ];
+    const synced = [
+      { id: "active-model", name: "active-model", isFree: true },
+      { id: "new-upstream-model", name: "new-upstream-model", isFree: true },
+    ];
+    const merged = mergeProviderModels(registry, [], synced);
+    assert.equal(merged.length, 2);
+    assert.equal(
+      merged.some((m) => m.id === "retired-static-model"),
+      false
+    );
+    assert.equal(
+      merged.some((m) => m.id === "active-model"),
+      true
+    );
+    assert.equal(
+      merged.some((m) => m.id === "new-upstream-model"),
+      true
+    );
+    // Preserves registry display name enrichment when available
+    const active = merged.find((m) => m.id === "active-model");
+    assert.equal(active?.name, "Active Model");
   });
 });

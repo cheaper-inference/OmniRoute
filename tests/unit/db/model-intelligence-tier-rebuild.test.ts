@@ -97,7 +97,7 @@ describe("buildModelsDevTierEntries", () => {
     assert.strictEqual(byCategory.analysis.score, 0.95);
   });
 
-  it("aggregation parity: matches taskFitness.ts live derivation for the same capabilities", () => {
+  it("persisted rows are what taskFitness layer 3 serves for the same capabilities", () => {
     seedCapabilities([
       { provider: "openrouter", modelId: "glm-5.1", reasoning: true, toolCall: true },
       { provider: "together", modelId: "mixtral-8x22b", toolCall: true, limitContext: 65536 },
@@ -106,18 +106,21 @@ describe("buildModelsDevTierEntries", () => {
 
     const entries = mi.buildModelsDevTierEntries();
     const byModelCategory = new Map(entries.map((e) => [`${e.model}:${e.category}`, e.score]));
+    mi.rebuildModelsDevTierIntelligence();
+    taskFitness.invalidateFitnessCache();
 
     for (const [model, category] of [
       ["glm-5.1", "coding"],
       ["mixtral-8x22b", "coding"],
       ["llama-3-8b", "default"],
     ] as const) {
-      const live = taskFitness.getModelsDevTierFitnessWithSource(model, category);
-      assert.ok(live, `live derivation should resolve for ${model}/${category}`);
+      const served = taskFitness.getModelsDevTierFitnessWithSource(model, category);
+      assert.ok(served, `taskFitness should serve the persisted tier row for ${model}/${category}`);
+      assert.strictEqual(served.source, "models_dev_tier");
       assert.strictEqual(
+        served.score,
         byModelCategory.get(`${model}:${category}`),
-        live.score,
-        `persisted score for ${model}/${category} should match live derivation`
+        `served score for ${model}/${category} should match the persisted tier row`
       );
     }
   });

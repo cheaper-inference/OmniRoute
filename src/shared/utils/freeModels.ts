@@ -8,7 +8,7 @@ import {
 } from "@/shared/constants/providers";
 import { globToRegex } from "@/shared/utils/globPattern";
 import { hasPayloadFreeEvidence, hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
-import { AI_MODELS } from "@/shared/constants/models";
+import { AI_MODELS, PROVIDER_MODELS } from "@/shared/constants/models";
 
 /**
  * Free-model detection shared between the "import only free models" connection
@@ -75,13 +75,77 @@ const FREE_MODEL_IDS_BY_PROVIDER: Map<string, Set<string>> = (() => {
   return map;
 })();
 
+export type ExtraFreeModelChecker = (providerId: string) => boolean;
+let _extraFreeModelChecker: ExtraFreeModelChecker | null = null;
+export function registerExtraFreeModelChecker(checker: ExtraFreeModelChecker | null): void {
+  _extraFreeModelChecker = checker;
+}
+
 /** Whether the given provider exposes any documented free models. Accepts a provider id or alias. */
-export function providerHasFreeModels(providerId: string | undefined | null): boolean {
+export function providerHasFreeModels(
+  providerId: string | undefined | null,
+  models?: Array<{
+    id?: unknown;
+    name?: unknown;
+    isFree?: unknown;
+    free?: unknown;
+    is_free?: unknown;
+    pricing?: unknown;
+    tags?: unknown;
+    [key: string]: unknown;
+  }>
+): boolean {
   if (typeof providerId !== "string") return false;
-  return (
-    PROVIDERS_WITH_FREE_MODELS.has(providerId) ||
-    PROVIDERS_WITH_FREE_MODELS.has(resolveProviderId(providerId))
-  );
+  const canonical = resolveProviderId(providerId);
+
+  // 1. Shipped catalog free tier
+  if (PROVIDERS_WITH_FREE_MODELS.has(providerId) || PROVIDERS_WITH_FREE_MODELS.has(canonical)) {
+    return true;
+  }
+
+  // 2. Candidate or passed-in models (from sync, /models, or custom list)
+  if (Array.isArray(models) && models.length > 0) {
+    if (
+      models.some(
+        (m) =>
+          m &&
+          ((m as { isFree?: unknown }).isFree === true ||
+            (m as { free?: unknown }).free === true ||
+            (typeof m.id === "string" && m.id.endsWith(":free")) ||
+            hasPayloadFreeEvidence(m as FreeModelCandidate) ||
+            isModelFreeBadge(canonical, m as FreeBadgeCandidate))
+      )
+    ) {
+      return true;
+    }
+  }
+
+  // 3. Static models in registry
+  const staticModels = PROVIDER_MODELS[providerId] ?? PROVIDER_MODELS[canonical];
+  if (
+    staticModels?.some(
+      (m) =>
+        (m as { isFree?: unknown }).isFree === true ||
+        (m as { free?: unknown }).free === true ||
+        (typeof m.id === "string" && m.id.endsWith(":free")) ||
+        hasPayloadFreeEvidence(m)
+    )
+  ) {
+    return true;
+  }
+
+  // 4. Extra registered checker (e.g. server-side DB checking synced / custom models)
+  if (_extraFreeModelChecker) {
+    try {
+      if (_extraFreeModelChecker(providerId) || _extraFreeModelChecker(canonical)) {
+        return true;
+      }
+    } catch {
+      // ignore checker errors
+    }
+  }
+
+  return false;
 }
 
 export interface FreeModelCandidate {
