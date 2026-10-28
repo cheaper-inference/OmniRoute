@@ -484,17 +484,17 @@ createResponsesApiTransformStream(): TransformStream
 
 ## 配置
 
-`open-sse/config/` 存放配置层：
+`open-sse/config/`持有配置层：
 
-| 文件                                | 用途                                  |
-| ----------------------------------- | ------------------------------------- |
-| `providerRegistry.ts`               | 基于 375 个提供者目录的聊天模型注册表 |
-| `providerModels.ts`                 | 模型别名、格式映射                    |
-| `constants.ts`                      | 超时、限制、状态码                    |
-| `defaultThinkingSignature.ts`       | 默认 Claude 思考签名                  |
-| `modelStrip.ts`（位于 services 中） | 按提供者进行字段剔除                  |
+| 文件                          | 目的                               |
+| ----------------------------- | ---------------------------------- |
+| `providerRegistry.ts`         | 377 个提供者目录上的聊天模型注册表 |
+| `providerModels.ts`           | 模型别名、格式映射                 |
+| `constants.ts`                | 超时、限制、状态代码               |
+| `defaultThinkingSignature.ts` | 默认Claude思维签名                 |
+| `modelStrip.ts` （服务中）    | 每个提供者的字段剥离               |
 
-### 提供者注册表结构
+### 提供者注册架构
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-模块加载时通过 Zod 校验，确保所有提供者配置均有效。
+模块加载时的Zod验证可确保所有提供程序配置均有效。
 
 ---
 

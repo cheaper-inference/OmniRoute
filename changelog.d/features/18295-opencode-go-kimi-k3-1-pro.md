@@ -1,0 +1,1 @@
+- **feat(providers):** OpenCode Go serves Kimi K3.1 Pro (`kimi-k3.1-pro`): 1M context, 131K output, always-on thinking, with default pricing ([#18295](https://github.com/cheaper-inference/OmniRoute/pull/18295)) — thanks @cristianob

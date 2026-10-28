@@ -33,9 +33,10 @@ import {
 import { reloadAfterReplace } from "./reloadSecret";
 import { addProxiesToScopePool, bumpProxyRegistryGeneration } from "../db/proxies";
 import { bumpProxyConfigGeneration } from "../db/settings";
-import { isSubscriptionDue } from "./due";
+import { isSubscriptionDue, isFeedlessSubscription, feedlessSyncResult } from "./due";
 import { parseLocalCoreEndpoints } from "./coreEndpoint";
 import { detachOrDeleteSubscriptionRow, removeStaleSubscriptionNodes } from "./staleNodes";
+import { throwIfFeedlessUpdate, throwIfFeedlessWithoutControl } from "./schema";
 import { resolveTargetScopes } from "./scopes";
 import { clampSelectorGapSeconds, setAnyControlUrlConfigured } from "./selectorTrigger";
 import { SELECTOR_TAG_RE, parseSelectorTag } from "./selectorEndpoint";
@@ -64,6 +65,13 @@ export { subscriptionErrorCode };
 
 import type { CoreReloadMode as CoreReloadModeValue } from "./coreConfig/reload";
 export type { CoreReloadModeValue };
+
+export interface SelectorLastSwitchEntry {
+  at: string;
+  result: string;
+  member: string | null;
+  kind: string | null;
+}
 
 export interface ProxySubscriptionRecord {
   id: string;
@@ -284,11 +292,9 @@ export async function createSubscription(
   const enabled = payload.enabled === true ? 1 : 0;
   const db = getDbInstance();
   const controlUrl = payload.controlUrl ?? null;
+  throwIfFeedlessWithoutControl(payload.url, controlUrl);
   const coreConfigPath = payload.coreConfigPath ?? null;
-  const controlSecretEnc =
-    payload.controlSecret != null && payload.controlSecret.length > 0
-      ? ((encrypt(payload.controlSecret) ?? null) as string | null)
-      : null;
+  const controlSecretEnc = encryptSecretField(payload.controlSecret) ?? null;
   const gapSeconds = clampSelectorGapSeconds(payload.selectorMinGapSeconds ?? 60);
   insertSubscriptionRow(db, {
     id,
@@ -308,7 +314,7 @@ export async function createSubscription(
   });
   if (controlUrl) setAnyControlUrlConfigured(true);
   const created = (await getSubscriptionById(id))!;
-  if (created.enabled) {
+  if (created.enabled && !isFeedlessSubscription(created.url)) {
     await syncSubscription(id);
   }
   // Re-read so the returned record reflects the post-sync status/error/lastNodes.
@@ -419,6 +425,7 @@ export async function updateSubscription(
   const db = getDbInstance();
   const { controlUrl, gapSeconds } = readControlFields(payload, existing);
   const now = new Date().toISOString();
+  throwIfFeedlessUpdate(payload, existing);
   const enabledChanged = payload.enabled !== undefined && payload.enabled !== existing.enabled;
   persistSubscriptionRow(db, {
     id,
@@ -696,6 +703,8 @@ async function syncSubscriptionUnsafe(id: string): Promise<SyncResult> {
       applied: false,
     };
   }
+  const feedless = feedlessSyncResult(sub);
+  if (feedless) return { subscriptionId: id, ...feedless };
 
   // One feed per URL, fetched concurrently: the primary plus every mirror.
   // A slow or failing feed never blocks the others; fetch failures arrive

@@ -482,19 +482,19 @@ See käsitleb järgmist:
 
 ---
 
-## Konfiguratsioon
+## Seadistamine
 
-`open-sse/config/` sisaldab konfiguratsioonikihti:
+`open-sse/config/` hoiab konfiguratsioonikihti:
 
-| Fail                          | Otstarve                                               |
-| ----------------------------- | ------------------------------------------------------ |
-| `providerRegistry.ts`         | Vestlusmudelite register 375 pakkujaga kataloogi kohal |
-| `providerModels.ts`           | Mudelite aliased, formaadi vastendamine                |
-| `constants.ts`                | Ajalõpud, piirangud, olekukoodid                       |
-| `defaultThinkingSignature.ts` | Claude'i vaikimisi mõtlemisallkiri                     |
-| `modelStrip.ts` (teenustes)   | Väljade eemaldamine pakkujapõhiselt                    |
+| Fail                          | Eesmärk                                            |
+| ----------------------------- | -------------------------------------------------- |
+| `providerRegistry.ts`         | Vestlusmudeli register 377 pakkuja kataloogi kaudu |
+| `providerModels.ts`           | Mudelinimed, vormingu vastendamine                 |
+| `constants.ts`                | Aegumised, piirangud, olekukoodid                  |
+| `defaultThinkingSignature.ts` | Vaikimisi mõtlev Claude signatuur                  |
+| `modelStrip.ts` (teenustes)   | Pakkujapõhine väljade eemaldamine                  |
 
-### Pakkujate registri skeem
+### Pakkuja registriskeem
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Zod-valideerimine mooduli laadimisel tagab, et kõik pakkujate konfiguratsioonid on kehtivad.
+Zod valideerimine mooduli laadimisel tagab, et kõik pakkuja konfiguratsioonid on kehtivad.
 
 ---
 

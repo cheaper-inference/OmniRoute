@@ -1,7 +1,7 @@
 /**
  * Column helpers for `proxy_subscriptions` readers/writers.
  *
- * The `mirror_urls` column lands via migration 214; databases migrated
+ * The `mirror_urls` column lands via migration 217; databases migrated
  * before it (and unit tests seeding legacy rows) lack the column. Readers
  * pick the SELECT list by probing `PRAGMA table_info`, writers add the
  * column only when present — so both paths stay green with and without
