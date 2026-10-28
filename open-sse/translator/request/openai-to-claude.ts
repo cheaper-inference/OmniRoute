@@ -7,6 +7,7 @@ import { normalizeClaudeToolInputSchema, sanitizeToolId } from "../helpers/schem
 import { safeParseJSON } from "../helpers/jsonUtil.ts";
 import {
   applyKimiCodingThinking,
+  createClaudeTailCacheControl,
   createDefaultClaudeCacheControl,
 } from "../helpers/claudeHelper.ts";
 import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
@@ -454,7 +455,7 @@ export function openaiToClaudeRequest(
       ) {
         const lastBlock = message.content[message.content.length - 1];
         if (lastBlock) {
-          lastBlock.cache_control = { type: "ephemeral" };
+          lastBlock.cache_control = createClaudeTailCacheControl(routedProvider);
           break;
         }
       }
@@ -647,7 +648,8 @@ function getContentBlocksFromMessage(
     // A nested `cache_control` is invalid inside `tool_result.content`; hoist it
     // onto the tool_result block. Also accept a marker already hoisted onto the
     // tool MESSAGE by filterToOpenAIFormat (openai-compat passthrough path).
-    const { content: hoistedContent, cacheControl } = hoistNestedToolResultCacheControl(toolContent);
+    const { content: hoistedContent, cacheControl } =
+      hoistNestedToolResultCacheControl(toolContent);
     const toolResultCacheControl =
       msg.cache_control !== undefined ? msg.cache_control : cacheControl;
     blocks.push({

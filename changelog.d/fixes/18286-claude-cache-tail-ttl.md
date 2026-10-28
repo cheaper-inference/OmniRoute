@@ -1,0 +1,1 @@
+- **fix(claude):** opt-in `CLAUDE_CACHE_TAIL_TTL_1H` feature flag caches the conversation tail with the same 1h TTL as system/tools (Vertex keeps 5m); default off keeps the 5m tail unchanged ([#18286](https://github.com/cheaper-inference/OmniRoute/pull/18286)) — thanks @tmaarcxs
