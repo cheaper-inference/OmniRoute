@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
+import { parseTokenExpiryMs } from "../../utils/tokenExpiry.ts";
 
 export const PASSIVE_CODEX_IDS = ["codex", "cx"] as const;
 export const PASSIVE_REFRESH_ENV = "OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS";
@@ -57,7 +57,7 @@ export async function resolvePassiveCodex(creds?: CredentialSnapshot): Promise<P
   if (!id) return disabled;
   try {
     // This DB accessor executes SELECT directly, unlike the five-second readCache wrapper.
-    const { getProviderConnectionById } = await import("@/lib/db/providers");
+    const { getProviderConnectionById } = await import("../codexAccount/write.ts");
     const stored = await getProviderConnectionById(id);
     if (!stored || !isCodexId(stored.provider)) return disabled;
     const accessToken = tokenString(stored.accessToken);
