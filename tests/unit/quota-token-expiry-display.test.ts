@@ -28,7 +28,8 @@ test("QuotaCardHeader derives token expiry only for OAuth connections with a kno
 
 test("QuotaCardHeader renders the expiry as a small blue (sky) informative line", () => {
   assert.match(source, /text-\[10px\]/, "expiry line must be small (10px)");
-  assert.match(source, /text-sky-500/, "active expiry must be blue (sky-500)");
+  // KEA-7886: the blue (sky) informative tone is the kit's info token.
+  assert.match(source, /text-info/, "active expiry must be blue (the info token)");
   assert.match(source, /tokenExpiresIn/, "must use the tokenExpiresIn i18n key");
   assert.match(source, /tokenExpired/, "must use the tokenExpired i18n key");
 });

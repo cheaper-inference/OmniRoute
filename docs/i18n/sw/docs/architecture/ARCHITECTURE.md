@@ -8,79 +8,78 @@
 
 _Ilisasishwa mara ya mwisho: 2026-06-28_
 
-## Muhtasari Mkuu
+## Muhtasari wa Mtendaji
 
-OmniRoute ni lango la ndani la uelekezaji wa AI na dashibodi iliyojengwa kwa Next.js.
-Hutoa endpoint moja inayooana na OpenAI (`/v1/*`) na kuelekeza trafiki kupitia watoa huduma wengi wa upstream, ikiwa na utafsiri, fallback, uonyeshaji upya wa tokeni na ufuatiliaji wa matumizi.
+OmniRoute ni lango la ndani AI la uelekezaji na dashibodi iliyojengwa juu ya Next.js. Inatoa sehemu moja ya mwisho inayooana na OpenAI (`/v1/*`) na trafiki ya njia katika watoa huduma wengi wa juu kwa tafsiri, njia mbadala, kuonyesha upya ishara na ufuatiliaji wa matumizi.
 
-Uwezo mkuu:
+Uwezo wa msingi:
 
-- Kiolesura cha API kinachooana na OpenAI kwa CLI/zana (watoa huduma 375, moduli 156 za utekelezaji)
-- Utafsiri wa maombi/majibu kati ya miundo ya watoa huduma
-- Fallback ya mchanganyiko wa modeli (mfuatano wa modeli nyingi)
-- Hatua zilizopangiliwa za mchanganyiko (`provider + model + connection`) zenye upangaji wakati wa utekelezaji kwa kutumia `compositeTiers`
-- Fallback katika kiwango cha akaunti (akaunti nyingi kwa kila mtoa huduma)
-- Ukaguzi wa awali wa kikomo na uteuzi wa akaunti wa P2C unaozingatia kikomo katika njia kuu ya gumzo
-- Usimamizi wa miunganisho ya watoa huduma kupitia OAuth + ufunguo wa API (moduli 27 za watoa huduma wa OAuth)
-- Uzalishaji wa embedding kupitia `/v1/embeddings` (watoa huduma 18)
-- Uzalishaji wa picha kupitia `/v1/images/generations` (watoa huduma 10+, modeli 20+)
+- Uso wa API unaoendana na OpenAI kwa CLI/tools (watoa huduma 377, moduli 156 za watekelezaji)
+- Request/response tafsiri katika miundo ya mtoaji
+- Mfano mbadala wa mseto (mfuatano wa miundo mingi)
+- Hatua za mchanganyiko zilizoundwa (`provider + model + connection`) na kuagiza wakati wa kukimbia na `compositeTiers`
+- Urejeshaji wa kiwango cha akaunti (akaunti nyingi kwa kila mtoaji)
+- Kiasi cha malipo ya awali na uteuzi wa akaunti ya P2C inayofahamu kiasi katika njia kuu ya gumzo
+- OAuth + usimamizi wa muunganisho wa mtoa huduma muhimu wa API (moduli 27 za watoa huduma OAuth )
+- Uzalishaji wa kupachika kupitia `/v1/embeddings` (watoa huduma 18)
+- Uzalishaji wa picha kupitia `/v1/images/generations` (watoa huduma + 10, miundo 20 + )
 - Unukuzi wa sauti kupitia `/v1/audio/transcriptions` (watoa huduma 18)
-- Ubadilishaji wa maandishi kuwa usemi kupitia `/v1/audio/speech` (watoa huduma 24 waliojengewa ndani)
+- Maandishi-kwa-hotuba kupitia `/v1/audio/speech` (watoa huduma 24 waliojengewa ndani)
 - Uzalishaji wa video kupitia `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Uzalishaji wa muziki kupitia `/v1/music/generations` (ComfyUI)
+- Kizazi cha muziki kupitia `/v1/music/generations` (ComfyUI)
 - Utafutaji wa wavuti kupitia `/v1/search` (watoa huduma 20)
-- Udhibiti wa maudhui kupitia `/v1/moderations`
-- Upangaji upya wa matokeo kupitia `/v1/rerank`
-- Uchanganuzi wa lebo za fikra (``) kwa modeli za kufikiri
-- Usafishaji wa majibu kwa uoanifu mkali na OpenAI SDK
-- Usawazishaji wa majukumu (developer→system, system→user) kwa uoanifu kati ya watoa huduma
-- Ubadilishaji wa matokeo yaliyopangiliwa (json_schema → Gemini responseSchema)
-- Uhifadhi wa ndani wa watoa huduma, funguo, lakabu, michanganyiko, mipangilio na bei (moduli 122 za DB)
-- Ufuatiliaji wa matumizi/gharama na uwekaji kumbukumbu za maombi
-- Usawazishaji wa hiari kupitia wingu kwa ajili ya usawazishaji wa vifaa vingi/hali
-- Orodha ya kuruhusu/kuzuia anwani za IP kwa udhibiti wa ufikiaji wa API
-- Usimamizi wa bajeti ya kufikiri (passthrough/auto/custom/adaptive)
-- Uingizaji wa kidokezo cha mfumo cha kimataifa
-- Ufuatiliaji wa vipindi na utambuzi wa alama za kipekee
-- Uzuiaji wa kasi ulioboreshwa kwa kila akaunti, wenye wasifu mahususi kwa mtoa huduma
-- Muundo wa circuit breaker kwa ustahimilivu wa watoa huduma
-- Ulinzi dhidi ya msongamano wa ghafla kwa kutumia kufunga kwa mutex
-- Akiba ya kuondoa marudio ya maombi kulingana na sahihi
-- Safu ya kikoa: kanuni za gharama, sera ya fallback, sera ya lockout
-- Context Relay: muhtasari wa makabidhiano ya kipindi kwa mwendelezo wakati wa kubadilisha akaunti
-- Uhifadhi wa hali ya kikoa (akiba ya SQLite ya kuandika moja kwa moja kwa fallbacks, bajeti, lockouts na circuit breakers)
-- Injini ya sera kwa tathmini ya maombi iliyowekwa kati (lockout → budget → fallback)
-- Telemetria ya maombi yenye ujumlishaji wa ucheleweshaji wa p50/p95/p99
-- Telemetria ya malengo ya mchanganyiko na historia ya afya ya malengo ya mchanganyiko kupitia `combo_execution_key` / `combo_step_id`
-- Kitambulisho cha uhusiano (X-Request-Id) kwa ufuatiliaji wa mwanzo hadi mwisho
-- Uwekaji kumbukumbu za ukaguzi wa uzingatiaji, wenye chaguo la kujiondoa kwa kila ufunguo wa API
-- Mfumo wa tathmini kwa uhakikisho wa ubora wa LLM
-- Dashibodi ya afya yenye hali ya wakati halisi ya circuit breaker ya mtoa huduma
-- MCP Server (zana 110) yenye njia 3 za usafirishaji (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) yenye ujuzi na mzunguko wa maisha wa kazi
-- Mfumo wa kumbukumbu (uchimbaji, uingizaji, urejeshaji, ufupishaji)
-- Mfumo wa ujuzi (sajili, kitekelezaji, sandbox, ujuzi uliojengewa ndani)
-- Proksi ya MITM yenye usimamizi wa vyeti na ushughulikiaji wa DNS
-- Middleware ya ulinzi dhidi ya uingizaji hasidi wa vidokezo
-- Msururu wa kubana vidokezo wenye Caveman, RTK, misururu iliyopangwa kwa tabaka, michanganyiko ya ubanaji, vifurushi vya lugha na uchanganuzi
-- Sajili ya ACP (Agent Communication Protocol)
-- Watoa huduma wa OAuth wa kimoduli (moduli 22 mahususi chini ya `src/lib/oauth/providers/`)
-- Hati za kuondoa/usafishaji kamili
-- Kitendo cha kurekebisha mazingira ya OAuth
-- Daraja la WebSocket kwa viteja vya WS vinavyoendana na OpenAI (`/v1/ws`)
-- Usimamizi wa tokeni za usawazishaji (utoaji/ubatilishaji, upakuaji wa kifurushi cha usanidi chenye matoleo ya ETag)
-- Mpangilio wa mtoa huduma wa kiwango cha kwanza wa GLM Thinking (`glmt`)
-- Kuhesabu tokeni kwa njia mseto (`/messages/count_tokens` ya upande wa mtoa huduma, yenye makadirio kama fallback)
-- Uanzishaji wa kiotomatiki wa lakabu za modeli (marekebisho 30+ ya lahaja kati ya proksi wakati wa kuanzisha)
-- Uletaji salama wa data ya nje wenye ulinzi wa SSRF, uzuiaji wa URL za faragha na urudiaji unaoweza kusanidiwa
-- Majaribio upya ya gumzo yanayozingatia muda wa kusubiri, yenye `requestRetry` na `maxRetryIntervalSec` zinazoweza kusanidiwa
-- Uthibitishaji wa mazingira ya wakati wa utekelezaji kwa kutumia Zod wakati wa kuanzisha
-- Ukaguzi wa uzingatiaji wa v2 wenye ugawaji wa kurasa, matukio ya CRUD ya watoa huduma na uwekaji kumbukumbu wa uthibitishaji uliozuiwa na SSRF
+- Udhibiti kupitia `/v1/moderations`
+- Kuweka upya nafasi kupitia `/v1/rerank`
+- Fikiria uchanganuzi wa lebo (`<think>...</think>`) kwa mifano ya hoja
+- Usafishaji wa majibu kwa utangamano madhubuti wa OpenAI SDK
+- Urekebishaji wa jukumu (mfumo wa → wa msanidi, mtumiaji wa → wa mfumo) kwa utangamano wa mtoaji mtambuka
+- Ubadilishaji wa pato lililoundwa (json_schema → Gemini majibuSchema)
+- Uvumilivu wa ndani kwa watoa huduma, funguo, lakabu, mchanganyiko, mipangilio, bei (moduli 122 DB )
+- Usage/cost kufuatilia na kuomba ukataji miti
+- Usawazishaji wa hiari wa wingu kwa ulandanishi multi-device/state
+- IP allowlist/blocklist kwa udhibiti wa ufikiaji API
+- Kufikiria usimamizi wa bajeti (passthrough/auto/custom/adaptive)
+- Sindano ya haraka ya mfumo wa kimataifa
+- Ufuatiliaji wa kipindi na alama za vidole
+- Uzuiaji wa viwango ulioimarishwa kwa kila akaunti kwa kutumia wasifu mahususi wa mtoaji
+- Mchoro wa kivunja mzunguko wa ustahimilivu wa mtoa huduma
+- Ulinzi wa kundi dhidi ya ngurumo na kufuli bubu
+- Akiba ya upunguzaji wa ombi kulingana na saini
+- Safu ya kikoa: sheria za gharama, sera mbadala, sera ya kufunga nje
+- Upeanaji wa Muktadha: muhtasari wa kukabidhiwa kwa kipindi kwa mwendelezo wa mzunguko wa akaunti
+- Udumifu wa hali ya kikoa (SQLite kuandika kupitia akiba ya makosa, bajeti, kufunga nje, vivunja saketi)
+- Injini ya sera ya tathmini ya ombi la kati (kuzuia → bajeti → kurudi nyuma)
+- Omba telemetry kwa p50/p95/p99 latency aggregation
+- Telemetry lengwa la mchanganyiko na afya inayolengwa ya kihistoria kupitia `combo_execution_key` / `combo_step_id`
+- Uwiano ID (X-Ombi-Id) kwa ufuatiliaji wa mwisho hadi mwisho
+- Uwekaji kumbukumbu wa ukaguzi wa kufuata kwa kuchagua kutoka kwa kila kitufe cha API
+- Mfumo wa Eval wa uhakikisho wa ubora LLM
+- Dashibodi ya afya iliyo na hali ya kivunja saketi ya mtoa huduma wa wakati halisi
+- Seva MCP (zana 110) yenye usafiri 3 (stdio/SSE/Streamable HTTP)
+- Seva ya A2A (JSON-RPC 2.0 + SSE) yenye ujuzi na mzunguko wa maisha ya kazi
+- Mfumo wa kumbukumbu (uchimbaji, sindano, kurejesha, muhtasari)
+- Mfumo wa ujuzi (msajili, mtekelezaji, sanduku la mchanga, ujuzi uliojengwa ndani)
+- wakala wa MITM na usimamizi wa cheti na utunzaji DNS
+- Chombo cha kati cha kuzuia sindano
+- Bomba la ukandamizaji wa haraka na Caveman, RTK, mabomba yaliyopangwa, mchanganyiko wa mbano, pakiti za lugha na uchanganuzi
+- ACP (Itifaki ya Mawasiliano ya Wakala) sajili
+- Watoa huduma OAuth za msimu (moduli 22 za mtu binafsi chini ya `src/lib/oauth/providers/`)
+- hati Uninstall/full-uninstall
+- OAuth hatua ya ukarabati wa mazingira
+- daraja la WebSocket kwa wateja wa WS wanaolingana na OpenAI (`/v1/ws`)
+- Udhibiti wa tokeni wa kusawazisha (issue/revoke, upakuaji wa kifungu cha usanidi kilichotolewa na ETag)
+- GLM Kufikiri (`glmt`) mpangilio wa awali wa mtoaji wa daraja la kwanza
+- Kuhesabu tokeni mseto ( `/messages/count_tokens` ya upande wa mtoaji na ukadiriaji wa kurudi nyuma)
+- Kielelezo cha lakabu la upandaji mbegu kiotomatiki (urekebishaji wa lahaja ya wakala 30 + wakati wa kuanza)
+- Uletaji salama wa kwenda nje na walinzi SSRF, uzuiaji wa URL binafsi, na ujaribu tena unaoweza kusanidiwa.
+- Gumzo la kufahamu hali tulivu hujaribu tena kwa `requestRetry` na `maxRetryIntervalSec` zinazoweza kusanidiwa
+- Uthibitishaji wa mazingira wa wakati wa utekelezaji na Zod wakati wa kuanza
+- Ukaguzi wa utiifu v2 na utaftaji, matukio ya mtoaji CRUD, na ukataji wa uthibitishaji uliozuiwa na SSRF.
 
-Muundo mkuu wa wakati wa utekelezaji:
+Muundo msingi wa wakati wa utekelezaji:
 
-- Njia za programu ya Next.js chini ya `src/app/api/*` hutekeleza API za dashibodi na API za uoanifu
-- Kiini cha pamoja cha SSE/uelekezaji katika `src/sse/*` + `open-sse/*` hushughulikia utekelezaji wa watoa huduma, utafsiri, utiririshaji, fallback na matumizi
+- njia za programu Next.js chini ya `src/app/api/*` hutekeleza dashibodi APIs na utangamano APIs
+- Msingi wa SSE/routing ulioshirikiwa katika `src/sse/*` + `open-sse/*` hushughulikia utekelezaji wa mtoaji, tafsiri, utiririshaji, urejeshaji nyuma na matumizi.
 
 ## Michoro ya Marejeleo
 
@@ -114,43 +113,50 @@ mingine imeunganishwa kutoka kwenye miongozo yake mahususi ya kikoa.
 - SLA/kiwango cha udhibiti cha mtoa huduma nje ya mchakato wa ndani
 - Faili tekelezi za nje za CLI zenyewe (Claude CLI, Codex CLI, n.k.)
 
-## Sehemu za Dashboard (Za Sasa)
+## Sehemu ya Dashibodi (Ya Sasa)
 
 Kurasa kuu zilizo chini ya `src/app/(dashboard)/dashboard/`:
 
 - `/dashboard` — mwongozo wa kuanza haraka + muhtasari wa watoa huduma
-- `/dashboard/endpoint` — proxy ya endpoint + MCP + A2A + vichupo vya endpoint za API
+- `/dashboard/endpoint` — proksi ya endpoint + vichupo vya MCP + A2A + endpoint ya API
 - `/dashboard/providers` — miunganisho na vitambulisho vya watoa huduma
-- `/dashboard/combos` — mikakati ya combo, violezo, kijenzi kinachotegemea hatua, kanuni za kuelekeza modeli, mpangilio wa kudumu unaosimamiwa mwenyewe
-- `/dashboard/auto-combo` — Auto Combo Engine: uzani wa alama, vifurushi vya hali, mipangilio awali ya kiwanda pepe, telemetria
+- `/dashboard/combos` — mikakati ya combo, violezo, kijenzi cha hatua, kanuni za uelekezaji wa modeli, upangaji wa kudumu wa mikono
+- `/dashboard/auto-combo` — Injini ya Auto Combo: uzani wa alama, vifurushi vya hali, mipangilio awali ya kiwanda pepe, telemetria
 - `/dashboard/costs` — ujumlishaji wa gharama na mwonekano wa bei
-- `/dashboard/analytics` — uchanganuzi wa matumizi, tathmini, hali ya malengo ya combo
-- `/dashboard/limits` — vidhibiti vya kiwango cha matumizi/kasi
-- `/dashboard/cli-tools` — utambulishaji wa CLI, utambuzi wa mazingira ya utekelezaji, utengenezaji wa usanidi
-- `/dashboard/agents` — mawakala wa ACP waliotambuliwa + usajili wa mawakala maalum
-- `/dashboard/cloud-agents` — kazi za mawakala wanaopangishwa kwenye cloud (Codex Cloud, Devin, Jules) na mzunguko wa maisha wa kazi
+- `/dashboard/analytics` — uchanganuzi wa matumizi, tathmini, hali ya lengo la combo
+- `/dashboard/limits` — vidhibiti vya mgao/kasi
+- `/dashboard/cli-tools` — uanzishaji wa CLI, utambuzi wa mazingira ya utekelezaji, utengenezaji wa usanidi
+- `/dashboard/agents` — mawakala wa ACP waliotambuliwa + usajili wa wakala maalum
+- `/dashboard/cloud-agents` — kazi za mawakala wanaopangishwa kwenye wingu (Codex Cloud, Devin, Jules) na mzunguko wa maisha wa kazi
 - `/dashboard/skills` — sajili ya ujuzi wa A2A, utekelezaji katika sandbox, katalogi ya ujuzi uliojengewa ndani
-- `/dashboard/memory` — ukaguzi na urejeshaji wa kumbukumbu endelevu za mazungumzo
-- `/dashboard/webhooks` — usajili wa webhook zinazotoka, ubadilishaji wa siri, takwimu za majaribio ya kutuma tena
+- `/dashboard/memory` — ukaguzi na urejeshaji wa kumbukumbu endelevu ya mazungumzo
+- `/dashboard/webhooks` — usajili wa webhook zinazoenda nje, ubadilishaji wa siri, takwimu za majaribio upya
 - `/dashboard/batch` — uwasilishaji wa kazi za kundi na maendeleo
-- `/dashboard/cache` — takwimu za akiba ya usomaji-pitia na uhoji, vidhibiti vya uondoaji
-- `/dashboard/playground` — mazingira shirikishi ya mazungumzo dhidi ya combo/modeli yoyote iliyosanidiwa
+- `/dashboard/cache` — takwimu za akiba ya usomaji-kupitia na ya uhawilishaji, vidhibiti vya uondoaji
+- `/dashboard/playground` — uwanja shirikishi wa gumzo unaotumia combo/modeli yoyote iliyosanidiwa
 - `/dashboard/changelog` — kitazamaji cha kumbukumbu ya mabadiliko ndani ya programu (huonyesha `CHANGELOG.md`)
-- `/dashboard/system` — uchunguzi wa mazingira ya utekelezaji, taarifa za toleo, sehemu ya uthibitishaji wa mazingira
+- `/dashboard/system` — uchunguzi wa mazingira ya utekelezaji, maelezo ya toleo, sehemu ya uthibitishaji wa mazingira
 - `/dashboard/onboarding` — mchawi wa usanidi wa matumizi ya kwanza kwa usakinishaji mpya
-- `/dashboard/media` — mazingira ya majaribio ya picha/video/muziki
+- `/dashboard/media` — uwanja wa picha/video/muziki
 - `/dashboard/search-tools` — majaribio na historia ya watoa huduma za utafutaji
-- `/dashboard/health` — muda wa upatikanaji, vivunja mzunguko, vikomo vya kasi, vipindi vinavyofuatiliwa kiwango cha matumizi
-- `/dashboard/logs` — kumbukumbu za maombi/proxy/ukaguzi/console
+- `/dashboard/health` — muda wa upatikanaji, vikata saketi, vikomo vya kasi, vipindi vinavyofuatiliwa kwa mgao
+- `/dashboard/logs` — kumbukumbu za maombi/proksi/ukaguzi/konsoli
 - `/dashboard/settings` — vichupo vya mipangilio ya mfumo (ya jumla, uelekezaji, chaguo-msingi za combo, n.k.)
-- `/dashboard/context/caveman` — kanuni za ukandamizaji za Caveman, vifurushi vya lugha, onyesho la kuchungulia, na hali ya matokeo
-- `/dashboard/context/rtk` — vichujio vya matokeo ya amri za RTK, onyesho la kuchungulia, na mipangilio ya usalama wa mazingira ya utekelezaji
-- `/dashboard/context/combos` — mifumo ya ukandamizaji yenye majina iliyogawiwa kwa combo za uelekezaji
-- `/dashboard/translator` — ukaguzi wa kitafsiri na onyesho la kuchungulia ubadilishaji wa muundo wa ombi
-- `/dashboard/audit` — kivinjari cha kumbukumbu za ukaguzi wa uzingatiaji chenye ugawaji wa kurasa na metadata iliyopangwa
+- `/dashboard/context/caveman` — kanuni za mgandamizo za Caveman, vifurushi vya lugha, onyesho la awali, na hali ya matokeo
+- `/dashboard/context/rtk` — vichujio vya matokeo ya amri za RTK, onyesho la awali, na mipangilio ya usalama wa mazingira ya utekelezaji
+- `/dashboard/context/combos` — mabomba ya mgandamizo yaliyopewa majina na kuhusishwa na combo za uelekezaji
+- `/dashboard/translator` — ukaguzi wa kitafsiri na onyesho la awali la ubadilishaji wa muundo wa ombi
+- `/dashboard/audit` — kivinjari cha kumbukumbu za ukaguzi wa utiifu chenye upangaji wa kurasa na metadata iliyopangwa
 - `/dashboard/usage` — kivinjari cha matumizi kwa kila ombi kilichounganishwa na `usage_history`
-- `/dashboard/compression` — uchanganuzi wa ukandamizaji, takwimu, na ugawaji wa mfumo wa uchakataji
-- `/dashboard/api-manager` — mzunguko wa maisha wa ufunguo wa API na ruhusa za modeli
+- `/dashboard/compression` — uchanganuzi wa mgandamizo, takwimu, na ugawaji wa mabomba
+- `/dashboard/api-manager` — mzunguko wa maisha wa funguo za API na ruhusa za modeli
+
+Safu ya UI: kila ukurasa huonyeshwa ndani ya ganda moja — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset` za kifurushi, `Sidebar.tsx` na `Header.tsx` za OmniRoute). Kurasa huleta
+vipengele vyake vya msingi kutoka `@/shared/components` (adapta juu ya Keak CI UI Kit iliyojumuishwa katika
+`packages/ui-kit`) au kutoka njia ndogo za vipengele vya kifurushi (`@omniroute/ui-kit/table`, `…/page-header`), na
+ikoni kupitia `<Icon>` (`ICON_MAP` → Lucide). Mandhari (`system` kwa chaguo-msingi, angavu/giza) na tokeni hutoka
+kwenye kifurushi kupitia daraja lililo katika `src/app/globals.css`. Maelezo: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Muktadha wa Mfumo wa Kiwango cha Juu
 

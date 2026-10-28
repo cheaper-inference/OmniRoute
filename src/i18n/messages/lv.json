@@ -25,8 +25,10 @@
     "confirm": "Vai tiešām?",
     "refresh": "Atsvaidzināt",
     "close": "Aizvērt",
+    "dialogTitleFallback": "Dialoglodziņš",
     "previousPage": "Iepriekšējā lapa",
     "nextPage": "Nākamā lapa",
+    "pagination": "Lapošana",
     "capsLockOn": "Caps Lock ir ieslēgts",
     "dismissNotification": "Aizvērt paziņojumu",
     "toggleColumns": "Pārslēgt kolonnas",
@@ -182,6 +184,7 @@
     "combos": "Kombinācijas",
     "noModelsFound": "Modeļi netika atrasti",
     "clear": "Notīrīt",
+    "clearFilters": "Notīrīt filtrus",
     "done": "Gatavs",
     "selectAll": "Atlasīt visus",
     "unselectAll": "Noņemt visu atlasi",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Izmantots {count, plural, one {# partijā} other {# partijās}}",
     "batchFilePreview": "Priekšskatījums",
     "batchFilePreviewTruncated": "Tiek rādītas pirmās {shown} rindas (kopā {total} rindas)",
-    "batchFileDownloadFull": "Lejupielādēt pilnu failu"
+    "batchFileDownloadFull": "Lejupielādēt pilnu failu",
+    "tokensPageTitle": "Tokeni",
+    "tokensPageDescription": "Sūtiet tokenus starp API atslēgām, kopīgojiet uzaicinājuma kodus un savienojiet kopienas serverus.",
+    "tokensServerUrlLabel": "Servera URL"
   },
   "disabled": "Izslēgts",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Novirzīt pieprasījumus, kuriem izsmelts budžets, uz avārijas bezmaksas rezerves nodrošinātāju/modeli.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Starpniekserveris ir apturēts vai tiek pārstartēts.",
     "expandSidebar": "Izvērst sānjoslu",
     "collapseSidebar": "Sakļaut sānjoslu",
-    "themes": "Tēmas",
-    "presetColors": "Populārās krāsas",
     "createTheme": "Izveidot tēmu",
     "chooseColor": "Izvēlieties vienu krāsu",
-    "themeCoral": "Koraļļu",
-    "themeBlue": "Zila",
-    "themeRed": "Sarkana",
-    "themeGreen": "Zaļa",
-    "themeViolet": "Violeta",
-    "themeOrange": "Oranža",
-    "themeCyan": "Ciāna",
     "cliToolsShort": "Rīki",
     "cache": "Kešatmiņa",
     "cacheShort": "Kešatmiņa",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Tēmu sistēma",
     "whitelabelingDesc": "Zīmola pielāgošanas apraksts",
     "switchThemes": "Pārslēgt tēmas",
-    "themeAccentDesc": "Tēmas akcenta apraksts",
     "uploadFavicon": "Augšupielādēt favikonu",
     "themeDark": "Tumšā tēma",
     "customLogoDesc": "Pielāgota logotipa apraksts",
     "sidebarVisibilityToggle": "Sānjoslas redzamības slēdzis",
-    "themeAccent": "Tēmas akcents",
     "resetFavicon": "Atiestatīt favikonu",
     "whitelabeling": "Zīmola pielāgošana",
     "darkMode": "Tumšais režīms",
@@ -1122,10 +1117,8 @@
     "customLogo": "Pielāgots logotips",
     "appearance": "Izskats",
     "themeSelectionAria": "Motīva izvēles ARIA",
-    "themeCreate": "Motīva izveide",
     "customFaviconDesc": "Pielāgotas favikonas apraksts",
     "logoPreview": "Logotipa priekšskatījums",
-    "themeCustom": "Pielāgots motīvs",
     "hideHealthLogsDesc": "Veselības pārbaudes žurnālu slēpšanas apraksts",
     "faviconPreview": "Favikonas priekšskatījums",
     "changelog": "Izmaiņu žurnāls",
@@ -1352,7 +1345,9 @@
       "open": "atvērt",
       "close": "aizvērt"
     },
-    "noResults": "Nav rezultātu"
+    "noResults": "Nav rezultātu",
+    "costsTeams": "Komandas",
+    "costsTeamsSubtitle": "Komandu izmaksu centri"
   },
   "webhooks": {
     "title": "Tīmekļa aizķeres",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 vai @channelname",
       "chatIdHint": "Unikālais tērzēšanas vai kanāla skaitliskais identifikators vai publiskais lietotājvārds.",
       "tutorial": "Kā konfigurēt Telegram webhook:"
-    }
+    },
+    "copy": "Kopēt",
+    "copied": "Nokopēts!",
+    "expandDetails": "Rādīt detalizētu informāciju",
+    "collapseDetails": "Slēpt detalizētu informāciju"
   },
   "compliance": {
     "auditTitle": "Audits",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Izsaukumi (24h)",
     "mcpMetricSuccessRate": "Sekmīgo izsaukumu īpatsvars",
     "mcpMetricAvgDuration": "Vidējais ilgums",
-    "mcpMetricTopTool": "Populārākais rīks"
-  },
-  "themesPage": {
-    "title": "Tēmas",
-    "description": "Izvēlieties iepriekš iestatītu tēmu vai izveidojiet savu ar vienu krāsu",
-    "presetColors": "Populāras krāsas",
-    "customTheme": "Pielāgota tēma",
-    "customThemeDesc": "Noklikšķiniet uz „Izveidot tēmu” un izvēlieties vienu krāsu",
-    "createTheme": "Izveidot tēmu",
-    "activePreset": "Aktīvā tēma"
+    "mcpMetricTopTool": "Populārākais rīks",
+    "dismissError": "Noraidīt kļūdu"
   },
   "header": {
     "logout": "Izrakstīties",
     "quickNavigation": "Ātrā navigācija",
     "quickNavigationTitle": "Ātrā navigācija (⌘K / Ctrl+K)",
     "openQuickNavigation": "Atvērt ātro navigāciju",
+    "openMenu": "Atvērt izvēlni",
+    "products": "Keak produkti",
     "switchToLightMode": "Pārslēgties uz gaišo režīmu",
     "switchToDarkMode": "Pārslēgties uz tumšo režīmu",
     "language": "Valoda",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Saderīgs ar Anthropic",
     "media": "Multivide",
     "mediaDescription": "Ģenerējiet attēlus, video un mūziku",
-    "themes": "Tēmas",
-    "themesDescription": "Izvēlieties krāsu tēmu visam vadības panelim",
     "costsDescription": "Sekojiet izdevumiem, analizējiet tendences un pārvaldiet savu AI budžetu visos pakalpojumu sniedzējos",
     "cacheDescription": "Pārraugiet pakalpojumu sniedzēju uzvednes kešatmiņas efektivitāti un lokālo semantisko atbilžu atkārtotu izmantošanu.",
     "limitsDescription": "Konfigurējiet ātruma ierobežojumus un kvotas katrai API atslēgai un pakalpojumu sniedzējam",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Papildu lietderīgās slodzes noteikumi, pieprasījumu ierobežojumi un proxy API iestatījumi",
     "mitmProxyDescription": "Konfigurēt MITM proxy iestatījumus datplūsmas pārbaudei un atkļūdošanai",
     "oneProxyDescription": "Konfigurēt 1Proxy iestatījumus uzlabotai proxy ķēdēšanai",
-    "omniSkillsDescription": "Instalēt un pārvaldīt smilškastes prasmes automatizētai uzvedņu un rīku izpildei"
+    "omniSkillsDescription": "Instalēt un pārvaldīt smilškastes prasmes automatizētai uzvedņu un rīku izpildei",
+    "teamsDescription": "Komandas izmaksu aplēses un kopīgi mīkstie budžeti"
   },
   "cloudSyncStatus": {
     "synced": "Sinhronizēts",
@@ -2495,7 +2487,12 @@
     "onlySelectedConnections": "Tikai atlasītie savienojumi",
     "selectAtLeastOneConnection": "Atlasiet vismaz vienu savienojumu vai izvēlieties Visi savienojumi.",
     "allConnectionsDesc": "Šī atslēga var izmantot jebkuru aktīvu savienojumu.",
-    "restrictedToConnections": "Piekļuve ierobežota līdz {count, plural, one {# savienojumam} other {# savienojumiem}}."
+    "restrictedToConnections": "Piekļuve ierobežota līdz {count, plural, one {# savienojumam} other {# savienojumiem}}.",
+    "preferredConnections": "Vēlamie savienojumi",
+    "preferredConnectionsDesc": "Prioritātes secība katrai atslēgai. Ja vēlamais savienojums nav pieejams, maršrutēšana pāriet uz nākamo piemēroto.",
+    "preferredConnectionsNone": "Preference nav iestatīta — tiek izmantota noklusējuma maršrutēšanas stratēģija.",
+    "preferredConnectionsClear": "Notīrīt",
+    "removeSelection": "Noņemt {name}"
   },
   "auditLog": {
     "title": "Audita žurnāls",
@@ -2607,7 +2604,9 @@
     "imageToTextBridgeCta": "Konfigurējiet Attēls→Teksts tiltu Modalitāšu tilta iestatījumos",
     "sttBridgeCta": "Konfigurējiet runas→teksta tiltu modalitāšu tilta iestatījumos",
     "existingConnection": "Esošs savienojums",
-    "openrouterSttDescription": "OpenRouter runas-uz-tekstu modeļi izmanto jūsu konfigurēto OpenRouter savienojumu. Atsevišķi akreditācijas dati nav nepieciešami."
+    "openrouterSttDescription": "OpenRouter runas-uz-tekstu modeļi izmanto jūsu konfigurēto OpenRouter savienojumu. Atsevišķi akreditācijas dati nav nepieciešami.",
+    "modalityTabsAria": "Multivides tips",
+    "serviceKindsAria": "Pakalpojuma tips"
   },
   "search": {
     "searchQuery": "Meklēšanas pieprasījums",
@@ -2982,6 +2981,7 @@
       "amp": "Izmantojiet, ja vēlaties Amp saīsinātās darbplūsmas, taču joprojām ir nepieciešama OmniRoute aizstājvārdu un maršrutēšanas noteikumu piespiedu piemērošana.",
       "hermes": "Izmantojiet, ja ātriem uzdevumiem nepieciešams viegls, terminālī darbināms AI asistents.",
       "hermes-agent": "Izmantojiet, ja jums nepieciešams Hermes Agent (izstrādājis Nousresearch), kura noklusējuma, deleģēšanas, attēlu apstrādes un palīgmodeļi tiek maršrutēti caur OmniRoute.",
+      "whycodes": "Izmantojiet, ja vēlaties WhyCodes kā vispārēja lietojuma autonomu CLI aģentu (TUI, nosaukti aģenti, atmiņa, swarm), kas vērsts uz OmniRoute.",
       "custom": "Izmantojiet pielāgotām rīku implementācijām vai vispārīgām, ar OpenAI saderīgām konfigurācijām."
     },
     "toolDescriptions": {
@@ -3022,6 +3022,7 @@
       "warp": "Warp AI terminālis ar pielāgotu pakalpojumu sniedzēju atbalstu",
       "agent-deck": "Agent Deck vairāku aģentu orķestrētājs",
       "5dive": "5dive — pašmitināta kodēšanas aģentu flote; viens autentifikācijas profils tos visus novirza uz OmniRoute",
+      "whycodes": "WhyCodes autonoms CLI aģents ar OpenAI saderīgu bāzes URL",
       "zed": "Zed koda redaktors — iebūvēts aģents, izmantojot ar OpenAI saderīgu nodrošinātāju"
     },
     "guides": {
@@ -3278,7 +3279,8 @@
     "cliproxyapiUnknown": "Nezināms",
     "cliproxyapiUpdate": "Atjaunināt",
     "cliproxyapiUpdateAvailable": "Pieejams atjauninājums: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versija"
+    "cliproxyapiVersion": "Versija",
+    "removeMapping": "Noņemt kartējumu"
   },
   "modelCatalog": {
     "title": "Modeļi un kombinācijas",
@@ -3342,6 +3344,18 @@
     "maxMembersPlaceholder": "piem., 10",
     "testSelected": "Testēt atlasītos ({count})",
     "testAllFiltered": "Testēt visus filtrētos ({count})",
+    "visibility": "Redzamība",
+    "allVisibility": "Redzamie un slēptie",
+    "visibleOnly": "Redzamie",
+    "hiddenOnly": "Slēptie",
+    "visibleColumn": "Redzams",
+    "hideModel": "Slēpt {name} no /v1/models",
+    "showModel": "Rādīt {name} sarakstā /v1/models",
+    "hiddenBadge": "Slēpts",
+    "hideFiltered": "Slēpt filtrētos ({count})",
+    "showFiltered": "Rādīt filtrētos ({count})",
+    "visibilityCounts": "{visible} redzami · {hidden} slēpti · kopā {total}",
+    "visibilityUpdateFailed": "Neizdevās atjaunināt modeļa redzamību",
     "cancel": "Atcelt",
     "clearResults": "Notīrīt rezultātus",
     "testing": "Testē...",
@@ -3400,13 +3414,13 @@
     "comboRefMember": "Kombinācija → {name}"
   },
   "combos": {
+    "title": "Kombinācijas",
+    "description": "Izveidojiet modeļu kombinācijas ar svērtu maršrutēšanu un rezerves variantu atbalstu",
+    "autoCatalogTitle": "Automātiskās maršrutēšanas katalogs",
     "autoTosLoadError": "Neizdevās ielādēt pakalpojuma noteikumu politiku. Pirms tās maiņas mēģiniet vēlreiz.",
     "autoTosSaveError": "Neizdevās saglabāt pakalpojuma noteikumu politiku. Joprojām tiek rādīts iepriekšējais iestatījums. Mēģiniet vēlreiz.",
     "autoTosIncludeLabel": "Iekļaut auto pakalpojumu sniedzējus ar atzīmi ToS: avoid",
     "autoTosDescription": "Pēc noklusējuma izslēgts. Attiecas uz visām auto kombinācijām, ne tikai vienu kontu. Pakalpojuma sniedzēja pievienošana neieslēdz šo iespēju.",
-    "title": "Kombinācijas",
-    "description": "Izveidojiet modeļu kombinācijas ar svērtu maršrutēšanu un rezerves variantu atbalstu",
-    "autoCatalogTitle": "Automātiskās maršrutēšanas katalogs",
     "autoCatalogTemplateCount": "{count} veidnes",
     "autoCatalogDescription": "Iebūvētās auto/* kombinācijas tiek dinamiski noteiktas, pamatojoties uz pievienotajiem pakalpojumu sniedzējiem. Izmantojiet jebkuru no šiem ID kā modeļa lauka vērtību — iestatīšana nav nepieciešama.",
     "autoCatalogExpand": "Paplašināt automātiskās maršrutēšanas katalogu",
@@ -3518,6 +3532,9 @@
     "moveUp": "Pārvietot augšup",
     "moveDown": "Pārvietot lejup",
     "removeModel": "Noņemt",
+    "testStep": "Testēt šo modeli",
+    "testStepRunning": "Notiek testēšana…",
+    "testStepNotTestable": "Testēt var tikai viena modeļa soļus",
     "saving": "Saglabā...",
     "liveNoProviders": "Vēl nav novēroti pakalpojumu sniedzēji.",
     "liveFleetDataHint": "Flotes dati pienāk, izmantojot tiešraides kombo notikumus.",
@@ -3559,6 +3576,7 @@
     "playgroundNoCombosYet": "Vēl nav konfigurēta neviena kombinācija.",
     "playgroundCreateFirst": "Vispirms izveidojiet kombināciju",
     "weighted": "Svērts",
+    "weightPercent": "Svars (%)",
     "leastUsed": "Vismazāk izmantots",
     "costOpt": "Izmaksu optimizācija",
     "strategyGuideTitle": "Kā izmantot šo stratēģiju",
@@ -3720,6 +3738,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# konts} other {# konti}}",
     "builderGlobalAdded": "Pievienots",
     "builderGlobalAdd": "Pievienot",
+    "clearSearch": "Notīrīt meklēšanu",
     "manualModel": "Manuāli norādīts modelis",
     "manualModelInvalid": "Ievadiet modeli formātā nodrošinātājs/modelis.",
     "manualModelUnknownProvider": "Nezināms nodrošinātāja prefikss.",
@@ -3936,6 +3955,7 @@
     "builderComboRefStep": "Pievienot kombinācijas atsauci",
     "builderPinnedAccount": "Fiksēts konts",
     "builderLegacyEntry": "Mantotais ieraksts",
+    "builderStaleModel": "Nav tiešsaistes katalogā",
     "reviewName": "Nosaukums",
     "reviewStrategy": "Stratēģija",
     "reviewSteps": "Soļi",
@@ -3973,6 +3993,10 @@
     "responseValidationMinLength": "Minimālais satura garums (rakstzīmēs)",
     "responseValidationJsonPaths": "JSON ceļu pārbaudes",
     "responseValidationAddCheck": "+ Pievienot pārbaudi",
+    "responseValidationRemoveCheck": "Noņemt pārbaudi",
+    "responseValidationPath": "JSON ceļš",
+    "responseValidationCondition": "Nosacījums",
+    "responseValidationValue": "Paredzamā vērtība",
     "agentFeaturesSystemMessageOverride": "Aizstāt sistēmas ziņojumu",
     "agentFeaturesSystemMessagePlaceholder": "Jūs esat lietpratīgs asistents...",
     "agentFeaturesSystemMessageHint": "Sistēmas ziņojuma aizstāšana aģentiem",
@@ -5288,7 +5312,8 @@
         "skipped": "jau konfigurēts",
         "failed": "neizdevās"
       }
-    }
+    },
+    "stepProgress": "Iestatīšanas progress"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Šis pakalpojumu sniedzējs pēc noklusējuma ir izslēgts no auto",
@@ -5579,6 +5604,7 @@
     "allModelsAlreadyImported": "Visi modeļi jau importēti",
     "noNewModelsToImport": "Nav jaunu modeļu importēšanai — visi modeļi jau ir reģistrā vai pielāgoto modeļu sarakstā",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Modeļa atklāšana neizdevās {time}",
     "skippingExistingModels": "Tiek izlaisti esošie modeļi ({count})",
     "autoSync": "Automātiskā sinhronizācija",
     "autoSyncShort": "Sinhronizēt",
@@ -6056,10 +6082,10 @@
     "apiFormatLabel": "API formāta apzīmējums",
     "apiKeyOptionalHint": "Atstājiet tukšu, ja jūsu lokālajai konfigurācijai vai pakalpojumu sniedzējam nav nepieciešama autentifikācija.",
     "apiKeyOptionalLabel": "API atslēga (neobligāta)",
-    "apiRegionChina": "API reģions: Ķīna",
-    "apiRegionHint": "API reģiona norāde",
-    "apiRegionInternational": "API reģions: starptautiskais",
-    "apiRegionLabel": "API reģiona apzīmējums",
+    "apiRegionChina": "Kontinentālā Ķīna",
+    "apiRegionHint": "Atlasiet galapunkta reģionu, kas tiek izmantots API piekļuvei un kvotu izsekošanai.",
+    "apiRegionInternational": "Starptautiskais",
+    "apiRegionLabel": "API reģions",
     "apikey": "API atslēga",
     "audio": "Audio",
     "audioProvidersHeading": "Audio sniedzēju sadaļa",
@@ -6080,6 +6106,13 @@
     "claudeLowPriorityModeDescription": "Kad šis konts sasniedz 5 stundu lietojuma ierobežojumu un Anthropic piedāvā zemākas prioritātes režīmu, OmniRoute to pieņem un turpina sūtīt pieprasījumus ar anthropic-usage-limit: slow, līdz laika periods tiek atiestatīts, nevis īslaicīgi aptur savienojumu. Nedēļas ierobežojums joprojām ir spēkā, un atbildes var gaidīt, līdz būs pieejama brīva jauda.",
     "claudeAutoLimitResetLabel": "Automātiski atiestatīt sesijas ierobežojumu (reizi nedēļā)",
     "claudeAutoLimitResetDescription": "Kad šis konts sasniedz 5 stundu lietojuma ierobežojumu un ir pieejama sesijas ierobežojuma atiestatīšana, OmniRoute to automātiski izmanto un atkārto pieprasījumu pilnā ātrumā. Tiek izmantota kontam pieejamā atiestatīšana reizi nedēļā, un lietojums joprojām tiek ieskaitīts nedēļas ierobežojumā.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Izlaist pārejošo nogaidīšanas periodu, lai šo savienojumu varētu izmantot arī pēc novēršamām kļūdām (galīgie stāvokļi, piemēram, bloķēts savienojums vai beidzies derīguma termiņš, joprojām ir spēkā).",
     "disableCoolingLabel": "Atspējot nogaidīšanas periodu šim savienojumam",
     "bulkPasteAdded": "{count, plural, one {Pievienota 1 atslēga} other {Pievienotas # atslēgas}}",
@@ -6533,6 +6566,7 @@
       "monsterapi": "Iegūstiet API atslēgu vietnē monsterapi.ai",
       "moonshot": "Savienojiet Kimi ar API atslēgu.",
       "morph": "Bezmaksas līmenis: 250K kredītu/mēnesī, 0 USD",
+      "apmix": "Savienojiet Apmix ar API atslēgu no apmix.ai/dashboard — viens abonements, daudzi modeļi.",
       "nanogpt": "Savienojiet NanoGPT ar API atslēgu.",
       "nebius": "Izmēģinājuma kredīti aptuveni 1 USD vērtībā pēc reģistrācijas API testēšanai",
       "nlpcloud": "NLP Cloud izmanto slēgtu chatbot API, nevis OpenAI chat/completions. OmniRoute pārveido OpenAI ziņojumus par input/context/history un nodrošina lokālu atbalstīto chatbot modeļu katalogu.",
@@ -6621,7 +6655,7 @@
       "claude": "Savienojiet Claude Code ar esošo OAuth plūsmu.",
       "cline": "Savienojiet Cline ar esošo OAuth plūsmu.",
       "cursor": "Savienojiet Cursor IDE ar esošo OAuth plūsmu.",
-      "cursor-api": "Savienojiet Cursor ar lietotāja API atslēgu (crsr_...) no cursor.com/dashboard/api; IDE sesija nav nepieciešama.",
+      "cursor-api": "Savienojiet Cursor ar lietotāja API atslēgu (crsr_... vai grok_...) no cursor.com/dashboard/api; IDE sesija nav nepieciešama.",
       "github": "Savienojiet GitHub Copilot ar esošo OAuth plūsmu.",
       "gitlab-duo": "OAuth lietojumprogramma ar ai_features + read_user tvērumiem. Konfigurējiet GITLAB_DUO_OAUTH_CLIENT_ID un pēc izvēles GITLAB_DUO_OAUTH_CLIENT_SECRET šajā OmniRoute instancē.",
       "kilocode": "Savienojiet Kilo Code ar esošo OAuth plūsmu.",
@@ -6629,8 +6663,7 @@
       "kiro": "Bezmaksas plāns: 50 kredīti mēnesī (~25K–100K tokenu). ⚠️ Kiro pakalpojuma sniegšanas noteikumi aizliedz trešo pušu proxy/harness izmantošanu.",
       "codex": "Savienojiet OpenAI Codex, izmantojot esošo OAuth plūsmu.",
       "qwen": "Savienojiet Qwen Code, izmantojot esošo OAuth plūsmu.",
-      "github-models": "Izveidojiet GitHub PAT ar 'models: read' tvērumu vietnē github.com/settings/tokens",
-      "apmix": "Savienojiet Apmix ar API atslēgu no apmix.ai/dashboard — viens abonements, daudzi modeļi."
+      "github-models": "Izveidojiet GitHub PAT ar 'models: read' tvērumu vietnē github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} pieņem sniedzēja formāta modeļu ID. Importējiet tos no /models vai pievienojiet pielāgotus ID maršrutēšanai.",
     "bedrockModelsDescription": "Amazon Bedrock modeļi ir piesaistīti AWS reģionam. Importējiet tos no /models vai pievienojiet izvēlētajā reģionā iespējoto Bedrock modeļu ID.",
@@ -6802,14 +6835,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Iestatījumi",
@@ -7105,16 +7131,6 @@
     "settingsSidebarDesc": "Izvēlieties, kurus sānjoslas vienumus rādīt. Pamata iestatījums saglabā papildu rīkus meklējamus.",
     "hideHealthLogs": "Slēpt veselības pārbaudes žurnālus",
     "hideHealthLogsDesc": "Kad ieslēgts, novērš [HealthCheck] ziņojumu parādīšanu servera konsolē",
-    "themeAccent": "Motīva krāsa",
-    "themeAccentDesc": "Izvēlieties iepriekš iestatītu krāsu vai izveidojiet savu motīvu ar vienu krāsu",
-    "themeCreate": "Izveidot motīvu",
-    "themeCustom": "Pielāgots motīvs",
-    "themeBlue": "Zila",
-    "themeRed": "Sarkana",
-    "themeGreen": "Zaļa",
-    "themeViolet": "Violeta",
-    "themeOrange": "Oranža",
-    "themeCyan": "Ciāna",
     "whitelabeling": "Zīmolvedība",
     "whitelabelingDesc": "Pielāgojiet lietojumprogrammas nosaukumu un logotipu",
     "appName": "Lietojumprogrammas nosaukums",
@@ -7255,7 +7271,7 @@
       "nextSwitchNow": "Tagad",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7266,7 +7282,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Pamatbinārā fails",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Neobligāti: pārbauda ģenerēto failu ar pamatbināro failu pirms pieņemtā faila aizstāšanas. Atstājiet tukšu, lai turpinātu rakstīt blakus. Direktorijs, ja tā nav, tiek izveidots."
+      "coreBinaryPathHelp": "Neobligāti: pārbauda ģenerēto failu ar pamatbināro failu pirms pieņemtā faila aizstāšanas. Atstājiet tukšu, lai turpinātu rakstīt blakus. Direktorijs, ja tā nav, tiek izveidots.",
+      "urlFeedlessHint": "Atstājiet tukšu, lai abonētu tikai selektoru: iestatiet kontroles URL zemāk, neviens plūsma netiek ielādēta, atjaunināta vai piesaistīta."
     },
     "bulkHealthcheck": "Masveida darbspējas pārbaude",
     "bulkHealthcheckDesc": "Pārbaudi visus konfigurētos starpniekserverus, izmantojot mērķa URL, lai noskaidrotu, kuri darbojas.",
@@ -7707,6 +7724,7 @@
     "configured": "konfigurēts",
     "none": "Nav",
     "modelOverrideValuePlaceholder": "Skaitliska vērtība",
+    "modelOverrideKey": "Pārrakstīšanas atslēga",
     "modelOverrideReasoningEffortsPlaceholder": "Ar komatu atdalīti angļu vārdi, piem., low, medium, high",
     "addKeyValue": "Pievienot atslēgas–vērtības pāri",
     "noModelOverrides": "Šim modelim nav konfigurētu pielāgojumu.",
@@ -7755,7 +7773,6 @@
     "customPricingNote": "Varat mainīt noklusējuma cenas konkrētiem modeļiem. Pielāgotajiem cenu iestatījumiem ir prioritāte pār automātiski noteiktajām cenām.",
     "editPricing": "Rediģēt cenas",
     "viewFullDetails": "Skatīt pilnu informāciju",
-    "themeCoral": "Koraļļu",
     "adaptiveVolumeRouting": "Adaptīvā apjoma maršrutēšana",
     "adaptiveVolumeRoutingDesc": "Dinamiski mērogo savienojumus, pamatojoties uz datu apjomu un caurlaidspējas slodzi.",
     "lkgpToggleTitle": "Pēdējais zināmais labais pakalpojumu sniedzējs (LKGP)",
@@ -7850,6 +7867,8 @@
     "compressionDesc": "Samaziniet tokenu izlietojumu, saspiežot uzvednes pirms nosūtīšanas nodrošinātājiem",
     "autoCombosTitle": "Automātiskās kombinācijas",
     "autoCombosDesc": "Atļaut šai atslēgai izmantot iebūvētās auto/* kombinācijas, kas automātiski izvēlas modeli no visiem konfigurētajiem pakalpojumu sniedzējiem",
+    "ccDiscoveryAliasesTitle": "Claude Code atklāšanas aizstājvārdi",
+    "ccDiscoveryAliasesDesc": "Paziņot claude/... saderības spoguļus modeļiem un kombinācijām, kuriem šī atslēga jau var piekļūt",
     "compressionGuidanceFullGuideLink": "Pilna saspiešanas rokasgrāmata",
     "compressionGuidanceShow": "Detaļas",
     "compressionGuidanceHide": "Slēpt detaļas",
@@ -9035,7 +9054,8 @@
     "tomlTestPassed": "Izdevās",
     "tomlTestFailed": "Neizdevās",
     "tomlImportError": "Nevarēja apstrādāt RTK TOML failu.",
-    "tomlFileReadError": "Nevarēja nolasīt izvēlēto TOML failu."
+    "tomlFileReadError": "Nevarēja nolasīt izvēlēto TOML failu.",
+    "viewMode": "Skata režīms"
   },
   "compressionEngineConfig": {
     "loading": "Ielādē…",
@@ -9257,7 +9277,8 @@
     "languagePacksList": "Valodu pakotnes: {packs}",
     "dragToReorder": "Velciet, lai mainītu soļa secību",
     "engine": "Dzinējs",
-    "intensity": "Intensitāte"
+    "intensity": "Intensitāte",
+    "compressionOverride": "Kompresijas pārrakstīšana"
   },
   "compressionStudio": {
     "noRun": "Nav pieejama neviena saspiešanas izpilde.",
@@ -9317,7 +9338,8 @@
     "encoderWinner": "uzvarētājs: {winner}",
     "encoder": "kodētājs",
     "bytes": "baiti",
-    "tokensCl100k": "tokeni (cl100k)"
+    "tokensCl100k": "tokeni (cl100k)",
+    "studioViews": "Studio skati"
   },
   "omniglyph": {
     "preview": "Priekšskatījums",
@@ -9523,7 +9545,9 @@
     "tooltipMinLength": "Ziņas, kas īsākas par šo, netiek saspiestas. Zemāks = vairāk saspiešanas.",
     "tooltipMinSavings": "Saspiest tikai tad, ja tas ietaupa vismaz šo tokenu skaitu.",
     "ultraSettings": "Ultra iestatījumi",
-    "ultraSettingsDesc": "SLM darbināta semantiskā saspiešana"
+    "ultraSettingsDesc": "SLM darbināta semantiskā saspiešana",
+    "defaultLanguage": "Noklusējuma valoda",
+    "viewMode": "Skata režīms"
   },
   "translator": {
     "title": "Tulkotājs",
@@ -9835,6 +9859,9 @@
     "streamTransformFailed": "Neizdevās pārveidot straumi"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kvota izsmelta; papildu lietojums ir atļauts, tāpēc pakalpojums turpinās.",
+    "healthPaidCreditsBypass": "Kvota izsmelta; pieejamie apmaksātie kredīti ļauj turpināt pakalpojumu.",
+    "healthFilteringBypass": "Kvota izsmelta; lokālā kvotu filtrēšana ir izslēgta, tāpēc pakalpojums turpinās.",
     "title": "Lietojums",
     "grokExtraUsageCredits": "Papildu lietojuma kredīti",
     "grokAutoTopUp": "Automātiska bilances papildināšana",
@@ -9998,6 +10025,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Nodrošinātāju limiti",
     "noProviders": "Nav savienotu pakalpojumu sniedzēju",
+    "quotaAuthRequired": "Nepieciešama autentifikācija — pierakstieties informācijas panelī",
+    "quotaAuthRequiredHint": "Pakalpojumu sniedzēju savienojumus nevarēja ielādēt, jo informācijas paneļa sesija nav pieejama vai ir beigusies. Pierakstieties un atsvaidziniet lapu, lai skatītu savus kvotu ierobežojumus.",
     "connectProvidersForQuota": "Izveidojiet savienojumu ar pakalpojumu sniedzējiem, izmantojot OAuth, lai sekotu API kvotu limitiem un lietojumam.",
     "accountsCount": "{count, plural, one {# konts} other {# konti}}",
     "filteredFromCount": "(atlasīts no {count})",
@@ -10047,9 +10076,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Nezināms",
     "statTotal": "Kopā",
-    "statCritical": "Kritisks",
-    "statAlert": "Brīdinājums",
-    "statHealthy": "Normāls",
     "filterPurchaseTypeLabel": "Tips",
     "filterTierLabel": "Līmenis",
     "purchaseAll": "Visi",
@@ -10288,10 +10314,64 @@
     "lastRefreshed": "Pēdējoreiz atsvaidzināts",
     "providerQuota": "Pakalpojuma sniedzēja kvota",
     "providerQuotaHomeHint": "Pievienoto kontu statuss reāllaikā",
+    "claudeResetCreditDefaultTitle": "Claude limitu atiestatīšana",
+    "confirmRedeemClaudeResetCredit": "Izmantošana nekavējoties atiestata atbilstošos Claude lietojuma limitus un neatgriezeniski iztērē šo kredītu.",
+    "claudeResetCreditsModalTitle": "Claude atiestatīšanas kredīti",
+    "claudeResetCreditsModalExplainer": "Šim kontam pieejamie Claude atiestatīšanas kredīti un iknedēļas sesiju atiestatīšanas.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Balstīts uz neseniem novērojumiem, nevis tiešsaistes pārbaudi. Atlasiet kontu, lai skatītu informāciju.",
+    "healthRecovery": "Paredzamā atjaunošana",
+    "healthAvailable": "Pieejams",
+    "healthRestricted": "Daļēji ierobežots",
+    "healthUnavailable": "Nepieejams",
+    "healthPeakHourProtection": "Pīķa stundu aizsardzība",
+    "healthCooldown": "Nogaidīšanas periods",
+    "healthQuotaExhausted": "Kvota izsmelta",
+    "healthOverview": "Pārskats",
+    "layoutFull": "Pilns",
+    "layoutCompact": "Kompakts",
+    "healthQuotaError": "Neizdevās nolasīt kvotu",
+    "healthNoRuntime": "Darbības stāvoklis nav pieejams",
+    "healthPreviousSnapshot": "Pēdējā atsvaidzināšana neizdevās; tiek rādīts iepriekšējais rezultāts",
+    "healthPreviousFailure": "Pēdējais pieprasījums neizdevās; gaidīšanas laiks beidzies",
+    "healthAwaitingSync": "Atiestatīšanas laiks pagājis; gaida sinhronizāciju",
+    "healthVerdictUnavailable": "Pieejamības pārbaude nav pieejama; tiek rādīti tikai kvotu līmeņi",
+    "healthSummaryFailed": "Neizdevās nolasīt stāvokļa kopsavilkumu; var trūkt modeļu bloķējumu",
+    "healthRuntimeObserved": "Stāvoklis atjaunināts {time}",
+    "healthQuotaObserved": "Kvota novērota {time}",
+    "healthOldestQuota": "Vecākais kvotas momentuzņēmums: {time}",
+    "healthRecoveryUnknown": "Atkopšanas laiks nav zināms",
+    "healthDetailsHint": "Noklikšķiniet, lai skatītu informāciju un darbības",
+    "healthFiveHour": "5 stundas",
+    "healthOverall": "Kopējā",
+    "healthAction": "Nepieciešama rīcība",
+    "healthTitle": "Kontu pieejamība",
+    "healthDrag": "Velciet, lai pārkārtotu pakalpojumu sniedzējus",
+    "healthDragPosition": "{provider}, {count, plural, zero {pozīcija {position, number} no #} one {pozīcija {position, number} no #} other {pozīcija {position, number} no #}}",
+    "healthResetOrder": "Atjaunot noklusējuma secību",
+    "healthPool": "{name} kopa",
+    "healthOtherPool": "Tas pats konts · {pool}: {status} (atlicis {remaining})",
+    "healthIncluded": "{count, plural, zero {Ietver # daļēji ierobežotu kontu} one {Ietver # daļēji ierobežotu kontu} other {Ietver # daļēji ierobežotus kontus}}",
+    "healthBannerUnavailable": "{count, plural, zero {# kontu īslaicīgi nav pieejami} one {# konts īslaicīgi nav pieejams} other {# konti īslaicīgi nav pieejami}}",
+    "healthBannerAvailable": "{count, plural, zero {Visi konti ir pieejami: #} one {# konts ir pieejams} other {Visi # konti ir pieejami}}",
+    "healthLegendHide": "Paslēpt apzīmējumus",
+    "healthLegendShow": "Rādīt apzīmējumus",
+    "healthLegendOk": "Necaurspīdīgs = atlikusī kvota; puscaurspīdīgs = izlietots.",
+    "healthLegendCooldown": "{window} kvota izlietota. Necaurspīdīgs = nogaidītais laiks; puscaurspīdīgs = atlikušais gaidīšanas laiks.",
+    "healthLegendAction": "Pilnvarojums beidzies vai konts bloķēts; gaidīšana nepalīdz.",
+    "healthLegendPartial": "Joprojām izmantojams. Dzeltens gals = modelis vai kopa ierobežota.",
+    "healthWaited": "Nogaidīts: {percent}",
+    "healthWait": "Vēl {duration} (atjaunosies {time})",
+    "healthFastest": "Ātrākā atjaunošanās pēc {duration}",
+    "healthRatio": "{available, plural, zero {Pieejami # / {active, number}} one {Pieejams # / {active, number}} other {Pieejami # / {active, number}}}",
+    "healthCd5": "5 stundas · Nogaidīšanas periods",
+    "healthCdw": "Iknedēļas · Nogaidīšanas periods",
+    "healthRecentSuccessBypass": "Maršrutēšana atļauj šo kontu, jo nesen pieprasījums bija veiksmīgs.",
+    "healthPurchasedBalanceBypass": "Iegādātais atlikums ļauj turpināt pēc iekļautās kvotas izsmelšanas.",
+    "healthCutoffAtRequest": "Reāllaika kvotas sliekšņi tiek pārbaudīti, maršrutējot pieprasījumu."
   },
   "modals": {
     "waitingAuth": "Tiek gaidīta autorizācija",
@@ -11078,7 +11158,8 @@
       "message": "Ziņojums",
       "error": "Kļūda",
       "completion": "Pabeigšana"
-    }
+    },
+    "statusFilter": "Statuss"
   },
   "templateNames": {
     "simple-chat": "Vienkārša tērzēšana",
@@ -11259,7 +11340,8 @@
     "minutesAgo": "pirms {minutes} min.",
     "hoursAgo": "pirms {hours} st.",
     "daysAgo": "pirms {days} d.",
-    "entries": "Ieraksti"
+    "entries": "Ieraksti",
+    "viewSwitcherAria": "Kešatmiņas skats"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globālais",
@@ -11447,6 +11529,7 @@
     "tableHealth": "Darbspēja (24 h)",
     "tableUsage": "Izmantojums",
     "tableActions": "Darbības",
+    "moreActions": "Citas darbības",
     "test": "Testēt",
     "edit": "Redaktēt",
     "delete": "Dzēst",
@@ -11526,7 +11609,7 @@
     "bulkImportNoValidEntries": "Nav atrasti derīgi ieraksti. Pārbaudiet formātu un mēģiniet vēlreiz.",
     "bulkImportSuccess": "Importēšana pabeigta: izveidoti — {created}, atjaunināti — {updated}, neizdevās — {failed}",
     "bulkImportErrorLine": "{line}. rinda: {reason}",
-    "bulkImportMaxExceeded": "Vienā reizē var importēt ne vairāk kā 100 starpniekserveru",
+    "bulkImportMaxExceeded": "Maksimums {max} starpniekserveri vienā importā",
     "bulkImportPreview": "Priekšskatījums",
     "clearAssignment": "(notīrīt piešķīrumu)",
     "bulkProxyAssignment": "Masveida starpniekserveru piešķiršana",
@@ -11587,6 +11670,7 @@
     "poolSetAsideKindIpQuota429": "IP pieprasījumu ierobežojums (429)",
     "poolSetAsideKindSlow": "lēnas atbildes",
     "poolSetAsideKindGeoBlocked": "reģiona bloķēts (403/451)",
+    "poolSetAsideKindOperatorReported": "pārtraukums, par ko ziņojis operators",
     "poolSetAsideUntil": "Atpakaļ rotācijā {endsAt}",
     "poolSetAsideRepeat": "Nolikts malā {count, plural, one {# reizi} other {# reizes}}",
     "poolUnknownAddress": "Nezināma adrese",
@@ -11696,7 +11780,6 @@
     "exportCodeTitle": "Eksportēt kodu",
     "exportShort": "Eksportēt",
     "noStateToExport": "Nav pieejams eksportējams izmēģinājumu vides stāvoklis.",
-    "closeExportModal": "Aizvērt eksportēšanas logu",
     "close": "Aizvērt",
     "exportRealKeyWarning": "Drošības brīdinājums: eksportēšana bloķēta — izvadē tika atrasta īsta API atslēga. Lūdzu, atiestati savu API atslēgu un mēģini vēlreiz.",
     "placeholderHintPrefix": "Aizvieto",
@@ -11809,7 +11892,8 @@
       "nextButton": "Tālāk",
       "runButton": "Palaist",
       "promptPlaceholder": "Ievadiet savu ziņu… (Enter, lai nosūtītu, Shift+Enter jaunai rindai)"
-    }
+    },
+    "playgroundTabs": "Playground režīmi"
   },
   "miniPlayground": {
     "endpoint": "Galapunkts",
@@ -11880,7 +11964,8 @@
     "assistant": "Asistents",
     "errorLabel": "Kļūda",
     "requestFailed": "Pieprasījums neizdevās",
-    "stop": "Apturēt"
+    "stop": "Apturēt",
+    "messageInputAria": "Ziņojums"
   },
   "requestLogger": {
     "recording": "Notiek ierakstīšana",
@@ -12028,8 +12113,8 @@
       "compressed": "Saspiests: {from} → {to} (ietaupīts {percent}%)",
       "output": "Izvade",
       "totalOut": "Kopā izvadē: {value}",
-      "reasoningObserved": "{value} · novērotas {chars} rakstzīmes",
       "reasoning": "Spriešana: {value}",
+      "reasoningObserved": "{value} · novērotas {chars} rakstzīmes",
       "requestedModel": "Pieprasītais modelis",
       "requestProtocol": "Pieprasījuma protokols",
       "cacheSource": "Kešatmiņas avots",
@@ -12067,8 +12152,18 @@
       "resilienceRotations": "{count} kontu rotācijas",
       "resilienceRetried": "Tukšais gājiens atkārtots",
       "resilienceContinued": "Atsākts straumes vidū",
-      "resilienceRecovered": "Atjaunots ar noturības darbību"
-    }
+      "resilienceRecovered": "Atjaunots ar noturības darbību",
+      "conversationContext": "Sarunas konteksts",
+      "goToBottom": "Doties uz leju",
+      "liveRefreshOn": "Tiešā atsvaidzināšana: ieslēgta",
+      "liveRefreshOff": "Tiešā atsvaidzināšana: izslēgta",
+      "liveRefresh": "Tiešā atsvaidzināšana",
+      "continuesFromParent": "turpinās no vecākelementa",
+      "continuesFrom": "Turpinās no {id}",
+      "viewConversation": "skatīt sarunu",
+      "openConversation": "Atvērt sarunu {id}"
+    },
+    "tableLabel": "Pieprasījumu žurnāli"
   },
   "proxyLogger": {
     "filterAll": "Visi",
@@ -12113,7 +12208,9 @@
     "colServedBy": "Piegādā",
     "filterTraffic": "Satiksme",
     "filterTests": "Testi",
-    "filterSource": "Avots"
+    "filterSource": "Avots",
+    "tableLabel": "Starpniekservera žurnāli",
+    "sortLogs": "Kārtot žurnālus"
   },
   "endpointOptions": {
     "speech": "Runa",
@@ -12198,7 +12295,8 @@
     "statusExhausted": "IZSMELTA",
     "statusAlerting": "BRĪDINĀJUMS",
     "statusError": "KĻŪDA",
-    "moreSuffix": "+{count} vēl"
+    "moreSuffix": "+{count} vēl",
+    "feedFilterLabel": "Filtrēt notikumus"
   },
   "quotaShare": {
     "weightPercent": "Svars %",
@@ -12365,7 +12463,10 @@
     "ungroupedTitle": "Nesagrupēti",
     "ungroupedHint": "Šie fondi nav piešķirti nevienai zināmai grupai. Rediģējiet fondu, lai pārvietotu to uz esošu grupu.",
     "removeFailed": "Neizdevās noņemt šo fondu.",
-    "dismiss": "Aizvērt"
+    "dismiss": "Aizvērt",
+    "allocationsHeading": "Piešķīrumi",
+    "wizardRemoveDimension": "Noņemt dimensiju",
+    "wizardRemoveKey": "Noņemt atslēgu"
   },
   "plugins": {
     "title": "Spraudņi",
@@ -12523,7 +12624,8 @@
       "settingsUpdateFailed": "Iestatījumu atjaunināšana neizdevās",
       "serviceRevealApiKey": "{actor} atklāja {target} API atslēgu",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Aizvērt kļūdas ziņojumu"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12758,21 @@
       "goNow": "Doties tagad",
       "message": "MITM Proxy tagad atrodas sadaļā AgentBridge.",
       "title": "Šī lapa ir pārvietota"
-    }
+    },
+    "dnsOn": "DNS ieslēgts",
+    "dnsOff": "DNS izslēgts",
+    "showServerSettings": "Rādīt servera iestatījumus",
+    "hideServerSettings": "Slēpt servera iestatījumus",
+    "upstreamCaTesting": "Notiek testēšana…",
+    "removeMapping": "Noņemt kartējumu",
+    "mappingSourcePlaceholder": "piem., gemini-3.6-flash-medium vai * visiem modeļiem bez kartējuma",
+    "mappingWildcardHint": "Izmantojiet * kā avotu, lai katru modeli bez skaidri norādīta kartējuma maršrutētu caur OmniRoute uz atlasīto mērķi. Precīzām avota atbilstībām vienmēr ir prioritāte pār *.",
+    "wizardDetectingModels": "Notiek modeļu noteikšana pārtvertajā datplūsmā...",
+    "wizardDetectedModels": "{count, plural, one {Pārtvertajā datplūsmā atrasts # modelis.} other {Pārtvertajā datplūsmā atrasti # modeļi.}} Atlasiet modeļus, kurus vēlaties pievienot:",
+    "wizardSelectedModels": "{count, plural, one {Atlasīts # modelis.} other {Atlasīti # modeļi.}} Nākamajā ekrānā tos piesaistīsiet OmniRoute modeļiem.",
+    "wizardAddModels": "{count, plural, one {Pievienot # modeli} other {Pievienot # modeļus}}",
+    "wizardNoModelsDetected": "Vēl nav noteikts neviens modelis. Izmantojiet {agent}, lai veiktu pieprasījumu, un pēc tam vēlreiz palaidiet šo vedni, lai automātiski noteiktu modeļus datplūsmā.",
+    "wizardNoModelsHint": "Vai arī aizveriet šo vedni un manuāli pievienojiet kartējumus aģenta kartītē."
   },
   "providerStats": {
     "unknownError": "Nezināma kļūda",
@@ -12686,7 +12802,11 @@
     "avgTtft": "Vidējais TTFT",
     "avgTotal": "Vidējais kopējais laiks",
     "requestTelemetry": "Pieprasījumu telemetrija",
-    "requestTelemetryDescription": "7 fāžu konveijera sadalījums (pēdējās 5 minūtes)"
+    "requestTelemetryDescription": "7 fāžu konveijera sadalījums (pēdējās 5 minūtes)",
+    "title": "Pakalpojumu sniedzēju statistika",
+    "description": "Katra pakalpojumu sniedzēja un modeļa datplūsma, latentums un sekmīgo pieprasījumu īpatsvars",
+    "combo": "Kombinēti",
+    "toggleModels": "Rādīt pakalpojumu sniedzēja {provider} modeļus"
   },
   "relay": {
     "title": "Bezserveru releju starpniekserveri",
@@ -12847,7 +12967,18 @@
     "noRequestBody": "Nav pieprasījuma pamatteksta.",
     "noResponseBody": "Nav atbildes pamatteksta.",
     "formatted": "Formatēts",
-    "raw": "Neapstrādāts"
+    "raw": "Neapstrādāts",
+    "requestCount": "{count, plural, one {# pieprasījums} other {# pieprasījumi}}",
+    "expandList": "Izvērst sarakstu",
+    "collapseList": "Sakļaut sarakstu",
+    "snippetLanguage": "Koda fragmenta valoda",
+    "headersTable": "Galvenes",
+    "showSecrets": "Rādīt slepenās vērtības",
+    "maskSecrets": "Maskēt slepenās vērtības",
+    "llmNotAvailable": "Šim pieprasījumam LLM metadati nav pieejami.",
+    "llmStreamYes": "jā (SSE)",
+    "llmStreamNo": "nē",
+    "llmTotalTokens": "Kopā: {count} tokeni"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13437,8 @@
     "colReliabilityHelp": "To izsaukumu īpatsvars, uz kuriem šis pakalpojumu sniedzējs faktiski atbildēja pēdējo 24 stundu laikā. Domuzīme nozīmē, ka tas apkalpoja pārāk mazu datplūsmu, lai noteiktu rādītāju.",
     "reliabilitySample": "Pēdējo {hours} stundu laikā veiksmīgi izpildīti {successes} no {requests} izsaukumiem",
     "reliabilityTooFew": "Pēdējo {hours} stundu laikā tikai {requests} izsaukumi — pārāk maz, lai noteiktu rādītāju",
-    "reliabilityNoTraffic": "Pēdējo 24 stundu laikā nav reģistrētu izsaukumu"
+    "reliabilityNoTraffic": "Pēdējo 24 stundu laikā nav reģistrētu izsaukumu",
+    "categoryFilter": "Uzdevuma kategorija"
   },
   "discovery": {
     "title": "Pakalpojumu sniedzēju meklēšana",
@@ -13331,7 +13463,11 @@
     "method": "Metode",
     "auth": "Autentifikācija",
     "feasibility": "Īstenojamība",
-    "models": "Modeļi"
+    "models": "Modeļi",
+    "provider": "Pakalpojumu sniedzējs",
+    "status": "Statuss",
+    "endpoint": "Galapunkts",
+    "actions": "Darbības"
   },
   "noAuthProvider": {
     "title": "Autentifikācija nav nepieciešama",
@@ -13380,7 +13516,8 @@
     "ownProxy": "Savs starpniekserveris",
     "freeTierPause": "Modelis {model} pauzēts (429), atgriezīsies {time}",
     "freeTierPauseProvider": "Pauzēts (429), atgriezīsies {time}",
-    "freeTierPauseNote": "Process pārtraukums šajā instancē"
+    "freeTierPauseNote": "Process pārtraukums šajā instancē",
+    "proxyType": "Starpniekservera veids"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13690,10 @@
         "description": "Tevi gaida slēpts sasniegums...",
         "criteria": "Pabeidz slēpto sasniegumu, lai atklātu šo nozīmīti."
       }
-    }
+    },
+    "leaderboardTitle": "Līderu saraksts",
+    "leaderboardDescription": "Jūsu API atslēgu reitingi un sasniegumi",
+    "badgeLocked": "Bloķēts"
   },
   "featureFlags": {
     "title": "Funkciju karodziņi",
@@ -13794,6 +13934,7 @@
     "latency": "Aizkave",
     "quota": "Kvota",
     "rangeWindow": "{range} logs",
+    "timeRange": "Laika diapazons",
     "runtimeHealthBlend": "izpildlaika/veselības stāvokļa apvienotais rādītājs",
     "averageResponseTime": "vidējais atbildes laiks",
     "worstQuota": "Sliktākā kvota",
@@ -13995,7 +14136,11 @@
     "learnMore": "Uzzināt vairāk",
     "changelogLoadFailed": "Neizdevās ielādēt izmaiņu žurnālu. Lūdzu, mēģiniet vēlreiz vēlāk.",
     "retry": "Mēģināt vēlreiz",
-    "viewFullHistory": "Skatīt pilno vēsturi vietnē GitHub"
+    "viewFullHistory": "Skatīt pilno vēsturi vietnē GitHub",
+    "title": "Jaunumi un izmaiņu žurnāls",
+    "description": "OmniRoute komandas paziņojumi un jaunākās laidiena piezīmes",
+    "viewLabel": "Skatīt",
+    "loadingNews": "Notiek paziņojumu ielāde..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14691,9 @@
       "circuitBreakerState": "Pakalpojumu sniedzēju ķēdes pārtraucēja stāvoklis",
       "lastUpdate": "Pēdējais atjauninājums: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} st. {minutes} min"
+      "uptimeHoursMinutes": "{hours} st. {minutes} min",
+      "breakerClosed": "Aizvērts",
+      "breakerNotClosed": "Atvērts vai daļēji atvērts"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14768,9 @@
         "primaryAction": "Apkopes informācija",
         "secondaryAction": "Sistēmas statuss"
       }
+    },
+    "miniapp": {
+      "askAnything": "Jautājiet jebko…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14961,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "Redzami: {visible} / kopā: {total}",
+    "modeLabel": "Skata režīms",
+    "jumpToNow": "Pāriet uz pašreizējo laiku; līnija TAGAD tiek atiestatīta pozīcijā {position}%",
+    "laneReuse": "Joslu atkārtota izmantošana",
+    "laneReuseLabel": "Joslas atkārtotas izmantošanas intervāls (minūtēs)",
+    "laneReuseHint": "Pieprasījumi ar vienādu sarunas ID paliek vienā un tajā pašā laika skalas rindā, ja intervāls starp tiem nepārsniedz norādīto minūšu skaitu.",
+    "laneReuseUnit": "min.",
+    "autoRefresh": "Automātiskā atsvaidzināšana",
+    "autoRefreshLabel": "Automātiskās atsvaidzināšanas intervāls (sekundēs)",
+    "autoRefreshHint": "Cik bieži laika skala atkārtoti ielādē pieprasījumu sarakstu no servera.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Tālināt",
+    "zoomIn": "Tuvināt"
   },
   "metadata": {
     "compressionTitle": "Saspiešana",
@@ -15015,6 +15178,83 @@
     "dismissAriaLabel": "Aizvērt"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Atspējot domāšanas līmeņu variantu (piem., -low, -medium, -high) ģenerēšanu /v1/models katalogā.",
+  "teamCosts": {
+    "title": "Komandas izmaksas",
+    "subtitle": "Pārvaldiet kopīgus mīkstos budžetus un kataloga izmaksu aplēses.",
+    "refresh": "Atsvaidzināt",
+    "create": "Izveidot komandu",
+    "edit": "Rediģēt komandu",
+    "archive": "Arhivēt",
+    "selectTeam": "Komandas",
+    "searchTeams": "Meklēt komandas",
+    "statusFilter": "Komandas statuss",
+    "active": "Aktīva",
+    "archived": "Arhivēta · tikai lasīšanai",
+    "allTeams": "Visas komandas",
+    "noTeams": "Nav atbilstošu komandu.",
+    "selectHint": "Izveidojiet vai atlasiet komandu, lai skatītu izmaksas.",
+    "loading": "Notiek komandas izmaksu ielāde…",
+    "budgetTitle": "Pašreizējais mīkstais budžets",
+    "budgetSubtitle": "Veiksmīga fiksēta izmantošana · slīdošs logs · neatkarīgi no atskaites datumiem",
+    "archivedBudget": "Arhivēta: budžeta ieviešana nav aktīva. Vēsturiskās atskaites paliek pieejamas.",
+    "unlimited": "Neierobežots — kopīgs mīkstais budžets nav konfigurēts.",
+    "budgetUnavailable": "Budžeta statuss nav pieejams. Atsvaidziniet, lai mēģinātu vēlreiz.",
+    "used": "Veiksmīga izmantošana",
+    "maximum": "Budžeta maksimums",
+    "remaining": "Zināmā atlikums",
+    "resets": "Atiestatās",
+    "unpricedBudget": "Daļai veiksmīgās izmantošanas cena nav zināma. Zināmā summa ir nepilnīga; budžeta ieviešana šo logu uzskata par pārsniegtu.",
+    "overBudget": "Budžets sasniegts vai pārsniegts · pārsniegts par {amount}",
+    "reportTitle": "Izmantošanas atskaite",
+    "reportSubtitle": "Visi mēģinājumi · kataloga aplēse USD, nevis rēķins · pilni UTC datumi",
+    "reportPeriod": "Atskaites periods",
+    "day1": "1 diena",
+    "day7": "7 dienas",
+    "day30": "30 dienas",
+    "allTime": "Viss laiks",
+    "reportSpend": "Aplēstie atskaites izdevumi",
+    "requests": "Pieprasījumi",
+    "assignedKeys": "Piešķirtās atslēgas",
+    "unpricedReport": "Šajā atskaitē ir nezināmas cenas. Aplēstie izdevumi ir nepilnīgi.",
+    "breakdown": "Izmaksas pa API atslēgām",
+    "noUsage": "Šajā atskaites periodā izmantošanas nav.",
+    "keyName": "API atslēgas nosaukums",
+    "tokens": "Ievades + izvades marķieri",
+    "unnamedKey": "Atslēga bez nosaukuma vai dzēsta",
+    "unpriced": "Nezināma cena",
+    "members": "Dalība",
+    "memberSubtitle": "Dalības maiņa saglabā vēsturiskos izdevumus sākotnējā komandā.",
+    "searchKeys": "Meklēt atslēgas vai pašreizējos īpašniekus",
+    "chooseKey": "Izvēlieties API atslēgu",
+    "unassigned": "Nav piešķirta",
+    "ownership": "Pašreizējā norēķinu komanda: {team}",
+    "assign": "Piešķirt",
+    "remove": "Noņemt",
+    "noMembers": "Nav pašreizējo dalībnieku. Vēsturiskā izmantošana joprojām var tikt ieskaitīta budžetā.",
+    "assignedAt": "Piešķirta {date} (UTC)",
+    "name": "Komandas nosaukums",
+    "description": "Apraksts",
+    "enableBudget": "Iespējot kopīgu mīksto budžetu",
+    "amount": "Budžeta summa (USD)",
+    "duration": "Slīdošais budžeta logs",
+    "cancel": "Atcelt",
+    "save": "Saglabāt",
+    "confirm": "Apstiprināt",
+    "transferTitle": "Apstipriniet atslēgas pārcelšanu",
+    "transferMessage": "Pārvietot šo atslēgu no “{source}” uz “{destination}”? Vēsturiskie izdevumi paliek sākotnējā komandā.",
+    "removeTitle": "Noņemt atslēgas piešķiršanu",
+    "removeMessage": "Noņemt šo atslēgu no “{team}”? Vēsturiskie izdevumi paliek šajā komandā.",
+    "archiveTitle": "Arhivēt komandu",
+    "archiveMessage": "Arhivēt “{team}”? Visas pašreizējās saistības tiek slēgtas un budžeta ieviešana apstājas. Vēsturiskās atskaites paliek pieejamas.",
+    "invalidName": "Ievadiet nosaukumu (1–200 rakstzīmes) un aprakstu ar ne vairāk kā 2000 rakstzīmēm.",
+    "invalidAmount": "Ievadiet galīgu budžeta summu, kas ir lielāka par nulli.",
+    "unauthorized": "Lai turpinātu, pierakstieties pārvaldības panelī.",
+    "forbidden": "Jums nav atļaujas pārvaldīt komandas. Jūsu ievade ir saglabāta.",
+    "notFound": "Šīs komandas vai piešķiršanas vairs nav.",
+    "conflict": "Piešķiršana vai komanda ir mainījusies. Atsvaidziniet un pirms atkārtota mēģinājuma apstipriniet pašreizējo piederību.",
+    "failed": "Pieprasījums neizdevās. Jūsu ievade ir saglabāta; mēģiniet vēlreiz.",
+    "partialBudget": "Daži saglabātie dienas grozi pārklājas ar loga robežu un nav precīzi sadalāmi. Parādītie izdevumi ir nepilnīgi; atlikusī summa nav pieejama. Esošā mīkstā budžeta politika nemainās."
+  },
   "connectionTest": {
     "title": "Testa ziņojums",
     "description": "Nosūtiet vienu reālu pieprasījumu, izmantojot šo kontu. Tas patērē nelielu kvotas daļu un atkarībā no pakalpojumu sniedzēja var sākt lietojuma periodu.",
@@ -15074,5 +15314,8 @@
     "importButton": "Importēt",
     "importFailed": "Importēšana neizdevās.",
     "importSuccess": "Importēti {connections} konti un {nodes} pakalpojumu sniedzēju mezgli; izlaisti {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Sākt no pašreizējās pozīcijas (izlaist esošos žurnālus)"
   }
 }

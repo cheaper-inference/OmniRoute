@@ -47,7 +47,7 @@ A2A იმართება **Endpoints → A2A** გადამრთვე�
 
 ### `message/send` — სინქრონული შესრულება
 
-აგზავნის შეტყობინებას უნართან და ელოდება სრულ პასუხს.
+უნარს უგზავნის შეტყობინებას და სრულ პასუხს ელოდება.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`-ისთვის `metadata.combo` კარიბჭის მოთხოვნაში აშკარად ანაცვლებს
+`metadata.model`-ს; ის იგზავნება როგორც რეალური `model` და არა როგორც
+იგნორირებული `x-combo` JSON ველი. კარიბჭის სტანდარტული API გასაღებისა და
+თითოეული სამიზნის ავტორიზაციის წესები კვლავ მოქმედებს. არასწორი ან ცარიელი კომბინაცია უარყოფილია.
+
+შედეგი შეიცავს `requested_combo`-ს (გამომძახებლის განზრახვა), `dispatched_model`-ს
+(კარიბჭის რეალური მოთხოვნა), `response_model`-ს (კარიბჭის პასუხი) და
+`confirmed_combo`-ს. ბოლო ველის მნიშვნელობა არის `null`, თუ კარიბჭე კომბინაციას აშკარად
+არ განსაზღვრავს. A2A გადაწყვეტილებების ჟურნალები შესრულებას მხოლოდ
+დადასტურებულ კომბინაციას მიაკუთვნებს, ხოლო დაუდასტურებელ მოთხოვნას `requestedCombo`-ს სახით ინახავს.
+
 **პასუხი:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE ნაკადური გადაცემა
 
-იგივეა, რაც `message/send`, მაგრამ რეალურ დროში ნაკადური გადაცემისთვის აბრუნებს სერვერის მიერ გამოგზავნილ მოვლენებს.
+იგივეა, რაც `message/send`, მაგრამ რეალურ დროში ნაკადური გადაცემისთვის Server-Sent Events-ს აბრუნებს.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — ამოცანის სტატუსის მოთხოვნა
+### `tasks/get` — დავალების სტატუსის მოთხოვნა
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — ამოცანის გაუქმება
+### `tasks/cancel` — დავალების გაუქმება
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,22 +152,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## ხელმისაწვდომი უნარები
 
-OmniRoute ამჟღავნებს 6 A2A უნარს, რომლებიც მიბმულია `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`-ში. თითოეული უნარის მოდული მდებარეობს `src/lib/a2a/skills/` საქაღალდეში.
+OmniRoute ავლენს 6 A2A უნარს `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ში. თითოეული უნარის მოდული ცხოვრობს `src/lib/a2a/skills/` ში.
 
-| უნარი                       | ID                   | აღწერა                                                                                                                                                          | Tags                       | მაგალითები                             |
-| :-------------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------- |
-| ჭკვიანი მარშრუტიზაცია       | `smart-routing`      | მისამართავს პრომპტს ოპტიმალური პროვაიდერის/კომბოს გავლით OmniRoute-ის კომბო ძრავისა და სკორინგის გამოყენებით                                                    | routing, providers         | "Route this prompt via the best model" |
-| კვოტის მართვა               | `quota-management`   | ანგარიშობს თითოეული პროვაიდერის კვოტის მდგომარეობას, ეხმარება გამომძახებლებს გადაწყვიტონ, როდის შეზღუდონ ან გადართონ                                            | quota, providers           | "Check quota for anthropic"            |
-| პროვაიდერების აღმოჩენა      | `provider-discovery` | აჩვენებს დაყენებული პროვაიდერების სიას შესაძლებლობებით, უფასო დონის ფლაგებითა და OAuth სტატუსით                                                                 | providers, discovery       | "What providers are available?"        |
-| ღირებულების ანალიზი         | `cost-analysis`      | აფასებს მოთხოვნის/საუბრის ღირებულებას კატალოგისა და ბოლო გამოყენების მონაცემების საფუძველზე                                                                     | cost, usage                | "Estimate cost for this conversation"  |
-| ჯანმრთელობის ანგარიში       | `health-report`      | აერთიანებს circuit breaker, cooldown და lockout მდგომარეობებს თითოეული პროვაიდერისთვის                                                                          | health, resilience         | "Show health status of all providers"  |
-| შესაძლებლობების ჩამონათვალი | `list-capabilities`  | აბრუნებს Agent Skills-ის სრულ 45-ჩანაწერიან კატალოგს (23 API + 21 CLI + 1 კონფიგურაცია) markdown ცხრილის სახით, უმუშავი SKILL.md URL-ებით კონტექსტის ჩასასმელად | catalog, discovery, skills | "List all OmniRoute capabilities"      |
+| უნარი                     | ID                   | აღწერა                                                                                                                                                        | ტეგები                      | მაგალითები                                            |
+| :------------------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------- | :---------------------------------------------------- |
+| ჭკვიანი მარშრუტიზაცია     | `smart-routing`      | მარშრუტებს აგზავნის მოთხოვნას ოპტიმალურ provider/combo ში OmniRoute ის კომბინირებული ძრავის + ქულის გამოყენებით                                               | მარშრუტიზაცია, პროვაიდერები | "ამ მოწოდების მარშრუტი საუკეთესო მოდელის მეშვეობით"   |
+| კვოტების მართვა           | `quota-management`   | აცნობებს თითო პროვაიდერს კვოტის მდგომარეობას, ეხმარება აბონენტებს გადაწყვიტონ, როდის გააკეთონ throttle/switch                                                 | კვოტა, პროვაიდერები         | "შეამოწმეთ კვოტა ანთროპიკისთვის"                      |
+| პროვაიდერის აღმოჩენა      | `provider-discovery` | ჩამოთვლილია დაინსტალირებული პროვაიდერები შესაძლებლობებით, თავისუფალი დონის დროშებით, OAuth სტატუსით                                                           | პროვაიდერები, აღმოჩენა      | "რა პროვაიდერები არიან ხელმისაწვდომი?"                |
+| ხარჯების ანალიზი          | `cost-analysis`      | აფასებს request/conversation ს ღირებულებას კატალოგის + ბოლო გამოყენების გათვალისწინებით                                                                       | ღირებულება, გამოყენება      | "ამ საუბრის სავარაუდო ღირებულება"                     |
+| ჯანმრთელობის ანგარიში     | `health-report`      | აგრეგატები ამომრთველი, გაგრილება, დაბლოკვის მდგომარეობა თითო პროვაიდერზე                                                                                      | ჯანმრთელობა, გამძლეობა      | "ყველა პროვაიდერის ჯანმრთელობის მდგომარეობის ჩვენება" |
+| ჩამოთვალეთ შესაძლებლობები | `list-capabilities`  | აბრუნებს აგენტის უნარების სრულ 45 ჩანაწერის კატალოგს (23 API + 21 CLI + 1 კონფიგურაცია), როგორც მარკირების ცხრილი ნედლი SKILL.md URLs კონტექსტის ინექციისთვის | კატალოგი, აღმოჩენა, უნარები | "ჩამოთვალეთ OmniRoute ყველა შესაძლებლობა"             |
 
-> Agent Card უნდა შეესაბამებოდეს მოქმედ 375-პროვაიდერიან კატალოგს; პროვაიდერების რაოდენობა და უფასო/ავტორიზაციის გარეშე მეტამონაცემები მოწოდებულია სამუშაო (runtime) რეესტრიდან.
+> აგენტის ბარათი უნდა ინახებოდეს პირდაპირ 377 პროვაიდერის კატალოგთან; პროვაიდერის რაოდენობა და free/no-auth მეტამონაცემები მიიღება გაშვების რეესტრიდან.
 
-### `list-capabilities` უნარის დეტალები
+### `list-capabilities` უნარი დეტალი
 
-`list-capabilities` უნარი განსაკუთრებით სასარგებლოა გარე აგენტებისთვის, რომლებსაც API გამოძახებების გაგზავნამდე სჭირდებათ გაარკვიონ, რას ამჟღავნებს OmniRoute. ის აბრუნებს სტრუქტურირებული markdown ცხრილის არტეფაქტს:
+`list-capabilities` უნარი განსაკუთრებით სასარგებლოა გარე აგენტებისთვის, რომლებმაც უნდა გაარკვიონ, თუ რას ავლენს OmniRoute API ზარების გაგზავნამდე. ის აბრუნებს სტრუქტურირებული ნიშნის ცხრილის არტეფაქტს:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -172,7 +176,7 @@ OmniRoute ამჟღავნებს 6 A2A უნარს, რომლე�
 ...
 ```
 
-თითოეული რიგი შეიცავს `rawUrl` სვეტს, რათა აგენტებმა მაშინვე მოიძიონ სრული SKILL.md. `metadata.totalSkills` ველი ასახავს კატალოგის ზომას (დღეს 45). იმპლემენტაცია: `src/lib/a2a/skills/listCapabilities.ts`. ასევე იხილეთ [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+თითოეული მწკრივი მოიცავს `rawUrl` სვეტს, ასე რომ აგენტებს შეუძლიათ დაუყოვნებლივ მიიღონ სრული SKILL.md. `metadata.totalSkills` ველი ასახავს კატალოგის ზომას (დღეს 45). განხორციელება: `src/lib/a2a/skills/listCapabilities.ts`. აგრეთვე [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -264,7 +268,7 @@ submitted → working → completed
 
 ## ინტეგრაციის მაგალითები
 
-### Python (requests)
+### პითონი (მოთხოვნები)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (მოტანა)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

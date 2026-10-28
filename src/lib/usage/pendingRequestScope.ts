@@ -66,14 +66,18 @@ function protectPendingMetadata(
 
 export function updatePendingScope(scope: PendingRequestScope, metadata: PendingRequestMetadata) {
   const retainedMetadata = protectPendingMetadata(scope, metadata);
-  if (!updatePendingRequestById(scope.id || null, retainedMetadata)) {
+  if (scope.id) {
+    updatePendingRequestById(scope.id, retainedMetadata);
+  } else {
     updatePendingRequest(scope.model, scope.provider, scope.connectionId, retainedMetadata);
   }
 }
 
 export function finalizePendingScope(scope: PendingRequestScope, metadata: PendingRequestMetadata) {
   const retainedMetadata = protectPendingMetadata(scope, metadata);
-  if (!finalizePendingRequestById(scope.id, retainedMetadata)) {
+  if (scope.id) {
+    finalizePendingRequestById(scope.id, retainedMetadata);
+  } else {
     finalizePendingRequest(scope.model, scope.provider, scope.connectionId, retainedMetadata);
   }
 }

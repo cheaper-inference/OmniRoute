@@ -43,11 +43,11 @@ A2A ត្រូវបានគ្រប់គ្រងដោយប៊ូតុ�
 
 ---
 
-## Methods របស់ JSON-RPC 2.0
+## វិធីសាស្ត្រ JSON-RPC 2.0
 
 ### `message/send` — ការប្រតិបត្តិបែបសមកាលកម្ម
 
-ផ្ញើសារទៅ skill មួយ ហើយរង់ចាំការឆ្លើយតបពេញលេញ។
+ផ្ញើសារទៅជំនាញមួយ ហើយរង់ចាំការឆ្លើយតបពេញលេញ។
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,10 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+សម្រាប់ `smart-routing` នោះ `metadata.combo` គឺជាការកំណត់ជាន់លើ `metadata.model` ដោយច្បាស់លាស់សម្រាប់សំណើទៅកាន់ gateway។ វាត្រូវបានផ្ញើជា `model` ពិតប្រាកដ មិនមែនជាវាល JSON `x-combo` ដែលត្រូវបានមិនអើពើនោះទេ។ ការផ្ទៀងផ្ទាត់ API key ធម្មតារបស់ gateway និងការផ្តល់សិទ្ធិតាមគោលដៅនីមួយៗនៅតែត្រូវបានអនុវត្ត។ combo ដែលមិនត្រឹមត្រូវ ឬទទេ នឹងត្រូវបានបដិសេធ។
+
+លទ្ធផលបង្ហាញ `requested_combo` (បំណងរបស់អ្នកហៅ), `dispatched_model` (សំណើជាក់ស្តែងទៅកាន់ gateway), `response_model` (ការឆ្លើយតបរបស់ gateway) និង `confirmed_combo`។ វាលចុងក្រោយនឹងមានតម្លៃ `null` លុះត្រាតែ gateway កំណត់អត្តសញ្ញាណ combo មួយយ៉ាងច្បាស់លាស់។ កំណត់ហេតុនៃការសម្រេចចិត្ត A2A កំណត់ការប្រតិបត្តិទៅឱ្យតែ combo ដែលបានបញ្ជាក់ប៉ុណ្ណោះ ដោយរក្សាទុកសំណើដែលមិនបានបញ្ជាក់ជា `requestedCombo`។
+
 **ការឆ្លើយតប៖**
 
 ```json
@@ -76,22 +80,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +96,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — ការផ្សាយបន្តផ្ទាល់តាម SSE
 
-ដូចគ្នានឹង `message/send` ប៉ុន្តែត្រឡប់ Server-Sent Events សម្រាប់ការផ្សាយបន្តផ្ទាល់ក្នុងពេលជាក់ស្តែង។
+ដូចគ្នានឹង `message/send` ដែរ ប៉ុន្តែវាត្រឡប់ព្រឹត្តិការណ៍ដែលផ្ញើពីម៉ាស៊ីនមេ សម្រាប់ការផ្សាយបន្តផ្ទាល់តាមពេលវេលាជាក់ស្តែង។
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -148,22 +145,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## ជំនាញដែលមាន
 
-OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលត្រូវបានភ្ជាប់នៅក្នុង `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`។ ម៉ូឌុលជំនាញនីមួយៗស្ថិតនៅក្នុង `src/lib/a2a/skills/`។
+OmniRoute លាតត្រដាងជំនាញ A2A ចំនួន 6 ដែលមានខ្សែនៅក្នុង `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`។ ម៉ូឌុលជំនាញនីមួយៗរស់នៅក្នុង `src/lib/a2a/skills/`។
 
-| ជំនាញ              | ID                   | ការពិពណ៌នា                                                                                                                                    | ស្លាក                      | ឧទាហរណ៍                                   |
-| :----------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :---------------------------------------- |
-| Smart Routing      | `smart-routing`      | ផ្តល់ផ្លូវ prompt តាម provider/combo ដែលល្អបំផុត ដោយប្រើ combo engine របស់ OmniRoute រួមជាមួយការវាយពិន្ទុ                                     | routing, providers         | "ផ្តល់ផ្លូវ prompt នេះតាមម៉ូដែលល្អបំផុត"  |
-| Quota Management   | `quota-management`   | រាយការណ៍ស្ថានភាព quota តាម provider នីមួយៗ និងជួយអ្នកហៅសម្រេចចិត្តពេលណាត្រូវ throttle/ប្តូរ                                                   | quota, providers           | "ពិនិត្យ quota សម្រាប់ anthropic"         |
-| Provider Discovery | `provider-discovery` | រាយបញ្ជី provider ដែលបានដំឡើង ជាមួយសមត្ថភាព ទង់ free-tier និងស្ថានភាព OAuth                                                                   | providers, discovery       | "តើមាន provider អ្វីខ្លះដែលអាចប្រើបាន?"   |
-| Cost Analysis      | `cost-analysis`      | ប៉ាន់ស្មានថ្លៃដើមនៃសំណើ/ការសន្ទនា ដោយផ្អែកលើកាតាឡុក និងការប្រើប្រាស់ថ្មីៗ                                                                     | cost, usage                | "ប៉ាន់ស្មានថ្លៃដើមសម្រាប់ការសន្ទនានេះ"    |
-| Health Report      | `health-report`      | បូកបញ្ចូលស្ថានភាព circuit breaker, cooldown និង lockout តាម provider នីមួយៗ                                                                   | health, resilience         | "បង្ហាញស្ថានភាពសុខភាពនៃ provider ទាំងអស់" |
-| List Capabilities  | `list-capabilities`  | ត្រឡប់កាតាឡុក Agent Skills ពេញលេញចំនួន 45 ធាតុ (23 API + 21 CLI + 1 config) ជាតារាង markdown ដែលមាន URL ឆៅរបស់ SKILL.md សម្រាប់ការបញ្ចូលបរិបទ | catalog, discovery, skills | "រាយបញ្ជីសមត្ថភាពទាំងអស់របស់ OmniRoute"   |
+| ជំនាញ                 | ID                   | ការពិពណ៌នា                                                                                                                          | ស្លាក                   | ឧទាហរណ៍                                        |
+| :-------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------- | :---------------------- | :--------------------------------------------- |
+| ផ្លូវឆ្លាតវៃ          | `smart-routing`      | បញ្ជូនការជម្រុញតាមរយៈ provider/combo ល្អបំផុតដោយប្រើម៉ាស៊ីនបន្សំរបស់ OmniRoute+ ពិន្ទុ                                              | ផ្លូវ, អ្នកផ្តល់សេវា    | "នាំផ្លូវនេះតាមគំរូល្អបំផុត"                   |
+| ការគ្រប់គ្រងកូតា      | `quota-management`   | របាយការណ៍តាមរដ្ឋកូតារបស់អ្នកផ្តល់សេវា ជួយអ្នកហៅទូរស័ព្ទសម្រេចចិត្តថាពេលណាត្រូវ throttle/switch                                      | កូតា អ្នកផ្តល់សេវា      | "ពិនិត្យកូតាសម្រាប់អនាធិបតេយ្យ"                |
+| ការរកឃើញអ្នកផ្តល់សេវា | `provider-discovery` | រាយបញ្ជីអ្នកផ្តល់សេវាដែលបានដំឡើងដែលមានសមត្ថភាព ទង់ថ្នាក់ឥតគិតថ្លៃ ស្ថានភាព OAuth                                                    | អ្នកផ្តល់សេវា, ការរកឃើញ | "តើអ្នកផ្តល់សេវាអ្វីខ្លះ?"                     |
+| ការវិភាគថ្លៃដើម       | `cost-analysis`      | តម្លៃប៉ាន់ស្មាននៃ request/conversation ដែលបានផ្តល់ឱ្យកាតាឡុក + ការប្រើប្រាស់ថ្មីៗ                                                   | ការចំណាយ, ការប្រើប្រាស់ | "តម្លៃប៉ាន់ស្មានសម្រាប់ការសន្ទនានេះ"           |
+| របាយការណ៍សុខភាព       | `health-report`      | សរុបការបំបែកសៀគ្វី ការចុះត្រជាក់ ស្ថានភាពចាក់សោរក្នុងមួយអ្នកផ្តល់សេវា                                                               | សុខភាព ភាពធន់           | "បង្ហាញស្ថានភាពសុខភាពរបស់អ្នកផ្តល់សេវាទាំងអស់" |
+| បញ្ជីសមត្ថភាព         | `list-capabilities`  | ត្រឡប់កាតាឡុកជំនាញភ្នាក់ងារ 45 ធាតុពេញលេញ (23 API + 21 CLI + 1 config) ជាតារាង markdown ជាមួយ SKILL.md URLs ឆៅសម្រាប់ការបញ្ចូលបរិបទ | កាតាឡុក ការរកឃើញ ជំនាញ  | "រាយបញ្ជីសមត្ថភាព OmniRoute ទាំងអស់"           |
 
-> Agent Card គួរតែត្រូវបានរក្សាឱ្យស្របគ្នាជាមួយកាតាឡុក provider ចំនួន 375 ដែលកំពុងដំណើរការ។ ចំនួន provider និង metadata អំពី free/no-auth ត្រូវបានយកមកពី runtime registry។
+> កាតភ្នាក់ងារគួរតែត្រូវបានរក្សាទុកឱ្យស្របជាមួយនឹងកាតាឡុកអ្នកផ្តល់សេវា 377 ផ្ទាល់។ ចំនួនអ្នកផ្តល់សេវា និងទិន្នន័យមេតា free/no-auth ត្រូវបានប្រភពចេញពីបញ្ជីឈ្មោះពេលដំណើរការ។
 
-### ព័ត៌មានលម្អិតអំពីជំនាញ `list-capabilities`
+### `list-capabilities` លម្អិតជំនាញ
 
-ជំនាញ `list-capabilities` មានប្រយោជន៍ជាពិសេសសម្រាប់ agent ខាងក្រៅដែលត្រូវការស្វែងរកអ្វីដែល OmniRoute ផ្តល់ជូន មុនពេលផ្ញើការហៅ API។ វាត្រឡប់ artifact ជាតារាង markdown ដែលមានរចនាសម្ព័ន្ធ៖
+ជំនាញ `list-capabilities` មានប្រយោជន៍ជាពិសេសសម្រាប់ភ្នាក់ងារខាងក្រៅដែលត្រូវការស្វែងរកអ្វីដែល OmniRoute លាតត្រដាងមុនពេលផ្ញើការហៅ API ។ វាត្រឡប់វត្ថុបុរាណតារាង markdown ដែលមានរចនាសម្ព័ន្ធ៖
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -172,7 +169,7 @@ OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលត្�
 ...
 ```
 
-ជួរដេកនីមួយៗរួមមានជួរឈរ `rawUrl` ដើម្បីឱ្យ agent អាចទាញយក SKILL.md ពេញលេញបានភ្លាមៗ។ វាល `metadata.totalSkills` ឆ្លុះបញ្ចាំងទំហំកាតាឡុក (45 នាពេលបច្ចុប្បន្ន)។ ការអនុវត្ត៖ `src/lib/a2a/skills/listCapabilities.ts`។ សូមមើលផងដែរ [AGENT-SKILLS.md](./AGENT-SKILLS.md)។
+ជួរនីមួយៗរួមបញ្ចូលជួរឈរ `rawUrl` ដូច្នេះភ្នាក់ងារអាចទៅយក SKILL.md ពេញលេញភ្លាមៗ។ វាល `metadata.totalSkills` ឆ្លុះទំហំកាតាឡុក (45 ថ្ងៃនេះ) ។ ការអនុវត្ត៖ `src/lib/a2a/skills/listCapabilities.ts`។ សូមមើលផងដែរ [AGENT-SKILLS.md](./AGENT-SKILLS.md) ។
 
 ---
 
@@ -262,9 +259,9 @@ OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលត្�
 
 ---
 
-## ឧទាហរណ៍ការរួមបញ្ចូល
+## ឧទាហរណ៍នៃការរួមបញ្ចូល
 
-### Python (requests)
+### Python (សំណើ)
 
 ```python
 import requests
@@ -283,7 +280,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (ទៅយក)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

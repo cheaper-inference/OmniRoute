@@ -287,3 +287,14 @@ export async function createBuiltinAutoCombo(
   virtualCombo.id = modelStr;
   return virtualCombo;
 }
+
+export async function projectBuiltinAutoCandidates(
+  modelStr: string,
+  suffix: string,
+  prepared: PreparedVirtualAutoComboInputs
+) {
+  const request = resolveBuiltinAutoMaterialization(modelStr, suffix);
+  if (!request) throw new Error(`Unknown built-in auto combo: ${modelStr}`);
+  const { projectVirtualAutoCandidatesFromPrepared } = await import("./candidateProjection.ts");
+  return projectVirtualAutoCandidatesFromPrepared(prepared, request.variant, request.spec);
+}

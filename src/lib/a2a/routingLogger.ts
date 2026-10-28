@@ -24,6 +24,8 @@ export interface RoutingDecision {
   requestId: string;
   taskType: string;
   comboId: string;
+  /** Caller intent only; never interpret this as an executed combo. */
+  requestedCombo?: string | null;
   providerSelected: string;
   modelUsed: string;
   score: number;

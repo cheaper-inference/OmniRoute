@@ -328,7 +328,12 @@ export function detectMalformedNonStream(
       (stopReason === "end_turn" || stopReason === "stop_sequence")
     )
       return null;
-    if (stopReason === "max_tokens" || stopReason === "tool_use" || stopReason === "length")
+    if (
+      stopReason === "max_tokens" ||
+      stopReason === "tool_use" ||
+      stopReason === "length" ||
+      stopReason === "refusal"
+    )
       return null;
     // content:[] with no stop_reason at all is non-terminal, not empty (#9971).
     if (content.length === 0 && stopReason.length === 0) return null;

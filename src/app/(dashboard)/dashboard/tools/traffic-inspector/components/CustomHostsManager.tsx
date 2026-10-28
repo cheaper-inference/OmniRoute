@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
+import Modal from "@/shared/components/Modal";
 import { z } from "zod";
 
 interface CustomHost {
@@ -85,66 +88,48 @@ export function CustomHostsManager({ onClose }: CustomHostsManagerProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-xl border border-border bg-surface shadow-xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-text-main">{t("customHostsTitle")}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-text-muted hover:text-text-main focus-ring rounded"
-            aria-label={t("close")}
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">
-              close
-            </span>
-          </button>
-        </div>
-
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addHost()}
-            placeholder={t("hostPlaceholder")}
-            className="flex-1 rounded border border-border bg-bg-subtle px-3 py-1.5 text-sm text-text-main focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <button
-            type="button"
-            onClick={addHost}
-            className="rounded border border-border bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 focus-ring"
-          >
-            {t("addHost")}
-          </button>
-        </div>
-        {error && <p className="text-xs text-red-400 mb-2">{error}</p>}
-
-        <div className="space-y-1 max-h-60 overflow-y-auto">
-          {loading && <p className="text-sm text-text-muted">{t("loading")}</p>}
-          {!loading && hosts.length === 0 && (
-            <p className="text-sm text-text-muted italic">{t("noHostsYet")}</p>
-          )}
-          {hosts.map((h) => (
-            <div
-              key={h.host}
-              className="flex items-center justify-between rounded border border-border/50 bg-bg-subtle px-3 py-1.5"
-            >
-              <span className="text-sm font-mono text-text-main">{h.host}</span>
-              <button
-                type="button"
-                onClick={() => deleteHost(h.host)}
-                className="text-text-muted hover:text-red-400 focus-ring rounded"
-                aria-label={t("removeHost", { host: h.host })}
-              >
-                <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-                  delete
-                </span>
-              </button>
-            </div>
-          ))}
-        </div>
+    <Modal isOpen onClose={onClose} title={t("customHostsTitle")} size="md">
+      <div className="mb-4 flex items-start gap-2">
+        <Input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addHost()}
+          placeholder={t("hostPlaceholder")}
+          aria-label={t("hostPlaceholder")}
+          error={error ?? undefined}
+          className="flex-1"
+        />
+        <Button variant="primary" icon="add" onClick={addHost}>
+          {t("addHost")}
+        </Button>
       </div>
-    </div>
+
+      <div className="max-h-60 space-y-1 overflow-y-auto">
+        {loading && (
+          <p className="text-sm text-text-muted" role="status" aria-live="polite">
+            {t("loading")}
+          </p>
+        )}
+        {!loading && hosts.length === 0 && (
+          <p className="text-sm text-text-muted italic">{t("noHostsYet")}</p>
+        )}
+        {hosts.map((h) => (
+          <div
+            key={h.host}
+            className="flex items-center justify-between rounded-control border border-border bg-bg-subtle px-3 py-1.5"
+          >
+            <span className="text-sm font-mono text-text-main">{h.host}</span>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              icon="delete"
+              onClick={() => deleteHost(h.host)}
+              aria-label={t("removeHost", { host: h.host })}
+            />
+          </div>
+        ))}
+      </div>
+    </Modal>
   );
 }

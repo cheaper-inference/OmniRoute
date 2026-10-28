@@ -45,9 +45,9 @@ JSON-RPC ਗਲਤੀ ਕੋਡ `-32000` ਨਾਲ HTTP 503 ਵਾਪਸ ਕਰ�
 
 ## JSON-RPC 2.0 ਵਿਧੀਆਂ
 
-### `message/send` — ਸਮਕਾਲੀ ਕਾਰਜ-ਨਿਰਵਹਿਣ
+### `message/send` — ਸਮਕਾਲੀ ਐਗਜ਼ੀਕਿਊਸ਼ਨ
 
-ਇੱਕ ਸਕਿੱਲ ਨੂੰ ਸੁਨੇਹਾ ਭੇਜਦਾ ਹੈ ਅਤੇ ਪੂਰੇ ਜਵਾਬ ਦੀ ਉਡੀਕ ਕਰਦਾ ਹੈ।
+ਕਿਸੇ ਸਕਿੱਲ ਨੂੰ ਸੁਨੇਹਾ ਭੇਜਦਾ ਹੈ ਅਤੇ ਪੂਰੇ ਜਵਾਬ ਦੀ ਉਡੀਕ ਕਰਦਾ ਹੈ।
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,12 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` ਲਈ, ਗੇਟਵੇ ਬੇਨਤੀ ਵਾਸਤੇ `metadata.combo`, `metadata.model` ਨੂੰ ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਓਵਰਰਾਈਡ ਕਰਦਾ ਹੈ; ਇਸਨੂੰ ਅਣਡਿੱਠੇ ਕੀਤੇ `x-combo` JSON ਫੀਲਡ ਵਜੋਂ ਨਹੀਂ, ਸਗੋਂ ਅਸਲ `model` ਵਜੋਂ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ। ਗੇਟਵੇ ਦੀ ਆਮ API-ਕੁੰਜੀ ਅਤੇ ਪ੍ਰਤੀ-ਟਾਰਗੇਟ ਪ੍ਰਮਾਣੀਕਰਨ ਨੀਤੀ ਫਿਰ ਵੀ ਲਾਗੂ ਹੁੰਦੀ ਹੈ। ਅਵੈਧ ਜਾਂ ਖਾਲੀ ਕੌਂਬੋ ਰੱਦ ਕਰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।
+
+ਨਤੀਜਾ `requested_combo` (ਕਾਲਰ ਦਾ ਇਰਾਦਾ), `dispatched_model`
+(ਅਸਲ ਗੇਟਵੇ ਬੇਨਤੀ), `response_model` (ਗੇਟਵੇ ਜਵਾਬ) ਅਤੇ
+`confirmed_combo` ਪ੍ਰਦਰਸ਼ਿਤ ਕਰਦਾ ਹੈ। ਆਖਰੀ ਫੀਲਡ `null` ਰਹਿੰਦੀ ਹੈ, ਜਦੋਂ ਤੱਕ ਗੇਟਵੇ ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਕਿਸੇ ਕੌਂਬੋ ਦੀ ਪਛਾਣ ਨਹੀਂ ਕਰਦਾ। A2A ਫ਼ੈਸਲਾ ਲੌਗ ਐਗਜ਼ੀਕਿਊਸ਼ਨ ਨੂੰ ਸਿਰਫ਼ ਪੁਸ਼ਟੀ ਕੀਤੇ ਕੌਂਬੋ ਨਾਲ ਜੋੜਦੇ ਹਨ, ਜਦਕਿ ਅਪੁਸ਼ਟ ਬੇਨਤੀ ਨੂੰ `requestedCombo` ਵਜੋਂ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹਨ।
+
 **ਜਵਾਬ:**
 
 ```json
@@ -76,22 +82,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +98,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE ਸਟ੍ਰੀਮਿੰਗ
 
-`message/send` ਵਾਂਗ ਹੀ ਹੈ, ਪਰ ਰੀਅਲ-ਟਾਈਮ ਸਟ੍ਰੀਮਿੰਗ ਲਈ Server-Sent Events ਵਾਪਸ ਕਰਦਾ ਹੈ।
+ਇਹ `message/send` ਵਾਂਗ ਹੀ ਹੈ, ਪਰ ਰੀਅਲ-ਟਾਈਮ ਸਟ੍ਰੀਮਿੰਗ ਲਈ Server-Sent Events ਵਾਪਸ ਕਰਦਾ ਹੈ।
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +125,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — ਟਾਸਕ ਸਥਿਤੀ ਬਾਰੇ ਪੁੱਛਗਿੱਛ
+### `tasks/get` — ਟਾਸਕ ਦੀ ਸਥਿਤੀ ਪੁੱਛੋ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +134,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — ਇੱਕ ਟਾਸਕ ਰੱਦ ਕਰੋ
+### `tasks/cancel` — ਟਾਸਕ ਰੱਦ ਕਰੋ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,24 +145,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## ਉਪਲਬਧ ਸਕਿੱਲਾਂ
+## ਉਪਲਬਧ ਹੁਨਰ
 
-OmniRoute 6 A2A ਸਕਿੱਲਾਂ ਐਕਸਪੋਜ਼ ਕਰਦਾ ਹੈ ਜੋ `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ਵਿੱਚ ਜੁੜੀਆਂ ਹਨ। ਹਰ ਸਕਿੱਲ ਮੋਡੀਊਲ `src/lib/a2a/skills/` ਵਿੱਚ ਸਥਿਤ ਹੈ।
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ਵਿੱਚ ਵਾਇਰਡ 6 A2A ਹੁਨਰਾਂ ਦਾ ਪਰਦਾਫਾਸ਼ ਕਰਦਾ ਹੈ। ਹਰੇਕ ਹੁਨਰ ਮੋਡੀਊਲ `src/lib/a2a/skills/` ਵਿੱਚ ਰਹਿੰਦਾ ਹੈ।
 
-| ਸਕਿੱਲ             | ID                   | ਵਰਣਨ                                                                                                                                              | ਟੈਗ                        | ਉਦਾਹਰਣਾਂ                                        |
-| :---------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :---------------------------------------------- |
-| ਸਮਾਰਟ ਰੂਟਿੰਗ      | `smart-routing`      | OmniRoute ਦੇ ਕੰਬੋ ਇੰਜਣ + ਸਕੋਰਿੰਗ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਕਿਸੇ ਪ੍ਰੌਂਪਟ ਨੂੰ ਸਭ ਤੋਂ ਅਨੁਕੂਲ ਪ੍ਰੋਵਾਈਡਰ/ਕੰਬੋ ਰਾਹੀਂ ਰੂਟ ਕਰਦਾ ਹੈ                                    | routing, providers         | "ਇਸ ਪ੍ਰੌਂਪਟ ਨੂੰ ਸਭ ਤੋਂ ਵਧੀਆ ਮਾਡਲ ਰਾਹੀਂ ਰੂਟ ਕਰੋ" |
-| ਕੋਟਾ ਪ੍ਰਬੰਧਨ      | `quota-management`   | ਹਰੇਕ-ਪ੍ਰੋਵਾਈਡਰ ਕੋਟਾ ਸਥਿਤੀ ਦੀ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ, ਕਾਲ ਕਰਨ ਵਾਲਿਆਂ ਨੂੰ ਇਹ ਫੈਸਲਾ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ ਕਿ ਕਦੋਂ throttle/switch ਕਰਨਾ ਹੈ                     | quota, providers           | "anthropic ਲਈ ਕੋਟਾ ਜਾਂਚੋ"                       |
-| ਪ੍ਰੋਵਾਈਡਰ ਖੋਜ     | `provider-discovery` | ਇੰਸਟਾਲ ਕੀਤੇ ਪ੍ਰੋਵਾਈਡਰਾਂ ਨੂੰ ਸਮਰੱਥਾਵਾਂ, free-tier ਫਲੈਗਾਂ ਅਤੇ OAuth ਸਥਿਤੀ ਸਮੇਤ ਸੂਚੀਬੱਧ ਕਰਦਾ ਹੈ                                                      | providers, discovery       | "ਕਿਹੜੇ ਪ੍ਰੋਵਾਈਡਰ ਉਪਲਬਧ ਹਨ?"                     |
-| ਲਾਗਤ ਵਿਸ਼ਲੇਸ਼ਣ    | `cost-analysis`      | ਕੈਟਾਲਾਗ + ਹਾਲੀਆ ਵਰਤੋਂ ਦੇ ਆਧਾਰ 'ਤੇ ਕਿਸੇ ਰਿਕਵੈਸਟ/ਗੱਲਬਾਤ ਦੀ ਲਾਗਤ ਦਾ ਅਨੁਮਾਨ ਲਗਾਉਂਦਾ ਹੈ                                                                | cost, usage                | "ਇਸ ਗੱਲਬਾਤ ਦੀ ਲਾਗਤ ਦਾ ਅਨੁਮਾਨ ਲਗਾਓ"              |
-| ਹੈਲਥ ਰਿਪੋਰਟ       | `health-report`      | ਹਰੇਕ ਪ੍ਰੋਵਾਈਡਰ ਲਈ circuit breaker, cooldown, lockout ਸਥਿਤੀ ਨੂੰ ਇਕੱਠਾ ਕਰਦਾ ਹੈ                                                                      | health, resilience         | "ਸਾਰੇ ਪ੍ਰੋਵਾਈਡਰਾਂ ਦੀ ਹੈਲਥ ਸਥਿਤੀ ਦਿਖਾਓ"          |
-| ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ | `list-capabilities`  | ਪੂਰਾ 45-ਐਂਟਰੀ Agent Skills ਕੈਟਾਲਾਗ (23 API + 21 CLI + 1 config) context injection ਲਈ raw SKILL.md URLs ਦੇ ਨਾਲ ਇੱਕ markdown ਟੇਬਲ ਵਜੋਂ ਵਾਪਸ ਕਰਦਾ ਹੈ | catalog, discovery, skills | "ਸਾਰੀਆਂ OmniRoute ਸਮਰੱਥਾਵਾਂ ਸੂਚੀਬੱਧ ਕਰੋ"        |
+| ਹੁਨਰ           | ID                   | ਵਰਣਨ                                                                                                                                            | ਟੈਗਸ               | ਉਦਾਹਰਨਾਂ                                  |
+| :------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- | :---------------------------------------- |
+| ਸਮਾਰਟ ਰੂਟਿੰਗ   | `smart-routing`      | OmniRoute ਦੇ ਕੰਬੋ ਇੰਜਣ + ਸਕੋਰਿੰਗ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹੋਏ ਅਨੁਕੂਲ provider/combo ਦੁਆਰਾ ਇੱਕ ਪ੍ਰੋਂਪਟ ਨੂੰ ਰੂਟ ਕਰਦਾ ਹੈ                                      | ਰੂਟਿੰਗ, ਪ੍ਰਦਾਤਾ    | "ਇਸ ਪ੍ਰੋਂਪਟ ਨੂੰ ਵਧੀਆ ਮਾਡਲ ਰਾਹੀਂ ਰੂਟ ਕਰੋ"  |
+| ਕੋਟਾ ਪ੍ਰਬੰਧਨ   | `quota-management`   | ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਕੋਟਾ ਰਾਜ ਦੀ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ, ਕਾਲਰਾਂ ਨੂੰ ਇਹ ਫੈਸਲਾ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ ਕਿ throttle/switch ਕਦੋਂ ਕਰਨਾ ਹੈ                              | ਕੋਟਾ, ਪ੍ਰਦਾਤਾ      | "ਐਨਥ੍ਰੋਪਿਕ ਲਈ ਕੋਟੇ ਦੀ ਜਾਂਚ ਕਰੋ"           |
+| ਪ੍ਰਦਾਤਾ ਖੋਜ    | `provider-discovery` | ਸਮਰੱਥਾਵਾਂ, ਫ੍ਰੀ-ਟੀਅਰ ਫਲੈਗ, OAuth ਸਥਿਤੀ ਵਾਲੇ ਸਥਾਪਤ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ                                                                       | ਪ੍ਰਦਾਤਾ, ਖੋਜ       | "ਕਿਹੜੇ ਪ੍ਰਦਾਤਾ ਉਪਲਬਧ ਹਨ?"                 |
+| ਲਾਗਤ ਵਿਸ਼ਲੇਸ਼ਣ | `cost-analysis`      | ਕੈਟਾਲਾਗ + ਦੀ ਹਾਲੀਆ ਵਰਤੋਂ ਦੇ ਮੱਦੇਨਜ਼ਰ ਇੱਕ request/conversation ਦੀ ਲਾਗਤ ਦਾ ਅਨੁਮਾਨ ਲਗਾਉਂਦਾ ਹੈ                                                      | ਲਾਗਤ, ਵਰਤੋਂ        | "ਇਸ ਗੱਲਬਾਤ ਲਈ ਅਨੁਮਾਨਿਤ ਲਾਗਤ"              |
+| ਸਿਹਤ ਰਿਪੋਰਟ    | `health-report`      | ਪ੍ਰਤੀ ਪ੍ਰਦਾਤਾ ਸਰਕਟ ਬ੍ਰੇਕਰ, ਕੂਲਡਾਉਨ, ਤਾਲਾਬੰਦੀ ਸਥਿਤੀ ਨੂੰ ਇਕੱਠਾ ਕਰਦਾ ਹੈ                                                                            | ਸਿਹਤ, ਲਚਕਤਾ        | "ਸਾਰੇ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਸਿਹਤ ਸਥਿਤੀ ਦਿਖਾਓ"     |
+| ਸੂਚੀ ਸਮਰੱਥਾਵਾਂ | `list-capabilities`  | ਸੰਦਰਭ ਟੀਕੇ ਲਈ ਕੱਚੇ SKILL.md URLs ਦੇ ਨਾਲ ਇੱਕ ਮਾਰਕਡਾਊਨ ਸਾਰਣੀ ਦੇ ਤੌਰ 'ਤੇ ਪੂਰਾ 45-ਐਂਟਰੀ ਏਜੰਟ ਹੁਨਰ ਕੈਟਾਲਾਗ (23 API + 21 CLI + 1 ਸੰਰਚਨਾ) ਵਾਪਸ ਕਰਦਾ ਹੈ | ਕੈਟਾਲਾਗ, ਖੋਜ, ਹੁਨਰ | "ਸਾਰੀਆਂ OmniRoute ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ" |
 
-> Agent Card ਨੂੰ ਲਾਈਵ 375-ਪ੍ਰੋਵਾਈਡਰ ਕੈਟਾਲਾਗ ਨਾਲ ਸੰਰੇਖਿਤ ਰੱਖਿਆ ਜਾਣਾ ਚਾਹੀਦਾ ਹੈ; ਪ੍ਰੋਵਾਈਡਰ ਗਿਣਤੀਆਂ ਅਤੇ free/no-auth ਮੈਟਾਡੇਟਾ runtime registry ਤੋਂ ਲਿਆ ਜਾਂਦਾ ਹੈ।
+> ਏਜੰਟ ਕਾਰਡ ਨੂੰ ਲਾਈਵ 377-ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ ਨਾਲ ਇਕਸਾਰ ਰੱਖਿਆ ਜਾਣਾ ਚਾਹੀਦਾ ਹੈ; ਪ੍ਰਦਾਤਾ ਗਿਣਤੀ ਅਤੇ free/no-auth ਮੈਟਾਡੇਟਾ ਰਨਟਾਈਮ ਰਜਿਸਟਰੀ ਤੋਂ ਪ੍ਰਾਪਤ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।
 
-### `list-capabilities` ਸਕਿੱਲ ਵੇਰਵਾ
+### `list-capabilities` ਹੁਨਰ ਵੇਰਵੇ
 
-`list-capabilities` ਸਕਿੱਲ ਬਾਹਰੀ ਏਜੰਟਾਂ ਲਈ ਖਾਸ ਤੌਰ 'ਤੇ ਉਪਯੋਗੀ ਹੈ ਜਿਨ੍ਹਾਂ ਨੂੰ API ਕਾਲਾਂ ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ ਇਹ ਖੋਜਣਾ ਹੁੰਦਾ ਹੈ ਕਿ OmniRoute ਕੀ ਐਕਸਪੋਜ਼ ਕਰਦਾ ਹੈ। ਇਹ ਇੱਕ structured markdown ਟੇਬਲ artifact ਵਾਪਸ ਕਰਦਾ ਹੈ:
+`list-capabilities` ਹੁਨਰ ਖਾਸ ਤੌਰ 'ਤੇ ਬਾਹਰੀ ਏਜੰਟਾਂ ਲਈ ਲਾਭਦਾਇਕ ਹੈ ਜਿਨ੍ਹਾਂ ਨੂੰ ਇਹ ਖੋਜਣ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ ਕਿ API ਕਾਲਾਂ ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ OmniRoute ਕੀ ਪ੍ਰਗਟ ਕਰਦਾ ਹੈ। ਇਹ ਇੱਕ ਸਟ੍ਰਕਚਰਡ ਮਾਰਕਡਾਊਨ ਟੇਬਲ ਆਰਟੀਫੈਕਟ ਵਾਪਸ ਕਰਦਾ ਹੈ:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -172,7 +171,7 @@ OmniRoute 6 A2A ਸਕਿੱਲਾਂ ਐਕਸਪੋਜ਼ ਕਰਦਾ ਹੈ 
 ...
 ```
 
-ਹਰ ਕਤਾਰ ਵਿੱਚ `rawUrl` ਕਾਲਮ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ ਤਾਂ ਜੋ ਏਜੰਟ ਪੂਰੀ SKILL.md ਤੁਰੰਤ ਫੈਚ ਕਰ ਸਕਣ। `metadata.totalSkills` ਫੀਲਡ ਕੈਟਾਲਾਗ ਦੇ ਆਕਾਰ (ਅੱਜ 45) ਨੂੰ ਦਰਸਾਉਂਦਾ ਹੈ। ਲਾਗੂਕਰਨ: `src/lib/a2a/skills/listCapabilities.ts`। ਇਹ ਵੀ ਵੇਖੋ [AGENT-SKILLS.md](./AGENT-SKILLS.md)।
+ਹਰੇਕ ਕਤਾਰ ਵਿੱਚ `rawUrl` ਕਾਲਮ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ ਤਾਂ ਜੋ ਏਜੰਟ ਤੁਰੰਤ ਪੂਰਾ SKILL.md ਪ੍ਰਾਪਤ ਕਰ ਸਕਣ। `metadata.totalSkills` ਫੀਲਡ ਕੈਟਾਲਾਗ ਆਕਾਰ (45 ਅੱਜ) ਨੂੰ ਦਰਸਾਉਂਦਾ ਹੈ। ਲਾਗੂ ਕਰਨਾ: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md) ਵੀ ਦੇਖੋ।
 
 ---
 
@@ -262,9 +261,9 @@ JSON-RPC ਐਂਡਪੌਇੰਟ `/a2a` ਪ੍ਰਮਾਣਿਕ A2A ਪ੍ਰ�
 
 ---
 
-## ਇੰਟੀਗ੍ਰੇਸ਼ਨ ਉਦਾਹਰਨਾਂ
+## ਏਕੀਕਰਣ ਦੀਆਂ ਉਦਾਹਰਨਾਂ
 
-### Python (requests)
+### ਪਾਈਥਨ (ਬੇਨਤੀ)
 
 ```python
 import requests
@@ -283,7 +282,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (ਲੈਣ)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

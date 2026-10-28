@@ -1,0 +1,62 @@
+{
+  "id": "test-phpunit",
+  "label": "PHPUnit",
+  "description": "Drop PHPUnit banner, runtime header and dot progress; keep failures, errors and the result summary.",
+  "category": "test",
+  "priority": 90,
+  "match": {
+    "outputTypes": ["test-phpunit"],
+    "commands": [
+      "^(?:php\\s+)?(?:\\./)?(?:vendor/bin/)?phpunit\\b",
+      "^php\\s+artisan\\s+test\\b",
+      "^composer\\s+(?:run(?:-script)?\\s+)?test\\b"
+    ],
+    "patterns": [
+      "^PHPUnit \\d+\\.\\d+",
+      "^Tests: \\d+, Assertions: \\d+",
+      "^OK \\(\\d+ tests?, \\d+ assertions?\\)",
+      "^(?:FAILURES|ERRORS)!$"
+    ]
+  },
+  "rules": {
+    "stripAnsi": true,
+    "dropPatterns": [
+      "^\\s*$",
+      "^PHPUnit \\d+\\.\\d+",
+      "^Runtime:\\s",
+      "^Configuration:\\s",
+      "^Random Seed:\\s",
+      "^Time: \\d",
+      "^[.FEWRSIDN]+\\s+\\d+ / \\d+ \\(\\s*\\d+%\\)$",
+      "^--$",
+      "^/\\S*/vendor/\\S+\\.php:\\d+$"
+    ],
+    "deduplicate": true,
+    "maxLines": 120,
+    "headLines": 30,
+    "tailLines": 40
+  },
+  "preserve": {
+    "errorPatterns": [
+      "^\\d+\\) \\S",
+      "^There (?:was|were) \\d+ ",
+      "Failed asserting",
+      "^(?:FAILURES|ERRORS)!$"
+    ],
+    "summaryPatterns": ["^Tests: \\d+, Assertions: \\d+", "^OK \\(", "^OK, but "]
+  },
+  "tests": [
+    {
+      "name": "passing run collapses to the OK line",
+      "command": "vendor/bin/phpunit",
+      "input": "PHPUnit 10.5.36 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.12\nConfiguration: /app/phpunit.xml\n\n...                                                                 3 / 3 (100%)\n\nTime: 00:00.012, Memory: 8.00 MB\n\nOK (3 tests, 3 assertions)\n",
+      "expected": "OK (3 tests, 3 assertions)"
+    },
+    {
+      "name": "failing run keeps heading, message, location and counts",
+      "command": "vendor/bin/phpunit",
+      "input": "PHPUnit 10.5.36 by Sebastian Bergmann and contributors.\n\nRuntime:       PHP 8.3.12\n\n.F                                                                  2 / 2 (100%)\n\nTime: 00:00.015, Memory: 8.00 MB\n\nThere was 1 failure:\n\n1) Tests\\MathTest::testAdd\nExpected 4 but got 5.\nFailed asserting that 5 is identical to 4.\n\n/app/tests/MathTest.php:15\n\nFAILURES!\nTests: 2, Assertions: 2, Failures: 1.\n",
+      "expected": "There was 1 failure:\n1) Tests\\MathTest::testAdd\nExpected 4 but got 5.\nFailed asserting that 5 is identical to 4.\n/app/tests/MathTest.php:15\nFAILURES!\nTests: 2, Assertions: 2, Failures: 1."
+    }
+  ]
+}

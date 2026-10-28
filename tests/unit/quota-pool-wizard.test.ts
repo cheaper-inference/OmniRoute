@@ -47,24 +47,15 @@ const pageClientSrc = fs.readFileSync(PAGE_CLIENT_PATH, "utf-8");
 // ── PoolWizard.tsx assertions ─────────────────────────────────────────────────
 
 test("PoolWizard.tsx: step 1 (Conta) is present", () => {
-  assert.ok(
-    wizardSrc.includes("step === 1"),
-    "Expected step === 1 block for Conta step"
-  );
+  assert.ok(wizardSrc.includes("step === 1"), "Expected step === 1 block for Conta step");
 });
 
 test("PoolWizard.tsx: step 2 (Limite) is present", () => {
-  assert.ok(
-    wizardSrc.includes("step === 2"),
-    "Expected step === 2 block for Limite step"
-  );
+  assert.ok(wizardSrc.includes("step === 2"), "Expected step === 2 block for Limite step");
 });
 
 test("PoolWizard.tsx: step 3 (Chaves) is present", () => {
-  assert.ok(
-    wizardSrc.includes("step === 3"),
-    "Expected step === 3 block for Chaves step"
-  );
+  assert.ok(wizardSrc.includes("step === 3"), "Expected step === 3 block for Chaves step");
 });
 
 test("PoolWizard.tsx: PATCH body includes the exclusive flag", () => {
@@ -80,12 +71,9 @@ test("PoolWizard.tsx: PATCH body includes the exclusive flag", () => {
 });
 
 test("PoolWizard.tsx: quotaModelName is imported from quotaModelNaming", () => {
+  assert.ok(wizardSrc.includes("quotaModelName"), "Expected quotaModelName import in PoolWizard");
   assert.ok(
-    wizardSrc.includes("quotaModelName"),
-    "Expected quotaModelName import in PoolWizard"
-  );
-  assert.ok(
-    wizardSrc.includes("from \"@/lib/quota/quotaModelNaming\"") ||
+    wizardSrc.includes('from "@/lib/quota/quotaModelNaming"') ||
       wizardSrc.includes("from '@/lib/quota/quotaModelNaming'"),
     "Expected import from @/lib/quota/quotaModelNaming"
   );
@@ -113,22 +101,10 @@ test("PoolWizard.tsx: save sequence does POST then conditional PUT then PATCH", 
 });
 
 test("PoolWizard.tsx: Stepper renders 3-step header", () => {
-  assert.ok(
-    wizardSrc.includes("Stepper"),
-    "Expected a Stepper component in PoolWizard"
-  );
-  assert.ok(
-    wizardSrc.includes("wizardStep1Label"),
-    "Expected wizardStep1Label i18n key used"
-  );
-  assert.ok(
-    wizardSrc.includes("wizardStep2Label"),
-    "Expected wizardStep2Label i18n key used"
-  );
-  assert.ok(
-    wizardSrc.includes("wizardStep3Label"),
-    "Expected wizardStep3Label i18n key used"
-  );
+  assert.ok(wizardSrc.includes("Stepper"), "Expected a Stepper component in PoolWizard");
+  assert.ok(wizardSrc.includes("wizardStep1Label"), "Expected wizardStep1Label i18n key used");
+  assert.ok(wizardSrc.includes("wizardStep2Label"), "Expected wizardStep2Label i18n key used");
+  assert.ok(wizardSrc.includes("wizardStep3Label"), "Expected wizardStep3Label i18n key used");
 });
 
 test("PoolWizard.tsx: plan dimensions editor uses UNIT_OPTIONS and WINDOW_OPTIONS", () => {
@@ -150,9 +126,15 @@ test("PoolWizard.tsx: dimensions are only saved when user edited them (dimension
 });
 
 test("PoolWizard.tsx: exclusive checkbox is rendered in step 3", () => {
+  // The checkbox is the shared Checkbox adapter (CI UI Kit) bound to the
+  // `exclusive` state, not a raw <input type="checkbox">.
   assert.ok(
-    wizardSrc.includes('type="checkbox"'),
-    "Expected a checkbox input for exclusive flag in step 3"
+    wizardSrc.includes('import Checkbox from "@/shared/components/Checkbox"'),
+    "Expected the shared Checkbox adapter import in PoolWizard"
+  );
+  assert.ok(
+    /<Checkbox\s[^>]*?checked=\{exclusive\}/.test(wizardSrc),
+    "Expected a checkbox for the exclusive flag in step 3"
   );
   assert.ok(
     wizardSrc.includes("wizardExclusiveLabel"),
