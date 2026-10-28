@@ -31,6 +31,7 @@ import {
   bindAbortLifecycle,
   type SsePassthroughResult,
 } from "./streamingPassthrough.ts";
+import { ensureStreamReadiness } from "../../utils/streamReadiness.ts";
 import type { AntigravityCredentials } from "../antigravity.ts";
 
 const LONG_RETRY_THRESHOLD_MS = 60_000;
@@ -91,7 +92,7 @@ export function markCreditsExhausted(accountId: string): void {
   creditsExhaustedUntil.set(accountId, Date.now() + CREDITS_EXHAUSTED_TTL_MS);
 }
 
-class AntigravityPreResponseTimeoutError extends Error {
+export class AntigravityPreResponseTimeoutError extends Error {
   code = ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
   status = HTTP_STATUS.GATEWAY_TIMEOUT;
 
@@ -99,6 +100,29 @@ class AntigravityPreResponseTimeoutError extends Error {
     super(`Antigravity upstream did not return response headers within ${timeoutMs}ms: ${url}`);
     this.name = "TimeoutError";
   }
+}
+
+/**
+ * Silent-body watchdog (#13125): the headers arrived but no first SSE event
+ * did within the readiness budget. It keeps the pre-response 504 code, so the
+ * account layer treats it like the header deadline, but that budget is spent
+ * per base URL: executeOnce may still fail over to the next host.
+ */
+export class AntigravityFirstEventTimeoutError extends AntigravityPreResponseTimeoutError {
+  constructor(timeoutMs: number, url: string) {
+    super(timeoutMs, url);
+    this.message = `Antigravity upstream sent no SSE event within ${timeoutMs}ms: ${url}`;
+  }
+}
+
+/**
+ * True only for the exhausted response-header deadline (#18052), which must
+ * not be spent again on another host; the silent-body watchdog is excluded.
+ */
+export function isAntigravityHeaderDeadlineTimeout(error: unknown): boolean {
+  return (
+    isAntigravityPreResponseTimeout(error) && !(error instanceof AntigravityFirstEventTimeoutError)
+  );
 }
 
 function getAbortErrorCode(error: unknown): string | null {
@@ -611,6 +635,32 @@ async function buildUpstreamErrorResult(
  * had an artificial timeout (now the standard FETCH_BODY_TIMEOUT_MS
  * of 10 min applies).
  */
+export async function peekFirstAntigravitySseEvent(
+  response: Response,
+  url: string,
+  timeoutMs: number = STREAM_READINESS_TIMEOUT_MS,
+  signal?: AbortSignal | null
+): Promise<Response> {
+  if (!response.body || !response.ok) {
+    return response;
+  }
+
+  if (signal?.aborted) {
+    response.body.cancel().catch(() => {});
+    throw signal.reason;
+  }
+
+  const readiness = await ensureStreamReadiness(response, {
+    timeoutMs,
+    provider: "antigravity",
+  });
+
+  if (!readiness.ok) {
+    throw new AntigravityFirstEventTimeoutError(timeoutMs, url);
+  }
+
+  return readiness.response;
+}
 async function buildNonStreamingExecuteOnceResult(
   response: Response,
   url: string,
@@ -715,11 +765,19 @@ export async function buildFinalAntigravityResult(
   transformedBody: Record<string, unknown>,
   accountId: string,
   signal: AbortSignal | null | undefined,
-  onCreditsUpdate: OnAntigravityCreditsUpdate
+  onCreditsUpdate: OnAntigravityCreditsUpdate,
+  readinessTimeoutMs: number = STREAM_READINESS_TIMEOUT_MS
 ): Promise<SsePassthroughResult> {
+  const peekedResponse = await peekFirstAntigravitySseEvent(
+    response,
+    url,
+    readinessTimeoutMs,
+    signal
+  );
+
   if (!stream) {
     return buildNonStreamingExecuteOnceResult(
-      response,
+      peekedResponse,
       url,
       finalHeaders,
       transformedBody,
@@ -729,7 +787,7 @@ export async function buildFinalAntigravityResult(
     );
   }
   return buildStreamingExecuteOnceResult(
-    response,
+    peekedResponse,
     url,
     finalHeaders,
     transformedBody,
