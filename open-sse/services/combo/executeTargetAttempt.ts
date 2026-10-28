@@ -70,6 +70,7 @@ import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
 import { buildBudgetExhaustedResponse } from "./budgetExhaustion.ts";
 import { advanceNativeCodexTurnGeneration, pinNativeCodexTurn } from "./nativeCodexTurnPin.ts";
 import { recordComboDecision } from "./decisionTrace.ts";
+import { recordCrashFailure } from "../crashStormBreaker.ts";
 import { recordProviderCooldown } from "../providerCooldownTracker.ts";
 import {
   validateResponseQuality,
@@ -720,6 +721,11 @@ export async function executeTargetAttempt(
     const failure = await readAttemptFailure(result, { log: deps.log, modelStr });
     const { errorText, errorBody, structuredError } = failure;
     const retryAfter = resolveAttemptRetryAfter(failure);
+
+    // Crash-storm breaker feed: recurring same-signature failures on one
+    // provider trip the pre-dispatch crash_storm gate. Only 5xx count inside
+    // the recorder — 429/4xx have their own quota and credential machinery.
+    recordCrashFailure(provider, errorText, result.status);
 
     // Track earliest retryAfter
     if (
