@@ -1,6 +1,11 @@
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { getLiveWsPath, resolveLiveWsPublicUrl } from "@/shared/utils/wsPath";
 import { authorizeWebSocketHandshake } from "@/lib/ws/handshake";
+import {
+  WS_HANDSHAKE_ORIGIN_HEADER,
+  buildHandshakeOriginRequest,
+  isWebSocketOriginAllowed,
+} from "@/server/origin/wsOrigin";
 
 const WS_HANDSHAKE_HEADERS = {
   ...CORS_HEADERS,
@@ -48,6 +53,31 @@ export async function OPTIONS() {
   });
 }
 
+/**
+ * Origin verdict for a `/v1/ws` upgrade, or `null` when the caller is not the bridge.
+ *
+ * The bridge (`scripts/dev/v1-ws-bridge.mjs`) streams `/v1/chat/completions`,
+ * `/v1/messages` and `/v1/responses` back as WebSocket frames, which browsers do not
+ * guard with CORS. It forwards the browser's `Origin` and upgrade headers here and
+ * refuses to upgrade unless the response says `originChecked: true`. A plain GET (the
+ * dashboard's same-origin `fetch`) carries no bridge header and gets no verdict.
+ */
+function checkBridgeOrigin(request: Request, authType: string): boolean | null {
+  const raw = request.headers.get(WS_HANDSHAKE_ORIGIN_HEADER);
+  if (raw === null) return null;
+  // A valid API key is exempt, as on `/v1/responses`: a cross-site page cannot know it.
+  if (authType === "api_key") return true;
+  let handshake: unknown = null;
+  try {
+    handshake = JSON.parse(raw);
+  } catch {
+    handshake = null;
+  }
+  return isWebSocketOriginAllowed(
+    buildHandshakeOriginRequest(handshake, request.headers.get("origin"))
+  );
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const handshake = url.searchParams.get("handshake") === "1";
@@ -74,9 +104,25 @@ export async function GET(request: Request) {
       );
     }
 
+    const originVerdict = checkBridgeOrigin(request, auth.authType);
+    if (originVerdict === false) {
+      return Response.json(
+        {
+          error: {
+            message: "WebSocket origin not allowed",
+            type: "invalid_request",
+            code: "ws_origin_forbidden",
+          },
+          path: auth.wsPath,
+        },
+        { status: 403, headers: WS_HANDSHAKE_HEADERS }
+      );
+    }
+
     return Response.json(
       {
         ok: true,
+        originChecked: originVerdict === true,
         path: auth.wsPath,
         wsAuth: auth.wsAuth,
         authenticated: auth.authenticated,
