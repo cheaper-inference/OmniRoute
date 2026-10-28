@@ -843,9 +843,13 @@ Web/search ಪೂರೈಕೆದಾರರ ಅಮೂರ್ತತೆ (ಟವಿಲ
 
 ಜೆನೆರಿಕ್ ಕ್ಷೇತ್ರಗಳು ಯಾವಾಗಲೂ ಗೆಲ್ಲುತ್ತವೆ: `query`, `max_results`, `filters` (ಡೊಮೇನ್ಗಳು), `country` ಮತ್ತು `search_type` ನಿಂದ ಪಡೆದ ವಿಷಯ. Exa ನಲ್ಲಿ, `search_type: "news"` `category: "news"` ಇರಿಸುತ್ತದೆ. Tavily ಸಹ `search_type: "finance"` (`topic: "finance"`) ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ.
 
+$0.002 (2 ಕ್ರೆಡಿಟ್ಗಳು) ಒಂದು ಬ್ಲಾಕ್ ಮತ್ತು ಪ್ರತಿ ಕರೆಗೆ ಕನಿಷ್ಠ ಒಂದು ಬ್ಲಾಕ್ ( [ಫೈರ್ಕ್ರಾಲ್ ಬಿಲ್ಲಿಂಗ್](https://docs.firecrawl.dev/billing) ): 10 ಫಲಿತಾಂಶಗಳ ಪ್ರಾರಂಭದ ಬ್ಲಾಕ್ಗೆ ಫೈರ್ಕ್ರಾಲ್ ಹುಡುಕಾಟದ ವೆಚ್ಚವನ್ನು ದಾಖಲಿಸಲಾಗುತ್ತದೆ: 11 ಫಲಿತಾಂಶಗಳ ಬೆಲೆ $0.004.
+
 ಜೆನೆರಿಕ್ `time_range` ಈಗ ಎರಡೂ ಪೂರೈಕೆದಾರರನ್ನು ತಲುಪುತ್ತದೆ: Exa `startPublishedDate` (ISO ಟೈಮ್ಸ್ಟ್ಯಾಂಪ್) ಅನ್ನು ಪಡೆಯುತ್ತದೆ ಮತ್ತು Tavily `start_date` (`YYYY-MM-DD`) ಅನ್ನು ಪಡೆಯುತ್ತದೆ. `provider_options` ನಲ್ಲಿನ ಸ್ಪಷ್ಟ ದಿನಾಂಕವು ಮ್ಯಾಪ್ ಮಾಡಲಾದ ಒಂದನ್ನು ಅತಿಕ್ರಮಿಸುತ್ತದೆ.
 
 Exa ಫಲಿತಾಂಶಗಳು `id`, `highlight_scores`, `summary`, `subpages`, `entities` ಮತ್ತು `extras` ಅನ್ನು `provider_raw` ನಲ್ಲಿ ಇರಿಸುತ್ತವೆ. Tavily ಫಲಿತಾಂಶಗಳು `images` ಮತ್ತು `favicon` ಇರಿಸುತ್ತವೆ.
+
+ಲಿಂಕ್ಅಪ್ ಹುಡುಕಾಟದ ವೆಚ್ಚವನ್ನು `depth` `fast` ಮತ್ತು `standard` ಗಾಗಿ $0.005 ಮತ್ತು `deep` ಗೆ $0.05 ( [ಲಿಂಕಪ್ ಬೆಲೆ](https://docs.linkup.so/pages/documentation/development/pricing) ) ದಾಖಲಿಸಲಾಗಿದೆ, `depth` `provider_options` ಅಥವಾ ಸಂಪರ್ಕದ ಸೆಟ್ಟಿಂಗ್ಗಳಿಂದ ಬಂದಿರಲಿ.
 
 Exa `type: "lite"` (Exa 3.0) ಒಂದು ಸಣ್ಣ ಕ್ಷೇತ್ರಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ ಮತ್ತು ಯಾವುದೇ ಇತರ ಕ್ಷೇತ್ರವನ್ನು ಹೊಂದಿಸಿದಾಗ ಸಂಪೂರ್ಣ ವಿನಂತಿಯನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ. ಲೈಟ್ಗಾಗಿ, `additionalQueries`, `systemPrompt` ಮತ್ತು `text` ಮತ್ತು `highlights` ಹೊರತುಪಡಿಸಿ ಪ್ರತಿಯೊಂದು `contents` ಕೀಲಿಯನ್ನು ಕರೆಯ ಮೊದಲು ಕೈಬಿಡಲಾಗುತ್ತದೆ. ಅಸಮ್ಮತಿಸಿದ `subpages`, `subpageTarget`, `highlights.numSentences` ಮತ್ತು `highlights.highlightsPerUrl` ಅನ್ನು ಇನ್ನು ಮುಂದೆ ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ.
 

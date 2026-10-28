@@ -872,9 +872,13 @@ Exa un Tavily nolasa pakalpojumu sniedzējam raksturīgus laukus no nosaukumiem 
 
 Vienmēr uzvar vispārīgie lauki: `query`, `max_results`, `filters` (domēni), `country` un tēma, kas iegūta no `search_type`. Uz Exa `search_type: "news"` saglabā `category: "news"`. Tavilijs pieņem arī `search_type: "finance"` (`topic: "finance"`).
 
+Firecrawl meklēšanas izmaksas tiek reģistrētas par katru sākto 10 atgriezto rezultātu bloku — 0,002 ASV dolāri (2 kredīti) par bloku un vismaz viens bloks par zvanu ( [Firecrawl norēķini](https://docs.firecrawl.dev/billing) ): 11 rezultāti maksā 0,004 ASV dolārus.
+
 Vispārējais `time_range` tagad sasniedz abus pakalpojumu sniedzējus: Exa iegūst `startPublishedDate` (ISO laikspiedolu), bet Tavily iegūst `start_date` (`YYYY-MM-DD`). Precīzs datums `provider_options` ignorē kartēto datumu.
 
 Eksāmenu rezultāti saglabā `id`, `highlight_scores`, `summary`, `subpages`, `entities` un `extras` `provider_raw`. Tavily rezultāti saglabā `images` un `favicon`.
+
+Saites meklēšanas izmaksas tiek reģistrētas USD 0,005 par `depth` `fast` un `standard` un USD 0,05 par `deep` ( [Saistīšanas cenas](https://docs.linkup.so/pages/documentation/development/pricing) ) neatkarīgi no tā, vai `depth` nāk no `provider_options` vai savienojuma iestatījumiem.
 
 Exa `type: "lite"` (Exa 3.0) pieņem mazāku lauku kopu un noraida visu pieprasījumu, ja ir iestatīts kāds cits lauks. Lite versijai `additionalQueries`, `systemPrompt` un visi `contents` taustiņi, izņemot `text` un `highlights` tiek atmesti pirms izsaukuma. Novecojušie `subpages`, `subpageTarget`, `highlights.numSentences` un `highlights.highlightsPerUrl` vairs netiek pārsūtīti.
 

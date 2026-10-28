@@ -872,9 +872,13 @@ POST /v1/providers/{provider}/images/generations
 
 الحقول العامة تفوز دائمًا: `query` و `max_results` و `filters` (المجالات) و `country` والموضوع المشتق من `search_type`. في Exa، `search_type: "news"` يحتفظ `category: "news"`. يقبل Tavily أيضًا `search_type: "finance"` (`topic: "finance"`).
 
+يتم تسجيل تكلفة بحث الزحف الناري لكل كتلة بدأت مكونة من 10 نتائج تم إرجاعها، بسعر 0.002 USD (اعتمادان) للكتل وكتلة واحدة على الأقل لكل مكالمة ( [فواتير الزحف الناري](https://docs.firecrawl.dev/billing) ): تكلفة 11 نتيجة 0.004 دولار أمريكي.
+
 يصل الآن `time_range` العام إلى كلا الموفرين: يحصل Exa على `startPublishedDate` (ISO timestamp) ويحصل Tavily على `start_date` (`YYYY-MM-DD`). التاريخ الصريح في `provider_options` يتجاوز التاريخ المعين.
 
 نتائج Exa تبقي `id` و `highlight_scores` و `summary` و `subpages` و `entities` و `extras` في `provider_raw`. نتائج Tavily تحافظ على `images` و `favicon`.
+
+يتم تسجيل تكلفة البحث عن الارتباط بمبلغ 0.005 USD لـ `depth` `fast` و `standard` و0.05 USD لـ `deep` ( [تسعير الارتباط](https://docs.linkup.so/pages/documentation/development/pricing) )، سواء أتى `depth` من `provider_options` أو من إعدادات الاتصال.
 
 يقبل Exa `type: "lite"` (Exa 3.0) مجموعة أصغر من الحقول ويرفض الطلب بالكامل عند تعيين أي حقل آخر. بالنسبة إلى lite، يتم إسقاط `additionalQueries` و `systemPrompt` وكل مفتاح `contents` باستثناء `text` و `highlights` قبل المكالمة. لم يعد يتم إعادة توجيه `subpages` و `subpageTarget` و `highlights.numSentences` و `highlights.highlightsPerUrl` المهملة.
 

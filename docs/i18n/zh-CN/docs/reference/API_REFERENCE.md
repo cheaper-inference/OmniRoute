@@ -829,9 +829,13 @@ Exa 和 Tavily 从命名空间包中读取特定于提供者的字段： `provid
 
 通用字段总是获胜： `query`、 `max_results`、 `filters` （域）、 `country`和从`search_type`派生的主题。在 Exa 上， `search_type: "news"`保留`category: "news"`。 Tavily 还接受`search_type: "finance"` (`topic: "finance"`)。
 
+Firecrawl 搜索成本记录为每个启动块（包含 10 个返回结果），每个块为 0.002 美元（2 个积分），并且每次调用至少一个块（ [Firecrawl 计费](https://docs.firecrawl.dev/billing)）：11 个结果的成本为 0.004 美元。
+
 通用`time_range`现在到达两个提供者：Exa 获取`startPublishedDate` （ISO时间戳），Tavily 获取`start_date` （`YYYY-MM-DD`）。 `provider_options`中的明确日期会覆盖映射的日期。
 
 Exa 结果将`id`、 `highlight_scores`、 `summary`、 `subpages`、 `entities`和`extras`保留在`provider_raw`中。总体结果保留`images`和`favicon`。
+
+Linkup search cost is recorded at $0.005 for `depth` `fast` and `standard` and $0.05 for `deep` ([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)), whether `depth` comes from `provider_options` or the connection's settings.
 
 Exa `type: "lite"` (Exa 3.0) 接受较小的字段集，并在设置任何其他字段时拒绝整个请求。对于 lite， `additionalQueries`、 `systemPrompt`和除`text`和`highlights`之外的每个`contents`键在调用之前都会被删除。已弃用的`subpages`、 `subpageTarget`、 `highlights.numSentences`和`highlights.highlightsPerUrl`不再转发。
 

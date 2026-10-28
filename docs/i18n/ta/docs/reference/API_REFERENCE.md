@@ -837,9 +837,13 @@ Exa மற்றும் Tavily ஒரு பெயர் இடைவெளி
 
 பொதுவான புலங்கள் எப்போதும் வெற்றி பெறும்: `query`, `max_results`, `filters` (டொமைன்கள்), `country` மற்றும் `search_type` இலிருந்து பெறப்பட்ட தலைப்பு. எக்ஸாவில், `search_type: "news"` `category: "news"` வைத்திருக்கும். Tavily `search_type: "finance"` (`topic: "finance"`) ஐயும் ஏற்றுக்கொள்கிறது.
 
+Firecrawl தேடல் செலவு 10 திரும்பிய முடிவுகளின் ஒரு தொடக்கத் தொகுதிக்கு பதிவு செய்யப்படுகிறது, ஒரு தொகுதிக்கு $0.002 (2 வரவுகள்) மற்றும் ஒரு அழைப்புக்கு குறைந்தபட்சம் ஒரு தொகுதி ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ): 11 முடிவுகளுக்கு $0.004 செலவாகும்.
+
 பொதுவான `time_range` இப்போது இரு வழங்குநர்களையும் சென்றடைகிறது: Exa `startPublishedDate` (ISO நேர முத்திரை) மற்றும் Tavily `start_date` (`YYYY-MM-DD`) பெறுகிறது. `provider_options` இல் ஒரு வெளிப்படையான தேதி மேப் செய்யப்பட்டதை மீறுகிறது.
 
 தேர்வு முடிவுகள் `id`, `highlight_scores`, `summary`, `subpages`, `entities` மற்றும் `extras` ஐ `provider_raw` இல் வைத்திருக்கும். Tavily முடிவுகள் `images` மற்றும் `favicon` வைத்திருக்கின்றன.
+
+இணைப்புத் தேடல் செலவு `depth` `fast` மற்றும் `standard` க்கு $0.005 ஆகவும், `deep` க்கு $0.05 ஆகவும் ( [Linkup விலை நிர்ணயம்](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` அல்லது இணைப்பின் அமைப்புகளில் இருந்து வந்தாலும்.
 
 Exa `type: "lite"` (Exa 3.0) ஒரு சிறிய புலங்களை ஏற்றுக்கொள்கிறது மற்றும் வேறு ஏதேனும் புலம் அமைக்கப்படும் போது முழு கோரிக்கையையும் நிராகரிக்கிறது. லைட்டிற்கு, `additionalQueries`, `systemPrompt` மற்றும் `text` மற்றும் `highlights` தவிர ஒவ்வொரு `contents` விசையும் அழைப்புக்கு முன் கைவிடப்படும். நிறுத்தப்பட்ட `subpages`, `subpageTarget`, `highlights.numSentences` மற்றும் `highlights.highlightsPerUrl` ஆகியவை இனி அனுப்பப்படாது.
 

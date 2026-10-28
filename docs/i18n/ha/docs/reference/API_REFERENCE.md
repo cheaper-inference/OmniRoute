@@ -873,9 +873,13 @@ Exa da Tavily suna karanta takamaiman filayen mai bayarwa daga jakar da aka raba
 
 Filayen gabaɗaya koyaushe suna nasara: `query`, `max_results`, `filters` (yankuna), `country` da batun da aka samo daga `search_type`. A kan Exa, `search_type: "news"` yana kiyaye `category: "news"`. Tavily kuma yana karɓar `search_type: "finance"` (`topic: "finance"`).
 
+Ana yin rikodin farashin binciken Firecrawl ga kowane farkon toshe na sakamakon 10 da aka dawo, a $0.002 (ƙididdigar ƙididdigewa 2) toshe kuma aƙalla toshe ɗaya a kowane kira ( [Billing na Firecrawl](https://docs.firecrawl.dev/billing) ): Sakamakon 11 ya kai $0.004.
+
 Jigon `time_range` yanzu ya isa duka masu samarwa: Exa yana samun `startPublishedDate` (ISO timestamp) da Tavily yana samun `start_date` (`YYYY-MM-DD`). Ƙayyadaddun kwanan wata a cikin `provider_options` ya soke wanda aka tsara.
 
 Sakamako yana kiyaye `id`, `highlight_scores`, `summary`, `subpages`, `entities` da `extras` a cikin `provider_raw`. Sakamako a zahiri suna kiyaye `images` da `favicon`.
+
+Ana yin rikodin farashin neman haɗin kai a $0.005 don `depth` `fast` da `standard` da $0.05 don `deep` ( [Farashin haɗin gwiwa](https://docs.linkup.so/pages/documentation/development/pricing) ), ko `depth` ya fito daga `provider_options` ko saitunan haɗin.
 
 Exa `type: "lite"` (Exa 3.0) yana karɓar ƙaramin saitin filayen kuma ya ƙi duk buƙatar lokacin da aka saita kowane filin. Don lite, `additionalQueries`, `systemPrompt` da kowane maɓallin `contents` banda `text` da `highlights` ana sauke kafin kiran. Ba a ƙara turawa da aka soke `subpages`, `subpageTarget`, `highlights.numSentences` da `highlights.highlightsPerUrl`.
 

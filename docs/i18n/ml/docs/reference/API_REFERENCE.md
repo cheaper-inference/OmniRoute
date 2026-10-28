@@ -825,9 +825,13 @@ Exa, Tavily ഒരു നെയിംസ്പെയ്സ്ഡ് ബാഗി
 
 പൊതുവായ ഫീൽഡുകൾ എല്ലായ്പ്പോഴും വിജയിക്കുന്നു: `query`, `max_results`, `filters` (ഡൊമെയ്നുകൾ), `country` കൂടാതെ `search_type` ൽ നിന്ന് ഉരുത്തിരിഞ്ഞ വിഷയവും. എക്സായിൽ, `search_type: "news"` `category: "news"` നിലനിർത്തുന്നു. താവിലിയും `search_type: "finance"` (`topic: "finance"`) സ്വീകരിക്കുന്നു.
 
+ഫയർക്രാൾ തിരയൽ നിരക്ക് 10 റിട്ടേൺ ചെയ്ത ഫലങ്ങളുടെ ഓരോ ബ്ലോക്കിനും രേഖപ്പെടുത്തുന്നു, ഒരു ബ്ലോക്കിന് $0.002 (2 ക്രെഡിറ്റുകൾ), ഒരു കോളിന് ഒരു ബ്ലോക്കെങ്കിലും ( [ഫയർക്രാൾ ബില്ലിംഗ്](https://docs.firecrawl.dev/billing) ): 11 ഫലങ്ങളുടെ വില $0.004 ആണ്.
+
 ജെനറിക് `time_range` ഇപ്പോൾ രണ്ട് ദാതാക്കളിലേക്കും എത്തുന്നു: Exa-യ്ക്ക് `startPublishedDate` (ISO ടൈംസ്റ്റാമ്പ്) ലഭിക്കുന്നു, Tavily-യ്ക്ക് `start_date` (`YYYY-MM-DD`) ലഭിക്കുന്നു. `provider_options` ൽ വ്യക്തമായ ഒരു തീയതി മാപ്പ് ചെയ്തതിനെ അസാധുവാക്കുന്നു.
 
 എക്സാ ഫലങ്ങൾ `id`, `highlight_scores`, `summary`, `subpages`, `entities`, `extras` എന്നിവ `provider_raw` ൽ നിലനിർത്തുന്നു. താവിലി ഫലങ്ങൾ `images`, `favicon` എന്നിവ നിലനിർത്തുന്നു.
+
+ലിങ്ക്അപ്പ് തിരയൽ ചെലവ് `depth` `fast`, `standard` എന്നിവയ്ക്ക് $0.005 ഉം `deep` ന് $0.05 ഉം ( [ലിങ്കപ്പ് വിലനിർണ്ണയം](https://docs.linkup.so/pages/documentation/development/pricing) ) രേഖപ്പെടുത്തുന്നു, `depth` `provider_options` ൽ നിന്നോ കണക്ഷൻ്റെ ക്രമീകരണങ്ങളിൽ നിന്നോ വന്നാലും.
 
 Exa `type: "lite"` (Exa 3.0) ഒരു ചെറിയ സെറ്റ് ഫീൽഡുകൾ സ്വീകരിക്കുകയും മറ്റേതെങ്കിലും ഫീൽഡ് സജ്ജമാക്കുമ്പോൾ മുഴുവൻ അഭ്യർത്ഥനയും നിരസിക്കുകയും ചെയ്യുന്നു. ലൈറ്റിനായി, `additionalQueries`, `systemPrompt` കൂടാതെ `text`, `highlights` എന്നിവ ഒഴികെയുള്ള എല്ലാ `contents` കീകളും കോളിന് മുമ്പ് ഡ്രോപ്പ് ചെയ്യപ്പെടും. ഒഴിവാക്കിയ `subpages`, `subpageTarget`, `highlights.numSentences`, `highlights.highlightsPerUrl` എന്നിവ ഇനി ഫോർവേഡ് ചെയ്യപ്പെടില്ല.
 

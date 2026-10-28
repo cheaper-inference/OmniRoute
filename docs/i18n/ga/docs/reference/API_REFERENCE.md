@@ -854,9 +854,13 @@ Léann Exa agus Tavily réimsí a bhaineann go sonrach le soláthraí ó mhála 
 
 Bíonn bua ag na réimsí cineálacha i gcónaí: `query`, `max_results`, `filters` (fearainn), `country` agus an topaic a dhíorthaítear ó `search_type`. Ar Exa, coinníonn `search_type: "news"` `category: "news"`. Glacann Tavily freisin `search_type: "finance"` (`topic: "finance"`).
 
+Taifeadtar costas cuardaigh Firecrawl in aghaidh an bhloc tosaithe de 10 dtorthaí a cuireadh ar ais, ag $0.002 (2 chreidmheas) an bloc agus bloc amháin ar a laghad in aghaidh an ghlao ( [Billeáil Firecrawl](https://docs.firecrawl.dev/billing) ): chosain 11 toradh $0.004.
+
 Sroicheann an `time_range` cineálach an dá sholáthraí anois: faigheann Exa `startPublishedDate` (stampa ama ISO ) agus faigheann Tavily `start_date` (`YYYY-MM-DD`). Sáraíonn dáta sainráite i `provider_options` an ceann léarscáilithe.
 
 Coinníonn torthaí exa `id`, `highlight_scores`, `summary`, `subpages`, `entities` agus `extras` i `provider_raw`. Coinníonn torthaí tavily `images` agus `favicon`.
+
+Taifeadtar costas cuardaigh Linkup ag $0.005 le haghaidh `depth` `fast` agus `standard` agus $0.05 le haghaidh `deep` ( [Praghsáil Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), cibé an dtagann `depth` ó `provider_options` nó ó shocruithe an naisc.
 
 Glacann Exa `type: "lite"` (Exa 3.0) le sraith réimsí níos lú agus diúltaíonn sé don iarratas iomlán nuair a shocraítear aon réimse eile. I gcás lite, scaoiltear `additionalQueries`, `systemPrompt` agus gach eochair `contents` seachas `text` agus `highlights` roimh an nglao. Ní chuirtear na `subpages`, `subpageTarget`, `highlights.numSentences` agus `highlights.highlightsPerUrl` ar aghaidh a thuilleadh.
 

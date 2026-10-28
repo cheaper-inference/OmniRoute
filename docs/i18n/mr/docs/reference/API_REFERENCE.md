@@ -822,9 +822,13 @@ Exa आणि Tavily ने नेमस्पेस असलेल्या �
 
 जेनेरिक फील्ड नेहमी जिंकतात: `query`, `max_results`, `filters` (डोमेन), `country` आणि `search_type` वरून घेतलेला विषय. Exa वर, `search_type: "news"` `category: "news"` ठेवते. Tavily `search_type: "finance"` (`topic: "finance"`) देखील स्वीकारते.
 
+फायरक्रॉल शोध खर्च प्रति स्टार्ट ब्लॉक 10 रिटर्न केलेल्या परिणामांची नोंद केली जाते, $0.002 (2 क्रेडिट्स) एक ब्लॉक आणि किमान एक ब्लॉक प्रति कॉल ( [फायरक्रॉल बिलिंग](https://docs.firecrawl.dev/billing) ): 11 परिणामांची किंमत $0.004 आहे.
+
 जेनेरिक `time_range` आता दोन्ही प्रदात्यांपर्यंत पोहोचते: Exa ला `startPublishedDate` (ISO टाइमस्टॅम्प) आणि Tavily ला `start_date` (`YYYY-MM-DD`) मिळते. `provider_options` मधील स्पष्ट तारीख मॅप केलेली तारीख ओव्हरराइड करते.
 
 Exa परिणाम `id`, `highlight_scores`, `summary`, `subpages`, `entities` आणि `extras` `provider_raw` मध्ये ठेवतात. Tavily परिणाम `images` आणि `favicon` ठेवतात.
+
+लिंकअप शोध खर्च `depth` `fast` आणि `standard` साठी $0.005 आणि `deep` ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) साठी $0.05 वर रेकॉर्ड केला जातो, `depth` `provider_options` किंवा कनेक्शन सेटिंग्जमधून आलेला असला तरीही.
 
 Exa `type: "lite"` (Exa 3.0) फील्डचा एक छोटा संच स्वीकारते आणि इतर फील्ड सेट केल्यावर संपूर्ण विनंती नाकारते. lite साठी, `additionalQueries`, `systemPrompt` आणि `text` आणि `highlights` वगळता प्रत्येक `contents` की कॉल करण्यापूर्वी सोडली जाते. बहिष्कृत `subpages`, `subpageTarget`, `highlights.numSentences` आणि `highlights.highlightsPerUrl` यापुढे फॉरवर्ड केले जाणार नाहीत.
 

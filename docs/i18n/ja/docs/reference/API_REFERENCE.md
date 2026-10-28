@@ -828,9 +828,13 @@ Exa と Tavily は、名前空間バッグからプロバイダー固有のフ�
 
 汎用フィールドが常に優先されます: `query`、 `max_results`、 `filters` (ドメイン)、 `country` 、および`search_type`から派生したトピック。 Exa では、 `search_type: "news"` `category: "news"`を保持します。 Tavily は`search_type: "finance"` (`topic: "finance"`) も受け入れます。
 
+Firecrawl の検索コストは、返された 10 件の結果の開始ブロックごとに記録され、1 ブロックあたり 0.002 ドル (2 クレジット)、呼び出しごとに少なくとも 1 ブロック ( [Firecrawl の請求](https://docs.firecrawl.dev/billing)): 11 件の結果の費用は 0.004 ドルです。
+
 汎用`time_range`両方のプロバイダーに到達するようになりました。Exa は`startPublishedDate` (ISOタイムスタンプ) を取得し、Tavily は`start_date` (`YYYY-MM-DD`) を取得します。 `provider_options`内の明示的な日付は、マップされた日付をオーバーライドします。
 
 Exa の結果は、 `id`、 `highlight_scores`、 `summary`、 `subpages`、 `entities`および`extras`を`provider_raw`に保持します。 Tavily の結果は`images`と`favicon`を維持します。
+
+リンクアップ検索コストは、 `depth` `provider_options`からのものか接続の設定からのものかに関係なく、 `depth` `fast`および`standard`については 0.005 ドル、 `deep`については 0.05 ドル ([リンクアップ価格設定](https://docs.linkup.so/pages/documentation/development/pricing)) で記録されます。
 
 Exa `type: "lite"` (Exa 3.0) は、より小さいフィールドのセットを受け入れ、他のフィールドが設定されている場合はリクエスト全体を拒否します。 lite の場合、 `additionalQueries`、 `systemPrompt` 、および`text`と`highlights`を除くすべての`contents`キーは呼び出し前に削除されます。非推奨の`subpages`、 `subpageTarget`、 `highlights.numSentences`および`highlights.highlightsPerUrl`は転送されなくなりました。
 

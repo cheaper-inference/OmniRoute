@@ -849,9 +849,13 @@ Exa ati Tavily ka awọn aaye olupese kan pato lati apo ti a fi orukọ silẹ: 
 
 Awọn aaye jeneriki nigbagbogbo bori: `query`, `max_results`, `filters` (awọn ibugbe), `country` ati koko-ọrọ ti o jade lati `search_type`. Lori Exa, `search_type: "news"` ntọju `category: "news"`. Tavily tun gba `search_type: "finance"` (`topic: "finance"`).
 
+Iye owo wiwa Firecrawl jẹ igbasilẹ fun bulọọki ti o bẹrẹ ti awọn abajade 10 ti o pada, ni $0.002 (awọn kirẹditi 2) bulọki kan ati pe o kere ju bulọọki kan fun ipe ( [Isanwo Firecrawl](https://docs.firecrawl.dev/billing) ): awọn abajade 11 jẹ $0.004.
+
 `time_range` jeneriki bayi de ọdọ awọn olupese mejeeji: Exa n gba `startPublishedDate` (ISO timestamp) ati Tavily n gba `start_date` (`YYYY-MM-DD`). Ọjọ ti o fojuhan ni `provider_options` dojukọ eyi ti a ya aworan.
 
 Awọn abajade idanwo tọju `id`, `highlight_scores`, `summary`, `subpages`, `entities` ati `extras` ninu `provider_raw`. Awọn abajade Tavily tọju `images` ati `favicon`.
+
+Iye owo wiwa ọna asopọ jẹ igbasilẹ ni $0.005 fun `depth` `fast` ati `standard` ati $0.05 fun `deep` ( [Ifowoleri Ọna asopọ](https://docs.linkup.so/pages/documentation/development/pricing) ), boya `depth` wa lati `provider_options` tabi awọn eto asopọ.
 
 Exa `type: "lite"` (Exa 3.0) gba eto ti o kere ju ti awọn aaye ati kọ gbogbo ibeere nigbati eyikeyi aaye miiran ti ṣeto. Fun Lite, `additionalQueries`, `systemPrompt` ati gbogbo bọtini `contents` ayafi `text` ati `highlights` ti wa silẹ ṣaaju ipe naa. `subpages`, `subpageTarget`, `highlights.numSentences` ati `highlights.highlightsPerUrl` ti a ti sọ silẹ ko ni siwaju mọ.
 

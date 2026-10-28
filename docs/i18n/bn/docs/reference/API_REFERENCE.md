@@ -868,9 +868,13 @@ Exa এবং Tavily নেমস্পেসযুক্ত ব্যাগ থ
 
 জেনেরিক ক্ষেত্রগুলি সর্বদা জয়ী হয়: `query`, `max_results`, `filters` (ডোমেন), `country` এবং `search_type` থেকে প্রাপ্ত বিষয়। Exa-এ, `search_type: "news"` `category: "news"` রাখে। Tavily এছাড়াও `search_type: "finance"` (`topic: "finance"`) গ্রহণ করে।
 
+ফায়ারক্রল অনুসন্ধান খরচ 10টি ফলাফলের সূচনা ব্লক প্রতি রেকর্ড করা হয়, $0.002 (2 ক্রেডিট) একটি ব্লক এবং প্রতি কলে কমপক্ষে একটি ব্লক ( [ফায়ারক্রল বিলিং](https://docs.firecrawl.dev/billing) ): 11টি ফলাফলের মূল্য $0.004।
+
 জেনেরিক `time_range` এখন উভয় প্রদানকারীর কাছে পৌঁছেছে: Exa পায় `startPublishedDate` (ISO টাইমস্ট্যাম্প) এবং Tavily পায় `start_date` (`YYYY-MM-DD`)। `provider_options` এ একটি স্পষ্ট তারিখ ম্যাপ করাকে ওভাররাইড করে।
 
 পরীক্ষার ফলাফল `id`, `highlight_scores`, `summary`, `subpages`, `entities` এবং `extras` `provider_raw` এ রাখে। Tavily ফলাফল `images` এবং `favicon` রাখা.
+
+লিংকআপ সার্চ খরচ `depth` `fast` এবং `standard` জন্য $0.005 এবং `deep` এর জন্য $0.05 রেকর্ড করা হয়েছে ( [লিঙ্কআপ মূল্য](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` থেকে আসে বা সংযোগের সেটিংস থেকে।
 
 Exa `type: "lite"` (Exa 3.0) ক্ষেত্রগুলির একটি ছোট সেট গ্রহণ করে এবং অন্য কোনও ক্ষেত্র সেট করা হলে পুরো অনুরোধটি প্রত্যাখ্যান করে। লাইটের জন্য, `additionalQueries`, `systemPrompt` এবং `text` এবং `highlights` ছাড়া প্রতিটি `contents` কী কলের আগে ড্রপ করা হয়। অপ্রচলিত `subpages`, `subpageTarget`, `highlights.numSentences` এবং `highlights.highlightsPerUrl` আর ফরওয়ার্ড করা হয় না।
 

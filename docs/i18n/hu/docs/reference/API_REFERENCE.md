@@ -857,9 +857,13 @@ Az Exa és a Tavily beolvassa a szolgáltató-specifikus mezőket egy névteres 
 
 Mindig az általános mezők nyernek: `query`, `max_results`, `filters` (domains), `country` és a `search_type` ből származó téma. Az Exa-n a `search_type: "news"` megtartja `category: "news"`. Tavily `search_type: "finance"` (`topic: "finance"`) is elfogadja.
 
+A Firecrawl keresési költsége 10 visszaadott eredmény elindított blokkjára vonatkozik, blokkonként 0,002 USD (2 kredit) és hívásonként legalább egy blokk ( [Firecrawl-számlázás](https://docs.firecrawl.dev/billing) ): 11 találat 0,004 USD-ba kerül.
+
 Az általános `time_range` mostantól mindkét szolgáltatót eléri: Exa `startPublishedDate` (ISO timestamp), Tavily pedig `start_date` (`YYYY-MM-DD`) kap. Az explicit dátum `provider_options` ben felülírja a leképezett dátumot.
 
 Az exa eredmények `id`, `highlight_scores`, `summary`, `subpages`, `entities` és `extras` `provider_raw` ben tartják . A Tavily eredmények `images` és `favicon` maradnak.
+
+A linkup keresési költsége 0,005 USD `depth` `fast` és `standard`, és 0,05 USD `deep` ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) esetében, függetlenül attól, hogy `depth` `provider_options` ből vagy a kapcsolat beállításaiból származik.
 
 Az Exa `type: "lite"` (Exa 3.0) kisebb mezőket fogad el, és elutasítja a teljes kérést, ha bármely más mező be van állítva. Lite esetén `additionalQueries`, `systemPrompt` és `text` és `highlights` kivételével minden `contents` billentyű eldobásra kerül a hívás előtt. Az elavult `subpages`, `subpageTarget`, `highlights.numSentences` és `highlights.highlightsPerUrl` továbbítása már nem történik meg.
 

@@ -842,9 +842,13 @@ Web/search ప్రొవైడర్ సంగ్రహణ (తవిలీ, �
 
 జెనరిక్ ఫీల్డ్లు ఎల్లప్పుడూ గెలుస్తాయి: `query`, `max_results`, `filters` (డొమైన్లు), `country` మరియు `search_type` నుండి తీసుకోబడిన అంశం. Exaలో, `search_type: "news"` `category: "news"` ఉంచుతుంది. Tavily కూడా `search_type: "finance"` (`topic: "finance"`) అంగీకరిస్తుంది.
 
+ఫైర్క్రాల్ శోధన ధర 10 రిటర్న్ చేసిన ఫలితాల యొక్క ప్రారంభ బ్లాక్కు నమోదు చేయబడుతుంది, ఒక బ్లాక్కి $0.002 (2 క్రెడిట్లు) మరియు ప్రతి కాల్కి కనీసం ఒక బ్లాక్ ( [ఫైర్క్రాల్ బిల్లింగ్](https://docs.firecrawl.dev/billing) ): 11 ఫలితాల ధర $0.004.
+
 జెనరిక్ `time_range` ఇప్పుడు రెండు ప్రొవైడర్లను చేరుకుంటుంది: Exa `startPublishedDate` (ISO టైమ్స్టాంప్) మరియు Tavily `start_date` (`YYYY-MM-DD`)ని పొందుతుంది. `provider_options` లో స్పష్టమైన తేదీ మ్యాప్ చేయబడిన తేదీని భర్తీ చేస్తుంది.
 
 Exa ఫలితాలు `id`, `highlight_scores`, `summary`, `subpages`, `entities` మరియు `extras` `provider_raw` లో ఉంచుతాయి. Tavily ఫలితాలు `images` మరియు `favicon` ఉంచుతాయి.
+
+లింక్అప్ శోధన ధర `depth` `fast` మరియు `standard` కోసం $0.005 మరియు `deep` కోసం $0.05 ( [Linkup ప్రైసింగ్](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` లేదా కనెక్షన్ సెట్టింగ్ల నుండి వచ్చినా నమోదు చేయబడుతుంది.
 
 Exa `type: "lite"` (Exa 3.0) చిన్న ఫీల్డ్లను అంగీకరిస్తుంది మరియు ఏదైనా ఇతర ఫీల్డ్ సెట్ చేయబడినప్పుడు మొత్తం అభ్యర్థనను తిరస్కరిస్తుంది. లైట్ కోసం, `additionalQueries`, `systemPrompt` మరియు `text` మరియు `highlights` మినహా ప్రతి `contents` కీ కాల్కు ముందు డ్రాప్ చేయబడతాయి. నిలిపివేయబడిన `subpages`, `subpageTarget`, `highlights.numSentences` మరియు `highlights.highlightsPerUrl` ఇకపై ఫార్వార్డ్ చేయబడవు.
 

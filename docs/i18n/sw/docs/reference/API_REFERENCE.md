@@ -869,9 +869,13 @@ Exa na Tavily walisoma sehemu mahususi za mtoa huduma kutoka kwa mfuko ulio na n
 
 Sehemu za jumla hushinda kila wakati: `query`, `max_results`, `filters` (vikoa), `country` na mada inayotokana na `search_type`. Kwenye Exa, `search_type: "news"` huweka `category: "news"`. Tavily pia anakubali `search_type: "finance"` (`topic: "finance"`).
 
+Gharama ya utafutaji ya Firecrawl inarekodiwa kwa kila block iliyoanza ya matokeo 10 yaliyorejeshwa, kwa $0.002 (salio 2) block na angalau block moja kwa kila simu ( [Billing Firecrawl](https://docs.firecrawl.dev/billing) ): Matokeo 11 yanagharimu $0.004.
+
 `time_range` ya jumla sasa inawafikia watoa huduma wote wawili: Exa anapata `startPublishedDate` (muhuri wa muda wa ISO ) na Tavily anapata `start_date` (`YYYY-MM-DD`). Tarehe ya wazi katika `provider_options` inabatilisha ile iliyochorwa.
 
 Matokeo ya Exa huweka `id`, `highlight_scores`, `summary`, `subpages`, `entities` na `extras` katika `provider_raw`. Matokeo ya Tavily huweka `images` na `favicon`.
+
+Gharama ya utafutaji ya kiunganishi imerekodiwa kuwa $0.005 kwa `depth` `fast` na `standard` na $0.05 kwa `deep` ( [Bei ya kiunganishi](https://docs.linkup.so/pages/documentation/development/pricing) ), iwe `depth` inatoka `provider_options` au mipangilio ya muunganisho.
 
 Exa `type: "lite"` (Exa 3.0) inakubali seti ndogo ya sehemu na kukataa ombi zima wakati uga mwingine wowote umewekwa. Kwa lite, `additionalQueries`, `systemPrompt` na kila kitufe cha `contents` isipokuwa `text` na `highlights` hudondoshwa kabla ya simu. `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl` zilizoacha kutumika hazisambazwi tena.
 

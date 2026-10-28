@@ -872,9 +872,13 @@ Exa dan Tavily membaca kolom khusus penyedia dari tas dengan namespace: `provide
 
 Bidang umum selalu menang: `query`, `max_results`, `filters` (domain), `country` dan topik turunan dari `search_type`. Di Exa, `search_type: "news"` menyimpan `category: "news"`. Tavily juga menerima `search_type: "finance"` (`topic: "finance"`).
 
+Biaya pencarian Firecrawl dicatat per blok yang dimulai dari 10 hasil yang dikembalikan, sebesar $0,002 (2 sks) per blok dan setidaknya satu blok per panggilan ( [Penagihan Firecrawl](https://docs.firecrawl.dev/billing) ): 11 hasil berharga $0,004.
+
 `time_range` generik sekarang menjangkau kedua penyedia: Exa mendapat `startPublishedDate` ( cap waktu ISO ) dan Tavily mendapat `start_date` (`YYYY-MM-DD`). Tanggal eksplisit di `provider_options` menggantikan tanggal yang dipetakan.
 
 Hasil ujian menyimpan `id`, `highlight_scores`, `summary`, `subpages`, `entities` dan `extras` di `provider_raw`. Hasil Tavily tetap `images` dan `favicon`.
+
+Biaya pencarian linkup dicatat sebesar $0,005 untuk `depth` `fast` dan `standard` dan $0,05 untuk `deep` ( [Harga linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), baik `depth` berasal dari `provider_options` atau pengaturan koneksi.
 
 Exa `type: "lite"` (Exa 3.0) menerima kumpulan bidang yang lebih kecil dan menolak seluruh permintaan ketika bidang lainnya disetel. Untuk ringan, `additionalQueries`, `systemPrompt` dan setiap kunci `contents` kecuali `text` dan `highlights` dihilangkan sebelum panggilan. `subpages`, `subpageTarget`, `highlights.numSentences` dan `highlights.highlightsPerUrl` yang tidak digunakan lagi tidak lagi diteruskan.
 

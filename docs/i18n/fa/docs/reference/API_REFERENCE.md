@@ -848,9 +848,13 @@ Exa و Tavily فیلدهای خاص ارائه دهنده را از یک کیس�
 
 فیلدهای عمومی همیشه برنده هستند: `query`، `max_results`، `filters` (دامنه ها)، `country` و موضوع مشتق شده از `search_type`. در Exa، `search_type: "news"` `category: "news"` را نگه میدارد. طویلی نیز `search_type: "finance"` (`topic: "finance"`) را می پذیرد.
 
+هزینه جستجوی Firecrawl برای هر بلوک شروع شده از 10 نتیجه بازگشتی، 0.002 دلار (2 اعتبار) هر بلوک و حداقل یک بلوک در هر تماس ( [صورتحساب Firecrawl](https://docs.firecrawl.dev/billing) ) ثبت می شود: 11 نتیجه 0.004 دلار هزینه دارد.
+
 `time_range` عمومی اکنون به هر دو ارائهدهنده میرسد: Exa `startPublishedDate` (مهر زمانی ISO ) و Tavily `start_date` (`YYYY-MM-DD`) دریافت میکند. تاریخ صریح در `provider_options` تاریخ نگاشت شده را لغو می کند.
 
 نتایج Exa `id`, `highlight_scores`, `summary`, `subpages`, `entities` و `extras` را در `provider_raw` نگه می دارند . طویلی نتایج حفظ `images` و `favicon`.
+
+هزینه جستجوی پیوند 0.005 دلار برای `depth` `fast` و `standard` و 0.05 دلار برای `deep` ( [قیمت گذاری پیوندها](https://docs.linkup.so/pages/documentation/development/pricing) ) ثبت می شود، چه `depth` از `provider_options` باشد یا از تنظیمات اتصال.
 
 Exa `type: "lite"` (Exa 3.0) مجموعه کوچکتری از فیلدها را می پذیرد و در صورت تنظیم هر فیلد دیگری، کل درخواست را رد می کند. برای lite، `additionalQueries`، `systemPrompt` و هر کلید `contents` به جز `text` و `highlights` قبل از تماس حذف میشوند. `subpages`، `subpageTarget`، `highlights.numSentences` و `highlights.highlightsPerUrl` منسوخ شده دیگر ارسال نمیشوند.
 

@@ -807,9 +807,13 @@ Exa va Tavily provayderga xos maydonlarni nomlar boʻshligʻidagi sumkadan oʻqi
 
 Umumiy maydonlar har doim g'alaba qozonadi: `query`, `max_results`, `filters` (domenlar), `country` va `search_type` dan olingan mavzu. Exa da `search_type: "news"` `category: "news"` saqlaydi. Tavily `search_type: "finance"` (`topic: "finance"`) ni ham qabul qiladi.
 
+Firecrawl qidiruv narxi 10 ta qaytarilgan natijadan iborat boshlangan blok uchun, har bir qo‘ng‘iroq uchun $0,002 (2 kredit) va kamida bitta blok ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ) miqdorida qayd etiladi: 11 ta natija $0,004 turadi.
+
 Umumiy `time_range` endi ikkala provayderga ham yetib boradi: Exa `startPublishedDate` (ISO vaqt tamg‘asi) va Tavily `start_date` (`YYYY-MM-DD`) oladi. `provider_options` -dagi aniq sana xaritadagini bekor qiladi.
 
 Exa natijalari `id`, `highlight_scores`, `summary`, `subpages`, `entities` `extras` ni `provider_raw` da saqlaydi. Tavily natijalari `images` va `favicon` saqlaydi.
+
+Linkup qidiruv narxi `depth` `fast` va `standard` uchun $0,005 va `deep` uchun $0,05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` dan keladimi yoki ulanish sozlamalaridan qatʼiy nazar qayd etiladi.
 
 Exa `type: "lite"` (Exa 3.0) kichikroq maydonlar to'plamini qabul qiladi va boshqa maydon o'rnatilganda butun so'rovni rad etadi. Lite uchun `additionalQueries`, `systemPrompt` va `text` va `highlights` dan tashqari barcha `contents` tugmalari qo'ng'iroqdan oldin tushiriladi. Eskirgan `subpages`, `subpageTarget`, `highlights.numSentences` va `highlights.highlightsPerUrl` endi boshqa uzatilmaydi.
 

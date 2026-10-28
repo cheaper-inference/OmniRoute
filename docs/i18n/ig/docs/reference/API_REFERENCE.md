@@ -872,9 +872,13 @@ Exa na Tavily na-agụ mpaghara ndị na-eweta-kpọmkwem site na akpa nwere aha
 
 Oghere ọnụọgụgụ mgbe niile na-emeri: `query`, `max_results`, `filters` (ngalaba), `country` na isiokwu sitere na `search_type`. Na Exa, `search_type: "news"` na-edobe `category: "news"`. Tavily na-anabatakwa `search_type: "finance"` (`topic: "finance"`).
 
+A na-edekọ ọnụ ahịa ọchụchọ Firecrawl n'otu ngọngọ mmalite nke rịzọlt 10 eweghachiri, na $0.002 (kredit 2) ngọngọ yana opekata mpe otu ngọngọ kwa oku ( [ịgba ụgwọ Firecrawl](https://docs.firecrawl.dev/billing) ): nsonaazụ 11 na-efu $0.004.
+
 Ngụkọta `time_range` ugbu a erutela ndị na-enye ha abụọ: Exa na-enweta `startPublishedDate` (ISO timestamp) na Tavily na-enweta `start_date` (`YYYY-MM-DD`). Ụbọchị doro anya na `provider_options` na-akagbu nke e sere ese.
 
 Nsonaazụ ule dowe `id`, `highlight_scores`, `summary`, `subpages`, `entities` na `extras` na `provider_raw`. Nsonaazụ dị mma dowe `images` na `favicon`.
+
+A na-edekọ ọnụ ahịa ọchụchọ Linkup na $0.005 maka `depth` `fast` na `standard` na $0.05 maka `deep` ( [ọnụahịa Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), ma `depth` sitere na `provider_options` ma ọ bụ ntọala njikọ.
 
 Exa `type: "lite"` (Exa 3.0) na-anabata obere ogige ma jụ arịrịọ niile mgbe edobere ubi ọ bụla ọzọ. Maka lite, `additionalQueries`, `systemPrompt` na igodo `contents` ọ bụla ma e wezụga `text` na `highlights` a na-atụba tupu oku a. Agakwaghị ebugharị `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl`.
 

@@ -872,9 +872,13 @@ Exa និង Tavily អានវាលជាក់លាក់របស់អ�
 
 វាលទូទៅតែងតែឈ្នះ៖ `query`, `max_results`, `filters` (ដែន), `country` និងប្រធានបទដែលបានមកពី `search_type`។ នៅលើ Exa, `search_type: "news"` រក្សា `category: "news"`។ Tavily ក៏ទទួលយក `search_type: "finance"` (`topic: "finance"`) ផងដែរ។
 
+ការចំណាយលើការស្វែងរក Firecrawl ត្រូវបានកត់ត្រាក្នុងមួយប្លុកដែលបានចាប់ផ្តើមនៃលទ្ធផល 10 ដែលត្រឡប់មកវិញនៅ $0.002 (2 ក្រេឌីត) ក្នុងមួយប្លុក និងយ៉ាងហោចណាស់មួយប្លុកក្នុងមួយការហៅ ( [ការចេញវិក្កយបត្រ Firecrawl](https://docs.firecrawl.dev/billing) ): 11 លទ្ធផលមានតម្លៃ $0.004 ។
+
 `time_range` ទូទៅឥឡូវនេះទៅដល់អ្នកផ្តល់សេវាទាំងពីរ៖ Exa ទទួលបាន `startPublishedDate` (ISO timestamp) និង Tavily ទទួលបាន `start_date` (`YYYY-MM-DD`)។ កាលបរិច្ឆេទច្បាស់លាស់នៅក្នុង `provider_options` បដិសេធការគូសផែនទី។
 
 លទ្ធផល Exa រក្សា `id`, `highlight_scores`, `summary`, `subpages`, `entities` និង `extras` ក្នុង `provider_raw`។ លទ្ធផល Tavily រក្សា `images` និង `favicon`។
+
+តម្លៃនៃការស្វែងរកតំណភ្ជាប់ត្រូវបានកត់ត្រានៅ $0.005 សម្រាប់ `depth` `fast` និង `standard` និង $0.05 សម្រាប់ `deep` ( [តម្លៃភ្ជាប់](https://docs.linkup.so/pages/documentation/development/pricing) ) ថាតើ `depth` មកពី `provider_options` ឬការកំណត់នៃការតភ្ជាប់។
 
 Exa `type: "lite"` (Exa 3.0) ទទួលយកសំណុំវាលតូចជាង ហើយបដិសេធសំណើទាំងមូលនៅពេលដែលវាលផ្សេងទៀតត្រូវបានកំណត់។ សម្រាប់ lite, `additionalQueries`, `systemPrompt` និងរាល់ `contents` key លើកលែងតែ `text` និង `highlights` ត្រូវបានទម្លាក់មុនពេលហៅ។ `subpages`, `subpageTarget`, `highlights.numSentences` និង `highlights.highlightsPerUrl` ដែលបានបដិសេធមិនត្រូវបានបញ្ជូនបន្តទៀតទេ។
 

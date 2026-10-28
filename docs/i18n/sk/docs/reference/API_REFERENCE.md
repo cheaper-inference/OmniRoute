@@ -881,9 +881,13 @@ Exa a Tavily čítajú polia špecifické pre poskytovateľa z vrecka s menným 
 
 Vždy vyhrávajú všeobecné polia: `query`, `max_results`, `filters` (domény), `country` a téma odvodená od `search_type`. Na Exa `search_type: "news"` ponechá `category: "news"`. Tavily akceptuje `search_type: "finance"` (`topic: "finance"`).
 
+Náklady na vyhľadávanie Firecrawl sa zaznamenávajú na začatý blok 10 vrátených výsledkov, pri 0,002 USD (2 kredity) blok a aspoň jeden blok na hovor ( [Fakturácia Firecrawl](https://docs.firecrawl.dev/billing) ): 11 výsledkov stojí 0,004 USD.
+
 Všeobecná `time_range` sa teraz dostáva k obom poskytovateľom: Exa získa `startPublishedDate` (časová značka ISO ) a Tavily získa `start_date` (`YYYY-MM-DD`). Explicitný dátum v `provider_options` prepíše mapovaný dátum.
 
 Výsledky Exa ponechajú `id`, `highlight_scores`, `summary`, `subpages`, `entities` a `extras` v `provider_raw`. Tavily výsledky zachovávajú `images` a `favicon`.
+
+Náklady na vyhľadávanie prepojenia sú zaznamenané vo výške 0,005 USD za `depth` `fast` a `standard` a 0,05 USD za `deep` ( [cena za prepojenie](https://docs.linkup.so/pages/documentation/development/pricing) ), či už `depth` pochádza zo `provider_options` alebo z nastavení pripojenia.
 
 Exa `type: "lite"` (Exa 3.0) akceptuje menšiu množinu polí a odmietne celú požiadavku, keď je nastavené akékoľvek iné pole. Pre lite sa pred hovorom zrušia `additionalQueries`, `systemPrompt` a všetky klávesy `contents` okrem `text` a `highlights`. Zastarané `subpages`, `subpageTarget`, `highlights.numSentences` a `highlights.highlightsPerUrl` sa už neposielajú ďalej.
 

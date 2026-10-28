@@ -868,9 +868,13 @@ Exa සහ Tavily නම් පරතරය සහිත බෑගයකින�
 
 සාමාන්‍ය ක්ෂේත්‍ර සැමවිටම ජය ගනී: `query`, `max_results`, `filters` (වසම්), `country` සහ `search_type` වෙතින් ව්‍යුත්පන්න වූ මාතෘකාව. Exa හි, `search_type: "news"` `category: "news"` තබා ගනී. Tavily `search_type: "finance"` (`topic: "finance"`) ද පිළිගනී.
 
+ෆයර්ක්‍රෝල් සෙවුම් පිරිවැය වාර්තා කරන ලද ප්‍රතිඵල 10කින් ආරම්භ කරන ලද කොටසකට, වාරිකයකට ඩොලර් 0.002 (බැර 2) සහ ඇමතුමකට අවම වශයෙන් එක් වාරණ ( [ෆයර්ක්‍රෝල් බිල්පත්](https://docs.firecrawl.dev/billing) ): 11 ප්‍රතිඵල සඳහා ඩොලර් 0.004ක් වැය වේ.
+
 සාමාන්‍ය `time_range` දැන් සපයන්නන් දෙදෙනාටම ළඟා වේ: Exa හට `startPublishedDate` (ISO වේලා මුද්‍රාව) සහ Tavily `start_date` (`YYYY-MM-DD`) ලබා ගනී. `provider_options` හි පැහැදිලි දිනයක් සිතියම්ගත කළ දිනය අභිබවා යයි.
 
 Exa ප්‍රතිඵල `id`, `highlight_scores`, `summary`, `subpages`, `entities` සහ `extras` `provider_raw` හි තබා ගනී. Tavily ප්රතිඵල `images` සහ `favicon` තබා ගන්න.
+
+Linkup සෙවුම් පිරිවැය `depth` `fast` සහ `standard` සඳහා $0.005 සහ `deep` සඳහා $0.05 ( [Linkup මිලකරණය](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` පැමිණෙන්නේ `provider_options` හෝ සම්බන්ධතා සැකසුම් වලින් වුවද.
 
 Exa `type: "lite"` (Exa 3.0) කුඩා ක්ෂේත්‍ර කට්ටලයක් පිළිගන්නා අතර වෙනත් ඕනෑම ක්ෂේත්‍රයක් සකසා ඇති විට සම්පූර්ණ ඉල්ලීම ප්‍රතික්ෂේප කරයි. lite සඳහා, `additionalQueries`, `systemPrompt` සහ `text` සහ `highlights` හැර සෑම `contents` යතුරක්ම ඇමතුමට පෙර අත්හරිනු ලැබේ. අත්හරින ලද `subpages`, `subpageTarget`, `highlights.numSentences` සහ `highlights.highlightsPerUrl` තවදුරටත් යොමු නොකෙරේ.
 

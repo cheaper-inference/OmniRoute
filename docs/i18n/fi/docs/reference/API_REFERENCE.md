@@ -872,9 +872,13 @@ Exa ja Tavily lukevat palveluntarjoajakohtaisia kenttiä nimiavaroidusta pussist
 
 Yleiset kentät voittaa aina: `query`, `max_results`, `filters` (domains), `country` ja `search_type`:stä johdettu aihe. Exassa `search_type: "news"` säilyttää `category: "news"`. Tavily hyväksyy myös `search_type: "finance"` (`topic: "finance"`).
 
+Firecrawl-haun hinta kirjataan 10 palautetun tuloksen aloitettua lohkoa kohti, 0,002 dollaria (2 krediittiä) lohko ja vähintään yksi lohko per puhelu ( [Firecrawl -laskutus](https://docs.firecrawl.dev/billing) ): 11 tuloksen hinta on 0,004 dollaria.
+
 Yleinen `time_range` saavuttaa nyt molemmat palveluntarjoajat: Exa saa `startPublishedDate` (ISO -aikaleiman) ja Tavily saa `start_date` (`YYYY-MM-DD`). Selkeä päivämäärä `provider_options` ssä ohittaa kartoitetun päivämäärän.
 
 Exa-tulokset säilyttävät `id`, `highlight_scores`, `summary`, `subpages`, `entities` ja `extras` `provider_raw` ssä. Tavilyn tulokset pitävät `images` ja `favicon`.
+
+Linkityshaun hinta kirjataan 0,005 $ `depth` `fast` ja `standard` ja 0,05 $ `deep` lle ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) riippumatta siitä, tuleeko `depth` `provider_options` tai yhteyden asetuksista.
 
 Exa `type: "lite"` (Exa 3.0) hyväksyy pienemmän joukon kenttiä ja hylkää koko pyynnön, kun jokin muu kenttä on asetettu. Lite:ssä `additionalQueries`, `systemPrompt` ja kaikki `contents` -näppäimet paitsi `text` ja `highlights` pudotetaan ennen kutsua. Käytöstä poistettuja `subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei enää lähetetä edelleen.
 

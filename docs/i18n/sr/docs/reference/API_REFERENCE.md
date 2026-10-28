@@ -872,9 +872,13 @@ OpenAI-компатибилна пакетна обрада.
 
 Генеричка поља увек побеђују: `query`, `max_results`, `filters` (домени), `country` и тема изведена из `search_type`. На Ека, `search_type: "news"` задржава `category: "news"`. Тавили такође прихвата `search_type: "finance"` (`topic: "finance"`).
 
+Трошкови Фирецравл претраге се евидентирају по започетом блоку од 10 враћених резултата, по 0,002 УСД (2 кредита) по блоку и најмање једном блоку по позиву ( [Фирецравл наплата](https://docs.firecrawl.dev/billing) ): 11 резултата кошта 0,004 УСД.
+
 Генерички `time_range` сада стиже до оба провајдера: Ека добија `startPublishedDate` (ISO временску ознаку) и Тавили добија `start_date` (`YYYY-MM-DD`). Експлицитни датум у `provider_options` замењује мапирани.
 
 Ека резултати задржавају `id`, `highlight_scores`, `summary`, `subpages`, `entities` и `extras` у `provider_raw`. Тавили резултати задржавају `images` и `favicon`.
+
+Цена претраге везе је 0,005 УСД за `depth` `fast` и `standard` и 0,05 УСД за `deep` ( [цене везе](https://docs.linkup.so/pages/documentation/development/pricing) ), без обзира да ли `depth` долази из `provider_options` или подешавања везе.
 
 Ека `type: "lite"` (Ека 3.0) прихвата мањи скуп поља и одбија цео захтев када се постави било које друго поље. За лите, `additionalQueries`, `systemPrompt` и сваки `contents` тастер осим `text` и `highlights` се испуштају пре позива. Застарели `subpages`, `subpageTarget`, `highlights.numSentences` и `highlights.highlightsPerUrl` се више не прослеђују.
 

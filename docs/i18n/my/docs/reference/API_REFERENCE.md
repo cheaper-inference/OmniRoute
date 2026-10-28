@@ -800,9 +800,13 @@ Exa နှင့် Tavily တို့သည် namespaced bag တစ်ခု�
 
 ယေဘုယျနယ်ပယ်များသည် အမြဲတမ်းအနိုင်ရသည်- `query`၊ `max_results`၊ `filters` (ဒိုမိန်းများ), `country` နှင့် `search_type` မှ ဆင်းသက်လာသော အကြောင်းအရာ။ Exa တွင် `search_type: "news"` `category: "news"` ထိန်းသိမ်းထားသည်။ Tavily သည် `search_type: "finance"` (`topic: "finance"`) ကိုလည်း လက်ခံသည်။
 
+Firecrawl ရှာဖွေမှုကုန်ကျစရိတ်သည် ဘလော့ဂ်တစ်ခုလျှင် $0.002 (ခရက်ဒစ် 2 ခု) နှင့် ခေါ်ဆိုမှုတစ်ခုလျှင် အနည်းဆုံး ဘလောက်တစ်ခု ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ): 11 ရလဒ်များသည် $0.004 ကုန်ကျသည်။
+
 ယေဘူယျ `time_range` ယခုအခါ ဝန်ဆောင်မှုပေးသူ နှစ်ခုစလုံးသို့ ရောက်ရှိသွားသည်- Exa သည် `startPublishedDate` (ISO timestamp) နှင့် Tavily သည် `start_date` (`YYYY-MM-DD`) ရရှိသည်။ `provider_options` တွင် ပြတ်သားသောရက်စွဲသည် မြေပုံရေးဆွဲထားသော ရက်စွဲကို အစားထိုးသည်။
 
 Exa ရလဒ်များသည် `id`, `highlight_scores`, `summary`, `subpages`, `entities` နှင့် `extras` ကို `provider_raw` တွင် ထားရှိသည်။ Tavily ရလဒ်များသည် `images` နှင့် `favicon` ကို ထိန်းထားသည်။
+
+Linkup ရှာဖွေမှုကုန်ကျစရိတ်သည် `depth` `fast` နှင့် `standard` အတွက် $0.005 နှင့် `deep` အတွက် $0.05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) ၊ `depth` မှ `provider_options` သို့မဟုတ် ချိတ်ဆက်မှု၏ဆက်တင်များတွင်ဖြစ်စေ မှတ်တမ်းတင်ထားသည်။
 
 Exa `type: "lite"` (Exa 3.0) သည် သေးငယ်သော နယ်ပယ်အစုံကို လက်ခံပြီး အခြားနယ်ပယ်တစ်ခုခုကို သတ်မှတ်သည့်အခါ တောင်းဆိုချက်တစ်ခုလုံးကို ငြင်းပယ်သည်။ Lite၊ `additionalQueries`၊ `systemPrompt` နှင့် `contents` ကီးတိုင်းကို ဖုန်းခေါ်ဆိုမှုမတိုင်မီ `text` နှင့် `highlights` မှလွဲ၍ ကျန်သည်။ ကန့်ကွက်ထားသော `subpages`၊ `subpageTarget`၊ `highlights.numSentences` နှင့် `highlights.highlightsPerUrl` တို့ကို ထပ်ဆင့်မပို့တော့ပါ။
 

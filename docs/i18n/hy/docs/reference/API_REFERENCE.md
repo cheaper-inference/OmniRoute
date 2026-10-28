@@ -845,9 +845,13 @@ Exa-ն և Tavily-ը կարդում են մատակարարի համար նախա
 
 Միշտ հաղթում են ընդհանուր դաշտերը՝ `query`, `max_results`, `filters` (տիրույթներ), `country` և `search_type` ից ստացված թեման։ Exa-ում `search_type: "news"` պահպանում է `category: "news"`: Թավիլը նույնպես ընդունում է `search_type: "finance"` (`topic: "finance"`)։
 
+Firecrawl որոնման արժեքը գրանցվում է 10 վերադարձված արդյունքների մեկնարկած բլոկի համար՝ $0,002 (2 վարկ) մեկ բլոկ և առնվազն մեկ բլոկ մեկ զանգի համար ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ). 11 արդյունքն արժե $0,004:
+
 Ընդհանուր `time_range` այժմ հասնում է երկու մատակարարներին. Exa-ն ստանում է `startPublishedDate` (ISO ժամադրոշմ) և Tavily-ն ստանում է `start_date` (`YYYY-MM-DD`): `provider_options` ում հստակ ամսաթիվը գերակայում է քարտեզագրվածին:
 
 Exa արդյունքները պահպանում են `id`, `highlight_scores`, `summary`, `subpages`, `entities` և `extras` `provider_raw` ում: Tavilly արդյունքները պահպանում են `images` և `favicon`:
+
+Linkup որոնման արժեքը գրանցվում է $0,005 `depth` `fast` և `standard` համար և $0,05-ի համար `deep` համար ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), անկախ նրանից `depth` գալիս է `provider_options` ից կամ կապի կարգավորումներից:
 
 Exa `type: "lite"` (Exa 3.0) ընդունում է դաշտերի ավելի փոքր շարք և մերժում է ամբողջ հարցումը, երբ որևէ այլ դաշտ է սահմանված: Lite-ի համար `additionalQueries`, `systemPrompt` և բոլոր `contents` ստեղները, բացի `text` և `highlights` հանվում են զանգից առաջ: Հնացած `subpages`, `subpageTarget`, `highlights.numSentences` և `highlights.highlightsPerUrl` այլևս չեն փոխանցվում:
 

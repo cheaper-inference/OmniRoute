@@ -872,9 +872,13 @@ Exa และ Tavily อ่านฟิลด์เฉพาะผู้ให�
 
 ช่องทั่วไปจะชนะเสมอ: `query`, `max_results`, `filters` (โดเมน), `country` และหัวข้อที่ได้มาจาก `search_type` บน Exa นั้น `search_type: "news"` จะเก็บ `category: "news"` ไว้ Tavily ยังยอมรับ `search_type: "finance"` (`topic: "finance"`)
 
+ค่าใช้จ่ายในการค้นหา Firecrawl จะถูกบันทึกต่อบล็อกเริ่มต้นของผลลัพธ์ที่ส่งคืน 10 รายการ ที่ 0.002 ดอลลาร์ (2 เครดิต) ต่อบล็อกและอย่างน้อยหนึ่งบล็อกต่อการโทร ( [การเรียกเก็บเงินของ Firecrawl](https://docs.firecrawl.dev/billing) ): ผลลัพธ์ 11 รายการมีราคา 0.004 ดอลลาร์
+
 ขณะนี้ `time_range` ทั่วไปเข้าถึงผู้ให้บริการทั้งสองรายแล้ว: Exa ได้รับ `startPublishedDate` (ISO timestamp) และ Tavily ได้รับ `start_date` (`YYYY-MM-DD`) วันที่ที่ชัดเจนใน `provider_options` จะแทนที่วันที่ที่แมปไว้
 
 ผลลัพธ์ Exa เก็บ `id`, `highlight_scores`, `summary`, `subpages`, `entities` และ `extras` ใน `provider_raw` ผลลัพธ์ Tavily ให้ `images` และ `favicon`
+
+ค่าใช้จ่ายในการค้นหาลิงก์อัปจะถูกบันทึกไว้ที่ 0.005 ดอลลาร์สำหรับ `depth` `fast` และ `standard` และ 0.05 ดอลลาร์สำหรับ `deep` ( [การกำหนดราคาลิงก์อัป](https://docs.linkup.so/pages/documentation/development/pricing) ) ไม่ว่า `depth` จะมาจาก `provider_options` หรือการตั้งค่าของการเชื่อมต่อก็ตาม
 
 Exa `type: "lite"` (Exa 3.0) ยอมรับชุดฟิลด์ที่เล็กกว่าและปฏิเสธคำขอทั้งหมดเมื่อมีการตั้งค่าฟิลด์อื่น สำหรับ lite, `additionalQueries`, `systemPrompt` และทุกคีย์ `contents` ยกเว้น `text` และ `highlights` จะถูกละทิ้งก่อนการโทร `subpages`, `subpageTarget`, `highlights.numSentences` และ `highlights.highlightsPerUrl` ที่เลิกใช้แล้วจะไม่ถูกส่งต่ออีกต่อไป
 

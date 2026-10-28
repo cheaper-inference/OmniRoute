@@ -849,9 +849,13 @@ Exa ଏବଂ Tavily ଏକ ନାମ ସ୍ଥାନିତ ବ୍ୟାଗର�
 
 ଜେନେରିକ୍ ଫିଲ୍ଡ ସବୁବେଳେ ଜିତେ: `query`, `max_results`, `filters` (ଡୋମେନ୍), `country` ଏବଂ `search_type` ରୁ ଉତ୍ପନ୍ନ ବିଷୟ \| Exa ରେ, `search_type: "news"` `category: "news"` ରଖେ \| ଟାଭିଲି `search_type: "finance"` (`topic: "finance"`) କୁ ମଧ୍ୟ ଗ୍ରହଣ କରେ \|
 
+Fire 0.002 (2 କ୍ରେଡିଟ୍) ରେ ଗୋଟିଏ ବ୍ଲକ୍ ଏବଂ କଲ୍ ପାଇଁ ଅତି କମରେ ଗୋଟିଏ ବ୍ଲକ୍ ( [ଫାୟାର୍କ୍ରାଲ୍ ବିଲିଂ](https://docs.firecrawl.dev/billing) ) ରେ ଫାୟାର୍କ୍ରାଲ୍ ସର୍ଚ୍ଚ ମୂଲ୍ୟ 10 ଟି ପ୍ରତ୍ୟାବର୍ତ୍ତିତ ଫଳାଫଳର ପ୍ରାରମ୍ଭ ବ୍ଲକ୍ ରେକର୍ଡ କରାଯାଇଛି: 11 ଫଳାଫଳର ମୂଲ୍ୟ $ 0.004 \|
+
 ଜେନେରିକ୍ `time_range` ବର୍ତ୍ତମାନ ଉଭୟ ପ୍ରଦାନକାରୀଙ୍କ ନିକଟରେ ପହଞ୍ଚିଛି: Exa `startPublishedDate` (ISO timestamp) ଏବଂ ଟାଭିଲି `start_date` (`YYYY-MM-DD`) ପାଇଥାଏ \| `provider_options` ରେ ଏକ ସ୍ପଷ୍ଟ ତାରିଖ ମ୍ୟାପ୍ ହୋଇଥିବା ଏକକୁ ନବଲିଖନ କରେ \|
 
 Exa ଫଳାଫଳ `id`, `highlight_scores`, `summary`, `subpages`, `entities` ଏବଂ `extras` `provider_raw` ରେ ରଖେ \| ଟାଭିଲି ଫଳାଫଳ `images` ଏବଂ `favicon` ରଖେ \|
+
+ଲିଙ୍କଅପ୍ ସନ୍ଧାନ ମୂଲ୍ୟ `depth` `fast` ଏବଂ `standard` ପାଇଁ $ 0.005 ଏବଂ `deep` ( [ଲିଙ୍କଅପ୍ ମୂଲ୍ୟ](https://docs.linkup.so/pages/documentation/development/pricing) ) ପାଇଁ $ 0.05 ରେକର୍ଡ କରାଯାଇଛି, `depth` `provider_options` ରୁ ହେଉ କିମ୍ବା ସଂଯୋଗର ସେଟିଂସମୂହ \|
 
 Exa `type: "lite"` (Exa 3.0) ଏକ ଛୋଟ କ୍ଷେତ୍ରର ସେଟ୍ ଗ୍ରହଣ କରେ ଏବଂ ଅନ୍ୟ କ field ଣସି କ୍ଷେତ୍ର ସେଟ୍ ହେବାପରେ ସମଗ୍ର ଅନୁରୋଧକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ \| ଲାଇଟ୍ ପାଇଁ, `additionalQueries`, `systemPrompt` ଏବଂ `text` ଏବଂ `highlights` ବ୍ୟତୀତ ପ୍ରତ୍ୟେକ `contents` କି କଲ୍ ପୂର୍ବରୁ ଡ୍ରପ୍ ହୋଇଯାଏ \| ପୁରୁଣା `subpages`, `subpageTarget`, `highlights.numSentences` ଏବଂ `highlights.highlightsPerUrl` ଆଉ ଅଗ୍ରଗାମୀ ନୁହେଁ \|
 

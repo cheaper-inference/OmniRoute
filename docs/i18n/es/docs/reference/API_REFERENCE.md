@@ -848,9 +848,13 @@ Exa y Tavily leen campos específicos del proveedor de una bolsa con espacio de 
 
 Siempre ganan los campos genéricos: `query`, `max_results`, `filters` (dominios), `country` y el tema derivado de `search_type`. En Exa, `search_type: "news"` mantiene `category: "news"`. Tavily también acepta `search_type: "finance"` (`topic: "finance"`).
 
+El costo de la búsqueda de Firecrawl se registra por bloque iniciado de 10 resultados devueltos, a $0,002 (2 créditos) por bloque y al menos un bloque por llamada ( [facturación de Firecrawl](https://docs.firecrawl.dev/billing) ): 11 resultados cuestan $0,004.
+
 El `time_range` genérico ahora llega a ambos proveedores: Exa obtiene `startPublishedDate` (ISO timestamp) y Tavily obtiene `start_date` (`YYYY-MM-DD`). Una fecha explícita en `provider_options` anula la asignada.
 
 Los resultados de Exa mantienen `id`, `highlight_scores`, `summary`, `subpages`, `entities` y `extras` en `provider_raw`. Los resultados de Tavily mantienen `images` y `favicon`.
+
+El costo de búsqueda de enlace se registra en $0,005 para `depth` `fast` y `standard` y $0,05 para `deep` ( [precio de enlace](https://docs.linkup.so/pages/documentation/development/pricing) ), ya sea que `depth` provenga de `provider_options` o de la configuración de la conexión.
 
 Exa `type: "lite"` (Exa 3.0) acepta un conjunto más pequeño de campos y rechaza la solicitud completa cuando se establece cualquier otro campo. Para lite, `additionalQueries`, `systemPrompt` y todas las teclas `contents` excepto `text` y `highlights` se eliminan antes de la llamada. Los obsoletos `subpages`, `subpageTarget`, `highlights.numSentences` y `highlights.highlightsPerUrl` ya no se reenvían.
 

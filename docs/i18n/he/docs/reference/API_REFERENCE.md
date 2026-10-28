@@ -872,9 +872,13 @@ Exa ו-Tavily קוראים שדות ספציפיים לספק מתוך תיק ע
 
 השדות הגנריים תמיד מנצחים: `query`, `max_results`, `filters` (דומיינים), `country` והנושא הנגזר מ- `search_type`. ב-Exa, `search_type: "news"` שומר על `category: "news"`. טבילי מקבל גם `search_type: "finance"` (`topic: "finance"`).
 
+עלות החיפוש של Firecrawl נרשמת לכל בלוק התחיל של 10 תוצאות שהוחזרו, ב-$0.002 (2 זיכויים) לחסימה ולפחות חסימה אחת לשיחה ( [חיוב Firecrawl](https://docs.firecrawl.dev/billing) ): 11 תוצאות עולות $0.004.
+
 ה- `time_range` הגנרי מגיע כעת לשני הספקים: Exa מקבל `startPublishedDate` (חותמת זמן ISO ) ו-Tavily מקבל `start_date` (`YYYY-MM-DD`). תאריך מפורש ב- `provider_options` עוקף את המופה.
 
 תוצאות Exa שומרות על `id`, `highlight_scores`, `summary`, `subpages`, `entities` ו- `extras` ב- `provider_raw`. תוצאות טובות לשמור על `images` ו- `favicon`.
+
+עלות חיפוש קישור נרשמת ב-$0.005 עבור `depth` `fast` ו- `standard` ו-$0.05 עבור `deep` ( [מחיר Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), בין אם `depth` מגיע מ- `provider_options` או מהגדרות החיבור.
 
 Exa `type: "lite"` (Exa 3.0) מקבל קבוצה קטנה יותר של שדות ודוחה את כל הבקשה כאשר כל שדה אחר מוגדר. עבור lite, `additionalQueries`, `systemPrompt` וכל מקש `contents` מלבד `text` ו- `highlights` נשמטים לפני השיחה. `subpages`, `subpageTarget`, `highlights.numSentences` ו- `highlights.highlightsPerUrl` לא מועברים עוד.
 

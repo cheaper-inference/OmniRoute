@@ -872,9 +872,13 @@ Binabasa ng Exa at Tavily ang mga field na partikular sa provider mula sa isang 
 
 Palaging panalo ang mga generic na field: `query`, `max_results`, `filters` (mga domain), `country` at ang paksang hinango mula sa `search_type`. Sa Exa, pinapanatili ng `search_type: "news"` `category: "news"`. Tumatanggap din ang Tavily `search_type: "finance"` (`topic: "finance"`).
 
+Ang gastos sa paghahanap ng Firecrawl ay naitala sa bawat panimulang bloke ng 10 ibinalik na resulta, sa $0.002 (2 credits) sa isang bloke at hindi bababa sa isang bloke bawat tawag ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ): Ang 11 resulta ay nagkakahalaga ng $0.004.
+
 Naabot na ngayon ng generic `time_range` ang parehong provider: Ang Exa ay nakakakuha ng `startPublishedDate` (ISO timestamp) at Tavily ay nakakakuha ng `start_date` (`YYYY-MM-DD`). Ino-override ng isang tahasang petsa sa `provider_options` ang naka-map.
 
 Ang mga resulta ng Exa ay nagpapanatili `id`, `highlight_scores`, `summary`, `subpages`, `entities` at `extras` sa `provider_raw`. Ang mga resulta ng Tavily ay nagpapanatili `images` at `favicon`.
+
+Ang gastos sa paghahanap ng linkup ay naitala sa $0.005 para sa `depth` `fast` at `standard` at $0.05 para sa `deep` ( [Pagpepresyo ng linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), kung `depth` ay nagmula sa `provider_options` o sa mga setting ng koneksyon.
 
 Ang Exa `type: "lite"` (Exa 3.0) ay tumatanggap ng mas maliit na hanay ng mga field at tinatanggihan ang buong kahilingan kapag nakatakda ang anumang ibang field. Para sa lite, `additionalQueries`, `systemPrompt` at bawat `contents` key maliban `text` at `highlights` ay ibinababa bago ang tawag. Ang hindi na ginagamit na `subpages`, `subpageTarget`, `highlights.numSentences` at `highlights.highlightsPerUrl` ay hindi na naipapasa.
 

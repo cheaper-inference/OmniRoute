@@ -796,9 +796,13 @@ Exa və Tavily ad boşluqlu çantadan provayderə məxsus sahələri oxuyur: `pr
 
 Ümumi sahələr həmişə qalib gəlir: `query`, `max_results`, `filters` (domenlər), `country` və `search_type` dən əldə edilən mövzu. Exa-da `search_type: "news"` `category: "news"` saxlayır. Tavily də `search_type: "finance"` (`topic: "finance"`) qəbul edir.
 
+Firecrawl axtarış dəyəri 10 qaytarılmış nəticənin hər bloku üçün 0,002 ABŞ dolları (2 kredit) və hər zəng üçün ən azı bir blok ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ) ilə qeydə alınır: 11 nəticə 0,004 dollara başa gəlir.
+
 Ümumi `time_range` indi hər iki provayderə çatır: Exa `startPublishedDate` (ISO vaxt damgası) və Tavily `start_date` (`YYYY-MM-DD`) alır. `provider_options` açıq-aşkar tarix xəritədə göstərilən tarixə üstünlük verir.
 
 Exa nəticələri `id`, `highlight_scores`, `summary`, `subpages`, `entities` və `extras` `provider_raw` də saxlayır . Tavily nəticələri `images` və `favicon` saxlayır.
+
+Linkup axtarış dəyəri `depth` `fast` və `standard` üçün 0,005 ABŞ dolları və `deep` üçün 0,05 ABŞ dolları ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` və ya əlaqə parametrlərindən gəlir olsun, qeydə alınır.
 
 Exa `type: "lite"` (Exa 3.0) daha kiçik sahələr dəstini qəbul edir və hər hansı digər sahə təyin edildikdə bütün sorğunu rədd edir. Lite üçün `additionalQueries`, `systemPrompt` və `text` və `highlights` istisna olmaqla hər `contents` düyməsi zəngdən əvvəl atılır. Köhnəlmiş `subpages`, `subpageTarget`, `highlights.numSentences` və `highlights.highlightsPerUrl` artıq yönləndirilmir.
 

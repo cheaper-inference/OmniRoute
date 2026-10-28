@@ -819,9 +819,13 @@ Exa와 Tavily는 네임스페이스 백( `provider_options.exa` (또는 `provide
 
 일반 필드는 항상 승리합니다: `query`, `max_results`, `filters` (도메인), `country` 및 `search_type` 에서 파생된 주제. Exa에서 `search_type: "news"` `category: "news"` 유지합니다. Tavily는 `search_type: "finance"` (`topic: "finance"`)도 허용합니다.
 
+Firecrawl 검색 비용은 반환된 결과 10개의 시작 블록당 $0.002(2크레딧), 호출당 최소 하나의 블록( [Firecrawl 청구](https://docs.firecrawl.dev/billing) )으로 기록됩니다. 11개 결과 비용은 $0.004입니다.
+
 일반 `time_range` 이제 두 공급자 모두에 도달합니다. Exa는 `startPublishedDate` (ISO 타임스탬프)를 가져오고 Tavily는 `start_date` (`YYYY-MM-DD`)를 가져옵니다. `provider_options` 의 명시적인 날짜는 매핑된 날짜보다 우선합니다.
 
 Exa 결과는 `id`, `highlight_scores`, `summary`, `subpages`, `entities` 및 `extras` `provider_raw` 에 유지합니다. Tavily 결과는 `images` 및 `favicon` 유지합니다.
+
+링크업 검색 비용은 `depth` `provider_options` 또는 연결 설정에서 가져온 것인지 여부에 관계없이 `depth` `fast` 및 `standard` 의 경우 $0.005, `deep` 의 경우 $0.05로 기록됩니다( [링크업 가격](https://docs.linkup.so/pages/documentation/development/pricing) ).
 
 Exa `type: "lite"` (Exa 3.0)는 더 작은 필드 집합을 허용하고 다른 필드가 설정되면 전체 요청을 거부합니다. 라이트의 경우 `additionalQueries`, `systemPrompt` 및 `text` 및 `highlights` 제외한 모든 `contents` 키는 호출 전에 삭제됩니다. 더 이상 사용되지 않는 `subpages`, `subpageTarget`, `highlights.numSentences` 및 `highlights.highlightsPerUrl` 는 더 이상 전달되지 않습니다.
 

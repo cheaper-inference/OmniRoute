@@ -851,9 +851,13 @@ Exa እና Tavily አቅራቢ-ተኮር መስኮችን በስም ከተሰየ�
 
 አጠቃላይ መስኮች ሁል ጊዜ ያሸንፋሉ `query`፣ `max_results`፣ `filters` (ጎራዎች)፣ `country` እና ከ `search_type` የተወሰደ ርዕስ። በ Exa ላይ፣ `search_type: "news"` `category: "news"` ን ይይዛል። ታቪሊ ደግሞ `search_type: "finance"` (`topic: "finance"`) ይቀበላል።
 
+የFirecrawl ፍለጋ ዋጋ በተጀመረ 10 የተመለሱ ውጤቶች፣ በ$0.002 (2 ክሬዲት) ብሎክ እና ቢያንስ አንድ ብሎክ በጥሪ ( [Firecrawl ክፍያ](https://docs.firecrawl.dev/billing) ) ይመዘገባል፡ 11 ውጤቶች ዋጋ $0.004 ነው።
+
 አጠቃላይ `time_range` አሁን ሁለቱንም አቅራቢዎች ይደርሳል፡ Exa `startPublishedDate` (ISO timestamp) እና Tavily `start_date` (`YYYY-MM-DD`) ያገኛል። በ `provider_options` ውስጥ ግልጽ የሆነ ቀን ካርታ የተሰራውን ይሽራል።
 
 የፈተና ውጤቶች `id`, `highlight_scores`, `summary`, `subpages`, `entities` እና `extras` በ `provider_raw` ያስቀምጣሉ። ትክክለኛ ውጤቶች `images` እና `favicon` ይጠብቃሉ።
+
+የማገናኘት ፍለጋ ዋጋ በ$0.005 ለ `depth` `fast` እና `standard` እና $0.05 ለ `deep` ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) )፣ `depth` ከ `provider_options` ወይም የግንኙነት መቼቶች ይመዘገባል።
 
 Exa `type: "lite"` (Exa 3.0) አነስተኛ የመስኮች ስብስብ ይቀበላል እና ሌላ ማንኛውም መስክ ሲዘጋጅ ሙሉውን ጥያቄ ውድቅ ያደርጋል። ለሊት፣ `additionalQueries`፣ `systemPrompt` እና `text` እና `highlights` በስተቀር ሁሉም `contents` ቁልፍ ከጥሪው በፊት ይጣላሉ። የተቋረጠው `subpages`፣ `subpageTarget`፣ `highlights.numSentences` እና `highlights.highlightsPerUrl` ከአሁን በኋላ አይተላለፉም።
 

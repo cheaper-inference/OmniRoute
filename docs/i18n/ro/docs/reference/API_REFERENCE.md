@@ -872,9 +872,13 @@ Exa și Tavily citesc câmpuri specifice furnizorului dintr-o pungă cu spații 
 
 Câmpurile generice câștigă întotdeauna: `query`, `max_results`, `filters` (domenii), `country` și subiectul derivat din `search_type`. Pe Exa, `search_type: "news"` păstrează `category: "news"`. Tavily acceptă și `search_type: "finance"` (`topic: "finance"`).
 
+Costul de căutare Firecrawl este înregistrat pentru fiecare bloc început de 10 rezultate returnate, la 0,002 USD (2 credite) un bloc și cel puțin un bloc pe apel ( [facturare Firecrawl](https://docs.firecrawl.dev/billing) ): 11 rezultate costă 0,004 USD.
+
 `time_range` generic ajunge acum la ambii furnizori: Exa primește `startPublishedDate` (ISO timestamp ) și Tavily primește `start_date` (`YYYY-MM-DD`). O dată explicită în `provider_options` o înlocuiește pe cea mapată.
 
 Rezultatele exa păstrează `id`, `highlight_scores`, `summary`, `subpages`, `entities` și `extras` în `provider_raw`. Rezultatele Tavily păstrează `images` și `favicon`.
+
+Costul de căutare a conexiunii este înregistrat la 0,005 USD pentru `depth` `fast` și `standard` și la 0,05 USD pentru `deep` ( [prețuri de conectare](https://docs.linkup.so/pages/documentation/development/pricing) ), indiferent dacă `depth` provine din `provider_options` sau din setările conexiunii.
 
 Exa `type: "lite"` (Exa 3.0) acceptă un set mai mic de câmpuri și respinge întreaga cerere atunci când este setat orice alt câmp. Pentru lite, `additionalQueries`, `systemPrompt` și fiecare tastă `contents` cu excepția `text` și `highlights` sunt abandonate înainte de apel. `subpages`, `subpageTarget`, `highlights.numSentences` și `highlights.highlightsPerUrl` depreciate nu mai sunt redirecționate.
 
