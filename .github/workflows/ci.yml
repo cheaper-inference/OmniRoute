@@ -17,6 +17,11 @@ on:
   merge_group:
     types: [checks_requested]
   workflow_dispatch:
+    inputs:
+      i18n_base_sha:
+        description: "Optional immutable base commit for the differential UI i18n gates"
+        required: false
+        type: string
 
 concurrency:
   # A metadata edit must not evict a pending candidate from GitHub's single slot.
@@ -520,14 +525,16 @@ jobs:
     name: i18n UI Coverage
     runs-on: ubuntu-latest
     needs: changes
+    permissions:
+      contents: read
+      pull-requests: read
     # P3 (plano mestre): a release-PR viva fica DRAFT o ciclo inteiro — jobs pesados pulam
     # drafts (ciclo v3.8.44: 123 runs pesados re-disparados por merges na release, 88 cancelados).
     # UI keys move with dashboard code OR message catalogs.
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && (needs.changes.outputs.i18n == 'true' || needs.changes.outputs.code == 'true')) }}
     steps:
-      # fetch-depth: 0 — the value-drift gate diffs en.json against the merge base to
-      # find rewritten English strings. On a shallow clone the base ref is missing and
-      # the gate self-skips (base-unresolved), so it would never actually run.
+      # Full history is required to pin the differential comparison. Missing history
+      # is INCOMPLETE and blocks; it cannot silently become a successful skip.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
@@ -553,9 +560,18 @@ jobs:
       # #8463: a rewritten English value used to leave its 39 translations behind
       # silently (googleOAuthWarning shipped wrong copy in 39 locales for months).
       # Key parity above cannot see it — a stale translation counts as covered.
+      - name: Resolve immutable i18n comparison
+        id: i18n_base
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/i18n/resolve-ui-diff-base.mjs
       - name: i18n UI value drift (stale translations)
         env:
-          BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
+          I18N_BASE_SHA: ${{ steps.i18n_base.outputs.base_sha }}
+          I18N_BASE_TIP_SHA: ${{ steps.i18n_base.outputs.base_tip_sha }}
+          I18N_CANDIDATE_SHA: ${{ steps.i18n_base.outputs.candidate_sha }}
+          I18N_COMPARISON_SOURCE: ${{ steps.i18n_base.outputs.source }}
+          I18N_COMPARISON_SCOPE: ${{ steps.i18n_base.outputs.scope }}
         run: node scripts/i18n/check-ui-value-drift.mjs
       # Sibling of the drift gate above. That one catches an English value that was
       # REWRITTEN; this one catches an English key that was ADDED while some locales never
@@ -565,7 +581,11 @@ jobs:
       # batch (#13044) took the repo to 51 and the nine newcomers shipped untranslated.
       - name: i18n new-key coverage (a new key must reach every locale)
         env:
-          BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
+          I18N_BASE_SHA: ${{ steps.i18n_base.outputs.base_sha }}
+          I18N_BASE_TIP_SHA: ${{ steps.i18n_base.outputs.base_tip_sha }}
+          I18N_CANDIDATE_SHA: ${{ steps.i18n_base.outputs.candidate_sha }}
+          I18N_COMPARISON_SOURCE: ${{ steps.i18n_base.outputs.source }}
+          I18N_COMPARISON_SCOPE: ${{ steps.i18n_base.outputs.scope }}
         run: node scripts/i18n/check-new-key-coverage.mjs
       # Absolute complement of the two gates above: every locale must carry exactly the key
       # set of en.json, whatever the age of the key. A locale batch is generated from the

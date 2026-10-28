@@ -28,6 +28,9 @@
 //     --hermetic    scrub OMNIROUTE_API_KEY/OMNIROUTE_URL from gate env so live
 //                   tests self-skip exactly like CI (dev machines otherwise run
 //                   them against localhost and produce false-positive reds)
+//     --i18n-base-sha <sha> --i18n-candidate-sha <sha>  explicit comparison pair
+//                   for --full-ci; otherwise resolve the event or explicit local BASE_REF.
+//     --i18n-scope <candidate|push-range|last-commit>  scope of an explicit pair
 //     --suites-from <dir>  consume hosted receipts instead of local suite execution;
 //                   requires --suites-workflow-sha <sha> from the producing workflow.
 //
@@ -43,7 +46,11 @@ import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
 import { runGateProcess } from "./gate-process.mjs";
 import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
-import { loadFullCiProfile, staticGateOutcome } from "./release-green-static-profile.mjs";
+import {
+  loadFullCiProfile,
+  resolveFullCiComparison,
+  staticGateOutcome,
+} from "./release-green-static-profile.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
@@ -801,6 +808,16 @@ async function main() {
   const SUITES_WORKFLOW_SHA =
     suitesWorkflowIndex >= 0 ? process.argv[suitesWorkflowIndex + 1] : null;
 
+  let i18nComparison = null;
+  let i18nComparisonError = null;
+  if (FULL_CI) {
+    try {
+      i18nComparison = resolveFullCiComparison(ROOT, process.argv.slice(2));
+    } catch (error) {
+      i18nComparisonError = error;
+    }
+  }
+
   const results = [];
   const record = (r) => {
     results.push(r);
@@ -1222,14 +1239,16 @@ async function main() {
   if (FULL_CI) {
     let gates = [];
     try {
-      gates = loadFullCiProfile(ROOT);
+      if (i18nComparisonError) throw i18nComparisonError;
+      gates = loadFullCiProfile(ROOT, { comparison: i18nComparison });
     } catch (err) {
       record({
         id: "full-ci-extract",
         label: "full-ci: validate explicit static profile",
         kind: "hard",
         ok: false,
-        detail: `invalid full static profile: ${err?.message || err}`,
+        evidenceState: "INCOMPLETE",
+        detail: `invalid full static profile or comparison: ${err?.message || err}`,
       });
     }
     const already = new Set(results.map((r) => r.id));
@@ -1323,6 +1342,7 @@ async function main() {
           }).trim(),
           profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
           completedAt: new Date().toISOString(),
+          i18nComparison,
           releaseGreen,
           hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
           drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),

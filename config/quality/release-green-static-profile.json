@@ -366,6 +366,7 @@
     },
     {
       "id": "i18n:check-value-drift",
+      "comparison": "ui-differential",
       "job": "i18n-ui-coverage",
       "args": ["run", "i18n:check-value-drift"],
       "kind": "hard",
@@ -373,6 +374,7 @@
     },
     {
       "id": "i18n:check-new-keys",
+      "comparison": "ui-differential",
       "job": "i18n-ui-coverage",
       "args": ["run", "i18n:check-new-keys"],
       "kind": "hard",

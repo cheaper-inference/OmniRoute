@@ -335,9 +335,14 @@ jobs:
             MODE="--with-build --full-ci --suites-from suite-results"
           fi
           echo "[release-green] mode: $MODE (event: $EVENT_NAME)"
+          # This observer selected an exact main/release tip. Its UI differential scope
+          # is the last commit; the workflow revision may belong to another branch.
+          I18N_BASE_SHA="$(git rev-parse --verify "${VALIDATED_SHA}^1")"
           # MODE is an intentional flag list, so word-splitting is wanted here
           # shellcheck disable=SC2086
           node scripts/quality/validate-release-green.mjs --json --hermetic $MODE \
+            --i18n-base-sha "$I18N_BASE_SHA" \
+            --i18n-candidate-sha "$VALIDATED_SHA" --i18n-scope last-commit \
             --suites-workflow-sha "$GITHUB_WORKFLOW_SHA" \
             1> release-green.json 2> release-green.log
           validation_exit=$?
@@ -554,9 +559,14 @@ jobs:
             MODE="--with-build --full-ci"
           fi
           echo "[main-green] mode: $MODE (event: $EVENT_NAME)"
+          # This observer selected an exact main/release tip. Its UI differential scope
+          # is the last commit; the workflow revision may belong to another branch.
+          I18N_BASE_SHA="$(git rev-parse --verify "${VALIDATED_SHA}^1")"
           # MODE is an intentional flag list, so word-splitting is wanted here
           # shellcheck disable=SC2086
           node scripts/quality/validate-release-green.mjs --json --hermetic $MODE \
+            --i18n-base-sha "$I18N_BASE_SHA" \
+            --i18n-candidate-sha "$VALIDATED_SHA" --i18n-scope last-commit \
             1> main-green.json 2> main-green.log
           validation_exit=$?
           node scripts/ci/release-green-result.mjs main-green.json "$validation_exit" "$VALIDATED_SHA" "$EVENT_NAME" >> main-green.log

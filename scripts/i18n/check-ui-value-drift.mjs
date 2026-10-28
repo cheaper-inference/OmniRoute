@@ -38,16 +38,17 @@
  *   node scripts/i18n/check-ui-value-drift.mjs --json          # machine-readable report
  *   BASE_REF=origin/release/vX.Y.Z node scripts/i18n/check-ui-value-drift.mjs
  *
- * Graceful SKIP (exit 0) when the base English catalog cannot be resolved — a shallow
- * clone without the base ref, or a brand-new catalog. Mirrors the base-unresolved SKIP in
- * `scripts/check/check-openapi-breaking.mjs`.
+ * Missing comparison history, unreadable catalogs, or oversized catalogs exit 2
+ * (INCOMPLETE), including in warn mode. The selected SHA pair and scope are reported.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+
+import { assertUiCandidateUnchanged, resolveUiDiffBase } from "./resolve-ui-diff-base.mjs";
+import { readUiCatalogAtRef, readUiCatalogFromDisk } from "./read-ui-catalog.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -173,7 +174,7 @@ function parseArgs(argv) {
           "  --warn    report drift but exit 0",
           "  --json    machine-readable report on stdout",
           "",
-          "  BASE_REF  ref to diff against (default: derived from package.json version)",
+          "  BASE_REF  explicit local ref to diff against (required outside CI)",
         ].join("\n")
       );
       process.exit(0);
@@ -182,92 +183,35 @@ function parseArgs(argv) {
   return opts;
 }
 
-function readPackageVersion() {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version ?? null;
-  } catch {
-    return null;
-  }
-}
-
-/** `3.8.49` -> `origin/release/v3.8.49`, matching check-openapi-breaking's convention. */
-function defaultBaseRef() {
-  const version = readPackageVersion();
-  return version && /^\d+\.\d+\.\d+$/.test(version) ? `origin/release/v${version}` : null;
-}
-
-function git(args) {
-  return execFileSync("git", args, {
-    cwd: ROOT,
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-}
-
-/** Prefer the merge base so a base branch that advanced independently cannot false-positive. */
-function resolveDiffBase(baseRef) {
-  try {
-    return git(["merge-base", "HEAD", baseRef]).trim();
-  } catch {
-    return baseRef; // shallow clone without common history — the tip is the best available
-  }
-}
-
-function readCatalogAtRef(ref, relPath) {
-  try {
-    return JSON.parse(git(["show", `${ref}:${relPath}`]));
-  } catch {
-    return null;
-  }
-}
-
-function readCatalogFromDisk(absPath) {
-  try {
-    return JSON.parse(fs.readFileSync(absPath, "utf8"));
-  } catch {
-    return null;
-  }
-}
-
 function main() {
   const opts = parseArgs(process.argv);
-  const baseRef = process.env.BASE_REF || defaultBaseRef();
-
-  const emitSkip = (reason) => {
-    if (opts.json) {
-      process.stdout.write(JSON.stringify({ ok: true, skipped: true, reason }) + "\n");
-    } else {
-      console.log(`[i18n-value-drift] SKIP reason=${reason}`);
-    }
-    process.exit(0);
-  };
-
-  if (!baseRef) emitSkip("base-unresolved");
-
-  const diffBase = resolveDiffBase(baseRef);
-  const baseEn = readCatalogAtRef(diffBase, `${MESSAGES_REL}/en.json`);
-  if (!baseEn) emitSkip("base-unresolved");
-
-  const headEn = readCatalogFromDisk(path.join(MESSAGES_DIR, "en.json"));
-  if (!headEn) emitSkip("head-en-unreadable");
+  const comparison = resolveUiDiffBase({ cwd: ROOT });
+  const baseRef = comparison.baseTipSha;
+  const diffBase = comparison.baseSha;
+  const baseEn = readUiCatalogAtRef(ROOT, diffBase, `${MESSAGES_REL}/en.json`);
+  const headEn = readUiCatalogFromDisk(path.join(MESSAGES_DIR, "en.json"));
+  if (!opts.json) console.log("[i18n-value-drift] comparison=" + JSON.stringify(comparison));
 
   const locales = fs
     .readdirSync(MESSAGES_DIR)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => f.slice(0, -5));
-
+    .filter((file) => file.endsWith(".json") && file !== "en.json")
+    .map((file) => file.slice(0, -5));
   const headLocales = {};
   const baseLocales = {};
   for (const locale of locales) {
-    headLocales[locale] = readCatalogFromDisk(path.join(MESSAGES_DIR, `${locale}.json`)) ?? {};
-    baseLocales[locale] = readCatalogAtRef(diffBase, `${MESSAGES_REL}/${locale}.json`) ?? {};
+    headLocales[locale] = readUiCatalogFromDisk(path.join(MESSAGES_DIR, `${locale}.json`));
+    baseLocales[locale] =
+      readUiCatalogAtRef(ROOT, diffBase, `${MESSAGES_REL}/${locale}.json`, { optional: true }) ??
+      {};
   }
 
   const stale = findStaleTranslations({ baseEn, headEn, baseLocales, headLocales });
+  assertUiCandidateUnchanged(ROOT, comparison.candidateSha);
 
   if (opts.json) {
     process.stdout.write(
-      JSON.stringify({ ok: stale.length === 0, baseRef, diffBase, stale }, null, 2) + "\n"
+      JSON.stringify({ ok: stale.length === 0, baseRef, diffBase, comparison, stale }, null, 2) +
+        "\n"
     );
     process.exit(stale.length === 0 || opts.mode === "warn" ? 0 : 1);
   }
@@ -315,5 +259,14 @@ if (
   process.argv[1] &&
   path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))
 ) {
-  main();
+  try {
+    main();
+  } catch (error) {
+    if (process.argv.includes("--json")) {
+      console.log(JSON.stringify({ ok: false, incomplete: true, reason: error.message }));
+    } else {
+      console.error("[i18n-value-drift] INCOMPLETE: " + error.message);
+    }
+    process.exitCode = 2;
+  }
 }

@@ -695,7 +695,15 @@ test("the real full profile requires workflow audits even when the curated obser
     t,
     fileURLToPath(new URL("../../", import.meta.url))
   );
-  const gates = loadFullCiProfile(fixture.root);
+  const gates = loadFullCiProfile(fixture.root, {
+    comparison: {
+      baseSha: fixture.baseSha,
+      baseTipSha: fixture.baseSha,
+      candidateSha: fixture.headSha,
+      source: "fixture",
+      scope: "candidate",
+    },
+  });
   const workflow = gates.find((gate) => gate.id === "check:workflows");
   assert.ok(workflow, "the full profile must include workflow auditing");
   assert.equal(workflow.kind, "hard");

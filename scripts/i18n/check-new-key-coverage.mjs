@@ -46,15 +46,17 @@
  *   node scripts/i18n/check-new-key-coverage.mjs --json
  *   BASE_REF=origin/release/vX.Y.Z node scripts/i18n/check-new-key-coverage.mjs
  *
- * Graceful SKIP (exit 0) when the base catalog cannot be resolved — shallow clone, or a
- * brand-new catalog. Mirrors the SKIP in check-ui-value-drift.mjs.
+ * Missing comparison history or unreadable/oversized catalogs exit 2 (INCOMPLETE),
+ * including in warn mode. Both differential gates share the same immutable SHA pair.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { execFileSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+
+import { assertUiCandidateUnchanged, resolveUiDiffBase } from "./resolve-ui-diff-base.mjs";
+import { readUiCatalogAtRef, readUiCatalogFromDisk } from "./read-ui-catalog.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -108,77 +110,26 @@ export function findUntranslatedNewKeys({ baseEn, headEn, headLocales }) {
   return gaps;
 }
 
-function git(args) {
-  return execFileSync("git", args, {
-    cwd: ROOT,
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-}
-
-function readPackageVersion() {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version;
-  } catch {
-    return null;
-  }
-}
-
-function defaultBaseRef() {
-  const v = readPackageVersion();
-  return v && /^\d+\.\d+\.\d+$/.test(v) ? `origin/release/v${v}` : null;
-}
-
-function resolveDiffBase(baseRef) {
-  try {
-    return git(["merge-base", "HEAD", baseRef]).trim();
-  } catch {
-    return baseRef;
-  }
-}
-
-function readCatalogAtRef(ref, relPath) {
-  try {
-    return JSON.parse(git(["show", `${ref}:${relPath}`]));
-  } catch {
-    return null;
-  }
-}
-
 function main() {
   const argv = process.argv.slice(2);
   const opts = { json: argv.includes("--json"), warn: argv.includes("--warn") };
-  const baseRef = process.env.BASE_REF || defaultBaseRef();
-
-  const skip = (reason) => {
-    if (opts.json) process.stdout.write(JSON.stringify({ ok: true, skipped: true, reason }) + "\n");
-    else console.log(`[i18n-new-keys] SKIP reason=${reason}`);
-    process.exit(0);
-  };
-
-  if (!baseRef) skip("base-unresolved");
-  const base = resolveDiffBase(baseRef);
-  const baseEn = readCatalogAtRef(base, `${MESSAGES_REL}/en.json`);
-  if (!baseEn) skip("base-catalog-unreadable");
-
+  const comparison = resolveUiDiffBase({ cwd: ROOT });
+  const baseEn = readUiCatalogAtRef(ROOT, comparison.baseSha, `${MESSAGES_REL}/en.json`);
   const dir = path.join(ROOT, MESSAGES_REL);
-  const headEn = JSON.parse(fs.readFileSync(path.join(dir, "en.json"), "utf8"));
+  const headEn = readUiCatalogFromDisk(path.join(dir, "en.json"));
+  if (!opts.json) console.log("[i18n-new-keys] comparison=" + JSON.stringify(comparison));
   const headLocales = {};
   for (const file of fs.readdirSync(dir)) {
     if (!file.endsWith(".json") || file === "en.json") continue;
-    try {
-      headLocales[file.replace(/\.json$/, "")] = JSON.parse(
-        fs.readFileSync(path.join(dir, file), "utf8")
-      );
-    } catch {
-      /* a malformed catalog is another gate's problem */
-    }
+    headLocales[file.replace(/\.json$/, "")] = readUiCatalogFromDisk(path.join(dir, file));
   }
 
   const gaps = findUntranslatedNewKeys({ baseEn, headEn, headLocales });
+  assertUiCandidateUnchanged(ROOT, comparison.candidateSha);
 
   if (opts.json) {
-    console.log(JSON.stringify({ ok: gaps.length === 0, gaps }, null, 2));
+    console.log(JSON.stringify({ ok: gaps.length === 0, comparison, gaps }, null, 2));
+    process.exit(gaps.length === 0 || opts.warn ? 0 : 1);
   }
 
   if (!gaps.length) {
@@ -213,4 +164,15 @@ function main() {
   if (!opts.warn) process.exit(1);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+  try {
+    main();
+  } catch (error) {
+    if (process.argv.includes("--json")) {
+      console.log(JSON.stringify({ ok: false, incomplete: true, reason: error.message }));
+    } else {
+      console.error("[i18n-new-keys] INCOMPLETE: " + error.message);
+    }
+    process.exitCode = 2;
+  }
+}
