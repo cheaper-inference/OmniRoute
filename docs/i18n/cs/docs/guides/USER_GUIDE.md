@@ -725,6 +725,31 @@ chybou uvádějící integrovaného poskytovatele nebo jeho přihlašovací úda
 vyhrazený: uzly uložené před zavedením tohoto pravidla zůstávají uložené, ale jejich prefix směruje požadavky
 k integrovanému poskytovateli. Upravte uzel a přidělte mu nový prefix.
 
+#### Možnosti brány pro jednotlivá připojení
+
+Tyto klíče se vkládají do `providerSpecificData` připojení (například prostřednictvím
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (celé číslo, 1–1024) — pro připojení kompatibilní s formátem chatu OpenAI, jejichž
+  brána odmítá dlouhé názvy nástrojů. Delší názvy se odesílají jako krátké aliasy a v odpovědi se
+  obnoví.
+- `quotaEndpoint` — koncový bod brány pro kvóty/kredity, který se načítá pro zobrazení kvóty na řídicím panelu a
+  směrování zohledňující kvóty. Funguje pro připojení kompatibilní s OpenAI i Anthropic; úplná struktura
+  je zdokumentována v `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Řetězení partnerských instancí OmniRoute
 
 Další bránu OmniRoute lze přidat jako **vlastního poskytovatele kompatibilního s OpenAI**. Použijte

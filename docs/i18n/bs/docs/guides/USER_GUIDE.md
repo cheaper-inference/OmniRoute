@@ -725,6 +725,31 @@ grešku koja navodi ugrađenog pružatelja ili njegove pristupne podatke, provje
 rezervisan: čvorovi sačuvani prije uvođenja ovog pravila još uvijek su pohranjeni, ali njihov prefiks usmjerava
 na ugrađenog pružatelja. Uredite čvor i dodijelite mu novi prefiks.
 
+#### Opcije gatewaya po konekciji
+
+Ovi ključevi se navode u `providerSpecificData` konekcije (naprimjer putem
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (cijeli broj, 1–1024) — za konekcije kompatibilne s OpenAI formatom chata čiji
+  gateway odbija duge nazive alata. Duži nazivi šalju se kao kratki aliasi i vraćaju u izvorni oblik u
+  odgovoru.
+- `quotaEndpoint` — endpoint gatewaya za kvote/kredite, koji se očitava za traku kvote na kontrolnoj ploči i
+  usmjeravanje koje uzima kvote u obzir. Radi i na konekcijama kompatibilnim s OpenAI-jem i na onima kompatibilnim s Anthropic-om; potpuna struktura
+  dokumentovana je u `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Povezivanje OmniRoute čvorova u lanac
 
 Drugi OmniRoute pristupnik može se dodati kao **prilagođeni pružatelj kompatibilan s OpenAI-em**. Koristite

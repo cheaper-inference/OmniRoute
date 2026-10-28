@@ -725,6 +725,31 @@ kuskuren da ya ambaci ginannen mai bayarwa ko bayanan shaidarsa, duba ko prefix 
 an keɓe shi: kullayen da aka adana kafin wannan ƙa'ida su na nan a ajiye, amma prefix ɗinsu yana tura buƙatu zuwa
 ginannen mai bayarwa. Gyara kullin ka ba shi sabon prefix.
 
+#### Zaɓuɓɓukan mashiga na kowane haɗi
+
+Ana saka waɗannan maɓallan cikin `providerSpecificData` na wani haɗi (misali ta hanyar
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (lamba cikakkiya, 1–1024) — don haɗe-haɗe masu dacewa da tsarin tattaunawa na OpenAI waɗanda
+  mashigarsu ke ƙin dogayen sunayen kayan aiki. Ana aika dogayen sunaye a matsayin gajerun laƙabi, sannan a mayar da
+  su yadda suke a cikin amsar.
+- `quotaEndpoint` — ƙarshen API na iyakokin amfani/kiredit na mashigar, wanda ake karantawa don tsiri na iyakokin amfani a allon sarrafawa da kuma
+  zaɓin hanya bisa iyakokin amfani. Yana aiki a kan haɗe-haɗe masu dacewa da OpenAI da Anthropic; an rubuta cikakken
+  tsarinsa a cikin `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Haɗa Abokan OmniRoute a Sarƙaƙƙiya
 
 Za a iya ƙara wata mashigar OmniRoute a matsayin mai bayarwa na **Custom OpenAI-compatible**. Yi amfani da

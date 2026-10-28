@@ -726,6 +726,31 @@ błędem wskazującym wbudowanego dostawcę lub jego dane uwierzytelniające, sp
 zarezerwowany: węzły zapisane przed wprowadzeniem tej reguły są nadal przechowywane, ale ich prefiksy kierują ruch do
 wbudowanego dostawcy. Edytuj węzeł i przypisz mu nowy prefiks.
 
+#### Opcje bramy dla poszczególnych połączeń
+
+Te klucze należy umieścić w `providerSpecificData` połączenia (na przykład za pomocą
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (liczba całkowita, 1–1024) — dla połączeń zgodnych z formatem czatu OpenAI, których
+  brama odrzuca długie nazwy narzędzi. Dłuższe nazwy są wysyłane jako krótkie aliasy i przywracane w
+  odpowiedzi.
+- `quotaEndpoint` — punkt końcowy limitów/kredytów bramy, odczytywany na potrzeby paska limitu w panelu i
+  routingu uwzględniającego limity. Działa zarówno z połączeniami zgodnymi z OpenAI, jak i Anthropic; pełna struktura
+  jest udokumentowana w `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Łączenie równorzędnych instancji OmniRoute
 
 Inną bramę OmniRoute można dodać jako **niestandardowego dostawcę zgodnego z OpenAI**. Użyj

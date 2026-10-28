@@ -725,6 +725,31 @@ prefix: "<prefix>" គឺជា prefix របស់ provider ដែលបាន�
 ត្រូវបានបម្រុងទុកឬអត់៖ ថ្នាំងដែលបានរក្សាទុក មុនពេលមានច្បាប់នេះ នៅតែត្រូវបានរក្សាទុក ប៉ុន្តែ prefix របស់វាត្រូវបាន route ទៅកាន់
 provider ដែលមានស្រាប់ក្នុងប្រព័ន្ធ។ កែសម្រួលថ្នាំង ហើយផ្តល់ prefix ថ្មីឱ្យវា។
 
+#### ជម្រើស gateway សម្រាប់ connection នីមួយៗ
+
+key ទាំងនេះត្រូវដាក់នៅក្នុង `providerSpecificData` របស់ connection (ឧទាហរណ៍ តាមរយៈ
+`PUT /api/providers/{id}`)៖
+
+- `toolNameMaxLength` (ចំនួនគត់, 1–1024) — សម្រាប់ connection ដែលឆបគ្នាជាមួយទម្រង់ chat របស់ OpenAI ហើយ
+  gateway របស់វាបដិសេធឈ្មោះ tool វែងៗ។ ឈ្មោះវែងៗត្រូវបានផ្ញើជាឈ្មោះក្លែងកាត់ខ្លី ហើយត្រូវបានស្ដារឡើងវិញនៅក្នុង
+  response។
+- `quotaEndpoint` — endpoint សម្រាប់ quota/credits របស់ gateway ដែលត្រូវបានអានសម្រាប់របារ quota នៅលើ dashboard និង
+  routing ដែលគិតគូរពី quota។ វាដំណើរការលើ connection ដែលឆបគ្នាទាំងជាមួយ OpenAI និង Anthropic; រចនាសម្ព័ន្ធពេញលេញ
+  ត្រូវបានចងក្រងជាឯកសារនៅក្នុង `open-sse/services/usage/openaiCompatible.ts`។
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### ការតភ្ជាប់ OmniRoute Peer ជាខ្សែសង្វាក់
 
 OmniRoute gateway មួយទៀតអាចត្រូវបានបន្ថែមជា provider **Custom OpenAI-compatible**។ ប្រើ

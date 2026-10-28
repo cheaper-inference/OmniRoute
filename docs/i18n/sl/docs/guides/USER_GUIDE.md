@@ -724,6 +724,31 @@ napako, ki omenja vgrajenega ponudnika ali njegove poverilnice, preverite, ali j
 rezervirana: vozlišča, shranjena pred uvedbo tega pravila, so še vedno shranjena, vendar njihova predpona
 usmerja k vgrajenemu ponudniku. Uredite vozlišče in mu dodelite novo predpono.
 
+#### Možnosti prehoda za posamezno povezavo
+
+Ti ključi se navedejo v `providerSpecificData` povezave (na primer prek
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (celo število, 1–1024) — za povezave, združljive z OpenAI-jevim formatom klepeta, katerih
+  prehod zavrača dolga imena orodij. Daljša imena so poslana kot kratki vzdevki in obnovljena v
+  odgovoru.
+- `quotaEndpoint` — končna točka prehoda za kvoto/dobroimetje, ki se uporablja za prikaz kvote na nadzorni plošči in
+  usmerjanje ob upoštevanju kvote. Deluje tako s povezavami, združljivimi z OpenAI, kot s tistimi, združljivimi z Anthropic; celotna struktura
+  je dokumentirana v `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Veriženje sorodnih prehodov OmniRoute
 
 Drug prehod OmniRoute je mogoče dodati kot ponudnika **Po meri, združljivega z OpenAI**. Uporabite

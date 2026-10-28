@@ -726,6 +726,27 @@ prefix: "<prefix>"는 예약된 공급자 접두사입니다. 다른 접두사�
 있는지 확인하세요. 이 규칙이 도입되기 전에 저장된 노드는 그대로 유지되지만 해당 접두사는
 기본 제공 공급자로 라우팅됩니다. 노드를 편집하고 새 접두사를 지정하세요.
 
+#### 연결별 게이트웨이 옵션
+
+이 키들은 연결의 `providerSpecificData`에 포함됩니다(예:
+`PUT /api/providers/{id}` 사용):
+
+- `toolNameMaxLength`(정수, 1–1024) — 게이트웨이가 긴 도구 이름을 거부하는 OpenAI 채팅 형식 호환 연결에 사용합니다. 긴 이름은 짧은 별칭으로 전송되고 응답에서 원래 이름으로 복원됩니다.
+- `quotaEndpoint` — 게이트웨이의 할당량/크레딧 엔드포인트로, 대시보드의 할당량 표시줄과 할당량 인식 라우팅에 사용하기 위해 읽습니다. OpenAI 및 Anthropic 호환 연결 모두에서 작동하며, 전체 구조는 `open-sse/services/usage/openaiCompatible.ts`에 문서화되어 있습니다.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute 피어 체이닝
 
 다른 OmniRoute 게이트웨이를 **사용자 지정 OpenAI 호환** 공급자로 추가할 수 있습니다.

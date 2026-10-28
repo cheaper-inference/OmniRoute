@@ -710,6 +710,27 @@ prefix: "<prefix>" は予約済みのプロバイダープレフィックスで�
 
 重複しないプレフィックス（`mygw`、`acme-proxy`）を選択してください。カスタムノードへのリクエストが、組み込みプロバイダーまたはその認証情報を示すエラーで失敗する場合は、ノードのプレフィックスが予約済みでないか確認してください。このルールが導入される前に保存されたノードは引き続き保存されていますが、そのプレフィックスは組み込みプロバイダーへルーティングされます。ノードを編集し、新しいプレフィックスを設定してください。
 
+#### 接続ごとのゲートウェイオプション
+
+以下のキーは、接続の `providerSpecificData` に設定します（たとえば
+`PUT /api/providers/{id}` を使用します）。
+
+- `toolNameMaxLength`（整数、1～1024）— 長いツール名を拒否するゲートウェイを使用する、OpenAI チャット形式互換接続向けです。長い名前は短いエイリアスとして送信され、レスポンス内で元の名前に復元されます。
+- `quotaEndpoint` — ゲートウェイのクォータ／クレジットエンドポイントです。ダッシュボードのクォータ表示バーおよびクォータ対応ルーティングで使用されます。OpenAI 互換接続と Anthropic 互換接続の両方で機能します。完全な構造については、`open-sse/services/usage/openaiCompatible.ts` に記載されています。
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute ピアのチェーン化
 
 別の OmniRoute ゲートウェイを **Custom OpenAI-compatible** プロバイダーとして追加できます。そのピアの `/v1` ベース URL と、ピアによって発行された専用の最小権限 API キーを使用してください。

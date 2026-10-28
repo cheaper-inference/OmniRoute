@@ -724,6 +724,31 @@ ralat yang menamakan penyedia terbina dalam atau kelayakannya, semak sama ada aw
 adalah awalan simpanan: nod yang disimpan sebelum peraturan ini diperkenalkan masih tersimpan, tetapi awalannya dihalakan kepada
 penyedia terbina dalam. Edit nod tersebut dan berikan awalan baharu.
 
+#### Pilihan get laluan per sambungan
+
+Kunci-kunci ini dimasukkan ke dalam `providerSpecificData` bagi sesuatu sambungan (contohnya melalui
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (integer, 1–1024) — untuk sambungan serasi format sembang OpenAI yang
+  get laluannya menolak nama alat yang panjang. Nama yang lebih panjang dihantar sebagai alias pendek dan dipulihkan dalam
+  respons.
+- `quotaEndpoint` — titik akhir kuota/kredit get laluan, dibaca untuk jalur kuota papan pemuka dan
+  penghalaan berasaskan kuota. Berfungsi pada sambungan serasi OpenAI dan Anthropic; struktur lengkapnya
+  didokumentasikan dalam `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Merantaikan Rakan OmniRoute
 
 Get laluan OmniRoute yang lain boleh ditambahkan sebagai penyedia **Tersuai yang serasi dengan OpenAI**. Gunakan

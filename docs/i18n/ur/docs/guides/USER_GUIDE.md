@@ -726,6 +726,31 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 محفوظ ہے: اس اصول کے نفاذ سے پہلے محفوظ کیے گئے نوڈز اب بھی موجود ہیں، لیکن ان کا پریفکس ٹریفک کو
 پہلے سے موجود فراہم کنندہ کی طرف بھیجتا ہے۔ نوڈ میں ترمیم کریں اور اسے نیا پریفکس دیں۔
 
+#### فی کنکشن گیٹ وے اختیارات
+
+یہ کلیدیں کسی کنکشن کے `providerSpecificData` میں شامل کی جاتی ہیں (مثلاً
+`PUT /api/providers/{id}` کے ذریعے):
+
+- `toolNameMaxLength` (صحیح عدد، 1–1024) — OpenAI چیٹ فارمیٹ سے ہم آہنگ ان کنکشنز کے لیے جن کا
+  گیٹ وے طویل ٹول ناموں کو مسترد کرتا ہے۔ طویل نام مختصر عرف کے طور پر بھیجے جاتے ہیں اور
+  جواب میں اصل حالت میں بحال کر دیے جاتے ہیں۔
+- `quotaEndpoint` — گیٹ وے کا کوٹہ/کریڈٹس اینڈ پوائنٹ، جسے ڈیش بورڈ کی کوٹہ پٹی اور
+  کوٹہ سے باخبر روٹنگ کے لیے پڑھا جاتا ہے۔ یہ OpenAI اور Anthropic دونوں سے ہم آہنگ کنکشنز پر
+  کام کرتا ہے؛ مکمل ساخت `open-sse/services/usage/openaiCompatible.ts` میں دستاویزی شکل میں موجود ہے۔
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute پیئرز کو زنجیر بنانا
 
 ایک اور OmniRoute گیٹ وے کو **Custom OpenAI-compatible** فراہم کنندہ کے طور پر شامل کیا جا سکتا ہے۔ اس

@@ -727,6 +727,27 @@ düğümün önekinin ayrılmış olup olmadığını kontrol edin: Bu kural uyg
 düğümler hâlâ saklanır, ancak önekleri yerleşik sağlayıcıya yönlendirilir. Düğümü düzenleyin ve
 ona yeni bir önek verin.
 
+#### Bağlantı başına ağ geçidi seçenekleri
+
+Bu anahtarlar, bir bağlantının `providerSpecificData` alanına eklenir (örneğin
+`PUT /api/providers/{id}` aracılığıyla):
+
+- `toolNameMaxLength` (tam sayı, 1–1024) — ağ geçidi uzun araç adlarını reddeden, OpenAI sohbet biçimiyle uyumlu bağlantılar içindir. Daha uzun adlar kısa takma adlar olarak gönderilir ve yanıtta özgün hâllerine geri döndürülür.
+- `quotaEndpoint` — ağ geçidinin kota/kredi uç noktasıdır; kontrol panelindeki kota şeridi ve kota duyarlı yönlendirme için okunur. Hem OpenAI hem de Anthropic uyumlu bağlantılarda çalışır; yapının tamamı `open-sse/services/usage/openaiCompatible.ts` dosyasında belgelenmiştir.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute Eşlerini Zincirleme
 
 Başka bir OmniRoute ağ geçidi, **Özel OpenAI uyumlu** sağlayıcı olarak eklenebilir. Eşin

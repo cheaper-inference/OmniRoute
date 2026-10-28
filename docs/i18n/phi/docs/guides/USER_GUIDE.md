@@ -726,6 +726,31 @@ error na nagbabanggit ng built-in na provider o mga credential nito, suriin kung
 nakaimbak pa rin ang mga node na na-save bago umiral ang panuntunang ito, ngunit ang prefix ng mga ito ay nira-route sa
 built-in na provider. I-edit ang node at bigyan ito ng bagong prefix.
 
+#### Mga opsyon ng gateway kada koneksyon
+
+Ang mga key na ito ay inilalagay sa `providerSpecificData` ng isang koneksyon (halimbawa, sa pamamagitan ng
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (integer, 1–1024) — para sa mga koneksyong compatible sa OpenAI chat format na
+  ang gateway ay tumatanggi sa mahahabang pangalan ng tool. Ipinapadala ang mas mahahabang pangalan bilang maiikling alias at ibinabalik sa orihinal na anyo sa
+  tugon.
+- `quotaEndpoint` — ang endpoint ng quota/credits ng gateway, na binabasa para sa quota strip ng dashboard at
+  routing na isinasaalang-alang ang quota. Gumagana sa parehong mga koneksyong compatible sa OpenAI at Anthropic; nakadokumento ang kumpletong
+  anyo sa `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Pagkakadena ng mga OmniRoute Peer
 
 Maaaring idagdag ang isa pang OmniRoute gateway bilang **Custom na provider na compatible sa OpenAI**. Gamitin ang

@@ -725,6 +725,31 @@ Fehler fehlschlagen, der einen integrierten Anbieter oder dessen Anmeldedaten ne
 reserviert ist: Knoten, die vor Einführung dieser Regel gespeichert wurden, bleiben gespeichert, ihr Präfix leitet jedoch an
 den integrierten Anbieter weiter. Bearbeiten Sie den Knoten und geben Sie ihm ein neues Präfix.
 
+#### Gateway-Optionen pro Verbindung
+
+Diese Schlüssel werden in `providerSpecificData` einer Verbindung eingetragen (zum Beispiel über
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (Ganzzahl, 1–1024) — für mit dem OpenAI-Chatformat kompatible Verbindungen, deren
+  Gateway lange Tool-Namen ablehnt. Längere Namen werden als kurze Aliase gesendet und in der
+  Antwort wiederhergestellt.
+- `quotaEndpoint` — der Quoten-/Guthaben-Endpunkt des Gateways, der für die Quotenanzeige im Dashboard und
+  das quotenbasierte Routing ausgelesen wird. Funktioniert sowohl mit OpenAI- als auch mit Anthropic-kompatiblen Verbindungen; die vollständige
+  Struktur ist in `open-sse/services/usage/openaiCompatible.ts` dokumentiert.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Verkettung von OmniRoute-Peers
 
 Ein weiteres OmniRoute-Gateway kann als **benutzerdefinierter OpenAI-kompatibler** Anbieter hinzugefügt werden. Verwenden Sie die

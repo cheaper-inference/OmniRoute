@@ -726,6 +726,31 @@ njehie na-akpọ aha onye na-eweta ọrụ arụnyere n’ime sistemụ ma ọ b
 edobere iche: node ndị echekwara tupu iwu a adị ka echekwara, mana prefix ha na-aga na
 onye na-eweta ọrụ arụnyere n’ime sistemụ. Dezie node ahụ ma nye ya prefix ọhụrụ.
 
+#### Nhọrọ gateway maka njikọ ọ bụla
+
+Igodo ndị a na-abanye na `providerSpecificData` nke njikọ (dịka ọmụmaatụ site na
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (ọnụọgụ zuru ezu, 1–1024) — maka njikọ ndị kwekọrọ na usoro nkata OpenAI nke
+  gateway ha na-ajụ aha ngwaọrụ ndị toro ogologo. A na-eziga aha ndị toro ogologo dị ka aha nnọchi dị mkpụmkpụ ma weghachite ha n’ụdị mbụ na
+  nzaghachi.
+- `quotaEndpoint` — endpoint nke oke ojiji/kredit nke gateway, nke a na-agụ maka ogwe oke ojiji dị na dashboard na
+  ntụgharị ụzọ nke na-eburu oke ojiji n’uche. Ọ na-arụ ọrụ na njikọ ndị kwekọrọ ma na OpenAI ma na Anthropic; a kọwara nhazi ya
+  n’uju na `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Ijikọta Ndị Ọgbọ OmniRoute n’Agbụ
 
 Enwere ike ịgbakwunye gateway OmniRoute ọzọ dịka onye na-eweta ọrụ **Custom OpenAI-compatible**. Jiri

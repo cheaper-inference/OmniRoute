@@ -728,6 +728,31 @@ hibával hiúsulnak meg, amely egy beépített szolgáltatót vagy annak hiteles
 fenntartott-e: a szabály bevezetése előtt mentett csomópontok továbbra is tárolva maradnak, de az előtagjuk a
 beépített szolgáltatóhoz irányít. Szerkessze a csomópontot, és adjon neki új előtagot.
 
+#### Kapcsolatonkénti átjáróbeállítások
+
+Ezek a kulcsok egy kapcsolat `providerSpecificData` mezőjébe kerülnek (például a
+`PUT /api/providers/{id}` használatával):
+
+- `toolNameMaxLength` (egész szám, 1–1024) — olyan OpenAI chat formátummal kompatibilis kapcsolatokhoz, amelyek
+  átjárója elutasítja a hosszú eszközneveket. A hosszabb neveket rövid álnevekként küldi el a rendszer, majd visszaállítja őket a
+  válaszban.
+- `quotaEndpoint` — az átjáró kvóta-/kreditvégpontja, amelyet az irányítópult kvótasávja és a
+  kvótát figyelembe vevő útválasztás olvas be. OpenAI- és Anthropic-kompatibilis kapcsolatokon egyaránt
+  működik; a teljes struktúra dokumentációja az `open-sse/services/usage/openaiCompatible.ts` fájlban található.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute-partnerek láncolása
 
 Egy másik OmniRoute-átjáró hozzáadható **egyéni OpenAI-kompatibilis** szolgáltatóként. Használja a

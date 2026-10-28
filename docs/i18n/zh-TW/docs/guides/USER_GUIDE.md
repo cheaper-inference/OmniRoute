@@ -725,6 +725,27 @@ prefix: "<prefix>" 是保留的提供者前綴 — 請選擇其他前綴（保�
 保留前綴：在此規則出現之前儲存的節點仍會保留，但其前綴會路由至
 內建提供者。請編輯節點並指定新的前綴。
 
+#### 每個連線的閘道選項
+
+這些鍵應放在連線的 `providerSpecificData` 中（例如透過
+`PUT /api/providers/{id}`）：
+
+- `toolNameMaxLength`（整數，1–1024）— 適用於閘道會拒絕過長工具名稱的 OpenAI 聊天格式相容連線。較長的名稱會以簡短別名傳送，並在回應中還原。
+- `quotaEndpoint` — 閘道的配額／點數端點，用於儀表板配額列與配額感知路由。適用於 OpenAI 與 Anthropic 相容連線；完整格式記錄於 `open-sse/services/usage/openaiCompatible.ts`。
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### 串接 OmniRoute 對等節點
 
 另一個 OmniRoute 閘道可新增為**自訂 OpenAI 相容**提供者。請使用

@@ -724,6 +724,31 @@ kļūdas ziņojumā ir norādīts iebūvēts pakalpojumu sniedzējs vai tā akre
 rezervēts: mezgli, kas saglabāti pirms šī noteikuma ieviešanas, joprojām tiek glabāti, taču to prefikss novirza pieprasījumus
 iebūvētajam pakalpojumu sniedzējam. Rediģējiet mezglu un piešķiriet tam jaunu prefiksu.
 
+#### Katram savienojumam specifiskas vārtejas opcijas
+
+Šīs atslēgas jānorāda savienojuma `providerSpecificData` (piemēram, izmantojot
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (vesels skaitlis, 1–1024) — OpenAI tērzēšanas formātam saderīgiem savienojumiem, kuru
+  vārteja noraida garus rīku nosaukumus. Garāki nosaukumi tiek nosūtīti kā īsi aizstājvārdi un atjaunoti
+  atbildē.
+- `quotaEndpoint` — vārtejas kvotas/kredītu galapunkts, kas tiek nolasīts informācijas paneļa kvotas joslai un
+  kvotu ievērojošai maršrutēšanai. Darbojas gan ar OpenAI, gan Anthropic saderīgiem savienojumiem; pilna struktūra
+  ir dokumentēta failā `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute vienādranga mezglu ķēdēšana
 
 Citu OmniRoute vārteju var pievienot kā **pielāgotu ar OpenAI saderīgu** pakalpojumu sniedzēju. Izmantojiet

@@ -726,6 +726,31 @@ erreur mentionnant un fournisseur intégré ou ses identifiants d’authentifica
 réservé : les nœuds enregistrés avant l’existence de cette règle sont toujours conservés, mais leur préfixe achemine les requêtes vers
 le fournisseur intégré. Modifiez le nœud et attribuez-lui un nouveau préfixe.
 
+#### Options de passerelle propres à chaque connexion
+
+Ces clés se placent dans le champ `providerSpecificData` d'une connexion (par exemple via
+`PUT /api/providers/{id}`) :
+
+- `toolNameMaxLength` (entier, 1–1024) — pour les connexions compatibles avec le format de chat OpenAI dont
+  la passerelle rejette les noms d'outils trop longs. Les noms plus longs sont envoyés sous forme d'alias courts, puis restaurés dans la
+  réponse.
+- `quotaEndpoint` — le point de terminaison de quota/crédits de la passerelle, consulté pour la barre de quota du tableau de bord et
+  le routage tenant compte des quotas. Fonctionne avec les connexions compatibles OpenAI et Anthropic ; la structure complète
+  est documentée dans `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Chaînage de pairs OmniRoute
 
 Une autre passerelle OmniRoute peut être ajoutée en tant que fournisseur **personnalisé compatible avec OpenAI**. Utilisez

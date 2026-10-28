@@ -725,6 +725,31 @@ Yan prefix tó yàtọ̀ (`mygw`, `acme-proxy`). Bí àwọn ìbéèrè sí node
 èyí tí a fi pamọ́: àwọn node tí a fipamọ́ ṣáájú kí òfin yìí tó wà ṣì wà níbi ìtọ́jú, ṣùgbọ́n prefix wọn máa ń darí sí
 olupèsè tí a ṣe sínú rẹ̀. Ṣàtúnṣe node náà, kí o sì fún un ní prefix tuntun.
 
+#### Àwọn àṣàyàn gateway fún ìsopọ̀ kọ̀ọ̀kan
+
+Àwọn kọ́kọ́rọ́ wọ̀nyí máa ń lọ sínú `providerSpecificData` ìsopọ̀ kan (fún àpẹẹrẹ nípasẹ̀
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (odidi, 1–1024) — fún àwọn ìsopọ̀ tó bá ìrísí ìfọ̀rọ̀wérọ̀ OpenAI mu, tí
+  gateway wọn kò gba àwọn orúkọ irinṣẹ́ gígùn. Àwọn orúkọ tó gùn jù ni a máa ń fi ránṣẹ́ gẹ́gẹ́ bí orúkọ àfidípò kúkúrú, a sì máa ń dá wọn padà sí orúkọ gangan nínú
+  èsì.
+- `quotaEndpoint` — endpoint ìpín/credit gateway náà, tí a máa ń kà fún àkójọpọ̀ ìpín lórí dashboard àti
+  ìtọ́sọ́nà tó mọ iye ìpín tó wà. Ó ń ṣiṣẹ́ lórí àwọn ìsopọ̀ tó bá OpenAI àti Anthropic mu; a ṣàkọsílẹ̀ ìrísí rẹ̀ ní kíkún
+  nínú `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Ṣíṣe Àwọn Ẹlẹgbẹ́ OmniRoute Ní Ẹ̀wọ̀n
 
 A lè ṣàfikún ẹnu-ọ̀nà OmniRoute mìíràn gẹ́gẹ́ bí olupèsè **Custom OpenAI-compatible**. Lo

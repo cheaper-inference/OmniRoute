@@ -726,6 +726,27 @@ təchizatçının və ya onun giriş məlumatlarının adını çəkən xəta il
 rezerv edilib-edilmədiyini yoxlayın: bu qayda mövcud olmamışdan əvvəl saxlanılmış qovşaqlar hələ də qalır, lakin onların prefiksi
 daxili təchizatçıya yönləndirilir. Qovşağı redaktə edin və ona yeni prefiks verin.
 
+#### Hər bağlantı üçün şlüz seçimləri
+
+Bu açarlar bağlantının `providerSpecificData` sahəsinə əlavə olunur (məsələn,
+`PUT /api/providers/{id}` vasitəsilə):
+
+- `toolNameMaxLength` (tam ədəd, 1–1024) — şlüzü uzun alət adlarını rədd edən, OpenAI söhbət formatı ilə uyğun bağlantılar üçün. Daha uzun adlar qısa ləqəblər kimi göndərilir və cavabda bərpa olunur.
+- `quotaEndpoint` — idarə panelindəki kvota zolağı və kvotanı nəzərə alan marşrutlaşdırma üçün oxunan şlüzün kvota/kredit son nöqtəsi. Həm OpenAI, həm də Anthropic ilə uyğun bağlantılarda işləyir; tam struktur `open-sse/services/usage/openaiCompatible.ts` faylında sənədləşdirilib.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute Həmkarlarının Zəncirlənməsi
 
 Başqa bir OmniRoute şlüzü **Fərdi OpenAI-uyğun** təchizatçı kimi əlavə edilə bilər. Həmkarın

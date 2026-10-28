@@ -726,6 +726,31 @@ virheessä mainitaan sisäänrakennettu palveluntarjoaja tai sen tunnistetiedot,
 varattu: ennen tämän säännön käyttöönottoa tallennetut solmut ovat edelleen tallessa, mutta niiden etuliite reitittää pyynnöt
 sisäänrakennetulle palveluntarjoajalle. Muokkaa solmua ja anna sille uusi etuliite.
 
+#### Yhteyskohtaiset yhdyskäytäväasetukset
+
+Nämä avaimet lisätään yhteyden `providerSpecificData`-objektiin (esimerkiksi
+`PUT /api/providers/{id}` -pyynnöllä):
+
+- `toolNameMaxLength` (kokonaisluku, 1–1024) — OpenAI-keskustelumuodon kanssa yhteensopiville yhteyksille, joiden
+  yhdyskäytävä hylkää pitkät työkalujen nimet. Pidemmät nimet lähetetään lyhyinä aliaksina ja palautetaan
+  alkuperäiseen muotoonsa vastauksessa.
+- `quotaEndpoint` — yhdyskäytävän kiintiöiden tai krediittien päätepiste, josta luetaan tiedot hallintapaneelin kiintiöpalkkia ja
+  kiintiöt huomioivaa reititystä varten. Toimii sekä OpenAI- että Anthropic-yhteensopivissa yhteyksissä; koko rakenne
+  on dokumentoitu tiedostossa `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute-vertaisyhdyskäytävien ketjuttaminen
 
 Toinen OmniRoute-yhdyskäytävä voidaan lisätä **mukautetuksi OpenAI-yhteensopivaksi** palveluntarjoajaksi. Käytä

@@ -728,6 +728,31 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 رزروشده است یا خیر: گرههایی که پیش از وضع این قانون ذخیره شدهاند همچنان نگهداری میشوند، اما پیشوند آنها به
 ارائهدهندهٔ داخلی مسیریابی میشود. گره را ویرایش کنید و پیشوند جدیدی به آن بدهید.
 
+#### گزینههای درگاه برای هر اتصال
+
+این کلیدها در `providerSpecificData` یک اتصال قرار میگیرند (برای مثال از طریق
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (عدد صحیح، 1–1024) — برای اتصالهای سازگار با قالب چت OpenAI که
+  درگاه آنها نامهای طولانی ابزارها را رد میکند. نامهای طولانیتر بهصورت نامهای مستعار کوتاه ارسال میشوند و در
+  پاسخ به حالت اصلی بازگردانده میشوند.
+- `quotaEndpoint` — نقطه پایانی سهمیه/اعتبار درگاه که برای نوار سهمیه داشبورد و
+  مسیریابی آگاه از سهمیه خوانده میشود. این گزینه روی اتصالهای سازگار با OpenAI و Anthropic کار میکند؛ ساختار کامل
+  آن در `open-sse/services/usage/openaiCompatible.ts` مستند شده است.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### زنجیرهکردن همتایان OmniRoute
 
 یک درگاه OmniRoute دیگر را میتوان بهعنوان ارائهدهندهٔ **سفارشی سازگار با OpenAI** اضافه کرد. از

@@ -722,6 +722,27 @@ hearráid a ainmníonn soláthraí ionsuite nó a dhintiúir, seiceáil an bhfui
 forchoimeádta: tá nóid a sábháladh sula raibh an riail seo ann fós stóráilte, ach ródálann a réimír chuig
 an soláthraí ionsuite. Cuir an nód in eagar agus tabhair réimír nua dó.
 
+#### Roghanna geata de réir naisc
+
+Cuirtear na heochracha seo i `providerSpecificData` naisc (mar shampla trí
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (slánuimhir, 1–1024) — le haghaidh naisc atá comhoiriúnach le formáid chomhrá OpenAI agus a ndiúltaíonn a ngeata d’ainmneacha fada uirlisí. Seoltar ainmneacha níos faide mar ailiasanna gearra agus aischuirtear iad sa fhreagairt.
+- `quotaEndpoint` — críochphointe cuóta/creidmheasanna an gheata, a léitear don stiall chuóta ar an deais agus don ródú atá feasach ar chuótaí. Oibríonn sé ar naisc atá comhoiriúnach le OpenAI agus Anthropic araon; tá an struchtúr iomlán doiciméadaithe in `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Piaraí OmniRoute a Shlabhrú
 
 Is féidir geata OmniRoute eile a chur leis mar sholáthraí **Saincheaptha atá comhoiriúnach le OpenAI**. Úsáid

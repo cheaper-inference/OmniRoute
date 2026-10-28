@@ -726,6 +726,31 @@ foutmelding waarin een ingebouwde provider of de bijbehorende referenties worden
 gereserveerd is: nodes die zijn opgeslagen voordat deze regel bestond, blijven opgeslagen, maar hun voorvoegsel routeert naar
 de ingebouwde provider. Bewerk de node en geef deze een nieuw voorvoegsel.
 
+#### Gatewayopties per verbinding
+
+Deze sleutels worden opgenomen in de `providerSpecificData` van een verbinding (bijvoorbeeld via
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (geheel getal, 1–1024) — voor verbindingen die compatibel zijn met de OpenAI-chatindeling en waarvan
+  de gateway lange toolnamen weigert. Langere namen worden als korte aliassen verzonden en in het
+  antwoord hersteld.
+- `quotaEndpoint` — het quota-/tegoedendpoint van de gateway, dat wordt uitgelezen voor de quotabalk op het dashboard en
+  quotabewuste routering. Werkt met zowel OpenAI- als Anthropic-compatibele verbindingen; de volledige structuur
+  is gedocumenteerd in `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute-peers koppelen
 
 Een andere OmniRoute-gateway kan als een **aangepaste OpenAI-compatibele** provider worden toegevoegd. Gebruik de

@@ -723,6 +723,31 @@ Agħżel prefiss distint (`mygw`, `acme-proxy`). Jekk talbiet lil node personali
 riżervat: nodes issejvjati qabel ma kienet teżisti din ir-regola għadhom maħżuna, iżda l-prefiss tagħhom jibgħat it-traffiku
 lill-fornitur inkorporat. Editja n-node u agħtih prefiss ġdid.
 
+#### Għażliet tal-gateway għal kull konnessjoni
+
+Dawn il-keys jitqiegħdu fil-`providerSpecificData` ta’ konnessjoni (pereżempju permezz ta’
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (numru sħiħ, 1–1024) — għal konnessjonijiet kompatibbli mal-format taċ-chat ta’ OpenAI li
+  l-gateway tagħhom jirrifjuta ismijiet twal tal-għodod. Ismijiet itwal jintbagħtu bħala psewdonimi qosra u jiġu rrestawrati fit-
+  tweġiba.
+- `quotaEndpoint` — l-endpoint tal-kwota/krediti tal-gateway, li jinqara għall-istrixxa tal-kwota fid-dashboard u
+  għar-routing konxju mill-kwota. Jaħdem kemm fuq konnessjonijiet kompatibbli ma’ OpenAI kif ukoll ma’ Anthropic; il-forma sħiħa
+  hija ddokumentata f’`open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Katina ta’ Peers ta’ OmniRoute
 
 Gateway OmniRoute ieħor jista’ jiżdied bħala fornitur **Personalizzat kompatibbli ma’ OpenAI**. Uża l-

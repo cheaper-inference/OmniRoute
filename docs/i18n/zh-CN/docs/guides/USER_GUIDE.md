@@ -710,6 +710,27 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 请选择不同的前缀（如 `mygw`、`acme-proxy`）。如果发送到自定义节点的请求失败，且错误消息提到了某个内置提供者或其凭据，请检查节点前缀是否为保留前缀：在此规则引入之前保存的节点仍会保留，但其前缀会将请求路由到内置提供者。请编辑该节点并为其指定新前缀。
 
+#### 每个连接的网关选项
+
+这些键应放入连接的 `providerSpecificData` 中（例如通过
+`PUT /api/providers/{id}`）：
+
+- `toolNameMaxLength`（整数，1–1024）— 适用于网关拒绝过长工具名称的 OpenAI 聊天格式兼容连接。较长的名称会以短别名发送，并在响应中恢复。
+- `quotaEndpoint` — 网关的配额/额度端点，用于仪表板配额栏和配额感知路由。适用于 OpenAI 和 Anthropic 兼容连接；完整结构记录在 `open-sse/services/usage/openaiCompatible.ts` 中。
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### 串联 OmniRoute 对等节点
 
 可以将另一个 OmniRoute 网关添加为**自定义 OpenAI 兼容**提供者。请使用对等节点的 `/v1` 基础 URL，以及由该对等节点签发的专用最小权限 API 密钥。

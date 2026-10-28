@@ -725,6 +725,31 @@ prefix: "<prefix>" היא קידומת ספק שמורה — יש לבחור ק�
 שמורה: צמתים שנשמרו לפני שהכלל הזה נוסף עדיין מאוחסנים, אך הקידומת שלהם מנותבת
 לספק המובנה. ערכו את הצומת והקצו לו קידומת חדשה.
 
+#### אפשרויות שער לכל חיבור
+
+מפתחות אלה נמצאים ב-`providerSpecificData` של חיבור (לדוגמה באמצעות
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (מספר שלם, 1–1024) — עבור חיבורים תואמי פורמט הצ'אט של OpenAI שהשער שלהם
+  דוחה שמות כלים ארוכים. שמות ארוכים יותר נשלחים ככינויים קצרים ומשוחזרים
+  בתגובה.
+- `quotaEndpoint` — נקודת הקצה של המכסה/נקודות הזכות בשער, שנקראת לצורך רצועת המכסה בלוח המחוונים
+  וניתוב מודע למכסות. פועל הן בחיבורים תואמי OpenAI והן בחיבורים תואמי Anthropic; המבנה המלא
+  מתועד ב-`open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### שרשור עמיתי OmniRoute
 
 ניתן להוסיף שער OmniRoute נוסף כספק **מותאם אישית תואם OpenAI**. השתמשו בכתובת

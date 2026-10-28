@@ -726,6 +726,31 @@ fejl, der nævner en indbygget udbyder eller dennes legitimationsoplysninger, sk
 reserveret: Noder, der blev gemt, før denne regel blev indført, gemmes stadig, men deres præfiks dirigerer til
 den indbyggede udbyder. Rediger noden, og giv den et nyt præfiks.
 
+#### Gatewayindstillinger pr. forbindelse
+
+Disse nøgler placeres i en forbindelses `providerSpecificData` (for eksempel via
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (heltal, 1–1024) — til forbindelser, der er kompatible med OpenAI-chatformatet, og hvis
+  gateway afviser lange værktøjsnavne. Længere navne sendes som korte aliasser og gendannes i
+  svaret.
+- `quotaEndpoint` — gatewayens slutpunkt for kvoter/kreditter, som aflæses til dashboardets kvoteindikator og
+  kvotebevidst routing. Fungerer både med OpenAI- og Anthropic-kompatible forbindelser; den fulde struktur
+  er dokumenteret i `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Sammenkædning af OmniRoute-peers
 
 En anden OmniRoute-gateway kan tilføjes som en **brugerdefineret OpenAI-kompatibel** udbyder. Brug

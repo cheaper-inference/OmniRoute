@@ -724,6 +724,27 @@ ichki provayder yoki uning hisob maʼlumotlarini koʻrsatuvchi xato bilan bajari
 zaxiralanganligini tekshiring: ushbu qoida paydo boʻlishidan oldin saqlangan tugunlar hamon saqlanadi,
 ammo ularning prefiksi ichki provayderga yoʻnaltiriladi. Tugunni tahrirlang va unga yangi prefiks bering.
 
+#### Har bir ulanish uchun gateway parametrlari
+
+Bu kalitlar ulanishning `providerSpecificData` maydoniga joylashtiriladi (masalan,
+`PUT /api/providers/{id}` orqali):
+
+- `toolNameMaxLength` (butun son, 1–1024) — gateway'i uzun vosita nomlarini rad etadigan, OpenAI chat formatiga mos ulanishlar uchun. Uzunroq nomlar qisqa taxalluslar sifatida yuboriladi va javobda tiklanadi.
+- `quotaEndpoint` — dashboard'dagi kvota tasmasi va kvotani hisobga oluvchi yoʻnaltirish uchun oʻqiladigan gateway kvota/kreditlar endpoint'i. OpenAI va Anthropic bilan mos ulanishlarning ikkalasida ham ishlaydi; toʻliq tuzilma `open-sse/services/usage/openaiCompatible.ts` faylida hujjatlashtirilgan.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute teng tugunlarini zanjirlash
 
 Boshqa OmniRoute shlyuzini **OpenAI bilan mos maxsus** provayder sifatida qoʻshish mumkin.

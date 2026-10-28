@@ -729,6 +729,31 @@ prefix: "<prefix>" የተያዘ የአቅራቢ ቅድመ ቅጥያ ነው — �
 የተያዘ መሆኑን ያረጋግጡ፦ ይህ ደንብ ከመኖሩ በፊት የተቀመጡ ኖዶች አሁንም ተከማችተዋል፣
 ነገር ግን ቅድመ ቅጥያቸው ወደ አብሮ የተሰራው አቅራቢ ይዞራል። ኖዱን ያርትዑ እና አዲስ ቅድመ ቅጥያ ይስጡት።
 
+#### ለእያንዳንዱ ግንኙነት የጌትዌይ አማራጮች
+
+እነዚህ ቁልፎች በግንኙነቱ `providerSpecificData` ውስጥ ይቀመጣሉ (ለምሳሌ፣ በ
+`PUT /api/providers/{id}` በኩል)፦
+
+- `toolNameMaxLength` (ኢንቲጀር፣ 1–1024) — ጌትዌያቸው ረጅም የመሣሪያ ስሞችን ውድቅ ለሚያደርግ፣ ከOpenAI የውይይት ቅርጸት ጋር ተኳሃኝ ለሆኑ ግንኙነቶች።
+  ረዘም ያሉ ስሞች እንደ አጭር ተለዋጭ ስሞች ይላካሉ፣ ከዚያም በ
+  ምላሹ ውስጥ ወደ ዋናው ይመለሳሉ።
+- `quotaEndpoint` — የጌትዌዩ የኮታ/ክሬዲት መገልገያ ነጥብ ሲሆን፣ ለዳሽቦርዱ የኮታ አሞሌ እና
+  ኮታን ለሚያገናዝብ ማስተላለፍ ይነበባል። ከOpenAI እና ከAnthropic ጋር ተኳሃኝ በሆኑ ግንኙነቶች ላይ ይሰራል፤ ሙሉው
+  መዋቅር በ`open-sse/services/usage/openaiCompatible.ts` ውስጥ ተመዝግቧል።
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### የOmniRoute አቻዎችን ማገናኘት
 
 ሌላ OmniRoute ጌትዌይ እንደ **ብጁ ከ-OpenAI ጋር ተኳሃኝ** አቅራቢ ሊታከል ይችላል። የአቻውን

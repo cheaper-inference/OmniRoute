@@ -725,6 +725,31 @@ pogrešku koja navodi ugrađenog pružatelja usluga ili njegove vjerodajnice, pr
 rezerviran: čvorovi spremljeni prije uvođenja ovog pravila i dalje su pohranjeni, ali njihov prefiks usmjerava
 na ugrađenog pružatelja usluga. Uredite čvor i dodijelite mu novi prefiks.
 
+#### Opcije pristupnika po vezi
+
+Ovi se ključevi navode u `providerSpecificData` veze (primjerice putem
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (cijeli broj, 1–1024) — za veze kompatibilne s OpenAI formatom razgovora čiji
+  pristupnik odbija duge nazive alata. Dulji nazivi šalju se kao kratki pseudonimi i vraćaju u izvorni
+  oblik u odgovoru.
+- `quotaEndpoint` — krajnja točka pristupnika za kvote/kredite, koja se dohvaća za prikaz kvote na nadzornoj ploči i
+  usmjeravanje koje uzima u obzir kvote. Radi s vezama kompatibilnima s OpenAI-jem i Anthropicom; cjelovita je struktura
+  dokumentirana u `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Povezivanje OmniRoute čvorova
 
 Drugi OmniRoute pristupnik može se dodati kao **prilagođeni pružatelj kompatibilan s OpenAI-jem**. Upotrijebite

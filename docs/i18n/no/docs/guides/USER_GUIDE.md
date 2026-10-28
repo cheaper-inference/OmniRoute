@@ -726,6 +726,31 @@ feil som nevner en innebygd leverandør eller dens påloggingsopplysninger, må 
 reservert: Noder som ble lagret før denne regelen eksisterte, er fortsatt lagret, men prefikset deres ruter til
 den innebygde leverandøren. Rediger noden og gi den et nytt prefiks.
 
+#### Gateway-alternativer per tilkobling
+
+Disse nøklene legges i en tilkoblings `providerSpecificData` (for eksempel via
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (heltall, 1–1024) — for OpenAI-chatformatkompatible tilkoblinger der
+  gatewayen avviser lange verktøynavn. Lengre navn sendes som korte aliaser og gjenopprettes i
+  svaret.
+- `quotaEndpoint` — gatewayens endepunkt for kvoter/kreditter, som leses for kvotevisningen i kontrollpanelet og
+  kvotebevisst ruting. Fungerer både med OpenAI- og Anthropic-kompatible tilkoblinger. Hele strukturen
+  er dokumentert i `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Sammenkobling av OmniRoute-noder
 
 En annen OmniRoute-gateway kan legges til som en **egendefinert OpenAI-kompatibel** leverandør. Bruk

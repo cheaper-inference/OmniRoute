@@ -728,6 +728,31 @@ veaga, mis nimetab sisseehitatud pakkujat või selle identimisteavet, kontrollig
 reserveeritud: enne selle reegli kehtestamist salvestatud sõlmed on endiselt talletatud, kuid nende prefiks suunab
 sisseehitatud pakkujale. Muutke sõlme ja määrake sellele uus prefiks.
 
+#### Ühendusepõhised lüüsi valikud
+
+Need võtmed lisatakse ühenduse väljale `providerSpecificData` (näiteks päringu
+`PUT /api/providers/{id}` kaudu):
+
+- `toolNameMaxLength` (täisarv, 1–1024) — OpenAI vestlusvorminguga ühilduvate ühenduste jaoks, mille
+  lüüs lükkab pikad tööriistanimed tagasi. Pikemad nimed saadetakse lühikeste varjunimedena ja taastatakse
+  vastuses.
+- `quotaEndpoint` — lüüsi kvoodi-/krediidipunkt, mida loetakse juhtpaneeli kvoodiriba ja
+  kvooditeadliku marsruutimise jaoks. Töötab nii OpenAI kui ka Anthropicuga ühilduvate ühendustega; täielik struktuur
+  on dokumenteeritud failis `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute'i partnersõlmede aheldamine
 
 Teise OmniRoute'i lüüsi saab lisada **kohandatud OpenAI-ga ühilduva** pakkujana. Kasutage

@@ -726,6 +726,31 @@ eroare care menționează un furnizor încorporat sau acreditările acestuia, ve
 rezervat: nodurile salvate înainte de introducerea acestei reguli sunt încă păstrate, dar prefixul lor direcționează solicitările
 către furnizorul încorporat. Editați nodul și atribuiți-i un prefix nou.
 
+#### Opțiuni de gateway per conexiune
+
+Aceste chei se introduc în `providerSpecificData` al unei conexiuni (de exemplu, prin
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (număr întreg, 1–1024) — pentru conexiunile compatibile cu formatul de chat OpenAI al căror
+  gateway respinge numele lungi ale instrumentelor. Numele mai lungi sunt trimise ca aliasuri scurte și restabilite în
+  răspuns.
+- `quotaEndpoint` — endpointul gateway-ului pentru cote/credite, consultat pentru bara de cote din tabloul de bord și
+  rutarea bazată pe cote. Funcționează atât pentru conexiunile compatibile cu OpenAI, cât și pentru cele compatibile cu Anthropic; structura completă
+  este documentată în `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Înlănțuirea instanțelor OmniRoute omoloage
 
 Un alt gateway OmniRoute poate fi adăugat ca furnizor **personalizat compatibil cu OpenAI**. Utilizați

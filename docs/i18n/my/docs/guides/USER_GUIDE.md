@@ -727,6 +727,27 @@ built-in provider သို့မဟုတ် ၎င်း၏ credential မျ�
 သီးသန့်ဖယ်ထားခြင်း ရှိမရှိ စစ်ဆေးပါ။ ဤစည်းမျဉ်း မရှိမီက သိမ်းဆည်းထားသော node များကို ဆက်လက်သိမ်းဆည်းထားသော်လည်း ၎င်းတို့၏ prefix သည်
 built-in provider သို့ route လုပ်မည်ဖြစ်သည်။ Node ကို တည်းဖြတ်ပြီး prefix အသစ်တစ်ခု သတ်မှတ်ပါ။
 
+#### ချိတ်ဆက်မှုတစ်ခုချင်းစီအတွက် gateway ရွေးချယ်စရာများ
+
+ဤ key များကို ချိတ်ဆက်မှုတစ်ခု၏ `providerSpecificData` ထဲတွင် ထည့်သွင်းရသည် (ဥပမာ
+`PUT /api/providers/{id}` မှတစ်ဆင့်)-
+
+- `toolNameMaxLength` (ကိန်းပြည့်၊ 1–1024) — tool အမည်ရှည်များကို gateway က လက်မခံသော OpenAI chat-format နှင့် ကိုက်ညီသည့် ချိတ်ဆက်မှုများအတွက် ဖြစ်သည်။ ပိုရှည်သော အမည်များကို alias အတိုများအဖြစ် ပေးပို့ပြီး response ထဲတွင် မူလအမည်များသို့ ပြန်လည်ထားရှိသည်။
+- `quotaEndpoint` — gateway ၏ quota/credits endpoint ဖြစ်ပြီး dashboard quota strip နှင့် quota-aware routing အတွက် ဖတ်ယူသည်။ OpenAI နှင့် Anthropic ကိုက်ညီသည့် ချိတ်ဆက်မှုနှစ်မျိုးစလုံးတွင် အလုပ်လုပ်သည်။ ဖွဲ့စည်းပုံအပြည့်အစုံကို `open-sse/services/usage/openaiCompatible.ts` တွင် မှတ်တမ်းတင်ထားသည်။
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute Peer များကို ဆက်တိုက်ချိတ်ဆက်ခြင်း
 
 အခြား OmniRoute gateway တစ်ခုကို **Custom OpenAI-compatible** provider အဖြစ် ထည့်သွင်းနိုင်သည်။

@@ -714,6 +714,31 @@ prefix: „<prefix>“ yra rezervuotas teikėjo priešdėlis — pasirinkite kit
 
 Pasirinkite unikalų priešdėlį (`mygw`, `acme-proxy`). Jei užklausos pasirinktiniam mazgui nepavyksta ir klaidoje nurodomas integruotas teikėjas arba jo prisijungimo duomenys, patikrinkite, ar mazgo priešdėlis nėra rezervuotas: prieš įvedant šią taisyklę išsaugoti mazgai vis dar saugomi, tačiau jų priešdėlis nukreipia į integruotą teikėją. Redaguokite mazgą ir suteikite jam naują priešdėlį.
 
+#### Kiekvienam ryšiui taikomos šliuzo parinktys
+
+Šie raktai nurodomi ryšio `providerSpecificData` (pavyzdžiui, naudojant
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (sveikasis skaičius, 1–1024) — skirta su OpenAI pokalbių formatu suderinamiems ryšiams, kurių
+  šliuzas atmeta ilgus įrankių pavadinimus. Ilgesni pavadinimai siunčiami kaip trumpi alternatyvūs vardai ir atsakyme
+  atkuriami.
+- `quotaEndpoint` — šliuzo kvotos / kreditų galinis taškas, naudojamas kvotos juostai valdymo skydelyje ir
+  į kvotą atsižvelgiančiam maršruto parinkimui. Veikia tiek su OpenAI, tiek su Anthropic suderinamuose ryšiuose; visa struktūra
+  aprašyta faile `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute lygiaverčių mazgų grandinės sudarymas
 
 Kitas OmniRoute tinklų sietuvas gali būti pridėtas kaip **pasirinktinis su OpenAI suderinamas** teikėjas. Naudokite lygiaverčio mazgo `/v1` bazinį URL ir specialų, mažiausių būtinų teisių principu to mazgo išduotą API raktą.

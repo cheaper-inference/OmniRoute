@@ -724,6 +724,31 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 ਰਾਖਵਾਂ ਤਾਂ ਨਹੀਂ ਹੈ: ਇਸ ਨਿਯਮ ਦੇ ਮੌਜੂਦ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਸੰਭਾਲੇ ਗਏ ਨੋਡ ਅਜੇ ਵੀ ਸਟੋਰ ਹਨ, ਪਰ ਉਨ੍ਹਾਂ ਦਾ ਪ੍ਰੀਫਿਕਸ
 ਬਿਲਟ-ਇਨ ਪ੍ਰਦਾਤਾ ਵੱਲ ਰੂਟ ਕਰਦਾ ਹੈ। ਨੋਡ ਨੂੰ ਸੰਪਾਦਿਤ ਕਰੋ ਅਤੇ ਇਸਨੂੰ ਨਵਾਂ ਪ੍ਰੀਫਿਕਸ ਦਿਓ।
 
+#### ਪ੍ਰਤੀ-ਕਨੈਕਸ਼ਨ ਗੇਟਵੇ ਵਿਕਲਪ
+
+ਇਹ ਕੁੰਜੀਆਂ ਕਿਸੇ ਕਨੈਕਸ਼ਨ ਦੇ `providerSpecificData` ਵਿੱਚ ਜਾਂਦੀਆਂ ਹਨ (ਉਦਾਹਰਨ ਲਈ
+`PUT /api/providers/{id}` ਰਾਹੀਂ):
+
+- `toolNameMaxLength` (ਪੂਰਨ ਅੰਕ, 1–1024) — OpenAI ਚੈਟ-ਫਾਰਮੈਟ ਅਨੁਕੂਲ ਕਨੈਕਸ਼ਨਾਂ ਲਈ, ਜਿਨ੍ਹਾਂ ਦਾ
+  ਗੇਟਵੇ ਲੰਮੇ ਟੂਲ ਨਾਮਾਂ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦਾ ਹੈ। ਲੰਮੇ ਨਾਮ ਛੋਟੇ ਉਪਨਾਮਾਂ ਵਜੋਂ ਭੇਜੇ ਜਾਂਦੇ ਹਨ ਅਤੇ ਜਵਾਬ ਵਿੱਚ
+  ਮੁੜ ਬਹਾਲ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।
+- `quotaEndpoint` — ਗੇਟਵੇ ਦਾ ਕੋਟਾ/ਕ੍ਰੈਡਿਟ ਐਂਡਪੌਇੰਟ, ਜੋ ਡੈਸ਼ਬੋਰਡ ਦੀ ਕੋਟਾ ਪੱਟੀ ਅਤੇ
+  ਕੋਟਾ-ਜਾਗਰੂਕ ਰੂਟਿੰਗ ਲਈ ਪੜ੍ਹਿਆ ਜਾਂਦਾ ਹੈ। ਇਹ OpenAI- ਅਤੇ Anthropic-ਅਨੁਕੂਲ ਦੋਵਾਂ ਕਨੈਕਸ਼ਨਾਂ 'ਤੇ ਕੰਮ ਕਰਦਾ ਹੈ; ਇਸਦੀ ਪੂਰੀ ਬਣਤਰ
+  `open-sse/services/usage/openaiCompatible.ts` ਵਿੱਚ ਦਸਤਾਵੇਜ਼ਬੱਧ ਹੈ।
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### OmniRoute ਪੀਅਰਾਂ ਨੂੰ ਲੜੀਬੱਧ ਕਰਨਾ
 
 ਕਿਸੇ ਹੋਰ OmniRoute ਗੇਟਵੇ ਨੂੰ **ਕਸਟਮ OpenAI-ਅਨੁਕੂਲ** ਪ੍ਰਦਾਤਾ ਵਜੋਂ ਜੋੜਿਆ ਜਾ ਸਕਦਾ ਹੈ। ਉਸ

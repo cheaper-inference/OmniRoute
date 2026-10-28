@@ -726,6 +726,31 @@ errore che menziona un provider integrato o le relative credenziali, verifica se
 riservato: i nodi salvati prima dell'introduzione di questa regola sono ancora memorizzati, ma il loro prefisso indirizza
 al provider integrato. Modifica il nodo e assegnagli un nuovo prefisso.
 
+#### Opzioni del gateway per connessione
+
+Queste chiavi vanno inserite nel `providerSpecificData` di una connessione (ad esempio tramite
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (numero intero, 1–1024) — per connessioni compatibili con il formato chat di OpenAI il cui
+  gateway rifiuta nomi di strumenti lunghi. I nomi più lunghi vengono inviati come alias brevi e ripristinati nella
+  risposta.
+- `quotaEndpoint` — l'endpoint del gateway per quote/crediti, letto per la barra delle quote della dashboard e
+  l'instradamento basato sulle quote. Funziona sia con connessioni compatibili con OpenAI sia con quelle compatibili con Anthropic; la struttura completa
+  è documentata in `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Concatenamento di peer OmniRoute
 
 Un altro gateway OmniRoute può essere aggiunto come provider **personalizzato compatibile con OpenAI**. Usa

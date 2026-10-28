@@ -726,6 +726,31 @@ kesalahan yang menyebutkan penyedia bawaan atau kredensialnya, periksa apakah pr
 dicadangkan: node yang disimpan sebelum aturan ini diberlakukan masih tersimpan, tetapi prefiksnya mengarahkan
 permintaan ke penyedia bawaan. Edit node dan berikan prefiks baru.
 
+#### Opsi gateway per koneksi
+
+Kunci-kunci ini ditempatkan dalam `providerSpecificData` milik koneksi (misalnya melalui
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (bilangan bulat, 1–1024) — untuk koneksi yang kompatibel dengan format chat OpenAI yang
+  gateway-nya menolak nama alat yang panjang. Nama yang lebih panjang dikirim sebagai alias pendek dan dipulihkan dalam
+  respons.
+- `quotaEndpoint` — endpoint kuota/kredit milik gateway, yang dibaca untuk bilah kuota dasbor dan
+  perutean yang mempertimbangkan kuota. Berfungsi pada koneksi yang kompatibel dengan OpenAI maupun Anthropic; struktur lengkapnya
+  didokumentasikan dalam `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Merangkai Peer OmniRoute
 
 Gateway OmniRoute lain dapat ditambahkan sebagai penyedia **Custom OpenAI-compatible**. Gunakan

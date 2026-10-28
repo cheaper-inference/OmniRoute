@@ -726,6 +726,31 @@ lỗi nêu tên một nhà cung cấp tích hợp sẵn hoặc thông tin xác t
 phải là tiền tố dành riêng hay không: các nút được lưu trước khi quy tắc này tồn tại vẫn được lưu trữ, nhưng tiền tố của chúng sẽ định tuyến đến
 nhà cung cấp tích hợp sẵn. Hãy chỉnh sửa nút và đặt cho nó một tiền tố mới.
 
+#### Các tùy chọn gateway theo từng kết nối
+
+Các khóa này được đặt trong `providerSpecificData` của một kết nối (ví dụ thông qua
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (số nguyên, 1–1024) — dành cho các kết nối tương thích với định dạng trò chuyện OpenAI mà
+  gateway từ chối tên công cụ dài. Các tên dài hơn được gửi dưới dạng bí danh ngắn và được khôi phục trong
+  phản hồi.
+- `quotaEndpoint` — endpoint hạn mức/tín dụng của gateway, được đọc để hiển thị thanh hạn mức trên bảng điều khiển và
+  định tuyến có nhận biết hạn mức. Hoạt động trên cả các kết nối tương thích với OpenAI và Anthropic; cấu trúc đầy đủ
+  được ghi lại trong `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Kết chuỗi các cổng OmniRoute ngang hàng
 
 Một cổng OmniRoute khác có thể được thêm dưới dạng nhà cung cấp **Tùy chỉnh tương thích với OpenAI**. Hãy sử dụng

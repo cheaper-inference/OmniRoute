@@ -726,6 +726,31 @@ hitilafu inayotaja mtoa huduma aliyejengewa ndani au vitambulisho vyake, angalia
 kimehifadhiwa: nodi zilizohifadhiwa kabla ya kuwepo kwa kanuni hii bado zimehifadhiwa, lakini kiambishi awali chake huelekeza kwa
 mtoa huduma aliyejengewa ndani. Hariri nodi na uipe kiambishi awali kipya.
 
+#### Chaguo za lango kwa kila muunganisho
+
+Vifunguo hivi huwekwa katika `providerSpecificData` ya muunganisho (kwa mfano kupitia
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (namba kamili, 1–1024) — kwa miunganisho inayooana na umbizo la gumzo la OpenAI ambayo
+  lango lake hukataa majina marefu ya zana. Majina marefu hutumwa kama lakabu fupi na kurejeshwa katika
+  jibu.
+- `quotaEndpoint` — sehemu ya mwisho ya kiasi kinachoruhusiwa/mikopo ya lango, inayosomwa kwa ajili ya ukanda wa kiasi kinachoruhusiwa kwenye dashibodi na
+  uelekezaji unaozingatia kiasi kinachoruhusiwa. Hufanya kazi kwenye miunganisho inayooana na OpenAI na Anthropic; muundo kamili
+  umeandikwa katika `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
 ### Kuunganisha Rika za OmniRoute kwa Msururu
 
 Lango jingine la OmniRoute linaweza kuongezwa kama mtoa huduma **Maalum anayeoana na OpenAI**. Tumia
