@@ -1,5 +1,6 @@
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { pickResponsesSnapshot } from "./sseParser/responsesSnapshot.ts";
 
 /**
  * Extract a provider error message from a buffered SSE stream that carries an
@@ -668,38 +669,6 @@ function mergeResponseItems(existing, incoming) {
         }
       : {}),
   };
-}
-
-/**
- * A provider can abort a Responses stream with a bare error frame (no `choices`, a non-empty
- * `error`). Returns the first such error, or null.
- */
-function findBareStreamError(events: Array<Record<string, unknown>>): unknown {
-  for (const evt of events) {
-    if (Array.isArray(evt?.choices)) continue;
-    const error = evt?.error;
-    if (typeof error === "string" ? error.trim() : Object.keys(toRecord(error)).length > 0) {
-      return error;
-    }
-  }
-  return null;
-}
-
-/**
- * Choose the snapshot a buffered Responses stream is reported from. A bare error frame only
- * decides the outcome when the stream never settled: it must not override a terminal
- * snapshot, nor a latest snapshot that itself reports `completed`. An in-progress snapshot
- * (e.g. `response.created`) followed by an error frame is a failure. Without any Responses
- * snapshot the payload is not a Responses stream at all (an error-only `data: {"error":…}`
- * chunk from a CLI executor, #3324): return null so the caller keeps trying the other formats
- * and the generic invalid-SSE path surfaces the upstream message as a 502.
- */
-function pickResponsesSnapshot(terminalResponse, latestResponse, events) {
-  const snapshot = terminalResponse || latestResponse;
-  if (!snapshot) return null;
-  const streamError = terminalResponse ? null : findBareStreamError(events);
-  if (!streamError || terminalResponse || latestResponse.status === "completed") return snapshot;
-  return { ...snapshot, status: "failed", error: streamError };
 }
 
 export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {

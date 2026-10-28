@@ -500,7 +500,7 @@ open-sse/
 （共用的身分識別輔助程式）和 `index.ts`（登錄表）。
 
 > 注意：此處未列出的提供者由 `default.ts` 使用通用的 OpenAI 相容執行器提供服務。
-> 完整的提供者目錄（375 個提供者）位於
+> 完整的提供者目錄（376 個提供者）位於
 > `src/shared/constants/providers.ts`。
 
 ### 4.3 `open-sse/translator/`

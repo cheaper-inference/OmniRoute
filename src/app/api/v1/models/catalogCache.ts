@@ -148,7 +148,80 @@ function catalogBuildTimeoutMs(): number {
   return Number.isFinite(n) && n > 0 ? n : CATALOG_BUILD_TIMEOUT_MS_DEFAULT;
 }
 
-const catalogLastGood = new Map<string, CachedCatalog>();
+// Bound both maps independently: cursor/auth/filter combinations can create many keys.
+// Oversized responses still reach the caller without being retained.
+const CATALOG_CACHE_MAX_ENTRIES = 64;
+const CATALOG_CACHE_MAX_BYTES = 16 * 1024 * 1024;
+
+class BoundedCatalogCache {
+  private items = new Map<string, { entry: CachedCatalog; bytes: number }>();
+  private bytes = 0;
+
+  get(key: string): CachedCatalog | undefined {
+    const value = this.items.get(key);
+    if (!value) return undefined;
+    this.items.delete(key);
+    this.items.set(key, value);
+    return value.entry;
+  }
+
+  set(key: string, entry: CachedCatalog): void {
+    // Two bytes per UTF-16 code unit bounds V8's one-/two-byte string storage.
+    // Entry-count limits bound object/Map overhead independently of string size.
+    const bytes =
+      2 *
+      (key.length +
+        entry.body.length +
+        Object.entries(entry.headers).reduce(
+          (total, [name, value]) => total + name.length + value.length,
+          0
+        ));
+    if (bytes > CATALOG_CACHE_MAX_BYTES) return;
+    // An oversized refresh must preserve an existing bounded last-good entry.
+    this.delete(key);
+    while (
+      this.items.size >= CATALOG_CACHE_MAX_ENTRIES ||
+      this.bytes + bytes > CATALOG_CACHE_MAX_BYTES
+    ) {
+      this.delete(this.items.keys().next().value!);
+    }
+    this.items.set(key, { entry, bytes });
+    this.bytes += bytes;
+  }
+
+  private delete(key: string): void {
+    const value = this.items.get(key);
+    if (!value) return;
+    this.bytes -= value.bytes;
+    this.items.delete(key);
+  }
+
+  clear(): void {
+    this.items.clear();
+    this.bytes = 0;
+  }
+
+  pruneExpired(now: number, staleWindowMs: number): void {
+    for (const [key, { entry }] of this.items) {
+      const retention = entry.status === 200 ? Math.max(0, staleWindowMs) : 0;
+      if (entry.expiresAt <= now && (entry.status !== 200 || now - entry.expiresAt > retention)) {
+        this.delete(key);
+      }
+    }
+  }
+
+  *entries(): IterableIterator<[string, CachedCatalog]> {
+    for (const [key, { entry }] of this.items) yield [key, entry];
+  }
+
+  stats(): { entries: number; bytes: number } {
+    return { entries: this.items.size, bytes: this.bytes };
+  }
+}
+
+// Last-good has no TTL: timeout fallback deliberately survives the fresh/SWR
+// windows, until LRU pressure or a catalog generation change removes the entry.
+const catalogLastGood = new BoundedCatalogCache();
 
 export class CatalogBuildTimeoutError extends Error {
   constructor() {
@@ -179,7 +252,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
-const catalogCache = new Map<string, CachedCatalog>();
+const catalogCache = new BoundedCatalogCache();
 
 /**
  * An in-flight build is bound to the catalog-state generation it started from
@@ -432,9 +505,13 @@ export async function resolveCachedCatalogResponse(
 
   const cacheKey = buildCatalogCacheKey(request, catalogSettings);
   const now = Date.now();
+  const staleWindowMs =
+    catalogSettings?.getStaleWhileRevalidateMs?.() ?? CATALOG_STALE_WHILE_REVALIDATE_MS;
+  catalogCache.pruneExpired(now, staleWindowMs);
   const cached = catalogCache.get(cacheKey);
 
   if (cached && cached.expiresAt > now) {
+    if (cached.status === 200) catalogLastGood.get(cacheKey);
     return catalogStringResponse(
       cached.body,
       mergeCatalogHeaders(corsHeaders, cached.headers, diagnosticHeaders),
@@ -447,9 +524,8 @@ export async function resolveCachedCatalogResponse(
   // intermittent failure behind a fake success forever — and (b) it is within the
   // staleness window, so a refresh that keeps failing eventually falls through to the
   // cold-path wait instead of pinning ancient data.
-  const staleWindowMs =
-    catalogSettings?.getStaleWhileRevalidateMs?.() ?? CATALOG_STALE_WHILE_REVALIDATE_MS;
   if (cached && cached.status === 200 && now - cached.expiresAt <= staleWindowMs) {
+    catalogLastGood.get(cacheKey);
     startBackgroundRefresh(
       cacheKey,
       request,
@@ -503,6 +579,11 @@ export function __resetCatalogBuilderRunsForTest(): void {
   lastSeenCatalogCacheVersion = getModelCatalogCacheVersion();
 }
 
+/** Retained-string accounting only; successful bodies may be shared across maps. */
+export function __getCatalogCacheStatsForTest() {
+  return { cache: catalogCache.stats(), lastGood: catalogLastGood.stats() };
+}
+
 /** Counts full builder executions — proves concurrent requests share one run (#6408). */
 export function __getCatalogBuilderRunsForTest(): number {
   return _catalogBuilderRuns;
@@ -515,7 +596,7 @@ export function __getCatalogBuilderRunsForTest(): number {
  */
 export function __expireCatalogCacheForTest(msAgo = 1): void {
   const expiresAt = Date.now() - msAgo;
-  for (const [key, entry] of catalogCache.entries()) {
+  for (const [key, entry] of [...catalogCache.entries()]) {
     catalogCache.set(key, { ...entry, expiresAt });
   }
 }

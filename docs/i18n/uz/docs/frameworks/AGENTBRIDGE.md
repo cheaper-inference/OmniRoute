@@ -20,7 +20,7 @@ IDE agenti (masalan, GitHub Copilot, Cursor, Claude Code) API chaqiruvi amalga o
 
 Bu sizga quyidagilarga imkon beradi:
 
-- **Istalgan agentni istalgan provayderga qayta yo'naltirish**: Copilot OpenAI bilan ishlayaptimi? Uni Anthropic Claude, Gemini yoki OmniRoute'ning 375 ta provayderidan istalgan biriga yo'naltiring.
+- **Istalgan agentni istalgan provayderga qayta yo'naltirish**: Copilot OpenAI bilan ishlayaptimi? Uni Anthropic Claude, Gemini yoki OmniRoute'ning 376 ta provayderidan istalgan biriga yo'naltiring.
 - **Model mappinglarini qo'llash**: `gemini-3-flash` → `claude-sonnet-4.7` handler darajasida shaffof tarzda.
 - **Barcha agent trafigini kuzatish**: har bir ushlab qolingan so'rov [Traffic Inspector](./TRAFFIC_INSPECTOR.md)ga e'lon qilinadi.
 - **OmniRoute chidamliligini qo'llash**: kombinatsiyalangan marshrutlash, circuit breaker'lar, fallback'lar va xarajatlarni kuzatish IDE agent trafigi uchun ham ishlaydi.

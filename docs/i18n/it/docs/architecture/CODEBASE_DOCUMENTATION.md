@@ -499,7 +499,7 @@ per provider (schemi degli strumenti, adattatori fetch/TTS, gestori delle peculi
 (helper condiviso per l'identità) e `index.ts` (registro).
 
 > Nota: i provider non elencati qui sono gestiti da `default.ts` tramite l'esecutore
-> generico compatibile con OpenAI. Il catalogo completo dei provider (375 provider) si trova in
+> generico compatibile con OpenAI. Il catalogo completo dei provider (376 provider) si trova in
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

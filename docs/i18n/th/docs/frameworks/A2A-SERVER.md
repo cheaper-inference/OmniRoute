@@ -163,7 +163,7 @@ OmniRoute เปิดให้ใช้งาน 6 สกิล A2A ที่�
 | Health Report      | `health-report`      | รวบรวมสถานะ circuit breaker, cooldown และ lockout ของ provider แต่ละราย                                                                         | health, resilience         | "แสดงสถานะสุขภาพของ provider ทั้งหมด" |
 | List Capabilities  | `list-capabilities`  | คืนค่าแคตตาล็อก Agent Skills ทั้งหมด 45 รายการ (23 API + 21 CLI + 1 config) ในรูปแบบตาราง markdown พร้อม URL ดิบของ SKILL.md สำหรับการแทรกบริบท | catalog, discovery, skills | "แสดงความสามารถทั้งหมดของ OmniRoute"  |
 
-> ควรปรับ Agent Card ให้สอดคล้องกับแคตตาล็อก 375 provider ที่ใช้งานจริงอยู่เสมอ โดยจำนวน provider และเมทาดาทา free/no-auth มาจากรีจิสทรีขณะรันไทม์
+> ควรปรับ Agent Card ให้สอดคล้องกับแคตตาล็อก 376 provider ที่ใช้งานจริงอยู่เสมอ โดยจำนวน provider และเมทาดาทา free/no-auth มาจากรีจิสทรีขณะรันไทม์
 
 ### รายละเอียดสกิล `list-capabilities`
 

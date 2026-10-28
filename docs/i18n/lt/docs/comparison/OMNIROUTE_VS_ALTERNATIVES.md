@@ -39,7 +39,7 @@ Objektyvus funkcijų palyginimas su populiariausiais atvirojo kodo AI maršrutiz
 
 ## Kada rinktis OmniRoute
 
-- Savarankiškai talpinate ir norite **maksimalios tiekėjų aprėpties** (375 tiekėjai, 155 nemokami / be autentifikacijos katalogo įrašai)
+- Savarankiškai talpinate ir norite **maksimalios tiekėjų aprėpties** (376 tiekėjai, 155 nemokami / be autentifikacijos katalogo įrašai)
 - Jums reikia **integruoto MCP serverio** (LLM įrankiai, atmintis, įgūdžiai, pateikiami kaip įrankiai)
 - Jums reikia **A2A protokolo** darbo eigoms tarp agentų
 - Norite **pirštų atspaudų maskavimo** (JA3/JA4), kad išvengtumėte aptikimo per upstream CAPTCHA

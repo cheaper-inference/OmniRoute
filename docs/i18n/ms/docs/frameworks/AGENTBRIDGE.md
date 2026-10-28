@@ -20,7 +20,7 @@ Apabila ejen IDE (cth., GitHub Copilot, Cursor, Claude Code) membuat panggilan A
 
 Ini bermakna anda boleh:
 
-- **Menghala semula sebarang ejen ke sebarang penyedia**: Copilot berhubung dengan OpenAI? Alihkannya ke Anthropic Claude, Gemini, atau mana-mana daripada 375 penyedia OmniRoute.
+- **Menghala semula sebarang ejen ke sebarang penyedia**: Copilot berhubung dengan OpenAI? Alihkannya ke Anthropic Claude, Gemini, atau mana-mana daripada 376 penyedia OmniRoute.
 - **Menggunakan pemetaan model**: `gemini-3-flash` → `claude-sonnet-4.7` secara telus pada tahap pengendali.
 - **Memerhati semua trafik ejen**: setiap permintaan yang dipintas diterbitkan ke [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **Menggunakan daya tahan OmniRoute**: penghalaan kombo, pemutus litar, fallback, dan penjejakan kos turut berfungsi untuk trafik ejen IDE.

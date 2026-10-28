@@ -20,7 +20,7 @@ IDE ወኪል (ለምሳሌ፣ GitHub Copilot፣ Cursor፣ Claude Code) API ጥ�
 
 ይህ ማለት የሚከተሉትን መሥራት ይችላሉ ማለት ነው፦
 
-- **ማንኛውንም ወኪል ወደ ማንኛውም አቅራቢ እንደገና ማስመራት**፦ Copilot ከOpenAI ጋር እየተነጋገረ ነው? ወደ Anthropic Claude፣ Gemini፣ ወይም ከOmniRoute 375 አቅራቢዎች ወደ ማንኛውም ያዞሩት።
+- **ማንኛውንም ወኪል ወደ ማንኛውም አቅራቢ እንደገና ማስመራት**፦ Copilot ከOpenAI ጋር እየተነጋገረ ነው? ወደ Anthropic Claude፣ Gemini፣ ወይም ከOmniRoute 376 አቅራቢዎች ወደ ማንኛውም ያዞሩት።
 - **የሞዴል ማስማቶችን መተግበር**፦ `gemini-3-flash` → `claude-sonnet-4.7` በግልጽ ሁኔታ በአስተናጋጅ (handler) ደረጃ።
 - **የወኪሎችን ሁሉ ትራፊክ መከታተል**፦ እያንዳንዱ የተያዘ ጥያቄ ወደ [Traffic Inspector](./TRAFFIC_INSPECTOR.md) ይታተማል።
 - **የOmniRoute መቋቋምን መተግበር**፦ የተጣመረ መከፋፈል (combo routing)፣ የወሰን መቋረጫዎች (circuit breakers)፣ አማራጭ መንገዶች (fallbacks)፣ እና የወጪ ክትትል ለIDE ወኪል ትራፊክም ይሠራሉ።

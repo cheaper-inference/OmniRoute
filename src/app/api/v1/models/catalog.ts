@@ -33,6 +33,7 @@ import {
 import { CODEX_NATIVE_UNPREFIXED_MODELS } from "@omniroute/open-sse/services/model";
 import { isModelSelectable } from "@omniroute/open-sse/services/modelLifecycle";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo";
+import { expandProviderWildcardsInCollection } from "@omniroute/open-sse/services/combo/providerWildcard";
 import {
   prepareBuiltinAutoComboInputs,
   isPaidTierAutoId,
@@ -470,6 +471,8 @@ async function buildUnifiedModelsResponseCore(
     await yieldCatalogBuildTurn();
     try {
       combos = await getCombos();
+      // Match inference before nested resolution and metadata lookup; keep saved wildcards intact.
+      combos = await expandProviderWildcardsInCollection(combos);
     } catch (e) {
       console.log("Could not fetch combos");
     }
@@ -835,11 +838,22 @@ async function buildUnifiedModelsResponseCore(
     const models = [];
     const timestamp = Math.floor(Date.now() / 1000);
     const listedIds = new Set<string>();
+    // The per-key metadata (quota pools, allowAutoCombos, allowCcDiscoveryAliases) must be
+    // resolved before the post-filter context below reads it.
+    const earlyApiKey = extractApiKey(request);
+    let earlyKeyMeta: Awaited<
+      ReturnType<typeof import("@/lib/db/apiKeys").getApiKeyMetadata>
+    > | null = null;
+    if (earlyApiKey) {
+      const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
+      earlyKeyMeta = await getApiKeyMetadata(earlyApiKey);
+    }
     const postFilterContext = {
       connections,
       prefixMode,
       aliasToProviderId,
       hideNoThinkVariants: settings.hideNoThinkVariants === true,
+      allowCcDiscoveryAliases: earlyKeyMeta?.allowCcDiscoveryAliases !== false,
       blockedProviders: settings.blockedProviders,
       // Per-entry `pricing`: a combo is priced as its first visible target.
       pricing: {
@@ -865,27 +879,19 @@ async function buildUnifiedModelsResponseCore(
     // Everything the quota path needs (`combos`, `timestamp`,
     // `buildComboCatalogMetadata`) already exists here, so return before the
     // provider/auto-combo/registry loops start.
-    const earlyApiKey = extractApiKey(request);
-    let earlyKeyMeta: Awaited<
-      ReturnType<typeof import("@/lib/db/apiKeys").getApiKeyMetadata>
-    > | null = null;
-    if (earlyApiKey) {
-      const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
-      earlyKeyMeta = await getApiKeyMetadata(earlyApiKey);
-      if (earlyKeyMeta?.allowedQuotas && earlyKeyMeta.allowedQuotas.length > 0) {
-        const { buildQuotaExclusiveModels } = await import("@/lib/quota/quotaCombos");
-        const quotaModels = await buildQuotaExclusiveModels(
-          earlyKeyMeta.allowedQuotas,
-          combos,
-          timestamp,
-          (c) => buildComboCatalogMetadata(c, combos)
-        );
-        const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
-        return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
-          ...corsHeaders,
-          ...diagnosticHeaders,
-        });
-      }
+    if (earlyKeyMeta?.allowedQuotas && earlyKeyMeta.allowedQuotas.length > 0) {
+      const { buildQuotaExclusiveModels } = await import("@/lib/quota/quotaCombos");
+      const quotaModels = await buildQuotaExclusiveModels(
+        earlyKeyMeta.allowedQuotas,
+        combos,
+        timestamp,
+        (c) => buildComboCatalogMetadata(c, combos)
+      );
+      const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
+      return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
+        ...corsHeaders,
+        ...diagnosticHeaders,
+      });
     }
 
     // #4164: advertise the built-in zero-setup `auto/*` combos at the very top.

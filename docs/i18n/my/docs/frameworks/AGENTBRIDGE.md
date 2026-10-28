@@ -20,7 +20,7 @@ IDE agent တစ်ခု (ဥပမာ — GitHub Copilot, Cursor, Claude Code)
 
 ဆိုလိုသည်မှာ သင် အောက်ပါတို့ကို လုပ်ဆောင်နိုင်ပါသည် —
 
-- **မည်သည့် agent ကိုမဆို မည်သည့် provider သို့မဆို ပြန်ညွှန်းနိုင်သည်**: Copilot က OpenAI နဲ့ ဆက်သွယ်နေတာလား? ၎င်းကို Anthropic Claude, Gemini သို့မဟုတ် OmniRoute ၏ provider 375 ခုအနက်မှ မည်သည့်တစ်ခုကိုမဆို ပြန်လည်ညွှန်းလိုက်ပါ။
+- **မည်သည့် agent ကိုမဆို မည်သည့် provider သို့မဆို ပြန်ညွှန်းနိုင်သည်**: Copilot က OpenAI နဲ့ ဆက်သွယ်နေတာလား? ၎င်းကို Anthropic Claude, Gemini သို့မဟုတ် OmniRoute ၏ provider 376 ခုအနက်မှ မည်သည့်တစ်ခုကိုမဆို ပြန်လည်ညွှန်းလိုက်ပါ။
 - **Model mappings များကို အသုံးချနိုင်သည်**: `gemini-3-flash` → `claude-sonnet-4.7` ကို handler အဆင့်တွင် သတိမထားမိစွာ ပြောင်းလဲပေးပါသည်။
 - **agent traffic အားလုံးကို စောင့်ကြည့်နိုင်သည်**: ကြားဖြတ်ဖမ်းယူထားသော request တိုင်းကို [Traffic Inspector](./TRAFFIC_INSPECTOR.md) သို့ ထုတ်ဝေပေးပါသည်။
 - **OmniRoute ၏ resilience ကို အသုံးချနိုင်သည်**: combo routing, circuit breakers, fallbacks နှင့် cost tracking တို့သည် IDE agent traffic အတွက်လည်း အလုပ်လုပ်ပါသည်။

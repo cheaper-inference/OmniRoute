@@ -163,7 +163,7 @@ OmniRoute exponerar 6 A2A-skills som är kopplade i `src/lib/a2a/taskExecution.t
 | Health Report      | `health-report`      | Aggregerar tillstånd för circuit breaker, cooldown och lockout per provider                                                                           | health, resilience         | "Visa hälsostatus för alla providers"              |
 | List Capabilities  | `list-capabilities`  | Returnerar hela Agent Skills-katalogen med 45 poster (23 API + 21 CLI + 1 config) som en markdown-tabell med råa SKILL.md-URL:er för kontextinjektion | catalog, discovery, skills | "Lista alla OmniRoute-funktioner"                  |
 
-> Agentkortet bör hållas synkroniserat med den aktuella katalogen med 375 providers; providerantal och free/no-auth-metadata hämtas från runtime-registret.
+> Agentkortet bör hållas synkroniserat med den aktuella katalogen med 376 providers; providerantal och free/no-auth-metadata hämtas från runtime-registret.
 
 ### Detaljer om `list-capabilities`-skill
 

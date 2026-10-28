@@ -163,7 +163,7 @@ OmniRoute ამჟღავნებს 6 A2A უნარს, რომლე�
 | ჯანმრთელობის ანგარიში       | `health-report`      | აერთიანებს circuit breaker, cooldown და lockout მდგომარეობებს თითოეული პროვაიდერისთვის                                                                          | health, resilience         | "Show health status of all providers"  |
 | შესაძლებლობების ჩამონათვალი | `list-capabilities`  | აბრუნებს Agent Skills-ის სრულ 45-ჩანაწერიან კატალოგს (23 API + 21 CLI + 1 კონფიგურაცია) markdown ცხრილის სახით, უმუშავი SKILL.md URL-ებით კონტექსტის ჩასასმელად | catalog, discovery, skills | "List all OmniRoute capabilities"      |
 
-> Agent Card უნდა შეესაბამებოდეს მოქმედ 375-პროვაიდერიან კატალოგს; პროვაიდერების რაოდენობა და უფასო/ავტორიზაციის გარეშე მეტამონაცემები მოწოდებულია სამუშაო (runtime) რეესტრიდან.
+> Agent Card უნდა შეესაბამებოდეს მოქმედ 376-პროვაიდერიან კატალოგს; პროვაიდერების რაოდენობა და უფასო/ავტორიზაციის გარეშე მეტამონაცემები მოწოდებულია სამუშაო (runtime) რეესტრიდან.
 
 ### `list-capabilities` უნარის დეტალები
 

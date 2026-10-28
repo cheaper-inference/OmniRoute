@@ -488,7 +488,7 @@ Bộ biến đổi này xử lý:
 
 | Tệp                              | Mục đích                                             |
 | -------------------------------- | ---------------------------------------------------- |
-| `providerRegistry.ts`            | Registry mô hình chat dựa trên danh mục 375 provider |
+| `providerRegistry.ts`            | Registry mô hình chat dựa trên danh mục 376 provider |
 | `providerModels.ts`              | Bí danh mô hình, ánh xạ định dạng                    |
 | `constants.ts`                   | Timeout, giới hạn, mã trạng thái                     |
 | `defaultThinkingSignature.ts`    | Chữ ký thinking mặc định của Claude                  |

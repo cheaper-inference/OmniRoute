@@ -163,7 +163,7 @@ OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` හි සම්�
 | Health Report      | `health-report`      | එක් එක් provider සඳහා circuit breaker, cooldown, lockout තත්ත්ව එකතු කරයි                                                                            | health, resilience         | "සියලුම providers හි සෞඛ්ය තත්ත්වය පෙන්වන්න"  |
 | List Capabilities  | `list-capabilities`  | සම්පූර්ණ Agent Skills catalog එක (entries 45: API 23 + CLI 21 + config 1) context injection සඳහා අමු SKILL.md URLs සහිත markdown වගුවක් ලෙස ලබා දෙයි | catalog, discovery, skills | "සියලුම OmniRoute හැකියාවන් ලැයිස්තුගත කරන්න" |
 
-> Agent Card එක සජීවී providers 375ක catalog එක සමඟ ගැලපෙන පරිදි තබා ගත යුතුය; provider ගණන සහ free/no-auth metadata runtime registry එකෙන් ලබාගැනේ.
+> Agent Card එක සජීවී providers 376ක catalog එක සමඟ ගැලපෙන පරිදි තබා ගත යුතුය; provider ගණන සහ free/no-auth metadata runtime registry එකෙන් ලබාගැනේ.
 
 ### `list-capabilities` කුසලතා විස්තර
 

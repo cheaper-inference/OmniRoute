@@ -20,7 +20,7 @@ Gdy agent IDE (np. GitHub Copilot, Cursor, Claude Code) wykonuje wywołanie API,
 
 Oznacza to, że możesz:
 
-- **Przekierowywać dowolnego agenta do dowolnego dostawcy**: Copilot komunikuje się z OpenAI? Przekieruj go do Anthropic Claude, Gemini lub dowolnego z 375 dostawców OmniRoute.
+- **Przekierowywać dowolnego agenta do dowolnego dostawcy**: Copilot komunikuje się z OpenAI? Przekieruj go do Anthropic Claude, Gemini lub dowolnego z 376 dostawców OmniRoute.
 - **Stosować mapowania modeli**: `gemini-3-flash` → `claude-sonnet-4.7` w sposób przezroczysty na poziomie handlera.
 - **Obserwować cały ruch agentów**: każde przechwycone żądanie jest publikowane w [Inspektorze ruchu](./TRAFFIC_INSPECTOR.md).
 - **Korzystać z odporności OmniRoute**: routing kombinowany, circuit breakery, fallbacki oraz śledzenie kosztów działają również dla ruchu agentów IDE.

@@ -21,7 +21,7 @@ import {
 import { isOfficialAnthropicBaseUrl } from "../utils/anthropicHost.ts";
 import { applyProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { stripUnsupportedParams } from "../translator/paramSupport.ts";
-import { applyRegistryToolNameLengthAliases } from "./toolNameLengthAlias.ts";
+import { applyToolNameLengthAliases, resolveToolNameMaxLength } from "./toolNameLengthAlias.ts";
 import {
   injectReasoningContentForThinkingModel,
   shouldInjectReasoningContentPlaceholder,
@@ -1069,7 +1069,10 @@ export class DefaultExecutor extends BaseExecutor {
       }
     }
 
-    applyRegistryToolNameLengthAliases(this.provider, withDefaults);
+    applyToolNameLengthAliases(
+      withDefaults,
+      resolveToolNameMaxLength(this.provider, credentials?.providerSpecificData)
+    );
 
     if (this.provider === "workbuddy") {
       withDefaults = sanitizeWorkbuddyBody(withDefaults);

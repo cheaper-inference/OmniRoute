@@ -20,7 +20,7 @@ Kada IDE agent (npr. GitHub Copilot, Cursor, Claude Code) izvrši API poziv, on 
 
 To znači da možete:
 
-- **Preusmjeriti bilo kojeg agenta na bilo kojeg pružatelja**: Copilot razgovara s OpenAI-jem? Preusmjerite ga na Anthropic Claude, Gemini ili bilo kojeg od 375 pružatelja usluga OmniRoutea.
+- **Preusmjeriti bilo kojeg agenta na bilo kojeg pružatelja**: Copilot razgovara s OpenAI-jem? Preusmjerite ga na Anthropic Claude, Gemini ili bilo kojeg od 376 pružatelja usluga OmniRoutea.
 - **Primijeniti mapiranja modela**: `gemini-3-flash` → `claude-sonnet-4.7` prozirno na razini handlera.
 - **Promatrati sav promet agenata**: svaki presretnuti zahtjev objavljuje se u [Inspektoru prometa](./TRAFFIC_INSPECTOR.md).
 - **Primijeniti otpornost OmniRoutea**: combo usmjeravanje, circuit breakeri, fallbackovi i praćenje troškova također funkcioniraju i za promet IDE agenata.

@@ -20,7 +20,7 @@ Wanneer een IDE-agent (bijv. GitHub Copilot, Cursor, Claude Code) een API-aanroe
 
 Dit betekent dat je:
 
-- **Elke agent kunt omleiden naar elke provider**: Copilot die met OpenAI praat? Leid hem om naar Anthropic Claude, Gemini of een van de 375 providers van OmniRoute.
+- **Elke agent kunt omleiden naar elke provider**: Copilot die met OpenAI praat? Leid hem om naar Anthropic Claude, Gemini of een van de 376 providers van OmniRoute.
 - **Modelmappings kunt toepassen**: `gemini-3-flash` → `claude-sonnet-4.7` transparant op handlerniveau.
 - **Al het agentverkeer kunt bekijken**: elk onderschept verzoek wordt gepubliceerd naar de [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **De veerkracht van OmniRoute kunt toepassen**: comborouting, circuit breakers, fallbacks en kostenregistratie werken ook voor IDE-agentverkeer.

@@ -15,7 +15,7 @@ Zagotavlja enotno končno točko, združljivo z OpenAI (`/v1/*`), ter usmerja pr
 
 Ključne zmogljivosti:
 
-- Površina API-ja, združljiva z OpenAI, za CLI/orodja (375 ponudnikov, 156 izvajalnih modulov)
+- Površina API-ja, združljiva z OpenAI, za CLI/orodja (376 ponudnikov, 156 izvajalnih modulov)
 - Prevajanje zahtev in odgovorov med oblikami ponudnikov
 - Nadomestne možnosti kombinacij modelov (zaporedje več modelov)
 - Strukturirani koraki kombinacij (`provider + model + connection`) z izvajanjem po vrstnem redu, ki ga določa `compositeTiers`

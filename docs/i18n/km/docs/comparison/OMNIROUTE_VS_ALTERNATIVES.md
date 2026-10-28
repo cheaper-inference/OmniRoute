@@ -39,7 +39,7 @@
 
 ## ពេលណាដែលគួរជ្រើសរើស OmniRoute
 
-- អ្នក self-host ដោយខ្លួនឯង ហើយចង់បាន **ការគ្រប់គ្រង provider យ៉ាងទូលំទូលាយបំផុត** (provider ចំនួន 375 និងធាតុ catalog ឥតគិតថ្លៃ/គ្មាន auth ចំនួន 155)
+- អ្នក self-host ដោយខ្លួនឯង ហើយចង់បាន **ការគ្រប់គ្រង provider យ៉ាងទូលំទូលាយបំផុត** (provider ចំនួន 376 និងធាតុ catalog ឥតគិតថ្លៃ/គ្មាន auth ចំនួន 155)
 - អ្នកត្រូវការ **MCP server ដែលបានបញ្ចូលជាមួយផ្ទាល់** (LLM tools, memory, skills ដែលបង្ហាញជា tools)
 - អ្នកត្រូវការ **A2A protocol** សម្រាប់ workflow agent-ទៅ-agent
 - អ្នកចង់បាន **fingerprint stealth** (JA3/JA4) ដើម្បីជៀសវាងការរកឃើញដោយ CAPTCHA ពី upstream

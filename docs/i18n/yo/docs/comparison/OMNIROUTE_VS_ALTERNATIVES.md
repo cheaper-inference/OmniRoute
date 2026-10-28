@@ -39,7 +39,7 @@
 
 ## Nígbà tí a yẹ kí a yan OmniRoute
 
-- O ń ṣe alele fúnra rẹ (self-host) tí o sì fẹ́ **ìbòmọ́lù àwọn ọlùpèsè tó pọ̀ jù lọ** (àwọn ọlùpèsè 375, àwọn kíkọ sí àtòkà ọ̀fẹ́/láì ní ìfàṣẹsìlẹ̀ 155)
+- O ń ṣe alele fúnra rẹ (self-host) tí o sì fẹ́ **ìbòmọ́lù àwọn ọlùpèsè tó pọ̀ jù lọ** (àwọn ọlùpèsè 376, àwọn kíkọ sí àtòkà ọ̀fẹ́/láì ní ìfàṣẹsìlẹ̀ 155)
 - O nílò **MCP server tí a fi kọ́ sínú** (àwọn irinṣẹ́ LLM, ìrántí, àti àwọn ògbón tí a ṣàfihàn gẹ́gẹ́ bí irinṣẹ́)
 - O nílò **ìlànà A2A** fún àwọn ìṣàn iṣẹ́ láti aṣojú-sí-aṣojú
 - O fẹ́ **ìfarapamọ́ ìtẹ̀ka** (JA3/JA4) láti yẹra fún ìmọ̀rírí nípasẹ̀ àwọn CAPTCHA àgàmọ̀ (upstream)

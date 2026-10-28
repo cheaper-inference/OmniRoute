@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | फ़ाइल                          | उद्देश्य                                   |
 | ------------------------------ | ------------------------------------------ |
-| `providerRegistry.ts`          | 375-प्रोवाइडर कैटलॉग पर चैट-मॉडल रजिस्ट्री |
+| `providerRegistry.ts`          | 376-प्रोवाइडर कैटलॉग पर चैट-मॉडल रजिस्ट्री |
 | `providerModels.ts`            | मॉडल उपनाम, प्रारूप मैपिंग                 |
 | `constants.ts`                 | टाइमआउट, सीमाएँ, स्थिति कोड                |
 | `defaultThinkingSignature.ts`  | डिफ़ॉल्ट Claude थिंकिंग सिग्नेचर           |

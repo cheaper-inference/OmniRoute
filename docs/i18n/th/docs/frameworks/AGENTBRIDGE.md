@@ -20,7 +20,7 @@ AgentBridge คือพร็อกซี MITM (Man-in-the-Middle) ของ Om
 
 ซึ่งหมายความว่าคุณสามารถ:
 
-- **เปลี่ยนเส้นทาง agent ใดก็ได้ไปยังผู้ให้บริการใดก็ได้**: Copilot กำลังคุยกับ OpenAI อยู่หรือ? เปลี่ยนเส้นทางไปยัง Anthropic Claude, Gemini หรือผู้ให้บริการ 375 รายของ OmniRoute ได้เลย
+- **เปลี่ยนเส้นทาง agent ใดก็ได้ไปยังผู้ให้บริการใดก็ได้**: Copilot กำลังคุยกับ OpenAI อยู่หรือ? เปลี่ยนเส้นทางไปยัง Anthropic Claude, Gemini หรือผู้ให้บริการ 376 รายของ OmniRoute ได้เลย
 - **ใช้การแมปโมเดล**: `gemini-3-flash` → `claude-sonnet-4.7` อย่างโปร่งใสที่ระดับ handler
 - **สังเกตการณ์ทราฟฟิกของ agent ทั้งหมด**: ทุกคำขอที่ถูกดักจับจะถูกเผยแพร่ไปยัง [Traffic Inspector](./TRAFFIC_INSPECTOR.md)
 - **ใช้ความทนทานของ OmniRoute**: combo routing, circuit breakers, fallbacks และการติดตามต้นทุน ทำงานกับทราฟฟิกของ IDE agent ได้เช่นกัน

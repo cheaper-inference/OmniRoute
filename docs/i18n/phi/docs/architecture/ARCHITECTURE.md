@@ -15,7 +15,7 @@ Nagbibigay ito ng iisang endpoint na compatible sa OpenAI (`/v1/*`) at nagruruta
 
 Mga pangunahing kakayahan:
 
-- API surface na compatible sa OpenAI para sa mga CLI/tool (375 provider, 156 executor module)
+- API surface na compatible sa OpenAI para sa mga CLI/tool (376 provider, 156 executor module)
 - Translation ng request/response sa iba't ibang format ng provider
 - Fallback ng kumbinasyon ng mga modelo (sequence ng maraming modelo)
 - Mga structured na hakbang ng kumbinasyon (`provider + model + connection`) na may runtime ordering ayon sa `compositeTiers`

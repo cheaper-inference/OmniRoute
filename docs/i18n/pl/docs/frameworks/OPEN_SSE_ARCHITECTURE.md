@@ -495,7 +495,7 @@ Katalog `open-sse/config/` zawiera warstwę konfiguracji:
 
 | Plik                          | Przeznaczenie                                         |
 | ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Rejestr modeli czatu oparty na katalogu 375 dostawców |
+| `providerRegistry.ts`         | Rejestr modeli czatu oparty na katalogu 376 dostawców |
 | `providerModels.ts`           | Aliasy modeli, mapowanie formatów                     |
 | `constants.ts`                | Limity czasu, limity, kody statusu                    |
 | `defaultThinkingSignature.ts` | Domyślna sygnatura myślenia Claude                    |

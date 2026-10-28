@@ -39,7 +39,7 @@ Paragun oġġettiv tal-karatteristiċi ma' routers tal-AI open-source popolari.
 
 ## Meta tagħżel OmniRoute
 
-- Jekk tagħmel self-hosting u trid **kopertura massima tal-providers** (375 provider, 155 entrata tal-katalgu b'xejn/bla awtentikazzjoni)
+- Jekk tagħmel self-hosting u trid **kopertura massima tal-providers** (376 provider, 155 entrata tal-katalgu b'xejn/bla awtentikazzjoni)
 - Għandek bżonn **MCP server inkorporat** (għodod LLM, memorja, ħiliet esposti bħala għodod)
 - Għandek bżonn il-**protokoll A2A** għal workflows bejn aġent u l-ieħor
 - Trid **stealth tal-fingerprint** (JA3/JA4) biex tevita d-detezzjoni minn CAPTCHAs upstream

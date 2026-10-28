@@ -148,6 +148,10 @@ import {
   fetchCodexGithubCatalogModels,
 } from "./discovery/codex";
 import { createCodexDiscoveryFetch, createCodexCatalogReconciler } from "./discovery/codexRoute";
+import {
+  getCodexClientVersion,
+  getCodexClientVersionSource,
+} from "@omniroute/open-sse/config/codexClient.ts";
 import { fetchClaudeDiscoveryModels } from "./discovery/claude";
 import { applyConnectionCustomHeaders } from "./discovery/connectionCustomHeaders";
 import { maybeHandleConolOrSyntxModelDiscovery } from "./webSessionDiscovery";
@@ -2226,13 +2230,26 @@ export async function GET(
             : liveModels;
         const catalog = reconcileCodexCatalog(enrichedLiveModels);
         await persistDiscoveredModels(provider, connectionId, catalog.activeModels);
+        const clientVersionSource = getCodexClientVersionSource();
         return buildResponse({
           provider,
           connectionId,
           models: catalog.activeModels,
           source: "api",
           warning: catalog.warning,
-          discovery: { mode: codexDiscoveryMode },
+          discovery: {
+            mode: codexDiscoveryMode,
+            clientVersion: {
+              version: getCodexClientVersion(),
+              source: clientVersionSource,
+              ...(clientVersionSource === "fallback"
+                ? {
+                    degraded:
+                      "the last version refresh failed, so models gated behind a newer client may be missing",
+                  }
+                : {}),
+            },
+          },
           ...(includeCandidates ? { candidateModels: catalog.candidateModels } : {}),
         });
       }
@@ -2569,7 +2586,19 @@ export async function GET(
     const status = getSafeOutboundFetchErrorStatus(error);
     if (status) {
       const message = error instanceof Error ? error.message : "Failed to fetch models";
-      return NextResponse.json({ error: message }, { status });
+      // Timeout messages embed the request URL, which can carry a `?key=` credential.
+      return NextResponse.json({ error: sanitizeErrorMessage(message) }, { status });
+    }
+    // #4843 — dead host / DNS / TLS failure with no cached or local catalog to
+    // degrade to is an upstream outage, not an OmniRoute bug: answer 502.
+    if (error instanceof SafeOutboundFetchError && error.code === "NETWORK_ERROR") {
+      return NextResponse.json(
+        {
+          error: `Failed to fetch models: ${sanitizeErrorMessage(error.message) || "upstream unreachable"}`,
+          code: "UPSTREAM_UNREACHABLE",
+        },
+        { status: 502 }
+      );
     }
     console.log("Error fetching provider models:", error);
     return NextResponse.json({ error: "Failed to fetch models" }, { status: 500 });
