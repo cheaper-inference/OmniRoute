@@ -137,6 +137,63 @@ test("isQuotaExhaustedForRequest scopes gemini exhaustion to the requested model
   );
 });
 
+test("isQuotaExhaustedForRequest ignores exhausted Argon buckets for Gemini Flash", () => {
+  const connectionId = "conn-gemini-argon-isolation-test";
+
+  quotaCache.setQuotaCache(connectionId, "antigravity", {
+    "gemini-3.8-flash-high": {
+      remainingPercentage: 100,
+      resetAt: null,
+    },
+    "gemini-4-argon-low": {
+      remainingPercentage: 0,
+      resetAt: null,
+    },
+    "gemini-4-argon-medium": {
+      remainingPercentage: 0,
+      resetAt: null,
+    },
+    "gemini-4-argon-high": {
+      remainingPercentage: 0,
+      resetAt: null,
+    },
+    gemini_weekly: {
+      remainingPercentage: 100,
+      resetAt: null,
+    },
+  });
+
+  assert.equal(
+    quotaCache.isQuotaExhaustedForRequest(
+      connectionId,
+      "antigravity",
+      "antigravity/gemini-3.8-flash-high"
+    ),
+    false,
+    "Gemini Flash should remain available when only Argon buckets are exhausted"
+  );
+});
+
+test("isQuotaExhaustedForRequest does not use Argon buckets as a Flash fallback", () => {
+  const connectionId = "conn-gemini-argon-fallback-test";
+
+  quotaCache.setQuotaCache(connectionId, "antigravity", {
+    "gemini-4-argon-low": { remainingPercentage: 0, resetAt: null },
+    "gemini-4-argon-medium": { remainingPercentage: 0, resetAt: null },
+    "gemini-4-argon-high": { remainingPercentage: 0, resetAt: null },
+  });
+
+  assert.equal(
+    quotaCache.isQuotaExhaustedForRequest(
+      connectionId,
+      "antigravity",
+      "antigravity/gemini-3.8-flash-high"
+    ),
+    false,
+    "Flash should not be marked exhausted when only Argon buckets are reported"
+  );
+});
+
 test("isQuotaExhaustedForRequest treats near-zero remaining as exhausted at default threshold", () => {
   const connectionId = "conn-near-zero-test";
   quotaCache.setQuotaCache(connectionId, "antigravity", {
