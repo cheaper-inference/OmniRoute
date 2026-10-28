@@ -1,0 +1,432 @@
+# Contributing to OmniRoute (Ελληνικά)
+
+🌐 **Languages:** 🇺🇸 [English](../../../CONTRIBUTING.md) · 🇪🇹 [am](../am/CONTRIBUTING.md) · 🇸🇦 [ar](../ar/CONTRIBUTING.md) · 🇦🇿 [az](../az/CONTRIBUTING.md) · 🇧🇬 [bg](../bg/CONTRIBUTING.md) · 🇧🇩 [bn](../bn/CONTRIBUTING.md) · 🇧🇦 [bs](../bs/CONTRIBUTING.md) · 🇨🇿 [cs](../cs/CONTRIBUTING.md) · 🇩🇰 [da](../da/CONTRIBUTING.md) · 🇩🇪 [de](../de/CONTRIBUTING.md) · 🇪🇸 [es](../es/CONTRIBUTING.md) · 🇪🇪 [et](../et/CONTRIBUTING.md) · 🇮🇷 [fa](../fa/CONTRIBUTING.md) · 🇫🇮 [fi](../fi/CONTRIBUTING.md) · 🇫🇷 [fr](../fr/CONTRIBUTING.md) · 🇮🇪 [ga](../ga/CONTRIBUTING.md) · 🇮🇳 [gu](../gu/CONTRIBUTING.md) · 🇳🇬 [ha](../ha/CONTRIBUTING.md) · 🇮🇱 [he](../he/CONTRIBUTING.md) · 🇮🇳 [hi](../hi/CONTRIBUTING.md) · 🇭🇷 [hr](../hr/CONTRIBUTING.md) · 🇭🇺 [hu](../hu/CONTRIBUTING.md) · 🇦🇲 [hy](../hy/CONTRIBUTING.md) · 🇮🇩 [id](../id/CONTRIBUTING.md) · 🇳🇬 [ig](../ig/CONTRIBUTING.md) · 🇮🇹 [it](../it/CONTRIBUTING.md) · 🇯🇵 [ja](../ja/CONTRIBUTING.md) · 🇬🇪 [ka](../ka/CONTRIBUTING.md) · 🇰🇭 [km](../km/CONTRIBUTING.md) · 🇮🇳 [kn](../kn/CONTRIBUTING.md) · 🇰🇷 [ko](../ko/CONTRIBUTING.md) · 🇱🇹 [lt](../lt/CONTRIBUTING.md) · 🇱🇻 [lv](../lv/CONTRIBUTING.md) · 🇮🇳 [ml](../ml/CONTRIBUTING.md) · 🇮🇳 [mr](../mr/CONTRIBUTING.md) · 🇲🇾 [ms](../ms/CONTRIBUTING.md) · 🇲🇹 [mt](../mt/CONTRIBUTING.md) · 🇲🇲 [my](../my/CONTRIBUTING.md) · 🇳🇵 [ne](../ne/CONTRIBUTING.md) · 🇳🇱 [nl](../nl/CONTRIBUTING.md) · 🇳🇴 [no](../no/CONTRIBUTING.md) · 🇮🇳 [or](../or/CONTRIBUTING.md) · 🇮🇳 [pa](../pa/CONTRIBUTING.md) · 🇵🇭 [phi](../phi/CONTRIBUTING.md) · 🇵🇱 [pl](../pl/CONTRIBUTING.md) · 🇵🇹 [pt](../pt/CONTRIBUTING.md) · 🇧🇷 [pt-BR](../pt-BR/CONTRIBUTING.md) · 🇷🇴 [ro](../ro/CONTRIBUTING.md) · 🇷🇺 [ru](../ru/CONTRIBUTING.md) · 🇱🇰 [si](../si/CONTRIBUTING.md) · 🇸🇰 [sk](../sk/CONTRIBUTING.md) · 🇸🇮 [sl](../sl/CONTRIBUTING.md) · 🇷🇸 [sr](../sr/CONTRIBUTING.md) · 🇸🇪 [sv](../sv/CONTRIBUTING.md) · 🇰🇪 [sw](../sw/CONTRIBUTING.md) · 🇮🇳 [ta](../ta/CONTRIBUTING.md) · 🇮🇳 [te](../te/CONTRIBUTING.md) · 🇹🇭 [th](../th/CONTRIBUTING.md) · 🇹🇷 [tr](../tr/CONTRIBUTING.md) · 🇺🇦 [uk-UA](../uk-UA/CONTRIBUTING.md) · 🇵🇰 [ur](../ur/CONTRIBUTING.md) · 🇺🇿 [uz](../uz/CONTRIBUTING.md) · 🇻🇳 [vi](../vi/CONTRIBUTING.md) · 🇳🇬 [yo](../yo/CONTRIBUTING.md) · 🇨🇳 [zh-CN](../zh-CN/CONTRIBUTING.md) · 🇹🇼 [zh-TW](../zh-TW/CONTRIBUTING.md)
+
+---
+
+Σας ευχαριστούμε για το ενδιαφέρον σας να συνεισφέρετε! Αυτός ο οδηγός καλύπτει όλα όσα χρειάζεστε για να ξεκινήσετε.
+
+Για την επίσημη ροή εργασίας ανά αλλαγή, ξεκινήστε με το
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md). Αντιστοιχίζει αλλαγές σε provider, routing,
+UI/UX, i18n, CLI, βάση δεδομένων και build/deploy στα συμβόλαιά τους, εστιασμένα tests, κάλυψη CI
+και βήματα συμφωνίας.
+
+---
+
+## Ρύθμιση Περιβάλλοντος Ανάπτυξης
+
+### Προαπαιτούμενα
+
+- **Node.js** `>=22.22.2 <23`, ή `>=24.0.0 <27` (συνιστάται: 24 LTS)
+- **npm** 10+
+
+> **Χρήστες npm v11+ (Node 24+):** Μετά το `npm install`, επαληθεύστε ότι εγκαταστάθηκαν τα εγγενή αρθρώματα:
+> `node -e "require('better-sqlite3')"`. Αν αποτύχει με `MODULE_NOT_FOUND`,
+> εκτελέστε `npm approve-scripts better-sqlite3 && npm install`. Δείτε την ενότητα
+> [Αντιμετώπιση προβλημάτων](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+
+- **Git**
+
+### Κλωνοποίηση & Εγκατάσταση
+
+```bash
+git clone https://github.com/diegosouzapw/OmniRoute.git
+cd OmniRoute
+npm install
+```
+
+### Μεταβλητές Περιβάλλοντος
+
+```bash
+# Δημιουργήστε το .env από το πρότυπο
+cp .env.example .env
+
+# Δημιουργήστε τα απαιτούμενα μυστικά
+echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
+echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
+```
+
+Βασικές μεταβλητές για την ανάπτυξη:
+
+| Μεταβλητή              | Προεπιλογή Ανάπτυξης       | Περιγραφή                         |
+| ---------------------- | -------------------------- | --------------------------------- |
+| `PORT`                 | `20128`                    | Θύρα διακομιστή                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Βασικό URL για το frontend        |
+| `JWT_SECRET`           | (δημιουργήστε το παραπάνω) | Μυστικό υπογραφής JWT             |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | Κωδικός πρόσβασης πρώτης σύνδεσης |
+| `APP_LOG_LEVEL`        | `info`                     | Επίπεδο λεπτομέρειας καταγραφής   |
+
+### Ρυθμίσεις Πίνακα Ελέγχου
+
+Ο πίνακας ελέγχου παρέχει διακόπτες διεπαφής χρήστη για λειτουργίες που μπορούν επίσης να διαμορφωθούν μέσω μεταβλητών περιβάλλοντος:
+
+| Θέση Ρύθμισης                 | Διακόπτης                       | Περιγραφή                                                           |
+| ----------------------------- | ------------------------------- | ------------------------------------------------------------------- |
+| Ρυθμίσεις → Για προχωρημένους | Λειτουργία εντοπισμού σφαλμάτων | Ενεργοποίηση αρχείων καταγραφής αιτημάτων εντοπισμού σφαλμάτων (UI) |
+| Ρυθμίσεις → Γενικά            | Ορατότητα πλαϊνής γραμμής       | Εμφάνιση/απόκρυψη ενοτήτων της πλαϊνής γραμμής                      |
+
+Αυτές οι ρυθμίσεις αποθηκεύονται στη βάση δεδομένων και διατηρούνται μεταξύ επανεκκινήσεων, παρακάμπτοντας τις προεπιλογές των μεταβλητών περιβάλλοντος όταν έχουν οριστεί.
+
+### Τοπική Εκτέλεση
+
+```bash
+# Λειτουργία ανάπτυξης (αυτόματη επαναφόρτωση)
+npm run dev
+
+# Build παραγωγής
+npm run build    # next build → .build/next/ και έπειτα assembleStandalone → dist/
+npm run start
+
+# Γρήγορη μεταγλώττιση μόνο του backend/API για αλλαγές συνεισφερόντων
+npm run build:contributor
+
+# Build έκδοσης (καθαρό rebuild + δείκτης HEAD — απαιτείται για την ανάπτυξη)
+npm run build:release   # rm -rf .build dist && build + εγγραφή του dist/BUILD_SHA
+
+# Συνήθης διαμόρφωση θύρας
+PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
+```
+
+Το build συνεισφερόντων εκτελεί επικύρωση μόνο μέσω μεταγλώττισης: δεν συναρμολογεί την αυτόνομη
+διανομή ούτε δημιουργεί προαιρετικούς εγγενείς πόρους πακεταρίσματος. Χρησιμοποιήστε το κανονικό build παραγωγής όταν
+χρειάζεται να επικυρώσετε το πακέτο που προορίζεται για διανομή.
+
+### Διάταξη Εξόδου Build
+
+| Κατάλογος | Περιεχόμενα                                                                                | Παρακολουθείται |
+| --------- | ------------------------------------------------------------------------------------------ | --------------- |
+| `src/`    | Πηγαίος κώδικας εφαρμογής (TypeScript / TSX)                                               | Ναι             |
+| `.build/` | Ενδιάμεσα αρχεία — έξοδος του `next build` (αγνοείται από το git, `distDir = .build/next`) | Όχι             |
+| `dist/`   | Πακέτο προς διανομή — συναρμολογείται από το `assembleStandalone` (αγνοείται από το git)   | Όχι             |
+
+Η ροή εργασίας του build εκτελείται σε ένα μόνο πέρασμα:
+
+```
+npm run build
+  └─ next build → .build/next/standalone  (έξοδος Next.js)
+  └─ assembleStandalone()                 (αντιγράφει τα standalone + static + public + εγγενείς πόρους)
+       └─ έξοδος: dist/                   (server.js, .next/static/, public/, node_modules/)
+```
+
+Το `npm run build:release` καθαρίζει επιπλέον πρώτα και τους δύο καταλόγους και εγγράφει το
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ως δείκτη ακεραιότητας ανάπτυξης.
+
+Το `npm run build:contributor` χρησιμοποιεί το προφίλ build μόνο για το backend. Αντικαθιστά προσωρινά με stub
+τα αρχεία UI του πίνακα ελέγχου κατά τη διάρκεια του build, διατηρεί τους χειριστές διαδρομών API και επαναφέρει τα αρχικά αρχεία
+μετά το build. Χρησιμοποιήστε το `npm run build` για αλλαγές που επηρεάζουν το UI του πίνακα ελέγχου ή για πλήρη
+επικύρωση έκδοσης· το προφίλ συνεισφερόντων δεν αντικαθιστά το build έκδοσης.
+
+> **Σημείωση ανάπτυξης σε VPS:** ο απομακρυσμένος κατάλογος εικόνας `/usr/lib/node_modules/omniroute/app/`
+> παραμένει αμετάβλητος. Οι δεξιότητες ανάπτυξης συγχρονίζουν μέσω rsync τα περιεχόμενα του `dist/` σε αυτόν.
+> Άλλαξε μόνο η διαδρομή εξόδου του build εντός του αποθετηρίου (`app/` → `dist/`).
+
+Προεπιλεγμένα URL:
+
+- **Πίνακας ελέγχου**: `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
+
+---
+
+## Ροή Εργασίας Git
+
+> ⚠️ **ΠΟΤΕ μην κάνετε commit απευθείας στο `main`.** Χρησιμοποιείτε πάντα feature branches.
+>
+> **Βάση PR:** στοχεύστε τον ενεργό κλάδο `release/vX.Y.Z` (όχι το `main`). Δείτε
+> [`docs/ops/BRANCHING_MODEL.md`](docs/ops/BRANCHING_MODEL.md) για το μοντέλο release-per-branch + tag-at-ship.
+
+```bash
+# Δημιουργία κλάδου από την ενεργή κορυφή release (παράδειγμα: release/v3.8.49)
+git fetch origin
+git checkout -b feat/your-feature-name origin/release/v3.8.49
+# ... πραγματοποιήστε αλλαγές ...
+git commit -m "feat: describe your change"
+git push -u origin feat/your-feature-name
+# Ανοίξτε ένα Pull Request με base = release/v3.8.49
+```
+
+### Ονοματολογία Κλάδων
+
+| Πρόθεμα     | Σκοπός                    |
+| ----------- | ------------------------- |
+| `feat/`     | Νέες λειτουργίες          |
+| `fix/`      | Διορθώσεις σφαλμάτων      |
+| `refactor/` | Αναδόμηση κώδικα          |
+| `docs/`     | Αλλαγές τεκμηρίωσης       |
+| `test/`     | Προσθήκη/διόρθωση δοκιμών |
+| `chore/`    | Εργαλεία, CI, εξαρτήσεις  |
+
+### Μηνύματα Commit
+
+Ακολουθήστε τα [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: add circuit breaker for provider calls
+fix: resolve JWT secret validation edge case
+docs: update SECURITY.md with PII protection
+test: add observability unit tests
+refactor(db): consolidate rate limit tables
+```
+
+Εύρη (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`.
+
+---
+
+## Εκτέλεση δοκιμών
+
+```bash
+# Όλες οι δοκιμές (unit + vitest + ecosystem + e2e)
+npm run test:all
+
+# Μεμονωμένο αρχείο δοκιμών (εγγενής εκτελεστής δοκιμών του Node.js — οι περισσότερες δοκιμές τον χρησιμοποιούν)
+node --import tsx/esm --test tests/unit/your-file.test.ts
+
+# Μόνο οι δοκιμές μονάδας που επηρεάζονται από την αλλαγή σας (ίδιος επιλογέας TIA με την πύλη του CI, #8084)
+npm run test:scoped            # αλλαγές στο τελευταίο commit (ή στο δέντρο εργασίας)
+npm run test:scoped:staged     # μόνο αλλαγές στο staging — συνδυάζεται καλά με εκτέλεση pre-commit
+npm run test:scoped:full       # πρώτα αναδημιουργεί τον χάρτη του γραφήματος εισαγωγών (μετά από προσθήκη/μετακίνηση αρχείων)
+# Έξοδος 1 + "εκτελέστε ολόκληρη τη σουίτα" σημαίνει ότι άλλαξε ένα κεντρικό αρχείο (tsconfig, package.json, …) ή
+# μια μη αντιστοιχισμένη πηγή — ο επιλογέας αποτυγχάνει με ασφάλεια και δεν παραλείπει ποτέ δοκιμές χωρίς ειδοποίηση.
+
+# Vitest (διακομιστής MCP, autoCombo, cache)
+npm run test:vitest
+
+# Δοκιμές E2E (απαιτεί Playwright)
+npm run test:e2e
+
+# E2E για πελάτες πρωτοκόλλων (μεταφορές MCP, A2A)
+npm run test:protocols:e2e
+
+# Δοκιμές συμβατότητας οικοσυστήματος
+npm run test:ecosystem
+
+# Πύλη κάλυψης: 60% εντολών/γραμμών/συναρτήσεων/κλάδων
+npm run test:coverage
+npm run coverage:report
+
+# Έλεγχος lint + μορφοποίησης
+npm run lint
+npm run check
+
+# Ελεγχόμενη δοκιμή smoke πραγματικών upstream συνδυασμών (απαιτεί πρόσβαση VPS + πραγματικές πιστώσεις παρόχων)
+# Καλεί ΠΡΑΓΜΑΤΙΚΟΥΣ παρόχους — έχει μικρό κόστος. Δεν εκτελείται ΠΟΤΕ στο CI. Παραλείπεται καθαρά χωρίς την πύλη.
+# Απαιτεί: πρόσβαση ssh root@192.168.0.15 (φορτώνει ένα στιγμιότυπο DB μόνο για ανάγνωση από το VPS).
+RUN_COMBO_LIVE=1 npm run test:combo:live
+
+# Ζωντανή δοκιμή smoke VPS φάσης 3 — απλά script Node ESM, καλούν απευθείας τον ζωντανό διακομιστή .15.
+# Απαιτεί: πρόσβαση ssh root@192.168.0.15 (οι συνδυασμοί δημιουργούνται/καταργούνται μέσω SSH sqlite).
+# Καλεί ΠΡΑΓΜΑΤΙΚΟΥΣ παρόχους (μικρό κόστος). Δημιουργεί/διαγράφει μόνο συνδυασμούς __live_test__*. Δεν εκτελείται ΠΟΤΕ στο CI.
+# REQUIRE_API_KEY=false στο .15, οπότε δεν απαιτείται κλειδί API, αλλά λαμβάνει υπόψη τα COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY αν έχουν οριστεί.
+npm run test:combo:live:vps              # 7 σενάρια HTTP (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # προσθέτει ένα πραγματικό σενάριο failover μεταξύ παρόχων (8 συνολικά)
+```
+
+Σημειώσεις κάλυψης:
+
+- Το `npm run test:coverage` μετρά την κάλυψη του πηγαίου κώδικα για την κύρια σουίτα δοκιμών μονάδας, εξαιρεί το `tests/**` και περιλαμβάνει το `open-sse/**`
+- Τα αιτήματα ενσωμάτωσης πρέπει να διατηρούν την πύλη κάλυψης σε **60%+** για εντολές/γραμμές/συναρτήσεις/κλάδους
+- Αν ένα PR αλλάζει κώδικα παραγωγής στα `src/`, `open-sse/`, `electron/` ή `bin/`, πρέπει να προσθέτει ή να ενημερώνει αυτοματοποιημένες δοκιμές στο ίδιο PR
+- Το `npm run coverage:report` εμφανίζει τη λεπτομερή αναφορά ανά αρχείο από την πιο πρόσφατη εκτέλεση κάλυψης
+- Το `npm run test:coverage:legacy` διατηρεί την παλαιότερη μέτρηση για ιστορική σύγκριση
+- Ανατρέξτε στο `docs/ops/COVERAGE_PLAN.md` για τον σταδιακό οδικό χάρτη βελτίωσης της κάλυψης
+
+### Απαιτήσεις αιτήματος ενσωμάτωσης
+
+Πριν ανοίξετε ένα PR, χρησιμοποιήστε τη
+[Χρυσή Διαδρομή Συνεισφοράς](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) για να εκτελέσετε τον εστιασμένο κύκλο για
+ό,τι αλλάξατε. Η πλήρης σουίτα δοκιμών μονάδας (4 τμήματα CI), το Vitest, η πύλη κάλυψης **60%+** και
+το build παραγωγής είναι ευθύνη του CI — η τοπική εκτέλεσή τους δεν προσθέτει πληροφορίες που δεν θα
+σας δώσουν ήδη οι έλεγχοι του PR και, σε μικρότερα μηχανήματα, μπορεί να εξαντλήσει τους πόρους του συστήματος (#8084):
+
+- Εκτελέστε τα αρχεία δοκιμών που καλύπτουν την αλλαγή σας: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Εκτελέστε το `npm run lint`
+- Συμπεριλάβετε ή ενημερώστε αυτοματοποιημένες δοκιμές στο ίδιο PR κάθε φορά που αλλάζει κώδικας παραγωγής
+- Σε αρχεία `node:test`, τοποθετήστε κάθε `await` ανώτατου επιπέδου (όπως `await import(...)`) πριν από το πρώτο `test()` / `describe()`: με το `--test-force-exit`, οι δοκιμές που καταχωρίζονται μετά από αυτό μπορεί σιωπηρά να μην εκτελεστούν ποτέ (#18045· επιβάλλεται από το `npm run check:test-tla-order`)
+- Συμπεριλάβετε στην περιγραφή του PR τα αρχεία δοκιμών που άλλαξαν ή προστέθηκαν, όταν έχει αλλάξει κώδικας παραγωγής
+- Ελέγξτε το αποτέλεσμα του SonarQube στο PR όταν τα μυστικά του έργου έχουν ρυθμιστεί στο CI
+
+Τρέχουσα κατάσταση δοκιμών: **122 αρχεία δοκιμών μονάδας** που καλύπτουν:
+
+- Μεταφραστές παρόχων και μετατροπή μορφών
+- Περιορισμό ρυθμού, circuit breaker και ανθεκτικότητα
+- Σημασιολογική cache, idempotency και παρακολούθηση προόδου
+- Λειτουργίες βάσης δεδομένων και σχήμα (21 μονάδες DB)
+- Ροές OAuth και έλεγχο ταυτότητας
+- Επικύρωση endpoint API (Zod v4)
+- Εργαλεία διακομιστή MCP και επιβολή scope
+- Συστήματα Memory και Skills
+
+---
+
+## Στυλ Κώδικα
+
+- **ESLint** — Εκτελέστε `npm run lint` πριν από κάθε commit
+- **Prettier** — Αυτόματη μορφοποίηση μέσω `lint-staged` κατά το commit (2 κενά, ελληνικά ερωτηματικά, διπλά εισαγωγικά, πλάτος 100 χαρακτήρων, κόμματα τύπου es5 στο τέλος)
+- **TypeScript** — Όλος ο κώδικας στο `src/` χρησιμοποιεί `.ts`/`.tsx`· το `open-sse/` χρησιμοποιεί `.ts`/`.js`· τεκμηρίωση με TSDoc (`@param`, `@returns`, `@throws`)
+- **Απαγόρευση `eval()`** — Το ESLint επιβάλλει `no-eval`, `no-implied-eval`, `no-new-func`
+- **Επικύρωση με Zod** — Χρησιμοποιείτε σχήματα Zod v4 για όλη την επικύρωση εισόδου API
+- **Ονοματολογία**: Αρχεία = camelCase/kebab-case, components = PascalCase, constants = UPPER_SNAKE
+
+### Διαχείριση σφαλμάτων / κενά μπλοκ catch
+
+Μην αφήνετε ποτέ ένα `catch` αναιτιολόγητο. Κατατάξτε το σε μία από τις δύο κατηγορίες (εφαρμόζει τον αυστηρό κανόνα «ποτέ μην αποκρύπτετε σιωπηλά σφάλματα σε SSE streams»):
+
+- **Σκόπιμο (δική μας προσπάθεια καλύτερης δυνατής εκκαθάρισης/τηλεμετρίας)** — μια αποτυχία εδώ είναι αναμενόμενη και ακίνδυνη· προσθέστε ένα σχόλιο μιας γραμμής με αιτιολόγηση, χωρίς logging (το logging σε κάθε αίτημα είναι ο θόρυβος που αποφεύγει αυτή η σύμβαση).
+
+  ```ts
+  } catch {} // το κλείσιμο ενός ήδη κλειστού controller μετά την αποσύνδεση του client είναι αναμενόμενο
+  ```
+
+- **Πρέπει να καταγραφεί (εξωτερικός κώδικας/κώδικας από τον καλούντα, ή η αποκάλυψη αλλάζει τη ροή ελέγχου)** — διατηρήστε το catch (μην αφήνετε ποτέ να σπάσει το stream) αλλά εκπέμψτε ένα εξατομικευμένο `console.debug`/`warn` ώστε η αποτυχία να είναι ανιχνεύσιμη.
+
+  ```ts
+  } catch (e) {
+    console.debug("[STREAM] onFailure callback error:", e);
+  }
+  ```
+
+Δείτε τα `open-sse/utils/stream.ts` και `open-sse/utils/streamHandler.ts` για πρακτικά παραδείγματα.
+
+---
+
+## Δομή Έργου
+
+```
+src/                        # TypeScript (.ts / .tsx)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Σελίδες πίνακα ελέγχου (23 ενότητες)
+│   ├── api/                # Διαδρομές API (51 κατάλογοι)
+│   └── login/              # Σελίδες ελέγχου ταυτότητας (.tsx)
+├── domain/                 # Μηχανή πολιτικών (policyEngine, comboResolver, costRules, κ.λπ.)
+├── lib/                    # Βασική επιχειρησιακή λογική (.ts)
+│   ├── a2a/                # Διακομιστής πρωτοκόλλου Agent-to-Agent v0.3
+│   ├── acp/                # Μητρώο Agent Communication Protocol
+│   ├── compliance/         # Μηχανή πολιτικών συμμόρφωσης
+│   ├── db/                 # Αρθρώματα τομέα SQLite + 130 μεταναστεύσεις
+│   ├── memory/             # Μόνιμη μνήμη συνομιλιών
+│   ├── oauth/              # Πάροχοι, υπηρεσίες και βοηθητικά εργαλεία OAuth
+│   ├── skills/             # Επεκτάσιμο πλαίσιο δεξιοτήτων
+│   ├── usage/              # Παρακολούθηση χρήσης και υπολογισμός κόστους
+│   └── localDb.ts          # Μόνο επίπεδο επανεξαγωγής — μην προσθέτετε ποτέ λογική εδώ
+├── middleware/              # Ενδιάμεσο λογισμικό αιτημάτων (promptInjectionGuard)
+├── mitm/                   # Διακομιστής μεσολάβησης MITM (πιστοποιητικό, DNS, δρομολόγηση προορισμού)
+├── shared/
+│   ├── components/         # Στοιχεία React (.tsx)
+│   ├── constants/          # Ορισμοί παρόχων (329), εμβέλειες MCP, 20 στρατηγικές δρομολόγησης
+│   ├── utils/              # Αυτόματος διακόπτης κυκλώματος, εξυγιαντής, βοηθητικά εργαλεία ελέγχου ταυτότητας
+│   └── validation/         # Σχήματα Zod v4
+└── sse/                    # Ροή διακομιστή μεσολάβησης SSE
+
+open-sse/                   # Χώρος εργασίας @omniroute/open-sse
+├── executors/              # 150 αρθρώματα εκτέλεσης (κλάσεις εκτέλεσης + βοηθητικά εργαλεία ανά πάροχο)
+├── handlers/               # 11 χειριστές αιτημάτων (συνομιλία, αποκρίσεις, ενσωματώσεις, εικόνες, κ.λπ.)
+├── mcp-server/             # Διακομιστής MCP (110 μοναδικά εργαλεία, 3 μεταφορές, 33 εμβέλειες)
+├── services/               # 178 υπηρεσίες ανώτατου επιπέδου (combo, autoCombo, rateLimitManager, κ.λπ.)
+├── translator/             # Μετατροπείς μορφών (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Μετασχηματιστής Responses API
+└── utils/                  # 22 αρθρώματα βοηθητικών εργαλείων (ροή, TLS, διακομιστής μεσολάβησης, καταγραφή)
+
+electron/                   # Εφαρμογή επιφάνειας εργασίας Electron (πολλαπλών πλατφορμών)
+
+tests/
+├── unit/                   # Εκτελεστής δοκιμών Node.js (1,574 αρχεία δοκιμών)
+├── integration/            # Δοκιμές ενσωμάτωσης
+├── e2e/                    # Δοκιμές Playwright
+├── security/               # Δοκιμές ασφαλείας
+├── translator/             # Δοκιμές ειδικά για τον μετατροπέα
+└── load/                   # Δοκιμές φόρτου
+
+docs/
+├── adr/                     # Αρχεία Αποφάσεων Αρχιτεκτονικής
+├── architecture/            # Αρχιτεκτονική συστήματος και ανθεκτικότητα
+├── comparison/              # OmniRoute έναντι εναλλακτικών
+├── compression/             # Οδηγοί και κανόνες συμπίεσης
+├── dev/                     # Οδηγοί ανάπτυξης
+├── diagrams/                # Διαγράμματα αρχιτεκτονικής
+├── frameworks/              # MCP, A2A, OpenCode, Μνήμη, Δεξιότητες
+├── guides/                  # Οδηγός χρήστη, Docker, ρύθμιση, αντιμετώπιση προβλημάτων
+├── i18n/                    # Διεθνοποιημένες μεταφράσεις README
+├── marketing/               # Υλικό μάρκετινγκ
+├── ops/                     # Ανάπτυξη, διακομιστής μεσολάβησης, κάλυψη, εκδόσεις
+├── providers/               # Τεκμηρίωση ειδική για κάθε πάροχο
+├── reference/               # Αναφορά API, μεταβλητές περιβάλλοντος, εργαλεία CLI, δωρεάν βαθμίδες
+├── releases/                # Σημειώσεις έκδοσης
+├── routing/                 # Μηχανή αυτόματων συνδυασμών, επανάληψη συλλογισμού
+├── screenshots/             # Στιγμιότυπα οθόνης πίνακα ελέγχου
+├── security/                # Προστατευτικά όρια, συμμόρφωση, απόκρυψη, διακριτικά
+└── specs/                   # Προδιαγραφές σχεδιασμού
+```
+
+---
+
+## Προσθήκη Νέου Παρόχου
+
+### Βήμα 1: Καταχώριση Σταθερών Παρόχου
+
+Προσθέστε στο `src/shared/constants/providers.ts` — επικυρώνεται με Zod κατά τη φόρτωση του module.
+
+### Βήμα 2: Προσθήκη Executor (εάν απαιτείται προσαρμοσμένη λογική)
+
+Δημιουργήστε executor στο `open-sse/executors/your-provider.ts` επεκτείνοντας τον βασικό executor.
+
+### Βήμα 3: Προσθήκη Translator (εάν η μορφή δεν είναι OpenAI)
+
+Δημιουργήστε translators αιτήματος/απόκρισης στο `open-sse/translator/`.
+
+### Βήμα 4: Προσθήκη Διαμόρφωσης OAuth (εάν βασίζεται σε OAuth)
+
+Προσθέστε διαπιστευτήρια OAuth στο `src/lib/oauth/constants/oauth.ts` και την υπηρεσία στο `src/lib/oauth/services/`.
+
+Εάν ο upstream πάροχος διανέμει δημόσιο OAuth `client_id`/secret ή Firebase Web API key μέσα στο δημόσιο CLI / bundle του προγράμματος περιήγησής του, **μην** το ενσωματώνετε ως string literal. Χρησιμοποιήστε το `resolvePublicCred()` από το `open-sse/utils/publicCreds.ts` και προσθέστε μια καταχώριση masked byte στο `EMBEDDED_DEFAULTS`. Η πλήρης υποχρεωτική ροή εργασίας τεκμηριώνεται στο [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md).
+
+Μέσα σε handlers/executors, τα μηνύματα σφάλματος που φτάνουν στον client πρέπει να περνούν μέσα από τα `buildErrorBody()` / `sanitizeErrorMessage()` από το `open-sse/utils/error.ts` — ποτέ μην τοποθετείτε raw `err.stack` ή `err.message` στο σώμα ενός Response. Δείτε [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md).
+
+### Βήμα 5: Καταχώριση Μοντέλων
+
+Προσθέστε ορισμούς μοντέλων στο `open-sse/config/providerRegistry.ts`.
+
+### Βήμα 6: Προσθήκη Tests
+
+Γράψτε unit tests στο `tests/unit/` που καλύπτουν τουλάχιστον:
+
+- Καταχώριση παρόχου
+- Μετάφραση αιτήματος/απόκρισης
+- Διαχείριση σφαλμάτων
+
+---
+
+## Λίστα ελέγχου Pull Request
+
+- [ ] Οι δοκιμές ολοκληρώνονται επιτυχώς (`npm test`)
+- [ ] Ο έλεγχος lint ολοκληρώνεται επιτυχώς (`npm run lint`)
+- [ ] Το build ολοκληρώνεται επιτυχώς (`npm run build`)
+- [ ] Προστέθηκαν τύποι TypeScript για νέες δημόσιες συναρτήσεις και διεπαφές
+- [ ] Δεν υπάρχουν hardcoded μυστικά ή εφεδρικές τιμές
+- [ ] Τα δημόσια διαπιστευτήρια upstream ενσωματώνονται μέσω `resolvePublicCred()` (βλ. [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)) και ποτέ ως literals
+- [ ] Οι αποκρίσεις σφαλμάτων δρομολογούνται μέσω `buildErrorBody()` / `sanitizeErrorMessage()` — δεν υπάρχουν ανεπεξέργαστα stack traces στα σώματα αποκρίσεων (βλ. [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Οι εντολές shell (`exec` / `spawn`) μεταβιβάζουν τις τιμές χρόνου εκτέλεσης μέσω `env` και όχι μέσω παρεμβολής συμβολοσειρών
+- [ ] Όλες οι είσοδοι επικυρώνονται με σχήματα Zod
+- [ ] Προστέθηκε **τμήμα** changelog στον κατάλογο `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` για αλλαγές που επηρεάζουν τους χρήστες (βλ. [`changelog.d/README.md`](./changelog.d/README.md)) — **μην** επεξεργάζεστε απευθείας το `CHANGELOG.md`· τα τμήματα συγκεντρώνονται κατά την έκδοση και δεν δημιουργούν ποτέ διενέξεις μεταξύ PR
+- [ ] Η τεκμηρίωση ενημερώθηκε (εφόσον απαιτείται)
+- [ ] Δεν δημιουργήθηκαν νέες ειδοποιήσεις CodeQL / Secret-Scanning ή καθεμία απορρίφθηκε με τεχνική αιτιολόγηση που παραπέμπει στο σχετικό έγγραφο του `docs/security/`
+- [ ] Οι διαδρομές που εκκινούν θυγατρικές διεργασίες (`/api/mcp/`, `/api/cli-tools/runtime/`) ταξινομούνται ως `isLocalOnlyPath()` στο `src/server/authz/routeGuard.ts` — βλ. [Αυστηρός κανόνας #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Δεν υπάρχουν trailers `Co-authored-by` από AI/bot στα μηνύματα commit (Αυστηρός κανόνας #16) — οι άνθρωποι συνεργάτες των οποίων η εργασία επαναχρησιμοποιείται αναφέρονται με τα τυπικά trailers `Co-authored-by: Name <email>`
+
+---
+
+## Κυκλοφορία Εκδόσεων
+
+Οι εκδόσεις διαχειρίζονται μέσω της ροής εργασιών `/generate-release`. Όταν δημιουργείται μια νέα GitHub Release, το πακέτο **δημοσιεύεται αυτόματα στο npm** μέσω του GitHub Actions.
+
+Για αναπτύξεις σε VPS, χρησιμοποιήστε `npm run build:release` (όχι `npm run build`) — εκτελεί μια καθαρή
+επαναδόμηση, συναρμολογεί το bundle στον φάκελο `dist/`, και γράφει το αρχείο σηματοδότη `dist/BUILD_SHA`.
+Στη συνέχεια χρησιμοποιήστε τις δεξιότητες `/deploy-vps-*-cc` που συγχρονίζουν τον φάκελο `dist/` με τον απομακρυσμένο κατάλογο `app/` μέσω rsync.
+
+---
+
+## Λήψη βοήθειας
+
+- **Αρχιτεκτονική**: Δείτε το [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Αναφορά API**: Δείτε το [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Τεκμηρίωση ασφαλείας**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Τεκμηρίωση λειτουργίας**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Ζητήματα**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

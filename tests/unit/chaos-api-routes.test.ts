@@ -45,7 +45,12 @@ async function resetStorage() {
   delete process.env.INITIAL_PASSWORD;
 }
 
-function makeRequest(method: string, url: string, body?: unknown, headers: Record<string, string> = {}) {
+function makeRequest(
+  method: string,
+  url: string,
+  body?: unknown,
+  headers: Record<string, string> = {}
+) {
   return new Request(url, {
     method,
     headers: {
@@ -114,10 +119,7 @@ test("GET /api/chaos/config — returns defaults, PUT updates, DELETE resets", a
   const getBody = (await getRes.json()) as { config: typeof chaosConfig.DEFAULT_CHAOS_CONFIG };
   // JSON.stringify drops keys whose value is `undefined` (systemPrompt), so compare
   // against the JSON round-tripped shape rather than the raw in-memory default.
-  assert.deepEqual(
-    getBody.config,
-    JSON.parse(JSON.stringify(chaosConfig.DEFAULT_CHAOS_CONFIG))
-  );
+  assert.deepEqual(getBody.config, JSON.parse(JSON.stringify(chaosConfig.DEFAULT_CHAOS_CONFIG)));
 
   const putRes = await configRoute.PUT(
     makeRequest("PUT", "http://localhost/api/chaos/config", {
@@ -137,12 +139,11 @@ test("GET /api/chaos/config — returns defaults, PUT updates, DELETE resets", a
     makeRequest("DELETE", "http://localhost/api/chaos/config")
   );
   assert.equal(deleteRes.status, 200);
-  const deleteBody = (await deleteRes.json()) as { config: typeof chaosConfig.DEFAULT_CHAOS_CONFIG };
+  const deleteBody = (await deleteRes.json()) as {
+    config: typeof chaosConfig.DEFAULT_CHAOS_CONFIG;
+  };
   // Same JSON.stringify undefined-key drop as the GET assertion above.
-  assert.deepEqual(
-    deleteBody.config,
-    JSON.parse(JSON.stringify(chaosConfig.DEFAULT_CHAOS_CONFIG))
-  );
+  assert.deepEqual(deleteBody.config, JSON.parse(JSON.stringify(chaosConfig.DEFAULT_CHAOS_CONFIG)));
 });
 
 test("PUT /api/chaos/config — 400 on schema validation failure", async () => {
@@ -190,7 +191,7 @@ test("POST /api/chaos/run — 400 on invalid body (missing task)", async () => {
   assert.equal(res.status, 400);
 });
 
-test("POST /api/chaos/run — 200 happy path dispatches without an Authorization header (dashboard/local mode)", async () => {
+test("POST /api/chaos/run — 200 happy path dispatches with internal Authorization (dashboard mode)", async () => {
   await chaosConfig.setChaosConfig({
     enabled: true,
     defaultMode: "parallel",
@@ -219,7 +220,7 @@ test("POST /api/chaos/run — 200 happy path dispatches without an Authorization
   const body = (await res.json()) as { models: { status: string; content: string }[] };
   assert.equal(body.models[0].status, "success");
   assert.equal(body.models[0].content, "dashboard result");
-  assert.equal(capturedAuth, null);
+  assert.equal(capturedAuth?.startsWith("Bearer "), true);
 });
 
 // ═════════════════════════════════════════════════════════════════════════════

@@ -1,15 +1,39 @@
 // Outbound fetch wrappers for provider validation: proxy-fallback, SSRF-aware proxy targeting, and
-// error→result mapping. Extracted from validation.ts (god-file decomposition). Behavior is
-// byte-identical to the original inline defs.
+// error→result mapping. Extracted from validation.ts (god-file decomposition) and kept as the
+// common boundary for sanitizing validation failures.
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import {
   SAFE_OUTBOUND_FETCH_PRESETS,
   SafeOutboundFetchError,
   getSafeOutboundFetchErrorStatus,
   safeOutboundFetch,
 } from "@/shared/network/safeOutboundFetch";
+import { FetchTimeoutError } from "@/shared/utils/fetchTimeout";
 import { isPrivateHost } from "@/shared/network/outboundUrlGuard";
 import { getProviderValidationGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { selectProxyForValidation } from "@omniroute/open-sse/services/proxyAutoSelector.ts";
+
+export type ProjectedProviderValidationResult<T> = {
+  [K in keyof T]: K extends "error" | "warning" ? string | null : T[K];
+} & {
+  error?: string | null;
+  warning?: string | null;
+};
+
+export function projectProviderValidationResultForPublicResponse<
+  T extends { error?: unknown; warning?: unknown },
+>(result: T): ProjectedProviderValidationResult<T>;
+export function projectProviderValidationResultForPublicResponse(
+  result: Record<string, unknown>
+): Record<string, unknown> {
+  const projected: Record<string, unknown> = { ...result };
+  for (const field of ["error", "warning"] as const) {
+    if (!Object.prototype.hasOwnProperty.call(result, field)) continue;
+    const value = result[field];
+    projected[field] = value === null || value === undefined ? null : sanitizeErrorMessage(value);
+  }
+  return projected;
+}
 
 /**
  * Wrapped fetch call that auto-retries with a proxy when the direct connection
@@ -75,10 +99,10 @@ export async function validationWrite(url: string, init: RequestInit, isLocal: b
 // surfaces as a `provider.validation.ssrf_blocked` audit event + a security warning in
 // the UI) when it is a GENUINE SSRF/guard block — not for every outbound-guard 503.
 // A blocked redirect (REDIRECT_BLOCKED) to a PUBLIC host is benign: the redirect was
-// never followed, so no SSRF occurred. Web-cookie providers like qwen-web answer their
-// probe with a 307 to a public host, which used to be mislabeled as an SSRF block
-// (#3288 / #3758). Only treat a blocked redirect as a security event when its target is
-// a private/internal host.
+// never followed, so no SSRF occurred. Some web-cookie providers answer their probe
+// with a 307 to a public host, which used to be mislabeled as an SSRF block (#3288 /
+// #3758). Only treat a blocked redirect as a security event when its target is a
+// private/internal host.
 export function isSecurityBlockError(error: unknown): boolean {
   if (!(error instanceof SafeOutboundFetchError)) return false;
   if (error.code === "URL_GUARD_BLOCKED" || error.code === "INVALID_URL") return true;
@@ -100,11 +124,15 @@ export function isSecurityBlockError(error: unknown): boolean {
 // — so it should degrade to "unsupported" the same way the discovery path already does for
 // REDIRECT_BLOCKED (#6267's buildDiscoveryErrorFallbackResponse).
 //
-// Scoped to `lmarena` only (root-caused and regression-tested for #7542): the other web-cookie
-// providers sharing a POST-only baseUrl shape (doubao-web, huggingchat, yuanbao-web,
-// zenmux-free, zai-web) have not been individually verified to actually redirect on this probe
-// rather than 404/405 — do not add them here without a proven repro per provider (see
-// #7542 plan-file, "Risks").
+// Scoped to `lmarena` only: the other web-cookie providers sharing a POST-only baseUrl shape
+// (doubao-web, huggingchat, yuanbao-web, zenmux-free, zai-web) have not been individually
+// verified to actually redirect on this probe rather than 404/405 — do not add them here
+// without a proven repro per provider (see #7542 plan-file, "Risks").
+//
+// lmarena's validation probe no longer targets `${baseUrl}/models` (it now reads the
+// session-scoped `/api/me/pulse`, see resolveWebCookieProbe in webCookie.ts), so this entry
+// is a defensive fallback: if that probe ever redirects, a blocked redirect is still not a
+// session-expiry signal and should degrade to "unsupported" rather than "Invalid".
 const WEB_COOKIE_PROVIDERS_WITH_UNRELIABLE_MODELS_PROBE = new Set(["lmarena"]);
 
 // #7857 — web-cookie providers whose registry `baseUrl` is a conversation/completion
@@ -118,16 +146,30 @@ const WEB_COOKIE_PROVIDERS_WITH_UNRELIABLE_MODELS_PROBE = new Set(["lmarena"]);
 // branch is short-circuited to the honest "unsupported" result instead of `valid: true`.
 // lmarena is deliberately NOT in this set — it already degrades via the
 // WEB_COOKIE_PROVIDERS_WITH_UNRELIABLE_MODELS_PROBE/REDIRECT_BLOCKED path above (#7542).
+// chatplayground baseUrl is https://app.chatplayground.ai/api/chat; appending /models
+// yields https://app.chatplayground.ai/api/chat/models which 404s regardless of cookie
+// (live auth signal is at GET /api/user or Clerk token endpoint).
 export const WEB_COOKIE_PROVIDERS_WITHOUT_MODELS_API = new Set([
   "huggingchat",
-  "chatgpt-web",
   "grok-web",
   "notion-web",
   "t3-web",
   "yuanbao-web",
   "copilot-web",
   "copilot-m365-web",
+  "chatplayground",
 ]);
+
+// #12107 — web-cookie providers whose registry entry exists to publish a model catalog
+// (so `/v1/models` and `/v1/providers/{id}/models` list something) but whose `baseUrl`
+// is a browser console, not an API host, so there is no side-effect-free auth probe on
+// the host. Unlike WEB_COOKIE_PROVIDERS_WITHOUT_MODELS_API these providers are therefore
+// not probed at all: validation stays the honest "unsupported" it reported before the
+// registry entry existed, decided BEFORE any network call.
+// #14217: gemini-business (the previous sole member) was retired — see
+// docs/reference/REMOVED_PROVIDERS.md — so this set is currently empty; keep it as the
+// documented extension point for the next catalog-only, unprobeable web-cookie provider.
+export const WEB_COOKIE_PROVIDERS_WITHOUT_AUTH_PROBE = new Set<string>([]);
 
 export function toWebCookieValidationErrorResult(provider: string, error: unknown) {
   if (
@@ -144,18 +186,64 @@ export function toWebCookieValidationErrorResult(provider: string, error: unknow
   return toValidationErrorResult(error);
 }
 
+/**
+ * proxyFetch.ts computes a detailed transport diagnosis (DNS/socket error
+ * code, syscall, address) whenever a direct fetch fails on both the pooled
+ * undici dispatcher and the native-fetch fallback, and attaches it to the
+ * thrown error as `.proxyFetchDetail`. safeOutboundFetch's
+ * normalizeFetchFailure() then wraps that error in a SafeOutboundFetchError
+ * whose `.message` is copied from the generic "fetch failed" string and
+ * whose `.cause` is the original error carrying `.proxyFetchDetail`. Without
+ * this, the computed diagnosis never reaches the caller (#14309).
+ */
+function extractProxyFetchDetail(error: unknown): string | undefined {
+  if (!(error instanceof Error)) return undefined;
+  const cause = (error as Error & { cause?: unknown }).cause;
+  if (!(cause instanceof Error)) return undefined;
+  const detail = (cause as Error & { proxyFetchDetail?: unknown }).proxyFetchDetail;
+  return typeof detail === "string" && detail.length > 0 ? detail : undefined;
+}
+
+const GENERIC_TRANSPORT_FAILURE_PATTERN = /^fetch failed$/i;
+
 export function toValidationErrorResult(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error || "Validation failed");
-  const statusCode = getSafeOutboundFetchErrorStatus(error);
+  let rawMessage: unknown = error || "Validation failed";
+  try {
+    if (error instanceof Error) rawMessage = error.message;
+  } catch {
+    rawMessage = "Validation failed";
+  }
+  try {
+    if (
+      typeof rawMessage === "string" &&
+      GENERIC_TRANSPORT_FAILURE_PATTERN.test(rawMessage.trim())
+    ) {
+      const detail = extractProxyFetchDetail(error);
+      if (detail) rawMessage = `Network error: ${detail}`;
+    }
+  } catch {
+    // Diagnostic enrichment is advisory; never let it break error reporting.
+  }
+  const message = sanitizeErrorMessage(rawMessage);
+  let statusCode: number | null = null;
+  let timeout = false;
+  let securityBlocked = false;
+  try {
+    statusCode = getSafeOutboundFetchErrorStatus(error);
+    timeout =
+      (error instanceof SafeOutboundFetchError && error.code === "TIMEOUT") ||
+      error instanceof FetchTimeoutError;
+    securityBlocked = isSecurityBlockError(error);
+  } catch {
+    // Classification is advisory; hostile accessors must not escape the safe error boundary.
+  }
 
   return {
     valid: false,
     error: message || "Validation failed",
     unsupported: false as const,
     ...(statusCode ? { statusCode } : {}),
-    ...(error instanceof SafeOutboundFetchError && error.code === "TIMEOUT"
-      ? { timeout: true }
-      : {}),
-    ...(isSecurityBlockError(error) ? { securityBlocked: true } : {}),
+    ...(timeout ? { timeout: true } : {}),
+    ...(securityBlocked ? { securityBlocked: true } : {}),
   };
 }

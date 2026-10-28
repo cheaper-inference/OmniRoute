@@ -47,9 +47,9 @@ async function extractEndpointFromConfig(
       return parseGrokBuildConfig(content).model?.base_url ?? null;
     }
 
-    // TOML-based tools (codex) — do a best-effort text search
-    if (toolId === "codex") {
-      const match = content.match(/base_url\s*=\s*["']([^"'\n]+)["']/i);
+    // TOML-based tools (codex, WhyCodes) — do a best-effort text search
+    if (toolId === "codex" || toolId === "whycodes") {
+      const match = content.match(/(?:base_url|api_base)\s*=\s*["']([^"'\n]+)["']/i);
       return match ? match[1] : null;
     }
 
@@ -80,6 +80,16 @@ async function extractEndpointFromConfig(
         // Hermes uses a text/TOML-like config; already handled via raw text above
         const match = content.match(/base_url\s*=\s*["']([^"'\n]+)["']/i);
         return match ? match[1] : null;
+      }
+      case "omp": {
+        const omnirouteBlock = content.match(
+          /omniroute:\s*\n(?:[^\n]+\n)*?\s*baseUrl:\s*["']?([^"'\r\n]+)["']?/i
+        );
+        if (omnirouteBlock) return omnirouteBlock[1].trim();
+        const match =
+          content.match(/baseUrl:\s*["']?([^"'\r\n]*(?:omniroute|20128)[^"'\r\n]*)["']?/i) ||
+          content.match(/baseUrl:\s*["']?([^"'\r\n]+)["']?/i);
+        return match ? match[1].trim() : null;
       }
       default:
         return null;

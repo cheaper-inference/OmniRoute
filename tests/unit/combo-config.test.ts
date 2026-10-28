@@ -44,6 +44,7 @@ test("getDefaultComboConfig returns a fresh copy of the defaults", () => {
   assert.equal(first.predictiveTtftMs, 0);
   assert.equal(first.evalRouting.enabled, false);
   assert.equal(first.evalRouting.maxAgeHours, 720);
+  assert.equal(first.quotaWeightedFloorPercent, 1);
 
   first.strategy = "weighted";
   assert.equal(second.strategy, "priority");
@@ -292,10 +293,10 @@ test("combo config schema allows zero-latency tuning fields when subfeatures sta
   assert.equal(parsed.config.predictiveTtftMs, 0);
 });
 
-test("resolveComboTargetTimeoutMs inherits the upstream timeout and only shortens it", () => {
+test("resolveComboTargetTimeoutMs honors explicit target timeouts", () => {
   assert.equal(resolveComboTargetTimeoutMs({}, 600000), 600000);
   assert.equal(resolveComboTargetTimeoutMs({ targetTimeoutMs: 30000 }, 600000), 30000);
-  assert.equal(resolveComboTargetTimeoutMs({ targetTimeoutMs: 900000 }, 600000), 600000);
+  assert.equal(resolveComboTargetTimeoutMs({ targetTimeoutMs: 900000 }, 600000), 900000);
   assert.equal(resolveComboTargetTimeoutMs({ targetTimeoutMs: 0 }, 600000), 600000);
   assert.equal(resolveComboTargetTimeoutMs({ targetTimeoutMs: 30000 }, 0), 30000);
   assert.equal(resolveComboTargetTimeoutMs({}, 0), 0);
@@ -312,10 +313,9 @@ test("resolveComboTargetTimeoutMs falls back to the saner combo default when uns
   // Unset config → use the default (capped at the ceiling), NOT the full upstream ceiling.
   // This is what shortens a hung-target failover from 600s to 120s (escalated cmqlrhd7c).
   assert.equal(resolveComboTargetTimeoutMs({}, 600000, 120000), 120000);
-  // Operators can still extend beyond the default, up to the ceiling.
+  // Operators can extend beyond the default when explicitly configured.
   assert.equal(resolveComboTargetTimeoutMs({ targetTimeoutMs: 300000 }, 600000, 120000), 300000);
-  // Explicit config above the ceiling is still capped at the ceiling.
-  assert.equal(resolveComboTargetTimeoutMs({ targetTimeoutMs: 900000 }, 600000, 120000), 600000);
+  assert.equal(resolveComboTargetTimeoutMs({ targetTimeoutMs: 900000 }, 600000, 120000), 900000);
   // A default larger than the ceiling is clamped to the ceiling.
   assert.equal(resolveComboTargetTimeoutMs({}, 100000, 120000), 100000);
   // Backward-compat: omitting the default arg keeps the legacy inherit-the-ceiling behavior.
@@ -382,6 +382,70 @@ test("combo timeout schema rejects values beyond the safe timer limit", () => {
   });
 
   assert.equal(result.success, false);
+});
+
+test("comboTimeoutMs is a first-class runtime config key", () => {
+  const parsed = createComboSchema.parse({
+    name: "combo-wall-clock",
+    models: ["openai/gpt-4"],
+    config: {
+      comboTimeoutMs: 1_200_000,
+      targetTimeoutMs: 600_000,
+    },
+  });
+
+  assert.equal(parsed.config.comboTimeoutMs, 1_200_000);
+  assert.equal(parsed.config.targetTimeoutMs, 600_000);
+
+  const unlimited = createComboSchema.parse({
+    name: "combo-unlimited-wall-clock",
+    models: ["openai/gpt-4"],
+    config: { comboTimeoutMs: 0 },
+  });
+  assert.equal(unlimited.config.comboTimeoutMs, 0);
+});
+
+test("comboTimeoutMs schema rejects values beyond the safe timer limit", () => {
+  const result = createComboSchema.safeParse({
+    name: "unsafe-combo-timeout",
+    models: ["openai/gpt-4"],
+    config: {
+      comboTimeoutMs: MAX_TIMER_TIMEOUT_MS + 1,
+    },
+  });
+
+  assert.equal(result.success, false);
+});
+
+test("updateComboDefaultsSchema accepts comboTimeoutMs", () => {
+  const parsed = updateComboDefaultsSchema.parse({
+    comboDefaults: {
+      comboTimeoutMs: 1_200_000,
+      targetTimeoutMs: 600_000,
+    },
+  });
+
+  assert.equal(parsed.comboDefaults.comboTimeoutMs, 1_200_000);
+  assert.equal(parsed.comboDefaults.targetTimeoutMs, 600_000);
+});
+
+test("combo editor and defaults pages expose comboTimeoutMs", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const editor = await readFile(
+    new URL("../../src/app/(dashboard)/dashboard/combos/page.tsx", import.meta.url),
+    "utf8"
+  );
+  const defaults = await readFile(
+    new URL(
+      "../../src/app/(dashboard)/dashboard/settings/components/ComboDefaultsTab.tsx",
+      import.meta.url
+    ),
+    "utf8"
+  );
+  assert.match(editor, /import ComboTimeoutFields from "\.\/ComboTimeoutFields"/);
+  assert.match(editor, /<ComboTimeoutFields[\s\S]*showHelp=\{!isExpertMode\}/);
+  assert.match(defaults, /comboTimeoutMs: secondsInputToOptionalMs\(e\.target\.value\)/);
+  assert.match(defaults, /comboTimeoutHint/);
 });
 
 test("resolveComboConfig preserves explicit empty handoffProviders overrides", () => {

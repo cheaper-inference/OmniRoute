@@ -63,3 +63,17 @@ test("en.json blockClaudeExtraUsage copy describes the quarantine/fallback behav
     "description must mention fallback switching to another connection"
   );
 });
+
+// The connection-row pill reads "<claudeExtraUsageShort> ON/OFF" where ON means extra usage is
+// ALLOWED (blocking is off). English says "Extra usage ON", so a locale that translates the short
+// label as an action ("Block extra") flips the meaning of ON/OFF for its users.
+test("claudeExtraUsageShort names the state, not the blocking action (en, pt-BR)", () => {
+  const blockWords = /bloque|block/i;
+  const en = JSON.parse(readFileSync(path.join(messagesDir, "en.json"), "utf8"));
+  assert.doesNotMatch(findNested(en, "claudeExtraUsageShort") ?? "", blockWords);
+
+  const ptBr = JSON.parse(readFileSync(path.join(messagesDir, "pt-BR.json"), "utf8"));
+  const label = findNested(ptBr, "claudeExtraUsageShort");
+  assert.ok(label, "claudeExtraUsageShort must exist in pt-BR.json");
+  assert.doesNotMatch(label!, blockWords, "pt-BR pill label must not read as 'Bloquear Extra'");
+});

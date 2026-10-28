@@ -1,0 +1,1 @@
+- **feat(config):** refresh the OpenCode Zen free-model catalog to the 10 free ids the live `/zen/v1/models` endpoint serves today (8 added, 4 retired), with sourced evidence records for the new rows and the free-tier counts updated to 471 ([#17345](https://github.com/diegosouzapw/OmniRoute/pull/17345) — thanks @leoplife)

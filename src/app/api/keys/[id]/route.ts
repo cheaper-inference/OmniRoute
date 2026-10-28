@@ -3,14 +3,17 @@ import {
   deleteApiKey,
   getApiKeyById,
   updateApiKeyPermissions,
-  isCloudEnabled,
   ApiKeyPolicyInvariantError,
-} from "@/lib/localDb";
+} from "@/lib/db/apiKeys";
+import { isCloudEnabled } from "@/lib/db/settings";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
 import { updateKeyPermissionsSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
-import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import {
+  requireCredentialForManagementScopedKey,
+  requireManagementAuth,
+} from "@/lib/api/requireManagementAuth";
 import * as log from "@/sse/utils/logger";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 
@@ -68,10 +71,12 @@ export async function PATCH(request, { params }) {
     const {
       name,
       modelAccessMode,
+      connectionAccessMode,
       allowedModels,
       blockedModels,
       allowedCombos,
       allowedConnections,
+      preferredConnections,
       noLog,
       autoResolve,
       isActive,
@@ -85,7 +90,12 @@ export async function PATCH(request, { params }) {
       allowedEndpoints,
       streamDefaultMode,
       compressionEnabled,
+      allowAutoCombos,
+      allowCcDiscoveryAliases,
+      catalogScope,
+      forcedModel,
       cacheDefaultMode,
+      codexServiceMode,
       disableNonPublicModels,
       allowUsageCommand,
       usageLimitEnabled,
@@ -94,13 +104,21 @@ export async function PATCH(request, { params }) {
       chaosModeEnabled,
     } = validation.data;
 
+    const scopeAuthError = await requireCredentialForManagementScopedKey(request, scopes);
+    if (scopeAuthError) return scopeAuthError;
+
     const payload: Parameters<typeof updateApiKeyPermissions>[1] = {};
     if (name !== undefined) payload.name = name;
     if (modelAccessMode !== undefined) payload.modelAccessMode = modelAccessMode;
     if (allowedModels !== undefined) payload.allowedModels = allowedModels;
     if (blockedModels !== undefined) payload.blockedModels = blockedModels;
     if (allowedCombos !== undefined) payload.allowedCombos = allowedCombos;
-    if (allowedConnections !== undefined) payload.allowedConnections = allowedConnections;
+    if (connectionAccessMode === "all") {
+      payload.allowedConnections = [];
+    } else if (allowedConnections !== undefined) {
+      payload.allowedConnections = allowedConnections;
+    }
+    if (preferredConnections !== undefined) payload.preferredConnections = preferredConnections;
     if (noLog !== undefined) payload.noLog = noLog;
     if (autoResolve !== undefined) payload.autoResolve = autoResolve;
     if (isActive !== undefined) payload.isActive = isActive;
@@ -114,6 +132,12 @@ export async function PATCH(request, { params }) {
     if (allowedEndpoints !== undefined) payload.allowedEndpoints = allowedEndpoints;
     if (streamDefaultMode !== undefined) payload.streamDefaultMode = streamDefaultMode;
     if (compressionEnabled !== undefined) payload.compressionEnabled = compressionEnabled;
+    if (codexServiceMode !== undefined) payload.codexServiceMode = codexServiceMode;
+    if (allowAutoCombos !== undefined) payload.allowAutoCombos = allowAutoCombos;
+    if (allowCcDiscoveryAliases !== undefined)
+      payload.allowCcDiscoveryAliases = allowCcDiscoveryAliases;
+    if (catalogScope !== undefined) payload.catalogScope = catalogScope;
+    if (forcedModel !== undefined) payload.forcedModel = forcedModel;
     if (cacheDefaultMode !== undefined) payload.cacheDefaultMode = cacheDefaultMode;
     if (disableNonPublicModels !== undefined)
       payload.disableNonPublicModels = disableNonPublicModels;
@@ -139,6 +163,7 @@ export async function PATCH(request, { params }) {
       ...(blockedModels !== undefined && { blockedModels }),
       ...(allowedCombos !== undefined && { allowedCombos }),
       ...(allowedConnections !== undefined && { allowedConnections }),
+      ...(preferredConnections !== undefined && { preferredConnections }),
       ...(noLog !== undefined && { noLog }),
       ...(autoResolve !== undefined && { autoResolve }),
       ...(isActive !== undefined && { isActive }),
@@ -152,7 +177,10 @@ export async function PATCH(request, { params }) {
       ...(allowedEndpoints !== undefined && { allowedEndpoints }),
       ...(streamDefaultMode !== undefined && { streamDefaultMode }),
       ...(compressionEnabled !== undefined && { compressionEnabled }),
+      ...(allowCcDiscoveryAliases !== undefined && { allowCcDiscoveryAliases }),
       ...(cacheDefaultMode !== undefined && { cacheDefaultMode }),
+      ...(codexServiceMode !== undefined && { codexServiceMode }),
+      ...(forcedModel !== undefined && { forcedModel }),
       ...(disableNonPublicModels !== undefined && { disableNonPublicModels }),
       ...(allowUsageCommand !== undefined && { allowUsageCommand }),
       ...(usageLimitEnabled !== undefined && { usageLimitEnabled }),
@@ -161,11 +189,18 @@ export async function PATCH(request, { params }) {
       ...(chaosModeEnabled !== undefined && { chaosModeEnabled }),
     });
   } catch (error) {
-    if (error instanceof ApiKeyPolicyInvariantError) {
-      return NextResponse.json(buildErrorBody(400, error.message, null, {
-        type: "lease_error",
-        code: error.code,
-      }), { status: 400 });
+    if (
+      error instanceof ApiKeyPolicyInvariantError ||
+      (error instanceof Error && (error as { code?: string }).code === "LEASE_KEY_POLICY_INVALID")
+    ) {
+      const err = error as Error & { code?: string };
+      return NextResponse.json(
+        buildErrorBody(400, err.message, null, {
+          type: "lease_error",
+          code: err.code || "LEASE_KEY_POLICY_INVALID",
+        }),
+        { status: 400 }
+      );
     }
     log.error("keys", "Error updating key permissions", error);
     return NextResponse.json({ error: "Failed to update permissions" }, { status: 500 });

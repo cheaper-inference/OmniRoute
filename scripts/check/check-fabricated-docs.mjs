@@ -61,8 +61,8 @@ const KNOWN_HOOKS = new Set([
   "onDeactivate",
   "onUninstall",
   // Real callbacks wired in code that docs reference (verified present in src/):
-  // onChunk/onFirstChunk — streaming callbacks (src/shared/utils/streamTracker.ts,
-  //   playground ChatTab.tsx); onServerStatus/onPortChanged/onUpdateStatus — Electron
+  // onChunk/onFirstChunk — streaming callbacks (playground useStreamMetrics.ts and
+  //   ChatTab.tsx); onServerStatus/onPortChanged/onUpdateStatus — Electron
   //   IPC callbacks (src/shared/hooks/useElectron.ts, HomePageClient.tsx);
   //   onEmpty — model-metadata registry callback (src/lib/modelMetadataRegistry.ts).
   "onChunk",
@@ -114,6 +114,7 @@ const ENV_VAR_ALLOWLIST = new Set([
   "OPENAI_BASE_URL", // env var OmniRoute passes to downstream CLIs (AGENT_PROTOCOLS_GUIDE.md)
   "NINEROUTER_API_KEY", // injected into the 9router subprocess at spawn (EMBEDDED-SERVICES.md)
   "CLAUDE_CODE_MAX_OUTPUT_TOKENS", // Claude Code CLI's own env var (CODEX-CLI-CONFIGURATION.md)
+  "ANTHROPIC_CUSTOM_HEADERS", // Claude Code CLI's own env var (API_REFERENCE.md, CLAUDE-CODE-CONFIGURATION.md)
   "CODEX_HOME", // Codex CLI's own config-home env var (CODEX-CLI-CONFIGURATION.md)
   // Gemini CLI's own auth-routing env vars. `omniroute run gemini` DELETES them
   // from the spawned child's env (bin/cli/commands/run.mjs) so a stored Vertex /
@@ -128,12 +129,6 @@ const ENV_VAR_ALLOWLIST = new Set([
   "LINUX_GPG_KEY", // electron AppImage signing key, CI/build only (ELECTRON_GUIDE.md)
   "BRANCH_LOCK_TOKEN", // release branch-protection ops token (QUALITY_GATE_PLAYBOOK.md)
   "NEXT_LOCALE", // next-intl locale cookie name (I18N.md)
-  // Feature flags are resolved by key at runtime — `resolveFeatureFlag()` reads
-  // `process.env[key]` (src/shared/utils/featureFlags.ts), never a literal
-  // `process.env.MODELS_CATALOG_PREFIX_MODE`, so this scan cannot see the read.
-  // The flag is real: defined in featureFlagDefinitions.ts, overridable from the
-  // dashboard or the environment. (API_REFERENCE.md, VSCODE-COPILOT.md)
-  "MODELS_CATALOG_PREFIX_MODE",
   // Telegram Mini App integration (proposal TELEGRAM-MINIAPP.md, not yet implemented): env vars named in the feasibility analysis but no code reads them yet.
   "TELEGRAM_WEBHOOK_URL", // proposal-only: Telegram webhook public endpoint (TELEGRAM-MINIAPP.md, future feature)
   "TELEGRAM_WEBHOOK_SECRET", // proposal-only: Telegram webhook HMAC secret (TELEGRAM-MINIAPP.md, future feature)
@@ -377,6 +372,8 @@ const ENDPOINT_ALLOWLIST = new Set([
   // paths on the UPSTREAM service (Claude.ai web, Blackbox), not OmniRoute routes.
   "/api/organizations/{orgId}/chat_conversations/{convId}/completion", // claude-web upstream
   "/api/chat", // Blackbox Web upstream (validated-token target)
+  "/api/dispatch", // notrack-web upstream (chat dispatch endpoint on notrack.ai)
+  "/api/chats", // notrack-web upstream (chat history listing on notrack.ai)
 ]);
 
 /** Doc files to skip (auto-generated, vendored, or third-party). */
@@ -500,6 +497,7 @@ export function buildCodebaseIndex(root = ROOT) {
   // LOCAL_ONLY_API_PREFIXES, HALF_OPEN) is NOT a fabricated env var.
   const envVars = new Set();
   const codeIdentifiers = new Set();
+  const errorCodes = new Set();
   function walkForEnv(dir) {
     const abs = path.join(root, dir);
     if (!fs.existsSync(abs)) return;
@@ -535,6 +533,14 @@ export function buildCodebaseIndex(root = ROOT) {
           // Object-literal / enum members on their own line: `HALF_OPEN: "HALF_OPEN"`.
           for (const m of content.matchAll(/^[ \t]*([A-Z][A-Z0-9_]{2,})[ \t]*[:=]/gm))
             codeIdentifiers.add(m[1]);
+          // Runtime error-code values such as `{ code: "SECURITY_001" }` are
+          // documented protocol identifiers, not environment variables. Keep this
+          // deliberately scoped to code/errorCode properties rather than accepting
+          // arbitrary ALL_CAPS string literals, which could hide a fabricated env var.
+          for (const m of content.matchAll(
+            /\b(?:code|errorCode)\s*:\s*["'`]([A-Z][A-Z0-9_]{2,})["'`]/g
+          ))
+            errorCodes.add(m[1]);
         } catch {
           /* ignore */
         }
@@ -572,6 +578,24 @@ export function buildCodebaseIndex(root = ROOT) {
   }
   readEnvContract();
 
+  // Feature flags are resolved by key at runtime — `resolveFeatureFlag()` reads
+  // `process.env[definition.key]` (src/shared/utils/featureFlags.ts), never a
+  // literal `process.env.<KEY>`, so the code-read index cannot see those reads.
+  // Every key in FEATURE_FLAG_DEFINITIONS is therefore a real, env-overridable
+  // knob (docs/reference/FEATURE_FLAGS.md documents the catalog 1:1).
+  function readFeatureFlagContract() {
+    try {
+      const t = fs.readFileSync(
+        path.join(root, "src", "shared", "constants", "featureFlagDefinitions.ts"),
+        "utf8"
+      );
+      for (const m of t.matchAll(/^\s*key:\s*"([A-Z][A-Z0-9_]+)"/gm)) envVars.add(m[1]);
+    } catch {
+      /* ignore */
+    }
+  }
+  readFeatureFlagContract();
+
   // Set of `omniroute <subcommand>` strings that exist in bin/
   const cliCommands = new Set();
   function walkCli(dir) {
@@ -603,7 +627,7 @@ export function buildCodebaseIndex(root = ROOT) {
   }
   walkCli("bin");
 
-  return { apiRoutes, apiPrefixes, apiMethods, envVars, codeIdentifiers, cliCommands };
+  return { apiRoutes, apiPrefixes, apiMethods, envVars, codeIdentifiers, errorCodes, cliCommands };
 }
 
 // ── Doc scanning ───────────────────────────────────────────────────────────
@@ -698,6 +722,7 @@ export function scanDocFile(absPath, index, root = ROOT) {
     // object-literal key) is a code symbol, not a fabricated env var.
     // E.g. LOCAL_ONLY_API_PREFIXES, HALF_OPEN, A2A_SKILL_HANDLERS, MCP_SCOPE_PRESETS.
     if (index.codeIdentifiers.has(name)) continue;
+    if (index.errorCodes.has(name)) continue;
     if (/^X-[A-Z]/.test(name)) continue;
     if (ENV_VAR_DENYLIST.has(name)) continue;
     const ln = lineOf(text, m.index);

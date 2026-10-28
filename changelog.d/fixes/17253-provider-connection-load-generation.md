@@ -1,0 +1,1 @@
+- Prevent stale initial provider connection, node and proxy configuration responses from updating a different provider page. ([#17253](https://github.com/diegosouzapw/OmniRoute/pull/17253)) — thanks @pacocartones

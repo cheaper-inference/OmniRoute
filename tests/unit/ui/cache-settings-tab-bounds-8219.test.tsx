@@ -11,6 +11,7 @@ import CacheSettingsTab from "@/app/(dashboard)/dashboard/settings/components/Ca
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useFormatter: () => ({ number: (value: number) => String(value) }),
 }));
 
 const roots: Array<{ root: Root; el: HTMLDivElement }> = [];
@@ -46,10 +47,7 @@ async function setInputValue(container: HTMLDivElement, value: string) {
   // event fires but React's commit doesn't flush before the callback
   // resolves), leaving the input showing its pre-dispatch value.
   act(() => {
-    const setter = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      "value"
-    )?.set;
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
     setter?.call(input, value);
     input.dispatchEvent(new Event("input", { bubbles: true }));
   });
@@ -115,6 +113,16 @@ describe("CacheSettingsTab TTL bounds", () => {
     );
 
     expect(getSaveButton(container).disabled).toBe(true);
+    // KEA-7886: the error belongs to the field — the input is marked invalid and points at an
+    // announced message (adapter `error` prop), not a loose paragraph.
+    const input = getInput(container);
+    expect(input.getAttribute("aria-invalid")).toBe("true");
+    const describedBy = input.getAttribute("aria-describedby") ?? "";
+    const message = describedBy
+      .split(" ")
+      .map((id) => document.getElementById(id))
+      .find((el) => el?.textContent?.includes("modelCatalogTtlMinimumError"));
+    expect(message?.getAttribute("role")).toBe("alert");
   });
 
   it("disables Save and shows an error above the maximum bound (60000ms)", async () => {

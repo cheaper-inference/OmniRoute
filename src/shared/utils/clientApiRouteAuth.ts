@@ -21,7 +21,7 @@
 
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
-import { extractApiKey, isValidApiKey } from "@/sse/services/auth";
+import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
 
@@ -33,10 +33,12 @@ import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
  *          request may proceed to policy enforcement.
  */
 export async function enforceClientApiRouteAuth(request: Request): Promise<Response | null> {
-  const apiKeyRaw = extractApiKey(request);
+  // Any presented credential that validates is accepted — a stale Bearer next
+  // to a valid x-api-key must not 401 here when `clientApiPolicy` admitted it.
+  const { apiKey: apiKeyRaw, valid } = await resolveClientApiKey(request);
 
+  if (valid) return null;
   if (apiKeyRaw) {
-    if (await isValidApiKey(apiKeyRaw)) return null;
     return isRequireApiKeyEnabled()
       ? errorResponse(HTTP_STATUS.UNAUTHORIZED, "Invalid API key")
       : null;

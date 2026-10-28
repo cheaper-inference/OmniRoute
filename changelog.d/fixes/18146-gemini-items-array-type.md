@@ -1,0 +1,1 @@
+- **fix(sse):** Gemini tool schemas no longer put `items` on a non-array node: a type union carrying `items` flattens to `array` (or `object` with `properties`) and an untyped node with `items` is typed `array`, avoiding the Gemini 400 `items: field predicate failed` (#18146 — thanks @rahmaangriawan).

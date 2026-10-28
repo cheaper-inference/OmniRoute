@@ -1,38 +1,53 @@
 # OmniRoute A2A Server Documentation (Bahasa Melayu)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../docs/A2A-SERVER.md) · 🇸🇦 [ar](../../ar/docs/A2A-SERVER.md) · 🇧🇬 [bg](../../bg/docs/A2A-SERVER.md) · 🇧🇩 [bn](../../bn/docs/A2A-SERVER.md) · 🇨🇿 [cs](../../cs/docs/A2A-SERVER.md) · 🇩🇰 [da](../../da/docs/A2A-SERVER.md) · 🇩🇪 [de](../../de/docs/A2A-SERVER.md) · 🇪🇸 [es](../../es/docs/A2A-SERVER.md) · 🇮🇷 [fa](../../fa/docs/A2A-SERVER.md) · 🇫🇮 [fi](../../fi/docs/A2A-SERVER.md) · 🇫🇷 [fr](../../fr/docs/A2A-SERVER.md) · 🇮🇳 [gu](../../gu/docs/A2A-SERVER.md) · 🇮🇱 [he](../../he/docs/A2A-SERVER.md) · 🇮🇳 [hi](../../hi/docs/A2A-SERVER.md) · 🇭🇺 [hu](../../hu/docs/A2A-SERVER.md) · 🇮🇩 [id](../../id/docs/A2A-SERVER.md) · 🇮🇹 [it](../../it/docs/A2A-SERVER.md) · 🇯🇵 [ja](../../ja/docs/A2A-SERVER.md) · 🇰🇷 [ko](../../ko/docs/A2A-SERVER.md) · 🇮🇳 [mr](../../mr/docs/A2A-SERVER.md) · 🇲🇾 [ms](../../ms/docs/A2A-SERVER.md) · 🇳🇱 [nl](../../nl/docs/A2A-SERVER.md) · 🇳🇴 [no](../../no/docs/A2A-SERVER.md) · 🇵🇭 [phi](../../phi/docs/A2A-SERVER.md) · 🇵🇱 [pl](../../pl/docs/A2A-SERVER.md) · 🇵🇹 [pt](../../pt/docs/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../pt-BR/docs/A2A-SERVER.md) · 🇷🇴 [ro](../../ro/docs/A2A-SERVER.md) · 🇷🇺 [ru](../../ru/docs/A2A-SERVER.md) · 🇸🇰 [sk](../../sk/docs/A2A-SERVER.md) · 🇸🇪 [sv](../../sv/docs/A2A-SERVER.md) · 🇰🇪 [sw](../../sw/docs/A2A-SERVER.md) · 🇮🇳 [ta](../../ta/docs/A2A-SERVER.md) · 🇮🇳 [te](../../te/docs/A2A-SERVER.md) · 🇹🇭 [th](../../th/docs/A2A-SERVER.md) · 🇹🇷 [tr](../../tr/docs/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../uk-UA/docs/A2A-SERVER.md) · 🇵🇰 [ur](../../ur/docs/A2A-SERVER.md) · 🇻🇳 [vi](../../vi/docs/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../zh-CN/docs/A2A-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
 
 ---
 
-> Agent-to-Agent Protocol v0.3 — OmniRoute as an intelligent routing agent
+> Protokol Agent-ke-Agent v0.3 — OmniRoute sebagai agen penghalaan pintar
 
-## Agent Discovery
+Permukaan A2A mempunyai dua antara muka:
+
+- **JSON-RPC 2.0** di `POST /a2a` (titik masuk kanonik, ditakrifkan dalam `src/app/a2a/route.ts`).
+- **REST** di bawah `/api/a2a/*` untuk papan pemuka dan alat bantu (status, senarai tugasan, pembatalan).
+
+Tugasan dijejaki oleh `A2ATaskManager` (`src/lib/a2a/taskManager.ts`, TTL lalai 5 minit). Kemahiran dihantar melalui `A2A_SKILL_HANDLERS` dalam `src/lib/a2a/taskExecution.ts`.
+
+## Penemuan Agen
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Returns the Agent Card describing OmniRoute's capabilities, skills, and authentication requirements.
+Mengembalikan Kad Agen yang menerangkan keupayaan, kemahiran dan keperluan pengesahan OmniRoute.
+
+Medan `version` Kad Agen diperoleh daripada `process.env.npm_package_version` (lihat `src/app/.well-known/agent.json/route.ts:13`), maka ia kekal disegerakkan secara automatik dengan `package.json` pada setiap keluaran.
 
 ---
 
-## Authentication
+## Pengesahan
 
-All `/a2a` requests require an API key via the `Authorization` header:
+Semua permintaan `/a2a` memerlukan kunci API melalui pengepala `Authorization`:
 
 ```
 Authorization: Bearer YOUR_OMNIROUTE_API_KEY
 ```
 
-If no API key is configured on the server, authentication is bypassed.
+Jika tiada kunci API dikonfigurasikan pada pelayan, pengesahan akan dipintas.
+
+## Pengaktifan
+
+A2A dikawal oleh togol **Titik Akhir → A2A** dan dinyahdayakan secara lalai. Apabila dinyahdayakan,
+`GET /api/a2a/status` melaporkan `status: "disabled"` dan `online: false`; panggilan JSON-RPC ke
+`POST /a2a` mengembalikan HTTP 503 dengan kod ralat JSON-RPC `-32000`.
 
 ---
 
-## JSON-RPC 2.0 Methods
+## Kaedah JSON-RPC 2.0
 
-### `message/send` — Synchronous Execution
+### `message/send` — Pelaksanaan Segerak
 
-Sends a message to a skill and waits for the complete response.
+Menghantar mesej kepada kemahiran dan menunggu respons lengkap.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -50,7 +65,18 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Response:**
+Untuk `smart-routing`, `metadata.combo` ialah penggantian eksplisit bagi
+`metadata.model` untuk permintaan get laluan; ia dihantar sebagai `model` sebenar,
+bukan sebagai medan JSON `x-combo` yang diabaikan. Kunci API biasa get laluan dan
+pemberian kuasa bagi setiap sasaran masih terpakai. Kombo yang tidak sah atau kosong akan ditolak.
+
+Hasilnya mendedahkan `requested_combo` (niat pemanggil), `dispatched_model`
+(permintaan get laluan sebenar), `response_model` (respons get laluan) dan
+`confirmed_combo`. Medan terakhir ialah `null` melainkan get laluan mengenal pasti
+kombo secara eksplisit. Log keputusan A2A mengaitkan pelaksanaan hanya kepada
+kombo yang disahkan, sambil mengekalkan permintaan yang belum disahkan sebagai `requestedCombo`.
+
+**Respons:**
 
 ```json
 {
@@ -61,6 +87,10 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
       "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
         { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
@@ -71,9 +101,9 @@ curl -X POST http://localhost:20128/a2a \
 }
 ```
 
-### `message/stream` — SSE Streaming
+### `message/stream` — Penstriman SSE
 
-Same as `message/send` but returns Server-Sent Events for real-time streaming.
+Sama seperti `message/send` tetapi mengembalikan Peristiwa Dihantar Pelayan untuk penstriman masa nyata.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -90,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE Events:**
+**Peristiwa SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -100,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Query Task Status
+### `tasks/get` — Tanya Status Tugas
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -109,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Cancel a Task
+### `tasks/cancel` — Batalkan Tugas
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -120,44 +150,125 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Available Skills
+## Kemahiran yang Ada
 
-| Skill              | Description                                                                                                                     |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| `smart-routing`    | Routes prompts through OmniRoute's intelligent pipeline. Returns response with routing explanation, cost, and resilience trace. |
-| `quota-management` | Answers natural-language queries about provider quotas, suggests free combos, and provides quota rankings.                      |
+OmniRoute mendedahkan 6 kemahiran A2A berwayar dalam `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul kemahiran hidup dalam `src/lib/a2a/skills/`.
 
----
+| Kemahiran            | ID                   | Penerangan                                                                                                                                                                   | Tag                          | Contoh                                      |
+| :------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :------------------------------------------ |
+| Penghalaan Pintar    | `smart-routing`      | Halakan gesaan melalui provider/combo optimum menggunakan pemarkahan + enjin kombo OmniRoute                                                                                 | penghalaan, pembekal         | "Halakan gesaan ini melalui model terbaik"  |
+| Pengurusan Kuota     | `quota-management`   | Laporan menyatakan kuota setiap pembekal, membantu pemanggil memutuskan bila untuk throttle/switch                                                                           | kuota, pembekal              | "Semak kuota untuk antropik"                |
+| Penemuan Pembekal    | `provider-discovery` | Menyenaraikan pembekal yang dipasang dengan keupayaan, bendera peringkat percuma, status OAuth                                                                               | pembekal, penemuan           | "Pembekal apa yang tersedia?"               |
+| Analisis Kos         | `cost-analysis`      | Anggaran kos request/conversation berdasarkan katalog + penggunaan terkini                                                                                                   | kos, penggunaan              | "Anggaran kos untuk perbualan ini"          |
+| Laporan Kesihatan    | `health-report`      | Agregat pemutus litar, cooldown, keadaan kunci keluar bagi setiap pembekal                                                                                                   | kesihatan, daya tahan        | "Tunjukkan status kesihatan semua pembekal" |
+| Senaraikan Keupayaan | `list-capabilities`  | Mengembalikan katalog Kemahiran Ejen 45 penyertaan penuh (23 API + 21 CLI + 1 konfigurasi) sebagai jadual penurunan harga dengan SKILL.md URLs mentah untuk suntikan konteks | katalog, penemuan, kemahiran | "Senaraikan semua keupayaan OmniRoute "     |
 
-## Task Lifecycle
+> Kad Ejen hendaklah sentiasa sejajar dengan katalog 377-pembekal langsung; kiraan pembekal dan metadata free/no-auth diperoleh daripada pendaftaran masa jalan.
+
+### `list-capabilities` Butiran Kemahiran
+
+Kemahiran `list-capabilities` amat berguna untuk ejen luar yang perlu mengetahui perkara yang OmniRoute dedahkan sebelum menghantar panggilan API. Ia mengembalikan artifak jadual penurunan nilai berstruktur:
 
 ```
-submitted → working → completed
-                    → failed
-                    → cancelled
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
+| --- | --- | --- | --- | --- | --- |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+...
 ```
 
-- Tasks expire after 5 minutes (configurable)
-- Terminal states: `completed`, `failed`, `cancelled`
-- Event log tracks every state transition
+Setiap baris termasuk lajur `rawUrl` supaya ejen boleh segera mengambil SKILL.md penuh . Medan `metadata.totalSkills` mencerminkan saiz katalog (45 hari ini). Pelaksanaan: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## Error Codes
+## REST API (tambahan)
 
-| Code   | Meaning                        |
-| :----- | :----------------------------- |
-| -32700 | Parse error (invalid JSON)     |
-| -32600 | Invalid request / Unauthorized |
-| -32601 | Method or skill not found      |
-| -32602 | Invalid params                 |
-| -32603 | Internal error                 |
+Titik akhir JSON-RPC `/a2a` ialah titik masuk A2A kanonik. Titik akhir REST di bawah menyediakan akses tambahan untuk papan pemuka dan perkakas luaran:
+
+| Titik akhir                  | Kaedah | Penerangan                                                         | Pengesahan                                           |
+| :--------------------------- | :----- | :----------------------------------------------------------------- | :--------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Status pelayan, kemahiran berdaftar                                | (awam)                                               |
+| `/api/a2a/tasks`             | GET    | Senaraikan tugasan dengan penapis                                  | pengurusan                                           |
+| `/api/a2a/tasks/[id]`        | GET    | Dapatkan tugasan mengikut ID                                       | pengurusan                                           |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Batalkan tugasan yang sedang berjalan                              | pengurusan                                           |
+| `/.well-known/agent.json`    | GET    | Kad Ejen (penemuan A2A)                                            | (awam, dicache selama 3600s)                         |
+| `/api/a2a/tasks`             | POST   | Perwakilan masuk kepada kelompok OmniConductor (Conductor PRD RF5) | Bearer berbanding `OMNIROUTE_API_KEY` + `a2aEnabled` |
+
+**Perwakilan Conductor masuk (`POST /api/a2a/tasks`):** ejen A2A luaran mewakilkan kerja pengekodan kepada kelompok OmniConductor melalui OmniRoute. Badan: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — hanya kemahiran kelompok Conductor (yang diumumkan pada Kad Ejen) boleh diwakilkan; `metadata.conductor.repo.url` diperlukan (kelompok tersebut mengendalikan repositori git). Laluan ini diterjemahkan kepada `POST /v1/tasks` hab menggunakan `CONDUCTOR_ORCHESTRATOR_TOKEN` pada bahagian pelayan (sandaran `CONDUCTOR_HUB_TOKEN`) dan mengembalikan `201 { conductor_task_id, state: "submitted" }`; keadaan tugasan disalurkan semula melalui cermin SSE→A2A (RF1) dan boleh dilihat melalui `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Integration Examples
+## Menambahkan Kemahiran Baharu
 
-### Python (requests)
+1. **Cipta fail kemahiran:** `src/lib/a2a/skills/<your-skill>.ts`
+
+   Eksport fungsi tak segerak `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur kemahiran sedia ada seperti `smartRouting.ts`.
+
+2. **Daftarkan pengendali:** dalam `src/lib/a2a/taskExecution.ts`, tambahkan entri kepada `A2A_SKILL_HANDLERS`:
+
+   ```typescript
+   export const A2A_SKILL_HANDLERS = {
+     // ...kemahiran sedia ada
+     "your-skill": async (task) => {
+       const skillModule = await import("./skills/yourSkill");
+       return skillModule.executeYourSkill(task);
+     },
+   };
+   ```
+
+3. **Dedahkan dalam Kad Ejen:** dalam `src/app/.well-known/agent.json/route.ts`, tambahkan kepada tatasusunan `skills`:
+
+   ```json
+   {
+     "id": "your-skill",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
+   }
+   ```
+
+4. **Tulis ujian:** `tests/unit/a2a-<your-skill>.test.ts`. Liputi laluan berjaya + laluan ralat.
+
+5. **Dokumentasikan** kemahiran baharu dalam jadual `Available Skills` fail ini.
+
+---
+
+## TTL Tugas
+
+Tugas tamat tempoh selepas `ttlMinutes` (lalai 5 min) — dikonfigurasikan dalam pembina `A2ATaskManager` di `src/lib/a2a/taskManager.ts:82`. Untuk menyesuaikannya, lakukan fork pada penciptaan tika `A2ATaskManager` dan berikan nilai yang berbeza (contohnya, `new A2ATaskManager(15)` untuk TTL 15 minit). Suatu sela latar belakang membersihkan tugas yang telah tamat tempoh setiap 60 saat.
+
+---
+
+## Kitar Hayat Tugas
+
+```
+diserahkan → sedang diproses → selesai
+                              → gagal
+                              → dibatalkan
+```
+
+- Tugas tamat tempoh selepas 5 minit secara lalai (lihat [TTL Tugas](#task-ttl))
+- Keadaan terminal: `completed`, `failed`, `cancelled`
+- Log peristiwa menjejaki setiap peralihan keadaan
+
+---
+
+## Kod Ralat
+
+| Kod    | Maksud                                  |
+| :----- | :-------------------------------------- |
+| -32700 | Ralat penghuraian (JSON tidak sah)      |
+| -32600 | Permintaan tidak sah / Tidak dibenarkan |
+| -32601 | Kaedah atau kemahiran tidak ditemukan   |
+| -32602 | Parameter tidak sah                     |
+| -32603 | Ralat dalaman                           |
+| -32000 | Titik akhir A2A dinyahdayakan           |
+
+---
+
+## Contoh Integrasi
+
+### Python (permintaan)
 
 ```python
 import requests
@@ -176,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (ambil)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

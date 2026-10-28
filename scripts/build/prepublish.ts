@@ -23,18 +23,26 @@ import {
   statSync,
   chmodSync,
 } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { assembleStandalone } from "./assembleStandalone.mjs";
+import { buildMitmUtilities } from "./buildMitm.mjs";
 import { isNativeExecutable, resolveLocalBinEntry } from "./buildToolRunner.mjs";
 import { resolveBundledNpmEntry } from "./resolveNpmEntry.ts";
+import { getPrepublishDistDirRefusal } from "./prepublishPathSafety.ts";
 import {
   APP_STAGING_ALLOWED_EXACT_PATHS,
   APP_STAGING_ALLOWED_PATH_PREFIXES,
   APP_STAGING_REMOVAL_PATHS,
   findUnexpectedArtifactPaths,
 } from "./pack-artifact-policy.ts";
+import {
+  collectWorkspaceVersions,
+  findPackageJsonFiles,
+  hasWorkspaceProtocol,
+  resolvePackageJsonWorkspaceProtocols,
+} from "./resolveWorkspaceProtocols.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -86,7 +94,13 @@ function runBuildTool(
   });
 }
 
-const DIST_DIR = join(ROOT, "dist");
+const DIST_DIR = process.env.OMNIROUTE_DIST_DIR || join(ROOT, "dist");
+// Step 1 wipes DIST_DIR recursively: also refuse parents that would erase the checkout.
+const distDirRefusal = getPrepublishDistDirRefusal(DIST_DIR, ROOT);
+if (distDirRefusal) {
+  console.error(`  ❌ Refusing ${DIST_DIR} as the publish dist directory: ${distDirRefusal}.`);
+  process.exit(1);
+}
 const METHOD_GUARD_REQUIRE = 'require("./http-method-guard.cjs").installHttpMethodGuard();\n';
 
 function walkFiles(dir: string, rootDir: string = dir, files: string[] = []): string[] {
@@ -216,62 +230,10 @@ if (existsSync(distServer)) {
 }
 
 // ── Step 8: Compile + copy MITM cert utilities ─────────────
-const mitmSrc = join(ROOT, "src", "mitm");
 const mitmDest = join(DIST_DIR, "src", "mitm");
-if (existsSync(mitmSrc)) {
-  console.log("  🔨 Compiling MITM utilities (TypeScript → JavaScript)...");
-  mkdirSync(mitmDest, { recursive: true });
-
-  // Write a temporary tsconfig.json targeting the mitm directory
-  const mitmTsconfig = {
-    compilerOptions: {
-      target: "ES2022",
-      module: "NodeNext",
-      moduleResolution: "NodeNext",
-      outDir: mitmDest,
-      rootDir: mitmSrc,
-      strict: false,
-      noImplicitAny: false,
-      strictNullChecks: false,
-      noEmitOnError: true,
-      allowImportingTsExtensions: true,
-      rewriteRelativeImportExtensions: true,
-      ignoreDeprecations: "6.0",
-      resolveJsonModule: true,
-      esModuleInterop: true,
-      skipLibCheck: true,
-      types: ["node"],
-      baseUrl: ".",
-      paths: {
-        "@/*": ["src/*"],
-      },
-    },
-    include: [mitmSrc + "/**/*"],
-  };
-  const tmpTsconfigPath = join(ROOT, "tsconfig.mitm.tmp.json");
-  writeFileSync(tmpTsconfigPath, JSON.stringify(mitmTsconfig, null, 2));
-
-  try {
-    runBuildTool("typescript", "tsc", ["-p", "tsconfig.mitm.tmp.json"], {
-      cwd: ROOT,
-      stdio: "inherit",
-    });
-    const mitmServerSrc = join(mitmSrc, "server.cjs");
-    if (existsSync(mitmServerSrc)) {
-      cpSync(mitmServerSrc, join(mitmDest, "server.cjs"));
-    }
-    console.log("  ✅ MITM utilities compiled to dist/src/mitm/");
-  } catch (err: any) {
-    console.warn("  ⚠️  MITM compile warning (non-fatal):", err.message);
-    // Fallback: copy source files so at least they are present
-    cpSync(mitmSrc, mitmDest, { recursive: true });
-  } finally {
-    // Cleanup temp tsconfig
-    try {
-      rmSync(tmpTsconfigPath);
-    } catch {}
-  }
-}
+console.log("  🔨 Typechecking and bundling MITM utilities...");
+await buildMitmUtilities({ projectRoot: ROOT, destination: mitmDest });
+console.log("  ✅ MITM utilities compiled to dist/src/mitm/");
 
 // ── Step 8.5: Bundle MCP server ────────────────────────────
 const mcpSrcFile = join(ROOT, "open-sse", "mcp-server", "server.ts");
@@ -291,11 +253,11 @@ if (existsSync(mcpSrcFile)) {
         "--platform=node",
         "--packages=external",
         "--format=esm",
-        "--outfile=dist/open-sse/mcp-server/server.js",
+        `--outfile=${mcpDestFile}`,
       ],
       { cwd: ROOT, stdio: "inherit" }
     );
-    console.log("  ✅ MCP Server bundled to dist/open-sse/mcp-server/server.js");
+    console.log(`  ✅ MCP Server bundled to ${mcpDestFile}`);
   } catch (err: any) {
     console.warn("  ⚠️  MCP Server bundle error:", err.message);
   }
@@ -322,22 +284,38 @@ const chatGptWebCodexMcpDestFile = join(
 if (existsSync(chatGptWebCodexMcpSrcFile)) {
   console.log("  🔨 Bundling ChatGPT Web (Codex) MCP bridge...");
   mkdirSync(dirname(chatGptWebCodexMcpDestFile), { recursive: true });
-  execFileSync(
-    NPX_BIN,
+  runBuildTool(
+    "esbuild",
+    "esbuild",
     [
-      "esbuild",
       "open-sse/vendor/codex-chatgpt-web/adapters/chatgpt-web/mcp-server.ts",
       "--bundle",
       "--platform=node",
       "--packages=external",
       "--format=esm",
-      "--outfile=dist/open-sse/vendor/codex-chatgpt-web/adapters/chatgpt-web/mcp-server.js",
+      `--outfile=${chatGptWebCodexMcpDestFile}`,
     ],
     { cwd: ROOT, stdio: "inherit" }
   );
 }
 
 // ── Step 8.6: Bundle call-log artifact worker ────────────────────────
+const healthWorkerDest = join(DIST_DIR, "src/lib/db/healthCheckWorker.js");
+mkdirSync(dirname(healthWorkerDest), { recursive: true });
+runBuildTool(
+  "esbuild",
+  "esbuild",
+  [
+    "src/lib/db/healthCheckWorker.ts",
+    "--bundle",
+    "--platform=node",
+    "--packages=external",
+    "--format=esm",
+    `--outfile=${healthWorkerDest}`,
+  ],
+  { cwd: ROOT, stdio: "inherit" }
+);
+
 const callLogWorkerSrc = join(ROOT, "src", "lib", "usage", "callLogArtifactWorker.ts");
 const callLogWorkerDest = join(DIST_DIR, "src", "lib", "usage", "callLogArtifactWorker.js");
 if (!existsSync(callLogWorkerSrc)) {
@@ -354,7 +332,33 @@ runBuildTool(
     "--platform=node",
     "--packages=external",
     "--format=esm",
-    "--outfile=dist/src/lib/usage/callLogArtifactWorker.js",
+    `--outfile=${callLogWorkerDest}`,
+  ],
+  { cwd: ROOT, stdio: "inherit" }
+);
+
+const logExportChildSrc = join(ROOT, "src", "lib", "logExport", "exportChild.ts");
+const logExportChildDest = join(DIST_DIR, "src", "lib", "logExport", "exportChild.js");
+const logExportScope = join(dirname(logExportChildDest), "package.json");
+if (!existsSync(logExportScope)) {
+  mkdirSync(dirname(logExportScope), { recursive: true });
+  writeFileSync(logExportScope, JSON.stringify({ type: "module" }) + "\n");
+}
+if (!existsSync(logExportChildSrc)) {
+  throw new Error("Required log-export child source is missing");
+}
+console.log("  🔨 Bundling log-export child...");
+mkdirSync(dirname(logExportChildDest), { recursive: true });
+runBuildTool(
+  "esbuild",
+  "esbuild",
+  [
+    "src/lib/logExport/exportChild.ts",
+    "--bundle",
+    "--platform=node",
+    "--packages=external",
+    "--format=esm",
+    `--outfile=${logExportChildDest}`,
   ],
   { cwd: ROOT, stdio: "inherit" }
 );
@@ -382,6 +386,7 @@ const llmWorkerDestDir = join(
   "engines",
   "llmlingua"
 );
+const llmWorkerDest = join(llmWorkerDestDir, "onnxWorker.js");
 if (existsSync(llmWorkerSrc)) {
   console.log("  🔨 Bundling LLMLingua ONNX worker (TypeScript → JavaScript)...");
   mkdirSync(llmWorkerDestDir, { recursive: true });
@@ -395,13 +400,11 @@ if (existsSync(llmWorkerSrc)) {
         "--platform=node",
         "--packages=external",
         "--format=esm",
-        "--outfile=dist/open-sse/services/compression/engines/llmlingua/onnxWorker.js",
+        `--outfile=${llmWorkerDest}`,
       ],
       { cwd: ROOT, stdio: "inherit" }
     );
-    console.log(
-      "  ✅ LLMLingua worker bundled to dist/open-sse/services/compression/engines/llmlingua/onnxWorker.js"
-    );
+    console.log(`  ✅ LLMLingua worker bundled to ${llmWorkerDest}`);
   } catch (err: any) {
     console.warn("  ⚠️  LLMLingua worker bundle error:", err.message);
   }
@@ -436,7 +439,7 @@ runBuildTool(
     "--platform=node",
     "--packages=external",
     "--format=esm",
-    "--outfile=dist/open-sse/services/compression/compressionWorker.js",
+    `--outfile=${compressionWorkerDest}`,
   ],
   { cwd: ROOT, stdio: "inherit" }
 );
@@ -477,9 +480,11 @@ if (existsSync(cliSrcFile)) {
 // flow for every downstream user.
 const opencodePluginSrc = join(ROOT, "@omniroute", "opencode-plugin");
 const opencodePluginDist = join(opencodePluginSrc, "dist", "index.js");
-const opencodePluginCjs = join(opencodePluginSrc, "dist", "index.cjs");
 if (existsSync(opencodePluginSrc) && existsSync(join(opencodePluginSrc, "package.json"))) {
-  const pluginAlreadyBuilt = existsSync(opencodePluginDist) && existsSync(opencodePluginCjs);
+  // The plugin's tsup config is ESM-only (format: ["esm"]), so a successful
+  // build only ever produces dist/index.js (+ dist/index.d.ts) — never
+  // dist/index.cjs. Gate the skip solely on dist/index.js.
+  const pluginAlreadyBuilt = existsSync(opencodePluginDist);
   if (!pluginAlreadyBuilt) {
     console.log("\n  🔨 Building @omniroute/opencode-plugin (tsup)...");
     try {
@@ -707,13 +712,40 @@ if (remainingUnexpectedFiles.length > 0) {
   process.exit(1);
 }
 
+// -- Step 11: Resolve workspace: protocol dependencies -----------------
+// npm/pnpm workspace protocol specifiers (workspace:*, workspace:^, ...)
+// are meaningless to the npm registry and make `npm install -g omniroute`
+// fail with EUNSUPPORTEDPROTOCOL. Rewrite any that leaked into published
+// package.json files to the concrete workspace package version.
+// Only touch files inside the staged dist/ tree; workspace member source
+// package.json files must never be mutated by the publish step.
+const workspaceVersions = collectWorkspaceVersions(ROOT);
+const publishablePackageJsonDirs = [DIST_DIR];
+const publishablePackageJsonPaths = publishablePackageJsonDirs
+  .flatMap((dir) => (existsSync(dir) ? findPackageJsonFiles(dir) : []))
+  .filter((filePath) => existsSync(filePath));
+
+for (const pkgJsonPath of publishablePackageJsonPaths) {
+  let pkg: Record<string, unknown>;
+  try {
+    pkg = JSON.parse(readFileSync(pkgJsonPath, "utf8")) as Record<string, unknown>;
+  } catch {
+    continue;
+  }
+  if (!hasWorkspaceProtocol(pkg)) continue;
+
+  const resolved = resolvePackageJsonWorkspaceProtocols(pkg, workspaceVersions);
+  writeFileSync(pkgJsonPath, JSON.stringify(resolved, null, 2) + "\n");
+  console.log(`  [resolved] Resolved workspace: protocols in ${relative(ROOT, pkgJsonPath)}`);
+}
+
 // ── Done ───────────────────────────────────────────────────
 const distPkg = join(DIST_DIR, "package.json");
 if (existsSync(distPkg)) {
   JSON.parse(readFileSync(distPkg, "utf8"));
   console.log(`\n  ✅ Build complete!`);
-  console.log(`     Dist directory: dist/`);
-  console.log(`     Server entry:  dist/server.js`);
+  console.log(`     Dist directory: ${DIST_DIR}`);
+  console.log(`     Server entry:  ${join(DIST_DIR, "server.js")}`);
 } else {
   console.log(`\n  ✅ Build complete! (dist/ ready for publish)`);
 }

@@ -1,7 +1,14 @@
 import { test, after } from "node:test";
 import assert from "node:assert/strict";
 
-import { resolveAutoStrategyOrder } from "@omniroute/open-sse/services/combo/resolveAutoStrategy.ts";
+import {
+  evaluateAutoCandidates,
+  resolveAutoStrategyOrder,
+} from "@omniroute/open-sse/services/combo/resolveAutoStrategy.ts";
+import { scoreAutoTargets } from "@omniroute/open-sse/services/combo/autoStrategy.ts";
+import { DEFAULT_WEIGHTS } from "@omniroute/open-sse/services/autoCombo/scoring.ts";
+import { buildComplexityRoutingHint } from "@omniroute/open-sse/services/autoCombo/complexityRouter.ts";
+import { setTierConfig } from "@omniroute/open-sse/services/tierResolver.ts";
 import { resetDbInstance } from "@/lib/db/core.ts";
 
 // resolveAutoStrategyOrder loads the LKGP via the DB singleton (dynamic import);
@@ -85,6 +92,44 @@ test("all candidates quota-cutoff-blocked -> early 429 Response", async () => {
     assert.ok(result.earlyResponse instanceof Response);
     assert.equal(result.earlyResponse.status, 429);
   }
+});
+
+test("candidate evaluation is deterministic and does not mutate builder-owned candidates", async () => {
+  const candidates = [
+    {
+      kind: "model",
+      stepId: "s1",
+      executionKey: "openai>gpt-4o@account-a",
+      modelStr: "gpt-4o",
+      provider: "openai",
+      model: "gpt-4o",
+      connectionId: "account-a",
+      quotaRemaining: 80,
+      quotaTotal: 100,
+      circuitBreakerState: "CLOSED",
+      costPer1MTokens: 1,
+      p95LatencyMs: 100,
+      latencyStdDev: 10,
+      errorRate: 0,
+    },
+  ];
+  const before = structuredClone(candidates);
+  const options = {
+    targets: [target("openai", "gpt-4o")],
+    comboName: "autoc",
+    body: { prompt_cache_key: "pure-evaluation", messages: [] },
+    taskType: "default",
+    weights: DEFAULT_WEIGHTS,
+    buildAutoCandidates: (async () => candidates) as never,
+  };
+
+  const first = await evaluateAutoCandidates(options);
+  const second = await evaluateAutoCandidates(options);
+
+  assert.deepEqual(first.scoredTargets, second.scoredTargets);
+  assert.deepEqual(candidates, before);
+  assert.notEqual(first.candidates[0], candidates[0]);
+  assert.equal(first.scoredTargets[0].factors.quota, 0.8);
 });
 
 test("cache affinity scores expanded auto account candidates directly", async () => {
@@ -270,4 +315,66 @@ test("per-request X-OmniRoute-Mode override changes the EFFECTIVE weights used f
     overridden.orderedTargets.map((t) => t.provider),
     native.orderedTargets.map((t) => t.provider)
   );
+});
+
+// Regression for #13386: `resolveAutoStrategyOrder` used to gate the complexity
+// hint behind `config.complexityAwareRouting === true`, but that flag was
+// orphaned by migration 103 (stripped from every persisted combo config) —
+// the feature was permanently unreachable. The fix removed the gate entirely
+// (the field no longer even exists on `ResolveAutoStrategyDeps["config"]`), so
+// the hint must now be built unconditionally. This proves the mechanism the
+// fix depends on: when the hint IS built (as it always is now), a free-tier
+// candidate under a trivial prompt scores full tierAffinity instead of the
+// neutral 0.5 a null hint (the pre-fix, gate-off state) would produce.
+test("scoreAutoTargets: the always-on complexity hint (#13386) moves tierAffinity off the null-hint neutral baseline", async () => {
+  const freeProvider = "regression-free-provider-13386";
+  setTierConfig({
+    providerOverrides: [{ provider: freeProvider, tier: "free" }],
+  });
+  try {
+    const t = [target(freeProvider, "shared-model-13386")];
+    const candidates = [
+      {
+        kind: "model",
+        stepId: "s1",
+        executionKey: `${freeProvider}>shared-model-13386`,
+        modelStr: "shared-model-13386",
+        provider: freeProvider,
+        model: "shared-model-13386",
+        quotaRemaining: 90,
+        quotaTotal: 100,
+        circuitBreakerState: "CLOSED",
+        costPer1MTokens: 5,
+        p95LatencyMs: 200,
+        latencyStdDev: 10,
+        errorRate: 0.01,
+      },
+    ] as never;
+
+    const withoutHint = scoreAutoTargets(t, candidates, "default", DEFAULT_WEIGHTS, null);
+    assert.equal(
+      withoutHint[0].factors.tierAffinity,
+      0.5,
+      "a null hint (the pre-#13386 opt-in-off state) must be tier-neutral"
+    );
+
+    const hint = await buildComplexityRoutingHint(
+      t as never,
+      { messages: [{ role: "user", content: "oi" }] },
+      { info() {} }
+    );
+    assert.ok(
+      hint,
+      "expected a non-null hint for a trivial prompt — buildComplexityRoutingHint takes no config param, so it cannot be gated"
+    );
+
+    const withHint = scoreAutoTargets(t, candidates, "default", DEFAULT_WEIGHTS, hint);
+    assert.equal(
+      withHint[0].factors.tierAffinity,
+      1.0,
+      "a free-tier candidate under a trivial-prompt hint must score full tier affinity"
+    );
+  } finally {
+    setTierConfig(null);
+  }
 });

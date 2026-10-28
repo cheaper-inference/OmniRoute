@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Card } from "@/shared/components";
+import Button from "@/shared/components/Button";
 import {
   firstProviderConnectionId,
   providerConnectionsRequestUrl,
@@ -48,14 +50,23 @@ function resolveText(text: RadarLocalizedText, locale: string): string {
 // Component
 // ---------------------------------------------------------------------------
 
-export default function RadarSetupPage() {
+function RadarSetupPageContent() {
   const t = useTranslations("radarSetupPage");
   const locale = useLocale();
   const searchParams = useSearchParams();
   const provider = searchParams.get("provider");
 
   const [setupData, setSetupData] = useState<ProviderSetupData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(provider !== null);
+
+  // Adjust-during-render when the provider query param changes (React docs
+  // pattern): a null provider has nothing to load, any other transition
+  // restarts the loading state before the fetch effect fires.
+  const [prevProvider, setPrevProvider] = useState(provider);
+  if (provider !== prevProvider) {
+    setPrevProvider(provider);
+    setLoading(provider !== null);
+  }
   const [error, setError] = useState("");
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
@@ -63,7 +74,6 @@ export default function RadarSetupPage() {
   // Fetch catalog to find the provider's setup data
   useEffect(() => {
     if (!provider) {
-      setLoading(false);
       return;
     }
 
@@ -123,12 +133,13 @@ export default function RadarSetupPage() {
   }, [provider, t]);
 
   // Test connection — uses the EXISTING connection-test endpoint
+  const connectionId = setupData?.connectionId ?? null;
   const handleTestConnection = useCallback(async () => {
-    if (!setupData?.connectionId) return;
+    if (!connectionId) return;
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await fetch(`/api/providers/${encodeURIComponent(setupData.connectionId)}/test`, {
+      const res = await fetch(`/api/providers/${encodeURIComponent(connectionId)}/test`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
@@ -147,12 +158,12 @@ export default function RadarSetupPage() {
     } finally {
       setTesting(false);
     }
-  }, [setupData?.connectionId, t]);
+  }, [connectionId, t]);
 
   if (!provider) {
     return (
       <div className="flex flex-col gap-6">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <PageHeader compact title={t("title")} />
         <Card>
           <div className="text-center py-12 text-text-muted">{t("noProvider")}</div>
         </Card>
@@ -162,21 +173,21 @@ export default function RadarSetupPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link
-          href="/dashboard/radar"
-          className="text-sm text-text-muted hover:text-text-main transition-colors"
-        >
-          ← {t("backToCatalog")}
-        </Link>
-      </div>
-      <div>
-        <h1 className="text-2xl font-bold">{t("setupTitle", { provider })}</h1>
-        <p className="text-sm text-text-muted mt-1">{t("setupSubtitle")}</p>
-      </div>
+      <PageHeader
+        compact
+        breadcrumbs={
+          <Link
+            href="/dashboard/radar"
+            className="text-sm text-text-muted hover:text-text-main transition-colors"
+          >
+            ← {t("backToCatalog")}
+          </Link>
+        }
+        title={t("setupTitle", { provider })}
+        description={t("setupSubtitle")}
+      />
 
-      {error && <div className="p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">{error}</div>}
+      {error && <div className="p-3 rounded-lg bg-error/10 text-error text-sm">{error}</div>}
 
       {loading ? (
         <div className="flex items-center justify-center min-h-[200px]">
@@ -188,8 +199,8 @@ export default function RadarSetupPage() {
           {setupData.configured && (
             <Card>
               <div className="flex items-center gap-3 py-2">
-                <span className="text-green-400 text-xl">✓</span>
-                <span className="text-green-400 font-medium">{t("providerConfigured")}</span>
+                <span className="text-success text-xl">✓</span>
+                <span className="text-success font-medium">{t("providerConfigured")}</span>
               </div>
             </Card>
           )}
@@ -203,7 +214,7 @@ export default function RadarSetupPage() {
                   href={setupData.setup.keyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-violet-400 hover:underline break-all"
+                  className="text-primary hover:underline break-all"
                 >
                   {setupData.setup.keyUrl}
                 </a>
@@ -219,7 +230,7 @@ export default function RadarSetupPage() {
                 <ol className="flex flex-col gap-3">
                   {setupData.setup.steps.map((step, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center text-sm font-medium">
+                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">
                         {idx + 1}
                       </span>
                       <span className="text-sm text-text-muted pt-1">
@@ -247,15 +258,15 @@ export default function RadarSetupPage() {
               <h2 className="font-semibold">{t("testConnection")}</h2>
               <p className="text-sm text-text-muted">{t("testDescription")}</p>
               <div className="flex items-center gap-3">
-                <button
+                <Button
+                  variant="outline"
                   onClick={handleTestConnection}
                   disabled={testing || !setupData.connectionId}
-                  className="px-4 py-2 text-sm font-medium rounded-lg border border-violet-500 text-violet-400 hover:bg-violet-500/10 transition-colors disabled:opacity-50"
                 >
                   {testing ? t("testing") : t("testButton")}
-                </button>
+                </Button>
                 {testResult && (
-                  <span className={`text-sm ${testResult.ok ? "text-green-400" : "text-red-400"}`}>
+                  <span className={`text-sm ${testResult.ok ? "text-success" : "text-error"}`}>
                     {testResult.message}
                   </span>
                 )}
@@ -270,7 +281,7 @@ export default function RadarSetupPage() {
               <p className="text-sm text-text-muted">{t("addConnectionDescription")}</p>
               <Link
                 href={providerSetupConnectionUrl(provider)}
-                className="text-violet-400 hover:underline text-sm"
+                className="text-primary hover:underline text-sm"
               >
                 {t("addConnectionLink")}
               </Link>
@@ -279,5 +290,13 @@ export default function RadarSetupPage() {
         </>
       ) : null}
     </div>
+  );
+}
+
+export default function RadarSetupPage() {
+  return (
+    <Suspense fallback={null}>
+      <RadarSetupPageContent />
+    </Suspense>
   );
 }

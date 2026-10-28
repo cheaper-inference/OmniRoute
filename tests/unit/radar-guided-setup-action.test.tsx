@@ -49,8 +49,11 @@ async function renderComponent(element: React.ReactNode): Promise<{
   return { container, root };
 }
 
-async function renderProviderPage(): Promise<{ container: HTMLDivElement; root: Root }> {
-  return renderComponent(<ProviderDetailPageClient />);
+async function renderProviderPage(): Promise<{ container: HTMLElement; root: Root }> {
+  const { root } = await renderComponent(<ProviderDetailPageClient />);
+  // The page's modals are kit Dialogs (Radix) since KEA-7886, portaled to document.body:
+  // queries start there (the page container is a child of body).
+  return { container: document.body, root };
 }
 
 async function settle(): Promise<void> {
@@ -108,7 +111,7 @@ describe("Radar guided setup provider action", () => {
   });
 
   it("keeps a subscription-risk provider behind the existing acknowledgement gate", async () => {
-    providerId = "chatgpt-web";
+    providerId = "grok-web";
     const { container, root } = await renderProviderPage();
 
     expect(container.querySelector('input[type="password"]')).toBeNull();

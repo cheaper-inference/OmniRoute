@@ -1,9 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import Icon from "./Icon";
 import Modal from "./Modal";
 import Button from "./Button";
+import Input from "./Input";
+import SegmentedControl from "./SegmentedControl";
+import Select from "./Select";
 import {
   type ProxyAssignmentItem,
   normalizeScopeId,
@@ -23,7 +28,9 @@ const BUILD_TIME_SOCKS5 = !["false", "0", "no", "off"].includes(
   (process.env.NEXT_PUBLIC_ENABLE_SOCKS5_PROXY ?? "").trim().toLowerCase()
 );
 export function buildProxyTypes(socks5Enabled: boolean) {
-  return socks5Enabled ? ALL_PROXY_TYPES : ALL_PROXY_TYPES.filter((type) => type.value !== "socks5");
+  return socks5Enabled
+    ? ALL_PROXY_TYPES
+    : ALL_PROXY_TYPES.filter((type) => type.value !== "socks5");
 }
 
 type ProxyConfigLevel = "global" | "provider" | "combo" | "key";
@@ -152,12 +159,40 @@ export default function ProxyConfigModal({
     return "8080";
   };
 
+  // Reset transient state when the modal opens (render-time adjustment per
+  // react.dev "You Might Not Need an Effect" — replaces the synchronous
+  // setStates the load effect used to issue).
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+    if (isOpen) {
+      setTestResult(null);
+      setFormError(null);
+      setLoading(true);
+    }
+  }
+
+  const resetFields = useCallback(() => {
+    // ALL_PROXY_TYPES[0] is "http" whether or not SOCKS5 is enabled, so this
+    // reset has no reactive dependencies and stays referentially stable.
+    setProxyType(ALL_PROXY_TYPES[0].value);
+    setHost("");
+    setPort("");
+    setUsername("");
+    setPassword("");
+    setShowAuth(false);
+    setFormError(null);
+  }, []);
+
+  // Translated strings the load effect needs, hoisted so the effect can depend
+  // on stable string values instead of the `t` function identity (an unstable
+  // `t` — e.g. the test mock — would otherwise re-run the load loop forever).
+  const socks5HiddenError = t("errorSocks5Hidden");
+  const levelGlobalLabel = t("levelGlobal");
+
   // Load existing proxy config when modal opens
   useEffect(() => {
     if (!isOpen) return;
-    setTestResult(null);
-    setFormError(null);
-    setLoading(true);
 
     const loadProxy = async () => {
       try {
@@ -196,7 +231,9 @@ export default function ProxyConfigModal({
             const assignedProxy = registryItems.find((item) => item.id === target.proxyId);
             if (assignedProxy?.source === DASHBOARD_CUSTOM_PROXY_SOURCE) {
               const normalizedType = String(assignedProxy.type || "http").toLowerCase();
-              const hasTypeOption = runtimeProxyTypes.some((entry) => entry.value === normalizedType);
+              const hasTypeOption = runtimeProxyTypes.some(
+                (entry) => entry.value === normalizedType
+              );
               setMode("custom");
               setProxyType(hasTypeOption ? normalizedType : runtimeProxyTypes[0]?.value || "http");
               setHost(assignedProxy.host || "");
@@ -209,7 +246,7 @@ export default function ProxyConfigModal({
               );
               setShowAuth(!!(assignedProxy.username || assignedProxy.password));
               if (normalizedType === "socks5" && !runtimeSocks5) {
-                setFormError(t("errorSocks5Hidden"));
+                setFormError(socks5HiddenError);
               }
             } else {
               setMode("saved");
@@ -242,7 +279,7 @@ export default function ProxyConfigModal({
             setShowAuth(!!(proxy.username || proxy.password));
             setHasOwnProxy(true);
             if (normalizedType === "socks5" && !runtimeSocks5) {
-              setFormError(t("errorSocks5Hidden"));
+              setFormError(socks5HiddenError);
             }
             if (!hasSavedAssignment) setMode("custom");
           } else {
@@ -263,14 +300,14 @@ export default function ProxyConfigModal({
             if (level === "key") {
               // Check combo, provider, global
               if (config.global)
-                setInheritedFrom({ level: t("levelGlobal"), proxy: config.global });
+                setInheritedFrom({ level: levelGlobalLabel, proxy: config.global });
               // Provider info requires more context, showing global as fallback
             } else if (level === "combo") {
               if (config.global)
-                setInheritedFrom({ level: t("levelGlobal"), proxy: config.global });
+                setInheritedFrom({ level: levelGlobalLabel, proxy: config.global });
             } else if (level === "provider") {
               if (config.global)
-                setInheritedFrom({ level: t("levelGlobal"), proxy: config.global });
+                setInheritedFrom({ level: levelGlobalLabel, proxy: config.global });
             }
           }
         }
@@ -282,17 +319,7 @@ export default function ProxyConfigModal({
     };
 
     loadProxy();
-  }, [isOpen, level, levelId]);
-
-  const resetFields = () => {
-    setProxyType(proxyTypes[0]?.value || "http");
-    setHost("");
-    setPort("");
-    setUsername("");
-    setPassword("");
-    setShowAuth(false);
-    setFormError(null);
-  };
+  }, [isOpen, level, levelId, resetFields, socks5HiddenError, levelGlobalLabel]);
 
   const handleSave = async () => {
     if (mode === "saved" && !selectedProxyId) {
@@ -427,7 +454,7 @@ export default function ProxyConfigModal({
     try {
       const scope = getAssignmentScope(level);
       const scopeId = getAssignmentScopeId(level, levelId);
-      await fetch("/api/settings/proxies/assignments", {
+      const assignmentRes = await fetch("/api/settings/proxies/assignments", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -436,6 +463,11 @@ export default function ProxyConfigModal({
           proxyId: null,
         }),
       });
+      if (!assignmentRes.ok) {
+        const payload = await readJson(assignmentRes);
+        setFormError(payload?.error?.message || t("errorClearProxy"));
+        return;
+      }
 
       const params = new URLSearchParams({ level });
       if (levelId) params.set("id", levelId);
@@ -542,11 +574,9 @@ export default function ProxyConfigModal({
         <div className="flex flex-col gap-5">
           {/* Inheritance indicator */}
           {level !== "global" && !hasOwnProxy && inheritedFrom && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
-              <span className="material-symbols-outlined text-blue-400 text-base">
-                subdirectory_arrow_right
-              </span>
-              <span className="text-blue-300">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-info/10 border border-info/20 text-sm">
+              <Icon name="subdirectory_arrow_right" size={16} className="text-info" />
+              <span className="text-info">
                 {t("inheritingFrom")} <strong>{inheritedFrom.level}</strong>:{" "}
                 {inheritedFrom.proxy?.type}
                 ://{inheritedFrom.proxy?.host}:{inheritedFrom.proxy?.port}
@@ -555,142 +585,92 @@ export default function ProxyConfigModal({
           )}
 
           {/* Proxy Type Selector */}
-          <div>
-            <label className="text-xs text-text-muted mb-1.5 block uppercase tracking-wider font-medium">
-              {t("source")}
-            </label>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setMode("saved")}
-                className={`px-3 py-2 rounded text-sm border transition-colors ${
-                  mode === "saved"
-                    ? "bg-primary text-white border-primary"
-                    : "bg-bg-subtle text-text-muted border-border"
-                }`}
-              >
-                {t("savedProxy")}
-              </button>
-              <button
-                onClick={() => setMode("custom")}
-                className={`px-3 py-2 rounded text-sm border transition-colors ${
-                  mode === "custom"
-                    ? "bg-primary text-white border-primary"
-                    : "bg-bg-subtle text-text-muted border-border"
-                }`}
-              >
-                {t("custom")}
-              </button>
-            </div>
-          </div>
+          <Field label={t("source")}>
+            <SegmentedControl
+              aria-label={t("source")}
+              value={mode}
+              onChange={(next) => setMode(next as typeof mode)}
+              options={[
+                { value: "saved", label: t("savedProxy") },
+                { value: "custom", label: t("custom") },
+              ]}
+            />
+          </Field>
 
           {mode === "saved" && (
-            <div>
-              <label className="text-xs text-text-muted mb-1.5 block uppercase tracking-wider font-medium">
-                {t("savedProxy")}
-              </label>
-              <select
-                value={selectedProxyId}
-                onChange={(e) => setSelectedProxyId(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary"
-              >
-                <option value="">{t("selectSavedProxyPlaceholder")}</option>
-                {sortedSavedProxies.map((item: any) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} ({item.type}://{item.host}:{item.port})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label={t("savedProxy")}
+              value={selectedProxyId}
+              onChange={(e) => setSelectedProxyId(e.target.value)}
+            >
+              <option value="">{t("selectSavedProxyPlaceholder")}</option>
+              {sortedSavedProxies.map((item: any) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} ({item.type}://{item.host}:{item.port})
+                </option>
+              ))}
+            </Select>
           )}
 
           {mode === "custom" && (
             <>
-              <div>
-                <label className="text-xs text-text-muted mb-1.5 block uppercase tracking-wider font-medium">
-                  {t("proxyType")}
-                </label>
-                <div className="flex gap-1 bg-bg-subtle rounded-lg p-1 border border-border">
-                  {proxyTypes.map((t) => (
-                    <button
-                      key={t.value}
-                      onClick={() => setProxyType(t.value)}
-                      className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                        proxyType === t.value
-                          ? "bg-primary text-white shadow-sm"
-                          : "text-text-muted hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5"
-                      }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <Field label={t("proxyType")}>
+                <SegmentedControl
+                  aria-label={t("proxyType")}
+                  className="w-full"
+                  value={proxyType}
+                  onChange={setProxyType}
+                  options={proxyTypes.map((pt) => ({ value: pt.value, label: pt.label }))}
+                />
+              </Field>
 
               {/* Host + Port */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2">
-                  <label className="text-xs text-text-muted mb-1.5 block uppercase tracking-wider font-medium">
-                    {t("host")}
-                  </label>
-                  <input
-                    type="text"
-                    value={host}
-                    onChange={(e) => setHost(e.target.value)}
-                    placeholder={t("hostPlaceholder")}
-                    className="w-full px-3 py-2.5 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-primary transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-text-muted mb-1.5 block uppercase tracking-wider font-medium">
-                    {t("port")}
-                  </label>
-                  <input
-                    type="text"
-                    value={port}
-                    onChange={(e) => setPort(e.target.value)}
-                    placeholder={getDefaultPort(proxyType)}
-                    className="w-full px-3 py-2.5 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-primary transition-colors"
-                  />
-                </div>
+                <Input
+                  className="col-span-2"
+                  label={t("host")}
+                  type="text"
+                  value={host}
+                  onChange={(e) => setHost(e.target.value)}
+                  placeholder={t("hostPlaceholder")}
+                />
+                <Input
+                  label={t("port")}
+                  type="text"
+                  value={port}
+                  onChange={(e) => setPort(e.target.value)}
+                  placeholder={getDefaultPort(proxyType)}
+                />
               </div>
 
               {/* Auth Toggle */}
               <div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-expanded={showAuth}
                   onClick={() => setShowAuth(!showAuth)}
-                  className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary transition-colors"
+                  className="gap-2 px-0 text-text-muted hover:text-text-main"
                 >
-                  <span className="material-symbols-outlined text-base">
-                    {showAuth ? "expand_less" : "expand_more"}
-                  </span>
+                  <Icon name={showAuth ? "expand_less" : "expand_more"} size={16} />
                   {t("authOptional")}
-                </button>
+                </Button>
                 {showAuth && (
                   <div className="grid grid-cols-2 gap-3 mt-3">
-                    <div>
-                      <label className="text-xs text-text-muted mb-1.5 block uppercase tracking-wider font-medium">
-                        {t("username")}
-                      </label>
-                      <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder={t("usernamePlaceholder")}
-                        className="w-full px-3 py-2.5 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-primary transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-text-muted mb-1.5 block uppercase tracking-wider font-medium">
-                        {t("password")}
-                      </label>
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder={t("passwordPlaceholder")}
-                        className="w-full px-3 py-2.5 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-primary transition-colors"
-                      />
-                    </div>
+                    <Input
+                      label={t("username")}
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder={t("usernamePlaceholder")}
+                    />
+                    <Input
+                      label={t("password")}
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t("passwordPlaceholder")}
+                    />
                   </div>
                 )}
               </div>
@@ -699,7 +679,7 @@ export default function ProxyConfigModal({
 
           {/* Test Result */}
           {formError && (
-            <div className="px-4 py-3 rounded-lg border border-red-500/30 bg-red-500/10 text-sm text-red-400">
+            <div className="px-4 py-3 rounded-lg border border-error/30 bg-error/10 text-sm text-error">
               {formError}
             </div>
           )}
@@ -708,29 +688,27 @@ export default function ProxyConfigModal({
             <div
               className={`flex items-center gap-3 px-4 py-3 rounded-lg border ${
                 testResult.success
-                  ? "bg-emerald-500/10 border-emerald-500/30"
-                  : "bg-red-500/10 border-red-500/30"
+                  ? "bg-success/10 border-success/30"
+                  : "bg-error/10 border-error/30"
               }`}
             >
-              <span
-                className={`material-symbols-outlined text-xl ${
-                  testResult.success ? "text-emerald-400" : "text-red-400"
-                }`}
-              >
-                {testResult.success ? "check_circle" : "error"}
-              </span>
+              <Icon
+                name={testResult.success ? "check_circle" : "error"}
+                size={20}
+                className={testResult.success ? "text-success" : "text-error"}
+              />
               <div className="flex-1">
                 {testResult.success ? (
                   <div>
-                    <span className="text-sm font-medium text-emerald-400">{t("connected")}</span>
+                    <span className="text-sm font-medium text-success">{t("connected")}</span>
                     <span className="text-text-muted text-xs ml-2">
                       {t("ip")}{" "}
-                      <span className="font-mono text-emerald-300">{testResult.publicIp}</span>
+                      <span className="font-mono text-success">{testResult.publicIp}</span>
                       {testResult.latencyMs && ` · ${testResult.latencyMs}ms`}
                     </span>
                   </div>
                 ) : (
-                  <div className="text-sm text-red-400">
+                  <div className="text-sm text-error">
                     {testResult.error || t("connectionFailed")}
                     {testResult.latencyMs && (
                       <span className="text-text-muted text-xs ml-2">
@@ -763,7 +741,7 @@ export default function ProxyConfigModal({
                   icon="delete"
                   onClick={handleClear}
                   disabled={saving}
-                  className="!text-red-400 hover:!bg-red-500/10"
+                  className="!text-error hover:!bg-error/10"
                 >
                   {t("clear")}
                 </Button>

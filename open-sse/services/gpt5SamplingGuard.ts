@@ -12,7 +12,9 @@
  * This guard removes `temperature`/`top_p` only when the resolved effort is active
  * (anything other than `none`). It is scoped to the `openai` provider (raw
  * api.openai.com Chat Completions): the `codex` provider's Responses requests are
- * already covered by the CodexExecutor allowlist (which drops both params), and
+ * already covered by CodexExecutor.transformRequest (STRIP_RULES drops
+ * temperature/top_p before native passthrough returns; the Responses allowlist
+ * also omits them on the translated path), and
  * other providers manage their own sampling rules.
  *
  * Refs: litellm#27351 (GPT-5.1 accepts temperature only when effort=none),
@@ -59,7 +61,7 @@ export function stripGpt5SamplingWhenReasoning<T extends Record<string, unknown>
   log?: { warn?: (tag: string, message: string) => void } | null
 ): T {
   if (provider !== "openai") return body;
-  if (typeof model !== "string" || !/^gpt-5/i.test(model)) return body;
+  if (typeof model !== "string" || !/^gpt-[56]/i.test(model)) return body;
 
   const record = asRecord(body);
   if (!record) return body;
@@ -99,6 +101,20 @@ function hasFunctionTools(record: JsonRecord): boolean {
   });
 }
 
+function disableLunaToolReasoning<T extends JsonRecord>(
+  body: T,
+  log?: { warn?: (tag: string, message: string) => void } | null
+): T {
+  if (body.reasoning_effort === "none" && !Object.hasOwn(body, "reasoning")) return body;
+  const next: JsonRecord = { ...body, reasoning_effort: "none" };
+  delete next.reasoning;
+  log?.warn?.(
+    "PARAMS",
+    "Set reasoning_effort=none for GPT-6 Luna function tools on Chat Completions"
+  );
+  return next as T;
+}
+
 /**
  * Raw api.openai.com Chat Completions rejects GPT-5.x reasoning models that
  * carry BOTH function `tools` and an active `reasoning_effort` with HTTP 400:
@@ -128,7 +144,7 @@ export function stripGpt5ReasoningWhenTools<T extends Record<string, unknown>>(
   log?: { warn?: (tag: string, message: string) => void } | null
 ): T {
   if (provider !== "openai") return body;
-  if (typeof model !== "string" || !/^gpt-5/i.test(model)) return body;
+  if (typeof model !== "string" || !/^gpt-[56]/i.test(model)) return body;
   // Already routed to /v1/responses (e.g. GPT-5.6, #7242) — that endpoint
   // supports tools + reasoning natively, nothing to strip.
   if (targetFormat === FORMATS.OPENAI_RESPONSES) return body;
@@ -136,6 +152,9 @@ export function stripGpt5ReasoningWhenTools<T extends Record<string, unknown>>(
   const record = asRecord(body);
   if (!record) return body;
   if (!hasFunctionTools(record)) return body;
+  // #16440: omission enables Luna's default reasoning, so stripping is insufficient.
+  // https://developers.openai.com/api/docs/models/gpt-6-luna
+  if (model.toLowerCase() === "gpt-6-luna") return disableLunaToolReasoning(body, log);
   if (!hasActiveReasoning(record, model)) return body;
 
   const stripped: string[] = [];

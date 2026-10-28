@@ -50,7 +50,9 @@ export async function maybeAutoDisableBannedAccount(input: {
       }
       return;
     }
-    await updateProviderConnection(input.connectionId, { isActive: false });
+    // permanentBan stamps banDisabledAt, which keeps the credential-health retest of
+    // gateway-disabled connections (#16190) away from this account for good.
+    await updateProviderConnection(input.connectionId, { isActive: false }, { permanentBan: true });
     log.info(
       "AUTH",
       `Auto-disabled ${input.connectionId.slice(0, 8)} — permanent ban detected (autoDisableBannedAccounts=true, scope=${settings.autoDisableBannedScope || "all"})`

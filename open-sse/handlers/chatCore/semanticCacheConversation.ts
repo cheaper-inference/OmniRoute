@@ -8,6 +8,7 @@ export function semanticCacheConversation(body: {
   systemInstruction?: unknown;
   system_instruction?: unknown;
   request?: unknown;
+  [key: string]: unknown;
 }): unknown {
   if (body.request && typeof body.request === "object" && !Array.isArray(body.request)) {
     return semanticCacheConversation({ ...body.request, request: undefined });

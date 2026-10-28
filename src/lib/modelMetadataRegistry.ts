@@ -24,6 +24,11 @@ import {
   type PricingByProvider,
 } from "@/lib/modelsDevSync";
 import { getSyncedPricing } from "@/lib/pricingSync";
+import {
+  lookupUserCatalogPricing,
+  readUserPricingMemoized,
+  type UserPricingByProvider,
+} from "@/lib/catalogUserPricing";
 import { getPricingForModel as getDefaultPricingForModel } from "@/shared/constants/pricing";
 import {
   CANONICAL_EFFORT_VALUES,
@@ -40,6 +45,8 @@ type JsonRecord = Record<string, unknown>;
 
 export interface CatalogEnrichmentSnapshot {
   modelsDevPricing: PricingByProvider | null;
+  /** #15528: bulk-loaded user `pricing` namespace (PATCH /api/pricing overrides). */
+  userPricing?: UserPricingByProvider | null;
   providerNodeIdsByPrefix?: Readonly<Record<string, string>>;
   /** #9147: build-local bulk load of synced capabilities + token/context overrides
    * so per-entry enrichment never hits SQLite again (see catalogResponse.ts). */
@@ -303,26 +310,48 @@ export function getCanonicalModelMetadata(input: {
 // a rebuild instead of rebuilt per lookup.
 const lowercaseIndexCache = new WeakMap<object, Map<string, unknown>>();
 
-function findInsensitive<T>(obj: Record<string, T> | null | undefined, key: string): T | undefined {
+/** Colliding keys named in the aggregated collision warning before it truncates. */
+const COLLISION_SAMPLE_SIZE = 5;
+
+/** Test hook (#13601): exercised directly by the collision-naming unit test. */
+export function findInsensitive<T>(
+  obj: Record<string, T> | null | undefined,
+  key: string
+): T | undefined {
   if (!obj || !key) return undefined;
   if (key in obj) return obj[key];
   let index = lowercaseIndexCache.get(obj);
   if (!index) {
     index = new Map();
+    const collisions: string[] = [];
+    const firstKeyByLower = new Map<string, string>();
     for (const [k, v] of Object.entries(obj)) {
       const lowerKey = k.toLowerCase();
-      // Warn once at index-build time (not per-lookup) if two keys collide
-      // case-insensitively — a real data-quality signal from an upstream sync (e.g.
-      // models.dev returning both "OpenAI" and "openai" as distinct provider keys).
-      // Matches the pre-fix scan's silent first-match-wins behavior, just surfaced
-      // instead of swallowed.
-      if (index.has(lowerKey)) {
-        console.warn(
-          `[modelMetadataRegistry] findInsensitive: case-insensitive key collision on "${lowerKey}" — keeping first-seen value, later one discarded`
-        );
+      // Collisions are a real data-quality signal from an upstream sync (e.g.
+      // models.dev returning both "OpenAI" and "openai" as distinct provider
+      // keys), so they are surfaced rather than swallowed — first-seen-wins,
+      // matching the pre-#8697 scan's behavior. Each collision is recorded with
+      // BOTH spellings (#13601) so the operator can tell which entries clash;
+      // they are reported together once the index finishes building.
+      const firstKey = firstKeyByLower.get(lowerKey);
+      if (firstKey !== undefined) {
+        collisions.push(`"${lowerKey}" ("${firstKey}" vs "${k}")`);
         continue;
       }
+      firstKeyByLower.set(lowerKey, k);
       index.set(lowerKey, v);
+    }
+    // Aggregate into ONE line per index build. Warning per colliding key made
+    // the signal unreadable and expensive: a real catalog collides on hundreds
+    // of keys, and a production log carried 27,296 of these lines (40% of the
+    // file, ~500/sec bursts) driving 52 MB rotations. The count plus a bounded
+    // sample keeps the diagnostic without the flood.
+    if (collisions.length > 0) {
+      const sample = collisions.slice(0, COLLISION_SAMPLE_SIZE).join(", ");
+      const more = collisions.length > COLLISION_SAMPLE_SIZE ? ", …" : "";
+      console.warn(
+        `[modelMetadataRegistry] findInsensitive: ${collisions.length} case-insensitive key collision(s) — keeping first-seen value, later ones discarded. Keys: ${sample}${more}`
+      );
     }
     lowercaseIndexCache.set(obj, index);
   }
@@ -335,38 +364,62 @@ function resolveCatalogPricing(
   snapshot?: CatalogEnrichmentSnapshot
 ): Record<string, number> | null {
   if (!provider || !model) return null;
+  const base = resolveBaseCatalogPricing(provider, model, snapshot);
+  // #15528: user overrides win per-field over models.dev / LiteLLM / defaults.
+  const user = lookupUserCatalogPricing(
+    snapshot?.userPricing !== undefined ? snapshot.userPricing : readUserPricingMemoized(),
+    provider,
+    model,
+    findInsensitive
+  );
+  return user ? { ...(base || {}), ...user } : base;
+}
 
+function lookupCatalogPricing(
+  source: Record<string, Record<string, Record<string, number>>>,
+  provider: string,
+  model: string
+): Record<string, number> | null {
+  const providerPricing =
+    findInsensitive(source, provider) || findInsensitive(source, provider.replace(/-cn$/, ""));
+  if (providerPricing) {
+    const modelPricing =
+      findInsensitive(providerPricing, model) ||
+      findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
+      findInsensitive(
+        providerPricing,
+        model.includes("/") ? model.split("/").pop() || model : model
+      );
+    if (modelPricing && typeof modelPricing === "object") {
+      const input = modelPricing.input;
+      const output = modelPricing.output;
+      if (typeof input === "number" || typeof output === "number") {
+        const pricing: Record<string, number> = {};
+        if (typeof input === "number") pricing.input = input;
+        if (typeof output === "number") pricing.output = output;
+        if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
+        if (typeof modelPricing.cache_creation === "number") {
+          pricing.cache_creation = modelPricing.cache_creation;
+        }
+        return pricing;
+      }
+    }
+  }
+  return null;
+}
+
+function resolveBaseCatalogPricing(
+  provider: string,
+  model: string,
+  snapshot?: CatalogEnrichmentSnapshot
+): Record<string, number> | null {
   // Prefer models.dev synced pricing when present; fall back to hardcoded defaults.
   try {
     const modelsDev = (
       snapshot ? snapshot.modelsDevPricing || {} : getModelsDevPricing()
     ) as Record<string, Record<string, Record<string, number>>>;
-    const providerPricing =
-      findInsensitive(modelsDev, provider) ||
-      findInsensitive(modelsDev, provider.replace(/-cn$/, ""));
-    if (providerPricing) {
-      const modelPricing =
-        findInsensitive(providerPricing, model) ||
-        findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
-        findInsensitive(
-          providerPricing,
-          model.includes("/") ? model.split("/").pop() || model : model
-        );
-      if (modelPricing && typeof modelPricing === "object") {
-        const input = modelPricing.input;
-        const output = modelPricing.output;
-        if (typeof input === "number" || typeof output === "number") {
-          const pricing: Record<string, number> = {};
-          if (typeof input === "number") pricing.input = input;
-          if (typeof output === "number") pricing.output = output;
-          if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
-          if (typeof modelPricing.cache_creation === "number") {
-            pricing.cache_creation = modelPricing.cache_creation;
-          }
-          return pricing;
-        }
-      }
-    }
+    const pricing = lookupCatalogPricing(modelsDev, provider, model);
+    if (pricing) return pricing;
   } catch {
     // pricing lookup must never break catalog assembly
   }
@@ -380,31 +433,8 @@ function resolveCatalogPricing(
       string,
       Record<string, Record<string, number>>
     >;
-    const providerPricing =
-      findInsensitive(litellm, provider) || findInsensitive(litellm, provider.replace(/-cn$/, ""));
-    if (providerPricing) {
-      const modelPricing =
-        findInsensitive(providerPricing, model) ||
-        findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
-        findInsensitive(
-          providerPricing,
-          model.includes("/") ? model.split("/").pop() || model : model
-        );
-      if (modelPricing && typeof modelPricing === "object") {
-        const input = modelPricing.input;
-        const output = modelPricing.output;
-        if (typeof input === "number" || typeof output === "number") {
-          const pricing: Record<string, number> = {};
-          if (typeof input === "number") pricing.input = input;
-          if (typeof output === "number") pricing.output = output;
-          if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
-          if (typeof modelPricing.cache_creation === "number") {
-            pricing.cache_creation = modelPricing.cache_creation;
-          }
-          return pricing;
-        }
-      }
-    }
+    const pricing = lookupCatalogPricing(litellm, provider, model);
+    if (pricing) return pricing;
   } catch {
     // pricing lookup must never break catalog assembly
   }
@@ -599,7 +629,15 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
   if (persistedOutputLimit !== null) {
     nextEntry.max_output_tokens = persistedOutputLimit;
   } else if (
-    typeof nextEntry.max_output_tokens !== "number" &&
+    // #16579: these OpenCode Go imports can carry a stale generic 32K output
+    // ceiling. For the three upstream-verified models use the resolved model
+    // metadata instead, which still honors a synced limit if one is present.
+    // Do not rewrite other providers' explicit advertised output limits.
+    (typeof nextEntry.max_output_tokens !== "number" ||
+      (metadata.provider === "opencode-go" &&
+        (model === "deepseek-v4.1-flash" ||
+          model === "deepseek-flash" ||
+          model === "minimax-m2.5"))) &&
     typeof metadata.limits.maxOutputTokens === "number" &&
     metadata.limits.maxOutputTokens > 0
   ) {

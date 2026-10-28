@@ -128,16 +128,64 @@ export async function prepareJinaMixedEmbeddingInput(
       continue;
     }
     if (isCanonicalEmbeddingItem(item)) {
-      const [translated] = await prepareJinaInput(
-        [item as EmbeddingMultimodalItem],
-        fetchMedia
-      );
+      const [translated] = await prepareJinaInput([item as EmbeddingMultimodalItem], fetchMedia);
       out.push(translated);
       continue;
     }
     out.push(item);
   }
   return out;
+}
+
+const LLAMA_CPP_AUDIO_FORMATS: Record<string, string> = {
+  "audio/wav": "wav",
+  "audio/x-wav": "wav",
+  "audio/wave": "wav",
+  "audio/vnd.wave": "wav",
+  "audio/mpeg": "mp3",
+  "audio/mp3": "mp3",
+  "audio/flac": "flac",
+  "audio/x-flac": "flac",
+};
+
+function toLlamaCppContentPart(
+  item: Exclude<EmbeddingMultimodalItem, { type: "text" }>,
+  inline: { data: string; mediaType: string }
+): Record<string, unknown> {
+  const dataUri = `data:${inline.mediaType};base64,${inline.data}`;
+  if (item.type === "image") return { type: "image_url", image_url: { url: dataUri } };
+  if (item.type === "video") return { type: "input_video", input_video: { url: dataUri } };
+  if (item.type === "audio") {
+    const format = LLAMA_CPP_AUDIO_FORMATS[inline.mediaType.split(";")[0].trim().toLowerCase()];
+    if (!format) {
+      throw new Error(
+        `llama.cpp audio embeddings accept wav, mp3 or flac (got ${inline.mediaType})`
+      );
+    }
+    return { type: "input_audio", input_audio: { data: inline.data, format } };
+  }
+  throw new Error(`llama.cpp has no ${item.type} embedding input`);
+}
+
+/**
+ * llama-server (`--embedding --mmproj …`) takes one `{ content: [part] }` object per
+ * input element, using the `/v1/chat/completions` content parts. Translate OmniRoute
+ * canonical items into that shape — one item stays one vector — and keep plain strings
+ * and canonical text items as strings. Remote sources are fetched (and size-capped)
+ * here, so llama-server only ever sees inline data.
+ */
+export async function prepareLlamaCppEmbeddingInput(
+  input: unknown[],
+  fetchMedia: StructuredEmbeddingFetchOptions["fetchMedia"]
+): Promise<unknown[]> {
+  const canonical = input.filter(isStructuredItem);
+  const resolved = await resolveInlineItems(canonical, fetchMedia);
+  const byItem = new Map(resolved.map((entry) => [entry.item, entry.inline]));
+  return input.map((item) => {
+    if (!isStructuredItem(item)) return item;
+    if (item.type === "text") return item.text;
+    return { content: [toLlamaCppContentPart(item, byItem.get(item)!)] };
+  });
 }
 
 function mapGeminiTaskType(value: unknown): unknown {
@@ -163,11 +211,34 @@ function embeddingValues(entry: unknown): unknown[] {
   return Array.isArray(values) ? values : [];
 }
 
-function normalizeGeminiEmbedContentResponse(data: Record<string, unknown>): Record<string, unknown> {
+/**
+ * Gemini embedContent and batchEmbedContents report one usageMetadata object
+ * at the response root. Read its prompt count without estimating from vector
+ * length or adding per-vector values (which would overcount batch requests).
+ */
+function geminiEmbeddingUsage(data: Record<string, unknown>): {
+  prompt_tokens: number;
+  total_tokens: number;
+} {
+  const metadata = data.usageMetadata;
+  const reported =
+    metadata && typeof metadata === "object" && !Array.isArray(metadata)
+      ? (metadata as Record<string, unknown>).promptTokenCount
+      : undefined;
+  const promptTokens =
+    typeof reported === "number" && Number.isSafeInteger(reported) && reported >= 0
+      ? reported
+      : 0;
+  return { prompt_tokens: promptTokens, total_tokens: promptTokens };
+}
+
+function normalizeGeminiEmbedContentResponse(
+  data: Record<string, unknown>
+): Record<string, unknown> {
   return {
     object: "list",
     data: [{ object: "embedding", embedding: embeddingValues(data.embedding), index: 0 }],
-    usage: { prompt_tokens: 0, total_tokens: 0 },
+    usage: geminiEmbeddingUsage(data),
   };
 }
 
@@ -180,7 +251,7 @@ function normalizeGeminiBatchResponse(data: Record<string, unknown>): Record<str
       embedding: embeddingValues(entry),
       index,
     })),
-    usage: { prompt_tokens: 0, total_tokens: 0 },
+    usage: geminiEmbeddingUsage(data),
   };
 }
 
@@ -263,10 +334,7 @@ async function itemToGeminiContent(
     return { parts: [await jinaDocToGeminiPart(item, fetchMedia)] };
   }
   if (isCanonicalEmbeddingItem(item)) {
-    const [part] = await prepareGeminiParts(
-      [item as EmbeddingMultimodalItem],
-      fetchMedia
-    );
+    const [part] = await prepareGeminiParts([item as EmbeddingMultimodalItem], fetchMedia);
     return { parts: [part] };
   }
   throw new Error("Unsupported Gemini embedding input item");
@@ -345,4 +413,42 @@ export async function prepareStructuredEmbeddingRequest(
     };
   }
   throw new Error(`Provider ${provider.id} has no structured embedding input translator`);
+}
+
+/**
+ * Normalize a single-text embedding endpoint's response into OpenAI's
+ * `/v1/embeddings` list shape.
+ *
+ * CLOVA Studio's embedding v2 answers:
+ *
+ * ```
+ * {"status":{"code":"20000","message":"OK"},
+ *  "result":{"embedding":[…1024 floats],"inputTokens":4}}
+ * ```
+ *
+ * There is no `data[]` and no `usage` object, so both are synthesized. `index` is
+ * left at 0 here — the batching loop in `embeddings.ts` rewrites it to the
+ * caller's position before the response is returned.
+ *
+ * A non-20000 status or malformed success envelope throws so an HTTP-200 error
+ * envelope can never be exposed as an empty successful embedding response.
+ */
+export function normalizeClovaEmbeddingV2Response(
+  rawData: Record<string, unknown>
+): Record<string, unknown> {
+  const statusCode = (rawData?.status as { code?: unknown } | undefined)?.code;
+  if (String(statusCode) !== "20000") {
+    throw new Error("CLOVA Studio embedding v2 returned an unsuccessful status");
+  }
+
+  const result = (rawData?.result ?? {}) as Record<string, unknown>;
+  if (!Array.isArray(result.embedding)) {
+    throw new Error("CLOVA Studio embedding v2 response is missing an embedding vector");
+  }
+
+  const inputTokens = Number(result.inputTokens) || 0;
+  return {
+    data: [{ object: "embedding", index: 0, embedding: result.embedding }],
+    usage: { prompt_tokens: inputTokens, total_tokens: inputTokens },
+  };
 }

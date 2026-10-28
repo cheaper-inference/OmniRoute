@@ -14,7 +14,48 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 
 ## Endpoints
 
-_No endpoints mapped for this area yet._
+### GET /api/system/env/repair
+
+GET system › env › repair
+
+```bash
+curl http://localhost:20128/api/system/env/repair \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/system/env/repair
+
+POST system › env › repair
+
+```bash
+curl -X POST http://localhost:20128/api/system/env/repair \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/system/version
+
+GET system › version
+
+Running version, latest published version, auto-update status and npm release channel. `releaseChannel` and `channels` are additive (rail 3.8.54); `channel` keeps meaning the deployment mode used by the dashboard updater.
+
+```bash
+curl http://localhost:20128/api/system/version \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/system/version
+
+POST system › version
+
+```bash
+curl -X POST http://localhost:20128/api/system/version \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
 ## Payloads
 
 See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.yaml` for detailed request/response schemas.

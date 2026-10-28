@@ -19,7 +19,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 Get usage analytics
 
 ```bash
-curl https://localhost:20128/api/usage/analytics \
+curl http://localhost:20128/api/usage/analytics \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -28,7 +28,18 @@ curl https://localhost:20128/api/usage/analytics \
 Get call logs
 
 ```bash
-curl https://localhost:20128/api/usage/call-logs \
+curl http://localhost:20128/api/usage/call-logs \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/call-logs/filters
+
+Get call log filter options
+
+Distinct providers, models, accounts and API keys seen in call logs, plus every configured API key (id and name only). Feeds the Logs tab filter dropdowns.
+
+```bash
+curl http://localhost:20128/api/usage/call-logs/filters \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -37,7 +48,7 @@ curl https://localhost:20128/api/usage/call-logs \
 Get a specific call log
 
 ```bash
-curl https://localhost:20128/api/usage/call-logs/{id} \
+curl http://localhost:20128/api/usage/call-logs/{id} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -46,7 +57,7 @@ curl https://localhost:20128/api/usage/call-logs/{id} \
 Get usage for a specific connection
 
 ```bash
-curl https://localhost:20128/api/usage/{connectionId} \
+curl http://localhost:20128/api/usage/{connectionId} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -55,7 +66,7 @@ curl https://localhost:20128/api/usage/{connectionId} \
 Get usage history
 
 ```bash
-curl https://localhost:20128/api/usage/history \
+curl http://localhost:20128/api/usage/history \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -64,7 +75,7 @@ curl https://localhost:20128/api/usage/history \
 Get usage logs
 
 ```bash
-curl https://localhost:20128/api/usage/logs \
+curl http://localhost:20128/api/usage/logs \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -73,7 +84,7 @@ curl https://localhost:20128/api/usage/logs \
 Get proxy logs
 
 ```bash
-curl https://localhost:20128/api/usage/proxy-logs \
+curl http://localhost:20128/api/usage/proxy-logs \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -82,7 +93,7 @@ curl https://localhost:20128/api/usage/proxy-logs \
 Get request logs
 
 ```bash
-curl https://localhost:20128/api/usage/request-logs \
+curl http://localhost:20128/api/usage/request-logs \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -93,7 +104,7 @@ Get usage budget status
 Returns current budget limits and consumption.
 
 ```bash
-curl https://localhost:20128/api/usage/budget \
+curl http://localhost:20128/api/usage/budget \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -104,7 +115,7 @@ Configure usage budget
 Set or update budget limits for usage tracking.
 
 ```bash
-curl -X POST https://localhost:20128/api/usage/budget \
+curl -X POST http://localhost:20128/api/usage/budget \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -122,7 +133,7 @@ Only successful (`status = 200`) calls with a non-null cache column are counted.
 
 
 ```bash
-curl https://localhost:20128/api/usage/cache-health \
+curl http://localhost:20128/api/usage/cache-health \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -133,7 +144,195 @@ Get per-model/provider latency statistics
 Aggregates `usage_history` rows into per-(provider, model) latency stats (avg/p50/p95/p99, std-dev, TTFT, tokens/sec) over a rolling window. Falls back from successful-only to all-sample rows when the successful count is below `minSamples`.
 
 ```bash
-curl https://localhost:20128/api/usage/model-latency-stats \
+curl http://localhost:20128/api/usage/model-latency-stats \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/budget/bulk
+
+GET usage › budget › bulk
+
+```bash
+curl http://localhost:20128/api/usage/budget/bulk \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/codex-reset-credit
+
+GET usage › codex reset credit
+
+```bash
+curl http://localhost:20128/api/usage/codex-reset-credit \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/usage/codex-reset-credit
+
+POST usage › codex reset credit
+
+```bash
+curl -X POST http://localhost:20128/api/usage/codex-reset-credit \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/usage/combo-forecast
+
+GET usage › combo forecast
+
+```bash
+curl http://localhost:20128/api/usage/combo-forecast \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/combo-health
+
+GET usage › combo health
+
+```bash
+curl http://localhost:20128/api/usage/combo-health \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/combo-health-autopilot
+
+GET usage › combo health autopilot
+
+```bash
+curl http://localhost:20128/api/usage/combo-health-autopilot \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/combo-health-dashboard
+
+GET usage › combo health dashboard
+
+```bash
+curl http://localhost:20128/api/usage/combo-health-dashboard \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/combo-scoring-inspector
+
+GET usage › combo scoring inspector
+
+```bash
+curl http://localhost:20128/api/usage/combo-scoring-inspector \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/combo-trace/{id}
+
+GET usage › combo trace › <id>
+
+```bash
+curl http://localhost:20128/api/usage/combo-trace/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/om-usage
+
+GET usage › om usage
+
+```bash
+curl http://localhost:20128/api/usage/om-usage \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/provider-limits
+
+GET usage › provider limits
+
+```bash
+curl http://localhost:20128/api/usage/provider-limits \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/usage/provider-limits
+
+POST usage › provider limits
+
+```bash
+curl -X POST http://localhost:20128/api/usage/provider-limits \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/usage/provider-window-costs
+
+GET usage › provider window costs
+
+```bash
+curl http://localhost:20128/api/usage/provider-window-costs \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/quota
+
+GET usage › quota
+
+```bash
+curl http://localhost:20128/api/usage/quota \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/requests-by-provider-date
+
+GET usage › requests by provider date
+
+```bash
+curl http://localhost:20128/api/usage/requests-by-provider-date \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/route-explain/{id}
+
+GET usage › route explain › <id>
+
+```bash
+curl http://localhost:20128/api/usage/route-explain/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/token-limits
+
+GET usage › token limits
+
+```bash
+curl http://localhost:20128/api/usage/token-limits \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/usage/token-limits
+
+POST usage › token limits
+
+Save a per-key token limit. A key holds one limit per scope and reset interval, so daily, weekly and monthly limits for the same scope coexist. Without `id`, a new limit is added (or the key's limit for the same scope and interval is updated); with `id`, that limit is updated.
+
+```bash
+curl -X POST http://localhost:20128/api/usage/token-limits \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### DELETE /api/usage/token-limits
+
+DELETE usage › token limits
+
+```bash
+curl -X DELETE http://localhost:20128/api/usage/token-limits \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/usage/utilization
+
+GET usage › utilization
+
+```bash
+curl http://localhost:20128/api/usage/utilization \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 

@@ -29,9 +29,7 @@ import {
 import { toValidationErrorResult } from "./validation/transport";
 import {
   validateDeepSeekWebProvider,
-  validateQwenWebProvider,
   validateGrokWebProvider,
-  validateChatGptWebProvider,
   validatePerplexityWebProvider,
   validateBlackboxWebProvider,
   validateKimiWebProvider,
@@ -49,6 +47,7 @@ import {
   validateDevinCloudAgentProvider,
   validateInnerAiProvider,
   validateNotionWebProvider,
+  validateSyntxProvider,
 } from "./validation/webProvidersB";
 import {
   validateHerokuProvider,
@@ -76,11 +75,12 @@ import {
   validateRekaProvider,
   validateMaritalkProvider,
   validateNlpCloudProvider,
+  validateOneMinAiProvider,
   validateRunwayProvider,
   validateNousResearchProvider,
   validatePoeProvider,
 } from "./validation/audioMiscProviders";
-import { validateChatGptWebCodexProvider } from "./validation/chatgptWebCodex";
+import { validateTypesafeProvider } from "./validation/typesafe";
 import { validateZaiWebProvider } from "./validation/zaiWeb";
 import { validateSearchProvider, SEARCH_VALIDATOR_CONFIGS } from "./validation/searchProviders";
 import {
@@ -109,6 +109,10 @@ import {
 } from "./validation/webCookie";
 import { validateAiHordeProvider } from "./validation/aihorde";
 import { validateDifyProvider } from "./validation/dify";
+import { validateZyloApiProvider } from "./validation/zylo";
+import { validateInceptionProvider } from "./validation/inception";
+import { validateClineProvider } from "./validation/cline";
+import { validateKilocodeProvider } from "./validation/kilocode";
 import { validateAdobeFireflyProvider } from "./validation/adobeFirefly";
 import {
   validateV0VercelProvider,
@@ -123,6 +127,7 @@ import {
   validateNvidiaProvider,
   validateZaiProvider,
   validateXiaomiMimoProvider,
+  validateXiaomiMimoTokenPlanProvider,
   buildGitlawbValidators,
 } from "./validation/specialtyInline";
 // validateCommandCodeProvider + validateClaudeCodeCompatibleProvider have external importers
@@ -165,14 +170,27 @@ export async function validateFreebuffProvider({ apiKey }: { apiKey: string }) {
       return { valid: false, error: "Invalid or expired Freebuff Auth Token", unsupported: false };
     }
     const errText = await res.text().catch(() => "");
-    return { valid: false, error: `Freebuff validation returned ${res.status}: ${errText.slice(0, 100)}`, unsupported: false };
+    return {
+      valid: false,
+      error: `Freebuff validation returned ${res.status}: ${errText.slice(0, 100)}`,
+      unsupported: false,
+    };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     return { valid: false, error: `Freebuff validation network error: ${msg}`, unsupported: false };
   }
 }
 
-export async function validateProviderApiKey({ provider, apiKey, providerSpecificData = {} }: any) {
+export async function validateProviderApiKey({
+  provider,
+  apiKey,
+  providerSpecificData = {},
+  // S-01 (#15159): forwarded to specialty validators that can reach a local spawn
+  // (currently only the devin cloud-agent CLI fallback). Remote-reachable routes
+  // pass `false` for non-loopback callers; direct/internal callers keep the
+  // permissive default. See validateDevinCloudAgentProvider for the rationale.
+  allowLocalSpawn = true,
+}: any) {
   provider = typeof provider === "string" ? resolveProviderId(provider) : provider;
   const requiresApiKey = !providerAllowsOptionalApiKey(provider);
   const isLocal = isLocalProvider(provider);
@@ -217,7 +235,10 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
     // "devin" is the Cognition cloud-agent provider (distinct from the "devin-cli"
     // LLM/ACP provider, which is already registered in providerRegistry). Wired here
     // for parity with the "jules" cloud-agent entry above — see #6142.
-    devin: validateDevinCloudAgentProvider,
+    // S-01 (#15159): wrapped so the local CLI-spawn fallback receives allowLocalSpawn;
+    // a bare reference would silently drop the flag and let a remote caller spawn.
+    devin: ({ apiKey, allowLocalSpawn }: any) =>
+      validateDevinCloudAgentProvider({ apiKey, allowLocalSpawn }),
     auggie: validateAuggieProvider,
     "cursor-api": validateCursorApiProvider,
     aihorde: validateAiHordeProvider,
@@ -238,6 +259,30 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
     // #5422: auth-only probe — Bytez 404s on every chat model until the account adds it to
     // its catalog, so the generic chat probe can't validate a fresh key.
     bytez: validateBytezProvider,
+    // #13828: Zylo serves GET /v1/models WITHOUT authentication — 200 with no Authorization
+    // header, and 200 for a bogus key. The generic OpenAI-like probe returns on the first 2xx
+    // from that route, so the setup dialog greened any string and the user only discovered the
+    // key was rejected when their own model test came back `401 {"error":"Key not found: zk-…"}`.
+    // Probe the chat route, which is the one Zylo actually authenticates.
+    "zylo-api": validateZyloApiProvider,
+    // Registered under the alias too: connections are commonly stored as "zylo" (same prefix as
+    // the zylo/<model> routing ids), and the alias must not fall back to the open-catalog probe.
+    // Same shape as the adobe-firefly/firefly pair above.
+    zylo: validateZyloApiProvider,
+    // Inception Labs serves GET /v1/models without authentication (200 for any key), so the
+    // generic OpenAI-like probe greened bogus keys. Probe the authenticated chat route instead.
+    inception: validateInceptionProvider,
+    // Cline and ClinePass serve unauthenticated GET /v1/models (open catalog returning 200 for any key)
+    // and require streaming + Cline client headers on /chat/completions. Probe the authenticated route.
+    cline: validateClineProvider,
+    clinepass: (args: {
+      apiKey?: string;
+      providerSpecificData?: Record<string, unknown> | null;
+      isLocal?: boolean;
+    }) => validateClineProvider({ ...args, provider: "clinepass" }),
+    // Kilo Code serves unauthenticated GET /models (open catalog returning 200 for any key).
+    // Authenticate against /chat/completions with the required X-KILOCODE-EDITORNAME header.
+    kilocode: validateKilocodeProvider,
     deepgram: validateDeepgramProvider,
     assemblyai: validateAssemblyAIProvider,
     "rev-ai": validateRevAiProvider,
@@ -297,16 +342,22 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
     reka: validateRekaProvider,
     maritalk: validateMaritalkProvider,
     nlpcloud: validateNlpCloudProvider,
+    oneminai: validateOneMinAiProvider,
     runwayml: validateRunwayProvider,
+    typesafe: ({ apiKey }: any) => validateTypesafeProvider({ apiKey }),
     snowflake: validateSnowflakeProvider,
     gigachat: validateGigachatProvider,
     "deepseek-web": validateDeepSeekWebProvider,
     "zai-web": validateZaiWebProvider,
     "grok-web": validateGrokWebProvider,
-    "qwen-web": validateQwenWebProvider,
     "kimi-web": validateKimiWebProvider,
-    "chatgpt-web": validateChatGptWebProvider,
-    "chatgpt-web-codex": validateChatGptWebCodexProvider,
+    "chatgpt-web-codex": (input: {
+      apiKey?: string;
+      providerSpecificData?: Record<string, unknown>;
+    }) =>
+      import("./validation/chatgptWebCodex").then((mod) =>
+        mod.validateChatGptWebCodexProvider(input)
+      ),
     "perplexity-web": validatePerplexityWebProvider,
     "blackbox-web": validateBlackboxWebProvider,
     "muse-spark-web": validateMuseSparkWebProvider,
@@ -319,6 +370,8 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
     "copilot-m365-web": validateCopilotM365WebProvider,
     "copilot-web": validateCopilotWebProvider,
     "t3-web": validateT3WebProvider,
+    syntx: validateSyntxProvider,
+    stx: validateSyntxProvider,
     "azure-openai": validateAzureOpenAIProvider,
     "azure-ai": validateAzureAiProvider,
     "voyage-ai": ({ apiKey, providerSpecificData }: any) => {
@@ -342,6 +395,8 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
     zai: validateZaiProvider,
     "xiaomi-mimo": ({ apiKey, providerSpecificData }: any) =>
       validateXiaomiMimoProvider({ apiKey, providerSpecificData, isLocal }),
+    "xiaomi-mimo-token-plan": ({ apiKey, providerSpecificData }: any) =>
+      validateXiaomiMimoTokenPlanProvider({ apiKey, providerSpecificData, isLocal }),
     // Gitlawb Opengateway — Xiaomi MiMo compatible, same /models endpoint limitation.
     // Bypass /models probe in favor of chat/completions, matching xiaomi-mimo's pattern.
     // Uses a factory to share validation logic across Opengateway provider variants.
@@ -358,7 +413,7 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
         id,
         ({ apiKey, providerSpecificData }: any) => {
           const { url, init } = configFn(apiKey, providerSpecificData);
-          return validateSearchProvider(url, init, providerSpecificData, isLocal);
+          return validateSearchProvider(url, init, providerSpecificData, isLocal, id);
         },
       ])
     ),
@@ -366,7 +421,11 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
 
   if (SPECIALTY_VALIDATORS[provider]) {
     try {
-      return await SPECIALTY_VALIDATORS[provider]({ apiKey, providerSpecificData });
+      return await SPECIALTY_VALIDATORS[provider]({
+        apiKey,
+        providerSpecificData,
+        allowLocalSpawn,
+      });
     } catch (error: any) {
       return toValidationErrorResult(error);
     }
@@ -374,7 +433,7 @@ export async function validateProviderApiKey({ provider, apiKey, providerSpecifi
 
   // Web-cookie providers WITHOUT a dedicated specialty validator above fall back to the generic
   // session-ping check (AUTH_007 SESSION_EXPIRED on 401/403). Providers that DO have a rich
-  // per-provider validator (grok-web, chatgpt-web, claude-web, …) are handled by
+  // per-provider validator (grok-web, perplexity-web, claude-web, etc.) are handled by
   // SPECIALTY_VALIDATORS first and must not be shadowed by this generic probe (issue: the
   // #4023 dispatch was placed too early and intercepted every web-cookie provider).
   const canonicalProvider = resolveProviderId(provider);

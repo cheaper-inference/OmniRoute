@@ -1,211 +1,202 @@
-# CLI-TOOLS (فارسی)
+# CLI Tools — OmniRoute (فارسی)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../reference/CLI-TOOLS.md) · 🇸🇦 [ar](../../../ar/docs/reference/CLI-TOOLS.md) · 🇦🇿 [az](../../../az/docs/reference/CLI-TOOLS.md) · 🇧🇬 [bg](../../../bg/docs/reference/CLI-TOOLS.md) · 🇧🇩 [bn](../../../bn/docs/reference/CLI-TOOLS.md) · 🇨🇿 [cs](../../../cs/docs/reference/CLI-TOOLS.md) · 🇩🇰 [da](../../../da/docs/reference/CLI-TOOLS.md) · 🇩🇪 [de](../../../de/docs/reference/CLI-TOOLS.md) · 🇪🇸 [es](../../../es/docs/reference/CLI-TOOLS.md) · 🇫🇮 [fi](../../../fi/docs/reference/CLI-TOOLS.md) · 🇫🇷 [fr](../../../fr/docs/reference/CLI-TOOLS.md) · 🇮🇳 [gu](../../../gu/docs/reference/CLI-TOOLS.md) · 🇮🇱 [he](../../../he/docs/reference/CLI-TOOLS.md) · 🇮🇳 [hi](../../../hi/docs/reference/CLI-TOOLS.md) · 🇭🇺 [hu](../../../hu/docs/reference/CLI-TOOLS.md) · 🇮🇩 [id](../../../id/docs/reference/CLI-TOOLS.md) · 🇮🇩 [in](../../../in/docs/reference/CLI-TOOLS.md) · 🇮🇹 [it](../../../it/docs/reference/CLI-TOOLS.md) · 🇯🇵 [ja](../../../ja/docs/reference/CLI-TOOLS.md) · 🇰🇷 [ko](../../../ko/docs/reference/CLI-TOOLS.md) · 🇮🇳 [mr](../../../mr/docs/reference/CLI-TOOLS.md) · 🇲🇾 [ms](../../../ms/docs/reference/CLI-TOOLS.md) · 🇳🇱 [nl](../../../nl/docs/reference/CLI-TOOLS.md) · 🇳🇴 [no](../../../no/docs/reference/CLI-TOOLS.md) · 🇵🇭 [phi](../../../phi/docs/reference/CLI-TOOLS.md) · 🇵🇱 [pl](../../../pl/docs/reference/CLI-TOOLS.md) · 🇵🇹 [pt](../../../pt/docs/reference/CLI-TOOLS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/CLI-TOOLS.md) · 🇷🇴 [ro](../../../ro/docs/reference/CLI-TOOLS.md) · 🇷🇺 [ru](../../../ru/docs/reference/CLI-TOOLS.md) · 🇸🇰 [sk](../../../sk/docs/reference/CLI-TOOLS.md) · 🇸🇪 [sv](../../../sv/docs/reference/CLI-TOOLS.md) · 🇰🇪 [sw](../../../sw/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ta](../../../ta/docs/reference/CLI-TOOLS.md) · 🇮🇳 [te](../../../te/docs/reference/CLI-TOOLS.md) · 🇹🇭 [th](../../../th/docs/reference/CLI-TOOLS.md) · 🇹🇷 [tr](../../../tr/docs/reference/CLI-TOOLS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/CLI-TOOLS.md) · 🇵🇰 [ur](../../../ur/docs/reference/CLI-TOOLS.md) · 🇻🇳 [vi](../../../vi/docs/reference/CLI-TOOLS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/CLI-TOOLS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/CLI-TOOLS.md)
-
----
+🌐 **Languages:** 🇺🇸 [English](../../../../reference/CLI-TOOLS.md) · 🇪🇹 [am](../../../am/docs/reference/CLI-TOOLS.md) · 🇸🇦 [ar](../../../ar/docs/reference/CLI-TOOLS.md) · 🇦🇿 [az](../../../az/docs/reference/CLI-TOOLS.md) · 🇧🇬 [bg](../../../bg/docs/reference/CLI-TOOLS.md) · 🇧🇩 [bn](../../../bn/docs/reference/CLI-TOOLS.md) · 🇧🇦 [bs](../../../bs/docs/reference/CLI-TOOLS.md) · 🇨🇿 [cs](../../../cs/docs/reference/CLI-TOOLS.md) · 🇩🇰 [da](../../../da/docs/reference/CLI-TOOLS.md) · 🇩🇪 [de](../../../de/docs/reference/CLI-TOOLS.md) · 🇬🇷 [el](../../../el/docs/reference/CLI-TOOLS.md) · 🇪🇸 [es](../../../es/docs/reference/CLI-TOOLS.md) · 🇪🇪 [et](../../../et/docs/reference/CLI-TOOLS.md) · 🇫🇮 [fi](../../../fi/docs/reference/CLI-TOOLS.md) · 🇫🇷 [fr](../../../fr/docs/reference/CLI-TOOLS.md) · 🇮🇪 [ga](../../../ga/docs/reference/CLI-TOOLS.md) · 🇮🇳 [gu](../../../gu/docs/reference/CLI-TOOLS.md) · 🇳🇬 [ha](../../../ha/docs/reference/CLI-TOOLS.md) · 🇮🇱 [he](../../../he/docs/reference/CLI-TOOLS.md) · 🇮🇳 [hi](../../../hi/docs/reference/CLI-TOOLS.md) · 🇭🇷 [hr](../../../hr/docs/reference/CLI-TOOLS.md) · 🇭🇺 [hu](../../../hu/docs/reference/CLI-TOOLS.md) · 🇦🇲 [hy](../../../hy/docs/reference/CLI-TOOLS.md) · 🇮🇩 [id](../../../id/docs/reference/CLI-TOOLS.md) · 🇳🇬 [ig](../../../ig/docs/reference/CLI-TOOLS.md) · 🇮🇹 [it](../../../it/docs/reference/CLI-TOOLS.md) · 🇯🇵 [ja](../../../ja/docs/reference/CLI-TOOLS.md) · 🇬🇪 [ka](../../../ka/docs/reference/CLI-TOOLS.md) · 🇰🇭 [km](../../../km/docs/reference/CLI-TOOLS.md) · 🇮🇳 [kn](../../../kn/docs/reference/CLI-TOOLS.md) · 🇰🇷 [ko](../../../ko/docs/reference/CLI-TOOLS.md) · 🇱🇹 [lt](../../../lt/docs/reference/CLI-TOOLS.md) · 🇱🇻 [lv](../../../lv/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ml](../../../ml/docs/reference/CLI-TOOLS.md) · 🇮🇳 [mr](../../../mr/docs/reference/CLI-TOOLS.md) · 🇲🇾 [ms](../../../ms/docs/reference/CLI-TOOLS.md) · 🇲🇹 [mt](../../../mt/docs/reference/CLI-TOOLS.md) · 🇲🇲 [my](../../../my/docs/reference/CLI-TOOLS.md) · 🇳🇵 [ne](../../../ne/docs/reference/CLI-TOOLS.md) · 🇳🇱 [nl](../../../nl/docs/reference/CLI-TOOLS.md) · 🇳🇴 [no](../../../no/docs/reference/CLI-TOOLS.md) · 🇮🇳 [or](../../../or/docs/reference/CLI-TOOLS.md) · 🇮🇳 [pa](../../../pa/docs/reference/CLI-TOOLS.md) · 🇵🇭 [phi](../../../phi/docs/reference/CLI-TOOLS.md) · 🇵🇱 [pl](../../../pl/docs/reference/CLI-TOOLS.md) · 🇵🇹 [pt](../../../pt/docs/reference/CLI-TOOLS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/CLI-TOOLS.md) · 🇷🇴 [ro](../../../ro/docs/reference/CLI-TOOLS.md) · 🇷🇺 [ru](../../../ru/docs/reference/CLI-TOOLS.md) · 🇱🇰 [si](../../../si/docs/reference/CLI-TOOLS.md) · 🇸🇰 [sk](../../../sk/docs/reference/CLI-TOOLS.md) · 🇸🇮 [sl](../../../sl/docs/reference/CLI-TOOLS.md) · 🇷🇸 [sr](../../../sr/docs/reference/CLI-TOOLS.md) · 🇸🇪 [sv](../../../sv/docs/reference/CLI-TOOLS.md) · 🇰🇪 [sw](../../../sw/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ta](../../../ta/docs/reference/CLI-TOOLS.md) · 🇮🇳 [te](../../../te/docs/reference/CLI-TOOLS.md) · 🇹🇭 [th](../../../th/docs/reference/CLI-TOOLS.md) · 🇹🇷 [tr](../../../tr/docs/reference/CLI-TOOLS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/CLI-TOOLS.md) · 🇵🇰 [ur](../../../ur/docs/reference/CLI-TOOLS.md) · 🇺🇿 [uz](../../../uz/docs/reference/CLI-TOOLS.md) · 🇻🇳 [vi](../../../vi/docs/reference/CLI-TOOLS.md) · 🇳🇬 [yo](../../../yo/docs/reference/CLI-TOOLS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/CLI-TOOLS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/CLI-TOOLS.md)
 
 ---
 
-title: "ابزارهای CLI — OmniRoute"
-version: 3.8.50
-lastUpdated: 2026-08-18
----
+آخرین به روز رسانی: 2026-08-23
 
-# ابزارهای CLI — OmniRoute
+OmniRoute با سه دسته از ابزارهای CLI که در سه صفحه داشبورد اختصاصی پخش شده اند ادغام می شود:
 
-آخرین به‌روزرسانی: 2026-08-18
+| صفحه              | مسیر                    | مفهوم                                                                                 | بشمار             |
+| ----------------- | ----------------------- | ------------------------------------------------------------------------------------- | ----------------- |
+| **کد CLI**        | `/dashboard/cli-code`   | ابزارهای کدگذاری که به OmniRoute اشاره میکنید (ارائهدهنده مشتری → CLI → OmniRoute → ) | 26                |
+| **نمایندگان CLI** | `/dashboard/cli-agents` | عوامل مستقلی که به OmniRoute اشاره میکنید (جریان یکسان، دامنه وسیعتر)                 | 11                |
+| **نمایندگان ACP** | `/dashboard/acp-agents` | CLIs که OmniRoute به عنوان backend از طریق stdio/ACP (جریان معکوس) تولید می شود       | رجیستری را ببینید |
 
-OmniRoute با سه دسته از ابزارهای CLI که در سه صفحه داشبورد اختصاصی پخش شده‌اند، یکپارچه می‌شود:
-
-| صفحه              | مسیر                    | مفهوم                                                                                  | تعداد                  |
-| ----------------- | ----------------------- | -------------------------------------------------------------------------------------- | ---------------------- |
-| **کدهای CLI**     | `/dashboard/cli-code`   | ابزارهای کدنویسی که به OmniRoute اشاره می‌کنند (مشتری → CLI → OmniRoute → ارائه‌دهنده) | 26                     |
-| **نمایندگان CLI** | `/dashboard/cli-agents` | نمایندگان خودکار که به OmniRoute اشاره می‌کنند (همان جریان، دامنه وسیع‌تر)             | 8                      |
-| **نمایندگان ACP** | `/dashboard/acp-agents` | CLIهایی که OmniRoute به عنوان بک‌اند از طریق stdio/ACP ایجاد می‌کند (جریان معکوس)      | به ثبت‌نام مراجعه کنید |
-
-مسیرهای قدیمی از طریق 308 هدایت می‌شوند: `/dashboard/cli-tools` → `/dashboard/cli-code`، `/dashboard/agents` → `/dashboard/acp-agents`.
+مسیرهای قدیمی از طریق 308 تغییر مسیر می دهند: `/dashboard/cli-tools` → `/dashboard/cli-code`، `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
 ## نحوه کار
 
 ```
-کدهای CLI / نمایندگان CLI (جریان مصرف):
+CLI Code's / CLI Agents (جریان مصرف):
 Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose / ...
            │
-           ▼  (همه به OmniRoute اشاره می‌کنند)
+           ▼  (همگی به OmniRoute متصل میشوند)
     http://YOUR_SERVER:20128/v1
            │
-           ▼  (OmniRoute به ارائه‌دهنده صحیح هدایت می‌کند)
+           ▼  (OmniRoute درخواست را به ارائهدهنده مناسب هدایت میکند)
     Anthropic / OpenAI / Gemini / DeepSeek / Groq / Mistral / ...
 
-نمایندگان ACP (جریان ایجاد معکوس):
-    درخواست مشتری → OmniRoute → CLI را از طریق stdio/ACP ایجاد می‌کند → پاسخ
+ACP Agents (جریان اجرای معکوس):
+    درخواست Client → OmniRoute → اجرای CLI از طریق stdio/ACP → پاسخ
 ```
 
 **مزایا:**
 
 - یک کلید API برای مدیریت همه ابزارها
-- ردیابی هزینه‌ها در تمام CLIها در داشبورد
-- تغییر مدل بدون نیاز به پیکربندی مجدد هر ابزار
-- کارکرد محلی و بر روی سرورهای از راه دور (VPS، Docker، Akamai، Cloudflare Tunnel)
+- ردیابی هزینه همه CLIها در داشبورد
+- تغییر مدل بدون پیکربندی مجدد تکتک ابزارها
+- قابل استفاده بهصورت محلی و روی سرورهای راه دور (VPS، Docker، Akamai، Cloudflare Tunnel)
 
 ---
 
 ## پیکربندی خودکار با `setup-*`
 
-شما نیازی به نوشتن پیکربندی هر ابزار به صورت دستی ندارید. OmniRoute یک دستور `setup-*`
-برای هر CLI پشتیبانی شده ارائه می‌دهد که کاتالوگ مدل **زنده** را از یک OmniRoute در حال اجرا (محلی یا از راه دور) می‌خواند و پیکربندی خود ابزار را بر روی ماشین شما می‌نویسد:
+لازم نیست پیکربندی هر ابزار را با دست بنویسید. OmniRoute یک فرمان `setup-*` را به ازای CLI پشتیبانی شده ارسال می کند که دستور را می خواند** زندگی می کنند** کاتالوگ مدل از یک OmniRoute در حال اجرا (محلی یا راه دور) و پیکربندی خود ابزار را روی دستگاه شما می نویسد:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
+omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-هر کدام `--remote <url> --api-key <key>` را می‌پذیرند (پیکربندی یک ابزار محلی در برابر یک OmniRoute از راه دور)، `--dry-run` (پیش‌نمایش بدون نوشتن) و `--port`. ابزارهایی که کشف خودکار مدل ندارند (Cline، Kilo، Roo، Goose، Aider، Qwen) `--model <id>` را می‌پذیرند (و `--yes` برای اجراهای غیرتعامل‌پذیر). برای راه‌اندازی یک CLI با محیط صحیح و بدون نوشتن هیچ پیکربندی، از راه‌انداز عمومی
-`omniroute run <target>` استفاده کنید (claude، codex، aider، goose، opencode، qwen،
-gemini — اهداف و نام‌های مستعار از `bin/cli/cli-manifest.mjs` می‌آیند)؛ راه‌اندازهای قدیمی به ازای هر ابزار `omniroute launch` (Claude Code) و `omniroute launch-codex`
-(Codex) همچنان در دسترس هستند. CLI جیمنای فقط برای راه‌اندازی است: این یک هدف `omniroute run`
-است اما هیچ دستور `setup-*`/`configure` ندارد.
+هر کدام `--remote <url> --api-key <key>` (پیکربندی یک ابزار محلی در برابر OmniRoute راه دور)، `--dry-run` (پیش نمایش بدون نوشتن) و `--port` را می پذیرد. ابزارهای بدون کشف خودکار مدل (Cline، Kilo، Roo، Goose، Aider، Qwen، 5dive، WhyCodes) `--model <id>` (و `--yes` برای اجراهای غیر تعاملی) می گیرند. `setup-5dive` تنها دستور العملی است که زیر `$HOME` نمی نویسد: یک ناوگان عامل 5 dive را با نوشتن یک نمایه اعتبار متعلق به ریشه در میزبان ناوگان پیکربندی می کند، بنابراین از طریق `sudo` مجددا اجرا می شود و هیچ حالت راه دوری ندارد. برای راهاندازی یک CLI با env مناسب و بدون پیکربندی نوشته شده، از لانچر عمومی `omniroute run <target>` استفاده کنید (claude، codex، aider، goose، opencode، qwen، gemini، Whycodes - اهداف و نامهای مستعار از `bin/cli/cli-manifest.mjs` آمدهاند). لانچرهای قدیمی `omniroute launch` (کد Claude ) و `omniroute launch-codex` (Codex) در دسترس هستند. Gemini CLI فقط راه اندازی است: یک هدف `omniroute run` است اما هیچ دستور العمل `setup-*`/`configure` ندارد.
 
-> **مرجع کامل:** جدول اصلی — آنچه هر دستور می‌نویسد، هر پرچم،
-> محلی در مقابل از راه دور، و اینکه کدام ابزارها به یک پسوند `/v1` نیاز دارند — در
-> **[یکپارچه‌سازی‌های CLI](../guides/CLI-INTEGRATIONS.md)** موجود است.
+> **مرجع کامل:** جدول اصلی - آنچه که هر دستور می نویسد، هر پرچم، محلی در مقابل راه دور، و ابزارهایی که پسوند `/v1` می خواهند - در** [CLI](../guides/CLI-INTEGRATIONS.md)** .
 
-### اجرای این‌ها در داخل یک کانتینر
+### اینها را داخل یک ظرف اجرا کنید
 
-یک دستور `setup-*` که در داخل کانتینر OmniRoute اجرا می‌شود، در خانه خود کانتینر می‌نویسد، که هیچ CLI میزبان آن را نمی‌خواند و با کانتینر ناپدید می‌شود. OmniRoute این را تشخیص می‌دهد و با دستورالعمل‌ها `2` خارج می‌شود به جای نوشتن. دو راه پشتیبانی شده برای پیشرفت — نصب CLI بر روی میزبان و
-`omniroute connect` به کانتینر، یا بایند-مونت کردن دایرکتوری‌های پیکربندی و تنظیم
-`CLI_CONFIG_HOME` (پروفایل میزبان کامپوز). هر دستور `setup-*`، به علاوه
-`omniroute configure` و `omniroute config set`، `--allow-container-write` را می‌پذیرند زمانی که پیکربندی CLIهای خود کانتینر واقعاً منظور شما بوده است؛ `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` همین کار را برای
-سرور انجام می‌دهد. به
-[راهنمای Docker → پیکربندی ابزارهای CLI میزبان](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) مراجعه کنید.
+یک دستور `setup-*` که در داخل کانتینر OmniRoute اجرا می شود، در خانه خود کانتینر می نویسد که هیچ میزبان CLI آن را نمی خواند و با ظرف ناپدید می شود. OmniRoute آن را تشخیص می دهد و به جای نوشتن، از `2` خارج می شود. دو راه قابل پشتیبانی - CLI را روی هاست نصب کنید و `omniroute connect` به کانتینر نصب کنید، یا پیکربندیها را متصل کنید و `CLI_CONFIG_HOME` (پروفایل نوشتن `host` ) را تنظیم کنید. هر دستور `setup-*` ، به اضافه `omniroute configure` و `omniroute config set`، `--allow-container-write` را هنگام پیکربندی CLIs خود ظرف، همان چیزی است که در واقع منظور شما بود. `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` همین کار را برای سرور انجام می دهد. [راهنمای Docker را ببینید → پیکربندی ابزار CLI میزبان](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-نقطه پایانی **اعمال داشبورد** (`POST /api/cli-tools/apply`) همان محافظ را اعمال می‌کند: در یک کانتینر، نوشتن که هدف آن از میزبان بایند-مونت نشده است، **`422`** را با `containerEphemeralTarget: true`، متن خطای ایمن و — برای ابزارهایی که دستور میزبان دارند (claude، codex، opencode، cline،
-kilo، continue) — یک `hostSetupCommand` (به عنوان مثال `omniroute setup-opencode`) برای اجرا بر روی میزبان به جای آن؛ هیچ چیزی نوشته نمی‌شود. `dryRun: true` در حالت کانتینر همچنان کار می‌کند و محتوای تولید شده + مسیر هدف را بدون لمس دیسک برمی‌گرداند، بنابراین می‌توانید از داشبورد پیش‌نمایش کنید و بر روی میزبان اعمال کنید. این رفتار عمدی است و توسط
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` محافظت می‌شود — هرگز "اصلاح" نکنید یک 422 را با حذف محافظ.
+مال داشبورد** نقطه پایانی را اعمال کنید** (`POST /api/cli-tools/apply`) همان محافظ را اجرا می کند: در یک ظرف، نوشته ای که هدف آن از میزبان متصل نشده است، پاسخ می دهد.**`422`** با `containerEphemeralTarget: true`، متن خطای ایمن و - برای ابزارهایی که دستور میزبانی دارند (کلود، کدکس، کد باز، کلین، کیلو، ادامه) - یک `hostSetupCommand` (مثلا `omniroute setup-opencode`) برای اجرا در هاست. چیزی نوشته نشده است `dryRun: true` در حالت کانتینر به کار خود ادامه می دهد و یک مسیر هدف + پیش نمایش ویرایش شده را بدون لمس دیسک برمی گرداند. محتوای پیشنمایش یک پیکربندی حاوی اعتبار برای کپی یا وارد کردن نیست. با ورودیهای tool/base URL/API key/model اصلی روی میزبان اعمال کنید یا از دستور تنظیم سمت میزبان استفاده کنید. [امنیت پیکربندی CLI](../security/CLI-CONFIGURATION.md) برای هدر پیش نمایش و قرارداد درخواست ببینید. این رفتار عمدی است و توسط `tests/unit/api/cli-tools/apply-container-guard.test.ts` دارای رگرسیون محافظت می شود - هرگز با برداشتن گارد، 422 را "اصلاح" نکنید.
 
 ---
 
 ## منبع حقیقت
 
-کاتالوگ یکپارچه در `src/shared/constants/cliTools.ts` به عنوان `CLI_TOOLS: Record<string, CliCatalogEntry>` وجود دارد.
+کاتالوگ یکپارچه در `src/shared/constants/cliTools.ts` و بهصورت `CLI_TOOLS: Record<string, CliCatalogEntry>` قرار دارد.
 
-هر ورودی دارای این فیلدها است (تعریف شده در `src/shared/schemas/cliCatalog.ts`):
+هر ورودی دارای فیلدهای زیر است (که در `src/shared/schemas/cliCatalog.ts` تعریف شدهاند):
 
-| فیلد                                            | نوع                                                          | توضیحات                                                      |
-| ----------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| `category`                                      | `"code" \| "agent"`                                          | کدام صفحه ابزار را نمایش می‌دهد                              |
-| `vendor`                                        | `string`                                                     | منبع ابزار ("Anthropic"، "OSS (P. Gauthier)")                |
-| `acpSpawnable`                                  | `boolean`                                                    | همچنین به عنوان یک عامل ACP قابل استفاده است (نشان داده شده) |
-| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | سطح پشتیبانی از نقطه پایانی سفارشی. `"none"` = MITM backlog  |
-| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | مکانیزم پیکربندی                                             |
-| `id`, `name`, `color`, `description`, `docsUrl` | استاندارد                                                    | فیلدهای اصلی نمایش                                           |
+| فیلد                                            | نوع                                                          | توضیحات                                                               |
+| ----------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `category`                                      | `"code" \| "agent"`                                          | ابزار در کدام صفحه نمایش داده میشود                                   |
+| `vendor`                                        | `string`                                                     | منشأ ابزار ("Anthropic"، "OSS (P. Gauthier)")                         |
+| `acpSpawnable`                                  | `boolean`                                                    | آیا بهعنوان یک ACP Agent نیز قابل استفاده است (نشان نمایش داده میشود) |
+| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | سطح پشتیبانی از نقطه پایانی سفارشی. `"none"` = فهرست انتظار MITM      |
+| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | سازوکار پیکربندی                                                      |
+| `id`, `name`, `color`, `description`, `docsUrl` | استاندارد                                                    | فیلدهای اصلی نمایش                                                    |
 
-ورودی‌هایی با `baseUrlSupport: "none"` در صفحات داشبورد **نمایش داده نمی‌شوند** — آنها در MITM backlog برای طرح 11 ثبت شده‌اند (به `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` مراجعه کنید).
+ورودیهای دارای `baseUrlSupport: "none"` در صفحات داشبورد **نمایش داده نمیشوند** — آنها برای طرح 11 در فهرست انتظار MITM ثبت شدهاند (به `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` مراجعه کنید).
 
-### سطوح قابلیت (کاتالوگ شده × قابل شناسایی × قابل پیکربندی × قابل راه‌اندازی)
+### سطوح قابلیت (کاتالوگشده × قابلشناسایی × قابلپیکربندی × قابلاجرا)
 
-هر ابزار کاتالوگ شده قابل شناسایی، قابل پیکربندی یا قابل راه‌اندازی نیست. هر سطح یک منبع اعلام کننده دارد و یک تست انحراف آنها را هم‌راستا نگه می‌دارد:
+هر ابزار کاتالوگشده لزوماً قابلشناسایی، قابلپیکربندی یا قابلاجرا نیست. هر سطح یک
+منبع تعریفکننده دارد و یک آزمون انحراف، همراستایی آنها را حفظ میکند:
 
-| سطح                 | معنی                                                                               | اعلام شده در                                                      |
-| ------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| **کاتالوگ شده**     | در کاتالوگ داشبورد ظاهر می‌شود (نام، فروشنده، مستندات، نوع پیکربندی)               | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                  |
-| **قابل شناسایی**    | شناسایی باینری/پیکربندی، بررسی سلامت، مسیرهای پیکربندی                             | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS` runtime catalog) |
-| **قابل پیکربندی**   | توسط `omniroute configure <cli>` پشتیبانی می‌شود (دستورالعمل راه‌اندازی وجود دارد) | `bin/cli/cli-manifest.mjs` (`configure: true`)                    |
-| **قابل راه‌اندازی** | توسط `omniroute run <target>` پشتیبانی می‌شود (تزریق env/args تعریف شده)           | `bin/cli/cli-manifest.mjs` (`run: true`)                          |
+| سطح              | معنا                                                                              | محل تعریف                                                            |
+| ---------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **کاتالوگشده**   | در کاتالوگ داشبورد ظاهر میشود (نام، ارائهدهنده، مستندات، نوع پیکربندی)            | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                     |
+| **قابلشناسایی**  | شناسایی فایل اجرایی/پیکربندی، بررسیهای سلامت، مسیرهای پیکربندی                    | `src/shared/services/cliRuntime.ts` (کاتالوگ زمان اجرای `CLI_TOOLS`) |
+| **قابلپیکربندی** | توسط `omniroute configure <cli>` پشتیبانی میشود (دستورالعمل راهاندازی موجود است)  | `bin/cli/cli-manifest.mjs` (`configure: true`)                       |
+| **قابلاجرا**     | توسط `omniroute run <target>` پشتیبانی میشود (تزریق محیط/آرگومانها تعریف شده است) | `bin/cli/cli-manifest.mjs` (`run: true`)                             |
 
-`bin/cli/cli-manifest.mjs` مانفیست اجرایی رسمی برای دستورات CLI است: `run`، `configure` و تولیدکنندگان تکمیل شل همه لیست‌های هدف، حل نام مستعار (به عنوان مثال `kilocode`/`kilo-code`/`kilo_cli` → `kilo`) و اتصال پرچم `--model` را از آن استخراج می‌کنند. نگهبان انحراف
-`tests/unit/cli/cli-manifest-drift.test.ts` تأیید می‌کند که مانفیست، کاتالوگ زمان اجرا، کاتالوگ UI و هر سطح مصرف‌کننده در همگام بمانند — هدفی که به یک سطح اضافه می‌شود بدون اینکه به دیگران اضافه شود، به جای انحراف بی‌صدا، آزمون را شکست می‌دهد.
-
-## 1. کاتالوگ کد CLI (۲۶ ابزار)
-
-تمام ابزارهایی که در `/dashboard/cli-code` ظاهر می‌شوند. آن‌هایی که `baseUrlSupport: none` دارند از طریق MITM یا یک راهنمای دستی به جای یک URL پایه سفارشی متصل شده‌اند:
-
-| id           | name                     | vendor                      | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ------------------------ | --------------------------- | -------------- | -------------- | ------------ |
-| claude       | کد کلاود                 | Anthropic                   | full           | env            | true         |
-| codex        | CLI کد OpenAI            | OpenAI                      | full           | custom         | true         |
-| zcode        | ZCode (برنامه نویسی GLM) | Z.ai                        | none           | custom         | false        |
-| cline        | Cline                    | OSS (توسعه‌دهنده ex-Claude) | full           | custom         | true         |
-| kilo         | کد کیلو                  | Kilo-Org                    | full           | custom         | false        |
-| roo          | کد رو                    | Roo (OSS)                   | full           | guide          | false        |
-| continue     | ادامه                    | continue.dev                | full           | guide          | false        |
-| aider        | Aider                    | OSS (P. Gauthier)           | full           | guide          | true         |
-| forge        | ForgeCode                | Antinomy HQ                 | full           | custom         | true         |
-| jcode        | jcode                    | 1jehuang (OSS)              | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI             | Hunter Bown (OSS)           | full           | custom         | false        |
-| codewhale    | CodeWhale                | Hmbown (OSS)                | full           | custom         | false        |
-| opencode     | OpenCode                 | Anomaly (ex-SST)            | full           | guide          | true         |
-| droid        | Factory Droid            | Factory AI                  | partial        | guide          | false        |
-| copilot      | CLI کد GitHub Copilot    | GitHub/MS                   | full           | custom         | false        |
-| cursor-cli   | CLI کد Cursor            | Anysphere                   | partial        | guide          | true         |
-| smelt        | Smelt                    | leonardcser (OSS)           | full           | custom         | false        |
-| pi           | Pi (عامل کدگذاری pi)     | M. Zechner (OSS)            | full           | custom         | false        |
-| grok-build   | Grok Build               | xAI                         | full           | custom         | false        |
-| crush        | Crush                    | OSS (Charm)                 | full           | custom         | false        |
-| qwen         | کد Qwen                  | Alibaba                     | full           | guide          | true         |
-| cursor       | Cursor                   | Anysphere                   | none           | guide          | false        |
-| antigravity  | ضد جاذبه                 | Google                      | none           | mitm           | false        |
-| hermes       | هرمس                     | Nous Research               | none           | guide          | false        |
-| kiro         | Kiro AI                  | Amazon                      | none           | mitm           | false        |
-| custom       | CLI سفارشی               | —                           | full           | custom-builder | false        |
-
-ابزارهایی که `baseUrlSupport: "partial"` دارند در کارت داشبورد نشان "⚠ Base URL parcial" را نمایش می‌دهند.
----
-
-## 2. کاتالوگ ابزارهای CLI (8 ابزار)
-
-عامل‌های خودمختار که در `/dashboard/cli-agents` ظاهر می‌شوند:
-
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | عامل هرمس        | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
+`bin/cli/cli-manifest.mjs` مانیفست اجرایی مرجع برای سطوح فرمان CLI است:
+`run`، `configure` و مولدهای تکمیل خودکار پوسته، همگی فهرست اهداف، تفکیک نامهای مستعار
+(برای مثال `kilocode`/`kilo-code`/`kilo_cli` → `kilo`) و سیمکشی پرچم `--model`
+را از آن استخراج میکنند. محافظ انحراف
+`tests/unit/cli/cli-manifest-drift.test.ts` بررسی میکند که مانیفست، کاتالوگ زمان اجرا،
+کاتالوگ رابط کاربری و تمام سطوح مصرفکننده همگام باقی بمانند — اگر هدفی بدون افزودن
+به سایر سطوح به یک سطح اضافه شود، مجموعه آزمون بهجای ایجاد انحراف خاموش با شکست مواجه میشود.
 
 ---
 
-## 3. عامل‌های ACP (/dashboard/acp-agents)
+## 1. کاتالوگ کد CLI (27 ابزار)
 
-این صفحه (که از `/dashboard/agents` تغییر نام داده است) CLIهایی را نشان می‌دهد که OmniRoute می‌تواند به عنوان موتورهای اجرایی backend از طریق پروتکل stdio/ACP **ایجاد** کند. کاتالوگ به طور جداگانه در `src/lib/acp/registry.ts` نگهداری می‌شود و **همانند** `CLI_TOOLS` نیست.
+همه ابزارهایی که در `/dashboard/cli-code` ظاهر می شوند. آنهایی که `baseUrlSupport: none` دارند به جای URL پایه سفارشی از طریق MITM یا یک راهنمای دستی متصل می شوند:
+
+| شناسه       | نام                      | فروشنده             | baseUrlSupport | configType | acpSpawnable |
+| ----------- | ------------------------ | ------------------- | -------------- | ---------- | ------------ |
+| کلود        | کد Claude                | Anthropic           | کامل           | env        | درست است     |
+| کدکس        | OpenAI Codex CLI         | OpenAI              | کامل           | سفارشی     | درست است     |
+| zcode       | ZCode (طرح کدگذاری GLM ) | Z.ai                | هیچ کدام       | سفارشی     | نادرست       |
+| cline       | Cline                    | OSS (کلود دیو سابق) | کامل           | سفارشی     | درست است     |
+| کیلو        | کد کیلویی                | کیلو ارگ            | کامل           | سفارشی     | نادرست       |
+| رو          | رو کد                    | رو (OSS)            | کامل           | راهنمای    | نادرست       |
+| ادامه       | ادامه دهید               | continue.dev        | کامل           | راهنمای    | نادرست       |
+| کمک کننده   | ایدر                     | OSS (P. Gauthier)   | کامل           | راهنمای    | درست است     |
+| جعل کردن    | ForgeCode                | ضدیت HQ             | کامل           | سفارشی     | درست است     |
+| jcode       | jcode                    | 1jehuang (OSS)      | کامل           | سفارشی     | نادرست       |
+| جستجوی عمیق | DeepSeek TUI             | شکارچی باون (OSS)   | کامل           | سفارشی     | نادرست       |
+| نهنگ کد     | CodeWhale                | همبون (OSS)         | کامل           | سفارشی     | نادرست       |
+| کد باز      | OpenCode                 | ناهنجاری (SST سابق) | کامل           | راهنمای    | درست است     |
+| خوانده      | دروید کارخانه ای         | کارخانه AI          | جزئی           | راهنمای    | نادرست       |
+| کمک خلبان   | GitHub Copilot CLI       | GitHub/MS           | کامل           | سفارشی     | نادرست       |
+| نشانگر-کلی  | Cursor CLI               | Anysphere           | جزئی           | راهنمای    | درست است     |
+| بو کردن     | بو کنید                  | leonardcser (OSS)   | کامل           | سفارشی     | نادرست       |
+| پی          | Pi (عامل کدگذاری pi)     | M. Zechner (OSS)    | کامل           | سفارشی     | نادرست       |
+| grok-build  | ساخت Grok                | xAI                 | کامل           | سفارشی     | نادرست       |
+| خرد کردن    | خرد کردن                 | OSS (افسون)         | کامل           | سفارشی     | نادرست       |
+| qwen        | کد Qwen                  | Alibaba             | کامل           | راهنمای    | درست است     |
+| زد          | Zed                      | صنایع Zed           | کامل           | راهنمای    | نادرست       |
+| مکان نما    | Cursor                   | Anysphere           | هیچ کدام       | راهنمای    | نادرست       |
+| ضد جاذبه    | Antigravity              | Google              | هیچ کدام       | mitm       | نادرست       |
+| هرمس        | هرمس                     | تحقیق نوس           | هیچ کدام       | راهنمای    | نادرست       |
+| کیرو        | Kiro AI                  | Amazon              | هیچ کدام       | mitm       | نادرست       |
+| سفارشی      | CLI سفارشی               | —                   | کامل           | سفارشی ساز | نادرست       |
+
+ابزارهای دارای `baseUrlSupport: "partial"` نشان "⚠ Base URL parcial" را در کارت داشبورد نشان میدهند.
+---
+
+## 2. کاتالوگ نمایندگان CLI (11 ابزار)
+
+عوامل مستقلی که در `/dashboard/cli-agents` ظاهر می شوند:
+
+| شناسه     | نام               | فروشنده              | baseUrlSupport | acpSpawnable |
+| --------- | ----------------- | -------------------- | -------------- | ------------ |
+| عامل هرمس | نماینده هرمس      | تحقیق نوس            | کامل           | نادرست       |
+| پنجه باز  | OpenClaw          | OSS (P. Steinberger) | کامل           | درست است     |
+| غاز       | غاز               | بنیاد بلوک / Linux   | کامل           | درست است     |
+| مترجم     | مترجم را باز کنید | OSS                  | کامل           | درست است     |
+| پیچ و تاب | Warp AI           | Warp                 | جزئی           | درست است     |
+| عامل-عرشه | عرشه مامور        | اششگوپلانی (OSS)     | کامل           | نادرست       |
+| omp       | اوه من پی         | OSS                  | کامل           | درست است     |
+| letta     | لتا CLI           | لتا                  | کامل           | نادرست       |
+| عامل اصلی | مامور اصلی        | عقل نخست (OSS)       | کامل           | نادرست       |
+| 5 شیرجه   | 5 شیرجه           | OSS (5dive-ai)       | کامل           | نادرست       |
+| چرا کدها  | WhyCodes          | چرا شرکت             | کامل           | نادرست       |
 
 ---
 
-## 4. لیست معوقه MITM (در داشبورد نمایش داده نمی‌شود)
+## 3. عاملهای ACP (/dashboard/acp-agents)
 
-CLIهای زیر به طور طبیعی از URL پایه سفارشی پشتیبانی نمی‌کنند و در صفحات کد CLI یا عامل‌های CLI **فهرست نشده‌اند**. آن‌ها نامزدهای مداخله MITM در طرح 11 هستند:
-
-| CLI                 | دلیل                                                   |
-| ------------------- | ------------------------------------------------------ |
-| windsurf            | BYOK محدود به مدل‌های انتخابی Claude + URL/token شرکتی |
-| amp                 | اکوسیستم بسته (Sourcegraph)                            |
-| amazon-q / kiro-cli | احراز هویت AWS SSO، بدون URL سفارشی                    |
-| cowork              | Anthropic Desktop، بدون نقطه پایانی قابل تنظیم         |
-
-برای مرجع کامل به `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` مراجعه کنید.
+این صفحه (که نام آن از `/dashboard/agents` تغییر کرده است) رابطهای خط فرمانی را نمایش میدهد که OmniRoute میتواند آنها را از طریق پروتکل stdio/ACP بهعنوان موتورهای اجرای بکاند **راهاندازی** کند. این فهرست بهصورت جداگانه در `src/lib/acp/registry.ts` نگهداری میشود و با `CLI_TOOLS` **یکسان نیست**.
 
 ---
 
-## 5. API تشخیص دسته‌ای
+## 4. فهرست کارهای باقیمانده MITM (در داشبورد نمایش داده نمیشود)
 
-تمام تشخیص ابزارها از طریق یک نقطه پایانی واحد تجمیع می‌شود:
+رابطهای خط فرمان زیر بهصورت بومی از URL پایهٔ سفارشی پشتیبانی نمیکنند و در صفحات CLI Code یا CLI Agents **فهرست نشدهاند**. آنها گزینههایی برای رهگیری MITM در طرح ۱۱ هستند:
+
+| CLI                 | دلیل                                                       |
+| ------------------- | ---------------------------------------------------------- |
+| windsurf            | BYOK محدود به مدلهای منتخب Claude بههمراه URL/توکن سازمانی |
+| amp                 | اکوسیستم بسته (Sourcegraph)                                |
+| amazon-q / kiro-cli | احراز هویت AWS SSO، بدون URL سفارشی                        |
+| cowork              | Anthropic Desktop، بدون نقطهٔ پایانی قابل پیکربندی         |
+
+برای ارجاع متقابل کامل، به `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` مراجعه کنید.
+
+---
+
+## 5. API تشخیص دستهای
+
+تشخیص همهٔ ابزارها از طریق یک نقطهٔ پایانی واحد تجمیع میشود:
 
 **`GET /api/cli-tools/all-statuses`**
 
-- Auth: `requireCliToolsAuth(request)` (همانند سایر مسیرهای `/api/cli-tools/`)
-- Returns: `Record<toolId, ToolBatchStatus>` (نوع: `src/shared/types/cliBatchStatus.ts`)
-- Strategy: `Promise.all` بر روی تمام ابزارها، 5 ثانیه زمان محدود برای هر ابزار
-- Cache: در حافظه LRU با ایندکس فایل پیکربندی `mtime`. کش زمانی که mtime تغییر کند، نامعتبر می‌شود. در زمان راه‌اندازی مجدد سرور بازنشانی می‌شود.
+- احراز هویت: `requireCliToolsAuth(request)` (همانند سایر مسیرهای `/api/cli-tools/`)
+- خروجی: `Record<toolId, ToolBatchStatus>` (نوع: `src/shared/types/cliBatchStatus.ts`)
+- راهبرد: اجرای `Promise.all` برای همهٔ ابزارها، با مهلت زمانی ۵ ثانیه برای هر ابزار
+- حافظهٔ نهان: LRU درونحافظهای که با `mtime` فایل پیکربندی نمایهسازی میشود. با تغییر mtime، حافظهٔ نهان نامعتبر میشود. با راهاندازی مجدد سرور بازنشانی میشود.
 
-شکل پاسخ برای هر ابزار:
+ساختار پاسخ برای هر ابزار:
 
 ```ts
 interface ToolBatchStatus {
@@ -222,95 +213,99 @@ interface ToolBatchStatus {
     endpoint?: string | null;
     lastConfiguredAt?: string | null;
   };
-  error?: string; // sanitized, no stack traces
+  error?: string; // پاکسازیشده، بدون ردپای پشته
 }
 ```
 
-## ۶. مدیریت تنظیمات برای ابزارهای جدید
+---
 
-ابزارهای جدید با `configType: "custom"` دارای مسیرهای API تنظیمات اختصاصی هستند:
+## ۶. مدیریتکنندههای تنظیمات برای ابزارهای جدید
 
-| مسیر                                        | ابزار                                                            |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flag)                                          |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                           |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primary + legacy `~/.deepseek` sync) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi coding agent                                                  |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)            |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedicated `.env` key)       |
+ابزارهای جدید با `configType: "custom"` دارای مسیرهای اختصاصی API برای تنظیمات هستند:
 
-تمام مسیرها از `sanitizeErrorMessage()` برای پاسخ‌های خطا استفاده می‌کنند (قانون سخت شماره ۱۲).
+| مسیر                                        | ابزار                                                             |
+| ------------------------------------------- | ----------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                           |
+| `POST /api/cli-tools/jcode-settings`        | jcode (فلگ --base-url)                                            |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL، قدیمی)                             |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL، همگامسازی اصلی + قدیمی `~/.deepseek`) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                             |
+| `POST /api/cli-tools/pi-settings`           | عامل کدنویسی Pi                                                   |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml، `[model.omniroute]`)             |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + کلید اختصاصی `.env`)         |
+
+همه مسیرها برای پاسخهای خطا از `sanitizeErrorMessage()` استفاده میکنند (قانون سختگیرانه شماره ۱۲).
 
 ---
 
 ## ۷. معماری صفحات داشبورد
 
-### کد CLI (`/dashboard/cli-code`)
+### CLI Code's (`/dashboard/cli-code`)
 
-- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — کامپوننت سرور
-- `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — گرید کلاینت
+- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — مؤلفه سرور
+- `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — شبکه سمت کلاینت
 - `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — صفحه جزئیات ابزار
-- `src/app/(dashboard)/dashboard/cli-code/components/` — ۱۲ کارت ابزار تخصصی + `ToolDetailClient.tsx`
+- `src/app/(dashboard)/dashboard/cli-code/components/` — ۱۲ کارت تخصصی ابزار + `ToolDetailClient.tsx`
 
-### عوامل CLI (`/dashboard/cli-agents`)
+### عاملهای CLI (`/dashboard/cli-agents`)
 
-- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — کامپوننت سرور
-- `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — گرید کلاینت
-- `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — استفاده مجدد از `ToolDetailClient`
+- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — مؤلفه سرور
+- `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — شبکه سمت کلاینت
+- `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — از `ToolDetailClient` مجدداً استفاده میکند
 
-### عوامل ACP (`/dashboard/acp-agents`)
+### عاملهای ACP (`/dashboard/acp-agents`)
 
-- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — کامپوننت سرور (انتقال یافته از `agents/`)
+- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — مؤلفه سرور (از `agents/` منتقل شده است)
 
-### کامپوننت‌های UI مشترک (`src/shared/components/cli/`)
+### مؤلفههای رابط کاربری مشترک (`src/shared/components/cli/`)
 
-| فایل                    | هدف                                               |
-| ----------------------- | ------------------------------------------------- |
-| `CliToolCard.tsx`       | کارت وضعیت هوشمند (تشخیص + تنظیمات + نقطه پایانی) |
-| `CliConceptCard.tsx`    | کارت توضیح مفهوم در هر صفحه                       |
-| `CliComparisonCard.tsx` | مقایسه سه ستونی بین انواع CLI                     |
-| `BaseUrlSelect.tsx`     | منوی کشویی نقطه پایانی (محلی/ابری/سفارشی)         |
-| `ApiKeySelect.tsx`      | انتخاب‌کننده کلید API                             |
-| `ManualConfigModal.tsx` | مدال قطعه کد تنظیمات قابل کپی                     |
+| فایل                    | هدف                                                |
+| ----------------------- | -------------------------------------------------- |
+| `CliToolCard.tsx`       | کارت هوشمند وضعیت (تشخیص + پیکربندی + نقطه پایانی) |
+| `CliConceptCard.tsx`    | کارت توضیح مفهوم برای هر صفحه                      |
+| `CliComparisonCard.tsx` | مقایسه سهستونه میان انواع CLI                      |
+| `BaseUrlSelect.tsx`     | فهرست کشویی نقطه پایانی (محلی/ابری/سفارشی)         |
+| `ApiKeySelect.tsx`      | انتخابگر کلید API                                  |
+| `ManualConfigModal.tsx` | پنجره محاورهای قطعه پیکربندی قابل کپی              |
 
 ### هوک مشترک (`src/shared/hooks/cli/`)
 
-| فایل                      | هدف                                                                    |
-| ------------------------- | ---------------------------------------------------------------------- |
-| `useToolBatchStatuses.ts` | دریافت `/api/cli-tools/all-statuses`، مدیریت حالت بارگذاری/به‌روزرسانی |
+| فایل                      | هدف                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `useToolBatchStatuses.ts` | `/api/cli-tools/all-statuses` را دریافت و وضعیت بارگذاری/نوسازی را مدیریت میکند |
 
-## 8. i18n
+---
 
-فضاهای نام جدید در طرح 14 F9 اضافه شده‌اند:
+## 8. بینالمللیسازی
 
-| Namespace   | Purpose                                                                   |
-| ----------- | ------------------------------------------------------------------------- |
-| `cliCommon` | رشته‌های مشترک (برچسب‌های کارت، متون مفهوم/مقایسه، برچسب‌های صفحه جزئیات) |
-| `cliCode`   | رشته‌های صفحه CLI Code                                                    |
-| `cliAgents` | رشته‌های صفحه CLI Agents                                                  |
-| `acpAgents` | رشته‌های صفحه ACP Agents                                                  |
+فضاهای نام جدید اضافهشده در طرح 14 F9:
 
-ترجمه‌های کامل PT-BR و EN ارائه شده‌اند. 39 زبان دیگر به طور خودکار از طریق ادغام سطح فضای نام در `src/i18n/request.ts` به EN برمی‌گردند.
+| فضای نام    | هدف                                                                          |
+| ----------- | ---------------------------------------------------------------------------- |
+| `cliCommon` | رشتههای مشترک (برچسبهای کارت، متنهای مفهومی/مقایسهای، برچسبهای صفحهٔ جزئیات) |
+| `cliCode`   | رشتههای صفحهٔ CLI Code                                                       |
+| `cliAgents` | رشتههای صفحهٔ CLI Agents                                                     |
+| `acpAgents` | رشتههای صفحهٔ ACP Agents                                                     |
+
+ترجمههای کامل PT-BR و EN ارائه شدهاند. 39 زبان دیگر از طریق ادغام در سطح فضای نام در `src/i18n/request.ts` بهطور خودکار از EN استفاده میکنند.
 
 ---
 
 ## 9. شروع سریع
 
-### مرحله 1 — دریافت کلید API OmniRoute
+### مرحلهٔ 1 — دریافت کلید API از OmniRoute
 
-1. به `/dashboard/api-manager` بروید → **ایجاد کلید API**
-2. یک نام به آن بدهید (مثلاً `cli-tools`) و تمام مجوزها را انتخاب کنید
-3. کلید را کپی کنید — شما به آن برای هر CLI زیر نیاز خواهید داشت
+1. `/dashboard/api-manager` را باز کنید ← **ایجاد کلید API**
+2. نامی برای آن تعیین کنید (برای مثال `cli-tools`) و همهٔ مجوزها را انتخاب کنید
+3. کلید را کپی کنید — برای تمام CLIهای زیر به آن نیاز خواهید داشت
 
-> کلید شما به شکل زیر است: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> کلید شما به این شکل است: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### مرحله 2 — نصب ابزارهای CLI
+### مرحلهٔ 2 — نصب ابزارهای CLI
 
-تمام ابزارهای مبتنی بر npm به Node.js 22.22.2+ یا 24.x نیاز دارند:
+همهٔ ابزارهای مبتنی بر npm به Node.js 22.22.2+ یا 24.x نیاز دارند:
 
 ```bash
 # Claude Code (Anthropic)
@@ -331,7 +326,7 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (قابل راه‌اندازی از طریق `omniroute run gemini` → /v1beta surface)
+# Google Gemini CLI (قابل اجرا از طریق `omniroute run gemini` ← سطح /v1beta)
 npm install -g @google/gemini-cli
 
 # Aider
@@ -340,44 +335,44 @@ pip install aider-chat
 # Smelt
 cargo install smelt  # مبتنی بر Rust
 
-# Pi coding agent
-# برای نصب به https://github.com/zechnerj/pi-coding-agent مراجعه کنید
+# عامل کدنویسی Pi
+# برای نصب، https://github.com/zechnerj/pi-coding-agent را ببینید
 
 # jcode
-# برای نصب به https://github.com/1jehuang/jcode مراجعه کنید
+# برای نصب، https://github.com/1jehuang/jcode را ببینید
 ```
 
 ---
 
-### مرحله 3 — پیکربندی از طریق داشبورد
+### مرحلهٔ 3 — پیکربندی از طریق داشبورد
 
 1. به `http://localhost:20128/dashboard/cli-code` بروید
 2. ابزار خود را در شبکه پیدا کنید
-3. بر روی کارت کلیک کنید تا صفحه جزئیات ابزار باز شود
-4. کلید API و URL پایه خود را انتخاب کنید
-5. بر روی **اعمال پیکربندی** کلیک کنید یا قطعه کد پیکربندی دستی را کپی کنید
+3. روی کارت کلیک کنید تا صفحهٔ جزئیات ابزار باز شود
+4. کلید API و URL پایهٔ خود را انتخاب کنید
+5. روی **اعمال پیکربندی** کلیک کنید یا قطعهکد پیکربندی دستی را کپی کنید
 
 ---
 
-### مرحله 4 — تنظیم متغیرهای محیطی جهانی
+### مرحلهٔ 4 — تنظیم متغیرهای محیطی سراسری
 
 ```bash
-# نقطه پایانی جهانی OmniRoute
+# نقطهٔ پایانی همگانی OmniRoute
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI در ROOT متغیر GOOGLE_GEMINI_BASE_URL را می‌خواند (SDK آن به طور خودکار /v1beta/... را اضافه می‌کند)
+# Gemini CLI مقدار GOOGLE_GEMINI_BASE_URL را در ریشه میخواند (SDK آن خودش /v1beta/... را اضافه میکند)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> برای **سرور از راه دور** `localhost:20128` را با IP یا دامنه سرور جایگزین کنید،
-> مثلاً `http://<your-server-ip>:20128`.
+> برای یک **سرور راه دور**، `localhost:20128` را با IP یا دامنهٔ سرور جایگزین کنید،
+> برای مثال `http://<your-server-ip>:20128`.
 
 ---
 
-### مرحله 4 — پیکربندی هر ابزار
+### مرحلهٔ 4 — پیکربندی هر ابزار
 
 #### Claude Code
 
@@ -393,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-از ریشه دروازه یکپارچه Anthropic برای Claude Code استفاده کنید. در اینجا `/v1` را اضافه نکنید.
+برای Claude Code از ریشهٔ یکپارچهٔ درگاه Anthropic استفاده کنید. در اینجا `/v1` را اضافه نکنید.
 
 **آزمایش:** `claude "say hello"`
 
@@ -401,7 +396,10 @@ EOF
 
 #### OpenAI Codex
 
-Codex مدرن (v0.137+) فقط `~/.codex/config.toml` را می‌خواند — `config.yaml` قدیمی متعلق به CLI قدیمی npm است و به طور خاموش نادیده گرفته می‌شود. کلید API در متغیر محیطی `OMNIROUTE_API_KEY` (`env_key`) باقی می‌ماند و هرگز در داخل فایل نیست:
+Codex مدرن (v0.137+) فقط `~/.codex/config.toml` را میخواند — فایل قدیمی
+`config.yaml` متعلق به CLI قدیمی npm است و بدون نمایش هیچ پیامی نادیده گرفته میشود. کلید API
+در متغیر محیطی `OMNIROUTE_API_KEY` (`env_key`) باقی میماند و هرگز
+داخل فایل قرار نمیگیرد:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -416,7 +414,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-مرجع کامل (پروفایل‌ها، `wire_api`، پنجره‌های زمینه): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+مرجع کامل (پروفایلها، `wire_api`، پنجرههای زمینه): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **آزمایش:** `codex "what is 2+2?"`
 
@@ -449,8 +447,9 @@ EOF
 
 **آزمایش:** `opencode`
 
-> از `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> برای ارسال واریانت‌های تفکر استفاده کنید.
+> برای ارسال گونههای دارای قابلیت تفکر، از
+> `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
+> استفاده کنید.
 
 ---
 
@@ -469,9 +468,9 @@ EOF
 ```
 
 **حالت VS Code:**
-تنظیمات افزونه Cline → ارائه‌دهنده API: `OpenAI Compatible` → URL پایه: `http://localhost:20128/v1`
+تنظیمات افزونهٔ Cline ← ارائهدهندهٔ API: `OpenAI Compatible` ← URL پایه: `http://localhost:20128/v1`
 
-یا از داشبورد OmniRoute استفاده کنید → **CLI Tools → Cline → Apply Config**.
+یا از داشبورد OmniRoute ← **ابزارهای CLI ← Cline ← اعمال پیکربندی** استفاده کنید.
 
 ---
 
@@ -492,11 +491,11 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-یا از داشبورد OmniRoute استفاده کنید → **CLI Tools → KiloCode → Apply Config**.
+یا از داشبورد OmniRoute ← **ابزارهای CLI ← KiloCode ← اعمال پیکربندی** استفاده کنید.
 
 ---
 
-#### Continue (افزونه VS Code)
+#### Continue (افزونهٔ VS Code)
 
 فایل `~/.continue/config.yaml` را ویرایش کنید:
 
@@ -510,20 +509,20 @@ models:
     default: true
 ```
 
-پس از ویرایش، VS Code را دوباره راه‌اندازی کنید.
+پس از ویرایش، VS Code را مجدداً راهاندازی کنید.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-از این مورد زمانی استفاده کنید که VS Code Insiders برای مدل‌های نقطه پایانی سفارشی پیکربندی شده و می‌خواهید OmniRoute بدون فیلد هدر سفارشی کار کند.
+زمانی از این روش استفاده کنید که VS Code Insiders برای مدلهای دارای نقطهٔ پایانی سفارشی پیکربندی شده است و میخواهید OmniRoute بدون فیلد هدر سفارشی کار کند.
 
-**محل توصیه شده:**
+**محل پیشنهادی:**
 
-- لینوکس: `~/.config/Code - Insiders/User/chatLanguageModels.json`
-- ویندوز: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
+- Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
+- Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**مثال با استفاده از نام مستعار توکن‌شده OmniRoute:**
+**مثال با استفاده از نام مستعار توکنیشدهٔ OmniRoute:**
 
 ```json
 [
@@ -547,97 +546,98 @@ models:
 
 **نکات:**
 
-- `sk-your-omniroute-key` را با کلید API ایجاد شده در OmniRoute جایگزین کنید.
+- `sk-your-omniroute-key` را با یک کلید API ساختهشده در OmniRoute جایگزین کنید.
 - فیلد `url` باید به `/api/v1/vscode/{token}/chat/completions` اشاره کند.
 - فیلد `modelsUrl` باید به `/api/v1/vscode/{token}/models` اشاره کند.
-- در صورت پشتیبانی کلاینت از هدرهای سفارشی، از جریان معمول `/v1` + هدر Bearer استفاده کنید.
-- توکن‌های جاسازی شده در URL یک بازگشت سازگاری هستند و ممکن است در لاگ‌های ویرایشگر یا تاریخچه پروکسی ظاهر شوند.
+- هنگامی که کلاینت از هدرهای سفارشی پشتیبانی میکند، جریان معمول `/v1` بههمراه هدر Bearer را ترجیح دهید.
+- توکنهای تعبیهشده در URL یک راهکار سازگاری جایگزین هستند و ممکن است در گزارشهای ویرایشگر یا سابقهٔ پروکسی ظاهر شوند.
 
 ---
 
-#### Kiro CLI (آمازون)
+#### Kiro CLI (Amazon)
 
 ```bash
 # به حساب AWS/Kiro خود وارد شوید:
 kiro-cli login
 
-# CLI از احراز هویت خود استفاده می‌کند — OmniRoute به عنوان backend برای Kiro CLI خود لازم نیست.
-# از kiro-cli در کنار OmniRoute برای ابزارهای دیگر استفاده کنید.
+# CLI از احراز هویت خودش استفاده میکند — خود Kiro CLI به OmniRoute بهعنوان بکاند نیاز ندارد.
+# برای ابزارهای دیگر، از kiro-cli در کنار OmniRoute استفاده کنید.
 kiro-cli status
 ```
 
-برای برنامه دسکتاپ **Kiro IDE**، از نقطه پایانی MITM که توسط OmniRoute در زیر `/dashboard/cli-tools → Kiro` در دسترس است استفاده کنید.
+برای برنامهٔ دسکتاپ **Kiro IDE**، از نقطهٔ پایانی MITM ارائهشده توسط OmniRoute
+در مسیر `/dashboard/cli-tools → Kiro` استفاده کنید.
 
 ---
 
-## 10. CLI داخلی OmniRoute
+## 10. رابط خط فرمان داخلی OmniRoute
 
-باینری `omniroute` دستورات مربوط به چرخه عمر سرور، راه‌اندازی، تشخیص و مدیریت ارائه‌دهنده را فراهم می‌کند. نقطه ورودی: `bin/omniroute.mjs`.
+فایل اجرایی `omniroute` فرمانهایی را برای چرخهٔ عمر سرور، راهاندازی، عیبیابی و مدیریت ارائهدهندگان فراهم میکند. نقطهٔ ورود: `bin/omniroute.mjs`.
 
 ```bash
-omniroute                              # شروع سرور (پورت پیش‌فرض 20128)
-omniroute setup                        # ویزارد راه‌اندازی تعاملی
-omniroute doctor                       # بررسی پیکربندی، پایگاه داده، پورت‌ها، زمان اجرا
-omniroute providers list               # اتصالات ارائه‌دهنده پیکربندی شده
-omniroute providers test-all           # تست هر اتصال فعال
-omniroute reset-password               # بازنشانی رمز عبور مدیر
-omniroute logs                         # استریم لاگ‌های درخواست
-omniroute health                       # سلامت دقیق (شکست‌ها، کش، حافظه)
-omniroute --version                    # چاپ نسخه
-omniroute --help                       # نمایش تمام دستورات
+omniroute                              # راهاندازی سرور (پورت پیشفرض 20128)
+omniroute setup                        # راهنمای تعاملی راهاندازی
+omniroute doctor                       # بررسی پیکربندی، پایگاه داده، پورتها و محیط اجرا
+omniroute providers list               # اتصالهای پیکربندیشدهٔ ارائهدهندگان
+omniroute providers test-all           # آزمایش همهٔ اتصالهای فعال
+omniroute reset-password               # بازنشانی گذرواژهٔ مدیر
+omniroute logs                         # پخش زندهٔ گزارشهای درخواست
+omniroute health                       # وضعیت سلامت با جزئیات (قطعکنندهها، حافظهٔ نهان، حافظه)
+omniroute --version                    # نمایش نسخه
+omniroute --help                       # نمایش همهٔ فرمانها
 ```
 
-### راه‌اندازی و اولیه‌سازی
+### راهاندازی و مقداردهی اولیه
 
 ```bash
-omniroute setup                        # ویزارد راه‌اندازی تعاملی
-omniroute setup --non-interactive      # حالت CI/خودکار (خواندن متغیرهای محیطی + پرچم‌ها)
-omniroute setup --password '<value>'   # تنظیم رمز عبور مدیر به طور مستقیم
+omniroute setup                        # راهنمای تعاملی راهاندازی
+omniroute setup --non-interactive      # حالت CI/خودکارسازی (خواندن متغیرهای محیطی + پرچمها)
+omniroute setup --password '<value>'   # تنظیم مستقیم گذرواژهٔ مدیر
 omniroute setup --add-provider \
   --provider openai \
   --api-key '<value>' \
-  --test-provider                      # افزودن و تست یک ارائه‌دهنده در یک مرحله
+  --test-provider                      # افزودن و آزمایش یک ارائهدهنده در یک مرحله
 ```
 
-متغیرهای محیطی شناخته شده برای راه‌اندازی غیر تعاملی:
+متغیرهای محیطی شناختهشده برای راهاندازی غیرتعاملی:
 
-| Var                 | Purpose                                                               |
-| ------------------- | --------------------------------------------------------------------- |
-| `OMNIROUTE_API_KEY` | کلید API ارائه‌دهنده (متصل به `--api-key` از طریق Commander `.env()`) |
-| `DATA_DIR`          | بازنویسی دایرکتوری داده‌های OmniRoute                                 |
+| متغیر               | کاربرد                                                                   |
+| ------------------- | ------------------------------------------------------------------------ |
+| `OMNIROUTE_API_KEY` | کلید API ارائهدهنده (از طریق Commander `.env()` به `--api-key` متصل است) |
+| `DATA_DIR`          | بازنویسی پوشهٔ دادهٔ OmniRoute                                           |
 
-تمام ورودی‌های غیر تعاملی دیگر به عنوان پرچم‌ها ارسال می‌شوند، نه متغیرهای محیطی:
-`--password`, `--provider`, `--provider-name`, `--provider-base-url`, `--default-model`
-(به گزینه‌های `omniroute setup` در بالا مراجعه کنید).
+سایر ورودیهای غیرتعاملی بهصورت پرچم ارسال میشوند، نه متغیر محیطی:
+`--password`، `--provider`، `--provider-name`، `--provider-base-url`، `--default-model`
+(گزینههای `omniroute setup` در بالا را ببینید).
 
-### تشخیص
+### عیبیابی
 
 ```bash
-omniroute doctor                       # بررسی پیکربندی، پایگاه داده، پورت‌ها، زمان اجرا، حافظه، زنده بودن
-omniroute doctor --json                # JSON قابل خواندن توسط ماشین
-omniroute doctor --no-liveness         # رد کردن پروب سلامت HTTP
-omniroute doctor --host 0.0.0.0        # بازنویسی میزبان زنده بودن
-omniroute doctor --liveness-url <url>  # بازنویسی کامل URL نقطه پایانی سلامت
+omniroute doctor                       # بررسی پیکربندی، پایگاه داده، پورتها، محیط اجرا، حافظه و زندهبودن
+omniroute doctor --json                # JSON قابلخواندن توسط ماشین
+omniroute doctor --no-liveness         # رد کردن کاوش سلامت HTTP
+omniroute doctor --host 0.0.0.0        # بازنویسی میزبان بررسی زندهبودن
+omniroute doctor --liveness-url <url>  # بازنویسی کامل URL نقطهٔ پایانی سلامت
 ```
 
-دکتر این بررسی‌ها را انجام می‌دهد: `پیکربندی`, `پایگاه داده`, `ذخیره‌سازی/رمزگذاری`,
-`دسترس‌پذیری پورت`, `زمان اجرای نود`, `باینری بومی` (better-sqlite3),
-`حافظه`, و `زنده بودن سرور`. اگر هر بررسی `شکست` بخورد، با کد غیر صفر خارج می‌شود.
+فرمان doctor این بررسیها را اجرا میکند: `Config`، `Database`، `Storage/encryption`،
+`Port availability`، `Node runtime`، `Native binary` (better-sqlite3)،
+`Memory` و `Server liveness`. اگر نتیجهٔ هر بررسی `fail` باشد، با کد خروج غیرصفر خاتمه مییابد.
 
-### مدیریت ارائه‌دهنده
+### مدیریت ارائهدهندگان
 
 ```bash
-omniroute providers available                       # کاتالوگ ارائه‌دهنده OmniRoute
-omniroute providers available --search openai       # فیلتر کاتالوگ بر اساس id/name/alias/category
-omniroute providers available --category api-key    # فیلتر بر اساس دسته (api-key, oauth, free, ...)
-omniroute providers available --json                # JSON قابل خواندن توسط ماشین
+omniroute providers available                       # کاتالوگ ارائهدهندگان OmniRoute
+omniroute providers available --search openai       # فیلتر کاتالوگ براساس شناسه/نام/نام مستعار/دستهبندی
+omniroute providers available --category api-key    # فیلتر براساس دستهبندی (api-key، oauth، free، ...)
+omniroute providers available --json                # JSON قابلخواندن توسط ماشین
 
-omniroute providers list                            # اتصالات ارائه‌دهنده پیکربندی شده
+omniroute providers list                            # اتصالهای پیکربندیشدهٔ ارائهدهندگان
 omniroute providers list --json
 
-omniroute providers test <id|name>                  # تست یک اتصال پیکربندی شده
-omniroute providers test-all                        # تست هر اتصال فعال
-omniroute providers validate                        # اعتبارسنجی ساختاری محلی
+omniroute providers test <id|name>                  # آزمایش یک اتصال پیکربندیشده
+omniroute providers test-all                        # آزمایش همهٔ اتصالهای فعال
+omniroute providers validate                        # اعتبارسنجی ساختاری صرفاً محلی
 omniroute providers add <provider> --credential-env PROVIDER_KEY
 omniroute providers import ./providers.json --dry-run --json
 omniroute providers auth <provider>                 # جریان OAuth موجود
@@ -645,119 +645,149 @@ omniroute providers edit <id|name> --default-model <model>
 omniroute providers remove <id|name> --yes
 ```
 
-`providers add/import/auth/edit/remove` API-first هستند و بنابراین بر اساس
-زمینه محلی یا از راه دور فعال کار می‌کنند. ورودی اعتبارنامه باید از
-`--credential-stdin` یا `--credential-env` استفاده کند؛ `--dry-run --json` فقط
-حضور/شکل مخفی شده را گزارش می‌دهد. `providers available` کاتالوگ OmniRoute را می‌خواند؛
-`providers list/test/test-all/validate` رفتار SQLite محلی خود را حفظ می‌کنند و
-نیاز به اجرای سرور ندارند.
+فرمانهای `providers add/import/auth/edit/remove` در وهلهٔ اول مبتنی بر API هستند و بنابراین روی
+زمینهٔ فعال محلی یا راهدور کار میکنند. برای ورود اطلاعات اعتبارنامه باید از
+`--credential-stdin` یا `--credential-env` استفاده شود؛ `--dry-run --json` فقط
+وجود/ساختار سانسورشده را گزارش میکند. `providers available` کاتالوگ OmniRoute را میخواند؛
+`providers list/test/test-all/validate` رفتار محلی SQLite خود را حفظ میکنند و
+به در حال اجرا بودن سرور نیازی ندارند.
+
+برای یک گره سفارشی سازگار با OpenAI یا Anthropic، با استفاده از `omniroute keys add "$NODE_ID" --stdin`
+اعتبارنامهها را به شناسهٔ گره بازگرداندهشده توسط `omniroute nodes add` متصل کنید.
+این کار به یک سرور در حال اجرا و احراز هویت مدیریتی برای زمینهٔ فعال نیاز دارد.
+رابط خط فرمان از `POST /api/providers` استفاده میکند که گره را اعتبارسنجی کرده و تنظیمات نقطهٔ پایانی آن را
+در اتصال کپی میکند. نبود گره، شکست مجوزدهی یا در دسترس نبودن سرور
+بدون ایجاد اعتبارنامهٔ جایگزین محلی، خطا برمیگرداند.
+
+`nodes add --base-url` نقطهٔ پایانی گره را تنظیم میکند؛ این مقدار با نشانی سرور
+در `OMNIROUTE_BASE_URL` متفاوت است. برای فایلهای OpenAPI، از
+`omniroute openapi dump --format json --out ./openapi.json` استفاده کنید؛ گزینهٔ سراسری `--output`
+قالببندی نمایش رابط خط فرمان را انتخاب میکند، نه نام فایل مقصد را.
 
 ### بازیابی و بازنشانی
 
 ```bash
-omniroute reset-password                # بازنشانی رمز عبور مدیر (همچنین: omniroute-reset-password)
-omniroute reset-encrypted-columns       # نمایش هشدار + اجرای آزمایشی برای بازنشانی اعتبارنامه‌های رمزگذاری شده
-omniroute reset-encrypted-columns --force  # در واقع اعتبارنامه‌های رمزگذاری شده را در SQLite خنثی کنید
+omniroute reset-password                # بازنشانی گذرواژهٔ مدیر (همچنین: omniroute-reset-password)
+omniroute reset-encrypted-columns       # نمایش هشدار + اجرای آزمایشی برای بازنشانی اعتبارنامههای رمزگذاریشده
+omniroute reset-encrypted-columns --force  # تهی کردن واقعی اعتبارنامههای رمزگذاریشده در SQLite
 ```
 
-### صادرات اعتبارنامه (⚠ با احتیاط برخورد کنید)
+### صدور اعتبارنامهها (⚠ با احتیاط انجام دهید)
 
 ```bash
-omniroute auth export                                 # نمایش هشدار + دروازه تأیید — بدون دسترسی به پایگاه داده
-omniroute auth export --force                          # صادرات اعتبارنامه‌های DECRYPTED تمام اتصالات به stdout به عنوان JSON
-omniroute auth export --force --id <id>                 # صادرات فقط اتصال مطابقت‌دهنده
+omniroute auth export                                 # نمایش هشدار + مرحلهٔ تأیید — بدون دسترسی به پایگاه داده
+omniroute auth export --force                          # صدور اعتبارنامههای رمزگشاییشدهٔ همهٔ اتصالها به stdout بهصورت JSON
+omniroute auth export --force --id <id>                 # صدور فقط اتصال منطبق
 omniroute auth export --force --format env               # تولید خطوط OMNIROUTE_<PROVIDER>_<FIELD>=<value>
-omniroute auth export --force --out creds.json           # نوشتن در یک فایل (ایجاد شده با مجوز 0600)
+omniroute auth export --force --out creds.json           # نوشتن در فایل (ایجادشده با مجوزهای 0600)
 ```
 
-`auth export` **فقط محلی** است (خواندن مستقیم SQLite، بدون مسیر HTTP) و عمداً
-مقادیر **متن ساده** `apiKey`/`accessToken`/`refreshToken`/`idToken` را چاپ/می‌نویسد — این ویژگی است، نه یک
-اشکال. هیچ چیزی از پایگاه داده خوانده نمی‌شود و هیچ چیزی بدون `--force` رمزگشایی نمی‌شود. یک بنر هشدار stderr همیشه قبل از هر متنی چاپ می‌شود. نیاز به تنظیم `STORAGE_ENCRYPTION_KEY` دارد. یک فیلدی که در رمزگشایی شکست می‌خورد (کلید منقضی، متن رمزگذاری شده خراب) به عنوان
-`<field>DecryptFailed: true` گزارش می‌شود به جای اینکه کل صادرات را متوقف کند یا خطای زیرین را نشت دهد.
+`auth export` **فقط بهصورت محلی** عمل میکند (خواندن مستقیم SQLite، بدون مسیر HTTP) و عمداً مقادیر
+**متن ساده**ی `apiKey`/`accessToken`/`refreshToken`/`idToken` را چاپ میکند یا مینویسد — این یک قابلیت است، نه
+یک باگ. بدون `--force`، هیچچیز از پایگاه داده خوانده و هیچچیز رمزگشایی نمیشود. پیش از انتشار هرگونه متن ساده، همیشه
+یک بنر هشدار در stderr چاپ میشود. لازم است `STORAGE_ENCRYPTION_KEY`
+تنظیم شده باشد. فیلدی که رمزگشایی آن ناموفق باشد (کلید قدیمی، متن رمزنگاریشدهی خراب)، بهجای لغو کل فرایند برونبری یا افشای خطای زیربنایی، بهصورت
+`<field>DecryptFailed: true` گزارش میشود.
 
-### سایر زیر دستورات
+### زیرفرمانهای دیگر
 
-اینها فرض می‌کنند که یک سرور OmniRoute در حال اجرا است، مگر اینکه خلاف آن ذکر شده باشد:
+این موارد، مگر آنکه خلافش ذکر شده باشد، وجود یک سرور OmniRoute در حال اجرا را فرض میکنند:
 
 ```bash
 omniroute status                       # وضعیت جامع زمان اجرا
-omniroute logs                         # استریم لاگ‌های درخواست (--json, --search, --follow)
-omniroute config show                  # نمایش پیکربندی فعلی
+omniroute logs                         # پخش جریانی گزارشهای درخواست (--json، --search، --follow)
+omniroute config list                  # نمایش ابزارهای CLI پیکربندیشده
 
-omniroute provider list                # لیست ارائه‌دهندگان موجود (معادل لیست ارائه‌دهندگان)
-omniroute provider add                 # ثبت OmniRoute به عنوان یک ارائه‌دهنده در یک ابزار
+omniroute provider list                # فهرست ارائهدهندگان موجود (نام مستعار providers list)
+omniroute provider add                 # ثبت OmniRoute بهعنوان ارائهدهنده در یک ابزار
 omniroute keys add | list | remove     # مدیریت کلیدهای API
-omniroute models [provider]            # لیست مدل‌ها (--json, --search)
+omniroute models [provider]            # فهرست مدلها (--json، --search)
 omniroute combo list | switch | create | delete
 
-omniroute backup                       # عکس‌برداری از پیکربندی + پایگاه داده
-omniroute restore                      # بازیابی از یک عکس‌برداری قبلی
+omniroute backup                       # تهیه تصویر لحظهای از پیکربندی + DB
+omniroute restore                      # بازیابی از یک تصویر لحظهای قبلی
 
-omniroute health                       # سلامت دقیق (شکست‌ها، کش، حافظه)
-omniroute quota                        # استفاده از سهم ارائه‌دهنده
-omniroute cache                        # وضعیت کش
-omniroute cache clear                  # پاک کردن کش‌های معنایی + امضا
+omniroute health                       # جزئیات سلامت (قطعکنندهها، حافظه نهان، حافظه)
+omniroute quota                        # میزان استفاده از سهمیه ارائهدهنده
+omniroute cache                        # وضعیت حافظه نهان
+omniroute cache clear                  # پاککردن حافظههای نهان معنایی + امضا
 
-omniroute mcp status | restart         # وضعیت سرور MCP / راه‌اندازی مجدد
+omniroute mcp status | restart         # وضعیت / راهاندازی مجدد سرور MCP
 omniroute a2a status | card            # وضعیت سرور A2A / کارت عامل
 
-omniroute tunnel list | create | stop  # مدیریت تونل‌ها (cloudflare/tailscale/ngrok)
+omniroute tunnel list | create | stop  # مدیریت تونلها (cloudflare/tailscale/ngrok)
 omniroute env show | get <k> | set <k> <v>  # بررسی / تنظیم متغیرهای محیطی (موقت)
 
-omniroute test                         # تست اتصال به ارائه‌دهنده
-omniroute update                       # بررسی به‌روزرسانی‌ها
-omniroute completion                   # تولید تکمیل شل
+omniroute test                         # آزمون سریع اتصال ارائهدهنده
+omniroute update                       # بررسی بهروزرسانیها
+omniroute completion                   # تولید تکمیل خودکار پوسته
 ```
 
-### پرچم‌های رایج
+### پرچمهای رایج
 
-| Flag                | Description                                                    |
-| ------------------- | -------------------------------------------------------------- |
-| `--no-open`         | به طور خودکار مرورگر را در شروع باز نکنید                      |
-| `--port <n>`        | بازنویسی پورت API (پیش‌فرض 20128)                              |
-| `--mcp`             | به عنوان سرور MCP بر روی stdio اجرا شود (برای IDEها)           |
-| `--non-interactive` | حالت CI (بدون درخواست؛ خواندن از env/flags)                    |
-| `--json`            | خروجی JSON قابل خواندن توسط ماشین (دکتر، ارائه‌دهندگان و غیره) |
-| `--help`, `-h`      | نمایش کمک خاص به دستور                                         |
-| `--version`, `-v`   | چاپ نسخه نصب شده                                               |
+| پرچم                | توضیحات                                                     |
+| ------------------- | ----------------------------------------------------------- |
+| `--no-open`         | مرورگر هنگام شروع بهطور خودکار باز نشود                     |
+| `--port <n>`        | بازنویسی پورت API (پیشفرض 20128)                            |
+| `--mcp`             | اجرا بهعنوان سرور MCP از طریق stdio (برای IDEها)            |
+| `--non-interactive` | حالت CI (بدون درخواست تعاملی؛ خواندن از محیط/پرچمها)        |
+| `--json`            | خروجی JSON قابلخواندن توسط ماشین (doctor، providers و غیره) |
+| `--help`, `-h`      | نمایش راهنمای مختص فرمان                                    |
+| `--version`, `-v`   | چاپ نسخه نصبشده                                             |
 
 ---
 
 ## نقاط پایانی API موجود
 
-| نقطه پایانی                | توضیحات                          | استفاده برای                                   |
-| -------------------------- | -------------------------------- | ---------------------------------------------- |
-| `/v1/chat/completions`     | چت استاندارد (همه ارائه‌دهندگان) | همه ابزارهای مدرن                              |
-| `/v1/responses`            | API پاسخ‌ها (فرمت OpenAI)        | Codex، جریان‌های عاملی                         |
-| `/v1/completions`          | تکمیل متن قدیمی                  | ابزارهای قدیمی که از `prompt:` استفاده می‌کنند |
-| `/v1/embeddings`           | جاسازی‌های متنی                  | RAG، جستجو                                     |
-| `/v1/images/generations`   | تولید تصویر                      | GPT-Image، Flux و غیره                         |
-| `/v1/audio/speech`         | تبدیل متن به گفتار               | ElevenLabs، OpenAI TTS                         |
-| `/v1/audio/transcriptions` | تبدیل گفتار به متن               | Deepgram، AssemblyAI                           |
+| نقطه پایانی                | توضیحات                         | کاربرد                                          |
+| -------------------------- | ------------------------------- | ----------------------------------------------- |
+| `/v1/chat/completions`     | چت استاندارد (همه ارائهدهندگان) | همه ابزارهای مدرن                               |
+| `/v1/responses`            | API پاسخها (با قالب OpenAI)     | Codex، گردشکارهای عاملمحور                      |
+| `/v1/completions`          | تکمیل متن قدیمی                 | ابزارهای قدیمیتر که از `prompt:` استفاده میکنند |
+| `/v1/embeddings`           | تعبیهسازیهای متنی               | RAG، جستوجو                                     |
+| `/v1/images/generations`   | تولید تصویر                     | GPT-Image، Flux و غیره                          |
+| `/v1/audio/speech`         | تبدیل متن به گفتار              | ElevenLabs، OpenAI TTS                          |
+| `/v1/audio/transcriptions` | تبدیل گفتار به متن              | Deepgram، AssemblyAI                            |
 
-نمونه‌های آماده برای چسباندن با یک URL OmniRoute توکن‌شده:
+نمونههای آماده برای جایگذاری با URL توکندار OmniRoute:
 
 ```txt
-مثال توکن: sk-a3ab3c080beaee3a-69f4a4-070d71af
+نمونه توکن: sk-a3ab3c080beaee3a-69f4a4-070d71af
 
 پایه استاندارد OpenAI: http://localhost:20128/v1
-مدل‌های VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
+مدلهای VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
 چت VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
-پاسخ‌های VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
-برچسب‌های Ollama: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/tags
+پاسخهای VS Code: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
+برچسبهای Ollama: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/tags
 چت Ollama: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/chat
 ```
 
 ---
 
-## عیب‌یابی
+## عیبیابی
 
-| خطا                                           | علت                                 | راه حل                                                  |
-| --------------------------------------------- | ----------------------------------- | ------------------------------------------------------- |
-| `Connection refused`                          | OmniRoute در حال اجرا نیست          | `omniroute serve`                                       |
-| `401 Unauthorized`                            | کلید API اشتباه                     | بررسی در `/dashboard/api-manager`                       |
-| `No combo configured`                         | هیچ ترکیب مسیریابی فعالی وجود ندارد | تنظیم در `/dashboard/combos`                            |
-| CLI نشان می‌دهد "not installed"               | باینری در PATH نیست                 | بررسی `which <command>`                                 |
-| داشبورد بعد از نصب نشان می‌دهد "not detected" | کش قدیمی                            | کلیک بر روی "⟳ Refresh detection" در داشبورد            |
-| لینک قدیمی `/dashboard/cli-tools`             | بوکمارک پیش از v3.8.6               | به طور خودکار به `/dashboard/cli-code` (308) هدایت شد   |
-| لینک قدیمی `/dashboard/agents`                | بوکمارک پیش از v3.8.6               | به طور خودکار به `/dashboard/acp-agents` (308) هدایت شد |
+| خطا                                                 | علت                                 | راهحل                                                      |
+| --------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------- |
+| `Connection refused`                                | OmniRoute در حال اجرا نیست          | `omniroute serve`                                          |
+| `401 Unauthorized`                                  | کلید API اشتباه است                 | در `/dashboard/api-manager` بررسی کنید                     |
+| `No combo configured`                               | هیچ ترکیب مسیریابی فعالی وجود ندارد | در `/dashboard/combos` تنظیم کنید                          |
+| CLI عبارت «نصب نشده» را نشان میدهد                  | فایل اجرایی در PATH نیست            | `which <command>` را بررسی کنید                            |
+| داشبورد پس از نصب عبارت «شناسایی نشد» را نشان میدهد | حافظه نهان قدیمی است                | در داشبورد روی «⟳ تازهسازی شناسایی» کلیک کنید              |
+| پیوند قدیمی `/dashboard/cli-tools`                  | نشانک مربوط به پیش از v3.8.6        | بهصورت خودکار به `/dashboard/cli-code` هدایت میشود (308)   |
+| پیوند قدیمی `/dashboard/agents`                     | نشانک مربوط به پیش از v3.8.6        | بهصورت خودکار به `/dashboard/acp-agents` هدایت میشود (308) |
+
+## مدیریت خطمشی کلید استنتاج با CLI مربوط به OmniRoute
+
+برای بررسی یا بهروزرسانی یک کلید استنتاج موجود با استفاده از شناسه آن، از یک زمینه مدیریتی احراز هویتشده استفاده کنید ([حالت راه دور](../guides/REMOTE-MODE.md) را ببینید):
+
+```bash
+omniroute --output json keys policy show KEY_ID
+omniroute keys policy set KEY_ID --unrestricted
+omniroute --output json keys policy show KEY_ID
+```
+
+`--unrestricted` نام مستعاری برای `--model-access-mode all` است. این بهروزرسانی فهرست مجاز مدلها را پاک میکند. دامنهها، قوانین اتصال، مدلهای مسدودشده، محدودیتهای نرخ و محدودیتهای هزینه حفظ میشوند؛ بنابراین این کنترلهای دیگر همچنان میتوانند یک درخواست را رد کنند. تعیین صریح `--allowed-models ""` نیز حالت `all` را انتخاب میکند؛ آن را با `--model-access-mode restricted` ترکیب کنید تا کلید محدودشدهای بدون هیچ مدل مجازی حفظ شود. یک فهرست غیرخالی جداشده با ویرگول، مگر اینکه صراحتاً خلاف آن مشخص شود، حالت `restricted` را انتخاب میکند. ترکیب متناقض `all` با یک فهرست مجاز غیرخالی، پیش از ارسال درخواست رد میشود.
+
+`--rate-limit 30` تعداد درخواست در دقیقه را تنظیم میکند و قوانین سایر بازههای زمانی را حفظ میکند. `--max-cost 5` سقف هزینه روزانه برحسب USD را بدون تغییر سقف هفتگی فعال میکند؛ `--max-cost 0` سقف روزانه را حذف کرده و وضعیت فعلی فعالسازی محدودیت مصرف و سقف هفتگی را حفظ میکند. فیلدهای خطمشی که مشخص نشدهاند بدون تغییر باقی میمانند. تغییرات نرخ ابتدا خطمشی فعلی را میخوانند؛ از ویرایش همزمان آرایه محدودیت نرخ یک کلید یکسان خودداری کنید.
+
+فرمانهای خطمشی از `GET`/`PATCH /api/keys/{id}` احراز هویتشده استفاده میکنند و زمینه فعال و گزینه سراسری `--api-key` را رعایت میکنند. خروجی JSON فقط شامل فیلدهای خطمشی است و کلید ذخیرهشده یا نمایش پوشاندهشده آن را شامل نمیشود. یک اعتبارنامه صرفاً مخصوص استنتاج نمیتواند تغییرات مدیریتی را مجاز کند. خطای 401/403 مستلزم بررسی اعتبارنامه و زمینه مدیریتی است؛ این خطا نشاندهنده خرابی توکن محلی CLI یا salt نیست. برای قرارداد جداگانه احراز هویت محلی، [توکن CLI](../security/CLI_TOKEN.md) را ببینید.

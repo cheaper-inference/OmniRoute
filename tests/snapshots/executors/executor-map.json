@@ -1,5 +1,10 @@
 {
   "entries": {
+    "1min": {
+      "className": "OneMinAiExecutor",
+      "configSource": "oneminai",
+      "provider": "oneminai"
+    },
     "9router": {
       "className": "NineRouterExecutor",
       "configSource": "<custom-config>",
@@ -65,6 +70,11 @@
       "configSource": "<custom-config>",
       "provider": "blackbox-web"
     },
+    "cbai": {
+      "className": "CodeBuddyIntlExecutor",
+      "configSource": "codebuddy-intl",
+      "provider": "codebuddy-intl"
+    },
     "cbcn": {
       "className": "CodeBuddyCnExecutor",
       "configSource": "codebuddy-cn",
@@ -85,11 +95,6 @@
       "configSource": "<custom-config>",
       "provider": "chatgpt-web-codex"
     },
-    "cgpt-web": {
-      "className": "ChatGptWebExecutor",
-      "configSource": "<custom-config>",
-      "provider": "chatgpt-web"
-    },
     "chatgpt-web": {
       "className": "ChatGptWebExecutor",
       "configSource": "<custom-config>",
@@ -100,15 +105,15 @@
       "configSource": "<custom-config>",
       "provider": "chatgpt-web-codex"
     },
+    "chatplayground": {
+      "className": "ChatPlaygroundExecutor",
+      "configSource": "<custom-config>",
+      "provider": "chatplayground"
+    },
     "cheaperinference": {
       "className": "CheaperInferenceExecutor",
       "configSource": "cheaperinference",
       "provider": "cheaperinference"
-    },
-    "chipotle": {
-      "className": "ChipotleExecutor",
-      "configSource": "<custom-config>",
-      "provider": "chipotle"
     },
     "cinf": {
       "className": "CheaperInferenceExecutor",
@@ -135,6 +140,11 @@
       "configSource": "<custom-config>",
       "provider": "cloudflare-playground"
     },
+    "clova-studio": {
+      "className": "ClovaStudioExecutor",
+      "configSource": "clova-studio",
+      "provider": "clova-studio"
+    },
     "cmd": {
       "className": "CommandCodeExecutor",
       "configSource": "<custom-config>",
@@ -149,6 +159,11 @@
       "className": "CodeBuddyCnExecutor",
       "configSource": "codebuddy-cn",
       "provider": "codebuddy-cn"
+    },
+    "codebuddy-intl": {
+      "className": "CodeBuddyIntlExecutor",
+      "configSource": "codebuddy-intl",
+      "provider": "codebuddy-intl"
     },
     "codex": {
       "className": "CodexExecutor",
@@ -189,6 +204,11 @@
       "className": "CliproxyapiExecutor",
       "configSource": "<custom-config>",
       "provider": "cliproxyapi"
+    },
+    "cpl": {
+      "className": "ChatPlaygroundExecutor",
+      "configSource": "<custom-config>",
+      "provider": "chatplayground"
     },
     "cu": {
       "className": "CursorExecutor",
@@ -280,16 +300,6 @@
       "configSource": "freebuff",
       "provider": "freebuff"
     },
-    "felo": {
-      "className": "FeloWebExecutor",
-      "configSource": "<custom-config>",
-      "provider": "felo-web"
-    },
-    "felo-web": {
-      "className": "FeloWebExecutor",
-      "configSource": "<custom-config>",
-      "provider": "felo-web"
-    },
     "firefly": {
       "className": "AdobeFireflyExecutor",
       "configSource": "<custom-config>",
@@ -304,16 +314,6 @@
       "className": "GrokCliExecutor",
       "configSource": "grok-cli",
       "provider": "grok-cli"
-    },
-    "gembiz": {
-      "className": "GeminiBusinessExecutor",
-      "configSource": "<custom-config>",
-      "provider": "gemini-business"
-    },
-    "gemini-business": {
-      "className": "GeminiBusinessExecutor",
-      "configSource": "<custom-config>",
-      "provider": "gemini-business"
     },
     "gemini-web": {
       "className": "GeminiWebExecutor",
@@ -375,11 +375,6 @@
       "configSource": "<custom-config>",
       "provider": "hyperagent"
     },
-    "hailuo-web": {
-      "className": "HailuoWebExecutor",
-      "configSource": "<custom-config>",
-      "provider": "hailuo-web"
-    },
     "hc": {
       "className": "HuggingChatExecutor",
       "configSource": "<custom-config>",
@@ -440,10 +435,10 @@
       "configSource": "<custom-config>",
       "provider": "lmarena"
     },
-    "microsoft-designer-web": {
-      "className": "MicrosoftDesignerWebExecutor",
-      "configSource": "<custom-config>",
-      "provider": "microsoft-designer-web"
+    "maxai": {
+      "className": "MaxAiExecutor",
+      "configSource": "maxai",
+      "provider": "maxai"
     },
     "moonshot": {
       "className": "MoonshotExecutor",
@@ -454,11 +449,6 @@
       "className": "MuseSparkWebExecutor",
       "configSource": "<custom-config>",
       "provider": "muse-spark-web"
-    },
-    "msdesigner": {
-      "className": "MicrosoftDesignerWebExecutor",
-      "configSource": "<custom-config>",
-      "provider": "microsoft-designer-web"
     },
     "muse-spark-web": {
       "className": "MuseSparkWebExecutor",
@@ -475,20 +465,30 @@
       "configSource": "<custom-config>",
       "provider": "notion-web"
     },
+    "notrack-web": {
+      "className": "NotrackWebExecutor",
+      "configSource": "<custom-config>",
+      "provider": "notrack-web"
+    },
     "nr": {
       "className": "NineRouterExecutor",
       "configSource": "<custom-config>",
       "provider": "9router"
+    },
+    "ntw": {
+      "className": "NotrackWebExecutor",
+      "configSource": "<custom-config>",
+      "provider": "notrack-web"
     },
     "nw": {
       "className": "NotionWebExecutor",
       "configSource": "<custom-config>",
       "provider": "notion-web"
     },
-    "opencode": {
-      "className": "OpencodeExecutor",
-      "configSource": "opencode-zen",
-      "provider": "opencode-zen"
+    "oneminai": {
+      "className": "OneMinAiExecutor",
+      "configSource": "oneminai",
+      "provider": "oneminai"
     },
     "opencode-go": {
       "className": "OpencodeExecutor",
@@ -499,11 +499,6 @@
       "className": "OpencodeExecutor",
       "configSource": "opencode-zen",
       "provider": "opencode-zen"
-    },
-    "pepper": {
-      "className": "ChipotleExecutor",
-      "configSource": "<custom-config>",
-      "provider": "chipotle"
     },
     "perplexity-web": {
       "className": "PerplexityWebExecutor",
@@ -545,25 +540,15 @@
       "configSource": "qoder",
       "provider": "qoder"
     },
-    "qw": {
-      "className": "QwenWebExecutor",
+    "stx": {
+      "className": "SyntxExecutor",
       "configSource": "<custom-config>",
-      "provider": "qwen-web"
+      "provider": "syntx"
     },
-    "qwen-web": {
-      "className": "QwenWebExecutor",
+    "syntx": {
+      "className": "SyntxExecutor",
       "configSource": "<custom-config>",
-      "provider": "qwen-web"
-    },
-    "raycast": {
-      "className": "RaycastExecutor",
-      "configSource": "raycast",
-      "provider": "raycast"
-    },
-    "rc": {
-      "className": "RaycastExecutor",
-      "configSource": "raycast",
-      "provider": "raycast"
+      "provider": "syntx"
     },
     "t3-web": {
       "className": "T3ChatWebExecutor",
@@ -590,25 +575,30 @@
       "configSource": "<custom-config>",
       "provider": "tencent-aistudio-web"
     },
-    "theoldllm": {
-      "className": "TheOldLlmExecutor",
-      "configSource": "<custom-config>",
-      "provider": "theoldllm"
-    },
     "tinycms-web": {
       "className": "TinyCmsExecutor",
       "configSource": "<custom-config>",
       "provider": "tinycms-web"
     },
-    "tllm": {
-      "className": "TheOldLlmExecutor",
+    "tm": {
+      "className": "TwinmindExecutor",
       "configSource": "<custom-config>",
-      "provider": "theoldllm"
+      "provider": "twinmind"
     },
     "trae": {
       "className": "TraeExecutor",
       "configSource": "trae",
       "provider": "trae"
+    },
+    "twinmind": {
+      "className": "TwinmindExecutor",
+      "configSource": "<custom-config>",
+      "provider": "twinmind"
+    },
+    "uc": {
+      "className": "UcExecutor",
+      "configSource": "uc",
+      "provider": "uc"
     },
     "v0": {
       "className": "V0VercelWebExecutor",
@@ -711,6 +701,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 142,
+  "keyCount": 140,
   "sharedInstances": []
 }

@@ -163,14 +163,26 @@ const RULE_KEYWORDS: Record<string, string[]> = {
 
 const ARTICLE_HINT_RE = /\b(?:a|an|the)\b/;
 
-function shouldAttemptRule(ruleName: string, lowerText: string): boolean {
-  if (ruleName === "articles") {
+function shouldAttemptRule(rule: CavemanRule, lowerText: string): boolean {
+  if (rule.name === "articles") {
     ARTICLE_HINT_RE.lastIndex = 0;
     return ARTICLE_HINT_RE.test(lowerText);
   }
 
-  const keywords = RULE_KEYWORDS[ruleName];
-  return !keywords || keywords.some((keyword) => lowerText.includes(keyword));
+  const keywords = RULE_KEYWORDS[rule.name];
+
+  if (!keywords) return true;
+
+  // File-based language packs have their own localized regexes.
+  // Do not block them using the English-only keyword prefilter.
+  if (!CAVEMAN_RULES.includes(rule)) {
+    rule.pattern.lastIndex = 0;
+    const matches = rule.pattern.test(lowerText);
+    rule.pattern.lastIndex = 0;
+    return matches;
+  }
+
+  return keywords.some((keyword) => lowerText.includes(keyword));
 }
 
 export function applyRulesToText(
@@ -178,11 +190,21 @@ export function applyRulesToText(
   rules: CavemanRule[]
 ): { text: string; appliedRules: string[] } {
   let result = text;
-  const lowerResult = text.toLowerCase();
+  // Keyword prefilters only need the original text (a keyword an earlier rule removed
+  // cannot reappear). The #12825 regex prefilter for file-pack rules is different: an
+  // anchored pattern such as leader_phrases' `^(?:i will|…)` only matches once
+  // pleasantries has stripped the leading "Sure, ", so it must be tested against the
+  // text as the rules so far have left it — not a snapshot taken before any ran.
+  let lowerResult = text.toLowerCase();
+  let lowerResultSource = text;
   const appliedRules: string[] = [];
 
   for (const rule of rules) {
-    if (!shouldAttemptRule(rule.name, lowerResult)) continue;
+    if (lowerResultSource !== result) {
+      lowerResult = result.toLowerCase();
+      lowerResultSource = result;
+    }
+    if (!shouldAttemptRule(rule, lowerResult)) continue;
 
     const before = result;
     const { pattern, replacement } = rule;
@@ -323,7 +345,20 @@ export function cavemanCompress(
   const customPreservation = compileUserPreservePatterns(config.preservePatterns ?? []);
   validationWarnings.push(...customPreservation.warnings);
 
-  const compressedMessages = body.messages.map((msg): ChatMessage => {
+  // The latest user turn is the one being answered. Clients append context to
+  // that same message (memory blocks, quoted history), which pushes it past
+  // minMessageLength and lets the rules delete words the user typed. Leave it as
+  // written whenever the request already carries earlier turns. A one-shot body
+  // (a single prompt, or the slices progressive aging compresses one at a time)
+  // has no earlier turn and keeps compressing.
+  const lastUserIndex = body.messages.findLastIndex((msg) => msg.role === "user");
+  const hasEarlierTurn =
+    lastUserIndex > 0 &&
+    body.messages
+      .slice(0, lastUserIndex)
+      .some((msg) => msg.role === "user" || msg.role === "assistant");
+
+  const compressedMessages = body.messages.map((msg, index): ChatMessage => {
     if (typeof msg.content !== "string" && !Array.isArray(msg.content)) {
       return msg;
     }
@@ -340,6 +375,11 @@ export function cavemanCompress(
             .filter(Boolean)
             .join("\n");
     totalOriginalTokens += estimateCompressionTokens(contentStr);
+
+    if (index === lastUserIndex && hasEarlierTurn) {
+      totalCompressedTokens += estimateCompressionTokens(contentStr);
+      return msg;
+    }
 
     if (!contentStr || contentStr.length < config.minMessageLength) {
       totalCompressedTokens += estimateCompressionTokens(contentStr);

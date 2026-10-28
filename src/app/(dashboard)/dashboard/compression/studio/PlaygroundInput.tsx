@@ -1,6 +1,10 @@
 "use client";
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
+import Button from "@/shared/components/Button";
+import Checkbox from "@/shared/components/Checkbox";
+import Textarea from "@/shared/components/Textarea";
 export const LANE_ENGINES = [
   "session-dedup",
   "ccr",
@@ -41,21 +45,24 @@ function EngineOptions({
   const t = useTranslations("compressionStudio");
   return (
     <div>
-      <div className="text-[10px] uppercase opacity-60">{t("activeCombined")}</div>
-      {LANE_ENGINES.map((engine) => (
-        <label key={engine} className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
+      <CheckboxGroup label={t("activeCombined")} className="gap-1">
+        {LANE_ENGINES.map((engine) => (
+          <Checkbox
+            key={engine}
+            label={engine}
             checked={active.includes(engine)}
             onChange={() => onToggleActive(engine)}
           />
-          {engine}
-        </label>
-      ))}
-      <label className="flex items-center gap-2 text-sm opacity-50">
-        <input type="checkbox" disabled /> llmlingua{" "}
-        <span className="text-[10px]">({t("requiresOnnx")})</span>
-      </label>
+        ))}
+        <Checkbox
+          disabled
+          label={
+            <>
+              llmlingua <span className="text-[10px]">({t("requiresOnnx")})</span>
+            </>
+          }
+        />
+      </CheckboxGroup>
     </div>
   );
 }
@@ -65,7 +72,7 @@ function ToggleOption({
   checked,
   onChange,
   children,
-  className = "flex items-center gap-2 text-sm",
+  className = "text-sm",
 }: {
   testId: string;
   checked: boolean;
@@ -74,10 +81,13 @@ function ToggleOption({
   className?: string;
 }) {
   return (
-    <label className={className}>
-      <input type="checkbox" data-testid={testId} checked={checked} onChange={onChange} />
-      {children}
-    </label>
+    <Checkbox
+      className={className}
+      data-testid={testId}
+      checked={checked}
+      onChange={onChange}
+      label={children}
+    />
   );
 }
 
@@ -102,9 +112,10 @@ export function PlaygroundInput({
   const t = useTranslations("compressionStudio");
   return (
     <div className="flex flex-col gap-3">
-      <textarea
+      <Textarea
         data-testid="play-input"
-        className="min-h-[160px] w-full rounded border p-2 font-mono text-xs"
+        aria-label={t("inputPlaceholder")}
+        className="min-h-[160px] w-full font-mono text-xs"
         value={text}
         onChange={(e) => onText(e.target.value)}
         placeholder={t("inputPlaceholder")}
@@ -123,7 +134,7 @@ export function PlaygroundInput({
         testId="quantum-toggle"
         checked={quantumLock}
         onChange={onToggleQuantum}
-        className="flex items-center gap-1 text-xs"
+        className="text-xs"
       >
         {t("quantumLock")}
       </ToggleOption>
@@ -131,18 +142,20 @@ export function PlaygroundInput({
         testId="heatmap-toggle"
         checked={Boolean(heatmap)}
         onChange={onToggleHeatmap}
-        className="flex items-center gap-1 text-xs"
+        className="text-xs"
       >
         {t("saliencyHeatmap")} {heatmap ? `(${heatmap})` : ""}
       </ToggleOption>
-      <button
+      <Button
         data-testid="play-run"
-        className="rounded bg-blue-500/30 py-2 font-semibold"
+        icon="play_arrow"
+        fullWidth
         onClick={onRun}
+        loading={loading}
         disabled={loading}
       >
-        {loading ? t("running") : `▶ ${t("run")}`}
-      </button>
+        {loading ? t("running") : t("run")}
+      </Button>
     </div>
   );
 }

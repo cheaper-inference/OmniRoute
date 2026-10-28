@@ -13,17 +13,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { APP_CONFIG } from "@/shared/constants/appConfig";
 import { getFleetSkills } from "@/lib/conductor/fleetSkills";
 import { getBaseUrl } from "@/lib/wellKnown";
-
-const PACKAGE_VERSION = process.env.npm_package_version || "1.8.1";
 
 /**
  * GET /.well-known/agent-card.json
  *
  * Returns the OmniRoute Agent Card (A2A v1.0).
  */
-export async function GET(request: NextRequest) {
+export async function GET(request?: NextRequest) {
   const fleetSkills = await getFleetSkills();
   const baseUrl = getBaseUrl(request);
 
@@ -34,7 +33,7 @@ export async function GET(request: NextRequest) {
       "format translation, and auto-managed combos. Routes AI requests to the optimal " +
       "provider based on cost, latency, quota availability, and task requirements.",
     url: `${baseUrl}/a2a`,
-    version: PACKAGE_VERSION,
+    version: APP_CONFIG.version,
     supportedInterfaces: [
       {
         url: `${baseUrl}/a2a`,
@@ -79,12 +78,16 @@ export async function GET(request: NextRequest) {
         description:
           "Discovers providers that can handle a requested capability (chat, images, audio, search, embeddings, rerank, video).",
         tags: ["providers", "discovery", "capabilities", "health"],
-        examples: ["Which providers can handle image generation?", "Find healthy providers for embeddings"],
+        examples: [
+          "Which providers can handle image generation?",
+          "Find healthy providers for embeddings",
+        ],
       },
       {
         id: "cost-analysis",
         name: "Cost Analysis",
-        description: "Analyzes usage costs by provider and model and returns cost-saving opportunities.",
+        description:
+          "Analyzes usage costs by provider and model and returns cost-saving opportunities.",
         tags: ["cost", "usage", "analytics", "optimization"],
         examples: ["How much did we spend this week?", "Which provider costs the most?"],
       },

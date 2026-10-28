@@ -4,7 +4,10 @@ import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
+import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
+import Select from "@/shared/components/Select";
 import {
   quotaModelName,
   quotaGroupSlug,
@@ -206,9 +209,10 @@ export default function QuotaEndpointsCard({
   }, [groups, pools, connections]);
 
   // Real qtSd combos grouped by group → provider (preferred over placeholders).
-  const realByGroup = useMemo<
-    Array<{ group: QuotaGroup; entries: Array<{ provider: string; models: string[] }> }> | null
-  >(() => {
+  const realByGroup = useMemo<Array<{
+    group: QuotaGroup;
+    entries: Array<{ provider: string; models: string[] }>;
+  }> | null>(() => {
     if (!realCombos || realCombos.length === 0) return null;
     const byGroupSlug = new Map<string, Map<string, string[]>>();
     for (const name of realCombos) {
@@ -269,9 +273,7 @@ export default function QuotaEndpointsCard({
 
   // ── Compute the combined default model count across all groups ────────────────
 
-  const hasAnyDefaultModels = viewByGroup.some((g) =>
-    g.entries.some((e) => e.models.length > 0)
-  );
+  const hasAnyDefaultModels = viewByGroup.some((g) => g.entries.some((e) => e.models.length > 0));
 
   // ── Render ───────────────────────────────────────────────────────────────────
 
@@ -282,9 +284,7 @@ export default function QuotaEndpointsCard({
       {/* Header row */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-start gap-2">
-          <span className="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">
-            api
-          </span>
+          <Icon name="api" size={18} className="text-primary mt-0.5" />
           <div>
             <span className="text-sm font-semibold text-text-main">{t("endpointsTitle")}</span>
             <p className="text-xs text-text-muted mt-0.5 max-w-lg">{t("endpointsHint")}</p>
@@ -295,13 +295,12 @@ export default function QuotaEndpointsCard({
         <div className="flex items-center gap-2 shrink-0">
           {apiKeys.length > 0 && (
             <>
-              <label className="text-xs text-text-muted whitespace-nowrap">
-                {t("previewForKey")}
-              </label>
-              <select
+              <Select
+                compact
+                label={t("previewForKey")}
                 value={selectedKeyId}
                 onChange={(e) => void handleKeyChange(e.target.value)}
-                className="px-2 py-1 rounded border border-border bg-bg-base text-xs text-text-main min-w-[140px]"
+                selectClassName="min-w-[140px]"
               >
                 <option value="">{t("previewKeyNone")}</option>
                 {apiKeys.map((k) => (
@@ -309,145 +308,145 @@ export default function QuotaEndpointsCard({
                     {keyLabel(k)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </>
           )}
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => setCollapsed((c) => !c)}
             title={collapsed ? t("endpointsExpand") : t("endpointsCollapse")}
             aria-label={collapsed ? t("endpointsExpand") : t("endpointsCollapse")}
-            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-text-main transition-colors cursor-pointer"
+            aria-expanded={!collapsed}
+            className="text-text-muted"
           >
-            <span className="material-symbols-outlined text-[18px]">
-              {collapsed ? "expand_more" : "expand_less"}
-            </span>
-          </button>
+            <Icon name={collapsed ? "expand_more" : "expand_less"} size={18} />
+          </Button>
         </div>
       </div>
 
       {!collapsed && (
         <>
-      {/* Base URL line(s) */}
-      <div className="mt-3 rounded-md bg-bg-subtle/50 border border-border/40 px-3 py-2 space-y-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
-            {t("endpointsBaseUrl")}
-          </span>
-          <code className="text-xs text-primary font-mono">POST /v1/chat/completions</code>
-          <span className="text-xs text-text-muted mx-1">·</span>
-          <code className="text-xs text-text-muted font-mono">
-            model: &quot;qtSd/&lt;group&gt;/&lt;provider&gt;/&lt;model&gt;&quot;
-          </code>
-        </div>
-        {hasAnthropic && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
-              {t("endpointsBaseUrl")}
-            </span>
-            <code className="text-xs text-primary font-mono">POST /v1/messages</code>
-            <span className="text-xs text-text-muted mx-1">·</span>
-            <code className="text-xs text-text-muted font-mono">
-              model: &quot;qtSd/&lt;group&gt;/&lt;provider&gt;/&lt;model&gt;&quot;
-            </code>
-            <span className="text-[10px] text-text-muted">({t("endpointsAnthropicNote")})</span>
-          </div>
-        )}
-        {hasResponses && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
-              {t("endpointsBaseUrl")}
-            </span>
-            <code className="text-xs text-primary font-mono">POST /v1/responses</code>
-            <span className="text-xs text-text-muted mx-1">·</span>
-            <code className="text-xs text-text-muted font-mono">
-              model: &quot;qtSd/&lt;group&gt;/&lt;provider&gt;/&lt;model&gt;&quot;
-            </code>
-            <span className="text-[10px] text-text-muted">({t("endpointsResponsesNote")})</span>
-          </div>
-        )}
-        {hasCodex && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
-              {t("endpointsBaseUrl")}
-            </span>
-            <code className="text-xs text-primary font-mono">WS /v1/responses</code>
-            <span className="text-xs text-text-muted mx-1">·</span>
-            <code className="text-xs text-text-muted font-mono">
-              model: &quot;qtSd/&lt;group&gt;/codex/&lt;model&gt;&quot;
-            </code>
-            <span className="text-[10px] text-text-muted">({t("endpointsWsNote")})</span>
-          </div>
-        )}
-      </div>
-
-      {/* Model listing */}
-      <div className="mt-3">
-        {loadingPreview ? (
-          <div className="text-xs text-text-muted animate-pulse py-2">{t("loading")}</div>
-        ) : previewModels !== null ? (
-          // Per-key preview from the API
-          <div>
-            {previewModels.length === 0 ? (
-              <p className="text-xs text-text-muted italic">{t("noAllocations")}</p>
-            ) : (
-              <ul className="space-y-0.5">
-                {previewModels.map((m) => (
-                  <li key={m}>
-                    <code className="text-[11px] font-mono text-text-main bg-bg-subtle/40 rounded px-1.5 py-0.5 inline-block">
-                      {m}
-                    </code>
-                  </li>
-                ))}
-              </ul>
+          {/* Base URL line(s) */}
+          <div className="mt-3 rounded-md bg-bg-subtle border border-border px-3 py-2 space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
+                {t("endpointsBaseUrl")}
+              </span>
+              <code className="text-xs text-primary font-mono">POST /v1/chat/completions</code>
+              <span className="text-xs text-text-muted mx-1">·</span>
+              <code className="text-xs text-text-muted font-mono">
+                model: &quot;qtSd/&lt;group&gt;/&lt;provider&gt;/&lt;model&gt;&quot;
+              </code>
+            </div>
+            {hasAnthropic && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
+                  {t("endpointsBaseUrl")}
+                </span>
+                <code className="text-xs text-primary font-mono">POST /v1/messages</code>
+                <span className="text-xs text-text-muted mx-1">·</span>
+                <code className="text-xs text-text-muted font-mono">
+                  model: &quot;qtSd/&lt;group&gt;/&lt;provider&gt;/&lt;model&gt;&quot;
+                </code>
+                <span className="text-[10px] text-text-muted">({t("endpointsAnthropicNote")})</span>
+              </div>
+            )}
+            {hasResponses && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
+                  {t("endpointsBaseUrl")}
+                </span>
+                <code className="text-xs text-primary font-mono">POST /v1/responses</code>
+                <span className="text-xs text-text-muted mx-1">·</span>
+                <code className="text-xs text-text-muted font-mono">
+                  model: &quot;qtSd/&lt;group&gt;/&lt;provider&gt;/&lt;model&gt;&quot;
+                </code>
+                <span className="text-[10px] text-text-muted">({t("endpointsResponsesNote")})</span>
+              </div>
+            )}
+            {hasCodex && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
+                  {t("endpointsBaseUrl")}
+                </span>
+                <code className="text-xs text-primary font-mono">WS /v1/responses</code>
+                <span className="text-xs text-text-muted mx-1">·</span>
+                <code className="text-xs text-text-muted font-mono">
+                  model: &quot;qtSd/&lt;group&gt;/codex/&lt;model&gt;&quot;
+                </code>
+                <span className="text-[10px] text-text-muted">({t("endpointsWsNote")})</span>
+              </div>
             )}
           </div>
-        ) : hasData && hasAnyDefaultModels ? (
-          // Default view: grouped by group → provider → real qtSd model ids
-          <div className="space-y-3">
-            {viewByGroup.map(({ group, entries }) => {
-              if (entries.length === 0) return null;
-              return (
-                <div key={group.id}>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="material-symbols-outlined text-[13px] text-text-muted">
-                      folder
-                    </span>
-                    <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">
-                      {quotaGroupSlug(group.name)}
-                    </span>
-                  </div>
-                  <div className="space-y-1 pl-4">
-                    {entries.map(({ provider, models }) => (
-                      <div key={provider} className="space-y-0.5">
-                        <span className="text-[10px] text-text-muted font-medium">{provider}</span>
-                        <ul className="space-y-0.5">
-                          {models.map((m) => (
-                            <li key={m}>
-                              <code className="text-[11px] font-mono text-text-main bg-bg-subtle/40 rounded px-1.5 py-0.5 inline-block">
-                                {m}
-                              </code>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+
+          {/* Model listing */}
+          <div className="mt-3">
+            {loadingPreview ? (
+              <div className="text-xs text-text-muted animate-pulse py-2">{t("loading")}</div>
+            ) : previewModels !== null ? (
+              // Per-key preview from the API
+              <div>
+                {previewModels.length === 0 ? (
+                  <p className="text-xs text-text-muted italic">{t("noAllocations")}</p>
+                ) : (
+                  <ul className="space-y-0.5">
+                    {previewModels.map((m) => (
+                      <li key={m}>
+                        <code className="text-[11px] font-mono text-text-main bg-bg-subtle/40 rounded px-1.5 py-0.5 inline-block">
+                          {m}
+                        </code>
+                      </li>
                     ))}
-                  </div>
-                </div>
-              );
-            })}
+                  </ul>
+                )}
+              </div>
+            ) : hasData && hasAnyDefaultModels ? (
+              // Default view: grouped by group → provider → real qtSd model ids
+              <div className="space-y-3">
+                {viewByGroup.map(({ group, entries }) => {
+                  if (entries.length === 0) return null;
+                  return (
+                    <div key={group.id}>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Icon name="folder" size={13} className="text-text-muted" />
+                        <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">
+                          {quotaGroupSlug(group.name)}
+                        </span>
+                      </div>
+                      <div className="space-y-1 pl-4">
+                        {entries.map(({ provider, models }) => (
+                          <div key={provider} className="space-y-0.5">
+                            <span className="text-[10px] text-text-muted font-medium">
+                              {provider}
+                            </span>
+                            <ul className="space-y-0.5">
+                              {models.map((m) => (
+                                <li key={m}>
+                                  <code className="text-[11px] font-mono text-text-main bg-bg-subtle/40 rounded px-1.5 py-0.5 inline-block">
+                                    {m}
+                                  </code>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              // No pools yet — show the format placeholder
+              <div className="text-xs text-text-muted italic">
+                <code className="font-mono text-[11px]">
+                  qtSd/&lt;groupSlug&gt;/&lt;provider&gt;/&lt;model&gt;
+                </code>
+                {" — "}
+                {t("emptyDescription")}
+              </div>
+            )}
           </div>
-        ) : (
-          // No pools yet — show the format placeholder
-          <div className="text-xs text-text-muted italic">
-            <code className="font-mono text-[11px]">
-              qtSd/&lt;groupSlug&gt;/&lt;provider&gt;/&lt;model&gt;
-            </code>
-            {" — "}
-            {t("emptyDescription")}
-          </div>
-        )}
-      </div>
         </>
       )}
     </Card>

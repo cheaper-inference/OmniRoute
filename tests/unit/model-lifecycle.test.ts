@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 const {
   MODEL_LIFECYCLE_RECORDS,
+  OPENAI_MODEL_DEPRECATIONS_URL,
   filterSelectableModels,
   formatModelLifecycleMessage,
   getModelLifecycleDecision,
@@ -32,11 +33,23 @@ test("upcoming shutdowns warn before the shutdown date", () => {
   assert.equal(decision.shutdownAt, "2026-08-10");
 });
 
-test("lifecycle records are provider-scoped", () => {
+test("dated OpenAI deprecations stay provider-scoped", () => {
+  // gpt-3.5-turbo-0125 shuts down 2026-10-23; CURRENT_DATE is 2026-07-26.
+  // Snapshot marks it retiring (not retired), so an aggregator still allows it.
+  const openai = getModelLifecycleDecision("openai", "gpt-3.5-turbo-0125", CURRENT_DATE);
+  const aggregator = getModelLifecycleDecision("opencode-zen", "gpt-3.5-turbo-0125", CURRENT_DATE);
+
+  assert.equal(openai.status, "deprecated");
+  assert.equal(openai.action, "warn");
+  assert.equal(aggregator.status, "untracked");
+  assert.equal(aggregator.action, "allow");
+});
+
+test("snapshot-retired ids are rejected on every provider (#11625)", () => {
   const decision = getModelLifecycleDecision("opencode-zen", "gpt-5.2-codex", CURRENT_DATE);
 
-  assert.equal(decision.status, "untracked");
-  assert.equal(decision.action, "allow");
+  assert.equal(decision.status, "shutdown");
+  assert.equal(decision.action, "reject");
 });
 
 test("catalog filtering hides deprecated and shutdown models by default", () => {
@@ -52,7 +65,7 @@ test("catalog filtering hides deprecated and shutdown models by default", () => 
   );
   assert.deepEqual(
     filterSelectableModels("opencode-zen", models, { asOf: CURRENT_DATE }).map((model) => model.id),
-    models.map((model) => model.id)
+    ["gpt-5.6-sol"]
   );
 });
 
@@ -78,4 +91,81 @@ test("the conflicted gpt-4-1106-preview date is not guessed", () => {
     MODEL_LIFECYCLE_RECORDS.some((record) => record.model === "gpt-4-1106-preview"),
     false
   );
+});
+
+test("a non-lowercase spelling of a shut-down model gets the dated record verdict", () => {
+  const decision = getModelLifecycleDecision("openai", "GPT-4-0314", CURRENT_DATE);
+
+  assert.equal(decision.status, "shutdown");
+  assert.equal(decision.action, "reject");
+  assert.equal(decision.provider, "openai");
+  assert.equal(decision.model, "gpt-4-0314");
+  assert.equal(decision.shutdownAt, "2026-03-26");
+  assert.equal(decision.replacement, null);
+  assert.equal(decision.source, OPENAI_MODEL_DEPRECATIONS_URL);
+  const message = formatModelLifecycleMessage(decision);
+  assert.match(message || "", /was shut down on 2026-03-26/);
+  assert.doesNotMatch(message || "", /Use "/);
+});
+
+test("a capitalized provider spelling keeps the same shutdown verdict", () => {
+  const decision = getModelLifecycleDecision("OpenAI", "gpt-4-0314", CURRENT_DATE);
+
+  assert.equal(decision.status, "shutdown");
+  assert.equal(decision.action, "reject");
+  assert.equal(decision.provider, "openai");
+  assert.equal(decision.model, "gpt-4-0314");
+  assert.equal(decision.shutdownAt, "2026-03-26");
+  assert.equal(decision.replacement, null);
+  assert.equal(decision.source, OPENAI_MODEL_DEPRECATIONS_URL);
+});
+
+test("an untracked current model id stays allowed", () => {
+  const decision = getModelLifecycleDecision("openai", "gpt-5.6-sol", CURRENT_DATE);
+
+  assert.equal(decision.status, "untracked");
+  assert.equal(decision.action, "allow");
+  assert.equal(decision.source, null);
+});
+
+test("a non-lowercase id missing from the snapshot still gets the dated record verdict", () => {
+  const record = MODEL_LIFECYCLE_RECORDS.find(
+    (candidate) => candidate.model === "o3-deep-research-2025-06-26"
+  );
+  assert.ok(record, "expected o3-deep-research-2025-06-26 in MODEL_LIFECYCLE_RECORDS");
+
+  const decision = getModelLifecycleDecision(
+    record.provider,
+    record.model.toUpperCase(),
+    CURRENT_DATE
+  );
+
+  assert.equal(decision.status, "shutdown");
+  assert.equal(decision.action, "reject");
+  assert.equal(decision.model, record.model);
+  assert.equal(decision.shutdownAt, "2026-07-23");
+  assert.equal(decision.source, OPENAI_MODEL_DEPRECATIONS_URL);
+});
+
+test("a non-lowercase id before its shutdown date still warns", () => {
+  const record = MODEL_LIFECYCLE_RECORDS.find(
+    (candidate) => candidate.model === "gpt-3.5-turbo-0125"
+  );
+  assert.ok(record, "expected gpt-3.5-turbo-0125 in MODEL_LIFECYCLE_RECORDS");
+
+  const decision = getModelLifecycleDecision(
+    record.provider,
+    record.model.toUpperCase(),
+    CURRENT_DATE
+  );
+
+  assert.equal(decision.status, "deprecated");
+  assert.equal(decision.action, "warn");
+  assert.equal(decision.model, record.model);
+  assert.equal(decision.shutdownAt, "2026-10-23");
+  assert.equal(decision.source, OPENAI_MODEL_DEPRECATIONS_URL);
+  assert.deepEqual(decision.replacement, {
+    provider: "openai",
+    model: "gpt-5.6-terra",
+  });
 });

@@ -14,7 +14,7 @@
  * All other commands are routed through Commander (bin/cli/program.mjs).
  */
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 let updateNotifier = null;
@@ -29,6 +29,12 @@ import { getDefaultDataDir } from "./cli/data-dir.mjs";
 import { shouldProvisionStorageKey } from "./cli/utils/storageKeyProvision.mjs";
 import { isVersionFastPath } from "./cli/utils/versionFastPath.mjs";
 import { parseEnvValue } from "./cli/utils/parseEnvValue.mjs";
+import { describeVolatileEnvWarning } from "./cli/utils/volatileEnvPath.mjs";
+import {
+  ensurePrivateDataDir,
+  tightenDataDirSecrets,
+  writePrivateFile,
+} from "./cli/privateDataDir.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -49,13 +55,49 @@ if (isVersionFastPath(process.argv)) {
   process.exit(0);
 }
 
+// Detect an unsupported Node.js runtime BEFORE the heavy `tsx/esm` import and
+// Commander's ~70-command registration chain run. That chain pulls in `ora` ->
+// the hoisted `string-width` package, whose module contains top-level ES2024
+// Unicode-set (`v` flag) regex literals. On a Node/V8 build that predates
+// `v`-flag support, those literals fail to even *parse*, throwing a bare
+// `SyntaxError: Invalid regular expression flags` deep inside a transitive
+// dependency instead of an actionable message (#12296). Skip this for the
+// same read-only invocations `shouldProvisionStorageKey` already exempts
+// (`--help`/`-h`, `help`/`completion`) — those still need the full command
+// registry to render their output, so an incompatible runtime crashing there
+// is a separate, pre-existing limitation this fix does not attempt to solve.
+if (shouldProvisionStorageKey(process.argv)) {
+  const nodeSupport = getNodeRuntimeSupport();
+  if (!nodeSupport.nodeCompatible) {
+    const runtimeWarning = getNodeRuntimeWarning() || "Unsupported Node.js runtime detected.";
+    console.error(
+      `\x1b[31m✖ Node.js ${nodeSupport.nodeVersion} is not supported.\x1b[0m\n` +
+        `  ${runtimeWarning}\n` +
+        `  Supported runtimes: ${nodeSupport.supportedDisplay}\n` +
+        `  Recommended: Node.js ${nodeSupport.recommendedVersion}\n` +
+        `  If you installed OmniRoute globally, run \`node -v\` and confirm \`omniroute\` is not resolving to\n` +
+        `  a stale/distro-packaged \`nodejs\` binary (e.g. /usr/bin/node) instead of the version you expect —\n` +
+        `  that mismatch is the most common cause even when package.json's engines range is correct.`
+    );
+    process.exit(1);
+  }
+}
+
 // MCP stdio transport uses stdout exclusively for JSON-RPC messages. Redirect
 // console.log/warn to stderr before anything else runs — including the tsx/esm and
 // polyfill imports below, since those (and their transitive module graphs, e.g. DB
 // init) can themselves log during evaluation. Redirecting after those imports let
 // early output leak straight into the JSON-RPC stream and corrupt it client-side
 // (e.g. Claude Desktop: "Unexpected token 'D', \"[DB] Changi\"... is not valid JSON").
-if (process.argv.includes("--mcp")) {
+//
+// `deploy` needs the same treatment for the same reason: it prints Kubernetes
+// YAML (or JSON) on stdout and is meant to be piped —
+// `omniroute deploy k8s | kubectl apply -f -`. Env-loading notices and DB
+// warnings on stdout make that YAML unparseable ("control characters are not
+// allowed"), so they belong on stderr where a human still sees them.
+const STDOUT_IS_DATA = process.argv.includes("--mcp") || process.argv[2] === "deploy";
+
+if (STDOUT_IS_DATA) {
   const { Console } = await import("node:console");
   const stderrConsole = new Console({ stdout: process.stderr, stderr: process.stderr });
   console.log = stderrConsole.log.bind(stderrConsole);
@@ -90,10 +132,8 @@ function migrateElectronServerEnv(dataDir) {
     const envPath = join(dataDir, ".env");
     const serverEnvPath = join(dataDir, "server.env");
     if (existsSync(envPath) || !existsSync(serverEnvPath)) return;
-    writeFileSync(envPath, readFileSync(serverEnvPath, "utf-8"), "utf-8");
-    console.log(
-      `  \x1b[2m♻ Migrated Electron secrets from ${serverEnvPath} to ${envPath}\x1b[0m`
-    );
+    writePrivateFile(envPath, readFileSync(serverEnvPath, "utf-8"));
+    console.log(`  \x1b[2m♻ Migrated Electron secrets from ${serverEnvPath} to ${envPath}\x1b[0m`);
   } catch {
     // Ignore errors migrating server.env — fall back to normal env loading below.
   }
@@ -115,7 +155,12 @@ function loadEnvFile() {
     addEnvPath(join(process.env.DATA_DIR, ".env"));
   }
 
-  addEnvPath(join(getDefaultDataDir(), ".env"));
+  // Hermetic commands (real CLI smokes, migrations, recovery probes) may point
+  // DATA_DIR at an isolated tree. Do not silently mix the user's default
+  // credential env into that process when isolation is explicitly requested.
+  if (process.env.OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV !== "1") {
+    addEnvPath(join(getDefaultDataDir(), ".env"));
+  }
 
   addEnvPath(join(process.cwd(), ".env"));
   // Skip the repo-checkout .env when explicitly requested (used by isolation tests
@@ -164,6 +209,26 @@ function loadEnvFile() {
     const setter = winner ? winner : "the environment";
     console.warn(`  \x1b[33m⚠ ${key} in ${loser} is ignored, ${setter} set it first\x1b[0m`);
   }
+
+  // The package directory is replaced by the next `npm i -g`, so a .env kept
+  // there is silently lost. Say so once, and only when that file actually
+  // supplied an effective value that is not a regenerated template default.
+  const durableEnvPath = join(process.env.DATA_DIR || getDefaultDataDir(), ".env");
+  const suppliedValues = new Map(
+    [...keyOrigin]
+      .filter(([, origin]) => origin === join(ROOT, ".env"))
+      .map(([key]) => [key, process.env[key]])
+  );
+  const volatileWarning = describeVolatileEnvWarning({
+    envPath: join(ROOT, ".env"),
+    packageRoot: ROOT,
+    durableEnvPath,
+    suppliedKeys: suppliedValues.size > 0,
+    suppliedValues,
+  });
+  if (volatileWarning && loadedEnvPaths.includes(join(ROOT, ".env"))) {
+    console.warn(`  \x1b[33m⚠ ${volatileWarning}\x1b[0m`);
+  }
 }
 
 loadEnvFile();
@@ -177,9 +242,9 @@ loadEnvFile();
   ensureAndroidCacheDir();
 }
 
-// Generate STORAGE_ENCRYPTION_KEY if not set (persisted to ~/.omniroute/.env)
+// Generate STORAGE_ENCRYPTION_KEY if not set (persisted to DATA_DIR or getDefaultDataDir()/.env)
 // This ensures the key survives across upgrades and is not regenerated on each install.
-// See: https://github.com/diegosouzapw/OmniRoute/issues/1622
+// See: https://github.com/cheaper-inference/OmniRoute/issues/1622
 //
 // Only provision for commands that actually touch encrypted storage. Purely
 // informational invocations (`--version`, `--help`, `help`) must not create a
@@ -187,16 +252,20 @@ loadEnvFile();
 // mutate the data dir.
 if (shouldProvisionStorageKey(process.argv)) {
   const { randomBytes } = await import("node:crypto");
-  const { existsSync, mkdirSync, readFileSync, writeFileSync } = await import("node:fs");
+  const { existsSync, readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
-  const { homedir } = await import("node:os");
+
+  // GHSA-2pg2-xm9r-8544: installs created before the fix have a world-readable .env and a
+  // world-traversable data dir. Repair them on every run that touches encrypted storage
+  // (best-effort; group bits are kept). Informational commands never reach this block.
+  tightenDataDirSecrets(process.env.DATA_DIR || getDefaultDataDir());
 
   if (!process.env.STORAGE_ENCRYPTION_KEY) {
     // Persist the key into DATA_DIR when set — that's the directory mounted as a volume in
     // Docker (where storage.sqlite lives), so the key survives `docker down` / `docker pull`.
     // Writing only to ~/.omniroute (the container home, not a volume) silently lost the key on
     // container recreation, leaving the persisted encrypted DB undecryptable (regression of #1622).
-    const dataDir = process.env.DATA_DIR || join(homedir(), ".omniroute");
+    const dataDir = process.env.DATA_DIR || getDefaultDataDir();
     const envPath = join(dataDir, ".env");
     const dbPath = join(dataDir, "storage.sqlite");
 
@@ -214,9 +283,8 @@ if (shouldProvisionStorageKey(process.argv)) {
       );
     } else {
       // First run (no database yet) — generate and persist a fresh key.
-      if (!existsSync(dataDir)) {
-        mkdirSync(dataDir, { recursive: true });
-      }
+      // GHSA-2pg2-xm9r-8544: owner-only — .env holds the key to every stored credential.
+      ensurePrivateDataDir(dataDir);
 
       const key = randomBytes(32).toString("hex");
 
@@ -230,7 +298,7 @@ if (shouldProvisionStorageKey(process.argv)) {
       if (!content.includes("STORAGE_ENCRYPTION_KEY=")) {
         const separator = content.trim() ? "\n" : "";
         const newContent = content.trimEnd() + separator + `STORAGE_ENCRYPTION_KEY=${key}`;
-        writeFileSync(envPath, newContent + "\n", "utf-8");
+        writePrivateFile(envPath, newContent + "\n");
         console.log(`  \x1b[2m✨ Generated STORAGE_ENCRYPTION_KEY in ${envPath}\x1b[0m`);
       }
 
@@ -247,16 +315,16 @@ if (shouldProvisionStorageKey(process.argv)) {
   const langEnv = process.env.OMNIROUTE_LANG;
   const chosen = langArg || langEnv;
   if (chosen) {
-    const { setLocale } = await import(
-      pathToFileURL(join(ROOT, "bin", "cli", "i18n.mjs")).href
-    );
+    const { setLocale } = await import(pathToFileURL(join(ROOT, "bin", "cli", "i18n.mjs")).href);
     setLocale(chosen);
   }
 }
 
 // Register update notifier — checks npm once per 24h, notifies on exit via stderr.
 const _pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
-const _notifier = updateNotifier ? updateNotifier({ pkg: _pkg, updateCheckInterval: 1000 * 60 * 60 * 24 }) : null;
+const _notifier = updateNotifier
+  ? updateNotifier({ pkg: _pkg, updateCheckInterval: 1000 * 60 * 60 * 24 })
+  : null;
 process.on("exit", () => {
   if (!_notifier || !_notifier.update) return;
   if (process.env.OMNIROUTE_NO_UPDATE_NOTIFIER) return;
@@ -265,7 +333,15 @@ process.on("exit", () => {
   const outputIdx = process.argv.indexOf("--output");
   const outputVal = outputIdx >= 0 ? process.argv[outputIdx + 1] : null;
   if (outputVal === "json" || outputVal === "jsonl" || outputVal === "csv") return;
-  if (process.argv.some((a) => a.startsWith("--output=json") || a.startsWith("--output=jsonl") || a.startsWith("--output=csv"))) return;
+  if (
+    process.argv.some(
+      (a) =>
+        a.startsWith("--output=json") ||
+        a.startsWith("--output=jsonl") ||
+        a.startsWith("--output=csv")
+    )
+  )
+    return;
   if (_notifier.update) {
     _notifier.notify({
       defer: false,

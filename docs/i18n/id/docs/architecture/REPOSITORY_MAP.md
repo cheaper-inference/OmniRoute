@@ -1,0 +1,596 @@
+# Repository Map (Bahasa Indonesia)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/REPOSITORY_MAP.md) · 🇪🇹 [am](../../../am/docs/architecture/REPOSITORY_MAP.md) · 🇸🇦 [ar](../../../ar/docs/architecture/REPOSITORY_MAP.md) · 🇦🇿 [az](../../../az/docs/architecture/REPOSITORY_MAP.md) · 🇧🇬 [bg](../../../bg/docs/architecture/REPOSITORY_MAP.md) · 🇧🇩 [bn](../../../bn/docs/architecture/REPOSITORY_MAP.md) · 🇧🇦 [bs](../../../bs/docs/architecture/REPOSITORY_MAP.md) · 🇨🇿 [cs](../../../cs/docs/architecture/REPOSITORY_MAP.md) · 🇩🇰 [da](../../../da/docs/architecture/REPOSITORY_MAP.md) · 🇩🇪 [de](../../../de/docs/architecture/REPOSITORY_MAP.md) · 🇬🇷 [el](../../../el/docs/architecture/REPOSITORY_MAP.md) · 🇪🇸 [es](../../../es/docs/architecture/REPOSITORY_MAP.md) · 🇪🇪 [et](../../../et/docs/architecture/REPOSITORY_MAP.md) · 🇮🇷 [fa](../../../fa/docs/architecture/REPOSITORY_MAP.md) · 🇫🇮 [fi](../../../fi/docs/architecture/REPOSITORY_MAP.md) · 🇫🇷 [fr](../../../fr/docs/architecture/REPOSITORY_MAP.md) · 🇮🇪 [ga](../../../ga/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [gu](../../../gu/docs/architecture/REPOSITORY_MAP.md) · 🇳🇬 [ha](../../../ha/docs/architecture/REPOSITORY_MAP.md) · 🇮🇱 [he](../../../he/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [hi](../../../hi/docs/architecture/REPOSITORY_MAP.md) · 🇭🇷 [hr](../../../hr/docs/architecture/REPOSITORY_MAP.md) · 🇭🇺 [hu](../../../hu/docs/architecture/REPOSITORY_MAP.md) · 🇦🇲 [hy](../../../hy/docs/architecture/REPOSITORY_MAP.md) · 🇳🇬 [ig](../../../ig/docs/architecture/REPOSITORY_MAP.md) · 🇮🇹 [it](../../../it/docs/architecture/REPOSITORY_MAP.md) · 🇯🇵 [ja](../../../ja/docs/architecture/REPOSITORY_MAP.md) · 🇬🇪 [ka](../../../ka/docs/architecture/REPOSITORY_MAP.md) · 🇰🇭 [km](../../../km/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [kn](../../../kn/docs/architecture/REPOSITORY_MAP.md) · 🇰🇷 [ko](../../../ko/docs/architecture/REPOSITORY_MAP.md) · 🇱🇹 [lt](../../../lt/docs/architecture/REPOSITORY_MAP.md) · 🇱🇻 [lv](../../../lv/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [ml](../../../ml/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [mr](../../../mr/docs/architecture/REPOSITORY_MAP.md) · 🇲🇾 [ms](../../../ms/docs/architecture/REPOSITORY_MAP.md) · 🇲🇹 [mt](../../../mt/docs/architecture/REPOSITORY_MAP.md) · 🇲🇲 [my](../../../my/docs/architecture/REPOSITORY_MAP.md) · 🇳🇵 [ne](../../../ne/docs/architecture/REPOSITORY_MAP.md) · 🇳🇱 [nl](../../../nl/docs/architecture/REPOSITORY_MAP.md) · 🇳🇴 [no](../../../no/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [or](../../../or/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [pa](../../../pa/docs/architecture/REPOSITORY_MAP.md) · 🇵🇭 [phi](../../../phi/docs/architecture/REPOSITORY_MAP.md) · 🇵🇱 [pl](../../../pl/docs/architecture/REPOSITORY_MAP.md) · 🇵🇹 [pt](../../../pt/docs/architecture/REPOSITORY_MAP.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/REPOSITORY_MAP.md) · 🇷🇴 [ro](../../../ro/docs/architecture/REPOSITORY_MAP.md) · 🇷🇺 [ru](../../../ru/docs/architecture/REPOSITORY_MAP.md) · 🇱🇰 [si](../../../si/docs/architecture/REPOSITORY_MAP.md) · 🇸🇰 [sk](../../../sk/docs/architecture/REPOSITORY_MAP.md) · 🇸🇮 [sl](../../../sl/docs/architecture/REPOSITORY_MAP.md) · 🇷🇸 [sr](../../../sr/docs/architecture/REPOSITORY_MAP.md) · 🇸🇪 [sv](../../../sv/docs/architecture/REPOSITORY_MAP.md) · 🇰🇪 [sw](../../../sw/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [ta](../../../ta/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [te](../../../te/docs/architecture/REPOSITORY_MAP.md) · 🇹🇭 [th](../../../th/docs/architecture/REPOSITORY_MAP.md) · 🇹🇷 [tr](../../../tr/docs/architecture/REPOSITORY_MAP.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/REPOSITORY_MAP.md) · 🇵🇰 [ur](../../../ur/docs/architecture/REPOSITORY_MAP.md) · 🇺🇿 [uz](../../../uz/docs/architecture/REPOSITORY_MAP.md) · 🇻🇳 [vi](../../../vi/docs/architecture/REPOSITORY_MAP.md) · 🇳🇬 [yo](../../../yo/docs/architecture/REPOSITORY_MAP.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/REPOSITORY_MAP.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/REPOSITORY_MAP.md)
+
+---
+
+> **Deskripsi satu baris untuk setiap direktori dan file root.**
+> Terakhir diperbarui: 2026-06-28 — OmniRoute v3.8.40
+>
+> Gunakan peta ini untuk menavigasi basis kode dengan cepat. Untuk pembahasan mendalam, ikuti tautan ke dokumentasi khusus.
+
+## Struktur tingkat teratas
+
+```
+OmniRoute/
+├── src/                  # Aplikasi Next.js 16 (UI + rute API + pustaka + domain + server)
+├── open-sse/             # Ruang kerja mesin streaming (handler, eksekutor, penerjemah, server MCP)
+├── packages/            # Ruang kerja npm: ui-kit (Keak CI UI Kit yang disertakan) dan browser-pool
+├── electron/             # Pembungkus desktop (Electron 41 + electron-builder 26.10)
+├── bin/                  # Titik masuk CLI dan handler perintah
+├── scripts/              # Skrip build, pemeriksaan, sinkronisasi, dan sekali pakai
+├── docs/                 # Dokumentasi publik (Anda berada di sini)
+├── tests/                # Semua rangkaian pengujian (unit, integrasi, e2e, klien protokol)
+├── public/               # Aset statis Next.js, manifes PWA, service worker, ikon
+├── config/               # Konfigurasi statis + status gerbang kualitas (i18n, payloadRules, quality/)
+├── images/               # Aset gambar pemasaran / README
+├── @omniroute/           # Paket pendamping yang dapat dipublikasikan (opencode-plugin, opencode-provider)
+├── skills/               # Paket keterampilan CLI/agen (cli-* + omni-* + config-codex-cli)
+├── examples/             # Plugin contoh + proyek awal omniroute-cmd-hello
+├── contrib/              # Kontribusi komunitas (podman/)
+├── .source/              # Konfigurasi sumber Fumadocs (source.config.mjs + server/browser/dynamic)
+├── .github/              # Alur kerja GitHub Actions + templat isu + templat PR
+├── .husky/               # Hook Git (pre-commit, pre-push)
+├── .claude/              # Perintah garis miring Claude Code (cakupan proyek)
+├── .agents/              # Alur kerja + keterampilan Codex / agen generik (cerminan .claude/)
+├── .vscode/              # Pengaturan ruang kerja VS Code
+├── _ideia/               # Catatan perencanaan (informal; tidak didistribusikan)
+├── _mono_repo/           # Subproyek historis (cloud, site, vscode-extension)
+├── _references/          # Klon referensi hanya-baca dari proyek OSS terkait
+├── _tasks/               # File pelacakan tugas per rilis (informal)
+├── .build/ .worktrees/ dist/   # Area sementara build lokal / git-worktree / keluaran build (diabaikan Git)
+├── .issues/              # Cache isu lokal (diabaikan Git)
+├── .playwright-mcp/      # Artefak pengujian Playwright MCP
+├── coverage/             # Keluaran cakupan c8 (diabaikan Git)
+├── logs/                 # Log runtime (diabaikan Git)
+├── node_modules/         # Dependensi (diabaikan Git)
+├── package/              # Area staging npm pack (artefak build)
+├── .next/                # Keluaran build Next.js (diabaikan Git)
+└── (file root — lihat di bawah)
+```
+
+---
+
+## File root
+
+| File                                        | Tujuan                                                                                        |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **README.md**                               | Halaman arahan pemasaran + panduan mulai cepat + matriks fitur (lihat juga `llm.txt`)         |
+| **CHANGELOG.md**                            | Log perubahan per rilis (dibuat otomatis oleh skill `/version-bump-cc`)                       |
+| **LICENSE**                                 | Teks lisensi MIT                                                                              |
+| **CLAUDE.md**                               | Aturan proyek untuk agen Claude Code (aturan wajib, konvensi, skenario)                       |
+| **AGENTS.md**                               | Sama seperti CLAUDE.md, tetapi untuk agen AI non-Claude (Codex, Cursor, dll.)                 |
+| **GEMINI.md**                               | Aturan ringkas untuk agen berbasis Gemini (subset dari CLAUDE.md)                             |
+| **CONTRIBUTING.md**                         | Panduan kontributor: penyiapan, conventional commits, pengujian, alur PR                      |
+| **SECURITY.md**                             | Kebijakan pelaporan kerentanan, versi yang didukung, model ancaman                            |
+| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — ekspektasi perilaku komunitas                                          |
+| **llm.txt**                                 | Halaman arahan teks biasa yang dioptimalkan untuk crawler LLM (SEO untuk asisten AI)          |
+| **package.json**                            | Manifes npm, skrip, dependensi, engine, gerbang cakupan c8                                    |
+| **package-lock.json**                       | Pohon dependensi yang dikunci                                                                 |
+| **tsconfig.json**                           | Konfigurasi TypeScript utama                                                                  |
+| **tsconfig.typecheck-core.json**            | Konfigurasi pemeriksaan tipe untuk inti `src/`                                                |
+| **tsconfig.typecheck-noimplicit-core.json** | Pemeriksaan tipe ketat (`noImplicitAny`)                                                      |
+| **tsconfig.tsbuildinfo**                    | Cache build inkremental TS (diabaikan oleh git)                                               |
+| **next.config.mjs**                         | Konfigurasi build Next.js 16 (keluaran mandiri)                                               |
+| **next-env.d.ts**                           | Tipe env yang dibuat otomatis oleh Next.js                                                    |
+| **eslint.config.mjs**                       | Konfigurasi datar ESLint (aturan per area proyek)                                             |
+| **prettier.config.mjs**                     | Aturan pemformatan Prettier                                                                   |
+| **postcss.config.mjs**                      | Konfigurasi PostCSS untuk pipeline Tailwind/CSS                                               |
+| **playwright.config.ts**                    | Konfigurasi pengujian E2E Playwright                                                          |
+| **vitest.config.ts**                        | Konfigurasi Vitest (suite default)                                                            |
+| **vitest.mcp.config.ts**                    | Konfigurasi Vitest untuk server MCP / suite autoCombo / cache                                 |
+| **sonar-project.properties**                | Konfigurasi SonarQube/SonarCloud (kualitas kode)                                              |
+| **Dockerfile**                              | Build Docker multi-tahap (builder → runner-base → runner-cli)                                 |
+| **docker-compose.yml**                      | Compose pengembangan dengan 4 profil (base, cli, host, cliproxyapi) + sidecar redis           |
+| **docker-compose.prod.yml**                 | Compose produksi (port 20130, redis, volume bernama)                                          |
+| **.dockerignore**                           | File yang dikecualikan dari konteks Docker                                                    |
+| **fly.toml**                                | Konfigurasi deployment Fly.io (region `sin`, port 20128, volume /data)                        |
+| **.env.example**                            | Templat file env (disalin otomatis ke `.env` saat instalasi pertama)                          |
+| **.gitignore**                              | Pola pengabaian Git                                                                           |
+| **.npmignore**                              | Daftar pengecualian publikasi npm                                                             |
+| **.npmrc**                                  | Konfigurasi npm (registry, kebijakan lockfile)                                                |
+| **.node-version**                           | Pin versi Node (digunakan oleh alat yang kompatibel dengan nvm)                               |
+| **.nvmrc**                                  | Pin versi Node untuk nvm                                                                      |
+| **eslint.complexity.config.mjs**            | Konfigurasi ESLint untuk ratchet kompleksitas (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | Konfigurasi ESLint untuk aturan SonarJS (kompleksitas kognitif / duplikasi)                   |
+| **source.config.ts**                        | Konfigurasi sumber `defineDocs` Fumadocs (mengisi `.source/`)                                 |
+| **knip.json**                               | Konfigurasi Knip — file/ekspor/dependensi yang tidak digunakan (mengisi gerbang dead-code)    |
+| **stryker.conf.json**                       | Konfigurasi pengujian mutasi Stryker                                                          |
+| **.size-limit.json**                        | Konfigurasi anggaran ukuran bundle size-limit                                                 |
+| **promptfooconfig.yaml**                    | Konfigurasi evaluasi promptfoo                                                                |
+| **.gitleaks.toml**                          | Kumpulan aturan pemindaian rahasia gitleaks                                                   |
+| **.zizmor.yml**                             | Konfigurasi lint keamanan GitHub Actions zizmor                                               |
+| **socket.yml**                              | Konfigurasi rantai pasok Socket.dev                                                           |
+| **news.json**                               | Feed pengumuman v2 yang dilokalkan; item peluncuran Radar disertakan dalam keadaan nonaktif   |
+| **flake.nix** / **flake.lock**              | Definisi dev-shell Nix + lock                                                                 |
+| **.env**                                    | Rahasia lokal (diabaikan git — dibuat dari `.env.example`)                                    |
+
+> **Dipindahkan dari root pada v3.8.26 (perapian):**
+>
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, dan `quality-metrics.json` yang dihasilkan (diabaikan git). Lihat [`## config/`](#config--static-configs--quality-gate-state).
+
+---
+
+## `src/` — aplikasi Next.js
+
+```
+src/
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node-only instrumentation
+└── proxy.ts             # HTTP-proxy entry shim
+```
+
+### `src/app/` — Router Aplikasi (Next.js 16)
+
+| Jalur                                                                        | Tujuan                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | API yang kompatibel dengan OpenAI publik (~ 25 sub-rute: obrolan, penyelesaian, penyematan, file, batch, audio, gambar, video, musik, peringkat ulang, moderasi, pencarian, ws, agen, akun, penyedia, dll.)                                                                                                         |
+| `app/api/v1beta/`                                                            | Titik akhir API gaya Gemini                                                                                                                                                                                                                                                                                         |
+| `app/api/playground/`                                                        | Rute Playground Studio: `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — lihat `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                    |
+| `app/api/` (non-v1)                                                          | rute Management/admin (~ 60 direktori: penyedia, kombo, pengaturan, mcp, a2a, evals, memori, keterampilan, webhook, kepatuhan, ketahanan, pemantauan, terowongan, alat cli, dll.)                                                                                                                                   |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 rute (kontrol server, agen state/DNS/mappings, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Lihat `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                         |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 rute + (permintaan, sesi, host, mode pengambilan, ekspor, ws). LOCAL_ONLY + SPAWN_CAPABLE. Lihat `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                    |
+| `app/a2a/`                                                                   | A2A titik masuk JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                          |
+| `app/.well-known/agent.json/`                                                | Kartu Agen A2A (penemuan)                                                                                                                                                                                                                                                                                           |
+| `app/(dashboard)/dashboard/`                                                 | Halaman dasbor UI (50 bagian +, ~ 118 file page.tsx : penyedia, kombo, pengaturan, memori, keterampilan, webhook, evaluasi, audit, batch, cache, biaya, kesehatan, sistem, aktivitas, dll.)                                                                                                                         |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Alat Pencarian Studio UI (3 tab: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — lihat `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                      |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (paket 21): `page.tsx` (3 tab shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | halaman dasbor AgentBridge — kartu server, 9 kartu agen, wizard pengaturan, pemetaan model, daftar bypass. i18n PT-BR + EN. Lihat `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                 |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Halaman dasbor Traffic Inspector — DevTools split, 7 tab detail, 4 tombol mode pengambilan, perekam sesi, pewarnaan konteks. i18n PT-BR + EN. Lihat `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                         |
+| `app/(dashboard)/dashboard/activity/`                                        | Halaman umpan aktivitas (Grup B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — lihat `docs/architecture/MONITORING_SECTIONS.md`                                                                                                        |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Halaman Pembagian Kuota (Grup B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                       |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Halaman konfigurasi paket penyedia (Grup B): `page.tsx` + `ProviderPlanConfigClient.tsx` — dimensi kuota per penggantian koneksi                                                                                                                                                                                    |
+| `app/docs/`                                                                  | Penampil dokumentasi tertanam (merender `docs/*.md`)                                                                                                                                                                                                                                                                |
+| `app/landing/`                                                               | Halaman arahan pemasaran                                                                                                                                                                                                                                                                                            |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Halaman terkait autentikasi                                                                                                                                                                                                                                                                                         |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | halaman kesalahan HTTP                                                                                                                                                                                                                                                                                              |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | halaman Static/status                                                                                                                                                                                                                                                                                               |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Tata letak root, beranda, manifes PWA, CSS global                                                                                                                                                                                                                                                                   |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Batasan kesalahan                                                                                                                                                                                                                                                                                                   |
+
+### `src/lib/` — Pustaka inti (~ 50 modul)
+
+| Modul                                    | Tujuan                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | manajer tugas protokol A2A, keterampilan (5), streaming                                                                                                                                                                                                                                                                      |
+| `acp/`                                   | CLI Agent Registry (penemuan CLI lokal — lihat `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                   |
+| `api/`                                   | Pembantu API bersama (`requireManagementAuth`, validasi)                                                                                                                                                                                                                                                                     |
+| `auth/`                                  | Sesi, hashing kata sandi, validasi token                                                                                                                                                                                                                                                                                     |
+| `batches/`                               | OpenAI Batch penangan API                                                                                                                                                                                                                                                                                                    |
+| `catalog/`                               | Katalog penyedia resolusi kemampuan Zod validasi +                                                                                                                                                                                                                                                                           |
+| `cloudAgent/`                            | Agen Cloud (Codex Cloud, Devin, Jules) — lihat `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                              |
+| `combos/`                                | Resolusi kombo + menyusun ulang pembantu                                                                                                                                                                                                                                                                                     |
+| `audit/`                                 | Pembantu umpan aktivitas: `highLevelActions.ts` (daftar yang diizinkan + `isHighLevelAction()`), `activityIcons.ts` (tindakan → icon/verb map), `timeline.ts` (groupByDay/relativeTime) — lihat `docs/architecture/MONITORING_SECTIONS.md`                                                                                   |
+| `compliance/`                            | Audit log audit penyedia + — lihat `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                             |
+| `compression/`                           | Lem mesin kompresi (mesin hidup di `open-sse/services/compression/`)                                                                                                                                                                                                                                                         |
+| `config/`                                | Pembantu konfigurasi runtime                                                                                                                                                                                                                                                                                                 |
+| `db/`                                    | 120 + domain DB modul + 168 migrasi (selalu buka di sini untuk SQLite)                                                                                                                                                                                                                                                       |
+| `quota/`                                 | Mesin Pembagian Kuota: `dimensions.ts` (types/Zod), `types.ts` ( antarmuka QuotaStore ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — lihat `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Klien katalog model bebas radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — lihat `docs/frameworks/RADAR.md`                                                                                                                                               |
+| `display/`                               | pembantu pemformatan UI (biaya, latensi, dll.)                                                                                                                                                                                                                                                                               |
+| `embeddings/`                            | Pembantu layanan penyematan                                                                                                                                                                                                                                                                                                  |
+| `env/`                                   | Validasi + penguraian variabel env                                                                                                                                                                                                                                                                                           |
+| `evals/`                                 | Kerangka kerja evaluasi (suite, runner, runtime) — lihat `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                          |
+| `guardrails/`                            | PII masker, injeksi cepat, jembatan penglihatan — lihat `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                        |
+| `jobs/`                                  | Pekerjaan latar belakang (seperti cron)                                                                                                                                                                                                                                                                                      |
+| `memory/`                                | Memori percakapan (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant tier 2) — lihat `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                  |
+| `memory/embedding/`                      | Lapisan penyematan multi-sumber: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (rencana 21)                                                                                                                                                                          |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF ( vektor FTS5 +, k = 60). Lazy-init, terdegradasi dengan baik ketika sqlite-vec tidak tersedia. (rencana 21)                                                                                                                                                        |
+| `memory/reindex.ts`                      | `runReindexBatch()` — memproses kenangan dengan `needs_reindex=1` di latar belakang; dipanggil oleh `POST /api/memory/reindex` dan jalur pengisian ulang yang malas. (rencana 21)                                                                                                                                            |
+| `monitoring/`                            | Pemeriksaan kesehatan, emisi metrik                                                                                                                                                                                                                                                                                          |
+| `oauth/`                                 | OAuth/import mengalir untuk 22 modul penyedia (agy, antigravity, claude, cline, codebuddy-cn, codex, kursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                    |
+| `plugins/`                               | Registri plugin                                                                                                                                                                                                                                                                                                              |
+| `promptCache/`                           | Breakpoint cache cepat bergaya antropis                                                                                                                                                                                                                                                                                      |
+| `skills/`                                | Kerangka kerja keterampilan (pasar + bawaan + SkillsSH) — lihat `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                  |
+| `playground/`                            | Pembantu bersama Playground Studio: `codeExport.ts` ( generator curl/Python/TS ), `promptImprover.ts` (pembuat meta-prompt), `streamMetrics.ts` ( TTFT/TPS murni), `types.ts` (tabel harga) — lihat `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                   |
+| `webhookDispatcher.ts`                   | pengiriman webhook HMAC — lihat `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Manajer terowongan — lihat `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                       |
+| `cloudSync.ts`, `initCloudSync.ts`       | Sinkronisasi cloud negara opsional                                                                                                                                                                                                                                                                                           |
+| `localDb.ts`                             | Ekspor ulang barel untuk modul db (tidak ada logika — hanya ekspor ulang)                                                                                                                                                                                                                                                    |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | Minta cache idempotensi +                                                                                                                                                                                                                                                                                                    |
+| (~ 30 lebih banyak file tingkat atas)    | Pembantu khusus (logEnv, modelsDevSync, piiSanitizer, dll.)                                                                                                                                                                                                                                                                  |
+
+### `src/lib/db/` — Basis data (147 modul + 208 migrasi)
+
+| Subdir                    | Tujuan                                                                                                                                                                              |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | `getDbInstance()` singleton dengan penjurnalan WAL                                                                                                                                  |
+| `db/migrations/`          | File SQL berversi (idempoten, transaksional). `073_memory_vec.sql` menambahkan kolom `memory_vec_meta` + `needs_reindex` (rencana 21).                                              |
+| `db/playgroundPresets.ts` | modul CRUD untuk preset Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)            |
+| `db/memoryVec.ts`         | CRUD untuk `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, dll. (rencana 21)                    |
+| `db/<domain>.ts`          | Satu modul per domain: penyedia, kombo, apiKeys, pengguna, sesi, penggunaan, log audit, webhook, keterampilan, memory_entries, cloud_agent_tasks, evals* \* , penalaran_cache, dll. |
+
+### `src/domain/`
+
+| Modul                  | Tujuan                                        |
+| ---------------------- | --------------------------------------------- |
+| `policy.ts`            | Mesin kebijakan                               |
+| `fallbackPolicy.ts`    | Pohon keputusan cadangan                      |
+| `costRules.ts`         | Aturan perhitungan biaya                      |
+| `lockoutPolicy.ts`     | kebijakan penguncian Model/connection         |
+| `tagRouter.ts`         | Perutean berbasis tag                         |
+| `comboResolver.ts`     | Resolusi kombo (digunakan oleh mesin kombo)   |
+| `modelAvailability.ts` | Pemeriksaan ketersediaan per model            |
+| `assessment/`          | Penilaian model (Fase 1 RFC-AUTO-ASSESSMENT ) |
+
+### `src/server/`
+
+| Modul    | Tujuan                                                                                          |
+| -------- | ----------------------------------------------------------------------------------------------- |
+| `authz/` | Jalur otorisasi: `classify` → `policies` → `enforce` — lihat `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | konfigurasi CORS                                                                                |
+| `auth/`  | Perangkat tengah sesi                                                                           |
+
+### `src/shared/`
+
+| Modul                            | Tujuan                                                                                              |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `components/`                    | Komponen dasbor API: adaptor melalui `packages/ui-kit` — lihat `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: nama ikon yang digunakan oleh layar → Komponen Lucide (`<Icon>`)                        |
+| `constants/providers.ts`         | **377 penyedia** dengan validasi Zod (sumber kebenaran)                                             |
+| `constants/cliTools.ts`          | Registri alat CLI eksternal                                                                         |
+| `constants/routingStrategies.ts` | **20 strategi perutean** dengan prioritas                                                           |
+| `constants/publicApiRoutes.ts`   | Rute yang memerlukan autentikasi Pembawa (vs manajemen).                                            |
+| `constants/upstreamHeaders.ts`   | Daftar penolakan header untuk permintaan upstream                                                   |
+| `validation/schemas.ts`          | skema ~ 80 Zod (satu-satunya sumber kebenaran untuk kontrak API )                                   |
+| `validation/helpers.ts`          | pembantu validasi Zod (`validateBody`, dll.)                                                        |
+| `types/`                         | Jenis TS bersama                                                                                    |
+| `contracts/`                     | Kontrak API publik (digunakan oleh `files:` di `package.json`)                                      |
+| `utils/circuitBreaker.ts`        | Pemutus sirkuit penyedia (lihat `docs/architecture/RESILIENCE_GUIDE.md`)                            |
+| `utils/apiAuth.ts`               | validasi kunci API, pemeriksaan cakupan                                                             |
+| `utils/fetchTimeout.ts`          | pembungkus Timeout/abort untuk pengambilan upstream                                                 |
+| `utils/releaseNotes.ts`          | Parser pengumuman v2/legacy tertutup, lokalisasi dan penutupan ID                                   |
+
+---
+
+## `open-sse/` — Workspace Mesin Streaming
+
+Workspace npm terpisah (`@omniroute/open-sse`). Menangani pemrosesan permintaan + eksekusi penyedia.
+
+```
+open-sse/
+├── handlers/            # 16 file (12 handler + 4 helper): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, dll.
+├── executors/           # 150 modul eksekutor (kelas yang memperluas BaseExecutor + helper per penyedia)
+├── translator/          # Konverter format (9 permintaan, 9 respons, 9 helper)
+├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
+├── services/            # ~80+ modul layanan (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, dll.)
+├── mcp-server/          # Server MCP (110 alat, 3 transport, 33 cakupan)
+├── config/              # Registri penyedia/model, konfigurasi header, alias model
+├── utils/               # Klien TLS, fetch/dispatcher proksi, helper jaringan
+├── index.ts             # Titik masuk workspace
+├── package.json         # Manifes workspace
+├── tsconfig.json        # Konfigurasi TS workspace
+└── types.d.ts           # Deklarasi tipe workspace
+```
+
+### `open-sse/mcp-server/`
+
+| Jalur                       | Tujuan                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| `server.ts`                 | Siklus hidup server MCP (transport stdio + HTTP)                                   |
+| `httpTransport.ts`          | Transport HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                |
+| `audit.ts`                  | Pencatatan audit ke tabel `mcp_tool_audit`                                         |
+| `scopeEnforcement.ts`       | Validasi cakupan per alat                                                          |
+| `runtimeHeartbeat.ts`       | Heartbeat kesehatan ke `DATA_DIR/runtime/mcp-heartbeat.json`                       |
+| `descriptionCompressor.ts`  | Mengompresi metadata deskripsi alat untuk menghemat konteks                        |
+| `schemas/tools.ts`          | 36 definisi alat dasar + cakupan                                                   |
+| `tools/advancedTools.ts`    | Implementasi alat lanjutan                                                         |
+| `tools/memoryTools.ts`      | 3 alat memori (pencarian/penambahan/penghapusan)                                   |
+| `tools/skillTools.ts`       | 4 alat keterampilan (daftar/aktifkan/eksekusi/eksekusi yang telah dilakukan)       |
+| `tools/compressionTools.ts` | 5 alat kompresi                                                                    |
+| `README.md`                 | README server MCP internal (ditautkan silang dari `docs/frameworks/MCP-SERVER.md`) |
+
+---
+
+## `packages/` — Workspace
+
+| Jalur                    | Tujuan                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit` — snapshot vendor dari Keak CI UI Kit (`private`, `UNLICENSED`), digunakan sebagai sumber (tanpa build). `UPSTREAM.md` menetapkan commit upstream dan mencatat otorisasi lisensi; `PATCHES.md` mencantumkan patch lokal (tidak ada); `src/` hanya disinkronkan oleh `scripts/dev/sync-ui-kit.sh` dan dijaga oleh `npm run check:ui-kit-snapshot`. Lihat `docs/architecture/DESIGN_SYSTEM.md` |
+| `packages/browser-pool/` | `@omniroute/browser-pool` — layanan pool browser opsional (chat yang didukung oleh CloakBrowser dan Playwright)                                                                                                                                                                                                                                                                                                  |
+
+---
+
+## `electron/` — Pembungkus Desktop
+
+| File             | Tujuan                                                                                   |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `main.js`        | Proses utama Electron (BrowserWindow, server Next.js tersemat, tray, pembaruan otomatis) |
+| `preload.js`     | Jembatan IPC (contextBridge → `window.omniroute`)                                        |
+| `package.json`   | Konfigurasi electron-builder + dependensi Electron 41 + electron-builder 26.10           |
+| `assets/`        | Ikon aplikasi (Windows .ico, macOS .icns, Linux .png)                                    |
+| `dist-electron/` | Keluaran build (diabaikan oleh git)                                                      |
+| `types.d.ts`     | Deklarasi tipe untuk jembatan renderer                                                   |
+| `README.md`      | README Electron internal (lihat juga `docs/guides/ELECTRON_GUIDE.md`)                    |
+
+---
+
+## `bin/` — CLI
+
+| File                                                                                                        | Tujuan                                                                                                                      |
+| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute.mjs`                                                                                             | Entri utama CLI — `omniroute serve`, `omniroute setup`, `omniroute doctor`, `omniroute providers`, `omniroute combos`, dll. |
+| `reset-password.mjs`                                                                                        | CLI mandiri untuk mengatur ulang kata sandi                                                                                 |
+| `cli/commands/setup.mjs`                                                                                    | Wizard penyiapan interaktif + noninteraktif                                                                                 |
+| `cli/commands/doctor.mjs`                                                                                   | Diagnostik kesehatan sistem (8+ pemeriksaan)                                                                                |
+| `cli/commands/providers.mjs`                                                                                | Daftar/pengujian/validasi penyedia                                                                                          |
+| `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | Modul pembantu CLI                                                                                                          |
+| `cli/tray/tray.ts`                                                                                          | Integrasi tray sistem (lintas platform: NotifyIcon di Windows, systray2 di macOS/Linux)                                     |
+| `cli/tray/tray.ps1`                                                                                         | Backend NotifyIcon PowerShell (Windows, tanpa biner baru)                                                                   |
+| `cli/tray/autostart.ts`                                                                                     | Mulai otomatis lintas platform (LaunchAgent / .desktop / registri)                                                          |
+| `cli/runtime/sqliteRuntime.mjs`                                                                             | Rantai resolusi driver SQLite 5 langkah (dibundelkan → runtime → instalasi tertunda → node:sqlite → sql.js)                 |
+| `cli/runtime/magicBytes.mjs`                                                                                | Validasi byte ajaib biner (ELF / Mach-O / Mach-O fat / PE)                                                                  |
+| `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — melakukan praresolusi driver saat postinstall / pengaktifan pertama                                    |
+| `nodeRuntimeSupport.mjs`                                                                                    | Memvalidasi versi Node.js yang didukung saat instalasi                                                                      |
+
+---
+
+## `skills/` — Keterampilan Agen Publik
+
+| Berkas                       | Tujuan                                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------- |
+| `skills/omniroute*/SKILL.md` | 10 manifes keterampilan untuk agen AI eksternal (Claude Desktop, ChatGPT, Cursor, Cline) |
+
+---
+
+## `scripts/` — Skrip Build & Pemeriksaan
+
+| Skrip                               | Tujuan                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `run-next.mjs`                      | Runner pengembangan/start dengan pemuatan variabel lingkungan                                           |
+| `build-next-isolated.mjs`           | Build mandiri (mode standalone Next.js 16)                                                              |
+| `prepublish.ts`                     | Persiapan paket sebelum `npm pack`                                                                      |
+| `postinstall.mjs`                   | Membuat `.env` secara otomatis dari `.env.example` pada instalasi pertama                               |
+| `sync-env.mjs`                      | Menyinkronkan ulang kunci `.env` dengan `.env.example`                                                  |
+| `check-cycles.mjs`                  | Mendeteksi dependensi sirkular                                                                          |
+| `check-route-validation.mjs`        | Memvalidasi bahwa semua rute API memiliki validasi Zod                                                  |
+| `check-t11-any-budget.mjs`          | Menerapkan batas eksplisit `any` per berkas                                                             |
+| `check-docs-sync.mjs`               | Memvalidasi sinkronisasi versi dokumentasi (pre-commit yang sudah ada)                                  |
+| **`check-env-doc-sync.mjs`**        | BARU: memeriksa silang variabel lingkungan dalam kode dengan `.env.example` dan `ENVIRONMENT.md`        |
+| **`check-docs-counts-sync.mjs`**    | BARU: memvalidasi bahwa jumlah (eksekutor, strategi, OAuth, keterampilan A2A) sesuai dengan dokumentasi |
+| **`check-deprecated-versions.mjs`** | BARU: menandai versi/tanggal usang dalam dokumentasi                                                    |
+| `check-supported-node-runtime.ts`   | Memvalidasi bahwa versi Node saat ini didukung                                                          |
+| `check-pr-test-policy.mjs`          | Menerapkan aturan "pengujian wajib" pada perubahan kode produksi                                        |
+| **`gen-provider-reference.ts`**     | BARU: menghasilkan otomatis `docs/reference/PROVIDER_REFERENCE.md` dari katalog                         |
+| `i18n/generate-multilang.mjs`       | Menerjemahkan string UI + dokumentasi melalui Google Translate                                          |
+| `i18n_autotranslate.py`             | Pipeline penerjemahan dokumentasi berbasis LLM                                                          |
+| `validate_translation.py`           | Validasi terjemahan per lokal                                                                           |
+| `check_translations.py`             | Pemeriksaan kunci i18n pada sisi kode                                                                   |
+| `run-playwright-tests.mjs`          | Runner E2E Playwright                                                                                   |
+| `run-protocol-clients-tests.mjs`    | Runner E2E MCP/A2A                                                                                      |
+| `run-ecosystem-tests.mjs`           | Pengujian ekosistem (integrasi penyedia)                                                                |
+| `test-report-summary.mjs`           | Menghasilkan markdown ringkasan cakupan                                                                 |
+| `smoke-electron-packaged.mjs`       | Melakukan smoke test pada build Electron yang telah dikemas                                             |
+| `native-binary-compat.mjs`          | Memvalidasi bahwa dependensi native (`better-sqlite3`) cocok dengan Node milik Electron                 |
+| `validate-pack-artifact.ts`         | Memvalidasi keluaran npm pack                                                                           |
+| `responses-ws-proxy.mjs`            | Jembatan WebSocket untuk Codex Responses API                                                            |
+| `v1-ws-bridge.mjs`                  | Jembatan WebSocket untuk endpoint `/api/v1/ws`                                                          |
+| `standalone-server-ws.mjs`          | Runner server WS mandiri                                                                                |
+| `system-info.mjs`                   | Mencetak informasi sistem/runtime untuk dukungan                                                        |
+| `healthcheck.mjs`                   | Pemeriksaan kesehatan sekali jalan (digunakan oleh Docker HEALTHCHECK)                                  |
+| `uninstall.mjs`                     | Skrip penghapusan instalasi secara bersih                                                               |
+| `dev/sync-ui-kit.sh`                | Menyalin `src/` CI UI Kit pada commit yang dipatok ke `packages/ui-kit/src`                             |
+| `check/check-ui-kit-snapshot.mjs`   | Gerbang pre-commit: `packages/ui-kit/src` cocok dengan commit upstream yang dipatok                     |
+| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — nama ikon yang digunakan tetapi tidak dipetakan oleh `ICON_MAP`                |
+| `dev/codemod-material-icons.mjs`    | Menulis ulang span Material Symbols literal menjadi `<Icon>` (perkakas migrasi)                         |
+
+---
+
+## `docs/` — Dokumentasi Publik (7 file root + 17 subdir)
+
+### Panduan tingkat atas
+
+| Dokter                      | Tujuan                                                                                    |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Arsitektur tingkat tinggi, peta subsistem, permukaan dasbor                               |
+| `CODEBASE_DOCUMENTATION.md` | Referensi teknik: direktori, modul, konvensi                                              |
+| `FEATURES.md`               | Matriks fitur dengan sorotan v3.8                                                         |
+| `USER_GUIDE.md`             | Panduan pengguna akhir (pengaturan, model, kombo, CLIs, audio, dll.)                      |
+| `API_REFERENCE.md`          | referensi titik akhir API dengan model autentikasi                                        |
+| `openapi.yaml`              | spesifikasi OpenAPI 3.0 (121 jalur)                                                       |
+| `SETUP_GUIDE.md`            | Metode instalasi (npm, npx, Docker, Electron, Termux, source)                             |
+| `ENVIRONMENT.md`            | Semua env vars (~ 800 didokumentasikan, ~ 3.050 baris `.env.example`)                     |
+| `TROUBLESHOOTING.md`        | Kesalahan umum + v3.8.0 masalah yang diketahui                                            |
+| `RELEASE_CHECKLIST.md`      | Alur rilis penuh (keterampilan, husky, komitmen konvensional, penerapan)                  |
+| `COVERAGE_PLAN.md`          | Sasaran cakupan dan kondisi saat ini                                                      |
+| `FREE_TIERS.md`             | Penyedia tingkat gratis yang dikurasi (48 + gratis + 11 OAuth)                            |
+| `CLI-TOOLS.md`              | Integrasi CLI eksternal + OmniRoute CLI internal                                          |
+| `I18N.md`                   | arsitektur i18n, menambahkan bahasa, 67 lokal                                             |
+| `UNINSTALL.md`              | Bersihkan langkah-langkah uninstall                                                       |
+| `PROVIDER_REFERENCE.md`     | **Dibuat secara otomatis** katalog 377 penyedia (regen: `npm run gen:provider-reference`) |
+
+### Penyelaman mendalam subsistem
+
+| Dokter                                       | Tujuan                                                                             |
+| -------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | server MCP : 110 alat, 3 transportasi, 33 cakupan, titik akhir REST                |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 keterampilan, pembantu REST, kartu agen                      |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Panduan terpadu: A2A vs ACP vs Agen Cloud                                          |
+| `CLOUD_AGENT.md`                             | orkestrasi Codex Cloud / Devin / Jules                                             |
+| `SKILLS.md`                                  | Kerangka kerja keterampilan ( + marketplace + SkillsSH + sandbox bawaan)           |
+| `RADAR.md`                                   | Hamparan katalog model bebas radar (`RADAR_ENABLED`, dinonaktifkan secara default) |
+| `MEMORY.md`                                  | Sistem memori (SQLite FTS5 + Qdrant)                                               |
+| `EVALS.md`                                   | Kerangka evaluasi (suite, run, rubrik)                                             |
+| `GUARDRAILS.md`                              | PII masker, injeksi cepat, jembatan penglihatan                                    |
+| `COMPLIANCE.md`                              | Log audit, retensi, penolakan noLog                                                |
+| `WEBHOOKS.md`                                | Pengiriman webhook bertanda tangan HMAC                                            |
+| `REASONING_REPLAY.md`                        | Cache memory/SQLite hibrid untuk `reasoning_content`                               |
+| `AUTHZ_GUIDE.md`                             | Saluran otorisasi (`classify` → `policies` → `enforce`)                            |
+| `RESILIENCE_GUIDE.md`                        | Penguncian model + cooldown + pemutus sirkuit                                      |
+| `docs/security/STEALTH_GUIDE.md` (hanya git) | sidik jari TLS (JA3/JA4), Claude Kode CCH, MITM cert                               |
+| `AUTO-COMBO.md`                              | Mesin Kombo Otomatis (skor 16 faktor, 6 paket mode, pabrik virtual)                |
+
+### Kompresi
+
+| Dokter                          | Tujuan                                    |
+| ------------------------------- | ----------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Ikhtisar peta jalan mode kompresi +       |
+| `COMPRESSION_ENGINES.md`        | Mesin manusia gua + RTK, kontrak registri |
+| `COMPRESSION_RULES_FORMAT.md`   | Skema JSON paket aturan manusia gua       |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Inventaris paket aturan per bahasa        |
+| `RTK_COMPRESSION.md`            | pipa deklaratif RTK (56 filter)           |
+
+### Penyebaran
+
+| Dokter                       | Tujuan                                                          |
+| ---------------------------- | --------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker build, profil (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Penerapan VM/VPS umum (Ubuntu/Debian + nginx + systemd)         |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Penerapan Fly.io (saat ini hanya untuk bahasa Mandarin)         |
+| `TERMUX_GUIDE.md`            | Android tanpa kepala melalui Termux                             |
+| `PWA_GUIDE.md`               | Aplikasi Web Progresif menginstal pekerja layanan +             |
+| `ELECTRON_GUIDE.md`          | Pembuatan aplikasi desktop + sign + distribusikan               |
+| `TUNNELS_GUIDE.md`           | + ngrok + Tailscale yang menyala-nyala                          |
+| `PROXY_GUIDE.md`             | Proksi keluar 4 tingkat + 1proxy pasar                          |
+
+### Subdirektori
+
+| Subdir                | Tujuan                                                                                                                                                                                                         |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Terjemahan dokumen yang dilokalkan (41 lokal)                                                                                                                                                                  |
+| `docs/screenshots/`   | Aset gambar untuk panduan                                                                                                                                                                                      |
+| `_tasks/superpowers/` | Plans/specs dari negara adidaya (`writing-plans`/`brainstorming`) penelitian + — repo yang terisolasi dan berversi terpisah, diabaikan oleh pohon utama. Lihat CLAUDE.md → "Perencanaan & Artefak Penelitian". |
+
+---
+
+## `tests/` — Rangkaian Pengujian
+
+| Subdirektori                         | Jenis                                      | Runner                                      |
+| ------------------------------------ | ------------------------------------------ | ------------------------------------------- |
+| `tests/unit/`                        | Pengujian unit (~4.800 file, paling cepat) | Runner pengujian bawaan Node                |
+| `tests/integration/`                 | Pengujian integrasi multi-modul + DB       | Runner pengujian bawaan Node (konkurensi 1) |
+| `tests/e2e/`                         | E2E UI + alur kerja                        | Playwright                                  |
+| `tests/e2e/protocol-clients.test.ts` | E2E klien nyata MCP + A2A                  | Klien protokol khusus                       |
+| `tests/e2e/ecosystem.test.ts`        | Integrasi penyedia (mengakses jaringan)    | Runner pengujian bawaan Node                |
+
+---
+
+## `public/` — Aset Statis
+
+| Jalur               | Tujuan                                                         |
+| ------------------- | -------------------------------------------------------------- |
+| `public/` (root)    | Favicon, robots.txt, manifes, service worker, gambar pemasaran |
+| `public/providers/` | PNG/SVG logo penyedia (digunakan di dasbor)                    |
+
+---
+
+## `config/` — Konfigurasi Statis + Status Gerbang Kualitas
+
+Templat konfigurasi yang didistribusikan beserta baseline gerbang kualitas yang di-commit
+(dipindahkan ke sini dari root repo pada v3.8.26 agar root tetap ringkas).
+
+| Jalur                                         | Tujuan                                                                                       |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `config/i18n.json`                            | Daftar locale + metadata (sumber kanonis untuk jumlah 42 locale)                             |
+| `config/i18n-schema.json`                     | Skema JSON yang memvalidasi `i18n.json`                                                      |
+| `config/payloadRules.json`                    | Aturan sanitasi payload upstream                                                             |
+| `config/quality/quality-baseline.json`        | Baseline ratchet multimetrik (`scripts/quality/check-quality-ratchet.mjs`)                   |
+| `config/quality/complexity-baseline.json`     | Baseline kompleksitas ESLint yang dibekukan (`check-complexity.mjs`)                         |
+| `config/quality/duplication-baseline.json`    | Baseline duplikasi jscpd yang dibekukan (`check-duplication.mjs`)                            |
+| `config/quality/file-size-baseline.json`      | Baseline ukuran per file yang dibekukan (`check-file-size.mjs`)                              |
+| `config/quality/test-discovery-baseline.json` | Baseline pengujian yatim yang dibekukan (`check-test-discovery.mjs`)                         |
+| `config/quality/dependency-allowlist.json`    | Daftar izin dependensi yang disetujui (`check-deps.mjs`)                                     |
+| `config/quality/.license-allowlist.json`      | Daftar izin lisensi SPDX (`check-licenses.mjs`)                                              |
+| `config/quality/quality-metrics.json`         | Metrik sementara yang dikumpulkan (dihasilkan oleh `collect-metrics.mjs`; **diabaikan Git**) |
+
+---
+
+## `.github/` — Integrasi GitHub
+
+| Path                               | Tujuan                                                            |
+| ---------------------------------- | ----------------------------------------------------------------- |
+| `.github/workflows/`               | Alur kerja CI/CD GitHub Actions (lint, pengujian, cakupan, rilis) |
+| `.github/ISSUE_TEMPLATE/`          | Templat isu bug/fitur                                             |
+| `.github/pull_request_template.md` | Templat PR                                                        |
+| `.github/dependabot.yml`           | Konfigurasi pembaruan dependensi                                  |
+
+---
+
+## `.husky/` — Git Hooks
+
+| File         | Tujuan                                                                            |
+| ------------ | --------------------------------------------------------------------------------- |
+| `pre-commit` | Menjalankan `lint-staged + check-docs-sync + check:any-budget:t11`                |
+| `pre-push`   | Saat ini dinonaktifkan (dikomentari). Jalankan `npm run test:unit` secara manual. |
+| `_/`         | Komponen internal Husky                                                           |
+
+---
+
+## `.claude/` — Perintah Slash Claude Code
+
+| File                                                | Tujuan                                                    |
+| --------------------------------------------------- | --------------------------------------------------------- |
+| `commands/version-bump-cc.md`                       | `/version-bump-cc` — menaikkan versi + changelog otomatis |
+| `commands/generate-release-cc.md`                   | `/generate-release-cc` — alur kerja rilis lengkap         |
+| `commands/deploy-vps-{local,akamai,both}-cc.md`     | Melakukan deployment ke VPS                               |
+| `commands/capture-release-evidences-cc.md`          | Merekam fitur baru melalui browser sebagai WebP           |
+| `commands/review-{prs,discussions}-cc.md`           | Melakukan triase PR/diskusi GitHub                        |
+| `commands/{review-issues,implement-features}-cc.md` | Alur kerja isu                                            |
+| `settings.local.json`                               | Pengaturan Claude Code per proyek                         |
+
+---
+
+## `.agents/` — Alur Kerja Agen Generik (Codex / Cursor / dll.)
+
+| Path                     | Tujuan                                                     |
+| ------------------------ | ---------------------------------------------------------- |
+| `workflows/*-ag.md`      | 11 definisi alur kerja (cerminan dari `.claude/commands/`) |
+| `skills/<name>/SKILL.md` | 9 definisi keterampilan dengan Catatan Eksekusi Codex      |
+
+> **Catatan:** Alur kerja dan perintah saat ini identik bita demi bita. Jika `.agents/` dimaksudkan untuk menargetkan runtime agen yang berbeda (Codex), variannya perlu dibuat berbeda secara bermakna.
+
+---
+
+## `_ideia/`, `_mono_repo/`, `_references/`, `_tasks/` — Di Luar Struktur Utama
+
+Direktori dengan awalan garis bawah ini menyimpan konten yang tidak disertakan dalam distribusi:
+
+- **`_ideia/`** — catatan desain (kategori ditunda / tidak sesuai / layak)
+- **`_mono_repo/`** — subproyek historis (omnirouteCloud, omnirouteSite, vscode-extension)
+- **`_references/`** — klona hanya-baca dari proyek OSS terkait (LiteLLM, 9router, ClawRouter, CLIProxyAPI, modelrelay, new-api, dll.) untuk referensi silang selama pengembangan
+- **`_tasks/`** — file pelacakan tugas per rilis (informal)
+
+Tidak disertakan dalam keluaran `npm pack`. Lihat `.npmignore`.
+
+---
+
+## Dihasilkan / Diabaikan Git
+
+| Path                   | Tujuan                           |
+| ---------------------- | -------------------------------- |
+| `node_modules/`        | Dependensi npm                   |
+| `.next/`               | Hasil build Next.js              |
+| `coverage/`            | Laporan cakupan c8               |
+| `logs/`                | Log runtime                      |
+| `package/`             | Staging npm pack                 |
+| `.playwright-mcp/`     | Artefak pengujian Playwright MCP |
+| `.issues/`             | Cache issue lokal                |
+| `tsconfig.tsbuildinfo` | Cache inkremental TS             |
+
+---
+
+## Tips navigasi
+
+- **Kontributor baru?** Baca `CONTRIBUTING.md` → `CLAUDE.md` → `docs/architecture/ARCHITECTURE.md` → `docs/architecture/CODEBASE_DOCUMENTATION.md`.
+- **Menambahkan penyedia?** Ikuti `docs/architecture/ARCHITECTURE.md § Adding a New Provider` + periksa silang dengan `docs/reference/PROVIDER_REFERENCE.md`.
+- **Menambahkan rute?** `docs/architecture/ARCHITECTURE.md § Adding a New API Route` + `src/shared/validation/schemas.ts`.
+- **Menambahkan alat MCP?** `docs/frameworks/MCP-SERVER.md § Adding a Tool`.
+- **Menambahkan keterampilan A2A?** `docs/frameworks/A2A-SERVER.md § Adding a New Skill`.
+- **Menjalankan secara lokal?** `docs/guides/SETUP_GUIDE.md`.
+- **Melakukan deployment?** `docs/guides/DOCKER_GUIDE.md` / `docs/ops/VM_DEPLOYMENT_GUIDE.md` / `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`.
+- **Merilis?** `docs/ops/RELEASE_CHECKLIST.md` (dan keterampilan Claude Code `/generate-release-cc`).

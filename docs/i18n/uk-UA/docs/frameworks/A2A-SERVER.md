@@ -1,38 +1,53 @@
 # OmniRoute A2A Server Documentation (Українська)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../docs/A2A-SERVER.md) · 🇸🇦 [ar](../../ar/docs/A2A-SERVER.md) · 🇧🇬 [bg](../../bg/docs/A2A-SERVER.md) · 🇧🇩 [bn](../../bn/docs/A2A-SERVER.md) · 🇨🇿 [cs](../../cs/docs/A2A-SERVER.md) · 🇩🇰 [da](../../da/docs/A2A-SERVER.md) · 🇩🇪 [de](../../de/docs/A2A-SERVER.md) · 🇪🇸 [es](../../es/docs/A2A-SERVER.md) · 🇮🇷 [fa](../../fa/docs/A2A-SERVER.md) · 🇫🇮 [fi](../../fi/docs/A2A-SERVER.md) · 🇫🇷 [fr](../../fr/docs/A2A-SERVER.md) · 🇮🇳 [gu](../../gu/docs/A2A-SERVER.md) · 🇮🇱 [he](../../he/docs/A2A-SERVER.md) · 🇮🇳 [hi](../../hi/docs/A2A-SERVER.md) · 🇭🇺 [hu](../../hu/docs/A2A-SERVER.md) · 🇮🇩 [id](../../id/docs/A2A-SERVER.md) · 🇮🇹 [it](../../it/docs/A2A-SERVER.md) · 🇯🇵 [ja](../../ja/docs/A2A-SERVER.md) · 🇰🇷 [ko](../../ko/docs/A2A-SERVER.md) · 🇮🇳 [mr](../../mr/docs/A2A-SERVER.md) · 🇲🇾 [ms](../../ms/docs/A2A-SERVER.md) · 🇳🇱 [nl](../../nl/docs/A2A-SERVER.md) · 🇳🇴 [no](../../no/docs/A2A-SERVER.md) · 🇵🇭 [phi](../../phi/docs/A2A-SERVER.md) · 🇵🇱 [pl](../../pl/docs/A2A-SERVER.md) · 🇵🇹 [pt](../../pt/docs/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../pt-BR/docs/A2A-SERVER.md) · 🇷🇴 [ro](../../ro/docs/A2A-SERVER.md) · 🇷🇺 [ru](../../ru/docs/A2A-SERVER.md) · 🇸🇰 [sk](../../sk/docs/A2A-SERVER.md) · 🇸🇪 [sv](../../sv/docs/A2A-SERVER.md) · 🇰🇪 [sw](../../sw/docs/A2A-SERVER.md) · 🇮🇳 [ta](../../ta/docs/A2A-SERVER.md) · 🇮🇳 [te](../../te/docs/A2A-SERVER.md) · 🇹🇭 [th](../../th/docs/A2A-SERVER.md) · 🇹🇷 [tr](../../tr/docs/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../uk-UA/docs/A2A-SERVER.md) · 🇵🇰 [ur](../../ur/docs/A2A-SERVER.md) · 🇻🇳 [vi](../../vi/docs/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../zh-CN/docs/A2A-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
 
 ---
 
-> Agent-to-Agent Protocol v0.3 — OmniRoute as an intelligent routing agent
+> Протокол Agent-to-Agent v0.3 — OmniRoute як інтелектуальний агент маршрутизації
 
-## Agent Discovery
+Інтерфейс A2A має дві форми:
+
+- **JSON-RPC 2.0** за адресою `POST /a2a` (канонічна точка входу, визначена в `src/app/a2a/route.ts`).
+- **REST** у просторі `/api/a2a/*` для панелей моніторингу та інструментів (стан, список завдань, скасування).
+
+Завдання відстежуються за допомогою `A2ATaskManager` (`src/lib/a2a/taskManager.ts`, TTL за замовчуванням — 5 хвилин). Навички спрямовуються через `A2A_SKILL_HANDLERS` у `src/lib/a2a/taskExecution.ts`.
+
+## Виявлення агента
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Returns the Agent Card describing OmniRoute's capabilities, skills, and authentication requirements.
+Повертає картку агента, яка описує можливості, навички та вимоги до автентифікації OmniRoute.
+
+Поле `version` картки агента отримується з `process.env.npm_package_version` (див. `src/app/.well-known/agent.json/route.ts:13`), тому воно автоматично синхронізується з `package.json` під час кожного випуску.
 
 ---
 
-## Authentication
+## Автентифікація
 
-All `/a2a` requests require an API key via the `Authorization` header:
+Усі запити до `/a2a` вимагають API-ключа в заголовку `Authorization`:
 
 ```
 Authorization: Bearer YOUR_OMNIROUTE_API_KEY
 ```
 
-If no API key is configured on the server, authentication is bypassed.
+Якщо на сервері не налаштовано API-ключ, автентифікація пропускається.
+
+## Увімкнення
+
+A2A керується перемикачем **Endpoints → A2A** і за замовчуванням вимкнений. Коли його вимкнено,
+`GET /api/a2a/status` повідомляє `status: "disabled"` і `online: false`; виклики JSON-RPC до
+`POST /a2a` повертають HTTP 503 із кодом помилки JSON-RPC `-32000`.
 
 ---
 
-## JSON-RPC 2.0 Methods
+## Методи JSON-RPC 2.0
 
-### `message/send` — Synchronous Execution
+### `message/send` — синхронне виконання
 
-Sends a message to a skill and waits for the complete response.
+Надсилає повідомлення навичці й очікує на повну відповідь.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -50,7 +65,18 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Response:**
+Для `smart-routing` значення `metadata.combo` явно перевизначає
+`metadata.model` для запиту до шлюзу; воно надсилається як фактичне `model`,
+а не як ігнороване поле JSON `x-combo`. Стандартна авторизація шлюзу за ключем API та
+для кожної цілі все одно застосовується. Недійсна або порожня комбінація відхиляється.
+
+Результат містить `requested_combo` (намір виклику), `dispatched_model`
+(фактичний запит до шлюзу), `response_model` (відповідь шлюзу) та
+`confirmed_combo`. Останнє поле має значення `null`, якщо шлюз явно не
+ідентифікує комбінацію. Журнали рішень A2A пов’язують виконання лише з
+підтвердженою комбінацією, зберігаючи непідтверджений запит як `requestedCombo`.
+
+**Відповідь:**
 
 ```json
 {
@@ -61,6 +87,10 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
       "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
         { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
@@ -71,9 +101,9 @@ curl -X POST http://localhost:20128/a2a \
 }
 ```
 
-### `message/stream` — SSE Streaming
+### `message/stream` — потокове передавання SSE
 
-Same as `message/send` but returns Server-Sent Events for real-time streaming.
+Працює так само, як `message/send`, але повертає події Server-Sent Events для потокового передавання в реальному часі.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -90,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE Events:**
+**Події SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -100,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Query Task Status
+### `tasks/get` — запит стану завдання
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -109,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Cancel a Task
+### `tasks/cancel` — скасування завдання
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -120,16 +150,96 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Available Skills
+## Доступні навички
 
-| Skill              | Description                                                                                                                     |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| `smart-routing`    | Routes prompts through OmniRoute's intelligent pipeline. Returns response with routing explanation, cost, and resilience trace. |
-| `quota-management` | Answers natural-language queries about provider quotas, suggests free combos, and provides quota rankings.                      |
+OmniRoute розкриває 6 навичок A2A, підключених до `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Кожен модуль навичок знаходиться в `src/lib/a2a/skills/`.
+
+| Майстерність            | ID                   | опис                                                                                                                                                             | Теги                        | Приклади                                     |
+| :---------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------- | :------------------------------------------- |
+| Розумна маршрутизація   | `smart-routing`      | Направляє підказку через оптимальний provider/combo за допомогою OmniRoute механізму +.                                                                          | маршрутизація, провайдери   | «Направити цей запит через найкращу модель»  |
+| Управління квотами      | `quota-management`   | Звітує про стан квоти для кожного постачальника, допомагає абонентам вирішити, коли використовувати throttle/switch                                              | квота, провайдери           | «Перевірити квоту на антропік»               |
+| Виявлення постачальника | `provider-discovery` | Перераховує встановлені постачальники з можливостями, прапорами вільного рівня, статусом OAuth                                                                   | провайдери, відкриття       | "Які постачальники доступні?"                |
+| Аналіз витрат           | `cost-analysis`      | Оцінка вартості request/conversation з урахуванням нещодавнього використання + каталогу                                                                          | вартість, використання      | «Оцінка вартості цієї розмови»               |
+| Звіт про здоров'я       | `health-report`      | Агрегує автоматичний вимикач, час відновлення, стан блокування для кожного постачальника                                                                         | здоров'я, стійкість         | «Показати стан здоров'я всіх постачальників» |
+| Список можливостей      | `list-capabilities`  | Повертає повний каталог навичок агента з 45 записів (23 API + 21 CLI + 1 конфігурація) як таблицю уцінки з необробленим SKILL.md URLs для впровадження контексту | каталог, відкриття, навички | «Перерахувати всі можливості OmniRoute »     |
+
+> Картка агента повинна бути узгоджена з поточним каталогом постачальників 377; кількість провайдерів і метадані free/no-auth отримані з реєстру часу виконання.
+
+### Деталі навичок `list-capabilities`
+
+Навички `list-capabilities` особливо корисні для зовнішніх агентів, яким потрібно дізнатися, що розкриває OmniRoute перш ніж надсилати виклики API. Він повертає артефакт структурованої таблиці розцінок:
+
+```
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
+| --- | --- | --- | --- | --- | --- |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+...
+```
+
+Кожен рядок містить стовпець `rawUrl`, щоб агенти могли негайно отримати повний SKILL.md. Поле `metadata.totalSkills` відображає розмір каталогу (сьогодні 45). Реалізація: `src/lib/a2a/skills/listCapabilities.ts`. Дивіться також [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## Task Lifecycle
+## REST API (допоміжний)
+
+Кінцева точка JSON-RPC `/a2a` є канонічною точкою входу A2A. Наведені нижче кінцеві точки REST забезпечують допоміжний доступ для інформаційних панелей і зовнішніх інструментів:
+
+| Кінцева точка                | Метод | Опис                                                       | Авторизація                                        |
+| :--------------------------- | :---- | :--------------------------------------------------------- | :------------------------------------------------- |
+| `/api/a2a/status`            | GET   | Стан сервера, зареєстровані навички                        | (публічна)                                         |
+| `/api/a2a/tasks`             | GET   | Список завдань із фільтрами                                | керування                                          |
+| `/api/a2a/tasks/[id]`        | GET   | Отримати завдання за ID                                    | керування                                          |
+| `/api/a2a/tasks/[id]/cancel` | POST  | Скасувати виконуване завдання                              | керування                                          |
+| `/.well-known/agent.json`    | GET   | Картка агента (виявлення A2A)                              | (публічна, кешується 3600 с)                       |
+| `/api/a2a/tasks`             | POST  | Вхідне делегування флоту OmniConductor (Conductor PRD RF5) | Bearer відносно `OMNIROUTE_API_KEY` + `a2aEnabled` |
+
+**Вхідне делегування Conductor (`POST /api/a2a/tasks`):** зовнішні агенти A2A делегують роботу з кодом флоту OmniConductor через OmniRoute. Тіло: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — делегувати можна лише навички флоту Conductor (оголошені в картці агента); `metadata.conductor.repo.url` є обов’язковим (флот працює з git-репозиторіями). Маршрут перетворюється на `POST /v1/tasks` хаба з використанням серверного `CONDUCTOR_ORCHESTRATOR_TOKEN` (резервний варіант — `CONDUCTOR_HUB_TOKEN`) і повертає `201 { conductor_task_id, state: "submitted" }`; стани завдань передаються назад через дзеркало SSE→A2A (RF1) і доступні через `GET /api/a2a/tasks?skill=conductor`.
+
+---
+
+## Додавання нової навички
+
+1. **Створіть файл навички:** `src/lib/a2a/skills/<your-skill>.ts`
+
+   Експортуйте асинхронну функцію `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Дотримуйтеся структури наявних навичок, як-от `smartRouting.ts`.
+
+2. **Зареєструйте обробник:** у `src/lib/a2a/taskExecution.ts` додайте запис до `A2A_SKILL_HANDLERS`:
+
+   ```typescript
+   export const A2A_SKILL_HANDLERS = {
+     // ...наявні навички
+     "your-skill": async (task) => {
+       const skillModule = await import("./skills/yourSkill");
+       return skillModule.executeYourSkill(task);
+     },
+   };
+   ```
+
+3. **Опублікуйте в картці агента:** у `src/app/.well-known/agent.json/route.ts` додайте до масиву `skills`:
+
+   ```json
+   {
+     "id": "your-skill",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
+   }
+   ```
+
+4. **Напишіть тести:** `tests/unit/a2a-<your-skill>.test.ts`. Перевірте успішний сценарій і сценарій помилки.
+
+5. **Задокументуйте** нову навичку в таблиці `Available Skills` цього файлу.
+
+---
+
+## TTL завдання
+
+Термін дії завдань спливає через `ttlMinutes` (за замовчуванням — 5 хв) — це налаштовується в конструкторі `A2ATaskManager` у `src/lib/a2a/taskManager.ts:82`. Щоб змінити це значення, створіть власний екземпляр `A2ATaskManager` і передайте інше значення (наприклад, `new A2ATaskManager(15)` для TTL тривалістю 15 хвилин). Фоновий інтервал перевіряє та видаляє прострочені завдання кожні 60 секунд.
+
+---
+
+## Життєвий цикл завдання
 
 ```
 submitted → working → completed
@@ -137,27 +247,28 @@ submitted → working → completed
                     → cancelled
 ```
 
-- Tasks expire after 5 minutes (configurable)
-- Terminal states: `completed`, `failed`, `cancelled`
-- Event log tracks every state transition
+- За замовчуванням термін дії завдань спливає через 5 хвилин (див. [TTL завдання](#task-ttl))
+- Кінцеві стани: `completed`, `failed`, `cancelled`
+- Журнал подій відстежує кожен перехід між станами
 
 ---
 
-## Error Codes
+## Коди помилок
 
-| Code   | Meaning                        |
-| :----- | :----------------------------- |
-| -32700 | Parse error (invalid JSON)     |
-| -32600 | Invalid request / Unauthorized |
-| -32601 | Method or skill not found      |
-| -32602 | Invalid params                 |
-| -32603 | Internal error                 |
+| Код    | Значення                                         |
+| :----- | :----------------------------------------------- |
+| -32700 | Помилка синтаксичного аналізу (некоректний JSON) |
+| -32600 | Некоректний запит / Немає авторизації            |
+| -32601 | Метод або навичку не знайдено                    |
+| -32602 | Некоректні параметри                             |
+| -32603 | Внутрішня помилка                                |
+| -32000 | Кінцеву точку A2A вимкнено                       |
 
 ---
 
-## Integration Examples
+## Приклади інтеграції
 
-### Python (requests)
+### Python (запити)
 
 ```python
 import requests
@@ -176,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (вибірка)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

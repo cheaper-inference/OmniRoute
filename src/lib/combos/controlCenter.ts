@@ -1,4 +1,5 @@
 import { normalizeComboModels, type ComboStep } from "./steps";
+import { resolveProviderAlias } from "../../../open-sse/services/providerAlias.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -11,6 +12,11 @@ export interface ComboControlCenterCombo {
   models?: unknown[];
   isActive?: boolean | null;
   config?: JsonRecord | null;
+  /**
+   * #17393: connectionId → account display name, resolved server-side by the
+   * combo route (the browser cannot read the connection table itself).
+   */
+  connectionLabels?: Record<string, string> | null;
 }
 
 export interface ComboControlCenterMetrics {
@@ -31,10 +37,10 @@ export interface ComboControlCenterHealth {
     totalRequests?: number;
   };
   quotaHealth?: {
-    worstRemainingPct?: number;
+    worstRemainingPct?: number | null;
     providers?: Array<{
       provider: string;
-      remainingPct: number;
+      remainingPct: number | null;
       isExhausted: boolean;
       trend: "improving" | "stable" | "declining";
     }>;
@@ -72,6 +78,11 @@ export interface ComboControlCenterTarget {
   model: string;
   provider: string | null;
   connectionId: string | null;
+  /**
+   * #17393: the account this target is pinned to, rendered in full. `null`
+   * means no connection is pinned (the UI shows the "dynamic" placeholder).
+   */
+  accountLabel: string | null;
   weight: number;
   tags: string[];
   health: ComboControlCenterTargetHealth | null;
@@ -108,9 +119,13 @@ function toString(value: unknown): string | null {
 
 function providerFromModel(model: string | null | undefined): string | null {
   if (!model) return null;
+  // Resolve through the general alias table that target resolution applies
+  // before dispatch, so this label matches what actually executed upstream
+  // instead of a raw, un-aliased prefix slice.
   const slashIndex = model.indexOf("/");
   if (slashIndex <= 0) return null;
-  return model.slice(0, slashIndex);
+  const prefix = model.slice(0, slashIndex);
+  return resolveProviderAlias(prefix) || prefix;
 }
 
 function normalizeSuccessRate(value: unknown): number {
@@ -140,9 +155,33 @@ function getStepLabel(step: ComboStep): string {
   return step.model;
 }
 
+/**
+ * #17393: the account a target is pinned to, rendered in full.
+ *
+ * Resolution order: the connection's display name (resolved server-side from
+ * the connection row, so a renamed account shows its current name) → the
+ * step's stored label (the combo builder stores the account label there) →
+ * the full, untruncated connection id. `null` means the target is not pinned
+ * to a connection at all.
+ */
+export function resolveComboTargetAccountLabel(input: {
+  label?: string | null;
+  connectionId?: string | null;
+  connectionLabels?: Record<string, string> | null;
+}): string | null {
+  const connectionId = toString(input.connectionId);
+  if (!connectionId) return null;
+  const resolved = toString(input.connectionLabels?.[connectionId]);
+  if (resolved) return resolved;
+  const label = toString(input.label);
+  if (label) return label;
+  return connectionId;
+}
+
 export function getComboControlCenterTargets(
   combo: ComboControlCenterCombo,
-  health?: ComboControlCenterHealth | null
+  health?: ComboControlCenterHealth | null,
+  connectionLabels?: Record<string, string> | null
 ): ComboControlCenterTarget[] {
   const steps = normalizeComboModels(combo.models || [], { comboName: combo.name || null });
   const healthByStepId = new Map<string, ComboControlCenterTargetHealth>();
@@ -169,6 +208,8 @@ export function getComboControlCenterTargets(
         : step.kind === "provider-wildcard"
           ? step.providerId
           : null;
+    const connectionId =
+      step.kind === "model" || step.kind === "provider-wildcard" ? step.connectionId || null : null;
 
     return {
       id: step.id,
@@ -177,10 +218,12 @@ export function getComboControlCenterTargets(
       label: getStepLabel(step),
       model,
       provider,
-      connectionId:
-        step.kind === "model" || step.kind === "provider-wildcard"
-          ? step.connectionId || null
-          : null,
+      connectionId,
+      accountLabel: resolveComboTargetAccountLabel({
+        label: step.label,
+        connectionId,
+        connectionLabels,
+      }),
       weight: step.weight || 0,
       tags: getStepTags(step),
       health: healthEntry,

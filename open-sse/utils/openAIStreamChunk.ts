@@ -2,6 +2,19 @@ import { restoreOpenAIToolNames } from "../translator/helpers/toolCallHelper.ts"
 
 type JsonRecord = Record<string, unknown>;
 
+function normalizeDeltaToolCallIds(choice: JsonRecord | null | undefined): boolean {
+  const delta = choice?.delta as JsonRecord | undefined;
+  if (!Array.isArray(delta?.tool_calls)) return false;
+  let changed = false;
+  for (const toolCall of delta.tool_calls as JsonRecord[]) {
+    if (toolCall?.id != null && typeof toolCall.id !== "string") {
+      toolCall.id = String(toolCall.id);
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 export function normalizeFinalOpenAIStreamChunk(
   parsed: JsonRecord,
   toolNameMap: unknown
@@ -14,14 +27,7 @@ export function normalizeFinalOpenAIStreamChunk(
 
   if (Array.isArray(parsed.choices)) {
     for (const choice of parsed.choices as JsonRecord[]) {
-      const delta = (choice as JsonRecord | null | undefined)?.delta as JsonRecord | undefined;
-      if (!Array.isArray(delta?.tool_calls)) continue;
-      for (const toolCall of delta.tool_calls as JsonRecord[]) {
-        if (toolCall?.id != null && typeof toolCall.id !== "string") {
-          toolCall.id = String(toolCall.id);
-          changed = true;
-        }
-      }
+      changed = normalizeDeltaToolCallIds(choice) || changed;
     }
   }
 

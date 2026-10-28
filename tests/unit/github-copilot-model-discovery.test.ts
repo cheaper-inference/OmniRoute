@@ -32,15 +32,29 @@ const {
 const MOCK_COPILOT_MODELS_RESPONSE = {
   data: [
     {
-      id: "gpt-5.4",
-      name: "GPT-5.4",
+      id: "gpt-6-astra",
+      name: "GPT-6 Astra",
       model_picker_enabled: true,
       policy: { state: "enabled" },
       capabilities: { type: "chat", limits: { max_context_window_tokens: 128000 } },
     },
     {
-      id: "claude-sonnet-4.5",
-      name: "Claude Sonnet 4.5",
+      id: "disabled-by-policy",
+      name: "Disabled by policy",
+      model_picker_enabled: true,
+      policy: { state: "disabled" },
+      capabilities: { type: "chat" },
+    },
+    {
+      id: "hidden-from-picker",
+      name: "Hidden from picker",
+      model_picker_enabled: false,
+      policy: { state: "enabled" },
+      capabilities: { type: "chat" },
+    },
+    {
+      id: "claude-sonnet-5",
+      name: "Claude Sonnet 5",
       model_picker_enabled: true,
       capabilities: { type: "chat" },
     },
@@ -73,13 +87,76 @@ test("#3120 parseGitHubCopilotModels keeps every entitled CHAT model (capability
   const ids = models.map((m) => m.id);
   // grok-4.6 is kept even though it is in no hardcoded allowlist — it's an
   // entitled chat model in the live response.
-  assert.deepEqual(ids, ["gpt-5.4", "claude-sonnet-4.5", "grok-4.6"]);
-  const gpt = models.find((m) => m.id === "gpt-5.4");
-  assert.ok(gpt, "gpt-5.4 entry present");
-  assert.equal(gpt.name, "GPT-5.4");
+  assert.deepEqual(ids, ["gpt-6-astra", "claude-sonnet-5", "grok-4.6"]);
+  const gpt = models.find((m) => m.id === "gpt-6-astra");
+  assert.ok(gpt, "gpt-6-astra entry present");
+  assert.equal(gpt.name, "GPT-6 Astra");
   assert.equal(gpt.owned_by, "github");
   assert.ok(!ids.includes("text-embedding-3-small"), "embeddings models are skipped");
   assert.ok(!ids.includes("gpt-41-copilot"), "completion utility models are skipped");
+  assert.ok(!ids.includes("disabled-by-policy"), "policy.state=disabled is not routable");
+  assert.ok(!ids.includes("hidden-from-picker"), "model_picker_enabled=false is not routable");
+});
+
+test("discovery preserves Responses-only routing for newly entitled GPT-6 models", () => {
+  const models = parseGitHubCopilotModels({
+    data: ["gpt-6-luna", "gpt-6.1-sol"].map((id) => ({
+      id,
+      capabilities: { type: "chat" },
+      supported_endpoints: ["/responses"],
+    })),
+  });
+  assert.deepEqual(
+    models,
+    ["gpt-6-luna", "gpt-6.1-sol"].map((id) => ({
+      id,
+      name: id,
+      owned_by: "github",
+      supportedEndpoints: ["responses"],
+      targetFormat: "openai-responses",
+    }))
+  );
+});
+
+test("discovery normalizes nested endpoint metadata without guessing from GPT versions", () => {
+  const models = parseGitHubCopilotModels({
+    data: [
+      {
+        id: "new-responses-model",
+        capabilities: {
+          type: "chat",
+          supported_endpoints: [" /v1/responses/ ", "/v1/responses/", null, 42, ""],
+        },
+      },
+      {
+        id: "top-level-wins",
+        capabilities: { type: "chat", supported_endpoints: ["/responses"] },
+        supported_endpoints: ["/chat/completions"],
+      },
+      {
+        id: "messages-capable",
+        capabilities: { type: "chat" },
+        supported_endpoints: ["/responses", "/v1/messages"],
+      },
+      ...["gpt-6-unlisted", "gemini-future", "claude-future"].map((id) => ({
+        id,
+        capabilities: { type: "chat" },
+        ...(id === "gpt-6-unlisted" ? {} : { supported_endpoints: ["/responses"] }),
+      })),
+    ],
+  });
+  assert.deepEqual(models[0], {
+    id: "new-responses-model",
+    name: "new-responses-model",
+    owned_by: "github",
+    supportedEndpoints: ["responses"],
+    targetFormat: "openai-responses",
+  });
+  assert.deepEqual(models[1].supportedEndpoints, ["chat"]);
+  assert.deepEqual(models[2].supportedEndpoints, ["chat", "responses"]);
+  for (const model of models.slice(1)) {
+    assert.equal(model.targetFormat, undefined, `${model.id} must not infer Responses-only`);
+  }
 });
 
 test("#3121 a model NOT in the live response is not advertised (entitlement filtering)", () => {
@@ -118,15 +195,16 @@ test("#3120 fetchGitHubCopilotModels does a live fetch and returns parsed models
   // Copilot chat headers must be present (e.g. copilot-integration-id).
   assert.ok(capturedHeaders["copilot-integration-id"], "must send Copilot integration header");
   assert.equal(result.source, "api");
+  assert.equal(result.failure, undefined);
   const ids = result.models.map((m) => m.id);
-  assert.deepEqual(ids, ["gpt-5.4", "claude-sonnet-4.5", "grok-4.6"]);
+  assert.deepEqual(ids, ["gpt-6-astra", "claude-sonnet-5", "grok-4.6"]);
   assert.ok(!ids.includes("gemini-3.1-pro-preview"));
 });
 
 test("#3120/#3121 fetch falls back to static catalog when the live fetch fails", async () => {
   const fakeFetch = (async () => new Response("nope", { status: 503 })) as unknown as typeof fetch;
   const fallback = [
-    { id: "gpt-5.4", name: "GPT-5.4" },
+    { id: "gpt-6-astra", name: "GPT-6 Astra" },
     { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro" },
     { id: "gpt-3.5-turbo", name: "GPT 3.5 Turbo" },
   ];
@@ -138,9 +216,15 @@ test("#3120/#3121 fetch falls back to static catalog when the live fetch fails",
   });
 
   assert.equal(result.source, "fallback");
+  assert.deepEqual(result.failure, {
+    kind: "http_status",
+    upstreamStatus: 503,
+    contentType: "text/plain",
+    bodyShape: "text",
+  });
   assert.deepEqual(
     result.models.map((m) => m.id),
-    ["gpt-5.4", "gemini-3.1-pro-preview"],
+    ["gpt-6-astra"],
     "offline/failed discovery must preserve only the curated static catalog"
   );
 });
@@ -152,17 +236,14 @@ test("static fallback catalog is the alias of the allowlist and covers the appro
   // The fallback must include the newly-entitled families so an offline import
   // (which can only draw from this static list) still surfaces them.
   for (const id of [
-    "claude-fable-5",
+    "claude-fable-5.1",
     "claude-opus-5",
     "claude-opus-4.8-fast",
-    "claude-opus-4.6",
-    "gemini-3.6-flash",
-    "gemini-3.5-flash",
-    "gpt-5.4-nano",
+    "claude-opus-4.8",
+    "gemini-3.8-flash",
+    "gpt-6-astra",
     "grok-4.6",
-    "grok-4.5",
     "mai-code-1.1-flash",
-    "mai-code-1-flash-picker",
   ]) {
     assert.ok(set.has(id), `static fallback must include ${id}`);
   }
@@ -199,13 +280,101 @@ test("fetch falls back when no token is provided (unauthed refresh stays safe)",
   const result = await fetchGitHubCopilotModels({
     token: "",
     fetchImpl: fakeFetch,
-    fallbackModels: [{ id: "gpt-5.4", name: "GPT-5.4" }],
+    fallbackModels: [{ id: "gpt-6-astra", name: "GPT-6 Astra" }],
   });
 
   assert.equal(called, false, "must not fetch without a token");
   assert.equal(result.source, "fallback");
+  assert.deepEqual(result.failure, { kind: "missing_token" });
   assert.deepEqual(
     result.models.map((m) => m.id),
-    ["gpt-5.4"]
+    ["gpt-6-astra"]
   );
+});
+
+test("Copilot discovery classifies invalid JSON without retaining upstream body text", async () => {
+  const upstreamSecret = "upstream-body-secret-should-never-escape";
+  const result = await fetchGitHubCopilotModels({
+    token: "token-secret-should-never-escape",
+    fetchImpl: (async () =>
+      new Response(`<html>${upstreamSecret}</html>`, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      })) as typeof fetch,
+  });
+
+  assert.equal(result.source, "fallback");
+  assert.deepEqual(result.failure, {
+    kind: "invalid_json",
+    upstreamStatus: 200,
+    contentType: "text/html",
+    bodyShape: "unparseable",
+  });
+  const serialized = JSON.stringify(result);
+  assert.doesNotMatch(serialized, /upstream-body-secret|token-secret/);
+});
+
+test("Copilot discovery classifies an empty parsed catalog by safe JSON shape", async () => {
+  const result = await fetchGitHubCopilotModels({
+    token: "copilot-token",
+    fetchImpl: (async () =>
+      Response.json({ data: [], diagnostic: "private upstream detail" })) as typeof fetch,
+  });
+
+  assert.equal(result.source, "fallback");
+  assert.deepEqual(result.failure, {
+    kind: "empty_catalog",
+    upstreamStatus: 200,
+    contentType: "application/json",
+    bodyShape: "object.data_array",
+  });
+  assert.doesNotMatch(JSON.stringify(result), /private upstream detail/);
+});
+
+test("Copilot discovery classifies network failures without retaining exception text", async () => {
+  const result = await fetchGitHubCopilotModels({
+    token: "copilot-token-secret",
+    fetchImpl: (async () => {
+      throw new Error("network failed with token copilot-token-secret and upstream body secret");
+    }) as typeof fetch,
+  });
+
+  assert.equal(result.source, "fallback");
+  assert.deepEqual(result.failure, { kind: "network" });
+  assert.doesNotMatch(JSON.stringify(result), /copilot-token-secret|upstream body secret/);
+});
+
+test("Copilot HTTP diagnostics retain status and safe shape but redact body and malformed headers", async () => {
+  const result = await fetchGitHubCopilotModels({
+    token: "copilot-token-secret",
+    fetchImpl: (async () =>
+      new Response('{"secret":"raw-upstream-body"}', {
+        status: 429,
+        headers: {
+          "content-type": "application/json; charset=utf-8",
+        },
+      })) as typeof fetch,
+  });
+
+  assert.deepEqual(result.failure, {
+    kind: "http_status",
+    upstreamStatus: 429,
+    contentType: "application/json",
+    bodyShape: "json",
+  });
+  assert.doesNotMatch(JSON.stringify(result), /copilot-token-secret|raw-upstream-body/);
+
+  const malformedHeaderResult = await fetchGitHubCopilotModels({
+    token: "copilot-token-secret",
+    fetchImpl: (async () =>
+      new Response("private body", {
+        status: 502,
+        headers: { "content-type": "not a media type with private-header-detail" },
+      })) as typeof fetch,
+  });
+  assert.deepEqual(malformedHeaderResult.failure, {
+    kind: "http_status",
+    upstreamStatus: 502,
+  });
+  assert.doesNotMatch(JSON.stringify(malformedHeaderResult), /private-header-detail|private body/);
 });

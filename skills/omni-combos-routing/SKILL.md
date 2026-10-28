@@ -19,7 +19,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 List routing combos
 
 ```bash
-curl https://localhost:20128/api/combos \
+curl http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -28,7 +28,7 @@ curl https://localhost:20128/api/combos \
 Create routing combo
 
 ```bash
-curl -X POST https://localhost:20128/api/combos \
+curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -39,7 +39,7 @@ curl -X POST https://localhost:20128/api/combos \
 Get combo by ID
 
 ```bash
-curl https://localhost:20128/api/combos/{id} \
+curl http://localhost:20128/api/combos/{id} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -50,7 +50,7 @@ Update combo
 Partial update: the body is merged onto the stored combo, so a field left out keeps its current value. An array that IS sent replaces the stored one outright.
 
 ```bash
-curl -X PUT https://localhost:20128/api/combos/{id} \
+curl -X PUT http://localhost:20128/api/combos/{id} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -63,7 +63,7 @@ Update combo
 Partial update: the body is merged onto the stored combo, so a field left out keeps its current value. An array that IS sent replaces the stored one outright.
 
 ```bash
-curl -X PATCH https://localhost:20128/api/combos/{id} \
+curl -X PATCH http://localhost:20128/api/combos/{id} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -74,7 +74,7 @@ curl -X PATCH https://localhost:20128/api/combos/{id} \
 Delete combo
 
 ```bash
-curl -X DELETE https://localhost:20128/api/combos/{id} \
+curl -X DELETE http://localhost:20128/api/combos/{id} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -83,7 +83,7 @@ curl -X DELETE https://localhost:20128/api/combos/{id} \
 Get combo metrics
 
 ```bash
-curl https://localhost:20128/api/combos/metrics \
+curl http://localhost:20128/api/combos/metrics \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -92,7 +92,7 @@ curl https://localhost:20128/api/combos/metrics \
 Test a combo configuration
 
 ```bash
-curl -X POST https://localhost:20128/api/combos/test \
+curl -X POST http://localhost:20128/api/combos/test \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -105,7 +105,7 @@ List fallback chains
 Returns all registered fallback chains for model routing.
 
 ```bash
-curl https://localhost:20128/api/fallback/chains \
+curl http://localhost:20128/api/fallback/chains \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -116,7 +116,7 @@ Create fallback chain
 Registers a fallback routing chain for a model.
 
 ```bash
-curl -X POST https://localhost:20128/api/fallback/chains \
+curl -X POST http://localhost:20128/api/fallback/chains \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -127,8 +127,48 @@ curl -X POST https://localhost:20128/api/fallback/chains \
 Delete fallback chain
 
 ```bash
-curl -X DELETE https://localhost:20128/api/fallback/chains \
+curl -X DELETE http://localhost:20128/api/fallback/chains \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/combos/auto
+
+GET combos › auto
+
+```bash
+curl http://localhost:20128/api/combos/auto \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/combos/builder/options
+
+GET combos › builder › options
+
+```bash
+curl http://localhost:20128/api/combos/builder/options \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/combos/duplicate
+
+POST combos › duplicate
+
+```bash
+curl -X POST http://localhost:20128/api/combos/duplicate \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/combos/reorder
+
+POST combos › reorder
+
+```bash
+curl -X POST http://localhost:20128/api/combos/reorder \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 ```
 
 ## Payloads
@@ -140,7 +180,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute — Routing & Combos
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ## What is a combo?
 
@@ -188,7 +228,7 @@ curl -X POST $OMNIROUTE_URL/api/combos \
 | `reset-window` | Order targets by their configured reset window |
 | `headroom` | Prefer targets with more remaining quota headroom |
 | `strict-random` | Random without repeating until all targets have been used |
-| `auto` | Auto-Combo scoring across 13 factors |
+| `auto` | Auto-Combo scoring across 16 factors |
 | `lkgp` | Last-known-good-provider sticky routing |
 | `context-optimized` | Pick the best model for the request's context size |
 | `cache-optimized` | Prefer targets with stronger cache affinity |
@@ -197,7 +237,7 @@ curl -X POST $OMNIROUTE_URL/api/combos \
 
 ## Auto-combo (recommended for production)
 
-Auto-combo scores each candidate on 13 factors every request:
+Auto-combo scores each candidate on 16 factors every request:
 
 ```bash
 curl -X POST $OMNIROUTE_URL/api/combos \

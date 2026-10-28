@@ -7,10 +7,10 @@ import { upsertSemanticMemoryPoint, deleteSemanticMemoryPoint } from "./qdrant";
 import { Memory, MemoryType } from "./types";
 import { logger } from "../../../open-sse/utils/logger.ts";
 import { sanitizeErrorMessage } from "../../../open-sse/utils/error.ts";
-import { resolveEmbeddingSource, embed } from "./embedding";
+import { resolveEmbeddingSource, embedWithRetry, withMeasuredDimensions } from "./embedding";
 import { getVectorStore } from "./vectorStore";
 import { getMemorySettings } from "./settings";
-import { markMemoryNeedsReindex } from "@/lib/localDb";
+import { markMemoryNeedsReindex } from "@/lib/db/memoryVec";
 
 const log = logger("MEMORY_STORE");
 
@@ -137,7 +137,9 @@ function scheduleVectorUpsert(id: string, content: string): void {
       const resolution = resolveEmbeddingSource(settings);
       if (!resolution.source) return;
 
-      const embeddingResult = await embed(content, settings);
+      // #13601: one retry before giving up — a single transient embed failure
+      // must not skip vectorization. The warn below keeps the cause visible.
+      const embeddingResult = await embedWithRetry(content, settings);
       if (!("vector" in embeddingResult)) {
         log.warn("memory.vec.embed.fail", {
           id,
@@ -154,7 +156,18 @@ function scheduleVectorUpsert(id: string, content: string): void {
         return;
       }
 
-      await vec.ensureReady(resolution);
+      // The vector in hand is the lazy probe the resolution is waiting for: the
+      // registry has no width for a self-hosted endpoint, so without this
+      // ensureReady() never creates vec_memories and every upsert below fails
+      // into the catch, leaving the memory stored but never vectorized (#12154).
+      const ready = await vec.ensureReady(
+        withMeasuredDimensions(resolution, embeddingResult.vector.length)
+      );
+      if (!ready.ready) {
+        log.warn("memory.vec.ensure_ready.skipped", { id, reason: ready.reason });
+        safeMarkNeedsReindex(id, true);
+        return;
+      }
       await vec.upsertVector(id, embeddingResult.vector);
       safeMarkNeedsReindex(id, false);
     } catch (err: unknown) {
@@ -191,7 +204,7 @@ export async function createMemory(
       now,
       memory.sessionId,
       memory.type,
-      memory.expiresAt ?? null,
+      memory.expiresAt?.toISOString() ?? null,
       existing.id
     );
 
@@ -268,6 +281,8 @@ export async function createMemory(
     now,
     memory.expiresAt?.toISOString() ?? null
   );
+
+  // memory_id (the FTS5 content_rowid) is assigned by the memory_fts_ai_assign trigger.
 
   const createdMemory: Memory = {
     id,
@@ -468,6 +483,7 @@ export async function listMemories(filters: {
   apiKeyId?: string;
   type?: MemoryType;
   sessionId?: string;
+  category?: string;
   query?: string;
   limit?: number;
   offset?: number;
@@ -492,6 +508,13 @@ export async function listMemories(filters: {
   if (filters.sessionId) {
     whereClauses.push("session_id = ?");
     whereParams.push(filters.sessionId);
+  }
+
+  if (typeof filters.category === "string" && filters.category.trim().length > 0) {
+    whereClauses.push(
+      "json_extract(CASE WHEN json_valid(metadata) THEN metadata ELSE '{}' END, '$.category') = ?"
+    );
+    whereParams.push(filters.category.trim());
   }
 
   if (typeof filters.query === "string" && filters.query.trim().length > 0) {

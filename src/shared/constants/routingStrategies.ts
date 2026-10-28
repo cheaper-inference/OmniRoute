@@ -11,6 +11,7 @@ export const ROUTING_STRATEGY_VALUES = [
   "reset-aware",
   "reset-window",
   "headroom",
+  "quota-weighted",
   "strict-random",
   "auto",
   "lkgp",
@@ -40,6 +41,7 @@ export const AUTO_ROUTING_STRATEGY_VALUES = [
   "typesafe",
   "jev",
   "rules",
+  "score",
   "cost",
   "eco",
   "latency",
@@ -47,19 +49,20 @@ export const AUTO_ROUTING_STRATEGY_VALUES = [
   "sla-aware",
   "sla",
   "lkgp",
+  "nadir",
 ] as const;
 
 export type AutoRoutingStrategyValue = (typeof AUTO_ROUTING_STRATEGY_VALUES)[number];
 
 export const ACCOUNT_FALLBACK_STRATEGY_VALUES = [
   "priority",
-  "weighted",
   "fill-first",
   "round-robin",
   "p2c",
   "random",
   "least-used",
   "cost-optimized",
+  "expiry-first",
   "strict-random",
 ] as const;
 
@@ -172,6 +175,13 @@ export const ROUTING_STRATEGIES: RoutingStrategyOption[] = [
     combosDescKey: "headroomDesc",
     settingsDescKey: "headroomDesc",
     icon: "battery_charging_full",
+  },
+  {
+    value: "quota-weighted",
+    labelKey: "quotaWeighted",
+    combosDescKey: "quotaWeightedDesc",
+    settingsDescKey: "quotaWeightedDesc",
+    icon: "pie_chart",
   },
   {
     value: "strict-random",

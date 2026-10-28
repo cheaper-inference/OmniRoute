@@ -22,9 +22,14 @@ import {
   isOmniJevStrategy,
   type OmniJevConfig,
 } from "../../../src/shared/validation/omniJev.ts";
-import { getMcpHttpAuthHeadersForInternalFetch } from "../httpAuthContext.ts";
+import { readAnalyticsTotals, readProviderMetrics } from "../analyticsShape.ts";
+import { toSafeMcpErrorMessage } from "../errorMessage.ts";
+// #15159 M-06: the hop lives in one place now. The private copy this replaced read
+// OMNIROUTE_API_KEY and the base URL at module load, so a key configured after import was
+// silently dropped; it also hardcoded a 30s timeout that ignored OMNIROUTE_MCP_FETCH_TIMEOUT_MS.
+import { omniRouteFetch as apiFetch } from "../internalFetch.ts";
+import { mcpFetchTimeoutSignal } from "../fetchTimeout.ts";
 import { normalizeQuotaResponse } from "../../../src/shared/contracts/quota.ts";
-import { resolveOmniRouteBaseUrl } from "../../../src/shared/utils/resolveOmniRouteBaseUrl.ts";
 import {
   getComboModelProvider,
   getComboModelString,
@@ -36,27 +41,6 @@ import type {
 } from "../../../src/shared/constants/routingStrategies.ts";
 import { normalizeRoutingStrategy } from "../../../src/shared/constants/routingStrategies.ts";
 import { toNumber } from "../../../src/shared/utils/numeric.ts";
-
-const OMNIROUTE_BASE_URL = resolveOmniRouteBaseUrl();
-const OMNIROUTE_API_KEY = process.env.OMNIROUTE_API_KEY || "";
-
-async function apiFetch(path: string, options: RequestInit = {}): Promise<unknown> {
-  const url = `${OMNIROUTE_BASE_URL}${path}`;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    // Static env key is only a fallback; the per-caller MCP identity forwarded via
-    // withMcpHttpAuthContext must win over it (#5819).
-    ...(OMNIROUTE_API_KEY ? { Authorization: `Bearer ${OMNIROUTE_API_KEY}` } : {}),
-    ...getMcpHttpAuthHeadersForInternalFetch(),
-    ...((options.headers as Record<string, string>) || {}),
-  };
-  const response = await fetch(url, { ...options, headers, signal: AbortSignal.timeout(30000) });
-  if (!response.ok) {
-    const text = await response.text().catch(() => "Unknown error");
-    throw new Error(`API [${response.status}]: ${text}`);
-  }
-  return response.json();
-}
 
 type JsonRecord = Record<string, unknown>;
 
@@ -317,7 +301,7 @@ export async function handleSimulateRoute(args: {
     await logToolCall("omniroute_simulate_route", args, result, Date.now() - start, true);
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_simulate_route", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -333,8 +317,8 @@ export async function handleSetBudgetGuard(args: {
     // Get current session cost
     let spent = 0;
     try {
-      const analytics = toRecord(await apiFetch("/api/usage/analytics?period=session"));
-      spent = toNumber(analytics.totalCost, 0);
+      const analytics = toRecord(await apiFetch("/api/usage/analytics?range=1d"));
+      spent = readAnalyticsTotals(analytics).totalCost;
     } catch {
       /* ignore if analytics not available */
     }
@@ -367,7 +351,7 @@ export async function handleSetBudgetGuard(args: {
     );
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_set_budget_guard", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -472,7 +456,7 @@ export async function handleSetRoutingStrategy(args: {
     await logToolCall("omniroute_set_routing_strategy", args, result, Date.now() - start, true);
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_set_routing_strategy", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -502,7 +486,7 @@ export async function handleSetResilienceProfile(args: {
     await logToolCall("omniroute_set_resilience_profile", args, result, Date.now() - start, true);
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall(
       "omniroute_set_resilience_profile",
       args,
@@ -553,6 +537,13 @@ export async function handleTestCombo(args: { comboId: string; testPrompt: strin
                 max_tokens: 50,
                 stream: false,
               }),
+              // #15159 M-06 + #9717: this is the one hop in this module that waits on an
+              // upstream provider — every provider in the combo is probed in parallel, so a
+              // cold or slow one easily outlives the management-read budget. The module's
+              // deleted private copy hardcoded 30s; inheriting the shared hop would have
+              // silently dropped it to MCP_FETCH_TIMEOUT_MS (10s) and aborted live probes,
+              // which is exactly the failure #9717 was filed for on `route_request`.
+              signal: mcpFetchTimeoutSignal("upstream"),
             })
           );
           const usage = toRecord(resp.usage);
@@ -573,7 +564,7 @@ export async function handleTestCombo(args: { comboId: string; testPrompt: strin
             latencyMs: Date.now() - providerStart,
             cost: 0,
             tokenCount: 0,
-            error: err instanceof Error ? err.message : String(err),
+            error: toSafeMcpErrorMessage(err),
           };
         }
       })
@@ -615,7 +606,7 @@ export async function handleTestCombo(args: { comboId: string; testPrompt: strin
     );
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_test_combo", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -627,7 +618,7 @@ export async function handleGetProviderMetrics(args: { provider: string }) {
     const [healthRaw, quotaRaw, analyticsRaw] = await Promise.allSettled([
       apiFetch("/api/monitoring/health"),
       apiFetch(`/api/usage/quota?provider=${encodeURIComponent(args.provider)}`),
-      apiFetch(`/api/usage/analytics?period=session&provider=${encodeURIComponent(args.provider)}`),
+      apiFetch(`/api/usage/analytics?range=1d&provider=${encodeURIComponent(args.provider)}`),
     ]);
 
     const health = healthRaw.status === "fulfilled" ? toRecord(healthRaw.value) : {};
@@ -642,11 +633,13 @@ export async function handleGetProviderMetrics(args: { provider: string }) {
     );
     const providerQuota = quota.providers.find((p) => p.provider === args.provider) || null;
 
+    const providerMetrics = readProviderMetrics(analytics, args.provider);
+
     const result = {
       provider: args.provider,
-      successRate: toNumber(analytics.successRate, 1.0),
-      requestCount: toNumber(analytics.requestCount, 0),
-      avgLatencyMs: toNumber(analytics.avgLatencyMs, 0),
+      successRate: providerMetrics.successRate,
+      requestCount: providerMetrics.requestCount,
+      avgLatencyMs: providerMetrics.avgLatencyMs,
       p50LatencyMs: toNumber(analytics.p50LatencyMs, 0),
       p95LatencyMs: toNumber(analytics.p95LatencyMs, 0),
       p99LatencyMs: toNumber(analytics.p99LatencyMs, 0),
@@ -665,7 +658,7 @@ export async function handleGetProviderMetrics(args: { provider: string }) {
     await logToolCall("omniroute_get_provider_metrics", args, result, Date.now() - start, true);
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_get_provider_metrics", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -748,7 +741,7 @@ export async function handleBestComboForTask(args: {
     );
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_best_combo_for_task", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -811,7 +804,7 @@ export async function handleExplainRoute(args: { requestId: string }) {
     );
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_explain_route", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -833,7 +826,7 @@ export async function handleSyncPricing(args: { sources?: string[]; dryRun?: boo
     await logToolCall("omniroute_sync_pricing", args, result, Date.now() - start, true);
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_sync_pricing", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -842,21 +835,19 @@ export async function handleSyncPricing(args: { sources?: string[]; dryRun?: boo
 export async function handleGetSessionSnapshot() {
   const start = Date.now();
   try {
-    const analytics = toRecord(
-      await apiFetch("/api/usage/analytics?period=session").catch(() => ({}))
-    );
-    const tokenCount = toRecord(analytics.tokenCount);
+    const analytics = toRecord(await apiFetch("/api/usage/analytics?range=1d").catch(() => ({})));
+    const totals = readAnalyticsTotals(analytics);
     const byModel = toArrayOfRecords(analytics.byModel);
     const byProvider = toArrayOfRecords(analytics.byProvider);
 
     const result = {
       sessionStart: toString(analytics.sessionStart, new Date().toISOString()),
       duration: toString(analytics.duration, "unknown"),
-      requestCount: toNumber(analytics.requestCount, 0),
-      costTotal: toNumber(analytics.totalCost, 0),
+      requestCount: totals.requestCount,
+      costTotal: totals.totalCost,
       tokenCount: {
-        prompt: toNumber(tokenCount.prompt, 0),
-        completion: toNumber(tokenCount.completion, 0),
+        prompt: totals.promptTokens,
+        completion: totals.completionTokens,
       },
       topModels: byModel.slice(0, 5).map((model) => ({
         model: toString(model.model, "unknown"),
@@ -886,7 +877,7 @@ export async function handleGetSessionSnapshot() {
     );
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_get_session_snapshot", {}, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -898,7 +889,7 @@ export async function handleDbHealthCheck(args: { autoRepair?: boolean }) {
 
   try {
     const { runManagedDbHealthCheck } = await import("../../../src/lib/db/core.ts");
-    const result = runManagedDbHealthCheck({ autoRepair });
+    const result = await runManagedDbHealthCheck({ autoRepair });
 
     await logToolCall(
       "omniroute_db_health_check",
@@ -913,7 +904,7 @@ export async function handleDbHealthCheck(args: { autoRepair?: boolean }) {
 
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_db_health_check", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -962,7 +953,7 @@ export async function handleCacheStats() {
     await logToolCall("omniroute_cache_stats", {}, result, Date.now() - start, true);
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_cache_stats", {}, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -999,7 +990,7 @@ export async function handleCacheFlush(args: { signature?: string; model?: strin
     await logToolCall("omniroute_cache_flush", args, result, Date.now() - start, true);
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_cache_flush", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -1039,7 +1030,7 @@ export async function handleOneproxyFetch(
     await logToolCall("omniroute_oneproxy_fetch", args, result, Date.now() - start, true);
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_oneproxy_fetch", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -1073,7 +1064,7 @@ export async function handleOneproxyRotate(
     await logToolCall("omniroute_oneproxy_rotate", args, result, Date.now() - start, true);
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_oneproxy_rotate", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
@@ -1115,7 +1106,7 @@ export async function handleOneproxyStats(args: Record<string, never> = {}) {
     await logToolCall("omniroute_oneproxy_stats", args, result, Date.now() - start, true);
     return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toSafeMcpErrorMessage(err);
     await logToolCall("omniroute_oneproxy_stats", args, null, Date.now() - start, false, msg);
     return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true };
   }
