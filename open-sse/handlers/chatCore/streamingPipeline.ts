@@ -88,6 +88,9 @@ export function assembleStreamingPipeline(
      * request's pre-handoff readiness gate, so slow-first-content reasoning
      * models keep the same generous budget in both phases. */
     contentStallTimeoutMs?: number;
+    /** Total lifetime budget for this stream (see resolveStreamActiveTimeoutMs).
+     * Omitted falls back to STREAM_ACTIVE_TIMEOUT_MS; 0 leaves the watchdog off. */
+    activeTimeoutMs?: number;
   },
   deps: StreamingPipelineDeps = DEFAULT_DEPS
 ) {
@@ -103,7 +106,10 @@ export function assembleStreamingPipeline(
     args.providerResponse,
     args.transformStream,
     args.streamController,
-    { contentStallTimeoutMs: args.contentStallTimeoutMs }
+    {
+      contentStallTimeoutMs: args.contentStallTimeoutMs,
+      activeTimeoutMs: args.activeTimeoutMs,
+    }
   );
   if (isPiiTransformEnabled({ piiDisabledGuardrails: args.piiDisabledGuardrails ?? [] })) {
     if (typeof args.createPiiTransform === "function") {

@@ -6,6 +6,7 @@ import {
   readCodexTurnStateHeader,
 } from "../../config/codexTurnState.ts";
 import {
+  STREAM_ACTIVE_TIMEOUT_OVERRIDE_MS,
   STREAM_DISCONNECT_GRACE_PERIOD_MS,
   STREAM_READINESS_MAX_TIMEOUT_MS,
   STREAM_READINESS_TIMEOUT_MS,
@@ -50,7 +51,11 @@ import { recordFinalInputCalibration } from "./contextEstimation.ts";
 import { emitStreamingRoutingEvent } from "./streamingRoutingEvent.ts";
 import { recordStreamingUsageStats } from "./streamingUsageStats.ts";
 import { maybeSyncClaudeExtraUsageState } from "./telemetryHelpers.ts";
-import { getExecutorTimeoutMs, resolveConnectionTimeoutMs } from "./upstreamTimeouts.ts";
+import {
+  getExecutorTimeoutMs,
+  resolveConnectionTimeoutMs,
+  resolveTargetStreamActiveTimeoutMs,
+} from "./upstreamTimeouts.ts";
 import { recordCost, recordUnpricedBudgetUsage } from "@/domain/costRules";
 import { extractFacts } from "@/lib/memory/extraction";
 import { calculateCost, calculateCostDetailed } from "@/lib/usage/costCalculator";
@@ -780,6 +785,15 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     // that same patience for their first REAL content, not just their first
     // lifecycle frame. See pipeWithDisconnect's own doc comment.
     contentStallTimeoutMs: streamReadinessPolicy.timeoutMs,
+    // The same target the readiness gate priced above. With STREAM_ACTIVE_TIMEOUT_MS
+    // unset, a budget it declared (connection, then model, then provider) can raise
+    // the default cap; an operator's positive value is a hard cap; 0 disables it.
+    activeTimeoutMs: resolveTargetStreamActiveTimeoutMs(
+      STREAM_ACTIVE_TIMEOUT_OVERRIDE_MS,
+      provider,
+      model,
+      credentials
+    ),
   });
   const clientFacingStream = wrapReadableStreamWithFinalize(finalStream, releaseTurnExecution);
 

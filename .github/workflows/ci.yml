@@ -533,6 +533,13 @@ jobs:
       # (release/v3.8.53 inherited 14 drifted sources while the translation backend was down)
       # is printed as inherited — the branch's own push run and the nightly Release-Green keep
       # the full strict verdict, so the debt stays visible without painting every PR red.
+      #
+      # Advisory on pull requests since 2026-10-28: an English doc edit no longer has to ship
+      # its 66 mirrors in the same PR. Per-PR translation serialised every doc PR behind one
+      # translation backend (a 6-day quota outage froze 8 PRs; one doc took 6.6 h of retries)
+      # and every mirror PR collided on `.i18n-state.json`. Mirrors are refreshed in a batch
+      # `npm run i18n:run` after merge; the push run below, the nightly Release-Green and the
+      # release cut keep the strict verdict, so stale mirrors still cannot ship in a release.
       - name: Base checkout for the i18n drift baseline (PR only)
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/checkout@v7
@@ -540,12 +547,15 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha }}
           path: .i18n-base
           persist-credentials: false
-      - name: i18n docs drift (PR — only drift introduced by this PR blocks)
+      - name: i18n docs drift (PR — advisory, mirrors are refreshed after merge)
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           set -euo pipefail
           node scripts/i18n/check-translation-drift.mjs --root .i18n-base --json --warn > /tmp/i18n-base-drift.json
-          node scripts/i18n/check-translation-drift.mjs --base-report /tmp/i18n-base-drift.json
+          node scripts/i18n/check-translation-drift.mjs --base-report /tmp/i18n-base-drift.json --warn | tee /tmp/i18n-pr-drift.txt
+          if grep -q "WARN — drift detected" /tmp/i18n-pr-drift.txt; then
+            echo "::notice title=i18n mirrors pending::This PR changes English docs whose 66 mirrors are now stale. Nothing to do here: the mirrors are refreshed in the post-merge i18n batch."
+          fi
       - name: i18n docs drift (sources changed since their translation)
         if: ${{ github.event_name != 'pull_request' }}
         run: node scripts/i18n/check-translation-drift.mjs
