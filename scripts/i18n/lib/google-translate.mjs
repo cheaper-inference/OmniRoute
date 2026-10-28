@@ -67,6 +67,10 @@ export const idIndex = (id) =>
     26
   );
 
+function hasLetters(s) {
+  return /\p{L}/u.test(s);
+}
+
 function escapeHtml(text) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -173,6 +177,7 @@ const EMPHASIS = /\*\*|__|~~|\*/y;
 export function maskInline(text, { protectedTerms = [] } = {}) {
   protectedTerms = [...new Set([...protectedTerms, ...BRAND_TERMS])];
   const tokens = []; // { raw, spaceBefore, spaceAfter }
+  let hasProse = false; // any letter left outside the masked tokens and markup
   const links = [];
   const terms = protectedTerms.length
     ? new RegExp(
@@ -188,6 +193,7 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
     let html = "";
     let plain = "";
     const flushPlain = () => {
+      if (!hasProse && hasLetters(plain)) hasProse = true;
       html += escapeHtml(plain);
       plain = "";
     };
@@ -303,7 +309,7 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
     return out.replace(/[\ue000-\uf8ff]/g, (ch) => tokens[ch.charCodeAt(0) - PUA_BASE]?.raw ?? ch);
   }
 
-  return { html, tokens, links, restore };
+  return { html, tokens, links, restore, hasProse };
 }
 
 // ----- block parsing ----------------------------------------------------------------
@@ -561,8 +567,6 @@ export function planBatches(items, { maxChars = BATCH_CHARS, maxItems = BATCH_IT
   return out;
 }
 
-const hasLetters = (s) => /\p{L}/u.test(s);
-
 /**
  * Translates one markdown chunk into `localeCode`. Structure (fences, table rows and
  * separators, blank lines, list/heading/quote prefixes, inline code, links, HTML) is
@@ -597,8 +601,7 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
   const results = new Map();
   const toSend = [];
   for (const [text, m] of masks) {
-    const prose = m.html.replace(/<span translate="no">zq[a-z]+<\/span>|<[^>]+>/g, "");
-    if (hasLetters(prose)) toSend.push([text, m]);
+    if (m.hasProse) toSend.push([text, m]);
     else results.set(text, text);
   }
 
