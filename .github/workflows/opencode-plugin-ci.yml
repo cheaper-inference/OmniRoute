@@ -6,11 +6,13 @@ on:
     paths:
       - "@omniroute/opencode-plugin/**"
       - "@omniroute/opencode-plugin-v2/**"
+      - ".github/workflows/opencode-plugin-ci.yml"
   pull_request:
     branches: [main, "release/**"]
     paths:
       - "@omniroute/opencode-plugin/**"
       - "@omniroute/opencode-plugin-v2/**"
+      - ".github/workflows/opencode-plugin-ci.yml"
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
@@ -32,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["22", "24"]
+        node: ["22.23.4", "24.22.1"]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -42,7 +44,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
           cache-dependency-path: "@omniroute/opencode-plugin/package-lock.json"
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npm run build
       - run: npm test
 
@@ -52,7 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["22", "24"]
+        node: ["22.23.4", "24.22.1"]
     defaults:
       run:
         working-directory: "@omniroute/opencode-plugin-v2"
@@ -79,7 +81,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
-          node-version: "22"
+          node-version: "24.22.1"
       - name: Build plugin-v2 artifact
         working-directory: "@omniroute/opencode-plugin-v2"
         run: npm ci --no-audit --no-fund && npm run build

@@ -2,13 +2,15 @@ name: opencode-provider CI
 
 on:
   push:
-    branches: [main, release/v3.8.0]
+    branches: [main, "release/**"]
     paths:
       - "@omniroute/opencode-provider/**"
+      - ".github/workflows/opencode-provider-ci.yml"
   pull_request:
-    branches: [main, release/v3.8.0]
+    branches: [main, "release/**"]
     paths:
       - "@omniroute/opencode-provider/**"
+      - ".github/workflows/opencode-provider-ci.yml"
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
@@ -30,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["20", "22", "24"]
+        node: ["22.23.4", "24.22.1"]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -53,7 +55,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24.22.1"
           cache: npm
           cache-dependency-path: "@omniroute/opencode-provider/package-lock.json"
       - run: npm ci
