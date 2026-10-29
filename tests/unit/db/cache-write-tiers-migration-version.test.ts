@@ -6,7 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { openMemorySqliteAdapter } from "../_helpers/memorySqliteAdapter.ts";
 
-// The cache-write tier migration was renumbered (213 -> 217) because 213 belongs to
+// The cache-write tier migration was renumbered (213 -> 217 -> 226) because 213 belongs to
 // api_key_preferred_connections on the release. Its isSchemaAlreadyApplied guard must follow
 // the file: left on "213", a DB that already carries the cache-write columns would skip the
 // unrelated api_keys migration.
