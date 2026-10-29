@@ -12,7 +12,10 @@ import { getRuntimePorts } from "@/lib/runtime/ports";
 import { requiresWebSessionCredential } from "@/shared/providers/webSessionCredentials";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import type { ComboLike, ResolvedComboTarget } from "@omniroute/open-sse/services/combo/types.ts";
-import { buildJevComboTestSummary } from "@omniroute/open-sse/services/combo/jevTestSummary.ts";
+import {
+  buildJevComboTestSummary,
+  type JevComboTestSummary,
+} from "@omniroute/open-sse/services/combo/jevTestSummary.ts";
 import { TYPESAFE_PROVIDER_ID } from "@omniroute/open-sse/services/typesafe/systemOne.ts";
 import { getProviderCredentials } from "@/sse/services/auth";
 import { getCachedSettings } from "@/lib/db/readCache";
@@ -248,6 +251,41 @@ async function testComboTarget(
   }
 }
 
+async function hasTypesafeApiKey(): Promise<boolean> {
+  try {
+    const credentials = await getProviderCredentials(TYPESAFE_PROVIDER_ID);
+    const apiKey = (credentials as { apiKey?: unknown } | null)?.apiKey;
+    return typeof apiKey === "string" && apiKey.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Jev-only test summary (admitted/held/blocked); null for every other strategy. */
+async function buildJevSummaryForComboTest(
+  combo: ComboRecord,
+  targets: ResolvedComboTarget[],
+  results: ComboTestResult[]
+): Promise<JevComboTestSummary | null> {
+  const strategy = String(combo.strategy || "priority")
+    .trim()
+    .toLowerCase();
+  if (strategy !== "jev") return null;
+  const resilienceSettings = resolveResilienceSettings(await getCachedSettings());
+  const probeByExecutionKey = new Map(results.map((result) => [result.executionKey, result]));
+  return buildJevComboTestSummary({
+    targets,
+    comboName: String(combo.name),
+    config: (combo.config as Record<string, unknown> | null | undefined) ?? null,
+    resilienceSettings,
+    hasTypesafeKey: await hasTypesafeApiKey(),
+    isModelAvailable: async (_model, target) => {
+      const probe = target ? probeByExecutionKey.get(target.executionKey) : undefined;
+      return probe?.status === "ok";
+    },
+  });
+}
+
 /**
  * POST /api/combos/test - Quick test a combo
  * Sends a real chat completion request through each model in the combo
@@ -297,44 +335,13 @@ export async function POST(request) {
 
     const baseInternalUrl = getInternalBaseUrl();
     const internalApiKey = await getInternalApiKey();
-
     const results = await probeComboTargets(
       targets,
       baseInternalUrl,
       internalApiKey,
       request.signal ?? null
     );
-    const strategy = String(combo.strategy || "priority")
-      .trim()
-      .toLowerCase();
-
-    let jev: Awaited<ReturnType<typeof buildJevComboTestSummary>> | null = null;
-    if (strategy === "jev") {
-      const settings = await getCachedSettings();
-      const resilienceSettings = resolveResilienceSettings(settings);
-      const probeByExecutionKey = new Map(results.map((result) => [result.executionKey, result]));
-      let hasTypesafeKey = false;
-      try {
-        const credentials = await getProviderCredentials(TYPESAFE_PROVIDER_ID);
-        hasTypesafeKey =
-          !!credentials &&
-          typeof (credentials as { apiKey?: unknown }).apiKey === "string" &&
-          (credentials as { apiKey: string }).apiKey.trim().length > 0;
-      } catch {
-        hasTypesafeKey = false;
-      }
-      jev = await buildJevComboTestSummary({
-        targets,
-        comboName: String(combo.name),
-        config: (combo.config as Record<string, unknown> | null | undefined) ?? null,
-        resilienceSettings,
-        hasTypesafeKey,
-        isModelAvailable: async (_model, target) => {
-          const probe = target ? probeByExecutionKey.get(target.executionKey) : undefined;
-          return probe?.status === "ok";
-        },
-      });
-    }
+    const jev = await buildJevSummaryForComboTest(combo, targets, results);
 
     return NextResponse.json(
       buildComboTestResponse(comboName, combo, results, totalAutoCandidates, jev)
@@ -379,7 +386,7 @@ function buildComboTestResponse(
   combo: ComboRecord,
   results: ComboTestResult[],
   totalAutoCandidates: number | null,
-  jev: Awaited<ReturnType<typeof buildJevComboTestSummary>> | null
+  jev: JevComboTestSummary | null
 ) {
   const resolvedResult = results.find((result) => result.status === "ok") || null;
   return {

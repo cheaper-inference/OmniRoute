@@ -200,71 +200,65 @@ function logJevOrderingSummary({
   );
 }
 
-function buildJevAllTargetsBlockedResponse(
-  blocked: JevPartition["blocked"],
+function jevProviderCooldownRetryMs(
+  target: ResolvedComboTarget,
   deps: JevPipelineDeps
-): Response {
-  const exclusions: PreDispatchExclusion[] = blocked.map(({ target, reason }) => {
-    const model = parseModel(target.modelStr).model || target.modelStr;
-    switch (reason) {
-      case "circuit_open": {
-        const breaker = target.provider
-          ? findOpenCircuitBreaker(target.provider, target.connectionId)
-          : null;
-        return {
-          provider: target.provider,
-          model,
-          reason,
-          retryAfterMs: breaker?.status.retryAfterMs || null,
-        };
-      }
-      case "provider_cooldown":
-        return {
-          provider: target.provider,
-          model,
-          reason,
-          retryAfterMs: target.provider
-            ? Math.max(
-                getRemainingCooldownMs(
-                  target.provider,
-                  target.connectionId ?? undefined,
-                  deps.resilienceSettings
-                ),
-                getRemainingCooldownMs(target.provider, undefined, deps.resilienceSettings)
-              ) || null
-            : null,
-        };
-      case "model_lockout":
-        return {
-          provider: target.provider,
-          model,
-          reason,
-          retryAfterMs:
-            getModelLockoutInfo(target.provider, target.connectionId || "", model)?.remainingMs ??
-            null,
-        };
-      case "persisted_cooldown":
-        return {
-          provider: target.provider,
-          model,
-          reason: "connection_cooldown",
-          retryAfterMs: null,
-        };
-      case "quota_cutoff":
-        return { provider: target.provider, model, reason, retryAfterMs: null };
-      default:
-        return {
-          provider: target.provider,
-          model,
-          reason: reason as PreDispatchExclusionReason,
-          retryAfterMs: null,
-        };
+): number | null {
+  if (!target.provider) return null;
+  return (
+    Math.max(
+      getRemainingCooldownMs(
+        target.provider,
+        target.connectionId ?? undefined,
+        deps.resilienceSettings
+      ),
+      getRemainingCooldownMs(target.provider, undefined, deps.resilienceSettings)
+    ) || null
+  );
+}
+
+function toJevPreDispatchExclusion(
+  { target, reason }: JevPartition["blocked"][number],
+  deps: JevPipelineDeps
+): PreDispatchExclusion {
+  const model = parseModel(target.modelStr).model || target.modelStr;
+  const base = { provider: target.provider, model };
+  switch (reason) {
+    case "circuit_open": {
+      const breaker = target.provider
+        ? findOpenCircuitBreaker(target.provider, target.connectionId)
+        : null;
+      return { ...base, reason, retryAfterMs: breaker?.status.retryAfterMs || null };
     }
-  });
+    case "provider_cooldown":
+      return { ...base, reason, retryAfterMs: jevProviderCooldownRetryMs(target, deps) };
+    case "model_lockout":
+      return {
+        ...base,
+        reason,
+        retryAfterMs:
+          getModelLockoutInfo(target.provider, target.connectionId || "", model)?.remainingMs ??
+          null,
+      };
+    case "persisted_cooldown":
+      return { ...base, reason: "connection_cooldown", retryAfterMs: null };
+    case "quota_cutoff":
+      return { ...base, reason, retryAfterMs: null };
+    default:
+      return { ...base, reason: reason as PreDispatchExclusionReason, retryAfterMs: null };
+  }
+}
 
-  const coolingResponse = buildAllTargetsCoolingDownResponse(exclusions);
-  if (coolingResponse) return coolingResponse;
+function excludedDiagnostics(exclusions: PreDispatchExclusion[]) {
+  return exclusions.map(({ provider, model, reason }) => ({ provider, model, reason }));
+}
 
+/** 404 (context window) or 400 (capability) when the blocks share that one cause; else null. */
+function buildJevRequirementsResponse(
+  blocked: JevPartition["blocked"],
+  exclusions: PreDispatchExclusion[],
+  deps: JevPipelineDeps
+): Response | null {
   if (blocked.length > 0 && blocked.every((item) => item.reason === "context_requirements")) {
     const { message, diagnostics } = buildEmptyComboTargetsPayload(
       blocked.map((item) => item.target),
@@ -282,22 +276,23 @@ function buildJevAllTargetsBlockedResponse(
     deps.body,
     deps.combo.name
   );
-  if (capabilityExhaustion) {
-    return errorResponseWithComboDiagnostics(
-      400,
-      capabilityExhaustion.message,
-      {
-        poolSize: blocked.length,
-        attempted: 0,
-        excluded: exclusions.map(({ provider, model, reason }) => ({ provider, model, reason })),
-        attemptOrder: [],
-        terminalReason: capabilityExhaustion.terminalReason,
-        recovery: buildRecoveryHint(capabilityExhaustion.terminalReason),
-      },
-      { code: "capability_mismatch", type: "invalid_request_error" }
-    );
-  }
+  if (!capabilityExhaustion) return null;
+  return errorResponseWithComboDiagnostics(
+    400,
+    capabilityExhaustion.message,
+    {
+      poolSize: blocked.length,
+      attempted: 0,
+      excluded: excludedDiagnostics(exclusions),
+      attemptOrder: [],
+      terminalReason: capabilityExhaustion.terminalReason,
+      recovery: buildRecoveryHint(capabilityExhaustion.terminalReason),
+    },
+    { code: "capability_mismatch", type: "invalid_request_error" }
+  );
+}
 
+function buildJevAllTargetsSkippedResponse(exclusions: PreDispatchExclusion[]): Response {
   const quotaOnly =
     exclusions.length > 0 && exclusions.every((item) => item.reason === "quota_cutoff");
   const status = quotaOnly ? 429 : 404;
@@ -310,7 +305,7 @@ function buildJevAllTargetsBlockedResponse(
     {
       poolSize: exclusions.length,
       attempted: 0,
-      excluded: exclusions.map(({ provider, model, reason }) => ({ provider, model, reason })),
+      excluded: excludedDiagnostics(exclusions),
       attemptOrder: [],
       terminalReason,
       recovery: buildRecoveryHint(terminalReason),
@@ -319,6 +314,18 @@ function buildJevAllTargetsBlockedResponse(
       code: quotaOnly ? "quota_exhausted" : "all_targets_skipped",
       type: quotaOnly ? "rate_limit_error" : "invalid_request_error",
     }
+  );
+}
+
+function buildJevAllTargetsBlockedResponse(
+  blocked: JevPartition["blocked"],
+  deps: JevPipelineDeps
+): Response {
+  const exclusions = blocked.map((item) => toJevPreDispatchExclusion(item, deps));
+  return (
+    buildAllTargetsCoolingDownResponse(exclusions) ??
+    buildJevRequirementsResponse(blocked, exclusions, deps) ??
+    buildJevAllTargetsSkippedResponse(exclusions)
   );
 }
 
@@ -375,6 +382,40 @@ async function previewJevSessionStickiness(
   return { targets: sticky.stuck ? stickyPreview.targets : targets, sticky };
 }
 
+/** Provider of a provider-level target the pinned connection can be bound to, else null. */
+function jevStickyExpansionProvider(
+  target: ResolvedComboTarget,
+  connectionId: string,
+  modelStr: string | null
+): string | null {
+  if (modelStr && target.modelStr !== modelStr) return null;
+  if (target.connectionId) return null;
+  if (target.allowedConnectionIds && !target.allowedConnectionIds.includes(connectionId)) {
+    return null;
+  }
+  const parsed = parseModel(target.modelStr);
+  return target.provider || parsed.provider || parsed.providerAlias || null;
+}
+
+async function getJevProviderPool(
+  providerPools: Map<string, Array<Record<string, unknown>>>,
+  provider: string,
+  log: ComboLogger
+): Promise<Array<Record<string, unknown>>> {
+  let pool = providerPools.get(provider);
+  if (pool) return pool;
+  try {
+    pool = (await getCachedProviderPoolConnections({ provider, isActive: true })) as Array<
+      Record<string, unknown>
+    >;
+  } catch {
+    log.warn("COMBO", "[jev] Couldn't resolve the pinned account for the session preview");
+    pool = [];
+  }
+  providerPools.set(provider, pool);
+  return pool;
+}
+
 async function expandJevStickyConnectionTarget(
   targets: ResolvedComboTarget[],
   connectionId: string,
@@ -386,36 +427,8 @@ async function expandJevStickyConnectionTarget(
   let found = false;
   const expanded: ResolvedComboTarget[] = [];
   for (const target of targets) {
-    if (modelStr && target.modelStr !== modelStr) {
-      expanded.push(target);
-      continue;
-    }
-    if (target.connectionId) {
-      expanded.push(target);
-      continue;
-    }
-    if (target.allowedConnectionIds && !target.allowedConnectionIds.includes(connectionId)) {
-      expanded.push(target);
-      continue;
-    }
-    const parsed = parseModel(target.modelStr);
-    const provider = target.provider || parsed.provider || parsed.providerAlias;
-    if (!provider) {
-      expanded.push(target);
-      continue;
-    }
-    let pool = providerPools.get(provider);
-    if (!pool) {
-      try {
-        pool = (await getCachedProviderPoolConnections({ provider, isActive: true })) as Array<
-          Record<string, unknown>
-        >;
-      } catch {
-        log.warn("COMBO", "[jev] Couldn't resolve the pinned account for the session preview");
-        pool = [];
-      }
-      providerPools.set(provider, pool);
-    }
+    const provider = jevStickyExpansionProvider(target, connectionId, modelStr);
+    const pool = provider ? await getJevProviderPool(providerPools, provider, log) : [];
     const connection = pool.find((candidate) => String(candidate.id) === connectionId);
     if (!connection) {
       expanded.push(target);
