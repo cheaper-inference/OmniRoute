@@ -70,6 +70,19 @@ type Loose = any;
 
 export type StreamingTailDeps = Record<string, Loose>;
 
+/**
+ * The request logger syncs captured stream chunks onto the pending entry only past a
+ * byte threshold or on flush (#17282). Flush before the entry moves to completed
+ * details, otherwise a short stream's capture never reaches them.
+ */
+function flushPendingStreamCapture(reqLogger: unknown): void {
+  try {
+    (reqLogger as { getPipelinePayloads?: () => unknown } | null)?.getPipelinePayloads?.();
+  } catch {
+    // Capture is best-effort; finalization must still release the pending attempt.
+  }
+}
+
 export async function runStreamingTail(deps: StreamingTailDeps) {
   const {
     agentGoalPolicy,
@@ -114,6 +127,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     onStreamFailure,
     pendingConnId,
     pendingRequestId,
+    pendingRequestOwner,
     persistAttemptLogs,
     persistFailureUsage,
     pipelineSessionId,
@@ -220,7 +234,18 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   if (streamReadiness.ok === false) {
     const { response: failureResponse, reason } = streamReadiness;
     const { classificationReason, upstreamDiagnostic } = streamReadiness;
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    if (pendingConnId) {
+      trackPendingRequest(
+        model,
+        provider,
+        pendingConnId,
+        false,
+        undefined,
+        pendingRequestOwner ?? pendingRequestId
+      );
+    } else {
+      streamController.clearPendingRequest();
+    }
     appendRequestLog({
       model,
       provider,
@@ -382,76 +407,85 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       if (streamFailureCompletionRecorded) return;
       streamFailureCompletionRecorded = true;
     }
-    const cacheUsageLogMeta = buildCacheUsageLogMeta(
-      streamUsage,
-      isScopedGeminiCacheTarget
-        ? {
-            mode: geminiPromptCacheMode,
-            evidence: streamCacheEvidence,
-            compressionTokens: tokensCompressed || undefined,
-            timing: { ttftMs: ttft, itlMs: streamItlMs },
-          }
-        : undefined
-    );
-    const streamConnectionId = getCurrentConnectionId();
+    let cacheUsageLogMeta: ReturnType<typeof buildCacheUsageLogMeta>;
+    let streamConnectionId = pendingConnId ?? connectionId;
+    try {
+      cacheUsageLogMeta = buildCacheUsageLogMeta(
+        streamUsage,
+        isScopedGeminiCacheTarget
+          ? {
+              mode: geminiPromptCacheMode,
+              evidence: streamCacheEvidence,
+              compressionTokens: tokensCompressed || undefined,
+              timing: { ttftMs: ttft, itlMs: streamItlMs },
+            }
+          : undefined
+      );
+      streamConnectionId = getCurrentConnectionId();
 
-    if (normalizedStreamStatus === 200) {
-      clearPostOutputFailureStreak(provider, streamConnectionId, modelInfo.model);
-      void maybeSyncClaudeExtraUsageState({
+      if (normalizedStreamStatus === 200) {
+        clearPostOutputFailureStreak(provider, streamConnectionId, modelInfo.model);
+        void maybeSyncClaudeExtraUsageState({
+          provider,
+          connectionId: streamConnectionId,
+          providerSpecificData: credentials?.providerSpecificData,
+          log,
+        });
+      }
+
+      // The stream translator stores Claude signed thinking per tool call as it goes;
+      // a turn that may echo video transcript cues must not be retained at all.
+      if (videoBridgeObserved && streamResponseBody) {
+        forgetClaudeThinkingForClientResponse(streamResponseBody);
+      }
+
+      if (normalizedStreamStatus === 200 && streamResponseBody) {
+        captureStreamReasoningForReplay({
+          streamResponseBody,
+          clientResponseFormat,
+          responseToolNameMap,
+          providerRequestBody: finalBody || translatedBody || body,
+          translatedBody,
+          reasoningReplayHistory,
+          provider,
+          model,
+          reasoningCacheScope,
+          videoTranscriptSensitive: videoBridgeObserved,
+        });
+      }
+      effectiveServiceTier = resolveReportedServiceTier(streamResponseBody) ?? effectiveServiceTier;
+
+      // Context Editing telemetry (streaming): the reconstructed stream body now carries
+      // context_management.applied_edits from the final message_delta snapshot. Mirror the
+      // non-streaming hook so streaming context-clear savings also surface under engine
+      // "context-editing" in compression analytics. Best-effort, Claude-only.
+      if (normalizedStreamStatus === 200) {
+        recordContextEditingTelemetryHook({
+          contextEditingEnabled,
+          provider,
+          responseBody: streamResponseBody,
+          skillRequestId,
+          log,
+        });
+      }
+    } finally {
+      // Keep the completion guard when bookkeeping fails, but release this exact
+      // pending attempt before the stream's callback boundary catches the error.
+      // Model-only admissions share the controller's disconnect/error cleanup guard.
+      if (!pendingConnId) streamController.clearPendingRequest();
+      flushPendingStreamCapture(reqLogger);
+      streamFailure.finalizeStreamRequestLog({
+        pendingRequestId: pendingRequestOwner ?? pendingRequestId,
+        model,
         provider,
         connectionId: streamConnectionId,
-        providerSpecificData: credentials?.providerSpecificData,
-        log,
+        providerResponse: providerPayload ?? streamResponseBody ?? undefined,
+        clientResponse: clientPayload ?? streamResponseBody ?? undefined,
+        status: normalizedStreamStatus,
+        error: streamError,
+        errorCode: streamErrorCode,
       });
     }
-
-    // The stream translator stores Claude signed thinking per tool call as it goes;
-    // a turn that may echo video transcript cues must not be retained at all.
-    if (videoBridgeObserved && streamResponseBody) {
-      forgetClaudeThinkingForClientResponse(streamResponseBody);
-    }
-
-    if (normalizedStreamStatus === 200 && streamResponseBody) {
-      captureStreamReasoningForReplay({
-        streamResponseBody,
-        clientResponseFormat,
-        responseToolNameMap,
-        providerRequestBody: finalBody || translatedBody || body,
-        translatedBody,
-        reasoningReplayHistory,
-        provider,
-        model,
-        reasoningCacheScope,
-        videoTranscriptSensitive: videoBridgeObserved,
-      });
-    }
-    effectiveServiceTier = resolveReportedServiceTier(streamResponseBody) ?? effectiveServiceTier;
-
-    // Context Editing telemetry (streaming): the reconstructed stream body now carries
-    // context_management.applied_edits from the final message_delta snapshot. Mirror the
-    // non-streaming hook so streaming context-clear savings also surface under engine
-    // "context-editing" in compression analytics. Best-effort, Claude-only.
-    if (normalizedStreamStatus === 200) {
-      recordContextEditingTelemetryHook({
-        contextEditingEnabled,
-        provider,
-        responseBody: streamResponseBody,
-        skillRequestId,
-        log,
-      });
-    }
-
-    streamFailure.finalizeStreamRequestLog({
-      pendingRequestId,
-      model,
-      provider,
-      connectionId: streamConnectionId,
-      providerResponse: providerPayload ?? streamResponseBody ?? undefined,
-      clientResponse: clientPayload ?? streamResponseBody ?? undefined,
-      status: normalizedStreamStatus,
-      error: streamError,
-      errorCode: streamErrorCode,
-    });
 
     // Track cache token metrics for streaming responses
     if (streamUsage && typeof streamUsage === "object") {
@@ -693,7 +727,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       // openai-responses → openai translation still wants the namespace identity
       // map for #7936-style round-trip closure when the client also speaks
       // Responses (Codex CLI).
-      requestToolIdentityMap
+      requestToolIdentityMap,
+      null,
+      undefined,
+      pendingRequestOwner ?? pendingRequestId
     );
   } else if (needsTranslation(targetFormat, clientResponseFormat)) {
     // Standard translation for other providers
@@ -727,7 +764,9 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       requestToolIdentityMap,
       // The CLIENT's declared tools[]: an Anthropic-format client gets its own
       // tool-name casing back from any provider (OpenCode `read`, Claude Code `Read`).
-      (body as Record<string, unknown> | null | undefined)?.tools ?? null
+      (body as Record<string, unknown> | null | undefined)?.tools ?? null,
+      undefined,
+      pendingRequestOwner ?? pendingRequestId
     );
   } else {
     log?.debug?.("STREAM", `Standard passthrough mode`);
@@ -743,7 +782,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       handleStreamFailure,
       clientResponseFormat,
       requestToolIdentityMap,
-      (body as Record<string, unknown> | null | undefined)?.tools ?? null
+      (body as Record<string, unknown> | null | undefined)?.tools ?? null,
+      pendingRequestOwner ?? pendingRequestId
     );
   }
 

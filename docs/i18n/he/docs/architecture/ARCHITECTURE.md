@@ -356,169 +356,124 @@ OmniRoute יכול להתקין, לפקח ולנתב אל תהליכי כלי AI
 
 העמקה: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## תת-מערכות מרכזיות (v3.8.0)
+## תת-מערכות עיקריות (v3.8.0)
 
-### A. מנוע Auto Combo
+### א. מנוע קומבו אוטומטי
 
-Auto Combo מדרג ובוחר באופן דינמי יעדי ניתוב בזמן הבקשה, במקום
-להסתמך על הגדרת combo סטטית. הוא מפעיל את משפחת קידומות המודלים `auto/*`.
+Auto Combo מבקיע ובוחרת באופן דינמי יעדי ניתוב בזמן בקשה, במקום להסתמך על הגדרה משולבת סטטית. הוא מניע את משפחת הקידומת של דגם `auto/*`.
 
-- נקודת הכניסה למנוע: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- פותר: `src/domain/comboResolver.ts` (זיהוי אוטומטי של הקידומת `auto/`)
-- לוח בקרה: `/dashboard/auto-combo`
-- טלמטריה: טבלת SQLite בשם `auto_combo_decisions`
+- כניסת מנוע: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- פותר: `src/domain/comboResolver.ts` (זיהוי אוטומטי של קידומת `auto/` )
+- לוח מחוונים: `/dashboard/auto-combo`
+- טלמטריה: שולחן `auto_combo_decisions` SQLite
 
-יכולות עיקריות:
+יכולות מפתח:
 
-- **20 אסטרטגיות ניתוב** (עדיפות, משוקלל, מילוי-הראשון, סבב מחזורי, P2C, אקראי,
-  הכי-פחות-בשימוש, ממוטב-עלות, מודע-לאיפוס, חלון-איפוס, מרווח-זמין, משוקלל-מכסה,
-  אקראי-קפדני, **auto**, lkgp, ממוטב-הקשר, ממוטב-מטמון, ממסר-הקשר, **fusion**,
-  צינור עיבוד) —
-  auto הוא התוספת המרכזית ב-v3.8.0;‏ `fusion` (פיזור לפאנל + סינתזה בידי שופט,
-  `open-sse/services/fusion.ts`) חדש ב-v3.8.36.
-- **ניקוד בן 16 גורמים**: מכסה, תקינות, עלות הפוכה, השהיה הפוכה, התאמה למשימה
-  ועשרה נוספים. הטבלה הקנונית של הגורמים ומשקלי ברירת המחדל שלהם נמצאת בתוך
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — הצגתה מחדש כאן
-  תיצור מקום נוסף שבו היא עלולה להתיישן.
-- **מפעל וירטואלי** יוצר מופעי combo ארעיים כאשר לא קיים combo בעל שם תואם,
-  תוך משיכת מועמדים מחיבורי ספק פעילים ותקינים.
-- **קידומות אוטומטיות**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — כל אחת מהן מגובה בפרופיל משקלים מכוונן.
-- **6 חבילות מצבים**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` ו-`chaos-mode` — תצורות משקלים מוגדרות מראש שניתן להפעיל
-  מלוח הבקרה. (אין לבלבל ביניהן לבין הקידומות `auto/*` שלעיל, שהן
-  וריאציות המיושמות בזמן הבקשה.)
+- **20 אסטרטגיות ניתוב** (עדיפות, משוקלל, מילוי ראשון, round-robin, P2C, אקראי, הכי פחות בשימוש, אופטימיזציה לעלות, reset-aware, reset-window, headroom, מכסה משוקלל, strict-random,** אוטומטי** , lkgp, מותאם להקשר, מותאם למטמון, ממסר הקשר,** הַתָכָה** , pipeline) — auto היא תוספת הכותרת בגרסה 3.8.0; `fusion` (פאנל fan-out + שופט סינתזה, `open-sse/services/fusion.ts`) חדש בגרסה 3.8.36.
+- **ניקוד של 16 גורמים** : מכסה, בריאות, עלות הפוכה, חביון הפוך, התאמה למשימה ועוד עשרה. טבלת הגורמים הקנונית ומשקולות ברירת המחדל שלהם חיים ב- [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — אם תחזרו עליה כאן יעניקו לה מקום שני להתיישנות.
+- **מפעל וירטואלי** מתממשת שילובים ארעיים כאשר לא קיימת שילוב עם שם תואם, ומביאה מועמדים מקשרים בריאים של ספקים פעילים.
+- **קידומות אוטומטיות** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — כל אחד מגובה בפרופיל משקל מכוון.
+- **6 חבילות מצבים** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` ו- `chaos-mode` — תצורות משקל מוגדרות מראש הניתנות להתקשרות מלוח המחוונים. (לא להתבלבל עם הקידומות `auto/*` לעיל, שהן גרסאות של זמן בקשה.)
 
-לפרטים אלגוריתמיים מלאים (נוסחאות הגורמים, כוונון משקלים), ראו
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+לפרטים אלגוריתמיים מלאים (נוסחאות גורמים, כוונון משקל), ראה [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. סוכני ענן
+### ב. סוכני ענן
 
-Cloud Agents עוטף פלטפורמות צד שלישי מתארחות לסוכני קוד (Codex Cloud, Devin,
-Jules) מאחורי מחזור חיים אחיד של משימות המגובה במסד נתונים. כל נקודות הקצה
-ליצירה ולבדיקה של משימות דורשות אימות ניהולי.
+Cloud Agents עוטף פלטפורמות קוד סוכני מתארחות של צד שלישי (Codex Cloud, Devin, Jules) מאחורי מחזור חיים אחיד של משימות מגובות DB. כל נקודות הקצה של task creation/inspection דורשות אימות ניהול.
 
-- שורש המודול: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, וכן תתי-תיקיות לכל סוכן תחת `agents/`)
-- מימושים לכל סוכן: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- נקודות קצה ציבוריות: `/api/v1/agents/tasks/*` (הצגה/יצירה/אחזור/ביטול)
-- נקודות קצה ניהוליות: `/api/cloud/*` (הקצאה, מצב, אצווה)
-- לוח בקרה: `/dashboard/cloud-agents`
-- אחסון: טבלת `cloud_agent_tasks`
+- שורש מודול: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, בתוספת ספריות משנה לכל סוכן תחת `agents/`)
+- יישומים לכל סוכן: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- נקודות קצה ציבוריות: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- נקודות קצה לניהול: `/api/cloud/*` (הקצאה, סטטוס, אצווה)
+- לוח מחוונים: `/dashboard/cloud-agents`
+- אחסון: שולחן `cloud_agent_tasks`
 
-לפרטי הקצאה ו-OAuth עבור כל סוכן, ראו
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+להקצאה לכל סוכן ולפרטי OAuth, ראה [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. מנגנוני הגנה
+### ג מעקות בטיחות
 
-מודול מנגנוני ההגנה הוא שכבת תווכה הניתנת לטעינה מחדש בזמן אמת, אשר בודקת בקשות
-ותגובות לאיתור מידע מזהה אישי (PII), הזרקת הנחיות ותוכן חזותי לא בטוח. הפרות
-עוצרות מיד את הבקשה עם HTTP **503** וקוד שגיאה מובנה, וכך מאפשרות
-לגורמים קוראים בהמשך השרשרת לנסות שוב או להתפצל למסלול אחר.
+מודול מעקות הבטיחות הוא שכבת תוכנת ביניים ניתנת לטעינה חוזרת הבודקת בקשות ותגובות עבור PII, הזרקה מהירה ותוכן ראייה לא בטוח. הפרות מקצרות את הבקשה עם HTTP** 503** בתוספת קוד שגיאה מובנה, המאפשר למתקשרים במורד הזרם לנסות שוב או להסתעף.
 
-- שורש המודול: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- טעינה מחדש בזמן אמת: הרישום עוקב אחר שינויי תצורה ובונה מחדש את השרשרת במקום
-- נקודות חיבור: כניסה למטפל בצ'אט, מטפל ביצירת תמונות, מנקה תגובות
-- חוזה HTTP: הפרות נחשפות כ-`503` עם `error.code = "GUARDRAIL_VIOLATION"`
+- שורש מודול: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- טעינה חוזרת חמה: הרישום עוקב אחר שינויים בתצורה ובונה מחדש את השרשרת במקומה
+- נקודות חוט-אין: כניסה למטפל בצ'אט, מטפל בהפקת תמונות, חיטוי תגובה
+- חוזה HTTP : הפרות מופיעות כ- `503` עם `error.code = "GUARDRAIL_VIOLATION"`
 
-ליצירת מערכי כללים ולכוונון ספים, ראו
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+ליצירת ערכות כללים וכוונון סף, ראה [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
-### D. שכבת התחום
+### ד. שכבת דומיין
 
-מרחב השמות `src/domain/` מרכז החלטות מדיניות, כדי שמטפלי הנתיבים לא
-יצטרכו להרכיב בעצמם לוגיקת נעילה/תקציב/חלופה.
+מרחב השמות `src/domain/` מרכז את החלטות המדיניות כך שמטפלי מסלולים לא צריכים להרכיב לוגיקת lockout/budget/fallback בעצמם.
 
-- מנוע מדיניות: `src/domain/policyEngine.ts` — נקודת כניסה יחידה עבור
-  הערכה טרם ביצוע (סדר: נעילה → תקציב → חלופה)
+- מנוע מדיניות: `src/domain/policyEngine.ts` — נקודת כניסה יחידה להערכה מוקדמת של ביצוע (הזמנת החלפה → budget → )
 - כללי עלות: `src/domain/costRules.ts`
-- מדיניות חלופה: `src/domain/fallbackPolicy.ts`
+- מדיניות סתירה: `src/domain/fallbackPolicy.ts`
 - מדיניות נעילה: `src/domain/lockoutPolicy.ts`
-- ניתוב מבוסס תגיות: `src/domain/tagRouter.ts`
-- פותר combo:‏ `src/domain/comboResolver.ts` — פותר שמות combo, קידומות auto/\*
-  ויעדי מודלים עם תווים כלליים לכדי תוכניות ביצוע קונקרטיות
-- מצרף כללי חיבור/מודל: `src/domain/connectionModelRules.ts`
-- תמונות מצב של זמינות מודלים: `src/domain/modelAvailability.ts`
-- מעקב אחר תפוגת ספקים: `src/domain/providerExpiration.ts`
-- מטמון מכסות: `src/domain/quotaCache.ts`
-- מצב הידרדרות: `src/domain/degradation.ts`
+- ניתוב מבוסס תג: `src/domain/tagRouter.ts`
+- פותר משולב: `src/domain/comboResolver.ts` — פותר שמות משולבים, קידומות אוטומטי/\* ויעדי מודל תווים כלליים לתוכניות ביצוע קונקרטיות
+- Connection/model כלל מצרף: `src/domain/connectionModelRules.ts`
+- תמונות זמינות דגם: `src/domain/modelAvailability.ts`
+- מעקב אחר תפוגה של ספק: `src/domain/providerExpiration.ts`
+- מטמון מכסה: `src/domain/quotaCache.ts`
+- מצב השפלה: `src/domain/degradation.ts`
 - ביקורת תצורה: `src/domain/configAudit.ts`
-- בונה מטא-נתונים לתגובת OmniRoute:‏ `src/domain/omnirouteResponseMeta.ts`
-- תת-מערכת הערכה: `src/domain/assessment/` — משימות הערכה תקופתיות
+- בונה מטא נתונים של תגובות OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- תת-מערכת הערכה: משרות הערכה תקופתיות `src/domain/assessment/` —
 
-### E. צינור הרשאות
+### ה. צינור הרשאה
 
-צינור ההרשאות מסווג כל בקשה נכנסת ומחיל את שרשרת המדיניות
-המתאימה לפני ההעברה לביצוע.
+צינור ההרשאות מסווג כל בקשה נכנסת ומחיל את שרשרת המדיניות המתאימה לפני השליחה.
 
-- נקודת הכניסה לצינור: `src/server/authz/pipeline.ts`
-- מסווג בקשות: `src/server/authz/classify.ts` — מבחין בין נתיבי תאימות
-  ציבוריים לבין נתיבי ניהול
-- מצאי נתיבים ציבוריים: `src/shared/constants/publicApiRoutes.ts`
-- מדיניות: `src/server/authz/policies/` — פרדיקטים הניתנים להרכבה
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` וכו')
-- כלי עזר לכותרות: `src/server/authz/headers.ts`
-- כלי עזר לאימות תנאים: `src/server/authz/assertAuth.ts`
-- הקשר בקשה: `src/server/authz/context.ts`
+- כניסת צינור: `src/server/authz/pipeline.ts`
+- מסווג בקשת: `src/server/authz/classify.ts` — מבדיל בין מסלולי תאימות ציבוריים למסלולי ניהול
+- מלאי מסלול ציבורי: `src/shared/constants/publicApiRoutes.ts`
+- מדיניות: פרדיקטים ניתנים לחיבור `src/server/authz/policies/` — (`requireApiKey`, `requireManagement`, `requireFreshAuth` וכו')
+- כלי עזר לכותרת: `src/server/authz/headers.ts`
+- עוזר טענה: `src/server/authz/assertAuth.ts`
+- הקשר הבקשה: `src/server/authz/context.ts`
 
-נתיבים ציבוריים לעומת נתיבי ניהול הם גבול קשיח: ממשקי API של סוכנים/תקופת צינון
-ושינויים בספקים דורשים אימות ניהולי (HTTP 401 אם הוא חסר).
+מסלולים ציבוריים לעומת ניהול הם גבול קשה: agent/cooldown APIs ומוטציות ספק דורשות אישור ניהול (HTTP 401 אם חסר).
 
-לכללי הסיווג המלאים של הנתיבים, ראו
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+לכללי סיווג המסלולים המלאים, ראה [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. מכונת מצבים סופית של תהליכי עבודה ונתב מודע-משימות
+### ו. זרימת עבודה FSM ונתב מודע למשימות
 
-נתב המונע בידי מכונת מצבים סופית ומשוכב מעל בחירת combo, כדי לנתב
-תעבורה על בסיס שלב תהליך העבודה שזוהה (תכנון, ביצוע,
-סקירה) והזיקה למשימות רקע.
+נתב מונע על מצב סופי של מכונה מרוכב מעל לבחירת משולבת כדי להפנות תנועה על סמך שלב זרימת העבודה שזוהה (תכנון, ביצוע, סקירה) וזיקת רקע למשימות.
 
-- FSM של תהליך העבודה: `open-sse/services/workflowFSM.ts`
-- נתב מודע למשימות: `open-sse/services/taskAwareRouter.ts`
-- מזהה משימות רקע: `open-sse/services/backgroundTaskDetector.ts`
+- זרימת עבודה FSM: `open-sse/services/workflowFSM.ts`
+- נתב מודע למשימה: `open-sse/services/taskAwareRouter.ts`
+- גלאי משימות רקע: `open-sse/services/backgroundTaskDetector.ts`
 - מסווג כוונות: `open-sse/services/intentClassifier.ts`
 
-המעברים ב-FSM מוזנים למנגנון הניקוד של Auto Combo, ומטים את הבחירה לעבר מודלים זולים יותר
-עבור משימות רקע/אוטומציה ולעבר מודלים חזקים יותר עבור סבבי
-תכנון/סקירה אינטראקטיביים.
+מעברי FSM ניזונים לניקוד של Auto Combo, תוך הטיה לדגמים זולים יותר עבור משימות background/automation ולכיוון מודלים חזקים יותר עבור פניות planning/review אינטראקטיביות.
 
-### G. עמידות ייעודית לספקים
+### ז. חוסן ספציפי לספק
 
-כמה ספקים כוללים מודולים ייעודיים לעמידות ולהסוואה, המתבססים על
-שכבות מפסק הזרם / השהיית החיבור / נעילת המודל הגלובליות:
+מספר ספקים שולחים מודולי חוסן והתגנבות ייעודיים המחזירים לאחור את שכבות מפסק המעגל / קירור חיבורים / נעילת דגם:
 
-- מנוע 429 של Antigravity: `open-sse/services/antigravity429Engine.ts` (מבצע רוטציה
-  של זהות, מנקה כותרות תגובה ומנהל מעקב אחר קרדיטים/גרסאות באמצעות
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- מדיניות המכסות של ModelScope: `open-sse/services/modelscopePolicy.ts`
-- CCH של Claude Code (לחיצת יד לערוץ תאימות): `open-sse/services/claudeCodeCCH.ts`,
-  וכן `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- עיצוב טביעת האצבע של Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- ערפול של Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- מנוע Antigravity 429: `open-sse/services/antigravity429Engine.ts` (מסובב זהות, מקרצף כותרות תגובה, מניע מעקב אחר credits/version באמצעות `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (תקציב לפי בקשה של 429s במעלה הזרם בכל המארחים, `ANTIGRAVITY_MAX_429_ATTEMPTS`; שליחה חוזרת זהה של גוף שסורב נענתה באופן מקומי; `src/sse/handlers/chat.ts` לא מפעילה מחדש בקשה כזו דרך הניסוי החוזר עם התקררות)
+- מדיניות מכסת ModelScope : `open-sse/services/modelscopePolicy.ts`
+- קוד Claude CCH (לחיצת יד של ערוץ תאימות): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- עיצוב טביעת אצבע של קוד Claude : `open-sse/services/claudeCodeFingerprint.ts`
+- ערפול קוד Claude : `open-sse/services/claudeCodeObfuscation.ts`
 
-לספר ההפעלה המלא בנושא הסוואה ולהנחיות תפעוליות, ראו
-`docs/security/STEALTH_GUIDE.md` (ב-git; אינו מהודר לתוך `/docs`).
+לחוברת התגנבות המלאה והדרכה תפעולית, ראה `docs/security/STEALTH_GUIDE.md` (git; לא הידור לתוך `/docs`).
 
-### H. Webhooks, מטמון חשיבה, מטמון קריאה
+### H. Webhooks, Reasoning Cache, Read Cache
 
-- **Webhooks** — שיגור יוצא של אירועי ספק/חשבון/משימה.
-  - משגר: `src/lib/webhookDispatcher.ts`
-  - אחסון: טבלת SQLite בשם `webhooks` (באמצעות `src/lib/db/webhooks.ts`)
-  - לוח בקרה: `/dashboard/webhooks` (מינויים, סודות, היסטוריית ניסיונות חוזרים)
-  - לטקסונומיית האירועים ולסמנטיקת הניסיונות החוזרים, ראו [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **מטמון חשיבה** — מקטעי חשיבה הניתנים להפעלה חוזרת עבור ספקים שפולטים
-  טוקני חשיבה (Claude, GLMT וכו׳), כך שסבבים עוקבים יוכלו לדלג על חשיבה מחדש.
-  - שכבת מסד הנתונים: `src/lib/db/reasoningCache.ts`
-  - שכבת השירות: `open-sse/services/reasoningCache.ts`
-  - לסמנטיקת ההפעלה החוזרת, ראו [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **מטמון קריאה** — מטמון תגובות קצר-טווח המבוסס על מפתח חתימה ומשמש
-  לאיחוד ניסיונות חוזרים זהים מערכות SDK פגומות במעלה הזרם.
-  - שכבת מסד הנתונים: `src/lib/db/readCache.ts`
-  - נקודת קצה לסטטיסטיקות: `GET /api/cache/stats`, לוח הבקרה ב-`/dashboard/cache`
+- **Webhooks** שיגור — יוצא לאירועי provider/account/task.
+  - שדר: `src/lib/webhookDispatcher.ts`
+  - אחסון: שולחן `webhooks` SQLite (דרך `src/lib/db/webhooks.ts`)
+  - לוח מחוונים: `/dashboard/webhooks` (מנויים, סודות, היסטוריית נסיונות חוזרים)
+  - לטקסונומיה של אירועים וסמנטיקה של ניסיון חוזר, ראה [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **מטמון הנמקה** חסימות חשיבה שניתנות להשמעה חוזרת של — עבור ספקים שפולטים אסימוני חשיבה (Claude, GLMT וכו') כך שתורים רצופים יכולים לדלג על חשיבה מחדש.
+  - שכבת DB : `src/lib/db/reasoningCache.ts`
+  - שכבת שירות: `open-sse/services/reasoningCache.ts`
+  - לסמנטיקה חוזרת, ראה [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **קרא את המטמון** מטמון תגובה קצר מועד — מקודם על ידי חתימה ומשמש כדי לכווץ ניסיונות חוזרים זהים מ- SDKs שבור במעלה הזרם.
+  - שכבת DB : `src/lib/db/readCache.ts`
+  - נקודת קצה סטטיסטיקה: `GET /api/cache/stats`, לוח מחוונים ב- `/dashboard/cache`
 
 ## 3) שכבת התמדה
 

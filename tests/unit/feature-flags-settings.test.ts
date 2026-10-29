@@ -58,7 +58,8 @@ const {
 // tool_call wrapper repair, default on) to 86.
 // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, OpenCode model surface from the
 // published catalog, default off) takes it to 87.
-const EXPECTED_FEATURE_FLAG_COUNT = 111;
+// UNPRICED_USAGE_BUDGET_POLICY (#14604, explicit enum policy, default fail_closed) to 113.
+const EXPECTED_FEATURE_FLAG_COUNT = 113;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
@@ -78,6 +79,7 @@ const EXPECTED_FEATURE_FLAG_COUNT = 111;
 // CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED (#15917, default off) takes it to 88.
 // NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED (#16632, default off) to 88.
 // COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED (#16305, default off) takes it to 88.
+// CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) takes it to 112.
 // default off) to 87; QUOTA_WINDOW_BOUNDED_PARK
 // (#17000, per-window quota policy honours the bounded park, default off) to 88.
 // default off) to 87; IMAGE_GENERATION_LONG_JOBS
@@ -89,6 +91,33 @@ const EXPECTED_FEATURE_FLAG_COUNT = 111;
 describe("featureFlagDefinitions", () => {
   it(`has exactly ${EXPECTED_FEATURE_FLAG_COUNT} flag definitions`, () => {
     assert.strictEqual(FEATURE_FLAG_DEFINITIONS.length, EXPECTED_FEATURE_FLAG_COUNT);
+  });
+
+  it("keeps the documented catalog total in sync with the registry", () => {
+    const catalog = fs.readFileSync(
+      new URL("../../docs/reference/FEATURE_FLAGS.md", import.meta.url),
+      "utf8"
+    );
+    const count = catalog.match(/^(\d+) flags across \d+ categories\./m);
+    assert.ok(count, "Feature Flags catalog must declare its total");
+    assert.equal(Number(count[1]), FEATURE_FLAG_DEFINITIONS.length);
+  });
+
+  it("resolves the unpriced budget policy description from every locale", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "UNPRICED_USAGE_BUDGET_POLICY");
+    assert.ok(def);
+    assert.equal(
+      def.descriptionI18nKey,
+      "featureFlags.definitions.UNPRICED_USAGE_BUDGET_POLICY.description"
+    );
+    const messagesDir = new URL("../../src/i18n/messages/", import.meta.url);
+    for (const filename of fs.readdirSync(messagesDir).filter((name) => name.endsWith(".json"))) {
+      const messages = JSON.parse(fs.readFileSync(new URL(filename, messagesDir), "utf8"));
+      const description =
+        messages.featureFlags?.definitions?.UNPRICED_USAGE_BUDGET_POLICY?.description;
+      assert.equal(typeof description, "string", `missing policy description in ${filename}`);
+      assert.ok(description.trim(), `blank policy description in ${filename}`);
+    }
   });
 
   it("has unique keys for all flags", () => {

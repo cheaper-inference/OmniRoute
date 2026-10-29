@@ -31,6 +31,7 @@ For the focused OpenAI-compatible protocol and provider capability matrix, see
 - [WebSocket Streaming](#websocket-streaming)
 - [Quotas & Issues Reporting](#quotas--issues-reporting)
 - [Semantic Cache](#semantic-cache)
+- [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
 - [Dashboard & Management](#dashboard--management)
 - [Combo Management](#combo-management)
 - [Webhooks](#webhooks)
@@ -882,6 +883,10 @@ The generic fields always win: `query`, `max_results`, `filters` (domains), `cou
 topic derived from `search_type`. On Exa, `search_type: "news"` keeps `category: "news"`.
 Tavily also accepts `search_type: "finance"` (`topic: "finance"`).
 
+Firecrawl search cost is recorded per started block of 10 returned results, at $0.002 (2
+credits) a block and at least one block per call
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): 11 results cost $0.004.
+
 The generic `time_range` now reaches both providers: Exa gets `startPublishedDate` (ISO
 timestamp) and Tavily gets `start_date` (`YYYY-MM-DD`). An explicit date in `provider_options`
 overrides the mapped one.
@@ -1023,6 +1028,27 @@ completion.
 | POST   | `/v1/issues/report` | Report a quota/key issuance failure to GitHub (requires `GITHUB_ISSUES_REPO` + token) |
 
 **Auth:** Bearer API key (`isAuthenticated`).
+
+### Quota session recovery (opt-in)
+
+A non-streaming `POST /v1/chat/completions` or `POST /v1/responses` that fails with a
+terminal quota error (`402`/`429`/`503` whose body says the quota or credits are exhausted)
+can be parked and replayed later instead of returning the error. The caller opts in per
+request with three headers:
+
+| Header                       | Value                                         |
+| ---------------------------- | --------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                        |
+| `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`          |
+| `x-omniroute-recovery-turn`  | turn id unique within the session (same rule) |
+
+Only `stream: false` turns with no tools, tool history or `previous_response_id`, and no
+`x-omniroute-connection` pin, are eligible, and `STORAGE_ENCRYPTION_KEY` must be set (the
+request is stored encrypted for up to 24 h). The response is then `202` with
+`recovery.poll`; poll `GET /v1/quota-recoveries/{id}` (`202` while pending, `200` with the
+recovered body when completed) or cancel with `DELETE`. Tickets are visible only to the API
+key that created them. A replay whose outcome is uncertain ends in `needs_confirmation`
+instead of being sent twice. Source: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1192,6 +1218,42 @@ Any request can bypass the cache regardless of key settings:
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+## CLIProxyAPI Management Compatibility
+
+OmniRoute answers the three [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+management endpoints that usage dashboards call to read Claude and Codex subscription limits
+(for example T3 Code's `cliproxy` usage-limit source). Point the client's base URL at
+OmniRoute and use an API key with the `manage` scope as its management key. The routes are
+served at `/v0/management/*` and at `/api/v0/management/*`.
+
+| Method | Path                         | Description                                                                                                                                    |
+| ------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude and Codex OAuth connections as `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. No tokens                        |
+| POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Sends one allowlisted request with the account's token and returns `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. Clears the connection cooldown, model lockouts and Codex per-scope cooldowns of one account                             |
+
+- `auth_index` is the OmniRoute connection id. `provider` is `claude` or `codex` (OAuth
+  connections only; the `anthropic` API-key provider is not listed). For Codex,
+  `id_token.chatgpt_account_id` is the stored workspace id and `plan_type` the stored plan.
+- `api-call` is not a generic proxy. It accepts only Claude `GET
+https://api.anthropic.com/api/oauth/usage` and Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` and
+  `POST .../wham/rate-limit-reset-credits/consume`, each only for an account of the matching
+  provider. Anything else returns `403` without contacting the upstream. The caller's
+  `Authorization` header (including the `$TOKEN$` placeholder) is ignored: OmniRoute injects
+  the connection's access token, refreshing it first when it is near expiry, and forwards only
+  allowlisted headers (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
+  `Accept`, `Content-Type`). A missing `Chatgpt-Account-Id` defaults to the stored workspace id.
+  Requests time out after 15 seconds and use the connection's proxy.
+- `reset-quota` leaves terminal states (banned, expired, credits_exhausted) alone. An unknown
+  `auth_index` returns `404`.
+
+**Auth:** dashboard session or a `manage`-scoped API key, required even when login is disabled
+(the paths are in `ALWAYS_PROTECTED_API_PATHS`). Inference-only keys get `403`. Source:
+`src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

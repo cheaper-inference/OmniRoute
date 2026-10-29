@@ -7,7 +7,12 @@ import {
 
 import { isVerifiedNativeCodexRequest } from "../config/codexIdentity.ts";
 import { FORMATS } from "../translator/formats.ts";
-import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
+import {
+  buildErrorBody,
+  errorResponse as canonicalErrorResponse,
+  sanitizeErrorMessage,
+} from "../utils/error.ts";
+import { drainAwareFailureStatus } from "../utils/drainStatus.ts";
 import { createChatGptWebAdapter } from "../vendor/codex-chatgpt-web/adapters/chatgpt-web/index.ts";
 import { ChatGptBrowserWorker } from "../vendor/codex-chatgpt-web/adapters/chatgpt-web/browser-worker.ts";
 import {
@@ -408,12 +413,14 @@ export class ChatGptWebCodexExecutor extends BaseExecutor {
         try {
           await adapter.runTurn(parsed, incoming, (event) => events.push(event));
         } catch (error) {
+          const message = sanitizeErrorMessage(error instanceof Error ? error.message : error);
+          const status = drainAwareFailureStatus(502);
           events.push({
             type: "error",
-            message: sanitizeErrorMessage(error instanceof Error ? error.message : error),
-            status: 502,
-            errorType: "provider_error",
-            code: "chatgpt_web_codex_turn_failed",
+            message,
+            status,
+            errorType: status === 499 ? "client_disconnected" : "provider_error",
+            code: status === 499 ? "client_disconnected" : "chatgpt_web_codex_turn_failed",
           });
         } finally {
           try {
@@ -440,6 +447,18 @@ export class ChatGptWebCodexExecutor extends BaseExecutor {
         const running = run();
         const collected = await events.collect();
         await running;
+        const drainFailure = collected.find(
+          (event) => event.type === "error" && event.status === 499
+        );
+        if (drainFailure?.type === "error") {
+          // Our own shutdown stopped the ChatGPT Web runtime under a request that
+          // was still in flight, so the turn was never really served. Answer 499
+          // (client_disconnected) with the canonical body of the repo's
+          // errorResponse helper, so the runtime does not read our own teardown as
+          // provider ill health. gracefulShutdown.cleanup() stops this runtime via
+          // stopChatGptWebCodexRuntime(); see open-sse/utils/drainStatus.ts.
+          return wrapped(canonicalErrorResponse(499, drainFailure.message), expandedBody);
+        }
         const response = buildResponseJSON(collected, input.model, {
           hideThinkingSummary: parsed.options.hideThinkingSummary,
           toolNsMap: maps.namespace,

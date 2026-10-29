@@ -203,7 +203,7 @@ O endpoint JSON-RPC `/a2a` é o ponto de entrada A2A canónico. Os endpoints RES
 
    Exporte uma função assíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga a estrutura das competências existentes, como `smartRouting.ts`.
 
-2. **Registar o manipulador:** em `src/lib/a2a/taskExecution.ts`, adicione uma entrada a `A2A_SKILL_HANDLERS`:
+2. **Registar o processador:** em `src/lib/a2a/taskExecution.ts`, adicione uma entrada a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,21 +215,21 @@ O endpoint JSON-RPC `/a2a` é o ponto de entrada A2A canónico. Os endpoints RES
    };
    ```
 
-3. **Expor no Cartão do Agente:** em `src/app/.well-known/agent.json/route.ts`, acrescente ao array `skills`:
+3. **Disponibilizar no Cartão do Agente:** em `src/lib/a2a/agentCardMetadata.ts` (partilhado por `/.well-known/agent.json` e `/.well-known/agent-card.json`), adicione ao array `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
-     "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "name": "A sua competência",
+     "description": "Descrição breve e centrada na intenção",
+     "tags": ["encaminhamento", "quota"],
+     "examples": ["Exemplo de invocação em linguagem natural"]
    }
    ```
 
-4. **Escrever testes:** `tests/unit/a2a-<your-skill>.test.ts`. Abranja o percurso de sucesso e o percurso de erro.
+4. **Escrever testes:** `tests/unit/a2a-<your-skill>.test.ts`. Abranja o cenário de sucesso e o cenário de erro.
 
-5. **Documentar** a nova competência na tabela `Competências disponíveis` deste ficheiro.
+5. **Documentar** a nova competência na tabela `Available Skills` deste ficheiro.
 
 ---
 

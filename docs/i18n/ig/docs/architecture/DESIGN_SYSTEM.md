@@ -99,9 +99,11 @@
 3. Ndochi maka oghere kit na-ebi n'ime adapter (ma ọ bụ na `globals.css` `@layer components` mgbe ndozi ahụ bụ style), ọ bụghị n'ime `packages/ui-kit/src`.
 4. Tinye ma ọ bụ melite `tests/unit/ui/adapters/<name>.test.tsx`. Maka adapter nwere ọtụtụ ndị na-akpọ ya, tụnyere markup e rụrụ tupu na mgbe mgbanwe ahụ gasịrị — mgbanwe padding ma ọ bụ wrapper na-agafe n'ihuenyo ọ bụla.
 
-## 5. Ịmelite kit
+## 5. Imelite ngwa ahụ
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` na-akọpu `src/` nke upstream na commit ahụ n'ime `packages/ui-kit/src` ma na-etinye naanị otu ntụgharị a nabatara (ọ na-ewepụ mgbakwunye `.js` na relative imports). Mgbe ahụ: nyochaa `git diff packages/ui-kit`, mee nlele anya na providers, settings, combos, usage na endpoint na theme abụọ ahụ, gbaa `npm run check:ui-kit-snapshot` na `npm run test:vitest:ui`, ma mepee PR ahụ tinyere changelog nke upstream.
+`npm run check:ui-kit-upstream` tụlere ụdị nke etinyere na `packages/ui-kit/UPSTREAM.md` na mkpado `v*` kachasị ọhụrụ nke repo elu wee bipụta iwu mmekọrịta mgbe mwepụta pụtara. Usoro ọrụ `UI Kit upstream watch` kwa izu (`.github/workflows/ui-kit-upstream-watch.yml`) na-agba otu nlele ahụ ma mee ka otu okwu nsochi meghee mgbe ntụtụ dị n'azụ; repo dị elu bụ nke nzuzo, yabụ usoro ọrụ ahụ chọrọ akara naanị ọgụgụ na nzuzo `UI_KIT_READ_TOKEN` wee nọrọ na-enweghị ya.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` na-eṅomi `src/` nke dị elu na ntinye ahụ (`latest` = mkpado `v*` ọhụrụ) n'ime `packages/ui-kit/src`, na-etinye mgbanwe otu ekwenyere (ọ na-ewepụ suffix `.js` site na mbubata ndị ikwu), ma debe ụdị ọrụ na `packages/ui-kit/package.json` na `package-lock.json` gaa na nke elu. Mgbe ahụ: nyochaa `git diff packages/ui-kit`, mee ihe ngosi anya na ndị na-enye, ntọala, combos, ojiji na njedebe na isiokwu abụọ ahụ, na-agba ọsọ `npm run check:ui-kit-snapshot` na `npm run test:vitest:ui`, ma mepee PR na elu mgbanwe mgbanwe.
 
 ## 6. README eserese
 

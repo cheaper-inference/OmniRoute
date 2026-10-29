@@ -1,0 +1,1 @@
+- **feat(dashboard):** the provider detail page now shows a badge on each model row listing the combos that use that model, built from a single `/api/combos` fetch ([#16307](https://github.com/diegosouzapw/OmniRoute/pull/16307) — thanks @farshadasadpour)

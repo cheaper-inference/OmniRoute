@@ -110,9 +110,11 @@
 3. workaround สำหรับช่องว่างของ kit ให้อยู่ใน adapter (หรือใน `globals.css` `@layer components` เมื่อการแก้ไขเป็น style) ห้ามอยู่ใน `packages/ui-kit/src`
 4. เพิ่มหรืออัปเดต `tests/unit/ui/adapters/<name>.test.tsx` สำหรับ adapter ที่มี caller จำนวนมาก ให้เปรียบเทียบ markup ที่ render ก่อนและหลังการเปลี่ยนแปลง — การเปลี่ยน padding หรือ wrapper จะแพร่ไปทุกหน้าจอ
 
-## 5. การอัปเดต kit
+## 5. อัพเดตชุดอุปกรณ์
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` คัดลอก `src/` จาก upstream ที่ commit นั้นไปยัง `packages/ui-kit/src` และใช้การแปลงเพียงอย่างเดียวที่อนุญาต (ตัด suffix `.js` ออกจาก relative imports) จากนั้น: ตรวจสอบ `git diff packages/ui-kit`, ตรวจด้วยสายตาบนหน้า providers, settings, combos, usage และ endpoint ในทั้งสองธีม, รัน `npm run check:ui-kit-snapshot` และ `npm run test:vitest:ui`, แล้วเปิด PR พร้อมกับ changelog ของ upstream
+`npm run check:ui-kit-upstream` เปรียบเทียบเวอร์ชันที่ปักหมุดใน `packages/ui-kit/UPSTREAM.md` กับแท็ก `v*` ใหม่ล่าสุดของ upstream repo และพิมพ์คำสั่ง sync เมื่อรีลีสหมด เวิร์กโฟลว์ `UI Kit upstream watch` รายสัปดาห์ (`.github/workflows/ui-kit-upstream-watch.yml`) ดำเนินการตรวจสอบเดียวกันและเปิดปัญหาการติดตามไว้หนึ่งรายการในขณะที่หมุดอยู่ด้านหลัง ที่เก็บต้นน้ำเป็นแบบส่วนตัว ดังนั้นเวิร์กโฟลว์จึงต้องการโทเค็นแบบอ่านอย่างเดียวในความลับ `UI_KIT_READ_TOKEN` และจะคงอยู่โดยเฉื่อยหากไม่มีโทเค็นดังกล่าว
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` คัดลอกอัปสตรีม `src/` ที่คอมมิตนั้น (`latest` = แท็ก `v*` ใหม่ล่าสุด) ลงใน `packages/ui-kit/src` ใช้การแปลงที่อนุญาตเพียงครั้งเดียว (โดยจะปล่อยส่วนต่อท้าย `.js` จากการนำเข้าแบบสัมพันธ์) และตั้งค่าเวอร์ชันพื้นที่ทำงานเป็น `packages/ui-kit/package.json` และ `package-lock.json` เป็นเวอร์ชันอัปสตรีม จากนั้น: ตรวจสอบ `git diff packages/ui-kit` ทำการส่งผ่านภาพไปยังผู้ให้บริการ การตั้งค่า คอมโบ การใช้งาน และจุดสิ้นสุดในทั้งสองธีม รัน `npm run check:ui-kit-snapshot` และ `npm run test:vitest:ui` และเปิด PR ด้วยบันทึกการเปลี่ยนแปลงอัปสตรีม
 
 ## 6. ไดอะแกรม README
 

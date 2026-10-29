@@ -16,7 +16,7 @@
  * The cut response is held, not discarded: when no later target succeeds, the combo
  * returns the last partial result (`length`), exactly what a single target returns.
  */
-import { emit } from "../../../src/lib/events/eventBus";
+import { emit } from "./rrDashboardEvents.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
 import { isTruncatedStreamResponse } from "../../utils/truncatedStreamPolicy.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./attemptLoopTypes.ts";

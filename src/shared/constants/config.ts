@@ -73,6 +73,7 @@ export const PROVIDER_ENDPOINTS = {
   tokenmarket: "https://api.tokensmarket.ai/v1/chat/completions",
   demonroute: "https://api.demonroute.com/v1/chat/completions",
   daoxe: "https://api.daoxe.com/v1/chat/completions",
+  gisoo: "https://gisoo.pro/api/v1/chat/completions",
   openai: "https://api.openai.com/v1/chat/completions",
   anthropic: "https://api.anthropic.com/v1/messages",
   gemini: "https://generativelanguage.googleapis.com/v1beta/models",

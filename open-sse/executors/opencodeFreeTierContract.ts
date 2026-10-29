@@ -39,6 +39,7 @@ import {
   getObservedToolNames,
   noteRefusedBorrowedToolNames,
   recordAcceptedToolNames,
+  recordedToolParameters,
   resolvePlaceholderNames,
 } from "./opencodeToolObservation.ts";
 import { isOpencodeFreeTierRefusal } from "./opencodeGeoBlock.ts";
@@ -51,6 +52,13 @@ import {
   rememberAttempt,
   shapeKeyOf,
 } from "./opencodeRequestShape.ts";
+
+/** Which conversation a placeholder's recorded schema belongs to. */
+export interface ToolSchemaScope {
+  readonly provider: string;
+  readonly model: string;
+  readonly session?: string;
+}
 
 /**
  * What one gated request declared, kept until its outcome is known.
@@ -65,6 +73,12 @@ export interface FreeTierContractAttempt {
   readonly session: string | undefined;
   readonly borrowed: boolean;
   readonly clientToolNames: readonly string[];
+  /**
+   * The parameter object each client tool declared, parsed once from the request body. Kept
+   * as references for the lifetime of the request only, so an accepted attempt can hand the
+   * observation store the shape the upstream just took.
+   */
+  readonly clientParameters?: ReadonlyMap<string, Record<string, unknown>>;
   /** A refusal may still be replayed in the other shape: its outcome is noted afterwards. */
   readonly probe?: boolean;
   /**
@@ -117,12 +131,13 @@ interface OpencodeFreeCatalog {
  * Legacy free ids kept only as the unsynced-catalog fallback (see the block above).
  *
  * `deepseek-v4.1-flash-free` replaced the delisted `deepseek-v4-flash-free` in the zen
- * registry; the rotating `-free` ids are covered by the suffix rule alongside this set.
+ * registry and `mimo-v2.6-flash-free` replaced the deprecated `mimo-v2.5-free`; the
+ * rotating `-free` ids are covered by the suffix rule alongside this set.
  */
 const OPENCODE_LEGACY_FREE_MODELS = new Set([
   "big-pickle",
   "deepseek-v4.1-flash-free",
-  "mimo-v2.5-free",
+  "mimo-v2.6-flash-free",
   "hy3-free",
   "nemotron-3-ultra-free",
   "north-mini-code-free",
@@ -370,16 +385,40 @@ const PLACEHOLDER_TOOL_PARAMETER_SCHEMAS: Readonly<Record<string, Record<string,
 };
 
 /**
- * Parameter schema for an injected placeholder tool named `name`. With the opt-in v2
- * fingerprint (`OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED`, #16571) a name the v2 CLI declares
- * (`read`, `shell`) carries that CLI's verbatim schema instead.
+ * Parameter schema for an injected placeholder tool named `name`. Precedence: the opt-in v2
+ * CLI schema (`isOpencodeV2ClientFingerprintEnabled()`, #16571, which pins the quartet
+ * verbatim), then the schema the client already sent and the upstream accepted (recorded by
+ * the caller through `scope`), then the pinned quartet schema, then the empty object. A
+ * name with no recorded schema and outside the quartet keeps the empty object exactly as
+ * before.
  */
 export function placeholderToolParameters(
   name: string,
-  v2Fingerprint = false
+  v2Fingerprint = false,
+  recorded?: Record<string, unknown>
 ): Record<string, unknown> {
   const v2 = v2Fingerprint ? v2PlaceholderTool(name) : undefined;
-  return v2?.parameters ?? PLACEHOLDER_TOOL_PARAMETER_SCHEMAS[name] ?? PLACEHOLDER_TOOL_PARAMETERS;
+  return (
+    v2?.parameters ??
+    recorded ??
+    PLACEHOLDER_TOOL_PARAMETER_SCHEMAS[name] ??
+    PLACEHOLDER_TOOL_PARAMETERS
+  );
+}
+
+/**
+ * The parameters an injected entry carries, reading the recorded schema for this scope when
+ * one is known. Both construction sites (first dispatch and retry) go through this, so a
+ * borrowed name never falls back to the empty object while a recorded schema exists.
+ */
+function injectedToolParameters(
+  name: string,
+  v2Fingerprint: boolean,
+  scope: ToolSchemaScope | undefined
+): Record<string, unknown> {
+  const recorded =
+    scope && recordedToolParameters(scope.provider, scope.model, scope.session, name);
+  return placeholderToolParameters(name, v2Fingerprint, recorded);
 }
 
 /** Description for an injected placeholder tool; the v2 CLI's own text under the v2 flag. */
@@ -409,14 +448,15 @@ export function applyFreeTierRequestContract<T>(
   body: T,
   requestFormat: string | null,
   placeholderNames: readonly string[] = [PLACEHOLDER_TOOL_NAME],
-  v2Fingerprint = false
+  v2Fingerprint = false,
+  scope?: ToolSchemaScope
 ): T {
   if (!body || typeof body !== "object" || Array.isArray(body)) return body;
   const record = body as Record<string, unknown>;
   const next: Record<string, unknown> = { ...record, stream: true };
   if (v2Fingerprint) sanitizeToolChoice(next);
 
-  const existingNames = new Set(clientToolNamesOf(next));
+  const existingNames = new Set(clientToolsOf(next).names);
   const baseNames = placeholderNames.length > 0 ? placeholderNames : [PLACEHOLDER_TOOL_NAME];
   const namesToAdd = baseNames.filter((name) => !existingNames.has(name));
 
@@ -431,7 +471,7 @@ export function applyFreeTierRequestContract<T>(
         type: "function",
         name,
         description: placeholderToolDescription(name, v2Fingerprint),
-        parameters: placeholderToolParameters(name, v2Fingerprint),
+        parameters: injectedToolParameters(name, v2Fingerprint, scope),
       })),
     ];
     return next as T;
@@ -445,7 +485,7 @@ export function applyFreeTierRequestContract<T>(
         function: {
           name,
           description: placeholderToolDescription(name, v2Fingerprint),
-          parameters: placeholderToolParameters(name, v2Fingerprint),
+          parameters: injectedToolParameters(name, v2Fingerprint, scope),
         },
       })),
     ];
@@ -488,9 +528,10 @@ export function mergeClientToolsWithObserved<T>(
   if (!Array.isArray(record.tools) || record.tools.length === 0) return body;
   const own = session ? getObservedToolNames(provider, model, session) : null;
   const observed = own ?? getObservedToolNames(provider, model) ?? configured;
-  const have = new Set(clientToolNamesOf(body));
+  const have = new Set(clientToolsOf(body).names);
   const missing = observed.filter((name) => !have.has(name));
   if (missing.length === 0) return body;
+  const scope: ToolSchemaScope = { provider, model, session };
   const next: Record<string, unknown> = { ...(record as Record<string, unknown>) };
   if (requestFormat === "openai-responses") {
     next.tools = [
@@ -499,7 +540,7 @@ export function mergeClientToolsWithObserved<T>(
         type: "function",
         name,
         description: placeholderToolDescription(name, v2Fingerprint),
-        parameters: placeholderToolParameters(name, v2Fingerprint),
+        parameters: injectedToolParameters(name, v2Fingerprint, scope),
       })),
     ];
     return next as T;
@@ -512,7 +553,7 @@ export function mergeClientToolsWithObserved<T>(
         function: {
           name,
           description: placeholderToolDescription(name, v2Fingerprint),
-          parameters: placeholderToolParameters(name, v2Fingerprint),
+          parameters: injectedToolParameters(name, v2Fingerprint, scope),
         },
       })),
     ];
@@ -521,18 +562,47 @@ export function mergeClientToolsWithObserved<T>(
   return body;
 }
 
-function clientToolNamesOf(body: unknown): string[] {
-  if (!body || typeof body !== "object" || Array.isArray(body)) return [];
-  const tools = (body as Record<string, unknown>).tools;
-  if (!Array.isArray(tools)) return [];
+/**
+ * The tools a request declares, in one pass: their names (for the observation store and the
+ * existing-name check) and the parameter object each one carried, by name. Chat Completions
+ * nests the fields under `function`; the Responses surface keeps them flat.
+ */
+function clientToolsOf(body: unknown): {
+  names: string[];
+  parameters: Map<string, Record<string, unknown>>;
+} {
   const names: string[] = [];
+  const parameters = new Map<string, Record<string, unknown>>();
+  if (!body || typeof body !== "object" || Array.isArray(body)) return { names, parameters };
+  const tools = (body as Record<string, unknown>).tools;
+  if (!Array.isArray(tools)) return { names, parameters };
   for (const tool of tools) {
-    if (!tool || typeof tool !== "object") continue;
-    const entry = tool as { name?: unknown; function?: { name?: unknown } };
-    const name = typeof entry.name === "string" ? entry.name : entry.function?.name;
-    if (typeof name === "string") names.push(name);
+    const declared = clientToolOf(tool);
+    if (!declared) continue;
+    names.push(declared.name);
+    if (declared.parameters) parameters.set(declared.name, declared.parameters);
   }
-  return names;
+  return { names, parameters };
+}
+
+/** One tool entry's name, and the parameter object it carries when it is a plain object. */
+function clientToolOf(tool: unknown): {
+  name: string;
+  parameters?: Record<string, unknown>;
+} | null {
+  if (!tool || typeof tool !== "object") return null;
+  const entry = tool as {
+    name?: unknown;
+    parameters?: unknown;
+    function?: { name?: unknown; parameters?: unknown };
+  };
+  const name = typeof entry.name === "string" ? entry.name : entry.function?.name;
+  if (typeof name !== "string") return null;
+  const schema = entry.function?.parameters ?? entry.parameters;
+  if (schema && typeof schema === "object" && !Array.isArray(schema)) {
+    return { name, parameters: schema as Record<string, unknown> };
+  }
+  return { name };
 }
 
 /**
@@ -565,7 +635,8 @@ export function prepareFreeTierRequest<T>(
   origin?: object,
   v2Fingerprint = false
 ): { body: T; attempt: FreeTierContractAttempt | null } {
-  const clientToolNames = clientToolNamesOf(body);
+  const clientTools = clientToolsOf(body);
+  const clientToolNames = clientTools.names;
   if (!requiresFreeTierRequestContract(surface, provider, model)) {
     if (isTrackable(origin)) forgetAttempt(origin);
     return { body, attempt: null };
@@ -579,12 +650,14 @@ export function prepareFreeTierRequest<T>(
   const chosen = plan.shape;
   const names = resolvePlaceholderNames(provider, model, session, configuredPlaceholderToolNames());
   const borrowed = clientToolNames.length === 0 && names.length > 0 && chosen === "tools";
+  const scope: ToolSchemaScope = { provider, model, session };
   const attempt: FreeTierContractAttempt = {
     provider,
     model,
     session,
     borrowed,
     clientToolNames,
+    clientParameters: clientTools.parameters,
     probe: plan.probe,
   };
   if (isTrackable(origin)) rememberAttempt(origin, attempt);
@@ -600,7 +673,7 @@ export function prepareFreeTierRequest<T>(
     body:
       chosen === "bare"
         ? withStreaming(body, v2Fingerprint)
-        : applyFreeTierRequestContract(body, requestFormat, names, v2Fingerprint),
+        : applyFreeTierRequestContract(body, requestFormat, names, v2Fingerprint, scope),
     attempt,
   };
 }
@@ -645,7 +718,8 @@ export function noteFreeTierOutcome(
         attempt.provider,
         attempt.model,
         attempt.session,
-        attempt.clientToolNames
+        attempt.clientToolNames,
+        attempt.clientParameters
       );
     } else if (attempt.borrowed && !attempt.probe) {
       confirmBorrowedToolNames(attempt.provider, attempt.model, attempt.session);

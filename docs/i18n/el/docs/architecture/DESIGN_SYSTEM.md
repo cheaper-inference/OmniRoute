@@ -59,13 +59,11 @@
 4. Πρόσθεσε ή ενημέρωσε το `tests/unit/ui/adapters/<name>.test.tsx`. Για adapter με πολλούς καλούντες, σύγκρινε το
    αποδοθέν markup πριν και μετά την αλλαγή — αλλαγές στο padding ή στο wrapper απλώνονται σε κάθε οθόνη.
 
-## 5. Ενημέρωση του kit
+## 5. Ενημέρωση του κιτ
 
-Το `scripts/dev/sync-ui-kit.sh <commit> [clone]` αντιγράφει το upstream `src/` σε εκείνο το commit μέσα στο
-`packages/ui-kit/src` και εφαρμόζει τον μοναδικό επιτρεπόμενο μετασχηματισμό (αφαιρεί την κατάληξη `.js` από τα
-σχετικά imports). Στη συνέχεια: έλεγξε το `git diff packages/ui-kit`, κάνε ένα οπτικό πέρασμα στις οθόνες providers,
-settings, combos, usage και endpoint και στα δύο θέματα, τρέξε `npm run check:ui-kit-snapshot` και
-`npm run test:vitest:ui`, και άνοιξε το PR με το upstream changelog.
+`npm run check:ui-kit-upstream` συγκρίνει την έκδοση που είναι καρφιτσωμένη στο `packages/ui-kit/UPSTREAM.md` με την πιο πρόσφατη ετικέτα `v*` του upstream repo και εκτυπώνει την εντολή συγχρονισμού όταν κυκλοφορήσει μια κυκλοφορία. Η εβδομαδιαία ροή εργασίας `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) εκτελεί τον ίδιο έλεγχο και διατηρεί ένα ζήτημα παρακολούθησης ανοιχτό ενώ η καρφίτσα βρίσκεται πίσω. το upstream repo είναι ιδιωτικό, επομένως η ροή εργασίας χρειάζεται ένα διακριτικό μόνο για ανάγνωση στο μυστικό `UI_KIT_READ_TOKEN` και παραμένει αδρανές χωρίς αυτό.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` αντιγράφει το upstream `src/` σε αυτήν την δέσμευση (`latest` = η νεότερη ετικέτα `v*` ) σε `packages/ui-kit/src`, εφαρμόζει τον μοναδικό επιτρεπόμενο μετασχηματισμό (αποκλείει το επίθημα `.js` από τις σχετικές εισαγωγές) και ορίζει την έκδοση χώρου εργασίας σε `packages/ui-kit/package.json` και `package-lock.json` στην ανοδική. Στη συνέχεια: ελέγξτε `git diff packages/ui-kit`, κάντε ένα οπτικό πέρασμα σε παρόχους, ρυθμίσεις, συνδυασμούς, χρήση και τελικό σημείο και στα δύο θέματα, εκτελέστε `npm run check:ui-kit-snapshot` και `npm run test:vitest:ui` και ανοίξτε το PR με το upstream changelog.
 
 ## 6. διαγράμματα README
 
