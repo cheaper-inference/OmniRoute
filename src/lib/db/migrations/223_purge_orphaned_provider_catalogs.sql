@@ -1,4 +1,4 @@
--- 217_purge_orphaned_provider_catalogs.sql
+-- 223_purge_orphaned_provider_catalogs.sql
 -- Provider removal migrations delete provider connections in SQL; the ones
 -- that don't purge the synced catalog namespace leave their synced catalogs
 -- behind: the synced catalog of every removed connection stayed there
@@ -24,7 +24,7 @@
 -- Renumbering: this migration takes the number its file name carries. If
 -- another migration takes that number before this one lands, this one takes
 -- the number that comes right after it, the file name included: the file
--- 217_purge_orphaned_provider_catalogs.sql becomes the same name with that
+-- 223_purge_orphaned_provider_catalogs.sql becomes the same name with that
 -- number. The number is written in twelve places, and each of them takes the
 -- new number:
 --   1. the file name of this migration

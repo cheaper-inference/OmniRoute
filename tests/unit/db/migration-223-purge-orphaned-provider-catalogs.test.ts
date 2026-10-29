@@ -17,7 +17,7 @@ import os from "node:os";
 import path from "node:path";
 
 const MIGRATIONS_DIR = path.resolve(import.meta.dirname, "../../../src/lib/db/migrations");
-const CLEANUP_MIGRATION_FILE = "217_purge_orphaned_provider_catalogs.sql";
+const CLEANUP_MIGRATION_FILE = "223_purge_orphaned_provider_catalogs.sql";
 const REMOVAL_MIGRATIONS = [
   "130_remove_unregistered_qwen_data.sql",
   "152_remove_puter_provider.sql",
