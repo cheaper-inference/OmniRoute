@@ -1,0 +1,1 @@
+- **fix(sse):** client-namespaced combo resolution restored — a missing `getComboByName` import was throwing `ReferenceError` for every `<namespace>/<combo>` request ([#18523](https://github.com/diegosouzapw/OmniRoute/pull/18523)) — thanks @RaviTharuma
