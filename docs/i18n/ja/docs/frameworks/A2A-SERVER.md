@@ -199,11 +199,11 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
 
 ## 新しいスキルの追加
 
-1. **スキルファイルを作成：** `src/lib/a2a/skills/<your-skill>.ts`
+1. **スキルファイルを作成:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   非同期関数 `(task: A2ATask) => Promise<{ artifacts, metadata }>` をエクスポートします。`smartRouting.ts` などの既存スキルの構成に従ってください。
+   非同期関数 `(task: A2ATask) => Promise<{ artifacts, metadata }>` をエクスポートします。`smartRouting.ts` など、既存のスキルの形式に従ってください。
 
-2. **ハンドラーを登録：** `src/lib/a2a/taskExecution.ts` で、`A2A_SKILL_HANDLERS` にエントリを追加します。
+2. **ハンドラーを登録:** `src/lib/a2a/taskExecution.ts` で、`A2A_SKILL_HANDLERS` にエントリを追加します。
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,7 +215,7 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
    };
    ```
 
-3. **Agent Card で公開：** `src/app/.well-known/agent.json/route.ts` で、`skills` 配列に追加します。
+3. **Agent Card で公開:** `src/lib/a2a/agentCardMetadata.ts`（`/.well-known/agent.json` と `/.well-known/agent-card.json` で共有）で、`skills` 配列に以下を追加します。
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
    }
    ```
 
-4. **テストを作成：** `tests/unit/a2a-<your-skill>.test.ts`。正常系とエラー系をカバーします。
+4. **テストを作成:** `tests/unit/a2a-<your-skill>.test.ts`。正常系とエラー系を網羅してください。
 
-5. このファイルの `利用可能なスキル` テーブルに新しいスキルを**記載**します。
+5. **ドキュメント化:** このファイルの `Available Skills` テーブルに新しいスキルを追加してください。
 
 ---
 

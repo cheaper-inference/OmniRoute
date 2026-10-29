@@ -748,6 +748,96 @@ test("follow-up allowModelFallback=false blocks model-unavailable fallback", asy
   }
 });
 
+test("Codex capacity 429 rotates without shared scope cooldown or body limiter drain", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const scoped: string[] = [];
+  const affinityCleared: string[] = [];
+  let bodyLearns = 0;
+  let headerLearns = 0;
+  let sends = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "codex",
+    connectionId: "conn-a",
+    send: async () => {
+      sends += 1;
+      if (sends === 1)
+        return makeAttempt(
+          { error: { message: "Codex is at capacity, please try again later" } },
+          429,
+          { headers: { "retry-after": "3" } }
+        );
+      return makeAttempt({ choices: [{ message: { content: "recovered" } }] }, 200);
+    },
+    getProviderCredentials: (async () => ({
+      connectionId: "conn-b",
+      allRateLimited: false,
+    })) as PipelineConnectionContext["getProviderCredentials"],
+    state: {
+      recordRateLimitHeaders: () => {
+        headerLearns += 1;
+      },
+      recordRateLimitBody: () => {
+        bodyLearns += 1;
+      },
+      onCodexScopeRateLimited: ({ failedConnectionId }) => {
+        scoped.push(failedConnectionId);
+      },
+      onClearSessionAffinity: ({ failedConnectionId }) => {
+        affinityCleared.push(failedConnectionId);
+      },
+    },
+  });
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(outcome.kind, "response");
+  assert.equal(sends, 2);
+  assert.equal(headerLearns, 1, "429 still updates/evicts the runtime limiter");
+  assert.equal(bodyLearns, 0, "capacity must not pause the shared Codex limiter");
+  assert.deepEqual(scoped, [], "capacity must not persist shared quota state");
+  assert.deepEqual(affinityCleared, ["conn-a"], "account rotation remains available");
+});
+
+test("Codex 429 with exhausted quota headers retains shared cooldown and limiter learning", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const scoped: string[] = [];
+  let bodyLearns = 0;
+  let sends = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "codex",
+    connectionId: "conn-a",
+    send: async () => {
+      sends += 1;
+      if (sends === 1)
+        return makeAttempt(
+          { error: { message: "Codex is at capacity, please try again later" } },
+          429,
+          { headers: { "x-codex-5h-usage": "100", "x-codex-5h-limit": "100" } }
+        );
+      return makeAttempt({ choices: [{ message: { content: "recovered" } }] }, 200);
+    },
+    getProviderCredentials: (async () => ({
+      connectionId: "conn-b",
+      allRateLimited: false,
+    })) as PipelineConnectionContext["getProviderCredentials"],
+    state: {
+      recordRateLimitBody: () => {
+        bodyLearns += 1;
+      },
+      onCodexScopeRateLimited: ({ failedConnectionId }) => {
+        scoped.push(failedConnectionId);
+      },
+    },
+  });
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(outcome.kind, "response");
+  assert.equal(sends, 2);
+  assert.equal(bodyLearns, 1, "authoritative quota keeps the limiter protections");
+  assert.deepEqual(scoped, ["conn-a"], "quota must retain shared-scope cooldown");
+});
+
 test("Codex 429 rotation calls scope-rate-limit, affinity-clear, and audit hooks", async () => {
   const { runProviderExecutionPipeline } =
     await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");

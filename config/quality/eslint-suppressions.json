@@ -1333,14 +1333,6 @@
       "count": 2
     }
   },
-  "src/lib/monitoring/providerHealthAutopilot.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
   "src/lib/monitoring/providerHealthMatrix.ts": {
     "no-restricted-syntax": {
       "count": 1
@@ -4377,11 +4369,6 @@
       "count": 5
     }
   },
-  "tests/unit/serial/provider-health-autopilot.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "tests/unit/service-combo-metrics.test.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -4742,7 +4729,7 @@
   },
   "tests/unit/translator-openai-to-gemini.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 65
+      "count": 63
     }
   },
   "tests/unit/translator-openai-to-kiro.test.ts": {

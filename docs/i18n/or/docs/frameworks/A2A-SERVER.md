@@ -196,13 +196,13 @@ JSON-RPC ଏଣ୍ଡପଏଣ୍ଟ `/a2a` ହେଉଛି ମାନକ A2A ପ
 
 ---
 
-## ଏକ ନୂଆ ସ୍କିଲ୍ ଯୋଡ଼ିବା
+## ଏକ ନୂତନ ସ୍କିଲ୍ ଯୋଡ଼ିବା
 
 1. **ସ୍କିଲ୍ ଫାଇଲ୍ ସୃଷ୍ଟି କରନ୍ତୁ:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   ଏକ async ଫଙ୍କସନ୍ `(task: A2ATask) => Promise<{ artifacts, metadata }>` ଏକ୍ସପୋର୍ଟ କରନ୍ତୁ। `smartRouting.ts` ପରି ବିଦ୍ୟମାନ ସ୍କିଲ୍ଗୁଡ଼ିକର ଢାଞ୍ଚା ଅନୁସରଣ କରନ୍ତୁ।
+   ଏକ async ଫଙ୍କସନ୍ `(task: A2ATask) => Promise<{ artifacts, metadata }>` ଏକ୍ସପୋର୍ଟ କରନ୍ତୁ। `smartRouting.ts` ପରି ବିଦ୍ୟମାନ ସ୍କିଲ୍ଗୁଡ଼ିକର ଗଠନ ଅନୁସରଣ କରନ୍ତୁ।
 
-2. **ହ୍ୟାଣ୍ଡଲର୍ ପଞ୍ଜୀକରଣ କରନ୍ତୁ:** `src/lib/a2a/taskExecution.ts`ରେ, `A2A_SKILL_HANDLERS`କୁ ଏକ ଏଣ୍ଟ୍ରି ଯୋଡ଼ନ୍ତୁ:
+2. **ହ୍ୟାଣ୍ଡଲର୍ ପଞ୍ଜୀକରଣ କରନ୍ତୁ:** `src/lib/a2a/taskExecution.ts` ମଧ୍ୟରେ, `A2A_SKILL_HANDLERS` ରେ ଏକ ଏଣ୍ଟ୍ରି ଯୋଡ଼ନ୍ତୁ:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -214,7 +214,7 @@ JSON-RPC ଏଣ୍ଡପଏଣ୍ଟ `/a2a` ହେଉଛି ମାନକ A2A ପ
    };
    ```
 
-3. **Agent Cardରେ ପ୍ରକାଶ କରନ୍ତୁ:** `src/app/.well-known/agent.json/route.ts`ରେ, `skills` ଆରେରେ ଯୋଡ଼ନ୍ତୁ:
+3. **Agent Card ରେ ଉପଲବ୍ଧ କରାନ୍ତୁ:** `src/lib/a2a/agentCardMetadata.ts` ମଧ୍ୟରେ (`/.well-known/agent.json` ଏବଂ `/.well-known/agent-card.json` ଦ୍ୱାରା ସହଭାଗୀ ଭାବେ ବ୍ୟବହୃତ), `skills` ଆରେରେ ନିମ୍ନଲିଖିତଟି ଯୋଡ଼ନ୍ତୁ:
 
    ```json
    {
@@ -226,9 +226,9 @@ JSON-RPC ଏଣ୍ଡପଏଣ୍ଟ `/a2a` ହେଉଛି ମାନକ A2A ପ
    }
    ```
 
-4. **ପରୀକ୍ଷାଗୁଡ଼ିକ ଲେଖନ୍ତୁ:** `tests/unit/a2a-<your-skill>.test.ts`। ସଫଳ ପଥ + ତ୍ରୁଟି ପଥକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ।
+4. **ପରୀକ୍ଷଣ ଲେଖନ୍ତୁ:** `tests/unit/a2a-<your-skill>.test.ts`। ସଫଳ ପଥ + ତ୍ରୁଟି ପଥକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ।
 
-5. **ଡକ୍ୟୁମେଣ୍ଟ କରନ୍ତୁ** ଏହି ଫାଇଲ୍ର `Available Skills` ଟେବୁଲ୍ରେ ନୂଆ ସ୍କିଲ୍ଟିକୁ।
+5. **ଡକ୍ୟୁମେଣ୍ଟ କରନ୍ତୁ** ଏହି ଫାଇଲ୍ର `Available Skills` ଟେବୁଲ୍ରେ ନୂତନ ସ୍କିଲ୍ଟିକୁ।
 
 ---
 

@@ -148,5 +148,5 @@ export function createResolvedModelGate(opts: {
 export function createVisibleResolvedModelGate(
   opts: Parameters<typeof createResolvedModelGate>[0]
 ): (resolvedModels: Iterable<string>) => Promise<Response | null> {
-  return withHiddenModelGate(createResolvedModelGate(opts));
+  return withHiddenModelGate(createResolvedModelGate(opts), opts.modelStr);
 }

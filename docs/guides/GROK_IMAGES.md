@@ -15,8 +15,11 @@ When the flag is on, subscription connections can generate images with
 `grok-cli/grok-imagine-image-2.0` (alias `gc/`) or
 `xai-oauth/grok-imagine-image-2.0` (alias `xao/`). Use an existing OAuth connection
 with API access; account permissions and subscription quota apply. API-key connections
-then use `xai/grok-imagine-image-2.0` through the same xAI image request. These routes
-use the xAI image endpoint and the router's existing token refresh and credential selection.
+then use `xai/grok-imagine-image-2.0` through the same xAI image request. `xai-oauth` and
+`xai` use the xAI image endpoint; `grok-cli` sends the same request body through the Grok
+Build proxy (`cli-chat-proxy.grok.com`) with the Grok CLI token-auth header, see
+[Grok Build OAuth media](../providers/grok-cli-media.md). All of them use the router's
+existing token refresh and credential selection.
 
 ```json
 {
