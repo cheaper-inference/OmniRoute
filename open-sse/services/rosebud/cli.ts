@@ -163,7 +163,11 @@ export const runRosebud: RosebudRunner = async (profile, args, timeoutMs = 12000
               : name === "throttled"
                 ? 429
                 : 502,
-          code === 4 || Boolean(signal)
+          code === 4 ||
+            code === 130 ||
+            code === 143 ||
+            Boolean(signal) ||
+            error.outcome === "unknown"
         )
       );
     });

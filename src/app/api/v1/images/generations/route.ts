@@ -4,6 +4,7 @@ import {
   rosebudImageBinding,
   scopedRosebudKey,
   matchesRosebudPin,
+  selectRosebudImageCredentials,
 } from "@omniroute/open-sse/services/rosebud/imageBinding.ts";
 import { RosebudError } from "@omniroute/open-sse/services/rosebud/cli.ts";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
@@ -342,24 +343,38 @@ async function postHandler(request, _context) {
       return errorResponse(409, "Original Rosebud account is unavailable for this model");
   }
   let credentials = null;
-  if (providerConfig && providerConfig.authType !== "none") {
+  if (provider === "rosebud") {
+    try {
+      const selected = await selectRosebudImageCredentials({
+        pinned: rosebudPinned,
+        eligible: rosebudEligible || [],
+        lookup: (ids, forced) =>
+          getProviderCredentialsWithQuotaPreflight(
+            provider,
+            null,
+            narrowConnectionScope(allowedConnections, ids),
+            requestedModel,
+            forced ? { forcedConnectionId: forced } : {}
+          ),
+        bind: (id) => bindRosebud(id),
+        usable: (value) =>
+          !isKeyScopeBlockedCredentials(value) && !isAllRateLimitedCredentials(value),
+      });
+      credentials = selected.credentials;
+      rosebudPinned = selected.pinned;
+    } catch (error) {
+      return errorResponse(
+        error instanceof RosebudError ? error.status : 503,
+        error instanceof RosebudError ? error.code : "Rosebud account selection unavailable"
+      );
+    }
+  } else if (providerConfig && providerConfig.authType !== "none") {
     credentials = await getProviderCredentialsWithQuotaPreflight(
       provider,
       null,
-      provider === "rosebud"
-        ? narrowConnectionScope(
-            allowedConnections,
-            rosebudPinned ? [rosebudPinned] : rosebudEligible
-          )
-        : allowedConnections,
-      requestedModel,
-      rosebudPinned ? { forcedConnectionId: rosebudPinned } : {}
+      allowedConnections,
+      requestedModel
     );
-    if (provider === "rosebud" && !matchesRosebudPin(rosebudPinned, credentials?.connectionId))
-      return errorResponse(
-        409,
-        "Original Rosebud account is unavailable; the request will not switch accounts"
-      );
     if (!credentials) {
       return errorResponse(
         HTTP_STATUS.BAD_REQUEST,
@@ -423,37 +438,6 @@ async function postHandler(request, _context) {
     const localCredentials = withoutKeyScopeBlocked(lookup);
     if (localCredentials && !isAllRateLimitedCredentials(localCredentials)) {
       credentials = localCredentials;
-    }
-  }
-
-  if (provider === "rosebud" && credentials?.connectionId) {
-    try {
-      const pinned = await bindRosebud(credentials.connectionId);
-      rosebudPinned = pinned;
-      if (pinned && pinned !== credentials.connectionId) {
-        credentials = await getProviderCredentialsWithQuotaPreflight(
-          provider,
-          null,
-          narrowConnectionScope(allowedConnections, [pinned]),
-          requestedModel,
-          { forcedConnectionId: pinned }
-        );
-        if (
-          !credentials ||
-          !matchesRosebudPin(pinned, credentials.connectionId) ||
-          isKeyScopeBlockedCredentials(credentials) ||
-          credentials.allRateLimited
-        )
-          return errorResponse(
-            409,
-            "Original Rosebud account is unavailable; the request will not switch accounts"
-          );
-      }
-    } catch (error) {
-      return errorResponse(
-        error instanceof RosebudError ? error.status : 503,
-        error instanceof RosebudError ? error.code : "Rosebud retry binding unavailable"
-      );
     }
   }
 
