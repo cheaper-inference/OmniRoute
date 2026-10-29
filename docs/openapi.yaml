@@ -11331,10 +11331,70 @@ paths:
     get:
       tags:
         - Logs
-      summary: "GET logs › console"
+      summary: Read retained application console history
+      description: >-
+        Requires management access. Reads the active file and retained OmniRoute
+        timestamped rotations, returning the newest page in display order. The
+        default range is all retained history, not only the last hour. Reads are
+        bounded to 64 files, 4096 directory entries and 8 MiB per request; individual
+        lines above 256 KiB are skipped. A cursor continues older pages and is bound
+        to the original filters and file identity. Deleted or replaced history
+        requires a fresh request. Retention settings are unchanged.
+      parameters:
+        - in: query
+          name: range
+          schema:
+            type: string
+            enum: [1h, 24h, 7d, all]
+            default: all
+        - in: query
+          name: level
+          schema:
+            type: string
+            enum: [all, trace, debug, info, warn, error, fatal]
+            default: all
+        - in: query
+          name: component
+          schema:
+            type: string
+            maxLength: 128
+        - in: query
+          name: limit
+          description: Positive integer; values above 2000 are clamped.
+          schema:
+            type: integer
+            minimum: 1
+            default: 500
+        - in: query
+          name: cursor
+          description: Opaque value returned by X-Console-Next-Cursor.
+          schema:
+            type: string
+            maxLength: 1800
       responses:
         "200":
-          description: OK
+          description: Console entries in display order; an empty page can still have a cursor.
+          headers:
+            X-Console-Next-Cursor:
+              description: Opaque cursor for older retained history, when available.
+              schema:
+                type: string
+            X-Console-Truncated:
+              description: Whether a scan, directory, file or line bound was reached.
+              schema:
+                type: string
+                enum: ["true", "false"]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+        "400":
+          description: Invalid query or cursor/filter mismatch.
+        "410":
+          description: Retained history changed; refresh without a cursor.
   /api/logs/detail:
     get:
       tags:
