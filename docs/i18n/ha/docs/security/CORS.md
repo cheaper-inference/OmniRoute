@@ -57,11 +57,11 @@ saboda wani takamaiman tsarin aiwatarwa:
 
 Ga abin da wannan ke nufi a kowane surface, ko da `CORS_ALLOW_ALL=true`:
 
-| Surface                                 | Hanyar auth                    | Tasirin wildcard CORS                                                                                                                                                                                                                                 |
-| --------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`         | Zaman cookie                   | Ana mayar da asalin, amma **ba tare da `Allow-Credentials` ba** burauzar tana **hana** karatun da ke da shaida. Shafin mugunta daga wani asali **ba zai iya karanta** amsoshin dashboard ɗinku da aka tabbatar ba, kuma ba a fallasa cookie na zaman. |
-| Client API `/v1/*`, `/v1beta/*`         | Header na Bearer / `x-api-key` | Tuni yana da sassauci **da gangan** (`relaxForTokenAuth`): burauzoci ba sa haɗa `Authorization`/`x-api-key` kai tsaye, don haka shafin maharin ba zai iya samar da key ɗinku ba. `CORS_ALLOW_ALL` ba ya faɗaɗa wannan.                                |
-| Karatun jama'a kawai (`/api/health`, …) | Babu                           | Ba mai muhimmanci ba ne; wildcard ba shi da illa.                                                                                                                                                                                                     |
+| Surface                                 | Hanyar auth                    | Tasirin wildcard CORS                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Dashboard / MANAGEMENT `/api/*`         | Zaman cookie                   | Ana mayar da asalin, amma **ba tare da `Allow-Credentials` ba** burauzar tana **hana** karatun da ke da shaida. Shafin mugunta daga wani asali **ba zai iya karanta** amsoshin dashboard ɗinku da aka tabbatar ba, kuma ba a fallasa cookie na zaman.                                                                                                                                      |
+| Client API `/v1/*`, `/v1beta/*`         | Header na Bearer / `x-api-key` | Tuni yana da sassauci **da gangan** (`relaxForTokenAuth`): burauzoci ba sa haɗa `Authorization`/`x-api-key` kai tsaye, don haka shafin maharin ba zai iya samar da key ɗinku ba. Ana mayar da asalin ne kawai idan an tabbatar da key ɗin da aka gabatar; amsoshin da ba a san mai su ba (`REQUIRE_API_KEY=false`) suna ci gaba da bin jerin izinin. `CORS_ALLOW_ALL` ba ya faɗaɗa wannan. |
+| Karatun jama'a kawai (`/api/health`, …) | Babu                           | Ba mai muhimmanci ba ne; wildcard ba shi da illa.                                                                                                                                                                                                                                                                                                                                          |
 
 Saboda haka, fallasar da ta **rage** daga `CORS_ALLOW_ALL=true` ta taƙaita ne ga: (a)
 karatun da ba ya ɗauke da shaida daga wani asali na bayanan da tun farko ba sa buƙatar auth, da (b)
@@ -123,10 +123,51 @@ sake kunnawa ba.
   waɗannan ta atomatik. CORS ba katanga mai ma’ana ba ce a nan — maɓallin API ne
   katangar — shi ya sa aka tsara wannan farfajiya ta zama mai sassauci domin browser da
   Electron clients su iya karanta amsoshin da suke da haƙƙin samu.
+  Mayar da asali mai sassauci yana bin key ɗin da aka tabbatar, ba kawai kasancewar
+  header ɗin ba: idan `REQUIRE_API_KEY=false` ta yi wa buƙata hidima ba tare da sanin mai
+  ita ba, amsarta mai nasara tana ci gaba da bin jerin izinin da ke rufewa idan an gaza.
+  Ƙin tantancewa (401) suna ci gaba da kasancewa masu karantuwa domin clients su iya
+  nuna key da aka soke ko aka rubuta ba daidai ba (#5242): 401 na pipeline ɗin kanta yana
+  riƙe mayar da asalin, kuma hanyar da ita kanta ta ƙi key ɗin bayan pipeline ta yi wa
+  buƙatar hidima a matsayin wadda ba a san mai ita ba (`/v1/models` da `/v1beta/models`
+  idan an saita tantancewar gudanarwa, hanyoyin da suka keɓanta ga mai shi `/v1/files`,
+  `/v1/batches`, `/v1/media`, `/v1/session-leases` da hanyoyin ’yan takarar auto-combo)
+  tana ƙara mayar da asalin a wannan 401 ta hanyar `credentialRejectionHeaders()`. Mayar
+  da asalin ya dogara ne kan ko buƙatar tana ɗauke da header na shaida (`Authorization`,
+  `x-api-key`, `x-goog-api-key` ko cookie na `auth_token`), ba kan wanne daga cikinsu
+  hanyar ta duba ba, kuma ba a taɓa haɗa shi da `Access-Control-Allow-Credentials` ba;
+  jikin amsar ambulan kuskure ne da ba ya canzawa. Hanyoyin gudanarwa a ƙarƙashin
+  `/api/v1/` da `requireManagementAuth()` ke kiyayewa (`/api/v1/management/*`,
+  `/api/v1/registered-keys`) ba sa ƙara mayar da asalin: tare da `REQUIRE_API_KEY=false`,
+  ba za a iya karanta 401/403 ɗinsu daga wani asali ba.
 - **Zaman cookie (dashboard):** ana kiyaye shi ta tsohuwar ƙa’idar rufewa idan an gaza **da kuma**
   rashin `Access-Control-Allow-Credentials` a kan hanyar da ake amfani da ita tare. Kada ka saka
   asalan gudanarwa/dashboard a cikin wani saitin sassauci; dole su ci gaba da kasancewa
   a rufe idan an gaza.
+
+## Musafahar WebSocket (`/v1/responses`, `/v1/ws`)
+
+Burauzoci ba sa amfani da CORS a kan WebSocket, don haka hanyoyin sufuri na WebSocket
+da ke mayar da sakamakon inference suna duba `Origin` na musafahar da kansu
+(`src/server/origin/wsOrigin.ts`): WebSocket na Responses (`/v1/responses`) kuma, idan
+OmniRoute na gudana ta `npm start` / `npm run dev`, gadar `/v1/ws` da `/api/v1/ws`, wadda
+ke yaɗa `/v1/chat/completions`, `/v1/messages` da `/v1/responses` a matsayin frames.
+Gadar tana tambayar `/api/v1/ws?handshake=1` hukunci kuma tana ƙin haɓaka haɗin sai
+dai idan wannan hanyar ta gudanar da binciken. Ana karɓar musafaha idan:
+
+- ba ta da header na `Origin` (Codex CLI, SDKs da sauran clients da ba burauza ba);
+- jerin izinin da ke sama ya amince da `Origin` ɗin (`CORS_ALLOWED_ORIGINS`, saitin
+  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` ɗin ɗaya ne daga cikin asalan jama’a na OmniRoute kansa (URL na tushe na
+  jama’a da aka saita, asalin da amintaccen proxy ya tura, ko mai masauki loopback/LAN
+  kai tsaye da aka bayar a matsayin adireshin IP na zahiri ko `localhost` — su ne
+  ’yan takarar da binciken sauye-sauyen dashboard ke amfani da su); ko
+- tana ɗauke da ingantaccen key na API, kamar a kan farfajiyar HTTP `/v1/*`.
+
+Duk wani abu dabam yana samun `403 ws_origin_forbidden`. Cookie na zaman dashboard ba
+ya keɓe `Origin` na waje, saboda burauzar tana haɗa shi da socket na kowane shafi.
+Ba a ɗaukar `localhost` a wata tashar jiragen ruwa (port) a matsayin asali ɗaya; ƙara
+irin waɗannan asalan haɓakawa a cikin `CORS_ALLOWED_ORIGINS`.
 
 ## Misali: reverse proxy a gaban OmniRoute
 
@@ -162,6 +203,7 @@ Security tab), ba a cikin proxy ba.
 | Tutar gargaɗin dashboard                         | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Filin CORS Allowed Origins                       | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS na kowace hanya na Cloud-Agent (keɓantacce) | `src/lib/cloudAgent/api.ts`                                          |
+| Binciken `Origin` na musafahar WebSocket         | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Duba kuma
 
