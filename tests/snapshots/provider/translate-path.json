@@ -1534,23 +1534,23 @@
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
         "Openai-Beta": "responses_websockets=2026-02-06",
-        "User-Agent": "codex-cli/0.159.2 (<OS>; <ARCH>)",
-        "Version": "0.159.2"
+        "User-Agent": "codex-cli/0.165.0 (<OS>; <ARCH>)",
+        "Version": "0.165.0"
       },
       "nonStream": {
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
         "Openai-Beta": "responses_websockets=2026-02-06",
-        "User-Agent": "codex-cli/0.159.2 (<OS>; <ARCH>)",
-        "Version": "0.159.2"
+        "User-Agent": "codex-cli/0.165.0 (<OS>; <ARCH>)",
+        "Version": "0.165.0"
       },
       "oauth": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
         "Content-Type": "application/json",
         "Openai-Beta": "responses_websockets=2026-02-06",
-        "User-Agent": "codex-cli/0.159.2 (<OS>; <ARCH>)",
-        "Version": "0.159.2"
+        "User-Agent": "codex-cli/0.165.0 (<OS>; <ARCH>)",
+        "Version": "0.165.0"
       }
     },
     "url": {
@@ -6050,6 +6050,29 @@
     "url": {
       "nonStream": "https://agent-router.gaib.ai/v1/chat/completions",
       "stream": "https://agent-router.gaib.ai/v1/chat/completions"
+    }
+  },
+  "tokenharbor": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://tokenharbor.ai/v1/chat/completions",
+      "stream": "https://tokenharbor.ai/v1/chat/completions"
     }
   },
   "tokenmarket": {

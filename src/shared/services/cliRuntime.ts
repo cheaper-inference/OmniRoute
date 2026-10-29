@@ -4,9 +4,11 @@ import os from "os";
 import path from "path";
 import { spawn } from "child_process";
 import { getHermesHome } from "@/lib/cli-helper/config-generator/hermesHome";
+import { getPiModelsPath } from "./piConfig";
 import { getCachedLoginShellPath, mergeShellPath } from "./loginShellPath";
 import { withSettingsFallback } from "./cliInstallFallback";
 import { GROK_BUILD_RUNTIME_ENTRY, AMP_RUNTIME_ENTRY } from "./cliRuntimeGrokBuild";
+import { WHYCODES_RUNTIME_ENTRY } from "./cliRuntimeWhyCodes";
 import { isLocationTrusted, findKnownPathMatch } from "./cliRuntimeKnownPath";
 import { buildHealthcheckPath } from "./cliRuntimeHealthcheckPath";
 import { appendWindowsKnownBinPaths, mergeWindowsLookupPath } from "./cliRuntimeWindowsNode";
@@ -313,7 +315,12 @@ const CLI_TOOLS: Record<string, any> = {
     requiresBinary: true,
     healthcheckTimeoutMs: 8000,
     paths: {
-      config: ".pi/config.json",
+      // Pi (>= 1.0) loads custom providers from `<agent-dir>/models.json`, not
+      // the pre-1.0 ~/.pi/config.json. The agent dir defaults to ~/.pi/agent and
+      // moves with PI_CODING_AGENT_DIR; getPiModelsPath() resolves both, this
+      // entry keeps the batch status + config-path surfaces pointed at the same
+      // file the pi-settings route writes.
+      config: ".pi/agent/models.json",
     },
   },
   // Config path reconciled with bin/cli/commands/setup-crush.mjs::resolveCrushTarget's
@@ -342,6 +349,7 @@ const CLI_TOOLS: Record<string, any> = {
       authProfiles: "auth-profiles",
     },
   },
+  whycodes: WHYCODES_RUNTIME_ENTRY,
 };
 
 /**
@@ -1158,6 +1166,15 @@ export const getCliConfigPaths = (toolId: string) => {
   if (toolId === "5dive") {
     return {
       authProfiles: path.join(getFivediveStateDir(), "auth-profiles"),
+    };
+  }
+
+  // pi: the agent dir is ~/.pi/agent by default and moves with
+  // PI_CODING_AGENT_DIR, which is not the same knob as CLI_CONFIG_HOME.
+  // getPiModelsPath() resolves both exactly the way pi itself does.
+  if (toolId === "pi") {
+    return {
+      config: getPiModelsPath(),
     };
   }
 

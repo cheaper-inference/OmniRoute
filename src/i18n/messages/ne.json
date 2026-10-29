@@ -1345,7 +1345,9 @@
       "open": "खोल्नुहोस्",
       "close": "बन्द गर्नुहोस्"
     },
-    "noResults": "कुनै परिणाम छैन"
+    "noResults": "कुनै परिणाम छैन",
+    "costsTeams": "टोलीहरू",
+    "costsTeamsSubtitle": "टोली लागत केन्द्रहरू"
   },
   "webhooks": {
     "title": "वेबहुकहरू",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "उन्नत पेलोड नियमहरू, अनुरोध सीमाहरू र प्रोक्सी API सेटिङहरू",
     "mitmProxyDescription": "ट्राफिक निरीक्षण र डिबगिङका लागि MITM प्रोक्सी सेटिङहरू कन्फिगर गर्नुहोस्",
     "oneProxyDescription": "उन्नत प्रोक्सी चेनिङका लागि 1Proxy सेटिङहरू कन्फिगर गर्नुहोस्",
-    "omniSkillsDescription": "स्वचालित प्रम्प्ट र उपकरण कार्यान्वयनका लागि स्यान्डबक्स सीपहरू स्थापना र व्यवस्थापन गर्नुहोस्"
+    "omniSkillsDescription": "स्वचालित प्रम्प्ट र उपकरण कार्यान्वयनका लागि स्यान्डबक्स सीपहरू स्थापना र व्यवस्थापन गर्नुहोस्",
+    "teamsDescription": "टोली लागत अनुमान र साझा सफ्ट बजेट"
   },
   "cloudSyncStatus": {
     "synced": "सिङ्क भएको छ",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "आफ्नो एन्डपोइन्ट प्रतिलिपि गर्नुहोस्",
     "readinessStep4": "परीक्षण अनुरोध पठाउनुहोस्",
     "readinessContinue": "सेटअप जारी राख्नुहोस्",
-    "readinessDismiss": "अहिलेलाई हटाउनुहोस्"
+    "readinessDismiss": "अहिलेलाई हटाउनुहोस्",
+    "unpricedUsageTitle": "{count, plural, one {# मोडेल} other {# मोडेलहरू}} जसमा हालै प्रयोग भएको छ तर मूल्य कन्फिगर गरिएको छैन",
+    "unpricedUsageFailClosed": "{keys, plural, one {# प्रयोग सीमा भएको API कुञ्जी} other {# प्रयोग सीमा भएका API कुञ्जीहरू}} यी मोडेलहरूलाई पछिल्लो 8 दिनमा प्रयोग गरिएको छ। जब त्यो प्रयोग कुञ्जीको दैनिक वा साप्ताहिक विन्डो भित्र हुन्छ, कुञ्जीलाई कोटा नाघेको मानिन्छ र यसको अनुरोधहरू ब्लक गरिन्छ (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "यो प्रयोग प्रति-कुञ्जी प्रयोग सीमाहरूमा $0 को रूपमा गणना हुन्छ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero)।",
+    "unpricedUsageModelStats": "{requests, plural, one {# अनुरोध} other {# अनुरोधहरू}}, {keys, plural, one {# सीमित कुञ्जी} other {# सीमित कुञ्जीहरू}}",
+    "unpricedUsageMore": "…र {count} थप",
+    "unpricedUsageConfigure": "मूल्य निर्धारण कन्फिगर गर्नुहोस्",
+    "unpricedUsageDismiss": "हटाउनुहोस्"
   },
   "analytics": {
     "title": "विश्लेषण",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - म्यानुअल कन्फिगरेसन",
     "clineManualConfiguration": "Cline म्यानुअल कन्फिगरेसन",
     "kiloManualConfiguration": "Kilo Code म्यानुअल कन्फिगरेसन",
+    "piManualConfiguration": "Pi - म्यानुअल कन्फिगरेसन",
+    "piConfigInvalidTitle": "Pi models.json अपठनीय छ",
+    "piOmnirouteConfigured": "OmniRoute Pi अनुकूलन प्रदायकको रूपमा कन्फिगर गरिएको छ",
+    "piModelHelp": "Pi ले आफू अनुकूल अन्तिम बिन्दुहरूका लागि मोडेलहरू स्वत: पत्ता लगाउँदैन — तपाईंले छनौट गर्नुभएको मोडेल models.json मा स्पष्ट रूपमा लेखिएको छ।",
+    "piManualConfigTitle": "वा ~/.pi/agent/models.json म्यानुअल रूपमा सम्पादन गर्नुहोस्",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "त्यसपछि Pi सुरु गर्नुहोस् र omniroute प्रदायक चयन गर्नुहोस्। सम्पूर्ण एजेन्ट डाइरेक्टरी सार्नको लागि PI_CODING_AGENT_DIR सेट गर्नुहोस्।",
+    "piUnownedNote": "यो प्रविष्टि OmniRoute बाहिर थपिएको थियो (जस्तै pi-gui को अनुकूलन अन्त बिन्दुहरू)। आवेदनले यसलाई अपनाउनेछ; रिसेट मात्र OmniRoute लेखिएको प्रविष्टिहरू हटाउँछ।",
     "whenToUseLabel": "कहिले प्रयोग गर्ने",
     "openToolDocs": "उपकरणका कागजातहरू खोल्नुहोस्",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Amp का संक्षिप्त कार्यप्रवाहहरू चाहँदा, तर अझै पनि OmniRoute का एलियास र रुटिङ नियमहरू लागू गर्नुपर्ने अवस्थामा प्रयोग गर्नुहोस्।",
       "hermes": "छिटो कामहरूका लागि टर्मिनलमै चल्ने हलुका AI सहायक आवश्यक हुँदा प्रयोग गर्नुहोस्।",
       "hermes-agent": "OmniRoute मार्फत रुट गरिएका पूर्वनिर्धारित, प्रत्यायोजन, भिजन र सहायक मोडेलहरूसहित Hermes Agent (Nousresearch द्वारा) आवश्यक हुँदा प्रयोग गर्नुहोस्।",
+      "whycodes": "WhyCodes लाई OmniRoute तर्फ निर्देशित बहुउद्देश्यीय स्वायत्त CLI एजेन्ट (TUI, नाम दिइएका एजेन्टहरू, मेमोरी, swarm) को रूपमा चाहनुहुन्छ भने प्रयोग गर्नुहोस्।",
       "custom": "अनुकूलन उपकरण कार्यान्वयन वा सामान्य OpenAI-संगत कन्फिगरेसनहरूका लागि प्रयोग गर्नुहोस्।"
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "कस्टम प्रदायक समर्थनसहितको xAI Grok Build TUI कोडिङ एजेन्ट",
       "droid": "Factory Droid AI सहायक",
       "openclaw": "Open Claw AI सहायक",
+      "openclaude": "OpenAI-अनुकूल प्रदायक समर्थनसहितको OpenClaude कोडिङ एजेन्ट CLI",
       "cline": "Cline AI कोडिङ सहायक CLI",
       "kilo": "Kilo Code AI सहायक CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "कस्टम प्रदायक समर्थनसहितको Warp AI टर्मिनल",
       "agent-deck": "Agent Deck बहु-एजेन्ट संयोजक",
       "5dive": "5dive — स्व-होस्ट गरिएको कोडिङ एजेन्टहरूको समूह; एउटै प्रमाणीकरण प्रोफाइलले ती सबैलाई OmniRoute तर्फ निर्देशित गर्छ",
+      "whycodes": "OpenAI-अनुकूल base URL सहितको WhyCodes स्वायत्त CLI एजेन्ट",
       "zed": "Zed कोड सम्पादक — OpenAI-अनुकूल प्रदायक मार्फत बिल्ट-इन एजेन्ट"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "अपडेट गर्नुहोस्",
     "cliproxyapiUpdateAvailable": "अपडेट उपलब्ध छ: v{current} → v{latest}",
     "cliproxyapiVersion": "संस्करण",
+    "piInstallTitle": "Pi कोडिङ एजेन्ट स्थापना गर्नुहोस्",
+    "piInstallInstructions": "Pi CLI स्थापना गर्नुहोस्, त्यसपछि OmniRoute मा जडान गर्न यहाँ फर्कनुहोस्।",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi चलिरहेको मेसिनबाट पहुँचयोग्य URL प्रयोग गर्नुहोस्। OpenAI-compatible /v1 अन्त्य बिन्दु स्वतः थपिएको छ।",
+    "piManualMergeHint": "पूर्वावलोकन मात्र। यो providers.omniroute प्रविष्टिलाई models.json मा मर्ज गर्नुहोस् ताकि तपाईंका अन्य प्रदायकहरू र सेटिङहरू यथावत रहोस्।",
     "removeMapping": "म्यापिङ हटाउनुहोस्"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "जस्तै: 10",
     "testSelected": "चयन गरिएका परीक्षण गर्नुहोस् ({count})",
     "testAllFiltered": "फिल्टर गरिएका सबै परीक्षण गर्नुहोस् ({count})",
+    "visibility": "दृश्यता",
+    "allVisibility": "देखिने र लुकाइएका",
+    "visibleOnly": "देखिने",
+    "hiddenOnly": "लुकाइएका",
+    "visibleColumn": "देखिने",
+    "hideModel": "/v1/models बाट {name} लुकाउनुहोस्",
+    "showModel": "/v1/models मा {name} देखाउनुहोस्",
+    "hiddenBadge": "लुकाइएको",
+    "hideFiltered": "फिल्टर गरिएका लुकाउनुहोस् ({count})",
+    "showFiltered": "फिल्टर गरिएका देखाउनुहोस् ({count})",
+    "visibilityCounts": "{visible} देखिने · {hidden} लुकाइएका · जम्मा {total}",
+    "visibilityUpdateFailed": "मोडेलको दृश्यता अद्यावधिक गर्न असफल भयो",
     "cancel": "रद्द गर्नुहोस्",
     "clearResults": "परिणामहरू खाली गर्नुहोस्",
     "testing": "परीक्षण गर्दै...",
@@ -3394,7 +3433,44 @@
     "httpError": "HTTP {status} सँग अनुरोध असफल भयो",
     "testFailedNoDetail": "कुनै त्रुटि सन्देश बिना परीक्षण असफल भयो",
     "additionalCapabilities": "थप क्षमताहरू: {list}",
-    "comboRefMember": "कम्बो → {name}"
+    "comboRefMember": "कम्बो → {name}",
+    "keyAccessButton": "API कुञ्जी पहुँच",
+    "allowedInKeys": "अनुमति दिइएको: {count, plural, one {# कुञ्जी} other {# कुञ्जीहरू}}",
+    "keysLoading": "API कुञ्जीहरू लोड हुँदैछ…",
+    "keysRetry": "कुञ्जीहरू लोड गर्न पुन: प्रयास गर्नुहोस्",
+    "accessViaPattern": "{pattern} मार्फत",
+    "accessBlocked": "{pattern} द्वारा ब्लक गरिएको",
+    "editKeyAccess": "कुञ्जी पहुँच सम्पादन गर्नुहोस्",
+    "toggleKeyAccess": "{name} मा {item} लाई अनुमति दिनुहोस्",
+    "resultNetworkError": "असाइन्मेन्ट असफल भयो",
+    "resultWouldEmptyModels": "यसले यो कुञ्जीलाई कुनै पनि अनुमति प्राप्त मोडेलहरू बिना छोड्नेछ — यसको सट्टा कुञ्जी पहुँच सम्पादन गर्नुहोस्",
+    "resultWouldEmptyCombos": "यसले यो कुञ्जीलाई कुनै पनि अनुमति प्राप्त combos बिना छोड्नेछ — यसको सट्टा कुञ्जी पहुँच सम्पादन गर्नुहोस्",
+    "keyUpdatePending": "{name} अझै अपडेट हुँदैछ। केही बेरपछि फेरि प्रयास गर्नुहोस्।",
+    "assignToKeys": "API कुञ्जीहरूमा असाइन गर्नुहोस्…",
+    "assignApply": "परिवर्तनहरू लागू गर्नुहोस्",
+    "assignComplete": "API कुञ्जी पहुँच अद्यावधिक गरियो",
+    "assignFailed": "केही API कुञ्जी अद्यावधिकहरू असफल भए",
+    "assignNoChanges": "कुनै पनि API कुञ्जी पहुँच परिवर्तन गरिएको छैन",
+    "selectedAccessItems": "चयन गरिएका वस्तुहरू: {count}",
+    "assignExcludedCombos": "{count, plural, one {# चयन गरिएको combo पङ्क्ति मोडेल होइन र यहाँ छोडिनेछ} other {# चयन गरिएका combo पङ्क्तिहरू मोडेलहरू होइनन् र यहाँ छोडिनेछन्}}। Combos ट्याबबाट combos असाइन गर्नुहोस्।",
+    "assignActionAdd": "थप्नुहोस्",
+    "assignActionRemove": "हटाउनुहोस्",
+    "searchKeys": "API कुञ्जीहरू खोज्नुहोस्",
+    "selectApiKey": "API कुञ्जी {name} चयन गर्नुहोस्",
+    "allModelsAccess": "सबै मोडेलहरू",
+    "allCombosAccess": "सबै कम्बोहरू",
+    "modelAccessCount": "मोडेलहरू: {count}",
+    "comboAccessCount": "कम्बोहरू: {count}",
+    "keyInactive": "निष्क्रिय",
+    "keyBanned": "प्रतिबन्धित",
+    "keyRevoked": "खारेज गरियो",
+    "switchRestrictedConfirm": "यो कुञ्जीलाई प्रतिबन्धित पहुँचमा बदल्नुहोस्: केवल चयन गरिएका वस्तुहरूलाई मात्र अनुमति दिइनेछ",
+    "removeNoChangeHint": "यो कुञ्जीले सबै कुरालाई अनुमति दिन्छ; चयन गरिएका वस्तुहरू हटाउँदा कुनै परिवर्तन हुने छैन",
+    "removeStaysAllowedHint": "{patterns} मार्फत यो कुञ्जीमा अझै पनि अनुमति दिइएको छ",
+    "resultChanged": "परिवर्तन गरियो",
+    "resultUnchanged": "कुनै परिवर्तन छैन",
+    "resultSkipped": "छोडियो",
+    "resultNeedsSwitch": "प्रतिबन्धितमा बदल्न आवश्यक छ"
   },
   "combos": {
     "title": "कम्बोहरू",
@@ -3515,6 +3591,9 @@
     "moveUp": "माथि सार्नुहोस्",
     "moveDown": "तल सार्नुहोस्",
     "removeModel": "हटाउनुहोस्",
+    "testStep": "यो मोडेल परीक्षण गर्नुहोस्",
+    "testStepRunning": "परीक्षण हुँदैछ…",
+    "testStepNotTestable": "एकल-मोडेल चरणहरू मात्र परीक्षण गर्न सकिन्छ",
     "saving": "सुरक्षित गरिँदै...",
     "liveNoProviders": "अहिलेसम्म कुनै प्रदायक अवलोकन गरिएको छैन।",
     "liveFleetDataHint": "फ्लिट डेटा प्रत्यक्ष कम्बो घटनाहरूमार्फत आउँछ।",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "CSV टेम्प्लेट डाउनलोड गर्नुहोस्",
     "importFromFileMoreErrors": "+{count} थप",
     "importFromFileSchemaHint": "CSV स्तम्भहरूको क्रम निश्चित छ: provider, name, apiKey, baseUrl (वैकल्पिक), priority (वैकल्पिक)। provider स्तम्भमा विद्यमान व्यवस्थित प्रदायक id वा पहिले नै दर्ता गरिएको OpenAI/Anthropic-सङ्गत node id हुनुपर्छ — यस आयातले नयाँ endpoint nodes सिर्जना गर्दैन।",
+    "importOAuthExport": "OAuth निर्यात आयात गर्नुहोस्",
+    "oauthExportTitle": "खाता-प्रबन्धक निर्यात आयात गर्नुहोस्",
+    "oauthExportDescription": "खाता प्रबन्धकबाट सादा पाठको निर्यात अपलोड गर्नुहोस् (जस्तै Antigravity Manager को cloud-accounts निर्यात)। टोकनहरू सर्भरमा रिफ्रेस गरिन्छन् र प्रत्येक खाता OAuth जडान बन्छ — दोहोरिएकाहरू आफ्नै ठाउँमा रिफ्रेस हुन्छन्।",
+    "oauthExportProviderLabel": "प्रदायक",
+    "oauthExportChoose": "फाइल छान्नुहोस्",
+    "oauthExportFileAria": "खाता निर्यात JSON फाइल",
+    "oauthExportSchemaHint": "स्वीकार्य: \"accounts\" एरे भएको कागजात, सादा एरे, वा एउटै रेकर्ड। टोकनहरू नेस्टेड token वस्तुभित्र वा सिधै रेकर्डमा हुन सक्छन्।",
+    "oauthExportDetected": "{count} खाता फेला परे",
+    "oauthExportSelectAll": "सबै खाता चयन गर्नुहोस्",
+    "oauthExportSelectAccount": "खाता {index} चयन गर्नुहोस्",
+    "oauthExportColEmail": "इमेल",
+    "oauthExportColProvider": "प्रदायक",
+    "oauthExportColRefresh": "रिफ्रेस टोकन",
+    "oauthExportNoEmail": "(इमेल छैन)",
+    "oauthExportYes": "हो",
+    "oauthExportNo": "होइन",
+    "oauthExportImporting": "आयात हुँदै छ…",
+    "oauthExportImport": "{count} खाता आयात गर्नुहोस्",
+    "oauthExportResult": "{imported}/{total} आयात भयो — {failed} असफल",
+    "oauthExportParseError": "यो फाइलबाट कुनै पनि खाता पढ्न सकिएन।",
+    "oauthExportUnknownError": "अज्ञात त्रुटि",
     "adaptaTutorial": {
       "title": "Adapta Web कसरी जडान गर्ने",
       "introPrefix": "Adapta ले Clerk मार्फत प्रमाणीकरण गर्छ। यो टोकन",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "सबै मोडेलहरू पहिले नै आयात गरिएका छन्",
     "noNewModelsToImport": "आयात गर्न कुनै नयाँ मोडेल छैन — सबै मोडेलहरू पहिले नै रजिस्ट्री वा अनुकूलित मोडेलहरूको सूचीमा छन्",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "मोडेल खोज असफल भयो {time}",
     "skippingExistingModels": "अवस्थित {count} मोडेलहरू छोडिँदैछन्",
     "autoSync": "स्वतः-सिङ्क",
     "autoSyncShort": "सिङ्क गर्नुहोस्",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} कम्बोमा प्रयोग गरिएको: {combos}",
+    "openComboTooltip": "कम्बोहरू खोल्नुहोस् — {combo} ले प्रयोग गरेको"
   },
   "settings": {
     "title": "सेटिङहरू",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "होस्ट",
     "qdrantCollection": "सङ्कलन",
     "catalogVisibilityHint": "लुकाइएका मोडेल ID हरूलाई उही पहुँच अनुमतिसहित अझै पनि कल गर्न सकिन्छ।",
+    "exposeCombosOnly": "/v1/models मा कम्बोहरू मात्र सूचीबद्ध गर्नुहोस्",
+    "exposeCombosOnlyDesc": "मोडेलहरू स्वतः पत्ता लगाउने क्लाइन्टहरूले कच्चा प्रदायक मोडेलहरूको सट्टा तपाईंका कम्बोहरू (र लुकाइएको छैन भने auto/*) देख्नेछन्। स्पष्ट provider/model ID हरू राउट भइरहनेछन्।",
     "catalogScopeTitle": "Models API सूचीकरण",
     "catalogScopeDesc": "यस कुञ्जीका लागि GET /v1/models ले के देखाउँछ। सूची सीमित गर्दा पनि कुञ्जीले कल गर्न सक्ने कुरामा कहिल्यै परिवर्तन हुँदैन।",
     "catalogScopeAll": "दुवै",
@@ -8917,7 +9022,9 @@
         "financial": "वित्तीय",
         "brazilian": "ब्राजिली",
         "usa": "अमेरिका",
-        "full": "पूर्ण"
+        "full": "पूर्ण",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (दक्षिण अफ्रिका)"
       },
       "builtinTypes": "निर्मित प्रकारहरू",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "IPv4 ठेगानाहरू",
         "ipv6_address": "IPv6 ठेगानाहरू",
         "aws_key": "AWS पहुँच कुञ्जीहरू",
-        "api_key_generic": "API कुञ्जी र टोकनहरू"
+        "api_key_generic": "API कुञ्जी र टोकनहरू",
+        "iban": "IBAN बैंक खाता नम्बरहरू",
+        "eu_vat": "EU VAT नम्बरहरू",
+        "es_dni_nie": "स्पेनिश DNI / NIE",
+        "it_codice_fiscale": "इटालियन कोडिस फिस्केल",
+        "pl_pesel": "पोलिश PESEL",
+        "nl_bsn": "डच BSN",
+        "de_steuer_id": "जर्मन Steuer-ID",
+        "se_personnummer": "स्विडेनी व्यक्ति संख्या",
+        "za_id": "दक्षिण अफ्रिकी ID नम्बरहरू",
+        "za_phone": "दक्षिण अफ्रिकी फोन नम्बरहरू",
+        "za_vat": "दक्षिण अफ्रिकी VAT नम्बरहरू",
+        "za_tax_ref": "दक्षिण अफ्रिकी कर सन्दर्भ"
       },
       "customPatterns": "अनुकूल ढाँचाहरू",
       "customPatternsDesc": "मेलहरू [CUSTOM_REDACTED] ले प्रतिस्थापन गरिन्छन्। बढीमा {max} ढाँचा। विनाशकारी ब्याकट्र्याकिङको जोखिम भएका ढाँचाहरू अस्वीकार गरिन्छन्।",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth कन्फिगर गरिएको छैन। रिडाइरेक्ट URI {redirectUri} र स्कोपहरू \"{scopes}\" सहित {applicationsUrl} मा OAuth अनुप्रयोग दर्ता गर्नुहोस्, त्यसपछि {clientIdEnv} (र वैकल्पिक रूपमा {clientSecretEnv}) सेट गरेर पुनः सुरु गर्नुहोस्।",
     "gitlabDuoSetupDescription": "अनुप्रयोग दर्ता भएपछि र यस OmniRoute इन्स्ट्यान्समा वातावरणीय चरहरू सेट गरिएपछि, OAuth लगइन सुरु गर्न जारी राख्नुहोस् क्लिक गर्नुहोस्।",
     "continue": "जारी राख्नुहोस्",
+    "copilotPolicyTitle": "प्रयोगात्मक प्रदायक: नीति स्थिति अस्पष्ट छ",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com मार्फत जडान हुन्छ, जुन GitHub सामान्य तेस्रो-पक्ष अनुमान API को रूपमा प्रकाशित गरेको छैन। यो एकीकरण प्रयोगात्मक छ र सूचना बिना परिवर्तन हुन सक्छ।",
+    "copilotPolicyLine2": "केवल तपाईंको आफ्नै GitHub खाता जडान हुन सक्छ। प्रमाणहरू, पूल खाताहरू, वा तपाईंको योजना सीमा नाघ्ने प्रयास कहिल्यै नगर्नुहोस्।",
+    "copilotPolicyLine3": "नि: शुल्क र विद्यार्थी योजना प्रयोगकर्ताहरूले स्वचालित मोडेल चयन मात्र प्राप्त गर्छन्। तपाईंको Copilot योजना सर्तहरू र कुनै पनि उपयोग सीमा तपाईंको जिम्मेवारी रहन्छ।",
+    "copilotPolicyAcknowledge": "मैले बुझें, जडान गर्नुहोस्",
     "tabPasteSetupToken": "सेटअप टोकन",
     "claudeSetupTokenDescription": "टर्मिनलमा `claude setup-token` चलाउनुहोस् र यसले छाप्ने टोकन टाँस्नुहोस्। यो एक वर्षका लागि मान्य छ र यसमा रिफ्रेस टोकन छैन। सुरक्षित गर्नुअघि OmniRoute ले Anthropic मा एउटा परीक्षण अनुरोध पठाउँछ।",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "कुराकानी हेर्नुहोस्",
       "openConversation": "कुराकानी {id} खोल्नुहोस्"
     },
-    "tableLabel": "अनुरोध लगहरू"
+    "tableLabel": "अनुरोध लगहरू",
+    "throughputPostFirstToken": "पहिलो टोकन पछिको",
+    "throughputEndToEnd": "सुरुदेखि अन्त्यसम्म",
+    "throughputRate": "{value} टोकन/सेकेन्ड",
+    "throughputExplanation": "दुवै दरहरूले आउटपुट र रिजनिङ टोकन गणनामध्ये ठूलोलाई प्रयोग गर्छन्। पहिलो टोकन पछिको दरले मान्य TTFT समावेश गर्दैन; अन्यथा यसले पूरा अवधि प्रयोग गर्छ। सुरुदेखि अन्त्यसम्मको दरले सधैं पूरा अवधि प्रयोग गर्छ। बफर गरिएको प्रतिक्रियामा मोडेल छिटो उत्पादन नगरे पनि उच्च बर्स्ट डेलिभरी दर हुन सक्छ।"
   },
   "proxyLogger": {
     "filterAll": "सबै",
@@ -12785,7 +12913,8 @@
     "title": "प्रदायकका तथ्याङ्कहरू",
     "description": "प्रत्येक प्रदायक र प्रत्येक मोडेलअनुसारको ट्राफिक, विलम्बता र सफलता दरहरू",
     "combo": "संयोजन",
-    "toggleModels": "{provider} का मोडेलहरू देखाउनुहोस्"
+    "toggleModels": "{provider} का मोडेलहरू देखाउनुहोस्",
+    "windowSince": "{date} देखि"
   },
   "relay": {
     "title": "सर्भरलेस रिले प्रोक्सीहरू",
@@ -13730,7 +13859,9 @@
       "disabled": "निष्क्रिय",
       "dual": "दोहोरो",
       "alias": "उपनाम",
-      "canonical": "प्रामाणिक"
+      "canonical": "प्रामाणिक",
+      "fail_closed": "ब्लक गर्नुहोस् (fail_closed)",
+      "count_as_zero": "$0 को रूपमा गणना गर्नुहोस् (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "सुरक्षित-प्राथमिकताका पूर्वाधार रोकावटहरू 502 का रूपमा",
         "description": "कोटाका लागि मात्र फलब्याक हुने प्राथमिकता लक्ष्यले कोटासँग सम्बन्धित नभएको प्रमाणित कारणले कम्बो रोक्दा 503 को सट्टा 502 उत्तर दिनुहोस्: खुला प्रदायक सर्किट ब्रेकर वा पूर्वानुमानात्मक विलम्बता स्किप।"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "मूल्यविहीन प्रयोग बजेट नीति",
+        "description": "प्रति-कुञ्जी दैनिक/साप्ताहिक USD सीमाहरूले प्रोभाइडर/मोडेलको मूल्य पङ्क्ति नहुँदा सफल प्रयोगलाई कसरी व्यवहार गर्छन् भन्ने बारे। fail_closed (पूर्वनिर्धारित) ले विन्डोलाई नाघिएको मान्छ, त्यसैले अज्ञात लागतले कडा सीमा पार गर्न पाउँदैन। count_as_zero ले त्यो प्रयोगलाई $0 मान्छ र मूल्यिएको खर्चको लागूकरणलाई जारी राख्छ। मूल्य नभएका मोडेलहरू जे भए पनि ड्यासबोर्ड होम पृष्ठमा सूचीबद्ध हुन्छन्।"
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "बन्द गर्नुहोस्"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "/v1/models क्याटलगमा सोचाइ स्तरका भेरियन्टहरू (जस्तै -low, -medium, -high) उत्पन्न गर्ने सुविधा निष्क्रिय गर्नुहोस्।",
+  "teamCosts": {
+    "title": "टोली लागत",
+    "subtitle": "साझा सफ्ट बजेट र क्याटलग लागत अनुमान व्यवस्थापन गर्नुहोस्।",
+    "refresh": "रिफ्रेस गर्नुहोस्",
+    "create": "टोली बनाउनुहोस्",
+    "edit": "टोली सम्पादन गर्नुहोस्",
+    "archive": "अभिलेखमा राख्नुहोस्",
+    "selectTeam": "टोलीहरू",
+    "searchTeams": "टोलीहरू खोज्नुहोस्",
+    "statusFilter": "टोलीको अवस्था",
+    "active": "सक्रिय",
+    "archived": "अभिलेखमा राखिएको · पढ्न मात्र",
+    "allTeams": "सबै टोलीहरू",
+    "noTeams": "मेल खाने टोली छैन।",
+    "selectHint": "लागत हेर्न टोली बनाउनुहोस् वा छान्नुहोस्।",
+    "loading": "टोली लागत लोड हुँदैछ…",
+    "budgetTitle": "हालको सफ्ट बजेट",
+    "budgetSubtitle": "सफलतापूर्वक दर्ता गरिएको प्रयोग · रोलिङ विन्डो · रिपोर्ट मितिबाट स्वतन्त्र",
+    "archivedBudget": "अभिलेखमा राखिएको: बजेट कार्यान्वयन निष्क्रिय छ। ऐतिहासिक रिपोर्टहरू उपलब्ध रहन्छन्।",
+    "unlimited": "असीमित — साझा सफ्ट बजेट कन्फिगर गरिएको छैन।",
+    "budgetUnavailable": "बजेटको अवस्था उपलब्ध छैन। फेरि प्रयास गर्न रिफ्रेस गर्नुहोस्।",
+    "used": "सफल प्रयोग",
+    "maximum": "बजेट अधिकतम",
+    "remaining": "थाहा भएको बाँकी",
+    "resets": "रिसेट हुने",
+    "unpricedBudget": "सफल प्रयोगको केही भागको मूल्य अज्ञात छ। थाहा भएको जोड अपूर्ण छ; बजेट कार्यान्वयनले यो विन्डोलाई नाघेको मान्छ।",
+    "overBudget": "बजेट पुग्यो वा नाघ्यो · {amount} बढी",
+    "reportTitle": "प्रयोग रिपोर्ट",
+    "reportSubtitle": "सबै प्रयास · USD मा क्याटलग अनुमान, बिल होइन · पूर्ण UTC मितिहरू",
+    "reportPeriod": "रिपोर्ट अवधि",
+    "day1": "१ दिन",
+    "day7": "७ दिन",
+    "day30": "३० दिन",
+    "allTime": "सबै समय",
+    "reportSpend": "अनुमानित रिपोर्ट खर्च",
+    "requests": "अनुरोधहरू",
+    "assignedKeys": "तोकिएका कुञ्जी",
+    "unpricedReport": "यो रिपोर्टमा अज्ञात मूल्यहरू छन्। अनुमानित खर्च अपूर्ण छ।",
+    "breakdown": "API कुञ्जी अनुसार लागत",
+    "noUsage": "यो रिपोर्ट अवधिमा कुनै प्रयोग छैन।",
+    "keyName": "API कुञ्जीको नाम",
+    "tokens": "इनपुट + आउटपुट टोकन",
+    "unnamedKey": "नाम नभएको वा मेटिएको कुञ्जी",
+    "unpriced": "अज्ञात मूल्य",
+    "members": "सदस्यता",
+    "memberSubtitle": "सदस्यता बदल्दा ऐतिहासिक खर्च मूल टोलीमै रहन्छ।",
+    "searchKeys": "कुञ्जी वा हालका मालिक खोज्नुहोस्",
+    "chooseKey": "API कुञ्जी छान्नुहोस्",
+    "unassigned": "तोकिएको छैन",
+    "ownership": "हालको बिलिङ टोली: {team}",
+    "assign": "तोक्नुहोस्",
+    "remove": "हटाउनुहोस्",
+    "noMembers": "हाल कुनै सदस्य छैन। ऐतिहासिक प्रयोग अझै बजेटमा गणना हुन सक्छ।",
+    "assignedAt": "{date} मा तोकिएको (UTC)",
+    "name": "टोलीको नाम",
+    "description": "विवरण",
+    "enableBudget": "साझा सफ्ट बजेट सक्षम गर्नुहोस्",
+    "amount": "बजेट रकम (USD)",
+    "duration": "रोलिङ बजेट विन्डो",
+    "cancel": "रद्द गर्नुहोस्",
+    "save": "सुरक्षित गर्नुहोस्",
+    "confirm": "पुष्टि गर्नुहोस्",
+    "transferTitle": "कुञ्जी स्थानान्तरण पुष्टि गर्नुहोस्",
+    "transferMessage": "यो कुञ्जी “{source}” बाट “{destination}” मा सार्ने? ऐतिहासिक खर्च मूल टोलीमै रहन्छ।",
+    "removeTitle": "कुञ्जी तोकाइ हटाउनुहोस्",
+    "removeMessage": "यो कुञ्जी “{team}” बाट हटाउने? ऐतिहासिक खर्च यही टोलीमा रहन्छ।",
+    "archiveTitle": "टोली अभिलेखमा राख्नुहोस्",
+    "archiveMessage": "“{team}” अभिलेखमा राख्ने? हालका सबै बन्धन बन्द हुन्छन् र बजेट कार्यान्वयन रोकिन्छ। ऐतिहासिक रिपोर्टहरू उपलब्ध रहन्छन्।",
+    "invalidName": "नाम (१–२०० अक्षर) र बढीमा २,००० अक्षरको विवरण हाल्नुहोस्।",
+    "invalidAmount": "शून्यभन्दा ठूलो सीमित बजेट रकम हाल्नुहोस्।",
+    "unauthorized": "जारी राख्न व्यवस्थापन ड्यासबोर्डमा साइन इन गर्नुहोस्।",
+    "forbidden": "तपाईंलाई टोली व्यवस्थापन गर्ने अनुमति छैन। तपाईंको इनपुट सुरक्षित छ।",
+    "notFound": "यो टोली वा तोकाइ अब छैन।",
+    "conflict": "तोकाइ वा टोली परिवर्तन भयो। फेरि प्रयास गर्नुअघि रिफ्रेस गरेर हालको स्वामित्व पुष्टि गर्नुहोस्।",
+    "failed": "अनुरोध असफल भयो। तपाईंको इनपुट सुरक्षित छ; कृपया फेरि प्रयास गर्नुहोस्।",
+    "partialBudget": "राखिएका केही दैनिक बकेट विन्डोको सीमासँग मिल्छन् र ठीकसँग बाँड्न सकिँदैन। देखाइएको खर्च अपूर्ण छ; बाँकी सीमा उपलब्ध छैन। विद्यमान सफ्ट बजेट नीति अपरिवर्तित छ।"
+  },
   "connectionTest": {
     "title": "परीक्षण सन्देश",
     "description": "यस खातामार्फत एउटा वास्तविक अनुरोध पठाउनुहोस्। यसले थोरै कोटा प्रयोग गर्छ र प्रदायकअनुसार प्रयोग अवधि सुरु गर्न सक्छ।",
@@ -15216,5 +15428,8 @@
     "importButton": "आयात गर्नुहोस्",
     "importFailed": "आयात असफल भयो।",
     "importSuccess": "{connections} खाता र {nodes} प्रदायक नोड आयात गरियो; {skipped} छोडियो।"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "हालको स्थानबाट सुरु गर्नुहोस् (अवस्थित लगहरू छोड्नुहोस्)"
   }
 }

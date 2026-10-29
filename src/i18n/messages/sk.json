@@ -1345,7 +1345,9 @@
       "open": "otvorené",
       "close": "zatvoriť"
     },
-    "noResults": "Žiadne výsledky"
+    "noResults": "Žiadne výsledky",
+    "costsTeams": "Tímy",
+    "costsTeamsSubtitle": "Nákladové strediská tímov"
   },
   "webhooks": {
     "title": "Webhooky",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "Pokročilé pravidlá dátovej časti, limity požiadaviek a nastavenia proxy API",
     "mitmProxyDescription": "Nakonfigurujte nastavenia MITM proxy na kontrolu a ladenie prevádzky",
     "oneProxyDescription": "Nakonfigurujte nastavenia 1Proxy pre pokročilé reťazenie proxy serverov",
-    "omniSkillsDescription": "Inštalujte a spravujte sandboxové zručnosti na automatizované vykonávanie promptov a nástrojov"
+    "omniSkillsDescription": "Inštalujte a spravujte sandboxové zručnosti na automatizované vykonávanie promptov a nástrojov",
+    "teamsDescription": "Odhady nákladov tímu a zdieľané mäkké rozpočty"
   },
   "cloudSyncStatus": {
     "synced": "Synchronizované",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "Skopírujte svoj koncový bod",
     "readinessStep4": "Odošlite testovaciu požiadavku",
     "readinessContinue": "Pokračovať v nastavení",
-    "readinessDismiss": "Zatiaľ zavrieť"
+    "readinessDismiss": "Zatiaľ zavrieť",
+    "unpricedUsageTitle": "{count, plural, one {# model} few {# modely} other {# modelov}} s nedávnym použitím, ale bez nakonfigurovanej ceny",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API kľúč s limitom používania} few {# API kľúče s limitom používania} other {# API kľúčov s limitom používania}} použili tieto modely za posledných 8 dní. Pokiaľ je toto použitie v rámci denného alebo týždenného okna kľúča, kľúč sa považuje za prekročený a jeho požiadavky sú zablokované (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Toto použitie sa započítava ako $0 do limitov používania na kľúč (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# požiadavka} few {# požiadavky} other {# požiadaviek}}, {keys, plural, one {# obmedzený kľúč} few {# obmedzené kľúče} other {# obmedzených kľúčov}}",
+    "unpricedUsageMore": "…a {count} ďalších",
+    "unpricedUsageConfigure": "Nastaviť ceny",
+    "unpricedUsageDismiss": "Zatvoriť"
   },
   "analytics": {
     "title": "Analytika",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Manuálna konfigurácia",
     "clineManualConfiguration": "Manuálna konfigurácia Cline",
     "kiloManualConfiguration": "Manuálna konfigurácia Kilo Code",
+    "piManualConfiguration": "Pi - Manuálna konfigurácia",
+    "piConfigInvalidTitle": "Pi models.json je nečitateľné",
+    "piOmnirouteConfigured": "OmniRoute je nakonfigurovaný ako vlastný poskytovateľ Pi",
+    "piModelHelp": "Pi automaticky neobjavuje modely pre vlastné koncové body — vybraný model je explicitne zapísaný do models.json.",
+    "piManualConfigTitle": "Alebo upravte ~/.pi/agent/models.json ručne",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Potom spustite Pi a vyberte poskytovateľa omniroute. Nastavte PI_CODING_AGENT_DIR na presun celého adresára agenta.",
+    "piUnownedNote": "Tento záznam bol pridaný mimo OmniRoute (napr. vlastné koncové body pi-gui). Žiadosť ju prijme; Obnoviť odstráni iba záznamy napísané OmniRoute.",
     "whenToUseLabel": "Kedy použiť",
     "openToolDocs": "Otvorte dokumentáciu nástroja",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Použite, keď potrebujete ľahkého terminálového natívneho asistenta AI na rýchle úlohy.",
       "hermes-agent": "Použite, keď potrebujete Hermes Agent (od Nousresearch) s predvolenými, delegačnými, vizuálnymi a pomocnými modelmi smerovanými cez OmniRoute.",
+      "whycodes": "Použite, keď chcete WhyCodes ako univerzálneho autonómneho CLI agenta (TUI, pomenovaní agenti, pamäť, swarm) nasmerovaného na OmniRoute.",
       "custom": "Používa sa na implementácie vlastných nástrojov alebo všeobecné konfigurácie kompatibilné s OpenAI."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "TUI kódovací agent xAI Grok Build s podporou vlastného poskytovateľa",
       "droid": "AI asistent Factory Droid",
       "openclaw": "Otvorte asistenta Claw AI",
+      "openclaude": "CLI programovací agent OpenClaude s podporou poskytovateľa kompatibilného s OpenAI",
       "cline": "CLI asistenta Cline AI na programovanie",
       "kilo": "CLI AI asistenta Kilo Code",
       "qwen": "Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "AI terminál Warp s podporou vlastného poskytovateľa",
       "agent-deck": "Multi-agentový orchestrátor Agent Deck",
       "5dive": "5dive — vlastná flotila kódovacích agentov; jeden auth profil nasmeruje všetkých na OmniRoute",
+      "whycodes": "Autonómny CLI agent WhyCodes so základnou URL kompatibilnou s OpenAI",
       "zed": "Editor kódu Zed — vstavaný agent cez poskytovateľa kompatibilného s OpenAI"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "Aktualizovať",
     "cliproxyapiUpdateAvailable": "Aktualizácia je k dispozícii: v{current} → v{latest}",
     "cliproxyapiVersion": "Verzia",
+    "piInstallTitle": "Nainštalujte Pi Coding Agent",
+    "piInstallInstructions": "Nainštalujte Pi CLI a potom sa sem vráťte a pripojte ho k OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Použite URL dosiahnuteľnú zo stroja s Pi. Koncový bod /v1 kompatibilný s OpenAI sa pridá automaticky.",
+    "piManualMergeHint": "Iba ukážka. Zlúčte tento záznam providers.omniroute do models.json, aby vaši ostatní poskytovatelia a nastavenia zostali nedotknuté.",
     "removeMapping": "Odstrániť mapovanie"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "napr. 10",
     "testSelected": "Otestovať vybrané ({count})",
     "testAllFiltered": "Otestovať všetky filtrované ({count})",
+    "visibility": "Viditeľnosť",
+    "allVisibility": "Viditeľné a skryté",
+    "visibleOnly": "Viditeľné",
+    "hiddenOnly": "Skryté",
+    "visibleColumn": "Viditeľný",
+    "hideModel": "Skryť {name} z /v1/models",
+    "showModel": "Zobraziť {name} v /v1/models",
+    "hiddenBadge": "Skrytý",
+    "hideFiltered": "Skryť filtrované ({count})",
+    "showFiltered": "Zobraziť filtrované ({count})",
+    "visibilityCounts": "{visible} viditeľných · {hidden} skrytých · {total} spolu",
+    "visibilityUpdateFailed": "Aktualizácia viditeľnosti modelu zlyhala",
     "cancel": "Zrušiť",
     "clearResults": "Vymazať výsledky",
     "testing": "Testuje sa...",
@@ -3394,7 +3433,44 @@
     "httpError": "Požiadavka zlyhala s kódom HTTP {status}",
     "testFailedNoDetail": "Test zlyhal bez chybovej správy",
     "additionalCapabilities": "Ďalšie schopnosti: {list}",
-    "comboRefMember": "Kombinácia → {name}"
+    "comboRefMember": "Kombinácia → {name}",
+    "keyAccessButton": "Prístup k API kľúčom",
+    "allowedInKeys": "Povolené v: {count, plural, one {# kľúči} few {# kľúčoch} other {# kľúčoch}}",
+    "keysLoading": "Načítavajú sa API kľúče…",
+    "keysRetry": "Znova načítať kľúče",
+    "accessViaPattern": "cez {pattern}",
+    "accessBlocked": "Zablokované vzorom {pattern}",
+    "editKeyAccess": "Upraviť prístup ku kľúču",
+    "toggleKeyAccess": "Povoliť {item} na {name}",
+    "resultNetworkError": "Priradenie zlyhalo",
+    "resultWouldEmptyModels": "Tento kľúč by zostal bez povolených modelov – namiesto toho upravte prístup ku kľúču",
+    "resultWouldEmptyCombos": "Tento kľúč by zostal bez povolených kombinácií – namiesto toho upravte prístup ku kľúču",
+    "keyUpdatePending": "{name} sa stále aktualizuje. Skúste to znova o chvíľu.",
+    "assignToKeys": "Priradiť k API kľúčom…",
+    "assignApply": "Použiť zmeny",
+    "assignComplete": "Prístup k API kľúču bol aktualizovaný",
+    "assignFailed": "Niektoré aktualizácie API kľúčov zlyhali",
+    "assignNoChanges": "Prístup k API kľúčom sa nezmenil",
+    "selectedAccessItems": "Vybraté položky: {count}",
+    "assignExcludedCombos": "{count, plural, one {# vybratý riadok kombinácie nie je model a bude tu preskočený} few {# vybraté riadky kombinácií nie sú modely a budú tu preskočené} other {# vybratých riadkov kombinácií nie sú modely a budú tu preskočené}}. Kombinácie priraďte na karte Combos.",
+    "assignActionAdd": "Pridať",
+    "assignActionRemove": "Odstrániť",
+    "searchKeys": "Hľadať API kľúče",
+    "selectApiKey": "Vybrať API kľúč {name}",
+    "allModelsAccess": "Všetky modely",
+    "allCombosAccess": "Všetky kombinácie",
+    "modelAccessCount": "Modely: {count}",
+    "comboAccessCount": "Kombinácie: {count}",
+    "keyInactive": "Neaktívny",
+    "keyBanned": "Zablokovaný",
+    "keyRevoked": "Odvolané",
+    "switchRestrictedConfirm": "Prepnúť tento kľúč na obmedzený prístup: povolené budú iba vybraté položky",
+    "removeNoChangeHint": "Tento kľúč povoľuje všetko; odstránenie vybratých položiek nespôsobí žiadnu zmenu",
+    "removeStaysAllowedHint": "Na tomto kľúči naďalej povolené cez {patterns}",
+    "resultChanged": "Zmenené",
+    "resultUnchanged": "Bez zmeny",
+    "resultSkipped": "Preskočené",
+    "resultNeedsSwitch": "Vyžaduje prepnutie na obmedzený"
   },
   "combos": {
     "title": "kombá",
@@ -3515,6 +3591,9 @@
     "moveUp": "Posunúť sa hore",
     "moveDown": "Presuňte sa nadol",
     "removeModel": "Odstrániť",
+    "testStep": "Otestovať tento model",
+    "testStepRunning": "Testuje sa…",
+    "testStepNotTestable": "Testovať možno iba kroky s jedným modelom",
     "saving": "Ukladá sa...",
     "liveNoProviders": "Zatiaľ neboli zaznamenaní žiadni poskytovatelia.",
     "liveFleetDataHint": "Údaje o flotile prichádzajú prostredníctvom živých udalostí combo.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Stiahnuť šablónu CSV",
     "importFromFileMoreErrors": "+{count} ďalších",
     "importFromFileSchemaHint": "Stĺpce CSV sú pozičné: provider, name, apiKey, baseUrl (voliteľné), priority (voliteľné). Stĺpec provider musí obsahovať existujúce ID spravovaného poskytovateľa alebo ID už zaregistrovaného uzla kompatibilného s OpenAI/Anthropic — tento import nevytvára nové uzly koncových bodov.",
+    "importOAuthExport": "Importovať export OAuth",
+    "oauthExportTitle": "Importovať export zo správcu účtov",
+    "oauthExportDescription": "Nahrajte export v obyčajnom texte zo správcu účtov (napr. export cloud-accounts z Antigravity Manageru). Tokeny sa obnovia na serveri a z každého účtu sa stane pripojenie OAuth — duplikáty sa obnovia na mieste.",
+    "oauthExportProviderLabel": "Poskytovateľ",
+    "oauthExportChoose": "Vybrať súbor",
+    "oauthExportFileAria": "Súbor JSON s exportom účtov",
+    "oauthExportSchemaHint": "Akceptované: dokument s poľom \"accounts\", samotné pole alebo jeden záznam. Tokeny môžu byť vo vnorenom objekte token alebo priamo v zázname.",
+    "oauthExportDetected": "Zistené účty: {count}",
+    "oauthExportSelectAll": "Vybrať všetky účty",
+    "oauthExportSelectAccount": "Vybrať účet {index}",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Poskytovateľ",
+    "oauthExportColRefresh": "Obnovovací token",
+    "oauthExportNoEmail": "(bez e-mailu)",
+    "oauthExportYes": "áno",
+    "oauthExportNo": "nie",
+    "oauthExportImporting": "Importuje sa…",
+    "oauthExportImport": "Importovať účty ({count})",
+    "oauthExportResult": "Importované {imported}/{total} — zlyhalo {failed}",
+    "oauthExportParseError": "Z tohto súboru sa nepodarilo načítať žiadne účty.",
+    "oauthExportUnknownError": "neznáma chyba",
     "adaptaTutorial": {
       "title": "Ako pripojiť Adapta Web",
       "introPrefix": "Adapta sa autentifikuje cez Clerk. Token",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "Všetky modely sú už importované",
     "noNewModelsToImport": "Žiadne nové modely na import — všetky modely sú už v registri alebo v zozname vlastných modelov",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Objavenie modelu zlyhalo {time}",
     "skippingExistingModels": "Preskakujem {count} existujúcich modelov",
     "autoSync": "Automatická synchronizácia",
     "autoSyncShort": "Synchronizovať",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Použité v kombách ({count}): {combos}",
+    "openComboTooltip": "Otvoriť kombá — používa {combo}"
   },
   "settings": {
     "title": "Nastavenia",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "Hostiteľ",
     "qdrantCollection": "Zbierka",
     "catalogVisibilityHint": "Skryté identifikátory modelov je možné naďalej volať s rovnakými prístupovými oprávneniami.",
+    "exposeCombosOnly": "V /v1/models zobrazovať iba kombinácie",
+    "exposeCombosOnlyDesc": "Klienti, ktorí modely zisťujú automaticky, uvidia vaše kombinácie (a auto/*, ak nie sú skryté) namiesto surových modelov poskytovateľov. Explicitné ID provider/model sa naďalej smerujú.",
     "catalogScopeTitle": "Zoznam rozhrania Models API",
     "catalogScopeDesc": "Čo GET /v1/models uvádza pre tento kľúč. Zúženie zoznamu nikdy nemení, čo môže kľúč volať.",
     "catalogScopeAll": "Oboje",
@@ -8917,7 +9022,9 @@
         "financial": "Finančná",
         "brazilian": "Brazílska",
         "usa": "USA",
-        "full": "Úplná"
+        "full": "Úplná",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Južná Afrika)"
       },
       "builtinTypes": "Vstavané typy",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "Adresy IPv4",
         "ipv6_address": "Adresy IPv6",
         "aws_key": "Prístupové kľúče AWS",
-        "api_key_generic": "Kľúče API a tokeny"
+        "api_key_generic": "Kľúče API a tokeny",
+        "iban": "čísla bankových účtov IBAN",
+        "eu_vat": "EU VAT čísla",
+        "es_dni_nie": "španielsky DNI / NIE",
+        "it_codice_fiscale": "Taliansky Codice Fiscale",
+        "pl_pesel": "Poľská PESEL",
+        "nl_bsn": "holandská BSN",
+        "de_steuer_id": "Nemecké Steuer-ID",
+        "se_personnummer": "švédske personnummer",
+        "za_id": "Juhoafrické čísla ID",
+        "za_phone": "telefónne čísla v Južnej Afrike",
+        "za_vat": "Juhoafrické čísla VAT",
+        "za_tax_ref": "Daňové referencie v Južnej Afrike"
       },
       "customPatterns": "Vlastné vzory",
       "customPatternsDesc": "Zhody sa nahrádzajú za [CUSTOM_REDACTED]. Najviac {max} vzorov. Vzory s rizikom katastrofického backtrackingu sa odmietajú.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth nie je nakonfigurovaný. Zaregistrujte OAuth aplikáciu na {applicationsUrl} s URI na presmerovanie {redirectUri} a rozsahmi \"{scopes}\", potom nastavte {clientIdEnv} (a voliteľne {clientSecretEnv}) a reštartujte.",
     "gitlabDuoSetupDescription": "Po registrácii aplikácie a nastavení env premenných na tejto inštancii OmniRoute kliknite na Pokračovať, aby ste začali prihlásenie pomocou OAuth.",
     "continue": "Pokračovať",
+    "copilotPolicyTitle": "Experimentálny poskytovateľ: stav pravidiel je nejednoznačný",
+    "copilotPolicyLine1": "OmniRoute sa pripája cez api.githubcopilot.com, ktorý GitHub nezverejnil ako všeobecnú inferenciu tretej strany API. Táto integrácia je experimentálna a môže sa zmeniť bez upozornenia.",
+    "copilotPolicyLine2": "Môže byť pripojený iba váš vlastný účet GitHub. Nikdy nezdieľajte poverenia, spoločné účty ani sa nepokúšajte prekročiť limity vášho plánu.",
+    "copilotPolicyLine3": "Používatelia bezplatných a študentských programov dostanú iba automatický výber modelu. Podmienky vášho plánu Copilot a akékoľvek obmedzenia používania zostávajú vašou zodpovednosťou.",
+    "copilotPolicyAcknowledge": "Rozumiem, spojte sa",
     "tabPasteSetupToken": "Token z nastavenia",
     "claudeSetupTokenDescription": "Spustite v termináli `claude setup-token` a vložte token, ktorý vypíše. Platí jeden rok a nemá obnovovací token. OmniRoute pred uložením odošle do Anthropic jednu testovaciu požiadavku.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "zobraziť konverzáciu",
       "openConversation": "Otvoriť konverzáciu {id}"
     },
-    "tableLabel": "Záznamy požiadaviek"
+    "tableLabel": "Záznamy požiadaviek",
+    "throughputPostFirstToken": "Po prvom tokene",
+    "throughputEndToEnd": "Od začiatku do konca",
+    "throughputRate": "{value} tokenov/s",
+    "throughputExplanation": "Obe rýchlosti používajú väčší z počtov výstupných tokenov a tokenov uvažovania. Hodnota Po prvom tokene nezahŕňa platný TTFT; inak používa celkové trvanie. Hodnota Od začiatku do konca vždy používa celkové trvanie. Odpoveď vo vyrovnávacej pamäti môže mať vysokú rýchlosť doručenia v dávke bez toho, aby model generoval rýchlejšie."
   },
   "proxyLogger": {
     "filterAll": "Všetko",
@@ -12785,7 +12913,8 @@
     "title": "Štatistiky poskytovateľov",
     "description": "Prevádzka, latencia a miera úspešnosti podľa poskytovateľa a modelu",
     "combo": "Kombinácia",
-    "toggleModels": "Zobraziť modely pre {provider}"
+    "toggleModels": "Zobraziť modely pre {provider}",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Serverless relay proxy",
@@ -13730,7 +13859,9 @@
       "disabled": "Zakázané",
       "dual": "Duálny",
       "alias": "Alias",
-      "canonical": "Kanonický"
+      "canonical": "Kanonický",
+      "fail_closed": "Zablokovať (fail_closed)",
+      "count_as_zero": "Počítať ako $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infraštruktúrne zastavenia s chránenou prioritou ako 502",
         "description": "Odpovedať kódom 502 namiesto 503, keď prioritný cieľ so záložnou možnosťou iba pri vyčerpaní kvóty zastaví kombináciu z dôvodu, ktorý preukázateľne nesúvisí s kvótou: otvorený istič poskytovateľa alebo prediktívne preskočenie z dôvodu latencie."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika rozpočtu pre použitie bez ceny",
+        "description": "Ako denné/týždenné USD limity na kľúč zaobchádzajú s úspešným použitím, ktorého poskytovateľ/model nemá položku ceny. fail_closed (predvolené) označí okno za prekročené, takže neznáma cena nikdy nemôže obísť tvrdý limit. count_as_zero započítava takéto použitie ako $0 a naďalej vynucuje výdavky na modely s nastavenou cenou. Modely bez ceny sú v každom prípade uvedené na domovskej stránke panela."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "Zavrieť"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Zakázať generovanie variantov úrovne uvažovania (napr. -low, -medium, -high) v katalógu /v1/models.",
+  "teamCosts": {
+    "title": "Náklady tímu",
+    "subtitle": "Spravujte zdieľané mäkké rozpočty a odhady nákladov z katalógu.",
+    "refresh": "Obnoviť",
+    "create": "Vytvoriť tím",
+    "edit": "Upraviť tím",
+    "archive": "Archivovať",
+    "selectTeam": "Tímy",
+    "searchTeams": "Hľadať tímy",
+    "statusFilter": "Stav tímu",
+    "active": "Aktívny",
+    "archived": "Archivovaný · iba na čítanie",
+    "allTeams": "Všetky tímy",
+    "noTeams": "Žiadne zodpovedajúce tímy.",
+    "selectHint": "Vytvorte alebo vyberte tím, aby ste videli náklady.",
+    "loading": "Načítavanie nákladov tímu…",
+    "budgetTitle": "Aktuálny mäkký rozpočet",
+    "budgetSubtitle": "Úspešné potvrdené využitie · kĺzavé okno · nezávislé od dátumov reportu",
+    "archivedBudget": "Archivovaný: vynucovanie rozpočtu je neaktívne. Historické reporty zostávajú dostupné.",
+    "unlimited": "Neobmedzené — nie je nastavený žiadny zdieľaný mäkký rozpočet.",
+    "budgetUnavailable": "Stav rozpočtu nie je dostupný. Obnovte a skúste to znova.",
+    "used": "Úspešné využitie",
+    "maximum": "Maximum rozpočtu",
+    "remaining": "Známy zvyšok",
+    "resets": "Resetuje sa",
+    "unpricedBudget": "Pri časti úspešného využitia nie je známa cena. Známy súčet je neúplný; vynucovanie rozpočtu toto okno považuje za prekročené.",
+    "overBudget": "Rozpočet dosiahnutý alebo prekročený · o {amount} viac",
+    "reportTitle": "Report využitia",
+    "reportSubtitle": "Všetky pokusy · odhad z katalógu v USD, nie faktúra · celé dátumy UTC",
+    "reportPeriod": "Obdobie reportu",
+    "day1": "1 deň",
+    "day7": "7 dní",
+    "day30": "30 dní",
+    "allTime": "Celé obdobie",
+    "reportSpend": "Odhadované výdavky reportu",
+    "requests": "Požiadavky",
+    "assignedKeys": "Priradené kľúče",
+    "unpricedReport": "Tento report obsahuje neznáme ceny. Odhadované výdavky sú neúplné.",
+    "breakdown": "Náklady podľa kľúča API",
+    "noUsage": "V tomto období reportu žiadne využitie.",
+    "keyName": "Názov kľúča API",
+    "tokens": "Vstupné + výstupné tokeny",
+    "unnamedKey": "Nepomenovaný alebo odstránený kľúč",
+    "unpriced": "Neznáma cena",
+    "members": "Členstvo",
+    "memberSubtitle": "Zmena členstva ponecháva historické výdavky pri pôvodnom tíme.",
+    "searchKeys": "Hľadať kľúče alebo súčasných vlastníkov",
+    "chooseKey": "Vyberte kľúč API",
+    "unassigned": "Nepriradené",
+    "ownership": "Súčasný fakturačný tím: {team}",
+    "assign": "Priradiť",
+    "remove": "Odstrániť",
+    "noMembers": "Žiadni súčasní členovia. Historické využitie sa do rozpočtu môže stále započítavať.",
+    "assignedAt": "Priradené {date} (UTC)",
+    "name": "Názov tímu",
+    "description": "Popis",
+    "enableBudget": "Povoliť zdieľaný mäkký rozpočet",
+    "amount": "Výška rozpočtu (USD)",
+    "duration": "Kĺzavé okno rozpočtu",
+    "cancel": "Zrušiť",
+    "save": "Uložiť",
+    "confirm": "Potvrdiť",
+    "transferTitle": "Potvrďte prenos kľúča",
+    "transferMessage": "Presunúť tento kľúč z „{source}“ do „{destination}“? Historické výdavky zostávajú pri pôvodnom tíme.",
+    "removeTitle": "Odstrániť priradenie kľúča",
+    "removeMessage": "Odstrániť tento kľúč z „{team}“? Historické výdavky zostávajú v tomto tíme.",
+    "archiveTitle": "Archivovať tím",
+    "archiveMessage": "Archivovať „{team}“? Všetky súčasné prepojenia sa uzavrú a vynucovanie rozpočtu sa zastaví. Historické reporty zostávajú dostupné.",
+    "invalidName": "Zadajte názov (1–200 znakov) a popis s najviac 2 000 znakmi.",
+    "invalidAmount": "Zadajte konečnú výšku rozpočtu väčšiu ako nula.",
+    "unauthorized": "Na pokračovanie sa prihláste do administračného panela.",
+    "forbidden": "Nemáte oprávnenie spravovať tímy. Vaše zadanie bolo zachované.",
+    "notFound": "Tento tím alebo priradenie už neexistuje.",
+    "conflict": "Priradenie alebo tím sa zmenili. Obnovte a pred opakovaním potvrďte súčasné vlastníctvo.",
+    "failed": "Požiadavka zlyhala. Vaše zadanie bolo zachované; skúste to znova.",
+    "partialBudget": "Niektoré uchované denné koše presahujú hranicu okna a nemožno ich presne rozdeliť. Zobrazené výdavky sú neúplné; zostávajúci priestor nie je dostupný. Existujúca politika mäkkého rozpočtu sa nemení."
+  },
   "connectionTest": {
     "title": "Testovacia správa",
     "description": "Odoslať jednu skutočnú požiadavku prostredníctvom tohto účtu. Spotrebuje sa tým malé množstvo kvóty a v závislosti od poskytovateľa sa môže začať obdobie používania.",
@@ -15216,5 +15428,8 @@
     "importButton": "Importovať",
     "importFailed": "Import zlyhal.",
     "importSuccess": "Importovaných {connections} účtov a {nodes} uzlov poskytovateľov; preskočených {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Začať od aktuálnej pozície (preskočiť existujúce záznamy)"
   }
 }

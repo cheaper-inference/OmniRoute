@@ -1345,7 +1345,9 @@
       "open": "buksan",
       "close": "isara"
     },
-    "noResults": "Walang resulta"
+    "noResults": "Walang resulta",
+    "costsTeams": "Mga koponan",
+    "costsTeamsSubtitle": "Mga sentro ng gastos ng koponan"
   },
   "webhooks": {
     "title": "Mga Webhook",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "Mga advanced na panuntunan sa payload, limitasyon sa request, at mga setting ng proxy API",
     "mitmProxyDescription": "I-configure ang mga setting ng MITM proxy para sa inspeksyon at pag-debug ng traffic",
     "oneProxyDescription": "I-configure ang mga setting ng 1Proxy para sa advanced na proxy chaining",
-    "omniSkillsDescription": "Mag-install at mamahala ng mga sandbox skill para sa awtomatikong prompt at pagpapagana ng tool"
+    "omniSkillsDescription": "Mag-install at mamahala ng mga sandbox skill para sa awtomatikong prompt at pagpapagana ng tool",
+    "teamsDescription": "Mga pagtataya ng gastos ng koponan at pinagsasaluhang malambot na badyet"
   },
   "cloudSyncStatus": {
     "synced": "Na-sync",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "Kopyahin ang iyong endpoint",
     "readinessStep4": "Magpadala ng pansubok na kahilingan",
     "readinessContinue": "Ipagpatuloy ang pag-setup",
-    "readinessDismiss": "Huwag munang ipakita"
+    "readinessDismiss": "Huwag munang ipakita",
+    "unpricedUsageTitle": "{count, plural, one {# modelo} other {# mga modelo}} na kamakailang ginamit ngunit walang naka-configure na presyo",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API key na may limit sa paggamit} other {# API keys na may limit sa paggamit}} ang gumamit ng mga modelong ito sa nakaraang 8 araw. Habang ang paggamit na iyon ay nasa loob ng pang-araw-araw o panglinggong panahon ng key, itinuturing na lampas sa quota ang key at binablok ang mga kahilingan nito (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Ang paggamit na ito ay binibilang bilang $0 para sa mga limitasyon ng paggamit kada key (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# kahilingan} other {# mga kahilingan}}, {keys, plural, one {# limitadong key} other {# mga limitadong key}}",
+    "unpricedUsageMore": "…at {count} pa",
+    "unpricedUsageConfigure": "I-configure ang pagpepresyo",
+    "unpricedUsageDismiss": "Isara"
   },
   "analytics": {
     "title": "Analitika",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Manu-manong Configuration",
     "clineManualConfiguration": "Manu-manong Configuration ng Cline",
     "kiloManualConfiguration": "Manu-manong Configuration ng Kilo Code",
+    "piManualConfiguration": "Pi - Manu-manong Configuration",
+    "piConfigInvalidTitle": "Pi models.json ay hindi nababasa",
+    "piOmnirouteConfigured": "OmniRoute ay na-configure bilang isang custom na provider ng Pi",
+    "piModelHelp": "Hindi awtomatikong natutuklasan ng Pi ang mga modelo para sa mga custom na endpoint — ang modelong pipiliin mo ay tahasang nakasulat sa models.json.",
+    "piManualConfigTitle": "O manu-manong i-edit ~/.pi/agent/models.json",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Pagkatapos ay simulan ang Pi at piliin ang omniroute provider. Itakda ang PI_CODING_AGENT_DIR upang ilipat ang buong direktoryo ng ahente.",
+    "piUnownedNote": "Ang entry na ito ay idinagdag sa labas ng OmniRoute (hal. Pi-gui's Custom endpoints). Ang pag-aaplay ay magpapatibay nito; Ang pag-reset ay nag-aalis lamang ng mga entry na isinulat OmniRoute.",
     "whenToUseLabel": "Kailan gagamitin",
     "openToolDocs": "Buksan ang tool docs",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Gamitin kapag kailangan mo ng magaan na terminal-native AI assistant para sa mga mabilisang gawain.",
       "hermes-agent": "Gamitin kapag kailangan mo ang Hermes Agent (ng Nousresearch) na may default, delegation, vision, at auxiliary na mga modelo na naka-route sa OmniRoute.",
+      "whycodes": "Gamitin kapag gusto mo ang WhyCodes bilang pangkalahatang awtonomong CLI agent (TUI, mga pinangalanang agent, memorya, swarm) na nakaturo sa OmniRoute.",
       "custom": "Gamitin para sa mga custom na pagpapatupad ng tool o generic na mga configuration na tugma sa OpenAI."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI coding agent na may suporta sa custom provider",
       "droid": "AI Assistant ng Factory Droid",
       "openclaw": "Buksan ang Claw AI Assistant",
+      "openclaude": "CLI ng OpenClaude coding agent na may suporta sa provider na compatible sa OpenAI",
       "cline": "CLI ng Cline AI Coding Assistant",
       "kilo": "CLI ng Kilo Code AI Assistant",
       "qwen": "Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "Warp AI terminal na may suporta sa custom provider",
       "agent-deck": "Agent Deck na tagapag-orkestra ng maraming ahente",
       "5dive": "5dive — self-hosted fleet ng coding agents; isang auth profile ang nagtuturo sa kanilang lahat sa OmniRoute",
+      "whycodes": "Awtonomong CLI agent na WhyCodes na may base URL na tugma sa OpenAI",
       "zed": "Zed code editor — built-in na agent sa pamamagitan ng provider na compatible sa OpenAI"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "I-update",
     "cliproxyapiUpdateAvailable": "Available na Update: v{current} → v{latest}",
     "cliproxyapiVersion": "Bersyon",
+    "piInstallTitle": "I-install ang Pi Coding Agent",
+    "piInstallInstructions": "I-install ang Pi CLI, pagkatapos ay bumalik dito para ikonekta ito sa OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Gamitin ang URL na naaabot mula sa machine na nagpapatakbo ng Pi. Awtomatikong idinaragdag ang OpenAI-compatible /v1 endpoint.",
+    "piManualMergeHint": "Preview lang. Pagsamahin ang providers.omniroute entry na ito sa models.json para manatiling buo ang iyong iba pang provider at setting.",
     "removeMapping": "Alisin ang mapping"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "hal. 10",
     "testSelected": "Subukan ang napili ({count})",
     "testAllFiltered": "Subukan ang lahat ng na-filter ({count})",
+    "visibility": "Visibility ng model",
+    "allVisibility": "Nakikita at nakatago",
+    "visibleOnly": "Nakikita",
+    "hiddenOnly": "Nakatago",
+    "visibleColumn": "Nakikita",
+    "hideModel": "Itago ang {name} mula sa /v1/models",
+    "showModel": "Ipakita ang {name} sa /v1/models",
+    "hiddenBadge": "Nakatago",
+    "hideFiltered": "Itago ang mga na-filter ({count})",
+    "showFiltered": "Ipakita ang mga na-filter ({count})",
+    "visibilityCounts": "{visible} nakikita · {hidden} nakatago · {total} kabuuan",
+    "visibilityUpdateFailed": "Hindi na-update ang visibility ng model",
     "cancel": "Kanselahin",
     "clearResults": "I-clear ang mga resulta",
     "testing": "Sinusubukan...",
@@ -3394,7 +3433,44 @@
     "httpError": "Nabigo ang kahilingan na may HTTP {status}",
     "testFailedNoDetail": "Nabigo ang pagsusuri nang walang mensahe ng error",
     "additionalCapabilities": "Mga karagdagang kakayahan: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "Access sa API key",
+    "allowedInKeys": "Pinapayagan sa: {count, plural, one {# key} other {# mga key}}",
+    "keysLoading": "Naglo-load ng mga API key…",
+    "keysRetry": "Subukang muli ang pag-load ng mga key",
+    "accessViaPattern": "sa pamamagitan ng {pattern}",
+    "accessBlocked": "Hinarang ng {pattern}",
+    "editKeyAccess": "I-edit ang access ng key",
+    "toggleKeyAccess": "Payagan ang {item} sa {name}",
+    "resultNetworkError": "Nabigo ang pagtatalaga",
+    "resultWouldEmptyModels": "Maiiwan ang key na ito na walang pinapayagang modelo — sa halip ay i-edit ang access sa key",
+    "resultWouldEmptyCombos": "Maiiwan ang key na ito na walang pinapayagang combo — sa halip ay i-edit ang access sa key",
+    "keyUpdatePending": "Kasalukuyan pang ina-update ang {name}. Subukang muli sa ilang sandali.",
+    "assignToKeys": "Italaga sa mga API key…",
+    "assignApply": "Ilapat ang mga pagbabago",
+    "assignComplete": "Na-update ang access sa API key",
+    "assignFailed": "Nabigo ang ilang update sa API key",
+    "assignNoChanges": "Walang binagong access sa API key",
+    "selectedAccessItems": "Mga napiling item: {count}",
+    "assignExcludedCombos": "{count, plural, one {# napiling row ng combo ay hindi modelo at lalaktawan dito} other {# napiling mga row ng combo ay hindi mga modelo at lalaktawan dito}}. Magtalaga ng mga combo mula sa tab na Combos.",
+    "assignActionAdd": "Idagdag",
+    "assignActionRemove": "Alisin",
+    "searchKeys": "Maghanap ng mga API key",
+    "selectApiKey": "Piliin ang API key na {name}",
+    "allModelsAccess": "Lahat ng modelo",
+    "allCombosAccess": "Lahat ng combo",
+    "modelAccessCount": "Mga modelo: {count}",
+    "comboAccessCount": "Mga combo: {count}",
+    "keyInactive": "Hindi aktibo",
+    "keyBanned": "Naka-ban",
+    "keyRevoked": "Binawi",
+    "switchRestrictedConfirm": "Ilipat ang key na ito sa pinaghihigpitang access: ang mga napiling item lamang ang papayagan",
+    "removeNoChangeHint": "Pinapayagan ng key na ito ang lahat; walang magiging pagbabago ang pag-alis ng mga napiling item",
+    "removeStaysAllowedHint": "Pinapayagan pa rin sa key na ito sa pamamagitan ng {patterns}",
+    "resultChanged": "Binago",
+    "resultUnchanged": "Walang pagbabago",
+    "resultSkipped": "Nilaktawan",
+    "resultNeedsSwitch": "Kailangang ilipat sa pinaghihigpitan"
   },
   "combos": {
     "title": "Mga combo",
@@ -3515,6 +3591,9 @@
     "moveUp": "Umakyat",
     "moveDown": "Ilipat pababa",
     "removeModel": "Alisin",
+    "testStep": "Subukan ang modelong ito",
+    "testStepRunning": "Sinusubukan…",
+    "testStepNotTestable": "Mga hakbang na may iisang modelo lang ang masusubukan",
     "saving": "Nagse-save...",
     "liveNoProviders": "Wala pang naobserbahang mga provider.",
     "liveFleetDataHint": "Dumarating ang data ng fleet sa pamamagitan ng mga live combo event.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "I-download ang template ng CSV",
     "importFromFileMoreErrors": "+{count} pa",
     "importFromFileSchemaHint": "Nakabatay sa posisyon ang mga column ng CSV: provider, name, apiKey, baseUrl (opsyonal), priority (opsyonal). Ang column na provider ay dapat isang umiiral na ID ng pinamamahalaang provider o ID ng nakarehistro nang node na compatible sa OpenAI/Anthropic — hindi gumagawa ang pag-import na ito ng mga bagong endpoint node.",
+    "importOAuthExport": "Mag-import ng OAuth export",
+    "oauthExportTitle": "Mag-import ng export mula sa account manager",
+    "oauthExportDescription": "Mag-upload ng plaintext na export mula sa isang account manager (hal. ang cloud-accounts export ng Antigravity Manager). Nire-refresh ang mga token sa server at nagiging OAuth na koneksyon ang bawat account — nire-refresh sa lugar ang mga duplicate.",
+    "oauthExportProviderLabel": "Tagapagbigay",
+    "oauthExportChoose": "Pumili ng file",
+    "oauthExportFileAria": "JSON file ng export ng account",
+    "oauthExportSchemaHint": "Tinatanggap: isang dokumentong may \"accounts\" na array, isang payak na array, o isang solong record. Maaaring nasa loob ng nested na token object ang mga token o direkta sa record.",
+    "oauthExportDetected": "{count} account ang natukoy",
+    "oauthExportSelectAll": "Piliin ang lahat ng account",
+    "oauthExportSelectAccount": "Piliin ang account {index}",
+    "oauthExportColEmail": "Email",
+    "oauthExportColProvider": "Tagapagbigay",
+    "oauthExportColRefresh": "Token sa pag-refresh",
+    "oauthExportNoEmail": "(walang email)",
+    "oauthExportYes": "oo",
+    "oauthExportNo": "hindi",
+    "oauthExportImporting": "Nag-i-import…",
+    "oauthExportImport": "I-import ang {count} account",
+    "oauthExportResult": "Na-import ang {imported}/{total} — {failed} ang nabigo",
+    "oauthExportParseError": "Walang mabasang account mula sa file na ito.",
+    "oauthExportUnknownError": "hindi kilalang error",
     "adaptaTutorial": {
       "title": "Paano ikonekta ang Adapta Web",
       "introPrefix": "Nag-a-authenticate ang Adapta sa pamamagitan ng Clerk. Ang token",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "Lahat ng mga modelo ay nai-import na",
     "noNewModelsToImport": "Walang bagong modelo na i-import — lahat ng mga modelo ay nasa registry o custom na listahan na",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Nabigo ang pagtuklas ng modelo {time}",
     "skippingExistingModels": "Pinapalampas ang {count} na umiiral na mga modelo",
     "autoSync": "Awtomatikong Pag-sync",
     "autoSyncShort": "I-sync",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Ginagamit sa {count} combo: {combos}",
+    "openComboTooltip": "Buksan ang Mga combo — ginagamit ng {combo}"
   },
   "settings": {
     "title": "Mga setting",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Koleksyon",
     "catalogVisibilityHint": "Maaari pa ring tawagin ang mga nakatagong model ID gamit ang parehong mga pahintulot sa pag-access.",
+    "exposeCombosOnly": "Ilista lamang ang mga combo sa /v1/models",
+    "exposeCombosOnlyDesc": "Makikita ng mga client na awtomatikong tumutuklas ng mga model ang iyong mga combo (at auto/* maliban kung nakatago) sa halip na ang mga raw na model ng provider. Patuloy na iruruta ang mga tahasang provider/model ID.",
     "catalogScopeTitle": "Listahan ng Models API",
     "catalogScopeDesc": "Kung ano ang inilalabas ng GET /v1/models para sa key na ito. Ang pagpapaliit ng listahan ay hindi kailanman nagbabago sa kung ano ang maaaring tawagin ng key.",
     "catalogScopeAll": "Pareho",
@@ -8917,7 +9022,9 @@
         "financial": "Pampinansiyal",
         "brazilian": "Pang-Brazil",
         "usa": "Estados Unidos",
-        "full": "Kumpleto"
+        "full": "Kumpleto",
+        "gdpr": "GDPR (Unyong Europeo)",
+        "popia": "POPIA (Timog Aprika)"
       },
       "builtinTypes": "Mga built-in na uri",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "Mga IPv4 address",
         "ipv6_address": "Mga IPv6 address",
         "aws_key": "Mga access key ng AWS",
-        "api_key_generic": "Mga API key at token"
+        "api_key_generic": "Mga API key at token",
+        "iban": "Mga numero ng bank account (IBAN)",
+        "eu_vat": "Mga numero ng VAT ng EU",
+        "es_dni_nie": "DNI / NIE ng Espanya",
+        "it_codice_fiscale": "Codice Fiscale ng Italya",
+        "pl_pesel": "PESEL ng Poland",
+        "nl_bsn": "BSN ng Netherlands",
+        "de_steuer_id": "Steuer-ID ng Alemanya",
+        "se_personnummer": "Personnummer ng Sweden",
+        "za_id": "Mga numero ng ID sa Timog Aprika",
+        "za_phone": "Mga numero ng telepono sa Timog Aprika",
+        "za_vat": "Mga numero ng VAT sa Timog Aprika",
+        "za_tax_ref": "Mga reperensya sa buwis sa Timog Aprika"
       },
       "customPatterns": "Mga custom na pattern",
       "customPatternsDesc": "Ang mga tugma ay papalitan ng [CUSTOM_REDACTED]. Hanggang {max} pattern. Tinatanggihan ang mga pattern na may panganib ng sakunang backtracking.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "Hindi naka-configure ang GitLab Duo OAuth. Magrehistro ng isang OAuth application sa {applicationsUrl} na may redirect URI na {redirectUri} at mga scope na \"{scopes}\", pagkatapos ay itakda ang {clientIdEnv} (at opsyonal na {clientSecretEnv}) at i-restart.",
     "gitlabDuoSetupDescription": "Matapos mairehistro ang aplikasyon at ma-set ang mga env vars sa instance na ito ng OmniRoute, i-click ang Magpatuloy upang simulan ang OAuth login.",
     "continue": "Magpatuloy",
+    "copilotPolicyTitle": "Eksperimental na provider: ang katayuan ng patakaran ay hindi maliwanag",
+    "copilotPolicyLine1": "kumokonekta ang OmniRoute sa pamamagitan ng api.githubcopilot.com, na hindi nai-publish ng GitHub bilang pangkalahatang third-party na hinuha API. Ang pagsasamang ito ay pang-eksperimento at maaaring magbago nang walang abiso.",
+    "copilotPolicyLine2": "Tanging ang iyong sariling GitHub account ang maaaring konektado. Huwag kailanman magbahagi ng mga kredensyal, pool account, o subukang lumampas sa mga limitasyon ng iyong plano.",
+    "copilotPolicyLine3": "Ang mga gumagamit ng libre at Student plan ay tumatanggap lamang ng awtomatikong pagpili ng modelo. Ang iyong mga tuntunin sa Copilot plan at anumang limitasyon sa paggamit ay mananatiling responsibilidad mo.",
+    "copilotPolicyAcknowledge": "Naiintindihan ko, kumonekta",
     "tabPasteSetupToken": "Setup token",
     "claudeSetupTokenDescription": "Patakbuhin ang `claude setup-token` sa isang terminal at i-paste ang token na ipi-print nito. Valid ito sa loob ng isang taon at walang refresh token. Nagpapadala ang OmniRoute ng isang test request sa Anthropic bago ito i-save.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "tingnan ang pag-uusap",
       "openConversation": "Buksan ang pag-uusap na {id}"
     },
-    "tableLabel": "Mga log ng request"
+    "tableLabel": "Mga log ng request",
+    "throughputPostFirstToken": "Pagkatapos ng unang token",
+    "throughputEndToEnd": "Mula simula hanggang dulo",
+    "throughputRate": "{value} token/seg",
+    "throughputExplanation": "Parehong rate ay gumagamit ng mas malaki sa bilang ng output at reasoning token. Ang pagkatapos ng unang token ay hindi kasama ang valid na TTFT; kung hindi, ginagamit nito ang buong tagal. Ang mula simula hanggang dulo ay palaging gumagamit ng buong tagal. Ang isang naka-buffer na tugon ay maaaring may mataas na burst delivery rate nang walang mas mabilis na henerasyon ng modelo."
   },
   "proxyLogger": {
     "filterAll": "Lahat",
@@ -12785,7 +12913,8 @@
     "title": "Mga istatistika ng provider",
     "description": "Trapiko, latency, at mga rate ng tagumpay kada provider at kada modelo",
     "combo": "Kombinasyon",
-    "toggleModels": "Ipakita ang mga modelo para sa {provider}"
+    "toggleModels": "Ipakita ang mga modelo para sa {provider}",
+    "windowSince": "Mula {date}"
   },
   "relay": {
     "title": "Mga Serverless Relay Proxy",
@@ -13730,7 +13859,9 @@
       "disabled": "Naka-disable",
       "dual": "Dalawahan",
       "alias": "Alyas",
-      "canonical": "Kanonikal"
+      "canonical": "Kanonikal",
+      "fail_closed": "Harangan (fail_closed)",
+      "count_as_zero": "Ituring na $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Humihinto bilang 502 ang Protektadong-Priyoridad na Imprastraktura",
         "description": "Ibalik ang 502 sa halip na 503 kapag pinahinto ng isang priyoridad na target na may fallback para lamang sa quota ang kumbinasyon dahil sa isang sanhi na mapatutunayang hindi quota: isang bukas na circuit breaker ng provider o paglaktaw batay sa hinulaang latency."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Patakaran sa Badyet para sa Hindi Naka-presyong Paggamit",
+        "description": "Kung paano tinatrato ng pang-araw-araw/panglinggong USD na mga limitasyon kada key ang matagumpay na paggamit kung ang provider/model ay walang hilera ng presyo. Ang fail_closed (karaniwan) ay minamarkahan ang panahon bilang nalampasan, kaya ang hindi kilalang gastos ay hindi kailanman makakalusot sa isang mahigpit na limitasyon. Ang count_as_zero ay binibilang ang paggamit na iyon bilang $0 at pinapanatili ang pagpapatupad ng binayarang gastos. Nakalista ang mga modelong walang presyo sa home page ng dashboard sa anumang kaso."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "Isara"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Huwag paganahin ang pagbuo ng mga variant ng antas ng pag-iisip (hal. -low, -medium, -high) sa katalogong /v1/models.",
+  "teamCosts": {
+    "title": "Mga gastos ng koponan",
+    "subtitle": "Pamahalaan ang pinagsasaluhang malambot na badyet at mga pagtataya ng gastos sa katalogo.",
+    "refresh": "I-refresh",
+    "create": "Gumawa ng koponan",
+    "edit": "I-edit ang koponan",
+    "archive": "I-archive",
+    "selectTeam": "Mga koponan",
+    "searchTeams": "Maghanap ng mga koponan",
+    "statusFilter": "Katayuan ng koponan",
+    "active": "Aktibo",
+    "archived": "Naka-archive · read-only",
+    "allTeams": "Lahat ng koponan",
+    "noTeams": "Walang tumutugmang koponan.",
+    "selectHint": "Gumawa o pumili ng koponan para makita ang mga gastos.",
+    "loading": "Nilo-load ang mga gastos ng koponan…",
+    "budgetTitle": "Kasalukuyang malambot na badyet",
+    "budgetSubtitle": "Matagumpay na naitalang paggamit · gumagalaw na window · hindi nakadepende sa mga petsa ng ulat",
+    "archivedBudget": "Naka-archive: hindi aktibo ang pagpapatupad ng badyet. Mananatiling available ang mga makasaysayang ulat.",
+    "unlimited": "Walang limitasyon — walang naka-configure na pinagsasaluhang malambot na badyet.",
+    "budgetUnavailable": "Hindi available ang katayuan ng badyet. I-refresh para subukan muli.",
+    "used": "Matagumpay na paggamit",
+    "maximum": "Pinakamataas na badyet",
+    "remaining": "Alam na natitira",
+    "resets": "Magre-reset sa",
+    "unpricedBudget": "May hindi alam na presyo ang bahagi ng matagumpay na paggamit. Hindi kumpleto ang alam na kabuuan; itinuturing ng pagpapatupad ng badyet na lampas na ang window na ito.",
+    "overBudget": "Naabot o lumampas ang badyet · {amount} na sobra",
+    "reportTitle": "Ulat ng paggamit",
+    "reportSubtitle": "Lahat ng pagtatangka · pagtatayang batay sa katalogo sa USD, hindi invoice · buong petsa ng UTC",
+    "reportPeriod": "Panahon ng ulat",
+    "day1": "1 araw",
+    "day7": "7 araw",
+    "day30": "30 araw",
+    "allTime": "Buong panahon",
+    "reportSpend": "Tinatayang gastos ng ulat",
+    "requests": "Mga kahilingan",
+    "assignedKeys": "Mga nakatalagang key",
+    "unpricedReport": "May mga hindi alam na presyo ang ulat na ito. Hindi kumpleto ang tinatayang gastos.",
+    "breakdown": "Gastos ayon sa API key",
+    "noUsage": "Walang paggamit sa panahon ng ulat na ito.",
+    "keyName": "Pangalan ng API key",
+    "tokens": "Mga input + output token",
+    "unnamedKey": "Key na walang pangalan o binura",
+    "unpriced": "Hindi alam na presyo",
+    "members": "Pagiging miyembro",
+    "memberSubtitle": "Ang pagpapalit ng pagiging miyembro ay nag-iiwan ng makasaysayang gastos sa orihinal na koponan.",
+    "searchKeys": "Maghanap ng mga key o kasalukuyang may-ari",
+    "chooseKey": "Pumili ng API key",
+    "unassigned": "Hindi nakatalaga",
+    "ownership": "Kasalukuyang koponan sa pagsingil: {team}",
+    "assign": "Italaga",
+    "remove": "Alisin",
+    "noMembers": "Walang kasalukuyang miyembro. Maaaring mabilang pa rin sa badyet ang makasaysayang paggamit.",
+    "assignedAt": "Itinalaga noong {date} (UTC)",
+    "name": "Pangalan ng koponan",
+    "description": "Paglalarawan",
+    "enableBudget": "I-enable ang pinagsasaluhang malambot na badyet",
+    "amount": "Halaga ng badyet (USD)",
+    "duration": "Gumagalaw na window ng badyet",
+    "cancel": "Kanselahin",
+    "save": "I-save",
+    "confirm": "Kumpirmahin",
+    "transferTitle": "Kumpirmahin ang paglilipat ng key",
+    "transferMessage": "Ilipat ang key na ito mula sa “{source}” patungo sa “{destination}”? Mananatili sa orihinal na koponan ang makasaysayang gastos.",
+    "removeTitle": "Alisin ang pagtatalaga ng key",
+    "removeMessage": "Alisin ang key na ito mula sa “{team}”? Mananatili sa koponang ito ang makasaysayang gastos.",
+    "archiveTitle": "I-archive ang koponan",
+    "archiveMessage": "I-archive ang “{team}”? Magsasara ang lahat ng kasalukuyang ugnayan at titigil ang pagpapatupad ng badyet. Mananatiling available ang mga makasaysayang ulat.",
+    "invalidName": "Maglagay ng pangalan (1–200 character) at paglalarawang hindi hihigit sa 2,000 character.",
+    "invalidAmount": "Maglagay ng may hangganang halaga ng badyet na higit sa zero.",
+    "unauthorized": "Mag-sign in sa dashboard ng pamamahala para magpatuloy.",
+    "forbidden": "Wala kang pahintulot na pamahalaan ang mga koponan. Napanatili ang iyong input.",
+    "notFound": "Wala na ang koponan o pagtatalagang ito.",
+    "conflict": "Nagbago ang pagtatalaga o koponan. I-refresh at kumpirmahin ang kasalukuyang pagmamay-ari bago subukan muli.",
+    "failed": "Nabigo ang kahilingan. Napanatili ang iyong input; pakisubukan muli.",
+    "partialBudget": "Nag-o-overlap ang ilang napanatiling pang-araw-araw na bucket sa hangganan ng window at hindi ito mahahati nang eksakto. Hindi kumpleto ang ipinapakitang gastos; hindi available ang natitirang alokasyon. Hindi nagbabago ang umiiral na patakaran sa malambot na badyet."
+  },
   "connectionTest": {
     "title": "Mensahe para sa pagsubok",
     "description": "Magpadala ng isang totoong kahilingan gamit ang account na ito. Gumagamit ito ng kaunting quota at maaaring magsimula ng panahon ng paggamit, depende sa provider.",
@@ -15216,5 +15428,8 @@
     "importButton": "I-import",
     "importFailed": "Nabigo ang pag-import.",
     "importSuccess": "Na-import ang {connections} account at {nodes} provider node; nilaktawan ang {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Magsimula sa kasalukuyang posisyon (laktawan ang mga umiiral na log)"
   }
 }

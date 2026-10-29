@@ -115,146 +115,146 @@ OmniRoute/
 
 ```
 src/
-├── app/                 # App Router (გვერდები + API მარშრუტები + სტატუსის გვერდები + ლენდინგი)
-├── lib/                 # ძირითადი ბიბლიოთეკები / დომენური მოდულები (80 ქვედირექტორია + ~70 ზედა დონის ფაილი)
-├── domain/              # სუფთა დომენური ლოგიკა (პოლიტიკის ძრავა, სარეზერვო მექანიზმი, ღირებულება, ბლოკირება, comboResolver, შეფასება)
-├── server/              # მხოლოდ სერვერის მოდულები (ავტორიზაციის კონვეიერი, cors, ავტორიზაციის შუამავალი) — კლიენტიდან იმპორტი შეუძლებელია
-├── shared/              # სერვერსა და კლიენტს შორის გაზიარებული, სადაც ეს უსაფრთხოა (კონსტანტები, ტიპები, ვალიდაცია, კონტრაქტები, დამხმარე ფუნქციები)
-├── i18n/                # next-intl კონფიგურაცია + თითოეული ლოკალის შეტყობინებების JSON (67 ლოკალი)
-├── middleware/          # Next.js შუამავალი (მოთხოვნის გამდიდრება, ლოკალის გამოვლენა)
-├── mitm/                # MITM პროქსის ბირთვი: სერტიფიკატის გენერაცია/ინსტალაცია, დამმუშავებლები, სამიზნეები, ინსპექტორი, ნიღბები, გამჭოლი გადაცემა
-│   ├── handlers/        # IDE-აგენტების 9 დამმუშავებელი კლასი, რომლებიც აფართოებენ MitmHandlerBase-ს (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # ტრაფიკის აღრიცხვის ფენა: ბუფერი (მეხსიერებაში არსებული რგოლური), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # მოდელის ადაპტერის დამაკავშირებელი შრე (მოძველებული თავსებადობის შრე)
-├── scripts/             # კოდურ ბაზაში განთავსებული ტექნიკური მომსახურების სკრიპტები (მაგ., backfillAggregation)
-├── sse/                 # მოძველებული SSE დამმუშავებლები/სერვისები (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # მოძველებული მეხსიერებაში არსებული საცავი (ეტაპობრივად იცვლება src/lib/db-ით)
-├── types/               # გაზიარებული TS ტიპების ფაილები
-├── instrumentation.ts   # Next.js ტელემეტრიის ჰუკი (ბრაუზერი + edge)
-├── instrumentation-node.ts  # მხოლოდ Node-ისთვის განკუთვნილი ინსტრუმენტაცია
-└── proxy.ts             # HTTP-პროქსის შესასვლელი თავსებადობის შრე
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node-only instrumentation
+└── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` — App Router (Next.js 16)
+### `src/app/` — აპლიკაციის როუტერი (Next.js 16)
 
-| გზა                                                                          | დანიშნულება                                                                                                                                                                                                                                                                                                                |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | საჯარო OpenAI-თან თავსებადი API (~25 ქვემარშრუტი: ჩატი, დასრულებები, ემბედინგები, ფაილები, პაკეტები, აუდიო, სურათები, ვიდეოები, მუსიკა, ხელახალი რანჟირება, მოდერაცია, ძიება, ws, აგენტები, ანგარიშები, პროვაიდერები და ა.შ.)                                                                                              |
-| `app/api/v1beta/`                                                            | Gemini-ის სტილის API საბოლოო წერტილები                                                                                                                                                                                                                                                                                     |
-| `app/api/playground/`                                                        | Playground Studio-ს მარშრუტები: `improve-prompt/` (POST — LLM მოთხოვნის გადამწერი), `presets/` (GET სია / POST შექმნა), `presets/[id]/` (GET / PUT / DELETE) — იხილეთ `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                               |
-| `app/api/` (არა-v1)                                                          | მართვის/ადმინისტრირების მარშრუტები (~60 დირექტორია: პროვაიდერები, კომბინაციები, პარამეტრები, mcp, a2a, შეფასებები, მეხსიერება, უნარები, ვებჰუკები, შესაბამისობა, მდგრადობა, მონიტორინგი, გვირაბები, cli-ინსტრუმენტები და ა.შ.)                                                                                             |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 მარშრუტი (სერვერის მართვა, აგენტის მდგომარეობა/DNS/ასახვები, გვერდის ავლა, სერტიფიკატი, ზედა დონის CA). LOCAL_ONLY + SPAWN_CAPABLE. იხილეთ `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                  |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ მარშრუტი (მოთხოვნები, სესიები, ჰოსტები, ჩაჭერის რეჟიმები, ექსპორტი, ws). LOCAL_ONLY + SPAWN_CAPABLE. იხილეთ `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                               |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 შესასვლელი წერტილი (`POST /a2a`)                                                                                                                                                                                                                                                                          |
-| `app/.well-known/agent.json/`                                                | A2A აგენტის ბარათი (აღმოჩენა)                                                                                                                                                                                                                                                                                              |
-| `app/(dashboard)/dashboard/`                                                 | მართვის პანელის UI გვერდები (50+ განყოფილება, ~118 page.tsx ფაილი: პროვაიდერები, კომბინაციები, პარამეტრები, მეხსიერება, უნარები, ვებჰუკები, შეფასებები, აუდიტი, პაკეტური დამუშავება, ქეში, ხარჯები, მდგომარეობა, სისტემა, აქტივობა და ა.შ.)                                                                                |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio-ს UI (3 ჩანართი: ძიება/ამოღება/შედარება + SearchConceptCard + ProviderCatalog) — იხილეთ `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                       |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (გეგმა 21): `page.tsx` (3-ჩანართიანი გარსი), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge-ის მართვის პანელის გვერდი — სერვერის ბარათი, 9 აგენტის ბარათი, დაყენების ოსტატი, მოდელის ასახვა, გვერდის ავლის სია. i18n PT-BR + EN. იხილეთ `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                  |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector-ის მართვის პანელის გვერდი — DevTools-ის გაყოფილი ხედი, დეტალების 7 ჩანართი, ჩაჭერის რეჟიმის 4 გადამრთველი, სესიის ჩამწერი, კონტექსტის გაფერადება. i18n PT-BR + EN. იხილეთ `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                        |
-| `app/(dashboard)/dashboard/activity/`                                        | აქტივობის არხის გვერდი (ჯგუფი B): `page.tsx` (სერვერი) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — იხილეთ `docs/architecture/MONITORING_SECTIONS.md`                                                                                                             |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | კვოტის გაზიარების გვერდი (ჯგუფი B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | პროვაიდერის გეგმის კონფიგურაციის გვერდი (ჯგუფი B): `page.tsx` + `ProviderPlanConfigClient.tsx` — კვოტის განზომილებების გადაფარვა თითოეული კავშირისთვის                                                                                                                                                                     |
-| `app/docs/`                                                                  | ჩაშენებული დოკუმენტაციის დამთვალიერებელი (`docs/*.md` ფაილების რენდერინგი)                                                                                                                                                                                                                                                 |
-| `app/landing/`                                                               | მარკეტინგული სადესანტო გვერდი                                                                                                                                                                                                                                                                                              |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | ავთენტიფიკაციასთან დაკავშირებული გვერდები                                                                                                                                                                                                                                                                                  |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP შეცდომების გვერდები                                                                                                                                                                                                                                                                                                   |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | სტატიკური/სტატუსის გვერდები                                                                                                                                                                                                                                                                                                |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | ძირეული განლაგება, მთავარი გვერდი, PWA მანიფესტი, გლობალური CSS                                                                                                                                                                                                                                                            |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | შეცდომების საზღვრები                                                                                                                                                                                                                                                                                                       |
+| ბილიკი                                                                       | მიზანი                                                                                                                                                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | საჯარო OpenAI-კომპატ API (~ 25 ქვე-მარშრუტები: ჩატი, დასრულებები, ჩაშენებები, ფაილები, სერიები, აუდიო, სურათები, ვიდეო, მუსიკა, გადაჯგუფება, მოდერაცია, ძებნა, ws, აგენტები, ანგარიშები, პროვაიდერები და ა.შ.)                                                                                                                  |
+| `app/api/v1beta/`                                                            | ტყუპების სტილის API ბოლო წერტილები                                                                                                                                                                                                                                                                                              |
+| `app/api/playground/`                                                        | Playground Studio მარშრუტები: `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET სია / POST შექმნა), `presets/[id]/` (GET / PUT / DELETE) — იხილეთ `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                          |
+| `app/api/` (არა-v1)                                                          | Management/admin მარშრუტები (~ 60 დირექტორიები: პროვაიდერები, კომბინაციები, პარამეტრები, mcp, a2a, evals, მეხსიერება, უნარები, ვებჰუკები, შესაბამისობა, გამძლეობა, მონიტორინგი, გვირაბები, cli-ინსტრუმენტები და ა.შ.)                                                                                                           |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 მარშრუტი (სერვერის კონტროლი, აგენტი state/DNS/mappings, შემოვლითი, სერტიფიკატი, ზემო დინებაში-CA). LOCAL_ONLY + SPAWN_CAPABLE. იხილეთ `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                            |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 + მარშრუტი (მოთხოვნები, სესიები, ჰოსტები, გადაღების რეჟიმი, ექსპორტი, ws). LOCAL_ONLY + SPAWN_CAPABLE. იხილეთ `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                   |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 შესვლის წერტილი (`POST /a2a`)                                                                                                                                                                                                                                                                                  |
+| `app/.well-known/agent.json/`                                                | A2A აგენტის ბარათი (აღმოჩენა)                                                                                                                                                                                                                                                                                                   |
+| `app/(dashboard)/dashboard/`                                                 | Dashboard UI გვერდები (50 + სექციები, ~ 118 page.tsx ფაილები: პროვაიდერები, კომბინაციები, პარამეტრები, მეხსიერება, უნარები, ვებ-კაუქები, evals, აუდიტი, ჯგუფი, ქეში, ხარჯები, ჯანმრთელობა, სისტემა, აქტივობა და ა.შ.)                                                                                                           |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 ჩანართი: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — იხილეთ `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                               |
+| `app/(dashboard)/dashboard/memory/`                                          | მეხსიერების სტუდია (გეგმა 21): `page.tsx` (3-ჩანართიანი გარსი), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge დაფის გვერდი — სერვერის ბარათი, 9 აგენტის ბარათი, დაყენების ოსტატი, მოდელის რუქა, შემოვლითი სია. i18n PT-BR + EN. იხილეთ `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                          |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector Dashboard-ის გვერდი — DevTools split, 7 დეტალური ჩანართი, 4 გადაღების რეჟიმის გადართვა, სესიის ჩამწერი, კონტექსტის შეღებვა. i18n PT-BR + EN. იხილეთ `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                   |
+| `app/(dashboard)/dashboard/activity/`                                        | აქტივობის არხის გვერდი (ჯგუფი B): `page.tsx` (სერვერი) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — იხილეთ `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                  |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | კვოტის გაზიარების გვერდი (B ჯგუფი): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                 |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | პროვაიდერის გეგმის კონფიგურაციის გვერდი (ჯგუფი B): `page.tsx` + `ProviderPlanConfigClient.tsx` — კვოტის ზომები თითო კავშირის უგულებელყოფაზე                                                                                                                                                                                     |
+| `app/docs/`                                                                  | ჩაშენებული დოკუმენტაციის მაყურებელი (აწარმოებს `docs/*.md`)                                                                                                                                                                                                                                                                     |
+| `app/landing/`                                                               | მარკეტინგის სადესანტო გვერდი                                                                                                                                                                                                                                                                                                    |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | ავტორიზაციასთან დაკავშირებული გვერდები                                                                                                                                                                                                                                                                                          |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP შეცდომების გვერდები                                                                                                                                                                                                                                                                                                        |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status გვერდები                                                                                                                                                                                                                                                                                                          |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Root განლაგება, მთავარი, PWA manifest, გლობალური CSS                                                                                                                                                                                                                                                                            |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | შეცდომის საზღვრები                                                                                                                                                                                                                                                                                                              |
 
-### `src/lib/` — ძირითადი ბიბლიოთეკები (~50 მოდული)
+### `src/lib/` — ძირითადი ბიბლიოთეკები (~ 50 მოდული)
 
-| მოდული                                   | დანიშნულება                                                                                                                                                                                                                                                                                                                     |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A პროტოკოლის ამოცანების მენეჯერი, უნარები (5), ნაკადური გადაცემა                                                                                                                                                                                                                                                              |
-| `acp/`                                   | CLI აგენტების რეესტრი (ლოკალური CLI-ის აღმოჩენა — იხილეთ `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                            |
-| `api/`                                   | საერთო API დამხმარე საშუალებები (`requireManagementAuth`, ვალიდაცია)                                                                                                                                                                                                                                                            |
-| `auth/`                                  | სესია, პაროლის ჰეშირება, ტოკენის ვალიდაცია                                                                                                                                                                                                                                                                                      |
-| `batches/`                               | OpenAI Batches API-ის დამმუშავებლები                                                                                                                                                                                                                                                                                            |
-| `catalog/`                               | პროვაიდერების კატალოგის Zod-ვალიდაცია + შესაძლებლობების განსაზღვრა                                                                                                                                                                                                                                                              |
-| `cloudAgent/`                            | ღრუბლოვანი აგენტები (Codex Cloud, Devin, Jules) — იხილეთ `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                       |
-| `combos/`                                | კომბინაციების განსაზღვრისა და გადალაგების დამხმარე საშუალებები                                                                                                                                                                                                                                                                  |
-| `audit/`                                 | აქტივობების არხის დამხმარე საშუალებები: `highLevelActions.ts` (ნებადართული სია + `isHighLevelAction()`), `activityIcons.ts` (ქმედება → ხატულა/ზმნის რუკა), `timeline.ts` (groupByDay/relativeTime) — იხილეთ `docs/architecture/MONITORING_SECTIONS.md`                                                                          |
-| `compliance/`                            | აუდიტის ჟურნალი + პროვაიდერის აუდიტი — იხილეთ `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                     |
-| `compression/`                           | შეკუმშვის ძრავის დამაკავშირებელი შრე (ძრავები მდებარეობს `open-sse/services/compression/`-ში)                                                                                                                                                                                                                                   |
-| `config/`                                | შესრულების დროის კონფიგურაციის დამხმარე საშუალებები                                                                                                                                                                                                                                                                             |
-| `db/`                                    | 120-ზე მეტი დომენური DB მოდული + 168 მიგრაცია (SQLite-თან მუშაობისას ყოველთვის ეს გამოიყენეთ)                                                                                                                                                                                                                                   |
-| `quota/`                                 | კვოტის გაზიარების ძრავა: `dimensions.ts` (ტიპები/Zod), `types.ts` (QuotaStore ინტერფეისი), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — იხილეთ `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Radar-ის უფასო მოდელების კატალოგის კლიენტი: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — იხილეთ `docs/frameworks/RADAR.md`                                                                                                                                      |
-| `display/`                               | UI-ის ფორმატირების დამხმარე საშუალებები (ღირებულება, დაყოვნება და ა.შ.)                                                                                                                                                                                                                                                         |
-| `embeddings/`                            | ემბედინგების სერვისის დამხმარე საშუალებები                                                                                                                                                                                                                                                                                      |
-| `env/`                                   | გარემოს ცვლადების პარსინგი + ვალიდაცია                                                                                                                                                                                                                                                                                          |
-| `evals/`                                 | შეფასების ფრეიმვორკი (კომპლექტები, გამშვები, შესრულების გარემო) — იხილეთ `docs/frameworks/EVALS.md`                                                                                                                                                                                                                             |
-| `guardrails/`                            | PII-ის შემნიღბავი, პრომპტ-ინექციისგან დაცვა, ხედვის ხიდი — იხილეთ `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                 |
-| `jobs/`                                  | ფონური დავალებები (cron-ის მსგავსი)                                                                                                                                                                                                                                                                                             |
-| `memory/`                                | სასაუბრო მეხსიერება (SQLite FTS5 + sqlite-vec-ის ჰიბრიდული RRF + Qdrant-ის მე-2 დონე) — იხილეთ `docs/frameworks/MEMORY.md`                                                                                                                                                                                                      |
-| `memory/embedding/`                      | მრავალწყაროიანი ემბედინგის შრე: `index.ts` (გადამწყვეტი), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (გეგმა 21)                                                                                                                                                                             |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9-ის გარსი — KNN-ის სრული გადარჩევა + ჰიბრიდული RRF (FTS5 + ვექტორი, k=60). ინიციალიზდება საჭიროებისას და გამართულად აგრძელებს მუშაობას, როდესაც sqlite-vec მიუწვდომელია. (გეგმა 21)                                                                                                                            |
-| `memory/reindex.ts`                      | `runReindexBatch()` — ფონურ რეჟიმში ამუშავებს მეხსიერების ჩანაწერებს, რომლებსაც `needs_reindex=1` აქვთ; გამოიძახება `POST /api/memory/reindex`-ისა და საჭიროებისას შევსების გზის მიერ. (გეგმა 21)                                                                                                                               |
-| `monitoring/`                            | ჯანმრთელობის შემოწმებები, მეტრიკების გამოქვეყნება                                                                                                                                                                                                                                                                               |
-| `oauth/`                                 | OAuth/იმპორტის ნაკადები 22 პროვაიდერის მოდულისთვის (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                  |
-| `plugins/`                               | პლაგინების რეესტრი                                                                                                                                                                                                                                                                                                              |
-| `promptCache/`                           | Anthropic-ის სტილის პრომპტის ქეშის საკონტროლო წერტილები                                                                                                                                                                                                                                                                         |
-| `skills/`                                | უნარების ფრეიმვორკი (ჩაშენებული + მარკეტპლეისი + SkillsSH) — იხილეთ `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                 |
-| `playground/`                            | Playground Studio-ს საერთო დამხმარე საშუალებები: `codeExport.ts` (curl/Python/TS გენერატორი), `promptImprover.ts` (მეტა-პრომპტის შემქმნელი), `streamMetrics.ts` (სუფთა TTFT/TPS), `types.ts` (ფასების ცხრილი) — იხილეთ `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                   |
-| `webhookDispatcher.ts`                   | HMAC webhook-ის მიწოდება — იხილეთ `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                 |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | გვირაბების მმართველები — იხილეთ `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                     |
-| `cloudSync.ts`, `initCloudSync.ts`       | მდგომარეობის არასავალდებულო ღრუბლოვანი სინქრონიზაცია                                                                                                                                                                                                                                                                            |
-| `localDb.ts`                             | db მოდულების ხელახალი ექსპორტის barrel (ლოგიკის გარეშე — მხოლოდ ხელახალი ექსპორტები)                                                                                                                                                                                                                                            |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | მოთხოვნების კეშირება + იდემპოტენტურობა                                                                                                                                                                                                                                                                                          |
-| (კიდევ ~30 ზედა დონის ფაილი)             | სპეციალიზებული დამხმარე საშუალებები (logEnv, modelsDevSync, piiSanitizer და სხვ.)                                                                                                                                                                                                                                               |
+| მოდული                                   | მიზანი                                                                                                                                                                                                                                                                                                                         |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `a2a/`                                   | A2A პროტოკოლის დავალების მენეჯერი, უნარები (5), სტრიმინგი                                                                                                                                                                                                                                                                      |
+| `acp/`                                   | CLI აგენტის რეესტრი (ადგილობრივი CLI აღმოჩენა — იხილეთ `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                             |
+| `api/`                                   | გაზიარებული API დამხმარეები (`requireManagementAuth`, დადასტურება)                                                                                                                                                                                                                                                             |
+| `auth/`                                  | სესია, პაროლის ჰეშირება, ტოკენის დადასტურება                                                                                                                                                                                                                                                                                   |
+| `batches/`                               | OpenAI Batches API დამმუშავებლები                                                                                                                                                                                                                                                                                              |
+| `catalog/`                               | პროვაიდერის კატალოგი Zod დადასტურება + შესაძლებლობების გარჩევადობა                                                                                                                                                                                                                                                             |
+| `cloudAgent/`                            | Cloud Agents (Codex Cloud, Devin, Jules) — იხილეთ `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                             |
+| `combos/`                                | კომბინირებული გარჩევადობის + გადაკვეთის დამხმარეები                                                                                                                                                                                                                                                                            |
+| `audit/`                                 | აქტივობის არხის დამხმარეები: `highLevelActions.ts` (დაშვებების სია + `isHighLevelAction()`), `activityIcons.ts` (მოქმედება → icon/verb რუკა), `timeline.ts` (groupByDay/relativeTime) — იხილეთ `docs/architecture/MONITORING_SECTIONS.md`                                                                                      |
+| `compliance/`                            | აუდიტის ჟურნალი + პროვაიდერის აუდიტი — იხილეთ `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                    |
+| `compression/`                           | შეკუმშვის ძრავის წებო (ძრავები ცხოვრობენ `open-sse/services/compression/` ში)                                                                                                                                                                                                                                                  |
+| `config/`                                | Runtime კონფიგურაციის დამხმარეები                                                                                                                                                                                                                                                                                              |
+| `db/`                                    | 120 + დომენის DB მოდული + 168 მიგრაცია (ყოველთვის გადადით აქ SQLite სთვის)                                                                                                                                                                                                                                                     |
+| `quota/`                                 | კვოტის გაზიარების ძრავა: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore ინტერფეისი), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` - იხილეთ `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | რადარის უფასო მოდელის კატალოგის კლიენტი: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — იხილეთ `docs/frameworks/RADAR.md`                                                                                                                                        |
+| `display/`                               | UI ფორმატირების დამხმარეები (ღირებულება, შეყოვნება და ა.შ.)                                                                                                                                                                                                                                                                    |
+| `embeddings/`                            | ჩაშენების სერვისის დამხმარეები                                                                                                                                                                                                                                                                                                 |
+| `env/`                                   | Env ცვლადის ანალიზი + ვალიდაცია                                                                                                                                                                                                                                                                                                |
+| `evals/`                                 | Eval Framework (ლუქსი, runner, runtime) — იხილეთ `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                    |
+| `guardrails/`                            | PII masker, სწრაფი ინექცია, ხედვის ხიდი - იხილეთ `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                 |
+| `jobs/`                                  | ფონური სამუშაოები (კრონის მსგავსი)                                                                                                                                                                                                                                                                                             |
+| `memory/`                                | სასაუბრო მეხსიერება (SQLite FTS5 + sqlite-vec ჰიბრიდული RRF + Qdrant იარუსი 2) — იხილეთ `docs/frameworks/MEMORY.md`                                                                                                                                                                                                            |
+| `memory/embedding/`                      | მრავალ წყაროს ჩაშენების ფენა: `index.ts` (გამხსნელი), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (გეგმა 21)                                                                                                                                                                                |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + ჰიბრიდული RRF (FTS5 + ვექტორი, k = 60). Lazy-init, გრაციოზულად მცირდება, როდესაც sqlite-vec მიუწვდომელია. (გეგმა 21)                                                                                                                                                             |
+| `memory/reindex.ts`                      | `runReindexBatch()` — ამუშავებს მეხსიერებას `needs_reindex=1` ფონზე; მოუწოდა `POST /api/memory/reindex` და lazy-backfill გზა. (გეგმა 21)                                                                                                                                                                                       |
+| `monitoring/`                            | ჯანმრთელობის შემოწმებები, მეტრიკის ემისია                                                                                                                                                                                                                                                                                      |
+| `oauth/`                                 | OAuth/import მიედინება 22 პროვაიდერის მოდულისთვის (agy, antigravity, claude, cline, codebuddy-cn, codex, კურსორი, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-opencoding, kilocode, kimi-opencoding, kiroder zed-hosted, zed)                                                     |
+| `plugins/`                               | დანამატის რეესტრი                                                                                                                                                                                                                                                                                                              |
+| `promptCache/`                           | ანთროპული სტილის სწრაფი ქეშის წყვეტის წერტილები                                                                                                                                                                                                                                                                                |
+| `skills/`                                | უნარების ჩარჩო (ჩაშენებული + ბაზარი + SkillsSH) — იხილეთ `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                           |
+| `playground/`                            | Playground Studio-ის საერთო დამხმარეები: `codeExport.ts` (curl/Python/TS გენერატორი), `promptImprover.ts` (მეტა-მოთხოვნის შემქმნელი), `streamMetrics.ts` (სუფთა TTFT/TPS), `types.ts` (ფასების ცხრილი) - იხილეთ `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                         |
+| `webhookDispatcher.ts`                   | HMAC webhook მიწოდება — იხილეთ `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                   |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | გვირაბის მენეჯერები — იხილეთ `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                       |
+| `cloudSync.ts`, `initCloudSync.ts`       | სურვილისამებრ ღრუბლოვანი მდგომარეობის სინქრონიზაცია                                                                                                                                                                                                                                                                            |
+| `localDb.ts`                             | ლულის ხელახალი ექსპორტი db მოდულებისთვის (ლოგიკის გარეშე — მხოლოდ რეექსპორტი)                                                                                                                                                                                                                                                  |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | მოითხოვეთ ქეშირების + idempotency                                                                                                                                                                                                                                                                                              |
+| (~ კიდევ 30 უმაღლესი დონის ფაილი)        | სპეციალიზებული დამხმარეები (logEnv, modelsDevSync, piiSanitizer და ა.შ.)                                                                                                                                                                                                                                                       |
 
 ### `src/lib/db/` — მონაცემთა ბაზა (147 მოდული + 208 მიგრაცია)
 
-| ქვედირექტორია             | დანიშნულება                                                                                                                                                                               |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()` singleton WAL-ჟურნალირებით                                                                                                                                              |
-| `db/migrations/`          | ვერსიონირებული SQL ფაილები (იდემპოტენტური, ტრანზაქციული). `073_memory_vec.sql` ამატებს `memory_vec_meta`-ს + `needs_reindex` სვეტს (გეგმა 21).                                            |
-| `db/playgroundPresets.ts` | CRUD მოდული Playground Studio-ს წინასწარი პარამეტრებისთვის (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
-| `db/memoryVec.ts`         | CRUD `memory_vec_meta`-სთვის (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` და სხვ. (გეგმა 21)                          |
-| `db/<domain>.ts`          | თითო მოდული თითოეული დომენისთვის: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache და სხვ.   |
+| ქვედირეჟი                 | მიზანი                                                                                                                                                                                                               |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | `getDbInstance()` singleton ერთად WAL journaling                                                                                                                                                                     |
+| `db/migrations/`          | ვერსია SQL ფაილები (იდემპოტენტური, ტრანზაქციული). `073_memory_vec.sql` ამატებს `memory_vec_meta` + `needs_reindex` სვეტს (გეგმა 21).                                                                                 |
+| `db/playgroundPresets.ts` | CRUD მოდული Playground Studio წინასწარ დაყენებისთვის (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                                  |
+| `db/memoryVec.ts`         | CRUD `memory_vec_meta` სთვის (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` და ა.შ. (გეგმა 21)                                                     |
+| `db/<domain>.ts`          | ერთი მოდული თითო დომენზე: პროვაიდერები, კომბინაციები, apiKeys, მომხმარებლები, სესიები, გამოყენება, აუდიტის ჟურნალი, ვებჰუკები, უნარები, მეხსიერების_ჩანაწერები, cloud_agent_tasks, evals* \* , მსჯელობა_ქეში და ა.შ. |
 
 ### `src/domain/`
 
-| მოდული                 | დანიშნულება                                                    |
-| ---------------------- | -------------------------------------------------------------- |
-| `policy.ts`            | პოლიტიკის ძრავა                                                |
-| `fallbackPolicy.ts`    | სარეზერვო ვარიანტზე გადასვლის გადაწყვეტილების ხე               |
-| `costRules.ts`         | ღირებულების გამოთვლის წესები                                   |
-| `lockoutPolicy.ts`     | მოდელის/კავშირის დაბლოკვის პოლიტიკა                            |
-| `tagRouter.ts`         | ტეგებზე დაფუძნებული მარშრუტიზაცია                              |
-| `comboResolver.ts`     | კომბინაციის გადაწყვეტა (გამოიყენება კომბინაციების ძრავის მიერ) |
-| `modelAvailability.ts` | ხელმისაწვდომობის შემოწმება თითოეული მოდელისთვის                |
-| `assessment/`          | მოდელის შეფასება (RFC-AUTO-ASSESSMENT-ის ფაზა 1)               |
+| მოდული                 | მიზანი                                                       |
+| ---------------------- | ------------------------------------------------------------ |
+| `policy.ts`            | პოლიტიკის ძრავა                                              |
+| `fallbackPolicy.ts`    | სარეზერვო გადაწყვეტილების ხე                                 |
+| `costRules.ts`         | ხარჯების გაანგარიშების წესები                                |
+| `lockoutPolicy.ts`     | Model/connection ჩაკეტვის პოლიტიკა                           |
+| `tagRouter.ts`         | ტეგზე დაფუძნებული მარშრუტიზაცია                              |
+| `comboResolver.ts`     | კომბინირებული გარჩევადობა (გამოიყენება კომბინირებული ძრავით) |
+| `modelAvailability.ts` | თითო მოდელის ხელმისაწვდომობის შემოწმება                      |
+| `assessment/`          | მოდელის შეფასება (RFC-AUTO-ASSESSMENT-ის 1 ფაზა)             |
 
 ### `src/server/`
 
-| მოდული   | დანიშნულება                                                                                             |
-| -------- | ------------------------------------------------------------------------------------------------------- |
-| `authz/` | ავტორიზაციის კონვეიერი: `classify` → `policies` → `enforce` — იხილეთ `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | CORS-ის კონფიგურაცია                                                                                    |
-| `auth/`  | სესიის middleware                                                                                       |
+| მოდული   | მიზანი                                                                                              |
+| -------- | --------------------------------------------------------------------------------------------------- |
+| `authz/` | ავტორიზაციის მილსადენი: `classify` → `policies` → `enforce` — იხ `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | CORS კონფიგურაცია                                                                                   |
+| `auth/`  | სესიის შუალედური პროგრამა                                                                           |
 
 ### `src/shared/`
 
-| მოდული                           | დანიშნულება                                                                                                      |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `components/`                    | მართვის პანელის კომპონენტების API: `packages/ui-kit`-ის ადაპტერები — იხილეთ `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: ეკრანების მიერ გამოყენებული ხატულების სახელები → Lucide-ის კომპონენტები (`<Icon>`)                   |
-| `constants/providers.ts`         | **376 პროვაიდერი** Zod-ვალიდაციით (სიმართლის პირველწყარო)                                                        |
-| `constants/cliTools.ts`          | გარე CLI-ინსტრუმენტების რეესტრი                                                                                  |
-| `constants/routingStrategies.ts` | **მარშრუტიზაციის 20 სტრატეგია** პრიორიტეტებით                                                                    |
-| `constants/publicApiRoutes.ts`   | მარშრუტები, რომლებიც Bearer-ავტორიზაციას საჭიროებს (მართვის ავტორიზაციისგან განსხვავებით)                        |
-| `constants/upstreamHeaders.ts`   | ზედა დონის მოთხოვნების სათაურების აკრძალული სია                                                                  |
-| `validation/schemas.ts`          | ~80 Zod-სქემა (API-კონტრაქტების სიმართლის ერთადერთი წყარო)                                                       |
-| `validation/helpers.ts`          | Zod-ვალიდაციის დამხმარე ფუნქციები (`validateBody` და სხვ.)                                                       |
-| `types/`                         | გაზიარებული TS-ტიპები                                                                                            |
-| `contracts/`                     | საჯარო API-კონტრაქტები (გამოიყენება `package.json`-ში `files:`-ის მიერ)                                          |
-| `utils/circuitBreaker.ts`        | პროვაიდერის circuit breaker (იხილეთ `docs/architecture/RESILIENCE_GUIDE.md`)                                     |
-| `utils/apiAuth.ts`               | API-გასაღების ვალიდაცია, წვდომის ფარგლების შემოწმება                                                             |
-| `utils/fetchTimeout.ts`          | დროის ამოწურვის/შეწყვეტის გარსები ზედა დონის fetch-ისთვის                                                        |
-| `utils/releaseNotes.ts`          | დახურული v2/მოძველებული განცხადებების პარსერი, ლოკალიზაცია და ID-ით გაუქმება                                     |
+| მოდული                           | მიზანი                                                                                                |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `components/`                    | დაფის კომპონენტი API: გადამყვანები `packages/ui-kit` ზე — იხილეთ `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: ეკრანის მიერ გამოყენებული ხატების სახელები → Lucide კომპონენტები (`<Icon>`)               |
+| `constants/providers.ts`         | **377 პროვაიდერი** Zod დადასტურებით (სიმართლის წყარო)                                                 |
+| `constants/cliTools.ts`          | გარე CLI ინსტრუმენტის რეესტრი                                                                         |
+| `constants/routingStrategies.ts` | **მარშრუტიზაციის 20 სტრატეგია** პრიორიტეტებით                                                         |
+| `constants/publicApiRoutes.ts`   | მარშრუტები, რომლებიც საჭიროებენ Bearer (მმართველობის წინააღმდეგ) ავტორიზაციას                         |
+| `constants/upstreamHeaders.ts`   | ზედა ნაკადის მოთხოვნების სათაურის უარყოფა                                                             |
+| `validation/schemas.ts`          | ~ 80 Zod სქემები (სიმართლის ერთი წყარო API კონტრაქტებისთვის)                                          |
+| `validation/helpers.ts`          | Zod ვალიდაციის დამხმარეები (`validateBody` და ა.შ.)                                                   |
+| `types/`                         | საერთო TS ტიპები                                                                                      |
+| `contracts/`                     | საჯარო API კონტრაქტები (მოხმარებული `files:` მიერ `package.json` ში)                                  |
+| `utils/circuitBreaker.ts`        | პროვაიდერის ამომრთველი (იხ. `docs/architecture/RESILIENCE_GUIDE.md`)                                  |
+| `utils/apiAuth.ts`               | API გასაღების დადასტურება, მოცულობის შემოწმება                                                        |
+| `utils/fetchTimeout.ts`          | Timeout/abort შეფუთვები ზემოთ დინებაში მოსატანად                                                      |
+| `utils/releaseNotes.ts`          | დახურული v2/legacy განცხადების პარსერი, ლოკალიზაცია და ID დათხოვნა                                    |
 
 ---
 
@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — საჯარო დოკუმენტაცია (7 ძირითადი ფაილი + 17 ქვედირექტორია)
+## `docs/` — საჯარო დოკუმენტაცია (7 root ფაილი + 17 subdirs)
 
-### ზედა დონის სახელმძღვანელოები
+### უმაღლესი დონის გიდები
 
-| დოკუმენტი                   | დანიშნულება                                                                                           |
-| --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | მაღალი დონის არქიტექტურა, ქვესისტემების რუკა, დაშბორდის ზედაპირი                                      |
-| `CODEBASE_DOCUMENTATION.md` | საინჟინრო სქოლიო: დირექტორიები, მოდულები, კონვენციები                                                 |
-| `FEATURES.md`               | ფუნქციების მატრიცა v3.8-ის მთავარი მახასიათებლებით                                                    |
-| `USER_GUIDE.md`             | საბოლოო მომხმარებლის სახელმძღვანელო (ინსტალაცია, მოდელები, კომბოები, CLI-ები, აუდიო და ა.შ.)          |
-| `API_REFERENCE.md`          | API ენდპოინტების სქოლიო ავტორიზაციის მოდელით                                                          |
-| `openapi.yaml`              | OpenAPI 3.0 სპეციფიკაცია (121 გზა)                                                                    |
-| `SETUP_GUIDE.md`            | ინსტალაციის მეთოდები (npm, npx, Docker, Electron, Termux, წყაროდან)                                   |
-| `ENVIRONMENT.md`            | ყველა გარემოს ცვლადი (~800 დოკუმენტირებული, ~3,050 ხაზი `.env.example`-ში)                            |
-| `TROUBLESHOOTING.md`        | გავრცელებული შეცდომები + v3.8.0-ის ცნობილი პრობლემები                                                 |
-| `RELEASE_CHECKLIST.md`      | რელიზის სრული პროცესი (skills, husky, conventional commits, დეპლოი)                                   |
-| `COVERAGE_PLAN.md`          | გაშუქების მიზნები და მიმდინარე მდგომარეობა                                                            |
-| `FREE_TIERS.md`             | შერჩეული უფასო დონის პროვაიდერები (48+ უფასო + 11 OAuth)                                              |
-| `CLI-TOOLS.md`              | გარე CLI ინტეგრაციები + შინაგანი OmniRoute CLI                                                        |
-| `I18N.md`                   | i18n არქიტექტურა, ენის დამატება, 67 ლოკალი                                                            |
-| `UNINSTALL.md`              | სუფთად წაშლის ნაბიჯები                                                                                |
-| `PROVIDER_REFERENCE.md`     | **ავტომატურად გენერირებული** 376 პროვაიდერის კატალოგი (რეგენერაცია: `npm run gen:provider-reference`) |
+| დოქ                         | მიზანი                                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | მაღალი დონის არქიტექტურა, ქვესისტემის რუკა, დაფის ზედაპირი                                       |
+| `CODEBASE_DOCUMENTATION.md` | საინჟინრო მითითება: დირექტორიები, მოდულები, კონვენციები                                          |
+| `FEATURES.md`               | მხატვრული მატრიცა v3.8 მაჩვენებლებით                                                             |
+| `USER_GUIDE.md`             | საბოლოო მომხმარებლის სახელმძღვანელო (დაყენება, მოდელები, კომბინაციები, CLIs, აუდიო და ა.შ.)      |
+| `API_REFERENCE.md`          | API საბოლოო წერტილის მითითება auth მოდელით                                                       |
+| `openapi.yaml`              | OpenAPI 3.0 სპეციფიკაცია (121 ბილიკი)                                                            |
+| `SETUP_GUIDE.md`            | ინსტალაციის მეთოდები (npm, npx, Docker, Electron, Termux, წყარო)                                 |
+| `ENVIRONMENT.md`            | ყველა env vars (~ 800 დოკუმენტირებული, ~ 3,050 ხაზი `.env.example`)                              |
+| `TROUBLESHOOTING.md`        | გავრცელებული შეცდომები + v3.8.0 ცნობილი საკითხები                                                |
+| `RELEASE_CHECKLIST.md`      | სრული გათავისუფლების ნაკადი (უნარები, ჰასკი, ჩვეულებრივი დავალებები, განლაგება)                  |
+| `COVERAGE_PLAN.md`          | დაფარვის მიზნები და მიმდინარე მდგომარეობა                                                        |
+| `FREE_TIERS.md`             | კურირებული უფასო დონის პროვაიდერები (48 + უფასო + 11 OAuth)                                      |
+| `CLI-TOOLS.md`              | გარე CLI ინტეგრაციები + შიდა OmniRoute CLI                                                       |
+| `I18N.md`                   | i18n არქიტექტურა, ენის დამატება, 67 ლოკალი                                                       |
+| `UNINSTALL.md`              | დეინსტალაციის ნაბიჯების გასუფთავება                                                              |
+| `PROVIDER_REFERENCE.md`     | **ავტომატურად გენერირებული** 377 პროვაიდერის კატალოგი (რეგენი: `npm run gen:provider-reference`) |
 
-### ქვესისტემების ღრმა ანალიზი
+### ღრმა ჩაყვინთვის ქვესისტემა
 
-| დოკუმენტი                                        | დანიშნულება                                                                      |
-| ------------------------------------------------ | -------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                                  | MCP სერვერი: 110 ინსტრუმენტი, 3 ტრანსპორტი, 33 სქოუპი, REST ენდპოინტები          |
-| `A2A-SERVER.md`                                  | A2A v0.3: JSON-RPC, 6 უნარი, REST დამხმარეები, აგენტის ბარათი                    |
-| `AGENT_PROTOCOLS_GUIDE.md`                       | ერთიანი სახელმძღვანელო: A2A vs ACP vs Cloud Agents                               |
-| `CLOUD_AGENT.md`                                 | Codex Cloud / Devin / Jules ორკესტრაცია                                          |
-| `SKILLS.md`                                      | უნარების ჩარჩო (ჩაშენებული + marketplace + SkillsSH + sandbox)                   |
-| `RADAR.md`                                       | Radar უფასო მოდელების კატალოგის ფენა (`RADAR_ENABLED`, ნაგულისხმევად გამორთულია) |
-| `MEMORY.md`                                      | მეხსიერების სისტემა (SQLite FTS5 + Qdrant)                                       |
-| `EVALS.md`                                       | შეფასების ჩარჩო (სიუტები, გაშვებები, რუბრიკები)                                  |
-| `GUARDRAILS.md`                                  | PII-ის დამასკირება, პრომპტ-ინექცია, ხედვის ხიდი                                  |
-| `COMPLIANCE.md`                                  | აუდიტის ჟურნალი, შენახვის ვადები, noLog-ით გამორიცხვა                            |
-| `WEBHOOKS.md`                                    | HMAC-ხელმოწერილი webhook-ების მიწოდება                                           |
-| `REASONING_REPLAY.md`                            | ჰიბრიდული მეხსიერების/SQLite ქეში `reasoning_content`-ისთვის                     |
-| `AUTHZ_GUIDE.md`                                 | ავტორიზაციის პაიპლაინი (`classify` → `policies` → `enforce`)                     |
-| `RESILIENCE_GUIDE.md`                            | Circuit breaker + cooldown + მოდელის ბლოკირება                                   |
-| `docs/security/STEALTH_GUIDE.md` (მხოლოდ git-ში) | TLS თითის ანაბეჭდები (JA3/JA4), Claude Code CCH, MITM სერტიფიკატი                |
-| `AUTO-COMBO.md`                                  | Auto Combo ძრავა (16-ფაქტორიანი შეფასება, 6 რეჟიმის პაკეტი, ვირტუალური ქარხანა)  |
+| დოქ                                           | მიზანი                                                                                |
+| --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                               | MCP სერვერი: 110 ინსტრუმენტი, 3 ტრანსპორტი, 33 სფერო, REST საბოლოო წერტილები          |
+| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 უნარები, REST დამხმარეები, აგენტის ბარათი                       |
+| `AGENT_PROTOCOLS_GUIDE.md`                    | ერთიანი სახელმძღვანელო: A2A vs ACP vs ღრუბლოვანი აგენტები                             |
+| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules ორკესტრირება                                              |
+| `SKILLS.md`                                   | უნარების ჩარჩო (ჩაშენებული + ბაზარი + SkillsSH + ქვიშის ყუთი)                         |
+| `RADAR.md`                                    | რადარის უფასო მოდელის კატალოგის გადაფარვა (`RADAR_ENABLED`, ნაგულისხმევად გამორთულია) |
+| `MEMORY.md`                                   | მეხსიერების სისტემა (SQLite FTS5 + Qdrant)                                            |
+| `EVALS.md`                                    | შეფასების ჩარჩო (ლუქსი, სერიები, რუბრიკები)                                           |
+| `GUARDRAILS.md`                               | PII masker, სწრაფი ინექცია, ხედვის ხიდი                                               |
+| `COMPLIANCE.md`                               | აუდიტის ჟურნალი, შენარჩუნება, noLog უარის თქმა                                        |
+| `WEBHOOKS.md`                                 | HMAC ხელმოწერილი ვებჰუკის მიწოდება                                                    |
+| `REASONING_REPLAY.md`                         | ჰიბრიდული memory/SQLite ქეში `reasoning_content` სთვის                                |
+| `AUTHZ_GUIDE.md`                              | ავტორიზაციის მილსადენი (`classify` → `policies` → `enforce`)                          |
+| `RESILIENCE_GUIDE.md`                         | ამომრთველი + გაგრილება + მოდელის დაბლოკვა                                             |
+| `docs/security/STEALTH_GUIDE.md` (მხოლოდ git) | TLS თითის ანაბეჭდი (JA3/JA4), Claude კოდი CCH, MITM cert                              |
+| `AUTO-COMBO.md`                               | Auto Combo ძრავა (16-ფაქტორიანი ქულა, 6 რეჟიმის პაკეტი, ვირტუალური ქარხანა)           |
 
 ### შეკუმშვა
 
-| დოკუმენტი                       | დანიშნულება                                 |
+| დოქ                             | მიზანი                                      |
 | ------------------------------- | ------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | შეკუმშვის რეჟიმების მიმოხილვა + გეგმა       |
+| `COMPRESSION_GUIDE.md`          | შეკუმშვის რეჟიმების მიმოხილვა + საგზაო რუკა |
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK ძრავები, რეესტრის კონტრაქტი   |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman წესების პაკეტის JSON სქემა          |
-| `COMPRESSION_LANGUAGE_PACKS.md` | ენების მიხედვით წესების პაკეტების ინვენტარი |
-| `RTK_COMPRESSION.md`            | RTK დეკლარატიული პაიპლაინი (56 ფილტრი)      |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman წესების პაკეტი JSON სქემა           |
+| `COMPRESSION_LANGUAGE_PACKS.md` | თითო ენაზე წესების პაკეტის ინვენტარი        |
+| `RTK_COMPRESSION.md`            | RTK დეკლარაციული მილსადენი (56 ფილტრი)      |
 
 ### განლაგება
 
-| დოკუმენტი                    | მიზანი                                                                 |
-| ---------------------------- | ---------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker-ის აწყობა, პროფილები (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | ზოგადი VM/VPS განლაგება (Ubuntu/Debian + nginx + systemd)              |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-ზე განლაგება (ამჟამად მხოლოდ ჩინურად)                           |
-| `TERMUX_GUIDE.md`            | Android-ის headless რეჟიმი Termux-ის საშუალებით                        |
-| `PWA_GUIDE.md`               | Progressive Web App-ის ინსტალაცია + service worker                     |
-| `ELECTRON_GUIDE.md`          | სამაგიდო აპლიკაციის აწყობა + ხელმოწერა + გავრცელება                    |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
-| `PROXY_GUIDE.md`             | 4-დონიანი გამავალი პროქსი + 1proxy-ის მარკეტპლეისი                     |
+| დოქ                          | მიზანი                                                             |
+| ---------------------------- | ------------------------------------------------------------------ |
+| `DOCKER_GUIDE.md`            | Docker build, პროფილები (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | ზოგადი VM/VPS დანერგვა (Ubuntu/Debian + nginx + systemd)           |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io განლაგება (ამჟამად მხოლოდ ჩინური)                           |
+| `TERMUX_GUIDE.md`            | ანდროიდი უთავო Termux-ის საშუალებით                                |
+| `PWA_GUIDE.md`               | პროგრესული ვებ აპლიკაციის ინსტალაცია + სერვისის მუშაკი             |
+| `ELECTRON_GUIDE.md`          | Desktop app build + sign + distribute                              |
+| `TUNNELS_GUIDE.md`           | ღრუბლიანი + ngrok + Tailscale Funnel                               |
+| `PROXY_GUIDE.md`             | 4 დონის გამავალი პროქსი + 1პროქსი ბაზარი                           |
 
 ### ქვედირექტორიები
 
-| ქვედირექტორია         | მიზანი                                                                                                                                                                                                                          |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | დოკუმენტაციის ლოკალიზებული თარგმნები (41 ლოკალი)                                                                                                                                                                                |
-| `docs/screenshots/`   | გზამკვლევებისთვის განკუთვნილი გამოსახულებების რესურსები                                                                                                                                                                         |
-| `_tasks/superpowers/` | გეგმები/სპეციფიკაციები superpowers-დან (`writing-plans`/`brainstorming`) + კვლევა — იზოლირებული, ცალკე ვერსირებული რეპოზიტორია, რომელსაც მთავარი ხე gitignore-ით უგნებელჰყოფს. იხ. CLAUDE.md → "Planning & Research Artifacts". |
+| ქვედირეჟი             | მიზანი                                                                                                                                                                                            |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | დოკუმენტების ლოკალიზებული თარგმანი (41 ლოკალი)                                                                                                                                                    |
+| `docs/screenshots/`   | გამოსახულების აქტივები გიდებისთვის                                                                                                                                                                |
+| `_tasks/superpowers/` | Plans/specs ზესახელმწიფოებიდან (`writing-plans`/`brainstorming`) + კვლევა - იზოლირებული, ცალკე ვერსიით რეპო, იგნორირებული მთავარი ხის მიერ. იხილეთ CLAUDE.md → "დაგეგმვა და კვლევის არტეფაქტები". |
 
 ---
 

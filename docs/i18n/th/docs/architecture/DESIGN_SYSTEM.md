@@ -4,13 +4,7 @@
 
 ---
 
-> **สถานะ:** แดชบอร์ดสร้างขึ้นบน **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ซึ่งถูกนำมา vendor
-> ไว้เป็น workspace `packages/ui-kit` (`@omniroute/ui-kit`; สแนปชอตจาก upstream ถูกปักหมุดไว้ใน
-> `packages/ui-kit/UPSTREAM.md` และมีการตรวจสอบโดย `npm run check:ui-kit-snapshot`) ธีม Light คือธีม
-> มาตรฐาน ค่า preference เริ่มต้นคือ `system` สี accent คือ Keak lime (`--ci-color-accent`) ฟอนต์ Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) คือฟอนต์หลักของ UI ส่วน Instrument Serif ใช้เฉพาะข้อความ
-> display ขนาดใหญ่ที่เบาบาง (`.ci-dashboard-display`) และ IBM Plex Mono สำหรับโค้ด — ทั้งหมด self-host
-> ผ่าน `@fontsource/*` imports ที่ด้านบนของ `src/app/globals.css` ทุกไอคอนเป็น glyph ของ Lucide
+> **สถานะ:** แดชบอร์ดถูกสร้างขึ้นบน** เกี๊ยก CI UI Kit** (`@keak/cheaper-inference-ui-kit`) จำหน่ายเป็นพื้นที่ทำงาน `packages/ui-kit` (`@omniroute/ui-kit`; สแน็ปช็อตอัปสตรีมถูกปักหมุดใน `packages/ui-kit/UPSTREAM.md` และป้องกันโดย `npm run check:ui-kit-snapshot`) แสงเป็นธีมที่เป็นที่ยอมรับ การตั้งค่าเริ่มต้นคือ `system` สำเนียงคือ มะนาวเปรี้ยว (`--ci-color-accent`) Switzer เป็นตระกูลเดี่ยวสำหรับ UI ที่แสดงและข้อความโค้ด (`--ci-font-ui`; `--ci-font-display` และ `--ci-font-mono` แก้ไขได้) ซึ่งโฮสต์เองโดยชุดอุปกรณ์เอง (`packages/ui-kit/src/ci-fonts.css` นำเข้าโดย `ci-tokens.css`) ทุกไอคอนเป็นสัญลักษณ์ลูซิด
 
 ## 1. ตำแหน่งที่อยู่ของสิ่งต่างๆ
 
@@ -79,36 +73,15 @@
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` และ `src/shared/components/ErrorPageScaffold.tsx`
   — จะแสดง lockup; และ `tests/unit/brand-pages-static.test.ts` คอยคุ้มกันส่วนนี้ไว้
 
-## 2. กฎ
+## 2. กฎเกณฑ์
 
-1. ใช้โทเคนเท่านั้น ห้ามใช้ค่าลิเทอรัล ข้อยกเว้นที่ตั้งใจเก็บไว้: เทอร์มินัลคอนโซลที่เป็นโทนมืดเสมอ และ
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ซึ่งเป็นมิร์เรอร์ hex ที่ resolve แล้วของพาเลตต์
-   สถานะของ kit สำหรับผู้เรียกที่ต้องการค่า hex แบบลิเทอรัล พาเลตต์เชิงหมวดหมู่ (categorical palettes)
-   ไม่ใช่ข้อยกเว้นอีกต่อไป: พวกมันทำงานอยู่บน chart token ทั้งห้าตัวของ kit (`--color-chart-1..5`) ผ่าน
-   `src/shared/utils/categoricalPalette.ts` และสำหรับกลยุทธ์การกำหนดเส้นทาง ผ่าน
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; เอจของ ReactFlow และแคนวาสของ
-   orchestration อ่านตัวแปร `--orch-status-*` ที่รองรับธีม (`src/shared/components/flow/edgeStyles.ts`)
-2. ห้ามแพตช์ `packages/ui-kit/src` ด้วยมือเด็ดขาด: ให้ซิงก์ด้วย `scripts/dev/sync-ui-kit.sh <commit>`;
-   เกต pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) จะล้มเหลวเมื่อมีไบต์ใด ๆ
-   แตกต่างจากคอมมิต upstream ที่ปักหมุดไว้ (จะข้ามพร้อมคำเตือนเมื่อไม่มี upstream clone ซึ่งคือ
-   `UI_KIT_CLONE` หรือ `_references/cheaper-inference-ui-kit`) เมื่อ kit ขาดอะไรบางอย่าง ให้หาทาง
-   แก้ปัญหาเฉพาะหน้าใน adapter หรือในหน้าจอ และร้องขอสิ่งนั้นจาก upstream
-3. ค่าเริ่มต้นของข้อความใน kit เป็นภาษาอังกฤษ (`label = "Loading"`, `loadingLabel = "Loading table"`…)
-   — ส่งสตริงที่แปลแล้วจาก `useTranslations(...)` ทุกครั้งที่คอมโพเนนต์ของ kit เรนเดอร์ข้อความ
-4. utility ของ Tailwind มีความสำคัญเหนือคลาสของคอมโพเนนต์ kit (kit ประกาศ
-   `@layer theme, base, components, utilities` และกฎของมันอยู่ใน `components`) — ใช้ utility สำหรับ
-   ระยะห่างและเลย์เอาต์ ไม่ใช่เพื่อเปลี่ยนสีของคอมโพเนนต์ kit
-5. หัวเรื่อง: `.ci-heading` (Inter ไม่มี tracking) สำหรับชื่อหน้าและชื่อส่วน; `.ci-dashboard-display`
-   (Instrument Serif) เฉพาะสำหรับข้อความแสดงผลขนาดใหญ่ที่มีจำนวนน้อย เช่น รหัสสถานะของหน้า error
-6. `tests/unit/dashboard-kit-sweep.test.ts` คุ้มกันการนำ kit มาใช้: ไม่อนุญาต Material ligature span ใต้
-   `src/app` หรือ `src/shared/components`; ในต้นไม้ของ dashboard (`src/app/(dashboard)` และ
-   `src/shared/components`) ไม่อนุญาต `<select>`, `<textarea>` หรือ `<table>` แบบดิบ และไม่อนุญาต
-   `role="dialog"` ที่เขียนเองนอกเหนือจากข้อยกเว้นที่ระบุไว้ (native branch ของ `Select` adapter,
-   `RequestLoggerDetail`); ทุก `<button>` หรือ `<input>` แบบดิบในที่นั้นต้องมีคอมเมนต์ที่มี
-   `kit-exception:` (พร้อมเหตุผล) ซึ่งจบลงไม่เกิน 3 บรรทัดเหนือมัน; เฉดสีของพาเลตต์และ `dark:` variant
-   อนุญาตเฉพาะในไฟล์ที่การทดสอบระบุไว้
-7. ตรวจสอบทั้งสองธีมและ viewport ขนาด 390 px ก่อน PR (ด้วยภาพหน้าจอ); `tests/e2e/a11y.spec.ts` รัน
-   axe
+1. โทเค็น ไม่ใช่ตัวอักษร ข้อยกเว้นที่เก็บไว้ตามวัตถุประสงค์: เทอร์มินัลคอนโซลที่มืดตลอดเวลาและ `STATUS_HEX` (`src/shared/constants/statusColors.ts`) มิเรอร์เลขฐานสิบหกที่แก้ไขแล้วของชุดสถานะชุดสำหรับผู้โทรที่ต้องการเลขฐานสิบหกตามตัวอักษร จานสีหมวดหมู่นั้นไม่มีข้อยกเว้นอีกต่อไป: โดยจะขี่บนโทเค็นแผนภูมิห้ารายการของชุด (`--color-chart-1..5`) ผ่าน `src/shared/utils/categoricalPalette.ts` และสำหรับกลยุทธ์การกำหนดเส้นทาง `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges และ canvas orchestration จะอ่านตัวแปร `--orch-status-*` ที่รับรู้ธีม (`src/shared/components/flow/edgeStyles.ts`)
+2. ไม่ต้องแพตช์ `packages/ui-kit/src` ด้วยมือ: ซิงค์กับ `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ล้มเหลวในไบต์ใด ๆ ที่แตกต่างจากการคอมมิตอัปสตรีมที่ปักหมุดไว้ (จะข้ามโดยมีคำเตือนเมื่ออัพสตรีมโคลน `UI_KIT_CLONE` หรือ `_references/cheaper-inference-ui-kit` หายไป) เมื่อชุดอุปกรณ์ขาดหายไป ให้แก้ไขโดยใช้อะแดปเตอร์หรือหน้าจอแล้วถามอัปสตรีม
+3. ค่าเริ่มต้นของข้อความ Kit คือภาษาอังกฤษ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ส่งสตริงที่แปลจาก `useTranslations(...)` ทุกครั้งที่ส่วนประกอบ kit แสดงผลข้อความ
+4. ยูทิลิตี้ Tailwind มีชัยเหนือคลาสส่วนประกอบของชุดคิท (ชุดดังกล่าวประกาศว่า `@layer theme, base, components, utilities` และกฎของมันอยู่ใน `components`) — ใช้ยูทิลิตี้สำหรับการเว้นวรรคและเลย์เอาต์ ไม่ใช่เพื่อเปลี่ยนสีส่วนประกอบของชุดคิท
+5. ส่วนหัว: `.ci-heading` สำหรับชื่อหน้าและส่วน; `.ci-dashboard-display` สำหรับข้อความที่แสดงขนาดใหญ่และกระจัดกระจาย เช่น รหัสสถานะหน้าข้อผิดพลาด ใช้สวิตเซอร์ทั้งคู่
+6. `tests/unit/dashboard-kit-sweep.test.ts` ป้องกันการนำชุดอุปกรณ์ไปใช้: ไม่มีช่วงการมัดวัสดุภายใต้ `src/app` หรือ `src/shared/components`; ในแผนผังแดชบอร์ด (`src/app/(dashboard)` และ `src/shared/components`) ไม่มีดิบ `<select>`, `<textarea>` หรือ `<table>` และไม่มี `role="dialog"` ที่ทำด้วยมือนอกข้อยกเว้นที่ระบุไว้ (สาขาดั้งเดิมของอะแดปเตอร์ `Select`, `RequestLoggerDetail`) `<button>` หรือ `<input>` ดิบทุกรายการจำเป็นต้องมีความคิดเห็นที่มี `kit-exception:` (พร้อมเหตุผล) ซึ่งลงท้ายด้วยไม่เกิน 3 บรรทัดด้านบน จานสีและตัวแปร `dark:` เฉพาะในไฟล์ในรายการทดสอบ
+7. ตรวจสอบทั้งธีมและวิวพอร์ต 390 พิกเซลก่อน PR (ภาพหน้าจอ) `tests/e2e/a11y.spec.ts` วิ่งขวาน
 
 ## 3. การเพิ่มหน้าจอ
 
@@ -137,20 +110,22 @@
 3. workaround สำหรับช่องว่างของ kit ให้อยู่ใน adapter (หรือใน `globals.css` `@layer components` เมื่อการแก้ไขเป็น style) ห้ามอยู่ใน `packages/ui-kit/src`
 4. เพิ่มหรืออัปเดต `tests/unit/ui/adapters/<name>.test.tsx` สำหรับ adapter ที่มี caller จำนวนมาก ให้เปรียบเทียบ markup ที่ render ก่อนและหลังการเปลี่ยนแปลง — การเปลี่ยน padding หรือ wrapper จะแพร่ไปทุกหน้าจอ
 
-## 5. การอัปเดต kit
+## 5. อัพเดตชุดอุปกรณ์
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` คัดลอก `src/` จาก upstream ที่ commit นั้นไปยัง `packages/ui-kit/src` และใช้การแปลงเพียงอย่างเดียวที่อนุญาต (ตัด suffix `.js` ออกจาก relative imports) จากนั้น: ตรวจสอบ `git diff packages/ui-kit`, ตรวจด้วยสายตาบนหน้า providers, settings, combos, usage และ endpoint ในทั้งสองธีม, รัน `npm run check:ui-kit-snapshot` และ `npm run test:vitest:ui`, แล้วเปิด PR พร้อมกับ changelog ของ upstream
+`npm run check:ui-kit-upstream` เปรียบเทียบเวอร์ชันที่ปักหมุดใน `packages/ui-kit/UPSTREAM.md` กับแท็ก `v*` ใหม่ล่าสุดของ upstream repo และพิมพ์คำสั่ง sync เมื่อรีลีสหมด เวิร์กโฟลว์ `UI Kit upstream watch` รายสัปดาห์ (`.github/workflows/ui-kit-upstream-watch.yml`) ดำเนินการตรวจสอบเดียวกันและเปิดปัญหาการติดตามไว้หนึ่งรายการในขณะที่หมุดอยู่ด้านหลัง ที่เก็บต้นน้ำเป็นแบบส่วนตัว ดังนั้นเวิร์กโฟลว์จึงต้องการโทเค็นแบบอ่านอย่างเดียวในความลับ `UI_KIT_READ_TOKEN` และจะคงอยู่โดยเฉื่อยหากไม่มีโทเค็นดังกล่าว
 
-## 6. ไดอะแกรมใน README
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` คัดลอกอัปสตรีม `src/` ที่คอมมิตนั้น (`latest` = แท็ก `v*` ใหม่ล่าสุด) ลงใน `packages/ui-kit/src` ใช้การแปลงที่อนุญาตเพียงครั้งเดียว (โดยจะปล่อยส่วนต่อท้าย `.js` จากการนำเข้าแบบสัมพันธ์) และตั้งค่าเวอร์ชันพื้นที่ทำงานเป็น `packages/ui-kit/package.json` และ `package-lock.json` เป็นเวอร์ชันอัปสตรีม จากนั้น: ตรวจสอบ `git diff packages/ui-kit` ทำการส่งผ่านภาพไปยังผู้ให้บริการ การตั้งค่า คอมโบ การใช้งาน และจุดสิ้นสุดในทั้งสองธีม รัน `npm run check:ui-kit-snapshot` และ `npm run test:vitest:ui` และเปิด PR ด้วยบันทึกการเปลี่ยนแปลงอัปสตรีม
 
-ไดอะแกรมสิบสองภาพที่ `README.md` หลักฝังอยู่ (`docs/diagrams/*.svg`) คือการนำ kit ไปใช้กับภาพนิ่ง และถูก generate ขึ้น ไม่ได้วาดด้วยมือ: ไฟล์ generator 13 ไฟล์ที่ `scripts/docs/gen-readme-*.mjs` (ไดอะแกรมสิบสองภาพบวกกับ driver `gen-readme-diagrams.mjs`) และ staleness test 12 ไฟล์ที่ `tests/unit/docs/readme-*-svg.test.ts` ภาพละหนึ่งไฟล์ แต่ละไฟล์เปรียบเทียบระดับ byte ระหว่างไฟล์ที่ commit กับ output ของ generator ของมัน (job `test-unit`)
+## 6. ไดอะแกรม README
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` คัดลอก palette จาก `packages/ui-kit/src/ci-tokens.css` (ปักหมุดกับไฟล์นั้นโดย `tests/unit/docs/readme-diagram-theme.test.ts`) และกำหนดบทบาทข้อความบนฟอนต์ของ kit — Instrument Serif สำหรับ display, Inter สำหรับข้อความ UI, IBM Plex Mono สำหรับตัวเลขและโค้ด ซึ่งเป็นแพ็กเกจ `@fontsource` ชุดเดียวกับที่ `src/app/globals.css` โหลดสำหรับ dashboard ค่าของธีม light อยู่บน `:root` และค่าของธีม dark อยู่หลัง `prefers-color-scheme: dark` ภายในไฟล์ เพื่อให้แต่ละภาพแสดงตาม scheme ของผู้ดูบน GitHub
-- **Fonts.** `scripts/docs/readme-fonts.mjs` ทำ subset ไฟล์ woff2 เหล่านั้นให้เหลือเฉพาะ glyph ที่แต่ละไดอะแกรมวาด และฝังเป็น `@font-face` `data:` URIs — วิธีเดียวที่ตัวพิมพ์ของ kit จะไปถึงภาพใน README ได้ เนื่องจาก GitHub Markdown ไม่มี CSS และ camo proxy บล็อกทุกการ fetch จากภายนอก subset เหล่านั้นเป็น latin เท่านั้น; glyph สัญลักษณ์ที่ fallback ไปยัง system stack จะได้รับอนุญาตทีละตัวใน `SYMBOL_FALLBACKS` และ glyph อื่นใดที่ไม่ครอบคลุมจะ throw
-- **Regenerate.** `npm run docs:readme-diagrams` เขียนทั้งสิบสองภาพใหม่ตามลำดับใน README และพิมพ์หนึ่งบรรทัดต่อไฟล์พร้อมขนาดของมัน generator แต่ละตัวก็รันได้ด้วยตัวเอง (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ต้องใช้ `node --import tsx/esm` เพราะตัวเลขของมันมาจาก live catalog loader ใน `open-sse/config/freeModelCatalog.ts`; ผลกระทบต่อ CI จากการเปลี่ยนแปลง catalog อยู่ใน `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`) ให้ commit generator และ SVG พร้อมกัน
-- **การพิสูจน์.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` render ไฟล์ในแบบเดียวกับที่ GitHub ให้บริการ (แท็ก `<img>`, `Content-Security-Policy` ของ camo, `image/svg+xml`) จับภาพ frame ทั้ง light และ dark และรายงาน external font requests ที่หน้าเว็บทำ (ต้องเป็น 0)
-- **ขีดจำกัดขนาด.** ต่ำกว่า 200 KB ต่อไฟล์ (staleness test แต่ละตัว assert ข้อนี้); 500 KB คือขีดจำกัดสูงสุดสำหรับภาพ README ใดๆ (กฎของ SVG studio validator)
-- **ข้อความคงเดิม ตัวเลขมาจาก gate.** การ rebrand เปลี่ยนฟอนต์และ palette ไม่ใช่คำ: generator แต่ละตัวเก็บข้อความของไดอะแกรมไว้ในค่าคงที่ `*_COPY` (หรือสร้างจาก live catalog) ซึ่งเป็นทั้งข้อความที่ถูกวาดและ input ของ font-subset ตัวเลข canonical อยู่ในโหนด `<text>` อ่านโดย `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); staleness test ของไดอะแกรมที่ gate อ่านก็รัน validator ของมันบนไฟล์ที่ generate ด้วย ดังนั้นตัวเลขที่เบี่ยงเบนจากโค้ดจะทำให้ test ล้มเหลว — ให้แก้ที่แหล่งข้อมูลซึ่ง gate อ่าน ห้ามแก้ตัวเลขใน generator
+ไดอะแกรมทั้งสิบสองไดอะแกรมที่รูต `README.md` ฝัง (`docs/diagrams/*.svg`) เป็นชุดที่ใช้กับรูปภาพคงที่ และไดอะแกรมเหล่านั้นถูกสร้างขึ้น ไม่ได้วาดด้วยมือ: ไฟล์ตัวสร้าง 13 ไฟล์ที่ `scripts/docs/gen-readme-*.mjs` (สิบสองไดอะแกรมบวกกับไดรเวอร์ `gen-readme-diagrams.mjs` ) และการทดสอบความเก่า 12 รายการที่ `tests/unit/docs/readme-*-svg.test.ts` หนึ่งรายการต่อไดอะแกรม แต่ละไบต์จะเปรียบเทียบไฟล์ที่คอมมิตกับเอาต์พุตของตัวสร้าง (งาน `test-unit`)
+
+- **โทเค็น** `scripts/docs/readme-diagram-theme.mjs` คัดลอกจานสีจาก `packages/ui-kit/src/ci-tokens.css` (ปักหมุดไว้กับไฟล์นั้นโดย `tests/unit/docs/readme-diagram-theme.test.ts`) และกำหนดบทบาทข้อความบนใบหน้าก่อนหน้าของ kit — Instrument Serif สำหรับการแสดงผล, Inter สำหรับข้อความ UI, IBM Plex Mono สำหรับตัวเลขและโค้ด — จากแพ็คเกจ `@fontsource` (แดชบอร์ดเองใช้ Switzer ของ kit ตั้งแต่ kit 0.0.66) ค่าแสงอยู่บน `:root` ค่ามืดอยู่ด้านหลัง `prefers-color-scheme: dark` ภายในไฟล์ ดังนั้นแต่ละภาพจึงเป็นไปตามโครงร่างของผู้ดูบน GitHub
+- **แบบอักษร** `scripts/docs/readme-fonts.mjs` ซับเซ็ตไฟล์ woff2 เหล่านั้นไปยังสัญลักษณ์ที่แต่ละไดอะแกรมวาดและฝังไว้เป็น `@font-face` `data:` URIs — วิธีเดียวที่การพิมพ์ชุดคิทจะเข้าถึงอิมเมจ README เนื่องจาก GitHub Markdown ไม่มี CSS และพร็อกซี camo จะบล็อกทุกการดึงข้อมูลภายนอก ชุดย่อยเป็นภาษาละตินเท่านั้น อนุญาตให้ใช้สัญลักษณ์สัญลักษณ์ที่ถอยกลับไปยังสแต็กระบบได้ทีละรายการใน `SYMBOL_FALLBACKS` และการพ่นสัญลักษณ์อื่นๆ ที่ไม่เปิดเผย
+- **สร้างใหม่** `npm run docs:readme-diagrams` เขียนใหม่ทั้งสิบสองตามลำดับ README และพิมพ์หนึ่งบรรทัดต่อไฟล์ด้วยขนาดของมัน เครื่องกำเนิดไฟฟ้าตัวเดียวยังทำงานด้วยตัวเอง (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ต้องการ `node --import tsx/esm` เนื่องจากตัวเลขของมันมาจากตัวโหลดแค็ตตาล็อกสดใน `open-sse/config/freeModelCatalog.ts`; ผลลัพธ์ CI ของการเปลี่ยนแปลงแค็ตตาล็อกอยู่ใน `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`) คอมมิตตัวสร้างและ SVG ร่วมกัน
+- **การพิสูจน์.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` เรนเดอร์ไฟล์ในแบบที่ GitHub ให้บริการ (แท็ก `<img>`, `Content-Security-Policy` ของ camo , `image/svg+xml`) จับแสงและกรอบสีเข้ม และรายงานแบบอักษรภายนอกที่ร้องขอเพจที่สร้าง (ต้องเป็น 0)
+- **งบประมาณ.** ต่ำกว่า 200 KB ต่อไฟล์ (การทดสอบความเก่าแต่ละครั้งยืนยัน) 500 KB เป็นฮาร์ดแคปสำหรับอิมเมจ README ใดๆ (กฎของเครื่องมือตรวจสอบ SVG studio)
+- **คัดลอกไม่เปลี่ยนแปลงนับจากประตู** การรีแบรนด์เปลี่ยนประเภทและจานสี ไม่ใช่คำ: ตัวสร้างแต่ละตัวจะมีสำเนาของไดอะแกรมเป็นค่าคงที่ `*_COPY` (หรือสร้างจากแค็ตตาล็อกสด) ซึ่งเป็นทั้งข้อความที่วาดและอินพุตชุดย่อยแบบอักษร ตัวเลข Canonical อยู่ในโหนด `<text>` อ่านโดย `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); การทดสอบความเก่าของไดอะแกรมที่เกทอ่านยังรันเครื่องมือตรวจสอบความถูกต้องในไฟล์ที่สร้างขึ้น ดังนั้นตัวเลขที่เบี่ยงเบนไปจากโค้ดจึงไม่ผ่านการทดสอบ - แก้ไขแหล่งที่มาที่เกทอ่าน ไม่ใช่ตัวเลขในตัวสร้าง
 
 ## 7. ดัชนีอ้างอิง
 

@@ -37,6 +37,17 @@
  *                                     cmd/deepseek/deepseek-v4.1-flash
  *   OMNIROUTE_TRANSLATION_TIMEOUT_MS  optional, default 60000
  *   OMNIROUTE_TRANSLATION_CONCURRENCY optional, default 4
+ *
+ * Google engine (scripts/i18n/lib/google-translate.mjs — structure-safe: only text is sent,
+ * fences / table rows / code spans are rebuilt from the source):
+ *   OMNIROUTE_TRANSLATION_ENGINE      llm (default) | google — `google` needs no LLM env at all
+ *   OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK  default on; `0` disables. With the llm engine, a
+ *                                     chunk no model could produce (every model and the
+ *                                     re-split rejected, or a model error) is translated by
+ *                                     Google instead of failing the locale.
+ *   OMNIROUTE_TRANSLATION_GOOGLE_API_KEY   optional; official Cloud Translation v2 instead of
+ *                                     the keyless web endpoint
+ *   OMNIROUTE_TRANSLATION_GOOGLE_CONCURRENCY  parallel Google requests (default 6)
  */
 
 import { promises as fs, existsSync, readFileSync } from "node:fs";
@@ -47,7 +58,16 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
-import { isFallbackWorthy, resolveModelChain } from "./lib/translate-backend.mjs";
+import {
+  isFallbackWorthy,
+  llmCircuit,
+  noteLlmFailure,
+  noteLlmSuccess,
+  resolveModelChain,
+  translationEngine as sharedTranslationEngine,
+  googleFallbackEnabled as sharedGoogleFallbackEnabled,
+} from "./lib/translate-backend.mjs";
+import { translateMarkdownWithGoogle } from "./lib/google-translate.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
 
 // ----- .env loader --------------------------------------------------------
@@ -543,12 +563,89 @@ export function validateTranslatedChunk(source, output) {
       `inline code changed: ${shown.join(", ")}${lost.length > 3 ? ` (+${lost.length - 3})` : ""}`
     );
   }
+  problems.push(...htmlStructureProblems(source, text));
+  const leaked = countMatches(LEAKED_PLACEHOLDER, text) - countMatches(LEAKED_PLACEHOLDER, source);
+  if (leaked > 0) problems.push(`leaked translator placeholder x${leaked}`);
   return { text, problems };
+}
+
+// The Google engine's masking tokens (`<span translate="no">zqa</span>`, bare `zqi`, private-use
+// placeholders): none may survive into a mirror (ja, 2026-10-28, shipped `zqi` / `zqo`).
+const LEAKED_PLACEHOLDER = /<span translate=|(?<!\p{L})zq[a-z]+(?!\p{L})|[\ue000-\uf8ff]/gu;
+const HTML_TAG = /<(\/?)([A-Za-z][\w-]*)(?=[\s/>])[^>]*?(\/?)>/g;
+const HTML_CODE = /<(code|kbd|samp)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
+const VOID_TAGS = new Set(["br", "hr", "img", "input", "meta", "link", "wbr", "source", "col"]);
+
+// Prose an HTML tag can live in: outside fences and outside backtick code spans (a tag inside
+// backticks is a literal, compared by lostInlineCode). <think> is checked on its own above.
+function htmlProse(markdown) {
+  return proseOutsideFences(markdown).replace(/(`+)[^\n]*?\1/g, "");
+}
+
+function htmlTags(prose) {
+  const tags = [];
+  for (const m of prose.matchAll(HTML_TAG)) {
+    const name = m[2].toLowerCase();
+    if (name === "think") continue;
+    tags.push({ name, close: m[1] === "/", single: m[3] === "/" || VOID_TAGS.has(name) });
+  }
+  return tags;
+}
+
+function nestsWell(tags) {
+  const stack = [];
+  for (const t of tags) {
+    if (t.single) continue;
+    if (!t.close) stack.push(t.name);
+    else if (stack.pop() !== t.name) return false;
+  }
+  return stack.length === 0;
+}
+
+// README's tech-stack table is HTML inside markdown: a translated `<tr>` row must keep every tag
+// (by name, opening and closing counted apart), the source's nesting, and the exact text of its
+// `<code>` / `<kbd>` / `<samp>` spans, the same contract lostInlineCode applies to backticks.
+export function htmlStructureProblems(source, translated) {
+  const problems = [];
+  const src = htmlProse(source);
+  const out = htmlProse(translated);
+  const srcTags = htmlTags(src);
+  const outTags = htmlTags(out);
+  const tally = (tags) => {
+    const counts = new Map();
+    for (const t of tags) {
+      const key = `<${t.close ? "/" : ""}${t.name}>`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return counts;
+  };
+  const before = tally(srcTags);
+  const after = tally(outTags);
+  const changed = [...new Set([...before.keys(), ...after.keys()])]
+    .filter((key) => (before.get(key) ?? 0) !== (after.get(key) ?? 0))
+    .map((key) => `${key} ${after.get(key) ?? 0}/${before.get(key) ?? 0}`);
+  if (changed.length) problems.push(`html tags ${changed.slice(0, 4).join(", ")}`);
+  if (nestsWell(srcTags) && !nestsWell(outTags)) problems.push("html nesting broken");
+  const codes = (prose) => {
+    const spans = new Map();
+    for (const m of prose.matchAll(HTML_CODE)) spans.set(m[2], (spans.get(m[2]) ?? 0) + 1);
+    return spans;
+  };
+  const srcCode = codes(src);
+  const outCode = codes(out);
+  const lost = [...srcCode].filter(([span, n]) => (outCode.get(span) ?? 0) < n).map(([s]) => s);
+  if (lost.length) {
+    const shown = lost.slice(0, 3).map((span) => `<code>${span}</code>`);
+    problems.push(
+      `html code changed: ${shown.join(", ")}${lost.length > 3 ? ` (+${lost.length - 3})` : ""}`
+    );
+  }
+  return problems;
 }
 
 // Inline code spans outside fenced blocks, counted by content. Soft-wrapped lines of a paragraph
 // are joined first, because a CommonMark code span may cross a line break.
-function inlineCodeSpans(markdown) {
+function proseOutsideFences(markdown) {
   const prose = [];
   let inFence = false;
   for (const line of markdown.split("\n")) {
@@ -557,7 +654,11 @@ function inlineCodeSpans(markdown) {
       prose.push("");
     } else prose.push(inFence ? "" : line);
   }
-  const joined = prose.join("\n").replace(/([^\n])\n(?=[^\n])/g, "$1 ");
+  return prose.join("\n").replace(/([^\n])\n(?=[^\n])/g, "$1 ");
+}
+
+function inlineCodeSpans(markdown) {
+  const joined = proseOutsideFences(markdown);
   const spans = new Map();
   for (const match of joined.matchAll(/(?<!`)`([^`\n]+)`(?!`)/g)) {
     const span = match[1].replace(/\s+/g, " ").trim();
@@ -913,34 +1014,140 @@ async function resolveSectionPlan({ task, state, opts, sections }) {
   return planSectionReuse({ previousHashes, sections, mirrorSections });
 }
 
-async function translateBody(body, localeEntry, backend) {
+// A chunk the validator keeps rejecting used to be retried CHUNK_ATTEMPTS times on the same
+// model and then fail the whole doc: the model chain only engaged on HTTP errors. On
+// 2026-10-27 the fallback model cut large tables right after the header row under load
+// ("table rows 1/9") and one USER_GUIDE run spent 6.6 h on retries. A rejected chunk now
+// falls through the chain (each level keeps the rest of the chain for HTTP fallback), and
+// when every model rejects a large chunk it is re-split on the same safe seams as
+// chunkMarkdown (headings, paragraphs, table rows) and translated piece by piece.
+const SPLIT_DEPTH = 2;
+const SPLIT_MIN_CHARS = 1500;
+
+export async function translateChunk(
+  chunk,
+  system,
+  backend,
+  { call = callChat, label = "chunk", depth = 0 } = {}
+) {
+  const messages = [
+    { role: "system", content: system },
+    { role: "user", content: chunk },
+  ];
+  const chain = [backend.model, ...(backend.fallbackModels ?? [])].filter(Boolean);
+  let checked;
+  for (let level = 0; level < chain.length; level++) {
+    const levelBackend = {
+      ...backend,
+      model: chain[level],
+      fallbackModels: chain.slice(level + 1),
+    };
+    for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
+      checked = validateTranslatedChunk(chunk, await call(messages, levelBackend));
+      if (checked.problems.length === 0) return checked.text;
+      logWarn(
+        `  ${label} rejected (${chain[level]}, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
+      );
+    }
+  }
+  if (depth < SPLIT_DEPTH && chunk.length > SPLIT_MIN_CHARS) {
+    const pieces = chunkMarkdown(chunk, Math.ceil(chunk.length / 2));
+    if (pieces.length > 1) {
+      logWarn(
+        `  ${label} split into ${pieces.length} smaller pieces after every model rejected it`
+      );
+      const parts = [];
+      for (let p = 0; p < pieces.length; p++) {
+        parts.push(
+          await translateChunk(pieces[p], system, backend, {
+            call,
+            label: `${label}.${p + 1}`,
+            depth: depth + 1,
+          })
+        );
+      }
+      return joinTranslatedChunks(parts);
+    }
+  }
+  throw new Error(`${label} failed validation: ${checked.problems.join("; ")}`);
+}
+
+export const translationEngine = sharedTranslationEngine;
+export const googleFallbackEnabled = sharedGoogleFallbackEnabled;
+
+let protectedTermsCache = null;
+function protectedTerms() {
+  if (protectedTermsCache) return protectedTermsCache;
+  try {
+    const file = path.join(SCRIPT_DIR, "glossary", "protected-terms.json");
+    protectedTermsCache = JSON.parse(readFileSync(file, "utf8")).terms ?? [];
+  } catch {
+    protectedTermsCache = [];
+  }
+  return protectedTermsCache;
+}
+
+// One chunk through Google, checked by the same output guard as a model answer. The web
+// endpoint's answers vary between calls (2026-10-28: hy failed once, passed on rerun), so a
+// rejected answer is retried like a model answer.
+async function translateChunkWithGoogle(chunk, localeEntry, backend, label) {
+  let problems = [];
+  for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
+    const text = await (backend.googleTranslate ?? translateMarkdownWithGoogle)(
+      chunk,
+      localeEntry.code,
+      { protectedTerms: protectedTerms() }
+    );
+    const checked = validateTranslatedChunk(chunk, text);
+    if (checked.problems.length === 0) return checked.text;
+    problems = checked.problems;
+    logWarn(
+      `  ${label} rejected (google, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${problems.join("; ")}`
+    );
+  }
+  throw new Error(`${label} failed validation (google): ${problems.join("; ")}`);
+}
+
+export async function translateBody(body, localeEntry, backend) {
   const englishName = localeEntry.english ?? localeEntry.name;
   const native = localeEntry.native ?? localeEntry.name;
   const system = SYSTEM_PROMPT(englishName, native);
   const chunks = chunkMarkdown(body);
   const translated = [];
+  const engine = backend.engine ?? "llm";
+  const fallback = backend.googleFallback ?? googleFallbackEnabled();
   for (let i = 0; i < chunks.length; i++) {
-    const messages = [
-      { role: "system", content: system },
-      { role: "user", content: chunks[i] },
-    ];
-    let checked;
-    for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
-      checked = validateTranslatedChunk(chunks[i], await callChat(messages, backend));
-      if (checked.problems.length === 0) break;
-      logWarn(
-        `  chunk ${i + 1}/${chunks.length} rejected (attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
-      );
+    const label = `chunk ${i + 1}/${chunks.length}`;
+    let text;
+    if (engine === "google" || (fallback && llmCircuit.open)) {
+      text = await translateChunkWithGoogle(chunks[i], localeEntry, backend, label);
+    } else {
+      try {
+        text = await translateChunk(chunks[i], system, backend, {
+          call: backend.callChat ?? callChat,
+          label,
+        });
+        noteLlmSuccess();
+      } catch (err) {
+        if (!fallback) throw err;
+        // quota / credits / auth, or LLM_FAILURE_LIMIT failures in a row: stop asking the LLM
+        if (noteLlmFailure(err)) {
+          logWarn(
+            `  LLM backend unavailable (${llmCircuit.reason}) — the rest of this run uses Google`
+          );
+        }
+        // Every model and the re-split rejected the chunk (or the chain errored out): Google
+        // rebuilds the structure from the source, so a truncated table cannot come back.
+        logWarn(
+          `  [i18n-google] ${label} via Google (${String(err?.message ?? err).slice(0, 160)})`
+        );
+        text = await translateChunkWithGoogle(chunks[i], localeEntry, backend, label);
+      }
     }
-    if (checked.problems.length > 0) {
-      throw new Error(
-        `chunk ${i + 1}/${chunks.length} failed validation: ${checked.problems.join("; ")}`
-      );
-    }
-    translated.push(checked.text);
+    translated.push(text);
     if (chunks.length > 1) {
       logInfo(
-        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${checked.text.length} chars)`
+        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${text.length} chars)`
       );
     }
   }
@@ -1091,7 +1298,13 @@ async function main() {
 
   // Read backend env up front so dry-run can still print masked summary.
   let backend = null;
-  if (!opts.dryRun) {
+  if (!opts.dryRun && translationEngine() === "google") {
+    backend = {
+      engine: "google",
+      concurrency: opts.concurrency || Number(process.env.OMNIROUTE_TRANSLATION_CONCURRENCY || 8),
+    };
+    logInfo(`backend: Google Translate (concurrency=${backend.concurrency})`);
+  } else if (!opts.dryRun) {
     backend = backendConfig();
     if (opts.concurrency) backend.concurrency = opts.concurrency;
     else backend.concurrency = Number(process.env.OMNIROUTE_TRANSLATION_CONCURRENCY || 4);

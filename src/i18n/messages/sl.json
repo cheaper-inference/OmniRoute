@@ -1345,7 +1345,9 @@
       "open": "odpri",
       "close": "zapri"
     },
-    "noResults": "Ni rezultatov"
+    "noResults": "Ni rezultatov",
+    "costsTeams": "Ekipe",
+    "costsTeamsSubtitle": "Stroškovna mesta ekip"
   },
   "webhooks": {
     "title": "Spletni kavlji",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "Napredna pravila za koristno vsebino, omejitve zahtev in nastavitve posredniškega API-ja",
     "mitmProxyDescription": "Konfigurirajte nastavitve posredniškega strežnika MITM za pregledovanje prometa in odpravljanje napak",
     "oneProxyDescription": "Konfigurirajte nastavitve 1Proxy za napredno veriženje posredniških strežnikov",
-    "omniSkillsDescription": "Namestite in upravljajte veščine peskovnika za avtomatizirano izvajanje pozivov in orodij"
+    "omniSkillsDescription": "Namestite in upravljajte veščine peskovnika za avtomatizirano izvajanje pozivov in orodij",
+    "teamsDescription": "Ocene stroškov ekipe in skupni mehki proračuni"
   },
   "cloudSyncStatus": {
     "synced": "Sinhronizirano",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "Kopirajte svojo končno točko",
     "readinessStep4": "Pošljite preskusno zahtevo",
     "readinessContinue": "Nadaljujte nastavitev",
-    "readinessDismiss": "Za zdaj prezrite"
+    "readinessDismiss": "Za zdaj prezrite",
+    "unpricedUsageTitle": "{count, plural, one {# model} two {# modela} few {# modeli} other {# modelov}} z nedavno uporabo, vendar brez konfigurirane cene",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API ključ z omejitvijo uporabe} two {# API ključa z omejitvijo uporabe} few {# API ključi z omejitvijo uporabe} other {# API ključev z omejitvijo uporabe}} so v zadnjih 8 dneh uporabili te modele. Dokler je ta uporaba znotraj dnevnega ali tedenskega okna ključa, se šteje, da je kvota prekoračena, zato so njegove zahteve blokirane (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Ta uporaba se šteje kot $0 pri omejitvah uporabe na ključ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# zahteva} two {# zahtevi} few {# zahteve} other {# zahtev}}, {keys, plural, one {# omejen ključ} two {# omejena ključa} few {# omejeni ključi} other {# omejenih ključev}}",
+    "unpricedUsageMore": "…in še {count}",
+    "unpricedUsageConfigure": "Konfiguriraj cene",
+    "unpricedUsageDismiss": "Zapri"
   },
   "analytics": {
     "title": "Analitika",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw – ročna konfiguracija",
     "clineManualConfiguration": "Ročna konfiguracija za Cline",
     "kiloManualConfiguration": "Ročna konfiguracija za Kilo Code",
+    "piManualConfiguration": "Pi - Ročna konfiguracija",
+    "piConfigInvalidTitle": "Pi models.json je neberljiv",
+    "piOmnirouteConfigured": "OmniRoute je konfiguriran kot ponudnik Pi po meri",
+    "piModelHelp": "Pi ne odkrije samodejno modelov za končne točke po meri — model, ki ga izberete, je izrecno zapisan v models.json.",
+    "piManualConfigTitle": "Ali uredite ~/.pi/agent/models.json ročno",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Nato zaženite Pi in izberite ponudnika omniroute. Nastavite PI_CODING_AGENT_DIR, da premakne celoten imenik posrednikov.",
+    "piUnownedNote": "Ta vnos je bil dodan zunaj OmniRoute (npr. končne točke po meri pi-gui). Prijavljanje ga bo sprejelo; Ponastavitev odstrani le vnose, ki jih je napisal OmniRoute.",
     "whenToUseLabel": "Kdaj uporabiti",
     "openToolDocs": "Odpri dokumentacijo orodja",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Uporabite, ko želite skrajšane poteke dela Amp, vendar morate še vedno uveljavljati pravila vzdevkov in usmerjanja OmniRoute.",
       "hermes": "Uporabite, ko potrebujete lahkega terminalskega pomočnika z umetno inteligenco za hitra opravila.",
       "hermes-agent": "Uporabite, ko potrebujete Hermes Agent (by Nousresearch) s privzetimi, delegacijskimi, vizualnimi in pomožnimi modeli, usmerjenimi prek OmniRoute.",
+      "whycodes": "Uporabite, ko želite WhyCodes kot avtonomnega CLI agenta za splošno rabo (TUI, poimenovani agenti, pomnilnik, swarm), usmerjenega na OmniRoute.",
       "custom": "Uporabite za izvedbe orodij po meri ali splošne konfiguracije, združljive z OpenAI."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI, programski agent s podporo za ponudnike po meri",
       "droid": "Factory Droid, pomočnik z umetno inteligenco",
       "openclaw": "Open Claw, pomočnik z umetno inteligenco",
+      "openclaude": "CLI programskega agenta OpenClaude s podporo za ponudnika, združljivega z OpenAI",
       "cline": "Cline CLI, pomočnik za programiranje z umetno inteligenco",
       "kilo": "Kilo Code CLI, pomočnik z umetno inteligenco",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "Warp, terminal z umetno inteligenco in podporo za ponudnike po meri",
       "agent-deck": "Agent Deck, orkestrator več agentov",
       "5dive": "5dive — samostojno gostovana flota programskih agentov; en profil za preverjanje pristnosti jih vse usmeri v OmniRoute",
+      "whycodes": "WhyCodes, avtonomni CLI agent z osnovnim URL-jem, združljivim z OpenAI",
       "zed": "Urejevalnik kode Zed — vgrajeni agent prek ponudnika, združljivega z OpenAI"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "Posodobi",
     "cliproxyapiUpdateAvailable": "Na voljo je posodobitev: v{current} → v{latest}",
     "cliproxyapiVersion": "Različica",
+    "piInstallTitle": "Namestite Pi Coding Agent",
+    "piInstallInstructions": "Namestite Pi CLI, nato se vrnite sem, da ga povežete z OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Uporabite URL ki je dosegljiv iz stroja, ki izvaja Pi. Končna točka /v1, združljiva z OpenAI, se doda samodejno.",
+    "piManualMergeHint": "Samo predogled. Spojite ta vnos providers.omniroute v models.json, da vaši drugi ponudniki in nastavitve ostanejo nedotaknjeni.",
     "removeMapping": "Odstrani preslikavo"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "npr. 10",
     "testSelected": "Preizkusi izbrane ({count})",
     "testAllFiltered": "Preizkusi vse filtrirane ({count})",
+    "visibility": "Vidnost",
+    "allVisibility": "Vidni in skriti",
+    "visibleOnly": "Vidni",
+    "hiddenOnly": "Skriti",
+    "visibleColumn": "Viden",
+    "hideModel": "Skrij {name} iz /v1/models",
+    "showModel": "Prikaži {name} v /v1/models",
+    "hiddenBadge": "Skrit",
+    "hideFiltered": "Skrij filtrirane ({count})",
+    "showFiltered": "Prikaži filtrirane ({count})",
+    "visibilityCounts": "{visible} vidnih · {hidden} skritih · {total} skupaj",
+    "visibilityUpdateFailed": "Posodobitev vidnosti modela ni uspela",
     "cancel": "Prekliči",
     "clearResults": "Počisti rezultate",
     "testing": "Preizkušanje...",
@@ -3394,7 +3433,44 @@
     "httpError": "Zahteva ni uspela s kodo HTTP {status}",
     "testFailedNoDetail": "Test ni uspel brez sporočila o napaki",
     "additionalCapabilities": "Dodatne zmožnosti: {list}",
-    "comboRefMember": "Kombinacija → {name}"
+    "comboRefMember": "Kombinacija → {name}",
+    "keyAccessButton": "Dostop z API-ključem",
+    "allowedInKeys": "Dovoljeno v: {count, plural, one {# ključ} two {# ključa} few {# ključi} other {# ključev}}",
+    "keysLoading": "Nalaganje API-ključev …",
+    "keysRetry": "Ponovno poskusi naložiti ključe",
+    "accessViaPattern": "prek {pattern}",
+    "accessBlocked": "Blokira {pattern}",
+    "editKeyAccess": "Uredi dostop ključa",
+    "toggleKeyAccess": "Dovoli {item} na {name}",
+    "resultNetworkError": "Dodelitev ni uspela",
+    "resultWouldEmptyModels": "Ta ključ bi ostal brez dovoljenih modelov — namesto tega uredite dostop do ključa",
+    "resultWouldEmptyCombos": "Ta ključ bi ostal brez dovoljenih kombinacij — namesto tega uredite dostop do ključa",
+    "keyUpdatePending": "{name} se še vedno posodablja. Poskusite znova čez trenutek.",
+    "assignToKeys": "Dodeli API-ključem …",
+    "assignApply": "Uveljavi spremembe",
+    "assignComplete": "Dostop z API-ključem posodobljen",
+    "assignFailed": "Nekatere posodobitve API-ključev niso uspele",
+    "assignNoChanges": "Dostop do ključa API ni bil spremenjen",
+    "selectedAccessItems": "Izbrani elementi: {count}",
+    "assignExcludedCombos": "{count, plural, one {# izbrana vrstica kombinacije ni model in bo tukaj preskočena} two {# izbrani vrstici kombinacije nista modela in bosta tukaj preskočeni} few {# izbrane vrstice kombinacije niso modeli in bodo tukaj preskočene} other {# izbranih vrstic kombinacije niso modeli in bodo tukaj preskočene}}. Dodelite kombinacije na zavihku Kombinacije.",
+    "assignActionAdd": "Dodaj",
+    "assignActionRemove": "Odstrani",
+    "searchKeys": "Išči API-ključe",
+    "selectApiKey": "Izberi API-ključ {name}",
+    "allModelsAccess": "Vsi modeli",
+    "allCombosAccess": "Vse kombinacije",
+    "modelAccessCount": "Modeli: {count}",
+    "comboAccessCount": "Kombinacije: {count}",
+    "keyInactive": "Neaktivno",
+    "keyBanned": "Blokirano",
+    "keyRevoked": "Preklicano",
+    "switchRestrictedConfirm": "Preklopi ta ključ na omejen dostop: dovoljeni bodo le izbrani elementi",
+    "removeNoChangeHint": "Ta ključ dovoljuje vse; odstranitev izbranih elementov ne bo prinesla sprememb",
+    "removeStaysAllowedHint": "Še vedno dovoljeno na tem ključu prek {patterns}",
+    "resultChanged": "Spremenjeno",
+    "resultUnchanged": "Brez sprememb",
+    "resultSkipped": "Preskočeno",
+    "resultNeedsSwitch": "Zahteva preklop na omejeno"
   },
   "combos": {
     "title": "Kombinacije",
@@ -3515,6 +3591,9 @@
     "moveUp": "Premakni navzgor",
     "moveDown": "Premakni navzdol",
     "removeModel": "Odstrani",
+    "testStep": "Preizkusi ta model",
+    "testStepRunning": "Preizkušanje…",
+    "testStepNotTestable": "Preizkusiti je mogoče samo korake z enim modelom",
     "saving": "Shranjevanje ...",
     "liveNoProviders": "Zaznan ni še noben ponudnik.",
     "liveFleetDataHint": "Podatki o floti prihajajo prek dogodkov kombinacij v živo.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Prenesi predlogo CSV",
     "importFromFileMoreErrors": "+{count} več",
     "importFromFileSchemaHint": "Stolpci CSV so določeni položajno: provider, name, apiKey, baseUrl (izbirno), priority (izbirno). Stolpec provider mora vsebovati ID obstoječega upravljanega ponudnika ali že registriran ID vozlišča, združljivega z OpenAI/Anthropic — ta uvoz ne ustvari novih vozlišč končnih točk.",
+    "importOAuthExport": "Uvozi izvoz OAuth",
+    "oauthExportTitle": "Uvozi izvoz iz upravitelja računov",
+    "oauthExportDescription": "Naložite izvoz v navadnem besedilu iz upravitelja računov (npr. izvoz cloud-accounts iz Antigravity Managerja). Žetoni se osvežijo na strežniku in vsak račun postane povezava OAuth — dvojniki se osvežijo na mestu.",
+    "oauthExportProviderLabel": "Ponudnik",
+    "oauthExportChoose": "Izberite datoteko",
+    "oauthExportFileAria": "Datoteka JSON z izvozom računov",
+    "oauthExportSchemaHint": "Sprejeto: dokument s poljem \"accounts\", golo polje ali en sam zapis. Žetoni so lahko v gnezdenem objektu token ali neposredno v zapisu.",
+    "oauthExportDetected": "Zaznanih računov: {count}",
+    "oauthExportSelectAll": "Izberi vse račune",
+    "oauthExportSelectAccount": "Izberi račun {index}",
+    "oauthExportColEmail": "E-pošta",
+    "oauthExportColProvider": "Ponudnik",
+    "oauthExportColRefresh": "Žeton za osvežitev",
+    "oauthExportNoEmail": "(ni e-pošte)",
+    "oauthExportYes": "da",
+    "oauthExportNo": "ne",
+    "oauthExportImporting": "Uvažanje…",
+    "oauthExportImport": "Uvozi račune ({count})",
+    "oauthExportResult": "Uvoženo {imported}/{total} — neuspešno {failed}",
+    "oauthExportParseError": "Iz te datoteke ni bilo mogoče prebrati nobenega računa.",
+    "oauthExportUnknownError": "neznana napaka",
     "adaptaTutorial": {
       "title": "Kako povezati Adapta Web",
       "introPrefix": "Adapta za preverjanje pristnosti uporablja Clerk. Žeton",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "Vsi modeli so že uvoženi",
     "noNewModelsToImport": "Ni novih modelov za uvoz — vsi modeli so že v registru ali na seznamu modelov po meri",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Odkrivanje modela ni uspelo {time}",
     "skippingExistingModels": "Preskakovanje obstoječih modelov: {count}",
     "autoSync": "Samodejna sinhronizacija",
     "autoSyncShort": "Sinhroniziraj",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Uporabljeno v kombinacijah ({count}): {combos}",
+    "openComboTooltip": "Odpri Kombinacije — uporablja {combo}"
   },
   "settings": {
     "title": "Nastavitve",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "Gostitelj",
     "qdrantCollection": "Zbirka",
     "catalogVisibilityHint": "Skrite ID-je modelov je še vedno mogoče klicati z enakimi dovoljenji za dostop.",
+    "exposeCombosOnly": "V /v1/models prikaži samo kombinacije",
+    "exposeCombosOnlyDesc": "Odjemalci, ki modele odkrivajo samodejno, vidijo vaše kombinacije (in auto/*, če niso skrite) namesto surovih modelov ponudnikov. Izrecni ID-ji provider/model se še naprej usmerjajo.",
     "catalogScopeTitle": "Seznam API-ja modelov",
     "catalogScopeDesc": "Kaj GET /v1/models prikazuje za ta ključ. Omejitev seznama nikoli ne spremeni, kaj lahko ključ kliče.",
     "catalogScopeAll": "Oboje",
@@ -8917,7 +9022,9 @@
         "financial": "Finančna",
         "brazilian": "Brazilska",
         "usa": "ZDA",
-        "full": "Popolna"
+        "full": "Popolna",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Južna Afrika)"
       },
       "builtinTypes": "Vgrajene vrste",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "Naslovi IPv4",
         "ipv6_address": "Naslovi IPv6",
         "aws_key": "Dostopni ključi AWS",
-        "api_key_generic": "Ključi API in žetoni"
+        "api_key_generic": "Ključi API in žetoni",
+        "iban": "številke bančnih računov IBAN",
+        "eu_vat": "EU VAT številke",
+        "es_dni_nie": "Španščina DNI / NIE",
+        "it_codice_fiscale": "italijanski Codice Fiscale",
+        "pl_pesel": "poljski PESEL",
+        "nl_bsn": "nizozemski BSN",
+        "de_steuer_id": "nemški Steuer-ID",
+        "se_personnummer": "Švedska personnummer",
+        "za_id": "Južnoafriške številke ID",
+        "za_phone": "Južnoafriške telefonske številke",
+        "za_vat": "Južnoafriške številke VAT",
+        "za_tax_ref": "Južnoafriške davčne reference"
       },
       "customPatterns": "Vzorci po meri",
       "customPatternsDesc": "Ujemanja se zamenjajo z [CUSTOM_REDACTED]. Največ {max} vzorcev. Vzorci s tveganjem katastrofalnega vračanja se zavrnejo.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "OAuth za GitLab Duo ni konfiguriran. Registrirajte aplikacijo OAuth na naslovu {applicationsUrl} z URI-jem za preusmeritev {redirectUri} in obsegi »{scopes}«, nato nastavite {clientIdEnv} (in po želji {clientSecretEnv}) ter znova zaženite.",
     "gitlabDuoSetupDescription": "Ko je aplikacija registrirana in so okoljske spremenljivke nastavljene v tej instanci OmniRoute, kliknite Nadaljuj, da začnete prijavo OAuth.",
     "continue": "Nadaljuj",
+    "copilotPolicyTitle": "Eksperimentalni ponudnik: stanje pravilnika je dvoumno",
+    "copilotPolicyLine1": "OmniRoute se poveže prek api.githubcopilot.com, ki ga GitHub ni objavil kot splošni sklep tretje osebe API. Ta integracija je poskusna in se lahko spremeni brez predhodnega obvestila.",
+    "copilotPolicyLine2": "Povezan je lahko le vaš lasten račun GitHub. Nikoli ne delite poverilnic, združite računov ali poskušajte preseči omejitev vašega načrta.",
+    "copilotPolicyLine3": "Uporabniki brezplačnega in študentskega paketa prejmejo samo samodejno izbiro modela. Pogoji vašega načrta Copilot in morebitne omejitve uporabe ostajajo vaša odgovornost.",
+    "copilotPolicyAcknowledge": "Razumem, poveži",
     "tabPasteSetupToken": "Žeton za nastavitev",
     "claudeSetupTokenDescription": "V terminalu zaženite `claude setup-token` in prilepite žeton, ki ga izpiše. Velja eno leto in nima žetona za osvežitev. OmniRoute pred shranjevanjem pošlje eno preizkusno zahtevo na Anthropic.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "ogled pogovora",
       "openConversation": "Odpri pogovor {id}"
     },
-    "tableLabel": "Dnevniki zahtev"
+    "tableLabel": "Dnevniki zahtev",
+    "throughputPostFirstToken": "Po prvem tokenu",
+    "throughputEndToEnd": "Od začetka do konca",
+    "throughputRate": "{value} tokenov/s",
+    "throughputExplanation": "Pri obeh stopnjah se upošteva večje od števila izhodnih in razmišljevalnih tokenov. Stopnja po prvem tokenu izključuje veljaven TTFT; sicer uporablja celotno trajanje. Stopnja od začetka do konca vedno uporablja celotno trajanje. Odgovor iz medpomnilnika ima lahko visoko stopnjo dostave v izbruhih, čeprav model ne generira hitreje."
   },
   "proxyLogger": {
     "filterAll": "Vse",
@@ -12785,7 +12913,8 @@
     "title": "Statistika ponudnikov",
     "description": "Promet, zakasnitev in stopnje uspešnosti po ponudnikih in modelih",
     "combo": "Kombinacija",
-    "toggleModels": "Prikaži modele za {provider}"
+    "toggleModels": "Prikaži modele za {provider}",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Brezstrežniški relejni posredniški strežniki",
@@ -13730,7 +13859,9 @@
       "disabled": "Onemogočeno",
       "dual": "Dvojno",
       "alias": "Vzdevek",
-      "canonical": "Kanonično"
+      "canonical": "Kanonično",
+      "fail_closed": "Blokiraj (fail_closed)",
+      "count_as_zero": "Štej kot $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infrastrukturne zaustavitve z zaščiteno prioriteto kot 502",
         "description": "Odgovori s 502 namesto 503, ko prednostni cilj z nadomestno uporabo samo ob izčrpani kvoti ustavi kombinacijo zaradi vzroka, ki dokazljivo ni povezan s kvoto: odprtega odklopnika ponudnika ali preskoka zaradi napovedane zakasnitve."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika proračuna za neocenjeno uporabo",
+        "description": "Kako dnevne/tedenske omejitve (v USD) za posamezen ključ obravnavajo uspešno uporabo, pri kateri ponudnik/model nima vnesene cene. fail_closed (privzeto) označi okno kot prekoračeno, zato neznan strošek nikoli ne more zaobiti trde omejitve. count_as_zero šteje to uporabo kot $0 in še naprej uveljavlja porabo s ceno. Modeli brez cene so v vsakem primeru navedeni na domači strani nadzorne plošče."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "Zapri"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Onemogoči ustvarjanje različic ravni razmišljanja (npr. -low, -medium, -high) v katalogu /v1/models.",
+  "teamCosts": {
+    "title": "Stroški ekipe",
+    "subtitle": "Upravljajte skupne mehke proračune in ocene stroškov iz kataloga.",
+    "refresh": "Osveži",
+    "create": "Ustvari ekipo",
+    "edit": "Uredi ekipo",
+    "archive": "Arhiviraj",
+    "selectTeam": "Ekipe",
+    "searchTeams": "Išči ekipe",
+    "statusFilter": "Stanje ekipe",
+    "active": "Aktivna",
+    "archived": "Arhivirana · samo za branje",
+    "allTeams": "Vse ekipe",
+    "noTeams": "Ni ustreznih ekip.",
+    "selectHint": "Ustvarite ali izberite ekipo za ogled stroškov.",
+    "loading": "Nalaganje stroškov ekipe…",
+    "budgetTitle": "Trenutni mehki proračun",
+    "budgetSubtitle": "Uspešna evidentirana poraba · drseče okno · neodvisno od datumov poročila",
+    "archivedBudget": "Arhivirana: uveljavljanje proračuna je neaktivno. Zgodovinska poročila ostajajo na voljo.",
+    "unlimited": "Neomejeno — skupni mehki proračun ni nastavljen.",
+    "budgetUnavailable": "Stanje proračuna ni na voljo. Osvežite za ponoven poskus.",
+    "used": "Uspešna poraba",
+    "maximum": "Največ proračuna",
+    "remaining": "Znani ostanek",
+    "resets": "Ponastavi se",
+    "unpricedBudget": "Del uspešne porabe ima neznano ceno. Znana vsota je nepopolna; uveljavljanje proračuna to okno šteje za preseženo.",
+    "overBudget": "Proračun dosežen ali presežen · {amount} čez",
+    "reportTitle": "Poročilo o porabi",
+    "reportSubtitle": "Vsi poskusi · ocena iz kataloga v USD, ni račun · celi datumi UTC",
+    "reportPeriod": "Obdobje poročila",
+    "day1": "1 dan",
+    "day7": "7 dni",
+    "day30": "30 dni",
+    "allTime": "Ves čas",
+    "reportSpend": "Ocenjeni izdatki poročila",
+    "requests": "Zahtevki",
+    "assignedKeys": "Dodeljeni ključi",
+    "unpricedReport": "To poročilo vsebuje neznane cene. Ocenjeni izdatki so nepopolni.",
+    "breakdown": "Strošek po ključu API",
+    "noUsage": "V tem obdobju poročila ni porabe.",
+    "keyName": "Ime ključa API",
+    "tokens": "Vhodni + izhodni žetoni",
+    "unnamedKey": "Neimenovan ali izbrisan ključ",
+    "unpriced": "Neznana cena",
+    "members": "Članstvo",
+    "memberSubtitle": "Sprememba članstva ohrani zgodovinske izdatke pri izvirni ekipi.",
+    "searchKeys": "Išči ključe ali trenutne lastnike",
+    "chooseKey": "Izberite ključ API",
+    "unassigned": "Ni dodeljeno",
+    "ownership": "Trenutna obračunska ekipa: {team}",
+    "assign": "Dodeli",
+    "remove": "Odstrani",
+    "noMembers": "Ni trenutnih članov. Zgodovinska poraba se lahko še vedno všteva v proračun.",
+    "assignedAt": "Dodeljeno {date} (UTC)",
+    "name": "Ime ekipe",
+    "description": "Opis",
+    "enableBudget": "Omogoči skupni mehki proračun",
+    "amount": "Znesek proračuna (USD)",
+    "duration": "Drseče proračunsko okno",
+    "cancel": "Prekliči",
+    "save": "Shrani",
+    "confirm": "Potrdi",
+    "transferTitle": "Potrdite prenos ključa",
+    "transferMessage": "Premakni ta ključ iz »{source}« v »{destination}«? Zgodovinski izdatki ostanejo pri izvirni ekipi.",
+    "removeTitle": "Odstrani dodelitev ključa",
+    "removeMessage": "Odstrani ta ključ iz »{team}«? Zgodovinski izdatki ostanejo v tej ekipi.",
+    "archiveTitle": "Arhiviraj ekipo",
+    "archiveMessage": "Arhiviraj »{team}«? Vse trenutne povezave se zaprejo in uveljavljanje proračuna preneha. Zgodovinska poročila ostajajo na voljo.",
+    "invalidName": "Vnesite ime (1–200 znakov) in opis z največ 2000 znaki.",
+    "invalidAmount": "Vnesite končen znesek proračuna, večji od nič.",
+    "unauthorized": "Za nadaljevanje se prijavite v nadzorno ploščo.",
+    "forbidden": "Nimate dovoljenja za upravljanje ekip. Vaš vnos je ohranjen.",
+    "notFound": "Ta ekipa ali dodelitev ne obstaja več.",
+    "conflict": "Dodelitev ali ekipa se je spremenila. Osvežite in pred ponovnim poskusom potrdite trenutno lastništvo.",
+    "failed": "Zahteva ni uspela. Vaš vnos je ohranjen; poskusite znova.",
+    "partialBudget": "Nekatere ohranjene dnevne vedra se prekrivajo z mejo okna in jih ni mogoče natančno razdeliti. Prikazani izdatki so nepopolni; preostali znesek ni na voljo. Obstoječa politika mehkega proračuna ostaja nespremenjena."
+  },
   "connectionTest": {
     "title": "Preskusno sporočilo",
     "description": "Pošlji eno dejansko zahtevo prek tega računa. To porabi majhno količino kvote in lahko začne obdobje uporabe, odvisno od ponudnika.",
@@ -15216,5 +15428,8 @@
     "importButton": "Uvozi",
     "importFailed": "Uvoz ni uspel.",
     "importSuccess": "Uvoženih {connections} računov in {nodes} vozlišč ponudnikov; preskočenih {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Začni na trenutnem mestu (preskoči obstoječe dnevnike)"
   }
 }

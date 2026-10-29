@@ -49,6 +49,9 @@ const GROK_BUILD_UNSUPPORTED_PARAMS = [
   "frequency_penalty",
   "top_logprobs",
   "reasoning_effort",
+  // The camel-case alias must go too: the base sanitizer runs after transformRequest and
+  // folds a surviving `reasoningEffort` into `reasoning_effort`, which Grok Build rejects.
+  "reasoningEffort",
 ];
 // OpenAI-only `web_search` tool arguments that Grok Build rejects with
 // `400 Argument not supported: <name>`. Codex CLI sends `external_web_access` on every turn.

@@ -1345,7 +1345,9 @@
       "open": "բացել",
       "close": "փակել"
     },
-    "noResults": "Արդյունքներ չկան"
+    "noResults": "Արդյունքներ չկան",
+    "costsTeams": "Թիմեր",
+    "costsTeamsSubtitle": "Թիմերի ծախսային կենտրոններ"
   },
   "webhooks": {
     "title": "Վեբհուկներ",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "Օգտակար բեռի ընդլայնված կանոններ, հարցումների սահմանաչափեր և պրոքսի API-ի կարգավորումներ",
     "mitmProxyDescription": "Կարգավորեք MITM պրոքսիի պարամետրերը՝ տրաֆիկի ստուգման և վրիպազերծման համար",
     "oneProxyDescription": "Կարգավորեք 1Proxy-ի պարամետրերը՝ պրոքսիների ընդլայնված շղթայակցման համար",
-    "omniSkillsDescription": "Տեղադրեք և կառավարեք sandbox հմտությունները՝ հուշումների և գործիքների ավտոմատ կատարման համար"
+    "omniSkillsDescription": "Տեղադրեք և կառավարեք sandbox հմտությունները՝ հուշումների և գործիքների ավտոմատ կատարման համար",
+    "teamsDescription": "Թիմի ծախսերի գնահատականներ և ընդհանուր փափուկ բյուջեներ"
   },
   "cloudSyncStatus": {
     "synced": "Համաժամեցված է",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "Պատճենեք ձեր վերջնակետը",
     "readinessStep4": "Ուղարկեք փորձնական հարցում",
     "readinessContinue": "Շարունակել կարգավորումը",
-    "readinessDismiss": "Առայժմ փակել"
+    "readinessDismiss": "Առայժմ փակել",
+    "unpricedUsageTitle": "{count, plural, one {# մոդել} other {# մոդելներ}} որոնք ունեցել են վերջին օգտագործում, բայց գինը սահմանված չէ",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API բանալի՝ օգտագործման սահմանով} other {# API բանալիներ՝ օգտագործման սահմանով}} օգտագործել են այս մոդելները վերջին 8 օրվա ընթացքում. Երբ այդ օգտագործումը ընկած է բանալիի օրական կամ շաբաթական պատուհանի մեջ, բանալին համարվում է քվոտան անցած և նրա հարցումները արգելվում են (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Այս օգտագործումը հաշվվում է որպես $0՝ բանալիի օգտագործման սահմանների համար (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# հարցում} other {# հարցումներ}}, {keys, plural, one {# սահմանափակ բանալի} other {# սահմանափակ բանալիներ}}",
+    "unpricedUsageMore": "…և ևս {count}",
+    "unpricedUsageConfigure": "Կարգավորել գները",
+    "unpricedUsageDismiss": "Փակել"
   },
   "analytics": {
     "title": "Վերլուծություն",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw — ձեռքով կազմաձևում",
     "clineManualConfiguration": "Cline-ի ձեռքով կազմաձևում",
     "kiloManualConfiguration": "Kilo Code-ի ձեռքով կազմաձևում",
+    "piManualConfiguration": "Pi - Ձեռնարկի կարգավորում",
+    "piConfigInvalidTitle": "Pi models.json անընթեռնելի է",
+    "piOmnirouteConfigured": "OmniRoute կազմաձևված է որպես Pi մաքսային մատակարար",
+    "piModelHelp": "Pi-ն ինքնաբերաբար չի հայտնաբերում մոդելներ հատուկ վերջնակետերի համար — ձեր ընտրած մոդելը բացահայտորեն գրված է models.json ում:",
+    "piManualConfigTitle": "Կամ խմբագրել ~/.pi/agent/models.json ձեռքով",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Այնուհետև գործարկեք Pi-ն և ընտրեք omniroute մատակարարին: Սահմանեք PI_CODING_AGENT_DIR ՝ տեղափոխելու ողջ գործակալի գրացուցակը:",
+    "piUnownedNote": "Այս գրառումն ավելացվել է OmniRoute դուրս (օրինակ՝ pi-gui-ի Հատուկ վերջնակետերը): Դիմելը կընդունի այն; Վերակայումը հեռացնում է միայն OmniRoute գրած գրառումները:",
     "whenToUseLabel": "Երբ օգտագործել",
     "openToolDocs": "Բացել գործիքի փաստաթղթերը",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Օգտագործեք, երբ ցանկանում եք Amp-ի կրճատ գրառումներով աշխատանքային հոսքեր, բայց միևնույն ժամանակ անհրաժեշտ է ապահովել OmniRoute-ի այլանունների և երթուղավորման կանոնների կիրառումը։",
       "hermes": "Օգտագործեք, երբ արագ առաջադրանքների համար անհրաժեշտ է թեթև, տերմինալում աշխատող AI օգնական։",
       "hermes-agent": "Օգտագործեք, երբ անհրաժեշտ է Hermes Agent-ը (Nousresearch-ի կողմից)՝ OmniRoute-ի միջոցով ուղղորդվող լռելյայն, պատվիրակման, տեսողական և օժանդակ մոդելներով։",
+      "whycodes": "Օգտագործեք, երբ ցանկանում եք WhyCodes-ը որպես բազմանպատակ ինքնավար CLI գործակալ (TUI, անվանված գործակալներ, հիշողություն, swarm)՝ ուղղված OmniRoute-ին։",
       "custom": "Օգտագործեք գործիքների հատուկ իրականացումների կամ ընդհանուր OpenAI-ի հետ համատեղելի կազմաձևումների համար։"
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI կոդավորման գործակալ՝ հատուկ մատակարարների աջակցությամբ",
       "droid": "Factory Droid AI օգնական",
       "openclaw": "Open Claw AI օգնական",
+      "openclaude": "OpenClaude կոդավորման գործակալի CLI՝ OpenAI-համատեղելի մատակարարի աջակցությամբ",
       "cline": "Cline AI կոդավորման օգնականի CLI",
       "kilo": "Kilo Code AI օգնականի CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "Warp AI տերմինալ՝ հատուկ մատակարարի աջակցությամբ",
       "agent-deck": "Agent Deck բազմագործակալային համակարգող",
       "5dive": "5dive — ինքնուրույն հոսթավորվող կոդավորման գործակալների խումբ․ նույնականացման մեկ պրոֆիլը բոլորին ուղղորդում է դեպի OmniRoute",
+      "whycodes": "WhyCodes ինքնավար CLI գործակալ՝ OpenAI-համատեղելի հիմնական URL-ով",
       "zed": "Zed կոդի խմբագիր — ներկառուցված գործակալ OpenAI-համատեղելի մատակարարի միջոցով"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "Թարմացնել",
     "cliproxyapiUpdateAvailable": "Հասանելի է թարմացում՝ v{current} → v{latest}",
     "cliproxyapiVersion": "Տարբերակ",
+    "piInstallTitle": "Տեղադրեք Pi կոդավորման գործակալը",
+    "piInstallInstructions": "Տեղադրեք Pi CLI, այնուհետև վերադարձեք այստեղ՝ այն OmniRoute ին միացնելու համար:",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Օգտագործեք URL, որը հասանելի է Pi-ն աշխատող մեքենայից: OpenAI-ի հետ համատեղելի /v1 վերջնակետը ավելացվում է ավտոմատ կերպով:",
+    "piManualMergeHint": "Միայն նախադիտում: Միավորեք այս providers.omniroute մուտքը models.json ին, որպեսզի ձեր մյուս մատակարարներն ու կարգավորումները մնան անփոփոխ:",
     "removeMapping": "Հեռացնել համապատասխանեցումը"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "օր.՝ 10",
     "testSelected": "Թեստավորել ընտրվածները ({count})",
     "testAllFiltered": "Թեստավորել բոլոր ֆիլտրվածները ({count})",
+    "visibility": "Տեսանելիություն",
+    "allVisibility": "Տեսանելի և թաքնված",
+    "visibleOnly": "Տեսանելի",
+    "hiddenOnly": "Թաքնված",
+    "visibleColumn": "Տեսանելի",
+    "hideModel": "Թաքցնել {name}-ը /v1/models-ից",
+    "showModel": "Ցուցադրել {name}-ը /v1/models-ում",
+    "hiddenBadge": "Թաքնված",
+    "hideFiltered": "Թաքցնել զտվածները ({count})",
+    "showFiltered": "Ցուցադրել զտվածները ({count})",
+    "visibilityCounts": "{visible} տեսանելի · {hidden} թաքնված · {total} ընդամենը",
+    "visibilityUpdateFailed": "Չհաջողվեց թարմացնել մոդելի տեսանելիությունը",
     "cancel": "Չեղարկել",
     "clearResults": "Մաքրել արդյունքները",
     "testing": "Թեստավորում...",
@@ -3394,7 +3433,44 @@
     "httpError": "Հարցումը ձախողվեց HTTP {status} կոդով",
     "testFailedNoDetail": "Թեստը ձախողվեց առանց սխալի հաղորդագրության",
     "additionalCapabilities": "Լրացուցիչ հնարավորություններ՝ {list}",
-    "comboRefMember": "Համակցություն → {name}"
+    "comboRefMember": "Համակցություն → {name}",
+    "keyAccessButton": "API բանալու հասանելիություն",
+    "allowedInKeys": "Թույլատրված է՝ {count, plural, one {# բանալիում} other {# բանալիներում}}",
+    "keysLoading": "API բանալիների բեռնում…",
+    "keysRetry": "Կրկնել բանալիների բեռնումը",
+    "accessViaPattern": "{pattern}-ի միջոցով",
+    "accessBlocked": "Արգելափակված է {pattern}-ի կողմից",
+    "editKeyAccess": "Խմբագրել բանալու հասանելիությունը",
+    "toggleKeyAccess": "Թույլատրել {item}-ը {name}-ում",
+    "resultNetworkError": "Նշանակումը ձախողվեց",
+    "resultWouldEmptyModels": "Այս բանալին կմնա առանց թույլատրված մոդելների — փոխարենը խմբագրեք բանալու մուտքի իրավունքները",
+    "resultWouldEmptyCombos": "Այս բանալին կմնա առանց թույլատրված կոմբոների — փոխարենը խմբագրեք բանալու մուտքի իրավունքները",
+    "keyUpdatePending": "{name}-ը դեռ թարմացվում է: Փորձեք կրկին մի փոքր ուշ:",
+    "assignToKeys": "Նշանակել API բանալիներին…",
+    "assignApply": "Կիրառել փոփոխությունները",
+    "assignComplete": "API բանալու հասանելիությունը թարմացված է",
+    "assignFailed": "API բանալիների որոշ թարմացումներ ձախողվեցին",
+    "assignNoChanges": "API բանալու հասանելիության որևէ փոփոխություն չի կատարվել",
+    "selectedAccessItems": "Ընտրված տարրեր՝ {count}",
+    "assignExcludedCombos": "{count, plural, one {Ընտրված # կոմբո տողը մոդել չէ և այստեղ բաց կթողնվի} other {Ընտրված # կոմբո տողերը մոդել չեն և այստեղ բաց կթողնվեն}}: Նշանակեք կոմբոները Combos ներդիրից:",
+    "assignActionAdd": "Ավելացնել",
+    "assignActionRemove": "Հեռացնել",
+    "searchKeys": "Փնտրել API բանալիներ",
+    "selectApiKey": "Ընտրել API բանալի {name}",
+    "allModelsAccess": "Բոլոր մոդելները",
+    "allCombosAccess": "Բոլոր համակցությունները",
+    "modelAccessCount": "Մոդելներ՝ {count}",
+    "comboAccessCount": "Համակցություններ՝ {count}",
+    "keyInactive": "Ոչ ակտիվ",
+    "keyBanned": "Արգելափակված",
+    "keyRevoked": "Հետկանչված",
+    "switchRestrictedConfirm": "Այս բանալին փոխարկել սահմանափակ հասանելիության. կթույլատրվեն միայն ընտրված տարրերը",
+    "removeNoChangeHint": "Այս բանալին թույլատրում է ամեն ինչ. ընտրված տարրերի հեռացումը ոչ մի փոփոխություն չի կատարի",
+    "removeStaysAllowedHint": "Դեռևս թույլատրված է այս բանալու վրա {patterns}-ի միջոցով",
+    "resultChanged": "Փոփոխված է",
+    "resultUnchanged": "Անփոփոխ",
+    "resultSkipped": "Բաց թողնված",
+    "resultNeedsSwitch": "Պահանջվում է անցում սահմանափակի"
   },
   "combos": {
     "title": "Կոմբինացիաներ",
@@ -3515,6 +3591,9 @@
     "moveUp": "Տեղափոխել վերև",
     "moveDown": "Տեղափոխել ներքև",
     "removeModel": "Հեռացնել",
+    "testStep": "Փորձարկել այս մոդելը",
+    "testStepRunning": "Փորձարկվում է…",
+    "testStepNotTestable": "Կարելի է փորձարկել միայն մեկ մոդելով քայլերը",
     "saving": "Պահվում է...",
     "liveNoProviders": "Դեռևս որևէ մատակարար չի նկատվել։",
     "liveFleetDataHint": "Համակազմի տվյալները ստացվում են համակցությունների ուղիղ իրադարձությունների միջոցով։",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Ներբեռնել CSV ձևանմուշը",
     "importFromFileMoreErrors": "+ևս {count}",
     "importFromFileSchemaHint": "CSV սյունակները դիրքային են՝ provider, name, apiKey, baseUrl (ըստ ցանկության), priority (ըստ ցանկության)։ Մատակարարի սյունակը պետք է պարունակի կառավարվող առկա մատակարարի id կամ արդեն գրանցված OpenAI/Anthropic-ի հետ համատեղելի հանգույցի id. այս ներմուծումը վերջնակետի նոր հանգույցներ չի ստեղծում։",
+    "importOAuthExport": "Ներմուծել OAuth արտահանումը",
+    "oauthExportTitle": "Ներմուծել հաշիվների կառավարչի արտահանումը",
+    "oauthExportDescription": "Վերբեռնեք հաշիվների կառավարչից պարզ տեքստով արտահանում (օր.՝ Antigravity Manager-ի cloud-accounts արտահանումը)։ Թոքենները թարմացվում են սերվերում, և յուրաքանչյուր հաշիվ դառնում է OAuth կապ — կրկնօրինակները թարմացվում են տեղում։",
+    "oauthExportProviderLabel": "Մատակարար",
+    "oauthExportChoose": "Ընտրել ֆայլ",
+    "oauthExportFileAria": "Հաշիվների արտահանման JSON ֆայլ",
+    "oauthExportSchemaHint": "Ընդունվում է՝ \"accounts\" զանգվածով փաստաթուղթ, պարզ զանգված կամ մեկ գրառում։ Թոքենները կարող են լինել ներդրված token օբյեկտում կամ անմիջապես գրառման մեջ։",
+    "oauthExportDetected": "Հայտնաբերվել է {count} հաշիվ",
+    "oauthExportSelectAll": "Ընտրել բոլոր հաշիվները",
+    "oauthExportSelectAccount": "Ընտրել {index} հաշիվը",
+    "oauthExportColEmail": "Էլ. փոստ",
+    "oauthExportColProvider": "Մատակարար",
+    "oauthExportColRefresh": "Թարմացման թոքեն",
+    "oauthExportNoEmail": "(էլ. փոստ չկա)",
+    "oauthExportYes": "այո",
+    "oauthExportNo": "ոչ",
+    "oauthExportImporting": "Ներմուծվում է…",
+    "oauthExportImport": "Ներմուծել {count} հաշիվ",
+    "oauthExportResult": "Ներմուծվել է {imported}/{total} — {failed} ձախողվել է",
+    "oauthExportParseError": "Այս ֆայլից ոչ մի հաշիվ հնարավոր չեղավ կարդալ։",
+    "oauthExportUnknownError": "անհայտ սխալ",
     "adaptaTutorial": {
       "title": "Ինչպես միացնել Adapta Web-ը",
       "introPrefix": "Adapta-ն նույնականացումն իրականացնում է Clerk-ի միջոցով։ Թոքենը",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "Բոլոր մոդելներն արդեն ներմուծված են",
     "noNewModelsToImport": "Ներմուծման համար նոր մոդելներ չկան. բոլոր մոդելներն արդեն գրանցամատյանում կամ հատուկ մոդելների ցանկում են",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Մոդելի հայտնաբերումը ձախողվեց {time}",
     "skippingExistingModels": "Բաց է թողնվում առկա {count} մոդել",
     "autoSync": "Ավտոմատ համաժամացում",
     "autoSyncShort": "Համաժամացնել",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Օգտագործվում է {count} համակցությունում՝ {combos}",
+    "openComboTooltip": "Բացել Համակցությունները — օգտագործում է {combo}"
   },
   "settings": {
     "title": "Կարգավորումներ",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "Հոսթ",
     "qdrantCollection": "Հավաքածու",
     "catalogVisibilityHint": "Թաքցված մոդելների նույնացուցիչները շարունակում են հասանելի լինել կանչերի համար նույն մուտքի թույլտվություններով։",
+    "exposeCombosOnly": "/v1/models-ում ցուցադրել միայն կոմբինացիաները",
+    "exposeCombosOnlyDesc": "Մոդելներն ավտոմատ հայտնաբերող հաճախորդները մատակարարների հում մոդելների փոխարեն տեսնում են ձեր կոմբինացիաները (և auto/*-ը, եթե թաքցված չեն): Բացահայտ provider/model նույնացուցիչները շարունակում են երթուղավորվել:",
     "catalogScopeTitle": "Models API-ի ցանկ",
     "catalogScopeDesc": "Ինչ է GET /v1/models-ը ցուցադրում այս բանալիի համար։ Ցանկի սահմանափակումը երբեք չի փոխում այն, թե ինչ կարող է կանչել բանալին։",
     "catalogScopeAll": "Երկուսն էլ",
@@ -8917,7 +9022,9 @@
         "financial": "Ֆինանսական",
         "brazilian": "Բրազիլական",
         "usa": "ԱՄՆ",
-        "full": "Ամբողջական"
+        "full": "Ամբողջական",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Հարավային Աֆրիկա)"
       },
       "builtinTypes": "Ներկառուցված տեսակներ",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "IPv4 հասցեներ",
         "ipv6_address": "IPv6 հասցեներ",
         "aws_key": "AWS մուտքի բանալիներ",
-        "api_key_generic": "API բանալիներ և թոքեններ"
+        "api_key_generic": "API բանալիներ և թոքեններ",
+        "iban": "IBAN բանկային հաշվի համարները",
+        "eu_vat": "EU VAT թվեր",
+        "es_dni_nie": "Իսպաներեն DNI / NIE",
+        "it_codice_fiscale": "Իտալական Codice Fiscale",
+        "pl_pesel": "Լեհական PESEL",
+        "nl_bsn": "Հոլանդական BSN",
+        "de_steuer_id": "Գերմանական Steuer-ID",
+        "se_personnummer": "Շվեդական անձ",
+        "za_id": "Հարավաֆրիկյան ID համարներ",
+        "za_phone": "Հարավային Աֆրիկայի հեռախոսահամարներ",
+        "za_vat": "Հարավաֆրիկյան VAT համարներ",
+        "za_tax_ref": "Հարավաֆրիկյան հարկային տեղեկանքներ"
       },
       "customPatterns": "Հատուկ նմուշներ",
       "customPatternsDesc": "Համընկնումները փոխարինվում են [CUSTOM_REDACTED]-ով։ Մինչև {max} նմուշ։ Աղետալի հետընթացի ռիսկ ունեցող նմուշները մերժվում են։",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth-ը կարգավորված չէ։ Գրանցեք OAuth հավելված {applicationsUrl} հասցեում՝ նշելով {redirectUri} վերահղման URI-ն և «{scopes}» տիրույթները, ապա սահմանեք {clientIdEnv}-ը (և ըստ ցանկության՝ {clientSecretEnv}-ը) ու վերագործարկեք։",
     "gitlabDuoSetupDescription": "Հավելվածը գրանցելուց և այս OmniRoute օրինակում միջավայրի փոփոխականները սահմանելուց հետո սեղմեք «Շարունակել»՝ OAuth մուտքը սկսելու համար։",
     "continue": "Շարունակել",
+    "copilotPolicyTitle": "Փորձարարական մատակարար. քաղաքականության կարգավիճակը երկիմաստ է",
+    "copilotPolicyLine1": "OmniRoute միանում է api.githubcopilot.com-ի միջոցով, որը GitHub չի հրապարակել որպես երրորդ կողմի ընդհանուր եզրակացություն API: Այս ինտեգրումը փորձնական է և կարող է փոխվել առանց ծանուցման:",
+    "copilotPolicyLine2": "Միայն ձեր սեփական GitHub հաշիվը կարող է միացված լինել: Երբեք մի համօգտագործեք հավատարմագրերը, միացրեք հաշիվները և մի փորձեք գերազանցել ձեր պլանի սահմանաչափերը:",
+    "copilotPolicyLine3": "Անվճար և Ուսանողական պլանի օգտվողները ստանում են միայն մոդելի ավտոմատ ընտրություն: Ձեր Copilot պլանի պայմանները և օգտագործման ցանկացած սահմանափակում մնում են ձեր պատասխանատվությունը:",
+    "copilotPolicyAcknowledge": "Հասկանում եմ, միացրու",
     "tabPasteSetupToken": "Կարգավորման թոքեն",
     "claudeSetupTokenDescription": "Գործարկեք `claude setup-token`-ը տերմինալում և տեղադրեք այն թոքենը, որը տպում է։ Այն վավեր է մեկ տարի և չունի թարմացման թոքեն։ Պահպանելուց առաջ OmniRoute-ը մեկ փորձնական հարցում է ուղարկում Anthropic-ին։",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "դիտել զրույցը",
       "openConversation": "Բացել {id} զրույցը"
     },
-    "tableLabel": "Հարցումների մատյաններ"
+    "tableLabel": "Հարցումների մատյաններ",
+    "throughputPostFirstToken": "Առաջին թոքենից հետո",
+    "throughputEndToEnd": "Ծայրից ծայր",
+    "throughputRate": "{value} թոքեն/վրկ",
+    "throughputExplanation": "Երկու արագություններն էլ հիմնվում են ելքի և դատողության թոքենների քանակներից ավելի մեծի վրա։ «Առաջին թոքենից հետո» ցուցանիշը բացառում է վավեր TTFT-ն. հակառակ դեպքում օգտագործվում է ամբողջ տևողությունը։ «Ծայրից ծայր» ցուցանիշը միշտ օգտագործում է ամբողջ տևողությունը։ Բուֆերացված պատասխանը կարող է ունենալ առաքման բարձր պոռթկային արագություն՝ առանց մոդելի ավելի արագ գեներացիայի։"
   },
   "proxyLogger": {
     "filterAll": "Բոլորը",
@@ -12785,7 +12913,8 @@
     "title": "Մատակարարների վիճակագրություն",
     "description": "Ըստ մատակարարի և մոդելի տրաֆիկը, հապաղումը և հաջողության ցուցանիշները",
     "combo": "Համակցված",
-    "toggleModels": "Ցույց տալ {provider}-ի մոդելները"
+    "toggleModels": "Ցույց տալ {provider}-ի մոդելները",
+    "windowSince": "{date}-ից սկսած"
   },
   "relay": {
     "title": "Առանց սերվերի ռելե-պրոքսիներ",
@@ -13730,7 +13859,9 @@
       "disabled": "Ապաակտիվացված",
       "dual": "Երկակի",
       "alias": "Այլանուն",
-      "canonical": "Կանոնական"
+      "canonical": "Կանոնական",
+      "fail_closed": "Արգելափակել (fail_closed)",
+      "count_as_zero": "Հաշվել որպես $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Պաշտպանված առաջնահերթության ենթակառուցվածքային դադարները՝ որպես 502",
         "description": "503-ի փոխարեն պատասխանել 502-ով, երբ միայն քվոտայի պատճառով պահուստային տարբերակ հանդիսացող առաջնահերթ թիրախը դադարեցնում է համակցությունը մի պատճառով, որն ապացուցելիորեն կապված չէ քվոտայի հետ՝ մատակարարի բաց շղթայի անջատիչ կամ կանխատեսվող ուշացման պատճառով բացթողում։"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Գին չունեցող օգտագործման բյուջեի քաղաքականություն",
+        "description": "Ինչպես են բանալուն առանձին օրական/շաբաթական USD սահմանները վերաբերվում հաջողված օգտագործմանը, որի մատակարարի/մոդելի համար գին չի նշված։ fail_closed (լռային) նշում է, որ պատուհանը գերազանցվել է, այնպես որ անհայտ ծախսը երբեւէ չի կարող անցնել խիստ սահմանը։ count_as_zero հաշվարկում է այդ օգտագործումը որպես $0 և շարունակում կիրառել գինով հաշվարկվող ծախսը։ Անգին մոդելները ցանկացած պարագայում ցուցադրվում են վահանակի գլխավոր էջում."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "Փակել"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Անջատել մտածողության մակարդակի տարբերակների (օր.՝ -low, -medium, -high) ստեղծումը /v1/models կատալոգում։",
+  "teamCosts": {
+    "title": "Թիմի ծախսեր",
+    "subtitle": "Կառավարեք ընդհանուր փափուկ բյուջեները և կատալոգի ծախսերի գնահատականները։",
+    "refresh": "Թարմացնել",
+    "create": "Ստեղծել թիմ",
+    "edit": "Խմբագրել թիմը",
+    "archive": "Արխիվացնել",
+    "selectTeam": "Թիմեր",
+    "searchTeams": "Որոնել թիմեր",
+    "statusFilter": "Թիմի կարգավիճակ",
+    "active": "Ակտիվ",
+    "archived": "Արխիվացված · միայն կարդալու համար",
+    "allTeams": "Բոլոր թիմերը",
+    "noTeams": "Համապատասխան թիմեր չկան։",
+    "selectHint": "Ծախսերը տեսնելու համար ստեղծեք կամ ընտրեք թիմ։",
+    "loading": "Թիմի ծախսերը բեռնվում են…",
+    "budgetTitle": "Ընթացիկ փափուկ բյուջե",
+    "budgetSubtitle": "Հաջող գրանցված օգտագործում · սահող պատուհան · անկախ հաշվետվության ամսաթվերից",
+    "archivedBudget": "Արխիվացված է. բյուջեի կիրառումն անակտիվ է։ Պատմական հաշվետվությունները մնում են հասանելի։",
+    "unlimited": "Անսահմանափակ — ընդհանուր փափուկ բյուջե կարգավորված չէ։",
+    "budgetUnavailable": "Բյուջեի կարգավիճակը հասանելի չէ։ Թարմացրեք՝ նորից փորձելու համար։",
+    "used": "Հաջող օգտագործում",
+    "maximum": "Բյուջեի առավելագույնը",
+    "remaining": "Հայտնի մնացորդ",
+    "resets": "Վերակայվում է",
+    "unpricedBudget": "Հաջող օգտագործման մի մասի գինն անհայտ է։ Հայտնի գումարը թերի է. բյուջեի կիրառումն այս պատուհանը համարում է գերազանցված։",
+    "overBudget": "Բյուջեն հասել է կամ գերազանցվել է · {amount} ավել",
+    "reportTitle": "Օգտագործման հաշվետվություն",
+    "reportSubtitle": "Բոլոր փորձերը · կատալոգի գնահատական USD-ով, ոչ թե հաշիվ · ամբողջ UTC ամսաթվեր",
+    "reportPeriod": "Հաշվետվության ժամանակահատված",
+    "day1": "1 օր",
+    "day7": "7 օր",
+    "day30": "30 օր",
+    "allTime": "Ամբողջ ժամանակ",
+    "reportSpend": "Հաշվետվության գնահատված ծախս",
+    "requests": "Հարցումներ",
+    "assignedKeys": "Նշանակված բանալիներ",
+    "unpricedReport": "Այս հաշվետվությունը պարունակում է անհայտ գներ։ Գնահատված ծախսը թերի է։",
+    "breakdown": "Ծախս ըստ API բանալու",
+    "noUsage": "Այս հաշվետվության ժամանակահատվածում օգտագործում չկա։",
+    "keyName": "API բանալու անունը",
+    "tokens": "Մուտքային + ելքային թոքեններ",
+    "unnamedKey": "Անանուն կամ ջնջված բանալի",
+    "unpriced": "Անհայտ գին",
+    "members": "Անդամակցություն",
+    "memberSubtitle": "Անդամակցության փոփոխությունը պատմական ծախսը թողնում է սկզբնական թիմում։",
+    "searchKeys": "Որոնել բանալիներ կամ ընթացիկ սեփականատերեր",
+    "chooseKey": "Ընտրեք API բանալի",
+    "unassigned": "Չնշանակված",
+    "ownership": "Ընթացիկ վճարման թիմ՝ {team}",
+    "assign": "Նշանակել",
+    "remove": "Հեռացնել",
+    "noMembers": "Ընթացիկ անդամներ չկան։ Պատմական օգտագործումը կարող է դեռ հաշվվել բյուջեում։",
+    "assignedAt": "Նշանակվել է {date}-ին (UTC)",
+    "name": "Թիմի անունը",
+    "description": "Նկարագրություն",
+    "enableBudget": "Միացնել ընդհանուր փափուկ բյուջեն",
+    "amount": "Բյուջեի գումար (USD)",
+    "duration": "Սահող բյուջեի պատուհան",
+    "cancel": "Չեղարկել",
+    "save": "Պահպանել",
+    "confirm": "Հաստատել",
+    "transferTitle": "Հաստատեք բանալու փոխանցումը",
+    "transferMessage": "Տեղափոխե՞լ այս բանալին «{source}»-ից «{destination}»։ Պատմական ծախսը մնում է սկզբնական թիմում։",
+    "removeTitle": "Հեռացնել բանալու նշանակումը",
+    "removeMessage": "Հեռացնե՞լ այս բանալին «{team}»-ից։ Պատմական ծախսը մնում է այս թիմում։",
+    "archiveTitle": "Արխիվացնել թիմը",
+    "archiveMessage": "Արխիվացնե՞լ «{team}»-ը։ Բոլոր ընթացիկ կապերը փակվում են, և բյուջեի կիրառումը դադարում է։ Պատմական հաշվետվությունները մնում են հասանելի։",
+    "invalidName": "Մուտքագրեք անուն (1–200 նիշ) և ոչ ավելի, քան 2000 նիշանոց նկարագրություն։",
+    "invalidAmount": "Մուտքագրեք զրոյից մեծ վերջավոր բյուջեի գումար։",
+    "unauthorized": "Շարունակելու համար մուտք գործեք կառավարման վահանակ։",
+    "forbidden": "Թիմերը կառավարելու թույլտվություն չունեք։ Ձեր մուտքագրածը պահպանված է։",
+    "notFound": "Այս թիմը կամ նշանակումն այլևս գոյություն չունի։",
+    "conflict": "Նշանակումը կամ թիմը փոխվել է։ Թարմացրեք և նորից փորձելուց առաջ հաստատեք ընթացիկ սեփականությունը։",
+    "failed": "Հարցումը ձախողվեց։ Ձեր մուտքագրածը պահպանված է. խնդրում ենք նորից փորձել։",
+    "partialBudget": "Պահպանված որոշ օրական զամբյուղներ համընկնում են պատուհանի սահմանի հետ և չեն կարող ճշգրիտ բաշխվել։ Ցուցադրված ծախսը թերի է. մնացած սահմանաչափը հասանելի չէ։ Գործող փափուկ բյուջեի քաղաքականությունը չի փոխվում։"
+  },
   "connectionTest": {
     "title": "Փորձնական հաղորդագրություն",
     "description": "Ուղարկել մեկ իրական հարցում այս հաշվի միջոցով։ Սա օգտագործում է քվոտայի փոքր մասը և, կախված մատակարարից, կարող է սկսել օգտագործման ժամանակահատվածը։",
@@ -15216,5 +15428,8 @@
     "importButton": "Ներմուծել",
     "importFailed": "Ներմուծումը ձախողվեց։",
     "importSuccess": "Ներմուծվեց {connections} հաշիվ և {nodes} մատակարարի հանգույց. բաց թողնվեց՝ {skipped}։"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Սկսել ընթացիկ դիրքից (բաց թողնել առկա մատյանները)"
   }
 }

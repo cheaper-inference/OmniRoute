@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "Komanda xərcləri",
+    "subtitle": "Paylaşılan yumşaq büdcələri və kataloq xərc təxminlərini idarə edin.",
+    "refresh": "Yenilə",
+    "create": "Komanda yarat",
+    "edit": "Komandanı redaktə et",
+    "archive": "Arxivlə",
+    "selectTeam": "Komandalar",
+    "searchTeams": "Komanda axtar",
+    "statusFilter": "Komanda statusu",
+    "active": "Aktiv",
+    "archived": "Arxivləndi · yalnız oxumaq üçün",
+    "allTeams": "Bütün komandalar",
+    "noTeams": "Uyğun komanda yoxdur.",
+    "selectHint": "Xərcləri görmək üçün komanda yaradın və ya seçin.",
+    "loading": "Komanda xərcləri yüklənir…",
+    "budgetTitle": "Cari yumşaq büdcə",
+    "budgetSubtitle": "Uğurlu qeydə alınmış istifadə · sürüşən pəncərə · hesabat tarixlərindən asılı olmayan",
+    "archivedBudget": "Arxivləndi: büdcənin tətbiqi qeyri-aktivdir. Tarixi hesabatlar əlçatan qalır.",
+    "unlimited": "Limitsiz — paylaşılan yumşaq büdcə konfiqurasiya edilməyib.",
+    "budgetUnavailable": "Büdcə statusu əlçatan deyil. Yenidən cəhd üçün yeniləyin.",
+    "used": "Uğurlu istifadə",
+    "maximum": "Büdcə maksimumu",
+    "remaining": "Məlum qalıq",
+    "resets": "Sıfırlanır",
+    "unpricedBudget": "Uğurlu istifadənin bir hissəsinin qiyməti məlum deyil. Məlum cəm natamamdır; büdcənin tətbiqi bu pəncərəni aşılmış sayır.",
+    "overBudget": "Büdcəyə çatıldı və ya aşıldı · {amount} artıq",
+    "reportTitle": "İstifadə hesabatı",
+    "reportSubtitle": "Bütün cəhdlər · USD ilə kataloq təxmini, hesab-faktura deyil · tam UTC tarixləri",
+    "reportPeriod": "Hesabat dövrü",
+    "day1": "1 gün",
+    "day7": "7 gün",
+    "day30": "30 gün",
+    "allTime": "Bütün vaxt",
+    "reportSpend": "Təxmini hesabat xərci",
+    "requests": "Sorğular",
+    "assignedKeys": "Təyin edilmiş açarlar",
+    "unpricedReport": "Bu hesabatda məlum olmayan qiymətlər var. Təxmini xərc natamamdır.",
+    "breakdown": "API açarı üzrə xərc",
+    "noUsage": "Bu hesabat dövründə istifadə yoxdur.",
+    "keyName": "API açarının adı",
+    "tokens": "Giriş + çıxış tokenləri",
+    "unnamedKey": "Adsız və ya silinmiş açar",
+    "unpriced": "Naməlum qiymət",
+    "members": "Üzvlük",
+    "memberSubtitle": "Üzvlüyü dəyişmək tarixi xərci ilkin komandada saxlayır.",
+    "searchKeys": "Açar və ya cari sahibləri axtar",
+    "chooseKey": "API açarı seçin",
+    "unassigned": "Təyin edilməyib",
+    "ownership": "Cari ödəniş komandası: {team}",
+    "assign": "Təyin et",
+    "remove": "Sil",
+    "noMembers": "Cari üzv yoxdur. Tarixi istifadə hələ də büdcəyə daxil ola bilər.",
+    "assignedAt": "{date} tarixində təyin edildi (UTC)",
+    "name": "Komanda adı",
+    "description": "Təsvir",
+    "enableBudget": "Paylaşılan yumşaq büdcəni aktiv et",
+    "amount": "Büdcə məbləği (USD)",
+    "duration": "Sürüşən büdcə pəncərəsi",
+    "cancel": "Ləğv et",
+    "save": "Yadda saxla",
+    "confirm": "Təsdiqlə",
+    "transferTitle": "Açarın köçürülməsini təsdiqləyin",
+    "transferMessage": "Bu açar “{source}” komandasından “{destination}” komandasına köçürülsün? Tarixi xərc ilkin komandada qalır.",
+    "removeTitle": "Açarın təyinatını sil",
+    "removeMessage": "Bu açar “{team}” komandasından silinsin? Tarixi xərc bu komandada qalır.",
+    "archiveTitle": "Komandanı arxivlə",
+    "archiveMessage": "“{team}” arxivlənsin? Bütün cari bağlantılar bağlanır və büdcənin tətbiqi dayanır. Tarixi hesabatlar əlçatan qalır.",
+    "invalidName": "Ad (1–200 simvol) və ən çox 2000 simvollu təsvir daxil edin.",
+    "invalidAmount": "Sıfırdan böyük sonlu büdcə məbləği daxil edin.",
+    "unauthorized": "Davam etmək üçün idarəetmə panelinə daxil olun.",
+    "forbidden": "Komandaları idarə etmək icazəniz yoxdur. Daxil etdiyiniz məlumat saxlanıldı.",
+    "notFound": "Bu komanda və ya təyinat artıq mövcud deyil.",
+    "conflict": "Təyinat və ya komanda dəyişib. Yenidən cəhd etməzdən əvvəl yeniləyin və cari mülkiyyəti təsdiqləyin.",
+    "failed": "Sorğu uğursuz oldu. Daxil etdiyiniz məlumat saxlanıldı; yenidən cəhd edin.",
+    "partialBudget": "Bəzi saxlanmış gündəlik qruplar pəncərə sərhədi ilə üst-üstə düşür və dəqiq bölünə bilmir. Göstərilən xərc natamamdır; qalan limit əlçatan deyil. Mövcud yumşaq büdcə siyasəti dəyişməyib."
+  },
   "codexKeyServiceMode": {
     "title": "Bu API açarı üçün Codex xidmət rejimi",
     "description": "Kombinasiyalardakı Codex modelləri də daxil olmaqla, Codex sorğularına tətbiq olunur. Məcburi rejimlər müştəri, qlobal parametrlər və bağlantının standart parametrlərini üstələyir. Digər provayderlər dəyişməz qalır.",
@@ -1345,7 +1422,9 @@
       "open": "açıq",
       "close": "bağla"
     },
-    "noResults": "Heç bir nəticə yoxdur"
+    "noResults": "Heç bir nəticə yoxdur",
+    "costsTeams": "Komandalar",
+    "costsTeamsSubtitle": "Komanda xərc mərkəzləri"
   },
   "webhooks": {
     "title": "Vebhuklar",
@@ -1598,6 +1677,7 @@
     "dismissError": "Xəta bildirişini bağla"
   },
   "header": {
+    "teamsDescription": "Komanda xərc təxminləri və paylaşılan yumşaq büdcələr",
     "logout": "Çıxış",
     "quickNavigation": "Sürətli naviqasiya",
     "quickNavigationTitle": "Sürətli naviqasiya (⌘K / Ctrl+K)",
@@ -1922,7 +2002,14 @@
     "readinessStep3": "Son nöqtənizi kopyalayın",
     "readinessStep4": "Sınaq sorğusu göndərin",
     "readinessContinue": "Quraşdırmaya davam edin",
-    "readinessDismiss": "Hələlik bağlayın"
+    "readinessDismiss": "Hələlik bağlayın",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# modellər}} son zamanlarda istifadə edilib, lakin qiymət təyin edilməyib",
+    "unpricedUsageFailClosed": "{keys, plural, one {# istifadə limiti olan API açarı} other {# istifadə limiti olan API açarları}} son 8 gündə bu modellərdən istifadə edib. Bu istifadə bir açarın günlük və ya həftəlik pəncərəsi daxilində olduğu müddətdə, açar kvota aşılmış sayılır və onun sorğuları bloklanır (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Bu istifadə hər-açar istifadə limitlərinə $0 kimi hesablanır (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# sorğu} other {# sorğular}}, {keys, plural, one {# limitli açar} other {# limitli açarlar}}",
+    "unpricedUsageMore": "…və daha {count}",
+    "unpricedUsageConfigure": "Qiymətləri təyin et",
+    "unpricedUsageDismiss": "Bağla"
   },
   "analytics": {
     "title": "Analitika",
@@ -2959,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw — Əl ilə konfiqurasiya",
     "clineManualConfiguration": "Cline üçün əl ilə konfiqurasiya",
     "kiloManualConfiguration": "Kilo Code üçün əl ilə konfiqurasiya",
+    "piManualConfiguration": "Pi - Manual Konfiqurasiya",
+    "piConfigInvalidTitle": "Pi models.json oxunmur",
+    "piOmnirouteConfigured": "OmniRoute Pi xüsusi provayderi kimi konfiqurasiya edilib",
+    "piModelHelp": "Pi fərdi son nöqtələr üçün modelləri avtomatik kəşf etmir — seçdiyiniz model models.json açıq şəkildə yazılır.",
+    "piManualConfigTitle": "Və ya redaktə edin ~/.pi/agent/models.json əl ilə",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Sonra Pi-ni işə salın və omniroute provayderini seçin. Bütün agent kataloqunu köçürmək üçün PI_CODING_AGENT_DIR seçin.",
+    "piUnownedNote": "Bu giriş OmniRoute xaricində əlavə edilmişdir (məsələn, pi-gui-nin Xüsusi son nöqtələri). Müraciət edən onu qəbul edəcək; Sıfırlama yalnız OmniRoute yazdığı qeydləri silir.",
     "whenToUseLabel": "Nə vaxt istifadə edilməlidir",
     "openToolDocs": "Alətin sənədlərini aç",
     "toolUseCases": {
@@ -2978,6 +3073,7 @@
       "amp": "Amp qısaldılmış iş axınlarından istifadə etmək istədikdə, lakin OmniRoute aliaslarının və yönləndirmə qaydalarının tətbiqinə də ehtiyacınız olduqda istifadə edin.",
       "hermes": "Sürətli tapşırıqlar üçün yüngül, terminalda işləyən süni intellekt köməkçisinə ehtiyacınız olduqda istifadə edin.",
       "hermes-agent": "OmniRoute vasitəsilə yönləndirilən standart, nümayəndəlik, görmə və köməkçi modelləri olan Hermes Agent (Nousresearch tərəfindən) lazım olduqda istifadə edin.",
+      "whycodes": "WhyCodes-u OmniRoute-a yönləndirilmiş geniş təyinatlı avtonom CLI agenti (TUI, adlandırılmış agentlər, yaddaş, swarm) kimi istədiyiniz zaman istifadə edin.",
       "custom": "Fərdi alət tətbiqləri və ya ümumi OpenAI-uyğun konfiqurasiyalar üçün istifadə edin."
     },
     "toolDescriptions": {
@@ -2987,6 +3083,7 @@
       "grok-build": "Fərdi provayder dəstəyi olan xAI Grok Build TUI kodlaşdırma agenti",
       "droid": "Factory Droid süni intellekt köməkçisi",
       "openclaw": "Open Claw süni intellekt köməkçisi",
+      "openclaude": "OpenAI ilə uyğun provayder dəstəyi olan OpenClaude kodlaşdırma agenti CLI",
       "cline": "Cline süni intellekt kodlaşdırma köməkçisi CLI",
       "kilo": "Kilo Code AI köməkçisi CLI",
       "qwen": "Qwen Code CLI",
@@ -3018,6 +3115,7 @@
       "warp": "Fərdi provayder dəstəyinə malik Warp AI terminalı",
       "agent-deck": "Agent Deck çoxagentli orkestratoru",
       "5dive": "5dive — öz serverinizdə işləyən kodlaşdırma agentləri parkı; bir auth profili hamısını OmniRoute-a yönəldir",
+      "whycodes": "OpenAI ilə uyğun base URL-li WhyCodes avtonom CLI agenti",
       "zed": "Zed kod redaktoru — OpenAI ilə uyğun provayder vasitəsilə daxili agent"
     },
     "guides": {
@@ -3275,6 +3373,12 @@
     "cliproxyapiUpdate": "Yenilə",
     "cliproxyapiUpdateAvailable": "Yeniləmə mövcuddur: v{current} → v{latest}",
     "cliproxyapiVersion": "Versiya",
+    "piInstallTitle": "Pi Kodlama Agentini quraşdırın",
+    "piInstallInstructions": "Pi CLI nı quraşdırın, sonra OmniRoute ə qoşulmaq üçün bura qayıdın.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi ilə işləyən maşından əldə edilə bilən URL istifadə edin. OpenAI uyğun /v1 son nöqtəsi avtomatik olaraq əlavə edilir.",
+    "piManualMergeHint": "Yalnız önizləmə. Bu providers.omniroute girişini models.json -ya birləşdirin ki, digər provayderlər və parametrlər toxunulmaz olsun.",
     "removeMapping": "Uyğunlaşdırmanı sil"
   },
   "modelCatalog": {
@@ -3339,6 +3443,18 @@
     "maxMembersPlaceholder": "məs. 10",
     "testSelected": "Seçilmişləri test et ({count})",
     "testAllFiltered": "Bütün filtrlənənləri test et ({count})",
+    "visibility": "Görünmə",
+    "allVisibility": "Görünən və gizli",
+    "visibleOnly": "Görünən",
+    "hiddenOnly": "Gizli",
+    "visibleColumn": "Görünür",
+    "hideModel": "{name} modelini /v1/models-dən gizlət",
+    "showModel": "{name} modelini /v1/models-də göstər",
+    "hiddenBadge": "Gizli",
+    "hideFiltered": "Süzülənləri gizlət ({count})",
+    "showFiltered": "Süzülənləri göstər ({count})",
+    "visibilityCounts": "{visible} görünən · {hidden} gizli · {total} cəmi",
+    "visibilityUpdateFailed": "Modelin görünməsini yeniləmək alınmadı",
     "cancel": "Ləğv et",
     "clearResults": "Nəticələri təmizlə",
     "testing": "Test edilir...",
@@ -3394,7 +3510,44 @@
     "httpError": "Sorğu HTTP {status} ilə uğursuz oldu",
     "testFailedNoDetail": "Test xəta mesajı olmadan uğursuz oldu",
     "additionalCapabilities": "Əlavə imkanlar: {list}",
-    "comboRefMember": "Kombo → {name}"
+    "comboRefMember": "Kombo → {name}",
+    "keyAccessButton": "API açarı girişi",
+    "allowedInKeys": "İcazə verildiyi yer: {count, plural, one {# açar} other {# açar}}",
+    "keysLoading": "API açarları yüklənir…",
+    "keysRetry": "Açarların yüklənməsini yenidən cəhd edin",
+    "accessViaPattern": "{pattern} vasitəsilə",
+    "accessBlocked": "{pattern} tərəfindən bloklanıb",
+    "editKeyAccess": "Açar girişini redaktə edin",
+    "toggleKeyAccess": "{name} üçün {item} icazəsi verin",
+    "resultNetworkError": "Təyinat uğursuz oldu",
+    "resultWouldEmptyModels": "Bu açarda heç bir icazə verilən model qalmayacaq — əvəzinə açar girişini redaktə edin",
+    "resultWouldEmptyCombos": "Bu açarda heç bir icazə verilən kombo qalmayacaq — əvəzinə açar girişini redaktə edin",
+    "keyUpdatePending": "{name} hələ də yenilənir. Bir azdan yenidən cəhd edin.",
+    "assignToKeys": "API açarlarına təyin edin…",
+    "assignApply": "Dəyişiklikləri tətbiq edin",
+    "assignComplete": "API açarı girişi yeniləndi",
+    "assignFailed": "Bəzi API açarlarının yenilənməsi uğursuz oldu",
+    "assignNoChanges": "Heç bir API açarı girişi dəyişdirilmədi",
+    "selectedAccessItems": "Seçilmiş elementlər: {count}",
+    "assignExcludedCombos": "{count, plural, one {# seçilmiş kombo sətri model deyil və burada ötürüləcək} other {# seçilmiş kombo sətri model deyil və burada ötürüləcək}}. Komboları Combos nişanından təyin edin.",
+    "assignActionAdd": "Əlavə edin",
+    "assignActionRemove": "Silin",
+    "searchKeys": "API açarlarını axtarın",
+    "selectApiKey": "{name} API açarını seçin",
+    "allModelsAccess": "Bütün modellər",
+    "allCombosAccess": "Bütün kombinasiyalar",
+    "modelAccessCount": "Modellər: {count}",
+    "comboAccessCount": "Kombinasiyalar: {count}",
+    "keyInactive": "Qeyri-aktiv",
+    "keyBanned": "Bloklanıb",
+    "keyRevoked": "Ləğv edildi",
+    "switchRestrictedConfirm": "Bu açarı məhdud girişə keçirin: yalnız seçilmiş elementlərə icazə veriləcək",
+    "removeNoChangeHint": "Bu açar hər şeyə icazə verir; seçilmiş elementlərin silinməsi heç bir dəyişiklik etməyəcək",
+    "removeStaysAllowedHint": "{patterns} vasitəsilə bu açarda hələ də icazə verilir",
+    "resultChanged": "Dəyişdirildi",
+    "resultUnchanged": "Dəyişiklik yoxdur",
+    "resultSkipped": "Ötürüldü",
+    "resultNeedsSwitch": "Məhdud rejimə keçid tələb olunur"
   },
   "combos": {
     "title": "Kombinasiyalar",
@@ -3515,6 +3668,9 @@
     "moveUp": "Yuxarı daşı",
     "moveDown": "Aşağı daşı",
     "removeModel": "Sil",
+    "testStep": "Bu modeli sına",
+    "testStepRunning": "Sınanır…",
+    "testStepNotTestable": "Yalnız tək modelli addımlar sınana bilər",
     "saving": "Yadda saxlanılır...",
     "liveNoProviders": "Hələ heç bir provayder müşahidə edilməyib.",
     "liveFleetDataHint": "Donanma məlumatları canlı kombo hadisələri vasitəsilə daxil olur.",
@@ -5334,6 +5490,27 @@
     "importFromFileDownloadTemplate": "CSV şablonunu endir",
     "importFromFileMoreErrors": "+{count} əlavə",
     "importFromFileSchemaHint": "CSV sütunları mövqeyə görə sıralanır: provider, name, apiKey, baseUrl (istəyə bağlı), priority (istəyə bağlı). provider sütununda mövcud idarə olunan provayder identifikatoru və ya artıq qeydiyyatdan keçmiş OpenAI/Anthropic-uyğun qovşaq identifikatoru olmalıdır — bu idxal yeni son nöqtə qovşaqları yaratmır.",
+    "importOAuthExport": "OAuth ixracını idxal et",
+    "oauthExportTitle": "Hesab menecerinin ixracını idxal et",
+    "oauthExportDescription": "Hesab menecerindən açıq mətnli ixrac faylını yükləyin (məs. Antigravity Manager-in cloud-accounts ixracı). Tokenlər server tərəfində yenilənir və hər hesab OAuth bağlantısına çevrilir — dublikatlar yerində yenilənir.",
+    "oauthExportProviderLabel": "Provayder",
+    "oauthExportChoose": "Fayl seçin",
+    "oauthExportFileAria": "Hesab ixracı JSON faylı",
+    "oauthExportSchemaHint": "Qəbul edilir: \"accounts\" massivi olan sənəd, sadə massiv və ya tək qeyd. Tokenlər iç-içə token obyektində və ya birbaşa qeydin özündə ola bilər.",
+    "oauthExportDetected": "{count} hesab aşkarlandı",
+    "oauthExportSelectAll": "Bütün hesabları seç",
+    "oauthExportSelectAccount": "{index} nömrəli hesabı seç",
+    "oauthExportColEmail": "E-poçt",
+    "oauthExportColProvider": "Provayder",
+    "oauthExportColRefresh": "Yeniləmə tokeni",
+    "oauthExportNoEmail": "(e-poçt yoxdur)",
+    "oauthExportYes": "bəli",
+    "oauthExportNo": "xeyr",
+    "oauthExportImporting": "İdxal edilir…",
+    "oauthExportImport": "{count} hesabı idxal et",
+    "oauthExportResult": "İdxal edildi: {imported}/{total} — {failed} uğursuz",
+    "oauthExportParseError": "Bu fayldan heç bir hesab oxunmadı.",
+    "oauthExportUnknownError": "naməlum xəta",
     "adaptaTutorial": {
       "title": "Adapta Web-ə necə qoşulmaq olar",
       "introPrefix": "Adapta Clerk vasitəsilə autentifikasiyadan keçir. Token",
@@ -5584,6 +5761,7 @@
     "allModelsAlreadyImported": "Bütün modellər artıq idxal edilib",
     "noNewModelsToImport": "İdxal ediləcək yeni model yoxdur — bütün modellər artıq reyestrdə və ya fərdi modellər siyahısındadır",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Model aşkarlanması uğursuz oldu {time}",
     "skippingExistingModels": "Mövcud olan {count} model buraxılır",
     "autoSync": "Avtomatik sinxronizasiya",
     "autoSyncShort": "Sinxronizasiya et",
@@ -6814,7 +6992,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} kombinasiyada istifadə olunur: {combos}",
+    "openComboTooltip": "Kombinasiyaları aç — {combo} tərəfindən istifadə olunur"
   },
   "settings": {
     "title": "Parametrlər",
@@ -8798,6 +8978,8 @@
     "qdrantHost": "Ev sahibi",
     "qdrantCollection": "Kolleksiya",
     "catalogVisibilityHint": "Gizlədilmiş model identifikatorlarını eyni giriş icazələri ilə çağırmaq mümkündür.",
+    "exposeCombosOnly": "/v1/models-də yalnız kombinasiyaları göstər",
+    "exposeCombosOnlyDesc": "Modelləri avtomatik aşkar edən müştərilər xam provayder modelləri əvəzinə kombinasiyalarınızı (və gizlədilməyibsə auto/*) görür. Açıq provider/model identifikatorları marşrutlanmağa davam edir.",
     "catalogScopeTitle": "Models API siyahısı",
     "catalogScopeDesc": "GET /v1/models sorğusunun bu açar üçün göstərdiyi siyahı. Siyahının daraldılması açarın hansı modelləri çağıra biləcəyini heç vaxt dəyişmir.",
     "catalogScopeAll": "Hər ikisi",
@@ -8917,7 +9099,9 @@
         "financial": "Maliyyə",
         "brazilian": "Braziliya",
         "usa": "ABŞ",
-        "full": "Tam"
+        "full": "Tam",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Cənubi Afrika)"
       },
       "builtinTypes": "Daxili növlər",
       "types": {
@@ -8931,7 +9115,19 @@
         "ip_address": "IPv4 ünvanları",
         "ipv6_address": "IPv6 ünvanları",
         "aws_key": "AWS giriş açarları",
-        "api_key_generic": "API açarları və tokenlər"
+        "api_key_generic": "API açarları və tokenlər",
+        "iban": "IBAN bank hesab nömrələri",
+        "eu_vat": "EU VAT nömrələri",
+        "es_dni_nie": "İspan DNI / NIE",
+        "it_codice_fiscale": "İtalyan Kodeksi Fiscale",
+        "pl_pesel": "Polşa PESEL",
+        "nl_bsn": "holland BSN",
+        "de_steuer_id": "Alman Steuer-ID",
+        "se_personnummer": "İsveçli kadr",
+        "za_id": "Cənubi Afrika ID nömrələri",
+        "za_phone": "Cənubi Afrika telefon nömrələri",
+        "za_vat": "Cənubi Afrika VAT nömrələri",
+        "za_tax_ref": "Cənubi Afrika vergi istinadları"
       },
       "customPatterns": "Fərdi nümunələr",
       "customPatternsDesc": "Uyğunluqlar [CUSTOM_REDACTED] ilə əvəz olunur. Ən çox {max} nümunə. Fəlakətli geri izləmə riski olan nümunələr rədd edilir.",
@@ -11433,6 +11629,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth konfiqurasiya edilməyib. {applicationsUrl} ünvanında yönləndirmə URI {redirectUri} və \"scopes\" \"{scopes}\" ilə OAuth tətbiqi qeydiyyatdan keçirin, sonra {clientIdEnv} (və istəyə bağlı olaraq {clientSecretEnv}) təyin edin və yenidən başladın.",
     "gitlabDuoSetupDescription": "Tətbiq qeydiyyatdan keçdikdən və bu OmniRoute nümunəsində env dəyişənləri təyin edildikdən sonra, OAuth girişini başlamaq üçün Davam et düyməsini basın.",
     "continue": "Davam et",
+    "copilotPolicyTitle": "Eksperimental təminatçı: siyasət statusu birmənalı deyil",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com vasitəsilə bağlanır, GitHub bunu API üçüncü tərəfin ümumi rəyi kimi dərc etməmişdir. Bu inteqrasiya eksperimentaldır və xəbərdarlıq edilmədən dəyişə bilər.",
+    "copilotPolicyLine2": "Yalnız öz GitHub hesabınız qoşula bilər. Heç vaxt etimadnamələri, hovuz hesablarını paylaşmayın və ya plan limitlərinizi aşmağa cəhd etməyin.",
+    "copilotPolicyLine3": "Pulsuz və Tələbə planı istifadəçiləri yalnız avtomatik model seçimi alırlar. Sizin Copilot plan şərtləriniz və istənilən istifadə limitləri sizin məsuliyyətiniz olaraq qalır.",
+    "copilotPolicyAcknowledge": "başa düşürəm, qoşul",
     "tabPasteSetupToken": "Quraşdırma tokeni",
     "claudeSetupTokenDescription": "Terminalda `claude setup-token` əmrini işə salın və çap etdiyi tokeni yapışdırın. Token bir il etibarlıdır və yeniləmə tokeni yoxdur. OmniRoute onu saxlamazdan əvvəl Anthropic-ə bir test sorğusu göndərir.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12343,11 @@
       "viewConversation": "söhbətə bax",
       "openConversation": "{id} söhbətini aç"
     },
-    "tableLabel": "Sorğu jurnalları"
+    "tableLabel": "Sorğu jurnalları",
+    "throughputPostFirstToken": "İlk tokendən sonra",
+    "throughputEndToEnd": "Ucdan-uca",
+    "throughputRate": "{value} token/san",
+    "throughputExplanation": "Hər iki sürət çıxış və düşünmə tokenlərinin sayından daha böyük olanını istifadə edir. İlk tokendən sonrakı sürət etibarlı TTFT-ni nəzərə almır; əks halda, tam müddətdən istifadə edir. Ucdan-uca sürət həmişə tam müddətdən istifadə edir. Buferlənmiş cavab model daha sürətli generasiya etmədən də yüksək ani çatdırılma sürətinə malik ola bilər."
   },
   "proxyLogger": {
     "filterAll": "Hamısı",
@@ -12785,7 +12990,8 @@
     "title": "Provayder statistikası",
     "description": "Provayder və model üzrə trafik, gecikmə və uğur göstəriciləri",
     "combo": "Kombinasiya",
-    "toggleModels": "{provider} üçün modelləri göstər"
+    "toggleModels": "{provider} üçün modelləri göstər",
+    "windowSince": "{date} tarixindən"
   },
   "relay": {
     "title": "Serverless Relay proksiləri",
@@ -13730,7 +13936,9 @@
       "disabled": "Deaktiv edilib",
       "dual": "İkili",
       "alias": "Ləqəb",
-      "canonical": "Kanonik"
+      "canonical": "Kanonik",
+      "fail_closed": "Blokla (fail_closed)",
+      "count_as_zero": "$0 kimi hesabla (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14085,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Qorunan prioritetli infrastruktur dayanmalarının 502 kimi qaytarılması",
         "description": "Yalnız kvota üzrə ehtiyat variant kimi istifadə olunan prioritet hədəf combo-nu kvota ilə əlaqəli olmadığı sübuta yetirilən səbəbdən — provayderin açıq dövrəqırıcısı və ya proqnozlaşdırılan gecikməyə görə ötürülmə — dayandırdıqda 503 əvəzinə 502 cavabı verin."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Qiymətsiz İstifadə Büdcə Siyasəti",
+        "description": "Bir-açar günlük/həftəlik USD limitləri provideri/modeli üçün qiymət sətri olmayan uğurlu istifadəni necə idarə edir. fail_closed (varsayılan) pəncərəni aşılmış kimi qeyd edir, beləliklə naməlum xərc heç vaxt sərt limiti keçə bilməz. count_as_zero həmin istifadəni $0 kimi hesablayır və qiymətlənmiş xərclərin tətbiqini davam etdirir. Qiyməti təyin olunmamış modellər hər halda panelin ana səhifəsində siyahılanır."
       }
     }
   },
@@ -15216,5 +15428,8 @@
     "importButton": "İdxal et",
     "importFailed": "İdxal uğursuz oldu.",
     "importSuccess": "{connections} hesab və {nodes} provayder qovşağı idxal edildi; {skipped} ötürüldü."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Cari mövqedən başla (mövcud qeydləri ötür)"
   }
 }

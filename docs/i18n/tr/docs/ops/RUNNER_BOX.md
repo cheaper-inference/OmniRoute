@@ -28,13 +28,12 @@ runner'larda çalıştığı için Turbopack yuvası çoğu zaman boştadır:
 | swap       | 16 GB                            | `omniroute-113-5`, swap kapalıyken (`MemorySwapMax=0`) çalışır; böylece kontrolden çıkan bir derleme, makineyi swap kullanmaya zorlamak yerine üst sınırında sonlandırılır                                                                                                                                                                                                                                                     |
 | `/tmp`     | **12 GB tmpfs = RAM**            | burada tutulan her şey bellek kullanır; kalan dosyalar 3 saat sonra temizlenir                                                                                                                                                                                                                                                                                                                                                 |
 | CPU        | 32 çekirdekte 60 yük gözlemlendi | kotalardan önce, bir Turbopack derlemesi (~1166 % CPU) ile aynı makinedeki bir coverage paketi, diğer listener'ların heartbeat sinyallerini kaynak yetersizliğine uğrattı (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                |
-| runner'lar | **6 listener**                   | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` devre dışıdır (`systemctl enable --now` bunlardan birini yeniden etkinleştirir)                                                                                                                                                                                                                                                                                |
+| runner'lar | **7 listener** (2026-10-28)      | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` ayrıca `omni-build` etiketini de taşır; `omniroute-113-3/-4/-8` depodan silindi (2026-10-28)                                                                                                                                                                                                                                                                            |
 
 Sınırlar, her unit'in `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` dosyasında
 bulunur (önceki değerler `override.conf.bak-20261018` olarak saklanmıştır) ve
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` ile canlı olarak uygulanmıştır — yeniden başlatma yapılmadığından
-çalışan hiçbir işe dokunulmamıştır. Etiketler de runners API'si aracılığıyla
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+çalışan hiçbir işe dokunulmamıştır. Etiketler de runners API'si aracılığıyla (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) canlı olarak değiştirilir.
 
 ## Temizleyiciyi kurun (tek seferlik, sunucuda)
@@ -43,7 +42,7 @@ bulunur (önceki değerler `override.conf.bak-20261018` olarak saklanmıştır) 
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): her 30 dakikada bir, günlüğü /var/log/runner-janitor.log dosyasına yaz
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` gereklidir: temizleyici, bir yolu kaldırmadan önce açık dosyaların tek bir
@@ -132,9 +131,10 @@ boşta olma denetimiyle yeniden başlatmayı aynı komutta gerçekleştirerek,
   çalıştı; 8 GB, kısıtlamayı ortadan kaldırır.
 - **Bilerek daha az dinleyici kullanılır.** Dört OmniRoute birimi 2026-08-29 tarihinde devre
   dışı bırakıldı — her ek dinleyici, yukarıdaki bellek bütçesini paylaşan başka bir kiracıdır.
-  Temizlik görevlisinin üst sınırı 6'dır (cron içindeki `MAX_ACTIVE_RUNNERS=6`): makinedeki her
-  `Runner.Listener` sürecini sayar; OmniHeuris ve OmniMind, bizim dört sürecimize iki tane daha
+  Temizlik görevlisinin üst sınırı 8'dir (cron içindeki `MAX_ACTIVE_RUNNERS=8`): makinedeki her
+  `Runner.Listener` sürecini sayar; OmniHeuris ve OmniMind, bizim beş sürecimize iki tane daha
   ekler.
+- **Unit ve Vitest işleri barındırılan çalıştırıcılarda kalır.** `ci.yml`, unit parçalarını ve Vitest işini `[self-hosted, omni-ci]` hedefine yalnızca `vars.USE_VPS_TEST_RUNNER` depo değişkeni `true` olduğunda ve o zaman da yalnızca aynı depodan gelen `pull_request` çalıştırmaları için gönderir; fork'lar, `merge_group` ve push'lar `ubuntu-latest` üzerinde kalır (`tests/unit/vps-runner-variable-scope.test.ts`). Değişken `false` durumundadır. 2026-10-28 tarihinde 4 çekirdekli üç `omni-ci` dinleyicisi `npm ci` için 250–270 s harcadı ve her unit parçası 30 dakikalık iş sınırına takıldı; barındırılan bir parça ise ~634 s sürüyordu ve makinenin yükü 17–24 idi. Dinleyiciler silindi. Değişkeni, bir unit parçası için boyutlandırılmış dinleyiciler olmadan yeniden açmayın.
 - **Herhangi bir çalıştırıcı meşgulken `/tmp` veya `_work` dizinini asla elle temizlemeyin.**
   Kontrol ile silme arasında boşluk bırakan bir kontrol-et-sonra-sil işlemi, 2026-08-27
   tarihinde çalışan bir Build işinin `_work` dizinini kaybetmesine neden oldu. Temizlik
@@ -149,8 +149,7 @@ boşta olma denetimiyle yeniden başlatmayı aynı komutta gerçekleştirerek,
 
 ## Barındırılan hat (GitHub tarafından barındırılan çalıştırıcılar)
 
-Hesap **Pro** planındadır: **eşzamanlı 40 barındırılan iş**; bu kapasite tüm PR kontrolleri,
-her push ile tetiklenen iş akışı ve CodeQL'in varsayılan kurulumu tarafından paylaşılır.
+Depo, **Team** planındaki `cheaper-inference` kuruluşuna aittir: **eşzamanlı 60 barındırılan iş**; bu kapasite kuruluştaki tüm depolar, tüm PR kontrolleri, her push ile tetiklenen iş akışı ve CodeQL'in varsayılan kurulumu tarafından paylaşılır. Aşağıdaki rakamlar **Pro** planında (eşzamanlı 40 barındırılan iş) ölçülmüştür.
 2026-10-18 tarihinde, birleştirme kampanyası sırasında (`release/v3.8.52` üzerinde saatte
 ~10 birleştirme) ölçülen değerler: **24 saatte oluşturulan 2.500 iş akışı çalıştırması**,
 6 saatte dala 44 push ve PR kontrolleri saatlerce beklerken **kuyruğa alınan 106 barındırılan

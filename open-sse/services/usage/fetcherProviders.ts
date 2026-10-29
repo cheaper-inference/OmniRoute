@@ -66,6 +66,9 @@ export const USAGE_FETCHER_PROVIDERS = [
   "codebuddy-intl",
   "cbai",
   "openrouter",
+  // Muse Code subscription has no usage API; registered so the generic fetcher
+  // returns persisted subscription metadata instead of "not implemented".
+  "muse-code",
   // LLM Gateway DevPass allowance (GET /v1/key → monthly + weekly premium)
   "llmgateway",
   // Lyceum credit balance (GET /api/v2/external/billing/credits)

@@ -8,6 +8,8 @@ import {
   getMoonshotOpenPlatformUsage,
 } from "../../open-sse/services/moonshotQuotaFetcher.ts";
 import { getUsageForProvider } from "../../open-sse/services/usage.ts";
+import { isKimiCodingBaseUrl } from "../../open-sse/services/usage/moonshotOpenPlatform.ts";
+import { getKimiUsage, resolveKimiUsageUrl } from "../../open-sse/services/usage/kimi.ts";
 import { getQuotaFetcher } from "../../open-sse/services/quotaPreflight.ts";
 
 const originalFetch = globalThis.fetch;
@@ -336,4 +338,155 @@ test("registerMoonshotFetchersForNodes still wires a kimi.com/coding node", asyn
   ]);
   assert.equal(typeof getQuotaFetcher("coding-node"), "function");
   assert.equal(typeof getQuotaFetcher("kcode"), "function");
+});
+
+test("isKimiCodingBaseUrl recognizes international api.kimi.ai/coding endpoints (#18180)", () => {
+  assert.equal(isKimiCodingBaseUrl("https://api.kimi.ai/coding/v1"), true);
+  assert.equal(isKimiCodingBaseUrl("https://api.kimi.ai/coding"), true);
+  assert.equal(isKimiCodingBaseUrl("https://api.kimi.ai/coding/"), true);
+  assert.equal(isKimiCodingBaseUrl("https://api.kimi.com/coding/v1"), true);
+  assert.equal(isKimiCodingBaseUrl("https://api.moonshot.ai/v1"), false);
+  assert.equal(isKimiCodingBaseUrl("https://api.moonshot.cn/v1"), false);
+});
+
+test("moonshot connection with international Kimi Coding baseUrl reads /usages from api.kimi.ai (#18180)", async () => {
+  const calls: string[] = [];
+  globalThis.fetch = (async (url: unknown) => {
+    calls.push(String(url));
+    return jsonResponse({
+      plan: "Kimi Coding",
+      usage: {
+        limit: "100",
+        used: "20",
+        remaining: "80",
+        resetTime: "2099-09-25T02:24:04Z",
+      },
+    });
+  }) as typeof fetch;
+
+  const usage = await getMoonshotOpenPlatformUsage({
+    id: "moonshot-coding-ai",
+    provider: "moonshot",
+    apiKey: "sk-coding-key",
+    providerSpecificData: { baseUrl: "https://api.kimi.ai/coding/v1" },
+  });
+
+  assert.deepEqual(calls, ["https://api.kimi.ai/coding/v1/usages"]);
+  assert.equal((usage as { plan?: string }).plan, "Kimi Coding");
+  assert.equal(
+    (usage as { quotas?: Record<string, { remainingPercentage?: number }> }).quotas?.code_7d
+      ?.remainingPercentage,
+    80
+  );
+});
+
+test("getKimiUsage queries api.kimi.ai when baseUrl is configured with .ai host (#18180)", async () => {
+  const calls: string[] = [];
+  globalThis.fetch = (async (url: unknown) => {
+    calls.push(String(url));
+    return jsonResponse({
+      plan: "Kimi Coding",
+      usage: {
+        limit: "100",
+        used: "10",
+        remaining: "90",
+      },
+    });
+  }) as typeof fetch;
+
+  await getKimiUsage(undefined, "sk-test", { baseUrl: "https://api.kimi.ai/coding/v1" });
+  assert.deepEqual(calls, ["https://api.kimi.ai/coding/v1/usages"]);
+});
+
+test("registerMoonshotFetchersForNodes wires an api.kimi.ai/coding node (#18180)", async () => {
+  const { registerMoonshotFetchersForNodes } =
+    await import("../../open-sse/services/moonshotQuotaFetcher.ts");
+  registerMoonshotFetchersForNodes([
+    {
+      id: "coding-node-ai",
+      prefix: "kcode-ai",
+      baseUrl: "https://api.kimi.ai/coding/v1",
+    },
+  ]);
+  assert.equal(typeof getQuotaFetcher("coding-node-ai"), "function");
+  assert.equal(typeof getQuotaFetcher("kcode-ai"), "function");
+});
+
+test("resolveKimiUsageUrl resolves full request URLs to canonical regional /coding/v1/usages (#18180)", () => {
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.com/coding/v1/messages?beta=true" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.com/coding/v1/chat/completions" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.ai/coding/v1/messages?beta=true" }),
+    "https://api.kimi.ai/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.ai/coding/v1/chat/completions" }),
+    "https://api.kimi.ai/coding/v1/usages"
+  );
+});
+
+test("resolveKimiUsageUrl enforces secure HTTPS and does not carry credentials over HTTP (#18180)", () => {
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "http://api.kimi.com/coding/v1" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "http://api.kimi.ai/coding/v1" }),
+    "https://api.kimi.ai/coding/v1/usages"
+  );
+});
+
+test("resolveKimiUsageUrl normalizes trailing slash and bare /coding, and keeps the .com default (#18180)", () => {
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.ai/coding/v1/" }),
+    "https://api.kimi.ai/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.com/coding" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.ai:8443/coding/v1" }),
+    "https://api.kimi.ai/coding/v1/usages"
+  );
+  assert.equal(resolveKimiUsageUrl(), "https://api.kimi.com/coding/v1/usages");
+  assert.equal(resolveKimiUsageUrl({}), "https://api.kimi.com/coding/v1/usages");
+  assert.equal(resolveKimiUsageUrl({ baseUrl: "   " }), "https://api.kimi.com/coding/v1/usages");
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "not a url" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://evil.example.com/coding/v1" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+});
+
+test("getKimiUsage sends requests to canonical regional HTTPS /usages even with full request URLs or HTTP override (#18180)", async () => {
+  const calls: string[] = [];
+  globalThis.fetch = (async (url: unknown) => {
+    calls.push(String(url));
+    return jsonResponse({
+      plan: "Kimi Coding",
+      usage: { limit: "100", used: "10", remaining: "90" },
+    });
+  }) as typeof fetch;
+
+  await getKimiUsage(undefined, "sk-test", {
+    baseUrl: "https://api.kimi.com/coding/v1/messages?beta=true",
+  });
+  await getKimiUsage(undefined, "sk-test", {
+    baseUrl: "http://api.kimi.ai/coding/v1",
+  });
+
+  assert.deepEqual(calls, [
+    "https://api.kimi.com/coding/v1/usages",
+    "https://api.kimi.ai/coding/v1/usages",
+  ]);
 });

@@ -1345,7 +1345,9 @@
       "open": "abrir",
       "close": "cerrar"
     },
-    "noResults": "Sin resultados"
+    "noResults": "Sin resultados",
+    "costsTeams": "Equipos",
+    "costsTeamsSubtitle": "Centros de costos de equipo"
   },
   "webhooks": {
     "title": "Ganchos web",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "Reglas avanzadas de carga útil, límites de solicitudes y ajustes de la API del proxy",
     "mitmProxyDescription": "Configura los ajustes del proxy MITM para inspeccionar y depurar el tráfico",
     "oneProxyDescription": "Configura los ajustes de 1Proxy para el encadenamiento avanzado de proxies",
-    "omniSkillsDescription": "Instala y administra habilidades de sandbox para la ejecución automatizada de prompts y herramientas"
+    "omniSkillsDescription": "Instala y administra habilidades de sandbox para la ejecución automatizada de prompts y herramientas",
+    "teamsDescription": "Estimaciones de costos de equipo y presupuestos blandos compartidos"
   },
   "cloudSyncStatus": {
     "synced": "Sincronizado",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "Copia tu endpoint",
     "readinessStep4": "Envía una solicitud de prueba",
     "readinessContinue": "Continuar con la configuración",
-    "readinessDismiss": "Descartar por ahora"
+    "readinessDismiss": "Descartar por ahora",
+    "unpricedUsageTitle": "{count, plural, one {# modelo} other {# modelos}} con uso reciente pero sin precio configurado",
+    "unpricedUsageFailClosed": "{keys, plural, one {# clave API con límite de uso usó estos modelos en los últimos 8 días. Mientras ese uso está dentro de la ventana diaria o semanal de la clave, la clave se considera excedida y sus solicitudes se bloquean (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).} other {# claves API con límite de uso usaron estos modelos en los últimos 8 días. Mientras ese uso está dentro de la ventana diaria o semanal de la clave, la clave se considera excedida y sus solicitudes se bloquean (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).}}",
+    "unpricedUsageCountAsZero": "Este uso cuenta como $0 para los límites de uso por clave (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# solicitud} other {# solicitudes}}, {keys, plural, one {# clave limitada} other {# claves limitadas}}",
+    "unpricedUsageMore": "…y {count} más",
+    "unpricedUsageConfigure": "Configurar precios",
+    "unpricedUsageDismiss": "Descartar"
   },
   "analytics": {
     "title": "Analítica",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Garra abierta - Configuración manual",
     "clineManualConfiguration": "Configuración manual de línea",
     "kiloManualConfiguration": "Configuración manual del código Kilo",
+    "piManualConfiguration": "Pi - Configuración manual",
+    "piConfigInvalidTitle": "Pi models.json es ilegible",
+    "piOmnirouteConfigured": "OmniRoute está configurado como un proveedor personalizado de Pi",
+    "piModelHelp": "Pi no descubre automáticamente modelos para puntos finales personalizados — el modelo que elige está escrito explícitamente en models.json.",
+    "piManualConfigTitle": "O edite ~/.pi/agent/models.json manualmente",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Luego inicie Pi y seleccione el proveedor omniroute. Configure PI_CODING_AGENT_DIR para mover todo el directorio del agente.",
+    "piUnownedNote": "Esta entrada se agregó fuera de OmniRoute (por ejemplo, puntos finales personalizados de pi-gui). El solicitante lo adoptará; Restablecer solo elimina las entradas que escribió OmniRoute.",
     "whenToUseLabel": "cuando usar",
     "openToolDocs": "Abrir documentos de herramientas",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Úsalo cuando quieras los flujos abreviados de Amp, pero sigas necesitando que se apliquen los alias y las reglas de enrutamiento de OmniRoute.",
       "hermes": "Úselo cuando necesite un asistente de IA nativo de terminal liviano para tareas rápidas.",
       "hermes-agent": "Utilizar cuando necesites el agente Hermes (de Nousresearch) con modelos predeterminados, de delegación, visión y auxiliares enrutados mediante OmniRoute.",
+      "whycodes": "Utilizar cuando quieras WhyCodes como agente CLI autónomo de uso general (TUI, agentes con nombre, memoria, swarm) apuntando a OmniRoute.",
       "custom": "Úselo para implementaciones de herramientas personalizadas o configuraciones genéricas compatibles con OpenAI."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "Agente de programación TUI de xAI Grok Build compatible con proveedores personalizados",
       "droid": "Asistente de IA de droide de fábrica",
       "openclaw": "Asistente de IA Open Claw",
+      "openclaude": "CLI del agente de programación OpenClaude con soporte para proveedores compatibles con OpenAI",
       "cline": "CLI del asistente de codificación AI de Cline",
       "kilo": "CLI del Asistente de Inteligencia Artificial de Kilo Code",
       "qwen": "CLI de Alibaba Qwen Code",
@@ -3018,6 +3038,7 @@
       "warp": "Terminal Warp AI compatible con proveedores personalizados",
       "agent-deck": "Orquestador multiagente Agent Deck",
       "5dive": "5dive — flota autoalojada de agentes de codificación; un perfil de autenticación los apunta todos a OmniRoute",
+      "whycodes": "Agente CLI autónomo WhyCodes con URL base compatible con OpenAI",
       "zed": "Editor de código Zed — agente integrado mediante un proveedor compatible con OpenAI"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "Actualizar",
     "cliproxyapiUpdateAvailable": "Actualización disponible: v{current} → v{latest}",
     "cliproxyapiVersion": "Versión",
+    "piInstallTitle": "Instalar el agente de codificación Pi",
+    "piInstallInstructions": "Instale el Pi CLI, luego regrese aquí para conectarlo a OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Utilice el URL accesible desde la máquina que ejecuta Pi. El punto final /v1 compatible con OpenAI se agrega automáticamente.",
+    "piManualMergeHint": "Solo vista previa. Combine esta entrada providers.omniroute en models.json para que sus otros proveedores y configuraciones permanezcan intactos.",
     "removeMapping": "Eliminar asignación"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "ej. 10",
     "testSelected": "Probar seleccionados ({count})",
     "testAllFiltered": "Probar todos los filtrados ({count})",
+    "visibility": "Visibilidad",
+    "allVisibility": "Visibles y ocultos",
+    "visibleOnly": "Visibles",
+    "hiddenOnly": "Ocultos",
+    "visibleColumn": "Visible",
+    "hideModel": "Ocultar {name} de /v1/models",
+    "showModel": "Mostrar {name} en /v1/models",
+    "hiddenBadge": "Oculto",
+    "hideFiltered": "Ocultar filtrados ({count})",
+    "showFiltered": "Mostrar filtrados ({count})",
+    "visibilityCounts": "{visible} visibles · {hidden} ocultos · {total} en total",
+    "visibilityUpdateFailed": "No se pudo actualizar la visibilidad del modelo",
     "cancel": "Cancelar",
     "clearResults": "Limpiar resultados",
     "testing": "Probando...",
@@ -3394,7 +3433,44 @@
     "httpError": "La solicitud falló con HTTP {status}",
     "testFailedNoDetail": "La prueba falló sin un mensaje de error",
     "additionalCapabilities": "Capacidades adicionales: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "Acceso a claves API",
+    "allowedInKeys": "Permitido en: {count, plural, one {# clave} other {# claves}}",
+    "keysLoading": "Cargando claves API…",
+    "keysRetry": "Reintentar carga de claves",
+    "accessViaPattern": "vía {pattern}",
+    "accessBlocked": "Bloqueado por {pattern}",
+    "editKeyAccess": "Editar acceso a claves",
+    "toggleKeyAccess": "Permitir {item} en {name}",
+    "resultNetworkError": "Error en la asignación",
+    "resultWouldEmptyModels": "Dejaría esta clave sin modelos permitidos — edita el acceso de la clave en su lugar",
+    "resultWouldEmptyCombos": "Dejaría esta clave sin combos permitidos — edita el acceso de la clave en su lugar",
+    "keyUpdatePending": "{name} aún se está actualizando. Inténtalo de nuevo en un momento.",
+    "assignToKeys": "Asignar a claves API…",
+    "assignApply": "Aplicar cambios",
+    "assignComplete": "Acceso a claves API actualizado",
+    "assignFailed": "Fallaron algunas actualizaciones de claves API",
+    "assignNoChanges": "No se modificó el acceso de la clave de API",
+    "selectedAccessItems": "Elementos seleccionados: {count}",
+    "assignExcludedCombos": "{count, plural, one {# fila de combo seleccionada no es un modelo y se omitirá aquí} other {# filas de combo seleccionadas no son modelos y se omitirán aquí}}. Asigna combos desde la pestaña Combos.",
+    "assignActionAdd": "Añadir",
+    "assignActionRemove": "Eliminar",
+    "searchKeys": "Buscar claves API",
+    "selectApiKey": "Seleccionar clave API {name}",
+    "allModelsAccess": "Todos los modelos",
+    "allCombosAccess": "Todos los combos",
+    "modelAccessCount": "Modelos: {count}",
+    "comboAccessCount": "Combos: {count}",
+    "keyInactive": "Inactivo",
+    "keyBanned": "Baneado",
+    "keyRevoked": "Revocado",
+    "switchRestrictedConfirm": "Cambiar esta clave a acceso restringido: solo se permitirán los elementos seleccionados",
+    "removeNoChangeHint": "Esta clave permite todo; eliminar los elementos seleccionados no provocará ningún cambio",
+    "removeStaysAllowedHint": "Aún permitido en esta clave mediante {patterns}",
+    "resultChanged": "Modificado",
+    "resultUnchanged": "Sin cambios",
+    "resultSkipped": "Omitido",
+    "resultNeedsSwitch": "Requiere cambio a restringido"
   },
   "combos": {
     "title": "combos",
@@ -3515,6 +3591,9 @@
     "moveUp": "Subir",
     "moveDown": "Bajar",
     "removeModel": "Quitar",
+    "testStep": "Probar este modelo",
+    "testStepRunning": "Probando…",
+    "testStepNotTestable": "Solo se pueden probar los pasos de un único modelo",
     "saving": "Guardando...",
     "liveNoProviders": "Aún no se ha detectado ningún proveedor.",
     "liveFleetDataHint": "Los datos de la flota llegan mediante eventos en vivo de combos.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Descargar plantilla CSV",
     "importFromFileMoreErrors": "+{count} más",
     "importFromFileSchemaHint": "Las columnas CSV son posicionales: provider, name, apiKey, baseUrl (opcional), priority (opcional). La columna provider debe contener el id de un proveedor administrado existente o el id de un nodo compatible con OpenAI/Anthropic ya registrado; esta importación no crea nuevos nodos de endpoint.",
+    "importOAuthExport": "Importar exportación OAuth",
+    "oauthExportTitle": "Importar exportación del gestor de cuentas",
+    "oauthExportDescription": "Sube una exportación en texto plano de un gestor de cuentas (p. ej., la exportación cloud-accounts de Antigravity Manager). Los tokens se renuevan en el servidor y cada cuenta se convierte en una conexión OAuth — las duplicadas se actualizan en su lugar.",
+    "oauthExportProviderLabel": "Proveedor",
+    "oauthExportChoose": "Elegir archivo",
+    "oauthExportFileAria": "Archivo JSON de exportación de cuentas",
+    "oauthExportSchemaHint": "Se acepta: un documento con un array \"accounts\", un array simple o un único registro. Los tokens pueden estar en un objeto token anidado o directamente en el registro.",
+    "oauthExportDetected": "{count} cuenta(s) detectada(s)",
+    "oauthExportSelectAll": "Seleccionar todas las cuentas",
+    "oauthExportSelectAccount": "Seleccionar cuenta {index}",
+    "oauthExportColEmail": "Correo electrónico",
+    "oauthExportColProvider": "Proveedor",
+    "oauthExportColRefresh": "Token de actualización",
+    "oauthExportNoEmail": "(sin correo)",
+    "oauthExportYes": "sí",
+    "oauthExportNo": "no",
+    "oauthExportImporting": "Importando…",
+    "oauthExportImport": "Importar {count} cuenta(s)",
+    "oauthExportResult": "Importadas {imported}/{total} — {failed} fallidas",
+    "oauthExportParseError": "No se pudo leer ninguna cuenta de este archivo.",
+    "oauthExportUnknownError": "error desconocido",
     "adaptaTutorial": {
       "title": "Cómo conectar Adapta Web",
       "introPrefix": "Adapta se autentica mediante Clerk. El token",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "Todos los modelos ya están importados",
     "noNewModelsToImport": "No hay modelos nuevos para importar — todos los modelos ya están en el registro o en la lista de modelos personalizados",
     "localCatalogFallbackStatus": "No se pudo acceder a la lista de modelos del proveedor: se muestra el catálogo integrado",
+    "discoveryDegradedStatus": "Descubrimiento del modelo fallido {time}",
     "skippingExistingModels": "Omitiendo {count} modelos existentes",
     "autoSync": "Sincronización automática",
     "autoSyncShort": "Sincronizar",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Límites de concurrencia por modelo",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Opcional: un modelo=límite por línea, comparado con el id exacto del modelo en el proveedor. Las solicitudes excedentes se ponen en cola localmente; en blanco significa sin límite por modelo.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Entrada de concurrencia por modelo no válida \"{entry}\": usa modelo=límite con un número entero de 1 a {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Entrada de concurrencia por modelo no válida \"{entry}\": usa modelo=límite con un número entero de 1 a {max}.",
+    "usedInComboTooltip": "Usado en {count} combinación(es): {combos}",
+    "openComboTooltip": "Abrir Combinaciones — usado por {combo}"
   },
   "settings": {
     "title": "Configuración",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "Anfitrión",
     "qdrantCollection": "Colección",
     "catalogVisibilityHint": "Los identificadores de modelos ocultos se pueden seguir invocando con los mismos permisos de acceso.",
+    "exposeCombosOnly": "Listar solo combinaciones en /v1/models",
+    "exposeCombosOnlyDesc": "Los clientes que descubren modelos automáticamente ven tus combinaciones (y auto/*, salvo que estén ocultos) en lugar de los modelos sin procesar de los proveedores. Los ID explícitos provider/model siguen enrutándose.",
     "catalogScopeTitle": "Listado de la API de modelos",
     "catalogScopeDesc": "Lo que GET /v1/models anuncia para esta clave. Limitar la lista nunca cambia los modelos que la clave puede invocar.",
     "catalogScopeAll": "Ambos",
@@ -8917,7 +9022,9 @@
         "financial": "Financiera",
         "brazilian": "Brasileña",
         "usa": "EE. UU.",
-        "full": "Completa"
+        "full": "Completa",
+        "gdpr": "RGPD (UE)",
+        "popia": "POPIA (Sudáfrica)"
       },
       "builtinTypes": "Tipos integrados",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "Direcciones IPv4",
         "ipv6_address": "Direcciones IPv6",
         "aws_key": "Claves de acceso de AWS",
-        "api_key_generic": "Claves de API y tokens"
+        "api_key_generic": "Claves de API y tokens",
+        "iban": "Números de cuenta bancaria IBAN",
+        "eu_vat": "Números de IVA de la UE",
+        "es_dni_nie": "DNI / NIE español",
+        "it_codice_fiscale": "Codice Fiscale italiano",
+        "pl_pesel": "PESEL polaco",
+        "nl_bsn": "BSN neerlandés",
+        "de_steuer_id": "Steuer-ID alemán",
+        "se_personnummer": "Personnummer sueco",
+        "za_id": "Números de identidad sudafricanos",
+        "za_phone": "Números de teléfono sudafricanos",
+        "za_vat": "Números de IVA sudafricanos",
+        "za_tax_ref": "Referencias fiscales sudafricanas"
       },
       "customPatterns": "Patrones personalizados",
       "customPatternsDesc": "Las coincidencias se reemplazan por [CUSTOM_REDACTED]. Hasta {max} patrones. Se rechazan los patrones con riesgo de backtracking catastrófico.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth no está configurado. Registra una aplicación OAuth en {applicationsUrl} con la URI de redirección {redirectUri} y los alcances \"{scopes}\", luego establece {clientIdEnv} (y opcionalmente {clientSecretEnv}) y reinicia.",
     "gitlabDuoSetupDescription": "Después de que la aplicación esté registrada y las variables de entorno estén configuradas en esta instancia de OmniRoute, haz clic en Continuar para iniciar la sesión de OAuth.",
     "continue": "Continuar",
+    "copilotPolicyTitle": "Proveedor experimental: el estado de la política es ambiguo",
+    "copilotPolicyLine1": "OmniRoute se conecta a través de api.githubcopilot.com, que GitHub no ha publicado como una inferencia general de terceros API. Esta integración es experimental y puede cambiar sin previo aviso.",
+    "copilotPolicyLine2": "Sólo se puede conectar su propia cuenta GitHub. Nunca comparta credenciales, agrupe cuentas ni intente exceder los límites de su plan.",
+    "copilotPolicyLine3": "Los usuarios de los planes Gratuito y Estudiante reciben únicamente la selección automática de modelo. Los términos de su plan Copilot y los límites de uso siguen siendo su responsabilidad.",
+    "copilotPolicyAcknowledge": "Entiendo, conéctate",
     "tabPasteSetupToken": "Token de configuración",
     "claudeSetupTokenDescription": "Ejecuta `claude setup-token` en una terminal y pega el token que imprime. Es válido durante un año y no tiene token de actualización. OmniRoute envía una solicitud de prueba a Anthropic antes de guardarlo.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "ver conversación",
       "openConversation": "Abrir conversación {id}"
     },
-    "tableLabel": "Registros de solicitudes"
+    "tableLabel": "Registros de solicitudes",
+    "throughputPostFirstToken": "Después del primer token",
+    "throughputEndToEnd": "De extremo a extremo",
+    "throughputRate": "{value} tokens/seg",
+    "throughputExplanation": "Ambas tasas usan el mayor de los recuentos de tokens de salida y de razonamiento. La tasa posterior al primer token excluye un TTFT válido; de lo contrario, usa la duración completa. La tasa de extremo a extremo siempre usa la duración completa. Una respuesta almacenada en búfer puede tener una alta tasa de entrega en ráfaga sin una generación del modelo más rápida."
   },
   "proxyLogger": {
     "filterAll": "Todos",
@@ -12785,7 +12913,8 @@
     "title": "Estadísticas de proveedores",
     "description": "Tráfico, latencia y tasas de éxito por proveedor y por modelo",
     "combo": "Combinado",
-    "toggleModels": "Mostrar modelos de {provider}"
+    "toggleModels": "Mostrar modelos de {provider}",
+    "windowSince": "Desde {date}"
   },
   "relay": {
     "title": "Proxies de retransmisión sin servidor",
@@ -13730,7 +13859,9 @@
       "disabled": "Deshabilitado",
       "dual": "Doble",
       "alias": "Alias",
-      "canonical": "Canónico"
+      "canonical": "Canónico",
+      "fail_closed": "Bloquear (fail_closed)",
+      "count_as_zero": "Contar como $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Detenciones de infraestructura de prioridad protegida como 502",
         "description": "Responde con 502 en lugar de 503 cuando un destino prioritario con alternativa solo por cuota detenga el combo por una causa que se pueda demostrar que no está relacionada con la cuota: un disyuntor abierto del proveedor o una omisión predictiva por latencia."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Política de presupuesto de uso sin precio",
+        "description": "Cómo los límites diarios/semanales por clave en USD tratan el uso exitoso cuyo proveedor/modelo no tiene una fila de precios. fail_closed (predeterminado) marca la ventana como excedida, de modo que un coste desconocido nunca puede eludir un tope estricto. count_as_zero cuenta ese uso como $0 y mantiene la aplicación del gasto tarifado. Los modelos sin precio se muestran en la página principal del panel de control de todas formas."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "Cerrar"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Desactiva la generación de variantes del nivel de razonamiento (p. ej., -low, -medium, -high) en el catálogo /v1/models.",
+  "teamCosts": {
+    "title": "Costos de equipo",
+    "subtitle": "Gestiona presupuestos blandos compartidos y estimaciones de costos del catálogo.",
+    "refresh": "Actualizar",
+    "create": "Crear equipo",
+    "edit": "Editar equipo",
+    "archive": "Archivar",
+    "selectTeam": "Equipos",
+    "searchTeams": "Buscar equipos",
+    "statusFilter": "Estado del equipo",
+    "active": "Activo",
+    "archived": "Archivado · solo lectura",
+    "allTeams": "Todos los equipos",
+    "noTeams": "No hay equipos coincidentes.",
+    "selectHint": "Crea o selecciona un equipo para ver los costos.",
+    "loading": "Cargando costos del equipo…",
+    "budgetTitle": "Presupuesto blando actual",
+    "budgetSubtitle": "Uso confirmado exitoso · ventana móvil · independiente de las fechas del informe",
+    "archivedBudget": "Archivado: la aplicación del presupuesto está inactiva. Los informes históricos siguen disponibles.",
+    "unlimited": "Ilimitado: no hay presupuesto blando compartido configurado.",
+    "budgetUnavailable": "El estado del presupuesto no está disponible. Actualiza para reintentar.",
+    "used": "Uso exitoso",
+    "maximum": "Máximo del presupuesto",
+    "remaining": "Restante conocido",
+    "resets": "Se restablece",
+    "unpricedBudget": "Parte del uso exitoso tiene precios desconocidos. La suma conocida está incompleta; la aplicación del presupuesto considera esta ventana como superada.",
+    "overBudget": "Presupuesto alcanzado o superado · {amount} de exceso",
+    "reportTitle": "Informe de uso",
+    "reportSubtitle": "Todos los intentos · estimación del catálogo en USD, no una factura · fechas UTC completas",
+    "reportPeriod": "Período del informe",
+    "day1": "1 día",
+    "day7": "7 días",
+    "day30": "30 días",
+    "allTime": "Todo el tiempo",
+    "reportSpend": "Gasto estimado del informe",
+    "requests": "Solicitudes",
+    "assignedKeys": "Claves asignadas",
+    "unpricedReport": "Este informe contiene precios desconocidos. El gasto estimado está incompleto.",
+    "breakdown": "Costo por clave de API",
+    "noUsage": "No hay uso en este período del informe.",
+    "keyName": "Nombre de la clave de API",
+    "tokens": "Tokens de entrada + salida",
+    "unnamedKey": "Clave sin nombre o eliminada",
+    "unpriced": "Precio desconocido",
+    "members": "Membresía",
+    "memberSubtitle": "Cambiar la membresía conserva el gasto histórico con su equipo original.",
+    "searchKeys": "Buscar claves o propietarios actuales",
+    "chooseKey": "Elige una clave de API",
+    "unassigned": "Sin asignar",
+    "ownership": "Equipo de facturación actual: {team}",
+    "assign": "Asignar",
+    "remove": "Quitar",
+    "noMembers": "No hay miembros actuales. El uso histórico aún puede contar para el presupuesto.",
+    "assignedAt": "Asignada el {date} (UTC)",
+    "name": "Nombre del equipo",
+    "description": "Descripción",
+    "enableBudget": "Activar presupuesto blando compartido",
+    "amount": "Monto del presupuesto (USD)",
+    "duration": "Ventana móvil del presupuesto",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "confirm": "Confirmar",
+    "transferTitle": "Confirmar transferencia de clave",
+    "transferMessage": "¿Mover esta clave de “{source}” a “{destination}”? El gasto histórico permanece con el equipo original.",
+    "removeTitle": "Quitar asignación de clave",
+    "removeMessage": "¿Quitar esta clave de “{team}”? El gasto histórico permanece en este equipo.",
+    "archiveTitle": "Archivar equipo",
+    "archiveMessage": "¿Archivar “{team}”? Se cierran todos los vínculos actuales y la aplicación del presupuesto se detiene. Los informes históricos siguen disponibles.",
+    "invalidName": "Introduce un nombre (1–200 caracteres) y una descripción de máximo 2.000 caracteres.",
+    "invalidAmount": "Introduce un monto de presupuesto finito mayor que cero.",
+    "unauthorized": "Inicia sesión en el panel de administración para continuar.",
+    "forbidden": "No tienes permiso para gestionar equipos. Tu entrada se conserva.",
+    "notFound": "Este equipo o asignación ya no existe.",
+    "conflict": "La asignación o el equipo cambió. Actualiza y confirma la propiedad actual antes de reintentar.",
+    "failed": "La solicitud falló. Tu entrada se conserva; vuelve a intentarlo.",
+    "partialBudget": "Algunos cubos diarios retenidos se solapan con el límite de la ventana y no pueden prorratearse con exactitud. El gasto mostrado está incompleto; el margen restante no está disponible. La política de presupuesto blando existente no cambia."
+  },
   "connectionTest": {
     "title": "Mensaje de prueba",
     "description": "Envía una solicitud real a través de esta cuenta. Esto utiliza una pequeña cantidad de la cuota y puede iniciar un período de uso, según el proveedor.",
@@ -15216,5 +15428,8 @@
     "importButton": "Importar",
     "importFailed": "La importación falló.",
     "importSuccess": "Se importaron {connections} cuentas y {nodes} nodos de proveedor; {skipped} omitidos."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Empezar desde la posición actual (omitir los registros existentes)"
   }
 }

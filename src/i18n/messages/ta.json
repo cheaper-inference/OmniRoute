@@ -1345,7 +1345,9 @@
       "open": "திறக்கவும்",
       "close": "மூடு"
     },
-    "noResults": "எந்த முடிவுகளும் இல்லை"
+    "noResults": "எந்த முடிவுகளும் இல்லை",
+    "costsTeams": "குழுக்கள்",
+    "costsTeamsSubtitle": "குழு செலவு மையங்கள்"
   },
   "webhooks": {
     "title": "வெப்ஹூக்ஸ்",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "மேம்பட்ட பேலோடு விதிகள், கோரிக்கை வரம்புகள் மற்றும் ப்ராக்ஸி API அமைப்புகள்",
     "mitmProxyDescription": "போக்குவரத்து ஆய்வு மற்றும் பிழைத்திருத்தத்திற்கான MITM ப்ராக்ஸி அமைப்புகளை உள்ளமைக்கவும்",
     "oneProxyDescription": "மேம்பட்ட ப்ராக்ஸி சங்கிலியிடலுக்கான 1Proxy அமைப்புகளை உள்ளமைக்கவும்",
-    "omniSkillsDescription": "தானியங்கி தூண்டுதல் மற்றும் கருவி செயலாக்கத்திற்கான சாண்ட்பாக்ஸ் திறன்களை நிறுவி நிர்வகிக்கவும்"
+    "omniSkillsDescription": "தானியங்கி தூண்டுதல் மற்றும் கருவி செயலாக்கத்திற்கான சாண்ட்பாக்ஸ் திறன்களை நிறுவி நிர்வகிக்கவும்",
+    "teamsDescription": "குழு செலவு மதிப்பீடுகள் மற்றும் பகிரப்பட்ட மென் பட்ஜெட்டுகள்"
   },
   "cloudSyncStatus": {
     "synced": "ஒத்திசைக்கப்பட்டது",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "உங்கள் இறுதிப்புள்ளியை நகலெடுக்கவும்",
     "readinessStep4": "ஒரு சோதனைக் கோரிக்கையை அனுப்பவும்",
     "readinessContinue": "அமைப்பைத் தொடரவும்",
-    "readinessDismiss": "இப்போதைக்கு மூடவும்"
+    "readinessDismiss": "இப்போதைக்கு மூடவும்",
+    "unpricedUsageTitle": "{count, plural, one {# மாதிரி} other {# மாதிரிகள்}} சமீபத்திய பயன்பாடு உண்டு, ஆனால் விலை அமைக்கப்படவில்லை",
+    "unpricedUsageFailClosed": "{keys, plural, one {பயன்பாடு வரம்பு கொண்ட # API விசை} other {பயன்பாடு வரம்பு கொண்ட # API விசைகள்}} கடந்த 8 நாட்களில் இந்த மாதிரிகளை பயன்படுத்தியுள்ளனர். அந்த பயன்பாடு ஒரு விசையின் தினசரி அல்லது வாராந்திர கணக்கீட்டு காலத்திற்கு உட்பட்டால், அந்த விசையை கூடுதல் வரம்பு மீறியதாக கருதி அதன் கோரிக்கைகள் தடுக்கப்படுகின்றன (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "இந்த பயன்பாடு $0 ஆக ஒரு விசைக்கு விதிக்கப்பட்ட பயன்பாடு வரம்புகளில் கணக்காகப் பெறப்படும் (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# கோரிக்கை} other {# கோரிக்கைகள்}}, {keys, plural, one {# வரையறுக்கப்பட்ட விசை} other {# வரையறுக்கப்பட்ட விசைகள்}}",
+    "unpricedUsageMore": "…மற்றும் {count} மேலும்",
+    "unpricedUsageConfigure": "விலை அமைக்கவும்",
+    "unpricedUsageDismiss": "மறுக்கவும்"
   },
   "analytics": {
     "title": "பகுப்பாய்வு",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - கைமுறை உள்ளமைவு",
     "clineManualConfiguration": "Cline கைமுறை உள்ளமைவு",
     "kiloManualConfiguration": "Kilo Code கைமுறை உள்ளமைவு",
+    "piManualConfiguration": "பை - கையேடு கட்டமைப்பு",
+    "piConfigInvalidTitle": "Pi models.json படிக்க முடியாதது",
+    "piOmnirouteConfigured": "OmniRoute பை தனிப்பயன் வழங்குநராக கட்டமைக்கப்பட்டுள்ளது",
+    "piModelHelp": "நீங்கள் தேர்ந்தெடுக்கும் மாதிரியானது models.json இல் வெளிப்படையாக எழுதப்பட்டிருக்கும் தனிப்பயன் இறுதிப்புள்ளிகளுக்கான — மாதிரிகளை Pi தானாகவே கண்டறியாது.",
+    "piManualConfigTitle": "அல்லது ~/.pi/agent/models.json கைமுறையாக திருத்தவும்",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "பின்னர் Pi ஐ ஆரம்பித்து omniroute வழங்குநரைத் தேர்ந்தெடுக்கவும். முழு முகவர் கோப்பகத்தையும் நகர்த்த PI_CODING_AGENT_DIR அமைக்கவும்.",
+    "piUnownedNote": "இந்த உள்ளீடு OmniRoute க்கு வெளியே சேர்க்கப்பட்டது (எ.கா. pi-gui's Custom endpoints). விண்ணப்பிப்பது அதை ஏற்றுக்கொள்ளும்; மீட்டமைப்பது OmniRoute எழுதிய உள்ளீடுகளை மட்டுமே நீக்குகிறது.",
     "whenToUseLabel": "எப்போது பயன்படுத்த வேண்டும்",
     "openToolDocs": "கருவியின் ஆவணங்களைத் திறக்கவும்",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Amp சுருக்கெழுத்துப் பணிப்பாய்வுகளை விரும்பினாலும், OmniRoute மாற்றுப்பெயர் மற்றும் வழித்தட விதிகளின் அமலாக்கம் தேவைப்படும்போது பயன்படுத்தவும்.",
       "hermes": "விரைவான பணிகளுக்கு இலகுரக, டெர்மினலுக்கே உரிய AI உதவியாளர் தேவைப்படும்போது பயன்படுத்தவும்.",
       "hermes-agent": "இயல்புநிலை, பிரதிநிதித்துவம், பார்வை மற்றும் துணை மாதிரிகள் OmniRoute வழியாக வழிநடத்தப்படும் Hermes Agent (Nousresearch வழங்கும்) உங்களுக்குத் தேவைப்படும்போது இதைப் பயன்படுத்தவும்.",
+      "whycodes": "WhyCodes-ஐ OmniRoute-ஐ நோக்கி அமைக்கப்பட்ட பல்நோக்கு தன்னாட்சி CLI முகவராக (TUI, பெயரிடப்பட்ட முகவர்கள், நினைவகம், swarm) விரும்பும்போது பயன்படுத்தவும்.",
       "custom": "தனிப்பயன் கருவிச் செயலாக்கங்கள் அல்லது பொதுவான OpenAI-இணக்கமான உள்ளமைவுகளுக்குப் பயன்படுத்தவும்."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "தனிப்பயன் வழங்குநர் ஆதரவுடன் கூடிய xAI Grok Build TUI குறியீட்டு முகவர்",
       "droid": "Factory Droid AI உதவியாளர்",
       "openclaw": "Open Claw AI உதவியாளர்",
+      "openclaude": "OpenAI-இணக்கமான வழங்குநர் ஆதரவுடன் OpenClaude குறியீட்டு முகவர் CLI",
       "cline": "Cline AI குறியீட்டாக்க உதவியாளர் CLI",
       "kilo": "Kilo Code AI உதவியாளர் CLI",
       "qwen": "Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "தனிப்பயன் வழங்குநர் ஆதரவுடன் கூடிய Warp AI டெர்மினல்",
       "agent-deck": "Agent Deck பல-முகவர் ஒருங்கிணைப்பாளர்",
       "5dive": "5dive — சுய-ஹோஸ்ட் செய்யப்பட்ட குறியீட்டு முகவர்களின் கூட்டம்; ஒரு auth சுயவிவரம் அனைத்தையும் OmniRoute-க்கு திருப்புகிறது",
+      "whycodes": "OpenAI-இணக்கமான base URL கொண்ட WhyCodes தன்னாட்சி CLI முகவர்",
       "zed": "Zed குறியீட்டு எடிட்டர் — OpenAI-இணக்கமான வழங்குநர் மூலம் உள்ளமைந்த முகவர்"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "புதுப்பிக்கவும்",
     "cliproxyapiUpdateAvailable": "புதுப்பிப்பு கிடைக்கிறது: v{current} → v{latest}",
     "cliproxyapiVersion": "பதிப்பு",
+    "piInstallTitle": "பை குறியீட்டு முகவரை நிறுவவும்",
+    "piInstallInstructions": "Pi CLI ஐ நிறுவவும், பின்னர் அதை OmniRoute உடன் இணைக்க இங்கே திரும்பவும்.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi இயங்கும் இயந்திரத்திலிருந்து URL ஐப் பயன்படுத்தவும். OpenAI-இணக்கமான /v1 எண்ட்பாயிண்ட் தானாகவே சேர்க்கப்படும்.",
+    "piManualMergeHint": "முன்னோட்டம் மட்டும். இந்த providers.omniroute நுழைவை models.json இல் இணைக்கவும், அதனால் உங்கள் மற்ற வழங்குநர்களும் அமைப்புகளும் அப்படியே இருக்கும்.",
     "removeMapping": "மேப்பிங்கை அகற்று"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "எ.கா. 10",
     "testSelected": "தேர்ந்தெடுக்கப்பட்டதைச் சோதிக்கவும் ({count})",
     "testAllFiltered": "வடிகட்டப்பட்ட அனைத்தையும் சோதிக்கவும் ({count})",
+    "visibility": "தெரிவுநிலை",
+    "allVisibility": "தெரிபவை மற்றும் மறைக்கப்பட்டவை",
+    "visibleOnly": "தெரிபவை",
+    "hiddenOnly": "மறைக்கப்பட்டவை",
+    "visibleColumn": "தெரியும்",
+    "hideModel": "/v1/models இலிருந்து {name} ஐ மறை",
+    "showModel": "/v1/models இல் {name} ஐக் காட்டு",
+    "hiddenBadge": "மறைக்கப்பட்டது",
+    "hideFiltered": "வடிகட்டியவற்றை மறை ({count})",
+    "showFiltered": "வடிகட்டியவற்றைக் காட்டு ({count})",
+    "visibilityCounts": "{visible} தெரிபவை · {hidden} மறைக்கப்பட்டவை · மொத்தம் {total}",
+    "visibilityUpdateFailed": "மாடலின் தெரிவுநிலையைப் புதுப்பிக்க முடியவில்லை",
     "cancel": "ரத்துசெய்",
     "clearResults": "முடிவுகளை அழிக்கவும்",
     "testing": "சோதிக்கப்படுகிறது...",
@@ -3394,7 +3433,44 @@
     "httpError": "HTTP {status} உடன் கோரிக்கை தோல்வியடைந்தது",
     "testFailedNoDetail": "பிழைச் செய்தி ஏதுமின்றி சோதனை தோல்வியடைந்தது",
     "additionalCapabilities": "கூடுதல் திறன்கள்: {list}",
-    "comboRefMember": "காம்போ → {name}"
+    "comboRefMember": "காம்போ → {name}",
+    "keyAccessButton": "API விசை அணுகல்",
+    "allowedInKeys": "இதில் அனுமதிக்கப்பட்டுள்ளது: {count, plural, one {# விசை} other {# விசைகள்}}",
+    "keysLoading": "API விசைகள் ஏற்றப்படுகின்றன…",
+    "keysRetry": "விசைகளை ஏற்றுவதை மீண்டும் முயலவும்",
+    "accessViaPattern": "{pattern} வழியாக",
+    "accessBlocked": "{pattern} ஆல் தடுக்கப்பட்டது",
+    "editKeyAccess": "விசை அணுகலைத் திருத்து",
+    "toggleKeyAccess": "{name}-இல் {item}-ஐ அனுமதி",
+    "resultNetworkError": "ஒதுக்கீடு தோல்வியடைந்தது",
+    "resultWouldEmptyModels": "இந்த விசையில் அனுமதிக்கப்பட்ட மாதிரிகள் எதுவும் இல்லாமல் போய்விடும் — அதற்குப் பதிலாக விசை அணுகலைத் திருத்தவும்",
+    "resultWouldEmptyCombos": "இந்த விசையில் அனுமதிக்கப்பட்ட காம்போக்கள் எதுவும் இல்லாமல் போய்விடும் — அதற்குப் பதிலாக விசை அணுகலைத் திருத்தவும்",
+    "keyUpdatePending": "{name} இன்னும் புதுப்பிக்கப்பட்டு வருகிறது. சிறிது நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
+    "assignToKeys": "API விசைகளுக்கு ஒதுக்கு…",
+    "assignApply": "மாற்றங்களைப் பயன்படுத்து",
+    "assignComplete": "API விசை அணுகல் புதுப்பிக்கப்பட்டது",
+    "assignFailed": "சில API விசை புதுப்பிப்புகள் தோல்வியடைந்தன",
+    "assignNoChanges": "API விசை அணுகல் எதுவும் மாற்றப்படவில்லை",
+    "selectedAccessItems": "தேர்ந்தெடுக்கப்பட்ட உருப்படிகள்: {count}",
+    "assignExcludedCombos": "{count, plural, one {# தேர்ந்தெடுக்கப்பட்ட காம்போ வரிசை ஒரு மாதிரி அல்ல, எனவே இங்கே தவிர்க்கப்படும்} other {# தேர்ந்தெடுக்கப்பட்ட காம்போ வரிசைகள் மாதிரிகள் அல்ல, எனவே இங்கே தவிர்க்கப்படும்}}. Combos தாவலில் இருந்து காம்போக்களை ஒதுக்கவும்.",
+    "assignActionAdd": "சேர்",
+    "assignActionRemove": "நீக்கு",
+    "searchKeys": "API விசைகளைத் தேடு",
+    "selectApiKey": "API விசை {name}-ஐத் தேர்ந்தெடு",
+    "allModelsAccess": "அனைத்து மாடல்களும்",
+    "allCombosAccess": "அனைத்து சேர்க்கைகளும்",
+    "modelAccessCount": "மாடல்கள்: {count}",
+    "comboAccessCount": "சேர்க்கைகள்: {count}",
+    "keyInactive": "செயலற்றது",
+    "keyBanned": "தடைசெய்யப்பட்டது",
+    "keyRevoked": "ரத்து செய்யப்பட்டது",
+    "switchRestrictedConfirm": "இந்த விசையைக் கட்டுப்படுத்தப்பட்ட அணுகலுக்கு மாற்றவும்: தேர்ந்தெடுக்கப்பட்ட உருப்படிகள் மட்டுமே அனுமதிக்கப்படும்",
+    "removeNoChangeHint": "இந்த விசை அனைத்தையும் அனுமதிக்கிறது; தேர்ந்தெடுக்கப்பட்ட உருப்படிகளை நீக்குவது எந்த மாற்றத்தையும் ஏற்படுத்தாது",
+    "removeStaysAllowedHint": "{patterns} மூலம் இந்த விசையில் இன்னும் அனுமதிக்கப்படுகிறது",
+    "resultChanged": "மாற்றப்பட்டது",
+    "resultUnchanged": "மாற்றமில்லை",
+    "resultSkipped": "தவிர்க்கப்பட்டது",
+    "resultNeedsSwitch": "கட்டுப்படுத்தப்பட்ட முறைக்கு மாற வேண்டும்"
   },
   "combos": {
     "title": "காம்போக்கள்",
@@ -3515,6 +3591,9 @@
     "moveUp": "மேலே நகர்த்து",
     "moveDown": "கீழே நகர்த்து",
     "removeModel": "அகற்று",
+    "testStep": "இந்த மாதிரியைச் சோதிக்கவும்",
+    "testStepRunning": "சோதிக்கப்படுகிறது…",
+    "testStepNotTestable": "ஒற்றை-மாதிரி படிகளை மட்டுமே சோதிக்க முடியும்",
     "saving": "சேமிக்கிறது...",
     "liveNoProviders": "வழங்குநர்கள் இன்னும் கண்டறியப்படவில்லை.",
     "liveFleetDataHint": "ஃப்ளீட் தரவு நேரலை காம்போ நிகழ்வுகள் மூலம் பெறப்படுகிறது.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "CSV வார்ப்புருவைப் பதிவிறக்கவும்",
     "importFromFileMoreErrors": "+{count} மேலும்",
     "importFromFileSchemaHint": "CSV நெடுவரிசைகள் வரிசை நிலையை அடிப்படையாகக் கொண்டவை: provider, name, apiKey, baseUrl (விருப்பத்தேர்வு), priority (விருப்பத்தேர்வு). provider நெடுவரிசை ஏற்கனவே உள்ள நிர்வகிக்கப்பட்ட வழங்குநர் id அல்லது முன்பே பதிவுசெய்யப்பட்ட OpenAI/Anthropic-இணக்கமான node id ஆக இருக்க வேண்டும் — இந்த இறக்குமதி புதிய endpoint nodes-ஐ உருவாக்காது.",
+    "importOAuthExport": "OAuth ஏற்றுமதியை இறக்குமதி செய்",
+    "oauthExportTitle": "கணக்கு மேலாளர் ஏற்றுமதியை இறக்குமதி செய்",
+    "oauthExportDescription": "கணக்கு மேலாளரிலிருந்து எளிய உரை ஏற்றுமதியைப் பதிவேற்றவும் (எ.கா. Antigravity Manager-இன் cloud-accounts ஏற்றுமதி). டோக்கன்கள் சேவையகத்தில் புதுப்பிக்கப்படும், ஒவ்வொரு கணக்கும் ஒரு OAuth இணைப்பாக மாறும் — நகல்கள் அதே இடத்தில் புதுப்பிக்கப்படும்.",
+    "oauthExportProviderLabel": "வழங்குநர்",
+    "oauthExportChoose": "கோப்பைத் தேர்வுசெய்க",
+    "oauthExportFileAria": "கணக்கு ஏற்றுமதி JSON கோப்பு",
+    "oauthExportSchemaHint": "ஏற்கப்படுபவை: \"accounts\" வரிசை கொண்ட ஆவணம், வெறும் வரிசை அல்லது ஒற்றைப் பதிவு. டோக்கன்கள் உள்ளமைந்த token பொருளிலோ நேரடியாகப் பதிவிலோ இருக்கலாம்.",
+    "oauthExportDetected": "{count} கணக்கு(கள்) கண்டறியப்பட்டன",
+    "oauthExportSelectAll": "அனைத்து கணக்குகளையும் தேர்ந்தெடு",
+    "oauthExportSelectAccount": "கணக்கு {index} ஐத் தேர்ந்தெடு",
+    "oauthExportColEmail": "மின்னஞ்சல்",
+    "oauthExportColProvider": "வழங்குநர்",
+    "oauthExportColRefresh": "புதுப்பிப்பு டோக்கன்",
+    "oauthExportNoEmail": "(மின்னஞ்சல் இல்லை)",
+    "oauthExportYes": "ஆம்",
+    "oauthExportNo": "இல்லை",
+    "oauthExportImporting": "இறக்குமதி செய்கிறது…",
+    "oauthExportImport": "{count} கணக்கு(களை) இறக்குமதி செய்",
+    "oauthExportResult": "{imported}/{total} இறக்குமதி செய்யப்பட்டது — {failed} தோல்வி",
+    "oauthExportParseError": "இந்தக் கோப்பிலிருந்து எந்தக் கணக்கையும் படிக்க முடியவில்லை.",
+    "oauthExportUnknownError": "அறியப்படாத பிழை",
     "adaptaTutorial": {
       "title": "Adapta Web-ஐ எவ்வாறு இணைப்பது",
       "introPrefix": "Adapta ஆனது Clerk மூலம் அங்கீகரிக்கிறது. டோக்கன்",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "அனைத்து மாடல்களும் ஏற்கனவே இறக்குமதி செய்யப்பட்டுள்ளன",
     "noNewModelsToImport": "இறக்குமதி செய்யப் புதிய மாடல்கள் எதுவும் இல்லை — அனைத்து மாடல்களும் ஏற்கனவே பதிவகத்தில் அல்லது தனிப்பயன் மாடல்கள் பட்டியலில் உள்ளன",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "மாடல் கண்டுபிடிப்பு தோல்வியடைந்தது {time}",
     "skippingExistingModels": "ஏற்கனவே உள்ள {count} மாடல்கள் தவிர்க்கப்படுகின்றன",
     "autoSync": "தானியங்கு ஒத்திசைவு",
     "autoSyncShort": "ஒத்திசைக்கவும்",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} காம்போக்களில் பயன்படுத்தப்படுகிறது: {combos}",
+    "openComboTooltip": "காம்போக்களைத் திற — {combo} பயன்படுத்துகிறது"
   },
   "settings": {
     "title": "அமைப்புகள்",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "விருந்தினர்",
     "qdrantCollection": "கலெக்ஷன்",
     "catalogVisibilityHint": "மறைக்கப்பட்ட மாதிரி ID-களை அதே அணுகல் அனுமதிகளுடன் தொடர்ந்து அழைக்கலாம்.",
+    "exposeCombosOnly": "/v1/models-இல் சேர்க்கைகளை மட்டும் பட்டியலிடு",
+    "exposeCombosOnlyDesc": "மாடல்களைத் தானாகக் கண்டறியும் கிளையண்ட்கள் மூல வழங்குநர் மாடல்களுக்குப் பதிலாக உங்கள் சேர்க்கைகளை (மறைக்கப்படவில்லை எனில் auto/* உட்பட) காண்பார்கள். வெளிப்படையான provider/model ID-கள் தொடர்ந்து வழிசெலுத்தப்படும்.",
     "catalogScopeTitle": "Models API பட்டியல்",
     "catalogScopeDesc": "இந்த விசைக்காக GET /v1/models எவற்றை அறிவிக்கிறது. பட்டியலைக் குறைப்பது, இந்த விசை எவற்றை அழைக்க முடியும் என்பதை ஒருபோதும் மாற்றாது.",
     "catalogScopeAll": "இரண்டும்",
@@ -8917,7 +9022,9 @@
         "financial": "நிதி",
         "brazilian": "பிரேசில்",
         "usa": "அமெரிக்கா",
-        "full": "முழுமை"
+        "full": "முழுமை",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (தென் ஆப்பிரிக்கா)"
       },
       "builtinTypes": "உள்ளமைந்த வகைகள்",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "IPv4 முகவரிகள்",
         "ipv6_address": "IPv6 முகவரிகள்",
         "aws_key": "AWS அணுகல் விசைகள்",
-        "api_key_generic": "API விசைகள் மற்றும் டோக்கன்கள்"
+        "api_key_generic": "API விசைகள் மற்றும் டோக்கன்கள்",
+        "iban": "IBAN வங்கி கணக்கு எண்கள்",
+        "eu_vat": "EU VAT எண்கள்",
+        "es_dni_nie": "ஸ்பானிஷ் DNI / NIE",
+        "it_codice_fiscale": "இத்தாலிய கோடிஸ் ஃபிஸ்கேல்",
+        "pl_pesel": "போலிஷ் PESEL",
+        "nl_bsn": "டச்சு BSN",
+        "de_steuer_id": "ஜெர்மன் ஸ்டீயர்-ஐடி",
+        "se_personnummer": "ஸ்வீடிஷ் நபர்",
+        "za_id": "தென்னாப்பிரிக்க ID எண்கள்",
+        "za_phone": "தென்னாப்பிரிக்க தொலைபேசி எண்கள்",
+        "za_vat": "தென்னாப்பிரிக்க VAT எண்கள்",
+        "za_tax_ref": "தென்னாப்பிரிக்க வரி குறிப்புகள்"
       },
       "customPatterns": "தனிப்பயன் வடிவங்கள்",
       "customPatternsDesc": "பொருத்தங்கள் [CUSTOM_REDACTED] ஆக மாற்றப்படும். அதிகபட்சம் {max} வடிவங்கள். பேரழிவு பின்னோக்கித் தேடல் அபாயமுள்ள வடிவங்கள் நிராகரிக்கப்படும்.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth அமைக்கப்படவில்லை. {applicationsUrl} இல் ஒரு OAuth பயன்பாட்டை பதிவு செய்யவும், மறுபடியும் URI {redirectUri} மற்றும் அளவைகள் \"{scopes}\" உடன், பின்னர் {clientIdEnv} (மற்றும் விருப்பமாக {clientSecretEnv}) ஐ அமைத்து மீண்டும் தொடங்கவும்.",
     "gitlabDuoSetupDescription": "அப்ப்ளிகேஷன் பதிவு செய்யப்பட்ட பிறகு மற்றும் இந்த OmniRoute instance இல் env vars அமைக்கப்பட்ட பிறகு, OAuth உள்நுழைவுக்கு தொடங்க Continue ஐ கிளிக் செய்யவும்.",
     "continue": "தொடர்ந்து",
+    "copilotPolicyTitle": "பரிசோதனை வழங்குநர்: கொள்கை நிலை தெளிவற்றதாக உள்ளது",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com வழியாக இணைக்கிறது, இது GitHub ஒரு பொதுவான மூன்றாம் தரப்பு அனுமானமாக வெளியிடப்படவில்லை API. இந்த ஒருங்கிணைப்பு சோதனையானது மற்றும் முன்னறிவிப்பின்றி மாறலாம்.",
+    "copilotPolicyLine2": "உங்கள் சொந்த GitHub கணக்கு மட்டுமே இணைக்கப்பட்டிருக்கலாம். நற்சான்றிதழ்களைப் பகிர வேண்டாம், கணக்குகளைச் சேகரிக்க வேண்டாம் அல்லது உங்கள் திட்ட வரம்புகளை மீற முயற்சிக்காதீர்கள்.",
+    "copilotPolicyLine3": "இலவச மற்றும் மாணவர் திட்ட பயனர்கள் தானியங்கி மாதிரி தேர்வை மட்டுமே பெறுவார்கள். உங்கள் Copilot திட்ட விதிமுறைகள் மற்றும் ஏதேனும் பயன்பாட்டு வரம்புகள் உங்கள் பொறுப்பாக இருக்கும்.",
+    "copilotPolicyAcknowledge": "எனக்கு புரிகிறது, இணைக்கவும்",
     "tabPasteSetupToken": "அமைவு டோக்கன்",
     "claudeSetupTokenDescription": "டெர்மினலில் `claude setup-token` ஐ இயக்கி, அது அச்சிடும் டோக்கனை ஒட்டவும். இது ஒரு வருடத்திற்குச் செல்லுபடியாகும், புதுப்பிப்பு டோக்கன் இல்லை. சேமிப்பதற்கு முன் OmniRoute Anthropic-க்கு ஒரு சோதனைக் கோரிக்கையை அனுப்புகிறது.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "உரையாடலைக் காண்க",
       "openConversation": "{id} உரையாடலைத் திறக்கவும்"
     },
-    "tableLabel": "கோரிக்கைப் பதிவுகள்"
+    "tableLabel": "கோரிக்கைப் பதிவுகள்",
+    "throughputPostFirstToken": "முதல் டோக்கனுக்குப் பின்",
+    "throughputEndToEnd": "தொடக்கம் முதல் முடிவு வரை",
+    "throughputRate": "{value} டோக்கன்கள்/வினாடி",
+    "throughputExplanation": "இரண்டு விகிதங்களும் வெளியீடு மற்றும் பகுத்தறிவு டோக்கன் எண்ணிக்கைகளில் பெரியதைப் பயன்படுத்துகின்றன. முதல் டோக்கனுக்குப் பின் என்பது செல்லுபடியான TTFT-ஐ விலக்குகிறது; இல்லையெனில் அது முழு கால அளவைப் பயன்படுத்துகிறது. தொடக்கம் முதல் முடிவு வரை எப்போதும் முழு கால அளவைப் பயன்படுத்துகிறது. பஃபர் செய்யப்பட்ட பதிலுக்கு, மாடல் வேகமாக உருவாக்கப்படாமலேயே அதிக வெடிப்பு வழங்கல் விகிதம் இருக்கலாம்."
   },
   "proxyLogger": {
     "filterAll": "அனைத்தும்",
@@ -12785,7 +12913,8 @@
     "title": "வழங்குநர் புள்ளிவிவரங்கள்",
     "description": "ஒவ்வொரு வழங்குநர் மற்றும் மாடலுக்குமான போக்குவரத்து, தாமதம் மற்றும் வெற்றி விகிதங்கள்",
     "combo": "சேர்க்கை",
-    "toggleModels": "{provider} மாடல்களைக் காட்டுக"
+    "toggleModels": "{provider} மாடல்களைக் காட்டுக",
+    "windowSince": "{date} முதல்"
   },
   "relay": {
     "title": "சர்வர்லெஸ் ரிலே ப்ராக்ஸிகள்",
@@ -13730,7 +13859,9 @@
       "disabled": "முடக்கப்பட்டது",
       "dual": "இரட்டை",
       "alias": "மாற்றுப்பெயர்",
-      "canonical": "முதன்மை"
+      "canonical": "முதன்மை",
+      "fail_closed": "தடுக்க (fail_closed)",
+      "count_as_zero": "$0 ஆக கணக்கிடு (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "பாதுகாக்கப்பட்ட-முன்னுரிமை உள்கட்டமைப்பு நிறுத்தங்கள் 502 ஆக",
         "description": "ஒதுக்கீடு-மட்டுமே-மாற்றுவழி முன்னுரிமை இலக்கு, ஒதுக்கீட்டால் ஏற்படவில்லை என உறுதியாக நிரூபிக்கக்கூடிய காரணத்திற்காக combo வை நிறுத்தும்போது 503க்குப் பதிலாக 502 எனப் பதிலளிக்கவும்: திறந்த provider circuit breaker அல்லது முன்கணிப்பு தாமதத் தவிர்ப்பு."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "விலை அமைக்கப்படாத பயன்பாடு பட்ஜெட் கொள்கை",
+        "description": "ஒரு விசைக்கு விதிக்கப்பட்ட தினசரி/வாராந்திர USD வரம்புகள், வழங்குநர்/மாதிரிக்கு விலை வரிசை இல்லாத வெற்றிகரமான பயன்பாட்டை எவ்வாறு கருதுகின்றன என்பதை விளக்குகிறது. fail_closed (இயல்புநிலை) கணக்கீட்டு காலத்தை மீறப்பட்டதாகக் குறிக்கிறது, ஆகவே தெரியாத செலவு கடுமையான வரம்பை சுற்றி தவறி போகாது. count_as_zero அந்த பயன்பாட்டை $0 ஆகக் கணக்கிட்டு விலை நிர்ணயிக்கப்பட்ட செலவினை தொடர்ந்து அமுல்படுத்தும். விலை மாற்றமில்லா மாதிரிகள் எந்த வழியிலும் டாஷ்போர்டு முகப்பு பக்கத்தில் பட்டியலிடப்படுகின்றன."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "மூடு"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "/v1/models பட்டியலில் thinking level variants (எ.கா. -low, -medium, -high) உருவாக்கப்படுவதை முடக்கவும்.",
+  "teamCosts": {
+    "title": "குழு செலவுகள்",
+    "subtitle": "பகிரப்பட்ட மென் பட்ஜெட்டுகளையும் பட்டியல் செலவு மதிப்பீடுகளையும் நிர்வகிக்கவும்.",
+    "refresh": "புதுப்பி",
+    "create": "குழுவை உருவாக்கு",
+    "edit": "குழுவைத் திருத்து",
+    "archive": "காப்பகப்படுத்து",
+    "selectTeam": "குழுக்கள்",
+    "searchTeams": "குழுக்களைத் தேடு",
+    "statusFilter": "குழு நிலை",
+    "active": "செயலில்",
+    "archived": "காப்பகப்படுத்தப்பட்டது · படிக்க மட்டும்",
+    "allTeams": "அனைத்து குழுக்கள்",
+    "noTeams": "பொருந்தும் குழுக்கள் இல்லை.",
+    "selectHint": "செலவுகளைக் காண ஒரு குழுவை உருவாக்கவும் அல்லது தேர்ந்தெடுக்கவும்.",
+    "loading": "குழு செலவுகள் ஏற்றப்படுகின்றன…",
+    "budgetTitle": "தற்போதைய மென் பட்ஜெட்",
+    "budgetSubtitle": "வெற்றிகரமாகப் பதிவான பயன்பாடு · நகரும் சாளரம் · அறிக்கை தேதிகளைச் சாராதது",
+    "archivedBudget": "காப்பகப்படுத்தப்பட்டது: பட்ஜெட் அமலாக்கம் செயலற்றது. வரலாற்று அறிக்கைகள் கிடைக்கும்.",
+    "unlimited": "வரம்பற்றது — பகிரப்பட்ட மென் பட்ஜெட் அமைக்கப்படவில்லை.",
+    "budgetUnavailable": "பட்ஜெட் நிலை கிடைக்கவில்லை. மீண்டும் முயல புதுப்பிக்கவும்.",
+    "used": "வெற்றிகரமான பயன்பாடு",
+    "maximum": "பட்ஜெட் அதிகபட்சம்",
+    "remaining": "அறியப்பட்ட மீதம்",
+    "resets": "மீட்டமைவு",
+    "unpricedBudget": "வெற்றிகரமான பயன்பாட்டின் ஒரு பகுதிக்கு விலை தெரியவில்லை. அறியப்பட்ட கூட்டுத்தொகை முழுமையற்றது; பட்ஜெட் அமலாக்கம் இந்தச் சாளரத்தை மீறியதாகக் கருதுகிறது.",
+    "overBudget": "பட்ஜெட் எட்டப்பட்டது அல்லது மீறப்பட்டது · {amount} அதிகம்",
+    "reportTitle": "பயன்பாட்டு அறிக்கை",
+    "reportSubtitle": "அனைத்து முயற்சிகள் · USD-இல் பட்டியல் மதிப்பீடு, விலைப்பட்டியல் அல்ல · முழு UTC தேதிகள்",
+    "reportPeriod": "அறிக்கைக் காலம்",
+    "day1": "1 நாள்",
+    "day7": "7 நாட்கள்",
+    "day30": "30 நாட்கள்",
+    "allTime": "எல்லா நேரமும்",
+    "reportSpend": "மதிப்பிடப்பட்ட அறிக்கைச் செலவு",
+    "requests": "கோரிக்கைகள்",
+    "assignedKeys": "ஒதுக்கப்பட்ட விசைகள்",
+    "unpricedReport": "இந்த அறிக்கையில் தெரியாத விலைகள் உள்ளன. மதிப்பிடப்பட்ட செலவு முழுமையற்றது.",
+    "breakdown": "API விசை வாரியான செலவு",
+    "noUsage": "இந்த அறிக்கைக் காலத்தில் பயன்பாடு இல்லை.",
+    "keyName": "API விசைப் பெயர்",
+    "tokens": "உள்ளீடு + வெளியீட்டு டோக்கன்கள்",
+    "unnamedKey": "பெயரில்லாத அல்லது நீக்கப்பட்ட விசை",
+    "unpriced": "தெரியாத விலை",
+    "members": "உறுப்பினர்",
+    "memberSubtitle": "உறுப்பினரை மாற்றினாலும் வரலாற்றுச் செலவு அசல் குழுவிலேயே இருக்கும்.",
+    "searchKeys": "விசைகள் அல்லது தற்போதைய உரிமையாளர்களைத் தேடு",
+    "chooseKey": "ஒரு API விசையைத் தேர்ந்தெடுக்கவும்",
+    "unassigned": "ஒதுக்கப்படவில்லை",
+    "ownership": "தற்போதைய பில்லிங் குழு: {team}",
+    "assign": "ஒதுக்கு",
+    "remove": "அகற்று",
+    "noMembers": "தற்போதைய உறுப்பினர்கள் இல்லை. வரலாற்றுப் பயன்பாடு இன்னும் பட்ஜெட்டில் கணக்கிடப்படலாம்.",
+    "assignedAt": "{date} அன்று ஒதுக்கப்பட்டது (UTC)",
+    "name": "குழுப் பெயர்",
+    "description": "விளக்கம்",
+    "enableBudget": "பகிரப்பட்ட மென் பட்ஜெட்டை இயக்கு",
+    "amount": "பட்ஜெட் தொகை (USD)",
+    "duration": "நகரும் பட்ஜெட் சாளரம்",
+    "cancel": "ரத்துசெய்",
+    "save": "சேமி",
+    "confirm": "உறுதிசெய்",
+    "transferTitle": "விசை பரிமாற்றத்தை உறுதிசெய்யவும்",
+    "transferMessage": "இந்த விசையை “{source}” குழுவிலிருந்து “{destination}” குழுவுக்கு நகர்த்தவா? வரலாற்றுச் செலவு அசல் குழுவிலேயே இருக்கும்.",
+    "removeTitle": "விசை ஒதுக்கீட்டை அகற்று",
+    "removeMessage": "இந்த விசையை “{team}” குழுவிலிருந்து அகற்றவா? வரலாற்றுச் செலவு இந்தக் குழுவிலேயே இருக்கும்.",
+    "archiveTitle": "குழுவைக் காப்பகப்படுத்து",
+    "archiveMessage": "“{team}” குழுவைக் காப்பகப்படுத்தவா? தற்போதைய அனைத்து இணைப்புகளும் மூடப்பட்டு பட்ஜெட் அமலாக்கம் நிற்கும். வரலாற்று அறிக்கைகள் கிடைக்கும்.",
+    "invalidName": "ஒரு பெயரையும் (1–200 எழுத்துகள்) 2,000 எழுத்துகளுக்கு மிகாத விளக்கத்தையும் உள்ளிடவும்.",
+    "invalidAmount": "பூஜ்யத்தை விடப் பெரிய வரையறுக்கப்பட்ட பட்ஜெட் தொகையை உள்ளிடவும்.",
+    "unauthorized": "தொடர நிர்வாக டாஷ்போர்டில் உள்நுழையவும்.",
+    "forbidden": "குழுக்களை நிர்வகிக்க உங்களுக்கு அனுமதி இல்லை. நீங்கள் உள்ளிட்டது பாதுகாக்கப்பட்டுள்ளது.",
+    "notFound": "இந்தக் குழு அல்லது ஒதுக்கீடு இனி இல்லை.",
+    "conflict": "ஒதுக்கீடு அல்லது குழு மாறியுள்ளது. மீண்டும் முயலும் முன் புதுப்பித்து தற்போதைய உரிமையை உறுதிசெய்யவும்.",
+    "failed": "கோரிக்கை தோல்வியடைந்தது. நீங்கள் உள்ளிட்டது பாதுகாக்கப்பட்டுள்ளது; மீண்டும் முயலவும்.",
+    "partialBudget": "சேமிக்கப்பட்ட சில தினசரி வாளிகள் சாளர எல்லையுடன் மேற்பொருந்துகின்றன, துல்லியமாகப் பகிர முடியாது. காட்டப்படும் செலவு முழுமையற்றது; மீதமுள்ள அனுமதி கிடைக்கவில்லை. தற்போதுள்ள மென் பட்ஜெட் கொள்கை மாறவில்லை."
+  },
   "connectionTest": {
     "title": "சோதனைச் செய்தி",
     "description": "இந்தக் கணக்கின் மூலம் ஓர் உண்மையான கோரிக்கையை அனுப்பவும். இது சிறிதளவு ஒதுக்கீட்டைப் பயன்படுத்தும்; வழங்குநரைப் பொறுத்து பயன்பாட்டுக் காலச்சாளரத்தைத் தொடங்கக்கூடும்.",
@@ -15216,5 +15428,8 @@
     "importButton": "இறக்குமதி செய்",
     "importFailed": "இறக்குமதி தோல்வியடைந்தது.",
     "importSuccess": "{connections} கணக்குகளும் {nodes} வழங்குநர் முனைகளும் இறக்குமதி செய்யப்பட்டன; {skipped} தவிர்க்கப்பட்டன."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "தற்போதைய இடத்திலிருந்து தொடங்கு (ஏற்கனவே உள்ள பதிவுகளைத் தவிர்)"
   }
 }

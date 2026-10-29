@@ -1345,7 +1345,9 @@
       "open": "ṣí",
       "close": "pa"
     },
-    "noResults": "Kò sí àbájáde"
+    "noResults": "Kò sí àbájáde",
+    "costsTeams": "Àwọn ẹgbẹ́",
+    "costsTeamsSubtitle": "Àwọn ibùdó ìnáwó ẹgbẹ́"
   },
   "webhooks": {
     "title": "Àwọn Webhook",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "Àwọn òfin payload onípele-gíga, àwọn ààlà ìbéèrè, àti àwọn ètò API aṣojú",
     "mitmProxyDescription": "Ṣètò àwọn ètò aṣojú MITM fún ṣíṣe àyẹ̀wò ìrìn-àjò dátà àti ìṣàwárí àṣìṣe",
     "oneProxyDescription": "Ṣètò àwọn ètò 1Proxy fún ṣíṣe àsopọ̀ ọ̀pọ̀ aṣojú onípele-gíga",
-    "omniSkillsDescription": "Fi àwọn ọgbọ́n sandbox sori ẹrọ kí o sì ṣàkóso wọn fún ìmúṣẹ́ prompt àti irinṣẹ́ láìfọwọ́ṣe"
+    "omniSkillsDescription": "Fi àwọn ọgbọ́n sandbox sori ẹrọ kí o sì ṣàkóso wọn fún ìmúṣẹ́ prompt àti irinṣẹ́ láìfọwọ́ṣe",
+    "teamsDescription": "Ìdíyelé ìnáwó ẹgbẹ́ àti àwọn ìṣúná rírọ̀ àjọpín"
   },
   "cloudSyncStatus": {
     "synced": "Ti múṣiṣẹ́pọ̀",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "Ṣe àdàkọ endpoint rẹ",
     "readinessStep4": "Fi ìbéèrè ìdánwò ránṣẹ́",
     "readinessContinue": "Tẹ̀ síwájú pẹ̀lú ìṣètò",
-    "readinessDismiss": "Pa á tì fún ìsinsìnyí"
+    "readinessDismiss": "Pa á tì fún ìsinsìnyí",
+    "unpricedUsageTitle": "{count, plural, one {# módelì} other {# módelì}} pẹ̀lú ìlò tuntun ṣùgbọ́n kò sí ìye owó tí a ṣètò",
+    "unpricedUsageFailClosed": "{keys, plural, one {# bọtini API tó ní ìdínà ìlò} other {# bọtini API tí ó ní ìdínà ìlò}} lo àwọn módelì wọ̀nyí ní ọjọ́ mẹjọ tó kọjá. Nígbà tí ìlò yẹn wà nínú àkókò ọjọ́ tàbí àkókò ọ̀sẹ̀ ti bọtini, a ka bọtini náà sí ìjàmbá ju ìwọn lọ, a sì dina ìbéèrè rẹ̀ (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Ìlò yìí kà sí $0 sí ìwọn ìlò fún bọtini kọọkan (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# ìbéèrè} other {# ìbéèrè}}, {keys, plural, one {# bọtini tí ó ní ìdínà} other {# bọtini tí ó ní ìdínà}}",
+    "unpricedUsageMore": "… àti {count} míì",
+    "unpricedUsageConfigure": "Ṣètò ìye",
+    "unpricedUsageDismiss": "Fagilé"
   },
   "analytics": {
     "title": "Ìtúpalẹ̀",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Ìṣètò aláfọwọ́ṣe",
     "clineManualConfiguration": "Ìṣètò aláfọwọ́ṣe Cline",
     "kiloManualConfiguration": "Ìṣètò aláfọwọ́ṣe Kilo Code",
+    "piManualConfiguration": "Pi - Afowoyi iṣeto ni",
+    "piConfigInvalidTitle": "Pi models.json ko ṣee ka",
+    "piOmnirouteConfigured": "OmniRoute jẹ atunto bi olupese aṣa Pi kan",
+    "piModelHelp": "Pi ko ṣe iwari awọn awoṣe adaṣe fun awọn aaye ipari aṣa — awoṣe ti o mu ni a kọ sinu models.json ni gbangba.",
+    "piManualConfigTitle": "Tabi ṣatunkọ ~/.pi/agent/models.json pẹlu ọwọ",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Lẹhinna bẹrẹ Pi ko si yan olupese omniroute. Ṣeto PI_CODING_AGENT_DIR lati gbe gbogbo itọsọna aṣoju lọ.",
+    "piUnownedNote": "Ti fikun titẹsi yii ni ita OmniRoute (fun apẹẹrẹ awọn aaye ipari Aṣa pi-gui). Nbere yoo gba o; Tunto nikan yọ awọn titẹ sii OmniRoute kowe kuro.",
     "whenToUseLabel": "Ìgbà tí o yẹ kí o lò ó",
     "openToolDocs": "Ṣí àwọn ìwé ìtọ́sọ́nà irinṣẹ́",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Lò ó nígbà tí o bá fẹ́ àwọn ìṣàn iṣẹ́ kúkúrú Amp, ṣùgbọ́n tí o ṣì nílò ìfipámúṣe àwọn orúkọ àfidípò àti ìlànà ìdarí OmniRoute.",
       "hermes": "Lò ó nígbà tí o bá nílò olùrànlọ́wọ́ AI inú terminal tó fẹ́ẹ́rẹ́ fún àwọn iṣẹ́ kíákíá.",
       "hermes-agent": "Lò ó nígbà tí o bá nílò Hermes Agent (láti ọwọ́ Nousresearch), tí àwọn módẹ́lì àkọ́kọ́, fífi iṣẹ́ lé aṣojú, ìríran àti olùrànlọ́wọ́ rẹ̀ sì ń gba OmniRoute kọjá.",
+      "whycodes": "Lò ó nígbà tí o bá fẹ́ WhyCodes gẹ́gẹ́ bí aṣojú CLI adáṣe fún onírúurú ìlò (TUI, àwọn aṣojú tí a dárúkọ, ìrántí, swarm) tí a darí sí OmniRoute.",
       "custom": "Lò ó fún àwọn ìmúlò irinṣẹ́ àdáni tàbí àwọn ìṣètò gbogbogbò tí ó bá OpenAI mu."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "Aṣojú ìkọ́ kóòdù xAI Grok Build TUI pẹ̀lú àtìlẹ́yìn olùpèsè àdáni",
       "droid": "Olùrànlọ́wọ́ AI Factory Droid",
       "openclaw": "Olùrànlọ́wọ́ AI Open Claw",
+      "openclaude": "CLI aṣojú ìkọ́ kóòdù OpenClaude pẹ̀lú àtìlẹ́yìn olùpèsè tó bá OpenAI mu",
       "cline": "CLI Olùrànlọ́wọ́ Ìkọ́ Kóòdù AI Cline",
       "kilo": "CLI Olùrànlọ́wọ́ AI Kilo Code",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "Terminal AI Warp pẹ̀lú àtìlẹ́yìn olùpèsè àdáni",
       "agent-deck": "Olùṣètò ọ̀pọ̀ aṣojú Agent Deck",
       "5dive": "5dive — agbo àwọn aṣojú kíkó kóòdù tí o ń gbàlejò fúnra rẹ; prófáìlì ìfàṣẹsí kan ń darí gbogbo wọn sí OmniRoute",
+      "whycodes": "Aṣojú CLI adáṣe WhyCodes pẹ̀lú base URL tó bá OpenAI mu",
       "zed": "Olùṣàtúnṣe kóòdù Zed — aṣojú tí a kọ́ sínú rẹ̀ nípasẹ̀ olùpèsè tí ó bá OpenAI mu"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "Ṣe ìmúdójúìwọ̀n",
     "cliproxyapiUpdateAvailable": "Ìmúdójúìwọ̀n wà: v{current} → v{latest}",
     "cliproxyapiVersion": "Ẹ̀yà",
+    "piInstallTitle": "Fi Aṣoju Ifaminsi Pi sori ẹrọ",
+    "piInstallInstructions": "Fi Pi CLI sori ẹrọ, lẹhinna pada si ibi lati so pọ mọ OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Lo URL arọwọto lati ẹrọ nṣiṣẹ Pi. Oju opo opin /v1 ti OpenAI-ibaramu ti wa ni afikun laifọwọyi.",
+    "piManualMergeHint": "Awotẹlẹ nikan. Darapọ iwọle providers.omniroute yii sinu models.json nitoribẹẹ awọn olupese ati eto rẹ miiran wa ni mimule.",
     "removeMapping": "Yọ ìbáṣepọ̀ náà kúrò"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "b.a. 10",
     "testSelected": "Dán àwọn tí a yàn wò ({count})",
     "testAllFiltered": "Dán gbogbo àwọn tí a sẹ̀ wò ({count})",
+    "visibility": "Hihan",
+    "allVisibility": "Ti o han ati ti a fi pamọ",
+    "visibleOnly": "Ti o han",
+    "hiddenOnly": "Ti a fi pamọ",
+    "visibleColumn": "O han",
+    "hideModel": "Fi {name} pamọ kuro ni /v1/models",
+    "showModel": "Fi {name} han ni /v1/models",
+    "hiddenBadge": "A ti fi pamọ",
+    "hideFiltered": "Fi awọn ti a ṣe àlẹmọ pamọ ({count})",
+    "showFiltered": "Fi awọn ti a ṣe àlẹmọ han ({count})",
+    "visibilityCounts": "{visible} ti o han · {hidden} ti a fi pamọ · {total} lapapọ",
+    "visibilityUpdateFailed": "Kuna lati ṣe imudojuiwọn hihan awoṣe",
     "cancel": "Fagilé",
     "clearResults": "Pa àwọn èsì rẹ́",
     "testing": "Ń dán an wò...",
@@ -3394,7 +3433,44 @@
     "httpError": "Ìbéèrè kùnà pẹ̀lú HTTP {status}",
     "testFailedNoDetail": "Àdánwò kùnà láìsí ìránṣẹ́ àṣìṣe",
     "additionalCapabilities": "Àwọn agbára àfikún: {list}",
-    "comboRefMember": "Àkópọ̀ → {name}"
+    "comboRefMember": "Àkópọ̀ → {name}",
+    "keyAccessButton": "Ìwọlé kọ́kọ́rọ́ API",
+    "allowedInKeys": "Gbà láàyè nínú: {count, plural, one {# kọ́kọ́rọ́} other {# àwọn kọ́kọ́rọ́}}",
+    "keysLoading": "Ń gbé àwọn kọ́kọ́rọ́ API wá…",
+    "keysRetry": "Tún gbìyànjú láti gbé àwọn kọ́kọ́rọ́ wá",
+    "accessViaPattern": "nípasẹ̀ {pattern}",
+    "accessBlocked": "Díwọ́ nípasẹ̀ {pattern}",
+    "editKeyAccess": "Ṣàtúnṣe ìwọlé kọ́kọ́rọ́",
+    "toggleKeyAccess": "Gba {item} láàyè lórí {name}",
+    "resultNetworkError": "Ìyànnáfún kùnà",
+    "resultWouldEmptyModels": "Yóò fi kọ́kọ́rọ́ yìí sílẹ̀ láìní àwọn àwòṣe tí a gbà láàyè kankan — ṣàtúnṣe àyè kọ́kọ́rọ́ dípò rẹ̀",
+    "resultWouldEmptyCombos": "Yóò fi kọ́kọ́rọ́ yìí sílẹ̀ láìní àwọn combo tí a gbà láàyè kankan — ṣàtúnṣe àyè kọ́kọ́rọ́ dípò rẹ̀",
+    "keyUpdatePending": "A ṣì ń sọ {name} dọ̀tun. Gbìyànjú lẹ́ẹ̀kan síi láìpẹ́.",
+    "assignToKeys": "Yàn fún àwọn kọ́kọ́rọ́ API…",
+    "assignApply": "Mú àwọn àyípadà ṣiṣẹ́",
+    "assignComplete": "A ti ṣe àmúdàtúnṣe ìwọlé kọ́kọ́rọ́ API",
+    "assignFailed": "Àwọn àmúdàtúnṣe kọ́kọ́rọ́ API kan kùnà",
+    "assignNoChanges": "Kò sí àyè kọ́kọ́rọ́ API tí a yípadà",
+    "selectedAccessItems": "Àwọn ohun tí a yàn: {count}",
+    "assignExcludedCombos": "{count, plural, one {# ìlà combo tí a yàn kì í ṣe àwòṣe, a ó sì fò kọjá níhìn-ín} other {# àwọn ìlà combo tí a yàn kì í ṣe àwòṣe, a ó sì fò wọ́n kọjá níhìn-ín}}. Yan àwọn combo láti inú táàbù Combos.",
+    "assignActionAdd": "Fi kún un",
+    "assignActionRemove": "Yọ kúrò",
+    "searchKeys": "Wá àwọn kọ́kọ́rọ́ API",
+    "selectApiKey": "Yan kọ́kọ́rọ́ API {name}",
+    "allModelsAccess": "Gbogbo àwọn àwòṣe",
+    "allCombosAccess": "Gbogbo àwọn àpapọ̀",
+    "modelAccessCount": "Àwọn àwòṣe: {count}",
+    "comboAccessCount": "Àwọn àpapọ̀: {count}",
+    "keyInactive": "Kò ṣiṣẹ́",
+    "keyBanned": "Tí a dènà",
+    "keyRevoked": "Ti fagilé",
+    "switchRestrictedConfirm": "Yí kọ́kọ́rọ́ yìí padà sí àǹfààní tí a dènà: àwọn ohun tí a yàn nìkan ni a ó gbà láàyè",
+    "removeNoChangeHint": "Kọ́kọ́rọ́ yìí gba ohun gbogbo láàyè; yíyọ àwọn ohun tí a yàn kúrò kò ní yí ohunkóhun padà",
+    "removeStaysAllowedHint": "A ṣì gbà á láàyè lórí kọ́kọ́rọ́ yìí nípasẹ̀ {patterns}",
+    "resultChanged": "Yípadà",
+    "resultUnchanged": "Kò sí àyípadà",
+    "resultSkipped": "Fò kọjá",
+    "resultNeedsSwitch": "Nílò ìyípadà sí ètò tí a dènà"
   },
   "combos": {
     "title": "Àwọn àkójọpọ̀",
@@ -3515,6 +3591,9 @@
     "moveUp": "Gbé sókè",
     "moveDown": "Gbé sọ̀kalẹ̀",
     "removeModel": "Yọ kúrò",
+    "testStep": "Dán àwòṣe yìí wò",
+    "testStepRunning": "Ń dán an wò…",
+    "testStepNotTestable": "Àwọn ìgbésẹ̀ àwòṣe kan ṣoṣo nìkan ni a lè dán wò",
     "saving": "Ń fipamọ́...",
     "liveNoProviders": "Kò sí olupèsè kankan tí a ti rí síbẹ̀.",
     "liveFleetDataHint": "Dátà ẹgbẹ́ àwòṣe ń dé nípasẹ̀ àwọn ìṣẹ̀lẹ̀ combo ní àkókò gidi.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Ṣàgbàsílẹ̀ àwòṣe CSV",
     "importFromFileMoreErrors": "+{count} sí i",
     "importFromFileSchemaHint": "Àwọn ọ̀wọ̀n CSV wà ní ipò yìí: provider, name, apiKey, baseUrl (kò pọn dandan), priority (kò pọn dandan). Ọ̀wọ̀n provider gbọ́dọ̀ jẹ́ id olùpèsè tó wà tẹ́lẹ̀ tí a ń ṣàkóso tàbí id nóòdù tó báramu pẹ̀lú OpenAI/Anthropic tí a ti forúkọsílẹ̀ tẹ́lẹ̀ — ìṣàgbéwọlé yìí kì í ṣẹ̀dá àwọn nóòdù endpoint tuntun.",
+    "importOAuthExport": "Ṣàgbéwọlé ìkójáde OAuth",
+    "oauthExportTitle": "Ṣàgbéwọlé ìkójáde olùṣàkóso àkọọ́lẹ̀",
+    "oauthExportDescription": "Gbé ìkójáde ọ̀rọ̀ lásán sókè láti ọ̀dọ̀ olùṣàkóso àkọọ́lẹ̀ (fún àpẹẹrẹ ìkójáde cloud-accounts ti Antigravity Manager). A ń sọ àwọn tókìnì dọ̀tun lórí olupin, àkọọ́lẹ̀ kọ̀ọ̀kan sì di ìsopọ̀ OAuth — a ń sọ àwọn àdàkọ dọ̀tun ní ipò wọn.",
+    "oauthExportProviderLabel": "Olùpèsè",
+    "oauthExportChoose": "Yan fáìlì",
+    "oauthExportFileAria": "Fáìlì JSON ìkójáde àkọọ́lẹ̀",
+    "oauthExportSchemaHint": "Ohun tí a gbà: ìwé tí ó ní àkójọ \"accounts\", àkójọ lásán, tàbí àkọsílẹ̀ kan ṣoṣo. Àwọn tókìnì lè wà nínú ohun token tí a fi sínú tàbí tààrà lórí àkọsílẹ̀ náà.",
+    "oauthExportDetected": "A rí àkọọ́lẹ̀ {count}",
+    "oauthExportSelectAll": "Yan gbogbo àkọọ́lẹ̀",
+    "oauthExportSelectAccount": "Yan àkọọ́lẹ̀ {index}",
+    "oauthExportColEmail": "Í-meèlì",
+    "oauthExportColProvider": "Olùpèsè",
+    "oauthExportColRefresh": "Tókìnì ìsọdọ̀tun",
+    "oauthExportNoEmail": "(kò sí í-meèlì)",
+    "oauthExportYes": "bẹ́ẹ̀ ni",
+    "oauthExportNo": "rárá",
+    "oauthExportImporting": "Ń ṣàgbéwọlé…",
+    "oauthExportImport": "Ṣàgbéwọlé àkọọ́lẹ̀ {count}",
+    "oauthExportResult": "A ṣàgbéwọlé {imported}/{total} — {failed} kùnà",
+    "oauthExportParseError": "A kò lè ka àkọọ́lẹ̀ kankan láti inú fáìlì yìí.",
+    "oauthExportUnknownError": "àṣìṣe àìmọ̀",
     "adaptaTutorial": {
       "title": "Bí a ṣe ń so Adapta Web pọ̀",
       "introPrefix": "Adapta ń ṣe ìfàṣẹsí nípasẹ̀ Clerk. Àmi náà",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "A ti ṣàgbéwọlé gbogbo àwọn módẹ́lì tẹ́lẹ̀",
     "noNewModelsToImport": "Kò sí módẹ́lì tuntun láti ṣàgbéwọlé — gbogbo àwọn módẹ́lì ti wà nínú ìforúkọsílẹ̀ tàbí àkójọ àwọn módẹ́lì àdáni",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Ikuna iwara ako {time}",
     "skippingExistingModels": "Ń foju kọ àwọn módẹ́lì {count} tó ti wà",
     "autoSync": "Ìmúdọ́gba Aládàáṣiṣẹ́",
     "autoSyncShort": "Múdọ́gba",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "A lò ó nínú àkópọ̀ {count}: {combos}",
+    "openComboTooltip": "Ṣí Àwọn Àkópọ̀ — {combo} ń lò ó"
   },
   "settings": {
     "title": "Àwọn Ààtò",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "Olùgbàlejò",
     "qdrantCollection": "Àkójọpọ̀",
     "catalogVisibilityHint": "A ṣì lè pe ID àwòṣe tí a fi pamọ́ pẹ̀lú àwọn àṣẹ ìwọlé kan náà.",
+    "exposeCombosOnly": "Ṣe àkójọ àwọn àkópọ̀ nìkan ní /v1/models",
+    "exposeCombosOnlyDesc": "Àwọn oníbàárà tí ń ṣàwárí àwòṣe fúnra wọn yóò rí àwọn àkópọ̀ rẹ (àti auto/* àyàfi tí wọ́n bá farapamọ́) dípò àwọn àwòṣe olùpèsè tí a kò ṣàtúnṣe. Àwọn ID provider/model tí a sọ ní kedere ṣì ń jẹ́ dídarí.",
     "catalogScopeTitle": "Àkójọ àwòṣe API",
     "catalogScopeDesc": "Ohun tí GET /v1/models fi hàn fún kọ́kọ́rọ́ yìí. Dídín àkójọ náà kù kì í yí ohun tí kọ́kọ́rọ́ náà lè pè padà.",
     "catalogScopeAll": "Méjèèjì",
@@ -8917,7 +9022,9 @@
         "financial": "Ti ìnáwó",
         "brazilian": "Ti Brazil",
         "usa": "Amẹ́ríkà",
-        "full": "Kíkún"
+        "full": "Kíkún",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Súúsù Áfíríkà)"
       },
       "builtinTypes": "Àwọn irú tí a kọ́ sínú",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "Àwọn àdírẹ́sì IPv4",
         "ipv6_address": "Àwọn àdírẹ́sì IPv6",
         "aws_key": "Àwọn kọ́kọ́rọ́ ìwọlé AWS",
-        "api_key_generic": "Àwọn kọ́kọ́rọ́ API àti tókìnì"
+        "api_key_generic": "Àwọn kọ́kọ́rọ́ API àti tókìnì",
+        "iban": "IBAN ifowo iroyin awọn nọmba",
+        "eu_vat": "EU VAT awọn nọmba",
+        "es_dni_nie": "Spani DNI / NIE",
+        "it_codice_fiscale": "Italian Codece Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID awọn nọmba",
+        "za_phone": "Awọn nọmba foonu South Africa",
+        "za_vat": "South African VAT awọn nọmba",
+        "za_tax_ref": "South African-ori to jo"
       },
       "customPatterns": "Àwọn àpẹẹrẹ àdáni",
       "customPatternsDesc": "A ó fi [CUSTOM_REDACTED] rọ́pò àwọn tí ó bá mu. Títí dé àpẹẹrẹ {max}. A ó kọ àwọn àpẹẹrẹ tí ó ní ewu ìpadàsẹ́yìn burúkú.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "A kò tíì ṣètò GitLab Duo OAuth. Forúkọsílẹ̀ ohun èlò OAuth ní {applicationsUrl} pẹ̀lú URI ìpadà {redirectUri} àti àwọn scopes \"{scopes}\", lẹ́yìn náà ṣètò {clientIdEnv} (àti {clientSecretEnv} bí o bá fẹ́) kí o sì tún un bẹ̀rẹ̀.",
     "gitlabDuoSetupDescription": "Lẹ́yìn tí a bá ti forúkọsílẹ̀ ohun èlò náà tí a sì ti ṣètò àwọn env vars lórí instance OmniRoute yìí, tẹ Tẹ̀síwájú láti bẹ̀rẹ̀ ìwọlé OAuth.",
     "continue": "Tẹ̀síwájú",
+    "copilotPolicyTitle": "Olupese esiperimenta: ipo eto imulo jẹ aibikita",
+    "copilotPolicyLine1": "OmniRoute sopọ nipasẹ api.githubcopilot.com, eyiti GitHub ko ti ṣe atẹjade bi itọkasi ẹnikẹta gbogbogbo API. Ibarapọ yii jẹ adanwo ati pe o le yipada laisi akiyesi.",
+    "copilotPolicyLine2": "Akọọlẹ GitHub tirẹ nikan ni o le sopọ. Maṣe pin awọn iwe-ẹri, awọn akọọlẹ adagun-odo, tabi gbiyanju lati kọja awọn opin ero rẹ.",
+    "copilotPolicyLine3": "Ọfẹ ati awọn olumulo ero ọmọ ile-iwe gba yiyan awoṣe adaṣe nikan. Awọn ofin ero Copilot rẹ ati awọn opin lilo eyikeyi jẹ ojuṣe rẹ.",
+    "copilotPolicyAcknowledge": "Mo ye, so",
     "tabPasteSetupToken": "Àmì ìṣètò",
     "claudeSetupTokenDescription": "Ṣiṣẹ́ `claude setup-token` nínú tẹ́mínà kí o sì lẹ àmì tí ó tẹ̀ jáde. Ó wúlò fún ọdún kan kò sì ní àmì ìsọdọ̀tun. OmniRoute ń fi ìbéèrè ìdánwò kan ránṣẹ́ sí Anthropic kí ó tó fi pamọ́.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "wo ìjíròrò",
       "openConversation": "Ṣí ìjíròrò {id}"
     },
-    "tableLabel": "Àwọn àkọọlẹ̀ ìbéèrè"
+    "tableLabel": "Àwọn àkọọlẹ̀ ìbéèrè",
+    "throughputPostFirstToken": "Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì",
+    "throughputEndToEnd": "Láti ìbẹ̀rẹ̀ dé ìparí",
+    "throughputRate": "{value} tọ́kẹ̀nì/sẹ́kọ̀ndì",
+    "throughputExplanation": "Àwọn ìwọ̀n méjèèjì ń lo èyí tó tóbi jù nínú iye tọ́kẹ̀nì ìjáde àti ìrònú. Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì kò ní TTFT tó wúlò; bí bẹ́ẹ̀ kọ́, ó ń lo gbogbo àkókò. Láti ìbẹ̀rẹ̀ dé ìparí ń lo gbogbo àkókò nígbà gbogbo. Ìdáhùn tí a kó jọ lè ní ìwọ̀n ìfijíṣẹ́ gíga láìsí ìpilẹ̀ṣẹ̀ àwòkọ́ tó yára jù."
   },
   "proxyLogger": {
     "filterAll": "Gbogbo rẹ̀",
@@ -12785,7 +12913,8 @@
     "title": "Àwọn ìṣirò olùpèsè",
     "description": "Ìṣàn, àkókò ìdádúró àti àwọn oṣùwọ̀n àṣeyọrí fún olùpèsè kọ̀ọ̀kan àti àwòṣe kọ̀ọ̀kan",
     "combo": "Àkójọpọ̀",
-    "toggleModels": "Ṣàfihàn àwọn àwòṣe fún {provider}"
+    "toggleModels": "Ṣàfihàn àwọn àwòṣe fún {provider}",
+    "windowSince": "Tió {date}"
   },
   "relay": {
     "title": "Àwọn Prọ́ọ̀sì Relay Aláìní Sẹ́fà",
@@ -13730,7 +13859,9 @@
       "disabled": "Ti pa",
       "dual": "Méjèèjì",
       "alias": "Orúkọ àfirọ́pò",
-      "canonical": "Àṣẹ̀dá"
+      "canonical": "Àṣẹ̀dá",
+      "fail_closed": "Dínà (fail_closed)",
+      "count_as_zero": "Kà sí $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Àwọn Ìdádúró Amáyédẹrùn Tó Ní Ààyò Ààbò Gẹ́gẹ́ Bí 502",
         "description": "Dáhùn pẹ̀lú 502 dípò 503 nígbà tí ibi-àfojúsùn tó ní ààyò, tí ìfàsẹ́yìn rẹ̀ jẹ́ fún quota nìkan, bá dá combo dúró nítorí ohun tí a lè fi ẹ̀rí hàn pé kì í ṣe quota: provider circuit breaker tó ṣí tàbí fífo nítorí ìdádúró àsọtẹ́lẹ̀."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Ilana Isuna Ìlò Aláìníye",
+        "description": "Bá ìwọn USD ọjọ́/ọ̀sẹ̀ fún bọtini kọọkan ṣe tọju ìlò tí ó ṣeyebíye tí olupese/módelì rẹ̀ kò ní ìkọ̀ọ́kan ìye. fail_closed (aìyipada) máa samisi àkókò náà gẹ́gẹ́ bí ti kọjá, nítorí náà iye tí a kò mọ̀ kò ní lè kọjá ẹ̀dá àgbára ìdínà. count_as_zero kà ìlò yẹn sí $0 kí ó sì tẹ̀síwájú ní mímú ìnáwó tí a ti ṣètò. Àwọn módelì aláìníye wà ní àtòkọ lórí ojú-ìwé ilé dasibọ́ọdu ní gbogbo ọ̀nà."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "Pa á tì"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Pa ṣíṣẹ̀dá àwọn ẹ̀yà ìpele ìrònú (fún àpẹẹrẹ -low, -medium, -high) nínú àkójọ /v1/models.",
+  "teamCosts": {
+    "title": "Àwọn ìnáwó ẹgbẹ́",
+    "subtitle": "Ṣàkóso àwọn ìṣúná rírọ̀ àjọpín àti ìdíyelé ìnáwó ìwé-àtòjọ.",
+    "refresh": "Sọ di tuntun",
+    "create": "Ṣẹ̀dá ẹgbẹ́",
+    "edit": "Ṣàtúnṣe ẹgbẹ́",
+    "archive": "Kó sínú ibi ìpamọ́",
+    "selectTeam": "Àwọn ẹgbẹ́",
+    "searchTeams": "Wá àwọn ẹgbẹ́",
+    "statusFilter": "Ipò ẹgbẹ́",
+    "active": "Ń ṣiṣẹ́",
+    "archived": "A ti kó sínú ibi ìpamọ́ · kíkà nìkan",
+    "allTeams": "Gbogbo ẹgbẹ́",
+    "noTeams": "Kò sí ẹgbẹ́ tó bá mu.",
+    "selectHint": "Ṣẹ̀dá tàbí yan ẹgbẹ́ kan láti wo àwọn ìnáwó.",
+    "loading": "Ń gbé àwọn ìnáwó ẹgbẹ́ wọlé…",
+    "budgetTitle": "Ìṣúná rírọ̀ lọ́wọ́lọ́wọ́",
+    "budgetSubtitle": "Lílò tó yọrí sí rere tí a gbà sílẹ̀ · fèrèsé tó ń yípo · kò gbára lé àwọn ọjọ́ ìròyìn",
+    "archivedBudget": "A ti kó sínú ibi ìpamọ́: ìmúlò ìṣúná kò ṣiṣẹ́. Àwọn ìròyìn ìtàn ṣì wà.",
+    "unlimited": "Kò ní ààlà — a kò tíì ṣètò ìṣúná rírọ̀ àjọpín kankan.",
+    "budgetUnavailable": "Ipò ìṣúná kò sí. Sọ di tuntun láti tún gbìyànjú.",
+    "used": "Lílò tó yọrí sí rere",
+    "maximum": "Òpin ìṣúná",
+    "remaining": "Ìyókù tí a mọ̀",
+    "resets": "Yóò tún bẹ̀rẹ̀",
+    "unpricedBudget": "Iye owó apá kan lílò tó yọrí sí rere kò dá wa lójú. Àpapọ̀ tí a mọ̀ kò pé; ìmúlò ìṣúná kà fèrèsé yìí sí èyí tó ti kọjá.",
+    "overBudget": "Ìṣúná ti dé tàbí ti kọjá · {amount} ju bó ṣe yẹ lọ",
+    "reportTitle": "Ìròyìn lílò",
+    "reportSubtitle": "Gbogbo ìgbìyànjú · ìdíyelé ìwé-àtòjọ ní USD, kì í ṣe ìwé-owó · àwọn ọjọ́ UTC pípé",
+    "reportPeriod": "Àkókò ìròyìn",
+    "day1": "Ọjọ́ 1",
+    "day7": "Ọjọ́ 7",
+    "day30": "Ọjọ́ 30",
+    "allTime": "Gbogbo àkókò",
+    "reportSpend": "Ìnáwó ìròyìn tí a díyelé",
+    "requests": "Àwọn ìbéèrè",
+    "assignedKeys": "Àwọn kọ́kọ́rọ́ tí a yàn",
+    "unpricedReport": "Ìròyìn yìí ní àwọn iye owó tí a kò mọ̀. Ìnáwó tí a díyelé kò pé.",
+    "breakdown": "Ìnáwó nípasẹ̀ kọ́kọ́rọ́ API",
+    "noUsage": "Kò sí lílò ní àkókò ìròyìn yìí.",
+    "keyName": "Orúkọ kọ́kọ́rọ́ API",
+    "tokens": "Àwọn àmì ìtẹ̀wọlé + ìjáde",
+    "unnamedKey": "Kọ́kọ́rọ́ aláìlórúkọ tàbí tí a pa rẹ́",
+    "unpriced": "Iye owó tí a kò mọ̀",
+    "members": "Ìkópa",
+    "memberSubtitle": "Yíyí ìkópa padà ń jẹ́ kí ìnáwó ìtàn wà pẹ̀lú ẹgbẹ́ àkọ́kọ́.",
+    "searchKeys": "Wá àwọn kọ́kọ́rọ́ tàbí àwọn onílé lọ́wọ́lọ́wọ́",
+    "chooseKey": "Yan kọ́kọ́rọ́ API kan",
+    "unassigned": "A kò yàn án",
+    "ownership": "Ẹgbẹ́ ìdíyelé lọ́wọ́lọ́wọ́: {team}",
+    "assign": "Yàn",
+    "remove": "Yọ kúrò",
+    "noMembers": "Kò sí ọmọ ẹgbẹ́ lọ́wọ́lọ́wọ́. Lílò ìtàn lè ṣì wà nínú ìṣúná.",
+    "assignedAt": "A yàn án ní {date} (UTC)",
+    "name": "Orúkọ ẹgbẹ́",
+    "description": "Àpèjúwe",
+    "enableBudget": "Mú ìṣúná rírọ̀ àjọpín ṣiṣẹ́",
+    "amount": "Iye ìṣúná (USD)",
+    "duration": "Fèrèsé ìṣúná tó ń yípo",
+    "cancel": "Fagilé",
+    "save": "Fipamọ́",
+    "confirm": "Jẹ́rìí",
+    "transferTitle": "Jẹ́rìí ìgbékalẹ̀ kọ́kọ́rọ́",
+    "transferMessage": "Kó kọ́kọ́rọ́ yìí láti “{source}” sí “{destination}”? Ìnáwó ìtàn ṣì wà pẹ̀lú ẹgbẹ́ àkọ́kọ́.",
+    "removeTitle": "Yọ ìyàn kọ́kọ́rọ́ kúrò",
+    "removeMessage": "Yọ kọ́kọ́rọ́ yìí kúrò ní “{team}”? Ìnáwó ìtàn ṣì wà nínú ẹgbẹ́ yìí.",
+    "archiveTitle": "Kó ẹgbẹ́ sínú ibi ìpamọ́",
+    "archiveMessage": "Kó “{team}” sínú ibi ìpamọ́? Gbogbo ìsopọ̀ lọ́wọ́lọ́wọ́ yóò ti, ìmúlò ìṣúná yóò sì dúró. Àwọn ìròyìn ìtàn ṣì wà.",
+    "invalidName": "Tẹ orúkọ (àmì 1–200) àti àpèjúwe tí kò ju àmì 2,000 lọ.",
+    "invalidAmount": "Tẹ iye ìṣúná tó ní ààlà tó tóbi ju òdo lọ.",
+    "unauthorized": "Wọlé sí pátákó ìṣàkóso láti tẹ̀síwájú.",
+    "forbidden": "O kò ní ìyọ̀ǹda láti ṣàkóso àwọn ẹgbẹ́. A ti pa ohun tí o tẹ̀ mọ́.",
+    "notFound": "Ẹgbẹ́ tàbí ìyàn yìí kò sí mọ́.",
+    "conflict": "Ìyàn tàbí ẹgbẹ́ ti yípadà. Sọ di tuntun kí o sì jẹ́rìí ìní lọ́wọ́lọ́wọ́ kí o tó tún gbìyànjú.",
+    "failed": "Ìbéèrè kùnà. A ti pa ohun tí o tẹ̀ mọ́; jọ̀wọ́ tún gbìyànjú.",
+    "partialBudget": "Àwọn garawa ojoojúmọ́ kan tí a pamọ́ ń dà pọ̀ mọ́ ààlà fèrèsé, a kò sì lè pín wọn ní pàtó. Ìnáwó tí a fihàn kò pé; ìyọ̀ǹda tó kù kò sí. Ìlànà ìṣúná rírọ̀ tó wà kò yípadà."
+  },
   "connectionTest": {
     "title": "Ìfiránṣẹ́ ìdánwò",
     "description": "Fi ìbéèrè gidi kan ránṣẹ́ nípasẹ̀ account yìí. Èyí máa ń lo ìwọ̀nba quota díẹ̀, ó sì lè bẹ̀rẹ̀ àkókò lílò, ó da lórí provider náà.",
@@ -15216,5 +15428,8 @@
     "importButton": "Kó wọlé",
     "importFailed": "Ìkówọlé kùnà.",
     "importSuccess": "A kó àkọọ́lẹ̀ {connections} àti node olùpèsè {nodes} wọlé; a fò {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Bẹ̀rẹ̀ láti ipò ìsinsìnyí (fo àwọn àkọsílẹ̀ tó wà tẹ́lẹ̀)"
   }
 }

@@ -1345,7 +1345,9 @@
       "open": "ଖୋଲନ୍ତୁ",
       "close": "ବନ୍ଦ କରନ୍ତୁ"
     },
-    "noResults": "କୌଣସି ଫଳାଫଳ ନାହିଁ"
+    "noResults": "କୌଣସି ଫଳାଫଳ ନାହିଁ",
+    "costsTeams": "ଦଳଗୁଡ଼ିକ",
+    "costsTeamsSubtitle": "ଦଳ ଖର୍ଚ୍ଚ କେନ୍ଦ୍ର"
   },
   "webhooks": {
     "title": "ୱେବହୁକ୍ଗୁଡ଼ିକ",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "ଉନ୍ନତ ପେଲୋଡ୍ ନିୟମ, ଅନୁରୋଧ ସୀମା ଏବଂ ପ୍ରକ୍ସି API ସେଟିଂସ୍",
     "mitmProxyDescription": "ଟ୍ରାଫିକ୍ ଯାଞ୍ଚ ଏବଂ ଡିବଗିଂ ପାଇଁ MITM ପ୍ରକ୍ସି ସେଟିଂସ୍ ବିନ୍ୟାସ କରନ୍ତୁ",
     "oneProxyDescription": "ଉନ୍ନତ ପ୍ରକ୍ସି ଚେନିଂ ପାଇଁ 1Proxy ସେଟିଂସ୍ ବିନ୍ୟାସ କରନ୍ତୁ",
-    "omniSkillsDescription": "ସ୍ୱୟଂଚାଳିତ ପ୍ରମ୍ପ୍ଟ ଏବଂ ଟୁଲ୍ ନିଷ୍ପାଦନ ପାଇଁ ସ୍ୟାଣ୍ଡବକ୍ସ ଦକ୍ଷତାଗୁଡ଼ିକ ଇନ୍ଷ୍ଟଲ୍ ଏବଂ ପରିଚାଳନା କରନ୍ତୁ"
+    "omniSkillsDescription": "ସ୍ୱୟଂଚାଳିତ ପ୍ରମ୍ପ୍ଟ ଏବଂ ଟୁଲ୍ ନିଷ୍ପାଦନ ପାଇଁ ସ୍ୟାଣ୍ଡବକ୍ସ ଦକ୍ଷତାଗୁଡ଼ିକ ଇନ୍ଷ୍ଟଲ୍ ଏବଂ ପରିଚାଳନା କରନ୍ତୁ",
+    "teamsDescription": "ଦଳ ଖର୍ଚ୍ଚ ଅନୁମାନ ଓ ଅଂଶୀଦାର ସଫ୍ଟ ବଜେଟ୍"
   },
   "cloudSyncStatus": {
     "synced": "ସିଙ୍କ୍ ହୋଇଛି",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "ଆପଣଙ୍କ ଏଣ୍ଡପଏଣ୍ଟ କପି କରନ୍ତୁ",
     "readinessStep4": "ଏକ ପରୀକ୍ଷାମୂଳକ ଅନୁରୋଧ ପଠାନ୍ତୁ",
     "readinessContinue": "ସେଟଅପ୍ ଜାରି ରଖନ୍ତୁ",
-    "readinessDismiss": "ବର୍ତ୍ତମାନ ପାଇଁ ବନ୍ଦ କରନ୍ତୁ"
+    "readinessDismiss": "ବର୍ତ୍ତମାନ ପାଇଁ ବନ୍ଦ କରନ୍ତୁ",
+    "unpricedUsageTitle": "{count, plural, one {# ମୋଡେଲ୍} other {# ମୋଡେଲ୍}} ସাম্প୍ରତିକ ବ୍ୟବହାର ରହିଛି କିନ୍ତୁ ମୂଲ୍ୟ ନିର୍ଦ୍ଧାରିତ ନାହିଁ",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API କୀ ଯାହାର ବ୍ୟବହାର ସୀମା ଅଛି} other {# API କୀଗୁଡିକ ଯାହାର ବ୍ୟବହାର ସୀମା ଅଛି}} ଗତ 8 ଦିନରେ ଏହି ମୋଡେଲ୍ଗୁଡିକୁ ବ୍ୟବହାର କରିଛନ୍ତି। ସେହି ବ୍ୟବହାର କିଛି କୀର ଦৈନିକ କିମ୍ବା ସାପ୍ତାହିକ ଦାୟରାରେ ଥିଲେ, ସେହି କୀକୁ କ୍ୱୋଟା ଅତିକ୍ରମ କରାଯାଇଥିବା ଭାବରେ ଗଣାଯିବ ଏବଂ ତାହାର ଅନୁରୋଧଗୁଡିକୁ ବ୍ଲକ୍ କରାଯିବ (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "ଏହି ବ୍ୟବହାର ପ୍ରତି-କୀ ବ୍ୟବହାର ସୀମା ପାଇଁ $0 ଭାବେ ଗଣାଯିବ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# ନିବେଦନ} other {# ନିବେଦନ}}, {keys, plural, one {# ସୀମିତ କୀ} other {# ସୀମିତ କୀଗୁଡିକ}}",
+    "unpricedUsageMore": "…ଏବଂ ଆଉ {count}ଟି",
+    "unpricedUsageConfigure": "ମୂଲ୍ୟ ବିନ୍ୟାସ କରନ୍ତୁ",
+    "unpricedUsageDismiss": "ବାତିଲ୍ କରନ୍ତୁ"
   },
   "analytics": {
     "title": "ବିଶ୍ଳେଷଣ",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - ମାନୁଆଲ୍ କନଫିଗରେସନ୍",
     "clineManualConfiguration": "Cline ମାନୁଆଲ୍ କନଫିଗରେସନ୍",
     "kiloManualConfiguration": "Kilo Code ମାନୁଆଲ୍ କନଫିଗରେସନ୍",
+    "piManualConfiguration": "Pi - ମାନୁଆଲ୍ ବିନ୍ୟାସକରଣ",
+    "piConfigInvalidTitle": "Pi models.json ପଢ଼ିହେବ ନାହିଁ",
+    "piOmnirouteConfigured": "OmniRoute ଏକ Pi କଷ୍ଟମ୍ ପ୍ରଦାନକାରୀ ଭାବରେ ବିନ୍ୟାସିତ ହୋଇଛି",
+    "piModelHelp": "Pi କଷ୍ଟମ୍ ଏଣ୍ଡପଏଣ୍ଟ ପାଇଁ ମଡେଲଗୁଡ଼ିକ ସ୍ୱତଃ-ଆବିଷ୍କାର କରେ ନାହିଁ — ଆପଣ ବାଛିଥିବା ମଡେଲ୍ models.json ରେ ସ୍ପଷ୍ଟ ଭାବରେ ଲେଖାଯାଏ।",
+    "piManualConfigTitle": "କିମ୍ବା ~/.pi/agent/models.json ହସ୍ତକୃତ ଭାବରେ ସଂପାଦନ କରନ୍ତୁ।",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "ତା’ପରେ Pi ଆରମ୍ଭ କରନ୍ତୁ ଏବଂ omniroute ପ୍ରଦାନକାରୀ ଚୟନ କରନ୍ତୁ। ପୁରା ଏଜେଣ୍ଟ ଡିରେକ୍ଟୋରୀକୁ ଘୁଞ୍ଚାଇବା ପାଇଁ PI_CODING_AGENT_DIR ସେଟ୍ କରନ୍ତୁ।",
+    "piUnownedNote": "ଏହି ଏଣ୍ଟ୍ରି OmniRoute ବାହାରେ ଯୋଡା ଯାଇଛି (ଉଦାହରଣ ସ୍ୱରୂପ pi-gui ର କଷ୍ଟମ୍ ଏଣ୍ଡପଏଣ୍ଟ)। ପ୍ରୟୋଗ ଏହାକୁ ଗ୍ରହଣ କରିବ; ପୁନଃସେଟ୍ କେବଳ OmniRoute ଲେଖିଥିବା ଏଣ୍ଟ୍ରିଗୁଡ଼ିକୁ ଅପସାରଣ କରେ।",
     "whenToUseLabel": "କେବେ ବ୍ୟବହାର କରିବେ",
     "openToolDocs": "ଟୁଲ୍ ଡକ୍ୟୁମେଣ୍ଟେସନ୍ ଖୋଲନ୍ତୁ",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Amp ଶର୍ଟହ୍ୟାଣ୍ଡ ୱାର୍କଫ୍ଲୋ ଚାହୁଁଥିଲେ, କିନ୍ତୁ OmniRoute ଆଲିଆସ୍ ଏବଂ ରାଉଟିଂ ନିୟମର ପ୍ରୟୋଗ ମଧ୍ୟ ଆବଶ୍ୟକ ହେଲେ ବ୍ୟବହାର କରନ୍ତୁ।",
       "hermes": "ଦ୍ରୁତ କାର୍ଯ୍ୟ ପାଇଁ ଏକ ହାଲୁକା ଟର୍ମିନାଲ୍-ନେଟିଭ୍ AI ସହାୟକ ଆବଶ୍ୟକ ହେଲେ ବ୍ୟବହାର କରନ୍ତୁ।",
       "hermes-agent": "OmniRoute ମାଧ୍ୟମରେ ରାଉଟ୍ ହୋଇଥିବା ଡିଫଲ୍ଟ, ଡେଲିଗେସନ୍, ଭିଜନ୍ ଏବଂ ସହାୟକ ମଡେଲ୍ ସହିତ Hermes Agent (by Nousresearch) ଆବଶ୍ୟକ ହେଲେ ବ୍ୟବହାର କରନ୍ତୁ।",
+      "whycodes": "ଯେତେବେଳେ ଆପଣ WhyCodes କୁ OmniRoute ଆଡକୁ ନିର୍ଦ୍ଦେଶିତ ବହୁଉଦ୍ଦେଶ୍ୟ ସ୍ୱୟଂଶାସିତ CLI ଏଜେଣ୍ଟ (TUI, ନାମିତ ଏଜେଣ୍ଟ, ମେମୋରୀ, swarm) ଭାବେ ଚାହାଁନ୍ତି ସେତେବେଳେ ବ୍ୟବହାର କରନ୍ତୁ।",
       "custom": "କଷ୍ଟମ୍ ଟୁଲ୍ ଇମ୍ପ୍ଲିମେଣ୍ଟେସନ୍ କିମ୍ବା ସାଧାରଣ OpenAI-ସୁସଙ୍ଗତ କନଫିଗରେସନ୍ ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ।"
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "କଷ୍ଟମ୍ ପ୍ରଦାନକାରୀ ସମର୍ଥନ ସହିତ xAI Grok Build TUI କୋଡିଂ ଏଜେଣ୍ଟ",
       "droid": "Factory Droid AI ସହାୟକ",
       "openclaw": "Open Claw AI ସହାୟକ",
+      "openclaude": "OpenAI-ସୁସଙ୍ଗତ ପ୍ରଦାତା ସମର୍ଥନ ସହିତ OpenClaude କୋଡିଂ ଏଜେଣ୍ଟ CLI",
       "cline": "Cline AI କୋଡିଂ ସହାୟକ CLI",
       "kilo": "Kilo Code AI ସହାୟକ CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "କଷ୍ଟମ୍ ପ୍ରଦାନକାରୀ ସମର୍ଥନ ସହିତ Warp AI ଟର୍ମିନାଲ୍",
       "agent-deck": "Agent Deck ବହୁ-ଏଜେଣ୍ଟ ସମନ୍ୱୟକାରୀ",
       "5dive": "5dive — ସ୍ୱୟଂ-ହୋଷ୍ଟ କରାଯାଇଥିବା କୋଡିଂ ଏଜେଣ୍ଟମାନଙ୍କର ଏକ ସମୂହ; ଗୋଟିଏ ପ୍ରମାଣୀକରଣ ପ୍ରୋଫାଇଲ୍ ସେମାନଙ୍କୁ OmniRoute ଆଡ଼କୁ ନିର୍ଦ୍ଦେଶ କରେ",
+      "whycodes": "OpenAI-ସୁସଙ୍ଗତ base URL ସହିତ WhyCodes ସ୍ୱୟଂଶାସିତ CLI ଏଜେଣ୍ଟ",
       "zed": "Zed କୋଡ୍ ଏଡିଟର — OpenAI-ସୁସଙ୍ଗତ ପ୍ରଦାତା ମାଧ୍ୟମରେ ବିଲ୍ଟ-ଇନ୍ ଏଜେଣ୍ଟ"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "ଅପଡେଟ୍ କରନ୍ତୁ",
     "cliproxyapiUpdateAvailable": "ଅପଡେଟ୍ ଉପଲବ୍ଧ: v{current} → v{latest}",
     "cliproxyapiVersion": "ସଂସ୍କରଣ",
+    "piInstallTitle": "Pi କୋଡିଂ ଏଜେଣ୍ଟ ସଂସ୍ଥାପନ କରନ୍ତୁ",
+    "piInstallInstructions": "Pi CLI ସଂସ୍ଥାପନ କରନ୍ତୁ, ତାପରେ ଏହାକୁ OmniRoute ସହିତ ସଂଯୋଗ କରିବାକୁ ଏଠାରେ ଫେରନ୍ତୁ।",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi ଚାଲୁଥିବା ମେସିନରୁ URL ପହଞ୍ଚିବା ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ। OpenAI- ସୁସଙ୍ଗତ /v1 ଶେଷ ପଏଣ୍ଟ ସ୍ୱୟଂଚାଳିତ ଭାବରେ ଯୋଗ କରାଯାଇଥାଏ।",
+    "piManualMergeHint": "କେବଳ ପୂର୍ବାବଲୋକନ। ଏହି providers.omniroute ପ୍ରବେଶକୁ models.json ରେ ମିଶ୍ରଣ କରନ୍ତୁ ଯାହା ଦ୍ୱାରା ଆପଣଙ୍କର ଅନ୍ୟ ପ୍ରଦାନକାରୀ ଏବଂ ସେଟିଂସମୂହ ଅକ୍ଷୁର୍ଣ୍ଣ ରହିବେ।",
     "removeMapping": "ମ୍ୟାପିଂ ହଟାନ୍ତୁ"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "ଉଦା. 10",
     "testSelected": "ମନୋନୀତ ପରୀକ୍ଷା କରନ୍ତୁ ({count})",
     "testAllFiltered": "ଫିଲ୍ଟର୍ ହୋଇଥିବା ସମସ୍ତ ପରୀକ୍ଷା କରନ୍ତୁ ({count})",
+    "visibility": "ଦୃଶ୍ୟମାନତା",
+    "allVisibility": "ଦୃଶ୍ୟମାନ ଏବଂ ଲୁଚାଯାଇଥିବା",
+    "visibleOnly": "ଦୃଶ୍ୟମାନ",
+    "hiddenOnly": "ଲୁଚାଯାଇଥିବା",
+    "visibleColumn": "ଦୃଶ୍ୟମାନ",
+    "hideModel": "/v1/models ରୁ {name} ଲୁଚାନ୍ତୁ",
+    "showModel": "/v1/models ରେ {name} ଦେଖାନ୍ତୁ",
+    "hiddenBadge": "ଲୁଚାଯାଇଛି",
+    "hideFiltered": "ଫିଲ୍ଟର ହୋଇଥିବା ଲୁଚାନ୍ତୁ ({count})",
+    "showFiltered": "ଫିଲ୍ଟର ହୋଇଥିବା ଦେଖାନ୍ତୁ ({count})",
+    "visibilityCounts": "{visible} ଦୃଶ୍ୟମାନ · {hidden} ଲୁଚାଯାଇଥିବା · ମୋଟ {total}",
+    "visibilityUpdateFailed": "ମଡେଲର ଦୃଶ୍ୟମାନତା ଅପଡେଟ କରିବାରେ ବିଫଳ",
     "cancel": "ବାତିଲ କରନ୍ତୁ",
     "clearResults": "ଫଳାଫଳ ଖାଲି କରନ୍ତୁ",
     "testing": "ପରୀକ୍ଷା କରାଯାଉଛି...",
@@ -3394,7 +3433,44 @@
     "httpError": "HTTP {status} ସହିତ ଅନୁରୋଧ ବିଫଳ ହେଲା",
     "testFailedNoDetail": "କୌଣସି ତ୍ରୁଟି ବାର୍ତ୍ତା ବିନା ପରୀକ୍ଷଣ ବିଫଳ ହେଲା",
     "additionalCapabilities": "ଅତିରିକ୍ତ କ୍ଷମତା: {list}",
-    "comboRefMember": "କମ୍ବୋ → {name}"
+    "comboRefMember": "କମ୍ବୋ → {name}",
+    "keyAccessButton": "API କୀ ଆକ୍ସେସ୍",
+    "allowedInKeys": "ଅନୁମୋଦିତ: {count, plural, one {# key} other {# keys}}",
+    "keysLoading": "API କୀ ଲୋଡ୍ ହେଉଛି…",
+    "keysRetry": "କୀ ଲୋଡ୍ କରିବା ପୁନଃ ଚେଷ୍ଟା କରନ୍ତୁ",
+    "accessViaPattern": "{pattern} ମାଧ୍ୟମରେ",
+    "accessBlocked": "{pattern} ଦ୍ୱାରା ବ୍ଲକ୍ କରାଯାଇଛି",
+    "editKeyAccess": "କୀ ଆକ୍ସେସ୍ ସମ୍ପାଦନା କରନ୍ତୁ",
+    "toggleKeyAccess": "{name} ରେ {item} କୁ ଅନୁମତି ଦିଅନ୍ତୁ",
+    "resultNetworkError": "ନ୍ୟସ୍ତ କରିବା ବିଫଳ ହେଲା",
+    "resultWouldEmptyModels": "ଏହା ଏହି key କୁ କୌଣସି ଅନୁମତିପ୍ରାପ୍ତ model ବିନା ଛାଡ଼ିଦେବ — ଏହା ବଦଳରେ key access ଏଡିଟ୍ କରନ୍ତୁ",
+    "resultWouldEmptyCombos": "ଏହା ଏହି key କୁ କୌଣସି ଅନୁମତିପ୍ରାପ୍ତ combo ବିନା ଛାଡ଼ିଦେବ — ଏହା ବଦଳରେ key access ଏଡିଟ୍ କରନ୍ତୁ",
+    "keyUpdatePending": "{name} ଏବେ ମଧ୍ୟ ଅପଡେଟ୍ ହେଉଛି। କିଛି ସମୟ ପରେ ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ।",
+    "assignToKeys": "API କୀ ଗୁଡ଼ିକୁ ନ୍ୟସ୍ତ କରନ୍ତୁ…",
+    "assignApply": "ପରିବର୍ତ୍ତନଗୁଡ଼ିକ ଲାଗୁ କରନ୍ତୁ",
+    "assignComplete": "API କୀ ଆକ୍ସେସ୍ ଅପଡେଟ୍ ହୋଇଛି",
+    "assignFailed": "କିଛି API କୀ ଅପଡେଟ୍ ବିଫଳ ହୋଇଛି",
+    "assignNoChanges": "କୌଣସି API key access ପରିବର୍ତ୍ତନ ହୋଇନାହିଁ",
+    "selectedAccessItems": "ଚୟନିତ ଆଇଟମ୍: {count}",
+    "assignExcludedCombos": "{count, plural, one {# ଚୟନିତ combo ଧାଡ଼ି ଏକ model ନୁହେଁ ଏବଂ ଏଠାରେ ବାଦ୍ ଦିଆଯିବ} other {# ଚୟନିତ combo ଧାଡ଼ି model ନୁହଁନ୍ତି ଏବଂ ଏଠାରେ ବାଦ୍ ଦିଆଯିବ}}। Combos ଟ୍ୟାବ୍‌ରୁ combos ଆସାଇନ୍ କରନ୍ତୁ।",
+    "assignActionAdd": "ଯୋଡ଼ନ୍ତୁ",
+    "assignActionRemove": "ହଟାନ୍ତୁ",
+    "searchKeys": "API କୀ ଖୋଜନ୍ତୁ",
+    "selectApiKey": "API କୀ {name} ଚୟନ କରନ୍ତୁ",
+    "allModelsAccess": "ସମସ୍ତ ମଡେଲ୍",
+    "allCombosAccess": "ସମସ୍ତ କମ୍ବୋ",
+    "modelAccessCount": "ମଡେଲ୍: {count}",
+    "comboAccessCount": "କମ୍ବୋ: {count}",
+    "keyInactive": "ନିଷ୍କ୍ରିୟ",
+    "keyBanned": "ପ୍ରତିବନ୍ଧିତ",
+    "keyRevoked": "ରଦ୍ଦ କରାଯାଇଛି",
+    "switchRestrictedConfirm": "ଏହି କୀ’କୁ ସୀମିତ ଆକ୍ସେସକୁ ବଦଳାନ୍ତୁ: କେବଳ ଚୟନିତ ଆଇଟମଗୁଡ଼ିକୁ ଅନୁମତି ଦିଆଯିବ",
+    "removeNoChangeHint": "ଏହି କୀ ସବୁକିଛିକୁ ଅନୁମତି ଦିଏ; ଚୟନିତ ଆଇଟମଗୁଡ଼ିକୁ ହଟାଇଲେ କୌଣସି ପରିବର୍ତ୍ତନ ହେବ ନାହିଁ",
+    "removeStaysAllowedHint": "{patterns} ମାଧ୍ୟମରେ ଏହି key ରେ ଏବେ ମଧ୍ୟ ଅନୁମତି ଅଛି",
+    "resultChanged": "ପରିବର୍ତ୍ତିତ",
+    "resultUnchanged": "କୌଣସି ପରିବର୍ତ୍ତନ ନାହିଁ",
+    "resultSkipped": "ଏଡ଼ାଇ ଦିଆଗଲା",
+    "resultNeedsSwitch": "ସୀମିତ ଆକ୍ସେସକୁ ସୁଇଚ୍ କରିବା ଆବଶ୍ୟକ"
   },
   "combos": {
     "title": "କମ୍ବୋଗୁଡ଼ିକ",
@@ -3515,6 +3591,9 @@
     "moveUp": "ଉପରକୁ ନିଅନ୍ତୁ",
     "moveDown": "ତଳକୁ ନିଅନ୍ତୁ",
     "removeModel": "ଅପସାରଣ କରନ୍ତୁ",
+    "testStep": "ଏହି ମଡେଲ ପରୀକ୍ଷା କରନ୍ତୁ",
+    "testStepRunning": "ପରୀକ୍ଷା ଚାଲିଛି…",
+    "testStepNotTestable": "କେବଳ ଏକକ-ମଡେଲ ପଦକ୍ଷେପଗୁଡ଼ିକ ପରୀକ୍ଷା କରାଯାଇପାରିବ",
     "saving": "ସଞ୍ଚୟ ହେଉଛି...",
     "liveNoProviders": "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ପ୍ରଦାତା ଦେଖାଯାଇନାହିଁ।",
     "liveFleetDataHint": "ଲାଇଭ୍ କମ୍ବୋ ଇଭେଣ୍ଟ ମାଧ୍ୟମରେ ଫ୍ଲିଟ୍ ଡାଟା ଆସେ।",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "CSV ଟେମ୍ପଲେଟ୍ ଡାଉନଲୋଡ୍ କରନ୍ତୁ",
     "importFromFileMoreErrors": "+ଆହୁରି {count}ଟି",
     "importFromFileSchemaHint": "CSV ସ୍ତମ୍ଭଗୁଡ଼ିକର ସ୍ଥାନକ୍ରମ ହେଉଛି: provider, name, apiKey, baseUrl (ଇଚ୍ଛାଧୀନ), priority (ଇଚ୍ଛାଧୀନ)। provider ସ୍ତମ୍ଭରେ ଏକ ବିଦ୍ୟମାନ ପରିଚାଳିତ ପ୍ରଦାନକାରୀ id କିମ୍ବା ପୂର୍ବରୁ ପଞ୍ଜୀକୃତ OpenAI/Anthropic-ସୁସଙ୍ଗତ ନୋଡ୍ id ରହିବା ଆବଶ୍ୟକ — ଏହି ଆମଦାନୀ ନୂଆ ଏଣ୍ଡପଏଣ୍ଟ ନୋଡ୍ ସୃଷ୍ଟି କରେ ନାହିଁ।",
+    "importOAuthExport": "OAuth ରପ୍ତାନି ଆମଦାନୀ କରନ୍ତୁ",
+    "oauthExportTitle": "ଆକାଉଣ୍ଟ-ମ୍ୟାନେଜର ରପ୍ତାନି ଆମଦାନୀ କରନ୍ତୁ",
+    "oauthExportDescription": "ଏକ ଆକାଉଣ୍ଟ ମ୍ୟାନେଜରରୁ ସାଧା ଟେକ୍ସଟ୍ ରପ୍ତାନି ଅପଲୋଡ୍ କରନ୍ତୁ (ଯେପରି Antigravity Manager ର cloud-accounts ରପ୍ତାନି)। ଟୋକେନଗୁଡ଼ିକ ସର୍ଭରରେ ରିଫ୍ରେସ୍ ହୁଏ ଏବଂ ପ୍ରତ୍ୟେକ ଆକାଉଣ୍ଟ ଏକ OAuth ସଂଯୋଗ ହୋଇଯାଏ — ନକଲଗୁଡ଼ିକ ସେହି ସ୍ଥାନରେ ରିଫ୍ରେସ୍ ହୁଏ।",
+    "oauthExportProviderLabel": "ପ୍ରଦାନକାରୀ",
+    "oauthExportChoose": "ଫାଇଲ୍ ବାଛନ୍ତୁ",
+    "oauthExportFileAria": "ଆକାଉଣ୍ଟ ରପ୍ତାନି JSON ଫାଇଲ୍",
+    "oauthExportSchemaHint": "ଗ୍ରହଣୀୟ: \"accounts\" ଆରେ ଥିବା ଏକ ଡକ୍ୟୁମେଣ୍ଟ, ଏକ ସାଧା ଆରେ, କିମ୍ବା ଏକ ମାତ୍ର ରେକର୍ଡ। ଟୋକେନଗୁଡ଼ିକ ଏକ ନେଷ୍ଟେଡ୍ token ଅବଜେକ୍ଟ ଭିତରେ କିମ୍ବା ସିଧାସଳଖ ରେକର୍ଡରେ ରହିପାରେ।",
+    "oauthExportDetected": "{count}ଟି ଆକାଉଣ୍ଟ ଚିହ୍ନଟ ହେଲା",
+    "oauthExportSelectAll": "ସମସ୍ତ ଆକାଉଣ୍ଟ ଚୟନ କରନ୍ତୁ",
+    "oauthExportSelectAccount": "ଆକାଉଣ୍ଟ {index} ଚୟନ କରନ୍ତୁ",
+    "oauthExportColEmail": "ଇମେଲ୍",
+    "oauthExportColProvider": "ପ୍ରଦାନକାରୀ",
+    "oauthExportColRefresh": "ରିଫ୍ରେସ୍ ଟୋକେନ",
+    "oauthExportNoEmail": "(କୌଣସି ଇମେଲ୍ ନାହିଁ)",
+    "oauthExportYes": "ହଁ",
+    "oauthExportNo": "ନା",
+    "oauthExportImporting": "ଆମଦାନୀ ହେଉଛି…",
+    "oauthExportImport": "{count}ଟି ଆକାଉଣ୍ଟ ଆମଦାନୀ କରନ୍ତୁ",
+    "oauthExportResult": "{imported}/{total} ଆମଦାନୀ ହେଲା — {failed} ବିଫଳ",
+    "oauthExportParseError": "ଏହି ଫାଇଲରୁ କୌଣସି ଆକାଉଣ୍ଟ ପଢ଼ିହେଲା ନାହିଁ।",
+    "oauthExportUnknownError": "ଅଜଣା ତ୍ରୁଟି",
     "adaptaTutorial": {
       "title": "Adapta Webକୁ କିପରି ସଂଯୋଗ କରିବେ",
       "introPrefix": "Adapta Clerk ମାଧ୍ୟମରେ ପ୍ରାମାଣୀକରଣ କରେ। ଟୋକେନ୍ଟି",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "ସମସ୍ତ ମଡେଲ୍ ପୂର୍ବରୁ ଇମ୍ପୋର୍ଟ ହୋଇସାରିଛି",
     "noNewModelsToImport": "ଇମ୍ପୋର୍ଟ କରିବାକୁ କୌଣସି ନୂଆ ମଡେଲ୍ ନାହିଁ — ସମସ୍ତ ମଡେଲ୍ ପୂର୍ବରୁ ରେଜିଷ୍ଟ୍ରି କିମ୍ବା କଷ୍ଟମ୍ ମଡେଲ୍ ତାଲିକାରେ ଅଛି",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "ମଡେଲ୍ ଡିସ୍କଭରୀ ବିଫଲ୍ {time}",
     "skippingExistingModels": "ପୂର୍ବରୁ ଥିବା {count}ଟି ମଡେଲ୍କୁ ଛାଡ଼ି ଦିଆଯାଉଛି",
     "autoSync": "ସ୍ୱୟଂ-ସିଙ୍କ୍",
     "autoSyncShort": "ସିଙ୍କ୍ କରନ୍ତୁ",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count}ଟି କମ୍ବୋରେ ବ୍ୟବହୃତ: {combos}",
+    "openComboTooltip": "କମ୍ବୋଗୁଡ଼ିକ ଖୋଲନ୍ତୁ — {combo} ଦ୍ୱାରା ବ୍ୟବହୃତ"
   },
   "settings": {
     "title": "ସେଟିଂସ୍",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "ହୋଷ୍ଟ",
     "qdrantCollection": "ସଂଗ୍ରହ",
     "catalogVisibilityHint": "ଲୁଚାଇଥିବା ମଡେଲ IDଗୁଡ଼ିକୁ ସମାନ ପ୍ରବେଶ ଅନୁମତି ସହିତ ଏବେ ମଧ୍ୟ କଲ୍ କରାଯାଇପାରିବ।",
+    "exposeCombosOnly": "/v1/models ରେ କେବଳ କମ୍ବୋଗୁଡ଼ିକ ତାଲିକାଭୁକ୍ତ କରନ୍ତୁ",
+    "exposeCombosOnlyDesc": "ମଡେଲଗୁଡ଼ିକୁ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଖୋଜୁଥିବା କ୍ଲାଏଣ୍ଟମାନେ କଞ୍ଚା ପ୍ରୋଭାଇଡର ମଡେଲ ବଦଳରେ ଆପଣଙ୍କ କମ୍ବୋଗୁଡ଼ିକ (ଏବଂ ଲୁଚାଯାଇନଥିଲେ auto/*) ଦେଖିବେ। ସ୍ପଷ୍ଟ provider/model ID ଗୁଡ଼ିକ ରାଉଟ୍ ହେବା ଜାରି ରହିବ।",
     "catalogScopeTitle": "Models API ତାଲିକା",
     "catalogScopeDesc": "ଏହି କୀ ପାଇଁ GET /v1/models କ’ଣ ପ୍ରଦର୍ଶିତ କରେ। ତାଲିକାକୁ ସୀମିତ କଲେ ମଧ୍ୟ କୀ କେଉଁ ମଡେଲ୍କୁ କଲ୍ କରିପାରିବ ତାହା କେବେ ବଦଳେ ନାହିଁ।",
     "catalogScopeAll": "ଉଭୟ",
@@ -8917,7 +9022,9 @@
         "financial": "ଆର୍ଥିକ",
         "brazilian": "ବ୍ରାଜିଲୀୟ",
         "usa": "ଯୁକ୍ତରାଷ୍ଟ୍ର",
-        "full": "ସମ୍ପୂର୍ଣ୍ଣ"
+        "full": "ସମ୍ପୂର୍ଣ୍ଣ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (ଦକ୍ଷିଣ ଆଫ୍ରିକା)"
       },
       "builtinTypes": "ଅନ୍ତର୍ନିର୍ମିତ ପ୍ରକାର",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "IPv4 ଠିକଣା",
         "ipv6_address": "IPv6 ଠିକଣା",
         "aws_key": "AWS ପ୍ରବେଶ କି",
-        "api_key_generic": "API କି ଏବଂ ଟୋକେନ୍"
+        "api_key_generic": "API କି ଏବଂ ଟୋକେନ୍",
+        "iban": "IBAN ବ୍ୟାଙ୍କ ଆକାଉଣ୍ଟ ନମ୍ବର \\|",
+        "eu_vat": "EU VAT ସଂଖ୍ୟା",
+        "es_dni_nie": "ସ୍ପାନିସ୍ DNI / NIE",
+        "it_codice_fiscale": "ଇଟାଲୀୟ କୋଡିସ୍ ଫିସ୍କାଲ୍ \\|",
+        "pl_pesel": "ପୋଲାଣ୍ଡ PESEL",
+        "nl_bsn": "ଡଚ୍ BSN",
+        "de_steuer_id": "ଜର୍ମାନ ଷ୍ଟିଅର୍- ID \\|",
+        "se_personnummer": "ସ୍ Swedish ିଡିଶ୍ ବ୍ୟକ୍ତିବିଶେଷ \\|",
+        "za_id": "ଦକ୍ଷିଣ ଆଫ୍ରିକୀୟ ID ସଂଖ୍ୟା \\|",
+        "za_phone": "ଦକ୍ଷିଣ ଆଫ୍ରିକାର ଫୋନ୍ ନମ୍ବର \\|",
+        "za_vat": "ଦକ୍ଷିଣ ଆଫ୍ରିକୀୟ VAT ସଂଖ୍ୟା \\|",
+        "za_tax_ref": "ଦକ୍ଷିଣ ଆଫ୍ରିକାର ଟିକସ ସନ୍ଦର୍ଭ \\|"
       },
       "customPatterns": "କଷ୍ଟମ୍ ପ୍ୟାଟର୍ନ",
       "customPatternsDesc": "ମେଳଗୁଡ଼ିକ [CUSTOM_REDACTED] ଦ୍ୱାରା ବଦଳାଯାଏ। ସର୍ବାଧିକ {max}ଟି ପ୍ୟାଟର୍ନ। ବିପର୍ଯ୍ୟୟକାରୀ ବ୍ୟାକଟ୍ରାକିଂ ବିପଦ ଥିବା ପ୍ୟାଟର୍ନ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ।",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth ବିନ୍ୟାସ କରାଯାଇନାହିଁ। {applicationsUrl}ରେ ରିଡାଇରେକ୍ଟ URI {redirectUri} ଏବଂ ସ୍କୋପ୍ \"{scopes}\" ସହିତ ଏକ OAuth ଆପ୍ଲିକେସନ୍ ପଞ୍ଜୀକରଣ କରନ୍ତୁ, ତା’ପରେ {clientIdEnv} (ଏବଂ ଇଚ୍ଛାନୁସାରେ {clientSecretEnv}) ସେଟ୍ କରି ପୁନରାରମ୍ଭ କରନ୍ତୁ।",
     "gitlabDuoSetupDescription": "ଆପ୍ଲିକେସନ୍ଟି ପଞ୍ଜୀକୃତ ହେବା ଏବଂ ଏହି OmniRoute ଇନ୍ଷ୍ଟାନ୍ସରେ ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ ସେଟ୍ ହେବା ପରେ, OAuth ଲଗଇନ୍ ଆରମ୍ଭ କରିବାକୁ ଜାରି ରଖନ୍ତୁ କ୍ଲିକ୍ କରନ୍ତୁ।",
     "continue": "ଜାରି ରଖନ୍ତୁ",
+    "copilotPolicyTitle": "ପରୀକ୍ଷାମୂଳକ ପ୍ରଦାନକାରୀ: ନୀତି ସ୍ଥିତି ଅସ୍ପଷ୍ଟ \\|",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com ମାଧ୍ୟମରେ ସଂଯୋଗ କରେ, ଯାହାକି GitHub ସାଧାରଣ ତୃତୀୟ-ପକ୍ଷ ସୂଚନା API ଭାବରେ ପ୍ରକାଶିତ ହୋଇନାହିଁ \\| ଏହି ଏକୀକରଣ ପରୀକ୍ଷାମୂଳକ ଏବଂ ବିନା ବିଜ୍ଞପ୍ତିରେ ପରିବର୍ତ୍ତନ ହୋଇପାରେ \\|",
+    "copilotPolicyLine2": "କେବଳ ଆପଣଙ୍କର GitHub ଖାତା ସଂଯୁକ୍ତ ହୋଇପାରେ \\| କଦାପି ପରିଚୟପତ୍ର, ପୁଲ୍ ଆକାଉଣ୍ଟ୍ ଅଂଶୀଦାର କରନ୍ତୁ ନାହିଁ, କିମ୍ବା ଆପଣଙ୍କର ଯୋଜନା ସୀମା ଅତିକ୍ରମ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ ନାହିଁ \\|",
+    "copilotPolicyLine3": "ମାଗଣା ଏବଂ ଛାତ୍ର ଯୋଜନା ବ୍ୟବହାରକାରୀମାନେ କେବଳ ସ୍ୱୟଂଚାଳିତ ମଡେଲ ଚୟନ ଗ୍ରହଣ କରନ୍ତି \\| ତୁମର Copilot ଯୋଜନା ସର୍ତ୍ତାବଳୀ ଏବଂ ଯେକ any ଣସି ବ୍ୟବହାର ସୀମା ତୁମର ଦାୟିତ୍ remain \\|",
+    "copilotPolicyAcknowledge": "ମୁଁ ବୁ understand ିଛି, ସଂଯୋଗ କର \\|",
     "tabPasteSetupToken": "ସେଟଅପ୍ ଟୋକେନ୍",
     "claudeSetupTokenDescription": "ଟର୍ମିନାଲରେ `claude setup-token` ଚଲାନ୍ତୁ ଏବଂ ଏହା ପ୍ରିଣ୍ଟ କରୁଥିବା ଟୋକେନ୍ ପେଷ୍ଟ କରନ୍ତୁ। ଏହା ଏକ ବର୍ଷ ପାଇଁ ବୈଧ ଏବଂ ଏହାର କୌଣସି ରିଫ୍ରେସ୍ ଟୋକେନ୍ ନାହିଁ। ସେଭ୍ କରିବା ପୂର୍ବରୁ OmniRoute Anthropic କୁ ଗୋଟିଏ ପରୀକ୍ଷଣ ଅନୁରୋଧ ପଠାଏ।",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "ବାର୍ତ୍ତାଳାପ ଦେଖନ୍ତୁ",
       "openConversation": "ବାର୍ତ୍ତାଳାପ {id} ଖୋଲନ୍ତୁ"
     },
-    "tableLabel": "ଅନୁରୋଧ ଲଗ୍ଗୁଡ଼ିକ"
+    "tableLabel": "ଅନୁରୋଧ ଲଗ୍ଗୁଡ଼ିକ",
+    "throughputPostFirstToken": "ପ୍ରଥମ ଟୋକନ୍ ପରେ",
+    "throughputEndToEnd": "ଆରମ୍ଭରୁ ଶେଷ ପର୍ଯ୍ୟନ୍ତ",
+    "throughputRate": "{value} ଟୋକନ୍/ସେକେଣ୍ଡ",
+    "throughputExplanation": "ଉଭୟ ହାର ଆଉଟପୁଟ୍ ଏବଂ ରିଜନିଂ ଟୋକନ୍ ସଂଖ୍ୟା ମଧ୍ୟରୁ ବଡ଼ଟିକୁ ବ୍ୟବହାର କରନ୍ତି। ପ୍ରଥମ ଟୋକନ୍ ପରେ ଏକ ବୈଧ TTFT ବାଦ ଦିଏ; ନଚେତ୍ ଏହା ସମ୍ପୂର୍ଣ୍ଣ ଅବଧି ବ୍ୟବହାର କରେ। ଆରମ୍ଭରୁ ଶେଷ ପର୍ଯ୍ୟନ୍ତ ସର୍ବଦା ସମ୍ପୂର୍ଣ୍ଣ ଅବଧି ବ୍ୟବହାର କରେ। ଏକ ବଫର୍ଡ ପ୍ରତିକ୍ରିୟାରେ ମଡେଲ ଉତ୍ପାଦନ ଶୀଘ୍ର ନହେଲେ ମଧ୍ୟ ଉଚ୍ଚ ବର୍ଷ୍ଟ ଡେଲିଭରି ହାର ରହିପାରେ।"
   },
   "proxyLogger": {
     "filterAll": "ସବୁ",
@@ -12785,7 +12913,8 @@
     "title": "ପ୍ରଦାତା ପରିସଂଖ୍ୟାନ",
     "description": "ପ୍ରତି ପ୍ରଦାତା ଏବଂ ପ୍ରତି ମଡେଲ୍ର ଟ୍ରାଫିକ୍, ବିଳମ୍ବତା ଏବଂ ସଫଳତା ହାର",
     "combo": "ସଂଯୁକ୍ତ",
-    "toggleModels": "{provider} ପାଇଁ ମଡେଲ୍ଗୁଡ଼ିକ ଦେଖାନ୍ତୁ"
+    "toggleModels": "{provider} ପାଇଁ ମଡେଲ୍ଗୁଡ଼ିକ ଦେଖାନ୍ତୁ",
+    "windowSince": "{date} ଠାରୁ"
   },
   "relay": {
     "title": "ସର୍ଭରଲେସ୍ ରିଲେ ପ୍ରକ୍ସିଗୁଡ଼ିକ",
@@ -13730,7 +13859,9 @@
       "disabled": "ଅକ୍ଷମ",
       "dual": "ଦ୍ୱୈତ",
       "alias": "ଛଦ୍ମନାମ",
-      "canonical": "କ୍ୟାନୋନିକାଲ୍"
+      "canonical": "କ୍ୟାନୋନିକାଲ୍",
+      "fail_closed": "ବ୍ଲକ୍ କରନ୍ତୁ (fail_closed)",
+      "count_as_zero": "$0 ଭାବେ ଗଣନ୍ତୁ (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "ସୁରକ୍ଷିତ-ପ୍ରାଥମିକତା ଇନ୍ଫ୍ରା ବନ୍ଦ: 502",
         "description": "ଯେତେବେଳେ ଏକ କେବଳ-କୋଟା-ଫଲ୍ବ୍ୟାକ୍ ପ୍ରାଥମିକତା ଲକ୍ଷ୍ୟ ଏପରି ଏକ କାରଣରୁ କମ୍ବୋକୁ ବନ୍ଦ କରେ ଯାହା ପ୍ରମାଣଯୋଗ୍ୟ ଭାବେ କୋଟା ନୁହେଁ—ଏକ ଖୋଲା ପ୍ରଦାନକାରୀ ସର୍କିଟ୍ ବ୍ରେକର୍ କିମ୍ବା ଏକ ପୂର୍ବାନୁମାନିତ ବିଳମ୍ବତା ସ୍କିପ୍—ସେତେବେଳେ 503 ପରିବର୍ତ୍ତେ 502 ଉତ୍ତର ଦିଅନ୍ତୁ।"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "ବିନା ମୂଲ୍ୟ ବ୍ୟବହାର ବଜେଟ୍ ନୀତି",
+        "description": "ପ୍ରତି-କୀ ଦৈନିକ/ସାପ୍ତାହିକ USD ସୀମାଗୁଡିକ କିପରି ସେହି ସଫଳ ବ୍ୟବହାରକୁ ଗ୍ରହଣ କରନ୍ତି ଯାହାର ପ୍ରୋଭାଇଡର/ମୋଡେଲ୍ ପାଇଁ ମୂଲ୍ୟ ରୋ ନାହିଁ। fail_closed (ପୂର୍ବନିର୍ଦ୍ଧାରିତ) ସେହି ଦାୟରାକୁ ଅତିକ୍ରମିତ ବୋଲି ଚିହ୍ନଟ କରେ, ତେଣୁ ଅଜଣା ଖର୍ଚ୍ଚ କଠୋର ସୀମାକୁ କେବେ ପାର ହେବ ନାହିଁ। count_as_zero ସେହି ବ୍ୟବହାରକୁ $0 ଭାବେ ଗଣାଯିବାକୁ କହେ ଏବଂ ମୂଲ୍ୟ ଥିବା ବ୍ୟୟକୁ ଲାଗୁ ରଖିଥାଏ। ବିନା ମୂଲ୍ୟ ଥିବା ମୋଡେଲ୍ଗୁଡିକ ଡ୍ୟାଶବୋର୍ଡ ହୋମ୍ ପୃଷ୍ଠାରେ ଯେଉଁ ପ୍ରକାରରେ ଅଛନ୍ତି ସେହିଭଳି ତାଲିକାଭୁକ୍ତ ହେବେ।"
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "ବନ୍ଦ କରନ୍ତୁ"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "/v1/models କ୍ୟାଟାଲଗ୍ରେ ଚିନ୍ତନ ସ୍ତର ଭାରିଆଣ୍ଟଗୁଡ଼ିକର (ଯଥା -low, -medium, -high) ସୃଷ୍ଟିକୁ ଅକ୍ଷମ କରନ୍ତୁ।",
+  "teamCosts": {
+    "title": "ଦଳ ଖର୍ଚ୍ଚ",
+    "subtitle": "ଅଂଶୀଦାର ସଫ୍ଟ ବଜେଟ୍ ଓ କାଟାଲଗ ଖର୍ଚ୍ଚ ଅନୁମାନ ପରିଚାଳନା କରନ୍ତୁ।",
+    "refresh": "ରିଫ୍ରେଶ୍ କରନ୍ତୁ",
+    "create": "ଦଳ ତିଆରି କରନ୍ତୁ",
+    "edit": "ଦଳ ସମ୍ପାଦନ କରନ୍ତୁ",
+    "archive": "ଆର୍କାଇଭ୍ କରନ୍ତୁ",
+    "selectTeam": "ଦଳଗୁଡ଼ିକ",
+    "searchTeams": "ଦଳ ଖୋଜନ୍ତୁ",
+    "statusFilter": "ଦଳର ସ୍ଥିତି",
+    "active": "ସକ୍ରିୟ",
+    "archived": "ଆର୍କାଇଭ୍ ହୋଇଛି · କେବଳ ପଢ଼ିବା ପାଇଁ",
+    "allTeams": "ସମସ୍ତ ଦଳ",
+    "noTeams": "ମେଳ ଖାଉଥିବା ଦଳ ନାହିଁ।",
+    "selectHint": "ଖର୍ଚ୍ଚ ଦେଖିବାକୁ ଏକ ଦଳ ତିଆରି କରନ୍ତୁ ବା ବାଛନ୍ତୁ।",
+    "loading": "ଦଳ ଖର୍ଚ୍ଚ ଲୋଡ୍ ହେଉଛି…",
+    "budgetTitle": "ବର୍ତ୍ତମାନର ସଫ୍ଟ ବଜେଟ୍",
+    "budgetSubtitle": "ସଫଳ ଭାବେ ରେକର୍ଡ ହୋଇଥିବା ବ୍ୟବହାର · ରୋଲିଂ ୱିଣ୍ଡୋ · ରିପୋର୍ଟ ତାରିଖଠାରୁ ସ୍ୱାଧୀନ",
+    "archivedBudget": "ଆର୍କାଇଭ୍ ହୋଇଛି: ବଜେଟ୍ କାର୍ଯ୍ୟକାରୀ ନିଷ୍କ୍ରିୟ। ଐତିହାସିକ ରିପୋର୍ଟ ଉପଲବ୍ଧ ରହେ।",
+    "unlimited": "ଅସୀମିତ — କୌଣସି ଅଂଶୀଦାର ସଫ୍ଟ ବଜେଟ୍ ବିନ୍ୟାସ ହୋଇନାହିଁ।",
+    "budgetUnavailable": "ବଜେଟ୍ ସ୍ଥିତି ଉପଲବ୍ଧ ନାହିଁ। ପୁନଃ ଚେଷ୍ଟା ପାଇଁ ରିଫ୍ରେଶ୍ କରନ୍ତୁ।",
+    "used": "ସଫଳ ବ୍ୟବହାର",
+    "maximum": "ବଜେଟ୍ ସର୍ବାଧିକ",
+    "remaining": "ଜଣାଥିବା ବାକି",
+    "resets": "ରିସେଟ୍ ହେବ",
+    "unpricedBudget": "ସଫଳ ବ୍ୟବହାରର କିଛି ଅଂଶର ମୂଲ୍ୟ ଅଜଣା। ଜଣାଥିବା ଯୋଗଫଳ ଅସମ୍ପୂର୍ଣ୍ଣ; ବଜେଟ୍ କାର୍ଯ୍ୟକାରୀ ଏହି ୱିଣ୍ଡୋକୁ ଅତିକ୍ରାନ୍ତ ଭାବେ ଗଣେ।",
+    "overBudget": "ବଜେଟ୍ ପହଞ୍ଚିଛି ବା ଅତିକ୍ରମ ହୋଇଛି · {amount} ଅଧିକ",
+    "reportTitle": "ବ୍ୟବହାର ରିପୋର୍ଟ",
+    "reportSubtitle": "ସମସ୍ତ ପ୍ରୟାସ · USD ରେ କାଟାଲଗ ଅନୁମାନ, ଇନଭଏସ୍ ନୁହେଁ · ସମ୍ପୂର୍ଣ୍ଣ UTC ତାରିଖ",
+    "reportPeriod": "ରିପୋର୍ଟ ଅବଧି",
+    "day1": "1 ଦିନ",
+    "day7": "7 ଦିନ",
+    "day30": "30 ଦିନ",
+    "allTime": "ସମସ୍ତ ସମୟ",
+    "reportSpend": "ଅନୁମାନିତ ରିପୋର୍ଟ ଖର୍ଚ୍ଚ",
+    "requests": "ଅନୁରୋଧ",
+    "assignedKeys": "ଦିଆଯାଇଥିବା କି",
+    "unpricedReport": "ଏହି ରିପୋର୍ଟରେ ଅଜଣା ମୂଲ୍ୟ ଅଛି। ଅନୁମାନିତ ଖର୍ଚ୍ଚ ଅସମ୍ପୂର୍ଣ୍ଣ।",
+    "breakdown": "API କି ଅନୁସାରେ ଖର୍ଚ୍ଚ",
+    "noUsage": "ଏହି ରିପୋର୍ଟ ଅବଧିରେ କୌଣସି ବ୍ୟବହାର ନାହିଁ।",
+    "keyName": "API କି ର ନାମ",
+    "tokens": "ଇନପୁଟ୍ + ଆଉଟପୁଟ୍ ଟୋକେନ୍",
+    "unnamedKey": "ନାମହୀନ ବା ଲିଭାଯାଇଥିବା କି",
+    "unpriced": "ଅଜଣା ମୂଲ୍ୟ",
+    "members": "ସଦସ୍ୟତା",
+    "memberSubtitle": "ସଦସ୍ୟତା ବଦଳାଇଲେ ଐତିହାସିକ ଖର୍ଚ୍ଚ ମୂଳ ଦଳରେ ହିଁ ରହେ।",
+    "searchKeys": "କି କିମ୍ବା ବର୍ତ୍ତମାନର ମାଲିକ ଖୋଜନ୍ତୁ",
+    "chooseKey": "ଏକ API କି ବାଛନ୍ତୁ",
+    "unassigned": "ଦିଆଯାଇନାହିଁ",
+    "ownership": "ବର୍ତ୍ତମାନର ବିଲିଂ ଦଳ: {team}",
+    "assign": "ଦିଅନ୍ତୁ",
+    "remove": "ହଟାନ୍ତୁ",
+    "noMembers": "ବର୍ତ୍ତମାନ କୌଣସି ସଦସ୍ୟ ନାହିଁ। ଐତିହାସିକ ବ୍ୟବହାର ତଥାପି ବଜେଟ୍‌ରେ ଗଣାଯାଇପାରେ।",
+    "assignedAt": "{date} ରେ ଦିଆଗଲା (UTC)",
+    "name": "ଦଳର ନାମ",
+    "description": "ବିବରଣୀ",
+    "enableBudget": "ଅଂଶୀଦାର ସଫ୍ଟ ବଜେଟ୍ ସକ୍ଷମ କରନ୍ତୁ",
+    "amount": "ବଜେଟ୍ ରାଶି (USD)",
+    "duration": "ରୋଲିଂ ବଜେଟ୍ ୱିଣ୍ଡୋ",
+    "cancel": "ବାତିଲ୍ କରନ୍ତୁ",
+    "save": "ସଞ୍ଚୟ କରନ୍ତୁ",
+    "confirm": "ନିଶ୍ଚିତ କରନ୍ତୁ",
+    "transferTitle": "କି ସ୍ଥାନାନ୍ତରଣ ନିଶ୍ଚିତ କରନ୍ତୁ",
+    "transferMessage": "ଏହି କି “{source}” ରୁ “{destination}” କୁ ନେବେ କି? ଐତିହାସିକ ଖର୍ଚ୍ଚ ମୂଳ ଦଳରେ ହିଁ ରହେ।",
+    "removeTitle": "କି ଦେବା ହଟାନ୍ତୁ",
+    "removeMessage": "ଏହି କି “{team}” ରୁ ହଟାଇବେ କି? ଐତିହାସିକ ଖର୍ଚ୍ଚ ଏହି ଦଳରେ ହିଁ ରହେ।",
+    "archiveTitle": "ଦଳ ଆର୍କାଇଭ୍ କରନ୍ତୁ",
+    "archiveMessage": "“{team}” ଆର୍କାଇଭ୍ କରିବେ କି? ସମସ୍ତ ବର୍ତ୍ତମାନର ବନ୍ଧନ ବନ୍ଦ ହୁଏ ଏବଂ ବଜେଟ୍ କାର୍ଯ୍ୟକାରୀ ରୁକେ। ଐତିହାସିକ ରିପୋର୍ଟ ଉପଲବ୍ଧ ରହେ।",
+    "invalidName": "ଏକ ନାମ (1–200 ଅକ୍ଷର) ଓ ସର୍ବାଧିକ 2,000 ଅକ୍ଷରର ବିବରଣୀ ଦିଅନ୍ତୁ।",
+    "invalidAmount": "ଶୂନ୍ୟଠାରୁ ବଡ଼ ଏକ ସୀମିତ ବଜେଟ୍ ରାଶି ଦିଅନ୍ତୁ।",
+    "unauthorized": "ଜାରି ରଖିବାକୁ ପରିଚାଳନା ଡ୍ୟାସବୋର୍ଡରେ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ।",
+    "forbidden": "ଦଳ ପରିଚାଳନା କରିବାକୁ ଆପଣଙ୍କର ଅନୁମତି ନାହିଁ। ଆପଣଙ୍କ ଇନପୁଟ୍ ସୁରକ୍ଷିତ ଅଛି।",
+    "notFound": "ଏହି ଦଳ ବା ଦିଆଯିବା ଆଉ ନାହିଁ।",
+    "conflict": "ଦିଆଯିବା ବା ଦଳ ବଦଳିଛି। ପୁନଃ ଚେଷ୍ଟା ପୂର୍ବରୁ ରିଫ୍ରେଶ୍ କରନ୍ତୁ ଓ ବର୍ତ୍ତମାନର ମାଲିକାନା ନିଶ୍ଚିତ କରନ୍ତୁ।",
+    "failed": "ଅନୁରୋଧ ବିଫଳ ହେଲା। ଆପଣଙ୍କ ଇନପୁଟ୍ ସୁରକ୍ଷିତ ଅଛି; ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।",
+    "partialBudget": "ରଖାଯାଇଥିବା କିଛି ଦୈନିକ ବକେଟ୍ ୱିଣ୍ଡୋ ସୀମା ସହ ଓଭରଲାପ୍ ହୁଏ ଏବଂ ସଠିକ୍ ଭାବେ ବାଣ୍ଟାଯାଇପାରିବ ନାହିଁ। ଦେଖାଯାଇଥିବା ଖର୍ଚ୍ଚ ଅସମ୍ପୂର୍ଣ୍ଣ; ବାକି ସୀମା ଉପଲବ୍ଧ ନାହିଁ। ବିଦ୍ୟମାନ ସଫ୍ଟ ବଜେଟ୍ ନୀତି ଅପରିବର୍ତ୍ତିତ।"
+  },
   "connectionTest": {
     "title": "ପରୀକ୍ଷଣ ସନ୍ଦେଶ",
     "description": "ଏହି ଆକାଉଣ୍ଟ ମାଧ୍ୟମରେ ଗୋଟିଏ ପ୍ରକୃତ ଅନୁରୋଧ ପଠାନ୍ତୁ। ଏଥିରେ ଅଳ୍ପ ପରିମାଣର କୋଟା ବ୍ୟବହାର ହୁଏ ଏବଂ ପ୍ରଦାନକାରୀଙ୍କ ଉପରେ ନିର୍ଭର କରି ଏହା ଏକ ବ୍ୟବହାର ଅବଧି ଆରମ୍ଭ କରିପାରେ।",
@@ -15216,5 +15428,8 @@
     "importButton": "ଆମଦାନି କରନ୍ତୁ",
     "importFailed": "ଆମଦାନି ବିଫଳ ହେଲା।",
     "importSuccess": "{connections} ଆକାଉଣ୍ଟ ଏବଂ {nodes} ପ୍ରଦାତା ନୋଡ ଆମଦାନି ହେଲା; {skipped} ଛଡ଼ାଗଲା।"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "ବର୍ତ୍ତମାନ ସ୍ଥାନରୁ ଆରମ୍ଭ କରନ୍ତୁ (ବିଦ୍ୟମାନ ଲଗ୍ ଛାଡ଼ନ୍ତୁ)"
   }
 }

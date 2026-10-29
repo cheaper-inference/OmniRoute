@@ -161,6 +161,10 @@ export async function getSettings() {
     disableSessionStickiness: false,
     // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
     connectionAwareExpansion: false,
+    // Keep combo targets whose known output ceiling is below the request's
+    // max_tokens instead of treating output_tokens as a hard compatibility
+    // mismatch; the upstream then applies its own ceiling.
+    outputLimitAdvisory: false,
     promptCacheAffinityEnabled: true,
     geminiPromptCacheMode: "off",
     comboStrategy: "fallback",
@@ -271,6 +275,9 @@ export async function getSettings() {
     // #9418: Opt-in filter that hides no-think/* gateway variants from the /v1/models catalog.
     // Routing still works for hidden ids sent explicitly.
     hideNoThinkVariants: false,
+    // Opt-in: the public /v1/models listing advertises only combos (user combos +
+    // auto/*). Catalog-only — explicit provider/model ids still route.
+    exposeCombosOnly: false,
     // #11481: Opt-in explicit model exposure allow/deny list, mirrored into the
     // auto/* combo candidate pool (open-sse/services/autoCombo/modelExposureFilter.ts)
     // so a denied model can't sneak back in via combo routing — the same trap

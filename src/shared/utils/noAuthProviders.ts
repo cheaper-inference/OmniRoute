@@ -1,4 +1,9 @@
-import { NOAUTH_PROVIDERS, getProviderById } from "@/shared/constants/providers";
+import {
+  NOAUTH_PROVIDERS,
+  getProviderById,
+  resolveProviderId,
+  getProviderAlias,
+} from "@/shared/constants/providers";
 
 type ProviderWithAlias = { alias?: string };
 type NoAuthProviderEntry = { id: string; alias?: string };
@@ -78,4 +83,38 @@ export function isNoAuthRawProviderPrefix(providerId: string, prefix: string): b
   return (
     typeof provider?.alias === "string" && provider.alias !== providerId && prefix === providerId
   );
+}
+
+/**
+ * Compute the next `blockedProviders` list when enabling or disabling one or more providers.
+ * - When `enable` is true (unblock): removes target provider IDs and their aliases.
+ * - When `enable` is false (block): cleans any existing alias and adds canonical provider IDs.
+ */
+export function computeNextBlockedProviders(
+  currentBlocked: unknown,
+  targetIds: string | string[],
+  enable: boolean
+): string[] {
+  const current = normalizeBlockedProviderSet(currentBlocked);
+  const targets = (Array.isArray(targetIds) ? targetIds : [targetIds]).filter(
+    (rawId): rawId is string => typeof rawId === "string" && rawId.length > 0
+  );
+
+  for (const rawId of targets) {
+    for (const key of blockedKeysFor(rawId)) current.delete(key);
+  }
+
+  if (!enable) {
+    for (const rawId of targets) current.add(resolveProviderId(rawId));
+  }
+
+  return Array.from(current);
+}
+
+/** Every `blockedProviders` key that can refer to `rawId`: itself, canonical id, alias, base id. */
+function blockedKeysFor(rawId: string): string[] {
+  const canonicalId = resolveProviderId(rawId);
+  const alias = getProviderAlias(canonicalId);
+  const baseId = canonicalId.replace(/-search$/, "");
+  return [rawId, canonicalId, alias, baseId].filter((key): key is string => Boolean(key));
 }

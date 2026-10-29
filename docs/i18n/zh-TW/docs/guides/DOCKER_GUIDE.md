@@ -45,10 +45,10 @@ docker run -d \
   diegosouzapw/omniroute:latest
 ```
 
-## 搭配環境變數檔案
+## 附環境文件
 
 ```bash
-# 請先複製並編輯 .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -608,27 +608,29 @@ sudo systemctl enable --now omniroute-update.path
 
 服務會在拉取前移除請求，避免失敗的執行重複循環。若未設定 `DOCKER_UPDATE_TRIGGER_FILE`，儀表板會保留手動命令流程。
 
-## 可用性：預設 SQLite 僅支援單一複本
+## 可用性：預設SQLite是單副本
 
-標準 Docker / Kubernetes OmniRoute 是 **一個 Node 程序 + 一個 SQLite 寫入器**。此拓撲**不支援高可用性**。
+庫存Docker / Kubernetes OmniRoute是**一個 Node 程序+一個SQLite writer** 。高可用性是**不支援**在該拓撲上。
 
-| 限制                                   | 後果                                                                                                                                                                                                                                                      |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 單一寫入器                             | **請勿**讓多個複本對同一個 SQLite 檔案執行。這會損毀資料庫。                                                                                                                                                                                              |
-| 重新建立 / 重新啟動 / HEALTHCHECK 終止 | 進行中的 SSE、儀表板工作階段與記憶體內狀態會**完全中斷**。每個已連線的用戶端都會斷線。在沒有端點可用的空窗期間，新請求會從反向 Proxy 收到 **`502 Bad Gateway: Unknown error`**，而不是 OmniRoute JSON——用戶端無法將此情況與提供者故障區分開來（#11015）。 |
-| 與 `/healthz` 使用相同的事件迴圈       | 忙碌的目錄或壓縮週期可能延遲探查；過短的逾時接著會重新啟動**唯一的**複本。                                                                                                                                                                                |
+| 約束                               | 結果                                                                                                                                                                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 單身作家                           | 做**不是**針對同一個SQLite檔案運行多個副本。這會損壞DB。                                                                                                                                                           |
+| 重新創建/重新啟動/ HEALTHCHECK殺死 | **全面停電**進行中的SSE、儀表板會話和記憶體狀態。每個連線的客戶端都會斷線。空端點視窗期間的新請求獲得反向代理**`502 Bad Gateway: Unknown error`** ，而不是OmniRoute JSON — 客戶端無法區分這與提供者失敗 (#11015)。 |
+| 與`/healthz`相同的事件循環         | 繁忙的目錄或壓縮標記可能會延遲探測；短暫逾時然後重新啟動**僅有的**複製品。                                                                                                                                         |
 
-**探查矩陣**（另請參閱 [Kubernetes 探查建議](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)）：
+**探針矩陣**（另請參閱[Kubernetes 探針建議](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)）：
 
-| 探查                | 目標                                                        | 請勿使用                                   |
-| ------------------- | ----------------------------------------------------------- | ------------------------------------------ |
-| 存活探查            | `PORT` 上的 TCP（預設為 `20128`），或寬鬆的 HTTP `/healthz` | `/api/monitoring/health`                   |
-| 就緒探查            | HTTP `GET /healthz`                                         | 將事件迴圈忙碌視為程序已停止的嚴格逾時設定 |
-| 深度檢查 / 人工檢查 | `/api/monitoring/health`                                    | 自動化 kubelet 存活探查                    |
+| 探測      | 目標                                               | 請勿使用                         |
+| --------- | -------------------------------------------------- | -------------------------------- |
+| 活力      | TCP on `PORT` （預設`20128`），或軟HTTP `/healthz` | `/api/monitoring/health`         |
+| 準備狀態  | HTTP `GET /healthz`                                | 嚴格的超時將事件循環繁忙視為已死 |
+| 深淵/人類 | `/api/monitoring/health`                           | 自動化 kubelet 活躍度            |
 
-**升級：**請預期每個工作階段都會中斷。如果可以，請先排空用戶端；預設 SQLite 不支援滾動更新。Compose 的 `restart: unless-stopped` 加上 Docker `HEALTHCHECK`，也會在容器狀態為 Unhealthy 時取代唯一的程序——影響範圍相同。
+**升級：**預計每個會話都會下降。如果可以的話，流失客戶；預設SQLite沒有滾動更新。 Compose `restart: unless-stopped`加Docker `HEALTHCHECK`也將取代容器不健康時唯一的進程－相同的爆炸半徑。
 
-適用於**單一複本**的 Kubernetes 片段（必須使用 Recreate；請勿在只有一個 SQLite 檔案的情況下提高 `replicas`）：
+`deploy/kubernetes/`和`deploy/helm/omniroute/`中存在現成的清單和 Helm 圖表 — 請參閱[Kubernetes 部署指南](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)。
+
+Kubernetes 片段**單一副本**（需要重新建立；不要針對一個SQLite檔案引發`replicas` ）：
 
 ```yaml
 spec:
@@ -655,9 +657,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` 的 sleep 讓 kube 能在傳送 SIGTERM 前移除 Service 端點，使**新的**流量不再送往即將終止的程序。進行中的 `/v1/responses` SSE 會透過重量級准入租約（#11015），最多在 `SHUTDOWN_TIMEOUT_MS`（預設為 30 秒）指定的時間內完成排空。仍送達該程序的新請求會收到 `503` + `Retry-After: 5`。在替代執行個體 Ready 之前，Recreate 造成的無端點空窗期仍會是完全中斷——這是 SQLite 拓撲本身的限制，而非探針設定錯誤。
+`preStop` sleep 讓 kube 在SIGTERM之前刪除服務端點，所以**新的**交通停止撞擊垂死的進程。飛行中的`/v1/responses` SSE透過重量級准入租約耗盡至`SHUTDOWN_TIMEOUT_MS` （預設 30 秒）（#11015）。仍然到達進程的新請求會得到`503` + `Retry-After: 5`。在更換就緒之前重新建立空端點間隙仍然是硬中斷 - 這是SQLite拓撲，而不是探針配置錯誤。
 
-外部 Postgres／多寫入器 HA **並非**已有文件說明的標準支援方案。如果你需要 HA，請維持單一副本，或使用專案已另行測試並記載於文件中的拓撲。Postgres/MySQL 的相關工作位於 [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)。在該功能發布之前，唯一受支援的**大型** `/v1/responses` 容量擴充方式，是執行 N 個彼此獨立的程序（請參閱下一節），而不是在同一個磁碟區上設定 `replicas > 1`。
+外部Postgres / 多重寫入者HA是**不是**記錄的庫存路徑。如果您需要HA，請保留單一副本或執行專案已單獨測試和記錄的拓撲。 Postgres/MySQL作品位於[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 。在那之前，唯一受支持的繁殖方式**大的**`/v1/responses`容量是 N 個獨立進程（下一節），而不是一個磁碟區上的`replicas > 1` 。
 
 ## 橫向擴充：N 個獨立程序
 

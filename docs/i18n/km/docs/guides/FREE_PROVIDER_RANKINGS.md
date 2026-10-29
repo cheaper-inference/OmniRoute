@@ -13,31 +13,17 @@
 
 ## តើវាជាអ្វី
 
-OmniRoute បានចុះបញ្ជី providers ចំនួន 376 រួមទាំង catalog entries ចំនួន 155 ដែលបានសម្គាល់ជា **ឥតគិតថ្លៃ/no-auth**
-(no-auth,
-OAuth កម្រិតឥតគិតថ្លៃ ឬ API key កម្រិតឥតគិតថ្លៃ — សូមមើល
-[មគ្គុត្តេសក៍ Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) និង
-[បញ្ជី Free Tiers](../reference/FREE_TIERS.md) ពេញលេញ)។ ចំណុចបញ្ហាគឺ៖ providers ឥតគិតថ្លៃ
-មានគុណភាពម៉ូដែលខុសគ្នាយ៉ាងច្រើន។ provider បែប no-auth ដែលផ្តល់ជូនម៉ូដែល frontier (ទំនើបបំផុត)
-មានប្រយោជន៍ខ្លាំងជាង provider ដែលផ្តល់ជូនម៉ូដែល legacy តូចៗ។
+OmniRoute ចុះឈ្មោះអ្នកផ្តល់សេវា 377 រួមទាំង 155 ធាតុកាតាឡុកត្រូវបានសម្គាល់**free/no-auth** (no-auth, free-tier OAuth, ឬ free-tier API key — សូមមើល [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) និង [Free Free-tiers directory](../reference/FREE_TIERS.md) )។ ការចាប់បាន៖ អ្នកផ្តល់សេវាឥតគិតថ្លៃមានភាពខុសប្លែកគ្នាយ៉ាងខ្លាំងនៅក្នុងគុណភាពគំរូ។ អ្នកផ្តល់សេវាដែលគ្មានការផ្ទៀងផ្ទាត់ដែលបម្រើគំរូព្រំដែនគឺមានប្រយោជន៍ជាងការបម្រើគំរូកេរ្តិ៍ដំណែលតូចមួយ។
 
-**Free Provider Rankings** ឆ្លើយសំណួរ "**តើ provider ឥតគិតថ្លៃមួយណាដែលផ្តល់ម៉ូដែលល្អបំផុតដល់ខ្ញុំ?**"
-ដោយភ្ជាប់ catalog របស់ provider ឥតគិតថ្លៃនីមួយៗ ជាមួយ **ពិន្ទុគុណភាពដែលប្រមូលពីសហគមន៍**
-ពី **Arena AI leaderboard** (ELO ផ្អែកលើចំណូលចិត្តរបស់មនុស្ត ដែលជាគំនិតដូចគ្នានឹង
-LMArena chatbot arena)។ បន្ទាប់មក providers ត្រូវបានចាត់ថ្នាក់តាមកម្លាំងនៃ
-**ម៉ូដែលឥតគិតថ្លៃល្អបំផុត** របស់ពួកគេ។
+**ចំណាត់ថ្នាក់អ្នកផ្តល់សេវាឥតគិតថ្លៃ** ចម្លើយ "** តើអ្នកផ្តល់សេវាឥតគិតថ្លៃណាដែលផ្តល់ឱ្យខ្ញុំនូវគំរូដ៏ល្អបំផុត?** " ដោយចូលរួមកាតាឡុករបស់អ្នកផ្តល់សេវាឥតគិតថ្លៃនីមួយៗជាមួយ** ពិន្ទុគុណភាពប្រភពពីហ្វូងមនុស្ស** ពី** Arena AI តារាងពិន្ទុ** ( ELO ចំណង់ចំណូលចិត្តរបស់មនុស្ស គំនិតដូចគ្នានៅពីក្រោយសង្វៀន LMArena chatbot)។ បន្ទាប់មកអ្នកផ្តល់សេវាត្រូវបានចាត់ថ្នាក់ដោយកម្លាំងរបស់ពួកគេ។** ម៉ូដែលឥតគិតថ្លៃល្អបំផុត** .
 
-ចំណាត់ថ្នាក់ត្រូវបានគណនាពីប្រភពពិតប្រាកដបី៖
+ចំណាត់ថ្នាក់ត្រូវបានគណនាពីប្រភពពិតចំនួនបី៖
 
-1. បញ្ជី free-provider — `NOAUTH_PROVIDERS` បូករួមនឹង entries ក្នុង `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` ដែលមាន flag `hasFree`
-   (`src/shared/constants/providers.ts`)។
-2. catalog ម៉ូដែលរបស់ provider នីមួយៗ ពី provider registry
-   (`open-sse/config/providerRegistry.ts`)។
-3. ពិន្ទុ task-fit ដែលមានប្រភពពី ELO ដែលបានរក្សាទុកក្នុងតារាង DB `model_intelligence`
-   ដោយ Arena ELO sync engine (`src/lib/arenaEloSync.ts`)។
+1. បញ្ជីអ្នកផ្តល់សេវាឥតគិតថ្លៃ — `NOAUTH_PROVIDERS` បូក `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ធាតុ `hasFree` (`src/shared/constants/providers.ts`) ។
+2. កាតាឡុកគំរូរបស់អ្នកផ្តល់សេវានីមួយៗពីបញ្ជីឈ្មោះអ្នកផ្តល់សេវា (`open-sse/config/providerRegistry.ts`) ។
+3. ពិន្ទុសមិទ្ធិផលដែលទទួលបានពី ELO ត្រូវបានរក្សាទុកក្នុងតារាង `model_intelligence` DB ដោយម៉ាស៊ីនសមកាលកម្ម Arena ELO (`src/lib/arenaEloSync.ts`) ។
 
-Logic នៃការភ្ជាប់ (join) ស្ថិតនៅក្នុង `src/lib/freeProviderRankings.ts`។
+តក្កវិជ្ជាចូលរួមរស់នៅក្នុង `src/lib/freeProviderRankings.ts`។
 
 ---
 

@@ -43,22 +43,6 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
       "Create an API key at https://cheaperinference.com/?utm_source=omniroute (needs the `inference` scope), then paste the ir_live_… token here.",
     passthroughModels: true,
   },
-  freebuff: {
-    id: "freebuff",
-    alias: "freebuff",
-    name: "Freebuff",
-    icon: "terminal",
-    color: "#10B981",
-    textIcon: "FB",
-    website: "https://freebuff.com",
-    hasFree: true,
-    serviceKinds: ["llm"],
-    subscriptionRisk: true,
-    riskNoticeVariant: "official-client-only",
-    authHint: "Enter your Freebuff / Codebuff auth token from the CLI login.",
-    freeNote: "Free Freebuff models (official client only); paid API: freebuff.com/account/api.",
-    passthroughModels: true,
-  },
   "charm-hyper": {
     id: "charm-hyper",
     serviceKinds: ["llm"],
@@ -1372,6 +1356,24 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
       "Create an API key in the Token Market console, then paste it here as a Bearer token.",
     apiHint:
       "Token Market provides an OpenAI-compatible API at https://api.tokensmarket.ai/v1 and discovers its current model catalog from /v1/models.",
+  },
+  tokenharbor: {
+    id: "tokenharbor",
+    serviceKinds: ["llm"],
+    alias: "tokenharbor",
+    name: "Token Harbor",
+    icon: "anchor",
+    color: "#0EA5E9",
+    textIcon: "TH",
+    passthroughModels: true,
+    website: "https://tokenharbor.ai",
+    hasFree: true,
+    authHint:
+      "Create a Token Harbor account and copy your Universal Key from https://tokenharbor.ai/dashboard.",
+    apiHint:
+      "Token Harbor is OpenAI-compatible. Use the tokenharbor provider prefix with the exact model ID from its live /v1/models catalog; API base URL: https://tokenharbor.ai/v1.",
+    freeNote:
+      "Selected :free model IDs (for example, claude-haiku-5.5:free) use a personal rolling 7-day list-price allowance and never charge the wallet; free routes have 60 RPM and 1,800 requests/hour per account. Enable free routes first; prompts and responses may be retained after opting in. Model availability can change.",
   },
   navy: {
     id: "navy",

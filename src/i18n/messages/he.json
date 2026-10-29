@@ -1345,7 +1345,9 @@
       "open": "פתח",
       "close": "סגור"
     },
-    "noResults": "אין תוצאות"
+    "noResults": "אין תוצאות",
+    "costsTeams": "צוותים",
+    "costsTeamsSubtitle": "מרכזי עלות של צוותים"
   },
   "webhooks": {
     "title": "וובהוקים",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "כללים מתקדמים למטען הנתונים, מגבלות בקשות והגדרות API של פרוקסי",
     "mitmProxyDescription": "הגדרת פרוקסי MITM לבדיקת תעבורה ולניפוי שגיאות",
     "oneProxyDescription": "הגדרת 1Proxy לשרשור פרוקסי מתקדם",
-    "omniSkillsDescription": "התקן ונהל מיומנויות ארגז חול להרצה אוטומטית של הנחיות וכלים"
+    "omniSkillsDescription": "התקן ונהל מיומנויות ארגז חול להרצה אוטומטית של הנחיות וכלים",
+    "teamsDescription": "הערכות עלות צוות ותקציבים רכים משותפים"
   },
   "cloudSyncStatus": {
     "synced": "מסונכרן",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "העתקת נקודת הקצה שלכם",
     "readinessStep4": "שליחת בקשת בדיקה",
     "readinessContinue": "המשך ההגדרה",
-    "readinessDismiss": "התעלמות לעת עתה"
+    "readinessDismiss": "התעלמות לעת עתה",
+    "unpricedUsageTitle": "{count, plural, one {# מודל} other {# מודלים}} עם שימוש לאחרונה אך ללא מחיר מוגדר",
+    "unpricedUsageFailClosed": "{keys, plural, one {# מפתח API עם מגבלת שימוש} other {# מפתחות API עם מגבלת שימוש}} השתמשו במודלים אלה ב-8 הימים האחרונים. כאשר שימוש זה נמצא בחלון היומי או השבועי של המפתח, המפתח נחשב כחורג מהמכסה ובקשותיו נחסמות (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "שימוש זה נספר כ-$0 כלפי מגבלות השימוש לכל מפתח (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# בקשה} other {# בקשות}}, {keys, plural, one {# מפתח מוגבל} other {# מפתחות מוגבלים}}",
+    "unpricedUsageMore": "…ועוד {count}",
+    "unpricedUsageConfigure": "הגדר תמחור",
+    "unpricedUsageDismiss": "התעלם"
   },
   "analytics": {
     "title": "אנליטיקס",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "פתח טופר - תצורה ידנית",
     "clineManualConfiguration": "תצורה ידנית של Cline",
     "kiloManualConfiguration": "תצורה ידנית של קילו קוד",
+    "piManualConfiguration": "Pi - תצורה ידנית",
+    "piConfigInvalidTitle": "Pi models.json אינו קריא",
+    "piOmnirouteConfigured": "OmniRoute מוגדר כספק מותאם אישית של Pi",
+    "piModelHelp": "Pi אינו מגלה אוטומטית מודלים עבור נקודות קצה מותאמות אישית — הדגם שאתה בוחר נכתב ב- models.json במפורש.",
+    "piManualConfigTitle": "או ערוך ~/.pi/agent/models.json באופן ידני",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "לאחר מכן הפעל את Pi ובחר בספק ה-omniroute. הגדר PI_CODING_AGENT_DIR להעביר את כל ספריית הסוכן.",
+    "piUnownedNote": "רשומה זו נוספה מחוץ OmniRoute (למשל נקודות הקצה המותאמות אישית של pi-gui). הגשת בקשה תאמץ אותו; איפוס מסיר רק ערכים שכתבו OmniRoute.",
     "whenToUseLabel": "מתי להשתמש",
     "openToolDocs": "פתח את מסמכי הכלים",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "השתמש כאשר אתה צריך עוזר AI קל משקל יליד מסוף למשימות מהירות.",
       "hermes-agent": "השתמש כאשר יש צורך ב-Hermes Agent (מבית Nousresearch) עם מודלי ברירת מחדל, האצלה, ראייה ועזר המנותבים דרך OmniRoute.",
+      "whycodes": "השתמש כאשר אתה רוצה את WhyCodes כסוכן CLI אוטונומי רב-תכליתי (TUI, סוכנים בעלי שם, זיכרון, swarm) המכוון ל-OmniRoute.",
       "custom": "השתמש עבור הטמעת כלים מותאמים אישית או תצורות כלליות תואמות OpenAI."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "סוכן תכנות TUI של xAI Grok Build עם תמיכה בספק מותאם אישית",
       "droid": "מפעל Droid AI Assistant",
       "openclaw": "פתח את Claw AI Assistant",
+      "openclaude": "CLI של סוכן התכנות OpenClaude עם תמיכה בספק תואם OpenAI",
       "cline": "Cline CLI — מסייע קידוד מבוסס AI",
       "kilo": "קילו קוד AI עוזר CLI",
       "qwen": "Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "מסוף Warp AI עם תמיכה בספק מותאם אישית",
       "agent-deck": "מתזמר מרובה סוכנים Agent Deck",
       "5dive": "5dive — צי מתארח עצמאית של סוכני קוד; פרופיל אימות אחד מכוון את כולם ל-OmniRoute",
+      "whycodes": "סוכן CLI אוטונומי WhyCodes עם כתובת URL בסיסית תואמת OpenAI",
       "zed": "עורך הקוד Zed — סוכן מובנה דרך ספק תואם OpenAI"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "עדכון",
     "cliproxyapiUpdateAvailable": "עדכון זמין: v{current} → v{latest}",
     "cliproxyapiVersion": "גרסה",
+    "piInstallTitle": "התקן Pi Coding Agent",
+    "piInstallInstructions": "התקן את ה-Pi CLI, ואז חזור לכאן כדי לחבר אותו ל- OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "השתמש ב- URL שניתן להגיע אליו מהמכונה שמפעילה את Pi. נקודת הקצה /v1 תואמת OpenAI מתווספת אוטומטית.",
+    "piManualMergeHint": "תצוגה מקדימה בלבד. מיזוג את הערך הזה של providers.omniroute לתוך models.json כך שהספקים וההגדרות האחרים שלך יישארו ללא פגע.",
     "removeMapping": "הסרת מיפוי"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "למשל 10",
     "testSelected": "בדיקת הנבחרים ({count})",
     "testAllFiltered": "בדיקת כל המסוננים ({count})",
+    "visibility": "נראות",
+    "allVisibility": "גלויים ומוסתרים",
+    "visibleOnly": "גלויים",
+    "hiddenOnly": "מוסתרים",
+    "visibleColumn": "גלוי",
+    "hideModel": "הסתרת {name} מ-/v1/models",
+    "showModel": "הצגת {name} ב-/v1/models",
+    "hiddenBadge": "מוסתר",
+    "hideFiltered": "הסתרת המסוננים ({count})",
+    "showFiltered": "הצגת המסוננים ({count})",
+    "visibilityCounts": "{visible} גלויים · {hidden} מוסתרים · {total} סה\"כ",
+    "visibilityUpdateFailed": "עדכון נראות המודל נכשל",
     "cancel": "ביטול",
     "clearResults": "ניקוי תוצאות",
     "testing": "בבדיקה...",
@@ -3394,7 +3433,44 @@
     "httpError": "הבקשה נכשלה עם HTTP {status}",
     "testFailedNoDetail": "הבדיקה נכשלה ללא הודעת שגיאה",
     "additionalCapabilities": "יכולות נוספות: {list}",
-    "comboRefMember": "שילוב → {name}"
+    "comboRefMember": "שילוב → {name}",
+    "keyAccessButton": "גישה למפתח API",
+    "allowedInKeys": "מורשה ב: {count, plural, one {# מפתח} other {# מפתחות}}",
+    "keysLoading": "טוען מפתחות API…",
+    "keysRetry": "נסה שוב לטעון מפתחות",
+    "accessViaPattern": "באמצעות {pattern}",
+    "accessBlocked": "נחסם על ידי {pattern}",
+    "editKeyAccess": "עריכת הרשאות מפתח",
+    "toggleKeyAccess": "אפשר את {item} ב-{name}",
+    "resultNetworkError": "השיוך נכשל",
+    "resultWouldEmptyModels": "פעולה זו תשאיר מפתח זה ללא מודלים מורשים — ערוך את הגישה למפתח במקום זאת",
+    "resultWouldEmptyCombos": "פעולה זו תשאיר מפתח זה ללא שילובים מורשים — ערוך את הגישה למפתח במקום זאת",
+    "keyUpdatePending": "העדכון של {name} עדיין נמשך. נסה שוב בעוד רגע.",
+    "assignToKeys": "שייך למפתחות API…",
+    "assignApply": "החל שינויים",
+    "assignComplete": "הרשאות מפתח ה-API עודכנו",
+    "assignFailed": "חלק מעדכוני מפתחות ה-API נכשלו",
+    "assignNoChanges": "לא שונתה הגישה למפתח ה-API",
+    "selectedAccessItems": "פריטים שנבחרו: {count}",
+    "assignExcludedCombos": "{count, plural, one {# שורת שילוב שנבחרה אינה מודל ותדולג כאן} other {# שורות שילוב שנבחרו אינן מודלים וידולגו כאן}}. הקצה שילובים מכרטיסיית Combos.",
+    "assignActionAdd": "הוספה",
+    "assignActionRemove": "הסרה",
+    "searchKeys": "חיפוש מפתחות API",
+    "selectApiKey": "בחר מפתח API {name}",
+    "allModelsAccess": "כל המודלים",
+    "allCombosAccess": "כל השילובים",
+    "modelAccessCount": "מודלים: {count}",
+    "comboAccessCount": "שילובים: {count}",
+    "keyInactive": "לא פעיל",
+    "keyBanned": "חסום",
+    "keyRevoked": "נשלל",
+    "switchRestrictedConfirm": "העבר מפתח זה לגישה מוגבלת: רק הפריטים שנבחרו יורשו",
+    "removeNoChangeHint": "מפתח זה מאפשר הכל; הסרת הפריטים שנבחרו לא תבצע כל שינוי",
+    "removeStaysAllowedHint": "עדיין מורשה במפתח זה באמצעות {patterns}",
+    "resultChanged": "שונה",
+    "resultUnchanged": "ללא שינוי",
+    "resultSkipped": "דולג",
+    "resultNeedsSwitch": "דורש מעבר לגישה מוגבלת"
   },
   "combos": {
     "title": "שילובים",
@@ -3515,6 +3591,9 @@
     "moveUp": "לזוז למעלה",
     "moveDown": "לזוז למטה",
     "removeModel": "הסר",
+    "testStep": "בדוק את המודל הזה",
+    "testStepRunning": "בודק…",
+    "testStepNotTestable": "ניתן לבדוק רק שלבים עם מודל יחיד",
     "saving": "שומר...",
     "liveNoProviders": "טרם נצפו ספקים.",
     "liveFleetDataHint": "נתוני הצי מגיעים דרך אירועי קומבו חיים.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "הורדת תבנית CSV",
     "importFromFileMoreErrors": "ועוד {count}",
     "importFromFileSchemaHint": "עמודות ה-CSV הן לפי מיקום: provider, name, apiKey, baseUrl (אופציונלי), priority (אופציונלי). העמודה provider חייבת להכיל מזהה קיים של ספק מנוהל או מזהה של צומת תואם OpenAI/Anthropic שכבר נרשם — ייבוא זה אינו יוצר צומתי נקודת קצה חדשים.",
+    "importOAuthExport": "ייבוא ייצוא OAuth",
+    "oauthExportTitle": "ייבוא ייצוא ממנהל חשבונות",
+    "oauthExportDescription": "העלה ייצוא בטקסט רגיל ממנהל חשבונות (למשל ייצוא cloud-accounts של Antigravity Manager). האסימונים מתרעננים בצד השרת וכל חשבון הופך לחיבור OAuth — כפילויות מתרעננות במקומן.",
+    "oauthExportProviderLabel": "ספק",
+    "oauthExportChoose": "בחר קובץ",
+    "oauthExportFileAria": "קובץ JSON של ייצוא חשבונות",
+    "oauthExportSchemaHint": "מתקבלים: מסמך עם מערך \"accounts\", מערך פשוט או רשומה בודדת. האסימונים יכולים להיות בתוך אובייקט token מקונן או ישירות ברשומה.",
+    "oauthExportDetected": "זוהו {count} חשבונות",
+    "oauthExportSelectAll": "בחר את כל החשבונות",
+    "oauthExportSelectAccount": "בחר חשבון {index}",
+    "oauthExportColEmail": "דוא\"ל",
+    "oauthExportColProvider": "ספק",
+    "oauthExportColRefresh": "אסימון רענון",
+    "oauthExportNoEmail": "(אין דוא\"ל)",
+    "oauthExportYes": "כן",
+    "oauthExportNo": "לא",
+    "oauthExportImporting": "מייבא…",
+    "oauthExportImport": "ייבוא {count} חשבונות",
+    "oauthExportResult": "יובאו {imported}/{total} — {failed} נכשלו",
+    "oauthExportParseError": "לא ניתן היה לקרוא חשבונות מקובץ זה.",
+    "oauthExportUnknownError": "שגיאה לא ידועה",
     "adaptaTutorial": {
       "title": "כיצד לחבר את Adapta Web",
       "introPrefix": "Adapta מבצעת אימות דרך Clerk. האסימון",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "כל הדגמים כבר מיובאים",
     "noNewModelsToImport": "אין דגמים חדשים לייבוא — כל הדגמים כבר קיימים ברישום או ברשימת הדגמים המותאמים",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "גילוי מודלים נכשל {time}",
     "skippingExistingModels": "מדלג על {count} דגמים קיימים",
     "autoSync": "סנכרון אוטומטי",
     "autoSyncShort": "סנכרון",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "בשימוש ב-{count} שילובים: {combos}",
+    "openComboTooltip": "פתח שילובים — בשימוש על ידי {combo}"
   },
   "settings": {
     "title": "הגדרות",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "מארח",
     "qdrantCollection": "אוסף",
     "catalogVisibilityHint": "אפשר עדיין לקרוא למזהי מודלים מוסתרים עם אותן הרשאות גישה.",
+    "exposeCombosOnly": "הצג רק שילובים ב-/v1/models",
+    "exposeCombosOnlyDesc": "לקוחות שמגלים מודלים אוטומטית יראו את השילובים שלך (ו-auto/* אלא אם הם מוסתרים) במקום מודלים גולמיים של ספקים. מזהי provider/model מפורשים ממשיכים להיות מנותבים.",
     "catalogScopeTitle": "רשימת Models API",
     "catalogScopeDesc": "מה ש-GET /v1/models מפרסם עבור מפתח זה. צמצום הרשימה לעולם אינו משנה את המודלים שהמפתח יכול לקרוא להם.",
     "catalogScopeAll": "שניהם",
@@ -8917,7 +9022,9 @@
         "financial": "פיננסי",
         "brazilian": "ברזילאי",
         "usa": "ארה״ב",
-        "full": "מלא"
+        "full": "מלא",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (דרום אפריקה)"
       },
       "builtinTypes": "סוגים מובנים",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "כתובות IPv4",
         "ipv6_address": "כתובות IPv6",
         "aws_key": "מפתחות גישה של AWS",
-        "api_key_generic": "מפתחות API ואסימונים"
+        "api_key_generic": "מפתחות API ואסימונים",
+        "iban": "מספרי חשבון בנק IBAN",
+        "eu_vat": "מספרי EU VAT",
+        "es_dni_nie": "DNI / NIE ספרדית",
+        "it_codice_fiscale": "Codice Fiscale האיטלקי",
+        "pl_pesel": "PESEL פולנית",
+        "nl_bsn": "BSN הולנדי",
+        "de_steuer_id": "גרמנית Steuer-ID",
+        "se_personnummer": "מספר אישי שוודי",
+        "za_id": "מספרי ID דרום אפריקאים",
+        "za_phone": "מספרי טלפון בדרום אפריקה",
+        "za_vat": "מספרי VAT דרום אפריקאים",
+        "za_tax_ref": "אסמכתאות מס בדרום אפריקה"
       },
       "customPatterns": "תבניות מותאמות אישית",
       "customPatternsDesc": "התאמות מוחלפות ב-[CUSTOM_REDACTED]. עד {max} תבניות. תבניות בסיכון לחזרה לאחור קטסטרופלית נדחות.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth לא מוגדר. רישום אפליקציית OAuth ב-{applicationsUrl} עם URI הפניה {redirectUri} וסקופים \"{scopes}\", ואז הגדר את {clientIdEnv} (ואופציונלית את {clientSecretEnv}) והפעל מחדש.",
     "gitlabDuoSetupDescription": "לאחר שהיישום נרשם והמשתנים הסביבתיים הוגדרו על מופע ה-OmniRoute הזה, לחץ על המשך כדי להתחיל את הכניסה באמצעות OAuth.",
     "continue": "להמשיך",
+    "copilotPolicyTitle": "ספק ניסיוני: סטטוס הפוליסה אינו ברור",
+    "copilotPolicyLine1": "OmniRoute מתחבר דרך api.githubcopilot.com, אשר GitHub לא פרסמה כהסקת צד שלישי כללית API. שילוב זה הוא ניסיוני ועשוי להשתנות ללא הודעה מוקדמת.",
+    "copilotPolicyLine2": "רק חשבון GitHub משלך יכול להיות מחובר. לעולם אל תשתף אישורים, חשבונות מאגר, או תנסה לחרוג ממגבלות התוכנית שלך.",
+    "copilotPolicyLine3": "משתמשי חינם ותוכנית סטודנטים מקבלים בחירת דגם אוטומטית בלבד. תנאי תוכנית Copilot שלך וכל מגבלת שימוש נשארים באחריותך.",
+    "copilotPolicyAcknowledge": "אני מבין, תתחבר",
     "tabPasteSetupToken": "אסימון הגדרה",
     "claudeSetupTokenDescription": "הריצו `claude setup-token` במסוף והדביקו את האסימון שהוא מדפיס. הוא תקף לשנה אחת ואין לו אסימון רענון. OmniRoute שולח בקשת בדיקה אחת ל-Anthropic לפני שמירתו.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "הצגת השיחה",
       "openConversation": "פתיחת השיחה {id}"
     },
-    "tableLabel": "יומני בקשות"
+    "tableLabel": "יומני בקשות",
+    "throughputPostFirstToken": "לאחר הטוקן הראשון",
+    "throughputEndToEnd": "מקצה לקצה",
+    "throughputRate": "{value} טוקנים/שנייה",
+    "throughputExplanation": "שני הקצבים משתמשים במספר הגדול מבין ספירות טוקני הפלט והחשיבה. הקצב שלאחר הטוקן הראשון אינו כולל TTFT תקף; אחרת הוא משתמש במשך המלא. קצב מקצה לקצה משתמש תמיד במשך המלא. לתגובה עם חוצץ יכולה להיות מהירות אספקה גבוהה בפרץ בלי יצירת מודל מהירה יותר."
   },
   "proxyLogger": {
     "filterAll": "הכול",
@@ -12785,7 +12913,8 @@
     "title": "סטטיסטיקות ספקים",
     "description": "תעבורה, זמני השהיה ושיעורי הצלחה לפי ספק ולפי מודל",
     "combo": "משולב",
-    "toggleModels": "הצגת מודלים עבור {provider}"
+    "toggleModels": "הצגת מודלים עבור {provider}",
+    "windowSince": "מאז {date}"
   },
   "relay": {
     "title": "פרוקסי Relay ללא שרת",
@@ -13730,7 +13859,9 @@
       "disabled": "מושבת",
       "dual": "כפול",
       "alias": "כינוי",
-      "canonical": "קנוני"
+      "canonical": "קנוני",
+      "fail_closed": "חסום (fail_closed)",
+      "count_as_zero": "נספר כ-$0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "עצירות תשתית בעדיפות מוגנת מוחזרות כ-502",
         "description": "יש להשיב ב-502 במקום ב-503 כאשר יעד בעדיפות שמאפשר גיבוי רק במקרה של מכסה עוצר את השילוב מסיבה שניתן להוכיח שאינה קשורה למכסה: מפסק מעגל פתוח של ספק או דילוג חזוי בשל זמן השהיה."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "מדיניות תקציב לשימוש לא מתומחר",
+        "description": "כיצד מגבלות USD יומיות/שבועיות לכל מפתח מתייחסות לשימוש מוצלח של ספק או מודל שאין לו שורת תמחור. fail_closed (ברירת מחדל) מסמן שהחלון עבר את המגבלה, כך שעלות לא ידועה לא תעבור מעולם את המכסה הקשיחה. count_as_zero מחשב שימוש זה כ-$0 וממשיך לאכוף את ההוצאה המתומחרת. מודלים ללא תמחור מופיעים בדף הבית של לוח המחוונים בכל מקרה."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "סגירה"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "השבתת היצירה של וריאציות של רמת החשיבה (למשל -low, -medium, -high) בקטלוג /v1/models.",
+  "teamCosts": {
+    "title": "עלויות צוות",
+    "subtitle": "נהלו תקציבים רכים משותפים והערכות עלות מהקטלוג.",
+    "refresh": "רענון",
+    "create": "יצירת צוות",
+    "edit": "עריכת צוות",
+    "archive": "העברה לארכיון",
+    "selectTeam": "צוותים",
+    "searchTeams": "חיפוש צוותים",
+    "statusFilter": "סטטוס הצוות",
+    "active": "פעיל",
+    "archived": "בארכיון · לקריאה בלבד",
+    "allTeams": "כל הצוותים",
+    "noTeams": "אין צוותים תואמים.",
+    "selectHint": "צרו או בחרו צוות כדי לראות עלויות.",
+    "loading": "טוען עלויות צוות…",
+    "budgetTitle": "התקציב הרך הנוכחי",
+    "budgetSubtitle": "שימוש מוצלח שנרשם · חלון מתגלגל · בלתי תלוי בתאריכי הדוח",
+    "archivedBudget": "בארכיון: אכיפת התקציב אינה פעילה. דוחות היסטוריים נשארים זמינים.",
+    "unlimited": "ללא הגבלה — לא הוגדר תקציב רך משותף.",
+    "budgetUnavailable": "סטטוס התקציב אינו זמין. רעננו כדי לנסות שוב.",
+    "used": "שימוש מוצלח",
+    "maximum": "תקרת התקציב",
+    "remaining": "יתרה ידועה",
+    "resets": "מתאפס ב",
+    "unpricedBudget": "לחלק מהשימוש המוצלח מחיר לא ידוע. הסכום הידוע חלקי; אכיפת התקציב רואה בחלון זה חריגה.",
+    "overBudget": "התקציב הושג או נחרג · חריגה של {amount}",
+    "reportTitle": "דוח שימוש",
+    "reportSubtitle": "כל הניסיונות · הערכת קטלוג ב-USD, לא חשבונית · ימי UTC שלמים",
+    "reportPeriod": "תקופת הדוח",
+    "day1": "יום אחד",
+    "day7": "7 ימים",
+    "day30": "30 יום",
+    "allTime": "כל הזמן",
+    "reportSpend": "הוצאה משוערת בדוח",
+    "requests": "בקשות",
+    "assignedKeys": "מפתחות מוקצים",
+    "unpricedReport": "הדוח כולל מחירים לא ידועים. ההוצאה המשוערת חלקית.",
+    "breakdown": "עלות לפי מפתח API",
+    "noUsage": "אין שימוש בתקופת דוח זו.",
+    "keyName": "שם מפתח API",
+    "tokens": "אסימוני קלט + פלט",
+    "unnamedKey": "מפתח ללא שם או שנמחק",
+    "unpriced": "מחיר לא ידוע",
+    "members": "חברות",
+    "memberSubtitle": "שינוי חברות משאיר את ההוצאה ההיסטורית אצל הצוות המקורי.",
+    "searchKeys": "חיפוש מפתחות או בעלים נוכחיים",
+    "chooseKey": "בחרו מפתח API",
+    "unassigned": "לא מוקצה",
+    "ownership": "צוות החיוב הנוכחי: {team}",
+    "assign": "הקצאה",
+    "remove": "הסרה",
+    "noMembers": "אין חברים נוכחיים. שימוש היסטורי עדיין עשוי להיספר בתקציב.",
+    "assignedAt": "הוקצה ב-{date} (UTC)",
+    "name": "שם הצוות",
+    "description": "תיאור",
+    "enableBudget": "הפעלת תקציב רך משותף",
+    "amount": "סכום התקציב (USD)",
+    "duration": "חלון תקציב מתגלגל",
+    "cancel": "ביטול",
+    "save": "שמירה",
+    "confirm": "אישור",
+    "transferTitle": "אישור העברת מפתח",
+    "transferMessage": "להעביר מפתח זה מ-“{source}” אל “{destination}”? ההוצאה ההיסטורית נשארת אצל הצוות המקורי.",
+    "removeTitle": "הסרת הקצאת מפתח",
+    "removeMessage": "להסיר מפתח זה מ-“{team}”? ההוצאה ההיסטורית נשארת בצוות זה.",
+    "archiveTitle": "העברת הצוות לארכיון",
+    "archiveMessage": "להעביר את “{team}” לארכיון? כל הקישורים הנוכחיים נסגרים ואכיפת התקציב נפסקת. דוחות היסטוריים נשארים זמינים.",
+    "invalidName": "הזינו שם (1–200 תווים) ותיאור של עד 2,000 תווים.",
+    "invalidAmount": "הזינו סכום תקציב סופי הגדול מאפס.",
+    "unauthorized": "היכנסו ללוח הניהול כדי להמשיך.",
+    "forbidden": "אין לכם הרשאה לנהל צוותים. הקלט שלכם נשמר.",
+    "notFound": "הצוות או ההקצאה כבר אינם קיימים.",
+    "conflict": "ההקצאה או הצוות השתנו. רעננו ואשרו את הבעלות הנוכחית לפני ניסיון נוסף.",
+    "failed": "הבקשה נכשלה. הקלט שלכם נשמר; נסו שוב.",
+    "partialBudget": "חלק מהדליים היומיים שנשמרו חופפים לגבול החלון ואי אפשר לחלקם במדויק. ההוצאה המוצגת חלקית; המכסה הנותרת אינה זמינה. מדיניות התקציב הרך הקיימת לא השתנתה."
+  },
   "connectionTest": {
     "title": "הודעת בדיקה",
     "description": "שליחת בקשה אמיתית אחת דרך חשבון זה. פעולה זו משתמשת בכמות קטנה מהמכסה ועשויה להתחיל חלון שימוש, בהתאם לספק.",
@@ -15216,5 +15428,8 @@
     "importButton": "ייבוא",
     "importFailed": "הייבוא נכשל.",
     "importSuccess": "יובאו {connections} חשבונות ו-{nodes} צמתי ספק; דולגו {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "התחלה מהמיקום הנוכחי (דילוג על יומנים קיימים)"
   }
 }

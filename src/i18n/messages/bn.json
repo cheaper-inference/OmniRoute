@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "দলের খরচ",
+    "subtitle": "শেয়ার করা সফট বাজেট এবং ক্যাটালগ খরচের অনুমান পরিচালনা করুন।",
+    "refresh": "রিফ্রেশ",
+    "create": "দল তৈরি করুন",
+    "edit": "দল সম্পাদনা করুন",
+    "archive": "আর্কাইভ করুন",
+    "selectTeam": "দলসমূহ",
+    "searchTeams": "দল খুঁজুন",
+    "statusFilter": "দলের অবস্থা",
+    "active": "সক্রিয়",
+    "archived": "আর্কাইভ করা · শুধু পড়ার জন্য",
+    "allTeams": "সব দল",
+    "noTeams": "কোনো মিলে যাওয়া দল নেই।",
+    "selectHint": "খরচ দেখতে একটি দল তৈরি বা নির্বাচন করুন।",
+    "loading": "দলের খরচ লোড হচ্ছে…",
+    "budgetTitle": "বর্তমান সফট বাজেট",
+    "budgetSubtitle": "সফলভাবে নথিভুক্ত ব্যবহার · রোলিং উইন্ডো · রিপোর্টের তারিখ নিরপেক্ষ",
+    "archivedBudget": "আর্কাইভ করা: বাজেট প্রয়োগ নিষ্ক্রিয়। ঐতিহাসিক রিপোর্ট পাওয়া যাবে।",
+    "unlimited": "সীমাহীন — কোনো শেয়ার করা সফট বাজেট কনফিগার করা নেই।",
+    "budgetUnavailable": "বাজেটের অবস্থা পাওয়া যাচ্ছে না। আবার চেষ্টা করতে রিফ্রেশ করুন।",
+    "used": "সফল ব্যবহার",
+    "maximum": "বাজেটের সর্বোচ্চ সীমা",
+    "remaining": "জানা অবশিষ্ট",
+    "resets": "রিসেট হবে",
+    "unpricedBudget": "সফল ব্যবহারের কিছু অংশের দাম অজানা। জানা যোগফল অসম্পূর্ণ; বাজেট প্রয়োগ এই উইন্ডোকে সীমা ছাড়ানো ধরে।",
+    "overBudget": "বাজেট পৌঁছেছে বা ছাড়িয়ে গেছে · {amount} বেশি",
+    "reportTitle": "ব্যবহার রিপোর্ট",
+    "reportSubtitle": "সব প্রচেষ্টা · USD-তে ক্যাটালগ অনুমান, চালান নয় · পূর্ণ UTC তারিখ",
+    "reportPeriod": "রিপোর্টের সময়কাল",
+    "day1": "১ দিন",
+    "day7": "৭ দিন",
+    "day30": "৩০ দিন",
+    "allTime": "সব সময়",
+    "reportSpend": "রিপোর্টের আনুমানিক ব্যয়",
+    "requests": "অনুরোধ",
+    "assignedKeys": "বরাদ্দ করা কী",
+    "unpricedReport": "এই রিপোর্টে অজানা দাম আছে। আনুমানিক ব্যয় অসম্পূর্ণ।",
+    "breakdown": "API কী অনুযায়ী খরচ",
+    "noUsage": "এই রিপোর্টের সময়কালে কোনো ব্যবহার নেই।",
+    "keyName": "API কী-র নাম",
+    "tokens": "ইনপুট + আউটপুট টোকেন",
+    "unnamedKey": "নামহীন বা মুছে ফেলা কী",
+    "unpriced": "অজানা দাম",
+    "members": "সদস্যপদ",
+    "memberSubtitle": "সদস্যপদ বদলালে ঐতিহাসিক ব্যয় মূল দলেই থাকে।",
+    "searchKeys": "কী বা বর্তমান মালিক খুঁজুন",
+    "chooseKey": "একটি API কী বেছে নিন",
+    "unassigned": "বরাদ্দ নেই",
+    "ownership": "বর্তমান বিলিং দল: {team}",
+    "assign": "বরাদ্দ করুন",
+    "remove": "সরান",
+    "noMembers": "কোনো বর্তমান সদস্য নেই। ঐতিহাসিক ব্যবহার এখনও বাজেটে গণ্য হতে পারে।",
+    "assignedAt": "{date} তারিখে বরাদ্দ (UTC)",
+    "name": "দলের নাম",
+    "description": "বিবরণ",
+    "enableBudget": "শেয়ার করা সফট বাজেট চালু করুন",
+    "amount": "বাজেটের পরিমাণ (USD)",
+    "duration": "রোলিং বাজেট উইন্ডো",
+    "cancel": "বাতিল",
+    "save": "সংরক্ষণ",
+    "confirm": "নিশ্চিত করুন",
+    "transferTitle": "কী স্থানান্তর নিশ্চিত করুন",
+    "transferMessage": "এই কী “{source}” থেকে “{destination}”-এ সরাবেন? ঐতিহাসিক ব্যয় মূল দলেই থাকে।",
+    "removeTitle": "কী বরাদ্দ সরান",
+    "removeMessage": "এই কী “{team}” থেকে সরাবেন? ঐতিহাসিক ব্যয় এই দলেই থাকে।",
+    "archiveTitle": "দল আর্কাইভ করুন",
+    "archiveMessage": "“{team}” আর্কাইভ করবেন? সব বর্তমান বাঁধন বন্ধ হবে এবং বাজেট প্রয়োগ থামবে। ঐতিহাসিক রিপোর্ট পাওয়া যাবে।",
+    "invalidName": "একটি নাম (১–২০০ অক্ষর) এবং সর্বোচ্চ ২,০০০ অক্ষরের বিবরণ দিন।",
+    "invalidAmount": "শূন্যের চেয়ে বড় একটি সীমিত বাজেটের পরিমাণ দিন।",
+    "unauthorized": "চালিয়ে যেতে ম্যানেজমেন্ট ড্যাশবোর্ডে সাইন ইন করুন।",
+    "forbidden": "দল পরিচালনার অনুমতি আপনার নেই। আপনার ইনপুট সংরক্ষিত আছে।",
+    "notFound": "এই দল বা বরাদ্দ আর নেই।",
+    "conflict": "বরাদ্দ বা দল বদলেছে। আবার চেষ্টার আগে রিফ্রেশ করে বর্তমান মালিকানা নিশ্চিত করুন।",
+    "failed": "অনুরোধ ব্যর্থ হয়েছে। আপনার ইনপুট সংরক্ষিত আছে; আবার চেষ্টা করুন।",
+    "partialBudget": "সংরক্ষিত কিছু দৈনিক বাকেট উইন্ডোর সীমার সঙ্গে মিলে যায় এবং সঠিকভাবে ভাগ করা যায় না। দেখানো ব্যয় অসম্পূর্ণ; অবশিষ্ট বরাদ্দ পাওয়া যাচ্ছে না। বিদ্যমান সফট বাজেট নীতি অপরিবর্তিত।"
+  },
   "codexKeyServiceMode": {
     "title": "এই API কী-এর জন্য Codex সার্ভিস মোড",
     "description": "কম্বোর ভেতরের Codex মডেলসহ Codex অনুরোধগুলোর ক্ষেত্রে প্রযোজ্য। বাধ্যতামূলক মোড ক্লায়েন্ট, গ্লোবাল সেটিংস এবং সংযোগের ডিফল্টকে অগ্রাহ্য করে। অন্যান্য প্রোভাইডার অপরিবর্তিত থাকে।",
@@ -1345,7 +1422,9 @@
       "open": "খুলুন",
       "close": "বন্ধ করুন"
     },
-    "noResults": "কোন ফলাফল নেই"
+    "noResults": "কোন ফলাফল নেই",
+    "costsTeams": "দলসমূহ",
+    "costsTeamsSubtitle": "দলের খরচ কেন্দ্র"
   },
   "webhooks": {
     "title": "ওয়েবহুক",
@@ -1598,6 +1677,7 @@
     "dismissError": "ত্রুটি বাতিল করুন"
   },
   "header": {
+    "teamsDescription": "দলের খরচের অনুমান ও শেয়ার করা সফট বাজেট",
     "logout": "লগআউট",
     "quickNavigation": "দ্রুত নেভিগেশন",
     "quickNavigationTitle": "দ্রুত নেভিগেশন (⌘K / Ctrl+K)",
@@ -1922,7 +2002,14 @@
     "readinessStep3": "আপনার এন্ডপয়েন্ট কপি করুন",
     "readinessStep4": "একটি টেস্ট রিকোয়েস্ট পাঠান",
     "readinessContinue": "সেটআপ চালিয়ে যান",
-    "readinessDismiss": "আপাতত সরিয়ে দিন"
+    "readinessDismiss": "আপাতত সরিয়ে দিন",
+    "unpricedUsageTitle": "{count, plural, one {#টি মডেল} other {#টি মডেল}} সাম্প্রতিক ব্যবহার আছে কিন্তু মূল্য কনফিগার করা নেই",
+    "unpricedUsageFailClosed": "{keys, plural, one {#টি API কী যার ব্যবহার সীমা আছে} other {#টি API কী যার ব্যবহার সীমা আছে}} গত 8 দিনে এই মডেলগুলো ব্যবহার করেছে। যখন সেই ব্যবহার কীটির দৈনিক বা সাপ্তাহিক উইন্ডোর ভেতরে থাকে, কীটিকে কোটা অতিক্রম করেছে বলে ধরা হয় এবং তার অনুরোধগুলো ব্লক করা হয় (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "এই ব্যবহার প্রতি কী-র ব্যবহার সীমায় $0 হিসেবে গণ্য হবে (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {#টি অনুরোধ} other {#টি অনুরোধ}}, {keys, plural, one {#টি সীমাবদ্ধ API কী} other {#টি সীমাবদ্ধ API কী}}",
+    "unpricedUsageMore": "…এবং আরও {count}",
+    "unpricedUsageConfigure": "মূল্য কনফিগার করুন",
+    "unpricedUsageDismiss": "বাতিল"
   },
   "analytics": {
     "title": "বিশ্লেষণ",
@@ -2959,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - ম্যানুয়াল কনফিগারেশন",
     "clineManualConfiguration": "Cline ম্যানুয়াল কনফিগারেশন",
     "kiloManualConfiguration": "Kilo Code ম্যানুয়াল কনফিগারেশন",
+    "piManualConfiguration": "পাই - ম্যানুয়াল কনফিগারেশন",
+    "piConfigInvalidTitle": "Pi models.json অপঠনযোগ্য",
+    "piOmnirouteConfigured": "OmniRoute একটি Pi কাস্টম প্রদানকারী হিসাবে কনফিগার করা হয়েছে",
+    "piModelHelp": "Pi কাস্টম এন্ডপয়েন্টের জন্য মডেল স্বয়ংক্রিয়ভাবে খুঁজে পায় না — আপনি যে মডেলটি বেছে নেন সেটি সরাসরি models.json-এ লেখা হয়।",
+    "piManualConfigTitle": "অথবা ~/.pi/agent/models.json নিজে সম্পাদনা করুন",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "তারপরে Pi শুরু করুন এবং omniroute প্রদানকারী নির্বাচন করুন। পুরো এজেন্ট ডিরেক্টরি সরাতে PI_CODING_AGENT_DIR সেট করুন।",
+    "piUnownedNote": "এই এন্ট্রিটি OmniRoute এর বাইরে যোগ করা হয়েছে (যেমন pi-gui-এর কাস্টম এন্ডপয়েন্ট)। আবেদন করলে তা গ্রহণ করবে; রিসেট শুধুমাত্র OmniRoute লেখা এন্ট্রি মুছে দেয়।",
     "whenToUseLabel": "কখন ব্যবহার করবেন",
     "openToolDocs": "টুলের ডকুমেন্টেশন খুলুন",
     "toolUseCases": {
@@ -2978,6 +3073,7 @@
       "amp": "Amp শর্টহ্যান্ড ওয়ার্কফ্লো চাইলে, তবে OmniRoute অ্যালিয়াস এবং রাউটিং নিয়ম প্রয়োগেরও প্রয়োজন হলে ব্যবহার করুন।",
       "hermes": "দ্রুত কাজের জন্য হালকা, টার্মিনাল-নেটিভ AI সহকারীর প্রয়োজন হলে ব্যবহার করুন।",
       "hermes-agent": "যখন আপনার OmniRoute-এর মাধ্যমে রাউট করা ডিফল্ট, ডেলিগেশন, ভিশন এবং অক্সিলিয়ারি মডেল সহ Hermes Agent (Nousresearch দ্বারা)-এর প্রয়োজন হবে তখন এটি ব্যবহার করুন।",
+      "whycodes": "যখন আপনি WhyCodes-কে OmniRoute-এর দিকে নির্দেশিত একটি বহুমুখী স্বায়ত্তশাসিত CLI এজেন্ট (TUI, নামযুক্ত এজেন্ট, মেমরি, swarm) হিসেবে চান তখন ব্যবহার করুন।",
       "custom": "কাস্টম টুল বাস্তবায়ন বা সাধারণ OpenAI-সামঞ্জস্যপূর্ণ কনফিগারেশনের জন্য ব্যবহার করুন।"
     },
     "toolDescriptions": {
@@ -2987,6 +3083,7 @@
       "grok-build": "কাস্টম প্রোভাইডার সাপোর্ট সহ xAI Grok Build TUI কোডিং এজেন্ট",
       "droid": "Factory Droid AI সহকারী",
       "openclaw": "Open Claw AI সহকারী",
+      "openclaude": "OpenAI-সামঞ্জস্যপূর্ণ প্রোভাইডার সমর্থনসহ OpenClaude কোডিং এজেন্ট CLI",
       "cline": "Cline AI কোডিং সহকারী CLI",
       "kilo": "Kilo Code AI সহকারী CLI",
       "qwen": "Qwen Code CLI",
@@ -3018,6 +3115,7 @@
       "warp": "কাস্টম প্রোভাইডার সাপোর্ট সহ Warp AI টার্মিনাল",
       "agent-deck": "Agent Deck মাল্টি-এজেন্ট অর্কেস্ট্রেটর",
       "5dive": "5dive — নিজে হোস্ট করা কোডিং এজেন্টের বহর; একটি auth প্রোফাইল সবগুলোকে OmniRoute-এ নির্দেশ করে",
+      "whycodes": "OpenAI-সামঞ্জস্যপূর্ণ base URL সহ WhyCodes স্বায়ত্তশাসিত CLI এজেন্ট",
       "zed": "Zed কোড এডিটর — OpenAI-সামঞ্জস্যপূর্ণ প্রোভাইডারের মাধ্যমে বিল্ট-ইন এজেন্ট"
     },
     "guides": {
@@ -3275,6 +3373,12 @@
     "cliproxyapiUpdate": "আপডেট",
     "cliproxyapiUpdateAvailable": "আপডেট উপলব্ধ: v{current} → v{latest}",
     "cliproxyapiVersion": "সংস্করণ",
+    "piInstallTitle": "পাই কোডিং এজেন্ট ইনস্টল করুন",
+    "piInstallInstructions": "Pi CLI ইনস্টল করুন, তারপর OmniRoute এর সাথে সংযোগ করতে এখানে ফিরে আসুন।",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi চালিত মেশিন থেকে URL ব্যবহার করুন। OpenAI- সামঞ্জস্যপূর্ণ /v1 এন্ডপয়েন্ট স্বয়ংক্রিয়ভাবে যোগ করা হয়।",
+    "piManualMergeHint": "শুধুমাত্র পূর্বরূপ. এই providers.omniroute এন্ট্রিকে models.json তে মার্জ করুন যাতে আপনার অন্যান্য প্রদানকারী এবং সেটিংস অক্ষত থাকে।",
     "removeMapping": "ম্যাপিং সরান"
   },
   "modelCatalog": {
@@ -3339,6 +3443,18 @@
     "maxMembersPlaceholder": "যেমন 10",
     "testSelected": "নির্বাচিতগুলো পরীক্ষা করুন ({count})",
     "testAllFiltered": "ফিল্টার করা সব পরীক্ষা করুন ({count})",
+    "visibility": "দৃশ্যমানতা",
+    "allVisibility": "দৃশ্যমান ও লুকানো",
+    "visibleOnly": "দৃশ্যমান",
+    "hiddenOnly": "লুকানো",
+    "visibleColumn": "দৃশ্যমান",
+    "hideModel": "/v1/models থেকে {name} লুকান",
+    "showModel": "/v1/models-এ {name} দেখান",
+    "hiddenBadge": "লুকানো",
+    "hideFiltered": "ফিল্টার করা লুকান ({count})",
+    "showFiltered": "ফিল্টার করা দেখান ({count})",
+    "visibilityCounts": "{visible}টি দৃশ্যমান · {hidden}টি লুকানো · মোট {total}টি",
+    "visibilityUpdateFailed": "মডেলের দৃশ্যমানতা আপডেট করা যায়নি",
     "cancel": "বাতিল",
     "clearResults": "ফলাফল মুছুন",
     "testing": "পরীক্ষা করা হচ্ছে...",
@@ -3394,7 +3510,44 @@
     "httpError": "HTTP {status} সহ অনুরোধ ব্যর্থ হয়েছে",
     "testFailedNoDetail": "কোনো ত্রুটি বার্তা ছাড়াই পরীক্ষা ব্যর্থ হয়েছে",
     "additionalCapabilities": "অতিরিক্ত সক্ষমতা: {list}",
-    "comboRefMember": "কম্বো → {name}"
+    "comboRefMember": "কম্বো → {name}",
+    "keyAccessButton": "API কী অ্যাক্সেস",
+    "allowedInKeys": "অনুমোদিত: {count, plural, one {#টি কী} other {#টি কী}}",
+    "keysLoading": "API কী লোড হচ্ছে…",
+    "keysRetry": "কী পুনরায় লোড করার চেষ্টা করুন",
+    "accessViaPattern": "{pattern}-এর মাধ্যমে",
+    "accessBlocked": "{pattern} দ্বারা ব্লক করা হয়েছে",
+    "editKeyAccess": "কী অ্যাক্সেস সম্পাদনা করুন",
+    "toggleKeyAccess": "{name}-এ {item} অনুমতি দিন",
+    "resultNetworkError": "অ্যাসাইনমেন্ট ব্যর্থ হয়েছে",
+    "resultWouldEmptyModels": "এটি এই কী-তে কোনো অনুমোদিত মডেল রাখবে না — এর পরিবর্তে কী অ্যাক্সেস সম্পাদনা করুন",
+    "resultWouldEmptyCombos": "এটি এই কী-তে কোনো অনুমোদিত কম্বো রাখবে না — এর পরিবর্তে কী অ্যাক্সেস সম্পাদনা করুন",
+    "keyUpdatePending": "{name} এখনও আপডেট করা হচ্ছে। কিছুক্ষণের মধ্যে আবার চেষ্টা করুন।",
+    "assignToKeys": "API কীতে অ্যাসাইন করুন…",
+    "assignApply": "পরিবর্তন প্রয়োগ করুন",
+    "assignComplete": "API কী অ্যাক্সেস আপডেট করা হয়েছে",
+    "assignFailed": "কিছু API কী আপডেট ব্যর্থ হয়েছে",
+    "assignNoChanges": "কোনো API কী অ্যাক্সেস পরিবর্তন করা হয়নি",
+    "selectedAccessItems": "নির্বাচিত আইটেম: {count}টি",
+    "assignExcludedCombos": "{count, plural, one {#টি নির্বাচিত কম্বো সারি কোনো মডেল নয় এবং এখানে এড়িয়ে যাওয়া হবে} other {#টি নির্বাচিত কম্বো সারি কোনো মডেল নয় এবং এখানে এড়িয়ে যাওয়া হবে}}। Combos ট্যাব থেকে কম্বো বরাদ্দ করুন।",
+    "assignActionAdd": "যোগ করুন",
+    "assignActionRemove": "সরিয়ে ফেলুন",
+    "searchKeys": "API কী খুঁজুন",
+    "selectApiKey": "API কী {name} নির্বাচন করুন",
+    "allModelsAccess": "সকল মডেল",
+    "allCombosAccess": "সকল কম্বো",
+    "modelAccessCount": "মডেল: {count}টি",
+    "comboAccessCount": "কম্বো: {count}টি",
+    "keyInactive": "নিষ্ক্রিয়",
+    "keyBanned": "নিষিদ্ধ",
+    "keyRevoked": "বাতিল করা হয়েছে",
+    "switchRestrictedConfirm": "এই কী-টিকে সীমাবদ্ধ অ্যাক্সেসে পরিবর্তন করুন: কেবল নির্বাচিত আইটেমগুলোর অনুমতি থাকবে",
+    "removeNoChangeHint": "এই কী সবকিছু অনুমতি দেয়; নির্বাচিত আইটেমগুলো সরালে কোনো পরিবর্তন হবে না",
+    "removeStaysAllowedHint": "{patterns}-এর মাধ্যমে এখনও এই কী-তে অনুমোদিত",
+    "resultChanged": "পরিবর্তিত",
+    "resultUnchanged": "কোনো পরিবর্তন নেই",
+    "resultSkipped": "এড়িয়ে যাওয়া হয়েছে",
+    "resultNeedsSwitch": "সীমাবদ্ধ অবস্থায় পরিবর্তন করা প্রয়োজন"
   },
   "combos": {
     "title": "কম্বোসমূহ",
@@ -3515,6 +3668,9 @@
     "moveUp": "উপরে সরান",
     "moveDown": "নিচে সরান",
     "removeModel": "সরিয়ে দিন",
+    "testStep": "এই মডেলটি পরীক্ষা করুন",
+    "testStepRunning": "পরীক্ষা চলছে…",
+    "testStepNotTestable": "শুধুমাত্র একক-মডেল ধাপগুলি পরীক্ষা করা যায়",
     "saving": "সংরক্ষণ করা হচ্ছে...",
     "liveNoProviders": "এখনও কোনো প্রোভাইডার দেখা যায়নি।",
     "liveFleetDataHint": "ফ্লিট ডেটা লাইভ কম্বো ইভেন্টের মাধ্যমে আসে।",
@@ -5334,6 +5490,27 @@
     "importFromFileDownloadTemplate": "CSV টেমপ্লেট ডাউনলোড করুন",
     "importFromFileMoreErrors": "+আরও {count}টি",
     "importFromFileSchemaHint": "CSV কলামগুলো অবস্থানভিত্তিক: provider, name, apiKey, baseUrl (ঐচ্ছিক), priority (ঐচ্ছিক)। provider কলামে অবশ্যই বিদ্যমান কোনো পরিচালিত প্রোভাইডারের id অথবা ইতোমধ্যে নিবন্ধিত OpenAI/Anthropic-সামঞ্জস্যপূর্ণ নোডের id থাকতে হবে—এই ইমপোর্ট নতুন এন্ডপয়েন্ট নোড তৈরি করে না।",
+    "importOAuthExport": "OAuth এক্সপোর্ট ইম্পোর্ট করুন",
+    "oauthExportTitle": "অ্যাকাউন্ট-ম্যানেজার এক্সপোর্ট ইম্পোর্ট করুন",
+    "oauthExportDescription": "কোনো অ্যাকাউন্ট ম্যানেজার থেকে প্লেইনটেক্সট এক্সপোর্ট আপলোড করুন (যেমন Antigravity Manager-এর cloud-accounts এক্সপোর্ট)। টোকেনগুলো সার্ভারে রিফ্রেশ করা হয় এবং প্রতিটি অ্যাকাউন্ট একটি OAuth সংযোগে পরিণত হয় — ডুপ্লিকেটগুলো জায়গাতেই রিফ্রেশ হয়।",
+    "oauthExportProviderLabel": "প্রোভাইডার",
+    "oauthExportChoose": "ফাইল বেছে নিন",
+    "oauthExportFileAria": "অ্যাকাউন্ট এক্সপোর্ট JSON ফাইল",
+    "oauthExportSchemaHint": "গ্রহণযোগ্য: \"accounts\" অ্যারে সহ একটি ডকুমেন্ট, একটি সাধারণ অ্যারে, অথবা একটি একক রেকর্ড। টোকেনগুলো একটি নেস্টেড token অবজেক্টের ভেতরে বা সরাসরি রেকর্ডে থাকতে পারে।",
+    "oauthExportDetected": "{count}টি অ্যাকাউন্ট শনাক্ত হয়েছে",
+    "oauthExportSelectAll": "সব অ্যাকাউন্ট নির্বাচন করুন",
+    "oauthExportSelectAccount": "অ্যাকাউন্ট {index} নির্বাচন করুন",
+    "oauthExportColEmail": "ইমেল",
+    "oauthExportColProvider": "প্রোভাইডার",
+    "oauthExportColRefresh": "রিফ্রেশ টোকেন",
+    "oauthExportNoEmail": "(কোনো ইমেল নেই)",
+    "oauthExportYes": "হ্যাঁ",
+    "oauthExportNo": "না",
+    "oauthExportImporting": "ইম্পোর্ট করা হচ্ছে…",
+    "oauthExportImport": "{count}টি অ্যাকাউন্ট ইম্পোর্ট করুন",
+    "oauthExportResult": "{imported}/{total} ইম্পোর্ট হয়েছে — {failed}টি ব্যর্থ",
+    "oauthExportParseError": "এই ফাইল থেকে কোনো অ্যাকাউন্ট পড়া যায়নি।",
+    "oauthExportUnknownError": "অজানা ত্রুটি",
     "adaptaTutorial": {
       "title": "Adapta Web কীভাবে কানেক্ট করবেন",
       "introPrefix": "Adapta Clerk-এর মাধ্যমে প্রমাণীকরণ করে। টোকেনটি",
@@ -5584,6 +5761,7 @@
     "allModelsAlreadyImported": "সব মডেল ইতিমধ্যেই ইম্পোর্ট করা হয়েছে",
     "noNewModelsToImport": "ইম্পোর্ট করার মতো কোনো নতুন মডেল নেই — সব মডেল ইতিমধ্যেই registry বা custom models তালিকায় রয়েছে",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "মডেল আবিষ্কার ব্যর্থ হয়েছে {time}",
     "skippingExistingModels": "বিদ্যমান {count}টি মডেল এড়িয়ে যাওয়া হচ্ছে",
     "autoSync": "স্বয়ংক্রিয় সিঙ্ক",
     "autoSyncShort": "সিঙ্ক",
@@ -6814,7 +6992,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count}টি কম্বোতে ব্যবহৃত: {combos}",
+    "openComboTooltip": "কম্বো খুলুন — {combo} দ্বারা ব্যবহৃত"
   },
   "settings": {
     "title": "সেটিংস",
@@ -8798,6 +8978,8 @@
     "qdrantHost": "হোস্ট",
     "qdrantCollection": "সংগ্রহ",
     "catalogVisibilityHint": "লুকানো মডেল আইডিগুলো একই প্রবেশাধিকারে কল করা যাবে।",
+    "exposeCombosOnly": "/v1/models-এ শুধু কম্বো তালিকাভুক্ত করুন",
+    "exposeCombosOnlyDesc": "যে ক্লায়েন্টরা স্বয়ংক্রিয়ভাবে মডেল খুঁজে নেয় তারা কাঁচা প্রোভাইডার মডেলের বদলে আপনার কম্বো (এবং লুকানো না থাকলে auto/*) দেখবে। স্পষ্ট provider/model আইডি রাউট হতে থাকবে।",
     "catalogScopeTitle": "Models API তালিকা",
     "catalogScopeDesc": "এই কী-এর জন্য GET /v1/models যা প্রদর্শন করে। তালিকা সীমিত করলেও কী-টি কী কল করতে পারবে তা কখনোই পরিবর্তিত হয় না।",
     "catalogScopeAll": "উভয়ই",
@@ -8917,7 +9099,9 @@
         "financial": "আর্থিক",
         "brazilian": "ব্রাজিলীয়",
         "usa": "যুক্তরাষ্ট্র",
-        "full": "সম্পূর্ণ"
+        "full": "সম্পূর্ণ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (দক্ষিণ আফ্রিকা)"
       },
       "builtinTypes": "অন্তর্নির্মিত ধরন",
       "types": {
@@ -8931,7 +9115,19 @@
         "ip_address": "IPv4 ঠিকানা",
         "ipv6_address": "IPv6 ঠিকানা",
         "aws_key": "AWS অ্যাক্সেস কী",
-        "api_key_generic": "API কী ও টোকেন"
+        "api_key_generic": "API কী ও টোকেন",
+        "iban": "IBAN ব্যাঙ্ক অ্যাকাউন্ট নম্বর",
+        "eu_vat": "EU VAT সংখ্যা",
+        "es_dni_nie": "স্প্যানিশ DNI / NIE",
+        "it_codice_fiscale": "ইতালীয় কোডিস ফিসকেল",
+        "pl_pesel": "পোলিশ PESEL",
+        "nl_bsn": "ডাচ BSN",
+        "de_steuer_id": "জার্মান স্ট্যুয়ার-আইডি",
+        "se_personnummer": "সুইডিশ ব্যক্তি সংখ্যা",
+        "za_id": "দক্ষিণ আফ্রিকার ID সংখ্যা",
+        "za_phone": "দক্ষিণ আফ্রিকার ফোন নম্বর",
+        "za_vat": "দক্ষিণ আফ্রিকার VAT সংখ্যা",
+        "za_tax_ref": "দক্ষিণ আফ্রিকার ট্যাক্স রেফারেন্স"
       },
       "customPatterns": "কাস্টম প্যাটার্ন",
       "customPatternsDesc": "মিলগুলো [CUSTOM_REDACTED] দিয়ে প্রতিস্থাপিত হয়। সর্বোচ্চ {max}টি প্যাটার্ন। বিপর্যয়কর ব্যাকট্র্যাকিংয়ের ঝুঁকিপূর্ণ প্যাটার্ন প্রত্যাখ্যান করা হয়।",
@@ -11433,6 +11629,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth কনফিগার করা হয়নি। {applicationsUrl} এ একটি OAuth অ্যাপ্লিকেশন নিবন্ধন করুন যার রিডাইরেক্ট URI {redirectUri} এবং স্কোপগুলি \"{scopes}\"। তারপর {clientIdEnv} (এবং ঐচ্ছিকভাবে {clientSecretEnv}) সেট করুন এবং পুনরায় চালু করুন।",
     "gitlabDuoSetupDescription": "অ্যাপ্লিকেশন নিবন্ধিত হওয়ার পর এবং এই OmniRoute উদাহরণে env vars সেট করার পর, OAuth লগইন শুরু করতে Continue ক্লিক করুন।",
     "continue": "চালিয়ে যান",
+    "copilotPolicyTitle": "পরীক্ষামূলক প্রদানকারী: নীতির অবস্থা অস্পষ্ট",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com এর মাধ্যমে সংযোগ করে, যা GitHub সাধারণ তৃতীয় পক্ষের অনুমান API হিসাবে প্রকাশ করেনি। এই ইন্টিগ্রেশন পরীক্ষামূলক এবং বিজ্ঞপ্তি ছাড়াই পরিবর্তন হতে পারে।",
+    "copilotPolicyLine2": "শুধুমাত্র আপনার নিজস্ব GitHub অ্যাকাউন্ট সংযুক্ত হতে পারে। শংসাপত্র, পুল অ্যাকাউন্ট বা আপনার পরিকল্পনার সীমা অতিক্রম করার চেষ্টা করবেন না।",
+    "copilotPolicyLine3": "বিনামূল্যে এবং ছাত্র পরিকল্পনা ব্যবহারকারীরা শুধুমাত্র স্বয়ংক্রিয় মডেল নির্বাচন পাবেন। আপনার Copilot প্ল্যানের শর্তাবলী এবং ব্যবহার সীমা আপনার দায়িত্ব থেকে যায়।",
+    "copilotPolicyAcknowledge": "আমি বুঝতে পারছি, সংযোগ",
     "tabPasteSetupToken": "সেটআপ টোকেন",
     "claudeSetupTokenDescription": "টার্মিনালে `claude setup-token` চালান এবং এটি যে টোকেন প্রিন্ট করে তা পেস্ট করুন। এটি এক বছরের জন্য বৈধ এবং এর কোনো রিফ্রেশ টোকেন নেই। সংরক্ষণের আগে OmniRoute Anthropic-এ একটি পরীক্ষামূলক অনুরোধ পাঠায়।",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12343,11 @@
       "viewConversation": "কথোপকথন দেখুন",
       "openConversation": "কথোপকথন {id} খুলুন"
     },
-    "tableLabel": "অনুরোধের লগ"
+    "tableLabel": "অনুরোধের লগ",
+    "throughputPostFirstToken": "প্রথম-টোকেন-পরবর্তী",
+    "throughputEndToEnd": "এন্ড-টু-এন্ড",
+    "throughputRate": "{value} টোকেন/সেকেন্ড",
+    "throughputExplanation": "উভয় রেটই আউটপুট এবং রিজনিং টোকেন সংখ্যার মধ্যে বড়টি ব্যবহার করে। প্রথম-টোকেন-পরবর্তী রেট একটি বৈধ TTFT বাদ দেয়; অন্যথায় এটি সম্পূর্ণ সময়কাল ব্যবহার করে। এন্ড-টু-এন্ড সর্বদা সম্পূর্ণ সময়কাল ব্যবহার করে। একটি বাফার করা রেসপন্সে মডেলের দ্রুততর জেনারেশন ছাড়াই উচ্চ বার্স্ট ডেলিভারি রেট থাকতে পারে।"
   },
   "proxyLogger": {
     "filterAll": "সব",
@@ -12785,7 +12990,8 @@
     "title": "প্রোভাইডারের পরিসংখ্যান",
     "description": "প্রোভাইডার ও মডেলভিত্তিক ট্র্যাফিক, লেটেন্সি এবং সাফল্যের হার",
     "combo": "কম্বো",
-    "toggleModels": "{provider}-এর মডেলগুলো দেখান"
+    "toggleModels": "{provider}-এর মডেলগুলো দেখান",
+    "windowSince": "{date} থেকে"
   },
   "relay": {
     "title": "সার্ভারলেস রিলে প্রক্সি",
@@ -13730,7 +13936,9 @@
       "disabled": "নিষ্ক্রিয়",
       "dual": "দ্বৈত",
       "alias": "অ্যালিয়াস",
-      "canonical": "ক্যানোনিকাল"
+      "canonical": "ক্যানোনিকাল",
+      "fail_closed": "ব্লক (fail_closed)",
+      "count_as_zero": "$0 হিসেবে গণ্য করুন (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14085,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "সুরক্ষিত-অগ্রাধিকার অবকাঠামোগত স্টপের জন্য 502",
         "description": "শুধু-কোটা-ফলব্যাক অগ্রাধিকার টার্গেট যখন প্রমাণযোগ্যভাবে কোটা-সংক্রান্ত নয় এমন কোনো কারণে combo থামায়—যেমন খোলা provider circuit breaker বা predictive latency skip—তখন 503-এর পরিবর্তে 502 দিয়ে উত্তর দিন।"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "মূল্যবিহীন ব্যবহার বাজেট নীতি",
+        "description": "প্রতি-কী দৈনিক/সাপ্তাহিক USD সীমাগুলি সফল ব্যবহারগুলোকে কীভাবে বিবেচনা করে যখন সেই প্রোভাইডার/মডেলের কোনো মূল্য সারি নেই। fail_closed (ডিফল্ট) উইন্ডোকে অতিপার হিসেবে চিহ্নিত করে, যাতে অজানা খরচ কখনো কঠোর কেপ পেরিয়ে যেতে না পারে। count_as_zero সেই ব্যবহারকে $0 হিসেবে গণ্য করে এবং মূল্য নির্ধারিত ব্যয় প্রয়োগ চালু রাখে। মূল্যবিহীন মডেলগুলো যাই হোক ড্যাশবোর্ড হোম পেজে তালিকাভুক্ত থাকে।"
       }
     }
   },
@@ -15216,5 +15428,8 @@
     "importButton": "ইমপোর্ট করুন",
     "importFailed": "ইমপোর্ট ব্যর্থ হয়েছে।",
     "importSuccess": "{connections}টি অ্যাকাউন্ট ও {nodes}টি প্রদানকারী নোড ইমপোর্ট হয়েছে; {skipped}টি এড়ানো হয়েছে।"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "বর্তমান অবস্থান থেকে শুরু করুন (বিদ্যমান লগ বাদ দিন)"
   }
 }

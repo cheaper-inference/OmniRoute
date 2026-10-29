@@ -1345,7 +1345,9 @@
       "open": "открыть",
       "close": "закрыть"
     },
-    "noResults": "Нет результатов"
+    "noResults": "Нет результатов",
+    "costsTeams": "Команды",
+    "costsTeamsSubtitle": "Центры затрат команд"
   },
   "webhooks": {
     "title": "Вебхуки",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "Расширенные правила обработки полезной нагрузки, ограничения запросов и настройки API прокси-сервера",
     "mitmProxyDescription": "Настройка MITM-прокси для анализа трафика и отладки",
     "oneProxyDescription": "Настройка 1Proxy для расширенного построения цепочек прокси-серверов",
-    "omniSkillsDescription": "Установите и управляйте песочными навыками для автоматизированного выполнения запросов и инструментов"
+    "omniSkillsDescription": "Установите и управляйте песочными навыками для автоматизированного выполнения запросов и инструментов",
+    "teamsDescription": "Оценки затрат команды и общие мягкие бюджеты"
   },
   "cloudSyncStatus": {
     "synced": "Синхронизировано",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "Скопируйте конечную точку",
     "readinessStep4": "Отправьте тестовый запрос",
     "readinessContinue": "Продолжить настройку",
-    "readinessDismiss": "Пока скрыть"
+    "readinessDismiss": "Пока скрыть",
+    "unpricedUsageTitle": "{count, plural, one {# модель} few {# модели} many {# моделей} other {# моделей}} с недавней активностью, но без настроенной цены",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-ключ с ограничением использования} few {# API-ключа с ограничением использования} many {# API-ключей с ограничением использования} other {# API-ключей с ограничением использования}} использовали эти модели за последние 8 дней. Пока это использование попадает в ежедневное или недельное окно ключа, ключ считается превышающим квоту и его запросы блокируются (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Это использование засчитывается как $0 в счёт лимитов использования по ключу (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# запрос} few {# запроса} many {# запросов} other {# запроса}}, {keys, plural, one {# ключ с лимитом} few {# ключа с лимитом} many {# ключей с лимитом} other {# ключей с лимитом}}",
+    "unpricedUsageMore": "…и ещё {count}",
+    "unpricedUsageConfigure": "Настроить цены",
+    "unpricedUsageDismiss": "Закрыть"
   },
   "analytics": {
     "title": "Аналитика",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Открытый коготь — ручная настройка",
     "clineManualConfiguration": "Ручная настройка Cline",
     "kiloManualConfiguration": "Ручная настройка кода Kilo",
+    "piManualConfiguration": "Пи — ручная настройка",
+    "piConfigInvalidTitle": "Пи models.json не читается",
+    "piOmnirouteConfigured": "OmniRoute настроен как пользовательский поставщик Pi",
+    "piModelHelp": "Pi не выполняет автоматическое обнаружение моделей для пользовательских конечных точек — выбранная вами модель явно записывается в models.json.",
+    "piManualConfigTitle": "Или отредактируйте ~/.pi/agent/models.json вручную",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Затем запустите Pi и выберите провайдера omniroute. Установите PI_CODING_AGENT_DIR для перемещения всего каталога агента.",
+    "piUnownedNote": "Эта запись была добавлена за пределами OmniRoute (например, пользовательские конечные точки pi-gui). Подача заявления примет его; Сброс удаляет только записи, записанные OmniRoute.",
     "whenToUseLabel": "Когда использовать",
     "openToolDocs": "Открыть документацию по инструменту",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Используйте, когда вам нужен легкий помощник с искусственным интеллектом, встроенный в терминал, для быстрых задач.",
       "hermes-agent": "Используйте, когда вам нужен Hermes Agent (от Nousresearch) с моделями по умолчанию, делегирования, видения и вспомогательными, маршрутизированными через OmniRoute.",
+      "whycodes": "Используйте, когда вам нужен WhyCodes как универсальный автономный CLI-агент (TUI, именованные агенты, память, swarm), направленный на OmniRoute.",
       "custom": "Используйте для пользовательских реализаций инструментов или общих конфигураций, совместимых с OpenAI."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "TUI-агент для кодинга xAI Grok Build с поддержкой кастомных провайдеров",
       "droid": "Искусственный интеллект заводского дроида",
       "openclaw": "Открытый ИИ-помощник когтя",
+      "openclaude": "CLI агента для кодинга OpenClaude с поддержкой OpenAI-совместимого провайдера",
       "cline": "Cline - CLI помощника по коду с ИИ",
       "kilo": "Интерфейс командной строки Kilo Code AI Assistant",
       "qwen": "Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "Терминал Warp AI с поддержкой кастомных провайдеров",
       "agent-deck": "Мультиагентный оркестратор Agent Deck",
       "5dive": "5dive — самостоятельно размещаемый флот агентов для кода; один auth-профиль направляет их всех в OmniRoute",
+      "whycodes": "Автономный CLI-агент WhyCodes с базовым URL, совместимым с OpenAI",
       "zed": "Редактор кода Zed — встроенный агент через OpenAI-совместимого провайдера"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "Обновить",
     "cliproxyapiUpdateAvailable": "Доступно обновление: v{current} → v{latest}",
     "cliproxyapiVersion": "Версия",
+    "piInstallTitle": "Установите агент Pi Coding",
+    "piInstallInstructions": "Установите Pi CLI, затем вернитесь сюда, чтобы подключить его к OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Используйте URL доступный с машины, на которой работает Pi. Конечная точка /v1, совместимая с OpenAI, добавляется автоматически.",
+    "piManualMergeHint": "Только предварительный просмотр. Объедините эту запись providers.omniroute с models.json, чтобы другие ваши провайдеры и настройки остались нетронутыми.",
     "removeMapping": "Удалить сопоставление"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "напр., 10",
     "testSelected": "Тестировать выбранные ({count})",
     "testAllFiltered": "Тестировать все отфильтрованные ({count})",
+    "visibility": "Видимость",
+    "allVisibility": "Видимые и скрытые",
+    "visibleOnly": "Видимые",
+    "hiddenOnly": "Скрытые",
+    "visibleColumn": "Виден",
+    "hideModel": "Скрыть {name} из /v1/models",
+    "showModel": "Показать {name} в /v1/models",
+    "hiddenBadge": "Скрыт",
+    "hideFiltered": "Скрыть отфильтрованные ({count})",
+    "showFiltered": "Показать отфильтрованные ({count})",
+    "visibilityCounts": "{visible} видимых · {hidden} скрытых · всего {total}",
+    "visibilityUpdateFailed": "Не удалось обновить видимость модели",
     "cancel": "Отмена",
     "clearResults": "Очистить результаты",
     "testing": "Тестирование...",
@@ -3394,7 +3433,44 @@
     "httpError": "Запрос завершился ошибкой HTTP {status}",
     "testFailedNoDetail": "Тест завершился сбоем без сообщения об ошибке",
     "additionalCapabilities": "Дополнительные возможности: {list}",
-    "comboRefMember": "Комбинация → {name}"
+    "comboRefMember": "Комбинация → {name}",
+    "keyAccessButton": "Доступ API-ключей",
+    "allowedInKeys": "Разрешено в: {count, plural, one {# ключе} few {# ключах} many {# ключах} other {# ключах}}",
+    "keysLoading": "Загрузка API-ключей…",
+    "keysRetry": "Повторить загрузку ключей",
+    "accessViaPattern": "через {pattern}",
+    "accessBlocked": "Заблокировано {pattern}",
+    "editKeyAccess": "Изменить доступ ключа",
+    "toggleKeyAccess": "Разрешить {item} для {name}",
+    "resultNetworkError": "Не удалось назначить",
+    "resultWouldEmptyModels": "У этого ключа не останется разрешенных моделей — вместо этого измените права доступа ключа",
+    "resultWouldEmptyCombos": "У этого ключа не останется разрешенных комбинаций — вместо этого измените права доступа ключа",
+    "keyUpdatePending": "{name} все еще обновляется. Повторите попытку чуть позже.",
+    "assignToKeys": "Назначить API-ключам…",
+    "assignApply": "Применить изменения",
+    "assignComplete": "Доступ API-ключей обновлен",
+    "assignFailed": "Не удалось обновить доступ для некоторых API-ключей",
+    "assignNoChanges": "Права доступа API-ключа не изменились",
+    "selectedAccessItems": "Выбрано элементов: {count}",
+    "assignExcludedCombos": "{count, plural, one {# выбранная строка комбинации не является моделью и будет пропущена} few {# выбранные строки комбинаций не являются моделями и будут пропущены} many {# выбранных строк комбинаций не являются моделями и будут пропущены} other {# выбранных строк комбинаций не являются моделями и будут пропущены}}. Назначайте комбинации на вкладке Combos.",
+    "assignActionAdd": "Добавить",
+    "assignActionRemove": "Удалить",
+    "searchKeys": "Поиск API-ключей",
+    "selectApiKey": "Выбрать API-ключ {name}",
+    "allModelsAccess": "Все модели",
+    "allCombosAccess": "Все комбинации",
+    "modelAccessCount": "Модели: {count}",
+    "comboAccessCount": "Комбинации: {count}",
+    "keyInactive": "Неактивен",
+    "keyBanned": "Заблокирован",
+    "keyRevoked": "Отозван",
+    "switchRestrictedConfirm": "Переключить этот ключ на ограниченный доступ: будут разрешены только выбранные элементы",
+    "removeNoChangeHint": "Этот ключ разрешает всё; удаление выбранных элементов ничего не изменит",
+    "removeStaysAllowedHint": "По-прежнему разрешено для этого ключа через {patterns}",
+    "resultChanged": "Изменено",
+    "resultUnchanged": "Без изменений",
+    "resultSkipped": "Пропущено",
+    "resultNeedsSwitch": "Требуется переключить на ограниченный доступ"
   },
   "combos": {
     "title": "Комбо",
@@ -3515,6 +3591,9 @@
     "moveUp": "Вверх",
     "moveDown": "Двигаться вниз",
     "removeModel": "Удалить",
+    "testStep": "Проверить эту модель",
+    "testStepRunning": "Проверка…",
+    "testStepNotTestable": "Проверять можно только шаги с одной моделью",
     "saving": "Сохранение...",
     "liveNoProviders": "Провайдеры пока не обнаружены.",
     "liveFleetDataHint": "Данные Fleet поступают через события combo в реальном времени.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Скачать шаблон CSV",
     "importFromFileMoreErrors": "+ ещё {count}",
     "importFromFileSchemaHint": "Столбцы CSV являются позиционными: provider, name, apiKey, baseUrl (необязательно), priority (необязательно). Столбец provider должен содержать идентификатор существующего управляемого провайдера или уже зарегистрированного узла, совместимого с OpenAI/Anthropic. Этот импорт не создаёт новые узлы конечных точек.",
+    "importOAuthExport": "Импорт экспорта OAuth",
+    "oauthExportTitle": "Импорт экспорта из менеджера аккаунтов",
+    "oauthExportDescription": "Загрузите экспорт в виде открытого текста из менеджера аккаунтов (например, экспорт cloud-accounts из Antigravity Manager). Токены обновляются на сервере, и каждый аккаунт становится OAuth-подключением — дубликаты обновляются на месте.",
+    "oauthExportProviderLabel": "Поставщик",
+    "oauthExportChoose": "Выбрать файл",
+    "oauthExportFileAria": "JSON-файл экспорта аккаунтов",
+    "oauthExportSchemaHint": "Поддерживается: документ с массивом \"accounts\", просто массив или одна запись. Токены могут находиться во вложенном объекте token или прямо в записи.",
+    "oauthExportDetected": "Обнаружено аккаунтов: {count}",
+    "oauthExportSelectAll": "Выбрать все аккаунты",
+    "oauthExportSelectAccount": "Выбрать аккаунт {index}",
+    "oauthExportColEmail": "Эл. почта",
+    "oauthExportColProvider": "Поставщик",
+    "oauthExportColRefresh": "Токен обновления",
+    "oauthExportNoEmail": "(нет эл. почты)",
+    "oauthExportYes": "да",
+    "oauthExportNo": "нет",
+    "oauthExportImporting": "Импорт…",
+    "oauthExportImport": "Импортировать аккаунты ({count})",
+    "oauthExportResult": "Импортировано {imported}/{total} — с ошибкой: {failed}",
+    "oauthExportParseError": "Не удалось прочитать ни одного аккаунта из этого файла.",
+    "oauthExportUnknownError": "неизвестная ошибка",
     "adaptaTutorial": {
       "title": "Как подключить Adapta Web",
       "introPrefix": "Adapta выполняет аутентификацию через Clerk. Токен",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "Все модели уже импортированы",
     "noNewModelsToImport": "Нет новых моделей для импорта — все модели уже есть в реестре или списке пользовательских моделей",
     "localCatalogFallbackStatus": "Не удалось получить список моделей провайдера — показан встроенный каталог",
+    "discoveryDegradedStatus": "Не удалось обнаружить модель {time}",
     "skippingExistingModels": "Пропуск {count} существующих моделей",
     "autoSync": "Автосинхронизация",
     "autoSyncShort": "Синхронизация",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Лимиты параллелизма по моделям",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Необязательно: одна запись model=cap в строке, сопоставляется с точным идентификатором upstream-модели. Лишние запросы ставятся в локальную очередь; пусто — без лимита по модели.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Недопустимая запись параллелизма по модели «{entry}» — используйте model=cap, где cap — целое число от 1 до {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Недопустимая запись параллелизма по модели «{entry}» — используйте model=cap, где cap — целое число от 1 до {max}.",
+    "usedInComboTooltip": "Используется в комбо ({count}): {combos}",
+    "openComboTooltip": "Открыть Комбо — используется в {combo}"
   },
   "settings": {
     "title": "Настройки",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "Хост",
     "qdrantCollection": "Коллекция",
     "catalogVisibilityHint": "Скрытые идентификаторы моделей по-прежнему можно вызывать с теми же правами доступа.",
+    "exposeCombosOnly": "Показывать в /v1/models только комбо",
+    "exposeCombosOnlyDesc": "Клиенты, которые автоматически обнаруживают модели, увидят ваши комбо (и auto/*, если они не скрыты) вместо исходных моделей провайдеров. Явные идентификаторы provider/model по-прежнему маршрутизируются.",
     "catalogScopeTitle": "Список API моделей",
     "catalogScopeDesc": "Что GET /v1/models возвращает для этого ключа. Сокращение списка не влияет на то, какие модели может вызывать ключ.",
     "catalogScopeAll": "Оба варианта",
@@ -8917,7 +9022,9 @@
         "financial": "Финансовый",
         "brazilian": "Бразильский",
         "usa": "США",
-        "full": "Полный"
+        "full": "Полный",
+        "gdpr": "GDPR (ЕС)",
+        "popia": "POPIA (ЮАР)"
       },
       "builtinTypes": "Встроенные типы",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "IPv4-адреса",
         "ipv6_address": "IPv6-адреса",
         "aws_key": "Ключи доступа AWS",
-        "api_key_generic": "API-ключи и токены"
+        "api_key_generic": "API-ключи и токены",
+        "iban": "Номера банковских счетов IBAN",
+        "eu_vat": "Номера плательщиков НДС в ЕС",
+        "es_dni_nie": "Испанские DNI / NIE",
+        "it_codice_fiscale": "Итальянский Codice Fiscale",
+        "pl_pesel": "Польский PESEL",
+        "nl_bsn": "Нидерландский BSN",
+        "de_steuer_id": "Немецкий Steuer-ID",
+        "se_personnummer": "Шведский personnummer",
+        "za_id": "Номера удостоверений личности ЮАР",
+        "za_phone": "Номера телефонов ЮАР",
+        "za_vat": "Номера НДС ЮАР",
+        "za_tax_ref": "Налоговые номера ЮАР"
       },
       "customPatterns": "Пользовательские шаблоны",
       "customPatternsDesc": "Совпадения заменяются на [CUSTOM_REDACTED]. До {max} шаблонов. Шаблоны с риском катастрофического бэктрекинга отклоняются.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "Не настроен Duo OAuth для GitLab. Зарегистрируйте OAuth-приложение по адресу {applicationsUrl} с URI перенаправления {redirectUri} и областями \"{scopes}\", затем установите {clientIdEnv} (и, при необходимости, {clientSecretEnv}) и перезапустите.",
     "gitlabDuoSetupDescription": "После регистрации приложения и настройки переменных окружения в этом экземпляре OmniRoute нажмите Продолжить, чтобы начать вход через OAuth.",
     "continue": "Продолжить",
+    "copilotPolicyTitle": "Экспериментальный провайдер: статус полиса неоднозначен",
+    "copilotPolicyLine1": "OmniRoute подключается через api.githubcopilot.com, который GitHub не опубликовал как общий сторонний вывод API. Эта интеграция является экспериментальной и может быть изменена без предварительного уведомления.",
+    "copilotPolicyLine2": "Можно подключить только вашу собственную учетную запись GitHub. Никогда не делитесь учетными данными, объединяйте учетные записи и не пытайтесь превысить ограничения вашего плана.",
+    "copilotPolicyLine3": "Пользователи бесплатного и студенческого плана получают только автоматический выбор модели. Условия вашего плана Copilot и любые ограничения на использование остаются под вашей ответственностью.",
+    "copilotPolicyAcknowledge": "Я понял, подключайся",
     "tabPasteSetupToken": "Токен настройки",
     "claudeSetupTokenDescription": "Выполните `claude setup-token` в терминале и вставьте выведенный токен. Он действует один год и не имеет токена обновления. Перед сохранением OmniRoute отправляет в Anthropic один тестовый запрос.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "просмотреть диалог",
       "openConversation": "Открыть диалог {id}"
     },
-    "tableLabel": "Журналы запросов"
+    "tableLabel": "Журналы запросов",
+    "throughputPostFirstToken": "После первого токена",
+    "throughputEndToEnd": "От начала до конца",
+    "throughputRate": "{value} токенов/с",
+    "throughputExplanation": "Оба показателя используют большее из значений количества выходных токенов и токенов рассуждения. «После первого токена» исключает корректный TTFT; в противном случае используется полная длительность. «От начала до конца» всегда использует полную длительность. Буферизованный ответ может иметь высокую пиковую скорость выдачи без более быстрой генерации модели."
   },
   "proxyLogger": {
     "filterAll": "Все",
@@ -12785,7 +12913,8 @@
     "title": "Статистика провайдеров",
     "description": "Трафик, задержка и доля успешных запросов по каждому провайдеру и каждой модели",
     "combo": "Комбинация",
-    "toggleModels": "Показать модели для {provider}"
+    "toggleModels": "Показать модели для {provider}",
+    "windowSince": "С {date}"
   },
   "relay": {
     "title": "Бессерверные прокси-ретрансляторы",
@@ -13730,7 +13859,9 @@
       "disabled": "Отключено",
       "dual": "Двойной",
       "alias": "Псевдоним",
-      "canonical": "Канонический"
+      "canonical": "Канонический",
+      "fail_closed": "Блокировать (fail_closed)",
+      "count_as_zero": "Зачислять как $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Инфраструктурные остановки защищённого приоритета как 502",
         "description": "Отвечать кодом 502 вместо 503, когда приоритетная цель с резервным переключением только при исчерпании квоты останавливает комбинацию по причине, которая заведомо не связана с квотой: открытый автоматический выключатель провайдера или пропуск из-за прогнозируемой задержки."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Политика бюджета для использования без цены",
+        "description": "Как ежедневные/недельные USD‑лимиты по ключу обрабатывают успешное использование, для которого у провайдера/модели нет строки с ценой. fail_closed (по умолчанию) помечает окно как превышенное, поэтому неизвестная стоимость никогда не сможет пройти мимо жёсткого лимита. count_as_zero считает такое использование равным $0 и продолжает применять ограничения к расходам, для которых задана цена. Модели без цены в любом случае отображаются на главной странице панели управления."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "Закрыть"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Отключить создание вариантов уровней рассуждения (например, -low, -medium, -high) в каталоге /v1/models.",
+  "teamCosts": {
+    "title": "Затраты команды",
+    "subtitle": "Управляйте общими мягкими бюджетами и оценками затрат по каталогу.",
+    "refresh": "Обновить",
+    "create": "Создать команду",
+    "edit": "Изменить команду",
+    "archive": "Архивировать",
+    "selectTeam": "Команды",
+    "searchTeams": "Поиск команд",
+    "statusFilter": "Статус команды",
+    "active": "Активна",
+    "archived": "В архиве · только чтение",
+    "allTeams": "Все команды",
+    "noTeams": "Подходящих команд нет.",
+    "selectHint": "Создайте или выберите команду, чтобы увидеть затраты.",
+    "loading": "Загрузка затрат команды…",
+    "budgetTitle": "Текущий мягкий бюджет",
+    "budgetSubtitle": "Успешное зафиксированное использование · скользящее окно · не зависит от дат отчёта",
+    "archivedBudget": "В архиве: контроль бюджета неактивен. Исторические отчёты остаются доступными.",
+    "unlimited": "Без ограничений — общий мягкий бюджет не настроен.",
+    "budgetUnavailable": "Статус бюджета недоступен. Обновите, чтобы повторить.",
+    "used": "Успешное использование",
+    "maximum": "Максимум бюджета",
+    "remaining": "Известный остаток",
+    "resets": "Сбрасывается",
+    "unpricedBudget": "Для части успешного использования цена неизвестна. Известная сумма неполна; контроль бюджета считает это окно превышенным.",
+    "overBudget": "Бюджет достигнут или превышен · превышение на {amount}",
+    "reportTitle": "Отчёт об использовании",
+    "reportSubtitle": "Все попытки · оценка по каталогу в USD, не счёт · полные даты UTC",
+    "reportPeriod": "Период отчёта",
+    "day1": "1 день",
+    "day7": "7 дней",
+    "day30": "30 дней",
+    "allTime": "Всё время",
+    "reportSpend": "Оценочные расходы по отчёту",
+    "requests": "Запросы",
+    "assignedKeys": "Назначенные ключи",
+    "unpricedReport": "В этом отчёте есть неизвестные цены. Оценочные расходы неполны.",
+    "breakdown": "Затраты по API-ключам",
+    "noUsage": "Нет использования за этот период отчёта.",
+    "keyName": "Имя API-ключа",
+    "tokens": "Входные + выходные токены",
+    "unnamedKey": "Ключ без имени или удалён",
+    "unpriced": "Неизвестная цена",
+    "members": "Участие",
+    "memberSubtitle": "Смена участия оставляет исторические расходы в исходной команде.",
+    "searchKeys": "Поиск ключей или текущих владельцев",
+    "chooseKey": "Выберите API-ключ",
+    "unassigned": "Не назначен",
+    "ownership": "Текущая расчётная команда: {team}",
+    "assign": "Назначить",
+    "remove": "Удалить",
+    "noMembers": "Нет текущих участников. Историческое использование всё ещё может учитываться в бюджете.",
+    "assignedAt": "Назначен {date} (UTC)",
+    "name": "Название команды",
+    "description": "Описание",
+    "enableBudget": "Включить общий мягкий бюджет",
+    "amount": "Сумма бюджета (USD)",
+    "duration": "Скользящее окно бюджета",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "confirm": "Подтвердить",
+    "transferTitle": "Подтвердите передачу ключа",
+    "transferMessage": "Переместить этот ключ из «{source}» в «{destination}»? Исторические расходы остаются в исходной команде.",
+    "removeTitle": "Удалить назначение ключа",
+    "removeMessage": "Удалить этот ключ из «{team}»? Исторические расходы остаются в этой команде.",
+    "archiveTitle": "Архивировать команду",
+    "archiveMessage": "Архивировать «{team}»? Все текущие привязки закрываются, контроль бюджета прекращается. Исторические отчёты остаются доступными.",
+    "invalidName": "Введите название (1–200 символов) и описание не длиннее 2000 символов.",
+    "invalidAmount": "Введите конечную сумму бюджета больше нуля.",
+    "unauthorized": "Войдите в панель управления, чтобы продолжить.",
+    "forbidden": "У вас нет прав на управление командами. Введённые данные сохранены.",
+    "notFound": "Эта команда или назначение больше не существует.",
+    "conflict": "Назначение или команда изменились. Обновите и подтвердите текущее владение, прежде чем повторить.",
+    "failed": "Запрос не выполнен. Введённые данные сохранены; повторите попытку.",
+    "partialBudget": "Некоторые сохранённые суточные корзины пересекают границу окна и не могут быть точно распределены. Показанные расходы неполны; оставшийся лимит недоступен. Действующая политика мягкого бюджета не изменилась."
+  },
   "connectionTest": {
     "title": "Тестовое сообщение",
     "description": "Отправить один реальный запрос через эту учётную запись. Это использует небольшую часть квоты и может запустить период учёта использования в зависимости от провайдера.",
@@ -15216,5 +15428,8 @@
     "importButton": "Импортировать",
     "importFailed": "Ошибка импорта.",
     "importSuccess": "Импортировано аккаунтов: {connections}, узлов провайдеров: {nodes}; пропущено: {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Начать с текущей позиции (пропустить существующие журналы)"
   }
 }

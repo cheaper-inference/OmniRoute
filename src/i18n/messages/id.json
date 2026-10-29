@@ -1345,7 +1345,9 @@
       "open": "buka",
       "close": "tutup"
     },
-    "noResults": "Tidak ada hasil"
+    "noResults": "Tidak ada hasil",
+    "costsTeams": "Tim",
+    "costsTeamsSubtitle": "Pusat biaya tim"
   },
   "webhooks": {
     "title": "Webhook",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "Aturan payload lanjutan, batas permintaan, dan pengaturan API proxy",
     "mitmProxyDescription": "Konfigurasikan pengaturan proxy MITM untuk pemeriksaan lalu lintas dan debugging",
     "oneProxyDescription": "Konfigurasikan pengaturan 1Proxy untuk perangkaian proxy lanjutan",
-    "omniSkillsDescription": "Instal dan kelola kemampuan sandbox untuk eksekusi prompt dan alat otomatis"
+    "omniSkillsDescription": "Instal dan kelola kemampuan sandbox untuk eksekusi prompt dan alat otomatis",
+    "teamsDescription": "Perkiraan biaya tim dan anggaran lunak bersama"
   },
   "cloudSyncStatus": {
     "synced": "Disinkronkan",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "Salin endpoint Anda",
     "readinessStep4": "Kirim permintaan uji",
     "readinessContinue": "Lanjutkan penyiapan",
-    "readinessDismiss": "Tutup untuk sekarang"
+    "readinessDismiss": "Tutup untuk sekarang",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# model}} dengan penggunaan baru-baru ini tetapi tanpa harga yang dikonfigurasikan",
+    "unpricedUsageFailClosed": "{keys, plural, one {# kunci API dengan batas penggunaan} other {# kunci API dengan batas penggunaan}} menggunakan model ini dalam 8 hari terakhir. Selama penggunaan itu berada dalam jendela harian atau mingguan kunci, kunci tersebut dianggap melebihi kuota dan permintaannya diblokir (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Penggunaan ini dihitung sebagai $0 terhadap batas penggunaan per kunci (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# permintaan} other {# permintaan}}, {keys, plural, one {# kunci terbatas} other {# kunci terbatas}}",
+    "unpricedUsageMore": "…dan {count} lagi",
+    "unpricedUsageConfigure": "Konfigurasikan harga",
+    "unpricedUsageDismiss": "Tutup"
   },
   "analytics": {
     "title": "Analisis",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Buka Claw - Konfigurasi Manual",
     "clineManualConfiguration": "Konfigurasi Manual Cline",
     "kiloManualConfiguration": "Konfigurasi Manual Kode Kilo",
+    "piManualConfiguration": "Pi - Konfigurasi Manual",
+    "piConfigInvalidTitle": "Pi models.json tidak dapat dibaca",
+    "piOmnirouteConfigured": "OmniRoute dikonfigurasi sebagai penyedia khusus Pi",
+    "piModelHelp": "Pi tidak menemukan model secara otomatis untuk titik akhir khusus — model yang Anda pilih ditulis ke dalam models.json secara eksplisit.",
+    "piManualConfigTitle": "Atau edit ~/.pi/agent/models.json secara manual",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Kemudian mulai Pi dan pilih penyedia omniroute. Atur PI_CODING_AGENT_DIR untuk memindahkan seluruh direktori agen.",
+    "piUnownedNote": "Entri ini ditambahkan di luar OmniRoute (misalnya titik akhir Kustom pi-gui). Menerapkan akan mengadopsinya; Reset hanya menghapus entri yang ditulis OmniRoute.",
     "whenToUseLabel": "Kapan harus digunakan",
     "openToolDocs": "Buka dokumen alat",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Gunakan saat Anda memerlukan asisten AI asli terminal yang ringan untuk tugas cepat.",
       "hermes-agent": "Gunakan saat Anda memerlukan Hermes Agent (oleh Nousresearch) dengan model bawaan, delegasi, visi, dan tambahan yang diarahkan melalui OmniRoute.",
+      "whycodes": "Gunakan saat Anda menginginkan WhyCodes sebagai agen CLI otonom serbaguna (TUI, agen bernama, memori, swarm) yang diarahkan ke OmniRoute.",
       "custom": "Gunakan untuk implementasi alat khusus atau konfigurasi umum yang kompatibel dengan OpenAI."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "Agen pengodean TUI xAI Grok Build dengan dukungan penyedia kustom",
       "droid": "Asisten AI Droid Pabrik",
       "openclaw": "Buka Asisten AI Claw",
+      "openclaude": "CLI agen pengodean OpenClaude dengan dukungan penyedia yang kompatibel dengan OpenAI",
       "cline": "CLI Asisten Pengkodean AI Cline",
       "kilo": "CLI Asisten AI Kode Kilo",
       "qwen": "CLI Qwen Code",
@@ -3018,6 +3038,7 @@
       "warp": "Terminal AI Warp dengan dukungan penyedia kustom",
       "agent-deck": "Orkestrator multi-agen Agent Deck",
       "5dive": "5dive — armada agen coding yang di-host sendiri; satu profil auth mengarahkan semuanya ke OmniRoute",
+      "whycodes": "Agen CLI otonom WhyCodes dengan base URL yang kompatibel dengan OpenAI",
       "zed": "Editor kode Zed — agen bawaan melalui penyedia yang kompatibel dengan OpenAI"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "Perbarui",
     "cliproxyapiUpdateAvailable": "Pembaruan tersedia: v{current} → v{latest}",
     "cliproxyapiVersion": "Versi",
+    "piInstallTitle": "Instal Agen Pengkodean Pi",
+    "piInstallInstructions": "Instal Pi CLI, lalu kembali ke sini untuk menghubungkannya ke OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Gunakan URL yang dapat dijangkau dari mesin yang menjalankan Pi. Titik akhir /v1 yang kompatibel dengan OpenAI ditambahkan secara otomatis.",
+    "piManualMergeHint": "Hanya pratinjau. Gabungkan entri providers.omniroute ini ke models.json sehingga penyedia dan pengaturan Anda yang lain tetap utuh.",
     "removeMapping": "Hapus pemetaan"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "mis. 10",
     "testSelected": "Uji yang dipilih ({count})",
     "testAllFiltered": "Uji semua yang difilter ({count})",
+    "visibility": "Visibilitas",
+    "allVisibility": "Terlihat dan tersembunyi",
+    "visibleOnly": "Terlihat",
+    "hiddenOnly": "Tersembunyi",
+    "visibleColumn": "Terlihat",
+    "hideModel": "Sembunyikan {name} dari /v1/models",
+    "showModel": "Tampilkan {name} di /v1/models",
+    "hiddenBadge": "Tersembunyi",
+    "hideFiltered": "Sembunyikan yang difilter ({count})",
+    "showFiltered": "Tampilkan yang difilter ({count})",
+    "visibilityCounts": "{visible} terlihat · {hidden} tersembunyi · {total} total",
+    "visibilityUpdateFailed": "Gagal memperbarui visibilitas model",
     "cancel": "Batal",
     "clearResults": "Hapus hasil",
     "testing": "Menguji...",
@@ -3394,7 +3433,44 @@
     "httpError": "Permintaan gagal dengan HTTP {status}",
     "testFailedNoDetail": "Pengujian gagal tanpa pesan kesalahan",
     "additionalCapabilities": "Kemampuan tambahan: {list}",
-    "comboRefMember": "Kombo → {name}"
+    "comboRefMember": "Kombo → {name}",
+    "keyAccessButton": "Akses kunci API",
+    "allowedInKeys": "Diizinkan di: {count, plural, one {# kunci} other {# kunci}}",
+    "keysLoading": "Memuat kunci API…",
+    "keysRetry": "Coba lagi memuat kunci",
+    "accessViaPattern": "melalui {pattern}",
+    "accessBlocked": "Diblokir oleh {pattern}",
+    "editKeyAccess": "Edit akses kunci",
+    "toggleKeyAccess": "Izinkan {item} pada {name}",
+    "resultNetworkError": "Penetapan gagal",
+    "resultWouldEmptyModels": "Akan membuat kunci ini tidak memiliki model yang diizinkan — edit akses kunci sebagai gantinya",
+    "resultWouldEmptyCombos": "Akan membuat kunci ini tidak memiliki kombo yang diizinkan — edit akses kunci sebagai gantinya",
+    "keyUpdatePending": "{name} masih diperbarui. Coba lagi sebentar lagi.",
+    "assignToKeys": "Tetapkan ke kunci API…",
+    "assignApply": "Terapkan perubahan",
+    "assignComplete": "Akses kunci API diperbarui",
+    "assignFailed": "Beberapa pembaruan kunci API gagal",
+    "assignNoChanges": "Tidak ada akses kunci API yang diubah",
+    "selectedAccessItems": "Item yang dipilih: {count}",
+    "assignExcludedCombos": "{count, plural, one {# baris kombo yang dipilih bukan model dan akan dilewati di sini} other {# baris kombo yang dipilih bukan model dan akan dilewati di sini}}. Tetapkan kombo dari tab Combos.",
+    "assignActionAdd": "Tambah",
+    "assignActionRemove": "Hapus",
+    "searchKeys": "Cari kunci API",
+    "selectApiKey": "Pilih kunci API {name}",
+    "allModelsAccess": "Semua model",
+    "allCombosAccess": "Semua kombo",
+    "modelAccessCount": "Model: {count}",
+    "comboAccessCount": "Kombo: {count}",
+    "keyInactive": "Tidak aktif",
+    "keyBanned": "Diblokir",
+    "keyRevoked": "Dicabut",
+    "switchRestrictedConfirm": "Ubah kunci ini ke akses terbatas: hanya item yang dipilih yang akan diizinkan",
+    "removeNoChangeHint": "Kunci ini mengizinkan semuanya; menghapus item yang dipilih tidak akan membuat perubahan apa pun",
+    "removeStaysAllowedHint": "Masih diizinkan pada kunci ini melalui {patterns}",
+    "resultChanged": "Diubah",
+    "resultUnchanged": "Tidak ada perubahan",
+    "resultSkipped": "Dilewati",
+    "resultNeedsSwitch": "Perlu diubah ke terbatas"
   },
   "combos": {
     "title": "kombo",
@@ -3515,6 +3591,9 @@
     "moveUp": "Naik",
     "moveDown": "Pindah ke bawah",
     "removeModel": "Hapus",
+    "testStep": "Uji model ini",
+    "testStepRunning": "Menguji…",
+    "testStepNotTestable": "Hanya langkah dengan satu model yang dapat diuji",
     "saving": "Menyimpan...",
     "liveNoProviders": "Belum ada penyedia yang terpantau.",
     "liveFleetDataHint": "Data armada tiba melalui peristiwa kombo langsung.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "Unduh templat CSV",
     "importFromFileMoreErrors": "+{count} lainnya",
     "importFromFileSchemaHint": "Kolom CSV bersifat posisional: provider, name, apiKey, baseUrl (opsional), priority (opsional). Kolom provider harus berupa id penyedia terkelola yang sudah ada atau id node kompatibel OpenAI/Anthropic yang sudah terdaftar — impor ini tidak membuat node endpoint baru.",
+    "importOAuthExport": "Impor ekspor OAuth",
+    "oauthExportTitle": "Impor ekspor pengelola akun",
+    "oauthExportDescription": "Unggah ekspor teks biasa dari pengelola akun (mis. ekspor cloud-accounts dari Antigravity Manager). Token diperbarui di sisi server dan setiap akun menjadi koneksi OAuth — duplikat diperbarui di tempat.",
+    "oauthExportProviderLabel": "Penyedia",
+    "oauthExportChoose": "Pilih file",
+    "oauthExportFileAria": "File JSON ekspor akun",
+    "oauthExportSchemaHint": "Diterima: dokumen dengan array \"accounts\", array biasa, atau satu rekaman. Token dapat berada di objek token bersarang atau langsung pada rekaman.",
+    "oauthExportDetected": "{count} akun terdeteksi",
+    "oauthExportSelectAll": "Pilih semua akun",
+    "oauthExportSelectAccount": "Pilih akun {index}",
+    "oauthExportColEmail": "Surel",
+    "oauthExportColProvider": "Penyedia",
+    "oauthExportColRefresh": "Token penyegaran",
+    "oauthExportNoEmail": "(tanpa surel)",
+    "oauthExportYes": "ya",
+    "oauthExportNo": "tidak",
+    "oauthExportImporting": "Mengimpor…",
+    "oauthExportImport": "Impor {count} akun",
+    "oauthExportResult": "Diimpor {imported}/{total} — {failed} gagal",
+    "oauthExportParseError": "Tidak dapat membaca akun apa pun dari file ini.",
+    "oauthExportUnknownError": "kesalahan tidak dikenal",
     "adaptaTutorial": {
       "title": "Cara menghubungkan Adapta Web",
       "introPrefix": "Adapta mengautentikasi melalui Clerk. Token",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "Semua model sudah diimpor",
     "noNewModelsToImport": "Tidak ada model baru untuk diimpor — semua model sudah ada di registri atau daftar model kustom",
     "localCatalogFallbackStatus": "Tidak dapat menjangkau daftar model penyedia — menampilkan katalog bawaan",
+    "discoveryDegradedStatus": "Penemuan model gagal {time}",
     "skippingExistingModels": "Melewatkan {count} model yang sudah ada",
     "autoSync": "Sinkronisasi Otomatis",
     "autoSyncShort": "Sinkronkan",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Batas konkurensi per model",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Opsional: satu model=cap per baris, dicocokkan dengan ID model upstream yang persis sama. Permintaan berlebih diantrekan secara lokal; kosong berarti tanpa batas per model.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Entri konkurensi per model \"{entry}\" tidak valid — gunakan model=cap dengan cap berupa bilangan bulat dari 1 sampai {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Entri konkurensi per model \"{entry}\" tidak valid — gunakan model=cap dengan cap berupa bilangan bulat dari 1 sampai {max}.",
+    "usedInComboTooltip": "Digunakan di {count} kombo: {combos}",
+    "openComboTooltip": "Buka Kombo — digunakan oleh {combo}"
   },
   "settings": {
     "title": "Pengaturan",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Koleksi",
     "catalogVisibilityHint": "ID model yang disembunyikan tetap dapat dipanggil dengan izin akses yang sama.",
+    "exposeCombosOnly": "Tampilkan hanya kombinasi di /v1/models",
+    "exposeCombosOnlyDesc": "Klien yang menemukan model secara otomatis akan melihat kombinasi Anda (dan auto/* kecuali disembunyikan) alih-alih model mentah penyedia. ID provider/model eksplisit tetap dirutekan.",
     "catalogScopeTitle": "Daftar Models API",
     "catalogScopeDesc": "Yang ditampilkan oleh GET /v1/models untuk kunci ini. Mempersempit daftar tidak akan mengubah model yang dapat dipanggil oleh kunci tersebut.",
     "catalogScopeAll": "Keduanya",
@@ -8917,7 +9022,9 @@
         "financial": "Keuangan",
         "brazilian": "Brasil",
         "usa": "AS",
-        "full": "Lengkap"
+        "full": "Lengkap",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Afrika Selatan)"
       },
       "builtinTypes": "Jenis bawaan",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "Alamat IPv4",
         "ipv6_address": "Alamat IPv6",
         "aws_key": "Kunci akses AWS",
-        "api_key_generic": "Kunci API dan token"
+        "api_key_generic": "Kunci API dan token",
+        "iban": "nomor rekening bank IBAN",
+        "eu_vat": "nomor EU VAT",
+        "es_dni_nie": "DNI Spanyol / NIE",
+        "it_codice_fiscale": "Skala Fiskal Kodeks Italia",
+        "pl_pesel": "PESEL Polandia",
+        "nl_bsn": "BSN belanda",
+        "de_steuer_id": "Steuer-ID Jerman",
+        "se_personnummer": "Nomor orang Swedia",
+        "za_id": "Nomor ID Afrika Selatan",
+        "za_phone": "Nomor telepon Afrika Selatan",
+        "za_vat": "Nomor VAT Afrika Selatan",
+        "za_tax_ref": "Referensi pajak Afrika Selatan"
       },
       "customPatterns": "Pola kustom",
       "customPatternsDesc": "Kecocokan diganti dengan [CUSTOM_REDACTED]. Hingga {max} pola. Pola yang berisiko backtracking katastrofik akan ditolak.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth belum dikonfigurasi. Daftarkan aplikasi OAuth di {applicationsUrl} dengan URI pengalihan {redirectUri} dan cakupan \"{scopes}\", lalu atur {clientIdEnv} (dan opsional {clientSecretEnv}) dan mulai ulang.",
     "gitlabDuoSetupDescription": "Setelah aplikasi terdaftar dan variabel lingkungan diatur pada instance OmniRoute ini, klik Lanjutkan untuk memulai login OAuth.",
     "continue": "Lanjutkan",
+    "copilotPolicyTitle": "Penyedia eksperimental: status kebijakannya ambigu",
+    "copilotPolicyLine1": "OmniRoute terhubung melalui api.githubcopilot.com, yang GitHub belum dipublikasikan sebagai inferensi pihak ketiga umum API. Integrasi ini bersifat eksperimental dan dapat berubah tanpa pemberitahuan.",
+    "copilotPolicyLine2": "Hanya akun GitHub Anda sendiri yang dapat terhubung. Jangan pernah membagikan kredensial, mengumpulkan akun, atau mencoba melampaui batas paket Anda.",
+    "copilotPolicyLine3": "Pengguna paket Gratis dan Pelajar hanya menerima pemilihan model otomatis. Ketentuan paket Copilot Anda dan batasan penggunaan apa pun tetap menjadi tanggung jawab Anda.",
+    "copilotPolicyAcknowledge": "Saya mengerti, sambungkan",
     "tabPasteSetupToken": "Token penyiapan",
     "claudeSetupTokenDescription": "Jalankan `claude setup-token` di terminal lalu tempel token yang dicetaknya. Token berlaku satu tahun dan tidak memiliki token penyegaran. OmniRoute mengirim satu permintaan uji ke Anthropic sebelum menyimpannya.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "lihat percakapan",
       "openConversation": "Buka percakapan {id}"
     },
-    "tableLabel": "Log permintaan"
+    "tableLabel": "Log permintaan",
+    "throughputPostFirstToken": "Setelah token pertama",
+    "throughputEndToEnd": "Ujung-ke-ujung",
+    "throughputRate": "{value} token/detik",
+    "throughputExplanation": "Kedua laju menggunakan jumlah token output dan reasoning yang lebih besar. Laju setelah token pertama tidak menyertakan TTFT yang valid; jika tidak, laju tersebut menggunakan durasi penuh. Laju ujung-ke-ujung selalu menggunakan durasi penuh. Respons yang di-buffer dapat memiliki laju pengiriman burst yang tinggi tanpa pembuatan model yang lebih cepat."
   },
   "proxyLogger": {
     "filterAll": "Semua",
@@ -12785,7 +12913,8 @@
     "title": "Statistik penyedia",
     "description": "Lalu lintas, latensi, dan tingkat keberhasilan per penyedia dan per model",
     "combo": "Kombinasi",
-    "toggleModels": "Tampilkan model untuk {provider}"
+    "toggleModels": "Tampilkan model untuk {provider}",
+    "windowSince": "Sejak {date}"
   },
   "relay": {
     "title": "Proksi Relai Serverless",
@@ -13730,7 +13859,9 @@
       "disabled": "Dinonaktifkan",
       "dual": "Ganda",
       "alias": "Alias",
-      "canonical": "Kanonis"
+      "canonical": "Kanonis",
+      "fail_closed": "Blokir (fail_closed)",
+      "count_as_zero": "Hitung sebagai $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Penghentian Infrastruktur Prioritas Terlindungi sebagai 502",
         "description": "Berikan respons 502 alih-alih 503 ketika target prioritas dengan fallback khusus kuota menghentikan combo karena penyebab yang terbukti bukan kuota: circuit breaker penyedia yang terbuka atau pelompatan berdasarkan prediksi latensi."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Kebijakan Anggaran Penggunaan Tanpa Harga",
+        "description": "Bagaimana batas USD harian/mingguan per-kunci memperlakukan penggunaan yang berhasil apabila penyedia/modelnya tidak memiliki baris harga. fail_closed (bawaan) menandai jendela sebagai terlampaui, sehingga biaya yang tidak diketahui tidak pernah bisa melewati batas keras. count_as_zero menghitung penggunaan itu sebagai $0 dan terus menegakkan pengeluaran yang diberi harga. Model tanpa harga tetap ditampilkan di halaman utama dasbor dalam kedua kasus."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "Tutup"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Nonaktifkan pembuatan varian tingkat pemikiran (misalnya -low, -medium, -high) dalam katalog /v1/models.",
+  "teamCosts": {
+    "title": "Biaya tim",
+    "subtitle": "Kelola anggaran lunak bersama dan perkiraan biaya katalog.",
+    "refresh": "Segarkan",
+    "create": "Buat tim",
+    "edit": "Edit tim",
+    "archive": "Arsipkan",
+    "selectTeam": "Tim",
+    "searchTeams": "Cari tim",
+    "statusFilter": "Status tim",
+    "active": "Aktif",
+    "archived": "Diarsipkan · hanya baca",
+    "allTeams": "Semua tim",
+    "noTeams": "Tidak ada tim yang cocok.",
+    "selectHint": "Buat atau pilih tim untuk melihat biaya.",
+    "loading": "Memuat biaya tim…",
+    "budgetTitle": "Anggaran lunak saat ini",
+    "budgetSubtitle": "Penggunaan berhasil yang tercatat · jendela bergulir · tidak bergantung pada tanggal laporan",
+    "archivedBudget": "Diarsipkan: penerapan anggaran tidak aktif. Laporan historis tetap tersedia.",
+    "unlimited": "Tanpa batas — belum ada anggaran lunak bersama yang dikonfigurasi.",
+    "budgetUnavailable": "Status anggaran tidak tersedia. Segarkan untuk mencoba lagi.",
+    "used": "Penggunaan berhasil",
+    "maximum": "Maksimum anggaran",
+    "remaining": "Sisa yang diketahui",
+    "resets": "Diatur ulang",
+    "unpricedBudget": "Sebagian penggunaan berhasil memiliki harga yang tidak diketahui. Jumlah yang diketahui tidak lengkap; penerapan anggaran menganggap jendela ini terlampaui.",
+    "overBudget": "Anggaran tercapai atau terlampaui · {amount} lebih",
+    "reportTitle": "Laporan penggunaan",
+    "reportSubtitle": "Semua percobaan · perkiraan katalog dalam USD, bukan faktur · tanggal UTC penuh",
+    "reportPeriod": "Periode laporan",
+    "day1": "1 hari",
+    "day7": "7 hari",
+    "day30": "30 hari",
+    "allTime": "Semua waktu",
+    "reportSpend": "Perkiraan pengeluaran laporan",
+    "requests": "Permintaan",
+    "assignedKeys": "Kunci yang ditetapkan",
+    "unpricedReport": "Laporan ini berisi harga yang tidak diketahui. Perkiraan pengeluaran tidak lengkap.",
+    "breakdown": "Biaya per kunci API",
+    "noUsage": "Tidak ada penggunaan pada periode laporan ini.",
+    "keyName": "Nama kunci API",
+    "tokens": "Token input + output",
+    "unnamedKey": "Kunci tanpa nama atau terhapus",
+    "unpriced": "Harga tidak diketahui",
+    "members": "Keanggotaan",
+    "memberSubtitle": "Mengubah keanggotaan menjaga pengeluaran historis tetap pada tim asalnya.",
+    "searchKeys": "Cari kunci atau pemilik saat ini",
+    "chooseKey": "Pilih kunci API",
+    "unassigned": "Belum ditetapkan",
+    "ownership": "Tim penagihan saat ini: {team}",
+    "assign": "Tetapkan",
+    "remove": "Hapus",
+    "noMembers": "Tidak ada anggota saat ini. Penggunaan historis masih dapat dihitung ke anggaran.",
+    "assignedAt": "Ditetapkan {date} (UTC)",
+    "name": "Nama tim",
+    "description": "Deskripsi",
+    "enableBudget": "Aktifkan anggaran lunak bersama",
+    "amount": "Jumlah anggaran (USD)",
+    "duration": "Jendela anggaran bergulir",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "confirm": "Konfirmasi",
+    "transferTitle": "Konfirmasi pemindahan kunci",
+    "transferMessage": "Pindahkan kunci ini dari “{source}” ke “{destination}”? Pengeluaran historis tetap pada tim asal.",
+    "removeTitle": "Hapus penetapan kunci",
+    "removeMessage": "Hapus kunci ini dari “{team}”? Pengeluaran historis tetap berada di tim ini.",
+    "archiveTitle": "Arsipkan tim",
+    "archiveMessage": "Arsipkan “{team}”? Semua pengikatan saat ini ditutup dan penerapan anggaran berhenti. Laporan historis tetap tersedia.",
+    "invalidName": "Masukkan nama (1–200 karakter) dan deskripsi maksimal 2.000 karakter.",
+    "invalidAmount": "Masukkan jumlah anggaran terbatas yang lebih besar dari nol.",
+    "unauthorized": "Masuk ke dasbor manajemen untuk melanjutkan.",
+    "forbidden": "Anda tidak memiliki izin untuk mengelola tim. Masukan Anda dipertahankan.",
+    "notFound": "Tim atau penetapan ini sudah tidak ada.",
+    "conflict": "Penetapan atau tim telah berubah. Segarkan dan konfirmasi kepemilikan saat ini sebelum mencoba lagi.",
+    "failed": "Permintaan gagal. Masukan Anda dipertahankan; silakan coba lagi.",
+    "partialBudget": "Beberapa bucket harian yang disimpan tumpang tindih dengan batas jendela dan tidak dapat dibagi secara tepat. Pengeluaran yang ditampilkan tidak lengkap; sisa jatah tidak tersedia. Kebijakan anggaran lunak yang ada tidak berubah."
+  },
   "connectionTest": {
     "title": "Pesan uji",
     "description": "Kirim satu permintaan nyata melalui akun ini. Tindakan ini menggunakan sedikit kuota dan dapat memulai periode penggunaan, tergantung pada penyedia.",
@@ -15216,5 +15428,8 @@
     "importButton": "Impor",
     "importFailed": "Impor gagal.",
     "importSuccess": "{connections} akun dan {nodes} node penyedia diimpor; {skipped} dilewati."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Mulai dari posisi saat ini (lewati log yang ada)"
   }
 }

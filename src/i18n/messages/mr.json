@@ -1345,7 +1345,9 @@
       "open": "उघडा",
       "close": "बंद करा"
     },
-    "noResults": "कोणतेही परिणाम नाहीत"
+    "noResults": "कोणतेही परिणाम नाहीत",
+    "costsTeams": "संघ",
+    "costsTeamsSubtitle": "संघ खर्च केंद्रे"
   },
   "webhooks": {
     "title": "वेबहुक",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "प्रगत पेलोड नियम, विनंती मर्यादा आणि प्रॉक्सी API सेटिंग्ज",
     "mitmProxyDescription": "ट्रॅफिक तपासणी आणि डीबगिंगसाठी MITM प्रॉक्सी सेटिंग्ज कॉन्फिगर करा",
     "oneProxyDescription": "प्रगत प्रॉक्सी शृंखलेसाठी 1Proxy सेटिंग्ज कॉन्फिगर करा",
-    "omniSkillsDescription": "स्वयंचलित प्रॉम्प्ट आणि टूल एक्झिक्यूशनसाठी सँडबॉक्स स्किल्स इन्स्टॉल आणि व्यवस्थापित करा"
+    "omniSkillsDescription": "स्वयंचलित प्रॉम्प्ट आणि टूल एक्झिक्यूशनसाठी सँडबॉक्स स्किल्स इन्स्टॉल आणि व्यवस्थापित करा",
+    "teamsDescription": "संघ खर्च अंदाज आणि सामायिक सॉफ्ट बजेट"
   },
   "cloudSyncStatus": {
     "synced": "सिंक केले",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "तुमचा एंडपॉइंट कॉपी करा",
     "readinessStep4": "चाचणी विनंती पाठवा",
     "readinessContinue": "सेटअप सुरू ठेवा",
-    "readinessDismiss": "सध्या बंद करा"
+    "readinessDismiss": "सध्या बंद करा",
+    "unpricedUsageTitle": "{count, plural, one {# मॉडेलला अलीकडील वापर आहे परंतु किंमत कॉन्फिगर केलेली नाही} other {# मॉडेलांना अलीकडील वापर आहे परंतु किंमत कॉन्फिगर केलेली नाही}}",
+    "unpricedUsageFailClosed": "{keys, plural, one {# मर्यादित वापर असलेली API की} other {# मर्यादित वापर असलेल्या API की}} गेल्या 8 दिवसांत या मॉडेलचा वापर झाला आहे. कीचा वापर तिच्या दैनंदिन किंवा साप्ताहिक विंडोच्या आत असताना ती की ओव्हर कोटा म्हणून वागवली जाते आणि तिच्या विनंत्या अवरुद्ध केल्या जातात (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "हा वापर प्रत्येक कीच्या वापर मर्यादेकडे $0 म्हणून गणला जातो (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# विनंती} other {# विनंत्या}}, {keys, plural, one {# मर्यादित की} other {# मर्यादित की}}",
+    "unpricedUsageMore": "…आणि {count} अधिक",
+    "unpricedUsageConfigure": "किंमत विन्यास करा",
+    "unpricedUsageDismiss": "रद्द करा"
   },
   "analytics": {
     "title": "विश्लेषण",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - मॅन्युअल कॉन्फिगरेशन",
     "clineManualConfiguration": "Cline मॅन्युअल कॉन्फिगरेशन",
     "kiloManualConfiguration": "Kilo Code मॅन्युअल कॉन्फिगरेशन",
+    "piManualConfiguration": "Pi - मॅन्युअल कॉन्फिगरेशन",
+    "piConfigInvalidTitle": "Pi models.json वाचनीय नाही",
+    "piOmnirouteConfigured": "OmniRoute हे Pi सानुकूल प्रदाता म्हणून कॉन्फिगर केले आहे",
+    "piModelHelp": "Pi सानुकूल एंडपॉइंट्ससाठी मॉडेल स्वयं-शोधत नाही — तुम्ही निवडलेले मॉडेल models.json मध्ये स्पष्टपणे लिहिलेले आहे.",
+    "piManualConfigTitle": "किंवा ~/.pi/agent/models.json स्वहस्ते संपादित करा",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "नंतर Pi सुरू करा आणि omniroute प्रदाता निवडा. संपूर्ण एजंट निर्देशिका हलविण्यासाठी PI_CODING_AGENT_DIR सेट करा.",
+    "piUnownedNote": "ही एंट्री OmniRoute बाहेर जोडली गेली (उदा. pi-gui चे कस्टम एंडपॉइंट). अर्ज केल्यास त्याचा अवलंब होईल; रीसेट केवळ OmniRoute लिहिलेल्या नोंदी काढून टाकते.",
     "whenToUseLabel": "केव्हा वापरावे",
     "openToolDocs": "टूलची कागदपत्रे उघडा",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Amp शॉर्टहँड कार्यप्रवाह हवे असतील, पण तरीही OmniRoute उपनाव आणि राउटिंग नियमांची अंमलबजावणी आवश्यक असेल तेव्हा वापरा.",
       "hermes": "जलद कामांसाठी हलका, टर्मिनल-नेटिव्ह AI सहाय्यक हवा असेल तेव्हा वापरा.",
       "hermes-agent": "जेव्हा तुम्हाला OmniRoute द्वारे रूट केलेल्या डीफॉल्ट, डेलिगेशन, व्हिजन आणि ऑक्झिलरी मॉडेल्ससह Hermes Agent (Nousresearch द्वारे) ची आवश्यकता असेल तेव्हा वापरा.",
+      "whycodes": "जेव्हा तुम्हाला WhyCodes हा OmniRoute कडे निर्देशित बहुउद्देशीय ऑटोनॉमस CLI एजंट (TUI, नाव असलेले एजंट, मेमरी, swarm) म्हणून हवा असेल तेव्हा वापरा.",
       "custom": "कस्टम टूल अंमलबजावणी किंवा सर्वसाधारण OpenAI-सुसंगत कॉन्फिगरेशनसाठी वापरा."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "कस्टम प्रोव्हायडर सपोर्टसह xAI Grok Build TUI कोडिंग एजंट",
       "droid": "Factory Droid AI सहाय्यक",
       "openclaw": "Open Claw AI सहाय्यक",
+      "openclaude": "OpenAI-सुसंगत प्रदाता समर्थनासह OpenClaude कोडिंग एजंट CLI",
       "cline": "Cline AI कोडिंग सहाय्यक CLI",
       "kilo": "Kilo Code AI सहाय्यक CLI",
       "qwen": "Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "कस्टम प्रोव्हायडर सपोर्टसह Warp AI टर्मिनल",
       "agent-deck": "Agent Deck मल्टी-एजंट ऑर्केस्ट्रेटर",
       "5dive": "5dive — स्वयं-होस्टेड कोडिंग एजंट्सचा ताफा; एक auth प्रोफाइल सर्वांना OmniRoute कडे निर्देशित करते",
+      "whycodes": "OpenAI-सुसंगत base URL असलेला WhyCodes ऑटोनॉमस CLI एजंट",
       "zed": "Zed कोड एडिटर — OpenAI-सुसंगत प्रदात्याद्वारे अंगभूत एजंट"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "अद्यतन करा",
     "cliproxyapiUpdateAvailable": "उपलब्ध अद्यतन: v{current} → v{latest}",
     "cliproxyapiVersion": "आवृत्ती",
+    "piInstallTitle": "पाई कोडिंग एजंट स्थापित करा",
+    "piInstallInstructions": "Pi CLI स्थापित करा, नंतर OmniRoute शी कनेक्ट करण्यासाठी येथे परत या.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi चालणाऱ्या मशीनवरून पोहोचता येण्याजोगा URL वापरा. OpenAI-compatible /v1 एंडपॉइंट आपोआप जोडला जातो.",
+    "piManualMergeHint": "फक्त पूर्वावलोकन. ही providers.omniroute एंट्री models.json मध्ये विलीन करा जेणेकरून तुमचे इतर प्रदाते आणि सेटिंग्ज कायम राहतील.",
     "removeMapping": "मॅपिंग काढा"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "उदा. 10",
     "testSelected": "निवडलेल्यांची चाचणी घ्या ({count})",
     "testAllFiltered": "फिल्टर केलेल्या सर्वांची चाचणी घ्या ({count})",
+    "visibility": "दृश्यता",
+    "allVisibility": "दृश्य आणि लपवलेले",
+    "visibleOnly": "दृश्य",
+    "hiddenOnly": "लपवलेले",
+    "visibleColumn": "दृश्य",
+    "hideModel": "/v1/models मधून {name} लपवा",
+    "showModel": "/v1/models मध्ये {name} दाखवा",
+    "hiddenBadge": "लपवलेले",
+    "hideFiltered": "फिल्टर केलेले लपवा ({count})",
+    "showFiltered": "फिल्टर केलेले दाखवा ({count})",
+    "visibilityCounts": "{visible} दृश्य · {hidden} लपवलेले · एकूण {total}",
+    "visibilityUpdateFailed": "मॉडेलची दृश्यता अद्यतनित करण्यात अयशस्वी",
     "cancel": "रद्द करा",
     "clearResults": "निकाल साफ करा",
     "testing": "चाचणी घेत आहे...",
@@ -3394,7 +3433,44 @@
     "httpError": "HTTP {status} सह विनंती अयशस्वी झाली",
     "testFailedNoDetail": "त्रुटी संदेशाशिवाय चाचणी अयशस्वी झाली",
     "additionalCapabilities": "अतिरिक्त क्षमता: {list}",
-    "comboRefMember": "कॉम्बो → {name}"
+    "comboRefMember": "कॉम्बो → {name}",
+    "keyAccessButton": "API की ॲक्सेस",
+    "allowedInKeys": "यात अनुमती आहे: {count, plural, one {# की} other {# की}}",
+    "keysLoading": "API की लोड होत आहेत…",
+    "keysRetry": "की लोड करण्याचा पुन्हा प्रयत्न करा",
+    "accessViaPattern": "{pattern} द्वारे",
+    "accessBlocked": "{pattern} द्वारे ब्लॉक केले आहे",
+    "editKeyAccess": "की ॲक्सेस संपादित करा",
+    "toggleKeyAccess": "{name} वर {item} ला अनुमती द्या",
+    "resultNetworkError": "असाइनमेंट अयशस्वी झाले",
+    "resultWouldEmptyModels": "यामुळे या कीसाठी कोणतेही अनुमत मॉडेल्स उरणार नाहीत — त्याऐवजी की ॲक्सेस संपादित करा",
+    "resultWouldEmptyCombos": "यामुळे या कीसाठी कोणतेही अनुमत कॉम्बोज उरणार नाहीत — त्याऐवजी की ॲक्सेस संपादित करा",
+    "keyUpdatePending": "{name} अजूनही अपडेट केले जात आहे. थोड्या वेळाने पुन्हा प्रयत्न करा.",
+    "assignToKeys": "API की वर असाइन करा…",
+    "assignApply": "बदल लागू करा",
+    "assignComplete": "API की ॲक्सेस अपडेट केला",
+    "assignFailed": "काही API की अपडेट अयशस्वी झाले",
+    "assignNoChanges": "कोणताही API की ॲक्सेस बदलला नाही",
+    "selectedAccessItems": "निवडलेले आयटम: {count}",
+    "assignExcludedCombos": "{count, plural, one {# निवडलेली कॉम्बो पंक्ती मॉडेल नाही आणि येथे वगळली जाईल} other {# निवडलेल्या कॉम्बो पंक्ती मॉडेल्स नाहीत आणि येथे वगळल्या जातील}}. Combos टॅबमधून कॉम्बोज असाइन करा.",
+    "assignActionAdd": "जोडा",
+    "assignActionRemove": "काढून टाका",
+    "searchKeys": "API की शोधा",
+    "selectApiKey": "API की {name} निवडा",
+    "allModelsAccess": "सर्व मॉडेल्स",
+    "allCombosAccess": "सर्व कॉम्बोज",
+    "modelAccessCount": "मॉडेल्स: {count}",
+    "comboAccessCount": "कॉम्बोज: {count}",
+    "keyInactive": "निष्क्रिय",
+    "keyBanned": "प्रतिबंधित",
+    "keyRevoked": "रद्द केले",
+    "switchRestrictedConfirm": "ही की मर्यादित ॲक्सेसवर स्विच करा: केवळ निवडलेल्या आयटमना अनुमती दिली जाईल",
+    "removeNoChangeHint": "ही की सर्व गोष्टींना अनुमती देते; निवडलेले आयटम काढून टाकल्याने कोणताही बदल होणार नाही",
+    "removeStaysAllowedHint": "{patterns} द्वारे या कीवर अजूनही अनुमती आहे",
+    "resultChanged": "बदलले",
+    "resultUnchanged": "काहीही बदल नाही",
+    "resultSkipped": "वगळले",
+    "resultNeedsSwitch": "मर्यादित ॲक्सेसवर स्विच करणे आवश्यक आहे"
   },
   "combos": {
     "title": "कॉम्बोज",
@@ -3515,6 +3591,9 @@
     "moveUp": "वर हलवा",
     "moveDown": "खाली हलवा",
     "removeModel": "काढून टाका",
+    "testStep": "हे मॉडेल तपासा",
+    "testStepRunning": "तपासणी सुरू आहे…",
+    "testStepNotTestable": "फक्त एकल-मॉडेल टप्प्यांचीच तपासणी करता येते",
     "saving": "जतन करत आहे...",
     "liveNoProviders": "अद्याप कोणतेही प्रदाते आढळले नाहीत.",
     "liveFleetDataHint": "फ्लीट डेटा थेट कॉम्बो इव्हेंट्सद्वारे येतो.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "CSV टेम्पलेट डाउनलोड करा",
     "importFromFileMoreErrors": "+{count} आणखी",
     "importFromFileSchemaHint": "CSV स्तंभ स्थानानुसार आहेत: provider, name, apiKey, baseUrl (पर्यायी), priority (पर्यायी). provider स्तंभामध्ये विद्यमान व्यवस्थापित प्रदाता id किंवा आधीच नोंदणीकृत OpenAI/Anthropic-सुसंगत नोड id असणे आवश्यक आहे — ही आयात नवीन एंडपॉइंट नोड तयार करत नाही.",
+    "importOAuthExport": "OAuth एक्सपोर्ट इंपोर्ट करा",
+    "oauthExportTitle": "अकाउंट-मॅनेजर एक्सपोर्ट इंपोर्ट करा",
+    "oauthExportDescription": "अकाउंट मॅनेजरमधील साध्या मजकुरातील एक्सपोर्ट अपलोड करा (उदा. Antigravity Manager चा cloud-accounts एक्सपोर्ट). टोकन सर्व्हरवर रिफ्रेश केले जातात आणि प्रत्येक अकाउंट एक OAuth कनेक्शन बनते — डुप्लिकेट आहे त्याच जागी रिफ्रेश होतात.",
+    "oauthExportProviderLabel": "प्रदाता",
+    "oauthExportChoose": "फाइल निवडा",
+    "oauthExportFileAria": "अकाउंट एक्सपोर्ट JSON फाइल",
+    "oauthExportSchemaHint": "स्वीकार्य: \"accounts\" अ‍ॅरे असलेला दस्तऐवज, साधा अ‍ॅरे किंवा एकच रेकॉर्ड. टोकन नेस्टेड token ऑब्जेक्टमध्ये किंवा थेट रेकॉर्डवर असू शकतात.",
+    "oauthExportDetected": "{count} अकाउंट आढळले",
+    "oauthExportSelectAll": "सर्व अकाउंट निवडा",
+    "oauthExportSelectAccount": "अकाउंट {index} निवडा",
+    "oauthExportColEmail": "ईमेल",
+    "oauthExportColProvider": "प्रदाता",
+    "oauthExportColRefresh": "रिफ्रेश टोकन",
+    "oauthExportNoEmail": "(ईमेल नाही)",
+    "oauthExportYes": "होय",
+    "oauthExportNo": "नाही",
+    "oauthExportImporting": "इंपोर्ट करत आहे…",
+    "oauthExportImport": "{count} अकाउंट इंपोर्ट करा",
+    "oauthExportResult": "{imported}/{total} इंपोर्ट झाले — {failed} अयशस्वी",
+    "oauthExportParseError": "या फाइलमधून कोणतेही अकाउंट वाचता आले नाही.",
+    "oauthExportUnknownError": "अज्ञात त्रुटी",
     "adaptaTutorial": {
       "title": "Adapta Web कसे कनेक्ट करावे",
       "introPrefix": "Adapta हे Clerk द्वारे प्रमाणीकृत होते. टोकन",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "सर्व मॉडेल आधीच आयात केली आहेत",
     "noNewModelsToImport": "आयात करण्यासाठी कोणतीही नवीन मॉडेल नाहीत — सर्व मॉडेल आधीच रजिस्ट्रीमध्ये किंवा सानुकूल मॉडेलच्या यादीत आहेत",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "मॉडेल शोध अयशस्वी {time}",
     "skippingExistingModels": "अस्तित्वात असलेली {count} मॉडेल वगळत आहे",
     "autoSync": "स्वयं-समक्रमण",
     "autoSyncShort": "समक्रमित करा",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} कॉम्बोमध्ये वापरले: {combos}",
+    "openComboTooltip": "कॉम्बो उघडा — {combo} द्वारे वापरले"
   },
   "settings": {
     "title": "सेटिंग्ज",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "होस्ट",
     "qdrantCollection": "संग्रह",
     "catalogVisibilityHint": "लपवलेले मॉडेल ID त्याच प्रवेश परवानग्यांसह अजूनही कॉल करता येतात.",
+    "exposeCombosOnly": "/v1/models मध्ये फक्त कॉम्बो दाखवा",
+    "exposeCombosOnlyDesc": "मॉडेल आपोआप शोधणारे क्लायंट कच्च्या प्रोव्हायडर मॉडेलऐवजी तुमचे कॉम्बो (आणि लपवलेले नसल्यास auto/*) पाहतील. स्पष्ट provider/model ID राउट होत राहतील.",
     "catalogScopeTitle": "Models API सूची",
     "catalogScopeDesc": "या कीसाठी GET /v1/models काय दर्शवते. सूची मर्यादित केल्याने ही की काय कॉल करू शकते, यात कधीही बदल होत नाही.",
     "catalogScopeAll": "दोन्ही",
@@ -8917,7 +9022,9 @@
         "financial": "आर्थिक",
         "brazilian": "ब्राझिलियन",
         "usa": "अमेरिका",
-        "full": "संपूर्ण"
+        "full": "संपूर्ण",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (दक्षिण आफ्रिका)"
       },
       "builtinTypes": "अंगभूत प्रकार",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "IPv4 पत्ते",
         "ipv6_address": "IPv6 पत्ते",
         "aws_key": "AWS प्रवेश की",
-        "api_key_generic": "API की आणि टोकन"
+        "api_key_generic": "API की आणि टोकन",
+        "iban": "IBAN बँक खाते क्रमांक",
+        "eu_vat": "EU VAT क्रमांक",
+        "es_dni_nie": "स्पॅनिश DNI / NIE",
+        "it_codice_fiscale": "इटालियन कोडिस फिस्केल",
+        "pl_pesel": "पोलिश PESEL",
+        "nl_bsn": "डच BSN",
+        "de_steuer_id": "जर्मन Steuer-ID",
+        "se_personnummer": "स्वीडिश व्यक्ती संख्या",
+        "za_id": "दक्षिण आफ्रिकन ID क्रमांक",
+        "za_phone": "दक्षिण आफ्रिकन फोन नंबर",
+        "za_vat": "दक्षिण आफ्रिकन VAT क्रमांक",
+        "za_tax_ref": "दक्षिण आफ्रिकन कर संदर्भ"
       },
       "customPatterns": "सानुकूल पॅटर्न",
       "customPatternsDesc": "जुळण्या [CUSTOM_REDACTED] ने बदलल्या जातात. जास्तीत जास्त {max} पॅटर्न. विनाशकारी बॅकट्रॅकिंगचा धोका असलेले पॅटर्न नाकारले जातात.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth कॉन्फिगर केलेले नाही. {applicationsUrl} येथे एक OAuth अनुप्रयोग नोंदणी करा ज्यामध्ये पुनर्निर्देश URI {redirectUri} आणि स्कोप्स \"{scopes}\" आहेत, नंतर {clientIdEnv} (आणि पर्यायी {clientSecretEnv}) सेट करा आणि पुन्हा सुरू करा.",
     "gitlabDuoSetupDescription": "अर्ज नोंदणीकृत झाल्यानंतर आणि या OmniRoute उदाहरणावर env vars सेट केल्यानंतर, OAuth लॉगिन सुरू करण्यासाठी Continue वर क्लिक करा.",
     "continue": "सुरू ठेवा",
+    "copilotPolicyTitle": "प्रायोगिक प्रदाता: धोरणाची स्थिती संदिग्ध आहे",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com द्वारे कनेक्ट होते, जे GitHub सामान्य तृतीय-पक्ष अनुमान API म्हणून प्रकाशित केलेले नाही. हे एकत्रीकरण प्रायोगिक आहे आणि सूचना न देता बदलू शकते.",
+    "copilotPolicyLine2": "फक्त तुमचे स्वतःचे GitHub खाते कनेक्ट केले जाऊ शकते. कधीही क्रेडेन्शियल, पूल खाती शेअर करू नका किंवा तुमची योजना मर्यादा ओलांडण्याचा प्रयत्न करू नका.",
+    "copilotPolicyLine3": "विनामूल्य आणि विद्यार्थी योजना वापरकर्त्यांना केवळ स्वयंचलित मॉडेल निवड मिळते. तुमच्या Copilot प्लॅनच्या अटी आणि कोणत्याही वापराच्या मर्यादा ही तुमची जबाबदारी राहतील.",
+    "copilotPolicyAcknowledge": "मला समजले, कनेक्ट करा",
     "tabPasteSetupToken": "सेटअप टोकन",
     "claudeSetupTokenDescription": "टर्मिनलमध्ये `claude setup-token` चालवा आणि ते छापत असलेले टोकन पेस्ट करा. ते एका वर्षासाठी वैध आहे आणि त्याला रिफ्रेश टोकन नाही. जतन करण्यापूर्वी OmniRoute Anthropic ला एक चाचणी विनंती पाठवते.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "संभाषण पहा",
       "openConversation": "{id} संभाषण उघडा"
     },
-    "tableLabel": "विनंती लॉग"
+    "tableLabel": "विनंती लॉग",
+    "throughputPostFirstToken": "पहिल्या टोकननंतर",
+    "throughputEndToEnd": "एंड-टू-एंड",
+    "throughputRate": "{value} टोकन/सेकंद",
+    "throughputExplanation": "दोन्ही दर आउटपुट आणि रिझनिंग टोकन संख्यांपैकी मोठी संख्या वापरतात. पहिल्या टोकननंतरचा दर वैध TTFT वगळतो; अन्यथा तो संपूर्ण कालावधी वापरतो. एंड-टू-एंड नेहमी संपूर्ण कालावधी वापरतो. बफर्ड प्रतिसादात जलद मॉडेल जनरेशनशिवाय उच्च बर्स्ट डिलिव्हरी दर असू शकतो."
   },
   "proxyLogger": {
     "filterAll": "सर्व",
@@ -12785,7 +12913,8 @@
     "title": "प्रदाता आकडेवारी",
     "description": "प्रत्येक प्रदाता आणि प्रत्येक मॉडेलनुसार ट्रॅफिक, विलंब आणि यशाचे दर",
     "combo": "संयोजन",
-    "toggleModels": "{provider} ची मॉडेल दाखवा"
+    "toggleModels": "{provider} ची मॉडेल दाखवा",
+    "windowSince": "{date} पासून"
   },
   "relay": {
     "title": "सर्व्हरलेस रिले प्रॉक्सी",
@@ -13730,7 +13859,9 @@
       "disabled": "अक्षम केले",
       "dual": "दुहेरी",
       "alias": "एलिआस",
-      "canonical": "कॅनोनिकल"
+      "canonical": "कॅनोनिकल",
+      "fail_closed": "ब्लॉक करा (fail_closed)",
+      "count_as_zero": "याला $0 म्हणून मोजा (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "संरक्षित-प्राधान्य इन्फ्रा थांब्यांसाठी 502",
         "description": "केवळ-कोटा-फॉलबॅक प्राधान्य लक्ष्याने निश्चितपणे कोटाशी संबंधित नसलेल्या कारणामुळे कॉम्बो थांबवल्यास 503 ऐवजी 502 उत्तर द्या: उघडा प्रोव्हायडर सर्किट ब्रेकर किंवा पूर्वानुमानित विलंब वगळणे."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "किंमत नसलेल्या वापराचे बजेट धोरण",
+        "description": "प्रत्येक कीच्या दैनिक/साप्ताहिक USD मर्यादेत ते यशस्वी वापर कसे वागवले जाते ज्याच्या प्रदाता/मॉडेलसाठी किंमत रेकॉर्ड नाही. fail_closed (पूर्वनिर्धारित) विंडोला ओलांडलेले म्हणून चिन्हांकित करते, त्यामुळे अज्ञात खर्च कधीही हार्ड कॅपच्या पलिकडे जाऊ शकत नाही. count_as_zero त्या वापराला $0 म्हणून मोजते आणि प्राइस असलेल्या खर्चाची अंमलबजावणी चालू ठेवते. किंमत नसलेली मॉडेल्स डॅशबोर्डच्या मुखपृष्ठावर दोन्हीप्रकारे सूचीबद्ध केल्या जातात."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "बंद करा"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "/v1/models कॅटलॉगमध्ये विचार-पातळीच्या प्रकारांची (उदा. -low, -medium, -high) निर्मिती अक्षम करा.",
+  "teamCosts": {
+    "title": "संघ खर्च",
+    "subtitle": "सामायिक सॉफ्ट बजेट आणि कॅटलॉग खर्च अंदाज व्यवस्थापित करा.",
+    "refresh": "रिफ्रेश करा",
+    "create": "संघ तयार करा",
+    "edit": "संघ संपादित करा",
+    "archive": "संग्रहित करा",
+    "selectTeam": "संघ",
+    "searchTeams": "संघ शोधा",
+    "statusFilter": "संघाची स्थिती",
+    "active": "सक्रिय",
+    "archived": "संग्रहित · फक्त वाचनीय",
+    "allTeams": "सर्व संघ",
+    "noTeams": "जुळणारे संघ नाहीत.",
+    "selectHint": "खर्च पाहण्यासाठी संघ तयार करा किंवा निवडा.",
+    "loading": "संघ खर्च लोड होत आहेत…",
+    "budgetTitle": "सध्याचे सॉफ्ट बजेट",
+    "budgetSubtitle": "यशस्वी नोंदवलेला वापर · रोलिंग विंडो · अहवालाच्या तारखांपासून स्वतंत्र",
+    "archivedBudget": "संग्रहित: बजेट अंमलबजावणी निष्क्रिय आहे. ऐतिहासिक अहवाल उपलब्ध राहतात.",
+    "unlimited": "अमर्याद — सामायिक सॉफ्ट बजेट कॉन्फिगर केलेले नाही.",
+    "budgetUnavailable": "बजेटची स्थिती उपलब्ध नाही. पुन्हा प्रयत्न करण्यासाठी रिफ्रेश करा.",
+    "used": "यशस्वी वापर",
+    "maximum": "बजेट कमाल",
+    "remaining": "ज्ञात उर्वरित",
+    "resets": "रीसेट होईल",
+    "unpricedBudget": "यशस्वी वापराच्या काही भागाची किंमत अज्ञात आहे. ज्ञात बेरीज अपूर्ण आहे; बजेट अंमलबजावणी ही विंडो ओलांडलेली मानते.",
+    "overBudget": "बजेट गाठले किंवा ओलांडले · {amount} अधिक",
+    "reportTitle": "वापर अहवाल",
+    "reportSubtitle": "सर्व प्रयत्न · USD मधील कॅटलॉग अंदाज, बीजक नव्हे · पूर्ण UTC तारखा",
+    "reportPeriod": "अहवाल कालावधी",
+    "day1": "1 दिवस",
+    "day7": "7 दिवस",
+    "day30": "30 दिवस",
+    "allTime": "सर्व काळ",
+    "reportSpend": "अंदाजित अहवाल खर्च",
+    "requests": "विनंत्या",
+    "assignedKeys": "नियुक्त केलेल्या कळा",
+    "unpricedReport": "या अहवालात अज्ञात किमती आहेत. अंदाजित खर्च अपूर्ण आहे.",
+    "breakdown": "API कीनुसार खर्च",
+    "noUsage": "या अहवाल कालावधीत वापर नाही.",
+    "keyName": "API कीचे नाव",
+    "tokens": "इनपुट + आउटपुट टोकन",
+    "unnamedKey": "नाव नसलेली किंवा हटवलेली की",
+    "unpriced": "अज्ञात किंमत",
+    "members": "सदस्यत्व",
+    "memberSubtitle": "सदस्यत्व बदलले तरी ऐतिहासिक खर्च मूळ संघाकडेच राहतो.",
+    "searchKeys": "कळा किंवा सध्याचे मालक शोधा",
+    "chooseKey": "API की निवडा",
+    "unassigned": "नियुक्त नाही",
+    "ownership": "सध्याचा बिलिंग संघ: {team}",
+    "assign": "नियुक्त करा",
+    "remove": "काढा",
+    "noMembers": "सध्याचे सदस्य नाहीत. ऐतिहासिक वापर अजूनही बजेटमध्ये मोजला जाऊ शकतो.",
+    "assignedAt": "{date} रोजी नियुक्त केले (UTC)",
+    "name": "संघाचे नाव",
+    "description": "वर्णन",
+    "enableBudget": "सामायिक सॉफ्ट बजेट सक्षम करा",
+    "amount": "बजेट रक्कम (USD)",
+    "duration": "रोलिंग बजेट विंडो",
+    "cancel": "रद्द करा",
+    "save": "जतन करा",
+    "confirm": "पुष्टी करा",
+    "transferTitle": "की हस्तांतरणाची पुष्टी करा",
+    "transferMessage": "ही की “{source}” मधून “{destination}” मध्ये हलवायची? ऐतिहासिक खर्च मूळ संघाकडेच राहतो.",
+    "removeTitle": "की नियुक्ती काढा",
+    "removeMessage": "ही की “{team}” मधून काढायची? ऐतिहासिक खर्च याच संघात राहतो.",
+    "archiveTitle": "संघ संग्रहित करा",
+    "archiveMessage": "“{team}” संग्रहित करायचा? सर्व सध्याची बंधने बंद होतात आणि बजेट अंमलबजावणी थांबते. ऐतिहासिक अहवाल उपलब्ध राहतात.",
+    "invalidName": "नाव (1–200 अक्षरे) आणि कमाल 2,000 अक्षरांचे वर्णन प्रविष्ट करा.",
+    "invalidAmount": "शून्यापेक्षा मोठी मर्यादित बजेट रक्कम प्रविष्ट करा.",
+    "unauthorized": "सुरू ठेवण्यासाठी व्यवस्थापन डॅशबोर्डमध्ये साइन इन करा.",
+    "forbidden": "संघ व्यवस्थापित करण्याची तुम्हाला परवानगी नाही. तुमची नोंद जतन केली आहे.",
+    "notFound": "हा संघ किंवा नियुक्ती आता अस्तित्वात नाही.",
+    "conflict": "नियुक्ती किंवा संघ बदलला आहे. पुन्हा प्रयत्न करण्यापूर्वी रिफ्रेश करा आणि सध्याच्या मालकीची पुष्टी करा.",
+    "failed": "विनंती अयशस्वी झाली. तुमची नोंद जतन केली आहे; कृपया पुन्हा प्रयत्न करा.",
+    "partialBudget": "राखून ठेवलेले काही दैनिक बकेट विंडोच्या सीमेशी ओव्हरलॅप होतात आणि अचूक वाटता येत नाहीत. दाखवलेला खर्च अपूर्ण आहे; उर्वरित मर्यादा उपलब्ध नाही. विद्यमान सॉफ्ट बजेट धोरण अपरिवर्तित आहे."
+  },
   "connectionTest": {
     "title": "चाचणी संदेश",
     "description": "या खात्याद्वारे एक वास्तविक विनंती पाठवा. यासाठी कोट्याचा थोडासा वापर होतो आणि प्रदात्यानुसार वापर कालावधी सुरू होऊ शकतो.",
@@ -15216,5 +15428,8 @@
     "importButton": "आयात करा",
     "importFailed": "आयात अयशस्वी.",
     "importSuccess": "{connections} खाती आणि {nodes} प्रदाता नोड आयात झाले; {skipped} वगळले."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "सध्याच्या स्थानापासून सुरू करा (विद्यमान लॉग वगळा)"
   }
 }

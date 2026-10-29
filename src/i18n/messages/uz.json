@@ -1345,7 +1345,9 @@
       "open": "ochish",
       "close": "yopish"
     },
-    "noResults": "Natijalar yo‘q"
+    "noResults": "Natijalar yo‘q",
+    "costsTeams": "Jamoalar",
+    "costsTeamsSubtitle": "Jamoa xarajat markazlari"
   },
   "webhooks": {
     "title": "Vebhuklar",
@@ -1702,7 +1704,8 @@
     "settingsAdvancedDescription": "Kengaytirilgan foydali yuk qoidalari, so‘rov cheklovlari va proksi API sozlamalari",
     "mitmProxyDescription": "Trafikni tekshirish va nosozliklarni tuzatish uchun MITM proksi sozlamalarini belgilang",
     "oneProxyDescription": "Kengaytirilgan proksi zanjirlash uchun 1Proxy sozlamalarini belgilang",
-    "omniSkillsDescription": "Promptlar va vositalarni avtomatik bajarish uchun sandbox ko‘nikmalarini o‘rnating va boshqaring"
+    "omniSkillsDescription": "Promptlar va vositalarni avtomatik bajarish uchun sandbox ko‘nikmalarini o‘rnating va boshqaring",
+    "teamsDescription": "Jamoa xarajatlari taxminlari va umumiy yumshoq byudjetlar"
   },
   "cloudSyncStatus": {
     "synced": "Sinxronlandi",
@@ -1922,7 +1925,14 @@
     "readinessStep3": "Endpoint manzilingizni nusxalang",
     "readinessStep4": "Sinov soʻrovini yuboring",
     "readinessContinue": "Sozlashni davom ettirish",
-    "readinessDismiss": "Hozircha yopish"
+    "readinessDismiss": "Hozircha yopish",
+    "unpricedUsageTitle": "{count, plural, one {# ta model yaqinda ishlatilgan, lekin narxi belgilanmagan} other {# ta model yaqinda ishlatilgan, lekin narxlari belgilanmagan}}",
+    "unpricedUsageFailClosed": "{keys, plural, one {# ta API kaliti foydalanish limitiga ega} other {# ta API kaliti foydalanish limitiga ega}} so’nggi 8 kunda bu modellardan foydalangan. Agar bu foydalanish kalitning kunlik yoki haftalik oynasi ichida bo’lsa, kalit kvota oshgan deb hisoblanadi va uning so’rovlariga ruxsat berilmaydi (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Bu foydalanish har bir kalit uchun foydalanish limitlariga $0 sifatida hisoblanadi (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# ta so’rov} other {# ta so’rov}}, {keys, plural, one {# ta cheklangan kalit} other {# ta cheklangan kalit}}",
+    "unpricedUsageMore": "…va yana {count} ta",
+    "unpricedUsageConfigure": "Narxlarni sozlash",
+    "unpricedUsageDismiss": "Yopish"
   },
   "analytics": {
     "title": "Tahlil",
@@ -2959,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw — qo‘lda sozlash",
     "clineManualConfiguration": "Cline vositasini qo‘lda sozlash",
     "kiloManualConfiguration": "Kilo Code vositasini qo‘lda sozlash",
+    "piManualConfiguration": "Pi - qo'lda sozlash",
+    "piConfigInvalidTitle": "Pi models.json o‘qilmaydi",
+    "piOmnirouteConfigured": "OmniRoute Pi maxsus provayderi sifatida sozlangan",
+    "piModelHelp": "Pi maxsus so'nggi nuqtalar uchun modellarni avtomatik kashf etmaydi — siz tanlagan model models.json ga aniq yozilgan.",
+    "piManualConfigTitle": "Yoki ~/.pi/agent/models.json qo'lda tahrirlang",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Keyin Pi-ni ishga tushiring va omniroute provayderini tanlang. Butun agent katalogini ko'chirish uchun PI_CODING_AGENT_DIR o'rnating.",
+    "piUnownedNote": "Bu yozuv OmniRoute dan tashqarida qoʻshilgan (masalan, pi-gui Custom endpoints). Ariza berish uni qabul qiladi; Reset faqat OmniRoute yozgan yozuvlarni olib tashlaydi.",
     "whenToUseLabel": "Qachon foydalanish kerak",
     "openToolDocs": "Vosita hujjatlarini ochish",
     "toolUseCases": {
@@ -2978,6 +2996,7 @@
       "amp": "Amp qisqartma ish jarayonlarini xohlasangiz, ammo OmniRoute taxalluslari va yo‘naltirish qoidalarining bajarilishini ta’minlash zarur bo‘lsa, foydalaning.",
       "hermes": "Tezkor vazifalar uchun yengil, terminalga xos sun’iy intellekt yordamchisi kerak bo‘lganda foydalaning.",
       "hermes-agent": "Hermes Agent (Nousresearch tomonidan) standart, delegatsiya, ko‘rish va yordamchi modellari bilan kerak bo‘lib, ular OmniRoute orqali yo‘naltirilishi lozim bo‘lganda foydalaning.",
+      "whycodes": "WhyCodes'ni OmniRoute'ga yo‘naltirilgan umumiy maqsadli avtonom CLI agenti (TUI, nomlangan agentlar, xotira, swarm) sifatida ishlatmoqchi bo‘lsangiz foydalaning.",
       "custom": "Maxsus vosita implementatsiyalari yoki umumiy OpenAI-mos konfiguratsiyalar uchun foydalaning."
     },
     "toolDescriptions": {
@@ -2987,6 +3006,7 @@
       "grok-build": "Maxsus provayderlarni qo‘llab-quvvatlaydigan xAI Grok Build TUI dasturlash agenti",
       "droid": "Factory Droid AI yordamchisi",
       "openclaw": "Open Claw AI yordamchisi",
+      "openclaude": "OpenAI bilan mos provayder qo'llab-quvvatlanadigan OpenClaude dasturlash agenti CLI",
       "cline": "Cline AI dasturlash yordamchisi CLI",
       "kilo": "Kilo Code AI yordamchisi CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3018,6 +3038,7 @@
       "warp": "Maxsus provayderlarni qo‘llab-quvvatlaydigan Warp AI terminali",
       "agent-deck": "Agent Deck ko‘p agentli orkestratori",
       "5dive": "5dive — o‘z serverida joylashtiriladigan dasturlash agentlari floti; bitta autentifikatsiya profili ularning barchasini OmniRoute’ga yo‘naltiradi",
+      "whycodes": "OpenAI bilan mos base URL'ga ega WhyCodes avtonom CLI agenti",
       "zed": "Zed kod muharriri — OpenAI bilan mos provayder orqali o'rnatilgan agent"
     },
     "guides": {
@@ -3275,6 +3296,12 @@
     "cliproxyapiUpdate": "Yangilash",
     "cliproxyapiUpdateAvailable": "Yangilanish mavjud: v{current} → v{latest}",
     "cliproxyapiVersion": "Versiya",
+    "piInstallTitle": "Pi kodlash agentini o'rnating",
+    "piInstallInstructions": "Pi CLI ni o'rnating, so'ngra OmniRoute ga ulash uchun bu yerga qayting.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi bilan ishlaydigan mashinadan kirish mumkin bo'lgan URL dan foydalaning. OpenAI-mos keladigan /v1 so'nggi nuqtasi avtomatik ravishda qo'shiladi.",
+    "piManualMergeHint": "Faqat oldindan koʻrish. Boshqa provayderlaringiz va sozlamalaringiz saqlanib qolishi uchun ushbu providers.omniroute kirishini models.json ga birlashtiring.",
     "removeMapping": "Moslashtirishni olib tashlash"
   },
   "modelCatalog": {
@@ -3339,6 +3366,18 @@
     "maxMembersPlaceholder": "masalan, 10",
     "testSelected": "Tanlanganlarni sinash ({count})",
     "testAllFiltered": "Barcha filtrlanganlarni sinash ({count})",
+    "visibility": "Koʻrinish",
+    "allVisibility": "Koʻrinadigan va yashirin",
+    "visibleOnly": "Koʻrinadigan",
+    "hiddenOnly": "Yashirin",
+    "visibleColumn": "Koʻrinadi",
+    "hideModel": "{name} ni /v1/models dan yashirish",
+    "showModel": "{name} ni /v1/models da koʻrsatish",
+    "hiddenBadge": "Yashirin",
+    "hideFiltered": "Filtrlanganlarni yashirish ({count})",
+    "showFiltered": "Filtrlanganlarni koʻrsatish ({count})",
+    "visibilityCounts": "{visible} koʻrinadigan · {hidden} yashirin · jami {total}",
+    "visibilityUpdateFailed": "Model koʻrinishini yangilab boʻlmadi",
     "cancel": "Bekor qilish",
     "clearResults": "Natijalarni tozalash",
     "testing": "Sinovdan oʻtkazilmoqda...",
@@ -3394,7 +3433,44 @@
     "httpError": "Soʻrov HTTP {status} bilan muvaffaqiyatsiz tugadi",
     "testFailedNoDetail": "Test xatolik xabarisiz muvaffaqiyatsiz tugadi",
     "additionalCapabilities": "Qoʻshimcha imkoniyatlar: {list}",
-    "comboRefMember": "Kombinatsiya → {name}"
+    "comboRefMember": "Kombinatsiya → {name}",
+    "keyAccessButton": "API kaliti ruxsatlari",
+    "allowedInKeys": "Quyidagilarda ruxsat etilgan: {count, plural, one {# ta kalit} other {# ta kalit}}",
+    "keysLoading": "API kalitlari yuklanmoqda…",
+    "keysRetry": "Kalitlarni qayta yuklash",
+    "accessViaPattern": "{pattern} orqali",
+    "accessBlocked": "{pattern} tomonidan bloklangan",
+    "editKeyAccess": "Kalit ruxsatlarini tahrirlash",
+    "toggleKeyAccess": "{name} uchun {item} ga ruxsat berish",
+    "resultNetworkError": "Biriktirish amalga oshmadi",
+    "resultWouldEmptyModels": "Bu kalitni hech qanday ruxsat etilgan modellsiz qoldiradi — buning oʻrniga kalit ruxsatini tahrirlang",
+    "resultWouldEmptyCombos": "Bu kalitni hech qanday ruxsat etilgan kombolarsiz qoldiradi — buning oʻrniga kalit ruxsatini tahrirlang",
+    "keyUpdatePending": "{name} hali ham yangilanmoqda. Bir ozdan keyin qayta urinib koʻring.",
+    "assignToKeys": "API kalitlariga biriktirish…",
+    "assignApply": "Oʻzgarishlarni qoʻllash",
+    "assignComplete": "API kaliti ruxsatlari yangilandi",
+    "assignFailed": "Baʼzi API kalitlarini yangilash muvaffaqiyatsiz tugadi",
+    "assignNoChanges": "Hech qanday API kalit ruxsati oʻzgartirilmadi",
+    "selectedAccessItems": "Tanlangan elementlar: {count}",
+    "assignExcludedCombos": "{count, plural, one {Tanlangan # ta kombo qatori model emas va bu yerda tashlab ketiladi} other {Tanlangan # ta kombo qatori model emas va bu yerda tashlab ketiladi}}. Kombolarni Combos yorligʻidan biriktiring.",
+    "assignActionAdd": "Qoʻshish",
+    "assignActionRemove": "Olib tashlash",
+    "searchKeys": "API kalitlarini qidirish",
+    "selectApiKey": "{name} API kalitini tanlash",
+    "allModelsAccess": "Barcha modellar",
+    "allCombosAccess": "Barcha kombinatsiyalar",
+    "modelAccessCount": "Modellar: {count}",
+    "comboAccessCount": "Kombinatsiyalar: {count}",
+    "keyInactive": "Faol emas",
+    "keyBanned": "Bloklangan",
+    "keyRevoked": "Bekor qilingan",
+    "switchRestrictedConfirm": "Ushbu kalitni cheklangan ruxsatga oʻtkazish: faqat tanlangan elementlarga ruxsat beriladi",
+    "removeNoChangeHint": "Bu kalit barchasiga ruxsat beradi; tanlangan elementlarni olib tashlash hech narsani oʻzgartirmaydi",
+    "removeStaysAllowedHint": "{patterns} orqali ushbu kalitda hali ham ruxsat berilgan",
+    "resultChanged": "Oʻzgartirildi",
+    "resultUnchanged": "Oʻzgarishsiz",
+    "resultSkipped": "Oʻtkazib yuborildi",
+    "resultNeedsSwitch": "Cheklangan rejimga oʻtkazish talab etiladi"
   },
   "combos": {
     "title": "Kombinatsiyalar",
@@ -3515,6 +3591,9 @@
     "moveUp": "Yuqoriga koʻchirish",
     "moveDown": "Pastga koʻchirish",
     "removeModel": "Olib tashlash",
+    "testStep": "Ushbu modelni sinash",
+    "testStepRunning": "Sinalmoqda…",
+    "testStepNotTestable": "Faqat bitta modelli qadamlarni sinash mumkin",
     "saving": "Saqlanmoqda...",
     "liveNoProviders": "Hali hech qanday provayder kuzatilmadi.",
     "liveFleetDataHint": "Infratuzilma maʼlumotlari jonli combo hodisalari orqali keladi.",
@@ -5334,6 +5413,27 @@
     "importFromFileDownloadTemplate": "CSV shablonini yuklab olish",
     "importFromFileMoreErrors": "yana +{count} ta",
     "importFromFileSchemaHint": "CSV ustunlari tartib bo‘yicha joylashadi: provider, name, apiKey, baseUrl (ixtiyoriy), priority (ixtiyoriy). provider ustunida mavjud boshqariladigan provayder identifikatori yoki avval ro‘yxatdan o‘tkazilgan OpenAI/Anthropic-mos tugun identifikatori bo‘lishi kerak — bu import yangi endpoint tugunlarini yaratmaydi.",
+    "importOAuthExport": "OAuth eksportini import qilish",
+    "oauthExportTitle": "Hisob menejeri eksportini import qilish",
+    "oauthExportDescription": "Hisob menejeridan oddiy matnli eksportni yuklang (masalan, Antigravity Manager’ning cloud-accounts eksporti). Tokenlar server tomonida yangilanadi va har bir hisob OAuth ulanishiga aylanadi — dublikatlar joyida yangilanadi.",
+    "oauthExportProviderLabel": "Provayder",
+    "oauthExportChoose": "Faylni tanlash",
+    "oauthExportFileAria": "Hisob eksporti JSON fayli",
+    "oauthExportSchemaHint": "Qabul qilinadi: \"accounts\" massivi bo‘lgan hujjat, oddiy massiv yoki bitta yozuv. Tokenlar ichki token obyektida yoki bevosita yozuvda bo‘lishi mumkin.",
+    "oauthExportDetected": "{count} ta hisob aniqlandi",
+    "oauthExportSelectAll": "Barcha hisoblarni tanlash",
+    "oauthExportSelectAccount": "{index}-hisobni tanlash",
+    "oauthExportColEmail": "Elektron pochta",
+    "oauthExportColProvider": "Provayder",
+    "oauthExportColRefresh": "Yangilash tokeni",
+    "oauthExportNoEmail": "(elektron pochta yo‘q)",
+    "oauthExportYes": "ha",
+    "oauthExportNo": "yo‘q",
+    "oauthExportImporting": "Import qilinmoqda…",
+    "oauthExportImport": "{count} ta hisobni import qilish",
+    "oauthExportResult": "{imported}/{total} import qilindi — {failed} ta muvaffaqiyatsiz",
+    "oauthExportParseError": "Ushbu fayldan birorta ham hisobni o‘qib bo‘lmadi.",
+    "oauthExportUnknownError": "noma’lum xato",
     "adaptaTutorial": {
       "title": "Adapta Web’ni ulash usuli",
       "introPrefix": "Adapta autentifikatsiya uchun Clerk’dan foydalanadi. Token",
@@ -5584,6 +5684,7 @@
     "allModelsAlreadyImported": "Barcha modellar allaqachon import qilingan",
     "noNewModelsToImport": "Import qilinadigan yangi modellar yo‘q — barcha modellar allaqachon reyestrda yoki maxsus modellar ro‘yxatida mavjud",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Modelni aniqlash muvaffaqiyatsiz bo'ldi {time}",
     "skippingExistingModels": "Mavjud {count} ta model o‘tkazib yuborilmoqda",
     "autoSync": "Avtomatik sinxronlash",
     "autoSyncShort": "Sinxronlash",
@@ -6814,7 +6915,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} ta kombinatsiyada ishlatiladi: {combos}",
+    "openComboTooltip": "Kombinatsiyalarni ochish — {combo} ishlatadi"
   },
   "settings": {
     "title": "Sozlamalar",
@@ -8798,6 +8901,8 @@
     "qdrantHost": "Xost",
     "qdrantCollection": "Toʻplam",
     "catalogVisibilityHint": "Yashirilgan model identifikatorlarini bir xil kirish ruxsatlari bilan chaqirish mumkin.",
+    "exposeCombosOnly": "/v1/models roʻyxatida faqat kombinatsiyalarni koʻrsatish",
+    "exposeCombosOnlyDesc": "Modellarni avtomatik aniqlaydigan mijozlar provayderlarning xom modellari oʻrniga sizning kombinatsiyalaringizni (va yashirilmagan boʻlsa auto/*) koʻradi. Aniq provider/model identifikatorlari yoʻnaltirilishda davom etadi.",
     "catalogScopeTitle": "Models API roʻyxati",
     "catalogScopeDesc": "GET /v1/models ushbu kalit uchun nimalarni koʻrsatishi. Roʻyxatni qisqartirish kalit qaysi modellarni chaqira olishiga taʼsir qilmaydi.",
     "catalogScopeAll": "Ikkalasi ham",
@@ -8917,7 +9022,9 @@
         "financial": "Moliyaviy",
         "brazilian": "Braziliya",
         "usa": "AQSH",
-        "full": "To'liq"
+        "full": "To'liq",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Janubiy Afrika)"
       },
       "builtinTypes": "O'rnatilgan turlar",
       "types": {
@@ -8931,7 +9038,19 @@
         "ip_address": "IPv4 manzillari",
         "ipv6_address": "IPv6 manzillari",
         "aws_key": "AWS kirish kalitlari",
-        "api_key_generic": "API kalitlari va tokenlar"
+        "api_key_generic": "API kalitlari va tokenlar",
+        "iban": "IBAN bank hisob raqamlari",
+        "eu_vat": "EU VAT raqamlari",
+        "es_dni_nie": "Ispan DNI / NIE",
+        "it_codice_fiscale": "Italiya Kodeksi Fiscale",
+        "pl_pesel": "Polsha PESEL",
+        "nl_bsn": "Gollandiyalik BSN",
+        "de_steuer_id": "Germaniya Steuer-ID",
+        "se_personnummer": "Shvetsiya xodimi",
+        "za_id": "Janubiy Afrika ID raqamlari",
+        "za_phone": "Janubiy Afrika telefon raqamlari",
+        "za_vat": "Janubiy Afrika VAT raqamlari",
+        "za_tax_ref": "Janubiy Afrika soliq ma'lumotnomalari"
       },
       "customPatterns": "Maxsus andozalar",
       "customPatternsDesc": "Mosliklar [CUSTOM_REDACTED] bilan almashtiriladi. Ko'pi bilan {max} ta andoza. Halokatli orqaga qaytish xavfi bor andozalar rad etiladi.",
@@ -11433,6 +11552,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth sozlanmagan. {applicationsUrl} manzilida qayta yoʻnaltirish URI manzili sifatida {redirectUri} va ruxsat doiralari sifatida \"{scopes}\" bilan OAuth ilovasini roʻyxatdan oʻtkazing, soʻng {clientIdEnv} (va ixtiyoriy ravishda {clientSecretEnv}) ni sozlab, qayta ishga tushiring.",
     "gitlabDuoSetupDescription": "Ilova roʻyxatdan oʻtkazilib, ushbu OmniRoute instansiyasida muhit oʻzgaruvchilari sozlangach, OAuth orqali kirishni boshlash uchun Davom etish tugmasini bosing.",
     "continue": "Davom etish",
+    "copilotPolicyTitle": "Eksperimental provayder: siyosat holati noaniq",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com orqali ulanadi, bu GitHub umumiy uchinchi tomon xulosasi sifatida e'lon qilinmagan API. Ushbu integratsiya eksperimental hisoblanadi va ogohlantirmasdan o'zgarishi mumkin.",
+    "copilotPolicyLine2": "Faqat shaxsiy GitHub hisobingiz ulanishi mumkin. Hech qachon hisobga olish ma'lumotlarini, pul hisoblarini baham ko'rmang yoki rejangiz chegarasidan oshib ketishga urinmang.",
+    "copilotPolicyLine3": "Bepul va Talaba tarif rejasi foydalanuvchilari faqat avtomatik model tanlashni oladi. Sizning Copilot rejasi shartlari va har qanday foydalanish cheklovlari sizning javobgarligingiz bo'lib qoladi.",
+    "copilotPolicyAcknowledge": "Tushundim, ulaning",
     "tabPasteSetupToken": "Sozlash tokeni",
     "claudeSetupTokenDescription": "Terminalda `claude setup-token` buyrug'ini ishga tushiring va u chiqargan tokenni joylashtiring. U bir yil amal qiladi va yangilash tokeniga ega emas. OmniRoute saqlashdan oldin Anthropic'ga bitta sinov so'rovini yuboradi.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12266,11 @@
       "viewConversation": "suhbatni koʻrish",
       "openConversation": "{id} suhbatini ochish"
     },
-    "tableLabel": "Soʻrov jurnallari"
+    "tableLabel": "Soʻrov jurnallari",
+    "throughputPostFirstToken": "Birinchi tokendan keyin",
+    "throughputEndToEnd": "Boshdan-oxirigacha",
+    "throughputRate": "{value} token/sek",
+    "throughputExplanation": "Ikkala koʻrsatkich ham chiqish va mulohaza tokenlari sonidan kattasini ishlatadi. Birinchi tokendan keyingi koʻrsatkich haqiqiy TTFTni hisobga olmaydi; aks holda u toʻliq davomiylikdan foydalanadi. Boshdan-oxirigacha har doim toʻliq davomiylikdan foydalanadi. Buferlangan javob model tezroq generatsiya qilmasa ham, yuqori portlash yetkazib berish tezligiga ega boʻlishi mumkin."
   },
   "proxyLogger": {
     "filterAll": "Barchasi",
@@ -12785,7 +12913,8 @@
     "title": "Provayder statistikasi",
     "description": "Har bir provayder va model boʻyicha trafik, kechikish va muvaffaqiyat koʻrsatkichlari",
     "combo": "Kombinatsiya",
-    "toggleModels": "{provider} modellarini koʻrsatish"
+    "toggleModels": "{provider} modellarini koʻrsatish",
+    "windowSince": "{date} dan beri"
   },
   "relay": {
     "title": "Serversiz rele proksilari",
@@ -13730,7 +13859,9 @@
       "disabled": "Faol emas",
       "dual": "Ikkalasi",
       "alias": "Taxallus",
-      "canonical": "Kanonik"
+      "canonical": "Kanonik",
+      "fail_closed": "Bloklash (fail_closed)",
+      "count_as_zero": "$0 sifatida hisoblash (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14008,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Himoyalangan ustuvorlikdagi infratuzilma toʻxtashlariga 502 javobi",
         "description": "Faqat kvota sababli zaxira variantga oʻtadigan ustuvor maqsad comboʼni kvotaga aloqador emasligi isbotlangan sabab — provayderning ochiq circuit breakerʼi yoki bashorat qilingan kechikish tufayli oʻtkazib yuborish — bilan toʻxtatsa, 503 oʻrniga 502 javobini bering."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Narxi belgilanmagan foydalanish byudjet siyosati",
+        "description": "Har bir kalit uchun kunlik/haftalik USD limitlar provayder/model uchun narx satri yo’q bo’lgan muvaffaqiyatli foydalanishni qanday hisoblashini ko’rsatadi. fail_closed (odatiy) oynani ortiqcha deb belgilaydi, shuning uchun noma’lum xarajat qattiq cheklovdan o’tib ketmaydi. count_as_zero ushbu foydalanishni $0 deb hisoblaydi va narxlangan sarfni majburan nazorat qilishni davom ettiradi. Narxi belgilanmagan modellar har holda boshqaruv paneli bosh sahifasida ko’rsatiladi."
       }
     }
   },
@@ -15157,6 +15292,83 @@
     "dismissAriaLabel": "Yopish"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "/v1/models katalogida fikrlash darajasi variantlarini (masalan, -low, -medium, -high) yaratishni o‘chirib qo‘ying.",
+  "teamCosts": {
+    "title": "Jamoa xarajatlari",
+    "subtitle": "Umumiy yumshoq byudjetlar va katalog xarajat taxminlarini boshqaring.",
+    "refresh": "Yangilash",
+    "create": "Jamoa yaratish",
+    "edit": "Jamoani tahrirlash",
+    "archive": "Arxivlash",
+    "selectTeam": "Jamoalar",
+    "searchTeams": "Jamoalarni qidirish",
+    "statusFilter": "Jamoa holati",
+    "active": "Faol",
+    "archived": "Arxivlangan · faqat o‘qish",
+    "allTeams": "Barcha jamoalar",
+    "noTeams": "Mos jamoalar yo‘q.",
+    "selectHint": "Xarajatlarni ko‘rish uchun jamoa yarating yoki tanlang.",
+    "loading": "Jamoa xarajatlari yuklanmoqda…",
+    "budgetTitle": "Joriy yumshoq byudjet",
+    "budgetSubtitle": "Muvaffaqiyatli qayd etilgan foydalanish · siljuvchi oyna · hisobot sanalariga bog‘liq emas",
+    "archivedBudget": "Arxivlangan: byudjetni qo‘llash nofaol. Tarixiy hisobotlar mavjud bo‘lib qoladi.",
+    "unlimited": "Cheksiz — umumiy yumshoq byudjet sozlanmagan.",
+    "budgetUnavailable": "Byudjet holati mavjud emas. Qayta urinish uchun yangilang.",
+    "used": "Muvaffaqiyatli foydalanish",
+    "maximum": "Byudjet maksimumi",
+    "remaining": "Ma’lum qoldiq",
+    "resets": "Qayta o‘rnatiladi",
+    "unpricedBudget": "Muvaffaqiyatli foydalanishning bir qismi narxi noma’lum. Ma’lum yig‘indi to‘liq emas; byudjetni qo‘llash bu oynani oshgan deb hisoblaydi.",
+    "overBudget": "Byudjetga yetildi yoki oshdi · {amount} ortiqcha",
+    "reportTitle": "Foydalanish hisoboti",
+    "reportSubtitle": "Barcha urinishlar · USD’dagi katalog taxmini, hisob-faktura emas · to‘liq UTC sanalari",
+    "reportPeriod": "Hisobot davri",
+    "day1": "1 kun",
+    "day7": "7 kun",
+    "day30": "30 kun",
+    "allTime": "Butun vaqt",
+    "reportSpend": "Hisobotning taxminiy xarajati",
+    "requests": "So‘rovlar",
+    "assignedKeys": "Biriktirilgan kalitlar",
+    "unpricedReport": "Bu hisobotda noma’lum narxlar bor. Taxminiy xarajat to‘liq emas.",
+    "breakdown": "API kaliti bo‘yicha xarajat",
+    "noUsage": "Bu hisobot davrida foydalanish yo‘q.",
+    "keyName": "API kaliti nomi",
+    "tokens": "Kiruvchi + chiquvchi tokenlar",
+    "unnamedKey": "Nomsiz yoki o‘chirilgan kalit",
+    "unpriced": "Noma’lum narx",
+    "members": "A’zolik",
+    "memberSubtitle": "A’zolikni o‘zgartirish tarixiy xarajatni dastlabki jamoada qoldiradi.",
+    "searchKeys": "Kalitlar yoki joriy egalarni qidirish",
+    "chooseKey": "API kalitini tanlang",
+    "unassigned": "Biriktirilmagan",
+    "ownership": "Joriy hisob-kitob jamoasi: {team}",
+    "assign": "Biriktirish",
+    "remove": "Olib tashlash",
+    "noMembers": "Joriy a’zolar yo‘q. Tarixiy foydalanish baribir byudjetga hisoblanishi mumkin.",
+    "assignedAt": "{date} sanasida biriktirildi (UTC)",
+    "name": "Jamoa nomi",
+    "description": "Tavsif",
+    "enableBudget": "Umumiy yumshoq byudjetni yoqish",
+    "amount": "Byudjet miqdori (USD)",
+    "duration": "Siljuvchi byudjet oynasi",
+    "cancel": "Bekor qilish",
+    "save": "Saqlash",
+    "confirm": "Tasdiqlash",
+    "transferTitle": "Kalitni ko‘chirishni tasdiqlang",
+    "transferMessage": "Bu kalit “{source}” jamoasidan “{destination}” jamoasiga ko‘chirilsinmi? Tarixiy xarajat dastlabki jamoada qoladi.",
+    "removeTitle": "Kalit biriktirilishini olib tashlash",
+    "removeMessage": "Bu kalit “{team}” jamoasidan olib tashlansinmi? Tarixiy xarajat shu jamoada qoladi.",
+    "archiveTitle": "Jamoani arxivlash",
+    "archiveMessage": "“{team}” arxivlansinmi? Barcha joriy bog‘lanishlar yopiladi va byudjetni qo‘llash to‘xtaydi. Tarixiy hisobotlar mavjud bo‘lib qoladi.",
+    "invalidName": "Nom (1–200 belgi) va ko‘pi bilan 2000 belgilik tavsif kiriting.",
+    "invalidAmount": "Noldan katta, chekli byudjet miqdorini kiriting.",
+    "unauthorized": "Davom etish uchun boshqaruv paneliga kiring.",
+    "forbidden": "Jamoalarni boshqarish uchun ruxsatingiz yo‘q. Kiritganingiz saqlandi.",
+    "notFound": "Bu jamoa yoki biriktirish endi mavjud emas.",
+    "conflict": "Biriktirish yoki jamoa o‘zgardi. Qayta urinishdan oldin yangilang va joriy egalikni tasdiqlang.",
+    "failed": "So‘rov bajarilmadi. Kiritganingiz saqlandi; qayta urinib ko‘ring.",
+    "partialBudget": "Ba’zi saqlangan kunlik guruhlar oyna chegarasi bilan kesishadi va aniq taqsimlab bo‘lmaydi. Ko‘rsatilgan xarajat to‘liq emas; qolgan limit mavjud emas. Mavjud yumshoq byudjet siyosati o‘zgarmaydi."
+  },
   "connectionTest": {
     "title": "Sinov xabari",
     "description": "Ushbu hisob orqali bitta haqiqiy soʻrov yuboring. Bu oz miqdordagi kvotadan foydalanadi va provayderga qarab foydalanish davrini boshlashi mumkin.",
@@ -15216,5 +15428,8 @@
     "importButton": "Import qilish",
     "importFailed": "Import muvaffaqiyatsiz tugadi.",
     "importSuccess": "{connections} ta hisob va {nodes} ta provayder tuguni import qilindi; {skipped} ta o'tkazib yuborildi."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Joriy joydan boshlash (mavjud jurnallarni o'tkazib yuborish)"
   }
 }

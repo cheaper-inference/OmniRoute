@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "Náklady týmu",
+    "subtitle": "Spravujte sdílené měkké rozpočty a odhady nákladů z katalogu.",
+    "refresh": "Obnovit",
+    "create": "Vytvořit tým",
+    "edit": "Upravit tým",
+    "archive": "Archivovat",
+    "selectTeam": "Týmy",
+    "searchTeams": "Hledat týmy",
+    "statusFilter": "Stav týmu",
+    "active": "Aktivní",
+    "archived": "Archivováno · pouze pro čtení",
+    "allTeams": "Všechny týmy",
+    "noTeams": "Žádné odpovídající týmy.",
+    "selectHint": "Vytvořte nebo vyberte tým, abyste viděli náklady.",
+    "loading": "Načítání nákladů týmu…",
+    "budgetTitle": "Aktuální měkký rozpočet",
+    "budgetSubtitle": "Úspěšné potvrzené využití · klouzavé okno · nezávislé na datech reportu",
+    "archivedBudget": "Archivováno: vymáhání rozpočtu je neaktivní. Historické reporty zůstávají dostupné.",
+    "unlimited": "Neomezeno — není nastaven žádný sdílený měkký rozpočet.",
+    "budgetUnavailable": "Stav rozpočtu není dostupný. Obnovte a zkuste to znovu.",
+    "used": "Úspěšné využití",
+    "maximum": "Maximum rozpočtu",
+    "remaining": "Známý zbytek",
+    "resets": "Resetuje se",
+    "unpricedBudget": "U části úspěšného využití není známa cena. Známý součet je neúplný; vymáhání rozpočtu toto okno považuje za překročené.",
+    "overBudget": "Rozpočet dosažen nebo překročen · o {amount} více",
+    "reportTitle": "Report využití",
+    "reportSubtitle": "Všechny pokusy · odhad z katalogu v USD, nikoli faktura · celá data UTC",
+    "reportPeriod": "Období reportu",
+    "day1": "1 den",
+    "day7": "7 dní",
+    "day30": "30 dní",
+    "allTime": "Celé období",
+    "reportSpend": "Odhadované výdaje reportu",
+    "requests": "Požadavky",
+    "assignedKeys": "Přiřazené klíče",
+    "unpricedReport": "Tento report obsahuje neznámé ceny. Odhadované výdaje jsou neúplné.",
+    "breakdown": "Náklady podle klíče API",
+    "noUsage": "V tomto období reportu žádné využití.",
+    "keyName": "Název klíče API",
+    "tokens": "Vstupní + výstupní tokeny",
+    "unnamedKey": "Nepojmenovaný nebo smazaný klíč",
+    "unpriced": "Neznámá cena",
+    "members": "Členství",
+    "memberSubtitle": "Změna členství ponechává historické výdaje u původního týmu.",
+    "searchKeys": "Hledat klíče nebo současné vlastníky",
+    "chooseKey": "Vyberte klíč API",
+    "unassigned": "Nepřiřazeno",
+    "ownership": "Současný fakturační tým: {team}",
+    "assign": "Přiřadit",
+    "remove": "Odebrat",
+    "noMembers": "Žádní současní členové. Historické využití se do rozpočtu může stále započítávat.",
+    "assignedAt": "Přiřazeno {date} (UTC)",
+    "name": "Název týmu",
+    "description": "Popis",
+    "enableBudget": "Povolit sdílený měkký rozpočet",
+    "amount": "Výše rozpočtu (USD)",
+    "duration": "Klouzavé okno rozpočtu",
+    "cancel": "Zrušit",
+    "save": "Uložit",
+    "confirm": "Potvrdit",
+    "transferTitle": "Potvrďte přenos klíče",
+    "transferMessage": "Přesunout tento klíč z „{source}“ do „{destination}“? Historické výdaje zůstávají u původního týmu.",
+    "removeTitle": "Odebrat přiřazení klíče",
+    "removeMessage": "Odebrat tento klíč z „{team}“? Historické výdaje zůstávají v tomto týmu.",
+    "archiveTitle": "Archivovat tým",
+    "archiveMessage": "Archivovat „{team}“? Všechna současná propojení se uzavřou a vymáhání rozpočtu se zastaví. Historické reporty zůstávají dostupné.",
+    "invalidName": "Zadejte název (1–200 znaků) a popis o nejvýše 2 000 znacích.",
+    "invalidAmount": "Zadejte konečnou výši rozpočtu větší než nula.",
+    "unauthorized": "Pro pokračování se přihlaste do administračního panelu.",
+    "forbidden": "Nemáte oprávnění spravovat týmy. Vaše zadání bylo zachováno.",
+    "notFound": "Tento tým nebo přiřazení již neexistuje.",
+    "conflict": "Přiřazení nebo tým se změnily. Obnovte a před opakováním potvrďte současné vlastnictví.",
+    "failed": "Požadavek selhal. Vaše zadání bylo zachováno; zkuste to znovu.",
+    "partialBudget": "Některé uchované denní koše přesahují hranici okna a nelze je přesně rozdělit. Zobrazené výdaje jsou neúplné; zbývající prostor není dostupný. Stávající politika měkkého rozpočtu se nemění."
+  },
   "codexKeyServiceMode": {
     "title": "Režim služby Codex pro tento klíč API",
     "description": "Platí pro požadavky Codex, včetně modelů Codex v kombinacích. Vynucené režimy přepíší nastavení klienta, globální nastavení a výchozí nastavení připojení. Ostatní poskytovatelé zůstanou beze změny.",
@@ -1345,7 +1422,9 @@
       "open": "otevřít",
       "close": "zavřít"
     },
-    "noResults": "Žádné výsledky"
+    "noResults": "Žádné výsledky",
+    "costsTeams": "Týmy",
+    "costsTeamsSubtitle": "Nákladová střediska týmů"
   },
   "webhooks": {
     "title": "Webhooky",
@@ -1598,6 +1677,7 @@
     "dismissError": "Skrýt chybu"
   },
   "header": {
+    "teamsDescription": "Odhady nákladů týmu a sdílené měkké rozpočty",
     "logout": "Odhlásit se",
     "quickNavigation": "Rychlá navigace",
     "quickNavigationTitle": "Rychlá navigace (⌘K / Ctrl+K)",
@@ -1922,7 +2002,14 @@
     "readinessStep3": "Zkopírujte svůj koncový bod",
     "readinessStep4": "Odešlete testovací požadavek",
     "readinessContinue": "Pokračovat v nastavení",
-    "readinessDismiss": "Prozatím skrýt"
+    "readinessDismiss": "Prozatím skrýt",
+    "unpricedUsageTitle": "{count, plural, one {# model} few {# modely} other {# modelů}} s nedávným použitím, ale bez nastavené ceny",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API klíč s limitem použití} few {# API klíče s limitem použití} other {# API klíčů s limitem použití}} použily tyto modely za posledních 8 dní. Pokud je toto použití v denním nebo týdenním okně klíče, je klíč považován za překročený a jeho požadavky jsou blokovány (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Toto použití se počítá jako $0 k limitům použití na klíč (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# požadavek} few {# požadavky} other {# požadavků}}, {keys, plural, one {# omezený klíč} few {# omezené klíče} other {# omezených klíčů}}",
+    "unpricedUsageMore": "…a dalších {count}",
+    "unpricedUsageConfigure": "Nastavit ceny",
+    "unpricedUsageDismiss": "Zavřít"
   },
   "analytics": {
     "title": "Analytika",
@@ -2959,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - Ruční nastavení",
     "clineManualConfiguration": "Cline Ruční nastavení",
     "kiloManualConfiguration": "Kilo Code Ruční nastavení",
+    "piManualConfiguration": "Pi - Manuální konfigurace",
+    "piConfigInvalidTitle": "Pi models.json je nečitelný",
+    "piOmnirouteConfigured": "OmniRoute je nakonfigurován jako vlastní poskytovatel Pi",
+    "piModelHelp": "Pi automaticky neobjevuje modely pro vlastní koncové body — model, který vyberete, je zapsán do models.json explicitně.",
+    "piManualConfigTitle": "Nebo upravit ~/.pi/agent/models.json ručně",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Poté spusťte Pi a vyberte poskytovatele omniroute. Nastavením PI_CODING_AGENT_DIR přesunete celý adresář agenta.",
+    "piUnownedNote": "Tento záznam byl přidán mimo OmniRoute (např. vlastní koncové body pi-gui). Podání žádosti jej přijme; Obnovit pouze odstraní záznamy zapsané OmniRoute.",
     "whenToUseLabel": "Kdy použít",
     "openToolDocs": "Otevřít dokumentaci nástroje",
     "toolUseCases": {
@@ -2978,6 +3073,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Použijte, když potřebujete lehkého terminálového nativního AI asistenta pro rychlé úkoly.",
       "hermes-agent": "Použijte, když potřebujete Hermes Agent (od Nousresearch) s výchozími, delegačními, vizuálními a pomocnými modely směrovanými přes OmniRoute.",
+      "whycodes": "Použijte, když chcete WhyCodes jako univerzálního autonomního CLI agenta (TUI, pojmenovaní agenti, paměť, swarm) nasměrovaného na OmniRoute.",
       "custom": "Použijte pro vlastní implementace nástrojů nebo obecné konfigurace kompatibilní s OpenAI."
     },
     "toolDescriptions": {
@@ -2987,6 +3083,7 @@
       "grok-build": "TUI programovací agent xAI Grok Build s podporou vlastních poskytovatelů",
       "droid": "Factory Droid AI asistent",
       "openclaw": "Open Claw AI asistent",
+      "openclaude": "CLI programovací agent OpenClaude s podporou poskytovatele kompatibilního s OpenAI",
       "cline": "Cline AI Coding asistent CLI",
       "kilo": "Kilo Code AI asistent CLI",
       "qwen": "Qwen Code CLI",
@@ -3018,6 +3115,7 @@
       "warp": "AI terminál Warp s podporou vlastních poskytovatelů",
       "agent-deck": "Multiagentní orchestrátor Agent Deck",
       "5dive": "5dive — vlastní flotila kódovacích agentů; jeden auth profil nasměruje všechny na OmniRoute",
+      "whycodes": "Autonomní CLI agent WhyCodes se základní URL kompatibilní s OpenAI",
       "zed": "Editor kódu Zed — vestavěný agent přes poskytovatele kompatibilního s OpenAI"
     },
     "guides": {
@@ -3275,6 +3373,12 @@
     "cliproxyapiUpdate": "Aktualizovat",
     "cliproxyapiUpdateAvailable": "K dispozici je aktualizace: v{current} → v{latest}",
     "cliproxyapiVersion": "Verze",
+    "piInstallTitle": "Nainstalujte Pi Coding Agent",
+    "piInstallInstructions": "Nainstalujte Pi CLI a poté se vraťte sem a připojte jej k OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Použijte URL dosažitelné ze stroje, na kterém běží Pi. Koncový bod /v1 kompatibilní s OpenAI se přidá automaticky.",
+    "piManualMergeHint": "Pouze náhled. Sloučte tento záznam providers.omniroute do models.json, aby vaši ostatní poskytovatelé a nastavení zůstali nedotčeni.",
     "removeMapping": "Odebrat mapování"
   },
   "modelCatalog": {
@@ -3339,6 +3443,18 @@
     "maxMembersPlaceholder": "např. 10",
     "testSelected": "Otestovat vybrané ({count})",
     "testAllFiltered": "Otestovat všechny filtrované ({count})",
+    "visibility": "Viditelnost",
+    "allVisibility": "Viditelné i skryté",
+    "visibleOnly": "Viditelné",
+    "hiddenOnly": "Skryté",
+    "visibleColumn": "Viditelný",
+    "hideModel": "Skrýt {name} z /v1/models",
+    "showModel": "Zobrazit {name} v /v1/models",
+    "hiddenBadge": "Skrytý",
+    "hideFiltered": "Skrýt filtrované ({count})",
+    "showFiltered": "Zobrazit filtrované ({count})",
+    "visibilityCounts": "{visible} viditelných · {hidden} skrytých · {total} celkem",
+    "visibilityUpdateFailed": "Aktualizace viditelnosti modelu se nezdařila",
     "cancel": "Zrušit",
     "clearResults": "Vymazat výsledky",
     "testing": "Testování...",
@@ -3394,7 +3510,44 @@
     "httpError": "Požadavek selhal s kódem HTTP {status}",
     "testFailedNoDetail": "Test selhal bez chybové zprávy",
     "additionalCapabilities": "Další schopnosti: {list}",
-    "comboRefMember": "Kombinace → {name}"
+    "comboRefMember": "Kombinace → {name}",
+    "keyAccessButton": "Přístup k API klíčům",
+    "allowedInKeys": "Povoleno v: {count, plural, one {# klíči} few {# klíčích} other {# klíčích}}",
+    "keysLoading": "Načítání API klíčů…",
+    "keysRetry": "Zkusit znovu načíst klíče",
+    "accessViaPattern": "přes {pattern}",
+    "accessBlocked": "Blokováno pravidlem {pattern}",
+    "editKeyAccess": "Upravit přístup klíče",
+    "toggleKeyAccess": "Povolit {item} na {name}",
+    "resultNetworkError": "Přiřazení selhalo",
+    "resultWouldEmptyModels": "Tímto by klíč zůstal bez povolených modelů – místo toho upravte přístup ke klíči",
+    "resultWouldEmptyCombos": "Tímto by klíč zůstal bez povolených kombinací – místo toho upravte přístup ke klíči",
+    "keyUpdatePending": "{name} se stále aktualizuje. Zkuste to za chvíli znovu.",
+    "assignToKeys": "Přiřadit k API klíčům…",
+    "assignApply": "Použít změny",
+    "assignComplete": "Přístup k API klíči aktualizován",
+    "assignFailed": "Některé aktualizace API klíčů selhaly",
+    "assignNoChanges": "Přístup k žádnému klíči API nebyl změněn",
+    "selectedAccessItems": "Vybrané položky: {count}",
+    "assignExcludedCombos": "{count, plural, one {# vybraný řádek kombinace není model a bude zde přeskočen} few {# vybrané řádky kombinací nejsou modely a budou zde přeskočeny} other {# vybraných řádků kombinací nejsou modely a budou zde přeskočeny}}. Kombinace přiřaďte na kartě Combos.",
+    "assignActionAdd": "Přidat",
+    "assignActionRemove": "Odebrat",
+    "searchKeys": "Hledat API klíče",
+    "selectApiKey": "Vybrat API klíč {name}",
+    "allModelsAccess": "Všechny modely",
+    "allCombosAccess": "Všechny kombinace",
+    "modelAccessCount": "Modely: {count}",
+    "comboAccessCount": "Kombinace: {count}",
+    "keyInactive": "Neaktivní",
+    "keyBanned": "Zablokováno",
+    "keyRevoked": "Odvoláno",
+    "switchRestrictedConfirm": "Přepnout tento klíč na omezený přístup: povoleny budou pouze vybrané položky",
+    "removeNoChangeHint": "Tento klíč povoluje vše; odebrání vybraných položek neprovede žádnou změnu",
+    "removeStaysAllowedHint": "Na tomto klíči stále povoleno prostřednictvím {patterns}",
+    "resultChanged": "Změněno",
+    "resultUnchanged": "Beze změny",
+    "resultSkipped": "Přeskočeno",
+    "resultNeedsSwitch": "Vyžaduje přepnutí na omezený přístup"
   },
   "combos": {
     "title": "Komba",
@@ -3515,6 +3668,9 @@
     "moveUp": "Posunout nahoru",
     "moveDown": "Přesunout dolů",
     "removeModel": "Odstranit",
+    "testStep": "Otestovat tento model",
+    "testStepRunning": "Testování…",
+    "testStepNotTestable": "Testovat lze pouze kroky s jedním modelem",
     "saving": "Ukládám...",
     "liveNoProviders": "Zatím nebyli zaznamenáni žádní poskytovatelé.",
     "liveFleetDataHint": "Data flotily přicházejí prostřednictvím živých událostí combo.",
@@ -5334,6 +5490,27 @@
     "importFromFileDownloadTemplate": "Stáhnout šablonu CSV",
     "importFromFileMoreErrors": "+{count} dalších",
     "importFromFileSchemaHint": "Sloupce CSV jsou poziční: provider, name, apiKey, baseUrl (volitelné), priority (volitelné). Sloupec provider musí obsahovat existující ID spravovaného poskytovatele nebo již zaregistrované ID uzlu kompatibilního s OpenAI/Anthropic — tento import nevytváří nové uzly koncových bodů.",
+    "importOAuthExport": "Importovat export OAuth",
+    "oauthExportTitle": "Importovat export ze správce účtů",
+    "oauthExportDescription": "Nahrajte export v prostém textu ze správce účtů (např. export cloud-accounts z Antigravity Manageru). Tokeny se obnoví na serveru a z každého účtu se stane připojení OAuth — duplicity se obnoví na místě.",
+    "oauthExportProviderLabel": "Poskytovatel",
+    "oauthExportChoose": "Vybrat soubor",
+    "oauthExportFileAria": "Soubor JSON s exportem účtů",
+    "oauthExportSchemaHint": "Podporováno: dokument s polem \"accounts\", samotné pole nebo jeden záznam. Tokeny mohou být ve vnořeném objektu token nebo přímo v záznamu.",
+    "oauthExportDetected": "Zjištěno účtů: {count}",
+    "oauthExportSelectAll": "Vybrat všechny účty",
+    "oauthExportSelectAccount": "Vybrat účet {index}",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Poskytovatel",
+    "oauthExportColRefresh": "Obnovovací token",
+    "oauthExportNoEmail": "(bez e-mailu)",
+    "oauthExportYes": "ano",
+    "oauthExportNo": "ne",
+    "oauthExportImporting": "Importování…",
+    "oauthExportImport": "Importovat účty ({count})",
+    "oauthExportResult": "Importováno {imported}/{total} — {failed} selhalo",
+    "oauthExportParseError": "Z tohoto souboru se nepodařilo načíst žádné účty.",
+    "oauthExportUnknownError": "neznámá chyba",
     "adaptaTutorial": {
       "title": "Jak připojit Adapta Web",
       "introPrefix": "Adapta používá k ověřování službu Clerk. Token",
@@ -5584,6 +5761,7 @@
     "allModelsAlreadyImported": "Všechny modely jsou již importovány",
     "noNewModelsToImport": "Žádné nové modely k importu — všechny modely jsou již v registru nebo v seznamu vlastních modelů",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Objevení modelu selhalo {time}",
     "skippingExistingModels": "Přeskakování {count} existujících modelů",
     "autoSync": "Automatická synchronizace",
     "autoSyncShort": "Synchronizace",
@@ -6814,7 +6992,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Použito v kombech ({count}): {combos}",
+    "openComboTooltip": "Otevřít Komba — používá {combo}"
   },
   "settings": {
     "title": "Nastavení",
@@ -8798,6 +8978,8 @@
     "qdrantHost": "Hostitel",
     "qdrantCollection": "Kolekce",
     "catalogVisibilityHint": "Skryté identifikátory modelů lze nadále volat se stejnými přístupovými oprávněními.",
+    "exposeCombosOnly": "V /v1/models vypisovat pouze komba",
+    "exposeCombosOnlyDesc": "Klienti, kteří modely zjišťují automaticky, uvidí vaše komba (a auto/*, pokud nejsou skrytá) místo surových modelů poskytovatelů. Explicitní ID provider/model se dál směrují.",
     "catalogScopeTitle": "Výpis API modelů",
     "catalogScopeDesc": "Co GET /v1/models uvádí pro tento klíč. Zúžení seznamu nikdy nezmění, které modely může klíč volat.",
     "catalogScopeAll": "Obojí",
@@ -8917,7 +9099,9 @@
         "financial": "Finanční",
         "brazilian": "Brazilská",
         "usa": "USA",
-        "full": "Úplná"
+        "full": "Úplná",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Jihoafrická republika)"
       },
       "builtinTypes": "Vestavěné typy",
       "types": {
@@ -8931,7 +9115,19 @@
         "ip_address": "Adresy IPv4",
         "ipv6_address": "Adresy IPv6",
         "aws_key": "Přístupové klíče AWS",
-        "api_key_generic": "Klíče API a tokeny"
+        "api_key_generic": "Klíče API a tokeny",
+        "iban": "čísla bankovních účtů IBAN",
+        "eu_vat": "EU VAT čísla",
+        "es_dni_nie": "Španělské DNI / NIE",
+        "it_codice_fiscale": "Italský Codice Fiscale",
+        "pl_pesel": "polská PESEL",
+        "nl_bsn": "holandská BSN",
+        "de_steuer_id": "Německý Steuer-ID",
+        "se_personnummer": "švédské personnummer",
+        "za_id": "Jihoafrická čísla ID",
+        "za_phone": "Jihoafrická telefonní čísla",
+        "za_vat": "Jihoafrická čísla VAT",
+        "za_tax_ref": "Jihoafrické daňové odkazy"
       },
       "customPatterns": "Vlastní vzory",
       "customPatternsDesc": "Shody se nahrazují za [CUSTOM_REDACTED]. Nejvýše {max} vzorů. Vzory s rizikem katastrofického backtrackingu se odmítají.",
@@ -11433,6 +11629,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth není nakonfigurován. Zaregistrujte OAuth aplikaci na {applicationsUrl} s přesměrovací URI {redirectUri} a rozsahy \"{scopes}\", poté nastavte {clientIdEnv} (a volitelně {clientSecretEnv}) a restartujte.",
     "gitlabDuoSetupDescription": "Po registraci aplikace a nastavení proměnných prostředí na této instanci OmniRoute klikněte na Pokračovat pro zahájení přihlášení pomocí OAuth.",
     "continue": "Pokračovat",
+    "copilotPolicyTitle": "Experimentální poskytovatel: stav zásad je nejednoznačný",
+    "copilotPolicyLine1": "OmniRoute se připojuje přes api.githubcopilot.com, který GitHub nepublikoval jako obecný závěr třetí strany API. Tato integrace je experimentální a může se změnit bez upozornění.",
+    "copilotPolicyLine2": "Může být připojen pouze váš vlastní účet GitHub. Nikdy nesdílejte přihlašovací údaje, nepokoušejte se překročit limity vašeho plánu.",
+    "copilotPolicyLine3": "Uživatelé bezplatných a studentských tarifů obdrží pouze automatický výběr modelu. Podmínky vašeho plánu Copilot a omezení používání zůstávají vaší odpovědností.",
+    "copilotPolicyAcknowledge": "Rozumím, spojte se",
     "tabPasteSetupToken": "Token z nastavení",
     "claudeSetupTokenDescription": "Spusťte v terminálu `claude setup-token` a vložte token, který vypíše. Platí jeden rok a nemá obnovovací token. OmniRoute před uložením odešle do Anthropic jeden testovací požadavek.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12343,11 @@
       "viewConversation": "zobrazit konverzaci",
       "openConversation": "Otevřít konverzaci {id}"
     },
-    "tableLabel": "Protokoly požadavků"
+    "tableLabel": "Protokoly požadavků",
+    "throughputPostFirstToken": "Po prvním tokenu",
+    "throughputEndToEnd": "Od začátku do konce",
+    "throughputRate": "{value} tokenů/s",
+    "throughputExplanation": "Obě rychlosti používají větší z počtu výstupních tokenů a tokenů pro uvažování. Hodnota po prvním tokenu nezahrnuje platné TTFT; jinak používá celkovou dobu trvání. Hodnota od začátku do konce vždy používá celkovou dobu trvání. U bufferované odpovědi může být vysoká rychlost doručení v dávce, aniž by model generoval rychleji."
   },
   "proxyLogger": {
     "filterAll": "Vše",
@@ -12785,7 +12990,8 @@
     "title": "Statistiky poskytovatelů",
     "description": "Provoz, latence a míry úspěšnosti podle poskytovatelů a modelů",
     "combo": "Kombinace",
-    "toggleModels": "Zobrazit modely poskytovatele {provider}"
+    "toggleModels": "Zobrazit modely poskytovatele {provider}",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Serverless relay proxy",
@@ -13730,7 +13936,9 @@
       "disabled": "Zakázáno",
       "dual": "Duální",
       "alias": "Alias",
-      "canonical": "Kanonický"
+      "canonical": "Kanonický",
+      "fail_closed": "Blokovat (fail_closed)",
+      "count_as_zero": "Započítat jako $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14085,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Zastavení kvůli infrastruktuře u chráněné priority jako 502",
         "description": "Odpovědět stavem 502 namísto 503, když prioritní cíl s náhradním řešením pouze při vyčerpání kvóty zastaví kombinaci z důvodu, který prokazatelně nesouvisí s kvótou: rozpojený jistič poskytovatele nebo prediktivní přeskočení kvůli latenci."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Zásada rozpočtu pro nepřiřazené ceny",
+        "description": "Jak denní/týdenní USD limity na klíč zacházejí s úspěšným použitím, pro které poskytovatel/model nemá záznam o ceně. fail_closed (výchozí) označí okno jako překročené, takže neznámý náklad nikdy neprojde tvrdým limitem. count_as_zero započítá toto použití jako $0 a zachová vynucování oceněných výdajů. Modely bez ceny jsou tak či tak uvedeny na domovské stránce dashboardu."
       }
     }
   },
@@ -15216,5 +15428,8 @@
     "importButton": "Importovat",
     "importFailed": "Import se nezdařil.",
     "importSuccess": "Importováno {connections} účtů a {nodes} uzlů poskytovatelů; přeskočeno {skipped}."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Začít od aktuální pozice (přeskočit existující protokoly)"
   }
 }

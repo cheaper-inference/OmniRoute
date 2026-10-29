@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "ടീം ചെലവുകൾ",
+    "subtitle": "പങ്കിട്ട സോഫ്റ്റ് ബജറ്റുകളും കാറ്റലോഗ് ചെലവ് കണക്കുകളും നിയന്ത്രിക്കുക.",
+    "refresh": "പുതുക്കുക",
+    "create": "ടീം സൃഷ്ടിക്കുക",
+    "edit": "ടീം എഡിറ്റ് ചെയ്യുക",
+    "archive": "ആർക്കൈവ് ചെയ്യുക",
+    "selectTeam": "ടീമുകൾ",
+    "searchTeams": "ടീമുകൾ തിരയുക",
+    "statusFilter": "ടീം നില",
+    "active": "സജീവം",
+    "archived": "ആർക്കൈവ് ചെയ്തത് · വായിക്കാൻ മാത്രം",
+    "allTeams": "എല്ലാ ടീമുകളും",
+    "noTeams": "പൊരുത്തപ്പെടുന്ന ടീമുകളില്ല.",
+    "selectHint": "ചെലവുകൾ കാണാൻ ഒരു ടീം സൃഷ്ടിക്കുകയോ തിരഞ്ഞെടുക്കുകയോ ചെയ്യുക.",
+    "loading": "ടീം ചെലവുകൾ ലോഡ് ചെയ്യുന്നു…",
+    "budgetTitle": "നിലവിലെ സോഫ്റ്റ് ബജറ്റ്",
+    "budgetSubtitle": "വിജയകരമായി രേഖപ്പെടുത്തിയ ഉപയോഗം · റോളിംഗ് വിൻഡോ · റിപ്പോർട്ട് തീയതികളെ ആശ്രയിക്കാത്തത്",
+    "archivedBudget": "ആർക്കൈവ് ചെയ്തത്: ബജറ്റ് നടപ്പാക്കൽ നിഷ്ക്രിയമാണ്. ചരിത്ര റിപ്പോർട്ടുകൾ ലഭ്യമായി തുടരും.",
+    "unlimited": "പരിധിയില്ല — പങ്കിട്ട സോഫ്റ്റ് ബജറ്റ് കോൺഫിഗർ ചെയ്തിട്ടില്ല.",
+    "budgetUnavailable": "ബജറ്റ് നില ലഭ്യമല്ല. വീണ്ടും ശ്രമിക്കാൻ പുതുക്കുക.",
+    "used": "വിജയകരമായ ഉപയോഗം",
+    "maximum": "ബജറ്റ് പരമാവധി",
+    "remaining": "അറിയാവുന്ന ബാക്കി",
+    "resets": "റീസെറ്റ് ആകുന്നത്",
+    "unpricedBudget": "വിജയകരമായ ഉപയോഗത്തിന്റെ ഒരു ഭാഗത്തിന്റെ വില അറിയില്ല. അറിയാവുന്ന തുക അപൂർണ്ണമാണ്; ബജറ്റ് നടപ്പാക്കൽ ഈ വിൻഡോ കവിഞ്ഞതായി കണക്കാക്കുന്നു.",
+    "overBudget": "ബജറ്റ് എത്തി അല്ലെങ്കിൽ കവിഞ്ഞു · {amount} അധികം",
+    "reportTitle": "ഉപയോഗ റിപ്പോർട്ട്",
+    "reportSubtitle": "എല്ലാ ശ്രമങ്ങളും · USD-യിലെ കാറ്റലോഗ് കണക്ക്, ഇൻവോയ്സ് അല്ല · പൂർണ്ണ UTC തീയതികൾ",
+    "reportPeriod": "റിപ്പോർട്ട് കാലയളവ്",
+    "day1": "1 ദിവസം",
+    "day7": "7 ദിവസം",
+    "day30": "30 ദിവസം",
+    "allTime": "എല്ലാ സമയവും",
+    "reportSpend": "കണക്കാക്കിയ റിപ്പോർട്ട് ചെലവ്",
+    "requests": "അഭ്യർത്ഥനകൾ",
+    "assignedKeys": "നൽകിയ കീകൾ",
+    "unpricedReport": "ഈ റിപ്പോർട്ടിൽ അറിയാത്ത വിലകളുണ്ട്. കണക്കാക്കിയ ചെലവ് അപൂർണ്ണമാണ്.",
+    "breakdown": "API കീ അനുസരിച്ചുള്ള ചെലവ്",
+    "noUsage": "ഈ റിപ്പോർട്ട് കാലയളവിൽ ഉപയോഗമില്ല.",
+    "keyName": "API കീയുടെ പേര്",
+    "tokens": "ഇൻപുട്ട് + ഔട്ട്പുട്ട് ടോക്കണുകൾ",
+    "unnamedKey": "പേരില്ലാത്ത അല്ലെങ്കിൽ ഇല്ലാതാക്കിയ കീ",
+    "unpriced": "അറിയാത്ത വില",
+    "members": "അംഗത്വം",
+    "memberSubtitle": "അംഗത്വം മാറ്റിയാലും ചരിത്ര ചെലവ് യഥാർത്ഥ ടീമിൽ തന്നെ തുടരും.",
+    "searchKeys": "കീകളോ നിലവിലെ ഉടമകളോ തിരയുക",
+    "chooseKey": "ഒരു API കീ തിരഞ്ഞെടുക്കുക",
+    "unassigned": "നൽകിയിട്ടില്ല",
+    "ownership": "നിലവിലെ ബില്ലിംഗ് ടീം: {team}",
+    "assign": "നൽകുക",
+    "remove": "നീക്കം ചെയ്യുക",
+    "noMembers": "നിലവിലെ അംഗങ്ങളില്ല. ചരിത്ര ഉപയോഗം ഇപ്പോഴും ബജറ്റിൽ കണക്കാക്കപ്പെട്ടേക്കാം.",
+    "assignedAt": "{date}-ന് നൽകി (UTC)",
+    "name": "ടീമിന്റെ പേര്",
+    "description": "വിവരണം",
+    "enableBudget": "പങ്കിട്ട സോഫ്റ്റ് ബജറ്റ് പ്രവർത്തനക്ഷമമാക്കുക",
+    "amount": "ബജറ്റ് തുക (USD)",
+    "duration": "റോളിംഗ് ബജറ്റ് വിൻഡോ",
+    "cancel": "റദ്ദാക്കുക",
+    "save": "സംരക്ഷിക്കുക",
+    "confirm": "സ്ഥിരീകരിക്കുക",
+    "transferTitle": "കീ കൈമാറ്റം സ്ഥിരീകരിക്കുക",
+    "transferMessage": "ഈ കീ “{source}”-ൽ നിന്ന് “{destination}”-ലേക്ക് മാറ്റണോ? ചരിത്ര ചെലവ് യഥാർത്ഥ ടീമിൽ തന്നെ തുടരും.",
+    "removeTitle": "കീ നൽകൽ നീക്കം ചെയ്യുക",
+    "removeMessage": "ഈ കീ “{team}”-ൽ നിന്ന് നീക്കം ചെയ്യണോ? ചരിത്ര ചെലവ് ഈ ടീമിൽ തന്നെ തുടരും.",
+    "archiveTitle": "ടീം ആർക്കൈവ് ചെയ്യുക",
+    "archiveMessage": "“{team}” ആർക്കൈവ് ചെയ്യണോ? നിലവിലെ എല്ലാ ബന്ധങ്ങളും അടയ്ക്കുകയും ബജറ്റ് നടപ്പാക്കൽ നിൽക്കുകയും ചെയ്യും. ചരിത്ര റിപ്പോർട്ടുകൾ ലഭ്യമായി തുടരും.",
+    "invalidName": "ഒരു പേരും (1–200 അക്ഷരങ്ങൾ) പരമാവധി 2,000 അക്ഷരങ്ങളുള്ള വിവരണവും നൽകുക.",
+    "invalidAmount": "പൂജ്യത്തേക്കാൾ വലിയ പരിമിതമായ ബജറ്റ് തുക നൽകുക.",
+    "unauthorized": "തുടരാൻ മാനേജ്മെന്റ് ഡാഷ്ബോർഡിൽ സൈൻ ഇൻ ചെയ്യുക.",
+    "forbidden": "ടീമുകൾ നിയന്ത്രിക്കാൻ നിങ്ങൾക്ക് അനുമതിയില്ല. നിങ്ങൾ നൽകിയത് സംരക്ഷിച്ചിട്ടുണ്ട്.",
+    "notFound": "ഈ ടീമോ നൽകലോ ഇപ്പോൾ നിലവിലില്ല.",
+    "conflict": "നൽകലോ ടീമോ മാറി. വീണ്ടും ശ്രമിക്കുന്നതിന് മുമ്പ് പുതുക്കി നിലവിലെ ഉടമസ്ഥത സ്ഥിരീകരിക്കുക.",
+    "failed": "അഭ്യർത്ഥന പരാജയപ്പെട്ടു. നിങ്ങൾ നൽകിയത് സംരക്ഷിച്ചിട്ടുണ്ട്; ദയവായി വീണ്ടും ശ്രമിക്കുക.",
+    "partialBudget": "സൂക്ഷിച്ച ചില ദൈനംദിന ബക്കറ്റുകൾ വിൻഡോ അതിരുമായി ഓവർലാപ്പ് ചെയ്യുന്നു, കൃത്യമായി വിഭജിക്കാനാവില്ല. കാണിച്ച ചെലവ് അപൂർണ്ണമാണ്; ശേഷിക്കുന്ന പരിധി ലഭ്യമല്ല. നിലവിലുള്ള സോഫ്റ്റ് ബജറ്റ് നയത്തിൽ മാറ്റമില്ല."
+  },
   "codexKeyServiceMode": {
     "title": "ഈ API കീയ്ക്കുള്ള Codex സേവന മോഡ്",
     "description": "കോംബോകളിലുള്ള Codex മോഡലുകൾ ഉൾപ്പെടെയുള്ള Codex അഭ്യർത്ഥനകൾക്ക് ബാധകമാണ്. നിർബന്ധിത മോഡുകൾ ക്ലയന്റ്, ആഗോള ക്രമീകരണങ്ങൾ, കണക്ഷൻ ഡിഫോൾട്ടുകൾ എന്നിവയെ മറികടക്കും. മറ്റ് പ്രൊവൈഡറുകൾക്ക് മാറ്റമുണ്ടാകില്ല.",
@@ -1345,7 +1422,9 @@
       "open": "തുറക്കുക",
       "close": "അടയ്ക്കുക"
     },
-    "noResults": "ഫലങ്ങളൊന്നുമില്ല"
+    "noResults": "ഫലങ്ങളൊന്നുമില്ല",
+    "costsTeams": "ടീമുകൾ",
+    "costsTeamsSubtitle": "ടീം ചെലവ് കേന്ദ്രങ്ങൾ"
   },
   "webhooks": {
     "title": "വെബ്ഹുക്കുകൾ",
@@ -1598,6 +1677,7 @@
     "dismissError": "പിശക് ഒഴിവാക്കുക"
   },
   "header": {
+    "teamsDescription": "ടീം ചെലവ് കണക്കുകളും പങ്കിട്ട സോഫ്റ്റ് ബജറ്റുകളും",
     "logout": "ലോഗ് ഔട്ട്",
     "quickNavigation": "ദ്രുത നാവിഗേഷൻ",
     "quickNavigationTitle": "ദ്രുത നാവിഗേഷൻ (⌘K / Ctrl+K)",
@@ -1922,7 +2002,14 @@
     "readinessStep3": "നിങ്ങളുടെ എൻഡ്പോയിന്റ് പകർത്തുക",
     "readinessStep4": "ഒരു പരീക്ഷണ അഭ്യർത്ഥന അയയ്ക്കുക",
     "readinessContinue": "സജ്ജീകരണം തുടരുക",
-    "readinessDismiss": "ഇപ്പോൾ ഒഴിവാക്കുക"
+    "readinessDismiss": "ഇപ്പോൾ ഒഴിവാക്കുക",
+    "unpricedUsageTitle": "{count, plural, one {# മോഡൽ} other {# മോഡലുകൾ}} അടുത്തകാലത്ത് ഉപയോഗമുണ്ടെങ്കിലും വില ക്രമീകരിച്ചിട്ടില്ല",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API കീ ഉപയോഗപരിധിയോടെ} other {# API കീകൾ ഉപയോഗപരിധിയോടെ}} ഈ മോഡലുകൾ കഴിഞ്ഞ 8 ദിവസത്തിനിടെ ഉപയോഗിച്ചു. ആ ഉപയോഗം ഒരു കീയുടെ ദൈനംദിന/സാപ്താഹിക കാലപരിധിക്കുള്ളിൽ ആകുമ്പോൾ, ആ കീ ഓവർ-ക്വോട്ടായി കരുതപ്പെടുകയും അതിന്റെ അഭ്യർത്ഥനകൾ തടയപ്പെടുകയും ചെയ്യുന്നു (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "ഈ ഉപയോഗം ഓരോ കീയുടെ ഉപയോഗപരിധികളിലേക്ക് $0 ആയി എണ്ണപ്പെടും (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# അഭ്യർ‍ത്ഥന} other {# അഭ്യർത്ഥനകൾ}}, {keys, plural, one {# പരിമിത കീ} other {# പരിമിത കീകൾ}}",
+    "unpricedUsageMore": "…കൂടാതെ {count} കൂടുതൽ",
+    "unpricedUsageConfigure": "വില ക്രമീകരിക്കുക",
+    "unpricedUsageDismiss": "ഒഴിവാക്കുക"
   },
   "analytics": {
     "title": "വിശകലനം",
@@ -2959,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - മാനുവൽ കോൺഫിഗറേഷൻ",
     "clineManualConfiguration": "Cline മാനുവൽ കോൺഫിഗറേഷൻ",
     "kiloManualConfiguration": "Kilo Code മാനുവൽ കോൺഫിഗറേഷൻ",
+    "piManualConfiguration": "പൈ - മാനുവൽ കോൺഫിഗറേഷൻ",
+    "piConfigInvalidTitle": "Pi models.json വായിക്കാൻ കഴിയില്ല",
+    "piOmnirouteConfigured": "OmniRoute ഒരു പൈ ഇഷ്ടാനുസൃത ദാതാവായി ക്രമീകരിച്ചിരിക്കുന്നു",
+    "piModelHelp": "നിങ്ങൾ തിരഞ്ഞെടുക്കുന്ന മോഡൽ models.json ൽ വ്യക്തമായി എഴുതിയതാണ് — ഇഷ്ടാനുസൃത എൻഡ്പോയിൻ്റുകൾക്കായുള്ള മോഡലുകൾ Pi സ്വയമേവ കണ്ടെത്തുന്നില്ല.",
+    "piManualConfigTitle": "അല്ലെങ്കിൽ ~/.pi/agent/models.json സ്വമേധയാ എഡിറ്റ് ചെയ്യുക",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "തുടർന്ന് പൈ ആരംഭിച്ച് omniroute പ്രൊവൈഡർ തിരഞ്ഞെടുക്കുക. മുഴുവൻ ഏജൻ്റ് ഡയറക്ടറിയും നീക്കാൻ PI_CODING_AGENT_DIR സജ്ജമാക്കുക.",
+    "piUnownedNote": "ഈ എൻട്രി OmniRoute പുറത്ത് ചേർത്തു (ഉദാ. pi-gui യുടെ കസ്റ്റം എൻഡ് പോയിൻ്റുകൾ). അപേക്ഷിച്ചാൽ അത് സ്വീകരിക്കും; OmniRoute എഴുതിയ എൻട്രികൾ മാത്രമേ റീസെറ്റ് നീക്കം ചെയ്യൂ.",
     "whenToUseLabel": "എപ്പോൾ ഉപയോഗിക്കണം",
     "openToolDocs": "ടൂൾ ഡോക്യുമെന്റേഷൻ തുറക്കുക",
     "toolUseCases": {
@@ -2978,6 +3073,7 @@
       "amp": "Amp ഷോർട്ട്ഹാൻഡ് വർക്ക്ഫ്ലോകൾ ആവശ്യമാണെങ്കിലും OmniRoute അപരനാമവും റൂട്ടിംഗ് നിയമങ്ങളും നിർബന്ധമാക്കേണ്ടപ്പോൾ ഇത് ഉപയോഗിക്കുക.",
       "hermes": "പെട്ടെന്നുള്ള ജോലികൾക്കായി ലളിതമായ ഒരു ടെർമിനൽ-നേറ്റീവ് AI അസിസ്റ്റന്റ് ആവശ്യമുള്ളപ്പോൾ ഇത് ഉപയോഗിക്കുക.",
       "hermes-agent": "OmniRoute വഴി റൂട്ട് ചെയ്യപ്പെടുന്ന ഡിഫോൾട്ട്, ഡെലിഗേഷൻ, വിഷൻ, ഓക്സിലറി മോഡലുകൾ സഹിതമുള്ള Hermes Agent (by Nousresearch) ആവശ്യമുള്ളപ്പോൾ ഇത് ഉപയോഗിക്കുക.",
+      "whycodes": "WhyCodes-നെ OmniRoute-ലേക്ക് നിർദ്ദേശിച്ച ബഹുമുഖ സ്വയംഭരണ CLI ഏജന്റായി (TUI, പേരുള്ള ഏജന്റുകൾ, മെമ്മറി, swarm) വേണമെങ്കിൽ ഉപയോഗിക്കുക.",
       "custom": "ഇഷ്ടാനുസൃത ടൂൾ ഇംപ്ലിമെന്റേഷനുകൾക്കോ പൊതുവായ OpenAI-അനുയോജ്യ കോൺഫിഗറേഷനുകൾക്കോ ഉപയോഗിക്കുക."
     },
     "toolDescriptions": {
@@ -2987,6 +3083,7 @@
       "grok-build": "ഇഷ്ടാനുസൃത പ്രൊവൈഡർ പിന്തുണയുള്ള xAI Grok Build TUI കോഡിംഗ് ഏജന്റ്",
       "droid": "Factory Droid AI അസിസ്റ്റന്റ്",
       "openclaw": "Open Claw AI അസിസ്റ്റന്റ്",
+      "openclaude": "OpenAI-അനുയോജ്യ ദാതാവ് പിന്തുണയുള്ള OpenClaude കോഡിംഗ് ഏജന്റ് CLI",
       "cline": "Cline AI കോഡിംഗ് അസിസ്റ്റന്റ് CLI",
       "kilo": "Kilo Code AI അസിസ്റ്റന്റ് CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3018,6 +3115,7 @@
       "warp": "ഇഷ്ടാനുസൃത പ്രൊവൈഡർ പിന്തുണയുള്ള Warp AI ടെർമിനൽ",
       "agent-deck": "Agent Deck മൾട്ടി-ഏജന്റ് ഓർക്കസ്ട്രേറ്റർ",
       "5dive": "5dive — സ്വയം ഹോസ്റ്റ് ചെയ്ത കോഡിംഗ് ഏജന്റുകളുടെ ഫ്ലീറ്റ്; ഒരൊറ്റ ഓത്ത് പ്രൊഫൈൽ അവയെല്ലാം OmniRoute-ലേക്ക് നയിക്കുന്നു",
+      "whycodes": "OpenAI-അനുയോജ്യമായ base URL ഉള്ള WhyCodes സ്വയംഭരണ CLI ഏജന്റ്",
       "zed": "Zed കോഡ് എഡിറ്റർ — OpenAI-അനുയോജ്യ ദാതാവ് വഴി ബിൽറ്റ്-ഇൻ ഏജന്റ്"
     },
     "guides": {
@@ -3275,6 +3373,12 @@
     "cliproxyapiUpdate": "അപ്ഡേറ്റ് ചെയ്യുക",
     "cliproxyapiUpdateAvailable": "അപ്ഡേറ്റ് ലഭ്യമാണ്: v{current} → v{latest}",
     "cliproxyapiVersion": "പതിപ്പ്",
+    "piInstallTitle": "പൈ കോഡിംഗ് ഏജൻ്റ് ഇൻസ്റ്റാൾ ചെയ്യുക",
+    "piInstallInstructions": "Pi CLI ഇൻസ്റ്റാൾ ചെയ്യുക, തുടർന്ന് അത് OmniRoute ലേക്ക് കണക്റ്റ് ചെയ്യാൻ ഇങ്ങോട്ട് മടങ്ങുക.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "പൈ പ്രവർത്തിക്കുന്ന മെഷീനിൽ നിന്ന് എത്തിച്ചേരാവുന്ന URL ഉപയോഗിക്കുക. OpenAI-അനുയോജ്യമായ /v1 എൻഡ്പോയിൻ്റ് സ്വയമേവ ചേർക്കുന്നു.",
+    "piManualMergeHint": "പ്രിവ്യൂ മാത്രം. ഈ providers.omniroute എൻട്രി models.json യിലേക്ക് ലയിപ്പിക്കുക, അതുവഴി നിങ്ങളുടെ മറ്റ് ദാതാക്കളും ക്രമീകരണങ്ങളും കേടുകൂടാതെയിരിക്കും.",
     "removeMapping": "മാപ്പിംഗ് നീക്കംചെയ്യുക"
   },
   "modelCatalog": {
@@ -3339,6 +3443,18 @@
     "maxMembersPlaceholder": "ഉദാ. 10",
     "testSelected": "തിരഞ്ഞെടുത്തവ ടെസ്റ്റ് ചെയ്യുക ({count})",
     "testAllFiltered": "ഫിൽട്ടർ ചെയ്ത എല്ലാം ടെസ്റ്റ് ചെയ്യുക ({count})",
+    "visibility": "ദൃശ്യത",
+    "allVisibility": "ദൃശ്യവും മറച്ചതും",
+    "visibleOnly": "ദൃശ്യം",
+    "hiddenOnly": "മറച്ചത്",
+    "visibleColumn": "ദൃശ്യം",
+    "hideModel": "/v1/models-ൽ നിന്ന് {name} മറയ്ക്കുക",
+    "showModel": "/v1/models-ൽ {name} കാണിക്കുക",
+    "hiddenBadge": "മറച്ചു",
+    "hideFiltered": "ഫിൽട്ടർ ചെയ്തവ മറയ്ക്കുക ({count})",
+    "showFiltered": "ഫിൽട്ടർ ചെയ്തവ കാണിക്കുക ({count})",
+    "visibilityCounts": "{visible} ദൃശ്യം · {hidden} മറച്ചത് · ആകെ {total}",
+    "visibilityUpdateFailed": "മോഡലിന്റെ ദൃശ്യത അപ്‌ഡേറ്റ് ചെയ്യാനായില്ല",
     "cancel": "റദ്ദാക്കുക",
     "clearResults": "ഫലങ്ങൾ മായ്‌ക്കുക",
     "testing": "ടെസ്റ്റ് ചെയ്യുന്നു...",
@@ -3394,7 +3510,44 @@
     "httpError": "HTTP {status} സഹിതം അഭ്യർത്ഥന പരാജയപ്പെട്ടു",
     "testFailedNoDetail": "പിശക് സന്ദേശമൊന്നുമില്ലാതെ ടെസ്റ്റ് പരാജയപ്പെട്ടു",
     "additionalCapabilities": "അധിക ശേഷികൾ: {list}",
-    "comboRefMember": "കോമ്പോ → {name}"
+    "comboRefMember": "കോമ്പോ → {name}",
+    "keyAccessButton": "API കീ ആക്സസ്",
+    "allowedInKeys": "ഇതിൽ അനുവദിച്ചിരിക്കുന്നു: {count, plural, one {# കീ} other {# കീകൾ}}",
+    "keysLoading": "API കീകൾ ലോഡ് ചെയ്യുന്നു…",
+    "keysRetry": "കീകൾ വീണ്ടും ലോഡ് ചെയ്യാൻ ശ്രമിക്കുക",
+    "accessViaPattern": "{pattern} വഴി",
+    "accessBlocked": "{pattern} മുഖേന തടഞ്ഞു",
+    "editKeyAccess": "കീ ആക്സസ് എഡിറ്റ് ചെയ്യുക",
+    "toggleKeyAccess": "{name}-ൽ {item} അനുവദിക്കുക",
+    "resultNetworkError": "അസൈൻ ചെയ്യുന്നത് പരാജയപ്പെട്ടു",
+    "resultWouldEmptyModels": "ഇത് ഈ കീയിൽ അനുവദനീയമായ മോഡലുകൾ ഒന്നും ഇല്ലാതാക്കും — പകരം കീ ആക്സസ് എഡിറ്റ് ചെയ്യുക",
+    "resultWouldEmptyCombos": "ഇത് ഈ കീയിൽ അനുവദനീയമായ കോമ്പോകൾ ഒന്നും ഇല്ലാതാക്കും — പകരം കീ ആക്സസ് എഡിറ്റ് ചെയ്യുക",
+    "keyUpdatePending": "{name} ഇപ്പോഴും അപ്‌ഡേറ്റ് ചെയ്തുകൊണ്ടിരിക്കുകയാണ്. അൽപ്പസമയത്തിനകം വീണ്ടും ശ്രമിക്കുക.",
+    "assignToKeys": "API കീകൾക്ക് അസൈൻ ചെയ്യുക…",
+    "assignApply": "മാറ്റങ്ങൾ ബാധകമാക്കുക",
+    "assignComplete": "API കീ ആക്സസ് അപ്‌ഡേറ്റ് ചെയ്തു",
+    "assignFailed": "ചില API കീ അപ്‌ഡേറ്റുകൾ പരാജയപ്പെട്ടു",
+    "assignNoChanges": "API കീ ആക്സസിലൊന്നും മാറ്റം വരുത്തിയിട്ടില്ല",
+    "selectedAccessItems": "തിരഞ്ഞെടുത്ത ഇനങ്ങൾ: {count}",
+    "assignExcludedCombos": "{count, plural, one {തിരഞ്ഞെടുത്ത # കോമ്പോ വരി ഒരു മോഡൽ അല്ല, അതിനാൽ ഇവിടെ ഒഴിവാക്കപ്പെടും} other {തിരഞ്ഞെടുത്ത # കോമ്പോ വരികൾ മോഡലുകൾ അല്ല, അതിനാൽ ഇവിടെ ഒഴിവാക്കപ്പെടും}}. Combos ടാബിൽ നിന്ന് കോമ്പോകൾ അസൈൻ ചെയ്യുക.",
+    "assignActionAdd": "ചേർക്കുക",
+    "assignActionRemove": "നീക്കം ചെയ്യുക",
+    "searchKeys": "API കീകൾ തിരയുക",
+    "selectApiKey": "API കീ {name} തിരഞ്ഞെടുക്കുക",
+    "allModelsAccess": "എല്ലാ മോഡലുകളും",
+    "allCombosAccess": "എല്ലാ കോംബോകളും",
+    "modelAccessCount": "മോഡലുകൾ: {count}",
+    "comboAccessCount": "കോംബോകൾ: {count}",
+    "keyInactive": "നിഷ്‌ക്രിയം",
+    "keyBanned": "നിരോധിച്ചത്",
+    "keyRevoked": "റദ്ദാക്കി",
+    "switchRestrictedConfirm": "ഈ കീ നിയന്ത്രിത ആക്സസിലേക്ക് മാറ്റുക: തിരഞ്ഞെടുത്ത ഇനങ്ങൾ മാത്രമേ അനുവദിക്കൂ",
+    "removeNoChangeHint": "ഈ കീ എല്ലാം അനുവദിക്കുന്നു; തിരഞ്ഞെടുത്ത ഇനങ്ങൾ നീക്കം ചെയ്യുന്നത് യാതൊരു മാറ്റവും ഉണ്ടാക്കില്ല",
+    "removeStaysAllowedHint": "{patterns} വഴി ഈ കീയിൽ ഇപ്പോഴും അനുവദിച്ചിരിക്കുന്നു",
+    "resultChanged": "മാറ്റി",
+    "resultUnchanged": "മാറ്റമില്ല",
+    "resultSkipped": "ഒഴിവാക്കി",
+    "resultNeedsSwitch": "നിയന്ത്രിത ആക്സസിലേക്ക് മാറ്റേണ്ടതുണ്ട്"
   },
   "combos": {
     "title": "കോംബോകൾ",
@@ -3515,6 +3668,9 @@
     "moveUp": "മുകളിലേക്ക് നീക്കുക",
     "moveDown": "താഴേക്ക് നീക്കുക",
     "removeModel": "നീക്കം ചെയ്യുക",
+    "testStep": "ഈ മോഡൽ പരിശോധിക്കുക",
+    "testStepRunning": "പരിശോധിക്കുന്നു…",
+    "testStepNotTestable": "ഒറ്റ-മോഡൽ ഘട്ടങ്ങൾ മാത്രമേ പരിശോധിക്കാനാകൂ",
     "saving": "സംരക്ഷിക്കുന്നു...",
     "liveNoProviders": "ഇതുവരെ പ്രൊവൈഡറുകളൊന്നും നിരീക്ഷിക്കപ്പെട്ടിട്ടില്ല.",
     "liveFleetDataHint": "തത്സമയ കോംബോ ഇവന്റുകളിലൂടെയാണ് ഫ്ലീറ്റ് ഡാറ്റ ലഭിക്കുന്നത്.",
@@ -5334,6 +5490,27 @@
     "importFromFileDownloadTemplate": "CSV ടെംപ്ലേറ്റ് ഡൗൺലോഡ് ചെയ്യുക",
     "importFromFileMoreErrors": "+{count} കൂടി",
     "importFromFileSchemaHint": "CSV കോളങ്ങൾ സ്ഥാനക്രമത്തിലാണ്: provider, name, apiKey, baseUrl (ഐച്ഛികം), priority (ഐച്ഛികം). provider കോളത്തിൽ നിലവിലുള്ള ഒരു മാനേജ്ഡ് പ്രൊവൈഡർ id അല്ലെങ്കിൽ ഇതിനകം രജിസ്റ്റർ ചെയ്ത OpenAI/Anthropic-അനുയോജ്യമായ നോഡ് id ഉണ്ടായിരിക്കണം — ഈ ഇറക്കുമതി പുതിയ എൻഡ്പോയിന്റ് നോഡുകൾ സൃഷ്ടിക്കില്ല.",
+    "importOAuthExport": "OAuth എക്‌സ്‌പോർട്ട് ഇറക്കുമതി ചെയ്യുക",
+    "oauthExportTitle": "അക്കൗണ്ട് മാനേജർ എക്‌സ്‌പോർട്ട് ഇറക്കുമതി ചെയ്യുക",
+    "oauthExportDescription": "ഒരു അക്കൗണ്ട് മാനേജറിൽ നിന്നുള്ള പ്ലെയിൻടെക്സ്റ്റ് എക്‌സ്‌പോർട്ട് അപ്‌ലോഡ് ചെയ്യുക (ഉദാ. Antigravity Manager-ന്റെ cloud-accounts എക്‌സ്‌പോർട്ട്). ടോക്കണുകൾ സെർവറിൽ പുതുക്കുന്നു, ഓരോ അക്കൗണ്ടും ഒരു OAuth കണക്ഷനായി മാറുന്നു — തനിപ്പകർപ്പുകൾ അതേ സ്ഥാനത്ത് പുതുക്കപ്പെടുന്നു.",
+    "oauthExportProviderLabel": "ദാതാവ്",
+    "oauthExportChoose": "ഫയൽ തിരഞ്ഞെടുക്കുക",
+    "oauthExportFileAria": "അക്കൗണ്ട് എക്‌സ്‌പോർട്ട് JSON ഫയൽ",
+    "oauthExportSchemaHint": "സ്വീകാര്യം: \"accounts\" അറേ ഉള്ള ഒരു ഡോക്യുമെന്റ്, ഒരു സാധാരണ അറേ, അല്ലെങ്കിൽ ഒരൊറ്റ റെക്കോർഡ്. ടോക്കണുകൾ ഒരു നെസ്റ്റഡ് token ഒബ്‌ജക്റ്റിലോ നേരിട്ട് റെക്കോർഡിലോ ആകാം.",
+    "oauthExportDetected": "{count} അക്കൗണ്ട്(കൾ) കണ്ടെത്തി",
+    "oauthExportSelectAll": "എല്ലാ അക്കൗണ്ടുകളും തിരഞ്ഞെടുക്കുക",
+    "oauthExportSelectAccount": "അക്കൗണ്ട് {index} തിരഞ്ഞെടുക്കുക",
+    "oauthExportColEmail": "ഇമെയിൽ",
+    "oauthExportColProvider": "ദാതാവ്",
+    "oauthExportColRefresh": "റിഫ്രഷ് ടോക്കൺ",
+    "oauthExportNoEmail": "(ഇമെയിൽ ഇല്ല)",
+    "oauthExportYes": "അതെ",
+    "oauthExportNo": "അല്ല",
+    "oauthExportImporting": "ഇറക്കുമതി ചെയ്യുന്നു…",
+    "oauthExportImport": "{count} അക്കൗണ്ട്(കൾ) ഇറക്കുമതി ചെയ്യുക",
+    "oauthExportResult": "{imported}/{total} ഇറക്കുമതി ചെയ്തു — {failed} പരാജയപ്പെട്ടു",
+    "oauthExportParseError": "ഈ ഫയലിൽ നിന്ന് ഒരു അക്കൗണ്ടും വായിക്കാൻ കഴിഞ്ഞില്ല.",
+    "oauthExportUnknownError": "അജ്ഞാത പിശക്",
     "adaptaTutorial": {
       "title": "Adapta Web എങ്ങനെ ബന്ധിപ്പിക്കാം",
       "introPrefix": "Adapta Clerk വഴി പ്രാമാണീകരിക്കുന്നു. ടോക്കൺ",
@@ -5584,6 +5761,7 @@
     "allModelsAlreadyImported": "എല്ലാ മോഡലുകളും ഇതിനകം ഇറക്കുമതി ചെയ്തിട്ടുണ്ട്",
     "noNewModelsToImport": "ഇറക്കുമതി ചെയ്യാൻ പുതിയ മോഡലുകളൊന്നുമില്ല — എല്ലാ മോഡലുകളും ഇതിനകം രജിസ്ട്രിയിലോ ഇഷ്ടാനുസൃത മോഡലുകളുടെ പട്ടികയിലോ ഉണ്ട്",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "മോഡൽ കണ്ടെത്തൽ പരാജയപ്പെട്ടു {time}",
     "skippingExistingModels": "നിലവിലുള്ള {count} മോഡലുകൾ ഒഴിവാക്കുന്നു",
     "autoSync": "യാന്ത്രിക സമന്വയം",
     "autoSyncShort": "സമന്വയിപ്പിക്കുക",
@@ -6814,7 +6992,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} കോംബോകളിൽ ഉപയോഗിക്കുന്നു: {combos}",
+    "openComboTooltip": "കോംബോകൾ തുറക്കുക — {combo} ഉപയോഗിക്കുന്നു"
   },
   "settings": {
     "title": "ക്രമീകരണങ്ങൾ",
@@ -8798,6 +8978,8 @@
     "qdrantHost": "ഹോസ്റ്റ്",
     "qdrantCollection": "ശേഖരം",
     "catalogVisibilityHint": "മറച്ച മോഡൽ ID-കൾ അതേ ആക്‌സസ് അനുമതികളോടെ തുടർന്നും വിളിക്കാം.",
+    "exposeCombosOnly": "/v1/models-ൽ കോംബോകൾ മാത്രം ലിസ്റ്റ് ചെയ്യുക",
+    "exposeCombosOnlyDesc": "മോഡലുകൾ സ്വയം കണ്ടെത്തുന്ന ക്ലയന്റുകൾ അസംസ്കൃത പ്രൊവൈഡർ മോഡലുകൾക്ക് പകരം നിങ്ങളുടെ കോംബോകൾ (മറച്ചിട്ടില്ലെങ്കിൽ auto/* ഉം) കാണും. വ്യക്തമായ provider/model ID-കൾ തുടർന്നും റൂട്ട് ചെയ്യപ്പെടും.",
     "catalogScopeTitle": "Models API ലിസ്റ്റിംഗ്",
     "catalogScopeDesc": "ഈ കീയ്ക്കായി GET /v1/models പ്രദർശിപ്പിക്കുന്നത്. ലിസ്റ്റ് ചുരുക്കുന്നത് കീയ്ക്ക് വിളിക്കാനാകുന്നവയെ ഒരിക്കലും മാറ്റില്ല.",
     "catalogScopeAll": "രണ്ടും",
@@ -8917,7 +9099,9 @@
         "financial": "സാമ്പത്തികം",
         "brazilian": "ബ്രസീലിയൻ",
         "usa": "യുഎസ്എ",
-        "full": "പൂർണ്ണം"
+        "full": "പൂർണ്ണം",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (ദക്ഷിണാഫ്രിക്ക)"
       },
       "builtinTypes": "ബിൽറ്റ്-ഇൻ തരങ്ങൾ",
       "types": {
@@ -8931,7 +9115,19 @@
         "ip_address": "IPv4 വിലാസങ്ങൾ",
         "ipv6_address": "IPv6 വിലാസങ്ങൾ",
         "aws_key": "AWS ആക്‌സസ് കീകൾ",
-        "api_key_generic": "API കീകളും ടോക്കണുകളും"
+        "api_key_generic": "API കീകളും ടോക്കണുകളും",
+        "iban": "IBAN ബാങ്ക് അക്കൗണ്ട് നമ്പറുകൾ",
+        "eu_vat": "EU VAT നമ്പറുകൾ",
+        "es_dni_nie": "സ്പാനിഷ് DNI / NIE",
+        "it_codice_fiscale": "ഇറ്റാലിയൻ കോഡിസ് ഫിസ്കെയിൽ",
+        "pl_pesel": "പോളിഷ് PESEL",
+        "nl_bsn": "ഡച്ച് BSN",
+        "de_steuer_id": "ജർമ്മൻ സ്റ്റ്യൂവർ-ഐഡി",
+        "se_personnummer": "സ്വീഡിഷ് വ്യക്തി",
+        "za_id": "ദക്ഷിണാഫ്രിക്കൻ ID നമ്പറുകൾ",
+        "za_phone": "ദക്ഷിണാഫ്രിക്കൻ ഫോൺ നമ്പറുകൾ",
+        "za_vat": "ദക്ഷിണാഫ്രിക്കൻ VAT നമ്പറുകൾ",
+        "za_tax_ref": "ദക്ഷിണാഫ്രിക്കൻ നികുതി പരാമർശങ്ങൾ"
       },
       "customPatterns": "ഇഷ്ടാനുസൃത പാറ്റേണുകൾ",
       "customPatternsDesc": "പൊരുത്തങ്ങൾ [CUSTOM_REDACTED] ആയി മാറ്റിസ്ഥാപിക്കുന്നു. പരമാവധി {max} പാറ്റേണുകൾ. വിനാശകരമായ ബാക്ക്‌ട്രാക്കിംഗ് സാധ്യതയുള്ള പാറ്റേണുകൾ നിരസിക്കപ്പെടും.",
@@ -11433,6 +11629,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth കോൺഫിഗർ ചെയ്തിട്ടില്ല. റീഡയറക്ട് URI {redirectUri}, \"{scopes}\" സ്കോപ്പുകൾ എന്നിവ ഉപയോഗിച്ച് {applicationsUrl}-ൽ ഒരു OAuth ആപ്ലിക്കേഷൻ രജിസ്റ്റർ ചെയ്യുക, തുടർന്ന് {clientIdEnv} (ആവശ്യമെങ്കിൽ {clientSecretEnv}-ഉം) സജ്ജീകരിച്ച് പുനരാരംഭിക്കുക.",
     "gitlabDuoSetupDescription": "ആപ്ലിക്കേഷൻ രജിസ്റ്റർ ചെയ്ത് ഈ OmniRoute ഇൻസ്റ്റൻസിൽ പരിസ്ഥിതി വേരിയബിളുകൾ സജ്ജീകരിച്ച ശേഷം, OAuth ലോഗിൻ ആരംഭിക്കാൻ തുടരുക എന്നതിൽ ക്ലിക്ക് ചെയ്യുക.",
     "continue": "തുടരുക",
+    "copilotPolicyTitle": "പരീക്ഷണാത്മക ദാതാവ്: പോളിസി നില അവ്യക്തമാണ്",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com വഴി ബന്ധിപ്പിക്കുന്നു, ഇത് GitHub ഒരു പൊതു മൂന്നാം കക്ഷി അനുമാനമായി പ്രസിദ്ധീകരിച്ചിട്ടില്ല API. ഈ സംയോജനം പരീക്ഷണാത്മകമാണ് കൂടാതെ അറിയിപ്പ് കൂടാതെ മാറിയേക്കാം.",
+    "copilotPolicyLine2": "നിങ്ങളുടെ സ്വന്തം GitHub അക്കൗണ്ട് മാത്രമേ കണക്റ്റ് ചെയ്തിരിക്കൂ. ഒരിക്കലും ക്രെഡൻഷ്യലുകൾ പങ്കിടരുത്, അക്കൗണ്ടുകൾ ശേഖരിക്കരുത്, അല്ലെങ്കിൽ നിങ്ങളുടെ പ്ലാൻ പരിധികൾ മറികടക്കാൻ ശ്രമിക്കരുത്.",
+    "copilotPolicyLine3": "സൗജന്യ, സ്റ്റുഡൻ്റ് പ്ലാൻ ഉപയോക്താക്കൾക്ക് ഓട്ടോമാറ്റിക് മോഡൽ തിരഞ്ഞെടുക്കൽ മാത്രമേ ലഭിക്കൂ. നിങ്ങളുടെ Copilot പ്ലാൻ നിബന്ധനകളും ഏതെങ്കിലും ഉപയോഗ പരിധികളും നിങ്ങളുടെ ഉത്തരവാദിത്തമായി തുടരും.",
+    "copilotPolicyAcknowledge": "ഞാൻ മനസ്സിലാക്കുന്നു, ബന്ധിപ്പിക്കുക",
     "tabPasteSetupToken": "സജ്ജീകരണ ടോക്കൺ",
     "claudeSetupTokenDescription": "ടെർമിനലിൽ `claude setup-token` പ്രവർത്തിപ്പിച്ച് അത് പ്രിന്റ് ചെയ്യുന്ന ടോക്കൺ ഒട്ടിക്കുക. ഇത് ഒരു വർഷത്തേക്ക് സാധുവാണ്, ഇതിന് റിഫ്രഷ് ടോക്കൺ ഇല്ല. സംരക്ഷിക്കുന്നതിന് മുമ്പ് OmniRoute Anthropic-ലേക്ക് ഒരു ടെസ്റ്റ് അഭ്യർത്ഥന അയയ്ക്കുന്നു.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12142,7 +12343,11 @@
       "viewConversation": "സംഭാഷണം കാണുക",
       "openConversation": "{id} സംഭാഷണം തുറക്കുക"
     },
-    "tableLabel": "അഭ്യർത്ഥന ലോഗുകൾ"
+    "tableLabel": "അഭ്യർത്ഥന ലോഗുകൾ",
+    "throughputPostFirstToken": "ആദ്യ ടോക്കണിന് ശേഷം",
+    "throughputEndToEnd": "തുടക്കം മുതൽ അവസാനം വരെ",
+    "throughputRate": "സെക്കൻഡിൽ {value} ടോക്കണുകൾ",
+    "throughputExplanation": "രണ്ട് നിരക്കുകളും ഔട്ട്പുട്ട് ടോക്കൺ എണ്ണത്തിലും റീസണിംഗ് ടോക്കൺ എണ്ണത്തിലും വലുതായത് ഉപയോഗിക്കുന്നു. സാധുവായ TTFT ഉണ്ടെങ്കിൽ ആദ്യ ടോക്കണിന് ശേഷമുള്ള നിരക്ക് അത് ഒഴിവാക്കുന്നു; അല്ലാത്തപക്ഷം, പൂർണ്ണ ദൈർഘ്യം ഉപയോഗിക്കുന്നു. തുടക്കം മുതൽ അവസാനം വരെയുള്ള നിരക്ക് എല്ലായ്പ്പോഴും പൂർണ്ണ ദൈർഘ്യം ഉപയോഗിക്കുന്നു. മോഡൽ ജനറേഷൻ വേഗത്തിലല്ലെങ്കിലും, ബഫർ ചെയ്ത പ്രതികരണത്തിന് ഉയർന്ന ബർസ്റ്റ് ഡെലിവറി നിരക്ക് ഉണ്ടായേക്കാം."
   },
   "proxyLogger": {
     "filterAll": "എല്ലാം",
@@ -12785,7 +12990,8 @@
     "title": "പ്രൊവൈഡർ സ്ഥിതിവിവരക്കണക്കുകൾ",
     "description": "ഓരോ പ്രൊവൈഡറിലെയും ഓരോ മോഡലിലെയും ട്രാഫിക്, ലേറ്റൻസി, വിജയനിരക്കുകൾ",
     "combo": "സംയോജനം",
-    "toggleModels": "{provider}-നുള്ള മോഡലുകൾ കാണിക്കുക"
+    "toggleModels": "{provider}-നുള്ള മോഡലുകൾ കാണിക്കുക",
+    "windowSince": "{date} മുതൽ"
   },
   "relay": {
     "title": "സർവർലെസ് റിലേ പ്രോക്സികൾ",
@@ -13730,7 +13936,9 @@
       "disabled": "പ്രവർത്തനരഹിതം",
       "dual": "ഡ്യുവൽ",
       "alias": "അപരനാമം",
-      "canonical": "കാനോനിക്കൽ"
+      "canonical": "കാനോനിക്കൽ",
+      "fail_closed": "തടയുക (fail_closed)",
+      "count_as_zero": "ഇത് $0 ആയി എണ്ണുക (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14085,10 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "സംരക്ഷിത-മുൻഗണന ഇൻഫ്രാ സ്റ്റോപ്പുകൾ 502 ആയി",
         "description": "ക്വോട്ട-മാത്രം-ഫാൾബാക്ക് മുൻഗണനാ ടാർഗറ്റ്, ക്വോട്ട കാരണമല്ലെന്ന് തെളിയിക്കാവുന്ന ഒരു കാരണത്താൽ കോംബോ നിർത്തുമ്പോൾ 503-ന് പകരം 502 നൽകുക: തുറന്ന പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കർ അല്ലെങ്കിൽ പ്രവചനാത്മക ലേറ്റൻസി സ്കിപ്പ്."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "വിലയില്ലാത്ത ഉപയോഗ ബജറ്റ് നയം",
+        "description": "ഒരു കീയുടെ ദൈനംദിന/സാപ്താഹിക USD പരമിതികൾ പ്രൊവൈഡർ/മോഡലിന് വില നിരക്ക് ഇല്ലാത്ത വിജയകരമായ ഉപയോഗത്തെ എങ്ങനെ കൈകാര്യം ചെയ്യുന്നു. fail_closed (പ്രാഥമികം) വിൻഡോ അതിക്രമിച്ചതായി അടയാളപ്പെടുത്തി, അജ്ഞാത ചെലവ് ഹാർഡ് ക്യാപ് മറികടക്കാൻ അനുവദിക്കില്ല. count_as_zero ആ ഉപയോഗം $0 ആയി എണ്ണുകയും വില നിശ്ചിത ചെലവിനെ തുടർച്ചയായി പ്രാബല്യത്തിൽവയ്ക്കുകയും ചെയ്യുന്നു. വിലയില്ലാത്ത മോഡലുകൾ ഏതായാലും ഡാഷ്ബോർഡ് ഹോം പേജിൽ പട്ടികപ്പെടുത്തിയിരിക്കും."
       }
     }
   },
@@ -15216,5 +15428,8 @@
     "importButton": "ഇറക്കുമതി ചെയ്യുക",
     "importFailed": "ഇറക്കുമതി പരാജയപ്പെട്ടു.",
     "importSuccess": "{connections} അക്കൗണ്ടുകളും {nodes} ദാതാവ് നോഡുകളും ഇറക്കുമതി ചെയ്തു; {skipped} ഒഴിവാക്കി."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "നിലവിലെ സ്ഥാനത്ത് നിന്ന് ആരംഭിക്കുക (നിലവിലുള്ള ലോഗുകൾ ഒഴിവാക്കുക)"
   }
 }
