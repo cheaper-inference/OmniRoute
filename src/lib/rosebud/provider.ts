@@ -149,17 +149,24 @@ export async function discoverRosebud(id: string) {
   return { provider: "rosebud", models, source: "rosebud-cli", creditUnit: "rosebud_credits" };
 }
 export function recordRosebudJob(connectionId: string, job: RosebudJob) {
-  saveRosebudCreditEvent({
-    id: job.id,
-    connectionId,
-    model: job.model,
-    modality: job.category,
-    status: job.status,
-    estimatedCredits: job.estimatedCredits,
-    actualCredits: job.actualCredits,
-    refundedCredits: job.refundedCredits,
-    updatedAt: job.updatedAt,
-  });
+  try {
+    saveRosebudCreditEvent({
+      id: job.id,
+      connectionId,
+      model: job.model,
+      modality: job.category,
+      status: job.status,
+      estimatedCredits: job.estimatedCredits,
+      actualCredits: job.actualCredits,
+      refundedCredits: job.refundedCredits,
+      updatedAt: job.updatedAt,
+    });
+  } catch {
+    // The durable CLI job survives a ledger failure: clients must recover it, not pay again.
+    const error = new RosebudError("usage_recording_failed", 503, !job.unpaidFailure);
+    error.jobId = job.id;
+    throw error;
+  }
 }
 export async function generateRosebud(
   connectionId: string,
@@ -167,12 +174,13 @@ export async function generateRosebud(
   request: unknown,
   signal?: AbortSignal | null
 ) {
+  let job: RosebudJob | undefined;
   try {
-    const job = await rosebudRuntime.generate(profile, request, signal);
+    job = await rosebudRuntime.generate(profile, request, signal);
     recordRosebudJob(connectionId, job);
     return job;
   } catch (error) {
-    if (error instanceof RosebudError && error.jobId) {
+    if (!job && error instanceof RosebudError && error.jobId) {
       recordRosebudJob(connectionId, await rosebudRuntime.read(profile, error.jobId));
     }
     throw error;

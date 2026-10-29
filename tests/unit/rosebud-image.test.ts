@@ -60,6 +60,21 @@ test("native image dispatch requires locality and uses the selected connected ac
       assert.equal(result.data.rosebud_usage.unit, "rosebud_credits");
       assert.equal(result.data.rosebud_usage.usd_cost, null);
     }
+    const { getDbInstance } = await import("../../src/lib/db/core.ts");
+    const db = getDbInstance();
+    const prepare = db.prepare;
+    const brokenLedger = context.mock.method(db, "prepare", function (sql: string) {
+      if (sql.startsWith("INSERT INTO key_value")) throw new Error("disk unavailable");
+      return prepare.call(db, sql);
+    });
+    const failedLedger = await handleRosebudImageGeneration({
+      body: { model: "rosebud/test-image", prompt: "test" },
+      peerLocality: "lan",
+      credentials: { connectionId: String(connection.id) },
+    });
+    brokenLedger.mock.restore();
+    assert.equal(failedLedger.status, 422);
+    assert.equal(failedLedger.rosebudUsage?.job_id, job.id);
     context.mock.method(rosebudRuntime, "artifact", async () => {
       throw new Error("download unavailable");
     });
