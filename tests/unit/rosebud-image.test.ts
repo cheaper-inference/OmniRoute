@@ -60,6 +60,25 @@ test("native image dispatch requires locality and uses the selected connected ac
       assert.equal(result.data.rosebud_usage.unit, "rosebud_credits");
       assert.equal(result.data.rosebud_usage.usd_cost, null);
     }
+    context.mock.method(rosebudRuntime, "artifact", async () => {
+      throw new Error("download unavailable");
+    });
+    const failedDownload = await handleRosebudImageGeneration({
+      body: { model: "rosebud/test-image", prompt: "test" },
+      peerLocality: "lan",
+      credentials: { connectionId: String(connection.id) },
+    });
+    assert.equal(failedDownload.status, 409);
+    assert.equal(failedDownload.rosebudUsage?.job_id, job.id);
+    const controller = new AbortController();
+    controller.abort();
+    const cancelled = await handleRosebudImageGeneration({
+      body: { model: "rosebud/test-image", prompt: "test" },
+      peerLocality: "lan",
+      credentials: { connectionId: String(connection.id) },
+      signal: controller.signal,
+    });
+    assert.equal(cancelled.status, 408);
     const unsupported = await handleRosebudImageGeneration({
       body: { model: "rosebud/test-image", rosebud_inputs: { output_format: "svg" } },
       peerLocality: "lan",

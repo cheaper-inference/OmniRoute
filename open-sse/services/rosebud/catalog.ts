@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RosebudError } from "./cli.ts";
 
 export const rosebudCategory = z.enum([
   "image",
@@ -62,7 +63,7 @@ export function validateRosebudInput(model: RosebudModel, input: Record<string, 
               "Use an asset ID or HTTPS URL"
             )
           : string;
-    } else throw new Error("Unsupported Rosebud input type");
+    } else throw new RosebudError("unsupported_input_type", 400);
     fields[spec.name] = spec.required ? field : field.optional();
   }
   return z.object(fields).strict().parse(input);
