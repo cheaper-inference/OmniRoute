@@ -199,15 +199,15 @@ JSON-RPC endpoint `/a2a` သည် ပင်မ A2A ဝင်ပေါက်ဖ�
 
 ## Skill အသစ်တစ်ခု ထည့်သွင်းခြင်း
 
-1. **Skill ဖိုင်ကို ဖန်တီးပါ:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skill ဖိုင် ဖန်တီးပါ:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Async function `(task: A2ATask) => Promise<{ artifacts, metadata }>` ကို export လုပ်ပါ။ `smartRouting.ts` ကဲ့သို့ လက်ရှိ skill များ၏ ပုံစံကို လိုက်နာပါ။
+   Async function `(task: A2ATask) => Promise<{ artifacts, metadata }>` ကို export လုပ်ပါ။ `smartRouting.ts` ကဲ့သို့ ရှိပြီးသား skill များ၏ ပုံစံကို လိုက်နာပါ။
 
-2. **Handler ကို မှတ်ပုံတင်ပါ:** `src/lib/a2a/taskExecution.ts` ရှိ `A2A_SKILL_HANDLERS` တွင် entry တစ်ခု ထည့်ပါ-
+2. **Handler ကို မှတ်ပုံတင်ပါ:** `src/lib/a2a/taskExecution.ts` တွင် `A2A_SKILL_HANDLERS` ထဲသို့ entry တစ်ခု ထည့်ပါ-
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...လက်ရှိ skill များ
+     // ...ရှိပြီးသား skill များ
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ JSON-RPC endpoint `/a2a` သည် ပင်မ A2A ဝင်ပေါက်ဖ�
    };
    ```
 
-3. **Agent Card တွင် ဖော်ပြပါ:** `src/app/.well-known/agent.json/route.ts` ရှိ `skills` array တွင် ထပ်ဖြည့်ပါ-
+3. **Agent Card တွင် ဖော်ပြပါ:** `src/lib/a2a/agentCardMetadata.ts` (`/.well-known/agent.json` နှင့် `/.well-known/agent-card.json` တို့က မျှဝေအသုံးပြုသည်) ရှိ `skills` array ထဲသို့ အောက်ပါတို့ကို ထည့်ပါ-
 
    ```json
    {
      "id": "your-skill",
-     "name": "သင့် Skill",
-     "description": "ရည်ရွယ်ချက်ကို အဓိကထားသော အကျဉ်းချုပ်ဖော်ပြချက်",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["သဘာဝဘာသာစကားဖြင့် ခေါ်ယူအသုံးပြုသည့် နမူနာ"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Test များ ရေးသားပါ:** `tests/unit/a2a-<your-skill>.test.ts`။ အောင်မြင်သည့်လမ်းကြောင်း + အမှားလမ်းကြောင်း နှစ်ခုစလုံးကို လွှမ်းခြုံပါ။
+4. **Test များ ရေးပါ:** `tests/unit/a2a-<your-skill>.test.ts`။ အောင်မြင်သည့် လမ်းကြောင်းနှင့် အမှားဖြစ်သည့် လမ်းကြောင်း နှစ်မျိုးစလုံးကို စမ်းသပ်ပါ။
 
-5. **ဤဖိုင်၏ `Available Skills` ဇယားတွင် skill အသစ်ကို မှတ်တမ်းတင်ပါ**။
+5. ဤဖိုင်၏ `Available Skills` ဇယားတွင် skill အသစ်ကို **မှတ်တမ်းတင်ပါ**။
 
 ---
 

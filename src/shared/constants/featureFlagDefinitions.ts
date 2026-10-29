@@ -479,7 +479,20 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
 
-  // ──────────────── Policies (7) ────────────────
+  // ──────────────── Policies (8) ────────────────
+  {
+    key: "UNPRICED_USAGE_BUDGET_POLICY",
+    label: "Unpriced Usage Budget Policy",
+    description:
+      "How per-key daily/weekly USD limits treat successful usage whose provider/model has no pricing row. 'fail_closed' (default) marks the window as exceeded so an unknown cost can never slip past a hard cap (#12341). 'count_as_zero' counts that usage as $0 and keeps enforcing the priced spend. Unpriced models are listed on the dashboard home page either way.",
+    descriptionI18nKey: "featureFlags.definitions.UNPRICED_USAGE_BUDGET_POLICY.description",
+    category: "policies",
+    defaultValue: "fail_closed",
+    type: "enum",
+    enumValues: ["fail_closed", "count_as_zero"],
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
   {
     key: "TOOL_POLICY_MODE",
     label: "Tool Policy Mode",
@@ -1336,6 +1349,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     description:
       "When every account is cooling down and the cooldown that ends first was caused by a 403 (access refused) or a 410 (gone), return that refusal at once instead of waiting the cooldown out and re-sending the request; a renewing agentrouter connection-scoped quota 403 is then persisted with errorCode 429 so it stays retryable. Off by default: only a 401 skips the wait, and every refusal is persisted with the status it arrived with.",
     descriptionI18nKey: "featureFlagCooldownRetrySkipRefusalsEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "CURSOR_GROK_47_DROP_MAX_EFFORT",
+    label: "Cursor Grok 4.7: Drop the max Effort Tier",
+    description:
+      "Stop offering and forwarding the max reasoning effort for Cursor Grok 4.7, which Cursor's docs do not list (low, medium, high, xhigh only): the grok-4.7-max fallback alias disappears from the catalog and a max effort request is sent without an effort parameter. Off by default: max stays offered and forwarded, as a live AgentService/Run probe accepted it.",
+    descriptionI18nKey: "featureFlagCursorGrok47DropMaxEffortDescription",
     category: "runtime",
     defaultValue: "false",
     type: "boolean",

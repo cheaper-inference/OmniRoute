@@ -201,7 +201,7 @@ JSON-RPC ಎಂಡ್ಪಾಯಿಂಟ್ `/a2a` ಅಂಗೀಕೃತ A2A ಪ�
 
 1. **ಕೌಶಲ್ಯ ಫೈಲ್ ರಚಿಸಿ:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` ಎಂಬ async ಫಂಕ್ಷನ್ ಅನ್ನು ಎಕ್ಸ್ಪೋರ್ಟ್ ಮಾಡಿ. `smartRouting.ts` ನಂತಹ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಕೌಶಲ್ಯಗಳ ಸ್ವರೂಪವನ್ನು ಅನುಸರಿಸಿ.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` ಎಂಬ async function ಅನ್ನು export ಮಾಡಿ. `smartRouting.ts` ನಂತಹ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಕೌಶಲ್ಯಗಳ ವಿನ್ಯಾಸವನ್ನು ಅನುಸರಿಸಿ.
 
 2. **ಹ್ಯಾಂಡ್ಲರ್ ನೋಂದಾಯಿಸಿ:** `src/lib/a2a/taskExecution.ts` ನಲ್ಲಿ, `A2A_SKILL_HANDLERS` ಗೆ ಒಂದು ನಮೂದನ್ನು ಸೇರಿಸಿ:
 
@@ -215,21 +215,21 @@ JSON-RPC ಎಂಡ್ಪಾಯಿಂಟ್ `/a2a` ಅಂಗೀಕೃತ A2A ಪ�
    };
    ```
 
-3. **ಏಜೆಂಟ್ ಕಾರ್ಡ್ನಲ್ಲಿ ಬಹಿರಂಗಪಡಿಸಿ:** `src/app/.well-known/agent.json/route.ts` ನಲ್ಲಿ, `skills` ಅರೇಗೆ ಸೇರಿಸಿ:
+3. **Agent Card ನಲ್ಲಿ ಪ್ರಕಟಿಸಿ:** `src/lib/a2a/agentCardMetadata.ts` ನಲ್ಲಿ (`/.well-known/agent.json` ಮತ್ತು `/.well-known/agent-card.json` ಎರಡೂ ಇದನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತವೆ), `skills` array ಗೆ ಇದನ್ನು ಸೇರಿಸಿ:
 
    ```json
    {
      "id": "your-skill",
-     "name": "ನಿಮ್ಮ ಕೌಶಲ್ಯ",
-     "description": "ಸಂಕ್ಷಿಪ್ತ, ಉದ್ದೇಶ-ಕೇಂದ್ರಿತ ವಿವರಣೆ",
-     "tags": ["ರೂಟಿಂಗ್", "ಕೋಟಾ"],
-     "examples": ["ನೈಸರ್ಗಿಕ ಭಾಷೆಯ ಮಾದರಿ ಆಹ್ವಾನ"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
 4. **ಪರೀಕ್ಷೆಗಳನ್ನು ಬರೆಯಿರಿ:** `tests/unit/a2a-<your-skill>.test.ts`. ಯಶಸ್ವಿ ಮಾರ್ಗ + ದೋಷದ ಮಾರ್ಗವನ್ನು ಒಳಗೊಳ್ಳಿ.
 
-5. **ದಾಖಲಿಸಿ:** ಈ ಫೈಲ್ನ `Available Skills` ಕೋಷ್ಟಕದಲ್ಲಿ ಹೊಸ ಕೌಶಲ್ಯವನ್ನು ದಾಖಲಿಸಿ.
+5. **ದಾಖಲಿಸಿ:** ಈ ಫೈಲ್ನ `Available Skills` table ನಲ್ಲಿ ಹೊಸ ಕೌಶಲ್ಯವನ್ನು ದಾಖಲಿಸಿ.
 
 ---
 

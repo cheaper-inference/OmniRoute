@@ -1,0 +1,1 @@
+- **feat(cli-tools):** add OpenClaude setup guide card to the CLI Code catalog (OpenAI-compatible env vars + `openclaude --provider openai`) ([#16844](https://github.com/diegosouzapw/OmniRoute/pull/16844)) — thanks @ntdatt812
