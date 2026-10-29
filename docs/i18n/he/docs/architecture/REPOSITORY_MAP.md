@@ -111,150 +111,150 @@ OmniRoute/
 
 ---
 
-## `src/` — יישום Next.js
+## `src/` - Next.js
 
 ```
 src/
-├── app/                 # נתב היישום (דפים + נתיבי API + דפי סטטוס + דף נחיתה)
-├── lib/                 # ספריות ליבה / מודולי תחום (80 תיקיות משנה + כ־70 קבצים ברמה העליונה)
-├── domain/              # לוגיקת תחום טהורה (מנוע מדיניות, מנגנון חלופי, עלות, נעילה, comboResolver, הערכה)
-├── server/              # מודולים לצד השרת בלבד (תהליך הרשאות, cors, תווכת אימות) — לא ניתן לייבא בצד הלקוח
-├── shared/              # משותף לשרת וללקוח כאשר הדבר בטוח (קבועים, טיפוסים, אימות, חוזים, כלי עזר)
-├── i18n/                # תצורת next-intl + קובצי JSON של הודעות לכל אזור (67 אזורים)
-├── middleware/          # תווכת Next.js (העשרת בקשות, זיהוי אזור)
-├── mitm/                # ליבת פרוקסי MITM: יצירה/התקנה של אישורים, מטפלים, יעדים, מפקח, מסכות, העברה ישירה
-│   ├── handlers/        # 9 מחלקות מטפלים לסוכני IDE המרחיבות את MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # שכבת לכידת תעבורה: מאגר (טבעת בזיכרון), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # קוד תיווך למתאמי מודלים (שכבת תאימות ישנה)
-├── scripts/             # סקריפטים פנימיים לתחזוקה (למשל, backfillAggregation)
-├── sse/                 # מטפלים/שירותים ישנים של SSE (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # מאגר ישן בזיכרון (מוצא בהדרגה משימוש לטובת src/lib/db)
-├── types/               # קובצי טיפוסים משותפים של TS
-├── instrumentation.ts   # נקודת חיבור לטלמטריה של Next.js (דפדפן + edge)
-├── instrumentation-node.ts  # מכשור עבור Node בלבד
-└── proxy.ts             # שכבת תאימות לכניסת HTTP-proxy
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node-only instrumentation
+└── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` — נתב היישום (Next.js 16)
+### `src/app/` — נתב אפליקציות (Next.js 16)
 
-| נתיב                                                                         | מטרה                                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | API ציבורי תואם OpenAI (כ־25 נתיבי משנה: צ'אט, השלמות, הטמעות, קבצים, אצוות, שמע, תמונות, סרטונים, מוזיקה, דירוג מחדש, ניהול תוכן, חיפוש, ws, סוכנים, חשבונות, ספקים וכו')                                                                                                                                                            |
-| `app/api/v1beta/`                                                            | נקודות קצה של API בסגנון Gemini                                                                                                                                                                                                                                                                                                       |
-| `app/api/playground/`                                                        | נתיבי Playground Studio:‏ `improve-prompt/` (POST — שכתוב פרומפט באמצעות LLM),‏ `presets/` (GET לקבלת רשימה / POST ליצירה),‏ `presets/[id]/` (GET / PUT / DELETE) — ראו `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                        |
-| `app/api/` (שאינו v1)                                                        | נתיבי ניהול/אדמין (כ־60 תיקיות: ספקים, שילובים, הגדרות, mcp,‏ a2a,‏ evals, זיכרון, מיומנויות, webhooks, תאימות, עמידות, ניטור, מנהרות, כלי CLI וכו')                                                                                                                                                                                  |
-| `app/api/tools/agent-bridge/`                                                | API מסוג REST של AgentBridge —‏ 12 נתיבים (שליטה בשרת, מצב סוכן/DNS/מיפויים, מעקף, אישור, CA במעלה הזרם). LOCAL_ONLY + SPAWN_CAPABLE. ראו `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                                        |
-| `app/api/tools/traffic-inspector/`                                           | API מסוג REST + WS של Traffic Inspector —‏ 16+ נתיבים (בקשות, הפעלות, מארחים, מצבי לכידה, ייצוא, ws). LOCAL_ONLY + SPAWN_CAPABLE. ראו `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                                      |
-| `app/a2a/`                                                                   | נקודת כניסה ל־A2A JSON-RPC 2.0‏ (`POST /a2a`)                                                                                                                                                                                                                                                                                         |
-| `app/.well-known/agent.json/`                                                | כרטיס סוכן A2A (גילוי)                                                                                                                                                                                                                                                                                                                |
-| `app/(dashboard)/dashboard/`                                                 | דפי ממשק המשתמש של לוח הבקרה (50+ מקטעים, כ־118 קובצי page.tsx: ספקים, שילובים, הגדרות, זיכרון, מיומנויות, webhooks,‏ evals, ביקורת, אצווה, מטמון, עלויות, תקינות, מערכת, פעילות וכו')                                                                                                                                                |
-| `app/(dashboard)/dashboard/search-tools/`                                    | ממשק המשתמש של Search Tools Studio (שלוש כרטיסיות: חיפוש/גירוד/השוואה + SearchConceptCard + ProviderCatalog) — ראו `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                           |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (תוכנית 21):‏ `page.tsx` (מעטפת בעלת שלוש כרטיסיות),‏ `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard),‏ `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab),‏ `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | דף לוח הבקרה של AgentBridge — כרטיס שרת, 9 כרטיסי סוכנים, אשף הגדרה, מיפוי מודלים, רשימת מעקפים. i18n PT-BR + EN. ראו `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                                               |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | דף לוח הבקרה של Traffic Inspector — תצוגה מפוצלת בסגנון DevTools,‏ 7 כרטיסיות פרטים, 4 מתגים למצבי לכידה, מקליט הפעלות, צביעה לפי הקשר. i18n PT-BR + EN. ראו `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                                  |
-| `app/(dashboard)/dashboard/activity/`                                        | דף פיד הפעילות (קבוצה B): `page.tsx` (שרת) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — ראו `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                                       |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | דף שיתוף מכסות (קבוצה B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                                 |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | דף תצורת תוכנית ספק (קבוצה B): `page.tsx` + `ProviderPlanConfigClient.tsx` — דריסת ממדי מכסה לפי חיבור                                                                                                                                                                                                                                |
-| `app/docs/`                                                                  | מציג תיעוד מוטמע (מרנדר את `docs/*.md`)                                                                                                                                                                                                                                                                                               |
-| `app/landing/`                                                               | דף נחיתה שיווקי                                                                                                                                                                                                                                                                                                                       |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | דפים הקשורים לאימות                                                                                                                                                                                                                                                                                                                   |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | דפי שגיאות HTTP                                                                                                                                                                                                                                                                                                                       |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | דפים סטטיים/דפי סטטוס                                                                                                                                                                                                                                                                                                                 |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | פריסת השורש, דף הבית, מניפסט PWA, CSS גלובלי                                                                                                                                                                                                                                                                                          |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | גבולות שגיאה                                                                                                                                                                                                                                                                                                                          |
+| נָתִיב                                                                       | מַטָרָה                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | Public OpenAI-compat API (~ 25 תת-מסלולים: צ'אט, השלמות, הטמעות, קבצים, אצוות, אודיו, תמונות, סרטונים, מוזיקה, דירוג מחדש, מנחות, חיפוש, ws, סוכנים, חשבונות, ספקים וכו')                                                                                                                                                 |
+| `app/api/v1beta/`                                                            | נקודות קצה API בסגנון מזל תאומים                                                                                                                                                                                                                                                                                          |
+| `app/api/playground/`                                                        | מסלולי Playground Studio: `improve-prompt/` (POST - LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) - ראה `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                          |
+| `app/api/` (לא v1)                                                           | מסלולי Management/admin (ספריות ~ 60: ספקים, שילובים, הגדרות, mcp, a2a, evals, זיכרון, מיומנויות, webhooks, תאימות, חוסן, ניטור, מנהרות, כלי cli וכו')                                                                                                                                                                    |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API - 12 מסלולים (בקרת שרת, סוכן state/DNS/mappings, עוקף, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. ראה `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                                      |
+| `app/api/tools/traffic-inspector/`                                           | מפקח התנועה REST + WS API — 16 מסלולי + (בקשות, הפעלות, מארחים, מצבי לכידה, ייצוא, ws). LOCAL_ONLY + SPAWN_CAPABLE. ראה `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                                        |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 נקודת כניסה (`POST /a2a`)                                                                                                                                                                                                                                                                                |
+| `app/.well-known/agent.json/`                                                | כרטיס סוכן A2A (גילוי)                                                                                                                                                                                                                                                                                                    |
+| `app/(dashboard)/dashboard/`                                                 | דפי UI של לוח המחוונים (50 קטעי +, קבצי ~ 118 page.tsx : ספקים, שילובים, הגדרות, זיכרון, מיומנויות, webhooks, evals, ביקורת, אצווה, מטמון, עלויות, בריאות, מערכת, פעילות וכו')                                                                                                                                            |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 כרטיסיות: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — ראה `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                           |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (תוכנית 21): `page.tsx` (מעטפת 3 כרטיסיות), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | עמוד לוח המחוונים AgentBridge - כרטיס שרת, 9 כרטיסי סוכן, אשף הגדרה, מיפוי דגמים, רשימת עוקפים. i18n PT-BR + EN. ראה `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                                    |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | דף לוח המחוונים של מפקח התנועה - פיצול DevTools, 7 כרטיסיות פרטים, 4 בוררים של מצבי לכידה, מקליט הפעלות, צביעת הקשר. i18n PT-BR + EN. ראה `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                                         |
+| `app/(dashboard)/dashboard/activity/`                                        | דף הזנת פעילות (קבוצה B): `page.tsx` (שרת) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — ראה `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                           |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | דף שיתוף מכסות (קבוצה ב): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                     |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | דף תצורת תוכנית הספק (קבוצה B): `page.tsx` + `ProviderPlanConfigClient.tsx` — מידות מכסה לכל עקיפה של חיבור                                                                                                                                                                                                               |
+| `app/docs/`                                                                  | מציג תיעוד מוטבע (מציג `docs/*.md`)                                                                                                                                                                                                                                                                                       |
+| `app/landing/`                                                               | דף נחיתה שיווקי                                                                                                                                                                                                                                                                                                           |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | דפים הקשורים לאימות                                                                                                                                                                                                                                                                                                       |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | דפי שגיאה של HTTP                                                                                                                                                                                                                                                                                                         |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | דפי Static/status                                                                                                                                                                                                                                                                                                         |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | פריסת שורש, בית, מניפסט PWA, CSS גלובלי                                                                                                                                                                                                                                                                                   |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | גבולות שגיאה                                                                                                                                                                                                                                                                                                              |
 
-### `src/lib/` — ספריות ליבה (כ־50 מודולים)
+### `src/lib/` - ספריות ליבה (~ 50 מודולים)
 
-| מודול                                    | מטרה                                                                                                                                                                                                                                                                                                             |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | מנהל משימות של פרוטוקול A2A, מיומנויות (5), הזרמה                                                                                                                                                                                                                                                                |
-| `acp/`                                   | רישום סוכני CLI (גילוי CLI מקומי — ראו `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                               |
-| `api/`                                   | כלי עזר משותפים ל-API (`requireManagementAuth`, אימות)                                                                                                                                                                                                                                                           |
-| `auth/`                                  | הפעלות, גיבוב סיסמאות, אימות אסימונים                                                                                                                                                                                                                                                                            |
-| `batches/`                               | מטפלים עבור OpenAI Batches API                                                                                                                                                                                                                                                                                   |
-| `catalog/`                               | אימות Zod של קטלוג ספקים + זיהוי יכולות                                                                                                                                                                                                                                                                          |
-| `cloudAgent/`                            | סוכני ענן (Codex Cloud, Devin, Jules) — ראו `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                     |
-| `combos/`                                | זיהוי שילובים + כלי עזר לשינוי סדר                                                                                                                                                                                                                                                                               |
-| `audit/`                                 | כלי עזר להזנת הפעילות: `highLevelActions.ts` (רשימת היתרים + `isHighLevelAction()`), `activityIcons.ts` (מיפוי פעולה ← סמל/פועל), `timeline.ts` (`groupByDay`/`relativeTime`) — ראו `docs/architecture/MONITORING_SECTIONS.md`                                                                                   |
-| `compliance/`                            | יומן ביקורת + ביקורת ספקים — ראו `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                   |
-| `compression/`                           | קוד תיווך למנוע הדחיסה (המנועים נמצאים תחת `open-sse/services/compression/`)                                                                                                                                                                                                                                     |
-| `config/`                                | כלי עזר להגדרת תצורת זמן ריצה                                                                                                                                                                                                                                                                                    |
-| `db/`                                    | יותר מ-120 מודולי מסד נתונים תחומיים + 168 מיגרציות (עבור SQLite יש לעבור תמיד דרך כאן)                                                                                                                                                                                                                          |
-| `quota/`                                 | מנוע שיתוף מכסות: `dimensions.ts` (טיפוסים/Zod), `types.ts` (ממשק QuotaStore), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — ראו `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | לקוח קטלוג המודלים החינמיים של Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — ראו `docs/frameworks/RADAR.md`                                                                                                                                |
-| `display/`                               | כלי עזר לעיצוב ממשק המשתמש (עלות, השהיה וכו׳)                                                                                                                                                                                                                                                                    |
-| `embeddings/`                            | כלי עזר לשירות הטמעות                                                                                                                                                                                                                                                                                            |
-| `env/`                                   | ניתוח ואימות של משתני סביבה                                                                                                                                                                                                                                                                                      |
-| `evals/`                                 | תשתית הערכה (חבילות בדיקה, מריץ, סביבת ריצה) — ראו `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                    |
-| `guardrails/`                            | מסווה מידע אישי מזהה (PII), הזרקת פרומפטים, גשר ראייה ממוחשבת — ראו `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                |
-| `jobs/`                                  | משימות רקע (דמויות cron)                                                                                                                                                                                                                                                                                         |
-| `memory/`                                | זיכרון שיחתי (RRF היברידי עם SQLite FTS5 ו־sqlite-vec + שכבה 2 של Qdrant) — ראו `docs/frameworks/MEMORY.md`                                                                                                                                                                                                      |
-| `memory/embedding/`                      | שכבת הטמעות מרובת מקורות: `index.ts` (פותר), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (תוכנית 21)                                                                                                                                                                          |
-| `memory/vectorStore.ts`                  | מעטפת sqlite-vec v0.1.9 — חיפוש KNN בכוח גס + RRF היברידי (FTS5 + וקטור, k=60). מאותחלת באופן עצל ומתדרדרת בחינניות כאשר sqlite-vec אינו זמין. (תוכנית 21)                                                                                                                                                       |
-| `memory/reindex.ts`                      | `runReindexBatch()` — מעבד ברקע זיכרונות עם `needs_reindex=1`; נקרא על ידי `POST /api/memory/reindex` ונתיב המילוי החוזר העצל. (תוכנית 21)                                                                                                                                                                       |
-| `monitoring/`                            | בדיקות תקינות, הפקת מדדים                                                                                                                                                                                                                                                                                        |
-| `oauth/`                                 | תהליכי OAuth/ייבוא עבור 22 מודולי ספקים (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                              |
-| `plugins/`                               | מרשם תוספים                                                                                                                                                                                                                                                                                                      |
-| `promptCache/`                           | נקודות עצירה במטמון פרומפטים בסגנון Anthropic                                                                                                                                                                                                                                                                    |
-| `skills/`                                | תשתית מיומנויות (מובנות + זירת מסחר + SkillsSH) — ראו `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                |
-| `playground/`                            | כלי עזר משותפים של Playground Studio:‏ `codeExport.ts` (מחולל curl/Python/TS),‏ `promptImprover.ts` (בונה מטא-הנחיות),‏ `streamMetrics.ts` (חישוב טהור של TTFT/TPS),‏ `types.ts` (טבלת תמחור) — ראו `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                       |
-| `webhookDispatcher.ts`                   | העברת webhooks עם HMAC — ראו `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                       |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | מנהלי מנהרות — ראו `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                   |
-| `cloudSync.ts`, `initCloudSync.ts`       | סנכרון אופציונלי של המצב לענן                                                                                                                                                                                                                                                                                    |
-| `localDb.ts`                             | קובץ מאגד לייצוא מחדש של מודולי מסד הנתונים (ללא לוגיקה — ייצוא מחדש בלבד)                                                                                                                                                                                                                                       |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | שמירת בקשות במטמון + אידמפוטנטיות                                                                                                                                                                                                                                                                                |
-| (כ־30 קבצים נוספים ברמה העליונה)         | כלי עזר ייעודיים (logEnv, modelsDevSync, piiSanitizer וכו׳)                                                                                                                                                                                                                                                      |
+| מודול                                    | מַטָרָה                                                                                                                                                                                                                                                                                                             |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | מנהל משימות פרוטוקול A2A, מיומנויות (5), סטרימינג                                                                                                                                                                                                                                                                   |
+| `acp/`                                   | CLI Agent Registry (גילוי CLI מקומי - ראה `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                               |
+| `api/`                                   | עוזרי API משותפים (`requireManagementAuth`, אימות)                                                                                                                                                                                                                                                                  |
+| `auth/`                                  | הפעלה, גיבוב סיסמא, אימות אסימון                                                                                                                                                                                                                                                                                    |
+| `batches/`                               | OpenAI Batches API                                                                                                                                                                                                                                                                                                  |
+| `catalog/`                               | ספק קטלוג Zod אימות יכולת + פתרון                                                                                                                                                                                                                                                                                   |
+| `cloudAgent/`                            | סוכני ענן (Codex Cloud, Devin, Jules) - ראה `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                        |
+| `combos/`                                | עוזרים לסדר מחדש + ברזולוציה משולבת                                                                                                                                                                                                                                                                                 |
+| `audit/`                                 | עוזרי הזנת פעילות: `highLevelActions.ts` (רשימת ההיתרים + `isHighLevelAction()`), `activityIcons.ts` (פעולה → icon/verb map), `timeline.ts` (groupByDay/relativeTime) - ראה `docs/architecture/MONITORING_SECTIONS.md`                                                                                              |
+| `compliance/`                            | יומן ביקורת ביקורת ספק + - ראה `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                        |
+| `compression/`                           | דבק מנוע דחיסה (מנועים חיים ב- `open-sse/services/compression/`)                                                                                                                                                                                                                                                    |
+| `config/`                                | עוזרי תצורת זמן ריצה                                                                                                                                                                                                                                                                                                |
+| `db/`                                    | 120 מודולי + domain DB + 168 העברות (תמיד עברו כאן עבור SQLite)                                                                                                                                                                                                                                                     |
+| `quota/`                                 | מנוע שיתוף מכסות: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore interface), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` - ראה `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | לקוח קטלוג דגם חופשי של מכ"ם: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) - ראה `docs/frameworks/RADAR.md`                                                                                                                                           |
+| `display/`                               | עוזרי עיצוב UI (עלות, חביון וכו')                                                                                                                                                                                                                                                                                   |
+| `embeddings/`                            | עוזרי שירותי הטבעה                                                                                                                                                                                                                                                                                                  |
+| `env/`                                   | ניתוח משתנה Env אימות +                                                                                                                                                                                                                                                                                             |
+| `evals/`                                 | Eval framework (סוויטות, ראנר, זמן ריצה) - ראה `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                           |
+| `guardrails/`                            | מסכת PII, הזרקה מהירה, גשר ראייה - ראה `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                |
+| `jobs/`                                  | עבודות רקע (כמו קרון)                                                                                                                                                                                                                                                                                               |
+| `memory/`                                | זיכרון שיחה (SQLite FTS5 + sqlite-vec היברידי RRF + Qdrant tier 2) - ראה `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                |
+| `memory/embedding/`                      | שכבת הטבעה מרובת מקורות: `index.ts` (פותר), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (תוכנית 21)                                                                                                                                                                              |
+| `memory/vectorStore.ts`                  | מעטפת sqlite-vec v0.1.9 — KNN brute-force + hybrid RRF (FTS5 + vector, k = 60). Lazy-init, משפיל בחן כאשר sqlite-vec אינו זמין. (תוכנית 21)                                                                                                                                                                         |
+| `memory/reindex.ts`                      | `runReindexBatch()` - מעבד זיכרונות עם `needs_reindex=1` ברקע; נקרא על ידי `POST /api/memory/reindex` ונתיב מילוי עצלן. (תוכנית 21)                                                                                                                                                                                 |
+| `monitoring/`                            | בדיקות בריאות, פליטת מדדים                                                                                                                                                                                                                                                                                          |
+| `oauth/`                                 | OAuth/import זורם עבור 22 מודולי ספקים (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, zero, openference, זד)                                                                    |
+| `plugins/`                               | רישום תוספים                                                                                                                                                                                                                                                                                                        |
+| `promptCache/`                           | נקודות עצירה של קבצים למטמון בסגנון אנתרופי                                                                                                                                                                                                                                                                         |
+| `skills/`                                | מסגרת מיומנויות ( + marketplace מובנה + SkillsSH) - ראה `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                 |
+| `playground/`                            | עוזרים משותפים ל-Playground Studio: `codeExport.ts` (מחולל curl/Python/TS ), `promptImprover.ts` (בונה מטה-prompt), `streamMetrics.ts` ( TTFT/TPS טהור), `types.ts` (טבלת תמחור) - ראה `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                       |
+| `webhookDispatcher.ts`                   | HMAC webhook delivery — ראה `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                           |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | מנהלי מנהרות - ראה `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                      |
+| `cloudSync.ts`, `initCloudSync.ts`       | סנכרון ענן אופציונלי של מצב                                                                                                                                                                                                                                                                                         |
+| `localDb.ts`                             | ייצוא מחדש של חבית עבור מודולי db (ללא היגיון - ייצוא מחדש בלבד)                                                                                                                                                                                                                                                    |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | בקש מאמצת + idempotency                                                                                                                                                                                                                                                                                             |
+| (~ 30 קבצים נוספים ברמה העליונה)         | עוזרים מיוחדים (logEnv, modelsDevSync, piiSanitizer וכו')                                                                                                                                                                                                                                                           |
 
-### `src/lib/db/` — מסד נתונים (147 מודולים + 208 מיגרציות)
+### `src/lib/db/` - מסד נתונים (147 מודולים + 208 העברות)
 
-| תת-תיקייה                 | מטרה                                                                                                                                                                                    |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | מופע יחיד של `getDbInstance()` עם רישום WAL ביומן                                                                                                                                       |
-| `db/migrations/`          | קובצי SQL בעלי גרסאות (אידמפוטנטיים וטרנזקציוניים). `073_memory_vec.sql` מוסיף את `memory_vec_meta` ואת העמודה `needs_reindex` (תוכנית 21).                                             |
-| `db/playgroundPresets.ts` | מודול CRUD עבור הגדרות קבועות מראש של Playground Studio‏ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
-| `db/memoryVec.ts`         | פעולות CRUD עבור `memory_vec_meta` ‏(active_dim, embedding_signature, last_reset_at, vec_loaded) וכן `markMemoryNeedsReindex`,‏ `getMemoryReindexQueue` וכו׳ (תוכנית 21)                |
-| `db/<domain>.ts`          | מודול אחד לכל תחום: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache וכו׳.                 |
+| Subdir                    | מַטָרָה                                                                                                                                                                    |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | `getDbInstance()` singleton עם WAL journaling                                                                                                                              |
+| `db/migrations/`          | קבצי SQL בגרסה (אימפוטנטית, טרנזקציונית). `073_memory_vec.sql` מוסיף `memory_vec_meta` + `needs_reindex` (תוכנית 21).                                                      |
+| `db/playgroundPresets.ts` | מודול CRUD עבור Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)           |
+| `db/memoryVec.ts`         | CRUD עבור `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` וכו' (תוכנית 21)              |
+| `db/<domain>.ts`          | מודול אחד לכל תחום: ספקים, שילובים, apiKeys, משתמשים, הפעלות, שימוש, יומן ביקורת, webhooks, מיומנויות, ערכים_זיכרון, משימות_agent_cloud, evals* \* , reasoning_cache וכו'. |
 
 ### `src/domain/`
 
-| מודול                  | מטרה                                         |
-| ---------------------- | -------------------------------------------- |
-| `policy.ts`            | מנגנון מדיניות                               |
-| `fallbackPolicy.ts`    | עץ החלטות למעבר לחלופה                       |
-| `costRules.ts`         | כללים לחישוב עלויות                          |
-| `lockoutPolicy.ts`     | מדיניות נעילה של מודל/חיבור                  |
-| `tagRouter.ts`         | ניתוב מבוסס תגיות                            |
-| `comboResolver.ts`     | פתרון שילובים (משמש את מנגנון השילובים)      |
-| `modelAvailability.ts` | בדיקת זמינות לכל מודל                        |
-| `assessment/`          | הערכת מודלים (שלב 1 של RFC-AUTO-ASSESSMENT ) |
+| מודול                  | מַטָרָה                                     |
+| ---------------------- | ------------------------------------------- |
+| `policy.ts`            | מנוע מדיניות                                |
+| `fallbackPolicy.ts`    | עץ החלטות נפילה                             |
+| `costRules.ts`         | כללי חישוב עלות                             |
+| `lockoutPolicy.ts`     | מדיניות נעילה Model/connection              |
+| `tagRouter.ts`         | ניתוב מבוסס תגים                            |
+| `comboResolver.ts`     | רזולוציית משולבת (בשימוש על ידי מנוע משולב) |
+| `modelAvailability.ts` | בדיקת זמינות לכל דגם                        |
+| `assessment/`          | הערכת מודל (שלב 1 של RFC-AUTO-ASSESSMENT )  |
 
 ### `src/server/`
 
-| מודול    | מטרה                                                                                      |
+| מודול    | מַטָרָה                                                                                   |
 | -------- | ----------------------------------------------------------------------------------------- |
-| `authz/` | תהליך הרשאה: `classify` → `policies` → `enforce` — ראו `docs/architecture/AUTHZ_GUIDE.md` |
+| `authz/` | צנרת ההרשאה: `classify` → `policies` → `enforce` — ראה `docs/architecture/AUTHZ_GUIDE.md` |
 | `cors/`  | תצורת CORS                                                                                |
-| `auth/`  | תווכת הפעלות                                                                              |
+| `auth/`  | תוכנת ביניים להפעלה                                                                       |
 
 ### `src/shared/`
 
-| מודול                            | מטרה                                                                                               |
-| -------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `components/`                    | API של רכיבי לוח המחוונים: מתאמים מעל `packages/ui-kit` — ראו `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: שמות סמלים המשמשים במסכים → רכיבי Lucide (`<Icon>`)                                    |
-| `constants/providers.ts`         | **375 ספקים** עם אימות Zod (מקור האמת)                                                             |
-| `constants/cliTools.ts`          | מרשם כלי CLI חיצוניים                                                                              |
-| `constants/routingStrategies.ts` | **20 אסטרטגיות ניתוב** עם עדיפויות                                                                 |
-| `constants/publicApiRoutes.ts`   | נתיבים הדורשים אימות Bearer (לעומת אימות ניהולי)                                                   |
-| `constants/upstreamHeaders.ts`   | רשימת כותרות חסומות עבור בקשות upstream                                                            |
-| `validation/schemas.ts`          | כ־80 סכמות Zod (מקור אמת יחיד לחוזי API)                                                           |
-| `validation/helpers.ts`          | כלי עזר לאימות Zod (`validateBody` וכו׳)                                                           |
-| `types/`                         | טיפוסי TS משותפים                                                                                  |
-| `contracts/`                     | חוזי API ציבוריים (נצרכים על ידי `files:` ב־`package.json`)                                        |
-| `utils/circuitBreaker.ts`        | מפסק מעגלים לספקים (ראו `docs/architecture/RESILIENCE_GUIDE.md`)                                   |
-| `utils/apiAuth.ts`               | אימות מפתח API, בדיקת היקפים                                                                       |
-| `utils/fetchTimeout.ts`          | מעטפות timeout/abort עבור fetch ל־upstream                                                         |
-| `utils/releaseNotes.ts`          | מנתח הכרזות שנסגרו עבור v2/legacy, לוקליזציה וסילוק לפי ID                                         |
+| מודול                            | מַטָרָה                                                                                        |
+| -------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `components/`                    | רכיב לוח המחוונים API: מתאמים מעל `packages/ui-kit` - ראה `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: שמות סמלים המשמשים את המסכים רכיבי → Lucide (`<Icon>`)                             |
+| `constants/providers.ts`         | **377 ספקים** עם אימות Zod (מקור האמת)                                                         |
+| `constants/cliTools.ts`          | רישום כלי CLI חיצוני                                                                           |
+| `constants/routingStrategies.ts` | **20 אסטרטגיות ניתוב** עם סדרי עדיפויות                                                        |
+| `constants/publicApiRoutes.ts`   | מסלולים הדורשים אישור נושאת (לעומת ניהול).                                                     |
+| `constants/upstreamHeaders.ts`   | רשימת דחיית כותרות לבקשות במעלה הזרם                                                           |
+| `validation/schemas.ts`          | סכימות ~ 80 Zod (מקור יחיד של אמת לחוזי API )                                                  |
+| `validation/helpers.ts`          | עוזרי אימות Zod (`validateBody` וכו')                                                          |
+| `types/`                         | סוגי TS משותפים                                                                                |
+| `contracts/`                     | חוזי API ציבוריים (נצרך על ידי `files:` ב- `package.json`)                                     |
+| `utils/circuitBreaker.ts`        | מפסק חשמל של ספק (ראה `docs/architecture/RESILIENCE_GUIDE.md`)                                 |
+| `utils/apiAuth.ts`               | אימות מפתח API, בדיקת היקף                                                                     |
+| `utils/fetchTimeout.ts`          | עטיפות Timeout/abort להבאה במעלה הזרם                                                          |
+| `utils/releaseNotes.ts`          | מנתח הודעת v2/legacy סגור, לוקליזציה וביטול ID                                                 |
 
 ---
 
@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — תיעוד ציבורי (7 קובצי שורש + 17 תיקיות משנה)
+## `docs/` - תיעוד ציבורי (7 קבצי שורש + 17 subdirs)
 
 ### מדריכים ברמה העליונה
 
-| מסמך                        | מטרה                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | ארכיטקטורה ברמה גבוהה, מפת תתי-מערכות, ממשק לוח הבקרה                                |
-| `CODEBASE_DOCUMENTATION.md` | חומר עזר הנדסי: תיקיות, מודולים, מוסכמות                                             |
-| `FEATURES.md`               | מטריצת תכונות עם נקודות עיקריות של v3.8                                              |
-| `USER_GUIDE.md`             | מדריך למשתמש הקצה (הגדרה, מודלים, שילובים, ממשקי CLI, שמע וכו׳)                      |
-| `API_REFERENCE.md`          | חומר עזר לנקודות קצה של API עם מודל אימות                                            |
-| `openapi.yaml`              | מפרט OpenAPI 3.0 ‏(121 נתיבים)                                                       |
-| `SETUP_GUIDE.md`            | שיטות התקנה (npm, npx, Docker, Electron, Termux, קוד מקור)                           |
-| `ENVIRONMENT.md`            | כל משתני הסביבה (כ-800 מתועדים, כ-3,050 שורות ב-`.env.example`)                      |
-| `TROUBLESHOOTING.md`        | שגיאות נפוצות + בעיות ידועות ב-v3.8.0                                                |
-| `RELEASE_CHECKLIST.md`      | תהליך הפצה מלא (מיומנויות, husky, קומיטים קונבנציונליים, פריסה)                      |
-| `COVERAGE_PLAN.md`          | יעדי כיסוי והמצב הנוכחי                                                              |
-| `FREE_TIERS.md`             | ספקים נבחרים עם מסלול חינמי (48+ בחינם + 11 OAuth)                                   |
-| `CLI-TOOLS.md`              | שילובי CLI חיצוניים + CLI פנימי של OmniRoute                                         |
-| `I18N.md`                   | ארכיטקטורת i18n, הוספת שפה, 67 אזורים                                                |
-| `UNINSTALL.md`              | שלבים להסרה נקייה                                                                    |
-| `PROVIDER_REFERENCE.md`     | קטלוג של 375 ספקים שנוצר **אוטומטית** (יצירה מחדש: `npm run gen:provider-reference`) |
+| דוק                         | מַטָרָה                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | ארכיטקטורה ברמה גבוהה, מפת תת-מערכת, משטח לוח המחוונים                         |
+| `CODEBASE_DOCUMENTATION.md` | התייחסות הנדסית: ספריות, מודולים, מוסכמות                                      |
+| `FEATURES.md`               | מטריצת תכונות עם הדגשות v3.8                                                   |
+| `USER_GUIDE.md`             | מדריך למשתמש קצה (הגדרה, דגמים, שילובים, CLIs, אודיו וכו')                     |
+| `API_REFERENCE.md`          | הפניה לנקודת קצה API עם מודל אישור                                             |
+| `openapi.yaml`              | מפרט OpenAPI 3.0 (121 נתיבים)                                                  |
+| `SETUP_GUIDE.md`            | שיטות התקנה (npm, npx, Docker, Electron, Termux, source)                       |
+| `ENVIRONMENT.md`            | כל ה-env vars (~ 800 מתועד, ~ 3,050 שורות `.env.example`)                      |
+| `TROUBLESHOOTING.md`        | שגיאות נפוצות + v3.8.0 בעיות ידועות                                            |
+| `RELEASE_CHECKLIST.md`      | זרימת שחרור מלאה (מיומנויות, צרוד, התחייבויות קונבנציונליות, פריסה)            |
+| `COVERAGE_PLAN.md`          | יעדי כיסוי ומצב נוכחי                                                          |
+| `FREE_TIERS.md`             | ספקי שכבה חופשית אוצרות (48 + free + 11 OAuth)                                 |
+| `CLI-TOOLS.md`              | שילובי CLI חיצוניים + פנימי OmniRoute CLI                                      |
+| `I18N.md`                   | ארכיטקטורת i18n, הוספת שפה, 67 מקומות                                          |
+| `UNINSTALL.md`              | נקה את שלבי הסרת ההתקנה                                                        |
+| `PROVIDER_REFERENCE.md`     | **נוצר אוטומטית** קטלוג של 377 ספקים (Regen: `npm run gen:provider-reference`) |
 
-### סקירות מעמיקות של תתי-מערכות
+### צלילות עמוקות של תת-מערכת
 
-| מסמך                                          | מטרה                                                                           |
-| --------------------------------------------- | ------------------------------------------------------------------------------ |
-| `MCP-SERVER.md`                               | שרת MCP:‏ 110 כלים, 3 תעבורות, 33 תחומים, נקודות קצה של REST                   |
-| `A2A-SERVER.md`                               | A2A v0.3:‏ JSON-RPC,‏ 6 מיומנויות, כלי עזר ל-REST, כרטיס סוכן                  |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | מדריך מאוחד: A2A לעומת ACP לעומת סוכני ענן                                     |
-| `CLOUD_AGENT.md`                              | תזמור Codex Cloud / Devin / Jules                                              |
-| `SKILLS.md`                                   | מסגרת מיומנויות (מובנות + זירת מסחר + SkillsSH + ארגז חול)                     |
-| `RADAR.md`                                    | שכבת-על לקטלוג המודלים החינמיים של Radar ‏(`RADAR_ENABLED`, כבויה כברירת מחדל) |
-| `MEMORY.md`                                   | מערכת זיכרון (SQLite FTS5 + Qdrant)                                            |
-| `EVALS.md`                                    | מסגרת הערכה (חבילות, הרצות, מחוונים)                                           |
-| `GUARDRAILS.md`                               | מיסוך PII, הזרקת הנחיות, גשר ראייה                                             |
-| `COMPLIANCE.md`                               | יומן ביקורת, שמירת נתונים, ביטול השתתפות באמצעות noLog                         |
-| `WEBHOOKS.md`                                 | מסירת webhook חתומה באמצעות HMAC                                               |
-| `REASONING_REPLAY.md`                         | מטמון היברידי של זיכרון/SQLite עבור `reasoning_content`                        |
-| `AUTHZ_GUIDE.md`                              | צינור הרשאות (`classify` → `policies` → `enforce`)                             |
-| `RESILIENCE_GUIDE.md`                         | מפסק זרם + תקופת צינון + נעילת מודל                                            |
-| `docs/security/STEALTH_GUIDE.md` (ב-git בלבד) | טביעת אצבע של TLS ‏(JA3/JA4),‏ Claude Code CCH, אישור MITM                     |
-| `AUTO-COMBO.md`                               | מנוע Auto Combo (ניקוד לפי 16 גורמים, 6 חבילות מצבים, מפעל וירטואלי)           |
+| דוק                                         | מַטָרָה                                                                   |
+| ------------------------------------------- | ------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | שרת MCP : 110 כלים, 3 העברות, 33 היקפים, נקודות קצה REST                  |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 כישורים, עוזרי REST, כרטיס סוכן                     |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | מדריך מאוחד: A2A vs ACP vs Cloud Agents                                   |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules                                               |
+| `SKILLS.md`                                 | מסגרת מיומנויות (ארגז חול מובנה + marketplace + SkillsSH + )              |
+| `RADAR.md`                                  | שכבת-על של קטלוג דגם רדאר (`RADAR_ENABLED`, כבוי כברירת מחדל)             |
+| `MEMORY.md`                                 | מערכת זיכרון (SQLite FTS5 + Qdrant)                                       |
+| `EVALS.md`                                  | Eval framework (סוויטות, ריצות, רובריקות)                                 |
+| `GUARDRAILS.md`                             | מסכת PII, הזרקה מהירה, גשר ראייה                                          |
+| `COMPLIANCE.md`                             | יומן ביקורת, שמירה, ביטול הסכמה של noLog                                  |
+| `WEBHOOKS.md`                               | משלוח אינטרנטי חתום על ידי HMAC                                           |
+| `REASONING_REPLAY.md`                       | מטמון memory/SQLite היברידי עבור `reasoning_content`                      |
+| `AUTHZ_GUIDE.md`                            | צינור הרשאות (`classify` → `policies` → `enforce`)                        |
+| `RESILIENCE_GUIDE.md`                       | נעילה של מפסק מעגל + cooldown דגם +                                       |
+| `docs/security/STEALTH_GUIDE.md` (גיט בלבד) | טביעת אצבע TLS (JA3/JA4), Claude Code CCH, MITM cert                      |
+| `AUTO-COMBO.md`                             | מנוע משולב אוטומטי (ניקוד של 16 גורמים, חבילות של 6 מצבים, מפעל וירטואלי) |
 
-### דחיסה
+### דְחִיסָה
 
-| מסמך                            | מטרה                              |
-| ------------------------------- | --------------------------------- |
-| `COMPRESSION_GUIDE.md`          | סקירה של מצבי דחיסה + מפת דרכים   |
-| `COMPRESSION_ENGINES.md`        | מנועי Caveman + RTK, חוזה רישום   |
-| `COMPRESSION_RULES_FORMAT.md`   | סכמת JSON לחבילת כללים של Caveman |
-| `COMPRESSION_LANGUAGE_PACKS.md` | מצאי חבילות כללים לפי שפה         |
-| `RTK_COMPRESSION.md`            | צינור הצהרתי של RTK ‏(49 מסננים)  |
+| דוק                             | מַטָרָה                                |
+| ------------------------------- | -------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | סקירה כללית של מצבי דחיסה מפת הדרכים + |
+| `COMPRESSION_ENGINES.md`        | מנועי Caveman + RTK, חוזה רישום        |
+| `COMPRESSION_RULES_FORMAT.md`   | ערכת כלל חבילת JSON schema             |
+| `COMPRESSION_LANGUAGE_PACKS.md` | מלאי של חבילת כללים לכל שפה            |
+| `RTK_COMPRESSION.md`            | צינור הצהרתי של RTK (56 מסננים)        |
 
-### פריסה
+### פְּרִיסָה
 
-| מסמך                         | מטרה                                                                          |
-| ---------------------------- | ----------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | בנייה באמצעות Docker, פרופילים (base/cli/host/cliproxyapi), שירות Redis נלווה |
-| `VM_DEPLOYMENT_GUIDE.md`     | פריסה כללית ב-VM/VPS‏ (Ubuntu/Debian‏ + nginx‏ + systemd)                     |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | פריסה ב-Fly.io (זמין כרגע בסינית בלבד)                                        |
-| `TERMUX_GUIDE.md`            | הפעלה ללא ממשק גרפי ב-Android באמצעות Termux                                  |
-| `PWA_GUIDE.md`               | התקנת Progressive Web App‏ + service worker                                   |
-| `ELECTRON_GUIDE.md`          | בנייה, חתימה והפצה של יישום שולחני                                            |
-| `TUNNELS_GUIDE.md`           | Cloudflared‏ + ngrok‏ + Tailscale Funnel                                      |
-| `PROXY_GUIDE.md`             | פרוקסי יוצא ב-4 רמות + שוק 1proxy                                             |
+| דוק                          | מַטָרָה                                                           |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker build, פרופילים (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | פריסת VM/VPS גנרית (Ubuntu/Debian + nginx + systemd)              |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | פריסת Fly.io (כרגע בסינית בלבד)                                   |
+| `TERMUX_GUIDE.md`            | אנדרואיד ללא ראש דרך Termux                                       |
+| `PWA_GUIDE.md`               | Progressive Web App התקנת + service worker                        |
+| `ELECTRON_GUIDE.md`          | אפליקציית שולחן העבודה לבנות + sign + להפיץ                       |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale                                   |
+| `PROXY_GUIDE.md`             | שוק פרוקסי יוצא 4 רמות + 1proxy                                   |
 
-### תיקיות משנה
+### ספריות משנה
 
-| תיקיית משנה           | מטרה                                                                                                                                                                                      |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | תרגומים מקומיים של התיעוד (41 אזורים)                                                                                                                                                     |
-| `docs/screenshots/`   | נכסי תמונה עבור המדריכים                                                                                                                                                                  |
-| `_tasks/superpowers/` | תוכניות/מפרטים מ-superpowers‏ (`writing-plans`/`brainstorming`) + מחקר — מאגר נפרד ומבודד עם ניהול גרסאות עצמאי, שהעץ הראשי מתעלם ממנו באמצעות git. ראו CLAUDE.md‏ ← "תוצרי תכנון ומחקר". |
+| Subdir                | מַטָרָה                                                                                                                                                         |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | תרגומי מסמכים מקומיים (41 מקומות)                                                                                                                               |
+| `docs/screenshots/`   | נכסי תמונה למדריכים                                                                                                                                             |
+| `_tasks/superpowers/` | Plans/specs ממעצמות-על (`writing-plans`/`brainstorming`) מחקר + - ריפו מבודד, בעל גרסאות נפרדות, המנוטרל על ידי העץ הראשי. ראה CLAUDE.md → "תכנון ומחקר חפצים". |
 
 ---
 

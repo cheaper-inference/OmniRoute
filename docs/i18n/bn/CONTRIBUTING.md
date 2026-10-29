@@ -166,32 +166,32 @@ Scope (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `
 
 ---
 
-## টেস্ট চালানো
+## পরীক্ষা চালানো
 
 ```bash
-# সব টেস্ট (unit + vitest + ecosystem + e2e)
+# সব পরীক্ষা (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# একটি টেস্ট ফাইল (Node.js নেটিভ টেস্ট রানার — অধিকাংশ টেস্ট এটি ব্যবহার করে)
+# একটি পরীক্ষা ফাইল (Node.js নেটিভ টেস্ট রানার — অধিকাংশ পরীক্ষায় এটি ব্যবহৃত হয়)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# শুধুমাত্র আপনার পরিবর্তনে প্রভাবিত unit টেস্টগুলো (CI গেটের মতো একই TIA selector, #8084)
-npm run test:scoped            # সর্বশেষ commit-এর পরিবর্তনগুলো (অথবা working tree)
+# শুধু আপনার পরিবর্তনে প্রভাবিত unit পরীক্ষাগুলো (CI গেটের একই TIA selector, #8084)
+npm run test:scoped            # শেষ commit-এর পরিবর্তনগুলো (অথবা working tree)
 npm run test:scoped:staged     # শুধু staged পরিবর্তন — pre-commit চালানোর সঙ্গে ভালোভাবে কাজ করে
-npm run test:scoped:full       # প্রথমে import-graph map পুনর্নির্মাণ করে (ফাইল যোগ/সরানোর পরে)
-# Exit 1 + "run the full suite"-এর অর্থ হলো কোনো hub ফাইল (tsconfig, package.json, …) অথবা
-# unmapped source পরিবর্তিত হয়েছে — selector নিরাপদভাবে ব্যর্থ হয়, এটি কখনো নীরবে এড়িয়ে যায় না।
+npm run test:scoped:full       # প্রথমে import-graph map পুনর্নির্মাণ করে (ফাইল যোগ/স্থানান্তরের পর)
+# Exit 1 + "সম্পূর্ণ suite চালান" মানে একটি hub ফাইল (tsconfig, package.json, …) অথবা কোনো
+# unmapped source পরিবর্তিত হয়েছে — selector নিরাপদভাবে ব্যর্থ হয়, কখনো নীরবে এড়িয়ে যায় না।
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E টেস্ট (Playwright প্রয়োজন)
+# E2E পরীক্ষা (Playwright প্রয়োজন)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# Protocol client E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem compatibility টেস্ট
+# Ecosystem compatibility পরীক্ষা
 npm run test:ecosystem
 
 # Coverage gate: statements/lines/functions/branches-এর 60%
@@ -202,24 +202,24 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# গেটযুক্ত real-upstream combo smoke (VPS access + প্রকৃত provider credits প্রয়োজন)
-# এটি REAL providers-এ অনুরোধ পাঠায় — সামান্য খরচ হয়। CI-তে কখনো চলে না। গেট না থাকলে নির্বিঘ্নে এড়িয়ে যায়।
+# গেটযুক্ত বাস্তব upstream combo smoke পরীক্ষা (VPS access + বাস্তব provider credits প্রয়োজন)
+# বাস্তব provider-এ অনুরোধ পাঠায় — সামান্য খরচ হয়। CI-তে কখনো চলে না। গেট না থাকলে নির্বিঘ্নে এড়িয়ে যায়।
 # প্রয়োজন: ssh root@192.168.0.15 access (VPS থেকে একটি read-only DB snapshot source করে)।
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — সাধারণ Node ESM scripts, সরাসরি live .15 server-এ অনুরোধ পাঠায়।
-# প্রয়োজন: ssh root@192.168.0.15 access (SSH sqlite-এর মাধ্যমে combos তৈরি/অপসারণ করা হয়)।
-# এটি REAL providers-এ অনুরোধ পাঠায় (সামান্য খরচ)। শুধু __live_test__* combos তৈরি/মুছে দেয়। CI-তে কখনো চলে না।
-# .15-এ REQUIRE_API_KEY=false, তাই API key প্রয়োজন নেই; তবে সেট করা থাকলে COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY মানে।
+# Phase-3 VPS live smoke — সাধারণ Node ESM script, সরাসরি live .15 server-এ অনুরোধ পাঠায়।
+# প্রয়োজন: ssh root@192.168.0.15 access (SSH sqlite-এর মাধ্যমে combo তৈরি/মুছে ফেলা হয়)।
+# বাস্তব provider-এ অনুরোধ পাঠায় (সামান্য খরচ)। শুধু __live_test__* combo তৈরি/মুছে ফেলে। CI-তে কখনো চলে না।
+# .15-এ REQUIRE_API_KEY=false, তাই API key প্রয়োজন নেই; তবে সেট করা থাকলে COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY মেনে চলে।
 npm run test:combo:live:vps              # 7টি HTTP scenario (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # একটি প্রকৃত cross-provider failover scenario যোগ করে (মোট 8টি)
+npm run test:combo:live:vps:failover     # একটি বাস্তব cross-provider failover scenario যোগ করে (মোট 8টি)
 ```
 
 Coverage সংক্রান্ত নোট:
 
-- `npm run test:coverage` মূল unit test suite-এর source coverage পরিমাপ করে, `tests/**` বাদ দেয় এবং `open-sse/**` অন্তর্ভুক্ত করে
+- `npm run test:coverage` প্রধান unit test suite-এর source coverage পরিমাপ করে, `tests/**` বাদ দেয় এবং `open-sse/**` অন্তর্ভুক্ত করে
 - Pull request-গুলোতে statements/lines/functions/branches-এর coverage gate **60%+** রাখতে হবে
-- কোনো PR যদি `src/`, `open-sse/`, `electron/`, অথবা `bin/`-এর production code পরিবর্তন করে, তাহলে একই PR-এ automated test যোগ বা হালনাগাদ করতে হবে
+- কোনো PR যদি `src/`, `open-sse/`, `electron/`, অথবা `bin/`-এর production code পরিবর্তন করে, তবে একই PR-এ automated test যোগ বা update করতে হবে
 - `npm run coverage:report` সর্বশেষ coverage run থেকে বিস্তারিত file-by-file report দেখায়
 - `npm run test:coverage:legacy` ঐতিহাসিক তুলনার জন্য পুরোনো metric সংরক্ষণ করে
 - পর্যায়ক্রমিক coverage উন্নয়নের roadmap-এর জন্য `docs/ops/COVERAGE_PLAN.md` দেখুন
@@ -228,20 +228,21 @@ Coverage সংক্রান্ত নোট:
 
 PR খোলার আগে, আপনার পরিবর্তনের জন্য focused loop চালাতে
 [Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ব্যবহার করুন। সম্পূর্ণ unit suite (4টি CI shard), Vitest, **60%+** coverage gate এবং
-production build চালানো CI-এর দায়িত্ব — এগুলো স্থানীয়ভাবে চালালে এমন কোনো অতিরিক্ত সংকেত পাওয়া যায় না যা PR
-check-গুলো ইতোমধ্যে দেবে না, এবং ছোট machine-এ এটি host-কে অতিরিক্ত চাপে ফেলতে পারে (#8084):
+production build-এর দায়িত্ব CI-এর — এগুলো স্থানীয়ভাবে চালালে PR
+check-গুলো ইতিমধ্যেই যে signal দেবে তার বাইরে অতিরিক্ত কোনো signal পাওয়া যায় না, এবং ছোট machine-এ এটি host-কে অতিরিক্ত চাপে ফেলতে পারে (#8084):
 
 - আপনার পরিবর্তন cover করে এমন test file-গুলো চালান: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` চালান
-- production code পরিবর্তিত হলে একই PR-এ automated test অন্তর্ভুক্ত বা হালনাগাদ করুন
-- production code পরিবর্তিত হলে PR description-এ পরিবর্তিত বা যোগ করা test file-গুলো উল্লেখ করুন
-- CI-তে project secrets configure করা থাকলে PR-এর SonarQube result পরীক্ষা করুন
+- production code পরিবর্তিত হলে একই PR-এ automated test অন্তর্ভুক্ত বা update করুন
+- `node:test` file-এ প্রতিটি top-level `await` (যেমন `await import(...)`) প্রথম `test()` / `describe()`-এর আগে রাখুন: `--test-force-exit`-এর অধীনে এর পরে register হওয়া test নীরবে কখনোই না চলতে পারে (#18045; `npm run check:test-tla-order` দ্বারা প্রয়োগ করা হয়)
+- production code পরিবর্তিত হলে PR description-এ পরিবর্তিত বা যোগ করা test file-গুলো অন্তর্ভুক্ত করুন
+- CI-তে project secret configure করা থাকলে PR-এর SonarQube result পরীক্ষা করুন
 
-বর্তমান test status: **122টি unit test file**, যা নিম্নলিখিত বিষয় cover করে:
+বর্তমান পরীক্ষার অবস্থা: **122টি unit test file**, যেগুলো cover করে:
 
 - Provider translator এবং format conversion
 - Rate limiting, circuit breaker এবং resilience
-- Semantic cache, idempotency এবং progress tracking
+- Semantic cache, idempotency, progress tracking
 - Database operation এবং schema (21টি DB module)
 - OAuth flow এবং authentication
 - API endpoint validation (Zod v4)

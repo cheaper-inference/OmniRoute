@@ -1,0 +1,308 @@
+/* Editions is an opt-in document appearance, shared by the landing page and
+ * application surfaces. A mounted shell opts the document in so body-portalled
+ * dialogs, menus and the mobile sidebar inherit the same tokens. Removing the
+ * final shell restores the ordinary CI appearance without persistent JS state.
+ * Explicit light/dark remains controlled by the existing data-theme API.
+ * The html type selector intentionally outranks a host's :root[data-theme]
+ * compatibility aliases without !important or selectors into component DOM. */
+:is(html:root:has([data-ci-appearance="editions"]), html:root[data-ci-appearance="editions"], [data-ci-appearance="editions"]),
+:is(html:root:has([data-ci-appearance="editions"]), html:root[data-ci-appearance="editions"]) .ci-theme {
+  --ci-observed-canvas: #f3f1e9;
+  --ci-observed-ink: #20211c;
+  --ci-observed-body: #20211c;
+  --ci-observed-muted: #626459;
+  --ci-observed-inverse: #f2f0e8;
+  --ci-neutral-0: #faf9f4;
+  --ci-neutral-25: #f3f1e9;
+  --ci-neutral-50: #eae8df;
+  --ci-neutral-100: #e3e1d7;
+  --ci-neutral-200: #d4d2c7;
+  --ci-neutral-300: #bcbeb0;
+  --ci-neutral-400: #a5a69b;
+  --ci-neutral-500: #818375;
+  --ci-neutral-600: #626459;
+  --ci-neutral-700: #45473c;
+  --ci-neutral-800: #292a23;
+  --ci-neutral-900: #191a16;
+  --ci-neutral-950: #11120f;
+  --ci-color-background: #f3f1e9;
+  --ci-color-canvas: #f3f1e9;
+  --ci-color-surface: #faf9f4;
+  --ci-color-surface-subtle: #eae8df;
+  --ci-color-surface-muted: #e3e1d7;
+  --ci-color-surface-inverse: #11120f;
+  --ci-color-foreground: #20211c;
+  --ci-color-text: #20211c;
+  --ci-color-heading: #20211c;
+  --ci-color-brand-mark: #20211c;
+  --ci-color-text-muted: #626459;
+  --ci-color-text-subtle: #626459;
+  --ci-color-text-inverse: #f2f0e8;
+  --ci-color-accent: #e5ac82;
+  --ci-color-accent-hover: #edb78b;
+  --ci-color-accent-active: #99562f;
+  --ci-color-accent-foreground: #241b15;
+  --ci-color-accent-surface-subtle: rgb(229 172 130 / .12);
+  --ci-color-accent-surface-strong: rgb(229 172 130 / .22);
+  --ci-color-accent-surface-range: rgb(229 172 130 / .18);
+  --ci-color-control-active-bg: #e5ac82;
+  --ci-color-control-active-fg: #241b15;
+  --ci-color-control-thumb: #626459;
+  --ci-color-control-thumb-checked: #241b15;
+  --ci-color-border-subtle: rgb(32 33 28 / .13);
+  --ci-color-border: rgb(32 33 28 / .22);
+  --ci-color-border-strong: rgb(32 33 28 / .45);
+  --ci-color-focus: #99562f;
+  --ci-color-focus-ring: #99562f;
+  --ci-color-selection: rgb(229 172 130 / .3);
+  --ci-color-selection-foreground: #20211c;
+  --ci-color-overlay: rgb(17 18 15 / .55);
+  --ci-color-track: rgb(32 33 28 / .18);
+  --ci-color-neutral-tint: rgb(32 33 28 / .045);
+  --ci-color-loading-cell-muted: #626459;
+  /* Live/success retain their status meaning; copper is the brand accent. */
+  --ci-color-live: #477665;
+  --ci-color-success: #3c735b;
+  --ci-color-success-bg: #e4ece3;
+  --ci-color-warning: #99631f;
+  --ci-color-warning-bg: #f3e6cf;
+  --ci-color-danger: #ae4340;
+  --ci-color-danger-bg: #f5e2dc;
+  --ci-color-danger-foreground: #faf9f4;
+  --ci-color-info: #526b80;
+  --ci-color-info-bg: #e4e9ed;
+  --ci-chart-1: #99562f;
+  --ci-chart-2: #477665;
+  --ci-chart-3: #8a8068;
+  --ci-chart-4: #526b80;
+  --ci-chart-5: #96727a;
+  --ci-color-announcement-accent: #e5ac82;
+  --ci-font-display: var(--ci-font-ui);
+  --ci-type-display-family: var(--ci-font-ui);
+  --ci-type-dashboard-display-family: var(--ci-font-ui);
+  --ci-letter-spacing-display: var(--ci-type-heading-tracking);
+  --ci-page-title-size: clamp(2rem, 3.4vw, 3rem);
+  --ci-page-title-compact-size: clamp(2rem, 3vw, 2.5rem);
+  --ci-page-title-weight: var(--ci-font-weight-medium);
+  --ci-page-title-leading: var(--ci-type-heading-leading);
+  --ci-dashboard-canvas-image: none;
+  --ci-dashboard-canvas-overlay: none;
+  /* Shared by the shell and body portals: pill actions, soft fields and
+     surfaces. Keep this scale in the kit so every dashboard route agrees. */
+  --ci-radius-sm: 0.25rem;
+  --ci-radius-md: 0.5rem;
+  --ci-radius-lg: 0.75rem;
+  --ci-radius-xl: 1rem;
+  --ci-radius-2xl: 1.5rem;
+  --ci-radius-control: var(--ci-radius-md);
+  --ci-radius-surface: var(--ci-radius-lg);
+  --ci-radius-pill: var(--ci-radius-full);
+  --ci-shadow-xs: none;
+  --ci-shadow-sm: none;
+  --ci-shadow-md: none;
+  --ci-shadow-lg: none;
+  --ci-shadow-xl: none;
+  --ci-button-primary-bg: #e5ac82;
+  --ci-button-primary-fg: #241b15;
+  --ci-button-primary-hover: #edb78b;
+  --ci-button-accent-bg: #e5ac82;
+  --ci-button-accent-fg: #241b15;
+  --ci-field-bg: var(--ci-color-surface);
+  --ci-field-fg: var(--ci-color-foreground);
+  --ci-field-placeholder: var(--ci-color-text-subtle);
+  --ci-field-border: var(--ci-color-border);
+  --ci-card-bg: var(--ci-color-surface);
+  --ci-card-border: var(--ci-color-border-subtle);
+  --ci-sidebar-bg: var(--ci-color-background);
+  --ci-sidebar-fg: var(--ci-color-foreground);
+  --ci-sidebar-active-bg: #20211c;
+  --ci-sidebar-active-fg: #f2f0e8;
+  --primary: var(--ci-button-primary-bg);
+  --primary-foreground: var(--ci-button-primary-fg);
+}
+
+:is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"]), html:root[data-theme="dark"][data-ci-appearance="editions"]),
+:is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"]), html:root[data-theme="dark"][data-ci-appearance="editions"]) :is(.ci-theme, [data-ci-appearance="editions"]),
+[data-ci-appearance="editions"][data-theme="dark"] {
+  --ci-color-background: #11120f;
+  --ci-color-canvas: #11120f;
+  --ci-color-surface: #191a16;
+  --ci-color-surface-subtle: #22231d;
+  --ci-color-surface-muted: #292a23;
+  --ci-color-foreground: #f2f0e8;
+  --ci-color-text: #f2f0e8;
+  --ci-color-heading: #f2f0e8;
+  --ci-color-brand-mark: #f2f0e8;
+  --ci-color-text-muted: #a5a69b;
+  --ci-color-text-subtle: #93958a;
+  --ci-color-accent-active: #e5ac82;
+  --ci-color-control-thumb: #a5a69b;
+  --ci-color-border-subtle: rgb(242 240 232 / .13);
+  --ci-color-border: rgb(242 240 232 / .22);
+  --ci-color-border-strong: rgb(242 240 232 / .45);
+  --ci-color-focus: #e5ac82;
+  --ci-color-focus-ring: #e5ac82;
+  --ci-color-selection-foreground: #f2f0e8;
+  --ci-color-overlay: rgb(0 0 0 / .72);
+  --ci-color-track: rgb(242 240 232 / .18);
+  --ci-color-neutral-tint: rgb(242 240 232 / .045);
+  --ci-color-loading-cell-muted: #a5a69b;
+  --ci-color-live: #9ecbbb;
+  --ci-color-success: #9ecbbb;
+  --ci-color-success-bg: #1c3028;
+  --ci-color-warning: #e5c28c;
+  --ci-color-warning-bg: #352c1c;
+  --ci-color-danger: #edaaa1;
+  --ci-color-danger-bg: #382421;
+  --ci-color-danger-foreground: #241b15;
+  --ci-color-info: #a6bfd0;
+  --ci-color-info-bg: #212e37;
+  --ci-chart-1: #e5ac82;
+  --ci-chart-2: #9ecbbb;
+  --ci-chart-3: #c0b79b;
+  --ci-chart-4: #a6bfd0;
+  --ci-chart-5: #c99ca5;
+  --ci-sidebar-active-bg: rgb(229 172 130 / .14);
+  --ci-sidebar-active-fg: #e5ac82;
+}
+
+/* The host normally resolves system preference with data-theme. These tokens
+ * also cover a shell mounted before that initialization runs. */
+@media (prefers-color-scheme: dark) {
+  :is(html:root:not([data-theme]):has([data-ci-appearance="editions"]), html:root:not([data-theme])[data-ci-appearance="editions"]),
+  :is(html:root:not([data-theme]):has([data-ci-appearance="editions"]), html:root:not([data-theme])[data-ci-appearance="editions"]) :is(.ci-theme, [data-ci-appearance="editions"]) {
+    --ci-color-background: #11120f;
+    --ci-color-canvas: #11120f;
+    --ci-color-surface: #191a16;
+    --ci-color-surface-subtle: #22231d;
+    --ci-color-surface-muted: #292a23;
+    --ci-color-foreground: #f2f0e8;
+    --ci-color-text: #f2f0e8;
+    --ci-color-heading: #f2f0e8;
+    --ci-color-brand-mark: #f2f0e8;
+    --ci-color-text-muted: #a5a69b;
+    --ci-color-text-subtle: #93958a;
+    --ci-color-accent-active: #e5ac82;
+    --ci-color-control-thumb: #a5a69b;
+    --ci-color-border-subtle: rgb(242 240 232 / .13);
+    --ci-color-border: rgb(242 240 232 / .22);
+    --ci-color-border-strong: rgb(242 240 232 / .45);
+    --ci-color-focus: #e5ac82;
+    --ci-color-focus-ring: #e5ac82;
+    --ci-color-selection-foreground: #f2f0e8;
+    --ci-color-overlay: rgb(0 0 0 / .72);
+    --ci-color-track: rgb(242 240 232 / .18);
+    --ci-color-neutral-tint: rgb(242 240 232 / .045);
+    --ci-color-loading-cell-muted: #a5a69b;
+    --ci-color-live: #9ecbbb;
+    --ci-color-success: #9ecbbb;
+    --ci-color-success-bg: #1c3028;
+    --ci-color-warning: #e5c28c;
+    --ci-color-warning-bg: #352c1c;
+    --ci-color-danger: #edaaa1;
+    --ci-color-danger-bg: #382421;
+    --ci-color-danger-foreground: #241b15;
+    --ci-color-info: #a6bfd0;
+    --ci-color-info-bg: #212e37;
+    --ci-chart-1: #e5ac82;
+    --ci-chart-2: #9ecbbb;
+    --ci-chart-3: #c0b79b;
+    --ci-chart-4: #a6bfd0;
+    --ci-chart-5: #c99ca5;
+    --ci-sidebar-active-bg: rgb(229 172 130 / .14);
+    --ci-sidebar-active-fg: #e5ac82;
+  }
+}
+
+/* A kit-owned variant of the existing menu button; app consumers use its
+ * public active state and sidebar tokens, never its internal DOM. */
+@layer components {
+  :is(html:root:has([data-ci-appearance="editions"]), html:root[data-ci-appearance="editions"]) .ci-sidebar__menu-button[data-active="true"] {
+    color: var(--ci-sidebar-active-fg);
+    background: var(--ci-sidebar-active-bg);
+  }
+}
+
+/* Landing continuity is an explicit document variant. Tokens alone reach
+ * existing controls and body portals; removing the modifier restores Editions.
+ * Hosts supply Inter through --font-inter or a loaded Inter font family. */
+:is(html:root:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-ci-appearance="editions"][data-ci-editions-variant="landing"], [data-ci-appearance="editions"][data-ci-editions-variant="landing"]),
+:is(html:root:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-ci-appearance="editions"][data-ci-editions-variant="landing"]) :is(.ci-theme, [data-ci-appearance="editions"]) {
+  --ci-font-ui: var(--font-inter, "Inter"), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ci-font-display: var(--ci-font-ui);
+  --ci-font-mono: var(--font-ibm-plex-mono, "IBM Plex Mono"), ui-monospace, monospace;
+  --ci-color-background: #f3f0e7;
+  --ci-color-canvas: #f3f0e7;
+  --ci-color-surface: #f8f5ed;
+  --ci-color-surface-subtle: #ece8de;
+  --ci-color-surface-muted: #e5e0d5;
+  --ci-color-surface-inverse: #191a15;
+  --ci-color-foreground: #24251f;
+  --ci-color-text: #24251f;
+  --ci-color-heading: #24251f;
+  --ci-color-brand-mark: #24251f;
+  --ci-color-text-muted: #606156;
+  --ci-color-text-subtle: #606156;
+  --ci-color-text-inverse: #f4f1e8;
+  --ci-color-accent-hover: #edba94;
+  --ci-color-accent-foreground: #221b14;
+  --ci-color-border: #24251f33;
+  --ci-color-border-subtle: #24251f24;
+  --ci-color-border-strong: #24251f66;
+  --ci-color-focus: #a15e38;
+  --ci-color-focus-ring: #a15e38;
+  --ci-color-selection: #e5ac8259;
+  --ci-radius-sm: 2px;
+  --ci-radius-md: 4px;
+  --ci-radius-lg: 4px;
+  --ci-radius-xl: 6px;
+  --ci-radius-2xl: 8px;
+  --ci-radius-control: 2px;
+  --ci-radius-surface: 2px;
+  --ci-radius-pill: 2px;
+  --ci-button-primary-fg: #221b14;
+  --ci-button-primary-hover: #edba94;
+  --ci-button-accent-fg: #221b14;
+  --ci-card-border: var(--ci-color-border);
+}
+:is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-theme="dark"][data-ci-appearance="editions"][data-ci-editions-variant="landing"]),
+:is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-theme="dark"][data-ci-appearance="editions"][data-ci-editions-variant="landing"]) :is(.ci-theme, [data-ci-appearance="editions"]),
+[data-ci-appearance="editions"][data-ci-editions-variant="landing"][data-theme="dark"] {
+  --ci-color-background: #11120f;
+  --ci-color-canvas: #11120f;
+  --ci-color-surface: #191a16;
+  --ci-color-surface-subtle: #20211b;
+  --ci-color-surface-muted: #292a23;
+  --ci-color-foreground: #f4f1e8;
+  --ci-color-text: #f4f1e8;
+  --ci-color-heading: #f4f1e8;
+  --ci-color-brand-mark: #f4f1e8;
+  --ci-color-text-muted: #b0b0a3;
+  --ci-color-text-subtle: #a4a597;
+  --ci-color-border: #f4f1e833;
+  --ci-color-border-subtle: #f4f1e824;
+  --ci-color-border-strong: #f4f1e866;
+  --ci-color-focus: #e5ac82;
+  --ci-color-focus-ring: #e5ac82;
+}
+@media (prefers-color-scheme: dark) {
+:is(html:root:not([data-theme]):has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root:not([data-theme])[data-ci-appearance="editions"][data-ci-editions-variant="landing"]),
+:is(html:root:not([data-theme]):has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root:not([data-theme])[data-ci-appearance="editions"][data-ci-editions-variant="landing"]) :is(.ci-theme, [data-ci-appearance="editions"]) {
+  --ci-color-background: #11120f;
+  --ci-color-canvas: #11120f;
+  --ci-color-surface: #191a16;
+  --ci-color-surface-subtle: #20211b;
+  --ci-color-surface-muted: #292a23;
+  --ci-color-foreground: #f4f1e8;
+  --ci-color-text: #f4f1e8;
+  --ci-color-heading: #f4f1e8;
+  --ci-color-brand-mark: #f4f1e8;
+  --ci-color-text-muted: #b0b0a3;
+  --ci-color-text-subtle: #a4a597;
+  --ci-color-border: #f4f1e833;
+  --ci-color-border-subtle: #f4f1e824;
+  --ci-color-border-strong: #f4f1e866;
+  --ci-color-focus: #e5ac82;
+  --ci-color-focus-ring: #e5ac82;
+}
+}

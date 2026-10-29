@@ -391,6 +391,44 @@ export function isReasoningProgressFrame(frame: string): boolean {
   return false;
 }
 
+// Bounded prefix match on the Responses compaction lifecycle event family
+// (today only `response.compaction.compacting` is observed in the wild).
+const COMPACTION_PROGRESS_TYPE_PATTERN = /^response\.compaction\./;
+
+/**
+ * #17826: a Responses remote-compaction progress frame (`event:
+ * response.compaction.compacting`). Compaction is upstream model work with no
+ * user-visible output, so it must restart the content-stall budget exactly
+ * like a reasoning frame — and never count as content, or a compaction-only
+ * stream would slip past the #8649 empty-output guard. The whole
+ * `response.compaction.*` family counts; the terminal variant carries the
+ * turn's compaction output and is already cleared as content by the normal
+ * content scan before this signal is consulted.
+ */
+export function isCompactionProgressFrame(frame: string): boolean {
+  if (!frame.includes("response.compaction.")) return false;
+  for (const line of frame.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("event:")) {
+      if (COMPACTION_PROGRESS_TYPE_PATTERN.test(trimmed.slice(6).trim())) return true;
+      continue;
+    }
+    if (!trimmed.startsWith("data:")) continue;
+    try {
+      const parsed: unknown = JSON.parse(trimmed.slice(5).trim());
+      if (
+        isRecord(parsed) &&
+        typeof parsed.type === "string" &&
+        COMPACTION_PROGRESS_TYPE_PATTERN.test(parsed.type)
+      )
+        return true;
+    } catch {
+      // non-JSON data lines carry no compaction signal
+    }
+  }
+  return false;
+}
+
 export type StreamContentWatcher = {
   /** Feed a decoded slice of the client-facing stream. Safe to call with partial frames. */
   note: (text: string) => void;
@@ -403,6 +441,12 @@ export type StreamContentWatcher = {
    * output. Grows while a reasoning model thinks without visible output.
    */
   reasoningProgress: () => number;
+  /**
+   * #17826: Responses compaction progress frames (isCompactionProgressFrame)
+   * seen before the first real output. Same contract as reasoningProgress —
+   * liveness only, never content.
+   */
+  compactionProgress: () => number;
   /** True once a terminal state was seen where emitting no content is valid. */
   sawLegitEmptyTerminal: () => boolean;
   /**
@@ -454,6 +498,7 @@ export function createStreamContentWatcher(
   let sse = false;
   let error = false;
   let progress = 0;
+  let compaction = 0;
 
   const inspect = (frame: string): void => {
     if (!frame) return;
@@ -461,6 +506,7 @@ export function createStreamContentWatcher(
     if (!error && frameHasStructuredStreamError(frame)) error = true;
     if (!content && hasUsefulStreamContent(frame, { contentProbe })) content = true;
     if (!content && isReasoningProgressFrame(frame)) progress += 1;
+    if (!content && isCompactionProgressFrame(frame)) compaction += 1;
     if (!normalStop) {
       for (const match of frame.matchAll(TERMINAL_REASON_PATTERN)) {
         const reasons = NORMAL_STOP_TERMINALS.get(match[1] ?? "");
@@ -500,6 +546,7 @@ export function createStreamContentWatcher(
     },
     sawContent: () => content,
     reasoningProgress: () => progress,
+    compactionProgress: () => compaction,
     sawLegitEmptyTerminal: () => legitEmpty,
     sawNormalStopTerminal: () => normalStop,
     sawSseFrame: () => sse,

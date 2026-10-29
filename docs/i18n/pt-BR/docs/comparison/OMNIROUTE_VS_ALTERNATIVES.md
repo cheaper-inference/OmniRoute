@@ -37,13 +37,13 @@ Comparação objetiva de recursos vs roteadores de IA de código aberto populare
 | **Suporte a túneis (Cloudflared, Tailscale, Ngrok)**  |                       ✅                        |          ❌           |        n/a        |     n/a      |
 | **Licença**                                           |                       MIT                       |          MIT          |   proprietário    | proprietário |
 
-## Quando escolher o OmniRoute
+## Quando escolher OmniRoute
 
-- Você faz auto-hospedagem e quer **cobertura máxima de provedores** (375 provedores, 155 entradas de catálogo gratuitas/sem autenticação)
-- Você precisa de um **servidor MCP integrado** (ferramentas de LLM, memória e skills expostas como ferramentas)
-- Você precisa do **protocolo A2A** para fluxos de trabalho agente a agente
-- Você quer **furtividade de fingerprint** (JA3/JA4) para evitar detecção por CAPTCHAs upstream
-- Você precisa de **recursos corporativos** (guardrails, evals, trilha de auditoria) sem uma fatura de SaaS
+- Você se auto-hospeda e quer** cobertura máxima do provedor** (377 fornecedores, 155 entradas de catálogo free/no-auth )
+- Você precisa de um** servidor MCP integrado** (ferramentas LLM, memória, habilidades expostas como ferramentas)
+- Você precisa** protocolo A2A** para fluxos de trabalho entre agentes
+- Você quer** furtividade de impressão digital** (JA3/JA4) para evitar a detecção pelo CAPTCHAs upstream
+- Você precisa** recursos empresariais** (guarda-corpos, avaliações, trilha de auditoria) sem uma conta SaaS
 
 ## Quando escolher o LiteLLM
 

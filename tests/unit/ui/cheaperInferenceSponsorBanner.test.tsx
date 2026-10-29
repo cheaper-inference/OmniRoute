@@ -62,6 +62,17 @@ describe("CheaperInferenceSponsorBanner", () => {
     expect(link?.getAttribute("title")).toBe("partnerLinkNote");
   });
 
+  it("keeps the partner-link note and the CTA ink at AA contrast (KEA-7886 P7)", async () => {
+    const container = await renderBanner();
+    const note = Array.from(container.querySelectorAll("span")).find(
+      (el) => el.textContent === "partnerLinkNote"
+    );
+    expect(note).toBeDefined();
+    // Was text-[9px] text-text-muted/70 (axe color-contrast on /dashboard).
+    expect(note?.className).toContain("text-text-muted");
+    expect(note?.className).not.toMatch(/text-\[9px\]|text-text-muted\/\d+/);
+  });
+
   it("hides after dismissal and stays hidden on re-render", async () => {
     const first = await renderBanner();
     const button = first.querySelector("button");

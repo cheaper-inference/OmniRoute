@@ -1,5 +1,5 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
-import { upstreamErrorResponse } from "../utils/audioResponse.ts";
+import { audioErrorResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
 import { Buffer } from "node:buffer";
 /**
  * Audio Transcription Handler
@@ -32,6 +32,7 @@ import { handleSyntxTranscription } from "./syntxAudio.ts";
 import {
   hasTranscriptionInput,
   resolveTranscriptionFileOrResponse,
+  type RemoteMediaFetcher,
 } from "../utils/transcriptionRemoteAudio.ts";
 
 type TranscriptionCredentials = {
@@ -969,11 +970,14 @@ export async function handleAudioTranscription({
   credentials,
   resolvedProvider = null,
   resolvedModel = null,
+  remoteMediaFetcher = null,
 }: {
   formData: FormData;
   credentials?: TranscriptionCredentials | null;
   resolvedProvider?: AudioProvider | null;
   resolvedModel?: string | null;
+  /** SSRF-hardened downloader for `url` input, injected by the API route. */
+  remoteMediaFetcher?: RemoteMediaFetcher | null;
 }): Promise<Response> {
   const model = formData.get("model");
   if (typeof model !== "string" || !model) {
@@ -1014,7 +1018,10 @@ export async function handleAudioTranscription({
 
   // Fetch URL input into a local file. Never forward Telegram URLs/tokens
   // or other caller-controlled URLs to the upstream STT provider.
-  const resolvedFile = await resolveTranscriptionFileOrResponse(formData);
+  const resolvedFile = await resolveTranscriptionFileOrResponse(
+    formData,
+    remoteMediaFetcher ?? undefined
+  );
   if ("response" in resolvedFile) return resolvedFile.response;
   const file = resolvedFile.file;
 
@@ -1133,6 +1140,6 @@ export async function handleAudioTranscription({
     });
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
-    return errorResponse(500, `Transcription request failed: ${error.message}`);
+    return audioErrorResponse(500, `Transcription request failed: ${error.message}`);
   }
 }

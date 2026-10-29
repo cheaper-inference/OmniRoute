@@ -183,10 +183,10 @@ node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Hanya pengujian unit yang terdampak oleh perubahan Anda (pemilih TIA yang sama dengan gerbang CI, #8084)
 npm run test:scoped            # perubahan dalam commit terakhir (atau working tree)
-npm run test:scoped:staged     # hanya perubahan yang di-stage — cocok dipasangkan dengan eksekusi pre-commit
-npm run test:scoped:full       # bangun ulang peta grafik impor terlebih dahulu (setelah menambah/memindahkan file)
+npm run test:scoped:staged     # hanya perubahan yang di-stage — cocok digunakan dengan proses pre-commit
+npm run test:scoped:full       # buat ulang peta graf impor terlebih dahulu (setelah menambah/memindahkan file)
 # Exit 1 + "run the full suite" berarti file hub (tsconfig, package.json, …) atau sumber
-# yang belum dipetakan berubah — pemilih gagal secara aman dan tidak pernah melewati pengujian secara diam-diam.
+# yang belum dipetakan berubah — pemilih gagal dengan aman dan tidak pernah melewati pengujian secara diam-diam.
 
 # Vitest (server MCP, autoCombo, cache)
 npm run test:vitest
@@ -208,40 +208,41 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Smoke combo upstream nyata berpagar (memerlukan akses VPS + kredit penyedia nyata)
-# Mengakses penyedia NYATA — memerlukan sedikit biaya. TIDAK PERNAH dijalankan di CI. Dilewati dengan aman tanpa gerbang.
+# Smoke test kombo real-upstream berpagar (memerlukan akses VPS + kredit penyedia sungguhan)
+# Mengakses penyedia SUNGGUHAN — memerlukan sedikit biaya. TIDAK PERNAH dijalankan di CI. Dilewati dengan aman tanpa gerbang.
 # Memerlukan: akses ssh root@192.168.0.15 (mengambil snapshot DB hanya-baca dari VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Smoke live VPS fase-3 — skrip Node ESM biasa, mengakses server .15 yang aktif secara langsung.
-# Memerlukan: akses ssh root@192.168.0.15 (combo dibuat/dihapus melalui SSH sqlite).
-# Mengakses penyedia NYATA (biaya kecil). Hanya membuat/menghapus combo __live_test__*. TIDAK PERNAH dijalankan di CI.
-# REQUIRE_API_KEY=false pada .15 sehingga tidak memerlukan kunci API, tetapi mematuhi COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jika ditetapkan.
+# Smoke test langsung VPS fase 3 — skrip Node ESM biasa, mengakses server .15 yang aktif secara langsung.
+# Memerlukan: akses ssh root@192.168.0.15 (kombo dibuat/dihapus melalui SSH sqlite).
+# Mengakses penyedia SUNGGUHAN (biaya kecil). Hanya membuat/menghapus kombo __live_test__*. TIDAK PERNAH dijalankan di CI.
+# REQUIRE_API_KEY=false pada .15 sehingga kunci API tidak diperlukan, tetapi mematuhi COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jika ditetapkan.
 npm run test:combo:live:vps              # 7 skenario HTTP (prioritas/round-robin/berbobot/biaya/fusi/otomatis + kesehatan)
-npm run test:combo:live:vps:failover     # menambahkan skenario failover lintas-penyedia nyata (total 8)
+npm run test:combo:live:vps:failover     # menambahkan skenario failover lintas penyedia sungguhan (total 8)
 ```
 
 Catatan cakupan:
 
 - `npm run test:coverage` mengukur cakupan sumber untuk rangkaian pengujian unit utama, mengecualikan `tests/**`, dan menyertakan `open-sse/**`
-- Pull request harus mempertahankan gerbang cakupan pada **60%+** pernyataan/baris/fungsi/cabang
-- Jika PR mengubah kode produksi di `src/`, `open-sse/`, `electron/`, atau `bin/`, PR tersebut harus menambahkan atau memperbarui pengujian otomatis dalam PR yang sama
-- `npm run coverage:report` mencetak laporan terperinci per file dari eksekusi cakupan terbaru
+- Pull request harus mempertahankan gerbang cakupan pada **60%+** untuk pernyataan/baris/fungsi/cabang
+- Jika PR mengubah kode produksi di `src/`, `open-sse/`, `electron/`, atau `bin/`, PR tersebut harus menambah atau memperbarui pengujian otomatis dalam PR yang sama
+- `npm run coverage:report` menampilkan laporan terperinci per file dari proses cakupan terbaru
 - `npm run test:coverage:legacy` mempertahankan metrik lama untuk perbandingan historis
-- Lihat `docs/ops/COVERAGE_PLAN.md` untuk peta jalan peningkatan cakupan bertahap
+- Lihat `docs/ops/COVERAGE_PLAN.md` untuk roadmap peningkatan cakupan bertahap
 
 ### Persyaratan Pull Request
 
 Sebelum membuka PR, gunakan
 [Alur Utama Kontribusi](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) untuk menjalankan siklus terfokus bagi
-hal yang Anda ubah. Rangkaian unit lengkap (4 shard CI), Vitest, gerbang cakupan **60%+**, dan
-build produksi merupakan tanggung jawab CI — menjalankannya secara lokal tidak memberikan informasi
-tambahan yang belum diberikan oleh pemeriksaan PR, dan pada mesin yang lebih kecil dapat memenuhi kapasitas host (#8084):
+perubahan yang Anda buat. Rangkaian pengujian unit lengkap (4 shard CI), Vitest, gerbang cakupan **60%+**, dan
+build produksi merupakan tanggung jawab CI — menjalankannya secara lokal tidak memberikan informasi tambahan
+yang belum disediakan oleh pemeriksaan PR, dan pada mesin yang lebih kecil hal ini dapat membebani host hingga penuh (#8084):
 
 - Jalankan file pengujian yang mencakup perubahan Anda: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Jalankan `npm run lint`
 - Sertakan atau perbarui pengujian otomatis dalam PR yang sama setiap kali kode produksi berubah
-- Sertakan file pengujian yang diubah atau ditambahkan dalam deskripsi PR saat kode produksi berubah
+- Dalam file `node:test`, letakkan setiap `await` tingkat teratas (seperti `await import(...)`) sebelum `test()` / `describe()` pertama: saat menggunakan `--test-force-exit`, pengujian yang didaftarkan setelahnya dapat tidak pernah berjalan tanpa pemberitahuan (#18045; diberlakukan oleh `npm run check:test-tla-order`)
+- Sertakan file pengujian yang diubah atau ditambahkan dalam deskripsi PR ketika kode produksi berubah
 - Periksa hasil SonarQube pada PR ketika secret proyek dikonfigurasi di CI
 
 Status pengujian saat ini: **122 file pengujian unit** yang mencakup:
@@ -249,11 +250,11 @@ Status pengujian saat ini: **122 file pengujian unit** yang mencakup:
 - Penerjemah penyedia dan konversi format
 - Pembatasan laju, circuit breaker, dan ketahanan
 - Cache semantik, idempotensi, pelacakan progres
-- Operasi dan skema basis data (21 modul DB)
+- Operasi dan skema database (21 modul DB)
 - Alur OAuth dan autentikasi
 - Validasi endpoint API (Zod v4)
-- Alat server MCP dan penerapan cakupan
-- Sistem Memori dan Skills
+- Tool server MCP dan penegakan cakupan
+- Sistem Memory dan Skills
 
 ---
 

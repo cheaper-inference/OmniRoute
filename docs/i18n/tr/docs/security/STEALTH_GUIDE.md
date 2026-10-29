@@ -20,64 +20,66 @@ Gizlilik özellikleri, OmniRoute'un kullanıcıların sahip olduğu resmî hesap
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Kalıcı `wreq-js` oturumları, hesap kapsamı ve çözümlenmiş proxy başına gerektiğinde oluşturulur. Süreç genelindeki `TlsClient`, Cloudflare arkasındaki üst hizmetler için **macOS üzerinde Chrome 124** kimliğine bürünen en fazla 128 oturumu havuzda tutar. Yerel çalışma zamanı kullanılamadığında `TlsClient.fetch()` güvenli biçimde başarısız olur; çağıran taraf bu sarmalayıcının dışında açıkça bir geri dönüş seçeneği belirleyebilir.
+Kalıcı `wreq-js` oturumları, hesap kapsamı ve çözümlenen proxy başına tembel olarak oluşturulur.
+İşlem genelindeki `TlsClient`, Cloudflare arkasındaki üst servisler için **macOS üzerinde Chrome 124**
+taklidi yapan en fazla 128 oturumu havuzda tutar. Yerel çalışma zamanı kullanılamadığında
+`TlsClient.fetch()` güvenli biçimde başarısız olur; çağıran taraf bu sarmalayıcının dışında açıkça
+bir geri dönüş seçebilir.
 
 - Oturum profili: `browser: "chrome_124", os: "macos"`
-- Proxy çözümlemesi (öncelik): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (küçük harfli biçimleri de dâhil)
+- Proxy çözümleme (öncelik): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (küçük harfli biçimleri de)
 - Zaman aşımı: `TLS_CLIENT_TIMEOUT_MS` (`FETCH_TIMEOUT_MS` değerinden devralınır, varsayılan 600000)
 - `wreq-js` Response, fetch ile uyumludur (`headers`, `text()`, `json()`, `clone()`, `body`).
-- İlk bayt gözcüsü (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`,
-  üst hizmet başlıkları ulaşır ulaşmaz çözümlenir; dolayısıyla tek başına `TLS_CLIENT_TIMEOUT_MS`,
-  hiçbir zaman ilk baytı vermeyen bir gövdeyi sınırlayamaz. `guardTlsFirstByte()`, gövdenin ilk
-  `read()` çağrısını `TLS_FIRST_BYTE_WATCHDOG_MS` (varsayılan `10000`, `0` devre dışı bırakır) ile
-  yarıştırır; sağlıklı bir gövde bundan etkilenmezken takılmış bir gövde, wreq okuyucusunu iptal eder
-  ve `proxyFetch` işlevinin mevcut TLS geri dönüş mantığının doğrudan/proxy dağıtıcısına geçmesini
-  sağlar (ör. gövdeli bir POST gibi yeniden oynatılması güvenli olmayan bir istek, sessizce yeniden
-  denenmek yerine yine hata fırlatır).
+- İlk bayt gözetimi (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`,
+  üst servis başlıkları ulaşır ulaşmaz sonuçlandığından yalnızca `TLS_CLIENT_TIMEOUT_MS`, hiçbir
+  zaman ilk baytı üretmeyen bir gövdeyi sınırlayamaz. `guardTlsFirstByte()`, gövdenin ilk `read()`
+  işlemini `TLS_FIRST_BYTE_WATCHDOG_MS` (varsayılan `10000`, `0` devre dışı bırakır) ile yarıştırır;
+  sağlıklı bir gövde etkilenmezken takılmış bir gövde wreq okuyucusunu iptal eder ve `proxyFetch`'in
+  mevcut TLS geri dönüş mantığının doğrudan/proxy dağıtıcısına geçmesine izin verir (güvenli biçimde
+  yeniden oynatılamayan bir istek, örneğin gövdeli bir POST, sessizce yeniden denenmek yerine yine
+  hata fırlatır).
 
 ### Web çerezi sağlayıcı aktarımı — wreq-js 3.2.0
 
 `open-sse/services/tlsClientBase.ts`, aşağıdaki beş özelleştirilmiş web çerezi aktarımı için paylaşılan
-bağdaştırıcıdır. Her ince sağlayıcı sarmalayıcısı bir tarayıcı/işletim sistemi profili seçer.
-Bağdaştırıcı, `open-sse/utils/tlsClient.ts` içindeki tek wreq çalışma zamanı yükleyicisini ve aktarım
-havuzunu kullanır; bunlar profil + işletim sistemi + çözümlenmiş proxy anahtarına göre tutulurken her
-istek `cookieMode: "ephemeral"` kullanır. Bu nedenle hesaplar ve istekler aktarım düzeyindeki
-bağlantıları paylaşır, ancak hiçbir zaman bir wreq oturumunu veya çerez deposunu paylaşmaz.
+adaptördür. Her bir ince sağlayıcı sarmalayıcısı bir tarayıcı/işletim sistemi profili seçer. Adaptör,
+`open-sse/utils/tlsClient.ts` içindeki tek wreq çalışma zamanı yükleyicisini ve aktarım havuzunu
+kullanır; bunlar profil + işletim sistemi + çözümlenen proxy anahtarıyla belirlenirken her istek
+`cookieMode: "ephemeral"` kullanır. Bu nedenle hesaplar ve istekler, aktarım düzeyindeki bağlantıları
+paylaşır ancak hiçbir zaman bir wreq oturumunu veya çerez deposunu paylaşmaz.
 
-| Sağlayıcı  | Profil        | Taklit edilen işletim sistemi | Akış EOF politikası                  |
-| ---------- | ------------- | ----------------------------- | ------------------------------------ |
-| Claude     | `chrome_146`  | Linux                         | `[DONE]` dâhil                       |
-| Perplexity | `firefox_148` | macOS                         | `event: end_of_stream` dâhil         |
-| Grok       | `chrome_146`  | Linux                         | `[DONE]` hariç                       |
-| Notion     | `chrome_146`  | Windows                       | `[DONE]` dâhil                       |
-| LMArena    | `chrome_146`  | Windows                       | belirteç yok; yerel EOF'de kapatılır |
+| Sağlayıcı  | Profil        | Taklit Edilen İşletim Sistemi | Akış EOF politikası                      |
+| ---------- | ------------- | ----------------------------- | ---------------------------------------- |
+| Claude     | `chrome_146`  | Linux                         | `[DONE]` dahil edilir                    |
+| Perplexity | `firefox_151` | macOS                         | `event: end_of_stream` dahil edilir      |
+| Grok       | `chrome_146`  | Linux                         | `[DONE]` hariç tutulur                   |
+| Notion     | `chrome_146`  | Windows                       | `[DONE]` dahil edilir                    |
+| LMArena    | `chrome_146`  | Windows                       | sonlandırıcı yok; yerel EOF'de kapatılır |
 
-- Akış, yerel yanıt `ReadableStream` nesnesini doğrudan tüketir; geçici dosya veya yardımcı süreç
+- Akış, yerel yanıtın `ReadableStream` öğesini doğrudan tüketir; geçici dosya veya yardımcı işlem
   oluşturulmaz.
 - Bir akış kullanıma sunulmadan önce başlangıçtaki en fazla 256 bayt incelenir. SSE sağlayıcıları,
-  SSE olmayan hataları arabelleğe alır; Grok/LMArena, Cloudflare doğrulamalarını `403` durumuna ve
-  HTML ara sayfalarını `502` durumuna eşler.
-- Yerel istek zaman aşımı, mutlak bir JS kesin son tarihiyle sarmalanmaya devam eder. Bir takılma,
+  SSE olmayan hataları arabelleğe alır; Grok/LMArena, Cloudflare doğrulama sayfalarını `403`,
+  HTML ara sayfalarını ise `502` olarak eşler.
+- Yerel istek zaman aşımı, mutlak bir JS kesin son süresiyle sarmalanmaya devam eder. Bir takılma,
   yalnızca etkilenen profil/işletim sistemi/proxy aktarımını geçersiz kılıp kapatır; sonraki istek
   bunu yeniden oluşturur.
-- Proxy çözümleme önceliği, her çağrı için `proxyUrl` → istek kapsamındaki hesap/gösterge paneli
-  bağlamı → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (küçük harfli biçimleri dâhil) şeklindedir.
-  Çözümleme hataları, doğrudan bağlantı sızdırmak yerine güvenli biçimde başarısız olur. LMArena
-  bilinçli olarak `arena.ai` üzerinden çözümleme yapar.
+- Proxy çözümleme önceliği, çağrı başına `proxyUrl` → istek kapsamındaki hesap/pano bağlamı →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` şeklindedir (küçük harfli biçimleri dahil). Çözümleme
+  hataları, doğrudan bağlantı sızdırmak yerine güvenli biçimde başarısız olur. LMArena kasıtlı
+  olarak `arena.ai` üzerinden çözümleme yapar.
 - `byteResponse`, UTF-8 bozulması olmadan içerik türü belirtilmiş bir `data:` URL'si döndürür.
 - Hatalar; `TlsClientUnavailableError` (paket/eklenti kullanılamıyor), `TlsClientHangError`
-  (kesin son tarih aşıldı) ve sınırlandırılmış 128 profil/işletim sistemi/proxy yuvasının tümü etkin
-  veya kapanmakta olduğunda `WreqTransportCapacityError` (paylaşılan oturum kapasitesi hata kodu)
-  şeklindedir.
+  (kesin son süre aşıldı) ve sınırlı 128 profil/işletim sistemi/proxy yuvasının tamamı etkin veya
+  kapanıyor olduğunda `WreqTransportCapacityError` (paylaşılan oturum kapasitesi hata kodu) şeklindedir.
 
-Yukarıdaki genel `TlsClient` oturumu, tarayıcı destekli kalıcı çerez durumu için özelleştirilmiş
-olmaya devam eder. Her iki yol da önbelleğe alınmış tek bir wreq modül yükleyicisini ve süreç yaşam
-döngüsü kancasını yeniden kullanır; çerez ömürleri kasıtlı olarak farklı olduğundan havuzları ayrı
-kalır.
+Yukarıdaki genel `TlsClient` oturumu, kalıcı ve tarayıcı destekli çerez durumu için özelleştirilmiş
+olarak kalır. Her iki yol da önbelleğe alınmış tek bir wreq modül yükleyicisini ve işlem yaşam döngüsü
+kancasını yeniden kullanır; çerez yaşam süreleri kasıtlı olarak farklı olduğundan havuzları ayrı kalır.
 
-Profiller sabitlenmiş paket tarafından desteklenir, ancak gerçek WAF kabulü yerel sözleşme
-testlerinden bağımsız olarak değişebilir. Bir üst tarayıcıyla eşdeğerlik iddia etmeden önce parmak
-izi değişikliklerini açıkça yetkilendirilmiş canlı bir hesapla doğrulayın.
+Profiller sabitlenmiş paket tarafından desteklenir ancak gerçek WAF kabulü, yerel sözleşme
+testlerinden bağımsız olarak değişebilir. Bir üst servis tarayıcısıyla eşdeğerlik iddia etmeden önce
+parmak izi değişikliklerini açıkça yetkilendirilmiş canlı bir hesapla doğrulayın.
 
 ---
 
