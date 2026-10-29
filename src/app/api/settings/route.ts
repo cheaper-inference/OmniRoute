@@ -37,6 +37,7 @@ import { isPaidModelTarget } from "@/shared/utils/freeModels";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance";
 import { deriveSettingsAuditActor, emitSettingsFailureAudit } from "@/lib/api/settingsAudit";
 import { isAuthRequired } from "@/shared/utils/apiAuth";
+import { hasSocialLoginAccessChange } from "@/lib/auth/socialOAuth";
 import {
   DASHBOARD_SESSION_COOKIE,
   REVOKED_SESSIONS_SETTING,
@@ -153,6 +154,20 @@ const OPERATOR_ONLY_SETTINGS_KEYS = new Set<string>([
   ...DASHBOARD_SESSION_STATE_SETTINGS_KEYS,
 ]);
 
+/**
+ * Ends every dashboard session issued before this write (`sessionsValidAfter = now`) when the
+ * patch changes the password or who may sign in with Google/GitHub. Returns whether it did.
+ */
+function applySessionCutoff(
+  body: Record<string, unknown>,
+  before: Record<string, unknown>,
+  passwordChanged: boolean
+): boolean {
+  if (!passwordChanged && !hasSocialLoginAccessChange(body, before)) return false;
+  body[SESSIONS_VALID_AFTER_SETTING] = Math.floor(Date.now() / 1000);
+  return true;
+}
+
 function touchesOperatorOnlySettings(body: Record<string, unknown>): boolean {
   return Object.keys(body).some(
     (key) => OPERATOR_ONLY_SETTINGS_KEYS.has(key) || key.startsWith("oidc")
@@ -197,6 +212,8 @@ export async function GET(request: Request) {
       password,
       [SESSIONS_VALID_AFTER_SETTING]: _sessionsValidAfter,
       [REVOKED_SESSIONS_SETTING]: _revokedSessions,
+      googleClientSecret,
+      githubClientSecret,
       ...safeSettings
     } = settings;
 
@@ -219,6 +236,9 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         ...safeSettings,
+        // Social-login secrets never leave the server; the UI only learns whether one is set.
+        googleClientSecretConfigured: Boolean(googleClientSecret),
+        githubClientSecretConfigured: Boolean(githubClientSecret),
         settingsRevision,
         hasPassword: hasManagementPasswordConfigured(settings),
         runtimePorts,
@@ -454,21 +474,22 @@ export async function PATCH(request: Request) {
     // included `newPassword` in SECURITY_IMPACTING_SETTINGS_KEYS, so no separate
     // verify happens here — strictly hashing + body rewriting.
     // A password change also ends every dashboard session issued before it, so a copy of the
-    // old cookie cannot outlive the password it was issued under.
+    // old cookie cannot outlive the password it was issued under. So does a change to who may
+    // sign in with Google/GitHub (allowlist, client, provider toggle).
     const passwordChanged = Boolean(body.newPassword);
     if (body.newPassword) {
       body.password = await hashManagementPassword(body.newPassword);
-      body[SESSIONS_VALID_AFTER_SETTING] = Math.floor(Date.now() / 1000);
       delete body.newPassword;
     }
-    const callerSession = passwordChanged
-      ? await verifyDashboardSessionToken(readCookie(request, DASHBOARD_SESSION_COOKIE))
-      : null;
     delete body.currentPassword;
     delete body.expectedRevision;
 
     // Snapshot BEFORE the write so the success row can record a real diff.
     const beforeSnapshot = (await getSettings()) as Record<string, unknown>;
+    const endsOlderSessions = applySessionCutoff(body, beforeSnapshot, passwordChanged);
+    const callerSession = endsOlderSessions
+      ? await verifyDashboardSessionToken(readCookie(request, DASHBOARD_SESSION_COOKIE))
+      : null;
     let settings: Awaited<ReturnType<typeof getSettings>>;
     try {
       settings = await updateSettings(body, { expectedRevision });
@@ -574,14 +595,21 @@ export async function PATCH(request: Request) {
       password,
       [SESSIONS_VALID_AFTER_SETTING]: _sessionsValidAfter,
       [REVOKED_SESSIONS_SETTING]: _revokedSessions,
+      googleClientSecret,
+      githubClientSecret,
       ...safeSettings
     } = settings;
     const settingsRevision = await getSettingsRevision();
     const response = NextResponse.json(
-      { ...safeSettings, settingsRevision },
+      {
+        ...safeSettings,
+        googleClientSecretConfigured: Boolean(googleClientSecret),
+        githubClientSecretConfigured: Boolean(githubClientSecret),
+        settingsRevision,
+      },
       { headers: settingsResponseHeaders(settingsRevision) }
     );
-    // The browser that changed the password keeps its own session: swap its cookie for one issued
+    // The browser that changed the password (or the social login access) keeps its own session: swap its cookie for one issued
     // after the cutoff instead of signing the operator out of the page they are on.
     const secret = getDashboardJwtSecret();
     if (callerSession && secret) {

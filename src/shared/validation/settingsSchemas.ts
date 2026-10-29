@@ -8,6 +8,7 @@
 import { z } from "zod";
 import { oidcAdmissionClaimSchema } from "@/shared/utils/oidcAdmissionClaim";
 import { CONNECTION_TEST_PROMPT_MAX_LENGTH } from "@/shared/constants/connectionTest";
+import { isPublicEmailDomainEntry } from "@/shared/constants/publicEmailDomains";
 import { COMBO_CONFIG_MODES } from "@/shared/constants/comboConfigMode";
 import { MAX_REQUEST_BODY_LIMIT_MB, MIN_REQUEST_BODY_LIMIT_MB } from "@/shared/constants/bodySize";
 import {
@@ -107,6 +108,12 @@ const transformObfuscateWordsSchema = z.object({
     .optional(),
 });
 
+/** Same-origin absolute path only: it is appended to the request origin to form `redirect_uri`. */
+const socialRedirectPathSchema = z
+  .string()
+  .max(500)
+  .regex(/^\/(?!\/)[A-Za-z0-9/_.~-]*$/, "must be an absolute same-origin path");
+
 export const updateSettingsSchema = z.object({
   connectionTestPrompt: z.string().trim().min(1).max(CONNECTION_TEST_PROMPT_MAX_LENGTH).optional(),
   /** #13917: per-request proxy bulk-import ceiling; resolved by resolveProxyBulkImportLimit. */
@@ -133,6 +140,23 @@ export const updateSettingsSchema = z.object({
   oidcRedirectPath: z.string().max(500).optional(),
   oidcAllowedSubjects: z.array(z.string().max(200)).optional(),
   oidcAdmissionClaim: oidcAdmissionClaimSchema.nullable().optional(),
+  googleAuthEnabled: z.boolean().optional(),
+  googleClientId: z.string().max(200).optional(),
+  googleClientSecret: z.string().max(500).optional(),
+  googleRedirectPath: socialRedirectPathSchema.optional(),
+  githubAuthEnabled: z.boolean().optional(),
+  githubClientId: z.string().max(200).optional(),
+  githubClientSecret: z.string().max(500).optional(),
+  githubRedirectPath: socialRedirectPathSchema.optional(),
+  authAllowedEmails: z
+    .array(z.string().max(200))
+    .max(500)
+    .refine((entries) => !entries.some(isPublicEmailDomainEntry), {
+      message:
+        "domain entries for public mail providers (e.g. @gmail.com) would admit every account; list exact e-mails instead",
+    })
+    .optional(),
+  disablePasswordLogin: z.boolean().optional(),
   enableSocks5Proxy: z.boolean().optional(),
   instanceName: z.string().max(100).optional(),
   customLogoUrl: z.string().max(2000).optional(),

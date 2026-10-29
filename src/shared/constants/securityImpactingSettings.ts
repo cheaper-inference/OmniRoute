@@ -1,4 +1,19 @@
 /**
+ * Social login keys that decide which accounts can sign in. Changing any of them also ends every
+ * dashboard session issued before the change (`sessionsValidAfter`), so removing someone from the
+ * allowlist, rotating a client, or switching a provider off actually signs that person out.
+ */
+export const SOCIAL_LOGIN_SESSION_ENDING_SETTINGS_KEYS = [
+  "googleAuthEnabled",
+  "googleClientId",
+  "googleClientSecret",
+  "githubAuthEnabled",
+  "githubClientId",
+  "githubClientSecret",
+  "authAllowedEmails",
+] as const;
+
+/**
  * Settings keys whose change broadens attack surface. Spec §Security:
  * `PATCH /api/settings` requires password re-auth when any of these is present
  * in the body, and every other settings writer that skips that gate (e.g. the
@@ -23,6 +38,13 @@
  *   API with the operator's cookie, and whether repeated failed logins are throttled.
  *   Loosening either weakens the login defenses, so both need the same re-auth (the Security
  *   tab asks for the current password) and are dropped by the JSON import.
+ *
+ * - `google*` / `github*` / `authAllowedEmails` / `disablePasswordLogin`: the Google/GitHub
+ *   dashboard login (#15153) — the OAuth client trusted for the login, where the code is sent,
+ *   which accounts may log in and whether the password form is shown. Same reasoning as the
+ *   OIDC keys: without re-auth a stolen session could plant its own client and allowlist and
+ *   keep admin access after the password rotates (pinned by
+ *   `tests/unit/social-oauth-settings-security.test.ts`).
  *
  * Every key here is also OPERATOR-ONLY on `PATCH /api/settings`: a manage-scoped API key or an
  * `oma_` access token is refused with 403 even when it knows the password
@@ -49,6 +71,10 @@ export const SECURITY_IMPACTING_SETTINGS_KEYS = [
   "oidcScopes",
   "corsOrigins",
   "bruteForceProtection",
+  ...SOCIAL_LOGIN_SESSION_ENDING_SETTINGS_KEYS,
+  "googleRedirectPath",
+  "githubRedirectPath",
+  "disablePasswordLogin",
 ] as const;
 
 /**

@@ -121,6 +121,54 @@ supplemented:
   Importing an older backup therefore cannot revive a session that a password
   change or a sign-out already ended.
 
+#### Optional Google / GitHub login (#15153)
+
+The login page can also offer "Continue with Google" / "Continue with GitHub"
+(`src/app/api/auth/{google,github}/{login,callback}/route.ts`,
+`src/lib/auth/socialOAuth.ts`, `src/lib/auth/socialLogin.ts`). Password login
+stays available.
+
+- **Off by default.** A provider runs only with its client id **and** secret
+  (settings, or the dedicated `AUTH_GOOGLE_*` / `AUTH_GITHUB_*` env vars; the
+  generic `GOOGLE_CLIENT_ID` / `GITHUB_CLIENT_ID` are never read) **and** a
+  non-empty allowlist (`authAllowedEmails` or `AUTH_ALLOWED_EMAILS`). A bare
+  `*` is dropped, so there is no "allow everyone" spelling.
+  `googleAuthEnabled: false` / `githubAuthEnabled: false` switch a configured
+  provider off (kill-switch; both default to `true`).
+- **Allowlist entries.** Exact e-mails match the provider's verified e-mail.
+  Domain entries (`@corp.com`, `*@corp.com`) also need the provider's proof
+  that the account belongs to that domain: the Workspace `hd` claim for
+  Google, the account's **primary** verified e-mail for GitHub. Domain entries
+  for public mail providers (`@gmail.com`, `@outlook.com`, `@github.com`…,
+  `src/shared/constants/publicEmailDomains.ts`) never match and the settings
+  schema refuses them. GitHub accounts can be listed by stable numeric id
+  (`github:<id>`). A bare GitHub username also works, but a username can be
+  renamed and later registered by someone else, so prefer `github:<id>`.
+- **Flow.** The login route sends a random `state` and a PKCE S256 challenge;
+  the state and the verifier live in short-lived `httpOnly` cookies and are
+  consumed together by the callback, so a stolen authorization code cannot be
+  redeemed from another browser. The redirect URI and the final redirect use
+  the `Host` header (never `X-Forwarded-Host`). Errors redirect to
+  `/login?error=<code>` without provider text.
+- **Session.** On success the callback mints the session through
+  `mintDashboardSessionToken` like every other login, so sign-out revokes it
+  and a password change ends it. Changing the allowlist, a provider client id
+  or secret, or a provider toggle sets `sessionsValidAfter` too, so removing
+  someone from the allowlist signs them out (the browser that made the change
+  gets a fresh cookie).
+- **Settings.** Every `google*` / `github*` key, `authAllowedEmails` and
+  `disablePasswordLogin` is in `SECURITY_IMPACTING_SETTINGS_KEYS`: `PATCH
+/api/settings` needs `currentPassword`, machine credentials get `403`, and
+  `POST /api/settings/import-json` drops them. The client secrets are never
+  returned by `GET` / `PATCH /api/settings` (only `*SecretConfigured`).
+- **Trust model.** `/api/auth/google/` and `/api/auth/github/` are public
+  prefixes (they run before a session exists) and spawn no process. Behind a
+  tunnel, the dashboard's security becomes that of the allowlisted Google or
+  GitHub accounts, including their 2FA. `disablePasswordLogin` /
+  `AUTH_DISABLE_PASSWORD_LOGIN` only hides the password form:
+  `POST /api/auth/login` keeps accepting the password, which is the recovery
+  path when the identity provider is unavailable.
+
 ## Route Classes
 
 `src/server/authz/types.ts` defines three classes; any route that cannot be classified deterministically falls back to `MANAGEMENT`.
